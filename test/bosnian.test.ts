@@ -198,7 +198,7 @@ describe("Bosnian text normalization", () => {
             .toBe("u sˈezoni od xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set pˈete do xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set ʃˈeste ɡˈodine");
         // …and an UNDOTTED year span stays cardinal: the writer marked nothing, so nothing is claimed.
         expect(say("ratu (1894-1895), Qing vlada"))
-            .toBe("rˈatu xˈiʎadu ˈo˥˩samsto deʋedˈe˩˥set t͡ʃˈe˩˥tiri do xˈiʎadu ˈo˥˩samsto deʋedˈe˩˥set peː˥˩t , inɡ ʋlˈaː˩˥da");
+            .toBe("rˈatu xˈiʎadu ˈo˥˩samsto deʋedˈe˩˥set t͡ʃˈe˩˥tiri do xˈiʎadu ˈo˥˩samsto deʋedˈe˩˥set peː˥˩t , kinɡ ʋlˈaː˩˥da");
     });
 
     test("the hyphen + case suffix resolves through the ordinal paradigm, not by concatenation", () => {
@@ -262,7 +262,33 @@ describe("Bosnian text normalization", () => {
     // `(James i dr. 1995)`, the academic *et al.* A ported rule reads that as *doktor hiljadu devetsto
     // devedeset pet*. One flag is the whole fix.
     test("DIVERGENCE: `Dr.` is a doctor and lowercase `dr.` is `et al.`", () => {
-        expect(say("Dr. Moll misli")).toBe("dˈo˥˩ktor moll mˈisli");
+        // ⚠ `mol` — the geminate this used to pin is not a BCS phoneme; see the hr degemination test.
+        expect(say("Dr. Moll misli")).toBe("dˈo˥˩ktor mol mˈisli");
+        // ⚠ A FOREIGN BEARING LETTER MUST BE CONSUMED BY THE DEGREE RULE. ⟨W X Y Q⟩ are outside Gaj's
+        //   Latin so the compass arm's `[SJIZsjiz]` cannot claim them; once the shared fold maps the
+        //   letter, an unconsumed one glues onto the noun as *stepeniʋ* and the stress lookup then runs on
+        //   the nonexistent word `stepeniv` and loses the pitch accent.
+        expect(say("35°W")).toContain("zˈaː˥˩padno");   // read, not consumed — the word is in 5b's table
+        expect(say("35°Z")).toContain("zˈaː˥˩padno");   // the compass arm still reads its own letters
+        // ⚠ N AND E ARE READ, NOT DELETED. They fell through both arms and glued; the words are already in
+        //   5b's table and the imported English-convention bearings are unambiguous in either system, so
+        //   reading them beats consuming them.
+        expect(say("35°N")).toContain("sjˈe˥˩ʋerno");
+        expect(say("35°E")).toContain("ˈi˩˥stot͡ʃno");
+        // ⚠ AND A SPACE IS ALLOWED FOR THE UNAMBIGUOUS BEARINGS ONLY. `i` and `s` are function words, so
+        //   they must be attached; J Z N E are letters no Bosnian sentence uses alone.
+        expect(say("35° Z")).toContain("zˈaː˥˩padno");
+        // ⚠ AND THE AMBIGUITY GUARD IS CASE-SENSITIVE. Only the LOWERCASE letter is the function word, so a
+        //   spaced UPPERCASE bearing is an ordinary latitude and must still read.
+        expect(say("35° S")).toContain("sjˈe˥˩ʋerno");
+        expect(say("35° I")).toContain("ˈi˩˥stot͡ʃno");
+        expect(say("300°K je")).toContain("stˈe˥˩peni k");   // the replacement's trailing space, not a class
+        // ⚠ ATTACHED ONLY — `i` "and" and `s` "with" are bearings AND function words, and a space-tolerant
+        //   rule read `35° i padavine` as *istočno* and deleted the conjunction.
+        expect(say("temperatura 35° i padavine")).toContain(" i ");
+        expect(say("35° s vjetrom")).toContain(" s ");
+        expect(say("35° od ekvatora")).toContain("stˈe˥˩peni od");
+        expect(say("MMF")).toBe("mmf");                 // and an initialism keeps its doubled letter
         expect(say("James i dr. 1995")).toBe("jˈames i dr . xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set peː˥˩t");
     });
 

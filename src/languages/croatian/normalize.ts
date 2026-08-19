@@ -113,6 +113,7 @@ const SAT = ["sat", "sata", "sati"] as const; // 22 sata · 23 sata · 15 sati
 const MINUT = ["minut", "minuta", "minuta"] as const;
 const METAR = ["metar", "metra", "metara"] as const;
 const MILJA = ["milja", "milje", "milja"] as const;
+const STUPANJ = ["stupanj", "stupnja", "stupnjeva"] as const; // 1 stupanj · 2 stupnja · 5 stupnjeva
 
 /** Integer part of a Croatian-written number ("2,4" → 2), for the local count-agreement calls. */
 function intOf(n: string): number {
@@ -192,8 +193,28 @@ export function normalizeCroatian(input: string): string {
     // 5) DEGREES. `90 °F`, `+30°C`, `35° W` (a LONGITUDE — the bare-degree rule must not claim it).
     s = s.replace(/(\d+)\s?°\s?([CFcf])(?![\p{L}\p{M}])/gui, (_m, n: string, u: string) =>
         `${n} ${/[Ff]/u.test(u) ? "stupnjeva Farenhajta" : "stupnjeva Celzija"}`);
-    s = s.replace(/(\d+)\s?°\s?([NSEWnsew])(?![\p{L}\p{M}])/gu, (_m, n: string, c: string) =>
-        `${n} stupnjeva ${({ N: "sjeverno", S: "južno", E: "istočno", W: "zapadno" } as Record<string, string>)[c.toUpperCase()]!}`);
+    // ⚠ ATTACHMENT IS REQUIRED OF LOWERCASE ⟨s⟩ AND ONLY OF IT. `S` is *južno* and `s` is the preposition "with",
+    //   so spaced off the degree the bearing arm was deleting a common word and inventing a bearing:
+    //   `35° s padavinama` read as *trideset pet stupnjeva JUŽNO padavinama`. N, E and W are letters no
+    //   Croatian sentence uses alone, so `35° w` — the form this corpus actually writes — still reads.
+    //   ⚠ AND THE GUARD IS CASE-SENSITIVE: only the LOWERCASE letter is the word. A spaced uppercase `35° S`
+    //   is an ordinary way to write a latitude and must keep reading as *južno*.
+    s = s.replace(/(\d+)\s?°(?:\s?([NEWSnew])|([s]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
+        `${n} stupnjeva ${({ N: "sjeverno", S: "južno", E: "istočno", W: "zapadno" } as Record<string, string>)[(spaced ?? tight)!.toUpperCase()]!}`);
+
+    // 5b) THE BARE DEGREE. ⚠ ADDED BECAUSE THE ARM ABOVE STOPPED CLAIMING EVERYTHING. While the compass
+    //     arm swallowed a spaced ⟨s⟩ there was no such thing as an unclaimed bare degree in this corpus, so
+    //     none was needed; requiring attachment for ⟨s⟩ creates one — `35° s padavinama` now reaches here,
+    //     and without this arm the degree noun disappears entirely. It also consumes ⟨q x y⟩, which Gaj's
+    //     Latin has no bearing word for and which `foreignLetters` would otherwise make audible.
+    //     ⚠ COUNT AGREEMENT, like every other counted noun in this file — `1 stupanj`, `2 stupnja`,
+    //     `5 stupnjeva`. The genitive plural is only right from five up.
+    //     ⚠ AND A TRAILING SPACE, which is what stops the next character gluing onto the noun. Any letter
+    //     this arm does not consume — `300°K` — would otherwise land inside the word, and the stress
+    //     lookup then runs on `stupnjevak`, misses the dictionary and loses the pitch accent. Consuming a
+    //     letter class cannot cover this: the class is finite and the alphabet is not.
+    s = s.replace(/(\d+)\s?°(?:\s?[QXYqxy](?![\p{L}\p{M}]))?/gu,
+        (_m, n: string) => `${n} ${counted(intOf(n), STUPANJ)} `);
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih`, `15-og`). The suffix is the LAST LETTERS of the
     //    inflected ordinal. Runs before the range rule.

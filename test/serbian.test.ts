@@ -137,8 +137,48 @@ describe("Serbian normalization", () => {
         // outright protects the scale word (Celsius/Fahrenheit, which the C/F arm supplies) but throws the
         // degree noun away with it — and a LONGITUDE then loses the word that makes it one.
         // ⚠ The compass `W` is still unread, and deliberately: `јужне` is ×0 in this corpus, so a four-way
-        // table would have to invent its missing quarter. Only the recoverable half is fixed.
-        expect(say("35°W")).toBe("trˈiː˩˥deset peː˥˩t stˈepeni");
+        // table would have to invent its missing quarter. Only the recoverable half is fixed. The degree
+        // rule CONSUMES the letter to enforce that, rather than leaving it for the g2p to drop.
+        // ⚠ GOLDEN CHANGED, and the old one was pinning a defect. Leaving `W` in place produced
+        // `35 stepeniW` with NO SPACE, so the stress lookup ran on the nonexistent word `stepeniw`, missed
+        // stress.tsv and lost the pitch accent — `stˈepeni` where every other route to the same word gives
+        // `stˈe˥˩peni`. A stray letter glued to a word silently changes which word is looked up.
+        expect(say("35°W")).toBe("trˈiː˩˥deset peː˥˩t stˈe˥˩peni");
+        expect(say("35°")).toBe(say("35 stepeni"));   // and all routes to the noun now agree
+        // ⚠ THE GUARD SCOPES TO THE COMPASS LETTER, NEVER THE WHOLE MATCH. A trailing lookahead on the rule
+        //   made a degree followed by any other letter fail outright and took the degree NOUN with it —
+        //   `35°З` read as *trideset pet z*. That is the Cyrillic west-bearing, the form a Cyrillic corpus
+        //   actually writes, so the class carries both scripts (С Ј И З, not only N S E W).
+        expect(say("35°З")).toBe(say("35 stepeni"));
+        expect(say("35°Z")).toBe(say("35 stepeni"));   // the LATIN bearings too — jug, zapad
+        expect(say("35°J")).toBe(say("35 stepeni"));
+        expect(say("35°I")).toBe(say("35 stepeni"));   // Latin istok — omitting it let `35°I` glue
+        expect(say("35° W")).toBe(say("35 stepeni")); // a space is fine for an UNAMBIGUOUS bearing
+        // ⚠ THE CYRILLIC SCALE LETTER IS ATTACHED-ONLY, AND MUST STILL READ. `°С` is the natural Cyrillic
+        //   spelling of a temperature; dropping it from the scale class to dodge the preposition turned a
+        //   correct reading into a silent omission. Attachment separates the two cleanly.
+        expect(say("температура 35°С")).toContain("t͡sˈelzijusa");
+        expect(say("35 °С")).toContain("t͡sˈelzijusa");
+        // ⚠ CYRILLIC ⟨С⟩ IS U+0421, NOT ⟨Ѕ⟩ U+0405. The bearing class was typed with DZE, a homoglyph, so
+        //   the north bearing never matched and `35° С` left a stray /s/ in the output.
+        expect(say("Тачка на 35° С је ту.")).not.toContain(" s ");
+        // ⚠ X Y Q are consumed here too, as in the sibling engines — `foreignLetters` now makes them
+        //   audible, so an unconsumed one is a spurious syllable rather than a silent drop.
+        expect(say("35°X je tu.")).toContain("stˈe˥˩peni je");
+        expect(say("300°K je")).toContain("stˈe˥˩peni k");   // and nothing glues onto the noun
+        // ⚠ A BEARING MUST BE ATTACHED TO THE `°`. Two of them — `и` "and" and `с` "with" — are among the
+        //   commonest words in the language, so a rule that allows a space before the letter DELETES them.
+        //   Every bearing in this corpus is written attached (`35°w`), so requiring it costs nothing.
+        expect(say("температура 35° и падавине")).toContain(" i ");
+        expect(say("35° с падавинама")).toContain(" s ");   // and ⟨с⟩ is not Celsius either
+        // ⚠ THE WHITESPACE LIVES INSIDE THE OPTIONAL GROUP. Outside it, `\s?` is eaten even when the group
+        //   matches empty, and the next word glues onto the noun — *stepeniод*, which then misses
+        //   stress.tsv and loses the pitch accent, the very defect this arm exists to prevent.
+        expect(say("око 35° од екватора")).toContain("stˈe˥˩peni od");
+        expect(say("35°C")).toContain("t͡sˈelzijusa");   // the scale arm still claims its own letter
+        // ⚠ INITIALISMS keep their doubled letters — see the hr degemination test.
+        expect(say("СССР")).toBe("sssr");
+        expect(say("SSSR")).toBe("sssr");   // both scripts, and the doubled letters survive
     });
     // PRIMARY STRESS — lexical, from stress.tsv (kaikki/Wiktionary), shared with the hr and bs engines because
     // they import this g2p. Validated against the COMMITTED wikipron referee, which has carried the pitch accent

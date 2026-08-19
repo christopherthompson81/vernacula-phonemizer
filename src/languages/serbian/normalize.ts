@@ -311,17 +311,53 @@ export function normalizeSerbian(input: string): string {
     // 4) DEGREES, two arms. The first claims `°C` / `°F` and supplies both the degree noun and the scale
     //    name. A WRITTEN degree noun is CONSUMED when present (`32 °C степена`), or the word is emitted
     //    twice; the count agrees with the numeral (32 → gen.sg stepena), not with what was written.
-    s = s.replace(/(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gui,
-        (_m, n: string, unit: string, _written: string | undefined) =>
-            `${n} ${counted(Number(n), STEPEN)} ${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}`);
+    //    ⚠ THE CYRILLIC SCALE LETTER IS ATTACHED-ONLY, and the Latin one is not. `°С` is the natural
+    //    Cyrillic spelling of a temperature and must keep reading as Celsius — but ⟨с⟩ spaced off the
+    //    degree is the preposition "with", so `35° с падавинама` would read as Celsius and delete the
+    //    word. Attachment separates them: `35°С` is the scale, `35° с` is the preposition. Latin ⟨c⟩ has
+    //    no such collision and the corpus writes it spaced (`32 °c`), so that arm keeps its `\s?`.
+    s = s.replace(/(\d+)\s?°(?:\s?([CFcf])|([СЦФсцф]))(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gui,
+        (_m, n: string, lat: string | undefined, cyr: string | undefined, _written: string | undefined) =>
+            `${n} ${counted(Number(n), STEPEN)} `
+            + (/[FfФф]/u.test(lat ?? cyr ?? "") ? "Farenhajta" : "Celzijusa"));
     //    4b) THE BARE DEGREE emits the degree noun ONLY, no scale word — right for a longitude (`35°W`) and
     //    harmless for a bare temperature. Safe unguarded because the C/F arm above has already consumed
     //    those forms. It consumes a written degree noun for the same reason the C/F arm does.
     //    ⚠ THE COMPASS LETTER IS STILL NOT READ, a stated limit rather than an oversight: the full form is
     //    *35 степени западне географске дужине*, and the four-way compass table cannot be completed without
     //    inventing its missing quarter.
-    s = s.replace(/(\d+)\s?°(\s*(?:степен[аи]|stepen[ai]))?/gu,
-        (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)}`);
+    //    ⚠ AND IT CONSUMES THE UNREAD COMPASS LETTER, which it must now do EXPLICITLY. Leaving the letter
+    //    in place used to be harmless only because the g2p had no ⟨w⟩ and silently dropped it; now that the
+    //    shared `foreignLetters` fold maps it (⟨w⟩ → /ʋ/), an unconsumed `W` glues onto the degree noun as
+    //    *stepeniʋ*. The limit stated above is a decision, so it is enforced here rather than left to
+    //    depend on a deletion elsewhere in the stack.
+    //    ⚠ THE GUARD SCOPES TO THE COMPASS LETTER ONLY, never to the whole match. Written as a trailing
+    //    `(?![\p{L}\p{M}])` on the rule it made a degree followed by ANY other letter fail outright, and
+    //    the degree noun then vanished with it — `35°З` read as *trideset pet z*, losing *stepeni*. That is
+    //    the Cyrillic west-bearing, i.e. exactly the form a Cyrillic corpus writes.
+    //    ⚠ AND THE CLASS CARRIES BOTH SCRIPTS. A Latin-only `[NSEWnsew]` matches nothing in Cyrillic text —
+    //    the trap bosnian/normalize.ts already records against Croatian's list. Cyrillic bearings are
+    //    С Ј И З (север/juг/исток/запад), not N S E W.
+    //    ⚠ THE BEARING MUST BE ATTACHED TO THE `°`, WITH NO SPACE, and that is what makes the rule safe.
+    //    The BCS bearings are С Ј И З / S J I Z, and two of them are among the commonest words in the
+    //    language — `и` "and" and `с` "with". A rule that allows a space before the letter eats them:
+    //    `температура 35° и падавине` loses the conjunction outright. Every bearing in this corpus is
+    //    written attached (`35°w`, `35°z`), so requiring it costs nothing and closes the ambiguity.
+    //    ⚠ AND THE WHITESPACE LIVES INSIDE THE OPTIONAL GROUP. Outside it, `\s?` is consumed even when the
+    //    group matches empty, so `око 35° од екватора` glued to *stepeniод* — the very defect this arm was
+    //    changed to prevent, reintroduced for the general case.
+    //    ⚠ ATTACHMENT IS REQUIRED ONLY OF THE AMBIGUOUS BEARINGS, which is the whole rule in one line.
+    //    ⟨s⟩/⟨с⟩ ("with") and ⟨i⟩/⟨и⟩ ("and") are bearings AND two of the commonest words in the language,
+    //    so those four may not be spaced off the degree or the rule eats them. Every other bearing —
+    //    N E W J Z, Ј З — is a letter no BCS sentence uses on its own, so a space is safe there and
+    //    `35° W` still reads. Latin ⟨I⟩ (istok) belongs in the list too; leaving it out let `35°I` glue.
+    //    ⚠ CASE-SENSITIVE: only the LOWERCASE letter is the function word, so a spaced uppercase bearing
+    //    (`35° S`, `35° И`) still reads. Only `s i с и` need the attachment.
+    s = s.replace(/(\d+)\s?°(?:(?:\s?[NEWJZSIXYQnewjzxyqЈЗСИјз]|[siси])(?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
+        //    ⚠ TRAILING SPACE — any letter this arm does not consume would otherwise glue onto the noun
+        //    (`300°K` → *stepenik*), and the stress lookup then runs on a word that does not exist. A
+        //    letter class cannot cover that: the class is finite and the alphabet is not.
+        (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)} `);
 
     // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`, `11-ом`, `13-то`). As in Russian, the written
     //    suffix is the LAST LETTERS of the inflected ordinal, not an appendable marker, so the rule generates

@@ -15,6 +15,61 @@ describe("Croatian (hr) canonical IPA", () => {
         }
     });
 
+    /**
+     * BCS HAS NO PHONEMIC GEMINATES, and a doubled consonant letter reaches this engine only in a loan or
+     * a foreign name — 175 distinct such word types across the hr/bs/sr corpus, every one of them a loan.
+     * Re-scored against the recognized phones over the 609 geminate-bearing utterances: 544 closer to what
+     * the reader said, 39 further, mean distance 0.1858 → 0.1822.
+     *
+     * ⚠ THE SUPERLATIVE SEAM IS NOT AN EXCEPTION, and it was written as one before the audio was checked.
+     * `naj-` before a ⟨j⟩-initial stem is the one doubled consonant BCS writes natively, so exempting it
+     * looked obviously right — but the readers say a single /j/ (`n aː j e d n o s t a v n i`), with the
+     * length on the prefix vowel instead. The prefix seams a grammar would predict (podd-, izz-, nuzz-)
+     * appear in neither the corpus nor the referee, so there is nothing to carve out either.
+     *
+     * ⚠ THE REFEREE CANNOT ADJUDICATE THIS — it holds four such words and contradicts itself on them: the
+     * same human set keeps `Matteo`'s Italian geminate and drops `inšallah`'s (`ǐ n ʃ a l aː x`, which is
+     * what we now emit). Net −2 of 26,486 on the primary. The audio is the instrument that can decide it.
+     */
+    test("doubled consonants degeminate; doubled VOWELS do not", () => {
+        expect(phonemize("Anna", "hr")).toBe("ˈana");
+        expect(phonemize("Holland", "hr")).toBe("xˈoland");
+        expect(phonemize("Ellsworth", "hr")).toBe("ˈelsʋortx");
+        expect(phonemize("najjednostavniji", "hr")).toBe("nˈajednostaʋniji");
+        // ⚠ A DOUBLED VOWEL IS TWO SYLLABLES in a loan, not a long vowel — only consonants collapse.
+        expect(phonemize("zoo", "hr")).toBe("zˈoo");
+        // ⚠ AND AN INITIALISM IS A LETTER RUN, NOT A WORD. Collapsing there DELETES a letter — `BBC` read
+        //   as *bt͡s*, `www` as a single *ʋ*, and in the sibling engines `СССР` as *sr* and `MMF` as *mf*.
+        //   Guarded on the no-vowel signature, which a real BCS word carrying a geminate cannot trip:
+        //   they are all loans, and loans have vowels.
+        expect(phonemize("BBC", "hr")).toBe("bbt͡s");
+        expect(phonemize("www", "hr")).toBe("ʋʋʋ");
+        // ⚠ AND THE GUARD IS CASE-INDEPENDENT. An "all caps" signature was tried and is wrong — it makes
+        //   degemination depend on capitalisation for ordinary words, so a headline or an all-caps proper
+        //   noun keeps a geminate the language does not have.
+        expect(phonemize("HOLLAND", "hr")).toBe(phonemize("Holland", "hr"));
+        expect(phonemize("ANNA", "hr")).toBe(phonemize("Anna", "hr"));
+    });
+
+    // ⚠ THE BEARING AMBIGUITY GUARD IS CASE-SENSITIVE. `s` is the preposition "with" and `S` is *južno*;
+    //   only the lowercase letter needs to be attached to the degree, or a spaced uppercase latitude stops
+    //   reading. Croatian gained a bare-degree arm at the same time: while the compass arm swallowed a
+    //   spaced ⟨s⟩ there was no unclaimed bare degree in this corpus, and requiring attachment creates one.
+    test("a degree bearing: lowercase is a word, uppercase is a bearing", () => {
+        expect(phonemize("35° s padavinama", "hr")).toContain("stˈupɲeʋa s ");
+        expect(phonemize("35° S od ekvatora", "hr")).toContain("jˈu˥˩ʒno");
+        expect(phonemize("35° w", "hr")).toContain("zˈaː˥˩padno");
+        expect(phonemize("35°", "hr")).toBe("trˈiː˩˥deset peː˥˩t stˈupɲeʋa");
+        // ⚠ COUNT AGREEMENT, like every other counted noun in this file. The genitive plural is only right
+        //   from five up, and the arm was hardcoding it.
+        expect(phonemize("1°", "hr")).toContain("stˈuː˥˩paɲ");
+        expect(phonemize("2°", "hr")).toContain("stˈupɲa");
+        // ⚠ AND THE REPLACEMENT ENDS IN A SPACE. Consuming a letter class cannot stop the gluing — the
+        //   class is finite and the alphabet is not — so `300°K` landed inside the noun as *stupnjevak*,
+        //   sending the stress lookup to a word that does not exist.
+        expect(phonemize("Temperatura 300°K je", "hr")).toContain("stˈupɲeʋa k");
+    });
+
     test("Croatian-specific grapheme→IPA (Gaj's Latin, Ijekavian read as letters)", () => {
         expect(phonemize("mlijeko", "hr").trim()).toBe("mlijˈeː˩˥ko"); // Ijekavian "milk"
         expect(phonemize("đak", "hr").trim()).toBe("d͡ʑaː˥˩k"); // ⟨đ⟩ → d͡ʑ
@@ -84,13 +139,15 @@ describe("Croatian text normalization", () => {
         expect(ph("I. svjetskog rata")).toBe("pˈr˩˥ʋoɡ sʋjˈetskoɡ rˈata");
         expect(ph("II. svjetskom ratu")).toBe("drˈuː˥˩ɡom sʋjˈetskom rˈatu");
         expect(ph("itd.")).toBe("i tˈa˩˥ko dˈa˥˩ʎe .");
-        expect(ph("Dr. Moll")).toBe("dˈo˥˩ktor moll");
+        // ⚠ `mol`, not `moll` — this golden pinned a geminate the language does not have. The reader of
+        //   this very utterance says a single /l/ (`m o l o t k r e`); see the degemination test above.
+        expect(ph("Dr. Moll")).toBe("dˈo˥˩ktor mol");
         // ⚠ GOLDEN CHANGED, and it was pinning a DELETION. ⟨W⟩ is outside Gaj's Latin, the shared g2p had
         // no rule for it, and the middle initial simply vanished (`ɡeorɡe busx`). It now folds to ⟨v⟩ —
         // the reading Croatian gives the letter in *Velšani*, *velški* — so the initial is audible.
         // ⚠ AND IT IS NOT A NEW CONVENTION, IT IS THE EXISTING ONE. This engine already reads a lone
         // initial as its bare phone rather than its letter name: `V.` → *ʋ*, `B.` → *b*. ⟨W⟩ now joins
-        // them instead of being the one initial that disappears. See FOREIGN_LETTER in croatian.ts.
+        // them instead of being the one initial that disappears. See `foreignLetters` in serbian.ts.
         expect(ph("George W. Bush")).toBe("ɡˈeorɡe ʋ busx");
         expect(ph("George V. Bush")).toBe("ɡˈeorɡe ʋ busx"); // the native letter, for the comparison
     });
