@@ -208,3 +208,72 @@ false-positive rate against *any* label is 34%.
     3+ word spans     → GlotLID PQ 9.3 MB, English arm    (0.2% false positive)
 
 Each tier is chosen because the tier above it is *measurably wrong* at that input, not by preference.
+
+## Run 9 — the intruders' real shape, and a correction that deflates the whole approach
+
+Run 8 recommended routing at 3+ words. That was answering "where is the model safe?" without asking
+"what do real intruders look like?". They are much shorter than that threshold.
+
+**Ground truth by script** — in a non-Latin host, a Latin run is unambiguously foreign, so no classifier is
+involved. 24,025 spans over 103,738 utterances:
+
+    1 word  43.8%      2 words 18.5%  (cumulative 62.3%)      3 words 10.1%      6+ 16.1%
+
+**Ground truth by lexicon** for French — a token in the English g2p dict but not the French lexicon.
+1,357 spans over 3,190 utterances:
+
+    1 word  77.5%      2 words 19.5%  (cumulative 96.9%)      3+ 3.1%
+
+⚠ **A 3+ word threshold reaches 3.1% of French intruders.** The model is safe exactly where the intruders
+are not.
+
+### And then the correction: code-switching them makes things WORSE
+
+Scored the actual readings against the audio — read the detected span as English, versus reading the whole
+utterance as French:
+
+    1-word spans   n=400   mean 0.1042 → 0.1187   closer  67, further 293
+    2+-word spans  n=143   mean 0.1335 → 0.1415   closer  49, further  91
+
+Both directions lose. That contradicts Run 10a of the alignment investigation, which found code-switching
+better in 7 of 9 French rows — and the contradiction is the finding. **Those two measurements sample
+different populations.** The earlier one used hand-marked genuine English phrases from `all-flagged` rows;
+this one uses every lexicon-detected span, and 389 of 400 sit in rows already marked `verified` — text the
+audio says we already read correctly.
+
+What the lexicon actually flags in verified French rows:
+
+    h, john, france, europe, the, charles, san, luxembourg, northern, pakistan, kenya, reid,
+    washington, jr, whitehall, texas, disney, francisco, alonso, george, atlanta, costello, kyoto
+
+**Those are place names and personal names French has its own pronunciations for.** *France*, *Europe*,
+*Luxembourg*, *Washington*, *Pakistan*, *Kenya* are French words. Reading them as English is simply wrong,
+and the audio says so 293 times to 67.
+
+### What this means for the design
+
+The rule is not about span length. It is:
+
+- **A genuine run of English PROSE** → readers code-switch. Rare: ~9 rows in `fr_fr`, and 7 of 9 improved.
+- **A proper NAME, of any length** → readers nativise. Common: ~400 rows in `fr_fr`, and switching them
+  loses 293 to 67.
+
+⚠ **NEITHER A LENGTH THRESHOLD NOR A LID DISTINGUISHES THESE.** `washington` and `whitehall` are equally
+English to a classifier and to a lexicon; the difference is whether the host language has adopted the word,
+which is a lexical fact about the HOST, not a property of the span. A detector that cannot tell them apart
+does **net harm** at the observed base rates — roughly 40 rows helped against 400 hurt.
+
+⚠ **The numeral case is unaffected and remains strong** (85/90 rows closer, Run 11 of the alignment
+investigation). It is not the same phenomenon: a digit run has no host-language pronunciation to compete
+with, so there is no nativisation alternative. That is why it needs a per-language register and not a model.
+
+### Status
+
+The LID is measured, compressed and characterised, and it does its stated job well (100% precision on
+intruder detection at every size). But the **premise** — that detecting foreign spans lets us read them
+better — holds only for genuine foreign prose, which is rare, and is actively false for the common case of
+adopted names. Wiring it in on span detection alone would regress the corpus.
+
+What would change this: a signal for *"has the host adopted this word?"* — i.e. a per-language exonym /
+loanword lexicon. That is the same lexical tier the single-word analysis already pointed to, arrived at
+from the opposite direction.
