@@ -61,5 +61,33 @@ describe("hebrew neural vowel restoration", () => {
             expect(out).toContain("ʔaχ ʁoʃ hamemʃala");
             expect(out).toContain("ʔamaʁ");
         });
+
+        /**
+         * ⚠ AND THE CLAUSE KEEPS ITS CROSS-WORD CONTEXT AROUND THE BROKEN WORD. Retrying word-at-a-time
+         * would recover the vowels but lose the very thing clauses are batched for — `ספר` is sefeʁ or
+         * sifeʁ and `קרא` is kaʁa or koʁa depending on the sentence, which is the module doc's own reason
+         * for batching. `canRead` identifies the unreadable words with no model call, so the run is split
+         * at them and the surviving segments stay batched.
+         */
+        test("the surviving segments keep their context, not just their vowels", async () => {
+            const out = await phonemizeHebrewNeural("הוא קרא ספר של ג'ון טוב");
+            expect(out).toContain("kaʁa sefeʁ"); // the clause reading; word-at-a-time gives koʁa / sifeʁ
+            expect(out).toContain("d͡ʒvn");       // and only the geresh name degrades
+        });
+
+        /**
+         * ⚠ THE MAQAF U+05BE IS A WORD JOINER, NOT NIQQUD, and it sits inside the [U+0591–U+05C7] block.
+         * Classing it as niqqud made a bare compound test as "already vocalized": it went to the rule
+         * engine as a skeleton AND flushed the clause around it. It is not in the tagger's charset either,
+         * so the compound is split on it and the halves restored together.
+         *
+         * ⚠ THE HALVES REJOIN INTO ONE QUEUE ENTRY. assembleClauses draws exactly one entry per token, so
+         * pushing two for one input word shifts every later word and drops the last — the same alignment
+         * failure the length guard exists to catch. `ɡadol` is the canary.
+         */
+        test("a maqaf compound restores, and does not shift the words after it", async () => {
+            expect(await phonemizeHebrewNeural("בית־ספר גדול")).toBe("bet sefeʁ ɡadol");
+            expect(await phonemizeHebrewNeural("בית־ספר ותיק מאוד")).toBe("bet sefeʁ vatik meod");
+        });
     });
 });

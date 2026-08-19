@@ -12,6 +12,7 @@
 import { assembleClauses } from "../../core/clauses.ts";
 import { withHost } from "../../core/foreign.ts";
 import { phonemizeWord } from "./hebrew.ts";
+import { lexiconLookup } from "./lexicon.ts";
 import { normalizeHebrew } from "./normalize.ts";
 import { createHebrewTagger, type HebrewTagger } from "./hebrewTagger.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -21,7 +22,12 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // ⚠ KEPT IDENTICAL TO `hebrew.ts`'s TOKEN, including the word-MEDIAL geresh — see the note there. This class
 // used to admit the apostrophe only after the first letter, so `בייג'ינג` split where `ג'יימס` did not.
 const TOKEN = /([א-ת][֑-ׇ־'׳’]*(?:[א-ת][֑-ׇ'׳’]*)*)|(\d+(?:\.\d+)?)|([.!?…,;:׃])/gu;
-const NIQQUD = /[֑-ׇ]/u;
+// ⚠ U+05BE MAQAF IS EXCLUDED, and it is inside the [֑-ׇ] block. TOKEN admits the maqaf inside a word, so
+// with it in this class a bare maqaf-joined compound tested as "already vocalized": it went straight to the
+// rule engine as a skeleton AND flushed the clause run around it — `בית־ספר גדול` → *vjtsfʁ ɡadol* where the
+// tagger reads *bet sefeʁ ɡadol*. That is the same "one word costs its vowels" shape this module now guards
+// against everywhere else. A maqaf word is bare, so it belongs on the tagger path like any other.
+const NIQQUD = /[\u0591-\u05BD\u05BF-\u05C7]/u; // U+0591–U+05C7 minus U+05BE, written as escapes on purpose
 const MAX_CHARS = 200; // keep clauses in-distribution (the tagger trained on ≤220-char runs)
 
 let taggerP: Promise<HebrewTagger | undefined> | undefined;
@@ -43,8 +49,8 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
     const flush = async (): Promise<void> => {
         if (!run.length) return;
         const out = (await tagger.restore(run.join(" "))).split(" ");
-        if (out.length === run.length && out.every(Boolean)) queue.push(...out);
-        else {
+        if (out.length === run.length && out.every(Boolean)) { queue.push(...out); run = []; return; }
+        {
             // ⚠ RETRY WORD BY WORD RATHER THAN ABANDONING THE CLAUSE. The guard used to send the WHOLE run
             // to the rule engine, which on unvocalized input is a bare consonant skeleton — so one
             // unreadable word cost every vowel in the sentence. It is not a rare shape: the tagger returns
@@ -60,10 +66,45 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
             // all, so a recovered word may be vocalized less well than a clean clause pass would manage.
             // That is still the better of the two outcomes: one degraded word against a whole degraded
             // sentence.
+            // ⚠ SPLIT AT THE UNREADABLE WORDS AND RE-RUN THE SEGMENTS AS CLAUSES, rather than dropping to
+            // word-at-a-time for the whole run. Cross-word context is the entire reason clauses are batched
+            // — it is what resolves the homographs the module doc names (ספר sefeʁ/sifeʁ, קרא kaʁa/koʁa) —
+            // and a word-by-word retry throws it away for every word, not just the broken one. `canRead`
+            // answers which words those are with NO model call, so this costs two or three inferences
+            // instead of N+1 and keeps `הוא קרא ספר של` batched around the name that broke it.
+            let seg: string[] = [];
+            const flushSeg = async (): Promise<void> => {
+                if (!seg.length) return;
+                const o = (await tagger.restore(seg.join(" "))).split(" ");
+                if (o.length === seg.length && o.every(Boolean)) queue.push(...o);
+                else for (const w of seg) queue.push(lexiconLookup(w) ?? phonemizeWord(w));
+                seg = [];
+            };
             for (const w of run) {
-                const one = (await tagger.restore(w)).trim();
-                queue.push(one && !one.includes(" ") ? one : phonemizeWord(w));
+                if (tagger.canRead(w)) { seg.push(w); continue; }
+                // ⚠ A MAQAF IS A WORD JOINER, so split on it rather than declining the compound. U+05BE is
+                // not in the tagger's charset, but each half is: `בית־ספר` → `bet sefeʁ`, where declining
+                // gives the skeleton *vjtsfʁ*. Splitting also keeps the halves inside the segment, so they
+                // still get the cross-word context of the clause around them. 28 he_il rows carry one.
+                await flushSeg();
+                // ⚠ A MAQAF IS A WORD JOINER, so split on it rather than declining the compound. U+05BE is
+                // not in the tagger's charset but each half is: `בית־ספר` → `bet sefeʁ`, where declining
+                // gives the skeleton *vjtsfʁ*. 28 he_il rows carry one.
+                // ⚠ AND THE HALVES REJOIN INTO ONE QUEUE ENTRY. `assembleClauses` below draws exactly one
+                // entry per TOKEN match, so pushing two for one input word shifts every later word and
+                // silently drops the last one — which is the very failure the length guard above exists to
+                // catch, reintroduced one branch down.
+                const parts = w.split("\u05BE");
+                if (parts.length > 1 && parts.every((x) => x && tagger.canRead(x))) {
+                    const joined = (await tagger.restore(parts.join(" "))).trim();
+                    queue.push(joined || (lexiconLookup(w) ?? phonemizeWord(w)));
+                    continue;
+                }
+                // ⚠ THROUGH THE LEXICON FIRST, as the tagger's own tail does. Reaching straight for
+                // `phonemizeWord` skips the layer that gives a known skeleton its curated reading.
+                queue.push(lexiconLookup(w) ?? phonemizeWord(w));
             }
+            await flushSeg();
         }
         run = [];
     };

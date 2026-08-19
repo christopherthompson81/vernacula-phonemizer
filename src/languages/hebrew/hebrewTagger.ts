@@ -30,6 +30,11 @@ const NIQQUD = /[֑-ׇ]/gu; // strip the restored niqqud back to the skeleton fo
 export interface HebrewTagger {
     /** Restore + phonemize a CLAUSE of bare Hebrew words (space-separated) → Modern Israeli IPA. "" if declined. */
     restore(clause: string): Promise<string>;
+    /** Whether every character of `word` is in the model's charset — i.e. whether `restore` will decline it.
+     *  ⚠ Answered WITHOUT a model call, which is what lets the caller split a clause at the words the tagger
+     *  cannot read and keep the surviving segments batched. The decline is all-or-nothing on the first
+     *  unknown char, so one such word would otherwise cost the whole clause its cross-word context. */
+    canRead(word: string): boolean;
 }
 
 /** Build the Hebrew nakdan tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
@@ -49,6 +54,10 @@ export async function createHebrewTagger(basename = "he-tagger"): Promise<Hebrew
     const nTags = Object.keys(meta.tags).length;
 
     return {
+        canRead(word: string): boolean {
+            for (const c of word.normalize("NFC")) if (meta.src[c] === undefined) return false;
+            return true;
+        },
         async restore(clause: string): Promise<string> {
             const chars = [...clause.normalize("NFC")];
             const T = chars.length;
