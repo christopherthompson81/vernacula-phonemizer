@@ -2166,3 +2166,70 @@ reading the same row twice had not** — which is the argument for the verdict c
 string rather than just a label.
 
     all-flagged  747 (session start) -> 682 (re-scored) -> 662 (hand verdicts)
+
+## Run 33 — 2026-08-19 — retiring the queue as a worklist, and the instrument that replaces it
+
+662 all-flagged rows remain and hand-verifying them is not the answer: Run 32 marked 20 and each needed a
+careful per-row justification. The question is what the 662 ARE.
+
+⚠ **THEY ARE A SAMPLE, NOT A BACKLOG.** Every fix this session moved far more rows than it had in the
+queue — Hebrew's ktiv-male digraph moved **1,107 corpus rows while only 13 were ever all-flagged**. The
+queue points at CLASSES; as a worklist it is 0.25% of the corpus (662 of 270,106) and its remaining
+categories are mostly already-decided: code-switching (measured net harmful, declined), the MIXED-tier
+numeral register (measured 62–85%, declined), and recognizer noise in languages it finds hard.
+
+### Where the defects actually came from
+
+Not one of this session's three real defect classes was found by reading a flagged row:
+
+    he_il  identical-consonant clusters in OUR OUTPUT  ->  ktiv male     1,107 rows
+    de_de  the referee's residual                      ->  ⟨th⟩            127 rows
+    hu_hu  a re-derived queue after fixing the fold    ->  ⟨ch⟩            171 rows
+
+The Hebrew one is the template and the cheapest: it used **no audio, no referee, and no comparison at
+all** — just the observation that Hebrew has no identical-consonant clusters, so any in our output are
+ours. That generalises.
+
+### `output_anomalies.py` — check the output against what IPA can BE
+
+⚠ **AND THE OBVIOUS CHECKS ARE MOSTLY NOISE, which is the main design finding.** The first draft flagged
+76k "identical-consonant clusters" that are Italian geminates (*dˈella*), 33k "punctuation inside a word"
+that is Lao's syllable separator, and called Mandarin's syllabic *ʐ̩* and Portuguese's *bˈẽj̃* vowel-less —
+the detector reporting its own gaps. Only a check whose violation is impossible **in every language**
+belongs in the default run. One qualifies outright: **a word with no nucleus cannot be said.**
+
+    lang      no-nucleus   tokens    rate    examples
+    ps_af           7310    65005   11.25%   d̪ hm t̪r hr kɻ
+    mt_mt            655    60704    1.08%   fl bl t͡ʃ jr dr
+    ckb_iq           634    55930    1.13%   kɾd tɾ bn ɡʃt pʃt
+    mn_mn            436    58400    0.75%   t͡ʃʰ nt kʰm kʰw
+    he_il            407    56638    0.72%   d͡ʒvn knd͡ʒʁ t͡ʃʁls
+
+**`ps_af` at 11.25% — one Pashto word in nine is unpronounceable.** `pashto.ts` already records a "deferred
+short-vowel-restoration subsystem", so this is a known deferral; what is new is the NUMBER. The detector's
+real value is turning "deferred" into a measured cost and ranking the fleet's deferrals by how much output
+each actually damages. Nothing in 33 runs of distance work surfaced this, because a language that is
+uniformly bad has no outliers — the same degeneracy the README records for `ga_ie`.
+
+⚠ **AND IT FOUND AN UNDOCUMENTED CLASS IN A LANGUAGE ALREADY WORKED TWICE.** German lowercase
+abbreviations are read as consonant clusters instead of being spelled out:
+
+    dvd -> tft      tv -> tf      mrt -> mʁt      ms -> ms      nhc -> nhk
+
+*dvd* → *tft* even applies final devoicing to an acronym. FLEURS transcripts are lowercased, which destroys
+the casing signal `core/initialisms.ts` needs; `initialism_casing.mts` exists to restore it and these slip
+past. 8 distinct words in de_de, but the mechanism is fleet-wide.
+
+### The recommendation
+
+1. **Retire the all-flagged queue as a per-row worklist.** Keep it as a class detector, re-derived after
+   each fix — Run 31 showed it sharpens as the language improves (`ny_mw` rose 11→20 *because* its median
+   fell).
+2. **Run `output_anomalies.py` as the primary sweep.** Cheaper, unambiguous, fleet-wide, and it finds what
+   the distance cannot see: uniform damage, which by construction produces no outliers.
+3. **The 662 are training-corpus policy, not a defect list.** A pair whose IPA disagrees with its audio is
+   a poor training example whatever the cause; `exclude_defective.py` in the corpus repo already answers
+   that question, and 0.25% is a rounding error against 270,106 rows.
+
+Next by measured damage: **ps_af** (11.25%, a quantified deferral), the **German lowercase-initialism**
+class, then **mt_mt** (1.08% plus the `id-9.30` decimal bug from Run 31).
