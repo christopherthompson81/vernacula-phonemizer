@@ -266,7 +266,10 @@ class SerbianPhonemizer implements Phonemizer {
         // number the tier's count agreement reads), so the tier cannot be applied around this call the
         // way most engines do it. See the ordering comments there.
         return assembleClauses(normalizeSerbian(input), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
+            // `foreignLetters` BEFORE `nat`, as in hr/bs. A no-op on Cyrillic input, which is why the
+            // corpus barely exercises it here (0.7% of rows against 11.8% Bosnian) — but Serbian is
+            // written in both scripts and the Latin side had the same deletion.
+            if (m[1]) sink.emit(phonemizeWord(nat(foreignLetters(m[1]))));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
@@ -281,3 +284,34 @@ class SerbianPhonemizer implements Phonemizer {
 export function createSerbian(): Phonemizer {
     return new SerbianPhonemizer();
 }
+
+const FOREIGN_LETTER = /qu|[qwxy]/giu;
+/** The ⟨q w x y⟩ spelling fold, shared by all three BCS engines — see the block comment in croatian.ts
+ *  for the orthographic sourcing. A SPELLING fold applied per word BEFORE `nat`, never a g2p rule: it must
+ *  not change `phonemizeWord`, which all three share.
+ *
+ *  ⚠ WITHOUT IT THE LETTER IS DELETED OUTRIGHT — `watt` read as *at*, `Ellsworth` as *ˈelsortx* — which is
+ *  silent content loss, the worst of the available errors and the reason this is applied rather than left.
+ *
+ *  ⚠ THE AUDIO SUPPORT IS WEAK FOR ⟨w⟩ AND ⟨y⟩, AND THE REASON IS KNOWN. Over the 364 Bosnian utterances
+ *  carrying one of these letters the fold is net positive on all four mappings but only decisive on one:
+ *      qu/q → kv/k   23 better / 4 worse        x → ks   25 / 13
+ *      w → v         93 better / 67 worse       y → i|j  107 / 91
+ *  The ⟨w⟩ and ⟨y⟩ words are overwhelmingly English — web, world, new, Disney, city, beauty — and the
+ *  readers CODE-SWITCH on them, so neither the folded nor the deleted form matches what was said. ⟨q⟩ words
+ *  (piquet, Qing, cirque) are nativised, which is why that arm is clean. Re-measure ⟨w⟩/⟨y⟩ once a
+ *  span-level language signal exists; the confound is the measurement's, not the fold's.
+ *
+ *  ⚠ NEITHER REFEREE CAN ADJUDICATE THIS: wikipron hbs_latn and epitran srp-Latn contain ZERO words with
+ *  any of these letters, so extending the fold moves them by exactly nothing. */
+export const foreignLetters = (w: string): string =>
+    w.replace(FOREIGN_LETTER, (m, at: number, s: string) => {
+        const lower = m.toLowerCase();
+        if (lower === "qu") return "kv";
+        if (lower === "q") return "k";
+        if (lower === "w") return "v";
+        if (lower === "x") return "ks";
+        // ⟨y⟩: the /j/ offglide after a vowel, the vowel /i/ otherwise.
+        return /[aeiouAEIOU]/u.test(s[at - 1] ?? "") ? "j" : "i";
+    });
+

@@ -198,7 +198,7 @@ describe("Bosnian text normalization", () => {
             .toBe("u sˈezoni od xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set pˈete do xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set ʃˈeste ɡˈodine");
         // …and an UNDOTTED year span stays cardinal: the writer marked nothing, so nothing is claimed.
         expect(say("ratu (1894-1895), Qing vlada"))
-            .toBe("rˈatu xˈiʎadu ˈo˥˩samsto deʋedˈe˩˥set t͡ʃˈe˩˥tiri do xˈiʎadu ˈo˥˩samsto deʋedˈe˩˥set peː˥˩t , inɡ ʋlˈaː˩˥da");
+            .toBe("rˈatu xˈiʎadu ˈo˥˩samsto deʋedˈe˩˥set t͡ʃˈe˩˥tiri do xˈiʎadu ˈo˥˩samsto deʋedˈe˩˥set peː˥˩t , kinɡ ʋlˈaː˩˥da");
     });
 
     test("the hyphen + case suffix resolves through the ordinal paradigm, not by concatenation", () => {

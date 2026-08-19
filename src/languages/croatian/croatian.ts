@@ -13,7 +13,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
-import { phonemizeWord } from "../serbian/serbian.ts";
+import { foreignLetters, phonemizeWord } from "../serbian/serbian.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeCroatian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -81,17 +81,6 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
  * override on a proper name, a much smaller and rarer error than deleting the letter, and inventing a
  * French-name detector here would be guessing at a population the artifact does not contain.
  */
-const FOREIGN_LETTER = /qu|[qwxy]/giu;
-const foreignLetters = (w: string): string =>
-    w.replace(FOREIGN_LETTER, (m, at: number, s: string) => {
-        const lower = m.toLowerCase();
-        if (lower === "qu") return "kv";
-        if (lower === "q") return "k";
-        if (lower === "w") return "v";
-        if (lower === "x") return "ks";
-        // ⟨y⟩: the /j/ offglide after a vowel, the vowel /i/ otherwise.
-        return /[aeiouAEIOU]/u.test(s[at - 1] ?? "") ? "j" : "i";
-    });
 
 // symbol normalization — Croatian: % is "posto" (indecilnable), the units/rates/exponents follow the
 // Serbian tier, and the currency signs the corpus writes (¥, $, €, £) are declared. Kept in the ENGINE

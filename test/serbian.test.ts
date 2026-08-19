@@ -137,8 +137,14 @@ describe("Serbian normalization", () => {
         // outright protects the scale word (Celsius/Fahrenheit, which the C/F arm supplies) but throws the
         // degree noun away with it — and a LONGITUDE then loses the word that makes it one.
         // ⚠ The compass `W` is still unread, and deliberately: `јужне` is ×0 in this corpus, so a four-way
-        // table would have to invent its missing quarter. Only the recoverable half is fixed.
-        expect(say("35°W")).toBe("trˈiː˩˥deset peː˥˩t stˈepeni");
+        // table would have to invent its missing quarter. Only the recoverable half is fixed. The degree
+        // rule CONSUMES the letter to enforce that, rather than leaving it for the g2p to drop.
+        // ⚠ GOLDEN CHANGED, and the old one was pinning a defect. Leaving `W` in place produced
+        // `35 stepeniW` with NO SPACE, so the stress lookup ran on the nonexistent word `stepeniw`, missed
+        // stress.tsv and lost the pitch accent — `stˈepeni` where every other route to the same word gives
+        // `stˈe˥˩peni`. A stray letter glued to a word silently changes which word is looked up.
+        expect(say("35°W")).toBe("trˈiː˩˥deset peː˥˩t stˈe˥˩peni");
+        expect(say("35°")).toBe(say("35 stepeni"));   // and all routes to the noun now agree
     });
     // PRIMARY STRESS — lexical, from stress.tsv (kaikki/Wiktionary), shared with the hr and bs engines because
     // they import this g2p. Validated against the COMMITTED wikipron referee, which has carried the pitch accent

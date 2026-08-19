@@ -320,7 +320,12 @@ export function normalizeSerbian(input: string): string {
     //    ⚠ THE COMPASS LETTER IS STILL NOT READ, a stated limit rather than an oversight: the full form is
     //    *35 степени западне географске дужине*, and the four-way compass table cannot be completed without
     //    inventing its missing quarter.
-    s = s.replace(/(\d+)\s?°(\s*(?:степен[аи]|stepen[ai]))?/gu,
+    //    ⚠ AND IT CONSUMES THE UNREAD COMPASS LETTER, which it must now do EXPLICITLY. Leaving the letter
+    //    in place used to be harmless only because the g2p had no ⟨w⟩ and silently dropped it; now that the
+    //    shared `foreignLetters` fold maps it (⟨w⟩ → /ʋ/), an unconsumed `W` glues onto the degree noun as
+    //    *stepeniʋ*. The limit stated above is a decision, so it is enforced here rather than left to
+    //    depend on a deletion elsewhere in the stack.
+    s = s.replace(/(\d+)\s?°\s?[NSEWnsew]?(\s*(?:степен[аи]|stepen[ai]))?(?![\p{L}\p{M}])/gu,
         (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`, `11-ом`, `13-то`). As in Russian, the written

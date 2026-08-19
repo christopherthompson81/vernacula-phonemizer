@@ -12,7 +12,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
-import { phonemizeWord } from "../serbian/serbian.ts";
+import { foreignLetters, phonemizeWord } from "../serbian/serbian.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeBosnian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -43,7 +43,9 @@ class BosnianPhonemizer implements Phonemizer {
         // the ordinal period are both `.`, i.e. clause punctuation, until this pass removes them). The
         // shared symbol tier runs inside that pass, in the ordered position its neighbours require.
         return assembleClauses(normalizeBosnian(input), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(nat(m[1]))); // shared Serbo-Croatian g2p
+            // `foreignLetters` BEFORE `nat`: the fold is spelled in Gaj's Latin, so what reaches the
+            // script normaliser is already native spelling. Without it ⟨q w x y⟩ are DELETED.
+            if (m[1]) sink.emit(phonemizeWord(nat(foreignLetters(m[1])))); // shared Serbo-Croatian g2p
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); // Bosnian numbers
             else if (m[3]) {
