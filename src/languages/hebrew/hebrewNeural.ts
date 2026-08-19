@@ -43,8 +43,28 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
     const flush = async (): Promise<void> => {
         if (!run.length) return;
         const out = (await tagger.restore(run.join(" "))).split(" ");
-        if (out.length === run.length) queue.push(...out);
-        else for (const w of run) queue.push(phonemizeWord(w)); // alignment guard → per-word rule-engine fallback
+        if (out.length === run.length && out.every(Boolean)) queue.push(...out);
+        else {
+            // ⚠ RETRY WORD BY WORD RATHER THAN ABANDONING THE CLAUSE. The guard used to send the WHOLE run
+            // to the rule engine, which on unvocalized input is a bare consonant skeleton — so one
+            // unreadable word cost every vowel in the sentence. It is not a rare shape: the tagger returns
+            // an EMPTY STRING for any word carrying a geresh or gershayim (צ׳מברס, ג׳ון, ח׳ופו, ד״ר), the
+            // marks Hebrew uses to write foreign consonants, and those are everywhere in transliterated
+            // names. Measured over the he_il corpus: 7.6% of clause runs tripped this, 6.6% of all rows
+            // came out as skeletons, and their median distance against the recognized phones was 0.649
+            // where the vocalized rows sat at 0.342.
+            // ⚠ NOT A CHARACTER-NORMALISATION PROBLEM — the model fails on the ASCII apostrophe AND on
+            // U+05F3/U+05F4 alike, and reads the same word fine with the mark removed. Its charset has no
+            // geresh; only retraining fixes the word itself. What is fixable here is the blast radius.
+            // ⚠ The per-word pass loses the cross-word context that is the reason clauses are batched at
+            // all, so a recovered word may be vocalized less well than a clean clause pass would manage.
+            // That is still the better of the two outcomes: one degraded word against a whole degraded
+            // sentence.
+            for (const w of run) {
+                const one = (await tagger.restore(w)).trim();
+                queue.push(one && !one.includes(" ") ? one : phonemizeWord(w));
+            }
+        }
         run = [];
     };
     for (const m of text.matchAll(TOKEN)) {

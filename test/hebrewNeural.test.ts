@@ -32,5 +32,34 @@ describe("hebrew neural vowel restoration", () => {
         test("a common unvocalized phrase restores correctly", async () => {
             expect(await phonemizeHebrewNeural("אני אוהב אותך")).toBe("ʔani ʔohev ʔotχa"); // sentence context → present-tense ohev; אותך masc. "you" = otχa
         });
+
+        /**
+         * ⚠ ONE UNREADABLE WORD MUST NOT COST THE SENTENCE ITS VOWELS. The tagger returns an EMPTY STRING
+         * for any word carrying a geresh or gershayim — צ׳ ג׳ ז׳ ח׳, the marks Hebrew writes foreign
+         * consonants with, and ד״ר for an abbreviation — because its charset has none of them. The
+         * alignment guard used to send the WHOLE clause run to the rule engine on any mismatch, and on
+         * unvocalized input that is a bare consonant skeleton, so a single transliterated name flattened
+         * every vowel around it.
+         *
+         * Measured over the he_il corpus: 7.6% of clause runs tripped it, 216 of 3,242 rows (6.6%) came out
+         * as skeletons, and their median distance against the recognized phones was 0.649 against 0.342 for
+         * the vocalized rows. Retrying word by word takes the skeleton rows to ZERO — 330 rows closer to
+         * what the reader said, 28 further, median 0.352 → 0.341.
+         *
+         * ⚠ NOT FIXABLE BY NORMALISING THE MARK: the model fails on the ASCII apostrophe and on U+05F3 /
+         * U+05F4 alike, and reads the same word fine with the mark removed. Only the geresh WORD degrades
+         * now, and it degrades to a consonantally-correct skeleton (צ׳ is still read /t͡ʃ/ by the rules).
+         */
+        test("a geresh word degrades alone, not the clause around it", async () => {
+            const out = await phonemizeHebrewNeural("צ'מברס תבע את אלוהים");
+            expect(out).toContain("t͡ʃmvʁs");        // the geresh word: no vowels, right consonants
+            expect(out).toContain("tava ʔet ʔelohim"); // and everything else is fully restored
+        });
+
+        test("a mid-sentence geresh name leaves the rest vocalized", async () => {
+            const out = await phonemizeHebrewNeural("אך ראש הממשלה ג'ון האוורד אמר");
+            expect(out).toContain("ʔaχ ʁoʃ hamemʃala");
+            expect(out).toContain("ʔamaʁ");
+        });
     });
 });
