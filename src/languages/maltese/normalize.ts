@@ -641,30 +641,72 @@ function euroSpelling(text: string): string {
  * corpus and ×0 in the 449 retained segments either way.
  */
 const CLOCK_TAIL = /^\s?(?:[ap]\s?\.?\s?m\b|ta['’’]\s?(?:filg|wara|bil))/iu;
+
+/**
+ * ── THE CLOCK ───────────────────────────────────────────────────────────────────────────────────────────
+ *
+ * Maltese speaks a time as `hour u minutes`, never as two bare numbers, and the corpus AUDIO attests the
+ * whole frame. Ten readings, different speakers, with the recognizer's output beside each:
+ *
+ *     11:00                 il-ħdax                              hour ALONE — no minutes at all
+ *     10:00 ta' filgħodu    fl-għaxra ta' filgħodu               hour alone again
+ *     1:15  ta' filgħodu    fis-siegħa **u kwart** ta' filgħodu
+ *     8:30  ta' filgħaxija  fit-tmienja **u nofs** ta' filgħaxija
+ *     9.30  am              id-disgħa **u nofs** ta' filgħodu     the DOTTED spelling, same frame
+ *     11:20                 fil-ħdax **u għoxrin**               bare, no minute-noun
+ *     11:29                 fil-ħdax u disgħa u għoxrin *minuta*
+ *     7:19  a.m.            fis-sebgħa u dsatax-**il minuta**
+ *     10:08 ta' filgħaxija  fl-għaxra u **tmien minuti**          construct plural
+ *     15:00 utc             **it-tlieta** ta' waranofsinhar       24h spoken as 12h
+ *
+ * ⚠ THIS IS WHY THE RULE EARNS ITS PLACE: `l-11:00` used to read *l ħdaʃ **,** zɛrɔ* — a pause AND the
+ * literal digit zero, inside a clock time. Both halves are things no reader produces.
+ *
+ * ⚠ THE MINUTE-NOUN IS DELIBERATELY NOT EMITTED, because the readers do not agree on it: 11:20 is bare,
+ * 11:29 takes *minuta*, 7:19 the teen linker *dsatax-il minuta*, 10:08 the construct plural *tmien minuti*.
+ * Three agreements for one slot. `hour u minutes` matches four of the ten EXACTLY and the rest to within
+ * that noun; choosing one agreement would be wrong more often than silence is.
+ *
+ * ⚠ 13–23 ARE SPOKEN AS 1–11. Maltese does not say *ħmistax* for 15:00 — the reader says *it-tlieta*. The
+ * day-part that disambiguates it is already written in the text where the source supplies one, so the hour
+ * is mapped and the part is never invented.
+ *
+ * ⚠ NOT ATTEMPTED: `nieqes kwart`. The reader gave 8:46 as *fid-disgħa nieqes kwart* — quarter TO the NEXT
+ * hour — which needs rounding :46 to :45 and incrementing. That is a reader's rounding, not a rule, and one
+ * attestation cannot license inventing arithmetic.
+ *
+ * The DOTTED spelling is claimed only with a clock tail (`9.30 am`); a bare `6.34 pulzieri` and `3.50 m` are
+ * decimals. The COLON needs no gate: the corpus's 28 colon pairs are 27 clocks and one `2:2` degree class,
+ * which the two-digit minute excludes.
+ */
+function clockPhrase(h: number, mi: number): string {
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    // ⚠ ONE O'CLOCK IS `siegħa`, NOT `wieħed`. The hour is feminine in the clock frame, and the written
+    //   article agrees with it — the corpus has `fis-1:15`, where `fis-` < *fi + is-* selects *siegħa*.
+    //   Attested: the reader says *fis-siegħa u kwart ta' filgħodu*, `f i s s i aʊ k w a r t`.
+    const hour = h12 === 1 ? "siegħa" : String(h12);
+    if (mi === 0) return hour;
+    if (mi === 15) return `${hour} u kwart`;
+    if (mi === 30) return `${hour} u nofs`;
+    return `${hour} u ${mi}`;
+}
+
+function clock(text: string): string {
+    const s = text.replace(
+        /(?<![\d.,:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+        (_m, h: string, mi: string) => clockPhrase(Number(h), Number(mi)),
+    );
+    return s.replace(
+        /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d:])/gu,
+        (m: string, h: string, mi: string, offset: number, full: string) =>
+            CLOCK_TAIL.test(full.slice(offset + m.length)) ? clockPhrase(Number(h), Number(mi)) : m,
+    );
+}
+
 function decimalPoint(text: string): string {
     return text.replace(
         /(\p{Nd})\.(\p{Nd}+)/gu,
-        (m, a: string, b: string, offset: number, full: string) =>
-            // ⚠ A CLOCK IS NOT A DECIMAL, BUT RETURNING IT UNTOUCHED WAS WORSE THAN EITHER READING. The
-            // guard correctly declines `9.30 am` — *disgħa punt tletin* would be wrong — but it handed the
-            // string back with its dot intact, and the clause layer downstream reads a bare `.` as SENTENCE
-            // PUNCTUATION. `id-9.30 am` came out *ɪt dɪsa . tlɛtɪn am*: a prosodic break inside a clock
-            // time, which for a training corpus is worse than any wrong-but-pronounceable reading. Dropping
-            // the separator gives *disgħa tletin* — two cardinals, no pause.
-            //
-            // ⚠ THE READING IS STILL WRONG, AND THE AUDIO SAYS SO — this only removes the pause. Both
-            // recordings of the corpus's one dotted-clock sentence read `id-9.30 am` as
-            // **id-disgħa u nofs ta' filgħodu**, "half past nine in the morning": the recognizer returns
-            // `e d i s a · u n o s t a · f i l o t o` (and `f i d i s aʊ · n o s t a · f e l o d o`). So the
-            // reader does not say the minutes as a NUMBER at all — 30 is *nofs*, half — and reads `am` as
-            // *ta' filgħodu*, not as letters. Two cardinals is not what a Maltese reader produces.
-            //
-            // ⚠ THAT IS THE ATTESTATION THIS FILE SAID THE CLOCK FRAME LACKED. `punt` was admitted on
-            // espeak plus two wikipedia articles; here the corpus AUDIO supplies the frame directly, twice.
-            // A real clock reader — `hour (u nofs | u kwart | u N) [ta' filgħodu | ta' waranofsinhar]` —
-            // is therefore buildable on evidence rather than invention, and is the right fix. It is not
-            // attempted for 3 corpus rows; this is the pause repair only, which asserts nothing new.
-            CLOCK_TAIL.test(full.slice(offset + m.length)) ? `${a} ${b}` : `${a} ${DECIMAL_POINT} ${b}`,
+        (_m, a: string, b: string) => `${a} ${DECIMAL_POINT} ${b}`,
     );
 }
 
@@ -707,6 +749,8 @@ export function normalizeMaltese(input: string): string {
     s = ilLinkedUnit(s); //   5b. the tier cannot cross the `-il` linker between a number and its unit
     s = euroSpelling(s); //   6. lets the tier's own redundancy guard see a variant spelling
     s = SYMBOLS(s); //        7. percent, currency + magnitude, units, exponent, ampersand
+    s = clock(s); //          7b. BEFORE the decimal — 9.30 am is a time, and step 8 now claims every
+    //                            digit-dot-digit unconditionally, so the clock must take its own first
     return decimalPoint(s); // 8. last: the tier needs the number whole (see the step's note)
 }
 

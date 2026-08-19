@@ -2302,3 +2302,40 @@ rather than invention. Not attempted for 3 corpus rows, but no longer blocked on
 This is the same shape as Run 19's Lingala note (*onze juste* for `11:00`), and it generalises: **the
 recognizer is a source of attestation for spoken frames that text corpora do not record.** The numeral
 register already quantified the prize at ~115 rows across five languages for clocks and decimals alone.
+
+### Run 34b — the Maltese clock reader, built on the audio
+
+Ten corpus readings, different speakers, decoded from the recognizer output — this IS the attestation the
+engine's own note said the clock frame lacked:
+
+    11:00                 il-ħdax                              hour ALONE
+    10:00 ta' filgħodu    fl-għaxra ta' filgħodu               hour alone again
+    1:15  ta' filgħodu    fis-siegħa u kwart ta' filgħodu
+    8:30  ta' filgħaxija  fit-tmienja u nofs ta' filgħaxija
+    9.30  am              id-disgħa u nofs ta' filgħodu        the DOTTED spelling, same frame
+    11:20                 fil-ħdax u għoxrin                   bare, no minute-noun
+    11:29                 fil-ħdax u disgħa u għoxrin minuta
+    7:19  a.m.            fis-sebgħa u dsatax-il minuta
+    10:08 ta' filgħaxija  fl-għaxra u tmien minuti             construct plural
+    15:00 utc             it-tlieta ta' waranofsinhar          24h spoken as 12h
+
+Implemented: `hour u minutes`, with `:00` → hour alone, `:15` → *u kwart*, `:30` → *u nofs*, 13–23 mapped to
+1–11, and 1 o'clock as the feminine **siegħa** (the written article `fis-` agrees with it).
+
+⚠ **THE MINUTE-NOUN IS NOT EMITTED, BECAUSE THE READERS DO NOT AGREE ON IT** — 11:20 bare, 11:29 *minuta*,
+7:19 the teen linker *dsatax-il minuta*, 10:08 the construct plural *tmien minuti*. Three agreements for one
+slot. Silence matches four of the ten exactly and the rest to within that noun.
+
+⚠ **AND `nieqes kwart` IS NOT DERIVED.** The reader gave 8:46 as *fid-disgħa nieqes kwart* — quarter TO the
+next hour — which needs rounding :46 to :45 and incrementing. That is a reader's rounding, and one
+attestation cannot license inventing arithmetic.
+
+⚠ **THE METRIC IS NEARLY NEUTRAL AND THAT IS EXPECTED: 17 closer / 10 further, mean 0.3336 → 0.3335.** The
+gains are the frame (8:30 +0.087, 1:15 +0.049, 9.30 +0.033, 11:00 +0.015) and every loss is ≤0.035 and is
+the minute-noun we deliberately withhold. The distance cannot reward what this change is actually for —
+`l-11:00` used to read *l ħdaʃ **,** zɛrɔ*, a pause AND the literal digit zero inside a clock time, and
+`fold()` strips the comma before scoring so the pause was never counted against us in the first place.
+**The justification is the attestation, not the number**, and the number is reported so that is visible.
+
+This also revises a decision twice: the test first pinned the raw dot ("the pause it already had stands"),
+then two bare cardinals from Run 34's interim repair. Both are gone.

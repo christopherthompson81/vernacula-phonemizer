@@ -142,24 +142,12 @@ describe("Maltese text normalization — the rules' branches", () => {
     // and the clock refusal.
     test("decimal point: the rewrite, and the CLOCK left exactly as it was", () => {
         expect(normalizeMaltese("12.5%")).toBe("12 punt 5 fil-mija");
-        // Maltese writes a time of day with a dot, so the clock is REFUSED as a decimal (trap 53) rather
-        // than read as *disgħa punt erbgħin*.
-        //
-        // ⚠ THIS TEST USED TO PIN THE DOT ITSELF, on the reasoning that "the pause it already had stands".
-        //   That was wrong, and reversing it is deliberate: refusing did not produce *nothing*, it produced
-        //   a bare `.` that the clause layer downstream reads as SENTENCE PUNCTUATION — `id-9.30 am` came
-        //   out *ɪt dɪsa . tlɛtɪn am*, a prosodic break inside a clock time. A pause is as much an
-        //   assertion as a reading, and it is one no reader makes. The separator is now dropped, which
-        //   asserts nothing new: two cardinals, *disgħa tletin*.
-        //
-        //   Scale honestly: 3 corpus rows, all one sentence recorded three times, and the reading is STILL
-        //   WRONG — the audio has the reader saying *id-disgħa u nofs ta' filgħodu*, "half past nine in the
-        //   morning", so 30 is *nofs* and `am` is *ta' filgħodu*. This removes the pause and nothing more.
-        //   The recognizer output is however the ATTESTATION the clock frame was said to lack, so a real
-        //   clock reader is now buildable on evidence — see the note in normalize.ts.
-        expect(normalizeMaltese("9.40am")).toBe("9 40am");
-        expect(normalizeMaltese("8.30 p.m.")).toBe("8 30 p.m.");
-        expect(normalizeMaltese("fl-4.00 ta' filgħodu")).toBe("fl-4 00 ta' filgħodu");
+        // ⚠ A CLOCK IS READ AS A CLOCK NOW — see `clock()` in normalize.ts, whose frame is attested by ten
+        //   corpus readings. This test twice pinned something weaker: first the dot itself ("the pause it
+        //   already had stands", which was a PAUSE inside a time), then two bare cardinals. Both are gone.
+        expect(normalizeMaltese("9.40am")).toBe("9 u 40am");
+        expect(normalizeMaltese("8.30 p.m.")).toBe("8 u nofs p.m.");
+        expect(normalizeMaltese("fl-4.00 ta' filgħodu")).toBe("fl-4 ta' filgħodu"); // :00 is the hour ALONE
         // …and the guard must be the RIGHT context, because the SHAPE cannot tell these two apart.
         // ⚠ THE AGREEMENT HERE USED TO BE `dollari` AND THAT WAS THE DOCUMENTED RESIDUE, not the target: a
         // magnitude governs the SINGULAR in Maltese, and the shared tier resolved every magnitude as a fixed
@@ -411,19 +399,40 @@ describe("Maltese — a magnitude takes the singular, a small count still takes 
  * came out *ɪt dɪsa . tlɛtɪn am*, a prosodic break inside a clock time. Dropping the separator gives two
  * cardinals and no pause. The idiomatic `u` connective (*id-disgħa u tletin*) is deliberately not invented.
  */
-describe("Maltese — a clock time carries no clause break", () => {
-    test("a decimal followed by a clock tail loses the separator, not gains a pause", () => {
-        expect(phonemize("id-9.30 am", "mt")).toBe("ɪt dɪsa tlɛtɪn am");
-        expect(phonemize("id-9.30 am", "mt")).not.toContain(".");
-        expect(phonemize("fis-2.30 pm", "mt")).not.toContain(".");
+describe("Maltese — the clock, on the frame the audio attests", () => {
+    /**
+     * Ten corpus readings give the frame `hour u minutes`, with three special minutes. The recognizer
+     * output for each is in `clock()`'s note; every assertion here is one of those readings.
+     */
+    test("the attested frame", () => {
+        expect(phonemize("l-11:00", "mt")).toBe("l ħdaʃ"); // hour ALONE — was *l ħdaʃ , zɛrɔ*
+        expect(phonemize("fit-8:30 ta' filgħaxija", "mt")).toBe("fɪt tmɪnja u nɔfs ta fɪlaʃɪja");
+        expect(phonemize("fil-11:20", "mt")).toBe("fɪl ħdaʃ u ɔʃrɪn");
+        expect(phonemize("id-9.30 am", "mt")).toContain("dɪsa u nɔfs"); // the DOTTED spelling, same frame
     });
 
-    test("an ordinary decimal still reads punt", () => {
-        expect(phonemize("9.30", "mt")).toBe("dɪsa punt tlɛtɪn");
-        expect(phonemize("1.5 miljun", "mt")).toContain("punt");
+    /** ⚠ ONE O'CLOCK IS `siegħa`, not `wieħed` — feminine in the clock frame, and `fis-` agrees with it. */
+    test("the first hour is feminine", () => {
+        expect(phonemize("fis-1:15 ta' filgħodu", "mt")).toBe("fɪs sɪa u kwart ta fɪlɔdu");
     });
 
-    test("the version-dot refusal is untouched", () => {
-        expect(phonemize("802.11n", "mt")).toContain("punt"); // 802.11n reads as a dotted designation
+    /** ⚠ 13–23 ARE SPOKEN AS 1–11. Maltese does not say *ħmistax* for 15:00; the reader says *it-tlieta*. */
+    test("a 24-hour time is spoken as 12-hour", () => {
+        expect(normalizeMaltese("15:00 utc")).toBe("3 utc");
+        expect(normalizeMaltese("00:30")).toBe("12 u nofs");
+    });
+
+    /** ⚠ THE DOT IS ONLY A CLOCK WITH A CLOCK TAIL — these are decimals and must keep `punt`. */
+    test("decimals and dotted designations are untouched", () => {
+        expect(normalizeMaltese("6.34 pulzieri")).toBe("6 punt 34 pulzieri");
+        expect(normalizeMaltese("3.50 m")).toBe("3 punt 50 metri");
+        expect(normalizeMaltese("802.11n")).toBe("802 punt 11n");
+        expect(normalizeMaltese("2:2 lawrija")).toBe("2:2 lawrija"); // a degree class, not a time
+    });
+
+    /** ⚠ NOT ATTEMPTED: `nieqes kwart`. The reader rounded 8:46 to quarter-to-nine; that is a reader's
+     *  rounding, not a rule, and one attestation cannot license inventing the arithmetic. */
+    test("quarter-to is deliberately not derived", () => {
+        expect(normalizeMaltese("8:46")).toBe("8 u 46");
     });
 });
