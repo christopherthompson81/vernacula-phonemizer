@@ -1551,3 +1551,76 @@ is still [t͡s]. Unlike ⟨ch⟩ there is no orthographic discriminator: native 
 ⟨ck⟩ looked like a clean rule — Hungarian "has no native ⟨ck⟩" — and is not: *palackok*, *kockázat*,
 *arcképét*, *építőkockáiként* are ordinary Hungarian where [t͡sk] is correct. ~58 foreign tokens against
 ~12 native ones is not a rule, and checking the word list before writing it is what stopped it.
+
+## Run 24 — 2026-08-19 — hy_am: the referee's biggest residual class, refuted by both instruments
+
+19 all-flagged rows, 9 distinct sentences, and the Armenian in them is accurate — the word-initial ե/ո
+glides (*jen*, *voɾ*, *voɾonkʰ*), initial-cluster epenthesis (*t͡ʃʰəmʃkoɾdin*, *dəɾɑn*, *məɾɡɑjin*), the
+aspirate series, and the compound numerals (Armenian writes 500 as one word, հինգհարյուր → *hinɡhɑɾjuɾ*,
+which looked like a missing space and is not).
+
+### The dominant confusion pair is notation, and the referee settles it
+
+`ɑ → a` is **34.3% of all substitutions** in the language, 40,091 of them. It is not a `COARSEN` candidate:
+the recognizer writes `ɑ` 151,005 times corpus-wide against our 492,171 — 31%, nowhere near the <1% that
+qualified `ɒ` in Run 23 — and four languages (cmn, ps, nl, km) genuinely contrast ɑ with a, so a global
+fold would erase a distinction the recognizer makes. More decisively, **wikipron's human Eastern Armenian
+transcriptions use `ɑ` exactly where we do.** Our symbol is right; the recognizer simply prefers `a`.
+
+### The schwa class: 37% of the referee's misses, and not a rule gap
+
+`hy.jsonc` records the residual as "largely the schwa-epenthesis layer (unwritten ə in clusters)", and the
+measurement bears out the size. Excluding 68 all-caps acronyms (where the referee spells letter names with
+ə and we do not — a citation convention, not phonology):
+
+    referee hits            14,907
+    reconciled by ə ALONE    1,133      <- 37% of the 3,115 misses
+    other                    1,982
+
+    of the ə-only:  referee has MORE 762   we have more 371
+
+`armenian.ts` implements Vaux-style epenthesis for INITIAL and FINAL clusters only — medial clusters are
+untouched, and every referee-has-more example is a medial one: *ɑdɾbed͡ʒɑn* → *ɑdəɾbed͡ʒɑn* (Ադրբեջան),
+*ɑfʁɑnstɑn* → *ɑfʁɑnəstɑn*, *dɑʁstɑn* → *dɑʁəstɑn*, *ɡɑlstjɑn* → *ɡɑləstjɑn*. Every one is a 3+ consonant
+medial run. That is a clean hypothesis with an obvious rule.
+
+⚠ **AND IT IS WRONG. EVERY PLACEMENT MAKES THE REFEREE WORSE:**
+
+    baseline        14,907/18,022   82.72%
+    ə after 1st     14,799          82.12%
+    ə after 2nd     14,801          82.13%
+    ə before last   14,803          82.14%
+
+The examples were consistent because they were the cases the rule would fix; the rule also fires on the
+far larger set of medial clusters the referee leaves intact.
+
+⚠ **THE AUDIO AGREES, AND THAT MATTERS MORE HERE THAN USUAL.** `hy.jsonc` declares an explicit
+`secondaryGap` — wikipron hye_e is the ONLY referee, and Western Armenian is a different dialect rather
+than a second source — so the harness's "corroborate across ≥2 independent sources" rule cannot normally be
+satisfied for Armenian. The ASR corpus is that second source, and it is independent of Wiktionary:
+
+    baseline        mean 0.4430   median 0.4286
+    ə after 1st     mean 0.4436                  better  19   worse 598
+    ə after 2nd     mean 0.4434                  better  21   worse 596
+    ə before last   mean 0.4436                  better  28   worse 589
+
+Roughly 25:1 against, on every variant. Two instruments that disagree about almost everything else agree
+that medial epenthesis is not a rule Armenian applies across the board — it is lexical, or it is wikipron's
+narrow-transcription habit, and nothing here can separate those.
+
+### Verdict
+
+**No phonemizer defect in hy_am, and no change made.** The largest class the referee reports was worth
+chasing precisely because it looked so clean, and the value of the run is the refutation: the next person
+to read `hy.jsonc`'s "largely the schwa-epenthesis layer" note now has the number saying a blanket rule
+costs more than it gains, on both instruments.
+
+⚠ **A CANDIDATE THIS RAISES, NOT ACTED ON.** `COARSEN` is global, and `ɑ` shows why that is sometimes the
+wrong grain: the recognizer writes it 2.3% as often as we do for hy_am, 0.05% for sw_ke and nso_za, but
+72% for cmn. A per-language fold would serve those languages better, at the cost of the property that
+makes the current map trustworthy — one definition of "phones this recognizer cannot distinguish", shared
+with `consonant_skeleton.py`.
+
+**Two languages in a row with no defect found.** bn_in and hy_am both had a large, real, aggregate-visible
+residual class, and in both cases the class turned out to be correctly designed. That is worth noting about
+the queue's remaining yield rather than only about these two languages.
