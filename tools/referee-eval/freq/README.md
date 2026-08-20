@@ -28,3 +28,13 @@ on 25% of words (Run 17); real text is simply dominated by short common words wh
 dialogue rather than prose. It is still far closer to real text than a uniform type weighting.
 ⚠ `ur.txt` is the thinnest of the three (9.2k types); formal/technical Urdu has a longer tail than
 subtitle dialogue, so it flatters the core more than a prose corpus would.
+
+`ar.txt` / `arz.txt`: MSA and Egyptian, built 2026-08-20 from the in-domain Wikipedia corpora already used for
+diacritizer training (`/mnt/data/ar-diac/silver.txt` with diacritics stripped, `/mnt/data/arz-diac/corpus_arz.txt`),
+CC BY-SA 4.0. 50k entries each, from 6.6M and 18.3M tokens.
+
+⚠ **COVERAGE IS PARTIAL and the weighted figure describes only the covered subset** — 342 of 590 arz referee
+words carry a frequency, 2,001 of 4,758 for ar/wikipron. ⚠ **And the two MSA referees move in OPPOSITE
+directions** under token weighting: kaikki 69.7% → 87.4%, wikipron 64.9% → 50.1%. Two referees for one language
+disagreeing in direction on common words is a convention problem in one of them, not an engine result — do not
+quote either MSA figure without the other. arz behaves as the af precedent predicts: 50.0% → 61.7%.

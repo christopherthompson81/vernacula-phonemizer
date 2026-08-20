@@ -195,3 +195,53 @@ value is the correct vocalization for the FLEURS `ar_eg` audio, not the number);
 (non-circular). 30 arabic tests pass (2 regression-gold values updated to the new consistent convention: ازاى
 ezzaːj→ezːaːj gemination, برتقان burtuʔaːn→bortoʔaːn majhūl o per kaikki). Rebuild is deterministic from the kaikki
 dump; no build script committed (one-off from /mnt/data/kaikki-arz.jsonl).
+
+## Run — 2026-08-20 — the cosine retrain: DER halves, pronunciation does not
+
+**What was done.** The shipped v2 finished its 25 epochs with `lr` still at 5.0e-04 — `ReduceLROnPlateau`
+never reduced it once — while val DER was still falling. Resumed from its epoch-25 checkpoint with packed
+sequences and a deterministic cosine anneal (5e-4 → 0 over 12 epochs).
+
+| | TEST DER | TEST WER |
+|---|---|---|
+| shipped v2 | 1.69% | 5.00% |
+| retrain | **0.89%** | **2.54%** |
+
+**⚠ AND IT IS VERY NEARLY A NO-OP FOR USERS.** Three instruments, one conclusion:
+
+| | shipped → retrain |
+|---|---|
+| DER (CALIMA-silver test split) | 1.69% → 0.89% (−47% relative) |
+| runtime word-exact vs silver gold | 64.68% → 65.01% (+0.33pp) |
+| **FLEURS `ar_eg` mean phone-distance** | 0.4341 → **0.4341** (zero) |
+| **words actually pronounced differently** | **0.85%** (64 of 7,494) |
+
+**DER IS A POOR PROXY FOR THIS PIPELINE.** It scores the diacritic LABEL sequence, and most labels do not
+survive into the IPA — a sukun predicted or not, a mark on a letter whose realisation is unchanged. A 47%
+DER reduction bought a 0.85% change in pronunciation, a ~50× discrepancy. What the retrain actually did is
+converge harder onto its CALIMA teacher, which only helps to the extent the teacher is right.
+
+⚠ The audio null is NOT evidence of a bad referee here. The metric has real dynamic range across the fleet
+(es_419 0.089, median 0.362, ar_eg 0.442, worst 0.67) — it is not saturated. No instrument detects a 0.85%
+output change. The models are simply near-identical.
+
+**⚠ AND THERE IS INDEPENDENT CORROBORATION AFTER ALL — the referee eval routes through the neural
+diacritizer.** wikipron arz is human dialectal IPA with no CALIMA in it and no connection to the training
+corpus, and it moves with the retrain: **50.0% → 50.7% folded** (295 → 299 of 590; frequency-weighted 61.7%
+unchanged). Four words is small, but it is positive and it is from a source the model never saw. This was
+missed on the first pass because the arz referee row was assumed to exercise only the sync path.
+
+**SHIPPED.** ⚠ The first draft of this entry recommended NOT shipping, on the grounds that the improvement
+could not be independently corroborated. That conflates *"unverified"* with *"absent"*. This is the same model
+trained further, in less disagreement with its corpus; it is better on its objective (DER), better on the
+silver runtime harness, and unchanged on the audio — **nothing measures it worse**. Absence of an independent
+referee is a fact about Egyptian's instruments, not about the model. Checkpoint archived at
+`/mnt/data/arz-diac/bilstm_egy_cosine.pt`.
+
+**⚠ THE BINDING CONSTRAINT IS THE REFEREE, AND IT WAS ALREADY DOCUMENTED (Run 3, "DATA-BLOCKED").** Egyptian
+has exactly two machine-readable IPA sources and they are the same upstream: wikipron arz (590–800 words) IS
+the referee, and kaikki arz feeds `egyptian-lexicon.tsv` — so the eval must run `lexicon: false` to stay
+non-circular, reporting a configuration nobody ships. The audio is independent but Arabic is among the
+recognizer's weaker languages. **Nothing currently in the repo can tell you whether an Egyptian model is
+good** — only whether it is anomalous relative to itself. That gap, not the OOV vowel tail, is what blocks
+progress: the tail cannot be closed by a method nobody can score.

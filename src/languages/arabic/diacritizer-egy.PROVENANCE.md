@@ -54,3 +54,24 @@ The honest comparison is the NON-CIRCULAR wikipron-arz referee (rules-only, lexi
 (teacher-distillation plateaus: the ceiling is the calima-egy teacher's quality + the abjad, not silver volume).
 Shipped v2 as the full-corpus model (better on the honest metric). Pipeline: `$ARZDIAC/run_pipeline_v2.sh`
 (6 parallel silver shards → filter_split_v2.py → train_bilstm_sent.py → export_egy_v2.py).
+
+## 2026-08-20 — cosine retrain
+
+The previous model finished its 25 epochs with `lr` still at 5.0e-04 — `ReduceLROnPlateau` never reduced it
+once — while val DER was still falling. Resumed from its epoch-25 checkpoint with packed sequences and a
+deterministic cosine anneal (5e-4 → 0 over 12 epochs), same split, `--pausal 1`.
+
+| | TEST DER | TEST WER |
+|---|---|---|
+| previous | 1.69% | 5.00% |
+| **this model** | **0.89%** | **2.54%** |
+
+⚠ **DER IS A POOR PROXY HERE AND THIS ROW WILL BE MISREAD.** DER scores the diacritic LABEL sequence, and most
+labels do not survive into the IPA. The halving corresponds to **0.85% of words pronounced differently** (64 of
+7,494) — a ~50× discrepancy. Measured alongside: the runtime harness against silver gold moved 64.68% → 65.01%,
+and mean phone-distance against FLEURS `ar_eg` audio was **unchanged at 0.4341**. Do not quote 0.89% as a
+user-visible quality gain; it is convergence onto the CALIMA silver teacher.
+
+Rebuild: `tools/arabic/train_ar_diacritizer.py --pausal 1 --cosine 1 --cosine-lr 5e-4 --epochs 37 --patience 99
+--batch 128 --resume <v2 resume ckpt>`, then `export_ar_diacritizer_onnx.py --basename diacritizer-egy`.
+Checkpoint: `/mnt/data/arz-diac/bilstm_egy_cosine.pt`.
