@@ -328,6 +328,9 @@ const FOREIGN_LETTER = /qu|xx|th|[qwxy]/giu;
  * `pred+hod` → *prethodni*, `pod+hraniti` → *pothranjenost*, `pod+hlađen` → *pothlađenost*. There the two
  * letters are separate phonemes and [tx] is CORRECT.
  *
+ * ⚠ AND IT IS A SHARED FOLD: hr, bs and sr all call this. The native prefix family is common to all
+ * three standards, so the guard is not a Croatian special case.
+ *
  * Counted over the sr/hr/bs FLEURS corpora: 104 native tokens against 167 foreign (arthur, chatham,
  * ellsworth, lufthansa, macbeth, north, smith, thomson, the …). Folding blind would take the 167 and lose
  * the 104. The prefix is checked at WORD START and immediately before the ⟨h⟩, which admits every native
@@ -340,6 +343,7 @@ const FOREIGN_LETTER = /qu|xx|th|[qwxy]/giu;
 const NATIVE_TH_PREFIX = /^(?:pret|pot|ot|nat)$/iu;
 /**
  * ⟨q w x y⟩ — THE FOUR LETTERS GAJ'S LATIN DOES NOT HAVE, AND THIS ENGINE WAS DELETING.
+ * (⟨th⟩ joined this fold later on the same reasoning; its own note is above `NATIVE_TH_PREFIX`.)
  *
  * ⚠ THE AUDIO SUPPORT IS WEAK FOR ⟨w⟩ AND ⟨y⟩, AND THE REASON IS KNOWN. Over the 364 Bosnian utterances
  * carrying one of these letters the fold is net positive on all four mappings but decisive on only one:
@@ -375,9 +379,9 @@ const NATIVE_TH_PREFIX = /^(?:pret|pot|ot|nat)$/iu;
  *     qu → kv   `quiz` → *kviz*, `quality` → *kvaliteta*, `quart` → *kvart*
  *     q → k     the residue, when no ⟨u⟩ follows
  *     y → i     `Dylan` → *Dilan*, `Barry` → *Bari*
- *     th → t    `theory` → *teorija*, `mathematics` → *matematika*, `athletics` → *atletika* — Croatian
- *               adapts foreign /θ/ as /t/, and ⟨h⟩ alone is /x/, so an unfolded ⟨th⟩ gives the impossible
- *               *txe* for `the` and *mˈatxeʋ* for `Matthew`
+ *     th → t    `theory` → *teorija*, `mathematics` → *matematika*, `athletics` → *atletika* — all three
+ *               standards adapt foreign /θ/ as /t/, and ⟨h⟩ alone is /x/, so an unfolded ⟨th⟩ gives the
+ *               impossible *txe* for `the` and *mˈatxeʋ* for `Matthew`
  *
  * The letters themselves are documented as outside the alphabet and used only in foreign material —
  * *Hrvatski pravopis* (pravopis.hr/slova): "Pri abecediranju q dolazi iza p, a w, x, y iza v", "U pisanju
