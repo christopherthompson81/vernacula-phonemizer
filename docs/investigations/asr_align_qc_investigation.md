@@ -3427,3 +3427,95 @@ catch that, and re-deriving a hand row is unconditionally correct.
 
 **Not done:** the other 45 marked `reader_divergence` rows in ceb/fil/mi/ig. Each needs a human to read
 what the recognizer heard and write the reading; the mechanism is in place and the rows are marked.
+
+## Run 57 — 2026-08-20 — Croatian ⟨th⟩, with the guard the obvious version needs
+
+Run 54 found `the → txe`, `Matthew → mˈatxeʋ` in `hr`: Croatian ⟨h⟩ is /x/, so ⟨t⟩+⟨h⟩ falls out as an
+impossible `tx`. Croatian adapts foreign /θ/ as **[t]** (*teorija*, *matematika*, *atletika*), which is the
+same evidence class the existing ⟨q w x y⟩ fold already uses — the readings the orthography writes when it
+adapts the spelling.
+
+⚠ **The blind version is net-negative.** Native ⟨th⟩ is a PREFIX BOUNDARY — `pred+hod` → *prethodni*,
+`pod+hraniti` → *pothranjenost*, `pod+hlađen` → *pothlađenost* — where the letters are separate phonemes
+and `tx` is correct. Counted over the sr/hr/bs corpora:
+
+```
+NATIVE (prefix + h)   104 tokens   prethod* ×13 forms, pothranjenost, pothlađenost
+FOREIGN               167 tokens   arthur chatham ellsworth lufthansa macbeth north
+                                   northern smith thomson the ninth parenthood …
+```
+
+The guard checks the prefix at WORD START and immediately before the ⟨h⟩ (`pret|pot|ot|nat`), which admits
+every native token in the corpora and no foreign one. It will be wrong on `Othello`/`otherwise` — recorded
+at the site rather than papered over; a root list (*hod, hran, hlad, hvat*…) is fragile the other way.
+
+**Measured on the rows that contain a foreign ⟨th⟩:**
+
+```
+bs_ba   52 rows   mean 0.2009 -> 0.1937
+hr_hr   90 rows   mean 0.2280 -> 0.2244
+sr_rs    8 rows   mean 0.1855 -> 0.1852     (Cyrillic — barely any Latin ⟨th⟩)
+
+per-row: 128 closer / 17 further / 5 unchanged      7.5:1
+```
+
+7.5:1 clears the 4.6:1 bar the ⟨ʔ⟩ decision was held to. Fleet medians move as expected for a fold touching
+3.5% of rows: hr 0.1375 → 0.1368, bs 0.1571 → 0.1565, sr unchanged. All 171 referee floors pass.
+
+⚠ **It lives in `foreignLetters` in the SERBIAN module**, which hr/bs/sr all call — the fold is a spelling
+rewrite applied per word before nativisation, so `phonemizeWord` stays byte-identical for its three callers.
+
+One gold assertion moved: `test/croatian.test.ts` pinned `Ellsworth → ˈelsʋortx`, where the `tx` was
+incidental to a degemination test. Now `ˈelsʋort`, with the fold and its guard pinned in their own test.
+
+## Run 58 — 2026-08-20 — the 45 reader-divergence rows, authored per row
+
+Run 56 built the `{code:…}` span and left the marked rows. This applies it, and the method is the point:
+**the register is chosen per row from that row's own audio**, not asserted.
+
+**Procedure.** For each marked row, generate the whole-row candidates — host unchanged, every plain cardinal
+or year wrapped `{en:…}`, the same `{es:…}` — phonemize each through the segment path, score against the
+stored recognizer output, and accept the best only if it beats the host reading by ≥0.02. Clock and decimal
+shapes are refused outright, exactly as `numeral_register.mts` refuses them: a shape whose correct reading
+is not implemented scores well for the wrong reason.
+
+```
+57 candidate rows
+  35 accepted     ceb 10 en + 2 es · fil 9 en + 1 es · ig 8 en · mi 5 en
+   4 kept host    the reader used the host language after all (fil ×3, mi ×1)
+  18 no candidate clock / decimal / grouped shapes the register declines
+```
+
+⚠ **Cebuano splits 10 English to 2 Spanish, and Filipino 9 to 1.** That is the per-language table's failure
+made concrete — no single register answers for the language, which is exactly why run 19 measured
+ceb/fil/mi/ig at 62–85% and declined them. A per-row fact needs a per-row vehicle.
+
+⚠ **Four rows kept the host reading and were left alone.** The screen has to be able to say no, or it is
+not evidence — those readers voiced the numeral natively and their rows are already right.
+
+**Result, over the 37 hand rows now carrying a span (35 + the two from run 56):**
+
+```
+ceb_ph  14 rows   mean 0.5949 -> 0.3629
+fil_ph  10 rows   mean 0.5602 -> 0.3374
+ig_ng    8 rows   mean 0.6345 -> 0.3738
+mi_nz    5 rows   mean 0.6075 -> 0.4042
+
+all 37  mean 0.5958 -> 0.3640   median 0.5968 -> 0.3488   37 closer / 0 further
+```
+
+Example, with both registers in one corpus:
+
+```
+text       natukod ang relihiyon sa ika-15 nga siglo ni guru nanak 1469 …
+read_text  natukod ang relihiyon sa ika-{es:quince} nga siglo ni guru nanak {es:mil cuatrocientos sesenta y nueve} …
+```
+
+⚠ **THE DATA LIVES IN `align.sqlite`, NOT IN GIT.** This entry and the tooling are the repository's record
+of it; the 37 `read_text` values and 35 re-commented verdicts are in the corpus database. Re-running the
+authoring pass is not idempotent-by-accident — it reads `status='reader_divergence' AND sibling='all-flagged'`
+and the accepted rows are now `read_text_src='hand'`, which the auto pass skips.
+
+**Still open:** the 18 declined rows. They need a clock and decimal reading in the register language —
+`numeral_register.mts` already quantifies that opportunity at ~115 rows across the five wired languages, and
+these add to it.
