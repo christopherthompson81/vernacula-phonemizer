@@ -25,6 +25,23 @@ Status values, and the split they encode:
                     but it makes the PAIR bad training data, which is its own decision.
   convention        we and the recognizer disagree about notation, not about the reading (ʈ vs t, b vs v).
   artefact          the recognizer is simply wrong here.
+  examined_clean    a human READ this row and found no defect. Distinct from `verified`, which is
+                    automatic and only means "inside this language's own distribution" — a uniformly
+                    wrong language is uniformly `verified` (nso_za sat at 1,989/1,990 verified while
+                    holding the worst median in the fleet). `examined_clean` is the only status that
+                    means someone looked.
+
+⚠ WITHOUT `examined_clean` THE QUEUE SENDS YOU BACK INTO WORK ALREADY DONE. Run 42 of
+docs/investigations/asr_align_qc_investigation.md ranked the all-flagged queue by size and found three of
+its top five were already investigated and clean, with the investigation doc itself acting as the mark —
+"the queue needs an 'examined, no defect' mark; until it has one, this table is the mark". Run 54 then
+re-walked the declined ceb/fil/mi/ig numeral-register decision for the same reason. A prose table in a
+3,000-line document is not a mark. This column is.
+
+⚠ AND `--set` VALIDATES AGAINST THIS LIST. A typo used to create a new silent category of one row, which
+is indistinguishable from a real verdict in `--stats` and invisible to every query that names the statuses
+it cares about. Pass `--force-status` to add a genuinely new one, which should be accompanied by adding it
+here.
 
 ⚠ A BULK PASS NEVER OVERWRITES A HAND VERDICT. Re-running the scorer must not silently erase review work,
 so the automatic statuses are only written where `status` is NULL or is itself automatic.
@@ -32,6 +49,7 @@ so the automatic statuses are only written where `status` is NULL or is itself a
 Usage:
   python3 asr_align_label.py --apply                  # (re)apply the automatic labels
   python3 asr_align_label.py --set defect --lang en_us --id 28 --comment "adjacent numbers merged"
+  python3 asr_align_label.py --set examined_clean --lang bn_in --id 42 --comment "run 54: no defect"
   python3 asr_align_label.py --stats
 """
 from __future__ import annotations
@@ -48,6 +66,9 @@ from collections import Counter
 ROOT = os.environ.get("ASR_ALIGN_ROOT", "/mnt/data/omnivoice_ipa")
 DB = f"{ROOT}/work/asr_align/align.sqlite"
 AUTOMATIC = ("verified", "investigate", "recognizer_short", "defective_audio")
+#: Hand verdicts. Never written by a bulk pass, never overwritten by one — see the docstring.
+BY_HAND = ("defect", "reader_divergence", "convention", "artefact", "examined_clean")
+STATUSES = AUTOMATIC + BY_HAND
 SILENT_TSV = f"{ROOT}/work/silent_audio.tsv"
 
 
@@ -239,7 +260,14 @@ def main() -> None:
     ap.add_argument("--lang")
     ap.add_argument("--id", help="sentence_id")
     ap.add_argument("--wav")
+    ap.add_argument("--sibling", choices=("all-flagged", "exonerated", "no-sibling"),
+                    help="with --set and --lang: mark every row of that sibling class (bulk review verdict)")
+    ap.add_argument("--digits", action="store_true",
+                    help="with --sibling: restrict to rows whose TEXT contains a digit (the numeral-register "
+                         "queues are digit-bearing by construction, so a verdict about them must say so)")
     ap.add_argument("--comment", default="")
+    ap.add_argument("--force-status", action="store_true",
+                    help="allow a --set value outside STATUSES (add it to the docstring too)")
     a = ap.parse_args()
 
     db = sqlite3.connect(a.db)
@@ -252,9 +280,17 @@ def main() -> None:
         #   silent-audio sweep, one stage further along.
         sibling_screen(db)
     if a.set:
-        if not a.lang or not (a.id or a.wav):
-            sys.exit("--set needs --lang and (--id or --wav)")
-        where, args = ("sentence_id=?", [a.id]) if a.id else ("wav=?", [a.wav])
+        if not a.lang or not (a.id or a.wav or a.sibling):
+            sys.exit("--set needs --lang and (--id or --wav or --sibling)")
+        if a.set not in STATUSES and not a.force_status:
+            sys.exit(f"--set {a.set!r} is not a known status. Known: {', '.join(sorted(STATUSES))}. "
+                     f"Use --force-status to add a new one (and document it in the module docstring).")
+        if a.sibling:
+            where, args = ("sibling=?", [a.sibling])
+            if a.digits:
+                where += " AND text GLOB '*[0-9]*'"
+        else:
+            where, args = ("sentence_id=?", [a.id]) if a.id else ("wav=?", [a.wav])
         n = db.execute(f"UPDATE utt SET status=?, comment=? WHERE lang=? AND {where}",
                        [a.set, a.comment, a.lang, *args]).rowcount
         db.commit()

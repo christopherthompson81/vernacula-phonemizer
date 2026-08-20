@@ -109,6 +109,37 @@ def stale(db: sqlite3.Connection) -> None:
         print(f"⚠ {lang}: {n} row(s) have a read_text but no ipa — re-derive before scoring", file=sys.stderr)
 
 
+#: Characters no ORTHOGRAPHY in this corpus uses — suprasegmentals and modifier letters. Deliberately NOT
+#: a list of "IPA-looking" letters: ⟨ħ ġ ż ċ⟩ are Maltese, ⟨ɛ ɔ ŋ ɖ ƒ⟩ are Ewe/Akan, ⟨ə⟩ is Azerbaijani and
+#: ⟨ʔ⟩ is orthographic in several. A guard built from those refuses the exact Maltese hand-reading the
+#: README documents — measured: "preċiżament fid-disgħa nieqes kwart" tripped on ħ, "ɖeviɖu ƒe ŋkɔ" on ŋ ɔ ɖ,
+#: "səkkiz yüz əlli" on ə. Stress, length, tie bars, tone letters and superscript modifiers are safe: they
+#: carry no orthographic duty anywhere, and every IPA string this fleet emits contains at least one.
+IPA_ONLY = "ˈˌːˑ˥˦˧˨˩͜͡ᵐⁿᵑᶮʰʷʲˠ̩̥̬"
+
+
+def reject_ipa(text: str) -> None:
+    """⚠ `read_text` IS A TEXT COLUMN AND THE HOST RE-READS IT. Writing IPA here does not pass through —
+    every engine tokenizes it and applies its own grapheme rules, and the result still LOOKS like IPA, so
+    the corruption is invisible in a dump. Measured over ten languages with `naɪntiːn fɔːɹti faɪv`:
+
+        ceb  nˈanti n fˈo tˈi fˈab      mi   nˈaɪnti n fˈɔ ɹtˈi fˈaɪv
+        hr   nˈanti n fo ti faʋ         en   naɪnti ˈɛn fɔ ɹti fˈaɪv
+
+    Not one passed through. Length marks and `ɹ` are absorbed, and a stray `n` becomes a syllabic nasal in
+    the Bantu engines. `numeral_register.mts` records the same result from the other direction (`fˈɔːɹ`
+    came back as *f o*) — IPA cannot travel through a channel the host will re-parse.
+
+    A reader who switched LANGUAGE cannot be recorded here either: `mi` passes `nineteen` through as raw
+    letters into the IPA. That needs the SEGMENT path in numeral_register.mts, not this column."""
+    bad = sorted({c for c in text if c in IPA_ONLY})
+    if bad:
+        sys.exit(f"read_text: refusing to store IPA — found {' '.join(bad)}\n"
+                 f"  This column holds TEXT in the host orthography; the engine re-reads it and will\n"
+                 f"  mangle IPA silently (see reject_ipa's docstring). To record a reader who switched\n"
+                 f"  LANGUAGE, the segment path in tools/corpus/numeral_register.mts is the mechanism.")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=DB)
@@ -121,6 +152,7 @@ def main() -> int:
     ensure(db)
     if a.set:
         lang, wav, text = a.set
+        reject_ipa(text)
         warn_broadcast(db, lang, wav, text)
         n = db.execute("UPDATE utt SET read_text=?, read_text_src='hand', ipa=NULL WHERE lang=? AND wav=?",
                        (text, lang, wav)).rowcount
