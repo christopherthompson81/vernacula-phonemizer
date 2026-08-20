@@ -3365,8 +3365,10 @@ campaign twice.
 `--stale` LISTS the rows awaiting re-derivation. **Nothing re-derived them.** `phonemize-fleurs.mts` cannot:
 it reads the FLEURS TSV and never sees a hand `read_text`.
 
-Measured on export: **5 rows were parked outside scoring**, three of them pre-existing — hand corrections
-made in an earlier session that have been silently excluded ever since.
+Measured on export: **2 rows were parked** — the two this change created. ⚠ A first draft of this entry
+said five, three of them pre-existing and silently excluded. Wrong: the three Maltese hand rows carry an
+`ipa` and score normally. The `5` came from the `--stats` line (total hand rows), read as if it were the
+pending count.
 
 `rederive_read_text.mts` + `read_text.py --export-pending / --import-ipa` closes it. The import only fills
 `ipa IS NULL`, so re-running it cannot restate a scoring row from a stale export.
@@ -3390,6 +3392,20 @@ ipa        … kaniʔˈadtoŋ nˈaᶦntˈiːn fˈɔːɹt̬i fˈaᶦv ʔˈuɡ na�
 The Cebuano engine read the Cebuano and the English engine read the span. Being per-row, this costs the
 two-thirds of ceb rows that read natively exactly nothing — which is the difference between this and the
 register table that was declined.
+
+### ⚠ And a second wrong reading, caught in review
+
+Those three Maltese rows then looked stale on inspection — `read_text` says `fid-disgħa`, `ipa` says
+`fɪt dɪsa`, which reads as a hybrid of the original `fit-8:46` and the hand reading. It is not. Maltese
+devoices the assimilated article: `phonemize("fid-disgħa", "mt")` **is** `fɪt dɪsa`. Re-deriving all five
+hand rows changed nothing.
+
+That is twice in two runs that reading the stored `ipa` produced a defect that was not there — run 54's
+Croatian geminate was the other. **Run the engine before believing a mismatch.** Recorded at the site.
+
+`--export-hand` / `--import-ipa --overwrite` were added during that diagnosis and are kept on the sound
+part of the reasoning: a hand row's IPA goes stale whenever the engine changes, `ipa IS NULL` does not
+catch that, and re-deriving a hand row is unconditionally correct.
 
 **Not done:** the other 45 marked `reader_divergence` rows in ceb/fil/mi/ig. Each needs a human to read
 what the recognizer heard and write the reading; the mechanism is in place and the rows are marked.

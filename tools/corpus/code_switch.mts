@@ -37,12 +37,6 @@ export interface CodeSwitchSegment {
 /** `{code:text}` — a registry code, then text with no nested brace. Anything else is literal. */
 const SPAN = /\{([a-z][a-z0-9-]{0,15}):([^{}]*)\}/gu;
 
-/** True if `text` carries at least one code-switch span. */
-export function hasCodeSwitch(text: string): boolean {
-    SPAN.lastIndex = 0;
-    return SPAN.test(text);
-}
-
 /**
  * Split `text` into segments, `{code:…}` spans carrying their language and everything else passing through
  * the host's numeral register.
@@ -62,7 +56,7 @@ export function codeSwitchSegments(
     let last = 0;
     SPAN.lastIndex = 0;
     for (const m of text.matchAll(SPAN)) {
-        const [whole, code, inner] = m as unknown as [string, string, string];
+        const whole = m[0], code = m[1]!, inner = m[2]!;
         if (!isKnownLang(code)) {
             throw new Error(
                 `code_switch: unknown language tag {${code}:…} in read_text. Use a registry code, ` +
@@ -77,7 +71,9 @@ export function codeSwitchSegments(
     return out.length ? out : [{ text }];
 }
 
-/** The markup stripped back to plain text — for anything that needs the reading without the tags. */
+/** The markup stripped back to plain text — the reading as a human would write it out.
+ *  Used when reporting a row we could NOT re-derive, so the operator sees the attempted reading
+ *  rather than the tags. */
 export function stripCodeSwitch(text: string): string {
     return text.replace(SPAN, "$2").replace(/\s+/gu, " ").trim();
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { codeSwitchSegments, hasCodeSwitch, stripCodeSwitch } from "../tools/corpus/code_switch.mts";
+import { codeSwitchSegments, stripCodeSwitch } from "../tools/corpus/code_switch.mts";
 
 /** The tags a test needs; the real caller passes the registry's resolver. */
 const known = (c: string): boolean => ["en", "fr", "es", "sw"].includes(c);
@@ -32,9 +32,9 @@ describe("code-switch markup for read_text", () => {
     });
 
     it("does NOT treat a bare brace or a non-tag as markup", () => {
-        expect(hasCodeSwitch("a { b } c")).toBe(false);
-        expect(hasCodeSwitch("a {EN:x} c")).toBe(false);       // tags are lowercase registry codes
-        expect(hasCodeSwitch("a {en:nineteen} c")).toBe(true);
+        // Both must reach the host untouched rather than being parsed as a span.
+        expect(codeSwitchSegments("a { b } c", "ceb", known)).toEqual([{ text: "a { b } c" }]);
+        expect(codeSwitchSegments("a {EN:x} c", "ceb", known)).toEqual([{ text: "a {EN:x} c" }]);
     });
 
     it("is not confused by two spans or by a span at either edge", () => {
@@ -42,9 +42,11 @@ describe("code-switch markup for read_text", () => {
         expect(segs.map((s) => s.lang ?? "(host)")).toEqual(["en", "(host)", "fr"]);
     });
 
-    it("hasCodeSwitch is not stateful across calls (the global-regex trap)", () => {
+    it("is not stateful across calls (the global-regex trap)", () => {
         const t = "a {en:x} b";
-        expect([hasCodeSwitch(t), hasCodeSwitch(t), hasCodeSwitch(t)]).toEqual([true, true, true]);
+        const runs = [0, 1, 2].map(() => codeSwitchSegments(t, "ceb", known).length);
+        expect(runs).toEqual([runs[0], runs[0], runs[0]]);
+        expect(runs[0]).toBe(3);
     });
 
     it("strips back to the plain reading", () => {

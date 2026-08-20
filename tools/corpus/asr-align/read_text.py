@@ -10,6 +10,7 @@ the column exists and why a hand correction is never clobbered.
 from __future__ import annotations
 
 import argparse
+import re
 import json
 import os
 import subprocess
@@ -18,7 +19,6 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB = os.environ.get("ASR_ALIGN_ROOT", "/mnt/data/omnivoice_ipa") + "/work/asr_align/align.sqlite"
-import re
 import sqlite3  # noqa: E402
 
 
@@ -119,7 +119,7 @@ def stale(db: sqlite3.Connection) -> None:
 IPA_ONLY = "ˈˌːˑ˥˦˧˨˩͜͡ᵐⁿᵑᶮʰʷʲˠ̩̥̬"
 
 
-def reject_ipa(text: str) -> None:
+def validate_read_text(text: str) -> None:
     """⚠ `read_text` IS A TEXT COLUMN AND THE HOST RE-READS IT. Writing IPA here does not pass through —
     every engine tokenizes it and applies its own grapheme rules, and the result still LOOKS like IPA, so
     the corruption is invisible in a dump. Measured over ten languages with `naɪntiːn fɔːɹti faɪv`:
@@ -131,8 +131,11 @@ def reject_ipa(text: str) -> None:
     the Bantu engines. `numeral_register.mts` records the same result from the other direction (`fˈɔːɹ`
     came back as *f o*) — IPA cannot travel through a channel the host will re-parse.
 
-    A reader who switched LANGUAGE cannot be recorded here either: `mi` passes `nineteen` through as raw
-    letters into the IPA. That needs the SEGMENT path in numeral_register.mts, not this column."""
+    ⚠ A LANGUAGE SWITCH HAS ITS OWN NOTATION, and it is not IPA either. Writing the foreign words as plain
+    text does not work — `mi` passes `nineteen` through as raw letters into the IPA — so a reader who voiced
+    part of the sentence in another language is recorded as a `{code:…}` span, which reaches that language's
+    engine as its own segment: `kaniadtong {en:nineteen forty five} ug`. See tools/corpus/code_switch.mts.
+    The tag is checked here; the span itself is resolved at re-derivation."""
     for tag in re.findall(r"\{([^:{}]*):", text):
         if not re.fullmatch(r"[a-z][a-z0-9-]{0,15}", tag):
             sys.exit(f"read_text: {{{tag}:...}} is not a code-switch tag — the tag must be a lowercase "
@@ -141,26 +144,44 @@ def reject_ipa(text: str) -> None:
     if bad:
         sys.exit(f"read_text: refusing to store IPA — found {' '.join(bad)}\n"
                  f"  This column holds TEXT in the host orthography; the engine re-reads it and will\n"
-                 f"  mangle IPA silently (see reject_ipa's docstring). To record a reader who switched\n"
-                 f"  LANGUAGE, the segment path in tools/corpus/numeral_register.mts is the mechanism.")
+                 f"  mangle IPA silently (see validate_read_text's docstring). To record a reader who\n"
+                 f"  switched LANGUAGE, use a code-switch span: {{en:nineteen forty five}}.")
 
 
-def export_pending(db: sqlite3.Connection, path: str) -> None:
-    """Rows with a `read_text` and no `ipa` — everything awaiting re-derivation, for rederive_read_text.mts."""
-    rows = db.execute("SELECT lang, wav, read_text FROM utt "
-                      "WHERE read_text IS NOT NULL AND read_text != '' AND ipa IS NULL").fetchall()
+def export_pending(db: sqlite3.Connection, path: str, all_hand: bool = False) -> None:
+    """Rows awaiting re-derivation, for rederive_read_text.mts.
+
+    Default is `ipa IS NULL` — the rows `--set` parked.
+
+    ⚠ `all_hand` EXISTS BECAUSE `ipa IS NULL` IS NOT THE ONLY WAY A HAND ROW GOES WRONG. A hand row's IPA
+    goes stale exactly as an auto row's does whenever the engine changes, and nothing detects that — the
+    contract "ipa is derived from read_text" is unconditional for a hand row, so re-deriving all of them is
+    always safe. `--stale` only finds `ipa IS NULL`, which is the subset `--set` parked.
+
+    ⚠ AND DO NOT DIAGNOSE STALENESS BY EYE FROM THE STORED `ipa`. The Maltese rows look wrong and are not:
+    `read_text` says `fid-disgħa` while `ipa` says `fɪt dɪsa`, which reads as a hybrid of the original
+    `fit-8:46` and the hand reading. It is not — Maltese devoices the assimilated article, and
+    `phonemize("fid-disgħa", "mt")` is `fɪt dɪsa`. Re-deriving all five hand rows changed nothing. Run the
+    engine before believing a mismatch; the same mistake turned a stale stored `ipa` into a phantom
+    Croatian defect in run 54."""
+    where = ("read_text_src='hand'" if all_hand
+             else "read_text IS NOT NULL AND read_text != '' AND ipa IS NULL")
+    rows = db.execute(f"SELECT lang, wav, read_text FROM utt WHERE {where}").fetchall()
     with open(path, "w", encoding="utf-8") as fh:
         for lang, wav, text in rows:
             fh.write(f"{lang}\t{wav}\t{text}\n")
     print(f"{len(rows)} pending row(s) -> {path}", file=sys.stderr)
 
 
-def import_ipa(db: sqlite3.Connection, path: str) -> None:
+def import_ipa(db: sqlite3.Connection, path: str, overwrite: bool = False) -> None:
     """Store re-derived IPA.
 
     ⚠ ONLY WHERE `ipa IS NULL`. A re-derivation must never overwrite a row that already scores — the
     import is the tail of a pipeline whose input was "rows awaiting derivation", and re-running it after
-    an unrelated pass must not quietly restate those rows' IPA from a stale export."""
+    an unrelated pass must not quietly restate those rows' IPA from a stale export.
+
+    `overwrite` lifts that, and is meant to pair with `--export-hand`: there the input IS every hand row,
+    so restating them is the point."""
     n = 0
     with open(path, encoding="utf-8") as fh:
         for line in fh:
@@ -168,10 +189,12 @@ def import_ipa(db: sqlite3.Connection, path: str) -> None:
             if len(parts) < 3:
                 continue
             lang, wav, ipa = parts[0], parts[1], parts[2]
-            n += db.execute("UPDATE utt SET ipa=? WHERE lang=? AND wav=? AND ipa IS NULL",
+            guard = "" if overwrite else " AND ipa IS NULL"
+            n += db.execute(f"UPDATE utt SET ipa=? WHERE lang=? AND wav=?{guard}",
                             (ipa, lang, wav)).rowcount
     db.commit()
-    print(f"{n} row(s) re-derived into ipa (rows that already had one were left alone)", file=sys.stderr)
+    print(f"{n} row(s) re-derived into ipa"
+          f"{'' if overwrite else ' (rows that already had one were left alone)'}", file=sys.stderr)
 
 
 def main() -> int:
@@ -182,13 +205,18 @@ def main() -> int:
     ap.add_argument("--stats", action="store_true")
     ap.add_argument("--stale", action="store_true", help="list rows whose ipa may predate their read_text")
     ap.add_argument("--export-pending", metavar="TSV", help="write rows awaiting re-derivation")
+    ap.add_argument("--export-hand", metavar="TSV",
+                    help="write EVERY hand row, whatever its ipa — a hand row's ipa must come from its "
+                         "read_text, and `ipa IS NULL` does not catch one that is merely wrong")
     ap.add_argument("--import-ipa", metavar="TSV", help="store IPA from rederive_read_text.mts")
+    ap.add_argument("--overwrite", action="store_true",
+                    help="with --import-ipa: replace an existing ipa (pair with --export-hand)")
     a = ap.parse_args()
     db = sqlite3.connect(a.db)
     ensure(db)
     if a.set:
         lang, wav, text = a.set
-        reject_ipa(text)
+        validate_read_text(text)
         warn_broadcast(db, lang, wav, text)
         n = db.execute("UPDATE utt SET read_text=?, read_text_src='hand', ipa=NULL WHERE lang=? AND wav=?",
                        (text, lang, wav)).rowcount
@@ -199,8 +227,10 @@ def main() -> int:
         apply(db, a.apply)
     if a.export_pending:
         export_pending(db, a.export_pending)
+    if a.export_hand:
+        export_pending(db, a.export_hand, all_hand=True)
     if a.import_ipa:
-        import_ipa(db, a.import_ipa)
+        import_ipa(db, a.import_ipa, overwrite=a.overwrite)
     if a.stale:
         stale(db)
     if a.stats or a.apply is not None or not (a.set or a.apply is not None):

@@ -20,7 +20,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 import { getPhonemizer } from "../../../src/registry.ts";
 import { phonemizeAsync } from "../../../src/index.ts";
-import { codeSwitchSegments } from "../code_switch.mts";
+import { codeSwitchSegments, stripCodeSwitch } from "../code_switch.mts";
 import { registryCode } from "./read_text.mts";
 
 /** Does the registry own this code? The switch has no exported key set, so resolution IS the test. */
@@ -60,7 +60,9 @@ for (const line of readFileSync(inPath, "utf8").split("\n")) {
         if (ipa) out.push(`${lang}\t${wav}\t${ipa}`);
         else errs.push(`${lang}\t${wav}\tEMPTY`);
     } catch (e) {
-        errs.push(`${lang}\t${wav}\t${(e as Error).message.replace(/[\r\n\t]+/gu, " ").slice(0, 200)}`);
+        // Report the READING, not the markup: an operator fixing this needs to see what was attempted.
+        errs.push(`${lang}\t${wav}\t${(e as Error).message.replace(/[\r\n\t]+/gu, " ").slice(0, 160)}` +
+            `\t${stripCodeSwitch(text).slice(0, 80)}`);
     }
 }
 writeFileSync(outPath, out.join("\n") + (out.length ? "\n" : ""), "utf8");
