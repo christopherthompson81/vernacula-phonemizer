@@ -149,7 +149,8 @@ failure mode.
 (Config 1 already includes `ɑ ɾ ɪ`, hence 506 rather than the 482 baseline.)
 
 **Raw finding.** Config 4 recovers nearly all of what config 5 does while keeping the final-vowel axis
-scoreable. The 17-word gap between 4 and 5 is precisely the set config 5 would forgive — `sabʕ`/`sabʕa`,
+scoreable. (⚠ The `shipped` column here is superseded by run 9 — it is circular. It is retained because the
+*relative* ordering of the five configurations is what this run is comparing, and that comparison holds.) The 17-word gap between 4 and 5 is precisely the set config 5 would forgive — `sabʕ`/`sabʕa`,
 `ini`/`in` — which are real engine errors and the most useful thing left in the residual.
 
 **Implication.** Recommend **config 4**: fold `[æɑ]→a`, `[eɛ]→i`, `[oɔ]→u`, `ɾ→r`, `ɪ→i` as preFolds
@@ -218,7 +219,7 @@ axis-deletion premium, the words where the final-vowel difference is real.
 | arz folded (lexicon-off) | 50.7% | **61.7%** |
 | arz symbol accuracy | 84.1% | **88.4%** |
 | arz frequency-weighted | 61.7% | **80.4%** |
-| arz SHIPPED path | 81.7% | **89.7%** |
+| arz SHIPPED path | 81.7% | 89.7% — ⚠ **RETRACTED in run 9, circular; do not quote** |
 | acw / ajp / ary / apc / ayl / afb / acm | see run 8 | +4.7 / +6.1 / +3.3 / +3.4 / +1.8 / +0.5 / −0.9 pp |
 
 ⚠ Correction to an earlier claim in `docs/language-maturity.md`: arz's outstanding short-vowel tail was

@@ -2,7 +2,12 @@
 // "egyptian"): the MSA neural diacritizer restores the short vowels, the MSA g2p runs, then the Egyptian shifts
 // (ج→ɡ, ق→ʔ, ث→t, ذ/ظ→d/dˤ, ay→eː, aw→oː) transform it. Referee: wikipron arz_arab_broad (HUMAN, fully-voweled
 // DIALECTAL IPA, INDEPENDENT). The short-vowel restructuring gap (MSA diacritizer restores MSA vowels, not
-// Egyptian) is the documented tail — a dialect vowel lexicon is Phase 2.
+// Egyptian) is the documented tail.
+//
+// ⚠ THE EVAL RUNS `{ lexicon: false }` (eval.ts) AND MUST KEEP DOING SO. egyptian-lexicon.tsv is mined from
+// kaikki arz and was validated against THIS referee at build; it contains 563 of these 590 words (95.4%). With
+// the lexicon on, the score is 89.7% and is reading back the answer key. On the 27 referee words the lexicon
+// does not contain, lexicon-on scores 18/27 and lexicon-off 19/27 — no measurable advantage on unseen words.
 //
 // ⚠ wikipron arz is a POOLED CROWD CORPUS WITH PER-CONTRIBUTOR NOTATION, not one transcription convention.
 // Measured over the 590 rows: `a` 425 rows / `ɑ` 21 / `æ` 36, and ZERO rows contain both `a` and `ɑ`; `r` 142 /
@@ -11,7 +16,7 @@
 // the word-initial glottal onset: across the 95 orthographically vowel-initial words (alef/hamza carriers, where
 // Egyptian supplies an automatic onset) the referee writes ʔ on 47 and omits it on 48 — a coin flip on an
 // identical environment (أنا → a n a, but آسف → ʔ aː s i f). These are NOTATION, and folding them is what the
-// fold set is for. See docs/arz_referee_investigation.md.
+// fold set is for. See docs/investigations/arz_referee_investigation.md.
 //
 // ⚠ ORDERING: the symbol-normalizing folds are preFolds, NOT folds, because a POSITIONAL fold must see already-
 // normalized symbols. When [æɑ]→a and [eɛ]→i / [oɔ]→u ran post-backbone while a `[aiu]$` pausal strip ran as a
@@ -41,7 +46,7 @@
         {
             "pattern": "[eɛ]",
             "replace": "i",
-            "note": "MAJHŪL ي: [iː]~[eː] both written ي — unrecoverable from the abjad (أسانسير asanser→asansir, the ay→eː diphthong). Also folds the referee's [ɪ] rows onto the same target below."
+            "note": "MAJHŪL ي: [iː]~[eː] both written ي — unrecoverable from the abjad (أسانسير asanser→asansir, the ay→eː diphthong)."
         },
         {
             "pattern": "ɪ",
