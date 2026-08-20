@@ -34,3 +34,58 @@ maps) is committed beside it.
 a model trained on CATT-labelled public Wikipedia retains none of any source corpus's selection/arrangement —
 only the orthographic regularities of the language, which are facts (Feist). The chosen inputs are permissive by
 their own terms regardless (Apache-2.0 teacher, CC-BY-SA text), so the question is moot at the source.
+
+## 2026-08-20 — retrained: packed sequences + a cosine tail
+
+Measured END-TO-END through the runtime against PAUSALIZED gold (`tools/arabic/eval_ar_runtime.mts`, 1,500
+held-out sentences / 32,018 words) — both sides through the identical sync g2p, so a mismatch is a
+diacritization error:
+
+| | word-exact | sentence-exact |
+|---|---|---|
+| previous model | 85.10% (27,248/32,018) | 11.9% |
+| **this model** | **85.53% (27,385/32,018)** | **12.3%** |
+
+At checkpoint level on the pausal task, TEST DER 2.02% → **1.83%**, WER 7.81% → **7.20%**.
+
+⚠ **ATTRIBUTION: ~0.17pp of the DER gain is the COSINE SCHEDULE, ~0.02pp (noise) is the packing.** Arabic is
+the one language in the fleet-wide packing rollout where packing is not measurable, and the mechanism predicts
+it: a sentence-level model with `maxlen 400` has almost no positions near the sequence end, whereas a
+10-character word is nearly all "near the end" (da +5.6pp, nb +2.2pp). Do not read this row as a packing win.
+
+⚠ The 25-epoch cap was truncating an ADAPTIVE `ReduceLROnPlateau` mid-decay — and asymmetrically, so an A/B
+under it read 2.02 vs 2.10 and looked like packing had HURT. Resuming both arms from one epoch under an
+identical cosine anneal (`--cosine`) removed the confound and found 0.2pp neither arm had reached.
+
+**Quantization is free**: fp32 1.83% vs QUInt8 1.84% DER, scored one sentence at a time as the runtime serves.
+⚠ A padded-batch scorer read 2.73% for the SAME fp32 graph and was briefly mistaken for a 0.9pp int8 loss —
+an unpacked BiLSTM over padding, i.e. the very defect this retrain is about, reintroduced in the measuring
+tool.
+
+⚠ **THIS FILE'S "Provenance" SECTION IS UNRELIABLE ABOUT THE PREVIOUS MODEL'S SOURCE.** It names
+`bilstm_silver_only.pt`, but that checkpoint is PAUSAL (2.02% DER at `--pausal 1`) while the artifact it
+shipped predicted FULL diacritization (3.31% at `--pausal 0`, 16.89% at `--pausal 1`). They are different
+models. Harmless in service — `diacritizer.ts::pausalize()` strips case endings downstream either way, which
+is why the two agree on 98.04% of words — but it means the previously deployed artifact was not reproducible
+from the checkpoint this document names. The model now shipped IS reproducible: `tools/arabic/train_ar.sh`.
+
+### ⚠ Full-then-pausalize costs MEASUREMENT accuracy, and the referee already knew
+
+The previous arrangement trained on FULL diacritization and stripped case endings at serve time
+(`diacritizer.ts::pausalize()`). Three consequences worth stating, because "full diacritization" sounds like
+the higher-accuracy option and is not:
+
+1. **Its headline DER overstates served error.** Tashkeela-style gold scores the iʕrab case/mood endings, and
+   `pausalize()` then discards them — so that number counts mistakes which never reach the output. The
+   previous artifact's 3.31% (`--pausal 0`) is not a description of the product; this model's 1.83%
+   (`--pausal 1`) scores only what survives to the IPA.
+2. **The referee never rewarded them either.** `tools/referee-eval/langs/ar.jsonc` uses kaikki ara — "PAUSAL,
+   multi-pron" — with an explicit preFold: *drop a word-final SHORT vowel (the iʕrab case/mood ending, and
+   the verb -a)*. Case endings are folded off both sides before scoring.
+3. So capacity went to predicting syntax that neither the runtime nor the referee consumes.
+
+⚠ **NOT ESTABLISHED: that pausal is the better TRAINING objective.** The end-to-end win here (85.53% vs
+85.10%) is confounded — this model also got packed sequences and the cosine tail. The opposite argument is
+real: case endings force the model to parse, which may improve the stem vowels that DO survive. Isolating it
+needs a full-diacritization model trained under this same recipe and compared through
+`eval_ar_runtime.mts`. Open.

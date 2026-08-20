@@ -67,8 +67,11 @@ function isPausalBoundary(next: string | undefined): boolean {
   const isMark = (cp >= 0x064b && cp <= 0x065f) || cp === 0x0670;
   return !isArabicLetterCp(cp) && !isMark;
 }
-/** Pausal form for TTS: drop a word-final case-ending vowel/tanwin; accusative ـًا/ـًى → /aː/. */
-function pausalize(text: string): string {
+/** Pausal form for TTS: drop a word-final case-ending vowel/tanwin; accusative ـًا/ـًى → /aː/.
+ *  ⚠ EXPORTED for `tools/arabic/eval_ar_runtime.mts`, which must pausalize the GOLD exactly as the runtime
+ *  pausalizes the model or every word-final scores wrong (it read 0% before). Reused rather than ported —
+ *  a copy would drift and the measurement would silently stop meaning anything. */
+export function pausalize(text: string): string {
   const chars = [...text];
   const out: string[] = [];
   for (let i = 0; i < chars.length; i++) {

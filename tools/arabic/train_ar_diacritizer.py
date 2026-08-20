@@ -332,9 +332,26 @@ if args.eval_onnx:
     _name = _sess.get_inputs()[0].name
 
     class _OnnxShim:
+        """⚠ ONE SENTENCE PER CALL, UNPADDED — because that is what serving does, and because the exported
+        graph has NO packing. Feeding it a padded batch runs an unpacked BiLSTM over the padding: the very
+        defect this whole campaign is about, reintroduced inside the tool measuring the fix. Measured: the
+        same model read 2.73% DER through a padded batch and 1.83% one sentence at a time — a 0.9pp artefact
+        that was briefly mistaken for a quantization loss. Quantization actually costs 0.01pp
+        (fp32 2.73 / QInt8 2.74 / QUInt8 2.73 under the padded harness; all three agree)."""
+
         def eval(self): return self
+
         def __call__(self, X, lens=None):
-            return torch.from_numpy(_sess.run(None, {_name: X.cpu().numpy()})[0])
+            if lens is None:
+                return torch.from_numpy(_sess.run(None, {_name: X.cpu().numpy()})[0])
+            xs = X.cpu().numpy()
+            outs = []
+            for r in range(xs.shape[0]):
+                L = int(lens[r])
+                o = _sess.run(None, {_name: xs[r:r + 1, :L]})[0][0]          # [L, nl], no padding present
+                pad = torch.zeros(X.size(1) - L, o.shape[-1], dtype=torch.float32)
+                outs.append(torch.cat([torch.from_numpy(o), pad], 0))
+            return torch.stack(outs)
 
     model = _OnnxShim()
     _d, _w = evaluate(test)

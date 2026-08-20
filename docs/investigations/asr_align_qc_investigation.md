@@ -3085,3 +3085,42 @@ int8 and pausal questions recorded where a rebuilder will meet them.
 with it.** A hardcoded sibling path, an assumption that the output directory exists, a scorer whose
 correctness depended on a bug that was just fixed elsewhere. Nothing here was caught by reading the diff; all
 three came from running the files in their new home.
+
+## Run 51 — 2026-08-20 — Arabic ships, and the sixth instrument failure was the campaign's own bug
+
+**Both blockers from Run 49 dissolved, and neither was what it looked like.**
+
+**int8 costs 0.01pp, not 0.9pp.** fp32 1.83% / QInt8 1.84% / QUInt8 1.84% DER, scored ONE SENTENCE AT A TIME as
+the runtime serves. ⚠ The earlier 2.73% came from `--eval-onnx` feeding PADDED BATCHES to a graph with no
+packing — an unpacked BiLSTM over padding, **the exact defect this entire campaign exists to fix, reintroduced
+inside the tool measuring the fix**. The shim accepted `lens` and ignored it, which reads as unremarkable code.
+Having just fixed this in five trainers and written the invariant test for it did not help; the fault was
+attributed to quantization type, label convention and vocab tables before the actual cause.
+
+**The pausal difference is real but absorbed.** The deployed artifact predicts FULL diacritization (3.31% at
+`--pausal 0`, 16.89% at `--pausal 1`); `diacritizer.ts::pausalize()` strips case endings downstream. A
+pausal-trained model is therefore a valid drop-in — `pausalize()` is simply a no-op on it — which is why the
+two agree on 98.04% of words over 400 real sentences.
+
+**The comparison that decided it** — `tools/arabic/eval_ar_runtime.mts`, end-to-end through the runtime against
+gold pausalized by a faithful port of `pausalize()`, 1,500 sentences / 32,018 words:
+
+| | word-exact | sentence-exact |
+|---|---|---|
+| previous model | 85.10% | 11.9% |
+| **retrain** | **85.53%** | **12.3%** |
+
++0.43pp, and the gap GREW from +0.27pp at 400 sentences while both metrics moved together. Shipped.
+⚠ The first version of this harness read 0% because it scored pausal model output against UN-pausalized gold.
+Both sides must go through the same transformation — the same discipline `eval_modern_holdout.ts` uses for he.
+
+**A documentation defect found on the way, worth its own attention.** `diacritizer.PROVENANCE.md` names
+`bilstm_silver_only.pt` as the source of the previously deployed model. That checkpoint is PAUSAL; the artifact
+it shipped was FULL. They are different models, so **the previously deployed Arabic diacritizer was not
+reproducible from the checkpoint its own provenance named.** Recorded in that file. The model now shipped is
+reproducible: `tools/arabic/train_ar.sh`.
+
+**Tally for the Arabic work: six instrument failures, zero model defects.** Vocab table, pausal convention,
+wrong agreement unit, mismatched gold, padded-batch ONNX scoring, un-pausalized gold. Every one initially read
+as the model being broken. The check that would have caught all of them cost one command —
+`phonemizeAsync` on three sentences, showing the shipped model obviously healthy — and it was run fourth.
