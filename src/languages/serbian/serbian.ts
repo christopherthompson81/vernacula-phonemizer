@@ -321,7 +321,23 @@ export function createSerbian(): Phonemizer {
 // ⚠ `xx` IS ONE CLUSTER. Expanding each ⟨x⟩ independently gives `Exxon` → *ekskson*, and the
 //   doubling is invisible to degemination because it happens after this fold, in a pair the
 //   scan never sees as a repeated LETTER.
-const FOREIGN_LETTER = /qu|xx|[qwxy]/giu;
+const FOREIGN_LETTER = /qu|xx|th|[qwxy]/giu;
+/**
+ * ⚠ ⟨th⟩ IS NOT ALWAYS FOREIGN, and the obvious grapheme edit is net-negative without this. Native ⟨th⟩ is
+ * a PREFIX BOUNDARY: a prefix ending in /t/ (or in /d/ devoiced to /t/) meeting an h-initial root —
+ * `pred+hod` → *prethodni*, `pod+hraniti` → *pothranjenost*, `pod+hlađen` → *pothlađenost*. There the two
+ * letters are separate phonemes and [tx] is CORRECT.
+ *
+ * Counted over the sr/hr/bs FLEURS corpora: 104 native tokens against 167 foreign (arthur, chatham,
+ * ellsworth, lufthansa, macbeth, north, smith, thomson, the …). Folding blind would take the 167 and lose
+ * the 104. The prefix is checked at WORD START and immediately before the ⟨h⟩, which admits every native
+ * token in the corpus and no foreign one.
+ *
+ * ⚠ IT WILL BE WRONG ON `Othello`/`otherwise` — foreign words that happen to open with ⟨ot⟩+⟨h⟩. Neither
+ * appears in the corpora, and the alternative (a root list of *hod, hran, hlad, hvat, hrv*…) is fragile in
+ * the other direction. Recorded rather than guessed at, as with the French ⟨qu⟩ override below.
+ */
+const NATIVE_TH_PREFIX = /^(?:pret|pot|ot|nat)$/iu;
 /**
  * ⟨q w x y⟩ — THE FOUR LETTERS GAJ'S LATIN DOES NOT HAVE, AND THIS ENGINE WAS DELETING.
  *
@@ -359,6 +375,9 @@ const FOREIGN_LETTER = /qu|xx|[qwxy]/giu;
  *     qu → kv   `quiz` → *kviz*, `quality` → *kvaliteta*, `quart` → *kvart*
  *     q → k     the residue, when no ⟨u⟩ follows
  *     y → i     `Dylan` → *Dilan*, `Barry` → *Bari*
+ *     th → t    `theory` → *teorija*, `mathematics` → *matematika*, `athletics` → *atletika* — Croatian
+ *               adapts foreign /θ/ as /t/, and ⟨h⟩ alone is /x/, so an unfolded ⟨th⟩ gives the impossible
+ *               *txe* for `the` and *mˈatxeʋ* for `Matthew`
  *
  * The letters themselves are documented as outside the alphabet and used only in foreign material —
  * *Hrvatski pravopis* (pravopis.hr/slova): "Pri abecediranju q dolazi iza p, a w, x, y iza v", "U pisanju
@@ -389,6 +408,8 @@ export const foreignLetters = (w: string): string =>
         if (lower === "q") return "k";
         if (lower === "w") return "v";
         if (lower === "x" || lower === "xx") return "ks";
+        // ⟨th⟩ → t. See the ⟨th⟩ note in the docstring for the native-prefix guard.
+        if (lower === "th") return NATIVE_TH_PREFIX.test(s.slice(0, at + 1)) ? m : "t";
         // ⟨y⟩: the /j/ offglide after a vowel, the vowel /i/ otherwise.
         return /[aeiouAEIOU]/u.test(s[at - 1] ?? "") ? "j" : "i";
     });

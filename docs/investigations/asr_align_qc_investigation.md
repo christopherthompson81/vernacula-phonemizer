@@ -3427,3 +3427,43 @@ catch that, and re-deriving a hand row is unconditionally correct.
 
 **Not done:** the other 45 marked `reader_divergence` rows in ceb/fil/mi/ig. Each needs a human to read
 what the recognizer heard and write the reading; the mechanism is in place and the rows are marked.
+
+## Run 57 — 2026-08-20 — Croatian ⟨th⟩, with the guard the obvious version needs
+
+Run 54 found `the → txe`, `Matthew → mˈatxeʋ` in `hr`: Croatian ⟨h⟩ is /x/, so ⟨t⟩+⟨h⟩ falls out as an
+impossible `tx`. Croatian adapts foreign /θ/ as **[t]** (*teorija*, *matematika*, *atletika*), which is the
+same evidence class the existing ⟨q w x y⟩ fold already uses — the readings the orthography writes when it
+adapts the spelling.
+
+⚠ **The blind version is net-negative.** Native ⟨th⟩ is a PREFIX BOUNDARY — `pred+hod` → *prethodni*,
+`pod+hraniti` → *pothranjenost*, `pod+hlađen` → *pothlađenost* — where the letters are separate phonemes
+and `tx` is correct. Counted over the sr/hr/bs corpora:
+
+```
+NATIVE (prefix + h)   104 tokens   prethod* ×13 forms, pothranjenost, pothlađenost
+FOREIGN               167 tokens   arthur chatham ellsworth lufthansa macbeth north
+                                   northern smith thomson the ninth parenthood …
+```
+
+The guard checks the prefix at WORD START and immediately before the ⟨h⟩ (`pret|pot|ot|nat`), which admits
+every native token in the corpora and no foreign one. It will be wrong on `Othello`/`otherwise` — recorded
+at the site rather than papered over; a root list (*hod, hran, hlad, hvat*…) is fragile the other way.
+
+**Measured on the rows that contain a foreign ⟨th⟩:**
+
+```
+bs_ba   52 rows   mean 0.2009 -> 0.1937
+hr_hr   90 rows   mean 0.2280 -> 0.2244
+sr_rs    8 rows   mean 0.1855 -> 0.1852     (Cyrillic — barely any Latin ⟨th⟩)
+
+per-row: 128 closer / 17 further / 5 unchanged      7.5:1
+```
+
+7.5:1 clears the 4.6:1 bar the ⟨ʔ⟩ decision was held to. Fleet medians move as expected for a fold touching
+3.5% of rows: hr 0.1375 → 0.1368, bs 0.1571 → 0.1565, sr unchanged. All 171 referee floors pass.
+
+⚠ **It lives in `foreignLetters` in the SERBIAN module**, which hr/bs/sr all call — the fold is a spelling
+rewrite applied per word before nativisation, so `phonemizeWord` stays byte-identical for its three callers.
+
+One gold assertion moved: `test/croatian.test.ts` pinned `Ellsworth → ˈelsʋortx`, where the `tx` was
+incidental to a degemination test. Now `ˈelsʋort`, with the fold and its guard pinned in their own test.

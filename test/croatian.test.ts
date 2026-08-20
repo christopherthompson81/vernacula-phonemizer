@@ -31,10 +31,24 @@ describe("Croatian (hr) canonical IPA", () => {
      * same human set keeps `Matteo`'s Italian geminate and drops `inšallah`'s (`ǐ n ʃ a l aː x`, which is
      * what we now emit). Net −2 of 26,486 on the primary. The audio is the instrument that can decide it.
      */
+    test("⟨th⟩ folds to [t] in foreign words but NOT across a native prefix boundary", () => {
+        // Croatian adapts foreign /θ/ as /t/ (teorija, matematika); ⟨h⟩ alone is /x/, so an unfolded
+        // ⟨th⟩ gave the impossible *txe*. 128 closer / 17 further across the sr/hr/bs FLEURS audio.
+        expect(phonemize("the", "hr")).toBe("te");
+        expect(phonemize("Matthew", "hr")).toBe("mˈateʋ");
+        expect(phonemize("Thomson", "hr")).toBe("tˈomson");
+        expect(phonemize("Lufthansa", "hr")).toBe("lˈuftansa");
+        // ⚠ NATIVE ⟨th⟩ IS A PREFIX BOUNDARY and keeps [tx] — pred+hod, pod+hraniti, pod+hlađen.
+        // Folding these was the net-negative version of this change: 104 native tokens in the corpora.
+        expect(phonemize("prethodni", "hr")).toContain("txodni");
+        expect(phonemize("pothranjenost", "hr")).toContain("txraɲenost");
+        expect(phonemize("pothlađenost", "hr")).toContain("txlad͡ʑenost");
+    });
+
     test("doubled consonants degeminate; doubled VOWELS do not", () => {
         expect(phonemize("Anna", "hr")).toBe("ˈana");
         expect(phonemize("Holland", "hr")).toBe("xˈoland");
-        expect(phonemize("Ellsworth", "hr")).toBe("ˈelsʋortx");
+        expect(phonemize("Ellsworth", "hr")).toBe("ˈelsʋort"); // ⟨ll⟩ degeminates; ⟨th⟩ folds to t (see below)
         expect(phonemize("najjednostavniji", "hr")).toBe("nˈajednostaʋniji");
         // ⚠ A DOUBLED VOWEL IS TWO SYLLABLES in a loan, not a long vowel — only consonants collapse.
         expect(phonemize("zoo", "hr")).toBe("zˈoo");
