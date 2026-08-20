@@ -3124,3 +3124,67 @@ reproducible: `tools/arabic/train_ar.sh`.
 wrong agreement unit, mismatched gold, padded-batch ONNX scoring, un-pausalized gold. Every one initially read
 as the model being broken. The check that would have caught all of them cost one command —
 `phonemizeAsync` on three sentences, showing the shipped model obviously healthy — and it was run fourth.
+
+## Run 52 — 2026-08-20 — full vs pausal training: equivalent, and a retraction
+
+**The question** (user's): does full diacritization + `pausalize()` give up anything against training pausal
+directly? Run 51 asserted the full arrangement "spent capacity on syntax nobody consumes". That was an
+assertion, so it was tested.
+
+**Method.** A full-diacritization model under the BEST recipe rather than a mirror of the incumbent's —
+packed, cosine 1e-3 → 0 across all 40 epochs, `--patience 99` so the anneal cannot be truncated, same split.
+⚠ The user's steer here was right and worth keeping: *the best training method is the one to use regardless* —
+matching a legacy recipe for the sake of symmetry would have handicapped the arm being tested.
+
+**Result**, both arms scored in a single run through `eval_ar_runtime.mts`, 1,500 sentences / 32,018 words:
+
+| | word-exact | sentence-exact |
+|---|---|---|
+| full (`--pausal 0`) | 85.57% (27,399) | 12.5% |
+| pausal (shipped) | 85.53% (27,385) | 12.3% |
+
+**14 words apart — equivalent.** ⚠ **RETRACTED: "capacity spent on syntax nobody consumes."** A model trained
+on the harder target matches one trained directly on the served task, so the case endings are not wasted
+effort. Neither are they a useful auxiliary signal at this scale. Both leanings favour full and both are
+inside noise.
+
+**Kept pausal for a MEASUREMENT reason.** Its DER scores only what survives `pausalize()`; the full model's
+2.83% counts errors the runtime discards. Given equivalent output, prefer the model whose headline number
+cannot be misread — this session lost hours to exactly that misreading.
+
+**Mid-run checkpoints predicted the endpoint well.** At epoch 28/40 (val DER 3.07%, LR 2.1e-4) the full model
+already scored 85.45% end-to-end, 0.08pp off its final 85.57%. `best_state` is written into the resume
+checkpoint every epoch, so a long run can be interrogated cheaply rather than waited out — worth remembering
+before committing to a full training cycle to answer a question.
+
+## Run 53 — 2026-08-20 — the audible question, and an alternate kept rather than discarded
+
+**User's question: would a TTS listener hear the difference between full and pausal?** Yes — **1.17% of words**
+(145 of 12,350), about one word in 85. And not randomly distributed.
+
+**A prediction that failed first, which is why the answer is trustworthy.** I expected the accusative ـًا to be
+the audible class, because `pausalize()` has a special rule converting tanwīn fatḥ before alif into a fatḥa. It
+is not: the **alif itself** supplies the /aː/ whether or not tanwīn is predicted, so that rule prevents a
+doubled vowel rather than creating one. Five probes (`شكرا جزيلا`, `أهلا وسهلا`, …) were identical across both
+models. The real class turned out to be **case marking on ATTACHED PRONOUN SUFFIXES** —
+`wabiħaːrˈihaː`/`wabiħaːrˈahaː`, `wasufˈunih`/`wasufˈunah` — which survives pausalization precisely because it
+is not word-final, plus vowel quality in names and loans.
+
+**Which model is right on the contested words**, scored against pausalized gold:
+
+    full right, pausal wrong : 54
+    pausal right, full wrong : 42
+    both wrong               : 49
+
+56/44 — real but not decisive, and a third of the disagreements neither model gets.
+
+**Decision: keep the shipped pausal model, PRESERVE the alternate.** The quality case is a wash (85.57 vs
+85.53); the reason to prefer pausal is that its DER describes what serves, while the full model's 2.83% counts
+case endings the runtime discards. But "equivalent overall" and "identical to the ear" are different claims,
+and the second is false — so discarding the alternate would throw away the only thing that might separate them.
+Kept at `/mnt/data/ar-diac/alt-full-diacritization/` with swap and rebuild commands, and feedback solicited
+from `diacritizer.PROVENANCE.md` and the `ar` row of `docs/language-maturity.md`.
+
+⚠ **Review step worth generalising: execute the instructions a user would follow.** The swap-and-revert was
+run end to end (model loads, output correct, `git checkout` clean) and every flag cited in the alternate's
+README was checked against the tools' actual `--help`. A documented procedure nobody has run is a guess.
