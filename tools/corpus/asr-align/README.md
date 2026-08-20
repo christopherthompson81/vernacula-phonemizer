@@ -169,6 +169,44 @@ which needs rounding :46 to :45 *and* incrementing the hour. No rule should inve
     read_text  preċiżament fid-disgħa nieqes kwart ta' filgħodu …
     src        hand
 
+### Code-switching — `{en:nineteen forty five}`
+
+A reader who voices part of a sentence in ANOTHER language cannot be recorded as plain `read_text`: the
+host re-reads the spelling with its own rules. `mi` passes `nineteen` through as raw LETTERS into the IPA;
+`ceb` gives *ninetˈeʔen fˈoɾtj fˈibe*. IPA cannot go there either — see the espeak/IPA section above.
+
+So `read_text` accepts an inline span carrying **text and a language**, never phones, and each segment is
+read by the engine that owns it:
+
+    text       miapil siya sa team kaniadtong 1945 ug nagpabilin hangtod 1958
+    read_text  miapil siya sa team kaniadtong {en:nineteen forty five} ug nagpabilin hangtod {en:nineteen fifty eight}
+    ipa        … kaniʔˈadtoŋ nˈaᶦntˈiːn fˈɔːɹt̬i fˈaᶦv ʔˈuɡ naɡpabˈilin hˈaŋtod nˈaᶦntˈiːn fˈɪfti ˈeᶦt
+    dist       0.6634 -> 0.2727   (sibling row: 0.6716 -> 0.3521)
+
+⚠ **This is the PER-ROW form of `numeral_register.mts`, and that is the whole point.** The register table
+answers for a whole language, which is why ceb/fil/mi/ig were measured at 62–85% and DECLINED — a third of
+their rows read natively and would get worse. A span is a fact about one recording, so it costs those rows
+nothing.
+
+⚠ **It carries text, never phones, so the row still tests the phonemizer.** Hand-written IPA would make the
+row permanently unfailable — worse than a wrong row, because it is a wrong row that looks right forever.
+Every segment still reaches an engine.
+
+⚠ **An unknown tag is an error, not literal text.** `{xx:…}` throws rather than sending braces through the
+host g2p.
+
+### Re-deriving `ipa` after a hand edit
+
+`--set` clears `ipa`, which removes the row from scoring (every scorer filters `ipa IS NOT NULL`) until it
+is re-derived — and until now **nothing re-derived it**, so hand corrections parked their rows permanently.
+`phonemize-fleurs.mts` cannot do it: it reads the FLEURS TSV and never sees a hand `read_text`.
+
+```bash
+python3 read_text.py --export-pending /tmp/pending.tsv
+npx tsx rederive_read_text.mts /tmp/pending.tsv /tmp/ipa.tsv
+python3 read_text.py --import-ipa /tmp/ipa.tsv        # only fills rows whose ipa IS NULL
+```
+
 ```bash
 python3 read_text.py --apply [lang…]                 # derive and store the auto repair
 python3 read_text.py --set mt_mt <wav> "<reading>"   # record what the reader actually said

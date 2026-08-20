@@ -3188,3 +3188,224 @@ from `diacritizer.PROVENANCE.md` and the `ar` row of `docs/language-maturity.md`
 ⚠ **Review step worth generalising: execute the instructions a user would follow.** The swap-and-revert was
 run end to end (model loads, output correct, `git checkout` clean) and every flag cited in the alternate's
 README was checked against the tools' actual `--help`. A documented procedure nobody has run is a guess.
+
+## Run 54 — 2026-08-20 — the all-flagged queue, re-ranked; and one closed path re-walked
+
+**Question.** After the elevated-median work (`docs/investigations/low_vowel_notation_investigation.md`),
+turn to the all-flagged queue: 658 rows where every recording of a sentence is flagged.
+
+### The queue is a TEXT-NORMALIZATION queue, and that is measurable
+
+```
+sibling        n     contains digits   contains symbol
+all-flagged    658        39.7%             4.1%
+exonerated    6444        26.7%             2.1%
+no-sibling    1172        31.5%             2.8%
+corpus       268098       21.3%             1.8%
+```
+
+All-flagged rows carry digits at **1.9× the corpus rate**. The de_de precedent (the year reading, the `°C`
+rule) generalises: when several readers all disagree with one IPA string, the defect is upstream of the
+phones.
+
+### ⚠ I re-walked a closed decision — read the numeral-register docstring first
+
+Measured that `ceb_ph` readers voice numerals in Spanish and English, `fil_ph` and `mi_nz` in English, with
+a non-digit control at ~0% and `es_419` (18.1%) as the calibration ceiling. All of it is already in
+`tools/corpus/numeral_register.mts` and run 19 of this document: **ceb / fil / mi / ig measured 84.8% /
+62.3% / 63.5% / 66.8% and were DECLINED** because a third of their rows would get worse. Their all-flagged
+queues are 71–92% digit-bearing *because of that decision*.
+
+The docstring says so explicitly and I did not read it before measuring. It also already answered the
+sub-question I thought was new — Cebuano's Spanish — since every candidate was scored against en, fr AND es.
+
+### A ranking the queue did not have
+
+Run 42 noted "the by-lift ordering is now misleading" and that the queue needs an examined mark. Raw row
+count sends you into the largest queues, which are the known-clean and the known-declined. Ranking each
+language's all-flagged mean against **its own median** separates them:
+
+```
+lang     rows  median  af_mean  excess  digit%
+hr_hr      17   0.138    0.385    2.8×    41%    <- not examined
+ln_cd      17   0.184    0.484    2.6×    76%    declined (numeral register)
+ceb_ph     24   0.246    0.603    2.5×    92%    declined
+el_gr       8   0.244    0.609    2.5×     0%    <- not examined, NO digits
+mi_nz      15   0.243    0.607    2.5×    80%    declined
+sn_zw       8   0.211    0.535    2.5×     0%    <- not examined, NO digits
+bs_ba      11   0.157    0.372    2.4×    55%
+hu_hu      12   0.280    0.667    2.4×     0%    <- not examined, NO digits
+bn_in      31   0.289    0.674    2.3×    29%    CLEAN, investigated
+```
+
+An all-flagged row in a language whose baseline is *clean* is worth more than one in a language the
+recognizer finds hard, and raw count does not show that. The three 0%-digit entries (el_gr, sn_zw, hu_hu)
+cannot be the numeral story at all and are the most interesting unexamined rows in the queue.
+
+### ⚠ The stored `ipa` column is STALE, and reading it directly misleads
+
+`align.sqlite` holds `ellsworth → ˈellsʋortx` with a geminate. The current engine emits `ˈelsʋortx` — the
+degemination was fixed after that pass. Any conclusion drawn from the stored `ipa` is a conclusion about
+whatever the engine was that day. Re-phonemize before believing a row. (The nso and sw results in the
+sibling investigations were verified end-to-end for exactly this reason; this queue reading was not, at
+first, and one of the two Croatian "defects" evaporated on checking.)
+
+### hr_hr examined — ⟨th⟩ → [tx] in foreign words
+
+Croatian ⟨h⟩ is /x/, so ⟨t⟩+⟨h⟩ falls out as `tx`. Verified live against the engine:
+
+```
+the        -> txe          matthew    -> mˈatxeʋ
+ellsworth  -> ˈelsʋortx    otthon     -> ˈotxon
+```
+
+Croatian adapts foreign θ as **[t]** (*teorija*, *matematika*), so `txe` is wrong. The recognizer agrees —
+readers gave `ɛ l s w ø θ` for ellsworth and `d ə` for "the".
+
+⚠ **But a blanket ⟨th⟩→[t] would break native words**, and the corpus contains them: `prethodno`,
+`prethodnika`, `prethodnim` are `pred-` + `hod-`, where the two letters are separate phonemes across a
+prefix boundary and `tx` is *correct*. Split over the whole hr_hr corpus:
+
+```
+distinct ⟨th⟩ words: 32   tokens: 136
+  NATIVE (pret- prefix):   8 types,  29 tokens   prethodio, prethodna, prethodni, prethodnika, …
+  FOREIGN:                24 types, 107 tokens   arthur, chatham, ellsworth, lufthansa, macbeth,
+                                                 northern, smith, thomson, the, ninth, …
+```
+
+79% of ⟨th⟩ tokens are foreign. Fires on 120 of 3,459 rows (3.5%). **A fix needs a prefix guard, not a
+grapheme edit** — the obvious rule is net-negative on 29 tokens of correct native output.
+
+Two further hr_hr items seen but not sized: `xdr-tb → ksdr tb` where the reader spelled the letters
+(*iks-de-er tuberkuloza*), and embedded English runs read with Croatian rules (`national superintendent of
+the year → nˈational sˈuperintendent of txe ˈiear`). The second is a foreign-run-handler question, the same
+shape as Swahili's `makeNativiser`, and is larger than a table fix.
+
+## Run 55 — 2026-08-20 — the queue gets a memory, and IPA cannot be a payload
+
+Run 54 re-walked a decision that was already made and documented. That is the second time the queue has
+sent someone into finished work (run 42 found three of its top five already clean), and the cause is that
+**the record lived in prose, not in the row**.
+
+### `examined_clean`
+
+Added to `asr_align_label.py`. It is the only status that means *a human looked* — `verified` is automatic
+and only means "inside this language's own distribution", which is exactly what a uniformly-wrong language
+looks like (nso_za: 1,989/1,990 verified, worst median in the fleet).
+
+`--set` now validates against the documented vocabulary. It previously accepted anything, and the DB holds
+`convention` with exactly one row — a real verdict and a typo are indistinguishable after the fact.
+`--force-status` is the escape hatch, and it says to document the new value.
+
+`--set` also gained `--sibling` / `--digits` so a bulk review verdict is reproducible through the tool
+rather than ad-hoc SQL. Marks applied:
+
+```
+examined_clean     50   bn_in 31, hy_am 19      (run 42: read, no defect)
+reader_divergence  57   ceb_ph 22, fil_ph 13, mi_nz 12, ig_ng 10, +existing
+                        (digit-bearing all-flagged only — the declined numeral register)
+```
+
+`fr_fr` matched 0: its all-flagged rows were re-screened to `exonerated` since run 42, and its 20
+`reader_divergence` + 2 `defect` verdicts were already recorded. The run-42 table is stale, which is the
+argument for the column.
+
+### ⚠ IPA in `read_text` does not pass through — measured, and it fails SILENTLY
+
+`numeral_register.mts` records this from one direction (`fˈɔːɹ` came back as *f o*). Confirmed across ten
+languages with `naɪntiːn fɔːɹti faɪv`:
+
+```
+ceb  nˈanti n fˈo tˈi fˈab      mi   nˈaɪnti n fˈɔ ɹtˈi fˈaɪv
+hr   nˈanti n fo ti faʋ         en   naɪnti ˈɛn fɔ ɹti fˈaɪv
+sw   naˈn̩ti ˈn̩ fˈo tˈi fˈav      xh   nˈaːntʼi n fˈɔː tʼˈiː fˈaːv̤
+```
+
+**Not one passed through.** Length marks and `ɹ` are absorbed, and the stray `n` becomes a syllabic nasal
+in the Bantu engines. The output still *looks* like IPA, so nothing in a corpus dump reveals the
+corruption. `read_text.py --set` now refuses it.
+
+⚠ **And the guard had to be narrowed before it was right.** The first version listed "IPA-looking"
+characters and refused three legitimate orthographies on the first test: Maltese `fid-disgħa` on ⟨ħ⟩, Ewe
+`ɖeviɖu ƒe ŋkɔ` on ⟨ŋ ɔ ɖ⟩, Azerbaijani `səkkiz` on ⟨ə⟩ — including the exact Maltese hand-reading the
+README documents. The guard is now suprasegmentals and modifier letters only (`ˈ ˌ ː ˑ` tone letters, tie
+bars, superscripts), which carry no orthographic duty in any script and appear in every IPA string the
+fleet emits.
+
+### What `read_text` can and cannot carry
+
+| the reader… | vehicle |
+|---|---|
+| chose a different wording in the same language (Maltese *fid-disgħa nieqes kwart* for `8:46`) | `read_text` — works today |
+| voiced a numeral in another language | **neither** — `read_text` makes the host re-read the spelling (`mi` passes `nineteen` through as raw letters), and the segment path in `numeral_register.mts` is per-LANGUAGE, not per-row |
+| said something with no orthographic form at all | nothing — mark `reader_divergence` and let the row be excluded |
+
+The middle row is the open gap, and it is exactly why ceb/fil/mi/ig were declined: their register is a
+per-ROW fact and the table can only express a per-LANGUAGE one.
+
+## Run 56 — 2026-08-20 — code-switch spans, and the re-derivation that never existed
+
+**Question.** Run 55 established that a reader who switches LANGUAGE has no vehicle: `read_text` makes the
+host re-read the spelling, IPA is destroyed on re-parse, and `numeral_register.mts` is per-language. Build
+the per-row form.
+
+### `{en:nineteen forty five}`
+
+`tools/corpus/code_switch.mts` parses inline spans into the same `Segment` shape the numeral register
+already emits — text and a language, never phones — and host text still passes through the register.
+
+The constraint that shaped it: **a span carries text so the row keeps testing the phonemizer.** Hand-written
+IPA would make a row permanently unfailable, which is worse than a wrong row because it is a wrong row that
+looks right forever. Nine unit tests, including the global-regex statefulness trap that has bitten this
+campaign twice.
+
+### The contract that was documented and unimplemented
+
+`read_text.py` says "ipa is derived from read_text", `--set` clears `ipa` so the gap is visible, and
+`--stale` LISTS the rows awaiting re-derivation. **Nothing re-derived them.** `phonemize-fleurs.mts` cannot:
+it reads the FLEURS TSV and never sees a hand `read_text`.
+
+Measured on export: **2 rows were parked** — the two this change created. ⚠ A first draft of this entry
+said five, three of them pre-existing and silently excluded. Wrong: the three Maltese hand rows carry an
+`ipa` and score normally. The `5` came from the `--stats` line (total hand rows), read as if it were the
+pending count.
+
+`rederive_read_text.mts` + `read_text.py --export-pending / --import-ipa` closes it. The import only fills
+`ipa IS NULL`, so re-running it cannot restate a scoring row from a stale export.
+
+⚠ **The FLEURS→registry code map is now EXPORTED from `read_text.mts` rather than copied.** Its own comment
+says the passes must agree about which engine read a language; a second copy is how they stop agreeing.
+Four codes are not a prefix split (`ar_eg→arz`, `fil_ph→tl`, `ny_mw→nya`, `es_419→es-419`), and the first
+run of the new tool failed on exactly this — `no phonemizer registered for "ceb_ph"`.
+
+### End-to-end, on two real rows
+
+```
+text       … kaniadtong 1945 ug nagpabilin hangtod 1958
+read_text  … kaniadtong {en:nineteen forty five} ug nagpabilin hangtod {en:nineteen fifty eight}
+ipa        … kaniʔˈadtoŋ nˈaᶦntˈiːn fˈɔːɹt̬i fˈaᶦv ʔˈuɡ naɡpabˈilin hˈaŋtod nˈaᶦntˈiːn fˈɪfti ˈeᶦt
+
+15654683974721888057   0.6634 -> 0.2727   (-0.3907)
+2887141455778020347    0.6716 -> 0.3521   (-0.3195)
+```
+
+The Cebuano engine read the Cebuano and the English engine read the span. Being per-row, this costs the
+two-thirds of ceb rows that read natively exactly nothing — which is the difference between this and the
+register table that was declined.
+
+### ⚠ And a second wrong reading, caught in review
+
+Those three Maltese rows then looked stale on inspection — `read_text` says `fid-disgħa`, `ipa` says
+`fɪt dɪsa`, which reads as a hybrid of the original `fit-8:46` and the hand reading. It is not. Maltese
+devoices the assimilated article: `phonemize("fid-disgħa", "mt")` **is** `fɪt dɪsa`. Re-deriving all five
+hand rows changed nothing.
+
+That is twice in two runs that reading the stored `ipa` produced a defect that was not there — run 54's
+Croatian geminate was the other. **Run the engine before believing a mismatch.** Recorded at the site.
+
+`--export-hand` / `--import-ipa --overwrite` were added during that diagnosis and are kept on the sound
+part of the reasoning: a hand row's IPA goes stale whenever the engine changes, `ipa IS NULL` does not
+catch that, and re-deriving a hand row is unconditionally correct.
+
+**Not done:** the other 45 marked `reader_divergence` rows in ceb/fil/mi/ig. Each needs a human to read
+what the recognizer heard and write the reading; the mechanism is in place and the rows are marked.
