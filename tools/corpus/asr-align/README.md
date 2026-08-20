@@ -65,6 +65,28 @@ its 382 flags are one gender**, against 0.33% for the other. Corpus-wide there i
 the sentence. Gender is standing in for speaker here; the sibling screen is the exact version of the
 same argument.
 
+## ⚠ The recognizer is not independent of espeak
+
+`wav2vec2-xlsr-53-espeak-cv-ft` — note the **espeak** in the name — is fine-tuned to emit espeak phoneme labels. So when its output agrees
+with espeak's convention for a language, **that is one source, not two**, and citing "espeak says X and the
+recognizer says X" as corroboration double-counts. This is the same error as treating wikipron and kaikki
+as two referees when both are en.wiktionary.
+
+It is not simply replaying espeak per-language, though. espeak's Kyrgyz voice writes `ɑ`, Kyrgyz has a
+voice and is a CommonVoice language, and the recognizer still returns `a` 86.2% / `ɑ` 2.1% there — so it
+looks like one pooled acoustic mapping rather than a per-language convention. Both facts matter:
+
+- Its evidence is **strongest where espeak has no voice at all** (`nso`, `st` — check with
+  `espeak-ng --voices`), because then no convention could have been learned.
+- Its evidence is **weakest against a written tradition espeak disagrees with**, because there the
+  recognizer and espeak are the same witness.
+- It has a **frequency prior**: it writes `a` 3.58M times against `ɑ` 151k corpus-wide. Treat a bare
+  preference for the commoner symbol as weak, and look for the fr/de/pt-style control showing it resolves
+  the contrast where one genuinely exists.
+
+Worked through in `docs/investigations/low_vowel_notation_investigation.md`, which proposed three language
+changes on recognizer evidence and then withdrew all three on this basis.
+
 ## The recognizer cannot hear 3.67% of what we write
 
 Measured over 221,469 aligned utterances: 30 phones we emit ≥2,000 times each are returned by
