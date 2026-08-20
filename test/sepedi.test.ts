@@ -12,13 +12,13 @@ import { normalizeSepedi } from "../src/languages/sepedi/normalize.ts";
 // deferred.
 describe("Sepedi (Northern Sotho) canonical IPA — Sotho-Tswana rule g2p (authored)", () => {
     test("distinctive graphemes: ⟨š⟩→ʃ, ⟨kg⟩→kx, ⟨g⟩→x, ⟨hl⟩→ɬ", () => {
-        expect(phonemizeWord("kgoši")).toBe("kxɔʃi"); // kg→kx, š→ʃ
-        expect(phonemizeWord("mošomo")).toBe("mɔʃɔmɔ"); // š→ʃ
-        expect(phonemizeWord("hlogo")).toBe("ɬɔxɔ"); // hl→ɬ, g→x
+        expect(phonemizeWord("kgoši")).toBe("kxoʃi"); // kg→kx, š→ʃ
+        expect(phonemizeWord("mošomo")).toBe("moʃomo"); // š→ʃ
+        expect(phonemizeWord("hlogo")).toBe("ɬoxo"); // hl→ɬ, g→x
     });
     test("aspirate ⟨th⟩→tʰ, ejective ⟨p⟩→pʼ", () => {
-        expect(phonemizeWord("batho")).toBe("bɑtʰɔ"); // th→tʰ
-        expect(phonemizeWord("sepedi")).toBe("sɛpʼɛdi"); // p→pʼ (ejective)
+        expect(phonemizeWord("batho")).toBe("batʰo"); // th→tʰ
+        expect(phonemizeWord("sepedi")).toBe("sepʼedi"); // p→pʼ (ejective)
     });
 });
 
@@ -55,8 +55,8 @@ describe("Sepedi cardinal numbers — citation series + conjunctive compounds", 
         expect(numberToWords(1000000000)).toBe("bilione");
     });
     test("end-to-end through the g2p", () => {
-        expect(phonemize("21", "nso").trim()).toBe("mɑsɔmɛpʼɛdi tʼɛɛ");
-        expect(phonemize("200", "nso").trim()).toBe("mɑkxɔlɔpʼɛdi");
+        expect(phonemize("21", "nso").trim()).toBe("masomepʼedi tʼee");
+        expect(phonemize("200", "nso").trim()).toBe("makxolopʼedi");
     });
 });
 
@@ -182,10 +182,10 @@ describe("Sepedi text normalization", () => {
         // ⚠ TWO TRAP-56 MISREADS CLOSED, neither of which any leak class could see: ⟨kg⟩ IS the Sepedi
         // digraph for /kx/, so `1200 kg` was PRONOUNCED as a velar affricate; ⟨c⟩ has no grapheme rule and
         // falls through to latinPhone, so ⟨cm⟩ read [km] — one ejective mark from ⟨km⟩ → [kʼm].
-        expect(phonemize("1200 kg", "nso")).toContain("dikʰilɔxrɑmɑ");
+        expect(phonemize("1200 kg", "nso")).toContain("dikʰiloxrama");
         expect(phonemize("1200 kg", "nso")).not.toContain(" kx");
-        expect(phonemize("50 cm", "nso")).toContain("sɛntʰimɛtʼɑrɑ");
-        expect(phonemize("108 km/h", "nso")).toBe("dikʰilɔmitʰɑrɑ t͡ʃʼɛ lɛkxɔlɔ lɛ sɛswɑi kʼɑ iri");
-        expect(phonemize("40%", "nso")).toBe("dipʼɛrɛsɛntʼɛ t͡ʃʼɛ mɑsɔmɛnnɛ");
+        expect(phonemize("50 cm", "nso")).toContain("sentʰimetʼara");
+        expect(phonemize("108 km/h", "nso")).toBe("dikʰilomitʰara t͡ʃʼe lekxolo le seswai kʼa iri");
+        expect(phonemize("40%", "nso")).toBe("dipʼeresentʼe t͡ʃʼe masomenne");
     });
 });

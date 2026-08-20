@@ -3,7 +3,11 @@
  * A pure greedy longest-match scan over the grapheme table (sepedi.jsonc), the same engine as
  * the sibling Setswana — Sepedi is open CV, so no coda/syllabification logic. Authored beyond any machine referee
  * (kaikki Sotho = 3 words) from standard Sepedi phonology. Signatures: EJECTIVE plain stops ⟨p t k⟩→[pʼ tʼ kʼ]
- * (vs aspirated ⟨ph th kh⟩), ⟨ts⟩→[t͡sʼ], ⟨hl⟩→[ɬ], ⟨a⟩→[ɑ]. Vowel height unwritten (default mid); tone deferred. Cardinal numbers: numbers.ts (citation stems + the
+ * (vs aspirated ⟨ph th kh⟩), ⟨ts⟩→[t͡sʼ], ⟨hl⟩→[ɬ].
+ * VOWELS: the unmarked ⟨e o⟩ are the CLOSE-mid [e o] and the circumflex ⟨ê ô⟩ the OPEN-mid [ɛ ɔ] — the contrast the
+ * orthography writes; ⟨a⟩→[a]. The residual height alternation (⟨e⟩ also realised [i], ⟨o⟩ also [u], conditioned by a
+ * following high vowel) is NOT modelled: it is real in the audio but raising categorically measures WORSE than the flat
+ * default (0.2840 vs 0.2763), so it needs a better source than a phone recognizer. Tone deferred. Cardinal numbers: numbers.ts (citation stems + the
  * CONJUNCTIVE compounds lesometee/masomepedi/makgolopedi — authored from Northern Sotho sources, NOT from st).
  */
 import type { Phonemizer } from "../../registry.ts";

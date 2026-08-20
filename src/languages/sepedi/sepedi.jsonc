@@ -21,7 +21,18 @@
         "š": "ʃ", "j": "d͡ʒ", "y": "j",
         "b": "b", "d": "d", "f": "f", "g": "x", "h": "ɦ", "k": "kʼ", "l": "l", "m": "m",
         "n": "n", "p": "pʼ", "r": "r", "s": "s", "t": "tʼ", "v": "v", "w": "w", "z": "z",
-        "a": "ɑ", "e": "ɛ", "ê": "ɛ", "i": "i", "o": "ɔ", "ô": "ɔ", "u": "u"
+        // ⚠ THE UNMARKED LETTERS ARE THE CLOSE-MID VOWELS, and the CIRCUMFLEX marks the open-mid ones —
+        // that is what ⟨ê⟩/⟨ô⟩ are FOR in Northern Sotho orthography. This table mapped e and ê both to [ɛ]
+        // and o and ô both to [ɔ], collapsing the contrast the orthography writes and giving the UNMARKED
+        // letter the marked value. ⟨a⟩ was [ɑ], which no source writes for this family at all.
+        // Corroborated two ways, neither of them a dictionary (nso has no wikipron/kaikki/epitran):
+        //   · 1,990 FLEURS utterances — our ɑ came back as [a] 81.9% (the same rate as the vowels we get
+        //     right: i 81.6%, u 74.2%); our ɛ came back as [ɛ] 0.2% and our ɔ as [ɔ] 0.3%, against 75-87%
+        //     for the same recognizer on fr/de/pt/en, so it discriminates the contrast and did not hear it.
+        //   · epitran tsn-Latn (the sibling) over Sepedi text: ⟨a⟩→a 100%, ⟨o⟩→ɔ NEVER, ⟨e⟩→ɛ 4%.
+        // Median audio distance 0.6647 (worst in the fleet) → 0.2763. See
+        // docs/investigations/nso_vowel_investigation.md, and ⚠ note there what this spends.
+        "a": "a", "e": "e", "ê": "ɛ", "i": "i", "o": "o", "ô": "ɔ", "u": "u"
     },
 
     "clausePunctuation": {
