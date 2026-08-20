@@ -68,3 +68,24 @@ shipped predicted FULL diacritization (3.31% at `--pausal 0`, 16.89% at `--pausa
 models. Harmless in service — `diacritizer.ts::pausalize()` strips case endings downstream either way, which
 is why the two agree on 98.04% of words — but it means the previously deployed artifact was not reproducible
 from the checkpoint this document names. The model now shipped IS reproducible: `tools/arabic/train_ar.sh`.
+
+### ⚠ Full-then-pausalize costs MEASUREMENT accuracy, and the referee already knew
+
+The previous arrangement trained on FULL diacritization and stripped case endings at serve time
+(`diacritizer.ts::pausalize()`). Three consequences worth stating, because "full diacritization" sounds like
+the higher-accuracy option and is not:
+
+1. **Its headline DER overstates served error.** Tashkeela-style gold scores the iʕrab case/mood endings, and
+   `pausalize()` then discards them — so that number counts mistakes which never reach the output. The
+   previous artifact's 3.31% (`--pausal 0`) is not a description of the product; this model's 1.83%
+   (`--pausal 1`) scores only what survives to the IPA.
+2. **The referee never rewarded them either.** `tools/referee-eval/langs/ar.jsonc` uses kaikki ara — "PAUSAL,
+   multi-pron" — with an explicit preFold: *drop a word-final SHORT vowel (the iʕrab case/mood ending, and
+   the verb -a)*. Case endings are folded off both sides before scoring.
+3. So capacity went to predicting syntax that neither the runtime nor the referee consumes.
+
+⚠ **NOT ESTABLISHED: that pausal is the better TRAINING objective.** The end-to-end win here (85.53% vs
+85.10%) is confounded — this model also got packed sequences and the cosine tail. The opposite argument is
+real: case endings force the model to parse, which may improve the stem vowels that DO survive. Isolating it
+needs a full-diacritization model trained under this same recipe and compared through
+`eval_ar_runtime.mts`. Open.
