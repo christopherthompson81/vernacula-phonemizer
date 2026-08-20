@@ -182,7 +182,7 @@ const DOLLAR = `ditolara ${TSE}`;
  * ga 2.24º le 1.02º Celsius … fasefase go - 3.12º Celsius`. What makes it shippable anyway is that it is the
  * international scale NAME written by this wiki in exactly this slot, and that the alternative is worse:
  * claiming the sign and saying nothing DELETES the scale from the sentence, while `1.2 °C` currently reads
- * `tʼɛɛ . pʼɛdi k` — a sentence break inside the number and the scale letter pronounced as a bare [k].
+ * `tʼee . pʼedi k` — a sentence break inside the number and the scale letter pronounced as a bare [k].
  * `Fahrenheit` gets no such treatment: it is ×0, so `°F`'s letter is claimed and left unsaid.
  */
 const CELSIUS = "Celsius";
@@ -316,8 +316,8 @@ export function normalizeSepedi(input: string): string {
     });
 
     // 2) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping comma reads as a CLAUSE
-    //    PAUSE and a grouping period as a FULL STOP, so `1,600,000` came out *tʼɛɛ , mɑkxɔlɔt͡sʰɛlɑ ,
-    //    lɛfɛɛlɑ* — "one, six hundred, zero" — and `216.061 badudi` broke one population figure into two
+    //    PAUSE and a grouping period as a FULL STOP, so `1,600,000` came out *tʼee , makxolot͡sʰela ,
+    //    lefeela* — "one, six hundred, zero" — and `216.061 badudi` broke one population figure into two
     //    sentences.
     //
     //    ⚠ SEPEDI'S WIKI WRITES ALL THREE CONVENTIONS AT ONCE, and each arm is load-bearing. Measured over
@@ -344,7 +344,7 @@ export function normalizeSepedi(input: string): string {
     //    (`2 658 455 991 569 831 744 654 692 615 953 842 176`). De-grouped, that exceeds
     //    `Number.MAX_SAFE_INTEGER`, so the engine's own `Number(m[2])` yields `2.658455991569832e+42` and
     //    `numberToWords` spells the EXPONENT NOTATION digit by digit — the reading came out
-    //    *sɛɲɑnɛ pʼɛdi t͡sʰɛlɑ … tʰɑrɔ pʼɛdi **ɛ** tʰɑrɔ t͡sʰɛlɑ*, with the letter ⟨e⟩ of `e+42` voiced as a
+    //    *seɲane pʼedi t͡sʰela … tʰaro pʼedi **e** tʰaro t͡sʰela*, with the letter ⟨e⟩ of `e+42` voiced as a
     //    numeral. Four groups is 15 digits at most, inside the safe-integer range, and the corpus's largest
     //    genuine grouped number is `30 560 860` (three). The precision limit itself is an ENGINE defect, not
     //    a normalization one, and is recorded in the investigation doc rather than worked around here.
@@ -502,7 +502,7 @@ export function normalizeSepedi(input: string): string {
 
     // 9) DECIMALS, LAST of the numeric rules — steps 2 to 8 all need their number intact, and the shared tier
     //    (which runs BEFORE this whole pass) needs the digit adjacent to its sign. The dot was reaching
-    //    `clausePunctuation` and becoming a SENTENCE BREAK inside a number: `9.84` read *sɛɲɑnɛ . …*.
+    //    `clausePunctuation` and becoming a SENTENCE BREAK inside a number: `9.84` read *seɲane . …*.
     //    NO separator word is emitted; see the header for the `khutlo` register finding.
     //    ⚠ BOTH SEPARATORS, both restricted to a 1–2 digit tail — the same discipline step 2 uses from the
     //    other side, and the tail limit is what keeps a grouped thousand step 2 declined out of these arms.
