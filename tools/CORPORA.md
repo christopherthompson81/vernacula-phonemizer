@@ -150,23 +150,33 @@ RIDER_CKPT=/tmp/rider.pt .venv/bin/python tools/perso-arabic/export_onnx.py
 
 ## ar / arz — the two Arabic diacritizers (`diacritizer.onnx`, `diacritizer-egy.onnx`)
 
-⚠ **AFFECTED BY THE PACKING BUG, AND THE TRAINER IS IN ANOTHER REPO.**
-`~/Programming/espeak-ng-portable/tools/diacritization/train_bilstm_sent.py` — bidirectional LSTM over a
-`pad_sequence` collate with `def forward(s, x)` and no packing, the same shape as everything in Run 41.
-⚠ Its `collate` **already returns `torch.tensor([len(x) for x in xs])`** — the lengths are computed and then
-never passed. This is almost certainly the ancestor the rider was copied from, which is how the family
-inherited the defect; the fix is one line in `forward` plus using the third tuple element.
+⚠ **THE TRAINER IS NOW IN-TREE AND FIXED**: `tools/arabic/train_ar_diacritizer.py` (was
+`~/Programming/espeak-ng-portable/tools/diacritization/train_bilstm_sent.py`). Its `collate` had **always**
+returned `torch.tensor([len(x) for x in xs])` while `forward(s, x)` had no parameter to receive them — the
+lengths were plumbed end to end and dropped. This file is where the whole fleet's packing defect began; the
+rider is a direct descendant. Packed at all three call sites, covered by `smoke_test.py` check 9.
+
+⚠ **THE SHIPPED MODEL WAS NOT REPLACED** (investigation Run 49). The retrain measures better in fp32
+(2.02% → 1.83% TEST DER, ~90% of it from the cosine schedule rather than the packing), but int8 export appears
+to cost ~0.9pp, and the committed `diacritizer.onnx` behaves as FULL diacritization (3.63% DER at
+`--pausal 0`, 17.09% at `--pausal 1`) while this recipe and its provenance both say pausal. Both are open
+questions; resolve them before swapping the artifact.
+
+⚠ **USE `--cosine` FOR ANY A/B.** The default `ReduceLROnPlateau` is adaptive, so two arms decay on different
+timetables and a fixed epoch cap cuts them at different LRs — measured at 2.02 vs 2.10 purely from that.
 
 | | |
 |---|---|
 | MSA data | `/mnt/data/ar-diac/` — `silver.txt` 320k, `train.txt` 310k, `val.txt` 5k; warm-start checkpoints `bilstm_*.pt`; `arwiki.xml.bz2` |
 | Egyptian data | `/mnt/data/arz-diac/` — `corpus_arz_350k.txt`, `arzwiki.xml.bz2`, `export_egy*.py` |
-| driver | `/mnt/data/ar-diac/train.sh` (splits silver → train/val/test, trains, exports) |
+| driver | `tools/arabic/train_ar.sh` — ⚠ the split reshuffle is now OPT-IN (`RESPLIT=1`); the original recipe reshuffled on every run, silently changing the held-out set |
 
-⚠ **The rider warm-starts from the Arabic base** (`bilstm_pausal.pt`), so retraining the base means
-re-warm-starting the rider on top of it — do them in that order or the comparison is meaningless. Not done
-here: the trainer belongs to a different repository, which is a decision to take deliberately rather than as
-a side effect of a phonemizer PR.
+⚠ **CORRECTION (2026-08-20): the rider does NOT depend on the shipped diacritizer's checkpoint.** This file
+previously claimed retraining the Arabic base forced a rider re-warm-start "or the comparison is meaningless".
+Checked: the rider warms from `bilstm_pausal.pt` (5 Jul) while `diacritizer.onnx` derives from
+`bilstm_silver_only.pt` (12 Jul) — different files, different weights. Retraining the MSA diacritizer leaves
+the rider untouched, and there is no ordering constraint between them. The claim was asserted from the two
+sharing a directory and a lineage, never verified.
 
 ## Not to be committed, and why
 

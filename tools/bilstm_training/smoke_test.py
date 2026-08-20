@@ -135,11 +135,13 @@ def main():
         "sindhi/export_sd_tagger_onnx.py": dict(nsrc=10, ntag=4),
         "khmer/train_km_segmenter.py": dict(nc=10),
         "perso-arabic/train_multilingual_harakat.py": dict(nc=10, nl=4, emb=32, h=16, ly=2),
+        "arabic/train_ar_diacritizer.py": dict(nc=10, nl=4, emb=32, h=16, ly=2),
     }
     for rel, kw in STANDALONE.items():
         path = os.path.join(HERE, "..", rel)
         want = {"khmer/train_km_segmenter.py": "Segmenter",
-                "perso-arabic/train_multilingual_harakat.py": "BiLSTM"}.get(rel, "Tagger")
+                "perso-arabic/train_multilingual_harakat.py": "BiLSTM",
+                "arabic/train_ar_diacritizer.py": "BiLSTM"}.get(rel, "Tagger")
         cls = next((n for n in ast.parse(open(path, encoding="utf8").read()).body
                     if isinstance(n, ast.ClassDef) and n.name == want), None)
         if cls is None:

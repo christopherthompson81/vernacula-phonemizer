@@ -2991,3 +2991,97 @@ tags both), confirming the shipped model was already a phase-2 export.
 was printed not checked, a warning with the wrong number, a command with plausible defaults, and now a doc
 whose omission was invisible because every other language happened not to need it. The reviews that pay are
 the ones that execute the artifact rather than re-read it.
+
+## Run 49 — 2026-08-20 — Arabic: the trainer comes in, the model does NOT ship, and four instrument failures
+
+**The root-cause fix landed where it belongs.** `train_bilstm_sent.py` is now
+`tools/arabic/train_ar_diacritizer.py`, packed at all three call sites. ⚠ Its `collate` has ALWAYS returned
+`torch.tensor([len(x) for x in xs])` and all three sites already unpacked it as `lens` — plumbed end to end and
+never passed, because `forward(s, x)` had no parameter for it. The rider is a direct descendant of this file;
+this is where the fleet's defect originates. Covered by smoke check 9.
+
+**Measured, with a consistent harness (matching vocab, matching `--pausal 1`):**
+
+| | TEST DER | TEST WER |
+|---|---|---|
+| shipped checkpoint `bilstm_silver_only.pt` | 2.02% | 7.81% |
+| my 25-epoch unpacked baseline | **2.02%** *(exact reproduction)* | 7.81% |
+| + cosine tail, unpacked | 1.85% | 7.23% |
+| + cosine tail, packed | **1.83%** | **7.20%** |
+
+**Attribution: ~0.17pp from the SCHEDULE, ~0.02pp (noise) from the packing.** Arabic is the one language where
+packing is not measurable, and the mechanism predicts it — a sentence-level model with `maxlen 400` has almost
+no positions near the sequence end, where a 10-character word is nearly all "near the end" (da +5.6, nb +2.2).
+The effect scales with how much of each input sits at the tail; the rider, also sentence-level, sat between.
+
+⚠ **THE SCHEDULE FINDING IS THE USEFUL ONE, AND IT WAS AN A/B ARTEFACT FIRST.** At the 25-epoch cap the arms
+read 2.02 vs 2.10 — "packing made Arabic worse" — because `ReduceLROnPlateau` is ADAPTIVE: each arm decayed on
+its own timetable and the cap cut them at different LRs (1.3e-04 vs 2.5e-04) while this model's gains arrive AT
+lr drops. Resuming both from the same epoch under an identical cosine anneal removed the confound and found
+0.2pp neither arm had reached. Only two trainers in the fleet use an adaptive schedule — this one and the
+rider, its descendant. The shared trainer uses `CosineAnnealingLR` precisely because it is deterministic.
+
+**⚠ THE MODEL IS DELIBERATELY NOT SHIPPED.** Four reasons, in order of weight:
+1. **int8 appears to cost ~0.9pp DER** (my export: fp32 1.83% → int8 2.74%, same harness and vocab). That
+   would erase the entire gain. Needs its own investigation — the fleet is split between `QInt8` and `QUInt8`
+   and nobody has ever scored a quantized artifact on a task metric.
+2. **The committed `diacritizer.onnx` behaves as FULL diacritization** (3.63% DER at `--pausal 0`, 17.09% at
+   `--pausal 1`) while its provenance and `train.sh` both say pausal. Unexplained; replacing it with a pausal
+   model before understanding that is reckless.
+3. The gain is ~90% schedule, so shipping it under "packing rollout" would credit the wrong cause.
+4. My measurement harness was wrong twice in this run alone (below). That is not the footing for swapping a
+   shipped model.
+
+**FOUR INSTRUMENT FAILURES, all mine, all initially read as model defects:**
+- `--eval-onnx` took the vocab from `--resume`: character ids are assigned in first-seen order, so the same 39
+  characters carry different ids — 30 of 39 differed. The committed model scored **66.20% DER** and looked
+  destroyed. Fixed to read the artifact's own sidecar.
+- Even corrected it read 17.09%, which was the pausal/full mismatch above, not the model.
+- The int8 gate measured **whole-sentence** argmax agreement over ~60 chars (65%) where the fleet's gates are
+  per-word over ~10; per-character it is 98.5%. Same quality, unrecognisable number. And it scores
+  `torch.randint` garbage rather than Arabic.
+- A runtime gold-scoring harness read 0% sentence-exact because `test.txt` gold is full-diacritized and the
+  model is pausal.
+
+⚠ **THE CHECK THAT SETTLED IT COST ONE COMMAND AND I RAN IT FOURTH**: `phonemizeAsync` on three sentences
+showed the shipped model producing *marħˈabaː bilʕˈaːlam*, *ðˈahab alwˈalad ʔlˈaː almadrˈasa* — obviously
+healthy. **Run the product before debugging the metric.** A model-vs-model runtime A/B then showed the retrain
+is 98.04% word-identical to the incumbent over 400 sentences, i.e. a safe drop-in whenever the int8 and pausal
+questions are answered.
+
+**Also corrected: the rider does NOT depend on this checkpoint.** `CORPORA.md` and PR #843 both claimed
+retraining the Arabic base forces a rider re-warm-start. The rider warms from `bilstm_pausal.pt` (5 Jul); the
+diacritizer derives from `bilstm_silver_only.pt` (12 Jul) — different files. Asserted from shared lineage,
+never checked.
+
+## Run 50 — 2026-08-20 — PR review of the Arabic import: three defects in the carried-over files
+
+Reviewing #845. Copying a toolchain out of another repository is not a move — the files carry assumptions
+about where they live, and none of them announce it.
+
+**1. The exporter crashed AFTER all the expensive work.** No `makedirs` on `--dest`, so a fresh output
+directory meant export + quantize + two parity sweeps completed and then `shutil.copy` raised
+`FileNotFoundError`. The worst possible failure position: everything computed, nothing kept. Directory created
+before the work now.
+
+**2. `decode_ar_sent.py` had the packing bug too, and it is a MEASUREMENT script.** It pads batches with
+`pad_sequence` and ran `forward(s, x)` unpacked, so the predictions it emits for scoring came from a
+different computation than serving performs. Fixing the trainer while leaving the scorer unpacked would have
+meant measuring the fixed model with a broken instrument — precisely the class of error this run already hit
+four times. Packed.
+
+**3. `train_ar.sh` still invoked the espeak-ng-portable path**, so the committed recipe would have trained
+with the OLD unpacked trainer while the repo advertised the fixed one. Rewritten against the in-tree tools,
+and ⚠ **the split reshuffle is now opt-in** (`RESPLIT=1`): the original began every run with
+`shuf silver.txt > silver.shuf` and a fresh train/val/test, which silently changes the held-out set and makes
+any retrain incomparable to the shipped model. That is the same mechanism that makes km's numbers
+non-continuous, sitting unremarked at the top of the canonical recipe.
+
+**Also:** `CORPORA.md` still described the trainer as living in another repo — stale the moment this PR moved
+it — and its ar/arz driver row pointed at `/mnt/data/ar-diac/train.sh`. Both corrected, with the unresolved
+int8 and pausal questions recorded where a rebuilder will meet them.
+
+**Method note.** All three defects are the same shape: **an imported file's implicit context does not travel
+with it.** A hardcoded sibling path, an assumption that the output directory exists, a scorer whose
+correctness depended on a bug that was just fixed elsewhere. Nothing here was caught by reading the diff; all
+three came from running the files in their new home.
