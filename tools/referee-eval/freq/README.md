@@ -37,4 +37,4 @@ CC BY-SA 4.0. 50k entries each, from 6.6M and 18.3M tokens.
 words carry a frequency, 2,001 of 4,758 for ar/wikipron. ⚠ **And the two MSA referees move in OPPOSITE
 directions** under token weighting: kaikki 69.7% → 87.4%, wikipron 64.9% → 50.1%. Two referees for one language
 disagreeing in direction on common words is a convention problem in one of them, not an engine result — do not
-quote either MSA figure without the other. arz behaves as the af precedent predicts: 50.0% → 61.7%.
+quote either MSA figure without the other. arz behaves as the af precedent predicts: 61.7% → 80.4% (both figures re-measured 2026-08-20 after the arz fold-ordering fix — see docs/investigations/arz_referee_investigation.md).

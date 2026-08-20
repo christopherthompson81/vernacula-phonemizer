@@ -1,8 +1,33 @@
 // Egyptian Arabic (arz) — the first Arabic VARIETY. Evaluated through the async pipeline phonemizeArabic(text,
 // "egyptian"): the MSA neural diacritizer restores the short vowels, the MSA g2p runs, then the Egyptian shifts
 // (ج→ɡ, ق→ʔ, ث→t, ذ/ظ→d/dˤ, ay→eː, aw→oː) transform it. Referee: wikipron arz_arab_broad (HUMAN, fully-voweled
-// DIALECTAL IPA, INDEPENDENT). Same pausal + gemination folds as MSA. The short-vowel restructuring gap (MSA
-// diacritizer restores MSA vowels, not Egyptian) is the documented tail — a dialect vowel lexicon is Phase 2.
+// DIALECTAL IPA, INDEPENDENT). The short-vowel restructuring gap (MSA diacritizer restores MSA vowels, not
+// Egyptian) is the documented tail.
+//
+// ⚠ THE EVAL RUNS `{ lexicon: false }` (eval.ts) AND MUST KEEP DOING SO. egyptian-lexicon.tsv is mined from
+// kaikki arz and was validated against THIS referee at build; it contains 563 of these 590 words (95.4%). With
+// the lexicon on, the score is 89.7% and is reading back the answer key. On the 27 referee words the lexicon
+// does not contain, lexicon-on scores 18/27 and lexicon-off 19/27 — no measurable advantage on unseen words.
+//
+// ⚠ wikipron arz is a POOLED CROWD CORPUS WITH PER-CONTRIBUTOR NOTATION, not one transcription convention.
+// Measured over the 590 rows: `a` 425 rows / `ɑ` 21 / `æ` 36, and ZERO rows contain both `a` and `ɑ`; `r` 142 /
+// `ɾ` 14, ZERO rows contain both. Conditioned allophony would put both symbols inside single words constantly —
+// zero co-occurrence means each contributor picked one symbol and used it throughout their own entries. Same for
+// the word-initial glottal onset: across the 95 orthographically vowel-initial words (alef/hamza carriers, where
+// Egyptian supplies an automatic onset) the referee writes ʔ on 47 and omits it on 48 — a coin flip on an
+// identical environment (أنا → a n a, but آسف → ʔ aː s i f). These are NOTATION, and folding them is what the
+// fold set is for. See docs/investigations/arz_referee_investigation.md.
+//
+// ⚠ ORDERING: the symbol-normalizing folds are preFolds, NOT folds, because a POSITIONAL fold must see already-
+// normalized symbols. When [æɑ]→a and [eɛ]→i / [oɔ]→u ran post-backbone while a `[aiu]$` pausal strip ran as a
+// preFold, the strip saw `æ` on the referee side and `e`/`o` on ours and fired on whichever side happened to use
+// the plain symbol: انت ours ˈenta vs referee "e n t æ" — the SAME pronunciation, scored a miss. That defect cost
+// ~24 of 108 shipped-path misses.
+//
+// ⚠ NO PAUSAL FOLD. ar.jsonc strips a word-final short vowel because MSA's iʕrab case ending is not pronounced
+// in pause. EGYPTIAN DROPPED IʕRAB — the final -a of سبعة and the nisba -i are LEXICAL. Stripping them scores
+// their absence as free: measured, it buys 17 words that are all real engine errors (ours sabʕ vs sabʕa, ours
+// ini vs in). Keeping the axis scoreable is worth more than the 2.8pp.
 {
     "referees": [
         {
@@ -14,9 +39,29 @@
     "segmentJoin": true,
     "preFolds": [
         {
-            "pattern": "[aiu]$",
-            "replace": "",
-            "note": "PAUSAL: drop a word-final short vowel (as MSA; preFold so long aː/iː/uː/eː/oː ending in ː survive)"
+            "pattern": "[æɑ]",
+            "replace": "a",
+            "note": "CONTRIBUTOR NOTATION for /a/: the referee writes short /a/ as [æ] in 36 rows (Egyptian imāla — انت entæ, ألو ælo) and as [ɑ] in 21 (emphatic backing), never both in one row; ours is [a] throughout. Allophonic notation, cf. pa [ɑ]→a."
+        },
+        {
+            "pattern": "[eɛ]",
+            "replace": "i",
+            "note": "MAJHŪL ي: [iː]~[eː] both written ي — unrecoverable from the abjad (أسانسير asanser→asansir, the ay→eː diphthong)."
+        },
+        {
+            "pattern": "ɪ",
+            "replace": "i",
+            "note": "CONTRIBUTOR NOTATION for /i/: 8 rows write lax [ɪ] where the rest write [i]. Not a contrast in Egyptian."
+        },
+        {
+            "pattern": "[oɔ]",
+            "replace": "u",
+            "note": "MAJHŪL و: [uː]~[oː] are both written with the single letter و in the Arabic ABJAD → the quality is unrecoverable from the skeleton (as for sd/ur/pa-Shahmukhi). Folds the loanword [o] (أوتوبيس otobus, أكتوبر oktobar) and the diphthong aw→oː onto [u] symmetrically on both sides."
+        },
+        {
+            "pattern": "ɾ",
+            "replace": "r",
+            "note": "CONTRIBUTOR NOTATION for /r/: 14 rows write the tap [ɾ], 142 write [r], zero write both. Egyptian /r/ is a tap; the two symbols are one phoneme."
         }
     ],
     "folds": [
@@ -26,19 +71,9 @@
             "note": "gemination (shadda): collapse doubling — length already stripped by the backbone"
         },
         {
-            "pattern": "[oɔ]",
-            "replace": "u",
-            "note": "MAJHŪL و: [uː]~[oː] are both written with the single letter و in the Arabic ABJAD → the quality is unrecoverable from the skeleton (as for sd/ur/pa-Shahmukhi). Folds the loanword [o] (أوتوبيس otobus, أكتوبر oktobar) and the diphthong aw→oː onto [u] symmetrically on both sides."
-        },
-        {
-            "pattern": "[eɛ]",
-            "replace": "i",
-            "note": "MAJHŪL ي: [iː]~[eː] both written ي — unrecoverable from the abjad (أسانسير asanser→asansir, the ay→eː diphthong)."
-        },
-        {
-            "pattern": "æ",
-            "replace": "a",
-            "note": "Egyptian IMĀLA: the referee writes short /a/ as [æ] (انت entæ, ألو ælo); ours is [a] — allophonic notation (cf. pa [ɑ]→a)."
+            "pattern": "^ʔ",
+            "replace": "",
+            "note": "WORD-INITIAL GLOTTAL ONSET: non-contrastive word-initially (every vowel-initial word gets one) and the referee writes it on a 49/51 coin flip across the same environment. Positional → a fold, so it runs after the preFold symbol normalization."
         }
     ]
 }
