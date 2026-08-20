@@ -3403,6 +3403,24 @@ hand rows changed nothing.
 That is twice in two runs that reading the stored `ipa` produced a defect that was not there — run 54's
 Croatian geminate was the other. **Run the engine before believing a mismatch.** Recorded at the site.
 
+⚠ **A third reading of the same row, also wrong, and the audio settles it.** If `text` has `fit-8:46` and
+`read_text` has `fid-disgħa`, is the `fid` a slip by whoever authored the reading? No — the Maltese article
+assimilates to the word actually spoken, and changing *tmienja* (t-initial, `fit-`) to *disgħa* (d-initial)
+obliges `fid-`. The hand reading is right.
+
+Which then raises whether OUR `fɪt dɪsa` is right, since an assimilated article is normally a geminate
+([fɪdˈdɪsa]) rather than a devoiced separate word. The three readers of this sentence:
+
+```
+reader 1   f i t   d i s a       devoiced      <- our output
+reader 2   f e d d i s a         voiced + geminated
+reader 3   f i t   d e s a       devoiced
+```
+
+2 of 3 devoice. Our rendering is the majority reading and there is no defect. The row looked wrong three
+times and was right three times — each time because a plausible inference was made from stored text
+instead of from the engine or the audio.
+
 `--export-hand` / `--import-ipa --overwrite` were added during that diagnosis and are kept on the sound
 part of the reasoning: a hand row's IPA goes stale whenever the engine changes, `ipa IS NULL` does not
 catch that, and re-deriving a hand row is unconditionally correct.
