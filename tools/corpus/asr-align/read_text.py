@@ -18,6 +18,7 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB = os.environ.get("ASR_ALIGN_ROOT", "/mnt/data/omnivoice_ipa") + "/work/asr_align/align.sqlite"
+import re
 import sqlite3  # noqa: E402
 
 
@@ -132,12 +133,45 @@ def reject_ipa(text: str) -> None:
 
     A reader who switched LANGUAGE cannot be recorded here either: `mi` passes `nineteen` through as raw
     letters into the IPA. That needs the SEGMENT path in numeral_register.mts, not this column."""
+    for tag in re.findall(r"\{([^:{}]*):", text):
+        if not re.fullmatch(r"[a-z][a-z0-9-]{0,15}", tag):
+            sys.exit(f"read_text: {{{tag}:...}} is not a code-switch tag — the tag must be a lowercase "
+                     f"registry code, e.g. {{en:nineteen forty five}}. See tools/corpus/code_switch.mts.")
     bad = sorted({c for c in text if c in IPA_ONLY})
     if bad:
         sys.exit(f"read_text: refusing to store IPA — found {' '.join(bad)}\n"
                  f"  This column holds TEXT in the host orthography; the engine re-reads it and will\n"
                  f"  mangle IPA silently (see reject_ipa's docstring). To record a reader who switched\n"
                  f"  LANGUAGE, the segment path in tools/corpus/numeral_register.mts is the mechanism.")
+
+
+def export_pending(db: sqlite3.Connection, path: str) -> None:
+    """Rows with a `read_text` and no `ipa` — everything awaiting re-derivation, for rederive_read_text.mts."""
+    rows = db.execute("SELECT lang, wav, read_text FROM utt "
+                      "WHERE read_text IS NOT NULL AND read_text != '' AND ipa IS NULL").fetchall()
+    with open(path, "w", encoding="utf-8") as fh:
+        for lang, wav, text in rows:
+            fh.write(f"{lang}\t{wav}\t{text}\n")
+    print(f"{len(rows)} pending row(s) -> {path}", file=sys.stderr)
+
+
+def import_ipa(db: sqlite3.Connection, path: str) -> None:
+    """Store re-derived IPA.
+
+    ⚠ ONLY WHERE `ipa IS NULL`. A re-derivation must never overwrite a row that already scores — the
+    import is the tail of a pipeline whose input was "rows awaiting derivation", and re-running it after
+    an unrelated pass must not quietly restate those rows' IPA from a stale export."""
+    n = 0
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) < 3:
+                continue
+            lang, wav, ipa = parts[0], parts[1], parts[2]
+            n += db.execute("UPDATE utt SET ipa=? WHERE lang=? AND wav=? AND ipa IS NULL",
+                            (ipa, lang, wav)).rowcount
+    db.commit()
+    print(f"{n} row(s) re-derived into ipa (rows that already had one were left alone)", file=sys.stderr)
 
 
 def main() -> int:
@@ -147,6 +181,8 @@ def main() -> int:
     ap.add_argument("--set", nargs=3, metavar=("LANG", "WAV", "TEXT"))
     ap.add_argument("--stats", action="store_true")
     ap.add_argument("--stale", action="store_true", help="list rows whose ipa may predate their read_text")
+    ap.add_argument("--export-pending", metavar="TSV", help="write rows awaiting re-derivation")
+    ap.add_argument("--import-ipa", metavar="TSV", help="store IPA from rederive_read_text.mts")
     a = ap.parse_args()
     db = sqlite3.connect(a.db)
     ensure(db)
@@ -161,6 +197,10 @@ def main() -> int:
               f"(every scorer filters `ipa IS NOT NULL`) until it is re-derived", file=sys.stderr)
     if a.apply is not None:
         apply(db, a.apply)
+    if a.export_pending:
+        export_pending(db, a.export_pending)
+    if a.import_ipa:
+        import_ipa(db, a.import_ipa)
     if a.stale:
         stale(db)
     if a.stats or a.apply is not None or not (a.set or a.apply is not None):

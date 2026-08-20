@@ -3342,3 +3342,54 @@ fleet emits.
 
 The middle row is the open gap, and it is exactly why ceb/fil/mi/ig were declined: their register is a
 per-ROW fact and the table can only express a per-LANGUAGE one.
+
+## Run 56 — 2026-08-20 — code-switch spans, and the re-derivation that never existed
+
+**Question.** Run 55 established that a reader who switches LANGUAGE has no vehicle: `read_text` makes the
+host re-read the spelling, IPA is destroyed on re-parse, and `numeral_register.mts` is per-language. Build
+the per-row form.
+
+### `{en:nineteen forty five}`
+
+`tools/corpus/code_switch.mts` parses inline spans into the same `Segment` shape the numeral register
+already emits — text and a language, never phones — and host text still passes through the register.
+
+The constraint that shaped it: **a span carries text so the row keeps testing the phonemizer.** Hand-written
+IPA would make a row permanently unfailable, which is worse than a wrong row because it is a wrong row that
+looks right forever. Nine unit tests, including the global-regex statefulness trap that has bitten this
+campaign twice.
+
+### The contract that was documented and unimplemented
+
+`read_text.py` says "ipa is derived from read_text", `--set` clears `ipa` so the gap is visible, and
+`--stale` LISTS the rows awaiting re-derivation. **Nothing re-derived them.** `phonemize-fleurs.mts` cannot:
+it reads the FLEURS TSV and never sees a hand `read_text`.
+
+Measured on export: **5 rows were parked outside scoring**, three of them pre-existing — hand corrections
+made in an earlier session that have been silently excluded ever since.
+
+`rederive_read_text.mts` + `read_text.py --export-pending / --import-ipa` closes it. The import only fills
+`ipa IS NULL`, so re-running it cannot restate a scoring row from a stale export.
+
+⚠ **The FLEURS→registry code map is now EXPORTED from `read_text.mts` rather than copied.** Its own comment
+says the passes must agree about which engine read a language; a second copy is how they stop agreeing.
+Four codes are not a prefix split (`ar_eg→arz`, `fil_ph→tl`, `ny_mw→nya`, `es_419→es-419`), and the first
+run of the new tool failed on exactly this — `no phonemizer registered for "ceb_ph"`.
+
+### End-to-end, on two real rows
+
+```
+text       … kaniadtong 1945 ug nagpabilin hangtod 1958
+read_text  … kaniadtong {en:nineteen forty five} ug nagpabilin hangtod {en:nineteen fifty eight}
+ipa        … kaniʔˈadtoŋ nˈaᶦntˈiːn fˈɔːɹt̬i fˈaᶦv ʔˈuɡ naɡpabˈilin hˈaŋtod nˈaᶦntˈiːn fˈɪfti ˈeᶦt
+
+15654683974721888057   0.6634 -> 0.2727   (-0.3907)
+2887141455778020347    0.6716 -> 0.3521   (-0.3195)
+```
+
+The Cebuano engine read the Cebuano and the English engine read the span. Being per-row, this costs the
+two-thirds of ceb rows that read natively exactly nothing — which is the difference between this and the
+register table that was declined.
+
+**Not done:** the other 45 marked `reader_divergence` rows in ceb/fil/mi/ig. Each needs a human to read
+what the recognizer heard and write the reading; the mechanism is in place and the rows are marked.

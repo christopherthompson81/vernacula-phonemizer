@@ -42,7 +42,10 @@ import { readFileSync, writeFileSync } from "node:fs";
 const VARIETY: Record<string, string> = {
     ar_eg: "arz", es_419: "es-419", pt_br: "pt-BR", fil_ph: "tl", ny_mw: "nya",
 };
-const code = (lang: string): string => VARIETY[lang] ?? lang.split("_")[0]!;
+/** ⚠ EXPORTED so `rederive_read_text.mts` shares this exact map. The comment above says the passes must
+ *  agree about which engine read a language; a second copy is the way they stop agreeing. */
+export const registryCode = (lang: string): string => VARIETY[lang] ?? lang.split("_")[0]!;
+const code = registryCode;
 
 /** The text the phonemizer actually reads: the three repairs in `phonemize-fleurs.mts`'s order, then the
  *  numeral register's segments rejoined.
