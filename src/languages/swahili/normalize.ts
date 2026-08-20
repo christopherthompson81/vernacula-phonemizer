@@ -140,7 +140,7 @@ export function normalizeSwahili(input: string): string {
     //   NYUZI thelathini* — the reader supplies the DEGREE word where the sign is, not a plus (2 of 2, the
     //   second decoding the same slot as `dʒ u m l a`). So sw patterns with en/hi/vi/te/xh/am/ne, not with
     //   ta/gu/ml/mi. Voiced anyway, per the standing choice that an explicitly typed character is content.
-    //   `plas` reads plˈɑs, matching the decode; ⚠ the conventional Swahili spelling of the loan is UNSOURCED,
+    //   `plas` reads plˈas, matching the decode; ⚠ the conventional Swahili spelling of the loan is UNSOURCED,
     //   and this spelling is chosen to reproduce the attested phones.
     // THE MINUS AND ±. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
     //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the

@@ -1,7 +1,17 @@
 // Swahili / Kiswahili (sw) — Bantu, highly phonemic Latin orthography, no tone. wikipron swa (human, space-sep
 // phones) PRIMARY + kaikki swa (human) SECONDARY; epitran swa-Latn is a third (independent map) corroborating the
 // inventory (implosives, prenasalization). Folds: r~ɾ tap notation, aspiration (unwritten, referee-variable),
-// a~ɑ / e~ɛ / o~ɔ where a referee uses the cardinal vowels, and the labialization/glide notation.
+// a~ɑ / e~ɛ / o~ɔ, and the labialization/glide notation.
+//
+// ⚠ THE a~ɑ / e~ɛ / o~ɔ FOLDS MAKE THIS EVAL BLIND TO THE VOWEL AXIS, and that is load-bearing to know:
+// 93.5% / 97.8% are byte-identical whether the engine emits [ɑ ɛ ɔ] or [a e o]. That is how the engine sat
+// on the wrong set through two referees at 93%+ — 3,070 FLEURS utterances put the audio distance at 0.4439
+// with [ɑ ɛ ɔ] and 0.1571 with [a e o] (rank 6 of 102), and the engine was switched in 2026-08.
+// The folds are still CORRECT — Swahili has no low/mid contrast, so the symbols carry no phonology and
+// penalising a notation difference would measure nothing — but they mean this file cannot referee vowels.
+// ⚠ AND THE TWO REFEREES ARE ONE TRADITION on this point: wikipron swa and kaikki swa are both
+// en.wiktionary and both write ɑ (356:8 and 387:7). epitran swa-Latn, which is not, writes a/e/o.
+// See docs/investigations/low_vowel_notation_investigation.md.
 {
     "referees": [
         { "file": "sw.wikipron-swa-broad.tsv", "source": "wikipron swa_latn broad (human)", "role": "primary" },

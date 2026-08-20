@@ -3,12 +3,12 @@
 // stress. The distinctive features: the plain voiced stops are IMPLOSIVES (b→ɓ d→ɗ j→ʄ g→ɠ, both human referees
 // mark them), PRENASALIZED stops written as a nasal + voiced consonant (mb→ᵐb, nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ) with a
 // homorganic superscript nasal, ⟨ng'⟩→ŋ (velar nasal, DISTINCT from ⟨ng⟩→ᵑɡ), syllabic nasals (mtu→m̩tu), and
-// Arabic-loan fricatives (dh→ð, th→θ, gh→ɣ, kh→x). Vowels are [ɑ ɛ i ɔ u].
+// Arabic-loan fricatives (dh→ð, th→θ, gh→ɣ, kh→x). Vowels are [a e i o u] — see the vowel note below.
 {
     "language": "sw",
     "name": "Swahili",
     "script": ["Latin"],
-    "provenance": "Authored from standard Swahili phonology (implosives, prenasalization, penultimate stress). Validated against wikipron swa + kaikki swa (human) + epitran swa-Latn.",
+    "provenance": "Authored from standard Swahili phonology (implosives, prenasalization, penultimate stress). Consonants + stress validated against wikipron swa + kaikki swa (human) + epitran swa-Latn. ⚠ The VOWELS were not: the referee eval folds them away, and the engine disagreed with epitran on all three until 2026-08-20 — they are now anchored on epitran + 3,070 FLEURS utterances instead (see the vowel note).",
 
     // ⟨ng'⟩ (with apostrophe) → the velar nasal ŋ — scanned before ⟨ng⟩ (the prenasalized ᵑɡ).
     "velarNasal": "ng'",
@@ -27,8 +27,21 @@
         "c": "k", "q": "k", "x": "ks"
     },
 
-    // Vowels — the 5-vowel system, phonetically [ɑ ɛ i ɔ u] (the convention of both human referees).
-    "vowels": { "a": "ɑ", "e": "ɛ", "i": "i", "o": "ɔ", "u": "u" },
+    // Vowels — a 5-vowel system with NO low/mid contrast anywhere in it, so the choice between [ɑ ɛ ɔ] and
+    // [a e o] is NOTATION, not phonology: there is nothing for the backer/opener symbols to distinguish.
+    // ⚠ THIS USED TO BE [ɑ ɛ i ɔ u], "the convention of both human referees". Both referees are ONE
+    // tradition: wikipron swa and kaikki swa are both en.wiktionary, and they write ɑ 356:8 and 387:7. The
+    // two sources that are NOT that tradition both disagree with it:
+    //   · epitran swa-Latn writes a/e/o (habari→haɓaɾi, jambo→ʄambo, asante→asante).
+    //   · 3,070 FLEURS utterances: our ɑ came back as [a] 81.4%, our ɛ as [e] 73.5%, our ɔ as [o] 77.3%,
+    //     against controls of i→i 87.8% and u→u 80.0%. The recognizer writes ɑ/ɛ/ɔ freely in ~100 other
+    //     languages and returns them here below 3.3%, so it is not inventory-limited — it did not hear them.
+    // Median audio distance 0.4439 → 0.1571 (rank 6 of 102). ⚠ The REFEREE CANNOT SEE THIS EITHER WAY:
+    // the referee config (tools/referee-eval/langs/sw.jsonc) folds [aä]→ɑ, e→ɛ, o→ɔ on BOTH sides, so
+    // 93.5%/97.8% are byte-identical under this change — which is how the old set survived two referees
+    // at 93%+. Verified by running the eval both ways, not assumed. See
+    // docs/investigations/low_vowel_notation_investigation.md.
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
 
     "clausePunctuation": {
         ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","

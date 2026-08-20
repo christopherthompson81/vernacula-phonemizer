@@ -554,8 +554,8 @@ describe("symbol normalization — FLEURS-priority round", () => {
 
     /** `currencyPrefix`, the counterpart to `percentPrefix`, reported missing by the Swahili run. */
     test("a prefix-currency language emits the noun before the number", () => {
-        expect(phonemize("$30", "sw")).toBe("ɗˈɔlɑ θɛlɑθˈini");   // dola thelathini
-        expect(phonemize("KSh 500", "sw")).toBe("ʃilˈiᵑɡi mˈiɑ tˈɑnɔ");
+        expect(phonemize("$30", "sw")).toBe("ɗˈola θelaθˈini");   // dola thelathini
+        expect(phonemize("KSh 500", "sw")).toBe("ʃilˈiᵑɡi mˈia tˈano");
         // …and the postfix languages must not move.
         expect(phonemize("$5", "fr")).toContain("sɛ̃k dɔlˈaʁ");
     });
@@ -682,11 +682,11 @@ describe("unit words for the languages that had none", () => {
 
     test("Swahili puts the measure noun FIRST, including in a rate", () => {
         // 82 unit-before to 0 unit-after across sw_ke's attested unit words, which is why `unitPrefix` exists.
-        expect(phonemize("5 km", "sw")).toBe("kilɔmˈitɑ tˈɑnɔ");
+        expect(phonemize("5 km", "sw")).toBe("kilomˈita tˈano");
         // And the rate hinges on the same head noun, which the first version of `unitPrefix` forgot — the
         // corpus's `160 Km/h` (capital K) then read the unit and stranded the `/h` as a bare *h*.
-        expect(phonemize("160 Km/h", "sw")).toBe("kilɔmˈitɑ mˈiɑ mˈɔʄɑ nˈɑ sitˈini kʷˈɑ sˈɑː");
-        expect(phonemize("10 m/s", "sw")).toBe("mˈitɑ kˈumi kʷˈɑ sɛkˈuⁿdɛ");
+        expect(phonemize("160 Km/h", "sw")).toBe("kilomˈita mˈia mˈoʄa nˈa sitˈini kʷˈa sˈaː");
+        expect(phonemize("10 m/s", "sw")).toBe("mˈita kˈumi kʷˈa sekˈuⁿde");
         // …and a language that emits the unit after is untouched by the flag.
         expect(phonemize("120 km/h", "de")).toBe("ˈaɪ̯nhʊndɐtt͡svant͡sɪç kilomˈeːtɐ pʁoː ʃtˈʊndə");
     });
