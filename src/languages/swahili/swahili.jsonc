@@ -32,10 +32,14 @@
     // ⚠ THIS USED TO BE [ɑ ɛ i ɔ u], "the convention of both human referees". Both referees are ONE
     // tradition: wikipron swa and kaikki swa are both en.wiktionary, and they write ɑ 356:8 and 387:7. The
     // two sources that are NOT that tradition both disagree with it:
-    //   · epitran swa-Latn writes a/e/o (habari→haɓaɾi, jambo→ʄambo, asante→asante).
+    //   · epitran swa-Latn writes a/e/o (habari→haɓaɾi, jambo→ʄambo, asante→asante). This is the load-bearing
+    //     one: it is a rule system independent of BOTH Wiktionary and espeak.
     //   · 3,070 FLEURS utterances: our ɑ came back as [a] 81.4%, our ɛ as [e] 73.5%, our ɔ as [o] 77.3%,
     //     against controls of i→i 87.8% and u→u 80.0%. The recognizer writes ɑ/ɛ/ɔ freely in ~100 other
     //     languages and returns them here below 3.3%, so it is not inventory-limited — it did not hear them.
+    //     ⚠ This recognizer is espeak-fine-tuned and espeak's Swahili voice also writes a/e/o, so it is NOT
+    //     independent of espeak — count it and espeak as one witness, not two. The case rests on epitran
+    //     plus the structural fact that the symbols distinguish nothing here.
     // Median audio distance 0.4439 → 0.1571 (rank 6 of 102). ⚠ The REFEREE CANNOT SEE THIS EITHER WAY:
     // the referee config (tools/referee-eval/langs/sw.jsonc) folds [aä]→ɑ, e→ɛ, o→ɔ on BOTH sides, so
     // 93.5%/97.8% are byte-identical under this change — which is how the old set survived two referees

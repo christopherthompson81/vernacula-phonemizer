@@ -146,3 +146,80 @@ wrong; what is missing is anywhere that records *which axes a language's referee
   the structural screen from run 3 has to be run on it rather than assumed.
 - Nothing reads the medians as a queue. The 3×MAD flag list is scored within a language and cannot rank
   across them, which is why nso sat last of 102 with 1,989/1,990 rows marked verified.
+
+## Run 5 — 2026-08-20 — ⚠ the confound I should have tested first
+
+**Question.** Before batching hy/ky/ur, one thing was never checked: the recognizer is
+`wav2vec2-xlsr-53-**espeak**-cv-ft`, fine-tuned to emit espeak phoneme labels. When it returns `a` where we
+write `ɑ`, is that an acoustic judgement or espeak's transcription convention played back?
+
+**Command.** `espeak-ng -v<lang> -q --ipa` on native-script words for every language in the worklist.
+
+**Raw finding.**
+
+```
+lang  espeak writes   wikipron    other written                  recognizer → our ɑ
+nso   NO VOICE        none        epitran tsn: a                 a 83%
+sw    a               ɑ 356:8     epitran: a                     a 82%
+hy    a               ɑ 23622     none                           a 87%
+ky    ɑ               ɑ 440:156   epitran: ɑ                     a 86%
+ur    aː              ɑ 5142:6    CLE speech: ɑ · epitran: ɑː    a 84%
+```
+
+**Implication — two, pulling opposite ways.**
+
+**Kyrgyz is a natural experiment that partly exonerates the recognizer.** espeak's Kyrgyz voice writes `ɑ`,
+Kyrgyz has an espeak voice and is a CommonVoice language, and the recognizer *still* returns `a` 86.2% and
+`ɑ` only 2.1%. If it were replaying espeak's per-language convention, Kyrgyz would come back `ɑ`. It does
+not — the model appears to apply one pooled acoustic mapping rather than a per-language convention. (Not
+provable from here: Kyrgyz may have been absent or tiny in the fine-tuning split.)
+
+**But it is not an independent witness against espeak.** Wherever espeak and the recognizer agree, they are
+one source, not two. That is exactly the arz/sw error — counting one tradition twice — arriving from a new
+direction, and it changes what each language's evidence is worth.
+
+## Run 6 — 2026-08-20 — the batch does not hold; all three held
+
+Re-reading the table with the confound applied:
+
+- **ky — DO NOT CHANGE.** epitran `ɑ`, espeak `ɑ`, wikipron mostly `ɑ` (440:156). Three written sources,
+  two of them independent of each other, all against one recognizer with a documented prior toward `a`
+  (it writes `a` 3.58M times against `ɑ` 151k corpus-wide). The recognizer loses this one.
+- **ur — DO NOT CHANGE.** wikipron `ɑ`, epitran `ɑː`, **and the CLE Lahore Phonetically Rich Urdu Speech
+  Corpus writes `ɑ` (2,711:0)** — a human transcription of actual read speech, independent of Wiktionary
+  AND of espeak. That is a better witness to Urdu acoustics than a multilingual recognizer. Separately, the
+  structural screen was wrong here: Urdu's `ɑː` is contrastive with `ə`, so the symbol is not free.
+- **hy — DO NOT CHANGE, though it is the close call.** Only Wiktionary says `ɑ` (23,622 tokens); espeak's
+  Armenian voice writes `a` and is a genuine voice (`մարդ→mˈard`, `քաղաք→kʰaʀˈakʰ`, `հաց→hˈatsʰ`), not an
+  English fallback. But there is no epitran hye, so the ledger is one written tradition against one written
+  tradition, plus a recognizer that is downstream of one of them. **1-vs-1 is not enough to overturn an
+  18,090-word human referee.** hy needs a source that is neither Wiktionary nor espeak.
+
+**I proposed three languages and the evidence supports none of them.** Recorded because the screen in run 3
+looked sufficient and was not: it tests our own inventory for a competing symbol, which is necessary, but it
+says nothing about how much *written* attestation the current symbol has.
+
+### The screen, corrected
+
+A low-vowel notation change needs all three:
+
+1. **Structural** — no other low vowel in the inventory for the symbol to contrast with. (Fails for ur:
+   `ɑː` vs `ə`.)
+2. **Written** — at most one written tradition supports the current symbol, and at least one written source
+   *independent of espeak* supports the change. (Fails for ky and ur; fails for hy for want of a second
+   source.)
+3. **Acoustic** — the recognizer agrees, with the fr/de/pt control showing it resolves the contrast
+   elsewhere.
+
+## What this does to nso and sw
+
+**nso is unaffected and is the strongest case in the set.** There is **no espeak Sepedi voice at all**, so
+the recognizer cannot have learned an nso convention — its output there is acoustic generalisation. The
+independent written source (epitran tsn) agrees. Nothing to revise.
+
+**sw stands, but its writeup overstated the audio's independence.** espeak's Swahili voice writes `a`
+(`habˈari wˈatu kitˈabu`), so the recognizer and espeak are one source there, not two. What survives is:
+epitran swa-Latn (a rule system independent of espeak) writes `a/e/o`; the structural argument holds
+(Swahili has no low or mid contrast, so the symbols distinguish nothing); and the only source for `[ɑ ɛ ɔ]`
+was a single Wiktionary lineage counted twice. That is still enough — but it is 1 independent written source
+plus a confounded recognizer, not 2 independent sources, and the PR said otherwise.
