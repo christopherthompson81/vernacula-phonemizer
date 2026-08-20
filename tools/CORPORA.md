@@ -163,10 +163,12 @@ inherited the defect; the fix is one line in `forward` plus using the third tupl
 | Egyptian data | `/mnt/data/arz-diac/` — `corpus_arz_350k.txt`, `arzwiki.xml.bz2`, `export_egy*.py` |
 | driver | `/mnt/data/ar-diac/train.sh` (splits silver → train/val/test, trains, exports) |
 
-⚠ **The rider warm-starts from the Arabic base** (`bilstm_pausal.pt`), so retraining the base means
-re-warm-starting the rider on top of it — do them in that order or the comparison is meaningless. Not done
-here: the trainer belongs to a different repository, which is a decision to take deliberately rather than as
-a side effect of a phonemizer PR.
+⚠ **CORRECTION (2026-08-20): the rider does NOT depend on the shipped diacritizer's checkpoint.** This file
+previously claimed retraining the Arabic base forced a rider re-warm-start "or the comparison is meaningless".
+Checked: the rider warms from `bilstm_pausal.pt` (5 Jul) while `diacritizer.onnx` derives from
+`bilstm_silver_only.pt` (12 Jul) — different files, different weights. Retraining the MSA diacritizer leaves
+the rider untouched, and there is no ordering constraint between them. The claim was asserted from the two
+sharing a directory and a lineage, never verified.
 
 ## Not to be committed, and why
 
