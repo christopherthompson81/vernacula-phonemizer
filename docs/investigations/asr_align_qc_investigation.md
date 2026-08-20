@@ -2962,3 +2962,32 @@ batch used to change the answer, so a batched decode would have scored a differe
 `lengths` the packed batch is bitwise the batch-1 result, asserted by smoke check 8. The speedup is unlocked
 BY the packing fix. Deferred deliberately — changing the evaluator mid-campaign is the confound that already
 reversed two conclusions.
+
+## Run 48 — 2026-08-19 — PR review of the final batch: an unrun code path and a doc that omits verification
+
+**1. The nb quantization block had never executed.** It was added AFTER nb's export had already run, so the
+committed trainer carried a path nothing had exercised — the same exposure as the he/fa trainers patched blind
+in Run 43. Extracted lines 110–113 from the shipped source and executed them against a scratch directory:
+int8 produced, fp32 removed, block correct. ⚠ A retrain-and-then-edit ordering silently produces untested
+shipping code; the edit must be re-run or the block executed in isolation.
+
+**2. `CORPORA.md` told you how to REBUILD but never how to VERIFY** — which is the precise gap that lost
+Hebrew's harness in the first place. Every other language's trainer prints its own held-out number, so the
+omission was invisible; he's does not measure what he is judged on. Added the explicit verification command
+plus reference points (incumbent 87.9%, current 88.7%), and the warning that the trainer's per-consonant and
+CLAUSE-exact figures are a bad proxy and a different metric respectively. **A reproducibility record that
+stops at "train" is only half a record.**
+
+**3. The nb section still named the fp32** as the artifact after the int8 switch. Corrected, with a note that
+`.gitignore` and the `package.json` files-negation are a pair the packaging test enforces — that test is what
+caught the half-done switch during the work.
+
+**Also checked and clean:** km's `batches()` now yields three values and both of its consumers are in the same
+file (no external caller); the fetch script still runs end-to-end after the `-type f` fix and prints the FILE
+rather than the shadowing directory; nb's `meta.json` is byte-identical to the committed one (48 chars, 474
+tags both), confirming the shipped model was already a phase-2 export.
+
+**Method note.** Three of the last four review rounds found defects in things that READ correctly — a pin that
+was printed not checked, a warning with the wrong number, a command with plausible defaults, and now a doc
+whose omission was invisible because every other language happened not to need it. The reviews that pay are
+the ones that execute the artifact rather than re-read it.

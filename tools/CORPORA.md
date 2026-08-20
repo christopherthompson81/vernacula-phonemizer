@@ -22,7 +22,7 @@ upstream if that disk is gone.
 
 ---
 
-## nb — Norwegian Bokmål g2p tagger (`nb-g2p-tagger.onnx`)
+## nb — Norwegian Bokmål g2p tagger (`nb-g2p-tagger.int8.onnx`)
 
 | | |
 |---|---|
@@ -39,6 +39,10 @@ python3 tools/norwegian/build_nb_data.py --pron <nor030224NST.pron> --freq <no_5
 NB_LEX=/tmp/nb_train_stress.tsv NB_KEEP_STRESS=1 NB_SUBSAMPLE=0 \
     .venv/bin/python -u tools/norwegian/train_nb_bilstm.py
 ```
+
+⚠ **The trainer quantizes and deletes the fp32** (since 2026-08-19); `norwegianTagger.ts` loads the `.int8`.
+Do not resurrect the fp32 as the shipped file — `.gitignore` excludes it and `package.json` carries the
+matching files-negation, a pair the repo's packaging test enforces.
 
 ⚠ **All three environment settings are load-bearing** and the loader's defaults are wrong for a production
 retrain: `NB_LEX` defaults to `/tmp/nb_train.tsv` (a path the builder does not write), `NB_KEEP_STRESS`
@@ -81,7 +85,17 @@ git clone https://github.com/elazarg/hebrew_diacritized /tmp/hebrew_diacritized
 npx tsx tools/hebrew/build_tagger_data.ts /tmp/hebrew_diacritized /tmp/he_tagger_train.tsv
 .venv/bin/python tools/hebrew/train_he_tagger.py /tmp/he_tagger_train.tsv src/languages/hebrew
 .venv/bin/python tools/hebrew/export_he_tagger_onnx.py src/languages/hebrew
+# ⚠ VERIFY — the trainer's own numbers do NOT measure what he is judged on:
+npx tsx tools/hebrew/eval_modern_holdout.ts /tmp/hebrew_diacritized     # → modern-holdout word-exact
 ```
+
+⚠ **THE VERIFICATION STEP IS NOT OPTIONAL FOR he, AND ITS ABSENCE IS WHY THIS FILE EXISTS.** The trainer
+reports per-consonant niqqud and CLAUSE-exact; every architecture and data decision for this language was made
+on **modern-holdout running-text word-exact**, a harness that was never committed and had to be reconstructed
+in 2026-08 (`tools/hebrew/eval_modern_holdout.ts`, investigation Run 13). The proxy is bad — Run 5 moved
+per-consonant 94.0 → 95.9 for a word-exact gain of only 84.5 → 85.6 — and the two "word-exact" figures are
+different metrics, so a rebuild that only checks the trainer's output can look like a catastrophe or a triumph
+and mean neither. Reference points on that harness: shipped incumbent **87.9%**, current model **88.7%**.
 
 ## fa — Persian tagger + restorers (`fa-tagger`, `fa-vowel-restorer`, `fa-context-restorer`)
 
