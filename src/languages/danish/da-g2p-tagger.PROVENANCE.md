@@ -19,7 +19,29 @@ hand-featured perceptron is competitive with a BiLSTM below ~10k pairs). Swappin
 | model (held-out) | WORD-exact | symbol accuracy (1−PER) |
 |---|---|---|
 | averaged perceptron (7.5k lexicon) | ~45.5% | 82.0% |
-| **BiLSTM tagger (this model, full 199k NST)** | **73.1%** | **95.7%** |
+| **BiLSTM tagger (this model, full 199k NST)** | **78.7%** | **96.6%** |
+
+## 2026-08-19 — retrained with PACKED sequences
+
+Training ran the BiLSTM over padded batches without `pack_padded_sequence`, so the backward direction crossed
+the padding before reaching each word's last symbol, while serving is batch=1 and unpadded — damage at the END
+of the word. Same corpus, same split, same seed; see `tools/bilstm_training/tagger.py` and investigation Runs
+41, 43, 47.
+
+| | word-exact | symbol |
+|---|---|---|
+| unpacked training | 73.1% | 95.7% |
+| **packed training (this model)** | **78.7%** | **96.6%** |
+
+**+5.6pp word-exact — the largest gain of the fleet-wide rollout.** ⚠ The pre-fix baseline reproduced the
+historical 73.1%/95.7% EXACTLY from a re-fetched NST corpus (which also rebuilt `da-lexicon.tsv`
+byte-identically), so the delta is the packing and nothing else.
+
+⚠ **The `int8` is what ships and the trainer does not write it.** `da_bilstm.py` exports fp32; `danishTagger.ts`
+loads `${basename}.int8.onnx`. A production run therefore prints a confident `exported →` line while leaving
+the served model untouched — it was still dated 25 July after this retrain. Quantized separately, 398/400
+argmax parity. Same trap as fr and en.
+
 
 It reads the whole narrow convention from spelling — **r-vocalisation** (`snurretop → ˈsnuːɐˌtɐb`), **stop lenition**
 (`-top → [tɐb]`, `kat → ˈkad`), **soft-d** `ð`, **length** `ː`, and **stød** `ˀ` — none of which the rule engine emits.

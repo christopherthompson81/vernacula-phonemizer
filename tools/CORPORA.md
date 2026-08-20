@@ -13,6 +13,13 @@ having written this down.
 
 `bash tools/fetch_corpora.sh <lang…>` automates the fetch + checksum for everything here.
 
+⚠ **A LOCAL CACHE EXISTS FIRST: `/mnt/data/phonemizer-corpora/{nb,da,he,fa,km}/`** (893 MB, populated
+2026-08-19, with its own README). It holds each upstream archive AND the derived training file, so a retrain
+starts immediately instead of re-downloading ~600 MB. Mirrors `/mnt/data/ar-diac` + `/mnt/data/arz-diac`,
+which is the only reason the Arabic rig survived. Point the builders at it, or `CORPORA_DIR=…` the fetch
+script. ⚠ It is a CACHE, not the record — this file is the record, and everything here re-fetches from
+upstream if that disk is gone.
+
 ---
 
 ## nb — Norwegian Bokmål g2p tagger (`nb-g2p-tagger.onnx`)
@@ -22,7 +29,7 @@ having written this down.
 | source | NST *Nasjonalbibliotekets uttaleleksikon*, National Library of Norway / Språkbanken |
 | url | `https://www.nb.no/sbfil/leksikalske_databaser/leksikon/no.leksikon.tar.gz` |
 | sha256 | `cef2a5f9690d058331f0f814f175109887bcdc7415e802e1523043b9c36e455b` |
-| size | 24 MB → 163 MB extracted; the file wanted is `nor030224NST.pron` (ISO-8859-1, CRLF, `;`-separated) |
+| size | 24 MB → 163 MB extracted. ⚠ The tarball creates a DIRECTORY `NSTs norske leksikon/nor030224NST.pron/` — the file you want is the identically-named `.pron` INSIDE it (ISO-8859-1, CRLF, `;`-separated). `find … -type f`. |
 | licence | **CC0** |
 | also needs | OpenSubtitles frequency list, `https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/no/no_50k.txt` (CC BY-SA) |
 
@@ -49,7 +56,7 @@ Training on it produces a smaller, different model — do not substitute it.
 | source | NST Danish lexicon (`sbr-26`), same publisher |
 | url | `https://www.nb.no/sbfil/leksikalske_databaser/leksikon/da_leksikon.tar.gz` |
 | sha256 | `c54a27fa45ea0773bc05ecdfd362044f59e7a9538d142e71b245b81e1bd40102` |
-| size | 5.7 MB → 34 MB; the file wanted is `dan030224NST.pron` |
+| size | 5.7 MB → 34 MB. ⚠ Same trap as nb: `dan030224NST.pron` is a DIRECTORY containing the `.pron` file. |
 | licence | **CC0** |
 | also needs | `…/content/2018/da/da_50k.txt` (CC BY-SA) |
 
@@ -65,7 +72,7 @@ DA_PRODUCTION=1 DA_LEX=/tmp/da_train.tsv .venv/bin/python -u tools/danish/da_bil
 | | |
 |---|---|
 | source | Nakdimon `hebrew_diacritized`, `https://github.com/elazarg/hebrew_diacritized` |
-| pinned | commit `1211c8f3edafd601922d4be473f678ff79c5a12c` (verified 2026-08-19) |
+| pinned | commit `1211c8f3edafd601922d4be473f678ff79c5a12c` — ⚠ **this is upstream HEAD as of 2026-08-19, NOT a record of what the shipped model was trained on.** The original commit was never recorded, so a rebuild from this pin is a NEW model on possibly-different data, not a reproduction: measured 46.0% word-exact / 93.9% per-consonant against the committed 86.4% / 95.6%. Compare arms WITHIN a rebuild, never a rebuild against the shipped figure. |
 | size | 84 MB |
 | licence | **MIT** — ⚠ but the builder uses the PERMISSIVE SUBSET ONLY (public-domain pre-modern + permissively-licensed modern). See `he-tagger.PROVENANCE.md`; do not widen it without re-reading that policy. |
 
@@ -110,7 +117,9 @@ python3 tools/normalization/wikidump-to-text.py <kmwiki-latest-pages-articles.xm
 ```
 
 ⚠ A *latest* dump is not the one the committed model saw, so a rebuild is a NEW model on NEWER data, not a
-reproduction. Say so in any before/after.
+reproduction. Confirmed 2026-08-19: a fresh dump gives 187,369 paragraphs against the documented 180,782, and
+the rebuild scores F1 88.5 against the committed 89.0 — **the unigram Viterbi CONTROL moved too** (66.7 vs
+66.8), which is the tell that the data changed rather than the model. Compare arms within a rebuild only.
 
 ## rider — Perso-Arabic harakat diacritizer (`riderDiacritizer.onnx`, serves ur + pnb)
 

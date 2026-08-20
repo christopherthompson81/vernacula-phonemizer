@@ -2918,3 +2918,47 @@ instead of failing inside the download.
 Three of the four defects across this and Run 44 were things that *read* correctly — a pin that was printed
 not checked, a warning with the wrong number in it, a command with plausible defaults. Diff-reading does not
 catch those; running them does.
+
+## Run 47 — 2026-08-19 — the outstanding four, and three process traps
+
+**Corpus recovery worked, and it validated the builders as well as the data.** All five corpora fetched and
+rebuilt from `tools/CORPORA.md`. ⚠ Both NST rebuilds reproduce their SHIPPED lexicons byte-identically
+(`da-lexicon.tsv`, `nb-lexicon.tsv`) — the strongest available evidence that the recovered corpus is the one
+the repo was built from, and it settles whether recovery was even meaningful.
+
+**Seven of nine baselines reproduced their committed figure**, nb to the individual word (56,456/62,838 =
+89.8%), fa to 0.1pp (87.6 vs 87.7). km did not, and its unigram Viterbi CONTROL moved too (66.7 vs 66.8) —
+the tell that a newer wiki dump changed the data rather than the model. he is measured on a rebuilt harness
+(below).
+
+| | metric | unpacked | **packed** | Δ |
+|---|---|---|---|---|
+| **da** | word-exact (19,831) | 73.1% | **78.7%** | **+5.6** |
+| **km** | F1 (Viterbi 66.7 both arms) | 88.5 | **90.5** | +2.0 |
+| **he** | modern-holdout word-exact | 87.7% | **88.7%** | +1.0 |
+| **fa** | per-word (13,021) | 87.6% | **88.4%** | +0.8 |
+
+Danish is the largest word-exact gain of the whole campaign, and its baseline was an exact reproduction, so
+the delta is unusually well-founded. he's incumbent scores 87.9% on the same harness, so the packed model
+beats what is deployed, and the unpacked arm's 87.7% confirms the rebuild reproduces the incumbent.
+
+**⚠ TRAP 1 — `timeout` failures arrive as SUCCESSFUL background tasks.** nb's baseline reported "completed",
+wrapper exit 0, while the inner command returned **124**: killed at 5,400s mid-phase-2, epoch 25 of 40. Caught
+only because the export line was missing. Phase 1's number was already banked so nothing was lost, but a run
+truncated this way is indistinguishable from a clean one unless the inner exit code is checked. nb rerun
+unbounded — it is the heaviest job in the fleet (631k words, two trainings, two aligner passes) and, unlike
+da/fr/en, has NO production gate, so phase 2 always runs.
+
+**⚠ TRAP 2 — the fp32/int8 split bit a THIRD language.** da's production run printed
+`exported → da-g2p-tagger.onnx` and looked entirely successful, but `danishTagger.ts` loads
+`${basename}.int8.onnx`, still dated 25 July. Same as fr and en (Run 43). Quantized separately, 398/400 argmax
+parity. **Three instances is a pattern, not three footnotes** — the trainer prints a success line naming a
+file the runtime does not load.
+
+**⚠ TRAP 3 — the held-out decode is single-word, single-core** (user's observation). `decode_chunks` runs one
+word per call; nb's 62,838-word held-out pins one core at 100% while the GPU idles, and it is why nb alone
+overran a budget every other language fit inside. ⚠ **Batching it is safe NOW and was not before**: a padded
+batch used to change the answer, so a batched decode would have scored a different model than serving; with
+`lengths` the packed batch is bitwise the batch-1 result, asserted by smoke check 8. The speedup is unlocked
+BY the packing fix. Deferred deliberately — changing the evaluator mid-campaign is the confound that already
+reversed two conclusions.

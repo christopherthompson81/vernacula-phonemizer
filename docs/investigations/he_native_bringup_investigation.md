@@ -312,3 +312,39 @@ finalize-lexicon.ts}`. Live: human holdout 87.8%, gt.tsv 66.2%. `he` stays 🔷 
 conversational-corpus gap remains). ENG NOTE: re-persist the RIGHT intermediate — I'd stored PK's IPA, not its
 niqqud, so the normalized rebuild needed a fresh add_diacritics pass (niq_infer). Convention-target flip DEFERRED as a
 deliberate fleet decision, not chased reactively.
+
+## Run 13 — 2026-08-19 — the eval harness that every earlier decision rested on was never committed
+
+**How it surfaced.** The BiLSTM packing rollout (`asr_align_qc_investigation.md` Runs 41–45) reached he, and a
+retrain could not be judged: the trainer reports per-consonant niqqud and clause-exact, but every decision in
+Runs 3–6 was made on **modern-holdout running-text word-exact** — 72.1 → 84.4 (sentence-level), → 85.6 (×5
+oversample), → 86.4 (targeted suppression, the shipped headline). No commit in this repository's history has
+ever contained that harness. Checked: `git log --diff-filter=D` over `tools/hebrew/*` shows no deletion, and a
+sweep of every commit's tree for a Hebrew eval file finds nothing. It was never committed, not removed.
+
+**Why the trainer's own number cannot stand in for it.** Run 5 measured both across the same change:
+per-consonant 94.0 → 95.9 for a word-exact move of only 84.5 → 85.6. The proxy moves ~2× the thing it proxies.
+⚠ And the two "word-exact" figures in this document are DIFFERENT METRICS — the trainer's is CLAUSE-exact
+(54.2% in Run 4, ~5 words per clause), the decision metric is per-word on running text (86.4%). Comparing a
+fresh 46.0% clause-exact against the 86.4% headline reads as catastrophic collapse and means nothing; that
+mistake was made and corrected in the course of this run.
+
+**Reconstructed** from Run 3's description plus PR #422: `tools/hebrew/eval_modern_holdout.ts`. Sources are
+`modern/news`, `modern/blogs`, `test_modern`, `dictaTestCorpus` — the copyrighted subdirs the permissive-data
+policy EXCLUDES from training, which is precisely what makes them a clean holdout. Strip niqqud → restore →
+compare against the gold pointing, both sides through the same Phase-1 g2p so every IPA mismatch is a niqqud
+error (the property Run 5's residual mining depended on).
+
+**Validation — the shipped model scores 87.9% (7,044/8,012) against its recorded 86.4%.** Same metric family,
+same ballpark; the 1.5pp is clause selection (this harness takes clauses of ≥2 words in corpus order to the
+8,004-word denominator, rather than the original sample). Close enough to compare arms with, which is the job.
+
+⚠ **The first draft scored 0.0%**, because `hebrewTagger.restore()` already returns IPA — it reassembles the
+vocalized word, consults the lexicon and runs Phase-1 itself — so phonemizing both sides double-applied the
+g2p. Worth recording as a shape: **a broken harness looks exactly like a dead model.** A 0% that arrives before
+any before/after is nearly always the instrument.
+
+**Standing consequence.** he could not be retrained for a known defect because its evaluation was unreproducible
+— not its data, which pins to a 2022 upstream commit and rebuilds exactly. The corpus was recoverable in
+minutes (`tools/CORPORA.md`); the harness took reconstruction from prose. **Record the evaluator with the same
+care as the data.**

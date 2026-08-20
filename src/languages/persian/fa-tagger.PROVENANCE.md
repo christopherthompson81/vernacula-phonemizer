@@ -43,7 +43,25 @@ lossless):
 | gold | tagger | (former seq2seq, same subset) |
 |---|---|---|
 | **HomoRich canonical held-out** (the fair self-measure) | **93.6%** per-word | 92.5% |
-| all held-out words | 87.7% | 90.6% |
+| all held-out words | **88.4%** | 90.6% |
+
+## 2026-08-19 — retrained with PACKED sequences
+
+Training ran the BiLSTM over padded batches without `pack_padded_sequence`, so the backward direction crossed
+the padding before reaching each word's last symbol, while serving is batch=1 and unpadded — damage at the END
+of the word. Same corpus, same split, same seed; see `tools/bilstm_training/tagger.py` and investigation Runs
+41, 43, 47.
+
+| all held-out words (13,021) | per-word |
+|---|---|
+| unpacked training | 87.6% |
+| **packed training (this model)** | **88.4%** |
+
+⚠ **`test_heldout.tsv` — "the seq2seq's exact" file — was never preserved.** This pair uses a deterministic
+1,500-sentence reconstruction (seed 1234) applied identically to both arms, so the COMPARISON is sound while
+the absolute figure is not strictly continuous with the historical 87.7%. That it lands within 0.1pp of it is
+reassurance, not proof.
+
 | catastrophic degeneration | **0% (structural)** | ~1.4% |
 
 **Independent referee** (non-circular): vs GE2PE Kasre+Homograph (tools/referee-eval/referees/fa.ge2pe-ezafe-

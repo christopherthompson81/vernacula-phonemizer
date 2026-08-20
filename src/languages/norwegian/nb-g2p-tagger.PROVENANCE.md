@@ -63,7 +63,7 @@ comparison):
 The perceptron loses ~27 points — the per-grapheme classifier can't model Norwegian's long-range stress-conditioned
 vowel quality the way a BiLSTM's recurrent state can (mirrors the Danish precedent). So the sync-simplicity of a
 pure-JS perceptron isn't worth 27 points on the names/novel-compounds the OOV tail is made of. The shipped model is the
-**stress-included** BiLSTM — held-out **89.8%** full-word exact-match INCLUDING the stress mark (56456/62838, measured
+**stress-included** BiLSTM — held-out **92.0%** full-word exact-match INCLUDING the stress mark (57789/62838, measured
 with the shipped masked-argmax + oneStress decode; the segmental table above drops stress for the perceptron
 comparison, so this is the harder complete-output number).
 Trained with a **cosine LR decay** (2e-3→0): a fixed lr overshot the minimum in late epochs (loss climbed ~50% past
@@ -71,3 +71,35 @@ its epoch-10 bottom, held-out 75.1% on the last-epoch weights); annealing made t
 to 89.7%. `onnxruntime-node` is an optional dependency
 imported lazily — absent it, `createNorwegianTagger()` resolves to `undefined` and the sync engine (lexicon → rules)
 serves everything, so the tagger is a pure quality add-on with no hard dependency.
+
+## 2026-08-19 — retrained with PACKED sequences, and moved to int8
+
+Training ran the BiLSTM over padded batches without `pack_padded_sequence`: the backward direction crossed the
+padding before reaching each word's last grapheme, while serving is batch=1 and unpadded — damage at the END
+of the word, which for nb is where the suffix that places STRESS lives. Same NST corpus, same seed-0 split:
+
+| held-out 62,838, incl. stress | word-exact |
+|---|---|
+| unpacked training | 89.8% (56,456) |
+| **packed training (this model)** | **92.0% (57,789)** |
+
+⚠ The pre-fix baseline reproduced the historical figure to the individual word (56,456/62,838), from an NST
+corpus re-fetched per `tools/CORPORA.md` — which also rebuilt `nb-lexicon.tsv` byte-identically.
+
+### int8 — nb was the last fp32 in the fleet
+
+Measured over the WHOLE held-out set rather than a 400-word parity sample, because nb's 474-tag alphabet is
+the only one that EMBEDS THE STRESS MARK and a flipped label there moves stress rather than a vowel:
+
+| | word-exact | note |
+|---|---|---|
+| fp32 | 94.709% | ⚠ phase-2 model on data it trained on — a fp32-vs-int8 control, NOT an honest accuracy |
+| int8 | 94.637% | −45 words of 62,838 (0.072pp), 2.9 MB → 0.7 MB |
+
+**The disagreements are CHURN, not decay**: of 624, int8-only-wrong 246 against fp32-only-wrong **201** — so
+quantization nudges borderline cases both ways and the net −45 is the residue. 141 differ only in stress
+placement, also bidirectionally. Shipped: `norwegianTagger.ts` now loads `${basename}.int8.onnx`, the fp32 is
+gitignored with a `package.json` files-negation (the repo's packaging test enforces the pair).
+
+⚠ `test/nbNeural.test.ts` gated on the fp32 filename and, once it was gone, reported **"1 passed, 3 skipped"**
+— green while testing nothing. A `skipIf` guard naming a path that no longer exists is worse than no guard.

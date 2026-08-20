@@ -27,12 +27,16 @@ for lang in "${@:-none}"; do case "$lang" in
       get https://www.nb.no/sbfil/leksikalske_databaser/leksikon/no.leksikon.tar.gz \
           cef2a5f9690d058331f0f814f175109887bcdc7415e802e1523043b9c36e455b no.leksikon.tar.gz
       get https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/no/no_50k.txt SKIP no_50k.txt
-      tar xzf "$DEST/no.leksikon.tar.gz" -C "$DEST" && echo "  → $(find "$DEST" -name 'nor*NST.pron' | head -1)" ;;
+      tar xzf "$DEST/no.leksikon.tar.gz" -C "$DEST"
+      # ⚠ -type f: the tarball extracts a DIRECTORY named nor030224NST.pron that CONTAINS the .pron file
+      echo "  → $(find "$DEST" -type f -name 'nor*NST.pron' | head -1)" ;;
   da) echo "da — NST Danish (CC0) + OpenSubtitles freq (CC BY-SA)"
       get https://www.nb.no/sbfil/leksikalske_databaser/leksikon/da_leksikon.tar.gz \
           c54a27fa45ea0773bc05ecdfd362044f59e7a9538d142e71b245b81e1bd40102 da_leksikon.tar.gz
       get https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/da/da_50k.txt SKIP da_50k.txt
-      tar xzf "$DEST/da_leksikon.tar.gz" -C "$DEST" && echo "  → $(find "$DEST" -name 'dan*NST.pron' | head -1)" ;;
+      tar xzf "$DEST/da_leksikon.tar.gz" -C "$DEST"
+      # ⚠ -type f: likewise a DIRECTORY named dan030224NST.pron containing the .pron file
+      echo "  → $(find "$DEST" -type f -name 'dan*NST.pron' | head -1)" ;;
   he) echo "he — Nakdimon hebrew_diacritized (MIT; PERMISSIVE SUBSET ONLY — see CORPORA.md)"
       # ⚠ CHECK OUT THE PIN, do not merely print it. The first draft cloned HEAD and echoed the recorded hash
       # beside it, which reads like verification and is not: a corpus that has moved since would rebuild a
@@ -43,9 +47,15 @@ for lang in "${@:-none}"; do case "$lang" in
       git -C "$DEST/hebrew_diacritized" checkout -q "$ref"
       echo "  ok  hebrew_diacritized @ $(git -C "$DEST/hebrew_diacritized" rev-parse --short HEAD) (pin checked out)" ;;
   fa) echo "fa — HomoRich (CC0)"
-      command -v huggingface-cli >/dev/null || { echo "  need: pip install huggingface_hub[cli]" >&2; exit 3; }
-      huggingface-cli download MahtaFetrat/HomoRich-G2P-Persian --repo-type dataset --local-dir "$DEST/homorich" >/dev/null
-      echo "  ok  $(find "$DEST/homorich" -name '*.parquet' | head -1)" ;;
+      # ⚠ `huggingface-cli` was RENAMED to `hf`; the old name now prints help and EXITS 0, so a script that
+      # only checks the exit status reports success having downloaded nothing. Prefer `hf`, and assert a
+      # parquet actually landed rather than trusting the return code.
+      hfcli=$(command -v hf || command -v huggingface-cli || true)
+      [ -n "$hfcli" ] || { echo "  need: pip install 'huggingface_hub[cli]'" >&2; exit 3; }
+      "$hfcli" download MahtaFetrat/HomoRich-G2P-Persian --repo-type dataset --local-dir "$DEST/homorich" >/dev/null
+      pq=$(find "$DEST/homorich" -name '*.parquet' | head -1)
+      [ -n "$pq" ] || { echo "  FAILED: no .parquet under $DEST/homorich" >&2; exit 4; }
+      echo "  ok  $pq" ;;
   km) echo "km — kmwiki dump (CC BY-SA). ⚠ 'latest' is NOT the dump the committed model saw."
       get https://dumps.wikimedia.org/kmwiki/latest/kmwiki-latest-pages-articles.xml.bz2 SKIP kmwiki-latest.xml.bz2 ;;
   none) sed -n '/^for lang/,$p' "$0" | grep -oE '^  [a-z]{2}\)' | tr -d ' )' | tr '\n' ' '; echo "— pass one or more" ;;

@@ -100,11 +100,17 @@ describe("hebrew neural vowel restoration", () => {
             // ⚠ AND A STANDALONE ONE-LETTER PROCLITIC IS NOT DROPPED. The tagger tags a lone `ה` BARE and
             //   the bare letter reads as "", which `emit()` discards; alone the same tagger says `ha`. 95
             //   such particles stand alone in this corpus, so it is attested rather than hypothetical.
-            expect(await phonemizeHebrewNeural("ה בית הגדול")).toBe("ha bet haɡadol");
+            // ⚠ `bajit`, NOT `bet` — UPDATED 2026-08-19 and the change is a FIX, not drift. בית is
+            //   state-ambiguous: absolute בַּיִת *bajit* "a house" vs construct בֵּית *bet* "house-of". With the
+            //   definite article this is הבית הגדול = *ha-bajit ha-gadol*, the absolute; the pre-packing model
+            //   said *bet* in EVERY context, i.e. it had the construct right and the absolute wrong. The
+            //   retrained tagger now splits them by context — בית־ספר and בית ספר still read *bet sefeʁ* below
+            //   — which is precisely the homograph resolution a SENTENCE-level nakdan exists to do.
+            expect(await phonemizeHebrewNeural("ה בית הגדול")).toBe("ha bajit haɡadol");
             // ⚠ AND ON THE SEGMENT PATH TOO. The patch was applied at the whole-clause call site only, so a
             //   clause that ALSO held an unreadable word took the other branch and dropped the article.
             //   It lives inside `restore` now, where no call site can omit it.
-            expect(await phonemizeHebrewNeural("ג'ון ה בית הגדול")).toBe("d͡ʒvn ha bet haɡadol");
+            expect(await phonemizeHebrewNeural("ג'ון ה בית הגדול")).toBe("d͡ʒvn ha bajit haɡadol");
             expect(await phonemizeHebrewNeural("בית־ספר ה גדול")).toBe("bet sefeʁ ha ɡadol");
         });
 

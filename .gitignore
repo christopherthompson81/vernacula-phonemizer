@@ -10,6 +10,7 @@ __pycache__/
 src/languages/english/en-g2p-tagger.onnx
 src/languages/french/fr-g2p-tagger.onnx
 src/languages/danish/da-g2p-tagger.onnx
+src/languages/norwegian/nb-g2p-tagger.onnx
 
 # Khmer boundary tagger: the torch checkpoint is a regeneratable intermediate — only the int8 graph and its
 # meta ship. Rebuild with tools/khmer/build_km_segmenter_data.py + train_km_segmenter.py from a kmwiki dump.

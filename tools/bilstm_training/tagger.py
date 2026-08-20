@@ -119,7 +119,19 @@ def train(model, X, Y, epochs=40, batch=256, lr=2e-3, log_every=5, dev=None):
 def decode_chunks(model, chars, itag, char_tags, word, dev=None):
     """MASKED argmax over each letter's permitted chunk set → the list of emitted chunks, or None on an out-of-vocab
     grapheme (which is how serving declines rather than guessing). Callers assemble: "".join for single-char IPA,
-    split(" ") per chunk for multi-token ARPABET, plus any language-specific post-pass (e.g. Norwegian one_stress)."""
+    split(" ") per chunk for multi-token ARPABET, plus any language-specific post-pass (e.g. Norwegian one_stress).
+
+    ⚠ ONE WORD PER CALL, AND THAT IS THE SLOW TAIL OF EVERY RETRAIN. nb decodes 62,838 held-out words this way:
+    a single Python loop pinning one core at 100% while the GPU idles, because for a ~10-token input the
+    kernel-launch overhead dwarfs the work. It is the reason nb overran a 5,400s budget that every other
+    language fit inside.
+
+    ⚠ BATCHING THIS IS NOW SAFE, AND IT WAS NOT BEFORE. A padded batch used to change the answer — the
+    backward pass crossed the padding (see `Tagger.forward`) — so a batched held-out decode would have scored
+    a different model than serving runs. With `lengths` the packed batch is bitwise the batch-1 result, which
+    `smoke_test.py` check 8 asserts directly. So the speedup is unlocked BY the packing fix.
+    NOT done during the 2026-08-19 rollout: changing the evaluator mid-campaign is the confound that already
+    reversed two conclusions (bn, the rider). Do it as its own change, and verify the number is unmoved."""
     dev = dev or DEV
     model.eval()
     ids = [chars.get(c) for c in word]

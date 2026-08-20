@@ -101,7 +101,17 @@ def main():
         "charTags": {str(ci): sorted(ti) for ci, ti in char_tags.items()},
     }
     json.dump(meta, open(os.path.join(SRC, "nb-g2p-tagger.meta.json"), "w", encoding="utf-8"), ensure_ascii=False)
-    print(f"exported → {SRC}/nb-g2p-tagger.onnx + .meta.json ({len(chars)} chars, {len(tags)} tags)", flush=True)
+    # ⚠ QUANTIZE — nb shipped fp32 alone in the fleet until 2026-08-19. Measured over the WHOLE 62,838-word
+    # held-out (not a 400-word parity sample, because nb's 474-tag alphabet EMBEDS THE STRESS MARK and a
+    # flipped label there moves stress, not just a vowel): fp32 94.709% vs int8 94.637% word-exact, -45 words
+    # (0.072pp) for 2.9 MB → 0.7 MB. The disagreements are CHURN, not decay — of 624, int8-only-wrong 246 and
+    # fp32-only-wrong 201, i.e. quantization nudges borderline cases both ways; 141 differ only in stress, also
+    # bidirectionally. See nb-g2p-tagger.PROVENANCE.md.
+    from onnxruntime.quantization import quantize_dynamic, QuantType
+    quantize_dynamic(os.path.join(SRC, "nb-g2p-tagger.onnx"),
+                     os.path.join(SRC, "nb-g2p-tagger.int8.onnx"), weight_type=QuantType.QUInt8)
+    os.remove(os.path.join(SRC, "nb-g2p-tagger.onnx"))  # only the int8 graph ships
+    print(f"exported → {SRC}/nb-g2p-tagger.int8.onnx + .meta.json ({len(chars)} chars, {len(tags)} tags)", flush=True)
 
 if __name__ == "__main__":
     main()
