@@ -24,6 +24,7 @@ ap.add_argument("--ckpt", required=True, help="trained .pt (best-val), e.g. /tmp
 ap.add_argument("--dest", default=DEST)
 ap.add_argument("--basename", default="diacritizer", help="diacritizer | diacritizer-egy")
 a = ap.parse_args()
+os.makedirs(a.dest, exist_ok=True)  # ⚠ before the work: shutil.copy failed AFTER export+quantize+parity
 
 ck = torch.load(a.ckpt, map_location="cpu", weights_only=False)
 chars, labels, cfg = ck["chars"], ck["labels"], ck["cfg"]

@@ -60,7 +60,16 @@ class BiLSTM(nn.Module):
         super().__init__(); s.emb=nn.Embedding(nc,emb,padding_idx=0)
         s.lstm=nn.LSTM(emb,h,num_layers=ly,batch_first=True,bidirectional=True,dropout=0.3 if ly>1 else 0.0)
         s.fc=nn.Linear(2*h,nl)
-    def forward(s,x): return s.fc(s.lstm(s.emb(x))[0])
+    def forward(s,x,lengths=None):
+        """⚠ PASS `lengths` — this script PADS its batches (pad_sequence above) and an unpacked BiLSTM reads
+        the padding on the backward pass, so an unpacked decode scores a different model than serving runs.
+        Same defect as the trainer had (investigation Run 41); fixed here so predictions emitted for scoring
+        match what the deployed graph produces."""
+        h = s.emb(x)
+        if lengths is None: return s.fc(s.lstm(h)[0])
+        pk = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(s.lstm(pk)[0], batch_first=True, total_length=x.size(1))
+        return s.fc(out)
 model=BiLSTM(len(chars),len(labels),cfg["emb"],cfg["hidden"],cfg["layers"]).to(dev)
 model.load_state_dict(ck["state"]); model.eval()
 

@@ -3053,3 +3053,35 @@ questions are answered.
 retraining the Arabic base forces a rider re-warm-start. The rider warms from `bilstm_pausal.pt` (5 Jul); the
 diacritizer derives from `bilstm_silver_only.pt` (12 Jul) — different files. Asserted from shared lineage,
 never checked.
+
+## Run 50 — 2026-08-20 — PR review of the Arabic import: three defects in the carried-over files
+
+Reviewing #845. Copying a toolchain out of another repository is not a move — the files carry assumptions
+about where they live, and none of them announce it.
+
+**1. The exporter crashed AFTER all the expensive work.** No `makedirs` on `--dest`, so a fresh output
+directory meant export + quantize + two parity sweeps completed and then `shutil.copy` raised
+`FileNotFoundError`. The worst possible failure position: everything computed, nothing kept. Directory created
+before the work now.
+
+**2. `decode_ar_sent.py` had the packing bug too, and it is a MEASUREMENT script.** It pads batches with
+`pad_sequence` and ran `forward(s, x)` unpacked, so the predictions it emits for scoring came from a
+different computation than serving performs. Fixing the trainer while leaving the scorer unpacked would have
+meant measuring the fixed model with a broken instrument — precisely the class of error this run already hit
+four times. Packed.
+
+**3. `train_ar.sh` still invoked the espeak-ng-portable path**, so the committed recipe would have trained
+with the OLD unpacked trainer while the repo advertised the fixed one. Rewritten against the in-tree tools,
+and ⚠ **the split reshuffle is now opt-in** (`RESPLIT=1`): the original began every run with
+`shuf silver.txt > silver.shuf` and a fresh train/val/test, which silently changes the held-out set and makes
+any retrain incomparable to the shipped model. That is the same mechanism that makes km's numbers
+non-continuous, sitting unremarked at the top of the canonical recipe.
+
+**Also:** `CORPORA.md` still described the trainer as living in another repo — stale the moment this PR moved
+it — and its ar/arz driver row pointed at `/mnt/data/ar-diac/train.sh`. Both corrected, with the unresolved
+int8 and pausal questions recorded where a rebuilder will meet them.
+
+**Method note.** All three defects are the same shape: **an imported file's implicit context does not travel
+with it.** A hardcoded sibling path, an assumption that the output directory exists, a scorer whose
+correctness depended on a bug that was just fixed elsewhere. Nothing here was caught by reading the diff; all
+three came from running the files in their new home.
