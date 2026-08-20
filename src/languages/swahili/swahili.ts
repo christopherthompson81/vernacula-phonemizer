@@ -4,7 +4,7 @@
  * (the id/tl pattern) with Swahili's distinctive segments: the plain voiced stops are IMPLOSIVES (b→ɓ d→ɗ j→ʄ
  * g→ɠ), PRENASALIZED stops are one segment with a homorganic superscript nasal (mb→ᵐb, nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ),
  * ⟨ng'⟩→ŋ is DISTINCT from ⟨ng⟩→ᵑɡ, a nasal before another consonant is SYLLABIC (mtu→m̩tu, nchi→n̩t͡ʃi), and the
- * Arabic-loan fricatives dh/th/gh/kh→ð/θ/ɣ/x. Vowels [ɑ ɛ i ɔ u].
+ * Arabic-loan fricatives dh/th/gh/kh→ð/θ/ɣ/x. Vowels [a e i o u].
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -64,7 +64,7 @@ function scan(w: string): Seg[] {
         }
         const c = s[i]!;
         if (VOWEL_LETTER.includes(c)) {
-            // Two identical adjacent vowels (⟨aa⟩ ⟨ee⟩ …) are one LONG vowel (kuu→kuː, taa→tɑː).
+            // Two identical adjacent vowels (⟨aa⟩ ⟨ee⟩ …) are one LONG vowel (kuu→kuː, taa→taː).
             const long = s[i + 1] === c;
             segs.push({ ph: DEF.vowels[c]! + (long ? "ː" : ""), nucleus: true });
             i += long ? 2 : 1;
@@ -74,7 +74,7 @@ function scan(w: string): Seg[] {
             !segs[segs.length - 1]!.nucleus &&
             VOWEL_LETTER.includes(s[i + 1] ?? "")
         ) {
-            // ⟨w⟩ after a consonant onset, before a vowel → labialization on that consonant (kweli→kʷɛli, mwezi→mʷɛzi).
+            // ⟨w⟩ after a consonant onset, before a vowel → labialization on that consonant (kweli→kʷeli, mwezi→mʷezi).
             segs[segs.length - 1]!.ph += "ʷ";
             i++;
         } else if (c === "m" || c === "n") {
@@ -206,7 +206,7 @@ const SYMBOLS = makeSymbolNormalizer({
         "KSh": ["shilingi"], "TSh": ["shilingi"],
     },
     currencyPrefix: true,
-    // `5 km` read as *tˈɑnɔ kˈm̩*: no unit was declared, and until now none COULD be, because Swahili
+    // `5 km` read as *tˈano kˈm̩*: no unit was declared, and until now none COULD be, because Swahili
     // puts the measure noun FIRST and the tier only emitted it after. Counted over sw_ke's four attested unit
     // words: 82 unit-before to 0 unit-after — "Mbuga hiyo inachukua kilomita 19,500 mraba", "mtindo huru wa
     // mita 100 na mita 200". Hence `unitPrefix`, the mirror of the `currencyPrefix` already set above.

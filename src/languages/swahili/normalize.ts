@@ -87,7 +87,7 @@ const DOTTED: readonly (readonly [string, string])[] = [
 /** Fold Latin diacritics to their base letter. Swahili's orthography has none, so `á ü õ ç` are always
  *  foreign spellings — and without this they are not matched by the engine's ASCII tokenizer, fall into
  *  the clause assembler's foreign-run handler, and are read as ENGLISH LETTER NAMES inside a Swahili
- *  word: `Sámi` → [s ˈə mi], `Gürses` → the letter U [juː], `São` → [s ˈə ˈɔ]. Restricted to Latin so an
+ *  word: `Sámi` → [s ˈə mi], `Gürses` → the letter U [juː], `São` → [s ˈə ˈo]. Restricted to Latin so an
  *  embedded non-Latin run is untouched. */
 function foldLatinDiacritics(s: string): string {
     if (!/[^\p{ASCII}]/u.test(s)) return s;
@@ -140,7 +140,7 @@ export function normalizeSwahili(input: string): string {
     //   NYUZI thelathini* — the reader supplies the DEGREE word where the sign is, not a plus (2 of 2, the
     //   second decoding the same slot as `dʒ u m l a`). So sw patterns with en/hi/vi/te/xh/am/ne, not with
     //   ta/gu/ml/mi. Voiced anyway, per the standing choice that an explicitly typed character is content.
-    //   `plas` reads plˈɑs, matching the decode; ⚠ the conventional Swahili spelling of the loan is UNSOURCED,
+    //   `plas` reads plˈas, matching the decode; ⚠ the conventional Swahili spelling of the loan is UNSOURCED,
     //   and this spelling is chosen to reproduce the attested phones.
     // THE MINUS AND ±. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
     //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
