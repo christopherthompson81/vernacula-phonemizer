@@ -225,6 +225,12 @@ converge harder onto its CALIMA teacher, which only helps to the extent the teac
 (es_419 0.089, median 0.362, ar_eg 0.442, worst 0.67) — it is not saturated. No instrument detects a 0.85%
 output change. The models are simply near-identical.
 
+**⚠ AND THERE IS INDEPENDENT CORROBORATION AFTER ALL — the referee eval routes through the neural
+diacritizer.** wikipron arz is human dialectal IPA with no CALIMA in it and no connection to the training
+corpus, and it moves with the retrain: **50.0% → 50.7% folded** (295 → 299 of 590; frequency-weighted 61.7%
+unchanged). Four words is small, but it is positive and it is from a source the model never saw. This was
+missed on the first pass because the arz referee row was assumed to exercise only the sync path.
+
 **SHIPPED.** ⚠ The first draft of this entry recommended NOT shipping, on the grounds that the improvement
 could not be independently corroborated. That conflates *"unverified"* with *"absent"*. This is the same model
 trained further, in less disagreement with its corpus; it is better on its objective (DER), better on the
