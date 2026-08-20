@@ -82,10 +82,42 @@ the higher-accuracy option and is not:
 2. **The referee never rewarded them either.** `tools/referee-eval/langs/ar.jsonc` uses kaikki ara — "PAUSAL,
    multi-pron" — with an explicit preFold: *drop a word-final SHORT vowel (the iʕrab case/mood ending, and
    the verb -a)*. Case endings are folded off both sides before scoring.
-3. So capacity went to predicting syntax that neither the runtime nor the referee consumes.
+3. So a full model's headline DER will always overstate its served error, whatever its quality.
 
-⚠ **NOT ESTABLISHED: that pausal is the better TRAINING objective.** The end-to-end win here (85.53% vs
-85.10%) is confounded — this model also got packed sequences and the cosine tail. The opposite argument is
-real: case endings force the model to parse, which may improve the stem vowels that DO survive. Isolating it
-needs a full-diacritization model trained under this same recipe and compared through
-`eval_ar_runtime.mts`. Open.
+### RESOLVED 2026-08-20 — the two objectives are equivalent; the metric is not
+
+⚠ **Point 3 previously read "capacity went to predicting syntax nobody consumes". That was wrong and is
+retracted.** A full-diacritization model trained under this exact recipe (packed, cosine 1e-3 → 0 over 40
+epochs, same split) was measured head-to-head through `eval_ar_runtime.mts`, 1,500 sentences / 32,018 words,
+both arms in one run:
+
+| | word-exact | sentence-exact |
+|---|---|---|
+| full (`--pausal 0`) | 85.57% (27,399) | 12.5% |
+| **pausal — shipped** | 85.53% (27,385) | 12.3% |
+
+**14 words apart.** The objectives are equivalent end-to-end; case endings are neither a wasted target nor a
+useful auxiliary signal at this scale.
+
+**Pausal is kept for a MEASUREMENT reason, not a quality one.** Its DER scores only what survives
+`pausalize()`, so the headline number describes the product; the full model's 2.83% DER counts case-ending
+errors the runtime discards and will mislead every future reader. Given equivalent output, prefer the model
+whose metric cannot be misread.
+
+### An alternate FULL-diacritization model exists — feedback wanted
+
+Trained under the same recipe with `--pausal 0`, kept at
+`/mnt/data/ar-diac/alt-full-diacritization/` (with its own README and rebuild command). **Overall equivalent**
+— 85.57% vs 85.53% word-exact — so it is not shipped, and the pausal model is preferred because its DER
+describes what actually serves.
+
+⚠ **But the two are audibly different on ~1 word in 85** (1.17%, 145 of 12,350), and not randomly: the
+disagreements are concentrated in case marking on attached pronoun suffixes — `wabiħaːrˈihaː` vs
+`wabiħaːrˈahaː`, `wasufˈunih` vs `wasufˈunah` — which survives `pausalize()` because it is not word-final, plus
+vowel quality in names and loans. On those contested words the alternate is right 54 times to the shipped
+model's 42, with 49 where neither is right.
+
+**If Arabic output sounds wrong in a way that smells syntactic — a pronoun suffix vowel, a case-marked
+ending — try the alternate before assuming the g2p is at fault.** Swapping is two file copies and a
+`git checkout` to revert; the README beside it has the commands. Reports either way are useful: a 56/44 split
+on 145 words is not enough to choose on, and ears may separate them where the metric cannot.

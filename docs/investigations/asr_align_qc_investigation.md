@@ -3124,3 +3124,35 @@ reproducible: `tools/arabic/train_ar.sh`.
 wrong agreement unit, mismatched gold, padded-batch ONNX scoring, un-pausalized gold. Every one initially read
 as the model being broken. The check that would have caught all of them cost one command —
 `phonemizeAsync` on three sentences, showing the shipped model obviously healthy — and it was run fourth.
+
+## Run 52 — 2026-08-20 — full vs pausal training: equivalent, and a retraction
+
+**The question** (user's): does full diacritization + `pausalize()` give up anything against training pausal
+directly? Run 51 asserted the full arrangement "spent capacity on syntax nobody consumes". That was an
+assertion, so it was tested.
+
+**Method.** A full-diacritization model under the BEST recipe rather than a mirror of the incumbent's —
+packed, cosine 1e-3 → 0 across all 40 epochs, `--patience 99` so the anneal cannot be truncated, same split.
+⚠ The user's steer here was right and worth keeping: *the best training method is the one to use regardless* —
+matching a legacy recipe for the sake of symmetry would have handicapped the arm being tested.
+
+**Result**, both arms scored in a single run through `eval_ar_runtime.mts`, 1,500 sentences / 32,018 words:
+
+| | word-exact | sentence-exact |
+|---|---|---|
+| full (`--pausal 0`) | 85.57% (27,399) | 12.5% |
+| pausal (shipped) | 85.53% (27,385) | 12.3% |
+
+**14 words apart — equivalent.** ⚠ **RETRACTED: "capacity spent on syntax nobody consumes."** A model trained
+on the harder target matches one trained directly on the served task, so the case endings are not wasted
+effort. Neither are they a useful auxiliary signal at this scale. Both leanings favour full and both are
+inside noise.
+
+**Kept pausal for a MEASUREMENT reason.** Its DER scores only what survives `pausalize()`; the full model's
+2.83% counts errors the runtime discards. Given equivalent output, prefer the model whose headline number
+cannot be misread — this session lost hours to exactly that misreading.
+
+**Mid-run checkpoints predicted the endpoint well.** At epoch 28/40 (val DER 3.07%, LR 2.1e-4) the full model
+already scored 85.45% end-to-end, 0.08pp off its final 85.57%. `best_state` is written into the resume
+checkpoint every epoch, so a long run can be interrogated cheaply rather than waited out — worth remembering
+before committing to a full training cycle to answer a question.
