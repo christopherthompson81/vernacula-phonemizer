@@ -67,7 +67,7 @@ same argument.
 
 ## ⚠ The recognizer is not independent of espeak
 
-`wav2vec2-xlsr-53-**espeak**-cv-ft` is fine-tuned to emit espeak phoneme labels. So when its output agrees
+`wav2vec2-xlsr-53-espeak-cv-ft` — note the **espeak** in the name — is fine-tuned to emit espeak phoneme labels. So when its output agrees
 with espeak's convention for a language, **that is one source, not two**, and citing "espeak says X and the
 recognizer says X" as corroboration double-counts. This is the same error as treating wikipron and kaikki
 as two referees when both are en.wiktionary.

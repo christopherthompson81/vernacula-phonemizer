@@ -150,7 +150,8 @@ wrong; what is missing is anywhere that records *which axes a language's referee
 ## Run 5 — 2026-08-20 — ⚠ the confound I should have tested first
 
 **Question.** Before batching hy/ky/ur, one thing was never checked: the recognizer is
-`wav2vec2-xlsr-53-**espeak**-cv-ft`, fine-tuned to emit espeak phoneme labels. When it returns `a` where we
+`wav2vec2-xlsr-53-espeak-cv-ft` — note the **espeak** in the name — is fine-tuned to emit espeak phoneme
+labels. When it returns `a` where we
 write `ɑ`, is that an acoustic judgement or espeak's transcription convention played back?
 
 **Command.** `espeak-ng -v<lang> -q --ipa` on native-script words for every language in the worklist.
