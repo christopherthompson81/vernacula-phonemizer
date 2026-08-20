@@ -87,7 +87,7 @@ const DOTTED: readonly (readonly [string, string])[] = [
 /** Fold Latin diacritics to their base letter. Swahili's orthography has none, so `á ü õ ç` are always
  *  foreign spellings — and without this they are not matched by the engine's ASCII tokenizer, fall into
  *  the clause assembler's foreign-run handler, and are read as ENGLISH LETTER NAMES inside a Swahili
- *  word: `Sámi` → [s ˈə mi], `Gürses` → the letter U [juː], `São` → [s ˈə ˈo]. Restricted to Latin so an
+ *  word: `Sámi` → [s ˈə mi], `Gürses` → the letter U [juː], `São` → [s ˈə ˈɔ]. Restricted to Latin so an
  *  embedded non-Latin run is untouched. */
 function foldLatinDiacritics(s: string): string {
     if (!/[^\p{ASCII}]/u.test(s)) return s;
