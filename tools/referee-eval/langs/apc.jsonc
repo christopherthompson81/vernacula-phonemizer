@@ -12,13 +12,11 @@
         }
     ],
     "segmentJoin": true,
-    "preFolds": [
-        {
-            "pattern": "[aiu]$",
-            "replace": "",
-            "note": "PAUSAL: drop a word-final short vowel (as MSA; preFold so long aː/iː/uː/eː/oː ending in ː survive)"
-        }
-    ],
+    // ⚠ NO PAUSAL FOLD. ar.jsonc strips a word-final short vowel because MSA's iʕrab case ending is not
+    // pronounced in pause. THE SPOKEN DIALECTS DROPPED IʕRAB — a final short vowel here is lexical, not a case
+    // ending, so stripping it scored its absence as free (the axis-deletion failure) AND fired asymmetrically,
+    // since it ran as a preFold, before the symbol folds. Removing it moved this family +0.5 to +6.1pp.
+    // Measured 2026-08-20; see docs/investigations/arz_referee_investigation.md.
     "folds": [
         {
             "pattern": "(.)\\1+",
