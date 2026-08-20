@@ -10,7 +10,10 @@ import { createNorwegianTagger } from "../src/languages/norwegian/norwegianTagge
 // The neural OOV tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back to
 // the sync engine, so the fallback contract is testable everywhere; the retagging assertions run only with the model
 // present.
-const haveModel = existsSync(join(import.meta.dirname, "../src/languages/norwegian/nb-g2p-tagger.onnx"));
+// ⚠ `.int8.onnx` — nb moved off fp32 on 2026-08-19 and this guard kept naming the old file, so the suite
+// SILENTLY SKIPPED (1 passed, 3 skipped) instead of failing. A skipIf guard pointed at a path that no longer
+// exists is worse than no guard: it reports green while testing nothing.
+const haveModel = existsSync(join(import.meta.dirname, "../src/languages/norwegian/nb-g2p-tagger.int8.onnx"));
 
 describe("norwegian neural OOV tagger", () => {
     // Numbers, punctuation, clause assembly, and lexicon/common words are the SYNC engine's — the neural path only

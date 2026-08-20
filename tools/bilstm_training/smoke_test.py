@@ -133,18 +133,24 @@ def main():
         "bengali/train_bn_tagger.py": dict(nc=10, nl=4),
         "sindhi/train_sd_tagger_masked.py": dict(nsrc=10, ntag=4),
         "sindhi/export_sd_tagger_onnx.py": dict(nsrc=10, ntag=4),
+        "khmer/train_km_segmenter.py": dict(nc=10),
+        "perso-arabic/train_multilingual_harakat.py": dict(nc=10, nl=4, emb=32, h=16, ly=2),
     }
     for rel, kw in STANDALONE.items():
         path = os.path.join(HERE, "..", rel)
+        want = {"khmer/train_km_segmenter.py": "Segmenter",
+                "perso-arabic/train_multilingual_harakat.py": "BiLSTM"}.get(rel, "Tagger")
         cls = next((n for n in ast.parse(open(path, encoding="utf8").read()).body
-                    if isinstance(n, ast.ClassDef) and n.name == "Tagger"), None)
+                    if isinstance(n, ast.ClassDef) and n.name == want), None)
         if cls is None:
-            check(f"{rel} defines a Tagger", False, "no class Tagger — did the file move?")
+            check(f"{rel} defines {want}", False, f"no class {want} — did the file move?")
             continue
-        g = {"nn": torch.nn, "torch": torch, "EMB": 32, "HID": 16, "LAYERS": 2, "DROP": 0.3}
+        class _Args:  # the rider's class reads `args.dropout` at definition time
+            dropout = 0.2
+        g = {"nn": torch.nn, "torch": torch, "EMB": 32, "HID": 16, "LAYERS": 2, "DROP": 0.3, "args": _Args()}
         exec(compile(ast.fix_missing_locations(ast.Module(body=[cls], type_ignores=[])), path, "exec"), g)
         torch.manual_seed(0)
-        mm = g["Tagger"](**kw).eval()
+        mm = g[want](**kw).eval()
         with torch.no_grad():
             alone = mm(torch.tensor([[3, 4, 5]]))
             lots = mm(torch.tensor([[3, 4, 5, 0, 0, 0, 0]]), torch.tensor([3]))[:, :3]

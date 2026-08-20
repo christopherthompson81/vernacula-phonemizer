@@ -28,7 +28,7 @@ export function createNorwegianTagger(basename = "nb-g2p-tagger"): Promise<Norwe
     return createWordStructuralTagger({
         dir: dirname(fileURLToPath(import.meta.url)),
         basename,
-        modelFile: `${basename}.onnx`,
+        modelFile: `${basename}.int8.onnx`,
         context: "Norwegian neural tagging",
         epEnv: "NB_ORT_EP",
         // lowercase + NFC so graphemes match the training vocab (the sync lexicon/rule paths also lowercase). The vocab

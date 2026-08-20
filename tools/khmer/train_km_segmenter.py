@@ -77,8 +77,17 @@ class Segmenter(nn.Module):
         self.lstm = nn.LSTM(emb, h, LAYERS, batch_first=True, bidirectional=True, dropout=DROP)
         self.o = nn.Linear(2 * h, 3)
 
-    def forward(self, x):
-        return self.o(self.lstm(self.e(x))[0])
+    def forward(self, x, lengths=None):
+        """⚠ PASS `lengths` FOR A PADDED BATCH. Unpacked, the BiLSTM's BACKWARD direction crosses the pad steps
+        before reaching each paragraph's last real character, while serving (khmerNeural.ts) is one text at a
+        time, unpadded — so the damage lands at the END of the input. For a SEGMENTER that is the final word
+        boundary of every chunk. See investigation Run 41."""
+        h = self.e(x)
+        if lengths is None:
+            return self.o(self.lstm(h)[0])
+        pk = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(self.lstm(pk)[0], batch_first=True, total_length=x.size(1))
+        return self.o(out)
 
 
 def batches(data, bs, shuffle=True):
@@ -97,7 +106,7 @@ def batches(data, bs, shuffle=True):
             Y[r, 0] = 0                                      # position 0 is not a decision
             for i in range(1, len(l)):
                 Y[r, i] = 0 if l[i] == "?" else (2 if l[i] == "1" else 1)
-        yield X, Y
+        yield X, Y, torch.tensor([len(d[0]) for d in chunk])
 
 
 m = Segmenter(len(cv)).to(dev)
@@ -124,8 +133,8 @@ crit = nn.CrossEntropyLoss(ignore_index=0, weight=torch.tensor([0.0, 1.0, POS_WE
 for ep in range(EPOCHS):
     m.train()
     tot = nb = 0
-    for X, Y in batches(train, BATCH):
-        lo = m(X.to(dev))
+    for X, Y, ln in batches(train, BATCH):
+        lo = m(X.to(dev), ln)
         loss = crit(lo.reshape(-1, 3), Y.to(dev).reshape(-1))
         opt.zero_grad()
         loss.backward()
@@ -139,8 +148,9 @@ for ep in range(EPOCHS):
 m.eval()
 tp = fp = fn = tn = 0
 with torch.no_grad():
-    for X, Y in batches(hold, 256, shuffle=False):
-        lo = m(X.to(dev)).cpu()
+    for X, Y, ln in batches(hold, 256, shuffle=False):
+        # ⚠ the held-out pass is padded too — unpacked it scored under a condition serving never presents.
+        lo = m(X.to(dev), ln).cpu()
         pred = (lo[:, :, 2] > lo[:, :, 1])
         for r in range(X.shape[0]):
             for i in range(1, X.shape[1]):

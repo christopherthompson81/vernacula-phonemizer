@@ -39,7 +39,25 @@ than quoting two different experiments:
 | model | P | R | F1 |
 |---|---|---|---|
 | unigram Viterbi (`segment.ts`) | 60.1% | 75.3% | 66.8% |
-| **BiLSTM tagger (this model)** | **82.3%** | **96.8%** | **89.0%** |
+| **BiLSTM tagger (this model)** | **86.0%** | **95.6%** | **90.5%** |
+
+## 2026-08-19 — retrained with PACKED sequences
+
+Training ran the BiLSTM over padded batches without `pack_padded_sequence`, so the backward direction crossed
+the padding before reaching each word's last symbol, while serving is batch=1 and unpadded — damage at the END
+of the word. Same corpus, same split, same seed; see `tools/bilstm_training/tagger.py` and investigation Runs
+41, 43, 47.
+
+| (same split, unigram Viterbi control 66.7 F1 in BOTH arms) | P | R | F1 |
+|---|---|---|---|
+| unpacked training | 81.8% | 96.3% | 88.5 |
+| **packed training (this model)** | **86.0%** | **95.6%** | **90.5** |
+
+⚠ **REBUILT ON A NEWER DUMP, so this is not a reproduction of the 82.3/96.8/89.0 above.** A `latest` kmwiki
+pull gives 187,369 paragraphs against the original 180,782, and the tell is that the unigram Viterbi CONTROL
+moved too (66.7 vs 66.8) — the data changed, not the model. Compare the two arms above, which share a dump and
+a split; do not compare either against the historical row.
+
 
 ⚠ These are measured against the DICTIONARY-EXPANDED labels (layer 4 below). The earlier label set gave
 78.1/97.5/86.7 for this model and 53.5/75.5/62.6 for the baseline — both moved, because a change to the labels

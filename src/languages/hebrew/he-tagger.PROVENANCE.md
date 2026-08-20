@@ -77,3 +77,30 @@ python tools/hebrew/export_he_tagger_onnx.py src/languages/hebrew
 **Runtime contract:** `onnxruntime-node` is OPTIONAL (lazy). If it or this model is absent, `createHebrewTagger()`
 resolves to `undefined` and `phonemizeHebrewNeural` returns exactly the sync Phase-1 path (no throw). Separate async
 path; the sync engine + its tests are untouched.
+
+## 2026-08-19 — retrained with PACKED sequences, on a harness that had to be rebuilt first
+
+⚠ **THE EVAL THAT EVERY EARLIER DECISION USED WAS NEVER COMMITTED.** The 72.1 → 84.4 → 85.6 → 86.4 progression
+in `he_native_bringup_investigation.md` Runs 3–6 is modern-holdout running-text word-exact, and no commit in
+this repo has ever contained the harness that produced it (verified: no deletion in `git log --diff-filter=D`,
+and no such file in any commit's tree). Reconstructed as `tools/hebrew/eval_modern_holdout.ts` from Run 3's
+description plus PR #422 — sources `modern/news`, `modern/blogs`, `test_modern`, `dictaTestCorpus`, the
+copyrighted subdirs the permissive-data policy EXCLUDES from training, which is what makes them a clean
+holdout. It scores the SHIPPED model at 87.9% against its recorded 86.4%: same metric, same ballpark.
+
+| modern-holdout word-exact | |
+|---|---|
+| shipped incumbent | 87.9% |
+| rebuild, unpacked training | 87.7% |
+| **rebuild, packed training (this model)** | **88.7%** |
+
+The unpacked arm landing on the incumbent is what validates the rebuild; the packed arm then beats what is
+deployed. Corpus-held-out per-consonant moved 93.9% → **95.6%** and clause-exact 46.0% → **61.6%**.
+
+⚠ **The trainer's own numbers are a POOR PROXY and are different metrics.** Run 5 moved per-consonant 94.0 →
+95.9 for a word-exact gain of only 84.5 → 85.6. And the trainer's "word-exact" is CLAUSE-exact (~5 words per
+clause); comparing it against the 86.4% headline reads as collapse and means nothing. Both mistakes were made
+and corrected while producing this table.
+
+⚠ The corpus pin (`1211c8f`, upstream dated 2022-05-04) is HEAD as of 2026-08-19, **not** a record of what the
+shipped model trained on — that was never captured. See `tools/CORPORA.md`.
