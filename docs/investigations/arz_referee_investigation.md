@@ -226,3 +226,50 @@ described as **"data-blocked"**. At 89.7% on the shipped path that word is wrong
 motivated it was substantially instrument error. What is actually closed is one scale path — Farasa's
 dialect diacritizer is research-license-only. Widening the Egyptian vowel lexicon and improving the
 silver teacher are both open and ordinary.
+
+## Run 9 — 2026-08-20 — is arz ✅? (no; and the shipped figure is circular)
+
+**Command.** Partition the 590 referee words by membership in `src/languages/arabic/egyptian-lexicon.tsv`
+(714 headwords), score each partition shipped and lexicon-off, and weight by `freq/arz.txt`.
+
+**Question.** The `✅` criterion rests on an *independent* referee. The shipped path reads 89.7% against
+wikipron-arz — but the lexicon is kaikki-derived. How much of that 89.7% is circular?
+
+**Raw finding.**
+
+```
+referee words also in the lexicon:  563/590 (95.4%)
+  shipped, IN lexicon (circular):   511/563 (90.8%)
+  shipped, NOT in lexicon (clean):   18/27  (66.7%)   <-- the only clean shipped figure
+  lexicon-off, NOT in lexicon:       19/27  (70.4%)
+  shipped, ALL:                     529/590 (89.7%)
+
+frequency-weighted:  shipped ALL 93.6%   |   lexicon-off ALL 80.4%
+```
+
+**Implication.** **Almost the entire referee is inside the lexicon.** The lexicon was mined from kaikki
+Egyptian-Arabic and, per its own build note, *validated ~88–92% against wikipron-arz at build* — so it was
+tuned on the referee it is now being scored against. 89.7% is reading back the answer key and must not be
+quoted as a quality figure. Removed from the maturity row and the floor comment.
+
+On the 27 words outside the lexicon, shipped 18/27 vs lexicon-off 19/27 — at that sample size there is no
+measurable shipped advantage on unseen words at all.
+
+Compare the `af` precedent, which is the ✅ this was being argued toward: af bounded its circularity at
+**0.1pp** by scoring against a primary referee that no lexicon tier derives from, and reported a genuine
+own-error of ~0.2% of running-text tokens. arz has no second referee to do that with.
+
+**Verdict on the status marker.** arz stays **🟡**, and comfortably so:
+
+- **Not ✅** — ✅ requires that the low referee % be *only* referee noise or a fold ceiling. After run 7
+  removed both of those, 226 of 590 misses remain lexicon-off, and their composition is a systematic
+  segment class (short-vowel quality), which the doc's own discriminator calls "real, fixable work".
+- **Not 🟢** — the information *is* in the input: Egyptian short vowels are recoverable from context, which
+  is what the neural diacritizer does. A path exists, so it is a backlog item, not a cap.
+- **🟡 exactly** — "a documented exception/lexicon layer would close a small, *specific* class." That is
+  literally the open item.
+- 🔷 is arguable (one referee), but 🔷 means *trustworthy on one tradition*, and the honest independent
+  number here is 61.7% / 80.4% token-weighted, which is not yet a trust claim.
+
+The honest summary of arz: **61.7% folded, 88.4% symbol, 80.4% frequency-weighted, all lexicon-off and
+non-circular.** Everything above that is the answer key.
