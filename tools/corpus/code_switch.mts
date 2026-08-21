@@ -70,7 +70,16 @@ export function codeSwitchSegments(
     };
     const host = (s: string): void => {
         if (s === "") return;
-        for (const sg of numeralSegments(s, hostCode)) if (sg.text !== "") push(sg);
+        // ⚠ NUMERAL SEGMENTS ABUT EACH OTHER BY CONSTRUCTION — `numeralSegments` PARTITIONS the string, so
+        //   any space between them lives inside a segment's own text and is lost when `phonemize` trims it.
+        //   They therefore need the same `tight` treatment as spans, or `ngo1956` rejoins as `ngo 19 56`.
+        let prev = "";
+        for (const sg of numeralSegments(s, hostCode)) {
+            if (sg.text === "") continue;
+            if (prev !== "") tight = !/\s$/u.test(prev) && !/^\s/u.test(sg.text);
+            push(sg);
+            prev = sg.text;
+        }
         tight = !/\s$/u.test(s);
     };
     let last = 0;

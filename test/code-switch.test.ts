@@ -62,6 +62,15 @@ describe("code-switch markup for read_text", () => {
         expect(tight("a {en:x}{en:y} b")).toBe("·host ·en +en ·host");  // span abutting a span
     });
 
+    it("numeral-register segments get the same treatment — they abut by construction", () => {
+        // `numeralSegments` PARTITIONS the host text, so any space between its segments lives inside one
+        // of them and is lost when phonemize trims. Without `tight`, xh `ngo1956` rejoins as `ngo 19 56`.
+        const tight = (t: string): string =>
+            codeSwitchSegments(t, "xh", known).map((s) => (s.tight ? "+" : "·") + (s.lang ?? "host")).join(" ");
+        expect(tight("ngo1956 kwaye")).toBe("·host +en ·host");   // digit glued to the host word
+        expect(tight("ngo 1956 kwaye")).toBe("·host ·en ·host");  // space in the source → not tight
+    });
+
     it("strips back to the plain reading", () => {
         expect(stripCodeSwitch("miapil sa {en:nineteen forty five} ug")).toBe("miapil sa nineteen forty five ug");
     });

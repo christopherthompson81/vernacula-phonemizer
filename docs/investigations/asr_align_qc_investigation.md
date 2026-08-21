@@ -3784,8 +3784,12 @@ inventing a word break the speaker did not make. ⚠ **The distance metric strip
 never have shown up in the score** — a trainer reading the IPA would simply see two words.
 
 Adjacency is already in the source (the span either touches the previous character or it does not), so
-`codeSwitchSegments` now marks such a segment `tight` and the re-derivation joins it with no space. Five
-shapes pinned in `test/code-switch.test.ts`, including a span abutting a span.
+`codeSwitchSegments` now marks such a segment `tight` and the re-derivation joins it with no space.
+
+⚠ **The numeral register had the same gap and it was invisible for the same reason.** `numeralSegments`
+PARTITIONS the host text, so a space between its segments lives inside one of them and is lost when
+`phonemize` trims — xh `ngo1956` rejoined as `ngo 19 56`. Now flagged the same way. Seven shapes pinned in
+`test/code-switch.test.ts`, including a span abutting a span and a digit glued to a host word.
 
 ### ⚠ And then the measurement said not to use it here
 
