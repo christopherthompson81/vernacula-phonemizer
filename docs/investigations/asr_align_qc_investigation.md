@@ -4904,3 +4904,70 @@ feeding the wrong shape is silently accepted and surfaces only here. Now a named
 Also: per-row try/catch plus an errors file (one throwing row used to lose the whole run), the documented
 invocation matched to the actual four-argument form, and a candidate that moves nothing prints
 "no evidence" rather than a confident `0.0% NATIVE`.
+
+## Run 79 — 2026-08-21 — the non-numeral leads are all reduction, and the instrument gets a competence number
+
+With the numeral cluster settled (runs 77–78) and the one-phone clitics excluded by the `--min-units 4`
+guard `wordize` already ships, 177 word types remain in the investigate queue at ≥4 occurrences and
+≥0.65 median distance. A digit-share column separates the two kinds at a glance.
+
+### None of the non-numeral leads is a defect
+
+The largest is `ny_mw kuti` — the complementizer, **80 occurrences**. Our `/kuti/` is the standard form
+and Chichewa orthography is transparent, so the question is what the recognizers hear:
+
+```
+our k:  k 31%   ɡ 28%   ∅ 8%      1,651 kuti tokens, both recognizers
+our t:  t 35%   d 28%   r 12%
+```
+
+Variable intervocalic lenition — and a near-even split is variation, not a systematic error. The rest
+behave the same way: the top target per position is the identity or DELETION, never a consistent
+different phone.
+
+```
+km_kh  ʔaoj    ʔ→∅ 54%   o→∅ 43%   j→∅ 31%
+my_mm  twɪ˨ɴ   t→∅ 37%   w→∅ 28%   ɴ→∅ 30%
+so_so  waħaj   a→∅ 27%   ħ→h 30%
+wo_sn  ŋɡir    ŋ→∅ 33%   ɡ→ɡ 39%
+```
+
+⚠ **Every one is a high-frequency function word being reduced.** They are worse than their language's
+4-unit baseline in the VERIFIED rows too (`kuti` 0.400 vs 0.250; `d͡ziko` 0.455 vs 0.273), which is the
+signature of a word that is hard everywhere rather than a row that went wrong.
+
+### ⚠ And the deciding question is whether the instrument can hear the language at all
+
+A voicing control against German settles `kuti` and generalises:
+
+```
+                our k→k   our t→t   our p→p
+de_de              89%       89%       86%
+ny_mw              48%       63%       42%
+```
+
+The recognizers are not failing on `kuti`; they are weak on Chichewa. So the metric this campaign was
+missing is a per-language one — **the share of our phones the recognizers return unchanged**:
+
+```
+worst      mn_mn 40.3%  sd_in 43.1%  my_mm 43.5%  ps_af 43.6%  vi_vn 45.8%  ckb_iq 46.4%  km_kh 47.1%
+best       es_419 82.9%  fr_fr 82.7%  en_us 79.4%  gl_es 78.1%  it_it 76.7%  de_de 76.6%  sw_ke 76.6%
+fleet median 61.7%   (102 languages, both recognizers pooled)
+```
+
+⚠ **A "lead" in a 40% language is not weak evidence, it is no evidence**, and `allo_compare --competence`
+now says so before any mining starts.
+
+⚠ **IT ALSO EXPLAINS THE `--serious` RANKING.** Run 75 concluded that a flat distance cut ranks the
+languages the recognizers handle worst rather than the ones we do — inferred there from the threshold
+arithmetic. Five of that ranking's worst six (mn_mn, sd_in, my_mm, ps_af, vi_vn) are five of the six
+worst here. The same confound, now measured directly instead of argued.
+
+⚠ **It is not a quality score for the language.** A low value can mean hard audio, a phone inventory far
+from either model's training, or a transcription convention neither shares; this cannot separate those
+and does not try. It answers one question — is the instrument usable here.
+
+**65 ny_mw rows marked `artefact`** (kuti at or above the row median, so it drives the row rather than
+riding along). No language change from this pass, which is the right outcome: the campaign has been
+principled, and where the tool disagrees without being able to hear the contrast, the tool is what is
+wrong.

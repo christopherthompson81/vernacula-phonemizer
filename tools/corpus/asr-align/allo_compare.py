@@ -174,6 +174,8 @@ def main() -> int:
     ap.add_argument("--langs", nargs="*")
     ap.add_argument("--pairs", type=int, default=20)
     ap.add_argument("--min-rows", type=int, default=50)
+    ap.add_argument("--sample", type=int, default=250,
+                    help="rows per language for --competence (default 250)")
     ap.add_argument("--all-status", action="store_true",
                     help=f"do NOT exclude rows whose verdict is already recorded ({'/'.join(CLOSED)}) "
                          "-- audio, instrument and reader failures plus closed human verdicts. Skipped "
@@ -181,6 +183,9 @@ def main() -> int:
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
+    ap.add_argument("--competence", action="store_true",
+                    help="per language, the share of our phones the recognizers return UNCHANGED. Check "
+                         "this BEFORE mining a language: where it is low the tool cannot adjudicate.")
     ap.add_argument("--words", action="store_true",
                     help="word-level corroborated queue: WORD TYPES both recognizers put far from our "
                          "IPA, across many occurrences. The most actionable output here.")
@@ -329,6 +334,54 @@ def main() -> int:
               f"-- rows no recognizer, under any decode, puts near us "
               f"({'flat ' + str(a.bad) if a.absolute else 'per-language median+3*MAD'})"
               + (f"; {tu} rows excluded as unmeasurable" if tu else ""))
+        return 0
+
+    # ⚠ ASK THIS BEFORE MINING A LANGUAGE. Every other mode here assumes the recognizers can hear the
+    # language well enough for a disagreement to mean something, and for a third of the fleet they cannot.
+    # Measured: our phones come back unchanged 82.9% of the time in es_419 and 40.3% in mn_mn, against a
+    # fleet median of 61.7%. A "lead" in a 40% language is not weak evidence, it is no evidence.
+    #
+    # ⚠ IT EXPLAINS THE `--serious` RANKING. Run 75 found that a flat distance cut ranks the languages the
+    # recognizers handle worst rather than the ones we do; the five worst there (mn_mn, sd_in, my_mm,
+    # ps_af, vi_vn) are five of the six worst here. That was diagnosed indirectly and is now a number.
+    #
+    # ⚠ It is NOT a quality score for the language. A low value can mean the audio is hard, the phone
+    # inventory is far from either model's training, or the transcription convention differs — this
+    # cannot separate those, and does not try to. It answers one question: is the instrument usable here.
+    if a.competence:
+        from wordize import align_path
+
+        out = []
+        for lang in langs:
+            hit = tot = 0
+            for ipa, ph, pa in db.execute(
+                    "SELECT ipa, phones, phones_allo FROM utt WHERE lang=? AND ipa IS NOT NULL "
+                    "AND phones IS NOT NULL AND phones_allo IS NOT NULL" + ST + " LIMIT ?",
+                    (lang, a.sample)):
+                for stream in (ph, pa):
+                    ours, theirs = units(ipa), units(stream)
+                    if not theirs:
+                        continue
+                    ours, theirs = notate(ours), notate(theirs)
+                    for i, j in align_path(ours, theirs):
+                        if i >= 0:
+                            tot += 1
+                            hit += int(j >= 0 and ours[i] == theirs[j])
+            if tot >= 2000:
+                out.append((hit / tot, lang, tot))
+        if not out:
+            print("no language had enough aligned phones", file=sys.stderr)
+            return 1
+        out.sort()
+        print(f"{'lang':<14}{'identity':>9}   usable?")
+        print(f"{'-'*14}{'-'*8:>9}   {'-'*7}")
+        med = statistics.median(x[0] for x in out)
+        for frac, lang, tot in out:
+            note = ("⚠ the instrument cannot adjudicate here" if frac < 0.50 else
+                    "weak" if frac < med else "")
+            print(f"{lang:<14}{100 * frac:8.1f}%   {note}")
+        print(f"\n{len(out)} languages, fleet median {100 * med:.1f}%, "
+              f"{sum(1 for x in out if x[0] < 0.50)} below 50%")
         return 0
 
     # The all-flagged class is the strongest signal in the corpus -- every recording of the sentence is
