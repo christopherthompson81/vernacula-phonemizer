@@ -3841,11 +3841,11 @@ corr(θ count, ⟨z/ce/ci⟩ count) = 0.749        mean θ per row        1.83
 corr(θ count, ⟨s⟩ count)       = 0.254        mean ⟨z/ce/ci⟩ per row 2.11
 ```
 
-⚠ **This closes the obvious confound.** CommonVoice Spanish is heavily Peninsular, so a recognizer with a
-learned bias was the alternative explanation — but the model is purely acoustic and never sees the text. A
-0.749 correlation with an ORTHOGRAPHIC count can only arise if the speakers produce [θ] at those positions;
-a biased model would scatter θ across all /s/. Same reasoning shape as the Kyrgyz natural experiment in the
-espeak-confound entry.
+⚠ ⚠ **I CLAIMED THIS CLOSED THE CONFOUND. IT DOES NOT — SEE RUN 64.** The argument was that the model is
+purely acoustic and never sees the text, so an orthographic correlation must come from the speakers. That
+misses a mechanism: the model can learn the pattern LEXICALLY. Trained on (Spanish audio, espeak-`es`
+labels), it sees *ciudad* labelled with θ every time, and reproduces it from the word's acoustic shape
+without any [θ] being present. Run 64 tests this and the evidence favours it.
 
 Textbook, in one breath: `los ciudadanos` → heard `los θjuðaðanos`. [s] for the ⟨s⟩ of *los*, [θ] for the
 ⟨c⟩ of *ciudadanos*.
@@ -3873,8 +3873,57 @@ es    (Peninsular)   median 0.0744   mean 0.0825
 carries `ar_eg→arz`, `ny_mw→nya`), and the numeral-register precedent says rendering choices of this kind
 are training-corpus policy rather than phonemizer correctness.
 
-⚠ **It changes published data**, so it is recorded rather than applied: `es_419` is one of the 28 languages
-in the Hugging Face dataset, and remapping it would repoint 2,306 rows of training IPA from seseo to
-distinción. The case for doing it is that the PAIR is what a trainer consumes, and today it pairs Latin
-American IPA with Peninsular speech. The case against is the 467 rows (≈20%) whose readers really are
-seseo — one engine cannot serve both, and `es` serves 86% of them.
+⚠ **DO NOT REMAP — see run 64.** Recorded rather than applied, and run 64 turns "not yet" into "no".
+
+## Run 64 — 2026-08-20 — the θ is probably espeak's, not the speakers'
+
+Run 63 concluded the `es_419` audio is Peninsular. **That conclusion is withdrawn**, on a mechanism I had
+not considered: the recognizer was trained with **espeak-generated labels**, and espeak's Spanish choice is
+a DIALECT choice.
+
+```
+espeak -ves      la θjuðˈad ðe seɾβˈiθjo katˈoɾθe θapˈato lˈos     <- Spain, θ
+espeak -ves-419  la sjuðˈad ðe seɾβˈisjo katˈoɾse sapˈato lˈos     <- Latin America, s
+espeak -vca      lɐ siwðˈat ðə sərβˈisjʊ kɐtˈorsə zɐpˈatʊ lˈos     <- no θ
+```
+
+CommonVoice Spanish is one locale, so the labelling pipeline almost certainly used `es`. The model was then
+trained on mixed-origin Spanish audio against **European** labels, and can reproduce that pattern
+LEXICALLY — recognising the word-shape of *ciudad* and emitting the θ it was always labelled with, whether
+or not the speaker produced one. That generates the orthographic correlation with no [θ] in the audio.
+
+**Catalan is consistent with this.** espeak `ca` writes no θ, and ca_es shows θ in 17.7% of rows against
+es_419's 79.7%.
+
+### The test: does θ depend on word FREQUENCY?
+
+A speaker's pronunciation does not. A memorised lexical pattern does. Over rows containing exactly one
+⟨c/z⟩ word, so the θ is attributable:
+
+```
+bucket        n    θ rate   median dist
+freq >= 5   319      77%       0.0829
+freq 2-4    256      77%       0.0730
+hapax        39      56%       0.0728
+```
+
+**The θ rate falls 77% → 56% for words seen once, while those rows are recognised just as well** (median
+distance 0.0728 vs 0.0829/0.0730). That rules out the obvious confound — rare words being harder overall —
+and leaves a lexical effect, which is what memorisation looks like and what genuine distinción does not.
+
+⚠ n=39 in the hapax bucket, so this SUPPORTS the espeak explanation rather than proving it. What would
+settle it: listening to a sample, FLEURS speaker-locale metadata, or a second recognizer trained on
+different labels.
+
+### It inverts the recommendation
+
+Run 63's 3.3:1 for remapping `es_419 → es` now reads as **fitting the instrument, not the speech**. If the
+θ is espeak's, remapping would pair genuinely Latin American audio with Peninsular IPA — corrupting the
+training pairs to chase a metric artefact. **Do not remap.**
+
+### And it generalises the espeak confound
+
+The earlier entry established that the recognizer is not independent of espeak for SYMBOL choices. This
+adds: **it is not independent for DIALECT choices either**, and that failure mode looks exactly like a
+corpus-labelling defect — an entire language appearing to be recorded in the wrong variety. Any future
+"this split is speaking the wrong dialect" finding has to clear espeak's voice for that language first.
