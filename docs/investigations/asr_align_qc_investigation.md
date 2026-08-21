@@ -5131,3 +5131,48 @@ serious rows are measurably band-limited (HF share 0.179 against 0.308) without 
 ⚠ **The actionable form is corpus selection, not a phonemizer change.** 86% of the corpus has sibling
 takes and they are shipped equally; the spread ranks them, so the best-matching take is the better
 training row. That is a policy for the corpus repo, recorded here rather than acted on.
+
+## Closing the ASR-alignment campaign — 2026-08-21
+
+**The activity of mining audio phone recognition for phonemizer defects is done.** Not abandoned —
+worked out. The evidence:
+
+- `--triage` puts **570 of 7,440** queue rows (7.7%) in a state where our output could still be the
+  cause. 79.3% are exonerated by a same-text sibling, and the remainder are numeral-register or diffuse.
+- The residue does not concentrate: 36 rows in the largest language, then 33, 29, 22.
+- Every real find was **orthographic-to-lexical, not phonetic** — a year form, a code-switched numeral,
+  an abbreviation, a bare glide standing as a word. Those survive imperfect delivery because they are
+  about WHICH WORDS were said. The phonetic leads all dissolved into reduction, notation, or an
+  instrument that could not resolve the contrast.
+
+⚠ **AND THE INSTRUMENT'S CEILING IS MEASURED, NOT ASSUMED.** Recognizer competence runs 39–83% with a
+fleet median of 61.7%; a third of the fleet sits below the point where a marginal disagreement means
+anything. Two independently-labelled recognizers agree with each other more than either agrees with us
+on exactly the axes they share (voicing, aspiration, vowel height), which is what run 74 rejected the
+Mongolian change on.
+
+### What the database is FOR, going forward
+
+⚠ **It is a training-data filter, not a defect queue.** At TTS training time, rows the alignment cannot
+vouch for should be excluded from the corpus rather than investigated:
+
+  · `defective_audio`, `recognizer_short` — the audio or the instrument failed
+  · `reader_divergence` — the reader did not say the script; the PAIR is bad training data even though
+    neither side is wrong
+  · `defect` where the `ipa` has not been re-derived since the fix
+  · and the sibling spread: 86% of the corpus has multiple takes per sentence, shipped equally weighted,
+    and **8,411 rows are >=0.20 worse than the best take of their own text**. Preferring the best-matching
+    take is a real selection win and needs no verdict about why the others are worse.
+
+⚠ `instrument_blind` is NOT a training-exclusion signal — it says the recognizer could not judge the
+row, which is not a claim about the audio or the IPA. Excluding on it would throw away good data.
+
+### The real fixes this campaign produced
+
+`nso_za` 0.6647→0.2763 · `sw_ke` 0.4439→0.1571 · `arz` referee 50.7%→61.7% · Croatian/Shona code-switch
+spans · `ff_sn` French numerals · a bare `dr` reading as a consonant cluster · ckb's free conjunction
+`و` → [u] at 37:1 · English years behind a determiner and in dashed ranges · and the numeral register
+measured for ha/ky/umb with the harness now committed rather than lost.
+
+Plus the negative results, which cost the same to find and are worth as much: the Mongolian labial, the
+low-vowel axis, the es_419 dialect remap, BCS final devoicing, the uppercase-Latin default.
