@@ -3817,3 +3817,64 @@ Applied to both recordings of each sentence — `read_text` is a property of the
 **The general rule, for the next language:** an English run that stands alone is a candidate for a span; an
 English stem carrying host morphology is a loanword the host engine should keep. The corpus can tell them
 apart, the orthography cannot.
+
+## Run 63 — 2026-08-20 — `es_419` is not Latin American
+
+`es_419` has the fleet's best median (0.082), so its all-flagged rows are a strong signal. Reading them
+turned up two things, and the second is about the corpus rather than the engine.
+
+### The all-flagged rows themselves: English proper names
+
+`turkish airlines` → ours `tuɾkis aᶦɾlines`, heard `tœɾkʃɛlaɪns`; `air canada delta air lines` → heard
+`erɡanaða deldaerlaɪns`; `minneapolis star-tribune` → heard `minjapolis tʃaɾtɹiːbun`. The same
+code-switching class as Shona (run 62), not yet authored.
+
+### ⚠ And the split is speaking PENINSULAR Spanish
+
+The recognizer keeps returning `θ` where we write `s` — `katorθe`, `θerkana`, `imbesθiɡaθjon`, `loftanθa`.
+That is *distinción*, which Latin American Spanish does not have.
+
+**It tracks the ORTHOGRAPHY, which is what makes it real:**
+
+```
+corr(θ count, ⟨z/ce/ci⟩ count) = 0.749        mean θ per row        1.83
+corr(θ count, ⟨s⟩ count)       = 0.254        mean ⟨z/ce/ci⟩ per row 2.11
+```
+
+⚠ **This closes the obvious confound.** CommonVoice Spanish is heavily Peninsular, so a recognizer with a
+learned bias was the alternative explanation — but the model is purely acoustic and never sees the text. A
+0.749 correlation with an ORTHOGRAPHIC count can only arise if the speakers produce [θ] at those positions;
+a biased model would scatter θ across all /s/. Same reasoning shape as the Kyrgyz natural experiment in the
+espeak-confound entry.
+
+Textbook, in one breath: `los ciudadanos` → heard `los θjuðaðanos`. [s] for the ⟨s⟩ of *los*, [θ] for the
+⟨c⟩ of *ciudadanos*.
+
+Over rows with ≥3 ⟨z/ce/ci⟩:
+
+```
+distinción (θ/cz ≥ 0.5)   697   86%
+seseo      (θ/cz < 0.15)   23    3%
+mixed                      90   11%
+```
+
+### The engine is right and the LABEL is wrong
+
+`phonemize-fleurs.mts` maps `es_419 → es-419`, which correctly emits seseo. Scoring the same audio against
+the Peninsular engine instead:
+
+```
+es-419 (current)     median 0.0824   mean 0.0894
+es    (Peninsular)   median 0.0744   mean 0.0825
+                     1295 closer / 467 further      gained 22.93  lost 6.98  =  3.3:1
+```
+
+**Not a phonemizer defect — a corpus-labelling one.** The `VARIETY` map exists for exactly this (it already
+carries `ar_eg→arz`, `ny_mw→nya`), and the numeral-register precedent says rendering choices of this kind
+are training-corpus policy rather than phonemizer correctness.
+
+⚠ **It changes published data**, so it is recorded rather than applied: `es_419` is one of the 28 languages
+in the Hugging Face dataset, and remapping it would repoint 2,306 rows of training IPA from seseo to
+distinción. The case for doing it is that the PAIR is what a trainer consumes, and today it pairs Latin
+American IPA with Peninsular speech. The case against is the 467 rows (≈20%) whose readers really are
+seseo — one engine cannot serve both, and `es` serves 86% of them.
