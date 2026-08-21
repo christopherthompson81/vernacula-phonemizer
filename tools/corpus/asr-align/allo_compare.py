@@ -175,8 +175,13 @@ def competence(db, lang: str, sample: int) -> float | None:
 
     hit = tot = 0
     for ipa, ph, pa in db.execute(
+            # ⚠ `ORDER BY wav`, NOT A BARE LIMIT. A bare LIMIT takes the first N rows in rowid order —
+            # ingest order, plausibly one speaker or one archive's file order — which is the "`--limit`
+            # IS NOT A SAMPLE" hazard `wordize.py` already documents. The wav basenames are content
+            # hashes, so ordering by them spreads the draw across the language and stays deterministic,
+            # which a seedless `random()` would not.
             "SELECT ipa, phones, phones_allo FROM utt WHERE lang=? AND ipa IS NOT NULL "
-            "AND phones IS NOT NULL AND phones_allo IS NOT NULL LIMIT ?", (lang, sample)):
+            "AND phones IS NOT NULL AND phones_allo IS NOT NULL ORDER BY wav LIMIT ?", (lang, sample)):
         for stream in (ph, pa):
             ours, theirs = notate(units(ipa)), notate(units(stream))
             if not theirs:
@@ -185,7 +190,7 @@ def competence(db, lang: str, sample: int) -> float | None:
                 if i >= 0:
                     tot += 1
                     hit += int(j >= 0 and ours[i] == theirs[j])
-    return hit / tot if tot >= 2000 else None
+    return (hit / tot, tot) if tot >= 2000 else None
 
 
 def corroborated(ours: list[str], streams: list[list[str]]) -> float | None:
@@ -384,11 +389,20 @@ def main() -> int:
 
         from wordize import wordize
 
-        nf = (lambda x: x) if a.raw_notation else (lambda x: notate(units(x)))  # noqa: E731
+        # ⚠ ALWAYS THE FOLDED UNITS HERE, IGNORING `--raw-notation`. Handing `wordize` an identity `nf`
+        # makes it iterate the raw STRING, so Needleman-Wunsch runs over characters: ">=4 units" silently
+        # becomes ">=4 characters" and the "too short to judge" test counts characters of the whole IPA
+        # and never fires. The buckets would keep their labels while answering a different question, and
+        # `competence()` folds regardless, so the gate and the distances would disagree.
+        nf = lambda x: notate(units(x))  # noqa: E731
+        if a.raw_notation:
+            print("# --raw-notation does not apply to --triage (it would align characters, not units)",
+                  file=sys.stderr)
         cat: Counter = Counter()
         where: dict[str, Counter] = {}
         for lang in langs:
-            comp = competence(db, lang, a.sample)
+            comp_r = competence(db, lang, a.sample)
+            comp = comp_r[0] if comp_r else None
             for txt, ipa, ph, pa, pu in db.execute(
                     "SELECT text, ipa, phones, phones_allo, phones_allo_uni FROM utt "
                     "WHERE lang=? AND status=? AND ipa IS NOT NULL AND phones IS NOT NULL "
@@ -448,18 +462,18 @@ def main() -> int:
         for lang in langs:
             c = competence(db, lang, a.sample)
             if c is not None:
-                out.append((c, lang, 0))
+                out.append((c[0], lang, c[1]))
         if not out:
             print("no language had enough aligned phones", file=sys.stderr)
             return 1
         out.sort()
-        print(f"{'lang':<14}{'identity':>9}   usable?")
-        print(f"{'-'*14}{'-'*8:>9}   {'-'*7}")
+        print(f"{'lang':<14}{'identity':>9}{'phones':>9}   usable?")
+        print(f"{'-'*14}{'-'*8:>9}{'-'*8:>9}   {'-'*7}")
         med = statistics.median(x[0] for x in out)
         for frac, lang, tot in out:
             note = ("⚠ the instrument cannot adjudicate here" if frac < 0.50 else
                     "weak" if frac < med else "")
-            print(f"{lang:<14}{100 * frac:8.1f}%   {note}")
+            print(f"{lang:<14}{100 * frac:8.1f}%{tot:9}   {note}")
         print(f"\n{len(out)} languages, fleet median {100 * med:.1f}%, "
               f"{sum(1 for x in out if x[0] < 0.50)} below 50%")
         return 0

@@ -4950,10 +4950,17 @@ The recognizers are not failing on `kuti`; they are weak on Chichewa. So the met
 missing is a per-language one — **the share of our phones the recognizers return unchanged**:
 
 ```
-worst      mn_mn 40.3%  sd_in 43.1%  my_mm 43.5%  ps_af 43.6%  vi_vn 45.8%  ckb_iq 46.4%  km_kh 47.1%
-best       es_419 82.9%  fr_fr 82.7%  en_us 79.4%  gl_es 78.1%  it_it 76.7%  de_de 76.6%  sw_ke 76.6%
-fleet median 61.7%   (102 languages, both recognizers pooled)
+$ python3 tools/corpus/asr-align/allo_compare.py --competence
+
+worst      mn_mn 39.3%  sd_in 41.0%  my_mm 43.5%  ps_af 43.6%  vi_vn 45.8%  ckb_iq 46.3%  km_kh 47.1%
+best       fr_fr 82.6%  en_us 79.4%  es_419 79.0%  de_de 76.6%
+fleet median 61.7%   (102 languages, both recognizers pooled, 10 below 50%)
 ```
+
+⚠ **These are the re-quoted figures.** The first pass sampled with a bare `LIMIT`, which takes the head
+of the table in ingest order rather than a sample of the language — the "`--limit` IS NOT A SAMPLE"
+hazard `wordize.py` already documents. `ORDER BY wav` (the basenames are content hashes) fixed it and it
+mattered: es_419 82.9% → 79.0%, sd_in 43.1% → 41.0%, and **nb_no crossed below the gate at 48.7%**.
 
 ⚠ **A "lead" in a 40% language is not weak evidence, it is no evidence**, and `allo_compare --competence`
 now says so before any mining starts.
@@ -4987,22 +4994,29 @@ The screen was already absorbing what the competence number measures.
 ### What the queue is actually made of
 
 ```
-7,908 investigate rows
-  4,056  51.3%  no word-level lead — the divergence is diffuse, or in words too short to attribute
-  2,246  28.4%  ACTIONABLE — a >=4-unit non-numeral lead
-  1,222  15.5%  lead is in a digit-bearing row (numeral register, measured per language in runs 19/77/78)
-    384   4.9%  instrument cannot adjudicate (<50% competence)
+$ python3 tools/corpus/asr-align/allo_compare.py --triage
+
+7,524 investigate rows
+  3,030  40.3%  ACTIONABLE — a >=4-unit non-numeral lead
+  2,935  39.0%  no word-level lead — the divergence is diffuse, or in words too short to attribute
+  1,488  19.8%  lead is in a digit-bearing row (numeral register, measured per language in runs 19/77/78)
+     71   0.9%  instrument cannot adjudicate (<50% competence)
 ```
 
-**The real work is 2,246 rows, and reading the raw count as a work list overstates it 3.5×.** It
-concentrates: bn_in 193, hu_hu 156, ny_mw 106, el_gr 98, gu_in 94, pa_in 86.
+**The real work is ~3,000 rows, and reading the raw count as a work list overstates it 2.5×.** It
+concentrates: bn_in 231, hu_hu 185, el_gr 144, ny_mw 120, gu_in 112, pa_in 103.
 
-⚠ **THE LARGEST CATEGORY IS THE ONE WITH NOTHING TO ACT ON.** Over half the queue has no localised lead
-at all — and every productive finding in this campaign has been word-localised (a code-switched numeral,
-an unexpanded abbreviation, a bare glide standing as a word). ⚠ That is a statement about the METHOD, not
-a verdict on those rows: "diffuse" may mean uniformly-slightly-off audio, an accent, or a defect this
-tooling cannot localise. **They are deliberately NOT re-statused**, because burying 4,056 rows on the
-strength of a tool limitation is exactly the kind of silent truncation this campaign keeps catching.
+⚠ **AN EARLIER DRAFT OF THIS SECTION SAID "THE LARGEST CATEGORY IS THE ONE WITH NOTHING TO ACT ON", AND
+THAT IS FALSE AT THE SHIPPED DEFAULT.** It was computed at `--bad 0.65` while the tool defaults to 0.60,
+which moves actionable from 28.4% to 40.3% and makes it the LARGEST bucket rather than the second. The
+invocation is now recorded above, as this document's own convention requires and as neither run 79 nor
+the first draft of run 80 did. The lead threshold is a dial, and a bucket count is meaningless without it.
+
+⚠ **The no-lead bucket is still ~39%, and it is a statement about the METHOD.** "Diffuse" may mean
+uniformly-slightly-off audio, an accent, or a defect this tooling cannot localise; every productive
+finding in this campaign has been word-localised. **Those rows are deliberately NOT re-statused**,
+because burying 2,935 rows on the strength of a tool limitation is exactly the kind of silent truncation
+this campaign keeps catching.
 
 ### A new status, and why not an existing one
 
@@ -5013,8 +5027,9 @@ docstring says outright that it is not a statement about our IPA and that the ro
 if a better recognizer is added.
 
 ```
-ckb_iq 46.4%  92    km_kh 47.1%  62    my_mm 43.5%  39    sd_in 43.1%  17
-uz_uz  49.9%  71    da_dk 49.8%  43    mn_mn 40.3%  33    ps_af 43.6%  21    vi_vn 45.8%   6
+ckb_iq 46.3%  92    km_kh 47.1%  62    my_mm 43.5%  39    sd_in 41.0%  17
+uz_uz  49.9%  71    da_dk 49.8%  43    mn_mn 39.3%  33    ps_af 43.6%  21    vi_vn 45.8%   6
+nb_no  48.7%  71    <- added after the sampling fix moved it below the gate
 ```
 
 `allo_compare --triage` ships the split so the queue can be read correctly without asserting verdicts,

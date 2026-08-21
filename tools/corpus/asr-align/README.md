@@ -133,7 +133,8 @@ CPU, or batch. Measured floors: identical bytes decode identically (20/20); GPU-
 
 ⚠ **`allo_compare.py` HONOURS `status`, and the first version did not.** Rows whose verdict is already
 recorded — `defective_audio`, `recognizer_short`, `reader_divergence` (audio, instrument, reader) plus
-`convention`, `artefact`, `examined_clean` (closed human verdicts) — are excluded by default;
+`convention`, `artefact`, `examined_clean`, `instrument_blind` (closed human verdicts) — are excluded
+by default;
 `--all-status` keeps them. ⚠ `defect` is deliberately NOT excluded: those rows are ours, and the
 ckb_iq ones are additionally awaiting a corpus re-derivation that must stay visible. Ignoring the durable record made `--serious` report es_419 as the fleet's worst language on 490
 rows, every one of which was already closed — 864 `defective_audio` + 509 `recognizer_short` account
@@ -180,6 +181,9 @@ Two folds were proposed and refused, both recorded at the fold site so they are 
 | `asr_align_allo.py` | the SECOND recognizer: allosaurus (PHOIBLE-trained, espeak-independent) → `phones_allo` |
 | `allo_fast.py` | vectorizes allosaurus's per-frame MFCC loop; `--selftest` proves it bit-identical |
 | `allo_compare.py` | reads the two recognizers against each other — does a queue median survive a change of tradition? |
+| `allo_compare.py --competence` | ⚠ **ask this first** — can the recognizers hear this language at all? |
+| `allo_compare.py --triage` | what a status class is actually made of: blind / no-lead / numeral / actionable |
+| `measure_numeral_register.mts` + `score_numeral_register.py` | score a candidate numeral register for a language |
 | `asr_align_report.py` | the scoring — `fold`, `coarsen`, `dist`, and the per-language 3×MAD queues |
 | `asr_align_label.py` | the durable record: `status` on each row (verified / investigate / defective_audio) |
 | `read_text.py` + `.mts` | the text the phonemizer ACTUALLY READ — `read_text`, `read_text_src` (auto/hand) |

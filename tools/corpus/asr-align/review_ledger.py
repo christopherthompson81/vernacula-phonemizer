@@ -6,7 +6,7 @@ THE REVIEW LEDGER — the human verdicts, versioned in the repo instead of only 
 IPA, `asr_align_corpus.py` re-runs the recognizer, `asr_align_label.py --apply` re-labels in bulk. Two
 things cannot, because they are somebody's judgement rather than a computation:
 
-  · a HAND `status` — `defect`, `reader_divergence`, `convention`, `artefact`, `examined_clean`
+  · a HAND `status` — the `BY_HAND` tuple in `asr_align_label.py`, imported below rather than copied
   · a HAND `read_text` — what the reader actually said, including `{code:…}` code-switch spans
 
 `asr_align_corpus.py` writes rows with `INSERT OR REPLACE INTO utt(...)`, which replaces the WHOLE row. A
@@ -60,7 +60,13 @@ LEDGER = os.path.join(HERE, "review", "hand_review.tsv")
 import sqlite3  # noqa: E402
 
 #: Statuses a bulk pass never writes — see asr_align_label.py. Only these are carried.
-BY_HAND = ("defect", "reader_divergence", "convention", "artefact", "examined_clean")
+#
+# ⚠ THIS IS A SECOND COPY OF `asr_align_label.BY_HAND` AND IT DRIFTED. `instrument_blind` was added
+# there and not here, so 384 hand verdicts sat outside the durable record — and the drift did not merely
+# omit them: a row qualifying on `read_text_src='hand'` while carrying an unlisted status is exported
+# with its status BLANKED below, so a round-trip DESTROYS the verdict rather than skipping it. Imported
+# from the one place that defines it, so the next status cannot repeat this.
+from asr_align_label import BY_HAND  # noqa: E402
 
 COLS = ("lang", "wav", "sentence_id", "status", "comment", "read_text", "read_text_src", "text")
 
