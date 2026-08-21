@@ -4760,3 +4760,69 @@ stands, so `yearWords` is unchanged and only the NEW arms are gated. Shipped at 
 ⚠ An existing regression pin had to move: `Sejong (1418 – 1450)` asserted no change. It now reads as two
 years, which is what it is, and those very rows improved by 0.106. The pin's actual purpose — a range
 must never become a subtraction — is untouched.
+
+## Run 77 — 2026-08-21 — ha_ng numerals: NOT a register, and the queue misled me about it
+
+Run 76's word-level sweep put Hausa numerals at the top of the leads — `dˈu˥bu˥` (thousand) ×31,
+`ɡˈo˥ma˩` (ten) ×22, `ɗˈa˩ri˥` (hundred). Hand-reading five queue rows made it look decisive:
+
+```
+"karfe 11:00"      OURS  ɡˈo˥ma˩ ʃˈa˥ ɗˈa˥ja˥          W2V  i l ɛ v ə n           "eleven"
+"shekarar 1683"    OURS  dˈu˥bu˥ dˈa ɗˈa˩ri˥ ʃˈi˥da˩   W2V  s ɪ k s t iː ŋ e t i  "sixteen eighty-three"
+"2017"             OURS  dˈu˥bu˥ bˈi˥ju˥ dˈa ɡˈo˥ma˩…  W2V  t uː n t iː s ə v i n t i n
+```
+
+⚠ **`ha` was never in run 19's table** — that run covered 14 languages and Hausa was not one, so this
+looked like a clean gap with an obvious answer.
+
+### Measured, and the answer is NATIVE
+
+Over all 736 digit-bearing ha_ng rows, scored against BOTH recognizers:
+
+```
+cand      median   closer  further   same     pct    band
+en        0.3276      233      456     47    33.8%   NATIVE
+fr        0.3333      212      476     48    30.8%   NATIVE
+native    0.3007
+```
+
+**No register wired.** Wiring `ha: en` would damage ~450 rows to help 204.
+
+### ⚠ The five rows I read were selected FOR disagreeing
+
+Splitting the same measurement by status shows exactly how the sample lied:
+
+```
+investigate  n= 42   native 0.5271 -> en 0.4080   en closer  29/6   = 82.9%
+verified     n=694   native 0.2929 -> en 0.3209   en closer 204/450 = 31.2%
+```
+
+⚠ **The investigate queue is by construction the rows where we disagree with the audio, so sampling it
+and generalising to the language is circular.** The queue is the right place to FIND a candidate and the
+wrong place to MEASURE one. Every future register candidate must be scored over the whole digit-bearing
+corpus, as run 19 did, not over its queue rows.
+
+Hausa is the ceb/fil/mi/ig shape that `code_switch.mts` already describes: the register is a per-ROW
+fact. 27 rows are English-read and clearly so (each ≥0.02 closer); they are marked
+`reader_divergence` with the numbers, and `read_text`'s `{en:...}` spans are the vehicle if they are
+ever authored.
+
+⚠ **A caveat on those 27, recorded rather than fixed**: the English reading that wins there is the
+CARDINAL one the register machinery emits, but the recognizer plainly says *sixteen eighty-three* — a
+YEAR reading. So the 82.9% understates the real English fit, and authoring `read_text` for these rows
+should use the year form, not `enWords()`.
+
+### The harness now survives
+
+Run 19 established every entry in `numeral_register.mts` this way and **its harness did not survive**,
+so scoring the next candidate meant rebuilding it. Now committed:
+`tools/corpus/measure_numeral_register.mts` + `asr-align/score_numeral_register.py`, with
+`segmentsForRegister(text, reg)` exported so a candidate can be scored against an EXPLICIT register —
+going through `numeralSegments` would read the table under test and return every unlisted language
+unchanged.
+
+⚠ It scores against both recognizers, where run 19 had only wav2vec2. That matters more here than
+elsewhere: a register is a claim about WHICH LANGUAGE a span is in, and an English candidate scored
+against an espeak-labelled recognizer is flattered. ⚠ `es` is not scored — Hausa's contact languages are
+English and French, and adding a Spanish compositor to test an implausible candidate is not worth the
+code. Say so rather than implying the run-19 triple was reproduced.

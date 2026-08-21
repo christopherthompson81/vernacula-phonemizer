@@ -142,7 +142,20 @@ export interface Segment {
 /** Split `text` into segments, digit runs carrying their register. One segment when nothing applies. */
 export function numeralSegments(text: string, registryCode: string): readonly Segment[] {
     const reg = NUMERAL_REGISTER[registryCode];
-    if (reg === undefined || !/\d/u.test(text)) return [{ text }];
+    if (reg === undefined) return [{ text }];
+    return segmentsForRegister(text, reg);
+}
+
+/**
+ * The same split against an EXPLICIT register, for scoring a candidate that is not in the table yet.
+ *
+ * ⚠ THE TABLE IS THE THING UNDER TEST, so a measurement cannot go through `numeralSegments` — it would
+ * read the answer it is trying to establish and return the text unchanged for every unlisted language.
+ * Run 19 established every entry above this way and its harness did not survive; `tools/corpus/
+ * measure_numeral_register.mts` now does, so the next candidate is scored by the same code that ships.
+ */
+export function segmentsForRegister(text: string, reg: "en" | "fr"): readonly Segment[] {
+    if (!/\d/u.test(text)) return [{ text }];
     const out: Segment[] = [];
     let last = 0;
     for (const m of text.matchAll(DIGIT_RUN)) {
