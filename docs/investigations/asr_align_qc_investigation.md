@@ -3667,7 +3667,10 @@ from a diacritic that belongs there — so the trailing lookahead refused the to
 - `initialism_casing.mts` left it lowercase, so the repair never fired;
 - `core/initialisms.ts` refused the run even when uppercased, so `UTCּ+1` still read as the word *ˈaᶷt͡ʃ*.
 
-Both now bound on the Latin combining-diacritic blocks only (U+0300–036F, 1AB0–1AFF, 1DC0–1DFF, FE20–2F).
+Both now bound on the Latin combining-diacritic blocks only (U+0300–036F, 1AB0–1AFF, 1DC0–1DFF, FE20–2F),
+from a SINGLE exported `LATIN_MARK` in `core/initialisms.ts` that the corpus tool imports — the same
+boundary written twice is the drift this file warns about elsewhere. `INITIAL_RUN` (the dotted `U.S.A.`
+form) took the same bound, since it had the identical lookbehind.
 A Hebrew point, an Arabic harakat or a Devanagari matra after Latin letters is ADJACENT, not attached; a
 decomposed `MRI`+U+0301 is still refused, which is what the boundary exists for.
 
