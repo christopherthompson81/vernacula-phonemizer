@@ -5112,21 +5112,33 @@ the columns the old ones wrote.**
 about the recording. Measured over every sentence with more than one take:
 
 ```
-103,939 sentences with 2+ recordings, 231,742 rows
-  6.5%  a row >=0.15 worse than the BEST take of the same sentence
-  3.6%  >=0.20  (8,411 rows)
-  1.5%  >=0.30
-  0.7%  >=0.40
+$ python3 tools/corpus/asr-align/allo_compare.py --takes
+
+103,939 sentences with 2+ takes, 231,742 rows   (CORROBORATED distance, not the `dist` column)
+  6.46%  a row >=0.15 behind the BEST take of the same sentence
+  3.63%  >=0.20  (8,411 rows)
+  1.52%  >=0.30
+  0.74%  >=0.40
 ```
+
+⚠ **NAME THE METRIC OR THE NUMBER IS NOT A NUMBER.** This was first written as ad-hoc SQL with the
+distance unnamed, and a careful re-derivation got 10,714 at >=0.20 instead of 8,411 — because it used
+the stored `dist` column (wav2vec2 alone, through COARSEN) where this uses `corroborated` (the minimum
+over wav2vec2 and both allosaurus decodes, notation-folded). Both are defensible; they are not the same
+measurement. It now ships as `--takes` so the figure is regenerable by a command.
 
 ⚠ **This does NOT show a uniformly amateurish corpus.** If it were, sibling takes would disagree widely
 everywhere; 96% of rows sit within 0.20 of the best take of their own text. What exists is a TAIL of
 ~8,400 poor takes, concentrated in nb_no 15.3%, sd_in 14.1%, cy_gb 14.1%, bn_in 12.8%.
 
-⚠ **And the cause is not separable here.** `cy_gb` and `nb_no` are precisely the languages with known bad
-audio — cy_gb has 585 files too short for their text and 338 rows with no recognizer output at all — so
-recording quality confounds elocution, and neither is separable from accent. Run 75 already found the
-serious rows are measurably band-limited (HF share 0.179 against 0.308) without that classifying them.
+⚠ **And the cause is not separable here** — but the first draft overstated how much of it is audio.
+`cy_gb` and `nb_no` are two of the four leaders AND two of the three worst for bad audio (17.2% and
+15.7% of their rows `defective_audio`/`recognizer_short`), so recording quality plainly contributes.
+⚠ **It does not explain the tail on its own**: `sd_in` is second on spread at 14.1% with only 7.1% bad
+audio, `bn_in` is fourth with almost none, and `es_419` is the WORST language for bad audio (17.5%) and
+absent from the spread top ten. Elocution, accent and recording quality are all live here and this
+measurement separates none of them. Run 75 found the serious rows measurably band-limited (HF share
+0.179 against 0.308) without that classifying them either.
 
 ⚠ **The actionable form is corpus selection, not a phonemizer change.** 86% of the corpus has sibling
 takes and they are shipped equally; the spread ranks them, so the best-matching take is the better
@@ -5168,7 +5180,9 @@ vouch for should be excluded from the corpus rather than investigated:
     take is a real selection win and needs no verdict about why the others are worse.
 
 Sizes, so the recommendation is concrete: the status-based exclusion is **3,569 rows, 1.32%** of the
-corpus (1,248 defective_audio + 797 recognizer_short + 185 reader_divergence + 1,333 stale ckb defect).
+corpus (1,248 defective_audio + 797 recognizer_short + 185 reader_divergence + 1,339 defect, of which
+1,333 are the stale ckb rows). ⚠ The first draft of this line wrote 1,333 for the defect term and did not
+add up — six `defect` rows are outside ckb_iq.
 The sibling-spread selection is the larger lever at 8,411 rows, and it KEEPS the sentence — it swaps one
 take for a better one rather than dropping data.
 
