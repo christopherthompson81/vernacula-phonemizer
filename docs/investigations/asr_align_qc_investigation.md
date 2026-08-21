@@ -4068,3 +4068,56 @@ and entirely in the tail, which is where the training pairs were wrong.
 unterminated final line — silently, with the loop reporting success. The generator now emits a trailing
 newline and the loops use `|| [ -n "$var" ]`. Verified the other batches were unaffected (sn 6/6, hr 9/9,
 and run 58's 37 = 35 accepted + 2 demo).
+
+## Run 67 — 2026-08-20 — wordize's first use: BCS final devoicing is real, and should not be modelled
+
+First finding from `wordize.py` rather than from reading rows. Ranking `hr_hr` word types put **`zˈarez` at
+mean 0.494, +0.345 over the language baseline** — the highest of any type, and a word WE insert (the
+Croatian decimal comma).
+
+The readers do say it. The divergence is one segment:
+
+```
+ours  zˈarez        heard  z a ɾ e z  /  z a r e s  /  z a r e z
+```
+
+Final `z` coming back as `s`. That is **word-final obstruent devoicing**, which standard BCS orthoepy does
+NOT prescribe (unlike Russian, Polish or German).
+
+### The control that makes it a finding
+
+A 26–36% devoicing rate could simply be the recognizer being unreliable about voicing. It is not — compare
+the same obstruents word-MEDIALLY, on clean 1:1 alignments only:
+
+```
+lang     FINAL n  devoiced      MEDIAL n  devoiced    ratio
+hr_hr       378     33.6%           4487     2.7%     12.3x
+sr_rs       374     47.3%           4979     2.4%     19.5x
+bs_ba       335     32.8%           4330     1.5%     22.6x
+```
+
+**12–23×.** Position-specific, so the phenomenon is real. Medial 1.5–2.7% is the recognizer's voicing noise
+floor, which is a useful number in its own right.
+
+⚠ **And pl/de/ru are the other half of the control**: they return almost no word-final voiced obstruents at
+all (pl 0, de 0, ru 20), because their engines already devoice. Only the BCS three carry them.
+
+### But applying it is net negative
+
+```
+hr_hr  median 0.1374 -> 0.1390   527 closer / 931 further   gained 7.08 lost 11.99   0.59:1
+sr_rs  median 0.1469 -> 0.1478   570 closer / 716 further   gained 7.28 lost  9.07   0.80:1
+bs_ba  median 0.1570 -> 0.1594   381 closer / 874 further   gained 5.11 lost 11.28   0.45:1
+```
+
+At 33–47% the devoicing is **variable, not categorical** — a rule is wrong more often than right. Both
+readings are real and the standard keeps the voicing, so the standard is what ships. **Not applied**, and
+recorded so the 12–23× signal is not rediscovered as a defect.
+
+It also explains part of why BCS word-level means sit above baseline: a third of their final obstruents
+disagree for a reason that is not an error.
+
+### Still open in hr_hr
+
+`kˈoji`/`kˈoje`/`kˈoja` (873 occurrences combined, +0.16 to +0.18), `ɡdje` (+0.251), `zbog` (+0.230), and
+the number words `tisuću`/`devetsto`/`dvadeset` (+0.08 to +0.17). None examined.
