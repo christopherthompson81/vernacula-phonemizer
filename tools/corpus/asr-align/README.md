@@ -125,7 +125,39 @@ Two folds were proposed and refused, both recorded at the fold site so they are 
 | `scan_silent_audio.py` | measures the WAVEFORM — the one defect the phone comparison cannot see |
 | `consonant_skeleton.py` | consonant-only distance; `--validate` scores it against the full distance |
 | `confusion_pairs.py` | which phone substitutions dominate, investigate vs verified |
+| `wordize.py` | cuts the recognizer's flat stream into WORDS, so a divergence is attributable |
 | `judge_alignment.py` | optional LLM adjudication of the queue (local endpoint) |
+
+### `wordize.py` — attributing a divergence to a word
+
+`dist` says a row disagrees; it never says where. Every finding in the investigation doc so far was reached
+by a human reading two strings side by side, which does not scale past a few hundred rows.
+
+The recognizer emits no word boundaries — but **ours does**, so a global alignment of our units against
+theirs induces a cut of their stream at our boundaries, and each of our words gets a distance of its own.
+
+```bash
+python3 wordize.py --lang ig_ng --words 25     # word TYPES ranked by total divergence
+python3 wordize.py --lang ig_ng --rows 10      # worst rows, word by word
+python3 wordize.py --lang xx --selftest        # alignment invariants
+```
+
+⚠ **It rediscovered a known finding, which is the only reason to trust it.** Run 58 established by reading
+rows one at a time that Igbo speakers voice numerals in English. Ranked blind, six of `ig_ng`'s top eight
+word types are numbers — `puku` (thousand) at +0.340 over the language baseline, `naɾɪ`, `abʊɔ`, `itoolu`,
+`asatɔ`, `asaa`.
+
+⚠ **Read `--words`, not `--rows`.** The alignment degrades exactly where it matters: a badly wrong word has
+no anchor, so the path can absorb a neighbour's phones or hand its own away. The aggregate is sound; a
+single row is indicative.
+
+⚠ **Short words are excluded by default** (`--min-units 4`). `dist` is normalised, so a two-phone word
+scores 1.0 the moment the path shifts by one — hr_hr unfiltered returns `je`, `u`, `i`, `od`, `se`, `su`,
+which is frequency × shortness, not signal.
+
+⚠ **Every ranking prints a per-language BASELINE**, because word-level distances sit well above the
+utterance median (hr_hr: ordinary word 0.273, utterance median 0.137). Without it, "mean 0.46" reads as a
+defect when it may be normal for the language.
 
 ## Running it
 
