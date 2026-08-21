@@ -55,8 +55,12 @@ for (const line of readFileSync(inPath, "utf8").split("\n")) {
         // ⚠ SEGMENTS, NOT A STRING. A `{en:…}` span must reach the ENGLISH engine; handing the host its
         //   spelling is a misreading and handing it IPA is destroyed on re-parse. See code_switch.mts.
         const segs = codeSwitchSegments(text, reg, isKnownLang);
-        const ipa = (await Promise.all(segs.map((s) => phonemizeAsync(s.text, s.lang ?? reg))))
-            .filter(Boolean).join(" ").replace(/\s+/gu, " ").trim();
+        const parts = await Promise.all(segs.map((s) => phonemizeAsync(s.text, s.lang ?? reg)));
+        // ⚠ `tight` segments join with NO space — a span inside a word (Shona `ma{en:neutron}`) must not
+        //   invent a word break. See CodeSwitchSegment.tight.
+        const ipa = parts.reduce((acc, p, i) =>
+            p ? (acc === "" ? p : acc + (segs[i]!.tight ? "" : " ") + p) : acc, "")
+            .replace(/\s+/gu, " ").trim();
         if (ipa) out.push(`${lang}\t${wav}\t${ipa}`);
         else errs.push(`${lang}\t${wav}\tEMPTY`);
     } catch (e) {

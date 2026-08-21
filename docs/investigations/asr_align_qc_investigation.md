@@ -3770,3 +3770,50 @@ recognizer at zero the comparison could only penalise the symbol, never judge it
 Three of its four all-flagged sentences are **English code-switching** — *maslow's hierachy of needs
 theory*, *virgin … northen rock … asset management* — read with Shona rules, producing `neeɗs` with a
 Shona implosive and `theorj`. That is what `{en:…}` spans are for; not authored yet.
+
+## Run 62 — 2026-08-20 — Shona code-switching, and the line between a switch and a loanword
+
+Run 61 left three `sn_zw` all-flagged sentences reading English with Shona rules — *maslow's hierachy of
+needs theory* → `θeorj`, *needs* → `neeɗs` with a Shona **implosive**. `{en:…}` spans are the mechanism.
+
+### The mechanism needed one addition: TIGHT joins
+
+Shona takes English stems under its noun-class prefixes — `maneutron`, `nezveasset` — so a span is not
+always at a word boundary. Written `ma{en:neutron}` and joined on a space, that gives `ma nˈuːtɹɑːn`,
+inventing a word break the speaker did not make. ⚠ **The distance metric strips whitespace, so it would
+never have shown up in the score** — a trainer reading the IPA would simply see two words.
+
+Adjacency is already in the source (the span either touches the previous character or it does not), so
+`codeSwitchSegments` now marks such a segment `tight` and the re-derivation joins it with no space. Five
+shapes pinned in `test/code-switch.test.ts`, including a span abutting a span.
+
+### ⚠ And then the measurement said not to use it here
+
+Wrapping the prefixed stems as well as the standalone English:
+
+```
+sid 559   0.5490 -> 0.5842  +0.0351      sid 153   0.5163 -> 0.5733  +0.0570
+sid 559   0.4757 -> 0.6078  +0.1321      sid 153   0.6623 -> 0.6954  +0.0330
+sid 1184  0.5099 -> 0.3669  -0.1430      sid 1184  0.4830 -> 0.3630  -0.1200
+```
+
+The standalone English phrases win big; every prefixed stem loses. The reason is in the recognizer output:
+the reader says **`maɲuːtrɔn`** — a Shona palatal `ɲ` on an English stem. That is a **nativised loanword**,
+not a code-switch, and neither a pure-Shona nor a pure-English rendering captures it.
+
+**So the span is for code-switching, not for loanwords**, and the two are not distinguishable by looking at
+the orthography — only by what the reader did. Standalone English only:
+
+```
+sid 1184  0.5099 -> 0.3669      sid 559  0.5490 -> 0.5098      sid 153  0.5163 -> 0.5033
+sid 1184  0.4830 -> 0.3630      sid 559  0.4757 -> 0.4951      sid 153  0.6623 -> 0.6623
+
+mean 0.5327 -> 0.4834     gained 0.315  lost 0.019  = 16:1     all three sentences net positive
+```
+
+Applied to both recordings of each sentence — `read_text` is a property of the text — and marked
+`reader_divergence` with the loanword exclusion recorded in the comment so it is not re-tried.
+
+**The general rule, for the next language:** an English run that stands alone is a candidate for a span; an
+English stem carrying host morphology is a loanword the host engine should keep. The corpus can tell them
+apart, the orthography cannot.
