@@ -12,8 +12,18 @@ allosaurus is trained on a PHOIBLE phone-inventory / allophone tradition instead
 the entire point: it is the one thing the espeak confound cannot reach. Run 69 used it to settle es_419
 -- wav2vec2 returned exactly one theta per orthographic <c/z> (28/28) and allosaurus returned none.
 
-  audio -> phones        wav2vec2, espeak-labelled     what the espeak tradition would write
-  audio -> phones_allo   allosaurus, PHOIBLE-labelled  what a different tradition would write
+  audio -> phones            wav2vec2, espeak-labelled      what the espeak tradition would write
+  audio -> phones_allo       allosaurus, language inventory what a different tradition would write
+  audio -> phones_allo_uni   allosaurus, all 230 phones     the same, with no inventory prior
+
+⚠ **BOTH ALLOSAURUS DECODES SHIP, because neither wins in general and the difference is large.**
+Restricting the decode to a language's PHOIBLE inventory is the mirror image of espeak's failure -- it
+can SUPPRESS a real phone rather than invent one -- and on `ast_es`, whose inventory is the fleet's
+smallest at 29 phones, it does: the restricted decode returns 0.649 phones per wav2vec2 phone against
+the universal decode's 1.083, and agrees with our IPA far worse (0.520 vs 0.414). On `af_za` the
+ordering REVERSES (0.634 restricted vs 0.721 universal). Choosing one globally would have silently
+biased every per-language conclusion drawn from the column. The extra decode costs ~4%: the acoustic
+model forward is shared and only the CTC decode runs twice.
 
 ⚠ IT IS NOT GROUND TRUTH EITHER, and it is not the better of the two. It is coarser (fewer length
 marks, dental diacritics the folds must handle) and it carries its own inventory prior. The value is
@@ -85,14 +95,19 @@ NO_INVENTORY = ("be_by", "bs_ba", "kk_kz", "nso_za", "ny_mw", "om_et")
 MIGRATE = (
     "ALTER TABLE utt ADD COLUMN phones_allo TEXT",
     "ALTER TABLE utt ADD COLUMN phones_allo_lang TEXT",
+    "ALTER TABLE utt ADD COLUMN phones_allo_uni TEXT",
 )
 NOTES = {
     "phones_allo": "allosaurus (PHOIBLE-trained) phones -- a second, espeak-INDEPENDENT opinion on the "
                    "same audio. Space-separated units. Not ground truth; read it against `phones`, "
                    "where disagreement means the finding is about the instrument.",
-    "phones_allo_lang": "the allosaurus lang_id used: an ISO-639-3 code for a restricted inventory "
-                        f"decode, or {UNIVERSAL!r} for the unrestricted 230-phone decode used by the "
-                        "six languages with no PHOIBLE inventory. NEVER pool the two without checking.",
+    "phones_allo_lang": "the allosaurus lang_id behind `phones_allo`: an ISO-639-3 code for a "
+                        f"restricted inventory decode, or {UNIVERSAL!r} for the six languages with no "
+                        "PHOIBLE inventory, where the two columns are identical.",
+    "phones_allo_uni": "the SAME audio and the SAME acoustic model decoded against allosaurus's full "
+                       "230-phone set instead of the language's inventory. Neither column is the "
+                       "better one in general -- which wins is a per-language question, so both ship. "
+                       "See allo_compare.py --decodes.",
 }
 
 
@@ -160,7 +175,8 @@ def main() -> None:
     for lang in todo:
         lid = allo_lang(lang)
         want = {r[0] for r in db.execute(
-            "SELECT wav FROM utt WHERE lang=?" + ("" if a.redo else " AND phones_allo IS NULL"),
+            "SELECT wav FROM utt WHERE lang=?"
+            + ("" if a.redo else " AND (phones_allo IS NULL OR phones_allo_uni IS NULL)"),
             (lang,))}
         if not want:
             print(f"{lang}: already done", file=sys.stderr)
@@ -189,10 +205,18 @@ def main() -> None:
             with torch.no_grad():
                 lprobs = rec.am(tb, tl).detach().cpu().numpy()
             for j, src in enumerate(order):
-                out = rec.lm.compute(lprobs[j][: srt[j].shape[0]], lid, 1, emit=1.0)
+                # ⚠ `.copy()` IS LOAD-BEARING: allosaurus's decoder calls `mask.mask_logits(logits)`,
+                # which mutates the array IN PLACE. Decoding the same slice twice without a copy makes
+                # the second call read what the first masked, and it returns the FIRST decode's answer
+                # while looking like it ran -- which is exactly how a restricted-vs-universal probe
+                # first came back "identical", concealing a real per-language difference.
+                lp = lprobs[j][: srt[j].shape[0]]
+                out = rec.lm.compute(lp.copy(), lid, 1, emit=1.0)
+                uni = out if lid == UNIVERSAL else rec.lm.compute(lp.copy(), UNIVERSAL, 1, emit=1.0)
                 db.execute(
-                    "UPDATE utt SET phones_allo=?, phones_allo_lang=? WHERE lang=? AND wav=?",
-                    (out, lid, lang, batch[src][0]))
+                    "UPDATE utt SET phones_allo=?, phones_allo_lang=?, phones_allo_uni=? "
+                    "WHERE lang=? AND wav=?",
+                    (out, lid, uni, lang, batch[src][0]))
             db.commit()
 
         # ⚠ Decompression runs in its own thread, feeding a bounded queue. gunzip is only ~3% of the
@@ -253,7 +277,8 @@ def main() -> None:
               file=sys.stderr)
 
     pool.shutdown()
-    done = db.execute("SELECT COUNT(*) FROM utt WHERE phones_allo IS NOT NULL").fetchone()[0]
+    done = db.execute("SELECT COUNT(*) FROM utt WHERE phones_allo IS NOT NULL "
+                      "AND phones_allo_uni IS NOT NULL").fetchone()[0]
     total = db.execute("SELECT COUNT(*) FROM utt").fetchone()[0]
     print(f"\n{a.db}: phones_allo on {done}/{total} rows", file=sys.stderr)
     db.close()
