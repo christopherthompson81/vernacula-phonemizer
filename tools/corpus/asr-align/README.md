@@ -131,10 +131,11 @@ batch size 1, so a single-item CUDA decode disagrees with both the CPU decode an
 CPU, or batch. Measured floors: identical bytes decode identically (20/20); GPU-batched vs CPU is
 0.0005 mean PER; `ffmpeg -sample_fmt s16` vs in-memory int16 is ~0.02–0.04 PER, because ffmpeg dithers.
 
-⚠ **`allo_compare.py` HONOURS `status`, and the first version did not.** Rows already labelled
-`defective_audio`, `recognizer_short` or `reader_divergence` are audio, instrument or reader failures
-and cannot inform a question about our output; they are excluded by default (`--all-status` keeps
-them). Ignoring the durable record made `--serious` report es_419 as the fleet's worst language on 490
+⚠ **`allo_compare.py` HONOURS `status`, and the first version did not.** Rows whose verdict is already
+recorded — `defective_audio`, `recognizer_short`, `reader_divergence` (audio, instrument, reader) plus
+`convention`, `artefact`, `examined_clean` (closed human verdicts) — are excluded by default;
+`--all-status` keeps them. ⚠ `defect` is deliberately NOT excluded: those rows are ours, and the
+ckb_iq ones are additionally awaiting a corpus re-derivation that must stay visible. Ignoring the durable record made `--serious` report es_419 as the fleet's worst language on 490
 rows, every one of which was already closed — 864 `defective_audio` + 509 `recognizer_short` account
 for exactly the 1,373 rows fleet-wide that carry no wav2vec2 output. With the record respected, es_419
 goes from 17.5% serious to **0.0%** and the fleet from ~11% to 0.27%.

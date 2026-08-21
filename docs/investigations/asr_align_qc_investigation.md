@@ -4610,3 +4610,24 @@ Before acting on a corroborated finding, ask whether the disputed symbol lies on
 recognizers share and the language does not** — voicing, aspiration, vowel height/backness, length.
 If it does, the agreement is worth nothing on its own and the question needs the literature or a
 purpose-built acoustic probe. Both recognizers are trained on inventories, and an inventory is a claim.
+
+### Marked in the database, so neither comes back
+
+⚠ **A verdict that is not written into the row is not a verdict.** Both of run 73/74's conclusions are
+now `status` in `align.sqlite`, with `asr_align_label.py --wav-file` added to mark a computed row SET
+(the tool could previously do one row, one language, or one sibling class, and nothing in between):
+
+```
+mn_mn    469 rows  convention   the 469 SERIOUS rows the weak-labial axis actually drives -- not all 831.
+                                The other 362 are not explained by run 74 and stay in the queue.
+ckb_iq  1333 rows  defect       the free conjunction; fixed in the engine, ipa stale until re-derived.
+```
+
+⚠ **And `allo_compare` was still resurfacing them**, because its exclusion list held only the
+audio/instrument/reader statuses — a row a human had marked `convention` came straight back the next
+run. That is precisely the failure `examined_clean` was created to prevent, reintroduced by new tooling
+that did not know about it. The list is now the CLOSED set. mn_mn drops 27.0% → 13.9% serious, which is
+the 469 rows leaving and the 362 unexplained ones remaining, as intended.
+
+⚠ `defect` is deliberately NOT excluded. Those rows are ours, and ckb_iq's 1,333 need the re-derivation
+pass before any ckb number is quoted again.

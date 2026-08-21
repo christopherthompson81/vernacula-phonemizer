@@ -138,7 +138,13 @@ def notate(us: list[str]) -> list[str]:
 # about OUR output. `reader_divergence` is a row where the reader said something other than the script:
 # also real, also not our bug. Excluded by default, overridable, and counted so the exclusion is visible
 # rather than silent.
-NOT_OUR_OUTPUT = ("defective_audio", "recognizer_short", "reader_divergence")
+# ⚠ CLOSED VERDICTS, not just "not our fault". The first version listed only the audio/instrument/reader
+# statuses, so a row marked `convention` -- a HUMAN having decided the divergence is notation -- came
+# straight back the next run. That is the exact failure `examined_clean` was created to prevent, and it
+# defeats the point of writing the verdict down. `defect` is deliberately NOT here: those rows are ours,
+# and for ckb_iq they are additionally awaiting a corpus re-derivation, which must stay visible.
+CLOSED = ("defective_audio", "recognizer_short", "reader_divergence",
+          "convention", "artefact", "examined_clean")
 
 
 # ⚠ AN EMPTY RECOGNIZER STREAM ABSTAINS; IT DOES NOT VOTE MAXIMUM DISAGREEMENT. `per` returns 1.0
@@ -152,7 +158,7 @@ def status_sql(include: bool) -> str:
     """SQL fragment excluding rows whose recorded verdict is not about our output."""
     if include:
         return ""
-    return " AND (status IS NULL OR status NOT IN (%s))" % ",".join(f"'{v}'" for v in NOT_OUR_OUTPUT)
+    return " AND (status IS NULL OR status NOT IN (%s))" % ",".join(f"'{v}'" for v in CLOSED)
 
 
 def corroborated(ours: list[str], streams: list[list[str]]) -> float | None:
@@ -168,8 +174,9 @@ def main() -> int:
     ap.add_argument("--pairs", type=int, default=20)
     ap.add_argument("--min-rows", type=int, default=50)
     ap.add_argument("--all-status", action="store_true",
-                    help=f"do NOT exclude rows already labelled {'/'.join(NOT_OUR_OUTPUT)} -- those are "
-                         "audio, instrument or reader failures, and are skipped by default")
+                    help=f"do NOT exclude rows whose verdict is already recorded ({'/'.join(CLOSED)}) "
+                         "-- audio, instrument and reader failures plus closed human verdicts. Skipped "
+                         "by default so a decided row does not come back. `defect` is NOT skipped.")
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
