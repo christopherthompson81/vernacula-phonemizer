@@ -4121,3 +4121,67 @@ disagree for a reason that is not an error.
 
 `kˈoji`/`kˈoje`/`kˈoja` (873 occurrences combined, +0.16 to +0.18), `ɡdje` (+0.251), `zbog` (+0.230), and
 the number words `tisuću`/`devetsto`/`dvadeset` (+0.08 to +0.17). None examined.
+
+## Run 68 — 2026-08-20 — the rest of hr_hr's word ranking: standard vs connected speech
+
+Run 67 left four leads from `wordize`. All four resolve the same way, and together they explain why BCS
+word-level means sit above baseline without a single defect being present.
+
+### `tisuću` (+0.169) — instrument blindness, not a defect
+
+Croatian ⟨ć⟩ is /t͡ɕ/ and the recognizer writes `tʃ` for it. It is not that it lacks the symbol:
+
+```
+lang            our ɕ n   what comes back
+cmn_hans_cn        2656   ɕ=93%          <- it writes ɕ freely for Mandarin
+hr_hr               288   ʃ=93%   ɕ=0%
+sr_rs               217   ʃ=91%   ɕ=0%
+pl_pl              1258   ʃ=49%   s=21%
+```
+
+So the recognizer HAS `ɕ` and uses it heavily — for the Mandarin fricative. It never hears BCS ⟨ć⟩ as
+distinct from ⟨č⟩, which makes the contrast invisible to this instrument.
+
+⚠ **NOT a COARSEN candidate**, and this is where the `ɒ` precedent does not transfer. `ɒ`'s justification
+was "the recognizer's count is 0, so the map is unreachable outside these three languages". Here the count
+is 29,514 and 93% of it is Mandarin — a global `ɕ→ʃ` would destroy a distinction the recognizer genuinely
+makes. Cost of leaving it, measured as the share of edit operations attributable to `ɕ` vs `ʃ`:
+
+```
+hr_hr  480 / 16695 = 2.9%      sr_rs  364 / 17241 = 2.1%      bs_ba  361 / 19480 = 1.9%
+```
+
+A fixed 2–3% penalty carrying no information. It does not distort the ranking WITHIN a language, but it
+does inflate every ⟨ć⟩ word — which is exactly how `tisuću` reached the top of the list.
+
+### `koji`/`koje`/`koja` (+0.16 to +0.18) — variable /ji/ reduction
+
+```
+ours kˈoji   n=393   ->   ko 222x · koj 42x · koi 40x · koɪ 27x · koji 13x
+```
+
+Control, over hr_hr words of ≥3 units ending in a vowel:
+
+```
+final vowel absent from the heard span, all words:   25.1%   (10,035 words)
+final vowel absent, words ending in /ji/:            47.4%   (1,091 words)
+```
+
+**Roughly double the baseline**, so the reduction is specific to /ji/ rather than general final-vowel loss.
+Real, and at 47% variable rather than categorical — the same shape as the final devoicing in run 67, and
+declined for the same reason.
+
+### `zbog` (+0.230), `gdje` (+0.251)
+
+`zbog` → `zbok` 25× / `sbok` 14× / `zboɡ` 13×: the run-67 final devoicing again, plus initial z~s. `gdje`
+→ `ɡde` 8× / `de` 7×: the /j/ of the jat reflex dropping.
+
+### What this says about hr_hr as a whole
+
+Every elevated word type in the ranking is **our careful/standard form against connected speech** —
+`ć`/`č` the instrument cannot separate, final obstruents variably devoiced, /ji/ variably reduced, jat /j/
+dropped. None is a phonemizer error, and the standard is the right thing to emit.
+
+⚠ **The useful consequence is for reading the tool.** A high word-level mean in BCS is the expected state,
+not a lead. Languages whose orthography is close to their careful pronunciation will rank clean; languages
+with heavy connected-speech reduction will not, and that says nothing about the engine.
