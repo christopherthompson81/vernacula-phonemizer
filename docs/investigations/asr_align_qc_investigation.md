@@ -4465,3 +4465,76 @@ pt_br        ŋ      0.0    29.7      9.3     <- and ŋ in yo_ng, ln_cd, umb_ao,
 ⚠ **`ŋ` recurs across six unrelated languages** — a phone the fleet never emits and both recognizers
 hear. That is the shape of a systematic gap rather than six coincidences, and it is the one lead here
 that a single recognizer could not have produced.
+
+## Run 73 — 2026-08-21 — the word-level corroborated queue finds a real defect: ckb's free ⟨و⟩
+
+Runs 71–72 kept converging on vowel quality — ɑ/a, ɪ/i, ə. ⚠ **That is a statement about the
+INSTRUMENT, not about the fleet.** A per-symbol detector finds per-symbol things; its output going
+fine-grained means there is nothing coarse left *of that kind*, not that fine-grained work is what
+matters most. Asking the blunt question instead — which WORD TYPES do both recognizers put far from
+us — found a defect on the first try.
+
+### The queue
+
+`allo_compare.py --words`, on the four languages the re-ranked all-flagged list put on top. Two-stage:
+the cheap row score filters to rows no recognizer vouches for, then `wordize` aligns only those. Word
+distance is `min` across wav2vec2 and both allosaurus decodes, so no single instrument's convention can
+carry a finding.
+
+```
+=== ckb_iq  (107 rows no recognizer vouches for)
+    1.000  x59   w          <- taken
+    1.000  x15   j
+    1.000  x7    duː
+=== he_il  (89 rows)
+    1.000  x12   be         <- proclitics; not actioned
+    1.000  x6    ve
+    0.750  x10   pʰˈiː      <- English letter-names, in Hebrew and Kurdish both
+```
+
+### ckb: the free conjunction ⟨و⟩ was a bare [w]
+
+`scanWord` resolves the و/ی matres lectionis as "glide word-initially or next to a written vowel, else
+the vowel". For the ONE-LETTER WORD ⟨و⟩ — the conjunction "û", *and* — `i === 0` makes it word-initial,
+so it emitted a bare `[w]`: a consonant standing alone as a word, with no following segment to glide
+onto.
+
+⚠ **We already knew, and routed around it instead of fixing it.** From `numbers.ts`:
+
+> The connective is an ENCLITIC, so `link()` appends it to the END of the preceding word rather than
+> emitting it as a free token … **Emitting a standalone ⟨و⟩ would instead phonemize to a bare [w] (the
+> ckb g2p reads a word-initial ⟨و⟩ as the glide).**
+
+That workaround fixed the numeral connective and left the far commoner free conjunction standing. ⟨و⟩
+is a whole word **1,900 times in 3,040** FLEURS ckb sentences.
+
+### Measured, against both recognizers
+
+Over the 1,337 affected rows, distance = min(wav2vec2, allosaurus-restricted, allosaurus-universal),
+notation folded:
+
+```
+             median    mean    closer / further
+current      0.2742   0.3018
+w -> u       0.2663   0.2918    861 /  23   = 37.4:1     <- taken
+w -> uː      0.2663   0.2918    861 /  23               (indistinguishable: fold strips length)
+w -> drop    0.2698   0.2971   1312 /  25   = 52.5:1
+```
+
+⚠ **Deleting it scores more rows closer but a worse median and mean.** That is the count-vs-magnitude
+split the ⟨ʔ⟩ decision already set a bar for, and it resolves the same way: deletion is the
+connected-speech reduction, `[u]` is the standard form, and the register is a choice. ⚠ `u` over `uː`
+is decided on the language, not the metric — the eval cannot see length at all.
+
+⚠ **This is the first fleet change in this campaign carried by a non-espeak instrument.** 37:1 against
+wav2vec2 alone would have been the low_vowel_notation situation over again; 37:1 against the minimum of
+two independently-labelled recognizers is not something an espeak convention can produce.
+
+### Not actioned
+
+- **he_il `be`/`ve`/`hen` at 1.000** — Hebrew proclitics we emit as free words. Whether that is a defect
+  or a segmentation convention needs the `pr839` proclitic work, not a grapheme edit.
+- **`pʰˈiː`, `jˈuː`, `duː`, `ˈɛn` in BOTH he_il and ckb_iq** — Latin acronyms read with English letter
+  names. The English fallback was accepted deliberately; recorded because it now has a measured cost.
+- ⚠ The stored `ipa` for ckb_iq is now stale. The corpus needs a re-derivation pass before these
+  numbers are re-measured.

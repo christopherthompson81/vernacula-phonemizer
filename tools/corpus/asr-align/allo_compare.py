@@ -109,6 +109,17 @@ def main() -> int:
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
+    ap.add_argument("--words", action="store_true",
+                    help="word-level corroborated queue: WORD TYPES both recognizers put far from our "
+                         "IPA, across many occurrences. The most actionable output here.")
+    ap.add_argument("--min-n", type=int, default=4,
+                    help="minimum occurrences before a word type is reported (default 4)")
+    ap.add_argument("--serious", action="store_true",
+                    help="rows BOTH recognizers put far from us, after folding the notation axes -- "
+                         "structural breakage rather than transcription-convention drift")
+    ap.add_argument("--bad", type=float, default=0.60,
+                    help="a row is serious when even the closer recognizer is this far (default 0.60)")
+    ap.add_argument("--show", type=int, default=0, help="print this many worst rows per language")
     ap.add_argument("--flagged", action="store_true",
                     help="re-rank the all-flagged queue by whether ANY recognizer supports us")
     ap.add_argument("--min-flagged", type=int, default=5,
@@ -129,6 +140,95 @@ def main() -> int:
     db = sqlite3.connect(f"file:{a.db}?mode=ro", uri=True)
     langs = a.langs or [r[0] for r in db.execute(
         "SELECT lang FROM utt WHERE phones_allo IS NOT NULL GROUP BY lang ORDER BY lang")]
+
+    # ⚠ THE MOST ACTIONABLE MODE, and the reason is CLUSTERING. A row-level score says an utterance is
+    # wrong; a word type failing across many utterances says a RULE is wrong, and names it. Scattered
+    # bad rows are reader slips; a word type at distance 0.8 over 30 occurrences is a defect with an
+    # address.
+    #
+    # ⚠ TWO-STAGE, because it has to be. wordize runs a Needleman-Wunsch per row per recognizer --
+    # ~11k cells each, in Python -- so 270k rows x 3 streams is not affordable. The cheap
+    # SequenceMatcher row score filters first, and only rows no recognizer can vouch for are aligned.
+    # ⚠ That means this CANNOT see a bad word inside an otherwise-good row. It is a detector of
+    # concentrated damage, not a census.
+    if a.words:
+        from wordize import wordize
+
+        nf = lambda x: notate(units(x))  # noqa: E731
+        for lang in langs:
+            agg: dict[str, list[float]] = {}
+            n_rows = 0
+            for ipa, ph, pa, pu in db.execute(
+                    "SELECT ipa, phones, phones_allo, phones_allo_uni FROM utt "
+                    "WHERE lang=? AND ipa IS NOT NULL AND phones IS NOT NULL "
+                    "AND phones_allo IS NOT NULL", (lang,)):
+                u = nf(ipa)
+                if len(u) < 10:
+                    continue
+                streams = [ph, pa, pu or pa]
+                if min(per(u, nf(x)) for x in streams) < a.bad:
+                    continue
+                n_rows += 1
+                per_word = [wordize(ipa, x, nf) for x in streams]
+                for k, (w, _g, _d) in enumerate(per_word[0]):
+                    # ⚠ min across streams again: a word only wav2vec2 dislikes is not a lead.
+                    agg.setdefault(w, []).append(min(pw[k][2] for pw in per_word))
+            hits = [(statistics.median(v), len(v), w) for w, v in agg.items()
+                    if len(v) >= a.min_n and statistics.median(v) >= a.bad]
+            if not hits:
+                continue
+            hits.sort(reverse=True)
+            print(f"\n=== {lang}  ({n_rows} rows no recognizer vouches for)")
+            for med, n, w in hits[:a.pairs]:
+                print(f"    {med:.3f}  x{n:<4} {w}")
+        return 0
+
+    # ⚠ THE PER-SYMBOL VERDICT FINDS FINE-GRAINED THINGS BECAUSE THAT IS WHAT IT LOOKS AT. Its output
+    # converged on vowel quality -- ɑ/a, ɪ/i, ə -- which is a sign the fleet has no large defects LEFT
+    # OF THAT KIND, not that vowel quality is the most important thing outstanding. This mode asks the
+    # blunt question instead: which UTTERANCES are structurally wrong?
+    #
+    # ⚠ The notation fold is what makes this mean something. Without it a row scores badly for writing
+    # `r` where both recognizers write `ɾ`, which inflates every language uniformly. With it, distance
+    # is carried by segments that are MISSING, EXTRA, or DIFFERENT -- wrong word, dropped clitic,
+    # unexpanded number, failed transliteration.
+    #
+    # ⚠ And `min` over all three streams keeps it charitable, as in --flagged: a row counts as serious
+    # only when NO independent reading of the audio, under any decode, comes close to us. A row that
+    # only wav2vec2 dislikes is an espeak artefact and is deliberately NOT counted here.
+    if a.serious:
+        out = []
+        for lang in langs:
+            worst, rows = [], []
+            for wav, ipa, ph, pa, pu in db.execute(
+                    "SELECT wav, ipa, phones, phones_allo, phones_allo_uni FROM utt "
+                    "WHERE lang=? AND ipa IS NOT NULL AND phones IS NOT NULL "
+                    "AND phones_allo IS NOT NULL", (lang,)):
+                u = notate(units(ipa))
+                if len(u) < 10:
+                    continue
+                d = min(per(u, notate(units(ph))),
+                        per(u, notate(units(pa))),
+                        per(u, notate(units(pu or pa))))
+                worst.append(d)
+                if a.show and d >= a.bad:
+                    rows.append((d, wav))
+            if len(worst) < a.min_rows:
+                continue
+            n_bad = sum(1 for d in worst if d >= a.bad)
+            out.append((n_bad / len(worst), n_bad, lang, statistics.median(worst), len(worst), rows))
+        out.sort(reverse=True)
+        print(f"{'serious%':>9}{'n':>7}{'lang':<15}{'median':>8}{'rows':>7}")
+        print(f"{'-'*8:>9}{'-'*6:>7} {'-'*13:<14}{'-'*7:>8}{'-'*6:>7}")
+        for frac, n_bad, lang, med, n, rows in out:
+            print(f"{100 * frac:8.1f}%{n_bad:7}{lang:<15}{med:8.4f}{n:7}")
+            for d, wav in sorted(rows, reverse=True)[:a.show]:
+                print(f"           {d:.4f}  {lang}/{wav}")
+        tb = sum(r[1] for r in out)
+        tn = sum(r[4] for r in out)
+        print(f"\n{len(out)} languages, {tn} rows, {tb} serious ({100 * tb / max(tn, 1):.2f}%) "
+              f"-- rows no recognizer, under any decode, puts within {a.bad} of us")
+        return 0
 
     # The all-flagged class is the strongest signal in the corpus -- every recording of the sentence is
     # flagged, so a reader-specific slip is ruled out. What it could never rule out with one recognizer
