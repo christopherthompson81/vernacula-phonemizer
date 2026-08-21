@@ -168,6 +168,11 @@ Two folds were proposed and refused, both recorded at the fold site so they are 
 | `asr_align_allo.py` | the SECOND recognizer: allosaurus (PHOIBLE-trained, espeak-independent) → `phones_allo` |
 | `allo_fast.py` | vectorizes allosaurus's per-frame MFCC loop; `--selftest` proves it bit-identical |
 | `allo_compare.py` | reads the two recognizers against each other — does a queue median survive a change of tradition? |
+
+Both carry the `--selftest` convention: `asr_align_allo.py --selftest` checks the language map's
+invariants with no audio, no GPU and no model download (it parses its own source, because a duplicate
+key in a dict literal is silent); `allo_fast.py --selftest` re-proves the MFCC vectorization
+bit-identical against real audio, and should be run after any allosaurus upgrade.
 | `asr_align_report.py` | the scoring — `fold`, `coarsen`, `dist`, and the per-language 3×MAD queues |
 | `asr_align_label.py` | the durable record: `status` on each row (verified / investigate / defective_audio) |
 | `read_text.py` + `.mts` | the text the phonemizer ACTUALLY READ — `read_text`, `read_text_src` (auto/hand) |

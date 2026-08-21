@@ -115,6 +115,65 @@ def allo_lang(lang: str) -> str:
     return ALLO_LANG.get(lang, UNIVERSAL)
 
 
+def selftest(db_path: str) -> int:
+    """Check the language map's invariants. No audio, no GPU, no model download.
+
+    ⚠ A DUPLICATE KEY IN A DICT LITERAL IS SILENT -- the last one wins and nothing complains, which is
+    the same hazard `test/abbreviation-table.test.ts` exists for on the TypeScript side (a duplicate
+    `cs_cz` key shipped there, and tsc could not see it). The dict cannot report its own duplicates, so
+    this parses the source.
+    """
+    import ast as _ast
+
+    bad = 0
+    tree = _ast.parse(open(os.path.abspath(__file__), encoding="utf8").read())
+    for node in _ast.walk(tree):
+        if not (isinstance(node, _ast.Assign) and isinstance(node.value, _ast.Dict)):
+            continue
+        if not any(getattr(t, "id", None) == "ALLO_LANG" for t in node.targets):
+            continue
+        keys = [k.value for k in node.value.keys if isinstance(k, _ast.Constant)]
+        dupes = {k for k in keys if keys.count(k) > 1}
+        if dupes:
+            print(f"  ALLO_LANG has duplicate keys: {sorted(dupes)}", file=sys.stderr)
+            bad += 1
+        print(f"  ALLO_LANG: {len(keys)} entries, {len(set(keys))} unique")
+
+    overlap = sorted(set(ALLO_LANG) & set(NO_INVENTORY))
+    if overlap:
+        print(f"  languages listed BOTH as mapped and as having no inventory: {overlap}",
+              file=sys.stderr)
+        bad += 1
+
+    for fl, iso in sorted(ALLO_LANG.items()):
+        if not (3 <= len(iso) <= 4 and iso.isalpha() and iso.islower()):
+            print(f"  {fl}: {iso!r} is not an ISO-639-3 code", file=sys.stderr)
+            bad += 1
+
+    # ⚠ Coverage is checked against the TABLE, not against a hardcoded list, so a language added to the
+    # corpus later shows up here rather than silently taking the universal decode.
+    if os.path.exists(db_path):
+        db = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+        corpus = [r[0] for r in db.execute("SELECT DISTINCT lang FROM utt")]
+        unmapped = sorted(set(corpus) - set(ALLO_LANG) - set(NO_INVENTORY))
+        stale = sorted(set(ALLO_LANG) - set(corpus))
+        print(f"  corpus: {len(corpus)} languages, "
+              f"{len(set(corpus) & set(ALLO_LANG))} mapped, "
+              f"{len(set(corpus) & set(NO_INVENTORY))} on the universal decode")
+        if unmapped:
+            print(f"  NOT accounted for (would silently get {UNIVERSAL!r}): {unmapped}",
+                  file=sys.stderr)
+            bad += 1
+        if stale:
+            print(f"  mapped but not in the corpus: {stale}", file=sys.stderr)
+        db.close()
+    else:
+        print(f"  {db_path}: absent, skipping coverage check")
+
+    print("selftest: OK" if not bad else f"selftest: FAILED ({bad})", file=sys.stderr)
+    return bad
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--langs", nargs="*")
@@ -128,9 +187,14 @@ def main() -> None:
     ap.add_argument("--db", default=DB)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--redo", action="store_true", help="re-run languages already filled in")
+    ap.add_argument("--selftest", action="store_true",
+                    help="check the language map's invariants and exit (no audio, no GPU)")
     ap.add_argument("--stock-mfcc", action="store_true",
                     help="skip the allo_fast vectorization (identical output, ~20x slower)")
     a = ap.parse_args()
+
+    if a.selftest:
+        sys.exit(1 if selftest(a.db) else 0)
 
     # ⚠ Set BEFORE numpy/torch import or it is ignored. Stock MFCC was 91% of wall-clock and BLAS was
     # spreading its small per-frame matmuls over every core -- 19m40s of CPU to produce 2m12s of
