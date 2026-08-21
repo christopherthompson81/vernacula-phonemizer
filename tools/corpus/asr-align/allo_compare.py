@@ -25,6 +25,16 @@ PHOIBLE inventory is starving the decode -- and the unrestricted one scores 0.41
 where the restricted scores 0.520. On `af_za` the ordering reverses. Read `--decodes` before quoting
 a delta for any language, and prefer the decode that wins there.
 
+⚠⚠ **CORROBORATION IS STRONG FOR "IS THERE A SEGMENT HERE", WEAK FOR "WHICH CATEGORY IS IT".** Two
+recognizers agreeing against us is not two witnesses when both are mapping an unfamiliar category into
+a familiar one. Neither has a voiceless-unaspirated-vs-aspirated system; both have voiced-vs-voiceless.
+On Mongolian's weak labial they made the same reduction for the same reason and agreed at 7.0:1 that
+⟨б⟩ is [b] — and Svantesson's Khalkha grammar transcribes every ⟨б⟩ as [p], with our table already
+encoding the exact labial/dental/velar asymmetry he documents. See run 74. Before acting on a
+corroborated finding, ask whether the disputed symbol sits on a category axis the RECOGNIZERS share and
+the LANGUAGE does not — voicing, aspiration, vowel height, length. If so the agreement is worth nothing
+alone. An inventory is a claim, and both models were trained on one.
+
 ⚠ **DELTA IS A TRIAGE SIGNAL, NOT A VERDICT**, for three reasons: allosaurus runs at **8 kHz** and is deaf above 4 kHz where sibilant contrasts live; it is
 coarser than wav2vec2 in general, so it will agree with a coarser transcription for uninteresting
 reasons; and six languages use a different decode (see `phones_allo_lang`).
@@ -48,7 +58,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 from asr_align_allo import UNIVERSAL  # noqa: E402
-from asr_align_report import fold  # noqa: E402
+from asr_align_report import COARSEN, fold  # noqa: E402
 from wordize import align_path  # noqa: E402
 
 DB = os.environ.get("ASR_ALIGN_ROOT", "/mnt/data/omnivoice_ipa") + "/work/asr_align/align.sqlite"
@@ -62,17 +72,37 @@ def per(a: list[str], b: list[str]) -> float:
     return 1.0 - SequenceMatcher(None, a, b, autojunk=False).ratio()
 
 
-# ⚠ `fold` ONLY -- deliberately NOT `coarsen`. COARSEN maps phones onto what WAV2VEC2 writes instead;
-# it is that model's inventory, calibrated against that model's zero counts. Applying it here would
-# push allosaurus's output through its rival's conventions and destroy the independence that is the
-# entire reason for the column. Both comparisons below use the same plain fold, so they are on equal
-# footing even though neither is the number the shipped queue reports.
+# ⚠ NOT the whole of `coarsen`: that table is calibrated against WAV2VEC2's zero counts, and pushing
+# allosaurus through its rival's inventory would destroy the independence the column exists for. The
+# split below keeps only the entries BOTH recognizers are blind to.
 #
 # ⚠ It also already handles allosaurus's dental diacritics with no extra work: `s̪` is s + U+032A, a
 # combining mark, so `fold` strips it. Run 69 claimed the fold tables "would need to handle" these.
 # They do not.
+# ⚠ COARSEN IS WAV2VEC2'S BLINDNESS, AND ALLOSAURUS IS NOT BLIND TO A THIRD OF IT. Measured over all
+# 270,106 rows: of COARSEN's 27 entries, allosaurus returns nine of them in quantity where wav2vec2
+# returns exactly zero —
+#
+#     ʋ  ours 173,823   w2v 0   allo  11,570        ɳ  ours 38,899   w2v 0   allo  92,254
+#     ɒ  ours  52,582   w2v 0   allo 221,525        ɴ  ours 32,163   w2v 0   allo  55,426
+#     ʂ  ours  47,921   w2v 0   allo 101,230        ʝ  ours  6,699   w2v 0   allo   9,763
+#     ɖ  ours  45,592   w2v 0   allo  14,222        ɻ  ours  5,670   w2v 0   allo   6,963
+#     ʄ  ours   3,962   w2v 0   allo   1,024
+#
+# ~403k tokens the shipped metric folds away as unjudgeable BECAUSE ONE MODEL COULD NOT WRITE THEM. The
+# second recognizer restores measurement on them, and folding them here would throw that away — the
+# README's "the recognizer cannot hear 3.67% of what we write" is a fact about wav2vec2, not about audio.
+#
+# ⚠ BUT THE OTHER EIGHTEEN MUST STILL FOLD, and not folding them was a real defect in this tool: `ɮ` is
+# 61/1000 of Mongolian and NEITHER recognizer writes it, so every ɮ counted as our error and mn_mn came
+# out at 42% "serious" — an artefact of the fold table, not a finding about Mongolian.
+BLIND_BOTH = {k: v for k, v in COARSEN.items()
+              if k in ("ɫ", "ɦ", "ʈ", "χ", "ɓ", "ɗ", "ɽ", "ɮ", "ʑ", "ɸ", "ɀ", "ɠ", "ᶑ", "ɜ",
+                       "ǀ", "ǁ", "ǃ", "ǂ")}
+
+
 def units(s: str) -> list[str]:
-    return fold(s or "")
+    return [BLIND_BOTH.get(u, u) for u in fold(s or "") if BLIND_BOTH.get(u, u)]
 
 
 # ⚠ WITHOUT THIS THE "corroborated" QUEUE IS A NOTATION QUEUE. Measured: of 538 corroborated findings
@@ -109,7 +139,13 @@ def notate(us: list[str]) -> list[str]:
 # about OUR output. `reader_divergence` is a row where the reader said something other than the script:
 # also real, also not our bug. Excluded by default, overridable, and counted so the exclusion is visible
 # rather than silent.
-NOT_OUR_OUTPUT = ("defective_audio", "recognizer_short", "reader_divergence")
+# ⚠ CLOSED VERDICTS, not just "not our fault". The first version listed only the audio/instrument/reader
+# statuses, so a row marked `convention` -- a HUMAN having decided the divergence is notation -- came
+# straight back the next run. That is the exact failure `examined_clean` was created to prevent, and it
+# defeats the point of writing the verdict down. `defect` is deliberately NOT here: those rows are ours,
+# and for ckb_iq they are additionally awaiting a corpus re-derivation, which must stay visible.
+CLOSED = ("defective_audio", "recognizer_short", "reader_divergence",
+          "convention", "artefact", "examined_clean")
 
 
 # ⚠ AN EMPTY RECOGNIZER STREAM ABSTAINS; IT DOES NOT VOTE MAXIMUM DISAGREEMENT. `per` returns 1.0
@@ -123,7 +159,7 @@ def status_sql(include: bool) -> str:
     """SQL fragment excluding rows whose recorded verdict is not about our output."""
     if include:
         return ""
-    return " AND (status IS NULL OR status NOT IN (%s))" % ",".join(f"'{v}'" for v in NOT_OUR_OUTPUT)
+    return " AND (status IS NULL OR status NOT IN (%s))" % ",".join(f"'{v}'" for v in CLOSED)
 
 
 def corroborated(ours: list[str], streams: list[list[str]]) -> float | None:
@@ -139,8 +175,9 @@ def main() -> int:
     ap.add_argument("--pairs", type=int, default=20)
     ap.add_argument("--min-rows", type=int, default=50)
     ap.add_argument("--all-status", action="store_true",
-                    help=f"do NOT exclude rows already labelled {'/'.join(NOT_OUR_OUTPUT)} -- those are "
-                         "audio, instrument or reader failures, and are skipped by default")
+                    help=f"do NOT exclude rows whose verdict is already recorded ({'/'.join(CLOSED)}) "
+                         "-- audio, instrument and reader failures plus closed human verdicts. Skipped "
+                         "by default so a decided row does not come back. `defect` is NOT skipped.")
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
@@ -153,7 +190,11 @@ def main() -> int:
                     help="rows BOTH recognizers put far from us, after folding the notation axes -- "
                          "structural breakage rather than transcription-convention drift")
     ap.add_argument("--bad", type=float, default=0.60,
-                    help="a row is serious when even the closer recognizer is this far (default 0.60)")
+                    help="distance cut: the row threshold under --absolute, AND the row/word threshold "
+                         "in --words and the symbol modes, which have no per-language cut (default 0.60)")
+    ap.add_argument("--absolute", action="store_true",
+                    help="use the flat --bad cut instead of each language's own median+3*MAD. Ranks "
+                         "recognizer competence rather than our output -- see the call site.")
     ap.add_argument("--show", type=int, default=0, help="print this many worst rows per language")
     ap.add_argument("--flagged", action="store_true",
                     help="re-rank the all-flagged queue by whether ANY recognizer supports us")
@@ -250,15 +291,29 @@ def main() -> int:
                     unmeasured += 1
                     continue
                 worst.append(d)
-                if a.show and d >= a.bad:
-                    rows.append((d, wav))
+                rows.append((d, wav))
             if len(worst) < a.min_rows:
                 if a.langs:
                     print(f"{lang}: {len(worst)} usable rows, below --min-rows {a.min_rows}")
                 continue
-            n_bad = sum(1 for d in worst if d >= a.bad)
-            out.append((n_bad / len(worst), n_bad, lang, statistics.median(worst), len(worst), rows,
-                        unmeasured))
+            # ⚠ SELF-RELATIVE, AND THE ABSOLUTE VERSION RANKED THE WRONG THING. A flat 0.60 cut flags
+            # 0.0% of es_419 and en_us but 13.9% of mn_mn, 16.4% of sd_in, 14.8% of my_mm -- because
+            # those are the languages BOTH RECOGNIZERS handle worst, not the ones we do. mn_mn's median
+            # corroborated distance is 0.4982, so 0.60 sits barely above its median and catches the
+            # ordinary tail. Against each language's own median + 3*MAD the rate lands at 4.8-8.9%
+            # everywhere, which is comparable. THIRD appearance of one error -- run 72's aggregate delta
+            # and the ignored `status` column were the others. Plainly: across languages, only
+            # self-relative figures mean anything.
+            med = statistics.median(worst)
+            mad = statistics.median(abs(d - med) for d in worst)
+            # ⚠ A ZERO MAD MUST FALL BACK, NOT DEGENERATE. `or 1e-9` made the cut `med + 3e-9`, which
+            # flags every row at or above the median -- roughly half the language -- and reads as a
+            # catastrophic finding. It needs >50% of rows sharing a distance exactly, which floats make
+            # unlikely but short identical utterances can produce.
+            cut = a.bad if (a.absolute or mad == 0) else med + 3 * mad
+            n_bad = sum(1 for d in worst if d >= cut)
+            rows = sorted((r for r in rows if r[0] >= cut), reverse=True)[:a.show] if a.show else []
+            out.append((n_bad / len(worst), n_bad, lang, med, len(worst), rows, unmeasured))
         out.sort(reverse=True)
         print(f"{'serious%':>9}{'n':>7}  {'lang':<15}{'median':>8}{'rows':>7}")
         print(f"{'-'*8:>9}{'-'*6:>7}  {'-'*13:<15}{'-'*6:>8}{'-'*5:>7}")
@@ -271,7 +326,8 @@ def main() -> int:
         tn = sum(r[4] for r in out)
         tu = sum(r[6] for r in out)
         print(f"\n{len(out)} languages, {tn} rows, {tb} serious ({100 * tb / max(tn, 1):.2f}%) "
-              f"-- rows no recognizer, under any decode, puts within {a.bad} of us"
+              f"-- rows no recognizer, under any decode, puts near us "
+              f"({'flat ' + str(a.bad) if a.absolute else 'per-language median+3*MAD'})"
               + (f"; {tu} rows excluded as unmeasurable" if tu else ""))
         return 0
 

@@ -260,6 +260,12 @@ def main() -> None:
     ap.add_argument("--lang")
     ap.add_argument("--id", help="sentence_id")
     ap.add_argument("--wav")
+    # ⚠ A ROW SET, because the interesting verdicts are not "a whole language" or "one row". Run 74 had
+    # to mark the mn_mn rows where a SPECIFIC axis drives the divergence, computed by a screen elsewhere;
+    # without this the choice was 2,000 subprocess calls or an unrecorded hand-edit of the DB.
+    ap.add_argument("--wav-file",
+                    help="file of wav basenames, one per line (blank lines and #comments ignored); "
+                         "requires --lang")
     ap.add_argument("--sibling", choices=("all-flagged", "exonerated", "no-sibling"),
                     help="with --set and --lang: mark every row of that sibling class (bulk review verdict)")
     ap.add_argument("--digits", action="store_true",
@@ -280,21 +286,52 @@ def main() -> None:
         #   silent-audio sweep, one stage further along.
         sibling_screen(db)
     if a.set:
-        if not a.lang or not (a.id or a.wav or a.sibling):
-            sys.exit("--set needs --lang and (--id or --wav or --sibling)")
+        if not a.lang or not (a.id or a.wav or a.sibling or a.wav_file):
+            sys.exit("--set needs --lang and (--id or --wav or --wav-file or --sibling)")
         if a.set not in STATUSES and not a.force_status:
             sys.exit(f"--set {a.set!r} is not a known status. Known: {', '.join(sorted(STATUSES))}. "
                      f"Use --force-status to add a new one (and document it in the module docstring).")
-        if a.sibling:
-            where, args = ("sibling=?", [a.sibling])
-            if a.digits:
-                where += " AND text GLOB '*[0-9]*'"
+        if a.wav_file:
+            if not a.lang:
+                sys.exit("--wav-file requires --lang (wav basenames are only unique within a language)")
+            with open(a.wav_file, encoding="utf8") as fh:
+                # ⚠ DEDUPE, or the "not found" warning lies. The PK is (lang, wav), so a repeated wav
+                # updates one row and contributes 1 to rowcount while contributing 2 to len(wavs) --
+                # a file with repeats reported wavs as missing that were found and set.
+                wavs = list(dict.fromkeys(
+                    ln.strip() for ln in fh if ln.strip() and not ln.lstrip().startswith("#")))
+            if not wavs:
+                sys.exit(f"{a.wav_file}: no wavs")
+            # ⚠ Chunked: SQLite's default parameter limit is 999 and these sets run to thousands.
+            n = 0
+            for i in range(0, len(wavs), 500):
+                chunk = wavs[i:i + 500]
+                q = ",".join("?" * len(chunk))
+                cur = db.execute(
+                    f"UPDATE utt SET status=?, comment=? WHERE lang=? AND wav IN ({q})",
+                    [a.set, a.comment, a.lang, *chunk])
+                n += cur.rowcount
+            db.commit()
+            missing = len(wavs) - n
+            # ⚠ stderr, matching the other --set paths, and NO early return: returning here skipped
+            # --stats and left the connection unclosed.
+            print(f"{n} rows set to {a.set!r} in {a.lang}"
+                  + (f"  ⚠ {missing} of {len(wavs)} wavs not found" if missing else ""),
+                  file=sys.stderr)
         else:
-            where, args = ("sentence_id=?", [a.id]) if a.id else ("wav=?", [a.wav])
-        n = db.execute(f"UPDATE utt SET status=?, comment=? WHERE lang=? AND {where}",
-                       [a.set, a.comment, a.lang, *args]).rowcount
-        db.commit()
-        print(f"{n} row(s) set to {a.set}", file=sys.stderr)
+            # ⚠ `else`, not a fall-through. The wav-file arm used to `return`, which skipped --stats and
+            # left the connection open; dropping the return without this guard sent it on to the
+            # single-row arm with a.wav unset, i.e. `WHERE wav IS NULL` and a confusing "0 row(s) set".
+            if a.sibling:
+                where, args = ("sibling=?", [a.sibling])
+                if a.digits:
+                    where += " AND text GLOB '*[0-9]*'"
+            else:
+                where, args = ("sentence_id=?", [a.id]) if a.id else ("wav=?", [a.wav])
+            n = db.execute(f"UPDATE utt SET status=?, comment=? WHERE lang=? AND {where}",
+                           [a.set, a.comment, a.lang, *args]).rowcount
+            db.commit()
+            print(f"{n} row(s) set to {a.set}", file=sys.stderr)
     if a.stats or a.apply:
         print("\nstatus                 rows", file=sys.stderr)
         for st, n in db.execute(

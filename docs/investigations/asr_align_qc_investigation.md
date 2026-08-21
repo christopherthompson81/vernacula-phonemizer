@@ -4538,3 +4538,225 @@ two independently-labelled recognizers is not something an espeak convention can
   names. The English fallback was accepted deliberately; recorded because it now has a measured cost.
 - ⚠ The stored `ipa` for ckb_iq is now stale. The corpus needs a re-derivation pass before these
   numbers are re-measured.
+
+## Run 74 — 2026-08-21 — mn_mn ⟨б⟩→[b] REJECTED: two recognizers agreeing is not two witnesses
+
+Run 73's method — a word/symbol divergence corroborated by both recognizers — proposed a second change
+and the literature killed it. Recording the whole path, because the failure mode generalises.
+
+### The case, as it looked
+
+Mongolian was the fleet's worst residual: 27.0% of rows serious, median 0.519. The symbol profile said
+we write `p` 31.7/1k where both recognizers write 2.4–9.6, and we write `b` **zero times in the whole
+language** where they write 26.4 and 36.3. `mongolian.jsonc:44` looked internally inconsistent —
+⟨б⟩→`p` and ⟨д⟩→`t` but ⟨г⟩→`ɡ`, three members of one series treated two ways.
+
+Measured on the unaspirated series only (`fold` strips ʰ, so a naive `p→b` also converts ⟨п⟩ /pʰ/ and
+the first attempt was confounded):
+
+```
+p (unasp) -> b   median 0.5188 -> 0.4949   2149 closer /  308 further = 7.0:1
+t (unasp) -> d   median 0.5188 -> 0.5319    922 closer / 1713 further = 0.5:1
+k (unasp) -> ɡ   no effect (we already write ɡ 10,785 times)
+```
+
+7.0:1, well over the ⟨ʔ⟩ bar. ⚠ **And the obvious objection was tested and appeared to fail.** Mongolian
+contrasts aspiration, not voicing, so a recognizer trained on voicing languages should map unaspirated
+to its voiced category — but the control said no: in ko_kr, cmn_hans_cn and th_th, all
+aspiration-contrast languages, our `p` rate matches both recognizers closely (cmn 20.1 vs 19.2/24.1).
+Mongolian looked like the lone outlier.
+
+### The literature says our table is right
+
+Svantesson, *Khalkha* (in Janhunen ed., *The Mongolic Languages*), on the weak obstruents:
+
+> The weak stops and affricates are basically plain voiceless unaspirated sounds in all positions. In
+> Modern Khalkha, however, this is **fully true only of the weak labials and dentals** [p, t, ts], while
+> the **weak velars seem to be functionally voiced**, though they can be phonetically voiceless [k, q]
+> word-finally and before a voiceless consonant. In other positions, they are phonetically voiced [ɡ, ɢ].
+
+and every worked example transcribes ⟨б⟩ as [p]: `baatar` [patr] 'hero', `bal` [paɮ] 'honey', `bol-`
+[pɔɮ] 'to become', `bar` [par] 'tiger', `bag` [paɢ] 'team'.
+
+⚠ **`mongolian.jsonc` already encodes that exact three-way asymmetry** — ⟨б⟩→p, ⟨д⟩→t, ⟨г⟩→ɡ. What
+looked like an inconsistency is the documented phonetics, and it is why `t→d` measured NEGATIVE while
+`p→b` measured positive: the table is not applying a rule unevenly, it is following the language.
+
+**Rejected. No change shipped.**
+
+### ⚠ The lesson, and it undercuts the tool's headline criterion
+
+**Two recognizers agreeing against us is not two witnesses when both are mapping an unfamiliar category
+into a familiar one.** Neither model has a voiceless-unaspirated-vs-aspirated category system; both
+have voiced-vs-voiceless. Confronted with Mongolian's weak labial they make the *same* reduction for
+the *same* reason, and their agreement measures their shared architecture, not the audio. This is the
+`low_vowel_notation` shape again, arrived at from a direction that was supposed to be immune to it.
+
+⚠ **And the control that was supposed to catch it was too weak.** Comparing our rate to the recognizers'
+rate in other aspiration languages cannot detect a bias that only bites where OUR transcription is
+unusual — ko/cmn/th agree with the recognizers already, so there was nothing for the control to see.
+A sufficient control would need a language where we write voiceless-unaspirated AND the recognizers are
+known to be right, which is close to assuming the answer.
+
+⚠ **What this does NOT overturn: ckb ⟨و⟩→[u] (run 73).** That was not a category mapping. A bare [w]
+standing alone as a word is not pronounceable in any framework, our own `numbers.ts` had documented the
+defect and routed around it, and the corroboration was internal as well as acoustic. The distinction
+worth keeping: **corroboration is strong for "is there a segment here at all", and weak for "which
+category does this segment belong to."**
+
+### Standing rule for this tool
+
+Before acting on a corroborated finding, ask whether the disputed symbol lies on a **category axis the
+recognizers share and the language does not** — voicing, aspiration, vowel height/backness, length.
+If it does, the agreement is worth nothing on its own and the question needs the literature or a
+purpose-built acoustic probe. Both recognizers are trained on inventories, and an inventory is a claim.
+
+### Marked in the database, so neither comes back
+
+⚠ **A verdict that is not written into the row is not a verdict.** Both of run 73/74's conclusions are
+now `status` in `align.sqlite`, with `asr_align_label.py --wav-file` added to mark a computed row SET
+(the tool could previously do one row, one language, or one sibling class, and nothing in between):
+
+```
+mn_mn    469 rows  convention   the 469 SERIOUS rows the weak-labial axis actually drives -- not all 831.
+                                The other 362 are not explained by run 74 and stay in the queue.
+ckb_iq  1333 rows  defect       the free conjunction; fixed in the engine, ipa stale until re-derived.
+```
+
+⚠ **And `allo_compare` was still resurfacing them**, because its exclusion list held only the
+audio/instrument/reader statuses — a row a human had marked `convention` came straight back the next
+run. That is precisely the failure `examined_clean` was created to prevent, reintroduced by new tooling
+that did not know about it. The list is now the CLOSED set. mn_mn drops 27.0% → 13.9% serious, which is
+the 469 rows leaving and the 362 unexplained ones remaining, as intended.
+
+⚠ `defect` is deliberately NOT excluded. Those rows are ours, and ckb_iq's 1,333 need the re-derivation
+pass before any ckb number is quoted again.
+
+## Run 75 — 2026-08-21 — the 362 mn_mn rows: no defect, and the screen was ranking the wrong thing
+
+Run 74 left 362 mn_mn rows unexplained. They are not a defect in our output, and finding that out cost
+seven wrong hypotheses — all recorded, because each is a plausible next guess for someone else.
+
+### Rejected, in order
+
+| hypothesis | test | result |
+| --- | --- | --- |
+| audio too short for the text | our phones ÷ audio seconds | **0 of 362** above 17/s; they are SLOWER than normal |
+| a bug in my own batching | re-decode single-item on CPU | stored == fresh, exactly (8=8, 14=14, 93=93) |
+| long audio breaks the recognizers | fleet ratio by duration | ratio RISES with duration, 0.851 → 1.000 |
+| slow speech starves the CTC decode | fleet ratio by speech RATE | slow speech is the BEST bucket (0.991, 3.3% serious) |
+| silence / dead air | frame-energy speech fraction | **1.000** for serious rows vs 0.831 for the rest |
+| audio too quiet | absolute RMS | serious rows are LOUDER (0.0179 vs 0.0077) |
+| audio paired with the wrong text | match each stream against all 1,492 mn_mn sentences | 11/12 "matched another sentence" — at 0.6-0.73 against a language norm of 0.25. ⚠ A MULTIPLE-COMPARISONS ARTEFACT of scanning 1,492 candidates, not a finding. The correct test requires the rival match to be GOOD, not merely better. |
+
+The one real correlate is recording quality: serious rows are muffled and compressed (HF share 0.179 vs
+0.308, dynamic range 29.8 dB vs 37.4 dB). ⚠ **But it does not classify**: "HF<0.24 and range<32 dB"
+catches 49% of the serious rows and 23% of everything else. A tendency, not a rule, and not a label.
+
+### What the 362 actually are
+
+```
+ 82  a same-text SIBLING recording scores inside the bulk  -> the recording, not our IPA
+ 73  no sibling recording exists                           -> unscreenable
+207  every recording of that sentence is bad               -> the only ones our IPA could own
+```
+
+and the 207 are indistinguishable from the rest of Mongolian on every text feature measured — digits
+25.6% vs 22.1%, Latin 5.8% vs 4.3%, 18 words vs 18, 108 phones vs 105 — and on symbol profile (ə 91.0
+vs 86.6, t 135.6 vs 131.6).
+
+### ⚠ Because the screen was ranking recognizer competence, not our output
+
+`--serious` used a FLAT 0.60 cut. Against each language's own distribution:
+
+```
+           median   3xMAD cut   flat-0.60 flags   own-cut flags
+es_419     0.0726     0.1525          0.0%            5.7%
+en_us      0.1519     0.2380          0.0%            8.9%
+af_za      0.3023     0.4233          0.2%            5.3%
+mn_mn      0.4982     0.6704         13.9%            9.9%
+sd_in      0.4586     0.7031         16.4%            5.3%
+my_mm      0.5061     0.6664         14.8%            4.8%
+```
+
+⚠ **mn_mn's median is 0.4982, so a 0.60 cut sits barely above its median and harvests the ordinary
+tail.** The "worst five languages" were the five both recognizers handle worst. Self-relative, mn_mn is
+9.9% — beside **en_us at 8.9%** — and the fleet residual is not concentrated anywhere.
+
+⚠ **THIS IS THE THIRD APPEARANCE OF ONE ERROR** in this campaign: run 72's aggregate delta (all 102
+languages negative), the ignored `status` column (run 74's marking), and now a flat distance cut. Each
+time the fix is the same and the lesson did not transfer. Stated once more: **across languages, only
+self-relative figures mean anything.** `--serious` now uses median + 3×MAD per language; `--absolute`
+restores the old behaviour and says in its help what it measures.
+
+### Marked
+
+75 mn_mn rows written as `sibling=exonerated` — the screen's own verdict, for rows it never reached
+(it has only ever run over rows that entered the investigate queue, so 2,571 of 2,604 mn_mn rows were
+NULL). **No language change. Mongolian is not specially defective; both recognizers are simply weak on
+it, and the earlier picture was the threshold.**
+
+## Run 76 — 2026-08-21 — working the investigate queue: en years, and what the queue is made of
+
+8,021 rows carry `investigate`. Two structural facts first, then the one change.
+
+### The second recognizer does NOT clear this queue
+
+Only **493 of 8,021 (6%)** score inside their language's verified bulk once allosaurus is allowed to
+vouch; 5,413 remain above median+3×MAD. ⚠ These rows really do diverge from BOTH instruments, so the
+espeak-artefact escape does not apply to them and there is no wholesale clearing to be had.
+
+### ⚠ Most of the word-level queue is a wordize artefact, not a defect
+
+Ranking word TYPES over the queue, the top entries are all one- or two-phone function words at distance
+exactly 1.000:
+
+```
+480  hu_hu ˈɒ      the definite article a          64  ru_ru f  \
+178  hu_hu ˈɒz     the definite article az         46  bg_bg f   |  the preposition v,
+118  pt_br e       and                             25  cs_cz f   |  a single consonant
+107  oc_fr e                                       25  be_by w  /
+ 58  ca_es ə                                       27  sl_si ʋ
+```
+
+A clitic of one phone cannot be attributed by an aligner — its phone lands on the neighbouring word and
+the clitic scores 1.000 no matter what we emit. `wordize.py` already defaults to `--min-units 4` for
+exactly this and the sweep did not apply it. **Nothing in that group is a finding**, including the
+he_il `be`/`ve` proclitics flagged back in run 73.
+
+### What IS left is numerals, across unrelated languages
+
+`ig_ng puku` (thousand), `ig_ng itoolu` (nine), `ceb_ph lˈibo` (thousand), `ky_kg d͡ʒyz` (hundred),
+`ha_ng dˈu˥bu˥` (thousand), `ha_ng ɡˈo˥ma˩` (ten), `mi_nz waɾu` (eight), `en_us hˈʌndɹəd`. Rows carrying
+a digit are over-represented in the queue — 27.8% against 21.2% of verified.
+
+### en_us: a determiner blocked the year reading, and ranges were never covered
+
+English already reads years pair-wise, gated on a context word. The gate required ADJACENCY:
+
+```
+"founded in 1998"       -> "founded in 19 98"   ✓
+"in a 1998 book"        -> unchanged            ✗ the determiner blocks it
+"guru nanak 1469–1539"  -> unchanged            ✗ a life-date range has no context word
+```
+
+so `1998` spoke as *one thousand nine hundred ninety-eight*. Two arms added — an optional `the|a|an`
+between context and year, and a dashed pair of 4-digit years — with the range arm running FIRST, since
+with the other order `from 1918-1939` had its left year eaten and came out `from 19 18-1939`.
+
+⚠ **PRE-2010 ONLY, and the split is measured.** Against both recognizers:
+
+```
+pre-2000   n=12   median 0.2593 -> 0.1515   12 closer /  0 further
+2010s      n= 7   median 0.2083 -> 0.2378    1 closer /  6 further   <- excluded
+```
+
+Readers of a 2010s year often say *two thousand seventeen* — the corpus has "january 2017" read that
+way and "the 2010 earthquake" read *twenty ten* — while nobody says *one thousand nine hundred
+ninety-eight*. ⚠ Switching the whole decade to the `2 thousand N` form was measured too and is a coin
+flip: 9 closer / 7 further, median 0.1847 → 0.1812. Where both readings are real the standard one
+stands, so `yearWords` is unchanged and only the NEW arms are gated. Shipped at **12 closer / 0 further**.
+
+⚠ An existing regression pin had to move: `Sejong (1418 – 1450)` asserted no change. It now reads as two
+years, which is what it is, and those very rows improved by 0.106. The pin's actual purpose — a range
+must never become a subtraction — is untouched.
