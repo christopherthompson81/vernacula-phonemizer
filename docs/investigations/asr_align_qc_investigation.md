@@ -4185,3 +4185,56 @@ dropped. None is a phonemizer error, and the standard is the right thing to emit
 ⚠ **The useful consequence is for reading the tool.** A high word-level mean in BCS is the expected state,
 not a lead. Languages whose orthography is close to their careful pronunciation will rank clean; languages
 with heavy connected-speech reduction will not, and that says nothing about the engine.
+
+## Run 69 — 2026-08-20 — a SECOND recognizer, and it settles es_419
+
+Run 64 said the Spanish θ was probably espeak's rather than the speakers', and named what would settle it:
+"listening, FLEURS speaker metadata, or a second recognizer trained on different labels". The third is
+available.
+
+### Allosaurus
+
+`pip install allosaurus` — a universal phone recognizer over ~2000 languages, trained on a PHOIBLE phone-
+inventory/allophone tradition rather than espeak labels. That independence is the whole point: it is the
+one thing the espeak confound cannot reach.
+
+```
+text        exactamente a las 8:46 a m la ciudad se volvió silencio marcando el preciso
+wav2vec2    …laθjðadseβoljosilɛnθjomaɾkandoelpɾesiso…      θ=3
+allosaurus  …las̪iuðals̪eɡol̪ʎosilensiomalkanðoðelpoɾes…    θ=0    <- dental s̪, exactly where θ was
+```
+
+Over the 11 rows that could be extracted and converted:
+
+```
+⟨z/ce/ci⟩ graphemes in the text:            28
+θ returned by wav2vec2 (espeak-trained):    28      <- one per orthographic c/z, exactly
+θ returned by allosaurus (PHOIBLE-trained):  0
+```
+
+⚠ **A recognizer whose θ count EQUALS the spelling count one-for-one is reproducing the orthography, not
+the acoustics.** And an independent model on the same audio hears none. Run 64's retraction was right, the
+`es_419` audio is Latin American as labelled, and remapping it to `es` would have corrupted 2,306 rows of
+published training data.
+
+### What a second recognizer is worth, generally
+
+Every espeak-confound finding in this document — the ⟨ɑ⟩/⟨a⟩ holds for hy/ky/ur, the Spanish θ, the
+"22 languages cannot spell Latin acronyms" framing — turned on not being able to separate the instrument's
+convention from the speech. A second, differently-labelled model separates them directly.
+
+Practical notes for wiring it in:
+
+- **FLEURS wavs are float32 (WAV format 3)** and allosaurus's reader takes 16-bit PCM only. `ffmpeg -ac 1
+  -ar 16000 -sample_fmt s16` converts; the corpus pass would need that step.
+- It takes an **ISO-639-3 language code** (`spa`, `ces`) and can restrict output to that language's phone
+  inventory, which is a different failure mode from espeak's — a narrow inventory can suppress a real
+  phone rather than invent one. Worth measuring before trusting it as a primary.
+- Its output is **coarser**: fewer length marks, and it writes dental diacritics (`s̪`, `l̪`, `t̪`) the
+  current `fold`/`COARSEN` would need to handle.
+- Extraction is the slow part, not inference: each `tar xzf --wildcards` decompresses the whole per-language
+  archive, so a real pass should stream the tar once per language.
+
+**It should not replace wav2vec2 — it should sit beside it.** Agreement between two independently-labelled
+recognizers is far stronger evidence than either alone, and disagreement is exactly the signal that a
+finding is about the instrument. That is the check this campaign has needed four separate times.
