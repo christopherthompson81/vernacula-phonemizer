@@ -25,6 +25,12 @@ Status values, and the split they encode:
                     but it makes the PAIR bad training data, which is its own decision.
   convention        we and the recognizer disagree about notation, not about the reading (ʈ vs t, b vs v).
   artefact          the recognizer is simply wrong here.
+  instrument_blind  the RECOGNIZERS cannot adjudicate this language, so the row's disagreement carries no
+                    information either way. ⚠ NOT `artefact`, which claims the recognizer is WRONG here —
+                    this claims only that it is unreliable, which is weaker and is what was measured:
+                    `allo_compare.py --competence` returns the share of our phones the recognizers hand
+                    back unchanged, and these languages sit under 50% against a fleet median of 61.7%
+                    and 76–83% for de/es/fr. ⚠ It says NOTHING about our IPA; do not read it as clean.
   examined_clean    a human READ this row and found no defect. Distinct from `verified`, which is
                     automatic and only means "inside this language's own distribution" — a uniformly
                     wrong language is uniformly `verified` (nso_za sat at 1,989/1,990 verified while
@@ -67,7 +73,8 @@ ROOT = os.environ.get("ASR_ALIGN_ROOT", "/mnt/data/omnivoice_ipa")
 DB = f"{ROOT}/work/asr_align/align.sqlite"
 AUTOMATIC = ("verified", "investigate", "recognizer_short", "defective_audio")
 #: Hand verdicts. Never written by a bulk pass, never overwritten by one — see the docstring.
-BY_HAND = ("defect", "reader_divergence", "convention", "artefact", "examined_clean")
+BY_HAND = ("defect", "reader_divergence", "convention", "artefact", "examined_clean",
+           "instrument_blind")
 STATUSES = AUTOMATIC + BY_HAND
 SILENT_TSV = f"{ROOT}/work/silent_audio.tsv"
 

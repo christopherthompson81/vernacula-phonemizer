@@ -4971,3 +4971,51 @@ and does not try. It answers one question — is the instrument usable here.
 riding along). No language change from this pass, which is the right outcome: the campaign has been
 principled, and where the tool disagrees without being able to hear the contrast, the tool is what is
 wrong.
+
+## Run 80 — 2026-08-21 — how much of the queue is actually work
+
+Run 79 gave the instrument a competence number. The obvious next question is what that does to the
+8,021-row `investigate` queue, and the first guess was wrong.
+
+### ⚠ Dropping the blind languages barely dents it
+
+The nine languages under 50% competence contribute **384 rows, 4.9%** of the queue — not the "third of
+the fleet" the competence ranking suggested. The 3×MAD screen is SELF-RELATIVE, so a language whose
+recognizer is weak gets a high median AND a high MAD and does not produce a proportionally larger queue.
+The screen was already absorbing what the competence number measures.
+
+### What the queue is actually made of
+
+```
+7,908 investigate rows
+  4,056  51.3%  no word-level lead — the divergence is diffuse, or in words too short to attribute
+  2,246  28.4%  ACTIONABLE — a >=4-unit non-numeral lead
+  1,222  15.5%  lead is in a digit-bearing row (numeral register, measured per language in runs 19/77/78)
+    384   4.9%  instrument cannot adjudicate (<50% competence)
+```
+
+**The real work is 2,246 rows, and reading the raw count as a work list overstates it 3.5×.** It
+concentrates: bn_in 193, hu_hu 156, ny_mw 106, el_gr 98, gu_in 94, pa_in 86.
+
+⚠ **THE LARGEST CATEGORY IS THE ONE WITH NOTHING TO ACT ON.** Over half the queue has no localised lead
+at all — and every productive finding in this campaign has been word-localised (a code-switched numeral,
+an unexpanded abbreviation, a bare glide standing as a word). ⚠ That is a statement about the METHOD, not
+a verdict on those rows: "diffuse" may mean uniformly-slightly-off audio, an accent, or a defect this
+tooling cannot localise. **They are deliberately NOT re-statused**, because burying 4,056 rows on the
+strength of a tool limitation is exactly the kind of silent truncation this campaign keeps catching.
+
+### A new status, and why not an existing one
+
+The 384 instrument-blind rows are marked `instrument_blind`, not `artefact`. ⚠ `artefact` means "the
+recognizer is simply WRONG here", and that is a stronger claim than was measured — what the competence
+number establishes is that the recognizer is UNRELIABLE, which is weaker and different. The status's
+docstring says outright that it is not a statement about our IPA and that the rows should be re-opened
+if a better recognizer is added.
+
+```
+ckb_iq 46.4%  92    km_kh 47.1%  62    my_mm 43.5%  39    sd_in 43.1%  17
+uz_uz  49.9%  71    da_dk 49.8%  43    mn_mn 40.3%  33    ps_af 43.6%  21    vi_vn 45.8%   6
+```
+
+`allo_compare --triage` ships the split so the queue can be read correctly without asserting verdicts,
+and `--competence` is factored out so both modes share one definition.

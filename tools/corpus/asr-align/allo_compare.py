@@ -145,7 +145,7 @@ def notate(us: list[str]) -> list[str]:
 # defeats the point of writing the verdict down. `defect` is deliberately NOT here: those rows are ours,
 # and for ckb_iq they are additionally awaiting a corpus re-derivation, which must stay visible.
 CLOSED = ("defective_audio", "recognizer_short", "reader_divergence",
-          "convention", "artefact", "examined_clean")
+          "convention", "artefact", "examined_clean", "instrument_blind")
 
 
 # ⚠ AN EMPTY RECOGNIZER STREAM ABSTAINS; IT DOES NOT VOTE MAXIMUM DISAGREEMENT. `per` returns 1.0
@@ -162,6 +162,25 @@ def status_sql(include: bool) -> str:
     return " AND (status IS NULL OR status NOT IN (%s))" % ",".join(f"'{v}'" for v in CLOSED)
 
 
+def competence(db, lang: str, sample: int, st: str) -> float | None:
+    """Share of our phones the recognizers return unchanged — see the --competence note."""
+    from wordize import align_path
+
+    hit = tot = 0
+    for ipa, ph, pa in db.execute(
+            "SELECT ipa, phones, phones_allo FROM utt WHERE lang=? AND ipa IS NOT NULL "
+            "AND phones IS NOT NULL AND phones_allo IS NOT NULL" + st + " LIMIT ?", (lang, sample)):
+        for stream in (ph, pa):
+            ours, theirs = notate(units(ipa)), notate(units(stream))
+            if not theirs:
+                continue
+            for i, j in align_path(ours, theirs):
+                if i >= 0:
+                    tot += 1
+                    hit += int(j >= 0 and ours[i] == theirs[j])
+    return hit / tot if tot >= 2000 else None
+
+
 def corroborated(ours: list[str], streams: list[list[str]]) -> float | None:
     """Distance to the closest recognizer that actually produced something. None if none did."""
     live = [c for c in streams if c]
@@ -174,6 +193,8 @@ def main() -> int:
     ap.add_argument("--langs", nargs="*")
     ap.add_argument("--pairs", type=int, default=20)
     ap.add_argument("--min-rows", type=int, default=50)
+    ap.add_argument("--sibling-status", default="investigate",
+                    help="which status --triage splits (default investigate)")
     ap.add_argument("--sample", type=int, default=250,
                     help="rows per language for --competence (default 250)")
     ap.add_argument("--all-status", action="store_true",
@@ -183,6 +204,9 @@ def main() -> int:
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
+    ap.add_argument("--triage", action="store_true",
+                    help="split a status class into what is actually in it: instrument-blind, no "
+                         "word-level lead, numeral-register, or genuinely actionable")
     ap.add_argument("--competence", action="store_true",
                     help="per language, the share of our phones the recognizers return UNCHANGED. Check "
                          "this BEFORE mining a language: where it is low the tool cannot adjudicate.")
@@ -336,6 +360,61 @@ def main() -> int:
               + (f"; {tu} rows excluded as unmeasurable" if tu else ""))
         return 0
 
+    # ⚠ THE QUEUE IS NOT A WORK LIST UNTIL IT IS SPLIT. Measured over the 7,908 `investigate` rows: 51.3%
+    # carry no word-level lead at all, 15.5% are numeral-register rows in languages already measured,
+    # 4.9% are in languages where the instrument cannot adjudicate, and **28.4% are actionable**. Reading
+    # the raw count as work overstates it by 3.5x.
+    #
+    # ⚠ "No word-level lead" is NOT "this row is fine". It means the divergence is diffuse, or lives in
+    # words too short for an aligner to attribute — every productive finding in this campaign has been
+    # word-localised, so this method has nothing to say about those rows. That is a statement about the
+    # method, and they are deliberately NOT re-statused on the strength of it.
+    if a.triage:
+        import re as _re
+
+        from wordize import wordize
+
+        nf = (lambda x: x) if a.raw_notation else (lambda x: notate(units(x)))  # noqa: E731
+        cat: Counter = Counter()
+        where: dict[str, Counter] = {}
+        for lang in langs:
+            comp = competence(db, lang, a.sample, ST)
+            for txt, ipa, ph, pa, pu in db.execute(
+                    "SELECT text, ipa, phones, phones_allo, phones_allo_uni FROM utt "
+                    "WHERE lang=? AND status=? AND ipa IS NOT NULL AND phones IS NOT NULL "
+                    "AND phones_allo IS NOT NULL", (lang, a.sibling_status)):
+                bucket = None
+                u = nf(ipa)
+                streams = [x for x in (ph, pa, pu or pa) if nf(x)]
+                if comp is not None and comp < 0.50:
+                    bucket = "instrument cannot adjudicate (<50%)"
+                elif len(u) < 10:
+                    bucket = "too short to judge"
+                elif not streams:
+                    bucket = "no recognizer output"
+                else:
+                    pw = [wordize(ipa, x, nf) for x in streams]
+                    leads = [k for k, (w, _g, _d) in enumerate(pw[0])
+                             if len(nf(w)) >= 4 and min(p[k][2] for p in pw) >= a.bad]
+                    if not leads:
+                        bucket = "no word-level lead (short/clitic or diffuse)"
+                    elif _re.search(r"[0-9]", txt or ""):
+                        bucket = "lead in a digit-bearing row (numeral register)"
+                    else:
+                        bucket = "ACTIONABLE: a >=4-unit non-numeral lead"
+                cat[bucket] += 1
+                where.setdefault(bucket, Counter())[lang] += 1
+        tot = sum(cat.values()) or 1
+        print(f"{tot} rows with status {a.sibling_status!r}, by what is actually in them\n")
+        for k, n in cat.most_common():
+            print(f"  {k:<48}{n:6}  ({100 * n / tot:4.1f}%)")
+        act = where.get("ACTIONABLE: a >=4-unit non-numeral lead", Counter())
+        if act:
+            print("\n  where the actionable rows are:")
+            for lang, n in act.most_common(15):
+                print(f"    {lang:<14}{n:5}")
+        return 0
+
     # ⚠ ASK THIS BEFORE MINING A LANGUAGE. Every other mode here assumes the recognizers can hear the
     # language well enough for a disagreement to mean something, and for a third of the fleet they cannot.
     # Measured: our phones come back unchanged 82.9% of the time in es_419 and 40.3% in mn_mn, against a
@@ -349,26 +428,11 @@ def main() -> int:
     # inventory is far from either model's training, or the transcription convention differs — this
     # cannot separate those, and does not try to. It answers one question: is the instrument usable here.
     if a.competence:
-        from wordize import align_path
-
         out = []
         for lang in langs:
-            hit = tot = 0
-            for ipa, ph, pa in db.execute(
-                    "SELECT ipa, phones, phones_allo FROM utt WHERE lang=? AND ipa IS NOT NULL "
-                    "AND phones IS NOT NULL AND phones_allo IS NOT NULL" + ST + " LIMIT ?",
-                    (lang, a.sample)):
-                for stream in (ph, pa):
-                    ours, theirs = units(ipa), units(stream)
-                    if not theirs:
-                        continue
-                    ours, theirs = notate(ours), notate(theirs)
-                    for i, j in align_path(ours, theirs):
-                        if i >= 0:
-                            tot += 1
-                            hit += int(j >= 0 and ours[i] == theirs[j])
-            if tot >= 2000:
-                out.append((hit / tot, lang, tot))
+            c = competence(db, lang, a.sample, ST)
+            if c is not None:
+                out.append((c, lang, 0))
         if not out:
             print("no language had enough aligned phones", file=sys.stderr)
             return 1
