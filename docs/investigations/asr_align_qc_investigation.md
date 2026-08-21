@@ -4538,3 +4538,75 @@ two independently-labelled recognizers is not something an espeak convention can
   names. The English fallback was accepted deliberately; recorded because it now has a measured cost.
 - ⚠ The stored `ipa` for ckb_iq is now stale. The corpus needs a re-derivation pass before these
   numbers are re-measured.
+
+## Run 74 — 2026-08-21 — mn_mn ⟨б⟩→[b] REJECTED: two recognizers agreeing is not two witnesses
+
+Run 73's method — a word/symbol divergence corroborated by both recognizers — proposed a second change
+and the literature killed it. Recording the whole path, because the failure mode generalises.
+
+### The case, as it looked
+
+Mongolian was the fleet's worst residual: 27.0% of rows serious, median 0.519. The symbol profile said
+we write `p` 31.7/1k where both recognizers write 2.4–9.6, and we write `b` **zero times in the whole
+language** where they write 26.4 and 36.3. `mongolian.jsonc:44` looked internally inconsistent —
+⟨б⟩→`p` and ⟨д⟩→`t` but ⟨г⟩→`ɡ`, three members of one series treated two ways.
+
+Measured on the unaspirated series only (`fold` strips ʰ, so a naive `p→b` also converts ⟨п⟩ /pʰ/ and
+the first attempt was confounded):
+
+```
+p (unasp) -> b   median 0.5188 -> 0.4949   2149 closer /  308 further = 7.0:1
+t (unasp) -> d   median 0.5188 -> 0.5319    922 closer / 1713 further = 0.5:1
+k (unasp) -> ɡ   no effect (we already write ɡ 10,785 times)
+```
+
+7.0:1, well over the ⟨ʔ⟩ bar. ⚠ **And the obvious objection was tested and appeared to fail.** Mongolian
+contrasts aspiration, not voicing, so a recognizer trained on voicing languages should map unaspirated
+to its voiced category — but the control said no: in ko_kr, cmn_hans_cn and th_th, all
+aspiration-contrast languages, our `p` rate matches both recognizers closely (cmn 20.1 vs 19.2/24.1).
+Mongolian looked like the lone outlier.
+
+### The literature says our table is right
+
+Svantesson, *Khalkha* (in Janhunen ed., *The Mongolic Languages*), on the weak obstruents:
+
+> The weak stops and affricates are basically plain voiceless unaspirated sounds in all positions. In
+> Modern Khalkha, however, this is **fully true only of the weak labials and dentals** [p, t, ts], while
+> the **weak velars seem to be functionally voiced**, though they can be phonetically voiceless [k, q]
+> word-finally and before a voiceless consonant. In other positions, they are phonetically voiced [ɡ, ɢ].
+
+and every worked example transcribes ⟨б⟩ as [p]: `baatar` [patr] 'hero', `bal` [paɮ] 'honey', `bol-`
+[pɔɮ] 'to become', `bar` [par] 'tiger', `bag` [paɢ] 'team'.
+
+⚠ **`mongolian.jsonc` already encodes that exact three-way asymmetry** — ⟨б⟩→p, ⟨д⟩→t, ⟨г⟩→ɡ. What
+looked like an inconsistency is the documented phonetics, and it is why `t→d` measured NEGATIVE while
+`p→b` measured positive: the table is not applying a rule unevenly, it is following the language.
+
+**Rejected. No change shipped.**
+
+### ⚠ The lesson, and it undercuts the tool's headline criterion
+
+**Two recognizers agreeing against us is not two witnesses when both are mapping an unfamiliar category
+into a familiar one.** Neither model has a voiceless-unaspirated-vs-aspirated category system; both
+have voiced-vs-voiceless. Confronted with Mongolian's weak labial they make the *same* reduction for
+the *same* reason, and their agreement measures their shared architecture, not the audio. This is the
+`low_vowel_notation` shape again, arrived at from a direction that was supposed to be immune to it.
+
+⚠ **And the control that was supposed to catch it was too weak.** Comparing our rate to the recognizers'
+rate in other aspiration languages cannot detect a bias that only bites where OUR transcription is
+unusual — ko/cmn/th agree with the recognizers already, so there was nothing for the control to see.
+A sufficient control would need a language where we write voiceless-unaspirated AND the recognizers are
+known to be right, which is close to assuming the answer.
+
+⚠ **What this does NOT overturn: ckb ⟨و⟩→[u] (run 73).** That was not a category mapping. A bare [w]
+standing alone as a word is not pronounceable in any framework, our own `numbers.ts` had documented the
+defect and routed around it, and the corroboration was internal as well as acoustic. The distinction
+worth keeping: **corroboration is strong for "is there a segment here at all", and weak for "which
+category does this segment belong to."**
+
+### Standing rule for this tool
+
+Before acting on a corroborated finding, ask whether the disputed symbol lies on a **category axis the
+recognizers share and the language does not** — voicing, aspiration, vowel height/backness, length.
+If it does, the agreement is worth nothing on its own and the question needs the literature or a
+purpose-built acoustic probe. Both recognizers are trained on inventories, and an inventory is a claim.

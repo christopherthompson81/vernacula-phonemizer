@@ -25,6 +25,16 @@ PHOIBLE inventory is starving the decode -- and the unrestricted one scores 0.41
 where the restricted scores 0.520. On `af_za` the ordering reverses. Read `--decodes` before quoting
 a delta for any language, and prefer the decode that wins there.
 
+⚠⚠ **CORROBORATION IS STRONG FOR "IS THERE A SEGMENT HERE", WEAK FOR "WHICH CATEGORY IS IT".** Two
+recognizers agreeing against us is not two witnesses when both are mapping an unfamiliar category into
+a familiar one. Neither has a voiceless-unaspirated-vs-aspirated system; both have voiced-vs-voiceless.
+On Mongolian's weak labial they made the same reduction for the same reason and agreed at 7.0:1 that
+⟨б⟩ is [b] — and Svantesson's Khalkha grammar transcribes every ⟨б⟩ as [p], with our table already
+encoding the exact labial/dental/velar asymmetry he documents. See run 74. Before acting on a
+corroborated finding, ask whether the disputed symbol sits on a category axis the RECOGNIZERS share and
+the LANGUAGE does not — voicing, aspiration, vowel height, length. If so the agreement is worth nothing
+alone. An inventory is a claim, and both models were trained on one.
+
 ⚠ **DELTA IS A TRIAGE SIGNAL, NOT A VERDICT**, for three reasons: allosaurus runs at **8 kHz** and is deaf above 4 kHz where sibilant contrasts live; it is
 coarser than wav2vec2 in general, so it will agree with a coarser transcription for uninteresting
 reasons; and six languages use a different decode (see `phones_allo_lang`).
