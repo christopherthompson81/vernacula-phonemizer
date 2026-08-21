@@ -48,7 +48,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 from asr_align_allo import UNIVERSAL  # noqa: E402
-from asr_align_report import fold  # noqa: E402
+from asr_align_report import COARSEN, fold  # noqa: E402
 from wordize import align_path  # noqa: E402
 
 DB = os.environ.get("ASR_ALIGN_ROOT", "/mnt/data/omnivoice_ipa") + "/work/asr_align/align.sqlite"
@@ -62,17 +62,36 @@ def per(a: list[str], b: list[str]) -> float:
     return 1.0 - SequenceMatcher(None, a, b, autojunk=False).ratio()
 
 
-# ⚠ `fold` ONLY -- deliberately NOT `coarsen`. COARSEN maps phones onto what WAV2VEC2 writes instead;
-# it is that model's inventory, calibrated against that model's zero counts. Applying it here would
-# push allosaurus's output through its rival's conventions and destroy the independence that is the
-# entire reason for the column. Both comparisons below use the same plain fold, so they are on equal
-# footing even though neither is the number the shipped queue reports.
+# ⚠ NOT the whole of `coarsen`: that table is calibrated against WAV2VEC2's zero counts, and pushing
+# allosaurus through its rival's inventory would destroy the independence the column exists for. The
+# split below keeps only the entries BOTH recognizers are blind to.
 #
 # ⚠ It also already handles allosaurus's dental diacritics with no extra work: `s̪` is s + U+032A, a
 # combining mark, so `fold` strips it. Run 69 claimed the fold tables "would need to handle" these.
 # They do not.
+# ⚠ COARSEN IS WAV2VEC2'S BLINDNESS, AND ALLOSAURUS IS NOT BLIND TO A THIRD OF IT. Measured over all
+# 270,106 rows: of COARSEN's 27 entries, allosaurus returns nine of them in quantity where wav2vec2
+# returns exactly zero —
+#
+#     ʋ  ours 173,823   w2v 0   allo  11,570        ɳ  ours 38,899   w2v 0   allo  92,254
+#     ɒ  ours  52,582   w2v 0   allo 221,525        ɴ  ours 32,163   w2v 0   allo  55,426
+#     ʂ  ours  47,921   w2v 0   allo 101,230        ʝ  ours  6,699   w2v 0   allo   9,763
+#     ɖ  ours  45,592   w2v 0   allo  14,222        ɻ  ours  5,670   w2v 0   allo   6,963
+#
+# ~403k tokens the shipped metric folds away as unjudgeable BECAUSE ONE MODEL COULD NOT WRITE THEM. The
+# second recognizer restores measurement on them, and folding them here would throw that away — the
+# README's "the recognizer cannot hear 3.67% of what we write" is a fact about wav2vec2, not about audio.
+#
+# ⚠ BUT THE OTHER EIGHTEEN MUST STILL FOLD, and not folding them was a real defect in this tool: `ɮ` is
+# 61/1000 of Mongolian and NEITHER recognizer writes it, so every ɮ counted as our error and mn_mn came
+# out at 42% "serious" — an artefact of the fold table, not a finding about Mongolian.
+BLIND_BOTH = {k: v for k, v in COARSEN.items()
+              if k in ("ɫ", "ɦ", "ʈ", "χ", "ɓ", "ɗ", "ɽ", "ɮ", "ʑ", "ɸ", "ɀ", "ɠ", "ᶑ", "ɜ",
+                       "ǀ", "ǁ", "ǃ", "ǂ")}
+
+
 def units(s: str) -> list[str]:
-    return fold(s or "")
+    return [BLIND_BOTH.get(u, u) for u in fold(s or "") if BLIND_BOTH.get(u, u)]
 
 
 # ⚠ WITHOUT THIS THE "corroborated" QUEUE IS A NOTATION QUEUE. Measured: of 538 corroborated findings
