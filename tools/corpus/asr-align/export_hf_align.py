@@ -28,6 +28,14 @@ so the two drop into the same layout without colliding. Per-language files mean 
 rewrites one file.
 
     python3 export_hf_align.py --out /tmp/hf_align [--langs xh_za …] [--gzip]
+
+Published to `christopherthompson81/omnivoice-ipa-corpus` under `alignment/`, beside — not inside — the
+training corpus's `data/`. The two share a provenance and a join key (`id`, `sentence_id`) but answer
+different questions over different coverage: 28 languages of training pairs against 102 of QC.
+
+    from huggingface_hub import HfApi
+    HfApi().upload_folder(folder_path=OUT, path_in_repo="alignment",
+                          repo_id="christopherthompson81/omnivoice-ipa-corpus", repo_type="dataset")
 """
 from __future__ import annotations
 

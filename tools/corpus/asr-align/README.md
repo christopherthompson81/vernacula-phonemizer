@@ -258,10 +258,21 @@ only — not the source audio"*. But `codes_<lang>.npz` is 8-codebook Higgs code
 which is far more of FLEURS than its transcripts are. FLEURS is also **CC-BY-4.0**, so redistribution with
 attribution is permitted outright and the card already gives it. Withholding cost 4 MB of nothing.
 
-⚠ **The sibling dataset is the TRAINING corpus, not this.** `omnivoice-ipa-corpus` is 28 languages / ~77k
-utterances of `(ipa → codec tokens)` pairs. This is 102 languages / 270k rows of QC measurement. Same
-provenance and same owner, different scope and purpose — worth deciding deliberately whether it lands
-there under an `align_` prefix or in a sibling dataset repo.
+**Published to** `christopherthompson81/omnivoice-ipa-corpus` under **`alignment/`** — a separate folder
+from the training corpus's `data/`, because the two are different artefacts sharing a provenance:
+
+| | `data/` | `alignment/` |
+|---|---|---|
+| what | `(ipa → codec tokens)` training pairs | QC measurement against the audio |
+| coverage | 28 languages, ~77k utterances | **102 languages, 270,106 utterances** |
+| answers | what should this say | does what we wrote match what was said |
+
+`id` and `sentence_id` join the two for the 28 languages that have both. The dataset card documents the
+schema, the `status` vocabulary and the code-switch spans.
+
+⚠ **The card's frontmatter `language:` list still names the 28 training languages only.** Extending it to
+102 would change what the dataset advertises, which is an editorial call about the dataset's identity
+rather than a fact about this export — left alone deliberately.
 
 ### Re-deriving `ipa` after a hand edit
 
