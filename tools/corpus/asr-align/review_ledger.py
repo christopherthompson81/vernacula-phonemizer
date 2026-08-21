@@ -18,10 +18,28 @@ found clean, with a prose table as the only mark — and run 54 then re-walked a
 measured, documented and declined. That is the failure with the DB intact. A rebuild would lose the
 verdicts too, and the queue would send someone through all of it a third time.
 
+⚠ THE LEDGER IS THE JUDGEMENT, NOT THE CORPUS, AND THAT BOUNDARY IS DELIBERATE. `align.sqlite` is 337 MB
+over 270,106 rows and 102 languages — text 32 MB, ipa 42 MB, phones 53 MB, and ~19 MB compressed apiece.
+That is dataset-sized, not repository-sized, and it belongs in a Hugging Face dataset beside the corpus
+tooling that already publishes there. What belongs HERE is the 138 rows nobody can recompute.
+
+The three bulk columns differ in what they cost to lose, which is why none of them is versioned here:
+
+    text     from the FLEURS TSVs — re-fetchable, and not ours to redistribute in bulk
+    ipa      re-derived by phonemize-fleurs.mts in about an hour of CPU
+    phones   THE EXPENSIVE ONE — a GPU pass over 270k utterances against a ~30 GB audio tree
+
+If any of it is to be preserved, `phones` is the artefact worth publishing: it is the only column whose
+recomputation needs hardware and a download rather than time.
+
 Usage:
   python3 review_ledger.py --export            # DB  -> review/hand_review.tsv   (commit the diff)
   python3 review_ledger.py --import            # TSV -> DB                       (after a rebuild)
   python3 review_ledger.py --check             # report drift without writing either side
+
+⚠ TEXT DRIFT WARNS BUT DOES NOT BLOCK. This file is disaster recovery; refusing to restore 138 verdicts
+because a transcript was re-normalised would lose the very thing it exists to protect. The warning is
+per-row and counted in the summary, so a wholesale mismatch — a ledger from a different corpus — is loud.
 
 ⚠ `--import` NEVER TOUCHES `ipa`. A restored `read_text` leaves `ipa` as the rebuild derived it, which is
 the auto reading, not the hand one — so re-derive afterwards, exactly as `--set` requires:
@@ -105,8 +123,6 @@ def apply_ledger(db: sqlite3.Connection, path: str, dry: bool = False) -> int:
         if r["text"] and clean(got[0]) != r["text"]:
             drift += 1
             print(f"⚠ TEXT DRIFT, verdict still applied: {r['lang']} {r['wav']}", file=sys.stderr)
-        if dry:
-            continue
         sets, args = [], []
         if r["status"]:
             sets += ["status=?", "comment=?"]
@@ -114,9 +130,12 @@ def apply_ledger(db: sqlite3.Connection, path: str, dry: bool = False) -> int:
         if r["read_text_src"] == "hand":
             sets += ["read_text=?", "read_text_src='hand'"]
             args += [r["read_text"]]
-        if sets:
-            n += db.execute(f"UPDATE utt SET {','.join(sets)} WHERE lang=? AND wav=?",
-                            [*args, r["lang"], r["wav"]]).rowcount
+        if not sets:
+            continue
+        # ⚠ COUNT IN DRY MODE TOO. `--check` reporting "would restore 0" while printing warnings about rows
+        #   it found is the kind of output that gets read as "nothing to do".
+        n += 1 if dry else db.execute(f"UPDATE utt SET {','.join(sets)} WHERE lang=? AND wav=?",
+                                      [*args, r["lang"], r["wav"]]).rowcount
     if not dry:
         db.commit()
     print(f"{'would restore' if dry else 'restored'} {n} row(s); {miss} missing, {drift} with text drift",

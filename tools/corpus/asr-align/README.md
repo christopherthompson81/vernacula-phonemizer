@@ -211,6 +211,13 @@ python3 review_ledger.py --import     # TSV -> DB                       (after a
 python3 review_ledger.py --check      # report drift, write nothing
 ```
 
+⚠ **The ledger is the judgement, not the corpus.** `align.sqlite` is 337 MB over 270,106 rows and 102
+languages (text 32 MB, ipa 42 MB, phones 53 MB; ~19 MB each compressed) — dataset-sized, not
+repository-sized, and it belongs on Hugging Face beside the corpus tooling that already publishes there.
+Of its bulk columns, `text` is re-fetchable from FLEURS, `ipa` is an hour of CPU, and **`phones` is the
+only one whose recomputation needs a GPU and a ~30 GB audio download** — that is the artefact worth
+publishing. What belongs in git is the part nobody can recompute.
+
 `review/hand_review.tsv` holds 138 rows: 135 hand verdicts (`reader_divergence` 78, `examined_clean` 50,
 `defect` 6, `convention` 1) and 40 hand readings, 37 of them carrying code-switch spans. The `text` column
 is context so the diff is reviewable — `--import` verifies it and never writes it, so a ledger from a
