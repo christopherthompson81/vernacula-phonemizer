@@ -129,7 +129,11 @@ export const INITIALISM_UPPERCASE: readonly string[] = [
     "rs",       // cs — multiple sclerosis (roztroušená skleróza)
     "rmn",      // ca/es/fr/pt — MRI (ressonància magnètica nuclear) → erra-ema-ena
     "irm",      // ca/es/fr/pt — the other MRI abbreviation; audio has the reader spelling it
-    "mrt",      // de/sv — MRI (Magnetresonanztomographie) → em-er-te
+    // `mrt` (de/sv MRI) belongs here by the same reasoning but is ALREADY in the casing-differential
+    // batch above, with the stronger justification — it is the one token there English does not read
+    // inertly (*Marty*). Listed twice until `test/abbreviation-table.test.ts` caught it; harmless at
+    // runtime, since the second matcher just repeats an idempotent replacement, but the list is
+    // hand-reviewed and its length is quoted in the docstring.
     "osn",      // cs — the UN (Organizace spojených národů) → o-es-en
     "bm",       // tr — the UN (Birleşmiş Milletler) → be-me
     "dda",      // pt — ADHD (déficit de atenção) → dê-dê-á
@@ -301,10 +305,32 @@ export const ABBREVIATION_DOT: Readonly<Record<string, readonly string[]>> = {
     // `kr` is the ERA marker here, not the currency: all three sv occurrences are `f.kr`, and FLEURS
     // dropped the trailing dot the rule needs (`f.kr.`). Checked every occurrence — no currency `kr`.
     sv_se: ["kl", "kr"],
-    cs_cz: ["tzv", "atd", "tzn", "sv", "cca"],
+    cs_cz: ["tzv", "atd", "tzn", "sv", "cca", "dr"],   // `dr` — see the note below the table
+
     fr_fr: ["cf"],
     // From the UNSURE second pass: `vb.` → *ve benzeri* ("and so on"), already in the Turkish table.
     tr_tr: ["vb"],
+    // ⚠ `dr` — 18 occurrences across these six, every one the DOCTOR abbreviation (`dr damadian`,
+    // `dr ehud ur`), and every one read as the full word by the speaker. Without the dot the token reaches
+    // the g2p as a bare consonant cluster: hr *dr smit*, cs *dr̩ smɪtx*, and worst of all en **dɹaᶦv** —
+    // English reads it as *drive*.
+    //
+    // ⚠ ONE KEY PER LINE, DELIBERATELY. A duplicate key in an object literal SILENTLY WINS, and tsc does
+    // not flag it here because the type is a `Record<string, …>` index signature rather than a literal.
+    // Adding `dr` as a second `cs_cz` entry would have dropped tzv/atd/tzn/sv/cca with no error and no
+    // failing test; five keys crammed onto one line is what hid it. `test/abbreviation-table.test.ts`
+    // now parses this source for repeated keys, since the object itself cannot show them.
+    //
+    // ⚠ ONLY THE LANGUAGES WHOSE OWN TABLE EXPANDS `dr.`, which is not most of them. Adding the dot
+    // elsewhere makes it a CLAUSE MARK and is strictly worse — measured: mt/cy/et/ny/pl/bs/sr all give
+    // `dr . smith`, a spurious pause where there was only a defective abbreviation. fr is excluded for the
+    // opposite reason: it already expands without the dot, so there is nothing to repair.
+    en_us: ["dr"],
+    hr_hr: ["dr"],
+    ms_my: ["dr"],
+    sk_sk: ["dr"],
+    sl_si: ["dr"],
+    // (cs_cz takes `dr` too — merged into its entry above rather than repeated as a second key.)
 };
 
 const DOT_PATTERNS: Readonly<Record<string, ReadonlyArray<RegExp>>> = Object.fromEntries(

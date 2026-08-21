@@ -3931,3 +3931,73 @@ The earlier entry established that the recognizer is not independent of espeak f
 adds: **it is not independent for DIALECT choices either**, and that failure mode looks exactly like a
 corpus-labelling defect — an entire language appearing to be recorded in the wrong variety. Any future
 "this split is speaking the wrong dialect" finding has to clear espeak's voice for that language first.
+
+## Run 65 — 2026-08-20 — hr_hr: a bare `dr`, and more code-switching
+
+`hr_hr` at 2.8× its own median, 17 rows / 8 sentences. Two findings and a confirmation of the run-62 rule.
+
+### `dr` without a period is read as a consonant cluster
+
+```
+[639] dr damadian je 1977. …      ours  dr damadian …        heard  dɔktɔ deɾmeːdjn …
+[1447] dr. tony moll …            ours  doktor toni mol …    heard  doktortonimol …
+```
+
+The dotted form expands and the bare one does not — `restoreAbbreviationDots` exists for exactly this
+(FLEURS strips the trailing period) but had **no `hr_hr` entry**. Corpus-wide the bare form appears **99
+times across many languages**, every sampled one the doctor abbreviation (`dr damadian`, `dr ehud ur`).
+
+⚠ **Only the languages whose own table expands `dr.` may have it**, and that is not most of them:
+
+```
+cs  dr̩ smɪtx  -> doktor smɪtx     ✓        mt  dr smɪtħ  -> dr . smɪtħ    ✗ the dot becomes a CLAUSE MARK
+en  dɹaᶦv smɪθ -> dɑːktɚ smɪθ     ✓        cy, et, ny, pl, bs, sr  likewise ✗
+hr  dr smit    -> doktor smit     ✓        fr  already expands without it  — nothing to repair
+```
+
+⚠ **English reads the bare token as `dɹaᶦv` — *drive*.** That is the worst of the eighteen.
+
+Added for cs/en/hr/ms/sk/sl — 18 occurrences, all verified as the abbreviation:
+
+```
+17 closer / 1 further     gained 0.2773   lost 0.0021   = 132:1
+```
+
+⚠ **A self-review catch, and then a second one from the guard it prompted.** The first edit added
+`cs_cz: ["dr"]` as a SECOND key. A duplicate key in an object literal silently wins, and **tsc does not flag
+it** — the type is a `Record<string, …>` index signature, so repeated literal keys are legal. It would have
+dropped `tzv/atd/tzn/sv/cca` with no error and no failing test. Merged into the existing entry, reformatted
+one key per line (five on one line is what hid it), and `test/abbreviation-table.test.ts` now parses the
+SOURCE for repeated keys, since the runtime object cannot show them.
+
+That test immediately found a second one: **`mrt` was listed twice** in `INITIALISM_UPPERCASE` — once in the
+casing-differential batch and once in the later UNSURE-bucket pass. Harmless at runtime (the extra matcher
+repeats an idempotent replacement) but the list is hand-reviewed and its length is quoted in its own
+docstring. Removed the later entry, kept the one with the stronger justification.
+
+### Code-switching again, and the run-62 rule holds
+
+Four sentences carry standalone English read in English: `national superintendent of the year` (ours
+*…of te iear*), `george w bush` (heard `dʒordʒ idablju boʃ` — the English letter name for ⟨w⟩),
+`henry louis gates`, `ellsworth land`.
+
+```
+sid 177   0.3835 -> 0.2615    0.4225 -> 0.2950    0.4493 -> 0.3037
+sid 1464  0.3273 -> 0.2093    0.3333 -> 0.2056
+sid 1062  0.3504 -> 0.2931    0.3729 -> 0.2991
+sid 1129  0.3387 -> 0.2806    0.4000 -> 0.3224
+
+9 rows, ALL closer, gained 0.9074  lost 0.0000
+```
+
+⚠ **`bellingshausenovim` was left alone** — it carries a Croatian instrumental suffix, so by the run-62
+rule it is a nativised loanword rather than a switch, and the host engine should keep it. The rule
+transferred from Shona to Croatian without adjustment.
+
+### Not resolved
+
+`[1447]` the reader expands `TB` to *tuberkuloza* — a reader's lexical choice, not derivable. `[808]` and
+`[1006]` are pure Croatian with garbled recognizer output. Left unmarked pending the same
+under-production check run 61 used for hu_hu.
+
+All-flagged is now **528**, down from 658 when this stretch began.
