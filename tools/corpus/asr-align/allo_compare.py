@@ -189,7 +189,10 @@ def main() -> int:
                     help="rows BOTH recognizers put far from us, after folding the notation axes -- "
                          "structural breakage rather than transcription-convention drift")
     ap.add_argument("--bad", type=float, default=0.60,
-                    help="a row is serious when even the closer recognizer is this far (default 0.60)")
+                    help="absolute distance cut, used only with --absolute (default 0.60)")
+    ap.add_argument("--absolute", action="store_true",
+                    help="use the flat --bad cut instead of each language's own median+3*MAD. Ranks "
+                         "recognizer competence rather than our output -- see the call site.")
     ap.add_argument("--show", type=int, default=0, help="print this many worst rows per language")
     ap.add_argument("--flagged", action="store_true",
                     help="re-rank the all-flagged queue by whether ANY recognizer supports us")
@@ -286,15 +289,25 @@ def main() -> int:
                     unmeasured += 1
                     continue
                 worst.append(d)
-                if a.show and d >= a.bad:
-                    rows.append((d, wav))
+                rows.append((d, wav))
             if len(worst) < a.min_rows:
                 if a.langs:
                     print(f"{lang}: {len(worst)} usable rows, below --min-rows {a.min_rows}")
                 continue
-            n_bad = sum(1 for d in worst if d >= a.bad)
-            out.append((n_bad / len(worst), n_bad, lang, statistics.median(worst), len(worst), rows,
-                        unmeasured))
+            # ⚠ SELF-RELATIVE, AND THE ABSOLUTE VERSION RANKED THE WRONG THING. A flat 0.60 cut flags
+            # 0.0% of es_419 and en_us but 13.9% of mn_mn, 16.4% of sd_in, 14.8% of my_mm -- because
+            # those are the languages BOTH RECOGNIZERS handle worst, not the ones we do. mn_mn's median
+            # corroborated distance is 0.4982, so 0.60 sits barely above its median and catches the
+            # ordinary tail. Against each language's own median + 3*MAD the rate lands at 4.8-8.9%
+            # everywhere, which is comparable. THIRD appearance of one error -- run 72's aggregate delta
+            # and the ignored `status` column were the others. Plainly: across languages, only
+            # self-relative figures mean anything.
+            med = statistics.median(worst)
+            mad = statistics.median(abs(d - med) for d in worst) or 1e-9
+            cut = a.bad if a.absolute else med + 3 * mad
+            n_bad = sum(1 for d in worst if d >= cut)
+            rows = sorted((r for r in rows if r[0] >= cut), reverse=True)[:a.show] if a.show else []
+            out.append((n_bad / len(worst), n_bad, lang, med, len(worst), rows, unmeasured))
         out.sort(reverse=True)
         print(f"{'serious%':>9}{'n':>7}  {'lang':<15}{'median':>8}{'rows':>7}")
         print(f"{'-'*8:>9}{'-'*6:>7}  {'-'*13:<15}{'-'*6:>8}{'-'*5:>7}")
@@ -307,7 +320,8 @@ def main() -> int:
         tn = sum(r[4] for r in out)
         tu = sum(r[6] for r in out)
         print(f"\n{len(out)} languages, {tn} rows, {tb} serious ({100 * tb / max(tn, 1):.2f}%) "
-              f"-- rows no recognizer, under any decode, puts within {a.bad} of us"
+              f"-- rows no recognizer, under any decode, puts near us "
+              f"({'flat ' + str(a.bad) if a.absolute else 'per-language median+3*MAD'})"
               + (f"; {tu} rows excluded as unmeasurable" if tu else ""))
         return 0
 

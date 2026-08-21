@@ -4631,3 +4631,67 @@ the 469 rows leaving and the 362 unexplained ones remaining, as intended.
 
 ⚠ `defect` is deliberately NOT excluded. Those rows are ours, and ckb_iq's 1,333 need the re-derivation
 pass before any ckb number is quoted again.
+
+## Run 75 — 2026-08-21 — the 362 mn_mn rows: no defect, and the screen was ranking the wrong thing
+
+Run 74 left 362 mn_mn rows unexplained. They are not a defect in our output, and finding that out cost
+seven wrong hypotheses — all recorded, because each is a plausible next guess for someone else.
+
+### Rejected, in order
+
+| hypothesis | test | result |
+| --- | --- | --- |
+| audio too short for the text | our phones ÷ audio seconds | **0 of 362** above 17/s; they are SLOWER than normal |
+| a bug in my own batching | re-decode single-item on CPU | stored == fresh, exactly (8=8, 14=14, 93=93) |
+| long audio breaks the recognizers | fleet ratio by duration | ratio RISES with duration, 0.851 → 1.000 |
+| slow speech starves the CTC decode | fleet ratio by speech RATE | slow speech is the BEST bucket (0.991, 3.3% serious) |
+| silence / dead air | frame-energy speech fraction | **1.000** for serious rows vs 0.831 for the rest |
+| audio too quiet | absolute RMS | serious rows are LOUDER (0.0179 vs 0.0077) |
+| audio paired with the wrong text | match each stream against all 1,492 mn_mn sentences | 11/12 "matched another sentence" — at 0.6-0.73 against a language norm of 0.25. ⚠ A MULTIPLE-COMPARISONS ARTEFACT of scanning 1,492 candidates, not a finding. The correct test requires the rival match to be GOOD, not merely better. |
+
+The one real correlate is recording quality: serious rows are muffled and compressed (HF share 0.179 vs
+0.308, dynamic range 29.8 dB vs 37.4 dB). ⚠ **But it does not classify**: "HF<0.24 and range<32 dB"
+catches 49% of the serious rows and 23% of everything else. A tendency, not a rule, and not a label.
+
+### What the 362 actually are
+
+```
+ 82  a same-text SIBLING recording scores inside the bulk  -> the recording, not our IPA
+ 73  no sibling recording exists                           -> unscreenable
+207  every recording of that sentence is bad               -> the only ones our IPA could own
+```
+
+and the 207 are indistinguishable from the rest of Mongolian on every text feature measured — digits
+25.6% vs 22.1%, Latin 5.8% vs 4.3%, 18 words vs 18, 108 phones vs 105 — and on symbol profile (ə 91.0
+vs 86.6, t 135.6 vs 131.6).
+
+### ⚠ Because the screen was ranking recognizer competence, not our output
+
+`--serious` used a FLAT 0.60 cut. Against each language's own distribution:
+
+```
+           median   3xMAD cut   flat-0.60 flags   own-cut flags
+es_419     0.0726     0.1525          0.0%            5.7%
+en_us      0.1519     0.2380          0.0%            8.9%
+af_za      0.3023     0.4233          0.2%            5.3%
+mn_mn      0.4982     0.6704         13.9%            9.9%
+sd_in      0.4586     0.7031         16.4%            5.3%
+my_mm      0.5061     0.6664         14.8%            4.8%
+```
+
+⚠ **mn_mn's median is 0.4982, so a 0.60 cut sits barely above its median and harvests the ordinary
+tail.** The "worst five languages" were the five both recognizers handle worst. Self-relative, mn_mn is
+9.9% — beside **en_us at 8.9%** — and the fleet residual is not concentrated anywhere.
+
+⚠ **THIS IS THE THIRD APPEARANCE OF ONE ERROR** in this campaign: run 72's aggregate delta (all 102
+languages negative), the ignored `status` column (run 74's marking), and now a flat distance cut. Each
+time the fix is the same and the lesson did not transfer. Stated once more: **across languages, only
+self-relative figures mean anything.** `--serious` now uses median + 3×MAD per language; `--absolute`
+restores the old behaviour and says in its help what it measures.
+
+### Marked
+
+75 mn_mn rows written as `sibling=exonerated` — the screen's own verdict, for rows it never reached
+(it has only ever run over rows that entered the investigate queue, so 2,571 of 2,604 mn_mn rows were
+NULL). **No language change. Mongolian is not specially defective; both recognizers are simply weak on
+it, and the earlier picture was the threshold.**
