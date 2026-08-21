@@ -76,6 +76,30 @@ def units(s: str) -> list[str]:
     return fold(s or "")
 
 
+# ⚠ WITHOUT THIS THE "corroborated" QUEUE IS A NOTATION QUEUE. Measured: of 538 corroborated findings
+# under the universal decode, the residual after removing inventory artefacts and connected-speech
+# schwa was still 392, and it was dominated by ONE THING -- both recognizers writing `ɾ` where we write
+# `r` (10 languages) and `ɪ` where we write `i` (10 languages). Two recognizers agreeing against us is
+# only evidence if they are not simply agreeing on a TRANSCRIPTION CONVENTION we did not adopt, and
+# these are the axes where both traditions happen to be narrower than ours.
+#
+# ⚠ APPLIED TO ALL THREE STREAMS, symmetrically, exactly as COARSEN is applied to both sides. Folding
+# only the recognizers would manufacture agreement rather than reveal it.
+# ⚠ THIS DELETES REAL AXES, and that is the point of it being explicit rather than implicit: after
+# folding, this tool CANNOT see an r/ɾ or i/ɪ error. That is the trade for being able to see anything
+# else. Anything on a folded axis has to be measured with a purpose-built probe, not with this.
+NOTATION = {
+    "ɾ": "r", "ɹ": "r", "ʀ": "r", "ʁ": "r",       # rhotic realisation
+    "ɪ": "i", "ʊ": "u",                            # lax high vowels
+    "ɛ": "e", "ɔ": "o",                            # mid-vowel height
+    "ɐ": "a", "ʌ": "a", "ɑ": "a",                  # low-vowel backness (see low_vowel_notation_investigation)
+}
+
+
+def notate(us: list[str]) -> list[str]:
+    return [NOTATION.get(u, u) for u in us]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=DB)
@@ -85,6 +109,19 @@ def main() -> int:
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
+    ap.add_argument("--flagged", action="store_true",
+                    help="re-rank the all-flagged queue by whether ANY recognizer supports us")
+    ap.add_argument("--min-flagged", type=int, default=5,
+                    help="minimum rows in the sibling class before a language is ranked")
+    ap.add_argument("--sibling", default="all-flagged",
+                    help="which sibling class --flagged reads (default all-flagged)")
+    ap.add_argument("--symbols", action="store_true",
+                    help="the three-way per-symbol verdict: which stream is the odd one out")
+    ap.add_argument("--raw-notation", action="store_true",
+                    help="do NOT fold the shared notation axes (r/ɾ, i/ɪ, e/ɛ, a/ɑ ...) -- shows what "
+                         "the folding is hiding, which is most of the corroborated list")
+    ap.add_argument("--rate", type=float, default=2.0,
+                    help="minimum rate per 1000 units for a symbol to be considered (default 2.0)")
     ap.add_argument("--uni", action="store_true",
                     help="use phones_allo_uni (the unrestricted decode) as the allosaurus side")
     a = ap.parse_args()
@@ -92,6 +129,114 @@ def main() -> int:
     db = sqlite3.connect(f"file:{a.db}?mode=ro", uri=True)
     langs = a.langs or [r[0] for r in db.execute(
         "SELECT lang FROM utt WHERE phones_allo IS NOT NULL GROUP BY lang ORDER BY lang")]
+
+    # The all-flagged class is the strongest signal in the corpus -- every recording of the sentence is
+    # flagged, so a reader-specific slip is ruled out. What it could never rule out with one recognizer
+    # is the INSTRUMENT: es_419's θ was flagged on every recording too, and was espeak's all along.
+    #
+    # ⚠ THE TEST IS `worst`, THE MEDIAN OF min(w2v, allosaurus-restricted, allosaurus-universal). A row
+    # is a real defect only if NO independent reading of the audio, under any decode, agrees with us.
+    # Taking the minimum is deliberately CHARITABLE to our output: it lets each row be exonerated by
+    # whichever instrument reads it best, so what survives is what nothing supports.
+    #
+    # ⚠ `rescued` counts rows where wav2vec2 disagrees by >=0.20 more than allosaurus does. Those are
+    # the es_419 shape -- the queue is ranking the instrument, not us -- and they should come off the
+    # list rather than be investigated.
+    if a.flagged:
+        # ⚠ RANKING ON THE RAW FIGURE JUST RE-FINDS HARD LANGUAGES. all-flagged rows are the worst rows
+        # by construction, so every language reads "nothing supports us" on an absolute threshold. The
+        # question is self-relative, as the 3xMAD screen already is elsewhere: is this language's
+        # flagged set worse THAN ITS OWN typical row? That excess is what points at a specific defect.
+        out = []
+        for lang in langs:
+            base, flag, dw, resc = [], [], [], 0
+            for sib, ipa, ph, pa, pu in db.execute(
+                    "SELECT sibling, ipa, phones, phones_allo, phones_allo_uni FROM utt "
+                    "WHERE lang=? AND ipa IS NOT NULL AND phones IS NOT NULL "
+                    "AND phones_allo IS NOT NULL", (lang,)):
+                u = units(ipa)
+                if not u:
+                    continue
+                w = per(u, units(ph))
+                worst = min(w, per(u, units(pa)), per(u, units(pu or pa)))
+                if sib == a.sibling:
+                    flag.append(worst); dw.append(w)
+                    if w - min(per(u, units(pa)), per(u, units(pu or pa))) >= 0.20:
+                        resc += 1
+                else:
+                    base.append(worst)
+            if len(flag) < a.min_flagged or not base:
+                continue
+            mf, mb = statistics.median(flag), statistics.median(base)
+            out.append((mf - mb, lang, mf, mb, statistics.median(dw), resc, len(flag)))
+        out.sort(reverse=True)
+        print(f"{'excess':>7} {'lang':<14}{'flagged':>8}{'baseline':>9}{'ours~w2v':>9}"
+              f"{'rescued':>8}{'n':>4}   verdict")
+        print(f"{'-'*7} {'-'*14}{'-'*7:>8}{'-'*8:>9}{'-'*8:>9}{'-'*7:>8}{'-'*3:>4}   {'-'*7}")
+        for ex, lang, mf, mb, mw, resc, n in out:
+            note = ("flagged set is far worse than its own baseline" if ex >= 0.20 else
+                    "elevated" if ex >= 0.10 else
+                    "flagged rows look like ordinary rows here")
+            print(f"{ex:+7.4f} {lang:<14}{mf:8.4f}{mb:9.4f}{mw:9.4f}{resc:8}{n:4}   {note}")
+        print(f"\n{len(out)} languages with >={a.min_flagged} {a.sibling} rows, "
+              f"{sum(r[6] for r in out)} rows, "
+              f"{sum(r[5] for r in out)} rescued by allosaurus (>=0.20 closer than wav2vec2), "
+              f"{sum(1 for r in out if r[0] >= 0.20)} languages at or above +0.20 excess")
+        return 0
+
+    # ⚠ THE AGGREGATE DELTA CANNOT SEE A SYMBOL-LEVEL ARTEFACT, measured: on the full fleet every one
+    # of the 102 languages came out NEGATIVE (median -0.176, none above +0.10) and `es_419` -- the one
+    # case whose answer is known -- ranked 32nd, indistinguishable from the fleet. The θ artefact is
+    # ~28 phones in a ~107-phone utterance, and the baseline quality gap between the two recognizers
+    # swamps it. Aggregate distance measures WHICH RECOGNIZER IS BETTER, not where either is biased.
+    #
+    # This mode asks the question that does separate them: per symbol, which of the three streams is
+    # the odd one out. It recovers es_419's θ at rank 2 (w2v 4,206 / allosaurus 7 / ours 0).
+    if a.symbols:
+        print(f"{'lang':<14}{'sym':>4}{'verdict':>14}{'ours/1k':>9}{'w2v/1k':>8}{'allo/1k':>9}   reading")
+        print(f"{'-'*14}{'-'*4:>4}{'-'*13:>14}{'-'*8:>9}{'-'*7:>8}{'-'*8:>9}   {'-'*7}")
+        # ⚠ USE `--uni` FOR ANY CORROBORATED FINDING YOU INTEND TO ACT ON. The restricted decode cannot
+        # corroborate a symbol its inventory does not contain, and that is not a rare edge: allosaurus's
+        # Azerbaijani and Estonian inventories contain no `a` at all, so it MUST write `ɑ` there, and its
+        # Armenian, Swahili, Urdu and Spanish inventories contain no `ɑ`, so it MUST write `a`. Read
+        # naively, that produced "both recognizers hear `a` and we do not" for Armenian -- which is a
+        # statement about PHOIBLE's inventory file, not about the audio.
+        acol = "phones_allo_uni" if a.uni else "phones_allo"
+        norm = (lambda x: x) if a.raw_notation else notate
+        tally = Counter()
+        for lang in langs:
+            O, W, A = Counter(), Counter(), Counter()
+            for ipa, ph, pa in db.execute(
+                    f"SELECT ipa, phones, {acol} FROM utt WHERE lang=? AND ipa IS NOT NULL "
+                    f"AND phones IS NOT NULL AND {acol} IS NOT NULL", (lang,)):
+                O.update(norm(units(ipa))); W.update(norm(units(ph)))
+                A.update(norm(units(pa)))
+            to, tw, ta = sum(O.values()), sum(W.values()), sum(A.values())
+            if min(to, tw, ta) < 1000:
+                continue
+            for sym in set(O) | set(W) | set(A):
+                ro, rw, ra = 1000 * O[sym] / to, 1000 * W[sym] / tw, 1000 * A[sym] / ta
+                hi = max(ro, rw, ra)
+                if hi < a.rate:
+                    continue
+                lo = 0.10 * hi
+                # ⚠ The two recognizers AGREEING against us is the only one of these four that is a
+                # lead about OUR output, and it is the one a single recognizer cannot produce.
+                if ro < lo <= min(rw, ra) and min(rw, ra) >= a.rate:
+                    v, why = "corroborated", "both hear it, we do not"
+                elif rw >= a.rate and ra < lo and ro < lo:
+                    v, why = "w2v-alone", "espeak artefact; we are penalised for it"
+                elif ra >= a.rate and rw < lo and ro < lo:
+                    v, why = "allo-alone", "allosaurus artefact"
+                elif ro >= a.rate and rw < lo and ra < lo:
+                    v, why = "ours-alone", "neither can write it (COARSEN territory)"
+                else:
+                    continue
+                tally[v] += 1
+                print(f"{lang:<14}{sym:>4}{v:>14}{ro:9.1f}{rw:8.1f}{ra:9.1f}   {why}")
+        print(f"\n{sum(tally.values())} findings: " +
+              ", ".join(f"{v} {n}" for v, n in tally.most_common()))
+        return 0
 
     if a.decodes:
         print(f"{'lang':<14}{'decode':>7}{'restricted':>12}{'universal':>11}{'better':>12}"

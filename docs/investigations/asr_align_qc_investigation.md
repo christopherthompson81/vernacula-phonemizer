@@ -4385,3 +4385,83 @@ circularity surfacing as a number.
 ⚠ **Delta triages, it does not adjudicate**, and three things keep it honest: allosaurus is deaf above
 4 kHz (run 70), it is coarser in general so it will agree with a coarser transcription for
 uninteresting reasons, and the decode choice above moves it. Read `--decodes` first.
+
+## Run 72 — 2026-08-21 — the fleet pass, a metric that failed, and what the corroborated queue actually contains
+
+270,106 rows, 102 languages, both decodes, ~100 min at 32–66 utt/s.
+
+### ⚠ The aggregate delta failed its validation case
+
+`delta = median dist(ours, wav2vec2) - median dist(ours, allosaurus)` was supposed to separate "our
+output is wrong" from "the instrument is wrong". On the full fleet **all 102 languages came out
+negative** (median −0.176, none above +0.10), and `es_419` — the one case whose answer we know —
+ranked **32nd of 102**, indistinguishable from the fleet.
+
+⚠ **Aggregate distance measures which recognizer is better, not where either is biased.** The θ
+artefact is ~28 phones in a ~107-phone utterance; the baseline quality gap between the two recognizers
+swamps it. Kept in the tool with this recorded, because it is an inviting trap.
+
+### The decode split was worth shipping
+
+84 languages prefer the restricted decode, 12 the universal, 6 identical. The three worst-starved
+inventories are all in the universal group (`sr_rs` 0.566 phones per wav2vec2 phone, `ast_es` 0.646,
+`ckb_iq` 0.704). Had run 70's single restricted decode shipped, 12 languages would have been measured
+through a starved instrument.
+
+### What does work: the three-way per-symbol verdict
+
+With three streams you can ask which one is the odd one out. It recovers es_419's θ as `w2v-alone` at
+15.2/1k against 0.0 and 0.0 — the known answer, found by the general instrument.
+
+⚠ **But `corroborated` is not a defect queue until three things are removed, and each was found the
+hard way:**
+
+1. **Inventory forcing.** The restricted decode cannot corroborate a symbol its inventory lacks.
+   allosaurus's Azerbaijani and Estonian inventories contain **no `a` at all**, so it must write `ɑ`;
+   its Armenian, Swahili, Urdu and Spanish inventories contain no `ɑ`, so it must write `a`. Read
+   naively this produced "both recognizers hear `a` and we do not" for Armenian — a statement about a
+   PHOIBLE inventory file, not about audio. **Use `--uni` for anything you intend to act on.**
+2. **Shared notation.** Two recognizers agreeing against us is only evidence if they are not simply
+   agreeing on a convention we did not adopt. Both write `ɾ` where we write `r` (10 languages) and `ɪ`
+   where we write `i` (10 languages). A symmetric `NOTATION` fold, applied to all three streams, takes
+   538 findings to 232. ⚠ It DELETES those axes — this tool can no longer see an r/ɾ error at all.
+3. **Connected-speech reduction.** 33 of the remaining 232 are `ə` across ~15 languages: both
+   recognizers hear reduced vowels, we write the careful form. Run 68 established this for hr_hr; a
+   second independent instrument now confirms it fleet-wide. Not a defect — the register is a choice.
+
+### The low-vowel axis, with an independent witness at last
+
+`low_vowel_notation_investigation.md` proposed three changes on recognizer evidence and withdrew all
+three because wav2vec2 is not independent of espeak. Correlating the per-language ratio ɑ/(ɑ+a):
+
+```
+corr(ours, wav2vec2)               +0.281
+corr(ours, allosaurus RESTRICTED)  +0.142    <- inventory-forced, not evidence
+corr(ours, allosaurus UNIVERSAL)   +0.074    <- no inventory prior
+corr(wav2vec2, allosaurus UNIVERSAL) +0.467
+```
+
+⚠ **The two recognizers agree with each other far better than either agrees with us**, and the
+unrestricted decode is discriminating rather than defaulting (it writes `ɑ` in 60/101 languages against
+the restricted decode's 23). This does not license a change — both models carry a ~23:1 frequency prior
+toward `a`, so shared prior is not excluded — but it is the first evidence on this axis that espeak
+cannot explain. The withdrawal stands; the question is now answerable rather than blocked.
+
+### The residual, and it is small
+
+Of 199 non-schwa corroborated findings after folding, **177 are in a language that also has an
+`ours-alone` symbol** — almost certainly the same segment written differently. **22 are not**: the
+language has no unwritten-symbol of its own, so we simply never emit that phone.
+
+```
+lang       sym  ours/1k  w2v/1k  allo/1k
+ast_es       ð      0.0    33.4     25.8     <- /d/ spirantisation
+it_it        ð      0.0     6.5     17.4
+kea_cv       j      0.0    11.2     25.9
+umb_ao       r      0.0     9.2     20.3
+pt_br        ŋ      0.0    29.7      9.3     <- and ŋ in yo_ng, ln_cd, umb_ao, ast_es, ro_ro
+```
+
+⚠ **`ŋ` recurs across six unrelated languages** — a phone the fleet never emits and both recognizers
+hear. That is the shape of a systematic gap rather than six coincidences, and it is the one lead here
+that a single recognizer could not have produced.
