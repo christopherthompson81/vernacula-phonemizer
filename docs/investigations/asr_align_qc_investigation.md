@@ -4238,3 +4238,92 @@ Practical notes for wiring it in:
 **It should not replace wav2vec2 — it should sit beside it.** Agreement between two independently-labelled
 recognizers is far stronger evidence than either alone, and disagreement is exactly the signal that a
 finding is about the instrument. That is the check this campaign has needed four separate times.
+
+## Run 70 — 2026-08-20 — allosaurus becomes a standing column, and the es_419 control that closes run 69
+
+Run 69 used allosaurus once, by hand, on 11 rows. This makes it a permanent second opinion:
+`tools/corpus/asr-align/asr_align_allo.py` fills a new **`phones_allo`** column beside `phones`, with
+`phones_allo_lang` recording which decode each row got.
+
+### First, the control run 69 did not run
+
+Run 69's claim was "allosaurus hears no θ in es_419". That claim is worthless if allosaurus cannot
+write θ, or if a restricted inventory forbade it. Both checked:
+
+```
+θ in allosaurus's SPANISH inventory (46 phones):   YES   <- it was free to write it
+θ emitted on 20 en_us utterances w/ a θ word:      11    <- it does write it when it hears it
+θ on es_419, restricted (spa) decode, 25 rows:      0    of 66 <z/ce/ci> graphemes
+θ on es_419, UNRESTRICTED (ipa) decode, same rows:  0    <- not inventory suppression
+wav2vec2 on the same 25 rows:                      58
+```
+
+⚠ **The zero survives the unrestricted decode**, which has 230 phones available. Run 69's conclusion
+holds and is now controlled: the espeak-trained model was reproducing the orthography.
+
+### Language coverage
+
+96 of 102 corpus languages resolve to a PHOIBLE inventory. Six do not (`be_by`, `bs_ba`, `kk_kz`,
+`nso_za`, `ny_mw`, `om_et`) and take the unrestricted `ipa` decode instead.
+
+⚠ **THE TWO DECODES ARE DIFFERENT INSTRUMENTS, not two settings of one.** On es_419 the restricted
+decode yields 33 phone types and the unrestricted 88, at 0.249 PER between them — the unrestricted one
+invents exotica (`b̞`, `ɻ̩`, `k͡p̚`) no fold table will tame. `phones_allo_lang` exists so the column can
+never be silently pooled across the two. The six are exactly the wrong six to lose, `nso_za` included.
+
+### ⚠ allosaurus runs at 8 kHz
+
+`pm.sample_rate = 8000`. Every 16 kHz FLEURS clip is resampled down before features, so **everything
+above 4 kHz is discarded** — which is precisely where sibilant and fricative energy lives. This is a
+standing caveat on every θ/s, s/ʃ, and sibilant-inventory question we ask it. It does not overturn the
+es_419 result (the English control shows θ recall survives the 4 kHz ceiling), but it means a
+*negative* result from allosaurus on a fricative contrast is weaker than a positive one.
+
+### Instrument floors, measured
+
+Three separate noise floors, worth knowing before any single-phone disagreement is read as signal:
+
+```
+same bytes, decoded twice                    0.0000 PER   exact 20/20   (do_dither is commented out upstream)
+GPU-batched vs CPU reference                 0.0005 PER   exact 114/120, max 0.0213
+ffmpeg -sample_fmt s16 vs in-memory int16    ~0.02-0.04 PER on non-degenerate rows
+```
+
+⚠ **The ffmpeg floor is the largest of the three and it is an artefact of run 69's own method.** ffmpeg
+DITHERS on the float32→s16 conversion, so run 69's temp-file pipeline perturbed its own input. The
+column is built with a deterministic in-memory int16 conversion instead — not more correct, but free
+and reproducible.
+
+⚠ **cuDNN picks a different kernel at batch size 1.** A single-item CUDA decode disagrees with both the
+CPU decode and the batched CUDA decode (37 vs 38 phones on the row that exposed it); CPU is
+batch-invariant across B=1/8/48. Anyone re-deriving one row on the GPU to check the table will see
+spurious disagreement. Use CPU, or batch.
+
+### Making it affordable: the pass was 91% MFCC and 3% GPU
+
+Naive throughput was 7.8 utt/s — 9.6 hours for the corpus — and both CPU and GPU sat underutilized.
+Profiling found the cost was nowhere near the model:
+
+```
+tar stream + gunzip     2.2%
+wav decode              0.4%
+MFCC (pm.compute)      91.3%     <- and 92% of THAT is resampy, 16 kHz -> the model's 8 kHz
+GPU acoustic model      3.1%
+LM decode               3.0%
+```
+
+Three fixes, each verified not to change output rather than assumed not to:
+
+1. **`allo_fast.py` vectorizes `framesig`.** Upstream loops over ~1,100 frames per utterance in Python
+   doing DC-offset removal and preemphasis one frame at a time, and rebuilds the Povey window with
+   another Python loop per call. Both vectorize over the frame axis exactly. **Bit-identical features,
+   40/40, on two languages** — not merely phone-identical. It monkeypatches a third-party package, so
+   `install()` refuses to patch if upstream's source no longer matches, and `--selftest` re-checks.
+2. **BLAS pinned to 1 thread.** Stock MFCC spent 19m40s of CPU to make 2m12s of wall-clock on af_za —
+   BLAS spreading tiny per-frame matmuls over 16 cores and paying 9× the power to thrash.
+3. **A 12-thread MFCC pool and a producer thread for the tar.** resampy's kernel is a numba gufunc and
+   releases the GIL, so plain threads scale: 15.8 → 100 utt/s, bit-identical 96/96.
+
+**7.8 → ~50 utt/s**, and af_za went 132s → 25s. ⚠ Note what the profile says about instrument choice
+generally: the GPU was never the constraint, and the second recognizer is cheap. There is no throughput
+argument against adding a third.
