@@ -87,6 +87,7 @@ def per(a: list[str], b: list[str]) -> float:
 #     ɒ  ours  52,582   w2v 0   allo 221,525        ɴ  ours 32,163   w2v 0   allo  55,426
 #     ʂ  ours  47,921   w2v 0   allo 101,230        ʝ  ours  6,699   w2v 0   allo   9,763
 #     ɖ  ours  45,592   w2v 0   allo  14,222        ɻ  ours  5,670   w2v 0   allo   6,963
+#     ʄ  ours   3,962   w2v 0   allo   1,024
 #
 # ~403k tokens the shipped metric folds away as unjudgeable BECAUSE ONE MODEL COULD NOT WRITE THEM. The
 # second recognizer restores measurement on them, and folding them here would throw that away — the
@@ -189,7 +190,8 @@ def main() -> int:
                     help="rows BOTH recognizers put far from us, after folding the notation axes -- "
                          "structural breakage rather than transcription-convention drift")
     ap.add_argument("--bad", type=float, default=0.60,
-                    help="absolute distance cut, used only with --absolute (default 0.60)")
+                    help="distance cut: the row threshold under --absolute, AND the row/word threshold "
+                         "in --words and the symbol modes, which have no per-language cut (default 0.60)")
     ap.add_argument("--absolute", action="store_true",
                     help="use the flat --bad cut instead of each language's own median+3*MAD. Ranks "
                          "recognizer competence rather than our output -- see the call site.")
@@ -303,8 +305,12 @@ def main() -> int:
             # and the ignored `status` column were the others. Plainly: across languages, only
             # self-relative figures mean anything.
             med = statistics.median(worst)
-            mad = statistics.median(abs(d - med) for d in worst) or 1e-9
-            cut = a.bad if a.absolute else med + 3 * mad
+            mad = statistics.median(abs(d - med) for d in worst)
+            # ⚠ A ZERO MAD MUST FALL BACK, NOT DEGENERATE. `or 1e-9` made the cut `med + 3e-9`, which
+            # flags every row at or above the median -- roughly half the language -- and reads as a
+            # catastrophic finding. It needs >50% of rows sharing a distance exactly, which floats make
+            # unlikely but short identical utterances can produce.
+            cut = a.bad if (a.absolute or mad == 0) else med + 3 * mad
             n_bad = sum(1 for d in worst if d >= cut)
             rows = sorted((r for r in rows if r[0] >= cut), reverse=True)[:a.show] if a.show else []
             out.append((n_bad / len(worst), n_bad, lang, med, len(worst), rows, unmeasured))

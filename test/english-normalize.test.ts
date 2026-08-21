@@ -66,6 +66,26 @@ describe("English text normalization", () => {
         expect(normalizeEnglish("guru nanak 1469–1539")).toBe("guru nanak 14 69–15 39");
         expect(normalizeEnglish("from 1918-1939 the war")).toBe("from 19 18-19 39 the war");
         expect(normalizeEnglish("the 1418 - 1450 period")).toBe("the 14 18 - 14 50 period");
+        // ⚠ 2010s RANGES CONVERT TOO, matching the tight contexts ("in 2011" → "20 11"). Restricting the
+        // range arm to pre-2010 while the context arm still fired on 2010s years reintroduced the exact
+        // half-conversion the ordering above exists to prevent: "from 2011-2015" → "from 20 11-2015".
+        expect(normalizeEnglish("from 2011-2015 he served")).toBe("from 20 11-20 15 he served");
+        expect(normalizeEnglish("from 2009-2015")).toBe("from 2 thousand 9-20 15");
+    });
+
+    /** ⚠ A DASHED PAIR OF 4-DIGIT NUMBERS IS NOT ALWAYS A DATE, and the range rule shipped without a gate
+     *  in review: `pp. 1234-1256` read as "12 34-12 56" and `room 1200-1300` as "12 hundred-13 hundred".
+     *  Two guards, one specific and one general — a reference/quantity cue before, the context arm's unit
+     *  list after, and the observation that A DATE RANGE ASCENDS, which rules out phone fragments and
+     *  reversed ID ranges as a class rather than one cue at a time. */
+    test("a dashed pair that is not a date keeps its cardinal reading", () => {
+        expect(normalizeEnglish("see pp. 1234-1256 for details")).toBe("see pp. 1234-1256 for details");
+        expect(normalizeEnglish("room 1200-1300")).toBe("room 1200-1300");
+        expect(normalizeEnglish("pages 1100-1200")).toBe("pages 1100-1200");
+        expect(normalizeEnglish("he ran 1500-1600 meters")).toBe("he ran 1500-1600 meters");
+        expect(normalizeEnglish("revenue 1200-1400 usd")).toBe("revenue 1200-1400 usd");
+        expect(normalizeEnglish("call 1800-1234")).toBe("call 1800-1234"); // descending → not a range
+        expect(normalizeEnglish("part 1500-1200")).toBe("part 1500-1200");
     });
 
     test("units, with count agreement, only after a number", () => {

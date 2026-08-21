@@ -295,8 +295,11 @@ def main() -> None:
             if not a.lang:
                 sys.exit("--wav-file requires --lang (wav basenames are only unique within a language)")
             with open(a.wav_file, encoding="utf8") as fh:
-                wavs = [ln.strip() for ln in fh
-                        if ln.strip() and not ln.lstrip().startswith("#")]
+                # ⚠ DEDUPE, or the "not found" warning lies. The PK is (lang, wav), so a repeated wav
+                # updates one row and contributes 1 to rowcount while contributing 2 to len(wavs) --
+                # a file with repeats reported wavs as missing that were found and set.
+                wavs = list(dict.fromkeys(
+                    ln.strip() for ln in fh if ln.strip() and not ln.lstrip().startswith("#")))
             if not wavs:
                 sys.exit(f"{a.wav_file}: no wavs")
             # ⚠ Chunked: SQLite's default parameter limit is 999 and these sets run to thousands.
@@ -310,19 +313,25 @@ def main() -> None:
                 n += cur.rowcount
             db.commit()
             missing = len(wavs) - n
+            # ⚠ stderr, matching the other --set paths, and NO early return: returning here skipped
+            # --stats and left the connection unclosed.
             print(f"{n} rows set to {a.set!r} in {a.lang}"
-                  + (f"  ⚠ {missing} of {len(wavs)} wavs not found" if missing else ""))
-            return
-        if a.sibling:
-            where, args = ("sibling=?", [a.sibling])
-            if a.digits:
-                where += " AND text GLOB '*[0-9]*'"
+                  + (f"  ⚠ {missing} of {len(wavs)} wavs not found" if missing else ""),
+                  file=sys.stderr)
         else:
-            where, args = ("sentence_id=?", [a.id]) if a.id else ("wav=?", [a.wav])
-        n = db.execute(f"UPDATE utt SET status=?, comment=? WHERE lang=? AND {where}",
-                       [a.set, a.comment, a.lang, *args]).rowcount
-        db.commit()
-        print(f"{n} row(s) set to {a.set}", file=sys.stderr)
+            # ⚠ `else`, not a fall-through. The wav-file arm used to `return`, which skipped --stats and
+            # left the connection open; dropping the return without this guard sent it on to the
+            # single-row arm with a.wav unset, i.e. `WHERE wav IS NULL` and a confusing "0 row(s) set".
+            if a.sibling:
+                where, args = ("sibling=?", [a.sibling])
+                if a.digits:
+                    where += " AND text GLOB '*[0-9]*'"
+            else:
+                where, args = ("sentence_id=?", [a.id]) if a.id else ("wav=?", [a.wav])
+            n = db.execute(f"UPDATE utt SET status=?, comment=? WHERE lang=? AND {where}",
+                           [a.set, a.comment, a.lang, *args]).rowcount
+            db.commit()
+            print(f"{n} row(s) set to {a.set}", file=sys.stderr)
     if a.stats or a.apply:
         print("\nstatus                 rows", file=sys.stderr)
         for st, n in db.execute(

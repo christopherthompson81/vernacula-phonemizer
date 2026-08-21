@@ -449,17 +449,36 @@ export function normalizeEnglish(input: string): string {
     //    followed by a sentence boundary after such) → pair-wise reading. ⚠ Context-gated on purpose: "2011
     //    people died" must not become "twenty eleven people". Grouped digits (1,998) never match.
     //    ⚠ A DASHED PAIR OF 4-DIGIT YEARS IS A DATE RANGE, and encyclopedic prose is full of them —
-    //    "guru nanak 1469–1539" is life dates, not arithmetic. Both sides take the pair-wise reading. This
-    //    cannot collide with the sign rule in 0e: that one requires the dash to FOLLOW a space or an open
-    //    paren, and here it follows a digit. The dash itself is left alone rather than spoken as "to",
-    //    because that would assert a word the reader may not say.
-    //    ⚠ THIS MUST RUN BEFORE THE CONTEXT RULE BELOW. With the context rule first,
-    //    "from 1918-1939" had its LEFT year consumed and the range rule could no longer see a
-    //    pair, giving the half-converted "from 19 18-1939".
+    //    "guru nanak 1469–1539" is life dates, not arithmetic. Both sides take the pair-wise reading. The
+    //    dash is left alone rather than spoken as "to", which would assert a word the reader may not say.
+    //
+    //    ⚠ IT NEEDS ITS OWN GATE, and shipping it without one was a defect: a bare dashed pair of 4-digit
+    //    numbers is not always a date. `pp. 1234-1256` became "12 34-12 56" and `room 1200-1300` became
+    //    "12 hundred-13 hundred". The reference/quantity cues below are excluded before, and the context
+    //    arm's own unit list after, so a measurement range keeps its cardinal reading. This is the same
+    //    principle the context gate above states — a bare number is not a year — applied to the pair.
+    //
+    //    ⚠ BOTH SIDES ARE `20\d\d`, NOT `200\d`. Restricting the range to pre-2010 while the tight
+    //    contexts still convert 2010s years reintroduced the exact half-conversion the ordering below
+    //    fixes: `from 2011-2015` matched no range, then the context arm ate the left year alone and gave
+    //    "from 20 11-2015". A range IS a date context, as strong as "in", so it follows the tight-context
+    //    behaviour for every year. Only the DETERMINER arm is pre-2010 gated, and for a different reason.
+    //
+    //    ⚠ THIS MUST RUN BEFORE THE CONTEXT RULE BELOW. With the context rule first, "from 1918-1939" had
+    //    its LEFT year consumed and the range rule could no longer see a pair.
+    //    ⚠ It does NOT fully escape the sign rule at step 0f: that arm needs the dash to follow a space or
+    //    an open paren, which `1998-1999` and `1998 - 1999` avoid but `1998 -1999` does not — that spacing
+    //    still reads as a negative, exactly as it does on main. Not introduced here, and not fixed here.
     s = s.replace(
-        /\b(1[1-9]\d\d|200\d)(\s*[-–—]\s*)(1[1-9]\d\d|200\d)\b(?![.,]?\d)/g,
+        /(?<!\b(?:pp|p|pages?|nos?|no|rooms?|chapters?|verses?|lines?|sections?|parts?|models?|items?|figs?|figures?|tables?|suites?|apt|ext)\.?\s)\b(1[1-9]\d\d|20\d\d)(\s*[-–—]\s*)(1[1-9]\d\d|20\d\d)\b(?![.,]?\d)(?!\s*(?:percent|kilometers?|meters?|km|kg|miles?|feet|ft|dollars?|usd|euros?))/gi,
+        //    ⚠ AND A DATE RANGE ASCENDS. This catches what no cue list can: `call 1800-1234` is a phone
+        //    number, not a reign, and it read as "18 hundred-12 34". Requiring b >= a rules out phone
+        //    fragments, descending part numbers and reversed ID ranges generally, rather than one at a
+        //    time. An equal pair (`1998-1998`) is kept — it is a degenerate range, still a year.
         (_m, a: string, dash: string, b: string) =>
-            `${yearWords(Number(a))}${dash}${yearWords(Number(b))}`,
+            Number(b) >= Number(a)
+                ? `${yearWords(Number(a))}${dash}${yearWords(Number(b))}`
+                : _m,
     );
     //    ⚠ A DETERMINER MAY SIT BETWEEN THE CONTEXT WORD AND THE YEAR, and requiring adjacency missed it:
     //    "in a 1998 book" and "since the 1998 report" read as *one thousand nine hundred ninety-eight*
