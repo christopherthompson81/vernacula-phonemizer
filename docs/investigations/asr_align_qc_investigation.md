@@ -3770,3 +3770,164 @@ recognizer at zero the comparison could only penalise the symbol, never judge it
 Three of its four all-flagged sentences are **English code-switching** — *maslow's hierachy of needs
 theory*, *virgin … northen rock … asset management* — read with Shona rules, producing `neeɗs` with a
 Shona implosive and `theorj`. That is what `{en:…}` spans are for; not authored yet.
+
+## Run 62 — 2026-08-20 — Shona code-switching, and the line between a switch and a loanword
+
+Run 61 left three `sn_zw` all-flagged sentences reading English with Shona rules — *maslow's hierachy of
+needs theory* → `θeorj`, *needs* → `neeɗs` with a Shona **implosive**. `{en:…}` spans are the mechanism.
+
+### The mechanism needed one addition: TIGHT joins
+
+Shona takes English stems under its noun-class prefixes — `maneutron`, `nezveasset` — so a span is not
+always at a word boundary. Written `ma{en:neutron}` and joined on a space, that gives `ma nˈuːtɹɑːn`,
+inventing a word break the speaker did not make. ⚠ **The distance metric strips whitespace, so it would
+never have shown up in the score** — a trainer reading the IPA would simply see two words.
+
+Adjacency is already in the source (the span either touches the previous character or it does not), so
+`codeSwitchSegments` now marks such a segment `tight` and the re-derivation joins it with no space.
+
+⚠ **The numeral register had the same gap and it was invisible for the same reason.** `numeralSegments`
+PARTITIONS the host text, so a space between its segments lives inside one of them and is lost when
+`phonemize` trims — xh `ngo1956` rejoined as `ngo 19 56`. Now flagged the same way. Seven shapes pinned in
+`test/code-switch.test.ts`, including a span abutting a span and a digit glued to a host word.
+
+### ⚠ And then the measurement said not to use it here
+
+Wrapping the prefixed stems as well as the standalone English:
+
+```
+sid 559   0.5490 -> 0.5842  +0.0351      sid 153   0.5163 -> 0.5733  +0.0570
+sid 559   0.4757 -> 0.6078  +0.1321      sid 153   0.6623 -> 0.6954  +0.0330
+sid 1184  0.5099 -> 0.3669  -0.1430      sid 1184  0.4830 -> 0.3630  -0.1200
+```
+
+The standalone English phrases win big; every prefixed stem loses. The reason is in the recognizer output:
+the reader says **`maɲuːtrɔn`** — a Shona palatal `ɲ` on an English stem. That is a **nativised loanword**,
+not a code-switch, and neither a pure-Shona nor a pure-English rendering captures it.
+
+**So the span is for code-switching, not for loanwords**, and the two are not distinguishable by looking at
+the orthography — only by what the reader did. Standalone English only:
+
+```
+sid 1184  0.5099 -> 0.3669      sid 559  0.5490 -> 0.5098      sid 153  0.5163 -> 0.5033
+sid 1184  0.4830 -> 0.3630      sid 559  0.4757 -> 0.4951      sid 153  0.6623 -> 0.6623
+
+mean 0.5327 -> 0.4834     gained 0.315  lost 0.019  = 16:1     all three sentences net positive
+```
+
+Applied to both recordings of each sentence — `read_text` is a property of the text — and marked
+`reader_divergence` with the loanword exclusion recorded in the comment so it is not re-tried.
+
+**The general rule, for the next language:** an English run that stands alone is a candidate for a span; an
+English stem carrying host morphology is a loanword the host engine should keep. The corpus can tell them
+apart, the orthography cannot.
+
+## Run 63 — 2026-08-20 — `es_419` is not Latin American
+
+`es_419` has the fleet's best median (0.082), so its all-flagged rows are a strong signal. Reading them
+turned up two things, and the second is about the corpus rather than the engine.
+
+### The all-flagged rows themselves: English proper names
+
+`turkish airlines` → ours `tuɾkis aᶦɾlines`, heard `tœɾkʃɛlaɪns`; `air canada delta air lines` → heard
+`erɡanaða deldaerlaɪns`; `minneapolis star-tribune` → heard `minjapolis tʃaɾtɹiːbun`. The same
+code-switching class as Shona (run 62), not yet authored.
+
+### ⚠ And the split is speaking PENINSULAR Spanish
+
+The recognizer keeps returning `θ` where we write `s` — `katorθe`, `θerkana`, `imbesθiɡaθjon`, `loftanθa`.
+That is *distinción*, which Latin American Spanish does not have.
+
+**It tracks the ORTHOGRAPHY, which is what makes it real:**
+
+```
+corr(θ count, ⟨z/ce/ci⟩ count) = 0.749        mean θ per row        1.83
+corr(θ count, ⟨s⟩ count)       = 0.254        mean ⟨z/ce/ci⟩ per row 2.11
+```
+
+⚠ ⚠ **I CLAIMED THIS CLOSED THE CONFOUND. IT DOES NOT — SEE RUN 64.** The argument was that the model is
+purely acoustic and never sees the text, so an orthographic correlation must come from the speakers. That
+misses a mechanism: the model can learn the pattern LEXICALLY. Trained on (Spanish audio, espeak-`es`
+labels), it sees *ciudad* labelled with θ every time, and reproduces it from the word's acoustic shape
+without any [θ] being present. Run 64 tests this and the evidence favours it.
+
+Textbook, in one breath: `los ciudadanos` → heard `los θjuðaðanos`. [s] for the ⟨s⟩ of *los*, [θ] for the
+⟨c⟩ of *ciudadanos*.
+
+Over rows with ≥3 ⟨z/ce/ci⟩:
+
+```
+distinción (θ/cz ≥ 0.5)   697   86%
+seseo      (θ/cz < 0.15)   23    3%
+mixed                      90   11%
+```
+
+### The engine is right and the LABEL is wrong
+
+`phonemize-fleurs.mts` maps `es_419 → es-419`, which correctly emits seseo. Scoring the same audio against
+the Peninsular engine instead:
+
+```
+es-419 (current)     median 0.0824   mean 0.0894
+es    (Peninsular)   median 0.0744   mean 0.0825
+                     1295 closer / 467 further      gained 22.93  lost 6.98  =  3.3:1
+```
+
+**Not a phonemizer defect — a corpus-labelling one.** The `VARIETY` map exists for exactly this (it already
+carries `ar_eg→arz`, `ny_mw→nya`), and the numeral-register precedent says rendering choices of this kind
+are training-corpus policy rather than phonemizer correctness.
+
+⚠ **DO NOT REMAP — see run 64.** Recorded rather than applied, and run 64 turns "not yet" into "no".
+
+## Run 64 — 2026-08-20 — the θ is probably espeak's, not the speakers'
+
+Run 63 concluded the `es_419` audio is Peninsular. **That conclusion is withdrawn**, on a mechanism I had
+not considered: the recognizer was trained with **espeak-generated labels**, and espeak's Spanish choice is
+a DIALECT choice.
+
+```
+espeak -ves      la θjuðˈad ðe seɾβˈiθjo katˈoɾθe θapˈato lˈos     <- Spain, θ
+espeak -ves-419  la sjuðˈad ðe seɾβˈisjo katˈoɾse sapˈato lˈos     <- Latin America, s
+espeak -vca      lɐ siwðˈat ðə sərβˈisjʊ kɐtˈorsə zɐpˈatʊ lˈos     <- no θ
+```
+
+CommonVoice Spanish is one locale, so the labelling pipeline almost certainly used `es`. The model was then
+trained on mixed-origin Spanish audio against **European** labels, and can reproduce that pattern
+LEXICALLY — recognising the word-shape of *ciudad* and emitting the θ it was always labelled with, whether
+or not the speaker produced one. That generates the orthographic correlation with no [θ] in the audio.
+
+**Catalan is consistent with this.** espeak `ca` writes no θ, and ca_es shows θ in 17.7% of rows against
+es_419's 79.7%.
+
+### The test: does θ depend on word FREQUENCY?
+
+A speaker's pronunciation does not. A memorised lexical pattern does. Over rows containing exactly one
+⟨c/z⟩ word, so the θ is attributable:
+
+```
+bucket        n    θ rate   median dist
+freq >= 5   319      77%       0.0829
+freq 2-4    256      77%       0.0730
+hapax        39      56%       0.0728
+```
+
+**The θ rate falls 77% → 56% for words seen once, while those rows are recognised just as well** (median
+distance 0.0728 vs 0.0829/0.0730). That rules out the obvious confound — rare words being harder overall —
+and leaves a lexical effect, which is what memorisation looks like and what genuine distinción does not.
+
+⚠ n=39 in the hapax bucket, so this SUPPORTS the espeak explanation rather than proving it. What would
+settle it: listening to a sample, FLEURS speaker-locale metadata, or a second recognizer trained on
+different labels.
+
+### It inverts the recommendation
+
+Run 63's 3.3:1 for remapping `es_419 → es` now reads as **fitting the instrument, not the speech**. If the
+θ is espeak's, remapping would pair genuinely Latin American audio with Peninsular IPA — corrupting the
+training pairs to chase a metric artefact. **Do not remap.**
+
+### And it generalises the espeak confound
+
+The earlier entry established that the recognizer is not independent of espeak for SYMBOL choices. This
+adds: **it is not independent for DIALECT choices either**, and that failure mode looks exactly like a
+corpus-labelling defect — an entire language appearing to be recorded in the wrong variety. Any future
+"this split is speaking the wrong dialect" finding has to clear espeak's voice for that language first.

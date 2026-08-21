@@ -32,6 +32,19 @@ export interface CodeSwitchSegment {
     readonly text: string;
     /** `undefined` = the host language reads this segment. */
     readonly lang?: string;
+    /**
+     * Join this segment's IPA to the previous one with NO space.
+     *
+     * ⚠ CODE-SWITCHING IS NOT ALWAYS AT A WORD BOUNDARY. Shona takes English stems under its own noun-class
+     * prefixes — `maneutron`, `maproton` — and the reader says the prefix in Shona and the stem in English
+     * (`maɲuːtrɔn`). Writing that as `ma{en:neutron}` and joining on a space gives `ma nˈuːtɹɑːn`, inventing
+     * a word break the speaker did not make. The distance metric strips whitespace so it would not show
+     * there, which is exactly why it needs handling here: a trainer reading the IPA would see two words.
+     *
+     * Adjacency is already in the source — the span either touches the previous character or it does not —
+     * so nothing extra has to be written by hand.
+     */
+    readonly tight?: boolean;
 }
 
 /** `{code:text}` — a registry code, then text with no nested brace. Anything else is literal. */
@@ -50,8 +63,24 @@ export function codeSwitchSegments(
     isKnownLang: (code: string) => boolean,
 ): readonly CodeSwitchSegment[] {
     const out: CodeSwitchSegment[] = [];
+    let tight = false; // set when the next segment abuts the previous one in the SOURCE
+    const push = (sg: CodeSwitchSegment): void => {
+        out.push(tight && out.length > 0 ? { ...sg, tight: true } : sg);
+        tight = false;
+    };
     const host = (s: string): void => {
-        if (s !== "") for (const sg of numeralSegments(s, hostCode)) if (sg.text !== "") out.push(sg);
+        if (s === "") return;
+        // ⚠ NUMERAL SEGMENTS ABUT EACH OTHER BY CONSTRUCTION — `numeralSegments` PARTITIONS the string, so
+        //   any space between them lives inside a segment's own text and is lost when `phonemize` trims it.
+        //   They therefore need the same `tight` treatment as spans, or `ngo1956` rejoins as `ngo 19 56`.
+        let prev = "";
+        for (const sg of numeralSegments(s, hostCode)) {
+            if (sg.text === "") continue;
+            if (prev !== "") tight = !/\s$/u.test(prev) && !/^\s/u.test(sg.text);
+            push(sg);
+            prev = sg.text;
+        }
+        tight = !/\s$/u.test(s);
     };
     let last = 0;
     SPAN.lastIndex = 0;
@@ -63,8 +92,11 @@ export function codeSwitchSegments(
                 `e.g. {en:nineteen forty five}. Tag came from: ${whole.slice(0, 40)}`,
             );
         }
-        host(text.slice(last, m.index));
-        if (inner.trim() !== "") out.push({ text: inner, lang: code });
+        const before = text.slice(last, m.index);
+        host(before);
+        if (before === "" && out.length > 0) tight = true; // span directly follows the previous span
+        if (inner.trim() !== "") push({ text: inner, lang: code });
+        tight = !/^\s/u.test(text.slice(m.index + whole.length));
         last = m.index + whole.length;
     }
     host(text.slice(last));

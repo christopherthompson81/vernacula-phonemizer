@@ -80,7 +80,14 @@ looks like one pooled acoustic mapping rather than a per-language convention. Bo
   `espeak-ng --voices`), because then no convention could have been learned.
 - Its evidence is **weakest against a written tradition espeak disagrees with**, because there the
   recognizer and espeak are the same witness.
-- It has a **frequency prior**: it writes `a` 3.58M times against `ɑ` 151k corpus-wide. Treat a bare
+- It has a **frequency prior**: it writes `a` 3.58M times against `ɑ` 151k corpus-wide.
+- ⚠ **It carries espeak's DIALECT choice, not just its symbols.** espeak `es` is Peninsular and writes
+  θ; `es-419` writes s. CommonVoice Spanish is one locale, so the labels were almost certainly `es`, and
+  the model reproduces θ on Spanish c/z words LEXICALLY — which reads as "this split is recorded in the
+  wrong variety" when nothing of the sort is happening. The tell is word FREQUENCY: a speaker's
+  pronunciation does not depend on it, a memorised pattern does (es_419 θ rate 77% for common ⟨c/z⟩
+  words, 56% for hapaxes, at equal recognition quality). Check espeak's voice before concluding a
+  corpus is mislabelled. Treat a bare
   preference for the commoner symbol as weak, and look for the fr/de/pt-style control showing it resolves
   the contrast where one genuinely exists.
 

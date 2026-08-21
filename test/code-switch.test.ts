@@ -49,6 +49,28 @@ describe("code-switch markup for read_text", () => {
         expect(runs[0]).toBe(3);
     });
 
+    it("marks a span that abuts the previous segment as TIGHT — code-switching is not always at a word boundary", () => {
+        // Shona takes English stems under its noun-class prefixes: `maneutron`, read *maɲuːtrɔn*. Joining
+        // on a space would invent a word break the speaker did not make, and the distance metric strips
+        // whitespace so it would never show up there.
+        const tight = (t: string): string =>
+            codeSwitchSegments(t, "sn", known).map((s) => (s.tight ? "+" : "·") + (s.lang ?? "host")).join(" ");
+        expect(tight("ma{en:neutron} uye")).toBe("·host +en ·host");
+        expect(tight("nezve{en:asset management}")).toBe("·host +en");
+        expect(tight("sa {en:nineteen} ug")).toBe("·host ·en ·host");   // space in source → not tight
+        expect(tight("{en:nucleus} inoumbwa")).toBe("·en ·host");       // first segment is never tight
+        expect(tight("a {en:x}{en:y} b")).toBe("·host ·en +en ·host");  // span abutting a span
+    });
+
+    it("numeral-register segments get the same treatment — they abut by construction", () => {
+        // `numeralSegments` PARTITIONS the host text, so any space between its segments lives inside one
+        // of them and is lost when phonemize trims. Without `tight`, xh `ngo1956` rejoins as `ngo 19 56`.
+        const tight = (t: string): string =>
+            codeSwitchSegments(t, "xh", known).map((s) => (s.tight ? "+" : "·") + (s.lang ?? "host")).join(" ");
+        expect(tight("ngo1956 kwaye")).toBe("·host +en ·host");   // digit glued to the host word
+        expect(tight("ngo 1956 kwaye")).toBe("·host ·en ·host");  // space in the source → not tight
+    });
+
     it("strips back to the plain reading", () => {
         expect(stripCodeSwitch("miapil sa {en:nineteen forty five} ug")).toBe("miapil sa nineteen forty five ug");
     });
