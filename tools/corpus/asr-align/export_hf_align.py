@@ -13,9 +13,15 @@ beside the corpus they came from.
     ipa      ours, re-derivable by phonemize-fleurs.mts in about an hour of CPU — but pinned here so the
              published `phones` has the exact IPA it was scored against, which a later engine will not
              reproduce.
-    text     NOT EXPORTED. It is FLEURS', and the sibling dataset card already declines to redistribute
-             FLEURS-owned content ("Codes + IPA/metadata only — not the source audio"). `sentence_id`
-             joins back to it.
+    text     the FLEURS transcript. Exported.
+
+⚠ AN EARLIER VERSION OF THIS FILE WITHHELD `text` ON A REASON THAT DOES NOT HOLD. The argument was that
+the sibling dataset card "declines to redistribute FLEURS-owned content — Codes + IPA/metadata only, not
+the source audio". But `codes_<lang>.npz` is 8-codebook Higgs codec tokens at ~25 Hz, and those DECODE
+BACK TO WAVEFORMS: the dataset already redistributes a processed form of ~267 hours of FLEURS audio,
+which is far more of FLEURS than its transcripts are. And FLEURS is CC-BY-4.0 — redistribution with
+attribution is permitted outright, which the card already gives. There was never a barrier, and a QC
+export without the sentence is much the poorer: a reader cannot judge `reader_divergence` against an id.
 
 ⚠ FILE NAMING FOLLOWS THE SIBLING DATASET — `data/manifest_<lang>.jsonl` there, `align_<lang>.jsonl` here,
 so the two drop into the same layout without colliding. Per-language files mean re-running one language
@@ -36,7 +42,7 @@ import sqlite3  # noqa: E402
 
 #: Carried per row. `status`/`comment`/`read_text` travel so the QC verdicts reach a consumer that never
 #: sees the git ledger — the ledger is the authority, this is a copy for readers of the dataset.
-COLS = ("id", "sentence_id", "lang", "ipa", "phones", "dist", "status", "comment", "read_text")
+COLS = ("id", "sentence_id", "lang", "text", "ipa", "phones", "dist", "status", "comment", "read_text")
 
 
 def export(db: sqlite3.Connection, out: str, langs: list[str], gz: bool) -> None:
@@ -46,7 +52,7 @@ def export(db: sqlite3.Connection, out: str, langs: list[str], gz: bool) -> None
     total = 0
     for lang in have:
         rows = db.execute(
-            "SELECT wav, sentence_id, lang, ipa, phones, dist, status, comment, read_text "
+            "SELECT wav, sentence_id, lang, text, ipa, phones, dist, status, comment, read_text "
             "FROM utt WHERE lang=? ORDER BY wav", (lang,)).fetchall()
         path = os.path.join(out, f"align_{lang}.jsonl" + (".gz" if gz else ""))
         op = gzip.open if gz else open

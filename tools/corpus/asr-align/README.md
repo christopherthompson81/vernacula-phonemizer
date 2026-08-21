@@ -239,7 +239,7 @@ colliding:
 
 ```bash
 python3 export_hf_align.py --out /tmp/hf_align --gzip
-# 270,106 rows across 102 languages -> 68 MB gzipped, ~17 s
+# 270,106 rows across 102 languages -> 72 MB gzipped, ~17 s
 ```
 
 Ranked by what it costs to lose:
@@ -249,7 +249,14 @@ Ranked by what it costs to lose:
 | `phones` | ✅ | **the one that matters** — a GPU pass over 270k utterances against a ~30 GB FLEURS audio tree |
 | `ipa` | ✅ | ours, and re-derivable in ~1 h of CPU, but pinned so the published `phones` keeps the exact IPA it was scored against |
 | `status`/`comment`/`read_text` | ✅ | so a dataset consumer sees the QC verdicts; `review/hand_review.tsv` stays the authority |
-| `text` | ❌ | FLEURS', and the sibling card already declines to redistribute FLEURS-owned content. `sentence_id` joins back |
+| `text` | ✅ | the FLEURS transcript — a reader cannot judge `reader_divergence` against an id |
+
+⚠ **`text` was withheld at first on a reason that does not hold**, and the correction is worth keeping. The
+argument was that the sibling card declines to redistribute FLEURS-owned content — *"Codes + IPA/metadata
+only — not the source audio"*. But `codes_<lang>.npz` is 8-codebook Higgs codec tokens at ~25 Hz, and those
+**decode back to waveforms**: the dataset already ships a processed form of ~267 hours of FLEURS audio,
+which is far more of FLEURS than its transcripts are. FLEURS is also **CC-BY-4.0**, so redistribution with
+attribution is permitted outright and the card already gives it. Withholding cost 4 MB of nothing.
 
 ⚠ **The sibling dataset is the TRAINING corpus, not this.** `omnivoice-ipa-corpus` is 28 languages / ~77k
 utterances of `(ipa → codec tokens)` pairs. This is 102 languages / 270k rows of QC measurement. Same
