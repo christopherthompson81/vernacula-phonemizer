@@ -135,6 +135,18 @@ describe("Central Kurdish — the bizroke lexicon", () => {
         expect(bizrokeLexiconHas("زۆر")).toBe(false); // already has a written vowel
     });
 
+    /** ⚠ THE FREE CONJUNCTION IS A VOWEL, and it was a bare [w] until the ASR-alignment corpus surfaced it:
+     *  ⟨و⟩ stands alone 1,900 times in 3,040 FLEURS ckb sentences and both recognizers put a vowel there
+     *  (median 0.2742 → 0.2663, 861 closer / 23 further). The matres-lectionis rule reads a word-initial
+     *  ⟨و⟩ as the glide, which is right INSIDE a word and wrong when the word IS ⟨و⟩ — so both cases are
+     *  pinned here together, or a future simplification collapses them again. numbers.ts routes around the
+     *  same defect by making its connective enclitic; that workaround is now the only caller relying on it. */
+    test("standalone ⟨و⟩ is the conjunction [u], not the glide", () => {
+        expect(phonemizeWord("و")).toBe("u");
+        expect(phonemizeWord("وتی")).toBe("wtiː");   // word-INITIAL ⟨و⟩ is still the glide
+        expect(phonemizeWord("گەورە")).toBe("ɡawɾa"); // and so is intervocalic ⟨و⟩
+    });
+
     test("words with written vowels are unaffected", () => {
         expect(phonemizeWord("زۆر")).toBe("zoːɾ");
         expect(phonemizeWord("ماڵ")).toBe("maːɫ");

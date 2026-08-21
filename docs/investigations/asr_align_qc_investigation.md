@@ -4068,3 +4068,473 @@ and entirely in the tail, which is where the training pairs were wrong.
 unterminated final line — silently, with the loop reporting success. The generator now emits a trailing
 newline and the loops use `|| [ -n "$var" ]`. Verified the other batches were unaffected (sn 6/6, hr 9/9,
 and run 58's 37 = 35 accepted + 2 demo).
+
+## Run 67 — 2026-08-20 — wordize's first use: BCS final devoicing is real, and should not be modelled
+
+First finding from `wordize.py` rather than from reading rows. Ranking `hr_hr` word types put **`zˈarez` at
+mean 0.494, +0.345 over the language baseline** — the highest of any type, and a word WE insert (the
+Croatian decimal comma).
+
+The readers do say it. The divergence is one segment:
+
+```
+ours  zˈarez        heard  z a ɾ e z  /  z a r e s  /  z a r e z
+```
+
+Final `z` coming back as `s`. That is **word-final obstruent devoicing**, which standard BCS orthoepy does
+NOT prescribe (unlike Russian, Polish or German).
+
+### The control that makes it a finding
+
+A 26–36% devoicing rate could simply be the recognizer being unreliable about voicing. It is not — compare
+the same obstruents word-MEDIALLY, on clean 1:1 alignments only:
+
+```
+lang     FINAL n  devoiced      MEDIAL n  devoiced    ratio
+hr_hr       378     33.6%           4487     2.7%     12.3x
+sr_rs       374     47.3%           4979     2.4%     19.5x
+bs_ba       335     32.8%           4330     1.5%     22.6x
+```
+
+**12–23×.** Position-specific, so the phenomenon is real. Medial 1.5–2.7% is the recognizer's voicing noise
+floor, which is a useful number in its own right.
+
+⚠ **And pl/de/ru are the other half of the control**: they return almost no word-final voiced obstruents at
+all (pl 0, de 0, ru 20), because their engines already devoice. Only the BCS three carry them.
+
+### But applying it is net negative
+
+```
+hr_hr  median 0.1374 -> 0.1390   527 closer / 931 further   gained 7.08 lost 11.99   0.59:1
+sr_rs  median 0.1469 -> 0.1478   570 closer / 716 further   gained 7.28 lost  9.07   0.80:1
+bs_ba  median 0.1570 -> 0.1594   381 closer / 874 further   gained 5.11 lost 11.28   0.45:1
+```
+
+At 33–47% the devoicing is **variable, not categorical** — a rule is wrong more often than right. Both
+readings are real and the standard keeps the voicing, so the standard is what ships. **Not applied**, and
+recorded so the 12–23× signal is not rediscovered as a defect.
+
+It also explains part of why BCS word-level means sit above baseline: a third of their final obstruents
+disagree for a reason that is not an error.
+
+### Still open in hr_hr
+
+`kˈoji`/`kˈoje`/`kˈoja` (873 occurrences combined, +0.16 to +0.18), `ɡdje` (+0.251), `zbog` (+0.230), and
+the number words `tisuću`/`devetsto`/`dvadeset` (+0.08 to +0.17). None examined.
+
+## Run 68 — 2026-08-20 — the rest of hr_hr's word ranking: standard vs connected speech
+
+Run 67 left four leads from `wordize`. All four resolve the same way, and together they explain why BCS
+word-level means sit above baseline without a single defect being present.
+
+### `tisuću` (+0.169) — instrument blindness, not a defect
+
+Croatian ⟨ć⟩ is /t͡ɕ/ and the recognizer writes `tʃ` for it. It is not that it lacks the symbol:
+
+```
+lang            our ɕ n   what comes back
+cmn_hans_cn        2656   ɕ=93%          <- it writes ɕ freely for Mandarin
+hr_hr               288   ʃ=93%   ɕ=0%
+sr_rs               217   ʃ=91%   ɕ=0%
+pl_pl              1258   ʃ=49%   s=21%
+```
+
+So the recognizer HAS `ɕ` and uses it heavily — for the Mandarin fricative. It never hears BCS ⟨ć⟩ as
+distinct from ⟨č⟩, which makes the contrast invisible to this instrument.
+
+⚠ **NOT a COARSEN candidate**, and this is where the `ɒ` precedent does not transfer. `ɒ`'s justification
+was "the recognizer's count is 0, so the map is unreachable outside these three languages". Here the count
+is 29,514 and 93% of it is Mandarin — a global `ɕ→ʃ` would destroy a distinction the recognizer genuinely
+makes. Cost of leaving it, measured as the share of edit operations attributable to `ɕ` vs `ʃ`:
+
+```
+hr_hr  480 / 16695 = 2.9%      sr_rs  364 / 17241 = 2.1%      bs_ba  361 / 19480 = 1.9%
+```
+
+A fixed 2–3% penalty carrying no information. It does not distort the ranking WITHIN a language, but it
+does inflate every ⟨ć⟩ word — which is exactly how `tisuću` reached the top of the list.
+
+### `koji`/`koje`/`koja` (+0.16 to +0.18) — variable /ji/ reduction
+
+```
+ours kˈoji   n=393   ->   ko 222x · koj 42x · koi 40x · koɪ 27x · koji 13x
+```
+
+Control, over hr_hr words of ≥3 units ending in a vowel:
+
+```
+final vowel absent from the heard span, all words:   25.1%   (10,035 words)
+final vowel absent, words ending in /ji/:            47.4%   (1,091 words)
+```
+
+**Roughly double the baseline**, so the reduction is specific to /ji/ rather than general final-vowel loss.
+Real, and at 47% variable rather than categorical — the same shape as the final devoicing in run 67, and
+declined for the same reason.
+
+### `zbog` (+0.230), `gdje` (+0.251)
+
+`zbog` → `zbok` 25× / `sbok` 14× / `zboɡ` 13×: the run-67 final devoicing again, plus initial z~s. `gdje`
+→ `ɡde` 8× / `de` 7×: the /j/ of the jat reflex dropping.
+
+### What this says about hr_hr as a whole
+
+Every elevated word type in the ranking is **our careful/standard form against connected speech** —
+`ć`/`č` the instrument cannot separate, final obstruents variably devoiced, /ji/ variably reduced, jat /j/
+dropped. None is a phonemizer error, and the standard is the right thing to emit.
+
+⚠ **The useful consequence is for reading the tool.** A high word-level mean in BCS is the expected state,
+not a lead. Languages whose orthography is close to their careful pronunciation will rank clean; languages
+with heavy connected-speech reduction will not, and that says nothing about the engine.
+
+## Run 69 — 2026-08-20 — a SECOND recognizer, and it settles es_419
+
+Run 64 said the Spanish θ was probably espeak's rather than the speakers', and named what would settle it:
+"listening, FLEURS speaker metadata, or a second recognizer trained on different labels". The third is
+available.
+
+### Allosaurus
+
+`pip install allosaurus` — a universal phone recognizer over ~2000 languages, trained on a PHOIBLE phone-
+inventory/allophone tradition rather than espeak labels. That independence is the whole point: it is the
+one thing the espeak confound cannot reach.
+
+```
+text        exactamente a las 8:46 a m la ciudad se volvió silencio marcando el preciso
+wav2vec2    …laθjðadseβoljosilɛnθjomaɾkandoelpɾesiso…      θ=3
+allosaurus  …las̪iuðals̪eɡol̪ʎosilensiomalkanðoðelpoɾes…    θ=0    <- dental s̪, exactly where θ was
+```
+
+Over the 11 rows that could be extracted and converted:
+
+```
+⟨z/ce/ci⟩ graphemes in the text:            28
+θ returned by wav2vec2 (espeak-trained):    28      <- one per orthographic c/z, exactly
+θ returned by allosaurus (PHOIBLE-trained):  0
+```
+
+⚠ **A recognizer whose θ count EQUALS the spelling count one-for-one is reproducing the orthography, not
+the acoustics.** And an independent model on the same audio hears none. Run 64's retraction was right, the
+`es_419` audio is Latin American as labelled, and remapping it to `es` would have corrupted 2,306 rows of
+published training data.
+
+### What a second recognizer is worth, generally
+
+Every espeak-confound finding in this document — the ⟨ɑ⟩/⟨a⟩ holds for hy/ky/ur, the Spanish θ, the
+"22 languages cannot spell Latin acronyms" framing — turned on not being able to separate the instrument's
+convention from the speech. A second, differently-labelled model separates them directly.
+
+Practical notes for wiring it in:
+
+- **FLEURS wavs are float32 (WAV format 3)** and allosaurus's reader takes 16-bit PCM only. `ffmpeg -ac 1
+  -ar 16000 -sample_fmt s16` converts; the corpus pass would need that step.
+- It takes an **ISO-639-3 language code** (`spa`, `ces`) and can restrict output to that language's phone
+  inventory, which is a different failure mode from espeak's — a narrow inventory can suppress a real
+  phone rather than invent one. Worth measuring before trusting it as a primary.
+- Its output is **coarser**: fewer length marks, and it writes dental diacritics (`s̪`, `l̪`, `t̪`) the
+  current `fold`/`COARSEN` would need to handle.
+- Extraction is the slow part, not inference: each `tar xzf --wildcards` decompresses the whole per-language
+  archive, so a real pass should stream the tar once per language.
+
+**It should not replace wav2vec2 — it should sit beside it.** Agreement between two independently-labelled
+recognizers is far stronger evidence than either alone, and disagreement is exactly the signal that a
+finding is about the instrument. That is the check this campaign has needed four separate times.
+
+## Run 70 — 2026-08-20 — allosaurus becomes a standing column, and the es_419 control that closes run 69
+
+Run 69 used allosaurus once, by hand, on 11 rows. This makes it a permanent second opinion:
+`tools/corpus/asr-align/asr_align_allo.py` fills a new **`phones_allo`** column beside `phones`, with
+`phones_allo_lang` recording which decode each row got.
+
+### First, the control run 69 did not run
+
+Run 69's claim was "allosaurus hears no θ in es_419". That claim is worthless if allosaurus cannot
+write θ, or if a restricted inventory forbade it. Both checked:
+
+```
+θ in allosaurus's SPANISH inventory (46 phones):   YES   <- it was free to write it
+θ emitted on 20 en_us utterances w/ a θ word:      11    <- it does write it when it hears it
+θ on es_419, restricted (spa) decode, 25 rows:      0    of 66 <z/ce/ci> graphemes
+θ on es_419, UNRESTRICTED (ipa) decode, same rows:  0    <- not inventory suppression
+wav2vec2 on the same 25 rows:                      58
+```
+
+⚠ **The zero survives the unrestricted decode**, which has 230 phones available. Run 69's conclusion
+holds and is now controlled: the espeak-trained model was reproducing the orthography.
+
+### Language coverage
+
+96 of 102 corpus languages resolve to a PHOIBLE inventory. Six do not (`be_by`, `bs_ba`, `kk_kz`,
+`nso_za`, `ny_mw`, `om_et`) and take the unrestricted `ipa` decode instead.
+
+⚠ **THE TWO DECODES ARE DIFFERENT INSTRUMENTS, not two settings of one.** On es_419 the restricted
+decode yields 33 phone types and the unrestricted 88, at 0.249 PER between them — the unrestricted one
+invents exotica (`b̞`, `ɻ̩`, `k͡p̚`) no fold table will tame. `phones_allo_lang` exists so the column can
+never be silently pooled across the two. The six are exactly the wrong six to lose, `nso_za` included.
+
+### ⚠ allosaurus runs at 8 kHz
+
+`pm.sample_rate = 8000`. Every 16 kHz FLEURS clip is resampled down before features, so **everything
+above 4 kHz is discarded** — which is precisely where sibilant and fricative energy lives. This is a
+standing caveat on every θ/s, s/ʃ, and sibilant-inventory question we ask it. It does not overturn the
+es_419 result (the English control shows θ recall survives the 4 kHz ceiling), but it means a
+*negative* result from allosaurus on a fricative contrast is weaker than a positive one.
+
+### Instrument floors, measured
+
+Three separate noise floors, worth knowing before any single-phone disagreement is read as signal:
+
+```
+same bytes, decoded twice                    0.0000 PER   exact 20/20   (do_dither is commented out upstream)
+GPU-batched vs CPU reference                 0.0005 PER   exact 114/120, max 0.0213
+ffmpeg -sample_fmt s16 vs in-memory int16    ~0.02-0.04 PER on non-degenerate rows
+```
+
+⚠ **The ffmpeg floor is the largest of the three and it is an artefact of run 69's own method.** ffmpeg
+DITHERS on the float32→s16 conversion, so run 69's temp-file pipeline perturbed its own input. The
+column is built with a deterministic in-memory int16 conversion instead — not more correct, but free
+and reproducible.
+
+⚠ **cuDNN picks a different kernel at batch size 1.** A single-item CUDA decode disagrees with both the
+CPU decode and the batched CUDA decode (37 vs 38 phones on the row that exposed it); CPU is
+batch-invariant across B=1/8/48. Anyone re-deriving one row on the GPU to check the table will see
+spurious disagreement. Use CPU, or batch.
+
+### Making it affordable: the pass was 91% MFCC and 3% GPU
+
+Naive throughput was 7.8 utt/s — 9.6 hours for the corpus — and both CPU and GPU sat underutilized.
+Profiling found the cost was nowhere near the model:
+
+```
+tar stream + gunzip     2.2%
+wav decode              0.4%
+MFCC (pm.compute)      91.3%     <- and 92% of THAT is resampy, 16 kHz -> the model's 8 kHz
+GPU acoustic model      3.1%
+LM decode               3.0%
+```
+
+Three fixes, each verified not to change output rather than assumed not to:
+
+1. **`allo_fast.py` vectorizes `framesig`.** Upstream loops over ~1,100 frames per utterance in Python
+   doing DC-offset removal and preemphasis one frame at a time, and rebuilds the Povey window with
+   another Python loop per call. Both vectorize over the frame axis exactly. **Bit-identical features,
+   40/40, on two languages** — not merely phone-identical. It monkeypatches a third-party package, so
+   `install()` refuses to patch if upstream's source no longer matches, and `--selftest` re-checks.
+2. **BLAS pinned to 1 thread.** Stock MFCC spent 19m40s of CPU to make 2m12s of wall-clock on af_za —
+   BLAS spreading tiny per-frame matmuls over 16 cores and paying 9× the power to thrash.
+3. **A 12-thread MFCC pool and a producer thread for the tar.** resampy's kernel is a numba gufunc and
+   releases the GIL, so plain threads scale: 15.8 → 100 utt/s, bit-identical 96/96.
+
+**7.8 → ~50 utt/s**, and af_za went 132s → 25s. ⚠ Note what the profile says about instrument choice
+generally: the GPU was never the constraint, and the second recognizer is cheap. There is no throughput
+argument against adding a third.
+
+## Run 71 — 2026-08-21 — the restricted decode was the wrong default, and the probe that hid it
+
+Run 70 shipped one allosaurus decode per row, restricted to the language's PHOIBLE inventory, and
+justified it on the es_419 control: θ was IN the Spanish inventory and went unwritten anyway, so the
+inventory was not suppressing. That control was sound but it was one language and one phone.
+
+### The first comparison came back "identical", and that was a bug
+
+Comparing the restricted and unrestricted decodes on `ast_es` returned **exactly** the same median and
+the same mean unit count for both. Two decodes over a 29-phone inventory and a 230-phone one agreeing
+to four decimals is not a result, it is a defect:
+
+```python
+# allosaurus/lm/decoder.py
+mask = self.inventory.get_mask(lang_id, approximation=self.config.approximate)
+logits = mask.mask_logits(logits)        # <- MUTATES IN PLACE
+```
+
+⚠ **The second call was reading the array the first had already masked**, so it returned the first
+decode's answer while looking like it ran. The es_419 spa-vs-ipa figures in run 70 are unaffected —
+that probe recomputed features per decode, so each call got a fresh array — but every call site now
+passes `.copy()`.
+
+### With the bug fixed, neither decode wins
+
+```
+                 restricted   universal        units vs wav2vec2
+ast_es (29-phone inv)  0.5200      0.4140       0.649  ->  1.083
+af_za  (36-phone inv)  0.6342      0.7207       0.919  ->  1.074
+```
+
+⚠ **`ast_es` is the suppression failure mode, caught in the act.** Its inventory is the fleet's
+smallest and the restricted decode returns barely two thirds of a phone per wav2vec2 phone — the
+decode is being starved, not sharpened. ⚠ **And `af_za` reverses the ordering**, so this is not a case
+of "the universal decode is simply better". Picking either one globally would have silently biased
+every per-language conclusion the column is meant to support — the same class of error as run 64's
+es_419 remap, arrived at from the opposite direction.
+
+Both decodes now ship: `phones_allo` (restricted) and `phones_allo_uni` (all 230 phones). The acoustic
+model forward is shared, so the second costs ~4%. `allo_compare.py --decodes` reports which fits each
+language.
+
+### What the column is for
+
+`allo_compare.py` asks the question the second recognizer exists to answer, per language:
+
+    delta = median dist(ours, wav2vec2) - median dist(ours, allosaurus)
+
+A large POSITIVE delta means the all-flagged queue is ranking an espeak artefact rather than our
+output — we agree with the independent instrument and disagree only with the espeak-trained one. Near
+zero means the disagreement survives a change of tradition and is a real lead. Large NEGATIVE means we
+agree with espeak's conventions specifically, which for rules written against espeak output is
+circularity surfacing as a number.
+
+⚠ **Delta triages, it does not adjudicate**, and three things keep it honest: allosaurus is deaf above
+4 kHz (run 70), it is coarser in general so it will agree with a coarser transcription for
+uninteresting reasons, and the decode choice above moves it. Read `--decodes` first.
+
+## Run 72 — 2026-08-21 — the fleet pass, a metric that failed, and what the corroborated queue actually contains
+
+270,106 rows, 102 languages, both decodes, ~100 min at 32–66 utt/s.
+
+### ⚠ The aggregate delta failed its validation case
+
+`delta = median dist(ours, wav2vec2) - median dist(ours, allosaurus)` was supposed to separate "our
+output is wrong" from "the instrument is wrong". On the full fleet **all 102 languages came out
+negative** (median −0.176, none above +0.10), and `es_419` — the one case whose answer we know —
+ranked **32nd of 102**, indistinguishable from the fleet.
+
+⚠ **Aggregate distance measures which recognizer is better, not where either is biased.** The θ
+artefact is ~28 phones in a ~107-phone utterance; the baseline quality gap between the two recognizers
+swamps it. Kept in the tool with this recorded, because it is an inviting trap.
+
+### The decode split was worth shipping
+
+84 languages prefer the restricted decode, 12 the universal, 6 identical. The three worst-starved
+inventories are all in the universal group (`sr_rs` 0.566 phones per wav2vec2 phone, `ast_es` 0.646,
+`ckb_iq` 0.704). Had run 70's single restricted decode shipped, 12 languages would have been measured
+through a starved instrument.
+
+### What does work: the three-way per-symbol verdict
+
+With three streams you can ask which one is the odd one out. It recovers es_419's θ as `w2v-alone` at
+15.2/1k against 0.0 and 0.0 — the known answer, found by the general instrument.
+
+⚠ **But `corroborated` is not a defect queue until three things are removed, and each was found the
+hard way:**
+
+1. **Inventory forcing.** The restricted decode cannot corroborate a symbol its inventory lacks.
+   allosaurus's Azerbaijani and Estonian inventories contain **no `a` at all**, so it must write `ɑ`;
+   its Armenian, Swahili, Urdu and Spanish inventories contain no `ɑ`, so it must write `a`. Read
+   naively this produced "both recognizers hear `a` and we do not" for Armenian — a statement about a
+   PHOIBLE inventory file, not about audio. **Use `--uni` for anything you intend to act on.**
+2. **Shared notation.** Two recognizers agreeing against us is only evidence if they are not simply
+   agreeing on a convention we did not adopt. Both write `ɾ` where we write `r` (10 languages) and `ɪ`
+   where we write `i` (10 languages). A symmetric `NOTATION` fold, applied to all three streams, takes
+   538 findings to 232. ⚠ It DELETES those axes — this tool can no longer see an r/ɾ error at all.
+3. **Connected-speech reduction.** 33 of the remaining 232 are `ə` across ~15 languages: both
+   recognizers hear reduced vowels, we write the careful form. Run 68 established this for hr_hr; a
+   second independent instrument now confirms it fleet-wide. Not a defect — the register is a choice.
+
+### The low-vowel axis, with an independent witness at last
+
+`low_vowel_notation_investigation.md` proposed three changes on recognizer evidence and withdrew all
+three because wav2vec2 is not independent of espeak. Correlating the per-language ratio ɑ/(ɑ+a):
+
+```
+corr(ours, wav2vec2)               +0.281
+corr(ours, allosaurus RESTRICTED)  +0.142    <- inventory-forced, not evidence
+corr(ours, allosaurus UNIVERSAL)   +0.074    <- no inventory prior
+corr(wav2vec2, allosaurus UNIVERSAL) +0.467
+```
+
+⚠ **The two recognizers agree with each other far better than either agrees with us**, and the
+unrestricted decode is discriminating rather than defaulting (it writes `ɑ` in 60/101 languages against
+the restricted decode's 23). This does not license a change — both models carry a ~23:1 frequency prior
+toward `a`, so shared prior is not excluded — but it is the first evidence on this axis that espeak
+cannot explain. The withdrawal stands; the question is now answerable rather than blocked.
+
+### The residual, and it is small
+
+Of 199 non-schwa corroborated findings after folding, **177 are in a language that also has an
+`ours-alone` symbol** — almost certainly the same segment written differently. **22 are not**: the
+language has no unwritten-symbol of its own, so we simply never emit that phone.
+
+```
+lang       sym  ours/1k  w2v/1k  allo/1k
+ast_es       ð      0.0    33.4     25.8     <- /d/ spirantisation
+it_it        ð      0.0     6.5     17.4
+kea_cv       j      0.0    11.2     25.9
+umb_ao       r      0.0     9.2     20.3
+pt_br        ŋ      0.0    29.7      9.3     <- and ŋ in yo_ng, ln_cd, umb_ao, ast_es, ro_ro
+```
+
+⚠ **`ŋ` recurs across six unrelated languages** — a phone the fleet never emits and both recognizers
+hear. That is the shape of a systematic gap rather than six coincidences, and it is the one lead here
+that a single recognizer could not have produced.
+
+## Run 73 — 2026-08-21 — the word-level corroborated queue finds a real defect: ckb's free ⟨و⟩
+
+Runs 71–72 kept converging on vowel quality — ɑ/a, ɪ/i, ə. ⚠ **That is a statement about the
+INSTRUMENT, not about the fleet.** A per-symbol detector finds per-symbol things; its output going
+fine-grained means there is nothing coarse left *of that kind*, not that fine-grained work is what
+matters most. Asking the blunt question instead — which WORD TYPES do both recognizers put far from
+us — found a defect on the first try.
+
+### The queue
+
+`allo_compare.py --words`, on the four languages the re-ranked all-flagged list put on top. Two-stage:
+the cheap row score filters to rows no recognizer vouches for, then `wordize` aligns only those. Word
+distance is `min` across wav2vec2 and both allosaurus decodes, so no single instrument's convention can
+carry a finding.
+
+```
+=== ckb_iq  (107 rows no recognizer vouches for)
+    1.000  x59   w          <- taken
+    1.000  x15   j
+    1.000  x7    duː
+=== he_il  (89 rows)
+    1.000  x12   be         <- proclitics; not actioned
+    1.000  x6    ve
+    0.750  x10   pʰˈiː      <- English letter-names, in Hebrew and Kurdish both
+```
+
+### ckb: the free conjunction ⟨و⟩ was a bare [w]
+
+`scanWord` resolves the و/ی matres lectionis as "glide word-initially or next to a written vowel, else
+the vowel". For the ONE-LETTER WORD ⟨و⟩ — the conjunction "û", *and* — `i === 0` makes it word-initial,
+so it emitted a bare `[w]`: a consonant standing alone as a word, with no following segment to glide
+onto.
+
+⚠ **We already knew, and routed around it instead of fixing it.** From `numbers.ts`:
+
+> The connective is an ENCLITIC, so `link()` appends it to the END of the preceding word rather than
+> emitting it as a free token … **Emitting a standalone ⟨و⟩ would instead phonemize to a bare [w] (the
+> ckb g2p reads a word-initial ⟨و⟩ as the glide).**
+
+That workaround fixed the numeral connective and left the far commoner free conjunction standing. ⟨و⟩
+is a whole word **1,900 times in 3,040** FLEURS ckb sentences.
+
+### Measured, against both recognizers
+
+Over the 1,337 affected rows, distance = min(wav2vec2, allosaurus-restricted, allosaurus-universal),
+notation folded:
+
+```
+             median    mean    closer / further
+current      0.2742   0.3018
+w -> u       0.2663   0.2918    861 /  23   = 37.4:1     <- taken
+w -> uː      0.2663   0.2918    861 /  23               (indistinguishable: fold strips length)
+w -> drop    0.2698   0.2971   1312 /  25   = 52.5:1
+```
+
+⚠ **Deleting it scores more rows closer but a worse median and mean.** That is the count-vs-magnitude
+split the ⟨ʔ⟩ decision already set a bar for, and it resolves the same way: deletion is the
+connected-speech reduction, `[u]` is the standard form, and the register is a choice. ⚠ `u` over `uː`
+is decided on the language, not the metric — the eval cannot see length at all.
+
+⚠ **This is the first fleet change in this campaign carried by a non-espeak instrument.** 37:1 against
+wav2vec2 alone would have been the low_vowel_notation situation over again; 37:1 against the minimum of
+two independently-labelled recognizers is not something an espeak convention can produce.
+
+### Not actioned
+
+- **he_il `be`/`ve`/`hen` at 1.000** — Hebrew proclitics we emit as free words. Whether that is a defect
+  or a segmentation convention needs the `pr839` proclitic work, not a grapheme edit.
+- **`pʰˈiː`, `jˈuː`, `duː`, `ˈɛn` in BOTH he_il and ckb_iq** — Latin acronyms read with English letter
+  names. The English fallback was accepted deliberately; recorded because it now has a measured cost.
+- ⚠ The stored `ipa` for ckb_iq is now stale. The corpus needs a re-derivation pass before these
+  numbers are re-measured.

@@ -62,6 +62,8 @@ sys.path.insert(0, HERE)
 DB = os.environ.get("ASR_ALIGN_ROOT", "/mnt/data/omnivoice_ipa") + "/work/asr_align/align.sqlite"
 import sqlite3  # noqa: E402
 
+from difflib import SequenceMatcher  # noqa: E402
+
 from asr_align_report import coarsen, dist, fold  # noqa: E402
 
 
@@ -94,16 +96,23 @@ def align_path(a: list[str], b: list[str]) -> list[tuple[int, int]]:
     return out[::-1]
 
 
-def wordize(ipa: str, phones: str) -> list[tuple[str, str, float]]:
-    """(our word, the phones opposite it, that word's distance) — one tuple per word of `ipa`."""
-    words = [w for w in ipa.split() if units(w)]
+def wordize(ipa: str, phones: str, unit_fn=None) -> list[tuple[str, str, float]]:
+    """(our word, the phones opposite it, that word's distance) — one tuple per word of `ipa`.
+
+    ⚠ `unit_fn` EXISTS SO THIS IS NOT WELDED TO ONE RECOGNIZER. The default `units` is
+    `coarsen(fold(s))`, and `coarsen` is wav2vec2's inventory — the phones THAT model has no symbol
+    for. Running allosaurus's output through it would push a second, independent tradition into its
+    rival's conventions and destroy the independence that is the whole point of having it. Callers
+    comparing against `phones_allo` pass their own fold (see allo_compare.NOTATION)."""
+    uf = unit_fn or units
+    words = [w for w in ipa.split() if uf(w)]
     if not words:
         return []
     ours, owner = [], []                       # flat our-units, and which word each came from
     for k, w in enumerate(words):
-        for u in units(w):
+        for u in uf(w):
             ours.append(u); owner.append(k)
-    theirs = units(phones)
+    theirs = uf(phones)
     got: list[list[str]] = [[] for _ in words]
     last = 0
     for i, j in align_path(ours, theirs):
@@ -111,7 +120,18 @@ def wordize(ipa: str, phones: str) -> list[tuple[str, str, float]]:
             last = owner[i]
         if j >= 0:
             got[last].append(theirs[j])        # an insertion attaches to the word in progress
-    return [(w, " ".join(g), dist(units(w), g)) for w, g in zip(words, got)]
+    if unit_fn is None:
+        return [(w, " ".join(g), dist(units(w), g)) for w, g in zip(words, got)]
+    # ⚠ `dist` coarsens internally, for the same reason as above; a custom fold scores plainly.
+    return [(w, " ".join(g), _plain_dist(uf(w), g)) for w, g in zip(words, got)]
+
+
+def _plain_dist(a: list[str], b: list[str]) -> float:
+    if not a and not b:
+        return 0.0
+    if not a or not b:
+        return 1.0
+    return 1.0 - SequenceMatcher(None, a, b, autojunk=False).ratio()
 
 
 def selftest() -> int:

@@ -135,6 +135,20 @@ export function phonemizeWord(word: string, oov?: OovResolver): string {
 
 function scanWord(word: string): string {
     const w = [...word.replace(/[‌ـ]/gu, "")]; // strip ZWNJ + tatweel
+    // ⚠ THE FREE CONJUNCTION ⟨و⟩ IS THE VOWEL [u], NOT THE GLIDE. The matres-lectionis rule below reads a
+    // word-initial ⟨و⟩ as [w], which is right for وتی → [wtiː] but wrong for the one-letter word ⟨و⟩ "and",
+    // where there is no following segment to glide onto and a bare [w] is not pronounceable as a word.
+    // numbers.ts already knew: it makes its connective an ENCLITIC specifically because "emitting a
+    // standalone ⟨و⟩ would instead phonemize to a bare [w]". That workaround documented the defect for
+    // numbers and left it standing for the conjunction, which is far commoner — ⟨و⟩ is a whole word 1,900
+    // times in 3,040 FLEURS ckb sentences.
+    // Measured over the 1,337 affected rows against BOTH recognizers (min of wav2vec2 and allosaurus, so an
+    // espeak convention cannot carry it): median 0.2742 → 0.2663, 861 closer / 23 further = 37:1.
+    // ⚠ `u` NOT `uː`: the eval cannot tell them apart (`fold` strips length), so this is decided on the
+    // language — the conjunction is short, and matches what non-glide ⟨و⟩ already produces below.
+    // ⚠ Deleting it instead scores MORE ROWS closer (1,312/25) but a WORSE median and mean — that is the
+    // connected-speech reduction, and the standard form is what we emit.
+    if (w.length === 1 && w[0] === "و") return "u";
     const toks: string[] = [];
     for (let i = 0; i < w.length; i++) {
         const c = w[i]!;
