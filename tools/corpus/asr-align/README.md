@@ -231,6 +231,31 @@ which is the auto reading — re-derive afterwards with `--export-hand` / `reder
 top five had been read and found clean with only a prose table as the mark, and run 54 then re-walked a
 decision that had been measured, documented and declined. That is the failure with the database intact.
 
+### Publishing the measurements — `export_hf_align.py`
+
+The ledger keeps the judgement in git; this puts the measurements where they belong. Per-language JSONL
+matching the sibling dataset's `data/manifest_<lang>.jsonl` naming, so the two share a layout without
+colliding:
+
+```bash
+python3 export_hf_align.py --out /tmp/hf_align --gzip
+# 270,106 rows across 102 languages -> 68 MB gzipped, ~17 s
+```
+
+Ranked by what it costs to lose:
+
+| column | exported | why |
+|---|---|---|
+| `phones` | ✅ | **the one that matters** — a GPU pass over 270k utterances against a ~30 GB FLEURS audio tree |
+| `ipa` | ✅ | ours, and re-derivable in ~1 h of CPU, but pinned so the published `phones` keeps the exact IPA it was scored against |
+| `status`/`comment`/`read_text` | ✅ | so a dataset consumer sees the QC verdicts; `review/hand_review.tsv` stays the authority |
+| `text` | ❌ | FLEURS', and the sibling card already declines to redistribute FLEURS-owned content. `sentence_id` joins back |
+
+⚠ **The sibling dataset is the TRAINING corpus, not this.** `omnivoice-ipa-corpus` is 28 languages / ~77k
+utterances of `(ipa → codec tokens)` pairs. This is 102 languages / 270k rows of QC measurement. Same
+provenance and same owner, different scope and purpose — worth deciding deliberately whether it lands
+there under an `align_` prefix or in a sibling dataset repo.
+
 ### Re-deriving `ipa` after a hand edit
 
 `--set` clears `ipa`, which removes the row from scoring (every scorer filters `ipa IS NOT NULL`) until it
