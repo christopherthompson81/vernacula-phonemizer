@@ -195,6 +195,35 @@ Every segment still reaches an engine.
 ⚠ **An unknown tag is an error, not literal text.** `{xx:…}` throws rather than sending braces through the
 host g2p.
 
+### The review ledger — the verdicts, in the repo
+
+Everything else here can be rebuilt: `phonemize-fleurs.mts` re-derives the IPA, `asr_align_corpus.py`
+re-runs the recognizer, `asr_align_label.py --apply` re-labels in bulk. **Two things cannot**, because they
+are somebody's judgement rather than a computation — a hand `status` and a hand `read_text`.
+
+And `asr_align_corpus.py` ingests with `INSERT OR REPLACE INTO utt(...)`, which replaces the **whole row**.
+A re-ingest erases every verdict and every hand reading, and until now nothing outside the database
+remembered them.
+
+```bash
+python3 review_ledger.py --export     # DB  -> review/hand_review.tsv   (commit the diff)
+python3 review_ledger.py --import     # TSV -> DB                       (after a rebuild)
+python3 review_ledger.py --check      # report drift, write nothing
+```
+
+`review/hand_review.tsv` holds 138 rows: 135 hand verdicts (`reader_divergence` 78, `examined_clean` 50,
+`defect` 6, `convention` 1) and 40 hand readings, 37 of them carrying code-switch spans. The `text` column
+is context so the diff is reviewable — `--import` verifies it and never writes it, so a ledger from a
+different corpus version announces itself instead of applying quietly.
+
+⚠ **`--import` does not touch `ipa`.** A restored `read_text` sits beside whatever IPA the rebuild derived,
+which is the auto reading — re-derive afterwards with `--export-hand` / `rederive_read_text.mts` /
+`--import-ipa --overwrite`.
+
+⚠ **The cost of not having this is already on the record.** Run 42 found three of the all-flagged queue's
+top five had been read and found clean with only a prose table as the mark, and run 54 then re-walked a
+decision that had been measured, documented and declined. That is the failure with the database intact.
+
 ### Re-deriving `ipa` after a hand edit
 
 `--set` clears `ipa`, which removes the row from scoring (every scorer filters `ipa IS NOT NULL`) until it
