@@ -94,6 +94,52 @@ looks like one pooled acoustic mapping rather than a per-language convention. Bo
 Worked through in `docs/investigations/low_vowel_notation_investigation.md`, which proposed three language
 changes on recognizer evidence and then withdrew all three on this basis.
 
+## The second recognizer — `phones_allo`
+
+The section above is a standing problem, and the answer to it is a second opinion from a different
+labelling tradition. **allosaurus** is trained on PHOIBLE phone inventories rather than espeak labels,
+so it is the one instrument the espeak confound cannot reach. `asr_align_allo.py` fills two more
+columns over the same audio:
+
+| column | what it is |
+| --- | --- |
+| `phones_allo` | allosaurus decoded against the language's PHOIBLE inventory |
+| `phones_allo_uni` | the same audio and acoustic model, decoded against all 230 phones |
+| `phones_allo_lang` | which lang_id produced `phones_allo` (ISO-639-3, or `ipa` for the six with no inventory) |
+
+It settled `es_419` decisively. wav2vec2 returned **exactly one θ per orthographic ⟨c/z⟩** (28 of 28);
+allosaurus returned none, writing dental `s̪` in those slots. The control that makes that meaningful:
+θ **is** in allosaurus's 46-phone Spanish inventory, and it emits θ readily on English — so the zero is
+a judgement about the audio, not a missing symbol. It also survives the unrestricted 230-phone decode.
+
+⚠ **BOTH DECODES SHIP BECAUSE NEITHER WINS.** Restricting to a PHOIBLE inventory is the mirror image of
+espeak's failure — it can SUPPRESS a real phone rather than invent one. On `ast_es` (29-phone
+inventory, the fleet's smallest) the restricted decode returns 0.649 phones per wav2vec2 phone and
+scores 0.520 against our IPA where the unrestricted scores 0.414. On `af_za` the ordering reverses. Run
+`allo_compare.py --decodes` before quoting a number for a language.
+
+⚠ **allosaurus runs at 8 kHz.** Everything above 4 kHz is discarded — precisely where sibilant and
+fricative energy lives. A *negative* allosaurus result on a fricative contrast is therefore weaker
+evidence than a positive one.
+
+⚠ **It is coarser than wav2vec2 and it is NOT ground truth either.** The value is in the pair:
+agreement between two independently-labelled recognizers is far stronger than either alone, and
+disagreement is the signal that a finding is about the instrument rather than the language.
+
+⚠ **Do not re-derive a single row on the GPU to check the table.** cuDNN picks a different kernel at
+batch size 1, so a single-item CUDA decode disagrees with both the CPU decode and the batched one. Use
+CPU, or batch. Measured floors: identical bytes decode identically (20/20); GPU-batched vs CPU is
+0.0005 mean PER; `ffmpeg -sample_fmt s16` vs in-memory int16 is ~0.02–0.04 PER, because ffmpeg dithers.
+
+### Reading it — `allo_compare.py`
+
+    delta = median dist(ours, wav2vec2) - median dist(ours, allosaurus)
+
+A large **positive** delta means the all-flagged queue is ranking an espeak artefact and not our
+output. **Near zero** means the disagreement survives a change of tradition — a real lead. A large
+**negative** delta means we agree with espeak's conventions specifically, which for rules written
+against espeak output is circularity surfacing as a number.
+
 ## The recognizer cannot hear 3.67% of what we write
 
 Measured over 221,469 aligned utterances: 30 phones we emit ≥2,000 times each are returned by
@@ -119,6 +165,9 @@ Two folds were proposed and refused, both recorded at the fold site so they are 
 |---|---|
 | `phonemize-fleurs.mts` | run THIS repo's engine over FLEURS transcripts → `byid/<lang>.tsv` |
 | `asr_align_corpus.py` | GPU pass: audio → recognized phones, into SQLite beside our IPA |
+| `asr_align_allo.py` | the SECOND recognizer: allosaurus (PHOIBLE-trained, espeak-independent) → `phones_allo` |
+| `allo_fast.py` | vectorizes allosaurus's per-frame MFCC loop; `--selftest` proves it bit-identical |
+| `allo_compare.py` | reads the two recognizers against each other — does a queue median survive a change of tradition? |
 | `asr_align_report.py` | the scoring — `fold`, `coarsen`, `dist`, and the per-language 3×MAD queues |
 | `asr_align_label.py` | the durable record: `status` on each row (verified / investigate / defective_audio) |
 | `read_text.py` + `.mts` | the text the phonemizer ACTUALLY READ — `read_text`, `read_text_src` (auto/hand) |
