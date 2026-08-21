@@ -143,9 +143,12 @@ python3 wordize.py --lang xx --selftest        # alignment invariants
 ```
 
 ⚠ **It rediscovered a known finding, which is the only reason to trust it.** Run 58 established by reading
-rows one at a time that Igbo speakers voice numerals in English. Ranked blind, six of `ig_ng`'s top eight
-word types are numbers — `puku` (thousand) at +0.340 over the language baseline, `naɾɪ`, `abʊɔ`, `itoolu`,
-`asatɔ`, `asaa`.
+rows one at a time that Igbo speakers voice numerals in English. Ranked blind over the whole language, four
+of `ig_ng`'s top eight word types are numbers — `puku` (thousand) +0.353 over the language baseline, `abʊɔ`
+(two) +0.288, `itoolu` (nine) +0.368, `naɾɪ` (hundred) +0.196.
+
+⚠ **`--limit` is not a sample.** The query is `ORDER BY dist DESC`, so it takes the WORST N rows and every
+figure from a limited run is inflated — baseline included. Use it to iterate, never to conclude.
 
 ⚠ **Read `--words`, not `--rows`.** The alignment degrades exactly where it matters: a badly wrong word has
 no anchor, so the path can absorb a neighbour's phones or hand its own away. The aggregate is sound; a

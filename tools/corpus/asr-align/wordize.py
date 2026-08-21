@@ -30,15 +30,21 @@ is no word of ours to attach it to and the phones are absorbed by whichever neig
 That is the `reader_divergence` class, and it will look like a defect in the neighbour.
 
 ⚠ IT REDISCOVERED A KNOWN FINDING, WHICH IS THE ONLY REASON TO TRUST IT. Run 58 established by reading
-rows one at a time that Igbo speakers voice numerals in English. Ranking `ig_ng` word types blind returns:
+rows one at a time that Igbo speakers voice numerals in English. Ranking `ig_ng` word types blind, over the
+whole language:
 
-    puku    134  mean 0.818  +0.340 vs baseline     thousand
-    naɾɪ    146       0.584  +0.107                 hundred
-    abʊɔ    117       0.712  +0.235                 two
-    itoolu   94       0.783  +0.306                 nine
-    asatɔ    50       0.667  +0.189                 eight
+    abʊɔ    459  mean 0.659  +0.288 vs baseline     two
+    puku    357       0.724  +0.353                 thousand
+    naɾɪ    383       0.567  +0.196                 hundred
+    itoolu  217       0.739  +0.368                 nine
 
-Six of the top eight are number words. No row was read to get that.
+Four of the top eight are number words, and the other four (`ŋʷeɾe`, `mɡ͡be`, `ɔtʊtʊ`, `ʊɡ͡bɔ`) are simply
+the language's commonest content words in a corpus the recognizer finds hard. No row was read to get that.
+
+⚠ `--limit` IS NOT A SAMPLE. The query is `ORDER BY dist DESC`, so `--limit 400` takes the four hundred
+WORST rows — every figure from a limited run is inflated, baseline included. An earlier draft of this note
+quoted `--limit 400` numbers (`puku` 0.818, six of eight) and read a stronger result than the corpus
+supports. Use it to iterate, never to conclude.
 
     python3 wordize.py --lang hr_hr --words 25        # word types ranked by total divergence
     python3 wordize.py --lang hr_hr --rows 10         # worst rows, word by word
@@ -146,7 +152,9 @@ def main() -> int:
     ap.add_argument("--lang", required=True)
     ap.add_argument("--words", type=int, default=0, help="rank WORD TYPES by total divergence")
     ap.add_argument("--rows", type=int, default=0, help="show the worst rows, word by word")
-    ap.add_argument("--limit", type=int, default=0, help="cap the rows scanned")
+    ap.add_argument("--limit", type=int, default=0,
+                    help="cap rows scanned — ⚠ takes the WORST N (the query is ORDER BY dist DESC), "
+                         "not a sample; every figure from a limited run is inflated")
     ap.add_argument("--min-units", type=int, default=4,
                     help="ignore words shorter than this many units in --words (default 4)")
     ap.add_argument("--min-n", type=int, default=3, help="ignore word types seen fewer times (default 3)")
@@ -166,17 +174,22 @@ def main() -> int:
     if a.words:
         tot: collections.Counter[str] = collections.Counter()
         seen: collections.Counter[str] = collections.Counter()
+        # ⚠ ONE PASS. The alignment is the expensive part — O(our units x theirs) per row — and the first
+        #   version walked every row twice, once for the totals and once for the baseline. Same numbers,
+        #   half the time (hr_hr 18s -> 9s; the whole fleet is 102 languages of that).
+        base: list[float] = []
         for _text, ipa, ph, _d in rows:
             for w, _g, wd in wordize(ipa, ph):
                 if len(units(w)) < a.min_units:
                     continue
                 tot[w] += wd; seen[w] += 1
+                base.append(wd)   # ⚠ the baseline is EVERY qualifying word, before the --min-n filter
         tot = collections.Counter({w: t for w, t in tot.items() if seen[w] >= a.min_n})
         # ⚠ A BASELINE, OR THE MEANS ARE UNREADABLE. Word-level distances sit well above the utterance
         #   median because a word has no neighbouring context to absorb alignment slop. Without knowing
         #   what an ORDINARY word scores here, "mean 0.46" invites reading noise as a defect.
-        base = ([wd for _t, ipa, ph, _d in rows for w, _g, wd in wordize(ipa, ph)
-                 if len(units(w)) >= a.min_units] or [0.0])
+        if not base:
+            base = [0.0]
         base.sort()
         med = base[len(base) // 2]
         mean = sum(base) / len(base)
