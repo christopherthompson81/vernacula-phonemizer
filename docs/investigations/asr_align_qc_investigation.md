@@ -3693,4 +3693,11 @@ magnitude once repaired), and `tr UCLA → ˈud͡ʒɫa` is the same shape unmeas
 
 Inverting the default — in a non-English host, spell an uppercase Latin run unless the host's own lexicon
 has it as a word — is defensible and is what `NATO→natˈo` in Turkish would have to survive. It is a
-fleet-wide change to 190 engines and needs its own measurement pass; not started here.
+fleet-wide change to 190 engines and needs its own measurement pass.
+
+**→ Measured and REJECTED at 0.11:1** — see `docs/investigations/uppercase_latin_default_investigation.md`.
+The losses are one token: `UN`, the Romance indefinite article, ×802 in Italian alone. It sits on the repair
+list safely precisely BECAUSE a pronounceable run falls through to the word reading, so inverting the
+default deletes the property the casing list is built on. The same entry also withdraws the framing of the
+English fallback as a defect: the Greek reader spelled `ucla` with ENGLISH letter names, so routing Latin
+material to English is what the readers themselves do.
