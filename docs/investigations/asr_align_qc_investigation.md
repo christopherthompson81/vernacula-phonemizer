@@ -4327,3 +4327,61 @@ Three fixes, each verified not to change output rather than assumed not to:
 **7.8 → ~50 utt/s**, and af_za went 132s → 25s. ⚠ Note what the profile says about instrument choice
 generally: the GPU was never the constraint, and the second recognizer is cheap. There is no throughput
 argument against adding a third.
+
+## Run 71 — 2026-08-21 — the restricted decode was the wrong default, and the probe that hid it
+
+Run 70 shipped one allosaurus decode per row, restricted to the language's PHOIBLE inventory, and
+justified it on the es_419 control: θ was IN the Spanish inventory and went unwritten anyway, so the
+inventory was not suppressing. That control was sound but it was one language and one phone.
+
+### The first comparison came back "identical", and that was a bug
+
+Comparing the restricted and unrestricted decodes on `ast_es` returned **exactly** the same median and
+the same mean unit count for both. Two decodes over a 29-phone inventory and a 230-phone one agreeing
+to four decimals is not a result, it is a defect:
+
+```python
+# allosaurus/lm/decoder.py
+mask = self.inventory.get_mask(lang_id, approximation=self.config.approximate)
+logits = mask.mask_logits(logits)        # <- MUTATES IN PLACE
+```
+
+⚠ **The second call was reading the array the first had already masked**, so it returned the first
+decode's answer while looking like it ran. The es_419 spa-vs-ipa figures in run 70 are unaffected —
+that probe recomputed features per decode, so each call got a fresh array — but every call site now
+passes `.copy()`.
+
+### With the bug fixed, neither decode wins
+
+```
+                 restricted   universal        units vs wav2vec2
+ast_es (29-phone inv)  0.5200      0.4140       0.649  ->  1.083
+af_za  (36-phone inv)  0.6342      0.7207       0.919  ->  1.074
+```
+
+⚠ **`ast_es` is the suppression failure mode, caught in the act.** Its inventory is the fleet's
+smallest and the restricted decode returns barely two thirds of a phone per wav2vec2 phone — the
+decode is being starved, not sharpened. ⚠ **And `af_za` reverses the ordering**, so this is not a case
+of "the universal decode is simply better". Picking either one globally would have silently biased
+every per-language conclusion the column is meant to support — the same class of error as run 64's
+es_419 remap, arrived at from the opposite direction.
+
+Both decodes now ship: `phones_allo` (restricted) and `phones_allo_uni` (all 230 phones). The acoustic
+model forward is shared, so the second costs ~4%. `allo_compare.py --decodes` reports which fits each
+language.
+
+### What the column is for
+
+`allo_compare.py` asks the question the second recognizer exists to answer, per language:
+
+    delta = median dist(ours, wav2vec2) - median dist(ours, allosaurus)
+
+A large POSITIVE delta means the all-flagged queue is ranking an espeak artefact rather than our
+output — we agree with the independent instrument and disagree only with the espeak-trained one. Near
+zero means the disagreement survives a change of tradition and is a real lead. Large NEGATIVE means we
+agree with espeak's conventions specifically, which for rules written against espeak output is
+circularity surfacing as a number.
+
+⚠ **Delta triages, it does not adjudicate**, and three things keep it honest: allosaurus is deaf above
+4 kHz (run 70), it is coarser in general so it will agree with a coarser transcription for
+uninteresting reasons, and the decode choice above moves it. Read `--decodes` first.
