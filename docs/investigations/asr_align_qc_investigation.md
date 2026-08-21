@@ -3519,3 +3519,82 @@ and the accepted rows are now `read_text_src='hand'`, which the auto pass skips.
 **Still open:** the 18 declined rows. They need a clock and decimal reading in the register language —
 `numeral_register.mts` already quantifies that opportunity at ~115 rows across the five wired languages, and
 these add to it.
+
+## Run 59 — 2026-08-20 — the all-flagged queue, re-ranked; and a Latin-acronym hole
+
+With `examined_clean` / `reader_divergence` now marked, the queue re-ranks by excess over each language's
+own median. The three highest with **0% digit-bearing rows** — el_gr 2.5×, sn_zw 2.5×, hu_hu 2.4× — cannot
+be the numeral-register story, so they were read first.
+
+### The finding: `ucla`
+
+Greek, `…κέντρο ρόναλντ ρήγκαν του ucla όπου…`
+
+```
+ours    … ɾiŋɡan tu ˈuːklæ opu …          the WORD
+heard   … ɾeɪɡʌntʊ ɣuːsiːɪlleɪ opʊ …      the LETTERS — "yoo see el ay"
+```
+
+The reader spelled it, in **English** letter names (not Greek *ipsilon-si-lamda-alfa*). And the engine
+already knows how: `phonemize("UCLA", "el")` is **`ʝu si el ei`** — English letter names in Greek phonology,
+which is what the reader said. **Only the casing was missing.** FLEURS lowercases (0 rows corpus-wide
+contain `UCLA`), and `restoreInitialismCasing` had no entry for it.
+
+Added to `INITIALISM_UPPERCASE` — the first entry justified on AUDIO rather than the casing differential,
+and it needed to be: `ucla` is perfectly pronounceable, so `isUnreadableEnglish` declines it and the OOV
+g2p produces the word. Spread is 22 languages / 37 tokens, clearing the list's documented ≥4 bar.
+
+```
+el_gr  0.5484 -> 0.5220     th_th  0.5188 -> 0.4783
+el_gr  0.8831 -> 0.6709     th_th  0.3577 -> 0.3239
+```
+
+### ⚠ The negative result: the list cannot be extended on audio in general
+
+Scanned every lowercase Latin run in the non-Latin-script corpora, took the 60 with the widest
+cross-language spread, and scored word-reading against spelled-out over 118 row comparisons.
+
+```
+run     better worse   Δmean   langs        run     better worse   Δmean
+jas       3     0    +0.0123    1           minae     3     3    -0.0076
+il        3     0    +0.0096    1           zmapp     2     4    -0.0031
+dna       3     1    +0.0146    1           of        0     3    -0.0093
+add       3     1    +0.0134    2           de        0     4    -0.0041
+```
+
+Effect sizes of ±0.01 on three or four rows are the recognizer's noise floor — compare the numeral work
+(0.5958 → 0.3640) or nso's vowels (0.6647 → 0.2763). **The audio cannot adjudicate a one-token change
+inside a long sentence at these sample sizes.** `ucla` is the exception because 22 languages × the same
+FLEURS sentence gives repeated evidence and the effect reached −0.21 on one row.
+
+The spread test alone is also useless here: FLEURS is PARALLEL, so every brand name appears in 20+ corpora
+too — `ebay` 31 languages, `yahoo` 27, `apple` 24, `google` 21. 843 runs clear ≥4 languages. The docstring
+already says a phonotactic test fails in both directions; so does spread, on its own.
+
+### ⚠ The bigger hole: 4 of 26 non-Latin-script languages spell Latin acronyms at all
+
+```
+spells out (4):   el th ja ko
+reads as an English WORD (22):  ru bg uk he ka hy ta mr ne ar fa ur hi bn te kn ml si my km lo am
+```
+
+`core/initialisms.ts` declines a PRONOUNCEABLE acronym by design — "the existing OOV g2p already produces
+that word, so this pass gets out of the way". That is right for a Latin-script language, where the OOV g2p
+is the host's own. For a non-Latin-script language it hands the token to **English**: `UCLA` → `ˈuːklæ`,
+`internet` → `ˈɪntɚnˌɛt` with `ɚ`, inside a Russian or Hebrew stream.
+
+Greek found this independently and fixed it locally — `greek/normalize.ts` opens with it: *"the all-caps
+initialisms have to be claimed, or `το FBI` reads with ENGLISH phonemes in a Greek stream (to ˈɛfbˈiːʲˈaᶦ)
+and `η UNESCO` comes out carrying ɪ ʊ ɹ ʃ d͡ʒ æ ɫ."* 2,084 rows across 41 non-Latin-script corpora contain
+one of the 90 already-listed initialisms.
+
+⚠ **And it is context-dependent, so the casing fix does not reach everyone.** Japanese spells `UCLA` in
+isolation (`jɯᵝːɕiːe̞ɾɯᵝe̞ː`) but embedded in a Japanese sentence still emits `ˈuːklɑː`. The two ja rows
+moved 0.0000. Not chased further here; it is the same shape as the Greek hole, one layer in.
+
+### Tooling gap found by using it
+
+`read_text.py --apply` did not clear `ipa` when the derived text CHANGED — only `--set` did. Adding `ucla`
+to the repair list therefore rewrote 135 rows' `read_text` to carry `UCLA` while their `ipa` still said
+*ˈuːklæ*, and **nothing detects that**: `--stale` only finds `ipa IS NULL`. A wrong IPA that scores is
+worse than an absent one that does not. `--apply` now clears `ipa` on change, and reports the count.

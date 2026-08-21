@@ -35,6 +35,14 @@ export const INITIALISM_UPPERCASE: readonly string[] = [
     "rspca", "usgs", "nsa", "npws", "nhc", "ptwc", "ndp", "pmo", "hjr", "afcfta", "plc",
     // Broadcast / brand call signs
     "pbs", "wned", "qvc",
+    // ⚠ `ucla` is the first entry added on AUDIO rather than on the casing differential, and it needed
+    // to be: it is perfectly pronounceable, so `isUnreadableEnglish` declines it and the OOV g2p reads it
+    // as the word *ˈuːklæ*. The recognizer shows a Greek reader SPELLING it — `ɣ uː s iː ɪ l l eɪ`,
+    // English letter names in Greek phonology, which is exactly what `phonemize("UCLA","el")` already
+    // produces (*ʝu si el ei*). Only the CASING was missing. Spread 22 languages / 37 tokens, and
+    // uppercasing moves every row that can act on it: el 0.5484→0.5220 and 0.8831→0.6709, ja
+    // 0.4345→0.3960 and 0.3241→0.3020, th 0.5188→0.4783 and 0.3577→0.3239 — 6 of 6 closer.
+    "ucla",
     // Technical
     "vpn", "pstn", "dslr", "gp", "xdr", "qc",
     // ⚠ Added by the CASING DIFFERENTIAL (scan_casing_differential.mts), which compares
