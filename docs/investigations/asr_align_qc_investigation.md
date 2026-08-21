@@ -3963,8 +3963,17 @@ Added for cs/en/hr/ms/sk/sl — 18 occurrences, all verified as the abbreviation
 17 closer / 1 further     gained 0.2773   lost 0.0021   = 132:1
 ```
 
-⚠ **A self-review catch:** the first edit added `cs_cz: ["dr"]` as a second key, and a duplicate key in an
-object literal silently WINS — it would have dropped `tzv/atd/tzn/sv/cca`. Merged into the existing entry.
+⚠ **A self-review catch, and then a second one from the guard it prompted.** The first edit added
+`cs_cz: ["dr"]` as a SECOND key. A duplicate key in an object literal silently wins, and **tsc does not flag
+it** — the type is a `Record<string, …>` index signature, so repeated literal keys are legal. It would have
+dropped `tzv/atd/tzn/sv/cca` with no error and no failing test. Merged into the existing entry, reformatted
+one key per line (five on one line is what hid it), and `test/abbreviation-table.test.ts` now parses the
+SOURCE for repeated keys, since the runtime object cannot show them.
+
+That test immediately found a second one: **`mrt` was listed twice** in `INITIALISM_UPPERCASE` — once in the
+casing-differential batch and once in the later UNSURE-bucket pass. Harmless at runtime (the extra matcher
+repeats an idempotent replacement) but the list is hand-reviewed and its length is quoted in its own
+docstring. Removed the later entry, kept the one with the stronger justification.
 
 ### Code-switching again, and the run-62 rule holds
 
