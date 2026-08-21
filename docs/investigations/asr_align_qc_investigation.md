@@ -3701,3 +3701,72 @@ list safely precisely BECAUSE a pronounceable run falls through to the word read
 default deletes the property the casing list is built on. The same entry also withdraws the framing of the
 English fallback as a defect: the Greek reader spelled `ucla` with ENGLISH letter names, so routing Latin
 material to English is what the readers themselves do.
+
+## Run 61 — 2026-08-20 — the queue after the fixes, hu_hu triaged, and a COARSEN entry
+
+**Housekeeping first.** The ⟨th⟩ fold and `ucla` changed the ENGINE, which the `read_text` machinery does
+not notice — only text changes clear `ipa`. Cleared and re-derived the 252 affected sr/hr/bs rows, then
+`asr_align_label.py --apply`. **Flagged 8,274 → 8,167, all-flagged 658 → 549**: 107 rows left the tail
+because the fixes landed. Hand verdicts survived, as designed.
+
+### hu_hu — examined, recognizer artefact
+
+12 rows / 6 sentences at 2.4× its own median, 0% digit-bearing. No systematic class:
+
+```
+top substitutions   a>ɛ 2.4%   ɛ>ə 1.6%   o>ʊ 1.5%   ɔ>ə 1.3%   r>ɾ 1.1%      — diffuse
+DELETIONS           37% of all non-matching ops, spread over l ɔ r t o ɛ a k   — no class
+phone-count ratio   recognizer/ours 0.77 on these rows vs 0.95 for hu_hu overall
+```
+
+The recognizer returned about a fifth less than we emit and dropped material broadly. Marked `artefact`.
+`sn_zw` (0.96 vs 0.97) and `el_gr` (0.90 vs 0.94) do NOT show this, so it is not a general property of the
+all-flagged class.
+
+### ⚠ A retraction: `c` is NOT unhearable
+
+Chasing Hungarian ⟨ty⟩=/c/, a raw count said the recognizer writes `c` **zero** times against our 44,509 —
+which would meet the COARSEN bar outright and contradict the docstring's flat rejection ("corpus-wide the
+recognizer writes `c` 10,292 times … a fifth, not a hundredth"). Both databases agreed on zero, so the
+docstring looked stale.
+
+It is not. **The recognizer writes `ç` — 12,288 times — and `fold()` NFD-normalises it to `c`.** The
+docstring measured folded units, which is the correct unit for a COARSEN decision; I measured the raw
+column. The rejection stands.
+
+Third time this session that reading a raw column produced a defect that was not there (stale stored `ipa`
+twice, now raw-vs-folded). **Measure on the units the decision operates on.**
+
+### `ɀ` → `ʒ` — a COARSEN entry that does meet the bar
+
+Measured properly, on folded units:
+
+```
+sym    ours    recog   langs
+ɀ      4394        0        0      <- not in COARSEN
+ʑ     12664        0        0         already in COARSEN
+ɓ     35192        0        0         already in COARSEN
+```
+
+`ɀ` is Shona's whistled sibilant (⟨zv⟩ → `ɀin̤u`), emitted by **sn_zw only**, and the recognizer has no
+symbol for it. Target chosen by measurement:
+
+```
+ɀ -> ʒ    median 0.2157 -> 0.2000   1215 closer /    6 further   <- taken
+ɀ -> z              -> 0.2127        460 closer /   33 further
+ɀ -> s              -> 0.2143        291 closer /   46 further
+ɀ -> zw             -> 0.2212        296 closer / 1345 further
+```
+
+**sn_zw language median 0.2105 → 0.2000, mean 0.2242 → 0.2142.** No other language can be affected —
+provable, since only sn_zw emits it and the recognizer's count is zero.
+
+⚠ **It merges a contrast**, the cost `ɒ` records for Danish: Shona emits both `ɀ` (4,394) and `ʒ` (821), so
+a row writing one where the other belongs now scores as a hit. Accepted on the same grounds — with the
+recognizer at zero the comparison could only penalise the symbol, never judge it.
+
+### Still open in sn_zw
+
+Three of its four all-flagged sentences are **English code-switching** — *maslow's hierachy of needs
+theory*, *virgin … northen rock … asset management* — read with Shona rules, producing `neeɗs` with a
+Shona implosive and `theorj`. That is what `{en:…}` spans are for; not authored yet.

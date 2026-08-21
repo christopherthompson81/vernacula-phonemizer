@@ -151,6 +151,22 @@ COARSEN = {
     "ʋ": "v", "ɦ": "h", "ɫ": "l", "ʈ": "t", "ʂ": "s", "ɖ": "d", "ɳ": "n", "ɽ": "r",
     "ɓ": "b", "ɗ": "d", "ʄ": "j", "ɠ": "ɡ", "ᶑ": "d", "χ": "x", "ʑ": "ʒ", "ɸ": "f",
     "ʝ": "ʃ", "ɴ": "n", "ɻ": "r", "ɮ": "l",
+    # ⚠ `ɀ` IS SHONA'S WHISTLED SIBILANT AND THE RECOGNIZER HAS NO SYMBOL FOR IT: we write it 4,394 times
+    # (sn_zw ONLY — 1,643 rows) and it comes back ZERO times in all 270,106 utterances. Same criterion `ɒ`
+    # met. Target chosen by measurement, not by shape:
+    #
+    #     ɀ -> ʒ    median 0.2157 -> 0.2000   1215 closer /    6 further   <- taken
+    #     ɀ -> z              -> 0.2127        460 closer /   33 further
+    #     ɀ -> s              -> 0.2143        291 closer /   46 further
+    #     ɀ -> v              -> 0.2157         41 closer /   12 further
+    #     ɀ -> zw             -> 0.2212        296 closer / 1345 further
+    #
+    # ⚠ NO OTHER LANGUAGE CAN BE AFFECTED, provably: only sn_zw emits it and the recognizer's count is 0.
+    # ⚠ IT DOES MERGE A CONTRAST, the same cost `ɒ` records for Danish. Shona emits both `ɀ` (4,394) and
+    # `ʒ` (821), so a row writing one where the other belongs now scores as a hit. Accepted on the same
+    # grounds: with the recognizer's count at zero the comparison was never able to JUDGE the symbol, only
+    # to penalise it. Recorded so the loss is not discovered later as a surprise.
+    "ɀ": "ʒ",
     # clicks: our IPA writes them as k+click (kǀ, kǁ, kǃ), so the k already carries the position and
     # the click letter itself has no counterpart at all — it is removed rather than mapped.
     "ǀ": "", "ǁ": "", "ǃ": "", "ǂ": "",
