@@ -16,8 +16,9 @@ is likewise rebuilt with a Python loop on every call, and depends only on `frame
 
 ⚠ THIS MONKEYPATCHES A THIRD-PARTY PACKAGE, which is only defensible because the equivalence is
 CHECKED rather than argued: `selftest()` runs both implementations over real audio and compares the
-decoded phone strings, and `install()` refuses to patch if allosaurus's source no longer matches what
-this was written against. Run `python3 allo_fast.py --selftest` after any allosaurus upgrade.
+decoded phone strings, and `install()` refuses to patch unless a sha256 over the upstream functions
+this reimplements matches one it was verified against. Run `python3 allo_fast.py --selftest` after any
+allosaurus upgrade; it prints the hash to adopt.
 
 ⚠ It does NOT change what the model outputs -- if it ever does, that is a bug in here, not a better
 decode. allosaurus is deterministic (its `do_dither` call is commented out upstream; verified 20/20
@@ -79,28 +80,45 @@ def framesig(sig, frame_len, frame_step, dither=1.0, preemph=0.97, remove_dc_off
     return pre * win, raw_frames
 
 
-# The upstream body this was derived from. If allosaurus changes `framesig`, the vectorization may no
-# longer be equivalent, and silently patching over a changed implementation is the failure mode worth
-# guarding: the pass would still run and the numbers would still look plausible.
-_EXPECT = (
-    "frames[frm, :] = do_remove_dc_offset(frames[frm, :])",
-    "raw_frames[frm, :] = frames[frm, :]",
-    "frames[frm, :] = do_preemphasis(frames[frm, :], preemph)",
-    "return frames * win, raw_frames",
-)
+# ⚠ A HASH, NOT A SUBSTRING CHECK, and the difference matters. An earlier version of this guard tested
+# that four specific lines were still present, which can only detect a REMOVAL. It could not see an
+# ADDITION -- and there is a live one waiting: upstream's `do_dither` call is commented out today
+#
+#     # frames[frm, :] = do_dither(frames[frm, :], dither)  # dither
+#
+# so if a future release uncomments it, all four fragments still match, the patch installs happily, and
+# this implementation -- which ignores `dither` entirely -- SILENTLY REMOVES DITHERING from every
+# decode. The same hole covered the povey-window formula (`_window` re-derives it independently), the
+# numframes/padsignal arithmetic, and both helpers. Hashing the whole dependency closure closes it.
+#
+# To adopt a new allosaurus: run `--selftest`, confirm it still reports bit-identical features, and
+# paste the hash it prints. Do not update this constant without running the selftest.
+_UPSTREAM = ("78cdeff9fd5be61184d960f98137b1517025a1750ce228098e257c25a1af3c70",)
+_DEPENDS = ("framesig", "do_remove_dc_offset", "do_preemphasis", "rolling_window", "round_half_up")
 
 
-def install(strict: bool = True) -> bool:
-    """Patch allosaurus to use the vectorized framesig. Returns whether the patch was applied."""
+def upstream_hash() -> str:
+    """sha256 over the upstream functions this vectorization reimplements or depends on."""
+    import hashlib
     import inspect
 
     from allosaurus.pm import preprocess
 
+    src = "".join(inspect.getsource(getattr(preprocess, n)) for n in _DEPENDS)
+    return hashlib.sha256(src.encode()).hexdigest()
+
+
+def install(strict: bool = True) -> bool:
+    """Patch allosaurus to use the vectorized framesig. Returns whether the patch was applied."""
+    from allosaurus.pm import preprocess
+
     if getattr(preprocess.framesig, "_vectorized", False):
         return True
-    src = inspect.getsource(preprocess.framesig)
-    if not all(frag in src for frag in _EXPECT):
-        msg = "allo_fast: upstream framesig has changed; refusing to patch (rerun --selftest)"
+    got = upstream_hash()
+    if got not in _UPSTREAM:
+        msg = (f"allo_fast: upstream preprocess has changed (sha256 {got}); refusing to patch. "
+               f"Run `allo_fast.py --selftest`; if it still reports bit-identical features, add that "
+               f"hash to _UPSTREAM.")
         if strict:
             raise RuntimeError(msg)
         print(f"# {msg}", file=sys.stderr)
@@ -174,6 +192,9 @@ def selftest(lang: str = "es_419", n: int = 40) -> int:
                 break
     print(f"allo_fast selftest on {lang}: {checked} utterances, "
           f"{checked - bad} phone-identical, {feat_exact} bit-identical features")
+    got = upstream_hash()
+    print(f"upstream preprocess sha256: {got}"
+          f"{'  (known)' if got in _UPSTREAM else '  ⚠ NOT IN _UPSTREAM -- see install()'}")
     return bad
 
 

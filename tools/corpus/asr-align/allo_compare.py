@@ -25,8 +25,7 @@ PHOIBLE inventory is starving the decode -- and the unrestricted one scores 0.41
 where the restricted scores 0.520. On `af_za` the ordering reverses. Read `--decodes` before quoting
 a delta for any language, and prefer the decode that wins there.
 
-⚠ **DELTA IS A TRIAGE SIGNAL, NOT A VERDICT**, for three reasons kept in front of the reader by
-`--notes`: allosaurus runs at **8 kHz** and is deaf above 4 kHz where sibilant contrasts live; it is
+⚠ **DELTA IS A TRIAGE SIGNAL, NOT A VERDICT**, for three reasons: allosaurus runs at **8 kHz** and is deaf above 4 kHz where sibilant contrasts live; it is
 coarser than wav2vec2 in general, so it will agree with a coarser transcription for uninteresting
 reasons; and six languages use a different decode (see `phones_allo_lang`).
 
@@ -100,12 +99,48 @@ def notate(us: list[str]) -> list[str]:
     return [NOTATION.get(u, u) for u in us]
 
 
+# ⚠ THE DURABLE RECORD IS AUTHORITATIVE; DO NOT REDISCOVER WHAT IS ALREADY LABELLED. `asr_align_label.py`
+# exists so a verdict is recorded once and not rehashed, and these tools ignored it at first. The result
+# was that --serious reported es_419 as the fleet's worst language on 490 rows, every one of which was
+# ALREADY marked -- 864 `defective_audio` + 509 `recognizer_short` fleet-wide account for exactly the
+# 1,373 rows carrying no wav2vec2 output. That is not a finding, it is a re-run of a closed one.
+#
+# `defective_audio` and `recognizer_short` are instrument/audio failures and cannot inform a question
+# about OUR output. `reader_divergence` is a row where the reader said something other than the script:
+# also real, also not our bug. Excluded by default, overridable, and counted so the exclusion is visible
+# rather than silent.
+NOT_OUR_OUTPUT = ("defective_audio", "recognizer_short", "reader_divergence")
+
+
+# ⚠ AN EMPTY RECOGNIZER STREAM ABSTAINS; IT DOES NOT VOTE MAXIMUM DISAGREEMENT. `per` returns 1.0
+# against an empty side, which is right for "the recognizer heard nothing" only if there was nothing to
+# hear. There was: 1,373 rows fleet-wide carry NO wav2vec2 output at all despite full-length audio, and
+# they are concentrated -- es_419 17.5%, nb_no 15.5%, cy_gb 9.9%. Counting those as "no recognizer
+# supports us" made es_419 the worst language in --serious on 490 rows that are an instrument failure,
+# not our output. A stream with no units is a missing measurement and is dropped from the vote; a row
+# where EVERY stream is empty is unmeasurable and is reported separately rather than scored.
+def status_sql(include: bool) -> str:
+    """SQL fragment excluding rows whose recorded verdict is not about our output."""
+    if include:
+        return ""
+    return " AND (status IS NULL OR status NOT IN (%s))" % ",".join(f"'{v}'" for v in NOT_OUR_OUTPUT)
+
+
+def corroborated(ours: list[str], streams: list[list[str]]) -> float | None:
+    """Distance to the closest recognizer that actually produced something. None if none did."""
+    live = [c for c in streams if c]
+    return min(per(ours, c) for c in live) if live else None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=DB)
     ap.add_argument("--langs", nargs="*")
     ap.add_argument("--pairs", type=int, default=20)
     ap.add_argument("--min-rows", type=int, default=50)
+    ap.add_argument("--all-status", action="store_true",
+                    help=f"do NOT exclude rows already labelled {'/'.join(NOT_OUR_OUTPUT)} -- those are "
+                         "audio, instrument or reader failures, and are skipped by default")
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
@@ -130,7 +165,8 @@ def main() -> int:
                     help="the three-way per-symbol verdict: which stream is the odd one out")
     ap.add_argument("--raw-notation", action="store_true",
                     help="do NOT fold the shared notation axes (r/ɾ, i/ɪ, e/ɛ, a/ɑ ...) -- shows what "
-                         "the folding is hiding, which is most of the corroborated list")
+                         "the folding is hiding, which is most of the corroborated list. Applies to "
+                         "every mode that folds: --symbols, --serious, --flagged and --words.")
     ap.add_argument("--rate", type=float, default=2.0,
                     help="minimum rate per 1000 units for a symbol to be considered (default 2.0)")
     ap.add_argument("--uni", action="store_true",
@@ -138,6 +174,7 @@ def main() -> int:
     a = ap.parse_args()
 
     db = sqlite3.connect(f"file:{a.db}?mode=ro", uri=True)
+    ST = status_sql(a.all_status)
     langs = a.langs or [r[0] for r in db.execute(
         "SELECT lang FROM utt WHERE phones_allo IS NOT NULL GROUP BY lang ORDER BY lang")]
 
@@ -161,12 +198,13 @@ def main() -> int:
             for ipa, ph, pa, pu in db.execute(
                     "SELECT ipa, phones, phones_allo, phones_allo_uni FROM utt "
                     "WHERE lang=? AND ipa IS NOT NULL AND phones IS NOT NULL "
-                    "AND phones_allo IS NOT NULL", (lang,)):
+                    "AND phones_allo IS NOT NULL" + ST, (lang,)):
                 u = nf(ipa)
                 if len(u) < 10:
                     continue
-                streams = [ph, pa, pu or pa]
-                if min(per(u, nf(x)) for x in streams) < a.bad:
+                streams = [x for x in (ph, pa, pu or pa) if nf(x)]
+                d = corroborated(u, [nf(x) for x in streams])
+                if d is None or d < a.bad:
                     continue
                 n_rows += 1
                 per_word = [wordize(ipa, x, nf) for x in streams]
@@ -199,35 +237,42 @@ def main() -> int:
     if a.serious:
         out = []
         for lang in langs:
-            worst, rows = [], []
+            worst, rows, unmeasured = [], [], 0
             for wav, ipa, ph, pa, pu in db.execute(
                     "SELECT wav, ipa, phones, phones_allo, phones_allo_uni FROM utt "
                     "WHERE lang=? AND ipa IS NOT NULL AND phones IS NOT NULL "
-                    "AND phones_allo IS NOT NULL", (lang,)):
+                    "AND phones_allo IS NOT NULL" + ST, (lang,)):
                 u = notate(units(ipa))
                 if len(u) < 10:
                     continue
-                d = min(per(u, notate(units(ph))),
-                        per(u, notate(units(pa))),
-                        per(u, notate(units(pu or pa))))
+                d = corroborated(u, [notate(units(x)) for x in (ph, pa, pu or pa)])
+                if d is None:
+                    unmeasured += 1
+                    continue
                 worst.append(d)
                 if a.show and d >= a.bad:
                     rows.append((d, wav))
             if len(worst) < a.min_rows:
+                if a.langs:
+                    print(f"{lang}: {len(worst)} usable rows, below --min-rows {a.min_rows}")
                 continue
             n_bad = sum(1 for d in worst if d >= a.bad)
-            out.append((n_bad / len(worst), n_bad, lang, statistics.median(worst), len(worst), rows))
+            out.append((n_bad / len(worst), n_bad, lang, statistics.median(worst), len(worst), rows,
+                        unmeasured))
         out.sort(reverse=True)
-        print(f"{'serious%':>9}{'n':>7}{'lang':<15}{'median':>8}{'rows':>7}")
-        print(f"{'-'*8:>9}{'-'*6:>7} {'-'*13:<14}{'-'*7:>8}{'-'*6:>7}")
-        for frac, n_bad, lang, med, n, rows in out:
-            print(f"{100 * frac:8.1f}%{n_bad:7}{lang:<15}{med:8.4f}{n:7}")
+        print(f"{'serious%':>9}{'n':>7}  {'lang':<15}{'median':>8}{'rows':>7}")
+        print(f"{'-'*8:>9}{'-'*6:>7}  {'-'*13:<15}{'-'*6:>8}{'-'*5:>7}")
+        for frac, n_bad, lang, med, n, rows, unmeasured in out:
+            note = f"   ⚠ {unmeasured} rows unmeasurable (no recognizer output)" if unmeasured else ""
+            print(f"{100 * frac:8.1f}%{n_bad:7}  {lang:<15}{med:8.4f}{n:7}{note}")
             for d, wav in sorted(rows, reverse=True)[:a.show]:
                 print(f"           {d:.4f}  {lang}/{wav}")
         tb = sum(r[1] for r in out)
         tn = sum(r[4] for r in out)
+        tu = sum(r[6] for r in out)
         print(f"\n{len(out)} languages, {tn} rows, {tb} serious ({100 * tb / max(tn, 1):.2f}%) "
-              f"-- rows no recognizer, under any decode, puts within {a.bad} of us")
+              f"-- rows no recognizer, under any decode, puts within {a.bad} of us"
+              + (f"; {tu} rows excluded as unmeasurable" if tu else ""))
         return 0
 
     # The all-flagged class is the strongest signal in the corpus -- every recording of the sentence is
@@ -247,25 +292,35 @@ def main() -> int:
         # by construction, so every language reads "nothing supports us" on an absolute threshold. The
         # question is self-relative, as the 3xMAD screen already is elsewhere: is this language's
         # flagged set worse THAN ITS OWN typical row? That excess is what points at a specific defect.
+        # ⚠ FOLD THE NOTATION AXES HERE TOO. `--serious` does, and the inconsistency was not harmless:
+        # the excess figure is self-relative so uniform inflation largely cancels, but `rescued` is an
+        # ABSOLUTE 0.20 threshold, and the r/ɾ + i/ɪ mass differs between wav2vec2 and the two allosaurus
+        # decodes -- so an unfolded `rescued` was partly counting notation drift as exoneration.
+        nf = (lambda x: x) if a.raw_notation else (lambda x: notate(units(x)))  # noqa: E731
         out = []
         for lang in langs:
             base, flag, dw, resc = [], [], [], 0
             for sib, ipa, ph, pa, pu in db.execute(
                     "SELECT sibling, ipa, phones, phones_allo, phones_allo_uni FROM utt "
                     "WHERE lang=? AND ipa IS NOT NULL AND phones IS NOT NULL "
-                    "AND phones_allo IS NOT NULL", (lang,)):
-                u = units(ipa)
+                    "AND phones_allo IS NOT NULL" + ST, (lang,)):
+                u = nf(ipa)
                 if not u:
                     continue
-                w = per(u, units(ph))
-                worst = min(w, per(u, units(pa)), per(u, units(pu or pa)))
+                fw, fa, fu = nf(ph), nf(pa), nf(pu or pa)
+                worst = corroborated(u, [fw, fa, fu])
+                if worst is None:
+                    continue
                 if sib == a.sibling:
-                    flag.append(worst); dw.append(w)
-                    if w - min(per(u, units(pa)), per(u, units(pu or pa))) >= 0.20:
-                        resc += 1
+                    allo = corroborated(u, [fa, fu])
+                    flag.append(worst)
+                    if fw:
+                        dw.append(per(u, fw))
+                        if allo is not None and per(u, fw) - allo >= 0.20:
+                            resc += 1
                 else:
                     base.append(worst)
-            if len(flag) < a.min_flagged or not base:
+            if len(flag) < a.min_flagged or not base or not dw:
                 continue
             mf, mb = statistics.median(flag), statistics.median(base)
             out.append((mf - mb, lang, mf, mb, statistics.median(dw), resc, len(flag)))
@@ -308,7 +363,7 @@ def main() -> int:
             O, W, A = Counter(), Counter(), Counter()
             for ipa, ph, pa in db.execute(
                     f"SELECT ipa, phones, {acol} FROM utt WHERE lang=? AND ipa IS NOT NULL "
-                    f"AND phones IS NOT NULL AND {acol} IS NOT NULL", (lang,)):
+                    f"AND phones IS NOT NULL AND {acol} IS NOT NULL" + ST, (lang,)):
                 O.update(norm(units(ipa))); W.update(norm(units(ph)))
                 A.update(norm(units(pa)))
             to, tw, ta = sum(O.values()), sum(W.values()), sum(A.values())
@@ -348,18 +403,20 @@ def main() -> int:
             for ipa, ph, pa, pu, p_l in db.execute(
                     "SELECT ipa, phones, phones_allo, phones_allo_uni, phones_allo_lang FROM utt "
                     "WHERE lang=? AND ipa IS NOT NULL AND phones IS NOT NULL "
-                    "AND phones_allo IS NOT NULL AND phones_allo_uni IS NOT NULL", (lang,)):
+                    "AND phones_allo IS NOT NULL AND phones_allo_uni IS NOT NULL" + ST, (lang,)):
                 u, w, r, n = units(ipa), units(ph), units(pa), units(pu)
                 if not u:
                     continue
                 rs.append(per(u, r)); us.append(per(u, n))
                 lw += len(w); lr += len(r); lu += len(n); pal = p_l
             if len(rs) < a.min_rows:
+                if a.langs:
+                    print(f"{lang}: {len(rs)} usable rows, below --min-rows {a.min_rows}")
                 continue
             mr, mu = statistics.median(rs), statistics.median(us)
             # ⚠ Identical columns for the six with no inventory; say so rather than declaring a winner.
             win = "same" if pal == UNIVERSAL else ("restricted" if mr < mu else "universal")
-            print(f"{lang:<14}{pal:>7}{mr:>12.4f}{mu:>11.4f}{win:>12}"
+            print(f"{lang:<14}{pal or '?':>7}{mr:>12.4f}{mu:>11.4f}{win:>12}"
                   f"{lr / max(lw, 1):>8.3f}{lu / max(lw, 1):>8.3f}{len(rs):>7}")
         return 0
 
@@ -371,7 +428,7 @@ def main() -> int:
         for ipa, ph, pa, pal in db.execute(
                 f"SELECT ipa, phones, {col}, phones_allo_lang FROM utt "
                 "WHERE lang=? AND ipa IS NOT NULL AND phones IS NOT NULL "
-                f"AND {col} IS NOT NULL", (lang,)):
+                f"AND {col} IS NOT NULL" + ST, (lang,)):
             u, w, s = units(ipa), units(ph), units(pa)
             if not u:
                 continue

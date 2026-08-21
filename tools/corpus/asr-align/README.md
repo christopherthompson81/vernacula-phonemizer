@@ -131,6 +131,17 @@ batch size 1, so a single-item CUDA decode disagrees with both the CPU decode an
 CPU, or batch. Measured floors: identical bytes decode identically (20/20); GPU-batched vs CPU is
 0.0005 mean PER; `ffmpeg -sample_fmt s16` vs in-memory int16 is ~0.02–0.04 PER, because ffmpeg dithers.
 
+⚠ **`allo_compare.py` HONOURS `status`, and the first version did not.** Rows already labelled
+`defective_audio`, `recognizer_short` or `reader_divergence` are audio, instrument or reader failures
+and cannot inform a question about our output; they are excluded by default (`--all-status` keeps
+them). Ignoring the durable record made `--serious` report es_419 as the fleet's worst language on 490
+rows, every one of which was already closed — 864 `defective_audio` + 509 `recognizer_short` account
+for exactly the 1,373 rows fleet-wide that carry no wav2vec2 output. With the record respected, es_419
+goes from 17.5% serious to **0.0%** and the fleet from ~11% to 0.27%.
+
+⚠ **An empty recognizer stream ABSTAINS rather than voting maximum disagreement.** `dist` returns 1.0
+against an empty side, which is only right if there was nothing to hear.
+
 ### Reading it — `allo_compare.py`
 
     delta = median dist(ours, wav2vec2) - median dist(ours, allosaurus)
@@ -168,11 +179,6 @@ Two folds were proposed and refused, both recorded at the fold site so they are 
 | `asr_align_allo.py` | the SECOND recognizer: allosaurus (PHOIBLE-trained, espeak-independent) → `phones_allo` |
 | `allo_fast.py` | vectorizes allosaurus's per-frame MFCC loop; `--selftest` proves it bit-identical |
 | `allo_compare.py` | reads the two recognizers against each other — does a queue median survive a change of tradition? |
-
-Both carry the `--selftest` convention: `asr_align_allo.py --selftest` checks the language map's
-invariants with no audio, no GPU and no model download (it parses its own source, because a duplicate
-key in a dict literal is silent); `allo_fast.py --selftest` re-proves the MFCC vectorization
-bit-identical against real audio, and should be run after any allosaurus upgrade.
 | `asr_align_report.py` | the scoring — `fold`, `coarsen`, `dist`, and the per-language 3×MAD queues |
 | `asr_align_label.py` | the durable record: `status` on each row (verified / investigate / defective_audio) |
 | `read_text.py` + `.mts` | the text the phonemizer ACTUALLY READ — `read_text`, `read_text_src` (auto/hand) |
@@ -181,6 +187,11 @@ bit-identical against real audio, and should be run after any allosaurus upgrade
 | `confusion_pairs.py` | which phone substitutions dominate, investigate vs verified |
 | `wordize.py` | cuts the recognizer's flat stream into WORDS, so a divergence is attributable |
 | `judge_alignment.py` | optional LLM adjudication of the queue (local endpoint) |
+
+Both carry the `--selftest` convention: `asr_align_allo.py --selftest` checks the language map's
+invariants with no audio, no GPU and no model download (it parses its own source, because a duplicate
+key in a dict literal is silent); `allo_fast.py --selftest` re-proves the MFCC vectorization
+bit-identical against real audio, and should be run after any allosaurus upgrade.
 
 ### `wordize.py` — attributing a divergence to a word
 

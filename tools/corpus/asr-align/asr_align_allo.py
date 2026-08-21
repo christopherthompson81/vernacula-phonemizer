@@ -229,10 +229,15 @@ def main() -> None:
                     lang=UNIVERSAL, approximate=False, prior=None)
     rec = read_recognizer(cfg)
 
+    # ⚠ `--stock-mfcc` MUST NOT CALL install() AT ALL. It used to pass `strict=False`, but `strict`
+    # only decides whether a hash mismatch RAISES or WARNS -- the patch went in either way. So the
+    # documented escape hatch ran the vectorized path anyway and printed "mfcc stock" while doing it,
+    # which is the worst of both: an operator reaching for it BECAUSE the selftest failed would have
+    # got the suspect code with a log line swearing otherwise.
     import allo_fast
-    fast = allo_fast.install(strict=not a.stock_mfcc)
+    fast = False if a.stock_mfcc else allo_fast.install(strict=True)
     print(f"# allosaurus on {'cuda' if dev >= 0 else 'cpu'}, batch {a.batch}, "
-          f"{a.threads} mfcc threads, mfcc {'vectorized' if fast and not a.stock_mfcc else 'stock'}", file=sys.stderr)
+          f"{a.threads} mfcc threads, mfcc {'vectorized' if fast else 'stock'}", file=sys.stderr)
 
     todo = a.langs or [r[0] for r in db.execute("SELECT DISTINCT lang FROM utt ORDER BY lang")]
     pool = ThreadPoolExecutor(a.threads)
