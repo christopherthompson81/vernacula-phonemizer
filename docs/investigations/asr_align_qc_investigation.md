@@ -4695,3 +4695,68 @@ restores the old behaviour and says in its help what it measures.
 (it has only ever run over rows that entered the investigate queue, so 2,571 of 2,604 mn_mn rows were
 NULL). **No language change. Mongolian is not specially defective; both recognizers are simply weak on
 it, and the earlier picture was the threshold.**
+
+## Run 76 — 2026-08-21 — working the investigate queue: en years, and what the queue is made of
+
+8,021 rows carry `investigate`. Two structural facts first, then the one change.
+
+### The second recognizer does NOT clear this queue
+
+Only **493 of 8,021 (6%)** score inside their language's verified bulk once allosaurus is allowed to
+vouch; 5,413 remain above median+3×MAD. ⚠ These rows really do diverge from BOTH instruments, so the
+espeak-artefact escape does not apply to them and there is no wholesale clearing to be had.
+
+### ⚠ Most of the word-level queue is a wordize artefact, not a defect
+
+Ranking word TYPES over the queue, the top entries are all one- or two-phone function words at distance
+exactly 1.000:
+
+```
+480  hu_hu ˈɒ      the definite article a          64  ru_ru f  \
+178  hu_hu ˈɒz     the definite article az         46  bg_bg f   |  the preposition v,
+118  pt_br e       and                             25  cs_cz f   |  a single consonant
+107  oc_fr e                                       25  be_by w  /
+ 58  ca_es ə                                       27  sl_si ʋ
+```
+
+A clitic of one phone cannot be attributed by an aligner — its phone lands on the neighbouring word and
+the clitic scores 1.000 no matter what we emit. `wordize.py` already defaults to `--min-units 4` for
+exactly this and the sweep did not apply it. **Nothing in that group is a finding**, including the
+he_il `be`/`ve` proclitics flagged back in run 73.
+
+### What IS left is numerals, across unrelated languages
+
+`ig_ng puku` (thousand), `ig_ng itoolu` (nine), `ceb_ph lˈibo` (thousand), `ky_kg d͡ʒyz` (hundred),
+`ha_ng dˈu˥bu˥` (thousand), `ha_ng ɡˈo˥ma˩` (ten), `mi_nz waɾu` (eight), `en_us hˈʌndɹəd`. Rows carrying
+a digit are over-represented in the queue — 27.8% against 21.2% of verified.
+
+### en_us: a determiner blocked the year reading, and ranges were never covered
+
+English already reads years pair-wise, gated on a context word. The gate required ADJACENCY:
+
+```
+"founded in 1998"       -> "founded in 19 98"   ✓
+"in a 1998 book"        -> unchanged            ✗ the determiner blocks it
+"guru nanak 1469–1539"  -> unchanged            ✗ a life-date range has no context word
+```
+
+so `1998` spoke as *one thousand nine hundred ninety-eight*. Two arms added — an optional `the|a|an`
+between context and year, and a dashed pair of 4-digit years — with the range arm running FIRST, since
+with the other order `from 1918-1939` had its left year eaten and came out `from 19 18-1939`.
+
+⚠ **PRE-2010 ONLY, and the split is measured.** Against both recognizers:
+
+```
+pre-2000   n=12   median 0.2593 -> 0.1515   12 closer /  0 further
+2010s      n= 7   median 0.2083 -> 0.2378    1 closer /  6 further   <- excluded
+```
+
+Readers of a 2010s year often say *two thousand seventeen* — the corpus has "january 2017" read that
+way and "the 2010 earthquake" read *twenty ten* — while nobody says *one thousand nine hundred
+ninety-eight*. ⚠ Switching the whole decade to the `2 thousand N` form was measured too and is a coin
+flip: 9 closer / 7 further, median 0.1847 → 0.1812. Where both readings are real the standard one
+stands, so `yearWords` is unchanged and only the NEW arms are gated. Shipped at **12 closer / 0 further**.
+
+⚠ An existing regression pin had to move: `Sejong (1418 – 1450)` asserted no change. It now reads as two
+years, which is what it is, and those very rows improved by 0.106. The pin's actual purpose — a range
+must never become a subtraction — is untouched.

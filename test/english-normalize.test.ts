@@ -39,6 +39,35 @@ describe("English text normalization", () => {
         expect(normalizeEnglish("in 1998.5 units")).toBe("in 1998.5 units"); // decimal guard
     });
 
+    /** ⚠ A DETERMINER BETWEEN THE CONTEXT WORD AND THE YEAR used to block the pair-wise reading, so
+     *  "in a 1998 book" spoke *one thousand nine hundred ninety-eight* while "in 1998" was correct.
+     *  The ASR corpus found it: `hˈʌndɹəd` was among the commonest words in the en_us investigate queue
+     *  and the recognizer plainly returns *nineteen ninety-eight*. 12 closer / 0 further, median
+     *  0.2593 → 0.1515 against both recognizers.
+     *  ⚠ PRE-2010 ONLY, and that is measured rather than stylistic: on 2010-2019 the same loosening
+     *  scored 1 closer / 6 further, because readers of a 2010s year often say "two thousand seventeen"
+     *  while nobody says "one thousand nine hundred ninety-eight". The tight contexts are unchanged for
+     *  every year, so "in 2011" still reads pair-wise. */
+    test("a determiner may sit between the context word and a pre-2010 year", () => {
+        expect(normalizeEnglish("in a 1998 book")).toBe("in a 19 98 book");
+        expect(normalizeEnglish("of the 2009 season")).toBe("of the 2 thousand 9 season");
+        expect(normalizeEnglish("since the 1905 report")).toBe("since the 19 oh 5 report");
+        expect(normalizeEnglish("after the 2010 earthquake")).toBe("after the 2010 earthquake");
+        expect(normalizeEnglish("in a 2011 people survey")).toBe("in a 2011 people survey");
+        expect(normalizeEnglish("in 2011")).toBe("in 20 11"); // tight context, unchanged
+    });
+
+    /** ⚠ A DASHED PAIR OF 4-DIGIT YEARS IS A DATE RANGE — encyclopedic prose is full of life dates, and
+     *  "guru nanak 1469–1539" was read as two cardinals. Both sides take the pair-wise reading and the
+     *  dash is left alone rather than spoken as "to", which would assert a word the reader may not say.
+     *  ⚠ IT MUST RUN BEFORE THE CONTEXT RULE: with that order reversed, "from 1918-1939" had its left
+     *  year consumed by the context arm and came out half-converted as "from 19 18-1939". */
+    test("a dashed pair of years is a range, and the left one is not eaten first", () => {
+        expect(normalizeEnglish("guru nanak 1469–1539")).toBe("guru nanak 14 69–15 39");
+        expect(normalizeEnglish("from 1918-1939 the war")).toBe("from 19 18-19 39 the war");
+        expect(normalizeEnglish("the 1418 - 1450 period")).toBe("the 14 18 - 14 50 period");
+    });
+
     test("units, with count agreement, only after a number", () => {
         expect(normalizeEnglish("40 km away")).toBe("40 kilometers away");
         expect(normalizeEnglish("1 km away")).toBe("1 kilometer away");
@@ -363,7 +392,11 @@ describe("Latin abbreviations and phrases", () => {
     // four hundred fifty". ⚠ Step 0f requires the digit IMMEDIATELY after the dash, which is what keeps a
     // spaced range out; `\s?` is the whole difference between the two behaviours.
     test("a spaced dash between years is never a minus", () => {
-        expect(normalizeEnglish("Sejong (1418 – 1450)")).toBe("Sejong (1418 – 1450)");
+        // ⚠ THE RANGE NOW READS AS TWO YEARS, which is what it is — Sejong's reign — and the corpus rows
+        // carrying exactly this string improved by 0.106 against both recognizers. The pin this test
+        // exists for is unchanged and is the `not.toContain("negative")` assertions below: a range must
+        // never become a subtraction. Only the year reading was added on top.
+        expect(normalizeEnglish("Sejong (1418 – 1450)")).toBe("Sejong (14 18 – 14 50)");
         // ⚠ ASSERTED ON "negative", NOT "minus" — the word the sign rule now emits. Left as `minus` these
         // three would pass VACUOUSLY, testing nothing, since that word is no longer produced anywhere by this
         // rule. A regression pin has to name the string the code can actually emit.

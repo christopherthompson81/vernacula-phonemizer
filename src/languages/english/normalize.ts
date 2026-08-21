@@ -230,6 +230,10 @@ function isoDate(year: number, month: number, day: number): string | undefined {
  *  2007 → "2 thousand 7", 2011 → "20 11" (twenty eleven). */
 function yearWords(y: number): string {
     const hi = Math.floor(y / 100), lo = y % 100;
+    // ⚠ 2010-2019 STAYS PAIR-WISE ("twenty ten"), and it was measured rather than assumed. Readers split:
+    // the corpus has "the 2010 earthquake" read *twenty ten* and "january 2017" read *two thousand
+    // seventeen*. Switching the decade to the "2 thousand N" form scores 9 closer / 7 further with the
+    // median moving 0.1847 -> 0.1812 -- a coin flip. Where both readings are real the standard one stands.
     if (y >= 2000 && y < 2010) return lo === 0 ? "2 thousand" : `2 thousand ${lo}`;
     if (lo === 0) return `${hi} hundred`;
     if (lo < 10) return `${hi} oh ${lo}`;
@@ -444,9 +448,34 @@ export function normalizeEnglish(input: string): string {
     // 5) YEARS: a bare 4-digit 1100–2099 in a date-like CONTEXT (after in/of/since/…, a month name, or
     //    followed by a sentence boundary after such) → pair-wise reading. ⚠ Context-gated on purpose: "2011
     //    people died" must not become "twenty eleven people". Grouped digits (1,998) never match.
+    //    ⚠ A DASHED PAIR OF 4-DIGIT YEARS IS A DATE RANGE, and encyclopedic prose is full of them —
+    //    "guru nanak 1469–1539" is life dates, not arithmetic. Both sides take the pair-wise reading. This
+    //    cannot collide with the sign rule in 0e: that one requires the dash to FOLLOW a space or an open
+    //    paren, and here it follows a digit. The dash itself is left alone rather than spoken as "to",
+    //    because that would assert a word the reader may not say.
+    //    ⚠ THIS MUST RUN BEFORE THE CONTEXT RULE BELOW. With the context rule first,
+    //    "from 1918-1939" had its LEFT year consumed and the range rule could no longer see a
+    //    pair, giving the half-converted "from 19 18-1939".
     s = s.replace(
-        /\b(in|of|since|from|until|till|by|before|after|around|circa|year|late|early|mid)\s+(1[1-9]\d\d|20\d\d)\b(?![.,]?\d)(?!\s*(?:percent|kilometers?|meters?))/gi,
-        (_m, ctx: string, y: string) => `${ctx} ${yearWords(Number(y))}`,
+        /\b(1[1-9]\d\d|200\d)(\s*[-–—]\s*)(1[1-9]\d\d|200\d)\b(?![.,]?\d)/g,
+        (_m, a: string, dash: string, b: string) =>
+            `${yearWords(Number(a))}${dash}${yearWords(Number(b))}`,
+    );
+    //    ⚠ A DETERMINER MAY SIT BETWEEN THE CONTEXT WORD AND THE YEAR, and requiring adjacency missed it:
+    //    "in a 1998 book" and "since the 1998 report" read as *one thousand nine hundred ninety-eight*
+    //    while "in 1998" read correctly. The corpus caught it — en_us `hˈʌndɹəd` is one of the commonest
+    //    words in the investigate queue, and the recognizer plainly returns *nineteen ninety-eight*. Only
+    //    the three bare determiners are allowed through: an adjective slot would let "in a 2011 people
+    //    survey" past, which is the reading the context gate exists to prevent.
+    s = s.replace(
+        /\b(in|of|since|from|until|till|by|before|after|around|circa|year|late|early|mid)(\s+(?:the|a|an))?\s+(1[1-9]\d\d|20\d\d)\b(?![.,]?\d)(?!\s*(?:percent|kilometers?|meters?))/gi,
+        (_m, ctx: string, det: string | undefined, y: string) =>
+            // ⚠ THE DETERMINER ARM IS PRE-2010 ONLY, and the split is measured, not stylistic. Reaching
+            // more contexts with the pair-wise reading scores 12 closer / 0 further on years before 2000
+            // (median 0.2593 -> 0.1515) and 1 closer / 6 further on 2010-2019 (0.2083 -> 0.2378), because
+            // readers of a 2010s year often say "two thousand N" while nobody says "one thousand nine
+            // hundred ninety-eight". A year in the ORIGINAL tight contexts is untouched either way.
+            det && Number(y) >= 2010 ? _m : `${ctx}${det ?? ""} ${yearWords(Number(y))}`,
     );
     s = s.replace(
         new RegExp(`\\b(${MONTH_ALT})((?:\\s+\\d{1,2}(?:st|nd|rd|th))?,?)\\s+(1[1-9]\\d\\d|20\\d\\d)\\b(?![.,]?\\d)`, "gi"),
