@@ -4854,3 +4854,53 @@ hyphen, the spans become ADJACENT, and adjacency is the `tight` join built for S
 connective the reader may not have said, the same reasoning as not speaking a dash as "to". The distance
 metric could not see this at all (`fold` strips spaces); it matters for the word boundaries in training
 data, which is the corpus's actual product.
+
+## Run 78 — 2026-08-21 — ky_kg and umb_ao, and a near-miss on which language
+
+The two numeral candidates run 19 never covered, through the rebuilt harness. Both scored against all
+of en/fr/pt and against BOTH recognizers.
+
+```
+ky_kg   640 rows   en  5.0%   fr  7.0%   pt  5.5%   native 0.2443   NATIVE — decisively
+umb_ao  233 rows   en 63.9%   fr 78.4%   pt 80.5%   native 0.2863   mixed  — NOT wired
+```
+
+`ky_kg` reads its own numerals. ⚠ The `d͡ʒyz` (hundred) lead that put it on the list came from the
+investigate queue, which is run 77's lesson repeating: the queue is where a candidate is FOUND, never
+where it is measured.
+
+### ⚠ umb_ao nearly repeated the `ln_cd` error, in reverse
+
+The harness supported only English and French, and **French scored 78.4%** — enough to look like a
+finding. Umbundu is Angolan, and Angola is Lusophone; French is not a contact language there at all. It
+scored well purely by sitting closer to Portuguese than English does. `ptWords` was written before
+drawing any conclusion, and Portuguese then won on both count and median (80.5%, 0.2486).
+
+⚠ **Run 19 caught exactly this for Lingala** (66% en against 89% fr) and wrote the warning at the top of
+`numeral_register.mts`; the warning did not prevent the repeat, because the failure is not "forgot to
+test French" — it is **testing whichever candidates the tooling happens to support**. The harness now
+carries en/fr/pt, and the standing question before quoting any register number is: *is the region's real
+contact language among the candidates scored?*
+
+At 80.5% umb_ao is `mixed` — 41 of 233 rows get worse — so nothing is wired, consistent with `ceb_ph`
+declined at 84.8%. 21 investigate rows where Portuguese is clearly closer now carry `{pt:...}` spans in
+`read_text`: **21 closer / 0 further, median 0.4833 → 0.3578**. Portuguese needs no year-form special
+case — it reads years as cardinals (`mil novecentos e oitenta e nove`).
+
+### Review fixes to the harness itself
+
+⚠ **It did not apply the shipped path's text repairs.** `phonemize-fleurs.mts` runs
+`restoreInitialismCasing` → `restoreAbbreviationDots` → `restoreNguniConcordAcronyms` before the
+register, so a harness without them prints medians the corpus would never show. Added; the verdicts did
+not move (ha_ng en 33.8% → 33.7%) but the quoted numbers are now the real ones.
+
+⚠ **The CLEAN band was 90, and the table wires `ln` at 89** — so the harness printed "do not wire" for a
+language that is wired, i.e. it could not reproduce a decision already taken. Now 89, with the gap to
+ceb's declined 84.8% named at the constant.
+
+⚠ **Zero matched rows died on `median of empty data`**, which is the harness's likeliest failure — the
+input is `wav<TAB>text` while the sibling `rederive_read_text.mts` takes `lang<TAB>wav<TAB>text`, and
+feeding the wrong shape is silently accepted and surfaces only here. Now a named error and exit 1.
+Also: per-row try/catch plus an errors file (one throwing row used to lose the whole run), the documented
+invocation matched to the actual four-argument form, and a candidate that moves nothing prints
+"no evidence" rather than a confident `0.0% NATIVE`.
