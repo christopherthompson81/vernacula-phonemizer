@@ -4826,3 +4826,31 @@ elsewhere: a register is a claim about WHICH LANGUAGE a span is in, and an Engli
 against an espeak-labelled recognizer is flattered. ⚠ `es` is not scored — Hausa's contact languages are
 English and French, and adding a Spanish compositor to test an implausible candidate is not worth the
 code. Say so rather than implying the run-19 triple was reproduced.
+
+### The 27 rows finished: `read_text` carries the switch, the G2P does not
+
+⚠ **MARKING THE STATUS WAS ONLY HALF OF IT.** The 27 rows were left with the auto-derived `read_text`,
+i.e. the plain transcript with bare digits, so nothing recorded WHAT WAS SAID and the row stayed
+unscoreable against its own audio. The 83 existing code-switch rows (ceb/ff/fil/hr/ig/mi/sn) all carry
+`{en:...}` spans with `read_text_src=hand`; these now match that precedent.
+
+```
+a shekarar {en:sixteen eighty three} sojojin daular qing {en:sixteen forty four} {en:nineteen twelve} …
+→ ˈa ʃekˈarar sɪkstˈiːn ˈeᶦt̬i θɹˈiː sod͡ʒˈod͡ʒin dˈaᵘlar kˈiŋɡ sɪkstˈiːn fˈɔːɹt̬i fˈɔːɹ nˈaᶦntˈiːn twˈɛɫv …
+```
+
+**27 closer / 0 further, median 0.5322 → 0.3757.** ⚠ The split is exactly right: the English spans are
+read by the English engine, the Hausa around them by Hausa, and `phonemize("1683", "ha")` is untouched —
+Hausa numerals remain Hausa, because the register measurement said NATIVE.
+
+⚠ **The year form, not the cardinal.** `read_text` records what was SAID, and the recognizer returns
+*sixteen eighty-three*. This is the caveat this run flagged and it is now acted on rather than left
+standing — the 82.9% figure was measured with the register machinery's cardinals and understated the fit.
+
+⚠ **A HYPHEN BETWEEN TWO SPANS IS NOT SPOKEN, and leaving it in fused two words.**
+`{en:sixteen forty four}-{en:nineteen twelve}` gave *…fˈɔːɹt̬i fˈɔːɹnˈaᶦntˈiːn twˈɛɫv*: the host drops the
+hyphen, the spans become ADJACENT, and adjacency is the `tight` join built for Shona's `ma{en:neutron}`.
+5 hyphens across 4 rows, replaced with a space — which records two spoken numbers without asserting a
+connective the reader may not have said, the same reasoning as not speaking a dash as "to". The distance
+metric could not see this at all (`fold` strips spaces); it matters for the word boundaries in training
+data, which is the corpus's actual product.
