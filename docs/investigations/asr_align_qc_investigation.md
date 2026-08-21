@@ -4760,3 +4760,147 @@ stands, so `yearWords` is unchanged and only the NEW arms are gated. Shipped at 
 ⚠ An existing regression pin had to move: `Sejong (1418 – 1450)` asserted no change. It now reads as two
 years, which is what it is, and those very rows improved by 0.106. The pin's actual purpose — a range
 must never become a subtraction — is untouched.
+
+## Run 77 — 2026-08-21 — ha_ng numerals: NOT a register, and the queue misled me about it
+
+Run 76's word-level sweep put Hausa numerals at the top of the leads — `dˈu˥bu˥` (thousand) ×31,
+`ɡˈo˥ma˩` (ten) ×22, `ɗˈa˩ri˥` (hundred). Hand-reading five queue rows made it look decisive:
+
+```
+"karfe 11:00"      OURS  ɡˈo˥ma˩ ʃˈa˥ ɗˈa˥ja˥          W2V  i l ɛ v ə n           "eleven"
+"shekarar 1683"    OURS  dˈu˥bu˥ dˈa ɗˈa˩ri˥ ʃˈi˥da˩   W2V  s ɪ k s t iː ŋ e t i  "sixteen eighty-three"
+"2017"             OURS  dˈu˥bu˥ bˈi˥ju˥ dˈa ɡˈo˥ma˩…  W2V  t uː n t iː s ə v i n t i n
+```
+
+⚠ **`ha` was never in run 19's table** — that run covered 14 languages and Hausa was not one, so this
+looked like a clean gap with an obvious answer.
+
+### Measured, and the answer is NATIVE
+
+Over all 736 digit-bearing ha_ng rows, scored against BOTH recognizers:
+
+```
+cand      median   closer  further   same     pct    band
+en        0.3276      233      456     47    33.8%   NATIVE
+fr        0.3333      212      476     48    30.8%   NATIVE
+native    0.3007
+```
+
+**No register wired.** Wiring `ha: en` would damage ~450 rows to help 204.
+
+### ⚠ The five rows I read were selected FOR disagreeing
+
+Splitting the same measurement by status shows exactly how the sample lied:
+
+```
+investigate  n= 42   native 0.5271 -> en 0.4080   en closer  29/6   = 82.9%
+verified     n=694   native 0.2929 -> en 0.3209   en closer 204/450 = 31.2%
+```
+
+⚠ **The investigate queue is by construction the rows where we disagree with the audio, so sampling it
+and generalising to the language is circular.** The queue is the right place to FIND a candidate and the
+wrong place to MEASURE one. Every future register candidate must be scored over the whole digit-bearing
+corpus, as run 19 did, not over its queue rows.
+
+Hausa is the ceb/fil/mi/ig shape that `code_switch.mts` already describes: the register is a per-ROW
+fact. 27 rows are English-read and clearly so (each ≥0.02 closer); they are marked
+`reader_divergence` with the numbers, and `read_text`'s `{en:...}` spans are the vehicle if they are
+ever authored.
+
+⚠ **A caveat on those 27, recorded rather than fixed**: the English reading that wins there is the
+CARDINAL one the register machinery emits, but the recognizer plainly says *sixteen eighty-three* — a
+YEAR reading. So the 82.9% understates the real English fit, and authoring `read_text` for these rows
+should use the year form, not `enWords()`.
+
+### The harness now survives
+
+Run 19 established every entry in `numeral_register.mts` this way and **its harness did not survive**,
+so scoring the next candidate meant rebuilding it. Now committed:
+`tools/corpus/measure_numeral_register.mts` + `asr-align/score_numeral_register.py`, with
+`segmentsForRegister(text, reg)` exported so a candidate can be scored against an EXPLICIT register —
+going through `numeralSegments` would read the table under test and return every unlisted language
+unchanged.
+
+⚠ It scores against both recognizers, where run 19 had only wav2vec2. That matters more here than
+elsewhere: a register is a claim about WHICH LANGUAGE a span is in, and an English candidate scored
+against an espeak-labelled recognizer is flattered. ⚠ `es` is not scored — Hausa's contact languages are
+English and French, and adding a Spanish compositor to test an implausible candidate is not worth the
+code. Say so rather than implying the run-19 triple was reproduced.
+
+### The 27 rows finished: `read_text` carries the switch, the G2P does not
+
+⚠ **MARKING THE STATUS WAS ONLY HALF OF IT.** The 27 rows were left with the auto-derived `read_text`,
+i.e. the plain transcript with bare digits, so nothing recorded WHAT WAS SAID and the row stayed
+unscoreable against its own audio. The 83 existing code-switch rows (ceb/ff/fil/hr/ig/mi/sn) all carry
+`{en:...}` spans with `read_text_src=hand`; these now match that precedent.
+
+```
+a shekarar {en:sixteen eighty three} sojojin daular qing {en:sixteen forty four} {en:nineteen twelve} …
+→ ˈa ʃekˈarar sɪkstˈiːn ˈeᶦt̬i θɹˈiː sod͡ʒˈod͡ʒin dˈaᵘlar kˈiŋɡ sɪkstˈiːn fˈɔːɹt̬i fˈɔːɹ nˈaᶦntˈiːn twˈɛɫv …
+```
+
+**27 closer / 0 further, median 0.5322 → 0.3757.** ⚠ The split is exactly right: the English spans are
+read by the English engine, the Hausa around them by Hausa, and `phonemize("1683", "ha")` is untouched —
+Hausa numerals remain Hausa, because the register measurement said NATIVE.
+
+⚠ **The year form, not the cardinal.** `read_text` records what was SAID, and the recognizer returns
+*sixteen eighty-three*. This is the caveat this run flagged and it is now acted on rather than left
+standing — the 82.9% figure was measured with the register machinery's cardinals and understated the fit.
+
+⚠ **A HYPHEN BETWEEN TWO SPANS IS NOT SPOKEN, and leaving it in fused two words.**
+`{en:sixteen forty four}-{en:nineteen twelve}` gave *…fˈɔːɹt̬i fˈɔːɹnˈaᶦntˈiːn twˈɛɫv*: the host drops the
+hyphen, the spans become ADJACENT, and adjacency is the `tight` join built for Shona's `ma{en:neutron}`.
+5 hyphens across 4 rows, replaced with a space — which records two spoken numbers without asserting a
+connective the reader may not have said, the same reasoning as not speaking a dash as "to". The distance
+metric could not see this at all (`fold` strips spaces); it matters for the word boundaries in training
+data, which is the corpus's actual product.
+
+## Run 78 — 2026-08-21 — ky_kg and umb_ao, and a near-miss on which language
+
+The two numeral candidates run 19 never covered, through the rebuilt harness. Both scored against all
+of en/fr/pt and against BOTH recognizers.
+
+```
+ky_kg   640 rows   en  5.0%   fr  7.0%   pt  5.5%   native 0.2443   NATIVE — decisively
+umb_ao  233 rows   en 63.9%   fr 78.4%   pt 80.5%   native 0.2863   mixed  — NOT wired
+```
+
+`ky_kg` reads its own numerals. ⚠ The `d͡ʒyz` (hundred) lead that put it on the list came from the
+investigate queue, which is run 77's lesson repeating: the queue is where a candidate is FOUND, never
+where it is measured.
+
+### ⚠ umb_ao nearly repeated the `ln_cd` error, in reverse
+
+The harness supported only English and French, and **French scored 78.4%** — enough to look like a
+finding. Umbundu is Angolan, and Angola is Lusophone; French is not a contact language there at all. It
+scored well purely by sitting closer to Portuguese than English does. `ptWords` was written before
+drawing any conclusion, and Portuguese then won on both count and median (80.5%, 0.2486).
+
+⚠ **Run 19 caught exactly this for Lingala** (66% en against 89% fr) and wrote the warning at the top of
+`numeral_register.mts`; the warning did not prevent the repeat, because the failure is not "forgot to
+test French" — it is **testing whichever candidates the tooling happens to support**. The harness now
+carries en/fr/pt, and the standing question before quoting any register number is: *is the region's real
+contact language among the candidates scored?*
+
+At 80.5% umb_ao is `mixed` — 41 of 233 rows get worse — so nothing is wired, consistent with `ceb_ph`
+declined at 84.8%. 21 investigate rows where Portuguese is clearly closer now carry `{pt:...}` spans in
+`read_text`: **21 closer / 0 further, median 0.4833 → 0.3578**. Portuguese needs no year-form special
+case — it reads years as cardinals (`mil novecentos e oitenta e nove`).
+
+### Review fixes to the harness itself
+
+⚠ **It did not apply the shipped path's text repairs.** `phonemize-fleurs.mts` runs
+`restoreInitialismCasing` → `restoreAbbreviationDots` → `restoreNguniConcordAcronyms` before the
+register, so a harness without them prints medians the corpus would never show. Added; the verdicts did
+not move (ha_ng en 33.8% → 33.7%) but the quoted numbers are now the real ones.
+
+⚠ **The CLEAN band was 90, and the table wires `ln` at 89** — so the harness printed "do not wire" for a
+language that is wired, i.e. it could not reproduce a decision already taken. Now 89, with the gap to
+ceb's declined 84.8% named at the constant.
+
+⚠ **Zero matched rows died on `median of empty data`**, which is the harness's likeliest failure — the
+input is `wav<TAB>text` while the sibling `rederive_read_text.mts` takes `lang<TAB>wav<TAB>text`, and
+feeding the wrong shape is silently accepted and surfaces only here. Now a named error and exit 1.
+Also: per-row try/catch plus an errors file (one throwing row used to lose the whole run), the documented
+invocation matched to the actual four-argument form, and a candidate that moves nothing prints
+"no evidence" rather than a confident `0.0% NATIVE`.

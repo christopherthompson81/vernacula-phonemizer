@@ -31,6 +31,23 @@
  * more (ceb, ig, mi, fil) measured 62–85%: genuine reader-to-reader variation rather than a register, and
  * a third of their rows would get worse. Read the investigation's table before adding to this one.
  *
+ * ⚠ THREE MORE MEASURED IN RUN 77/78, none wired (scored against BOTH recognizers, not wav2vec2 alone):
+ *
+ *     ha_ng   736 rows   en 33.7%   fr 30.8%   pt 26.1%   NATIVE — reads its own numerals
+ *     ky_kg   640 rows   en  5.0%   fr  7.0%   pt  5.5%   NATIVE — decisively
+ *     umb_ao  233 rows   en 63.9%   fr 78.4%   pt 80.5%   mixed  — Portuguese, and NOT wired
+ *
+ * ⚠ `umb_ao` NEARLY REPEATED THE `ln_cd` ERROR IN REVERSE. Angola is Lusophone, but the harness only had
+ * English and French, and French scored 78.4% purely by sitting closer to Portuguese than English does.
+ * Testing only the candidates the tooling happens to support names the wrong language at a rate that
+ * still looks like a finding. `ptWords` was added before concluding anything; Portuguese then won on both
+ * count and median. It is still `mixed`, so it stays out of this table.
+ *
+ * ⚠ AND ha_ng SHOWS WHERE NOT TO SAMPLE. Its queue rows are 82.9% English while the language as a whole is
+ * 33.8% — the investigate queue is by construction the rows that disagree with the audio, so a candidate
+ * found there must be MEASURED over the whole digit-bearing corpus. Harness:
+ * `tools/corpus/measure_numeral_register.mts` + `asr-align/score_numeral_register.py`.
+ *
  * ⚠ KEYS ARE REGISTRY CODES, NOT FLEURS CODES. FLEURS writes `ny_mw` and this registry ships Chichewa as
  * `nya`; a key that is not a registered code is silently dead. Checked against the registry's key set.
  */
@@ -83,6 +100,13 @@ const EN_ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", 
 const EN_TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
 const FR_ONES = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix",
     "onze", "douze", "treize", "quatorze", "quinze", "seize", "dix-sept", "dix-huit", "dix-neuf"];
+// ⚠ EUROPEAN forms (dezasseis, not Brazilian dezesseis): the candidate this exists to test is Angolan.
+const PT_ONES = ["zero", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez",
+    "onze", "doze", "treze", "catorze", "quinze", "dezasseis", "dezassete", "dezoito", "dezanove"];
+const PT_TENS = ["", "", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta",
+    "noventa"];
+const PT_HUNDREDS = ["", "cento", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos",
+    "setecentos", "oitocentos", "novecentos"];
 
 function enWords(n: number): string {
     if (n < 20) return EN_ONES[n]!;
@@ -90,6 +114,47 @@ function enWords(n: number): string {
     if (n < 1000) return EN_ONES[Math.floor(n / 100)]! + " hundred" + (n % 100 ? " " + enWords(n % 100) : "");
     for (const [v, w] of [[1e9, "billion"], [1e6, "million"], [1e3, "thousand"]] as const) {
         if (n >= v) return enWords(Math.floor(n / v)) + " " + w + (n % v ? " " + enWords(n % v) : "");
+    }
+    return String(n);
+}
+
+/**
+ * Portuguese cardinals, for scoring a Lusophone register.
+ *
+ * ⚠ THE CANDIDATE MUST BE THE REGION'S ACTUAL CONTACT LANGUAGE, and this function exists because it was
+ * nearly not. `umb_ao` scored 63.9% English and 78.4% FRENCH — and Umbundu is Angolan, so French is not a
+ * contact language there at all. French simply sits closer to Portuguese than English does. Wiring it on
+ * that number would have repeated the `ln_cd` error this file already warns about, in the other
+ * direction: run 19 caught Lingala being 66% English against 89% French, and the lesson is symmetric.
+ */
+function ptWords(n: number): string {
+    if (n < 20) return PT_ONES[n]!;
+    if (n < 100) {
+        const t = PT_TENS[Math.floor(n / 10)]!, u = n % 10;
+        return u ? `${t} e ${PT_ONES[u]!}` : t;
+    }
+    if (n < 1000) {
+        if (n === 100) return "cem";                       // ⚠ bare 100 is `cem`, 101+ is `cento e …`
+        const h = PT_HUNDREDS[Math.floor(n / 100)]!, r = n % 100;
+        return r ? `${h} e ${ptWords(r)}` : h;
+    }
+    if (n < 1e6) {
+        const q = Math.floor(n / 1000), r = n % 1000;
+        const head = q === 1 ? "mil" : `${ptWords(q)} mil`;
+        // ⚠ `e` only when the remainder is under 100 or a round hundred — "mil e duzentos" but
+        // "mil duzentos e trinta". Getting this wrong inserts a word the reader never said.
+        if (!r) return head;
+        return r < 100 || r % 100 === 0 ? `${head} e ${ptWords(r)}` : `${head} ${ptWords(r)}`;
+    }
+    for (const [v, one, many] of [[1e9, "mil milhões", "mil milhões"], [1e6, "milhão", "milhões"]] as const) {
+        if (n >= v) {
+            const q = Math.floor(n / v), r = n % v;
+            const head = v === 1e9
+                ? (q === 1 ? "mil milhões" : `${ptWords(q)} mil milhões`)
+                : (q === 1 ? "um milhão" : `${ptWords(q)} ${many}`);
+            void one;
+            return r ? `${head} e ${ptWords(r)}` : head;
+        }
     }
     return String(n);
 }
@@ -136,13 +201,26 @@ function frWords(n: number): string {
 export interface Segment {
     readonly text: string;
     /** `undefined` = the host language reads this segment. */
-    readonly lang?: "en" | "fr";
+    readonly lang?: "en" | "fr" | "pt";
 }
 
 /** Split `text` into segments, digit runs carrying their register. One segment when nothing applies. */
 export function numeralSegments(text: string, registryCode: string): readonly Segment[] {
     const reg = NUMERAL_REGISTER[registryCode];
-    if (reg === undefined || !/\d/u.test(text)) return [{ text }];
+    if (reg === undefined) return [{ text }];
+    return segmentsForRegister(text, reg);
+}
+
+/**
+ * The same split against an EXPLICIT register, for scoring a candidate that is not in the table yet.
+ *
+ * ⚠ THE TABLE IS THE THING UNDER TEST, so a measurement cannot go through `numeralSegments` — it would
+ * read the answer it is trying to establish and return the text unchanged for every unlisted language.
+ * Run 19 established every entry above this way and its harness did not survive; `tools/corpus/
+ * measure_numeral_register.mts` now does, so the next candidate is scored by the same code that ships.
+ */
+export function segmentsForRegister(text: string, reg: "en" | "fr" | "pt"): readonly Segment[] {
+    if (!/\d/u.test(text)) return [{ text }];
     const out: Segment[] = [];
     let last = 0;
     for (const m of text.matchAll(DIGIT_RUN)) {
@@ -192,7 +270,7 @@ function yearTokens(y: number): string {
 
 /** The register reading of one digit run, or `undefined` for a shape the register does not claim.
  *  `after` is the text following the run, which the year rule needs to see a unit. */
-function registerWords(run: string, reg: "en" | "fr", after: string): string | undefined {
+function registerWords(run: string, reg: "en" | "fr" | "pt", after: string): string | undefined {
     if (reg === "en" && YEAR.test(run) && !UNIT_FOLLOWS.test(after)) return yearTokens(Number(run));
     {
         const digits = run.replace(/[  ,]/gu, "");
@@ -204,7 +282,7 @@ function registerWords(run: string, reg: "en" | "fr", after: string): string | u
         //   digits rather than emit a truncated reading.
         if (digits.length > 1 && digits.startsWith("0")) return undefined;
         if (!Number.isSafeInteger(n) || n < 0 || n > 999_999_999_999) return undefined;
-        return reg === "fr" ? frWords(n) : enWords(n);
+        return reg === "fr" ? frWords(n) : reg === "pt" ? ptWords(n) : enWords(n);
     }
 }
 
