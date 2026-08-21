@@ -4001,3 +4001,53 @@ transferred from Shona to Croatian without adjustment.
 under-production check run 61 used for hu_hu.
 
 All-flagged is now **528**, down from 658 when this stretch began.
+
+## Run 66 — 2026-08-20 — ff_sn reads numerals in French, but it is NOT a register
+
+`ff_sn` (Fulah, Senegal) at 2.6× its own median, **100% digit-bearing**. The recognizer output is
+unmistakable:
+
+```
+6387 km  3,980 miles   ->  … katrvɛnset kilomeːtr … virɡil …    quatre-vingt-sept, kilomètre, VIRGULE
+783,562 square km      ->  … sesankatrventruː … kilmɛtɛr …      sept cent quatre-vingt-trois
+HJR-3 … legislature    ->  … lezislatʃir …                      législature
+```
+
+Senegal is francophone, and `ln_cd` is already wired to French for the same reason — so the obvious move is
+a register entry. **Run 19 never measured `ff_sn`**, so this replicates its method over all 704 digit rows:
+
+```
+register    median    closer/further      %
+fr          0.3333          344/327     51.3%
+en          0.3571          277/394     41.3%
+es          0.3419          308/355     46.5%
+                 native median 0.3279
+```
+
+**French fails the bar and the median gets WORSE.** Below even the 60–85% "mixed" tier. But split by the
+sibling screen:
+
+```
+all-flagged   n=  6   0.6837 -> 0.5145     6/0    100%
+exonerated    n= 45   0.6303 -> 0.6166    38/5     88%
+not flagged   n=648   0.3184 -> 0.3230   296/321   48%
+```
+
+The tail favours French overwhelmingly; the bulk is a coin flip. ⚠ **And that split is partly circular** —
+a row where the reader used French is flagged BECAUSE our native reading mismatched, so the flagged subset
+is selected for exactly the property being tested. What the unflagged 648 show is the honest signal: **most
+Fulah readers read the numerals natively.**
+
+So this is per-row reader variation, like ceb/fil/mi/ig, not a language fact. `{fr:}` spans on the six
+all-flagged rows:
+
+```
+sid 1189  0.5837 -> 0.3366      sid 430   0.6909 -> 0.5186      sid 301  0.5748 -> 0.4932
+sid 430   0.7903 -> 0.7576      sid 301   0.7252 -> 0.6856
+5 rows, ALL closer, gained 0.5732  lost 0.0000
+```
+
+⚠ **A tension worth recording.** `read_text` is a property of the TEXT, but a numeral register is a property
+of the READER — and the 45 exonerated rows are exactly the case where one recording of a sentence switched
+and another did not. Per-`wav` `--set` handles it correctly, but the "same text, same reading" framing used
+in run 58 does not hold for this class. Those 45 are a candidate pool, unauthored.
