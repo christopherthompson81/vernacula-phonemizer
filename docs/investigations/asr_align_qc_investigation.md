@@ -3632,3 +3632,62 @@ he_il  utcּ+1                    a combining dagesh breaks the word boundary �
 ```
 
 Only the Hebrew one is a miss, and it is 3 rows behind a combining mark.
+
+## Run 60 — 2026-08-20 — the three "unrepaired" cases, and two of them were mine
+
+### tr_tr / az_az — NOT a defect; my scan was wrong
+
+The Turkic entry does not decline to uppercase. It uses `toLocaleUpperCase("tr")`, which maps ⟨i⟩→⟨İ⟩,
+because plain ⟨I⟩ is the capital of ⟨ı⟩ — a different vowel. The repair had worked all along: **`HİV` ×2
+and `MRİ` ×4 are in `read_text`.** My coverage scan searched for the naive `w.upper()` (`HIV`, `MRI`) and
+counted its own bug as a corpus gap. Real coverage is 16,861/16,861.
+
+The engine agrees with the locale, and does the right thing on both sides of the pronounceability line:
+
+```
+tr  HİV  -> hˈiv           the WORD, and hˈiv not hˈɯv — the dotted capital survived
+tr  FBİ  -> fˈe bˈe ˈi     the LETTERS, in Turkish letter names
+az  MRİ  -> ˈem ˈeɾ ˈi     the LETTERS, in Azerbaijani letter names
+az  mri  -> mɾˈi           lowercase reads as a word — the casing is doing the work
+```
+
+### az `i̇rs` — correct as it stands, and the combining dot is already handled
+
+`i̇rs` is ⟨i⟩ + COMBINING DOT ABOVE — the Unicode default lowercase of ⟨İ⟩, so the source was capitalised.
+But in context (*maddi i̇rs üzrə*, "on material heritage") it is the Azerbaijani WORD, not an acronym, and
+the engine reads all three spellings identically: `i̇rs`, `irs`, `İRS` → **`ˈiɾs`**. Nothing to fix; the
+capitalisation marker is not by itself an acronym signal, since a sentence-initial or title-cased word
+carries the same dot.
+
+### he_il `utcּ+1` — a real boundary bug, at TWO layers
+
+`utc` + HEBREW POINT DAGESH (U+05BC) + `+1`. A stray Hebrew mark on a Latin run, and `\p{M}` cannot tell it
+from a diacritic that belongs there — so the trailing lookahead refused the token in **both** matchers:
+
+- `initialism_casing.mts` left it lowercase, so the repair never fired;
+- `core/initialisms.ts` refused the run even when uppercased, so `UTCּ+1` still read as the word *ˈaᶷt͡ʃ*.
+
+Both now bound on the Latin combining-diacritic blocks only (U+0300–036F, 1AB0–1AFF, 1DC0–1DFF, FE20–2F).
+A Hebrew point, an Arabic harakat or a Devanagari matra after Latin letters is ADJACENT, not attached; a
+decomposed `MRI`+U+0301 is still refused, which is what the boundary exists for.
+
+```
+he  UTCּ+1  ˈaᶷt͡ʃ ʔaχat  ->  jˈuː tʰˈiː sˈiː ʔaχat
+```
+
+No regressions on the cases the module documents: `NASA→nˈæsə` (word), `MRI→ˌɛmɑːɹˈaᶦ` (letters),
+`США→ɛs ʂa a` (the Cyrillic case this boundary was written for), `A380` intact. 4,912 tests green.
+
+⚠ **The audio does not confirm a benefit here**: the 5 he rows move −0.0010, −0.0021, +0.0041, 0, 0. This is
+a correctness fix — a token was being silently refused — not a measured win. Recorded as such.
+
+### Open: the default for a PRONOUNCEABLE uppercase Latin run
+
+`core/initialisms.ts` spells out only what `isUnreadableEnglish` rejects, deferring everything else to the
+OOV g2p. That is an **English phonotactic test deciding what a Turkish or Greek reader does with foreign
+letters**, and the evidence so far says readers spell them: the Greek reader spelled `ucla` (7.9:1 by
+magnitude once repaired), and `tr UCLA → ˈud͡ʒɫa` is the same shape unmeasured.
+
+Inverting the default — in a non-English host, spell an uppercase Latin run unless the host's own lexicon
+has it as a word — is defensible and is what `NATO→natˈo` in Turkish would have to survive. It is a
+fleet-wide change to 190 engines and needs its own measurement pass; not started here.

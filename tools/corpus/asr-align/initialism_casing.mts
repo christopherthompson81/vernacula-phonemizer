@@ -228,9 +228,17 @@ export const EXCLUDED: Readonly<Record<string, string>> = {
  * One matcher per token: the run, not embedded in a longer letter run. The trailing lookahead excludes
  * letters and combining marks but NOT digits, so `cg4684` and `kv62` are claimed too — which is the point,
  * since the pass's alphanumeric-code branch is uppercase-gated in the same way.
+ *
+ * ⚠ A COMBINING MARK FROM ANOTHER SCRIPT IS NOT PART OF A LATIN RUN, and `\p{M}` cannot tell the
+ * difference. Hebrew `utcּ+1` carries a HEBREW POINT DAGESH (U+05BC) stuck to the end of a Latin `utc` —
+ * a stray from the source text, not a diacritic on the ⟨c⟩ — and the blanket `\p{M}` lookahead refused
+ * the token, so it stayed lowercase and read as a word. The marks that genuinely attach to Latin are the
+ * combining-diacritic blocks; a Hebrew point, an Arabic harakat or a Devanagari matra following Latin
+ * letters is adjacent, not attached. Only the Latin-compatible ones block the match now.
  */
+const LATIN_MARK = "\\u0300-\\u036F\\u1AB0-\\u1AFF\\u1DC0-\\u1DFF\\uFE20-\\uFE2F";
 const MATCHERS: ReadonlyArray<readonly [RegExp, string]> = INITIALISM_UPPERCASE.map(
-    (t) => [new RegExp(`(?<![\\p{L}\\p{M}])${t}(?![\\p{L}\\p{M}])`, "gu"), t] as const,
+    (t) => [new RegExp(`(?<![\\p{L}${LATIN_MARK}])${t}(?![\\p{L}${LATIN_MARK}])`, "gu"), t] as const,
 );
 
 /**

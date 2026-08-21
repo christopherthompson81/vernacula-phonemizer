@@ -87,6 +87,12 @@ export interface InitialismData {
  * sentence-opening function words, which is language-specific lexical knowledge and does not belong in shared
  * code — a language that finds this costly can pre-empt it in its own normalize.ts.
  */
+/** Combining marks that genuinely attach to LATIN — the diacritic blocks. See RUN_OR_CODE below. */
+const LATIN_MARK = "\\u0300-\\u036F\\u1AB0-\\u1AFF\\u1DC0-\\u1DFF\\uFE20-\\uFE2F";
+/** An all-caps run, or a caps run glued to digits (`A380`), bounded by letters and Latin diacritics only. */
+const RUN_OR_CODE = new RegExp(
+    `(?<![\\p{L}${LATIN_MARK}])\\p{Lu}{2,}(?![\\p{L}${LATIN_MARK}])`
+    + `|(?<![\\p{L}${LATIN_MARK}])\\p{Lu}+(?=\\d)`, "gu");
 const INITIAL_RUN = /(?<![\p{L}\p{M}])(?:\p{Lu}\.[  ]*){2,}/gu;
 const LONE_INITIAL = /(?<=\p{Lu}\p{L}*[  ])(\p{Lu})\.(?=[  ]+\p{Lu}\p{Ll})/gu;
 
@@ -130,7 +136,14 @@ export function makeInitialismNormalizer(d: InitialismData): (text: string) => s
         // finds no boundary against Cyrillic (or Greek, Armenian, Georgian …) and the whole pass silently
         // did nothing for them — США came out as the cluster [sʂa]. Russian was the first non-Latin script
         // to reach this pass and exposed it.
-        return text.replace(/(?<![\p{L}\p{M}])\p{Lu}{2,}(?![\p{L}\p{M}])|(?<![\p{L}\p{M}])\p{Lu}+(?=\d)/gu, (tok) => {
+        // ⚠ A COMBINING MARK FROM ANOTHER SCRIPT IS NOT PART OF THIS RUN, and `\p{M}` cannot tell the
+        // difference. Hebrew `UTCּ+1` carries a HEBREW POINT DAGESH (U+05BC) stuck to the end of a Latin
+        // `UTC` — a stray from the source, not a diacritic on the ⟨C⟩ — and a blanket `\p{M}` lookahead
+        // refuses the whole run, so it falls through to the OOV g2p and reads as the word *ˈaᶷt͡ʃ*. The
+        // marks that genuinely attach to Latin are the combining-diacritic blocks; a Hebrew point, an
+        // Arabic harakat or a Devanagari matra after Latin letters is ADJACENT, not attached. A decomposed
+        // `MRI`+U+0301 is still refused, which is the case this boundary exists for.
+        return text.replace(RUN_OR_CODE, (tok) => {
             const low = lower(tok);
             const spelled = spellOut(low, d.letterName);
             if (tok.length < 2) return spelled ?? tok; // attached code: a letter, never a word
