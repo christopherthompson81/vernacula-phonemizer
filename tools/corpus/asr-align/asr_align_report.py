@@ -84,9 +84,16 @@ def fold(ipa: str) -> list[str]:
     return out
 
 
+# ⚠ EVERY COUNT IN THIS BLOCK IS ON `fold()` OUTPUT, NOT ON THE RAW COLUMN, and the difference has already
+# cost one wrong conclusion. `fold()` NFD-normalises and strips combining marks, so the recognizer's `ç`
+# (12,288 of them) arrives here as plain `c`. Counting `c` in the raw `phones` column returns ZERO and makes
+# it look like a textbook candidate; it is not, which is what the `c` note below says. Count what `coarsen`
+# actually sees, since that is the unit the fold operates on.
+#
 # ⚠ THE RECOGNIZER'S INVENTORY, FOLDED — applied to BOTH sides, and ONLY inside the distance. Measured over
 # all 221,469 aligned utterances: 30 phones that we emit at least 2,000 times each are returned by the
-# recognizer less than 1% as often, and they account for 902,870 tokens = 3.67% of everything we write. It is
+# recognizer less than 1% as often, and they account for 902,870 tokens = 3.67% of everything we write.
+# (`ɒ`, `ɜ` and `ɀ` were added later on the same criterion and are not in that 30 or that token count.) It is
 # not noise and it is not our error — `facebook/wav2vec2-xlsr-53-espeak-cv-ft` simply has no symbol for them:
 #
 #     ʋ 158956/0    ɫ 90312/0    ɦ 76815/0    ʈ 66306/0    ʂ 46938/0    ɖ 41067/0
@@ -113,7 +120,8 @@ def fold(ipa: str) -> list[str]:
 # Folding it away would delete the evidence for that class of fix. The fixed penalty is the lesser cost.
 #
 # ⚠ AND `c` IS NOT IN IT EITHER, though Khmer made it look unhearable (ours 1731, rec 10 there). Corpus-wide
-# the recognizer writes `c` 10,292 times against our 49,987 — a fifth, not a hundredth. It is emitted, `tʃ`/`dʒ`
+# the recognizer writes `c` 10,292 times against our 49,987 — a fifth, not a hundredth. ⚠ THOSE ARE FOLDED
+# COUNTS: the recognizer spells it `ç`, so a raw-column count says zero and re-opens this decision wrongly. It is emitted, `tʃ`/`dʒ`
 # are contrastive in many of these languages, and folding c→tʃ globally would destroy a distinction the
 # recognizer does make. Generalising from one language was the error; the DB-wide count is the check.
 # ⚠ `ɒ` WAS MISSING AND MET THE CRITERION OUTRIGHT: we write it 52,582 times and the recognizer writes it
@@ -151,6 +159,22 @@ COARSEN = {
     "ʋ": "v", "ɦ": "h", "ɫ": "l", "ʈ": "t", "ʂ": "s", "ɖ": "d", "ɳ": "n", "ɽ": "r",
     "ɓ": "b", "ɗ": "d", "ʄ": "j", "ɠ": "ɡ", "ᶑ": "d", "χ": "x", "ʑ": "ʒ", "ɸ": "f",
     "ʝ": "ʃ", "ɴ": "n", "ɻ": "r", "ɮ": "l",
+    # ⚠ `ɀ` IS SHONA'S WHISTLED SIBILANT AND THE RECOGNIZER HAS NO SYMBOL FOR IT: we write it 4,394 times
+    # (sn_zw ONLY — 1,643 rows) and it comes back ZERO times in all 270,106 utterances. Same criterion `ɒ`
+    # met. Target chosen by measurement, not by shape:
+    #
+    #     ɀ -> ʒ    median 0.2157 -> 0.2000   1215 closer /    6 further   <- taken
+    #     ɀ -> z              -> 0.2127        460 closer /   33 further
+    #     ɀ -> s              -> 0.2143        291 closer /   46 further
+    #     ɀ -> v              -> 0.2157         41 closer /   12 further
+    #     ɀ -> zw             -> 0.2212        296 closer / 1345 further
+    #
+    # ⚠ NO OTHER LANGUAGE CAN BE AFFECTED, provably: only sn_zw emits it and the recognizer's count is 0.
+    # ⚠ IT DOES MERGE A CONTRAST, the same cost `ɒ` records for Danish. Shona emits both `ɀ` (4,394) and
+    # `ʒ` (821), so a row writing one where the other belongs now scores as a hit. Accepted on the same
+    # grounds: with the recognizer's count at zero the comparison was never able to JUDGE the symbol, only
+    # to penalise it. Recorded so the loss is not discovered later as a surprise.
+    "ɀ": "ʒ",
     # clicks: our IPA writes them as k+click (kǀ, kǁ, kǃ), so the k already carries the position and
     # the click letter itself has no counterpart at all — it is removed rather than mapped.
     "ǀ": "", "ǁ": "", "ǃ": "", "ǂ": "",
