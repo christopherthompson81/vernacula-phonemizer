@@ -4996,15 +4996,21 @@ The screen was already absorbing what the competence number measures.
 ```
 $ python3 tools/corpus/asr-align/allo_compare.py --triage
 
-7,524 investigate rows
-  3,030  40.3%  ACTIONABLE — a >=4-unit non-numeral lead
-  2,935  39.0%  no word-level lead — the divergence is diffuse, or in words too short to attribute
-  1,488  19.8%  lead is in a digit-bearing row (numeral register, measured per language in runs 19/77/78)
-     71   0.9%  instrument cannot adjudicate (<50% competence)
+7,440 investigate rows
+  5,902  79.3%  a same-text sibling scores fine — our IPA is exonerated
+    600   8.1%  no word-level lead — the divergence is diffuse, or in words too short to attribute
+    570   7.7%  ACTIONABLE — a >=4-unit non-numeral lead, on a row nothing else explains
+    368   4.9%  lead is in a digit-bearing row (numeral register, measured per language in runs 19/77/78)
 ```
 
-**The real work is ~3,000 rows, and reading the raw count as a work list overstates it 2.5×.** It
-concentrates: bn_in 231, hu_hu 185, el_gr 144, ny_mw 120, gu_in 112, pa_in 103.
+**The real work is 570 rows, and reading the raw count as a work list overstates it 13×.** It is spread
+thin rather than concentrated: pa_in 36, ny_mw 33, bn_in 29, fa_ir 22, te_in 19, ky_kg 16.
+
+⚠ **THE FIRST VERSION OF THIS TABLE SAID 3,030 ACTIONABLE, BECAUSE IT READ `status` AND NEVER LOOKED AT
+`sibling`.** A row marked `exonerated` has a same-text recording that scores inside the bulk — same
+`sentence_id`, therefore IDENTICAL IPA — so our output demonstrably is not the cause, and 79.3% of the
+queue is in that state. The word-level "leads" being ranked were mostly sitting inside rows already
+answered.
 
 ⚠ **AN EARLIER DRAFT OF THIS SECTION SAID "THE LARGEST CATEGORY IS THE ONE WITH NOTHING TO ACT ON", AND
 THAT IS FALSE AT THE SHIPPED DEFAULT.** It was computed at `--bad 0.65` while the tool defaults to 0.60,
@@ -5050,3 +5056,145 @@ threshold with no stated limit gets applied past its evidence.
 status filter as everything else, which now contains `instrument_blind` — so marking a language's worst
 rows RAISED its score, and `uz_uz` crossed back over the 50% threshold that had just justified marking
 it (49.9% → 50.0%). It now measures a fixed population regardless of `status`.
+
+## Run 82 — 2026-08-21 — Bengali, and the screen the triage forgot to read
+
+`bn_in` topped the actionable list at 231 rows, competence 63.1% — comfortably above the gate.
+
+### The real finding: readers use the Bengali YEAR form
+
+```
+1970   OURS  æk ɦad͡ʒaɾ nɔj ʃɔt̪ ʃɔt̪ːɔɾ    "one thousand nine hundred seventy"
+       W2V   uː n l ɪ ʃ ə ɡ ʃ t ɾ …        ≈ উনিশশো সত্তর, "nineteen-hundred seventy"
+```
+
+The same shape as the English year fix, in another script. ⚠ **But it is NOT wired**: over all 235
+four-digit-year rows it is 153 closer / 82 further = 65%, the `mixed` band that declined ceb/ig/mi/fil,
+and ⚠ **a date-context gate does not sharpen it** (2.1:1 against 1.9:1) — so unlike English this is not
+context, it is genuine reader-to-reader variation. `phonemize("1970","bn")` keeps the cardinal.
+
+13 investigate rows where the year form clearly wins carry it in `read_text`: **13 closer / 0 further**,
+median 0.5141 → 0.4595. ⚠ **No code-switch tag** — both readings are Bengali, so this records a register
+choice WITHIN the host, not a switch out of it, and is the first `read_text` of that kind.
+
+Two leads checked and cleared: `ʒ` returns as `ʒ` only 27% of the time (23% deleted), which looked like
+an affricate defect until the raw streams showed it resolving when aligned (`d͡ʒa kina` → `dʒ a k i n a`)
+— the word-level failures are misattributed spans. And `ɦad͡ʒaɾ` topped the list at 65 occurrences but is
+হাজার "thousand" at 86% digit rows, and bn measured NATIVE in run 19.
+
+### ⚠ Then a single random row dissolved most of the queue
+
+Asked to justify moving on from the residue, I picked one at random (seeded) rather than choosing:
+
+```
+wav 12059920093717905969   dist 0.455   sibling=exonerated
+TEXT  ...যুদ্ধ শেষ হওয়ার সাথে সাথেই জার্মানি ব্রিটেন দ্বীপপুঞ্জে আক্রমণের...
+```
+
+No word explained it — 0.00 to 0.67, worst `d̪ippund͡ʒe` where wav2vec2 returned `ɡ i b b d ə m d e`,
+which is mush rather than a competing pronunciation. **And the same sentence has two other recordings
+scoring 0.111 and 0.236.** Same `sentence_id` means identical IPA, so our output scores 0.111 on one
+recording and 0.455 on this one; it cannot be the cause. The row's `sibling` column already said
+`exonerated`.
+
+⚠ **`--triage` was reading `status` and never looking at `sibling`. 5,902 of 7,440 rows — 79.3% — are
+already exonerated.** Corrected, ACTIONABLE goes from 3,030 (40.3%) to **570 (7.7%)**, and bn_in from
+231 to 29.
+
+⚠ **This is the third time in this campaign that new tooling has re-derived what an existing screen
+already recorded** — the ignored `status` column, the flat distance cut that re-found recognizer
+competence, and now the sibling screen. The rule is now at the call site: **before adding a screen, read
+the columns the old ones wrote.**
+
+### The exonerated rows are a CORPUS finding, not nothing
+
+79.3% of the queue is exonerated by a sibling, which closes it for the phonemizer but leaves a question
+about the recording. Measured over every sentence with more than one take:
+
+```
+$ python3 tools/corpus/asr-align/allo_compare.py --takes
+
+103,939 sentences with 2+ takes, 231,742 rows   (CORROBORATED distance, not the `dist` column)
+  6.46%  a row >=0.15 behind the BEST take of the same sentence
+  3.63%  >=0.20  (8,411 rows)
+  1.52%  >=0.30
+  0.74%  >=0.40
+```
+
+⚠ **NAME THE METRIC OR THE NUMBER IS NOT A NUMBER.** This was first written as ad-hoc SQL with the
+distance unnamed, and a careful re-derivation got 10,714 at >=0.20 instead of 8,411 — because it used
+the stored `dist` column (wav2vec2 alone, through COARSEN) where this uses `corroborated` (the minimum
+over wav2vec2 and both allosaurus decodes, notation-folded). Both are defensible; they are not the same
+measurement. It now ships as `--takes` so the figure is regenerable by a command.
+
+⚠ **This does NOT show a uniformly amateurish corpus.** If it were, sibling takes would disagree widely
+everywhere; 96% of rows sit within 0.20 of the best take of their own text. What exists is a TAIL of
+~8,400 poor takes, concentrated in nb_no 15.3%, sd_in 14.1%, cy_gb 14.1%, bn_in 12.8%.
+
+⚠ **And the cause is not separable here** — but the first draft overstated how much of it is audio.
+`cy_gb` and `nb_no` are two of the four leaders AND two of the three worst for bad audio (17.2% and
+15.7% of their rows `defective_audio`/`recognizer_short`), so recording quality plainly contributes.
+⚠ **It does not explain the tail on its own**: `sd_in` is second on spread at 14.1% with only 7.1% bad
+audio, `bn_in` is fourth with almost none, and `es_419` is the WORST language for bad audio (17.5%) and
+absent from the spread top ten. Elocution, accent and recording quality are all live here and this
+measurement separates none of them. Run 75 found the serious rows measurably band-limited (HF share
+0.179 against 0.308) without that classifying them either.
+
+⚠ **The actionable form is corpus selection, not a phonemizer change.** 86% of the corpus has sibling
+takes and they are shipped equally; the spread ranks them, so the best-matching take is the better
+training row. That is a policy for the corpus repo, recorded here rather than acted on.
+
+## Closing the ASR-alignment campaign — 2026-08-21
+
+**The activity of mining audio phone recognition for phonemizer defects is done.** Not abandoned —
+worked out. The evidence:
+
+- `--triage` puts **570 of 7,440** queue rows (7.7%) in a state where our output could still be the
+  cause. 79.3% are exonerated by a same-text sibling, and the remainder are numeral-register or diffuse.
+- The residue does not concentrate: 36 rows in the largest language, then 33, 29, 22.
+- Every real find was **orthographic-to-lexical, not phonetic** — a year form, a code-switched numeral,
+  an abbreviation, a bare glide standing as a word. Those survive imperfect delivery because they are
+  about WHICH WORDS were said. The phonetic leads all dissolved into reduction, notation, or an
+  instrument that could not resolve the contrast.
+
+⚠ **AND THE INSTRUMENT'S CEILING IS MEASURED, NOT ASSUMED.** Recognizer competence runs 39–83% with a
+fleet median of 61.7%; a third of the fleet sits below the point where a marginal disagreement means
+anything. Two independently-labelled recognizers agree with each other more than either agrees with us
+on exactly the axes they share (voicing, aspiration, vowel height), which is what run 74 rejected the
+Mongolian change on.
+
+### What the database is FOR, going forward
+
+⚠ **It is a training-data filter, not a defect queue.** At TTS training time, rows the alignment cannot
+vouch for should be excluded from the corpus rather than investigated:
+
+  · `defective_audio`, `recognizer_short` — the audio or the instrument failed
+  · `reader_divergence` — the reader did not say the script; the PAIR is bad training data even though
+    neither side is wrong
+  · `defect` where the `ipa` has not been re-derived since the fix — ⚠ **STALE, NOT BAD**. The 1,333
+    ckb_iq rows are excludable only until the re-derivation pass runs; after it they are ordinary good
+    rows and must come back in. Excluding them permanently would discard a language's worth of data
+    over a fix that already landed.
+  · and the sibling spread: 86% of the corpus has multiple takes per sentence, shipped equally weighted,
+    and **8,411 rows are >=0.20 worse than the best take of their own text**. Preferring the best-matching
+    take is a real selection win and needs no verdict about why the others are worse.
+
+Sizes, so the recommendation is concrete: the status-based exclusion is **3,569 rows, 1.32%** of the
+corpus (1,248 defective_audio + 797 recognizer_short + 185 reader_divergence + 1,339 defect, of which
+1,333 are the stale ckb rows). ⚠ The first draft of this line wrote 1,333 for the defect term and did not
+add up — six `defect` rows are outside ckb_iq.
+The sibling-spread selection is the larger lever at 8,411 rows, and it KEEPS the sentence — it swaps one
+take for a better one rather than dropping data.
+
+⚠ `instrument_blind` is NOT a training-exclusion signal — it says the recognizer could not judge the
+row, which is not a claim about the audio or the IPA. Excluding on it would throw away good data.
+
+### The real fixes this campaign produced
+
+`nso_za` 0.6647→0.2763 · `sw_ke` 0.4439→0.1571 · `arz` referee 50.7%→61.7% · Croatian/Shona code-switch
+spans · `ff_sn` French numerals · a bare `dr` reading as a consonant cluster · ckb's free conjunction
+`و` → [u] at 37:1 · English years behind a determiner and in dashed ranges · and the numeral register
+measured for ha/ky/umb with the harness now committed rather than lost.
+
+Plus the negative results, which cost the same to find and are worth as much: the Mongolian labial, the
+low-vowel axis, the es_419 dialect remap, BCS final devoicing, the uppercase-Latin default.

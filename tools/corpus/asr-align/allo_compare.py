@@ -210,6 +210,8 @@ def main() -> int:
     # site. This selects a `status` value.
     ap.add_argument("--triage-status", default="investigate",
                     help="which status value --triage splits (default investigate)")
+    ap.add_argument("--behind", type=float, default=0.20,
+                    help="--takes: how far behind the best take counts as trailing (default 0.20)")
     ap.add_argument("--sample", type=int, default=250,
                     help="rows per language for --competence (default 250)")
     ap.add_argument("--all-status", action="store_true",
@@ -219,6 +221,9 @@ def main() -> int:
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
+    ap.add_argument("--takes", action="store_true",
+                    help="for sentences with more than one recording, how far each take falls behind "
+                         "the best take of the same text — a corpus selection signal, not a defect queue")
     ap.add_argument("--triage", action="store_true",
                     help="split a status class into what is actually in it: instrument-blind, no "
                          "word-level lead, numeral-register, or genuinely actionable")
@@ -375,10 +380,70 @@ def main() -> int:
               + (f"; {tu} rows excluded as unmeasurable" if tu else ""))
         return 0
 
-    # ⚠ THE QUEUE IS NOT A WORK LIST UNTIL IT IS SPLIT. Measured over the 7,908 `investigate` rows: 51.3%
-    # carry no word-level lead at all, 15.5% are numeral-register rows in languages already measured,
-    # 4.9% are in languages where the instrument cannot adjudicate, and **28.4% are actionable**. Reading
-    # the raw count as work overstates it by 3.5x.
+    # ⚠ WHICH DISTANCE, STATED: `corroborated` — the minimum over wav2vec2 and BOTH allosaurus decodes,
+    # on notation-folded units. It is NOT the stored `dist` column, which is wav2vec2 alone through
+    # COARSEN, and the two disagree materially: >=0.20 gives 8,411 rows here against 10,714 on `dist`.
+    # ⚠ THIS EXISTS BECAUSE THE NUMBER WAS ONCE AD-HOC SQL IN A DOC. Two careful readings of the same
+    # claim produced 8,411 and 10,714 because the metric was never named. A figure quoted as a corpus
+    # recommendation has to be regenerable by a command.
+    #
+    # ⚠ It is a SELECTION signal, not a verdict. A take that trails its siblings may be weak elocution,
+    # muffled audio or a heavier accent, and nothing here separates those — but the corpus ships every
+    # take equally weighted, so preferring the best-matching one is a win that needs no diagnosis.
+    if a.takes:
+        bysid: dict[tuple[str, str], list[float]] = {}
+        for lang in langs:
+            for sid, ipa, ph, pa, pu in db.execute(
+                    "SELECT sentence_id, ipa, phones, phones_allo, phones_allo_uni FROM utt "
+                    "WHERE lang=? AND ipa IS NOT NULL AND phones IS NOT NULL "
+                    "AND phones_allo IS NOT NULL", (lang,)):
+                u = units(ipa)
+                if len(notate(u)) < 10:
+                    continue
+                d = corroborated(notate(u), [notate(units(x)) for x in (ph, pa, pu or pa)])
+                if d is not None:
+                    bysid.setdefault((lang, sid), []).append(d)
+        rows = behind = 0
+        per: dict[str, list[int]] = {}
+        cuts = (0.15, 0.20, 0.30, 0.40)
+        hit = dict.fromkeys(cuts, 0)
+        nsent = 0
+        for (lang, _sid), v in bysid.items():
+            if len(v) < 2:
+                continue
+            nsent += 1
+            rows += len(v)
+            best = min(v)
+            p = per.setdefault(lang, [0, 0])
+            p[1] += len(v)
+            for d in v:
+                for c in cuts:
+                    if d - best >= c:
+                        hit[c] += 1
+                if d - best >= a.behind:
+                    behind += 1
+                    p[0] += 1
+        if not rows:
+            print("no sentence has more than one take in this selection", file=sys.stderr)
+            return 1
+        print(f"{nsent} sentences with 2+ takes, {rows} rows (corroborated distance, not the `dist` column)")
+        for c in cuts:
+            print(f"  >= {c:.2f} behind the best take: {hit[c]:6}  ({100 * hit[c] / rows:5.2f}%)")
+        print(f"\nper language, share of rows >= {a.behind:.2f} behind the best take of their own text:")
+        for lang, (n, t) in sorted(per.items(), key=lambda x: -x[1][0] / max(x[1][1], 1))[:15]:
+            if t:
+                print(f"  {lang:<14}{n:5} / {t:5} = {100 * n / t:5.1f}%")
+        return 0
+
+    # ⚠ THE QUEUE IS NOT A WORK LIST UNTIL IT IS SPLIT. Over the 7,440 `investigate` rows at the shipped
+    # default: **79.3% are exonerated by a same-text sibling**, 8.1% carry no word-level lead, 4.9% are
+    # numeral-register rows in languages already measured, and **7.7% are actionable**. Reading the raw
+    # count as work overstates it 13x.
+    #
+    # ⚠ AN EARLIER VERSION OF THIS COMMENT SAID 28.4% ACTIONABLE OVER 7,908 ROWS and stood here, forty
+    # lines above the code that superseded it, stating a dead distribution as current — the first thing a
+    # reader of this mode hits. That is the failure the exonerated branch below warns about, reproduced
+    # one screen above itself.
     #
     # ⚠ "No word-level lead" is NOT "this row is fine". It means the divergence is diffuse, or lives in
     # words too short for an aligner to attribute — every productive finding in this campaign has been
@@ -403,14 +468,26 @@ def main() -> int:
         for lang in langs:
             comp_r = competence(db, lang, a.sample)
             comp = comp_r[0] if comp_r else None
-            for txt, ipa, ph, pa, pu in db.execute(
-                    "SELECT text, ipa, phones, phones_allo, phones_allo_uni FROM utt "
+            for sib, txt, ipa, ph, pa, pu in db.execute(
+                    "SELECT sibling, text, ipa, phones, phones_allo, phones_allo_uni FROM utt "
                     "WHERE lang=? AND status=? AND ipa IS NOT NULL AND phones IS NOT NULL "
                     "AND phones_allo IS NOT NULL", (lang, a.triage_status)):
                 bucket = None
                 u = nf(ipa)
                 streams = [x for x in (ph, pa, pu or pa) if nf(x)]
-                if comp is not None and comp < 0.50:
+                # ⚠ THE SIBLING SCREEN ANSWERS FIRST, AND IGNORING IT OVERSTATED THIS QUEUE 5x. A row
+                # marked `exonerated` has a SAME-TEXT recording that scores inside the bulk — same
+                # sentence_id, therefore identical IPA — so our output cannot be the cause; the earlier
+                # version of this mode read `status` and never looked at `sibling`, and 79.3% of the
+                # queue is exonerated. Re-bucketing today's 7,440 rows the old way gives 3,029 (40.7%)
+                # would-be-actionable against 570 (7.7%) — the 40.3% quoted earlier was over the older
+                # 7,524-row population, so do not compare the two percentages directly.
+                # ⚠ Third time this campaign that new tooling has re-derived what an existing screen
+                # already recorded (the ignored `status` column, the flat distance cut, now this).
+                # BEFORE ADDING A SCREEN, READ THE COLUMNS THE OLD ONES WROTE.
+                if sib == "exonerated":
+                    bucket = "a same-text sibling scores fine (our IPA exonerated)"
+                elif comp is not None and comp < 0.50:
                     bucket = "instrument cannot adjudicate (<50%)"
                 elif len(u) < 10:
                     bucket = "too short to judge"
