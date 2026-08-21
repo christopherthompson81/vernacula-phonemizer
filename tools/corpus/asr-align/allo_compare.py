@@ -194,7 +194,16 @@ def competence(db, lang: str, sample: int) -> float | None:
 
 
 def corroborated(ours: list[str], streams: list[list[str]]) -> float | None:
-    """Distance to the closest recognizer that actually produced something. None if none did."""
+    """Distance to the closest recognizer that actually produced something. None if none did.
+
+    ⚠ `phones_allo` AND `phones_allo_uni` ARE NOT TWO WITNESSES. They are the SAME acoustic model read
+    through two inventory masks — on a row inspected by hand they sat 0.175 apart while each was 0.75
+    from wav2vec2 — so passing all three here lets one model vote twice. ⚠ THE BIAS IS TOWARD FLATTERING
+    US: `min` over more candidates can only shrink the distance, so this UNDER-reports disagreement and
+    therefore under-reports findings. Every verdict drawn with it is conservative, which is why nothing
+    already decided has to be revisited; but a claim about how GOOD the output is must use the
+    independent pair only. `--inter` does.
+    """
     live = [c for c in streams if c]
     return min(per(ours, c) for c in live) if live else None
 
@@ -221,6 +230,9 @@ def main() -> int:
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
+    ap.add_argument("--inter", action="store_true",
+                    help="do the two INDEPENDENT recognizers agree with each other? Where they do not, "
+                         "neither can serve as a reference and the row is unmeasurable")
     ap.add_argument("--takes", action="store_true",
                     help="for sentences with more than one recording, how far each take falls behind "
                          "the best take of the same text — a corpus selection signal, not a defect queue")
@@ -380,6 +392,54 @@ def main() -> int:
               + (f"; {tu} rows excluded as unmeasurable" if tu else ""))
         return 0
 
+    # ⚠ THE ONLY TEST HERE THAT NEVER CONSULTS OUR IPA. Everything else asks "does our output match the
+    # audio", which cannot distinguish a bad transcription from an instrument that cannot read the row.
+    # This asks whether the two INDEPENDENTLY-LABELLED models agree with EACH OTHER; where they do not,
+    # neither is a reference and the row is unmeasurable whatever we wrote.
+    #
+    # ⚠ ONLY wav2vec2 vs allosaurus IS AN INDEPENDENCE TEST. `phones_allo_uni` is the same acoustic model
+    # as `phones_allo` behind a different inventory mask — 0.175 apart on the row that prompted this,
+    # against 0.75 for either against wav2vec2 — so pairing those two measures a decode setting, not
+    # agreement.
+    #
+    # Fleet: median inter-recognizer PER 0.424, and 31.3% of rows sit >=0.5 apart. By status it tracks
+    # the queue — verified 0.420, investigate 0.522, recognizer_short 0.744 — and correlates +0.429 with
+    # our own distance, so a real share of "we disagree with the audio" is "they disagree with each other".
+    #
+    # ⚠ AND THE REASSURING DIRECTION, measured the same way: on 101 of 102 languages our IPA is CLOSER to
+    # a recognizer than the two recognizers are to each other (sr_rs 0.157 against their 0.659; only
+    # my_mm inverts, at +0.055). The engine sits inside the instruments' own noise nearly everywhere.
+    if a.inter:
+        out = []
+        for lang in langs:
+            ours, inter = [], []
+            for ipa, ph, pa in db.execute(
+                    "SELECT ipa, phones, phones_allo FROM utt WHERE lang=? AND ipa IS NOT NULL "
+                    "AND phones IS NOT NULL AND phones_allo IS NOT NULL" + ST + " ORDER BY wav LIMIT ?",
+                    (lang, a.sample)):
+                u, w, al = notate(units(ipa)), notate(units(ph)), notate(units(pa))
+                if not w or not al or len(u) < 10:
+                    continue
+                ours.append(min(per(u, w), per(u, al)))
+                inter.append(per(w, al))
+            if len(ours) < 50:
+                continue
+            mo, mi = statistics.median(ours), statistics.median(inter)
+            out.append((mo - mi, lang, mo, mi, len(ours)))
+        if not out:
+            print("not enough rows with both recognizers", file=sys.stderr)
+            return 1
+        out.sort()
+        print(f"{'lang':<14}{'ours~best':>10}{'w2v~allo':>10}{'gap':>8}{'n':>7}   reading")
+        for g, lang, mo, mi, n in out:
+            note = ("⚠ we are FURTHER out than they are from each other" if g >= 0 else
+                    "the instruments disagree more than we do" if g <= -0.20 else "")
+            print(f"{lang:<14}{mo:10.3f}{mi:10.3f}{g:+8.3f}{n:7}   {note}")
+        good = sum(1 for g, *_ in out if g < 0)
+        print(f"\n{good} of {len(out)} languages: our IPA is closer to a recognizer than the two "
+              f"recognizers are to each other")
+        return 0
+
     # ⚠ WHICH DISTANCE, STATED: `corroborated` — the minimum over wav2vec2 and BOTH allosaurus decodes,
     # on notation-folded units. It is NOT the stored `dist` column, which is wav2vec2 alone through
     # COARSEN, and the two disagree materially: >=0.20 gives 8,411 rows here against 10,714 on `dist`.
@@ -390,6 +450,8 @@ def main() -> int:
     # ⚠ It is a SELECTION signal, not a verdict. A take that trails its siblings may be weak elocution,
     # muffled audio or a heavier accent, and nothing here separates those — but the corpus ships every
     # take equally weighted, so preferring the best-matching one is a win that needs no diagnosis.
+    # ⚠ Locals here must not shadow the module-level helpers: a `per` dict in this mode made `per()`
+    # unreachable for EVERY other mode in the same function body, and the failure surfaced 40 lines away.
     if a.takes:
         bysid: dict[tuple[str, str], list[float]] = {}
         for lang in langs:
@@ -404,7 +466,7 @@ def main() -> int:
                 if d is not None:
                     bysid.setdefault((lang, sid), []).append(d)
         rows = behind = 0
-        per: dict[str, list[int]] = {}
+        bylang: dict[str, list[int]] = {}
         cuts = (0.15, 0.20, 0.30, 0.40)
         hit = dict.fromkeys(cuts, 0)
         nsent = 0
@@ -414,7 +476,7 @@ def main() -> int:
             nsent += 1
             rows += len(v)
             best = min(v)
-            p = per.setdefault(lang, [0, 0])
+            p = bylang.setdefault(lang, [0, 0])
             p[1] += len(v)
             for d in v:
                 for c in cuts:
@@ -430,7 +492,7 @@ def main() -> int:
         for c in cuts:
             print(f"  >= {c:.2f} behind the best take: {hit[c]:6}  ({100 * hit[c] / rows:5.2f}%)")
         print(f"\nper language, share of rows >= {a.behind:.2f} behind the best take of their own text:")
-        for lang, (n, t) in sorted(per.items(), key=lambda x: -x[1][0] / max(x[1][1], 1))[:15]:
+        for lang, (n, t) in sorted(bylang.items(), key=lambda x: -x[1][0] / max(x[1][1], 1))[:15]:
             if t:
                 print(f"  {lang:<14}{n:5} / {t:5} = {100 * n / t:5.1f}%")
         return 0

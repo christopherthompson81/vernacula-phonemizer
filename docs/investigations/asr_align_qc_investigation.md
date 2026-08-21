@@ -5198,3 +5198,58 @@ measured for ha/ky/umb with the harness now committed rather than lost.
 
 Plus the negative results, which cost the same to find and are worth as much: the Mongolian labial, the
 low-vowel axis, the es_419 dialect remap, BCS final devoicing, the uppercase-Latin default.
+
+## Run 83 — 2026-08-21 — the test that never consults our IPA
+
+A hand-inspected row (`bn_in` 807, `11370530752972026163.wav`) had no consensus among the three phone
+columns. Reading it with our IPA as the anchor is how the problem is NOTICED; it cannot say whose fault
+it is, because a wrong transcription and an unreadable row look identical from there. Dropping our IPA
+out of the test is what makes it non-circular, and that is only possible because there are two
+independently-labelled models.
+
+```
+w2v  vs allo   PER 0.754      <- two independent models, 25% agreement
+w2v  vs uni    PER 0.805
+allo vs uni    PER 0.175      <- SAME acoustic model, two inventory masks. Not a witness pair.
+```
+
+### ⚠ `phones_allo` and `phones_allo_uni` are not two witnesses
+
+They are one model behind two masks. `corroborated()` takes the minimum over all three, which lets that
+model vote twice. ⚠ **The bias is toward FLATTERING US** — `min` over more candidates can only shrink
+the distance — so it under-reports disagreement and therefore under-reports findings. Every verdict
+already drawn with it is conservative and none needs revisiting; but a claim about how GOOD the output
+is must use the independent pair, and `--inter` does.
+
+### Fleet
+
+```
+$ python3 tools/corpus/asr-align/allo_compare.py --inter
+
+268,677 rows.  inter-recognizer PER (wav2vec2 vs allosaurus): median 0.424
+   31.3% of rows have the two instruments >=0.5 apart
+
+by status   verified 0.420 · investigate 0.522 · defect 0.737 · recognizer_short 0.744
+corr(inter-recognizer disagreement, our distance) = +0.429
+```
+
+So a real share of what the queue called "our output disagrees with the audio" is the instruments
+disagreeing with each other, and `investigate` rows are measurably worse on a test our IPA never enters.
+
+### ⚠ And the direction that matters for the engine
+
+```
+lang        ours~best   w2v~allo      gap
+sr_rs           0.157      0.659    -0.502
+ckb_iq          0.264      0.732    -0.468
+ast_es          0.138      0.538    -0.400
+   ...
+my_mm           0.504      0.449    +0.055   <- the only inversion
+```
+
+**On 101 of 102 languages our IPA is closer to a recognizer than the two recognizers are to each other.**
+The engine sits inside the instruments' own noise nearly everywhere, which is the strongest statement
+this corpus can make about the phonemizer and the right note to close the campaign on. ⚠ It is a
+statement about AGREEMENT, not correctness: two models can be jointly wrong about a convention, which is
+what run 74 rejected the Mongolian change on. It says the residual disagreement is mostly instrument
+noise, not that every remaining row is right.
