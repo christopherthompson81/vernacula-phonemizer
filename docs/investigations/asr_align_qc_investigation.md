@@ -4050,4 +4050,21 @@ sid 430   0.7903 -> 0.7576      sid 301   0.7252 -> 0.6856
 ⚠ **A tension worth recording.** `read_text` is a property of the TEXT, but a numeral register is a property
 of the READER — and the 45 exonerated rows are exactly the case where one recording of a sentence switched
 and another did not. Per-`wav` `--set` handles it correctly, but the "same text, same reading" framing used
-in run 58 does not hold for this class. Those 45 are a candidate pool, unauthored.
+in run 58 does not hold for this class.
+
+**Those 45 were then scored per row** and 25 accepted at a >0.02 margin (3 rejected, 17 neutral) — the
+screen saying no on 3 is what makes it evidence rather than assumption. Applied per `wav`, not per sentence.
+
+```
+all ff_sn spans (31 rows):  31 closer / 0 further   gained 3.4973  lost 0.0000
+ff_sn language median:      0.2587 -> 0.2587
+```
+
+The median does not move, and saying so matters: 31 rows out of 3,000-odd cannot shift it. The gain is real
+and entirely in the tail, which is where the training pairs were wrong.
+
+⚠ **A process bug, caught by checking the applied state rather than the script output.** The first pass set
+5 of 6 rows: the generator wrote the TSV with no trailing newline and bash `while read` drops an
+unterminated final line — silently, with the loop reporting success. The generator now emits a trailing
+newline and the loops use `|| [ -n "$var" ]`. Verified the other batches were unaffected (sn 6/6, hr 9/9,
+and run 58's 37 = 35 accepted + 2 demo).
