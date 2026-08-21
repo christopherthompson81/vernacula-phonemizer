@@ -301,10 +301,20 @@ export const ABBREVIATION_DOT: Readonly<Record<string, readonly string[]>> = {
     // `kr` is the ERA marker here, not the currency: all three sv occurrences are `f.kr`, and FLEURS
     // dropped the trailing dot the rule needs (`f.kr.`). Checked every occurrence — no currency `kr`.
     sv_se: ["kl", "kr"],
-    cs_cz: ["tzv", "atd", "tzn", "sv", "cca"],
+    cs_cz: ["tzv", "atd", "tzn", "sv", "cca", "dr"],
     fr_fr: ["cf"],
     // From the UNSURE second pass: `vb.` → *ve benzeri* ("and so on"), already in the Turkish table.
     tr_tr: ["vb"],
+    // ⚠ `dr` — 18 occurrences across these six, every one the DOCTOR abbreviation (`dr damadian`,
+    // `dr ehud ur`), and every one read as the full word by the speaker. Without the dot the token reaches
+    // the g2p as a bare consonant cluster: hr *dr smit*, cs *dr̩ smɪtx*, and worst of all en **dɹaᶦv** —
+    // English reads it as *drive*.
+    //
+    // ⚠ ONLY THE LANGUAGES WHOSE OWN TABLE EXPANDS `dr.`, which is not most of them. Adding the dot
+    // elsewhere makes it a CLAUSE MARK and is strictly worse — measured: mt/cy/et/ny/pl/bs/sr all give
+    // `dr . smith`, a spurious pause where there was only a defective abbreviation. fr is excluded for the
+    // opposite reason: it already expands without the dot, so there is nothing to repair.
+    en_us: ["dr"], hr_hr: ["dr"], ms_my: ["dr"], sk_sk: ["dr"], sl_si: ["dr"],   // cs_cz above
 };
 
 const DOT_PATTERNS: Readonly<Record<string, ReadonlyArray<RegExp>>> = Object.fromEntries(
