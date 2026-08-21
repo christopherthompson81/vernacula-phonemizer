@@ -5159,10 +5159,18 @@ vouch for should be excluded from the corpus rather than investigated:
   · `defective_audio`, `recognizer_short` — the audio or the instrument failed
   · `reader_divergence` — the reader did not say the script; the PAIR is bad training data even though
     neither side is wrong
-  · `defect` where the `ipa` has not been re-derived since the fix
+  · `defect` where the `ipa` has not been re-derived since the fix — ⚠ **STALE, NOT BAD**. The 1,333
+    ckb_iq rows are excludable only until the re-derivation pass runs; after it they are ordinary good
+    rows and must come back in. Excluding them permanently would discard a language's worth of data
+    over a fix that already landed.
   · and the sibling spread: 86% of the corpus has multiple takes per sentence, shipped equally weighted,
     and **8,411 rows are >=0.20 worse than the best take of their own text**. Preferring the best-matching
     take is a real selection win and needs no verdict about why the others are worse.
+
+Sizes, so the recommendation is concrete: the status-based exclusion is **3,569 rows, 1.32%** of the
+corpus (1,248 defective_audio + 797 recognizer_short + 185 reader_divergence + 1,333 stale ckb defect).
+The sibling-spread selection is the larger lever at 8,411 rows, and it KEEPS the sentence — it swaps one
+take for a better one rather than dropping data.
 
 ⚠ `instrument_blind` is NOT a training-exclusion signal — it says the recognizer could not judge the
 row, which is not a claim about the audio or the IPA. Excluding on it would throw away good data.
