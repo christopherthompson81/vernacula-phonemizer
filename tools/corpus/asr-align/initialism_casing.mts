@@ -1,3 +1,5 @@
+import { LATIN_MARK } from "../../../src/core/initialisms.ts";
+
 /**
  * Restore the CASING that FLEURS' normalization destroyed, so the phonemizer's initialism pass can see it.
  *
@@ -35,6 +37,14 @@ export const INITIALISM_UPPERCASE: readonly string[] = [
     "rspca", "usgs", "nsa", "npws", "nhc", "ptwc", "ndp", "pmo", "hjr", "afcfta", "plc",
     // Broadcast / brand call signs
     "pbs", "wned", "qvc",
+    // ⚠ `ucla` is the first entry added on AUDIO rather than on the casing differential, and it needed
+    // to be: it is perfectly pronounceable, so `isUnreadableEnglish` declines it and the OOV g2p reads it
+    // as the word *ˈuːklæ*. The recognizer shows a Greek reader SPELLING it — `ɣ uː s iː ɪ l l eɪ`,
+    // English letter names in Greek phonology, which is exactly what `phonemize("UCLA","el")` already
+    // produces (*ʝu si el ei*). Only the CASING was missing. Spread 22 languages / 37 tokens, and
+    // uppercasing moves every row that can act on it: el 0.5484→0.5220 and 0.8831→0.6709, ja
+    // 0.4345→0.3960 and 0.3241→0.3020, th 0.5188→0.4783 and 0.3577→0.3239 — 6 of 6 closer.
+    "ucla",
     // Technical
     "vpn", "pstn", "dslr", "gp", "xdr", "qc",
     // ⚠ Added by the CASING DIFFERENTIAL (scan_casing_differential.mts), which compares
@@ -220,9 +230,14 @@ export const EXCLUDED: Readonly<Record<string, string>> = {
  * One matcher per token: the run, not embedded in a longer letter run. The trailing lookahead excludes
  * letters and combining marks but NOT digits, so `cg4684` and `kv62` are claimed too — which is the point,
  * since the pass's alphanumeric-code branch is uppercase-gated in the same way.
+ *
+ * ⚠ Bounded by `LATIN_MARK` from core/initialisms.ts, NOT `\p{M}`: a Hebrew point, an Arabic
+ * harakat or a Devanagari matra following Latin letters is ADJACENT, not attached, and a blanket
+ * `\p{M}` lookahead refused `utcּ+1` outright so it stayed lowercase and read as a word. Shared with
+ * the ENGINE's matcher rather than restated — the same boundary in two places would drift.
  */
 const MATCHERS: ReadonlyArray<readonly [RegExp, string]> = INITIALISM_UPPERCASE.map(
-    (t) => [new RegExp(`(?<![\\p{L}\\p{M}])${t}(?![\\p{L}\\p{M}])`, "gu"), t] as const,
+    (t) => [new RegExp(`(?<![\\p{L}${LATIN_MARK}])${t}(?![\\p{L}${LATIN_MARK}])`, "gu"), t] as const,
 );
 
 /**

@@ -3519,3 +3519,178 @@ and the accepted rows are now `read_text_src='hand'`, which the auto pass skips.
 **Still open:** the 18 declined rows. They need a clock and decimal reading in the register language —
 `numeral_register.mts` already quantifies that opportunity at ~115 rows across the five wired languages, and
 these add to it.
+
+## Run 59 — 2026-08-20 — the all-flagged queue, re-ranked; and a Latin-acronym hole
+
+With `examined_clean` / `reader_divergence` now marked, the queue re-ranks by excess over each language's
+own median. The three highest with **0% digit-bearing rows** — el_gr 2.5×, sn_zw 2.5×, hu_hu 2.4× — cannot
+be the numeral-register story, so they were read first.
+
+### The finding: `ucla`
+
+Greek, `…κέντρο ρόναλντ ρήγκαν του ucla όπου…`
+
+```
+ours    … ɾiŋɡan tu ˈuːklæ opu …          the WORD
+heard   … ɾeɪɡʌntʊ ɣuːsiːɪlleɪ opʊ …      the LETTERS — "yoo see el ay"
+```
+
+The reader spelled it, in **English** letter names (not Greek *ipsilon-si-lamda-alfa*). And the engine
+already knows how: `phonemize("UCLA", "el")` is **`ʝu si el ei`** — English letter names in Greek phonology,
+which is what the reader said. **Only the casing was missing.** FLEURS lowercases (0 rows corpus-wide
+contain `UCLA`), and `restoreInitialismCasing` had no entry for it.
+
+Added to `INITIALISM_UPPERCASE` — the first entry justified on AUDIO rather than the casing differential,
+and it needed to be: `ucla` is perfectly pronounceable, so `isUnreadableEnglish` declines it and the OOV
+g2p produces the word. Spread is 22 languages / 37 tokens, clearing the list's documented ≥4 bar.
+
+```
+el_gr  0.5484 -> 0.5220     th_th  0.5188 -> 0.4783
+el_gr  0.8831 -> 0.6709     th_th  0.3577 -> 0.3239
+```
+
+### ⚠ The negative result: the list cannot be extended on audio in general
+
+Scanned every lowercase Latin run in the non-Latin-script corpora, took the 60 with the widest
+cross-language spread, and scored word-reading against spelled-out over 118 row comparisons.
+
+```
+run     better worse   Δmean   langs        run     better worse   Δmean
+jas       3     0    +0.0123    1           minae     3     3    -0.0076
+il        3     0    +0.0096    1           zmapp     2     4    -0.0031
+dna       3     1    +0.0146    1           of        0     3    -0.0093
+add       3     1    +0.0134    2           de        0     4    -0.0041
+```
+
+Effect sizes of ±0.01 on three or four rows are the recognizer's noise floor — compare the numeral work
+(0.5958 → 0.3640) or nso's vowels (0.6647 → 0.2763). **The audio cannot adjudicate a one-token change
+inside a long sentence at these sample sizes.** `ucla` is the exception because 22 languages × the same
+FLEURS sentence gives repeated evidence and the effect reached −0.21 on one row.
+
+The spread test alone is also useless here: FLEURS is PARALLEL, so every brand name appears in 20+ corpora
+too — `ebay` 31 languages, `yahoo` 27, `apple` 24, `google` 21. 843 runs clear ≥4 languages. The docstring
+already says a phonotactic test fails in both directions; so does spread, on its own.
+
+### ⚠ The bigger hole: 4 of 26 non-Latin-script languages spell Latin acronyms at all
+
+```
+spells out (4):   el th ja ko
+reads as an English WORD (22):  ru bg uk he ka hy ta mr ne ar fa ur hi bn te kn ml si my km lo am
+```
+
+`core/initialisms.ts` declines a PRONOUNCEABLE acronym by design — "the existing OOV g2p already produces
+that word, so this pass gets out of the way". That is right for a Latin-script language, where the OOV g2p
+is the host's own. For a non-Latin-script language it hands the token to **English**: `UCLA` → `ˈuːklæ`,
+`internet` → `ˈɪntɚnˌɛt` with `ɚ`, inside a Russian or Hebrew stream.
+
+Greek found this independently and fixed it locally — `greek/normalize.ts` opens with it: *"the all-caps
+initialisms have to be claimed, or `το FBI` reads with ENGLISH phonemes in a Greek stream (to ˈɛfbˈiːʲˈaᶦ)
+and `η UNESCO` comes out carrying ɪ ʊ ɹ ʃ d͡ʒ æ ɫ."* 2,084 rows across 41 non-Latin-script corpora contain
+one of the 90 already-listed initialisms.
+
+⚠ **And it is context-dependent, so the casing fix does not reach everyone.** Japanese spells `UCLA` in
+isolation (`jɯᵝːɕiːe̞ɾɯᵝe̞ː`) but embedded in a Japanese sentence still emits `ˈuːklɑː`. The two ja rows
+moved 0.0000. Not chased further here; it is the same shape as the Greek hole, one layer in.
+
+### Tooling gap found by using it
+
+`read_text.py --apply` did not clear `ipa` when the derived text CHANGED — only `--set` did. Adding `ucla`
+to the repair list therefore rewrote 135 rows' `read_text` to carry `UCLA` while their `ipa` still said
+*ˈuːklæ*, and **nothing detects that**: `--stale` only finds `ipa IS NULL`. A wrong IPA that scores is
+worse than an absent one that does not. `--apply` now clears `ipa` on change, and reports the count.
+
+### Run 59b — the repair applied corpus-wide
+
+`--apply` had only been run for the four languages measured, so the rest of the corpus still held the old
+reading. Full pass: **125 rows changed, `ipa` cleared** (the fix above working as intended), re-derived.
+
+Listed-initialism repair coverage across the whole corpus: **16,840 / 16,861 = 99.9%.**
+
+⚠ **Count and magnitude disagree, and magnitude is right.** Over the 131 `ucla` rows, 23 moved: **12 closer
+/ 11 further**, which reads like a wash. It is not — the wins are an order of magnitude larger:
+
+```
+nso_za -0.3571   nso_za -0.2446   el_gr -0.2122   th_th -0.0405   th_th -0.0337   el_gr -0.0264
+bg_bg  -0.0234   he_il  -0.0137   zu_za  -0.0130  vi_vn -0.0113   zu_za  -0.0104  xh_za -0.0024
+xh_za  +0.0407   om_et  +0.0126   vi_vn  +0.0098  sk_sk +0.0094   cs_cz  +0.0088  sl_si +0.0087
+ckb_iq +0.0082   sl_si  +0.0080   ckb_iq +0.0077  fr_fr +0.0053   fr_fr  +0.0051
+
+gained 0.9887   lost 0.1245   = 7.9:1
+```
+
+7.9:1 clears the 4.6:1 bar the ⟨ʔ⟩ decision was held to. The losses are Latin-script languages whose
+readers said the word rather than the letters — real, small, and the price of a per-corpus repair list
+where the reading is per-reader.
+
+⚠ **The 21 remaining unrepaired occurrences are all CORRECT declines**, which is the useful part:
+
+```
+tr_tr hiv/fbi/mri · az_az mri   the TURKIC rule the module documents — Turkish does not uppercase ⟨i⟩→⟨I⟩
+az_az  i̇rs                      a real Azerbaijani word (heritage); the scan matched inside it
+yo_ng  ìwọ̀nba                   a real Yoruba word; likewise
+he_il  utcּ+1                    a combining dagesh breaks the word boundary — 3 occurrences, a genuine edge
+```
+
+Only the Hebrew one is a miss, and it is 3 rows behind a combining mark.
+
+## Run 60 — 2026-08-20 — the three "unrepaired" cases, and two of them were mine
+
+### tr_tr / az_az — NOT a defect; my scan was wrong
+
+The Turkic entry does not decline to uppercase. It uses `toLocaleUpperCase("tr")`, which maps ⟨i⟩→⟨İ⟩,
+because plain ⟨I⟩ is the capital of ⟨ı⟩ — a different vowel. The repair had worked all along: **`HİV` ×2
+and `MRİ` ×4 are in `read_text`.** My coverage scan searched for the naive `w.upper()` (`HIV`, `MRI`) and
+counted its own bug as a corpus gap. Real coverage is 16,861/16,861.
+
+The engine agrees with the locale, and does the right thing on both sides of the pronounceability line:
+
+```
+tr  HİV  -> hˈiv           the WORD, and hˈiv not hˈɯv — the dotted capital survived
+tr  FBİ  -> fˈe bˈe ˈi     the LETTERS, in Turkish letter names
+az  MRİ  -> ˈem ˈeɾ ˈi     the LETTERS, in Azerbaijani letter names
+az  mri  -> mɾˈi           lowercase reads as a word — the casing is doing the work
+```
+
+### az `i̇rs` — correct as it stands, and the combining dot is already handled
+
+`i̇rs` is ⟨i⟩ + COMBINING DOT ABOVE — the Unicode default lowercase of ⟨İ⟩, so the source was capitalised.
+But in context (*maddi i̇rs üzrə*, "on material heritage") it is the Azerbaijani WORD, not an acronym, and
+the engine reads all three spellings identically: `i̇rs`, `irs`, `İRS` → **`ˈiɾs`**. Nothing to fix; the
+capitalisation marker is not by itself an acronym signal, since a sentence-initial or title-cased word
+carries the same dot.
+
+### he_il `utcּ+1` — a real boundary bug, at TWO layers
+
+`utc` + HEBREW POINT DAGESH (U+05BC) + `+1`. A stray Hebrew mark on a Latin run, and `\p{M}` cannot tell it
+from a diacritic that belongs there — so the trailing lookahead refused the token in **both** matchers:
+
+- `initialism_casing.mts` left it lowercase, so the repair never fired;
+- `core/initialisms.ts` refused the run even when uppercased, so `UTCּ+1` still read as the word *ˈaᶷt͡ʃ*.
+
+Both now bound on the Latin combining-diacritic blocks only (U+0300–036F, 1AB0–1AFF, 1DC0–1DFF, FE20–2F),
+from a SINGLE exported `LATIN_MARK` in `core/initialisms.ts` that the corpus tool imports — the same
+boundary written twice is the drift this file warns about elsewhere. `INITIAL_RUN` (the dotted `U.S.A.`
+form) took the same bound, since it had the identical lookbehind.
+A Hebrew point, an Arabic harakat or a Devanagari matra after Latin letters is ADJACENT, not attached; a
+decomposed `MRI`+U+0301 is still refused, which is what the boundary exists for.
+
+```
+he  UTCּ+1  ˈaᶷt͡ʃ ʔaχat  ->  jˈuː tʰˈiː sˈiː ʔaχat
+```
+
+No regressions on the cases the module documents: `NASA→nˈæsə` (word), `MRI→ˌɛmɑːɹˈaᶦ` (letters),
+`США→ɛs ʂa a` (the Cyrillic case this boundary was written for), `A380` intact. 4,912 tests green.
+
+⚠ **The audio does not confirm a benefit here**: the 5 he rows move −0.0010, −0.0021, +0.0041, 0, 0. This is
+a correctness fix — a token was being silently refused — not a measured win. Recorded as such.
+
+### Open: the default for a PRONOUNCEABLE uppercase Latin run
+
+`core/initialisms.ts` spells out only what `isUnreadableEnglish` rejects, deferring everything else to the
+OOV g2p. That is an **English phonotactic test deciding what a Turkish or Greek reader does with foreign
+letters**, and the evidence so far says readers spell them: the Greek reader spelled `ucla` (7.9:1 by
+magnitude once repaired), and `tr UCLA → ˈud͡ʒɫa` is the same shape unmeasured.
+
+Inverting the default — in a non-English host, spell an uppercase Latin run unless the host's own lexicon
+has it as a word — is defensible and is what `NATO→natˈo` in Turkish would have to survive. It is a
+fleet-wide change to 190 engines and needs its own measurement pass; not started here.

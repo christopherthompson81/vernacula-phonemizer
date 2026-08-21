@@ -70,6 +70,18 @@ export interface InitialismData {
 }
 
 /**
+ * Combining marks that genuinely attach to LATIN — the diacritic blocks and their supplements.
+ *
+ * ⚠ `\p{M}` IS TOO BROAD FOR A BOUNDARY ON A LATIN RUN. Hebrew `UTCּ+1` carries a HEBREW POINT DAGESH
+ * (U+05BC) stuck to the end of a Latin `UTC` — a stray from the source text, not a diacritic on the ⟨C⟩ —
+ * and a blanket `\p{M}` lookaround refuses the whole run, so it falls through to the OOV g2p and reads
+ * as the word *ˈaᶷt͡ʃ*. A Hebrew point, an Arabic harakat or a Devanagari matra after Latin letters is
+ * ADJACENT, not attached. A decomposed `MRI`+U+0301 is still refused, which is the case the boundary
+ * exists for.
+ */
+export const LATIN_MARK = "\\u0300-\\u036F\\u1AB0-\\u1AFF\\u1DC0-\\u1DFF\\uFE20-\\uFE2F";
+
+/**
  * PERSONAL INITIALS — `J. S. Bach`, `George W. Bush`. A single capital plus a period, which the all-caps run
  * below cannot claim because it requires two letters, so the bare letter reaches the g2p as an unpronounceable
  * consonant plus a spurious phrase break (es `w .`, pt `v .`, ru `u .`, de `f .`).
@@ -87,7 +99,11 @@ export interface InitialismData {
  * sentence-opening function words, which is language-specific lexical knowledge and does not belong in shared
  * code — a language that finds this costly can pre-empt it in its own normalize.ts.
  */
-const INITIAL_RUN = /(?<![\p{L}\p{M}])(?:\p{Lu}\.[  ]*){2,}/gu;
+/** An all-caps run, or a caps run glued to digits (`A380`), bounded by letters and Latin diacritics only. */
+const RUN_OR_CODE = new RegExp(
+    `(?<![\\p{L}${LATIN_MARK}])\\p{Lu}{2,}(?![\\p{L}${LATIN_MARK}])`
+    + `|(?<![\\p{L}${LATIN_MARK}])\\p{Lu}+(?=\\d)`, "gu");
+const INITIAL_RUN = new RegExp(`(?<![\\p{L}${LATIN_MARK}])(?:\\p{Lu}\\.[  ]*){2,}`, "gu");
 const LONE_INITIAL = /(?<=\p{Lu}\p{L}*[  ])(\p{Lu})\.(?=[  ]+\p{Lu}\p{Ll})/gu;
 
 /**
@@ -130,7 +146,9 @@ export function makeInitialismNormalizer(d: InitialismData): (text: string) => s
         // finds no boundary against Cyrillic (or Greek, Armenian, Georgian …) and the whole pass silently
         // did nothing for them — США came out as the cluster [sʂa]. Russian was the first non-Latin script
         // to reach this pass and exposed it.
-        return text.replace(/(?<![\p{L}\p{M}])\p{Lu}{2,}(?![\p{L}\p{M}])|(?<![\p{L}\p{M}])\p{Lu}+(?=\d)/gu, (tok) => {
+        // ⚠ Bounded by `LATIN_MARK`, not `\p{M}` — see that declaration for why a Hebrew point following
+        // a Latin run is adjacent rather than attached.
+        return text.replace(RUN_OR_CODE, (tok) => {
             const low = lower(tok);
             const spelled = spellOut(low, d.letterName);
             if (tok.length < 2) return spelled ?? tok; // attached code: a letter, never a word

@@ -48,13 +48,24 @@ def apply(db: sqlite3.Connection, langs: list[str]) -> None:
         subprocess.run(["npx", "tsx", os.path.join(HERE, "read_text.mts"), src, dst],
                        check=True, cwd=os.path.join(HERE, "..", "..", ".."))
         out = json.load(open(dst))
-    n = 0
+    # ⚠ CLEAR `ipa` WHERE THE DERIVED TEXT CHANGED, exactly as `--set` does for a hand edit. Without this
+    #   the auto pass silently leaves a row whose `ipa` predates its `read_text`, and NOTHING detects that:
+    #   `--stale` only finds `ipa IS NULL`. Adding `ucla` to INITIALISM_UPPERCASE re-derived 135 rows'
+    #   read_text to carry `UCLA` while their ipa still said *ˈuːklæ* — a wrong IPA that scores, which is
+    #   worse than an absent one that does not. The repair list changes; this is the path that notices.
+    n = changed = 0
     for lang, wav, read in out:
-        db.execute("UPDATE utt SET read_text=?, read_text_src='auto' WHERE lang=? AND wav=? "
-                   "AND (read_text_src IS NULL OR read_text_src='auto')", (read, lang, wav))
+        prev = db.execute("SELECT read_text FROM utt WHERE lang=? AND wav=?", (lang, wav)).fetchone()
+        moved = prev is not None and (prev[0] or "") != read
+        db.execute("UPDATE utt SET read_text=?, read_text_src='auto'"
+                   + (", ipa=NULL" if moved else "")
+                   + " WHERE lang=? AND wav=? AND (read_text_src IS NULL OR read_text_src='auto')",
+                   (read, lang, wav))
         n += 1
+        changed += moved
     db.commit()
-    print(f"read_text: {n} auto rows written", file=sys.stderr)
+    print(f"read_text: {n} auto rows written; {changed} changed -> ipa CLEARED, re-derive before scoring",
+          file=sys.stderr)
 
 
 def stats(db: sqlite3.Connection) -> None:
