@@ -162,14 +162,21 @@ def status_sql(include: bool) -> str:
     return " AND (status IS NULL OR status NOT IN (%s))" % ",".join(f"'{v}'" for v in CLOSED)
 
 
-def competence(db, lang: str, sample: int, st: str) -> float | None:
-    """Share of our phones the recognizers return unchanged — see the --competence note."""
+def competence(db, lang: str, sample: int) -> float | None:
+    """Share of our phones the recognizers return unchanged — see the --competence note.
+
+    ⚠ IT DELIBERATELY IGNORES `status`, AND PASSING THE FILTER IN WAS A FEEDBACK LOOP. Competence is a
+    property of the instrument and the language, not of how far QC has got. With the CLOSED filter
+    applied — which now contains `instrument_blind` — marking a language's worst rows RAISES its score,
+    and `uz_uz` crossed back over the 50% threshold that had just justified marking it (49.9% → 50.0%).
+    A number that moves when you act on it cannot gate acting on it. Fixed population, always.
+    """
     from wordize import align_path
 
     hit = tot = 0
     for ipa, ph, pa in db.execute(
             "SELECT ipa, phones, phones_allo FROM utt WHERE lang=? AND ipa IS NOT NULL "
-            "AND phones IS NOT NULL AND phones_allo IS NOT NULL" + st + " LIMIT ?", (lang, sample)):
+            "AND phones IS NOT NULL AND phones_allo IS NOT NULL LIMIT ?", (lang, sample)):
         for stream in (ph, pa):
             ours, theirs = notate(units(ipa)), notate(units(stream))
             if not theirs:
@@ -193,8 +200,11 @@ def main() -> int:
     ap.add_argument("--langs", nargs="*")
     ap.add_argument("--pairs", type=int, default=20)
     ap.add_argument("--min-rows", type=int, default=50)
-    ap.add_argument("--sibling-status", default="investigate",
-                    help="which status --triage splits (default investigate)")
+    # ⚠ NOT `--sibling-status`: that name sat beside the existing `--sibling` (which selects a
+    # SIBLING-SCREEN class, a different axis entirely) and invited the two to be confused at the call
+    # site. This selects a `status` value.
+    ap.add_argument("--triage-status", default="investigate",
+                    help="which status value --triage splits (default investigate)")
     ap.add_argument("--sample", type=int, default=250,
                     help="rows per language for --competence (default 250)")
     ap.add_argument("--all-status", action="store_true",
@@ -378,11 +388,11 @@ def main() -> int:
         cat: Counter = Counter()
         where: dict[str, Counter] = {}
         for lang in langs:
-            comp = competence(db, lang, a.sample, ST)
+            comp = competence(db, lang, a.sample)
             for txt, ipa, ph, pa, pu in db.execute(
                     "SELECT text, ipa, phones, phones_allo, phones_allo_uni FROM utt "
                     "WHERE lang=? AND status=? AND ipa IS NOT NULL AND phones IS NOT NULL "
-                    "AND phones_allo IS NOT NULL", (lang, a.sibling_status)):
+                    "AND phones_allo IS NOT NULL", (lang, a.triage_status)):
                 bucket = None
                 u = nf(ipa)
                 streams = [x for x in (ph, pa, pu or pa) if nf(x)]
@@ -405,7 +415,7 @@ def main() -> int:
                 cat[bucket] += 1
                 where.setdefault(bucket, Counter())[lang] += 1
         tot = sum(cat.values()) or 1
-        print(f"{tot} rows with status {a.sibling_status!r}, by what is actually in them\n")
+        print(f"{tot} rows with status {a.triage_status!r}, by what is actually in them\n")
         for k, n in cat.most_common():
             print(f"  {k:<48}{n:6}  ({100 * n / tot:4.1f}%)")
         act = where.get("ACTIONABLE: a >=4-unit non-numeral lead", Counter())
@@ -424,13 +434,19 @@ def main() -> int:
     # recognizers handle worst rather than the ones we do; the five worst there (mn_mn, sd_in, my_mm,
     # ps_af, vi_vn) are five of the six worst here. That was diagnosed indirectly and is now a number.
     #
+    # ⚠ LOW COMPETENCE DOES NOT MEAN NO FINDING IS POSSIBLE, and ckb_iq is the counterexample sitting in
+    # the same database: it measures 46.3%, below the gate, and the free-conjunction defect was found and
+    # fixed there at 861 closer / 23 further. A 37:1 signal survives a noisy instrument; a 1.3:1 does not.
+    # The gate says WEAK SIGNALS CANNOT BE TRUSTED here, not that the language is closed — so it belongs
+    # on marginal leads, never on one that is already overwhelming.
+    #
     # ⚠ It is NOT a quality score for the language. A low value can mean the audio is hard, the phone
     # inventory is far from either model's training, or the transcription convention differs — this
     # cannot separate those, and does not try to. It answers one question: is the instrument usable here.
     if a.competence:
         out = []
         for lang in langs:
-            c = competence(db, lang, a.sample, ST)
+            c = competence(db, lang, a.sample)
             if c is not None:
                 out.append((c, lang, 0))
         if not out:

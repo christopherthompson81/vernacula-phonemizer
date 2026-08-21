@@ -5019,3 +5019,19 @@ uz_uz  49.9%  71    da_dk 49.8%  43    mn_mn 40.3%  33    ps_af 43.6%  21    vi_
 
 `allo_compare --triage` ships the split so the queue can be read correctly without asserting verdicts,
 and `--competence` is factored out so both modes share one definition.
+
+### ⚠ A caveat on the competence gate, found while testing it
+
+`--triage --triage-status defect` puts all 1,333 ckb_iq `defect` rows in the "instrument cannot
+adjudicate" bucket — ckb_iq measures 46.3%. **That is the language where run 73 found and fixed the free
+conjunction, at 861 closer / 23 further.** The gate would have said do not mine there.
+
+So the gate means **weak signals cannot be trusted here**, not that the language is closed. A 37:1
+result survives a noisy instrument; the 1.3:1 decade question in run 76 would not. It belongs on
+marginal leads and never on one that is already overwhelming — recorded at the call site, because a
+threshold with no stated limit gets applied past its evidence.
+
+⚠ **And the number must not move when you act on it.** `competence()` was originally passed the same
+status filter as everything else, which now contains `instrument_blind` — so marking a language's worst
+rows RAISED its score, and `uz_uz` crossed back over the 50% threshold that had just justified marking
+it (49.9% → 50.0%). It now measures a fixed population regardless of `status`.
