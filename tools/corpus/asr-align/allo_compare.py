@@ -403,14 +403,24 @@ def main() -> int:
         for lang in langs:
             comp_r = competence(db, lang, a.sample)
             comp = comp_r[0] if comp_r else None
-            for txt, ipa, ph, pa, pu in db.execute(
-                    "SELECT text, ipa, phones, phones_allo, phones_allo_uni FROM utt "
+            for sib, txt, ipa, ph, pa, pu in db.execute(
+                    "SELECT sibling, text, ipa, phones, phones_allo, phones_allo_uni FROM utt "
                     "WHERE lang=? AND status=? AND ipa IS NOT NULL AND phones IS NOT NULL "
                     "AND phones_allo IS NOT NULL", (lang, a.triage_status)):
                 bucket = None
                 u = nf(ipa)
                 streams = [x for x in (ph, pa, pu or pa) if nf(x)]
-                if comp is not None and comp < 0.50:
+                # ⚠ THE SIBLING SCREEN ANSWERS FIRST, AND IGNORING IT OVERSTATED THIS QUEUE 5x. A row
+                # marked `exonerated` has a SAME-TEXT recording that scores inside the bulk — same
+                # sentence_id, therefore identical IPA — so our output cannot be the cause; the earlier
+                # version of this mode read `status` and never looked at `sibling`, and 79.3% of the
+                # queue is exonerated. That took ACTIONABLE from 3,030 (40.3%) to 570 (7.7%).
+                # ⚠ Third time this campaign that new tooling has re-derived what an existing screen
+                # already recorded (the ignored `status` column, the flat distance cut, now this).
+                # BEFORE ADDING A SCREEN, READ THE COLUMNS THE OLD ONES WROTE.
+                if sib == "exonerated":
+                    bucket = "a same-text sibling scores fine (our IPA exonerated)"
+                elif comp is not None and comp < 0.50:
                     bucket = "instrument cannot adjudicate (<50%)"
                 elif len(u) < 10:
                     bucket = "too short to judge"
