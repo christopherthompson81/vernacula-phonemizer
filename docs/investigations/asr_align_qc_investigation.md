@@ -4904,3 +4904,149 @@ feeding the wrong shape is silently accepted and surfaces only here. Now a named
 Also: per-row try/catch plus an errors file (one throwing row used to lose the whole run), the documented
 invocation matched to the actual four-argument form, and a candidate that moves nothing prints
 "no evidence" rather than a confident `0.0% NATIVE`.
+
+## Run 79 — 2026-08-21 — the non-numeral leads are all reduction, and the instrument gets a competence number
+
+With the numeral cluster settled (runs 77–78) and the one-phone clitics excluded by the `--min-units 4`
+guard `wordize` already ships, 177 word types remain in the investigate queue at ≥4 occurrences and
+≥0.65 median distance. A digit-share column separates the two kinds at a glance.
+
+### None of the non-numeral leads is a defect
+
+The largest is `ny_mw kuti` — the complementizer, **80 occurrences**. Our `/kuti/` is the standard form
+and Chichewa orthography is transparent, so the question is what the recognizers hear:
+
+```
+our k:  k 31%   ɡ 28%   ∅ 8%      1,651 kuti tokens, both recognizers
+our t:  t 35%   d 28%   r 12%
+```
+
+Variable intervocalic lenition — and a near-even split is variation, not a systematic error. The rest
+behave the same way: the top target per position is the identity or DELETION, never a consistent
+different phone.
+
+```
+km_kh  ʔaoj    ʔ→∅ 54%   o→∅ 43%   j→∅ 31%
+my_mm  twɪ˨ɴ   t→∅ 37%   w→∅ 28%   ɴ→∅ 30%
+so_so  waħaj   a→∅ 27%   ħ→h 30%
+wo_sn  ŋɡir    ŋ→∅ 33%   ɡ→ɡ 39%
+```
+
+⚠ **Every one is a high-frequency function word being reduced.** They are worse than their language's
+4-unit baseline in the VERIFIED rows too (`kuti` 0.400 vs 0.250; `d͡ziko` 0.455 vs 0.273), which is the
+signature of a word that is hard everywhere rather than a row that went wrong.
+
+### ⚠ And the deciding question is whether the instrument can hear the language at all
+
+A voicing control against German settles `kuti` and generalises:
+
+```
+                our k→k   our t→t   our p→p
+de_de              89%       89%       86%
+ny_mw              48%       63%       42%
+```
+
+The recognizers are not failing on `kuti`; they are weak on Chichewa. So the metric this campaign was
+missing is a per-language one — **the share of our phones the recognizers return unchanged**:
+
+```
+$ python3 tools/corpus/asr-align/allo_compare.py --competence
+
+worst      mn_mn 39.3%  sd_in 41.0%  my_mm 43.5%  ps_af 43.6%  vi_vn 45.8%  ckb_iq 46.3%  km_kh 47.1%
+best       fr_fr 82.6%  en_us 79.4%  es_419 79.0%  de_de 76.6%
+fleet median 61.7%   (102 languages, both recognizers pooled, 10 below 50%)
+```
+
+⚠ **These are the re-quoted figures.** The first pass sampled with a bare `LIMIT`, which takes the head
+of the table in ingest order rather than a sample of the language — the "`--limit` IS NOT A SAMPLE"
+hazard `wordize.py` already documents. `ORDER BY wav` (the basenames are content hashes) fixed it and it
+mattered: es_419 82.9% → 79.0%, sd_in 43.1% → 41.0%, and **nb_no crossed below the gate at 48.7%**.
+
+⚠ **A "lead" in a 40% language is not weak evidence, it is no evidence**, and `allo_compare --competence`
+now says so before any mining starts.
+
+⚠ **IT ALSO EXPLAINS THE `--serious` RANKING.** Run 75 concluded that a flat distance cut ranks the
+languages the recognizers handle worst rather than the ones we do — inferred there from the threshold
+arithmetic. Five of that ranking's worst six (mn_mn, sd_in, my_mm, ps_af, vi_vn) are five of the six
+worst here. The same confound, now measured directly instead of argued.
+
+⚠ **It is not a quality score for the language.** A low value can mean hard audio, a phone inventory far
+from either model's training, or a transcription convention neither shares; this cannot separate those
+and does not try. It answers one question — is the instrument usable here.
+
+**65 ny_mw rows marked `artefact`** (kuti at or above the row median, so it drives the row rather than
+riding along). No language change from this pass, which is the right outcome: the campaign has been
+principled, and where the tool disagrees without being able to hear the contrast, the tool is what is
+wrong.
+
+## Run 80 — 2026-08-21 — how much of the queue is actually work
+
+Run 79 gave the instrument a competence number. The obvious next question is what that does to the
+8,021-row `investigate` queue, and the first guess was wrong.
+
+### ⚠ Dropping the blind languages barely dents it
+
+The nine languages under 50% competence contribute **384 rows, 4.9%** of the queue — not the "third of
+the fleet" the competence ranking suggested. The 3×MAD screen is SELF-RELATIVE, so a language whose
+recognizer is weak gets a high median AND a high MAD and does not produce a proportionally larger queue.
+The screen was already absorbing what the competence number measures.
+
+### What the queue is actually made of
+
+```
+$ python3 tools/corpus/asr-align/allo_compare.py --triage
+
+7,524 investigate rows
+  3,030  40.3%  ACTIONABLE — a >=4-unit non-numeral lead
+  2,935  39.0%  no word-level lead — the divergence is diffuse, or in words too short to attribute
+  1,488  19.8%  lead is in a digit-bearing row (numeral register, measured per language in runs 19/77/78)
+     71   0.9%  instrument cannot adjudicate (<50% competence)
+```
+
+**The real work is ~3,000 rows, and reading the raw count as a work list overstates it 2.5×.** It
+concentrates: bn_in 231, hu_hu 185, el_gr 144, ny_mw 120, gu_in 112, pa_in 103.
+
+⚠ **AN EARLIER DRAFT OF THIS SECTION SAID "THE LARGEST CATEGORY IS THE ONE WITH NOTHING TO ACT ON", AND
+THAT IS FALSE AT THE SHIPPED DEFAULT.** It was computed at `--bad 0.65` while the tool defaults to 0.60,
+which moves actionable from 28.4% to 40.3% and makes it the LARGEST bucket rather than the second. The
+invocation is now recorded above, as this document's own convention requires and as neither run 79 nor
+the first draft of run 80 did. The lead threshold is a dial, and a bucket count is meaningless without it.
+
+⚠ **The no-lead bucket is still ~39%, and it is a statement about the METHOD.** "Diffuse" may mean
+uniformly-slightly-off audio, an accent, or a defect this tooling cannot localise; every productive
+finding in this campaign has been word-localised. **Those rows are deliberately NOT re-statused**,
+because burying 2,935 rows on the strength of a tool limitation is exactly the kind of silent truncation
+this campaign keeps catching.
+
+### A new status, and why not an existing one
+
+The 384 instrument-blind rows are marked `instrument_blind`, not `artefact`. ⚠ `artefact` means "the
+recognizer is simply WRONG here", and that is a stronger claim than was measured — what the competence
+number establishes is that the recognizer is UNRELIABLE, which is weaker and different. The status's
+docstring says outright that it is not a statement about our IPA and that the rows should be re-opened
+if a better recognizer is added.
+
+```
+ckb_iq 46.3%  92    km_kh 47.1%  62    my_mm 43.5%  39    sd_in 41.0%  17
+uz_uz  49.9%  71    da_dk 49.8%  43    mn_mn 39.3%  33    ps_af 43.6%  21    vi_vn 45.8%   6
+nb_no  48.7%  71    <- added after the sampling fix moved it below the gate
+```
+
+`allo_compare --triage` ships the split so the queue can be read correctly without asserting verdicts,
+and `--competence` is factored out so both modes share one definition.
+
+### ⚠ A caveat on the competence gate, found while testing it
+
+`--triage --triage-status defect` puts all 1,333 ckb_iq `defect` rows in the "instrument cannot
+adjudicate" bucket — ckb_iq measures 46.3%. **That is the language where run 73 found and fixed the free
+conjunction, at 861 closer / 23 further.** The gate would have said do not mine there.
+
+So the gate means **weak signals cannot be trusted here**, not that the language is closed. A 37:1
+result survives a noisy instrument; the 1.3:1 decade question in run 76 would not. It belongs on
+marginal leads and never on one that is already overwhelming — recorded at the call site, because a
+threshold with no stated limit gets applied past its evidence.
+
+⚠ **And the number must not move when you act on it.** `competence()` was originally passed the same
+status filter as everything else, which now contains `instrument_blind` — so marking a language's worst
+rows RAISED its score, and `uz_uz` crossed back over the 50% threshold that had just justified marking
+it (49.9% → 50.0%). It now measures a fixed population regardless of `status`.

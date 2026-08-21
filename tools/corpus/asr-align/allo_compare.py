@@ -145,7 +145,7 @@ def notate(us: list[str]) -> list[str]:
 # defeats the point of writing the verdict down. `defect` is deliberately NOT here: those rows are ours,
 # and for ckb_iq they are additionally awaiting a corpus re-derivation, which must stay visible.
 CLOSED = ("defective_audio", "recognizer_short", "reader_divergence",
-          "convention", "artefact", "examined_clean")
+          "convention", "artefact", "examined_clean", "instrument_blind")
 
 
 # ⚠ AN EMPTY RECOGNIZER STREAM ABSTAINS; IT DOES NOT VOTE MAXIMUM DISAGREEMENT. `per` returns 1.0
@@ -162,6 +162,37 @@ def status_sql(include: bool) -> str:
     return " AND (status IS NULL OR status NOT IN (%s))" % ",".join(f"'{v}'" for v in CLOSED)
 
 
+def competence(db, lang: str, sample: int) -> float | None:
+    """Share of our phones the recognizers return unchanged — see the --competence note.
+
+    ⚠ IT DELIBERATELY IGNORES `status`, AND PASSING THE FILTER IN WAS A FEEDBACK LOOP. Competence is a
+    property of the instrument and the language, not of how far QC has got. With the CLOSED filter
+    applied — which now contains `instrument_blind` — marking a language's worst rows RAISES its score,
+    and `uz_uz` crossed back over the 50% threshold that had just justified marking it (49.9% → 50.0%).
+    A number that moves when you act on it cannot gate acting on it. Fixed population, always.
+    """
+    from wordize import align_path
+
+    hit = tot = 0
+    for ipa, ph, pa in db.execute(
+            # ⚠ `ORDER BY wav`, NOT A BARE LIMIT. A bare LIMIT takes the first N rows in rowid order —
+            # ingest order, plausibly one speaker or one archive's file order — which is the "`--limit`
+            # IS NOT A SAMPLE" hazard `wordize.py` already documents. The wav basenames are content
+            # hashes, so ordering by them spreads the draw across the language and stays deterministic,
+            # which a seedless `random()` would not.
+            "SELECT ipa, phones, phones_allo FROM utt WHERE lang=? AND ipa IS NOT NULL "
+            "AND phones IS NOT NULL AND phones_allo IS NOT NULL ORDER BY wav LIMIT ?", (lang, sample)):
+        for stream in (ph, pa):
+            ours, theirs = notate(units(ipa)), notate(units(stream))
+            if not theirs:
+                continue
+            for i, j in align_path(ours, theirs):
+                if i >= 0:
+                    tot += 1
+                    hit += int(j >= 0 and ours[i] == theirs[j])
+    return (hit / tot, tot) if tot >= 2000 else None
+
+
 def corroborated(ours: list[str], streams: list[list[str]]) -> float | None:
     """Distance to the closest recognizer that actually produced something. None if none did."""
     live = [c for c in streams if c]
@@ -174,6 +205,13 @@ def main() -> int:
     ap.add_argument("--langs", nargs="*")
     ap.add_argument("--pairs", type=int, default=20)
     ap.add_argument("--min-rows", type=int, default=50)
+    # ⚠ NOT `--sibling-status`: that name sat beside the existing `--sibling` (which selects a
+    # SIBLING-SCREEN class, a different axis entirely) and invited the two to be confused at the call
+    # site. This selects a `status` value.
+    ap.add_argument("--triage-status", default="investigate",
+                    help="which status value --triage splits (default investigate)")
+    ap.add_argument("--sample", type=int, default=250,
+                    help="rows per language for --competence (default 250)")
     ap.add_argument("--all-status", action="store_true",
                     help=f"do NOT exclude rows whose verdict is already recorded ({'/'.join(CLOSED)}) "
                          "-- audio, instrument and reader failures plus closed human verdicts. Skipped "
@@ -181,6 +219,12 @@ def main() -> int:
     ap.add_argument("--decodes", action="store_true",
                     help="which allosaurus decode fits each language: restricted inventory or the "
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
+    ap.add_argument("--triage", action="store_true",
+                    help="split a status class into what is actually in it: instrument-blind, no "
+                         "word-level lead, numeral-register, or genuinely actionable")
+    ap.add_argument("--competence", action="store_true",
+                    help="per language, the share of our phones the recognizers return UNCHANGED. Check "
+                         "this BEFORE mining a language: where it is low the tool cannot adjudicate.")
     ap.add_argument("--words", action="store_true",
                     help="word-level corroborated queue: WORD TYPES both recognizers put far from our "
                          "IPA, across many occurrences. The most actionable output here.")
@@ -329,6 +373,109 @@ def main() -> int:
               f"-- rows no recognizer, under any decode, puts near us "
               f"({'flat ' + str(a.bad) if a.absolute else 'per-language median+3*MAD'})"
               + (f"; {tu} rows excluded as unmeasurable" if tu else ""))
+        return 0
+
+    # ⚠ THE QUEUE IS NOT A WORK LIST UNTIL IT IS SPLIT. Measured over the 7,908 `investigate` rows: 51.3%
+    # carry no word-level lead at all, 15.5% are numeral-register rows in languages already measured,
+    # 4.9% are in languages where the instrument cannot adjudicate, and **28.4% are actionable**. Reading
+    # the raw count as work overstates it by 3.5x.
+    #
+    # ⚠ "No word-level lead" is NOT "this row is fine". It means the divergence is diffuse, or lives in
+    # words too short for an aligner to attribute — every productive finding in this campaign has been
+    # word-localised, so this method has nothing to say about those rows. That is a statement about the
+    # method, and they are deliberately NOT re-statused on the strength of it.
+    if a.triage:
+        import re as _re
+
+        from wordize import wordize
+
+        # ⚠ ALWAYS THE FOLDED UNITS HERE, IGNORING `--raw-notation`. Handing `wordize` an identity `nf`
+        # makes it iterate the raw STRING, so Needleman-Wunsch runs over characters: ">=4 units" silently
+        # becomes ">=4 characters" and the "too short to judge" test counts characters of the whole IPA
+        # and never fires. The buckets would keep their labels while answering a different question, and
+        # `competence()` folds regardless, so the gate and the distances would disagree.
+        nf = lambda x: notate(units(x))  # noqa: E731
+        if a.raw_notation:
+            print("# --raw-notation does not apply to --triage (it would align characters, not units)",
+                  file=sys.stderr)
+        cat: Counter = Counter()
+        where: dict[str, Counter] = {}
+        for lang in langs:
+            comp_r = competence(db, lang, a.sample)
+            comp = comp_r[0] if comp_r else None
+            for txt, ipa, ph, pa, pu in db.execute(
+                    "SELECT text, ipa, phones, phones_allo, phones_allo_uni FROM utt "
+                    "WHERE lang=? AND status=? AND ipa IS NOT NULL AND phones IS NOT NULL "
+                    "AND phones_allo IS NOT NULL", (lang, a.triage_status)):
+                bucket = None
+                u = nf(ipa)
+                streams = [x for x in (ph, pa, pu or pa) if nf(x)]
+                if comp is not None and comp < 0.50:
+                    bucket = "instrument cannot adjudicate (<50%)"
+                elif len(u) < 10:
+                    bucket = "too short to judge"
+                elif not streams:
+                    bucket = "no recognizer output"
+                else:
+                    pw = [wordize(ipa, x, nf) for x in streams]
+                    leads = [k for k, (w, _g, _d) in enumerate(pw[0])
+                             if len(nf(w)) >= 4 and min(p[k][2] for p in pw) >= a.bad]
+                    if not leads:
+                        bucket = "no word-level lead (short/clitic or diffuse)"
+                    elif _re.search(r"[0-9]", txt or ""):
+                        bucket = "lead in a digit-bearing row (numeral register)"
+                    else:
+                        bucket = "ACTIONABLE: a >=4-unit non-numeral lead"
+                cat[bucket] += 1
+                where.setdefault(bucket, Counter())[lang] += 1
+        tot = sum(cat.values()) or 1
+        print(f"{tot} rows with status {a.triage_status!r}, by what is actually in them\n")
+        for k, n in cat.most_common():
+            print(f"  {k:<48}{n:6}  ({100 * n / tot:4.1f}%)")
+        act = where.get("ACTIONABLE: a >=4-unit non-numeral lead", Counter())
+        if act:
+            print("\n  where the actionable rows are:")
+            for lang, n in act.most_common(15):
+                print(f"    {lang:<14}{n:5}")
+        return 0
+
+    # ⚠ ASK THIS BEFORE MINING A LANGUAGE. Every other mode here assumes the recognizers can hear the
+    # language well enough for a disagreement to mean something, and for a third of the fleet they cannot.
+    # Measured: our phones come back unchanged 82.9% of the time in es_419 and 40.3% in mn_mn, against a
+    # fleet median of 61.7%. A "lead" in a 40% language is not weak evidence, it is no evidence.
+    #
+    # ⚠ IT EXPLAINS THE `--serious` RANKING. Run 75 found that a flat distance cut ranks the languages the
+    # recognizers handle worst rather than the ones we do; the five worst there (mn_mn, sd_in, my_mm,
+    # ps_af, vi_vn) are five of the six worst here. That was diagnosed indirectly and is now a number.
+    #
+    # ⚠ LOW COMPETENCE DOES NOT MEAN NO FINDING IS POSSIBLE, and ckb_iq is the counterexample sitting in
+    # the same database: it measures 46.3%, below the gate, and the free-conjunction defect was found and
+    # fixed there at 861 closer / 23 further. A 37:1 signal survives a noisy instrument; a 1.3:1 does not.
+    # The gate says WEAK SIGNALS CANNOT BE TRUSTED here, not that the language is closed — so it belongs
+    # on marginal leads, never on one that is already overwhelming.
+    #
+    # ⚠ It is NOT a quality score for the language. A low value can mean the audio is hard, the phone
+    # inventory is far from either model's training, or the transcription convention differs — this
+    # cannot separate those, and does not try to. It answers one question: is the instrument usable here.
+    if a.competence:
+        out = []
+        for lang in langs:
+            c = competence(db, lang, a.sample)
+            if c is not None:
+                out.append((c[0], lang, c[1]))
+        if not out:
+            print("no language had enough aligned phones", file=sys.stderr)
+            return 1
+        out.sort()
+        print(f"{'lang':<14}{'identity':>9}{'phones':>9}   usable?")
+        print(f"{'-'*14}{'-'*8:>9}{'-'*8:>9}   {'-'*7}")
+        med = statistics.median(x[0] for x in out)
+        for frac, lang, tot in out:
+            note = ("⚠ the instrument cannot adjudicate here" if frac < 0.50 else
+                    "weak" if frac < med else "")
+            print(f"{lang:<14}{100 * frac:8.1f}%{tot:9}   {note}")
+        print(f"\n{len(out)} languages, fleet median {100 * med:.1f}%, "
+              f"{sum(1 for x in out if x[0] < 0.50)} below 50%")
         return 0
 
     # The all-flagged class is the strongest signal in the corpus -- every recording of the sentence is

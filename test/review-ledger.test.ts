@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { codeSwitchSegments } from "../tools/corpus/code_switch.mts";
+import { getPhonemizer } from "../src/registry.ts";
 
 /**
  * The review ledger is the ONLY copy of the human verdicts outside `align.sqlite`, and
@@ -12,7 +13,17 @@ import { codeSwitchSegments } from "../tools/corpus/code_switch.mts";
  * ledger. Parsing every span with the real parser catches it at commit time instead.
  */
 const PATH = "tools/corpus/asr-align/review/hand_review.tsv";
-const BY_HAND = new Set(["defect", "reader_divergence", "convention", "artefact", "examined_clean"]);
+/** ⚠ READ FROM `asr_align_label.py`, NOT COPIED. A hand-kept copy of this list is exactly what broke the
+ *  ledger: `instrument_blind` was added to the Python and not to `review_ledger.py`'s duplicate, so 384
+ *  verdicts fell outside the durable record — and a round-trip BLANKED the status of any row that
+ *  qualified on `read_text_src` alone. Two copies drifted; a third here would drift the same way. The
+ *  source of truth is Python, so the test parses it, as `abbreviation-table.test.ts` parses its table. */
+const BY_HAND: ReadonlySet<string> = (() => {
+    const src = readFileSync(new URL("../tools/corpus/asr-align/asr_align_label.py", import.meta.url), "utf8");
+    const m = /^BY_HAND = \(([\s\S]*?)\)/mu.exec(src);
+    if (!m) throw new Error("review-ledger.test: BY_HAND not found in asr_align_label.py");
+    return new Set([...m[1]!.matchAll(/"([a-z_]+)"/gu)].map((x) => x[1]!));
+})();
 const COLS = ["lang", "wav", "sentence_id", "status", "comment", "read_text", "read_text_src", "text"];
 
 describe("asr-align review ledger", () => {
@@ -43,7 +54,12 @@ describe("asr-align review ledger", () => {
     });
 
     it("EVERY code-switch span parses with a known tag", () => {
-        const known = (c: string): boolean => ["en", "es", "fr"].includes(c);
+        // ⚠ RESOLUTION IS THE TEST, matching `rederive_read_text.mts`. A hardcoded ["en","es","fr"]
+        // rejected the legitimate `{pt:…}` spans authored for umb_ao — the test would have blocked a
+        // correct corpus edit while still passing a typo'd tag that happened to be one of the three.
+        const known = (c: string): boolean => {
+            try { getPhonemizer(c); return true; } catch { return false; }
+        };
         let spans = 0;
         for (const r of rows) {
             if (!r.read_text?.includes("{")) continue;
