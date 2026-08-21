@@ -3598,3 +3598,37 @@ moved 0.0000. Not chased further here; it is the same shape as the Greek hole, o
 to the repair list therefore rewrote 135 rows' `read_text` to carry `UCLA` while their `ipa` still said
 *ˈuːklæ*, and **nothing detects that**: `--stale` only finds `ipa IS NULL`. A wrong IPA that scores is
 worse than an absent one that does not. `--apply` now clears `ipa` on change, and reports the count.
+
+### Run 59b — the repair applied corpus-wide
+
+`--apply` had only been run for the four languages measured, so the rest of the corpus still held the old
+reading. Full pass: **125 rows changed, `ipa` cleared** (the fix above working as intended), re-derived.
+
+Listed-initialism repair coverage across the whole corpus: **16,840 / 16,861 = 99.9%.**
+
+⚠ **Count and magnitude disagree, and magnitude is right.** Over the 131 `ucla` rows, 23 moved: **12 closer
+/ 11 further**, which reads like a wash. It is not — the wins are an order of magnitude larger:
+
+```
+nso_za -0.3571   nso_za -0.2446   el_gr -0.2122   th_th -0.0405   th_th -0.0337   el_gr -0.0264
+bg_bg  -0.0234   he_il  -0.0137   zu_za  -0.0130  vi_vn -0.0113   zu_za  -0.0104  xh_za -0.0024
+xh_za  +0.0407   om_et  +0.0126   vi_vn  +0.0098  sk_sk +0.0094   cs_cz  +0.0088  sl_si +0.0087
+ckb_iq +0.0082   sl_si  +0.0080   ckb_iq +0.0077  fr_fr +0.0053   fr_fr  +0.0051
+
+gained 0.9887   lost 0.1245   = 7.9:1
+```
+
+7.9:1 clears the 4.6:1 bar the ⟨ʔ⟩ decision was held to. The losses are Latin-script languages whose
+readers said the word rather than the letters — real, small, and the price of a per-corpus repair list
+where the reading is per-reader.
+
+⚠ **The 21 remaining unrepaired occurrences are all CORRECT declines**, which is the useful part:
+
+```
+tr_tr hiv/fbi/mri · az_az mri   the TURKIC rule the module documents — Turkish does not uppercase ⟨i⟩→⟨I⟩
+az_az  i̇rs                      a real Azerbaijani word (heritage); the scan matched inside it
+yo_ng  ìwọ̀nba                   a real Yoruba word; likewise
+he_il  utcּ+1                    a combining dagesh breaks the word boundary — 3 occurrences, a genuine edge
+```
+
+Only the Hebrew one is a miss, and it is 3 rows behind a combining mark.
