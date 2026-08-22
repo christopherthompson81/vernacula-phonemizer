@@ -73,6 +73,12 @@ def main() -> int:
             if src == "hand":
                 hand += 1          # ⚠ never overwritten from the transcript — see the module note
                 continue
+            # ⚠ THIS GUARD IS ON THE VALUE, NOT ON PRESENCE, and that holds only while `hand` is the one
+            # source whose read_text differs from the transcript. Issue #871 would add ~191k rows sourced
+            # from the FLEURS raw column; those carry restored case and punctuation the transcript does
+            # NOT have, so a value-keyed guard would sail past them and quietly re-derive their ipa from
+            # the case-folded text — leaving a populated read_text beside ipa that no longer matches it.
+            # ⚠ WIDEN THIS TO "any non-empty read_text" BEFORE ADDING A NEW read_text_src.
             new = m.get(sid)
             if new is None:
                 missing += 1

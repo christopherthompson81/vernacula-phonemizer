@@ -124,7 +124,20 @@ async function run(lang: string, limit: number): Promise<void> {
   }
 
   if (!existsSync(OUT)) mkdirSync(OUT, { recursive: true });
-  writeFileSync(join(OUT, `${lang}.tsv`), lines.join("\n") + "\n", "utf8");
+  // ⚠ A LIMITED RUN MUST NOT CLOBBER A FULL FILE. `--limit 1` writes a one-row file over the real one
+  //    and reports success — the downstream refresh then sees 1 of N rows and calls the rest "missing".
+  //    Caught by running `--limit 1 --diff-set` as a smoke test, which truncated a 3,163-row language to
+  //    one line. A limited run is a probe, so it declines rather than overwrites something larger.
+  const outFile = join(OUT, `${lang}.tsv`);
+  if (limit > 0 && existsSync(outFile)) {
+    const have = readFileSync(outFile, "utf8").split("\n").filter(Boolean).length;
+    if (have > lines.length) {
+      console.log(`${lang}: REFUSED — ${outFile} has ${have} rows, this limited run produced ${lines.length}. `
+        + `Re-run without --limit, or delete the file first.`);
+      return;
+    }
+  }
+  writeFileSync(outFile, lines.join("\n") + "\n", "utf8");
   if (errs.length) writeFileSync(join(OUT, `${lang}.errors.tsv`), errs.join("\n") + "\n", "utf8");
 
   const dt = ((Date.now() - t0) / 1000).toFixed(0);
