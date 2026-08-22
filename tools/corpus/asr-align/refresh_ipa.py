@@ -66,19 +66,24 @@ def main() -> int:
             continue
         stale = hand = missing = n = 0
         upd = []
-        for wav, sid, ipa, src in db.execute(
-                "SELECT wav, sentence_id, ipa, COALESCE(read_text_src,'') FROM utt WHERE lang=?",
+        for wav, sid, ipa, rt, txt in db.execute(
+                "SELECT wav, sentence_id, ipa, COALESCE(read_text,''), COALESCE(text,'') "
+                "FROM utt WHERE lang=?",
                 (lang,)):
             n += 1
-            if src == "hand":
-                hand += 1          # ⚠ never overwritten from the transcript — see the module note
+            # ⚠ THE GUARD IS "read_text DIFFERS FROM THE TRANSCRIPT", not a list of source tags and
+            # not mere presence. It used to test `read_text_src == "hand"`, which was correct only while
+            # `hand` was the one source carrying non-transcript text: `restore_raw_text.py` adds ~250k
+            # rows tagged `fleurs_raw` with case and punctuation the transcript does NOT have, and a
+            # value-keyed guard sails past them and re-derives their ipa from the case-folded text —
+            # leaving a populated read_text beside ipa that no longer matches it, which looks repaired
+            # and is not. ⚠ TESTING PRESENCE IS EQUALLY WRONG in the other direction: `auto` read_text is
+            # populated on 269,897 rows and is mostly a copy of the transcript, so a presence guard makes
+            # this script a fleet-wide no-op. The semantic condition is the one to test, and it needs no
+            # maintenance when a new read_text_src appears.
+            if rt and rt != txt:
+                hand += 1
                 continue
-            # ⚠ THIS GUARD IS ON THE VALUE, NOT ON PRESENCE, and that holds only while `hand` is the one
-            # source whose read_text differs from the transcript. Issue #871 would add ~191k rows sourced
-            # from the FLEURS raw column; those carry restored case and punctuation the transcript does
-            # NOT have, so a value-keyed guard would sail past them and quietly re-derive their ipa from
-            # the case-folded text — leaving a populated read_text beside ipa that no longer matches it.
-            # ⚠ WIDEN THIS TO "any non-empty read_text" BEFORE ADDING A NEW read_text_src.
             new = m.get(sid)
             if new is None:
                 missing += 1
@@ -97,7 +102,7 @@ def main() -> int:
                   + (f"   ⚠ {missing} sentence_id not in byid" if missing else ""))
     verb = "would update" if a.check else "updated"
     print(f"\n{verb} {tot_stale} rows across {len(changed_langs)} languages "
-          f"({tot_rows} seen, {tot_hand} hand read_text left alone"
+          f"({tot_rows} seen, {tot_hand} rows with a read_text left alone"
           + (f", {tot_missing} missing from byid" if tot_missing else "") + ")")
     if tot_hand and not a.check:
         print("\n⚠ The hand read_text rows were NOT refreshed here — their IPA comes from what the\n"
