@@ -273,3 +273,19 @@ describe("french canonical IPA", () => {
         expect(phonemize("120 m³", "fr")).toContain("mɛtʁ kˈyb");
     });
 });
+
+// `4:41.20` is a race time — minutes, seconds, hundredths — and the clock rule claimed it, asserting an
+// hour on a four-minute race. One source sentence (a Paralympic result) carries the shape into 45 FLEURS
+// languages. The guard DECLINES the duration; it does not read it. A real duration reading needs its own
+// per-language sourcing, and inventing one would score well against the recognizers while staying wrong.
+describe("french clock — a fractional part is not a time of day", () => {
+    test("a duration does not become an hour", () => {
+        expect(phonemize("4:41.20", "fr")).not.toContain("œʁ"); // was: katʁ ŒʁE kaʁɑ̃teˈyn . vˈɛ̃
+        expect(phonemize("2:11.60", "fr")).not.toContain("œʁ");
+    });
+
+    test("and a real clock still reads as one", () => {
+        expect(phonemize("il est 4:41", "fr")).toBe("il e katʁ œʁ kaʁɑ̃teˈyn");
+        expect(phonemize("il est 8:30", "fr")).toContain("œʁ");
+    });
+});
