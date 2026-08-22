@@ -71,7 +71,13 @@ from collections import Counter
 # so the tooling is not a statement about one machine.
 ROOT = os.environ.get("ASR_ALIGN_ROOT", "/mnt/data/omnivoice_ipa")
 DB = f"{ROOT}/work/asr_align/align.sqlite"
-AUTOMATIC = ("verified", "investigate", "recognizer_short", "defective_audio")
+# ⚠ `audio_overlong` / `uncodeable_length` mark rows the CODEC never sees: everything over 30 s is
+#: dropped before encoding, so without a label a skipped row is indistinguishable from one that
+#: never existed. `audio_overlong` is a bad pair (audio far exceeds its text, the mirror of
+#: `defective_audio`); `uncodeable_length` is a FINE pair that is merely long. See
+#: label_long_audio.py for why the threshold has to be per-language.
+AUTOMATIC = ("verified", "investigate", "recognizer_short", "defective_audio",
+             "audio_overlong", "uncodeable_length")
 #: Hand verdicts. Never written by a bulk pass, never overwritten by one — see the docstring.
 BY_HAND = ("defect", "reader_divergence", "convention", "artefact", "examined_clean",
            "instrument_blind")
