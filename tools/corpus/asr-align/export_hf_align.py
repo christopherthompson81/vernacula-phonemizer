@@ -50,7 +50,12 @@ import sqlite3  # noqa: E402
 
 #: Carried per row. `status`/`comment`/`read_text` travel so the QC verdicts reach a consumer that never
 #: sees the git ledger — the ledger is the authority, this is a copy for readers of the dataset.
-COLS = ("id", "sentence_id", "lang", "text", "ipa", "phones", "dist", "status", "comment", "read_text")
+# ⚠ `read_text_src` TRAVELS WITH `read_text` OR THE COLUMN IS UNREADABLE. Since the FLEURS raw-column
+#: restore it is on 249,639 of 271,798 rows, so presence no longer distinguishes a machine merge from
+#: `hand` — a human writing down what the reader actually said, which is the highest-value row in the
+#: set and the only one a consumer must not second-guess. Without the tag those 209 rows are invisible.
+COLS = ("id", "sentence_id", "lang", "text", "ipa", "phones", "dist", "status", "comment",
+        "read_text", "read_text_src")
 
 
 def export(db: sqlite3.Connection, out: str, langs: list[str], gz: bool) -> None:
@@ -60,7 +65,7 @@ def export(db: sqlite3.Connection, out: str, langs: list[str], gz: bool) -> None
     total = 0
     for lang in have:
         rows = db.execute(
-            "SELECT wav, sentence_id, lang, text, ipa, phones, dist, status, comment, read_text "
+            "SELECT wav, sentence_id, lang, text, ipa, phones, dist, status, comment, read_text, read_text_src "
             "FROM utt WHERE lang=? ORDER BY wav", (lang,)).fetchall()
         path = os.path.join(out, f"align_{lang}.jsonl" + (".gz" if gz else ""))
         op = gzip.open if gz else open
