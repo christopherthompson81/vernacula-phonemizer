@@ -232,7 +232,11 @@ def main() -> int:
                          "full 230-phone set. Neither wins in general -- see the module docstring.")
     ap.add_argument("--inter", action="store_true",
                     help="do the two INDEPENDENT recognizers agree with each other? Where they do not, "
-                         "neither can serve as a reference and the row is unmeasurable")
+                         "neither can serve as a reference and the row is unmeasurable. Reads the whole "
+                         "corpus and ignores --all-status (it measures the instruments, not the QC state)")
+    ap.add_argument("--cap", action="store_true",
+                    help="--inter: cap at --sample rows per language. Off by default because the "
+                         "headline count moves with it")
     ap.add_argument("--takes", action="store_true",
                     help="for sentences with more than one recording, how far each take falls behind "
                          "the best take of the same text — a corpus selection signal, not a defect queue")
@@ -410,34 +414,69 @@ def main() -> int:
     # a recognizer than the two recognizers are to each other (sr_rs 0.157 against their 0.659; only
     # my_mm inverts, at +0.055). The engine sits inside the instruments' own noise nearly everywhere.
     if a.inter:
-        out = []
+        import math
+
+        # ⚠ NO STATUS FILTER, for the reason `competence()` gives: this measures a property of the
+        # INSTRUMENTS, and a population that moves when QC acts on it cannot gate a claim about them.
+        # ⚠ AND NO `--sample` CAP unless asked. An earlier version silently read 250 rows per language,
+        # which is 25,500 of 268,677 — and the headline moved with it (101 of 102 at 250, 100 of 102 at
+        # 2000, `vi_vn` crossing over). A cap that changes the answer must be visible in the output.
+        lim = f" LIMIT {int(a.sample)}" if a.cap else ""
+        out, allinter, allours, bystat = [], [], [], {}
         for lang in langs:
             ours, inter = [], []
-            for ipa, ph, pa in db.execute(
-                    "SELECT ipa, phones, phones_allo FROM utt WHERE lang=? AND ipa IS NOT NULL "
-                    "AND phones IS NOT NULL AND phones_allo IS NOT NULL" + ST + " ORDER BY wav LIMIT ?",
-                    (lang, a.sample)):
+            for st, ipa, ph, pa in db.execute(
+                    "SELECT status, ipa, phones, phones_allo FROM utt WHERE lang=? AND ipa IS NOT NULL "
+                    "AND phones IS NOT NULL AND phones_allo IS NOT NULL ORDER BY wav" + lim, (lang,)):
                 u, w, al = notate(units(ipa)), notate(units(ph)), notate(units(pa))
                 if not w or not al or len(u) < 10:
                     continue
-                ours.append(min(per(u, w), per(u, al)))
-                inter.append(per(w, al))
-            if len(ours) < 50:
+                o, i = min(per(u, w), per(u, al)), per(w, al)
+                ours.append(o); inter.append(i)
+                allours.append(o); allinter.append(i)
+                bystat.setdefault(st or "(null)", []).append(i)
+            if len(ours) < a.min_rows:
+                if a.langs:
+                    print(f"{lang}: {len(ours)} usable rows, below --min-rows {a.min_rows}")
                 continue
-            mo, mi = statistics.median(ours), statistics.median(inter)
-            out.append((mo - mi, lang, mo, mi, len(ours)))
+            out.append((statistics.median(ours) - statistics.median(inter), lang,
+                        statistics.median(ours), statistics.median(inter), len(ours)))
         if not out:
             print("not enough rows with both recognizers", file=sys.stderr)
             return 1
         out.sort()
-        print(f"{'lang':<14}{'ours~best':>10}{'w2v~allo':>10}{'gap':>8}{'n':>7}   reading")
-        for g, lang, mo, mi, n in out:
-            note = ("⚠ we are FURTHER out than they are from each other" if g >= 0 else
-                    "the instruments disagree more than we do" if g <= -0.20 else "")
-            print(f"{lang:<14}{mo:10.3f}{mi:10.3f}{g:+8.3f}{n:7}   {note}")
-        good = sum(1 for g, *_ in out if g < 0)
-        print(f"\n{good} of {len(out)} languages: our IPA is closer to a recognizer than the two "
-              f"recognizers are to each other")
+        print(f"{len(allinter)} rows{' (capped at ' + str(a.sample) + '/language)' if a.cap else ''}. "
+              f"inter-recognizer PER (wav2vec2 vs allosaurus): "
+              f"median {statistics.median(allinter):.3f}")
+        for t in (0.5, 0.6, 0.7, 0.8):
+            n = sum(1 for x in allinter if x >= t)
+            print(f"   >= {t:.1f}: {n:6} rows ({100 * n / len(allinter):4.1f}%)")
+        print("\nby status, median inter-recognizer PER:")
+        for k, v in sorted(bystat.items(), key=lambda x: -statistics.median(x[1])):
+            if len(v) >= 40:
+                print(f"   {k:<18}{len(v):7}  {statistics.median(v):.3f}")
+        mx, my = statistics.mean(allinter), statistics.mean(allours)
+        num = sum((x - mx) * (y - my) for x, y in zip(allinter, allours))
+        den = math.sqrt(sum((x - mx) ** 2 for x in allinter) * sum((y - my) ** 2 for y in allours))
+        print(f"\ncorr(inter-recognizer disagreement, our distance) = {num / den:+.3f}")
+
+        print(f"\n{'lang':<14}{'ours~best':>10}{'w2v~allo':>10}{'gap':>8}{'n':>8}")
+        shown = out if len(out) <= 14 else out[:8] + out[-4:]   # no duplicate rows on a short list
+        for g, lang, mo, mi, n in shown:
+            print(f"{lang:<14}{mo:10.3f}{mi:10.3f}{g:+8.3f}{n:8}")
+        # ⚠ THREE COUNTS, NOT ONE, BECAUSE `ours~best` IS A MIN AND THE RIGHT-HAND SIDE IS NOT.
+        # A transcription sitting anywhere near the midpoint of two disagreeing models beats `inter` by
+        # construction, so the bare count overstates. The controls that bound it:
+        #   · SHUFFLED (our IPA from a DIFFERENT row of the same language) wins 0 of 102 — the test is
+        #     not satisfiable by any third stream, so it does carry signal.
+        #   · `max` (closer to BOTH than they are to each other) wins 6 of 102.
+        #   · beating the midpoint `inter/2` wins 26 of 102.
+        # The defensible claim is "materially closer on most of the fleet", not the raw count.
+        beat = sum(1 for g, *_ in out if g < 0)
+        half = sum(1 for _g, _l, mo, mi, _n in out if mo < mi / 2)
+        print(f"\n{beat} of {len(out)} languages: ours~best < w2v~allo")
+        print(f"{half} of {len(out)} also beat the midpoint baseline (ours~best < w2v~allo / 2) — the "
+              f"stronger form, since a min against a pairwise distance flatters the left-hand side")
         return 0
 
     # ⚠ WHICH DISTANCE, STATED: `corroborated` — the minimum over wav2vec2 and BOTH allosaurus decodes,

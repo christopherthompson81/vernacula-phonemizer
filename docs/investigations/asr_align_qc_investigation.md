@@ -5215,41 +5215,85 @@ allo vs uni    PER 0.175      <- SAME acoustic model, two inventory masks. Not a
 
 ### ⚠ `phones_allo` and `phones_allo_uni` are not two witnesses
 
-They are one model behind two masks. `corroborated()` takes the minimum over all three, which lets that
-model vote twice. ⚠ **The bias is toward FLATTERING US** — `min` over more candidates can only shrink
-the distance — so it under-reports disagreement and therefore under-reports findings. Every verdict
-already drawn with it is conservative and none needs revisiting; but a claim about how GOOD the output
-is must use the independent pair, and `--inter` does.
+One model behind two inventory masks. `corroborated()` takes the minimum over all three, which lets that
+model vote twice — and ⚠ **for the six languages with no PHOIBLE inventory the two columns are
+BYTE-IDENTICAL**, so there it is a literal duplicate. The bias is toward FLATTERING US, since `min` over
+more candidates can only shrink the distance.
 
-### Fleet
+⚠ **That is not a blanket "nothing needs revisiting", and an earlier draft of this entry said it was.**
+`--serious` uses a SELF-RELATIVE cut (median + 3×MAD); deflating every row deflates the median and the
+MAD too, so the threshold moves with the bias and the effect on the flag RATE is not one-signed. What
+holds is narrower: a row it called far from us really is far from at least one recognizer.
+
+### Fleet — one command, whole corpus
 
 ```
 $ python3 tools/corpus/asr-align/allo_compare.py --inter
 
-268,677 rows.  inter-recognizer PER (wav2vec2 vs allosaurus): median 0.424
-   31.3% of rows have the two instruments >=0.5 apart
+268677 rows. inter-recognizer PER (wav2vec2 vs allosaurus): median 0.424
+   >= 0.5:  84009 rows (31.3%)      >= 0.7:  16359 rows ( 6.1%)
+   >= 0.6:  39919 rows (14.9%)      >= 0.8:   4524 rows ( 1.7%)
 
-by status   verified 0.420 · investigate 0.522 · defect 0.737 · recognizer_short 0.744
+by status, median inter-recognizer PER:
+   recognizer_short  0.744 · defect 0.737 · artefact 0.702 · examined_clean 0.692
+   convention 0.655 · instrument_blind 0.654 · defective_audio 0.600
+   investigate 0.522 · reader_divergence 0.446 · verified 0.420
+
 corr(inter-recognizer disagreement, our distance) = +0.429
 ```
 
-So a real share of what the queue called "our output disagrees with the audio" is the instruments
-disagreeing with each other, and `investigate` rows are measurably worse on a test our IPA never enters.
+⚠ **THE FIRST DRAFT OF THIS BLOCK WAS FABRICATED PROVENANCE.** It showed a `$ … --inter` prompt above
+numbers that mode never printed — they came from a throwaway script, over the unfiltered population,
+while `--inter` was then honouring the status filter. The tell was in the table itself:
+`recognizer_short` is in `CLOSED` and a default run cannot report a median for it. The mode now prints
+all of the above, reads the whole corpus, and ignores the status filter for the reason `competence()`
+gives — an instrument-property measure must not move when QC acts on it.
 
-### ⚠ And the direction that matters for the engine
+⚠ **And it was silently capped at 250 rows per language**, 25,500 of 268,677, with the headline moving
+under the cap (101 of 102 at 250, 100 of 102 at 2,000, `vi_vn` crossing over). The cap is now opt-in
+`--cap` and always named in the output.
+
+### ⚠ The direction that matters, and its honest bound
 
 ```
-lang        ours~best   w2v~allo      gap
-sr_rs           0.157      0.659    -0.502
-ckb_iq          0.264      0.732    -0.468
-ast_es          0.138      0.538    -0.400
+lang        ours~best   w2v~allo      gap       n
+sr_rs           0.162      0.660    -0.499    2944
+ckb_iq          0.264      0.734    -0.470    3033
+ast_es          0.141      0.537    -0.396    2511
    ...
-my_mm           0.504      0.449    +0.055   <- the only inversion
+vi_vn           0.489      0.490    -0.001    2994
+my_mm           0.506      0.443    +0.064    3058   <- the only inversion
+
+101 of 102 languages: ours~best < w2v~allo
+ 27 of 102 also beat the midpoint baseline (ours~best < w2v~allo / 2)
 ```
 
-**On 101 of 102 languages our IPA is closer to a recognizer than the two recognizers are to each other.**
-The engine sits inside the instruments' own noise nearly everywhere, which is the strongest statement
-this corpus can make about the phonemizer and the right note to close the campaign on. ⚠ It is a
-statement about AGREEMENT, not correctness: two models can be jointly wrong about a convention, which is
-what run 74 rejected the Mongolian change on. It says the residual disagreement is mostly instrument
-noise, not that every remaining row is right.
+⚠ **THE RAW COUNT OVERSTATES, AND THE BOUND MATTERS MORE THAN THE HEADLINE.** `ours~best` is a MIN over
+two streams; the right-hand side is a plain pairwise distance. Anything sitting near the midpoint of two
+disagreeing models beats it by construction, and `vi_vn` at −0.001 or `ca_es` at −0.028 are exactly that.
+Three controls bound it:
+
+- a **SHUFFLED** baseline — our IPA taken from a DIFFERENT row of the same language — wins **0 of 102**,
+  so the test is not satisfiable by any plausible-looking phone string and does carry signal;
+- **`max`** (closer to BOTH than they are to each other) wins **6 of 102**;
+- beating the **midpoint** wins **27 of 102**.
+
+**The claim the data supports is "on most of the fleet our IPA is materially closer to a recognizer than
+the recognizers are to each other" — not a 101/102 count.** The languages this entry leans on are in the
+strong group (`sr_rs` is 4× better than midpoint); the tail carrying the count is not.
+
+⚠ **AND IT REVERSES RUN 82'S CLOSING LINE**, which said the two recognizers "agree with each other more
+than either agrees with us on exactly the axes they share". Both are true and they are not the same
+measurement — that was a symbol-RATE correlation on the shared category axes (run 71), this is a
+row-level median over everything — but run 82 stated it as a general conclusion and it should not stand
+unqualified.
+
+⚠ It remains a statement about AGREEMENT, not correctness. Two models can be jointly wrong about a
+convention, which is what run 74 rejected the Mongolian change on.
+
+### A crash fix, which the first draft called a rename
+
+A `per` dict local to `--takes` shadowed the module-level `per()` distance function for the whole of
+`main()`. ⚠ **`--takes` was the one mode that worked**: on `main`, the DEFAULT mode and `--decodes` both
+die with `UnboundLocalError` — verified by running the pre-merge file. That is a crash on the tool's
+advertised entry point, shipped in #867, not the hygiene rename the first draft described.
