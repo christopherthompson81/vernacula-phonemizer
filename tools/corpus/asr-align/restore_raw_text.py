@@ -110,9 +110,20 @@ def merge(raw: str, norm: str, lang: str) -> str:
                 #   normalized column is NOT uniformly punctuation-free — where it kept a final period,
                 #   `cunami.` merged to `cunami..`, and bs_ba/hr_hr/oc_fr came out with 110-113% of raw's
                 #   punctuation, i.e. spurious pauses in the very thing this restores.
-                w = LEAD.match(nfc(ntok[j])).group(2) or nfc(ntok[j])
-                if mid[:1].isupper():
-                    w = w[:1].upper() + w[1:]
+                nt = LEAD.match(nfc(ntok[j])).group(2) or nfc(ntok[j])
+                # ⚠ TAKE RAW'S WHOLE TOKEN WHEN THE TWO DIFFER ONLY IN CASE, or INTERNAL capitals are
+                #   lost. Restoring just the first letter destroyed the Nguni concord acronyms this is
+                #   supposed to recover: zu_za `iHK` (class prefix + initialism) merged to `ihk`, which
+                #   the engine then reads as a word (`ˈiːhkʼ`) instead of spelling it (`iɛjˈiːt͡ʃʼi kʰˈɛːji`)
+                #   — the exact repair `restoreNguniConcordAcronyms` exists for, undone by the restorer.
+                #   Only when the tokens differ by MORE than case does norm win, which is the yo_ng case
+                #   (raw `n` vs norm `ń`): there raw has no case to lose.
+                if mid.lower() == nt.lower():
+                    w = mid
+                else:
+                    w = nt
+                    if mid[:1].isupper():
+                        w = w[:1].upper() + w[1:]
                 out.append(lead + w + trail)
         elif tag in ("replace", "insert"):
             # ⚠ CAPITALISE ONLY THE FIRST TOKEN OF A REPLACED RUN. Applying the run's leading capital to
