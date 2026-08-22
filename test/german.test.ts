@@ -561,3 +561,21 @@ describe("German — compound decomposition already protects the ⟨th⟩ seam",
         expect(phonemizeWord("vertrautheit")).toContain("th"); // `traut` absent, so ⟨heit⟩ cannot strip
     });
 });
+
+// The corpus is 100% case-folded (271,798 rows, 102 languages — see issue #871), so a rule keyed on a
+// capital never fires on it. This is the same trap the degree-scale rule documents two lines below the
+// clock rule in normalize.ts, and the clock rule had not been given the same treatment.
+describe("german clock — case-folded Uhr", () => {
+    test("a case-folded `uhr` does not double the noun", () => {
+        // Was: *acht Uhr dreissig UHR* — the capital-only group never matched, so the rule inserted its
+        // own " Uhr" and the literal one survived. 24 of 24 clock rows in the German corpus.
+        expect(phonemize("um 8:30 uhr", "de")).toBe(phonemize("um 8:30 Uhr", "de"));
+        expect(phonemize("um 8:30 UHR", "de")).toBe(phonemize("um 8:30 Uhr", "de"));
+        expect(phonemize("um 11.00 uhr", "de")).toBe(phonemize("um 11.00 Uhr", "de"));
+    });
+
+    test("the noun is re-emitted, so the reading is the one properly-cased word", () => {
+        expect(phonemize("um 11.00 uhr", "de")).toBe("ʊm ɛlf uːɐ̯");
+        expect(phonemize("um 8:30", "de")).toBe("ʊm axt uːɐ̯ dʁˈaɪ̯sɪç");
+    });
+});

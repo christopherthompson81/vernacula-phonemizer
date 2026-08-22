@@ -48,7 +48,21 @@ export interface CodeSwitchSegment {
 }
 
 /** `{code:text}` — a registry code, then text with no nested brace. Anything else is literal. */
-const SPAN = /\{([a-z][a-z0-9-]{0,15}):([^{}]*)\}/gu;
+// ⚠ THE SUBTAG MAY BE UPPERCASE, and a lowercase-only class made four registry codes UNTAGGABLE:
+// `en-GB`, `en-IN`, `fr-CA`, `pt-BR`. Those spans did not fail loudly — they never matched as spans, so
+// the unknown-tag guard below never fired and the braces went to the host as literal text:
+// `{pt-BR:obrigado}` came out `ɔst ptbe ˈɛʁ , ɔbʁiɡado ˈɔst`, the tag read aloud letter by letter and
+// the braces turned into a comma. That is the "wreckage that still LOOKS like IPA" this module exists
+// to prevent, in its silent form. BCP-47 subtags are conventionally uppercase, so the tag must accept
+// what the registry actually ships.
+//
+// ⚠ THE FIRST LETTER STAYS LOWERCASE ON PURPOSE, and it is a real tension with the note above. Every
+// registry code begins lowercase, so `{EN:x}` cannot be a valid tag — but it is far likelier a TYPO of
+// `{en:x}` than deliberate literal text, and making it throw would catch that. A test pins the opposite
+// (`does NOT treat a bare brace or a non-tag as markup`), so the line is left where it was documented
+// rather than moved silently. ⚠ The residue: a tag whose FIRST letter is miscased still reaches the
+// host as literal braces. Change both together, or not at all.
+const SPAN = /\{([a-z][A-Za-z0-9-]{0,15}):([^{}]*)\}/gu;
 
 /**
  * Split `text` into segments, `{code:…}` spans carrying their language and everything else passing through

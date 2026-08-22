@@ -93,6 +93,13 @@ const NUMERAL_REGISTER: Readonly<Record<string, "en" | "fr">> = {
  * worth roughly 115 rows across the five wired languages.
  */
 const GROUPED = String.raw`\d{1,3}(?:,\d{3})+|\d{1,3}(?:[  ]\d{3})+`;
+// ⚠ A DIGIT TOUCHING A LETTER IS DELIBERATELY STILL MATCHED, and a guard against it was written and
+// reverted. `h5n1` segmenting to `h{en:five}n{en:one}` LOOKS mangled, but the reading it produces —
+// "H five N one" — is correct, and so are `covid19` → "covid nineteen", `mp3` → "M P three", `b52` →
+// "B fifty-two", `kv62` → "K V sixty-two" (pinned by a test, from the 28 end-of-clause rows in the
+// note above). The markup is ugly; the output is right. ⚠ What IS imperfect is that the host reads the
+// LETTERS with its own grapheme rules rather than as English letter-names, so Maori `h5n1` gets a Maori
+// /h/ where a reader says "aitch" — a real but separate defect, and not one a boundary guard fixes.
 const DIGIT_RUN = new RegExp(String.raw`(?<![\d:.,])(?:${GROUPED}|\d+)(?![\d:])(?![.,]\d)`, "gu");
 
 const EN_ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",

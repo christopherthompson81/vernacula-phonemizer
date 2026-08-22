@@ -267,7 +267,15 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //    vingt", and "4:41" turned the colon into a pause mark.
     s = s.replace(/\b([01]?\d|2[0-3])\s*[hH]\s*([0-5]\d)?(?![\p{L}\p{M}\d])/gu,
         (_m, h: string, min?: string) => timeWords(Number(h), min === undefined ? undefined : Number(min)));
-    s = s.replace(/\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+    //    ⚠ A FRACTIONAL PART MEANS IT IS NOT A TIME OF DAY, and the guard must reject it. `4:41.20` is a
+    //    race time — minutes, seconds, hundredths — and without this the clock rule claimed it and asserted
+    //    an hour on a four-minute race: *quatre HEURES quarante-et-un*, with the `.20` left over as a stray
+    //    pause. The corpus carries one such sentence (a Paralympic result, translated into 45 languages),
+    //    so the footprint is small and the reading is flatly wrong. ⚠ THIS DECLINES, IT DOES NOT READ:
+    //    a proper duration reading needs its own per-language sourcing, and inventing one would score well
+    //    while staying wrong — see the trap documented in tools/corpus/numeral_register.mts. German uses
+    //    the same `(?!\.?\d)` shape; a clock at the end of a sentence (`à 4:41.`) still matches.
+    s = s.replace(/\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!\.\d)/gu,
         (_m, h: string, min: string) => timeWords(Number(h), Number(min)));
 
     // 8) DATES. A numeric date is day-first in French. Then a bare day 1 before a month name becomes the

@@ -223,9 +223,15 @@ export function normalizeGerman(input: string): string {
     // 4) CLOCK, before the number tokenizer sees the separator. Both written forms occur and both were
     //    broken: the colon became a PAUSE with a spurious "null", and the dot form was read as a DECIMAL
     //    ("11.00 Uhr" → *elf komma null null*). German says "elf Uhr", "acht Uhr sechsundvierzig".
-    s = s.replace(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b(?!\.?\d)(\s*Uhr)?/gu,
-        (_m, h: string, min: string, uhr?: string) => {
-            const head = `${numberToWords(Number(h))}${uhr ?? " Uhr"}`;
+    //    ⚠ THE `Uhr` MUST BE MATCHED CASE-INSENSITIVELY, exactly as the degree scale below must be, and
+    //    for the same reason: the corpus is case-folded. All 2987 German rows are lowercase, so a
+    //    capital-only `Uhr` never matched, the optional group stayed empty, the rule inserted its own
+    //    " Uhr", and the literal one survived — *acht Uhr dreissig uhr*. That is 24 of 24 clock rows in
+    //    the corpus, i.e. the rule was case-correct and corpus-wrong. The word is re-emitted rather than
+    //    echoed back, so a lowercase or shouted `UHR` still yields the one properly-cased noun.
+    s = s.replace(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b(?!\.?\d)(\s*Uhr)?/giu,
+        (_m, h: string, min: string) => {
+            const head = `${numberToWords(Number(h))} Uhr`;
             return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min))}`;
         });
 
