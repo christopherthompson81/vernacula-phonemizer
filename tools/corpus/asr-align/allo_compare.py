@@ -200,9 +200,13 @@ def corroborated(ours: list[str], streams: list[list[str]]) -> float | None:
     through two inventory masks — on a row inspected by hand they sat 0.175 apart while each was 0.75
     from wav2vec2 — so passing all three here lets one model vote twice. ⚠ THE BIAS IS TOWARD FLATTERING
     US: `min` over more candidates can only shrink the distance, so this UNDER-reports disagreement and
-    therefore under-reports findings. Every verdict drawn with it is conservative, which is why nothing
-    already decided has to be revisited; but a claim about how GOOD the output is must use the
-    independent pair only. `--inter` does.
+    therefore under-reports findings. ⚠ THAT IS NOT A BLANKET "NOTHING NEEDS REVISITING": `--serious`
+    uses a SELF-RELATIVE cut (median + 3*MAD), and deflating every row also deflates the median and the
+    MAD, so the threshold moves with the bias and the effect on the flag RATE is not one-signed. What
+    holds is narrower — a row it called far from us really is far from at least one recognizer.
+    ⚠ AND FOR THE SIX LANGUAGES WITH NO PHOIBLE INVENTORY THE TWO COLUMNS ARE BYTE-IDENTICAL
+    (`asr_align_allo.py` writes `uni` = `allo` there), so this is not one model voting twice, it is a
+    literal duplicate. A claim about how GOOD the output is must use the independent pair; `--inter` does.
     """
     live = [c for c in streams if c]
     return min(per(ours, c) for c in live) if live else None
