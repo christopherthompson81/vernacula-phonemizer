@@ -55,11 +55,21 @@ function regCode(lang: string): string {
   return VARIETY[lang] ?? lang.split("_")[0];
 }
 
-/** The languages actually present in the existing espeak corpus — the diff set. */
-function allLangs(): string[] {
-  return readdirSync(OLD)
-    .filter((f) => f.endsWith(".tsv"))
-    .map((f) => f.slice(0, -4))
+/**
+ * Every language with a FLEURS transcript — i.e. everything that can be phonemized.
+ *
+ * ⚠ THIS USED TO ENUMERATE THE ESPEAK CORPUS (`work/phonemized/byid`), which is 28 languages, because
+ * the script was written to produce a DIFF against espeak. `--all` therefore silently meant "the 28",
+ * and a re-phonemization run after the engine fixes refreshed 28 of 102 files while reporting success
+ * — the other 74 kept IPA from before the fixes with nothing in the output to say so. Enumerate what
+ * is actually available; `--diff-set` restores the old behaviour for an espeak comparison.
+ */
+function allLangs(diffSet = false): string[] {
+  const dir = diffSet ? OLD : TSV;
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((e) => (diffSet ? e.isFile() && e.name.endsWith(".tsv") : e.isDirectory()))
+    .map((e) => (diffSet ? e.name.slice(0, -4) : e.name))
+    .filter((l) => existsSync(join(TSV, l, "train.tsv")))
     .sort();
 }
 
@@ -130,7 +140,7 @@ const limit = li >= 0 ? Number(argv[li + 1]) : 0;
 // Guard the `li + 1` skip on li >= 0 — otherwise, with no --limit, li is -1 and this drops argv[0],
 // so `... sd_in` silently fell through to "no positional args" and re-ran all 28 languages.
 const positional = argv.filter((a, i) => !a.startsWith("--") && !(li >= 0 && i === li + 1));
-const langs = positional.length === 0 ? allLangs() : positional;
+const langs = positional.length === 0 ? allLangs(argv.includes("--diff-set")) : positional;
 
 console.log(`# ${langs.length} language(s), limit=${limit || "none"}, out=${OUT}`);
 for (const l of langs) await run(l, limit);

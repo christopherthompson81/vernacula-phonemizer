@@ -2,6 +2,13 @@
 # licensed CC BY-SA 4.0 (verified 2026-07-29: lexique.org states CC BY-SA 4.0; openlexicon's Lexique383
 # distribution bundles LICENSE-CC-BY-SA4.0.txt). Derived work inherits CC BY-SA 4.0; attribution: New &
 # Pallier, Lexique. The g2p engine (g2p.ts) handles OOV words.
+# ⚠ ADDITIONS BELOW THE LEXIQUE SET are listed here so the provenance line above stays true. Each is
+#   a word Lexique does not carry, with the evidence that justified it.
+#   kanjar  kɑ̃dʒaʁ->kandʒaʁ : a South Asian surname. The g2p nasalises ⟨an⟩ by French rule (kɑ̃ʒˈaʁ);
+#   FLEURS readers say kandʒaʁ — un-nasalised AND ⟨j⟩ as /dʒ/ rather than /ʒ/. Both takes of the one
+#   sentence that contains it improve against both recognizers (0.219->0.162, 0.179->0.113).
+#   ⚠ THE ENTRY IS THE NAME, NOT A RULE: one surname in one sentence does not establish that French
+#   should stop nasalising foreign ⟨an⟩ generally. That broader question is logged, not assumed.
 a	a
 aa	aa
 abaca	abaka
@@ -65718,6 +65725,7 @@ kana	kana
 kandjar	kɑ̃djaʁ
 kangourou	kɑ̃ɡuʁu
 kangourous	kɑ̃ɡuʁu
+kanjar	kandʒaʁ
 kanji	kɑ̃ʒi
 kantien	kɑ̃tjɛ̃
 kantisme	kɑ̃tizm

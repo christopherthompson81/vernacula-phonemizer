@@ -37,6 +37,18 @@ describe("code-switch markup for read_text", () => {
         expect(codeSwitchSegments("a {EN:x} c", "ceb", known)).toEqual([{ text: "a {EN:x} c" }]);
     });
 
+    /** ⚠ A BCP-47 SUBTAG IS UPPERCASE, and a lowercase-only tag class made four shipped registry codes
+     *  untaggable — `en-GB`, `en-IN`, `fr-CA`, `pt-BR`. The failure was SILENT: the span never matched,
+     *  so the unknown-tag guard never fired and the braces reached the host as text
+     *  (`{pt-BR:obrigado}` → `ɔst ptbe ˈɛʁ , ɔbʁiɡado ˈɔst`, the tag spoken letter by letter). Any code
+     *  the registry resolves must be taggable, or the markup silently excludes part of the fleet. */
+    it("accepts a registry code with an uppercase subtag", () => {
+        for (const code of ["pt-BR", "en-GB", "en-IN", "fr-CA"]) {
+            expect(codeSwitchSegments(`a {${code}:x} b`, "fr", () => true).map((s) => s.lang ?? "(host)"))
+                .toEqual(["(host)", code, "(host)"]);
+        }
+    });
+
     it("is not confused by two spans or by a span at either edge", () => {
         const segs = codeSwitchSegments("{en:one} mid {fr:deux}", "ceb", known);
         expect(segs.map((s) => s.lang ?? "(host)")).toEqual(["en", "(host)", "fr"]);

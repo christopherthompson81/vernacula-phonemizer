@@ -23,6 +23,14 @@ import { phonemizeAsync } from "../../../src/index.ts";
 import { codeSwitchSegments, stripCodeSwitch } from "../code_switch.mts";
 import { registryCode } from "./read_text.mts";
 
+/**
+ * Hosts whose ˈ marks a PHRASE, not a word — so a mid-sentence segment boundary must not create one.
+ * ⚠ Established by measurement, not by reading grammars: for every language with code-switch rows,
+ * phonemize a fragment and the same words inside a longer utterance and compare the ˈ count. Only
+ * French differs. Re-run that check before adding an entry.
+ */
+const PHRASE_FINAL_STRESS = new Set(["fr"]);
+
 /** Does the registry own this code? The switch has no exported key set, so resolution IS the test. */
 const KNOWN = new Map<string, boolean>();
 function isKnownLang(code: string): boolean {
@@ -56,6 +64,22 @@ for (const line of readFileSync(inPath, "utf8").split("\n")) {
         //   spelling is a misreading and handing it IPA is destroyed on re-parse. See code_switch.mts.
         const segs = codeSwitchSegments(text, reg, isKnownLang);
         const parts = await Promise.all(segs.map((s) => phonemizeAsync(s.text, s.lang ?? reg)));
+        // ⚠ A HOST SEGMENT IS A FRAGMENT, NOT AN UTTERANCE, and a language that marks PHRASE-final
+        // prominence stresses the end of every fragment. Measured across all ten languages that have
+        // code-switch rows, exactly one does: French puts one ˈ on the last syllable of each prosodic
+        // phrase, so `à la {en:crown court}` gave `a lˈa …` where the whole sentence gives `a la …` —
+        // the phrase does not end at "la", it continues into the span. ha/ceb/hr/ff mark LEXICAL stress
+        // (same marks on the same words either way) and umb/ig/mi/sn mark none, so none of them is
+        // touched. ⚠ `fold()` STRIPS ˈ, so no QC metric could ever see this; it surfaces only in the
+        // training corpus, where prosody is the product.
+        for (let i = 0; i < segs.length; i++) {
+            if (segs[i]!.lang || !PHRASE_FINAL_STRESS.has(reg)) continue;   // spans keep their own
+            if (i === segs.length - 1) continue;                            // really is utterance-final
+            // ⚠ Punctuation ends a phrase for real — "il mange, {en:then}" keeps its stress on mange.
+            if (/[,;:.!?…»)\]]\s*$/u.test(segs[i]!.text)) continue;
+            const k = parts[i]!.lastIndexOf("\u02C8");
+            if (k >= 0) parts[i] = parts[i]!.slice(0, k) + parts[i]!.slice(k + 1);
+        }
         // ⚠ `tight` segments join with NO space — a span inside a word (Shona `ma{en:neutron}`) must not
         //   invent a word break. See CodeSwitchSegment.tight.
         const ipa = parts.reduce((acc, p, i) =>
