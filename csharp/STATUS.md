@@ -16,7 +16,9 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 4 of 182** — `en`, `af`, `qu`, `ru`, all **200/200**. 800 rows, 0 differ.
+- **Languages: 5 of 182** — `en`, `af`, `el`, `qu`, `ru`, all **200/200**. 1,000 rows, 0 differ.
+- **Every cross-engine dependency the goldens have is now satisfied** — the 65 self-contained goldens
+  plus the 44 that route a foreign run to `en`/`ru`/`el` can all be gated as they land.
 - `Languages/Bootstrap.cs` is the registration list: one line per ported language, plus the neural table.
 
 ## Next, in order
@@ -59,13 +61,17 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
    `[\p{L}\p{M}]+` ran **372 ms where plain .NET ran 16 ms** — a 23x tax with correct output.
    Asserted structurally in `AstralBranchesAreGuarded`.
 
-3. **Languages — four ported and gated, 800/800 rows byte-identical.**
+3. **Languages — five ported and gated, 1,000/1,000 rows byte-identical.**
      - **en (English)** — 2,100 lines, 9 files: CMUdict lexicon, POS perceptron, n-gram OOV G2P, ONNX
        BiLSTM tagger, ARPABET→IPA allophony, 663-line normalizer.
      - **ru (Russian)** — 1,003 lines, 6 files: lexical stress dictionary, palatalization/iotation/voicing
        g2p, the case-ending ordinal notation (`1970-х`), and the Roman-numeral ORDINAL policy a century
        needs. First run was already 200/200 — and it turned Quechua's two blocked rows green, which is the
        dependency diagnostic paying for itself.
+     - **el (Greek)** — 839 lines, 4 files: a context-sensitive scan (velar palatalisation, γ-nasal
+       digraphs, prenasalised stops, synizesis with its lexicon), the case/gender ordinal endings, Greek
+       alphabetic numerals, and the Latin-initialism reading Greek gives in Greek letter names. 200/200
+       first run. It closes the last cross-engine gap: `The word λόγος` now reads its Greek run.
      - **af (Afrikaans)** — 1,191 lines, 7 files, ONNX tagger + two lexicons + Germanic morphology.
      - **qu (Quechua)** — 587 lines, 4 files.
    Defects found so far, all in shared infrastructure or the loader rather than in a language's own logic:
@@ -88,8 +94,8 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
        lb lg ln lt luo lv mi ms mt nb nl nso oc om pl pt ro ru si sk sl sn so st su sv sw tr tt uz vi wo
        xh yo za zu`
      - **40 need `en`** (non-Latin scripts with embedded Latin runs) · 3 need `ru` · 1 needs `el`
-   `en` and `ru` are ported, so 43 of the 44 cross-engine dependencies are satisfied; only `el` (1 golden)
-   remains. The 65 self-contained goldens are portable in any order.
+   `en`, `ru` and `el` are all ported, so EVERY cross-engine dependency the goldens have is satisfied.
+   Nothing is blocked: the remaining 104 goldens can be ported and gated in any order.
 
 5. **Goldens for the 84 uncovered codes.** `tools/gen_parity_goldens.mts` produced nothing for them
    — mostly regional variants (`en-GB`, `pt-BR`) and languages with no FLEURS text. Without a golden
