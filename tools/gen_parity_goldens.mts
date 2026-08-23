@@ -37,12 +37,15 @@ for (const d of readdirSync(FLEURS)) {
 
 /** First TSV under the language's likely module dirs, first column = headwords. */
 function lexiconWords(code: string): string[] {
+  // ⚠ MODULES ARE IN src/, THEIR DATA IS IN data/ since the shared-tree move — this scans both:
+  //   the .ts to identify which directory owns the code, the .tsv under data/ for the headwords.
   const guesses = readdirSync("src/languages").filter((d) => {
     try { return readFileSync(`src/languages/${d}/${d.includes("-") ? d : d}.ts`, "utf8").includes(`"${code}"`); }
     catch { return false; }
   });
   for (const dir of guesses.length ? guesses : readdirSync("src/languages")) {
-    const base = `src/languages/${dir}`;
+    const base = `data/languages/${dir}`;
+    if (!existsSync(base)) continue;
     for (const f of readdirSync(base)) {
       if (!f.endsWith(".tsv")) continue;
       const words: string[] = [];

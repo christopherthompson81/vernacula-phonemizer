@@ -42,6 +42,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   engine's native-digit architecture depends on the JS meaning. It is silent when wrong and lands
   hardest in the scripts we care most about. Never write a bare `\d` in a .NET pattern.
 - **Goldens are the definition of done**, byte-identical. Not "close".
+- ⚠ **Goldens are ASYNC-mode output** (`phonemizeAsync` → ONNX neural taggers). Comparing them
+  against the sync engine reports 467 of 2,400 rows changed, all phantom. The C# parity runner must
+  call the neural-capable path.
+- ⚠ **Never regenerate goldens while the tree is moving.** The first set was generated *during* the
+  `git mv` of 317 data files and came out half-and-half — silently, and it looked like a real
+  regression in languages the branch never touched.
 - **Fixes are bidirectional**: a bug found while porting is fixed in TypeScript FIRST (with a test),
   goldens regenerate, then C# implements the fixed behaviour. Never fix C# alone — a fix in one
   engine is a fork. Sites awaiting the TS half are marked `// ⚠ PAIRED-FIX PENDING:`.
