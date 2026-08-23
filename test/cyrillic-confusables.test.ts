@@ -58,7 +58,7 @@ describe("foldCyrillicConfusables", () => {
     // manifest that nobody adds to the set fails here rather than silently losing its tie-break, and an
     // entry whose manifest stops leading with Cyrillic fails rather than lingering.
     test("CYRILLIC_HOSTS is exactly the Cyrillic-primary manifests", () => {
-        const dir = new URL("../src/languages/", import.meta.url);
+        const dir = new URL("../data/languages/", import.meta.url);
         const declared = new Set<string>();
         for (const d of readdirSync(dir)) {
             for (const f of readdirSync(new URL(`${d}/`, dir)).filter((n) => n.endsWith(".jsonc"))) {

@@ -255,11 +255,15 @@ export function context(code: string): Ctx {
     // evidence of presence, which is as close to a self-refuting measurement as this tool could produce.
     const stripComments = strippedOfComments;
     let langSrc = "";
-    if (dir !== undefined && existsSync(join("src/languages", dir)))
-        for (const f of readdirSync(join("src/languages", dir)))
-            langSrc += f.endsWith(".ts") || f.endsWith(".jsonc")
-                ? stripComments(read(join("src/languages", dir, f)))
-                : read(join("src/languages", dir, f));
+    // ⚠ CODE AND DATA LIVE IN SEPARATE TREES since the shared data/ move: modules under src/, their
+    //   assets mirrored under data/. This context is "everything the language ships", so it unions both.
+    if (dir !== undefined)
+        for (const base of ["src/languages", "data/languages"])
+            if (existsSync(join(base, dir)))
+                for (const f of readdirSync(join(base, dir)))
+                    langSrc += f.endsWith(".ts") || f.endsWith(".jsonc")
+                        ? stripComments(read(join(base, dir, f)))
+                        : read(join(base, dir, f));
     return { code, dir, espeak: read(join(DICT, `${code}_list`)) + read(join(DICT, `${code}_extra`)), referee, langSrc, corpus };
 }
 

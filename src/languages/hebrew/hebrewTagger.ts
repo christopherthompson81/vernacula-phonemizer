@@ -16,12 +16,12 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
 import { phonemizeWord } from "./hebrew.ts";
 import { lexiconLookup } from "./lexicon.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 const BARE = "∅"; // the tag for a consonant with no niqqud
 const SPACE = " "; // the tag for a space char (word boundary)
@@ -39,7 +39,7 @@ export interface HebrewTagger {
 
 /** Build the Hebrew nakdan tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export async function createHebrewTagger(basename = "he-tagger"): Promise<HebrewTagger | undefined> {
-    const dir = dirname(fileURLToPath(import.meta.url));
+    const dir = dataDir(import.meta.url);
     let meta: TaggerMeta, modelBytes: Uint8Array;
     try {
         meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as TaggerMeta;

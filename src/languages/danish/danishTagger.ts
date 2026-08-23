@@ -12,9 +12,9 @@
  * resolves to `undefined` and the async path (daNeural.ts) falls back to the sync rule engine.
  */
 import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { createWordStructuralTagger, oneStress, type WordStructuralTagger } from "../../core/structuralTagger.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 export type DanishTagger = WordStructuralTagger;
 
@@ -25,7 +25,7 @@ const VOWEL = /[ɑaeɛiɪoɔuʉʊyʏøœæəɐɒ]/u;
 /** Build the Danish OOV tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export function createDanishTagger(basename = "da-g2p-tagger"): Promise<DanishTagger | undefined> {
     return createWordStructuralTagger({
-        dir: dirname(fileURLToPath(import.meta.url)),
+        dir: dataDir(import.meta.url),
         basename,
         modelFile: `${basename}.int8.onnx`,
         context: "Danish neural OOV G2P",

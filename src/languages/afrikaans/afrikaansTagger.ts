@@ -17,16 +17,16 @@
  * createAfrikaansTagger() resolves to `undefined` and callers fall back to the sync path.
  */
 import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { createWordStructuralTagger, type WordStructuralTagger } from "../../core/structuralTagger.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 export type AfrikaansTagger = WordStructuralTagger;
 
 /** Build the Afrikaans OOV tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export function createAfrikaansTagger(basename = "af-g2p-tagger"): Promise<AfrikaansTagger | undefined> {
     return createWordStructuralTagger({
-        dir: dirname(fileURLToPath(import.meta.url)),
+        dir: dataDir(import.meta.url),
         basename,
         modelFile: `${basename}.int8.onnx`,
         context: "Afrikaans neural tagging",

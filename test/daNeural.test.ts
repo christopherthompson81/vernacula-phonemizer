@@ -10,7 +10,7 @@ import { createDanishTagger } from "../src/languages/danish/danishTagger.ts";
 // The neural OOV tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back to
 // the sync NST-lexicon + rule-g2p engine, so the fallback contract is testable everywhere; the retagging assertions run
 // only with the model present.
-const haveModel = existsSync(join(import.meta.dirname, "../src/languages/danish/da-g2p-tagger.int8.onnx"));
+const haveModel = existsSync(join(import.meta.dirname, "../data/languages/danish/da-g2p-tagger.int8.onnx"));
 
 describe("danish neural OOV tagger", () => {
     // Lexicon words and punctuation are the SYNC engine's — the neural path only swaps genuinely-OOV word readings, so

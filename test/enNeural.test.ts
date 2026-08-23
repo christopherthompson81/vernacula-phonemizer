@@ -10,7 +10,7 @@ import { createEnglishTagger } from "../src/languages/english/englishTagger.ts";
 // The neural OOV tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back to
 // the sync CMUdict + n-gram engine, so the fallback contract is testable everywhere; the retagging assertions run only
 // with the model present.
-const haveModel = existsSync(join(import.meta.dirname, "../src/languages/english/en-g2p-tagger.int8.onnx"));
+const haveModel = existsSync(join(import.meta.dirname, "../data/languages/english/en-g2p-tagger.int8.onnx"));
 
 describe("english neural OOV tagger", () => {
     // Dict words, heteronyms, numbers, possessives, and punctuation are the SYNC engine's — the neural path only swaps

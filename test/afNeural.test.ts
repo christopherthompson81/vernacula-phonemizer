@@ -10,7 +10,7 @@ import { createAfrikaansTagger } from "../src/languages/afrikaans/afrikaansTagge
 
 // The neural OOV tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back
 // to the sync engine, so the fallback contract is testable everywhere; the retagging assertions need the model.
-const haveModel = existsSync(join(import.meta.dirname, "../src/languages/afrikaans/af-g2p-tagger.int8.onnx"));
+const haveModel = existsSync(join(import.meta.dirname, "../data/languages/afrikaans/af-g2p-tagger.int8.onnx"));
 
 describe("afrikaans neural OOV tagger", () => {
     // Numbers, punctuation, normalization, clause assembly and every lexicon-covered word belong to the SYNC

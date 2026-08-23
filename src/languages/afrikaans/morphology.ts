@@ -8,10 +8,10 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { makeDecompose, type MorphologyConfig } from "../../core/germanicMorphology.ts";
 import { MANIFEST } from "./manifest.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 const M = MANIFEST.morphology;
 
@@ -22,7 +22,7 @@ function stems(): Set<string> {
     if (STEMS === undefined) {
         STEMS = new Set();
         try {
-            const path = join(dirname(fileURLToPath(import.meta.url)), "af-stems.txt");
+            const path = join(dataDir(import.meta.url), "af-stems.txt");
             for (const line of readFileSync(path, "utf8").split("\n")) {
                 const w = line.trim().toLowerCase();
                 if (w) STEMS.add(w);

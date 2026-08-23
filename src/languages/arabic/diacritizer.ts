@@ -8,10 +8,10 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { MANIFEST } from "./manifest.ts";
 import { loadOrt } from "../../core/onnx.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 const SHADDA = MANIFEST.marks.shadda;
 const LABEL_VOWEL_MARK = MANIFEST.diacritizer.labelMarks; // label → combining mark
@@ -153,7 +153,7 @@ export async function loadArabicDiacritizer(modelBytes: Uint8Array, meta: Diacri
  *  student model (diacritizer-egy.onnx, restores EGYPTIAN short vowels — مصر→maṣr not the MSA miṣr); it falls
  *  back to the MSA model (→ MSA vowels + the Cairene consonant shifts, the pre-lexicon behavior) if absent. */
 export async function createArabicDiacritizer(variety?: string): Promise<ArabicDiacritizer | undefined> {
-  const dir = dirname(fileURLToPath(import.meta.url));
+  const dir = dataDir(import.meta.url);
   const bases = variety === "egyptian" ? ["diacritizer-egy", "diacritizer"] : ["diacritizer"];
   for (const base of bases) {
     let bytes: Buffer;

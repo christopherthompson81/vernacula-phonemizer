@@ -12,7 +12,7 @@ import { isSkeleton, restoreSkeletons, lexiconPrimary } from "../src/languages/a
 
 // The neural diacritizer model is gitignored (dev stand-in / built permissively) — skip its tests if absent.
 const haveDiacritizer = existsSync(
-    join(import.meta.dirname, "../src/languages/arabic/diacritizer.onnx"),
+    join(import.meta.dirname, "../data/languages/arabic/diacritizer.onnx"),
 );
 
 // Canonical-IPA goldens for Arabic (ar) — the DIACRITIZED input path (broad MSA, cleanroom rules,

@@ -19,7 +19,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, phonemizeWordRules } from "../src/languages/khmer/khmer.ts";
 
-const KM = join(import.meta.dirname, "../src/languages/khmer");
+const KM = join(import.meta.dirname, "../data/languages/khmer");
 const read = (f: string): Map<string, string> => {
     const m = new Map<string, string>();
     for (const line of readFileSync(join(KM, f), "utf8").split("\n")) {

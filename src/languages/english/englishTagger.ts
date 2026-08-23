@@ -13,13 +13,13 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
 import { collapseGeminates, enforceSinglePrimary } from "./englishG2p.ts";
 import { makeArpabetToIpa } from "./englishArpabet.ts";
 import { MANIFEST } from "./manifest.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 export interface EnglishTagger {
     /** A bare OOV word (letters) → canonical IPA, or "" to defer to the sync n-gram engine (out-of-vocab letter). */
@@ -28,7 +28,7 @@ export interface EnglishTagger {
 
 /** Build the English OOV tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export async function createEnglishTagger(basename = "en-g2p-tagger"): Promise<EnglishTagger | undefined> {
-    const dir = dirname(fileURLToPath(import.meta.url));
+    const dir = dataDir(import.meta.url);
     let meta: TaggerMeta, modelBytes: Uint8Array;
     try {
         meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as TaggerMeta;

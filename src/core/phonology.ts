@@ -5,9 +5,9 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { parseJsonc } from "./jsonc.ts";
+import { dataDir } from "./dataPath.ts";
 
 /**
  * Universal (not language-specific) phonology tables, loaded from data/native/_shared/phonology.jsonc.
@@ -21,7 +21,7 @@ export interface Phonology {
     homorganicNasal: Record<string, string>;
 }
 
-const SHARED_DIR = dirname(fileURLToPath(import.meta.url)); // phonology.jsonc sits beside this module
+const SHARED_DIR = dataDir(import.meta.url); // phonology.jsonc sits beside this module
 
 let cached: Phonology | undefined;
 
