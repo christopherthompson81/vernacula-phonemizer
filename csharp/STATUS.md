@@ -30,7 +30,9 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
    and pinned in `Vernacula.Phonemizer.Tests/JsRegexDialectTests.cs` (28 tests):
      - **Simple case folding.** JS /iu folds `\u017F`→s, `\u0345`→ι, `\u1C80-\u1C88`→modern
        Cyrillic; .NET IgnoreCase does none of them. French, Portuguese, Mindong and Lingala
-       tokenizers all dropped a long s. Fixed with a MEASURED table (94 divergent pairs of 2,408).
+       tokenizers all dropped a long s. Fixed with a MEASURED table (94 divergent pairs of 2,408) —
+       `tools/measure_case_folding.mts` regenerates the measurement, and `JsRegexFoldTests`
+       re-derives the .NET half at test time so a runtime casing change fails loudly.
      - **...but only under /u.** Legacy /i refuses non-ASCII→ASCII folds; applying the fold on `i`
        alone regressed `scottishgaelic/numbers.ts`. The harness caught the regression immediately.
      - **`[^\S\n]`** (4 patterns) and **`\p{ASCII}`** were refused outright — both are now
@@ -44,6 +46,9 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
        `[^x]` happily matches half of one. Categories now carry an astral half (built from
        `CharUnicodeInfo`, so it cannot drift from the BMP half), and every "any character except"
        construct takes a whole pair.
+     - **A negated class body must be emitted VERBATIM.** Excluding surrogates by appending to the
+       body turned `[^a-]` into `[^a-\uD800-\uDFFF]`, reading `a-\uD800` as a range. Found by review,
+       not by the harness: no pattern in src/ has that shape.
      - **Two advance rules.** JS global iteration skips a code POINT after a zero-length match but a
        code UNIT after a failed attempt; `Regex.Matches` reproduces neither, so `JsRe` drives the
        loop. Verified against Node on `/(?<![\p{L}])/gu`, which really does report a position

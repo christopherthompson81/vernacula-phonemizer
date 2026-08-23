@@ -207,7 +207,9 @@ public static class JsRegex
     //
     // The map is MEASURED, not hand-written: every ordered pair (a, b) here is one where Node says
     // /[a]/iu matches b and .NET says it does not, taken over every case-equivalence group in the BMP
-    // (tools/../scratchpad measurement, 94 pairs of 2,408). Adding b to the class body fixes both
+    // (94 pairs of 2,408). Regenerate the measurement with tools/measure_case_folding.mts; the .NET
+    // half is re-derived at TEST time by JsRegexFoldTests, so a runtime whose casing changes fails a
+    // test instead of quietly emitting a different phoneme. Adding b to the class body fixes both
     // polarities at once — a positive class gains the member, a negated class excludes it, which is
     // exactly what JS does. Note this is a lower bound: it can only find pairs whose members share a
     // toUpperCase().toLowerCase() key, which is scf for every case in Unicode's BMP fold table.
@@ -419,9 +421,13 @@ public static class JsRegex
                     // "any code point except these": a whole astral pair (unless the class itself
                     // covers it), or one non-surrogate unit. Emitting plain [^…] would match a LONE
                     // SURROGATE and report half a character as the answer.
+                    // ⚠ THE SURROGATE EXCLUSION IS A LOOKAHEAD, NOT A CLASS MEMBER. Appending
+                    // "\uD800-\uDFFF" to the body corrupts a body that ends in a literal hyphen:
+                    // [^a-] became [^a-\uD800-\uDFFF], reading "a-\uD800" as a RANGE, and stopped
+                    // matching "q" entirely. The body must be emitted exactly as JS wrote it.
                     sbOut.Append("(?:");
                     if (astral.Count > 0) sbOut.Append("(?!").Append(UnicodeScripts.GuardAstral(string.Join("|", astral))).Append(')');
-                    sbOut.Append(AstralPair).Append("|[^").Append(body).Append(NoSurrogate).Append("])");
+                    sbOut.Append(AstralPair).Append("|(?![").Append(NoSurrogate).Append("])[^").Append(body).Append("])");
                 }
                 else if (astral.Count == 0)
                 {

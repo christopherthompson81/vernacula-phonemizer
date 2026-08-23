@@ -11,6 +11,10 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The measured fold relation the JsRegex table is checked against (tools/measure_case_folding.mts). -->
+    <Content Include="../fold-pairs.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../Vernacula.Phonemizer/Vernacula.Phonemizer.csproj" />
   </ItemGroup>
 </Project>

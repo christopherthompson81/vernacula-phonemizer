@@ -126,6 +126,21 @@ public class JsRegexCodePointTests
     public void FailedAttemptAdvancesByCodeUnit() =>
         Assert.Equal(new[] { (0, ""), (3, "") }, All("(?<![\\p{L}])", "gu", "\U00020001\U0002B740"));
 
+    [Theory]
+    [InlineData("[^a-]", "q", true)]
+    [InlineData("[^a-]", "-", false)]
+    [InlineData("[^-a]", "q", true)]
+    [InlineData("[^a-z-]", "q", false)]
+    [InlineData("[^a-z-]", "\u3000", true)]
+    public void NegatedClassBodyIsEmittedVerbatim(string pattern, string input, bool expected)
+    {
+        // ⚠ FOUND BY REVIEW, NOT BY THE HARNESS — no pattern in src/ ends a negated class with a
+        // literal hyphen, so nothing exercised it. Excluding surrogates by APPENDING to the body
+        // turned [^a-] into [^a-\uD800-\uDFFF], which reads "a-\uD800" as a range and stops matching
+        // ordinary letters. The exclusion is a lookahead so the body stays exactly as JS wrote it.
+        Assert.Equal(expected, JsRegex.Compile(pattern, "u").IsMatch(input));
+    }
+
     [Fact]
     public void AstralBranchesAreGuarded()
     {
