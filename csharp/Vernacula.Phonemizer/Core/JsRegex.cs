@@ -280,6 +280,29 @@ public static class JsRegex
         ['\uA64B'] = "\u1C88",   // ꙋ
     };
 
+    /// <summary>Splice the fold extras into a class body.
+    ///
+    /// ⚠ NOT A PLAIN APPEND. A body may END IN A LITERAL HYPHEN — `[a-zñ'ʼ-]`, Cebuano's native class — and
+    /// appending after it makes that hyphen a RANGE operator: `ʼ-\u017F`, which .NET rejects outright as
+    /// "range in reverse order". The class compiled fine in Node and threw at engine construction here, so the
+    /// whole language failed to build rather than reading one word wrong. Insert BEFORE a trailing literal
+    /// hyphen instead, which is where a hyphen has to stay to remain literal.</summary>
+    private static void AppendFoldExtras(StringBuilder body)
+    {
+        var extras = FoldExtrasFor(body.ToString());
+        if (extras.Length == 0) return;
+        // A trailing '-' is literal only when it is not itself escaped; count the backslashes before it.
+        var trailingHyphen = body.Length > 0 && body[^1] == '-';
+        if (trailingHyphen)
+        {
+            var slashes = 0;
+            for (var i = body.Length - 2; i >= 0 && body[i] == '\\'; i--) slashes++;
+            trailingHyphen = slashes % 2 == 0;
+        }
+        if (trailingHyphen) body.Insert(body.Length - 1, extras);
+        else body.Append(extras);
+    }
+
     /// <summary>Characters to add to a class body (or a bare literal) so .NET's IgnoreCase reproduces
     /// JS's scf-based /i. Returns "" when the class touches none of the divergent characters.</summary>
     private static string FoldExtrasFor(string classBody)
@@ -415,7 +438,7 @@ public static class JsRegex
             if (c == ']' && !first)
             {
                 i++;
-                if (foldWide) body.Append(FoldExtrasFor(body.ToString()));
+                if (foldWide) AppendFoldExtras(body);
                 if (negated && unicode)
                 {
                     // "any code point except these": a whole astral pair (unless the class itself

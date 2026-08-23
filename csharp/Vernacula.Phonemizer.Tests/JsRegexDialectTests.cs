@@ -36,6 +36,19 @@ public class JsRegexDialectTests
     }
 
     [Fact]
+    public void FoldExtrasDoNotTurnATrailingHyphenIntoARange()
+    {
+        // ⚠ FOUND BY A LANGUAGE, NOT BY THE HARNESS. Cebuano's native class is `[a-zñ'ʼ-]` — a body ending in
+        // a LITERAL hyphen — and appending the fold extras after it made that hyphen a RANGE OPERATOR:
+        // `ʼ-\u017F`, which .NET rejects as "range in reverse order". The class is fine in Node, so the whole
+        // engine threw at construction and all 200 golden rows failed at once. The extras go BEFORE a trailing
+        // hyphen now, which is the only place a hyphen stays literal.
+        Assert.True(JsRegex.Compile("^(?:[a-zñ\u0027ʼ-])+$", "iu").IsMatch("usa"));
+        Assert.True(JsRegex.Compile("[a-z-]", "iu").IsMatch("-"));
+        Assert.True(JsRegex.Compile("[a-z-]", "iu").IsMatch("ſ"));   // …and the fold still applies
+    }
+
+    [Fact]
     public void FoldExtrasSurviveNegation()
     {
         // A negated class must EXCLUDE the fold partner, which is what adding it to the body does.
