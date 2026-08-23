@@ -66,7 +66,7 @@ public static class EnglishArpabet
         var m = PHONE.Match(phone);
         return new Phone(
             m.Success ? m.Groups[1].Value : phone,
-            m.Success && m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? int.Parse(m.Groups[2].Value) : -1);
+            m.Success && m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? int.Parse(m.Groups[2].Value, System.Globalization.CultureInfo.InvariantCulture) : -1);
     }
 
     private static readonly JsRe ED_ES = JsRegex.Compile("(ed|es)$");
