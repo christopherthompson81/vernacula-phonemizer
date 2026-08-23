@@ -23,6 +23,7 @@ if (!Directory.Exists(goldens)) goldens = "csharp/goldens";
 var only = args.Where(a => !a.StartsWith('-')).ToHashSet();
 int langsOk = 0, langsBad = 0, rowsOk = 0, rowsBad = 0;
 var firstDiff = new List<string>();
+var dependencyGaps = new SortedSet<string>(StringComparer.Ordinal);
 
 foreach (var file in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, StringComparer.Ordinal))
 {
@@ -30,6 +31,10 @@ foreach (var file in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, 
     if (only.Count > 0 && !only.Contains(code)) continue;
     int ok = 0, bad = 0;
     string? sample = null;
+    // ⚠ SNAPSHOT PER LANGUAGE, not once for the run. Every UNPORTED golden also asks the registry for its own
+    // engine, so a run-wide list named all 105 of them and buried the two entries that matter — the engines a
+    // PORTED language reached through the script router and did not get.
+    var pendingBefore = Registry.PortPending.ToHashSet(StringComparer.Ordinal);
     foreach (var line in File.ReadLines(file))
     {
         var t = line.Split('\t');
@@ -45,6 +50,7 @@ foreach (var file in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, 
         else { bad++; sample ??= $"  {code}: \"{t[0][..Math.Min(48, t[0].Length)]}\"\n    want {t[1]}\n    got  {got}"; }
     }
     rowsOk += ok; rowsBad += bad;
+    foreach (var key in Registry.PortPending) if (!pendingBefore.Contains(key)) dependencyGaps.Add($"{code} → {key}");
     if (bad == 0) { langsOk++; Console.WriteLine($"  {code,-8} OK    {ok} rows"); }
     else { langsBad++; Console.WriteLine($"  {code,-8} DIFF  {bad}/{ok + bad} rows differ"); if (firstDiff.Count < 8 && sample != null) firstDiff.Add(sample); }
     continue;
@@ -55,8 +61,8 @@ Console.WriteLine($"\n{langsOk} languages byte-identical, {langsBad} differ ({ro
 // ⚠ A DIFF MAY NOT BE A PORTING BUG. The script router reads an embedded foreign run through ANOTHER
 // language's engine and catches the failure, so an unported target silently drops the run and the row
 // just differs. Naming the keys that were asked for and missing separates "blocked" from "wrong".
-if (Registry.PortPending.Count > 0)
-    Console.WriteLine($"⚠ unported engines requested during this run (rows needing them cannot pass yet): " +
-                      string.Join(", ", Registry.PortPending));
+if (dependencyGaps.Count > 0)
+    Console.WriteLine("⚠ a PORTED language reached for an engine that is not ported (its rows cannot pass yet): "
+                      + string.Join(", ", dependencyGaps));
 foreach (var d in firstDiff) Console.WriteLine(d);
 return langsBad == 0 ? 0 : 1;

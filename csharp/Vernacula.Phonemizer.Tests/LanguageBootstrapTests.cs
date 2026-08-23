@@ -26,14 +26,15 @@ public class LanguageBootstrapTests
         // A missing engine must be a NAMED failure. The script router catches this exception and drops the
         // run, so without the record a golden row simply differs and reads as a porting bug in the language
         // that was ported — Quechua's Cyrillic rows are read by the RUSSIAN engine.
-        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("ru"));
-        Assert.Contains("russian", Registry.PortPending);
+        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("de"));
+        Assert.Contains("german", Registry.PortPending);
     }
 
     [Theory]
     [InlineData("qu", "iskay chunka", "ˈiskaj ˈt͡ʃunka")]   // read off the TypeScript engine, not guessed
     [InlineData("af", "twee", "twˈiə")]           // ⟨tw⟩ is the glide, not [v] — the W_GLIDE_AFTER rule
     [InlineData("en", "virgin branson", "vˈɝd͡ʒɪn bɹˈænsən")]   // the ARPABET conditional vowels (ER/AH)
+    [InlineData("ru", "XIX веке", "dʲɪvʲɪtnˈat͡sətɨj vʲˈekʲe")]   // the Roman pass takes ru's ORDINAL policy
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 
