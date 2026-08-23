@@ -335,7 +335,7 @@ export function normalizeWolof(input: string): string {
     //    spaced digit groups — is rejected by the LEADING guard instead, because `602` is preceded by a comma.
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[  ]\d{3})+(?![\d])/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[  ]\d{3})+(?![\d])/gu, (w) => w.replace(/[  ]/gu, ""));
 
     // 6) RANGES → `ba`. 21 ascending digit-flanked spans in the retained text once verse references are
     //    excluded: `1906-2001`, `1960-1980`, `1500-1888`, `1884-1885`, `1740 -1786`, `1265 - 1321`, `10-20`.

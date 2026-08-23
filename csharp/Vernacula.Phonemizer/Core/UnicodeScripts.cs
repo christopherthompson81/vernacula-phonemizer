@@ -63,10 +63,30 @@ public static class UnicodeScripts
     private static readonly Dictionary<string, string> ClsCache = new();
     private static readonly object Gate = new();
 
-    private static int[] RangesOf(string script) =>
-        Ranges.TryGetValue(script, out var r)
+    /// <summary>ISO 15924 short aliases, which JS accepts interchangeably with the long name
+    /// (`\p{sc=Latn}` ≡ `\p{Script=Latin}` — the TS source uses BOTH spellings, 42 sites use the short
+    /// one). Without this the translator threw "unknown script" on every one of them.</summary>
+    private static readonly Dictionary<string, string> Aliases = new()
+    {
+        ["Latn"] = "Latin", ["Cyrl"] = "Cyrillic", ["Grek"] = "Greek", ["Hani"] = "Han",
+        ["Hira"] = "Hiragana", ["Kana"] = "Katakana", ["Hang"] = "Hangul", ["Arab"] = "Arabic",
+        ["Hebr"] = "Hebrew", ["Deva"] = "Devanagari", ["Beng"] = "Bengali", ["Taml"] = "Tamil",
+        ["Thai"] = "Thai", ["Ethi"] = "Ethiopic", ["Armn"] = "Armenian", ["Geor"] = "Georgian",
+        ["Mymr"] = "Myanmar", ["Telu"] = "Telugu", ["Knda"] = "Kannada", ["Mlym"] = "Malayalam",
+        ["Gujr"] = "Gujarati", ["Guru"] = "Gurmukhi", ["Orya"] = "Oriya", ["Sinh"] = "Sinhala",
+        ["Khmr"] = "Khmer", ["Laoo"] = "Lao", ["Tibt"] = "Tibetan", ["Tfng"] = "Tifinagh",
+        ["Cher"] = "Cherokee", ["Olck"] = "Ol_Chiki", ["Adlm"] = "Adlam", ["Nkoo"] = "Nko",
+        ["Sylo"] = "Syloti_Nagri", ["Java"] = "Javanese", ["Sund"] = "Sundanese",
+        ["Thaa"] = "Thaana", ["Syrc"] = "Syriac",
+    };
+
+    private static int[] RangesOf(string script)
+    {
+        if (Aliases.TryGetValue(script, out var full)) script = full;
+        return Ranges.TryGetValue(script, out var r)
             ? r
             : throw new ArgumentException($"UnicodeScripts: unknown script \"{script}\"");
+    }
 
     private static string EscapeBmp(int cp) => $"\\u{cp:X4}";
 

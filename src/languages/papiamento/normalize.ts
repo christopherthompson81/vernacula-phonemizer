@@ -59,8 +59,8 @@ export function normalizePapiamento(input: string): string {
     //    every decimal has one or two (`24,6%`, `27.3°C`).
     //    ⚠ THE WHOLE NUMBER AT ONCE, not one join per pass (trap 63); the trailing guard rejects a DIGIT
     //    and nothing else, or every clause-final figure is declined (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
+        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
     s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
     s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu,

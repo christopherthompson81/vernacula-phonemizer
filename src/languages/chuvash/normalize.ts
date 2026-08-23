@@ -160,15 +160,15 @@ export function normalizeChuvash(input: string): string {
     //    decimal tail, which this corpus writes — while a bare `(?![\d.,])` declines every clause-final
     //    figure (trap 58). The separator here is a SPACE, and a decimal never has one before its
     //    fraction, so `(?!\d)` is the whole guard.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
+        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
     //    ⚠ AND THE SPACE GROUPS THE FRACTION TOO, SI-style — `1 мм²=0,000 001 м²`, the square-millimetre
     //    article. That is 0.000001, and the integer-side rule cannot reach it: its leading guard rejects a
     //    group sitting behind a decimal separator, correctly, because that is how `1.234 567` is kept from
     //    being read as grouping. The fractional side needs its own pass, anchored on the separator.
-    s = s.replace(/([.,]\d{3})((?:[    ]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
-    s = s.replace(/[   ]/gu, " ");
+    s = s.replace(/([.,]\d{3})((?:[    ]\d{3})+)(?!\d)/gu,
+        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
+    s = s.replace(/[    ]/gu, " ");
 
     // 1) THE MAGNITUDE ABBREVIATIONS, before any single-dot rule — `1,3 млн. çын`, `143,8 млн. çын`,
     //    `$4,2 млрд`, `$1,915 трлн`. The dot is optional because the corpus writes both.

@@ -324,8 +324,8 @@ export function normalizeEnglish(input: string): string {
     //     core/sinitic.ts does. Pairwise cannot carry the leading-group constraint: after `2 008 400`
     //     merges its first pair the head is four digits, so the second pass would refuse its own output.
     const SPACE_GROUP = new RegExp(
-        `(?<!(?:${MONTH_ALT})[  ])(?<![\\d.,])\\d{1,3}(?:[  ]\\d{3})+(?![\\d])`, "giu");
-    s = s.replace(SPACE_GROUP, (m0) => m0.replace(/[  ]/gu, ""));
+        `(?<!(?:${MONTH_ALT})[  ])(?<![\\d.,])\\d{1,3}(?:[  ]\\d{3})+(?![\\d])`, "giu");
+    s = s.replace(SPACE_GROUP, (m0) => m0.replace(/[    ]/gu, ""));
 
     // 0e) SCIENTIFIC NOTATION'S EXPONENT, resolved before BOTH the sign rule and the unit rule — ⚠ AND THE
     //     ORDERING IS THE WHOLE REASON THIS IS SEPARATE FROM 6b rather than the same rule.

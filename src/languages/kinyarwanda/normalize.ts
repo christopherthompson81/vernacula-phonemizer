@@ -358,10 +358,10 @@ export function normalizeKinyarwanda(input: string): string {
     //    a one-letter unit, and the tier's `NOT_VERSION` guard rejects exactly `\d+[.,]\d+[a-zA-Z]` — the
     //    `802.11g` defence. De-grouped first they are `1300m` and the metre reads; left alone the unit leaks
     //    raw. 2 instances, and the alternative was withdrawing the `m` key altogether.
-    const NOT_COORD = "(?![  ]?[°º])";
+    const NOT_COORD = "(?![    ]?[°º])";
     s = s.replace(new RegExp(`(?<![\\d.,])[1-9]\\d{0,2}(?:,\\d{3})+(?!\\d|[.,]\\d)${NOT_COORD}`, "gu"), (w) => w.replace(/,/gu, ""));
     s = s.replace(new RegExp(`(?<![\\d.,])[1-9]\\d{0,2}(?:\\.\\d{3})+(?!\\d|[.,]\\d)${NOT_COORD}`, "gu"), (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
 
     // 3) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — `km² 26,338`, `m 900`, `cm 25`, `kg 250`, `ml 10`,
     //    `g 200`. The shared tier matches ONLY number-then-unit, so these 30 instances are structurally

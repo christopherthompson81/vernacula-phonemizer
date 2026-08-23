@@ -21,7 +21,7 @@ import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { portugueseOrdinal } from "./romanOrdinals.ts";
 
-const GROUP_SPACE = "    ";
+const GROUP_SPACE = "    ";
 const MONTHS = "janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro";
 
 /** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare "no"
@@ -102,7 +102,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    form is not, and the number token cannot span a space.
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
-    s = s.replace(/[   ]/gu, " ");
+    s = s.replace(/[    ]/gu, " ");
 
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first — `a.` is
     //    8 of the 19 dotted abbreviations in the corpus and every one is `a.C.`.

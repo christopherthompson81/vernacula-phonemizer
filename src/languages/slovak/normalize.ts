@@ -110,7 +110,7 @@ export function normalizeSlovakInitialisms(text: string): string {
 /** Regular, NBSP and narrow-NBSP. The corpus uses NBSP BOTH as a thousands separator (`11 000`) and as an
  *  ordinary inter-word space (28 instances, `s vlastnením`), so it is folded to a plain space after the
  *  de-grouping pass has had its look. */
-const GROUP_SPACE = "  ";
+const GROUP_SPACE = "  ";
 
 /** Pick the count form of a counted noun written [sg, paucal (2–4), gen-pl]. */
 function counted(n: number, forms: readonly [string, string, string]): string {

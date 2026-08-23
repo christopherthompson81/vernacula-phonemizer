@@ -60,8 +60,8 @@ export function normalizeFaroese(input: string): string {
     // 2) THE THOUSANDS GROUP — exactly three digits after the dot, and the no-break space this corpus
     //    also uses (`7 737 fólkini`, `48 219`, `12 000–10 000 f. Kr.`). ⚠ THE WHOLE NUMBER AT ONCE, not
     //    one join per pass (trap 63); the trailing guard rejects a DIGIT and nothing else (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
+        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
     s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 

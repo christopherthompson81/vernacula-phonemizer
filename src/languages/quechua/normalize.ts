@@ -339,7 +339,7 @@ export function normalizeQuechua(input: string): string {
     const degroup = (sep: RegExp) => (w: string) => w.replace(sep, "");
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, degroup(/\./gu));
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, degroup(/,/gu));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?!\d)/gu, degroup(/[  ]/gu));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?!\d)/gu, degroup(/[  ]/gu));
 
     // ── 3. THE SHARED TIER — units, exponents, rates, currency, `&` ─────────────────────────────────────
     // ⚠ AFTER de-grouping, or `1.007 km` is seen as `007 km` and the kilometre attaches to the wrong

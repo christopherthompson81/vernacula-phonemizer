@@ -316,7 +316,7 @@ export function normalizeSetswanaPost(input: string): string {
     //    then read as a decimal by step 10.
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?![\d])/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?![\d])/gu, (w) => w.replace(/[  ]/gu, ""));
 
     // 7) THE ENGLISH ORDINAL SUFFIX (`20th`, `3rd`, `2nd`). Setswana writes its own ordinals as words —
     //    *wa ntlha*, *ya bobedi*, *la bo 18 la dingwaga* — so a Latin suffix on a digit is always foreign

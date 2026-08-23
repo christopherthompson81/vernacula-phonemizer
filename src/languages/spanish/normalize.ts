@@ -30,7 +30,7 @@ import { numberToWords } from "./numbers.ts";
 import { spanishOrdinal } from "./romanOrdinals.ts";
 
 /** Space characters used as digit-group separators: regular, NBSP, narrow NBSP, thin. */
-const GROUP_SPACE = "    ";
+const GROUP_SPACE = "    ";
 
 const MONTHS = "enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre";
 
@@ -142,7 +142,7 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     //    token cannot span a space, so "5 000 años" read as "cinco cero años".
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
-    s = s.replace(/[   ]/gu, " ");
+    s = s.replace(/[    ]/gu, " ");
 
     // 0b) ⚠ THE DOT ALSO DECIMATES, AND THE THREE-DIGIT TEST TELLS THE TWO APART. Spanish groups thousands
     //     with a period and the number token reads that (`17.000` → diecisiete mil), but BOTH corpora carry

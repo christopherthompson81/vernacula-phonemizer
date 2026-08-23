@@ -241,7 +241,7 @@ export function normalizeKikuyu(input: string): string {
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
     //    The space-grouped form, same shape. ×0 in this corpus; the arm is here because a wiki that writes
     //    `41,200` also writes `41 200`, and it cannot fire on anything else (three digits, no letters).
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
 
     // 4) THE ENGLISH ORDINAL SUFFIX (`21st`, `20th`, `70th`, `4th`, `2nd`; 194 whole-corpus). Kikuyu writes
     //    its own ordinals as WORDS with a class-agreeing prefix — this corpus has *wa mbere*, *wa kerĩ*,

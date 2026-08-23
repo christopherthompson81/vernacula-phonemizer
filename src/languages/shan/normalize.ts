@@ -77,7 +77,7 @@ export function normalizeShan(input: string): string {
     s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     //    …and the no-break space, which this corpus also uses between a figure and its magnitude.
-    s = s.replace(/[   ]/gu, " ");
+    s = s.replace(/[    ]/gu, " ");
 
     // 2) THE ERA MARKER, written in LATIN letters inside Shan text — `A.D 649-729`, `(1434 A.D.)`,
     //    `A.D 739`, `ထိုင်မႃး A.D 748`. It was reaching `core/foreign.ts` and reading as the English
