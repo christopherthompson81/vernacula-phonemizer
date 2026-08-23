@@ -11,16 +11,16 @@
  * createFrenchTagger() resolves to `undefined` and the async path (frNeural.ts) falls back to the sync rule engine.
  */
 import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { createWordStructuralTagger, type WordStructuralTagger } from "../../core/structuralTagger.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 export type FrenchTagger = WordStructuralTagger;
 
 /** Build the French OOV tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export function createFrenchTagger(basename = "fr-g2p-tagger"): Promise<FrenchTagger | undefined> {
     return createWordStructuralTagger({
-        dir: dirname(fileURLToPath(import.meta.url)),
+        dir: dataDir(import.meta.url),
         basename,
         modelFile: `${basename}.int8.onnx`,
         context: "French neural OOV G2P",

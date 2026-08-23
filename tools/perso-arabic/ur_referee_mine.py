@@ -47,7 +47,7 @@ for l in open(f"{HERE}/tools/referee-eval/referees/ur.cle-speech.tsv",encoding="
     if l.startswith("#") or "\t" not in l: continue
     k,v=l.rstrip("\n").split("\t"); cle[k]=norm(v)
 ours={}
-for l in open(f"{HERE}/src/languages/urdu/lexicon-ipa.tsv",encoding="utf8"):
+for l in open(f"{HERE}/data/languages/urdu/lexicon-ipa.tsv",encoding="utf8"):
     if l.startswith("#") or "\t" not in l: continue
     k,v=l.rstrip("\n").split("\t"); ours[k]=norm(v)
 

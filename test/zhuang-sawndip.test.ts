@@ -32,7 +32,7 @@ describe("Zhuang Sawndip (second-script front-end)", () => {
     });
 
     test("the shipped dictionary is well-formed and every reading is phonemizable", () => {
-        const dict = loadTsvMap(import.meta.url, "../src/languages/zhuang/sawndip-readings.tsv");
+        const dict = loadTsvMap(import.meta.url, "../data/languages/zhuang/sawndip-readings.tsv");
         expect(dict.size).toBeGreaterThan(2000);
         for (const [glyph, reading] of dict) {
             expect([...glyph].length).toBe(1); // single codepoint per key

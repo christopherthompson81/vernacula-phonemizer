@@ -12,7 +12,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { phonemizeWordRules, phonemizeWordForced } from "../../src/languages/greek/greek.ts";
 
 const REF = "tools/referee-eval/referees";
-const OUT = "src/languages/greek/greek-synizesis.tsv";
+const OUT = "data/languages/greek/greek-synizesis.tsv";
 
 // Mirror the eval's backbone + folds so "consensus" means the same thing the eval measures.
 const clean = (s: string): string =>

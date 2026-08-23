@@ -39,7 +39,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-const LEXICON = join(dirname(fileURLToPath(import.meta.url)), "../../src/languages/french/lexicon.tsv");
+const LEXICON = join(dirname(fileURLToPath(import.meta.url)), "../../data/languages/french/lexicon.tsv");
 
 const lex = new Map<string, string>();
 for (const line of readFileSync(LEXICON, "utf8").split("\n")) {

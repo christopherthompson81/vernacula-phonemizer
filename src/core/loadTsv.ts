@@ -10,8 +10,8 @@
  * missing file yield an empty Map instead of throwing (for lexicons that may be absent).
  */
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+
+import { dataFile } from "./dataPath.ts";
 
 /** Read a data file beside `metaUrl`, returning its non-blank, non-`#`-comment lines. `optional` → [] on a
  *  missing file (else rethrows). Shared by loadTsvMap and loadLines so both parse lines identically. */
@@ -20,7 +20,7 @@ function readDataLines(
     filename: string,
     optional: boolean,
 ): string[] {
-    const path = join(dirname(fileURLToPath(metaUrl)), filename);
+    const path = dataFile(metaUrl, filename);
     let text: string;
     try {
         text = readFileSync(path, "utf8");

@@ -61,7 +61,7 @@ describe("Egyptian lexicon — no annotation artifacts", () => {
     const DELIMITER = /[/[\]~()|\\]/u;
 
     it("ships no entry carrying a structural delimiter", () => {
-        const path = new URL("../src/languages/arabic/egyptian-lexicon.tsv", import.meta.url);
+        const path = new URL("../data/languages/arabic/egyptian-lexicon.tsv", import.meta.url);
         const bad: string[] = [];
         for (const line of readFileSync(path, "utf8").split("\n")) {
             if (!line || line.startsWith("#")) continue;

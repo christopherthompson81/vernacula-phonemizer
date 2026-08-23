@@ -15,9 +15,9 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { loadOrt, type OrtLike, type OrtSession, type OrtTensor } from "../../core/onnx.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 interface Meta { src: Record<string, number>; tgt: Record<string, number>; H: number; bos: number; eos: number; unk: number }
 
@@ -44,7 +44,7 @@ export function stressPerWord(ipa: string): string {
  * classical-only. `basename` is retained for symmetry / test overrides.
  */
 export async function createFaContextRestorer(basename = "fa-context-restorer"): Promise<FaContextRestorer | undefined> {
-    const dir = dirname(fileURLToPath(import.meta.url));
+    const dir = dataDir(import.meta.url);
     let meta: Meta, encBytes: Uint8Array, decBytes: Uint8Array;
     try {
         meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as Meta;

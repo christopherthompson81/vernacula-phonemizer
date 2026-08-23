@@ -1,0 +1,13 @@
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/bin/Debug/net10.0/Vernacula.Phonemizer.deps.json
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/bin/Debug/net10.0/Vernacula.Phonemizer.dll
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/bin/Debug/net10.0/Vernacula.Phonemizer.pdb
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/Vernacula.Phonemizer.csproj.AssemblyReference.cache
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/Vernacula.Phonemizer.GeneratedMSBuildEditorConfig.editorconfig
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/Vernacula.Phonemizer.AssemblyInfoInputs.cache
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/Vernacula.Phonemizer.AssemblyInfo.cs
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/Vernacula.Phonemizer.csproj.CoreCompileInputs.cache
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/Vernacula.Phonemizer.sourcelink.json
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/Vernacula.Phonemizer.dll
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/refint/Vernacula.Phonemizer.dll
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/Vernacula.Phonemizer.pdb
+/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/obj/Debug/net10.0/ref/Vernacula.Phonemizer.dll

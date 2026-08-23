@@ -30,7 +30,7 @@ const SCRIPTS = new Set([
     "Syloti Nagri", "Tamil", "Telugu", "Thai", "Tibetan",
 ]);
 
-const DIR = new URL("../src/languages/", import.meta.url);
+const DIR = new URL("../data/languages/", import.meta.url);
 const manifests: Array<[string, string]> = [];
 for (const d of readdirSync(DIR)) {
     // Comments are stripped BEFORE any regex sees the source, so a comment inside a matched span can

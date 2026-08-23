@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build src/languages/serbian/accent-transitions.tsv — the OOV tier for sr/hr/bs accent.
+"""Build data/languages/serbian/accent-transitions.tsv — the OOV tier for sr/hr/bs accent.
 
 The lexicon covers ~43% of polysyllabic corpus tokens. The rest is not random: the commonest misses (godine,
 može, ima, bila, rekao) are INFLECTED FORMS of lemmas the lexicon already has, and over the 56899 lemmas

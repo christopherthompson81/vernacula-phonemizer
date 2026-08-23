@@ -17,11 +17,11 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { stressPerWord, type FaContextRestorer } from "./contextRestorer.ts";
 
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 
 const SHORT_V = new Set(["a", "e", "o"]);
@@ -55,7 +55,7 @@ function correctFirstVowel(word: string, ipa: string, pin: Map<string, string>):
 
 /** Build the structural tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export async function createFaTagger(basename = "fa-tagger"): Promise<FaContextRestorer | undefined> {
-    const dir = dirname(fileURLToPath(import.meta.url));
+    const dir = dataDir(import.meta.url);
     let meta: TaggerMeta, modelBytes: Uint8Array;
     try {
         meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as TaggerMeta;

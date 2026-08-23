@@ -25,11 +25,11 @@ for (const l of readFileSync(`${HERE}/../../tools/referee-eval/referees/ur.wikip
     set.add(cfold(pron.replace(/ /gu, "")));
 }
 const lex = new Map<string, string>();
-for (const l of readFileSync(`${HERE}/../../src/languages/urdu/lexicon-ipa.tsv`, "utf8").split("\n")) { if (l.startsWith("#") || !l.includes("\t")) continue; const [k, v] = l.split("\t"); lex.set(k!, v!); }
+for (const l of readFileSync(`${HERE}/../../data/languages/urdu/lexicon-ipa.tsv`, "utf8").split("\n")) { if (l.startsWith("#") || !l.includes("\t")) continue; const [k, v] = l.split("\t"); lex.set(k!, v!); }
 // old harakat lexicon: skeleton → vocalized (harakat)
 const harakat = new Map<string, string>();
 const HARAKAT_G = /[ؐ-ًؚ-ٰٟۖ-ۭـ]/gu;
-for (const l of readFileSync(`${HERE}/../../src/languages/urdu/lexicon.tsv`, "utf8").split("\n")) { if (l.startsWith("#") || !l.includes("\t")) continue; const [k, v] = l.split("\t"); harakat.set(k!.normalize("NFC"), v!.normalize("NFC")); }
+for (const l of readFileSync(`${HERE}/../../data/languages/urdu/lexicon.tsv`, "utf8").split("\n")) { if (l.startsWith("#") || !l.includes("\t")) continue; const [k, v] = l.split("\t"); harakat.set(k!.normalize("NFC"), v!.normalize("NFC")); }
 
 let regMiss = 0, hasHarakat = 0, harakatFixes = 0, harakatAlsoMiss = 0;
 const ex: string[] = [];

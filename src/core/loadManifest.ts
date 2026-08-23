@@ -6,14 +6,12 @@
  *   export const MANIFEST = loadManifest<XManifest>(import.meta.url, "x.jsonc");
  */
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
+import { dataFile } from "./dataPath.ts";
 import { parseJsonc } from "./jsonc.ts";
 
 export function loadManifest<T>(metaUrl: string, filename: string): T {
-    const dir = dirname(fileURLToPath(metaUrl));
-    return parseJsonc<T>(readFileSync(join(dir, filename), "utf8"));
+    return parseJsonc<T>(readFileSync(dataFile(metaUrl, filename), "utf8"));
 }
 
 /**
@@ -22,6 +20,5 @@ export function loadManifest<T>(metaUrl: string, filename: string): T {
  * character JSONC scan would be wasted work.
  */
 export function loadJson<T>(metaUrl: string, filename: string): T {
-    const dir = dirname(fileURLToPath(metaUrl));
-    return JSON.parse(readFileSync(join(dir, filename), "utf8")) as T;
+    return JSON.parse(readFileSync(dataFile(metaUrl, filename), "utf8")) as T;
 }

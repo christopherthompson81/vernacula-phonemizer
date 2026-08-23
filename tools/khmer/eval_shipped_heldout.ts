@@ -59,7 +59,7 @@ const heldOut = new Set(
 );
 
 /** Tier 1, as it would have been mined from the 80% only. */
-const exceptions = new Map(readTsv("src/languages/khmer/km-lexicon.tsv").filter(([w]) => !heldOut.has(w)));
+const exceptions = new Map(readTsv("data/languages/khmer/km-lexicon.tsv").filter(([w]) => !heldOut.has(w)));
 
 /** Tier 2, rebuilt with the exclusion gate seeing only the 80% — so held-out words the dictionary covers enter. */
 const KHMER_WORD = /^[ក-៓ៜ-៝]{1,}$/u;
@@ -77,7 +77,7 @@ for (const line of readFileSync(src, "utf8").split("\n")) {
  *  and the experiment measures Wiktionary-vs-Wiktionary. The production tier already contains NO wikipron
  *  word by construction, so filtering held-out words here is a no-op today; it is written down so a future
  *  rebuild against a different wikipron scrape cannot silently break the experiment. */
-const kaikki = new Map(readTsv("src/languages/khmer/km-lexicon-kaikki.tsv").filter(([w]) => !heldOut.has(w)));
+const kaikki = new Map(readTsv("data/languages/khmer/km-lexicon-kaikki.tsv").filter(([w]) => !heldOut.has(w)));
 
 /** The shipped resolution order, reproduced over the rebuilt tiers: exceptions → kaikki → dictionary → rules. */
 const shipped = (w: string): string => exceptions.get(w) ?? kaikki.get(w) ?? dict.get(w) ?? phonemizeWordRules(w);
@@ -101,7 +101,7 @@ for (const w of held) {
 
 const pc = (x: number, n: number): string => `${((100 * x) / n).toFixed(1)}%`;
 console.log(`referee unique words: ${words.length}   held out (20%): ${held.length}`);
-console.log(`rebuilt tiers — exceptions ${exceptions.size} (was ${readTsv("src/languages/khmer/km-lexicon.tsv").length}), dictionary ${dict.size}`);
+console.log(`rebuilt tiers — exceptions ${exceptions.size} (was ${readTsv("data/languages/khmer/km-lexicon.tsv").length}), dictionary ${dict.size}`);
 console.log(`\non the ${held.length} held-out words:`);
 console.log(`  rules only            ${String(rulesOk).padStart(5)}  ${pc(rulesOk, held.length)}`);
 console.log(`  shipped (dict-first)  ${String(shippedOk).padStart(5)}  ${pc(shippedOk, held.length)}`);

@@ -13,7 +13,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { renderWord, type Corr } from "../../src/languages/portuguese/portuguese.ts";
 
 const REF = (process.env["DUMPS"] ?? ".") + "/wp_por_latn_po_broad_filtered.tsv";
-const OUT = "src/languages/portuguese/lexicon.tsv";
+const OUT = "data/languages/portuguese/lexicon.tsv";
 
 // word → first pronunciation, kept SPACE-separated (phones) for per-vowel alignment.
 const ref = new Map<string, string>();

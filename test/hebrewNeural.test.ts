@@ -9,7 +9,7 @@ import { phonemizeHebrewNeural } from "../src/languages/hebrew/hebrewNeural.ts";
 // The neural VOWEL RESTORER for UNVOCALIZED Hebrew is gated on the (optional) ONNX model + onnxruntime-node.
 // When absent the path falls back to the sync rule engine (vocalized-only), so the fallback contract is testable
 // everywhere; the restoration assertions run only with the model present. See he-tagger.PROVENANCE.md.
-const haveModel = existsSync(join(import.meta.dirname, "../src/languages/hebrew/he-tagger.int8.onnx"));
+const haveModel = existsSync(join(import.meta.dirname, "../data/languages/hebrew/he-tagger.int8.onnx"));
 
 describe("hebrew neural vowel restoration", () => {
     // A VOCALIZED word is always routed to the deterministic rule g2p (the tagger declines on niqqud chars), so

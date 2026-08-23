@@ -1,5 +1,5 @@
 /**
- * Generate src/languages/tagalog/loanword-lexicon.tsv — a SHIPPED word→IPA override for the loanword FOREIGN-SEGMENT
+ * Generate data/languages/tagalog/loanword-lexicon.tsv — a SHIPPED word→IPA override for the loanword FOREIGN-SEGMENT
  * class only: Spanish ⟨j⟩→[h] (abenojar→abenohaɾ) and soft ⟨c⟩→[s] (abece→abese). These are origin-specific — native
  * Tagalog has neither — so pinning them never touches native vocabulary (verified against a native canary set below).
  *
@@ -57,6 +57,6 @@ const header =
     "# final-ʔ) and keeping it only where all wikipron readings agree AND the op matches the referee. The broader VV/\n" +
     "# glide/hiatus loanword class is NOT mined (same spelling = native [ij]/hiatus-ʔ vs loanword glide → would corrupt\n" +
     "# siya/tao). SHIPPED-only: phonemizeWordRules (the eval) skips it → non-circular.\n";
-writeFileSync(new URL("../../src/languages/tagalog/loanword-lexicon.tsv", import.meta.url), header + out.join("\n") + "\n");
+writeFileSync(new URL("../../data/languages/tagalog/loanword-lexicon.tsv", import.meta.url), header + out.join("\n") + "\n");
 console.log(`pinned ${out.length} loanwords (foreign-segment class); native canaries clean`);
 console.log("samples:", out.slice(0, 6));

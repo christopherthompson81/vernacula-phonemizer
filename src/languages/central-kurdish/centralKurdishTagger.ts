@@ -32,17 +32,17 @@
  * createCentralKurdishTagger() resolves to `undefined` and callers fall back to the sync engine (no throw).
  */
 import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { createWordStructuralTagger, type WordStructuralTagger } from "../../core/structuralTagger.ts";
 import { phonemizeWordRules } from "./central-kurdish.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 export type CentralKurdishTagger = WordStructuralTagger;
 
 /** Build the ckb bizroke tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export function createCentralKurdishTagger(basename = "ckb-bizroke-tagger"): Promise<CentralKurdishTagger | undefined> {
     return createWordStructuralTagger({
-        dir: dirname(fileURLToPath(import.meta.url)),
+        dir: dataDir(import.meta.url),
         basename,
         modelFile: `${basename}.int8.onnx`,
         context: "Central Kurdish neural tagging",

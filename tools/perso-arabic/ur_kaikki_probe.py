@@ -8,7 +8,7 @@ import os
 HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 DUMP="/tmp/ur_kaikki.jsonl"
 WIKI=f"{HERE}/tools/referee-eval/referees/ur.wikipron-urd-broad.tsv"
-LEX=f"{HERE}/src/languages/urdu/lexicon-ipa.tsv"
+LEX=f"{HERE}/data/languages/urdu/lexicon-ipa.tsv"
 HARAKAT_G=r"[ؐ-ًؚ-ٰٟۖ-ۭـ]"
 import re
 HRX=re.compile(HARAKAT_G)

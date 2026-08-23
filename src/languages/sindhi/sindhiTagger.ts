@@ -16,16 +16,16 @@
  * createSindhiTagger() resolves to `undefined` and callers fall back to the sync rule engine (no throw).
  */
 import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { createWordStructuralTagger, type WordStructuralTagger } from "../../core/structuralTagger.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 export type SindhiTagger = WordStructuralTagger;
 
 /** Build the Sindhi OOV tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export function createSindhiTagger(basename = "sd-g2p-tagger"): Promise<SindhiTagger | undefined> {
     return createWordStructuralTagger({
-        dir: dirname(fileURLToPath(import.meta.url)),
+        dir: dataDir(import.meta.url),
         basename,
         modelFile: `${basename}.int8.onnx`,
         context: "Sindhi neural tagging",

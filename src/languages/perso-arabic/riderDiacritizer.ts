@@ -12,10 +12,10 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { HARAKAT, HARAKAT_G, stripHarakat } from "../../core/harakatLexicon.ts";
 import { loadOrt } from "../../core/onnx.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 // label → the combining harakat to append after a base letter. Mirrors the training VOWELS map (invert_harakat.ts /
 // train_multilingual_harakat.py): a fatḥa, u damma, i kasra, o sukūn, F/N/K tanwīn, ^ dagger-alif (U+0670); a "~"
@@ -104,7 +104,7 @@ export async function loadRiderDiacritizer(modelBytes: Uint8Array, meta: RiderDi
  *  failed `onnxruntime-node` load (optional native dep absent / ABI mismatch) — rather than throwing. Call
  *  loadRiderDiacritizer directly if you want the underlying error surfaced. */
 export async function createRiderDiacritizer(): Promise<RiderDiacritizer | undefined> {
-    const dir = dirname(fileURLToPath(import.meta.url));
+    const dir = dataDir(import.meta.url);
     let bytes: Buffer, meta: RiderDiacritizerMeta;
     try {
         bytes = readFileSync(join(dir, "riderDiacritizer.onnx"));

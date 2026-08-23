@@ -9,7 +9,7 @@ import { phonemizeBnNeural } from "../src/languages/bengali/bengaliNeural.ts";
 // The neural OOV tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back
 // to the sync engine, so the fallback contract is testable everywhere; the retagging assertions run only with the
 // model present. See src/languages/bengali/bn-g2p-tagger.PROVENANCE.md.
-const haveModel = existsSync(join(import.meta.dirname, "../src/languages/bengali/bn-g2p-tagger.int8.onnx"));
+const haveModel = existsSync(join(import.meta.dirname, "../data/languages/bengali/bn-g2p-tagger.int8.onnx"));
 
 describe("bengali neural OOV tagger", () => {
     // Numbers, punctuation, clause assembly, and lexicon/common words are the SYNC engine's — the neural path only

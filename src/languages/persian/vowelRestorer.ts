@@ -14,9 +14,9 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { loadOrt, type OrtLike, type OrtSession, type OrtTensor } from "../../core/onnx.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 interface Meta {
     src: Record<string, number>;
@@ -48,7 +48,7 @@ function toIranian(ipa: string, word: string): string {
 
 /** Build the Persian OOV vowel restorer, or `undefined` if the model / onnxruntime-node is unavailable. */
 export async function createFaVowelRestorer(): Promise<FaVowelRestorer | undefined> {
-    const dir = dirname(fileURLToPath(import.meta.url));
+    const dir = dataDir(import.meta.url);
     let meta: Meta, encBytes: Uint8Array, decBytes: Uint8Array;
     try {
         meta = JSON.parse(readFileSync(join(dir, "fa-vowel-restorer.meta.json"), "utf8")) as Meta;

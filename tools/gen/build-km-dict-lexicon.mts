@@ -1,5 +1,5 @@
 /**
- * Build src/languages/khmer/km-lexicon-dict.tsv — the SECOND-TIER Khmer lexicon, from an independent dictionary.
+ * Build data/languages/khmer/km-lexicon-dict.tsv — the SECOND-TIER Khmer lexicon, from an independent dictionary.
  *
  * Run: npx tsx tools/gen/build-km-dict-lexicon.mts <km/data/lexicon.tsv>
  *   source: https://github.com/google/language-resources — km/data/lexicon.tsv, CC BY 4.0, © 2018 Google Inc.
@@ -112,7 +112,7 @@ const settled = new Set<string>();
 for (const l of readFileSync(join(here, "../referee-eval/referees/km.wikipron-khm-broad.tsv"), "utf8").split("\n"))
     if (!l.startsWith("#") && l.includes("\t")) settled.add(l.split("\t")[0]!);
 /** And the exceptions lexicon takes precedence at runtime anyway; excluded here so the file carries no dead rows. */
-for (const l of readFileSync(join(here, "../../src/languages/khmer/km-lexicon.tsv"), "utf8").split("\n"))
+for (const l of readFileSync(join(here, "../../data/languages/khmer/km-lexicon.tsv"), "utf8").split("\n"))
     if (!l.startsWith("#") && l.includes("\t")) settled.add(l.split("\t")[0]!);
 
 const rows: [string, string][] = [];
@@ -128,7 +128,7 @@ for (const line of readFileSync(src, "utf8").split("\n")) {
 }
 rows.sort((a, b) => a[0].localeCompare(b[0]));
 
-const out = join(here, "../../src/languages/khmer/km-lexicon-dict.tsv");
+const out = join(here, "../../data/languages/khmer/km-lexicon-dict.tsv");
 writeFileSync(out, `# Khmer SECOND-TIER lexicon — word → IPA, for words no human transcription covers.
 #
 # SOURCE:  https://github.com/google/language-resources  (km/data/lexicon.tsv)

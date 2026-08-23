@@ -21,7 +21,7 @@ const REQUIRED = [
 ] as const;
 
 describe("manifest signWords", () => {
-    const dir = new URL("../src/languages/", import.meta.url);
+    const dir = new URL("../data/languages/", import.meta.url);
     const declaring: [string, Record<string, unknown>][] = [];
     for (const d of readdirSync(dir))
         for (const f of readdirSync(new URL(`${d}/`, dir)).filter((n) => n.endsWith(".jsonc"))) {

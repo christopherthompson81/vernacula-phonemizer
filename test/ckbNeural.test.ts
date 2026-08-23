@@ -10,7 +10,7 @@ import { createCentralKurdishTagger } from "../src/languages/central-kurdish/cen
 
 // The bizroke tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back
 // to the sync engine, so the fallback contract is testable everywhere; the retagging assertions need the model.
-const haveModel = existsSync(join(import.meta.dirname, "../src/languages/central-kurdish/ckb-bizroke-tagger.int8.onnx"));
+const haveModel = existsSync(join(import.meta.dirname, "../data/languages/central-kurdish/ckb-bizroke-tagger.int8.onnx"));
 
 describe("central kurdish bizroke tagger", () => {
     // Numbers, punctuation, normalization and clause assembly belong to the SYNC engine — the neural path only
@@ -64,10 +64,10 @@ describe("central kurdish bizroke tagger", () => {
         // no test failure — just the bizroke quietly missing from a slice of the vocabulary.
         test("every symbol the engine can emit is in the model vocab (else the tier silently declines)", async () => {
             const meta = JSON.parse(
-                readFileSync(join(import.meta.dirname, "../src/languages/central-kurdish/ckb-bizroke-tagger.meta.json"), "utf8"),
+                readFileSync(join(import.meta.dirname, "../data/languages/central-kurdish/ckb-bizroke-tagger.meta.json"), "utf8"),
             ) as { src: Record<string, number> };
             const def = JSON.parse(
-                readFileSync(join(import.meta.dirname, "../src/languages/central-kurdish/central-kurdish.jsonc"), "utf8")
+                readFileSync(join(import.meta.dirname, "../data/languages/central-kurdish/central-kurdish.jsonc"), "utf8")
                     .replace(/^\s*\/\/.*$/gmu, ""),
             ) as { consonants: Record<string, string>; vowels: Record<string, string> };
             const emitted = new Set([...Object.values(def.consonants), ...Object.values(def.vowels)].flatMap((v) => [...v]));

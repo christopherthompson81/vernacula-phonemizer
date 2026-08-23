@@ -13,7 +13,7 @@ import { describe, expect, test } from "vitest";
 
 import { guruLexicon, phonemizeWord, phonemizeWordEval } from "../src/languages/punjabi/punjabi.ts";
 
-const PA = join(import.meta.dirname, "../src/languages/punjabi");
+const PA = join(import.meta.dirname, "../data/languages/punjabi");
 const referee = new Set<string>();
 for (const line of readFileSync(join(import.meta.dirname, "../tools/referee-eval/referees/pa.wikipron-pan-broad.tsv"), "utf8").split("\n"))
     if (!line.startsWith("#") && line.includes("\t")) referee.add(line.split("\t")[0]!);

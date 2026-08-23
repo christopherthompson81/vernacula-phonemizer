@@ -29,9 +29,9 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 /** U+200B ZERO WIDTH SPACE — what Khmer writers type at a word boundary, and what the tokeniser breaks a run on. */
 export const ZWSP = "​";
@@ -62,7 +62,7 @@ export interface KhmerSegmenter {
  * characters) but silently dropping its tail would delete text, which is the one thing this path must never do.
  */
 export function createKhmerSegmenter(basename = "km-segmenter"): Promise<KhmerSegmenter | undefined> {
-    const dir = dirname(fileURLToPath(import.meta.url));
+    const dir = dataDir(import.meta.url);
     let meta: Meta;
     try {
         meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as Meta;

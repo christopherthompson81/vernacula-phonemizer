@@ -1,7 +1,7 @@
 /**
  * Extract single-character Hokkien (Min Nan) Tâi-lô readings from the kaikki.org Wiktionary
  * Chinese extract (kaikki.org-dictionary-Chinese.jsonl, ~1.2 GB, streamed) — the SUPPLEMENT tier
- * for src/languages/minnan/dict-chars.tsv (see build-nan-chhoetaigi.mts, which consumes this
+ * for data/languages/minnan/dict-chars.tsv (see build-nan-chhoetaigi.mts, which consumes this
  * output as its lowest-priority char source).
  *
  * License: Wiktionary → CC-BY-SA (same fence as the gan/hakka/jin/xiang dicts).

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Vernacula.Phonemizer.Tests/Vernacula.Phonemizer.Tests.csproj" />
+  <Project Path="Vernacula.Phonemizer/Vernacula.Phonemizer.csproj" />
+</Solution>

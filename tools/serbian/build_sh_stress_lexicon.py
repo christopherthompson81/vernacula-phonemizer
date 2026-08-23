@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build src/languages/serbian/stress.tsv — the Serbo-Croatian lexical accent lexicon.
+"""Build data/languages/serbian/stress.tsv — the Serbo-Croatian lexical accent lexicon.
 
 Serbo-Croatian stress is lexical and unwritten in ordinary text, so the engine cannot derive it. Same shape as
 Russian's stress.tsv (word<TAB>0-based stressed-nucleus ordinal, built from kaikki), and it feeds the SAME g2p

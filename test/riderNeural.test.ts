@@ -7,7 +7,7 @@ import { phonemize } from "../src/index.ts";
 import { phonemizeRiderNeural, NEURAL_RIDERS } from "../src/languages/perso-arabic/riderNeural.ts";
 
 // The neural GENERALIZATION tier is gated on the (gitignored-optional) ONNX model + onnxruntime-node.
-const haveModel = existsSync(join(import.meta.dirname, "../src/languages/perso-arabic/riderDiacritizer.onnx"));
+const haveModel = existsSync(join(import.meta.dirname, "../data/languages/perso-arabic/riderDiacritizer.onnx"));
 
 describe("rider neural diacritizer (two-layer path)", () => {
     test("NEURAL_RIDERS covers the four Perso-Arabic riders", () => {

@@ -55,7 +55,7 @@ byv=Counter(pin.values())
 print(f"PIN lexicon: {len(pin)} words (freq≥{FREQ}, consistency≥{CONS}, agreement-validated). first-V mix: {dict(byv)}")
 # --- WRITE the shipped lexicon (this IS the canonical builder; path derived from the script location) ---
 import os
-_OUT=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "src/languages/persian/fa-pin-vowels.tsv")
+_OUT=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data/languages/persian/fa-pin-vowels.tsv")
 _HDR=["# fa first-syllable-vowel PIN — skeleton <TAB> correct first SHORT vowel (a/e/o). Corrects the tagger's",
       "# /a/-prior default on lexically-fixed first vowels: the vowel is in the clean training data but",
       "# the lightweight BiLSTM can't memorise every lexical exception. FREQUENT (HomoRich freq≥30) + CONSISTENT",

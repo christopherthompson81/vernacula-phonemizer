@@ -14,7 +14,7 @@ import { resolve } from "node:path";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const SRC = resolve(REPO, "tools/referee-eval/referees/da.wiktionary-da.tsv");
-const OUT = resolve(REPO, "src/languages/danish/da-lexicon.tsv");
+const OUT = resolve(REPO, "data/languages/danish/da-lexicon.tsv");
 
 // Strip the suprasegmental / narrow-notation layer, keep the segmental phonemes → canonical Danish IPA.
 function normalize(ipa: string): string {

@@ -28,7 +28,7 @@ import { devaToIpa, skeleton, calFold } from "./crossscript_sd.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PAIRS = join(HERE, "sd_deva_pairs.json");
-const LEX = join(HERE, "..", "..", "src/languages/sindhi/sindhi-lexicon.tsv");
+const LEX = join(HERE, "..", "..", "data/languages/sindhi/sindhi-lexicon.tsv");
 const OUT = join(HERE, "sd.openlex.tsv");
 const OUT_MARKED = join(HERE, "sd.openlex.marked.tsv");
 

@@ -109,7 +109,7 @@ describe("Sindhi short-vowel restoration — 2-source-verified (kaikki ∩ Nihal
 // export_sd_tagger_onnx.py prunes the empty tag from any letter that took it in <5% of >=20 observations.
 // This asserts the shipped MASK directly, so it runs without onnxruntime and cannot silently regress.
 describe("Sindhi tagger mask — glide-deletion guard", () => {
-    const META = new URL("../src/languages/sindhi/sd-g2p-tagger.meta.json", import.meta.url);
+    const META = new URL("../data/languages/sindhi/sd-g2p-tagger.meta.json", import.meta.url);
     test("glide/vowel letters cannot emit the empty chunk; genuine silent carriers still can", () => {
         if (!existsSync(META)) return; // model not built in this checkout
         const meta = JSON.parse(readFileSync(META, "utf8")) as {

@@ -7,9 +7,9 @@
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { phonemizeWord } from "./hebrew.ts";
+import { dataDir } from "../../core/dataPath.ts";
 
 let cache: Map<string, string> | undefined; // skeleton → niqqud
 
@@ -17,7 +17,7 @@ function load(): Map<string, string> {
     if (cache) return cache;
     cache = new Map();
     try {
-        const path = join(dirname(fileURLToPath(import.meta.url)), "he-lexicon.tsv");
+        const path = join(dataDir(import.meta.url), "he-lexicon.tsv");
         for (const line of readFileSync(path, "utf8").split("\n")) {
             if (!line || line.startsWith("#")) continue;
             const [skel, niqqud] = line.split("\t");

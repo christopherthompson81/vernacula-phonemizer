@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "Sg07aePiU4Q=",
+  "success": true,
+  "projectFilePath": "/home/chris/Programming/vernacula-phonemizer/csharp/Vernacula.Phonemizer/Vernacula.Phonemizer.csproj",
+  "expectedPackageFiles": [
+    "/home/chris/.nuget/packages/microsoft.ml.onnxruntime/1.24.4/microsoft.ml.onnxruntime.1.24.4.nupkg.sha512",
+    "/home/chris/.nuget/packages/microsoft.ml.onnxruntime.managed/1.24.4/microsoft.ml.onnxruntime.managed.1.24.4.nupkg.sha512",
+    "/home/chris/.nuget/packages/system.numerics.tensors/9.0.0/system.numerics.tensors.9.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

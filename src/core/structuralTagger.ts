@@ -16,6 +16,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { loadOrt, type OrtLike, type OrtSession } from "./onnx.ts";
+import { dataDir } from "./dataPath.ts";
 
 /** `src`: symbol → id (incl. `<pad>`=0, `<unk>`=1). `tags`: tag-id → IPA chunk. `charTags`: symbol-id → the tag-ids
  *  that symbol may emit (the consonant mask). Emitted by the train/export tools (export_tagger_onnx.py /
@@ -76,7 +77,7 @@ export interface WordStructuralTagger {
 }
 
 export interface WordTaggerOptions {
-    /** the calling module's directory (`dirname(fileURLToPath(import.meta.url))`) — the model + meta live beside it */
+    /** the calling module's directory (`dataDir(import.meta.url)`) — the model + meta live beside it */
     dir: string;
     /** meta filename stem; loads `${basename}.meta.json` */
     basename: string;

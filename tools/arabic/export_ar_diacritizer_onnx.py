@@ -2,7 +2,7 @@
 """Export a trained Arabic diacritizer checkpoint to the SHIPPED int8 ONNX + meta sidecar.
 
 ⚠ THE ORIGINAL VERSION OF THIS SCRIPT STOPPED HALFWAY. It hardcoded one checkpoint path, wrote an fp32 graph
-into /mnt/data, and ended there — while what ships is `src/languages/arabic/diacritizer.onnx`, the INT8
+into /mnt/data, and ended there — while what ships is `data/languages/arabic/diacritizer.onnx`, the INT8
 quantization of that graph. The quantize-and-copy step lived only in someone's shell history, so a "successful"
 export left the served model untouched. That is the same shape as fr/en/da exporting fp32 while the int8 ships
 (investigation Runs 43, 47); this version does the whole job and writes where the runtime actually looks.

@@ -11,7 +11,7 @@
  * spellings people actually use. A consonant-skeleton GATE drops mis-paired / bad-OCR forms.
  *
  *   curl kaikki Punjabi dump → $DUMPS/kaikki-Punjabi.jsonl ; npx tsx build_gurmukhi_shahmukhi.ts
- * Output: ../../src/languages/punjabi/crossscript.tsv (shahmukhi-word ⇥ gold-IPA) — shipped directly.
+ * Output: ../../data/languages/punjabi/crossscript.tsv (shahmukhi-word ⇥ gold-IPA) — shipped directly.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -128,7 +128,7 @@ function main(): void {
         "# Consonant-skeleton gated. Regenerate: tools/perso-arabic/build_gurmukhi_shahmukhi.ts",
     ].join("\n");
     writeFileSync(
-        join(HERE, "../../src/languages/punjabi/crossscript.tsv"),
+        join(HERE, "../../data/languages/punjabi/crossscript.tsv"),
         header + "\n" + rows.join("\n") + "\n",
     );
     console.log(

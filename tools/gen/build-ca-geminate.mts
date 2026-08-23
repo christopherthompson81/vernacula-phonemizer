@@ -1,5 +1,5 @@
 /**
- * Build the vernacula Catalan bl/gl-gemination lexicon `src/languages/catalan/bl-gl-geminate.tsv` from the
+ * Build the vernacula Catalan bl/gl-gemination lexicon `data/languages/catalan/bl-gl-geminate.tsv` from the
  * espeak-ng 1.52 Central shim. Whether intervocalic ⟨bl⟩/⟨gl⟩ GEMINATES (poble → pɔbːlə) or SPIRANTIZES
  * (problema → pɾuβlə, obligar → uβliɣə) is LEXICAL — popular/inherited words geminate, learned words don't, and
  * it is not derivable from the surface form. espeak marks the geminate as a doubled stop (bbl / ɡɡl), so we
@@ -15,7 +15,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const WORDS = process.argv[2]!;
 const IPA = process.argv[3]!;
-const OUT = "src/languages/catalan/bl-gl-geminate.tsv";
+const OUT = "data/languages/catalan/bl-gl-geminate.tsv";
 
 const words = readFileSync(WORDS, "utf8").split("\n").map((w) => w.trim().toLowerCase()).filter(Boolean);
 const lines = readFileSync(IPA, "utf8").split("\n").map((l) => l.trim()).filter((l) => l !== "");

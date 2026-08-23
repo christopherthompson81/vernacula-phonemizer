@@ -199,7 +199,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     // regression, and a 10-point cliff is nothing like the "ordinary churn" the floors above are sized for.
     // Skip rather than lower: an 0.70 floor that always passes would stop guarding what it exists to guard.
     const haveCkbModel = existsSync(
-        join(import.meta.dirname, "../src/languages/central-kurdish/ckb-bizroke-tagger.int8.onnx"),
+        join(import.meta.dirname, "../data/languages/central-kurdish/ckb-bizroke-tagger.int8.onnx"),
     ) && (() => { try { createRequire(import.meta.url).resolve("onnxruntime-node"); return true; } catch { return false; } })();
     for (const [lang, floor] of Object.entries(floors)) {
         it.skipIf(lang === "ckb" && !haveCkbModel)(`${lang} backbone ≥ ${(floor * 100).toFixed(0)}% of its primary referee`, async () => {
