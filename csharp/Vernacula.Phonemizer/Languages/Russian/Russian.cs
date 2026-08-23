@@ -54,7 +54,12 @@ public sealed class RussianPhonemizer : ILanguage
             var eIdx = vowels.FindIndex(v => v == "ё");
             ord = eIdx >= 0 ? eIdx : 0; // ё is always stressed; otherwise default to the first vowel
         }
-        return G2p.ToIpa(w, (int)ord.Value, HardDict().TryGetValue(w, out var h) ? h : null);
+        // ⚠ A NON-NUMERIC ORDINAL FALLS BACK TO THE LAST VOWEL, NOT THE FIRST. `Number("x")` is NaN in the TS
+        // and `vowelIdx[NaN]` is undefined, so g2p takes its last-vowel fallback; `(int)double.NaN` in C# is 0,
+        // which would silently stress the FIRST vowel instead. Unreachable from today's stress.tsv (all
+        // 406,680 values are numeric) — closed because the next dictionary regeneration need not be.
+        var ordinal = double.IsNaN(ord.Value) ? -1 : (int)ord.Value;
+        return G2p.ToIpa(w, ordinal, HardDict().TryGetValue(w, out var h) ? h : null);
     }
 
     // Adjective / participle / adjectival-pronoun case endings (longest first), each paired with the masculine
