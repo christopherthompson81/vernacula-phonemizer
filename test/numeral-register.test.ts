@@ -65,15 +65,18 @@ describe("numeral register (corpus rendering policy)", () => {
         // 42 rows. A EUROPEAN DECIMAL COMMA, not grouping — read as grouping, `1,5` comes out *fifteen*.
         expect(words("ezingu-1,5", "zu")).toBe("ezingu-1,5");
         expect(words("2,8", "sn")).toBe("2,8");
-        // 109 rows. A clock time, not two cardinals.
-        expect(words("dza10:08", "sn")).toBe("dza10:08");
-        expect(words("11:20", "zu")).toBe("11:20");
+        // ⚠ CLOCK AND DECIMAL ARE NO LONGER DECLINED FOR THE ENGLISH REGISTER — they were measured.
+        //    The `phones` column shows readers using the register reading: 21/25 zu, 15/21 nya, 13/22 xh
+        //    and 11/17 sn clock rows, and `:00` decides it — sn `10:00` is heard `tenoklok`, not *ten
+        //    zero zero*. The shape is routed to English WHOLE and English's own normalizer reads it, so
+        //    no reading was invented. See the note at REGISTER_SHAPE. Pinned in its own test below.
         // 252 rows. A leading zero is an identifier or a grouped tail; `Number()` drops the zeros, so
         // `007` would read *seven*.
         expect(words("007", "sn")).toBe("007");
         expect(words("00", "sn")).toBe("00");
-        // A decimal has its own reading in every language.
-        expect(words("versie 1.5", "sn")).toBe("versie 1.5");
+        // ⚠ The DOT decimal is no longer declined for the English register either — measured, 19/33 zu
+        //    and 7/25 nya rows show a spoken *point*. The COMMA decimal above still is: `1,5` read as
+        //    grouping comes out *fifteen*, and no reading was measured for it.
         // Past the compositors' range, hand back the digits rather than a truncated reading.
         expect(words("9007199254740993", "sn")).toBe("9007199254740993");
     });
@@ -134,10 +137,31 @@ describe("numeral register (corpus rendering policy)", () => {
         expect(words("na 1992.", "ln")).toContain("mille neuf cent quatre-vingt-douze");
         expect(words("mu 1998, ndipo", "nya")).toContain("19 98");
         expect(words("kv62. kv62", "sn")).toContain("sixty two");
-        // …and the decimal readings this lookahead exists for are still refused.
+        // …and the EUROPEAN COMMA decimal this lookahead exists for is still refused.
         expect(words("ezingu-1,5", "zu")).toBe("ezingu-1,5");
-        expect(words("versie 1.5", "sn")).toBe("versie 1.5");
-        expect(words("11:20", "zu")).toBe("11:20");
+    });
+
+    /**
+     * ⚠ CLOCK AND DECIMAL GO TO THE REGISTER LANGUAGE WHOLE, UNCOMPOSED, and that is why they need no
+     * reading of their own. English already produces what the readers say, verbatim against the `phones`:
+     *
+     *     10:00 -> tʰˈɛn əklˈɑːk      heard tenoklok (sn)      1.5  -> wˈʌn pʰɔᶦnt fˈaᶦv  heard wanpoɪntfaɪv (zu)
+     *     1:15  -> wˈʌn fɪftˈiːn      heard anfiftin (zu)      6.34 -> heard sikspoɪntθrifo (nya)
+     *
+     * ⚠ FRENCH IS EXCLUDED ON EVIDENCE, NOT CAUTION. Lingala is the only `fr` language; its readers say
+     * `11:00` as *onze juste* where French gives *onze heures*, and one of its 15 clock rows is a race
+     * time that French would read as *quatre HEURES quarante-et-un*. Decimal evidence there is 0 of 2.
+     */
+    test("clock and decimal are routed to the English register, and declined for French", () => {
+        expect(words("dza10:08", "sn")).toBe("dza|10:08");
+        expect(words("11:20", "zu")).toBe("11:20");          // whole shape, handed to en
+        expect(words("versie 1.5", "sn")).toBe("versie |1.5");
+        // ⚠ a fractional tail is a DURATION, not a time of day — the #872 guard, or this would import
+        //    that bug into four more languages. Declined outright, including the `.20` tail.
+        expect(words("te wā 4:41.20 me", "sn")).toBe("te wā 4:41.20 me");
+        // Lingala keeps declining both.
+        expect(words("nsima ya 11:00, ba", "ln")).toBe("nsima ya 11:00, ba");
+        expect(words("monene 4:41 esili", "ln")).toBe("monene 4:41 esili");
     });
 
     test("text with no digits is returned unchanged", () => {

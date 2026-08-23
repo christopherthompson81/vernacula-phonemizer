@@ -102,6 +102,38 @@ const GROUPED = String.raw`\d{1,3}(?:,\d{3})+|\d{1,3}(?:[  ]\d{3})+`;
 // /h/ where a reader says "aitch" — a real but separate defect, and not one a boundary guard fixes.
 const DIGIT_RUN = new RegExp(String.raw`(?<![\d:.,])(?:${GROUPED}|\d+)(?![\d:])(?![.,]\d)`, "gu");
 
+// ⚠ CLOCK AND DECIMAL ARE ROUTED WHOLE AND UNCOMPOSED, which is why they need no reading of their own.
+//   `DIGIT_RUN`'s guards exclude digits touching `:` or `.`, and that exclusion IS the decline this
+//   module documented. The shape is now handed to the register language verbatim — `{en:10:00}` — and
+//   that language's normalizer reads it. English already produces exactly what the readers say, so
+//   nothing is invented and nothing needs sourcing:
+//
+//     10:00 -> tʰˈɛn əklˈɑːk          heard  ten oklok        (sn_zw)
+//     1:15  -> wˈʌn fɪftˈiːn          heard  anfiftin         (zu_za)
+//     11:20 -> ɪlˈɛvən twˈɛnti        heard  leventuent       (ny_mw)
+//     1.5   -> wˈʌn pʰɔᶦnt fˈaᶦv      heard  wanpoɪntfaɪv     (zu_za)
+//
+//   ⚠ `:00` IS THE CASE THAT DECIDES IT. Bare cardinals give *ten zero zero*; the readers say
+//   *ten o'clock*, and 21/25 zu, 15/21 nya, 13/22 xh and 11/17 sn clock rows carry the register
+//   reading. Decimals likewise: 19/33 zu and 7/25 nya show a spoken *point*.
+//
+// ⚠ ENGLISH REGISTER ONLY, and the exclusion of French is evidence, not caution. Lingala is the sole
+//   `fr` language, and its readers say `11:00` as *onze juste* where `phonemize("11:00","fr")` gives
+//   *onze heures* — routing would emit a reading they demonstrably do not use. Worse, one of its 15
+//   clock rows is a race time (`Slalom ya monene … 4:41`) and French reads bare `4:41` as *quatre
+//   HEURES quarante-et-un*, the defect fixed for French in #872. Its decimal evidence is 0 of 2.
+//
+// ⚠ A FRACTIONAL TAIL MEANS IT IS NOT A TIME OF DAY — `4:41.20` is minutes, seconds and hundredths.
+//   Same guard as french/normalize.ts; without it this would import that bug into four more languages.
+const CLOCK_SHAPE = String.raw`(?<![\d.:])(?:[01]?\d|2[0-3]):[0-5]\d(?![\d:])(?!\.\d)`;
+const DECIMAL_SHAPE = String.raw`(?<![\d.:,])\d{1,3}\.\d+(?![\d.])`;
+// ⚠ THE BARE-RUN ARM KEEPS ITS LOOKBEHIND. Inlining it without `(?<![\d:.,])` let the tail of a
+//   declined shape match on its own: `4:41.20` came out `4:41.{en:twenty}`, which is worse than
+//   leaving it alone — a stray "twenty" welded to an unread time.
+const REGISTER_SHAPE = new RegExp(
+    `${CLOCK_SHAPE}|${DECIMAL_SHAPE}|(?<![\\d:.,])(?:${GROUPED}|\\d+)(?![\\d:])(?![.,]\\d)`, "gu");
+const SHAPE_ONLY = new RegExp(`^(?:${CLOCK_SHAPE}|${DECIMAL_SHAPE})$`, "u");
+
 const EN_ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
     "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
 const EN_TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
@@ -230,8 +262,15 @@ export function segmentsForRegister(text: string, reg: "en" | "fr" | "pt"): read
     if (!/\d/u.test(text)) return [{ text }];
     const out: Segment[] = [];
     let last = 0;
-    for (const m of text.matchAll(DIGIT_RUN)) {
-        const words = registerWords(m[0], reg, text.slice(m.index + m[0].length));
+    // English-register languages also claim the clock and decimal shapes; see the note at
+    // REGISTER_SHAPE for why French does not.
+    for (const m of text.matchAll(reg === "en" ? REGISTER_SHAPE : DIGIT_RUN)) {
+        if (m.index < last) continue;                      // an earlier shape already consumed it
+        // ⚠ A SHAPE GOES ACROSS RAW so the register language's own normalizer reads it; only a bare
+        //   run is composed here, because the compositor is all this module has for one.
+        const words = SHAPE_ONLY.test(m[0])
+            ? m[0]
+            : registerWords(m[0], reg, text.slice(m.index + m[0].length));
         if (words === undefined) continue;
         if (m.index > last) out.push({ text: text.slice(last, m.index) });
         out.push({ text: words, lang: reg });
