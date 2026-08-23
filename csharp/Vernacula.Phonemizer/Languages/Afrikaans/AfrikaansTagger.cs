@@ -1,0 +1,38 @@
+/**
+ * Afrikaans OOV g2p STRUCTURAL tagger — the neural OOV reader. A per-grapheme BiLSTM (ONNX) that labels each letter
+ * with its IPA-chunk TAG in a single forward pass. Output length == input length so it cannot degenerate, and a
+ * per-grapheme CONSONANT-CONSISTENCY MASK constrains each letter to the tags it produced in training.
+ *
+ * ⚠ NO STRESS POSTPROCESS, unlike Norwegian's. af emits no stress mark by convention — the stress information lives
+ * in the VOWEL QUALITY (reduction + open/closed length), and that is precisely what this model learns: the rule
+ * engine places stress correctly only 74.8% of the time overall and 40% at eight syllables, which is why the
+ * residual it leaves is contextual rather than tabulable.
+ *
+ * On a 3,873-word dictionary-gold held-out split the tagger reads **91.4% exact / 98.7% symbol**, against the rule engine's
+ * **63.5% / 93.5%** on the same dictionary-gold words — a 77% relative reduction in word error. Provenance, including why ~31k
+ * training pairs is the ceiling for this language: af-g2p-tagger.PROVENANCE.md.
+ *
+ * The lazy-load + masked decode loop is the shared `createWordStructuralTagger` (core/structuralTagger.ts); this
+ * file supplies only the af-specific preprocess. `onnxruntime` is optional; absent it (or the model),
+ * createAfrikaansTagger() resolves to `null` and callers fall back to the sync path.
+ */
+using System.Text;
+using Vernacula.Phonemizer.Core;
+
+namespace Vernacula.Phonemizer.Languages.Afrikaans;
+
+public static class AfrikaansTaggerFactory
+{
+    /** Build the Afrikaans OOV tagger, or `null` if the model / onnxruntime is unavailable. */
+    public static Task<IWordStructuralTagger?> CreateAfrikaansTagger(string basename = "af-g2p-tagger") =>
+        StructuralTagger.CreateWordStructuralTagger(new WordTaggerOptions
+        {
+            Dir = "languages/afrikaans",
+            Basename = basename,
+            ModelFile = $"{basename}.int8.onnx",
+            Context = "Afrikaans neural tagging",
+            EpEnv = "AF_ORT_EP",
+            // lowercase + NFC so graphemes match the training vocab (the sync lexicon/rule paths also lowercase).
+            Preprocess = w => w.ToLowerInvariant().Normalize(NormalizationForm.FormC),
+        });
+}

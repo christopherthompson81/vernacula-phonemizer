@@ -35,7 +35,10 @@ foreach (var file in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, 
         var t = line.Split('\t');
         if (t.Length != 2) continue;
         string got;
-        try { got = Phonemizer.Phonemize(t[0], code); }
+        // ⚠ THE NEURAL-CAPABLE ENTRY, per the async-goldens warning above. Calling the sync Phonemize here
+        // reported the ENGINE as broken for every neural language: af showed 120/200 rows differing, all of
+        // them the rule g2p standing in for the tagger.
+        try { got = Phonemizer.PhonemizeAsync(t[0], code).GetAwaiter().GetResult(); }
         catch (NotImplementedException) { goto notPorted; }
         catch (Exception e) { got = $"<THREW {e.GetType().Name}: {e.Message}>"; }
         if (got == t[1]) ok++;
@@ -49,5 +52,11 @@ notPorted:
     Console.WriteLine($"  {code,-8} not ported");
 }
 Console.WriteLine($"\n{langsOk} languages byte-identical, {langsBad} differ ({rowsOk} rows ok, {rowsBad} differ)");
+// ⚠ A DIFF MAY NOT BE A PORTING BUG. The script router reads an embedded foreign run through ANOTHER
+// language's engine and catches the failure, so an unported target silently drops the run and the row
+// just differs. Naming the keys that were asked for and missing separates "blocked" from "wrong".
+if (Registry.PortPending.Count > 0)
+    Console.WriteLine($"⚠ unported engines requested during this run (rows needing them cannot pass yet): " +
+                      string.Join(", ", Registry.PortPending));
 foreach (var d in firstDiff) Console.WriteLine(d);
 return langsBad == 0 ? 0 : 1;
