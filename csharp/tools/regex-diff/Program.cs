@@ -29,16 +29,16 @@ foreach (var line in File.ReadLines(path))
     var flags = doc.GetProperty("flags").GetString()!;
     var file = doc.GetProperty("file").GetString()!;
 
-    System.Text.RegularExpressions.Regex re;
+    JsRe re;
     try { re = JsRegex.Compile(pattern, flags); }
     catch (NotSupportedException e) { refused++; if (refusedPatterns.Count < 10) refusedPatterns.Add($"  {pattern}  [{flags}]  — {e.Message}"); continue; }
     catch (Exception e) { threw++; if (examples.Count < 10) examples.Add($"  THREW {e.GetType().Name} compiling /{pattern}/{flags}\n    {file}"); continue; }
 
-    bool global = flags.Contains('g');
+    bool global = re.Global;
     foreach (var pair in doc.GetProperty("matches").EnumerateArray())
     {
         var input = pair[0].GetString()!;
-        var want = pair[1].EnumerateArray().Select(x => x.GetString()!).ToArray();
+        var want = pair[1].EnumerateArray().Select(x => Decode(x.GetString()!)).ToArray();
         string[] got;
         try
         {
@@ -60,5 +60,13 @@ Console.WriteLine($"{refused} patterns refused by JsRegex (designed behaviour fo
 foreach (var r in refusedPatterns) Console.WriteLine(r);
 if (examples.Count > 0) { Console.WriteLine("\nmismatches:"); foreach (var e in examples) Console.WriteLine(e); }
 return mismatch + threw == 0 ? 0 : 1;
+
+// Undo the extractor's lone-surrogate sentinel (\0S + 4 hex): JSON cannot carry an unpaired
+// surrogate, and a non-u pattern matching one is a result worth diffing, not discarding.
+static string Decode(string s) =>
+    s.Contains("\u0000S", StringComparison.Ordinal)
+        ? System.Text.RegularExpressions.Regex.Replace(s, "\u0000S([0-9a-f]{4})",
+            m => ((char)Convert.ToInt32(m.Groups[1].Value, 16)).ToString())
+        : s;
 
 static string Show(string s) => s == "\u0000null" ? "(no match)" : "\"" + s.Replace("\n", "\\n").Replace("\t", "\\t") + "\"";

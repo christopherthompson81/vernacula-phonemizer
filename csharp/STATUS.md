@@ -21,15 +21,42 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 
 1. **Finish Core** (the two above), then `dotnet sln add csharp/tools/parity` — it is deliberately
    out of the solution so it cannot fail the build gate before the engine API exists.
-2. ~~Differential regex harness~~ **BUILT** — `tools/extract_regexes.mts` +
-   `csharp/tools/regex-diff/`. 2,585 distinct patterns × 47 probes = **121,495 assertions**, with
-   Node's answers recorded in `csharp/regex-corpus.jsonl`. Run:
+2. ~~Differential regex harness~~ **BUILT AND RUN — CLEAN.** `tools/extract_regexes.mts` +
+   `csharp/tools/regex-diff/`. 2,314 distinct patterns × 51 probes = **118,014 assertions**, all
+   identical to Node, 0 patterns refused. Re-run with:
    `npx tsx tools/extract_regexes.mts && dotnet run --project csharp/tools/regex-diff`
-   Hazard coverage: `\d` 1,079 · `\p{L…}` 720 · `(?<!` 783 · `(?<=` 107 · `\b` 106 ·
-   `\p{Script=` 55 · `\u{` 6 · v-flag 4. ⚠ Probes are chosen for the DIALECT GAP (ASCII vs
-   Unicode digits, non-Latin scripts, empty/space/newline for `\b`), not for plausible text — an
-   ordinary-word probe set would pass with the gap wide open.
-   ⚠ NOT YET RUN: it needs Core complete to compile. First run is the next action after that.
+   ⚠ Probes are chosen for the DIALECT GAP, not for plausible text — an ordinary-word probe set
+   would pass with the gap wide open. The first run found SEVEN real defects in JsRegex, all fixed
+   and pinned in `Vernacula.Phonemizer.Tests/JsRegexDialectTests.cs` (28 tests):
+     - **Simple case folding.** JS /iu folds `\u017F`→s, `\u0345`→ι, `\u1C80-\u1C88`→modern
+       Cyrillic; .NET IgnoreCase does none of them. French, Portuguese, Mindong and Lingala
+       tokenizers all dropped a long s. Fixed with a MEASURED table (94 divergent pairs of 2,408) —
+       `tools/measure_case_folding.mts` regenerates the measurement, and `JsRegexFoldTests`
+       re-derives the .NET half at test time so a runtime casing change fails loudly.
+     - **...but only under /u.** Legacy /i refuses non-ASCII→ASCII folds; applying the fold on `i`
+       alone regressed `scottishgaelic/numbers.ts`. The harness caught the regression immediately.
+     - **`[^\S\n]`** (4 patterns) and **`\p{ASCII}`** were refused outright — both are now
+       translated (.NET class subtraction, and the trivial range).
+     - **Astral members in a class** (`[\u{20000}-\u{2a6df}]`, cmn/ja/Adlam) were refused; they now
+       become surrogate-pair alternations.
+     - **`[]` is not the empty set in .NET.** An astral-only class emitted `[]|alt`, which .NET
+       reparsed into a class matching LONE SURROGATES — so `[\u{1E950}-\u{1E959}]` matched every
+       neighbouring astral code point. Found by a unit test, not the harness: no probe carried Adlam.
+     - **Code points vs code units.** .NET's `\p{L}` matches neither half of an astral letter and
+       `[^x]` happily matches half of one. Categories now carry an astral half (built from
+       `CharUnicodeInfo`, so it cannot drift from the BMP half), and every "any character except"
+       construct takes a whole pair.
+     - **A negated class body must be emitted VERBATIM.** Excluding surrogates by appending to the
+       body turned `[^a-]` into `[^a-\uD800-\uDFFF]`, reading `a-\uD800` as a range. Found by review,
+       not by the harness: no pattern in src/ has that shape.
+     - **Two advance rules.** JS global iteration skips a code POINT after a zero-length match but a
+       code UNIT after a failed attempt; `Regex.Matches` reproduces neither, so `JsRe` drives the
+       loop. Verified against Node on `/(?<![\p{L}])/gu`, which really does report a position
+       INSIDE a surrogate pair.
+   ⚠ PERF INVARIANT: astral alternations carry a one-class lookahead guard. Without it
+   `[\p{L}\p{M}]+` ran **372 ms where plain .NET ran 16 ms** — a 23x tax with correct output.
+   Asserted structurally in `AstralBranchesAreGuarded`.
+
 3. **Goldens for the 84 uncovered codes.** `tools/gen_parity_goldens.mts` produced nothing for them
    — mostly regional variants (`en-GB`, `pt-BR`) and languages with no FLEURS text. Without a golden
    a language cannot be declared ported; find a text source or accept lexicon-only coverage.
