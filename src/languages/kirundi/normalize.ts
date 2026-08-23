@@ -436,7 +436,7 @@ export function normalizeKirundi(input: string): string {
     //    ordering.
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?!\d|,\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?!\d|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
 
     // 4) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — `km 1,965`, `km² 517`, `mm 1.000`, `mm 1,200`. The
     //    shared tier matches ONLY number-then-unit, so these 4 instances are structurally invisible to it:

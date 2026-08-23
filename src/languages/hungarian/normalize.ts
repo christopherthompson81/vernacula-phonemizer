@@ -424,7 +424,7 @@ export function normalizeHungarian(input: string): string {
         // comma, so the mark is only a separator when a digit follows: `(?![\d]|,\d)`. Same defect the zu
         // and xh runs found in swahili/normalize.ts, which is where this guard shape came from.
         s = s.replace(/(\d)[.  ](\d{3})(?![\d]|,\d)/gu, "$1$2");
-        s = s.replace(/(\d)\.[  ](\d{3})(?![\d]|,\d)/gu, "$1$2"); // the corpus's one `400. 000`
+        s = s.replace(/(\d)\.[  ](\d{3})(?![\d]|,\d)/gu, "$1$2"); // the corpus's one `400. 000`
         s = s.replace(/(\d),(\d{3})(?![\d]|,\d)/gu, "$1$2");
     }
 

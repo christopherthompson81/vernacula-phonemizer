@@ -67,3 +67,7 @@ tools/perso-arabic/lexicon.*.noref.tsv
 
 # Agent worktrees (created by parallel Claude Code agents; never source).
 .claude/worktrees/
+
+# C# build output — the port's bin/obj must never enter the tree
+csharp/**/bin/
+csharp/**/obj/

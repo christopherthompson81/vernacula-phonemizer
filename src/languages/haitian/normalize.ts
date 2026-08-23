@@ -299,7 +299,7 @@ export function normalizeHaitian(input: string): string {
     //    The SPACE form must additionally reject a bare adjacency that is really two numbers in a list;
     //    requiring every group to be exactly three digits does that (`ant 1854 ak 1889` has no 3-digit
     //    group). The corpus uses both U+0020 and U+00A0 here.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[  ]\d{3})+)(?![\d]|[  ]\d)/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[  ]\d{3})+)(?![\d]|[  ]\d)/gu, (w) => w.replace(/[  ]/gu, ""));
 
     // 5) UNITS, before decimals — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten (the playbook's standing coupling), and after de-grouping so `1 250 257,6 km²`

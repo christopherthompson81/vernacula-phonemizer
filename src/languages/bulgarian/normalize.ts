@@ -120,7 +120,7 @@ export function normalizeBulgarian(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = t.replace(/(\d)[   ](\d{3})(?!\d)/gu, "$1$2");
+        t = t.replace(/(\d)[   ](\d{3})(?!\d)/gu, "$1$2");
     } while (t !== prev);
 
     // 5) DECIMAL COMMA. The comma is clause punctuation, so `12,5` reads as "дванайсет , пет" — a PAUSE

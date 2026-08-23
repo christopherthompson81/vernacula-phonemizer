@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- ⚠ Out of the solution deliberately, like tools/parity: it exercises the engine's internals
+       and must not be able to fail the Core build gate. Run it explicitly. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Vernacula.Phonemizer/Vernacula.Phonemizer.csproj" />
+  </ItemGroup>
+</Project>

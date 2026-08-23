@@ -350,8 +350,23 @@ function pick(forms: CountForms, n: number, countForm: (n: number) => number): s
 /** Leading integer value of a possibly grouped/decimal numeral string ("1,234.5" → 1234; agreement is
  *  driven by the integer part, matching how the languages themselves resolve it). A decimal number
  *  always takes the plural/genitive form (1.5 процента… — close enough; decimals are rare in prose). */
+/** ⚠ THE DIGIT-GROUPING SEPARATORS, and this used to be `[    ]` — two ASCII spaces, a duplicated
+ *  U+0020 sitting under a comment that claimed "thin/regular space grouping". The characters French,
+ *  Russian and Swedish typography actually group with (U+00A0 NBSP, U+202F narrow NBSP, U+2009 thin)
+ *  all fell through. Found by the C# port under the bidirectional rule in csharp/PORTING.md.
+ *  Measured failure: ru `3\u2009850 км` read as *three, eight hundred fifty* — the thousand lost —
+ *  while the ASCII `3 850 км` worked, which is why it stayed invisible. Shared by all five sites so
+ *  they cannot drift apart again. */
+const GROUP_SP = String.raw`[ \u00a0\u202f\u2009]`;
+
 function numValue(num: string): number {
-    const cleaned = num.replace(/[  ]/gu, ""); // thin/regular space grouping
+    // ⚠ THE CLASS WAS TWO ASCII SPACES, and the comment beside it claimed "thin/regular space
+    //   grouping" — a duplicated U+0020 that has been there since the file was introduced. The
+    //   characters French, Russian and Swedish typography actually group digits with — U+00A0,
+    //   U+202F, U+2009 — all fell through. Found by the C# port (csharp/PORTING.md's bidirectional
+    //   rule); measured failure: ru `3\u2009850 км` read as *three, eight hundred fifty*, losing the
+    //   thousand. The ASCII form `3 850 км` worked, which is why it stayed invisible.
+    const cleaned = num.replace(new RegExp(GROUP_SP, "gu"), "");
     // Grouping separators come in 3-digit blocks; a trailing 1–2 digit block after . or , is a decimal.
     const m = /^(\d+(?:[.,]\d{3})*)(?:[.,](\d+))?$/.exec(cleaned);
     if (!m) return NaN;
@@ -361,7 +376,7 @@ function numValue(num: string): number {
 
 // Space-grouping is only real grouping when the block is EXACTLY three digits (3 850 = 3850); otherwise
 // "30 9" would fuse two separate numbers and eat the association between a number and its unit.
-const NUM = "\\d+(?:[  ]\\d{3}(?!\\d)|[.,]\\d+)*";
+const NUM = "\\d+(?:[ \u00a0\u202f\u2009]\\d{3}(?!\\d)|[.,]\\d+)*";
 
 /** Build the text→text symbol normalizer for one language's data. */
 /**
@@ -741,15 +756,15 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
      * `93% ശതമാനം` read as *ശതമാനം ശതമാനം*.
      */
     const saidAfter = (forms: CountForms): RegExp => {
-        const conn = d.magnitudeConnective === undefined ? "" : `(?:${esc(d.magnitudeConnective)}[  ]+)?`;
+        const conn = d.magnitudeConnective === undefined ? "" : `(?:${esc(d.magnitudeConnective)}[ \u00a0\u202f\u2009]+)?`;
         // ⚠ CASE-INSENSITIVE. Running text capitalises the currency noun (English style capitalises it after
         // a sign), and a case-sensitive guard let it through TWICE: pcm's own sourcing sentence,
         // "$12.4 Billion Dolla", read *…biljan dola dola*. Suppression only — emission is unaffected, so a
         // language whose word this matches still emits its own declared form.
-        return new RegExp(`^[  ]*${conn}(?:${forms.map(esc).join("|")})`, "iu");
+        return new RegExp(`^[ \u00a0\u202f\u2009]*${conn}(?:${forms.map(esc).join("|")})`, "iu");
     };
     /** The mirror, for a PREFIX word: Turkish `yüzde 40%` was reading *yüzde yüzde kırk*. */
-    const saidBefore = (forms: CountForms): RegExp => new RegExp(`(?:${forms.map(esc).join("|")})[  ]*$`, "iu");
+    const saidBefore = (forms: CountForms): RegExp => new RegExp(`(?:${forms.map(esc).join("|")})[ \u00a0\u202f\u2009]*$`, "iu");
     const PCT_AFTER = d.percent ? saidAfter(d.percent) : null;
     const PCT_BEFORE = d.percent ? saidBefore(d.percent) : null;
 

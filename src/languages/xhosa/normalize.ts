@@ -208,8 +208,8 @@ export function normalizeXhosa(input: string): string {
     s = s.replace(/(?<![\d.,])(\d{1,3})(?:,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
     //    SPACE grouping. The shared tier's `NUM` understands it but the TOKEN does not, so `6 500` reads
     //    "six five hundred". Blocks of exactly three digits, or "30 9" would fuse two unrelated numbers.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[  ]\d{3})+)(?![\d])/gu,
-        (whole) => whole.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[  ]\d{3})+)(?![\d])/gu,
+        (whole) => whole.replace(/[    ]/gu, ""));
 
     // 5) THE CURRENCY SIGN, PRISED OFF ITS CONCORD PREFIX. ⚠ The shared tier is letter-bounded on the left,
     //    deliberately, so a sign written INSIDE a word cannot match — and Xhosa glues its concord straight

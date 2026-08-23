@@ -280,8 +280,8 @@ export function normalizeBelarusian(input: string): string {
     //    whole. ⚠ THIS IS THE LARGEST WRONG-MAGNITUDE DEFECT IN THE LANGUAGE, not a tidy-up: `3 000 000`
     //    read as *тры нуль нуль*. Two passes, because adjacent groups share the digit the first consumes
     //    (`5 000 000`); `X 000` is 7 of the corpus's 21 grouped figures.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[    ](\d{3})(?!\d)/gu, "$1$2");
-    s = s.replace(/[   ]/gu, " ");
+    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[    ](\d{3})(?!\d)/gu, "$1$2");
+    s = s.replace(/[    ]/gu, " ");
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule (step 4) so their interior dots do not first
     //    become phrase breaks. `н.э.` ×17 glued and `н. э.` ×2 spaced — both spellings occur. The FINAL dot
