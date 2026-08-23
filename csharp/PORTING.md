@@ -67,6 +67,21 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
 
 ## Process
 - Port in dependency order: Core → registry/index → languages (leaf modules first inside each).
+- ⚠ THE DEPENDENCY GRAPH IS NOT JUST IMPORTS. `core/scripts.ts` routes an embedded foreign run to
+  ANOTHER language's engine and `Registry` CATCHES the failure, so an unported target does not raise —
+  the run is silently dropped and the golden row merely differs, looking like a bug in the language you
+  just ported. Measured over the 109 goldens: 65 need no other engine, 40 need `en`, 3 need `ru`, 1
+  needs `el`. `Registry.PortPending` records what a run asked for and did not get; the parity tool
+  prints it, so "blocked" reads differently from "wrong".
+- A ported language registers itself from `Languages/Bootstrap.cs` — one explicit list, NOT a
+  `[ModuleInitializer]` per file (CA2255 in a library, and it would scatter the coverage answer across
+  182 files). A neural language also needs its `NeuralRegistry` entry, and the bootstrap installs BOTH:
+  ⚠ the neural table must be live before the FIRST `PhonemizeAsync`, or that call silently serves the
+  sync reading.
+- ⚠ NEVER set `InvariantGlobalization` in a project that touches the engine. `string.Normalize` becomes
+  a no-op — no throw, no warning — and every NFC/NFD fold stops working. The engine now refuses to start
+  in that mode (`Core/Globalization.cs`); it was the PARITY TOOL that had it set, so the gate was
+  reporting the engine as broken.
 - After each language: run the parity tool (`csharp/tools/parity`) against its golden TSV.
   A language is DONE when its rows are byte-identical, not before.
 - ⚠ ENGINEERING SHORTCOMINGS MAY BE CORRECTED; OBSERVABLE BEHAVIOUR MAY NOT. The line between the

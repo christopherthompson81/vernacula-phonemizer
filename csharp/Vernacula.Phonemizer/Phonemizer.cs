@@ -79,6 +79,9 @@ public static class Phonemizer
                 // A missing model or a tagger failure must not take the utterance down.
             }
         }
+        // ⚠ The language bootstrap installs the neural table; without this the FIRST async call in a
+        // process finds it empty and silently serves the sync reading (see Registry.EnsureLanguages).
+        Registry.EnsureLanguages();
         var neural = GetNeuralPhonemizer(lang);
         return neural is not null ? await neural(text).ConfigureAwait(false) : Phonemize(text, lang);
     }

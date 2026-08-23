@@ -11,11 +11,13 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 | `JsRegex.cs` | the pattern translator (407 lines) — **all** regexes route through it |
 | `DataPath.cs` | resolves the shared root `data/` tree; mirrors `src/core/dataPath.ts` |
 | `Registry.cs` | 859 lines, self-registration (`Registry.Register("thai", () => …)`); languages slot in without editing it |
-| Goldens | 109 files in `csharp/goldens/` (100 FLEURS-text, 9 lexicon-only) |
+| Goldens | 109 files in `csharp/goldens/` (100 FLEURS-text, 9 lexicon-only). ⚠ ASYNC-MODE output — the gate calls `PhonemizeAsync` |
 
-## In flight at pause
+## State
 
-- `Core/Initialisms.cs` and `Core/NormalizeSymbols.cs` — the last two core files (agent running).
+- **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
+- **Languages: 2 of 182** — `qu` 198/200 (2 rows blocked on unported `russian`), `af` 200/200.
+- `Languages/Bootstrap.cs` is the registration list: one line per ported language, plus the neural table.
 
 ## Next, in order
 
@@ -57,11 +59,43 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
    `[\p{L}\p{M}]+` ran **372 ms where plain .NET ran 16 ms** — a 23x tax with correct output.
    Asserted structurally in `AstralBranchesAreGuarded`.
 
-3. **Goldens for the 84 uncovered codes.** `tools/gen_parity_goldens.mts` produced nothing for them
+3. **Languages — the pilot slice is DONE; English is next.** Two languages are ported and gated:
+     - **qu (Quechua)** — 587 lines, 4 files. **198/200 byte-identical**; the two remaining rows are
+       BLOCKED, not wrong (see the dependency note below).
+     - **af (Afrikaans)** — 1,191 lines, 7 files, ONNX tagger + two lexicons + the shared Germanic
+       morphology. **200/200 byte-identical**, through the async neural path.
+   Four defects surfaced, three of them in shared infrastructure rather than in the languages:
+     - **The parity gate set `InvariantGlobalization`**, which makes `string.Normalize` a SILENT NO-OP.
+       Every NFC/NFD fold in the engine stopped working and the gate reported the ENGINE as broken —
+       qu showed 20 failing rows instead of 2. The engine now refuses to start in that mode
+       (`Core/Globalization.cs`), because a gate that can misreport what it measures is worse than none.
+     - **The bootstrap ran only on the sync path.** The FIRST `PhonemizeAsync` call in a process found
+       `GetNeuralPhonemizer` unset, served the rule reading, and installed the table on its way out —
+       one wrong utterance per process, correct from the second call on. It cost af exactly one row.
+     - **A golden can depend on ANOTHER language's engine.** The script router reads an embedded foreign
+       run through that script's engine and CATCHES the failure, so an unported target silently drops the
+       run. Quechua's golden expects `л` read by RUSSIAN. The gate now names the unported engines a run
+       asked for, so "blocked" is a distinct answer from "wrong".
+     - **`[ModuleInitializer]` is the wrong registration mechanism** for a library (CA2255, and it would
+       scatter "which languages are ported?" across 182 files). `Languages/Bootstrap.cs` is one list.
+
+4. **Port English next, before the bulk.** MEASURED over the 109 goldens, counting only runs whose script
+   is not the language's own:
+     - **65 goldens need no other engine** — bulk-portable in any order, gated immediately:
+       `af ar ast az bs ca ceb cs cy da de en es et ff fi fr ga gl ha hr hu id ig is it jv kam kea kl la
+       lb lg ln lt luo lv mi ms mt nb nl nso oc om pl pt ro ru si sk sl sn so st su sv sw tr tt uz vi wo
+       xh yo za zu`
+     - **40 need `en`** (non-Latin scripts with embedded Latin runs) · 3 need `ru` · 1 needs `el`
+   English is also the `readAsEnglish` reader threaded into ~46 engines, so it is the universal unlock —
+   2,100 lines, 9 files, neural, and the one engine the registry reaches beyond `ILanguage`.
+
+5. **Goldens for the 84 uncovered codes.** `tools/gen_parity_goldens.mts` produced nothing for them
    — mostly regional variants (`en-GB`, `pt-BR`) and languages with no FLEURS text. Without a golden
    a language cannot be declared ported; find a text source or accept lexicon-only coverage.
-4. **Languages**, in dependency order, batched. 652 files / 112k lines / 182 directories. Each batch
-   gated on its golden before the next starts.
+
+6. **The remaining languages**, in dependency order, batched. 650 files / 111k lines / 180 directories.
+   Import hubs first (hindi 10 dependents, serbian 8, sinitic 4, zulu/danish/bengali 3), each batch gated
+   on its golden.
 
 ## ⚠ Things that will bite
 

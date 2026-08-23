@@ -37,10 +37,41 @@ public static class Registry
 
     /// <summary>The single language stub helper: resolve a registered factory or throw the
     /// compile-now placeholder.</summary>
-    private static ILanguage Create(string key) =>
-        Factories.TryGetValue(key, out var f)
-            ? f()
-            : throw new NotImplementedException($"port pending: {key}");
+    /**
+     * Every language key a run ASKED FOR and did not get.
+     *
+     * ⚠ A MISSING ENGINE IS INVISIBLE AT THE CALL SITE. The script router reads an embedded foreign run
+     * through another language's engine and CATCHES the failure, so an unported target does not raise —
+     * the run is silently dropped and the row merely differs. Quechua's golden expects `л` to be read by
+     * the RUSSIAN engine (*ɫ*); with russian unported the row looks like an ordinary porting bug. The
+     * parity gate reads this set so "blocked on an unported dependency" is a distinct answer from "wrong".
+     */
+    private static readonly SortedSet<string> PortPendingRequested = new(StringComparer.Ordinal);
+
+    /// <summary>Language keys requested during this process that have no registered factory.</summary>
+    public static IReadOnlyCollection<string> PortPending
+    {
+        get { lock (PortPendingRequested) return PortPendingRequested.ToArray(); }
+    }
+
+    /**
+     * Run the language bootstrap once — the C# stand-in for registry.ts's static imports.
+     *
+     * ⚠ EVERY ENTRY POINT MUST CALL THIS, not just the sync one. It was originally reached only from
+     * `Create`, so the FIRST `phonemizeAsync` call found `GetNeuralPhonemizer` still unset, fell back to
+     * the sync engine, and only installed the neural table on its way through — every call after it was
+     * correct. One wrong utterance per process, in the rule reading of the OOV tail, with nothing to see
+     * from the second call onwards.
+     */
+    public static void EnsureLanguages() => Languages.Bootstrap.EnsureRegistered();
+
+    private static ILanguage Create(string key)
+    {
+        EnsureLanguages();
+        if (Factories.TryGetValue(key, out var f)) return f();
+        lock (PortPendingRequested) PortPendingRequested.Add(key);
+        throw new NotImplementedException($"port pending: {key}");
+    }
 
     /**
      * Per-language ROMAN NUMERAL policy: how this language reads a Roman numeral, including whether a
@@ -66,6 +97,10 @@ public static class Registry
     // engines whose tokenizer matches only their own script DROP such text silently (core/foreign.ts).
     static Registry()
     {
+        // ⚠ Before anything else: an engine running without Unicode normalization returns wrong
+        // phonemes instead of failing (see Core/Globalization.cs).
+        Core.Globalization.AssertNormalizationWorks();
+
         Foreign.SetDefaultForeign(ReadAsEnglish);
 
         // SCRIPT ROUTING (core/scripts.ts). The line above reads every foreign run as ENGLISH, which is correct

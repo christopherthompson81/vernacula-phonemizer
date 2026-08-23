@@ -1,0 +1,35 @@
+/**
+ * The language registration list — the C# stand-in for registry.ts's static imports.
+ *
+ * The TS registry imports every `create<Language>` factory at the top of the file, so importing the
+ * registry is what makes a language exist. C# has no equivalent side effect, so each ported language
+ * exposes an internal `RegisterSelf()` and this file calls them all, ONCE, the first time the registry
+ * is asked for anything.
+ *
+ * ⚠ ONE EXPLICIT LIST, NOT 182 [ModuleInitializer]s. Initializers would work, but they are load-time
+ * side effects in a library (CA2255) and — the reason that actually matters — they would scatter the
+ * answer to "which languages are ported?" across 182 files. Here it is one grep.
+ */
+namespace Vernacula.Phonemizer.Languages;
+
+public static class Bootstrap
+{
+    private static bool done;
+    private static readonly object Gate = new();
+
+    /// <summary>Register every ported language exactly once. Called by the registry before any lookup.</summary>
+    public static void EnsureRegistered()
+    {
+        lock (Gate)
+        {
+            if (done) return;
+            done = true;
+            // The async (neural best-path) table, the C# stand-in for neuralRegistry.ts's static imports.
+            // Installed here for the same reason the engines are: nothing else imports the language modules.
+            Phonemizer.GetNeuralPhonemizer = NeuralRegistry.GetNeuralPhonemizer;
+
+            Afrikaans.AfrikaansPhonemizer.RegisterSelf();
+            Quechua.QuechuaPhonemizer.RegisterSelf();
+        }
+    }
+}
