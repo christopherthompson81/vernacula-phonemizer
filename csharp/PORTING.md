@@ -38,14 +38,21 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
     `\b` ×138 — JS is ASCII-\w-based; .NET is Unicode. Rewritten to lookaround emulation.
     `\p{Script=X}` ×79 — absent from .NET. Expanded from the ported scripts.ts tables
        (UnicodeScripts). ⚠ NEVER `\p{IsGreek}`-style blocks: blocks ≠ scripts, silently wrong.
-    `v`-flag ×9, astral literals ×0 — OUTSIDE the verified subset: `JsRegex` THROWS at
-       construction. A loud error at startup beats a quiet mismatch at match time; those sites
-       get individual treatment.
+    `v`-flag — OUTSIDE the verified subset: `JsRegex` THROWS at construction. A loud error at
+       startup beats a quiet mismatch at match time; those sites get individual treatment.
+    Simple case folding under `/iu` — JS folds a long s onto `s`, ypogegrammeni onto iota, and the
+       pre-1918 Cyrillic letters onto their modern forms; .NET does none of these. A measured table
+       widens the class. ⚠ Only under `u`: legacy `/i` deliberately refuses non-ASCII→ASCII folds.
+    Code points vs code units — .NET matches one UTF-16 UNIT, JS under `u` matches one CODE POINT.
+       `\p{L}` gains an astral half, `[^x]`/`\D`/`\W`/`\S`/`.` take a whole surrogate pair rather
+       than matching half a character, and global iteration is driven by `JsRe` because JS uses two
+       different advance rules and `Regex.Matches` matches neither.
   Keeping the pattern strings byte-identical to the TS source is the point: ports diff
   mechanically, future TS→C# syncs stay trivial, and the whole dialect gap is ONE differentially
-  tested component (all 6,034 literals, Node vs C#, same inputs) instead of 683 files of hazard.
-- Flags: `s`→Singleline, `m`→Multiline, `i`→IgnoreCase|CultureInvariant, `u`→no-op (the rewrites
-  encode it), `g`/`y`/`d`→call-site helpers (`JsRegex.MatchAll`, sticky match, indices).
+  tested component instead of 683 files of hazard. As of the first full run: 2,314 distinct
+  patterns × 51 probes, **118,014 results identical to Node, 0 divergent, 0 refused**.
+- Flags: `s`→Singleline, `m`→Multiline, `i`→IgnoreCase|CultureInvariant, `u`→drives the code-point
+  rewrites and the wide case fold, `g`/`y`/`d`→call-site helpers (`JsRegex.MatchAll`, sticky, indices).
 - Lookbehind ports as-is (.NET is MORE permissive — do not widen a pattern because it now can).
 - Always `RegexOptions.CultureInvariant`. ⚠ Turkish casing (`i`→`İ`) corrupts case-folds on any
   tr-TR machine otherwise — and we ship Turkish.

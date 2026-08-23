@@ -24,12 +24,27 @@ import { globSync, readFileSync, writeFileSync } from "node:fs";
 const strip = (s: string) =>
   s.replace(/\/\*[\s\S]*?\*\//g, "")
    .replace(/^\s*\/\/.*$/gm, "")
+   // ⚠ TRAILING // comments too, or their PROSE is scanned for regex literals: "/ bhf → w/v"
+   // and three like it were extracted as v-flag patterns and reported as harness refusals. A
+   // real literal always escapes an inner slash outside a class, so `//` here is a comment.
+   .replace(/(^|[^\\:])\/\/.*$/gm, "$1")
    .replace(/"(?:[^"\\\n]|\\.)*"/g, '""')
    .replace(/'(?:[^'\\\n]|\\.)*'/g, "''")
    .replace(/`(?:[^`\\]|\\.)*`/g, "``");
 const LITERAL = /(?<![\w)\]])\/((?:[^/\\\n[]|\\.|\[(?:[^\]\\]|\\.)*\])+)\/([dgimsuvy]*)/g;
 
-const PROBES: string[] = ["abc def", "ABC DEF", "hello, world.", "  spaced  out  ", "123 456", "1.5", "1,500", "10:08", "2026-08-23", "007", "٢٠٢٤ ٣", "৩৫ ২৪", "१२३", "๑๒๓", "café naïve", "ÅNGSTRÖM", "Grüße", "İstanbul", "ĳsselmeer", "Ελληνικά", "Русский", "עברית", "العربية", "हिन्दी", "ไทย", "中文", "日本語", "한국어", "ǀclick ǁtwo", "kʼeʼ ɓaɗ", "ˈstrʌk.tʃɚ", "tʰˈɛn əklˈɑːk", "<b>tag</b>", "a&amp;b", "km<sup>2</sup>", "{en:five}", "h5n1", "covid19", "", " ", "\t", "a\nb", "-", "—", "…", "'’‘", "\"quoted\""];
+const PROBES: string[] = ["abc def", "ABC DEF", "hello, world.", "  spaced  out  ", "123 456", "1.5", "1,500", "10:08", "2026-08-23", "007", "٢٠٢٤ ٣", "৩৫ ২৪", "१२३", "๑๒๓", "café naïve", "ÅNGSTRÖM", "Grüße", "İstanbul", "ĳsselmeer", "Ελληνικά", "Русский", "עברית", "العربية", "हिन्दी", "ไทย", "中文", "日本語", "한국어", "ǀclick ǁtwo", "kʼeʼ ɓaɗ", "ˈstrʌk.tʃɚ", "tʰˈɛn əklˈɑːk", "<b>tag</b>", "a&amp;b", "km<sup>2</sup>", "{en:five}", "h5n1", "covid19", "", " ", "\t", "a\nb", "-", "—", "…", "'’‘", "\"quoted\"", "\u017f\u212a\u2126\u1e9e\u0131\u0345", "\u00df\u0130i\u0307", "\u{1E950}\u{1E94F}", "\u{20001}\u{2B740}\u{1F600}"];
+
+// A non-u pattern can match HALF a surrogate pair, and JSON cannot carry a lone surrogate (the C#
+// reader rejects it outright). Encode those code units as a sentinel the harness decodes back —
+// dropping them would hide the one behaviour where both engines really are UTF-16 unit machines.
+const enc = (s: string) =>
+  [...s].map((ch) => {
+    const u = ch.charCodeAt(0);
+    return ch.length === 1 && u >= 0xd800 && u <= 0xdfff
+      ? `\u0000S${u.toString(16).padStart(4, "0")}`
+      : ch;
+  }).join("");
 
 const rows: string[] = [];
 const seen = new Set<string>();
@@ -49,7 +64,7 @@ for (const f of globSync("src/**/*.ts")) {
         const got = flags.includes("g")
           ? [...p.matchAll(new RegExp(pattern, base + "g"))].map((x) => x[0])
           : [p.match(new RegExp(pattern, base))?.[0] ?? "\u0000null"];
-        matches.push([p, got]);
+        matches.push([p, got.map(enc)]);
       } catch { /* a probe this pattern rejects is not evidence */ }
     }
     rows.push(JSON.stringify({ pattern, flags, file: f, matches }));

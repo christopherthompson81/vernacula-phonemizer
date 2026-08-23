@@ -90,6 +90,9 @@ public static class UnicodeScripts
 
     private static string EscapeBmp(int cp) => $"\\u{cp:X4}";
 
+    /// <summary>One BMP code point as a \\uXXXX escape, safe as a character-class member.</summary>
+    public static string EscapeBmpChar(int cp) => EscapeBmp(cp);
+
     /// <summary>The BMP portion of the script as character-class BODY text (no surrounding brackets),
     /// for composing into a larger class. Astral portions must be OR'd in via <see cref="AstralAlt"/>.</summary>
     public static string BmpInner(string script)
@@ -116,19 +119,35 @@ public static class UnicodeScripts
         for (var i = 0; i < r.Length; i += 2)
         {
             if (r[i + 1] <= 0xFFFF) continue;
-            var a = Math.Max(r[i], 0x10000);
-            var b = r[i + 1];
-            var hiA = 0xD800 + ((a - 0x10000) >> 10);
-            var hiB = 0xD800 + ((b - 0x10000) >> 10);
-            for (var hi = hiA; hi <= hiB; hi++)
-            {
-                var loA = hi == hiA ? 0xDC00 + ((a - 0x10000) & 0x3FF) : 0xDC00;
-                var loB = hi == hiB ? 0xDC00 + ((b - 0x10000) & 0x3FF) : 0xDFFF;
-                var lo = loA == loB ? EscapeBmp(loA) : $"[{EscapeBmp(loA)}-{EscapeBmp(loB)}]";
-                alts.Add($"{EscapeBmp(hi)}{lo}");
-            }
+            alts.Add(RangeAlt(Math.Max(r[i], 0x10000), r[i + 1]));
         }
         return alts.Count == 0 ? null : string.Join("|", alts);
+    }
+
+    /// <summary>One astral code-point range as a surrogate-pair alternation. Both endpoints must be
+    /// above the BMP. Used for script ranges and for a literal astral range inside a JS class, which
+    /// .NET cannot express as a class member at all (it matches UTF-16 units, so an astral member
+    /// would silently become two independent surrogates).</summary>
+    /// <summary>Wrap a surrogate-pair alternation so it FAILS FAST. Without this the engine tries
+    /// every branch at every position: [\p{L}\p{M}]+ measured 372 ms against plain .NET's 16 ms on the
+    /// same text, a 23x tax paid on every phonemization. The one-class lookahead settles it before any
+    /// branch is entered, and it is correct under right-to-left matching too (inside a lookbehind .NET
+    /// evaluates the assertion after consuming, at the start of the consumed text).</summary>
+    public static string GuardAstral(string alt) => $"(?=[\uD800-\uDBFF])(?:{alt})";
+
+    public static string RangeAlt(int a, int b)
+    {
+        var alts = new List<string>();
+        var hiA = 0xD800 + ((a - 0x10000) >> 10);
+        var hiB = 0xD800 + ((b - 0x10000) >> 10);
+        for (var hi = hiA; hi <= hiB; hi++)
+        {
+            var loA = hi == hiA ? 0xDC00 + ((a - 0x10000) & 0x3FF) : 0xDC00;
+            var loB = hi == hiB ? 0xDC00 + ((b - 0x10000) & 0x3FF) : 0xDFFF;
+            var lo = loA == loB ? EscapeBmp(loA) : $"[{EscapeBmp(loA)}-{EscapeBmp(loB)}]";
+            alts.Add($"{EscapeBmp(hi)}{lo}");
+        }
+        return string.Join("|", alts);
     }
 
     /// <summary>A self-contained regex fragment matching one code point of the script — the drop-in
@@ -140,7 +159,11 @@ public static class UnicodeScripts
             if (ClsCache.TryGetValue(script, out var cached)) return cached;
             var bmp = BmpInner(script);
             var astral = AstralAlt(script);
-            var cls = astral is null ? $"[{bmp}]" : $"(?:[{bmp}]|{astral})";
+            // ⚠ An astral-only script (Adlam) has an EMPTY BMP half, and "[]" is not the empty set in
+            // .NET — it swallows what follows and matches lone surrogates instead.
+            var cls = astral is null ? $"[{bmp}]"
+                : bmp.Length == 0 ? $"(?:{GuardAstral(astral)})"
+                : $"(?:[{bmp}]|{GuardAstral(astral)})";
             ClsCache[script] = cls;
             return cls;
         }
