@@ -105,6 +105,16 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
    Import hubs first (hindi 10 dependents, serbian 8, sinitic 4, zulu/danish/bengali 3), each batch gated
    on its golden.
 
+## Filed, not fixed
+
+- **A LATIN-SCRIPT host never prewarms, so its delegated foreign words get the n-gram reading, not the
+  BiLSTM one.** `phonemizeAsync`'s prewarm gate is on the text's SCRIPT MIX, and a Latin-script host
+  (vi, mi, tr…) whose tokenizer declines a foreign Latin word still routes it to English — where the
+  memo is empty. Surfaced while fixing the golden contamination: the old vi golden read
+  `hesperonychus` as *hˌɛspɚənˈaᶦt͡ʃəs* (neural) only because another language had warmed the memo; the
+  engine's own answer is the n-gram *ˈɛspɚˌoᶷnˌiːkəs*. Whether the gate SHOULD widen is a measurement,
+  not a port decision, so both engines keep the current behaviour and this is recorded.
+
 ## ⚠ Things that will bite
 
 - **`\d` is the single worst hazard**: 1,914 uses, JS ASCII-only vs .NET all-Unicode-digits, and the
