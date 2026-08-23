@@ -124,6 +124,23 @@ export function addForeignOov(g2pKey: string, ipa: string): void {
     foreignOov.set(g2pKey, ipa);
 }
 
+/**
+ * Drop every memoized reading.
+ *
+ * ⚠ FOR BATCH TOOLS THAT RENDER MANY LANGUAGES IN ONE PROCESS, and it is not an optimisation — it is what
+ * makes their output REPRODUCIBLE. The memo is global and survives across languages, so a mixed-script
+ * language whose prewarm tagged `duxbury` leaves that BiLSTM reading behind, and a LATIN-script language
+ * rendered afterwards picks it up through the foreign reader even though its own `phonemizeAsync` call
+ * never prewarms anything. The result is a row that depends on what ran before it: `tools/gen_parity_goldens.mts`
+ * captured 15 such rows in the Māori golden, none of which the engine reproduces on its own.
+ *
+ * Not called by the engine itself — a long-lived server WANTS the memo warm, and within one utterance the
+ * reading is context-free either way.
+ */
+export function clearForeignOov(): void {
+    foreignOov.clear();
+}
+
 /** The neural reading for `g2pKey`, or `undefined` — the shape English's `oovOverride` expects. */
 export function lookupForeignOov(g2pKey: string): string | undefined {
     return foreignOov.get(g2pKey);

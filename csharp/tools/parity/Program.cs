@@ -17,6 +17,7 @@
 //   dotnet run --project csharp/tools/parity -- fr th   just these codes
 using System.Text;
 using Vernacula.Phonemizer;
+using Vernacula.Phonemizer.Core;
 
 var goldens = Path.Combine(AppContext.BaseDirectory, "../../../../../goldens");
 if (!Directory.Exists(goldens)) goldens = "csharp/goldens";
@@ -35,6 +36,11 @@ foreach (var file in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, 
     // engine, so a run-wide list named all 105 of them and buried the two entries that matter — the engines a
     // PORTED language reached through the script router and did not get.
     var pendingBefore = Registry.PortPending.ToHashSet(StringComparer.Ordinal);
+    // ⚠ AND THE FOREIGN-OOV MEMO IS CLEARED PER LANGUAGE, for the same reason the GENERATOR clears it: it is
+    // global, so a mixed-script language's prewarm would otherwise leave BiLSTM readings that a later
+    // Latin-script language picks up through the foreign reader — making a row pass because of what ran
+    // before it. The goldens are generated per-language-isolated; the gate has to measure the same way.
+    Foreign.ClearForeignOov();
     foreach (var line in File.ReadLines(file))
     {
         var t = line.Split('\t');

@@ -17,6 +17,7 @@
  */
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { phonemizeAsync } from "../src/index.ts";
+import { clearForeignOov } from "../src/core/foreign.ts";
 
 const FLEURS = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 const OUT = "csharp/goldens";
@@ -65,6 +66,12 @@ mkdirSync(OUT, { recursive: true });
 let full = 0, thin = 0;
 const skipped: string[] = [];
 for (const code of codes) {
+  // ⚠ THE MEMO IS GLOBAL AND THIS LOOP IS ONE PROCESS. A mixed-script language's prewarm leaves BiLSTM
+  // readings behind, and a Latin-script language rendered later picks them up through the foreign reader —
+  // producing a golden row that only exists because of what ran BEFORE it. Measured: 15 Māori rows the
+  // engine cannot reproduce on its own, `duxbury` among them. Clearing per language makes the artifact a
+  // function of the language alone, which is the whole point of a reference file.
+  clearForeignOov();
   let rows: string[] = [];
   const dir = fleursFor.get(code);
   if (dir && existsSync(`${FLEURS}/${dir}/train.tsv`)) {

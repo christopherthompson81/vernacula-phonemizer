@@ -154,6 +154,23 @@ public static class Foreign
         foreignOov[g2pKey] = ipa;
     }
 
+    /**
+     * Drop every memoized reading.
+     *
+     * ⚠ FOR BATCH TOOLS THAT RENDER MANY LANGUAGES IN ONE PROCESS, and it is not an optimisation — it is what
+     * makes their output REPRODUCIBLE. The memo is global and survives across languages, so a mixed-script
+     * language whose prewarm tagged `duxbury` leaves that BiLSTM reading behind, and a LATIN-script language
+     * rendered afterwards picks it up through the foreign reader even though its own call never prewarms
+     * anything. Measured on the golden generator: 25 rows across 5 languages that the engine cannot reproduce
+     * on its own, 15 of them Māori. Not called by the engine itself — a long-lived server WANTS the memo warm,
+     * and within one utterance the reading is context-free either way.
+     */
+    public static void ClearForeignOov()
+    {
+        foreignOov.Clear();
+        foreignOovOrder.Clear();
+    }
+
     /** The neural reading for `g2pKey`, or `undefined` — the shape English's `oovOverride` expects. */
     public static string? LookupForeignOov(string g2pKey)
     {
