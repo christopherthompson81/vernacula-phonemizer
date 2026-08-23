@@ -68,7 +68,7 @@ const shippedOrdinal = (us: string[], idx: number): number =>
 
 // ⚠ EMPTY IT FIRST — see the header. phonemizeWord's lazy load then finds no corrections, so `ours` is the
 // raw engine reading and the `k` this script keys on is still a `k`.
-writeFileSync("src/languages/german/consonant.tsv", "");
+writeFileSync("data/languages/german/consonant.tsv", "");
 
 const rows = readFileSync(KAIKKI, "utf8").trim().split("\n").map((l) => l.split("\t"));
 const out: [string, string][] = [];

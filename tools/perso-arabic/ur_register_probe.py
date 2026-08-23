@@ -9,7 +9,7 @@ import unicodedata
 import os
 HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 WIKI=f"{HERE}/tools/referee-eval/referees/ur.wikipron-urd-broad.tsv"
-LEX=f"{HERE}/src/languages/urdu/lexicon-ipa.tsv"
+LEX=f"{HERE}/data/languages/urdu/lexicon-ipa.tsv"
 HIND=f"{HERE}/tools/perso-arabic/silver.hindiurdu.tsv"
 FA=f"{HERE}/tools/perso-arabic/lexicon.fa.tsv"
 PA_LETTERS=set("عحذضظطصثق")

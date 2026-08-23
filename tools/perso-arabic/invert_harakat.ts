@@ -189,7 +189,7 @@ function label(lang: string): void {
     // exactly this miner's input shape and 4x the wikipron/kaikki silver. Same inversion, same round-trip
     // verification — the harakat label exists only where a vocalization REPRODUCES the cross-script gold.
     if (lang === "pa") {
-        const cs = join(HERE, "../../src/languages/punjabi/crossscript.tsv");
+        const cs = join(HERE, "../../data/languages/punjabi/crossscript.tsv");
         // ⚠ DICTIONARY TRANCHE ONLY (the kaikki dual-script pairs), NOT the Wikipedia-title tranche. The
         // titles are 65% foreign proper nouns, and training on them regressed EVERY rider on the fixed
         // wikipron eval set (pa 58.5→54.5, ps −4.4, ur −1.8 — the same register confound the pa BiLSTM

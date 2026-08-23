@@ -75,11 +75,11 @@ for (const l of readFileSync("tools/referee-eval/referees/km.wikipron-khm-broad.
     const [w, i] = l.split("\t");
     wik.set(w!, [...(wik.get(w!) ?? []), i!]);
 }
-const exceptions = new Set(readFileSync("src/languages/khmer/km-lexicon.tsv", "utf8").split("\n")
+const exceptions = new Set(readFileSync("data/languages/khmer/km-lexicon.tsv", "utf8").split("\n")
     .filter((l) => l.trim() && !l.startsWith("#")).map((l) => l.split("\t")[0]!));
-const dict = new Set(readFileSync("src/languages/khmer/km-lexicon-dict.tsv", "utf8").split("\n")
+const dict = new Set(readFileSync("data/languages/khmer/km-lexicon-dict.tsv", "utf8").split("\n")
     .filter((l) => l.trim() && !l.startsWith("#")).map((l) => l.split("\t")[0]!));
-const kaikki = new Set(readFileSync("src/languages/khmer/km-lexicon-kaikki.tsv", "utf8").split("\n")
+const kaikki = new Set(readFileSync("data/languages/khmer/km-lexicon-kaikki.tsv", "utf8").split("\n")
     .filter((l) => l.trim() && !l.startsWith("#")).map((l) => l.split("\t")[0]!));
 
 const fold = makeFold(CONFIG.km!);

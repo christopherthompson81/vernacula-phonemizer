@@ -20,7 +20,7 @@ import { phonemizeWord } from "../../src/languages/thai/g2p.ts";
 
 const EP = process.env["ESPEAK_PORTABLE"] ?? "";
 const KAIKKI = `${EP}/tools/thai-gold/th_kaikki_gold.tsv`;
-const DICT = new URL("../../src/languages/thai/dictionary.tsv", import.meta.url)
+const DICT = new URL("../../data/languages/thai/dictionary.tsv", import.meta.url)
     .pathname;
 
 const VOWEL = "aeiouɛɔɤɯəæ"; // nucleus vowels (tone lands after the last of these; length ː extends it)

@@ -11,7 +11,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { toIpa } from "../../src/languages/french/g2p.ts";
 
-const LEX = new URL("../../src/languages/french/lexicon.tsv", import.meta.url)
+const LEX = new URL("../../data/languages/french/lexicon.tsv", import.meta.url)
     .pathname;
 const oNeutral = (s: string) => s.replace(/[oɔ]/gu, "O");
 

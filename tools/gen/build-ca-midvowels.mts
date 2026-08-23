@@ -1,5 +1,5 @@
 /**
- * Build the vernacula Catalan mid-vowel-height lexicon `src/languages/catalan/mid-vowels.tsv` from the mature
+ * Build the vernacula Catalan mid-vowel-height lexicon `data/languages/catalan/mid-vowels.tsv` from the mature
  * espeak-ng 1.52 Central-Catalan shim (the convergence reference; the height ⟨e⟩=ɛ/e, ⟨o⟩=ɔ/o is LEXICAL, not
  * spelling-derivable — dona/dóna, os/ós). Only the CONVENTION-INDEPENDENT abstract feature is taken: for each
  * corpus word, is the STRESSED mid vowel CLOSE (e/o) or OPEN (ɛ/ɔ)? The engine defaults to open, so we emit a
@@ -16,7 +16,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const WORDS = process.argv[2]!;
 const IPA = process.argv[3]!;
-const OUT = "src/languages/catalan/mid-vowels.tsv";
+const OUT = "data/languages/catalan/mid-vowels.tsv";
 
 const words = readFileSync(WORDS, "utf8").split("\n").map((w) => w.trim().toLowerCase()).filter(Boolean);
 const lines = readFileSync(IPA, "utf8").split("\n").map((l) => l.trim()).filter((l) => l !== "");

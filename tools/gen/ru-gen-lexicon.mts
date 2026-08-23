@@ -14,7 +14,7 @@ const foldRef = (s: string): string => s.replace(/⁽ʲ⁾/g, "").replace(/[⁽�
 
 // stress ordinal (same extraction as stress.tsv) — needed to phonemize.
 const stress = new Map<string, number>();
-for (const line of readFileSync("src/languages/russian/stress.tsv", "utf8").split("\n")) {
+for (const line of readFileSync("data/languages/russian/stress.tsv", "utf8").split("\n")) {
   if (line === "" || line.startsWith("#")) continue;
   const tab = line.indexOf("\t");
   if (tab > 0) stress.set(line.slice(0, tab), Number(line.slice(tab + 1)));
@@ -42,6 +42,6 @@ for (const line of readFileSync((process.env["DUMPS"] ?? ".") + "/ru_kaikki.tsv"
   if (hard.length) rows.push(`${w}\t${hard.join(",")}`);
 }
 rows.sort();
-writeFileSync("src/languages/russian/hard-e.tsv",
+writeFileSync("data/languages/russian/hard-e.tsv",
   "# Russian loanword hard-consonant-before-е/и corrections — word<TAB>vowel-ordinals (тест → tɛst). From kaikki.\n" + rows.join("\n") + "\n");
 console.log(`wrote ${rows.length} hard-е/и correction rows`);

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Vernacula.Phonemizer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b4d2196d5dc548e1fc8831ddc160d27fffae4a54")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+87f42a89cf81b6ae79b14b3ee158821be01a226a")]
 [assembly: System.Reflection.AssemblyProductAttribute("Vernacula.Phonemizer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Vernacula.Phonemizer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

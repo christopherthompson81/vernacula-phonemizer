@@ -2930,7 +2930,7 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     wuu: {
         // ⚠ wuu HAS NO REFEREE (the whole modern Wu ecosystem derives from the one Wugniu tradition, so any
         // automated referee is circular), and no FLEURS corpus. Every count below is over the mined
-        // artifact's retained text; the words are separately checked against `src/languages/wu/dict.tsv`,
+        // artifact's retained text; the words are separately checked against `data/languages/wu/dict.tsv`,
         // which is a hard gate here — a word the dict does not carry is SKIPPED by the front end, silently.
         minus: "measured: 169 hyphens, 56 digit-flanked, and ZERO of them a negative. They are RANGES with a "
             + "unit (`2-8°C`, `15-25公里`, `0-14 岁`), YEAR ranges (`1763-1774`), BUS ROUTE LISTS "

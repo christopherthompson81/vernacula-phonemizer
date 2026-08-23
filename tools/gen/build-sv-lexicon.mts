@@ -18,7 +18,7 @@ function arg(name: string, fallback: string): string {
 const EP = process.env["ESPEAK_PORTABLE"] ?? "";  // set to the reference-engine checkout
 const NST = arg("nst", `${EP}/tools/corpus/.cache/sv/NST svensk leksikon/swe030224NST.pron/swe030224NST.pron`);
 const CORPUS = arg("corpus", `${EP}/tools/qa-compare/words-50000.sv.txt`);
-const OUT = "src/languages/swedish/accent-stress.tsv";
+const OUT = "data/languages/swedish/accent-stress.tsv";
 
 const corpus = new Set(readFileSync(CORPUS, "utf8").split("\n").map((w) => w.trim().toLowerCase()).filter(Boolean));
 

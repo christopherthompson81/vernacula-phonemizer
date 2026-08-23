@@ -23,7 +23,7 @@ import { phonemizeWordRules } from "../../src/languages/khmer/khmer.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REF = join(HERE, "../referee-eval/referees/km.wikipron-khm-broad.tsv");
-const OUT = join(HERE, "../../src/languages/khmer/km-lexicon.tsv");
+const OUT = join(HERE, "../../data/languages/khmer/km-lexicon.tsv");
 
 /** wikipron transcription (space-separated) → our canonical convention. */
 function canon(ipa: string): string {

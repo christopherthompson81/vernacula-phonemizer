@@ -18,7 +18,7 @@ import { phonemizeWord as g2p } from "../../src/languages/urdu/g2p.ts";
 import { finalizeUrduIpa } from "../../src/languages/urdu/urdu.ts";
 
 const HERE = import.meta.dirname;
-const OUT = `${HERE}/../../src/languages/urdu/lexicon-ipa.tsv`;
+const OUT = `${HERE}/../../data/languages/urdu/lexicon-ipa.tsv`;
 
 /** Normalise a raw IPA string to our canonical convention (unstressed). */
 function canon(ipa: string): string {
@@ -77,7 +77,7 @@ for (const line of readFileSync(`${HERE}/silver.hindiurdu.tsv`, "utf8").split("\
 }
 
 // 3. existing harakat lexicon → IPA via g2p (fills the Urdu-native tail the above two lack)
-for (const line of readFileSync(`${HERE}/../../src/languages/urdu/lexicon.tsv`, "utf8").split("\n")) {
+for (const line of readFileSync(`${HERE}/../../data/languages/urdu/lexicon.tsv`, "utf8").split("\n")) {
     if (line.startsWith("#") || !line.includes("\t")) continue;
     const [skelRaw, voc] = line.split("\t");
     if (!skelRaw || !voc) continue;

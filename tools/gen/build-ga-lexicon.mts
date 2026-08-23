@@ -32,7 +32,7 @@ function arg(name: string, fallback: string): string {
     return i >= 0 && process.argv[i + 1] ? process.argv[i + 1]! : fallback;
 }
 const ORACLE = arg("oracle", "");
-const OUT = "src/languages/irish/lexicon.tsv";
+const OUT = "data/languages/irish/lexicon.tsv";
 if (!ORACLE) throw new Error("pass --oracle <word\\tIPA tsv> (see header for how to regenerate it)");
 
 const V = "aɛɪɔʊəiɑoeu";

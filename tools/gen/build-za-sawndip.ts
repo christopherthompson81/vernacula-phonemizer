@@ -19,7 +19,7 @@ import { phonemizeWord as za } from "../../src/languages/zhuang/zhuang.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SRC = (process.env["DUMPS"] ?? ".") + "/kaikki-Zhuang.jsonl";
-const OUT = join(HERE, "../../src/languages/zhuang/sawndip-readings.tsv");
+const OUT = join(HERE, "../../data/languages/zhuang/sawndip-readings.tsv");
 
 interface Cand { reading: string; ipa: string; senses: number }
 const byGlyph = new Map<string, Cand[]>();

@@ -25,8 +25,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
-LEX = ROOT / "src/languages/sindhi/sindhi-lexicon.tsv"
-DEF = ROOT / "src/languages/sindhi/sindhi.jsonc"
+LEX = ROOT / "data/languages/sindhi/sindhi-lexicon.tsv"
+DEF = ROOT / "data/languages/sindhi/sindhi.jsonc"
 EMPTY = "_"
 
 

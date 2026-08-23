@@ -229,7 +229,7 @@ const header = [
     "# SHIPPED PATH ONLY — phonemizeWordRules (what the eval scores) does not consult this.",
     `# ${out.length} entries.`,
 ].join("\n");
-writeFileSync(join(REPO, "src/languages/afrikaans/af-rcrl-lexicon.tsv"), `${header}\n${out.join("\n")}\n`);
+writeFileSync(join(REPO, "data/languages/afrikaans/af-rcrl-lexicon.tsv"), `${header}\n${out.join("\n")}\n`);
 console.log(
     `wrote ${out.length} entries; dropped ${droppedLetter} single letters (letter-name rule), ` +
     Object.entries(dropped).map(([k, n]) => `${n} ${k}`).join(", "),

@@ -17,7 +17,7 @@ covered words are served by the lexicon, not the model).
 """
 import sys, os, random
 HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-CROSS = f"{HERE}/src/languages/punjabi/crossscript.tsv"
+CROSS = f"{HERE}/data/languages/punjabi/crossscript.tsv"
 WIKI = f"{HERE}/tools/referee-eval/referees/pa.wikipron-pan-arab-broad.tsv"
 MODE = sys.argv[1] if len(sys.argv) > 1 else "align"
 

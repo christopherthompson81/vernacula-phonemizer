@@ -25,7 +25,7 @@ function arg(name: string, fb: string): string {
     return i >= 0 && process.argv[i + 1] ? process.argv[i + 1]! : fb;
 }
 const KAIKKI = arg("kaikki", "");
-const OUT = "src/languages/german/quality.tsv";
+const OUT = "data/languages/german/quality.tsv";
 if (!KAIKKI) throw new Error("pass --kaikki <word\\tIPA tsv> (see header to regenerate it)");
 
 const VOWELS = MANIFEST.vowelChars; // the ENGINE's vowel inventory — must match or ordinals misalign

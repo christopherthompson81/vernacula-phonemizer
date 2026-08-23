@@ -71,7 +71,7 @@ for (const m of text.matchAll(KHMER_RUN)) {
 const kept = [...counts].filter(([, n]) => n >= MIN_COUNT).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 const covered = kept.reduce((a, [, n]) => a + n, 0);
 
-const out = join(dirname(fileURLToPath(import.meta.url)), "../../src/languages/khmer/km-wordfreq.tsv");
+const out = join(dirname(fileURLToPath(import.meta.url)), "../../data/languages/khmer/km-wordfreq.tsv");
 // Sorted by descending count then by word, so the file is stable across runs and its head is readable.
 writeFileSync(out, kept.map(([w, n]) => `${w}\t${n}`).join("\n") + "\n", "utf8");
 

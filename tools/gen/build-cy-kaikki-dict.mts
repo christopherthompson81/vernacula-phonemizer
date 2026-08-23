@@ -25,7 +25,7 @@ function arg(name: string): string | undefined {
 }
 const KAIKKI = arg("kaikki");
 if (!KAIKKI) throw new Error("pass --kaikki <cym-kaikki.tsv>");
-const OUT = new URL("../../src/languages/welsh/lexicon.tsv", import.meta.url).pathname;
+const OUT = new URL("../../data/languages/welsh/lexicon.tsv", import.meta.url).pathname;
 const CORPUS =
     (process.env["ESPEAK_PORTABLE"] ?? ".") + "/tools/qa-compare/words-50000.cy.txt";
 

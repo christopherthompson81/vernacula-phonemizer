@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build src/languages/slovenian/stress.tsv — the Slovene lexical stress lexicon.
+"""Build data/languages/slovenian/stress.tsv — the Slovene lexical stress lexicon.
 
 Slovene stress is free, lexical and UNWRITTEN in ordinary text, so the engine cannot derive it;
 `slovenian.jsonc` recorded it as deferred pending a lexicon. Same shape as the sibling Serbo-Croatian

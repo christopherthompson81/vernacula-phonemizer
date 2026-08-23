@@ -25,7 +25,7 @@ function arg(name: string): string | undefined {
 }
 const KAIKKI = arg("kaikki");
 if (!KAIKKI) throw new Error("pass --kaikki <ces-kaikki.tsv> (stream kaikki.org Czech → word<TAB>ipa)");
-const OUT = new URL("../../src/languages/czech/loanwords.tsv", import.meta.url)
+const OUT = new URL("../../data/languages/czech/loanwords.tsv", import.meta.url)
     .pathname;
 const CORPUS =
     (process.env["ESPEAK_PORTABLE"] ?? ".") + "/tools/qa-compare/words-50000.cs.txt";

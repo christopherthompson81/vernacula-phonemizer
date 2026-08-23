@@ -26,7 +26,8 @@ public static class LoadTsv
      *  lines identically. */
     private static List<string> ReadDataLines(string moduleDir, string filename, bool optional)
     {
-        var path = DataPath.Resolve(moduleDir + "/" + filename);
+        // Optionality is decided HERE, not in DataPath (mirrors TS loadTsv's try/catch around readFileSync).
+        var path = DataPath.ResolveAllowMissing(moduleDir + "/" + filename);
         string text;
         try
         {

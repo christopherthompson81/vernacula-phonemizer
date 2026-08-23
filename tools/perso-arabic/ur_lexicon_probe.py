@@ -9,7 +9,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 WIKI=f"{HERE}/tools/referee-eval/referees/ur.wikipron-urd-broad.tsv"
 SILVER=f"{HERE}/tools/perso-arabic/silver.hindiurdu.tsv"
 EXTRA=f"{HERE}/tools/perso-arabic/ur_extra_pool.tsv"
-SHIP=f"{HERE}/src/languages/urdu/lexicon.tsv"
+SHIP=f"{HERE}/data/languages/urdu/lexicon.tsv"
 
 UNITS=["t͡ʃ","d͡ʒ","t̪","d̪","ɑː","aː","uː","iː","eː","oː","ɔː","ɛː","ə","ɪ","ʊ","ɔ","ɛ","ɑ","æ","a","e","o","u","i",
        "b","p","t","s","h","x","d","z","ʒ","ʃ","ɾ","r","ʔ","ɣ","f","q","k","ɡ","g","l","m","n",

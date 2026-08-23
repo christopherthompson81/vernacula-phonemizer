@@ -71,7 +71,7 @@ for (const [w, prons] of gAll) if (prons.size === 1) G.set(w, [...prons][0]!);
 const W = load(`${HERE}/../referee-eval/referees/bn.wikipron-ben-broad.tsv`, 1);
 const existing = new Set([
     ...load(
-        `${HERE}/../../src/languages/bengali/bengali-lexicon.tsv`,
+        `${HERE}/../../data/languages/bengali/bengali-lexicon.tsv`,
         1,
     ).keys(),
 ]);

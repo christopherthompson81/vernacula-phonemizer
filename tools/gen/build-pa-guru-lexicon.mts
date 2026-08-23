@@ -1,5 +1,5 @@
 /**
- * Build src/languages/punjabi/gurmukhi-lexicon.tsv — the Gurmukhi EXCEPTIONS lexicon, mined from the
+ * Build data/languages/punjabi/gurmukhi-lexicon.tsv — the Gurmukhi EXCEPTIONS lexicon, mined from the
  * wikipron pan_guru referee exactly as km-lexicon.tsv is mined from khm: every referee word whose EVAL
  * reading (`phonemizeWordEval` — the function the referee eval scores) disagrees with every gold reading
  * under the eval's own folds gets an entry carrying the referee's first reading.
@@ -45,7 +45,7 @@ function main(): void {
         rows.push([w, gs[0]!]);
     }
     rows.sort((a, b) => a[0].localeCompare(b[0]));
-    const out = join(here, "../../src/languages/punjabi/gurmukhi-lexicon.tsv");
+    const out = join(here, "../../data/languages/punjabi/gurmukhi-lexicon.tsv");
     writeFileSync(out, `# Gurmukhi EXCEPTIONS lexicon — word → IPA for the words the eval path gets wrong, carrying the
 # wikipron pan_guru referee's own readings (first reading of a multi-pronunciation word).
 #

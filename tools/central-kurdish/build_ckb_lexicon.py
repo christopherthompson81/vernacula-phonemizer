@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build src/languages/central-kurdish/lexicon.tsv — the bizroke coverage lexicon.
+"""Build data/languages/central-kurdish/lexicon.tsv — the bizroke coverage lexicon.
 
 ⚠ WHAT THIS SUPPLIES, AND WHY A RULE CANNOT. Sorani writes every long vowel and the short /a/ but NOT the
 short /ɪ/ (the *bizroke*), so `central-kurdish.ts` emits nothing for it and 634 corpus tokens across 54 word

@@ -1,5 +1,5 @@
 /**
- * Build src/languages/khmer/km-lexicon-kaikki.tsv — the THIRD-TIER Khmer lexicon, from the kaikki.org
+ * Build data/languages/khmer/km-lexicon-kaikki.tsv — the THIRD-TIER Khmer lexicon, from the kaikki.org
  * extraction of en.wiktionary's Khmer entries.
  *
  * Run: npx tsx tools/gen/build-km-kaikki-lexicon.mts <kaikki.org-dictionary-Khmer.jsonl>
@@ -110,7 +110,7 @@ function main(src: string): void {
         }
         rows.sort((a, b) => a[0].localeCompare(b[0]));
 
-        const out = join(here, "../../src/languages/khmer/km-lexicon-kaikki.tsv");
+        const out = join(here, "../../data/languages/khmer/km-lexicon-kaikki.tsv");
         writeFileSync(out, `# Khmer THIRD-TIER lexicon — word → IPA, from en.wiktionary via kaikki.org.
 #
 # SOURCE:  https://kaikki.org/dictionary/Khmer/ (wiktextract of en.wiktionary)
