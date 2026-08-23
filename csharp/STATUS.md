@@ -16,7 +16,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 2 of 182** — `qu` 198/200 (2 rows blocked on unported `russian`), `af` 200/200.
+- **Languages: 3 of 182** — `en` 200/200, `af` 200/200, `qu` 198/200 (2 rows blocked on unported `russian`).
 - `Languages/Bootstrap.cs` is the registration list: one line per ported language, plus the neural table.
 
 ## Next, in order
@@ -59,35 +59,37 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
    `[\p{L}\p{M}]+` ran **372 ms where plain .NET ran 16 ms** — a 23x tax with correct output.
    Asserted structurally in `AstralBranchesAreGuarded`.
 
-3. **Languages — the pilot slice is DONE; English is next.** Two languages are ported and gated:
-     - **qu (Quechua)** — 587 lines, 4 files. **198/200 byte-identical**; the two remaining rows are
-       BLOCKED, not wrong (see the dependency note below).
-     - **af (Afrikaans)** — 1,191 lines, 7 files, ONNX tagger + two lexicons + the shared Germanic
-       morphology. **200/200 byte-identical**, through the async neural path.
-   Four defects surfaced, three of them in shared infrastructure rather than in the languages:
-     - **The parity gate set `InvariantGlobalization`**, which makes `string.Normalize` a SILENT NO-OP.
-       Every NFC/NFD fold in the engine stopped working and the gate reported the ENGINE as broken —
-       qu showed 20 failing rows instead of 2. The engine now refuses to start in that mode
-       (`Core/Globalization.cs`), because a gate that can misreport what it measures is worse than none.
-     - **The bootstrap ran only on the sync path.** The FIRST `PhonemizeAsync` call in a process found
-       `GetNeuralPhonemizer` unset, served the rule reading, and installed the table on its way out —
-       one wrong utterance per process, correct from the second call on. It cost af exactly one row.
-     - **A golden can depend on ANOTHER language's engine.** The script router reads an embedded foreign
-       run through that script's engine and CATCHES the failure, so an unported target silently drops the
-       run. Quechua's golden expects `л` read by RUSSIAN. The gate now names the unported engines a run
-       asked for, so "blocked" is a distinct answer from "wrong".
-     - **`[ModuleInitializer]` is the wrong registration mechanism** for a library (CA2255, and it would
-       scatter "which languages are ported?" across 182 files). `Languages/Bootstrap.cs` is one list.
+3. **Languages — three ported and gated.**
+     - **en (English)** — 2,100 lines, 9 files: CMUdict lexicon, POS perceptron for heteronyms, n-gram OOV
+       G2P, ONNX BiLSTM tagger, ARPABET→IPA allophony, 663-line normalizer. **200/200 byte-identical**,
+       both the sync and the async path, and it unblocks the 40 goldens that need a Latin foreign reader.
+     - **af (Afrikaans)** — 1,191 lines, 7 files, ONNX tagger + two lexicons + Germanic morphology.
+       **200/200**.
+     - **qu (Quechua)** — 587 lines, 4 files. **198/200**; both remainders BLOCKED on unported `russian`.
+   Defects found, all in shared infrastructure or the loader rather than in a language's own logic:
+     - **The parity gate set `InvariantGlobalization`**, making `string.Normalize` a SILENT NO-OP. Every
+       NFC/NFD fold stopped working and the gate reported the ENGINE as broken (qu: 20 rows instead of 2).
+       The engine now refuses to start in that mode (`Core/Globalization.cs`).
+     - **The bootstrap ran only on the sync path**, so the FIRST `PhonemizeAsync` in a process served the
+       rule reading and installed the neural table on its way out. Cost af one row of 200.
+     - **A manifest key the camelCase policy mangles deserializes to the type's DEFAULT.** English's
+       ARPABET block is keyed `AH`/`ER`/`IY`/`UW`; none survived, so those vowels came out as the EMPTY
+       STRING and `virgin` read *vd͡ʒɪn* — the nucleus gone, nothing thrown, the ONNX tagger and its mask
+       byte-identical to Node's. 42 golden rows. `ManifestMappingTests` now diffs every ported manifest's
+       key set against the round-tripped object, so an unclaimed key fails structurally.
+     - **A golden can depend on ANOTHER language's engine** through the script router, which CATCHES the
+       failure — so an unported target silently drops the run. `Registry.PortPending` names them.
+     - **`[ModuleInitializer]` is the wrong registration mechanism** for a library (CA2255).
 
-4. **Port English next, before the bulk.** MEASURED over the 109 goldens, counting only runs whose script
-   is not the language's own:
+4. **The bulk, in dependency order.** MEASURED over the 109 goldens, counting only runs whose script is
+   not the language's own:
      - **65 goldens need no other engine** — bulk-portable in any order, gated immediately:
        `af ar ast az bs ca ceb cs cy da de en es et ff fi fr ga gl ha hr hu id ig is it jv kam kea kl la
        lb lg ln lt luo lv mi ms mt nb nl nso oc om pl pt ro ru si sk sl sn so st su sv sw tr tt uz vi wo
        xh yo za zu`
      - **40 need `en`** (non-Latin scripts with embedded Latin runs) · 3 need `ru` · 1 needs `el`
-   English is also the `readAsEnglish` reader threaded into ~46 engines, so it is the universal unlock —
-   2,100 lines, 9 files, neural, and the one engine the registry reaches beyond `ILanguage`.
+   `en` is ported, so the 40 are unblocked; `ru` (3) and `el` (1) remain. The 65 self-contained goldens
+   are portable in any order.
 
 5. **Goldens for the 84 uncovered codes.** `tools/gen_parity_goldens.mts` produced nothing for them
    — mostly regional variants (`en-GB`, `pt-BR`) and languages with no FLEURS text. Without a golden

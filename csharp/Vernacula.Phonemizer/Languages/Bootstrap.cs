@@ -28,7 +28,12 @@ public static class Bootstrap
             // Installed here for the same reason the engines are: nothing else imports the language modules.
             Phonemizer.GetNeuralPhonemizer = NeuralRegistry.GetNeuralPhonemizer;
 
+            // English also supplies the foreign-run OOV prewarm, which phonemizeAsync calls for every
+            // non-English host carrying Latin text (core/foreign.ts).
+            Phonemizer.PrewarmForeignEnglish = English.EnglishNeural.PrewarmForeignEnglish;
+
             Afrikaans.AfrikaansPhonemizer.RegisterSelf();
+            English.EnglishFactory.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }
