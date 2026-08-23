@@ -78,6 +78,12 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
   182 files). A neural language also needs its `NeuralRegistry` entry, and the bootstrap installs BOTH:
   ⚠ the neural table must be live before the FIRST `PhonemizeAsync`, or that call silently serves the
   sync reading.
+- ⚠ A MANIFEST KEY THE NAMING POLICY MANGLES DESERIALIZES TO THE TYPE'S DEFAULT, silently. The loader
+  applies camelCase, which does not leave an all-caps or otherwise irregular JSON key alone — English's
+  ARPABET block is keyed `AH`/`ER`/`IY`/`UW` and none of them matched, so those vowels loaded as the
+  EMPTY STRING and `virgin` read *vd͡ʒɪn*. Put `[JsonPropertyName("…")]` on any property whose JSON key
+  is not plain camelCase, and add the language to `ManifestMappingTests`, which diffs the file's key set
+  against the round-tripped object so an unclaimed key fails as a test rather than as a phoneme.
 - ⚠ NEVER set `InvariantGlobalization` in a project that touches the engine. `string.Normalize` becomes
   a no-op — no throw, no warning — and every NFC/NFD fold stops working. The engine now refuses to start
   in that mode (`Core/Globalization.cs`); it was the PARITY TOOL that had it set, so the gate was

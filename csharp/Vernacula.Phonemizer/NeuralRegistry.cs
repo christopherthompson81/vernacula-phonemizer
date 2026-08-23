@@ -17,6 +17,7 @@ public static class NeuralRegistry
         // per-grapheme BiLSTM reading the words BOTH af lexicons miss: 91.4% vs the rules' 63.5% word-exact
         // on a dictionary-gold held-out split, because af's residual is stress-conditioned vowel quality —
         // contextual, not tabulable
+        ["en"] = Languages.English.EnglishNeural.PhonemizeEnNeural, // BiLSTM OOV reader (else the sync n-gram OOV G2P)
         ["af"] = Languages.Afrikaans.AfrikaansNeural.PhonemizeAfNeural,
     };
 

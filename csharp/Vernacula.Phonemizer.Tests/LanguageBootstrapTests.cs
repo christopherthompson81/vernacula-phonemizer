@@ -33,6 +33,7 @@ public class LanguageBootstrapTests
     [Theory]
     [InlineData("qu", "iskay chunka", "ˈiskaj ˈt͡ʃunka")]   // read off the TypeScript engine, not guessed
     [InlineData("af", "twee", "twˈiə")]           // ⟨tw⟩ is the glide, not [v] — the W_GLIDE_AFTER rule
+    [InlineData("en", "virgin branson", "vˈɝd͡ʒɪn bɹˈænsən")]   // the ARPABET conditional vowels (ER/AH)
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 

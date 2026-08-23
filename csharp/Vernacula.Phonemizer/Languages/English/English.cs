@@ -1,0 +1,447 @@
+/**
+ * Native English text phonemizer — canonical IPA. English is irregular, so pronunciation
+ * comes from a CMUdict-derived lexicon + a cleanroom n-gram OOV G2P + a POS perceptron for heteronyms
+ * (no rules). Resolution order per word: heteronym (POS-gated, incl. -s plural) → flat lexicon →
+ * possessive 's → OOV G2P. Numbers become words (numberToWords) resolved through the same path.
+ *
+ * NOTE: this stage emits per-word CITATION stress + clause-pause marks. Sentence-level de-accenting (the
+ * `look over there` → ˌoᶷvɚ demotion) is a following pass (intonation.ts).
+ */
+using System.Numerics;
+using System.Text;
+using System.Text.RegularExpressions;
+using Vernacula.Phonemizer.Core;
+
+namespace Vernacula.Phonemizer.Languages.English;
+
+public sealed class EnglishPhonemizer : IEnglishPhonemizer
+{
+    private readonly IReadOnlyDictionary<string, string> _lexicon;
+    private readonly IReadOnlyDictionary<string, HeteronymEntry> _heteronyms;
+    private readonly IEnglishG2p _g2p;
+    private readonly PosTagger _tagger;
+    private readonly IReadOnlySet<string> _unstressed;
+    // Closed word-lists from english.jsonc: clause punctuation → pause, clause-final de-accented pronouns,
+    // and wh-pronouns that demote to secondary stress.
+    private readonly IReadOnlyDictionary<string, string> _clausePunctuation;
+    private readonly IReadOnlySet<string> _nonTonicFinal;
+    private readonly IReadOnlySet<string> _whSecondary;
+
+    public EnglishPhonemizer(
+        IReadOnlyDictionary<string, string> lexicon,
+        IReadOnlyDictionary<string, HeteronymEntry> heteronyms,
+        IEnglishG2p g2p,
+        PosTagger tagger,
+        IReadOnlySet<string> unstressed,
+        IReadOnlyDictionary<string, string> clausePunctuation,
+        IReadOnlySet<string> nonTonicFinal,
+        IReadOnlySet<string> whSecondary)
+    {
+        _lexicon = lexicon;
+        _heteronyms = heteronyms;
+        _g2p = g2p;
+        _tagger = tagger;
+        _unstressed = unstressed;
+        _clausePunctuation = clausePunctuation;
+        _nonTonicFinal = nonTonicFinal;
+        _whSecondary = whSecondary;
+    }
+
+    private static readonly JsRe TRAILING_DIACRITICS = JsRegex.Compile("[̀-ͯːˈˌ‿ᶦᶷʰʲ]", "u");
+
+    /** English regular plural/3sg/genitive sibilant allomorph appended to a base IPA: sibilant→ɪz, voiceless→s,
+     *  else voiced/vowel→z. Skips trailing diacritics/length/stress/offglide to read the final base phone. */
+    private static string SibilantAllomorph(string ipa)
+    {
+        var chars = Js.CodePoints(ipa.Normalize(NormalizationForm.FormC));
+        var i = chars.Count - 1;
+        while (i >= 0 && TRAILING_DIACRITICS.IsMatch(chars[i])) i--;
+        var last = i >= 0 ? chars[i] : "";
+        if (last.Length == 1 && "szʃʒ".Contains(last, StringComparison.Ordinal)) return "ɪz";
+        if (last.Length == 1 && "ptkfθ".Contains(last, StringComparison.Ordinal)) return "s";
+        return "z";
+    }
+
+    private static readonly JsRe COMBINING = JsRegex.Compile("[̀-ͯ]", "gu");
+    private static readonly JsRe STRESS_MARKS = JsRegex.Compile("[ˈˌː]", "g");
+
+    /** A voicing-pair heteronym (default & marked differ only in the final consonant: use/close/house). Their
+     *  -s inflection voicing is lexical/irregular, so those defer their plurals to the flat lexicon. */
+    private static bool IsVoicingHeteronym(HeteronymEntry het)
+    {
+        var marked = het.Verb ?? het.Noun ?? het.Past;
+        if (marked is null) return false;
+        static string Strip(string s) => STRESS_MARKS.Replace(COMBINING.Replace(s.Normalize(NormalizationForm.FormD), ""), "");
+        string a = Strip(het.Default), b = Strip(marked);
+        return a.Length == b.Length
+            && a.Length > 0
+            && a[..^1] == b[..^1]
+            && a[^1..] != b[^1..];
+    }
+
+    private static readonly JsRe FIRST_VOWEL = JsRegex.Compile("[aeiouɪʊɛɔəɐæɑɒʌɝɚɜɨʉ]", "u");
+
+    /** Insert primary stress before the first vowel — the nuclear-tonic fallback for an all-unstressed clause. */
+    private static string PromoteFirstVowel(string ipa)
+    {
+        var m = FIRST_VOWEL.Match(ipa);
+        return !m.Success ? ipa : ipa[..m.Index] + "ˈ" + ipa[m.Index..];
+    }
+
+    private abstract record Token;
+    private sealed record WordToken(string Text) : Token;
+    private sealed record NumberToken(string Text, bool Ordinal) : Token;
+    private sealed record ClauseToken(string Text) : Token;
+    // A run in a script this engine does not own, ALREADY resolved to IPA by whichever engine owns that
+    // script (core/scripts.ts). It carries phonemes rather than text because it must bypass the tagger
+    // and the resolver entirely — there is no English pronunciation of Владимир to look up.
+    private sealed record ForeignToken(string Ipa) : Token;
+
+    // number (grouped + decimal) with optional ordinal suffix · word (letters + internal/trailing apostrophes) · clause punct
+    // The word class is LATIN-SCRIPT, not [A-Za-z]: an ASCII-only class split accented loanwords at the
+    // accent, so "naïve" tokenized as "na"+"ve" -> [nˈɑː vˈiː] and "résumé" as "r"+"sum" -> [ˈɑːɹ sˈʌm].
+    // resolveWord folds the diacritics away for lookup (foldLatinDiacritics). Non-Latin scripts stay
+    // unmatched, as before — English is not the engine for them.
+    // ⚠ A WORD MUST START WITH A LATIN LETTER. The class was `[\p{Script=Latin}\p{M}]+`, which also matched a
+    // COMBINING MARK on its own — so the vowel signs of an embedded abugida were claimed as English "words"
+    // and the run was shattered around them: `తెలుగు` reached the Telugu engine as three bare consonants and
+    // read "ta la ga" instead of "telugu". Marks may follow a Latin letter; they may not begin a token.
+    private static readonly JsRe TOKEN_RE = JsRegex.Compile(
+        "(\\d[\\d,]*(?:\\.\\d+)?)(st|nd|rd|th)?|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*(?:['’]\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)*['’]?)|([.?!,;:])",
+        "gu");
+
+    private static readonly JsRe CURLY_APOSTROPHE = JsRegex.Compile("’", "gu");
+    private static readonly JsRe APOSTROPHES = JsRegex.Compile("'", "g");
+    private static readonly JsRe ASCII_WORD = JsRegex.Compile("^[a-z]+$");
+    private static readonly JsRe GROUPING = JsRegex.Compile("[,.]", "g");
+    private static readonly JsRe COMMAS = JsRegex.Compile(",", "g");
+    private static readonly JsRe PRIMARY_MARK = JsRegex.Compile("ˈ", "g");
+
+    /** Dict-only lookup for creoles (e.g. Naija) that NATIVISE English-etymological words: the CMUdict-derived
+     *  citation IPA if `word` is known English, else null (an OOV word — likely a substrate loan — for the
+     *  caller to handle differently). No OOV G2P and no clause/stress processing — the raw pronunciation to remap. */
+    public string? KnownWord(string word)
+    {
+        var lower = word.ToLowerInvariant();
+        if (_lexicon.TryGetValue(lower, out var v)) return v;
+        return _heteronyms.TryGetValue(lower, out var het) ? het.Default : null;
+    }
+
+    /** `text` with an `oovOverride`, for the registry's FOREIGN reader (core/foreign.ts) — the path that reads an
+     *  embedded Latin run inside another language, which needs the prewarmed neural readings.
+     *
+     *  ⚠ In the TS this had to call the PROTOTYPE's `text`, because `getPhonemizer` shadows `text` as an OWN
+     *  property with a one-argument wrapper and `this.text` would silently drop arguments two and three. C# has
+     *  no such shadowing — the registry wraps the INSTANCE — so this simply calls the real method. */
+    public string TextWithOov(string input, Func<string, string?> oovOverride) =>
+        Text(input, null, oovOverride);
+
+    /** One orthographic word → canonical IPA, given its POS expectation. `oovOverride` (async neural path only,
+     *  enNeural.ts) resolves a genuinely-OOV g2pKey to the BiLSTM tagger's reading BEFORE the sync n-gram engine —
+     *  the sync path passes nothing, so behaviour is byte-identical. */
+    private string ResolveWord(string word, PosExpectation? e, Func<string, string?>? oovOverride)
+    {
+        // Fold Latin diacritics before any lookup: the lexicon and the n-gram G2P are ASCII-keyed
+        // (CMUdict has `cafe`/`naive`/`jalapeno`, never the accented spellings), and the curly
+        // apostrophe is normalised so "don’t" resolves like "don't".
+        var lower = CURLY_APOSTROPHE.Replace(Unicode.FoldLatinDiacritics(word.ToLowerInvariant()), "'");
+
+        // Heteronym (direct or a regular -s/-es plural of a stress-shift heteronym).
+        HeteronymEntry? het = _heteronyms.TryGetValue(lower, out var direct) ? direct : null;
+        var pluralAllomorph = false;
+        if (het is null)
+        {
+            string? bas =
+                lower.EndsWith("es", StringComparison.Ordinal) && _heteronyms.ContainsKey(lower[..^2]) ? lower[..^2]
+                : lower.EndsWith("s", StringComparison.Ordinal) && lower.Length > 1 && _heteronyms.ContainsKey(lower[..^1]) ? lower[..^1]
+                : null;
+            var cand = bas is not null && _heteronyms.TryGetValue(bas, out var cv) ? cv : null;
+            if (cand is not null && !IsVoicingHeteronym(cand))
+            {
+                het = cand;
+                pluralAllomorph = true;
+            }
+        }
+        if (het is not null)
+        {
+            // JS `(a && b) || (c && d) || … || fallback` — the first NON-EMPTY marked reading wins.
+            var ipa = (e?.Past == true && !string.IsNullOrEmpty(het.Past)) ? het.Past!
+                : (e?.Verb == true && !string.IsNullOrEmpty(het.Verb)) ? het.Verb!
+                : (e?.Noun == true && !string.IsNullOrEmpty(het.Noun)) ? het.Noun!
+                : het.Default;
+            if (pluralAllomorph) ipa += SibilantAllomorph(ipa);
+            return ipa;
+        }
+
+        // Possessive / genitive clitic: X's → base + allomorph; Xs' → base.
+        var lookupKey = lower;
+        var possAllomorph = false;
+        if (lower.EndsWith("'s", StringComparison.Ordinal) && lower.Length > 2)
+        {
+            lookupKey = lower[..^2];
+            possAllomorph = true;
+        }
+        else if (lower.EndsWith("'", StringComparison.Ordinal) && lower.Length > 2 && lower[^2] == 's')
+        {
+            lookupKey = lower[..^1];
+        }
+
+        var over = _lexicon.TryGetValue(lookupKey, out var lex) ? lex : null;
+        if (over is null)
+        {
+            // OOV → the neural tagger (async path) if it has a reading, else native n-gram G2P (strip any apostrophes
+            // so contractions/loanwords G2P their letters).
+            var g2pKey = APOSTROPHES.Replace(lookupKey, "");
+            over = oovOverride?.Invoke(g2pKey) ?? (ASCII_WORD.IsMatch(g2pKey) ? _g2p.G2p(g2pKey) : g2pKey);
+        }
+        if (possAllomorph) over += SibilantAllomorph(over);
+        return over;
+    }
+
+    /** POS expectations for a sentence's words (perceptron tags → verb/noun/past, + imperative recovery). */
+    private List<PosExpectation?> PosExpectations(IReadOnlyList<string> words)
+    {
+        var tags = _tagger.Tag(words);
+        var outp = tags.Select(t => (PosExpectation?)Pos.PosExpectationOf(t)).ToList();
+        if (outp.Count > 1 && outp[0]!.Verb == false && Pos.HeadsObjectPhrase(tags.Count > 1 ? tags[1] : ""))
+            outp[0] = new PosExpectation { Verb = true, Noun = false, Past = false }; // sentence-initial imperative ("Wind the clock")
+        return outp;
+    }
+
+    private sealed class NumWord
+    {
+        public required string Text { get; init; }
+        public bool Reduced { get; init; }
+    }
+
+    private sealed class Unit
+    {
+        public List<NumWord> Words { get; init; } = new();
+        public string? Clause { get; init; }
+        /** Already-resolved IPA (a foreign run); contributes NO words, so tagger alignment is
+         *  unaffected and `expect[wi]` keeps indexing the English stream correctly. */
+        public string? Foreign { get; init; }
+    }
+
+    private sealed class Item
+    {
+        public required string Word { get; init; }
+        public required string Citation { get; init; }
+        public required bool Reduced { get; init; }
+        public required string Display { get; set; }
+    }
+
+    private sealed class ClauseAcc
+    {
+        public List<Item> Items { get; } = new();
+        public string? Mark { get; set; }
+    }
+
+    public string Text(string input) => Text(input, null, null);
+
+    /** `wordTransform`, if given, post-processes each resolved word's IPA with its (lowercased) source word —
+     *  the hook the en-GB accent variant uses to apply its per-word lexical-set delta while reusing this engine's
+     *  full number/heteronym/prosody context. Clause pause marks are not passed through it. */
+    public string Text(string input, Func<string, string, string>? wordTransform, Func<string, string?>? oovOverride)
+    {
+        // Text normalization: %, $, units, dates, times, years, romans. ⚠ INITIALISMS run after, so
+        // the Roman-numeral rules get first refusal on all-caps letter runs — run earlier, this spells
+        // "Louis XIV" as EX-EYE-VEE.
+        input = Normalize.NormalizeEnglishInitialisms(Normalize.NormalizeEnglish(input), w => _lexicon.ContainsKey(w));
+        var tokens = new List<Token>();
+        // GAPS between tokens carry embedded foreign text. English's tokenizer matches Latin script only, so
+        // without this a Greek or Cyrillic run is dropped outright and "The word λόγος means word" reads as
+        // "the word means word".
+        // ⚠ ENGLISH CANNOT USE `assembleClauses` — that is a streaming sink and this is a two-phase pipeline
+        // (tokens → POS tagger → resolver) — but the GAP PASS is separable from the clause model.
+        var gapCursor = 0;
+        void ClaimGap(int upto)
+        {
+            if (upto > gapCursor)
+            {
+                var gap = input[gapCursor..upto];
+                foreach (Match g in Clauses.FOREIGN_RUN.Matches(gap))
+                {
+                    var ipa = Foreign.ReadForeignRun(g.Value);
+                    if (ipa is not null && ipa != "") tokens.Add(new ForeignToken(ipa));
+                }
+            }
+            gapCursor = upto;
+        }
+        foreach (Match m in TOKEN_RE.Matches(input))
+        {
+            ClaimGap(m.Index);
+            gapCursor = m.Index + m.Value.Length;
+            if (m.Groups[1].Success) tokens.Add(new NumberToken(m.Groups[1].Value, m.Groups[2].Success));
+            else if (m.Groups[3].Success) tokens.Add(new WordToken(m.Groups[3].Value));
+            else if (m.Groups[4].Success) tokens.Add(new ClauseToken(m.Groups[4].Value));
+        }
+        ClaimGap(input.Length);
+
+        // Expand numbers to words up-front so the POS tagger + resolver see a flat word stream. A word may be
+        // flagged `reduced` at expansion time — the decimal separator "point" is a prosodically-weak connector,
+        // not a stressed content noun, so it is de-accented like a function word.
+        var units = new List<Unit>();
+        foreach (var t in tokens)
+        {
+            switch (t)
+            {
+                case ClauseToken ct:
+                    if (_clausePunctuation.TryGetValue(ct.Text, out var mk) && mk.Length > 0)
+                        units.Add(new Unit { Clause = mk });
+                    break;
+                case ForeignToken ft:
+                    units.Add(new Unit { Foreign = ft.Ipa });
+                    break;
+                case WordToken wt:
+                    units.Add(new Unit { Words = { new NumWord { Text = wt.Text } } });
+                    break;
+                case NumberToken nt:
+                {
+                    var n = BigInteger.Parse(GROUPING.Replace(nt.Text, ""), System.Globalization.CultureInfo.InvariantCulture); // integer part; fractional read separately below
+                    var dot = nt.Text.IndexOf('.');
+                    if (dot >= 0)
+                    {
+                        var intText = COMMAS.Replace(nt.Text[..dot], "");
+                        var intWords = Numbers.NumberToWords(BigInteger.Parse(
+                                intText.Length > 0 ? intText : "0", System.Globalization.CultureInfo.InvariantCulture))
+                            .Select(w => new NumWord { Text = w });
+                        var frac = nt.Text[(dot + 1)..].Select(d =>
+                            new NumWord { Text = Numbers.NumberToWords(BigInteger.Parse(d.ToString(), System.Globalization.CultureInfo.InvariantCulture))[0] });
+                        var u = new Unit();
+                        u.Words.AddRange(intWords);
+                        u.Words.Add(new NumWord { Text = "point", Reduced = true });
+                        u.Words.AddRange(frac);
+                        units.Add(u);
+                    }
+                    else
+                    {
+                        var u = new Unit();
+                        u.Words.AddRange((nt.Ordinal ? Numbers.OrdinalToWords(n) : Numbers.NumberToWords(n))
+                            .Select(w => new NumWord { Text = w }));
+                        units.Add(u);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Tag word-by-word across the whole utterance (START/END padded), resolve each to CITATION IPA, then
+        // de-accent: unstressed function words lose their primary; a clause left with no primary promotes its
+        // last word back to the nuclear tonic. Clause boundaries are the pause marks.
+        var allWords = units.SelectMany(u => u.Words.Select(w => w.Text)).ToList();
+        var expect = PosExpectations(allWords);
+        var wi = 0;
+        var clauses = new List<ClauseAcc> { new() };
+        foreach (var u in units)
+        {
+            if (u.Clause is not null)
+            {
+                var cur = clauses[^1];
+                if (cur.Items.Count > 0)
+                {
+                    cur.Mark = u.Clause;
+                    clauses.Add(new ClauseAcc());
+                }
+                continue;
+            }
+            if (u.Foreign is not null)
+            {
+                clauses[^1].Items.Add(new Item { Word = "", Citation = u.Foreign, Reduced = false, Display = u.Foreign });
+                continue;
+            }
+            foreach (var w in u.Words)
+            {
+                var citation = ResolveWord(w.Text, wi < expect.Count ? expect[wi] : null, oovOverride);
+                wi++;
+                if (citation == "") continue;
+                var lw = w.Text.ToLowerInvariant();
+                clauses[^1].Items.Add(new Item
+                {
+                    Word = lw,
+                    Citation = citation,
+                    Reduced = w.Reduced || _unstressed.Contains(lw),
+                    Display = citation,
+                });
+            }
+        }
+
+        var parts = new List<string>();
+        foreach (var c in clauses)
+        {
+            foreach (var it in c.Items)
+            {
+                if (_whSecondary.Contains(it.Word)) it.Display = PRIMARY_MARK.Replace(it.Citation, "ˌ"); // wh-pronoun → secondary
+                else if (it.Reduced) it.Display = PRIMARY_MARK.Replace(it.Citation, ""); // unstressed function word / decimal point
+            }
+            if (c.Items.Count > 0)
+            {
+                // Nuclear tonic: the clause-FINAL word takes primary in a TERMINAL clause (. ? ! / utterance end) —
+                // EXCEPT a de-accentable personal pronoun ("please use it" → jˈuːz ɪt, not …ˈɪt). A clause with NO
+                // primary at all always promotes its last word (tonic guarantee), pronoun or not.
+                var terminal = c.Mark is null || c.Mark == "." || c.Mark == "?" || c.Mark == "!";
+                var hasPrimary = c.Items.Any(it => it.Display.Contains('ˈ'));
+                var last = c.Items[^1];
+                var promote = !hasPrimary || (terminal && !last.Display.Contains('ˈ') && !_nonTonicFinal.Contains(last.Word));
+                if (promote)
+                    last.Display = last.Citation.Contains('ˈ') ? last.Citation : PromoteFirstVowel(last.Citation);
+            }
+            foreach (var it in c.Items)
+                parts.Add(wordTransform is not null ? wordTransform(it.Display, it.Word) : it.Display);
+            if (c.Mark is not null) parts.Add(c.Mark);
+        }
+        return string.Join(" ", parts);
+    }
+}
+
+public static class EnglishFactory
+{
+    /** Load the English data and build the phonemizer. */
+    public static EnglishPhonemizer CreateEnglish()
+    {
+        const string dir = "languages/english";
+        // accent-lexicon.tsv is 3-column word<TAB>?<TAB>ipa. `parse` receives the post-first-tab REMAINDER
+        // ("?<TAB>ipa"), so the ipa is remainder field [1] (= file column 3). Keep it when non-empty.
+        var lexicon = LoadTsv.LoadTsvMap<string>(dir, "accent-lexicon.tsv", (rest, _) =>
+        {
+            var fields = rest.Split('\t');
+            var ipa = fields.Length > 1 ? fields[1].Trim() : null;
+            return fields.Length >= 2 && !string.IsNullOrEmpty(ipa) ? ipa : null;
+        });
+
+        var manifest = Manifest.MANIFEST; // consolidated hand-authored facts (english.jsonc), loaded once by manifest.ts
+        var heteronyms = manifest.Heteronyms;
+        var unstressed = new HashSet<string>(manifest.UnstressedWords, StringComparer.Ordinal);
+        var arpabetToIpa = EnglishArpabet.MakeArpabetToIpa(manifest.Arpabet);
+
+        var g2pDict = LoadTsv.LoadTsvMap<List<string>>(dir, "g2p-dict.tsv", (v, _) => v.Split(' ').ToList());
+        var g2pCommon = new HashSet<string>(LoadTsv.LoadLines(dir, "g2p-common.txt"), StringComparer.Ordinal);
+        var g2p = EnglishG2pFactory.CreateEnglishG2p(
+            LoadManifest.LoadJson<EnglishG2pModel>(dir, "g2p-model.json"),
+            g2pDict,
+            g2pCommon,
+            arpabetToIpa,
+            new G2pClassSets
+            {
+                VowelLetters = manifest.G2pClasses.VowelLetters,
+                Voiceless = manifest.G2pClasses.Voiceless,
+                Sibilants = manifest.G2pClasses.Sibilants,
+                StopPieces = manifest.G2pClasses.StopPieces,
+                Vowels = manifest.Arpabet.Vowels, // OOV G2P reuses arpabet.vowels (single source)
+            });
+
+        var tagger = new PosTagger(LoadManifest.LoadJson<PosModel>(dir, "pos-model.json"));
+
+        return new EnglishPhonemizer(
+            lexicon,
+            heteronyms,
+            g2p,
+            tagger,
+            unstressed,
+            manifest.ClausePunctuation,
+            new HashSet<string>(manifest.NonTonicFinal, StringComparer.Ordinal),
+            new HashSet<string>(manifest.WhSecondary, StringComparer.Ordinal));
+    }
+
+    internal static void RegisterSelf() => Registry.Register("english", () => CreateEnglish());
+}
