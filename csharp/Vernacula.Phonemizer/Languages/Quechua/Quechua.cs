@@ -40,7 +40,9 @@ public sealed class QuechuaPhonemizer : ILanguage
             var matched = false;
             foreach (var key in ORDER)
             {
-                if (string.CompareOrdinal(w, i, key, 0, key.Length) == 0 && i + key.Length <= w.Length)
+                // JS `w.startsWith(key, i)` — the BOUNDS TEST COMES FIRST: CompareOrdinal with a length
+                // past the end of `w` compares only what is there, so testing it afterwards is too late.
+                if (i + key.Length <= w.Length && string.CompareOrdinal(w, i, key, 0, key.Length) == 0)
                 {
                     segs.Add(DIGRAPHS[key]);
                     i += key.Length;
@@ -90,7 +92,7 @@ public sealed class QuechuaPhonemizer : ILanguage
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(Nat(m.Groups[1].Value)));
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
-                foreach (var wd in Numbers.NumberToWords(double.Parse(m.Groups[2].Value)).Split(' '))
+                foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value)).Split(' '))
                     sink.Emit(PhonemizeWord(wd));
             else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
             {

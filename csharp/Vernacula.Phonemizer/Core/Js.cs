@@ -49,4 +49,16 @@ public static class Js
         n == Math.Floor(n) && !double.IsInfinity(n)
             ? ((long)n).ToString(CultureInfo.InvariantCulture)
             : n.ToString("R", CultureInfo.InvariantCulture);
+
+    /// <summary>Port of JS `Number(s)` for the numeral strings the engines parse out of text.
+    ///
+    /// ⚠ INVARIANT, ALWAYS. `double.Parse(s)` reads the AMBIENT culture, where "." can be a group
+    /// separator and "," a decimal point — a language module parsing its own captured digits would then
+    /// give a different number on a de-DE machine than on an en-US one, with nothing in the output to say
+    /// why. Every call site gets it right by not having to remember. NaN for an unparseable string, as
+    /// JS `Number()` gives.</summary>
+    public static double Number(string s) =>
+        double.TryParse(s, System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out var v)
+            ? v
+            : double.NaN;
 }

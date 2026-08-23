@@ -227,7 +227,7 @@ public static class Normalize
         //    BEFORE the clock rule so a digit run is not first claimed as a time. CASE-INSENSITIVE: the suffix
         //    is orthography, not a lowercase convention, and a capitalized head (`11De`, a heading or a
         //    title-cased date) would otherwise read as the cardinal with the suffix stranded as a word.
-        s = ORDINAL.Replace(s, m => OrdinalWord(double.Parse(m.Groups[1].Value)) ?? m.Value);
+        s = ORDINAL.Replace(s, m => OrdinalWord(Js.Number(m.Groups[1].Value)) ?? m.Value);
 
         // 5) CLOCK, in both written forms, BEFORE the number tokenizer sees the separator. The undotted
         //    `vm`/`nm` AM/PM markers are expanded to voormiddag/namiddag and appended (10:00vm, 9:30 vm, 5vm);
@@ -237,8 +237,8 @@ public static class Normalize
         // `9:30 vm` read *nege voormiddag dertig*, which only stayed invisible because the tested instance
         // (`10:00vm`) drops its zero minutes.
         static string Clock(string h, string min, string period) =>
-            $"{Numbers.NumberToWords(double.Parse(h))}" +
-            (double.Parse(min) == 0 ? "" : $" {Numbers.NumberToWords(double.Parse(min))}") + period;
+            $"{Numbers.NumberToWords(Js.Number(h))}" +
+            (Js.Number(min) == 0 ? "" : $" {Numbers.NumberToWords(Js.Number(min))}") + period;
         static string Period(string? p) =>
             // ⚠ AN UNKNOWN ABBREVIATION KEEPS ITS TEXT rather than vanishing. The regex only admits vm|nm
             // today so the fallback is unreachable, but a silent "" is exactly how the sign words would have
@@ -262,7 +262,7 @@ public static class Normalize
         // separator-less instances are both `vm`, and admitting `nm` here reads the nanometre `10nm` as *tien
         // namiddag*. A spaced or dotted `n.m.`/`nm` still reaches the forms above.
         s = CLOCK_BARE_VM.Replace(s, m =>
-            $"{Numbers.NumberToWords(double.Parse(m.Groups[1].Value))} {MANIFEST.ClockPeriods["vm"]}");
+            $"{Numbers.NumberToWords(Js.Number(m.Groups[1].Value))} {MANIFEST.ClockPeriods["vm"]}");
 
         // 6) COMMA-GROUPED THOUSANDS. The comma is the ENGLISH grouping separator here (17,500, 100,000) — NOT
         //    a decimal. It is consumed before the symbol tier so the tier sees a plain digit run, and before the
@@ -305,7 +305,7 @@ public static class Normalize
         {
             var d = m.Groups[1].Value;
             var roman = new Dictionary<string, double> { ["I"] = 1, ["II"] = 2, ["III"] = 3, ["IV"] = 4 };
-            double? n = ALL_DIGITS.IsMatch(d) ? double.Parse(d) : roman.TryGetValue(d, out var rv) ? rv : null;
+            double? n = ALL_DIGITS.IsMatch(d) ? Js.Number(d) : roman.TryGetValue(d, out var rv) ? rv : null;
             var ord = n is null ? null : OrdinalWord(n.Value);
             return ord is null ? m.Value : $"{ord} Wêreldoorlog";
         });
@@ -350,7 +350,7 @@ public static class Normalize
         //     ratio chain (`1/5/2020`) out. LAST, so no earlier rule has to work around a slash.
         s = FRACTION.Replace(s, m =>
         {
-            double num = double.Parse(m.Groups[1].Value), den = double.Parse(m.Groups[2].Value);
+            double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
             if (den == 2) return num == 1 ? FRAC.OneHalf : $"{Numbers.NumberToWords(num)} {FRAC.Halves}";
             var ord = OrdinalWord(den);
             return ord is null ? m.Value : $"{Numbers.NumberToWords(num)} {ord}";

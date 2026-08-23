@@ -572,12 +572,12 @@ public sealed class AfrikaansPhonemizer : ILanguage
                     var bits = COMMAS.Replace(m.Groups[2].Value, "").Split('.');
                     var intPart = bits[0];
                     string? frac = bits.Length > 1 ? bits[1] : null;
-                    foreach (var wd in Numbers.NumberToWords(double.Parse(intPart)).Split(' ')) sink.Emit(PhonemizeWord(wd));
+                    foreach (var wd in Numbers.NumberToWords(Js.Number(intPart)).Split(' ')) sink.Emit(PhonemizeWord(wd));
                     if (frac is not null)
                     {
                         sink.Emit(PhonemizeWord("komma"));
                         foreach (var d in frac)
-                            foreach (var wd in Numbers.NumberToWords(double.Parse(d.ToString())).Split(' ')) sink.Emit(PhonemizeWord(wd));
+                            foreach (var wd in Numbers.NumberToWords(Js.Number(d.ToString())).Split(' ')) sink.Emit(PhonemizeWord(wd));
                     }
                 }
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
