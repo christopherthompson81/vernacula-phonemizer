@@ -16,7 +16,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 3 of 182** — `en` 200/200, `af` 200/200, `qu` 198/200 (2 rows blocked on unported `russian`).
+- **Languages: 4 of 182** — `en`, `af`, `qu`, `ru`, all **200/200**. 800 rows, 0 differ.
 - `Languages/Bootstrap.cs` is the registration list: one line per ported language, plus the neural table.
 
 ## Next, in order
@@ -59,26 +59,26 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
    `[\p{L}\p{M}]+` ran **372 ms where plain .NET ran 16 ms** — a 23x tax with correct output.
    Asserted structurally in `AstralBranchesAreGuarded`.
 
-3. **Languages — three ported and gated.**
-     - **en (English)** — 2,100 lines, 9 files: CMUdict lexicon, POS perceptron for heteronyms, n-gram OOV
-       G2P, ONNX BiLSTM tagger, ARPABET→IPA allophony, 663-line normalizer. **200/200 byte-identical**,
-       both the sync and the async path, and it unblocks the 40 goldens that need a Latin foreign reader.
+3. **Languages — four ported and gated, 800/800 rows byte-identical.**
+     - **en (English)** — 2,100 lines, 9 files: CMUdict lexicon, POS perceptron, n-gram OOV G2P, ONNX
+       BiLSTM tagger, ARPABET→IPA allophony, 663-line normalizer.
+     - **ru (Russian)** — 1,003 lines, 6 files: lexical stress dictionary, palatalization/iotation/voicing
+       g2p, the case-ending ordinal notation (`1970-х`), and the Roman-numeral ORDINAL policy a century
+       needs. First run was already 200/200 — and it turned Quechua's two blocked rows green, which is the
+       dependency diagnostic paying for itself.
      - **af (Afrikaans)** — 1,191 lines, 7 files, ONNX tagger + two lexicons + Germanic morphology.
-       **200/200**.
-     - **qu (Quechua)** — 587 lines, 4 files. **198/200**; both remainders BLOCKED on unported `russian`.
-   Defects found, all in shared infrastructure or the loader rather than in a language's own logic:
-     - **The parity gate set `InvariantGlobalization`**, making `string.Normalize` a SILENT NO-OP. Every
-       NFC/NFD fold stopped working and the gate reported the ENGINE as broken (qu: 20 rows instead of 2).
-       The engine now refuses to start in that mode (`Core/Globalization.cs`).
-     - **The bootstrap ran only on the sync path**, so the FIRST `PhonemizeAsync` in a process served the
-       rule reading and installed the neural table on its way out. Cost af one row of 200.
+     - **qu (Quechua)** — 587 lines, 4 files.
+   Defects found so far, all in shared infrastructure or the loader rather than in a language's own logic:
+     - **The parity gate set `InvariantGlobalization`**, making `string.Normalize` a SILENT NO-OP; the gate
+       reported the ENGINE as broken (qu: 20 rows instead of 2). The engine now refuses to start that way.
+     - **The bootstrap ran only on the sync path**, so the FIRST `PhonemizeAsync` per process served the
+       rule reading. Cost af one row of 200.
      - **A manifest key the camelCase policy mangles deserializes to the type's DEFAULT.** English's
-       ARPABET block is keyed `AH`/`ER`/`IY`/`UW`; none survived, so those vowels came out as the EMPTY
-       STRING and `virgin` read *vd͡ʒɪn* — the nucleus gone, nothing thrown, the ONNX tagger and its mask
-       byte-identical to Node's. 42 golden rows. `ManifestMappingTests` now diffs every ported manifest's
-       key set against the round-tripped object, so an unclaimed key fails structurally.
+       ARPABET block is keyed `AH`/`ER`/`IY`/`UW`; none survived, so `virgin` read *vd͡ʒɪn*. 42 rows.
+       `ManifestMappingTests` now diffs every ported manifest's key set against the round-tripped object.
      - **A golden can depend on ANOTHER language's engine** through the script router, which CATCHES the
-       failure — so an unported target silently drops the run. `Registry.PortPending` names them.
+       failure. The gate names those gaps — scoped to PORTED languages, because a run-wide list named all
+       105 unported goldens and buried the two entries that meant anything.
      - **`[ModuleInitializer]` is the wrong registration mechanism** for a library (CA2255).
 
 4. **The bulk, in dependency order.** MEASURED over the 109 goldens, counting only runs whose script is
@@ -88,8 +88,8 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
        lb lg ln lt luo lv mi ms mt nb nl nso oc om pl pt ro ru si sk sl sn so st su sv sw tr tt uz vi wo
        xh yo za zu`
      - **40 need `en`** (non-Latin scripts with embedded Latin runs) · 3 need `ru` · 1 needs `el`
-   `en` is ported, so the 40 are unblocked; `ru` (3) and `el` (1) remain. The 65 self-contained goldens
-   are portable in any order.
+   `en` and `ru` are ported, so 43 of the 44 cross-engine dependencies are satisfied; only `el` (1 golden)
+   remains. The 65 self-contained goldens are portable in any order.
 
 5. **Goldens for the 84 uncovered codes.** `tools/gen_parity_goldens.mts` produced nothing for them
    — mostly regional variants (`en-GB`, `pt-BR`) and languages with no FLEURS text. Without a golden

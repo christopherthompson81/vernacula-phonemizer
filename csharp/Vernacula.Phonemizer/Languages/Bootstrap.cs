@@ -34,6 +34,7 @@ public static class Bootstrap
 
             Afrikaans.AfrikaansPhonemizer.RegisterSelf();
             English.EnglishFactory.RegisterSelf();
+            Russian.RussianPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }
