@@ -81,6 +81,7 @@ public static class Bootstrap
             Romanian.RomanianPhonemizer.RegisterSelf();
             Dutch.DutchPhonemizer.RegisterSelf();
             Hungarian.HungarianPhonemizer.RegisterSelf();
+            Yoruba.YorubaPhonemizer.RegisterSelf();
         }
     }
 }
