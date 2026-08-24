@@ -235,7 +235,7 @@ const ELISION = /(?<![\p{L}\p{M}])([bcdfghjklmnprstwyzɲŋ])['’ʼ]([aeɛiɔou]
  * a capital — so a real pause is never deleted.
  */
 function expandDotted(s: string, body: string, word: string): string {
-    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[  ]*(?:$|\\p{Lu}))`, "gu");
+    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
@@ -342,7 +342,7 @@ export function normalizeBambara(input: string): string {
         (whole: string, _g: string, off: number, all: string) => {
             const body = whole.replace(/\./gu, "");
             const rest = all.slice(off + whole.length);
-            return /^[  ]*(?:$|\p{Lu})/u.test(rest) ? `${body}.` : body;
+            return /^[ \u00a0]*(?:$|\p{Lu})/u.test(rest) ? `${body}.` : body;
         });
 
     // 5) ISBN, before every numeric rule — an identifier is read DIGIT BY DIGIT, not as a quantity. ×5, all

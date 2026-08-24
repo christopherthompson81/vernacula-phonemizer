@@ -346,7 +346,7 @@ export function normalizeLuganda(input: string): string {
     //    and it must run before step 6, whose unit key sits immediately after the second block.
     //    ⚠ THE SECOND MEMBER OF EVERY `[ \u00A0]` CLASS IN THIS FILE IS A NO-BREAK SPACE, WRITTEN AS AN ESCAPE
     //    ON PURPOSE. It was originally typed as the literal character and had silently collapsed to a DUPLICATE
-    //    ASCII SPACE — `[  ]`, a class that reads as two alternatives and is one. Nothing regressed, because
+    //    ASCII SPACE — `[ \u00a0]`, a class that reads as two alternatives and is one. Nothing regressed, because
     //    `stripMarkup` decodes `&nbsp;` to ASCII above this layer (`core/markup.ts` documents that as a
     //    deliberate infidelity for exactly this hazard) and the retained text contains U+0020 and U+000A and no
     //    other whitespace at all — measured, 20,030 spaces, zero U+00A0. It is robustness for a dump that

@@ -272,18 +272,18 @@ export function normalizeSesotho(input: string): string {
     //    carries are `U.S.`, `B.C.`, `J.G.`, `M&G` — each currently emitting one sentence pause per dot in
     //    the middle of a Sesotho sentence.
     //    ⚠ THE FINAL DOT IS KEPT ONLY AT END OF INPUT, and the trade is measured rather than assumed. The
-    //    interior `[  ]?` also eats the space after the last dot, so a run followed by a capitalised word
+    //    interior `[ \u00a0]?` also eats the space after the last dot, so a run followed by a capitalised word
     //    loses its period. All three such instances in the artifact:
     //        `B.C. Li ne li entsoe`   a genuine sentence end  — ONE lost pause
     //        `J.G. Fraser`            name initials           — a pause here would be SPURIOUS
     //        `U.D. Oliveirense`       a club name             — likewise
-    //    1 against 2, so the dot goes. Reinstating it (`(?:[  ](?=\p{Lu}\.))?`, so the space is consumed only
+    //    1 against 2, so the dot goes. Reinstating it (`(?:[ \u00a0](?=\p{Lu}\.))?`, so the space is consumed only
     //    between two capital-dot pairs) flips the score to 2 wrong / 1 right; it was tried and reverted.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[  ]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {
-        const letters = run.replace(/[.  ]/gu, "");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {
+        const letters = run.replace(/[. \u00a0]/gu, "");
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
-        return rest === "" || /^[  ]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
+        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
     });
 
     // 3b) THE DOTTED DATE — spend the dots, and nothing else. `*30.01.1912 ka Hannover †27.12.1999 ka
@@ -322,7 +322,7 @@ export function normalizeSesotho(input: string): string {
     //    so `m` → *dimilione* and `bn` → *dibilione*, in the SA spelling `numbers.ts` already emits.
     //    MUST run after step 4 (a grouped amount is one digit run by now) and before the tier.
     s = s.replace(
-        /((?:US[  ]?)?[$£€R])([  ]?\d[\d.,]*)(m|bn)(?![\p{L}\p{M}\d])/gu,
+        /((?:US[ \u00a0]?)?[$£€R])([ \u00a0]?\d[\d.,]*)(m|bn)(?![\p{L}\p{M}\d])/gu,
         (_w, sym: string, num: string, mag: string) => `${sym}${num} ${mag === "m" ? "dimilione" : "dibilione"}`,
     );
 
@@ -334,7 +334,7 @@ export function normalizeSesotho(input: string): string {
     //        "e ikarabella ho diperesente tse 1.5% ka hara naha"                (SA — tier handles this one)
     //    Without this, the Lesotho sentence would read *liporesente tse diperesente tse 25*.
     s = s.replace(
-        /((?<![\p{L}\p{M}])[dl]i(?:peresente|poresente|phesente)[  ]+(?:tse[  ]+)?)(\d[\d.,]*)[  ]?%/giu,
+        /((?<![\p{L}\p{M}])[dl]i(?:peresente|poresente|phesente)[ \u00a0]+(?:tse[ \u00a0]+)?)(\d[\d.,]*)[ \u00a0]?%/giu,
         "$1$2",
     );
 
@@ -347,7 +347,7 @@ export function normalizeSesotho(input: string): string {
     //     ⚠ NARROWED TO THE `%` CASE ON PURPOSE. Letter+digit in this corpus is otherwise a DESIGNATION —
     //     `U20`, `T20`, `y2`, `x5`, and reference glue `h50`, `g48` — and splitting those would break the
     //     one shape (`km2`) whose adjacency the exponent branch depends on.
-    s = s.replace(/(?<=[\p{L}\p{M}])(?=\d[\d.,]*[  ]?%)/gu, " ");
+    s = s.replace(/(?<=[\p{L}\p{M}])(?=\d[\d.,]*[ \u00a0]?%)/gu, " ");
 
     // 7) RANGES → `ho isa ho`, BEFORE the shared tier and that ordering is load-bearing: `unitPrefix` moves
     //    the measure noun in FRONT of its number, so a range claimed after the tier would read
@@ -370,7 +370,7 @@ export function normalizeSesotho(input: string): string {
     //    guard that declines it. `\.\d` still does; a bare removal would have read the DOI as a span.
     //    ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA as well as the comma group,
     //    so `5–13,7` must not be claimed with its fraction left behind.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${SPAN} ${b}` : whole));
 
     // 8) THE ENGLISH ORDINAL SUFFIX (`60th`, `1st`, `18th`). Sesotho writes its own ordinals as WORDS with a
@@ -392,7 +392,7 @@ export function normalizeSesotho(input: string): string {
     //     digit (trap 14) — `tse` is the invariant class 8/10 concord of the magnitude noun, which is
     //     `dimilione`/`dibilione` whatever number follows.
     //     ⚠ ONLY AFTER A CONCORD THIS FILE JUST EMITTED, so a magnitude in ordinary prose is untouched.
-    s = s.replace(new RegExp(`(tse[  ]+(?:${MAG_ALT}))[  ]+(?=\\d)`, "gu"), "$1 tse ");
+    s = s.replace(new RegExp(`(tse[ \u00a0]+(?:${MAG_ALT}))[ \u00a0]+(?=\\d)`, "gu"), "$1 tse ");
 
     // 11) DECIMALS, LAST of the numeric rules — steps 5 to 10 all need their number intact, and the tier
     //     needs the digit adjacent to its sign (`37,99 km²` must still be one operand when the unit is

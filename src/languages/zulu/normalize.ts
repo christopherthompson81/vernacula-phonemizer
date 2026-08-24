@@ -61,7 +61,7 @@ const BCE_WORD = "ngaphambi kukaKristu";
  * its final dot.
  */
 function expandDotted(s: string, body: string, word: string): string {
-    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[  ]*(?:$|\\p{Lu}))`, "gu");
+    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
@@ -152,15 +152,15 @@ export function normalizeZulu(input: string): string {
     s = expandDotted(s, "B\\.C\\.E", BCE_WORD);
     s = expandDotted(s, "B\\.C", BCE_WORD);
     s = s.replace(/(?<![\p{L}\p{M}])BCE(?![\p{L}\p{M}])/gu, BCE_WORD);
-    s = s.replace(/(?<=\d[  ])BC(?![\p{L}\p{M}])/gu, BCE_WORD);
+    s = s.replace(/(?<=\d[ \u00a0])BC(?![\p{L}\p{M}])/gu, BCE_WORD);
 
     // 4) DOTTED CAPITAL RUNS and a LONE INITIAL — `U.S.` read [ˈuː . s .], two spurious phrase breaks inside
     //    one token. The interior dots are abbreviation dots, not clause marks, so they go; the letters stay
     //    as they were, since no letter-name reading is available for Zulu.
     //    The lone-initial arm (`uJoji W. Hlathi`) risks eating a sentence-final period before a new capital,
     //    which is why it requires a letter and a space immediately before the initial.
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[  ]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
-    s = s.replace(/(?<=\p{L}[  ])(\p{Lu})\.(?=[  ]+\p{Lu})/gu, "$1");
+    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
+    s = s.replace(/(?<=\p{L}[ \u00a0])(\p{Lu})\.(?=[ \u00a0]+\p{Lu})/gu, "$1");
 
     // 5) THOUSANDS DE-GROUPING, before anything else numeric: the grouping comma reads as CLAUSE
     //    PUNCTUATION and the tail as a separate number — `1,000` came out *kunye , iqanda* ("one, egg").
@@ -176,7 +176,7 @@ export function normalizeZulu(input: string): string {
     //    SPACE GROUPING too (`ku- 100 000 abantu`) — read as two numbers, *ikhulu iqanda*. Blocks of EXACTLY
     //    three digits only, the same discipline the shared tier states for its own `NUM`: without it `30 9`
     //    would fuse two unrelated numbers.
-    s = s.replace(/(?<![\d.,])(\d{1,3})([   ]\d{3})+(?!\d)/gu, (whole) => whole.replace(/[   ]/gu, ""));
+    s = s.replace(/(?<![\d.,])(\d{1,3})([ \u00a0 ]\d{3})+(?!\d)/gu, (whole) => whole.replace(/[ \u00a0 ]/gu, ""));
 
     // 5b) SPORTS TIMES — `4:41.30`, racing paces. NOT clocks, and the clock rule below correctly refuses
     //     them (a third `.dd` field) — but refusing is not enough: the colon then survives as a CLAUSE PAUSE
@@ -190,16 +190,16 @@ export function normalizeZulu(input: string): string {
     //    pace, excluded by the trailing `(?![:.\d])`. BEFORE the decimal rules, which would otherwise claim
     //    the `11.60` tail of a sports time, and before the range rule.
     s = s.replace(
-        /(?<![\d:.,])([01]?\d|2[0-3]):[  ]?([0-5]\d)(?![:.\d])(?:[  ]*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)(?![\p{L}\p{M}]))?/gu,
+        /(?<![\d:.,])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![:.\d])(?:[ \u00a0]*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)(?![\p{L}\p{M}]))?/gu,
         (_m, h: string, min: string, ap: string | undefined) => `${clockBody(h, min)}${halfDay(ap)}`);
 
     // 7) CLOCK before a TIMEZONE, in Zulu's other two spellings: `ngo-12,00 GMT` (comma), `(15.00 UTC)`
     //    (dot) and `(0230 UTC)` (bare four digits, marked by the leading zero). The separator is otherwise a
     //    decimal or a grouping mark; the timezone after two-digit minutes is what identifies a clock. AFTER
     //    the colon clock, BEFORE every decimal rule.
-    s = s.replace(/(?<![\d.,])(\d{1,2})[.,]([0-5]\d)(?=[  ]*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,
+    s = s.replace(/(?<![\d.,])(\d{1,2})[.,]([0-5]\d)(?=[ \u00a0]*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,
         (_m, h: string, min: string) => clockBody(h, min));
-    s = s.replace(/(?<![\d.,])(0\d)([0-5]\d)(?=[  ]*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,
+    s = s.replace(/(?<![\d.,])(0\d)([0-5]\d)(?=[ \u00a0]*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,
         (_m, h: string, min: string) => clockBody(h, min));
 
     // 8) a.m./p.m. NOT attached to a clock. The marker is only ever readable as the half-day word; leaving
@@ -220,7 +220,7 @@ export function normalizeZulu(input: string): string {
     //     `thabatha`, the VERB "subtract", so juxtaposing would read "plus subtract" — an operation where
     //     the sign marks a tolerance.
     s = s.replace(/±/gu, " plas o mayinas ");
-    s = s.replace(/[  ]?\+[  ]?(?=\d)/gu, " plas ");
+    s = s.replace(/[ \u00a0]?\+[ \u00a0]?(?=\d)/gu, " plas ");
 
     // 9) DEGREES. `°` was dropped and the scale letter read as a CLICK: `+30°C` → [… kǀ], `35°W` → [… w].
     //    `amazinga` is the degree word and the concord `angu-` agrees with it — a class-6 noun THIS rule
@@ -239,14 +239,14 @@ export function normalizeZulu(input: string): string {
         /amazinga[^.!?;]*$/u.test(before);
     const deg = (whole: string, digits: string, tail: string, offset: number, full: string): string =>
         `${saidDegrees(full.slice(0, offset)) ? "" : "amazinga angu-"}${digits}${tail}`;
-    s = s.replace(/(\d[\d.,]*)[  ]?[°º][  ]?C(?![\p{L}\p{M}])/gui,
+    s = s.replace(/(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?C(?![\p{L}\p{M}])/gui,
         (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
-    s = s.replace(/(\d[\d.,]*)[  ]?[°º][  ]?F(?![\p{L}\p{M}])/gui,
+    s = s.replace(/(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?F(?![\p{L}\p{M}])/gui,
         (m0, d: string, off: number, full: string) => deg(m0, d, " Fahrenheit", off, full));
-    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?([NSEW])(?![\p{L}\p{M}])/gu,
+    s = s.replace(/[+]?(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,
         (m0, d: string, c: string, off: number, full: string) =>
             deg(m0, d, ` ${COMPASS[c.toUpperCase()]!}`, off, full));
-    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º]/gu,
+    s = s.replace(/[+]?(\d[\d.,]*)[ \u00a0]?[°º]/gu,
         (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
 
     // 10) RANGES → `kuya ku-` ("going to"). The `ku-` is class-17 locative and INVARIANT, which is exactly
@@ -265,8 +265,8 @@ export function normalizeZulu(input: string): string {
     //     ⚠ A DECIMAL range is joined in EITHER direction, unlike an integer one. The ascending-only guard
     //     exists to keep scores and seasons out, and neither is ever written with a decimal point — so a
     //     DESCENDING decimal span (`ezingu-4.2-3.9 edlule`, "4.2 to 3.9 million years ago") is genuine.
-    s = s.replace(/(?<![\d.,])(\d+\.\d+)[  ]*[-–—][  ]*(\d+\.\d+)(?![\d.,])/gu, "$1 kuya ku-$2");
-    s = s.replace(/(?<![\d.,])(\d[\d,]*\d|\d)[  ]*[-–—][  ]*(\d[\d,]*\d|\d)(?![\d.,])/gu, span);
+    s = s.replace(/(?<![\d.,])(\d+\.\d+)[ \u00a0]*[-–—][ \u00a0]*(\d+\.\d+)(?![\d.,])/gu, "$1 kuya ku-$2");
+    s = s.replace(/(?<![\d.,])(\d[\d,]*\d|\d)[ \u00a0]*[-–—][ \u00a0]*(\d[\d,]*\d|\d)(?![\d.,])/gu, span);
 
     // 11) RATE, LOCAL and not the shared tier's. Zulu's rate is a SINGLE agglutinated word — nga- + ihora →
     //     `ngehora` — while `makeSymbolNormalizer` emits a rate as four tokens (`num head per denominator`)
@@ -277,7 +277,7 @@ export function normalizeZulu(input: string): string {
     //     nothing for an unguarded match to break.
     //     BEFORE the decimal rules (the rate operands are all integers) and before the tier, which would
     //     otherwise claim `km` and strand `/h` as the letter H.
-    s = s.replace(/(?<!\d)(\d[\d.,]*)[  ]?(km|mi|m|mm|cm|kg)[  ]*\/[  ]*([hs])(?![\p{L}\p{M}])/giu,
+    s = s.replace(/(?<!\d)(\d[\d.,]*)[ \u00a0]?(km|mi|m|mm|cm|kg)[ \u00a0]*\/[ \u00a0]*([hs])(?![\p{L}\p{M}])/giu,
         (_m, n: string, u: string, d: string) => `${n} ${UNIT_WORD[u.toLowerCase()]!} ${PER[d.toLowerCase()]!}`);
     s = s.replace(/(?<![\p{L}\p{M}])mph(?![\p{L}\p{M}])/giu, `${UNIT_WORD["mi"]!} ${PER["h"]!}`);
     s = s.replace(/(?<![\p{L}\p{M}])kph(?![\p{L}\p{M}])/giu, `${UNIT_WORD["km"]!} ${PER["h"]!}`);
@@ -286,15 +286,15 @@ export function normalizeZulu(input: string): string {
     //     metric equivalent is written out (`amakhilomitha skwele angu-783,562`). A plain `km²` needs no
     //     rule here — the shared tier's `exponentWords` produces the same order — but a squared unit sitting
     //     on a DECIMAL does, and step 13 claims it.
-    s = s.replace(/(\d[\d.,]*)[  ]?sq[  ]?mi(?![\p{L}\p{M}])/giu, `$1 ${UNIT_WORD["mi"]!} skwele`);
+    s = s.replace(/(\d[\d.,]*)[ \u00a0]?sq[ \u00a0]?mi(?![\p{L}\p{M}])/giu, `$1 ${UNIT_WORD["mi"]!} skwele`);
 
     // 13) DECIMALS. The currency and unit arms come first because this rewrite is the one that destroys
     //     number↔symbol adjacency, so it has to claim its own neighbours before the tier could.
     const dec = (i: string, f: string): string =>
         [i, ...f.replace(/0+$/u, "")].filter((t) => t !== "").join(" ");
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US\$|AUD\$|\$|£)[  ]?(\d+)\.(\d+)(?!\.?\d)/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US\$|AUD\$|\$|£)[ \u00a0]?(\d+)\.(\d+)(?!\.?\d)/gu,
         (_m, i: string, f: string) => `${dec(i, f)} amadola`);
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)[  ]?(km|mi|mm|cm|kg|ft|m)([²2])?(?![\p{L}\p{M}'’])/giu,
+    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)[ \u00a0]?(km|mi|mm|cm|kg|ft|m)([²2])?(?![\p{L}\p{M}'’])/giu,
         (_m, i: string, f: string, u: string, exp: string | undefined) =>
             `${dec(i, f)} ${UNIT_WORD[u.toLowerCase()]!}${exp === undefined ? "" : " skwele"}`);
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?!\.?\d)/gu, (_m, i: string, f: string) => dec(i, f));
@@ -308,7 +308,7 @@ export function normalizeZulu(input: string): string {
     //     *izingxenye ezintathu kwezinhlanu*, whose numerator carries a class-8 concord that would have to
     //     be applied to the digits. An unclaimed `3/5` keeps the bare juxtaposition it has today, which is
     //     not confidently wrong. AFTER the decimals, so a date-like `1.5/2` cannot reach here half-rewritten.
-    s = s.replace(/(?<![\d/.,])1[  ]?\/[  ]?(\d{1,2})(?![\d/.,])/gu, (m0, d: string) => {
+    s = s.replace(/(?<![\d/.,])1[ \u00a0]?\/[ \u00a0]?(\d{1,2})(?![\d/.,])/gu, (m0, d: string) => {
         const ord = ORDINAL_YE[Number(d)];
         return ord === undefined ? m0 : `ingxenye ${ord}`;
     });
@@ -325,19 +325,19 @@ export function normalizeZulu(input: string): string {
     //      ⚠ THE MINUS CARRIES A SECOND LOOKBEHIND rejecting a digit plus a space. Without it the rugby
     //      score `26 -00` reads *ukukhipha iqanda* ("subtract zero"); the range rule has already claimed
     //      the other `-\d` shape at step 10.
-    s = s.replace(/[  ]?×[  ]?/gu, " kuphindwe ngo-");
-    s = s.replace(/[  ]?=[  ]?/gu, " kulingana no-");
-    s = s.replace(/[  ]?<[  ]?/gu, " ngaphansi kuka-");
-    s = s.replace(/[  ]?>[  ]?/gu, " ngaphezu kuka-");
+    s = s.replace(/[ \u00a0]?×[ \u00a0]?/gu, " kuphindwe ngo-");
+    s = s.replace(/[ \u00a0]?=[ \u00a0]?/gu, " kulingana no-");
+    s = s.replace(/[ \u00a0]?<[ \u00a0]?/gu, " ngaphansi kuka-");
+    s = s.replace(/[ \u00a0]?>[ \u00a0]?/gu, " ngaphezu kuka-");
     // ⚠ THE PLUS IS NOT CLAIMED HERE — step 8c takes it, before the degree rule. An arm here would be
     // unreachable, so there is deliberately none. See step 8c.
-    s = s.replace(/(?<![\p{L}\p{Nd}])(?<![\p{L}\p{Nd}][  ])[-−](?=\d)/gu, "ukukhipha ");
+    s = s.replace(/(?<![\p{L}\p{Nd}])(?<![\p{L}\p{Nd}][ \u00a0])[-−](?=\d)/gu, "ukukhipha ");
 
     // 15) A SPACED DASH is a parenthetical break and was DROPPED ENTIRELY, taking the clause boundary with
     //     it (`ilunga - bona Umfanekiso`). LAST, so step 10 has already claimed every dash sitting between
     //     two numbers: the rugby score `26 -00` must keep its bare juxtaposition rather than gain a
     //     spurious pause.
-    s = s.replace(/(?<!\d)[  ]+[-–—]+[  ]+(?!\d)/gu, ", ");
+    s = s.replace(/(?<!\d)[ \u00a0]+[-–—]+[ \u00a0]+(?!\d)/gu, ", ");
     // `njl.` / `njll.` is *njalonjalo* ("et cetera") — corpus: `izinto zokuthutha, njll.`, previously
     // the cluster [ɲd͡ʒ̤l] plus a leaked break. Dot optional: FLEURS strips it.
     s = s.replace(/(?<![\p{L}\p{M}])njll?\.?(?![\p{L}\p{M}])/giu, "njalonjalo");

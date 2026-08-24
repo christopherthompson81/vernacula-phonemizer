@@ -275,7 +275,7 @@ const ERA: readonly (readonly [string, string])[] = [
  * verbatim from the Bambara/Lingala layer.
  */
 function expandDotted(s: string, body: string, word: string): string {
-    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[  ]*(?:$|\\p{Lu}))`, "gu");
+    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
@@ -322,7 +322,7 @@ export function normalizeTashelhit(input: string): string {
         (whole: string, _g: string, off: number, all: string) => {
             const body = whole.replace(/\./gu, "");
             const rest = all.slice(off + whole.length);
-            return /^[  ]*(?:$|\p{Lu})/u.test(rest) ? `${body}.` : body;
+            return /^[ \u00a0]*(?:$|\p{Lu})/u.test(rest) ? `${body}.` : body;
         });
 
     // 4) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause

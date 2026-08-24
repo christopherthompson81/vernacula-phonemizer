@@ -139,7 +139,7 @@ export function normalizeAbkhaz(text: string): string {
     //    ⚠ THE LEFT GUARD IS LOAD-BEARING: without `(?<!\d)` the 1–3 digit group BACKTRACKS into the tail
     //    of a longer number, so "1877 250 ҩык" (a year beside a count) joined into 1877250 and was read as
     //    one seven-figure number. The comment used to claim the 3-digit rule covered that; it did not.
-    s = s.replace(/(?<!\d)(\d{1,3})(?:[   ](\d{3}))+(?!\d)/gu, (m) => m.replace(/[   ]/gu, ""));
+    s = s.replace(/(?<!\d)(\d{1,3})(?:[  ](\d{3}))+(?!\d)/gu, (m) => m.replace(/[  ]/gu, ""));
 
     //    ⚠ COMMA-GROUPING TOO. Two-plus groups are unambiguous (£29,721,250 — the wiki spells that very
     //    sum de-grouped, "29,721,250 фунт стерлинг"). A SINGLE comma group collides with the decimal

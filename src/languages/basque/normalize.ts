@@ -242,7 +242,7 @@ export function normalizeBasque(input: string): string {
     //    without its scale would put a temperature word on a latitude.
     //    BEFORE the tier, so the scale letter cannot be mistaken for a unit key, and before step 6 so the
     //    operand is still one figure.
-    s = s.replace(/(\d)[  ]?°[  ]?([CF])(?![\p{L}\p{M}])/gui, (_m, d: string, k: string) => `${d} ${DEGREE} ${SCALES[k.toUpperCase()]!}`);
+    s = s.replace(/(\d)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui, (_m, d: string, k: string) => `${d} ${DEGREE} ${SCALES[k.toUpperCase()]!}`);
 
     // 3) THE CASE ENDING GLUED TO THE **UNIT**, before the tier, because the tier's trailing guard refuses a
     //    letter after a unit key and therefore declined the whole match — leaving a raw `km` in the IPA. This

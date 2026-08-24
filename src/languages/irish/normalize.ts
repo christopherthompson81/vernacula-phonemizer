@@ -190,7 +190,7 @@ export function normalizeIrish(input: string): string {
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `George W. Bush` — the W. suffix dot is a break.
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[  ]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
+    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
     //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
     //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
     //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
@@ -212,7 +212,7 @@ export function normalizeIrish(input: string): string {
     //    the PRECEDING word is inspected: a vowel-initial ordinal takes the t- prefix after a bare "an"
     //    (an t-ochtú, an t-aonú), which is the one piece of the article's morphology that belongs to us
     //    rather than to the corpus text.
-    s = s.replace(/(\ban )?(?<![\d.,])(\d[\d,]*)ú(?![\p{L}\p{M}])([  ]+([\p{L}\p{M}]+))?/giu,
+    s = s.replace(/(\ban )?(?<![\d.,])(\d[\d,]*)ú(?![\p{L}\p{M}])([ \u00a0]+([\p{L}\p{M}]+))?/giu,
         (m0, art: string | undefined, d: string, spaced: string | undefined, noun: string | undefined) => {
             const n = Number(d.replace(/,/gu, ""));
             if (!Number.isFinite(n) || n < 1) return m0;

@@ -292,9 +292,9 @@ export function normalizeWolof(input: string): string {
     //    by a lowercase word. The trade is stated instead of being hidden behind a word list.
     const degree = (n: string, off: number, len: number, full: string): string =>
         saidAfter(full, off + len, DEGREE) ? n : `${n} ${DEGREE}`;
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)[  ]?°[  ]?(?=\d)/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+)[ \u00a0]?°[ \u00a0]?(?=\d)/gu,
         (w, n: string, off: number, full: string) => `${degree(n, off, w.length, full)} `);
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)[  ]?[°º](?![\d\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+)[ \u00a0]?[°º](?![\d\p{L}\p{M}])/gu,
         (w, n: string, off: number, full: string) => degree(n, off, w.length, full));
 
     // 3) THE DOTTED ERA AND HONORIFIC MARKERS — de-dotted, NOT expanded. ~46 in the retained text:
@@ -312,7 +312,7 @@ export function normalizeWolof(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}.])[a-z](?:\.[a-zA-Z]){1,3}\.?(?![\p{L}\p{M}])/gu, (run, off: number, full: string) => {
         const letters = [...run.replace(/\./gu, "")].join(" ");
         const rest = full.slice(off + run.length);
-        return rest === "" || /^[  ]*$/u.test(rest) || /^[  ]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
+        return rest === "" || /^[ \u00a0]*$/u.test(rest) || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
     });
 
     // 4) THE SHARED SYMBOL TIER — %, currency, units, the exponent and `&`. AFTER step 1 (it needs a real
@@ -368,9 +368,9 @@ export function normalizeWolof(input: string): string {
     //    clause-final dot was already admitted (`15-20.` → *15 ba 20 .*) and adding `\.\d` here would be a
     //    second, unrelated change smuggled into a comma fix.
     //    Same shape as the clause-final period two paragraphs up, and the same trap (58) one step further on.
-    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-:\d\p{L}\p{M}]|,\d)/gu,
+    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-:\d\p{L}\p{M}]|,\d)/gu,
         (whole, a: string, b: string, off: number, full: string) =>
-            Number(a) < Number(b) && !/[·∙×][  ]*$/u.test(full.slice(Math.max(0, off - 3), off))
+            Number(a) < Number(b) && !/[·∙×][ \u00a0]*$/u.test(full.slice(Math.max(0, off - 3), off))
                 ? `${a} ${SPAN} ${b}`
                 : whole);
 

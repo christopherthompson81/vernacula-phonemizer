@@ -183,7 +183,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //     claim and the tokenizer then drops, so `preços em US$` would go from spelling the letters to saying
     //     NOTHING. Neither reading is right — *dólares* is — but silence is strictly worse than the letters,
     //     so an unquantified code keeps its existing behaviour and only the useful case is folded.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[  ]?\d)/gu, "$");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");
 
     // 6) DEGREES, before the unit tier so the bare sign is not left behind.
     s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 graus Celsius");

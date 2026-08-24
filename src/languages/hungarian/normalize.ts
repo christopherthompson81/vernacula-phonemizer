@@ -434,7 +434,7 @@ export function normalizeHungarian(input: string): string {
     //    *tizenegy nulla nulla*. Output stays DIGITS so the number path expands them, and so step 10's
     //    suffix rule can still attach (`11:35-re` → `11 35-re` → *harmincötre*).
     //    Two-digit minutes are REQUIRED, which is what keeps the score `3:2-re` out of this rule.
-    s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3]):[  ]?([0-5]\d)(?![\d:])/gu, (_m, h: string, min: string) =>
+    s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![\d:])/gu, (_m, h: string, min: string) =>
         Number(min) === 0 ? h : `${h} ${min}`,
     );
 

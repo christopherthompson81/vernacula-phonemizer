@@ -364,7 +364,7 @@ const MAGNITUDES = [MANIFEST.numbers.thousand, MANIFEST.numbers.million, MANIFES
 // Captured as part of the match so it is CONSUMED and re-emitted (trap 10), never copied out of the tail and
 // left behind as a second copy. The trailing `[\p{L}\p{M}]*` is what makes a case-marked magnitude VISIBLE to
 // the callback, which then refuses.
-const MAG = `(?:[  ](?:их[  ])?(?:${MAGNITUDES.join("|")})[\\p{L}\\p{M}]*)?`;
+const MAG = `(?:[ \u00a0](?:их[ \u00a0])?(?:${MAGNITUDES.join("|")})[\\p{L}\\p{M}]*)?`;
 
 const SAID_CURRENCY = new RegExp(
     `${NOT_LETTER_BEFORE}(?:доллар|евро(?:гийн|гоор|нууд|той|оос|[гдт])?${NOT_LETTER})`, "iu");
@@ -383,8 +383,8 @@ const SAID_CURRENCY = new RegExp(
  */
 const currencyWindow = (whole: string, off: number): string =>
     whole.slice(off, off + 40).split(/[.!?…](?!\d)/u)[0]!;
-const CURRENCY_BEFORE = new RegExp(`([$€])[  ]?(\\d+(?:[.,]\\d+)?)(${MAG})`, "gu");
-const CURRENCY_AFTER = new RegExp(`(\\d+(?:[.,]\\d+)?)[  ]?([$€])(${MAG})`, "gu");
+const CURRENCY_BEFORE = new RegExp(`([$€])[ \u00a0]?(\\d+(?:[.,]\\d+)?)(${MAG})`, "gu");
+const CURRENCY_AFTER = new RegExp(`(\\d+(?:[.,]\\d+)?)[ \u00a0]?([$€])(${MAG})`, "gu");
 const CURRENCY_WORD: Readonly<Record<string, string>> = { $: "доллар", "€": "евро" };
 const MAGNITUDE_SUFFIXED = new RegExp(`(?:${MAGNITUDES.join("|")})[\\p{L}\\p{M}]`, "u");
 

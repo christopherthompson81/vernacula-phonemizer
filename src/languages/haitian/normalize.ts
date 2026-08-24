@@ -231,7 +231,7 @@ function ordinalWord(n: number): string | undefined {
  * when the sentence visibly continues.
  */
 function expandDotted(s: string, body: string, word: string): string {
-    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[  ]*(?:$|\\p{Lu}))`, "gu");
+    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
@@ -447,7 +447,7 @@ export function normalizeHaitian(input: string): string {
     const MAG = "(?:milliards?|millions?|milyon|milya|mil)";
     const NAMED = new RegExp(`^[\\s)\\]]*(?:${MAG}\\s+)?(?:dola|dolar|dollars?)(?![\\p{L}\\p{M}])`, "iu");
     s = s.replace(/(?<![\p{L}\p{M}])(US)\s?\$\s?(?=\d)/giu, "$1 ");
-    s = s.replace(new RegExp(`\\$\\s?(\\d(?:[\\d  ,.]*\\d)?)(\\s?${MAG})?`, "giu"),
+    s = s.replace(new RegExp(`\\$\\s?(\\d(?:[\\d \u00a0,.]*\\d)?)(\\s?${MAG})?`, "giu"),
         (whole: string, n: string, mag: string | undefined, off: number, all: string) => {
             const quantity = `${n}${mag ?? ""}`;
             return NAMED.test(all.slice(off + whole.length)) ? quantity : `${quantity} dola`;
