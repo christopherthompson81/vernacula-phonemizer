@@ -8,14 +8,16 @@ namespace Vernacula.Phonemizer.Languages.Dutch;
 
 public sealed class DutchPhonemizer : ILanguage
 {
-    private static readonly JsRe UNSTRESSED_PREFIX = JsRegex.Compile("^(ver|ge|be|ont|her|te)", "u");
-    private static readonly JsRe SCHWA_PREFIX = JsRegex.Compile("^(ver|ge|be|te)", "u");
+    // ⚠ BOTH BUILT FROM THE MANIFEST. The first duplicated `morphology.prefixUnstressed`, which was already
+    // in dutch.jsonc. Alternation order is free here because no member is a prefix of another — if one ever
+    // is, this must sort longest-first. See src/languages/dutch/dutch.ts.
+    private static JsRe Alt(IReadOnlyList<string> xs) => JsRegex.Compile($"^({string.Join("|", xs)})", "u");
+    private static readonly JsRe UNSTRESSED_PREFIX = Alt(Manifest.MANIFEST.Morphology.PrefixUnstressed);
+    private static readonly JsRe SCHWA_PREFIX = Alt(Manifest.MANIFEST.Morphology.PrefixSchwa);
 
-    private static readonly IReadOnlyDictionary<string, string> FUNCTION_WORDS = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["de"] = "də", ["je"] = "jə", ["ze"] = "zə", ["we"] = "ʋə", ["me"] = "mə", ["te"] = "tə", ["ge"] = "ɣə",
-        ["het"] = "ɦət", ["'t"] = "ət", ["'n"] = "ən", ["'k"] = "ək", ["'m"] = "əm", ["'s"] = "əs",
-    };
+    // The reduced (schwa) readings of the high-frequency function words. Now data; dutch.jsonc records why
+    // the numeral/article "een" is deliberately absent.
+    private static IReadOnlyDictionary<string, string> FUNCTION_WORDS => Manifest.MANIFEST.FunctionWords;
 
     /** Place primary stress and reduce an unstressed prefix's vowel. */
     private static int PlaceStress(List<Seg> segs, string word)
@@ -155,7 +157,7 @@ public sealed class DutchPhonemizer : ILanguage
                 foreach (var wd in Numbers.NumberToWords(Js.Number(intPart)).Split(' ')) sink.Emit(PhonemizeWord(wd));
                 if (frac is not null)
                 {
-                    sink.Emit(PhonemizeWord("komma"));
+                    sink.Emit(PhonemizeWord(Manifest.MANIFEST.Numbers.DecimalWord));
                     foreach (var d in frac)
                         foreach (var wd in Numbers.NumberToWords(Js.Number(d.ToString())).Split(' '))
                             sink.Emit(PhonemizeWord(wd));

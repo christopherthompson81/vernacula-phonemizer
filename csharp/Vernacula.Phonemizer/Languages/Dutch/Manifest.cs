@@ -23,6 +23,9 @@ public sealed class DutchNumbersDef
     public string[] Ones { get; init; } = [];
     public string[] Tens { get; init; } = [];
     public string Connector { get; init; } = "";
+    /** The connector after a vowel-final unit, with the trema (tweeën). */
+    public string ConnectorTrema { get; init; } = "";
+    public string DecimalWord { get; init; } = "";
     public string Hundred { get; init; } = "";
     public string Thousand { get; init; } = "";
     public MagnitudeSgPl Million { get; init; } = new();
@@ -34,6 +37,8 @@ public sealed class DutchMorphologyDef
     public string[] PrefixUnstressed { get; init; } = [];
     public string[] PrefixStressed { get; init; } = [];
     public string[] AmbiguousPrefixes { get; init; } = [];
+    /** The subset of `PrefixUnstressed` whose vowel also reduces to schwa — NOT `AmbiguousPrefixes`. */
+    public string[] PrefixSchwa { get; init; } = [];
     public string[] Suffixes { get; init; } = [];
     public string[] VowelInitialSuffixes { get; init; } = [];
     public string[] LinkingElements { get; init; } = [];
@@ -44,6 +49,10 @@ public sealed class DutchMorphologyDef
 public sealed class DutchManifest
 {
     public string VowelChars { get; init; } = "";
+    /** The ORTHOGRAPHIC vowel letters. ⚠ Not `VowelChars`, which is the IPA set. */
+    public string VowelLetters { get; init; } = "";
+    /** Function words / clitics → their reduced (schwa) IPA reading. */
+    public IReadOnlyDictionary<string, string> FunctionWords { get; init; } = new Dictionary<string, string>();
     public IReadOnlyList<string> ConsonantPhones { get; init; } = Array.Empty<string>();
     public DutchVowels Vowels { get; init; } = new();
     public IReadOnlyDictionary<string, string> Consonants { get; init; } = new Dictionary<string, string>();

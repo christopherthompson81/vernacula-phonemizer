@@ -23,6 +23,12 @@
     // IPA vowel inventory (nucleus detection).
     "vowelChars": "ɑaɛeɪioɔuyʏøœəɐ",
 
+    // The ORTHOGRAPHIC vowel letters — a different set from `vowelChars` above, which is IPA. ⚠ THIS WAS
+    // WRITTEN OUT TWICE IN CODE AND THE TWO HAD ALREADY DRIFTED: g2p.ts carried the circumflexes and
+    // morphology.ts did not. No reading depended on the difference (0 of 9,457 probes moved when they were
+    // unified), so the drift was latent rather than harmless — the next edit to either copy decided it.
+    "vowelLetters": "aeiouyáéíóúàèâêîôûäëïöü",
+
     // The CONSONANT phones that DEGEMINATE across a syllable seam: when a syllable's coda and the next
     // syllable's onset are the same phone and it is one of these, one copy is dropped. The Dutch-specific
     // values are here — ⟨ʋ⟩ for ⟨w⟩, ⟨ɦ⟩ for ⟨h⟩, ⟨ɣ⟩ for the voiced velar fricative.
@@ -89,6 +95,14 @@
     "voicedFinal": { "b": "p", "d": "t", "v": "f", "z": "s", "ɣ": "x", "ʒ": "ʃ" },
 
     // Clause / phrase punctuation → canonical inline pause marks.
+    // High-frequency function words and clitics whose vowel is reduced to schwa. ⚠ WORD→IPA, unlike English's
+    // `unstressedWords`, which is a bare list — Dutch names the reduced reading itself because the g2p's
+    // first-syllable rule would otherwise give a full vowel (de → deː). The numeral/article "een" is
+    // deliberately ABSENT so the number path keeps eːn.
+    "functionWords": {
+        "de": "də", "je": "jə", "ze": "zə", "we": "ʋə", "me": "mə", "te": "tə", "ge": "ɣə",
+        "het": "ɦət", "'t": "ət", "'n": "ən", "'k": "ək", "'m": "əm", "'s": "əs"
+    },
     "clausePunctuation": {
         ".": ".",
         "!": "!",
@@ -166,6 +180,11 @@
             "negentig",
         ],
         "connector": "en",
+        // The connector after a VOWEL-FINAL unit, where the ⟨e⟩ takes a trema (twee→tweeën, drie→drieën). The
+        // allomorphy rule is in numbers.ts; only the two spellings are data.
+        "connectorTrema": "ën",
+        // The decimal separator word, spoken by the text path.
+        "decimalWord": "komma",
         "hundred": "honderd",
         "thousand": "duizend",
         "million": { "sg": "een miljoen", "pl": "miljoen" },
@@ -181,6 +200,11 @@
         "prefixUnstressed": ["ver", "ont", "her", "be", "ge", "te"],
         "prefixStressed": ["achter", "binnen", "buiten", "onder", "tegen", "terug", "tussen", "samen", "over", "voor", "door", "mee", "aan", "af", "bij", "in", "om", "op", "na", "toe", "uit", "weg"],
         "ambiguousPrefixes": ["be", "ge", "te"],
+        // The subset of `prefixUnstressed` whose vowel additionally REDUCES to schwa (ge-/be-/ver-/te- → ɣə/bə/
+        // vər/tə). ⚠ NOT `ambiguousPrefixes`, which is the be/ge/te triple — this one includes ver-, and ont-/her-
+        // shift stress but KEEP their full vowel (ɔnt-/hɛr-). Two different subsets of the same list, which is why
+        // dutch.ts had to spell this one out rather than derive it.
+        "prefixSchwa": ["ver", "ge", "be", "te"],
         "suffixes": ["heid", "teit", "isme", "achtig", "baar", "loos", "zaam", "schap", "ling", "ende", "ing", "end", "lijk", "isch", "nis", "dom"],
         "vowelInitialSuffixes": ["achtig", "isme", "isch", "ende", "end"],
         "linkingElements": ["", "s", "en", "e"],

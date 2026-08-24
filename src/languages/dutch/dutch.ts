@@ -13,19 +13,21 @@ import { MANIFEST } from "./manifest.ts";
 import { normalizeDutch, normalizeDutchInitialisms } from "./normalize.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
-// Unstressed prefixes that shift stress off the first syllable (verkópen, gelóven, begín, ontslág, herhálen).
-const UNSTRESSED_PREFIX = /^(ver|ge|be|ont|her|te)/u;
-// The subset whose vowel additionally REDUCES to schwa when the prefix is treated as unstressed (ge-/be-/ver-/te-
-// → ɣə/bə/vər/tə). ont-/her- shift stress but KEEP their full vowel (ɔnt-/hɛr-), so they are excluded here.
-const SCHWA_PREFIX = /^(ver|ge|be|te)/u;
+// Unstressed prefixes that shift stress off the first syllable (verkópen, gelóven, begín, ontslág, herhálen),
+// and the subset whose vowel additionally REDUCES to schwa (ge-/be-/ver-/te- → ɣə/bə/vər/tə; ont-/her- shift
+// stress but KEEP their full vowel, ɔnt-/hɛr-).
+//
+// ⚠ BOTH ARE BUILT FROM THE MANIFEST, and the first was a duplicate of `morphology.prefixUnstressed` that had
+// been sitting beside it in dutch.jsonc all along. Alternation order is free here because no member is a
+// prefix of another — if one ever is, this must sort longest-first.
+const alt = (xs: readonly string[]): RegExp => new RegExp(`^(${xs.join("|")})`, "u");
+const UNSTRESSED_PREFIX = alt(MANIFEST.morphology.prefixUnstressed);
+const SCHWA_PREFIX = alt(MANIFEST.morphology.prefixSchwa);
 
-// High-frequency function words / clitics whose vowel is reduced to schwa (unstressed by default) — the g2p's
-// first-syllable rule would give them a full vowel (de → deː). The numeral/article "een" is left to the g2p
-// (eːn) so the number path is unaffected. Apostrophe clitics ('t, 'n, 'k, …) are the reduced forms.
-const FUNCTION_WORDS: Record<string, string> = {
-    de: "də", je: "jə", ze: "zə", we: "ʋə", me: "mə", te: "tə", ge: "ɣə",
-    het: "ɦət", "'t": "ət", "'n": "ən", "'k": "ək", "'m": "əm", "'s": "əs",
-};
+// High-frequency function words / clitics whose vowel is reduced to schwa — the g2p's first-syllable rule
+// would give them a full vowel (de → deː). Now data: see dutch.jsonc, which also records why the
+// numeral/article "een" is deliberately absent.
+const FUNCTION_WORDS: Record<string, string> = MANIFEST.functionWords;
 
 /** Place primary stress and reduce an unstressed prefix's vowel. Returns the stressed-nucleus seg index. The
  *  prefix is treated as unstressed ONLY when a later nucleus exists AND it isn't a schwa — this distinguishes a
@@ -157,7 +159,7 @@ class DutchPhonemizer implements Phonemizer {
                 const [intPart, frac] = m[2].replace(/\./gu, "").split(",");
                 for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
-                    sink.emit(phonemizeWord("komma"));
+                    sink.emit(phonemizeWord(MANIFEST.numbers.decimalWord));
                     for (const d of frac)
                         for (const wd of numberToWords(Number(d)).split(" ")) sink.emit(phonemizeWord(wd));
                 }

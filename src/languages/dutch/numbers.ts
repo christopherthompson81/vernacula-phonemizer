@@ -11,7 +11,7 @@ const { ones: ONES, tens: TENS } = N;
 
 /** The -en- connector, with a trema on ⟨e⟩ after a vowel-final unit (twee→tweeën, drie→drieën). */
 function connect(unit: string): string {
-    return /[aeiou]$/.test(unit) ? "ën" : N.connector;
+    return /[aeiou]$/.test(unit) ? N.connectorTrema : N.connector;
 }
 
 /** 1 ≤ n < 100 (compounded: eenentwintig, tweeëntwintig). */

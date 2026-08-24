@@ -34,7 +34,7 @@ function stems(): Set<string> {
 
 const LINKS = M.linkingElements;
 const CONFIG: MorphologyConfig = {
-    vowels: "aeiouyáéíóúàèäëïöü",
+    vowels: MANIFEST.vowelLetters,
     prefixUnstressed: M.prefixUnstressed,
     prefixStressed: M.prefixStressed,
     ambiguousPrefixes: new Set(M.ambiguousPrefixes),

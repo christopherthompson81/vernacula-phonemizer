@@ -20,7 +20,9 @@ public static class G2p
     private static IReadOnlyDictionary<string, string> CONS => Manifest.MANIFEST.Consonants;
     private static IReadOnlyDictionary<string, string> VOICED_FINAL => Manifest.MANIFEST.VoicedFinal;
 
-    private const string VOWELS = "aeiouyáéíóúàèâêîôûäëïöü";
+    // ⚠ The ORTHOGRAPHIC vowel letters, from the manifest — not `VowelChars`, which is the IPA set. This was
+    // spelled here AND in Morphology.cs and the two had drifted; see dutch.jsonc.
+    private static string VOWELS => Manifest.MANIFEST.VowelLetters;
     // ⚠ `c !== ""` IS THE WHOLE GUARD, AND IT IS LOAD-BEARING: `VOWELS.includes("")` is TRUE in JS, and
     // `.NET Contains("")` is true too. The scanner reads past the end of the word constantly (`w[i+1] ?? ""`),
     // so without the empty test every word would end in a phantom vowel.
