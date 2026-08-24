@@ -218,6 +218,11 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/gujarati", "gujarati.jsonc", Languages.Gujarati.GujaratiPhonemizer.DEF,
             "language", "name", "script", "provenance", "convention");
 
+    [Fact]
+    public void PolishManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/polish", "polish.jsonc", Languages.Polish.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
     // ── MODEL SIDECARS ────────────────────────────────────────────────────────────────────────────────────
     //
     // ⚠ THE SAME SILENT FAILURE, ONE DIRECTORY OVER. A `*.meta.json` beside an ONNX model is deserialized by

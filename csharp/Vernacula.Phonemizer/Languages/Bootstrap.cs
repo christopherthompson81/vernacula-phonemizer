@@ -75,6 +75,7 @@ public static class Bootstrap
             Javanese.JavanesePhonemizer.RegisterSelf();
             Italian.ItalianPhonemizer.RegisterSelf();
             Gujarati.GujaratiPhonemizer.RegisterSelf();
+            Polish.PolishPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }
