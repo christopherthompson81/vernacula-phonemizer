@@ -16,10 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 43 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+- **Languages: 44 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
   cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha, tr, ta, sw, yue, vi,
-  ko, jv — all **200/200**. 8,600 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user
-  direction), from `tools/language-catalogue/languages.db`: next it, gu, pl, uk, ro…
+  ko, jv, it — all **200/200**. 8,800 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user
+  direction), from `tools/language-catalogue/languages.db`: next gu, pl, uk, ro, nl…
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
@@ -150,6 +150,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   off-golden. Six off-golden probe modes against Node found them — normalize, sync, neural, classical
   context, modern context, and the tagger-absent fallback (run with the tagger files removed from a copy
   of `data/`).
+- ⚠ **`"abc".includes("")` IS TRUE IN BOTH LANGUAGES, AND THE GUARD C# INVITES YOU TO ADD IS THE BUG.**
+  Three languages now: German (four rules), Swahili (word-final ⟨w⟩ labialization), Italian (word-final
+  ⟨s⟩ voicing — 18 golden rows, `james` → *jˈamez*). Every one is a `next ?? ""` handed to a membership
+  test, where JS returns TRUE at end of word and the reading depends on it. `.NET Contains("")` is true
+  too, so the FAITHFUL port is the bare call; adding `c != ""` looks defensive and silently deletes a rule.
 - ⚠ **A COMPOSITION EXCLUSION DECOMPOSED IN SOURCE IS A TOTAL, DISGUISED FAILURE — TWICE NOW.** Bengali
   ড়/য় (#891, 400 rows) and Devanagari क़/य़ (mr, 200 rows). NFC cannot repair either; inside a regex class
   the extra character inverts a range and the type initializer throws, so the gate blames the engine.
