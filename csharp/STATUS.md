@@ -1,6 +1,6 @@
-# C# port — state as of 2026-08-23
+# C# port — state as of 2026-08-24
 
-Resume here. Read `PORTING.md` first; it is the contract and it has been amended four times.
+Resume here. Read `PORTING.md` first; it is the contract and it has been amended five times — most recently to REVERSE the "keep comment text" rule.
 
 ## Done
 
