@@ -28,6 +28,10 @@ public static class G2p
     private static IReadOnlyDictionary<string, string> C => DEF.Consonants;
     private static string HE => DEF.AspirateHe;
     private static IReadOnlyDictionary<string, string> ASP => DEF.Aspirates;
+    // ⚠ Declared, loaded and never read until now — the values were spelled as literals below while the
+    // manifest held them. See src/languages/urdu/g2p.ts, which carries the finding.
+    private static IReadOnlyDictionary<string, string> LONG => DEF.LongVowels;
+    private static IReadOnlyDictionary<string, string> GLIDE => DEF.Glides;
     private static IReadOnlyDictionary<string, string> HARAKAT => DEF.Harakat;
     private static readonly IReadOnlySet<string> NASAL = new HashSet<string>(DEF.Nasalizers, StringComparer.Ordinal);
     private static string INH => DEF.InherentVowel;
@@ -38,23 +42,23 @@ public static class G2p
     private const string BARI_YE = "ے";
     private const string HE_GOL = "ہ";
 
-    private static readonly JsRe VOWEL_PH = JsRegex.Compile("[əaɑɪiʊueoɛɔ]", "");
     private static readonly JsRe ENDS_VOWEL = JsRegex.Compile("[əaɑɪiʊueoɛɔ]ː?̃?$", "u");
     private static readonly JsRe ENDS_TILDE = JsRegex.Compile("̃$", "");
 
-    private static bool IsVowelPh(string ph) => VOWEL_PH.IsMatch(ph);
     /** True when the output so far ENDS in a vowel (ignoring a trailing length ː / nasal ̃). */
     private static bool EndsInVowel(string @out) => ENDS_VOWEL.IsMatch(@out);
 
-    /** A short-vowel letter/glide that, standing alone, is a syllable nucleus rather than a consonant. */
-    private static string? LongVowelAfterConsonant(string ch)
-    {
-        if (ch == ALIF || ch == ALIF_MADDA) return "ɑː";
-        if (ch == WAW) return "oː";
-        if (ch == YA) return "iː";
-        if (ch == BARI_YE) return "eː";
-        return null;
-    }
+    /**
+     * A short-vowel letter/glide that, standing alone, is a syllable nucleus rather than a consonant.
+     *
+     * ⚠ THE GUARD IS NOT REDUNDANT WITH THE TABLE. `LongVowels` also holds ﯼ ﯽ ئ ؤ, which are not carriers
+     * in this sense, and this doubles as a PREDICATE over arbitrary characters below — a bare lookup moves
+     * 402 readings. The five carriers are the claim; the manifest supplies the values.
+     */
+    private static string? LongVowelAfterConsonant(string ch) =>
+        ch == ALIF || ch == ALIF_MADDA || ch == WAW || ch == YA || ch == BARI_YE
+            ? LONG.GetValueOrDefault(ch)
+            : null;
 
     /** Urdu word → canonical IPA. */
     public static string PhonemizeWord(string word)
@@ -96,7 +100,7 @@ public static class G2p
             }
             if (ch == "ئ" || ch == "ؤ")
             {
-                @out += ch == "ئ" ? "iː" : "oː";
+                @out += LONG.GetValueOrDefault(ch) ?? "";
                 i++;
                 if ((ch == "ئ" && At(i) == YA) || (ch == "ؤ" && At(i) == WAW)) i++;
                 continue;
@@ -104,9 +108,9 @@ public static class G2p
             if (ch == WAW || ch == YA || ch == BARI_YE || ch == ALIF || ch == ALIF_MADDA)
             {
                 var prevVowel = EndsInVowel(@out);
-                if (ch == BARI_YE) @out += "eː";
+                if (ch == BARI_YE) @out += LONG.GetValueOrDefault(ch) ?? "";
                 else if (prevVowel)
-                    @out += ch == WAW ? "ʋ" : ch == YA ? "j" : ch == ALIF || ch == ALIF_MADDA ? "ɑː" : "";
+                    @out += GLIDE.GetValueOrDefault(ch) ?? LONG.GetValueOrDefault(ch) ?? "";
                 else @out += LongVowelAfterConsonant(ch) ?? "";
                 i++;
                 continue;

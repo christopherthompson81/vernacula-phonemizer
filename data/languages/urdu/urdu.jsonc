@@ -36,7 +36,10 @@
         "و": "oː",  // waw as vowel — DEFAULT oː (also uː/ɔː; ambiguous, lexical)
         "ی": "iː",  // ya as vowel — DEFAULT iː (also eː; ambiguous, lexical)
         "ے": "eː",  // bari ye — eː
-        "ﯼ": "iː", "ﯽ": "iː", "ئ": "iː"
+        "ﯼ": "iː", "ﯽ": "iː", "ئ": "iː",
+        // ⚠ ؤ (waw + hamza) IS NOT A NEW CLAIM. g2p.ts already read this seat as [oː], as the twin of ئ→iː;
+        // the value was asserted in code while its partner sat here, so the pair was split across two files.
+        "ؤ": "oː"
     },
 
     // و and ی act as CONSONANT glides word-initially or after a vowel.

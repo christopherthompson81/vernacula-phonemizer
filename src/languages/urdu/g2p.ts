@@ -25,6 +25,12 @@ const C = DEF.consonants;
 const HE = DEF.aspirateHe;
 const ASP = DEF.aspirates;
 const HARAKAT = DEF.harakat;
+// ⚠ THESE TWO WERE DECLARED, LOADED AND NEVER READ. `longVowels` and `glides` sat in urdu.jsonc while the
+// scan below spelled ɑː/oː/iː/eː and ʋ/j as literals — the value authored twice, one copy unreachable. The
+// sibling `punjabi/shahmukhi.ts` reads `DEF.longVowels` for the same letters. Same class as tg's
+// `numbers.and` (#901): a mapped key is not a read one.
+const LONG = DEF.longVowels;
+const GLIDE = DEF.glides;
 const NASAL = new Set(DEF.nasalizers);
 const INH = DEF.inherentVowel;
 const ALIF = "ا",
@@ -34,17 +40,22 @@ const ALIF = "ا",
     BARI_YE = "ے",
     HE_GOL = "ہ";
 
-const isVowelPh = (ph: string): boolean => /[əaɑɪiʊueoɛɔ]/.test(ph);
 /** True when the output so far ENDS in a vowel (ignoring a trailing length ː / nasal ̃). */
 const endsInVowel = (out: string): boolean => /[əaɑɪiʊueoɛɔ]ː?̃?$/u.test(out);
 
-/** A short-vowel letter/glide that, standing alone, is a syllable nucleus rather than a consonant. */
+/**
+ * A short-vowel letter/glide that, standing alone, is a syllable nucleus rather than a consonant.
+ *
+ * ⚠ THE GUARD IS NOT REDUNDANT WITH THE TABLE, and dropping it moves 402 readings. `longVowels` also holds
+ * ﯼ ﯽ ئ ؤ, which are NOT vowel carriers in this sense, and this function is used as a PREDICATE over
+ * arbitrary characters below (the glide-next test and the default-schwa decision) — so a table lookup alone
+ * makes بئ read bˈiː where it is bˈəiː. The five carriers are the claim; the manifest supplies the values.
+ * `punjabi/shahmukhi.ts` keeps exactly this shape.
+ */
 function longVowelAfterConsonant(ch: string): string | undefined {
-    if (ch === ALIF || ch === ALIF_MADDA) return "ɑː";
-    if (ch === WAW) return "oː";
-    if (ch === YA) return "iː";
-    if (ch === BARI_YE) return "eː";
-    return undefined;
+    return ch === ALIF || ch === ALIF_MADDA || ch === WAW || ch === YA || ch === BARI_YE
+        ? LONG[ch]
+        : undefined;
 }
 
 /** Urdu word → canonical IPA. */
@@ -90,7 +101,7 @@ export function phonemizeWord(word: string): string {
         // Hamza seats ئ/ؤ carry a vowel in hiatus (بھائی→bʱɑːiː, کوئی→koːiː): emit the vowel and absorb a
         // directly-following ی/و (ئی = one iː). ء (bare hamza) → glottal/hiatus, skipped in the coda.
         if (ch === "ئ" || ch === "ؤ") {
-            out += ch === "ئ" ? "iː" : "oː";
+            out += LONG[ch] ?? "";
             i++;
             if ((ch === "ئ" && s[i] === YA) || (ch === "ؤ" && s[i] === WAW)) i++;
             continue;
@@ -98,8 +109,8 @@ export function phonemizeWord(word: string): string {
         // Standalone glide/vowel letters after a vowel (hiatus) → glide; after a consonant → long vowel.
         if (ch === WAW || ch === YA || ch === BARI_YE || ch === ALIF || ch === ALIF_MADDA) {
             const prevVowel = endsInVowel(out);
-            if (ch === BARI_YE) out += "eː";
-            else if (prevVowel) out += ch === WAW ? "ʋ" : ch === YA ? "j" : ch === ALIF || ch === ALIF_MADDA ? "ɑː" : "";
+            if (ch === BARI_YE) out += LONG[ch] ?? "";
+            else if (prevVowel) out += (GLIDE[ch] ?? LONG[ch]) ?? "";
             else out += longVowelAfterConsonant(ch) ?? "";
             i++;
             continue;
