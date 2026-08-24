@@ -181,7 +181,7 @@ export function normalizeAzerbaijani(input: string): string {
     // 5) SPACE-GROUPED THOUSANDS. Azerbaijani groups thousands with a SPACE (400 000, 30 000). Two passes,
     //    because the groups overlap on the shared digit. AFTER the ordinal (no `N-ci` has a space).
     for (let i = 0; i < 2; i++)
-        s = s.replace(/(\d)[  ](\d{3})(?!\d)/gu, "$1$2");
+        s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");
 
     // 6) CLOCK, in the COLON form. The comma DECIMAL and the DOT version are handled elsewhere; the colon
     //    is clause punctuation and must be claimed here. `12:00 GMT` → saat on iki GMT; `21:20` → iyirmi

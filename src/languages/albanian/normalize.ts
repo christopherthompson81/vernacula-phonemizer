@@ -220,7 +220,7 @@ const SYMBOLS = makeSymbolNormalizer({
  * number path then reads as 375, 500 and 1. A probability spoken as a thousand, with nothing leaked and
  * nothing dropped for a gate to see.
  */
-const GROUP_SEPARATED = /(?<![\d.,])([1-9]\d{0,2})((?:[.,  ]\d{3})+)(?!\d)/gu;
+const GROUP_SEPARATED = /(?<![\d.,])([1-9]\d{0,2})((?:[.,\u00a0\u202f\u2009 ]\d{3})+)(?!\d)/gu;
 
 /**
  * 6. THE DECIMAL SEPARATOR. Runs LAST, after de-grouping has removed every three-digit group and after the
@@ -342,7 +342,7 @@ export function normalizeAlbanian(input: string): string {
      */
     let s = input.replace(ASCII_EXPONENT, (_m, p: string) => `km${p === "2" ? "\u00B2" : "\u00B3"}`); // 0
 
-    s = s.replace(GROUP_SEPARATED, (_w, head: string, groups: string) => head + groups.replace(/[.,  ]/gu, "")); // 1
+    s = s.replace(GROUP_SEPARATED, (_w, head: string, groups: string) => head + groups.replace(/[.,\u00a0\u202f\u2009 ]/gu, "")); // 1
     s = s.replace(RANGE, `$1 deri $2`); // 3 — before a dash can be claimed as a minus
     s = s.replace(PER_MILLE, `$1 për mijë`); // 2b — before the tier, which has no per-mille arm
     s = SYMBOLS(s); // 2 — percent, currency, units, rates, exponents; needs the figure intact

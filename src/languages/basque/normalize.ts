@@ -229,7 +229,7 @@ export function normalizeBasque(input: string): string {
     //    ⚠ AND THE SPACE-GROUPED FORM, ×5 — `40 091 km-koa`, `12 756 km-koa`, `12 730 km-koa`. A wiki that
     //    writes `44.579.000` also writes `40 091`, and both are in this corpus. Three digits per block and a
     //    1–9 head, so an adjacent PAIR of numbers cannot fuse.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 2) THE DEGREE SIGN WITH A SCALE LETTER — `56,7 ° C`, `26 °C`. Both readings come from one attestation
     //    (see SCALES), so neither is inferred from the other.

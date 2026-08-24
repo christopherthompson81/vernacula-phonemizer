@@ -661,7 +661,7 @@ export function normalizeSlovenian(input: string): string {
     //    instances is not evidence of correctness. Exactly three digits, so `100 in 200 m` cannot fuse.
     //    NBSP is folded to a plain space AFTERWARDS, never before: this corpus uses it 22 times and always
     //    as an ORDINARY inter-word space (`Umrl je v torek`), never as a separator.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[  ](\d{3})(?!\d)/gu, "$1$2");
+    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");
     s = s.replace(/[    ]/gu, " ");
 
     // 1) MULTI-DOT ERA MARKERS, before the single-dot rule (⚠ coupling) — otherwise the interior

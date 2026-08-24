@@ -423,8 +423,8 @@ export function normalizeHungarian(input: string): string {
         // split off, `000` spoken as zero, AND a spurious full stop. Hungarian marks the decimal with a
         // comma, so the mark is only a separator when a digit follows: `(?![\d]|,\d)`. Same defect the zu
         // and xh runs found in swahili/normalize.ts, which is where this guard shape came from.
-        s = s.replace(/(\d)[.  ](\d{3})(?![\d]|,\d)/gu, "$1$2");
-        s = s.replace(/(\d)\.[  ](\d{3})(?![\d]|,\d)/gu, "$1$2"); // the corpus's one `400. 000`
+        s = s.replace(/(\d)[.\u00a0\u202f\u2009 ](\d{3})(?![\d]|,\d)/gu, "$1$2");
+        s = s.replace(/(\d)\.[ \u00a0\u202f\u2009](\d{3})(?![\d]|,\d)/gu, "$1$2"); // the corpus's one `400. 000`
         s = s.replace(/(\d),(\d{3})(?![\d]|,\d)/gu, "$1$2");
     }
 

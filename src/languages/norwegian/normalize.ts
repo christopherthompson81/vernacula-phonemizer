@@ -143,7 +143,7 @@ export function normalizeNorwegian(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = t.replace(/(\d)[ \u00a0 ](\d{3})(?!\d)/gu, "$1$2");
+        t = t.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");
     } while (t !== prev);
 
     // 2) ENGLISH-STYLE COMMA GROUPING (5) — before the decimal rule, which would otherwise read 23,764 as

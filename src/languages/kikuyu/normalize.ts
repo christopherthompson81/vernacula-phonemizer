@@ -241,7 +241,7 @@ export function normalizeKikuyu(input: string): string {
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
     //    The space-grouped form, same shape. ×0 in this corpus; the arm is here because a wiki that writes
     //    `41,200` also writes `41 200`, and it cannot fire on anything else (three digits, no letters).
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 4) THE ENGLISH ORDINAL SUFFIX (`21st`, `20th`, `70th`, `4th`, `2nd`; 194 whole-corpus). Kikuyu writes
     //    its own ordinals as WORDS with a class-agreeing prefix — this corpus has *wa mbere*, *wa kerĩ*,
@@ -334,7 +334,7 @@ export function normalizeKikuyu(input: string): string {
     //    attested for Kikuyu — `unitPer` is one invariant string and this language has no candidate for it.
     //    AFTER the ranges (step 5) and BEFORE the decimals (step 9), which is what leaves `934.6` intact to
     //    be this rule's operand.
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0]?km(?![\p{L}\p{M}\d²³/])/gu,
+    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0\u202f\u2009]?km(?![\p{L}\p{M}\d²³/])/gu,
         (w, n: string, off: number, all: string) =>
             saidNear(all, off, off + w.length, KILOMETRE) ? n : `${KILOMETRE} ${n}`);
     const metre = (w: string, n: string, off: number, all: string): string =>

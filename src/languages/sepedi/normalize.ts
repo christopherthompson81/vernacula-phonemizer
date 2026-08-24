@@ -350,7 +350,7 @@ export function normalizeSepedi(input: string): string {
     //    a normalization one, and is recorded in the investigation doc rather than worked around here.
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[  ]\d{3}){1,4}(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3}){1,4}(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 3) THE ENGLISH ORDINAL SUFFIX (`4th`, `16th`, `19th`). Sepedi writes its own ordinals as WORDS and this
     //    corpus does exactly that beside the Latin form — *"mokgatlokgolo wa lesome senyane (19th)"*,
@@ -409,7 +409,7 @@ export function normalizeSepedi(input: string): string {
     //    two) is not read as an area while `km ²` is.
     s = s.replace(
         new RegExp(
-            `${NOT_VERSION}(\\d+(?:[  ]\\d{3}(?!\\d)|[.,]\\d+)*)(?![\\d.,])[  ]?(${UNIT_ALT})` +
+            `${NOT_VERSION}(\\d+(?:[ \u00a0\u202f\u2009]\\d{3}(?!\\d)|[.,]\\d+)*)(?![\\d.,])[ \u00a0\u202f\u2009]?(${UNIT_ALT})` +
                 `(?:[    ]?/[    ]?(${DENOM_ALT})|[    ]?(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?` +
                 `(?![\\p{L}\\p{M}\\d'’ʼ])`,
             "giu",

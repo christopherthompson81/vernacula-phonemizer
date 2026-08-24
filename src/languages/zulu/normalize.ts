@@ -176,7 +176,7 @@ export function normalizeZulu(input: string): string {
     //    SPACE GROUPING too (`ku- 100 000 abantu`) — read as two numbers, *ikhulu iqanda*. Blocks of EXACTLY
     //    three digits only, the same discipline the shared tier states for its own `NUM`: without it `30 9`
     //    would fuse two unrelated numbers.
-    s = s.replace(/(?<![\d.,])(\d{1,3})([ \u00a0 ]\d{3})+(?!\d)/gu, (whole) => whole.replace(/[ \u00a0 ]/gu, ""));
+    s = s.replace(/(?<![\d.,])(\d{1,3})([ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (whole) => whole.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 5b) SPORTS TIMES — `4:41.30`, racing paces. NOT clocks, and the clock rule below correctly refuses
     //     them (a third `.dd` field) — but refusing is not enough: the colon then survives as a CLAUSE PAUSE

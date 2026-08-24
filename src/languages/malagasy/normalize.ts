@@ -196,7 +196,7 @@ export function normalizeMalagasy(input: string): string {
     //    ⚠ The trailing guard rejects a following DIGIT only, not a following mark, because the French
     //    convention combines both in one number: `299 792,458 km/s` (the speed of light) is space-grouped
     //    AND comma-decimal, and a `(?![\p{Nd}.,])` guard left its integer part as two separate numbers.
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?: \p{Nd}{3})+)(?!\p{Nd})/gu, (m) => m.replaceAll(" ", ""));
+    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 3) THOUSANDS GROUPED WITH A PERIOD — only at exactly three digits, and only when no `°` follows.
     //    ⚠ THE DEGREE IS THE DISCRIMINATOR, and it is the corpus's own: every period-decimal that is not a

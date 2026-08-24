@@ -218,7 +218,7 @@ const ABBREV_DOT = /(?<=[а-яөүё])\.(?=[а-яөүё])/gu;
  * tidy-up.
  */
 const GROUP_COMMA = /(?<=\d)[,](?=\d{3}(?![\d]))/gu;
-const GROUP_SPACE = /(?<![\d.,])(\d{1,3}) (\d{3})(?!\d)/gu;
+const GROUP_SPACE = /(?<![\d.,])(\d{1,3})[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu;
 
 // ---------------------------------------------------------------------------------------------------
 // 4. ORDINALS — `3-р сарын`, `21-р байранд`
@@ -556,7 +556,7 @@ const UNIT_KEYS = Object.keys(UNIT_WORD).sort((a, b) => b.length - a.length).joi
 // The trailing `-суффикс` is CAPTURED so it is consumed and re-emitted (trap 10) rather than left behind to be
 // stranded by accident; the callback decides whether it glues onto the unit noun or stays separate.
 const UNIT = new RegExp(
-    `(?<![\\d.,\\p{L}\\p{M}])(\\d+(?:[.,]\\d+)?)[  ]?(${UNIT_KEYS})([²³23])?(?![\\p{L}\\p{M}\\d/²³])`
+    `(?<![\\d.,\\p{L}\\p{M}])(\\d+(?:[.,]\\d+)?)[ \u00a0\u202f\u2009]?(${UNIT_KEYS})([²³23])?(?![\\p{L}\\p{M}\\d/²³])`
     + `(?:-([а-яөүё]+)${NOT_LETTER})?`,
     "gu",
 );

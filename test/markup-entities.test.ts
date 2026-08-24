@@ -14,13 +14,22 @@
 import { describe, expect, test } from "vitest";
 import { stripMarkup } from "../src/core/markup.ts";
 import { phonemize } from "../src/index.ts";
+import { readFileSync } from "node:fs";
+
+/** Every language the registry can build, read from its own switch rather than re-declared here — the same
+ *  trick `test/normalization-sources.test.ts` uses, so the list cannot fall behind the fleet. */
+const LANGUAGE_CODES = [
+    ...new Set([...readFileSync("src/registry.ts", "utf8").matchAll(/case "([a-zA-Z-]+)":/gu)].map((m) => m[1]!)),
+];
 
 describe("entities that decode", () => {
-    /** ⚠ ASCII SPACE, NOT U+00A0 / U+2009. 42 engines de-group a thousands separator only on an ASCII
-     *  space, and every corpus instance of both entities is a thousands separator. See the row's comment. */
-    test("the space family folds to an ASCII space", () => {
-        expect(stripMarkup("176&thinsp;215&nbsp;km")).toBe("176 215 km");
-        expect(stripMarkup("&nbsp;&bull; 100")).toBe("   100");
+    /** ⚠ FAITHFULLY, SINCE #935. These two used to fold to an ASCII space because 42 engines de-grouped a
+     *  thousands separator only on U+0020 — the workaround is gone because the engines are fixed: 191 of 192
+     *  now read the whole space family identically (see the fleet guard at the bottom of this file).
+     *  `&bull;` still decodes to a space, and for its own unrelated reason — U+2022 is read by nothing. */
+    test("the space family decodes to the characters it names", () => {
+        expect(stripMarkup("176&thinsp;215&nbsp;km")).toBe("176\u2009215\u00a0km");
+        expect(stripMarkup("&nbsp;&bull; 100")).toBe("\u00a0  100");
     });
 
     test("the invisible controls decode to the real characters, not to nothing", () => {
@@ -118,16 +127,38 @@ describe("entities deliberately left literal", () => {
 /**
  * ⚠ THE ARTIFACT DOES NOT SAY WHAT THE ENGINE READS. The mined corpora store the RAW entity (`&nbsp;`
  * ×2,305) and `stripMarkup` decodes at read time, so a rule author writing a character class from what an
- * artifact shows is writing it against text the engine never sees. This is not hypothetical — it is why
- * `nbsp` folds to an ASCII space rather than to U+00A0, and it is the trap gn walked into from the other
- * side. Pinned here so the property is stated somewhere executable.
+ * artifact shows is writing it against text the engine never sees. That gap is why `nbsp` used to fold to an
+ * ASCII space, and it is the trap gn walked into from the other side.
+ *
+ * ⚠ THE FOLD IS GONE (#935) AND THIS IS WHAT REPLACES IT. Rather than decode dishonestly, every engine's
+ * grouping and unit rules were widened to the space family, so the entity and the character now mean the same
+ * thing to the fleet. The guard below is what keeps that true: it is a FLEET-WIDE property, not a per-language
+ * one, and a new engine written with `[ ]` where it means "a space" will fail it.
  */
 describe("artifact text is not runtime text", () => {
-    test("the decoded form and the raw character are NOT interchangeable to every engine", () => {
-        // The 42 engines whose grouping class is ASCII-only; km is one of them. This is the defect the
-        // ASCII fold masks, asserted so that "fix" the fold and this test tells you what it costs.
-        const viaEntity = phonemize("1&nbsp;904&nbsp;569", "km");
-        const viaCharacter = phonemize("1 904 569", "km");
-        expect(viaEntity).not.toBe(viaCharacter);
+    /** The one engine that reads them differently, and it is not a lost numeral: Tibetan's tokenizer treats an
+     *  ASCII space as a phrase boundary (its own orthography separates with tsheg, not space), so the ASCII
+     *  form gains clause pauses the NBSP form does not. Both read every digit. */
+    const PAUSE_ON_ASCII_SPACE = new Set(["bo"]);
+
+    test("a numeral grouped with any space character reads the same in every engine", () => {
+        const langs = LANGUAGE_CODES.filter((l) => !PAUSE_ON_ASCII_SPACE.has(l));
+        const offenders: string[] = [];
+        for (const lang of langs) {
+            for (const shape of ["1 904 569", "3 850 km"]) {
+                const base = phonemize(shape, lang);
+                for (const [name, ch] of [["nbsp", "\u00a0"], ["nnbsp", "\u202f"], ["thin", "\u2009"]] as const) {
+                    const got = phonemize(shape.replace(/ /gu, ch), lang);
+                    if (got !== base) offenders.push(`${lang} ${name} ${JSON.stringify(shape)}: ${base} != ${got}`);
+                }
+            }
+        }
+        expect(offenders).toEqual([]);
+    });
+
+    test("the entity and the raw character reach the engine as the same text", () => {
+        expect(phonemize("1&nbsp;904&nbsp;569", "km")).toBe(phonemize("1\u00a0904\u00a0569", "km"));
+        // …and that text now reads as one numeral, which is the whole point of dropping the fold.
+        expect(phonemize("1&nbsp;904&nbsp;569", "km")).toBe(phonemize("1 904 569", "km"));
     });
 });

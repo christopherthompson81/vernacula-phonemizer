@@ -17,7 +17,7 @@ const NAMED: Readonly<Record<string, string>> = {
     gt: ">",
     quot: '"',
     apos: "'",
-    nbsp: " ",
+    nbsp: "\u00a0",
     laquo: "«",
     raquo: "»",
     ldquo: "“",
@@ -50,25 +50,24 @@ const NAMED: Readonly<Record<string, string>> = {
     permil: "‰",
     cent: "¢",
 
-    // ── THE SPACE FAMILY, AND WHY `nbsp` DECODES TO AN ASCII SPACE RATHER THAN U+00A0 ──────────────────
-    // ⚠ THIS ROW IS A DELIBERATE INFIDELITY AND IT IS LOAD-BEARING. `&nbsp;` denotes U+00A0, but 42 of the
-    // 188 engines de-group a thousands separator ONLY on an ASCII space — their grouping classes are
-    // `[ ]`, not `[    ]` — so decoding faithfully would read `1 904 569` as three numbers
-    // in all 42 (ln, km, bm, mos, ki, rn … measured: *one, nine hundred four, five hundred sixty-nine*).
-    // `&thinsp;` joins on the same terms and for the same reason; la writes `1&thinsp;904&thinsp;569` and
-    // `250&thinsp;000`, gn writes `176&thinsp;215`.
-    // ⚠ THE INFIDELITY HAS A COST, AND IT IS THE REASON THIS COMMENT EXISTS. Folding to ASCII here MASKS
-    // that fleet defect: a dump carrying the RAW character reaches those 42 engines untouched and still
-    // loses its numeral, and no corpus can show it because every corpus instance arrives as an entity.
-    // gn hit exactly this from the other side — its grouping class needed U+00A0 written in explicitly and
-    // passed the corpus without it, because the entity had already become an ASCII space by then
-    // (`languages/guarani/normalize.ts` step 6). The general fix belongs in the engines' grouping classes,
-    // not here; changing this row instead would regress 42 languages to fix a shape no corpus contains.
-    // ⚠ `&bull;` IS IN THIS GROUP, NOT A CHARACTER ROW. U+2022 is read by NOTHING — it is silent in all 188
-    // — so a faithful decode would trade the audible-but-wrong *and bull* for a silent deletion. A bullet
-    // is a list marker whose reading IS a break, which is what a space already gives; `languages/quechua`
-    // reached the same conclusion locally on the same corpus instance (`&nbsp;&bull; 100 ¢ = 1 $`).
-    thinsp: " ",
+    // ── THE SPACE FAMILY — DECODED FAITHFULLY SINCE #935 ────────────────────────────────────────────────
+    // ⚠ THIS USED TO BE A DELIBERATE INFIDELITY: `nbsp` and `thinsp` folded to an ASCII space because 42 of
+    // the 188 engines de-grouped a thousands separator ONLY on U+0020 — their grouping classes were `[ ]`,
+    // not `[ \u00a0\u202f\u2009]` — so decoding faithfully read `1 904 569` as three numbers in all 42.
+    // The comment then said the general fix belonged in the engines' grouping classes, not here. It did, and
+    // that is what #925 and #935 did: the classes were widened fleet-wide and the population re-measured
+    // BEHAVIOURALLY (every engine × the four space characters, not by reading source). 57 engines differed;
+    // now 1 does, and not by losing a numeral — Tibetan's tokenizer treats an ASCII space as a phrase
+    // boundary, so the ASCII form gains pauses the NBSP form does not. Both read every digit.
+    // The cost the old comment named is therefore also gone: a dump carrying the RAW character used to reach
+    // those engines untouched and lose its numeral, where no corpus could show it because every corpus
+    // instance arrives as an entity. `test/markup-entities.test.ts` now pins the property fleet-wide.
+    // ⚠ `&bull;` STAYS A SPACE, and for its own unrelated reason. U+2022 is read by NOTHING — it is silent in
+    // all 188 — so a faithful decode would trade the audible-but-wrong *and bull* for a silent deletion. A
+    // bullet is a list marker whose reading IS a break, which is what a space already gives;
+    // `languages/quechua` reached the same conclusion locally on the same corpus instance
+    // (`&nbsp;&bull; 100 ¢ = 1 $`).
+    thinsp: "\u2009",
     bull: " ",
 
     // ── THE INVISIBLE FORMATTING CONTROLS — decoded FAITHFULLY, because the fleet strips them ──────────

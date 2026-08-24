@@ -51,7 +51,7 @@ public static class Normalize
      *  golden cannot see, and the TS is the specification.)
      *  ⚠ ESCAPED, NOT LITERAL: the NBSP is invisible, and a heredoc or an editor that folds it to a plain
      *  space would silently narrow the class to nothing. Same repair the French grouping class needed. */
-    private const string GROUP_SPACE = " \u00a0";
+    private const string GROUP_SPACE = " \u00a0\u202f\u2009";
 
     /**
      * Polish count-form selector for `core/normalizeSymbols.ts` (and for the local unit rules below).

@@ -295,7 +295,7 @@ export function normalizeSwedish(input: string): string {
     //    `1400-talet` get the SAME hundreds reading — the inconsistency to avoid.
     do {
         prev = t;
-        t = t.replace(/(\d)[   ](\d{3})(?!\d)/gu, "$1$2");
+        t = t.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");
     } while (t !== prev);
 
     // 2) ENGLISH-STYLE COMMA GROUPING (9) — before anything reads the comma as a decimal point, which is
