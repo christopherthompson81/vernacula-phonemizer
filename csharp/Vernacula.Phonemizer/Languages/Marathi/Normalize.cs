@@ -65,11 +65,8 @@ public static class Normalize
         .OrderByDescending(k => k.Length)
         .Select(k => JsRegex.Replace(k, UNIT_ESC, m => "\\" + m.Value)));
 
-    /** Currency sign → the Marathi noun (युरो / पौंड where Hindi's tier says यूरो / पाउंड). */
-    private static readonly IReadOnlyDictionary<string, string> CURRENCY = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["$"] = "डॉलर", ["€"] = "युरो", ["¥"] = "येन", ["£"] = "पौंड", ["₹"] = "रुपये",
-    };
+    /** Currency sign → the Marathi noun, from the manifest and SHARED with Marathi.cs's symbol tier. See
+     *  marathi.jsonc for the evidence that settled £. */
 
     /** Magnitude words that hop over the currency sign — "$२.३ बिलियन" is said "…बिलियन डॉलर". */
     private const string MAGNITUDE_ALT = "बिलियन|ट्रिलियन|मिलियन|दशलक्ष|अब्ज|कोटी|लाख|हजार";
@@ -122,8 +119,13 @@ public static class Normalize
 
     /** Build the Marathi normalizer. Takes the numbers definition so the ordinal and clock rules compose
      *  their cardinals from the same data the engine's own number path uses. */
-    public static Func<string, string> MakeMarathiNormalizer(NumbersDef numbers)
+    public static Func<string, string> MakeMarathiNormalizer(MarathiDef def)
     {
+        var numbers = def.Numbers;
+        /** Currency sign → the Marathi noun, SHARED with Marathi.cs's symbol tier. ⚠ Scoped to the factory,
+         *  not static: two normalizers built from different defs must not share it. */
+        var CURRENCY = def.Currency;
+        var PERCENT_W = def.Percent;
         /** Integer → its Marathi cardinal words, exactly as the engine's number path would render them. */
         List<string> Cardinal(double n) =>
             Numbers.indicNumberWords(n, numbers).Select(w => w ?? "").ToList();
@@ -223,7 +225,7 @@ public static class Normalize
             s = JsRegex.Replace(s, PERCENT, m =>
             {
                 var n = m.Groups[1].Value;
-                return $"{n} {(Js.Number(JsRegex.Replace(n, COMMA_G, _ => "")) == 1 ? "टक्का" : "टक्के")}";
+                return $"{n} {(Js.Number(JsRegex.Replace(n, COMMA_G, _ => "")) == 1 ? PERCENT_W.Singular : PERCENT_W.Plural)}";
             });
 
             s = JsRegex.Replace(s, CURRENCY_RE, m =>
