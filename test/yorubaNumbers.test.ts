@@ -172,3 +172,22 @@ describe("yoruba cardinals — the corpus's own numeral↔digit glosses", () => 
         expect(yorubaCardinal(0)).toBe("òdo");
     });
 });
+
+// ⚠ THE HUNDREDS TABLE IS CONSULTED ONLY FROM 200 UP, and its 100 slot is therefore unreachable: everything
+// below 200 is composed from the VIGESIMAL tens series, where the hundred word lives as `tens["100"].free`.
+// Sabotaging `hundreds[1]` changes no reading — this pins the boundary so the dead slot cannot be mistaken
+// for the source of a hundred, and so a future change that routes 100-199 back through the table is caught.
+describe("Yoruba — the 100-199 range is vigesimal, not a hundreds-table entry", () => {
+    test("hundreds below 200 come from the tens series", () => {
+        expect(yorubaCardinal(100)).toBe("ọgọ́rùn-ún"); // tens["100"].free
+        expect(yorubaCardinal(137)).toBe("mẹ́tàdínlógóje"); // lé/dín onto a vigesimal base
+        expect(yorubaCardinal(180)).toBe("ọgọ́sàn-án");
+        expect(yorubaCardinal(199)).toBe("mọ́kàndínnígba"); // subtractive from 200
+        expect(yorubaCardinal(1100)).toBe("ẹgbẹ̀rún kan ó lé ọgọ́rùn-ún");
+    });
+    test("the hundreds table starts doing work at 200", () => {
+        expect(yorubaCardinal(200)).toBe("igba");
+        expect(yorubaCardinal(250)).toBe("igba ó lé àádọ́ta");
+        expect(yorubaCardinal(300)).toBe("ọ̀ọ́dúnrún");
+    });
+});

@@ -63,6 +63,11 @@ function belowTwoHundred(n: number): string {
  * composes onto them exactly as it does below 100 (`mẹ́tàdínlógóje` = 137). So the tens table runs to 190 and
  * this range goes through the same code. From 200 up the hundreds ARE their own words joined by `ó lé`, which
  * the corpus glosses directly (`igba ó lé ọgọ́rin` = 280).
+ *
+ * ⚠ SO `N.hundreds[1]` IS UNREACHABLE — the 100 slot of that table can never be indexed here, because
+ * `n < 200` has already returned. The hundred word a reader hears comes from `tens["100"].free`, and
+ * sabotaging the hundreds entry changes no reading at all. Stated because the table LOOKS like the source of
+ * every hundred; see the note in yoruba.jsonc for why the slot is kept rather than blanked.
  */
 function below1000(n: number): string {
     if (n < 200) return belowTwoHundred(n);
