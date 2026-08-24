@@ -27,7 +27,7 @@ public static class Numbers
         int h = (int)Math.Floor(n / 100);
         double r = n % 100;
         var head = "";
-        if (h >= 1 && d.HundredsFused is not null) head = d.HundredsFused[h]; // dialect fused forms (mijːa, miteːn)
+        if (h >= 1 && d.HundredsFused is not null) head = d.HundredsFused[h]; // dialect fused forms (mijːa, miteːn, tultumijːa)
         else if (h == 1) head = d.Magnitudes.Hundred;
         else if (h == 2) head = d.Magnitudes.HundredDual;
         else if (h >= 3) head = $"{d.HundredsConstruct![h]}{d.Magnitudes.Hundred}"; // θalaːθumiʔa

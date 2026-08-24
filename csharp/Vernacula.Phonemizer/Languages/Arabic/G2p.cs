@@ -18,7 +18,8 @@ public sealed class Seg
 
 public static class G2p
 {
-    // All Arabic DATA — script inventory + maps — is consolidated in arabic.jsonc.
+    // All Arabic DATA — script inventory + maps — is consolidated in arabic.jsonc; here we bind it to the readable
+    // local names the parsing algorithm below uses.
     private static IReadOnlyDictionary<string, string> CONS => Manifest.MANIFEST.Consonants;
     private static readonly IReadOnlySet<string> SUN = new HashSet<string>(Manifest.MANIFEST.SunLetters, StringComparer.Ordinal);
     private static IReadOnlyDictionary<string, string> PROCLITIC => Manifest.MANIFEST.Proclitics;
@@ -48,8 +49,9 @@ public static class G2p
     }, StringComparer.Ordinal);
 
     /**
-     * Resolve the vowel from a gathered harakat `hk` plus the following LETTER at index i (a long
-     * vowel/diphthong consumes a following ا/ي/و). Returns the IPA vowel ("" = sukun/none) and next index.
+     * Resolve the vowel from a gathered harakat `hk` plus the following LETTER at index i (a long vowel/diphthong
+     * consumes a following ا/ي/و). Decoupling the harakat from the shadda first means the fatḥa/shadda mark order
+     * (نَّا vs نَّا) doesn't affect long-vowel detection. Returns the IPA vowel ("" = sukun/none) and next index.
      */
     private static (string V, int Next) ResolveVowel(string hk, string s, int i)
     {
@@ -137,8 +139,9 @@ public static class G2p
         var i = 0;
         if (At(i) == ALIF && At(i + 1) == "ل")
         {
-            // word-initial article الـ — the alif is hamzat al-waṣl → a plain [a] onset, NOT [ʔa]. Egyptian
-            // raises the article vowel a→i (variety shift, il-).
+            // word-initial article الـ — the alif is hamzat al-waṣl → a plain [a] onset, NOT [ʔa]: القمر → alqamar,
+            // الشمس → aʃːams (both referees omit the ʔ; the ʔ that follows an article, as in الأحد → alʔaħad, is the
+            // next word's own hamza, not the article's). Egyptian raises the article vowel a→i (variety shift, il-).
             PushVowel("a", article: true); // tag so a variety can raise it (arz il-)
             i = EmitArticle(i + 1);
         }
@@ -157,8 +160,10 @@ public static class G2p
         }
         else if (At(i) == ALIF && HARAKAT.Contains(At(i + 1)))
         {
-            // word-initial BARE alif is hamzat al-waṣl (a connecting/elidable seat) → a plain VOWEL onset,
-            // NOT a glottal stop: ابتسم → ibtasam. Only the hamza-CARRIERS أ إ آ ء get a real [ʔ].
+            // word-initial BARE alif is hamzat al-waṣl (a connecting/elidable seat) → a plain VOWEL onset, NOT a
+            // glottal stop: ابتسم → ibtasam, ائتلاف → iʔtilaːf (both referees, MSA + arz, omit the ʔ here). Only the
+            // hamza-CARRIERS أ إ آ ء (CONS→ʔ, and ALIF_MADDA below) get a real [ʔ]. Emitting ʔ here was over-generating
+            // a word-initial glottal on every waṣl word (the dominant arz residual class; also wrong for MSA).
             var (_, hk, next) = GatherMarks(s, i + 1);
             var r = ResolveVowel(hk, s, next);
             PushVowel(r.V);
@@ -172,9 +177,9 @@ public static class G2p
         }
         else if (At(i) == ALIF)
         {
-            // word-initial bare alif with NO vowel mark: still hamzat al-waṣl, but the diacritization source
-            // left the elision vowel unwritten (the MSA Tashkeela convention). Supply the default waṣl vowel
-            // [i] (اسم → ism) instead of dropping the alif.
+            // word-initial bare alif with NO vowel mark: still hamzat al-waṣl, but the diacritization source left the
+            // elision vowel unwritten (the MSA Tashkeela convention — احْتَاج، اسْم). Supply the default waṣl vowel [i]
+            // (اسم → ism, استخدم → istaxdam, arz istaxdim) instead of dropping the alif (which produced sm, ħtaːɡ).
             PushVowel("i");
             i += 1;
         }
