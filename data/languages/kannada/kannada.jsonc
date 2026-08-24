@@ -88,11 +88,6 @@
             "crore": { "bare": "ಕೋಟಿ", "combining": "ಕೋಟಿ" }
         },
 
-        // Retained for the NumbersDef contract (core/numbers.ts) even though numbers.ts reads the forms
-        // above; a bare 100/1000 is the magnitude word alone, never *ಒಂದು ನೂರು.
-        "magnitudes": { "hundred": "ನೂರು", "thousand": "ಸಾವಿರ", "lakh": "ಲಕ್ಷ", "crore": "ಕೋಟಿ" },
-        "compoundOrder": "tens-unit",
-        "bareMagnitude": true,
         "decimalWord": "ದಶಾಂಶ"
     }
 }
