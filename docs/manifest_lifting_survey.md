@@ -1,8 +1,8 @@
 # Manifest-lifting survey
 
 Data hardcoded in `src/languages/*/**.ts` that belongs in `data/languages/<lang>/<lang>.jsonc`, read as
-`DEF.<key>`. Covers **43 of the 52 ported languages**; the sweep was cut short, so **uk — the language that
-prompted this — is NOT covered**, along with af am ar as ast bn bg pa pl pt te th tr.
+`DEF.<key>`. Covers **51 of the 52 ported languages** — everything except **uk, the language that prompted this**,
+which the sweep was stopped before reaching.
 
 Test applied throughout: *could a sibling language plug in different values and get a correct reading with
 the SAME code?* If yes, it is data. `makeSymbolNormalizer({…})` call sites were excluded by construction —
@@ -24,6 +24,52 @@ language, so none of these is a new idea — they are the fleet failing to be co
 | unit / rate / exponent nouns outside the tier | — | en 38, mr 26, ko 11, ms 17, ln 8, my 8, ro 15, kn 5, ja 12, hi 8 |
 | `months` | — | es 13, fr 12, de 12, hu 12, en 12 |
 | `eraMarkers` | lt | es, sw, de, fr, it, mr, ha, gu, hi, kn, vi, ln |
+
+
+## The sharpest single findings
+
+Ranked by how clearly each one shows the convention failing rather than merely being unevenly applied.
+
+1. **ur has two DEAD manifest keys.** `longVowels` and `glides` are in urdu.jsonc, are declared on
+   `UrduDef`, are loaded — and are never read, because `g2p.ts` hardcodes both tables. The sibling
+   `punjabi/shahmukhi.ts` DOES read `DEF.longVowels`, with the same shape. This is the `numbers.and`
+   defect (#901) again, which tajik.ts's own comment already records: *"the value was authored twice and
+   only one copy was reachable."*
+2. **as had to write `AS_GEMINATE` because bn's geminate set is hardcoded.** That is the survey's test —
+   "could a sibling plug in different values into the same code?" — failing in the most literal way
+   available: the sibling could not, so it forked the constant. Assamese also disables height harmony
+   *wholesale* (`heightHarmony:false`) because bn's trigger set `[iu]` is not parameterisable.
+3. **bn/as/bpy share one normalize.ts, so as and bpy silently speak Bengali's words** — its ordinal
+   tables, unit abbreviations, clock and sign words. The file's header explicitly claims these tables for
+   code; that claim is the thing to re-litigate, since it is the largest single cluster in the survey.
+   Same shape in hi (inherited by bho/mag/awa/hne/mai/rkt) and id (by ms/zsm).
+4. **Manifests missing a whole block.** thai.jsonc has **no numbers block at all** — the digit words and
+   the entire scale ladder (`ล้าน แสน หมื่น พัน ร้อย`) live in code. kalaallisut.jsonc has **no `numbers`
+   key** — native 0-12 and the full Danish loan series are in numbers.ts. malay has **no manifest file**.
+5. **Keys that exist in a sibling but not here.** `unitWords` is in assamese.jsonc but not bengali.jsonc;
+   `signs` is in assamese.jsonc while bn hardcodes its six; `digits` and `longVowels` are in
+   shahmukhi.jsonc but not punjabi.jsonc; `letterNames` is in af/id/wu and hardcoded in fifteen others;
+   `voicing.toVoiceless` is loaded from the manifest by pl and hardcoded by oc.
+6. **tr `"aıou"` is a hand-written duplicate of `vowels.back`, already in the manifest** — and it is the
+   THIRD copy of the Turkish vowel set in that package.
+7. **ar `restore.ts` re-spells the consonant inventory and the mater-lectionis carriers** that
+   `MANIFEST.consonants` and `letters.{alif,waw,ya,alifMaqsura}` already hold; `diacritizer.ts` has a
+   two-entry spelling fold that belongs in the `defectiveSpelling` key that already exists.
+
+## Ordering hazards — the reason several of these are not one-line moves
+
+A lift is only safe where the ordering is DERIVED in code rather than authored in the file. Most
+`dottedAbbrev` tables sort longest-first at load, which is what makes them cheap. These do not:
+
+- **th `ABBREV`** — "ORDER IS LOAD-BEARING: longest key first", stated in the comment. Needs an ordered
+  ARRAY in the JSONC, not an object.
+- **ps `ERA`** — bare `م` must be claimed last or the era reads as its own opposite; the bodies are regex
+  fragments (`م\s?[.‌ ]?\s?ز`), not plain strings.
+- **bn ordinal suffixes** — `তম` before `ম`. **or** — `ତମ` before `ମ`. **ta** — fused endings chosen by
+  string compare.
+- **bg `UNITS`** — `м`/`г` must come last; `SQUARED` must run before `UNITS`.
+- **th `THAI_E_COMBOS`**, **te `GEMINATE`**, **ln `UNITS`**, **ps `UNITS`** (km² before km) — longest-first
+  scans.
 
 ## Highest value ÷ risk — do these first
 
