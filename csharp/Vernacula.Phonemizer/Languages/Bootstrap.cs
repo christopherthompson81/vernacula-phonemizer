@@ -42,10 +42,12 @@ public static class Bootstrap
             Hindi.Hindi.RegisterSelf();
             Kalaallisut.KalaallisutPhonemizer.RegisterSelf();
             Kannada.KannadaPhonemizer.RegisterSelf();
+            Mandarin.MandarinPhonemizer.RegisterSelf();
             Maori.MaoriPhonemizer.RegisterSelf();
             Occitan.OccitanPhonemizer.RegisterSelf();
             Odia.OdiaPhonemizer.RegisterSelf();
             Russian.RussianPhonemizer.RegisterSelf();
+            Spanish.SpanishPhonemizer.RegisterSelf();
             Umbundu.UmbunduPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
