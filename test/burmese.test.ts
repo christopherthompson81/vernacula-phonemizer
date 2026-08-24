@@ -200,3 +200,18 @@ describe("burmese normalization", () => {
             .toBe("မြန်မာနိုင်ငံသည် အရှေ့တောင်အာရှတွင် ရှိသည်။");
     });
 });
+
+// ⚠ THE SEGMENTATION SAFETY CHECK COMPARES THE SYLLABLE SEQUENCE, not the concatenated text, and the U+0001
+// join separator is what makes that true. It used to be a bare control character in the source — invisible in
+// every editor and diff — so this pins the behaviour it protects: a partial dictionary cover is accepted only
+// when the split leaves every syllable body intact, and `ကစကား` is the case that must stay WHOLE, because
+// peeling its leading က would turn a word-internal MINOR syllable into a full one (kə → ka).
+describe("burmese segmentation — a split may not change the syllable sequence", () => {
+    test("a partial cover that would lose a minor syllable keeps the run whole", () => {
+        expect(segment("ကစကား")).toEqual(["ကစကား"]);
+        expect(phonemize("ကစကား", "my").trim()).toBe("kəsəka˥˩"); // the leading syllable stays reduced
+    });
+    test("a full dictionary cover is split, and each part keeps its own reading", () => {
+        expect(segment("မြန်မာနိုင်ငံ")).toEqual(["မြန်မာ", "နိုင်ငံ"]);
+    });
+});
