@@ -263,7 +263,18 @@ function dravidianGroup(
     const sup = key === "thousand" ? d.thousandForms?.[String(count)] : undefined;
     if (sup !== undefined) return [hasRemainder ? sup.combining : sup.bare];
     const mag = dravidianForm(d.magnitudeForms[key], count, hasRemainder);
-    return count === 1 ? [mag] : [...dravidianBelow1000(count, d), mag];
+    // ⚠ THE COUNT IS COMPOSED RECURSIVELY, NOT BY `dravidianBelow1000`, AND THE DIFFERENCE STARTS AT 10^10.
+    // Indian 2-2-3 grouping bounds the thousand and lakh counts at 99, but the CRORE group takes everything
+    // above 10^7, so its count runs to 900,719,925 at the safe-integer ceiling. Sent to a function whose
+    // contract is 1-999, a count of 1000 asked for `units[10]` — `undefined` in JS, which `join(" ")`
+    // rendered as an empty string. So 10^10, 10^12 and 10^15 all read as ` നൂറ് കോടി` ("hundred crore",
+    // with a leading space) — three different quantities given one wrong reading, and no throw to notice it
+    // by. Found by the C# port, where the same index throws (csharp/PORTING.md, the bidirectional rule).
+    //
+    // Recursion is the composition the system already implies: 10^9 is നൂറ് കോടി, 10^10 ആയിരം കോടി,
+    // 10^12 ലക്ഷം കോടി, 10^14 കോടി കോടി. It terminates because `count` is strictly smaller than `n`, and
+    // for every count below 1000 it is the SAME call `dravidianBelow1000` was making.
+    return count === 1 ? [mag] : [...dravidianNumberWords(count, d), mag];
 }
 
 /**
