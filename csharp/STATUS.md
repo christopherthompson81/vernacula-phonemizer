@@ -16,9 +16,9 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 16 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi —
-  all **200/200**. 3,200 rows, 0 differ. Hindi unblocks its nine composing dependents (mr, gu, ne,
-  bho, mag, hne, awa, mai, rkt) and Gujarati's import.
+- **Languages: 18 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+  cmn, es — all **200/200**. 3,600 rows, 0 differ. ORDER IS NOW DESCENDING SPEAKER POPULATION
+  (user direction): next ar, pt, bn, fr, ja, de…
 - **Every cross-engine dependency the goldens have is now satisfied** — the 65 self-contained goldens
   plus the 44 that route a foreign run to `en`/`ru`/`el` can all be gated as they land.
 - `Languages/Bootstrap.cs` is the registration list: one line per ported language, plus the neural table.
