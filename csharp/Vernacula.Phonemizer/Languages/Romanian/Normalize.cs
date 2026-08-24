@@ -118,7 +118,7 @@ public static class Normalize
     // ⚠ THE GROUPING CLASS IS THREE CHARACTERS — space, NBSP (U+00A0) and narrow NBSP (U+202F) — two of them
     // invisible in a source file. Written as escapes so an editor that folds an exotic space cannot narrow the
     // class in silence (the French golden-row defect earlier in this port).
-    private static readonly JsRe GROUP_SPACE = JsRegex.Compile("(\\d)[ \u00a0\u202f](\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe GROUP_SPACE = JsRegex.Compile("(\\d)[ \u00a0\u202f\u2009](\\d{3})(?!\\d)", "gu");
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(\\d+),(\\d+)", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(\\d{1,2}):(\\d{2})(?!\\d)", "gu");
     private static readonly JsRe PERCENT = JsRegex.Compile("(\\d+)\\s*%", "gu");

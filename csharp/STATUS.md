@@ -178,6 +178,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   normalizers, swept in #925 (nl first, in #924); a guard test on each side now fails on the shape, verified by
   sabotage. No golden moves — the corpora's NBSPs do not sit in those slots — but constructed input showed real
   repairs: nb read `1<NBSP>000` as *one zero*, zu lost a magnitude, sw read `1000<NBSP>BC` as a cluster.
+- ⚠ **MEASURE A FLEET PROPERTY BEHAVIOURALLY, NOT BY READING SOURCE.** #935 asked how many engines group a
+  numeral only on an ASCII space. A source scan said ~5; running every engine against the four space
+  characters said **57 of 192** — a rule can be narrow in a shape the scan does not model (a unit lookbehind, a
+  tokenizer alternative, a `GROUP_SPACE` constant). After widening them all it is 1, and that one (bo) differs
+  in PAUSES rather than digits. The same instrument then licensed dropping the `&nbsp;`→ASCII fold that had
+  been working around the defect since before the port.
 - ⚠ **A STALE `PAIRED-FIX PENDING` MARKER IS A FORK THAT DOCUMENTS ITSELF AS FIDELITY.** The shared symbol
   tier's C# side kept the doubled class under a marker saying the fix belonged in the TypeScript — where it had
   landed already, in #877. The parity gate cannot see such a fork (no golden groups with a NBSP); a SEPARATOR

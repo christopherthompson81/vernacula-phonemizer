@@ -295,8 +295,8 @@ public static class Normalize
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?\u00bb)\\]]|$))", "giu");
     // The three de-grouping classes carry a NON-BREAKING SPACE (U+00A0) beside the plain one, written as an
     // escape so an editor that folds it cannot narrow the class in silence.
-    private static readonly JsRe GROUP_DOT_SPACE = JsRegex.Compile("(\\d)[.\u00a0 ](\\d{3})(?![\\d]|,\\d)", "gu");
-    private static readonly JsRe GROUP_DOT_THEN_SPACE = JsRegex.Compile("(\\d)\\.[ \u00a0](\\d{3})(?![\\d]|,\\d)", "gu");
+    private static readonly JsRe GROUP_DOT_SPACE = JsRegex.Compile("(\\d)[.\u00a0\u202f\u2009 ](\\d{3})(?![\\d]|,\\d)", "gu");
+    private static readonly JsRe GROUP_DOT_THEN_SPACE = JsRegex.Compile("(\\d)\\.[ \u00a0\u202f\u2009](\\d{3})(?![\\d]|,\\d)", "gu");
     private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(\\d),(\\d{3})(?![\\d]|,\\d)", "gu");
     // ⚠ THE SEPARATOR CLASS HERE USED TO BE TWO PLAIN SPACES — a duplicate matching exactly what one space
     // matches. Swept TS-first across the fleet in #925; a clock written with a NBSP after the colon no
