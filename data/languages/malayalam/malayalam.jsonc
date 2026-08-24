@@ -113,12 +113,7 @@
         },
 
         // The decimal-point word
-        "decimalWord": "ദശാംശം",
+        "decimalWord": "ദശാംശം"
 
-        // Retained for the NumbersDef contract (core/numbers.ts) even though the Dravidian composer
-        // reads the forms above; a bare 100/1000/lakh/crore is the magnitude word alone.
-        "magnitudes": { "hundred": "നൂറ്", "thousand": "ആയിരം", "lakh": "ലക്ഷം", "crore": "കോടി" },
-        "compoundOrder": "tens-unit",
-        "bareMagnitude": true
     }
 }

@@ -9,14 +9,23 @@
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
-import type { DravidianForms, NumbersDef } from "../../core/numbers.ts";
+import type { DravidianForms, DravidianNumbersDef } from "../../core/numbers.ts";
 
 /** A magnitude noun's two forms: bare (nothing follows) and combining (a remainder follows).
  *  Now the shared `DravidianForms` — the composer moved to core/numbers.ts (see numbers.ts). */
 export type MagnitudeForms = DravidianForms;
 
-export interface KannadaNumbers extends NumbersDef {
-    teens: string[];
+/**
+ * ⚠ THIS EXTENDS THE DRAVIDIAN DEF, NOT `NumbersDef`, AND THE DIFFERENCE WAS THREE DEAD KEYS. Kannada
+ * composes through `dravidianNumberWords`, which reads units/teens/tens/compound/hundredForms/
+ * magnitudeForms and nothing else. `NumbersDef` is the shape `indicNumberWords` reads, and extending it
+ * made `magnitudes` a REQUIRED key of a manifest no composer would ever consult — so the file carried a
+ * second, unread set of magnitude words beside the `magnitudeForms` that are actually read, plus the
+ * optional `compoundOrder` and `bareMagnitude`, which `indicNumberWords` alone honours. Sabotaging all
+ * three to nonsense moved 0 of 1,211 readings. A required field of an inherited interface is not
+ * evidence that anything reads it.
+ */
+export interface KannadaNumbers extends DravidianNumbersDef {
     compound: Record<string, string>;
     /** Irregular fused round hundreds, keyed by the count of hundreds (1,2,3,5,9 — see numbers.ts). */
     hundredForms: Record<string, MagnitudeForms>;

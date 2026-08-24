@@ -10,10 +10,15 @@
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
-import type { DravidianNumbersDef, NumbersDef } from "../../core/numbers.ts";
+import type { DravidianNumbersDef } from "../../core/numbers.ts";
 
-export interface MalayalamNumbers extends NumbersDef, DravidianNumbersDef {
-    teens: string[];
+/**
+ * ⚠ THE DRAVIDIAN DEF ALONE. This used to extend `NumbersDef` as well, which made `magnitudes` a
+ * REQUIRED key — a second, unread set of magnitude words beside the `magnitudeForms` the composer
+ * actually reads — and invited the optional `compoundOrder`/`bareMagnitude` that only `indicNumberWords`
+ * honours. Malayalam never calls that composer. Sabotaging all three moved 0 of 1,229 readings.
+ */
+export interface MalayalamNumbers extends DravidianNumbersDef {
     compound: Record<string, string>;
     decimalWord: string;
 }
