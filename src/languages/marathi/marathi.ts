@@ -14,10 +14,24 @@ import { loadSharedPhonology } from "../../core/phonology.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { makeMarathiNormalizer } from "./normalize.ts";
 
+/** Marathi's manifest adds the two word tables Hindi's def does not carry. */
+export interface MarathiDef extends HindiDef {
+    percent: { plural: string; singular: string };
+    currency: Record<string, string>;
+}
+
+// ⚠ ONE LOAD, MODULE-LEVEL. The tier below is built at import time and must read the same object the engine
+// does, or the two go back to disagreeing — which is exactly what happened to £ (see marathi.jsonc).
+export const DEF = loadManifest<MarathiDef>(import.meta.url, "marathi.jsonc");
+
+// The bare-sign map the Hindi engine tokenizes on is DERIVED from `percent`, not authored a second time.
+const WITH_SYMBOLS: MarathiDef = { ...DEF, symbols: { ...(DEF.symbols ?? {}), "%": DEF.percent.plural } };
+
+
 let MR: ReturnType<typeof makeNativeHindi> | undefined;
 function engine(foreign?: ForeignPhonemizer) {
     return makeNativeHindi(
-        loadManifest<HindiDef>(import.meta.url, "marathi.jsonc"),
+        WITH_SYMBOLS,
         loadSharedPhonology(),
         foreign,
     );
@@ -36,8 +50,10 @@ const MR_SYMBOLS = makeSymbolNormalizer({
     // `आणि` ×1073 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
     ampersand: "आणि",
-    percent: ["टक्के"], // Hindi's प्रतिशत is not Marathi
-    currency: { "$": ["डॉलर"], "€": ["युरो"], "£": ["पाउंड"], "₹": ["रुपये"], "¥": ["येन"] },
+    percent: [DEF.percent.plural], // Hindi's प्रतिशत is not Marathi
+    // From the manifest, and shared with normalize.ts — the two paths claim the sign in different positions
+    // and used to answer with different words for £.
+    currency: Object.fromEntries(Object.entries(DEF.currency).map(([k, v]) => [k, [v]])),
     // ⚠ ⟨ha⟩ ⟨l⟩ ⟨L⟩ WERE MIS-READING, NOT LEAKING — `10 ha` read *d̪ˈəɦaː hˈɑː* and `10 l` *d̪ˈəɦaː ˈɛɫ*,
     // the English letter name out of a Devanagari engine, with no ASCII surviving and nothing vanishing.
     // See `tools/normalization/misread.ts`. Each word is definitional on mr.wikipedia:
@@ -62,9 +78,8 @@ const MR_SYMBOLS = makeSymbolNormalizer({
 export function createMarathi(foreign?: ForeignPhonemizer): {
     text(input: string): string;
 } {
-    const def = loadManifest<HindiDef>(import.meta.url, "marathi.jsonc");
-    return makeNativeHindi(def, loadSharedPhonology(), foreign, undefined, undefined, {
-        normalize: makeMarathiNormalizer(def.numbers),
+    return makeNativeHindi(WITH_SYMBOLS, loadSharedPhonology(), foreign, undefined, undefined, {
+        normalize: makeMarathiNormalizer(DEF),
         symbols: MR_SYMBOLS,
     });
 }

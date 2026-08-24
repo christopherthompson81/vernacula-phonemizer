@@ -90,13 +90,6 @@ const UNIT_ALT = Object.keys(UNIT_WORD)
     .map((k) => k.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&"))
     .join("|");
 
-/** Currency sign → the Marathi noun. डॉलर and येन are the fleet spellings; युरो and पौंड are the
- *  Marathi ones (Hindi's tier says यूरो / पाउंड) — both are corpus-attested here as युरोज ×1 and
- *  पौंड ×2 / पाउंड ×3. */
-const CURRENCY: Readonly<Record<string, string>> = {
-    "$": "डॉलर", "€": "युरो", "¥": "येन", "£": "पौंड", "₹": "रुपये",
-};
-
 /** Magnitude words that hop over the currency sign — "$२.३ बिलियन" is said "…बिलियन डॉलर". */
 const MAGNITUDE_ALT = "बिलियन|ट्रिलियन|मिलियन|दशलक्ष|अब्ज|कोटी|लाख|हजार";
 
@@ -111,8 +104,15 @@ const TAH_ADVERB_ALT = [
 /** Build the Marathi normalizer. Takes the numbers definition so the ordinal and clock rules compose
  *  their cardinals from the same data the engine's own number path uses. */
 export function makeMarathiNormalizer(
-    numbers: NumbersDef,
+    def: { numbers: NumbersDef; currency: Record<string, string>; percent: { plural: string; singular: string } },
 ): (text: string) => string {
+    const numbers = def.numbers;
+    /** Currency sign → the Marathi noun, from the manifest and SHARED with marathi.ts's symbol tier. The two
+     *  paths claim the sign in different positions (here before the amount, the tier after it) and used to
+     *  answer with different words for £; marathi.jsonc records the evidence that settled it. ⚠ Scoped to
+     *  the factory, not module-level: two normalizers built from different defs must not share it. */
+    const CURRENCY = def.currency;
+    const PERCENT = def.percent;
     /** Integer → its Marathi cardinal words, exactly as the engine's number path would render them. */
     const cardinal = (n: number): string[] =>
         indicNumberWords(n, numbers).map((w) => w ?? "");
@@ -289,7 +289,7 @@ export function makeMarathiNormalizer(
         //    same document read two different languages depending on which digits it used.) टक्का is
         //    the singular.
         s = s.replace(/(\d+(?:[.,]\d+)*)\s?[%٪％]/gu, (_m, n: string) =>
-            `${n} ${Number(n.replace(/,/g, "")) === 1 ? "टक्का" : "टक्के"}`);
+            `${n} ${Number(n.replace(/,/g, "")) === 1 ? PERCENT.singular : PERCENT.plural}`);
 
         // 10) CURRENCY, likewise before the shared tier (which would give यूरो / पाउंड for € / £). The
         //     sign is always PRE-posed in this corpus and the noun always follows the number, with any

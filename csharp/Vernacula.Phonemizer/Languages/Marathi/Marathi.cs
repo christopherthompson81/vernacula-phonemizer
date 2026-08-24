@@ -8,16 +8,40 @@ using Vernacula.Phonemizer.Languages.Hindi;
 
 namespace Vernacula.Phonemizer.Languages.Marathi;
 
+/** Marathi's manifest adds the two word tables Hindi's def does not carry. */
+public sealed class MarathiDef : HindiDef
+{
+    public PercentDef Percent { get; set; } = new();
+    public Dictionary<string, string> Currency { get; set; } = new();
+
+    public sealed class PercentDef
+    {
+        public string Plural { get; set; } = "";
+        public string Singular { get; set; } = "";
+    }
+}
+
 public static class MarathiPhonemizer
 {
-    public static readonly HindiDef DEF = LoadManifest.Load<HindiDef>("languages/marathi", "marathi.jsonc");
+    // ⚠ ONE LOAD. The tier below is built at type-init and must read the same object the engine does, or the
+    // two go back to disagreeing — which is exactly what happened to £ (see marathi.jsonc).
+    public static readonly MarathiDef DEF = LoadManifest.Load<MarathiDef>("languages/marathi", "marathi.jsonc");
+
+    // The bare-sign map the Hindi engine tokenizes on is DERIVED from `percent`, not authored a second time.
+    private static readonly MarathiDef WITH_SYMBOLS = WithPercentSign(DEF);
+
+    private static MarathiDef WithPercentSign(MarathiDef d)
+    {
+        d.Symbols = new Dictionary<string, string>(d.Symbols ?? new Dictionary<string, string>(), StringComparer.Ordinal)
+        {
+            ["%"] = d.Percent.Plural,
+        };
+        return d;
+    }
 
     private static NativeHindiEngine? MR;
     private static NativeHindiEngine Engine(ForeignPhonemizer? foreign = null) =>
-        Hindi.Hindi.MakeNativeHindi(
-            LoadManifest.Load<HindiDef>("languages/marathi", "marathi.jsonc"),
-            PhonologyLoader.LoadSharedPhonology(),
-            foreign);
+        Hindi.Hindi.MakeNativeHindi(WITH_SYMBOLS, PhonologyLoader.LoadSharedPhonology(), foreign);
 
     /**
      * Marathi shares Hindi's ENGINE but not Hindi's orthographic conventions, so it supplies its OWN symbol
@@ -27,12 +51,10 @@ public static class MarathiPhonemizer
     {
         Multiply = new MultiplyDef { Times = "गुणिले" },
         Ampersand = "आणि",
-        Percent = new[] { "टक्के" }, // Hindi's प्रतिशत is not Marathi
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "डॉलर" }, ["€"] = new[] { "युरो" }, ["£"] = new[] { "पाउंड" },
-            ["₹"] = new[] { "रुपये" }, ["¥"] = new[] { "येन" },
-        },
+        Percent = new[] { DEF.Percent.Plural }, // Hindi's प्रतिशत is not Marathi
+        // From the manifest, and shared with Normalize.cs — the two paths claim the sign in different
+        // positions and used to answer with different words for £.
+        Currency = DEF.Currency.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)new[] { kv.Value }, StringComparer.Ordinal),
         Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
         {
             ["km"] = new[] { "किलोमीटर" }, ["cm"] = new[] { "सेंटीमीटर" }, ["mm"] = new[] { "मिलिमीटर" },
@@ -45,9 +67,8 @@ public static class MarathiPhonemizer
 
     public static NativeHindiEngine CreateMarathi(ForeignPhonemizer? foreign = null)
     {
-        var def = LoadManifest.Load<HindiDef>("languages/marathi", "marathi.jsonc");
-        return Hindi.Hindi.MakeNativeHindi(def, PhonologyLoader.LoadSharedPhonology(), foreign, null, null,
-            normalizeOverride: Normalize.MakeMarathiNormalizer(def.Numbers),
+        return Hindi.Hindi.MakeNativeHindi(WITH_SYMBOLS, PhonologyLoader.LoadSharedPhonology(), foreign, null, null,
+            normalizeOverride: Normalize.MakeMarathiNormalizer(DEF),
             symbolsOverride: MR_SYMBOLS);
     }
 

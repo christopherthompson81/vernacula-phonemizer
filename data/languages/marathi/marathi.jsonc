@@ -238,7 +238,21 @@
         "decimalWord": "दशांश"
     },
 
-    "symbols": { "%": "टक्के" },
+    // PERCENT — the ONE authored copy. It used to be written three times: here, in marathi.ts's tier, and
+    // inline in normalize.ts. `symbols` (the bare-sign map the Hindi engine tokenizes on) is now DERIVED from
+    // `plural` in marathi.ts rather than authored again. टक्के not प्रतिशत: Hindi's word is not Marathi's.
+    "percent": { "plural": "टक्के", "singular": "टक्का" },
+
+    // CURRENCY — likewise one copy, read by both normalize.ts (sign BEFORE the amount) and the symbol tier
+    // (sign AFTER). ⚠ THE TWO PATHS USED TO DISAGREE ABOUT £: normalize.ts said पौंड and the tier said
+    // पाउंड, so `£5` and `5 £` read as different words in the same document.
+    //
+    // ⚠ RESOLVED TO पाउंड, WHICH REVERSES normalize.ts's EARLIER CHOICE. That choice took पाउंड for Hindi's
+    // form and preferred पौंड as the Marathi one, with the mined counts पौंड ×2 / पाउंड ×3 stated. The
+    // deciding evidence is a SECOND, INDEPENDENT corpus: FLEURS mr writes पाउंड in running prose
+    // ("ब्रिटिश पाउंड सहसा बेटांवर…") and पौंड not once. Two independent sources agreeing outweighs the
+    // contamination hypothesis. डॉलर/येन are the fleet spellings; युरो is Marathi's (Hindi says यूरो).
+    "currency": { "$": "डॉलर", "€": "युरो", "¥": "येन", "£": "पाउंड", "₹": "रुपये" },
     "stripSymbols": "₹",
 
     // Clause / phrase punctuation → canonical inline pause marks (Devanagari danda ।/॥ + ASCII).
