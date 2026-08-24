@@ -117,19 +117,6 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   engine's own answer is the n-gram *ˈɛspɚˌoᶷnˌiːkəs*. Whether the gate SHOULD widen is a measurement,
   not a port decision, so both engines keep the current behaviour and this is recorded.
 
-- **`headsCompound` over-suppresses the counter fusion when the counter is followed by KANA, so
-  `1本のペン` reads *it͡ɕi ho̞n* instead of *いっぽん*.** The guard exists to stop a counter kanji being
-  split off the dictionary compound it heads (`3時間` must stay さんじかん, not さんじ + 間), and every
-  example in its own docstring is kanji+kanji. But it tests only "is there a ≥2-char reading entry
-  here", and `本の` IS one — the adverb ほんの ("just a"). After a DIGIT that reading is impossible, so
-  the counter fusion should win. Found while porting ja.
-  Measured: 126 of the reading keys are counter-initial with a kana second character; on the 200-row
-  ja golden the guard fires 10 times and ALL ten are genuine kanji+kanji compounds, so requiring the
-  second character to be a kanji would change 0 golden rows. That narrowing matches the docstring's
-  intent exactly. Not landed here because the other 125 keys are verbs and nouns (分かつ, 人たち) whose
-  behaviour after a digit needs corpus evidence, not a port decision — so both engines keep the
-  current behaviour and this is recorded.
-
 ## ⚠ Things that will bite
 
 - **`\d` is the single worst hazard**: 1,914 uses, JS ASCII-only vs .NET all-Unicode-digits, and the

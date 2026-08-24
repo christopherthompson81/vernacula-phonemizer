@@ -94,6 +94,18 @@ describe("Japanese counters (助数詞)", () => {
         expect(phonemize("3年生", "ja")).toBe("säɴ ne̞nse̞ː"); // さん ねんせい, not さんねん+生
         expect(phonemize("1冊読む", "ja")).toBe("issät͡sɯᵝ jo̞ꜜmɯᵝ"); // いっさつ (euphony kept before a verb kanji)
     });
+    // ⚠ THE COMPOUND GUARD ONLY APPLIES TO A KANJI+KANJI COMPOUND. 126 reading keys start with a counter
+    // kanji and continue in kana — verb conjugations (分かつ, 回す, 着く, 足す) and a few noun phrases
+    // (本の, 日の丸, 人たち). None of those readings can follow a DIGIT, so the euphonic counter reading must
+    // win there; unguarded, `本の` suppressed the fusion and 1本のペン read *it͡ɕi ho̞n* instead of いっぽん.
+    it("a kana-continued entry is not a compound, so the counter still fuses", () => {
+        expect(phonemize("1本のペン", "ja")).toBe("ippo̞nno̞pe̞ɴ"); // いっぽんのペン, not いち ほんの…
+        expect(phonemize("3回した", "ja")).toBe("säŋkäiꜜɕitä"); // さんかい — 回す the VERB cannot follow a digit
+        expect(phonemize("2人たち", "ja")).toBe("ɸɯᵝtäɾität͡ɕi"); // ふたり, not に + 人たち
+        // and the genuine kanji+kanji compounds are untouched
+        expect(phonemize("3時間", "ja")).toBe("säɴ d͡ʑikäɴ");
+        expect(phonemize("3年生", "ja")).toBe("säɴ ne̞nse̞ː");
+    });
 });
 
 describe("Japanese pitch accent", () => {
