@@ -1,9 +1,6 @@
 /**
  * English-native canonical converter: CMUdict ARPABET → canonical IPA (the en divestment convention).
- * Cleanroom GenAm allophony (flapping, aspiration, dark-l, offglides, weak-vowel ᵻ, reduction), before-
- * nucleus stress. This is the single source of truth for the en canonical convention: the compile-time
- * pronunciation-lexicon build (build-en-cmudict.ts) and the runtime OOV G2P (englishG2p.ts) both use it,
- * so dict words and G2P'd words share one convention with no seam.
+ * Ported from src/languages/english/englishArpabet.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using System.Text.Json.Serialization;
@@ -33,9 +30,8 @@ public sealed class ConditionalVowelUw
 public sealed class ConditionalVowels
 {
     // ⚠ EXPLICIT JSON NAMES. The loader applies a camelCase naming policy, which does NOT leave an all-caps
-    // ARPABET key alone — so `AH`/`ER`/`IY`/`UW` silently deserialized to their defaults and every vowel they
-    // own came out as the EMPTY STRING: `virgin` read *vd͡ʒɪn* and `branson` *bɹˈænsn*, the nucleus simply
-    // gone. Nothing threw; the tagger and the mask were byte-identical to Node's.
+    // ARPABET key alone — so `AH`/`ER`/`IY`/`UW` silently deserialize to their defaults and every vowel they
+    // own comes out as the EMPTY STRING, with nothing thrown.
     [JsonPropertyName("AH")] public ConditionalVowelPair AH { get; init; } = new();
     [JsonPropertyName("ER")] public ConditionalVowelPair ER { get; init; } = new();
     [JsonPropertyName("IY")] public ConditionalVowelIy IY { get; init; } = new();
@@ -80,33 +76,33 @@ public static class EnglishArpabet
     {
         var (bas, stress) = P[vi];
         if (stress > 0 || (bas != "IH" && bas != "AH")) return false;
-        // -ed / -ted / -ded after an alveolar stop (started, wanted, united, decided → ᵻd)
         if (ED_ES.IsMatch(word)
             && ni == nucleiCount - 1
             && vi + 1 < P.Count
             && vi > 0
             && (P[vi - 1].Base == "T" || P[vi - 1].Base == "D"))
             return true;
-        // -ity/-ety/-ities/-ility (university, quality, security → ᵻti); the vowel before the final -t- cluster
         if (ITY.IsMatch(word) && vi + 1 < P.Count && P[vi + 1].Base == "T")
             return true;
-        // -ible (possible → ᵻbəl)
         if (IBLE.IsMatch(word) && vi + 1 < P.Count && P[vi + 1].Base == "B")
             return true;
-        // Latinate reduced prefix be/de/re/se/pre + consonant (believe, decide, review, security → ᵻ)
         if (ni == 0 && LATINATE_PREFIX.IsMatch(word)) return true;
         return false;
     }
 
     /** Build the ARPABET→IPA converter from a correspondence def. The allophony (flap/aspirate/dark-l/ŋ/ʲ,
-     *  stress marking, weak-vowel merger) is the shared engine; `def` supplies the variety-specific IPA values. */
+     *  stress marking, weak-vowel merger) is the shared engine; `def` supplies the variety-specific IPA
+     *  values. */
     public static Func<IReadOnlyList<string>, string, string> MakeArpabetToIpa(ArpabetDef def)
     {
         var map = def.Map;
         var cv = def.ConditionalVowels;
         var VOWELS = new HashSet<string>(def.Vowels, StringComparer.Ordinal);
 
-        /** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */
+        /**
+         * Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm
+         * allophony).
+         */
         return (phones, word) =>
         {
             word ??= "";
@@ -125,7 +121,6 @@ public static class EnglishArpabet
                 if (VOWELS.Contains(bas))
                 {
                     var ni = nucleusNum[i];
-                    // Secondary-stress clash: drop a 2° whose syllable is ADJACENT (consecutive nucleus) to the 1°.
                     var mark = stress == 1 ? "ˈ" : stress == 2 ? "ˌ" : "";
                     if (stress == 2 && primaryNi >= 0 && Math.Abs(ni - primaryNi) == 1) mark = "";
                     outSb.Append(mark);
@@ -136,7 +131,6 @@ public static class EnglishArpabet
                     else if (bas == "IY") outSb.Append(nextIsR ? cv.IY.BeforeR : stress <= 0 ? cv.IY.Unstressed : cv.IY.Stressed);
                     else if (bas == "UW") outSb.Append(nextIsR ? cv.UW.BeforeR : cv.UW.Default);
                     else outSb.Append(map.TryGetValue(bas, out var mv) ? mv : bas);
-                    // ʲ-glide hiatus: a high front nucleus (i/iː) directly before another vowel inserts ʲ.
                     if (bas == "IY" && nextIsV) outSb.Append('ʲ');
                     continue;
                 }
@@ -145,7 +139,6 @@ public static class EnglishArpabet
                     outSb.Append('ŋ');
                     continue;
                 }
-                // FLAP (mined t:V_V0=ɾ79 / d:V_V0=ɾ64): t/d intervocalic before a NON-primary vowel → voiced flap.
                 if ((bas == "T" || bas == "D") && i > 0 && i + 1 < P.Count)
                 {
                     var prev = P[i - 1];
@@ -156,7 +149,6 @@ public static class EnglishArpabet
                         continue;
                     }
                 }
-                // ASPIRATE (mined #_V1=ʰ~75, NOT after /s/): p/t/k at a syllable onset before a STRESSED vowel.
                 if (bas == "P" || bas == "T" || bas == "K")
                 {
                     var prevBase = i > 0 ? P[i - 1].Base : "#";
@@ -168,7 +160,6 @@ public static class EnglishArpabet
                         continue;
                     }
                 }
-                // DARK-L (mined coda l→ɫ): l is velarized in the coda (before a consonant or word-finally).
                 if (bas == "L" && !(i + 1 < P.Count && VOWELS.Contains(P[i + 1].Base)))
                 {
                     outSb.Append('ɫ');

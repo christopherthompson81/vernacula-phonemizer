@@ -1,16 +1,6 @@
 /**
  * GENERIC abugida grapheme-to-phoneme engine.
- *
- * All language-specifics live in a plain, self-describing JSONC definition (see
- * `data/native/<lang>.jsonc`); this file is a thin, DECLARATIVE-DRIVEN interpreter of it. That's
- * deliberate for portability: to reimplement in C# (or any environment) you port this ~80-line
- * algorithm and load the SAME data file — no per-language logic to re-translate.
- *
- * Covers the systematic core of a Brahmic abugida: consonant + inherent vowel, dependent vowel
- * signs (matras), virama (vowel suppression / clusters), independent vowels, nukta composition, and
- * the combining signs (anusvara → nasalized vowel + homorganic nasal; chandrabindu → nasalization;
- * visarga → [h]). Schwa deletion (the one non-trivial rule) is applied separately via the shared
- * `deleteMedialSchwa`, parameterised by the definition. Stress and numbers are layered on top.
+ * Ported from src/core/abugida.ts — see that file for the corpus evidence.
  */
 using System.Text;
 
@@ -26,7 +16,7 @@ public sealed class AbugidaSign
     public string Char { get; set; } = "";
 
     /** `effect: "nasalizeVowelHomorganic"` opts this sign into the anusvara's homorganic-nasal
-     *  restoration (Gurmukhi bindi, referee-derived 26:5); absent/other → pure nasalization (Devanagari). */
+     *  restoration (Gurmukhi bindi); absent or other → pure nasalization (Devanagari). */
     public string? Effect { get; set; }
 }
 
@@ -39,8 +29,8 @@ public sealed class AbugidaSigns
     public AbugidaSign Nukta { get; set; } = new();
 }
 
-// NOT sealed: language defs (Odia, Assamese, …) extend it with their numbers/punctuation blocks, exactly
-// as the TS interfaces do (`interface OdiaDef extends AbugidaDef`).
+// ⚠ NOT SEALED: language defs (Odia, Assamese, …) extend it with their own numbers/punctuation blocks,
+// exactly as the TS interfaces do (`interface OdiaDef extends AbugidaDef`).
 public class AbugidaDef
 {
     public string Language { get; set; } = "";
@@ -54,7 +44,6 @@ public class AbugidaDef
 
 public static class Abugida
 {
-    // Verbatim TS patterns (abugida.ts `out.replace(/ː$/, "")` and `/̃/.test(...)`).
     private static readonly JsRe LongMarkAtEnd = JsRegex.Compile("ː$");
     private static readonly JsRe NasalTilde = JsRegex.Compile("̃");
 
@@ -64,8 +53,8 @@ public static class Abugida
         var C = def.Consonants;
         var IV = def.IndependentVowels;
         var VS = def.VowelSigns;
-        // Longest-prefix place lookup: sort keys so t͡ʃ / t̪ win over any shorter prefix. `""` (no match) →
-        // homorganicNasal[""] is undefined, so no nasal is inserted.
+        // Longest-prefix place lookup: sort keys so t͡ʃ / t̪ win over any shorter prefix. A miss yields "",
+        // whose homorganic-nasal entry is absent, so no nasal is inserted.
         var placeKeys = phon.PlaceOfArticulation.Keys.ToList();
         // JS `sort((a, b) => b.length - a.length)` — a STABLE length-descending sort (V8 sort is stable).
         placeKeys = placeKeys.OrderByDescending(k => k.Length).ToList(); // OrderByDescending is stable too.
@@ -94,11 +83,6 @@ public static class Abugida
                 if (nasalShort) outp = LongMarkAtEnd.Replace(outp, "");
                 if (!NasalTilde.IsMatch(outp[Math.Max(0, outp.Length - 2)..])) outp += "̃";
             }
-            // ⚠ PER-LANGUAGE: does the chandrabindu-slot sign ALSO restore the homorganic nasal before a stop?
-            // Devanagari's ँ is PURE vowel nasalization and must stay so (Hindi default). Gurmukhi's BINDI ਂ is
-            // not: the pa referee writes the consonant in 26 of 31 bindi-before-stop words (ਆਂਡਾ aːɳɖaː,
-            // ਗੋਂਗਲੂ ɡoːŋɡluː, ਆਂਦਰ aːnd̪ər) — population-derived, and the class was invisible to the folded
-            // metric only because the fold strips the nasality diacritic the engine was emitting instead.
             var chHomorganic = def.Signs.Chandrabindu?.Effect == "nasalizeVowelHomorganic";
             void SignsRun()
             {
@@ -110,7 +94,6 @@ public static class Abugida
                         Nasalize();
                         if (s[i] == AN || (s[i] == CH && chHomorganic))
                         {
-                            // anusvara also emits the homorganic nasal before a stop
                             var nx = i + 1 < s.Count ? s[i + 1] : null;
                             var nc = nx is not null
                                 ? (C.TryGetValue(nx, out var cPh)

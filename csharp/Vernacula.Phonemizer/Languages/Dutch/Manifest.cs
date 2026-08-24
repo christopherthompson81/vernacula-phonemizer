@@ -1,7 +1,6 @@
 /**
- * Loads the Dutch data manifest (dutch.jsonc) once at module init and exposes it typed. The hand-authored DATA
- * tables (vowel length maps, final-devoicing pairs, clause punctuation, number words) live in the JSONC; the
- * ALGORITHMS that consume them stay in the sibling modules (g2p.ts, dutch.ts, numbers.ts).
+ * Loads the Dutch data manifest (dutch.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/dutch/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

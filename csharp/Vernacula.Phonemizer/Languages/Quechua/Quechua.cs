@@ -1,12 +1,7 @@
 /**
  * Quechua (qu) phonemizer — Southern Quechua / Runasimi (Qhichwa; Cusco-Collao + Ayacucho), Latin script,
- * canonical IPA. Near-phonemic: a 3-vowel system ⟨a i u⟩ and a THREE-WAY stop series written overtly —
- * plain ⟨p t k q ch⟩, aspirated with ⟨h⟩ (⟨ph th kh qh chh⟩), ejective with an apostrophe (⟨p' t' k' q'
- * ch'⟩); uvular ⟨q⟩→[q]. A longest-match scan (tri/digraphs before single graphemes) suffices, then
- * regular PENULTIMATE stress on the onset of the penult syllable.
- *
- * ⚠ THE APOSTROPHE IS A LETTER HERE, not punctuation — it marks ejection, and the three shapes (ʼ ’ ')
- * are normalised to U+0027 before the scan so all of them reach the same rule.
+ * canonical IPA.
+ * Ported from src/languages/quechua/quechua.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -31,7 +26,6 @@ public sealed class QuechuaPhonemizer : ILanguage
     /** Phonemize one Quechua word → canonical IPA: longest-match scan + penultimate stress. */
     public static string PhonemizeWord(string word)
     {
-        // Normalise the three apostrophe glyphs (modifier ʼ / curly ’ / ASCII ') so the ejective digraphs match.
         var w = APOSTROPHE.Replace(word.Normalize(NormalizationForm.FormC).ToLowerInvariant(), "'");
         var segs = new List<string>();
         var i = 0;
@@ -51,15 +45,11 @@ public sealed class QuechuaPhonemizer : ILanguage
                 }
             }
             if (matched) continue;
-            // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
-            // Consulted AFTER every digraph and single-letter rule, so it cannot override this language.
             var ch = w[i].ToString();
             var ph = G.TryGetValue(ch, out var g) ? g : LatinPhones.LatinPhone(ch, new PhoneOpts { Initial = i == 0 });
             if (ph is not null) segs.Add(ph);
             i += 1;
         }
-        // Regular penultimate stress: ˈ before the onset of the penultimate syllable (the second-to-last vowel, or the
-        // sole vowel of a monosyllable). Quechua onsets are a single consonant, so back up at most one segment.
         var vidx = new List<int>();
         for (var idx = 0; idx < segs.Count; idx++) if (VOWEL.Contains(segs[idx])) vidx.Add(idx);
         if (vidx.Count > 0)
@@ -71,23 +61,15 @@ public sealed class QuechuaPhonemizer : ILanguage
         return string.Concat(segs).Normalize(NormalizationForm.FormC);
     }
 
-    // A word (Quechua Latin letters incl. ñ + the apostrophe glyphs for ejectives) / number / punctuation.
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"({HostWord.HostWordRun(new[] { "Latin" }, "'’ʼ‘-")})|(\\d+)|([.!?…,;:])", "gu");
 
-    /**
-     * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
-     * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
-     * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
-     * core/hostWord.ts.
-     */
+    /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zñşA-ZÑŞ'’ʼ‘-]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "u");
 
     public string Text(string input)
     {
-        // The pre-tokenizer normalization pass — see normalize.ts. Pure text→text, so everything it emits
-        // still reaches the g2p through the TOKEN below (playbook trap 6).
         return Clauses.AssembleClauses(Normalize.NormalizeQuechua(input), TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(Nat(m.Groups[1].Value)));
@@ -101,7 +83,7 @@ public sealed class QuechuaPhonemizer : ILanguage
         });
     }
 
-    /** Build the Quechua phonemizer (direct 3-vowel phonemic g2p + the aspirate/ejective series + penultimate stress). */
+    /** Build the Quechua phonemizer: 3-vowel phonemic g2p, aspirate/ejective series, penultimate stress. */
     public static ILanguage CreateQuechua() => new QuechuaPhonemizer();
 
     // The TS registry imports `createQuechua` statically; the C# port has no such import, so the module

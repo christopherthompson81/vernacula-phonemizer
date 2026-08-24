@@ -11,12 +11,13 @@ namespace Vernacula.Phonemizer;
 public static class Phonemizer
 {
     /**
-     * Does `text` mix a Latin run into a non-Latin script? Then the host's tokenizer will not claim the Latin and it
-     * becomes a FOREIGN RUN, delegated to English (core/foreign.ts) — so its OOV words are worth prewarming.
+     * Does `text` mix a Latin run into a non-Latin script? Then the host's tokenizer will not claim the Latin
+     * and it becomes a FOREIGN RUN, delegated to English (core/foreign.ts) — so its OOV words are worth
+     * prewarming.
      *
-     * The gate is on the TEXT, not a table of host scripts, because that is what the delegation actually keys on, and
-     * because it keeps the prewarm off the languages that would waste it: a Latin-script host (en, vi, tr, …) reads
-     * its own words, so an all-Latin text needs nothing tagged for the foreign path.
+     * The gate is on the TEXT, not a table of host scripts, because that is what the delegation actually keys
+     * on, and because it keeps the prewarm off the languages that would waste it: a Latin-script host
+     * (en, vi, tr, …) reads its own words, so an all-Latin text needs nothing tagged for the foreign path.
      */
     private static readonly JsRe LatinAny = JsRegex.Compile(@"\p{Script=Latin}", "u");
 
@@ -42,26 +43,26 @@ public static class Phonemizer
     public static Func<string, Task>? PrewarmForeignEnglish { get; set; }
 
     /** Phonemize `text` in language `lang` to canonical IPA (SYNCHRONOUS). Throws for an unregistered language.
-     *  This is the simple path: a complete rule/lexicon engine for every language. Two caveats it does NOT cover —
-     *  the unpointed ABJADS (Arabic `ar`+dialects, Hebrew `he`) expect VOCALIZED input here (bare text → the consonant
-     *  skeleton), and the languages with a neural OOV/restoration upgrade (en, bn, da, nb, fr, fa, ur, ps, pnb) use
-     *  their SYNC fallback. `phonemizeAsync` covers both — prefer it for real-world text. */
+     *  This is the simple path: a complete rule/lexicon engine for every language. Two caveats it does NOT
+     *  cover — the unpointed ABJADS (Arabic `ar`+dialects, Hebrew `he`) expect VOCALIZED input here (bare text
+     *  → the consonant skeleton), and the languages with a neural OOV/restoration upgrade
+     *  (en, bn, da, nb, fr, fa, ur, ps, pnb) use their SYNC fallback. `phonemizeAsync` covers both — prefer it
+     *  for real-world text. */
     public static string Phonemize(string text, string lang) =>
         Registry.GetPhonemizer(lang).Text(text);
 
-    /** Phonemize real-world text to canonical IPA — the UNIFIED best-output entry. Identical to `phonemize` for the
-     *  bulk, but routes each language to its best available path (neuralRegistry.ts): the unpointed ABJADS restore
-     *  their unwritten vowels from BARE input (Arabic `ar`+dialects via the neural diacritizer), and the
-     *  neural-upgrade languages (en's BiLSTM OOV, bn/da/nb/fr taggers, he NAKDAN, fa + the ur/ps/pnb Perso-Arabic
-     *  riders) use their ONNX model. Every other language resolves synchronously. When a model / `onnxruntime-node`
-     *  is absent each path degrades to the sync engine, so this is always safe to call. Use this for undiacritized /
-     *  novel-word text.
+    /** Phonemize real-world text to canonical IPA — the UNIFIED best-output entry. Identical to `phonemize` for
+     *  the bulk, but routes each language to its best available path (neuralRegistry.ts): the unpointed ABJADS
+     *  restore their unwritten vowels from BARE input (Arabic `ar`+dialects via the neural diacritizer), and
+     *  the neural-upgrade languages (en's BiLSTM OOV, bn/da/nb/fr taggers, he NAKDAN, fa + the ur/ps/pnb
+     *  Perso-Arabic riders) use their ONNX model. Every other language resolves synchronously. When a model /
+     *  `onnxruntime-node` is absent each path degrades to the sync engine, so this is always safe to call. Use
+     *  this for undiacritized / novel-word text.
      *
-     *  ⚠ THE TWO ENTRIES SHARE THE REGISTRY'S PRE-PASSES. Markup stripping, the native/fullwidth digit folds, the
-     *  vulgar-fraction fold, the Roman-numeral pass and the foreign-run host apply here exactly as they do to
-     *  `phonemize` — they used not to, because the async registry's entries build their engine directly and so
-     *  never reached the wrapper `getPhonemizer` installs. `getNeuralPhonemizer` applies them now; see the note
-     *  there, and `test/phonemizeAsync.test.ts` for the invariant that keeps the two in step. */
+     *  ⚠ THE TWO ENTRIES SHARE THE REGISTRY'S PRE-PASSES. Markup stripping, the native/fullwidth digit folds,
+     *  the vulgar-fraction fold, the Roman-numeral pass and the foreign-run host apply here exactly as they do
+     *  to `phonemize`, because `GetNeuralPhonemizer` applies them — the async entries build their engine
+     *  directly and so never reach the wrapper `GetPhonemizer` installs. */
     public static async Task<string> PhonemizeAsync(string text, string lang)
     {
         // FOREIGN RUNS FIRST. An embedded Latin run is read by a synchronous reader (core/foreign.ts), so its OOV

@@ -1,7 +1,6 @@
 /**
- * Korean number → words. Korean has TWO systems: Sino-Korean (일 이 삼 …, used for dates/money/counting above
- * ~100) and native (하나 둘 셋 …, for small counts). This uses the Sino-Korean system (the default for digits),
- * scaling by 만 (10^4) / 억 (10^8) like other CJK. Digits are read as Hangul then phonemized.
+ * Korean number → words: the Sino-Korean system (the default for digits), scaling by 만 (10⁴) / 억 (10⁸).
+ * Ported from src/languages/korean/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -9,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.Korean;
 
 public static class KoreanNumbers
 {
-    // Number words are authored DATA — consolidated in korean.jsonc; the myriad-group compositor below is the algorithm.
     private static KoreanNumbersDef N => Manifest.MANIFEST.Numbers;
     private static string[] ONES => N.Ones;
     private static string[] UNITS => N.MyriadUnits;
@@ -26,15 +24,8 @@ public static class KoreanNumbers
     }
 
     /**
-     * The digit-at-a-time reading — the fallback for a digit run `numberToWords` must refuse.
-     *
-     * ⚠ `numberToWords` RETURNS `""` FOR AN UNSAFE INTEGER AND THAT CONTRACT IS DELIBERATELY UNTOUCHED: three
-     * callers in normalize.ts test it (`numberToWords(…) || t`, `w === "" ? m : w`) to mean "out of range, leave
-     * the digits for the number path". The bug was that the number path then dropped them too. So the fallback
-     * is a SEPARATE function, used at that path's end, and the emptiness contract still holds for normalize.ts.
-     *
-     * Sino-Korean digit names are what rule 6 already spells a decimal tail with (7.75 → 칠점칠오), so this
-     * needs no word the engine has not measured.
+     * The digit-at-a-time reading — the fallback for a digit run `NumberToWords` must refuse. Kept a SEPARATE
+     * function because callers test `NumberToWords(…) == ""` to mean "out of range, leave the digits".
      */
     public static string SpellDigits(string digits) =>
         string.Concat(Js.CodePoints(digits).Select(c =>
@@ -43,7 +34,10 @@ public static class KoreanNumbers
             return i >= 0 && i < ONES.Length ? ONES[i] : "";
         }));
 
-    /** Non-negative integer → Sino-Korean Hangul. `""` when out of range — see `spellDigits`, and its callers. */
+    /**
+     * Non-negative integer → Sino-Korean Hangul. Returns "" past the JS safe-integer limit (2^53-1), where a
+     * double has already lost the low digits — the callers read that "" as "spell the digits instead".
+     */
     public static string NumberToWords(double n)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0) return "";
@@ -59,9 +53,9 @@ public static class KoreanNumbers
         for (var g = groups.Count - 1; g >= 0; g--)
         {
             if (groups[g] == 0) continue;
-            // ⚠ `UNITS[g] ?? ""` in the TS — an out-of-range myriad index yields undefined and the `??` makes
-            // it empty, so a number past the authored ladder simply loses its magnitude word rather than
-            // fabricating one. C# would throw on the index; the bound is explicit and gives the same "".
+            // The TS writes `UNITS[g] ?? ""`: an out-of-range myriad index yields undefined there, so the
+            // number loses its magnitude word rather than fabricating one. C# would throw on that index, so
+            // the bound is explicit here and gives the same "".
             outp += Below10000(groups[g]) + (g < UNITS.Length ? UNITS[g] : "");
         }
         return outp;

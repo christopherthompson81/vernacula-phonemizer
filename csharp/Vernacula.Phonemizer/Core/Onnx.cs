@@ -1,23 +1,20 @@
 /**
- * Shared onnxruntime-node plumbing for every neural path (fa tagger/seq2seq/context restorers, the rider + Arabic
- * diacritizers, the Bengali OOV tagger). `onnxruntime-node` is an OPTIONAL dependency: it is imported lazily here
- * exactly once per process, and consumers wrap `loadOrt()` in their own try/catch to fall back to the sync path
- * (or, for bare Arabic, to surface the install hint). ⚠ ONE SOURCE FOR THE Ort* INTERFACES AND THE LOADER: hand-
- * copied per consumer they drift, and they had — different `OrtTensor.data` unions, `create(path)` vs
- * `create(bytes, options)`.
+ * Shared ONNX plumbing for every neural path (the taggers, the seq2seq and context restorers, the rider and
+ * Arabic diacritizers). ONE source for the Ort* interfaces and the loader.
+ * Ported from src/core/onnx.ts — see that file for the rationale.
  *
- * C# PORT NOTE: Microsoft.ML.OnnxRuntime is a HARD reference here (the vernacula stack's runtime), so the
- * "optional dependency" machinery reduces to: LoadOrt memoizes ONE OrtLike per process (the TS caches the
- * dynamic-import promise the same way), and a native-library initialization failure clears the memo and throws
- * a context-named error, which consumers catch to fall back — identical control flow to the TS.
+ * C# PORT NOTE: Microsoft.ML.OnnxRuntime is a HARD reference here (it is already the vernacula stack's
+ * runtime), so the TS "optional dependency" machinery reduces to: LoadOrt memoizes ONE IOrtLike per process,
+ * and a native-library initialization failure clears the memo and throws a context-named error, which
+ * consumers catch to fall back to the sync path — the same control flow the lazy dynamic import gives the TS.
  */
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 
 namespace Vernacula.Phonemizer.Core;
 
-/** An ORT output/input tensor. `data` is the widest union any consumer needs (int64 ids, float32 logits/states,
- *  uint8 bool masks) — long[] / float[] / byte[] here. */
+/** An ORT input/output tensor. The TS `data` union (int64 ids, float32 logits/states, uint8 bool masks) is
+ *  carried as a bare `Array`, narrowed by the AsX accessors — hence `Type`, which the union implied. */
 public sealed class OrtTensor
 {
     public OrtTensor(string type, Array data, int[] dims)
@@ -27,7 +24,7 @@ public sealed class OrtTensor
         Dims = dims;
     }
 
-    /** "int64" | "float32" | "uint8" | "bool" — the TS `new ort.Tensor(type, …)` strings. */
+    /** "int64" | "float32" | "uint8" | "bool" — the TS `new ort.Tensor(type, …)` strings, verbatim. */
     public string Type { get; }
     public Array Data { get; }
     public int[] Dims { get; }
@@ -44,8 +41,8 @@ public interface IOrtSession
 
 public interface IOrtLike
 {
-    /** `create` accepts either a path or the model bytes, with an optional execution-provider list (CPU default;
-     *  the taggers opt into CUDA via an env var for fast eval). */
+    /** Either the model bytes or a path, with an optional execution-provider list (CPU default; the taggers
+     *  opt into CUDA via an env var). Two overloads stand in for the TS union parameter. */
     Task<IOrtSession> CreateInferenceSession(byte[] model, IReadOnlyList<string>? executionProviders = null);
 
     Task<IOrtSession> CreateInferenceSession(string modelPath, IReadOnlyList<string>? executionProviders = null);
@@ -59,9 +56,9 @@ public static class Onnx
     private static readonly object Gate = new();
 
     /**
-     * Lazily import onnxruntime-node once per process. `context` names the caller for the missing-dependency error (e.g.
-     * "Arabic diacritization"). On import failure the memo is cleared so a later call can retry, and the rejection is
-     * NOT cached — so each caller sees its own context. Callers that treat the model as optional catch and fall back.
+     * Get the runtime, once per process. `context` names the caller in the error (e.g. "Arabic diacritization").
+     * ⚠ THE FAILURE IS NOT MEMOIZED — the memo is cleared before throwing, so a later call retries and each
+     * caller sees its own context, matching the TS, which caches the import promise only on success.
      */
     public static Task<IOrtLike> LoadOrt(string context = "Neural inference")
     {

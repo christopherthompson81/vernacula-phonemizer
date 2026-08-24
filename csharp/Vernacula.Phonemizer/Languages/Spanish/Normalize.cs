@@ -1,28 +1,7 @@
 /**
  * Spanish (es / es-419) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
- * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
- *
- * Third language to get this treatment, after English and French, and it reuses the shared tiers:
- * `core/normalizeSymbols.ts` for %, currency and units, `core/initialisms.ts` for acronyms, and the
- * registry's `core/roman.ts` pass for Roman numerals. What is left here is what is genuinely
- * Spanish-specific: its abbreviations, its ordinal indicators, and the shape of its dates and times.
- *
- * ORDERING — the couplings, measured against the es_419 FLEURS corpus (2,796 utterances):
- *   · `EE. UU.` is claimed BEFORE the generic dotted-abbreviation rule, or it splits into two abbreviations
- *     and reads as "ee . uu ." with two spurious pauses. At 31 occurrences it is by far the most frequent
- *     abbreviation in the corpus, and it expands to words (Estados Unidos), not to letters.
- *   · Era markers (`a. C.`, ×11, usually written WITH a space) run before the generic rule too, or the
- *     bare `a.` is claimed first.
- *   · Times run before units, so a unit rule cannot eat an hour.
- *   · Digit degrouping runs first so every later step sees one unbroken digit run.
- * Roman numerals need no ordering care here, unlike in English and French: `es` is not in the registry's
- * ROMAN_NATIVE set, so the shared pass converts them at the registry seam BEFORE this engine's text() is
- * called. By the time the initialism rule runs, `siglo XVIII` is already digits.
- *
- * NOT a problem in Spanish, in contrast to the other two: a bare 4-digit year is read as a plain cardinal
- * (1988 = mil novecientos ochenta y ocho), so there is no pair-wise year rule; the thousands-dot and
- * decimal-comma conventions were already handled by the number tokenizer; and % and currency already
- * worked through the shared symbol tier.
+ * already a pronounceable word into words the existing pipeline speaks.
+ * Ported from src/languages/spanish/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -30,11 +9,7 @@ namespace Vernacula.Phonemizer.Languages.Spanish;
 
 public sealed class SpanishNormalizeOptions
 {
-    /**
-     * Latin-American usage. The one normalization difference between the varieties: the FIRST of the month
-     * is an ordinal in America (*el primero de enero*) and a cardinal in Spain (*el uno de enero*). RAE,
-     * DPD s.v. «fecha». Every other day is a cardinal in both.
-     */
+    /** Latin-American usage. */
     public bool Americas { get; init; }
 }
 
@@ -45,10 +20,7 @@ public static class Normalize
 
     private const string MONTHS = "enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre";
 
-    /**
-     * Dotted abbreviations → the spoken words. `no.` is deliberately absent from this table and handled
-     * separately, because bare "no" is one of the commonest words in Spanish.
-     */
+    /** Dotted abbreviations → the spoken words. */
     private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["sr"] = "señor", ["sra"] = "señora", ["srta"] = "señorita", ["sres"] = "señores",
@@ -64,7 +36,7 @@ public static class Normalize
     /** Longest first, so `págs` is not matched as `pág` plus a stray s. */
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
-    /** Spanish letter names, each verified through this engine. `w` and `x`/`y` are the pan-American names. */
+    /** Spanish letter names, each verified through this engine. `w`/`x`/`y` are the pan-American names. */
     private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["a"] = "a", ["b"] = "be", ["c"] = "ce", ["d"] = "de", ["e"] = "e", ["f"] = "efe", ["g"] = "ge",
@@ -103,7 +75,7 @@ public static class Normalize
     });
 
     /** Spanish has no pronunciation dictionary — the g2p is fully rule-based — so nothing is "recorded" in
-     *  the sense core/initialisms.ts means. Acronyms are decided by the lexical list plus the OOV rule alone. */
+     *  the sense core/initialisms.ts means. Acronyms rest on the lexical list plus the OOV rule alone. */
     public static string NormalizeSpanishInitialisms(string text) => InitialismNormalizer(text);
 
     private static readonly JsRe FINAL_O = JsRegex.Compile("o$", "u");
@@ -136,7 +108,6 @@ public static class Normalize
         var bas = DENOMINATOR.TryGetValue((int)den, out var d) ? d
             : double.IsInteger(den) && den >= 1 && den <= 1000 ? RomanOrdinals.SpanishOrdinal((int)den) : null;
         if (bas is null) return null;
-        // The numerator apocopates before the fraction noun: "un quinto", not "uno quinto".
         return $"{(num == 1 ? "un" : Numbers.NumberToWords(num))} {(num > 1 ? $"{bas}s" : bas)}";
     }
 
@@ -174,41 +145,27 @@ public static class Normalize
         var americas = options?.Americas ?? false;
         var s = input;
 
-        // 0) DIGIT GROUPING with a space. Spanish groups thousands with a period (17.000), which the number
-        //    tokenizer already reads, but the SI space form also occurs and the number token cannot span a
-        //    space, so "5 000 años" read as "cinco cero años".
         s = SPACE_GROUP_RE.Replace(s, "$1$2");
         s = SPACE_GROUP_RE.Replace(s, "$1$2");
         s = SPACES.Replace(s, " ");
 
-        // 0b) ⚠ THE DOT ALSO DECIMATES, AND THE THREE-DIGIT TEST TELLS THE TWO APART: `2.3 millones` read as
-        //     *veintitrés millones* — a silent 10× error. Measured over es_419: dot+3 digits ×5 (all
-        //     grouping), dot+1–2 ×15 (all decimal). ⚠ SO THE COMMA IS LEFT ALONE — neither corpus writes a
-        //     comma-grouped figure. ⚠ AND A FOLLOWING LETTER BLOCKS IT (`802.11n`, `2.4Ghz`); a preceding
-        //     colon blocks the sports times.
         s = DOT_DECIMAL.Replace(s, "$1,$2");
 
-        // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first.
+        // ⚠ ERA MARKERS before the generic abbreviation rule, or the bare `a.` is claimed first; then
+        //   `EE. UU.`, before the generic rule too, or it splits into two abbreviations and two pauses.
         s = ERA_BC.Replace(s, "antes de Cristo");
         s = ERA_AD.Replace(s, "después de Cristo");
 
-        // 2) EE. UU. — the most frequent abbreviation in the corpus, and it expands to WORDS.
         s = EEUU_UPPER.Replace(s, "Estados Unidos");
         s = EEUU_LOWER.Replace(s, "Estados Unidos");
 
-        // 2b) a. m. / p. m. — read as the LETTER NAMES in Spanish ([a ˈeme], [pe ˈeme]).
         s = AM_PM.Replace(s, m => m.Groups[1].Value.ToLowerInvariant() == "a" ? "a eme" : "pe eme");
 
-        // 3) NÚMERO. `no.` only counts before a digit — bare "no" is one of the commonest Spanish words.
-        //    `n.º` — n + period + the ORDINAL INDICATOR — is the form that actually occurs.
         s = NUMERO_SIGN.Replace(s, "número ");
 
-        // 4) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues; at a phrase end it stays.
         s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
         s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
 
-        // 5) ORDINAL INDICATORS. `1º`/`1ª`/`1er`/`1.º` were reaching the phoneme string RAW. ° (U+00B0) is
-        //    deliberately NOT an ordinal indicator: "20 °C" and "35°" are temperatures. Only º and ª.
         s = ORDINAL_IND.Replace(s, m =>
         {
             var n = Js.Number(DIGITS_IN.Match(m.Value).Value);
@@ -219,30 +176,21 @@ public static class Normalize
             return masc;
         });
 
-        // 6) SIGNS. A dropped sign is silent content loss, and for a temperature it inverts the meaning.
-        // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it.
         s = PLUS_MINUS.Replace(s, " más menos ");
         s = PLUS_ATTACHED.Replace(s, "$1 más $2");
         s = PLUS_LEADING.Replace(s, "$1más $2");
         s = MINUS.Replace(s, "$1menos $2");
 
-        // 6b) RELATIONAL AND DIVISION SIGNS. ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The División
-        //     article reads the operation aloud in exactly this slot: "veinte dividido por cinco es igual a
-        //     cuatro" — sourcing the division word AND the equals word in one sentence. The copula is dropped
-        //     (`igual a`, not `es igual a`).
         s = EQUALS.Replace(s, " igual a ");
         s = LESS_THAN.Replace(s, " menor que ");
         s = GREATER_THAN.Replace(s, " mayor que ");
         s = DIVIDE.Replace(s, " dividido por ");
 
-        // 7) FRACTIONS, guarded against a date and a unit ratio by requiring digits both sides.
         s = FRACTION.Replace(s, m =>
             FractionWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);
 
-        // 8) TIMES. The colon was becoming a PHRASE BREAK. `hora` is feminine, so 1 takes *una*.
         s = CLOCK.Replace(s, m => TimeWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
 
-        // 9) DATES. The day is a cardinal, except the first of the month in American usage.
         s = FIRST_OF_MONTH.Replace(s, m =>
             americas ? $"primero de {m.Groups[1].Value}" : ONE_INDICATOR.Replace(m.Value, "uno"));
 

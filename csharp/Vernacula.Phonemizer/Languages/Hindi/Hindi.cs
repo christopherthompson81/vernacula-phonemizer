@@ -1,11 +1,6 @@
 /**
- * Native Hindi text phonemizer — canonical IPA. Assembles the generic abugida modules
- * (G2P + weight-stress + number compositor) with Hindi's self-describing JSONC definition (hindi.jsonc,
- * beside this file).
- *
- * text() handles: Devanagari word runs, number runs (integer + Indian grouping + decimal), clause-
- * terminating punctuation → canonical inline pause marks, symbols (% → प्रतिशत, ₹ stripped), and embedded
- * Latin runs → an injected foreign (en) phonemizer.
+ * Native Hindi text phonemizer — canonical IPA.
+ * Ported from src/languages/hindi/hindi.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -48,11 +43,8 @@ public sealed class AbugidaScript
 {
     public required string Word { get; init; }
     public required IReadOnlyDictionary<string, string> Digits { get; init; }
-    /**
-     * The script's AVAGRAHA sign, for `schwaDeletion.retainOnAvagraha`. ⚠ IT IS PER-SCRIPT, not a constant:
-     * the Brahmic blocks are aligned so it sits at offset 0x3D in each — Devanagari ऽ U+093D, Bengali ঽ
-     * U+09BD, Gujarati ઽ U+0ABD.
-     */
+    /** The script's AVAGRAHA sign, for `schwaDeletion.retainOnAvagraha`. ⚠ PER-SCRIPT, not a constant: the
+     *  Brahmic blocks are aligned so it sits at offset 0x3D in each — Devanagari ऽ U+093D, Bengali ঽ U+09BD. */
     public string? Avagraha { get; init; }
 }
 
@@ -82,15 +74,14 @@ public static class Hindi
     private static readonly JsRe SCHWA_FINAL = JsRegex.Compile("ə$");
 
     /** Does the coda (a word body with the final schwa already removed) end in a consonant CLUSTER or
-     *  GEMINATE? Used by `retainFinalAfterCluster` (Marathi): the word-final inherent schwa is deleted after
-     *  a single consonant (घर→ɡʱəɾ) but RETAINED to avoid a word-final cluster (अंक→əŋkə). Affricates are ONE
-     *  consonant; a length mark ː is a geminate = heavy. */
+     *  GEMINATE? Used by `RetainFinalAfterCluster`. Affricates count as ONE consonant; a length mark ː on a
+     *  consonant is a geminate and so heavy. */
     public static bool HeavyFinalCoda(string body)
     {
-        // Geminate/long CONSONANT coda (क्क→kː) is heavy. Guard the ː to a consonant so a trailing long
-        // VOWEL isn't misread as a geminate.
+        // The ː is guarded to a CONSONANT so a trailing long vowel is not misread as a geminate.
         if (CONS_LONG_FINAL.IsMatch(body)) return true;
-        // Collapse affricates to a single placeholder BEFORE stripping the (combining) tie bar, so d͡z counts as 1.
+        // Affricates collapse to a single placeholder BEFORE the (combining) tie bar is stripped, so d͡z
+        // still counts as one consonant.
         var collapsed = MARKS_ETC.Replace(
             AFFRICATES.Replace(body, "Ç").Normalize(NormalizationForm.FormD), "");
         var n = 0;
@@ -112,8 +103,6 @@ public static class Hindi
         IReadOnlyDictionary<string, string>? lexicon = null,
         /**
          * PER-LANGUAGE OVERRIDES for the two things that are Hindi's LEXICAL choices rather than its engine.
-         * Nine languages reuse this engine, and until this parameter existed they also inherited Hindi's
-         * normalizer and Hindi's symbol words. Both default to Hindi's.
          */
         Func<string, string>? normalizeOverride = null,
         Func<string, string>? symbolsOverride = null)
@@ -128,28 +117,27 @@ public static class Hindi
         var symbols = def.Symbols ?? new Dictionary<string, string>();
         var strip = def.StripSymbols ?? "";
         var symbolClass = string.Concat(symbols.Keys) + strip;
+        // ⚠ The Latin group spans ALL of Latin, not just ASCII: the group already means "foreign" (its
+        // match goes straight to the injected reader), and narrowing it shreds accented foreign names.
         var tokenRe = JsRegex.Compile(
-            // ⚠ THE LATIN GROUP SPANS ALL OF LATIN, not just ASCII — `[A-Za-z]+` shredded every accented
-            // foreign name: `São Paulo` in Hindi read *ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ*. This group already means
-            // "foreign" (its match goes straight to the injected reader), so widening it is the whole change.
-            // ⚠ REACHES 17 LANGUAGES, every one that composes `makeNativeHindi`.
             $"([{script.Word}]+)|(\\p{{Script=Latin}}[\\p{{Script=Latin}}\\p{{M}}]*)|([{DIGIT_CLASS}]+(?:,[{DIGIT_CLASS}]+)*(?:\\.[{DIGIT_CLASS}]+)?)"
             + $"|([।॥.?!,;:]){(symbolClass.Length > 0 ? $"|([{symbolClass}])" : "")}",
             "gu");
 
-        // ⚠ FAIL LOUDLY RATHER THAN SILENTLY DO NOTHING. A manifest asking for avagraha retention under a
-        // script that has not declared its avagraha would read as though the rule were on while every final
-        // schwa still deleted.
+        // ⚠ Fail loudly rather than silently do nothing: a manifest asking for avagraha retention under a
+        // script that declares no avagraha would read as though the rule were on while every schwa deleted.
         var retainOnAvagraha = def.SchwaDeletion.RetainOnAvagraha == true;
         if (retainOnAvagraha && script.Avagraha is null)
             throw new InvalidOperationException("schwaDeletion.retainOnAvagraha is set but this script declares no `avagraha` sign");
 
-        /** Pure RULE-ENGINE word→IPA (no lexicon) — the honest, non-circular signal used by the referee eval. */
+        /**
+         * Pure RULE-ENGINE word→IPA (no lexicon) — the honest, non-circular signal used by the referee eval.
+         */
         string WordRules(string w)
         {
             var x = g2p(w);
-            // ⚠ THE AVAGRAHA ⟨ऽ⟩ IS READ FROM THE SPELLING, NOT THE PHONES: g2p drops the character, leaving
-            // nothing downstream to test.
+            // ⚠ The avagraha ⟨ऽ⟩ is read from the SPELLING, not the phones: g2p drops the character, so
+            // there is nothing downstream to test.
             var avagraha = retainOnAvagraha && w.EndsWith(script.Avagraha!, StringComparison.Ordinal);
             foreach (var r in post) x = r.Re.Replace(x, r.To);
             var syls = VOWEL_G.Matches(x).Count;
@@ -180,9 +168,8 @@ public static class Hindi
             var dot = ascii.IndexOf('.');
             if (dot >= 0 && !string.IsNullOrEmpty(def.Numbers.DecimalWord))
             {
-                // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA, in every engine built
-                // from this maker — one bug reaching eleven languages. Digit-at-a-time out of
-                // `def.numbers.units` is exactly what the decimal tail below already does.
+                // JS `Number` semantics: above 2^53 the float has lost its low digits, so the integer head
+                // is spelled digit-at-a-time out of `def.Numbers.Units` rather than composed.
                 var intText = ascii[..dot];
                 var intN = Js.Number(intText.Length > 0 ? intText : "0");
                 var head = double.IsInteger(intN) && Math.Abs(intN) <= 9007199254740991d
@@ -196,8 +183,7 @@ public static class Hindi
             return Core.Numbers.RenderNumber(n, def.Numbers, Word);
         }
 
-        // ⚠ THE HINDI-SPECIFIC REWRITES RUN BEFORE THE SHARED SYMBOL TIER, whose unit keys are LATIN.
-        // Roman numerals need no ordering care: `hi` is not ROMAN_NATIVE, so the shared pass has already run.
+        // ⚠ The Hindi-specific rewrites run BEFORE the shared symbol tier, whose unit keys are LATIN.
         var normalize = normalizeOverride ?? Normalize.MakeHindiNormalizer(def.Numbers);
         var symbolTier = symbolsOverride ?? SYMBOLS;
 
@@ -227,34 +213,25 @@ public static class Hindi
     /** प्रतिशत is invariant, and the units follow the number. (Full sourcing notes: hindi.ts.) */
     internal static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        // ⚠ Declaring `multiply` HERE is what makes ASCII `x` read like `×`. One word, so `by` defaults to it.
         Multiply = new MultiplyDef { Times = "गुणा" },
         Percent = new[] { "प्रतिशत" },
-        // ⚠ `¢` IS ROBUSTNESS, NOT ATTESTATION (probably an OCR corruption of `″`) — declared anyway,
-        // because the engine's job is to read the character it is given and a dropped sign is INAUDIBLE.
         Currency = new Dictionary<string, IReadOnlyList<string>>
         {
             ["$"] = new[] { "डॉलर" }, ["€"] = new[] { "यूरो" }, ["£"] = new[] { "पाउंड" },
             ["₹"] = new[] { "रुपये" }, ["¥"] = new[] { "येन" }, ["¢"] = new[] { "सेंट" },
         },
-        // ⚠ THIS TIER IS INHERITED BY SEVEN OTHER LANGUAGES (awa, bgc, bho, hne, mag, mai, rkt pass no
-        // override), so these keys are declared for them too — sourced from hi.wikipedia, stated rather than
-        // left to be discovered. हेक्टर IS NOT the hectare word (it is HECTOR, the Trojan prince); ग्राम's
-        // count is mostly the "village" homograph and the definitional hit is the evidence, not the count.
         Units = new Dictionary<string, IReadOnlyList<string>>
         {
             ["km"] = new[] { "किलोमीटर" }, ["cm"] = new[] { "सेंटीमीटर" }, ["mm"] = new[] { "मिलीमीटर" },
             ["kg"] = new[] { "किलोग्राम" }, ["m"] = new[] { "मीटर" }, ["g"] = new[] { "ग्राम" },
             ["l"] = new[] { "लीटर" }, ["L"] = new[] { "लीटर" }, ["ha"] = new[] { "हेक्टेयर" }, ["nm"] = new[] { "नैनोमीटर" },
         },
-        // `km²` → वर्ग किलोमीटर, corpus-attested in exactly this slot. `before`, not `compound`.
         ExponentWords = new ExponentWordsDef
         {
             Squared = new[] { "वर्ग" },
             Cubed = new[] { "घन" },
             Position = ExponentPosition.Before,
         },
-        // BARE EXPONENT — STANDARD MATHEMATICAL REGISTER, not corpus attestations.
         BareExponent = new BareExponentDef
         {
             Squared = "{n} का वर्ग", Cubed = "{n} का घन", Power = "{n} की घात {e}", Negative = "ऋण",

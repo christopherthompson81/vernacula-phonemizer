@@ -1,8 +1,6 @@
 /**
- * Loads the consolidated Arabic data manifest (arabic.jsonc) once at module init and exposes it typed. The
- * hand-authored DATA tables (consonant map, sun letters, proclitics, clause punctuation, number words, and the
- * diacritizer's label / defective-spelling tables) live in the JSONC; the ALGORITHMS that consume them stay in
- * the sibling modules (g2p.ts, numbers.ts, diacritizer.ts, arabic.ts).
+ * Loads the consolidated Arabic data manifest (arabic.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/arabic/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -43,9 +41,6 @@ public sealed class ArabicMagnitudes
     public string MillionsPlural { get; init; } = "";
 }
 
-// Number words are authored DATA — MSA in arabic.jsonc, with optional per-VARIETY overrides (egyptian.jsonc:
-// arz otherwise reads 80 as MSA θamaːnuːn, with a θ the dialect does not have). A variety table may carry
-// `hundredsFused`, the dialects' fused hundreds (mijːa, miteːn, tultumijːa …).
 public sealed class ArabicNumberData
 {
     public IReadOnlyList<string> Ones { get; init; } = Array.Empty<string>();

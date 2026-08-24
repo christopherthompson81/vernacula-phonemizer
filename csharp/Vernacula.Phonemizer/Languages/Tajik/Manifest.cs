@@ -1,16 +1,6 @@
 /**
  * Loads the Tajik data manifest (tajik.jsonc) once at module init and exposes it typed.
- *
- * ⚠ IT IS ITS OWN MODULE BECAUSE `tajik.ts` AND `normalize.ts` BOTH NEED IT. The engine imports the
- * normalizer (to run it inside `text()`) and the normalizer needs the manifest's letter names and month
- * names at module init — re-exporting the manifest from `tajik.ts` made that a cycle, and it failed at
- * import time with "Cannot access 'MANIFEST' before initialization" rather than at any gate. Same shape as
- * `russian/manifest.ts`, and for the same reason.
- *
- * Holds the context-free hand-authored DATA: the vowel/glide/consonant → IPA tables, the cardinal number
- * atoms and their scale ladder, the izofat month names, the Cyrillic letter-name table for initialisms, and
- * clause punctuation. The ALGORITHMS that read them stay in code (`tajik.ts`'s grapheme scan, final stress
- * and number compositor; `normalize.ts`'s rules).
+ * Ported from src/languages/tajik/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

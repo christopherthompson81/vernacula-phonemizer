@@ -1,11 +1,6 @@
 /**
- * Loads the Kannada data manifest (kannada.jsonc) once and exposes it typed. The manifest IS the
- * language data: the abugida definition read by the shared core/abugida.ts G2P, the clause punctuation,
- * and the cardinal number words including the fused 21-99 compounds, the irregular round hundreds and
- * the combining ("oblique") magnitude forms. The ALGORITHMS that read it stay in code — the G2P
- * post-pass (kannada.ts) and the number compositor (numbers.ts).
- *
- * Split out of kannada.ts so numbers.ts and normalize.ts can read the same single load.
+ * Loads the Kannada data manifest (kannada.jsonc) once and exposes it typed.
+ * Ported from src/languages/kannada/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

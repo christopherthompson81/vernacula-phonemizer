@@ -82,10 +82,17 @@ function stressedNucleus(word: string, segs: Seg[]): number {
 const isGlidePh = (ph: string): boolean =>
     ph === "j" || ph === "w" || ph === "j̃" || ph === "w̃";
 
-/** Post-stress onglide demotion: an UNSTRESSED high vowel (i/u) immediately before another nucleus is a rising
- *  glide, not a syllable of its own (diamante → djɐmɐ̃tɨ, água → aɡwɐ) — but a stressed one stays (dia → diɐ).
- *  Runs after stress so the count is settled; mid-vowel onglides (e/o) are left alone (moeda → muɛðɐ). */
 const LIQUID = new Set(MANIFEST.liquids);
+/** Post-stress onglide demotion: an UNSTRESSED i/u/e immediately before another nucleus is a rising glide, not a
+ *  syllable of its own (diamante → djɐmɐ̃tɨ, água → aɡwɐ, teatro → tjˈatɾu) — but a stressed one stays
+ *  (dia → dˈiɐ). Runs after stress so the count is settled.
+ *
+ *  ⚠ ⟨e⟩ IS DEMOTED AND THE DOCSTRING SAID IT WAS NOT. This comment used to read "mid-vowel onglides (e/o) are
+ *  left alone (moeda → muɛðɐ)", while the guard below has always admitted `e` and the assignment below has
+ *  always spelled it `i/e → j`: `real` is ʁjˈaɫ and `beato` is bjˈatu. Only ⟨o⟩ is left alone — it is not in
+ *  the guard at all, so `moeda` is muˈedɐ with two nuclei. The stale example named a reading the engine has
+ *  not produced either. Found by the C# port's comment pass under the bidirectional rule in csharp/PORTING.md;
+ *  the docstring also sat on `LIQUID`, one declaration above the function it describes. */
 function onglides(segs: Seg[], stress: number): void {
     for (let i = 0; i < segs.length; i++) {
         const s = segs[i]!;

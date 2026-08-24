@@ -1,9 +1,6 @@
 /**
- * Japanese number + counter (助数詞) reading. After a number, a counter kanji fuses with euphonic sound changes:
- * gemination (促音便: 1→いっ, 6→ろっ, 8→はっ, 10→じゅっ before k/s/h counters), rendaku/handaku on h-initial
- * counters (本 3→ぼん / 1→いっぽん), and Sino number readings for 4/7/9 on some counters (4月→しがつ, 4時→よじ).
- * A few counters are wholly irregular (日: ついたち…はつか; 人: ひとり/ふたり). Built and validated against OpenJTalk
- * (BSD; the readings are linguistic facts). Feeds kana to kanaToIpa like the plain number path.
+ * Japanese number + counter (助数詞) reading.
+ * Ported from src/languages/japanese/counters.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -38,20 +35,12 @@ public static class Counters
     private static string Head(string r) => Js.CodePoints(r) is var cs && cs.Count > 0 ? cs[0] : "";
     private static string Tail(string r) => string.Concat(Js.CodePoints(r).Skip(1));
 
-    // 日 counter: irregular native readings 1–10, 14, 20, 24; others are Xにち (handled by the regular path).
     private static readonly IReadOnlyDictionary<int, string> DAY = new Dictionary<int, string>
     {
         [1] = "ついたち", [2] = "ふつか", [3] = "みっか", [4] = "よっか", [5] = "いつか", [6] = "むいか", [7] = "なのか",
         [8] = "ようか", [9] = "ここのか", [10] = "とおか", [14] = "じゅうよっか", [20] = "はつか", [24] = "にじゅうよっか",
     };
 
-    // ⚠ つ is the NATIVE (wago) general counter, and it is wholly suppletive: the number is not read with
-    // the Sino series at all. 1つ is ひとつ, never いちつ. It is also the ONLY counter written in hiragana,
-    // which is why it was missing here — the fusion regex in japanese.ts matched Han script only, so a
-    // digit + つ never even reached this table and `1つには` came out `it͡ɕi t͡sɯᵝniwä`. 89 FLEURS ja_jp
-    // rows (1つ ×47, 2つ ×24, 3つ ×12, 5つ ×6).
-    // The series stops at 9: ten of something is とお / 十, written without つ, so there is deliberately no
-    // entry for 10 and the regular path (じゅう + つ) is unreachable in practice.
     private static readonly IReadOnlyDictionary<int, string> TSU = new Dictionary<int, string>
     {
         [1] = "ひとつ", [2] = "ふたつ", [3] = "みっつ", [4] = "よっつ", [5] = "いつつ",
@@ -98,7 +87,9 @@ public static class Counters
         [4] = "よん", [7] = "なな", [9] = "きゅう",
     };
 
-    /** number reading (numberToKana) but with the ONES digit's 4/7/9 replaced per the counter (4月→し, 4時→よ). */
+    /**
+     * number reading (numberToKana) but with the ONES digit's 4/7/9 replaced per the counter (4月→し, 4時→よ).
+     */
     private static string NumWithOverride(double n, Counter c)
     {
         var baseR = Numbers.NumberToKana(n);
@@ -123,9 +114,6 @@ public static class Counters
         var num = NumWithOverride(n, c);
         if (c.Cls == "regular") return num + c.Reading;
 
-        // Euphony keys on the ENDING of the number reading (so 21本→にじゅういっぽん, 100本→ひゃっぽん all work).
-        // Gemination: いち→いっ, はち→はっ, じゅう→じゅっ (all k/s/h); ろく→ろっ, and the ゃく-hundreds ひゃく/びゃく/ぴゃく
-        // (100/300/600/800 → ひゃっ/びゃっ/ぴゃっ) (k/h, NOT s: 300頭→さんびゃくとう keeps ゃく).
         string? Geminate(string end, string rep) =>
             num.EndsWith(end, StringComparison.Ordinal) ? num[..^end.Length] + rep : null;
         string? gem = null;
@@ -136,7 +124,6 @@ public static class Counters
                 gem ??= Geminate(end, rep);
 
         if (gem is not null) return gem + (c.Cls == "h" ? PForm(c.Reading) : c.Reading);
-        // ん-ending numbers (さん=3, よん=4, せん=1000, …): h-counters take handaku/rendaku after ん.
         if (num.EndsWith("ん", StringComparison.Ordinal))
         {
             if (n % 10 == 4) return num + (c.Four ?? c.Reading); // 4本→よんほん, 4分→よんぷん

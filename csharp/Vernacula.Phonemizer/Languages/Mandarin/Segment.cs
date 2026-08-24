@@ -1,9 +1,6 @@
 /**
- * Hanzi → pinyin segmentation. Greedy longest-match against the phrase dictionary gives
- * polyphone disambiguation (银行 → yín háng, not yín xíng); characters not covered by a phrase fall back to
- * their most-common single-char reading. Non-Han characters pass through untouched (numbers / punctuation /
- * Latin are handled downstream). Output is a list of `base+tone` pinyin tokens (+ raw pass-through tokens)
- * ready for the pinyin→IPA path.
+ * Hanzi → pinyin segmentation.
+ * Ported from src/languages/mandarin/segment.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -33,8 +30,8 @@ public static class Segmenter
 
     /**
      * Segment a run of code points into pinyin tokens. `exempt[i]` marks a character that must not drive word
-     * sandhi — a spoken digit synthesized from a number (三点一四, 2024) — so it gets no `src` and word-level
-     * 一/不 sandhi never fires on it. Quantity 一 (一千 → yì qiān) is NOT exempt and sandhis normally.
+     * sandhi — a spoken digit synthesized from a number — so it gets no `Src` and 一/不 sandhi never fires on
+     * it. Quantity 一 (一千) is NOT exempt and sandhis normally.
      */
     public static List<PinToken> Segment(IReadOnlyList<string> chars, PinyinTables t, IReadOnlyList<bool>? exempt = null)
     {
@@ -49,15 +46,14 @@ public static class Segmenter
                 i++;
                 continue;
             }
-            // Ordinal 一: after 第, force 一 to a single-char token so its citation (第一 → dì yī) survives
-            // instead of being swallowed by a greedy 一X phrase (第一个 must not read the 一个 → yí gè sandhi).
+            // This arm must run BEFORE the greedy phrase match below: 第一个 would otherwise be swallowed by
+            // the 一个 phrase and read the sandhi, losing the ordinal citation 第一 → dì yī.
             if (ch == "一" && outp.Count > 0 && outp[^1].Src == "第")
             {
                 outp.Add(new PinToken { Py = t.Chars.TryGetValue("一", out var r) ? r[0] : "一", Src = "一" });
                 i++;
                 continue;
             }
-            // Greedy longest phrase starting at i.
             var matched = false;
             var maxLen = Math.Min(t.MaxPhrase, chars.Count - i);
             for (var len = maxLen; len >= 2; len--)
@@ -72,8 +68,7 @@ public static class Segmenter
                 }
             }
             if (matched) continue;
-            // Single-char fallback: most-common reading. Real input chars carry `src` (for 一/不/第 sandhi); a
-            // sandhi-exempt spoken digit does not.
+            // A real input character carries Src (what 一/不/第 sandhi reads); a sandhi-exempt digit does not.
             var readings = t.Chars.TryGetValue(ch, out var rd) ? rd : null;
             outp.Add(exempt is not null && i < exempt.Count && exempt[i]
                 ? new PinToken { Py = readings is not null ? readings[0] : ch }

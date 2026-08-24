@@ -1,6 +1,6 @@
 /**
- * Portuguese number → words (European convention). Space-separated words with the "e" connector. Covers
- * 0 … <10⁹. Decimals read "vírgula" + digits (handled by the caller).
+ * Portuguese number → words (European convention).
+ * Ported from src/languages/portuguese/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -8,13 +8,11 @@ namespace Vernacula.Phonemizer.Languages.Portuguese;
 
 public static class Numbers
 {
-    // Number words are authored DATA — consolidated in portuguese.jsonc; the "e"-connector compositor is the algorithm.
     private static PortugueseNumberData N => Manifest.MANIFEST.Numbers;
     private static IReadOnlyList<string> TENS => N.Tens;
     private static IReadOnlyList<string> HUNDREDS => N.Hundreds;
     private static string E => N.Connector; // "e"
 
-    // The only EP/BP difference in the number words: the "dez-a-" teens 16/17/19 are "dez-e-" in Brazil.
     private static readonly IReadOnlyDictionary<int, string> SMALL_BP = new Dictionary<int, string>
     {
         [16] = "dezesseis",
@@ -56,7 +54,6 @@ public static class Numbers
             int th = v / 1000, r0 = v % 1000;
             var thousand = th == 1 ? N.Thousand : $"{Below1000(th, dialect)} {N.Thousand}";
             if (r0 == 0) return thousand;
-            // "e" before the remainder when it is < 100 or a round hundred (mil e duzentos, mil e vinte)
             return r0 < 100 || r0 % 100 == 0
                 ? $"{thousand} {E} {Below1000(r0, dialect)}"
                 : $"{thousand} {Below1000(r0, dialect)}";
@@ -66,7 +63,6 @@ public static class Numbers
             ? $"{Small(1, dialect)} {N.Million}"
             : $"{Below1000(m, dialect)} {N.MillionPlural}";
         if (r == 0) return million;
-        // "e" before a remainder that is < 100 or "round" (milhão e um, milhão e cem, milhão e quinhentos mil)
         return r < 100 || r % 100 == 0
             ? $"{million} {E} {NumberToWords(r, dialect)}"
             : $"{million} {NumberToWords(r, dialect)}";

@@ -1,24 +1,13 @@
 /**
- * The DEFAULT foreign-run phonemizer: how an engine reads a run of text in a script it does not own
- * (in practice, embedded Latin — a brand name, acronym, loanword or code-switched phrase).
- *
- * Registered by the registry rather than imported from it, so `core/` keeps its no-dependency
- * position and there is no import cycle. Set once at registry module load; read lazily.
- *
- * ⚠ WHY THIS EXISTS: an engine's tokenizer only matches its own script, and `assembleClauses` skips
- * whatever the tokenizer does not claim — so without a fallback, `phonemize("hello век", "ru")` returns just
- * the Cyrillic. That is 3–15% of utterances per language, losing real content ("new mexico", "covid", "gps").
- *
- * An engine that handles Latin itself — its own tokenizer group plus an injected `ForeignPhonemizer` — claims
- * the text, leaves no gap, and is unaffected by this fallback.
+ * The DEFAULT foreign-run phonemizer: how an engine reads a run of text in a script it does not own,
+ * plus the host stack and the neural-OOV memo the foreign path reads.
+ * Ported from src/core/foreign.ts — see that file for the corpus evidence.
  */
 namespace Vernacula.Phonemizer.Core;
 
 public static class Foreign
 {
-    /** Reads a run of foreign (non-native-script) text to canonical IPA. */
-    // TS: `export type ForeignPhonemizer = (text: string) => string;` — represented as Func<string, string>.
-
+    /** Reads a run of foreign (non-native-script) text to canonical IPA (TS `ForeignPhonemizer`). */
     private static Func<string, string>? defaultForeign;
 
     /** Register the fallback used for unclaimed foreign runs. Called by the registry at load. */
@@ -27,20 +16,13 @@ public static class Foreign
         defaultForeign = f;
     }
 
-    /** The registered fallback, or `undefined` if none — in which case unclaimed runs stay dropped. */
+    /** The registered fallback, or null if none — in which case unclaimed runs stay dropped. */
     public static Func<string, string>? GetDefaultForeign()
     {
         return defaultForeign;
     }
 
-    /**
-     * SCRIPT-AWARE reading (see core/scripts.ts). ⚠ `defaultForeign` above reads every run as ENGLISH, which is
-     * right for Latin and wrong for everything else. This reader is given the run AND the host language, so it can
-     * route by script with the host's own overrides applied.
-     */
-    // TS: `export type ScriptReader = (run: string, host: string) => string | undefined;`
-    // — represented as Func<string, string, string?> (null = undefined = the router declines).
-
+    /** Script-aware reading (TS `ScriptReader`): null stands for the TS `undefined` — the router declines. */
     private static Func<string, string, string?>? scriptReader;
 
     /** Register the script router. Called by the registry at load, like `setDefaultForeign`. */
@@ -51,8 +33,8 @@ public static class Foreign
 
     /**
      * The host language currently being read, as a STACK — reading a foreign run calls back into another
-     * engine, so this nests, and a plain variable would be clobbered by the inner call and never restored.
-     * Synchronous throughout, so a stack is sufficient and no async context is needed.
+     * engine, so this nests. Synchronous throughout, so a plain stack is sufficient: no AsyncLocal, and
+     * deliberately not one — see WithHost below.
      */
     private static readonly List<string> hosts = new();
 
@@ -69,13 +51,10 @@ public static class Foreign
     /**
      * Run one SYNCHRONOUS render with `lang` as the host, restoring the previous host afterwards.
      *
-     * ⚠ `fn` is typed sync ON PURPOSE, and that is the whole point of this helper existing rather than callers
-     * pairing `pushHost`/`popHost` themselves. The stack above is only correct while every push and its pop sit
-     * in the same synchronous turn; hold a host across an `await` and two concurrent callers interleave into
-     * each other's frames. The ASYNC (neural) entries each end in a synchronous engine call, so they wrap THAT
-     * — not the whole promise. Without it their foreign runs are dropped outright: `readForeignRun` declines
-     * with an empty stack, and the Latin-only default never sees a non-Latin run
-     * (`phonemizeAsync("বছর Владимир শেষ", "bn")` lost the name entirely).
+     * ⚠ `fn` IS `Func<T>` AND NOT `Func<Task<T>>` ON PURPOSE — do not add an async overload. The stack is
+     * only correct while every push and its pop sit in the same synchronous turn; hold a host across an
+     * `await` and two concurrent callers interleave into each other's frames. The async (neural) entries
+     * each end in a synchronous engine call and must wrap THAT, not the whole task.
      */
     public static T WithHost<T>(string lang, Func<T> fn)
     {
@@ -106,36 +85,23 @@ public static class Foreign
     }
 
     /**
-     * NEURAL OOV READINGS for words inside embedded foreign runs, resolved by the async entries and consulted by
-     * the default (English) foreign reader.
+     * NEURAL OOV READINGS for words inside embedded foreign runs, resolved by the async entries and consulted
+     * by the default (English) foreign reader. A plain unscoped memo, not a scoped override like WithHost: a
+     * reading is keyed on a bare lowercased g2pKey, so it is context-free and there is nothing to restore.
      *
-     * ⚠ WHY THIS EXISTS: `defaultForeign` is typed synchronous, so a delegated run got English's SYNC engine —
-     * lexicon + n-gram OOV — even under `phonemizeAsync`. The neural BiLSTM never saw it, and delegated runs are
-     * mostly proper nouns, i.e. exactly the OOV tail the BiLSTM exists for. Measured on the OmniVoice FLEURS
-     * corpora, the sync reader deletes and invents phones the async one does not:
-     *
-     *     liguria      async ləɡjˈʊɹiʲə          sync lˈaᶦʊɹiʲə        (the ɡ is gone)
-     *     adekoya      async æd̬əkʰˈɔᶦə           sync ˈædŋkoᶷjˌɑː      (ˈædŋ is not an English onset)
-     *     sezen        async sˈɛzən              sync sˈɑːʃɛn
-     *
-     * A PLAIN MEMO, deliberately — not a scoped override like `withHost` above. The tagger reads a bare lowercased
-     * g2pKey, so a reading is context-free and deterministic: there is nothing to restore, hence none of the
-     * async-interleaving hazard that forces the host stack to stay inside one synchronous turn. Consulted ONLY on
-     * the foreign path, so `phonemize(text, "en")` stays byte-identical no matter what ran before it.
+     * ⚠ C# PORT NOTE (ordering): the TS `foreignOov` is a JS Map, whose iteration order is INSERTION
+     * ORDER even across deletes — `keys().next()` is always the OLDEST surviving entry. A .NET
+     * Dictionary does NOT preserve order once entries have been removed (freed slots are reused), so
+     * insertion order is tracked in a parallel queue. A key is enqueued only when it is NEW to the map
+     * (a re-`set` of a live key keeps its original JS Map position, exactly as here), so the queue
+     * mirrors the Map's key order one-to-one; the eviction loop still skips any entry no longer
+     * present, defensively.
      */
-    // ⚠ C# PORT NOTE (ordering): the TS `foreignOov` is a JS Map, whose iteration order is INSERTION
-    // ORDER even across deletes — `keys().next()` is always the OLDEST surviving entry. A .NET
-    // Dictionary does NOT preserve order once entries have been removed (freed slots are reused), so
-    // insertion order is tracked in a parallel queue. A key is enqueued only when it is NEW to the
-    // map (a re-`set` of a live key keeps its original JS Map position, exactly as here), so the
-    // queue mirrors the Map's key order one-to-one; the eviction loop still skips any entry no longer
-    // present, defensively.
     private static readonly Dictionary<string, string> foreignOov = new();
     private static readonly Queue<string> foreignOovOrder = new();
 
-    /** Cap the memo. Readings are tiny and reused across utterances, but a long-lived process phonemizing an
-     *  unbounded stream of documents should not grow one forever. Oldest-first eviction; a re-tag costs one
-     *  BiLSTM call, so a miss is cheap and correctness never depends on a hit. */
+    /** Cap the memo — oldest-first eviction. A re-tag costs one BiLSTM call, so a miss is cheap and
+     *  correctness never depends on a hit. */
     private const int FOREIGN_OOV_MAX = 20_000;
 
     /** Record one neural reading for `g2pKey`. Called by the async entries' pre-pass. */
@@ -143,7 +109,6 @@ public static class Foreign
     {
         if (foreignOov.Count >= FOREIGN_OOV_MAX)
         {
-            // TS: `const oldest = foreignOov.keys().next(); if (!oldest.done) foreignOov.delete(oldest.value);`
             while (foreignOovOrder.Count > 0)
             {
                 var oldest = foreignOovOrder.Dequeue();
@@ -155,15 +120,10 @@ public static class Foreign
     }
 
     /**
-     * Drop every memoized reading.
-     *
-     * ⚠ FOR BATCH TOOLS THAT RENDER MANY LANGUAGES IN ONE PROCESS, and it is not an optimisation — it is what
-     * makes their output REPRODUCIBLE. The memo is global and survives across languages, so a mixed-script
-     * language whose prewarm tagged `duxbury` leaves that BiLSTM reading behind, and a LATIN-script language
-     * rendered afterwards picks it up through the foreign reader even though its own call never prewarms
-     * anything. Measured on the golden generator: 25 rows across 5 languages that the engine cannot reproduce
-     * on its own, 15 of them Māori. Not called by the engine itself — a long-lived server WANTS the memo warm,
-     * and within one utterance the reading is context-free either way.
+     * Drop every memoized reading. ⚠ FOR BATCH TOOLS THAT RENDER MANY LANGUAGES IN ONE PROCESS: the memo is
+     * static and survives across languages, so without this a later language picks up an earlier one's
+     * BiLSTM readings through the foreign reader and its output is not reproducible standalone. Not called
+     * by the engine itself — a long-lived server wants the memo warm.
      */
     public static void ClearForeignOov()
     {
@@ -171,7 +131,7 @@ public static class Foreign
         foreignOovOrder.Clear();
     }
 
-    /** The neural reading for `g2pKey`, or `undefined` — the shape English's `oovOverride` expects. */
+    /** The neural reading for `g2pKey`, or null — the shape English's `oovOverride` expects. */
     public static string? LookupForeignOov(string g2pKey)
     {
         return foreignOov.TryGetValue(g2pKey, out var ipa) ? ipa : null;

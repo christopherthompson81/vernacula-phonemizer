@@ -1,15 +1,12 @@
 /**
- * Loads the Umbundu data manifest (umbundu.jsonc) once at module init and exposes it typed. Holds the context-free
- * hand-authored DATA: the orthography→IPA grapheme table (prenasalised clusters, ⟨c⟩=t͡ʃ, ⟨ñ⟩=ɲ, ⟨ng'⟩=ŋ) + clause
- * punctuation. The ALGORITHM (the greedy longest-match scan + tone-accent stripping) stays in code (umbundu.ts).
+ * Loads the Umbundu data manifest (umbundu.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/umbundu/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.Umbundu;
 
-/** The Umbundu cardinal number words (see umbundu.jsonc "numbers"; the compositor is numbers.ts). Each magnitude
- *  selects its OWN multiplier series — akwi takes the cl.6 a- concord, ovita the cl.8 vi- concord, and the slot
- *  after the connective "la" is its own (irregular) series — so these must stay four separate tables. */
+/** The Umbundu cardinal number words (see umbundu.jsonc "numbers"; the compositor is numbers.ts). */
 public sealed class UmbunduNumbers
 {
     /** zero (a Portuguese loan; see the manifest note). */
@@ -56,6 +53,5 @@ public static class Manifest
     public static readonly UmbunduManifest MANIFEST =
         LoadManifest.Load<UmbunduManifest>("languages/umbundu", "umbundu.jsonc");
 
-    // Grapheme keys sorted LENGTH DESC so the greedy scan tries the trigraph ⟨ng'⟩ before prenasal digraphs before singles.
     public static readonly List<string> GRAPHEME_KEYS = MANIFEST.Graphemes.Keys.OrderByDescending(k => k.Length).ToList();
 }

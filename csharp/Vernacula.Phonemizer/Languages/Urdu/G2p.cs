@@ -1,9 +1,6 @@
 /**
- * Urdu (ur) grapheme→phoneme engine — Perso-Arabic abjad → canonical IPA (Hindi phoneme inventory). Urdu is
- * stored in logical order = phonetic order, so RTL is a non-issue (as for Arabic). Handles: consonant letters,
- * aspiration (C + ھ → Cʰ/Cʱ), long vowels written with ا/آ/و/ی/ے, short vowels from harakat WHEN present,
- * shadda gemination, ں nasalization, and — for the usual undiacritized text — a DEFAULT short vowel [ə]
- * between consonants (the crude stand-in for the deferred short-vowel-restoration subsystem).
+ * Urdu (ur) grapheme→phoneme engine — Perso-Arabic abjad → canonical IPA (Hindi phoneme inventory).
+ * Ported from src/languages/urdu/g2p.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -68,7 +65,6 @@ public static class G2p
         var i = 0;
         string At(int k) => k >= 0 && k < n ? s[k] : "";
 
-        // Word-initial vowel carrier (alif): آ→ɑː; ا+و→oː, ا+ی→eː, ا+ے→eː; bare ا → short ə carrier.
         if (At(0) == ALIF_MADDA)
         {
             @out += "ɑː";
@@ -84,14 +80,12 @@ public static class G2p
         while (i < n)
         {
             var ch = s[i];
-            // Nasalizer → nasalize the preceding vowel.
             if (NASAL.Contains(ch))
             {
                 if (!ENDS_TILDE.IsMatch(@out) && EndsInVowel(@out)) @out += "̃";
                 i++;
                 continue;
             }
-            // Word-final ہ after a consonant realizes as the [ɑ] vowel (بارہ→bɑːɾɑ, آئینہ→ɑːiːnɑ); elsewhere it is [ɦ].
             if (ch == HE_GOL)
             {
                 var atEnd = i == n - 1;
@@ -100,8 +94,6 @@ public static class G2p
                 i++;
                 continue;
             }
-            // Hamza seats ئ/ؤ carry a vowel in hiatus (بھائی→bʱɑːiː, کوئی→koːiː): emit the vowel and absorb a
-            // directly-following ی/و (ئی = one iː). ء (bare hamza) → glottal/hiatus, skipped in the coda.
             if (ch == "ئ" || ch == "ؤ")
             {
                 @out += ch == "ئ" ? "iː" : "oː";
@@ -109,7 +101,6 @@ public static class G2p
                 if ((ch == "ئ" && At(i) == YA) || (ch == "ؤ" && At(i) == WAW)) i++;
                 continue;
             }
-            // Standalone glide/vowel letters after a vowel (hiatus) → glide; after a consonant → long vowel.
             if (ch == WAW || ch == YA || ch == BARI_YE || ch == ALIF || ch == ALIF_MADDA)
             {
                 var prevVowel = EndsInVowel(@out);
@@ -120,25 +111,21 @@ public static class G2p
                 i++;
                 continue;
             }
-            // Consonant.
             if (C.TryGetValue(ch, out var cph))
             {
                 var ph = cph;
                 i++;
-                // Aspiration: C + ھ → aspirated (only for aspirable consonants; else ھ is a plain [ɦ]).
                 if (At(i) == HE && ASP.TryGetValue(ph, out var asp) && asp.Length > 0)
                 {
                     ph = asp;
                     i++;
                 }
-                // Shadda → gemination (length on the consonant).
                 if (At(i) == DEF.Shadda)
                 {
                     ph += "ː";
                     i++;
                 }
                 @out += ph;
-                // Vowel after the consonant.
                 var hk = i < n ? HARAKAT.GetValueOrDefault(s[i]) : null;
                 if (At(i) == DEF.Sukun)
                 {
@@ -146,15 +133,8 @@ public static class G2p
                 }
                 else if (hk is not null)
                 {
-                    // An EXPLICITLY-WRITTEN fatḥa (= /ə/) must survive medial schwa-deletion, which only elides the
-                    // g2p's UNwritten default schwa. Mark it (ə + U+0332) so deleteMedialSchwa (targets bare "ə") skips
-                    // it; urdu.ts strips the mark. Without this, a written vowel gets deleted and no vocalization can
-                    // reproduce e.g. کَرَنو → kəɾənoː (the cap on inversion for tri-consonantal words).
                     @out += hk == "ə" ? "ə̲" : hk;
                     i++;
-                    // harakat + a matching long-vowel letter lengthens to the HIGH long vowel: kasra+ی→iː, damma+و→uː
-                    // (the explicit diacritic pins the letter — bare ی/و default to iː/oː; damma+waw = uː, e.g. آلُو ɑːluː,
-                    // آرزُو ɑːrzuː). Without this, medial و can only surface as oː and no vocalization reaches the ū words.
                     if ((hk == "ɪ" && At(i) == YA) || (hk == "ʊ" && At(i) == WAW))
                     {
                         @out = @out[..^hk.Length] + (At(i) == YA ? "iː" : "uː");
@@ -163,14 +143,10 @@ public static class G2p
                 }
                 else
                 {
-                    // ی/و before ANOTHER vowel letter is a glide (دنیا→d̪ʊnjɑ, not d̪əniːɑ), not a long vowel.
                     var glideNext = (At(i) == YA || At(i) == WAW) && LongVowelAfterConsonant(At(i + 1)) is not null;
                     var lv = glideNext ? null : LongVowelAfterConsonant(At(i));
                     if (lv is not null)
                     {
-                        // یَ (ya + fatḥa) → eː in our ADAPTED-WORD convention (bare ی = iː). The diacritic encodes the
-                        // iː/eː distinction standard harakat lacks — the g2p reads it and the model learns which words
-                        // take it, exactly as damma+waw encodes uː. Output is a diacritized word in OUR scheme.
                         if (At(i) == YA && At(i + 1) == "َ") { @out += "eː"; i += 2; }
                         else { @out += lv; i++; }
                     }
@@ -183,14 +159,11 @@ public static class G2p
                              && !NASAL.Contains(s[i])
                              && !(At(i) == HE_GOL && i == n - 1)) // word-final ہ is the [ɑ] vowel, not a coda needing ə
                     {
-                        // No written vowel and more letters follow → the abjad's omitted SHORT vowel: default [ə].
                         @out += INH;
                     }
-                    // word-final consonant with no written vowel → no vowel (skeleton coda).
                 }
                 continue;
             }
-            // hamza carriers / unknown diacritic → skip.
             i++;
         }
         return @out.Normalize(System.Text.NormalizationForm.FormC);

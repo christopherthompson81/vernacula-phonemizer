@@ -1,8 +1,6 @@
 /**
- * Loads the Hausa data manifest (hausa.jsonc) once at module init and exposes it typed. The hand-authored DATA
- * (the longest-match orthography→IPA rule table, the tone-code→Chao map, clause punctuation, and the number
- * words) lives in the JSONC; the ALGORITHM (longest-match scan + penultimate stress + tone overlay) stays in
- * g2p.ts / hausa.ts / numbers.ts, and the per-word tone lexicon is a separate file (tone.tsv).
+ * Loads the Hausa data manifest (hausa.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/hausa/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -23,9 +21,9 @@ public sealed class HausaNumbersDef
 public sealed class HausaManifest
 {
     /**
-     * The longest-match orthography→IPA rule table. ⚠ THE TS TYPE IS A TUPLE, `[string, string, boolean][]`,
-     * which JSON writes as an array-of-arrays; C# has no tuple deserializer for that shape in
-     * System.Text.Json, so the rows arrive as `object[][]` and are projected once into `RULES` below.
+     * The longest-match orthography→IPA rule table. The TS type is a tuple, `[string, string, boolean][]`,
+     * which JSON writes as an array-of-arrays; System.Text.Json has no tuple deserializer for that shape, so
+     * the rows arrive as JsonElement and are projected once into `RULES` below.
      */
     public List<List<System.Text.Json.JsonElement>> Rules { get; init; } = new();
     public IReadOnlyDictionary<string, string> ToneChao { get; init; } = new Dictionary<string, string>();

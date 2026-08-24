@@ -1,7 +1,6 @@
 /**
- * German number → words (cardinals). German writes numbers as single compound words with units before tens
- * (einundzwanzig). Output is space-separated at the thousand/million boundaries so each chunk reads through the
- * g2p; within a chunk it stays compounded. Covers 0 … <10⁹.
+ * German number → words (cardinals).
+ * Ported from src/languages/german/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -9,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.German;
 
 public static class Numbers
 {
-    // Number words are authored DATA — consolidated in german.jsonc; the composition logic below is the algorithm.
     private static GermanNumberData N => Manifest.MANIFEST.Numbers;
     private static IReadOnlyList<string> ONES => N.Ones;
     private static IReadOnlyList<string> TENS => N.Tens;

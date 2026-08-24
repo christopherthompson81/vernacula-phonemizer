@@ -1,19 +1,7 @@
 /**
- * Polish (pl) cardinal number compositor. Returns composed Polish TEXT (space-separated) that polish.ts runs
- * through the g2p, so the IPA stays consistent with the word engine.
- *
- * SOURCE for the numeral words: pl.wikipedia's per-number articles — "1 (liczba)" → jeden, … "20 (liczba)" →
- * dwadzieścia, "40 (liczba)" → czterdzieści, "100 (liczba)" → sto, "200 (liczba)" → dwieście, "300 (liczba)" →
- * trzysta, "400 (liczba)" → czterysta, "500 (liczba)" → pięćset, "1000 (liczba)" → tysiąc; the table itself lives
- * in polish.jsonc. Magnitude agreement forms are the standard paradigm (tysiąc/tysiące/tysięcy,
- * milion/miliony/milionów, miliard/miliardy/miliardów).
- *
- * ⚠ WHY THIS IS NOT `westernNumberWords`: the shared Western composer stores ONE string per magnitude, but a
- *   Slavic magnitude noun agrees with its count (2 tysiące vs 5 tysięcy). Polish also DIVERGES from the shared
- *   `slavicCountForm` used by ru/cs for symbol agreement: in Polish a compound numeral ending in "jeden" takes
- *   the GENITIVE PLURAL, not the singular — "dwadzieścia jeden tysięcy" (3 hits on pl.wikipedia) vs
- *   *"dwadzieścia jeden tysiąc" (0 hits); cf. Russian двадцать одна тысяча. So the singular is reserved for an
- *   EXACT count of 1 and `agree()` below is Polish-specific rather than the shared selector.
+ * Polish (pl) cardinal number compositor — returns composed Polish TEXT that Polish.cs runs back through the
+ * g2p. Deliberately NOT the shared Western composer: a Slavic magnitude noun agrees with its count.
+ * Ported from src/languages/polish/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -46,7 +34,8 @@ public static class PolishNumbers
     }
 
     /** The Polish count form of a magnitude noun: EXACTLY 1 → sg; …2–4 (but not …12–14) → paucal; else gen-pl.
-     *  Unlike Russian, a compound ending in 1 (21, 101) takes the genitive plural — dwadzieścia jeden tysięcy. */
+     *  ⚠ NOT the shared Slavic selector: unlike Russian, a Polish compound ending in 1 (21, 101) takes the
+     *  GENITIVE PLURAL — dwadzieścia jeden tysięcy — so the singular is reserved for an exact count of 1. */
     private static string Agree(double count, Agreement forms)
     {
         if (count == 1) return forms.Sg;
@@ -55,8 +44,8 @@ public static class PolishNumbers
         return m10 >= 2 && m10 <= 4 ? forms.Paucal : forms.Plural;
     }
 
-    /** One magnitude group. A bare count of 1 drops the numeral entirely (tysiąc / milion / miliard — the idiomatic
-     *  reading of 1000 / 1 000 000, parallel to the bare hundred "sto"); any other count is spelled + agreed. */
+    /** One magnitude group. A bare count of 1 drops the numeral entirely (tysiąc / milion / miliard — the
+     *  idiomatic reading, parallel to the bare hundred "sto"); any other count is spelled out and agreed. */
     private static string Magnitude(double count, Agreement forms) =>
         count == 1 ? forms.Sg : $"{Sub1000(count)} {Agree(count, forms)}";
 

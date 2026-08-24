@@ -1,7 +1,6 @@
 /**
- * Thai word segmentation (authored). DAG maximal-matching (fewest tokens) over the seg-words set, with word boundaries constrained to
- * TCC (Thai Character Cluster, PyThaiNLP/Theeramunkong) boundaries so a word never splits mid-cluster. Used to
- * split a corpus token that is actually a compound (ก็คือ → ก็ คือ).
+ * Thai word segmentation (authored).
+ * Ported from src/languages/thai/segment.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -25,11 +24,8 @@ public static class ThaiSegment
     }
 
     /**
-     * Segment a Thai run into words by DAG maximal-matching (FEWEST tokens) over `words`,
-     * with word boundaries CONSTRAINED to TCC cluster boundaries (so a dictionary word can
-     * neither start nor end mid-cluster, and the fallback never shatters a cluster). An
-     * out-of-dictionary run coalesces into ONE token (graceful: the syllabifier then treats
-     * it as an unsegmented word).
+     * Segment a Thai run into words by DAG maximal-matching (FEWEST tokens) over `words`, with word
+     * boundaries CONSTRAINED to TCC cluster boundaries. An out-of-dictionary run coalesces into ONE token.
      */
     public static List<string> SegmentThai(string text, IReadOnlySet<string> words, int maxLen)
     {
@@ -38,7 +34,6 @@ public static class ThaiSegment
         return Core.Segment.SegmentByDag(cs, words, maxLen, ThaiTccBoundaries(cs));
     }
 
-    // Load the seg-words set (beside this file) once; longest entry bounds the DAG scan.
     private static (HashSet<string> Set, int MaxLen)? WORDS;
     private static readonly object GATE = new();
     private static (HashSet<string> Set, int MaxLen) Words()
@@ -46,7 +41,10 @@ public static class ThaiSegment
         lock (GATE) return WORDS ??= Core.Segment.LoadSegWords("languages/thai");
     }
 
-    /** Segment a Thai token into words via the seg-words DAG (a single in-dictionary word comes back unchanged). */
+    /**
+     * Segment a Thai token into words via the seg-words DAG (a single in-dictionary word comes back
+     * unchanged).
+     */
     public static List<string> Segment(string text)
     {
         var (set, maxLen) = Words();

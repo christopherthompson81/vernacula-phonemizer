@@ -1,9 +1,8 @@
 /**
- * Loads the Ukrainian data manifest (ukrainian.jsonc) once and exposes it typed. The TS declares this shape
- * inline in ukrainian.ts and re-loads the file in normalize.ts and romanOrdinals.ts, each for the slice it
- * needs; C# loads it once here and the three files read the same object. Hand-authored DATA only — the vowel
- * and consonant tables, the letter-environment sets, the clause marks, the number words with their East-Slavic
- * agreement forms, and the acronym list. The ALGORITHMS stay in code (ukrainian.cs / normalize.cs / numbers.cs).
+ * Loads the Ukrainian data manifest (ukrainian.jsonc) once and exposes it typed. ⚠ THE TS HAS NO SUCH MODULE:
+ * it declares the shape inline in ukrainian.ts and re-loads the file in normalize.ts and romanOrdinals.ts,
+ * each for the slice it needs; C# loads it once here and the three files read the same object.
+ * Ported from src/languages/ukrainian/ukrainian.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

@@ -1,8 +1,6 @@
 /**
- * Arabic number → canonical IPA (Modern Standard Arabic, counting/masculine forms). Emitted as IPA directly
- * (not spelled Arabic) because the g2p needs diacritics that a bare numeral spelling lacks. Structure: ones
- * precede tens joined by wa (٢١ → waːħid wa ʕiʃruːn); hundreds/thousands use construct + dual forms. Covers
- * 0 … <10⁹; gender agreement and rarer construct nuances are deferred. See the shim for the target forms.
+ * Arabic number → canonical IPA (Modern Standard Arabic, counting/masculine forms).
+ * Ported from src/languages/arabic/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

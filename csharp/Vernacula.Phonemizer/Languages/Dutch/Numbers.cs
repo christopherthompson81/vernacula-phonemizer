@@ -1,8 +1,6 @@
 /**
- * Dutch number → words (cardinals). Dutch writes numbers as single compound words with units before tens joined
- * by -en- (eenentwintig); a trema marks the connector after a vowel-final unit (tweeëntwintig, drieëntwintig).
- * Output is space-separated at the thousand/million boundaries so each chunk reads through the g2p; within a
- * chunk it stays compounded. Covers 0 … <10¹².
+ * Dutch number → words (cardinals).
+ * Ported from src/languages/dutch/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -54,7 +52,6 @@ public static class Numbers
             mil = Math.Floor(n % 1e9 / 1e6),
             th = Math.Floor(n % 1e6 / 1000),
             r = n % 1000;
-        // miljard / miljoen stay separate words; thousands compound onto their group (tweeduizend, honderdduizend).
         if (mrd != 0) parts.Add(mrd == 1 ? N.Milliard.Sg : $"{Below1000(mrd)} {N.Milliard.Pl}");
         if (mil != 0) parts.Add(mil == 1 ? N.Million.Sg : $"{Below1000(mil)} {N.Million.Pl}");
         if (th != 0) parts.Add($"{(th == 1 ? "" : Below1000(th))}{N.Thousand}");

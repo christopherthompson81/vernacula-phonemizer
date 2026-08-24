@@ -1,8 +1,6 @@
 /**
- * Loads the Quechua data manifest (quechua.jsonc) once at module init and exposes it typed. Both readers
- * import it from HERE rather than each calling loadManifest: quechua.ts already imports numbers.ts, so
- * having numbers.ts import the manifest back from quechua.ts would close an import cycle, and two
- * loadManifest calls would read and JSONC-parse the same file twice at startup.
+ * Loads the Quechua data manifest (quechua.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/quechua/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

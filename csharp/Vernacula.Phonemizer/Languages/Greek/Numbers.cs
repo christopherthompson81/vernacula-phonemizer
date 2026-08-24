@@ -1,12 +1,6 @@
 /**
- * Modern Greek cardinal number → words (space-separated; each runs through the g2p). Simplified counting form
- * (δέκα = 10, tens[]/hundreds[] tables, χίλια = 1000); the full gender/case agreement is contextual and not
- * modelled. Covers 0 … <10¹²; larger / non-finite → digit-by-digit. Numbers are unmeasured (the referees are
- * word-only) — best-effort.
- *
- * the 10⁶ ceiling was raised because the corpus's `5.000.000` (a period-grouped number, de-grouped by
- * normalize.ts step 7) fell off it and read as seven digit names — «πέντε μηδέν μηδέν μηδέν μηδέν μηδέν
- * μηδέν». εκατομμύριο/δισεκατομμύριο take the same singular-vs-plural shape as χίλια/χιλιάδες.
+ * Modern Greek cardinal number → words (space-separated; each runs through the g2p).
+ * Ported from src/languages/greek/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -37,9 +31,7 @@ public static class Numbers
 
     /**
      * The multiplier of χιλιάδες agrees with it, and χιλιάδα is FEMININE: «πεντακόσιες χιλιάδες», «τρεις
-     * χιλιάδες» — not the neuter πεντακόσια / τρία the tables hold. Only 1, 3, 4 and the hundreds inflect;
-     * everything else is invariant. Exposed by the digit de-grouping, which made the corpus's 50
-     * period-grouped numbers (1.000, 783.562) reach this path as whole integers for the first time.
+     * χιλιάδες» — not the neuter πεντακόσια / τρία the tables hold.
      */
     private static readonly IReadOnlyDictionary<string, string> FEMININE = new Dictionary<string, string>(StringComparer.Ordinal)
     {

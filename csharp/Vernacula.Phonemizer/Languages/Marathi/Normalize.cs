@@ -1,22 +1,7 @@
 /**
- * Marathi (mr) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
- *
- * ⚠ MARATHI SHARES HINDI'S SCRIPT AND HINDI'S ABUGIDA ENGINE (`makeNativeHindi`) BUT NOT HINDI'S
- * ORTHOGRAPHIC CONVENTIONS, and the two diverge in every tier this file touches: Marathi writes the
- * percent as टक्के (not प्रतिशत), the clock as वाजून/वाजता (not बजकर/बजे), and the ordinal suffix as
- * -व्या/-वा/-वी/-वे with its own suppletive 1–4. It also writes a large fraction of its numbers in
- * DEVANAGARI DIGITS, which every ASCII-defined rule misses — see step 2, and note that the same lead
- * FAILS for several sibling Indic languages, so it must be measured per language rather than assumed.
- *
- * ⚠ THE DANDA ।/॥ DOES NOT APPEAR — Marathi text of this kind uses the ASCII period. A negative result
- * worth recording, because it is the opposite of what the script suggests.
- *
- * ⚠ A NOTE ON THE SHARED ENGINE, which shapes several rules below. `makeNativeHindi` applies HINDI's
- * normalizer and HINDI's symbol tier to every language that reuses it, and there is no seam to pass a
- * different one. So this pass runs FIRST and must leave nothing behind that Hindi's pass can claim —
- * every rule here is written to consume its input completely. Where that forced a rule into a shape it
- * would not otherwise take, it is called out at the step (5, 7, 12).
+ * Marathi (mr) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the existing pipeline speaks.
+ * Ported from src/languages/marathi/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -24,19 +9,17 @@ namespace Vernacula.Phonemizer.Languages.Marathi;
 
 public static class Normalize
 {
-    /** Ordinal suffixes → the agreement slot they mark. Marathi attaches these to the cardinal (सोळावा,
-     *  पंधराव्या) and the suffix itself carries the agreement, so it is read off the text, not guessed.
-     *  Corpus: व्या ×36 (oblique, by far the most common — "१६व्या शतकात"), वा ×6, वे ×3. Longest first. */
+    /**
+     * Ordinal suffixes → the agreement slot they mark. Marathi attaches these to the cardinal and the suffix
+     * itself carries the agreement, so it is read off the text, not guessed. Matched LONGEST FIRST.
+     */
     private static readonly IReadOnlyDictionary<string, int> SUFFIX_FORM = new Dictionary<string, int>(StringComparer.Ordinal)
     {
         ["व्या"] = 3, ["वा"] = 0, ["वी"] = 1, ["वे"] = 2,
     };
     private static readonly string SUFFIX_ALT = string.Join("|", SUFFIX_FORM.Keys.OrderByDescending(k => k.Length));
 
-    /** Suppletive ordinals 1-4, indexed [masc, fem, plural/neuter, oblique]. Marathi's differ from Hindi's
-     *  (पहिला not पहला, तिसरा not तीसरा, and the oblique is -ऱ्या not -े). 5 upward are regular: the
-     *  cardinal stem plus the suffix. All four rows are corpus-attested (पहिल्या ×21, दुसऱ्या ×18,
-     *  तिसऱ्या ×2, चौथ्या ×1, चौथा ×2). */
+    /** Suppletive ordinals 1-4, indexed [masc, fem, plural/neuter, oblique]. */
     private static readonly IReadOnlyDictionary<int, string[]> IRREGULAR = new Dictionary<int, string[]>
     {
         [1] = new[] { "पहिला", "पहिली", "पहिले", "पहिल्या" },
@@ -45,24 +28,18 @@ public static class Normalize
         [4] = new[] { "चौथा", "चौथी", "चौथे", "चौथ्या" },
     };
 
-    /** Devanagari consonant letters (base + nukta block) — used to test whether a cardinal ends in a bare
-     *  consonant, which is what conditions the ordinal's linking -आ- (साठ → साठावा). */
+    /**
+     * Devanagari consonant letters (base + nukta block) — used to test whether a cardinal ends in a bare
+     * consonant, which is what conditions the ordinal's linking -आ- (साठ → साठावा).
+     */
     // ⚠ THE TWO NUKTA LETTERS IN THIS CLASS MUST BE PRECOMPOSED — U+0958 and U+095F, one code point each.
-    // Both are Unicode COMPOSITION EXCLUSIONS, so NFC will NOT rebuild them from base+U+093C; decomposed,
-    // the class gains two characters and its second range runs U+093C → U+092F, which .NET rejects as
-    // reversed. It throws at type-init, so all 200 golden rows fail at once. Identical to the Bengali
-    // ড়/য় crash in #891, one script over. (Named by code point rather than shown: writing the decomposed
-    // form here to illustrate it would plant the hazard in the file that warns about it.)
+    // Both are Unicode COMPOSITION EXCLUSIONS, so NFC will NOT rebuild them; decomposed, the class gains two
+    // characters and its second range runs U+093C → U+092F, which .NET rejects as reversed — a type-init
+    // throw that fails every golden row at once. (Named by code point rather than shown, so this warning
+    // does not itself plant the hazard.)
     private static readonly JsRe DEV_CONSONANT_FINAL = JsRegex.Compile("[क-हक़-य़]$", "u");
 
-    /**
-     * Devanagari unit abbreviations → the full Marathi word. The shared symbol tier
-     * (`core/normalizeSymbols.ts`) is keyed on the LATIN abbreviations, which is not what this corpus
-     * writes: किमी ×14, मिमी ×8, मी ×3, किमी/तास ×3, किमी² ×2, मिमी2 ×1. Unexpanded, किमी was read as a
-     * word, [kˈɪmiː]. The Latin `km²`/`mm2` forms are here too because Hindi's symbol tier declares no
-     * `exponentWords`, so its ² was dropped silently. Longest key first (किमी/तास must beat किमी).
-     * चौरस = "square", and it PRECEDES the unit in Marathi (चौरस किलोमीटर), unlike Italian/Polish.
-     */
+    /** Devanagari unit abbreviations → the full Marathi word. */
     private static readonly IReadOnlyDictionary<string, string> UNIT_WORD = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["किमी/ताशी"] = "किलोमीटर ताशी", // ताशी already means "per hour"; प्रति would double it
@@ -78,31 +55,17 @@ public static class Normalize
         ["km²"] = "चौरस किलोमीटर", ["km2"] = "चौरस किलोमीटर",
         ["m²"] = "चौरस मीटर", ["cm²"] = "चौरस सेंटीमीटर",
         ["mm²"] = "चौरस मिलीमीटर", ["mm2"] = "चौरस मिलीमीटर",
-        // The plain Latin units too. Hindi's shared tier already renders these and its words happen to be
-        // Marathi's as well, but the bare-hundred rewrite in step 14 turns `100 km` into `शंभर km`, which
-        // that tier can no longer match (its NUM is a digit run) — the Latin would have been stranded and
-        // read out as letter names. Owning them here settles the ordering. Single-letter `m` is deliberately
-        // NOT here: ⚠ a one-letter unit key matches alphanumeric designations, and the `100m`/`200m`
-        // that occur are swim events, not measurements.
-        // ⚠ ⟨ha⟩ ⟨l⟩ ⟨L⟩ BELONG HERE FOR THE SAME REASON, and declaring them ONLY in the shared tier is
-        // audibly wrong rather than merely redundant. Left to the tier, `100 ha` read *ˈeːk ʃˈeː ɦˈeːkʈəɾ* —
-        // शे is the COMBINING hundred, and the bare-hundred rewrite that produces शंभर for `100 km` never got
-        // to run. Same path, same number word: `100 ha` → शंभर हेक्टर. Their words are sourced in marathi.ts.
-        // ⚠ Single-letter ⟨g⟩ is NOT here either, and its counter-example is the one `NOT_VERSION` cannot
-        // see — a SPACED version designation, `802.11 g`. The shared guard requires the letter glued to the
-        // number, because `12.5 g` is a real measurement of exactly the spaced shape; this local rule has no
-        // version guard at all, so the key would be worse here than in the tier.
         ["km"] = "किलोमीटर", ["cm"] = "सेंटीमीटर", ["mm"] = "मिलीमीटर", ["kg"] = "किलोग्रॅम",
         ["ha"] = "हेक्टर", ["l"] = "लिटर", ["L"] = "लिटर",
     };
+    // Longest key first, and each key is guarded by `(?![\p{L}\p{M}])` at the use site — that is what keeps
+    // मी (metre) out of मीटर, मिनिटे and the pronoun मी.
     private static readonly JsRe UNIT_ESC = JsRegex.Compile("[.*+?^${}()|[\\]\\\\/]", "g");
     private static readonly string UNIT_ALT = string.Join("|", UNIT_WORD.Keys
         .OrderByDescending(k => k.Length)
         .Select(k => JsRegex.Replace(k, UNIT_ESC, m => "\\" + m.Value)));
 
-    /** Currency sign → the Marathi noun. डॉलर and येन are the fleet spellings; युरो and पौंड are the
-     *  Marathi ones (Hindi's tier says यूरो / पाउंड) — both are corpus-attested here as युरोज ×1 and
-     *  पौंड ×2 / पाउंड ×3. */
+    /** Currency sign → the Marathi noun (युरो / पौंड where Hindi's tier says यूरो / पाउंड). */
     private static readonly IReadOnlyDictionary<string, string> CURRENCY = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["$"] = "डॉलर", ["€"] = "युरो", ["¥"] = "येन", ["£"] = "पौंड", ["₹"] = "रुपये",
@@ -111,17 +74,14 @@ public static class Normalize
     /** Magnitude words that hop over the currency sign — "$२.३ बिलियन" is said "…बिलियन डॉलर". */
     private const string MAGNITUDE_ALT = "बिलियन|ट्रिलियन|मिलियन|दशलक्ष|अब्ज|कोटी|लाख|हजार";
 
-    /** The -तः adverbs, written in this corpus with an ASCII colon for the visarga (विशेषत: ×12,
-     *  सामान्यत: ×9, स्वत: ×3, साधारणत: ×2, संभाव्यत: ×1, अंशत: ×1). A CLOSED LIST, not the pattern
-     *  `त:` — that would also claim the genuine list colons in आहेत: ×5 and करतात: ×1, turning a phrase
-     *  break into a stray [h]. */
+    /** The -तः adverbs, commonly written with an ASCII colon standing in for the visarga. */
     private static readonly string TAH_ADVERB_ALT = string.Join("|", new[]
     {
         "विशेषत", "सामान्यत", "साधारणत", "संभाव्यत", "मुख्यत", "अंशत", "स्वत", "दुख",
     });
 
     // The step patterns. The TS builds each inline in the returned closure; JsRegex.Compile caches, so
-    // hoisting them is a readability choice and not a behaviour one.
+    // hoisting them here is a readability choice and not a behaviour one.
     private static readonly JsRe AE_DIGRAPH = JsRegex.Compile("अ[‌‍]?ॅ", "gu");
     private static readonly JsRe AO_DIGRAPH = JsRegex.Compile("अ[‌‍]?ॉ", "gu");
     private static readonly JsRe ZW_JOINERS = JsRegex.Compile("[‌‍]", "gu");
@@ -172,17 +132,7 @@ public static class Normalize
         var UNITS = new HashSet<string>(numbers.Units, StringComparer.Ordinal);
         var TEENS = new HashSet<string>(numbers.Teens ?? [], StringComparer.Ordinal);
 
-        /**
-         * The ordinal STEM of the last cardinal word. Marathi's ordinal is the cardinal plus -वा/-वी/-वे/-व्या,
-         * but the stem alternates and the alternation is conditioned by which slot the word came from:
-         *   units and teens take the suffix bare .... पाच→पाचवा, आठ→आठवा, सोळा→सोळावा, अठरा→अठराव्या
-         *   -ीस shortens to -िसा ..................... वीस→विसावा, एकोणीस→एकोणिसावा, सदतीस→सदतिसावा
-         *   other consonant-final tens/compounds/
-         *     magnitudes take a linking -आ- .......... साठ→साठावा, नव्वद→नव्वदावा, हजार→हजारावा, चोपन्न→चोपन्नाव्या
-         *   vowel-final ones take it bare ............ ऐंशी→ऐंशीवा, कोटी→कोटीवा
-         * The unit/teen test is what keeps आठ (8, आठवा) apart from साठ (60, साठावा) — they are homographs
-         * at the suffix and cannot be told apart by spelling alone.
-         */
+        /** The ordinal STEM of the last cardinal word. */
         string OrdinalStem(string w)
         {
             if (w == numbers.Magnitudes.Hundred) return "शंभरा"; // शे is the combining form; the ordinal is शंभरावा
@@ -198,8 +148,6 @@ public static class Normalize
                 IRREGULAR.TryGetValue((int)n, out var irr)) return irr[form];
             var words = Cardinal(n);
             if (words.Count == 0 || words.Any(w => w == "")) return null;
-            // The suffix JOINS the final cardinal word — सोळा + व्या is ONE word, सोळाव्या. Emitting them
-            // apart is what the engine did before this file existed, and it made [ʋjˈaː] a stray syllable.
             words[^1] = $"{OrdinalStem(words[^1])}{suffix}";
             return string.Join(" ", words);
         }
@@ -215,67 +163,25 @@ public static class Normalize
         {
             var s = input;
 
-            // 1) ZWJ / ZWNJ, and the अ‍ॅ digraph. FIRST, because U+200D is category Cf — neither \p{L} nor
-            //    \p{M} — so it silently defeats every `(?<![\p{L}\p{M}])` boundary guard used below, and
-            //    because `core/unicode.ts` DEVANAGARI_WORD ("ऀ-ॣॲ-ॿ") excludes it: आपल्‍या tokenized as two
-            //    words, आपल् + या → [ˈaːpəl jˈaː]. 66 instances. Stripping it is orthographically lossless.
-            //    अ‍ॅ / अॅ is the Marathi spelling of the loan vowel /æ/ and is folded to ऍ (candra e), which
-            //    the manifest already maps to ɛː; left as अ + ॅ it read as two vowels [ə ɛː].
             s = JsRegex.Replace(s, AE_DIGRAPH, _ => "ऍ");
             s = JsRegex.Replace(s, AO_DIGRAPH, _ => "ऑ");
             s = JsRegex.Replace(s, ZW_JOINERS, _ => "");
 
-            // 2) DEVANAGARI DIGITS → ASCII. Second, and before EVERY rule that follows, because all of them
-            //    — and the shared symbol tier, whose NUM is `\d+(?:[ ]\d{3}|[.,]\d+)*` — are ASCII-defined.
-            //    597 native digits in this corpus, and without this step the consequences were silent:
-            //    `$२२,५००` lost its डॉलर entirely (the sign is in neither `symbols` nor `stripSymbols`, so
-            //    the tokenizer simply never emitted it), `३५°` dropped its degree sign, `१५व्या` kept its
-            //    stray suffix syllable and `१/२` read as "एक दोन". The engine's own number() already folds
-            //    these digits to ASCII, so doing it here is loss-free.
             s = JsRegex.Replace(s, DEV_DIGIT, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0966));
 
-            // 3) The two colon/visarga confusions, both before the clock rule in step 7 (they compete for
-            //    the same characters).
-            //    3a) ः (visarga) written where a clock colon was meant: ११ः०० वाजता ×1, १ः२ ×1, १ः० ×1.
             s = JsRegex.Replace(s, VISARGA_CLOCK, m => $"{m.Groups[1].Value}:{m.Groups[2].Value}");
-            //    3b) ASCII ':' written where a visarga was meant. Word-INTERNAL is unambiguous (स्वत:चे —
-            //        a list colon is always followed by a space). Word-FINAL needs the closed adverb list.
             s = JsRegex.Replace(s, COLON_INTERNAL, _ => "ः");
             s = JsRegex.Replace(s, TAH_COLON, m => $"{m.Groups[1].Value}ः");
 
-            // 4) ERA MARKERS, before the abbreviation rule in step 5 so a bare इ. / स. / पू. is not claimed
-            //    first, and before anything that reads a dot as a phrase break: इ.स.पू. was producing three
-            //    of them ([ˈɪ . sˈə . pˈuː .]). The corpus writes both पू. and पु.; इ. ×5, स. ×4 and पू. ×3
-            //    occur ONLY inside these markers (checked — no bare-letter false positives).
-            //    BOTH इ and ई occur — the corpus writes ई.पू. once as well as इ.स.पू. ×4. That single instance
-            //    used to be caught by HINDI's era rule running after this pass, which expanded it to Hindi's
-            //    ईसा पूर्व; once Marathi supplied its own normalizer through the engine's override the Hindi
-            //    rule no longer ran and the dots reached the output as two spurious pauses. Claimed here now,
-            //    with Marathi's own wording rather than Hindi's.
             s = JsRegex.Replace(s, ERA_BCE_FULL, _ => "इसवी सन पूर्व");
             s = JsRegex.Replace(s, ERA_BCE_SHORT, _ => "इसवी सन पूर्व");
             s = JsRegex.Replace(s, ERA_CE, _ => "इसवी सन");
 
-            // 5) ABBREVIATIONS. डॉ. is the only one in this corpus (×6, always with the dot). The dot is
-            //    consumed so it cannot become a phrase break.
             s = JsRegex.Replace(s, DOCTOR, m => $"डॉक्टर{m.Groups[1].Value}");
 
-            // 6) ORDINALS. Before the numeral-spelling rule in step 6b, which exists only to mop up what
-            //    this step legitimately leaves behind.
-            //    THE BOUNDARY IS THE WHOLE RULE. `(?![\p{L}\p{M}])` after the suffix is not decoration: the
-            //    inherited Hindi rule has no such guard and its `वा` alternative matches the first two
-            //    characters of वाजता, वाजल्यानंतर, वाजण्याच्या, वादळे, वाईल्ड and (via वे) वेळा, वेगवेगळ्या —
-            //    13 live corruptions in this corpus, e.g. "8:30 वाजता" → [ˈaːʈʰ , t̪iːsʋˈaːd͡zt̪aː]. A
-            //    leading `(?<![\d.,])` likewise keeps the rule off the minute field of a clock time.
             s = JsRegex.Replace(s, ORDINAL, m =>
                 Ordinal(Js.Number(m.Groups[1].Value), SUFFIX_FORM[m.Groups[2].Value], m.Groups[2].Value) ?? m.Value);
 
-            // 6b) SPELL OUT a numeral that is still adjacent to a व-initial word. This rule exists for one
-            //     reason and is documented as a workaround rather than an idiom: the shared engine runs
-            //     Hindi's normalizer AFTER this one, and Hindi's unguarded ordinal rule would claim the वा /
-            //     वी / वे at the start of the following word (7 वेळा → "सातवाळा"-shaped glue). Removing the
-            //     digit removes the match. The output is correct Marathi either way — "सात वेळा", "पाच
-            //     वाजता", "चार वेगवेगळ्या" — so the cost is nil; only the MOTIVE is external.
             s = JsRegex.Replace(s, NUM_BEFORE_VA, m =>
             {
                 var n = Js.Number(m.Groups[1].Value);
@@ -286,25 +192,13 @@ public static class Normalize
                 return $"{string.Join(" ", words)}{(sp != "" ? sp : " ")}";
             });
 
-            // 7) TIMES. Two rules, and the guard between them is the point.
-            //    7a) SPORTS times mm:ss.hh — 4:41.30, 2:11.60, 1:09.02 (×3, all in swimming/athletics
-            //        contexts, all followed by मिनिटांच्या/मिनिटांनी). These are NOT clocks. The inherited
-            //        Hindi clock rule claims them (its `(?![\d:])` permits a following dot) and produced
-            //        "चार बजकर एकेचाळीस मिनट . तीस" — a bogus clock, a Hindi word, and a spurious phrase
-            //        break. Dropping the colon leaves two plain numbers, which is the honest reading and
-            //        which nothing downstream can re-claim.
-            //        (the trailing guard is `(?![\d:])`, NOT `(?![\d.,:])` — the corpus writes these in a
-            //        comma-separated list, "4:41.30, 2:11.60", and excluding a following comma made the rule
-            //        miss the first of the two.)
+            // Sports times (mm:ss.hh) FIRST, and the guard between the two time rules is the point: these are
+            // not clocks, but the inherited Hindi clock rule claims them. Dropping the colon leaves two plain
+            // numbers, which nothing downstream can re-claim.
             s = JsRegex.Replace(s, SPORTS_TIME, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
-            //    7b) The clock proper. `(?![\d:.])` is what refuses 7a's leftovers and any h:mm:ss. A
-            //        following वाजता is CONSUMED when the minutes are spoken, because वाजून already carries
-            //        its sense; at :00 the postposition is exactly right and is supplied when absent — but
-            //        NOT when the next word is another वाज- form ("11:00 वाजल्यानंतर" must not become
-            //        "अकरा वाजता वाजल्यानंतर").
-            //
-            //    ⚠ `whole` is the JS replacer's fifth argument — the subject string, snapshotted because `s`
-            //       is reassigned by every step.
+            // The clock proper; its `(?![\d:.])` is what refuses 7a's leftovers. `whole7b` stands in for the JS
+            // replacer's fifth argument (the subject string) and must be snapshotted, since `s` is reassigned
+            // by every step.
             var whole7b = s;
             s = JsRegex.Replace(s, CLOCK_COLON, m =>
             {
@@ -316,14 +210,8 @@ public static class Normalize
                 var rest = whole7b[(m.Index + m.Length)..];
                 return !string.IsNullOrEmpty(vaajta) || !VAAJ_NEXT.IsMatch(rest) ? $"{body} वाजता" : body;
             });
-            //    7c) The same clock written with a DOT, which only occurs beside a timezone marker in this
-            //        corpus ("१२.०० GMT वाजता", "(15.00 यूटीसी)"). No वाजता is added — the sentence already
-            //        carries one after the timezone, and adding a second read as "बारा वाजता GMT वाजता".
             s = JsRegex.Replace(s, CLOCK_DOT_TZ, m => Clock(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
 
-            // 8) DEGREES, before the signs in step 14 so the ° still has its digit adjacent ("+30°से."). अंश
-            //    is the Marathi word (corpus-attested in "90(फ)- अंश तापमानात"), not Hindi's डिग्री. से. is
-            //    the corpus's abbreviation for सेल्सिअस and its dot must be eaten, or it becomes a break.
             s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} अंश सेल्सिअस");
             s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} अंश फॅरेनहाइट");
             s = JsRegex.Replace(s, DEG_N, m => $"{m.Groups[1].Value} अंश उत्तर");
@@ -332,39 +220,19 @@ public static class Normalize
             s = JsRegex.Replace(s, DEG_W, m => $"{m.Groups[1].Value} अंश पश्चिम");
             s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} अंश");
 
-            // 9) PERCENT. Must precede the shared symbol tier, which is Hindi's and says प्रतिशत: the
-            //    corpus's own word, nine times over, is टक्के. (The ASCII-digit half of the corpus was
-            //    getting प्रतिशत while the Devanagari-digit half fell through to the manifest's टक्के — the
-            //    same document read two different languages depending on which digits it used.) टक्का is
-            //    the singular.
             s = JsRegex.Replace(s, PERCENT, m =>
             {
                 var n = m.Groups[1].Value;
                 return $"{n} {(Js.Number(JsRegex.Replace(n, COMMA_G, _ => "")) == 1 ? "टक्का" : "टक्के")}";
             });
 
-            // 10) CURRENCY, likewise before the shared tier (which would give यूरो / पाउंड for € / £). The
-            //     sign is always PRE-posed in this corpus and the noun always follows the number, with any
-            //     magnitude word hopping along: "$२.३ बिलियन" → "२.३ बिलियन डॉलर".
             s = JsRegex.Replace(s, CURRENCY_RE, m =>
                 $"{m.Groups[2].Value}{(m.Groups[3].Success ? m.Groups[3].Value : "")} {CURRENCY[m.Groups[1].Value]}");
 
-            // 11) UNITS. After the clock (step 7) so that no rule looking for a bare number can claim a
-            //     time, and after currency so the magnitude hop is already done; before the fraction rule in
-            //     step 13, whose solidus would otherwise have to compete with किमी/तास. The shared tier
-            //     matches a unit only when a NUMBER is adjacent and these keys are Devanagari, so this stays
-            //     local. `(?![\p{L}\p{M}])` after the key is what keeps मी (metre) out of मीटर, मिनिटे and
-            //     the pronoun मी — the same over-counting trap any short unit key has in an abugida.
             s = JsRegex.Replace(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
 
-            // 12) RANGES N-M → "N ते M". THE ASCENDING GUARD IS EVIDENCE, NOT CAUTION. Of the 17 hyphenated
-            //     number pairs in this corpus, 4 are sports results — 5-3 (a hockey win), 7-2 (a head-to-head
-            //     record), ६-६ (a tennis tie-break), २६-०० (a rugby scoreline) — where "ते" ("to") is simply
-            //     wrong and the silent hyphen the engine already produces is correct. Every one of those 4 is
-            //     descending or equal, and every one of the 11 genuine ranges (१६४४-१९१२, ३५-४० मीटर,
-            //     १०००-१३००, 100-200 मैल, 1469-1539 …) is ascending. So the rule fires only when b > a:
-            //     11 gained, 0 broken, 2 real ranges deliberately missed (१९९५-९६, an abbreviated year span,
-            //     and 4.2-3.9, a descending "million years ago" span).
+            // Ranges N-M → "N ते M", but ONLY when ascending: a descending or equal pair is a sports result,
+            // where "ते" would be wrong and the silent hyphen the engine already produces is correct.
             s = JsRegex.Replace(s, RANGE, m =>
             {
                 var a = m.Groups[1].Value;
@@ -372,9 +240,6 @@ public static class Normalize
                 return Js.Number(b) > Js.Number(a) ? $"{a} ते {b}" : m.Value;
             });
 
-            // 13) FRACTIONS. अर्धा / पाव / पाऊण are suppletive; anything else is the ordinary spoken
-            //     division form "n भागिले m" (Marathi's equivalent of Hindi बटा, which the inherited pass
-            //     would otherwise emit into Marathi output). Corpus: १/२, ३/४, 1/5 — all in measurements.
             s = JsRegex.Replace(s, FRACTION, m =>
             {
                 double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
@@ -386,46 +251,11 @@ public static class Normalize
                 return nw == "" || dw == "" ? m.Value : $"{nw} भागिले {dw}";
             });
 
-            // 14) THE BARE HUNDRED. The manifest's `hundred` is शे, the COMBINING form (दोनशे, आठशे); a
-            //     standalone 100 is शंभर, which the compositor cannot express because it emits
-            //     units[h] + hundred unconditionally. Runs AFTER the range rule in step 12, which needs the
-            //     digits, and is guarded against the dash on both sides so "100-200 मैल" and "100-मीटर"
-            //     keep theirs. `(?!\s*[A-Za-z])` was added after the corpus diff caught this rule producing
-            //     `शंभरm` from the swim event "100m आणि 200m" — the guard leaves any digits+Latin pair alone.
             s = JsRegex.Replace(s, BARE_HUNDRED, _ => "शंभर");
 
-            // 15) SIGNS. Plus and the approximation tilde only. ⚠ THE MINUS RULE IS DELIBERATELY NOT APPLIED:
-            //     Devanagari compounds are written with a hyphen (आस-पास), and the hyphen-before-digit that
-            //     occurs outside a range is a designation — "चंद्रयान -1", a spacecraft name — where reading
-            //     "उणे एक" ("minus one") is worse than silence.
             s = JsRegex.Replace(s, PLUS, _ => " अधिक ");
             s = JsRegex.Replace(s, TILDE, _ => " सुमारे ");
 
-            // 15b) THE RELATIONAL AND DIVISION SIGNS, and ±. ⚠ All sourced from running text rather than from
-            //      Marathi's own arithmetic articles, which write the notation instead of reading it — `बरोबर`,
-            //      `भागिले` and `पेक्षा कमी` are all ×0 there.
-            //
-            //      ⚠ THE COMPARATIVES ARE POSTPOSITIONAL, so they use core/postposedSign.ts rather than a
-            //      substitution: Marathi states the standard first and the comparative after it, and the corpus
-            //      writes पेक्षा FUSED to the standard — "एका मैलापेक्षा कमी" (less than one mile) ×8,
-            //      "१०० फुटांपेक्षा जास्त" (more than 100 feet) ×23. An infix rule would read the comparison
-            //      BACKWARDS — the same hazard any postpositional or verb-final language poses.
-            //
-            //      ⚠ THE DIVISION IS POSTPOSITIONAL TOO. A PARALLEL corpus is what settles this: the same
-            //      sentence performs a division aloud across many languages, and the Marathi rendering is
-            //      "बाराने भागणे" — instrumental -ने on the operand, THEN भागणे. So `A ÷ B` is "A, by B,
-            //      dividing". `भागिले`, the infix school form, is ×0 everywhere measured.
-            //
-            //      ⚠ AND `बरोबर` IS A HOMOGRAPH MAJORITY. Most of its tokens are the postposition "with" —
-            //      "तुमच्या बरोबर" (with you), "त्याच बरोबर" (along with that) — but the equality sense is present
-            //      and is the arithmetic reading: "तो बरोबर आहे" (it is correct), "अनुक्रमे बरोबर" (respectively
-            //      equal). COUNTED alone the word looks wrong; READ, it is right.
-            //
-            //      ± pairs this file's own अधिक with उणे — the word the minus note in step 15 names as the
-            //      reading it declined, so both halves are already cited in this file.
-            // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the
-            //    preceding word: `तापमान±5` reads *t̪ˈaːpmaːnəəd̪ʱɪk*, one token, with the stress of neither.
-            //    The shared symbol tier's `ampersand` note records the same hazard for the same reason.
             s = JsRegex.Replace(s, PLUSMINUS, _ => " अधिक उणे ");
             s = PostposedSignPass.PostposedSign(s, "<", "पेक्षा कमी");
             s = PostposedSignPass.PostposedSign(s, ">", "पेक्षा जास्त");

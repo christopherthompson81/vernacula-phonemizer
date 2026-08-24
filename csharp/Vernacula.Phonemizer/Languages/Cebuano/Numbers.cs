@@ -1,7 +1,6 @@
 /**
- * Cebuano cardinal number → words. Native Cebuano: tens are irregular ka-…-an forms (explicit table), compounds
- * join tens-first with the ligature "ug" (napulo ug usa = 11, kaluhaan ug usa = 21); hundreds/thousands use the
- * "ka" ligature (duha ka gatos). Covers 0 … <10⁶. Spanish numerals (uno, dos) common in speech are not modelled.
+ * Cebuano cardinal number → words.
+ * Ported from src/languages/cebuano/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

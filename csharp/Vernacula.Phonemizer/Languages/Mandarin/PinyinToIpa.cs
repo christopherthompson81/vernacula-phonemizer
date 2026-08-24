@@ -1,10 +1,6 @@
 /**
  * Pinyin → canonical IPA.
- *
- * A tokenized pinyin string (`ni3 hao3`, `zhong1 guo2`) becomes canonical IPA: each syllable is looked up
- * in the toneless syllable→IPA table, third-tone sandhi is applied over the tone-number sequence, and the
- * Chao tone is appended at the syllable end. The table + tone system are DATA (syllable-ipa.tsv, cmn.jsonc);
- * this file is the engine (sandhi + assembly), so it ports cleanly and mirrors the Hindi/English split.
+ * Ported from src/languages/mandarin/pinyinToIpa.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -45,7 +41,7 @@ public static class PinyinToIpa
 
     /**
      * Third-tone sandhi over a syllable run: a 3rd tone immediately before another 3rd tone surfaces as 2nd
-     * (你好 nǐ hǎo → ní hǎo). Applied left-to-right pairwise; the final 3rd tone in a run stays 3rd.
+     * (你好 nǐ hǎo → ní hǎo). Applied left-to-right pairwise; the last 3rd tone in a run stays 3rd.
      */
     public static List<int> ApplyThirdToneSandhi(IReadOnlyList<int> tones, (int From, int Before, int To) rule)
     {

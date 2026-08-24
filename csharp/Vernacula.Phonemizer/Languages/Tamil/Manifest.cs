@@ -1,19 +1,12 @@
 /**
- * Loads the Tamil data manifest (tamil.jsonc) once at module init and exposes it typed. The manifest IS the
- * language data: the abugida definition (consonants / vowels / signs — read by the shared core/abugida.ts G2P),
- * plus the Tamil-specific post-pass DATA (the Dravidian voicing classes, clause punctuation, and the cardinal
- * number words). The ALGORITHMS that read it stay in code (tamil.ts / numbers.ts): the IPA-unit segmenter, the
- * context-sensitive voicing allophony, the two-level stress pass, and the number compositor.
+ * Loads the Tamil data manifest (tamil.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/tamil/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.Tamil;
 
-/**
- * The Tamil cardinal tables. Tamil numerals are SANDHI-FUSED, so every level needs two forms: the free
- * form (exact multiple — இருபது, நூறு, ஆயிரம்) and the COMBINING/oblique form used when a remainder
- * follows it (இருபத்தி, நூற்றி, ஆயிரத்து). 11–19 are suppletive and listed outright.
- */
+/** The Tamil cardinal tables. */
 public sealed class TamilNumbers
 {
     public string[] Units { get; init; } = [];

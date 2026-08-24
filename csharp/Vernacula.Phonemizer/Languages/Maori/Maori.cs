@@ -1,8 +1,6 @@
 /**
- * Māori (mi) phonemizer — te reo Māori, Eastern Polynesian, Latin script, canonical IPA. One of
- * the simplest orthographies in the fleet: a near-1:1 phonemic grapheme map + the macron = LENGTH + two digraphs
- * (⟨wh⟩→[ɸ], ⟨ng⟩→[ŋ]). Strict CV syllables — no codas, no clusters, no glide formation, so a plain longest-match
- * scan suffices. Stress (mora-based, unwritten) is not emitted. Cardinal numbers: numbers.ts (the modern tekau mā series).
+ * Māori (mi) phonemizer — te reo Māori, Eastern Polynesian, Latin script, canonical IPA.
+ * Ported from src/languages/maori/maori.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -32,7 +30,10 @@ public sealed class MaoriPhonemizer : ILanguage
     private static bool StartsWithAt(string w, string key, int i) =>
         i + key.Length <= w.Length && string.CompareOrdinal(w, i, key, 0, key.Length) == 0;
 
-    /** Phonemize a single Māori word to canonical IPA — a longest-match scan (the ⟨wh ng⟩ digraphs, then single graphemes). */
+    /**
+     * Phonemize a single Māori word to canonical IPA — a longest-match scan (the ⟨wh ng⟩ digraphs, then
+     * single graphemes).
+     */
     public static string PhonemizeWord(string word)
     {
         var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
@@ -50,9 +51,8 @@ public sealed class MaoriPhonemizer : ILanguage
                 break;
             }
             if (matched) continue;
-            // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
-            // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
-            // has been tried, so it can never override a reading this language has an opinion about.
+            // Fall-through, reached only after every digraph and single-grapheme rule has declined: a letter
+            // with no rule still denotes a sound, so read it generically rather than dropping it.
             var ch = w[i].ToString();
             var ph = G.TryGetValue(ch, out var g) ? g : LatinPhones.LatinPhone(ch, new PhoneOpts { Initial = i == 0 });
             if (ph is not null) outp.Add(ph);
@@ -61,27 +61,18 @@ public sealed class MaoriPhonemizer : ILanguage
         return string.Concat(outp);
     }
 
-    // A word (Māori Latin letters incl. the macron vowels ā ē ī ō ū) / number / punctuation token.
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"({HostWord.HostWordRun(new[] { "Latin" }, "'ʻ-")})|(\\d+)|([.!?…,;:])", "gu");
 
-    /**
-     * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
-     * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters.
-     */
+    /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zāēīōūA-ZĀĒĪŌŪ'ʻ-]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "u");
 
     /**
-     * Can Māori spell this word at all? Decides ROUTING, and it is a different question from `NATIVE_CLASS`.
-     *
-     * ⚠ `NATIVE_CLASS` IS THE TOKEN CLASS, NOT THE ALPHABET — it spans `a-zA-Z`, because that is what the tokenizer
-     * needs in order to claim a word at all. Using it to decide routing routes NOTHING: `Safari` is entirely ASCII,
-     * so it tests as native and never reaches the reader.
-     *
-     * ⚠ IT WALKS THE WORD THE WAY THE G2P DOES — longest digraph first, then a single grapheme — rather than testing
-     * membership in a flat letter set. A flat set has to admit `g` for the sake of ⟨ng⟩, and then a standalone `g`
-     * slips through: `heritage` tested as Māori-spellable and was read *heɾitaɡ* instead of being routed.
+     * Can Māori spell this word at all? Decides ROUTING — a different question from `NATIVE_CLASS`, which is
+     * the TOKEN class and spans `a-zA-Z`, so testing against it would route nothing. ⚠ Walks the word the way
+     * the g2p does (longest digraph first) rather than testing a flat letter set: a flat set has to admit `g`
+     * for ⟨ng⟩, and then a standalone `g` slips through and `heritage` reads as Māori.
      */
     private static bool IsNativeWord(string word)
     {
@@ -113,20 +104,13 @@ public sealed class MaoriPhonemizer : ILanguage
     {
         return Clauses.AssembleClauses(Normalize.NormalizeMaori(input), TOKEN, (m, sink) =>
         {
-            // ⚠ A NON-MĀORI WORD IS ROUTED, NOT NATIVISED. Māori is strictly (C)V — no codas, no clusters — and a
-            // letter-by-letter substitution cannot repair either, because it has no notion of syllable structure.
-            // Giving each missing letter a phone stopped the DELETION (`Safari` had been reading *aaɾi*) and left the
-            // reading phonotactically illegal: `Xerox` → *kseɾoks*. Real Māori nativisation inserts an echo vowel and
-            // resolves every cluster — Christmas → Kirihimete — which is per-language loan phonology, not a letter
-            // table. Until that exists, an English reading is the honest answer for a word Māori cannot spell.
-            //
-            // The floor stays underneath: `nat` still applies on the native branch, and `latinPhone` still backs the
-            // g2p, for the case where no reader is injected (direct engine use, or a test).
+            // ⚠ A NON-MĀORI WORD IS ROUTED, NOT NATIVISED: Māori is strictly (C)V, and a letter-by-letter
+            // substitution has no notion of syllable structure, so it yields phonotactically illegal output
+            // (`Xerox` → *kseɾoks*). With no reader injected, the native branch is still the floor.
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0)
                 sink.Emit(IsNativeWord(m.Groups[1].Value) || _foreign is null
                     ? PhonemizeWord(Nat(m.Groups[1].Value))
                     : _foreign(m.Groups[1].Value));
-            // Cardinal numbers (numbers.ts) — emitted one word at a time, as for ordinary text.
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value)).Split(' ')) sink.Emit(PhonemizeWord(wd));
             else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
@@ -136,10 +120,12 @@ public sealed class MaoriPhonemizer : ILanguage
         });
     }
 
-    /** Build the Māori phonemizer (direct phonemic g2p + macron length + the ⟨wh ng⟩ digraphs + cardinal numbers). */
+    /**
+     * Build the Māori phonemizer (direct phonemic g2p + macron length + the ⟨wh ng⟩ digraphs + cardinal
+     * numbers).
+     */
     public static ILanguage CreateMaori(ForeignPhonemizer? foreign = null) => new MaoriPhonemizer(foreign);
 
-    // TS: createMaori(readAsEnglish) — the registry threads its English reader in.
     internal static void RegisterSelf() =>
         Registry.Register("maori", () => CreateMaori(latin => Registry.ReadAsEnglish(latin)));
 }

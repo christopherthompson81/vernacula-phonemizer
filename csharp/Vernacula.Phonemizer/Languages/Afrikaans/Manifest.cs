@@ -1,7 +1,6 @@
 /**
- * Loads the Afrikaans data manifest (afrikaans.jsonc) once at module init and exposes it typed. Holds the
- * hand-authored DATA tables (fixed graphemes/consonants, long/short bare-vowel maps, diacritic vowels, clause
- * punctuation). The open/closed vowel-length lookahead + final devoicing ALGORITHM lives in afrikaans.ts.
+ * Loads the Afrikaans data manifest (afrikaans.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/afrikaans/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -61,10 +60,16 @@ public sealed class AfrikaansManifest
     /** The voiceless obstruents of the inventory — the regressive-devoicing trigger, derived over `fixed`. */
     public IReadOnlyList<string> VoicelessPhones { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, string> UnstressedReduction { get; init; } = new Dictionary<string, string>();
-    /** Unstressed but OPEN syllable — the tense quality, taken short. Only the cells that differ from `unstressedReduction`. */
+    /**
+     * Unstressed but OPEN syllable — the tense quality, taken short. Only the cells that differ from
+     * `unstressedReduction`.
+     */
     public IReadOnlyDictionary<string, string?> UnstressedOpen { get; init; } = new Dictionary<string, string?>();
     public IReadOnlyList<string> CSoftBefore { get; init; } = Array.Empty<string>();
-    /** Morpheme-initial obstruents after which ⟨w⟩ is the glide [w] rather than [v] (swaar, twee, kwaad, dwaal). */
+    /**
+     * Morpheme-initial obstruents after which ⟨w⟩ is the glide [w] rather than [v] (swaar, twee, kwaad,
+     * dwaal).
+     */
     public IReadOnlyList<string> WGlideAfter { get; init; } = Array.Empty<string>();
     /** Derived: word-final suffix → syllables-from-the-END carrying primary stress (0 = final). */
     public IReadOnlyDictionary<string, double> StressFromEnd { get; init; } = new Dictionary<string, double>();
@@ -97,6 +102,9 @@ public static class Manifest
     public static readonly AfrikaansManifest MANIFEST =
         LoadManifest.Load<AfrikaansManifest>("languages/afrikaans", "afrikaans.jsonc");
 
-    /** Fixed grapheme keys sorted length-descending so the greedy scan tries trigraphs/digraphs before single letters. */
+    /**
+     * Fixed grapheme keys sorted length-descending so the greedy scan tries trigraphs/digraphs before single
+     * letters.
+     */
     public static readonly List<string> FIXED_KEYS = MANIFEST.Fixed.Keys.OrderByDescending(k => k.Length).ToList();
 }

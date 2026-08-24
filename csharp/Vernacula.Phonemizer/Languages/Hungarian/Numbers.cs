@@ -1,8 +1,6 @@
 /**
- * Hungarian cardinal number → words. Hungarian writes a number as ONE concatenated word (kétszázharmincnégy);
- * the tens 20 use the bound form "huszon-" (huszonegy) and "tíz" the "tizen-" teens; "2" is "két" before a scale
- * (kétszáz, kétezer) but "kettő" standalone/final. Covers 0 … <10⁹ (a space precedes millió/ezer groups only at
- * the millió boundary). Larger / non-finite → digit-by-digit.
+ * Hungarian cardinal number → words.
+ * Ported from src/languages/hungarian/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -29,11 +27,8 @@ public static class Numbers
 
     /**
      * STEM SHORTENING before a VOWEL-INITIAL suffix — the ordinary Hungarian alternations, needed because the
-     * hyphen-suffix rule concatenates onto the spoken numeral: `2022-es` is *kétezerhuszonkettes* (not
-     * *kettőes*), `1943-as` *…negyvenhármas* (not *hármas*'s stem being optional — *háromas* is not a word),
-     * `1907-es` *…hetes*, `36-an` *harminchatan* (no change), `1000-es` *ezres*. Only these four morphs
-     * alternate; every other cardinal takes the suffix unchanged (négyes, ötös, hatos, tízes, húszas,
-     * százas, harmincas …).
+     * hyphen-suffix rule concatenates onto the spoken numeral (`2022-es` → *kétezerhuszonkettes*). Only these
+     * four morphs alternate; every other cardinal takes the suffix unchanged.
      */
     // ⚠ INSERTION-ORDERED, and the order is the TS object's: `Object.entries` yields declaration order and
     // the loop below takes the FIRST match, so a Dictionary (which preserves insertion order here) keeps it.
@@ -43,7 +38,9 @@ public static class Numbers
     };
     private static readonly JsRe VOWEL_INITIAL = JsRegex.Compile("^[aáeéiíoóöőuúüű]", "u");
 
-    /** Apply the stem shortening above, if `suffix` is vowel-initial and `word` ends in an alternating morph. */
+    /**
+     * Apply the stem shortening above, if `suffix` is vowel-initial and `word` ends in an alternating morph.
+     */
     public static string StemForSuffix(string word, string suffix)
     {
         if (!VOWEL_INITIAL.IsMatch(suffix)) return word;
@@ -77,14 +74,9 @@ public static class Numbers
             mil = Math.Floor(n % 1e9 / 1e6),
             thg = Math.Floor(n % 1e6 / 1000),
             r = n % 1000;
-        // The multiplier before a scale word: 1→"egy", else the composed group in its ATTRIBUTIVE form —
-        // *kettő* becomes *két* before a noun, and that holds for a compound multiplier too: 22 000 is
-        // huszon**két**ezer, not *huszonkettőezer*, and 22 million huszonkét millió. Only `c === 2` was
-        // handled before, so every multiplier ENDING in 2 read the free-standing form.
         static string Mult(double c) => c == 1 ? "egy" : Attributive(Below1000(c));
         if (mrd != 0) parts.Add($"{Mult(mrd)} {N.Milliard}");
         if (mil != 0) parts.Add($"{Mult(mil)} {N.Million}");
-        // thousands + remainder concatenate into one word (kétezer-…); "2" before ezer → "két".
         var word = "";
         if (thg != 0) word += thg == 1 ? N.Thousand : $"{Attributive(Below1000(thg))}{N.Thousand}";
         if (r != 0) word += Below1000(r);
@@ -92,16 +84,7 @@ public static class Numbers
         return string.Join(" ", parts);
     }
 
-    /**
-     * The ORDINAL form of each morph that can END a Hungarian cardinal. Hungarian ordinal formation is
-     * entirely regular — the cardinal plus `-dik` with a linking vowel — and it applies to the LAST morph of
-     * the compound only: *ezernyolcszáznegyven·nyolcadik*, *kétszáznegyvenhetedik*, *százkilencvenedik*. The
-     * stem changes are the ordinary ones the language already shows (húsz → husza-, tíz → tize-, ezer →
-     * ezre-, millió → milliomo-), which is why this is a table of morphs and not of numbers.
-     *
-     * `egy`/`kettő` map to their COMBINING forms here (*huszonegyedik*, *tizenkettedik*); standalone 1 and 2
-     * are the suppletive *első* / *második* and are special-cased in `ordinalWords`.
-     */
+    /** The ORDINAL form of each morph that can END a Hungarian cardinal. */
     private static readonly IReadOnlyDictionary<string, string> ORDINAL_MORPH = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["nulla"] = "nulladik", ["egy"] = "egyedik", ["kettő"] = "kettedik", ["három"] = "harmadik", ["négy"] = "negyedik",
@@ -111,23 +94,13 @@ public static class Numbers
         ["kilencven"] = "kilencvenedik", ["száz"] = "századik", ["ezer"] = "ezredik", ["millió"] = "milliomodik",
         ["milliárd"] = "milliárdodik",
     };
-    // LONGEST FIRST: `kilencven` must beat nothing, but `negyven` must not be shadowed by `négy` — matching
-    // is by suffix, so the longest matching key is the real final morph.
+    // LONGEST FIRST: matching is by suffix, so `negyven` must not be shadowed by `négy`.
     private static readonly IReadOnlyList<string> ORDINAL_KEYS =
         ORDINAL_MORPH.Keys.OrderByDescending(k => k.Length).ToList();
 
     /**
      * MULTIPLICATIVE (-szor / -szer / -ször), which is how Hungarian reads a dimension `×` — `6 × 6 cm` is
-     * *hatszor hat centiméter*. Sourced from the corpus's own audio: facebook/wav2vec2-xlsr-53-espeak-cv-ft
-     * over hu_hu/train gives `h ɔ t s oː r  h ɔ t  ts ɛ n t i m eː ɾ t ə` and
-     * `ɔ n y t v ɛ n  h ɔ t s oː r  y t v ɛ n h ɔ t  m i l i m eː t ə r` — hatszor hat, ötvenhatszor ötvenhat.
-     *
-     * A TABLE, NOT A HARMONY RULE, and that is the point. The allomorph looks like ordinary back/front harmony on
-     * the last vowel — hat→hatszor (back), öt→ötször (front rounded), tíz→tízszer (front unrounded) — but
-     * `harminc` breaks it: its only vowel that matters is a front `i`, and the form is *harmincszor*, back. It is
-     * one of Hungarian's anti-harmonic stems. The numerals are a closed set, so an exact table cannot be wrong
-     * where a derived rule would be, exactly as ORDINAL_MORPH above is a table for the same reason.
-     * `kettő` is suppletive here too: *kétszer*, not *kettőszor*.
+     * *hatszor hat centiméter*.
      */
     private static readonly IReadOnlyDictionary<string, string> MULTIPLICATIVE_MORPH = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -138,16 +111,15 @@ public static class Numbers
         ["kilencven"] = "kilencvenszer", ["száz"] = "százszor", ["ezer"] = "ezerszer", ["millió"] = "milliószor",
         ["milliárd"] = "milliárdszor",
     };
-    // LONGEST FIRST, for the reason ORDINAL_KEYS gives: `negyven` must not be shadowed by `négy`.
+    // LONGEST FIRST, for the reason ORDINAL_KEYS gives.
     private static readonly IReadOnlyList<string> MULTIPLICATIVE_KEYS =
         MULTIPLICATIVE_MORPH.Keys.OrderByDescending(k => k.Length).ToList();
 
     private static readonly JsRe HAS_DIGIT = JsRegex.Compile("\\d", "u");
 
     /**
-     * Non-negative integer → the Hungarian MULTIPLICATIVE word (hatszor, ötvenhatszor), or `undefined` where the
-     * cardinal could not be composed. The suffix fuses onto the LAST morph of the compound, which is why
-     * `ötvenhat` yields *ötvenhatszor* — the same last-morph replacement `ordinalWords` performs.
+     * Non-negative integer → the Hungarian MULTIPLICATIVE word (hatszor, ötvenhatszor), or `undefined` where
+     * the cardinal could not be composed.
      */
     public static string? MultiplicativeWords(double n)
     {
@@ -164,8 +136,7 @@ public static class Numbers
 
     /**
      * Non-negative integer → the Hungarian ORDINAL word, or `undefined` where the cardinal itself could not
-     * be composed (≥10¹², where `numberToWords` falls back to digit-by-digit). 1 and 2 standing alone are
-     * the suppletive *első* / *második*; everything else is the cardinal with its final morph replaced.
+     * be composed (≥10¹², where `numberToWords` falls back to digit-by-digit).
      */
     public static string? OrdinalWords(double n)
     {

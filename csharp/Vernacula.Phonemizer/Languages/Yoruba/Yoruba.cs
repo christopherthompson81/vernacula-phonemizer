@@ -1,9 +1,6 @@
 /**
- * Native Yoruba / Èdè Yorùbá (yo) text phonemizer — canonical IPA. Volta-Niger (Niger-Congo),
- * a highly PHONEMIC three-tone Latin orthography, so a near one-to-one rule-based g2p. Signature features: the
- * labial-velars ⟨gb⟩→ɡ͡b / ⟨p⟩→k͡p (no plain /p/), ⟨j⟩→d͡ʒ, ⟨ṣ⟩→ʃ, ⟨r⟩→ɾ; the dotted-below vowels ẹ→ɛ ọ→ɔ; NASAL
- * vowels from a coda ⟨n⟩ (ọn→ɔ̃; an onset n before a vowel stays n); syllabic nasals m̩/n̩; and THREE level tones
- * on each vowel/syllabic nasal — High=acute ˥, Mid=unmarked ˧, Low=grave ˩ (Chao letters). Epitran-validated.
+ * Native Yoruba / Èdè Yorùbá (yo) text phonemizer — canonical IPA.
+ * Ported from src/languages/yoruba/yoruba.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -46,7 +43,6 @@ public sealed class YorubaPhonemizer : ILanguage
         for (var i = 0; i < n;)
         {
             var c = s[i];
-            // Base vowel + its combining marks (dot-below → ẹ/ọ, tone accent).
             if (IsVowelLetter(c))
             {
                 var ipa = DEF.Vowels[c];
@@ -64,7 +60,6 @@ public sealed class YorubaPhonemizer : ILanguage
                 segs.Add(new Seg { Ph = ipa, Tone = tone });
                 continue;
             }
-            // ⟨n⟩: syllabic n̩ (before a tone mark), onset n (before a vowel), else a coda that nasalises the vowel.
             if (c == "n")
             {
                 var nx = i + 1 < n ? s[i + 1] : null;
@@ -90,7 +85,6 @@ public sealed class YorubaPhonemizer : ILanguage
                 }
                 continue;
             }
-            // ⟨m⟩: syllabic m̩ before a tone mark, else a plain onset m.
             if (c == "m")
             {
                 var nx = i + 1 < n ? s[i + 1] : null;
@@ -110,7 +104,6 @@ public sealed class YorubaPhonemizer : ILanguage
                 }
                 continue;
             }
-            // ⟨gb⟩ digraph → ɡ͡b; ⟨gh⟩ → ɣ (dialectal / loan grapheme).
             if (c == "g" && i + 1 < n && s[i + 1] == "b")
             {
                 segs.Add(new Seg { Ph = DEF.Consonants["gb"] });
@@ -123,7 +116,6 @@ public sealed class YorubaPhonemizer : ILanguage
                 i += 2;
                 continue;
             }
-            // ⟨w⟩ after a consonant onset, before a vowel → labialisation on that consonant (ẹgwa→ɛɡʷa).
             if (c == "w"
                 && segs.Count > 0
                 && segs[^1].Tone is null
@@ -133,7 +125,6 @@ public sealed class YorubaPhonemizer : ILanguage
                 i++;
                 continue;
             }
-            // ⟨s⟩ + dot-below → ʃ (ṣ).
             if (c == "s")
             {
                 if (i + 1 < n && s[i + 1] == DOT_BELOW)
@@ -154,10 +145,10 @@ public sealed class YorubaPhonemizer : ILanguage
                 i++;
                 continue;
             }
-            // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
-            // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
-            // has been tried, so it can never override a reading this language has an opinion about.
             {
+                // ⚠ THE LATIN FALLBACK IS CONSULTED LAST, after every digraph and single-letter rule, so it can
+                // never override a reading this language has an opinion about — and a letter with no rule is
+                // still voiced rather than dropped.
                 var p = LatinPhones.LatinPhone(c, new PhoneOpts { Initial = i == 0 });
                 if (p is not null) segs.Add(new Seg { Ph = p });
             }
@@ -170,29 +161,18 @@ public sealed class YorubaPhonemizer : ILanguage
         return outp.Normalize(NormalizationForm.FormC);
     }
 
-    // A Yoruba word = Latin letters (incl. precomposed accented + dotted) plus any combining marks.
     private static readonly JsRe TOKEN = JsRegex.Compile("([A-Za-zÀ-ɏḀ-ỿ̀-ͯ]+)|(\\d+)|([.?!,;:])", "gu");
     private static readonly JsRe SPLIT_WORD = JsRegex.Compile("[\\s-]+", "u");
 
     public string Text(string input)
     {
-        // ⚠ NORMALIZE FIRST, then tokenize. The symbol layer turns `%`, `₦`, a digit-flanked dash and a decimal
-        // period into Yoruba words; TOKEN would otherwise drop the signs and read `.` as a clause break.
+        // ⚠ NORMALIZE FIRST, then tokenize: TOKEN would otherwise drop `%`/`₦`/a digit-flanked dash and read
+        // the decimal period as a clause break.
         return Clauses.AssembleClauses(Normalize.NormalizeYoruba(input), TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));
-            // ⚠ DIGITS GO TO THE YORUBA COMPOSITOR, NEVER TO `foreign`. That fallback is an ENGLISH phonemizer,
-            // so `1945` used to read *wˈʌn θˈaᶷzənd nˈaᶦn hˈʌndɹəd fˈɔːɹt̬i fˈaᶦv* — fluent English inside Yoruba
-            // speech, which for TTS is worse than silence. numbers.ts reads every digit run, and above 10¹² it
-            // falls back to digit-by-digit in Yoruba units rather than to another language.
-            // ⚠ ONE emit PER WORD. A composed numeral is several words, and handing the whole string to
-            // `phonemizeWord` ran them together — `1945` came out as one 40-phone blob with no boundary, so the
-            // syllabifier re-parsed across every junction.
-            // ⚠ SPLIT ON HYPHENS TOO, not only spaces, because TOKEN splits typed text there — `ọgọ́rùn-ún` is
-            // two tokens when a writer types it. Splitting only on spaces gave the SAME WORD two readings
-            // depending on where it came from: `100` read ɔ˧ɡɔ˥ɾũ˩ũ˥ as one unit while typed `ọgọ́rùn-ún` read
-            // ɔ˧ɡɔ˥ɾũ˩ ũ˥ with the boundary. The hyphen is a syllable boundary in this orthography, and
-            // `phonemizeWord` simply ignores it, so the joined form lost a boundary the text path keeps.
+            // ⚠ ONE emit PER WORD, and the split takes HYPHENS as well as spaces: TOKEN splits typed text at a
+            // hyphen too, so `100` and a typed `ọgọ́rùn-ún` must reach the syllabifier with the same boundaries.
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
             {
                 foreach (var w in SPLIT_WORD.Re.Split(Numbers.YorubaNumber(m.Groups[2].Value)))

@@ -1,12 +1,6 @@
 /**
- * Native Italian (it) text phonemizer — canonical IPA. Italian's Latin orthography is shallow
- * and near-phonemic, so this is a rule-based g2p: c/g soften to t͡ʃ/d͡ʒ before e/i (⟨ci⟩/⟨gi⟩+V drop a silent i),
- * ⟨sc⟩→ʃ, ⟨gl⟩i→ʎ, ⟨gn⟩→ɲ, ⟨ch⟩/⟨gh⟩→k/ɡ, ⟨qu⟩→kw; GEMINATION is written as doubled consonants (gatto→ɡatto —
- * the referee's own convention, and a real Italian contrast the shared backbone would strip if we used ː);
- * intervocalic ʎ/ɲ/ʃ geminate; i/u become glides j/w before a vowel; penultimate stress (written accent overrides).
- * The 7-vowel system a e ɛ i o ɔ u: unstressed mids are close, but STRESSED ⟨e⟩/⟨o⟩ openness (/e/~/ɛ/, /o/~/ɔ/)
- * is LEXICAL and unrecoverable from spelling — as are intervocalic ⟨s⟩ voicing and ⟨z⟩ voicing — so we take a
- * documented default and fold those axes against the referee.
+ * Native Italian (it) text phonemizer — canonical IPA.
+ * Ported from src/languages/italian/italian.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -46,9 +40,8 @@ public static class ItalianPhonemizer
     // ⚠ NO `c != ""` GUARD, AND THE GOLDEN PROVES IT. The TS is `VOWEL_LETTERS.includes(c)`, and JS
     // `String.includes("")` is TRUE — so every caller that passes `next ?? ""` at end of word gets `true`.
     // That is load-bearing for the ⟨s⟩ voicing rule: word-final ⟨s⟩ after a vowel VOICES, so `james` is
-    // *jˈamez*. Adding the bounds guard here looks defensive and silently devoiced it — 18 golden rows.
-    // .NET's `Contains("")` is true as well, so the bare call reproduces the JS exactly. Third instance of
-    // this shape in the port (German, Swahili, here).
+    // *jˈamez*. .NET's `Contains("")` is true as well, so the bare call reproduces the JS exactly. Third
+    // instance of this shape in the port (German, Swahili, here).
     private static bool IsVowelLetter(string c) => VOWEL_LETTERS.Contains(c, StringComparison.Ordinal);
     private static bool IsFront(string? c) => c is not null && FRONT.Contains(c, StringComparison.Ordinal);
     private static readonly JsRe ASCII_LOWER = JsRegex.Compile("[a-z]", "u");
@@ -67,7 +60,10 @@ public static class ItalianPhonemizer
         return new Seg { Ph = DEF.Vowels.GetValueOrDefault(c) ?? c, Accent = false };
     }
 
-    /** Scan a lowercased Italian word into phoneme segments (contextual c/g/s/z, digraphs, gemination, glides). */
+    /**
+     * Scan a lowercased Italian word into phoneme segments (contextual c/g/s/z, digraphs, gemination,
+     * glides).
+     */
     private static List<Seg> Scan(string word)
     {
         var s = Js.CodePoints(word);
@@ -95,8 +91,7 @@ public static class ItalianPhonemizer
             var nx = At(i + 1);
             var nn = At(i + 2);
 
-            // ── digraphs / contextual clusters (longest first) ──
-            // ⟨gli⟩ → ʎ (intervocalic geminate); ⟨gli⟩+V drops the silent i (figlio→fiʎʎo), else keep i (figli→fiʎi).
+            // ── digraphs / contextual clusters, LONGEST FIRST — the arms below fall through in order ──
             if (c == "g" && nx == "l" && nn == "i")
             {
                 var after = At(i + 3);
@@ -105,14 +100,12 @@ public static class ItalianPhonemizer
                 else i += 2; // leave the i as a nucleus
                 continue;
             }
-            // ⟨gn⟩ → ɲ (intervocalic geminate).
             if (c == "g" && nx == "n")
             {
                 PushGem("ɲ", IsVowelLetter(nn ?? ""));
                 i += 2;
                 continue;
             }
-            // ⟨sc⟩ before e/i → ʃ (geminate intervocalic); ⟨sci⟩+V drops the silent i (sciare→ʃare, scienza→ʃɛntsa).
             if (c == "s" && nx == "c" && IsFront(nn))
             {
                 var iDot = nn == "i" || nn == "ì";
@@ -122,7 +115,6 @@ public static class ItalianPhonemizer
                 else i += 2;
                 continue;
             }
-            // ⟨c⟩: ch→k; before e/i → t͡ʃ (⟨ci⟩+V silent i); else k. Doubled ⟨cc⟩ geminates.
             if (c == "c")
             {
                 var doubled = nx == "c";
@@ -130,7 +122,6 @@ public static class ItalianPhonemizer
                 var rest = doubled ? At(i + 3) : nn;
                 if (follow == "h")
                 {
-                    // ch → k
                     if (doubled) Push("k");
                     Push("k");
                     i += doubled ? 3 : 2;
@@ -146,13 +137,11 @@ public static class ItalianPhonemizer
                     else i += doubled ? 2 : 1; // else the triggering e/i is a pronounced nucleus — leave it
                     continue;
                 }
-                // hard c → k
                 if (doubled) Push("k");
                 Push("k");
                 i += doubled ? 2 : 1;
                 continue;
             }
-            // ⟨g⟩: gh→ɡ; before e/i → d͡ʒ (⟨gi⟩+V silent i); else ɡ. Doubled ⟨gg⟩ geminates. (gl/gn already handled.)
             if (c == "g")
             {
                 var doubled = nx == "g";
@@ -180,7 +169,6 @@ public static class ItalianPhonemizer
                 i += doubled ? 2 : 1;
                 continue;
             }
-            // ⟨qu⟩ → kw; ⟨q⟩ alone → k.
             if (c == "q")
             {
                 Push("k");
@@ -192,13 +180,10 @@ public static class ItalianPhonemizer
                 else i += 1;
                 continue;
             }
-            // ⟨s⟩: ss → geminate s; single ⟨s⟩ voices to z between vowels or before a voiced consonant (default —
-            // lexical, folded); else s.
             if (c == "s")
             {
                 if (nx == "s")
                 {
-                    // ⟨ss⟩ is always a long, voiceless geminate.
                     Push("s");
                     Push("s");
                     i += 2;
@@ -210,7 +195,6 @@ public static class ItalianPhonemizer
                 i += 1;
                 continue;
             }
-            // ⟨z⟩ → t͡s (default; /t͡s/~/d͡z/ is lexical, folded). ⟨zz⟩ geminates.
             if (c == "z")
             {
                 var doubled = nx == "z";
@@ -220,7 +204,6 @@ public static class ItalianPhonemizer
                 continue;
             }
 
-            // ── doubled simple consonant (bb dd ff ll mm nn pp rr tt vv) → geminate ──
             if (IsConsLetter(c) && nx == c && DEF.Consonants.TryGetValue(c, out var dblPh) && dblPh != "")
             {
                 Push(dblPh);
@@ -228,7 +211,6 @@ public static class ItalianPhonemizer
                 i += 2;
                 continue;
             }
-            // ── single simple consonant ──
             if (DEF.Consonants.TryGetValue(c, out var ph1))
             {
                 if (ph1 != "") Push(ph1); // ⟨h⟩ maps to "" (silent)
@@ -236,12 +218,8 @@ public static class ItalianPhonemizer
                 continue;
             }
 
-            // ── vowels & glides ──
             if (IsVowelLetter(c))
             {
-                // Unaccented i/u are semivowels next to another vowel: ONGLIDE before a vowel (piano→pjano,
-                // uomo→wɔmo, buono→bwɔno) or OFFGLIDE after one (aura→awra, mai→maj). Stressed hiatus (via, bugia)
-                // is lexical and lost — a documented tail.
                 var semivowel = (c == "i" || c == "u") &&
                                 ((nx is not null && IsVowelLetter(nx)) || PrevIsVowel());
                 if (semivowel)
@@ -259,7 +237,9 @@ public static class ItalianPhonemizer
         return segs;
     }
 
-    /** Stressed nucleus index: the written accent if any, else penultimate vowel (or the only/last nucleus). */
+    /**
+     * Stressed nucleus index: the written accent if any, else penultimate vowel (or the only/last nucleus).
+     */
     private static int StressIndex(IReadOnlyList<Seg> segs)
     {
         var nuclei = segs
@@ -286,7 +266,6 @@ public static class ItalianPhonemizer
         return outp.Normalize(System.Text.NormalizationForm.FormC);
     }
 
-    // ── Numbers (compositional, with the tens+unit fusion) ────────────────────────
     /** Build the fused Italian word for 0 ≤ n < 1000 (ventuno, duecentotrentaquattro). */
     private static string Under1000(double n)
     {
@@ -305,9 +284,10 @@ public static class ItalianPhonemizer
         return hundreds + (r != 0 ? Under1000(r) : "");
     }
 
-    /** Spoken Italian for a non-negative integer → space-separated magnitude words (thousands fused, millions split).
-     *  Exported so `romanOrdinals.ts` can derive the ORDINAL from it (`-esimo` on the cardinal) instead of
-     *  re-authoring the numeral data. */
+    /**
+     * Spoken Italian for a non-negative integer → space-separated magnitude words (thousands fused, millions
+     * split).
+     */
     public static string NumberWords(double n)
     {
         if (n == 0) return NUM.Units[0];
@@ -333,62 +313,23 @@ public static class ItalianPhonemizer
         return string.Join(" ", parts);
     }
 
-    /**
-     * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class below decides where the
-     * SCRIPT boundary falls, while this one decides whether the g2p has rules for these letters. A token this class
-     * REJECTS carries a letter the language does not use — i.e. a foreign name.
-     */
+    /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zA-ZàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ]";
-    /**
-     * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
-     * above is the inventory — a word it rejects carries a letter this language does not use. See
-     * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
-     */
+    /** NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. */
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "u");
 
-    // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
-    // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
-    // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-    // every gate: no digit or raw mark survives and nothing VANISHES.
     private static readonly JsRe TOKEN = JsRegex.Compile($"({HostWord.LATIN_RUN})|(\\d+)|([.?!,;:])", "gu");
 
-    /**
-     * symbol normalization — Italian. Percent is *per cento*, invariable, so a one-element form list.
-     * Currency and unit names are the standard Italian ones; the corpus writes the currency sign AFTER the
-     * amount ("banconote da 5 $"), which the shared tier already handles.
-     *
-     * `ha` (hectare) is deliberately ABSENT. It is a valid SI-adjacent abbreviation, but in Italian running
-     * text `<number> ha` is overwhelmingly the verb *avere* — all four occurrences in the it_it corpus are
-     * ("Chandrayaan-1 ha sganciato la sonda"), and admitting it would read them as *ettari*. Likewise `g`,
-     * `l` and `t` are omitted: none is attested here, `802.11g` shows the letter-after-digit collision is
-     * real, and `l'` before a vowel would be claimed as *litri* since an apostrophe is not a letter.
-     */
+    /** symbol normalization — Italian. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
-        // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — this
-        // language does not split dimension from product.
         Multiply = new MultiplyDef { Times = "per" },
-        // Unread, `&` is DROPPED outright and `B&B` loses the sign entirely.
-        // `e` ×1067 in this corpus. The tier spaces it on both sides, because `B&B` is two
-        // initialisms and joining them would make one token.
         Ampersand = "e",
         Percent = new[] { "per cento" },
-        // Only the POSTPOSED sign reaches here — normalize.ts step 10 has already claimed the preposed form,
-        // which needs the partitive *di* the shared magnitude hop cannot insert.
+        // Only the POSTPOSED sign reaches here — Normalize has already claimed the preposed form, which
+        // needs the partitive *di* the shared magnitude hop cannot insert.
         Currency = Normalize.CURRENCY.ToDictionary(
             kv => kv.Key, kv => (IReadOnlyList<string>)new[] { kv.Value.Singular, kv.Value.Plural }, StringComparer.Ordinal),
-        // DECLARED FOR THE UNIT PATH, and the reason it was withheld no longer applies. This list was
-        // deliberately absent so the CURRENCY magnitude hop could not emit `5 milioni dollari` without the
-        // partitive. But `magnitudes` also gates `magAltU`, the UNIT path's connective hop — so withholding it to
-        // protect currency left the tier unable to cross `milioni di` to reach a unit, and
-        // `2,2 milioni di km²` read as *due virgola due milioni di KM*: the exponent dropped AND the unit noun
-        // left raw in the IPA. One field, two consumers, and only one of them had a problem.
-        //
-        // Safe because step 10 runs FIRST and consumes the whole preposed shape — sign, amount, magnitude and
-        // partitive together — so the currency path here never sees a magnitude to hop. Measured: the corpus has
-        // exactly ONE currency-sign sentence (`tra 2.500 ¥ e 130.000 ¥`), postposed, with no magnitude word
-        // anywhere near it, and ZERO sentences carrying both a currency sign and *milioni*/*miliardi*.
         Magnitudes = new[] { "miliardi", "miliardo", "milioni", "milione", "mila" },
         MagnitudeConnective = "di", // due virgola due milioni DI chilometri quadrati
         // Longest keys match first (the builder sorts by length), so km² beats km and km/h beats km.
@@ -404,18 +345,7 @@ public static class ItalianPhonemizer
             ["gb"] = new[] { "gigabyte" }, ["mb"] = new[] { "megabyte" }, ["tb"] = new[] { "terabyte" },
             ["kw"] = new[] { "chilowatt" }, ["mw"] = new[] { "megawatt" }, ["hz"] = new[] { "hertz" },
         },
-        // MIGRATION TEST: the composite km²/m² keys are gone, composed by the shared tier instead.
         ExponentWords = new ExponentWordsDef { Squared = new[] { "quadrato", "quadrati" }, Cubed = new[] { "cubo", "cubi" } },
-        // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
-        // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
-        // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
-        // they are different words (chilometri quadrati but venti al quadrato).
-        // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
-        // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
-        // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
-        // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
-        // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
-        // The cardinal is used for the generic power, never the ordinal — see core for that argument.
         BareExponent = new BareExponentDef
         {
             Squared = "{n} al quadrato", Cubed = "{n} al cubo", Power = "{n} elevato a {e}", Negative = "meno",
@@ -426,12 +356,9 @@ public static class ItalianPhonemizer
     {
         public string Text(string input)
         {
-            // NORMALIZATION ORDER: general text normalization (de-grouping, era markers, abbreviations,
-            // degrees, ordinals, clock, signs, fractions) → INITIALISMS (after abbreviation expansion, so
-            // `a.C.` is already words) → SYMBOLS (%, currency, units) → the DECIMAL COMMA last of all, because
-            // the symbol tier matches a unit only against an ADJACENT number and "1,5 km/s" must reach it
-            // intact. Roman numerals need no ordering care: `it` is not in the registry's ROMAN_NATIVE set, so
-            // the shared pass converted them before text() was called.
+            // NORMALIZATION ORDER: general text normalization → INITIALISMS (after abbreviation expansion,
+            // so `a.C.` is already words) → SYMBOLS → the DECIMAL COMMA last of all, because the symbol tier
+            // matches a unit only against an ADJACENT number and "1,5 km/s" must reach it intact.
             var normalized = Normalize.NormalizeItalianDecimals(
                 SYMBOLS(Normalize.NormalizeItalianInitialisms(Normalize.NormalizeItalian(input))));
             return Clauses.AssembleClauses(normalized, TOKEN, (m, sink) =>
@@ -439,10 +366,8 @@ public static class ItalianPhonemizer
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(Nat(m.Groups[1].Value)));
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
-                    // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO BE EMITTED STRAIGHT INTO THE IPA. Refusing to
-                    // COMPOSE is right — the float has already lost the low digits — but the else emitted the
-                    // token itself, which is not a reading. Digit-at-a-time through the same number words
-                    // instead; see core/numbers.ts `spellDigits` for the account and the cost.
+                    // JS `Number` semantics: above 2^53 the float has already lost its low digits, so we
+                    // decline to compose and spell digit-at-a-time rather than emitting the raw ASCII token.
                     var num = Js.Number(m.Groups[2].Value);
                     if (double.IsInteger(num) && Math.Abs(num) <= 9007199254740991d)
                         foreach (var wd in NumberWords(num).Split(' '))

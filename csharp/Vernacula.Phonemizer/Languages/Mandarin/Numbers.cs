@@ -1,10 +1,6 @@
 /**
- * Arabic number → Chinese numeral characters (quantity reading). The result is spliced back into the Han
- * character stream and phonemized like any other characters, so it inherits segmentation, polyphone
- * disambiguation, and tone sandhi for free (e.g. 一百 → yì bǎi via the phrase dict). Covers integers up to
- * 10¹⁶ and simple decimals (整数 + 点 + digit-by-digit). 2 is read 二 throughout (二千 is understood; the
- * colloquial 两 alternation is a future refinement). Year/phone/ID digit-string readings are out of scope —
- * this is the default quantity reading.
+ * Arabic number → Chinese numeral characters (quantity reading).
+ * Ported from src/languages/mandarin/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -12,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.Mandarin;
 
 public static class Numbers
 {
-    // Number-reading tables are authored DATA — consolidated in cmn.jsonc; the compositor below is the algorithm.
     private static CmnNumbersDef N => Manifest.MANIFEST.Numbers;
     private static IReadOnlyList<string> DIG => N.Digits; // 0–9 (DIG[0] 零 doubles as the internal zero-gap filler)
     private static IReadOnlyList<string> POS => N.Positions; // position value within a 4-digit group
@@ -20,9 +15,8 @@ public static class Numbers
     private static string TWO => N.Two; // colloquial 两
 
     /**
-     * 0 ≤ n ≤ 9999 → characters, with a single internal 零 for zero gaps. `top` marks the highest group so 2
-     * as a leading multiplier of 百 reads 两 (两百五十) but a non-leading 二百 stays 二 (两千二百). 2 before 千
-     * is always 两; 2 in tens/units stays 二 (二十, 十二).
+     * 0 ≤ n ≤ 9999 → characters, with a single internal 零 for zero gaps. `top` marks the highest group, so
+     * 2 as a leading multiplier of 百 reads 两 (两百五十) while a non-leading 二百 stays 二 (两千二百).
      */
     private static string Group4(int n, bool top)
     {
@@ -50,7 +44,9 @@ public static class Numbers
         return s;
     }
 
-    /** Non-negative integer → Chinese numeral characters (quantity reading; colloquial 两 for standalone 2). */
+    /**
+     * Non-negative integer → Chinese numeral characters (quantity reading; colloquial 两 for standalone 2).
+     */
     public static string IntegerToChinese(double n)
     {
         if (n == 0) return DIG[0];
@@ -70,7 +66,7 @@ public static class Numbers
             var gs = g == 2 && i < BIG.Count && BIG[i].Length > 0 ? TWO : Group4(g, s == ""); // 2万/2亿 → 两万/两亿
             s += gs + BIG[i];
         }
-        // 12 → 十二 (not 一十二); 十万, 十亿…
+        // 12 → 十二, not 一十二; likewise 十万, 十亿.
         return JsRegex.Compile($"^{DIG[1]}{POS[2]}").Replace(s, POS[2]);
     }
 

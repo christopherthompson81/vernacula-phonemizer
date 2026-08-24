@@ -1,6 +1,6 @@
 /**
- * Korean (ko) phonemizer — Seoul standard, canonical IPA. Hangul g2p (g2p.ts) with the full
- * cross-syllable sandhi + coda neutralisation; no lexicon. text() tokenizes Hangul words / numbers / punctuation.
+ * Korean (ko) phonemizer — Seoul standard, canonical IPA.
+ * Ported from src/languages/korean/korean.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -11,16 +11,10 @@ public static class KoreanPhonemizer
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
     private static readonly JsRe TOKEN = JsRegex.Compile("([가-힣]+)|(\\d+)|([.!?…,;:])", "gu");
 
-    // symbol normalization — Korean: hangul loans through the ordinary engine. The UNITS moved to
-    // normalize.ts, which needs them before its range/decimal rules and needs them JOINED to the number
-    // (this tier always inserts a space); % and the currency sign stay here, where the shared machinery
-    // already places the word after the number, which is also Korean's order.
+    // The UNITS deliberately live in Normalize, not here: they are needed before its range/decimal rules and
+    // must be JOINED to the number, while this tier always inserts a space. % and the currency sign stay here.
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-        // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-        // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-        // One word, so `by` defaults to it; this language does not split dimension from product.
         Multiply = new MultiplyDef { Times = "곱하기" },
         Percent = new[] { "퍼센트" },
         Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
@@ -32,15 +26,13 @@ public static class KoreanPhonemizer
     private sealed class Engine : ILanguage
     {
         public string Text(string input) =>
-            // SYMBOLS FIRST, then normalizeKorean: % and $ have to see plain ASCII digits, and normalize's
-            // decimal rule rewrites 1.5 to 일점오, which would leave a following % with no number to attach to.
+            // SYMBOLS FIRST, then NormalizeKorean: % and $ have to see plain ASCII digits, and the decimal
+            // rule rewrites 1.5 to 일점오, which would leave a following % with no number to attach to.
             Clauses.AssembleClauses(Normalize.NormalizeKorean(SYMBOLS(input)), TOKEN, (m, sink) =>
             {
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(G2p.PhonemizeWord(m.Groups[1].Value));
-                // ⚠ ABOVE 2^53 THIS USED TO EMIT NOTHING — `numberToWords` returns "" for an integer whose low
-                // digits the float has already lost (composing it would be confidently WRONG), and "" went
-                // straight to the sink, so the NUMBER was deleted from the reading. The refusal is right; the
-                // else was missing. Digit-at-a-time is what normalize.ts already gives a decimal tail.
+                // NumberToWords returns "" past the JS safe-integer limit rather than compose a confidently
+                // wrong reading, so the else-branch below must spell the digits or the number is DELETED.
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
                     var words = KoreanNumbers.NumberToWords(Js.Number(m.Groups[2].Value));

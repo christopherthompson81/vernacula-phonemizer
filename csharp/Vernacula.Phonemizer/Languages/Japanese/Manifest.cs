@@ -1,9 +1,6 @@
 /**
- * Loads the Japanese data manifest (japanese.jsonc) once at module init and exposes it typed. Holds the
- * hand-authored kana→mora tables, the extended-katakana map, the moraic-ん assimilation classes, the Sino-
- * Japanese number words, clause punctuation, and the pitch-accent affix-strip lists. The ALGORITHMS that read
- * them stay in code (kana.ts / numbers.ts / kanji.ts / pitch.ts / japanese.ts); the bulk lexical data stays in
- * sibling .tsv/.txt files (readings/fallback/adverbs/pitch-accent), which the manifest only documents.
+ * Loads the Japanese data manifest (japanese.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/japanese/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

@@ -1,9 +1,8 @@
 /**
- * Loads the Romanian data manifest (romanian.jsonc) once and exposes it typed. The TS declares `RomanianDef`
- * inline in romanian.ts and casts `numbers` to a structural type at its use site; C# names both here. Plain
- * letter→IPA maps, the obstruent set, clause punctuation and the number spellings are DATA — the contextual
- * phonology (c/g softening, the rising diphthongs, the glides, final-i desyllabification) is code, in
- * Romanian.cs.
+ * Loads the Romanian data manifest (romanian.jsonc) once and exposes it typed. ⚠ The TS has no manifest
+ * module: it declares `RomanianDef` inline in romanian.ts and casts `numbers` structurally at its use site,
+ * so the named types below exist only in the C#.
+ * Ported from src/languages/romanian/romanian.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

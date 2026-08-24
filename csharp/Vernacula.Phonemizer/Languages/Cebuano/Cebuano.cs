@@ -1,10 +1,6 @@
 /**
- * Native Cebuano / Sinugboanon (ceb) text phonemizer — canonical IPA. A shallow near-phonemic
- * Philippine (Central Bisayan) Latin orthography → rule transliterator, the Tagalog pattern: the digraph ⟨ng⟩→ŋ
- * (+ nativized loan digraphs) then single letters, with a WORD-INITIAL glottal stop [ʔ] before a vowel, a HIATUS
- * glottal between two vowels (kaon→kaʔon, maayo→maʔajo), and a hyphen → [ʔ]. Stress defaults to PENULTIMATE (it is
- * phonemic but unwritten, and the referee eval folds stress). The unwritten word-final glottal (bata child [bataʔ]
- * vs bata robe [bata]) is phonemic but lexical → a deferred residual.
+ * Native Cebuano / Sinugboanon (ceb) text phonemizer — canonical IPA.
+ * Ported from src/languages/cebuano/cebuano.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -39,8 +35,6 @@ public sealed class CebuanoPhonemizer : ILanguage
             var c = s[i];
             if (c == "-" || c == "‑")
             {
-                // Intra-word hyphen → glottal stop (pag-asa→paɡʔasa), but ONLY when it joins two parts — a standalone
-                // or word-edge dash (a range/punctuation dash) must not inject a spurious [ʔ].
                 if (outp.Count > 0 && i + 1 < s.Count) outp.Add("ʔ");
                 i++;
                 continue;
@@ -54,8 +48,6 @@ public sealed class CebuanoPhonemizer : ILanguage
             }
             if (IsVowelLetter(c))
             {
-                // Glottal stop: word-initial before a vowel (adlaw→ʔadlaw), and between two vowels in hiatus
-                // (kaon→kaʔon, maayo→maʔajo). The y/w glides are consonants, so ⟨ay⟩/⟨aw⟩ stay glides.
                 var prev = outp.Count > 0 ? outp[^1] : null;
                 if (outp.Count == 0 || (prev is { Length: > 0 } && VOWEL_PH.Contains(prev[0]))) outp.Add("ʔ");
                 outp.Add(DEF.Vowels[c]);
@@ -71,7 +63,9 @@ public sealed class CebuanoPhonemizer : ILanguage
         return outp;
     }
 
-    /** Stress the PENULTIMATE vowel nucleus (default; phonemic stress is unwritten, ~majority is penultimate). */
+    /**
+     * Stress the PENULTIMATE vowel nucleus (default; phonemic stress is unwritten, ~majority is penultimate).
+     */
     private static string Stressed(IReadOnlyList<string> units)
     {
         var nuclei = new List<int>();
@@ -97,23 +91,15 @@ public sealed class CebuanoPhonemizer : ILanguage
         return Stressed(units).Normalize(NormalizationForm.FormC);
     }
 
-    // A word (Cebuano letters + hyphen + apostrophe glottal) / number / punctuation token.
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"({HostWord.HostWordRun(new[] { "Latin" }, "'ʼ-")})|(\\d+)|([.?!,;:])", "giu");
 
-    /**
-     * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
-     * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters.
-     */
+    /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zñ'ʼ-]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "iu");
 
     public string Text(string input)
     {
-        // NORMALIZATION runs first — pure text→text, so everything it emits is then read by the ordinary word,
-        // number and clause paths below. It must see the text BEFORE tokenization, because most of what it
-        // repairs (a grouping `,`, a decimal `.`, a clock `:`) is a character `TOKEN` would otherwise hand to
-        // `clausePunctuation` as a pause.
         return Clauses.AssembleClauses(Normalize.NormalizeCebuano(input), TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(Nat(m.Groups[1].Value)));
