@@ -44,7 +44,7 @@ import { MANIFEST } from "./manifest.ts";
 import { ordinal } from "./romanOrdinals.ts";
 
 /** Regular, NBSP and narrow-NBSP — all three occur as thousands separators in the corpus. */
-const GROUP_SPACE = "  ";
+const GROUP_SPACE = " \u00a0";
 
 /**
  * Polish count-form selector for `core/normalizeSymbols.ts` (and for the local unit rules below).
