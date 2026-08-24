@@ -47,6 +47,7 @@ public static class Bootstrap
             Maori.MaoriPhonemizer.RegisterSelf();
             Occitan.OccitanPhonemizer.RegisterSelf();
             Odia.OdiaPhonemizer.RegisterSelf();
+            Portuguese.PortuguesePhonemizer.RegisterSelf();
             Russian.RussianPhonemizer.RegisterSelf();
             Spanish.SpanishPhonemizer.RegisterSelf();
             Umbundu.UmbunduPhonemizer.RegisterSelf();
