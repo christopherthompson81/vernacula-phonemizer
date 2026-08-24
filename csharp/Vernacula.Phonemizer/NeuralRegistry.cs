@@ -20,6 +20,7 @@ public static class NeuralRegistry
         ["en"] = Languages.English.EnglishNeural.PhonemizeEnNeural, // BiLSTM OOV reader (else the sync n-gram OOV G2P)
         ["af"] = Languages.Afrikaans.AfrikaansNeural.PhonemizeAfNeural,
         ["bn"] = Languages.Bengali.BengaliNeural.PhonemizeBnNeural,
+        ["fr"] = Languages.French.FrenchNeural.PhonemizeFrNeural,
     };
 
     /**
