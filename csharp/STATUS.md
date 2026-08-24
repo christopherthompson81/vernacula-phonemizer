@@ -16,11 +16,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 53 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+- **Languages: 54 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
   cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha, tr, ta, sw, yue, vi,
-  ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln — all **200/200**. 10,600 rows, 0 differ. ORDER IS
-  DESCENDING SPEAKER POPULATION (user direction), from `tools/language-catalogue/languages.db`: next ps, ml,
-  om, uz…
+  ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps — all **200/200**. 10,800 rows, 0 differ. ORDER IS
+  DESCENDING SPEAKER POPULATION (user direction), from `tools/language-catalogue/languages.db`: next ml, om,
+  uz, sd…
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
@@ -196,5 +196,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   see. Neither the 200 golden rows nor 24,402 off-golden probes distinguish the two — the LITERAL-INVENTORY
   AUDIT did, by counting code points per file. Escaped in both engines now (#931). Run the audit on every port,
   and read a control character as a design decision rather than noise.
+- ⚠ **A REACHABILITY SWEEP MEASURES THE PROBE AS MUCH AS THE KEY.** Sabotaging each manifest value in turn and
+  re-running a probe is now the standard correctness lens (it found #922, #937, #939) — but the FIRST ps sweep
+  reported four dead keys that were merely unprobed: the 40/80 tens and the 22-29 compounds, none of which the
+  30-shape probe reached. Widening to every integer 0-120 left exactly one real corpse. State the probe's
+  coverage before believing its silence.
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.

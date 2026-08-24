@@ -84,6 +84,7 @@ public static class Bootstrap
             Yoruba.YorubaPhonemizer.RegisterSelf();
             Burmese.BurmesePhonemizer.RegisterSelf();
             Lingala.LingalaPhonemizer.RegisterSelf();
+            Pashto.PashtoPhonemizer.RegisterSelf();
         }
     }
 }
