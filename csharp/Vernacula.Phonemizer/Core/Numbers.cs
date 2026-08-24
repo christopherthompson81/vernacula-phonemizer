@@ -419,7 +419,9 @@ public sealed class DravidianForms
  * The data a Dravidian numeral needs beyond `indicNumberWords`. See `dravidianNumberWords` for why the
  * three extra fields exist; each of them is a thing `indicNumberWords` structurally cannot say.
  */
-public sealed class DravidianNumbersDef
+// NOT sealed: language defs (Kannada, Malayalam) extend it with their decimal word, exactly as the TS
+// `interface KannadaNumbers extends NumbersDef` does.
+public class DravidianNumbersDef
 {
     public string[] Units = []; // 0..9
     public string[] Teens = []; // 10..19
