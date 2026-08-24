@@ -228,6 +228,11 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/ukrainian", "ukrainian.jsonc", Languages.Ukrainian.Manifest.DEF,
             "language", "name", "script", "provenance");
 
+    [Fact]
+    public void RomanianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/romanian", "romanian.jsonc", Languages.Romanian.Manifest.DEF,
+            "language", "name", "script", "provenance");
+
     // ── MODEL SIDECARS ────────────────────────────────────────────────────────────────────────────────────
     //
     // ⚠ THE SAME SILENT FAILURE, ONE DIRECTORY OVER. A `*.meta.json` beside an ONNX model is deserialized by

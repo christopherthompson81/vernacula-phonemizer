@@ -78,6 +78,7 @@ public static class Bootstrap
             Polish.PolishPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
             Ukrainian.UkrainianPhonemizer.RegisterSelf();
+            Romanian.RomanianPhonemizer.RegisterSelf();
         }
     }
 }
