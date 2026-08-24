@@ -117,6 +117,21 @@ describe("swahili text normalization", () => {
         expect(phonemize("kwa 26 - 00 kwa urahisi", "sw")).not.toContain(",");
     });
 
+    // ⚠ A COMPOSER THAT CANNOT SPELL A NUMBER MUST REFUSE, NOT FABRICATE. The ladder stops at `milioni`,
+    // and above 10⁹ `belowThousand` indexed past the ten-element `units` array; JS handed back `undefined`,
+    // the template literal made it the six-letter English word, and the g2p SPOKE it — `1000000000` read
+    // *miliˈoni mˈia uⁿdefˈineɗ*. The guard makes the composition return "" and the digit-at-a-time
+    // fallback speak the numeral instead, which is the trade this file already documents above 2^53.
+    test("above the authored scale the numeral is spelled digit-by-digit, never fabricated", () => {
+        expect(phonemize("999999999", "sw")).toContain("miliˈoni"); // the top of the composable range
+        for (const n of ["1000000000", "4082940073", "1000000000000"]) {
+            const ipa = phonemize(n, "sw");
+            expect(ipa).not.toContain("uⁿdefˈineɗ"); // the fabricated word, as the g2p read it
+            expect(ipa).not.toContain("miliˈoni"); //  …and no half-composed magnitude either
+            expect(ipa.startsWith("mˈoʄa") || ipa.startsWith("ˈn̩ne")).toBe(true); // leading digit, spelled
+        }
+    });
+
     test("noun-class agreement is deliberately NOT attempted", () => {
         // The measured result: every counted noun that meets an agreeing numeral (1,2,3,4,5,8) in the
         // corpus is a class 9/10 N-class loanword, whose agreeing form IS the citation form. The single

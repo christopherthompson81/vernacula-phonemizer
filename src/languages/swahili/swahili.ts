@@ -127,11 +127,26 @@ function belowThousand(n: number): string {
     const hw = `${NUM.hundred} ${h === 1 ? NUM.units[1] : NUM.units[h]}`;
     return r ? `${hw} ${NUM.and} ${belowHundred(r)}` : hw;
 }
-/** Non-negative integer → standard Swahili numeral spelling. */
+/**
+ * Non-negative integer → standard Swahili numeral spelling, or "" when the authored scale cannot express it.
+ *
+ * ⚠ THE LADDER STOPS AT `milioni` AND ABOVE 10⁹ IT USED TO EMIT THE ENGLISH WORD "undefined" INTO THE IPA.
+ * `belowThousand(mil)` indexes `NUM.units[Math.floor(mil / 100)]`, and for n ≥ 10⁹ the count of millions is
+ * itself ≥ 1000, so that index is 10 or more — off the end of a ten-element array. JavaScript yields
+ * `undefined`, the template literal interpolates it as the six-letter string, and the g2p then reads it as
+ * an ordinary Swahili word: `1000000000` came out *miliˈoni mˈia uⁿdefˈineɗ*, and `4082940073` the same with
+ * a full tail after it. Not silence and not a wrong number — a fabricated English word, spoken.
+ *
+ * The manifest has no `bilioni`, and inventing one is the "do not bulk-invent language data" prohibition
+ * this file already respects for acronym letter names. So the composition REFUSES instead, and the caller's
+ * existing digit-at-a-time fallback speaks the numeral — the same trade `text()` already documents above
+ * 2^53: a reading that is merely less idiomatic, rather than one that is confidently wrong.
+ */
 function numberToText(n: number): string {
     if (n === 0) return NUM.units[0]!;
     const groups: string[] = [];
     const mil = Math.floor(n / 1_000_000);
+    if (mil >= 1000) return ""; // beyond `milioni` — see the note above
     if (mil) {
         groups.push(`${NUM.million} ${belowThousand(mil)}`);
         n %= 1_000_000;
@@ -233,10 +248,13 @@ class SwahiliPhonemizer implements Phonemizer {
                 // COMPOSE is right — the float has already lost the low digits — but the else emitted the
                 // token itself, which is not a reading. Digit-at-a-time through the same number words
                 // instead; see core/numbers.ts `spellDigits` for the account and the cost.
+                // ⚠ THE FALLBACK ALSO COVERS A REFUSED COMPOSITION, not only an unsafe integer. `numberToText`
+                // returns "" above 10⁹ because the authored ladder stops at `milioni`; before that guard the
+                // composer fabricated the word "undefined" and this branch happily spoke it.
                 const num = Number(m[2]);
-                if (Number.isSafeInteger(num))
-                    for (const wd of numberToText(num).split(" "))
-                        sink.emit(phonemizeWord(wd));
+                const composed = Number.isSafeInteger(num) ? numberToText(num) : "";
+                if (composed !== "")
+                    for (const wd of composed.split(" ")) sink.emit(phonemizeWord(wd));
                 else
                     for (const d of m[2])
                         for (const wd of numberToText(Number(d)).split(" "))
