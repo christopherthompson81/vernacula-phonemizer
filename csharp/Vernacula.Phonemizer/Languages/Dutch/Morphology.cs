@@ -39,7 +39,7 @@ public static class Morphology
 
     private static readonly MorphologyConfig CONFIG = new()
     {
-        Vowels = "aeiouyáéíóúàèäëïöü",
+        Vowels = Manifest.MANIFEST.VowelLetters,
         PrefixUnstressed = M.PrefixUnstressed,
         PrefixStressed = M.PrefixStressed,
         AmbiguousPrefixes = new HashSet<string>(M.AmbiguousPrefixes, StringComparer.Ordinal),

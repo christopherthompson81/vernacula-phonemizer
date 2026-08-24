@@ -15,7 +15,7 @@ public static class Numbers
     private static readonly JsRe VOWEL_FINAL = JsRegex.Compile("[aeiou]$");
 
     /** The -en- connector, with a trema on ⟨e⟩ after a vowel-final unit (twee→tweeën, drie→drieën). */
-    private static string Connect(string unit) => VOWEL_FINAL.IsMatch(unit) ? "ën" : N.Connector;
+    private static string Connect(string unit) => VOWEL_FINAL.IsMatch(unit) ? N.ConnectorTrema : N.Connector;
 
     /** 1 ≤ n < 100 (compounded: eenentwintig, tweeëntwintig). */
     private static string Below100(double n)

@@ -17,7 +17,11 @@ const VOICED_FINAL = MANIFEST.voicedFinal;
 // ⚠ THE CIRCUMFLEXES ARE DUTCH SPELLING, NOT FOREIGN DECORATION — Dutch keeps them on the French loans it has
 // naturalised (enquête, crêpe, gêne, coûte, blessûre). They were missing from this string, so the scan fell all
 // the way past the consonant switch and DELETED them: enquête → *ɛnkʋtə, crêpe → *krpeː, a nucleus short each.
-const VOWELS = "aeiouyáéíóúàèâêîôûäëïöü";
+// ⚠ THE ORTHOGRAPHIC vowel letters, from the manifest — not `vowelChars`, which is the IPA set. This used
+// to be spelled here AND in morphology.ts, and the two had already drifted: that copy lacked the
+// circumflexes. Every accent matters (an omitted one deletes a vowel), which is why one copy is worth the
+// indirection.
+const VOWELS = MANIFEST.vowelLetters;
 const isV = (c: string): boolean => c !== "" && VOWELS.includes(c);
 const isLiquid = (c: string): boolean => c === "l" || c === "r";
 

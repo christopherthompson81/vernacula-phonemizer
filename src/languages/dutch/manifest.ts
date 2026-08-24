@@ -22,15 +22,24 @@ export interface DutchManifest {
         ones: string[];
         tens: string[];
         connector: string;
+        /** The connector after a vowel-final unit, with the trema (tweeën). */
+        connectorTrema: string;
+        decimalWord: string;
         hundred: string;
         thousand: string;
         million: { sg: string; pl: string };
         milliard: { sg: string; pl: string };
     };
+    /** The ORTHOGRAPHIC vowel letters. ⚠ Not `vowelChars`, which is the IPA set. */
+    vowelLetters: string;
+    /** Function words / clitics → their reduced (schwa) IPA reading. */
+    functionWords: Record<string, string>;
     morphology: {
         prefixUnstressed: string[];
         prefixStressed: string[];
         ambiguousPrefixes: string[];
+        /** The subset of `prefixUnstressed` whose vowel also reduces to schwa — NOT `ambiguousPrefixes`. */
+        prefixSchwa: string[];
         suffixes: string[];
         vowelInitialSuffixes: string[];
         linkingElements: string[];
