@@ -39,7 +39,9 @@ public static class Bootstrap
             Cebuano.CebuanoPhonemizer.RegisterSelf();
             English.EnglishFactory.RegisterSelf();
             Greek.GreekPhonemizer.RegisterSelf();
+            Hindi.Hindi.RegisterSelf();
             Kalaallisut.KalaallisutPhonemizer.RegisterSelf();
+            Kannada.KannadaPhonemizer.RegisterSelf();
             Maori.MaoriPhonemizer.RegisterSelf();
             Occitan.OccitanPhonemizer.RegisterSelf();
             Odia.OdiaPhonemizer.RegisterSelf();
