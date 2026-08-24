@@ -77,6 +77,7 @@ public static class Bootstrap
             Gujarati.GujaratiPhonemizer.RegisterSelf();
             Polish.PolishPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
+            Ukrainian.UkrainianPhonemizer.RegisterSelf();
         }
     }
 }
