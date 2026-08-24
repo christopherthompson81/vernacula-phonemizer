@@ -16,10 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 51 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+- **Languages: 52 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
   cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha, tr, ta, sw, yue, vi,
-  ko, jv, it, gu, pl, uk, ro, nl, hu, yo — all **200/200**. 10,200 rows, 0 differ. ORDER IS DESCENDING
-  SPEAKER POPULATION (user direction), from `tools/language-catalogue/languages.db`: next my, ln, ps, ml…
+  ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my — all **200/200**. 10,400 rows, 0 differ. ORDER IS DESCENDING
+  SPEAKER POPULATION (user direction), from `tools/language-catalogue/languages.db`: next ln, ps, ml, om…
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
@@ -179,5 +179,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   the currency word gone). Fixed for nl in #924 with the class as an ESCAPE; the same shape is 281 more sites
   across 42 language normalizers, inventoried in #925. Neither engine can see it: the two agree perfectly, and
   no golden carries a NBSP.
+- ⚠ **AN INVISIBLE CHARACTER CAN BE THE WHOLE SEMANTICS OF A LINE.** Burmese's segmentation guard joins its
+  two syllable sequences on U+0001 so the comparison is of the SEQUENCE and not of the concatenated text; the
+  character was written literally, so the file reads as `join("")` and the port faithfully copied what it could
+  see. Neither the 200 golden rows nor 24,402 off-golden probes distinguish the two — the LITERAL-INVENTORY
+  AUDIT did, by counting code points per file. Escaped in both engines now (#931). Run the audit on every port,
+  and read a control character as a design decision rather than noise.
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.
