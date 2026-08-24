@@ -4,6 +4,13 @@ import { normalizeRomanian } from "../src/languages/romanian/normalize.ts";
 import { ROMAN_EXCLUSIONS } from "../src/core/roman.ts";
 import { phonemize } from "../src/index.ts";
 import { ROMAN_POLICY } from "../src/languages/romanian/romanOrdinals.ts";
+import { loadManifest } from "../src/core/loadManifest.ts";
+
+/** The manifest as the engine loads it — used below to assert which letters the letter map may declare. */
+const DEF = loadManifest<{ consonants: Record<string, string> }>(
+    new URL("../src/languages/romanian/romanian.ts", import.meta.url).href,
+    "romanian.jsonc",
+);
 
 // Diagnostic gold for the Romanian (ro) g2p — common words, one per signature feature. These are OUR canonical
 // output; they match the wikipron ron_latn referee on the shared backbone (stress is deferred, unwritten). The
@@ -31,6 +38,29 @@ describe("Romanian (ro) g2p — diagnostic gold", () => {
             expect(phonemizeWord(word)).toBe(ipa);
         });
     }
+});
+
+// ⚠ THE CONTEXTUAL LETTERS ARE NOT IN THE LETTER MAP, and this is the test that keeps it that way. `x` and `q`
+// were listed in romanian.jsonc's `consonants` with values nothing ever read: the scan claims both letters
+// before the map is consulted, so replacing their values with nonsense left every reading unchanged. A mapped
+// key is not a read one — the entries are gone, and these assertions pin the readings that actually speak.
+describe("Romanian — the contextual letters are decided by the g2p, not by the letter map", () => {
+    test("⟨x⟩ is [ɡz] in the word-initial ex- prefix and [ks] everywhere else", () => {
+        expect(phonemizeWord("examen")).toBe("eˈɡzamen");
+        expect(phonemizeWord("exact")).toBe("eˈɡzakt");
+        expect(phonemizeWord("xilofon")).toBe("ksiloˈfon");
+        expect(phonemizeWord("taxi")).toBe("ˈtaksʲ");
+    });
+    test("⟨q⟩ is [k], and ⟨qu⟩+V is [kw]", () => {
+        expect(phonemizeWord("qatar")).toBe("kaˈtar");
+        expect(phonemizeWord("quartz")).toBe("ˈkwartz");
+    });
+    test("none of the four contextual letters is declared in the context-free map", () => {
+        const consonants = DEF.consonants;
+        for (const letter of ["c", "g", "x", "q"]) expect(letter in consonants).toBe(false);
+        // …while every letter the map DOES declare is one the scan falls through to.
+        for (const letter of ["b", "h", "j", "ș", "ț", "w", "y", "z"]) expect(letter in consonants).toBe(true);
+    });
 });
 
 // ── Cardinal numbers: GENDER + `de` agreement with the magnitude nouns ─────────────────────────────────────

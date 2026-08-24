@@ -8,13 +8,20 @@
     "script": ["Latin"],
     "provenance": "Authored from standard Romanian orthography + phonology. Validated against wikipron ron_latn broad (human). This file IS the language data — the g2p reads it directly.",
 
-    // Simple (context-free) consonant letters → IPA. c/g are handled contextually in the g2p and are NOT here.
-    // ⟨h⟩ is pronounced [h] (unlike Italian); ⟨j⟩ → ʒ; ⟨ș⟩ → ʃ, ⟨ț⟩ → t͡s; ⟨x⟩ → ks.
+    // Simple (context-free) consonant letters → IPA. FOUR letters are missing on purpose, because their
+    // reading depends on what follows and the g2p decides it: ⟨c⟩ and ⟨g⟩ (soften to t͡ʃ/d͡ʒ before e/i, and
+    // ⟨ch gh⟩ are the hard digraphs), ⟨x⟩ (the word-initial prefix ⟨ex⟩+V is [ɡz] — examen → eɡzamen — and
+    // [ks] elsewhere) and ⟨q⟩ (⟨qu⟩+V is [kw]).
+    // ⚠ x AND q USED TO BE LISTED HERE, WITH VALUES NOTHING READ. The scan claims both letters before the
+    // map is consulted, so the entries were dead: replacing them with nonsense left every reading identical
+    // (examen → eˈɡzamen, xilofon → ksiloˈfon, quartz → ˈkwartz). Dead data drifts silently — and the ⟨x⟩
+    // entry was already a half-truth, since the engine says ɡz in the one environment that matters.
+    // ⟨h⟩ is pronounced [h] (unlike Italian); ⟨j⟩ → ʒ; ⟨ș⟩ → ʃ, ⟨ț⟩ → t͡s.
     "consonants": {
         "b": "b", "d": "d", "f": "f", "h": "h", "j": "ʒ", "k": "k",
-        "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "r",
+        "l": "l", "m": "m", "n": "n", "p": "p", "r": "r",
         "s": "s", "ș": "ʃ", "t": "t", "ț": "t͡s", "v": "v", "w": "v",
-        "x": "ks", "y": "i", "z": "z"
+        "y": "i", "z": "z"
     },
 
     // The OBSTRUENTS — both voicings, since the rule that reads them asks "is this an obstruent at all?"
