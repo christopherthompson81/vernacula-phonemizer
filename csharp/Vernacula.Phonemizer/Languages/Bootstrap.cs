@@ -34,6 +34,7 @@ public static class Bootstrap
 
             Afrikaans.AfrikaansPhonemizer.RegisterSelf();
             Amharic.AmharicPhonemizer.RegisterSelf();
+            Asturian.AsturianPhonemizer.RegisterSelf();
             Bulgarian.BulgarianPhonemizer.RegisterSelf();
             Cebuano.CebuanoPhonemizer.RegisterSelf();
             English.EnglishFactory.RegisterSelf();
@@ -41,7 +42,9 @@ public static class Bootstrap
             Kalaallisut.KalaallisutPhonemizer.RegisterSelf();
             Maori.MaoriPhonemizer.RegisterSelf();
             Occitan.OccitanPhonemizer.RegisterSelf();
+            Odia.OdiaPhonemizer.RegisterSelf();
             Russian.RussianPhonemizer.RegisterSelf();
+            Umbundu.UmbunduPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }

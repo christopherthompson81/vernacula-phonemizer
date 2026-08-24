@@ -18,7 +18,9 @@ namespace Vernacula.Phonemizer.Tests;
 
 public class ManifestMappingTests
 {
-    private static readonly JsonSerializerOptions Opts = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    // IncludeFields mirrors the loader (Jsonc.JsonOpts): a field-based data class must round-trip its fields
+    // or this guard reports them as unmapped when they are in fact consumed.
+    private static readonly JsonSerializerOptions Opts = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, IncludeFields = true };
 
     private static void CollectUnmapped(JsonElement source, JsonElement round, string path, List<string> missing)
     {
