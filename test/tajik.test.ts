@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest";
+import { numberWords } from "../src/languages/tajik/tajik.ts";
+import { MANIFEST } from "../src/languages/tajik/manifest.ts";
 
 import { phonemizeWord } from "../src/languages/tajik/tajik.ts";
 import { getPhonemizer } from "../src/registry.ts";
@@ -113,6 +115,19 @@ describe("Tajik text normalization (Persian in Cyrillic — two precedent famili
         expect(p.text("ТВ")).toBe("tˈe vˈe"); // те ве — was [tv]
         expect(p.text("ИМА")).toBe("imˈa"); // readable → stays a word, correctly
         expect(p.text("КАРБОН")).toBe("karbˈɔn"); // an encyclopedia headword in caps, not an acronym
+    });
+
+    // ⚠ THE CONNECTOR COMES FROM THE MANIFEST, and this pins that it is READ rather than re-typed. `numbers.and`
+    // sat in tajik.jsonc unreferenced while `numberWords` carried its own literal copy — the values agreed, so
+    // no output was ever wrong, but a manifest edit would have had no effect and the divergence would have
+    // surfaced as a wrong reading with a correct-looking data file. Asserting the composed form is what makes
+    // the manifest load-bearing: change `and` and this test moves.
+    test("the -у connector is the manifest's, not a literal in the compositor", () => {
+        expect(MANIFEST.numbers.and).toBe("у");
+        expect(numberWords(21)).toBe("бисту як"); // glued to the END of the preceding word
+        expect(numberWords(345)).toBe("сесаду чилу панҷ");
+        expect(numberWords(2000)).toBe("ду ҳазор"); // …but a MAGNITUDE takes a plain space, not the connector
+        expect(numberWords(1_001)).toBe("ҳазору як"); // the bare ҳазор, then the connector
     });
 
     // The spaced dash carried 280 pauses across 40% of the mined corpus and produced none of them.
