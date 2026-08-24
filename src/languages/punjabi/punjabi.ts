@@ -172,6 +172,37 @@ export function makeNativePunjabi(
         return applyWeightStress(x).normalize("NFC");
     }
 
+    /**
+     * The SHIPPED word path: the lexicon tiers in front of the rule engine, in the precedence the exported
+     * `phonemizeWord` already documents — mined Gurmukhi exceptions → cross-script gold → harakat restore →
+     * `word`.
+     *
+     * ⚠ text() USED TO CALL `word` DIRECTLY, so the shipped engine consulted NONE of the three lexicons and
+     * every one of them was dead weight on the only path users reach. Measured when it was found: 153 of the
+     * 200 pa golden rows contain at least one word the Gurmukhi exceptions lexicon covers — words mined
+     * precisely because the rules get them wrong — and the 11,166-entry cross-script GOLD lexicon was unused
+     * outright, so `آئرلینڈ` read *aːˈiːɾliːnəɖ* against its gold *aːɪɾlˈɛ̃ɳɖ*.
+     *
+     * ⚠ AND IT BROKE THE NEURAL RIDER'S DESIGN, which is how it stayed invisible: the rider diacritizer leaves
+     * a lexicon-covered word BARE on purpose, so that "the authoritative sync lexicon layer" vocalizes it
+     * (core/riderDiacritizer.ts says exactly that). With no such layer wired, those words got neither the
+     * neural vocalization nor the lexicon — the one class the whole precedence exists to serve.
+     *
+     * `word` itself is deliberately left lexicon-free: `phonemizeWordCore` and the mining tool depend on that,
+     * and `phonemizeWordEval` must never see the guru lexicon (it is mined FROM the referee).
+     *
+     * SARAIKI IS GATED OFF: these are Punjabi lexicons (Gurmukhi keys, pa cross-script pairs), and skr shares
+     * only the factory. Same gate as tonogenesis and the ɳ heuristic above.
+     */
+    function shippedWord(w: string): string {
+        if (opts.saraiki) return word(w);
+        return (
+            guruLexicon().get(w) ??
+            crossScriptLexicon().get(w) ??
+            word(restoreHarakat(w, harakatLexicon()))
+        );
+    }
+
     const toAscii = (d: string): string =>
         [...d].map((c) => GURMUKHI_DIGITS[c] ?? shahmukhiDigit(c) ?? c).join("");
     function number(digits: string): string {
@@ -204,7 +235,7 @@ export function makeNativePunjabi(
         // dropped entirely — the engine returned an empty string for it (core/unicode.ts). It runs
         // BEFORE `normalize`, whose patterns are all written against ASCII digits.
         return assembleClauses(normalize(foldNativeDigits(input)), tokenRe, (m, sink) => {
-            if (m[1]) sink.emit(word(m[1]));
+            if (m[1]) sink.emit(shippedWord(m[1]));
             else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
             else if (m[4]) {
@@ -213,7 +244,7 @@ export function makeNativePunjabi(
             }
         });
     }
-    return { word, number, text };
+    return { word, shippedWord, number, text };
 }
 
 // COVERAGE layer: mined Shahmukhi (Perso-Arabic) skeletons are vocalized before g2p; Gurmukhi input has no

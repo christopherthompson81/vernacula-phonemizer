@@ -51,7 +51,13 @@ describe("punjabi Shahmukhi front-end", () => {
     });
 
     test("text: Shahmukhi word run + Urdu punctuation", () => {
-        expect(phonemize("پنجابی بولی۔", "pa")).toBe("pəɲd͡ʒˈaːbiː bˈoːliː");
+        // ⚠ THE VALUE CHANGED WHEN text() WAS WIRED TO THE SHIPPED WORD PATH, and the new one is the reading
+        // the referee eval has been scoring all along. `پنجابی` is in crossscript.tsv as pˈə̃ɲd͡ʒaːbiː —
+        // derived from our own g2p over the VOWELED Gurmukhi sister-spelling ਪੰਜਾਬੀ, whose tippi supplies the
+        // nasal the abjad does not write. The eval imports `phonemizeWordEval`, which consults that lexicon,
+        // so this was always the measured reading; text() alone bypassed it. The old expectation recorded the
+        // lexicon-FREE rules, i.e. the one path nothing measured.
+        expect(phonemize("پنجابی بولی۔", "pa")).toBe("pˈə̃ɲd͡ʒaːbiː bˈoːliː");
     });
 });
 
@@ -151,5 +157,23 @@ describe("punjabi text normalization", () => {
         expect(phonemize("ایہ &nbsp؛ اے", "pnb")).toBe(phonemize("ایہ اے", "pnb"));
         // a REAL ampersand is still the conjunction — the entity step must not have eaten the rule
         expect(phonemize("ਸਾਡਾ & ਘਰ", "pa")).toContain("ˈət̪eː");
+    });
+});
+
+// ⚠ THE SENTENCE PATH AND THE WORD PATH MUST AGREE. `phonemizeWord` is documented as the SHIPPED reading
+// (mined Gurmukhi exceptions → cross-script gold → harakat restore → rules), but `text()` used to call the
+// lexicon-FREE core directly, so the engine users actually reach consulted none of the three lexicons.
+// Measured when it was found: 153 of the 200 pa golden rows contain a word the exceptions lexicon covers, and
+// the 11,166-entry cross-script GOLD lexicon was unused outright. It also broke the neural rider's precedence —
+// the diacritizer leaves a lexicon-covered word BARE for a sync lexicon layer that did not exist, so those
+// words got neither treatment. The referee eval cannot see any of this: it scores `phonemizeWordEval`, which
+// never went through text(). Consistency is therefore the invariant to pin.
+describe("the shipped sentence path uses the shipped word path", () => {
+    test("a word the Gurmukhi exceptions lexicon covers reads the same both ways", () => {
+        for (const w of ["ਉਸਤਰਾ", "ਉਹਦਾ", "ਉਣੰਜਾ"])
+            expect(phonemize(w, "pa")).toBe(phonemizeWord(w));
+    });
+    test("a Shahmukhi word the cross-script gold covers reads the gold, not the bare rules", () => {
+        expect(phonemize("آئرلینڈ", "pnb")).toBe("aːɪɾlˈɛ̃ɳɖ");
     });
 });

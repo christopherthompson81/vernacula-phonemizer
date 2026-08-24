@@ -109,3 +109,25 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
   clothes, invisible to both sides' tests. If the TS half of a fix cannot land now (needs corpus
   evidence, needs a decision), the C# ports the CURRENT behaviour and the finding is filed — matched
   engines with a shared known bug beat diverged engines where one is right.
+- ⚠ READ EACH FILE FOR CORRECTNESS, NOT ONLY FOR FIDELITY — and they are different questions. The
+  natural porting question is "does my C# match this?"; the bidirectional rule above only pays off if
+  someone also asks "IS this right?". The parity gate cannot ask the second one for you: it proves the
+  two engines AGREE, so a bug both sides reproduce identically passes it forever. Every defect the port
+  has sent back to the TypeScript was found by reading, never by the gate:
+    · digit grouping was ASCII-space-only in 63 places (#877) — no test caught it because every
+      fixture used ASCII spaces;
+    · ja's counter fusion was suppressed by any ≥2-char reading entry, so `1本のペン` read *it͡ɕi ho̞n*
+      (#894) — 0 golden rows changed when it was fixed, in either direction;
+    · pa's `text()` consulted NONE of its three lexicons while `phonemizeWord` was documented as the
+      shipped path, so the engine users reach and the engine the referee eval scores were different
+      engines.
+  The three questions that have actually found things, worth asking per file:
+    1. WHAT DOES THIS FILE'S OWN DOCSTRING PROMISE, and does the code do it? Every one of the above is
+       a gap between a stated contract and the code under it — the comment was right and the wiring
+       was not.
+    2. IS EVERY TABLE THIS FILE LOADS ACTUALLY REACHED? A lexicon nothing consults is not inert, it is
+       a silent regression: someone measured a tier into existence and the shipped path skips it.
+    3. WHICH PATH DOES THE INSTRUMENT MEASURE? Where the eval, the golden and the shipped entry point
+       are not the same path, the measured number does not describe the product — and that gap is
+       invisible from inside either path.
+  Finding one is not licence to fix it here: it goes through the three steps above, or it is filed.
