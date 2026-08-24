@@ -100,9 +100,13 @@ export function normalizeMalayalam(input: string): string {
     // 1) ZERO-WIDTH characters — FIRST, because every later rule asserts letter/digit adjacency and an
     //    invisible character defeats all of them. The two classes are NOT treated alike; see the header.
     //    (a) virama + ZWJ is the legacy chillu spelling → the atomic chillu character.
-    let s = input.replace(/([ണനരലളക])്‍/gu, (_m, base: string) => ZWJ_CHILLU[base]!);
+    //    ⚠ THE ZERO-WIDTH CHARACTERS ARE ESCAPED, NOT WRITTEN AS THEMSELVES. Both patterns used to carry
+    //    the literal code points, so (a) read as `virama` followed by nothing and (b) read as an EMPTY
+    //    character class — the two rules this file's header spends a paragraph distinguishing were both
+    //    invisible in their own source. Same defect class as the Burmese U+0001 join separator (#931).
+    let s = input.replace(/([ണനരലളക])്\u200d/gu, (_m, base: string) => ZWJ_CHILLU[base]!);
     //    (b) everything else zero-width is a rendering hint with no phonetic content.
-    s = s.replace(/[​‌‍﻿]/gu, "");
+    s = s.replace(/[\u200b\u200c\u200d\ufeff]/gu, "");
 
     // 2) MALAYALAM DIGITS ൦-൯ → ASCII. Zero occurrences here (see the header); folded before every
     //    numeric rule anyway so a native-digit numeral would be eligible for the same de-grouping,
