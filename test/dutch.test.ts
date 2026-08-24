@@ -151,6 +151,15 @@ describe("Dutch text normalization", () => {
         expect(say("802.11g")).not.toMatch(/ɣrˈɑm/u);
     });
 
+    test("the US$ fold survives a NON-BREAKING space between the code and the amount", () => {
+        // The class was two PLAIN spaces — a duplicate matching exactly what one space matches — so the
+        // typeset spacing `US$\u00a014,7` walked past the rule and hit the defect it exists to prevent:
+        // the initialism pass spelled the code and the CURRENCY WORD went missing.
+        expect(say("US$ 14,7 miljard")).toBe("vˈeːrtin kˈɔmaː zˈeːvən mˈɪljɑrt dˈɔlɑr");
+        expect(say("US$\u00a014,7 miljard")).toBe("vˈeːrtin kˈɔmaː zˈeːvən mˈɪljɑrt dˈɔlɑr");
+        expect(say("AUD$\u00a05")).toBe("vˈɛi̯f dˈɔlɑr");
+    });
+
     test("signs, ampersand and fractions", () => {
         expect(say("UTC+1")).toBe("ˈy tˈeː sˈeː plˈʏs ˈeːn"); // the + was dropped
         expect(say("Arts & Sciences")).toBe("ˈɑrts ˈɛn sˈinsəs"); // the & was dropped
