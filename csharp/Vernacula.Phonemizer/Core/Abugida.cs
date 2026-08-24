@@ -39,7 +39,9 @@ public sealed class AbugidaSigns
     public AbugidaSign Nukta { get; set; } = new();
 }
 
-public sealed class AbugidaDef
+// NOT sealed: language defs (Odia, Assamese, …) extend it with their numbers/punctuation blocks, exactly
+// as the TS interfaces do (`interface OdiaDef extends AbugidaDef`).
+public class AbugidaDef
 {
     public string Language { get; set; } = "";
     public string InherentVowel { get; set; } = "";

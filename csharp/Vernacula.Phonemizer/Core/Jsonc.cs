@@ -17,6 +17,11 @@ public static class Jsonc
     internal static readonly JsonSerializerOptions JsonOpts = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        // ⚠ FIELDS TOO. Some Core data classes (NumbersDef, AbugidaDef's members) are ported with public
+        // FIELDS, and System.Text.Json ignores fields by default — the member deserializes to its DEFAULT
+        // with no error, the exact silent failure mode the ARPABET keys already demonstrated once. Odia is
+        // the first manifest to route through NumbersDef, which is how this surfaced.
+        IncludeFields = true,
     };
 
     /** Strip JSONC comments and trailing commas, returning parseable JSON. String contents are preserved verbatim. */

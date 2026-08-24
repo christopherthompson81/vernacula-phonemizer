@@ -1,0 +1,87 @@
+/**
+ * Umbundu (umb) phonemizer — Bantu (R11, Angola), the Latin orthography, canonical IPA. A pure
+ * greedy longest-match scan over the grapheme table (manifest.ts): Umbundu is open CV with prenasalised clusters as
+ * single onset units, so no coda/syllabification logic is needed. Signatures: VOICED obstruents ONLY prenasalised
+ * (⟨mb nd nj ng⟩→ᵐb ⁿd ᶮd͡ʒ ᵑɡ), ⟨c⟩→t͡ʃ, ⟨v⟩→v, ⟨ñ⟩/⟨ny⟩→ɲ, ⟨ng'⟩→ŋ, ⟨l⟩→l. Tone (H á / L à + downstep) is often
+ * unwritten → the accents are STRIPPED (tone DEFERRED); nasal-vowel tildes are kept. Cardinal numbers: numbers.ts (citation
+ * forms + the quinary 6–9 nouns + the la/l’ connective).
+ */
+using System.Text;
+using Vernacula.Phonemizer.Core;
+
+namespace Vernacula.Phonemizer.Languages.Umbundu;
+
+public sealed class UmbunduPhonemizer : ILanguage
+{
+    private static IReadOnlyDictionary<string, string> G => Manifest.MANIFEST.Graphemes;
+    private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
+
+    private static readonly JsRe TONE_MARKS = JsRegex.Compile("[̀́]", "gu");
+
+    /** Strip the tone accents (acute U+0301 = H, grave U+0300 = L; tone is DEFERRED) but KEEP the nasalisation
+     *  tilde (U+0303) — decompose, drop only the tone marks, recompose. */
+    private static string StripTone(string w) =>
+        TONE_MARKS.Replace(w.Normalize(NormalizationForm.FormD), "").Normalize(NormalizationForm.FormC);
+
+    private static bool StartsWithAt(string w, string key, int i) =>
+        i + key.Length <= w.Length && string.CompareOrdinal(w, i, key, 0, key.Length) == 0;
+
+    /** Phonemize a single Umbundu word to canonical IPA (segmental; tone unwritten/deferred). */
+    public static string PhonemizeWord(string word)
+    {
+        var w = StripTone(word.ToLowerInvariant());
+        var outSb = new StringBuilder();
+        var i = 0;
+        while (i < w.Length)
+        {
+            var matched = false;
+            foreach (var key in Manifest.GRAPHEME_KEYS)
+            {
+                if (!StartsWithAt(w, key, i)) continue;
+                outSb.Append(G[key]);
+                i += key.Length;
+                matched = true;
+                break;
+            }
+            // ⚠ NOT SILENTLY: a letter with no grapheme rule here still denotes a sound, and dropping it deletes
+            // what the writer typed. Consulted only on the MISS branch, after every grapheme has been tried.
+            if (!matched)
+            {
+                outSb.Append(LatinPhones.LatinPhone(w[i].ToString(), new PhoneOpts { Initial = i == 0, IncludeH = true }) ?? "");
+                i++;
+            }
+        }
+        return outSb.ToString();
+    }
+
+    // A word (Umbundu letters incl. ⟨ñ⟩ + the ⟨ng'⟩ apostrophe, and tone/nasal diacritics) / number / punctuation.
+    // ⚠ THE WORD GROUP IS BOUNDED TO LATIN SCRIPT — `\p{L}` matches EVERY script and claimed embedded Greek,
+    // Cyrillic, Thai and Devanagari, so the run vanished with nothing in the IPA to flag it. ⚠ AND THE GROUP
+    // MUST BEGIN WITH A LATIN LETTER: `[\p{Script=Latin}\p{M}]+` still matches a BARE COMBINING MARK.
+    private static readonly JsRe TOKEN = JsRegex.Compile(
+        "(['’]?\\p{Script=Latin}[\\p{Script=Latin}\\p{M}'’]*)|(\\d+)|([.!?…,;:])", "gu");
+
+    private static readonly JsRe CURLY = JsRegex.Compile("’", "gu");
+
+    public string Text(string input)
+    {
+        // normalize.ts FIRST — its Greek-iota fold has to reach the word before TOKEN's Latin-script bound
+        // splits it, and its separator, clock, dash and range steps need the figure and its mark still
+        // adjacent. The shared symbol tier runs INSIDE that pass, ahead of the de-grouping.
+        return Clauses.AssembleClauses(Normalize.NormalizeUmbundu(input), TOKEN, (m, sink) =>
+        {
+            if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(CURLY.Replace(m.Groups[1].Value, "'")));
+            else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
+                foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value)).Split(' ')) sink.Emit(PhonemizeWord(wd));
+            else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
+            {
+                if (CLAUSE_MARK.TryGetValue(m.Groups[3].Value, out var mk) && mk.Length > 0) sink.Pause(mk);
+            }
+        });
+    }
+
+    /** Build the Umbundu phonemizer (greedy rule g2p + the cardinal compositor; tone deferred). */
+    public static ILanguage CreateUmbundu() => new UmbunduPhonemizer();
+
+    internal static void RegisterSelf() => Registry.Register("umbundu", CreateUmbundu);
+}

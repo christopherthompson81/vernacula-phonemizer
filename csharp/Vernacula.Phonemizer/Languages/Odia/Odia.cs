@@ -1,0 +1,110 @@
+/**
+ * Native Odia / ଓଡ଼ିଆ (or) text phonemizer — canonical IPA. Odia is an Eastern Indo-Aryan
+ * Brahmic abugida read by the generic engine (core/abugida.ts), like the Dravidian trio (Telugu/Kannada/Malayalam):
+ * NO inherent-vowel deletion — every akshara is pronounced, and the inherent vowel is /ɔ/ (ଘର→ɡʱɔɾɔ), like Bengali.
+ * odia.ts adds only the light post-processing: geminate → length, ଳ୍ଳ → [ɭː], and
+ * first-syllable (weak) stress. No intervocalic voicing (Indo-Aryan, unlike the Dravidian trio).
+ */
+using System.Text;
+using Vernacula.Phonemizer.Core;
+
+namespace Vernacula.Phonemizer.Languages.Odia;
+
+public sealed class OdiaDef : AbugidaDef
+{
+    public NumbersDef Numbers { get; set; } = new();
+    public Dictionary<string, string> ClausePunctuation { get; set; } = new();
+}
+
+/** Read a Latin run with another language's engine — injected from the registry. */
+public delegate string ForeignPhonemizer(string latin);
+
+public sealed class OdiaPhonemizer : ILanguage
+{
+    internal static readonly OdiaDef DEF = LoadManifest.Load<OdiaDef>("languages/odia", "odia.jsonc");
+    private static IReadOnlyDictionary<string, string> CLAUSE_MARK => DEF.ClausePunctuation;
+    private const string ODIA_WORD = "଀-୥୰-୷"; // Odia block EXCLUDING the digits ୦-୯ (matched by the digit branch)
+    private static readonly IReadOnlyDictionary<string, string> ODIA_DIGITS = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["୦"] = "0", ["୧"] = "1", ["୨"] = "2", ["୩"] = "3", ["୪"] = "4",
+        ["୫"] = "5", ["୬"] = "6", ["୭"] = "7", ["୮"] = "8", ["୯"] = "9",
+    };
+    private static readonly string DIGIT_CLASS = "0-9" + string.Concat(ODIA_DIGITS.Keys);
+    private const string VOWEL = "aeiouɔɾ";
+
+    private static Func<string, string>? G2P;
+    private static string G2p(string w) => (G2P ??= Abugida.MakeAbugidaG2P(DEF, PhonologyLoader.LoadSharedPhonology()))(w);
+
+    // Geminate consonant (doubled base, possibly aspirated) → single + length ː.
+    private static readonly JsRe GEMINATE = JsRegex.Compile(
+        "(t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|ʈʰ|ɖʱ|ɡʱ|kʰ|t̪|d̪|n̪|[kɡpbmnlʃʂsʈɖɳɭɲŋjɦhʋwɾr])\\1(?!͡)", "gu");
+    private static readonly JsRe LENGTH_ASPIRATE = JsRegex.Compile("ː([ʰʱ])", "gu");
+    private static readonly JsRe RETROFLEX_GEM = JsRegex.Compile("ɭl", "gu");
+    private static readonly JsRe FIRST_VOWEL = JsRegex.Compile($"[{VOWEL}]", "u");
+
+    /** One Odia word → canonical IPA. */
+    public static string PhonemizeWord(string word)
+    {
+        // Anusvara ଂ nasalizes the vowel in ALL positions in Odia — including word-finally (ଏବଂ→ebɔ̃, NOT ebɔm;
+        // unlike Kannada's final ಂ→[m]) — so the engine's nasalizeVowel handles it directly, no override.
+        var norm = word.Normalize(NormalizationForm.FormC);
+        var x = G2p(norm);
+        x = LENGTH_ASPIRATE.Replace(GEMINATE.Replace(x, "$1ː"), "$1ː");
+        x = RETROFLEX_GEM.Replace(x, "ɭː"); // ଳ୍ଳ → geminate retroflex [ɭː]
+        // First-syllable (weak) stress: mark the first vowel nucleus.
+        var m = FIRST_VOWEL.Match(x);
+        if (m.Success) x = x[..m.Index] + "ˈ" + x[m.Index..];
+        return x.Normalize(NormalizationForm.FormC);
+    }
+
+    private static string ToAscii(string d) =>
+        string.Concat(Js.CodePoints(d).Select(c => ODIA_DIGITS.TryGetValue(c, out var a) ? a : c));
+
+    private static string Number(string digits)
+    {
+        var n = Js.Number(ToAscii(digits));
+        // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA. `isSafeInteger` is right to
+        // refuse to COMPOSE — the float has already lost the low digits — but the refusal returned the digit
+        // string, which no g2p in this fleet reads. Read it out digit-at-a-time through this engine's own
+        // number words instead; see core/numbers.ts `spellDigits`.
+        if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d))
+            return Numbers.SpellDigits(ToAscii(digits), DEF.Numbers, PhonemizeWord);
+        return Numbers.RenderNumber(n, DEF.Numbers, PhonemizeWord);
+    }
+
+    private static readonly JsRe TOKEN = JsRegex.Compile(
+        // ⚠ ALL OF LATIN, not just ASCII: `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it
+        // became an unclaimed gap read as an English LETTER NAME — `São Paulo` read *ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ*.
+        // This group already means FOREIGN (its match goes to the injected reader), so widening it is the fix.
+        $"([{ODIA_WORD}]+)|(\\p{{Script=Latin}}[\\p{{Script=Latin}}\\p{{M}}]*)|([{DIGIT_CLASS}]+)|([।॥.?!,;:])",
+        "gu");
+
+    private static readonly Func<string, string> NORMALIZE = Normalize.MakeOdiaNormalizer(DEF.Numbers);
+
+    private readonly ForeignPhonemizer? _foreign;
+
+    public OdiaPhonemizer(ForeignPhonemizer? foreign = null) => _foreign = foreign;
+
+    public string Text(string input)
+    {
+        // NATIVE DIGITS FIRST: the corpus writes ୦-୯ (52 of them), and every pattern in normalize.ts is
+        // written against ASCII digits. `number()` folds them for the bare-numeral path anyway, so this
+        // changes no reading — it only lets the normalization rules see them.
+        return Clauses.AssembleClauses(NORMALIZE(Unicode.FoldNativeDigits(input)), TOKEN, (m, sink) =>
+        {
+            if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));
+            else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0) sink.Emit(_foreign is not null ? _foreign(m.Groups[2].Value) : "");
+            else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0) sink.Emit(Number(m.Groups[3].Value));
+            else if (m.Groups[4].Success && m.Groups[4].Value.Length > 0)
+            {
+                if (CLAUSE_MARK.TryGetValue(m.Groups[4].Value, out var mk) && mk.Length > 0) sink.Pause(mk);
+            }
+        });
+    }
+
+    /** Build the Odia phonemizer. `foreign` handles embedded Latin runs. */
+    public static ILanguage CreateOdia(ForeignPhonemizer? foreign = null) => new OdiaPhonemizer(foreign);
+
+    internal static void RegisterSelf() =>
+        Registry.Register("odia", () => CreateOdia(latin => Registry.ReadAsEnglish(latin)));
+}
