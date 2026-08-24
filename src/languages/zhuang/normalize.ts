@@ -355,7 +355,7 @@ export function normalizeZhuang(input: string): string {
     //    The SPACE form (×3: `357 021 bingzfueng`, `8 200 fanh`, `52 fanh 6 500 cih`) additionally has to
     //    reject a bare adjacency that is really two numbers in a list. Requiring every group to be exactly
     //    three digits does that: `2008 nienz 7-11 nyied` has no 3-digit group to join.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?: \d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/ /gu, ""));
+    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 5) UNITS, before decimals — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten into spaced digits (the playbook's standing "units before decimals"

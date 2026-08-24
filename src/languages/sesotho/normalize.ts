@@ -309,7 +309,7 @@ export function normalizeSesotho(input: string): string {
     //    is then read as a decimal by step 11.
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?![\d])/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 5) A MAGNITUDE LETTER GLUED TO A CURRENCY AMOUNT → the magnitude WORD, and this step is what makes
     //    the one-letter metre key safe. The artifact writes `R2.3m`, `£1.2m`, `R22.8m`, `$2.5bn`,

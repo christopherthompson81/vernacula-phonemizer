@@ -51,7 +51,7 @@ import { mkOrdinal, numberToText } from "./numbers.ts";
 
 const MANIFEST = loadManifest<{ acronymLetters: string[] }>(import.meta.url, "macedonian.jsonc");
 
-const GROUP_SPACE = " \u00a0\u202f";
+const GROUP_SPACE = " \u00a0\u202f\u2009";
 /** The months — dates read the day as an ordinal. */
 const MONTHS = new Set([
     "јануари", "февруари", "март", "април", "мај", "јуни", "јули",

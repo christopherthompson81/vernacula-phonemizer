@@ -161,7 +161,7 @@ const W = NRM.words;
 /** ASCII space or NO-BREAK space. Written as an ESCAPE, never as a literal — a literal U+00A0 collapses
  *  invisibly to a duplicate ASCII space under an editor or a copy-paste and the class silently becomes one
  *  alternative instead of two (the defect found reviewing the Luganda layer). */
-const SP = "[ \\u00A0]";
+const SP = "[ \\u00A0\\u202F\\u2009]";
 /** Not inside a word. `\p{M}` beside `\p{L}` per trap 23 — Lithuanian is alphabetic, but the guard is
  *  written once and copied, and a decomposed ⟨ž⟩ is `z` + U+030C, a mark. */
 const NW = "(?![\\p{L}\\p{M}])";

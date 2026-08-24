@@ -120,7 +120,7 @@ export function normalizeScottishGaelic(input: string): string {
         s = s.replace(/(\d)\.(\d{3})(?!\d)/gu, "$1$2");
     }
     //    The SI space form, for completeness — it does not occur in the retained text.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[   ](\d{3})(?!\d)/gu, "$1$2");
+    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");
 
     // 1) DOTTED ABBREVIATIONS. The dot is consumed before a following word so it cannot become a phrase
     //    break; at a real sentence end it is kept.

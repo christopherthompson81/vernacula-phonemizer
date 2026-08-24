@@ -351,7 +351,7 @@ export function normalizeLuganda(input: string): string {
     //    deliberate infidelity for exactly this hazard) and the retained text contains U+0020 and U+000A and no
     //    other whitespace at all — measured, 20,030 spaces, zero U+00A0. It is robustness for a dump that
     //    preserves the raw character, and an escape cannot degrade invisibly the way the literal did.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00A0]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00A0]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
     //    ⚠ THE PERIOD ARM IS THE RISKY ONE AND ITS EXPOSURE IS MEASURED RATHER THAN ASSERTED. A period-grouped
     //    thousand is indistinguishable from a decimal with exactly three fractional digits, and this rule runs
     //    ABOVE step 7, so a wrong call turns 0.628 into six hundred and twenty-eight. Counted over the retained
@@ -409,13 +409,13 @@ export function normalizeLuganda(input: string): string {
     //    NUMBER, so `580,367 km2` read *"…musanvu km bbiri"* — trap 53's Igbo defect exactly.
     const km2 = (w: string, n: string, off: number, all: string): string =>
         saidNear(all, off, off + w.length, ...spellings(KILOMETRE)) ? n : `${KILOMETRE} ${SQUARED} ${n}`;
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00A0]?km[²2](?![\p{L}\p{M}\d])/gu, km2);
+    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0\u202f\u2009]?km[²2](?![\p{L}\p{M}\d])/gu, km2);
     //    ⚠ THE BARE `km` ARM IS ROBUSTNESS, AND THAT IS SAID RATHER THAN IMPLIED (trap 22). Digit-adjacent `km`
     //    with nothing after it is ×0 in the retained text — every occurrence is `km²`, `km2` or `km/s` — so this
     //    arm repairs no measured defect today. It is here because `kiromita` is the best-attested unit noun in
     //    the language (×61/20) and `km` is a two-letter key with no Luganda word to collide with. The `/` in the
     //    right guard is what keeps `299,792 km/s` out: there is no rate idiom (header).
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00A0]?km(?![\p{L}\p{M}\d²³/])/gu,
+    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0\u202f\u2009]?km(?![\p{L}\p{M}\d²³/])/gu,
         (w, n: string, off: number, all: string) =>
             saidNear(all, off, off + w.length, ...spellings(KILOMETRE)) ? n : `${KILOMETRE} ${n}`);
     //    `cm` ×11 is the largest unit class in this corpus (*"obugulumivu bwa 10 cm"*, *"9” = 23 cm"*,

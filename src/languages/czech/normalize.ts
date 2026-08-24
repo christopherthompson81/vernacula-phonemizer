@@ -22,7 +22,7 @@ import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 
 /** Regular, NBSP and narrow-NBSP — all three occur as thousands separators. */
-const GROUP_SPACE = "  ";
+const GROUP_SPACE = " \\u00a0\\u202f\\u2009";
 
 /**
  * Czech count-form selector for the LOCAL rules below and for czech.ts's shared symbol tier. Same final-digit

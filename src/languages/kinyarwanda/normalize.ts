@@ -361,7 +361,7 @@ export function normalizeKinyarwanda(input: string): string {
     const NOT_COORD = "(?![    ]?[°º])";
     s = s.replace(new RegExp(`(?<![\\d.,])[1-9]\\d{0,2}(?:,\\d{3})+(?!\\d|[.,]\\d)${NOT_COORD}`, "gu"), (w) => w.replace(/,/gu, ""));
     s = s.replace(new RegExp(`(?<![\\d.,])[1-9]\\d{0,2}(?:\\.\\d{3})+(?!\\d|[.,]\\d)${NOT_COORD}`, "gu"), (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 3) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — `km² 26,338`, `m 900`, `cm 25`, `kg 250`, `ml 10`,
     //    `g 200`. The shared tier matches ONLY number-then-unit, so these 30 instances are structurally

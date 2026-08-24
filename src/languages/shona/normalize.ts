@@ -226,7 +226,7 @@ export function normalizeShonaPre(input: string): string {
     //    grouped number that is followed by a clause comma or a sentence period, and step 9 would then read
     //    the leftover separator as a decimal.
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 5) THE ENGLISH ORDINAL SUFFIX (`19th Century`, ×1 here). Shona writes its own ordinals as WORDS with a
     //    `chi-`/`re-` prefix — this corpus has *mwaka wechizana 19*, *zana ramakore rechi20*, *kechiviri*,

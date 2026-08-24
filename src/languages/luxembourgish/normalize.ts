@@ -53,7 +53,7 @@ const FEM_DATIVE = new Set(["der"]);
 /** ⚠ THE SPACE BETWEEN A NUMBER AND ITS NEIGHBOUR IS USUALLY NOT A PLAIN SPACE. Real text writes NBSP
  *  (U+00A0) and NARROW NBSP (U+202F) almost everywhere — `88 %`, `1.000 $`, `9 000`, `1894 – 1895`,
  *  `v. Chr.` — so a rule keyed on ` ` alone matches almost nothing. */
-const SP = "[ \\u00a0\\u202f]";
+const SP = "[ \\u00a0\\u202f\\u2009]";
 /** Coordinators that chain a list of ordinals: `am 11., 12. an 13. Joerhonnert`, `dem 10. bis 11.`. */
 const ORDINAL_LIST = new RegExp(
     String.raw`^(?:,|${SP}+(?:an|a|bis|oder))(?:${SP}+[\p{L}'’-]+){0,2}${SP}+\d{1,4}\.`, "u");

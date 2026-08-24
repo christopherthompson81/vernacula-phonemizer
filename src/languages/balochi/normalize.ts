@@ -453,7 +453,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         s = BARE_UNITS(s);
         for (const [abbr, word] of UNITS) {
             s = s.replace(
-                new RegExp(`(?<![${D}.,٫])([${D}]+(?:[.٫][${D}]+)?)[ \u00a0]?${abbr}(?![\\p{L}\\p{M}‌])`, "giu"),
+                new RegExp(`(?<![${D}.,٫])([${D}]+(?:[.٫][${D}]+)?)[ \u00a0\u202f\u2009]?${abbr}(?![\\p{L}\\p{M}‌])`, "giu"),
                 `$1 ${word}`,
             );
         }

@@ -210,7 +210,7 @@ export function normalizeChichewa(input: string): string {
     //    is then read as a decimal by step 10. It only needs to stop a PARTIAL match inside a longer run.
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?![\d])/gu, (w) => w.replace(/[  ]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 5) DEGREES. `40 °C (104.0 °F)`, `25 ° S`, and a bare `30 °`. The sign was dropped outright and the
     //    scale letter reached the g2p as a phoneme — `C` as [k] and `F` as [f], because Chichewa has no

@@ -369,7 +369,7 @@ export function normalizeAkan(input: string): string {
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a row.
     //    Requiring every group to be exactly three digits does that: `afe 1961 – 25` has no 3-digit group,
     //    and `bosome 9 1946` is not `\d{1,3}( \d{3})+` because 1946 is four digits.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?: \d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/ /gu, ""));
+    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 4) UNITS, BEFORE DECIMALS — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten into a word plus spaced digits (the playbook's standing coupling), and after

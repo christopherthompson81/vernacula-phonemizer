@@ -99,7 +99,7 @@ export function normalizeUzbek(input: string): string {
     //    that splits the number. Two passes, because the groups overlap on the shared digit (783 562 948).
     //    A space is only grouping when the block is exactly three digits ("800 000" but not "3000 mil").
     for (let i = 0; i < 2; i++)
-        s = s.replace(/(\d)[  ](\d{3})(?!\d)/gu, "$1$2");
+        s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");
     s = s.replace(/[    ]/gu, " ");
 
     // 1) ERA MARKERS, before the single-dot rules so the interior dots cannot survive as breaks. `m.a.` =
