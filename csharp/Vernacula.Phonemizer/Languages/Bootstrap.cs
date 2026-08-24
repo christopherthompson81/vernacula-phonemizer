@@ -59,6 +59,7 @@ public static class Bootstrap
             Spanish.SpanishPhonemizer.RegisterSelf();
             Umbundu.UmbunduPhonemizer.RegisterSelf();
             Urdu.UrduPhonemizer.RegisterSelf();
+            Punjabi.PunjabiPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }
