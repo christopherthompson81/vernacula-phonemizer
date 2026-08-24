@@ -1,0 +1,373 @@
+/**
+ * Gujarati (gu) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
+ *
+ * ⚠ GUJARATI REUSES HINDI'S ENGINE (`makeNativeHindi`), AND THAT MAKES INHERITING HINDI'S SYMBOL WORDS A
+ * SILENT DELETION rather than a wrong reading. Hindi's words are written in DEVANAGARI, which is not in
+ * `core/unicode.ts`'s GUJARATI_WORD, so the tokenizer never emits them at all:
+ *     "45%"          → [pˈistalis]          the percent word vanishes entirely
+ *     "$45 મિલિયન"    → [pˈistalis mˈilijən]  so does the currency word
+ *     "11:00 વાગતાજ"  → [ˈəɡijaɾ ʋˈaɡt̪ad͡ʒ]    Hindi's बजे vanishes, and :00 is dropped
+ * Every symbol tier in this file therefore REPLACES an inherited Hindi one. Adding a Devanagari word here
+ * does not degrade the reading — it produces no reading at all.
+ *
+ * ⚠ THE LARGEST DEFECT CLASS IS A DIGIT WITH AN ATTACHED GUJARATI SUFFIX (માં, ના, મી, થી, ની …), which is
+ * ordinary Gujarati morphology and not an ordinal marker. Step 7 owns it.
+ *
+ * ⚠ ASCII `:` IS WRITTEN FOR THE VISARGA (પુન:, સંભવત:, ક્રમશ:), so a colon here is not always a clock.
+ *
+ * NEGATIVE RESULTS, recorded so they are not re-investigated: Gujarati text punctuates with the ASCII period
+ * rather than the danda ।/॥, and the ZWJ/ZWNJ defect that bites Marathi does not occur.
+ *
+ * ⚠ SOURCING. Everything this file emits is attested in Gujarati text in the same function, EXCEPT a short
+ * list taken as transparent international or arithmetic vocabulary: સેલ્સિયસ, ફેરનહીટ, સેન્ટીમીટર,
+ * કિલોગ્રામ, રૂપિયા, ભાગ્યા, and દશાંશ (the exact cognate of the दशांश already shipped for Marathi).
+ * A wrong word is worse than a dropped sign, so anything not in one of those two categories is omitted.
+ */
+using Vernacula.Phonemizer.Core;
+
+namespace Vernacula.Phonemizer.Languages.Gujarati;
+
+public static class Normalize
+{
+    /**
+     * SUPPLETIVE ORDINALS 1-4 and 6, indexed [masc sg, fem, neut sg, oblique/plural]. Gujarati writes these
+     * with their own consonant — ૧લી, ૨જી, ૩જી, ૪થો, ૬ઠ્ઠો — not with the regular -મ-, which is why they are
+     * keyed by (number, consonant) rather than guessed. Corpus: "1લી અને 3જી ન્યૂ હૅમ્પશાયર" ×1 each; the
+     * spelled-out members of the paradigm are attested throughout (પહેલી, બીજા, ત્રીજું, ચોથો, છઠ્ઠો).
+     */
+    private static readonly IReadOnlyDictionary<int, string[]> IRREGULAR = new Dictionary<int, string[]>
+    {
+        [1] = new[] { "પહેલો", "પહેલી", "પહેલું", "પહેલા" },
+        [2] = new[] { "બીજો", "બીજી", "બીજું", "બીજા" },
+        [3] = new[] { "ત્રીજો", "ત્રીજી", "ત્રીજું", "ત્રીજા" },
+        [4] = new[] { "ચોથો", "ચોથી", "ચોથું", "ચોથા" },
+        [6] = new[] { "છઠ્ઠો", "છઠ્ઠી", "છઠ્ઠું", "છઠ્ઠા" },
+    };
+    /** The written vowel of an ordinal suffix → the agreement slot it marks. Read off the text, never
+     *  guessed: the suffix itself carries the gender/number in Gujarati (પંદરમી / પંદરમો / પંદરમા). */
+    private static readonly IReadOnlyDictionary<string, int> FORM = new Dictionary<string, int>(StringComparer.Ordinal)
+    {
+        ["ો"] = 0, ["ી"] = 1, ["ું"] = 2, ["ા"] = 3, ["ે"] = 3,
+    };
+    /** The suppletive consonant each of 1-4/6 takes. 4's is થ, which is ALSO the ablative postposition થી —
+     *  so `4થી` is ambiguous between "fourth" and "from four". The corpus contains no `4થી`, so the pairing
+     *  is excluded at the call site (step 13) rather than resolved by guesswork. */
+    private static readonly IReadOnlyDictionary<int, string> IRREGULAR_CONSONANT = new Dictionary<int, string>
+    {
+        [1] = "લ", [2] = "જ", [3] = "જ", [4] = "થ", [6] = "ઠ્ઠ",
+    };
+
+    /**
+     * POSTPOSITIONS written ATTACHED to a numeral — the corpus's single largest defect class, 120 instances.
+     * "1537માં" tokenized as a number plus a separate word and came out [… saɽˈət̪ɾis mˈã], a stressed stray
+     * syllable, where the orthography says one word, સાડત્રીસમાં → [… saɽət̪ɾˈismã]. NO SPACED FORM is in
+     * this list: a postposition written with a space genuinely IS a separate word and the engine already
+     * stresses it correctly. `ને` is deliberately absent — it is also the colloquial "and", and the corpus's
+     * "1 ને 6 જુલાઈએ" means "the 1st and the 6th". Longest first (માંથી must beat માં).
+     */
+    private static readonly string POSTPOSITION = string.Join("|",
+        new[] { "માંથી", "માં", "નાં", "ના", "ની", "નું", "નો", "થી" }.OrderByDescending(a => a.Length));
+
+    /**
+     * Gujarati DOTTED abbreviations that are not initialisms and must be claimed before the generic
+     * dotted-initialism rule in step 5 would spell them out letter by letter.
+     */
+    private static readonly IReadOnlyDictionary<string, string> DOTTED = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["કિ.મી."] = "કિલોમીટર", ["કી.મી."] = "કિલોમીટર",
+        ["દા.ત."] = "દાખલા તરીકે",
+        ["ફે."] = "ફેરનહીટ",
+    };
+    private static readonly JsRe DOT_ESC = JsRegex.Compile("\\.", "gu");
+    private static readonly string DOTTED_ALT = string.Join("|", DOTTED.Keys
+        .OrderByDescending(a => a.Length)
+        .Select(k => JsRegex.Replace(k, DOT_ESC, _ => "\\.")));
+
+    /**
+     * The -તઃ / -નઃ adverbs and prefixes, written in this corpus with an ASCII colon for the visarga:
+     * પુન: ×5 (પુન:સ્થાપિત, પુન:સ્થાપન, પુન:સર્જન, પુન: પ્રતિકૃતિ, પુન: પ્રાપ્ત), સંભવત: ×2, ક્રમશ: ×1,
+     * અંત: ×1. A CLOSED LIST, not the pattern `ત:` — the corpus's "લાંચ: રુશવત" is the compound લાંચ-રુશવત
+     * and its 40-odd genuine list colons ("કહ્યું: …", "છે: …") must stay the phrase break the manifest
+     * maps them to. ⚠ The same over-counting trap any short unit key has in an abugida.
+     */
+    private static readonly string VISARGA_WORD = string.Join("|",
+        new[] { "પુન", "સંભવત", "ક્રમશ", "અંત", "વિશેષત", "મુખ્યત", "સામાન્યત", "અંશત" });
+
+    // The step patterns. The TS builds several inline; JsRegex.Compile caches, so hoisting is a
+    // readability choice and not a behaviour one.
+    private static readonly JsRe GU_DIGIT = JsRegex.Compile("[૦-૯]", "gu");
+    private static readonly JsRe VISARGA_RE = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({VISARGA_WORD}):", "gu");
+    private static readonly JsRe ERA_RE = JsRegex.Compile("(?<![\\p{L}\\p{M}])[ઇઈ]\\.\\s?સ\\.", "gu");
+    private static readonly JsRe DOTTED_RE = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({DOTTED_ALT})", "gu");
+    private static readonly JsRe INITIALISM_RE = JsRegex.Compile("(?:[઀-૿]{1,2}\\.){2,}", "gu");
+    private static readonly JsRe DOCTOR = JsRegex.Compile("(?<![\\p{L}\\p{M}])ડ[ોૉ]\\.(\\s+)(?=[\\p{L}])", "gu");
+    private static readonly JsRe CLOCK_DOT = JsRegex.Compile("(?<![\\d.,:])([01]?\\d|2[0-3])\\.([0-5]\\d)(?![\\d.,])(?=\\s?[-–]\\s?\\d{1,2}[:.]\\d{2}|\\s*(?:વાગ|કલાક))", "gu");
+    private static readonly JsRe SPORTS_TIME = JsRegex.Compile("(?<![\\d.,:])(\\d{1,2}):(\\d{2}\\.\\d{1,2})(?![\\d:])", "gu");
+    private static readonly JsRe HMS = JsRegex.Compile("(?<![\\d.,:])(\\d{1,2}):\\s?([0-5]\\d):\\s?([0-5]\\d)(?![\\d.,:])", "gu");
+    private static readonly JsRe CLOCK_RE = JsRegex.Compile("(?<![\\d.,:])([01]?\\d|2[0-3]):\\s?([0-5]\\d)(?![\\d.:])", "gu");
+    private static readonly JsRe CLOCK_WORD_AFTER = JsRegex.Compile("વાગ|કલાક|GMT|UTC|જીએમટી|યુટીસી|યુ\\.?\\s?ટી", "u");
+    private static readonly JsRe PLUS_AFTER = JsRegex.Compile("(\\S)\\+\\s?(?=\\d)", "gu");
+    private static readonly JsRe PLUS_START = JsRegex.Compile("(^|\\s)\\+\\s?(?=\\d)", "gu");
+    private static readonly JsRe PLUSMINUS = JsRegex.Compile("±", "gu");
+    private static readonly JsRe EQUALS = JsRegex.Compile("\\s?=\\s?", "gu");
+    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C(?![\\p{L}\\p{M}])", "giu");
+    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F(?![\\p{L}\\p{M}])", "giu");
+    private static readonly JsRe DEG_BARE = JsRegex.Compile("(\\d)\\s?°", "gu");
+    private static readonly JsRe TILDE = JsRegex.Compile("~\\s?(?=\\d)", "gu");
+    private static readonly JsRe RANGE = JsRegex.Compile("(?<![\\d.,])(\\d+(?:\\.\\d+)?)\\s?[-–—]\\s?(\\d+(?:\\.\\d+)?)(?![\\d.,])", "gu");
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})\\/(\\d{1,3})(?![\\d\\/])", "gu");
+    private static readonly JsRe ORD_SUPPLETIVE = JsRegex.Compile("(?<![\\d.,])(\\d)(લ|જ|થ|ઠ્ઠ)(ો|ી|ું|ા|ે)(?![\\p{L}\\p{M}])", "gu");
+    private static readonly JsRe ORD_REGULAR_SUPPL = JsRegex.Compile("(?<![\\d.,])([12346])\\s?મ(ો|ી|ું|ા|ે)(?![\\p{L}\\p{M}])", "gu");
+    private static readonly JsRe JOIN_RE = JsRegex.Compile(
+        $"(?<![\\d.,$€£¥₹])(\\d+(?:,\\d+)*)(?:\\s?(મ[ોીાે]|મું)|({POSTPOSITION}))(?![\\p{{L}}\\p{{M}}])", "gu");
+    private static readonly JsRe COMMA_G = JsRegex.Compile(",", "gu");
+    private static readonly JsRe DOUBLE_SPACE = JsRegex.Compile(" {2,}", "gu");
+
+    /** Build the Gujarati normalizer. Takes the numbers definition so the ordinal and join rules compose
+     *  their cardinals from the same data the engine's own number path uses. */
+    public static Func<string, string> MakeGujaratiNormalizer(NumbersDef numbers)
+    {
+        /** Integer → its Gujarati cardinal words, exactly as the engine's number path would render them. */
+        List<string> Cardinal(double n) => Numbers.indicNumberWords(n, numbers).Select(w => w ?? "").ToList();
+        string CardinalText(double n) => string.Join(" ", Cardinal(n));
+
+        /** Spell `digits` (possibly comma-grouped) and GLUE `suffix` to the final word — the whole point of
+         *  the join: સાડત્રીસ + માં is one word in the orthography and must be one token here. */
+        string? Glue(string digits, string suffix)
+        {
+            var n = Js.Number(JsRegex.Replace(digits, COMMA_G, _ => ""));
+            if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d)) return null;
+            var words = Cardinal(n);
+            if (words.Count == 0 || words.Any(w => w == "")) return null;
+            words[^1] = $"{words[^1]}{suffix}";
+            return string.Join(" ", words);
+        }
+
+        return input =>
+        {
+            var s = input;
+
+            // 1) GUJARATI DIGITS ૦-૯ → ASCII. First, because every rule below — and the shared symbol tier,
+            //    whose NUM is `\d+…` — is ASCII-defined.
+            //    NEGATIVE RESULT, recorded because the lead was worth checking: this corpus contains only 11
+            //    Gujarati digits, in TWO utterances, where Marathi's had 597. The Marathi finding does NOT
+            //    generalise to Gujarati. The fold is kept anyway because it costs nothing (the engine's own
+            //    number() already folds them, so this is loss-free) and because both instances happen to be
+            //    exactly the forms steps 7 and 8 exist for: "રાત્રે ૧૦.૦૦-૧૧:૦૦" and "સવારે ૮.૪૬ વાગ્યે".
+            s = JsRegex.Replace(s, GU_DIGIT, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0ae6));
+
+            // 2) ASCII ':' written where a VISARGA ઃ was meant. Before the clock rules in step 7, which
+            //    compete for the same character. GUJARATI_WORD ("઀-૥૰-૿") already covers U+0A83 ઃ, so the
+            //    folded form is a single token; unfolded, પુન:સ્થાપિત was split into two words by a comma
+            //    pause, [pˈun , st̪ʰˈapit̪].
+            s = JsRegex.Replace(s, VISARGA_RE, m => $"{m.Groups[1].Value}ઃ");
+
+            // 3) ERA MARKERS, before the dotted-initialism rule in step 5 (which would otherwise spell ઈ.સ.
+            //    as two letter names) and before anything that reads a dot as a phrase break: "ઇ.સ. પૂર્વે"
+            //    was producing two of them, [ˈi . sˈə . pˈuɾʋe]. Both ઇ and ઈ occur. પૂર્વે is already an
+            //    ordinary word and needs no rewriting, so only the abbreviation itself is claimed — which is
+            //    also what makes the bare "ઈ.સ. 1000-1300" case fall out for free. The expansion ઈસવીસન is
+            //    the corpus's own spelling ("ઈસવીસન પૂર્વે 21 જુલાઈ, 356ના રોજ").
+            s = JsRegex.Replace(s, ERA_RE, _ => "ઈસવીસન");
+
+            // 4) DOTTED ABBREVIATIONS that are not initialisms (કિ.મી., દા.ત., ફે.), before step 5 for the
+            //    same reason. Longest key first.
+            s = JsRegex.Replace(s, DOTTED_RE, m => DOTTED[m.Groups[1].Value]);
+
+            // 5) GUJARATI DOTTED INITIALISMS — યુ.એસ. ×7, યુ.એન., એફ.ટી.એ., એ.એફ.સી.એફ.ટી.એ. Each interior
+            //    dot was surviving as a phrase break: "યુ.એસ." → [jˈu . ˈes .], a three-way split of one
+            //    word. The letters are already the right reading (they are Gujarati transliterations of the
+            //    English letter names), so all this has to do is drop the dots and keep the letters apart.
+            //
+            //    THE SHAPE IS EVIDENCE, NOT CAUTION. Components are capped at TWO codepoints and no space is
+            //    permitted between them, because a laxer pattern would claim ordinary sentence-final periods
+            //    ("…છે. તે…" is two short tokens either side of a dot). Run over the whole corpus, this
+            //    pattern matches 18 times and every one of the 18 is a real abbreviation — zero false
+            //    positives. The cost of the strictness is the one instance written with spaces,
+            //    "(યુ. ટી. સી.+1)", which is left alone.
+            s = JsRegex.Replace(s, INITIALISM_RE, m => $"{string.Join(" ", m.Value[..^1].Split('.'))} ");
+
+            // 6) SINGLE-DOT ABBREVIATIONS. ડો./ડૉ. ×6, always written with the dot, which is consumed so it
+            //    cannot become a phrase break. ડૉક્ટર is the corpus's own spelling.
+            s = JsRegex.Replace(s, DOCTOR, m => $"ડૉક્ટર{m.Groups[1].Value}");
+
+            // 7) TIMES. Four rules, and the guards between them are the point.
+            //    7a) The clock written with a DOT rather than a colon, which happens beside વાગ્યે / કલાકે
+            //        ("સવારે ૮.૪૬ વાગ્યે", "રાત્રે ૧૦.૦૦-૧૧:૦૦"). Folded to a colon so 7d claims it; left
+            //        alone it would be read by the decimal path added in this change as "આઠ દશાંશ ચાર છ".
+            s = JsRegex.Replace(s, CLOCK_DOT, m => $"{m.Groups[1].Value}:{m.Groups[2].Value}");
+            //    7b) SPORTS times mm:ss.hh — 4:41.30, 2:11.60, 1:09.02 (×3, all swimming/athletics, all
+            //        followed by મિનિટ). These are NOT clocks. The inherited Hindi clock rule claimed them
+            //        (its `(?![\d:])` permits a following dot) and produced [t͡ʃˈaɾ ˈekt̪alis . t̪ɾˈis] — a
+            //        bogus clock plus a spurious phrase break. Dropping the colon leaves two plain numbers,
+            //        which is the honest reading and which nothing downstream can re-claim.
+            s = JsRegex.Replace(s, SPORTS_TIME, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+            //    7c) h:mm:ss, which occurs once as "(શુક્રવારે 09: 19: 00 જીએમટી)". Before 7d so that 7d's
+            //        `(?![\s\d.:])` cannot claim its first two fields.
+            s = JsRegex.Replace(s, HMS, m => $"{m.Groups[1].Value} {m.Groups[2].Value} {m.Groups[3].Value}");
+            //    7d) The clock proper. A space after the colon is permitted — the corpus writes "1: 15",
+            //        "07: 19".
+            //
+            //        THE READING IS DELIBERATELY MINIMAL. Hindi's inherited rule builds a full
+            //        "H બજકર M મિનટ" phrase; Gujarati's equivalent construction would be "H વાગીને M મિનિટે",
+            //        and વાગીને/મિનિટે appear NOWHERE in this corpus. Rather than invent the phrase, this rule
+            //        fixes the two defects that are actually measurable — the colon became a phrase break, and
+            //        a :00 was read as શૂન્ય — by removing the colon and, at :00 only, supplying the corpus's
+            //        own વાગ્યે (×9). Every other word in the sentence survives, so "11:29 ની આસપાસ" reads
+            //        "અગિયાર ઓગણત્રીસ ની આસપાસ" and "8:30 વાગ્યે" keeps its own વાગ્યે.
+            //
+            //        વાગ્યે is NOT supplied when the sentence already carries a clock word or a timezone
+            //        after the time — "12:00 GMT વાગ્યે" and "11:00 (યુ. ટી. સી.+1) કલાકે" would otherwise
+            //        each have said it twice.
+            var whole7 = s;
+            s = JsRegex.Replace(s, CLOCK_RE, m =>
+            {
+                var h = m.Groups[1].Value;
+                var min = m.Groups[2].Value;
+                if (Js.Number(min) != 0) return $"{h} {min}";
+                var start = m.Index + m.Length;
+                var rest = whole7[start..Math.Min(whole7.Length, start + 40)];
+                return CLOCK_WORD_AFTER.IsMatch(rest) ? h : $"{h} વાગ્યે";
+            });
+
+            // 8) DEGREES, before any rule that would separate the sign from its digit. ડિગ્રી, not Marathi's
+            //    અંશ and not Hindi's inherited डिग्री: the corpus writes the word itself in exactly this
+            //    function ("35 ડિગ્રી પશ્ચિમ", "90 (ફે.) - ડિગ્રી ગરમીમાં"), where its અંશ ×7 all mean
+            //    "extent/portion" instead. The only ° in the corpus is "+30°C થી વધુ".
+            // THE PLUS → પ્લસ, SOURCED FROM THE CORPUS'S OWN AUDIO. The sign was DROPPED, so `+30°C` read *ત્રીસ
+            // ડિગ્રી* — thirty degrees, with nothing where the sign was — and `(યુ. ટી. સી.+1)` lost it too.
+            // No text tier could give the word: concept.ts returns the BARE CHARACTER `+` as Gujarati's own label
+            // for "plus sign", and prose writes the glyph. Decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft, a
+            // PHONEME recognizer whose 392-token vocabulary holds no `+` and no digits, over gu_in/train:
+            //   UTC+1  →  `… a r j uː t i s iː  p l a s v o n  k a l l a k …`   2 of 3 speakers
+            //   +30°C  →  `… m a h i n ɔ o m a  p l a s  t r iː s d i ɡ r i …`  and
+            //             `… m a h i n aʊ m a  p l a s  t r e s aʊ s s ɛ l ts i a s …`   BOTH speakers
+            // ⚠ gu VOICES THE MEASUREMENT PLUS, 2 of 2 — unlike en, hi, vi, te, xh and am, which all omit it there,
+            // and like ta and mi. So the reading habit genuinely splits across the fleet; it is not a universal.
+            // પ્લસ reads plˈəs, matching the decode, so no new lexical data was needed.
+            // BEFORE the degree rule — the ordering coupling zu's `[+]?` taught.
+            s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} પ્લસ ");
+            s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}પ્લસ ");
+
+            // 8b) THE RELATIONAL AND DIVISION SIGNS, and ±. Sourced from gu_in throughout — gu.wikipedia is
+            //     thin here (`બરાબર`, `ભાગ્યા`, `વત્તા` are all ×0 in its arithmetic articles), so tier 2 is the
+            //     whole of the evidence.
+            //
+            //     ⚠ THE COMPARATIVES ARE POSTPOSITIONAL and use core/postposedSign.ts: Gujarati puts કરતાં after the
+            //     standard of comparison — "કીબોર્ડ કરતાં વધુ નવું" (newer than a keyboard) ×17,
+            //     "ધાર્યા કરતાં ઓછું" (less than expected) ×2. Substituting between the operands would read the
+            //     comparison backwards.
+            //
+            //     ⚠ THE DIVISION WORD COMES FROM FLEURS BEING A PARALLEL CORPUS. Its aspect-ratio sentence performs
+            //     a division aloud in 57 of the 67 languages, and the Gujarati translator wrote
+            //     "બાર દ્વારા વિભાજીત" — દ્વારા after the operand, then વિભાજીત — so this is postpositional too, and
+            //     it is a recording of a human saying it rather than a register guess (×3).
+            //
+            //     ± pairs this file's own audio-sourced પ્લસ with માઈનસ, its loan counterpart, in the juxtaposed form
+            //     every language that reads ± uses. The minus is the same loan: the corpus has no minus sign to
+            //     decode, so the pairing rests on પ્લસ having been decoded from the audio directly above.
+            // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the preceding word:
+            //    `તાપમાન±5` read *t̪apmanˈəpləs*, one token, with the stress of neither. The shared symbol tier's
+            //    `ampersand` note records the same hazard for the same reason. Every other language that reads ± in this
+            //    fleet uses the spaced form; these three did not, and gu/mr got it by copying hi.
+            s = JsRegex.Replace(s, PLUSMINUS, _ => " પ્લસ માઈનસ ");
+            s = PostposedSignPass.PostposedSign(s, "<", "કરતાં ઓછું");
+            s = PostposedSignPass.PostposedSign(s, ">", "કરતાં વધુ");
+            s = PostposedSignPass.PostposedSign(s, "÷", "દ્વારા વિભાજીત");
+            s = JsRegex.Replace(s, EQUALS, _ => " બરાબર ");
+
+            s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} ડિગ્રી સેલ્સિયસ");
+            s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} ડિગ્રી ફેરનહીટ");
+            s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} ડિગ્રી");
+
+            // 9) TILDE. આશરે ("approximately") is the corpus's own word, ×5. Before step 13, which would
+            //    otherwise leave the sign stranded against a spelled-out number.
+            s = JsRegex.Replace(s, TILDE, _ => "આશરે ");
+
+            // 10) (no step 10 — units, percent and currency are DATA, in gujarati.ts's symbol tier, which the
+            //     engine runs AFTER this pass. That ordering is why step 13 must not eat a currency-adjacent
+            //     numeral; see the guard there.)
+
+            // 11) RANGES N-M → "N થી M". THE ASCENDING GUARD IS EVIDENCE, NOT CAUTION, and it reproduces the
+            //     Marathi finding exactly. Of the 17 hyphenated number pairs here, 4 are sports results —
+            //     5-3 (an ice-hockey win), 26 - 00 (a rugby scoreline), 6-6 (a tennis tie-break), 7-2 (a
+            //     head-to-head record) — where "થી" ("from…to") is simply wrong and the silent hyphen the
+            //     engine already produces is correct. Every one of those 4 is descending or equal, and 13 of
+            //     the 13 genuine ranges (1644-1912, 1469-1539, 10-60 મિનિટ, 100-200 માઇલ/કલાક, 120-160,
+            //     35-40, 56-64, 2-5 દિવસ, 1418 - 1450 …) are ascending. So the rule fires only when b > a:
+            //     13 gained, 0 broken, 2 real ranges deliberately missed (1995-96, an abbreviated year span,
+            //     and 4.2-3.9, a descending "million years ago" span). થી as the range connective is the
+            //     corpus's own ("2 થી 3 મિલિયન", "10થી 15 લોકો", "100થી 250 મીટર" — 737 થી in all).
+            s = JsRegex.Replace(s, RANGE, m =>
+                Js.Number(m.Groups[2].Value) > Js.Number(m.Groups[1].Value)
+                    ? $"{m.Groups[1].Value} થી {m.Groups[2].Value}"
+                    : m.Value);
+
+            // 12) FRACTIONS. Only ONE of the corpus's three digit/digit forms is a fraction: "5 મીમી (1/5
+            //     ઇંચ)". The other two are "293/4 ઇંચથી 241/2 ઇંચ" — mixed numbers, 29¾ and 24½, written
+            //     without the space. Hence `num < den`, which admits 1/5 and refuses both of those; without
+            //     it they would have become "બસો ત્રાણું ભાગ્યા ચાર". અડધો is corpus-attested; ભાગ્યા is the
+            //     ordinary spoken division form (and replaces Hindi's inherited બટા-equivalent, which would
+            //     have been emitted in Devanagari and so dropped outright).
+            s = JsRegex.Replace(s, FRACTION, m =>
+            {
+                double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
+                if (num >= den) return m.Value;
+                if (num == 1 && den == 2) return "અડધો";
+                var nw = CardinalText(num);
+                var dw = CardinalText(den);
+                return nw == "" || dw == "" ? m.Value : $"{nw} ભાગ્યા {dw}";
+            });
+
+            // 13) ORDINALS AND ATTACHED POSTPOSITIONS — one rule, because in Gujarati they are the same
+            //     operation. The regular ordinal is the cardinal plus -મ- plus the agreeing vowel, and it is
+            //     spelled as ONE word (પંદર + મી = પંદરમી); an attached postposition is likewise one word
+            //     (સાડત્રીસ + માં = સાડત્રીસમાં). For every non-suppletive number the two are literally the
+            //     same string, so "10માં સ્થાન" (10th place) and "1537માં" (in 1537) need no disambiguation
+            //     at all — which is what makes a single join rule correct rather than a compromise.
+            //
+            //     13a) The SUPPLETIVE ordinals, first, because 1/2/3/4/6 are the only numbers for which the
+            //          ordinal is not the cardinal. 4+થ is excluded: થી is also the ablative postposition and
+            //          `4થી` would be ambiguous between "fourth" and "from four"; the corpus has no instance,
+            //          so it is left to 13b (→ ચારથી) rather than resolved by guessing.
+            s = JsRegex.Replace(s, ORD_SUPPLETIVE, m =>
+            {
+                var n = (int)Js.Number(m.Groups[1].Value);
+                var cons = m.Groups[2].Value;
+                var vowel = m.Groups[3].Value;
+                if (IRREGULAR_CONSONANT.GetValueOrDefault(n) != cons) return m.Value;
+                if (n == 4 && cons == "થ" && vowel == "ી") return m.Value;
+                return IRREGULAR[n][FORM[vowel]];
+            });
+            //     13b) The suppletive numbers written with the REGULAR -મ- suffix (1મી, 6ઠ્ઠ- aside). Not
+            //          attested here — included because it is reachable and "એકમી" would be plainly wrong —
+            //          and kept off the postposition path by requiring a bare vowel, never માં.
+            s = JsRegex.Replace(s, ORD_REGULAR_SUPPL, m =>
+                IRREGULAR[(int)Js.Number(m.Groups[1].Value)][FORM[m.Groups[2].Value]]);
+            //     13c) The general join, for every other numeral. A SPACE is permitted only before the
+            //          ordinal -મ- ("15 મી સદી" ×6, "11 મી, 12 મી, અને 13 મી સદી") — a postposition written
+            //          with a space genuinely IS a separate word and already reads correctly.
+            //
+            //          THE TRAILING BOUNDARY IS THE WHOLE RULE. Without `(?![\p{L}\p{M}])` the મ- alternative
+            //          matches the first character of મીટર, મીલીમીટર, મીમી, મિનિટ, મહિના and મુકામ — the same
+            //          over-counting trap any short unit key has in an abugida, and live in this corpus at
+            //          "35 મીલીમીટર", "83 મીટરની", "45 મિનિટમાં", "3 મહિનામાં".
+            //
+            //          THE CURRENCY LOOKBEHIND IS ALSO LOAD-BEARING, and it is an ORDERING coupling with the
+            //          shared symbol tier rather than a boundary: the tier runs AFTER this pass and matches
+            //          `SIGN NUM`, so spelling out the digits of "US$11,000થી" here would have destroyed the
+            //          adjacency and dropped the currency word entirely. Left alone, the tier rewrites it to
+            //          "11,000 ડોલરથી", which is the right Gujarati and needs no join.
+            s = JsRegex.Replace(s, JOIN_RE, m =>
+            {
+                var digits = m.Groups[1].Value;
+                var ord = m.Groups[2].Success ? m.Groups[2].Value : null;
+                var post = m.Groups[3].Success ? m.Groups[3].Value : null;
+                return Glue(digits, ord ?? post!) ?? m.Value;
+            });
+
+            return JsRegex.Replace(s, DOUBLE_SPACE, _ => " ");
+        };
+    }
+}
