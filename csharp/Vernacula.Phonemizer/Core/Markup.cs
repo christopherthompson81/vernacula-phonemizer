@@ -60,7 +60,7 @@ public static class Markup
         // ── THE SPACE FAMILY, AND WHY `nbsp` DECODES TO AN ASCII SPACE RATHER THAN U+00A0 ──────────────────
         // ⚠ THIS ROW IS A DELIBERATE INFIDELITY AND IT IS LOAD-BEARING. `&nbsp;` denotes U+00A0, but 42 of the
         // 188 engines de-group a thousands separator ONLY on an ASCII space — their grouping classes are
-        // `[ ]`, not `[    ]` — so decoding faithfully would read `1 904 569` as three numbers
+        // `[ ]`, not `[ \u00a0\u2009\u202f]` — so decoding faithfully would read `1 904 569` as three numbers
         // in all 42 (ln, km, bm, mos, ki, rn … measured: *one, nine hundred four, five hundred sixty-nine*).
         // `&thinsp;` joins on the same terms and for the same reason; la writes `1&thinsp;904&thinsp;569` and
         // `250&thinsp;000`, gn writes `176&thinsp;215`.

@@ -134,7 +134,7 @@ public static class Normalize
     private static readonly JsRe AMP = JsRegex.Compile("&amp;", "giu");
     private static readonly JsRe ARTICLE_QUOTE = JsRegex.Compile("(?<![\\p{L}\\p{M}])[‘’ʼ`´]n(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe ARTICLE_NACUTE = JsRegex.Compile("(?<![\\p{L}\\p{M}])ń(?![\\p{L}\\p{M}])", "gu");
-    private static readonly JsRe DOTTED_CAPS = JsRegex.Compile("(?<![\\p{L}\\p{M}])\\p{Lu}\\.(?:[  ]?\\p{Lu}\\.)+", "gu");
+    private static readonly JsRe DOTTED_CAPS = JsRegex.Compile("(?<![\\p{L}\\p{M}])\\p{Lu}\\.(?:[ \u00a0]?\\p{Lu}\\.)+", "gu");
     private static readonly JsRe DOT_OR_SPACE = JsRegex.Compile("[.\\s]", "gu");
     private static readonly JsRe ORDINAL = JsRegex.Compile("(?<![\\d,.])(\\d{1,4})(?:ste[n]?|de[n]?|e)(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![:.]?\\d)(\\s*(?:vm|nm))?", "giu");

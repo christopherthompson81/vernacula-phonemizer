@@ -70,7 +70,7 @@ public static class Normalize
     private static readonly JsRe AMP_ENTITY = JsRegex.Compile("&amp;", "giu");
     private static readonly JsRe BC_BEFORE_KAFIN = JsRegex.Compile("B\\.?C\\.?(?=\\.?kafin)", "giu");
     private static readonly JsRe BCE = JsRegex.Compile("(?<![\\p{L}\\p{M}])B\\.?C\\.?E?\\.?(?![\\p{L}\\p{M}])", "giu");
-    private static readonly JsRe DOTTED_CAPS = JsRegex.Compile("(?<![\\p{L}\\p{M}])\\p{Lu}\\.(?:[  ]?\\p{Lu}\\.)+", "gu");
+    private static readonly JsRe DOTTED_CAPS = JsRegex.Compile("(?<![\\p{L}\\p{M}])\\p{Lu}\\.(?:[ \u00a0]?\\p{Lu}\\.)+", "gu");
     private static readonly JsRe DOT_OR_SPACE = JsRegex.Compile("[.\\s]", "gu");
     private static readonly JsRe INITIAL_DOT = JsRegex.Compile("(?<=\\p{Lu})\\.(?=\\s+\\p{Lu})", "gu");
     private static readonly JsRe VERSUS = JsRegex.Compile("(?<=\\p{L})\\s+v\\.\\s+(?=[A-Z])", "gu");

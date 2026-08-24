@@ -65,13 +65,13 @@ public static class Normalize
     private static readonly JsRe SQUARE_KM = JsRegex.Compile("(?<![ሀ-ፚ])ኪሜ\\s?[²2](?![\\d\\p{L}])", "gu");
     private static readonly JsRe KM = JsRegex.Compile("(?<![ሀ-ፚ])ኪሜ(?![ሀ-ፚ])", "gu");
     private static readonly JsRe DEGREE = JsRegex.Compile("°", "gu");
-    private static readonly JsRe PLUS_ATTACHED = JsRegex.Compile("(\\S)\\+[  ]?(?=\\d)", "gu");
-    private static readonly JsRe PLUS_LEADING = JsRegex.Compile("(^|[  ])\\+[  ]?(?=\\d)", "gu");
+    private static readonly JsRe PLUS_ATTACHED = JsRegex.Compile("(\\S)\\+[ \u00a0]?(?=\\d)", "gu");
+    private static readonly JsRe PLUS_LEADING = JsRegex.Compile("(^|[ \u00a0])\\+[ \u00a0]?(?=\\d)", "gu");
     private static readonly JsRe LESS_THAN = JsRegex.Compile("(\\S+)\\s*<\\s*(\\S+)", "gu");
     private static readonly JsRe GREATER_THAN = JsRegex.Compile("(\\S+)\\s*>\\s*(\\S+)", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("(\\S+)\\s*÷\\s*(\\S+)", "gu");
     private static readonly JsRe EQUALS = JsRegex.Compile("\\s?=\\s?", "gu");
-    private static readonly JsRe DOUBLE_SPACE = JsRegex.Compile("[  ]{2,}", "gu");
+    private static readonly JsRe DOUBLE_SPACE = JsRegex.Compile("[ \u00a0]{2,}", "gu");
 
     /**
      * Build the Amharic normalizer.

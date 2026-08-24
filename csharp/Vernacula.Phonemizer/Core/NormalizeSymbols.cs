@@ -454,10 +454,23 @@ public static class NormalizeSymbols
         return forms[Math.Max(0, i)];
     }
 
-    // ⚠ PAIRED-FIX PENDING: `[  ]` is TWO ASCII SPACES, not "thin/regular space" as the comment claims —
-    // U+00A0/U+202F/U+2009 grouping (the French and Russian written form of `3 850`) never matches, so a
-    // NBSP-grouped numeral is not recognised as one number. Ported verbatim; the fix belongs in the TS.
-    private static readonly JsRe NUM_SPACE = JsRegex.Compile("[  ]", "gu"); // thin/regular space grouping
+    /** ⚠ THE DIGIT-GROUPING SEPARATORS, and this used to be a class of two ASCII spaces — a duplicated
+     *  U+0020 sitting under a comment that claimed "thin/regular space grouping". The characters French,
+     *  Russian and Swedish typography actually group with (U+00A0 NBSP, U+202F narrow NBSP, U+2009 thin)
+     *  all fell through. Found by the C# port under the bidirectional rule in csharp/PORTING.md.
+     *  Measured failure: ru `3\u2009850 км` read as *three, eight hundred fifty* — the thousand lost —
+     *  while the ASCII `3 850 км` worked, which is why it stayed invisible. Shared by all five sites so
+     *  they cannot drift apart again.
+     *
+     *  ⚠ THIS SIDE WAS THE ONE THAT STAYED BROKEN, AND A `PAIRED-FIX PENDING` MARKER IS WHY. The TS half
+     *  landed in #877; the C# half kept the doubled class under a marker saying the fix belonged in the TS,
+     *  where it had already happened. A stale marker is a FORK THAT DOCUMENTS ITSELF as compliance — and the
+     *  parity gate cannot see it, because no golden groups a numeral with a NBSP. What did see it: a
+     *  separator differential over every ported language, where sw read `1\u00a0000 km` as *mˈoʄa
+     *  kilomˈita* (unit postposed) against the TS's *kilomˈita mˈoʄa* — the language declares `unitPrefix`,
+     *  and the prefix path never fired because the tier did not recognise the number. */
+    private const string GROUP_SP = "[ \u00a0\u202f\u2009]";
+    private static readonly JsRe NUM_SPACE = JsRegex.Compile(GROUP_SP, "gu");
     private static readonly JsRe NUM_SHAPE = JsRegex.Compile("^(\\d+(?:[.,]\\d{3})*)(?:[.,](\\d+))?$");
     private static readonly JsRe NUM_SEPS = JsRegex.Compile("[.,]", "g");
 
@@ -477,8 +490,7 @@ public static class NormalizeSymbols
 
     // Space-grouping is only real grouping when the block is EXACTLY three digits (3 850 = 3850); otherwise
     // "30 9" would fuse two separate numbers and eat the association between a number and its unit.
-    // ⚠ PAIRED-FIX PENDING: the `[  ]` class here is likewise two ASCII spaces — see `NUM_SPACE`.
-    private const string NUM = "\\d+(?:[  ]\\d{3}(?!\\d)|[.,]\\d+)*";
+    private const string NUM = "\\d+(?:[ \u00a0\u202f\u2009]\\d{3}(?!\\d)|[.,]\\d+)*";
 
     /**
      * A case-folded INDEX of a unit map. Folding the lookup STRING instead is asymmetric: it rescues
@@ -867,16 +879,16 @@ public static class NormalizeSymbols
          */
         JsRe SaidAfter(IReadOnlyList<string> forms)
         {
-            var conn = d.MagnitudeConnective is null ? "" : "(?:" + Esc(d.MagnitudeConnective) + "[  ]+)?";
+            var conn = d.MagnitudeConnective is null ? "" : "(?:" + Esc(d.MagnitudeConnective) + "[ \u00a0\u202f\u2009]+)?";
             // ⚠ CASE-INSENSITIVE. Running text capitalises the currency noun (English style capitalises it after
             // a sign), and a case-sensitive guard let it through TWICE: pcm's own sourcing sentence,
             // "$12.4 Billion Dolla", read *…biljan dola dola*. Suppression only — emission is unaffected, so a
             // language whose word this matches still emits its own declared form.
-            return JsRegex.Compile("^[  ]*" + conn + "(?:" + string.Join("|", forms.Select(Esc)) + ")", "iu");
+            return JsRegex.Compile("^[ \u00a0\u202f\u2009]*" + conn + "(?:" + string.Join("|", forms.Select(Esc)) + ")", "iu");
         }
         /** The mirror, for a PREFIX word: Turkish `yüzde 40%` was reading *yüzde yüzde kırk*. */
         JsRe SaidBefore(IReadOnlyList<string> forms) =>
-            JsRegex.Compile("(?:" + string.Join("|", forms.Select(Esc)) + ")[  ]*$", "iu");
+            JsRegex.Compile("(?:" + string.Join("|", forms.Select(Esc)) + ")[ \u00a0\u202f\u2009]*$", "iu");
         var PCT_AFTER = d.Percent is not null ? SaidAfter(d.Percent) : null;
         var PCT_BEFORE = d.Percent is not null ? SaidBefore(d.Percent) : null;
 

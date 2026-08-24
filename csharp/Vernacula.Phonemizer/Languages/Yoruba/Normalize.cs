@@ -148,13 +148,12 @@ public static class Normalize
      * ⚠ POSTPOSED, like every other unit here — see the units note above for why the corpus's preposed
      * instances are athletics event names rather than measurements.
      *
-     * ⚠ PAIRED-FIX PENDING (#925): both separator classes below are TWO PLAIN SPACES in the TypeScript — a
-     * duplicate that matches exactly what one space matches, where the intent is plainly "space or
-     * non-breaking space". Carried verbatim, because a port may not fork the engines; the sweep is
-     * inventoried in #925 and lands TS-first, as nl's did in #924.
+     * ⚠ BOTH SEPARATOR CLASSES BELOW USED TO BE TWO PLAIN SPACES — a duplicate matching exactly what one
+     * space matches, where the intent is plainly "space or non-breaking space". Swept TS-first across the
+     * fleet in #925; a NBSP before the `m` now reads *mítà* rather than leaking the bare letter.
      */
     private static readonly JsRe METRE = JsRegex.Compile(
-        "(?<![\\p{L}\\p{M}\\d.,])(?<!\\p{Nd}h[  ])(\\d+(?:\\.\\d+)?)[  ]?m(?![\\p{L}\\p{M}'’\\d])", "gu");
+        "(?<![\\p{L}\\p{M}\\d.,])(?<!\\p{Nd}h[ \u00a0])(\\d+(?:\\.\\d+)?)[ \u00a0]?m(?![\\p{L}\\p{M}'’\\d])", "gu");
     private const string METRE_WORD = "mítà";
 
     /** The unit nouns this layer expands, and a squared one with no number necessarily beside it. */
