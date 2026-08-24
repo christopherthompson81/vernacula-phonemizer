@@ -249,8 +249,15 @@ export function segment(token: string): string[] {
     for (const syl of sylls) bound.add(syl.start);
     const parts = segmentByDag(cs, set, maxLen, bound);
     if (parts.length <= 1 || parts.every((w) => set.has(w))) return parts; // single word, or a full dictionary cover
-    const whole = sylls.map((s) => s.body).join("");
-    const split = parts.flatMap((p) => syllabify(p).map((s) => s.body)).join("");
+    // ⚠ THE JOIN SEPARATOR IS U+0001, AND IT IS WRITTEN AS AN ESCAPE BECAUSE IT USED TO BE A BARE CONTROL
+    // CHARACTER — invisible in every editor, in every diff and in review. What it buys is that the comparison
+    // below is of the syllable SEQUENCE rather than of the concatenated text: without it, a split that moves a
+    // boundary without changing the total string ([a][bc] vs [ab][c]) compares EQUAL and is accepted, which is
+    // the opposite of what this guard is for. Sampled over the seg-words concatenations no current input
+    // distinguishes the two, so the separator is defensive — but a defence that only exists as an invisible
+    // byte is one bad copy-paste from being gone.
+    const whole = sylls.map((s) => s.body).join("\u0001");
+    const split = parts.flatMap((p) => syllabify(p).map((s) => s.body)).join("\u0001");
     return whole === split ? parts : [token]; // split changes a syllable body (lost minor-ə) → keep whole
 }
 
