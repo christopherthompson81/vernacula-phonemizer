@@ -22,7 +22,7 @@ namespace Vernacula.Phonemizer.Languages.Portuguese;
 
 public static class Normalize
 {
-    private const string GROUP_SPACE = "    ";
+    private const string GROUP_SPACE = "    ";
     private const string MONTHS = "janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro";
 
     /** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare "no"
@@ -66,22 +66,19 @@ public static class Normalize
     private static readonly IReadOnlySet<string> ACRONYM_LETTERS =
         new HashSet<string>(Manifest.MANIFEST.AcronymLetters, StringComparer.Ordinal);
 
-    private static Func<string, string>? _initialisms;
-
-    /** Portuguese has a pronunciation lexicon, but it is a CORRECTION table rather than a wordlist, so it
-     *  cannot serve as the "is this recorded" test the way CMUdict or Lexique do. Acronyms are decided by the
-     *  lexical list plus the OOV phonotactic rule alone. */
-    public static string NormalizePortugueseInitialisms(string text)
-    {
-        _initialisms ??= Initialisms.MakeInitialismNormalizer(new InitialismData
+    private static readonly Func<string, string> InitialismNormalizer =
+        Initialisms.MakeInitialismNormalizer(new InitialismData
         {
             LetterName = l => LETTER_NAME.GetValueOrDefault(l),
             AcronymLetters = ACRONYM_LETTERS,
             IsRecorded = _ => false,
             IsUnreadable = IsUnreadablePortuguese,
         });
-        return _initialisms(text);
-    }
+
+    /** Portuguese has a pronunciation lexicon, but it is a CORRECTION table rather than a wordlist, so it
+     *  cannot serve as the "is this recorded" test the way CMUdict or Lexique do. Acronyms are decided by the
+     *  lexical list plus the OOV phonotactic rule alone. */
+    public static string NormalizePortugueseInitialisms(string text) => InitialismNormalizer(text);
 
     private static readonly JsRe FINAL_O = JsRegex.Compile("o$", "u");
     private static readonly JsRe FINAL_UM = JsRegex.Compile("um$", "u");
@@ -107,7 +104,7 @@ public static class Normalize
     }
 
     private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
-    private static readonly JsRe THIN_SPACES = JsRegex.Compile("[   ]", "gu");
+    private static readonly JsRe THIN_SPACES = JsRegex.Compile("[    ]", "gu");
     private static readonly JsRe ERA_BC = JsRegex.Compile("\\ba\\.\\s?C\\.", "giu");
     private static readonly JsRe ERA_AD = JsRegex.Compile("\\bd\\.\\s?C\\.", "giu");
     private static readonly JsRe NUMERO = JsRegex.Compile("\\b(?:n\\.º|nº|n°|no|núm\\.)\\s?(?=\\d)", "giu");
