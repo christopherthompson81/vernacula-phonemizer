@@ -180,7 +180,7 @@ public static class Normalize
     private static readonly JsRe BARE_DAY_MONTH =
         JsRegex.Compile($"(?:(\\p{{L}}+)(\\s+))?(\\d{{1,2}})(\\s+)(?=(?:{MONTHS})(?![\\p{{L}}\\p{{M}}]))", "giu");
     private static readonly JsRe ABBREV_MID =
-        JsRegex.Compile($"(?<!\\p{{Lu}}\\.[  ])\\b({ABBREV_ALT})\\.(\\s+)(?=[\\p{{L}}\\d])", "giu");
+        JsRegex.Compile($"(?<!\\p{{Lu}}\\.[ \u00a0])\\b({ABBREV_ALT})\\.(\\s+)(?=[\\p{{L}}\\d])", "giu");
     private static readonly JsRe ABBREV_END =
         JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
     private static readonly JsRe CLOCK = JsRegex.Compile("\\b([01]?\\d|2[0-3])[:.]([0-5]\\d)\\b(?!\\.?\\d)(\\s*Uhr)?", "giu");

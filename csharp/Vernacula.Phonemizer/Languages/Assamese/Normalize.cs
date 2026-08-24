@@ -53,11 +53,11 @@ public static class Normalize
     private static readonly string[] ORDINAL_1_10 =
         { "প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম", "ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম" };
 
-    private static readonly JsRe DOTTED_LATIN = JsRegex.Compile("(?<![\\p{L}\\p{M}])[A-Za-z]\\.(?:[  ]?[A-Za-z]\\.)+", "gu");
+    private static readonly JsRe DOTTED_LATIN = JsRegex.Compile("(?<![\\p{L}\\p{M}])[A-Za-z]\\.(?:[ \u00a0]?[A-Za-z]\\.)+", "gu");
     private static readonly JsRe DOT_OR_SPACE = JsRegex.Compile("[.\\s]", "gu");
     private static readonly JsRe LONE_INITIAL = JsRegex.Compile("(?<![\\p{L}\\p{M}])([A-Z])\\.(?=\\s+[A-Z])", "gu");
     private static readonly JsRe DOTTED_BENGALI =
-        JsRegex.Compile("(?<![\\p{L}\\p{M}])[\\p{Script=Bengali}\\p{M}]+\\.(?:[  ]?[\\p{Script=Bengali}\\p{M}]+\\.)+", "gu");
+        JsRegex.Compile("(?<![\\p{L}\\p{M}])[\\p{Script=Bengali}\\p{M}]+\\.(?:[ \u00a0]?[\\p{Script=Bengali}\\p{M}]+\\.)+", "gu");
     private static readonly JsRe DOT_G = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe SPACE_RUN = JsRegex.Compile("\\s+", "gu");
     private static readonly JsRe SHA_TWO_DIGIT = JsRegex.Compile($"(?<![{D}])([{D}]{{2}})(শ)(?![{D}ত])", "gu");

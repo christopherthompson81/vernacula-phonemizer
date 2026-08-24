@@ -41,7 +41,7 @@ public static class Normalize
     };
 
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d.:])([01]?\\d|2[0-3])[.:]([0-5]\\d)\\b(?!\\.?\\d)", "gu");
-    private static readonly JsRe DOLLAR_CODE = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|AUD)\\$(?=[  ]?\\d)", "gu");
+    private static readonly JsRe DOLLAR_CODE = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|AUD)\\$(?=[ \u00a0]?\\d)", "gu");
     private static readonly JsRe RUPIAH = JsRegex.Compile("\\bRp\\.?\\s?(\\d[\\d.,]*)", "gu");
     private static readonly JsRe NOMOR = JsRegex.Compile("\\bno\\.\\s?(?=\\d)", "giu");
     private static readonly JsRe ABBREV_MID = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");

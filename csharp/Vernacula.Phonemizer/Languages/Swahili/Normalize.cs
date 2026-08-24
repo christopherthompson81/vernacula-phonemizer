@@ -63,7 +63,7 @@ public static class Normalize
      */
     private static string ExpandDotted(string s, string body, string word)
     {
-        var atEnd = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.(?=[  ]*(?:$|\\p{{Lu}}))", "gu");
+        var atEnd = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.(?=[ \u00a0]*(?:$|\\p{{Lu}}))", "gu");
         var inline = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.", "gu");
         return JsRegex.Replace(JsRegex.Replace(s, atEnd, _ => $"{word}."), inline, _ => word);
     }
@@ -78,7 +78,7 @@ public static class Normalize
     private static readonly (JsRe Re, string Word)[] BARE_ERA =
     {
         (JsRegex.Compile("(?<![\\p{L}\\p{M}])BCE(?![\\p{L}\\p{M}])", "gu"), BCE_WORD),
-        (JsRegex.Compile("(?<=\\d[  ])BC(?![\\p{L}\\p{M}])", "gu"), BCE_WORD),
+        (JsRegex.Compile("(?<=\\d[ \u00a0])BC(?![\\p{L}\\p{M}])", "gu"), BCE_WORD),
     };
 
     /** Dotted abbreviations, as `[body-without-final-dot, words]`. Only one shape occurs: `n.k.` ×2 =

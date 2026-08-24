@@ -298,11 +298,10 @@ public static class Normalize
     private static readonly JsRe GROUP_DOT_SPACE = JsRegex.Compile("(\\d)[.\u00a0 ](\\d{3})(?![\\d]|,\\d)", "gu");
     private static readonly JsRe GROUP_DOT_THEN_SPACE = JsRegex.Compile("(\\d)\\.[ \u00a0](\\d{3})(?![\\d]|,\\d)", "gu");
     private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(\\d),(\\d{3})(?![\\d]|,\\d)", "gu");
-    // ⚠ PAIRED-FIX PENDING (#925): the separator class here is TWO PLAIN SPACES in the TypeScript — a
-    // duplicate that matches exactly what one space matches, where the intent is plainly "space or
-    // non-breaking space". Carried verbatim, because a port may not fork the engines; the sweep is
-    // inventoried in #925 and lands TS-first, as nl's did in #924.
-    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d.,:])([01]?\\d|2[0-3]):[  ]?([0-5]\\d)(?![\\d:])", "gu");
+    // ⚠ THE SEPARATOR CLASS HERE USED TO BE TWO PLAIN SPACES — a duplicate matching exactly what one space
+    // matches. Swept TS-first across the fleet in #925; a clock written with a NBSP after the colon no
+    // longer takes a spurious comma pause.
+    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d.,:])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![\\d:])", "gu");
     private static readonly JsRe UNIT_SUFFIX = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({UNIT_ALT})([\u00b2\u00b323])?-([{LOWER}]+)", "giu");
     private static readonly JsRe METRE_SUFFIX = JsRegex.Compile($"(\\d)\\s?m([\u00b2\u00b323])?-([{LOWER}]+)", "gu");
     private static readonly JsRe PCT_SUFFIX = JsRegex.Compile($"(\\d)\\s?[%\u066a\uff05]-([{LOWER}]+)", "gu");

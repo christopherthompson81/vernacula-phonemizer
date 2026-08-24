@@ -173,12 +173,16 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   perfectly, and no golden row reaches any of the three, so only reading the two layers against each other
   found it (#920). When a language keeps a unit out of the shared tier, the agreement it declared there is
   the specification the local rule owes.
-- ⚠ **A CHARACTER CLASS CAN BE A DUPLICATE AND LOOK LIKE A PAIR.** Dutch's `US$` fold accepts an optional
-  separator written `[  ]` — and both characters are U+0020, so the class is one space written twice and a
-  NON-BREAKING space walks straight past it into the defect the rule exists to prevent (the code spelled out,
-  the currency word gone). Fixed for nl in #924 with the class as an ESCAPE; the same shape is 281 more sites
-  across 42 language normalizers, inventoried in #925. Neither engine can see it: the two agree perfectly, and
-  no golden carries a NBSP.
+- ⚠ **A CHARACTER CLASS CAN BE A DUPLICATE AND LOOK LIKE A PAIR.** A separator class written with two U+0020
+  characters is one space written twice, so a NON-BREAKING space walks straight past it. 296 sites across 44
+  normalizers, swept in #925 (nl first, in #924); a guard test on each side now fails on the shape, verified by
+  sabotage. No golden moves — the corpora's NBSPs do not sit in those slots — but constructed input showed real
+  repairs: nb read `1<NBSP>000` as *one zero*, zu lost a magnitude, sw read `1000<NBSP>BC` as a cluster.
+- ⚠ **A STALE `PAIRED-FIX PENDING` MARKER IS A FORK THAT DOCUMENTS ITSELF AS FIDELITY.** The shared symbol
+  tier's C# side kept the doubled class under a marker saying the fix belonged in the TypeScript — where it had
+  landed already, in #877. The parity gate cannot see such a fork (no golden groups with a NBSP); a SEPARATOR
+  DIFFERENTIAL over every ported language did, with sw reading `1<NBSP>000 km` unit-postposed against the TS's
+  prefixed form. When a marker's TS half lands, the marker is the thing to grep for.
 - ⚠ **AN INVISIBLE CHARACTER CAN BE THE WHOLE SEMANTICS OF A LINE.** Burmese's segmentation guard joins its
   two syllable sequences on U+0001 so the comparison is of the SEQUENCE and not of the concatenated text; the
   character was written literally, so the file reads as `join("")` and the port faithfully copied what it could
