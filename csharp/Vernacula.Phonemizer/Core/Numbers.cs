@@ -252,7 +252,9 @@ public static class Numbers
         };
         var mag = DravidianForm(magForms, count, hasRemainder);
         if (count == 1) return [mag];
-        var outp = DravidianBelow1000(count, d);
+        // ⚠ RECURSIVE, not DravidianBelow1000 — the crore count runs past 999, and this index THREW where
+        // the TS silently yielded undefined. See src/core/numbers.ts, which carries the finding.
+        var outp = DravidianNumberWords(count, d);
         outp.Add(mag);
         return outp;
     }

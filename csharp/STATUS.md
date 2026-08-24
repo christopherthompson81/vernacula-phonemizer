@@ -16,11 +16,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 54 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+- **Languages: 55 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
   cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha, tr, ta, sw, yue, vi,
-  ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps — all **200/200**. 10,800 rows, 0 differ. ORDER IS
-  DESCENDING SPEAKER POPULATION (user direction), from `tools/language-catalogue/languages.db`: next ml, om,
-  uz, sd…
+  ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml — all **200/200**. 11,000 rows, 0 differ. ORDER IS
+  DESCENDING SPEAKER POPULATION (user direction), from `tools/language-catalogue/languages.db`: next om, uz,
+  sd, su…
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
@@ -209,5 +209,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   the port into a divergence. ⚠ The nine files where the C# is the ONLY home for its reasoning — DataPath,
   Foreign, LoadManifest, LoadTsv, Onnx, Geez, NormalizeSymbols, Unicode, Registry — were held out of the
   mechanical sweep by hand; a pointer to a TS file that never had the answer is worse than the bloat.
+- ⚠ **A SILENT `undefined` ON ONE SIDE IS A THROW ON THE OTHER, AND THAT ASYMMETRY IS THE INSTRUMENT.** The
+  shared Dravidian composer sent the CRORE count to a function contracted for 1-999; above 10^10 it indexed
+  `units[10]`, which JS renders as an empty string and `join` swallows, so 10^10, 10^12 and 10^15 all read
+  as "hundred crore" with a leading space — one wrong answer for three quantities, in kn, ml AND te, with
+  no error and no golden row to catch it. The C# indexer throws, so three off-golden probes announced it
+  (#943). Chase every throw the port produces even where the TS "works".
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.
