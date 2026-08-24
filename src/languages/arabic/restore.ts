@@ -10,6 +10,7 @@
  */
 
 import { toSegments } from "./g2p.ts";
+import { MANIFEST } from "./manifest.ts";
 
 const HARAKAT_G = /[ً-ْٰ]/g; // tanwīn, short vowels, shadda, sukūn, dagger alif
 const stripHarakat = (w: string): string => w.replace(HARAKAT_G, "");
@@ -47,8 +48,15 @@ const CLITICS: ReadonlyArray<readonly [string, string]> = [
 // Pronominal/object suffixes (undiacritized), re-attached after the voweled stem.
 const SUFFIXES: readonly string[] = ["ها", "هما", "هم", "هن", "كما", "كم", "كن", "نا", "ه", "ك", "ي"];
 
-const ARABIC_CONSONANTS = "ءآأؤإئابةتثجحخدذرزسشصضطظعغفقكلمنهوي";
-const LONG_CARRIERS = "اوىي"; // alif/wāw/alif-maqṣūra/yāʾ — mater lectionis (long vowel)
+// ⚠ BOTH FROM THE MANIFEST, which already held every letter in them. The consonant string additionally
+// takes آ, ة and ا, which are vowel carriers rather than `consonants` entries — the delta is stated here
+// rather than by re-spelling the whole inventory, so adding a consonant to arabic.jsonc reaches this scan.
+// (Deriving it also admits the Perso-Arabic پچژڤڭگݣ, which the literal omitted; 0 of 4,531 async probes
+// moved, because the 258,784-entry restoration lexicon holds no word containing one.)
+const L = MANIFEST.letters;
+const ARABIC_CONSONANTS = Object.keys(MANIFEST.consonants).join("") + L.alifMadda + L.taaMarbuta + L.alif;
+/** alif / wāw / alif-maqṣūra / yāʾ — mater lectionis (long vowel). */
+const LONG_CARRIERS = L.alif + L.waw + L.alifMaqsura + L.ya;
 
 /**
  * Epenthesis floor: vocalize a bare consonant SKELETON so an OOV word (no lexicon/clitic hit) is at least SAYABLE.

@@ -50,6 +50,8 @@ export interface ArabicManifest {
     };
     diacritizer: {
         labelMarks: Record<string, string>;
+        /** Classical spelling → modern, applied to the SKELETON before `defectiveSpelling` is consulted. */
+        classicalSpelling: Record<string, string>;
         defectiveSpelling: Record<string, string>;
     };
 }

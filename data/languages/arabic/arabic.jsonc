@@ -228,6 +228,11 @@
             "^": "ٰ",
         },
         // Defective-spelling closed class: high-frequency words whose long /aː/ is an unwritten dagger-alif.
+        // Classical spellings rewritten to their modern form BEFORE the `defectiveSpelling` lookup — the otiose
+        // alif of مائة, which reads /miʔa/ and not /maːʔa/. ⚠ A different table from the one below: this maps
+        // skeleton→skeleton, that one maps skeleton→diacritized. Without it the ثلاثمئة/أربعمئة entries below
+        // cannot be reached from a classically-spelled text.
+        "classicalSpelling": { "مائة": "مئة", "مائت": "مئت" },
         "defectiveSpelling": {
             "هذا": "هٰذَا",
             "هذه": "هٰذِهِ",
