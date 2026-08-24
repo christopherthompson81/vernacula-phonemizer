@@ -46,7 +46,9 @@ export interface YorubaManifest {
         /** The additive infix (1-4 past a ten) and the subtractive one (5-9 toward the ten above). */
         add: string;
         subtract: string;
-        /** Hundreds 100..900 — irregular words, not multiples. Slot 0 unused. */
+        /** Hundreds 100..900 — irregular words, not multiples. ⚠ Slots 0 AND 1 are unused: `below1000` sends
+         *  everything under 200 through the VIGESIMAL series, so the 100 slot cannot be reached and 100-199
+         *  is composed from `tens`. See the note in yoruba.jsonc. */
         hundreds: string[];
         thousand: string;
         million: string;

@@ -118,6 +118,13 @@
         // ⚠ `igba` (200) is HOMOGRAPHIC with ìgbà "time" once tone is dropped, and this corpus is ~51%
         // tone-marked — so its 1,387 whole-word hits are mostly the ordinary word. The numeral rests on the 21
         // `igba (200)` glosses and the 70 uses before a multiplier, not on that number.
+        // ⚠ SLOTS 0 AND 1 ARE NEVER READ, and slot 1 is the one worth saying so about: `below1000` sends
+        // everything under 200 to the VIGESIMAL series, so 100-199 is composed from the tens table
+        // (`"100": { "free": "ọgọ́rùn-ún" }`) and this table is consulted only from 200 up. Replacing this
+        // entry with nonsense changes no reading — 100 still reads ọgọ́rùn-ún, 137 mẹ́tàdínlógóje, 1100
+        // ẹgbẹ̀rún kan ó lé ọgọ́rùn-ún. It is kept rather than blanked because an empty string here would be
+        // a SILENT gap if the 100-199 range were ever routed back through this path, where a correct word is
+        // merely unused; the index must stay put either way.
         "hundreds": ["", "ọgọ́rùn-ún", "igba", "ọ̀ọ́dúnrún", "irinwó", "ẹ̀ẹ́dẹ́gbẹ̀ta", "ẹgbẹ̀ta",
             "ẹ̀ẹ́dẹ́gbẹ̀rin", "ẹgbẹ̀rin", "ẹ̀ẹ́dẹ́gbẹ̀rún"],
         // MAGNITUDE FIRST, multiplier second — counted, not assumed: ẹgbẹ̀rún 249:2, mílíọ̀nù 197:7, igba 70:4.
