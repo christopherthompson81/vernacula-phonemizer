@@ -50,6 +50,14 @@ public class ManifestMappingTests
         }
     }
 
+    /// <summary>Leaf key names that are DOCUMENTATION anywhere they appear, not data. `note` annotates each
+    /// abugida consonant/vowel row with its phonological class and any referee decision; the TypeScript
+    /// interface declares the row as `{ ipa: string }` and never reads it either, so a C# property for it
+    /// would model a field neither engine has. Matched by leaf NAME at any depth, unlike `metadataOnly`
+    /// which is top-level only.</summary>
+    private static readonly IReadOnlySet<string> DocumentationLeaves =
+        new HashSet<string>(new[] { "note" }, StringComparer.Ordinal);
+
     /// <param name="metadataOnly">Top-level keys the TYPESCRIPT interface does not declare either —
     /// provenance prose, the convention note, the `models` file list the loader resolves by path. Listed
     /// explicitly so a NEW unclaimed key still fails; an empty default would make the guard vacuous.</param>
@@ -59,7 +67,8 @@ public class ManifestMappingTests
         using var round = JsonDocument.Parse(JsonSerializer.Serialize(loaded, Opts));
         var missing = new List<string>();
         CollectUnmapped(source.RootElement, round.RootElement, file, missing);
-        missing.RemoveAll(k => metadataOnly.Contains(k[(file.Length + 1)..]));
+        missing.RemoveAll(k => metadataOnly.Contains(k[(file.Length + 1)..])
+                            || DocumentationLeaves.Contains(k[(k.LastIndexOf('.') + 1)..]));
         Assert.True(missing.Count == 0, $"manifest keys no C# property consumed:\n  {string.Join("\n  ", missing)}");
     }
 
@@ -93,6 +102,20 @@ public class ManifestMappingTests
     [Fact]
     public void QuechuaManifestIsFullyMapped() =>
         AssertFullyMapped("languages/quechua", "quechua.jsonc", Languages.Quechua.Manifest.MANIFEST);
+
+    [Fact]
+    public void BengaliManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/bengali", "bengali.jsonc",
+            Core.LoadManifest.Load<Languages.Bengali.BengaliDef>("languages/bengali", "bengali.jsonc"),
+            "language", "name", "script", "provenance", "convention");
+
+    // Assamese reuses the Bengali engine and its def type; its manifest carries the divergence fields
+    // (heightHarmony / medialSchwaDeletion / skipLexicon / unitWords) that bengali.jsonc leaves unset.
+    [Fact]
+    public void AssameseManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/assamese", "assamese.jsonc",
+            Core.LoadManifest.Load<Languages.Bengali.BengaliDef>("languages/assamese", "assamese.jsonc"),
+            "language", "name", "script", "provenance", "convention");
 
     [Fact]
     public void PortugueseManifestIsFullyMapped() =>
