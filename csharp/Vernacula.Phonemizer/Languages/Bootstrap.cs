@@ -72,6 +72,7 @@ public static class Bootstrap
             Cantonese.CantonesePhonemizer.RegisterSelf();
             Vietnamese.VietnamesePhonemizer.RegisterSelf();
             Korean.KoreanPhonemizer.RegisterSelf();
+            Javanese.JavanesePhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }
