@@ -16,10 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 33 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
-  cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th — all **200/200**. 6,600 rows, 0 differ.
-  ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
-  `tools/language-catalogue/languages.db`: next mr, te, ha, tr, ta…
+- **Languages: 34 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+  cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr — all **200/200**. 6,800 rows,
+  0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  `tools/language-catalogue/languages.db`: next te, ha, tr, ta, sw…
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
@@ -150,6 +150,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   off-golden. Six off-golden probe modes against Node found them — normalize, sync, neural, classical
   context, modern context, and the tagger-absent fallback (run with the tagger files removed from a copy
   of `data/`).
+- ⚠ **A COMPOSITION EXCLUSION DECOMPOSED IN SOURCE IS A TOTAL, DISGUISED FAILURE — TWICE NOW.** Bengali
+  ড়/য় (#891, 400 rows) and Devanagari क़/य़ (mr, 200 rows). NFC cannot repair either; inside a regex class
+  the extra character inverts a range and the type initializer throws, so the gate blames the engine.
+  `LanguageInitializationTests` now builds EVERY golden-bearing language and phonemizes its first row, so
+  a type-init fault fails one named test instead of 200 anonymous rows. ⚠ The obvious guard — banning
+  decomposed exclusions outright — is WRONG: the TypeScript carries 94 on purpose.
 - ⚠ **A MAPPED MANIFEST KEY IS NOT A READ ONE.** `ManifestMappingTests` proves a C# property CONSUMES each
   key; it cannot see a property nothing then reads. tg declared `numbers.and` and both engines carried their
   own literal copy of its value instead — agreeing, so no gate could fire. Reachability is a READING
