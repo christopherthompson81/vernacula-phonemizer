@@ -155,11 +155,17 @@ public static class TajikPhonemizer
         if (parts.Count == 0) return "";
         // The Persian connector -у (va) glues to the END of the preceding word (бисту як, сесаду чилу панҷ), EXCEPT
         // before a magnitude word, which just follows its multiplier with a space (ду ҳазор, not ду-у ҳазор).
+        //
+        // ⚠ THE CONNECTOR IS READ FROM THE MANIFEST, and it used to be a LITERAL here while `numbers.and` sat in
+        // tajik.jsonc unread by anything. The two agreed, so nothing was wrong — but the value was authored twice
+        // and only one copy was reachable, which is the setup for a silent divergence rather than a bug today: an
+        // editor correcting the manifest would change nothing, and the manifest is where this file's header says
+        // the data lives. Found by reading, not by any gate; no golden row moves.
         var MAG = new HashSet<string>(new[] { N.Thousand, N.Million, N.Milliard, N.Trillion }, StringComparer.Ordinal);
         var @out = parts[0];
         for (var i = 1; i < parts.Count; i++)
         {
-            @out += (MAG.Contains(parts[i]) ? " " : "у ") + parts[i];
+            @out += (MAG.Contains(parts[i]) ? " " : $"{N.And} ") + parts[i];
         }
         return @out; // space-separated tokens; "бисту" is one token, phonemized bistu
     }

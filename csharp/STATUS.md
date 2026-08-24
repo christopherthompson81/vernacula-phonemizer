@@ -16,10 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 31 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
-  cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa — all **200/200**. 6,200 rows, 0 differ.
+- **Languages: 32 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+  cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg — all **200/200**. 6,400 rows, 0 differ.
   ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
-  `tools/language-catalogue/languages.db`: next tg, th, mr, te, ha, tr…
+  `tools/language-catalogue/languages.db`: next th, mr, te, ha, tr…
 - **Every cross-engine dependency the goldens have is now satisfied** — the 65 self-contained goldens
   plus the 44 that route a foreign run to `en`/`ru`/`el` can all be gated as they land.
 - `Languages/Bootstrap.cs` is the registration list: one line per ported language, plus the neural table.
@@ -146,5 +146,9 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   off-golden. Six off-golden probe modes against Node found them — normalize, sync, neural, classical
   context, modern context, and the tagger-absent fallback (run with the tagger files removed from a copy
   of `data/`).
+- ⚠ **A MAPPED MANIFEST KEY IS NOT A READ ONE.** `ManifestMappingTests` proves a C# property CONSUMES each
+  key; it cannot see a property nothing then reads. tg declared `numbers.and` and both engines carried their
+  own literal copy of its value instead — agreeing, so no gate could fire. Reachability is a READING
+  question (#901), which is what the correctness lens in `PORTING.md` is for.
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.
