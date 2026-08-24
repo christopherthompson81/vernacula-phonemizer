@@ -376,12 +376,12 @@ export function normalizeKirundi(input: string): string {
     //    `EPEL` rather than `EPE L`; it is bounded by `(?![\p{L}\p{M}])` so it cannot reach into the next word.
     //    ⚠ `J.-C.` (French *Jésus-Christ*, ×1) is deliberately NOT matched — the hyphen breaks the run, so the
     //    `{2,}` never fires. One instance of French date-marker debris is not worth widening the class for.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[  ]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run: string, off: number, full: string) => {
-        const letters = run.replace(/[.  ]/gu, "");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run: string, off: number, full: string) => {
+        const letters = run.replace(/[. \u00a0]/gu, "");
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
         if (!run.endsWith(".")) return letters;
-        return rest === "" || /^[  ]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
+        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
     });
 
     // 2) A DOTTED NUMERIC DATE — `d.m.yyyy`. rn-ONLY: rw's corpus contains none of these, and rn's has TEN,
@@ -445,13 +445,13 @@ export function normalizeKirundi(input: string): string {
     //    — `ibirometero kwadarato 517` — so the two orders converge on one reading and neither can drift.
     //    ⚠ AFTER step 3, so a grouped operand (`km 1,965`) is already one digit run.
     //    ⚠ THE KEY IS BOUNDED ON BOTH SIDES and the SPACE IS MANDATORY: `(?<![\p{L}\p{M}\d])` stops `km`
-    //    matching inside a word, and `(?=[  ]\d)` is what identifies the abbreviation at all. The unspaced
+    //    matching inside a word, and `(?=[ \u00a0]\d)` is what identifies the abbreviation at all. The unspaced
     //    shape means something else entirely — `km2` is `km²` with an ASCII exponent — and an optional space
     //    would let this rule read that `2` as the unit's NUMBER. Trap 28's family; all 4 corpus instances are
     //    spaced. Case-insensitive because the corpus writes `Km`/`KM` alongside `km` (trap 7).
     const PRE_UNIT = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
     s = s.replace(
-        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[  ]\\d)`, "giu"),
+        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0]\\d)`, "giu"),
         (_m, key: string, exp?: string) => {
             const noun = UNIT[key.toLowerCase()]!;
             return exp === undefined ? noun : `${noun} ${SQUARED}`;
@@ -503,12 +503,12 @@ export function normalizeKirundi(input: string): string {
     //    `27/28 ° C`, and `dogere 22/25` where the corpus's own noun stands in front. The second emits no
     //    noun — it is already there — and the first suppresses it via the same `saidNear` redundancy guard.
     const spanDeg = (a: string, b: string): string => `${a} ${DEGREE_AND} ${b}`;
-    s = s.replace(/(?<![\p{L}\p{M}\d.,:/-])(\d+)[  ]?[-–—/][  ]?(\d+)[  ]?°[  ]?[CF]?(?![\p{L}\p{M}])/gui,
+    s = s.replace(/(?<![\p{L}\p{M}\d.,:/-])(\d+)[ \u00a0]?[-–—/][ \u00a0]?(\d+)[ \u00a0]?°[ \u00a0]?[CF]?(?![\p{L}\p{M}])/gui,
         (w, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b)
                 ? `${saidNear(full, off, off + w.length, DEGREE) ? "" : `${DEGREE} `}${spanDeg(a, b)}`
                 : w);
-    s = s.replace(new RegExp(`(?<=${DEGREE}[  ])(\\d+)[  ]?[-–—/][  ]?(\\d+)(?![\\d.,:/])`, "giu"),
+    s = s.replace(new RegExp(`(?<=${DEGREE}[ \u00a0])(\\d+)[ \u00a0]?[-–—/][ \u00a0]?(\\d+)(?![\\d.,:/])`, "giu"),
         (w, a: string, b: string) => (Number(a) < Number(b) ? spanDeg(a, b) : w));
 
     //    5b) A `/` SPAN — an rn shape rw's corpus does not contain. 5 instances, all measurements and all
@@ -521,7 +521,7 @@ export function normalizeKirundi(input: string): string {
     //    date field and the `22` of `12:22/24`; `(?![\d.,]*[/:])` rejects a FIRST date field by looking ahead
     //    for the next separator; and a denominator is excluded because the character after the slash must be
     //    a digit. AFTER step 3, so `1.500 / 1.800` is `1500 / 1800` by now and the operands are single runs.
-    s = s.replace(/(?<![\d.,:/])(\d+)[  ]?\/[  ]?(\d+)(?![\d.,]*[/:])/gu,
+    s = s.replace(/(?<![\d.,:/])(\d+)[ \u00a0]?\/[ \u00a0]?(\d+)(?![\d.,]*[/:])/gu,
         (whole, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b) ? join(a, b, full, off, false) : whole);
 
@@ -541,7 +541,7 @@ export function normalizeKirundi(input: string): string {
     //    `kuva` for the suppression above to find.
     //    ⚠ THE SEPARATOR-PLUS-DIGIT HALF STAYS because rn writes BOTH separators inside a figure
     //    (`metero 1.500 / 1.800`, `mm 1,200 / 1,400 mm`): a right operand that continues is still refused.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
         (whole, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b) ? join(a, b, full, off, true) : whole);
 
@@ -571,17 +571,17 @@ export function normalizeKirundi(input: string): string {
     //    6a) A SCALE TEMPERATURE — `30 ° C`, `17°C`, `0,6 ° C`, `16 °C`. The `F` letter is CLAIMED so it
     //    cannot reach the phoneme stream raw, but NO Fahrenheit name is emitted: `farenheti` is 0/0 on
     //    rn.wikipedia and `°F` is ×0 in this corpus, so there is nothing to say and nothing is invented.
-    s = s.replace(/(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[  ]?°[  ]?[CF](?![\p{L}\p{M}])/gui,
+    s = s.replace(/(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?[CF](?![\p{L}\p{M}])/gui,
         (w, sg: string, n: string, off: number, full: string) => degreeBody(sg, n, off, off + w.length, full));
     //    6b) A COORDINATE — `9°55'`, `10°40'`, `1°05'`, `0°15'`. ⚠ NO COMPASS TABLE, and that is another rw
     //    divergence: Kinyarwanda writes the bare letter (`1.867 ° S`) and needs one, while Kirundi SPELLS THE
     //    DIRECTION OUT as an ordinary word — `hagati ya 9°55' na 10°40' mu buraruko`, `na 1°05' mu burengero
     //    na 0°15' mu buseruko`. `[NSEW]` after a degree is ×0 in rn. The arcminute mark carries no reading
     //    this repo has sourced for Kirundi, so it is left as written and only the degree is spoken.
-    s = s.replace(/(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[  ]?°(?=[  ]?\d+[′'])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[ \u00a0]?°(?=[ \u00a0]?\d+[′'])/gu,
         (w, sg: string, n: string, off: number, full: string) => `${degreeBody(sg, n, off, off + w.length, full)} `);
     //    6c) A BARE DEGREE.
-    s = s.replace(/(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[  ]?[°º](?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu,
         (w, sg: string, n: string, off: number, full: string) => degreeBody(sg, n, off, off + w.length, full));
 
     // 6d) A REDUNDANT PERCENT SIGN — the clause already SPELLS the word, so the reading must say it ONCE
@@ -595,7 +595,7 @@ export function normalizeKirundi(input: string): string {
     //     ⚠ BOTH APOSTROPHES, because the corpus writes `kw'ijana` (U+0027) and `kw’ijana` (U+2019) and the
     //     two render identically — the same class of invisible split trap 11 records for Bengali nukta.
     //     BEFORE step 7, so the tier never sees a sign that has already been spoken.
-    s = s.replace(/(\d)[  ]?%/gu, (w, d: string, off: number, full: string) =>
+    s = s.replace(/(\d)[ \u00a0]?%/gu, (w, d: string, off: number, full: string) =>
         /kw['’]ijana/iu.test(full.slice(Math.max(0, off - 45), off + w.length + 45)) ? d : w);
 
     // 7) THE SHARED SYMBOL TIER — percent, units, exponent, ampersand. See SYMBOLS above.
@@ -621,7 +621,7 @@ export function normalizeKirundi(input: string): string {
     //    denominator position (trap 46 through a third door). rn declares no one-letter key anyway.
     const DENOM_UNIT = Object.keys(UNIT_SG).sort((a, b) => b.length - a.length).join("|");
     s = s.replace(
-        new RegExp(`/[  ]?(${DENOM_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "giu"),
+        new RegExp(`/[ \u00a0]?(${DENOM_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "giu"),
         (_w, key: string, exp?: string) => {
             const noun = UNIT_SG[key.toLowerCase()]!;
             return ` ${PER} ${exp === undefined ? noun : `${noun} ${SQUARED}`}`;
@@ -635,7 +635,7 @@ export function normalizeKirundi(input: string): string {
     //     class has no attested Kirundi reading, and inventing one from Kinyarwanda's would be exactly the
     //     borrowing this file exists to refuse.
     //     ⚠ AFTER step 5a, whose guard already declined `12:22/24` on the colon it can still see.
-    s = s.replace(/(?<![\d:])(\d{1,2}):[  ]?(\d{2})(?![:\d])/gu, "$1 $2");
+    s = s.replace(/(?<![\d:])(\d{1,2}):[ \u00a0]?(\d{2})(?![:\d])/gu, "$1 $2");
 
     // 8c) A LONE `+`, `=` or `×` IS LEFT UNREAD, deliberately — the `+` ×2 are Wikipedia PORTAL SIZE MARKERS
     //     (`+1 000 000 : English · Deutsch`) and the other four signs are ×0 in the artifact. Recorded in

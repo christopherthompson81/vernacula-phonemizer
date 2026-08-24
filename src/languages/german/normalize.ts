@@ -215,7 +215,7 @@ export function normalizeGerman(input: string): string {
     //    sentence start stays ambiguous and is left to the table, as before.
     //    The lookahead admits a DIGIT as well as a letter: `S. 42` and `Nr. 5` are the ordinary forms and
     //    neither matched before, so both leaked a raw letter plus a spurious pause.
-    s = s.replace(new RegExp(`(?<!\\p{Lu}\\.[  ])\\b(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
+    s = s.replace(new RegExp(`(?<!\\p{Lu}\\.[ \u00a0])\\b(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
     s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);

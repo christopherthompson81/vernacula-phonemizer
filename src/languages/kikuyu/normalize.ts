@@ -277,7 +277,7 @@ export function normalizeKikuyu(input: string): string {
     //    `clause-final` check). What the decimal exclusion needs is a CONTINUATION of the number, which is
     //    what a following digit tests; `30.9-72.5` is still declined and so is a grouped `1-1,000`.
     //    ⚠ AND A TRAILING LETTER IS EXCLUDED, which is what leaves `1960/1961` and `13-14million` alone.
-    s = s.replace(/(?<![-+−–—\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-+−\d\p{L}\p{M}]|[.,]\d)/gu,
+    s = s.replace(/(?<![-+−–—\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-+−\d\p{L}\p{M}]|[.,]\d)/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     // 6) PERCENT → `N harĩ igana`, the one POSTPOSED reading in this layer (see the declaration for the two
@@ -288,7 +288,7 @@ export function normalizeKikuyu(input: string): string {
     //    digit, and the number takes its own dot so `%` after a grouped figure still finds one operand.
     //    ⚠ FOUR OF THE ARTIFACT'S `%` ARE CSS (`font-size:90%`), a mining residue named in the header. They
     //    are indistinguishable from a percentage without a markup rule and are left to read as one.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:\.\d+)?)[  ]?%/gu, `$1 ${PERCENT}`);
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0]?%/gu, `$1 ${PERCENT}`);
 
     // 7) THE DOLLAR SIGN → `dolari N`, the noun BEFORE its amount (this language's order — see the header).
     //    `$2.7 million`, `$ 5.6 million`, `US$486,840`, and the GDP-per-capita legend `>$60,000 $50,000 -
@@ -298,8 +298,8 @@ export function normalizeKikuyu(input: string): string {
     //    ⚠ THE TRAP-12 GUARD IS ON BOTH SIDES. The corpus writes `dolari milioni 4.35` and `mirioni 3.75 cia
     //    dollar` in monetary sentences, so a `$` beside an already-named currency must not say it twice.
     const NAMED = /dolari|dolar|dollars?|ciringi/iu;
-    s = s.replace(/(?<![\p{L}\p{M}])US[  ]?\$[  ]?(?=\d)/giu, `${DOLLAR} `);
-    s = s.replace(/\$[  ]?(?=\d)/gu, (w, off: number, all: string) =>
+    s = s.replace(/(?<![\p{L}\p{M}])US[ \u00a0]?\$[ \u00a0]?(?=\d)/giu, `${DOLLAR} `);
+    s = s.replace(/\$[ \u00a0]?(?=\d)/gu, (w, off: number, all: string) =>
         saidNear(all, off, off + w.length, "dolari") || NAMED.test(all.slice(Math.max(0, off - 45), off))
             ? "" : `${DOLLAR} `);
 
@@ -316,7 +316,7 @@ export function normalizeKikuyu(input: string): string {
     //      · the lookbehind stops a match BEGINNING INSIDE a number — that is the retry that defeats a bare
     //        lookahead, because an engine rejected at `802` simply restarts at `11m`;
     //      · and the metre arm is SPLIT so a DECIMAL operand must be SPACED from the key. Written as one arm
-    //        with `(\d+(?:\.\d+)?)[  ]?m` it read `802.11m` as *mita 802 11* — measured, not predicted, on
+    //        with `(\d+(?:\.\d+)?)[ \u00a0]?m` it read `802.11m` as *mita 802 11* — measured, not predicted, on
     //        the first probe run of this file. The split costs nothing: in this corpus a decimal metre is
     //        spaced 2/2 (`934.6 m`, `12.0 m`) and a glued decimal-plus-`m` is ×0, as is a glued integer one.
     //    ki's `version-dot` cell is ×5 whole-corpus and ×0 in the retained text, so this is exposure
@@ -334,13 +334,13 @@ export function normalizeKikuyu(input: string): string {
     //    attested for Kikuyu — `unitPer` is one invariant string and this language has no candidate for it.
     //    AFTER the ranges (step 5) and BEFORE the decimals (step 9), which is what leaves `934.6` intact to
     //    be this rule's operand.
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[  ]?km(?![\p{L}\p{M}\d²³/])/gu,
+    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0]?km(?![\p{L}\p{M}\d²³/])/gu,
         (w, n: string, off: number, all: string) =>
             saidNear(all, off, off + w.length, KILOMETRE) ? n : `${KILOMETRE} ${n}`);
     const metre = (w: string, n: string, off: number, all: string): string =>
         saidNear(all, off, off + w.length, METRE) ? n : `${METRE} ${n}`;
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+\.\d+)[  ]m(?![\p{L}\p{M}\d²³/])/gu, metre);
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+)[  ]?m(?![\p{L}\p{M}\d²³/])/gu, metre);
+    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+\.\d+)[ \u00a0]m(?![\p{L}\p{M}\d²³/])/gu, metre);
+    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+)[ \u00a0]?m(?![\p{L}\p{M}\d²³/])/gu, metre);
 
     // 9) DECIMALS, LAST of the numeric rules — steps 5 to 8 all need their number intact. The separator was
     //    reaching `clausePunctuation` and becoming a SENTENCE BREAK inside a number: `934.6 m` read

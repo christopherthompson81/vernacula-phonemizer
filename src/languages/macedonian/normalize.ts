@@ -289,7 +289,7 @@ export function normalizeMacedonian(input: string): string {
     //     roman, and "Формула 1" is Formula ONE, a cardinal), must be followed by PUNCTUATION or end
     //     (all three regnal instances are "III."/"II."/"XVI,"; "Цели 20 проценти" and "Имаше 2 гола" are
     //     counts), and must not open a comma-grouped thousands run ("Од 1,400 луѓе").
-    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[  ](\d{1,2})(?![,\d])(?=\.?[.,;:!?]|$)/gu, (_m: string, name: string, d: string) => {
+    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=\.?[.,;:!?]|$)/gu, (_m: string, name: string, d: string) => {
         const n = Number(d);
         const o = mkOrdinal(n);
         if (o === undefined || n < 2 || n > 39) return _m;

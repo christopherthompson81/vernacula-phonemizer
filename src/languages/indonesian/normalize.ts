@@ -62,7 +62,7 @@ export function normalizeIndonesian(input: string): string {
     //     no amount after it would leave a lone `$` the tier cannot place. Note the corpus writes BOTH
     //     spacings — `US$ 14,7` and `US $30` — and only the closed one is broken, since the open one already
     //     puts a space between the letter and the sign.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[  ]?\d)/gu, "$");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");
 
     // 2) RUPIAH. `Rp` was read as the bare letter pair [rp]; the shared symbol tier is keyed on
     //    single-character signs and cannot express a two-letter prefix. Indonesian says the unit AFTER the

@@ -151,7 +151,7 @@ export function normalizeUzbek(input: string): string {
     //    "Capitalized N." as regnal — "Sahifa 12." became *Sahifa oʻn ikkinchi* — and bought nothing, since
     //    no corpus instance takes that shape. The rule declines on scores and percents ("Gingrich 32 foiz",
     //    "Betten 2,3 milliard", "Oxirgi 3 oy"), and the comma-guard keeps "Izmir 3,7 million" cardinal.
-    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[  ](\d{1,2})(?![,\d])(?=[  ](?:ning|hukmron))/gu,
+    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=[ \u00a0](?:ning|hukmron))/gu,
         (_m: string, name: string, d: string): string => {
             const n = Number(d);
             const ord = ordinalWords(n);
@@ -239,7 +239,7 @@ export function normalizeUzbek(input: string): string {
     //     period before a LOWERCASE word, so the letter reached the g2p as a bare consonant plus a break.
     //     Claimed only when a LETTER follows the dot (a name or a word); "S. 42" — a period before a digit
     //     — stays a page reference. The shared pass still handles "D. K. Arya" (two initials) itself.
-    s = s.replace(/(?<![\p{L}\p{M}])([A-Z])\.(?=[  ]+[A-Za-z])/gu, (_m: string, l: string) =>
+    s = s.replace(/(?<![\p{L}\p{M}])([A-Z])\.(?=[ \u00a0]+[A-Za-z])/gu, (_m: string, l: string) =>
         LETTER_NAME[l.toLowerCase()] ?? l);
 
     // 11) INITIALISMS, LAST of the letter rules: it must run after the era markers (else m.a. → *em a*)

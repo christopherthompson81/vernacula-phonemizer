@@ -188,8 +188,8 @@ export function makeAmharicNormalizer(
         //     the quantity. ⚠ The MEASUREMENT position is voiced too, although readers commonly omit it there:
         //     for a TTS target a reader skipping a character the author typed is evidence about reading habit,
         //     not licence to delete content — and omitting a plus is lossless where omitting a minus inverts.
-        s = s.replace(/(\S)\+[  ]?(?=\d)/gu, "$1 ፕላስ ");
-        s = s.replace(/(^|[  ])\+[  ]?(?=\d)/gu, "$1ፕላስ ");
+        s = s.replace(/(\S)\+[ \u00a0]?(?=\d)/gu, "$1 ፕላስ ");
+        s = s.replace(/(^|[ \u00a0])\+[ \u00a0]?(?=\d)/gu, "$1ፕላስ ");
 
         // 16. THE RELATIONAL AND DIVISION SIGNS, which need a rule shape none of the other languages use.
         //
@@ -209,6 +209,6 @@ export function makeAmharicNormalizer(
         s = s.replace(/(\S+)\s*÷\s*(\S+)/gu, "$1 በ$2 በመክፈል");
         s = s.replace(/\s?=\s?/gu, " እኩል ");
 
-        return s.replace(/[  ]{2,}/gu, " ");
+        return s.replace(/[ \u00a0]{2,}/gu, " ");
     };
 }
