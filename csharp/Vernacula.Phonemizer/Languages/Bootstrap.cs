@@ -45,10 +45,12 @@ public static class Bootstrap
             German.GermanPhonemizer.RegisterSelf();
             Greek.GreekPhonemizer.RegisterSelf();
             Hindi.Hindi.RegisterSelf();
+            Indonesian.IndonesianPhonemizer.RegisterSelf();
             Japanese.JapanesePhonemizer.RegisterSelf();
             Kalaallisut.KalaallisutPhonemizer.RegisterSelf();
             Kannada.KannadaPhonemizer.RegisterSelf();
             Mandarin.MandarinPhonemizer.RegisterSelf();
+            Malay.MalayPhonemizer.RegisterSelf();
             Maori.MaoriPhonemizer.RegisterSelf();
             Occitan.OccitanPhonemizer.RegisterSelf();
             Odia.OdiaPhonemizer.RegisterSelf();
@@ -56,6 +58,7 @@ public static class Bootstrap
             Russian.RussianPhonemizer.RegisterSelf();
             Spanish.SpanishPhonemizer.RegisterSelf();
             Umbundu.UmbunduPhonemizer.RegisterSelf();
+            Urdu.UrduPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }

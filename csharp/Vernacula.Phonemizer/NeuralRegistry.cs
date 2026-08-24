@@ -21,6 +21,8 @@ public static class NeuralRegistry
         ["af"] = Languages.Afrikaans.AfrikaansNeural.PhonemizeAfNeural,
         ["bn"] = Languages.Bengali.BengaliNeural.PhonemizeBnNeural,
         ["fr"] = Languages.French.FrenchNeural.PhonemizeFrNeural,
+        // ur: the rider EARNS its place here — measured against the sync path on ur.cle-speech.
+        ["ur"] = t => RiderNeural.PhonemizeRiderNeural(t, "ur"),
     };
 
     /**
