@@ -140,7 +140,13 @@ export function normalizeDutch(input: string): string {
     //    `… 10 miljard euro  14. miljard DOLLAR  omzet draait`. So dropping `US` loses nothing a reader says,
     //    and the tier's `$` → *dollar* is the whole reading. (A text ASR is the right instrument here because
     //    the question is WHICH WORD, not whether a sign is present.)
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[  ]?\d)/gu, "$");
+    //    ⚠ THE SEPARATOR CLASS IS A PLAIN SPACE AND A NON-BREAKING ONE, WRITTEN AS AN ESCAPE. It used to be
+    //    two PLAIN spaces — a duplicate that matches exactly what one space matches — so `US$\u00a014,7`, the
+    //    spacing typeset text actually uses for a currency amount, walked straight past this rule and hit the
+    //    defect it exists to prevent: the code spelled out and THE CURRENCY WORD GONE (*ˈy ˈɛs vˈeːrtin
+    //    kˈɔmaː zˈeːvən mˈɪljɑrt*, no *dollar*). The escape is deliberate — a literal NBSP is invisible in a
+    //    source file and folds to a plain space under an editor, which is how the duplicate arose.
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");
 
     // 1) ERA MARKERS and the MULTI-DOT abbreviations. FIRST, before the single-dot rule — otherwise the
     //    single-dot rule consumes `v.` / `e.` and leaves `Chr.` / `d.` behind as an interior phrase break.
@@ -163,7 +169,7 @@ export function normalizeDutch(input: string): string {
     //    The pattern deliberately ENDS on a dot rather than allowing a trailing separator, so the space
     //    after the run survives — an earlier `(?:\p{Lu}\.\s?){2,}` swallowed it and glued "V.S. met" into
     //    the single token *VSmet*, which the initialism pass then could not see as a caps run at all.
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[  ]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
+    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
 
     // 3) SINGLE-DOT ABBREVIATIONS. As in German, two branches: mid-sentence the dot is CONSUMED so it
     //    cannot become a phrase break; at a phrase end it is kept, because there it really is the sentence
