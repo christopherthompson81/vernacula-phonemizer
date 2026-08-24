@@ -16,10 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 48 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+- **Languages: 49 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
   cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha, tr, ta, sw, yue, vi,
-  ko, jv, it, gu, pl, uk, ro — all **200/200**. 9,600 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION
-  (user direction), from `tools/language-catalogue/languages.db`: next nl, hu, el-variants…
+  ko, jv, it, gu, pl, uk, ro, nl — all **200/200**. 9,800 rows, 0 differ. ORDER IS DESCENDING SPEAKER
+  POPULATION (user direction), from `tools/language-catalogue/languages.db`: next hu, el-variants…
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
@@ -173,5 +173,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   perfectly, and no golden row reaches any of the three, so only reading the two layers against each other
   found it (#920). When a language keeps a unit out of the shared tier, the agreement it declared there is
   the specification the local rule owes.
+- ⚠ **A CHARACTER CLASS CAN BE A DUPLICATE AND LOOK LIKE A PAIR.** Dutch's `US$` fold accepts an optional
+  separator written `[  ]` — and both characters are U+0020, so the class is one space written twice and a
+  NON-BREAKING space walks straight past it into the defect the rule exists to prevent (the code spelled out,
+  the currency word gone). Fixed for nl in #924 with the class as an ESCAPE; the same shape is 281 more sites
+  across 42 language normalizers, inventoried in #925. Neither engine can see it: the two agree perfectly, and
+  no golden carries a NBSP.
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.
