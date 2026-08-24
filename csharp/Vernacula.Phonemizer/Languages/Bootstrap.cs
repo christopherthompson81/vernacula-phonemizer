@@ -64,6 +64,7 @@ public static class Bootstrap
             Tajik.TajikPhonemizer.RegisterSelf();
             Thai.ThaiPhonemizer.RegisterSelf();
             Marathi.MarathiPhonemizer.RegisterSelf();
+            Telugu.TeluguPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }
