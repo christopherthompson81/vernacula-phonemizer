@@ -14,7 +14,7 @@ import { phonemizeFrNeural } from "./languages/french/frenchNeural.ts";
 import { phonemizeFaNeural } from "./languages/persian/persianNeural.ts";
 import { phonemizeHebrewNeural } from "./languages/hebrew/hebrewNeural.ts";
 import { phonemizeKmNeural } from "./languages/khmer/khmerNeural.ts";
-import { phonemizeRiderNeural } from "./languages/perso-arabic/riderNeural.ts";
+import { phonemizeRiderNeural } from "./riderNeural.ts";
 import { phonemizeSdNeural } from "./languages/sindhi/sindhiNeural.ts";
 import { phonemizeAfNeural } from "./languages/afrikaans/afrikaansNeural.ts";
 import { phonemizeCkbNeural } from "./languages/central-kurdish/centralKurdishNeural.ts";
