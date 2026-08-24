@@ -152,13 +152,18 @@ public static class Normalize
      */
     public static string NormalizeKannada(string input)
     {
-        // 1) ZERO-WIDTH characters (ZWNJ ×922, ZWJ ×139, ZWSP ×6). Removed FIRST: every later rule asserts
-        //    letter/digit adjacency, and an invisible character defeats all of them. Every one of the 1,067
-        //    instances sits immediately after a virama ್, so deleting the joiner leaves the identical
-        //    akshara sequence and no phoneme changes.
+        // 1) ZERO-WIDTH characters (ZWNJ ×922, ZWJ ×139, ZWSP ×6 — the largest raw count in the corpus).
+        //    Removed FIRST: every later rule asserts letter/digit adjacency, and an invisible character
+        //    defeats all of them. It also fixes a defect of its own — the engine's word class is the
+        //    Kannada block, which excludes U+200C/U+200D, so ಪಾಯಿಂಟ್‌ಗಳಿಂದ tokenized as TWO words and came
+        //    out [pˈaːjĩɳʈ ɡˈaɭĩn̪d̪a], two primary stresses where the word has one. Every one of the 1,067
+        //    instances sits immediately after a virama ್ (checked by printing the neighbours), so deleting
+        //    the joiner leaves the identical akshara sequence and no phoneme changes.
         var s = ZERO_WIDTH.Replace(input, "");
 
-        // 2) KANNADA DIGITS ೦-೯ → ASCII (×1). Before every numeric rule below.
+        // 2) KANNADA DIGITS ೦-೯ → ASCII (×1). Before every numeric rule below, so that a native-digit
+        //    numeral is eligible for the same de-grouping, ordinal, percent and unit handling as an ASCII
+        //    one. kannada.ts also folds them, but only inside a token the tokenizer already classed as a
         s = Unicode.FoldNativeDigits(s);
 
         // 3) DIGIT DE-GROUPING, before anything that reads punctuation. 1,000 was reading as

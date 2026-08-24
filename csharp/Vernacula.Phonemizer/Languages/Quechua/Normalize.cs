@@ -319,10 +319,10 @@ public static class Normalize
     private static readonly JsRe FORMAT_CHAR = JsRegex.Compile("\\p{Cf}", "gu");
     private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})(?:\\.\\d{3})+(?!\\d)", "gu");
     private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})(?:,\\d{3})+(?!\\d)", "gu");
-    private static readonly JsRe GROUP_SPACE = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})(?:[  ]\\d{3})+(?!\\d)", "gu");
+    private static readonly JsRe GROUP_SPACE = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})(?:[  ]\\d{3})+(?!\\d)", "gu");
     private static readonly JsRe DOT = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe COMMA = JsRegex.Compile(",", "gu");
-    private static readonly JsRe SPACE_SEP = JsRegex.Compile("[  ]", "gu");
+    private static readonly JsRe SPACE_SEP = JsRegex.Compile("[  ]", "gu");
     private static readonly JsRe DEGREE = JsRegex.Compile("(?<![\\p{L}\\p{M}])(\\d+)\\s?°(?![CF])", "gui");
     private static readonly JsRe DECIMAL_SEP = JsRegex.Compile("(\\d)[.,](\\d)", "gu");
 

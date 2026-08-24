@@ -56,8 +56,8 @@ public static class Normalize
     private const string NOT_AFTER = "(?![\\p{L}\\p{M}])";
 
     private static readonly JsRe SPACE_GROUP = JsRegex.Compile(
-        "(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:[    ]\\d{3})+)(?!\\d)", "gu");
-    private static readonly JsRe GROUP_SEPS = JsRegex.Compile("[    ]", "gu");
+        "(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:[    ]\\d{3})+)(?!\\d)", "gu");
+    private static readonly JsRe GROUP_SEPS = JsRegex.Compile("[    ]", "gu");
     private static readonly JsRe DOT_DECIMAL = JsRegex.Compile("(?<!\\d)(\\d+)\\.(\\d+)(?!\\d)", "gu");
     private static readonly JsRe ERA_BC = JsRegex.Compile($"{NOT_BEFORE}a[bv]\\.?\\s?C\\.?{NOT_AFTER}", "gu");
     private static readonly JsRe ERA_AD = JsRegex.Compile($"{NOT_BEFORE}ap\\.?\\s?C\\.?{NOT_AFTER}", "gu");

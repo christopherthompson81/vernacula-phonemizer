@@ -41,7 +41,7 @@ public sealed class SpanishNormalizeOptions
 public static class Normalize
 {
     /** Space characters used as digit-group separators: regular, NBSP, narrow NBSP, thin. */
-    private const string GROUP_SPACE = "    ";
+    private const string GROUP_SPACE = "    ";
 
     private const string MONTHS = "enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre";
 
@@ -141,7 +141,7 @@ public static class Normalize
     }
 
     private static readonly JsRe SPACE_GROUP_RE = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
-    private static readonly JsRe SPACES = JsRegex.Compile("[    ]", "gu");
+    private static readonly JsRe SPACES = JsRegex.Compile("[    ]", "gu");
     private static readonly JsRe DOT_DECIMAL = JsRegex.Compile("(?<![\\d.,:])(?<!:\\d\\d)(\\d+)\\.(\\d{1,2})(?![\\d.,\\p{L}])", "gu");
     private static readonly JsRe ERA_BC = JsRegex.Compile("\\ba\\.\\s?de\\s?C\\.|\\ba\\.\\s?C\\.", "giu");
     private static readonly JsRe ERA_AD = JsRegex.Compile("\\bd\\.\\s?de\\s?C\\.|\\bd\\.\\s?C\\.", "giu");
