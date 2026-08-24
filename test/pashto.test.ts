@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { numberToText, phonemizeWord } from "../src/languages/pashto/pashto.ts";
 import { makePashtoNormalizer } from "../src/languages/pashto/normalize.ts";
+import { loadManifest } from "../src/core/loadManifest.ts";
 
 // Canonical-IPA goldens for Pashto / پښتو (ps) — first Eastern Iranian language, a Perso-Arabic ABJAD (extended).
 // scope-limited: the consonant + WRITTEN-vowel skeleton is correct (retroflex ʈ ɖ ɳ ɻ, retroflex sibilants ʂ ʐ,
@@ -284,5 +285,27 @@ describe("Pashto — a lexicon entry cannot suppress every vowel", () => {
 
     test("a PARTIAL sukun is still honoured — it is a real statement about one consonant", () => {
         expect(phonemizeWord("کړ")).toBe("kɻ"); // lexicon کْړ: sukun on ک only, deliberate
+    });
+});
+
+// ⚠ THE TEENS ARE THE TEN, AND A SEPARATE KEY FOR IT WAS DEAD. Pashto's 10-19 are irregular fused forms
+// rather than unit+لس compounds, so they are authored in full and 10 is `teens[0]`. `numbers.ten` sat
+// beside them duplicating لس, and `numberToText` never read it: sabotaging it changed no reading across
+// 0-120 and every magnitude. A mapped key is not a read one (#901). This pins where the ten comes from.
+describe("pashto — the ten is the first of the fused teens", () => {
+    const NUM = loadManifest<{ numbers: { teens: string[] } }>(
+        new URL("../src/languages/pashto/pashto.ts", import.meta.url).href,
+        "pashto.jsonc",
+    ).numbers;
+
+    test("the manifest declares no separate ten key", () => {
+        expect(Object.keys(NUM)).not.toContain("ten");
+    });
+    test("10-19 are fused forms, and 10 is the first of them", () => {
+        expect(numberToText(10)).toBe(NUM.teens[0]);
+        expect(numberToText(11)).toBe(NUM.teens[1]);
+        expect(numberToText(19)).toBe(NUM.teens[9]);
+        // …and a compound teen is NOT unit+ten, which is why the table exists at all
+        expect(numberToText(11)).not.toBe(`${numberToText(1)} ${numberToText(10)}`);
     });
 });

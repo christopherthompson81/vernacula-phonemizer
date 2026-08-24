@@ -56,7 +56,10 @@
     // ⟨و⟩ (and) joins only the hundred/thousand/million groups to their remainder.
     "numbers": {
         "units": ["صفر", "یو", "دوه", "درې", "څلور", "پنځه", "شپږ", "اووه", "اته", "نهه"],
-        "ten": "لس",
+        // ⚠ NO SEPARATE `ten` KEY, AND THE DUPLICATE THAT WAS HERE WAS DEAD. The teens are IRREGULAR FUSED
+        // forms rather than unit+لس compounds, so they are authored in full — and 10 is simply the first of
+        // them, `teens[0]`. A `"ten": "لس"` beside it was never read: sabotaging it to nonsense changed no
+        // reading across 0-120 and every magnitude. A mapped key is not a read one.
         "teens": ["لس", "يوولس", "دولس", "دیارلس", "څوارلس", "پنځه لس", "شپاړس", "اووه لس", "اته لس", "نولس"],
         "tens": { "20": "شل", "30": "دېرش", "40": "څلوېښت", "50": "پنځوس", "60": "شپېته", "70": "اویا", "80": "اتیا", "90": "نوی" },
         "compound": {

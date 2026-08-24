@@ -33,7 +33,8 @@ import { makePashtoNormalizer } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
-    ten: string;
+    /** 10-19, IRREGULAR FUSED forms — so 10 is `teens[0]` and there is no separate `ten` key; one that was
+     *  here duplicated it and nothing read it. */
     teens: string[];
     tens: Record<string, string>;
     compound: Record<string, string>;
