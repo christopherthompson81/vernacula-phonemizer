@@ -33,11 +33,14 @@ public static class Bootstrap
             Phonemizer.PrewarmForeignEnglish = English.EnglishNeural.PrewarmForeignEnglish;
 
             Afrikaans.AfrikaansPhonemizer.RegisterSelf();
+            Amharic.AmharicPhonemizer.RegisterSelf();
+            Bulgarian.BulgarianPhonemizer.RegisterSelf();
             Cebuano.CebuanoPhonemizer.RegisterSelf();
             English.EnglishFactory.RegisterSelf();
             Greek.GreekPhonemizer.RegisterSelf();
             Kalaallisut.KalaallisutPhonemizer.RegisterSelf();
             Maori.MaoriPhonemizer.RegisterSelf();
+            Occitan.OccitanPhonemizer.RegisterSelf();
             Russian.RussianPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }

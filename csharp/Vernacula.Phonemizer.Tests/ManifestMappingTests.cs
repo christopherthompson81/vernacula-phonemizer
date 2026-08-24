@@ -82,6 +82,13 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance", "convention");
 
     [Fact]
+    public void AmharicManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/amharic", "amharic.jsonc",
+            typeof(Languages.Amharic.AmharicPhonemizer).GetField("DEF",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.GetValue(null)!,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
     public void QuechuaManifestIsFullyMapped() =>
         AssertFullyMapped("languages/quechua", "quechua.jsonc", Languages.Quechua.Manifest.MANIFEST);
 }
