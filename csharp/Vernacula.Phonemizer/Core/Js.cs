@@ -44,11 +44,70 @@ public static class Js
     public static string FromCodePoint(int cp) => char.ConvertFromUtf32(cp);
 
     /// <summary>Port of JS `String(n)` / number-to-string for a double that TS produced with integer
-    /// arithmetic: integral values print without a decimal point, exactly as JS renders them.</summary>
-    public static string NumberToString(double n) =>
-        n == Math.Floor(n) && !double.IsInfinity(n)
-            ? ((long)n).ToString(CultureInfo.InvariantCulture)
-            : n.ToString("R", CultureInfo.InvariantCulture);
+    /// arithmetic: integral values print without a decimal point, exactly as JS renders them.
+    ///
+    /// ⚠ THE `(long)` FAST PATH CANNOT COVER EVERY INTEGRAL DOUBLE, and the overflow is silent. A cast of
+    /// 1e20 does not fit Int64 (max ≈9.22e18) and yields garbage digits, which the engines' digit-by-digit
+    /// number fallbacks then read aloud one by one: ja's `99999999999999999999個` came out
+    /// *kʲɯᵝːninisän…* where JS says *it͡ɕi* + れい×20. Every language whose out-of-range branch is
+    /// `[...String(Math.abs(n))]` shares the path, and no golden carries a number that large, so the parity
+    /// gate cannot see it.
+    ///
+    /// ⚠ AND JS DOES NOT PRINT THE EXACT BINARY EXPANSION. `String(123456789012345678901)` is
+    /// "123456789012345680000", not the double's true value 123456789012345683968: it takes the SHORTEST
+    /// round-trip digits and pads with zeros. Below 1e21 that is positional; at 1e21 and above JS switches
+    /// to exponential ("1e+21"). Both are reproduced here from .NET's shortest-round-trip "R".</summary>
+    public static string NumberToString(double n)
+    {
+        if (double.IsNaN(n)) return "NaN";
+        if (double.IsPositiveInfinity(n)) return "Infinity";
+        if (double.IsNegativeInfinity(n)) return "-Infinity";
+        if (n != Math.Floor(n)) return JsExponentForm(n.ToString("R", CultureInfo.InvariantCulture));
+        // Integral and inside Int64: the exact, cheap path.
+        // ⚠ THE EXACT-CAST PATH STOPS AT 2^53, NOT AT Int64. Above 2^53 doubles are spaced more than 1
+        // apart, and JS prints the SHORTEST round-trip rather than the exact value — String(2**62) is
+        // "4611686018427388000", where the double really is 4611686018427387904 and a long cast would
+        // print that. So the fast path is exactly the SAFE-INTEGER range, which is the same bound the TS
+        // number paths already guard with isSafeInteger.
+        if (Math.Abs(n) <= 9007199254740992.0) return ((long)n).ToString(CultureInfo.InvariantCulture);
+        return JsExponentForm(n.ToString("R", CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>.NET's shortest round-trip string → the form JS's `String(n)` would print. .NET writes
+    /// "1E+20" where JS writes "100000000000000000000", and .NET's exponent threshold and casing differ
+    /// from JS's; this rewrites the exponential form positionally when |exponent| puts JS in that mode.</summary>
+    private static string JsExponentForm(string r)
+    {
+        var e = r.IndexOfAny(new[] { 'E', 'e' });
+        if (e < 0) return r;
+        var mantissa = r[..e];
+        var exp = int.Parse(r[(e + 1)..], CultureInfo.InvariantCulture);
+        var neg = mantissa.StartsWith('-');
+        if (neg) mantissa = mantissa[1..];
+        var dot = mantissa.IndexOf('.');
+        var digits = dot < 0 ? mantissa : mantissa.Remove(dot, 1);
+        var intLen = (dot < 0 ? mantissa.Length : dot) + exp; // digits before the point after scaling
+        // JS prints positionally for 1e-7 < |n| < 1e21 and switches to exponential outside that range.
+        if (intLen > 21 || exp < -6) return (neg ? "-" : "") + mantissa + (exp < 0 ? "e-" : "e+") + Math.Abs(exp);
+        var sb = new System.Text.StringBuilder();
+        if (neg) sb.Append('-');
+        if (intLen <= 0)
+        {
+            sb.Append("0.");
+            sb.Append('0', -intLen);
+            sb.Append(digits);
+        }
+        else if (intLen >= digits.Length)
+        {
+            sb.Append(digits);
+            sb.Append('0', intLen - digits.Length);
+        }
+        else
+        {
+            sb.Append(digits, 0, intLen).Append('.').Append(digits, intLen, digits.Length - intLen);
+        }
+        return sb.ToString();
+    }
 
     /// <summary>Port of JS `Number(s)` for the numeral strings the engines parse out of text.
     ///
