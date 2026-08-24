@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemizeWord } from "../src/languages/lingala/lingala.ts";
 import { normalizeLingala } from "../src/languages/lingala/normalize.ts";
 import { getPhonemizer } from "../src/registry.ts";
+import { loadManifest } from "../src/core/loadManifest.ts";
 
 // Canonical-IPA goldens for Lingala / Lingála (ln) — Bantu (C30B), a major lingua franca of the Congo (~20M native
 // + ~20-25M L2). Authored from Meeuwis (2020) "A Grammatical Overview of Lingála" (Revised & Extended Edition,
@@ -203,5 +204,27 @@ describe("lingala text normalization", () => {
         expect(ln.text("4,20").trim()).toBe("mi˥ne˩i˩ mi˥ba˩le˥ li˩bu˩ᵑɡu˩tu˥lu˩"); // 4 · 2 · 0
         expect(ln.text("b.n.b.").trim()).toBe("bo˥˩ᵑɡo˥ na˩ bo˥˩ᵑɡo˥ ."); // was `b . n . b .`
         expect(ln.text("A & B").trim()).toBe("a˩ ᵐpe˥ b");
+    });
+});
+
+// ⚠ THE ONE NUMBER WORD THIS LAYER EMITS COMES FROM THE MANIFEST. Step 12 rewrites the French `1er`/`1ère`
+// shape to the suppletive first ordinal, and its comment always said the word was the one "the manifest
+// already declares as `firstCard`" — while the code carried a literal copy, so the key was DEAD: sabotaging
+// it changed no reading. A mapped key is not a read one (#901). This pins the link in both directions.
+describe("lingala — the suppletive first ordinal is read from the manifest", () => {
+    const FIRST = loadManifest<{ numbers: { firstCard: string } }>(
+        new URL("../src/languages/lingala/lingala.ts", import.meta.url).href,
+        "lingala.jsonc",
+    ).numbers.firstCard;
+
+    test("the manifest still declares it", () => {
+        expect(FIRST).toBe("libosó");
+    });
+    test("every `1er` spelling reaches it, and nothing else does", () => {
+        for (const written of ["1er", "1ère", "1re", "1 er"]) {
+            expect(normalizeLingala(`${written} décembre`)).toBe(`ya ${FIRST} décembre`);
+        }
+        expect(normalizeLingala("2e éd.")).toBe("ya 2 éd.");
+        expect(normalizeLingala("16ème siècle")).toBe("ya 16 siècle");
     });
 });

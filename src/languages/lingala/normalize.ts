@@ -73,6 +73,18 @@
  * below is built on top of it. Recorded so the measurement is re-runnable in one grep.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
+
+/** The ONE number word this layer emits — the suppletive first ordinal, for the French `1er`/`1ère` shape in
+ *  step 12. ⚠ READ FROM THE MANIFEST RATHER THAN SPELLED HERE: the step's own comment already said the word
+ *  "the manifest already declares as `firstCard`", and it did — while the code carried its own literal copy,
+ *  so the key was DEAD. Sabotaging `firstCard` to nonsense changed no reading at all. A mapped key is not a
+ *  read one (#901, tg's `numbers.and`), and the next person to correct this ordinal would have edited a
+ *  string nothing consulted. */
+const FIRST_ORDINAL = loadManifest<{ numbers: { firstCard: string } }>(
+    import.meta.url,
+    "lingala.jsonc",
+).numbers.firstCard;
 
 /** ⚠ THE UNIT NOUN COMES BEFORE THE NUMBER IN LINGALA, which is why units are local and not the shared
  *  tier's — `normalizeSymbols` can only POSTPOSE (playbook §47 reason 2, the Oromo case). The corpus is
@@ -182,8 +194,10 @@ function expandDotted(s: string, body: string, word: string): string {
 }
 
 /** Every rule here emits DIGITS wherever a number is involved and lets the engine's own number path speak
- *  them, so this layer carries no number words of its own — which is also why the `kámá`/`nkámá` question
- *  in the header is orthogonal to it. */
+ *  them, so this layer spells no number word of its own — which is also why the `kámá`/`nkámá` question
+ *  in the header is orthogonal to it. ⚠ THE ONE EXCEPTION IS THE SUPPLETIVE FIRST ORDINAL of step 12, and it
+ *  is READ FROM THE MANIFEST (`FIRST_ORDINAL`) rather than spelled here, so the exception cannot drift from
+ *  the language's own data. */
 export function normalizeLingala(input: string): string {
     // 0) NFC at the entry, so a literal in this file matches whichever normalization the corpus used.
     //    Lingala writes `é á ó ô ǒ` (which precompose) beside `ɛ́ ɔ́` (which cannot), so its text is
@@ -395,7 +409,7 @@ export function normalizeLingala(input: string): string {
     //     zero are ordinals, and the spaced arm was deleting that "and" — `em ya 1533 com a invasão`. Trap 9
     //     with the evidence pointing the other way: the alternative is not merely unattested, it is attested
     //     WRONG. Tight `2e`/`16e` (×184, all French ordinals) is what the rule is for and is unaffected.
-    s = s.replace(/(?<![\d\p{L}\p{M}])1\s?(?:er|ère|re)(?![\p{L}\p{M}])/gu, "ya libosó");
+    s = s.replace(/(?<![\d\p{L}\p{M}])1\s?(?:er|ère|re)(?![\p{L}\p{M}])/gu, `ya ${FIRST_ORDINAL}`);
     s = s.replace(/(?<![\d\p{L}\p{M}])(\d+)\s?(?:ème|nd)(?![\p{L}\p{M}])/gu, "ya $1");
     s = s.replace(/(?<![\d\p{L}\p{M}])(\d+)e(?![\p{L}\p{M}])/gu, "ya $1");
 
