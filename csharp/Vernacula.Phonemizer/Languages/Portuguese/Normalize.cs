@@ -1,0 +1,301 @@
+/**
+ * Portuguese (pt / pt-BR) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is
+ * not already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ *
+ * Eighth language, and structurally the closest to Spanish: same ordinal indicators, same dot-thousands /
+ * comma-decimal conventions, same era markers. Shared with pt-BR, which is the same engine with
+ * `dialect: "bp"` plus an open/close lexicon rather than a separate implementation — so there is one
+ * normalization layer for both, and the few genuinely Brazilian choices are noted where they arise.
+ *
+ * Already correct and untouched: dot-thousands (1.000 → mil) and comma-decimals were already in the number
+ * tokenizer, % and the metric units work through the shared symbol tier, dates take a plain cardinal day,
+ * and Roman numerals are handled at the registry seam (pt is not in ROMAN_NATIVE), so `século XV` is right
+ * and the roman-vs-initialism ordering hazard cannot arise here.
+ *
+ * Measured over the pt_br corpus (2,793 utterances): units ×69, dot-thousands ×65, dates ×56, percent ×29,
+ * comma-decimals ×29, the `NhNN` clock ×28 and `h:mm` ×17, all-caps ×230 (EUA ×15, TV ×13, AOL ×7, OHA ×6),
+ * Roman numerals ×25, ordinal indicators ×20, dotted abbreviations ×19, `a.C.` ×8.
+ */
+using Vernacula.Phonemizer.Core;
+
+namespace Vernacula.Phonemizer.Languages.Portuguese;
+
+public static class Normalize
+{
+    private const string GROUP_SPACE = "    ";
+    private const string MONTHS = "janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro";
+
+    /** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare "no"
+     *  is an extremely common Portuguese contraction (em + o), so only `nº`/`n.º`/`no` before a DIGIT counts. */
+    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["sr"] = "senhor", ["sra"] = "senhora", ["srta"] = "senhorita", ["srs"] = "senhores",
+        ["dr"] = "doutor", ["dra"] = "doutora", ["prof"] = "professor", ["profa"] = "professora", ["eng"] = "engenheiro",
+        ["etc"] = "etcétera", ["pág"] = "página", ["pag"] = "página", ["págs"] = "páginas",
+        ["cap"] = "capítulo", ["art"] = "artigo", ["vol"] = "volume", ["av"] = "avenida", ["ex"] = "exemplo",
+        ["ltda"] = "limitada", ["cia"] = "companhia", ["núm"] = "número", ["aprox"] = "aproximadamente",
+    };
+    private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
+
+    /** Portuguese letter names, each verified through this engine. */
+    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["a"] = "a", ["b"] = "bê", ["c"] = "cê", ["d"] = "dê", ["e"] = "é", ["f"] = "éfe", ["g"] = "gê", ["h"] = "agá", ["i"] = "i",
+        ["j"] = "jota", ["k"] = "cá", ["l"] = "éle", ["m"] = "eme", ["n"] = "ene", ["o"] = "ó", ["p"] = "pê", ["q"] = "quê",
+        ["r"] = "erre", ["s"] = "esse", ["t"] = "tê", ["u"] = "u", ["v"] = "vê", ["w"] = "dábliu", ["x"] = "xis", ["y"] = "ípsilon", ["z"] = "zê",
+    };
+
+    /** Portuguese phonotactics, for the OOV rule in core/initialisms.ts. */
+    public static readonly Func<string, bool> IsUnreadablePortuguese = Initialisms.MakeUnreadableTest(new PhonotacticsData
+    {
+        Vowels = JsRegex.Compile("[aeiouáéíóúâêôãõà]", "u"),
+        LegalOnsets = new HashSet<string>(new[]
+        {
+            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr",
+            "ch", "lh", "nh", "qu", "gu", "ps", "rr", "ss", "sc", "tl",
+        }, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(new[]
+        {
+            "ch", "lh", "nh", "rr", "ss", "ns", "rs", "ls", "is", "us", "as", "es", "os",
+            "st", "rt", "rd", "rn", "rl", "rm", "lt", "ld", "nt", "nd", "nc", "ng", "mp", "mb",
+            "sc", "sm", "cs", "ps", "ts", "ks", "bs", "ds",
+        }, StringComparer.Ordinal),
+    });
+
+    /** LEXICAL: acronyms spelled out. Authored in portuguese.jsonc beside the other hand-authored facts. */
+    private static readonly IReadOnlySet<string> ACRONYM_LETTERS =
+        new HashSet<string>(Manifest.MANIFEST.AcronymLetters, StringComparer.Ordinal);
+
+    private static Func<string, string>? _initialisms;
+
+    /** Portuguese has a pronunciation lexicon, but it is a CORRECTION table rather than a wordlist, so it
+     *  cannot serve as the "is this recorded" test the way CMUdict or Lexique do. Acronyms are decided by the
+     *  lexical list plus the OOV phonotactic rule alone. */
+    public static string NormalizePortugueseInitialisms(string text)
+    {
+        _initialisms ??= Initialisms.MakeInitialismNormalizer(new InitialismData
+        {
+            LetterName = l => LETTER_NAME.GetValueOrDefault(l),
+            AcronymLetters = ACRONYM_LETTERS,
+            IsRecorded = _ => false,
+            IsUnreadable = IsUnreadablePortuguese,
+        });
+        return _initialisms(text);
+    }
+
+    private static readonly JsRe FINAL_O = JsRegex.Compile("o$", "u");
+    private static readonly JsRe FINAL_UM = JsRegex.Compile("um$", "u");
+
+    /** Feminine ordinal: every element of a compound inflects (trigésimo sétimo → trigésima sétima). */
+    private static string FeminineOrdinal(string masc) =>
+        string.Join(" ", masc.Split(' ').Select(w => FINAL_O.Replace(w, "a")));
+
+    /** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora). */
+    private static string FeminineCardinal(double n) => FINAL_UM.Replace(Numbers.NumberToWords(n), "uma");
+
+    private static readonly IReadOnlyDictionary<int, string> DENOMINATOR = new Dictionary<int, string>
+    {
+        [2] = "meio", [3] = "terço",
+    };
+
+    private static string? FractionWords(int num, int den)
+    {
+        if (den < 2 || num < 1) return null;
+        var baseWord = DENOMINATOR.GetValueOrDefault(den) ?? RomanOrdinals.PortugueseOrdinal(den);
+        if (baseWord is null) return null;
+        return $"{Numbers.NumberToWords(num)} {(num > 1 ? $"{baseWord}s" : baseWord)}";
+    }
+
+    private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
+    private static readonly JsRe THIN_SPACES = JsRegex.Compile("[   ]", "gu");
+    private static readonly JsRe ERA_BC = JsRegex.Compile("\\ba\\.\\s?C\\.", "giu");
+    private static readonly JsRe ERA_AD = JsRegex.Compile("\\bd\\.\\s?C\\.", "giu");
+    private static readonly JsRe NUMERO = JsRegex.Compile("\\b(?:n\\.º|nº|n°|no|núm\\.)\\s?(?=\\d)", "giu");
+    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
+    private static readonly JsRe ABBREV_END = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
+    private static readonly JsRe ORDINAL_INDICATOR = JsRegex.Compile("\\b(\\d{1,3}(?:\\.\\d{3})+|\\d+)\\.?(?:º|ª)", "gu");
+    private static readonly JsRe FEMININE_MARK = JsRegex.Compile("ª", "u");
+    private static readonly JsRe GROUPING_DOT = JsRegex.Compile("\\.", "gu");
+    private static readonly JsRe REAIS = JsRegex.Compile("R\\$\\s?(\\d[\\d.,]*)", "gu");
+    private static readonly JsRe DOLLAR_CODE = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|AUD)\\$(?=[  ]?\\d)", "gu");
+    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C\\b", "giu");
+    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F\\b", "giu");
+    private static readonly JsRe DEG = JsRegex.Compile("(\\d)\\s?°", "gu");
+    private static readonly JsRe CLOCK_H = JsRegex.Compile("\\b([01]?\\d|2[0-3])\\s?h\\s?([0-5]\\d)?(?![\\p{L}\\p{M}\\d])", "gu");
+    private static readonly JsRe CLOCK_COLON = JsRegex.Compile("\\b([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])", "gu");
+    private static readonly JsRe MINUS = JsRegex.Compile("(^|[\\s(])[-−–](\\d)", "gu");
+    private static readonly JsRe PLUS_MINUS = JsRegex.Compile("±", "gu");
+    private static readonly JsRe PLUS_ATTACHED = JsRegex.Compile("(\\S)\\+\\s?(\\d)", "gu");
+    private static readonly JsRe PLUS_LEADING = JsRegex.Compile("(^|\\s)\\+\\s?(\\d)", "gu");
+    private static readonly JsRe EQUALS_RE = JsRegex.Compile("\\s?=\\s?", "gu");
+    private static readonly JsRe LESS_THAN = JsRegex.Compile("\\s?<\\s?", "gu");
+    private static readonly JsRe GREATER_THAN = JsRegex.Compile("\\s?>\\s?", "gu");
+    private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
+    private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})/(\\d{1,3})\\b(?!\\s*[/\\d])", "gu");
+    private static readonly JsRe FIRST_OF_MONTH = JsRegex.Compile($"\\b1\\s+de\\s+({MONTHS})\\b", "giu");
+
+    /**
+     * Normalize one Portuguese input string. Pure text→text.
+     *
+     * `brazilian` selects the one place the varieties genuinely differ in this layer: the first of the month.
+     */
+    public static string NormalizePortuguese(string input, bool brazilian = false)
+    {
+        var s = input;
+
+        // 0) DIGIT GROUPING with a space. The dot form (1.000) is already in the number tokenizer; the SI space
+        //    form is not, and the number token cannot span a space.
+        s = GROUP_SPACE_RE.Replace(s, "$1$2");
+        s = GROUP_SPACE_RE.Replace(s, "$1$2");
+        s = THIN_SPACES.Replace(s, " ");
+
+        // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first — `a.` is
+        //    8 of the 19 dotted abbreviations in the corpus and every one is `a.C.`.
+        s = ERA_BC.Replace(s, "antes de Cristo");
+        s = ERA_AD.Replace(s, "depois de Cristo");
+
+        // 2) NÚMERO, only before a digit: bare "no" is the contraction em+o and is everywhere.
+        s = NUMERO.Replace(s, "número ");
+
+        // 3) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues so it cannot become a
+        //    phrase break; at a phrase end it stays, because there it really is the sentence end.
+        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
+        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+
+        // 4) ORDINAL INDICATORS. º and ª were reaching the phoneme string RAW — a non-IPA character in the
+        //    output. ° (U+00B0 DEGREE SIGN) is deliberately NOT one of them: "35°" and "32 °" occur in this
+        //    corpus and are temperatures, and treating ° as ordinal would read them as ordinals.
+        //    ⚠ THE DIGIT RUN MUST SPAN THE GROUPING DOTS — a bare `\d+` cannot cross the `.`
+        //    in `1.000º`, and the consequences were two different failures on the same shape:
+        //      `1.000º`  the pattern matched the TAIL, `000º`, so n was 0, portugueseOrdinal(0) is undefined, the
+        //                match was returned unchanged and the º REACHED THE IPA RAW — the leak this rule exists to
+        //                prevent, on the one form it could not see. (`Seu 1.000º selo` read *mˈiɫ º*.)
+        //      `2.500º`  worse, because the tail IS an ordinal: it matched `500º` → *quingentésimo* and stranded
+        //                `2.`, so the reading was *dois PONTO quingentésimo* — two point five-hundredth.
+        //    Step 0 deliberately leaves dot-grouping to the number tokenizer, so this rule has to accept it
+        //    itself. The grouped alternative comes FIRST so it wins over the bare `\d+` on `1.000º`, and the dots
+        //    are stripped before Number() rather than by a separate pass, which would change what step 0 hands on.
+        //    ⚠ WHEN NO ORDINAL WORD IS AVAILABLE THE INDICATOR IS STRIPPED, NOT KEPT. `portugueseOrdinal` is
+        //    bounded to 1–1000, so `2.500º` and `1.000.000º` have no word — and returning the match unchanged put
+        //    a raw `º` in the phoneme string, which is the very thing this rule exists to prevent and the worst of
+        //    the three outcomes. Dropping the indicator reads `2.500º` as the cardinal *dois mil e
+        //    quinhentos*: it loses the ordinality, which is honest lossiness, and invents no morphology. Same
+        //    decision Xhosa's ordinal rule records for the English `-st/-nd/-th` suffixes.
+        //    Every ordinal in this corpus is within range (`1º` ×5, `37º` ×3, `1.000º` ×3, `60º`, `11º`, `16º`,
+        //    `7ª` ×3, `5ª` ×2), so this arm is for arbitrary text rather than for a corpus instance.
+        s = ORDINAL_INDICATOR.Replace(s, m =>
+        {
+            var digits = m.Groups[1].Value;
+            var n = Js.Number(GROUPING_DOT.Replace(digits, ""));
+            var masc = double.IsInteger(n) && n >= 1 && n <= 1000 ? RomanOrdinals.PortugueseOrdinal((int)n) : null;
+            if (masc is null) return digits;
+            return FEMININE_MARK.IsMatch(m.Value) ? FeminineOrdinal(masc) : masc;
+        });
+
+        // 5) CURRENCY. R$ is the Brazilian real and was read as a stray [ʁ] followed by "dólares" — the shared
+        //    tier saw only the $ and had no entry for the R.
+        s = REAIS.Replace(s, "$1 reais");
+
+        // 5b) THE DOLLAR CODES → the bare sign, WHICH IS WHAT MAKES THE DECLARED KEY REACHABLE. `US$` was
+        //     declared in portuguese.ts's currency table and the corpus's `DROP currency ×1` stood anyway, with a
+        //     note saying the difference "is not yet explained". It is explained, and the explanation indicts the
+        //     verification: the INITIALISM pass runs before the symbol tier (portuguese.ts composes
+        //     `SYMBOLS(initialisms(normalize(x)))`), and it splits the all-caps run — `por US$ 11.000 a` became
+        //     `por u esse$ 11.000 a`, after which the `$` is preceded by a LETTER and the tier's guard, the one
+        //     that stops a key biting into a word, correctly refuses it. The sign then vanishes.
+        //
+        //     ⚠ WHY THE ORIGINAL CHECK PASSED, and it is worth knowing: core/initialisms.ts opens with an
+        //     all-caps-DOCUMENT guard — `if (!/\p{Ll}/.test(text) && /\s/.test(text.trim())) return text` — so a
+        //     probe string of `US$ 11.000`, which contains no lowercase at all, tripped that guard and skipped the
+        //     pass entirely. The one context tested was the one context where the interfering rule is inactive.
+        //     A single-expression probe can trip a document-level heuristic; test the sign inside a sentence.
+        //
+        //     The fold is the attested reading, not a convenience: both pt_br speakers of this sentence say the
+        //     currency word and NEVER the code — "vendidas por 11 mil dólares a 22 mil e quinhentos dólares a
+        //     onça" (Parakeet over pt_br/train, 2 of 2). So `US` is not voiced, and folding to `$` loses nothing a
+        //     reader says. Folding rather than emitting the word directly (the shape R$ uses above) keeps the
+        //     tier's count agreement, so `US$ 1` still reads *dólar* and not *dólares*.
+        //
+        //     ⚠ NOT FIXED IN core/initialisms.ts, deliberately. Excluding `\p{Sc}` from that pass's trailing
+        //     guard would fix pt and REGRESS the 18 other languages that carry `US$`/`AUD$` without declaring a
+        //     compound key (measured across all 66 artifacts: 20 languages, every instance `US$` or `AUD$`, no
+        //     counterexample). They would stop spelling the letters and start reading `US` as a WORD, with the
+        //     sign still dropped — worse, for a fix they do not benefit from. The general repair is to let the
+        //     currency tier claim a sign before the initialism pass sees the letters; that is a reordering, and
+        //     it belongs to its own change.
+        //     ⚠ ONLY WHERE A NUMBER FOLLOWS, and that guard is not cosmetic. The tier's `$` key needs an adjacent
+        //     quantity; folding a bare `US$` with nothing after it would leave a lone `$` that the tier cannot
+        //     claim and the tokenizer then drops, so `preços em US$` would go from spelling the letters to saying
+        //     NOTHING. Neither reading is right — *dólares* is — but silence is strictly worse than the letters,
+        //     so an unquantified code keeps its existing behaviour and only the useful case is folded.
+        s = DOLLAR_CODE.Replace(s, "$");
+
+        // 6) DEGREES, before the unit tier so the bare sign is not left behind.
+        s = DEG_C.Replace(s, "$1 graus Celsius");
+        s = DEG_F.Replace(s, "$1 graus Fahrenheit");
+        s = DEG.Replace(s, "$1 graus");
+
+        // 7) CLOCK. Two forms occur and BOTH were broken: the `h` form (×28) dropped its marker entirely
+        //    ("07h19" → "sete dezenove") and the colon form (×17) turned the colon into a PAUSE with a
+        //    spurious "zero" at :00. `hora` is feminine, so 1 takes *uma*.
+        s = CLOCK_H.Replace(s, m => ClockWords(
+            Js.Number(m.Groups[1].Value),
+            m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? Js.Number(m.Groups[2].Value) : null));
+        s = CLOCK_COLON.Replace(s, m => ClockWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
+
+        // 8) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
+        s = MINUS.Replace(s, "$1menos $2");
+        // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
+        //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
+        //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
+        //    already in this file.
+        s = PLUS_MINUS.Replace(s, " mais menos ");
+        s = PLUS_ATTACHED.Replace(s, "$1 mais $2");
+        s = PLUS_LEADING.Replace(s, "$1mais $2");
+
+        // 8b) RELATIONAL AND DIVISION SIGNS. ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
+        //     absent from pt_br; the vocabulary is ordinary comparative prose and is present:
+        //
+        //       `maior`     ×100 TOKEN  (`maior que` ×1 phrase — "o território da turquia é maior que 1.600 km")
+        //       `menor`     ×29 TOKEN
+        //       `dividido`  ×3 TOKEN
+        //       `igual`     ×0 token / ×0 substring   ⚠ ABSENT ENTIRELY — the corpus cannot source the equals word
+        //
+        //     ⚠ SO THE EQUALS WORD CAME FROM THE REGISTER TIER, and Portuguese produced the best evidence in this
+        //     whole issue: pt.wikipedia's Divisão article does not merely use the words, it NAMES THE SIGNS and then
+        //     reads the notation back —
+        //
+        //       "o sinal de menor que ( < ), o sinal de maior que ( > ) e o sinal de desigualdade ( ≠ )"
+        //       "a ÷ b = c   (a dividido por b é igual a c)"
+        //
+        //     — the sign and its reading in the same sentence, with the operands in place. That is the tier-4
+        //     source the German pilot argued was required: a general existence check cannot distinguish a sense,
+        //     and here the article states the mapping outright.
+        //
+        //     The copula is dropped because these strings are what the source calls the SIGNS themselves ("o sinal
+        //     de menor que"), so the bare form is the sourced form — the same call `es` and `en` make.
+        s = EQUALS_RE.Replace(s, " igual a ");
+        s = LESS_THAN.Replace(s, " menor que ");
+        s = GREATER_THAN.Replace(s, " maior que ");
+        s = DIVIDE.Replace(s, " dividido por ");
+
+        // 9) FRACTIONS, guarded against a date and a unit ratio by requiring digits on both sides.
+        s = FRACTION.Replace(s, m =>
+            FractionWords((int)Js.Number(m.Groups[1].Value), (int)Js.Number(m.Groups[2].Value)) ?? m.Value);
+
+        // 10) DATES. The day is a plain cardinal, except the first of the month — and the varieties DIFFER, so
+        //     this is dialect-gated like the Spanish equivalent: Brazil says *primeiro de julho*, Portugal
+        //     normally *um de julho*. An EXPLICIT `1º` is honoured in both, because there the writer marked it.
+        if (brazilian)
+            s = FIRST_OF_MONTH.Replace(s, m => $"primeiro de {m.Groups[1].Value}");
+
+        return s;
+    }
+
+    /** An hour/minute pair → "sete horas e dezenove" / "uma hora". */
+    private static string ClockWords(double h, double? min)
+    {
+        var head = $"{FeminineCardinal(h)} {(h == 1 ? "hora" : "horas")}";
+        return min is null || min == 0 ? head : $"{head} e {FeminineCardinal(min.Value)}";
+    }
+}
