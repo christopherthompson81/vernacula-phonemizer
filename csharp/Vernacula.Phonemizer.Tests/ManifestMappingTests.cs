@@ -55,8 +55,18 @@ public class ManifestMappingTests
     /// interface declares the row as `{ ipa: string }` and never reads it either, so a C# property for it
     /// would model a field neither engine has. Matched by leaf NAME at any depth, unlike `metadataOnly`
     /// which is top-level only.</summary>
+    /// <summary>…and `medialRule` / `grouping`, which NAME THE SHARED ALGORITHM the manifest expects rather
+    /// than parameterising it: their values are the literal strings "ohala-VCaCV" and "indian-lakh-crore".
+    /// Ten Indic manifests carry them and NEITHER ENGINE READS EITHER — the TypeScript's `HindiDef` does not
+    /// declare them and no code looks them up.
+    ///
+    /// ⚠ THIS IS THE `note` CASE, NOT THE tg `numbers.and` CASE, and the difference is what decides the fix.
+    /// tg declared a VALUE — the connector "у" — that the compositor then re-typed as a literal, so wiring
+    /// it up removed a real duplicate (#901). These two are LABELS: "indian-lakh-crore" is not something
+    /// `indicNumberWords` could consume without inventing a dispatch it does not have, and making one up to
+    /// satisfy a test would be worse than recording that the key documents rather than configures.</summary>
     private static readonly IReadOnlySet<string> DocumentationLeaves =
-        new HashSet<string>(new[] { "note" }, StringComparer.Ordinal);
+        new HashSet<string>(new[] { "note", "medialRule", "grouping" }, StringComparer.Ordinal);
 
     /// <param name="metadataOnly">Top-level keys the TYPESCRIPT interface does not declare either —
     /// provenance prose, the convention note, the `models` file list the loader resolves by path. Listed
@@ -146,6 +156,11 @@ public class ManifestMappingTests
     [Fact]
     public void ThaiManifestIsFullyMapped() =>
         AssertFullyMapped("languages/thai", "thai.jsonc", Languages.Thai.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
+    public void MarathiManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/marathi", "marathi.jsonc", Languages.Marathi.MarathiPhonemizer.DEF,
             "language", "name", "script", "provenance", "convention");
 
     // ── MODEL SIDECARS ────────────────────────────────────────────────────────────────────────────────────
