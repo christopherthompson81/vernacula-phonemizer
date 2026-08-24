@@ -132,7 +132,7 @@ Wiktionary-derived; sidecar);
 CC-BY-SA 4.0 — EDRDG requires **specific named attribution** in NOTICE).
 
 **Shipped model weights declared CC-BY-SA-inheriting** (they reproduce licensed pronunciation
-data): `languages/perso-arabic/riderDiacritizer.onnx`; `persian/fa-vowel-restorer.*.onnx`;
+data): `core/riderDiacritizer.onnx`; `persian/fa-vowel-restorer.*.onnx`;
 `persian/fa-context-restorer.*.onnx` (Tajik component); `french/fr-g2p-tagger.int8.onnx`
 (Lexique); `afrikaans/af-g2p-tagger.int8.onnx` (RCRL CC BY-SA 2.5 ZA + NCHLT-inlang
 CC BY 3.0 — the share-alike term governs the combination; sidecar). These cannot ship in an MIT-only
