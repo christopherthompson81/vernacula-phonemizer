@@ -26,12 +26,16 @@ public static class Assamese
     private static string CollapseGeminates(string ipa) =>
         LENGTH_AFTER_ASPIRATION.Replace(AS_GEMINATE.Replace(ipa, "$1ː"), "$1ː");
 
+    // ⚠ THE OOV RESOLVER IS DROPPED ON EVERY ARM, as in the TS: `wrap`'s members are arity-1 arrows, so the
+    // Assamese surface is oov-blind by construction. Assamese has no neural path today (only bn is wired into
+    // the neural registry), so forwarding it would be inert — but it would also silently change the contract
+    // the day one is added, which is a decision for that change and not for this port.
     private static NativeBengaliEngine Wrap(NativeBengaliEngine b) => new()
     {
-        Word = (w, oov) => CollapseGeminates(b.Word(w, oov)),
+        Word = (w, _) => CollapseGeminates(b.Word(w, null)),
         WordRules = w => CollapseGeminates(b.WordRules(w)),
-        Number = (d, oov) => CollapseGeminates(b.Number(d, oov)),
-        Text = (i, oov) => CollapseGeminates(b.Text(i, oov)),
+        Number = (d, _) => CollapseGeminates(b.Number(d, null)),
+        Text = (i, _) => CollapseGeminates(b.Text(i, null)),
     };
 
     /** Load assamese.jsonc (beside this file) and build the Assamese phonemizer. `foreign` handles embedded Latin. */
@@ -51,7 +55,7 @@ public static class Assamese
             Word = b.Word,
             WordRules = b.WordRules,
             Number = b.Number,
-            Text = (i, oov) => baseText(Normalize.NormalizeAssamese(i), oov),
+            Text = (i, _) => baseText(Normalize.NormalizeAssamese(i), null),
         });
     }
 
