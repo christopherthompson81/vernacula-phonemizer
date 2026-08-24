@@ -108,7 +108,12 @@
         "units": ["nulla", "egy", "kettő", "három", "négy", "öt", "hat", "hét", "nyolc", "kilenc"],
         "teens": ["tíz", "tizenegy", "tizenkettő", "tizenhárom", "tizennégy", "tizenöt", "tizenhat", "tizenhét", "tizennyolc", "tizenkilenc"],
         "tens": ["", "tíz", "húsz", "harminc", "negyven", "ötven", "hatvan", "hetven", "nyolcvan", "kilencven"],
-        "tensPrefix": { "20": "huszon", "10": "tizen" },
+        // ⚠ ONE PREFIX, BECAUSE ONLY ONE IS READ. The TWENTIES are the only decade the compositor builds from
+        // a bound prefix (huszon + egy); the TEENS are authored in full above, in `teens`, and that is the
+        // table `below100` reads — so a `"10": "tizen"` entry beside this one could never reach a numeral.
+        // It was here, and replacing its value with nonsense changed no reading at all (10 tíz, 11 tizenegy,
+        // 1015 ezertizenöt, 2012 kétezertizenkettő). Dead data drifts silently; a mapped key is not a read one.
+        "tensPrefix": { "20": "huszon" },
         "hundred": "száz",
         "thousand": "ezer",
         "million": "millió",

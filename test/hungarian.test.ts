@@ -3,6 +3,8 @@ import { describe, expect, test } from "vitest";
 import { phonemizeWord, createHungarian } from "../src/languages/hungarian/hungarian.ts";
 import { ROMAN_POLICY } from "../src/languages/hungarian/romanOrdinals.ts";
 import { getPhonemizer } from "../src/registry.ts";
+import { numberToWords } from "../src/languages/hungarian/numbers.ts";
+import { loadManifest } from "../src/core/loadManifest.ts";
 
 // Canonical-IPA goldens for Hungarian / magyar (hu) — Uralic, Latin. A regular longest-match g2p: digraphs +
 // their geminate forms (ssz→sː, ggy→ɟː) before single letters, then doubled-consonant → Cː, then FIXED
@@ -183,6 +185,29 @@ describe("Hungarian text normalization", () => {
     test("the attributive két before a scale word, at every multiplier ending in 2", () => {
         expect(say("22500")).toBe("ˈhusoŋkeːtɛzɛrøtsaːz"); // was: *huszonkettőezer*
         expect(say("32000")).toBe("ˈhɒrmint͡skeːtɛzɛr");
+    });
+});
+
+// ⚠ THE PREFIX TABLE HOLDS ONLY WHAT THE COMPOSITOR READS. `tensPrefix` carried a `"10": "tizen"` entry
+// beside the twenties one, and nothing could reach it: the teens are authored in FULL in `numbers.teens`,
+// which is the table `below100` consults, so replacing the prefix's value with nonsense left every reading
+// identical. A mapped key is not a read one — the entry is gone, and this pins both halves.
+describe("Hungarian — the teens come from the table, the twenties from the prefix", () => {
+    const NUM = loadManifest<{ numbers: { tensPrefix: Record<string, string> } }>(
+        new URL("../src/languages/hungarian/hungarian.ts", import.meta.url).href,
+        "hungarian.jsonc",
+    ).numbers;
+    test("only the twenties prefix is declared", () => {
+        expect(Object.keys(NUM.tensPrefix)).toEqual(["20"]);
+    });
+    test("the teens read from `teens`, and the twenties compose from `huszon-`", () => {
+        expect(numberToWords(10)).toBe("tíz");
+        expect(numberToWords(11)).toBe("tizenegy");
+        expect(numberToWords(19)).toBe("tizenkilenc");
+        expect(numberToWords(1015)).toBe("ezertizenöt");
+        expect(numberToWords(20)).toBe("húsz");
+        expect(numberToWords(21)).toBe("huszonegy");
+        expect(numberToWords(2012)).toBe("kétezertizenkettő");
     });
 });
 
