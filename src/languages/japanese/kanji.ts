@@ -196,12 +196,27 @@ export function applyReadings(word: string): string {
 /** True if a whole-word reading entry of length ≥2 starts at the head of `text` — i.e. the leading kanji heads a
  *  dictionary compound (時間, 年生, 日中, 年間, 分間). Used by the number+counter fusion to avoid splitting a compound
  *  whose first kanji happens to be a counter (3時間 must stay さんじかん, not become さんじ + 間). A standalone counter
- *  before a particle/verb/punctuation does NOT head a compound (冊読 is no word), so its euphonic reading still fires. */
+ *  before a particle/verb/punctuation does NOT head a compound (冊読 is no word), so its euphonic reading still fires.
+ *
+ *  ⚠ THE SECOND CHARACTER MUST BE A KANJI, and that guard is the whole difference between the compound this
+ *  exists to protect and an ordinary word that merely starts with the same character. Every case above is
+ *  kanji+kanji, but the test was "is there ANY ≥2-char entry here", and 126 reading keys begin with a counter
+ *  kanji and continue in KANA — overwhelmingly verb conjugations (分かつ, 回す, 着く, 足す, 泊まる) plus a few
+ *  noun phrases (日の丸, 年の瀬, 人たち, 本の). None of those readings is available after a DIGIT, which is the
+ *  only context this function is consulted from: a numeral cannot precede a verb stem, and `本の` after a
+ *  number is the counter 本 plus the particle の, never the adverb ほんの. Unguarded, the entry suppressed the
+ *  fusion and `1本のペン` read *it͡ɕi ho̞n* instead of いっぽん — a wrong reading for one of the commonest
+ *  shapes in the language. Found while porting to C#. */
 export function headsCompound(text: string): boolean {
     const { map, maxKeyLength } = readings();
     return (
-        longestKeyMatch([...text], 0, maxKeyLength, 2, (k) => map.has(k)) !==
-        null
+        longestKeyMatch(
+            [...text],
+            0,
+            maxKeyLength,
+            2,
+            (k) => map.has(k) && isKanji([...k][1]!),
+        ) !== null
     );
 }
 
