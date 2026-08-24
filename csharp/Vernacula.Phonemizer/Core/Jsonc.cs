@@ -1,9 +1,7 @@
 /**
  * Minimal but conformant JSONC parser: standard JSON plus `//` line comments, `/* *​/` block comments, and
- * trailing commas. It is STRING-AWARE — comments and commas that occur inside a string value (e.g. a
- * "https://…" URL, or a comma before a brace inside prose) are preserved verbatim — so it is safe on the
- * hand-authored .jsonc manifests where the old line-anchored regex was both under- (missed inline comments and
- * trailing commas) and potentially over-eager. Shared by every manifest/data loader.
+ * trailing commas.
+ * Ported from src/core/jsonc.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using System.Text.Json;
@@ -18,13 +16,15 @@ public static class Jsonc
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         // ⚠ FIELDS TOO. Some Core data classes (NumbersDef, AbugidaDef's members) are ported with public
-        // FIELDS, and System.Text.Json ignores fields by default — the member deserializes to its DEFAULT
-        // with no error, the exact silent failure mode the ARPABET keys already demonstrated once. Odia is
-        // the first manifest to route through NumbersDef, which is how this surfaced.
+        // FIELDS, and System.Text.Json ignores fields by default — the member would deserialize to its
+        // DEFAULT with no error, the silent failure mode PORTING.md records for a mangled manifest key.
         IncludeFields = true,
     };
 
-    /** Strip JSONC comments and trailing commas, returning parseable JSON. String contents are preserved verbatim. */
+    /**
+     * Strip JSONC comments and trailing commas, returning parseable JSON. String contents are preserved
+     * verbatim.
+     */
     public static string StripJsonc(string src)
     {
         var outSb = new StringBuilder(src.Length);
@@ -35,7 +35,6 @@ public static class Jsonc
             var c = src[i];
             if (c == '"')
             {
-                // string literal — copy verbatim, respecting \ escapes
                 outSb.Append(c);
                 i++;
                 while (i < n)
@@ -55,14 +54,12 @@ public static class Jsonc
             }
             if (c == '/' && i + 1 < n && src[i + 1] == '/')
             {
-                // line comment → skip to end of line
                 i += 2;
                 while (i < n && src[i] != '\n') i++;
                 continue;
             }
             if (c == '/' && i + 1 < n && src[i + 1] == '*')
             {
-                // block comment → skip to */
                 i += 2;
                 while (i < n && !(src[i] == '*' && i + 1 < n && src[i + 1] == '/')) i++;
                 i += 2;
@@ -70,7 +67,6 @@ public static class Jsonc
             }
             if (c == ',')
             {
-                // trailing comma → drop if only ws/comments precede a } or ]
                 var j = i + 1;
                 for (; ; )
                 {

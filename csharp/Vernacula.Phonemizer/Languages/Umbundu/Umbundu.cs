@@ -1,10 +1,6 @@
 /**
- * Umbundu (umb) phonemizer — Bantu (R11, Angola), the Latin orthography, canonical IPA. A pure
- * greedy longest-match scan over the grapheme table (manifest.ts): Umbundu is open CV with prenasalised clusters as
- * single onset units, so no coda/syllabification logic is needed. Signatures: VOICED obstruents ONLY prenasalised
- * (⟨mb nd nj ng⟩→ᵐb ⁿd ᶮd͡ʒ ᵑɡ), ⟨c⟩→t͡ʃ, ⟨v⟩→v, ⟨ñ⟩/⟨ny⟩→ɲ, ⟨ng'⟩→ŋ, ⟨l⟩→l. Tone (H á / L à + downstep) is often
- * unwritten → the accents are STRIPPED (tone DEFERRED); nasal-vowel tildes are kept. Cardinal numbers: numbers.ts (citation
- * forms + the quinary 6–9 nouns + the la/l’ connective).
+ * Umbundu (umb) phonemizer — Bantu (R11, Angola), the Latin orthography, canonical IPA.
+ * Ported from src/languages/umbundu/umbundu.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -43,8 +39,6 @@ public sealed class UmbunduPhonemizer : ILanguage
                 matched = true;
                 break;
             }
-            // ⚠ NOT SILENTLY: a letter with no grapheme rule here still denotes a sound, and dropping it deletes
-            // what the writer typed. Consulted only on the MISS branch, after every grapheme has been tried.
             if (!matched)
             {
                 outSb.Append(LatinPhones.LatinPhone(w[i].ToString(), new PhoneOpts { Initial = i == 0, IncludeH = true }) ?? "");
@@ -54,10 +48,6 @@ public sealed class UmbunduPhonemizer : ILanguage
         return outSb.ToString();
     }
 
-    // A word (Umbundu letters incl. ⟨ñ⟩ + the ⟨ng'⟩ apostrophe, and tone/nasal diacritics) / number / punctuation.
-    // ⚠ THE WORD GROUP IS BOUNDED TO LATIN SCRIPT — `\p{L}` matches EVERY script and claimed embedded Greek,
-    // Cyrillic, Thai and Devanagari, so the run vanished with nothing in the IPA to flag it. ⚠ AND THE GROUP
-    // MUST BEGIN WITH A LATIN LETTER: `[\p{Script=Latin}\p{M}]+` still matches a BARE COMBINING MARK.
     private static readonly JsRe TOKEN = JsRegex.Compile(
         "(['’]?\\p{Script=Latin}[\\p{Script=Latin}\\p{M}'’]*)|(\\d+)|([.!?…,;:])", "gu");
 
@@ -65,9 +55,6 @@ public sealed class UmbunduPhonemizer : ILanguage
 
     public string Text(string input)
     {
-        // normalize.ts FIRST — its Greek-iota fold has to reach the word before TOKEN's Latin-script bound
-        // splits it, and its separator, clock, dash and range steps need the figure and its mark still
-        // adjacent. The shared symbol tier runs INSIDE that pass, ahead of the de-grouping.
         return Clauses.AssembleClauses(Normalize.NormalizeUmbundu(input), TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(CURLY.Replace(m.Groups[1].Value, "'")));

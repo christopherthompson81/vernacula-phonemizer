@@ -1,7 +1,7 @@
 /**
- * Japanese number → kana reading (Sino-Japanese counting), handling the common sound changes: 300 さんびゃく,
- * 600 ろっぴゃく, 800 はっぴゃく, 3000 さんぜん, 8000 はっせん, 一 in higher units dropped where idiomatic.
- * Covers 0 … <10¹⁶ (万/億/兆 grouping). The caller feeds the kana through kanaToIpa.
+ * Japanese number → kana reading (Sino-Japanese counting), handling the common sound changes: 300 さんびゃく, 600
+ * ろっぴゃく, 800 はっぴゃく, 3000 さんぜん, 8000 はっせん, 一 in higher units dropped where idiomatic.
+ * Ported from src/languages/japanese/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -9,7 +9,6 @@ namespace Vernacula.Phonemizer.Languages.Japanese;
 
 public static class Numbers
 {
-    // Number words are authored DATA — consolidated in japanese.jsonc; the group compositor below is the algorithm.
     private static JapaneseNumberData N => Manifest.MANIFEST.Numbers;
     private static IReadOnlyList<string> ONES => N.Ones;
     private static IReadOnlyList<string> HUND => N.Hundreds;

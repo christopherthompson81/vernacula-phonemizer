@@ -1,9 +1,7 @@
 /**
- * Loads the Burmese data manifest (burmese.jsonc) once and exposes it typed. The TS declares `BurmeseDef`
- * inline in burmese.ts and loads the `numbers` slice separately in numbers.ts; C# names both here and loads
- * the file once. Hand-authored DATA only — the consonant and vowel-sign tables, the coda classes, the
- * coda×vowel RIME CHART, the tone letters, the voicing/devoicing/palatalisation maps and the numerals. The
- * ALGORITHM (syllabification, tone derivation, segmentation, composition) stays in code.
+ * Loads the Burmese data manifest (burmese.jsonc) once and exposes it typed. ⚠ The TS declares `BurmeseDef`
+ * inline in burmese.ts and loads the `numbers` slice separately in numbers.ts; C# names both here.
+ * Ported from src/languages/burmese/burmese.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

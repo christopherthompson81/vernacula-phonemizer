@@ -1,10 +1,6 @@
 /**
- * Loads the Korean data manifest (korean.jsonc) once at module init and exposes it typed. Holds the hand-authored
- * jamo inventories, the onset / vowel / coda letter→IPA tables, the coda-cluster resolution table, the 7-way
- * neutralisation and sandhi class maps, clause punctuation, and the Sino-Korean number words. The ALGORITHMS that
- * read them stay in code (g2p.ts / numbers.ts / korean.ts): Hangul decomposition, cross-syllable sandhi, coda
- * neutralisation, stress, and the myriad-group number compositor. The lexical-tensification exceptions stay in
- * the sibling tensification.tsv (append-heavy wikipron data), which the manifest only references.
+ * Loads the Korean data manifest (korean.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/korean/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

@@ -1,9 +1,6 @@
 /**
- * Tamil (ta) phonemizer — canonical IPA. The systematic abugida parsing (consonant +
- * inherent/sign vowel, virama clusters, independent vowels) is handled by the SHARED core/abugida.ts
- * interpreter driven by tamil.jsonc — the same engine Hindi uses. Tamil-specifics are layered on top as a
- * post-pass: the Dravidian plosive voicing allophony and the two-level (primary + secondary) stress, which are
- * context-sensitive and cannot be declarative.
+ * Tamil (ta) phonemizer — canonical IPA.
+ * Ported from src/languages/tamil/tamil.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -14,8 +11,6 @@ public static class TamilPhonemizer
     private const string TIE = "͡";
     private static readonly IReadOnlySet<string> COMBINING =
         new HashSet<string>(new[] { "̪", "̃", "ᶦ", "ᶷ" }, StringComparer.Ordinal); // dental, nasalisation, superscript i/u (aᶦ/aᶷ diphthong offglides)
-    // Dravidian voicing classes are DATA (tamil.jsonc). VOICE: க/ட/த/ப → voiced; VOICELESS_BLOCK: units (voiceless
-    // obstruents + ற) that block a following stop from voicing (the tap ர ɾ is NOT here, so a stop voices after it).
     private static IReadOnlyDictionary<string, string> VOICE => Manifest.MANIFEST.Voicing.Voice;
     private static readonly IReadOnlySet<string> NASAL_UNITS = new HashSet<string>(Manifest.MANIFEST.Voicing.Nasals, StringComparer.Ordinal);
     private static readonly IReadOnlySet<string> VOICELESS_BLOCK = new HashSet<string>(Manifest.MANIFEST.Voicing.VoicelessBlock, StringComparer.Ordinal);
@@ -60,24 +55,19 @@ public static class TamilPhonemizer
             var u = units[i];
             var prev = i - 1 >= 0 ? units[i - 1] : null;
             var next = i + 1 < units.Count ? units[i + 1] : null;
-            // ற்ச → t͡ɕː (the ற assimilates to a following ச).
             if (u == "r" && next == "t͡ɕ")
             {
                 outp.Add("t͡ɕː");
                 i++;
                 continue;
             }
-            // Geminate: identical adjacent consonants → Cː; ற்ற → ʈr.
             if (!IsVowel(u) && next == u)
             {
                 outp.Add(u == "r" ? "ʈr" : u + "ː");
                 i++;
                 continue;
             }
-            // Coda ர (ɾ) → the alveolar r (அவர்→aʋɐr); onset ர stays the tap ɾ (அரசு→aɾɐt͡ɕʊ).
             if (u == "ɾ" && (next is null || !IsVowel(next))) u = "r";
-            // Voicing. க/ட/த/ப voice unless word-initial, after a voiceless obstruent/ற, or a coda (except ட and the
-            // word-final proclitic-sandhi form). ச is the exception: voiceless t͡ɕ, d͡ʒ only after a nasal.
             var prevVoiceless = prev is null || VOICELESS_BLOCK.Contains(prev);
             var postNasal = prev is not null && NASAL_UNITS.Contains(prev);
             var onset = next is not null && IsVowel(next);
@@ -131,9 +121,6 @@ public static class TamilPhonemizer
     private sealed class Engine : ILanguage
     {
         public string Text(string input) =>
-            // the ordered normalization pass (normalize.ts) owns the shared symbol tier too, because
-            // its position in the sequence is load-bearing: units must run BEFORE decimals and AFTER
-            // de-grouping and the rate rule. See the numbered steps there.
             Clauses.AssembleClauses(Normalize.NormalizeTamil(input), TOKEN, (m, sink) =>
             {
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));

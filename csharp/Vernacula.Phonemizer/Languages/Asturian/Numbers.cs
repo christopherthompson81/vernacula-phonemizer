@@ -1,20 +1,6 @@
 /**
- * Asturian cardinal number → words (masculine). Emits SPACE-separated words so each element reads through the
- * asturian.ts g2p. Covers 0 … <10¹²; larger / unsafe values read digit-by-digit.
- *
- * SOURCE for the numeral table (asturian.jsonc `numbers`): Academia de la Llingua Asturiana, "Gramática de la
- * Llingua Asturiana", cap. XII "Los numberales" §2.2 (pp. 127–129) — the normative table and the three
- * composition rules encoded below:
- *   - DECENES + UNIDAES — the twenties FUSE into one word (ventiún, ventidós …), the other tens take ⟨y⟩ and stay
- *     separate (trenta y un, cuarenta y dos);
- *   - CENTENES — only 100 has its own name (cien); 200+ = unit + cientos;
- *   - CENTENA Y OTRU NÚMBERU — the cien/cientu ALTERNATION: bare 100 is ⟨cien⟩ (and it is ⟨cien⟩ as the
- *     multiplier of mil: "100.000 cien mil"), but 101–199 read ⟨cientu⟩ + the remainder (101 cientu un,
- *     131 cientu trenta y un). Exactly the Spanish cien/ciento split.
- *
- * Pattern B (bespoke) rather than the shared `westernNumberWords`: the cien/cientu alternation is context-
- * sensitive (a bare round hundred vs a hundred with a remainder), which the flat `hundreds[]` slot cannot encode;
- * nor can that composer express the ⟨y⟩ connector or the fused twenties.
+ * Asturian cardinal number → words (masculine).
+ * Ported from src/languages/asturian/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -75,7 +61,9 @@ public static class Numbers
         return r != 0 ? $"{thousand} {Below1000(r)}" : thousand;
     }
 
-    /** Non-negative integer → Asturian words. Out-of-range / unsafe values read digit-by-digit (never empty). */
+    /**
+     * Non-negative integer → Asturian words. Out-of-range / unsafe values read digit-by-digit (never empty).
+     */
     public static string NumberToWords(double n)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e12)
@@ -87,8 +75,6 @@ public static class Numbers
         {
             if (n < sc.Value) continue;
             double q = Math.Floor(n / sc.Value), r = n % sc.Value;
-            // millón is a collective NOUN: it keeps the "un" (un millón) and pluralises (dos millones). With only
-            // the 10⁶ scale authored, 10⁹ composes as the Ibero-Romance long-scale "mil millones".
             var head = q == 1 ? sc.One : $"{Below1e6(q)} {sc.Many}";
             return r != 0 ? $"{head} {NumberToWords(r)}" : head;
         }

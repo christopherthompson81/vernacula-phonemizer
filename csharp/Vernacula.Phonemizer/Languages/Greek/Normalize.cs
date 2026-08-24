@@ -1,32 +1,7 @@
 /**
- * Modern Greek (el) text normalization — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
- *
- * ⚠ GREEK CARRIES THE HIGHEST RATE OF EMBEDDED LATIN OF ANY LANGUAGE MEASURED — roughly one utterance in
- * seven. Most of it is brand and place names left alone deliberately (see below), but the all-caps
- * initialisms have to be claimed, or `το FBI` reads with ENGLISH phonemes in a Greek stream
- * (to ˈɛfbˈiːʲˈaᶦ) and `η UNESCO` comes out carrying ɪ ʊ ɹ ʃ d͡ʒ æ ɫ.
- *
- * ⚠ LATIN↔GREEK HOMOGLYPHS ARE A REAL CLASS HERE, not a curiosity: a Latin `o` typed for the article ο makes
- * the word vanish into the foreign path (`και o αγριόκουρκος` → ce ˈoᶷ aɣɾʝokuɾkos). See step 1.
- *
- * ⚠ GREEK GROUPS THOUSANDS WITH A PERIOD AND TAKES A COMMA DECIMAL, so both separators reach
- * `clausePunctuation` as pauses unless claimed: `1.000 άτομα` → *ena . miðen atoma*.
- *
- * ⚠ THE ORDINAL ENDING IS THE CASE (15ο, 1η, 18ου, 9ης), not a fixed suffix — see step 7.
- *
- * ⚠ NEVER `\b` IN THIS FILE. It is ASCII-defined and finds no boundary against Greek script, so a rule
- * written with it silently matches NOTHING. Every boundary here is an explicit `(?<![\p{L}\p{M}])` /
- * `(?![\p{L}\p{M}])` lookaround.
- *
- * NOT DONE, deliberately:
- *   · NUMERIC RANGES — `3-5%`, `35-40 μίλια`. A Greek reader supplies a connective (έως / με), but which one
- *     is a register choice the text cannot settle, and the dash also occurs in `COVID-19`, `Super-G`,
- *     `1984-1985` and `Il-76`.
- *   · MIXED-CASE LATIN, the bulk of the embedded runs — brand and place names. Same call Japanese and Thai
- *     made: letter-spelling is not an available reading for `Xinhua`, and transliterating a name is invention.
- *   · AGE COMPOUNDS like `53χρονης`, whose reading is one fused word (πενηντατριάχρονης). A wrong compound is
- *     worse than the space it currently gets.
+ * Modern Greek (el) text normalization — the pre-tokenizer pass that rewrites everything which is not
+ * already a pronounceable word into words the pipeline speaks.
+ * Ported from src/languages/greek/normalize.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -35,12 +10,8 @@ namespace Vernacula.Phonemizer.Languages.Greek;
 
 public static class Normalize
 {
-    // ── data ────────────────────────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Latin→Greek HOMOGLYPHS. Only ever applied where a Latin letter TOUCHES Greek script, i.e. inside a
-     * token that is already broken — see step 1 for why the corpus contains these at all.
-     */
+    /** Latin→Greek HOMOGLYPHS. */
     private static readonly IReadOnlyDictionary<string, string> HOMOGLYPH = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["A"] = "Α", ["B"] = "Β", ["E"] = "Ε", ["H"] = "Η", ["I"] = "Ι", ["K"] = "Κ", ["M"] = "Μ",
@@ -49,13 +20,7 @@ public static class Normalize
         ["u"] = "υ", ["v"] = "ν", ["x"] = "χ", ["y"] = "υ",
     };
 
-    /**
-     * LATIN letter → its GREEK letter name. Greek reads a Latin-script initialism with the ENGLISH letter
-     * names written in Greek orthography — ΝΤΙ ΒΙ ΝΤΙ for DVD, ΕΦ ΜΠΙ ΑΪ for FBI.
-     *
-     * The names are emitted SPACED, not joined: μπ is [b] word-initially but prenasalised [mb] medially, so
-     * joining «εφ»+«μπι» would read the B of FBI as [mb]. Greek writes them spaced too.
-     */
+    /** LATIN letter → its GREEK letter name. */
     private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["a"] = "έι", ["b"] = "μπι", ["c"] = "σι", ["d"] = "ντι", ["e"] = "ι", ["f"] = "εφ", ["g"] = "τζι",
@@ -64,10 +29,7 @@ public static class Normalize
         ["v"] = "βι", ["w"] = "ντάμπλιου", ["x"] = "εξ", ["y"] = "γουάι", ["z"] = "ζετ",
     };
 
-    /**
-     * Acronyms Greek reads as a WORD rather than as letters. A LEXICAL fact, so this holds only established
-     * ones — anything absent falls through to letter-spelling, which is always legitimate.
-     */
+    /** Acronyms Greek reads as a WORD rather than as letters. */
     private static readonly IReadOnlyDictionary<string, string> WORD_ACRONYM = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["UNESCO"] = "Ουνέσκο", ["NATO"] = "ΝΑΤΟ", ["NASA"] = "Νάσα", ["ISIS"] = "Ίσις",
@@ -75,9 +37,8 @@ public static class Normalize
     };
 
     /**
-     * MIXED-CASE Latin is otherwise left to the foreign fallback (see the header), with one exception: `pH`
-     * (×3) is an initialism that merely happens to carry a lowercase letter, so the all-caps rule cannot
-     * reach it. Japanese made the same single exception for the same token.
+     * MIXED-CASE Latin is otherwise left to the foreign fallback, with one exception: `pH` is an initialism
+     * that merely happens to carry a lowercase letter, so the all-caps rule cannot reach it.
      */
     private static readonly IReadOnlyDictionary<string, string> MIXED_CASE_INITIALISM =
         new Dictionary<string, string>(StringComparer.Ordinal) { ["pH"] = "πι έιτς" };
@@ -97,22 +58,16 @@ public static class Normalize
     };
 
     /**
-     * Written ending → the ordinal's ending, for a BARYTONE stem (πρώτος, δέκατος, όγδοος) and for an
-     * OXYTONE one (εικοστός, τριακοστός), which carries the accent on the ending itself.
-     *
-     * Only the endings the corpus attests, plus the masculine-nominative citation form: -ο (masc.acc /
-     * neut) ×34, -η (fem.nom) ×15, -ου (gen.masc/neut) ×8, -ης (gen.fem) ×5.
+     * Written ending → the ordinal's ending, for a BARYTONE stem (πρώτος, δέκατος, όγδοος) and for an OXYTONE
+     * one (εικοστός, τριακοστός), which carries the accent on the ending itself.
      */
     private static readonly IReadOnlyDictionary<string, string[]> ORD_ENDING = new Dictionary<string, string[]>(StringComparer.Ordinal)
     {
-        //  written        barytone  oxytone
         ["ος"] = new[] { "ος", "ός" },
         ["ου"] = new[] { "ου", "ού" },
         ["ης"] = new[] { "ης", "ής" },
         ["ο"] = new[] { "ο", "ό" },
         ["η"] = new[] { "η", "ή" },
-        // The ACCENTED spellings of the same endings. An oxytone ordinal is properly written with its tonos
-        // on the ending (60ό, 21ή); this corpus writes all 55 of them bare, but both spellings occur.
         ["ός"] = new[] { "ος", "ός" },
         ["ού"] = new[] { "ου", "ού" },
         ["ής"] = new[] { "ης", "ής" },
@@ -131,11 +86,7 @@ public static class Normalize
         ["Ο"] = 70, ["Π"] = 80,
     };
 
-    /**
-     * FEMININE hour cardinals. Greek numerals 1/3/4 agree in gender and the clock counts ώρες (feminine):
-     * «στις τρεις», never «στις τρία». The manifest's `numbers.units` are NEUTER, so a clock built on them
-     * would be wrong for exactly those three.
-     */
+    /** FEMININE hour cardinals. */
     private static readonly string[] HOUR_FEM =
     {
         "μηδέν", "μία", "δύο", "τρεις", "τέσσερις", "πέντε", "έξι", "εφτά", "οχτώ", "εννιά", "δέκα",
@@ -162,11 +113,7 @@ public static class Normalize
         return u == 0 ? t : $"{t} {MIN_UNITS[u]}";
     }
 
-    /**
-     * Multi-dot and single-dot abbreviations. π.Χ. and π.χ. differ ONLY in the case of the χ and mean
-     * entirely different things — «προ Χριστού» vs «παραδείγματος χάριν» — so this table is matched
-     * CASE-SENSITIVELY on the second letter.
-     */
+    /** Multi-dot and single-dot abbreviations. */
     private static readonly IReadOnlyDictionary<string, string> DOTTED = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["π.Χ."] = "προ Χριστού",
@@ -183,26 +130,10 @@ public static class Normalize
         .OrderByDescending(k => k.Length)
         .Select(k => DOT_ESCAPE.Replace(k, "\\.")));
 
-    // ── the shared symbol tier ──────────────────────────────────────────────────────────────────────────
-
-    /**
-     * symbol normalization — Greek.
-     *
-     * NO `unitPer`. Greek does not say "A per B" for a rate; it takes the DEFINITE ARTICLE agreeing with the
-     * denominator — «χιλιόμετρα ΤΗΝ ώρα» (fem), «μέτρα ΤΟ δευτερόλεπτο» (neut). The corpus itself writes the
-     * long form twice, which is the evidence. `unitPer` is one invariant word and cannot express an agreeing
-     * article, so rates are kept LOCAL (step 5).
-     *
-     * The exponent measure word IS expressible: Greek puts an agreeing adjective BEFORE the noun, exactly
-     * like Russian — «783.562 τετραγωνικά χιλιόμετρα» — so `position: "before"`.
-     */
+    /** symbol normalization — Greek. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — this language is one of the fourteen
-        // that still had no word declared, so `&` was DROPPED outright. και is ×2717 TOKEN in its own corpus.
         Ampersand = "και",
-        // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-        // attestation: the plausible hits are homographs of PREPOSITIONS, never the operator.
         Multiply = new MultiplyDef { Times = "επί" },
         Percent = new[] { "τοις εκατό" }, // invariant
         Currency = new Dictionary<string, IReadOnlyList<string>>
@@ -221,8 +152,6 @@ public static class Normalize
             ["g"] = new[] { "γραμμάριο", "γραμμάρια" },
             ["mi"] = new[] { "μίλι", "μίλια" },
         },
-        // Greek writes the magnitude before the currency noun and takes no connective:
-        // «14,7 δισεκατομμύρια δολάρια», which is how the corpus spells it out.
         Magnitudes = new[] { "χιλιάδες", "εκατομμύρια", "εκατομμύριο", "δισεκατομμύρια", "δισεκατομμύριο" },
         ExponentWords = new ExponentWordsDef
         {
@@ -232,23 +161,15 @@ public static class Normalize
         },
     });
 
-    // ── helpers ─────────────────────────────────────────────────────────────────────────────────────────
-
     /** Inflect one masculine-nominative ordinal to the case/gender the written ending marks. */
     private static string Inflect(string bas, string written)
     {
         var forms = ORD_ENDING[written];
-        // An OXYTONE ordinal (εικοστός) carries the accent on the ending, so the ending itself is accented:
-        // εικοστ+ός/ό/ού/ή/ής. A barytone one (πρώτος, όγδοος) keeps its stem accent: πρώτ+ος/ο/ου/η/ης.
         var oxytone = bas.EndsWith("ός", StringComparison.Ordinal);
         return bas[..^2] + forms[oxytone ? 1 : 0];
     }
 
-    /**
-     * n → the ordinal's masculine-nominative WORDS. Greek inflects EVERY member of a compound ordinal
-     * (δέκατος πέμπτος, εικοστός πρώτος), so this returns the parts and the caller inflects each.
-     * Returns `null` past the range the corpus attests (1–100), so an out-of-range number is left alone.
-     */
+    /** n → the ordinal's masculine-nominative WORDS. */
     private static string[]? OrdinalParts(double n)
     {
         if (n < 1 || n > 100 || !double.IsInteger(n)) return null;
@@ -343,36 +264,18 @@ public static class Normalize
     private static readonly JsRe CAPS_RUN = JsRegex.Compile("(?<![\\p{Script=Latin}\\d'’])[A-Z]{2,}(?![\\p{Script=Latin}\\d'’])", "gu");
     private static readonly JsRe SINGLE_LATIN = JsRegex.Compile("(?<![\\p{Script=Latin}\\d'’&])[A-Za-z](?![\\p{Script=Latin}\\d'’&])", "gu");
 
-    // ── the ordered rules ───────────────────────────────────────────────────────────────────────────────
-
     /** Normalize one Modern Greek input string. Pure text→text. */
     public static string NormalizeGreek(string input)
     {
         var s = input;
 
-        // 0) ANO TELEIA. Greek's semicolon is canonically U+0387, but that codepoint sits INSIDE the Greek
-        //    letter range the engine's TOKEN uses for words, so it would be swallowed into the preceding word
-        //    run and never reach the clause-mark alternation. Folded to U+00B7 MIDDLE DOT.
         s = ANO_TELEIA.Replace(s, "·");
 
-        // 1) LATIN↔GREEK HOMOGLYPHS. FIRST, because every rule after this one assumes that a Latin run is
-        //    genuinely foreign text, and these are not — they are Greek words with a lookalike Latin letter
-        //    typed into them (`oι`, `στo`, `Bουλή`, `Yπό`), plus a bare Latin `o` typed for the article ο.
-        //    Only fires where the Latin letter TOUCHES Greek script, so the token is already broken.
         s = LATIN_TOUCHING_GREEK.Replace(s, m =>
             string.Concat(Js.CodePoints(m.Value).Select(c => HOMOGLYPH.TryGetValue(c, out var g) ? g : c)));
-        //    A standalone lowercase Latin `o` is the article ο. Every letter the corpus genuinely DISCUSSES
-        //    as a letter is a different one, so this claims nothing real.
         s = BARE_O.Replace(s, "ο");
-        //    The SENTENCE-INITIAL capitals are the same defect one case up: `H` and `O` are the only Latin
-        //    letters that are also whole Greek articles (Η, Ο). Restricted to sentence-initial position and a
-        //    following Greek word, which is what separates them from the genuine letter mentions.
         s = SENTENCE_INITIAL_HO.Replace(s, m => m.Groups[1].Value + HOMOGLYPH[m.Groups[2].Value]);
 
-        // 2) GREEK ALPHABETIC NUMERALS. Before every other rule that reads Greek capitals. The corpus writes
-        //    the sign as U+0384 GREEK TONOS rather than the canonical U+0374 keraia, so both are accepted.
-        //    THE FORM EMITTED IS -ο (masculine accusative / neuter): five of the six corpus instances are
-        //    exactly that; the sixth is a queen's regnal number and wants -η. Gender is not recoverable.
         s = GREEK_NUMERAL_RE.Replace(s, m =>
         {
             var v = GreekNumeralValue(m.Groups[1].Value);
@@ -380,45 +283,30 @@ public static class Normalize
             return Ordinal(v.Value, "ο") ?? m.Value;
         });
 
-        // 3) DOTTED ABBREVIATIONS, multi-dot ones only, and BEFORE any single-dot rule so their interior dots
-        //    cannot survive as phrase breaks — `300 π.Χ.` was three pauses out of one word. Matched
-        //    CASE-SENSITIVELY: π.Χ. is «προ Χριστού» and π.χ. is «παραδείγματος χάριν».
-        //    The FINAL dot is consumed when a lowercase word or another punctuation mark follows and KEPT
-        //    otherwise; the punctuation arm is not optional, or `1000 π.Χ., οι` emits a stop AND a comma.
         s = DOTTED_RE.Replace(s, m =>
         {
             var after = m.Groups[2].Value;
             return $"{DOTTED[m.Groups[1].Value]}{(after == "" ? "." : after)}";
         });
 
-        // 4) SINGLE-DOT ABBREVIATION `βλ.` → βλέπε. After step 3 so it cannot bite into a multi-dot form.
         s = VLEPE.Replace(s, "βλέπε");
 
-        // 5) RATES, kept LOCAL because Greek takes an agreeing definite article, not an invariant "per".
-        //    BEFORE the shared tier: the tier would otherwise claim `240 km` and strand `/h`, which then
-        //    read as the English letter H.
         s = RATE_KM_H.Replace(s, "$1 χιλιόμετρα την ώρα");
         s = RATE_MI_H.Replace(s, "$1 μίλια την ώρα");
         s = RATE_MPH.Replace(s, "$1 μίλια την ώρα");
         s = RATE_M_S.Replace(s, "$1 μέτρα το δευτερόλεπτο");
 
-        // 6) χλμ, after the rate rule has taken `χλμ / ώρα`. The dot is consumed only mid-sentence.
         s = XLM_DOT.Replace(s, "χιλιόμετρα");
         s = XLM.Replace(s, "χιλιόμετρα");
 
-        // 7) DIGIT DE-GROUPING. FIRST among the number rules: Greek groups thousands with a PERIOD, so
-        //    `1.000` was read as «ένα» + a phrase break + «μηδέν». Run twice for `5.000.000`. Only a block of
-        //    EXACTLY three digits is grouping — `4:41.30` (a sports time) and `802,11` are left intact.
+        // DIGIT DE-GROUPING, first among the number rules: Greek groups thousands with a PERIOD. Run twice
+        // for `5.000.000`. ⚠ Only a block of EXACTLY three digits is grouping, so a sports time is intact.
         for (var k = 0; k < 2; k++) s = DEGROUP.Replace(s, "$1$2");
 
-        // 8) ORDINAL NOTATION. The Greek ending is the CASE and GENDER, not an ordinal marker: `15ο` is
-        //    δέκατο πέμπτο, `9ης` ένατης — and BOTH members of a compound inflect. After step 7 so a grouped
-        //    number reaches it as digits. The trailing lookaround is what stops `53χρονης` being claimed.
         s = ORDINAL_RE.Replace(s, m => Ordinal(Js.Number(m.Groups[1].Value), m.Groups[2].Value) ?? m.Value);
 
-        // 9) CLOCK. The colon was a clause mark, so `11:00` read as «έντεκα , μηδέν». Hours are FEMININE
-        //    (they count ώρες); minutes are neuter. A whole hour drops the minutes entirely.
-        //    GUARDED against a SPORTS time — the corpus has three, which are minutes and decimal seconds.
+        // CLOCK. Hours are FEMININE (they count ώρες), minutes neuter; a whole hour drops the minutes.
+        // ⚠ Guarded against a sports time, which is minutes plus decimal seconds in the same shape.
         s = CLOCK.Replace(s, m =>
         {
             var hv = Js.Number(m.Groups[1].Value);
@@ -426,57 +314,31 @@ public static class Normalize
             return mv == 0 ? HOUR_FEM[(int)hv] : $"{HOUR_FEM[(int)hv]} και {MinuteWords(mv)}";
         });
 
-        // 10) DEGREES. `°C` was reading as the English letter C. Nominative plural is used.
         s = DEG_C.Replace(s, "$1 βαθμοί Κελσίου");
         s = DEG_F.Replace(s, "$1 βαθμοί Φαρενάιτ");
         s = DEG.Replace(s, "$1 βαθμοί");
 
-        // 11) SIGNS and VULGAR FRACTIONS. `(UTC +1)`; and `29¾ επί 24½ ίντσες`, where the elided noun is
-        //     feminine (ίντσα) — «είκοσι εννιά και τρία τέταρτα».
-        // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it.
         s = PLUS_MINUS.Replace(s, " συν μείον ");
         s = PLUS.Replace(s, "συν ");
         s = HALF.Replace(s, "$1 και μισή");
         s = QUARTER.Replace(s, "$1 και ένα τέταρτο");
         s = THREE_QUARTERS.Replace(s, "$1 και τρία τέταρτα");
 
-        // 11b) RELATIONAL AND DIVISION SIGNS. ⚠ SOURCED ENTIRELY AT TIER 4 — the corpus has nothing to give:
-        //      `ίσον` ×0 token / ×0 substring, `διά` ×0 token / ×338 SUBSTRING (every one inside διάφορες,
-        //      διαδικασία — the substring trap, and the largest count it has produced anywhere in the fleet).
-        //      el.wikipedia's arithmetic articles read the notation out, which is the article class tier 4
-        //      wants: "Το αποτέλεσμα εκφράζεται με ένα ίσον", "9 + 4 ίσον 1 modulo 12", "διαιρετός διά δύο".
         s = EQUALS.Replace(s, " ίσον ");
         s = LESS_THAN.Replace(s, " μικρότερο από ");
         s = GREATER_THAN.Replace(s, " μεγαλύτερο από ");
         s = DIVIDE.Replace(s, " διά ");
 
-        // 11c) THE PARENTHETICAL DASH → A PAUSE. Greek writes an APPOSITION between dashes where English
-        //      would use commas, and both dashes were dropped SILENTLY so the aside ran into its host clause.
-        //      THE CORPUS SEPARATES THE TWO USES BY CHARACTER: ASCII hyphen before a digit ×29, every one a
-        //      range or designation; EN DASH before a digit ×1, the parenthetical. ⚠ WHITESPACE IS THE
-        //      DISCRIMINATOR — `Apollo–Soyuz` is a COMPOUND with no space either side and is left alone.
         s = PARENTHETICAL_DASH.Replace(s, ", ");
 
-        // 11d) THE MINUS → μείον, and this one is ROBUSTNESS, not a measured repair: el_gr contains ZERO true
-        //      negatives, so no gate can see it. Worth having because step 11 already voices `+` as συν.
-        //      THE GUARD IS THE ONE defects.ts arrived at: no letter, mark or digit before (excluding
-        //      `COVID-19`), and not a RANGE (the second lookbehind rejects `35-40`, `7:00-8:00`, `26 - 00`).
         s = MINUS.Replace(s, "μείον ");
 
-        // 12) SHARED SYMBOL TIER: %, currency, plain units, squared/cubed. AFTER the rate and degree rules,
-        //     which need the raw `km/h` and `°C`, and BEFORE the decimal rewrite of step 13 — the tier only
-        //     matches a unit when a NUMBER is adjacent, and inserting «κόμμα» destroys that adjacency.
         s = SYMBOLS(s);
 
-        // 13) DECIMAL COMMA. Greek's decimal mark is the comma and the tokenizer read it as a clause break.
         s = DECIMAL_COMMA.Replace(s, "$1 κόμμα ");
 
-        // 14) LATIN INITIALISMS → Greek letter names. LAST of all, so every rule above still sees the ASCII
-        //     it matches on. Bounded by Latin-script lookarounds on both sides and by a digit guard. A
-        //     HYPHEN is deliberately NOT a boundary (`COVID-19`, `XDR-TB`); an apostrophe IS one.
         foreach (var (re, v) in MIXED_CASE_RES) s = re.Replace(s, v);
         s = CAPS_RUN.Replace(s, m => SpellLatin(m.Value));
-        //     Single letters, same boundaries: the corpus's 9 remaining ones are genuine letter mentions.
         s = SINGLE_LATIN.Replace(s, m => SpellLatin(m.Value));
 
         return s;

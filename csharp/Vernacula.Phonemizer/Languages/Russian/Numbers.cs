@@ -1,6 +1,6 @@
 /**
- * Russian number → words (cardinals, nominative). Space-separated words that each read through the stress
- * dictionary + g2p. Covers 0 … <10⁹. Gender/case agreement is simplified to the nominative base forms.
+ * Russian number → words (cardinals, nominative).
+ * Ported from src/languages/russian/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -8,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.Russian;
 
 public static class Numbers
 {
-    // Number words are authored DATA — consolidated in russian.jsonc; the compositor below is the algorithm.
     private static RussianNumbersDef N => Manifest.MANIFEST.Numbers;
     private static IReadOnlyList<string> ONES => N.Ones;
     private static IReadOnlyList<string> TENS => N.Tens;
@@ -59,7 +58,6 @@ public static class Numbers
         }
         if (th != 0)
         {
-            // тысяча is feminine → 1 → одна, 2 → две
             var thWords = DVA_FINAL.Replace(
                 ODIN_FINAL.Replace(Below1000(th), N.ThousandFeminine.One),
                 N.ThousandFeminine.Two); // тысяча is feminine (JS \b fails on Cyrillic)

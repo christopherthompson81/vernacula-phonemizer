@@ -1,11 +1,6 @@
 /**
- * Native Javanese / Basa Jawa (jv) text phonemizer — canonical IPA. Austronesian, Latin
- * script. A rule-based g2p (like id/tl) plus the three
- * signature Javanese processes: (1) the ⟨a⟩→[ɔ] rule — /a/ in a word-final OPEN syllable becomes [ɔ] and spreads
- * regressively through open penults (apa→ɔpɔ, sanga→sɔŋɔ, Jawa→d͡ʒɔwɔ); a closed final syllable blocks it
- * (mangan→maŋan); (2) the DENTAL vs RETROFLEX contrast (⟨t d⟩→t̪ d̪, ⟨th dh⟩→ʈ ɖ); (3) closed-syllable laxing
- * (i→ɪ u→ʊ o→ɔ) + word-final ⟨k⟩→ʔ (pitik→pitɪʔ). Bare ⟨e⟩ defaults to pepet /ə/. Penultimate stress. The
- * ngoko NUMBER system is irregular (-likur/-welas, seket/sewidak).
+ * Native Javanese / Basa Jawa (jv) text phonemizer — canonical IPA.
+ * Ported from src/languages/javanese/javanese.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -58,7 +53,6 @@ public static class JavanesePhonemizer
         ["i"] = "ɪ", ["u"] = "ʊ", ["o"] = "ɔ", // closed-syllable laxing (keyed by SOURCE letter)
     };
 
-    // Aksara Jawa (Hanacaraka) word run, and any single letter/sign of it — for script detection + tokenising.
     private static readonly JsRe AKSARA_WORD = JsRegex.Compile("[\\u{A980}-\\u{A9CF}]", "u");
 
     /** Scan a lowercased Javanese word into segments (digraphs first, then single letters). */
@@ -80,7 +74,6 @@ public static class JavanesePhonemizer
                 segs.Add(new Seg { Ph = DEF.Vowels.GetValueOrDefault(c) ?? c, V = c });
             else if (DEF.Consonants.TryGetValue(c, out var consPh))
                 segs.Add(new Seg { Ph = consPh, V = "" });
-            // else: unknown → skip
             i++;
         }
         return segs;
@@ -88,7 +81,10 @@ public static class JavanesePhonemizer
 
     private static bool IsVowelSeg(Seg sg) => sg.V != "";
 
-    /** Consonants between segment i (exclusive) and the next vowel — the coda+onset run. Returns [count, nextVowelIdx]. */
+    /**
+     * Consonants between segment i (exclusive) and the next vowel — the coda+onset run. Returns [count,
+     * nextVowelIdx].
+     */
     private static (int Count, int Next) ConsonantsAfter(IReadOnlyList<Seg> segs, int i)
     {
         var j = i + 1;
@@ -102,19 +98,13 @@ public static class JavanesePhonemizer
     {
         if (segs.Count == 0) return "";
 
-        // Word-final ⟨k⟩ → glottal stop ʔ.
         var last = segs[^1];
         if (last.Ph == "k") last.Ph = "ʔ";
 
-        // Homorganic nasal assimilation: /n/ → [ɲ] before a palatal affricate (kanca→kaɲt͡ʃɔ, banci→baɲt͡ʃi). The
-        // Aksara Jawa writes ꦚ (ɲ) explicitly; the Latin writes plain ⟨n⟩ but it is realized [ɲ] — so the Latin
-        // front-end needs the rule (the referee writes plain n → folded, as the config note documents).
         for (var i = 0; i < segs.Count - 1; i++)
             if (segs[i].Ph == "n" && (segs[i + 1].Ph == "t͡ʃ" || segs[i + 1].Ph == "d͡ʒ"))
                 segs[i].Ph = "ɲ";
 
-        // Closed-syllable laxing (i→ɪ u→ʊ o→ɔ): a vowel is CLOSED when a coda follows — i.e. ≥2 consonants before the
-        // next vowel (first is a coda), or ≥1 trailing consonant at word end.
         for (var i = 0; i < segs.Count; i++)
         {
             var sg = segs[i];
@@ -124,9 +114,6 @@ public static class JavanesePhonemizer
             if (closed) sg.Ph = lax;
         }
 
-        // The a→ɔ rule: /a/ in a word-final OPEN syllable → [ɔ], and the harmony reaches back exactly ONE syllable —
-        // a penultimate /a/ also → [ɔ] (regardless of its coda: bangsa→bɔŋsɔ, bandha→bɔndɔ). It does NOT spread to the
-        // antepenult (wahana→wahɔnɔ, not *wɔhɔnɔ). Trigger only from a final open /a/ (not other final vowels).
         var vowelIdx = segs.Select((sg, i) => IsVowelSeg(sg) ? i : -1).Where(i => i >= 0).ToList();
         if (vowelIdx.Count > 0 &&
             segs[vowelIdx[^1]].V == "a" &&
@@ -134,9 +121,6 @@ public static class JavanesePhonemizer
         {
             var lastV = vowelIdx[^1];
             segs[lastV].Ph = "ɔ";
-            // Reach back ONE syllable: a penult /a/ separated from the final by exactly one consonant unit (a single
-            // letter or a digraph) → [ɔ]. No antepenult spread; a heavier penult coda (bangsa) is left to the referee
-            // (spreading across a closed penult is net-NEGATIVE — the referee is inconsistent there, measured 2026-07-16).
             if (vowelIdx.Count >= 2)
             {
                 var penult = vowelIdx[^2];
@@ -144,7 +128,6 @@ public static class JavanesePhonemizer
             }
         }
 
-        // Penultimate stress (weak, non-distinctive); the schwa can bear it in Javanese, so no schwa-skip.
         var stress = vowelIdx.Count >= 2 ? vowelIdx[^2] : (vowelIdx.Count > 0 ? vowelIdx[0] : -1);
         var outp = "";
         for (var i = 0; i < segs.Count; i++)
@@ -155,13 +138,13 @@ public static class JavanesePhonemizer
         return outp.Normalize(System.Text.NormalizationForm.FormC);
     }
 
-    /** One Javanese word → canonical IPA, RULE-ENGINE ONLY (no cross-script lexicon). Routes by script: Aksara Jawa
-     *  → the abugida scanner, else the Latin g2p — both feed the shared phonology. The honest signal for the eval. */
+    /**
+     * One Javanese word → canonical IPA, RULE-ENGINE ONLY (no cross-script lexicon). Routes by script: Aksara
+     * Jawa → the abugida scanner, else the Latin g2p — both feed the shared phonology.
+     */
     public static string PhonemizeWordRules(string word) =>
         ApplyPhonology(AKSARA_WORD.IsMatch(word) ? Aksara.ScanAksara(word) : Scan(word.ToLowerInvariant()));
 
-    // Cross-script ⟨e⟩ lexicon (Aksara-resolved, Latin-keyed; see javanese-lexicon.tsv). Applied on the SHIPPED Latin
-    // path only — Aksara input already resolves ⟨e⟩ via the script, so it never consults this.
     private static Dictionary<string, string>? LEXICON;
     private static readonly object GATE = new();
     private static Dictionary<string, string> Lexicon()
@@ -169,15 +152,16 @@ public static class JavanesePhonemizer
         lock (GATE) return LEXICON ??= LoadTsv.LoadTsvMap("languages/javanese", "javanese-lexicon.tsv", optional: true);
     }
 
-    /** SHIPPED Javanese word → canonical IPA. For Latin input a cross-script ⟨e⟩ lexicon override applies (pepet vs
-     *  taling, unrecoverable from Latin); Aksara input and everything else fall through to the rule engine. */
+    /**
+     * SHIPPED Javanese word → canonical IPA. For Latin input a cross-script ⟨e⟩ lexicon override applies (pepet
+     * vs taling, unrecoverable from Latin); Aksara input and everything else fall through to the rule engine.
+     */
     public static string PhonemizeWord(string word)
     {
         if (!AKSARA_WORD.IsMatch(word) && Lexicon().TryGetValue(word.ToLowerInvariant(), out var hit)) return hit;
         return PhonemizeWordRules(word);
     }
 
-    // ── Numbers (ngoko; irregular) ────────────────────────────────
     /** n in [1,99] → ngoko spelling. */
     private static string BelowHundred(double n)
     {
@@ -199,7 +183,10 @@ public static class JavanesePhonemizer
         return r > 0 ? $"{hw} {BelowHundred(r)}" : hw;
     }
 
-    /** `[count] <magnitude>`: 1 fuses to the suppletive word, 2–9 use the combining multiplier, ≥10 a full count. */
+    /**
+     * `[count] <magnitude>`: 1 fuses to the suppletive word, 2–9 use the combining multiplier, ≥10 a full
+     * count.
+     */
     private static string Magnitude(double count, string[] pair)
     {
         var fused = pair[0];
@@ -233,30 +220,23 @@ public static class JavanesePhonemizer
         return string.Join(" ", parts);
     }
 
-    // Latin word · Aksara Jawa word run (letters+signs, U+A980–U+A9C0) · Aksara digits · ASCII digits · Aksara pada
-    // punctuation (U+A9C1–U+A9CE, U+A9DE–U+A9DF) · ASCII punctuation.
     private static readonly string LATIN_RUN = HostWord.HostWordRun(new[] { "Latin" });
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"({LATIN_RUN})|([\\u{{A980}}-\\u{{A9C0}}]+)|([\\u{{A9D0}}-\\u{{A9D9}}]+)|(\\d+)|([\\u{{A9C1}}-\\u{{A9CE}}\\u{{A9DE}}\\u{{A9DF}}])|([.?!,;:])",
         "gu");
 
-    /**
-     * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where the
-     * SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A token
-     * this class REJECTS carries a letter the language does not use — i.e. a foreign name. See core/hostWord.ts.
-     */
+    /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zA-ZéèêÉÈÊ]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "u");
 
-    /** Speak an integer: emit each ngoko numeral word separately (so word-final laxing / a→ɔ apply per word). */
+    /**
+     * Speak an integer: emit each ngoko numeral word separately (so word-final laxing / a→ɔ apply per word).
+     */
     private static void EmitNumber(double n, ClauseSink sink, string? digits = null)
     {
-        // ⚠ ABOVE 2^53 THIS USED TO EMIT NOTHING AND THE NUMBER VANISHED FROM THE READING. The guard is right —
-        // the float has already lost the low digits, so `numberToText` would compose a confidently WRONG numeral
-        // — but it had no else. Digit-at-a-time is what normalize.ts already gives a decimal tail, so the
-        // fallback needs no word this engine was never measured on; above 2^53 it is a digit string, not a
-        // quantity. `digits` is the ORIGINAL spelling: by the time this sees `n` the low digits are already
-        // gone, so a caller that has the source string must hand it over or the tail reads as zeros.
+        // `n` is a JS `number` here as in the TS: past 2^53 the low digits are already gone, so composing a
+        // numeral would be confidently wrong. Fall back to digit-at-a-time, reading `digits` — the ORIGINAL
+        // spelling — when the caller has it, or the tail reads as zeros.
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d))
         {
             foreach (var d in Js.CodePoints(digits ?? Js.NumberToString(n)))
@@ -266,8 +246,8 @@ public static class JavanesePhonemizer
             }
             return;
         }
-        // Number words bypass the content lexicon — the ngoko spellings collide with taling homographs (the
-        // number seket [səkət̪] vs a taling seket [sekət̪]); the compositor's words are the rule-form pronunciation.
+        // Number words deliberately bypass the content lexicon (PhonemizeWordRules, not PhonemizeWord): the
+        // ngoko spellings collide with taling homographs.
         foreach (var wd in NumberToText(n).Split(' '))
             sink.Emit(PhonemizeWordRules(wd));
     }
@@ -276,20 +256,17 @@ public static class JavanesePhonemizer
     {
         public string Text(string input)
         {
-            // Everything that is not yet a pronounceable word → words the pipeline already speaks. See
-            // normalize.ts, whose steps are ordered around the fact that a DOT in Javanese is a thousands
-            // separator, a decimal point and a clock separator depending on context.
             input = Normalize.NormalizeJavanese(input);
             return Clauses.AssembleClauses(input, TOKEN, (m, sink) =>
             {
-                // ⚠ Only the LATIN group is nativised. Group 2 is the Aksara Jawa run — this language's own
+                // Only the LATIN group is nativised. Group 2 is the Aksara Jawa run — this language's own
                 // script, where there is no inventory question to ask.
                 if ((m.Groups[1].Success && m.Groups[1].Value.Length > 0) || (m.Groups[2].Success && m.Groups[2].Value.Length > 0))
                     sink.Emit(PhonemizeWord(m.Groups[1].Success ? Nat(m.Groups[1].Value) : m.Groups[2].Value));
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
                 {
-                    // The Aksara Jawa digit run, transliterated to ASCII — handed over as well as converted, so
-                    // an above-2^53 run degrades to ITS OWN digits and not to the float's rounded ones.
+                    // The ASCII transliteration is handed over as well as converted, so an above-2^53 run
+                    // degrades to ITS OWN digits and not to the double's rounded ones.
                     var ascii = string.Concat(Js.CodePoints(m.Groups[3].Value).Select(Aksara.AksaraDigit));
                     EmitNumber(Js.Number(ascii), sink, ascii);
                 }

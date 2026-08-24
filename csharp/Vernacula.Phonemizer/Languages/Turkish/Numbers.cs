@@ -1,7 +1,6 @@
 /**
- * Turkish cardinal number → words (space-separated). Turkish scales by thousands: on/yüz/bin/milyon/…
- * "bir" is dropped before yüz and bin (100 → yüz, 1000 → bin) but kept before milyon+ (bir milyon).
- * 1985 → bin dokuz yüz seksen beş.
+ * Turkish cardinal number → words (space-separated).
+ * Ported from src/languages/turkish/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -9,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.Turkish;
 
 public static class TurkishNumbers
 {
-    // Number words are authored DATA — consolidated in turkish.jsonc; the thousands-scale compositor is the algorithm.
     private static TurkishNumbersDef N => Manifest.MANIFEST.Numbers;
     private static string[] ONES => N.Ones;
     private static string[] TENS => N.Tens;
@@ -57,8 +55,7 @@ public static class TurkishNumbers
             // stops at katrilyon, 10¹⁵). The TS pushes the resulting `undefined` and `Array.join` renders it
             // as the EMPTY STRING, so `numberToWords(1e18)` is literally `"bir "` — trailing space and all.
             // C# would throw on the index, so the bound is explicit and pushes `""` to reproduce that string
-            // exactly. ⚠ NOT FILTERED OUT: dropping the empty part would give `"bir"` and fork the two
-            // engines on the one input where both are already wrong.
+            // exactly. ⚠ NOT FILTERED OUT: dropping the empty part would give `"bir"` and fork the two engines.
             if (g > 0) parts.Add(g < SCALES.Length ? SCALES[g] : "");
         }
         return string.Join(" ", parts);

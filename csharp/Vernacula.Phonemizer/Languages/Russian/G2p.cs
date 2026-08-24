@@ -1,8 +1,6 @@
 /**
- * Russian grapheme→phoneme engine (standard Moscow Russian). Cyrillic + a stress-vowel ordinal → canonical
- * IPA. Handles palatalization (hard/soft consonant pairs Cʲ), iotation (я/е/ё/ю after a vowel/sign/initial →
- * j+V), stress-based vowel reduction (akanye/ikanye), final devoicing and regressive voicing assimilation.
- * Stress is lexical (not derivable from spelling) — supplied by the caller from stress.tsv.
+ * Russian grapheme→phoneme engine (standard Moscow Russian).
+ * Ported from src/languages/russian/g2p.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -11,8 +9,6 @@ namespace Vernacula.Phonemizer.Languages.Russian;
 
 public static class G2p
 {
-    // All letter→IPA / voicing lookup tables are DATA (russian.jsonc). Consonant → [hard, soft] IPA (ж/ш/ц always
-    // hard; ч/щ/й always soft). Voicing pairs drive final devoicing + regressive assimilation.
     private static IReadOnlyDictionary<string, string[]> CONS => Manifest.MANIFEST.Consonants;
     private static readonly IReadOnlySet<string> ALWAYS_HARD = new HashSet<string>(Manifest.MANIFEST.AlwaysHard, StringComparer.Ordinal);
     private static readonly IReadOnlySet<string> ALWAYS_SOFT = new HashSet<string>(Manifest.MANIFEST.AlwaysSoft, StringComparer.Ordinal);
@@ -50,7 +46,7 @@ public static class G2p
     /** JS `chars[i] ?? ""` over a code-point list. */
     private static string At(IReadOnlyList<string> chars, int i) => i >= 0 && i < chars.Count ? chars[i] : "";
 
-    /** Split a lowercased Cyrillic word into consonant / vowel / sign units, resolving palatalization + iotation. */
+    /** Split a lowercased Cyrillic word into consonant / vowel / sign units (palatalization + iotation). */
     private static List<Unit> Parse(string w)
     {
         var chars = Js.CodePoints(w);
@@ -58,7 +54,6 @@ public static class G2p
         for (var i = 0; i < chars.Count; i++)
         {
             var c = chars[i];
-            // т/д before с → affricate t͡s (детский, отсюда); with a ь between (-ться) → long t͡sː.
             if (c == "т" || c == "д")
             {
                 var soft = At(chars, i + 1) == "ь";
@@ -77,22 +72,18 @@ public static class G2p
                 } // тч → t͡ɕː
                 if (At(chars, i + 1) == "ц") continue; // тц/дц → t͡s (т/д merges into ц; отца → ɐt͡sa)
             }
-            // сч / зч / жч → ɕː (счастье → ɕːasʲtʲjə, мужчина → mʊɕːinə).
             if ((c == "с" || c == "з" || c == "ж") && At(chars, i + 1) == "ч")
             {
                 units.Add(new Unit { Cyr = "щ", Cons = new ConsPart { Ph = "ɕː", Soft = true } });
                 i += 1;
                 continue;
             }
-            // дж → the affricate d͡ʐ (loanwords: джинсы, менеджер, Джон, поджарить).
             if (c == "д" && At(chars, i + 1) == "ж")
             {
                 units.Add(new Unit { Cyr = "ж", Cons = new ConsPart { Ph = "d͡ʐ", Soft = false } });
                 i += 1;
                 continue;
             }
-            // Reflexive -ся / -сь after a hard consonant keeps hard с (вернулся → …ɫsə); after й (-йся) it stays soft
-            // (соприкасающийся → …jsʲə).
             if (c == "с"
                 && (At(chars, i + 1) == "я" || At(chars, i + 1) == "ь")
                 && i + 2 >= chars.Count
@@ -117,24 +108,18 @@ public static class G2p
                 var glide = IOTATED.Contains(c) && (prev == "" || VOWELS.Contains(prev) || prev == "ь" || prev == "ъ");
                 units.Add(new Unit { Cyr = c, Vowel = new VowelPart { Letter = c, Glide = glide, Ph = "" } });
             }
-            // ь/ъ carry no phoneme (ь already softened the preceding consonant); skip.
         }
-        // Regressive palatalization: a dental softens before an immediately-following soft dental (гостиный → sʲtʲ).
         for (var i = 0; i < units.Count; i++)
         {
             var c = units[i];
             if (c.Cons is null || c.Cons.Soft || !SOFTEN_TGT.Contains(c.Cyr, StringComparison.Ordinal)) continue;
             var nx = i + 1 < units.Count ? units[i + 1] : null;
             if (nx?.Cons is null || !nx.Cons.Soft) continue;
-            // two-tier: с/з soften only before soft т (сделать/здесь keep hard z before soft д); т/д/н soften before
-            // soft т/д/н/ч (стаканчик → nʲt͡ɕ; but женщина keeps hard н before щ).
             var ok = "сз".Contains(c.Cyr, StringComparison.Ordinal)
                 ? "тд".Contains(nx.Cyr, StringComparison.Ordinal)
                 : "тднч".Contains(nx.Cyr, StringComparison.Ordinal); // с/з soften before soft т/д (сделать→zʲdʲ, ездил→zʲdʲ)
             if (ok) c.Cons = new ConsPart { Ph = CONS[c.Cyr][1], Soft = true };
         }
-        // Geminate softness agreement: identical adjacent consonant letters take the softness of the second (россия
-        // → sʲsʲ → collapses to sʲː downstream).
         for (var i = 0; i < units.Count - 1; i++)
         {
             Unit a = units[i], b = units[i + 1];
@@ -144,7 +129,6 @@ public static class G2p
         return units;
     }
 
-    // Base (stressed) vowel quality by letter + whether the preceding consonant is soft.
     private static string StressedVowel(string letter, bool softContext) => letter switch
     {
         "а" => softContext ? "æ" : "a", // а fronts to æ between soft C (счастье → ɕːæsʲtʲje)
@@ -159,8 +143,6 @@ public static class G2p
         _ => letter,
     };
 
-    // Unstressed reduction (akanye/ikanye), position-sensitive: `strong` = immediately-pretonic OR absolute
-    // word-initial (→ ɐ for hard а/о); post-tonic soft vowels reduce further to ə.
     private static string ReducedVowel(string letter, bool softContext, bool strong, bool postTonic)
     {
         var soft = softContext || letter == "я" || letter == "е" || letter == "и" || letter == "ё" || letter == "ю";
@@ -182,17 +164,14 @@ public static class G2p
         }
     }
 
-    // Adverbs in -ого that keep [ɡ] (the genitive -ого/-его → v rule does NOT apply). Their genitive ADJECTIVE
-    // forms (многого, дорогого…) are regular genitives → v, so they must NOT be listed here.
     private static readonly IReadOnlySet<string> GEN_KEEP_G = new HashSet<string>(Manifest.MANIFEST.GenitiveKeepG, StringComparer.Ordinal);
 
-    /** Phonemize a Russian word given the 0-based ordinal of its stressed vowel, and optionally a set of vowel
-     *  ordinals whose preceding consonant is HARD (loanword е/и: тест → tɛst, not tʲest — supplied by the lexicon). */
+    /** Phonemize a Russian word given the 0-based ordinal of its stressed vowel, and optionally the vowel
+     *  ordinals whose preceding consonant is HARD (loanword е/и: тест → tɛst, not tʲest). */
     public static string ToIpa(string word, int stressOrd, IReadOnlyList<int>? hard = null)
     {
         var w0 = word.ToLowerInvariant();
         var units = Parse(w0);
-        // Genitive -ого/-его → the г is [v] (красного → …nəvə, его → jɪvo); adverbs (много…) keep ɡ.
         if ((w0.EndsWith("ого", StringComparison.Ordinal) || w0.EndsWith("его", StringComparison.Ordinal)) && !GEN_KEEP_G.Contains(w0))
         {
             for (var i = units.Count - 1; i >= 0; i--)
@@ -207,7 +186,6 @@ public static class G2p
         var stressPos = stressOrd >= 0 && stressOrd < vowelIdx.Count ? vowelIdx[stressOrd]
             : vowelIdx.Count > 0 ? vowelIdx[^1] : -1;
 
-        // Realize vowels (quality depends on stress + soft context + reduction position).
         var stressK = vowelIdx.IndexOf(stressPos);
         for (var k = 0; k < vowelIdx.Count; k++)
         {
@@ -215,7 +193,6 @@ public static class G2p
             var v = units[i].Vowel!;
             var prevCons = i - 1 >= 0 ? units[i - 1].Cons : null;
             var softCtx = (prevCons?.Soft ?? false) || (v.Glide && v.Letter != "э" && v.Letter != "ы");
-            // soft context to the right (for æ/ɵ fronting): a soft consonant, or an iotated (glide) vowel.
             var nextSoft = false;
             for (var j = i + 1; j < units.Count; j++)
             {
@@ -227,7 +204,6 @@ public static class G2p
             {
                 v.Ph = StressedVowel(v.Letter, softCtx);
                 if ((v.Letter == "я" || v.Letter == "а") && v.Ph == "æ" && !nextSoft) v.Ph = "a"; // æ only between two soft C
-                // ё → ɵ whenever not word-initial (встаёт, жильё); о → ɵ after a soft consonant (тётя).
                 if ((v.Letter == "ё" && i > 0) || (v.Letter == "о" && prevSoft)) v.Ph = "ɵ";
             }
             else
@@ -236,14 +212,12 @@ public static class G2p
                 v.Ph = ReducedVowel(v.Letter, softCtx, strong, k > stressK);
             }
             if ((v.Letter == "у" || v.Letter == "ю") && (prevSoft || v.Glide) && nextSoft) v.Ph = "ʉ"; // у between soft → ʉ
-            // After a hard sibilant / ц: и → ɨ, stressed е → ɛ, unstressed е → ɨ.
             var prevCyr = i - 1 >= 0 ? units[i - 1].Cyr : null;
             if (prevCyr is not null && "жшц".Contains(prevCyr, StringComparison.Ordinal))
             {
                 if (v.Letter == "и") v.Ph = "ɨ";
                 else if (v.Letter == "е") v.Ph = i == stressPos ? "ɛ" : "ɨ";
             }
-            // Word-final unstressed vowels: е → e (сборище → …ɕːe, счастье → …je); я → ə (дядя → …dʲə).
             if (i == units.Count - 1 && i != stressPos)
             {
                 if (v.Letter == "е") v.Ph = "e";
@@ -251,7 +225,6 @@ public static class G2p
             }
         }
 
-        // Voicing: regressive assimilation + final devoicing (right to left over the segment sequence).
         for (var i = units.Count - 1; i >= 0; i--)
         {
             var c = units[i].Cons;
@@ -264,19 +237,16 @@ public static class G2p
             }
             if (next is null)
             {
-                // word-final → devoice
                 if (VOICED_OBSTR.Contains(c.Ph)) c.Ph = DEVOICE.TryGetValue(c.Ph, out var d) ? d : c.Ph;
                 continue;
             }
             if (next.Value.Kind == "v") continue; // before a vowel: keep as is
-            // NB: в devoices normally (вш → fʂ), it just doesn't TRIGGER voicing of a preceding C (guarded below).
             if (VOICELESS_OBSTR.Contains(next.Value.Ph) && VOICED_OBSTR.Contains(c.Ph))
                 c.Ph = DEVOICE.TryGetValue(c.Ph, out var d2) ? d2 : c.Ph;
             else if (VOICED_OBSTR.Contains(next.Value.Ph) && next.Value.Ph != "v" && next.Value.Ph != "vʲ" && VOICELESS_OBSTR.Contains(c.Ph))
                 c.Ph = VOICE.TryGetValue(c.Ph, out var vv) ? vv : c.Ph;
         }
 
-        // Loanword hard consonant before е/и (lexicon): harden the preceding C and lower the vowel (е→ɛ/ɨ, и→ɨ).
         if (hard is not null)
         {
             foreach (var o in hard)
@@ -294,7 +264,6 @@ public static class G2p
                         prev.Ph = pair[0];
                         prev.Soft = false;
                     }
-                    // undo a stranded regressive softening of the consonant before it (стенд: с softened before soft т → re-hard)
                     var p2 = i - 2 >= 0 ? units[i - 2].Cons : null;
                     if (p2?.Soft == true && SOFTEN_TGT.Contains(units[i - 2].Cyr, StringComparison.Ordinal))
                     {
@@ -328,9 +297,6 @@ public static class G2p
             {
                 if (u.Cons.Ph == prevCons)
                 {
-                    // Geminate: written doubles and voicing-assimilated stops stay long (русский → sː, отдых → odːɨx); only
-                    // a SIBILANT assimilated across a morpheme (different letters: французский зс → s) simplifies to single.
-                    // Final geminate → single either way.
                     var sibilantAssim = SIBILANT_HEAD.IsMatch(u.Cons.Ph) && u.Cyr != prevCyr;
                     if (!sibilantAssim && i != lastIdx) outSb.Append('ː');
                 }

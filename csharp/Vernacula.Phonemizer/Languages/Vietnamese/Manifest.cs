@@ -1,9 +1,6 @@
 /**
- * Loads the Vietnamese data manifest (vietnamese.jsonc) once at module init and exposes it typed. Holds the
- * context-free hand-authored DATA: the tone diacritic→Chao map, the ordered longest-match onset table, the vowel
- * letter/phoneme sets, clause punctuation, and the number words. The ALGORITHMS that read them stay in code
- * (g2p.ts / vietnamese.ts / numbers.ts): NFD tone extraction, onset parse, rhyme lookup + assembly, the
- * tokenizer, and the number compositor. The closed rhyme set stays in the sibling rhymes.tsv.
+ * Loads the Vietnamese data manifest (vietnamese.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/vietnamese/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -30,9 +27,11 @@ public sealed class VietnameseNumbersDef
 public sealed class VietnameseManifest
 {
     public VietnameseTones Tones { get; init; } = new();
-    /** ⚠ A TUPLE ARRAY IN THE TS (`[string, string][]`), so JSON gives array-of-arrays and System.Text.Json
-     *  has no tuple binding for it. The rows land as `JsonElement` and are projected once into `ONSETS`;
-     *  FILE ORDER IS PRESERVED because the onset match is longest-first BY POSITION in that list. */
+    /**
+     * ⚠ A TUPLE ARRAY IN THE TS (`[string, string][]`), so JSON gives array-of-arrays and System.Text.Json has
+     * no tuple binding for it. The rows land as `JsonElement` and are projected once into `ONSETS`; FILE ORDER
+     * IS PRESERVED, because the onset match is longest-first BY POSITION in that list.
+     */
     public List<List<System.Text.Json.JsonElement>> Onsets { get; init; } = new();
     public string VowelLetters { get; init; } = "";
     public string VowelIpa { get; init; } = "";

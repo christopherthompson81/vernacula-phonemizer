@@ -1,8 +1,6 @@
 /**
- * Loads the French data manifest (french.jsonc) once at module init and exposes it typed. The hand-authored
- * DATA tables (vowel-letter inventory, oral/nasal vowel-multigraph tables, yod groups, sounded-final set, clause
- * punctuation, liaison + h-aspiré lists, number words) live in the JSONC; the ALGORITHMS that consume them stay
- * in the sibling modules (g2p.ts, french.ts, numbers.ts).
+ * Loads the French data manifest (french.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/french/manifest.ts — see that file for the corpus evidence.
  */
 using System.Text.Json.Serialization;
 using Vernacula.Phonemizer.Core;

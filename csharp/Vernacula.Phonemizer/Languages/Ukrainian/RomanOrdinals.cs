@@ -1,22 +1,6 @@
 /**
- * Ukrainian Roman-numeral reading. A century is read as an ORDINAL: `XIX століття` is *дев'ятнадцяте
- * століття*; the cardinal (*дев'ятнадцять століття*) would mean "nineteen centuries". Sources: Ukrainian
- * orthography (centuries written in Roman numerals, read as ordinal adjectives); the spelled form
- * "дев'ятнадцяте століття" is attested in running Ukrainian text (history teaching material, reference sites).
- *
- * FORM: **neuter** nominative singular — the Ukrainian century noun is neuter (століття, сторіччя), not
- * masculine as in Russian and Polish. So this table is *-е*, not *-ий*: дев'ятнадцяте, двадцяте, сорокове.
- * This is the one place in this group where the agreement form differs, and it follows directly from which
- * noun the language actually uses for "century".
- *
- * DOCUMENTED LIMITATIONS (one word per integer, no access to the matched context word):
- *  - CASE. "у XIX столітті" wants the locative *дев'ятнадцятому*. The nominative is emitted; oblique context
- *    forms are still matched, since the right lexeme with the wrong ending beats the wrong lexeme.
- *  - GENDER. Because the table is neuter, a masculine context reads wrong — which is why **вік / віку** is
- *    deliberately EXCLUDED from the context regex: `XX вік` stays a cardinal rather than producing the neuter
- *    *двадцяте вік*. Ukrainian standardly uses століття for a century anyway (вік more often means
- *    age/lifetime), so the excluded case is both rarer and the one the table cannot serve.
- *  - REGNAL context is NOT triggered (needs a proper-name list; and a masculine regnal name would want *-ий*).
+ * Ukrainian Roman-numeral reading.
+ * Ported from src/languages/ukrainian/romanOrdinals.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -24,7 +8,7 @@ namespace Vernacula.Phonemizer.Languages.Ukrainian;
 
 public static class RomanOrdinals
 {
-    /** Cardinal tens, read from the language's own number data (ukrainian.jsonc): двадцять, тридцять, сорок, … */
+    /** Cardinal tens, read from the language's own number data (ukrainian.jsonc): двадцять, тридцять, … */
     private static IReadOnlyDictionary<string, string> TENS_CARDINAL => Manifest.DEF.Numbers.Tens;
 
     /** 1–19, NEUTER nominative. Irregular stems (перше, друге, третє, четверте) → table. Apostrophe is U+0027,
@@ -43,10 +27,7 @@ public static class RomanOrdinals
         "вісімдесяте", "дев'яносте",
     };
 
-    /**
-     * Integer → Ukrainian ordinal, neuter nominative. Like Russian (and unlike Polish) only the LAST element
-     * inflects above 20: 21 → *двадцять перше*. `undefined` above 100 falls back to the cardinal.
-     */
+    /** Integer → Ukrainian ordinal, neuter nominative. */
     public static string? Ordinal(int n)
     {
         if (n < 1 || n > 100) return null;
@@ -61,9 +42,8 @@ public static class RomanOrdinals
     }
 
     /**
-     * століття / сторіччя in the cases that occur (nom-gen-acc -я, dat -ю, loc -і, instr -ям, loc pl -ях, instr pl
-     * -ями, gen pl століть / сторіч), plus річниця ("L річниця") and з'їзд, the ordinal contexts that reach past
-     * XXX. вік is excluded on purpose — see the header note on gender.
+     * століття / сторіччя in the cases that occur (nom-gen-acc -я, dat -ю, loc -і, instr -ям, loc pl -ях,
+     * instr pl -ями, gen pl століть / сторіч), plus річниця and з'їзд. вік is excluded on purpose.
      */
     private static readonly JsRe CONTEXT = JsRegex.Compile(
         "^(століт(тя|тю|ті|тям|тях|тями|ь)|сторіч(чя|чю|чі|чям|чях|чями|)|річниц(я|і|ю|ею|ям|ях)|з'їзд(у|і|ом|и|ів|ам|ах)?)$",

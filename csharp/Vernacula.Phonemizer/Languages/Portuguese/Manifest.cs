@@ -1,10 +1,6 @@
 /**
- * Loads the European Portuguese data manifest (portuguese.jsonc) once at module init and exposes it typed. Holds
- * the context-free hand-authored DATA: accent letter classes, the vowel-letter→IPA table, the reduction and
- * nasalization maps, the voiced-consonant / liquid sets, the function-word list, clause punctuation, and the
- * number words. The ALGORITHMS that read them stay in code (g2p.ts / portuguese.ts / numbers.ts): the scan,
- * stress, reduction pass, sibilant voicing, and the cardinal compositor. The lexical correction table stays in
- * the sibling lexicon.tsv / lexicon-manual.tsv, which the manifest only references.
+ * Loads the European Portuguese data manifest (portuguese.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/portuguese/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

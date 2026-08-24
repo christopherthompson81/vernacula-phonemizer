@@ -1,18 +1,6 @@
 /**
  * English-native OOV G2P.
- *
- * For words NOT in the CMUdict pronunciation lexicon. Compositional-first (real OOV is ~all compounds/
- * inflections of known words), with a joint-sequence n-gram fallback for the non-compositional tail:
- *
- *   compound-split (dict pieces + compound stress) → suffix morphology → joint n-gram beam decode
- *
- * All paths emit stress-bearing ARPABET; `arpabetToIpa` renders the SAME canonical convention as the
- * dict, so a sentence mixing dict + G2P words has no seam. Trained cleanroom on CMUdict (public domain) by
- * `tools/english/en_g2p_ngram.ts --emit`; the shipped artifact is `g2p-model.json`.
- * ⚠ NOT THE SAME MODEL AS THE NEURAL PATH: `en-g2p-tagger.onnx` is a separate BiLSTM built by
- * `tools/english/en_g2p_bilstm.py` and used by englishTagger.ts. This file is the SYNC n-gram fallback.
- * ⚠ A PURE FUNCTION of its injected {model, dict, common, arpabetToIpa} — no filesystem, no globals — which is
- * what makes it portable.
+ * Ported from src/languages/english/englishG2p.ts — see that file for the corpus evidence.
  */
 using System.Text.Json.Serialization;
 using Vernacula.Phonemizer.Core;
@@ -81,9 +69,7 @@ public static class EnglishG2pFactory
     private static string DropStress(string p) => STRESS_DIGIT.Replace(p, "");
     private static List<string> StressDown(IReadOnlyList<string> ph) => ph.Select(p => PRIMARY.Replace(p, "2")).ToList();
 
-    /** Collapse a doubled CONSONANT (bus+sin seam → bʌssɪn → bʌsɪn; CMUdict has no consonant geminates). Does NOT
-     *  collapse identical adjacent VOWELS — that would delete a nucleus/syllable (AA1 AA1 → AA1). Exported so the neural
-     *  OOV reader (englishTagger.ts) finishes its ARPABET the SAME way as the n-gram path. */
+    /** Collapse a doubled CONSONANT (bus+sin seam → bʌssɪn → bʌsɪn; CMUdict has no consonant geminates). */
     public static List<string> CollapseGeminates(IReadOnlyList<string> ph, IReadOnlySet<string> vowels)
     {
         var outp = new List<string>();
@@ -92,9 +78,7 @@ public static class EnglishG2pFactory
         return outp;
     }
 
-    /** A word has exactly ONE primary stress. A per-position predictor (n-gram OR the BiLSTM tagger) can emit several
-     *  `1`s (keep the FIRST, demote the rest to `2`) OR — for a short/odd word — ZERO `1`s (then PROMOTE the first vowel
-     *  to primary so every content word carries a tonic). Exported so englishTagger.ts shares the exact stress invariant. */
+    /** A word has exactly ONE primary stress. */
     public static List<string> EnforceSinglePrimary(IReadOnlyList<string> ph, IReadOnlySet<string> vowels)
     {
         var seen = false;
@@ -116,8 +100,7 @@ public static class EnglishG2pFactory
 
     /**
      * Build the engine from a model + the CMUdict ARPABET dict (word → phones, for compound pieces / morph
-     * stems) + the `common`-word set (frequency gate for compound pieces). Injected, not loaded, so this file
-     * is pure and mirror-friendly.
+     * stems) + the `common`-word set (frequency gate for compound pieces).
      */
     public static IEnglishG2p CreateEnglishG2p(
         EnglishG2pModel model,
@@ -151,7 +134,6 @@ public static class EnglishG2pFactory
             SIBILANT = new HashSet<string>(classes.Sibilants, StringComparer.Ordinal);
             STOP_PIECE = new HashSet<string>(classes.StopPieces, StringComparer.Ordinal);
 
-            // --- morphology: known-stem + inflectional suffix → dict stem + voicing-agreeing allomorph ---
             List<string> AllomorphS(List<string> stem)
             {
                 var f = DropStress(stem.Count > 0 ? stem[^1] : "");
@@ -189,13 +171,11 @@ public static class EnglishG2pFactory
             };
         }
 
-        // --- joint n-gram: stupid-backoff score + order matched (for the guessed-silence penalty) ---
         private (double Score, int Order) ScoreTokAt(IReadOnlyList<string> hist, string tok)
         {
             for (var o = _model.Order - 1; o >= 0; o--)
             {
                 var ctx = o == 0 ? "" : string.Join(" ", hist.Skip(hist.Count - o));
-                // e.c stores the JOINT tokens `${letter}:${chunk}` (as trained), so match the full token.
                 if (_model.Ngram.TryGetValue($"{o}|{ctx}", out var e))
                 {
                     foreach (var pair in e.C)
@@ -222,9 +202,6 @@ public static class EnglishG2pFactory
                 var raw = _gchunks.TryGetValue(c, out var g) ? g : new List<string> { "" };
                 var emptyPenalized = VOWEL_LETTER.Contains(c) && !(c == "e" && i == w.Length - 1);
                 var sibLetter = "sxzc".Contains(c, StringComparison.Ordinal);
-                // Phantom-sibilant filter, applied once per letter — a non-sibilant letter can't emit a chunk ending
-                // in S/Z. Fall back to the unfiltered chunks if the filter would leave nothing (so the beam can never
-                // empty and `beam[0]` can't be undefined).
                 var filtered = sibLetter ? raw : raw.Where(ch =>
                 {
                     if (ch.Length == 0) return true;
@@ -271,7 +248,6 @@ public static class EnglishG2pFactory
 
         private sealed record SplitState(List<List<string>> Parts, int NParts, double MinLen, double Score);
 
-        // --- compound split: DP into ≥2 dict pieces, maximize min-piece-length then sum-len²; compound stress ---
         private List<string>? CompoundSplit(string w)
         {
             var n = w.Length;
@@ -328,9 +304,6 @@ public static class EnglishG2pFactory
         public string G2p(string word)
         {
             var d = Decompose(word);
-            // Compound/morph pieces are pre-resolved dict pronunciations — pass NO word so arpabetToIpa doesn't
-            // re-fire the single-morpheme rules (barred-i) on a compound (subreddit ends "-it" but isn't -it
-            // suffixed). The n-gram path IS a single OOV morpheme, so pass the word (de-/re- reduction applies).
             return _arpabetToIpa(d.Phones, d.Source == "N" ? word : "");
         }
     }

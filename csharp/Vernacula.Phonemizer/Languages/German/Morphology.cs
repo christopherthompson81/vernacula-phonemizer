@@ -1,10 +1,7 @@
 /**
  * German morphological decomposition — now a thin CONFIG over the shared West-Germanic engine
- * (core/germanicMorphology.ts). The algorithm (prefix/suffix stripping, recursive compound split with the
- * over-split guards) lives in the core; this file supplies German's facts: the affix lists + linking elements +
- * validation onsets from the manifest, the content-stem lexicon (lexicon.tsv, word→flags), and German's specific
- * quirks (un- negation, mit- real-word gate, the ⟨sch⟩ digraph guard, the st/sp/sch element-initial seam, the
- * keep-whole -en verb). Output is byte-identical to the former private module.
+ * (core/germanicMorphology.ts).
+ * Ported from src/languages/german/morphology.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -14,14 +11,12 @@ public static class Morphology
 {
     public const string BOUNDARY = GermanicMorphology.BOUNDARY;
 
-    // Closed affix lists (this list IS the affix "flag table") — data in german.jsonc, consumed by german.ts too.
     public static IReadOnlyList<string> PREFIX_UNSTRESSED => Manifest.MANIFEST.Morphology.PrefixUnstressed;
     public static IReadOnlyList<string> PREFIX_STRESSED => Manifest.MANIFEST.Morphology.PrefixStressed;
     public static IReadOnlyList<string> SUFFIXES => Manifest.MANIFEST.Morphology.Suffixes;
     public static IReadOnlyDictionary<string, string> PREFIX_IPA => Manifest.MANIFEST.Morphology.PrefixIpa;
     public static IReadOnlyDictionary<string, string> SUFFIX_IPA => Manifest.MANIFEST.Morphology.SuffixIpa;
 
-    // Morphological lexicon: word → flags. k = compound constituent; N = noun; s = takes Fugen-s.
     private static Dictionary<string, string>? LEXICON;
     private static Dictionary<string, string> Lexicon() =>
         LEXICON ??= LoadTsv.LoadTsvMap("languages/german", "lexicon.tsv", optional: true);

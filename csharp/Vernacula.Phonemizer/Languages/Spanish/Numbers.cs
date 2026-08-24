@@ -1,6 +1,6 @@
 /**
- * Spanish number → words (long scale: millón = 10⁶). The words then phonemize through the same g2p as any
- * other word, so digits read like written Spanish. Covers 0 … <10¹².
+ * Spanish number → words (long scale: millón = 10⁶).
+ * Ported from src/languages/spanish/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -8,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.Spanish;
 
 public static class Numbers
 {
-    // Number words are authored DATA — consolidated in spanish.jsonc; the long-scale compositor is the algorithm.
     private static SpanishNumbers N => Manifest.MANIFEST.Numbers;
     private static IReadOnlyList<string> ONES => N.Ones;
     private static IReadOnlyList<string> TENS => N.Tens;

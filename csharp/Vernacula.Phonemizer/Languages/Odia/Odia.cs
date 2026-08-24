@@ -1,9 +1,7 @@
 /**
- * Native Odia / ଓଡ଼ିଆ (or) text phonemizer — canonical IPA. Odia is an Eastern Indo-Aryan
- * Brahmic abugida read by the generic engine (core/abugida.ts), like the Dravidian trio (Telugu/Kannada/Malayalam):
- * NO inherent-vowel deletion — every akshara is pronounced, and the inherent vowel is /ɔ/ (ଘର→ɡʱɔɾɔ), like Bengali.
- * odia.ts adds only the light post-processing: geminate → length, ଳ୍ଳ → [ɭː], and
- * first-syllable (weak) stress. No intervocalic voicing (Indo-Aryan, unlike the Dravidian trio).
+ * Native Odia / ଓଡ଼ିଆ (or) text phonemizer — canonical IPA. An Eastern Indo-Aryan abugida read by the
+ * generic engine (Core/Abugida.cs); this file adds only geminate → length, ଳ୍ଳ → [ɭː] and initial stress.
+ * Ported from src/languages/odia/odia.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -35,7 +33,6 @@ public sealed class OdiaPhonemizer : ILanguage
     private static Func<string, string>? G2P;
     private static string G2p(string w) => (G2P ??= Abugida.MakeAbugidaG2P(DEF, PhonologyLoader.LoadSharedPhonology()))(w);
 
-    // Geminate consonant (doubled base, possibly aspirated) → single + length ː.
     private static readonly JsRe GEMINATE = JsRegex.Compile(
         "(t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|ʈʰ|ɖʱ|ɡʱ|kʰ|t̪|d̪|n̪|[kɡpbmnlʃʂsʈɖɳɭɲŋjɦhʋwɾr])\\1(?!͡)", "gu");
     private static readonly JsRe LENGTH_ASPIRATE = JsRegex.Compile("ː([ʰʱ])", "gu");
@@ -45,13 +42,10 @@ public sealed class OdiaPhonemizer : ILanguage
     /** One Odia word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        // Anusvara ଂ nasalizes the vowel in ALL positions in Odia — including word-finally (ଏବଂ→ebɔ̃, NOT ebɔm;
-        // unlike Kannada's final ಂ→[m]) — so the engine's nasalizeVowel handles it directly, no override.
         var norm = word.Normalize(NormalizationForm.FormC);
         var x = G2p(norm);
         x = LENGTH_ASPIRATE.Replace(GEMINATE.Replace(x, "$1ː"), "$1ː");
         x = RETROFLEX_GEM.Replace(x, "ɭː"); // ଳ୍ଳ → geminate retroflex [ɭː]
-        // First-syllable (weak) stress: mark the first vowel nucleus.
         var m = FIRST_VOWEL.Match(x);
         if (m.Success) x = x[..m.Index] + "ˈ" + x[m.Index..];
         return x.Normalize(NormalizationForm.FormC);
@@ -63,19 +57,17 @@ public sealed class OdiaPhonemizer : ILanguage
     private static string Number(string digits)
     {
         var n = Js.Number(ToAscii(digits));
-        // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA. `isSafeInteger` is right to
-        // refuse to COMPOSE — the float has already lost the low digits — but the refusal returned the digit
-        // string, which no g2p in this fleet reads. Read it out digit-at-a-time through this engine's own
-        // number words instead; see core/numbers.ts `spellDigits`.
+        // ⚠ ABOVE 2^53 THE NUMBER IS NOT COMPOSED — the double has already lost its low digits — but the
+        // refusal must NOT return the raw digit string, which no g2p in this fleet reads. Spell it out
+        // digit-at-a-time through this language's own number words instead.
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d))
             return Numbers.SpellDigits(ToAscii(digits), DEF.Numbers, PhonemizeWord);
         return Numbers.RenderNumber(n, DEF.Numbers, PhonemizeWord);
     }
 
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        // ⚠ ALL OF LATIN, not just ASCII: `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it
-        // became an unclaimed gap read as an English LETTER NAME — `São Paulo` read *ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ*.
-        // This group already means FOREIGN (its match goes to the injected reader), so widening it is the fix.
+        // ⚠ The foreign group is ALL OF LATIN, not `[A-Za-z]+`: an ASCII-only class ends the token at a
+        // diacritic and the letter carrying it is read as an English LETTER NAME (`São Paulo`).
         $"([{ODIA_WORD}]+)|(\\p{{Script=Latin}}[\\p{{Script=Latin}}\\p{{M}}]*)|([{DIGIT_CLASS}]+)|([।॥.?!,;:])",
         "gu");
 
@@ -87,9 +79,8 @@ public sealed class OdiaPhonemizer : ILanguage
 
     public string Text(string input)
     {
-        // NATIVE DIGITS FIRST: the corpus writes ୦-୯ (52 of them), and every pattern in normalize.ts is
-        // written against ASCII digits. `number()` folds them for the bare-numeral path anyway, so this
-        // changes no reading — it only lets the normalization rules see them.
+        // ⚠ ORDER: native digits ୦-୯ are folded to ASCII FIRST, because every pattern in Normalize is written
+        // against ASCII digits. `Number()` folds them again for the bare-numeral path, so no reading changes.
         return Clauses.AssembleClauses(NORMALIZE(Unicode.FoldNativeDigits(input)), TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));

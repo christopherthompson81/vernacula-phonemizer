@@ -1,10 +1,7 @@
 /**
- * Neural Arabic diacritizer: a sentence-level BiLSTM that restores short vowels on bare Arabic
- * text, run via ONNX Runtime as an ASYNC PRE-PASS. Its vocalized output feeds the (synchronous) g2p in
- * arabic.ts — so phonemize() stays sync and dependency-free; only this pre-pass touches ONNX. `onnxruntime-
- * node` is an OPTIONAL dependency, imported lazily.
- *
- * Position-preserving: only harakat are inserted after Arabic letters; digits/punctuation/spacing are kept.
+ * Neural Arabic diacritizer: a sentence-level BiLSTM that restores short vowels on bare Arabic text, run via
+ * ONNX Runtime as an ASYNC PRE-PASS.
+ * Ported from src/languages/arabic/diacritizer.ts — see that file for the corpus evidence.
  */
 using System.Text.Json;
 using Vernacula.Phonemizer.Core;
@@ -44,8 +41,6 @@ public static class Diacritizer
         return outp;
     }
 
-    // Defective-spelling closed class (authored data in arabic.jsonc): high-frequency words whose long /aː/ is an
-    // unwritten dagger-alif.
     private static readonly IReadOnlyDictionary<string, string> AR_DEFECTIVE_SPELLING =
         Manifest.MANIFEST.Diacritizer.DefectiveSpelling;
 
@@ -59,7 +54,10 @@ public static class Diacritizer
     private static readonly JsRe DEFECTIVE_WORD = JsRegex.Compile("[؀-ۿݐ-ݿ]+", "gu");
     private static readonly JsRe DEFECTIVE_PROCLITIC = JsRegex.Compile("^([وفبكل][ً-ْٰ]*)(.+)$", "u");
 
-    /** Rewrite defective-spelling words to their dagger-alif form (keyed on the skeleton; strips a leading proclitic). */
+    /**
+     * Rewrite defective-spelling words to their dagger-alif form (keyed on the skeleton; strips a leading
+     * proclitic).
+     */
     private static string ApplyDefectiveSpelling(string line)
     {
         return DEFECTIVE_WORD.Replace(line, w =>
@@ -72,7 +70,9 @@ public static class Diacritizer
         });
     }
 
-    /** Whitespace set matching C# char.IsWhiteSpace + Python .split() (NOT JS /\s/) for cross-engine parity. */
+    /**
+     * Whitespace set matching C# char.IsWhiteSpace + Python .split() (NOT JS /\s/) for cross-engine parity.
+     */
     private static bool IsWhitespace(string c)
     {
         var cp = (int)c[0];
@@ -89,10 +89,7 @@ public static class Diacritizer
         return !IsArabicLetterCp(cp) && !isMark;
     }
 
-    /** Pausal form for TTS: drop a word-final case-ending vowel/tanwin; accusative ـًا/ـًى → /aː/.
-     *  ⚠ EXPORTED for `tools/arabic/eval_ar_runtime.mts`, which must pausalize the GOLD exactly as the runtime
-     *  pausalizes the model or every word-final scores wrong (it read 0% before). Reused rather than ported —
-     *  a copy would drift and the measurement would silently stop meaning anything. */
+    /** Pausal form for TTS: drop a word-final case-ending vowel/tanwin; accusative ـًا/ـًى → /aː/. */
     public static string Pausalize(string text)
     {
         var chars = Js.CodePoints(text);
@@ -227,7 +224,9 @@ public static class Diacritizer
         }
     }
 
-    /** Load a neural Arabic diacritizer from ONNX model bytes + sidecar meta. Session created once and reused. */
+    /**
+     * Load a neural Arabic diacritizer from ONNX model bytes + sidecar meta. Session created once and reused.
+     */
     public static async Task<IArabicDiacritizer> LoadArabicDiacritizer(byte[] modelBytes, DiacritizerMeta meta)
     {
         var ort = await Onnx.LoadOrt("Arabic diacritization");
@@ -235,10 +234,10 @@ public static class Diacritizer
         return new LoadedDiacritizer(ort, session, meta);
     }
 
-    /** Load the diacritizer from the model + meta beside this file (model is gitignored — dev stand-in or the
-     *  built permissive model). Returns undefined if the .onnx is absent. `variety:"egyptian"` prefers the EGYPTIAN
-     *  student model (diacritizer-egy.onnx, restores EGYPTIAN short vowels — مصر→maṣr not the MSA miṣr); it falls
-     *  back to the MSA model (→ MSA vowels + the Cairene consonant shifts, the pre-lexicon behavior) if absent. */
+    /**
+     * Load the diacritizer from the model + meta beside this file (model is gitignored — dev stand-in or the
+     * built permissive model).
+     */
     public static async Task<IArabicDiacritizer?> CreateArabicDiacritizer(string? variety = null)
     {
         var bases = variety == "egyptian" ? new[] { "diacritizer-egy", "diacritizer" } : new[] { "diacritizer" };

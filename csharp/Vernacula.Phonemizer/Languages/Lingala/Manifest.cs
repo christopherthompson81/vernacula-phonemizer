@@ -1,9 +1,7 @@
 /**
- * Loads the Lingala data manifest (lingala.jsonc) once and exposes it typed. The TS declares `LingalaDef`
- * inline in lingala.ts; C# names it here. Hand-authored DATA only — the consonant graphemes (prenasalised
- * digraphs included), the seven vowels, clause punctuation and the numeral words with their class-alternating
- * scale nouns. The ALGORITHMS (the greedy longest-match scan, the tone assignment, the cardinal composer)
- * stay in code.
+ * Loads the Lingala data manifest (lingala.jsonc) once and exposes it typed. DATA only; the algorithms
+ * stay in code. The TS declares `LingalaDef` inline, so C# names the shape here.
+ * Ported from src/languages/lingala/lingala.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

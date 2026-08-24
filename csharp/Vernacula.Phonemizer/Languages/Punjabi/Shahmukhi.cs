@@ -1,13 +1,7 @@
 /**
- * Shahmukhi (Perso-Arabic) scanner for Punjabi (pa) — the native abjad front-end used in Pakistan (Gurmukhi is
- * used in India). Scans the script into the SAME raw canonical IPA the Gurmukhi abugida (core/abugida.ts) emits,
- * so the shared Punjabi phonology in punjabi.ts (gemination → length, inherent-schwa deletion, TONOGENESIS, weight
- * stress) applies UNCHANGED — one phonology, two scripts (the Aksara-Jawa pattern). Stored in logical order =
- * phonetic order, so RTL is a non-issue (as for Urdu/Arabic).
- *
- * The tonal crux carries through: the historical voiced-aspirate digraphs بھ گھ دھ ڈھ جھ emit the breathy MARKERS
- * bʱ/ɡʱ/d̪ʱ/ɖʱ/d͡ʒʱ, which punjabi.ts's tonogenesis de-aspirates + tones. Because the abjad omits short vowels, a
- * DEFAULT [ə] stands in between consonants (the shared restoration gap, as for Urdu). See shahmukhi.jsonc.
+ * Shahmukhi (Perso-Arabic) scanner for Punjabi (pa) — the native abjad front-end used in Pakistan (Gurmukhi
+ * is used in India).
+ * Ported from src/languages/punjabi/shahmukhi.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -61,30 +55,7 @@ public static class Shahmukhi
         return ch == WAW || ch == YA || ch == BARI_YE ? DEF.LongVowels.GetValueOrDefault(ch) : null;
     }
 
-    /**
-     * ARABIC-KEYBOARD LETTERFORMS AND THE ARABIC-LOANWORD SPELLINGS → their Shahmukhi equivalents.
-     *
-     * ⚠ EVERY ROW HERE IS A CHARACTER `silentCharsIn` CAUGHT PRODUCING NOTHING, and every one of them is an
-     * ENCODING or SPELLING variant of a letter this scanner already reads — not a sound it has no rule for. Left
-     * unfolded they matched no branch of the scan below and were skipped in silence:
-     *
-     *     pnb  ⟨ى⟩ U+0649 ×34   عوامى → əʋˈaːm, آبادى → aːbˈaːd̪, ذاتى → zˈaːt̪  — the final /iː/ of every
-     *                           ـی-ending adjective, gone, because the writer typed the ARABIC alif maqṣūra
-     *     skr  ⟨ك⟩ U+0643 ×5    شاكر → ʃˈaːɾ — the /k/ deleted outright (ک U+06A9 is the Shahmukhi kāf)
-     *     skr  ⟨أ⟩ U+0623 ×8    أکثر → kˈəsəɾ — the initial vowel gone; Urdu-script writing seats no hamza on ا
-     *     skr  ⟨ة⟩ ×9 ⟨ۃ⟩ ×7    السنة → ˈəlsən, السیاسۃ → ələsjˈaːs
-     *
-     * ⚠ AND ⟨ة⟩/⟨ۃ⟩ FOLD TO ⟨ہ⟩ HERE WHILE THE ARABIC ENGINE EXEMPTS THEM AS CORRECTLY SILENT — the same
-     * character, the opposite verdict, because the languages differ. Arabic reads تāʾ marbūṭa as nothing in
-     * pausal form (the /a/ is the fatḥa before it, which Arabic writes); Urdu-script writing has no fatḥa to
-     * carry it and reads the letter ITSELF as final /a/ — السنۃ *as-sunna*, سورۃ *sūra* — which is exactly what
-     * word-final ⟨ہ⟩ already does in this scanner.
-     *
-     * ⚠ NOT FOLDED: ⟨ڊ⟩ U+068A, reported ×4 in skr. All four occurrences are ONE sentence of one article, and
-     * they disagree with each other — ⟨ڊے⟩ is transparently دے /d̪eː/ "of", while ⟨پچاڊھ⟩ wants a retroflex, and
-     * the letter's own Sindhi value is the retroflex implosive /ɗ̢/ (Saraiki writes that ݙ). Four tokens from one
-     * sentence do not source a phoneme, and a wrong reading is worse than a silence. Left reported.
-     */
+    /** ARABIC-KEYBOARD LETTERFORMS AND THE ARABIC-LOANWORD SPELLINGS → their Shahmukhi equivalents. */
     private static readonly IReadOnlyDictionary<string, string> LETTERFORM = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["ي"] = "ی", ["ى"] = "ی", // Arabic yeh / alif maqṣūra → Urdu-script yeh
@@ -94,28 +65,16 @@ public static class Shahmukhi
     };
     private static readonly JsRe LETTERFORM_RE = JsRegex.Compile($"[{string.Concat(LETTERFORM.Keys)}]", "gu");
 
-    /**
-     * The Arabic ADVERBIAL ENDING ⟨ـاً⟩ — the tanwīn's alif is a SEAT, not a long vowel.
-     *
-     * `silentCharsIn` reports ⟨ً⟩ ×32 in skr: تقریباً → t̪əqɾˈiːbaː, مثلاً → mˈəslaː, عموماً → əmˈoːmaː — the /n/
-     * of *taqrīban*, *maslan*, *ʿumūman* deleted in every one. The cause is positional rather than missing data:
-     * `harakat` in shahmukhi.jsonc has carried `"ً": "ən"` all along, but the scan only reads a mark that sits
-     * directly on a CONSONANT, and in ⟨ـاً⟩ the mark sits on the alif. Dropping the alif puts the tanwīn back on
-     * its consonant, where the existing table reads it — and drops the wrong long /aː/ at the same time, since
-     * the ending is /-an/ and never /-aːn/. Word-final only: a medial ⟨اً⟩ is not this ending.
-     */
-    // ⚠ ⟨ی⟩ AND NOT ⟨ى⟩: this runs AFTER the letterform fold above, which has already unified the two.
+    /** The Arabic ADVERBIAL ENDING ⟨ـاً⟩ — the tanwīn's alif is a SEAT, not a long vowel. Dropping it puts the
+     *  mark back on its consonant, where the harakat table reads it as /-an/. Word-final only.
+     *  ⚠ ⟨ی⟩ AND NOT ⟨ى⟩: this runs AFTER the letterform fold above, which has already unified the two. */
     private static readonly JsRe TANWIN_ALIF = JsRegex.Compile("[ای]([ًٌٍ])$", "u");
 
     /**
      * ⚠ SHADDA BEFORE ITS VOWEL MARK — AND WITHOUT THIS, A GEMINATE THAT CARRIES A VOWEL IS NOT A GEMINATE.
-     *
-     * The consonant branch below reads the marks in a FIXED order — shadda, then one haraka — but the canonical
-     * Unicode ordering is the opposite for the commonest case: a vowel mark has combining class 30 and the shadda
-     * 33, so ⟨کَّ⟩ is stored ⟨ک⟩+fatḥa+shadda and real text arrives that way. The shadda test saw the fatḥa, fell
-     * through, and the shadda was then skipped as an unknown diacritic — `مکَّہ` read *mˈəkəɦ*, losing both the
-     * gemination AND the word-final [aː] (the ہ was no longer word-final for the branch that reads it). The same
-     * bug, and the same one-line repair, as in `pashto.ts`; a no-op on the order the corpus usually writes.
+     * The consonant branch below reads the marks in a FIXED order, shadda then one haraka, but NFC orders them
+     * the other way (vowel mark ccc 30, shadda ccc 33), so ⟨کَّ⟩ arrives as ⟨ک⟩+fatḥa+shadda and the shadda test
+     * falls through. Same bug and same one-line repair as in Pashto; a no-op on already-ordered text.
      */
     private static readonly JsRe SHADDA_AFTER_VOWEL = JsRegex.Compile("([ً-ِٰ])ّ", "gu");
 
@@ -134,7 +93,6 @@ public static class Shahmukhi
         var i = 0;
         string At(int k) => k >= 0 && k < n ? s[k] : "";
 
-        // Word-initial vowel carrier (alif): آ→aː; ا+و→oː, ا+ی/ے→eː; bare ا → short ə carrier.
         if (At(0) == ALIF_MADDA)
         {
             @out += "aː";
@@ -150,15 +108,12 @@ public static class Shahmukhi
         while (i < n)
         {
             var ch = s[i];
-            // Nasalizer → nasalize the preceding vowel.
             if (NASAL.Contains(ch))
             {
                 if (!ENDS_TILDE.IsMatch(@out) && EndsInVowel(@out)) @out += "̃";
                 i++;
                 continue;
             }
-            // Word-final گول ہ after a consonant realizes as the final [aː] vowel (the -ā ending); elsewhere it is [ɦ]
-            // (Punjabi keeps ɦ — the intervocalic-ہ → tone merger is deferred, as on the Gurmukhi side).
             if (ch == HE_GOL)
             {
                 if (i == n - 1 && @out != "" && !EndsInVowel(@out)) @out += "aː";
@@ -166,7 +121,6 @@ public static class Shahmukhi
                 i++;
                 continue;
             }
-            // Hamza seats carry a vowel in hiatus; ئ→iː, ؤ→oː, absorbing a directly-following ی/و.
             if (ch == "ئ" || ch == "ؤ")
             {
                 @out += ch == "ئ" ? "iː" : "oː";
@@ -174,9 +128,8 @@ public static class Shahmukhi
                 if ((ch == "ئ" && At(i) == YA) || (ch == "ؤ" && At(i) == WAW)) i++;
                 continue;
             }
-            // Post-vocalic و/ی → glide (کوئی→koːiː's hiatus); after a consonant → the long-vowel nucleus (بو→boː);
-            // ے (bari ye) → /eː/; medial ا → aː. Word-INITIAL و/ی fall through to the consonant branch (a consonant
-            // glide that carries an inherent vowel: وڈّا→ʋəɖːaː, یار→jaːɾ), so the vowel-after logic applies.
+            // Post-vocalic و/ی → glide; after a consonant → the long-vowel nucleus. Word-INITIAL و/ی fall
+            // through to the consonant branch on purpose (a consonant glide that carries an inherent vowel).
             var postVocGlide = (ch == WAW || ch == YA) && @out != "";
             if (postVocGlide || ch == BARI_YE || ch == ALIF || ch == ALIF_MADDA)
             {
@@ -186,25 +139,21 @@ public static class Shahmukhi
                 i++;
                 continue;
             }
-            // Consonant (incl. a word-initial و/ی consonant glide).
             if (C.ContainsKey(ch) || ch == WAW || ch == YA)
             {
                 var ph = C.GetValueOrDefault(ch) ?? (ch == WAW ? "ʋ" : "j");
                 i++;
-                // Aspiration: C + ھ → aspirated / breathy (only aspirable consonants; else ھ is a plain [ɦ]).
                 if (At(i) == HE && ASP.TryGetValue(ph, out var asp) && asp.Length > 0)
                 {
                     ph = asp;
                     i++;
                 }
-                // Shadda → gemination: double the consonant (→ length in the shared reorder, as Gurmukhi addak).
                 if (At(i) == DEF.Shadda)
                 {
                     ph += ph;
                     i++;
                 }
                 @out += ph;
-                // Vowel after the consonant.
                 var hk = i < n ? HARAKAT.GetValueOrDefault(s[i]) : null;
                 if (At(i) == DEF.Sukun)
                 {
@@ -214,9 +163,9 @@ public static class Shahmukhi
                 {
                     @out += hk;
                     i++;
-                    // harakat + a matching long-vowel letter lengthens to the HIGH long vowel: kasra+ی→iː, damma+و→uː
-                    // (the explicit diacritic disambiguates the letter — bare ی/و default to iː/oː; damma+waw pins uː,
-                    // e.g. Urdu/Punjabi پُورا pūrā). This is the diacritic the Gurmukhi sister-script supplies as gold.
+                    // A haraka plus its matching long-vowel letter lengthens to the HIGH long vowel
+                    // (kasra+ی→iː, damma+و→uː): the explicit diacritic pins the letter, which bare ی/و
+                    // would otherwise default to iː/oː.
                     if ((hk == "ɪ" && At(i) == YA) || (hk == "ʊ" && At(i) == WAW))
                     {
                         @out = @out[..^hk.Length] + (At(i) == YA ? "iː" : "uː");
@@ -225,7 +174,6 @@ public static class Shahmukhi
                 }
                 else
                 {
-                    // ی/و before ANOTHER vowel letter is a glide (نیا→nəjaː), not a long vowel.
                     var glideNext = (At(i) == YA || At(i) == WAW) && LongVowelAfterConsonant(At(i + 1)) is not null;
                     var lv = glideNext ? null : LongVowelAfterConsonant(At(i));
                     if (lv is not null)
@@ -244,11 +192,9 @@ public static class Shahmukhi
                     {
                         @out += INH; // no written vowel, more letters follow → the abjad's omitted SHORT vowel: [ə]
                     }
-                    // word-final consonant with no written vowel → no vowel (skeleton coda).
                 }
                 continue;
             }
-            // hamza / unknown diacritic → skip.
             i++;
         }
         return @out.Normalize(System.Text.NormalizationForm.FormC);

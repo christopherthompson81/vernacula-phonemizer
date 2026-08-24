@@ -1,15 +1,7 @@
 /**
- * Occitan (Languedocien) cardinal number → words. Emits SPACE-separated words so each element reads through the
- * occitan.ts g2p (the orthographic hyphens of ⟨dètz-e-sèt⟩ / ⟨vint-e-un⟩ / ⟨dos cents⟩ become spaces). Covers
- * 0 … <10¹²; larger / unsafe values read digit-by-digit.
- *
- * SOURCE for the numeral table (occitan.jsonc `numbers`): omniglot.com/language/numbers/occitan.htm +
- * languagesandnumbers.com/how-to-count-in-occitan. Occitan is DECIMAL — setanta / ochanta / nonanta (70/80/90),
- * not the Provençal vigesimal ⟨quatre-vint⟩; the ⟨e⟩ connector is used for the TWENTIES only (vint e un) while
- * 30–90 juxtapose (trenta un) — the same split Catalan makes (vint-i-un vs trenta-un).
- *
- * Pattern B (bespoke) rather than the shared `westernNumberWords`: that composer has no connector slot and no
- * irregular-compound slot, so it cannot express the ⟨vint e …⟩ twenties.
+ * Occitan (Languedocien) cardinal number → words. Emits SPACE-separated words, so each element reads back
+ * through the occitan.ts g2p (the orthographic hyphens of ⟨dètz-e-sèt⟩ / ⟨vint-e-un⟩ become spaces).
+ * Ported from src/languages/occitan/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -66,7 +58,9 @@ public static class Numbers
         return r != 0 ? $"{thousand} {Below1000(r)}" : thousand;
     }
 
-    /** Non-negative integer → Occitan words. Out-of-range / unsafe values read digit-by-digit (never empty). */
+    /**
+     * Non-negative integer → Occitan words. Out-of-range / unsafe values read digit-by-digit (never empty).
+     */
     public static string NumberToWords(double n)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e12)
@@ -78,7 +72,6 @@ public static class Numbers
         {
             if (n < sc.Value) continue;
             double q = Math.Floor(n / sc.Value), r = n % sc.Value;
-            // milion/miliard are NOUNS: they keep the "un" (un milion) and pluralise (dos milions).
             var head = q == 1 ? sc.One : $"{Below1e6(q)} {sc.Many}";
             return r != 0 ? $"{head} {NumberToWords(r)}" : head;
         }

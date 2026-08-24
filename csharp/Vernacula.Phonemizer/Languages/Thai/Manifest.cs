@@ -1,10 +1,6 @@
 /**
- * Loads the Thai data manifest (thai.jsonc) once at module init and exposes it typed. Holds the context-free
- * hand-authored DATA: the onset / coda / vowel-quality grapheme→IPA tables, the vowel-length exception sets, the
- * full tone system (consonant class × mark × life/length → tone → Chao letters), and clause punctuation. The
- * ALGORITHMS that read them stay in code (syllabifier.ts / thaiTone.ts / g2p.ts / segment.ts): the orthographic
- * parser, the tone-computation functions, the IPA renderer, and word segmentation. The bulk lexica stay as
- * sibling files (dictionary.tsv, seg-words.txt), which the manifest only references.
+ * Loads the Thai data manifest (thai.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/thai/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

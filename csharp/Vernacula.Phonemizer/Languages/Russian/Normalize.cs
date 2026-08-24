@@ -1,19 +1,7 @@
 /**
  * Russian (ru) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
- * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
- *
- * ⚠ THE HARD PART IS ORDINAL NOTATION. Russian writes `5-е`, `1-й`, `1970-х`, `3-м`, and the suffix is NOT
- * an ordinal marker — it is the CASE ENDING. `5-е` is пятое (neuter nominative), `5-го` пятого (genitive),
- * `1970-х` семидесятых (genitive plural). So the rule reads the ending off the text and INFLECTS the
- * ordinal to match, rather than concatenating: what is written is the last letters of the full form, not a
- * suffix that can be appended. Unclaimed, each of these speaks the bare letter as a word — `5-е` comes out
- * [pʲætʲ je], "five ye".
- *
- * Already correct and untouched: dates take a plain cardinal day, the decimal comma reads as *целых*
- * (1,5 → один целых пять), % carries proper Slavic count agreement through the shared symbol tier
- * (процент / процента / процентов), and Roman numerals arrive already converted at the registry seam —
- * with `russian/romanOrdinals.ts` supplying the ORDINAL reading a century wants, so `XV век` is already
- * *пятнадцатый век*. That also means the roman-vs-initialism ordering hazard cannot arise here.
+ * pronounceable word into words the existing pipeline speaks.
+ * Ported from src/languages/russian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -25,12 +13,10 @@ public static class Normalize
 
     /**
      * Written case ending → the ordinal's full ending, for a HARD-stem ordinal (пятый, шестой, сороковой) and
-     * for the one soft stem among them (третий). The written form shows only the last letters, so this maps
-     * back to the whole ending rather than appending.
+     * for the one soft stem among them (третий).
      */
     private static readonly IReadOnlyDictionary<string, string[]> CASE_ENDING = new Dictionary<string, string[]>(StringComparer.Ordinal)
     {
-        // written        hard      soft (третий)
         ["й"] = new[] { "", "ий" }, // masculine nominative — the base form already
         ["е"] = new[] { "ое", "ье" }, ["ое"] = new[] { "ое", "ье" },
         ["я"] = new[] { "ая", "ья" }, ["ая"] = new[] { "ая", "ья" },
@@ -47,12 +33,7 @@ public static class Normalize
     /** Longest first, so `ого` is not matched as `го`. */
     private static readonly string CASE_ALT = string.Join("|", CASE_ENDING.Keys.OrderByDescending(k => k.Length));
 
-    /**
-     * Integer → the masculine-nominative ordinal, extended past `russianOrdinal`'s own 1–100 range. ⚠ ONLY THE
-     * LAST ELEMENT INFLECTS in Russian, so a larger number is its cardinal head plus the ordinal of its final
-     * ≤100 part: 1970 → "тысяча девятьсот" + семидесятый. That is what `1970-х` needs, and `russianOrdinal`
-     * alone returns undefined there.
-     */
+    /** Integer → the masculine-nominative ordinal, extended past `russianOrdinal`'s own 1–100 range. */
     private static string? OrdinalBase(double n)
     {
         var direct = double.IsInteger(n) && n >= int.MinValue && n <= int.MaxValue ? RomanOrdinals.RussianOrdinal((int)n) : null;
@@ -74,8 +55,8 @@ public static class Normalize
         var last = words[^1];
         var soft = last.EndsWith("ий", StringComparison.Ordinal); // третий is the only soft stem in the 1–19 table
         var stem = ORD_STEM.Replace(last, "");
-        // JS `forms[0] || last.slice(stem.length)` — the empty hard ending falls back to whatever the lemma
-        // already carries (the "й" row, where the base form IS the nominative).
+        // JS `forms[0] || last.slice(stem.length)` — the empty hard ending is FALSY in JS, so it falls back
+        // to whatever the lemma already carries (the "й" row, where the base form IS the nominative).
         words[^1] = stem + (soft ? forms[1] : forms[0].Length > 0 ? forms[0] : last[stem.Length..]);
         return string.Join(" ", words);
     }
@@ -90,10 +71,11 @@ public static class Normalize
         ["ы"] = "ы", ["э"] = "э", ["ю"] = "ю", ["я"] = "я",
     };
 
-    /** NOTE: every boundary in this file is an explicit lookaround, never `\b` — `\b` is defined on ASCII
-     *  word characters and finds none against Cyrillic, so a rule written with it silently matches nothing.
-     *  The same trap has now appeared in French, Hindi, Bengali, Mandarin and here, including inside
-     *  core/initialisms.ts itself, which this run had to fix. */
+    /**
+     * ⚠ Every boundary in this file is an explicit lookaround, never `\b`: the JS `\b` this port reproduces is
+     * defined on ASCII word characters and finds none against Cyrillic, so a rule written with it matches
+     * nothing at all. Do not "simplify" a lookaround back to `\b` here.
+     */
 
     /** Russian phonotactics, for the OOV rule in core/initialisms.ts. */
     public static readonly Func<string, bool> IsUnreadableRussian = Initialisms.MakeUnreadableTest(new PhonotacticsData
@@ -134,7 +116,7 @@ public static class Normalize
     private static readonly string[] HOUR = { "час", "часа", "часов" };
     private static readonly string[] MINUTE = { "минута", "минуты", "минут" };
 
-    /** Abbreviations. `г.`/`гг.` are the frequent ones (×10) and were reading as a bare [k]. */
+    /** Dotted abbreviations → the full word. */
     private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["г"] = "года", ["гг"] = "годов", ["в"] = "века", ["вв"] = "веков",
@@ -170,9 +152,8 @@ public static class Normalize
     private static readonly JsRe CLOSING_PUNCT = JsRegex.Compile("[,;:!?)»]", "u");
     private static readonly JsRe UPPER = JsRegex.Compile("\\p{Lu}", "u");
 
-    // ⚠ The abbreviation itself needs `i` (both `н. э.` and `Н. Э.` occur) but the CASE TEST cannot live in
-    // the pattern: `\p{Ll}`/`\p{Lu}` inside an `i` regex case-fold and match either case, so a lookahead
-    // written that way fired on "Затем" and ate the sentence boundary. Hence the callback below.
+    // ⚠ THE CASE TEST CANNOT LIVE IN THE PATTERN: the abbreviation itself needs `i`, and `\p{Ll}`/`\p{Lu}`
+    // inside an `i` regex case-fold and match either case. Hence the callback at the use site.
     private static readonly List<(JsRe Re, string Words)> MULTI_DOT = new List<(string, string)>
     {
         ("до\\s+н\\.\\s?э", "до нашей эры"),
@@ -187,23 +168,10 @@ public static class Normalize
     {
         var s = input;
 
-        // 0) DIGIT GROUPING with a space — the Russian convention, and the number token cannot span a space, so
-        //    "5 000 лет" read as "пять ноль лет".
         s = GROUP_1.Replace(s, "$1$2");
         s = GROUP_1.Replace(s, "$1$2");
         s = SPACES.Replace(s, " ");
 
-        // 1) MULTI-DOT ABBREVIATIONS, before the single-letter rule so `н. э.` and `т. е.` are claimed whole —
-        //    their interior dots were becoming phrase breaks.
-        //
-        //    THE TRAILING DOT IS TWO DIFFERENT THINGS and the first version consumed it unconditionally, so
-        //    "в 200 г. н. э. Затем…" ran straight into the next sentence with the boundary GONE. Found by the
-        //    Ukrainian run, which hit the identical bug in its own first pass and reported it here.
-        //    The discriminator is CASE, which a cased script gives for free: a lowercase word or a digit after
-        //    the dot continues the sentence, so the dot was the abbreviation's own and is consumed; an
-        //    uppercase word or end-of-input means it was doing double duty as the sentence end, so it stays.
-        //    Following punctuation already carries the break, so the dot is consumed there too rather than
-        //    doubled (`н. э.,` was emitting both a `.` and a `,`).
         foreach (var (re, words) in MULTI_DOT)
         {
             s = re.Replace(s, m =>
@@ -217,10 +185,8 @@ public static class Normalize
             });
         }
 
-        // 2) НОМЕР. The sign was dropped outright.
         s = NUMERO.Replace(s, "номер ");
 
-        // 3) ORDINAL NOTATION. The suffix is the CASE ending, not an appendable marker (see the file header).
         s = ORDINAL_NOTATION.Replace(s, m =>
         {
             var bas = OrdinalBase(Js.Number(m.Groups[1].Value));
@@ -228,30 +194,19 @@ public static class Normalize
             return InflectOrdinal(bas, m.Groups[2].Value.ToLowerInvariant()) ?? m.Value;
         });
 
-        // 3b) `г.` after a year is года, EXCEPT after the preposition в, which governs the prepositional
-        //     году ("в 2007 г." = в 2007 году). All three corpus instances are year contexts — none is the
-        //     city sense of г., which would need a different expansion and does not occur here.
         s = YEAR_G.Replace(s, "$1 $2 году");
 
-        // 4) DOTTED ABBREVIATIONS. The dot is consumed so it cannot become a phrase break.
         s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
         s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
 
-        // 5) UNITS the shared tier cannot express: the Cyrillic slash unit and the degree signs.
         s = KM_H.Replace(s, "$1 километров в час");
         s = M_S.Replace(s, "$1 метров в секунду");
-        // ⚠ THE LOWERCASE SCALE LETTERS GO IN THE CLASS, NOT IN AN `i` FLAG. `[а-яё]` is the guard against a
-        //    SPELLED-OUT scale name (`30 °Cельсия` — the ⟨C⟩ is the word's first letter, not the symbol), and
-        //    under `i` that property folds to reject uppercase Cyrillic too, quietly narrowing what the rule
-        //    will claim. The class carries both cases of both alphabets instead.
+        // ⚠ THE LOWERCASE SCALE LETTERS ARE IN THE CHARACTER CLASS, NOT AN `i` FLAG — under `i` the class
+        // folds and would also reject uppercase, quietly narrowing what the rule claims.
         s = DEG_C.Replace(s, "$1 градусов Цельсия");
         s = DEG_F.Replace(s, "$1 градусов Фаренгейта");
         s = DEG.Replace(s, "$1 градусов");
 
-        // 6) CLOCK. The colon was a clause mark, so "11:00" read as "одиннадцать , ноль". час and минута take
-        //    Slavic count agreement (1 час / 2 часа / 5 часов).
-        //    Guarded against a SPORTS time: "2:11,60 минуты" is 2 minutes 11.60 seconds, not two o'clock, and
-        //    the corpus contains one. A comma-plus-digit after the minutes marks decimal seconds.
         s = CLOCK.Replace(s, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
@@ -259,31 +214,16 @@ public static class Normalize
             return mv == 0 ? head : $"{head} {Numbers.NumberToWords(mv)} {Counted(mv, MINUTE)}";
         });
 
-        // 7) SIGNS.
         s = MINUS.Replace(s, "$1минус $2");
-        // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it.
         s = PLUS_MINUS.Replace(s, " плюс минус ");
         s = PLUS_ATTACHED.Replace(s, "$1 плюс $2");
         s = PLUS_LEADING.Replace(s, "$1плюс $2");
 
-        // 7b) RELATIONAL AND DIVISION SIGNS. ⚠ THE SOURCE HERE IS A PRONUNCIATION GLOSS, which is the strongest
-        //     shape this kind of evidence takes: the arithmetic articles do not merely use these words, they
-        //     QUOTE THE SPOKEN READING of the notation beside the notation itself —
-        //
-        //       6 : 3 = 2    («шесть разделить на три равно два»)
-        //       «два плюс два равно четыре»
-        //
-        //     ⚠ AND THE CORPUS EVIDENCE FOR `равно` IS THE WRONG SENSE: ×4 in ru_ru and every hit is the
-        //     conjunction `равно как и`. A COUNT-ONLY PASS WOULD HAVE CALLED IT CORPUS-SOURCED.
-        //     ⚠ THE COMPARATIVES TAKE `чем` RATHER THAN THE BARE GENITIVE, a grammatical requirement:
-        //     `меньше` governs the GENITIVE and numbers.ts emits NOMINATIVE cardinals, so `7 < 3` would read
-        //     *семь меньше три*. The `чем` construction takes the nominative.
         s = EQUALS.Replace(s, " равно ");
         s = LESS_THAN.Replace(s, " меньше чем ");
         s = GREATER_THAN.Replace(s, " больше чем ");
         s = DIVIDE.Replace(s, " разделить на ");
 
-        // 8) FRACTIONS — feminine, agreeing with the elided *часть*: 1/5 is «одна пятая».
         s = FRACTION.Replace(s, m =>
         {
             double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);

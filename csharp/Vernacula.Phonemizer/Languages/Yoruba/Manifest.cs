@@ -1,7 +1,6 @@
 /**
- * Loads the Yoruba data manifest (yoruba.jsonc) once at module init and exposes it typed. Holds the context-free
- * hand-authored DATA — the orthography→IPA tables, the three tones, clause punctuation and the vigesimal cardinal
- * numbers; the ALGORITHM stays in code (yoruba.ts, numbers.ts).
+ * Loads the Yoruba data manifest (yoruba.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/yoruba/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

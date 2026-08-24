@@ -8,13 +8,34 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
 
 ## Structure
 - Mirror the TS tree 1:1: `src/languages/thai/syllabifier.ts` → `csharp/Vernacula.Phonemizer/Languages/Thai/Syllabifier.cs`.
-  One TS module = one C# file; keep names, keep comment text (they carry measured evidence).
+  One TS module = one C# file; keep names. ⚠ DO NOT keep the comment text — see below.
 - Namespace = folder: `Vernacula.Phonemizer.Languages.Thai`.
 - Data files (`.tsv`, `.jsonc`, `.txt`, `.onnx` — 317 files, 141 MB) are NOT ported. They live in
   the repo-root `data/` tree, mirrored on the module structure (`data/languages/thai/…`,
   `data/core/…`) and OWNED BY NO ENGINE: the TypeScript resolves them through
   `src/core/dataPath.ts`, the C# through `DataPath.Resolve("languages/thai/…")`, both against the
   same keys. `VERNACULA_DATA_DIR` overrides the root in both. The csproj copies nothing.
+
+## ⚠ Comments — the TypeScript is where the evidence lives
+- ⚠ DO NOT TRANSCRIBE TS COMMENTS. An earlier version of this file said to carry them verbatim; that
+  was wrong, and it cost 18,857 comment lines (36% of the C# tree) that say nothing the TS does not
+  already say better. The TypeScript module is the SPECIFICATION and the permanent home of the
+  measured evidence — corpus counts, dump provenance, defect tables, the history of what was tried.
+  A second copy in C# is not a second witness: it is a copy that drifts, and every TS-first fix now
+  has to be applied to prose twice.
+- The C# file header is 2-4 lines: what the module does, and `Ported from src/languages/<x>/<y>.ts —
+  see that file for the corpus evidence.` A reader who needs the why has one hop to the whole of it.
+- ⚠ KEEP EXACTLY ONE CLASS OF INLINE COMMENT: the note whose absence would let a future editor
+  "improve" the port into a divergence. These are load-bearing in the C# specifically —
+    · a JS semantic the C# reproduces on purpose (`Contains("")` is true, unpacked iteration order,
+      UTF-16 surrogate behaviour, `Math.Round` vs banker's rounding);
+    · a `PAIRED-FIX PENDING` marker, which must name the TS issue and be DELETED when it lands — a
+      stale one is a fork that documents itself as fidelity (Core/NormalizeSymbols.cs, #934);
+    · a non-obvious ordering or fall-through the golden depends on and no name explains.
+  If the comment would be equally true of the TypeScript, it belongs only in the TypeScript.
+- ⚠ THE CORRECTNESS LENS SURVIVES THIS. Question 1 below — does the code do what its docstring
+  promises — is asked against the TS docstring while porting. Shedding the copy does not shed the
+  reading; it removes the second place that reading could go stale.
 
 ## Language & library mapping
 - `string` stays UTF-16 in both — indexing and `.Length` semantics match JS exactly. Do NOT

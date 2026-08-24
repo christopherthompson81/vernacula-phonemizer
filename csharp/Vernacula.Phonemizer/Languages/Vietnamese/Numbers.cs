@@ -1,7 +1,6 @@
 /**
- * Vietnamese cardinal number → words (space-separated syllables). Handles the common sound changes:
- * 5 in a unit slot after a ten → "lăm" (hai mươi lăm), 1 after a ten → "mốt" (hai mươi mốt), a zero tens slot
- * with a nonzero unit → "linh" (một trăm linh năm). Scales by thousands: nghìn / triệu / tỷ.
+ * Vietnamese cardinal number → words (space-separated syllables).
+ * Ported from src/languages/vietnamese/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -9,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.Vietnamese;
 
 public static class VietnameseNumbers
 {
-    // Number words are authored DATA — consolidated in vietnamese.jsonc; the thousands-scale compositor is the algorithm.
     private static VietnameseNumbersDef N => Manifest.MANIFEST.Numbers;
     private static string[] ONES => N.Ones;
     private static string[] SCALES => N.Scales;
@@ -59,12 +57,10 @@ public static class VietnameseNumbers
         {
             if (groups[g] == 0) continue;
             parts.AddRange(Below1000(groups[g], g < groups.Count - 1));
-            // ⚠ `SCALES[g]` IS AN OUT-OF-RANGE READ above the authored ladder (nghìn/triệu/tỷ, so 10¹²).
-            // The TS pushes `undefined` and `Array.join` renders it as the EMPTY string, which the caller
-            // then splits into an empty word that phonemizes to "". C# throws on the index, so the bound is
-            // explicit and pushes "" to reproduce that exactly — NOT filtered out, for the reason the same
-            // shape in Turkish records: dropping it would fork the engines on an input where both are
-            // already past what the data can say.
+            // ⚠ `SCALES[g]` IS AN OUT-OF-RANGE READ above the authored ladder (nghìn/triệu/tỷ, so 10¹²). The TS
+            // pushes `undefined` and `Array.join` renders it as the EMPTY string, which the caller then splits
+            // into an empty word that phonemizes to "". C# throws on the index, so the bound is explicit and
+            // pushes "" to reproduce that exactly — NOT filtered out, which would fork the engines.
             if (g > 0) parts.Add(g < SCALES.Length ? SCALES[g] : "");
         }
         return string.Join(" ", parts);

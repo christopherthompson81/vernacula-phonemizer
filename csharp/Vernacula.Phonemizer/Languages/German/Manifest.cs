@@ -1,8 +1,6 @@
 /**
- * Loads the German data manifest (german.jsonc) once at module init and exposes it typed. The hand-authored
- * DATA tables (vowel length maps, final-devoicing pairs, exception word-lists, clause punctuation, the
- * morphology tables, number words) live in the JSONC; the ALGORITHMS that consume them stay in the sibling
- * modules (g2p.ts, german.ts, morphology.ts, numbers.ts).
+ * Loads the German data manifest (german.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/german/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

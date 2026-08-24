@@ -1,16 +1,6 @@
 /**
  * Tamil cardinal number → words (space-separated), Indian grouping (ஆயிரம் 10³ / லட்சம் 10⁵ / கோடி 10⁷).
- *
- * The thing that makes Tamil different from the Indo-Aryan neighbours already done (hi/bn/ur) is that the
- * compounding is SANDHI, not concatenation: a numeral part changes shape depending on whether anything
- * follows it. நூறு "100" but நூற்றி "100 and…"; ஆயிரம் "1000" but ஆயிரத்து "1000 and…"; and 200/300/900
- * are fused stems (இருநூறு, முந்நூறு, தொள்ளாயிரம்), not "two hundred". So each level picks between a FREE
- * form and a COMBINING form, and 11–19 are suppletive. All of it is authored DATA in tamil.jsonc; this
- * file is only the compositor.
- *
- * evidence: before this, every one of the 660 numerals in the ta_in corpus went through the naive
- * concatenating path — 1995 read *ஒன்று ஆயிரம் ஒன்பது நூறு தொண்ணூறு ஐந்து instead of ஆயிரத்து
- * தொள்ளாயிரத்து தொண்ணூற்றி ஐந்து.
+ * Ported from src/languages/tamil/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -18,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.Tamil;
 
 public static class TamilNumbersComposer
 {
-    // Number words are authored DATA — consolidated in tamil.jsonc; the Indian-grouping compositor is the algorithm.
     private static TamilNumbers N => Manifest.MANIFEST.Numbers;
     private static string[] ONES => N.Units;
     private static string[] TENS => N.Tens;
@@ -53,12 +42,7 @@ public static class TamilNumbersComposer
         return outp;
     }
 
-    /**
-     * The thousands group. 1–10 thousand are single fused words (ஆயிரம் … பத்தாயிரம்); above that Tamil fuses
-     * the count into the same word (23,000 = இருபத்து மூவாயிரம்), approximated here as the ten's oblique plus
-     * the fused thousand (இருபத்தி மூவாயிரம்) — the same joint, one degree less contracted. For counts of 100+
-     * the count is spelled out before a free ஆயிரம்/ஆயிரத்து.
-     */
+    /** The thousands group. */
     private static List<string> Thousands(double count, bool hasRemainder)
     {
         var fused = hasRemainder ? THOU_C : THOU;
@@ -89,7 +73,6 @@ public static class TamilNumbersComposer
         n %= 100000;
         var thou = Math.Floor(n / 1000);
         n %= 1000;
-        // A magnitude noun takes the attributive ஒரு, never the free cardinal ஒன்று: ஒரு லட்சம், ஒரு கோடி.
         List<string> WithOne(double c) => c == 1 ? new List<string> { M.One } : Below1000(c);
         if (crore > 0)
         {
@@ -106,16 +89,7 @@ public static class TamilNumbersComposer
         return string.Join(" ", parts);
     }
 
-    /**
-     * The ORDINAL/oblique stem of a cardinal word, used by normalize.ts to build N-ஆம் and N-ஆவது. Tamil
-     * forms these by attaching the suffix to the LAST word of the cardinal with a regular euphonic change —
-     * 15ஆம் is பதினைந்தாம், one word, not *பதினைந்து ஆம் (which reaches the g2p as a stray syllable [aːm]).
-     *
-     * Three cases cover every word the compositor above can emit finally:
-     *   -ு  → drop it            ஒன்று → ஒன்ற-,  பத்து → பத்த-,  தொண்ணூறு → தொண்ணூற-,  நூறு → நூற-
-     *   -ம் → drop the virama    ஆயிரம் → ஆயிரம-,  தொள்ளாயிரம் → தொள்ளாயிரம-,  லட்சம் → லட்சம-
-     *   -ி  → insert the glide ய   கோடி → கோடிய-
-     */
+    /** The ORDINAL/oblique stem of a cardinal word, used by normalize.ts to build N-ஆம் and N-ஆவது. */
     public static string? OrdinalStem(string word)
     {
         if (word.EndsWith("ு", StringComparison.Ordinal)) return word[..^1]; // ◌ு

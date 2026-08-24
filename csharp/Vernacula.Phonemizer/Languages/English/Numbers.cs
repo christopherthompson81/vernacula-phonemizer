@@ -1,7 +1,6 @@
 /**
- * English number → spoken words (short scale). Clean reimplementation: digit input becomes the same WORDS
- * a person would type, which then resolve through the lexicon like any other word — so 42 == "forty two"
- * with no fragment-table indirection. Covers 0 … nonillion (bigint). Cardinal + ordinal.
+ * English number → spoken words (short scale).
+ * Ported from src/languages/english/numbers.ts — see that file for the corpus evidence.
  */
 using System.Numerics;
 using Vernacula.Phonemizer.Core;
@@ -10,14 +9,12 @@ namespace Vernacula.Phonemizer.Languages.English;
 
 public static class Numbers
 {
-    // Number words are authored DATA — consolidated in english.jsonc; the composition logic below is the algorithm.
     private static IReadOnlyList<string> ONES => Manifest.MANIFEST.Numbers.Ones;
     private static IReadOnlyList<string> TENS => Manifest.MANIFEST.Numbers.Tens;
     private static string HUNDRED => Manifest.MANIFEST.Numbers.Hundred;
     private static IReadOnlyList<string> SCALE => Manifest.MANIFEST.Numbers.Scale;
     private static IReadOnlyDictionary<string, string> ORDINAL => Manifest.MANIFEST.Numbers.Ordinals;
 
-    // scale is ascending (thousand=10³ … nonillion=10³⁰); GROUPS is descending {value, name} for the greedy loop.
     private static readonly IReadOnlyList<(BigInteger Value, string Name)> GROUPS =
         SCALE.Select((name, i) => (BigInteger.Pow(10, 3 * (i + 1)), name)).Reverse().ToList();
 

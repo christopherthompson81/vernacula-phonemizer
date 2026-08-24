@@ -1,6 +1,6 @@
 /**
- * Spanish (es) phonemizer — canonical IPA, broad Castilian. Rule-based g2p (g2p.ts) +
- * spirantization + rule-based stress; no lexicon. text() tokenizes words / numbers / punctuation.
+ * Spanish (es) phonemizer — canonical IPA, broad Castilian.
+ * Ported from src/languages/spanish/spanish.ts — see that file for the corpus evidence.
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
@@ -28,10 +28,7 @@ public sealed class SpanishPhonemizer : ILanguage
 
     /**
      * ⚠ SPIRANTIZATION IS POST-LEXICAL — it does not stop at the word edge, and `spirantize()` above cannot
-     * see past one. `nada` came out `nˈaða` while `la duda` came out `la dˈuða` — the identical environment,
-     * one word later, read two different ways. Measured against the FLEURS es_419 audio: our `d` is heard as
-     * [ð] in 2,278 aligned positions. The rule is the same one `spirantize()` states, where
-     * "utterance-initially" means after a pause mark or at the start.
+     * see past one.
      */
     private static readonly JsRe CROSS_WORD_STOP = JsRegex.Compile("([^\\s])(\\s+)([bdɡ])", "gu");
     private static readonly JsRe LETTERISH = JsRegex.Compile("[\\p{L}\\p{M}ˈˌ]", "u");
@@ -87,11 +84,7 @@ public sealed class SpanishPhonemizer : ILanguage
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"({HostWord.LATIN_RUN})|(\\d+(?:\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])", "giu");
 
-    /**
-     * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides
-     * where the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these
-     * letters.
-     */
+    /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-záéíóúüñ]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "iu");
 
@@ -110,8 +103,6 @@ public sealed class SpanishPhonemizer : ILanguage
         return words;
     }
 
-    // Unstressed monosyllabic clitics — de-accented in running text (DATA: spanish.jsonc). Accented
-    // counterparts (sí, tú, mí, más) keep their accent and stay stressed.
     private static readonly IReadOnlySet<string> FUNCTION_WORDS =
         new HashSet<string>(Manifest.MANIFEST.FunctionWords, StringComparer.Ordinal);
 
@@ -122,11 +113,8 @@ public sealed class SpanishPhonemizer : ILanguage
         return FUNCTION_WORDS.Contains(word.ToLowerInvariant()) ? Js.ReplaceFirst(ipa, "ˈ", "") : ipa;
     }
 
-    // symbol normalization — Spanish (shared by es and es-419; the words are variety-neutral).
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        // `multiply` — STANDARD MATHEMATICAL REGISTER: the plausible corpus hits are homographs of
-        // PREPOSITIONS (es `por` ×23 is the preposition, never the operator).
         Multiply = new MultiplyDef { Times = "por" },
         Ampersand = "y",
         Percent = new[] { "por ciento" },
@@ -135,7 +123,6 @@ public sealed class SpanishPhonemizer : ILanguage
             ["€"] = new[] { "euro", "euros" }, ["$"] = new[] { "dólar", "dólares" },
             ["£"] = new[] { "libra", "libras" }, ["¥"] = new[] { "yen", "yenes" },
         },
-        // Longest keys match first (the builder sorts by length), so km/h beats km and °c beats c.
         Units = new Dictionary<string, IReadOnlyList<string>>
         {
             ["km/h"] = new[] { "kilómetro por hora", "kilómetros por hora" },
@@ -149,7 +136,6 @@ public sealed class SpanishPhonemizer : ILanguage
             ["ml"] = new[] { "mililitro", "mililitros" },
             ["g"] = new[] { "gramo", "gramos" }, ["t"] = new[] { "tonelada", "toneladas" },
             ["ha"] = new[] { "hectárea", "hectáreas" },
-            // ⚠ SI CASE: ⟨kW⟩ ⟨W⟩ ⟨Hz⟩ are capitalised because watt and hertz are named after people.
             ["kW"] = new[] { "kilovatio", "kilovatios" }, ["W"] = new[] { "vatio", "vatios" },
             ["Hz"] = new[] { "hercio", "hercios" },
             ["gb"] = new[] { "gigabyte", "gigabytes" }, ["mb"] = new[] { "megabyte", "megabytes" },
@@ -162,7 +148,6 @@ public sealed class SpanishPhonemizer : ILanguage
             Squared = new[] { "cuadrado", "cuadrados" },
             Cubed = new[] { "cúbico", "cúbicos" },
         },
-        // BARE EXPONENT — STANDARD MATHEMATICAL REGISTER, not corpus attestations.
         BareExponent = new BareExponentDef
         {
             Squared = "{n} al cuadrado", Cubed = "{n} al cubo", Power = "{n} elevado a {e}", Negative = "menos",
@@ -177,10 +162,8 @@ public sealed class SpanishPhonemizer : ILanguage
 
     public string Text(string input)
     {
-        // normalization order: general text normalization (abbreviations, era markers, ordinal indicators,
-        // times, dates) → INITIALISMS → SYMBOLS (%, currency, units) last, since the time rule upstream has
-        // already claimed the hour. Roman numerals: `es` is not ROMAN_NATIVE, so the shared pass has already
-        // converted them before text().
+        // ⚠ ORDER: text normalization → INITIALISMS → SYMBOLS last, since the time rule upstream has
+        // already claimed the hour.
         var normalized = SYMBOLS(Normalize.NormalizeSpanishInitialisms(
             Normalize.NormalizeSpanish(input, new SpanishNormalizeOptions { Americas = _americas })));
         return SpirantizeAcrossWords(Clauses.AssembleClauses(normalized, TOKEN, (m, sink) =>

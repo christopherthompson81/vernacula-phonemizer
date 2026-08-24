@@ -1,7 +1,6 @@
 /**
- * Japanese kana → canonical IPA (Standard/Tokyo, narrow). Mora-based: gojūon + dakuten/handakuten + youon
- * (きゃ…) + sokuon (っ, gemination) + long vowels (ー, おう→o̞ː, えい→e̞ː) + moraic ん→ɴ. Katakana is folded to
- * hiragana first. Vowels: あ→ä い→i う→ɯᵝ え→e̞ お→o̞. Segmental only — pitch accent is a later phase.
+ * Japanese kana → canonical IPA (Standard/Tokyo, narrow).
+ * Ported from src/languages/japanese/kana.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -9,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.Japanese;
 
 public static class Kana
 {
-    // Vowels (narrow Tokyo): centralized ä, compressed ɯᵝ, mid-lowered e̞/o̞. Lookup tables are DATA (japanese.jsonc).
     private static string A => Manifest.MANIFEST.Vowels["a"];
     private static string I => Manifest.MANIFEST.Vowels["i"];
     private static string U => Manifest.MANIFEST.Vowels["u"];
@@ -50,10 +48,8 @@ public static class Kana
     private static string First(string s) => s.Length == 0 ? "" : Js.CodePoints(s)[0];
 
     /**
-     * A run of kana → its list of MORAE (one array element per mora: a long vowel ː is its own mora, a moraic ん is
-     * its own mora, a sokuon っ its own mora). `join("")` reconstructs the IPA. Keeping morae separate lets the pitch
-     * pass place the downstep by index without re-parsing (our assimilated ん→n/m would be ambiguous in the string).
-     * Returns null if the text isn't kana (so the caller can handle romaji/punctuation/unresolved kanji).
+     * A run of kana → its list of MORAE (one array element per mora: a long vowel ː is its own mora, a moraic
+     * ん is its own mora, a sokuon っ its own mora).
      */
     public static List<string>? KanaToMorae(string word)
     {
@@ -65,8 +61,6 @@ public static class Kana
         while (i < chars.Count)
         {
             string c = chars[i], nx = At(i + 1);
-            // Extended katakana (foreign sounds): base kana + small kana → onset + vowel (ファ→ɸä, チェ→t͡ɕe̞, ディ→di,
-            // デュ→dʲɯᵝ). Keys carry the small 2nd kana, so a direct FOREIGN lookup can't shadow a normal mora sequence.
             if (FOREIGN.TryGetValue(c + nx, out var fms) && fms.Length > 0)
             {
                 morae.Add(fms);
@@ -74,7 +68,6 @@ public static class Kana
                 i += 2;
                 continue;
             }
-            // Youon: Ci + small ゃゅょ.
             if (YOUON_ONSET.TryGetValue(c, out var yo) && yo.Length > 0
                 && SMALL_Y.TryGetValue(nx, out var sy) && sy.Length > 0)
             {
@@ -84,7 +77,6 @@ public static class Kana
                 i += 2;
                 continue;
             }
-            // Sokuon っ → geminate the next mora's first consonant (its own mora). Word-final / vowel-onset → glottal ʔ.
             if (c == "っ" || c == "ッ")
             {
                 var nx2 = At(i + 2);
@@ -98,7 +90,6 @@ public static class Kana
                 i++;
                 continue;
             }
-            // Long vowel mark ー → +1 mora (ː).
             if (c == "ー" || c == "ｰ")
             {
                 if (morae.Count > 0) morae.Add("ː");
@@ -106,12 +97,6 @@ public static class Kana
                 continue;
             }
             if (!MORA.TryGetValue(c, out var m)) return null; // not kana → let the caller handle (romaji, punctuation, kanji)
-            // Long-vowel coalescence, keyed on the CURRENT KANA (not the phoneme): the お+う / え+い digraphs (おう→o̞ː,
-            // えい→e̞ː) and a vowel kana repeating the previous vowel (おお→o̞ː, いい→iː) all fold to a length mark. This
-            // fires after a youon mora too — ː is the preferred long-vowel notation everywhere (じゅう→d͡ʑɯᵝː, きゅう→kʲɯᵝː,
-            // きょう→kʲo̞ː), for canonical consistency (a doubled vowel and a ー-lengthened vowel are the same length).
-            // A fold pushes a bare ː mora; stacking (けいい→ke̞ːː) works since lastVowel survives the ː. を is EXCLUDED from
-            // the same-vowel rule (a distinct kana, near-always the particle): 語を→ɡo̞o̞, never ɡo̞ː.
             if (lastVowel != "")
             {
                 if (c == "う" && lastVowel == O) { morae.Add("ː"); i++; continue; }
@@ -126,10 +111,8 @@ public static class Kana
     }
 
     /**
-     * Sokuon っ geminates the FOLLOWING mora's initial consonant. Like the ん pass below, this is split out so it
-     * can run again over CONCATENATED segments: per-morpheme conversion (segmentsToMorae) leaves a
-     * segment-final っ unable to see the next segment's onset, so it fell back to the glottal ʔ — 吹っ切れ came
-     * out ɸɯᵝʔkiɾe̞ instead of ɸɯᵝkkiɾe̞. Idempotent: an already-geminated mora is no longer "ʔ".
+     * Sokuon っ geminates the FOLLOWING mora's initial consonant. Idempotent, and split out so it can run a
+     * second time over CONCATENATED segments — a segment-final っ cannot see the next segment's onset.
      */
     public static List<string> GeminateSokuon(List<string> morae)
     {
@@ -137,21 +120,15 @@ public static class Kana
         {
             if (morae[k] != "ʔ") continue;
             var onset = k + 1 < morae.Count ? First(morae[k + 1]) : "";
-            // Only a CONSONANT-initial next mora geminates. A word-final っ, or one before a vowel-onset mora,
-            // is a genuine glottal stop and must stay ʔ.
             if (onset != "" && !IsVowelChar(onset)) morae[k] = onset;
         }
         return morae;
     }
 
     /**
-     * Moraic ん assimilates to the FOLLOWING onset's place: n before coronals, ŋ before velars, m before labials,
-     * else ɴ (before vowels/glides/fricatives or word-finally): こんにちは→ko̞nni…, にほんご→niho̞ŋɡo̞, さんぽ→sampo̞.
-     *
-     * Split out so it can run a second time over CONCATENATED segments: when a word is moraised per morpheme
-     * (segmentsToMorae), a ん ending one segment cannot see the next segment's onset, and 健康 けん|こう
-     * came out ke̞ɴko̞ː instead of ke̞ŋko̞ː. Re-running over the joined morae fixes that, and is idempotent —
-     * an already-assimilated mora is no longer "ɴ", so the loop skips it.
+     * Moraic ん assimilates to the FOLLOWING onset's place: n before coronals, ŋ before velars, m before
+     * labials, else ɴ (before vowels/glides/fricatives, or word-finally). Idempotent, and split out so it can
+     * run a second time over CONCATENATED segments — a segment-final ん cannot see the next segment's onset.
      */
     public static List<string> AssimilateMoraicN(List<string> morae)
     {
@@ -179,15 +156,6 @@ public static class Kana
 
     /**
      * Morae for a word given as READING SEGMENTS (one per kanji reading; a literal-kana run is one segment).
-     *
-     * Long-vowel coalescence is confined to a segment, so the first vowel of one morpheme can never be absorbed
-     * into the previous morpheme's length: 経営 けい|えい → ke̞ːe̞ː (not ke̞ːːː), 聖域 せい|いき → se̞ːiki (not
-     * se̞ːːki), 子牛 こ|うし → ko̞ɯᵝɕi (not ko̞ːɕi).
-     *
-     * The mora COUNT is unchanged by this — a coalesced ː was already one mora — so accent-nucleus indices from
-     * the pitch dictionary keep pointing at the same mora. Only the vowel QUALITY is corrected.
-     *
-     * Returns null if any segment is not kana, matching kanaToMorae's contract.
      */
     public static List<string>? SegmentsToMorae(IReadOnlyList<string> segments)
     {
@@ -199,9 +167,8 @@ public static class Kana
             if (m is null) return null;
             @out.AddRange(m);
         }
-        // Re-run the two rules that depend on the FOLLOWING onset over the JOINED morae: per-segment conversion
-        // hides the next segment's onset from a segment-final ん (健康 けん|こう → ke̞ɴko̞ː) and から a segment-final
-        // っ (吹っ切れ ふ|っ|き|れ → ɸɯᵝʔkiɾe̞). Both are idempotent, so within-segment results are unaffected.
+        // Re-run the two rules that key on the FOLLOWING onset over the JOINED morae: per-segment conversion
+        // hides the next segment's onset from a segment-final ん or っ. Both are idempotent.
         return AssimilateMoraicN(GeminateSokuon(@out));
     }
 }

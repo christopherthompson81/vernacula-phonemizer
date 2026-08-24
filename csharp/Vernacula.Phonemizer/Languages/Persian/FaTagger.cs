@@ -1,19 +1,8 @@
 /**
- * Persian STRUCTURAL TAGGER — the DEFAULT modern fa restorer. A sentence-level BiLSTM sequence-labeller that emits
- * one IPA-chunk TAG per abjad char (the char's consonant, COPIED, plus its following short vowel / ezafe), then
- * assembles the tags into words on the space chars. Because output length == input length, it CANNOT degenerate and
- * CANNOT break the consonant skeleton — a single forward pass, no beam, no autoregressive decode loop, no
- * degeneration guard. Context (ezafe / homographs) comes from the bidirectional pass.
- *
- * It REPLACES the modern seq2seq context restorer. On the CANONICAL held-out (the fair gold — colloquial
- * fusions/elisions no canonical phonemizer would produce are excluded) it measures 93.6% per-word vs the seq2seq's
- * 92.5% on that same subset, with 0% catastrophic degeneration (the seq2seq's ~1.4% runaway-loop risk) at ~3MB vs
- * ~5MB. A per-char CONSONANT-CONSISTENCY MASK constrains each char to only the tags whose consonant it produced in
- * training (ص→s, never ʃ; غ→ɣ, never the colloquial ɡ), so the output is always canonical. See
- * fa-tagger.PROVENANCE.md and.
- *
- * `onnxruntime-node` is optional (lazy import); createFaTagger() resolves to `undefined` (no-op) if it or the model
- * is absent — identical to the seq2seq restorer's contract, so callers fall back to the word-level path.
+ * Persian STRUCTURAL TAGGER — the DEFAULT modern fa restorer. A sentence-level BiLSTM sequence-labeller that
+ * emits one IPA-chunk TAG per abjad char and assembles the tags into words on the spaces; output length
+ * equals input length, so it cannot degenerate or break the consonant skeleton.
+ * Ported from src/languages/persian/faTagger.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -24,14 +13,11 @@ public static class FaTagger
     private static readonly IReadOnlySet<string> SHORT_V = new HashSet<string>(new[] { "a", "e", "o" }, StringComparer.Ordinal);
 
     /**
-     * Post-tagger FIRST-VOWEL correction — targets the tagger's /a/-prior default on the lexically-fixed first syllable
-     * (the correct vowel is in the clean training data, but the lightweight BiLSTM can't memorise every lexical
-     * exception, so it falls back to the majority /a/). Two parts: (1) a DETERMINISTIC rule — word-initial آ (alef madda)
-     * is always ʔ + long aː, so after the leading ʔ we force a long aː: promote a short vowel (آزاد ʔazaːd→ʔaːzaːd) OR
-     * INSERT aː when the tagger dropped the vowel entirely (آنان ʔnaːn→ʔaːnaːn); (2) a PIN transplant — replace the first
-     * short vowel with the value pinned for frequent, consistent (non-homograph) words. Only the first vowel is touched;
-     * consonants, later vowels, and ezafe are left to the tagger. Validated fix-only (0 breaks) on the GE2PE +
-     * cross-source referees; no HomoRich-canonical regression.
+     * Post-tagger FIRST-VOWEL correction — targets the tagger's /a/-prior default on the lexically-fixed
+     * first syllable. Two parts: word-initial آ is always ʔ + long aː (promote a short vowel, or insert aː
+     * when the tagger dropped it), and a pin transplant that replaces the first short vowel with the value
+     * pinned for that skeleton. Only the first vowel is touched; consonants, later vowels and ezafe are the
+     * tagger's.
      */
     private static string CorrectFirstVowel(string word, string ipa, IReadOnlyDictionary<string, string> pin)
     {
@@ -89,15 +75,11 @@ public static class FaTagger
             {
                 if (chars[k] == " ") { words.Add(""); continue; } // word boundary → new word, no tag emitted
                 var id = _meta.Src.GetValueOrDefault(chars[k], _unk);
-                // Masked argmax over ONLY this char's permitted tags (the consonant mask): keeps every consonant
-                // canonical, a cheap scan of ~8 candidates. UNK permits all tags, so `best` is never -1 here.
                 var best = StructuralTagger.MaskedArgmax(logits, k * _nTags,
                     _meta.CharTags.TryGetValue(id.ToString(System.Globalization.CultureInfo.InvariantCulture), out var valid) ? valid : null);
                 var tag = best < 0 ? "" : _meta.Tags.GetValueOrDefault(best.ToString(System.Globalization.CultureInfo.InvariantCulture)) ?? "";
                 if (tag != " ") words[^1] += tag;
             }
-            // Correct the lexically-fixed first vowel (آ→aː rule + pin transplant) before stress; grapheme words
-            // align 1:1 with the tagged output words (both split on the input spaces).
             var gWords = sentence.Split(' ');
             var fixedWords = words.Select((w, i) => CorrectFirstVowel(i < gWords.Length ? gWords[i] : "", w, _pin));
             return ContextRestorer.StressPerWord(string.Join(" ", fixedWords));
@@ -116,7 +98,6 @@ public static class FaTagger
             modelBytes = File.ReadAllBytes(DataPath.ResolveAllowMissing($"languages/persian/{basename}.int8.onnx"));
         }
         catch { return null; }
-        // First-syllable-vowel pin (fa-pin-vowels.tsv, skeleton→first short vowel). Optional — empty if absent.
         var pin = new Dictionary<string, string>(StringComparer.Ordinal);
         try
         {
@@ -131,7 +112,6 @@ public static class FaTagger
         try
         {
             var ort = await Onnx.LoadOrt("Persian neural tagging").ConfigureAwait(false);
-            // Shipping default is CPU. Opt into a GPU execution provider (fast eval iteration) with FA_ORT_EP=cuda.
             var ep = Environment.GetEnvironmentVariable("FA_ORT_EP");
             var sess = await ort.CreateInferenceSession(modelBytes, string.IsNullOrEmpty(ep) ? null : ep.Split(',')).ConfigureAwait(false);
             return new Loaded(ort, sess, meta, pin);

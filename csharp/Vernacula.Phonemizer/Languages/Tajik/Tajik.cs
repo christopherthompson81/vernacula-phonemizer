@@ -1,10 +1,6 @@
 /**
- * Tajik / тоҷикӣ (tg) phonemizer — canonical IPA. A variety of Persian (Iranian, SW) in the
- * CYRILLIC alphabet, which writes all its vowels → a near-phonemic left-to-right scan with NO short-vowel
- * restoration (the wall that keeps Perso-Arabic `fa` short of full coverage). The letter→IPA tables are DATA (tajik.jsonc);
- * the code here is the scan (word-initial / post-vowel е→je, iotated ё/ю/я, the six-vowel system, the special
- * Cyrillic letters ғ қ ҳ ҷ ӣ ӯ ъ), Persian FINAL stress, a cardinal-number compositor, and the tokenizer.
- * Validated against wikipron tgk_cyrl (broad + narrow, human) + epitran tgk-Cyrl.
+ * Tajik / тоҷикӣ (tg) phonemizer — canonical IPA.
+ * Ported from src/languages/tajik/tajik.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -39,12 +35,10 @@ public static class TajikPhonemizer
             var c = chars[i];
             if (VOWEL_LETTERS.Contains(c))
             {
-                // е (and э) → [je] word-initially or after another vowel (hiatus); → [e] after a consonant.
                 if ((c == "е" || c == "э") && (i == 0 || prevWasVowel))
                 {
                     segs.Add(new Seg { Ph = "j", Nucleus = false });
                 }
-                // Hiatus glide: и/ӣ after another vowel takes a [j] onset (Саид→sajid, Душанбеи→duʃanbeji).
                 else if ((c == "и" || c == "ӣ") && prevWasVowel)
                 {
                     segs.Add(new Seg { Ph = "j", Nucleus = false });
@@ -63,7 +57,6 @@ public static class TajikPhonemizer
                 }
                 else
                 {
-                    // ё/ю/я → j + vowel; the vowel is the nucleus.
                     foreach (var p in Js.CodePoints(ph))
                         segs.Add(new Seg { Ph = p, Nucleus = GLIDE_NUCLEUS.IsMatch(p) });
                     prevWasVowel = true;
@@ -75,7 +68,6 @@ public static class TajikPhonemizer
                 if (cons != "") segs.Add(new Seg { Ph = cons, Nucleus = false });
                 prevWasVowel = false;
             }
-            // unknown char (stray latin/punct inside a token) → skip
         }
         return segs;
     }
@@ -97,17 +89,10 @@ public static class TajikPhonemizer
         return @out;
     }
 
-    // ── Cardinal numbers — Persian composition with the connector у (va) ─────────────────────────────────────────
     private static TajikNumbersDef N => DEF.Numbers;
     /**
-     * Compose the Tajik SPELLING of a non-negative integer, then phonemize it (space-separated where appropriate).
-     *
-     * ⚠ THE SCALE LADDER USED TO STOP AT `миллион`, AND THE FAILURE WAS SILENT. The million branch called
-     * `three(n / 1e6)`, which for n ≥ 10⁹ has a hundreds digit of 10 or more and indexed `units[10]` —
-     * `undefined`. String concatenation turned that into the literal `"undefinedсад"`, and `toSegments` skips
-     * characters it does not know, so `1000000000` came out *сад миллион* ("one hundred million") and
-     * `1234567890` *саду сию чор миллион…* — a 10× error emitted with no marker any gate could see. The ladder
-     * now runs to триллион and `three` refuses a group it cannot spell instead of fabricating one.
+     * Compose the Tajik SPELLING of a non-negative integer, then phonemize it (space-separated where
+     * appropriate).
      */
     public static string NumberWords(double n)
     {
@@ -131,8 +116,6 @@ public static class TajikPhonemizer
             }
             return p;
         }
-        // Largest magnitude first. `1` before ҳазор is dropped (ҳазор, not *як ҳазор*) — the corpus's own form,
-        // e.g. `ҳазору сад`; the larger scale words keep their multiplier (як миллион).
         var SCALES = new (double Value, string Word, bool DropOne)[]
         {
             (1_000_000_000_000d, N.Trillion, false),
@@ -153,14 +136,6 @@ public static class TajikPhonemizer
         }
         if (left > 0) parts.AddRange(Three(left));
         if (parts.Count == 0) return "";
-        // The Persian connector -у (va) glues to the END of the preceding word (бисту як, сесаду чилу панҷ), EXCEPT
-        // before a magnitude word, which just follows its multiplier with a space (ду ҳазор, not ду-у ҳазор).
-        //
-        // ⚠ THE CONNECTOR IS READ FROM THE MANIFEST, and it used to be a LITERAL here while `numbers.and` sat in
-        // tajik.jsonc unread by anything. The two agreed, so nothing was wrong — but the value was authored twice
-        // and only one copy was reachable, which is the setup for a silent divergence rather than a bug today: an
-        // editor correcting the manifest would change nothing, and the manifest is where this file's header says
-        // the data lives. Found by reading, not by any gate; no golden row moves.
         var MAG = new HashSet<string>(new[] { N.Thousand, N.Million, N.Milliard, N.Trillion }, StringComparer.Ordinal);
         var @out = parts[0];
         for (var i = 1; i < parts.Count; i++)
@@ -175,11 +150,8 @@ public static class TajikPhonemizer
     private sealed class Engine : ILanguage
     {
         public string Text(string input) =>
-            // NORMALIZE FIRST, THEN INITIALISMS. The order is load-bearing in both directions: normalize's
-            // abbreviation, unit and rate steps must see `МВт`, `км` and `с.` before an all-caps pass could
-            // spell them out letter by letter, and the initialism pass must run before the tokenizer so a
-            // vowel-less caps run has already become words. The shared symbol tier is called from INSIDE
-            // normalize.ts (its step 9) rather than wrapped around it — see the comment there.
+            // ⚠ NORMALIZE FIRST, THEN INITIALISMS: normalize's abbreviation, unit and rate steps must see
+            // `МВт`, `км` and `с.` before an all-caps pass could spell them out letter by letter.
             Clauses.AssembleClauses(Normalize.NormalizeTajikInitialisms(Normalize.NormalizeTajik(input)), TOKEN, (m, sink) =>
             {
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));

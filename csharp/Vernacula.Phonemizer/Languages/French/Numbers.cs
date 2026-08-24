@@ -1,22 +1,6 @@
 /**
- * French number → words (standard/France, vigesimal 70/80/90). Covers 0 … <10⁹. Decimals read
- * "virgule" + digits.
- *
- * TOKENIZATION: the sub-100 group is emitted as ONE hyphenated orthographic word (dix-sept,
- * vingt-et-un, quatre-vingt-dix-sept) and the magnitude groups are space-separated
- * ("mille neuf cent quatre-vingt-huit"). The hyphens are not cosmetic — they are what makes the
- * numeral resolve against the Lexique compounds. ⚠ THE SPACE-SEPARATED FORM IS PHONEMICALLY WRONG AT THE
- * JOINS, because each piece is then phonemized in isolation:
- *     17  dix sept      → [dis sɛt]   but dix-sept      is [disɛt]    (one [s], not two)
- *     18  dix huit      → [dis ɥit]   but dix-huit      is [dizɥit]   (voiced — huit blocks liaison
- *                                     as a separate word, but not compound-internally)
- *     19  dix neuf      → [dis nœf]   but dix-neuf      is [diznœf]
- *     21  vingt et un   → [vɛ̃ e œ̃]    but vingt-et-un   is [vɛ̃teœ̃]    (the t liaison was lost)
- *     90  quatre vingt dix → [katʁ vɛ̃ dis] but quatre-vingt-dix is [katʁəvɛ̃dis]
- * Lexique attests the compounds (including soixante-dix-sept, quatre-vingt-dix-sept, trente-sept), so
- * they are served as data; the few it lacks (quarante-et-un, cinquante-et-un, soixante-et-un) fall to
- * the per-part concatenation in french.ts, which reproduces the same result. Hyphenating throughout
- * also matches the 1990 orthographic reform.
+ * French number → words (standard/France, vigesimal 70/80/90).
+ * Ported from src/languages/french/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -24,7 +8,6 @@ namespace Vernacula.Phonemizer.Languages.French;
 
 public static class Numbers
 {
-    // Number words are authored DATA — consolidated in french.jsonc; the composition logic below is the algorithm.
     private static IReadOnlyList<string> SMALL => Manifest.MANIFEST.Numbers.Small;
     private static IReadOnlyList<string> TENS => Manifest.MANIFEST.Numbers.Tens;
     private static FrenchMagnitudes MAG => Manifest.MANIFEST.Numbers.Magnitudes;
@@ -42,7 +25,6 @@ public static class Numbers
         }
         if (n < 80)
         {
-            // 60–79: soixante + 0..19
             var r0 = n - 60;
             if (r0 == 0) return MAG.Sixty;
             if (r0 == 1) return $"{MAG.Sixty}-et-un";

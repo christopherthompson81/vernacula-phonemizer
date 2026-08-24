@@ -1,8 +1,6 @@
 /**
- * Afrikaans (af) cardinal-number → words compositor. Afrikaans uses the Dutch-style UNIT-en-TEN order
- * (21 = een-en-twintig) and joins the sub-100 remainder to hundreds/thousands with "en" (honderd-en-vyf). The words
- * are authored in afrikaans.jsonc; numberToWords returns them space-separated and afrikaans.ts phonemizes each
- * through the g2p, so numbers stay in our canonical convention. Handles 0 … 10⁹-1; digit-by-digit fallback beyond.
+ * Afrikaans (af) cardinal-number → words compositor.
+ * Ported from src/languages/afrikaans/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -30,11 +28,7 @@ public static class Numbers
         return rest != 0 ? $"{head} {N.En} {Below100(rest)}" : head;
     }
 
-    /**
-     * A magnitude group. ⚠ A LONE THOUSAND IS BARE — *duisend*, not "een duisend" — but MILLION AND UP KEEP THE
-     * NUMERAL: 1 000 000 is *een miljoen*, and reading it as a bare *miljoen* drops the count entirely. Same split
-     * `core/numbers.ts` documents on `bareMagnitude`.
-     */
+    /** A magnitude group. */
     private static string Magnitude(double mult, string word, bool bareAtOne) =>
         mult == 1 && bareAtOne ? word : $"{Below1000(mult)} {word}";
 

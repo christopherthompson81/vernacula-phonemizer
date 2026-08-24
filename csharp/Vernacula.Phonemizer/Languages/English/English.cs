@@ -1,11 +1,6 @@
 /**
- * Native English text phonemizer — canonical IPA. English is irregular, so pronunciation
- * comes from a CMUdict-derived lexicon + a cleanroom n-gram OOV G2P + a POS perceptron for heteronyms
- * (no rules). Resolution order per word: heteronym (POS-gated, incl. -s plural) → flat lexicon →
- * possessive 's → OOV G2P. Numbers become words (numberToWords) resolved through the same path.
- *
- * NOTE: this stage emits per-word CITATION stress + clause-pause marks. Sentence-level de-accenting (the
- * `look over there` → ˌoᶷvɚ demotion) is a following pass (intonation.ts).
+ * Native English text phonemizer — canonical IPA.
+ * Ported from src/languages/english/english.ts — see that file for the corpus evidence.
  */
 using System.Numerics;
 using System.Text;
@@ -21,8 +16,6 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     private readonly IEnglishG2p _g2p;
     private readonly PosTagger _tagger;
     private readonly IReadOnlySet<string> _unstressed;
-    // Closed word-lists from english.jsonc: clause punctuation → pause, clause-final de-accented pronouns,
-    // and wh-pronouns that demote to secondary stress.
     private readonly IReadOnlyDictionary<string, string> _clausePunctuation;
     private readonly IReadOnlySet<string> _nonTonicFinal;
     private readonly IReadOnlySet<string> _whSecondary;
@@ -81,7 +74,9 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
 
     private static readonly JsRe FIRST_VOWEL = JsRegex.Compile("[aeiouɪʊɛɔəɐæɑɒʌɝɚɜɨʉ]", "u");
 
-    /** Insert primary stress before the first vowel — the nuclear-tonic fallback for an all-unstressed clause. */
+    /**
+     * Insert primary stress before the first vowel — the nuclear-tonic fallback for an all-unstressed clause.
+     */
     private static string PromoteFirstVowel(string ipa)
     {
         var m = FIRST_VOWEL.Match(ipa);
@@ -92,20 +87,8 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     private sealed record WordToken(string Text) : Token;
     private sealed record NumberToken(string Text, bool Ordinal) : Token;
     private sealed record ClauseToken(string Text) : Token;
-    // A run in a script this engine does not own, ALREADY resolved to IPA by whichever engine owns that
-    // script (core/scripts.ts). It carries phonemes rather than text because it must bypass the tagger
-    // and the resolver entirely — there is no English pronunciation of Владимир to look up.
     private sealed record ForeignToken(string Ipa) : Token;
 
-    // number (grouped + decimal) with optional ordinal suffix · word (letters + internal/trailing apostrophes) · clause punct
-    // The word class is LATIN-SCRIPT, not [A-Za-z]: an ASCII-only class split accented loanwords at the
-    // accent, so "naïve" tokenized as "na"+"ve" -> [nˈɑː vˈiː] and "résumé" as "r"+"sum" -> [ˈɑːɹ sˈʌm].
-    // resolveWord folds the diacritics away for lookup (foldLatinDiacritics). Non-Latin scripts stay
-    // unmatched, as before — English is not the engine for them.
-    // ⚠ A WORD MUST START WITH A LATIN LETTER. The class was `[\p{Script=Latin}\p{M}]+`, which also matched a
-    // COMBINING MARK on its own — so the vowel signs of an embedded abugida were claimed as English "words"
-    // and the run was shattered around them: `తెలుగు` reached the Telugu engine as three bare consonants and
-    // read "ta la ga" instead of "telugu". Marks may follow a Latin letter; they may not begin a token.
     private static readonly JsRe TOKEN_RE = JsRegex.Compile(
         "(\\d[\\d,]*(?:\\.\\d+)?)(st|nd|rd|th)?|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*(?:['’]\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)*['’]?)|([.?!,;:])",
         "gu");
@@ -119,7 +102,8 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
 
     /** Dict-only lookup for creoles (e.g. Naija) that NATIVISE English-etymological words: the CMUdict-derived
      *  citation IPA if `word` is known English, else null (an OOV word — likely a substrate loan — for the
-     *  caller to handle differently). No OOV G2P and no clause/stress processing — the raw pronunciation to remap. */
+     *  caller to handle differently). No OOV G2P and no clause/stress processing — the raw pronunciation
+     *  to remap. */
     public string? KnownWord(string word)
     {
         var lower = word.ToLowerInvariant();
@@ -127,26 +111,24 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         return _heteronyms.TryGetValue(lower, out var het) ? het.Default : null;
     }
 
-    /** `text` with an `oovOverride`, for the registry's FOREIGN reader (core/foreign.ts) — the path that reads an
-     *  embedded Latin run inside another language, which needs the prewarmed neural readings.
+    /**
+     * `text` with an `oovOverride`, for the registry's FOREIGN reader — the path that reads an embedded Latin
+     * run inside another language, which needs the prewarmed neural readings.
      *
-     *  ⚠ In the TS this had to call the PROTOTYPE's `text`, because `getPhonemizer` shadows `text` as an OWN
-     *  property with a one-argument wrapper and `this.text` would silently drop arguments two and three. C# has
-     *  no such shadowing — the registry wraps the INSTANCE — so this simply calls the real method. */
+     * ⚠ In the TS this had to call the PROTOTYPE's `text`, because `getPhonemizer` shadows `text` as an OWN
+     * property with a one-argument wrapper that would silently drop the extra arguments. C# has no such
+     * shadowing — the registry wraps the INSTANCE — so this simply calls the real method.
+     */
     public string TextWithOov(string input, Func<string, string?> oovOverride) =>
         Text(input, null, oovOverride);
 
     /** One orthographic word → canonical IPA, given its POS expectation. `oovOverride` (async neural path only,
-     *  enNeural.ts) resolves a genuinely-OOV g2pKey to the BiLSTM tagger's reading BEFORE the sync n-gram engine —
-     *  the sync path passes nothing, so behaviour is byte-identical. */
+     *  enNeural.ts) resolves a genuinely-OOV g2pKey to the BiLSTM tagger's reading BEFORE the sync n-gram
+     *  engine — the sync path passes nothing, so behaviour is byte-identical. */
     private string ResolveWord(string word, PosExpectation? e, Func<string, string?>? oovOverride)
     {
-        // Fold Latin diacritics before any lookup: the lexicon and the n-gram G2P are ASCII-keyed
-        // (CMUdict has `cafe`/`naive`/`jalapeno`, never the accented spellings), and the curly
-        // apostrophe is normalised so "don’t" resolves like "don't".
         var lower = CURLY_APOSTROPHE.Replace(Unicode.FoldLatinDiacritics(word.ToLowerInvariant()), "'");
 
-        // Heteronym (direct or a regular -s/-es plural of a stress-shift heteronym).
         HeteronymEntry? het = _heteronyms.TryGetValue(lower, out var direct) ? direct : null;
         var pluralAllomorph = false;
         if (het is null)
@@ -173,7 +155,6 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             return ipa;
         }
 
-        // Possessive / genitive clitic: X's → base + allomorph; Xs' → base.
         var lookupKey = lower;
         var possAllomorph = false;
         if (lower.EndsWith("'s", StringComparison.Ordinal) && lower.Length > 2)
@@ -189,8 +170,6 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         var over = _lexicon.TryGetValue(lookupKey, out var lex) ? lex : null;
         if (over is null)
         {
-            // OOV → the neural tagger (async path) if it has a reading, else native n-gram G2P (strip any apostrophes
-            // so contractions/loanwords G2P their letters).
             var g2pKey = APOSTROPHES.Replace(lookupKey, "");
             over = oovOverride?.Invoke(g2pKey) ?? (ASCII_WORD.IsMatch(g2pKey) ? _g2p.G2p(g2pKey) : g2pKey);
         }
@@ -240,20 +219,12 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     public string Text(string input) => Text(input, null, null);
 
     /** `wordTransform`, if given, post-processes each resolved word's IPA with its (lowercased) source word —
-     *  the hook the en-GB accent variant uses to apply its per-word lexical-set delta while reusing this engine's
-     *  full number/heteronym/prosody context. Clause pause marks are not passed through it. */
+     *  the hook the en-GB accent variant uses to apply its per-word lexical-set delta while reusing this
+     *  engine's full number/heteronym/prosody context. Clause pause marks are not passed through it. */
     public string Text(string input, Func<string, string, string>? wordTransform, Func<string, string?>? oovOverride)
     {
-        // Text normalization: %, $, units, dates, times, years, romans. ⚠ INITIALISMS run after, so
-        // the Roman-numeral rules get first refusal on all-caps letter runs — run earlier, this spells
-        // "Louis XIV" as EX-EYE-VEE.
         input = Normalize.NormalizeEnglishInitialisms(Normalize.NormalizeEnglish(input), w => _lexicon.ContainsKey(w));
         var tokens = new List<Token>();
-        // GAPS between tokens carry embedded foreign text. English's tokenizer matches Latin script only, so
-        // without this a Greek or Cyrillic run is dropped outright and "The word λόγος means word" reads as
-        // "the word means word".
-        // ⚠ ENGLISH CANNOT USE `assembleClauses` — that is a streaming sink and this is a two-phase pipeline
-        // (tokens → POS tagger → resolver) — but the GAP PASS is separable from the clause model.
         var gapCursor = 0;
         void ClaimGap(int upto)
         {
@@ -278,9 +249,6 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         }
         ClaimGap(input.Length);
 
-        // Expand numbers to words up-front so the POS tagger + resolver see a flat word stream. A word may be
-        // flagged `reduced` at expansion time — the decimal separator "point" is a prosodically-weak connector,
-        // not a stressed content noun, so it is de-accented like a function word.
         var units = new List<Unit>();
         foreach (var t in tokens)
         {
@@ -326,9 +294,6 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             }
         }
 
-        // Tag word-by-word across the whole utterance (START/END padded), resolve each to CITATION IPA, then
-        // de-accent: unstressed function words lose their primary; a clause left with no primary promotes its
-        // last word back to the nuclear tonic. Clause boundaries are the pause marks.
         var allWords = units.SelectMany(u => u.Words.Select(w => w.Text)).ToList();
         var expect = PosExpectations(allWords);
         var wi = 0;
@@ -376,9 +341,6 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             }
             if (c.Items.Count > 0)
             {
-                // Nuclear tonic: the clause-FINAL word takes primary in a TERMINAL clause (. ? ! / utterance end) —
-                // EXCEPT a de-accentable personal pronoun ("please use it" → jˈuːz ɪt, not …ˈɪt). A clause with NO
-                // primary at all always promotes its last word (tonic guarantee), pronoun or not.
                 var terminal = c.Mark is null || c.Mark == "." || c.Mark == "?" || c.Mark == "!";
                 var hasPrimary = c.Items.Any(it => it.Display.Contains('ˈ'));
                 var last = c.Items[^1];
@@ -400,8 +362,6 @@ public static class EnglishFactory
     public static EnglishPhonemizer CreateEnglish()
     {
         const string dir = "languages/english";
-        // accent-lexicon.tsv is 3-column word<TAB>?<TAB>ipa. `parse` receives the post-first-tab REMAINDER
-        // ("?<TAB>ipa"), so the ipa is remainder field [1] (= file column 3). Keep it when non-empty.
         var lexicon = LoadTsv.LoadTsvMap<string>(dir, "accent-lexicon.tsv", (rest, _) =>
         {
             var fields = rest.Split('\t');

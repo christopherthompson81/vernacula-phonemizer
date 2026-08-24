@@ -1,10 +1,7 @@
 /**
- * Dutch morphological decomposition — a config over the shared West-Germanic engine (core/germanicMorphology.ts).
- * Dutch compounds like German/Afrikaans (stadhuis, voetbalveld); dutch.ts uses this to find the COMPOUND (stem·stem)
- * boundaries and phonemize each element with its own stress + coda devoicing. The g2p already handles a word's own
- * prefix reduction and suffix schwa, so only stem·stem splits are consumed downstream. The affix lists come from
- * dutch.jsonc; the stem lexicon is a frequency wordlist (nl-stems.txt, hunspell nl.dic base forms). No per-stem
- * Fugen flags → a static linking-element order, and none of German's language-specific quirks apply.
+ * Dutch morphological decomposition — a config over the shared West-Germanic engine
+ * (core/germanicMorphology.ts).
+ * Ported from src/languages/dutch/morphology.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -14,8 +11,6 @@ public static class Morphology
 {
     private static DutchMorphologyDef M => Manifest.MANIFEST.Morphology;
 
-    // The stem lexicon: a frequency wordlist of Dutch words (one per line). A word ≥3 letters is a valid compound
-    // constituent. Optional — absent → no splitting (every word stays whole, the pre-morphology behaviour).
     private static HashSet<string>? STEMS;
     private static readonly object GATE = new();
 
@@ -56,15 +51,14 @@ public static class Morphology
         StKeep = new HashSet<string>(M.StKeep, StringComparer.Ordinal),
         IsWord = w => Stems().Contains(w),
         IsConstituent = w => w.Length >= 3 && Stems().Contains(w),
-        // Dutch separable prefixes (aan/af/op/over…) are letters that also begin many roots (aandeel, overheid); with no
-        // constituent flags, require the remainder to be a REAL word so they aren't peeled off a monomorpheme.
         RealWordStressedPrefixes = new HashSet<string>(M.PrefixStressed, StringComparer.Ordinal),
         MinTrailingConstituent = 4, // reject 3-letter inflectional-lookalike tails (druk·ken, af·slui·ten, dring·end)
         DontSplitKnownWords = true, // a whole dictionary entry is ONE morpheme — don't tear schakelen → scha·kelen
     };
 
     /** Is `w` a single known dictionary word? A monomorphemic entry (minister, hamster, spelling) must NOT be compound-
-     *  split — with no constituent flags every short lexicon word (ter, ken, ster) would else be a spurious second part. */
+     *  split — with no constituent flags every short lexicon word (ter, ken, ster) would else be a spurious
+     *  second part. */
     public static bool IsLexicalWord(string w) => Stems().Contains(w);
 
     /** Decompose a Dutch word into ordered morphemes with a stress hint. */

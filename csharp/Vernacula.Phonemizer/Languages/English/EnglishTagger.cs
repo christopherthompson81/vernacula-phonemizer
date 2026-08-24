@@ -1,14 +1,6 @@
 /**
- * English OOV G2P — the neural OOV reader. A per-grapheme BiLSTM (ONNX) that labels each
- * letter with an ARPABET-chunk TAG in a SINGLE forward pass, replacing the joint n-gram (and the net-harmful
- * compound-splitter) on the non-lexicon tail. On a clean CMUdict held-out it roughly HALVES the phone-error-rate vs
- * the n-gram pipeline (9.3% vs 18.2%; word-exact 59% vs 37%). It emits stress-bearing ARPABET, then finishes it the
- * SAME way as the n-gram path — `enforceSinglePrimary` + `collapseGeminates` + `arpabetToIpa` (shared, so a G2P word
- * has no seam with the dict) — so the tagger's only job is the letters→ARPABET map. A per-letter CONSONANT mask
- * (charTags) keeps it from emitting an impossible tag.
- *
- * `onnxruntime` is an OPTIONAL dependency loaded lazily; if it — or the model — is absent,
- * CreateEnglishTagger() resolves to `null` and the async path (EnglishNeural) falls back to the sync n-gram engine.
+ * English OOV G2P — the neural OOV reader.
+ * Ported from src/languages/english/englishTagger.ts — see that file for the corpus evidence.
  */
 using System.Text.Json;
 using Vernacula.Phonemizer.Core;
@@ -17,7 +9,10 @@ namespace Vernacula.Phonemizer.Languages.English;
 
 public interface IEnglishTagger
 {
-    /** A bare OOV word (letters) → canonical IPA, or "" to defer to the sync n-gram engine (out-of-vocab letter). */
+    /**
+     * A bare OOV word (letters) → canonical IPA, or "" to defer to the sync n-gram engine (out-of-vocab
+     * letter).
+     */
     Task<string> Tag(string word);
 }
 
@@ -73,8 +68,6 @@ public static class EnglishTaggerFactory
             var chars = Js.CodePoints(word.ToLowerInvariant());
             var T = chars.Count;
             if (T == 0) return "";
-            // DECLINE ("") on any letter outside the training vocab — its consonant isn't in the mask, so tagging it
-            // would emit an arbitrary ARPABET chunk; the caller then defers the word to the sync n-gram engine.
             var ids = new long[T];
             for (var i = 0; i < T; i++)
             {
@@ -96,8 +89,6 @@ public static class EnglishTaggerFactory
                 if (chunk.Length > 0) phones.AddRange(chunk.Split(' '));
             }
             if (phones.Count == 0) return "";
-            // finish the SAME way the n-gram path does: one primary stress, collapse seam geminates, then render to IPA
-            // (pass the word so the single-morpheme de-/re- reduction + barred-i rules fire, as for source "N").
             return _arpabetToIpa(
                 EnglishG2pFactory.EnforceSinglePrimary(EnglishG2pFactory.CollapseGeminates(phones, _vowels), _vowels),
                 word);

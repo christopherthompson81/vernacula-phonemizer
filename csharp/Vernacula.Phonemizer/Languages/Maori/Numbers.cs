@@ -1,21 +1,7 @@
 /**
- * Māori cardinal number → words. Polynesian decimal with an additive particle, so a bespoke composer:
- *   • units tahi … iwa; 10 tekau; 20–90 are <unit> tekau (rua tekau 20 … iwa tekau 90);
- *   • the unit digit is introduced by the additive particle MĀ — tekau mā tahi 11, rua tekau mā rima 25,
- *     kotahi rau mā tahi 101, iwa rau iwa tekau mā iwa 999. Everything larger is juxtaposed with no particle
- *     (kotahi rau tekau mā tahi 111, kotahi mano rua rau toru tekau mā whā 1234);
- *   • a magnitude with multiplier 1 uses KOTAHI ("one and only one"), not tahi: kotahi rau 100, kotahi mano 1000,
- *     kotahi miriona 10⁶, kotahi piriona 10⁹.
- * This is the MODERN STANDARD series. The older/alternative decade forms (ngahuru 10, and the ngahuru mā tahi /
- * tekau mā tahi doublet) are NOT used: modern te reo — as taught and as used in Māori-medium numeracy — is uniformly
- * tekau-based, which also keeps 10 and 20–90 morphologically consistent (tekau, rua tekau, …). Covers 0 … <10¹²;
- * ≥10¹² degrades to digit-by-digit.
- *
- * Source: Omniglot "Numbers in Māori (Ngā tau)" (kore 0, tahi…iwa, tekau ~ ngahuru, the tekau mā teens, rua tekau
- * decades, (kotahi) rau, (kotahi) mano); The Te Reo Māori Classroom "Māori Numbers — Beyond 100" (mā comes between
- * the tens and the ones only: kotahi rau mā tahi 101, kotahi rau tekau mā tahi 111, kotahi rau rua tekau mā whā);
- * Superprof NZ "How to Count Numbers in Māori from 1 to 1 Billion" (mano/miriona/piriona, kotahi before a magnitude,
- * "kotahi mano, rua rau, toru tekau mā whā" = 1234).
+ * Māori cardinal number → words — Polynesian decimal: the unit digit is introduced by the additive
+ * particle MĀ, and a magnitude with multiplier 1 takes KOTAHI rather than tahi.
+ * Ported from src/languages/maori/numbers.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

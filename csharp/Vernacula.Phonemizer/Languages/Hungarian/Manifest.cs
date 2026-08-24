@@ -1,8 +1,6 @@
 /**
- * Loads the Hungarian data manifest (hungarian.jsonc) once at module init and exposes it typed. Holds the
- * hand-authored longest-match orthography→IPA rule table (digraphs + their geminate forms), clause punctuation,
- * and the number words. The ALGORITHMS (the longest-match scan + doubled-consonant gemination + fixed
- * first-syllable stress, the cardinal compositor) stay in code (hungarian.ts / numbers.ts).
+ * Loads the Hungarian data manifest (hungarian.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/hungarian/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -23,9 +21,9 @@ public sealed class HungarianNumbersDef
 public sealed class HungarianManifest
 {
     /**
-     * The longest-match orthography→IPA rule table. ⚠ THE TS TYPE IS A TUPLE, `[string, string, boolean][]`,
+     * The longest-match orthography→IPA rule table. The TS type is a tuple, `[string, string, boolean][]`,
      * which JSON writes as an array-of-arrays; System.Text.Json has no tuple deserializer for that shape, so
-     * the rows arrive as JSON elements and are projected once into `RULES` below.
+     * the rows arrive as JsonElement and are projected once into `RULES` below.
      */
     public List<List<System.Text.Json.JsonElement>> Rules { get; init; } = new();
     public IReadOnlyList<string> VoicelessTriggers { get; init; } = Array.Empty<string>();

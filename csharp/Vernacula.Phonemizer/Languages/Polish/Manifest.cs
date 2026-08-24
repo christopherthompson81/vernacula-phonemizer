@@ -1,4 +1,7 @@
-/** Loads the consolidated Polish data manifest (polish.jsonc) once and exposes it typed. Algorithms live in g2p.ts. */
+/**
+ * Loads the consolidated Polish data manifest (polish.jsonc) once and exposes it typed.
+ * Ported from src/languages/polish/manifest.ts — see that file for the corpus evidence.
+ */
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.Polish;

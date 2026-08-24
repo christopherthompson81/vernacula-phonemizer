@@ -1,7 +1,6 @@
 /**
- * Loads the Modern Greek data manifest (greek.jsonc) once at module init. Holds the context-free hand-authored
- * DATA (vowel/consonant/digraph tables, palatalisation map, number words); the CONTEXT rules (palatalisation,
- * αυ/ευ + σ voicing, synizesis, double-consonant simplification) live in greek.ts.
+ * Loads the Modern Greek data manifest (greek.jsonc) once at module init.
+ * Ported from src/languages/greek/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

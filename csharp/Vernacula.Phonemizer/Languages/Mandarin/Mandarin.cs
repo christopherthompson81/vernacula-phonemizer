@@ -1,10 +1,7 @@
 /**
- * Mandarin Chinese (cmn) phonemizer — canonical IPA. Two input paths, one converter:
- *   · HANZI → pinyin via the pypinyin char + phrase dicts (polyphone-aware), then pinyin → IPA;
- *   · direct tokenized pinyin with tone digits → IPA.
- * The converter emits Chao tone letters and applies third-tone sandhi within a Han run, plus 一/不 sandhi.
- * Numbers and text normalization run ahead of it. The data (syllable→IPA table, tone system, sandhi) lives
- * beside this file; this module wires it into the Phonemizer interface.
+ * Mandarin Chinese (cmn) phonemizer — canonical IPA. Two input paths, one converter: hanzi → pinyin →
+ * IPA, and directly tokenized pinyin with tone digits → IPA.
+ * Ported from src/languages/mandarin/mandarin.ts — see that file for the corpus evidence.
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
@@ -17,21 +14,21 @@ public delegate string ForeignPhonemizer(string latin);
 public sealed class MandarinPhonemizer : ILanguage
 {
     private static readonly JsRe HAN = JsRegex.Compile("\\p{Script=Han}", "u");
-    // ⚠ `\p{Script=Latin}`, NOT `[A-Za-z]`. The ASCII class split an accented Latin word into pieces at every
-    // diacritic and handed each fragment to the English reader separately: `Haldarsvík` became `Haldarsv` + `k`.
+    // \p{Script=Latin}, NOT [A-Za-z]: the ASCII class splits an accented Latin word at every diacritic and
+    // hands each fragment to the English reader separately.
     private static readonly JsRe LATIN = JsRegex.Compile("\\p{Script=Latin}", "u");
-    /** Continuation of a Latin run: the script plus combining marks, so a decomposed accent stays attached. */
+    /**
+     * Continuation of a Latin run: the script plus combining marks, so a decomposed accent stays attached.
+     */
     private static readonly JsRe LATIN_RUN = JsRegex.Compile("[\\p{Script=Latin}\\p{M}]", "u");
     /** A letter or combining mark that is neither Han nor Latin — the run the script router should read.
      *  `\p{M}` is included so an abugida's matras stay inside their own run instead of splitting it. */
     private static readonly JsRe FOREIGN_CHAR = JsRegex.Compile("[\\p{L}\\p{M}]", "u");
-    // Clause punctuation + the measure-word set are DATA (cmn.jsonc). A standalone 2 before a measure word
-    // reads colloquial 两 (两个, 两天), not 二.
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
     private static string MEASURE_WORDS => Manifest.MANIFEST.MeasureWords;
     // A whitespace-separated pinyin string with at least one tone digit takes the direct pinyin path.
-    // ⚠ CASE-SENSITIVE: with the `i` flag this used to match `MP3`, which was returned VERBATIM into the
-    // phoneme stream. An all-caps run is a designation.
+    // ⚠ CASE-SENSITIVE on purpose — with an ignore-case flag this matches `MP3`, which then reaches the
+    // phoneme stream verbatim. An all-caps run is a designation, not pinyin.
     private static readonly JsRe PINYIN_INPUT = JsRegex.Compile("^[a-zü:]+[1-5]?(?:\\s+[a-zü:]+[1-5]?)*$", "u");
     private static readonly JsRe TONE_DIGIT_ANY = JsRegex.Compile("[1-5]");
     private static readonly JsRe FOUR_DIGITS = JsRegex.Compile("^\\d{4}$");
@@ -39,16 +36,11 @@ public sealed class MandarinPhonemizer : ILanguage
     private static readonly JsRe NUMBER_RE = JsRegex.Compile("\\d{1,3}(?:,\\d{3})+|\\d+(?:\\.\\d+)?", "g");
     private static readonly JsRe AFTER_WS = JsRegex.Compile("^\\s*(\\S)", "u");
 
-    // symbol normalization — Mandarin: 百分之 PRECEDES the number (百分之九十三); units follow.
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        // `multiply` — this language's OWN word, harvested from its existing `×` rule. Declaring it here is
-        // what makes ASCII `x` read like `×`.
         Multiply = new MultiplyDef { Times = "乘以" },
         Percent = new[] { "百分之" },
         PercentPrefix = true,
-        // Currency: the sign was DROPPED outright ($50 read as 五十, losing 美元). Mandarin says the unit
-        // after the number, which is what the shared tier emits.
         Currency = new Dictionary<string, IReadOnlyList<string>>
         {
             ["$"] = new[] { "美元" }, ["€"] = new[] { "欧元" }, ["£"] = new[] { "英镑" },
@@ -60,31 +52,26 @@ public sealed class MandarinPhonemizer : ILanguage
             ["m"] = new[] { "米" }, ["kg"] = new[] { "千克" }, ["g"] = new[] { "克" },
             ["km/h"] = new[] { "公里每小时" }, ["°c"] = new[] { "摄氏度" }, ["°f"] = new[] { "华氏度" },
             ["°"] = new[] { "度" },
-            // ℃ and ℉ are SINGLE CODE POINTS (U+2103, U+2109), not `°`+letter, so the two keys above could
-            // not reach them and `20℃` read as bare 二十 — the whole unit gone, not merely the degree sign.
+            // ℃ and ℉ are SINGLE code points (U+2103, U+2109), not `°`+letter, so the "°c"/"°f" keys above
+            // cannot reach them. Neither pair is redundant.
             ["℃"] = new[] { "摄氏度" }, ["℉"] = new[] { "华氏度" },
         },
-        // `km²` → 平方公里. The measure word PRECEDES the unit and fuses to it with no space — the `compound`
-        // position. `before` would emit "平方 公里", splitting one Han run into two and losing the segmenter's
-        // chance to see the compound.
+        // The measure word PRECEDES the unit and fuses to it with no space — hence Compound, not Before,
+        // which would split one Han run into two and hide the compound from the segmenter.
         ExponentWords = new ExponentWordsDef
         {
             Squared = new[] { "平方" },
             Cubed = new[] { "立方" },
             Position = ExponentPosition.Compound,
         },
-        // BARE EXPONENT — STANDARD MATHEMATICAL REGISTER, not corpus attestations.
         BareExponent = new BareExponentDef
         {
             Squared = "{n}的平方", Cubed = "{n}的立方", Power = "{n}的{e}次方", Negative = "负",
         },
-        // Chinese groups by MYRIADS, so the magnitude word between a number and its unit is 万 (10⁴) or 亿
-        // (10⁸). Undeclared, the tier's number–unit adjacency broke on it and the unit fell through to the
-        // English letter reading.
+        // Chinese groups by MYRIADS, so the magnitude word between a number and its unit is 万 (10⁴) or 亿.
         Magnitudes = new[] { "万", "亿", "兆" },
-        // Chinese has NO SPACES between words, so a unit or a currency sign is normally flanked by Han —
-        // which is exactly what the tier's letter-boundary guards were rejecting. Only punctuation-adjacent
-        // instances worked.
+        // No spaces between words, so a unit or currency sign is normally flanked by Han — which the tier's
+        // letter-boundary guards otherwise reject.
         UnspacedScript = true,
     });
 
@@ -99,7 +86,9 @@ public sealed class MandarinPhonemizer : ILanguage
         _foreign = foreign;
     }
 
-    /** A Han run (with a per-char sandhi-exempt mask): segment → 一/不 sandhi → pinyin → IPA (3-3 within run). */
+    /**
+     * A Han run (with a per-char sandhi-exempt mask): segment → 一/不 sandhi → pinyin → IPA (3-3 within run).
+     */
     private string HanRun(IReadOnlyList<string> chars, IReadOnlyList<bool> exempt)
     {
         var tokens = Segmenter.Segment(chars, _pinyin, exempt);
@@ -140,14 +129,13 @@ public sealed class MandarinPhonemizer : ILanguage
         }
     }
 
-    /** Substitute Arabic numbers with Chinese numeral characters, tracking which code points are sandhi-exempt. */
+    /** Substitute Arabic numbers with Chinese numerals, tracking which code points are sandhi-exempt. */
     private static (List<string> Cp, List<bool> Exempt) SubstituteNumbers(string input)
     {
         var cp = new List<string>();
         var exempt = new List<bool>();
         var last = 0;
-        // Comma grouping is part of the number, not a clause boundary: "783,562" was read as two numbers
-        // with a PAUSE between them. 61 occurrences in the corpus.
+        // Comma grouping is part of the number, not a clause boundary ("783,562" is one number, no pause).
         foreach (Match m in NUMBER_RE.Matches(input))
         {
             if (m.Index > last)
@@ -156,9 +144,8 @@ public sealed class MandarinPhonemizer : ILanguage
                     cp.Add(c);
                     exempt.Add(false);
                 }
-            // The following character must be found ACROSS WHITESPACE. The corpus writes "2009 年" with a
-            // space — 272 years and every 两 case — and taking the literal next character saw the space, so
-            // the year rule and the 两 rule both silently failed.
+            // The following character must be found ACROSS WHITESPACE: the corpus writes "2009 年" with a
+            // space, and the literal next character is the space, so the year and 两 rules would never fire.
             var rest = input[(m.Index + m.Value.Length)..];
             var afterM = AFTER_WS.Match(rest);
             AppendNumber(cp, exempt, m.Value, afterM.Success ? afterM.Groups[1].Value : null);
@@ -175,17 +162,15 @@ public sealed class MandarinPhonemizer : ILanguage
 
     public string Text(string input)
     {
-        // the Mandarin-specific rewrite (fraction order) before the shared symbol tier.
-        // ⚠ `spellInitialisms` LAST: the symbol tier reads a temperature's SCALE LETTER, so spelling the ⟨C⟩
-        // of `20°C` before it runs destroys the unit.
+        // Order: the Mandarin rewrite (fraction order) → the shared symbol tier → SpellInitialisms LAST,
+        // because the tier reads a temperature's scale letter and spelling the ⟨C⟩ of `20°C` destroys it.
         input = Normalize.SpellInitialisms(SYMBOLS(Normalize.NormalizeMandarin(input)));
-        // Tone-marked pinyin input (letters + a tone digit, no Han) keeps the direct path (e.g. "ni3 hao3").
         if (!HAN.IsMatch(input) && TONE_DIGIT_ANY.IsMatch(input) && PINYIN_INPUT.IsMatch(input))
             return _pinyinToIpa(input);
 
         var (cp, exempt) = SubstituteNumbers(input);
-        // Code-point run scanner (Han / Latin / punctuation), not a single regex — so it drives clauseSink()
-        // directly rather than going through assembleClauses, but reuses the shared emit/pause/flush assembly.
+        // A code-point run scanner (Han / Latin / other), deliberately not a single regex: it drives the
+        // clause sink directly instead of going through AssembleClauses, but reuses the same assembly.
         var (sink, finish) = Clauses.ClauseSink();
         var i = 0;
         while (i < cp.Count)
@@ -193,7 +178,6 @@ public sealed class MandarinPhonemizer : ILanguage
             var ch = cp[i];
             if (HAN.IsMatch(ch))
             {
-                // Han run (may include synthesized numerals)
                 var j = i;
                 while (j < cp.Count && HAN.IsMatch(cp[j])) j++;
                 sink.Emit(HanRun(cp.GetRange(i, j - i), exempt.GetRange(i, j - i)));
@@ -201,7 +185,6 @@ public sealed class MandarinPhonemizer : ILanguage
             }
             else if (LATIN.IsMatch(ch))
             {
-                // Latin run → foreign (en)
                 var j = i;
                 while (j < cp.Count && LATIN_RUN.IsMatch(cp[j])) j++;
                 sink.Emit(_foreign is not null ? _foreign(string.Concat(cp.GetRange(i, j - i))) : "");
@@ -209,11 +192,9 @@ public sealed class MandarinPhonemizer : ILanguage
             }
             else if (FOREIGN_CHAR.IsMatch(ch))
             {
-                // A LETTER RUN THAT IS NEITHER HAN NOR LATIN → the script router (core/scripts.ts). Without
-                // this branch such a run was SKIPPED, so Mandarin silently deleted every non-Latin foreign
-                // script. ⚠ THE RUN SPANS A SINGLE INTERIOR SPACE — Thai separates a reduplication mark
-                // (`คนอ้วน ๆ`), and split at the space, `ๆ` reaches Thai with no antecedent. Only ONE space,
-                // and only between two foreign letters.
+                // A letter run that is neither Han nor Latin goes to the script router. ⚠ The run spans a
+                // SINGLE interior space, and only between two foreign letters — Thai separates a
+                // reduplication mark (`คนอ้วน ๆ`), which split at the space reaches Thai with no antecedent.
                 var j = i;
                 while (j < cp.Count)
                 {
@@ -229,7 +210,6 @@ public sealed class MandarinPhonemizer : ILanguage
             }
             else
             {
-                // punctuation → pending pause; other → skip
                 if (CLAUSE_MARK.TryGetValue(ch, out var mk) && mk.Length > 0) sink.Pause(mk);
                 i++;
             }
@@ -256,7 +236,7 @@ public sealed class MandarinPhonemizer : ILanguage
         var syllableIpa = LoadTsv.LoadTsvMap("languages/mandarin", "syllable-ipa.tsv");
         var chars = LoadTsv.LoadTsvMap<List<string>>("languages/mandarin", "chars.tsv", (v, _) => v.Split(',').ToList());
         var phrases = LoadTsv.LoadTsvMap("languages/mandarin", "phrases.tsv");
-        // Longest phrase key (code points) — the scan bound; ≥2 so a single-char run always has room.
+        // Longest phrase key in code points — the scan bound; seeded at 2 so a single-char run has room.
         var maxPhrase = phrases.Keys.Aggregate(2, (m, k) => Math.Max(m, Js.CodePoints(k).Count));
 
         var st = Manifest.MANIFEST.Sandhi.ThirdThird;

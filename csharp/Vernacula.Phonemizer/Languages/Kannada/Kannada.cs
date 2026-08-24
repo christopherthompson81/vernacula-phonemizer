@@ -1,8 +1,6 @@
 /**
- * Native Kannada (kn) text phonemizer — canonical IPA. Kannada is a Dravidian Brahmic abugida
- * read by the generic engine (core/abugida.ts), mirroring Telugu: unlike Hindi there is NO inherent-vowel
- * deletion (every akshara is pronounced — inherent /a/). kannada.ts adds only the light post-processing:
- * geminate → length, ಳ್ಳ → [ɭː], and the word-final anusvara ಂ realized as [m]. First-syllable (weak) stress.
+ * Native Kannada (kn) text phonemizer — canonical IPA.
+ * Ported from src/languages/kannada/kannada.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -28,7 +26,6 @@ public sealed class KannadaPhonemizer : ILanguage
     private static Func<string, string>? G2P;
     private static string G2p(string w) => (G2P ??= Abugida.MakeAbugidaG2P(DEF, PhonologyLoader.LoadSharedPhonology()))(w);
 
-    // Geminate consonant (doubled base, possibly aspirated) → single + length ː.
     private static readonly JsRe GEMINATE = JsRegex.Compile(
         "(t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|ʈʰ|ɖʱ|ɡʱ|kʰ|t̪|d̪|[kɡpbmnlʃʂsʈɖɳɭɲŋjɦhʋɾr])\\1(?!͡)", "gu");
     private static readonly JsRe LENGTH_ASPIRATE = JsRegex.Compile("ː([ʰʱ])", "gu");
@@ -39,12 +36,10 @@ public sealed class KannadaPhonemizer : ILanguage
     /** One Kannada word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        // Word-final anusvara ಂ → [m]; medial ಂ is a homorganic nasal, handled by the engine.
         var norm = FINAL_ANUSVARA.Replace(word.Normalize(NormalizationForm.FormC), "ಮ್");
         var x = G2p(norm);
         x = LENGTH_ASPIRATE.Replace(GEMINATE.Replace(x, "$1ː"), "$1ː");
         x = RETROFLEX_GEM.Replace(x, "ɭː"); // ಳ್ಳ → geminate retroflex [ɭː]
-        // First-syllable (weak) stress: mark the first vowel nucleus.
         var m = FIRST_VOWEL.Match(x);
         if (m.Success) x = x[..m.Index] + "ˈ" + x[m.Index..];
         return x.Normalize(NormalizationForm.FormC);
@@ -53,16 +48,13 @@ public sealed class KannadaPhonemizer : ILanguage
     private static string ToAscii(string d) =>
         string.Concat(Js.CodePoints(d).Select(c => KANNADA_DIGITS.TryGetValue(c, out var a) ? a : c));
 
-    /**
-     * Digits → IPA. The compositor is Kannada's OWN (numbers.ts), not the shared `indicNumberWords`:
-     * Kannada fuses 21-99 into one word, has suppletive round hundreds and takes combining magnitude forms
-     * before a remainder.
-     */
+    /** Digits → IPA. */
     private static string Number(string digits)
     {
         var n = Js.Number(ToAscii(digits));
-        // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA. Read digit-at-a-time instead,
-        // THROUGH THE SAME COMPOSER.
+        // `n` is a JS `number` here as in the TS: past 2^53 the low digits are gone, so the composed numeral
+        // would be wrong. Read digit-at-a-time instead, THROUGH THE SAME COMPOSER — the raw ASCII digits must
+        // never leak into the IPA.
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d))
             return string.Join(" ", Js.CodePoints(ToAscii(digits))
                 .SelectMany(d => Numbers.NumberToWords(Js.Number(d)).Split(' '))
@@ -70,8 +62,8 @@ public sealed class KannadaPhonemizer : ILanguage
         return string.Join(" ", Numbers.NumberToWords(n).Split(' ').Select(PhonemizeWord));
     }
 
-    // The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
-    // diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*).
+    // The foreign arm is LATIN_RUN — ALL of Latin plus marks, not `[A-Za-z]+`, which ended the token at a
+    // diacritic and left that letter to be read as an English letter name.
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"([{KANNADA_WORD}]+)|({HostWord.LATIN_RUN})|([{DIGIT_CLASS}]+)|([।॥.?!,;:])", "gu");
 
@@ -81,7 +73,6 @@ public sealed class KannadaPhonemizer : ILanguage
 
     public string Text(string input)
     {
-        // TEXT NORMALIZATION runs first, before tokenization — it is pure text→text (see normalize.ts).
         return Clauses.AssembleClauses(Normalize.NormalizeKannada(input), TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));

@@ -1,9 +1,7 @@
 /**
- * Loads the Pashto data manifest (pashto.jsonc) once and exposes it typed. The TS declares `PashtoDef`
- * inline in pashto.ts; C# names it here. Hand-authored DATA only — the consonant letters, the harakat
- * values, the sukun/shadda marks, the zwarakay (the default short vowel the abjad does not write), clause
- * punctuation and the numeral words. The ALGORITHM — the carrier rules that decide vowel-vs-glide, the
- * zwarakay insertion, medial-schwa deletion and stress — stays in code.
+ * Loads the Pashto data manifest (pashto.jsonc) once and exposes it typed — letters, harakat, marks, the
+ * zwarakay, clause punctuation and the numeral words. The algorithm stays in Pashto.cs.
+ * Ported from src/languages/pashto/pashto.ts, which declares `PashtoDef` inline — see it for the evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -12,8 +10,7 @@ namespace Vernacula.Phonemizer.Languages.Pashto;
 public sealed class PashtoNumbersDef
 {
     public string[] Units { get; init; } = [];
-    /** 10-19, IRREGULAR FUSED forms — so 10 is `Teens[0]` and there is no separate `ten` key; one that was
-     *  there duplicated it and nothing read it (#939). */
+    /** 10-19, IRREGULAR FUSED forms — 10 is `Teens[0]`, and there is deliberately no separate `ten` key. */
     public string[] Teens { get; init; } = [];
     public IReadOnlyDictionary<string, string> Tens { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> Compound { get; init; } = new Dictionary<string, string>();

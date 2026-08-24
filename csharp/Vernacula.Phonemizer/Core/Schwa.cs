@@ -1,8 +1,6 @@
 /**
- * Medial schwa deletion for Indic-abugida IPA (Ohala 1983 VCəCV rule). Pure IPA-string in/out: segment into
- * C/V/stress units, then delete a medial ə that sits in a V·C·ə·C·V context (right-to-left), keeping the
- * syllable heavy across a geminate (…ː). Word-FINAL schwa deletion is handled by the caller (it depends on
- * the monosyllable guard). Generic across Indic languages.
+ * Medial schwa deletion for Indic-abugida IPA (Ohala 1983 VCəCV rule).
+ * Ported from src/core/schwa.ts — see that file for the corpus evidence.
  */
 
 namespace Vernacula.Phonemizer.Core;
@@ -58,7 +56,8 @@ public static class Schwa
     private static readonly JsRe NonSpace = JsRegex.Compile("\\S");
 
     /** Delete the medial inherent vowel in a V·C·_·C·V context (right-to-left), per word (whitespace-preserving).
-     *  `schwa` is the inherent-vowel symbol to delete — /ə/ for Hindi, /ɔ/ for Bengali (both already in the vowel
+     *  `schwa` is the inherent-vowel symbol to delete — /ə/ for Hindi, /ɔ/ for Bengali (both already in the
+     * vowel
      *  base set), so the same Ohala rule serves either abugida. */
     public static string DeleteMedialSchwa(string ipa, string schwa = "ə")
     {
@@ -88,7 +87,6 @@ public static class Schwa
                 var pp = PrevPhon(p - 1); // vowel before it?
                 var n = NextPhon(idx + 1); // consonant?
                 var nn = NextPhon(n + 1); // vowel after it?
-                // A GEMINATE (…ː) on either side keeps the syllable heavy → the schwa is retained.
                 if (p >= 0 &&
                     pp >= 0 &&
                     n < units.Count &&

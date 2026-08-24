@@ -1,12 +1,6 @@
 /**
- * Japanese (Tokyo) lexical pitch accent. Accent is lexical and
- * contrastive (箸 haꜜɕi "chopsticks" vs 端 haɕi "edge"); the accent NUCLEUS is marked with the IPA downstep
- * ꜜ (U+A71C) placed AFTER the nucleus mora. Heiban (accentless, nucleus 0) words carry no mark.
- *
- * The nucleus is looked up per bunsetsu: the SURFACE (kanji) first, so homographs the reading collapses are
- * disambiguated (はし→箸=1), then the READING (kana). A bunsetsu is a content word + trailing case/topic
- * particles or copula (橋を, 天気です); the accent sits on the content stem, so we strip those to recover it and
- * apply the nucleus to the full reading. Data: pitch-accent.tsv (merged consensus > inflected > base).
+ * Japanese (Tokyo) lexical pitch accent.
+ * Ported from src/languages/japanese/pitch.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -26,8 +20,6 @@ public static class Pitch
 
     private static readonly JsRe KATAKANA_RANGE = JsRegex.Compile("[ァ-ヶ]", "gu");
 
-    // Raw key, then a katakana→hiragana FOLDED fallback (UniDic/OpenJTalk layers are hiragana-keyed; the NHK
-    // consensus layer stores katakana surfaces UNFOLDED, so the raw lookup hits those first).
     private static int? Get(string k)
     {
         var m = Lex();
@@ -36,15 +28,14 @@ public static class Pitch
         return m.TryGetValue(folded, out var v) ? v : null;
     }
 
-    /** Whether the pitch lexicon has an entry for a surface/reading key (with the katakana→hiragana fold get() applies).
-     *  For the pitch eval's OOV tracking: an out-of-lexicon word renders heiban (0), indistinguishable from a real
-     *  heiban hit, so the eval must be able to tell a genuine agreement from an OOV-defaulted-flat coincidence. */
+    /**
+     * Whether the pitch lexicon has an entry for a surface/reading key (with the katakana→hiragana fold that
+     * Get applies). An OOV word renders heiban (0), so the eval needs this to tell a real heiban hit from an
+     * OOV default.
+     */
     public static bool PitchLexiconHas(string key) => Get(key) is not null;
 
     private static readonly JsRe HAN_END = JsRegex.Compile("\\p{Script=Han}$", "u");
-    // Trailing affixes to strip to recover a noun bunsetsu's content word (whose accent governs the phrase):
-    // case/topic particles (橋を→橋), and the copula + optional sentence-final particle (天気です→天気). The affix
-    // sets are DATA (japanese.jsonc → pitchStrip); the strip logic is here.
     private static PitchStripDef PS => Manifest.MANIFEST.PitchStrip;
     private static readonly JsRe[] STRIPS =
     {
@@ -63,9 +54,6 @@ public static class Pitch
     /** Resolve the accent nucleus (mora index, 0 = heiban) for a bunsetsu: surface first, then reading. */
     public static int AccentNucleus(string surface, string reading)
     {
-        // A bare PARTICLE token is always unaccented (heiban). Particles reach here as their own tokens when
-        // the preceding content is digits or katakana (二時に, ビザを) — the pitch dictionary must not put a
-        // downstep on them (85 で → de̞ꜜ was audible nonsense in the corpus).
         if (PARTICLE_TOKENS.Contains(surface)) return 0;
         var n = Get(surface); // 1. exact surface (disambiguates homographs the reading collapses)
         if (n is null)

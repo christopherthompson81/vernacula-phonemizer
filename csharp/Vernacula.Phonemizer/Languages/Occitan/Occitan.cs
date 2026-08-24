@@ -1,14 +1,8 @@
 /**
  * Occitan (oc) phonemizer — occitan / lenga d'òc, Occitano-Romance (Gallo-Romance), Latin script, canonical
- * IPA. Targets LANGUEDOCIEN (the central reference standard). A greedy longest-match
- * grapheme scan + code rules:
- *   - the signature vowels: unstressed ⟨o⟩→[u], final unstressed ⟨a⟩→[ɔ], ⟨u⟩→[y] ([w] as a diphthong offglide),
- *     ⟨ò⟩→[ɔ], ⟨è⟩→[ɛ];
- *   - ⟨c g⟩ softening before a front vowel (⟨c⟩→[s], ⟨g⟩→[d͡ʒ]), ⟨qu gu⟩→[k ɡ] (+[kw ɡw] before a back vowel);
- *   - ⟨lh⟩→[ʎ], ⟨nh⟩→[ɲ], ⟨ch⟩→[t͡ʃ], ⟨j⟩→[d͡ʒ], ⟨v⟩→[b] (betacism), ⟨h⟩ silent; intervocalic ⟨s⟩→[z];
- *   - the Languedocien FINAL-CONSONANT DELETION: a word-final ⟨n r⟩ after a vowel drops (Japon→dʒapu, cantar→kanta).
- * SPIRANTIZATION (intervocalic b/d/g→β/ð/ɣ), the rhotic tap/trill, and STRESS (unwritten, not emitted) are
- * folded/deferred.
+ * IPA, targeting LANGUEDOCIEN (the central reference standard): a greedy longest-match grapheme scan plus
+ * code rules for softening, the ⟨u⟩ glide and Languedocien final-consonant deletion.
+ * Ported from src/languages/occitan/occitan.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -33,7 +27,6 @@ public sealed class OccitanPhonemizer : ILanguage
     private static IReadOnlyDictionary<string, string> G => DEF.Graphemes;
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => DEF.ClausePunctuation;
     private static readonly List<string> ORDER = DEF.Digraphs.Keys.OrderByDescending(k => k.Length).ToList();
-    // Letter environments (occitan.jsonc): ⟨c g qu gu⟩ soften before a FRONT letter.
     private static readonly IReadOnlySet<string> VOWEL_LETTER = new HashSet<string>(DEF.VowelLetters, StringComparer.Ordinal);
     private static readonly IReadOnlySet<string> FRONT_LETTER = new HashSet<string>(DEF.FrontLetters, StringComparer.Ordinal);
     private static IReadOnlySet<string> VOWEL_PH => Ipa.IPA_VOWEL; // IPA vowel heads
@@ -50,7 +43,9 @@ public sealed class OccitanPhonemizer : ILanguage
 
     private static string At(string w, int i) => i >= 0 && i < w.Length ? w[i].ToString() : "";
 
-    /** Scan a lowercased Occitan word into phone tokens: digraphs, ⟨qu gu⟩, ⟨c g⟩ softening, ⟨u⟩→[w] offglide. */
+    /**
+     * Scan a lowercased Occitan word into phone tokens: digraphs, ⟨qu gu⟩, ⟨c g⟩ softening, ⟨u⟩→[w] offglide.
+     */
     private static List<Tok> Scan(string word)
     {
         var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
@@ -69,7 +64,6 @@ public sealed class OccitanPhonemizer : ILanguage
                 break;
             }
             if (matched) continue;
-            // ⟨qu gu⟩ → [k ɡ] before a front vowel, [kw ɡw] before a back vowel (the ⟨u⟩ is a glide, not [y]).
             if ((c == "q" || c == "g") && next == "u" && VOWEL_LETTER.Contains(At(w, i + 2)))
             {
                 var bas = c == "q" ? "k" : "ɡ";
@@ -81,13 +75,13 @@ public sealed class OccitanPhonemizer : ILanguage
             if (c == "g") { toks.Add(new Tok { Ph = FRONT_LETTER.Contains(next) ? "d͡ʒ" : "ɡ" }); i += 1; continue; }
             if (c == "u")
             {
-                // ⟨u⟩ → [w] only as a FALLING offglide (after a vowel: au/eu/èu); a plain ⟨u⟩ before a vowel
-                // in hiatus is the nucleus [y] (afluent→aflyent), and the rising [w] after ⟨q g⟩ was consumed above.
+                // ⟨u⟩ → [w] only as a FALLING offglide (after a vowel); in hiatus before a vowel it is the
+                // nucleus [y], and the rising [w] of ⟨qu gu⟩ was already consumed above.
                 toks.Add(new Tok { Ph = VOWEL_LETTER.Contains(At(w, i - 1)) ? "w" : "y" });
                 i += 1;
                 continue;
             }
-            // ⟨i⟩ → [j] before a vowel — but NOT before ⟨u⟩ (the falling diphthong [iw]: arriu→ariw).
+            // ⟨i⟩ → [j] before a vowel — but NOT before ⟨u⟩: that is the falling diphthong [iw] (arriu→ariw).
             if (c == "i" && next != "u" && VOWEL_LETTER.Contains(next)) { toks.Add(new Tok { Ph = "j" }); i += 1; continue; }
             if (G.TryGetValue(c, out var ph) && ph != "") toks.Add(new Tok { Ph = ph, SVar = c == "s" });
             i += 1;
@@ -152,7 +146,9 @@ public sealed class OccitanPhonemizer : ILanguage
             toks.RemoveAt(n - 1);
     }
 
-    /** Phonemize a single Occitan word to canonical IPA (segmental; spirantization + stress folded/deferred). */
+    /**
+     * Phonemize a single Occitan word to canonical IPA (segmental; spirantization + stress folded/deferred).
+     */
     public static string PhonemizeWord(string word)
     {
         var toks = Scan(word);
@@ -164,14 +160,7 @@ public sealed class OccitanPhonemizer : ILanguage
         return string.Concat(toks.Select(t => t.Ph));
     }
 
-    /**
-     * The shared SYMBOL tier. Every word is an oc.wikipedia TOKEN attestation whose examples were read:
-     * `sègle` ×182, `per` ×123, `oras` ×107, `Crist` ×98, `mètre` ×83, `èuro` ×80, `Celsius` ×73,
-     * `quilograma` ×72, `cubic` ×36, `cent` ×36, `virgula` ×36, `quilomètre` ×25, `graus` ×17.
-     *
-     * ⚠ `gras` SCORES ×156 AND IS NOT USED. It is the homograph meaning "fat" — the Fula `tere` shape, for
-     * the sixth time in this sweep. The degree word is `grau`/`graus`.
-     */
+    /** The shared SYMBOL tier. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
         Percent = new[] { "per cent" },
@@ -195,27 +184,22 @@ public sealed class OccitanPhonemizer : ILanguage
         Magnitudes = new[] { "milion", "milions", "miliard", "miliards" },
     });
 
-    // ⚠ THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause
-    // pause and `13,1°C` reads as *tretze , un* — a phrase break inside a quantity. normalize.ts has already
-    // folded the dot decimals onto the comma, so one branch covers both.
+    // ⚠ The number branch must SPAN the decimal comma, or the tokenizer's own `,` claims it as a clause pause
+    // and `13,1°C` reads as *tretze , un*. Normalize has already folded the dot decimals onto the comma.
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"({HostWord.HostWordRun(new[] { "Latin" }, "'·-")})|(\\d+(?:,\\d+)?)|([.!?…,;:])", "gu");
 
-    /**
-     * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
-     * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters.
-     */
+    /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zàèòáéíóúïüçA-ZÀÈÒÁÉÍÓÚÏÜÇ'·-]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "u");
 
     public string Text(string input)
     {
-        // normalize.ts FIRST — its separator, era, clock, sign and degree steps need the figure and its
-        // mark still adjacent, which the tier would break — then the shared symbol tier.
+        // ⚠ ORDER: Normalize runs FIRST — its separator, era, clock, sign and degree steps need the figure
+        // and its mark still adjacent, which the shared symbol tier would break.
         return Clauses.AssembleClauses(SYMBOLS(Normalize.NormalizeOccitan(input)), TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(Nat(m.Groups[1].Value)));
-            // A digit run reads as Occitan number WORDS, each phonemized like any other word.
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
             {
                 var bits = m.Groups[2].Value.Split(',');
@@ -224,7 +208,6 @@ public sealed class OccitanPhonemizer : ILanguage
                 foreach (var wd in Numbers.NumberToWords(Js.Number(intPart)).Split(' ')) sink.Emit(PhonemizeWord(wd));
                 if (frac is not null)
                 {
-                    // `virgula` ×36 on oc.wikipedia — the separator's own name. Fraction read digit by digit.
                     sink.Emit(PhonemizeWord("virgula"));
                     foreach (var dg in frac)
                         foreach (var wd in Numbers.NumberToWords(Js.Number(dg.ToString())).Split(' ')) sink.Emit(PhonemizeWord(wd));
@@ -237,7 +220,10 @@ public sealed class OccitanPhonemizer : ILanguage
         });
     }
 
-    /** Build the Occitan phonemizer (Languedocien grapheme g2p + o→u + final-a→ɔ; spirantization/stress folded). */
+    /**
+     * Build the Occitan phonemizer (Languedocien grapheme g2p + o→u + final-a→ɔ; spirantization/stress
+     * folded).
+     */
     public static ILanguage CreateOccitan() => new OccitanPhonemizer();
 
     internal static void RegisterSelf() => Registry.Register("occitan", CreateOccitan);

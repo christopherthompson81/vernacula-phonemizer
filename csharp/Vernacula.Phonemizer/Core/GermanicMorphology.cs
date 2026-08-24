@@ -1,15 +1,7 @@
 /**
- * Shared West-Germanic morphological decomposition — the layer that makes boundary-sensitive phonology possible for
- * the compounding Germanic languages (German, Dutch, Afrikaans, …). A word is split into
- * PREFIX* · STEM (+link · STEM)* · SUFFIX*, and the boundaries let each engine's g2p apply element-initial rules,
- * morpheme-final devoicing, blocked cross-boundary assimilation, and the stress domain (primary stress on a
- * separable prefix or the first stem).
- *
- * The ALGORITHM lives here; every language-specific fact is CONFIG: the affix lists, the linking elements
- * (Fugen-s), the stem lexicon (isWord/isConstituent/takesLink), the vowel set + valid onsets, and a few optional
- * per-language quirks (a negation prefix, real-word-only stressed prefixes, a suffix digraph guard, the
- * element-initial seam pattern, and a keep-whole verb suffix). German supplies all of them; Dutch and Afrikaans
- * supply the subset they need.
+ * Shared West-Germanic morphological decomposition — the layer that makes boundary-sensitive phonology
+ * possible for the compounding Germanic languages (German, Dutch, Afrikaans, …).
+ * Ported from src/core/germanicMorphology.ts — see that file for the corpus evidence.
  */
 namespace Vernacula.Phonemizer.Core;
 
@@ -42,17 +34,18 @@ public sealed class MorphologyConfig
     public required IReadOnlySet<string> StKeep { get; init; } // monomorphemic words to keep whole (no false prefix boundary)
     public required Func<string, bool> IsWord { get; init; } // a known content word (lexicon)
     public required Func<string, bool> IsConstituent { get; init; } // a valid compound part (lexicon; caller enforces any min length/flag)
-    // ── optional per-language quirks (default off → af/nl) ─────────────────────────────────────────────────
     public string? NegationPrefix { get; init; } // a negation prefix strippable ONLY before another prefix (German un-)
     public JsRe? NegationFollows { get; init; } // …which prefixes may follow it
     public IReadOnlySet<string>? RealWordStressedPrefixes { get; init; } // stressed prefixes needing a REAL-word stem (German mit-)
     public Func<string, string, bool>? SuffixDigraphGuard { get; init; } // reject a suffix strip that shatters a digraph
     public JsRe? SeamElementInitial { get; init; } // a non-first constituent starting like this resets element-initial (German st/sp/sch)
     public string? WholeVerbSuffix { get; init; } // keep a whole known verb lexeme ending in this suffix un-split (German -en)
-    public int? MinTrailingConstituent { get; init; } // min letters for a compound's trailing part (default 3; nl uses 4 to reject
-    // 3-letter inflectional-lookalike tails — ten/ken/den/end — that are real words but not compound heads)
-    public bool DontSplitKnownWords { get; init; } // never split a word that is itself a lexicon entry (nl only; German splits known
-    // compounds so it stays off — its lexicon flags constituents, not whole compounds)
+    // min letters for a compound's trailing part (default 3; nl uses 4 to reject 3-letter
+    // inflectional-lookalike tails that are real words but not compound heads)
+    public int? MinTrailingConstituent { get; init; }
+    // never split a word that is itself a lexicon entry (nl only; German splits known compounds so it stays
+    // off — its lexicon flags constituents, not whole compounds)
+    public bool DontSplitKnownWords { get; init; }
 }
 
 public static class GermanicMorphology
@@ -88,19 +81,12 @@ public static class GermanicMorphology
         List<string>? splitCompound(string w, int depth = 0)
         {
             if (depth > 2) return null;
-            // A lexicalised word must not be torn into two coincidental sub-words (nl schakelen ✗ scha·kelen, af
-            // amandel ✗). German (flag off) keeps splitting known compounds — its lexicon flags constituents, not whole
-            // compounds. nl has no such flags, so a whole dictionary entry is the signal that it's ONE morpheme.
-            // ⚠ af DOES NOT SET THIS, despite the "(nl/af)" this comment used to carry — only nl does. It was
-            // measured for af and REJECTED at −17 (Run 4): the af stem list is a frequency wordlist full of real
-            // compounds, so "is a dictionary entry" is not the one-morpheme signal there that it is for nl.
             if (cfg.DontSplitKnownWords && cfg.IsWord(w)) return null;
             var minTail = cfg.MinTrailingConstituent ?? 3;
-            // ⚠ A LEADING CONSTITUENT MUST BE ≥4 LETTERS, and the floor is load-bearing rather than cautious: a stem
-            // lexicon is a WORDLIST, so at ≥3 every three-letter word in it becomes a compound head and the splitter
-            // shatters ordinary vocabulary — measured on af, dropping the floor to 3 scores +33/−143 (bak·kie,
-            // dog·ter, ven·ster, sui·ker, don·ker…). A named-exception list for the real 3-letter stems was built and
-            // REJECTED; see docs/afrikaans_stress_investigation.md Run 7 for why it cannot be made safe here.
+            // ⚠ A LEADING CONSTITUENT MUST BE ≥4 LETTERS, and the floor is load-bearing rather than
+            // cautious: a stem lexicon is a WORDLIST, so at ≥3 every three-letter word in it becomes a
+            // compound head and the splitter shatters ordinary vocabulary. A named-exception list for the
+            // real 3-letter stems was tried and rejected.
             for (var i = w.Length - minTail; i >= 4; i--)
             {
                 var head = w[..i];

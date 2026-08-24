@@ -1,8 +1,6 @@
 /**
- * Loads the Spanish data manifest (spanish.jsonc) once at module init and exposes it typed. Holds the context-
- * free hand-authored DATA: the vowel classes, the accented-vowel→base map, the nasal + spirantization sets, the
- * function-word list, clause punctuation, and the number words. The ALGORITHMS that read them stay in code
- * (g2p.ts / spanish.ts / numbers.ts): the scan, glide classification, spirantization, stress, and the compositor.
+ * Loads the Spanish data manifest (spanish.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/spanish/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

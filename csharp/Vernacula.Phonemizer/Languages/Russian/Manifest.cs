@@ -1,10 +1,6 @@
 /**
- * Loads the Russian data manifest (russian.jsonc) once at module init and exposes it typed. Holds the context-
- * free hand-authored DATA: the hard/soft consonant table, the letter class sets, the voicing-pair maps + obstruent
- * sets, the regressive-softening dental classes, the genitive-ɡ adverb list, the closed-class irregulars, the
- * adjective-ending → lemma table, clause punctuation, and the number words. The ALGORITHMS that read them stay in
- * code (g2p.ts / russian.ts / numbers.ts): the Cyrillic scan, vowel reduction, voicing assimilation, stress
- * inference, and the number compositor. The lexical stress + hard-е dictionaries stay in sibling .tsv files.
+ * Loads the Russian data manifest (russian.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/russian/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

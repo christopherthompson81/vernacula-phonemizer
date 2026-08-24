@@ -1,9 +1,6 @@
 /**
- * Loads the English data manifest (english.jsonc) once at module init and exposes it typed. Holds the closed,
- * hand-authored FACTS of English — heteronyms, function words, number words, the ARPABET→IPA correspondence,
- * and the small closed word-lists — that the algorithms (english.ts, numbers.ts, englishArpabet.ts, and the
- * pure englishG2p.ts via injection) read. The bulk statistical models stay referenced as files (see the jsonc's
- * "models" block); only authorable data lives here.
+ * Loads the English data manifest (english.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/english/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -26,8 +23,6 @@ public sealed class EnglishNumbersDef
     public IReadOnlyDictionary<string, string> Ordinals { get; init; } = new Dictionary<string, string>();
 }
 
-// ARPABET phonetic-class sets consumed (via injection) by the pure OOV G2P. `vowels` is NOT here — the OOV
-// G2P reuses arpabet.vowels (single source of truth for the ARPABET vowel bases), spliced in at build time.
 public sealed class G2pClasses
 {
     public IReadOnlyList<string> VowelLetters { get; init; } = Array.Empty<string>();

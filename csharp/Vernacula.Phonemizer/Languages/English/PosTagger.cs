@@ -1,32 +1,12 @@
 /**
  * Pure averaged-perceptron POS tagger.
- *
- * Drives English homograph disambiguation — the `$verb`/`$noun`/`$past`
- * dictionary conditionals — with a real part-of-speech tagger.
- *
- * Zero runtime dependencies. The model artifact is trained OFFLINE on UD English-EWT
- * XPOS (Penn Treebank tags) by `tools/english/en_pos_train.ts` and shipped as the
- * data file `pos-model.json`; `pos-model.PROVENANCE.md` records where the weights
- * came from.
- * ⚠ THIS MODULE IS THE SINGLE SOURCE OF TRUTH FOR FEATURE EXTRACTION — the trainer
- * imports `extractFeatures` from here, so train-time and run-time features
- * cannot drift. Changing it invalidates the shipped weights.
- *
- * Tags are the Penn Treebank tagset (VB/VBP/VBZ/VBG/VBN/VBD verbal forms,
- * NN/NNS/NNP nominal forms, JJ adjectives, …). We need the full PTB set rather
- * than coarse UPOS because the homograph data distinguishes past tense
- * (`read` → ɹɛd needs VBD/VBN) from base/present forms.
+ * Ported from src/languages/english/posTagger.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.English;
 
-/**
- * Coarse POS expectations consumed by the dictionary homograph gating
- * (`$verb`/`$noun`/`$past`). VBD/VBN are BOTH verbal and past — so "read it
- * yesterday" (VBD) sets both `verb` and `past`, letting `read rEd $past` win,
- * while "they lead" (VBP) sets `verb` so the verb pronunciation wins.
- */
+/** Coarse POS expectations consumed by the dictionary homograph gating (`$verb`/`$noun`/`$past`). */
 public sealed class PosExpectation
 {
     public required bool Verb { get; init; }
@@ -59,20 +39,7 @@ public static class Pos
         return word.ToLowerInvariant();
     }
 
-    /**
-     * Honnibal/Collins feature set. `word` is the NORMALIZED token (see
-     * `NormalizeToken`); `context` is the normalized word stream padded with
-     * two START tokens at the front and two END tokens at the back, so the token at
-     * sentence position `i` lives at `context[i + 2]`.
-     *
-     * ⚠ PII-SCRUB COUPLING: the trainer's PII filter identifies which
-     * weights carry a raw corpus token by string-matching the feature key — a key
-     * "carries a token" iff it contains "word", and the token is its last
-     * space-delimited field. Every word-bearing feature below therefore ends in the
-     * token. If you add a feature whose key contains "word" but whose last field is
-     * NOT a corpus token, update `lexicalToken` in `tools/english/en_pos_train.ts` to
-     * match, or its PII scrub will mis-classify the feature.
-     */
+    /** Honnibal/Collins feature set. */
     public static Dictionary<string, double> ExtractFeatures(int i, string word, IReadOnlyList<string> context, string prev, string prev2)
     {
         var feats = new Dictionary<string, double>(StringComparer.Ordinal);
@@ -106,29 +73,20 @@ public static class Pos
     };
 
     /**
-     * Tags that head an object noun phrase: a determiner (`the`/`a`/`this`/…) or an
-     * object pronoun (`it`/`them`/…) or a possessive (`your`/`his`/…). Used to detect
-     * the imperative "VERB <object>" shape at sentence start, where the greedy
-     * tagger has no left context and falls back to the noun/preposition prior.
+     * Tags that head an object noun phrase: a determiner (`the`/`a`/`this`/…) or an object pronoun
+     * (`it`/`them`/…) or a possessive (`your`/`his`/…).
      */
     public static bool HeadsObjectPhrase(string tag) =>
         tag == "DT" || tag == "PDT" || tag == "WDT" || tag == "PRP$" || tag == "PRP";
 
     /**
-     * UPOS tags that are NOMINAL — they take FINAL stress in nominal-final-stress
-     * languages (Persian nouns/adjectives). Verbs/function words are excluded
-     * (verbs need prefix stress, deferred; clitics are unstressed).
+     * UPOS tags that are NOMINAL — they take FINAL stress in nominal-final-stress languages (Persian
+     * nouns/adjectives).
      */
     public static bool IsNominalTag(string tag) =>
         tag == "NOUN" || tag == "PROPN" || tag == "ADJ" || tag == "NUM";
 
-    /**
-     * UPOS tags that are VERBAL (Persian verb prefix-stress). Persian verbs
-     * are stressed on the FIRST syllable of the whole form — the prefix می/نمی/بـ/نـ
-     * when present, else the first stem syllable — with the personal ending
-     * (-am/-i/-ad/-im/-id/-and) unstressed. AUX (auxiliary/copula) is included:
-     * Persian compound/auxiliary verbs follow the same initial-stress pattern.
-     */
+    /** UPOS tags that are VERBAL (Persian verb prefix-stress). */
     public static bool IsVerbalUpos(string tag) => tag == "VERB" || tag == "AUX";
 }
 
@@ -162,22 +120,15 @@ public sealed class PosTagger
         var bestScore = scores.Length > 0 ? scores[0] : 0;
         for (var k = 1; k < scores.Length; k++)
         {
-            // Deterministic argmax (ties broken toward the lexicographically smaller
-            // class, matching the trainer's sorted `classes`).
+            // ⚠ Deterministic argmax: a strict `>` breaks ties toward the lexicographically smaller class,
+            // matching the trainer's sorted `classes`.
             var s = scores[k];
             if (s > bestScore) { bestScore = s; best = k; }
         }
         return best < _classes.Count ? _classes[best] : "NN";
     }
 
-    /**
-     * Tag a whole sentence's words; returns one PTB tag per word. Everything keys
-     * off the NORMALIZED token (lowercased; years/digits folded) — the same form
-     * the trainer uses for the tagdict and features — so train-time and run-time
-     * agree regardless of the caller's casing (the phonemize tokenizer lowercases
-     * words upstream, so the tagdict MUST be keyed on the normalized form or its
-     * frequent-word fast path is dead).
-     */
+    /** Tag a whole sentence's words; returns one PTB tag per word. */
     public List<string> Tag(IReadOnlyList<string> words)
     {
         var norm = words.Select(Pos.NormalizeToken).ToList();

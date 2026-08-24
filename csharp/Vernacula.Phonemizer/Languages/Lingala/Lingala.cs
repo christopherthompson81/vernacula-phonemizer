@@ -1,18 +1,6 @@
 /**
- * Lingala / Lingála (ln) phonemizer — Bantu (C30B), Latin orthography, canonical IPA. A major lingua franca of
- * the Congo basin (~20M native + ~20–25M L2). Authored from Meeuwis (2020), "A Grammatical Overview of
- * Lingála" (Revised & Extended Edition), which describes the prestige KINSHASA variety.
- *
- * A greedy longest-match g2p plus accent-based tone:
- *   · prenasalised obstruents are SINGLE onset units — ⟨mb nd ng nz⟩ → ᵐb ⁿd ᵑɡ ⁿz (homorganic ᵐ/ⁿ/ᵑ; §2.2);
- *     ⟨ny⟩ → ɲ, semi-vowels ⟨w y⟩ → w j. Only 13 consonant phonemes; no native /r/ or /h/ (loan graphemes).
- *   · 7 vowel graphemes a e ɛ i o ɔ u rendered as written. ⚠ Kinshasa is phonemically 5-vowel (ɛ/ɔ merged into
- *     e/o; §2.1.1), so the ⟨e⟩=/e/~/ɛ/ collapse of casual spelling is an unrecoverable gap — ɛ/ɔ are rendered
- *     only where the (careful/northwestern) orthography writes them. NO diphthongs: vowel sequences are
- *     HIATUS, each vowel its own tone-bearing nucleus (mái = ma.i; §2.1.5). No vowel harmony, length, or
- *     phonemic nasalisation.
- *   · TONE (H/L, meaning-distinctive; §2.4) is marked only in careful writing: acute → H (˥), háček → rising
- *     (˩˥), circumflex → falling (˥˩), unmarked → L (˩). Applied per nucleus; casual toneless input → all L.
+ * Lingala / Lingála (ln) phonemizer — Bantu (C30B), Latin orthography, canonical IPA.
+ * Ported from src/languages/lingala/lingala.ts — see that file for the corpus evidence.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
@@ -23,7 +11,8 @@ public sealed class LingalaPhonemizer : ILanguage
 {
     private static LingalaDef DEF => Manifest.DEF;
 
-    // Consonant grapheme keys, longest first (digraphs mb/nd/ny before singles).
+    // ⚠ ORDER IS LOAD-BEARING: longest grapheme first, so the prenasalised digraphs ⟨mb nd ng nz ny⟩ are
+    // claimed as single onset units before the single letters can split them.
     private static readonly IReadOnlyList<string> CKEYS =
         DEF.Consonants.Keys.OrderByDescending(k => k.Length).ToList();
     private const string ACUTE = "́", GRAVE = "̀", CIRC = "̂", CARON = "̌";
@@ -40,7 +29,6 @@ public sealed class LingalaPhonemizer : ILanguage
         var i = 0;
         while (i < s.Length)
         {
-            // consonant graphemes (prenasalised digraphs before singles)
             var matched = false;
             foreach (var k in CKEYS)
             {
@@ -62,16 +50,14 @@ public sealed class LingalaPhonemizer : ILanguage
                 i += TONE.ContainsKey(mark) ? 2 : 1;
                 continue;
             }
-            // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
-            // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
-            // has been tried, so it can never override a reading this language has an opinion about.
+            // Fall-through, consulted only after every digraph and single-letter rule has declined: a letter
+            // with no rule still denotes a sound, so read it generically rather than dropping it.
             outp += LatinPhones.LatinPhone(c, new PhoneOpts { Initial = i == 0 }) ?? "";
             i += 1;
         }
         return outp.Normalize(NormalizationForm.FormC);
     }
 
-    // ── Numbers (Meeuwis §3.6: cardinal = the connective ya + the ordinal; compounds joined by na) ──────────────
     private static LingalaNumbersDef NUM => DEF.Numbers;
 
     private static string CardinalWords(double n)
@@ -92,10 +78,6 @@ public sealed class LingalaPhonemizer : ILanguage
             var hun = $"{NUM.Hundred} {NUM.Ordinals[(int)h - 1]}";
             return r == 0 ? hun : $"{hun} {NUM.And} {CardinalWords(r)}";
         }
-        // The scale ladder above kámá. ⚠ THE SCALES DO NOT SHARE ONE SHAPE: kóto is INVARIANT and always carries an
-        // explicit multiplier (kóto mǒkó = 1 000), while the higher scales are class-alternating nouns whose
-        // SINGULAR stands alone for a multiplier of 1 and whose PLURAL takes the multiplier (efúku = 10⁶,
-        // bifúku míbalé = 2×10⁶). Driving them all off one multiplier list collapses 100 000, 10⁶ and 10⁹ together.
         var SCALES = new (double Value, string Sg, string? Pl)[]
         {
             (1_000_000_000, NUM.Billion, NUM.Billions),
@@ -120,11 +102,9 @@ public sealed class LingalaPhonemizer : ILanguage
 
     public string Text(string input)
     {
-        // NORMALIZATION runs first (normalize.ts), on NFC text — it matches literals like `bôngó` and
-        // `T.B.`, which only exist as such before the NFD below splits their accents off. It is pure
-        // text→text, so everything it emits is then read by the ordinary word and number paths.
-        // NFD so precomposed accented vowels (á í ǒ …) become base+combining and are captured by TOKEN's
-        // combining-mark range (else the accent splits the word and the vowel is dropped).
+        // ⚠ ORDER: normalization runs FIRST, on NFC text — its literals (`bôngó`, `T.B.`) only exist as such
+        // before the NFD below splits the accents off. Then NFD, so precomposed accented vowels become
+        // base+combining and are captured by TOKEN's combining-mark range instead of splitting the word.
         var normalized = Normalize.NormalizeLingala(input).Normalize(NormalizationForm.FormD);
         return Clauses.AssembleClauses(normalized, TOKEN, (m, sink) =>
         {
@@ -134,8 +114,6 @@ public sealed class LingalaPhonemizer : ILanguage
                 var num = Js.Number(m.Groups[2].Value);
                 if (double.IsInteger(num) && Math.Abs(num) <= 9007199254740991d && num >= 0 && num < 1e12)
                     foreach (var w in CardinalWords(num).Split(' ')) sink.Emit(PhonemizeWord(w));
-                // ⚠ THE ELSE USED TO EMIT THE RAW DIGIT STRING, i.e. ASCII inside the IPA. Above the
-                // authored 10¹² range the digits are read one at a time instead — see amharic.ts.
                 else
                     foreach (var c in m.Groups[2].Value)
                         foreach (var w in CardinalWords(Js.Number(c.ToString())).Split(' ')) sink.Emit(PhonemizeWord(w));

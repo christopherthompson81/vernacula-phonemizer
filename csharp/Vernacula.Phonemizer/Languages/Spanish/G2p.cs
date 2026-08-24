@@ -1,8 +1,6 @@
 /**
- * Spanish grapheme→phoneme engine (broad Castilian). Spanish orthography is shallow and near-deterministic,
- * so this is a left-to-right scan with small context rules — no lexicon. Produces a segment list (phoneme +
- * whether it's a syllable nucleus + whether it bears a written accent); stress and spirantization are
- * applied downstream. for the convention.
+ * Spanish grapheme→phoneme engine (broad Castilian).
+ * Ported from src/languages/spanish/g2p.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -17,14 +15,14 @@ public sealed class Seg
 
 public static class G2p
 {
-    // Vowel classes + the accented→base map are DATA (spanish.jsonc).
     private static string STRONG => Manifest.MANIFEST.Vowels.Strong; // strong vowels (two adjacent = hiatus)
     private static string WEAK_UNACC => Manifest.MANIFEST.Vowels.WeakUnaccented; // glide beside another vowel
     private static string WEAK_ACC => Manifest.MANIFEST.Vowels.WeakAccented; // always a nucleus; breaks a diphthong
     private static IReadOnlyDictionary<string, string> ACCENTED => Manifest.MANIFEST.Accents;
     private static string FRONT => Manifest.MANIFEST.Vowels.Front; // front vowels that soften c and g
 
-    // NB: guard against "" — "abc".includes("") is true, which at word end would misread the missing next char.
+    // ⚠ GUARD AGAINST "": .NET's `Contains("")` is true, as `"abc".includes("")` is in JS, which at word
+    // end would misread the missing next character as a vowel.
     private static bool IsVowel(string c) =>
         c != "" && (STRONG.Contains(c, StringComparison.Ordinal)
                     || WEAK_UNACC.Contains(c, StringComparison.Ordinal)
@@ -66,7 +64,6 @@ public static class G2p
             var nx = At(i + 1);
             var nx2 = At(i + 2);
 
-            // Digraphs / multi-letter units.
             if (c == "c" && nx == "h") { Cons("t͡ʃ"); i += 2; continue; }
             if (c == "l" && nx == "l") { Cons("ʎ"); i += 2; continue; }
             if (c == "r" && nx == "r") { Cons("r"); i += 2; continue; }
@@ -80,8 +77,6 @@ public static class G2p
             if (c == "g" && nx == "u" && IsFront(nx2)) { Cons("ɡ"); i += 2; continue; } // gue/gui → ɡ (u silent)
             if (c == "g" && nx == "ü" && (nx2 == "e" || nx2 == "i")) { Cons("ɡ"); Cons("w"); i += 2; continue; } // güe/güi → ɡw
 
-            // y: a consonant (ʝ) before a vowel; otherwise the vowel i — an offglide after a nucleus (muy →
-            // muj) or a standalone nucleus (y "and" → i).
             if (c == "y")
             {
                 if (IsVowel(nx)) { Cons("ʝ"); i++; continue; }
@@ -92,7 +87,6 @@ public static class G2p
                 continue;
             }
 
-            // Vowel run → nuclei + glides.
             if (IsVowel(c))
             {
                 var j = i;
@@ -113,7 +107,6 @@ public static class G2p
                 continue;
             }
 
-            // Single consonants.
             switch (c)
             {
                 case "b":
@@ -143,8 +136,6 @@ public static class G2p
                     break; // word-initial x → s (xenón); else ks
                 default:
                 {
-                    // ⚠ This used to push the RAW ORTHOGRAPHIC CHARACTER into the phone stream — a ⟨q⟩
-                    // survived as the IPA /q/, a uvular stop Spanish does not have.
                     var p = LatinPhones.LatinPhone(c, new PhoneOpts { Initial = segs.Count == 0, IncludeH = false });
                     if (p is not null) Cons(p);
                     else if (JsRegex.Compile("[a-zñ]").IsMatch(c)) Cons(c);

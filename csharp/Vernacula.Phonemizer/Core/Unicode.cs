@@ -1,10 +1,8 @@
 /**
- * Notation-parsing PRIMITIVES for the native abugida path — pure Unicode/IPA facts about HOW to read
- * the string (which codepoints are vowels, modifiers, tie bars, digits; which block is a script). These
- * are code constants, NOT declarative data: they don't decide which phoneme is produced (that lives in
- * `phonology.jsonc` beside this module, plus the per-language JSONC) — they only classify characters while
- * tokenizing. Regexes that match a SET are built from the string lists here at the use site, so the list
- * is the single source and the pattern is derived from it. One obvious mirror target for the C# port.
+ * Notation-parsing PRIMITIVES for the native abugida path — pure Unicode/IPA facts about HOW to read the
+ * string (which code points are vowels, modifiers, tie bars, digits; which block is a script), plus the
+ * text repairs the registry composes: mojibake, homoglyphs, native digits, caret and vulgar notations.
+ * Ported from src/core/unicode.ts — see that file for the corpus evidence.
  */
 using System.Globalization;
 using System.Text;
@@ -23,10 +21,11 @@ public static class Unicode
      *  breathy ʱ, ejective ʼ. (Combined with {@link COMBINING_DIACRITICS} to form the tokenizer's MOD set.) */
     public const string ATTACHING_MODIFIERS = "ːˑʲʰʱʼ";
 
-    /** IPA vowel letters — the universal alphabet the stress tokenizer treats as syllable nuclei. A vowel is
-     *  a vowel regardless of which language declares it, so this is a notation constant, not per-language data.
-     *  ⚠ RE-EXPORTED, NOT DEFINED HERE: core/ipa.ts owns the phone classes, and 31 engines now read the same
-     *  one. Kept exported from unicode.ts so the existing regex users need not care where it moved. */
+    /**
+     * IPA vowel letters — the universal alphabet the stress tokenizer treats as syllable nuclei.
+     * ⚠ RE-EXPORTED, NOT DEFINED HERE: Core/Ipa.cs owns the phone classes. Kept here so the existing regex
+     * users need not care where it moved.
+     */
     public const string IPA_VOWELS = Ipa.IPA_VOWELS;
 
     /** Primary / secondary stress marks (IPA). */
@@ -41,8 +40,10 @@ public static class Unicode
      *  word runs so a digit run breaks out as its own (number) token. */
     public const string DEVANAGARI_WORD = "ऀ-ॣॲ-ॿ";
 
-    /** Devanagari digits ०-९ → ASCII, for number parsing. The regex digit-class is built from these keys.
-     *  (Insertion-ordered like the JS object — consumers build character classes from the keys.) */
+    /**
+     * Devanagari digits ०-९ → ASCII. ⚠ INSERTION-ORDERED: consumers build character classes from the keys, so
+     * the order is the class's order — a Dictionary keeps it as long as nothing is removed, and nothing is.
+     */
     public static readonly IReadOnlyDictionary<string, string> DEVANAGARI_DIGITS = new Dictionary<string, string>
     {
         ["०"] = "0", ["१"] = "1", ["२"] = "2", ["३"] = "3", ["४"] = "4",
@@ -83,15 +84,8 @@ public static class Unicode
 
     /**
      * Fold Latin diacritics to the ASCII base letters an English-style lexicon and G2P are trained on:
-     * café → cafe, naïve → naive, jalapeño → jalapeno, résumé → resume.
-     *
-     * Needed because a dictionary keyed on ASCII has no entry for the accented spelling — CMUdict has
-     * `cafe`, `naive`, `jalapeno` and `resume` but none of their accented forms — so without folding, a
-     * loanword either misses the lexicon or (worse) is split at the accent by an ASCII-only tokenizer.
-     *
-     * Lossy by design where the accent is the only distinction: résumé and resume fold together, so the
-     * noun inherits the verb's reading. That is a documented conflation, and far better than the
-     * alternative of mangling the word.
+     * café → cafe, jalapeño → jalapeno. Lossy by design where the accent is the only distinction (résumé and
+     * resume fold together) — a documented conflation, better than mangling the word.
      */
     public static string FoldLatinDiacritics(string s)
     {
@@ -102,8 +96,8 @@ public static class Unicode
 
     /**
      * Decimal-digit block bases for every script this project supports. Unicode guarantees a decimal digit
-     * block is ten contiguous codepoints in ascending value, so the fold below is arithmetic rather than a
-     * per-script table of ten entries each.
+     * block is ten contiguous code points in ascending value, so the fold below is arithmetic rather than a
+     * per-script table.
      */
     private static readonly int[] NATIVE_DIGIT_BASES =
     {
@@ -134,30 +128,16 @@ public static class Unicode
     };
 
     /**
-     * Fold any script's own decimal digits to ASCII, so the number path can read them.
+     * Fold any script's own decimal digits to ASCII, so the number path can read them: an engine whose number
+     * token is the ASCII-only JS `\d` sees a native numeral as no token at all, and the number VANISHES.
      *
-     * WHY: an engine whose number token is `\d+` (ASCII-only, as JavaScript defines it) sees a numeral written
-     * in the language's own digits as no token at all, and `assembleClauses` skips what the tokenizer declines
-     * — so the number VANISHES. Auditing 21 scripts found six engines returning an EMPTY STRING for their own
-     * numerals: Punjabi, Tamil, Telugu, Malayalam, Sinhala and Lao. Total content loss, silent.
+     * ⚠ APPLIED FLEET-WIDE AT THE REGISTRY, with an opt-out list, and that single fact is what makes the
+     * fleet's ASCII digit classes correct rather than blind. Idempotent, so the per-language folds that
+     * predate the registry one stay.
      *
-     * ⚠ APPLIED FLEET-WIDE AT THE REGISTRY, with an opt-out list — this comment used to say the opposite and
-     * was stale. `registry.ts` calls this on every `text()`/`phonemize()` through the shadow wrapper, so the
-     * ASCII `\d` in every downstream normalizer is reading a string whose native digits are already ASCII.
-     * That single fact is what makes the fleet's ~386 ASCII digit classes correct rather than blind, and it
-     * is worth stating here because this is the file a reader checks when they doubt one of them.
-     *
-     * THE OPT-OUT IS THE ORIGINAL PER-ENGINE ARGUMENT, narrowed to the one language that earned it: Telugu's
-     * corpus uses ౦ (U+0C66, its digit zero) as a HOMOGLYPH for ం (sunna) in 144 places, so a blanket fold
-     * ahead of Telugu's own homoglyph rule would corrupt exactly the language that found the problem. `te` is
-     * therefore in `FOLD_OPT_OUT` and folds inside its own normalize.ts, after the homoglyph rule. The dozen
-     * per-language folds that predate the registry one stay: folding is idempotent.
-     *
-     * ⚠ AND IT RUNS LAST AMONG THE REPAIRS, which is a live ordering constraint rather than a detail. Every
-     * fold composed around it in `registry.ts` — the caret exponents, the vulgar fractions, the markup strip —
-     * sees the string BEFORE this one has run, so an ASCII-only digit guard inside any of them is blind to a
-     * native digit. Rare in the corpora and left as-is, but it is the reason a `\d` in this file is not
-     * automatically as safe as a `\d` in a normalizer.
+     * ⚠ AND IT RUNS LAST AMONG THE REPAIRS, a live ordering constraint: every fold composed around it in the
+     * registry sees the string BEFORE this one has run, so an ASCII-only digit guard inside any of them is
+     * blind to a native digit.
      */
     // C# PORT NOTE: the TS is `s.replace(/\p{Nd}/gu, …)`. A .NET pattern cannot see an ASTRAL digit
     // (Adlam U+1E950–1E959, in the table above) — the one place the JsRegex translator's \p{Nd}
@@ -194,29 +174,12 @@ public static class Unicode
     /**
      * GREEK / CYRILLIC LETTERS USED AS LATIN LOOK-ALIKES, folded ONLY when flanked by Latin letters.
      *
-     * ⚠ A HOMOGLYPH IS THE SAME SHAPE AS A MOJIBAKE PHANTOM: a character from the wrong script masquerading as one
-     * from the right one, invisible until something downstream depends on the distinction. It is the third variety
-     * of it in this file, after the double-encoding repair and the squared-degree fold. Real text carries them —
-     * `proteϊen` and `ruϊnes` are written with U+03CA GREEK SMALL LETTER IOTA WITH DIALYTIKA in place of Latin `ï`.
+     * ⚠ THE LATIN FLANK IS THE WHOLE GUARD, and it is what makes this fold safe with no opt-out list, where
+     * `FoldNativeDigits` needs one. A genuinely Greek or Cyrillic word has no Latin neighbours.
      *
-     * ⚠ THE LATIN FLANK IS THE WHOLE GUARD, and it is what makes this fold safe with no opt-out list at all,
-     * where `foldNativeDigits` needs one. A genuinely Greek or Cyrillic word has no Latin neighbours, so
-     * `Ελλάδα` and `Владимир` cannot match however they are hosted; only a letter WEDGED INSIDE a Latin word can.
-     *
-     * ⚠ MOSTLY PRECAUTIONARY, NOT CORPUS-ATTESTED, and the distinction matters for how much weight the rows carry.
-     * Across the fleet's corpora exactly ONE member of this table occurs between two Latin letters. Every other row
-     * is here on the Unicode TR39 confusables basis — a phonemizer is handed arbitrary text, and homoglyphs arrive
-     * from OCR and from keyboard-layout slips rather than from curated corpora. Admitting only the letters that
-     * happen to occur would leave the same trap for the next corpus.
-     *
-     * ⚠ THE LOWERCASE MAPPING IS NOT THE LOWERCASE OF THE UPPERCASE ONE. Greek capital `Β` looks like Latin `B`, so it
-     * folds to `B`. Greek small `β` does NOT look like `b` — it looks like German `ß`, which is why a mistyped or
-     * OCR'd `Straβe` is far commoner than anyone intending a `b`. Folding `β`→`b` by symmetry with `Β`→`B` would be
-     * wrong in exactly the case the row exists for.
-     *
-     * Without the row the letter is not merely mis-read, it FRAGMENTS the word: `β` is Greek script, so a Latin-script
-     * tokenizer declines it, and a lone Greek letter is below the script router's two-letter threshold — so
-     * `Straβe` comes out *stɹˈæ ˈiː* in English — the β gone and the word in two pieces.
+     * ⚠ THE LOWERCASE MAPPING IS NOT THE LOWERCASE OF THE UPPERCASE ONE. Greek `Β` looks like Latin `B`; Greek
+     * `β` does not look like `b` — it looks like German `ß`. Folding by symmetry would be wrong in exactly the
+     * case the row exists for.
      */
     private static readonly IReadOnlyDictionary<string, string> LATIN_CONFUSABLE = new Dictionary<string, string>
     {
@@ -236,14 +199,9 @@ public static class Unicode
     /**
      * Preceded by a Latin letter, and NOT followed by more of the homoglyph's own script.
      *
-     * ⚠ REQUIRING LATIN ON BOTH SIDES MISSES THE WORD-FINAL CASE, which for the row this was written for is the
-     * commonest one: German `ß` is word-final constantly — `Weiß`, `Gauß`, `Fluß`, `Maß` — so `Weiβ` and `Gauβ` were
-     * left unrepaired and still lost the letter, while the medial `Straβe` was fixed. A trailing-context guard has to
-     * admit the end of the word.
-     *
-     * The trailing lookahead is what keeps genuine Greek and Cyrillic safe, and it is strictly better than "must be
-     * followed by Latin": a real Greek word is either not preceded by a Latin letter at all (`Το βιβλίο` — the β
-     * follows a space) or continues in its own script (`theβιβλίο` — the β is followed by ι), and both are declined.
+     * ⚠ REQUIRING LATIN ON BOTH SIDES MISSES THE WORD-FINAL CASE, which for German `ß` is the commonest one.
+     * The trailing lookahead is what keeps genuine Greek and Cyrillic safe: such a word either is not preceded
+     * by a Latin letter at all, or continues in its own script.
      */
     private static readonly JsRe CONFUSABLE_RE = JsRegex.Compile(
         @"(?<=\p{Script=Latin})([" + string.Concat(LATIN_CONFUSABLE.Keys) + "])"
@@ -257,11 +215,8 @@ public static class Unicode
     }
 
     /**
-     * The MIRROR of the table above: a LATIN look-alike standing in for a Cyrillic letter. Only the rows where the
-     * Latin glyph is genuinely confusable with a Cyrillic one, so this is not simply the inverse map — Latin `j`
-     * for Cyrillic ⟨ј⟩ (U+0458) and `i` for ⟨і⟩ (U+0456) are the two that bite, because those Cyrillic letters
-     * exist only in some of the alphabets (Macedonian, Serbian, Ukrainian, Belarusian) and a keyboard set for
-     * Russian cannot type them.
+     * The MIRROR of the table above: a LATIN look-alike standing in for a Cyrillic letter. Only the rows where
+     * the Latin glyph is genuinely confusable, so this is not simply the inverse map.
      */
     private static readonly IReadOnlyDictionary<string, string> CYRILLIC_CONFUSABLE = new Dictionary<string, string>
     {
@@ -270,19 +225,10 @@ public static class Unicode
         ["A"] = "А", ["B"] = "В", ["C"] = "С", ["E"] = "Е", ["H"] = "Н",
         ["I"] = "І", ["J"] = "Ј", ["K"] = "К", ["M"] = "М",
         ["O"] = "О", ["P"] = "Р", ["S"] = "Ѕ", ["T"] = "Т", ["X"] = "Х", ["Y"] = "У",
-        // ⚠ THE FOUR CHUVASH LETTERS, and they are the largest instance of this defect in the fleet by two orders
-        // of magnitude. ӑ ӗ ҫ ӳ (U+04D1/04D7/04AB/04F3) have Latin twins that render identically in most fonts
-        // and sit on a Turkish or Romanian keyboard, and cv.wikipedia is written predominantly with the LATIN
-        // ones: measured over the retained text of `tools/corpus/mined/chv.jsonc`, ă ĕ ç ü occur **4,916
-        // times against 918** for the real letters — a 5.4:1 ratio the wrong way, with 28 segments using both.
-        // The cost was total: `çĕр` (сĕр "hundred/earth") read *sˈɛp*, English "sep"; `вăтам` split into three
-        // tokens; `пĕрремĕш` into five. **3,424 words** in that one artifact carry the defect.
-        //
-        // ⚠ FLEET-SAFE BY MEASUREMENT, not by assumption: across all 15 CYRILLIC_HOSTS artifacts, a
-        // Cyrillic-majority word containing one of these four Latin letters occurs 3,356 times in chv and
-        // **once** anywhere else (ba `арăм`, itself the same typo). ç and ü are common in Turkish, French
-        // and German names, so this row was the one worth checking rather than assuming; the majority guard
-        // above is what keeps `für`, `München` and `göğsüm` untouched, and it does.
+        // ⚠ THE FOUR CHUVASH LETTERS. ӑ ӗ ҫ ӳ have Latin twins that render identically in most fonts and sit on
+        // a Turkish or Romanian keyboard, and Chuvash text is written predominantly with the LATIN ones. ç and ü
+        // are common in Turkish, French and German names, so the majority guard below is what keeps `für`,
+        // `München` and `göğsüm` untouched.
     };
 
     private static readonly IReadOnlyDictionary<string, string> CHUVASH_CONFUSABLE = new Dictionary<string, string>
@@ -303,25 +249,17 @@ public static class Unicode
     private static readonly JsRe LatinOne = JsRegex.Compile(@"\p{Script=Latin}", "u");
 
     /**
-     * Fold a Latin look-alike sitting INSIDE a Cyrillic word to its Cyrillic equivalent.
+     * Fold a Latin look-alike sitting INSIDE a Cyrillic word to its Cyrillic equivalent. ⚠ THE FAILURE THIS
+     * PREVENTS IS NOT A DROPPED CHARACTER: the word SPLITS and the stray letter goes to the foreign reader as
+     * an ENGLISH LETTER NAME, so no leak gate can see it.
      *
-     * ⚠ THE FAILURE THIS PREVENTS IS NOT A DROPPED CHARACTER. A Latin letter inside a Cyrillic word falls outside
-     * the engine's token class, so the word SPLITS and the stray letter is handed to the foreign reader as an
-     * ENGLISH LETTER NAME: Macedonian `Фаренхаjт` with a Latin j read *fˈarɛnxa d͡ʒˈeᶦ t*. Nothing is dropped and
-     * no raw character survives, so no leak gate can see it.
+     * ⚠ THE DISCRIMINATOR IS WHICH SCRIPT DOMINATES THE WORD, not the immediate neighbours. Run both folds
+     * with flank guards and they fight — a Latin letter gives its Cyrillic neighbour a Latin flank, the Latin
+     * fold makes the word MORE Latin, and no lookahead can pull it back. Scoping to the word and requiring a
+     * Cyrillic majority settles the direction once, before any character is rewritten.
      *
-     * ⚠ THE DISCRIMINATOR IS WHICH SCRIPT DOMINATES THE WORD, not the immediate neighbours — and that is the one
-     * thing a flank test cannot express. `foldLatinConfusables` uses a Latin flank because it only ever pulls
-     * TOWARDS Latin; run both with flank guards and they fight: in `сeрiя` the Latin `e` gives the Cyrillic `р` a
-     * Latin left-flank, so the Latin fold rewrites it to `p` and makes the word MORE Latin, after which no
-     * trailing-lookahead guard can pull it back. Scoping to the word and requiring a Cyrillic majority settles the
-     * direction once, before any character is rewritten.
-     *
-     * ⚠ AN EXACT TIE IS BROKEN BY THE HOST LANGUAGE, not guessed from the word. `рaсa` is 2 Cyrillic and 2 Latin,
-     * and nothing in the word itself settles it — favouring Cyrillic would rewrite the two-letter Latin `оk`, and
-     * first-letter script fails the same way. The host language is the evidence the WORD does not carry: inside a
-     * Cyrillic-primary language (CYRILLIC_HOSTS) the tie folds to Cyrillic; anywhere else it declines and the
-     * established Latin default stands.
+     * ⚠ AN EXACT TIE IS BROKEN BY THE HOST LANGUAGE, not guessed from the word: inside a Cyrillic-primary
+     * language the tie folds to Cyrillic, anywhere else it declines and the Latin default stands.
      */
     public static string FoldCyrillicConfusables(string s, bool hostIsCyrillic = false)
     {
@@ -337,13 +275,10 @@ public static class Unicode
                 else if (LatinOne.IsMatch(ch)) lat++;
             }
             if (cyr == 0 || lat == 0) return w;
-            // ⚠ THE CHUVASH ROWS ARE APPLIED ON PRESENCE, NOT MAJORITY, and the asymmetry is the point. An
-            // ASCII look-alike is a REAL LETTER OF THE LATIN ALPHABET, so a word carrying several of them may
-            // genuinely be a Latin word and the majority test is what protects it. ă ĕ ç ü standing beside a
-            // Cyrillic letter cannot be: measured over all 15 CYRILLIC_HOSTS artifacts, the words the majority
-            // rule REFUSES and presence would fold are **76 in chv** — `ăшă` (warm), `çĕр`, `çĕнĕ` (new),
-            // `виççĕ` (three), all short words where two Latin twins outvote one Cyrillic letter — against
-            // **one** anywhere else (tt `kübrә`, itself already broken). Without this, `çĕр` stayed *sˈɛp*.
+            // ⚠ THE CHUVASH ROWS ARE APPLIED ON PRESENCE, NOT MAJORITY, and the asymmetry is the point. An ASCII
+            // look-alike is a REAL LETTER OF THE LATIN ALPHABET, so a word carrying several may genuinely be a Latin
+            // word and the majority test is what protects it. ă ĕ ç ü standing beside a Cyrillic letter cannot be —
+            // and they are short words, where two Latin twins outvote one Cyrillic letter.
             w = CHV_KEYS.Replace(w, c => CHUVASH_CONFUSABLE[c.Value]);
             cyr = 0;
             lat = 0;
@@ -359,36 +294,22 @@ public static class Unicode
     }
 
     /**
-     * THE CYRILLIC DICTIONARY STRESS MARK — a combining acute (or grave) on a Cyrillic letter, which is NOT a
-     * letter of any Cyrillic alphabet but a lexicographic annotation: `Абіса́ль`, `А́страхань`, `молоко́`. Wikipedia
-     * writes it in the lead of an article to show where the word is stressed, so it arrives in running text.
+     * THE CYRILLIC DICTIONARY STRESS MARK — a combining acute (or grave) on a Cyrillic letter, which is not a
+     * letter of any Cyrillic alphabet but a lexicographic annotation. ⚠ THE FAILURE IS NOT A LOST ACCENT BUT A
+     * SPLIT WORD: every Cyrillic engine here tokenizes on a BLOCK RANGE, U+0301 is outside it, and both halves
+     * are then read and stressed as words.
      *
-     * ⚠ THE FAILURE IS NOT A LOST ACCENT — IT IS A SPLIT WORD, and it is fleet-wide. Every Cyrillic engine in this
-     * repo tokenizes on a BLOCK RANGE (`[Ѐ-ӿ]+`), and U+0301 is outside it, so the word breaks in two and BOTH
-     * halves are then read and stressed as words: measured before this fold, `be Абіса́ль → abʲisa lʲ`,
-     * `tt А́страхань → ˈɑ strɑˈxɑn`, `mn кабу́л → kʰap ɮ`, `kk аба́й → ɑbˈɑ jˈə`, `ru А́страхань → a strˈaxənʲ` —
-     * 14 of the fleet's 14 Cyrillic-corpus languages, and `ru`, `uk`, `bg`, `mk` and `kk` were affected without
-     * any of them appearing in the silent-deletion scan, because their artifacts simply happen not to carry one.
-     * Nothing leaks and nothing is obviously dropped, which is why only the differential detector saw it.
+     * ⚠ THE MARK IS DROPPED, NOT HONOURED. Stress in these engines is computed by rule or by a lexicon, and
+     * none takes a per-word stress argument; dropping restores the correct SEGMENTS, which is the defect.
      *
-     * ⚠ THE MARK IS DROPPED, NOT HONOURED. Stress in these engines is computed by rule (Turkic oxytone, Chuvash
-     * last-full-vowel, Tajik final) or by a lexicon (`ru`'s stress.tsv), and none of them takes a per-word stress
-     * argument. Honouring the annotation would mean plumbing an override through fourteen engines to serve a
-     * character that occurs a few dozen times per corpus; dropping it restores the CORRECT SEGMENTS, which is the
-     * defect actually being fixed. `ru А́страхань` reads `ˈastrəxənʲ` after the fold — the lexicon's own stress,
-     * which agrees with the annotation.
+     * ⚠ THE COMPOSITION CHECK IS LOAD-BEARING, and a blind strip would DELETE LETTERS: Macedonian ⟨ѓ⟩ ⟨ќ⟩ ⟨ѐ⟩
+     * ⟨ѝ⟩ ARE base + U+0301/U+0300 under NFD. So each pair is COMPOSED first — if NFC yields a single character
+     * it is a letter and is kept; only a pair that composes to nothing is an annotation and loses its mark.
      *
-     * ⚠ THE COMPOSITION CHECK IS LOAD-BEARING, and a blind strip would DELETE LETTERS. Macedonian ⟨ѓ⟩ and ⟨ќ⟩ ARE
-     * ⟨г⟩/⟨к⟩ + U+0301 under NFD, and ⟨ѐ⟩ ⟨ѝ⟩ are ⟨е⟩/⟨и⟩ + U+0300 — real letters of the alphabet that a keyboard
-     * or a copy-paste can deliver decomposed. So each base+mark pair is COMPOSED first: if NFC yields a single
-     * character it is a letter and is kept (in its composed form, which is also what the token class wants);
-     * only a pair that composes to nothing is an annotation and loses its mark.
-     *
-     * Restricted to a CYRILLIC base by design. The same mark is a tone letter in vi, a stress letter in es and a
-     * tone mark in umbundu; this fold makes no claim about any of them.
+     * Restricted to a CYRILLIC base by design; the same mark is a tone or stress letter elsewhere.
      */
-    // ⚠ WRITTEN AS ESCAPES, NOT AS CHARACTERS. A combining mark typed literally inside `[...]` renders on top of
-    // the bracket and is invisible to review. U+0340/U+0341 are the deprecated "tone mark" spellings of the same
+    // ⚠ WRITTEN AS ESCAPES, NOT AS CHARACTERS. A combining mark typed literally inside `[...]` renders on
+    // top of the bracket and is invisible to review. U+0340/U+0341 are the deprecated spellings of the same
     // two marks; they compose away under NFC, which the pair check below applies anyway.
     private const string STRESS_MARKS = "\\u0300\\u0301\\u0340\\u0341";
 
@@ -412,32 +333,19 @@ public static class Unicode
 
     /**
      * REPAIR DOUBLE-ENCODED UTF-8 — text whose bytes were UTF-8 but got decoded as Latin-1 and re-encoded, so
-     * `²` arrives as `Â²` and `ñ` as `Ã±`. Mojibake is one of the commonest real-world corruptions in
-     * scraped text, and a phonemizer is handed arbitrary text.
+     * `²` arrives as `Â²` and `ñ` as `Ã±`. The signature is a lead byte followed by a UTF-8 CONTINUATION byte
+     * (U+0080–U+00BF), a sequence that occurs in no natural orthography.
      *
-     * WHY THIS IS SAFE, measured rather than assumed. The signature is `Â` or `Ã` followed by a UTF-8
-     * CONTINUATION byte (U+0080–U+00BF) — a sequence that occurs in no natural orthography, because those code
-     * points are C1 controls and punctuation that never follow a capital A-circumflex or A-tilde. Counted across
-     * all 67 FLEURS corpora: **31 occurrences, every one of them in id_id, and zero anywhere else.** All 31 are
-     * genuine corruption:
-     *   `19.500 kmÂ²` (should be km²) · `Las CaÃ±itas` (Cañitas) · `David KlÃ¶cker` (Klöcker)
-     * The `kmÂ²` case cost four readings outright: `Â` IS a letter, so the tier's trailing guard rejected the
-     * unit match and `km` reached the IPA raw.
+     * THE ARITHMETIC IS EXACT, not a lookup table: `cp = ((lead & 0x1f) << 6) | (b2 & 0x3f)` is the UTF-8
+     * definition. ⚠ HALF-REPAIRED MOJIBAKE DOES NOT MERELY FAIL TO READ, IT MANUFACTURES A SYMBOL for a later
+     * pass to reason about — a stranded `°` becomes a phantom degree, a stranded `€` a phantom currency.
      *
-     * THE ARITHMETIC IS EXACT, not a lookup table. UTF-8 `C2 XX` encodes U+0080–U+00BF, and for a lead byte of
-     * C2 the code point EQUALS the trailing byte, so the repair is simply to drop the `Â`. For `C3 XX` the code
-     * point is the trailing byte plus 0x40, which is why the second arm shifts.
-     *
-     * ⚠ LOSSY MOJIBAKE CANNOT BE REPAIRED AND IS NOT ATTEMPTED. mr_in carries `â€` + U+FFFD twice — a curly
-     * quote whose third byte was already replaced with U+FFFD upstream, so the information is gone. Two
-     * instances in one corpus, and guessing which quote it was would be invention.
+     * ⚠ LOSSY MOJIBAKE CANNOT BE REPAIRED AND IS NOT ATTEMPTED where the intended character is unrecoverable.
      */
     /**
-     * The bytes 0x80–0x9F have no Latin-1 characters, so a mis-decode of them goes through CP1252 instead — and
-     * that is what makes the THREE-byte case look different from the two-byte one. `â€“` is not
-     * `â + U+0080 + U+0093`; it is `â + € + U+201C`, because CP1252 maps 0x80 to the euro sign and
-     * 0x93 to a curly quote. An earlier pass measured the 3-byte signature as ZERO across all 67 corpora by
-     * searching for the Latin-1 form, which does not occur — the CP1252 form occurs 16 times.
+     * The bytes 0x80–0x9F have no Latin-1 characters, so a mis-decode of them goes through CP1252 instead —
+     * which is why the THREE-byte case looks different from the two-byte one. `â€“` is not
+     * `â + U+0080 + U+0093` but `â + € + U+201C`, because CP1252 maps 0x80 to the euro sign.
      */
     private static readonly IReadOnlyDictionary<int, int> CP1252_BACK = new Dictionary<int, int>
     {
@@ -466,32 +374,19 @@ public static class Unicode
 
     public static string RepairDoubleEncoded(string s)
     {
-        // The lead bytes the arms below can repair. This must stay in step with them: it was `[ÂÃâ]`
-        // when the two-byte arms were C2/C3-only, and widening the arm to C5 without widening this fast path left
-        // `Ä°zmir` returning EARLY and unrepaired — the fix silently did nothing.
+        // ⚠ THE FAST PATH MUST STAY IN STEP WITH THE ARMS BELOW. It was narrower than they were once, and
+        // widening an arm without widening this made the fix silently do nothing.
         if (!MojibakeLead.IsMatch(s)) return s;
-        // THREE-BYTE first, or the two-byte arms below would eat its lead. `E2 XX YY` encodes U+0800–U+FFFF;
-        // the lead nibble of 0xE2 is 2, so the code point is 0x2000 plus the two continuation payloads — which
-        // is why every hit here is a dash, quote or ellipsis. Measured: 16 occurrences, all in id_id
-        // (`â€“` → `–`, `â€”` → `—`), zero in the other 66 corpora.
-        // LOSSY RESIDUE, where the third byte did not survive to be decoded — and the intended character is
-        // still IDENTIFIABLE, which is the only reason this arm is allowed to guess. `â€` alone is `E2 80`, the
-        // first two bytes of a General Punctuation character (U+2000–U+206F), so whatever is missing was
-        // punctuation: a quote, a dash or a space. That bounds the damage — every candidate is either a clause
-        // mark or silent in this engine, so choosing wrongly among them cannot produce a wrong WORD, whereas
-        // leaving the sequence alone leaves a `€` that `\p{Sc}` reads as a PHANTOM CURRENCY. mr's
-        // `currency DROP` was exactly that: a euro sign inside a broken quote, in a sentence with no money in it.
+        // ⚠ THREE-BYTE FIRST, or the two-byte arms below would eat its lead. `E2 XX YY` encodes U+0800–U+FFFF,
+        // and with a lead of 0xE2 the code point is 0x2000 plus the two payloads — so every hit is a dash, quote
+        // or ellipsis.
         //
-        // ⚠ U+FFFD IS A FINGERPRINT, NOT NOISE. Of the E2 80 xx third bytes, only 0x81/0x8D/0x8F/0x90/0x9D are
-        // unmapped in CP1252 and so become the replacement character — and among those, `E2 80 9D` is `”`, the
-        // closing double quote, which is overwhelmingly the most frequent in running text. So `â€` + U+FFFD → `”`.
-        // ⚠ THE PAIRING IS CORROBORATED ACROSS LANGUAGES, which is what settles the opening quote — FLEURS
-        // translates ONE English set, so the same sentence exists elsewhere with its bytes intact:
-        //   en  `For example, “learning” and “socialization” are suggested as important motivations …`
-        //   hi  `उदाहरण के लिए, “लर्निंग” और “सोशलाइजेशन” को इंटरनेट …`
-        //   mr  `उदाहरणार्थ, â€इलर्निंगâ€� आणि â€समाजीकरणâ€� ला इंटरनेट …`
-        // Both siblings write U+201C/U+201D, so the residue before a letter is an OPENING quote, not a dash.
-        // Measured: the sequence occurs in exactly two corpora, id_id (42) and mr_in (24), and nowhere else.
+        // LOSSY RESIDUE, where the third byte did not survive to be decoded, and the intended character is still
+        // IDENTIFIABLE — which is the only reason this arm is allowed to guess. `â€` alone is `E2 80`, the first
+        // two bytes of a General Punctuation character, so whatever is missing was punctuation: every candidate
+        // is a clause mark or silent here, whereas leaving it alone leaves a `€` that `\p{Sc}` reads as a
+        // PHANTOM CURRENCY. ⚠ U+FFFD IS A FINGERPRINT, NOT NOISE: of the E2 80 xx third bytes only a handful are
+        // unmapped in CP1252, and among those the closing double quote is overwhelmingly the commonest.
         s = ThreeByte.Replace(s, m =>
         {
             var b2 = SourceByte(m.Value[1]);
@@ -500,77 +395,35 @@ public static class Unicode
             if (b2 < 0x80 || b2 > 0xbf || b3 < 0x80 || b3 > 0xbf) return m.Value;
             return Js.FromCodePoint(((0xe2 & 0x0f) << 12) | ((b2.Value - 0x80) << 6) | (b3.Value - 0x80));
         });
-        // ⚠ AFTER the three-byte pass, NOT BEFORE — the review caught this and my reasoning had been wrong.
-        // I argued these arms were safe ahead of it because the well-formed third characters (U+201C for `–`,
-        // U+201D for `—`) are punctuation and so could not match `[\p{L}\p{M}]`. True for those two, false in
-        // general: `“` is `E2 80 9C` whose third byte 0x9C maps to `œ` — A LETTER — so the opening-quote arm
-        // matched `â€` and stranded the `œ`, turning `â€œ` into `“œ`. Ordering after the full decode removes the
-        // whole class of interception, which is why it is the right fix rather than widening the guard.
+        // ⚠ AFTER the three-byte pass, NOT BEFORE. These arms look safe ahead of it because the well-formed
+        // third characters are punctuation, but that is only true of some: `“` is `E2 80 9C`, whose third byte
+        // 0x9C maps to `œ` — A LETTER — so the opening-quote arm matched `â€` and stranded the `œ`. Ordering
+        // after the full decode removes the whole class of interception.
         s = LossyCloseQuote.Replace(s, "”");
         s = LossyOpenQuote.Replace(s, "“");
-        // TWO-BYTE, as the GENERAL formula rather than one arm per lead byte. `C2` and `C3` were special-cased
-        // here for a while, and the case that showed why that was wrong is `Ä°zmir` — the mojibake of `İ`
-        // (U+0130), whose UTF-8 is `C4 B0`. A lead byte of C4 was outside both arms, so the sequence survived
-        // to the tier as `Ä` + `°` — AND `°` IS A DEGREE SIGN, so the audit reported a `degree` DROP on a
-        // sentence about the population of a Turkish city. A phantom degree, exactly as `â€`'s stranded euro
-        // was a phantom currency. The lesson repeats: half-repaired mojibake does not merely fail to read, it
-        // MANUFACTURES a symbol for a later pass to reason about.
+        // TWO-BYTE, as the GENERAL formula rather than one arm per lead byte: for C2 it returns b2 unchanged and
+        // for C3 it returns b2 + 0x40, and extending to C4/C5 reaches Latin Extended-A. Bounded there by
+        // measurement — the next range up never occurs.
         //
-        // `cp = ((lead & 0x1f) << 6) | (b2 & 0x3f)` is the UTF-8 definition, and it subsumes what the two arms
-        // said: for C2 it returns b2 unchanged (hence "drop the Â") and for C3 it returns b2 + 0x40 (hence the
-        // shift). Extending to C4/C5 reaches Latin Extended-A — the Turkish, Polish and Baltic letters.
+        // ⚠ THE LOWERCASED LEADS `ã` / `â` ARE HERE BECAUSE LOWERCASING DESTROYS THE SIGNATURE. A corpus that has
+        // been case-folded turns the lead `Ã` into `ã`, the repair no longer matches, and the whole token falls
+        // through to the raw passthrough. The arithmetic is unchanged, because the mask does not care about case.
         //
-        // BOUNDED BY MEASUREMENT, on the same standard as the arms above. `[C4C5]` + a continuation byte occurs
-        // **twice across all 67 corpora, both `Ä°` in id_id**, and the next range up, `[C6-CF]`, occurs ZERO
-        // times — so stopping at C5 costs nothing and every character this newly repairs is a real one.
-        // ⚠ THE LOWERCASED LEADS `ã` / `â` ARE HERE BECAUSE LOWERCASING DESTROYS THE SIGNATURE.
-        // A corpus that has been case-folded — FLEURS is — turns the mojibake lead `Ã` into `ã` and
-        // `Â` into `â`, and the repair above then does not match, so the whole token falls through
-        // to the raw passthrough: id_id's `guaycurãº` (from `Guaycurú`) came out of the g2p as the literal
-        // letters `gˈuaycuraº`. The uppercase form in the SAME corpus repairs correctly, which is what
-        // made it visible. This is the casing wall a third time, after the initialism pass and the dotted
-        // abbreviations.
+        // ⚠ `å` IS DELIBERATELY EXCLUDED: it is an ordinary Nordic letter, and Norwegian `nå»` is that word
+        // followed by a legitimate closing quote, which sits in the continuation range.
         //
-        // THE ARITHMETIC IS UNCHANGED because the mask does not care about case: `ã & 0x1f` and
-        // `Ã & 0x1f` are both 0x03, as are `â` and `Â` at 0x02.
-        //
-        // ⚠ SAFE BY MEASUREMENT, AND `å` IS DELIBERATELY EXCLUDED. Across all 102 FLEURS corpora the
-        // signature `[ãâ]` + a continuation character occurs 63 times — id_id 44, fil_ph 17, ceb_ph 2 — and
-        // EVERY distinct pair decodes to an obviously correct character (`â£`→`£`, `â¥`→`¥`, `â°`→`°`,
-        // `â²`→`²`, `ã§`→`ç`, `ã©`→`é`, `ãº`→`ú`, `ã¼`→`ü`). The same letters followed by
-        // anything else — ordinary Portuguese and French — occur 57,516 times and are untouched, because a
-        // real letter never follows them out of U+0080–U+00BF.
-        //
-        // `å` (from `Å`) is NOT a lead here: it is an ordinary Nordic letter, and nb_no's `for nå».` is
-        // "nå" (now) followed by a legitimate `»` closing quote, which sits in the continuation range. Adding
-        // it would corrupt Norwegian to repair nothing.
-        //
-        // ⚠ KNOWN RESIDUE, PRE-EXISTING AND UNCHANGED BY THIS: a trailing byte that CP1252 maps OUT of
-        // U+0080–U+00BF is still not matched, because this arm decodes the character directly instead of
-        // going through `sourceByte()` the way the three-byte arm does. `ÃœrÃ¼mqi` (Ürümqi) half-repairs to
-        // `Ãœrümqi` on main and does so identically here — byte 0x9C is `œ` in CP1252. Widening the trailing
-        // class to reach it would pull in en-dashes and curly quotes, which occur constantly in running
-        // text, to repair ONE token in 102 corpora. Not worth the blast radius; recorded instead.
+        // ⚠ KNOWN RESIDUE: a trailing byte that CP1252 maps OUT of U+0080–U+00BF is not matched, because this arm
+        // decodes the character directly instead of going through `SourceByte()` the way the three-byte arm does.
+        // Widening the trailing class to reach it would pull in en-dashes and curly quotes.
         return TwoByte.Replace(s, m =>
             Js.FromCodePoint(((m.Groups[1].Value[0] & 0x1f) << 6) | (m.Groups[2].Value[0] & 0x3f)));
     }
 
     /**
-     * CARET EXPONENTS → real superscripts. `2^10`, `km^2`, `10^-31`, and the LaTeX-ish `10^{10}`.
-     *
-     * WHY THIS IS A FOLD AND NOT A LANGUAGE RULE: the caret is how a programmer types an exponent when the
-     * keyboard has no superscripts, and it means the same thing in every language. Rendering it to `²`/`¹⁰`/`⁻³¹`
-     * hands it to the exponent machinery that already exists, rather than asking 67 languages to learn a second
-     * notation. Same argument as `foldSquaredDegrees` and `foldVulgarFractions`, which sit beside it.
-     *
-     * ⚠ UNHANDLED IT WAS WORSE THAN A DROP. `2^10` read as *tʰˈuː tʰˈɛn* — "two ten", two numbers with the
-     * relationship gone; `10^-31` as *tʰˈɛn θˈɝd̬iː wˈʌn*, losing the sign as well; and `km^2` as *ˈʊkm tʰˈuː*,
-     * with the unit abbreviation LEAKING raw because the caret broke its adjacency to the number.
-     *
-     * THE GUARD IS TIGHT because a caret is also an ordinary character. It must follow a letter or digit and be
-     * followed only by digits (optionally signed, optionally braced), so a stray `^` in prose or a regex quoted in
-     * running text cannot match. Measured across all 67 corpora and all 67 artifacts: `^` occurs ZERO times, so
-     * this is robustness for input a caller may hand us, not a repair of anything sampled.
+     * CARET EXPONENTS → real superscripts. `2^10`, `km^2`, `10^-31`, and the LaTeX-ish `10^{10}`: the caret is
+     * how a programmer types an exponent, and it means the same thing in every language, so rendering it hands
+     * it to the exponent machinery that already exists. THE GUARD IS TIGHT because a caret is also an ordinary
+     * character — it must follow a letter or digit and be followed only by digits, optionally signed or braced.
      */
     private static readonly IReadOnlyDictionary<string, string> CARET_SUP = new Dictionary<string, string>
     {
@@ -589,58 +442,27 @@ public static class Unicode
     }
 
     /**
-     * SQUARED DEGREE SIGNS → their two-character equivalents: ℃ → `°C`, ℉ → `°F`.
+     * SQUARED DEGREE SIGNS → their two-character equivalents: ℃ → `°C`, ℉ → `°F`. Idempotent, so the engines
+     * that already wrote the ℃ arm by hand stay as they are.
      *
-     * WHY A FOLD RATHER THAN A RULE PER LANGUAGE. U+2103 and U+2109 are single code points that mean exactly what
-     * `°C` and `°F` mean, and 52 of the 65 languages with a mined artifact ALREADY read `°C` correctly while
-     * dropping `℃` — the whole unit, not just the sign: `20℃` came out as bare *twenty*. Folding is therefore the
-     * only change that closes 52 languages at once, and it needs no new word in any of them. 13 already handled
-     * both, because they had written the ℃ arm out by hand (bg ckb cmn da en hi is ja my nb ro sd sv); folding is
-     * idempotent, so those stay as they are.
-     *
-     * ⚠ NOT `NFKC`, AND THIS IS THE WHOLE REASON THE LIST IS CURATED. Blanket compatibility normalisation looks
-     * like the general answer and is measurably destructive here. Counting every compatibility character in the
-     * corpora:
-     *
-     *   ²  → "2"     in 46 corpora   — would erase every exponent reading the tier composes
-     *   …  → "..."   in 18 corpora   — one ellipsis becomes THREE clause breaks
-     *   ¾  → "3⁄4"   in 35 corpora
-     *   য় ড় ਸ਼ ਜ਼ ଡ଼ ज़ …           — nukta letters in five Indic scripts, recomposed differently
-     *   ，（）：；                    — fullwidth punctuation the CJK layers claim deliberately
-     *
-     * ⚠ № IS DELIBERATELY EXCLUDED, though it is the same kind of character. NFKC gives `No`, and Bulgarian —
-     * which writes it 21 times ("космонавт № 11") — says *номер*. Folding it would replace a dropped symbol with
-     * an English word read by a Bulgarian g2p, which is the confidently-wrong outcome this tree ranks below
-     * silence. It needs a per-language WORD, not a fold.
-     *
-     * The CJK squared units (㎞ ㎡ ㎥ ㎏ ㎜ ㎝ ㎢ ㏊) are omitted for a duller reason: zero occurrences in any
-     * corpus, and each would need the language to declare that unit anyway.
+     * ⚠ NOT `NFKC`, AND THAT IS WHY THE LIST IS CURATED. Blanket compatibility normalisation looks like the
+     * general answer and is measurably destructive: `²`→`2` erases every exponent reading the tier composes,
+     * `…`→`...` turns one ellipsis into three clause breaks, the Indic nukta letters recompose differently, and
+     * the fullwidth punctuation the CJK layers claim deliberately is folded out from under them.
+     * ⚠ № IS DELIBERATELY EXCLUDED though it is the same kind of character: NFKC gives `No`, an English word
+     * read by a non-English g2p. It needs a per-language WORD, not a fold.
      */
     /**
-     * VULGAR FRACTIONS → the ASCII `n/m` every language's fraction rule already matches.
+     * VULGAR FRACTIONS → the ASCII `n/m` every language's fraction rule already matches, so each language
+     * speaks it with the fraction machinery it already has.
      *
-     * MEASURED FIRST, because the shape of the fix follows from it: 36 of the 67 artifacts contain a vulgar
-     * fraction, **every one of them the same universal sentence** — the manuscript's `(measuring 29¾ inches × 24½
-     * inches)` — and **27 of the 36 DROP it**, reading `29¾` as bare *twenty-nine*. Nine already handle it
-     * (az ca el ga hr kn mk te uz). One sentence, twenty-seven languages, so this is a fold and not twenty-seven
-     * vocabularies: each language then speaks it with the fraction machinery it already has.
+     * ⚠ NOT NFKC, for the reason `FoldSquaredDegrees` gives, and here specifically because NFKC maps `¾` to
+     * `3⁄4` with U+2044 FRACTION SLASH, which no language's fraction rule matches.
      *
-     * ⚠ NOT NFKC, for the reason `foldSquaredDegrees` gives at length — and here specifically because NFKC maps
-     * `¾` to `3⁄4` with U+2044 FRACTION SLASH, which no language's fraction rule matches. The fold has to be ASCII
-     * `/` to reach that machinery at all, which is why the compatibility mapping is not the answer even for the one
-     * character where it looks closest.
-     *
-     * ⚠ A SPACE IS INSERTED AFTER A DIGIT, and without it the fold makes things worse rather than better. These are
-     * MIXED numbers: `29¾` means twenty-nine and three quarters, so a bare substitution yields `293/4`, which
-     * Gujarati's fraction rule already refuses by design — its comment records `293/4 and 241/2 are MIXED NUMBERS …
-     * so `num < den` refuses them rather than saying "two hundred ninety-three divided by four"`. That refusal is
-     * correct given `293/4`; the space is what makes the input honest. gu therefore goes from a documented refusal
-     * to a reading, with no change to gu.
-     *
-     * ⚠ WHAT THIS DOES NOT SUPPLY is the "and" of *twenty-nine AND three quarters*, which is a per-language word in
-     * a per-language position. The fold gets the fraction SPOKEN; joining it to the integer idiomatically is a
-     * separate change, and th's own recording shows the reader saying the fraction as a unit
-     * (`s e s a m s ʊ n s iː` = เศษสามส่วนสี่) rather than as an addition.
+     * ⚠ A SPACE IS INSERTED AFTER A DIGIT, and without it the fold makes things worse: these are MIXED numbers,
+     * so a bare substitution yields `293/4`, which a fraction rule is right to refuse. The space is what makes
+     * the input honest. ⚠ WHAT THIS DOES NOT SUPPLY is the "and" of *twenty-nine AND three quarters*, which is
+     * a per-language word in a per-language position.
      */
     private static readonly IReadOnlyDictionary<string, string> VULGAR = new Dictionary<string, string>
     {
@@ -669,17 +491,11 @@ public static class Unicode
         Fahrenheit.Replace(Celsius.Replace(s, "°C"), "°F");
 
     /**
-     * FULLWIDTH LATIN LETTERS AND DIGITS → their ASCII twins (Ｇ→G, ７→7).
+     * FULLWIDTH LATIN LETTERS AND DIGITS → their ASCII twins (Ｇ→G, ７→7). They are `Script=Latin` letters with
+     * NO decomposition, so the mark-stripping fold cannot reach them and a g2p with no rule DROPS them.
      *
-     * The fullwidth forms are the same characters at CJK cell width, used inside Chinese, Japanese and Korean text for
-     * Latin runs and numerals. Nothing downstream knows them: they are `Script=Latin` letters with NO decomposition, so
-     * the mark-stripping fold cannot reach them and a g2p with no rule DROPS them. Attested in the corpora as `Ｇ` and
-     * `Ｗ` inside CJK sentences.
-     *
-     * ⚠ LETTERS AND DIGITS ONLY, not the whole fullwidth block. U+FF01–FF5E also holds fullwidth PUNCTUATION, and the
-     * CJK engines already read their own `，、。？！` and the fullwidth ASCII marks deliberately — folding those would
-     * reach into decisions those engines have already made. This is the narrow half of NFKC that is unambiguously
-     * safe, chosen for the same reason `foldSquaredDegrees` stops at two characters instead of applying NFKC wholesale.
+     * ⚠ LETTERS AND DIGITS ONLY, not the whole fullwidth block. U+FF01–FF5E also holds fullwidth PUNCTUATION,
+     * which the CJK engines already read deliberately — folding it would reach into decisions they have made.
      */
     private static readonly JsRe FULLWIDTH = JsRegex.Compile(@"[０-９Ａ-Ｚａ-ｚ]", "gu");
 

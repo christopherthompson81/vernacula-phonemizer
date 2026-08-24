@@ -1,14 +1,10 @@
 /**
- * Neural GENERALIZATION tier for the Perso-Arabic riders (Urdu, Persian, Pashto, Punjabi-Shahmukhi) — a shared
- * multilingual BiLSTM that restores short-vowel harakat on a bare skeleton, run via ONNX Runtime as an ASYNC
- * PRE-PASS. It fills the words the exact-match lexicon (harakatLexicon.ts) misses; a word the lexicon already
- * covers is LEFT BARE here so the (authoritative, gold) sync lexicon layer vocalizes it — giving the precedence
- * lexicon → neural → default. Vocalized output feeds the SYNC g2p, so phonemize() stays sync and dependency-free;
- * only this pre-pass touches ONNX. `onnxruntime-node` is an OPTIONAL dependency, imported lazily; the model is a
- * per-word restorer (one language TOKEN prepended, char sequence, argmax harakat per position). The int8 model
- * ships in-repo (like the Arabic diacritizer) but is optional at RUNTIME: if it — or `onnxruntime-node` — is
- * absent, the pre-pass degrades to a no-op and callers get the lexicon+default path. See
- * and tools/perso-arabic/export_onnx.py.
+ * Neural GENERALIZATION tier for the Perso-Arabic riders (Urdu, Persian, Pashto, Punjabi-Shahmukhi) — a
+ * shared multilingual BiLSTM that restores the short-vowel harakat these abjads leave unwritten, run as an
+ * ASYNC pre-pass. ⚠ THE PRECEDENCE IS lexicon → neural → default: a word the exact-match lexicon already
+ * covers is LEFT BARE here, so the authoritative sync lexicon layer vocalizes it. Vocalized output feeds
+ * the SYNC g2p, so `Phonemize` stays sync.
+ * Ported from src/core/riderDiacritizer.ts — see that file for the corpus evidence.
  */
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -26,16 +22,16 @@ public sealed class RiderDiacritizerMeta
 
 public interface IRiderDiacritizer
 {
-    /** Vocalize the words of `text` for `lang`, skipping any word whose skeleton is in `lexicon` (left bare for the
-     *  sync lexicon layer). Position-preserving: only harakat are inserted; spacing/digits/punctuation are kept. */
+    /** Vocalize the words of `text` for `lang`, skipping any word whose skeleton is in `lexicon` (left bare
+     *  for the sync lexicon layer). Position-preserving: only harakat are inserted; spacing, digits and
+     *  punctuation are kept. */
     Task<string> Diacritize(string text, string lang, IReadOnlyDictionary<string, string> lexicon);
 }
 
 public static class RiderDiacritizerLoader
 {
-    // label → the combining harakat to append after a base letter. Mirrors the training VOWELS map (invert_harakat.ts /
-    // train_multilingual_harakat.py): a fatḥa, u damma, i kasra, o sukūn, F/N/K tanwīn, ^ dagger-alif (U+0670); a "~"
-    // prefix = shadda (gemination) + that vowel; "0" = bare (the model's default).
+    // label → the combining haraka to append after a base letter, mirroring the training VOWELS map. A "~"
+    // prefix means shadda (gemination) plus that vowel; "0" is bare, the model's default.
     private static readonly IReadOnlyDictionary<string, string> HAR = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["0"] = "", ["a"] = "َ", ["u"] = "ُ", ["i"] = "ِ", ["o"] = "ْ",
@@ -48,9 +44,6 @@ public static class RiderDiacritizerLoader
         return HAR.GetValueOrDefault(label) ?? "";
     }
 
-    // A Perso-Arabic word run: letters/joiners in U+0600–06FF + U+0750–077F, PLUS the ZWNJ/ZWJ (U+200C/200D) that
-    // glue morphemes in Persian/Urdu compounds — the model was trained on those as ONE sequence (a ZWNJ-split would
-    // change the LSTM context and the predicted harakat), MINUS the harakat (handled separately).
     private static readonly JsRe WORD = JsRegex.Compile("[؀-ۿݐ-ݿ‌‍]+", "gu");
 
     private sealed class Loaded : IRiderDiacritizer
@@ -74,7 +67,10 @@ public static class RiderDiacritizerLoader
             _nLabels = ilabels.Length;
         }
 
-        /** One skeleton → predicted harakat labels (per base char; the prepended lang-token position is dropped). */
+        /**
+         * One skeleton → predicted harakat labels (per base char; the prepended lang-token position is
+         * dropped).
+         */
         private async Task<List<string>> Predict(int langTokIdx, IReadOnlyList<int> chars)
         {
             var seq = new List<long> { langTokIdx };
@@ -105,8 +101,6 @@ public static class RiderDiacritizerLoader
             var langTok = _meta.LangTokens.GetValueOrDefault(lang);
             int? langTokIdx = langTok is not null && _meta.Chars.TryGetValue(langTok, out var li) ? li : null;
             if (langTokIdx is null) return text; // unknown language → no-op
-            // Rebuild the text with a single cursor (append the gap before each word, then the word's replacement),
-            // avoiding shift bookkeeping and repeated full-string slicing.
             var @out = new List<string>();
             var cursor = 0;
             foreach (Match m in JsRegex.MatchAll(WORD, text))
@@ -114,8 +108,6 @@ public static class RiderDiacritizerLoader
                 var raw = m.Value;
                 @out.Add(text[cursor..m.Index]);
                 cursor = m.Index + raw.Length;
-                // Respect writer-supplied harakat (like restoreHarakat) and leave lexicon-covered words BARE for the
-                // authoritative sync lexicon layer — both are emitted unchanged.
                 var skel = HarakatLexicon.StripHarakat(raw).Normalize(System.Text.NormalizationForm.FormC);
                 if (skel.Length == 0 || HarakatLexicon.HARAKAT.IsMatch(raw) || lexicon.ContainsKey(skel))
                 {
@@ -140,10 +132,9 @@ public static class RiderDiacritizerLoader
         return new Loaded(ort, session, meta);
     }
 
-    /** Load the rider diacritizer from the model + meta beside this file. The model ships in-repo but this DEGRADES to
-     *  undefined (callers fall back to the lexicon+default path) on ANY unavailability — a missing model or meta, OR a
-     *  failed `onnxruntime-node` load (optional native dep absent / ABI mismatch) — rather than throwing. Call
-     *  loadRiderDiacritizer directly if you want the underlying error surfaced. */
+    /** Load the rider diacritizer from the model + meta beside this file. ⚠ DEGRADES TO NULL on ANY
+     *  unavailability — a missing model or meta, or a failed ONNX runtime load — rather than throwing;
+     *  callers fall back to the lexicon+default path. */
     public static async Task<IRiderDiacritizer?> CreateRiderDiacritizer()
     {
         byte[] bytes;

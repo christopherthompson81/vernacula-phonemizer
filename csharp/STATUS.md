@@ -201,5 +201,13 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   reported four dead keys that were merely unprobed: the 40/80 tens and the 22-29 compounds, none of which the
   30-shape probe reached. Widening to every integer 0-120 left exactly one real corpse. State the probe's
   coverage before believing its silence.
+- ⚠ **A COMMENT COPIED INTO THE PORT IS NOT A SECOND WITNESS.** PORTING.md originally said to carry TS comment
+  text verbatim, and 54 languages later that was 18,857 comment lines — 36% of the C# tree, Quechua at 352
+  comment lines over 84 of code. None of it is evidence the TypeScript does not already hold, and all of it is
+  a second place a TS-first fix has to land. The rule is now inverted (see PORTING.md "Comments"): a 2-4 line
+  header pointing at the TS module, and inline comments ONLY where their absence would let an editor "improve"
+  the port into a divergence. ⚠ The nine files where the C# is the ONLY home for its reasoning — DataPath,
+  Foreign, LoadManifest, LoadTsv, Onnx, Geez, NormalizeSymbols, Unicode, Registry — were held out of the
+  mechanical sweep by hand; a pointer to a TS file that never had the answer is worse than the bloat.
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.

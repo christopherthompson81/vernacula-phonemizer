@@ -1,8 +1,6 @@
 /**
- * Dutch (Northern Standard) grapheme→phoneme engine. Latin, largely rule-governed. Handles the open/closed
- * syllable vowel-length system (tense in an open syllable, lax in a closed one), the Dutch diphthongs
- * (ij/ei→ɛi̯, ui→œy̯, ou/au→ɑu̯, eu→øː, oe→u), the g→ɣ (onset) / x (coda) split, sch→sx, w→ʋ, h→ɦ, and final
- * devoicing (hond→hɔnt, dag→dɑx). Stress is added downstream (dutch.ts).
+ * Dutch (Northern Standard) grapheme→phoneme engine.
+ * Ported from src/languages/dutch/g2p.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -22,11 +20,6 @@ public static class G2p
     private static IReadOnlyDictionary<string, string> CONS => Manifest.MANIFEST.Consonants;
     private static IReadOnlyDictionary<string, string> VOICED_FINAL => Manifest.MANIFEST.VoicedFinal;
 
-    // Plain + trema vowel letters. The trema letters (ë ï ö ü) are vowels but never combine with a preceding vowel
-    // into a digraph (the scanner's digraph tests only match the plain letters), so ⟨tweeën⟩ scans twe·e·ën.
-    // ⚠ THE CIRCUMFLEXES ARE DUTCH SPELLING, NOT FOREIGN DECORATION — Dutch keeps them on the French loans it has
-    // naturalised (enquête, crêpe, gêne, coûte, blessûre). They were missing from this string, so the scan fell all
-    // the way past the consonant switch and DELETED them: enquête → *ɛnkʋtə, crêpe → *krpeː, a nucleus short each.
     private const string VOWELS = "aeiouyáéíóúàèâêîôûäëïöü";
     // ⚠ `c !== ""` IS THE WHOLE GUARD, AND IT IS LOAD-BEARING: `VOWELS.includes("")` is TRUE in JS, and
     // `.NET Contains("")` is true too. The scanner reads past the end of the word constantly (`w[i+1] ?? ""`),
@@ -49,9 +42,7 @@ public static class G2p
     /** JS `w[i]` — the code UNIT at i, or "" past the end (the TS reads with `?? ""` throughout). */
     private static string At(string w, int i) => i >= 0 && i < w.Length ? w[i].ToString() : "";
 
-    /** Is the single vowel at index i in an OPEN syllable (→ tense/long)? Open = word-final (ja, nu), a hiatus
-     *  vowel (open), or a single consonant followed by another vowel (wa·ter → aː). Closed (VC#, VCC → lax): dag→ɑ,
-     *  man→ɑ, kort→ɔ. Doubled vowels (aa/ee/oo/uu) are handled before this is called (always long). */
+    /** Is the single vowel at index i in an OPEN syllable (→ tense/long)? */
     private static bool IsOpen(string w, int i)
     {
         var run = ConsRun(w, i + 1);
@@ -60,7 +51,10 @@ public static class G2p
         return false; // VCC… → closed
     }
 
-    /** The TS builds `new RegExp(`[${VOWELS}]`, "u")` inside the ⟨ë⟩ branch on every call; the class is constant. */
+    /**
+     * The TS builds `new RegExp(`[${VOWELS}]`, "u")` inside the ⟨ë⟩ branch on every call; the class is
+     * constant.
+     */
     private static readonly JsRe ANY_VOWEL = JsRegex.Compile($"[{VOWELS}]", "u");
 
     /** Scan a lowercased Dutch word into IPA segments (no stress; g/ch voicing, devoicing applied here). */
@@ -77,11 +71,8 @@ public static class G2p
             string c = At(w, i), nx = At(w, i + 1), nx2 = At(w, i + 2), nx3 = At(w, i + 3);
             var seenVowel = segs.Any(s => s.Vowel);
 
-            // ── Unstressed native suffixes (reduce their vowel). Gated so stressed monosyllables are untouched. ──
             if (c == "l" && nx == "i" && nx2 == "j" && nx3 == "k" && i > 0)
             {
-                // -lijk suffix (mogelijk → …lək): ⟨ij⟩ → ə. Word-initial ⟨lijk⟩ (the noun "corpse" → lɛi̯k) is excluded
-                // by i>0. Matches -lijk / -lijke / -lijkheid (only the ⟨lijk⟩ span is consumed).
                 Push("l", i);
                 Push("ə", i, true);
                 Push("k", i);
@@ -89,7 +80,6 @@ public static class G2p
                 continue;
             }
 
-            // ── Glide-final vowel sequences (longest first). A ⟨w⟩ closing an u-glide diphthong is absorbed. ──
             if (c == "i" && nx == "e" && nx2 == "u" && nx3 == "w")
             {
                 Push("i", i, true);
@@ -126,11 +116,8 @@ public static class G2p
                 continue;
             } // oei → ui̯ (moeite)
 
-            // ── Two-letter vowel digraphs. ──
             if (c == "i" && (nx == "j" || nx == "e"))
             {
-                // ⟨ij⟩ → ɛi̯; ⟨ie⟩ → i (long). ⟨ie⟩ + ⟨ë⟩ is the -iën plural (knieën, bacteriën): ⟨ie⟩→i here and the
-                // ⟨ë⟩ becomes its own schwa next iteration. (⟨ië⟩ without the ⟨e⟩ — Italië — never enters this branch.)
                 if (nx == "j")
                 {
                     Push("ɛi̯", i, true);
@@ -171,7 +158,6 @@ public static class G2p
                 i += 2;
                 continue;
             } // oe → u (boek)
-            // Doubled vowel → one long/tense vowel (aa/ee/oo/uu).
             if (nx == c && "aeou".Contains(c, StringComparison.Ordinal))
             {
                 Push(LONG[c], i, true);
@@ -179,11 +165,8 @@ public static class G2p
                 continue;
             }
 
-            // ── Consonant digraphs / context. ──
             if (c == "s" && nx == "c" && nx2 == "h")
             {
-                // sch → sx before a vowel (school → sxoːl, schip); word-final / before a consonant → s (typisch → …is,
-                // mensch). The ⟨s⟩ + separate ⟨ch⟩ (this ⟨sch⟩) is the Dutch trigraph.
                 if (IsV(nx3))
                 {
                     Push("s", i);
@@ -247,11 +230,8 @@ public static class G2p
                 continue;
             } // sj → ʃ (sjaal, meisje)
 
-            // ── Vowels (single letter). ──
             if (IsV(c))
             {
-                // Word-final unstressed -ig suffix → əx (twintig → tʋɪntəx, gelukkig → …kəx). Gated on seenVowel so a
-                // stressed monosyllable (big → bɪx, twijg) — where ⟨i⟩ is the first nucleus — keeps its full lax vowel.
                 if (c == "i" && nx == "g" && nx2 == "" && seenVowel)
                 {
                     Push("ə", i, true);
@@ -259,7 +239,6 @@ public static class G2p
                     i += 2;
                     continue;
                 }
-                // Word-final Latinate -isch → is (tense ⟨i⟩ + s; the ⟨ch⟩ is silent): typisch → tipis, logisch → loːxis.
                 if (c == "i" && nx == "s" && nx2 == "c" && nx3 == "h" && i + 4 == n)
                 {
                     Push("i", i, true);
@@ -267,29 +246,18 @@ public static class G2p
                     i += 4;
                     continue;
                 }
-                // A single ⟨e⟩ that is NOT the first vowel nucleus reduces to schwa (Dutch default stress is initial:
-                // water → ʋaːtər, achterbos → ɑxtərbɔs, zeven → zeːvə, de → də). The ⟨ee/ei/eu/ie⟩ digraphs and the
-                // stressed first ⟨e⟩ (eten → eːtə) are consumed earlier, so they keep their full quality. Non-initial
-                // FULL-vowel ⟨e⟩ (loanword second-syllable stress, protest → proːtɛst) is the minority residual.
                 if (c == "e" && seenVowel)
                 {
                     Push("ə", i, true);
                     i++;
                     continue;
                 }
-                // Trema ⟨ë⟩ in a final -ën / -ë ending (a hiatus/plural schwa: tweeën → tʋeːə, ideeën, knieën) → schwa.
-                // A stressed ⟨ë⟩ with more material after it (poëzie → poːeːzi) keeps its full quality (falls through).
                 if (c == "ë" && seenVowel && !ANY_VOWEL.IsMatch(w[(i + 1)..]))
                 {
                     Push("ə", i, true);
                     i++;
                     continue;
                 }
-                // Trema/accented letters and plain vowels use the open/closed length rule.
-                // ⚠ The circumflex joins the row its base is already on, rather than getting a value of its own:
-                // this file's own precedent is that every accent Dutch writes on a vowel (á à ä é è ë …) reads as
-                // the plain letter under the open/closed length rule, and a separate quality for ⟨ê⟩ would be a new
-                // phonological claim with no referee behind it.
                 var bas = "áàâä".Contains(c, StringComparison.Ordinal) ? "a"
                     : "éèêë".Contains(c, StringComparison.Ordinal) ? "e"
                     : "íìîï".Contains(c, StringComparison.Ordinal) ? "i"
@@ -303,11 +271,8 @@ public static class G2p
                 continue;
             }
 
-            // ── Context-dependent consonants. ──
             if (c == "g")
             {
-                // g → ɣ in the onset (before a vowel, or a liquid + vowel: geven→ɣ, groot→ɣr); → x in a coda
-                // (dag→dɑx, magd, zorgt). ⟨gg⟩ → ɣ (zeggen → zɛɣə). Final devoicing already covered by the coda→x here.
                 var onset = IsV(nx) || (nx == "g" && IsV(nx2)) || (IsLiquid(nx) && IsV(nx2));
                 Push(onset ? "ɣ" : "x", i);
                 if (nx == "g") i++; // gg → single
@@ -341,25 +306,17 @@ public static class G2p
 
             if (c == "ñ")
             {
-                // ⚠ READ AS ⟨nj⟩, WHICH IS HOW THIS ENGINE ALREADY SPELLS THE PALATAL NASAL (Spanje → spɑnjə,
-                // oranje). Not a Dutch letter, but Dutch borrows the names that carry it and used to DELETE it
-                // (Cañitas → *kaːitɑs, a consonant short). Emitting /ɲ/ instead would be a phone Dutch has nowhere
-                // else in this engine's output; emitting /n/ alone would throw the palatal away.
                 Push("n", i);
                 Push("j", i);
                 i++;
                 continue;
             }
             var cp = CONS.TryGetValue(c, out var cpv) ? cpv : null;
-            // ⚠ NOT SILENTLY when the consonant table has nothing either. Everything Dutch spells was matched
-            // above, so what reaches here is a letter out of someone else's alphabet inside a name; the shared
-            // table names the phone it denotes rather than dropping it. Non-letters return `undefined`.
             var ph = cp ?? LatinPhones.LatinPhone(c, new PhoneOpts { Initial = i == 0 });
             if (ph is not null) Push(ph, i);
             i++;
         }
 
-        // Collapse doubled consonants (Dutch writes them only to mark a short vowel: bakken→bɑkə, zeggen handled).
         var outp = new List<Seg>();
         foreach (var s in segs)
         {
@@ -379,9 +336,6 @@ public static class G2p
             var s = segs[k];
             if (!VOICED_FINAL.TryGetValue(s.Ph, out var dev) || dev == "") continue;
             var next = k + 1 < segs.Count ? segs[k + 1] : null;
-            // Devoice a coda voiced obstruent word-finally, before a voiceless obstruent, or before another voiced
-            // obstruent that will itself devoice (the whole coda cluster devoices). Before a sonorant/vowel it is an
-            // onset and stays voiced (bever, adem).
             if (next is null
                 || (!next.Vowel
                     && ("ptksfxʃ".Contains(next.Ph.Length > 0 ? next.Ph[0].ToString() : "", StringComparison.Ordinal)

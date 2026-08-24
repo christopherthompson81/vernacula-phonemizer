@@ -1,11 +1,8 @@
 /**
- * Async neural entry for the Perso-Arabic riders (Urdu, Persian, Pashto, Punjabi-Shahmukhi) — the deploy wrapper
- * that runs the shared multilingual BiLSTM harakat pre-pass (core/riderDiacritizer.ts, ONNX) and then the SYNC
- * phonemizer. This is the full two-layer path: the pre-pass leaves lexicon-covered words BARE (the sync g2p's
- * restoreHarakat then applies the authoritative gold lexicon) and neural-vocalizes only the rest — so precedence
- * is lexicon → neural → default. When the optional `onnxruntime-node` dep or the .onnx model is absent the pre-pass
- * is a no-op and you get exactly the sync `phonemize(text, lang)` (lexicon + default). Bare Arabic uses the
- * separate `phonemizeArabic`; this is its rider analogue.
+ * Async neural entry for the Perso-Arabic riders (Urdu, Persian, Pashto, Punjabi-Shahmukhi): the shared
+ * multilingual BiLSTM harakat pre-pass (ONNX) followed by the SYNC phonemizer, so precedence is
+ * lexicon → neural → default. With no model or no `onnxruntime-node` the pre-pass is a no-op.
+ * Ported from src/riderNeural.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -13,9 +10,8 @@ namespace Vernacula.Phonemizer;
 
 public static class RiderNeural
 {
-    // The model's language token codes (train_multilingual_harakat.py LANGS) → each rider's coverage-lexicon ACCESSOR.
-    // Lazy (functions, not eager Maps) so a single-language neural call loads only that rider's lexicon, not all four.
-    //
+    // Model language token → that rider's coverage-lexicon ACCESSOR. Lazy (a `Func`, not an eager dictionary)
+    // so a single-language neural call loads only that rider's lexicon, not all four.
     // ⚠ PORT STATUS: the TypeScript declares all four riders (ur, fa, ps, pa) statically; this table is REGISTERED
     // INTO by each rider language as it lands, exactly as Languages/Bootstrap.cs and NeuralRegistry do. An unported
     // rider is therefore absent rather than wrong — `phonemizeRiderNeural` throws the same named error it throws in
@@ -36,11 +32,7 @@ public static class RiderNeural
     private static Task<IRiderDiacritizer?>? diacritizer;
     private static readonly object Gate = new();
 
-    /**
-     * Phonemize bare (undiacritized) rider text via the neural short-vowel pre-pass + the sync g2p. `lang` must be one
-     * of NEURAL_RIDERS. Async because the ONNX pre-pass is; the g2p itself stays sync. Falls back to the plain sync
-     * path (lexicon + default) when the model/`onnxruntime-node` is unavailable.
-     */
+    /** Phonemize bare (undiacritized) rider text via the neural short-vowel pre-pass + the sync g2p. */
     public static async Task<string> PhonemizeRiderNeural(string text, string lang)
     {
         Registry.EnsureLanguages();
@@ -55,11 +47,9 @@ public static class RiderNeural
         }
         var diac = await pending.ConfigureAwait(false); // undefined when the model or onnxruntime-node is unavailable → sync fallback
         var vocalized = diac is not null ? await diac.Diacritize(text, lang, lex()).ConfigureAwait(false) : text;
-        // `renderInHost`, NOT `getPhonemizer(lang).text`: the shared pre-passes have already run once, at
-        // `getNeuralPhonemizer`, and the chain is not idempotent — `stripMarkup` decodes entities, so a second pass
-        // would turn an author's `&amp;lt;` into a real `<` and strip it. This renders in `lang`'s host with the
-        // engine only. (This file was the ONE async entry that already reached the registry wrapper; the pre-passes
-        // moved up rather than away.)
+        // `RenderInHost`, NOT `GetPhonemizer(lang).Text`: the shared pre-passes have already run once, and the
+        // chain is not idempotent — `StripMarkup` decodes entities, so a second pass would turn an author's
+        // `&amp;lt;` into a real `<` and strip it.
         return Registry.RenderInHost(lang, vocalized);
     }
 }

@@ -1,9 +1,6 @@
 /**
- * Thai grapheme→phoneme engine (authored). The hard structural work — leading-vowel reorder,
- * อักษรนำ leaders, the schwa/inherent-vowel algorithm, syllable segmentation, and computed tone — is done by
- * the syllabifier (syllabifier.ts). This module RENDERS the
- * resulting {onset, nucleus, coda, tone} syllable structure to IPA directly.
- * Contributes ɤ.
+ * Thai grapheme→phoneme engine (authored).
+ * Ported from src/languages/thai/g2p.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 
@@ -11,8 +8,6 @@ namespace Vernacula.Phonemizer.Languages.Thai;
 
 public static class G2p
 {
-    // Lexical dictionary of irregulars (length, silent-ร Sanskrit, cluster-under-leading-vowel) the rules can't
-    // derive — word → IPA (Chao). Consulted BEFORE the rule engine.
     private static Dictionary<string, string>? DICT;
     private static readonly object GATE = new();
     private static Dictionary<string, string> Dict()
@@ -20,8 +15,6 @@ public static class G2p
         lock (GATE) return DICT ??= LoadTsv.LoadTsvMap("languages/thai", "dictionary.tsv", optional: true);
     }
 
-    // Grapheme→IPA tables + the length-exception sets are DATA (thai.jsonc). INIT: onset (อ = glottal ʔ; a silent
-    // leader is dropped first). CODA: 8-way final. VQUAL: written-vowel unit → base quality (ː added from the scan).
     private static IReadOnlyDictionary<string, string> INIT => Manifest.MANIFEST.Onset;
     private static IReadOnlyDictionary<string, string> CODA => Manifest.MANIFEST.Coda;
     private static IReadOnlyDictionary<string, string> VQUAL => Manifest.MANIFEST.VowelQuality;
@@ -71,15 +64,16 @@ public static class G2p
         }
         var coda = s.CodaG != "" ? (CODA.GetValueOrDefault(s.CodaG) ?? "") : glide;
         var tone = s.Tone is not null ? ThaiTone.THAI_TONE_IPA.GetValueOrDefault(s.Tone) ?? "" : "";
-        // A word-FINAL short open syllable takes a glottal ʔ — a written short vowel (จะ→t͡ɕaʔ) or a standalone
-        // single-consonant letter with its inherent vowel (ณ→naʔ). A non-final minor short syllable does not.
         var openLast = last && coda == "";
         var finalCoda =
             coda != "" ? coda : (openLast && (vShort || s.NucUnit.Kind == "C") ? "ʔ" : "");
         return onset + nucleus + tone + finalCoda;
     }
 
-    /** One Thai TOKEN → IPA: segment into words (a compound token like ก็คือ splits into ก็ คือ), phonemize each. */
+    /**
+     * One Thai TOKEN → IPA: segment into words (a compound token like ก็คือ splits into ก็ คือ), phonemize
+     * each.
+     */
     public static string PhonemizeWord(string token) =>
         string.Join(" ", ThaiSegment.Segment(token)
             .Select(PhonemizeSubword)
@@ -87,7 +81,10 @@ public static class G2p
 
     private static readonly JsRe STRESS_VOWEL = JsRegex.Compile("[aeiouɛɔɤɯ]", "u");
 
-    /** One segmented Thai word → canonical IPA (dictionary of irregulars, else the ported syllabifier + render). */
+    /**
+     * One segmented Thai word → canonical IPA (dictionary of irregulars, else the ported syllabifier +
+     * render).
+     */
     private static string PhonemizeSubword(string word)
     {
         if (Dict().TryGetValue(word, out var lex)) return lex;
@@ -99,7 +96,6 @@ public static class G2p
             prep.Fates,
             prep.UnitMark,
             prep.ShortMark);
-        // Stress: ˈ on the first syllable; ˌ on even nucleus indices ≥2 (syllables 3, 5, 7…).
         return string.Concat(syls.Select((s, i) =>
         {
             var syl = RenderSyllable(s, i == 0, i == syls.Count - 1);

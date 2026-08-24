@@ -1,9 +1,6 @@
 /**
- * Loads the Mandarin data manifest (cmn.jsonc) once at module init and exposes it typed. Holds the tone system,
- * the third-tone sandhi rule, clause punctuation, the measure-word set, and the number-reading tables. The bulk
- * lexical data stays in sibling .tsv files (syllable-ipa / chars / phrases), loaded separately in mandarin.ts.
- * The ALGORITHMS that read this manifest stay in code (pinyinToIpa.ts / numbers.ts / mandarin.ts): the sandhi
- * scan, the Arabic→Chinese numeral compositor, and the tokenizer.
+ * Loads the Mandarin data manifest (cmn.jsonc) once at module init and exposes it typed.
+ * Ported from src/languages/mandarin/manifest.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
 

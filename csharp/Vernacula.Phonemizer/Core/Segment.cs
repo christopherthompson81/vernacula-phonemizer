@@ -1,15 +1,14 @@
 /**
- * Shared DAG maximal-matching core for the SPACELESS-script segmenters (Thai, Burmese, …). Covers a code-point
- * run with the FEWEST dictionary words, with every word boundary required to be in `bound` (the language's legal
- * boundary positions — Thai TCC clusters, Burmese syllable starts — so a word never begins or ends mid-cluster).
- * Runs of out-of-dictionary clusters coalesce into ONE unknown token (graceful: the caller phonemizes it whole).
+ * Shared DAG maximal-matching core for the SPACELESS-script segmenters (Thai, Burmese, …).
+ * Ported from src/core/segment.ts — see that file for the corpus evidence.
  */
 namespace Vernacula.Phonemizer.Core;
 
 public static class Segment
 {
     /** Load a `seg-words.txt` beside `metaUrl` (one word per line, `#` comments skipped) into a set + its longest
-     *  entry (which bounds the DAG scan). Shared by the spaceless-script segmenters. `reduce` (not Math.max(...spread))
+     *  entry (which bounds the DAG scan). Shared by the spaceless-script segmenters. `reduce` (not
+     * Math.max(...spread))
      *  so a ~65k-entry set can't blow the call-argument limit. */
     public static (HashSet<string> Set, int MaxLen) LoadSegWords(string moduleDir)
     {
@@ -24,7 +23,10 @@ public static class Segment
         return (set, maxLen);
     }
 
-    /** Cover `cs` with the fewest dictionary `words`, boundaries constrained to `bound`; OOV runs coalesce to one token. */
+    /**
+     * Cover `cs` with the fewest dictionary `words`, boundaries constrained to `bound`; OOV runs coalesce to
+     * one token.
+     */
     public static List<string> SegmentByDag(
         IReadOnlyList<string> cs,
         IReadOnlySet<string> words,
@@ -55,14 +57,12 @@ public static class Segment
             }
             if (double.IsPositiveInfinity(dp[i]))
             {
-                //                       fallback: the single cluster here (advance to the next boundary)
                 var j = i + 1;
                 while (j < n && !bound.Contains(j)) j++;
                 dp[i] = dp[j] + 1;
                 next[i] = j;
             }
         }
-        // Reconstruct; coalesce consecutive OUT-OF-DICTIONARY clusters into one unknown word.
         var outp = new List<string>();
         for (var i = 0; i < n;)
         {
