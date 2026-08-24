@@ -16,10 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 46 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+- **Languages: 47 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
   cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha, tr, ta, sw, yue, vi,
-  ko, jv, it, gu, pl — all **200/200**. 9,200 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION
-  (user direction), from `tools/language-catalogue/languages.db`: next uk, ro, nl, hu, el-variants…
+  ko, jv, it, gu, pl, uk — all **200/200**. 9,400 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION
+  (user direction), from `tools/language-catalogue/languages.db`: next ro, nl, hu, el-variants…
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
@@ -165,5 +165,13 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   key; it cannot see a property nothing then reads. tg declared `numbers.and` and both engines carried their
   own literal copy of its value instead — agreeing, so no gate could fire. Reachability is a READING
   question (#901), which is what the correctness lens in `PORTING.md` is for.
+- ⚠ **A LOCAL RULE AND THE SHARED TIER CAN DISAGREE ABOUT THE SAME SENTENCE.** Ukrainian declares a FOURTH
+  count form for the shared symbol tier (the genitive singular a decimal governs, `1,5 км` → *кілометра*),
+  and the three unit rules it keeps locally — м, м/с, ° — each reached that slot a different wrong way: the
+  metre rule TRUNCATED the count (1,5 → *метр*, 0,5 → *метрів*, two answers for one construction) and the
+  degree rule read the FRACTIONAL digits as its count (`2,4 °` matched the `4`). Both engines agreed
+  perfectly, and no golden row reaches any of the three, so only reading the two layers against each other
+  found it (#920). When a language keeps a unit out of the shared tier, the agreement it declared there is
+  the specification the local rule owes.
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.
