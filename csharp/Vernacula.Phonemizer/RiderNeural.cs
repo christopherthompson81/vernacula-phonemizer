@@ -28,7 +28,10 @@ public static class RiderNeural
         LEXICONS[lang] = lexicon;
 
     /** The rider languages served by the neural pre-pass (the model was trained on exactly these + Arabic). */
-    public static IReadOnlyList<string> NEURAL_RIDERS => LEXICONS.Keys.OrderBy(k => k, StringComparer.Ordinal).ToList();
+    // ⚠ INSERTION ORDER, not sorted: the TS reads `Object.keys(LEXICONS)` off a literal, so the order is the
+    // declaration order and it reaches users through the not-a-rider error message. A Dictionary preserves
+    // insertion order as long as nothing is removed, which holds here (registration is append-only).
+    public static IReadOnlyList<string> NEURAL_RIDERS => LEXICONS.Keys.ToList();
 
     private static Task<IRiderDiacritizer?>? diacritizer;
     private static readonly object Gate = new();
