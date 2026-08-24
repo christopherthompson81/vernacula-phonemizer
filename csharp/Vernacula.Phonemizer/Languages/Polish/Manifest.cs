@@ -1,0 +1,53 @@
+/** Loads the consolidated Polish data manifest (polish.jsonc) once and exposes it typed. Algorithms live in g2p.ts. */
+using Vernacula.Phonemizer.Core;
+
+namespace Vernacula.Phonemizer.Languages.Polish;
+
+/** A Slavic magnitude noun's three count forms: sg (1), paucal (2–4), gen-pl (5+ / 11–14). */
+public sealed class Agreement
+{
+    public string Sg { get; init; } = "";
+    public string Paucal { get; init; } = "";
+    public string Plural { get; init; } = "";
+}
+
+public sealed class PolishVoicing
+{
+    public IReadOnlyDictionary<string, string> ToVoiceless { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> ToVoiced { get; init; } = new Dictionary<string, string>();
+}
+
+public sealed class PolishMagnitudes
+{
+    public Agreement Thousand { get; init; } = new();
+    public Agreement Million { get; init; } = new();
+    public Agreement Billion { get; init; } = new();
+}
+
+public sealed class PolishNumbersDef
+{
+    public string[] Units { get; init; } = [];
+    public string[] Teens { get; init; } = [];
+    public string[] Tens { get; init; } = [];
+    public string[] Hundreds { get; init; } = [];
+    public PolishMagnitudes Magnitudes { get; init; } = new();
+}
+
+public sealed class PolishManifest
+{
+    public IReadOnlyDictionary<string, string> Vowels { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> NasalVowels { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> Consonants { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> Digraphs { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> SoftI { get; init; } = new Dictionary<string, string>();
+    public PolishVoicing Voicing { get; init; } = new();
+    public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
+    /** LEXICAL: acronyms read letter-by-letter even though the letters could form a readable word. */
+    public string[] AcronymLetters { get; init; } = [];
+    public PolishNumbersDef Numbers { get; init; } = new();
+}
+
+public static class Manifest
+{
+    public static readonly PolishManifest MANIFEST = LoadManifest.Load<PolishManifest>("languages/polish", "polish.jsonc");
+}
