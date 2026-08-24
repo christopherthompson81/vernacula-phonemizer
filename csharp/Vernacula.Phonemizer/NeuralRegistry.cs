@@ -23,6 +23,9 @@ public static class NeuralRegistry
         ["fr"] = Languages.French.FrenchNeural.PhonemizeFrNeural,
         // ur: the rider EARNS its place here — measured against the sync path on ur.cle-speech.
         ["ur"] = t => RiderNeural.PhonemizeRiderNeural(t, "ur"),
+        // fa: the sentence-level STRUCTURAL TAGGER, not the rider — it reads ezafe and homographs from
+        // clause context, which no word-at-a-time model can. All 200 fa golden rows differ from the sync path.
+        ["fa"] = Languages.Persian.PersianNeural.PhonemizeFaNeural,
     };
 
     /**

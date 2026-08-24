@@ -124,6 +124,14 @@ public static class Onnx
 
         internal OrtSessionImpl(InferenceSession session) => _session = session;
 
+        /** An ORT bool tensor: allocate with the element type declared, then copy the 0/1 bytes in. */
+        private static OrtValue BoolTensor(byte[] data, long[] shape)
+        {
+            var v = OrtValue.CreateAllocatedTensorValue(OrtAllocator.DefaultInstance, TensorElementType.Bool, shape);
+            data.AsSpan().CopyTo(v.GetTensorMutableDataAsSpan<byte>());
+            return v;
+        }
+
         public Task<Dictionary<string, OrtTensor>> Run(IReadOnlyDictionary<string, OrtTensor> feeds)
         {
             lock (_runGate)
@@ -138,7 +146,13 @@ public static class Onnx
                         {
                             "int64" => OrtValue.CreateTensorValueFromMemory((long[])t.Data, shape),
                             "float32" => OrtValue.CreateTensorValueFromMemory((float[])t.Data, shape),
-                            "uint8" or "bool" => OrtValue.CreateTensorValueFromMemory((byte[])t.Data, shape),
+                            "uint8" => OrtValue.CreateTensorValueFromMemory((byte[])t.Data, shape),
+                            // ⚠ A BOOL TENSOR CANNOT BE BUILT FROM byte[] BY INFERENCE — CreateTensorValueFromMemory
+                            // reads the element type off the array and hands ORT a uint8 tensor, which the graph
+                            // rejects outright ("Actual: (tensor(uint8)), expected: (tensor(bool))"). The element type
+                            // has to be stated. `new ort.Tensor("bool", Uint8Array)` in JS does state it; this is the
+                            // one place the two APIs disagree about what a byte array means.
+                            "bool" => BoolTensor((byte[])t.Data, shape),
                             _ => throw new ArgumentException($"Onnx: unsupported tensor type \"{t.Type}\""),
                         };
                     }

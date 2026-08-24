@@ -60,6 +60,7 @@ public static class Bootstrap
             Umbundu.UmbunduPhonemizer.RegisterSelf();
             Urdu.UrduPhonemizer.RegisterSelf();
             Punjabi.PunjabiPhonemizer.RegisterSelf();
+            Persian.PersianPhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }

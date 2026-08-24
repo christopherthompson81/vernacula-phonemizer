@@ -12,7 +12,9 @@ namespace Vernacula.Phonemizer.Core;
 /** A number-composition strategy: integer → ordered number-word spellings (`null` = un-authored gap). */
 public delegate List<string?> NumberComposer(double n, NumbersDef d);
 
-public sealed class NumbersDef
+// ⚠ NOT SEALED: the TS declares `interface FaNumbersDef extends NumbersDef`, so a language may add its own
+// fields to the shared schema (Persian adds the connective enclitic's IPA). Persian is the first to do it.
+public class NumbersDef
 {
     public string[] Units = []; // 0..9 spellings
     public string[]? Teens; // 10..19 spellings (Indic irregular teens; omitted by systems that compose them, e.g. Turkic oʻn+unit)
