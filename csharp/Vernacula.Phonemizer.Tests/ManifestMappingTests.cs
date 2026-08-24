@@ -134,6 +134,65 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance", "convention", "dataFiles");
 
     [Fact]
+    public void PersianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/persian", "persian.jsonc", Languages.Persian.PersianPhonemizer.DEF,
+            "language", "name", "script", "provenance", "convention", "models");
+
+    // ── MODEL SIDECARS ────────────────────────────────────────────────────────────────────────────────────
+    //
+    // ⚠ THE SAME SILENT FAILURE, ONE DIRECTORY OVER. A `*.meta.json` beside an ONNX model is deserialized by
+    // the SAME options as a manifest, so the same camelCase mangling applies — and no manifest test covered
+    // them. Persian's two seq2seq sidecars key the hidden size as capital `H`, the policy renamed the property
+    // to "h", it bound to 0, and ONNX rejected a zero-width hidden state the first time the CLASSICAL context
+    // model ran. The parity gate could not see it: the fa golden runs the TAGGER, whose sidecar has no such
+    // key, so the crash lived entirely off-golden and was found by an off-golden probe against Node.
+    //
+    // `Seq2SeqMeta.H` now states its JSON name explicitly. The theory below is the general guard: EVERY model
+    // sidecar in the data tree is checked for a top-level key the policy would rename, and a new one fails
+    // unless it is listed here as deliberately annotated.
+    private static readonly IReadOnlySet<string> AnnotatedSidecarKeys =
+        new HashSet<string>(new[] { "H" }, StringComparer.Ordinal); // Seq2SeqMeta.H carries [JsonPropertyName("H")]
+
+    /// <summary>System.Text.Json's camelCase policy: lowercase the leading uppercase run, keeping the last of
+    /// it when a lowercase follows (so `H`→`h`, `IPA`→`ipa`, `ARPAbet`→`arpAbet`).</summary>
+    private static string CamelCase(string k) => JsonNamingPolicy.CamelCase.ConvertName(k);
+
+    public static TheoryData<string> ModelSidecars()
+    {
+        var data = new TheoryData<string>();
+        foreach (var f in Directory.EnumerateFiles(DataPath.Root(), "*.meta.json", SearchOption.AllDirectories).Order(StringComparer.Ordinal))
+            data.Add(Path.GetRelativePath(DataPath.Root(), f));
+        return data;
+    }
+
+    [Theory]
+    [MemberData(nameof(ModelSidecars))]
+    public void ModelSidecarKeysSurviveTheNamingPolicy(string relative)
+    {
+        using var doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(DataPath.Root(), relative)));
+        var mangled = doc.RootElement.EnumerateObject()
+            .Select(p => p.Name)
+            .Where(k => CamelCase(k) != k && !AnnotatedSidecarKeys.Contains(k))
+            .ToList();
+        Assert.True(mangled.Count == 0,
+            $"{relative}: key(s) the camelCase policy renames, with no [JsonPropertyName] to claim them: {string.Join(", ", mangled)}");
+    }
+
+    /// <summary>The concrete half: Persian's two seq2seq sidecars really do bind their hidden size. A `H` of 0
+    /// is what ONNX rejected, so this asserts the value the crash proved was missing.</summary>
+    [Theory]
+    [InlineData("fa-context-restorer")]
+    [InlineData("fa-vowel-restorer")]
+    public void PersianSeq2SeqSidecarBindsHiddenSize(string basename)
+    {
+        var meta = JsonSerializer.Deserialize<Languages.Persian.Seq2SeqMeta>(
+            File.ReadAllText(DataPath.Resolve($"languages/persian/{basename}.meta.json")), Opts)!;
+        Assert.Equal(256, meta.H);
+        Assert.NotEmpty(meta.Src);
+        Assert.NotEmpty(meta.Tgt);
+    }
+
+    [Fact]
     public void FrenchManifestIsFullyMapped() =>
         AssertFullyMapped("languages/french", "french.jsonc", Languages.French.Manifest.MANIFEST,
             "language", "name", "script", "provenance", "convention");

@@ -16,9 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 18 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
-  cmn, es — all **200/200**. 3,600 rows, 0 differ. ORDER IS NOW DESCENDING SPEAKER POPULATION
-  (user direction): next ar, pt, bn, fr, ja, de…
+- **Languages: 31 of 182** — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg, or, ast, umb, kn, hi,
+  cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa — all **200/200**. 6,200 rows, 0 differ.
+  ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  `tools/language-catalogue/languages.db`: next tg, th, mr, te, ha, tr…
 - **Every cross-engine dependency the goldens have is now satisfied** — the 65 self-contained goldens
   plus the 44 that route a foreign run to `en`/`ru`/`el` can all be gated as they land.
 - `Languages/Bootstrap.cs` is the registration list: one line per ported language, plus the neural table.
@@ -132,5 +133,18 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 - **Fixes are bidirectional**: a bug found while porting is fixed in TypeScript FIRST (with a test),
   goldens regenerate, then C# implements the fixed behaviour. Never fix C# alone — a fix in one
   engine is a fork. Sites awaiting the TS half are marked `// ⚠ PAIRED-FIX PENDING:`.
+- ⚠ **A MODEL SIDECAR IS DESERIALIZED BY THE MANIFEST OPTIONS**, so the camelCase policy mangles its keys
+  the same way — and no manifest test covered `*.meta.json`. Persian's two seq2seq sidecars key the hidden
+  size as capital `H`; it bound to 0 and ONNX rejected a zero-width hidden state. `ManifestMappingTests`
+  now sweeps every sidecar in the data tree for a key the policy would rename.
+- ⚠ **AN ORT BOOL TENSOR CANNOT BE BUILT FROM `byte[]` BY INFERENCE.** `CreateTensorValueFromMemory` reads
+  the element type off the array and hands ORT a uint8 tensor, which the graph rejects; the element type
+  has to be stated. `new ort.Tensor("bool", Uint8Array)` in JS does state it. The first bool mask in the
+  port is Persian's seq2seq encoder mask.
+- ⚠ **THE PARITY GATE MEASURES ONE PATH.** Both defects above were invisible to it: the fa golden runs the
+  TAGGER, and the seq2seq (classical context restorer + word-level OOV restorer) is only reachable
+  off-golden. Six off-golden probe modes against Node found them — normalize, sync, neural, classical
+  context, modern context, and the tagger-absent fallback (run with the tagger files removed from a copy
+  of `data/`).
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.
