@@ -26,8 +26,11 @@ public class LanguageBootstrapTests
         // A missing engine must be a NAMED failure. The script router catches this exception and drops the
         // run, so without the record a golden row simply differs and reads as a porting bug in the language
         // that was ported — Quechua's Cyrillic rows are read by the RUSSIAN engine.
-        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("de"));
-        Assert.Contains("german", Registry.PortPending);
+        // ⚠ THE SAMPLE MUST BE A LANGUAGE THAT IS STILL UNPORTED, so it changes as the port advances — it was
+        // `de` until German landed. Pick one far down the queue rather than the next one up, so this does not
+        // have to be edited every batch.
+        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("th"));
+        Assert.Contains("thai", Registry.PortPending);
     }
 
     [Theory]
