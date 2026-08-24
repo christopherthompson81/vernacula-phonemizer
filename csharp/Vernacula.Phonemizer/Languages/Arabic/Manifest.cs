@@ -55,6 +55,8 @@ public sealed class ArabicNumberData
 public sealed class DiacritizerDef
 {
     public IReadOnlyDictionary<string, string> LabelMarks { get; init; } = new Dictionary<string, string>();
+    /** Classical spelling → modern, applied to the SKELETON before `DefectiveSpelling` is consulted. */
+    public IReadOnlyDictionary<string, string> ClassicalSpelling { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> DefectiveSpelling { get; init; } = new Dictionary<string, string>();
 }
 

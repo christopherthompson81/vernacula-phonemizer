@@ -46,8 +46,14 @@ public static class Restore
     };
     private static readonly string[] SUFFIXES = { "ها", "هما", "هم", "هن", "كما", "كم", "كن", "نا", "ه", "ك", "ي" };
 
-    private const string ARABIC_CONSONANTS = "ءآأؤإئابةتثجحخدذرزسشصضطظعغفقكلمنهوي";
-    private const string LONG_CARRIERS = "اوىي"; // alif/wāw/alif-maqṣūra/yāʾ — mater lectionis (long vowel)
+    // ⚠ BOTH FROM THE MANIFEST, which already held every letter in them. The consonant string additionally
+    // takes آ, ة and ا, which are vowel carriers rather than `consonants` entries — the delta is stated here
+    // rather than by re-spelling the whole inventory. See src/languages/arabic/restore.ts.
+    private static ArabicLetters L => Manifest.MANIFEST.Letters;
+    private static readonly string ARABIC_CONSONANTS =
+        string.Concat(Manifest.MANIFEST.Consonants.Keys) + L.AlifMadda + L.TaaMarbuta + L.Alif;
+    /** alif / wāw / alif-maqṣūra / yāʾ — mater lectionis (long vowel). */
+    private static readonly string LONG_CARRIERS = L.Alif + L.Waw + L.AlifMaqsura + L.Ya;
 
     /**
      * Epenthesis floor: vocalize a bare consonant SKELETON so an OOV word (no lexicon/clitic hit) is at least

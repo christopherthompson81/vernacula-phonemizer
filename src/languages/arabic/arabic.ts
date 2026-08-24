@@ -146,7 +146,14 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // NAME. Their phoneme values are in arabic.jsonc; this is only the tokenizer half of the same fix. Listed by
 // codepoint rather than as a range because the block between them holds Arabic-Indic digits (٠-٩, ۰-۹) and the
 // Arabic percent/decimal signs, which have their own arms above and in normalizeArabic.
-const EXTENDED = "\\u067E\\u0686\\u0698\\u06A4\\u06AD\\u06AF\\u0763"; // پ چ ژ ڤ ڭ گ ݣ
+// ⚠ DERIVED FROM `consonants`, so adding a letter to arabic.jsonc reaches the tokenizer. It is every
+// consonant OUTSIDE the ء-ي range the class already covers — currently پ چ ژ ڤ ڭ گ ݣ. Escaped rather than
+// inlined because the block between them holds the Arabic-Indic digits (٠-٩, ۰-۹) and the percent/decimal
+// signs, which have their own arms; a range would swallow them.
+const EXTENDED = Object.keys(MANIFEST.consonants)
+    .filter((c) => c.codePointAt(0)! > 0x064a)
+    .map((c) => `\\u${c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`)
+    .join("");
 const TOKEN = new RegExp(
     `([ء-يٰٱً-ْـ${EXTENDED}]+)|(\\d+(?:,\\d{3})*(?:\\.\\d+)?)|([۔.!؟?،,؛;:…])`,
     "gu",

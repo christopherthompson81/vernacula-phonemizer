@@ -125,7 +125,14 @@ public static class Arabic
     }
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
-    private const string EXTENDED = "\\u067E\\u0686\\u0698\\u06A4\\u06AD\\u06AF\\u0763"; // پ چ ژ ڤ ڭ گ ݣ
+    // ⚠ DERIVED FROM `consonants`, so adding a letter to arabic.jsonc reaches the tokenizer. Every consonant
+    // OUTSIDE the ء-ي range the class already covers — currently پ چ ژ ڤ ڭ گ ݣ. Escaped rather than inlined
+    // because the block between them holds the Arabic-Indic digits and the percent/decimal signs. Order
+    // inside a character class is free, so the manifest's key order is fine.
+    private static readonly string EXTENDED = string.Concat(
+        Manifest.MANIFEST.Consonants.Keys
+            .Where(c => char.ConvertToUtf32(c, 0) > 0x064a)
+            .Select(c => $"\\u{char.ConvertToUtf32(c, 0):X4}"));
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"([ء-يٰٱً-ْـ{EXTENDED}]+)|(\\d+(?:,\\d{{3}})*(?:\\.\\d+)?)|([۔.!؟?،,؛;:…])",
         "gu");

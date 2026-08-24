@@ -39,16 +39,27 @@ function labelToMarks(label: string): string {
 // Defective-spelling closed class (authored data in arabic.jsonc): high-frequency words whose long /aː/ is an
 // unwritten dagger-alif.
 const AR_DEFECTIVE_SPELLING = new Map<string, string>(Object.entries(MANIFEST.diacritizer.defectiveSpelling));
-/** Classical otiose-alif مائة "hundred" → modern مئة (reads /miʔa/, not /maːʔa/). */
+/** A leading proclitic + its diacritics, then the stem. The letter class is `proclitics` from the manifest,
+ *  which is the same set this used to re-spell as `[وفبكل]`. */
+const PROCLITIC_STEM = new RegExp(`^([${Object.keys(MANIFEST.proclitics).join("")}][\u064B-\u0652\u0670]*)(.+)$`, "u");
+/**
+ * Classical otiose-alif مائة "hundred" → modern مئة (reads /miʔa/, not /maːʔa/).
+ *
+ * ⚠ A DIFFERENT TABLE FROM `defectiveSpelling`, though it feeds it: that one maps a SKELETON to its
+ * DIACRITIZED form, while this rewrites one undiacritized spelling to another so the skeleton lookups
+ * (ثلاثمئة, أربعمئة …) can hit at all. Now `diacritizer.classicalSpelling` in arabic.jsonc.
+ */
 function normalizeArabicNumberSpelling(skeleton: string): string {
-  return skeleton.replace(/مائة/g, "مئة").replace(/مائت/g, "مئت");
+  let out = skeleton;
+  for (const [from, to] of Object.entries(MANIFEST.diacritizer.classicalSpelling)) out = out.split(from).join(to);
+  return out;
 }
 /** Rewrite defective-spelling words to their dagger-alif form (keyed on the skeleton; strips a leading proclitic). */
 function applyDefectiveSpelling(line: string): string {
   return line.replace(/[؀-ۿݐ-ݿ]+/gu, (w) => {
     const direct = AR_DEFECTIVE_SPELLING.get(undiacritize(w));
     if (direct !== undefined) return direct;
-    const m = /^([وفبكل][ً-ْٰ]*)(.+)$/u.exec(w);
+    const m = PROCLITIC_STEM.exec(w);
     if (m) { const stem = AR_DEFECTIVE_SPELLING.get(undiacritize(m[2]!)); if (stem !== undefined) return m[1]! + stem; }
     return w;
   });

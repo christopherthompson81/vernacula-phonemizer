@@ -44,15 +44,26 @@ public static class Diacritizer
     private static readonly IReadOnlyDictionary<string, string> AR_DEFECTIVE_SPELLING =
         Manifest.MANIFEST.Diacritizer.DefectiveSpelling;
 
-    private static readonly JsRe OTIOSE_MIA = JsRegex.Compile("مائة", "g");
-    private static readonly JsRe OTIOSE_MIT = JsRegex.Compile("مائت", "g");
-
-    /** Classical otiose-alif مائة "hundred" → modern مئة (reads /miʔa/, not /maːʔa/). */
-    private static string NormalizeArabicNumberSpelling(string skeleton) =>
-        OTIOSE_MIT.Replace(OTIOSE_MIA.Replace(skeleton, "مئة"), "مئت");
+    /**
+     * Classical otiose-alif مائة "hundred" → modern مئة (reads /miʔa/, not /maːʔa/).
+     *
+     * ⚠ A DIFFERENT TABLE FROM `DefectiveSpelling`, though it feeds it: that one maps a SKELETON to its
+     * DIACRITIZED form, while this rewrites one undiacritized spelling to another so the skeleton lookups
+     * can hit at all. Now `diacritizer.classicalSpelling` in arabic.jsonc.
+     */
+    private static string NormalizeArabicNumberSpelling(string skeleton)
+    {
+        var outp = skeleton;
+        foreach (var (from, to) in Manifest.MANIFEST.Diacritizer.ClassicalSpelling)
+            outp = outp.Replace(from, to, StringComparison.Ordinal);
+        return outp;
+    }
 
     private static readonly JsRe DEFECTIVE_WORD = JsRegex.Compile("[؀-ۿݐ-ݿ]+", "gu");
-    private static readonly JsRe DEFECTIVE_PROCLITIC = JsRegex.Compile("^([وفبكل][ً-ْٰ]*)(.+)$", "u");
+    /** A leading proclitic + its diacritics, then the stem. The letter class is `proclitics` from the
+     *  manifest, which is the same set this used to re-spell as `[وفبكل]`. */
+    private static readonly JsRe DEFECTIVE_PROCLITIC = JsRegex.Compile(
+        $"^([{string.Concat(Manifest.MANIFEST.Proclitics.Keys)}][\\u064B-\\u0652\\u0670]*)(.+)$", "u");
 
     /**
      * Rewrite defective-spelling words to their dagger-alif form (keyed on the skeleton; strips a leading
