@@ -159,8 +159,13 @@ public static class PersianNeural
     }
 
     private static Task<IFaContextRestorer?>? contextP;
-    /** The clean-sentence filter shared by the two single-sentence context APIs below: keep only Perso-Arabic
-     *  letters, the two Persian-specific vowel marks and the space, then collapse the runs. */
+    /** The clean-sentence filter: keep only Perso-Arabic letters, the two Persian-specific vowel marks and the
+     *  space, then collapse the runs.
+     *
+     *  ⚠ NAMED HERE, SPELLED TWICE IN THE TS. `phonemizeFaContext` and `phonemizeFaModernContext` each carry the
+     *  same three-call chain inline and character-for-character; nothing distinguishes them, so this is one
+     *  function with two callers rather than two copies. Same reasoning as the shared beam decode in
+     *  ContextRestorer.cs, and the same caveat: if the TS ever makes the two chains differ, this must split. */
     private static readonly JsRe NON_PERSO = JsRegex.Compile("[^ء-ۿٰ-ۓ ]", "gu");
     private static readonly JsRe SPACE_RUN = JsRegex.Compile("\\s+", "gu");
     private static string CleanSentence(string sentence) =>
