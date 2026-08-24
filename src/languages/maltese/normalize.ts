@@ -331,7 +331,7 @@ const countForm = (n: number): number => (n === 1 || (n >= 11 && n % 1 === 0) ? 
  * copied rather than paraphrased, since `numValue` is not exported. Whoever changes one must change both.
  */
 function numeralValue(num: string): number {
-    const cleaned = num.replace(/[  ]/gu, ""); // thin/regular space grouping, as `numValue` does
+    const cleaned = num.replace(/[ \u00a0]/gu, ""); // thin/regular space grouping, as `numValue` does
     // Grouping separators come in 3-digit blocks; a trailing 1–2 digit block after . or , is a decimal.
     const m = /^(\d+(?:[.,]\d{3})*)(?:[.,](\d+))?$/.exec(cleaned);
     if (!m) return Number.NaN;

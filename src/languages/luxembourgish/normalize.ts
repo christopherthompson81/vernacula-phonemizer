@@ -300,12 +300,12 @@ export function normalizeLuxembourgish(input: string): string {
     s = s.replace(PLUS_INITIAL, "$1plus $2");
 
     // RELATIONAL AND ARITHMETIC SIGNS, and the AMPERSAND.
-    s = s.replace(/[  ]*[=≈][  ]*/gu, " ass gläich ");
-    s = s.replace(/[  ]*<[  ]*/gu, " méi kleng ewéi ");
-    s = s.replace(/[  ]*>[  ]*/gu, " méi grouss ewéi ");
-    s = s.replace(/(\d)[  ]*×[  ]*(?=\d)/gu, "$1 mol ");
-    s = s.replace(/[  ]*÷[  ]*/gu, " dividéiert duerch ");
-    s = s.replace(/[  ]*[&＆][  ]*/gu, " an ");
+    s = s.replace(/[ \u00a0]*[=≈][ \u00a0]*/gu, " ass gläich ");
+    s = s.replace(/[ \u00a0]*<[ \u00a0]*/gu, " méi kleng ewéi ");
+    s = s.replace(/[ \u00a0]*>[ \u00a0]*/gu, " méi grouss ewéi ");
+    s = s.replace(/(\d)[ \u00a0]*×[ \u00a0]*(?=\d)/gu, "$1 mol ");
+    s = s.replace(/[ \u00a0]*÷[ \u00a0]*/gu, " dividéiert duerch ");
+    s = s.replace(/[ \u00a0]*[&＆][ \u00a0]*/gu, " an ");
 
     // 14) FRACTIONS (`1/5` → *ee Fënneftel*). ⚠ Denominator 2 is the ADJECTIVE `hallef`, not a noun;
     //     everything else composes as ordinal stem + `el` (see fractionNoun). The numerator 1 is

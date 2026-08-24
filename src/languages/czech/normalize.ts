@@ -318,7 +318,7 @@ export function normalizeCzech(input: string): string {
     //     read as an ordinal (Lealofi 3 → Lealofi třetí). Guarded two ways: the number must be ≤ 39 (the
     //     practical monarch/pope range, which keeps "Standard 802.11n" and "O 250 let" untouched) and
     //     followed by a break, never another digit/letter.
-    s = s.replace(/(?<=\p{Lu}\p{Ll}+\p{M}*[  ])(\d{1,2})\.?(?=[\s.,;:!?]|$)/gu, (m0, d: string) => {
+    s = s.replace(/(?<=\p{Lu}\p{Ll}+\p{M}*[ \u00a0])(\d{1,2})\.?(?=[\s.,;:!?]|$)/gu, (m0, d: string) => {
         const n = Number(d);
         const o = ordinal(n);
         return o === undefined || n > 39 ? m0 : o;
