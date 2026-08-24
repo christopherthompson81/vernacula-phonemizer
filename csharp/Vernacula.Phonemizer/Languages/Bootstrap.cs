@@ -70,6 +70,7 @@ public static class Bootstrap
             Tamil.TamilPhonemizer.RegisterSelf();
             Swahili.SwahiliPhonemizer.RegisterSelf();
             Cantonese.CantonesePhonemizer.RegisterSelf();
+            Vietnamese.VietnamesePhonemizer.RegisterSelf();
             Quechua.QuechuaPhonemizer.RegisterSelf();
         }
     }
