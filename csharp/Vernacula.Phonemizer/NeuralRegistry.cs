@@ -38,8 +38,20 @@ public static class NeuralRegistry
      * within one synchronous turn, so holding a host across the await would let concurrent callers interleave.
      * Each entry wraps its own synchronous render in `withHost` instead.
      */
-    public static Func<string, Task<string>>? GetNeuralPhonemizer(string lang) =>
-        NEURAL.TryGetValue(lang, out var neural)
+    // Arabic ISO code → engine variety (mirrors the sync registry); every key routes bare text
+    // through the async diacritizer.
+    private static readonly Dictionary<string, string?> ARABIC_VARIETY = new(StringComparer.Ordinal)
+    {
+        ["ar"] = null, ["arz"] = "egyptian", ["apc"] = "levantine", ["ajp"] = "southlevantine", ["apd"] = "sudanese",
+        ["acm"] = "iraqi", ["afb"] = "gulf", ["acw"] = "hijazi", ["ary"] = "moroccan", ["ayl"] = "libyan",
+    };
+
+    public static Func<string, Task<string>>? GetNeuralPhonemizer(string lang)
+    {
+        if (ARABIC_VARIETY.TryGetValue(lang, out var variety))
+            return t => Languages.Arabic.Arabic.PhonemizeArabic(Registry.PrePass(lang, t), variety, host: lang);
+        return NEURAL.TryGetValue(lang, out var neural)
             ? t => neural(Registry.PrePass(lang, t))
             : null;
+    }
 }

@@ -93,4 +93,16 @@ public class ManifestMappingTests
     [Fact]
     public void QuechuaManifestIsFullyMapped() =>
         AssertFullyMapped("languages/quechua", "quechua.jsonc", Languages.Quechua.Manifest.MANIFEST);
+
+    [Fact]
+    public void ArabicManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/arabic", "arabic.jsonc", Languages.Arabic.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
+    // The nine variety defs share one shape; egyptian is the richest instance (articleVowel + full
+    // per-variety numbers with the FUSED hundreds), so it exercises every optional field.
+    [Fact]
+    public void ArabicEgyptianVarietyIsFullyMapped() =>
+        AssertFullyMapped("languages/arabic", "egyptian.jsonc",
+            Core.LoadManifest.Load<Languages.Arabic.Arabic.VarietyDef>("languages/arabic", "egyptian.jsonc"));
 }
