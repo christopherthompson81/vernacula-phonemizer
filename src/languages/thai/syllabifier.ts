@@ -405,11 +405,11 @@ function thaiSchwaFates(units: readonly ThaiUnit[]): Map<number, "o" | "a"> {
     seq = rewriteThai(seq, 5, (w) => {
         if (!(isV(w[0]) && isC(w[1]) && w[2]!.sym === "ə" && isC(w[3]) && isV(w[4])))
             return null;
-        // Protect a CLUSTER schwa: when w[1] is ר after an onset (w[0] is that onset's own schwa) forming a
-        // valid kr/pr/tr cluster, w[2] is the cluster's nucleus schwa — deleting it here strands ר as a coda
-        // (rule 4 → น). Leave it for rule 5: กรมการ → krom·kaːn, not kon·ma·kaːn. Restricted to ר: kr/pr/tr are
-        // almost always true clusters, whereas ל/ו after an onset are usually the inserted-o + ל-coda reading
-        // (ผล → pʰon, พล → pʰon, not pʰl). A Sanskrit inserted-vowel ר (กรกฎา → ka-ra) is the dictionary's job.
+        // Protect a CLUSTER schwa: when w[1] is ร after an onset (w[0] is that onset's own schwa) forming a
+        // valid kr/pr/tr cluster, w[2] is the cluster's nucleus schwa — deleting it here strands ร as a coda
+        // (rule 4 → น). Leave it for rule 5: กรมการ → krom·kaːn, not kon·ma·kaːn. Restricted to ร: kr/pr/tr are
+        // almost always true clusters, whereas ล/ว after an onset are usually the inserted-o + ล-coda reading
+        // (ผล → pʰon, พล → pʰon, not pʰl). A Sanskrit inserted-vowel ร (กรกฎา → ka-ra) is the dictionary's job.
         const onset = units[w[0]!.owner];
         if (
             w[0]!.sym === "ə" &&
@@ -442,6 +442,17 @@ function thaiSchwaFates(units: readonly ThaiUnit[]): Map<number, "o" | "a"> {
                       ? "n"
                       : p;
     }
+
+    // ⚠ THE COMMENT ABOVE NAMED HEBREW LETTERS FOR SEVEN CHARACTERS. It read "when w[1] is ר … Restricted
+    //   to ר … whereas ל/ו after an onset", using Hebrew resh/lamed/vav (U+05E8/05DC/05D5) where it means Thai
+    //   ro rua / lo ling / wo waen (ร/ล/ว, U+0E23/0E25/0E27). The code was always correct — it tests the
+    //   PHONEME `"r"` — so nothing was ever mispronounced and no gate could fire; the cost was a comment that
+    //   sends a reader looking for a letter this language does not have, and seven RTL characters inside an
+    //   LTR block, which reorder the surrounding text in any bidi-aware editor. Fixed rather than left because
+    //   the C# port cannot carry it verbatim without importing the same confusion.
+    //   A repo-wide sweep found three other files with stray Hebrew and all three are DELIBERATE: akan's ⟨כ⟩
+    //   is a real corpus artifact standing in for ⟨ɔ⟩ (documented at length there), and gan/initialisms are
+    //   both writing ABOUT Hebrew. Thai was the only slip.
 
     // 5: cluster schwa-deletion — (k)_(l/r/w), (p)_(l/r), (t)_r  (consume C·ə·C)
     seq = rewriteThai(seq, 3, (w) => {
