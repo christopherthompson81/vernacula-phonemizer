@@ -173,6 +173,29 @@ describe("Ukrainian text normalization", () => {
         expect(normalizeUkrainian("за 41 м'яч")).toBe("за 41 м'яч");
     });
 
+    test("the LOCAL unit rules agree exactly as the shared tier does — including on a decimal", () => {
+        // A DECIMAL governs the genitive singular, which is the fourth count form ukrainian.ts declares.
+        // The metre rule used to truncate, so the same construction got three different answers by
+        // accident: 1,5 → *метр* (nom.sg), 2,4 → *метри* (nom.pl), 0,5 → *метрів* (gen.pl).
+        expect(normalizeUkrainian("1,5 м")).toBe("1,5 метра");
+        expect(normalizeUkrainian("2,4 м")).toBe("2,4 метра");
+        expect(normalizeUkrainian("0,5 м")).toBe("0,5 метра");
+        expect(normalizeUkrainian("1,5 м/с")).toBe("1,5 метра на секунду");
+        // …and it matches the unit the SHARED tier owns, one character away.
+        expect(uk("1,5 км").endsWith("kʲiɫɔmɛtra")).toBe(true);
+        // The degree rule was counting the FRACTIONAL digits: `2,4 °` matched the `4` and said градуси.
+        expect(normalizeUkrainian("2,4 °")).toBe("2,4 градуса");
+        expect(normalizeUkrainian("1 °")).toBe("1 градус");
+        expect(normalizeUkrainian("2 °")).toBe("2 градуси");
+        expect(normalizeUkrainian("20 °")).toBe("20 градусів");
+        // The scale rules captured ONE digit and hard-coded the genitive plural, so `+30°C` was right by
+        // luck and `1 °C` was *один градусів Цельсія*.
+        expect(normalizeUkrainian("1 °C")).toBe("1 градус Цельсія");
+        expect(normalizeUkrainian("2 °C")).toBe("2 градуси Цельсія");
+        expect(normalizeUkrainian("0,5 °F")).toBe("0,5 градуса Фаренгейта");
+        expect(normalizeUkrainian("+30°C")).toBe("плюс 30 градусів Цельсія"); // unchanged
+    });
+
     test("percent, № and the signs, each of which was dropped outright", () => {
         expect(normalizeUkrainian("реактори № 1")).toBe("реактори номер 1");
         expect(normalizeUkrainian('"космонавт №11"')).toBe('"космонавт номер 11"');

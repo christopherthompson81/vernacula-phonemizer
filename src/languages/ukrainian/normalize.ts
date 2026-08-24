@@ -54,9 +54,19 @@ function cardinal(n: number): string {
     return eastSlavicNumberWords(n, DEF.numbers).map((w) => w ?? "").join(" ").trim();
 }
 
-/** Pick a three-form Slavic count noun for `n` (nom.sg / nom.pl 2–4 / gen.pl). */
-function counted(n: number, forms: readonly [string, string, string]): string {
-    return forms[Math.min(slavicCountForm(n), 2)]!;
+/**
+ * Pick a Slavic count form for `n` — the FOUR-way selector this language already declares for the shared
+ * symbol tier (see ukrainian.ts `countForm`): nom.sg / nom.pl (2–4) / gen.pl, plus the GENITIVE SINGULAR
+ * that a DECIMAL governs (2,4 відсотка).
+ *
+ * ⚠ THE DECIMAL SLOT IS NOT DECORATION, and the rules below reached it three different wrong ways before
+ * this: the metre rule TRUNCATED (`1,5 м` → *метр*, `0,5 м` → *метрів*) and the degree rule counted the
+ * FRACTIONAL digits (`2,4 °` matched the `4` and said *градуси*). A unit the shared tier owns sits right
+ * beside them — `1,5 км` is *кілометра* — so the same construction got a different agreement
+ * depending only on which layer happened to claim the unit.
+ */
+function counted(n: number, forms: readonly [string, string, string, string]): string {
+    return Number.isInteger(n) ? forms[Math.min(slavicCountForm(n), 2)]! : forms[3]!;
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -231,8 +241,9 @@ const HOUR_CASE: Readonly<Record<string, number>> = {
 };
 const FEM_NOM = 7; // ORD_ENDINGS index — the default when no preposition governs
 
-const METRE = ["метр", "метри", "метрів"] as const;
-const DEGREE = ["градус", "градуси", "градусів"] as const;
+const METRE = ["метр", "метри", "метрів", "метра"] as const;
+const DEGREE = ["градус", "градуси", "градусів", "градуса"] as const;
+/** Only the gen.pl is ever read (step 3), so this one stays three forms. */
 const SQUARE = ["квадратний", "квадратні", "квадратних"] as const;
 
 /** Abbreviations whose dot is NOT a sentence end. `кв.` is handled separately (step 3) because it is an
@@ -335,14 +346,20 @@ export function normalizeUkrainian(input: string): string {
     //    · `миль/год` has a SPELLED-OUT numerator, which the tier (abbreviation keys only) cannot match.
     //    Units run BEFORE the clock and before the decimal fold, because both destroy number adjacency.
     s = s.replace(/(\d+(?:[.,]\d+)?)\s?м\/с(?![\p{L}\p{M}])/gu,
-        (_m, n: string) => `${n} ${counted(Math.trunc(Number(n.replace(",", "."))), METRE)} на секунду`);
+        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), METRE)} на секунду`);
     s = s.replace(new RegExp(`(\\d+(?:[.,]\\d+)?)\\s?м(?![\\p{L}\\p{M}'’ʼ²³/])`, "gu"),
-        (_m, n: string) => `${n} ${counted(Math.trunc(Number(n.replace(",", "."))), METRE)}`);
+        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), METRE)}`);
     //      The 3-letter lookbehind is what keeps this off `км/год`, which the shared tier composes itself.
     s = s.replace(/(?<=[\p{L}\p{M}]{3})\s?\/\s?год(?![\p{L}\p{M}])/gu, " на годину");
-    s = s.replace(/(\d)\s?°\s?[CСc](?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} градусів Цельсія`);
-    s = s.replace(/(\d)\s?°\s?[FФf](?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} градусів Фаренгейта`);
-    s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
+    //      ⚠ THE SCALE RULES READ THE WHOLE NUMBER, not its last digit. `(\d)` was invisible while the word
+    //      was a hard-coded gen.pl (`+30°C` → *плюс 30 градусів Цельсія*, right by luck) and wrong the
+    //      moment the count is read off it — and with no agreement applied at all, `1 °C` was
+    //      *один градусів Цельсія* regardless of the capture.
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?[CСc](?![\p{L}\p{M}])/gui,
+        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)} Цельсія`);
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?[FФf](?![\p{L}\p{M}])/gui,
+        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)} Фаренгейта`);
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)}`);
 
     // 7) CLOCK. The colon is clause punctuation in ukrainian.jsonc, so `20:30` read as *двадцять ,
     //    тридцять*. Ukrainian says the hour as a FEMININE ORDINAL agreeing with the elided *година*, in
