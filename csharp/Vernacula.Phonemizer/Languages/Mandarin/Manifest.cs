@@ -35,6 +35,9 @@ public sealed class CmnManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public string MeasureWords { get; init; } = "";
     public CmnNumbersDef Numbers { get; init; } = new();
+    /** ⚠ Keyed by UPPERCASE Latin — see the jsonc. Dictionary keys are not touched by the loader's
+     *  camelCase PROPERTY policy, which is what mangled English's ARPABET block. */
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
 }
 
 public static class Manifest

@@ -235,6 +235,17 @@ public class ManifestMappingTests
 
     // ⚠ ADDED WITH THE es LIFT, WHICH IS WHY IT IS LATE: Spanish was one of the manifests this guard never
     // covered, and the lift added 21 keys to it — exactly the situation the guard exists for.
+    // ⚠ ADDED WITH THE letterNames BATCH: Mandarin was another manifest this guard never covered, and the
+    // batch added an UPPERCASE-keyed dictionary to it — exactly the shape that mangled English's ARPABET.
+    [Fact]
+    public void MandarinManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/mandarin", "cmn.jsonc", Languages.Mandarin.Manifest.MANIFEST,
+            // ⚠ `resolve` and `phases` are PROSE, not configuration: an ordered description of the pipeline
+            // and a done/deferred status list. Neither engine reads either, and the TypeScript's `CmnManifest`
+            // does not declare them — the `note` case, not the tg `numbers.and` case. Listed as metadata
+            // rather than given C# properties, which would model a field neither side has.
+            "language", "name", "script", "provenance", "convention", "resolve", "phases");
+
     [Fact]
     public void SpanishManifestIsFullyMapped() =>
         AssertFullyMapped("languages/spanish", "spanish.jsonc", Languages.Spanish.Manifest.MANIFEST,

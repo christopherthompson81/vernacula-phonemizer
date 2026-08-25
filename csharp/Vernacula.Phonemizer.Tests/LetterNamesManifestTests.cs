@@ -36,6 +36,37 @@ public class LetterNamesManifestTests
     private static string Say(string code, string s) =>
         Phonemizer.Phonemize(s, code).Replace("ˈ", "").Replace("ˌ", "");
 
+    /**
+     * Languages whose ONLY lifted table is `letterNames` — no phonotactics, because the OOV spell-it-out
+     * test does not apply: an embedded Latin run in a Thai, Vietnamese or Chinese sentence is spelled
+     * because it is FOREIGN, not because its clusters are illegal.
+     */
+    public static TheoryData<string, IReadOnlyDictionary<string, string>, string, string> SpellOnly()
+    {
+        var d = new TheoryData<string, IReadOnlyDictionary<string, string>, string, string>();
+        d.Add("th", Languages.Thai.Manifest.MANIFEST.LetterNames, "ระบบ USB ใหม่", "USB");
+        d.Add("vi", Languages.Vietnamese.Manifest.MANIFEST.LetterNames, "cổng USB hoạt động", "USB");
+        d.Add("cmn", Languages.Mandarin.Manifest.MANIFEST.LetterNames, "USB接口可以用", "USB");
+        return d;
+    }
+
+    [Theory]
+    [MemberData(nameof(SpellOnly))]
+    public void AnEmbeddedLatinRunIsSpelledFromLetterNames(
+        string code, IReadOnlyDictionary<string, string> letters, string sentence, string run)
+    {
+        foreach (var ch in run)
+        {
+            Assert.True(letters.ContainsKey(ch.ToString()), $"{code}: no letterNames entry for {ch}");
+            Assert.Contains(Say(code, letters[ch.ToString()]), Say(code, sentence));
+        }
+        // ⚠ KEYED UPPERCASE, and that is load-bearing — the engine looks a run up by the character as
+        // WRITTEN. The loader's camelCase policy applies to PROPERTY names, not dictionary keys; verified
+        // rather than assumed, because that policy is what mangled English's ARPABET block.
+        Assert.All(letters.Keys, k => Assert.Equal(k.ToUpperInvariant(), k));
+        Assert.Equal(26, letters.Count);
+    }
+
     [Theory]
     [MemberData(nameof(Cases))]
     public void TheLiftedInitialismTablesAreRead(

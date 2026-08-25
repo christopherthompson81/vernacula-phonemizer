@@ -44,6 +44,7 @@
  * attestations are the CONJUNCTION sense ("加上海外市場後" — "plus the overseas market, …"), and the
  * disambiguation page for `1+1` names the arithmetic reading 一加一. Availability is not correctness.
  */
+import { MANIFEST } from "./manifest.ts";
 
 /**
  * Western fraction notation → the Chinese order, still in digits: `a/b` → `b分之a`. Guarded against dates
@@ -121,41 +122,9 @@ const AMP_ELSEWHERE = /\s?[&＆]\s?/gu;
 const BARE_EXPONENT = /(?<=\d)([²³])/gu;
 const POWER: Readonly<Record<string, string>> = { "²": "平方", "³": "立方" };
 
-/**
- * LATIN LETTER NAMES, as Han the Hanzi→pinyin front end can read.
- *
- * An initialism embedded in Chinese prose (`中国GDP总量`, `IT行业`, `CEO`) routed to the ENGLISH phonemizer and
- * came out in English phonology — GDP → ɡˈiːdˈiːpʰˈiː, English [iː], English stress, and NO TONE inside a
- * tonal utterance. `initialism: 566` and `letter-name: 285` corpus-wide, the largest untreated class here.
- *
- * WHAT A MANDARIN SPEAKER SAYS is the ENGLISH letter NAME in MANDARIN phonology. Sourced: espeak-ng's own
- * `cmn_list` carries a block headed "Latin letters with Chinese accent" — a ei51 · b pi51 · d ti51 ·
- * w ta35pliou ("double-u") · x ai35ks — which is exactly that. So the fix is ORTHOGRAPHIC: spell the name in
- * Han and let the existing pipeline read it, rather than emitting a pronunciation (playbook trap 6).
- *
- * ⚠ UNLIKE WU, THE CONVENTIONAL CHINESE TRANSLITERATION IS CORRECT HERE UNCHANGED — and for a reason worth
- * recording, because it is the same fact from the other side. That convention was built FOR Mandarin, which
- * lost the Middle Chinese voiced series, so its letter table is internally consistent in Mandarin
- * (比 [pi] B vs 皮 [pʰi] P; 迪 [ti] D vs 提 [tʰi] T) and MISREADS in Wu, where 皮 is [bi] and those same
- * characters flip. `wu/wu.jsonc` therefore ships a different table, chosen by the Wu reading; see its note.
- *
- * VALIDATED against espeak's letter phonetics via this language's own `chars.tsv` pinyin: 20 of 26 agree
- * exactly, 2 more share the rime (G 吉 ji vs zhi, H 艾尺 ai-chi vs ei-chi). The 4 that differ are kept on the
- * written convention rather than on espeak, which is phonetic and cannot supply orthography: C 西 [ɕi]
- * (espeak `sei55`, not a syllable Chinese writes), J 杰, K 开, and L 艾勒. espeak has that whole block
- * COMMENTED OUT, with its reason in the file — "This will make letter within English sentence translated not
- * correctly. i.e. 'ma is a horse'" — which is an argument against a blanket letter rule, not against an
- * ALL-CAPS-scoped one, and is why the guards below are what they are.
- */
-const LETTER_NAMES: Readonly<Record<string, string>> = {
-    A: "诶", B: "比", C: "西", D: "迪", E: "伊", F: "艾弗", G: "吉", H: "艾尺", I: "艾", J: "杰",
-    K: "开", L: "艾勒", M: "艾姆", N: "恩", O: "欧", P: "皮", Q: "丘", R: "阿儿", S: "艾丝", T: "提",
-    U: "优", V: "维", W: "大布留", X: "艾克斯", Y: "歪", Z: "兹",
-};
-
 /** Spell a Latin run as its letter names, space-separated. See the two guards at the call sites. */
 function spellLetters(run: string): string {
-    return ` ${[...run].map((c) => LETTER_NAMES[c] ?? c).join(" ")} `;
+    return ` ${[...run].map((c) => MANIFEST.letterNames[c] ?? c).join(" ")} `;
 }
 
 export function normalizeMandarin(input: string): string {
@@ -208,7 +177,7 @@ export function spellInitialisms(input: string): string {
         /(?<=\p{Script=Han})([A-Z])(?![\p{sc=Latn}\d])|(?<![\p{sc=Latn}\d])([A-Z])(?=\p{Script=Han})/gu,
         (m, a: string | undefined, b: string | undefined) => {
             const L = a ?? b!;
-            return LETTER_NAMES[L] === undefined ? m : ` ${LETTER_NAMES[L]} `;
+            return MANIFEST.letterNames[L] === undefined ? m : ` ${MANIFEST.letterNames[L]} `;
         },
     );
     return s;

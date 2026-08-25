@@ -61,18 +61,9 @@ public static class Normalize
         ["²"] = "平方", ["³"] = "立方",
     };
 
-    /** LATIN LETTER NAMES, as Han the Hanzi→pinyin front end can read. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAMES = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["A"] = "诶", ["B"] = "比", ["C"] = "西", ["D"] = "迪", ["E"] = "伊", ["F"] = "艾弗", ["G"] = "吉",
-        ["H"] = "艾尺", ["I"] = "艾", ["J"] = "杰", ["K"] = "开", ["L"] = "艾勒", ["M"] = "艾姆", ["N"] = "恩",
-        ["O"] = "欧", ["P"] = "皮", ["Q"] = "丘", ["R"] = "阿儿", ["S"] = "艾丝", ["T"] = "提", ["U"] = "优",
-        ["V"] = "维", ["W"] = "大布留", ["X"] = "艾克斯", ["Y"] = "歪", ["Z"] = "兹",
-    };
-
     /** Spell a Latin run as its letter names, space-separated. See the two guards at the call sites. */
     private static string SpellLetters(string run) =>
-        $" {string.Join(" ", Js.CodePoints(run).Select(c => LETTER_NAMES.TryGetValue(c, out var n) ? n : c))} ";
+        $" {string.Join(" ", Js.CodePoints(run).Select(c => Manifest.MANIFEST.LetterNames.TryGetValue(c, out var n) ? n : c))} ";
 
     public static string NormalizeMandarin(string input)
     {
@@ -106,7 +97,7 @@ public static class Normalize
         s = LONE_UPPER.Replace(s, m =>
         {
             var L = m.Groups[1].Success && m.Groups[1].Value.Length > 0 ? m.Groups[1].Value : m.Groups[2].Value;
-            return LETTER_NAMES.TryGetValue(L, out var name) ? $" {name} " : m.Value;
+            return Manifest.MANIFEST.LetterNames.TryGetValue(L, out var name) ? $" {name} " : m.Value;
         });
         return s;
     }

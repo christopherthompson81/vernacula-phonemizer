@@ -27,6 +27,8 @@ export interface VietnameseManifest {
         unitFiveAfterTen: string;
         zeroTens: string;
     };
+    /** ⚠ Keyed by UPPERCASE Latin — see the jsonc. */
+    letterNames: Record<string, string>;
 }
 
 /** The consolidated hand-authored Vietnamese data tables (see vietnamese.jsonc). */

@@ -56,6 +56,7 @@
  *     available Thai reading, so it is the safe default for the whole class.
  */
 import { segment } from "./segment.ts";
+import { MANIFEST } from "./manifest.ts";
 import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** Thai digit words, indexed by value. Single source: thai.ts's cardinal compositor imports this, and
@@ -63,16 +64,6 @@ import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 export const THAI_DIGIT_WORDS: readonly string[] = [
     "ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า",
 ];
-
-/** Latin letter → its THAI letter name. Thai reads an initialism as these (GPS = จีพีเอส), which is what
- *  keeps it inside the Thai phoneme inventory instead of routing to the English phonemizer. Probed: every
- *  one of the 26 phonemizes to a well-formed Thai syllable (เอฟ → ʔˈeː˨˩p, ดับเบิลยู → dˈa˨˩pbɤ˥˩njˌuː˧). */
-const THAI_LETTER_NAME: Readonly<Record<string, string>> = {
-    A: "เอ", B: "บี", C: "ซี", D: "ดี", E: "อี", F: "เอฟ", G: "จี",
-    H: "เอช", I: "ไอ", J: "เจ", K: "เค", L: "แอล", M: "เอ็ม", N: "เอ็น",
-    O: "โอ", P: "พี", Q: "คิว", R: "อาร์", S: "เอส", T: "ที", U: "ยู",
-    V: "วี", W: "ดับเบิลยู", X: "เอกซ์", Y: "วาย", Z: "แซด",
-};
 
 /**
  * Thai abbreviation → its spoken expansion. ORDER IS LOAD-BEARING: longest key first, so the two-dot
@@ -318,7 +309,7 @@ export function normalizeThai(input: string): string {
     // still catching XDR-TB as two initialisms. Roman numerals cannot collide here — th is not in
     // registry.ts's ROMAN_NATIVE, so `III` has already become `3` before text() runs.
     s = s.replace(/(?<![A-Za-z0-9])[A-Z]{2,6}(?![A-Za-z0-9])/gu, (run) =>
-        [...run].map((c) => THAI_LETTER_NAME[c]!).join(" "),
+        [...run].map((c) => MANIFEST.letterNames[c]!).join(" "),
     );
 
     return s;
