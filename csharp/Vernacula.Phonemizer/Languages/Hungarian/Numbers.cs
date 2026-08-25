@@ -84,16 +84,9 @@ public static class Numbers
         return string.Join(" ", parts);
     }
 
-    /** The ORDINAL form of each morph that can END a Hungarian cardinal. */
-    private static readonly IReadOnlyDictionary<string, string> ORDINAL_MORPH = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["nulla"] = "nulladik", ["egy"] = "egyedik", ["kettő"] = "kettedik", ["három"] = "harmadik", ["négy"] = "negyedik",
-        ["öt"] = "ötödik", ["hat"] = "hatodik", ["hét"] = "hetedik", ["nyolc"] = "nyolcadik", ["kilenc"] = "kilencedik",
-        ["tíz"] = "tizedik", ["húsz"] = "huszadik", ["harminc"] = "harmincadik", ["negyven"] = "negyvenedik",
-        ["ötven"] = "ötvenedik", ["hatvan"] = "hatvanadik", ["hetven"] = "hetvenedik", ["nyolcvan"] = "nyolcvanadik",
-        ["kilencven"] = "kilencvenedik", ["száz"] = "századik", ["ezer"] = "ezredik", ["millió"] = "milliomodik",
-        ["milliárd"] = "milliárdodik",
-    };
+    /** The ordinal form of each morph that can END a cardinal — from the manifest. See the jsonc. */
+    private static IReadOnlyDictionary<string, string> ORDINAL_MORPH => Manifest.MANIFEST.OrdinalMorphs;
+
     // LONGEST FIRST: matching is by suffix, so `negyven` must not be shadowed by `négy`.
     private static readonly IReadOnlyList<string> ORDINAL_KEYS =
         ORDINAL_MORPH.Keys.OrderByDescending(k => k.Length).ToList();

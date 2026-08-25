@@ -1,3 +1,4 @@
+using System.Globalization;
 /**
  * Bengali (bn) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
  * pronounceable word into words the pipeline speaks.
@@ -26,22 +27,16 @@ public static class Normalize
         [1] = "পহেলা", [2] = "দোসরা", [3] = "তেসরা", [4] = "চৌঠা",
     };
 
-    /**
-     * The CLASSICAL ordinal series, 1–10, which is suppletive and not the cardinal plus a suffix: ৮ম is
-     * অষ্টম, not *আটম.
-     */
-    private static readonly IReadOnlyDictionary<int, string> ORDINAL_SUPPLETIVE = new Dictionary<int, string>
-    {
-        [1] = "প্রথম", [2] = "দ্বিতীয়", [3] = "তৃতীয়", [4] = "চতুর্থ", [5] = "পঞ্চম",
-        [6] = "ষষ্ঠ", [7] = "সপ্তম", [8] = "অষ্টম", [9] = "নবম", [10] = "দশম",
-    };
+    /** The suppletive 1–10 series, from the manifest — see the jsonc for why it stops at ten. */
+    private static IReadOnlyDictionary<string, string> ORDINAL_SUPPLETIVE => Bengali.DEF.Ordinals.Suppletive;
+
     /** Suffixes that mark the classical series rather than the date series. */
     private static readonly IReadOnlySet<string> CLASSICAL_SUFFIX =
         new HashSet<string>(new[] { "ম", "য়", "র্থ", "ষ্ঠ", "তম" }, StringComparer.Ordinal);
     private static readonly IReadOnlySet<string> DATE_SUFFIX =
         new HashSet<string>(new[] { "শে", "ই", "লা", "রা", "ঠা" }, StringComparer.Ordinal);
-    /** The suffixes, longest first so তম is not matched as ম. */
-    private static readonly string[] ORDINAL_SUFFIX = { "তম", "শে", "ই", "ম", "য়", "র্থ", "ষ্ঠ", "লা", "রা", "ঠা" };
+    /** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+    private static IReadOnlyList<string> ORDINAL_SUFFIX => Bengali.DEF.Ordinals.Suffixes;
 
     /** Bengali unit abbreviations → the full word. The shared symbol tier is keyed on the Latin forms. */
     private static readonly IReadOnlyDictionary<string, string> UNIT_WORD = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -85,7 +80,7 @@ public static class Normalize
         {
             var key = (int)n;
             if (DATE_SUFFIX.Contains(suffix) && DATE_SUPPLETIVE.TryGetValue(key, out var dateForm)) return dateForm;
-            if (CLASSICAL_SUFFIX.Contains(suffix) && ORDINAL_SUPPLETIVE.TryGetValue(key, out var classical)) return classical;
+            if (CLASSICAL_SUFFIX.Contains(suffix) && ORDINAL_SUPPLETIVE.TryGetValue(key.ToString(CultureInfo.InvariantCulture), out var classical)) return classical;
             var words = Cardinal(n).Split(' ');
             if (words.Any(w => w == "")) return null;
             words[^1] = $"{words[^1]}{suffix}";

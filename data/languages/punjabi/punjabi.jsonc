@@ -184,5 +184,13 @@
         // `$` already reads ਡਾਲਰ and a US dollar is that dollar. Nothing new is sourced here.
         "currency": { "US$": ["ਡਾਲਰ"], "$": ["ਡਾਲਰ"], "¥": ["ਯੇਨ"] },
         "magnitudes": ["ਹਜ਼ਾਰ", "ਲੱਖ", "ਕਰੋੜ", "ਮਿਲੀਅਨ", "ਅਰਬ"]
-    }
+    },
+
+    // ⚠ ORDER IS LOAD-BEARING: LONGEST FIRST. These are matched by prefix against the text after the
+    // numeral, so a shorter suffix listed first shadows a longer one that contains it. A JSON array
+    // preserves order; an object or a set would not, which is why this stays a list.
+    // Ordinal suffixes. Punjabi writes the ordinal as the numeral plus the suffix, and the suffix carries
+    // the gender/number agreement, so it is read off the TEXT rather than guessed. All six spellings occur
+    // in the corpus (ਵੀਂ ×19, ਵਾਂ ×3, ਵੇਂ ×2, and the bindi-less ਵੀ / ਵਾ ×1 each).
+    "ordinalSuffixes": ["ਵੀਂ", "ਵੀ", "ਵਾਂ", "ਵਾ", "ਵੇਂ", "ਵੇ"]
 }

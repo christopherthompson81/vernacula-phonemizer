@@ -78,9 +78,8 @@ const UNIT_ALT = Object.keys(UNIT_WORD)
 const RATE_NUM = ["କିଲୋମିଟର", "ମିଲିମିଟର", "ମିଟର", "ମାଇଲ୍", "ମାଇଲ"];
 const RATE_DEN = ["ଘଣ୍ଟା", "ସେକେଣ୍ଡ", "ମିନିଟ୍", "ମିନିଟ"];
 
-/** Ordinal suffixes, written attached to the numeral. All three occur: ଶ ×11 (11ଶ, 18ଶ ଶତାବ୍ଦୀ),
- *  ତମ ×5 (60 ତମ, 1000ତମ), ମ ×3 (9ମ, 1ମ). Longest first so ତମ is not split by ମ. */
-const ORDINAL_SUFFIXES = ["ତମ", "ଶ", "ମ"];
+/** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+const ORDINAL_SUFFIXES = MANIFEST.ordinalSuffixes;
 
 /** Build the Odia normalizer. Takes the numbers definition so the ordinal rule composes its cardinal
  *  from exactly the data the engine's own number path uses. */

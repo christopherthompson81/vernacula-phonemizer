@@ -32,9 +32,8 @@ public static class Normalize
         Magnitudes = new[] { "ਹਜ਼ਾਰ", "ਲੱਖ", "ਕਰੋੜ", "ਮਿਲੀਅਨ", "ਅਰਬ" },
     });
 
-    /** Ordinal suffixes. The suffix carries the gender/number agreement, so it is read off the text rather
-     *  than guessed; both the bindi and bindi-less spellings occur. */
-    private static readonly string[] ORDINAL_SUFFIXES = { "ਵੀਂ", "ਵੀ", "ਵਾਂ", "ਵਾ", "ਵੇਂ", "ਵੇ" };
+    /** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+    private static IReadOnlyList<string> ORDINAL_SUFFIXES => PunjabiPhonemizer.DEF.OrdinalSuffixes;
 
     /** Gurmukhi unit abbreviations → the full word, matched only AFTER a number (which is what keeps ordinary
      *  words that merely start with these letters out). ⚠ LONGEST FIRST in `UNIT_ALT`: the multi-dot forms

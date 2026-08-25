@@ -50,12 +50,8 @@ const SYMBOLS = makeSymbolNormalizer({
     multiply: MANIFEST.symbolTier.multiply,
 });
 
-/**
- * Ordinal suffixes. Punjabi writes the ordinal as the numeral plus the suffix, and the suffix carries the
- * gender/number agreement, so it is read off the text rather than guessed. All five spellings below occur
- * in the corpus (ਵੀਂ ×19, ਵਾਂ ×3, ਵੇਂ ×2, and the bindi-less ਵੀ / ਵਾ ×1 each).
- */
-const ORDINAL_SUFFIXES = ["ਵੀਂ", "ਵੀ", "ਵਾਂ", "ਵਾ", "ਵੇਂ", "ਵੇ"];
+/** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+const ORDINAL_SUFFIXES = MANIFEST.ordinalSuffixes;
 
 /**
  * Gurmukhi unit abbreviations → the full word, matched only AFTER a number. Longest first so ਕਿ.ਮੀ. beats

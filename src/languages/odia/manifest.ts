@@ -25,6 +25,8 @@ export interface OdiaManifest extends AbugidaDef {
         multiply: { times: string; by?: string };
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
+    /** Ordinal suffixes, LONGEST FIRST — order is load-bearing. See the jsonc. */
+    ordinalSuffixes: string[];
 }
 
 /** The consolidated hand-authored Odia data tables (see odia.jsonc). */

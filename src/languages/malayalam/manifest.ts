@@ -37,6 +37,8 @@ export interface MalayalamManifest extends AbugidaDef {
         multiply: { times: string; by?: string };
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
+    /** The clitics welded onto a numeral, LONGEST FIRST — order is load-bearing. See the jsonc. */
+    ordinalEndings: string[];
 }
 
 export const MANIFEST = loadManifest<MalayalamManifest>(import.meta.url, "malayalam.jsonc");

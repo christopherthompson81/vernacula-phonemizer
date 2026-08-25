@@ -14,6 +14,8 @@ public sealed class OdiaDef : AbugidaDef
     public Dictionary<string, string> ClausePunctuation { get; set; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public OdiaSymbolTier SymbolTier { get; init; } = new();
+    /** Ordinal suffixes, LONGEST FIRST — order is load-bearing. See the jsonc. */
+    public IReadOnlyList<string> OrdinalSuffixes { get; init; } = Array.Empty<string>();
 }
 
 /** Read a Latin run with another language's engine — injected from the registry. */

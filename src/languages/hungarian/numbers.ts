@@ -77,24 +77,9 @@ export function numberToWords(n: number): string {
     return parts.join(" ");
 }
 
-/**
- * The ORDINAL form of each morph that can END a Hungarian cardinal. Hungarian ordinal formation is
- * entirely regular — the cardinal plus `-dik` with a linking vowel — and it applies to the LAST morph of
- * the compound only: *ezernyolcszáznegyven·nyolcadik*, *kétszáznegyvenhetedik*, *százkilencvenedik*. The
- * stem changes are the ordinary ones the language already shows (húsz → husza-, tíz → tize-, ezer →
- * ezre-, millió → milliomo-), which is why this is a table of morphs and not of numbers.
- *
- * `egy`/`kettő` map to their COMBINING forms here (*huszonegyedik*, *tizenkettedik*); standalone 1 and 2
- * are the suppletive *első* / *második* and are special-cased in `ordinalWords`.
- */
-const ORDINAL_MORPH: Readonly<Record<string, string>> = {
-    "nulla": "nulladik", "egy": "egyedik", "kettő": "kettedik", "három": "harmadik", "négy": "negyedik",
-    "öt": "ötödik", "hat": "hatodik", "hét": "hetedik", "nyolc": "nyolcadik", "kilenc": "kilencedik",
-    "tíz": "tizedik", "húsz": "huszadik", "harminc": "harmincadik", "negyven": "negyvenedik",
-    "ötven": "ötvenedik", "hatvan": "hatvanadik", "hetven": "hetvenedik", "nyolcvan": "nyolcvanadik",
-    "kilencven": "kilencvenedik", "száz": "századik", "ezer": "ezredik", "millió": "milliomodik",
-    "milliárd": "milliárdodik",
-};
+/** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+const ORDINAL_MORPH: Readonly<Record<string, string>> = MANIFEST.ordinalMorphs;
+
 // LONGEST FIRST: `kilencven` must beat nothing, but `negyven` must not be shadowed by `négy` — matching
 // is by suffix, so the longest matching key is the real final morph.
 const ORDINAL_KEYS = Object.keys(ORDINAL_MORPH).sort((a, b) => b.length - a.length);

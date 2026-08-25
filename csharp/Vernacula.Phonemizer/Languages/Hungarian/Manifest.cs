@@ -34,6 +34,8 @@ public sealed class HungarianManifest
     public HungarianPhonotactics Phonotactics { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public HungarianSymbolTier SymbolTier { get; init; } = new();
+    /** The ordinal form of each morph that can END a cardinal. See the jsonc. */
+    public IReadOnlyDictionary<string, string> OrdinalMorphs { get; init; } = new Dictionary<string, string>();
 }
 
 public sealed class HungarianPhonotactics

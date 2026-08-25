@@ -32,14 +32,16 @@ public static class Normalize
         Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
     });
 
-    private static readonly string[] ORDINAL_ENDINGS = { "ാമത്തേത്", "ാമത്തെ", "മത്തേത്", "ാമത്", "മത്തെ", "മത്", "ആം", "ാം" };
+    /** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+    private static IReadOnlyList<string> ORDINAL_ENDINGS => Manifest.MANIFEST.OrdinalEndings;
+
     private static readonly string[] OBLIQUE_CLITICS = { "ത്തിലെ", "ത്തിൽ", "ത്തില്", "ലാണ്", "ന്റെ", "ലോ", "നും", "ലെ", "ൽ", "ന്" };
     private static readonly string[] PLURAL_CLITICS = { "കളുടെ", "കളിലെ", "കളിൽ", "കൾ" };
 
     // ⚠ `OrderByDescending`, NOT `List.Sort` — LINQ's ordering is STABLE like JS's `Array.prototype.sort`,
     // and `List.Sort` is not. Equal-length clitics would otherwise alternate between runs and the alternation
     // order decides which one an overlapping match claims.
-    private static string LongestFirst(string[] a) => string.Join("|", a.OrderByDescending(x => x.Length));
+    private static string LongestFirst(IReadOnlyList<string> a) => string.Join("|", a.OrderByDescending(x => x.Length));
 
     /** ത്തിൽ/ത്തിലെ are the ം-final oblique already spelled out; fold them onto the plain clitic. */
     private static readonly IReadOnlyDictionary<string, string> FOLD_CLITIC = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -47,7 +49,7 @@ public static class Normalize
         ["ത്തിലെ"] = "ലെ", ["ത്തിൽ"] = "ൽ", ["ത്തില്"] = "ൽ",
     };
 
-    private static JsRe Clitic(string[] list) =>
+    private static JsRe Clitic(IReadOnlyList<string> list) =>
         JsRegex.Compile($"(?<![\\d.,])(\\d+)\\s*[-–]?\\s*({LongestFirst(list)}){NA}", "gu");
 
     private static readonly JsRe ORDINAL_RE = Clitic(ORDINAL_ENDINGS);

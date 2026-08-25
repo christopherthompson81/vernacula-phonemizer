@@ -44,6 +44,8 @@ export interface PunjabiDef extends AbugidaDef {
         multiply: { times: string; by?: string };
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
+    /** Ordinal suffixes, LONGEST FIRST — order is load-bearing. See the jsonc. */
+    ordinalSuffixes: string[];
 }
 export type ForeignPhonemizer = (latin: string) => string;
 

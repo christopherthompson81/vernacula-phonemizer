@@ -34,6 +34,8 @@ export interface HungarianManifest {
         ampersand: string;
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
+    /** The ordinal form of each morph that can END a cardinal. See the jsonc. */
+    ordinalMorphs: Record<string, string>;
 }
 
 /** The consolidated hand-authored Hungarian data tables (see hungarian.jsonc). */

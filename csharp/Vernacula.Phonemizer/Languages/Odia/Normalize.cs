@@ -46,8 +46,8 @@ public static class Normalize
     private static readonly string[] RATE_NUM = { "କିଲୋମିଟର", "ମିଲିମିଟର", "ମିଟର", "ମାଇଲ୍", "ମାଇଲ" };
     private static readonly string[] RATE_DEN = { "ଘଣ୍ଟା", "ସେକେଣ୍ଡ", "ମିନିଟ୍", "ମିନିଟ" };
 
-    /** Ordinal suffixes, written attached to the numeral. ⚠ LONGEST FIRST, so ତମ is not split by ମ. */
-    private static readonly string[] ORDINAL_SUFFIXES = { "ତମ", "ଶ", "ମ" };
+    /** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+    private static IReadOnlyList<string> ORDINAL_SUFFIXES => OdiaPhonemizer.DEF.OrdinalSuffixes;
 
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(\\d)\\s?({UNIT_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe LATIN_INITIALISM = JsRegex.Compile(

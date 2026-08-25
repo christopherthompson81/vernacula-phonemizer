@@ -206,5 +206,23 @@
         "unitPer": "per",
         "rateDenominators": { "h": "óra", "s": "másodperc", "ó": "óra", "óra": "óra", "órás": "órás" },
         "exponentWords": { "squared": ["négyzet"], "cubed": ["köb"], "position": "compound" }
+    },
+
+    // THE ORDINAL FORM OF EACH MORPH THAT CAN END A HUNGARIAN CARDINAL. Hungarian ordinal formation is
+    // entirely regular — the cardinal plus `-dik` with a linking vowel — and it applies to the LAST morph of
+    // the compound only: *ezernyolcszáznegyven·nyolcadik*, *kétszáznegyvenhetedik*, *százkilencvenedik*. The
+    // stem changes are the ordinary ones the language already shows (húsz → husza-, tíz → tize-, ezer →
+    // ezre-, millió → milliomo-), which is why this is a table of MORPHS and not of numbers.
+    //
+    // ⚠ `egy`/`kettő` MAP TO THEIR COMBINING FORMS HERE (*huszonegyedik*, *tizenkettedik*); standalone 1 and
+    // 2 are the suppletive *első* / *második* and stay special-cased in the code, because that is a rule
+    // about position rather than a fact about a morph.
+    "ordinalMorphs": {
+        "nulla": "nulladik", "egy": "egyedik", "kettő": "kettedik", "három": "harmadik",
+        "négy": "negyedik", "öt": "ötödik", "hat": "hatodik", "hét": "hetedik", "nyolc": "nyolcadik",
+        "kilenc": "kilencedik", "tíz": "tizedik", "húsz": "huszadik", "harminc": "harmincadik",
+        "negyven": "negyvenedik", "ötven": "ötvenedik", "hatvan": "hatvanadik", "hetven": "hetvenedik",
+        "nyolcvan": "nyolcvanadik", "kilencven": "kilencvenedik", "száz": "századik", "ezer": "ezredik",
+        "millió": "milliomodik", "milliárd": "milliárdodik"
     }
 }

@@ -12,6 +12,8 @@ public class PunjabiDef : AbugidaDef
     public Dictionary<string, string> ClausePunctuation { get; set; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public PunjabiSymbolTier SymbolTier { get; init; } = new();
+    /** Ordinal suffixes, LONGEST FIRST — order is load-bearing. See the jsonc. */
+    public IReadOnlyList<string> OrdinalSuffixes { get; init; } = Array.Empty<string>();
 }
 
 /** Variety options. Saraiki (skr) is the NON-tonal Lahnda sibling: it never underwent Punjabi's tonogenesis

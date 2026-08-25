@@ -80,6 +80,8 @@ export interface BengaliDef extends AbugidaDef {
         multiply: { times: string; by?: string };
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
+    /** The suppletive 1–10 series and the regular suffixes. LONGEST FIRST. See the jsonc. */
+    ordinals: { suppletive: Record<string, string>; suffixes: string[] };
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */
