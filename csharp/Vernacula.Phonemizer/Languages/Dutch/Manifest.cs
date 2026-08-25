@@ -65,6 +65,8 @@ public sealed class DutchManifest
     public DutchMorphologyDef Morphology { get; init; } = new();
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public DutchPhonotactics Phonotactics { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public DutchSymbols Symbols { get; init; } = new();
 }
 
 public sealed class DutchPhonotactics
@@ -78,4 +80,16 @@ public static class Manifest
 {
     /** The consolidated hand-authored Dutch data tables (see dutch.jsonc). */
     public static readonly DutchManifest MANIFEST = LoadManifest.Load<DutchManifest>("languages/dutch", "dutch.jsonc");
+}
+
+public sealed class DutchSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public MultiplyDef Multiply { get; init; } = null!;
 }

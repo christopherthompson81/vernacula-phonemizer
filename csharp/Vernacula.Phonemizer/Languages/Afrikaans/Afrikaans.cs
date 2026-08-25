@@ -308,32 +308,17 @@ public sealed class AfrikaansPhonemizer : ILanguage
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = MANIFEST.SignWords.Times },
-        Percent = new[] { "persent" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["€"] = new[] { "euro" }, ["$"] = new[] { "dollar" }, ["£"] = new[] { "pond" },
-            ["¥"] = new[] { "jen" }, ["U$"] = new[] { "VS-dollar" }, ["VS$"] = new[] { "VS-dollar" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "kilometer" }, ["cm"] = new[] { "sentimeter" },
-            ["mm"] = new[] { "millimeter" }, ["kg"] = new[] { "kilogram" },
-            ["mi"] = new[] { "myl" }, ["mph"] = new[] { "myl per uur" },
-            ["m"] = new[] { "meter" },
-            ["g"] = new[] { "gram" },
-            ["l"] = new[] { "liter" }, ["L"] = new[] { "liter" }, ["t"] = new[] { "ton" },
-            ["V"] = new[] { "volt" }, ["W"] = new[] { "watt" },
-        },
-        RateDenominators = new Dictionary<string, string> { ["h"] = "uur", ["u"] = "uur", ["s"] = "sekonde" },
-        UnitPer = "per",
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "vierkante" },
-            Cubed = new[] { "kubieke" },
-            Position = ExponentPosition.Before,
-        },
-        Magnitudes = new[] { "miljoen", "miljard", "biljoen" },
+        // ⚠ Declaring `Multiply` HERE is what makes ASCII `x` read like `×`: otherwise `6x6 cm` reads the x as
+        // a LETTER NAME, and `NxN` is the commoner written form. ⚠ ONE SOURCE with SignWords.Times — `6 × 6`
+        // goes through Normalize.cs and `6x6 cm` through this tier, and they must read the same word.
+        Multiply = new MultiplyDef { Times = Manifest.MANIFEST.SignWords.Times },
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        RateDenominators = Manifest.MANIFEST.Symbols.RateDenominators,
+        UnitPer = Manifest.MANIFEST.Symbols.UnitPer,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
     });
 
     public string Text(string input) => Text(input, null);
@@ -352,7 +337,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
                     foreach (var wd in Numbers.NumberToWords(Js.Number(intPart)).Split(' ')) sink.Emit(PhonemizeWord(wd));
                     if (frac is not null)
                     {
-                        sink.Emit(PhonemizeWord("komma"));
+                        sink.Emit(PhonemizeWord(Manifest.MANIFEST.DecimalWord));
                         foreach (var d in frac)
                             foreach (var wd in Numbers.NumberToWords(Js.Number(d.ToString())).Split(' ')) sink.Emit(PhonemizeWord(wd));
                     }

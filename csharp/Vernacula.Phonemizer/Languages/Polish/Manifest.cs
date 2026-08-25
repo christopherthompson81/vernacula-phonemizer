@@ -50,6 +50,8 @@ public sealed class PolishManifest
     public PolishNumbersDef Numbers { get; init; } = new();
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public PolishPhonotactics Phonotactics { get; init; } = new();
+    /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
+    public string DecimalWord { get; init; } = "";
 }
 
 public sealed class PolishPhonotactics

@@ -104,21 +104,12 @@ public static class TurkishPhonemizer
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "çarpı" },
-        Percent = new[] { "yüzde" },
-        PercentPrefix = true,
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["€"] = new[] { "avro" }, ["$"] = new[] { "dolar" }, ["£"] = new[] { "sterlin" },
-            ["₺"] = new[] { "lira" }, ["¥"] = new[] { "yen" },
-        },
-        Units = UNITS,
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "kare" },
-            Cubed = new[] { "küp" },
-            Position = ExponentPosition.Suffix,
-        },
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        Multiply = Manifest.MANIFEST.Symbols.Multiply,
+        PercentPrefix = Manifest.MANIFEST.Symbols.PercentPrefix,
     });
 
     /**

@@ -26,6 +26,8 @@ interface OccitanDef {
     voicelessPhones: readonly string[];
     vowelLetters: readonly string[];
     frontLetters: readonly string[];
+    /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
+    decimalWord: string;
 }
 const DEF = loadManifest<OccitanDef>(import.meta.url, "occitan.jsonc");
 const DIGRAPHS = DEF.digraphs;
@@ -177,7 +179,7 @@ class OccitanPhonemizer implements Phonemizer {
                 if (frac !== undefined) {
                     // `virgula` ×36 on oc.wikipedia — the separator's own name, the same call every other
                     // layer in this sweep makes. The fractional part is read digit by digit.
-                    sink.emit(phonemizeWord("virgula"));
+                    sink.emit(phonemizeWord(DEF.decimalWord));
                     for (const dg of frac) for (const wd of numberToWords(Number(dg)).split(" ")) sink.emit(phonemizeWord(wd));
                 }
             }

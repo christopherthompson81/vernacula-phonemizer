@@ -62,4 +62,9 @@
             { "value": 1000000, "one": "un milion", "many": "milions" },
         ],
     },
+
+    // The name of the DECIMAL COMMA, emitted between the integer and fractional parts. ⚠ 35 languages
+    // already declared this; these four alone passed the word to the engine as a bare literal, so the
+    // same fact was manifest data in Dutch and a string in the code next door.
+    "decimalWord": "virgula"
 }

@@ -4,6 +4,7 @@
  * ALGORITHMS that consume them stay in the sibling modules (g2p.ts, dutch.ts, numbers.ts).
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface DutchManifest {
     vowelChars: string;
@@ -48,6 +49,17 @@ export interface DutchManifest {
     };
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** The shared symbol tier's data — moved verbatim, comments included. */
+    symbols: {
+        multiply: { times: string; by?: string };
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        rateDenominators: Record<string, string>;
+        unitPer: string;
+        magnitudes: string[];
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 /** The consolidated hand-authored Dutch data tables (see dutch.jsonc). */

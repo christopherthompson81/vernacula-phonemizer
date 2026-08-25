@@ -128,5 +128,27 @@
             "rç", "rd", "rf", "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rz", "sk", "st", "şt", "zm", "ng",
             "lg", "ht", "ny", "nc"
         ]
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    "symbols": {
+        // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+        // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
+        // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
+        // One word, so `by` defaults to it; this language does not split dimension from product.
+        "multiply": { "times": "çarpı" },
+        "percent": ["yüzde"],
+        "percentPrefix": true,
+        "currency": { "€": ["avro"], "$": ["dolar"], "£": ["sterlin"], "₺": ["lira"], "¥": ["yen"] },
+        "units": { "km": ["kilometre"], "cm": ["santimetre"], "mm": ["milimetre"], "kg": ["kilogram"], "m": ["metre"] },
+        // THE MEASURE WORD FUSES ONTO THE END, which is the `suffix` position and the reason it exists. This
+        // corpus writes `783.562 kilometrekare` ×4 and `120-160 metreküp` ×2 — one word each. Neither of the
+        // other three positions produces that: `after` gives *kilometre kare*, `compound` gives *karekilometre*.
+        // ⚠ Bare `kare` ×6 is the SHAPE ("küçük kare veya toplardan"), plus one `mil kare` for the imperial
+        // gloss — the fused unit form is the attestation, not the bare word.
+        "exponentWords": { "squared": ["kare"], "cubed": ["küp"], "position": "suffix" }
     }
 }

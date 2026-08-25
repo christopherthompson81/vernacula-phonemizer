@@ -34,6 +34,8 @@ public sealed class TurkishManifest
     public TurkishNumbersDef Numbers { get; init; } = new();
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public TurkishPhonotactics Phonotactics { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public TurkishSymbols Symbols { get; init; } = new();
 }
 
 public sealed class TurkishPhonotactics
@@ -47,4 +49,14 @@ public static class Manifest
 {
     /** The consolidated hand-authored Turkish data tables (see turkish.jsonc). */
     public static readonly TurkishManifest MANIFEST = LoadManifest.Load<TurkishManifest>("languages/turkish", "turkish.jsonc");
+}
+
+public sealed class TurkishSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public MultiplyDef Multiply { get; init; } = null!;
+    public bool PercentPrefix { get; init; } = false;
 }

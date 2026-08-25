@@ -21,19 +21,12 @@ public static class HausaPhonemizer
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "sau" },
-        Percent = new[] { "kashi" },
-        PercentPrefix = true,
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "dala" }, ["€"] = new[] { "euro" }, ["¥"] = new[] { "yen" }, ["£"] = new[] { "fam" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "kilomita" }, ["m"] = new[] { "mita" }, ["kg"] = new[] { "kilogram" },
-            ["mm"] = new[] { "milimita" }, ["cm"] = new[] { "santimita" },
-        },
-        ExponentWords = new ExponentWordsDef { Squared = new[] { "murabba'i" }, Cubed = new[] { "cubic" } },
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        Multiply = Manifest.MANIFEST.Symbols.Multiply,
+        PercentPrefix = Manifest.MANIFEST.Symbols.PercentPrefix,
     });
 
     private sealed class Engine : ILanguage

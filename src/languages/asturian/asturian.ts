@@ -23,6 +23,8 @@ interface AsturianDef {
     clausePunctuation: Record<string, string>;
     vowelLetters: readonly string[];
     frontLetters: readonly string[];
+    /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
+    decimalWord: string;
 }
 const DEF = loadManifest<AsturianDef>(import.meta.url, "asturian.jsonc");
 const DIGRAPHS = DEF.digraphs;
@@ -139,7 +141,7 @@ class AsturianPhonemizer implements Phonemizer {
                     // `coma` ×75 on ast.wikipedia — the separator's own name, the same call every other
                     // layer in this sweep makes. The fractional part is read digit by digit, which is
                     // what a reader does and what avoids composing a place name this layer cannot source.
-                    sink.emit(phonemizeWord("coma"));
+                    sink.emit(phonemizeWord(DEF.decimalWord));
                     for (const dg of frac) for (const wd of numberToWords(Number(dg)).split(" ")) sink.emit(phonemizeWord(wd));
                 }
             }

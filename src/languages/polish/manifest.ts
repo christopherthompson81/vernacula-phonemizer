@@ -30,6 +30,8 @@ export interface PolishManifest {
     };
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
+    decimalWord: string;
 }
 
 export const MANIFEST = loadManifest<PolishManifest>(import.meta.url, "polish.jsonc");

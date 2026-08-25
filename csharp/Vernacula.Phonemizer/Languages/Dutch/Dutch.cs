@@ -117,30 +117,14 @@ public sealed class DutchPhonemizer : ILanguage
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "keer" },
-        Percent = new[] { "procent" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["€"] = new[] { "euro" }, ["$"] = new[] { "dollar" }, ["£"] = new[] { "pond" }, ["¥"] = new[] { "yen" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "kilometer" }, ["cm"] = new[] { "centimeter" }, ["mm"] = new[] { "millimeter" },
-            ["m"] = new[] { "meter" },
-            ["kg"] = new[] { "kilogram" }, ["mg"] = new[] { "milligram" }, ["ha"] = new[] { "hectare" },
-            ["mi"] = new[] { "mijl" },
-            ["mph"] = new[] { "mijl per uur" },
-        },
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["u"] = "uur", ["h"] = "uur", ["s"] = "seconde",
-        },
-        UnitPer = "per",
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "vierkante" }, Cubed = new[] { "kubieke" }, Position = ExponentPosition.Before,
-        },
-        Magnitudes = new[] { "miljoen", "miljard", "biljoen" },
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        RateDenominators = Manifest.MANIFEST.Symbols.RateDenominators,
+        UnitPer = Manifest.MANIFEST.Symbols.UnitPer,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
+        Multiply = Manifest.MANIFEST.Symbols.Multiply,
     });
 
     public string Text(string input)

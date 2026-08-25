@@ -360,5 +360,47 @@
         // not an Afrikaans suffix, it is a loanword the stem splitter tore in half, and the defect there is the
         // split. Measured contribution: +4 words (the other three carry a second, unrelated error each).
         "resyllabifyingSuffixes": ["ing", "ers", "eer"]
-    }
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    "symbols": {
+        "percent": ["persent"],
+        "currency": { "€": ["euro"], "$": ["dollar"], "£": ["pond"], "¥": ["jen"], "U$": ["VS-dollar"], "VS$": ["VS-dollar"] },
+        "units": {
+            "km": ["kilometer"], "cm": ["sentimeter"], "mm": ["millimeter"], "kg": ["kilogram"],
+            "mi": ["myl"], "mph": ["myl per uur"],
+            // `m` is declared because `kubieke`/`vierkante` below cannot reach a bare metre without it.
+            // ⚠ THE HAZARD IS `40 m.p.u` (myl per uur, the Afrikaans spelling), which a letter-guard does NOT reject
+            // because a dot is not a letter — but normalize.ts rewrites the dotted abbreviation to words BEFORE the
+            // tier runs, so no bare `m` survives to be misread.
+            // ⚠ RESIDUAL EXPOSURE, stated rather than left to be discovered: normalize.ts step 7 rewrites a version
+            // dot to the WORD "punt" before the tier runs, so the tier's `NOT_VERSION` guard has no dot left to see
+            // and `802.11m` reads as "…elf METER". Bounded and unattested: that rule fires only on THREE-or-more
+            // integer digits plus one trailing letter, so `6.5m` is untouched, and 802.11 comes as a/b/g/n.
+            "m": ["meter"],
+            // ⚠ THE ONE-LETTER UNITS, declared because #762 made their absence AUDIBLE: a bare letter is now
+            // spelled as its name, so an undeclared `3 g suiker` read "drie GEE suiker" — a confident wrong
+            // WORD where it used to be a wrong phone. Only these three, all of which follow a numeral in
+            // ordinary text; anything rarer stays undeclared rather than guessed at.
+            // ⚠ ⟨V⟩ AND ⟨W⟩ ARE CAPITAL BECAUSE THEY ARE NAMED AFTER PEOPLE (Volta, Watt), and the resolver
+            // is case-sensitive for one-letter symbols (#763), so a lower-case ⟨v⟩/⟨w⟩ is correctly NOT read
+            // as a unit. ⟨t⟩ is the tonne; ⟨T⟩ would be the tesla and is deliberately not declared.
+            "g": ["gram"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+            // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+            // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+            "l": ["liter"], "L": ["liter"], "t": ["ton"], "V": ["volt"], "W": ["watt"],
+        },
+        "rateDenominators": { "h": "uur", "u": "uur", "s": "sekonde" },
+        "unitPer": "per",
+        "exponentWords": { "squared": ["vierkante"], "cubed": ["kubieke"], "position": "before" },
+        "magnitudes": ["miljoen", "miljard", "biljoen"]
+    },
+
+    // The name of the DECIMAL COMMA, emitted between the integer and fractional parts. ⚠ 35 languages
+    // already declared this; these four alone passed the word to the engine as a bare literal, so the
+    // same fact was manifest data in Dutch and a string in the code next door.
+    "decimalWord": "komma"
 }

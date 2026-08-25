@@ -126,23 +126,14 @@ const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|(\d{1,3}(?:\.\d{3})+|\
 // pond"), so each entry is a single form and no count agreement is needed.
 // ⚠ `g` IS DELIBERATELY NOT A UNIT: the Wi-Fi standards are written "802.11a/b/g", and "11g" is not 11 grams.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
-    // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — Dutch does
-    // not split dimension from product.
-    multiply: { times: "keer" },
-    percent: ["procent"],
-    currency: { "€": ["euro"], $: ["dollar"], "£": ["pond"], "¥": ["yen"] },
-    units: {
-        km: ["kilometer"], cm: ["centimeter"], mm: ["millimeter"], m: ["meter"],
-        kg: ["kilogram"], mg: ["milligram"], ha: ["hectare"], mi: ["mijl"],
-        mph: ["mijl per uur"],
-    },
-    // ⚠ Denominators ONLY. `s` as a standalone unit makes `Il-76s` read *zesenzeventig seconde*.
-    rateDenominators: { u: "uur", h: "uur", s: "seconde" },
-    unitPer: "per",
-    // Dutch puts the measure word BEFORE the unit, spaced, and measure nouns stay singular after a numeral.
-    exponentWords: { squared: ["vierkante"], cubed: ["kubieke"], position: "before" },
-    magnitudes: ["miljoen", "miljard", "biljoen"],
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    rateDenominators: MANIFEST.symbols.rateDenominators,
+    unitPer: MANIFEST.symbols.unitPer,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    magnitudes: MANIFEST.symbols.magnitudes,
+    multiply: MANIFEST.symbols.multiply,
 });
 
 class DutchPhonemizer implements Phonemizer {
