@@ -18,13 +18,23 @@
     {
         "language": "za",
         "wiki": "za.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "dohraeuj",
+        "tier": "wikipedia",
         "findings": [
         {
-                "word": "gienj",
+                "word": "gemj",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…, bwnda, da, bwndaraemx, ndaeng, bak, naengbak, rwz, naeng, gemj, rizndaeng, heuj caeuq hangz daengj.…",
+                "…an daeuj dajndaem caeuq gwn yungh. Sang daemq raemx haij bi gemj 1m. Bi 2006, sang daemq Haijdai dwg -418m. Bi 2007,gemj dae…",
+                "…bi gemj 1m. Bi 2006, sang daemq Haijdai dwg -418m. Bi 2007,gemj daengz -420m, vangqraez Haijdai gemjnoix dingzfaen yiengh g…"
+            ]
+            },
+        {
+                "word": "fouj",
                 "verdict": "absent",
                 "bounded": true,
                 "tokenHits": 0,
@@ -33,7 +43,43 @@
                 "examples": []
             },
         {
-                "word": "fouj",
+                "word": "gemjhauh",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gemjbae",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gienjbiengz",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "denj-yv",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gienj",
                 "verdict": "absent",
                 "bounded": true,
                 "tokenHits": 0,

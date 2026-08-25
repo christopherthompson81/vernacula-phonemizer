@@ -21,8 +21,38 @@
         "tier": "wikipedia (register-restricted)",
         // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
         // `--context` set to exactly this string.
-        "context": "mathematiki nọ́mbà",
+        "context": "ìṣirò nọ́mbà",
         "findings": [
+        {
+                "word": "àmì ìyọkúrò",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "yọ kúrò",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…èròjà onígbà-pípalẹ̀ (VOCs), ṣùgbọ́n pẹ̀lú methane tí a kò yọ kúrò. A kò yọ methane kúrò nínú àyíká ìbàjẹ́ afẹ́fẹ́ nítorí pé k…",
+                "…ko, àti àwọn agbègbè mìíràn tí a kà sí “kò ṣeé ṣe”, ni a óò yọ kúrò. Nítorí náà, nǹkan bí 85% ti ìtújáde ilẹ̀ Amẹ́ríkà ni a óò…"
+            ]
+            },
+        {
+                "word": "yọkúrò",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "nọ́mbà òdì",
                 "verdict": "substring-only",

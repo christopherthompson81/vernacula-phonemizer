@@ -18,8 +18,44 @@
     {
         "language": "bo",
         "wiki": "bo.wikipedia.org",
-        "tier": "wikipedia",
+        "tier": "wikipedia (register-restricted)",
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // `--context` set to exactly this string.
+        "context": "གྲངས་ཀ",
         "findings": [
+        {
+                "word": "འཐེན་རྟགས",
+                "verdict": "absent",
+                "bounded": false,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "འཕྲི་འཐེན",
+                "verdict": "absent",
+                "bounded": false,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "འཕྲི",
+                "verdict": "attested*",
+                "bounded": false,
+                "tokenHits": 9,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…ཡིན་པའི་ཁག་དོར་ནས། ཕན་ནུས་ལྡན་པའི་སྒོ་ནས་ཡིག་ཚགས་ཆེ་ཆུང་ཉུང་འཕྲི་བྱས་ཡོད། 4. RM RealVideoནིRealNetworksཡིས་ཆེད་དུ་དྲ་རྒྱའི་ས…",
+                "…ོས་འཛིན་མི་རུང་ངོ།། “འབྲི་བགྲང་སྣོན་པ་རང་གི་གཡས། སྒྱུར་བགོད་འཕྲི་བ་གཡོན་ལ་རྩོམ”ཞེས་རྩིས་ཀྱི་སྔོན་འགྲོ་རུ་གསུངས་པ་ལྟར་རོ།། ཤམ…",
+                "…བྱུང་སྤྱི་ལོ་དང་སྦྱོར་ཚུལ། ངེས་པའི་རབ་བྱུང་ལས་ནི་གཟུགས 1 །། འཕྲི་བའི་ལྷག་མར་མཁའ་རོས 60 བསྒྱུར།། ཐོབ་ནོར་བགྲང་བྱ་དུས་མིག་ཕྱོག…",
+                "…་སོང་པ་དེ་ཉིད་སྐབས་དེའི་སློབ་མ་ཚོའི་རེ་བ་གནང་དོན་བཞིན། བསྣན་འཕྲི་དག་བཅོས་འགའ་ཞིག་བྱས་ནས་ཕྲལ་སེལ་པར་སློག་ཏུ་བཏབ་ནས་བཀྲམས་པས།…",
+                "…ས་འཛིན་མི་རུང་ངོ་། ། འབྲི་བགྲང་སྣོན་པ་རང་གི་གཡས། སྒྱུར་བགོད་འཕྲི་བ་གཡོན་ལ་རྩོམ་ཞེས་རྩིས་ཀྱི་སྔོན་འགྲོ་རུ་གསུངས་པ་ལྟར་རོ། ། ཤ…"
+            ]
+            },
         {
                 "word": "མོ་གྲངས",
                 "verdict": "attested*",

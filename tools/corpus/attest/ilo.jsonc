@@ -18,11 +18,41 @@
     {
         "language": "ilo",
         "wiki": "ilo.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "matematika numero",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "iccatan",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "panangkissay",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…uay wenno nangged para iti panagkakappia dagiti nasion, iti panangkissay wenno panangikkat kadagiti militaria, ken iti panangitag-ay…",
+                "…gan, gatas a saan a na-pasteurized, gatas a na-pasteurized) panangkissay wenno panangikkat iti laktosa sebbangan (kas pagarigan baka…",
+                "…half\" (kagudua ti intero a gatas ken kagudua ti krema). === Panangkissay wenno panangikkat iti laktosa === Ti gatas nga awanan iti l…",
+                "…adagiti pakainaiganna a dakes nga epekto, a pakairamanan ti panangkissay iti panagayus ti dara iti tian. Kanayonanna, ti dobutamina…",
+                "…ket makatulong a mangpabassit iti kapaut ti bentilasion. Ti panangkissay iti intermitente wenno agtultuloy a sedasion ket tulongan a…"
+            ]
+            },
+        {
+                "word": "panagiccat",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "menos",
                 "verdict": "absent",

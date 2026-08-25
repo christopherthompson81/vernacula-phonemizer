@@ -242,3 +242,56 @@ Same corpus sentence, a temperature wrong by 448 degrees, expected verbatim. Upd
 
 **Still unsourced — 8 of the 11:** ab, ak, bo, ltg, mos, pcm, yo, za. bo is a refusal on evidence; the other
 seven returned ×0 on every candidate, so there is no word to caveat, only one to invent.
+
+## Run 7 — the alternates I skipped, and one of them was a whole language — 2026-08-25 16:05
+
+Challenged on Run 5/6: each language came with SEVERAL candidate words and I had probed the primary plus my
+own guesses. Correct — and the gaps were not evenly distributed.
+
+**⚠ MOSSI WAS NEVER PROBED AT ALL.** Not one attest call for `mos` in Run 5. It was carried in the
+"×0 / absent" column of that table on no evidence whatsoever. Probed now (`yãk`, `yãk n yiis`, `minus`):
+genuinely ×0 — the conclusion survives, but it was not a finding until this run, it was an assumption
+wearing a finding's clothes.
+
+**⚠ AND `comot` — pcm's PRIMARY candidate — WAS NEVER RUN EITHER.** I probed `minus`, `negativ`,
+`negativ nomba` and `bilo zero`, all my own guesses, and skipped the word actually supplied. ×0, along with
+`commot`.
+
+### Every named alternate, now probed
+
+| lang | alternates run this round | verdict |
+|---|---|---|
+| mos | `yãk`, `yãk n yiis`, `minus` | all ×0 |
+| pcm | `comot`, `commot` | ×0 |
+| yo | `àmì ìyọkúrò` ×0; **`yọ kúrò` ×2** | physical removal — *methane tí a kò yọ kúrò*, "methane not removed" |
+| bo | `འཐེན་རྟགས` ×0, `འཕྲི་འཐེན` ×0; **`འཕྲི` ×9/5** | **the genuine arithmetic verb**, quoted from an arithmetic primer: *"འབྲི་བགྲང་སྣོན་པ་རང་གི་གཡས། སྒྱུར་བགོད་འཕྲི་བ་གཡོན་ལ་རྩོམ"* — writing, counting, ADDING from the right; multiplying, dividing, SUBTRACTING from the left. The OPERATION, not the sign. |
+| ab | `ашәыхра`, `аӡәыхра`, `минус белгиси`, `аминуси` | all ×0 |
+| ltg | `atjimšona`, `atjimsona` | ×0 |
+| ak | `yi firi mu`, `te firi mu`, `ntefiri` | all ×0 |
+| za | `gienj` ×0 — **but `gemj` ×3, and the spelling was mine to get wrong** | see below |
+| ht | `siy mwen` ×0; `soustraksyon` ×9 | the operation noun, in real maths prose (*adisyon, soustraksyon, miltiplikasyon ak divizyon*). One example corroborates the register: *"espesyalman le itilize **nonm negatif**"*. Ships `mwens` regardless. |
+| hak | `fu` ×43 romanized | **the romanization trap** — every hit is a different morpheme: `Fu-ho̍k-sṳ` 副學士, `fu-sṳn-miàng` 富, `fu-siông` 互相, *"Kîn-chi-ho̍k chṳ̂ fu"* 經濟學之父. None is 負. hak reads the sign already. |
+
+Moot but run for completeness, all on languages that ALREADY read the sign: tn `ntsho` ×26, rw `gukuraho`
+×25, bar `oziang` ×5, mt `tnaqqis` ×102, ky `алуу белгиси` ×1, ilo `panangkissay` ×5. Every one is a
+subtraction noun or verb; none would improve a language reading "below zero" or "minus" today.
+
+### ⚠ ZHUANG: THE SPELLING WAS WRONG, THE WORD IS A HOMOGRAPH, AND THE SENTENCE PROVES THE NEED
+
+`gienj` is ×0; Standard Zhuang spells it **`gemj`**, which attests ×3/2. Reading them:
+
+```
+…ndaeng, bak, naengbak, rwz, naeng, gemj, rizndaeng, heuj caeuq hangz…     a list of FACIAL PARTS — CHEEK
+…sang daemq raemx haij bi gemj 1m … Bi 2007, gemj daengz -420m…            the VERB "to decrease"
+```
+
+One instance is the noun **cheek**; the other two are "to decrease". Emitting it for a leading sign gives
+*cheek four hundred eighteen metres*. Refused — and this is the clearest case yet that a wrong-sense word
+does not buy the trade, because a homograph does not even fail quietly.
+
+**And the same sentence is the best evidence in this whole investigation that za NEEDS the reading.** It is
+the Dead Sea's elevation: `sang daemq Haijdai dwg -418m … gemj daengz -420m` — below sea level, written with
+an ASCII hyphen, twice, in ordinary prose. Zhuang's single U+2212 instance understated the gap.
+
+**Nothing changed in any engine.** Eight languages remain unread — ab, ak, bo, ltg, mos, pcm, yo, za — and
+every named candidate for each is now probed rather than assumed.

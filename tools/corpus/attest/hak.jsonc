@@ -21,8 +21,42 @@
         "tier": "wikipedia (register-restricted)",
         // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
         // `--context` set to exactly this string.
-        "context": "溫度 度",
+        "context": "sṳ-ho̍k",
         "findings": [
+        {
+                "word": "fu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…iu ke kau-yuk kî-kèu, yû khièn-han pân-su ho̍k-vi, pâu-koat Fu-ho̍k-sṳ ho̍k-vi, Ho̍k-sṳ Ho̍k-vi (Bachelor), Sha̍k-sṳ Ho̍k-…",
+                "…hṳ̂-kâ-kô Thai-ho̍k (University of Chicago) he Mî-koet chui fu-sṳn-miàng ke sṳ̂-li̍p Thai-ho̍k tsṳ̂-yit, yù sa̍k-yù thai-v…",
+                "…i Fa-ho̍k Ngièn-su, Ngièn-chṳ́, Fûn-chṳ́ khi̍p kì-têu yì-hò fu-siông chok-yung chok chhut ngièn-kiu. Fa-ho̍k-kâ têu ngièn-…",
+                "…í-ngièn: Â-tông Sṳ̂-me̍t he kûng-ngin ke \"Kîn-chi-ho̍k chṳ̂ fu\"，“Koet-fu-lun” yit-sû ke chok-chá.…",
+                "…-tông Sṳ̂-me̍t he kûng-ngin ke \"Kîn-chi-ho̍k chṳ̂ fu\"，“Koet-fu-lun” yit-sû ke chok-chá.…",
+                "…Yî-ho̍k-hì、Chûng-yî-ho̍k-hì、Ngà-yî-ho̍k-hì、Yo̍k-yî-ho̍k-hì、Fu-lî-hì、Yî-kiám-hì、Vu̍t-lî Chhṳ-liàu-ho̍k-hì、Chṳt-nèn Chhṳ-li…"
+            ]
+            },
+        {
+                "word": "giam",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "giam-ho",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "負",
                 "verdict": "absent",

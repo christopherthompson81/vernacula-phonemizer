@@ -18,11 +18,24 @@
     {
         "language": "mt",
         "wiki": "mt.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "temperatura gradi",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "tnaqqis",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 102,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Fil-matematika, it-tnaqqis huwa wieħed mill-erba' operazzjonijiet aritmetiċi fundament…",
+                "…i s-somma n, jissejjaħ differenza. F'simboli, n - m = d. It-tnaqqis jintuża biex jimmudella t-tliet proċessi fiżiċi li ġejjin.…",
+                "…at ta’ €300. Matematikament ħafna drabi huwa utli li tara t-tnaqqis mhux bħala operazzjoni separata, iżda bħala żieda tal-oppos…",
+                "…bħala operazzjoni separata, iżda bħala żieda tal-oppost tat-tnaqqis. Għalhekk, 7-3 isir is-somma ta '7 u \"−3\". B'dan il-mod, ir…",
+                "…llha u n-nomenklatura taż-żieda jistgħu jiġu applikati għat-tnaqqis. Ikkunsidra wkoll li t-tnaqqis la huwa kommutattiv u lanqas…",
+                "…jistgħu jiġu applikati għat-tnaqqis. Ikkunsidra wkoll li t-tnaqqis la huwa kommutattiv u lanqas assoċjattiv, iżda ż-żieda ta '…"
+            ]
+            },
         {
                 "word": "nieqes",
                 "verdict": "absent",

@@ -18,11 +18,28 @@
     {
         "language": "ky",
         "wiki": "ky.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "температура градус",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "кемитүү белгиси",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "алуу белгиси",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…олуучу чечимдерди салыштырып баалоо ж-а эд мыктысын тан­тал алуу белгиси. Оптималдуулук критерийинин мазмуну көп факторго — коомдук…"
+            ]
+            },
         {
                 "word": "минус",
                 "verdict": "attested",

@@ -18,11 +18,33 @@
     {
         "language": "tn",
         "wiki": "tn.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "themphereitšha dikgato",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "ntsho",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…1994 go fitlha ka 1999. E ne e le tlhogo ya ntlha ya puso e ntsho Mo nageng, gape ele moporesidente wa ntlha yo o tlhophilwen…",
+                "…e Free State Province. Tlhophollo le tlhaolo ya batho ba ba ntsho e simolotse ka ngwaga wa 1913, batho bantsho ba ne ba dumel…",
+                "…ko le le nosi la mofuta wa Poecilogale, ke weasel e nnye, e ntsho le e tshweu e e tlholegang kwa borwa jwa Sahara mo Afrika.…",
+                "…etse tsa 2007, 90.8% ya batho mo porofenseng ke batho ba ba Ntsho (bontsi ba bua Setswana), 7.2% ke Basweu (Bontsi ba bua Afr…",
+                "…Noka ya Bafing (Manding for \"noka e ntsho\", French) ke noka e tona ya Noka ya Senegal e e fetang ka G…",
+                "…kwa Ghana. Dinoka tse dikgolo tsa Volta e Tshweu ke Volta e Ntsho le Volta e Khibidu. == Tsela le Kgaolo == Volta e tshweu ke…"
+            ]
+            },
+        {
+                "word": "letshwao la go ntsha",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "minus",
                 "verdict": "absent",
