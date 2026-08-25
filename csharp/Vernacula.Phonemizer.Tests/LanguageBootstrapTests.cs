@@ -40,6 +40,10 @@ public class LanguageBootstrapTests
     [InlineData("ru", "XIX веке", "dʲɪvʲɪtnˈat͡sətɨj vʲˈekʲe")]   // the Roman pass takes ru's ORDINAL policy
     [InlineData("el", "15ο", "ðekato pempto")]   // the Greek ending is the CASE, and both members inflect
     [InlineData("en", "The word λόγος means word", "ðə wˈɝd loɣos mˈiːnz wˈɝd")]   // the script router reaches el
+    // Oromo's two defining shapes: the enclitic GLUED TO THE DIGITS attaches to the numeral word with the
+    // linking vowel its stem demands, and the measure noun leads its number (head-initial).
+    [InlineData("om", "1994tti", "kˈuma ᶑˈibːa saɡˈal saɡaltamˈiː afurˈitːi")]
+    [InlineData("om", "mm 5", "miːliːmˈeːtira ʃˈan")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 
