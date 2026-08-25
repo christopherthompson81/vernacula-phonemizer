@@ -184,25 +184,20 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'")})|(\\d+)|([.?!,;:])`, "gu");
 
 /**
- * Shared symbol tier — PERCENT ONLY, and that is a measured decision, not an omission.
+ * Shared symbol tier. ⚠ THE HEADER THAT USED TO SIT HERE WAS STALE AND SAID THE OPPOSITE OF THE TABLE BELOW:
+ * it read "PERCENT ONLY", explained at length why `units` and `currency` were NOT declared, and was left in
+ * place while both were added — the currency once `currencyPrefix` existed, the units once `unitPrefix` did.
+ * A comment that contradicts the declaration two lines under it is worse than none, so it is replaced rather
+ * than extended. The reason it went stale is worth keeping: BOTH keys were once genuinely undeclarable here,
+ * because the tier only ever emitted the noun AFTER the number.
  *
- * · `percentPrefix` is exactly the Swahili order: the corpus writes *asilimia 31*, *asilimia 93*,
- *   *asilimia 3 hadi 5* (×16 spelled out), so `80%` → `asilimia 80` needs no local rule at all.
- *   `percent` is a ONE-element `CountForms` because *asilimia* is a class 9/10 N-class noun, which is
- *   invariant in both number and numeral agreement.
- * · `units` is NOT declared: there is not a single abbreviated unit symbol in the 1,938-utterance corpus.
- *   Swahili spells the measure noun out and puts it BEFORE the numeral (*kilomita 70 kwa saa*), so there
- *   is nothing for a "number then symbol" matcher to find, and declaring short keys like `m` would only
- *   create the `Il-76s` class of false positive the tier's own comment warns about.
- * · `currency` is NOT declared either, for a different reason — the tier always emits the currency word
- *   AFTER the number and offers no `currencyPrefix` to mirror `percentPrefix`, while the corpus writes
- *   *dola 30*. Swahili therefore handles currency locally in normalize.ts. Recorded as a core limitation
- *   rather than worked around in core.
+ * Swahili puts the measure noun FIRST — *asilimia 31*, *dola 30 za Kimarekani*, *kilomita 70 kwa saa* — and
+ * the three prefix flags are what say so. Counted over the corpus's four attested unit words: 82 unit-before
+ * to 0 unit-after. `percent` is a ONE-element `CountForms` because *asilimia* is a class 9/10 N-class noun,
+ * invariant in both number and numeral agreement.
+ *
+ * The per-key evidence travelled to swahili.jsonc with the values it explains.
  */
-// MIGRATION: currency moved off the local rule onto the shared tier, now that `currencyPrefix`
-// exists. Swahili puts the measure noun BEFORE the number for every measure it writes out — "dola 30 za
-// Kimarekani", "kilomita 70 kwa saa" — which is why the local rule existed. Verified byte-identical over
-// the whole sw_ke corpus.
 const SYMBOLS = makeSymbolNormalizer({
     percent: DEF.symbolTier.percent,
     currency: DEF.symbolTier.currency,

@@ -91,10 +91,9 @@ const TOKEN = /([ሀ-ፚ]+)|(\d+)|([።፣፤፥፦፧፨.?!,;:])/gu;
 export type ForeignPhonemizer = (latin: string) => string;
 
 // በመቶ "in a hundred" is the standard percent construction, postposed; the currency and unit words are the
-// standard loans, emitted in Ge'ez script and read by the ordinary fidel g2p.
-// ⚠ THE MAGNITUDE LIST IS LOAD-BEARING: text writes "US$14.7 ቢሊዮን", and without it the currency noun is
-// inserted BEFORE the written magnitude ("…ዶላር ቢሊዮን"). ቢልየን is a spelling variant listed so it is MATCHED,
-// not so it is emitted. No `magnitudeConnective` — Amharic takes none (አንድ ሚሊዮን ዶላር).
+// standard loans, emitted in Ge'ez script and read by the ordinary fidel g2p. The per-key evidence — the
+// corpus counts, the two exponent words that sit on opposite sides, why the magnitude list is load-bearing —
+// travelled to amharic.jsonc with the values it explains.
 const SYMBOLS = makeSymbolNormalizer({
     percent: DEF.symbolTier.percent,
     currency: DEF.symbolTier.currency,

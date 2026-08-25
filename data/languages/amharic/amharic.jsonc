@@ -66,6 +66,9 @@
         // in the parenthetical gloss beside a square-kilometre figure (`783,562 ስኩዌር ኪ.ሜ. (300,948 ካሬ ኪ.ሜ.)`),
         // so the corpus attests it as this text's rendering of *mi²*, not of *km²*.
         "exponentWords": { "squared": ["ስኩዌር"], "cubed": ["ኪዩብ"], "position": { "squared": "before", "cubed": "after" } },
+        // ⚠ THE MAGNITUDE LIST IS LOAD-BEARING: text writes "US$14.7 ቢሊዮን", and without it the currency noun
+        // is inserted BEFORE the written magnitude ("…ዶላር ቢሊዮን"). ቢልየን is a spelling variant listed so it is
+        // MATCHED, not so it is emitted. No `magnitudeConnective` — Amharic takes none (አንድ ሚሊዮን ዶላር).
         "magnitudes": ["ሚሊዮን", "ቢሊዮን", "ቢልየን", "ትሪሊዮን"]
     }
 }
