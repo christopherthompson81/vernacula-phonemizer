@@ -11,6 +11,7 @@
  * folded/deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
@@ -28,6 +29,15 @@ interface OccitanDef {
     frontLetters: readonly string[];
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     decimalWord: string;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 const DEF = loadManifest<OccitanDef>(import.meta.url, "occitan.jsonc");
 const DIGRAPHS = DEF.digraphs;
@@ -141,15 +151,12 @@ export function phonemizeWord(word: string): string {
  * transparent singular.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: ["per cent"],
-    currency: { "€": ["èuro", "èuros"], "$": ["dolar", "dolars"], "£": ["liura", "liuras"] },
-    units: {
-        "km": ["quilomètre", "quilomètres"], "m": ["mètre", "mètres"], "cm": ["centimètre", "centimètres"],
-        "mm": ["millimètre", "millimètres"], "kg": ["quilograma", "quilogramas"], "ha": ["ectara", "ectaras"],
-    },
-    exponentWords: { squared: ["quadrat", "quadrats"], cubed: ["cubic", "cubics"], position: "after" },
-    ampersand: "e",
-    magnitudes: ["milion", "milions", "miliard", "miliards"],
+    percent: DEF.symbols.percent,
+    currency: DEF.symbols.currency,
+    units: DEF.symbols.units,
+    exponentWords: DEF.symbols.exponentWords,
+    magnitudes: DEF.symbols.magnitudes,
+    ampersand: DEF.symbols.ampersand,
 });
 
 // ⚠ THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause

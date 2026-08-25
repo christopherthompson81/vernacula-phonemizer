@@ -9,18 +9,11 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeCebuano } from "./normalize.ts";
 
-interface CebuanoDef {
-    digraphs: Record<string, string>;
-    consonants: Record<string, string>;
-    vowels: Record<string, string>;
-    specialWords: Record<string, string>;
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<CebuanoDef>(import.meta.url, "cebuano.jsonc");
+const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;
 
 const isVowelLetter = (c: string): boolean => "aeiou".includes(c);

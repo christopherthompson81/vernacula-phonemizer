@@ -16,11 +16,8 @@ public static class KoreanPhonemizer
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
         Multiply = new MultiplyDef { Times = "곱하기" },
-        Percent = new[] { "퍼센트" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "달러" },
-        },
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
     });
 
     private sealed class Engine : ILanguage

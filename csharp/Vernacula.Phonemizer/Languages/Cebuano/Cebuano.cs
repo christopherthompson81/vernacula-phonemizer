@@ -15,6 +15,8 @@ public sealed class CebuanoDef
     public IReadOnlyDictionary<string, string> SpecialWords { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public CebNumbers Numbers { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public CebuanoSymbols Symbols { get; init; } = new();
 }
 
 public sealed class CebuanoPhonemizer : ILanguage
@@ -116,4 +118,17 @@ public sealed class CebuanoPhonemizer : ILanguage
     public static ILanguage CreateCebuano() => new CebuanoPhonemizer();
 
     internal static void RegisterSelf() => Registry.Register("cebuano", CreateCebuano);
+}
+
+public sealed class CebuanoSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

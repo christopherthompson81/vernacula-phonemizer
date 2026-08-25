@@ -90,5 +90,21 @@
         "million": "ohulua",
         "and": "la",
         "andElided": "l'"
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    "symbols": {
+        "percent": ["porcento"],
+        // ⚠ ONE-LETTER KEY, AND ITS SAFETY IS THE ORDERING BELOW. The tier's `NOT_VERSION` guard works by seeing
+        // the DOT (traps 39/46), and this corpus writes `802.11n` — so the tier MUST run before step 4 spends
+        // the thousands dot. It does; that is why step 3 sits where it does and not after de-grouping.
+        // Measured: every digit-adjacent `m` in this corpus is a genuine metre — `(38,48m)` ×2 and `3,50 m` ×1 —
+        // and `35mm`, `600Mbit/s`, `133 m/s` are declined by the tier's own trailing letter guard or, for the
+        // rate, by the undeclared denominator.
+        "units": { "m": ["metelo"] },
+        "ampersand": "kwenda"
     }
 }

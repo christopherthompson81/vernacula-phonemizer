@@ -12,24 +12,15 @@ public static class Normalize
     /** The shared symbol tier. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Percent = new[] { "porsyento" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["US$"] = new[] { "dolyar sa Estados Unidos" }, ["AUD$"] = new[] { "dolyar" },
-            ["$"] = new[] { "dolyar" }, ["€"] = new[] { "euro" },
-            ["£"] = new[] { "pound" },
-        },
-        Magnitudes = new[] { "libo", "milyon", "bilyon", "bilyones", "trilyon", "trilyones" },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "kilometro" }, ["m"] = new[] { "metro" }, ["cm"] = new[] { "sentimetro" },
-            ["mm"] = new[] { "milimetro" }, ["kg"] = new[] { "kilo" },
-        },
-        ExponentWords = new ExponentWordsDef { Squared = new[] { "kwadrado" } },
-        UnitPer = "kada",
-        RateDenominators = new Dictionary<string, string> { ["h"] = "oras", ["s"] = "segundo" },
         Ampersand = "ug",
         Multiply = new MultiplyDef { Times = "ka pilo" },
+        Percent = CebuanoPhonemizer.DEF.Symbols.Percent,
+        Currency = CebuanoPhonemizer.DEF.Symbols.Currency,
+        Units = CebuanoPhonemizer.DEF.Symbols.Units,
+        RateDenominators = CebuanoPhonemizer.DEF.Symbols.RateDenominators,
+        UnitPer = CebuanoPhonemizer.DEF.Symbols.UnitPer,
+        ExponentWords = CebuanoPhonemizer.DEF.Symbols.ExponentWords,
+        Magnitudes = CebuanoPhonemizer.DEF.Symbols.Magnitudes,
     });
 
     /** Dotted abbreviations, and the list is SHORT ON PURPOSE — see the header note at step 6. */

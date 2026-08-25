@@ -20,13 +20,9 @@ const TOKEN = /([가-힣]+)|(\d+)|([.!?…,;:])/gu;
 // (this tier always inserts a space); % and the currency sign stay here, where the shared machinery
 // already places the word after the number, which is also Korean's order.
 const SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-    // One word, so `by` defaults to it; this language does not split dimension from product.
-    multiply: { times: "곱하기" },
-    percent: ["퍼센트"],
-    currency: { "$": ["달러"] },
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    multiply: MANIFEST.symbols.multiply,
 });
 
 class KoreanPhonemizer implements Phonemizer {

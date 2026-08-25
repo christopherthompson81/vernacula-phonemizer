@@ -113,21 +113,16 @@
  *      phrase, no letter-name table since espeak has no umb). Backlog, not silenced.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { MANIFEST } from "./manifest.ts";
 
 /**
  * The shared SYMBOL tier. THREE declarations, no more — see the header for what each rests on and what was
  * refused. ⚠ NO `exponentWords`, NO `unitPer`, NO `magnitudes`, and NEITHER PREFIX FLAG.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: ["porcento"],
-    // ⚠ ONE-LETTER KEY, AND ITS SAFETY IS THE ORDERING BELOW. The tier's `NOT_VERSION` guard works by seeing
-    // the DOT (traps 39/46), and this corpus writes `802.11n` — so the tier MUST run before step 4 spends
-    // the thousands dot. It does; that is why step 3 sits where it does and not after de-grouping.
-    // Measured: every digit-adjacent `m` in this corpus is a genuine metre — `(38,48m)` ×2 and `3,50 m` ×1 —
-    // and `35mm`, `600Mbit/s`, `133 m/s` are declined by the tier's own trailing letter guard or, for the
-    // rate, by the undeclared denominator.
-    units: { m: ["metelo"] },
-    ampersand: "kwenda",
+    percent: MANIFEST.symbols.percent,
+    units: MANIFEST.symbols.units,
+    ampersand: MANIFEST.symbols.ampersand,
 });
 
 /** Normalize one Umbundu input string. Pure text→text. Steps are ORDER-DEPENDENT. */

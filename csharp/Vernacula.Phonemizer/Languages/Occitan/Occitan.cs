@@ -20,6 +20,8 @@ public sealed class OccitanDef
     public OccitanNumbers Numbers { get; init; } = new();
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     public string DecimalWord { get; init; } = "";
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public OccitanSymbols Symbols { get; init; } = new();
 }
 
 public sealed class OccitanPhonemizer : ILanguage
@@ -165,25 +167,12 @@ public sealed class OccitanPhonemizer : ILanguage
     /** The shared SYMBOL tier. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Percent = new[] { "per cent" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["€"] = new[] { "èuro", "èuros" }, ["$"] = new[] { "dolar", "dolars" }, ["£"] = new[] { "liura", "liuras" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "quilomètre", "quilomètres" }, ["m"] = new[] { "mètre", "mètres" },
-            ["cm"] = new[] { "centimètre", "centimètres" }, ["mm"] = new[] { "millimètre", "millimètres" },
-            ["kg"] = new[] { "quilograma", "quilogramas" }, ["ha"] = new[] { "ectara", "ectaras" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "quadrat", "quadrats" },
-            Cubed = new[] { "cubic", "cubics" },
-            Position = ExponentPosition.After,
-        },
         Ampersand = "e",
-        Magnitudes = new[] { "milion", "milions", "miliard", "miliards" },
+        Percent = OccitanPhonemizer.DEF.Symbols.Percent,
+        Currency = OccitanPhonemizer.DEF.Symbols.Currency,
+        Units = OccitanPhonemizer.DEF.Symbols.Units,
+        ExponentWords = OccitanPhonemizer.DEF.Symbols.ExponentWords,
+        Magnitudes = OccitanPhonemizer.DEF.Symbols.Magnitudes,
     });
 
     // ⚠ The number branch must SPAN the decimal comma, or the tokenizer's own `,` claims it as a clause pause
@@ -229,4 +218,14 @@ public sealed class OccitanPhonemizer : ILanguage
     public static ILanguage CreateOccitan() => new OccitanPhonemizer();
 
     internal static void RegisterSelf() => Registry.Register("occitan", CreateOccitan);
+}
+
+public sealed class OccitanSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
 }

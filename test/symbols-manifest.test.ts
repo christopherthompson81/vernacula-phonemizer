@@ -13,6 +13,9 @@ import { MANIFEST as NL } from "../src/languages/dutch/manifest.ts";
 import { MANIFEST as TR } from "../src/languages/turkish/manifest.ts";
 import { MANIFEST as HA } from "../src/languages/hausa/manifest.ts";
 import { MANIFEST as MI } from "../src/languages/maori/manifest.ts";
+import { MANIFEST as UMB } from "../src/languages/umbundu/manifest.ts";
+import { MANIFEST as KO } from "../src/languages/korean/manifest.ts";
+import { MANIFEST as CEB } from "../src/languages/cebuano/manifest.ts";
 
 interface Tier { symbols: { percent: string[]; units: Record<string, string[]>; currency: Record<string, string[]> } }
 
@@ -22,6 +25,7 @@ const LANGS: [string, Tier, string][] = [
     ["tr", TR, "bu 5 km uzakta"],
     ["ha", HA, "yana da nisan 5 km"],
     ["mi", MI, "he 5 km te tawhiti"],
+    ["ceb", CEB, "lima ka 5 km"],
 ];
 
 describe.each(LANGS)("%s reads its symbol tier from the manifest", (code, DEF, kmSentence) => {
@@ -69,6 +73,23 @@ describe("the decimal word is declared, not written into the engine", () => {
             // only one of them fails on a correct reading.
             const bare = (x: string): string => phonemize(x, code).replace(/[ˈˌ]/gu, "");
             expect(bare(sentence)).toContain(bare(w));
+        },
+    );
+});
+
+/**
+ * ⚠ `4x4` IS IN EVERY PROBE FROM HERE ON, and the reason is a bug the probes MISSED. Batch 1 dropped
+ * Afrikaans's `Multiply` in the C# port and `4x4` read *fˈir ˈɛks fˈir* — "four EX four", the letter name —
+ * instead of *fˈir kˈiər fˈir*. No probe line covered it; the single `4x4` row in the af GOLDEN is what
+ * caught it. ASCII ⟨x⟩ between digits is the case a symbol-tier port loses most quietly, because the output
+ * stays plausible.
+ */
+describe("the ASCII multiply sign survives the lift", () => {
+    test.each([["af", "'n 4x4 voertuig"], ["nl", "een 4x4 wagen"], ["ceb", "4x4 nga sakyanan"]] as const)(
+        "%s does not read x as a letter name", (code, sentence) => {
+            const said = phonemize(sentence, code).replace(/[ˈˌ]/gu, "");
+            const letterX = phonemize("x", code).replace(/[ˈˌ]/gu, "");
+            expect(said, `${code}: the x is being spelled`).not.toContain(letterX);
         },
     );
 });

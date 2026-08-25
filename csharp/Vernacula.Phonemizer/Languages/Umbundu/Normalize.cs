@@ -12,9 +12,9 @@ public static class Normalize
     /** The shared SYMBOL tier. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Percent = new[] { "porcento" },
-        Units = new Dictionary<string, IReadOnlyList<string>> { ["m"] = new[] { "metelo" } },
         Ampersand = "kwenda",
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Units = Manifest.MANIFEST.Symbols.Units,
     });
 
     private static readonly JsRe IOTA_LOWER = JsRegex.Compile("ῖ", "gu");

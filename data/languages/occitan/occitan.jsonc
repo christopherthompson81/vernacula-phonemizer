@@ -66,5 +66,21 @@
     // The name of the DECIMAL COMMA, emitted between the integer and fractional parts. ⚠ 35 languages
     // already declared this; these four alone passed the word to the engine as a bare literal, so the
     // same fact was manifest data in Dutch and a string in the code next door.
-    "decimalWord": "virgula"
+    "decimalWord": "virgula",
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    "symbols": {
+        "percent": ["per cent"],
+        "currency": { "€": ["èuro", "èuros"], "$": ["dolar", "dolars"], "£": ["liura", "liuras"] },
+        "units": {
+            "km": ["quilomètre", "quilomètres"], "m": ["mètre", "mètres"], "cm": ["centimètre", "centimètres"],
+            "mm": ["millimètre", "millimètres"], "kg": ["quilograma", "quilogramas"], "ha": ["ectara", "ectaras"],
+        },
+        "exponentWords": { "squared": ["quadrat", "quadrats"], "cubed": ["cubic", "cubics"], "position": "after" },
+        "ampersand": "e",
+        "magnitudes": ["milion", "milions", "miliard", "miliards"]
+    }
 }
