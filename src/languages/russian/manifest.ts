@@ -8,6 +8,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface RussianManifest {
     /** Acronyms read letter-by-letter; see russian.jsonc. */
@@ -43,6 +44,18 @@ export interface RussianManifest {
     };
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        unitPer: string;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+        bareExponent: { squared: string; cubed: string; power: string; negative: string };
+    };
 }
 
 /** The consolidated hand-authored Russian data tables (see russian.jsonc). */

@@ -35,26 +35,12 @@ public static class PolishPhonemizer
     {
         Multiply = new MultiplyDef { Times = "razy" },
         Ampersand = "i",
-        Percent = new[] { "procent", "procenty", "procent", "procenta" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "dolar", "dolary", "dolarów", "dolara" },
-            ["€"] = new[] { "euro" },
-            ["£"] = new[] { "funt", "funty", "funtów", "funta" },
-            ["¥"] = new[] { "jen", "jeny", "jenów", "jena" },
-            // Polish's own currency, as MULTI-character keys — it could not be declared while the shared tier
-            // keyed currencies as single characters.
-            ["zł"] = new[] { "złoty", "złote", "złotych", "złotego" },
-            ["PLN"] = new[] { "złoty", "złote", "złotych", "złotego" },
-        },
-        Magnitudes = new[] { "tysiąca", "tysięcy", "miliona", "milionów", "miliarda", "miliardów" },
-        Units = Normalize.UNITS.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)kv.Value, StringComparer.Ordinal),
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "kwadratowy", "kwadratowe", "kwadratowych", "kwadratowego" },
-            Cubed = new[] { "sześcienny", "sześcienne", "sześciennych", "sześciennego" },
-        },
         CountForm = Normalize.PlCountForm,
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
     });
 
     /**

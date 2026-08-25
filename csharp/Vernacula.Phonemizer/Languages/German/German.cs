@@ -366,27 +366,12 @@ public static class GermanPhonemizer
     {
         Multiply = new MultiplyDef { Times = "mal" },
         Ampersand = "und",
-        Percent = new[] { "Prozent" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["€"] = new[] { "Euro" }, ["$"] = new[] { "Dollar" }, ["£"] = new[] { "Pfund" }, ["¥"] = new[] { "Yen" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "Kilometer" }, ["cm"] = new[] { "Zentimeter" }, ["mm"] = new[] { "Millimeter" },
-            ["kg"] = new[] { "Kilogramm" }, ["mg"] = new[] { "Milligramm" },
-            ["m"] = new[] { "Meter" }, ["g"] = new[] { "Gramm" }, ["ha"] = new[] { "Hektar" },
-            ["l"] = new[] { "Liter" }, ["L"] = new[] { "Liter" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "Quadrat" }, Cubed = new[] { "Kubik" }, Position = "compound",
-        },
-        BareExponent = new BareExponentDef
-        {
-            Squared = "{n} zum Quadrat", Cubed = "{n} hoch drei", Power = "{n} hoch {e}", Negative = "minus",
-        },
-        Magnitudes = new[] { "Millionen", "Million", "Milliarden", "Milliarde" },
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        BareExponent = Manifest.MANIFEST.Symbols.BareExponent,
+        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
     });
 
     private sealed class Engine : ILanguage

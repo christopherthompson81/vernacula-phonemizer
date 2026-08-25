@@ -16,6 +16,12 @@ import { MANIFEST as MI } from "../src/languages/maori/manifest.ts";
 import { MANIFEST as UMB } from "../src/languages/umbundu/manifest.ts";
 import { MANIFEST as KO } from "../src/languages/korean/manifest.ts";
 import { MANIFEST as CEB } from "../src/languages/cebuano/manifest.ts";
+import { MANIFEST as DE } from "../src/languages/german/manifest.ts";
+import { MANIFEST as EL } from "../src/languages/greek/manifest.ts";
+import { MANIFEST as PL } from "../src/languages/polish/manifest.ts";
+import { MANIFEST as HU } from "../src/languages/hungarian/manifest.ts";
+import { MANIFEST as RU } from "../src/languages/russian/manifest.ts";
+import { MANIFEST as FR } from "../src/languages/french/manifest.ts";
 
 interface Tier { symbols: { percent: string[]; units: Record<string, string[]>; currency: Record<string, string[]> } }
 
@@ -26,13 +32,22 @@ const LANGS: [string, Tier, string][] = [
     ["ha", HA, "yana da nisan 5 km"],
     ["mi", MI, "he 5 km te tawhiti"],
     ["ceb", CEB, "lima ka 5 km"],
+    ["de", DE, "das sind 5 km"],
+    ["el", EL, "είναι 5 km"],
+    ["pl", PL, "to 5 km"],
+    ["hu", HU, "ez 5 km"],
+    ["ru", RU, "это 5 км"],
+    ["fr", FR, "c'est 5 km"],
 ];
 
 describe.each(LANGS)("%s reads its symbol tier from the manifest", (code, DEF, kmSentence) => {
     const say = (s: string): string => phonemize(s, code).replace(/[ˈˌ]/gu, "");
 
     test("the unit noun comes from the manifest", () => {
-        expect(say(kmSentence)).toContain(say(DEF.symbols.units["km"]![0]!));
+        // ⚠ ANY DECLARED FORM, not index 0. The count decides which one a language uses, and 5 takes the
+        // PLURAL in Greek (χιλιόμετρα) — asserting the singular fails on a correct reading.
+        const forms = DEF.symbols.units["km"]!;
+        expect(forms.some((f) => say(kmSentence).includes(say(f))), `no declared km form in the reading`).toBe(true);
     });
 
     test("percent and currency are declared and reached", () => {
@@ -85,7 +100,8 @@ describe("the decimal word is declared, not written into the engine", () => {
  * stays plausible.
  */
 describe("the ASCII multiply sign survives the lift", () => {
-    test.each([["af", "'n 4x4 voertuig"], ["nl", "een 4x4 wagen"], ["ceb", "4x4 nga sakyanan"]] as const)(
+    test.each([["af", "'n 4x4 voertuig"], ["nl", "een 4x4 wagen"], ["ceb", "4x4 nga sakyanan"],
+               ["de", "ein 4x4 Wagen"], ["pl", "auto 4x4 nowe"], ["fr", "un 4x4 neuf"]] as const)(
         "%s does not read x as a letter name", (code, sentence) => {
             const said = phonemize(sentence, code).replace(/[ˈˌ]/gu, "");
             const letterX = phonemize("x", code).replace(/[ˈˌ]/gu, "");

@@ -1,5 +1,6 @@
 /** Loads the consolidated Polish data manifest (polish.jsonc) once and exposes it typed. Algorithms live in g2p.ts. */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 /** A Slavic magnitude noun's three count forms: sg (1), paucal (2–4), gen-pl (5+ / 11–14). */
 interface Agreement {
@@ -32,6 +33,16 @@ export interface PolishManifest {
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     decimalWord: string;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        units: Record<string, CountForms>;
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 export const MANIFEST = loadManifest<PolishManifest>(import.meta.url, "polish.jsonc");

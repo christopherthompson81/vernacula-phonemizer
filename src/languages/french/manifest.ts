@@ -6,6 +6,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface FrenchManifest {
     vowelLetters: string;
@@ -39,6 +40,18 @@ export interface FrenchManifest {
     };
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        magnitudeConnective: string;
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+        bareExponent: { squared: string; cubed: string; power: string; negative: string };
+    };
 }
 
 /** The consolidated hand-authored French data tables (see french.jsonc). */

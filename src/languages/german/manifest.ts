@@ -6,6 +6,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface GermanManifest {
     months: string[];
@@ -54,6 +55,17 @@ export interface GermanManifest {
         hundred: string;
         thousand: string;
         million: { sg: string; pl: string };
+    };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+        bareExponent: { squared: string; cubed: string; power: string; negative: string };
     };
 }
 

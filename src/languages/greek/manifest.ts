@@ -4,6 +4,7 @@
  * αυ/ευ + σ voicing, synizesis, double-consonant simplification) live in greek.ts.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface GreekManifest {
     /** Accented vowel → its bare letter. ⚠ greek.ts DERIVES the stressed-vowel set from these keys. */
@@ -48,6 +49,16 @@ export interface GreekManifest {
         hundreds: string[];
         thousand: string;
         and: string;
+    };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
 }
 

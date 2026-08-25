@@ -86,6 +86,8 @@ public sealed class GermanManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public GermanMorphologyData Morphology { get; init; } = new();
     public GermanNumberData Numbers { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public GermanSymbols Symbols { get; init; } = new();
 }
 
 public static class Manifest
@@ -93,4 +95,16 @@ public static class Manifest
     /** The consolidated hand-authored German data tables (see german.jsonc). */
     public static readonly GermanManifest MANIFEST =
         LoadManifest.Load<GermanManifest>("languages/german", "german.jsonc");
+}
+
+public sealed class GermanSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public BareExponentDef BareExponent { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

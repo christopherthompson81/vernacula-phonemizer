@@ -75,30 +75,11 @@ public static class Normalize
     {
         Ampersand = "και",
         Multiply = new MultiplyDef { Times = "επί" },
-        Percent = new[] { "τοις εκατό" }, // invariant
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["$"] = new[] { "δολάριο", "δολάρια" },
-            ["€"] = new[] { "ευρώ" }, // indeclinable in Greek
-            ["£"] = new[] { "λίρα", "λίρες" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "χιλιόμετρο", "χιλιόμετρα" },
-            ["m"] = new[] { "μέτρο", "μέτρα" },
-            ["cm"] = new[] { "εκατοστό", "εκατοστά" },
-            ["mm"] = new[] { "χιλιοστό", "χιλιοστά" },
-            ["kg"] = new[] { "κιλό", "κιλά" },
-            ["g"] = new[] { "γραμμάριο", "γραμμάρια" },
-            ["mi"] = new[] { "μίλι", "μίλια" },
-        },
-        Magnitudes = new[] { "χιλιάδες", "εκατομμύρια", "εκατομμύριο", "δισεκατομμύρια", "δισεκατομμύριο" },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "τετραγωνικό", "τετραγωνικά" },
-            Cubed = new[] { "κυβικό", "κυβικά" },
-            Position = ExponentPosition.Before,
-        },
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
     });
 
     /** Inflect one masculine-nominative ordinal to the case/gender the written ending marks. */

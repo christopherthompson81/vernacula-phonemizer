@@ -5,6 +5,7 @@
  * first-syllable stress, the cardinal compositor) stay in code (hungarian.ts / numbers.ts).
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface HungarianManifest {
     rules: [string, string, boolean][];
@@ -23,6 +24,16 @@ export interface HungarianManifest {
     };
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        rateDenominators: Record<string, string>;
+        unitPer: string;
+        ampersand: string;
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 /** The consolidated hand-authored Hungarian data tables (see hungarian.jsonc). */

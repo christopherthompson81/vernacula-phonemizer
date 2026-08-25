@@ -10,7 +10,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toSegments } from "./g2p.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
-import { normalizePolish, normalizePolishInitialisms, plCountForm, UNITS } from "./normalize.ts";
+import { normalizePolish, normalizePolishInitialisms, plCountForm } from "./normalize.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
@@ -40,35 +40,14 @@ export function phonemizeWord(word: string): string {
  * noun ("pięć milionów dolarów"), so `magnitudeConnective` is deliberately omitted.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
-    // `i` ×846 in this corpus. The tier spaces it on both sides, because `B&B` is two
-    // initialisms and joining them would make one token.
-    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-    // One word, so `by` defaults to it; this language does not split dimension from product.
-    multiply: { times: "razy" },
-    ampersand: "i",
-    percent: ["procent", "procenty", "procent", "procenta"],
-    currency: {
-        "$": ["dolar", "dolary", "dolarów", "dolara"],
-        "€": ["euro"],
-        "£": ["funt", "funty", "funtów", "funta"],
-        "¥": ["jen", "jeny", "jenów", "jena"],
-        // Polish's own currency, which could not be declared while the tier keyed currencies as single
-        // characters — the Polish run reported exactly this gap and had to omit złoty.
-        "zł": ["złoty", "złote", "złotych", "złotego"],
-        "PLN": ["złoty", "złote", "złotych", "złotego"],
-    },
-    magnitudes: ["tysiąca", "tysięcy", "miliona", "milionów", "miliarda", "miliardów"],
-    units: UNITS,
-    // MIGRATION TEST: km²/mm² composed by the shared tier. The adjective agrees, so it carries the
-    // same three count forms the unit nouns do.
-    exponentWords: {
-        squared: ["kwadratowy", "kwadratowe", "kwadratowych", "kwadratowego"],
-        cubed: ["sześcienny", "sześcienne", "sześciennych", "sześciennego"],
-    },
+    units: MANIFEST.symbols.units,
     countForm: plCountForm,
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    magnitudes: MANIFEST.symbols.magnitudes,
+    ampersand: MANIFEST.symbols.ampersand,
+    multiply: MANIFEST.symbols.multiply,
 });
 
 // The number token carries its DECIMAL COMMA (Polish's decimal mark) so the comma is not read as clause
