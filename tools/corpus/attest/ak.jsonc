@@ -17,9 +17,125 @@
     // speech and the sense against the examples before using any of this to justify a reading.
     {
         "language": "ak",
-        "wiki": "ak.wikipedia.org",
+        "wiki": "tw.wikipedia.org",
         "tier": "wikipedia",
         "findings": [
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…, obi a ɔhwɛ nhwɛ nnipa wɔ biribi ho, a wɔyi firii asɛmfua 'minus' mu a ɛkyerɛ \"less\". Ɛwɔ aman wɔde Mansoafoɔ nhyehyɛeɛ bu ɔ…"
+            ]
+            },
+        {
+                "word": "zero ase",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ase zero",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "zero no ase",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hwee ase",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…o dii Chimú so nkonim bɛyɛ afe 1470 A.D. akyi no, Chan Chan hwee ase. Inkafo de nhyehyɛe bi a wɔfrɛ no \"Mitma nhyehyɛe a ɛfa mmu…",
+                "…re a Ɔman Anidan ahorow a ɛbaa 1989 mu no maa Dade Ntama no hwee ase na ɛde kabimamenkabi nsakrae bae wɔ kan Komunis aman mu, ti…"
+            ]
+            },
+        {
+                "word": "zero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…sɛ n’awofo yɛ abusuafo a (coefficient of inbreeding no boro zero)..[citation needed] Nea ɛyɛ anigye no, anuanom fa betumi ay…",
+                "…wa ason, a nea ɛkyerɛ wɔ pene a wɔpene so a ɛsan kɔ fam sen zero no so. Sɛnea yehu wɔ nhwɛso yi mu no, sanba tumi nhwɛso no…",
+                "…ɔpene so anaasɛ wɔmpene so wɔ nneyɛe a wɔde ama ho no bɛbɛn zero. Nanso, na gyinapɛn a emu yɛ den kɛse benya pene a wɔpene s…",
+                "…kɛse, nhyehyɛe a emu yɛ den, silage a wɔde ma wɔn aduan ne \"zero grazing\", nhyehyɛe a sare wom wotwitwa na wɔde ba nantwi no…"
+            ]
+            },
+        {
+                "word": "negatif",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ase",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 70,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…Esa Ase yɛ kuro bi din. Abakɔsɛm kyerɛ sɛ na edua bi a wɔfrɛ no esa…",
+                "…seɛ bi si asase bi so. Nnipakuo a wɔkɔsoeɛ Esa dua kɛseɛ yi ase no hwɛɛ Esa no kɛseɛ ne nwunu ne ahobanbɔ a esa kɛseɛ yi de…",
+                "…nso da ɔtadeɛ no ano. Ɛno nti wɔbɔɔ wɔn sese wɔ Abɛtene yi ase de wɔn atenaeɛ yi too saa Abɛtene yi sɛ Abaase ɛnam sɛ wɔmo…",
+                "…too saa Abɛtene yi sɛ Abaase ɛnam sɛ wɔmo soɔeɛ Abɛtene yi ase nti ne saa din Abaase yi. Abakɔsɛm no kɔ so kyerɛ sɛ saa Ab…",
+                "…nkron aduo ɔtwe nson (1987), Atifi Atɔeɛ shɛɛ ɔmanmuo nwoma ase firi Atifi Mantamu wɔ Ɔpɛnimaa bosome no mu mfeɛ apem aha-n…",
+                "…misa no tetee wɔ berɛ a Ghana hyɛɛ kabimamenkabi amanmuo no ase wɔ afe apem aha nkron ne aduokron mmienu (1992) no mu. == M…"
+            ]
+            },
+        {
+                "word": "nsakrae",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ka bɔne",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sika ka",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "mainɔso",
                 "verdict": "absent",
@@ -67,15 +183,6 @@
             },
         {
                 "word": "ntefiri",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
-            },
-        {
-                "word": "minus",
                 "verdict": "absent",
                 "bounded": true,
                 "tokenHits": 0,
