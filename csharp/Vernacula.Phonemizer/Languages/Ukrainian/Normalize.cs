@@ -9,7 +9,8 @@ namespace Vernacula.Phonemizer.Languages.Ukrainian;
 
 public static class Normalize
 {
-    private static UkrainianNumbers NUM => Manifest.DEF.Numbers;
+    private static UkrainianDef DEF => Manifest.DEF;
+    private static UkrainianNumbers NUM => DEF.Numbers;
 
     /** The cardinal, as words — the same composer the engine's number path uses, so an ordinal's head reads
      *  exactly as a bare numeral would (`1970` → *тисяча дев'ятсот*). */
@@ -21,37 +22,20 @@ public static class Normalize
      * symbol tier (see ukrainian.cs `CountForm`): nom.sg / nom.pl (2–4) / gen.pl, plus the GENITIVE SINGULAR
      * that a DECIMAL governs (2,4 відсотка).
      */
-    private static string Counted(double n, string[] forms) =>
+    private static string Counted(double n, IReadOnlyList<string> forms) =>
         double.IsInteger(n) ? forms[Math.Min(NormalizeSymbols.SlavicCountForm(n), 2)] : forms[3];
 
-    /** Masculine nominative ordinals. */
-    private static readonly string[] ORD_1_19 =
-    {
-        "", "перший", "другий", "третій", "четвертий", "п'ятий", "шостий", "сьомий", "восьмий", "дев'ятий",
-        "десятий", "одинадцятий", "дванадцятий", "тринадцятий", "чотирнадцятий", "п'ятнадцятий",
-        "шістнадцятий", "сімнадцятий", "вісімнадцятий", "дев'ятнадцятий",
-    };
-    private static readonly string[] ORD_TENS =
-    {
-        "", "десятий", "двадцятий", "тридцятий", "сороковий", "п'ятдесятий", "шістдесятий", "сімдесятий",
-        "вісімдесятий", "дев'яностий",
-    };
-    private static readonly string[] ORD_HUNDREDS =
-    {
-        "", "сотий", "двохсотий", "трьохсотий", "чотирьохсотий", "п'ятисотий", "шестисотий", "семисотий",
-        "восьмисотий", "дев'ятисотий",
-    };
-    private static readonly string[] ORD_THOUSANDS =
-    {
-        "", "тисячний", "двохтисячний", "трьохтисячний", "чотирьохтисячний", "п'ятитисячний",
-        "шеститисячний", "семитисячний", "восьмитисячний", "дев'ятитисячний",
-    };
+    /**
+     * The masculine-nominative ordinal tables (ukrainian.jsonc `ordinals`). `третій` is the one SOFT stem;
+     * every other form there is hard (-ий), which is what the paradigm below keys on.
+     */
+    private static UkrainianOrdinals ORD => DEF.Ordinals;
 
     /** Integer → the masculine-nominative ordinal. */
     private static string? OrdinalBase(double n)
     {
         if (!double.IsInteger(n) || n < 1) return null;
-        if (n < 20) return ORD_1_19[(int)n];
+        if (n < 20) return ORD.OneToNineteen[(int)n];
         if (n < 100)
         {
             double t = Math.Floor(n / 10), u = n % 10;
@@ -59,15 +43,15 @@ public static class Normalize
             // would throw instead. Neither is reachable from ukrainian.jsonc (20…90 are all authored), so the
             // lookup is direct — see the parity note in romanOrdinals.cs, where the same table IS reachable
             // with a gap.
-            return u == 0 ? ORD_TENS[(int)t] : $"{NUM.Tens[Js.NumberToString(t * 10)]} {ORD_1_19[(int)u]}";
+            return u == 0 ? ORD.Tens[(int)t] : $"{NUM.Tens[Js.NumberToString(t * 10)]} {ORD.OneToNineteen[(int)u]}";
         }
         if (n < 1000)
         {
             var r = n % 100;
-            if (r == 0) return ORD_HUNDREDS[(int)(n / 100)];
+            if (r == 0) return ORD.Hundreds[(int)(n / 100)];
             return $"{Cardinal(n - r)} {OrdinalBase(r)}";
         }
-        if (n < 10_000 && n % 1000 == 0) return ORD_THOUSANDS[(int)(n / 1000)];
+        if (n < 10_000 && n % 1000 == 0) return ORD.Thousands[(int)(n / 1000)];
         if (n < 1_000_000)
         {
             var r = n % 1000;
@@ -77,12 +61,20 @@ public static class Normalize
         return null;
     }
 
-    /** Ordinal adjective endings, HARD stem then SOFT (третій). */
-    private static readonly (string Hard, string Soft)[] ORD_ENDINGS =
-    {
-        ("ий", "ій"), ("ого", "ього"), ("ому", "ьому"), ("им", "ім"), ("е", "є"), ("і", "і"),
-        ("их", "іх"), ("а", "я"), ("ої", "ьої"), ("ій", "ій"), ("у", "ю"), ("ою", "ьою"), ("ими", "іми"),
-    };
+    /**
+     * The ordinal endings (ukrainian.jsonc `ordinals.endings`), in the order the manifest declares — which is
+     * a PREFERENCE order, not a paradigm order, because the written suffix is matched by `EndsWith` and
+     * several forms share a final letter: `-й` is claimed by both перший and першій, and the masculine
+     * nominative is what `1-й` means. `CaseIndex` is how the clock rule names a case instead of indexing by
+     * a magic number.
+     */
+    private static IReadOnlyList<OrdinalEnding> ORD_ENDINGS => ORD.Endings;
+    private static readonly IReadOnlyDictionary<string, int> CASE_INDEX =
+        ORD.Endings.Select((e, i) => (e.Case, i)).ToDictionary(x => x.Case, x => x.i, StringComparer.Ordinal);
+    private static int CaseIndex(string name) =>
+        CASE_INDEX.TryGetValue(name, out var i)
+            ? i
+            : throw new InvalidOperationException($"ukrainian.jsonc: ordinals.endings has no case \"{name}\"");
 
     /** Every case form of the ordinal for `n`, in preference order. Only the final word inflects. */
     private static List<string> OrdinalForms(double n)
@@ -97,49 +89,21 @@ public static class Normalize
         return ORD_ENDINGS.Select(e => $"{(head.Length > 0 ? head + " " : "")}{stem}{(soft ? e.Soft : e.Hard)}").ToList();
     }
 
-    /** GENITIVE cardinals. */
-    private static readonly string[] GEN_1_19 =
-    {
-        "", "одного", "двох", "трьох", "чотирьох", "п'яти", "шести", "семи", "восьми", "дев'яти",
-        "десяти", "одинадцяти", "дванадцяти", "тринадцяти", "чотирнадцяти", "п'ятнадцяти",
-        "шістнадцяти", "сімнадцяти", "вісімнадцяти", "дев'ятнадцяти",
-    };
-    private static readonly string[] GEN_TENS =
-    {
-        "", "десяти", "двадцяти", "тридцяти", "сорока", "п'ятдесяти", "шістдесяти", "сімдесяти",
-        "вісімдесяти", "дев'яноста",
-    };
-    private static readonly string[] GEN_HUNDREDS =
-    {
-        "", "ста", "двохсот", "трьохсот", "чотирьохсот", "п'ятисот", "шестисот", "семисот", "восьмисот",
-        "дев'ятисот",
-    };
+    /** GENITIVE cardinals (ukrainian.jsonc `genitiveCardinals`). */
+    private static UkrainianGenitiveCardinals GEN => DEF.GenitiveCardinals;
 
     private static string? GenitiveCardinal(double n)
     {
         if (!double.IsInteger(n) || n < 1 || n >= 1000) return null;
-        if (n < 20) return GEN_1_19[(int)n];
+        if (n < 20) return GEN.OneToNineteen[(int)n];
         if (n < 100)
         {
             double t = Math.Floor(n / 10), u = n % 10;
-            return u == 0 ? GEN_TENS[(int)t] : $"{GEN_TENS[(int)t]} {GEN_1_19[(int)u]}";
+            return u == 0 ? GEN.Tens[(int)t] : $"{GEN.Tens[(int)t]} {GEN.OneToNineteen[(int)u]}";
         }
         double h = Math.Floor(n / 100), r2 = n % 100;
-        return r2 == 0 ? GEN_HUNDREDS[(int)h] : $"{GEN_HUNDREDS[(int)h]} {GenitiveCardinal(r2)}";
+        return r2 == 0 ? GEN.Hundreds[(int)h] : $"{GEN.Hundreds[(int)h]} {GenitiveCardinal(r2)}";
     }
-
-    /** Ukrainian letter NAMES (Український правопис, назви літер). й is *йот*; ь is *м'який знак*. и and е
-     *  are included with their Ukrainian values — `ИТ` occurs in the corpus. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["а"] = "а", ["б"] = "бе", ["в"] = "ве", ["г"] = "ге", ["ґ"] = "ґе", ["д"] = "де", ["е"] = "е",
-        ["є"] = "є", ["ж"] = "же", ["з"] = "зе",
-        ["и"] = "и", ["і"] = "і", ["ї"] = "ї", ["й"] = "йот", ["к"] = "ка", ["л"] = "ел", ["м"] = "ем",
-        ["н"] = "ен", ["о"] = "о", ["п"] = "пе",
-        ["р"] = "ер", ["с"] = "ес", ["т"] = "те", ["у"] = "у", ["ф"] = "еф", ["х"] = "ха", ["ц"] = "це",
-        ["ч"] = "че", ["ш"] = "ша", ["щ"] = "ща",
-        ["ь"] = "м'який знак", ["ю"] = "ю", ["я"] = "я",
-    };
 
     /** NOTE: every boundary in this file is an explicit lookaround, never `\b` — `\b` is defined on ASCII word
      *  characters and finds none against Cyrillic, so a rule written with it silently matches nothing. That is
@@ -148,25 +112,14 @@ public static class Normalize
     /** Ukrainian phonotactics, for the OOV rule in core/initialisms.ts. */
     public static readonly Func<string, bool> IsUnreadableUkrainian = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[аеиіїєоуюя]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "бл", "бр", "вл", "вр", "гл", "гр", "гн", "дв", "др", "дн", "жд", "зв", "зд", "зл", "зм",
-            "зн", "зр", "кл", "кн", "кр", "кв", "мн",
-            "пл", "пр", "сл", "см", "сн", "сп", "ст", "св", "тр", "тв", "фл", "фр", "хл", "хр", "цв",
-            "шк", "шл", "шп", "шт", "щи",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ст", "нт", "нд", "нс", "рт", "рд", "рс", "рн", "рм", "лт", "лд", "лс", "кт", "кс",
-            "пт", "фт", "зд", "зн", "сн", "см", "тр", "др", "бр", "вр", "гр", "пр", "кр", "нк", "нг",
-            "лм", "лк", "рк", "рг", "рх", "нь", "сь", "ть",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{DEF.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(DEF.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(DEF.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     private static readonly Func<string, string> InitialismNormalizer = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
-        LetterName = l => LETTER_NAME.TryGetValue(l, out var v) ? v : null,
+        LetterName = l => DEF.LetterNames.TryGetValue(l, out var v) ? v : null,
         AcronymLetters = new HashSet<string>(Manifest.DEF.AcronymLetters, StringComparer.Ordinal),
         IsRecorded = _ => false,
         IsUnreadable = w => IsUnreadableUkrainian(w),
@@ -176,26 +129,32 @@ public static class Normalize
      *  test cannot be answered — acronyms are decided by the lexical list plus the OOV rule alone. */
     public static string NormalizeUkrainianInitialisms(string text) => InitialismNormalizer(text);
 
-    private static readonly IReadOnlyDictionary<string, int> HOUR_CASE = new Dictionary<string, int>(StringComparer.Ordinal)
-    {
-        ["о"] = 9, ["об"] = 9, ["в"] = 9, ["у"] = 9, ["на"] = 9, // locative — о двадцятій
-        ["з"] = 8, ["із"] = 8, ["зі"] = 8, ["до"] = 8, ["від"] = 8, ["близько"] = 8, ["після"] = 8,
-        ["протягом"] = 8, ["біля"] = 8, // genitive — з шостої
-        ["між"] = 11, ["перед"] = 11, ["за"] = 11, // instrumental — між двадцять другою
-    };
-    private const int FEM_NOM = 7; // ORD_ENDINGS index — the default when no preposition governs
+    /** Preposition → the `ordinals.endings` case it governs (ukrainian.jsonc `clock`), resolved to the index
+     *  `OrdinalForms` returns. `FEM_NOM` is the default when no preposition governs. */
+    private static readonly IReadOnlyDictionary<string, int> HOUR_CASE =
+        DEF.Clock.PrepositionCase.ToDictionary(kv => kv.Key, kv => CaseIndex(kv.Value), StringComparer.Ordinal);
+    private static readonly int FEM_NOM = CaseIndex(DEF.Clock.DefaultCase);
 
-    private static readonly string[] METRE = { "метр", "метри", "метрів", "метра" };
-    private static readonly string[] DEGREE = { "градус", "градуси", "градусів", "градуса" };
-    /** Only the gen.pl is ever read (step 3), so this one stays three forms. */
-    private static readonly string[] SQUARE = { "квадратний", "квадратні", "квадратних" };
+    // ⚠ THE METRE AND THE SQUARE ADJECTIVE COME FROM THE SYMBOL TIER'S OWN DATA, not from a second copy here.
+    // Both rules below hold words the tier already declares (`symbols.units.м`, `symbols.exponentWords.squared`),
+    // and before the lift this file carried its own byte-identical duplicates of each — two sources for one fact,
+    // with nothing to keep them together.
+    private static readonly IReadOnlyList<string> METRE = DEF.Symbols.Units["м"];
+    private static readonly IReadOnlyList<string> DEGREE = DEF.Degree;
+    /** Only the gen.pl is ever read (step 3), which is index 2 of the squared adjective's four forms. */
+    private static readonly string SQUARE_GEN_PL = DEF.Symbols.ExponentWords.Squared![2];
 
-    /** Abbreviations whose dot is NOT a sentence end. `кв.` is handled separately (step 3) because it is an
-     *  adjective that must agree with the following number. */
-    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["р"] = "року", ["рр"] = "років", ["стор"] = "сторінка", ["див"] = "дивись", ["ін"] = "інше",
-    };
+    // ⚠ ONE SOURCE with the symbol tier in Ukrainian.cs: the rate words below are the tier's own
+    // `RateDenominators`, and `SIGN.Times` / `SIGN.Ampersand` are what it declares for ⟨×⟩ and ⟨&⟩. `м/с` and
+    // `миль/год` are composed here only because the tier cannot reach them (see step 6), not because they are
+    // different words.
+    private static SignWords SIGN => DEF.SignWords;
+    private static string UNIT_PER => DEF.Symbols.UnitPer;
+    private static IReadOnlyDictionary<string, string> RATE => DEF.Symbols.RateDenominators;
+
+    /** Abbreviations whose dot is NOT a sentence end (ukrainian.jsonc `dottedAbbrev`). `кв.` is absent on
+     *  purpose — it is an ADJECTIVE that must agree with the following number, so it has its own rule. */
+    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = DEF.DottedAbbrev;
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
     private const string NOT_LETTER = "(?![\\p{L}\\p{M}'\u2019\u02bc])";
@@ -205,13 +164,24 @@ public static class Normalize
     private static readonly JsRe DEGROUP_SPACE = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
     private static readonly JsRe DEGROUP_COMMA = JsRegex.Compile("(\\d),(\\d{3})(?!\\d)", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile($"[{GROUP_SPACE}]", "gu");
-    private static readonly (JsRe Re, string Word)[] MULTI_DOT =
+    /**
+     * The multi-word dotted abbreviations, compiled from `multiDotAbbrev` IN MANIFEST ORDER — `до н. е.` must
+     * be tried before `н. е.` or the longer reading is unreachable. The written form is reconstructed rather
+     * than stored as a pattern: whitespace AFTER A DOT is optional (both `н. е.` and `н.е.` occur in the
+     * corpus), whitespace after a bare word is required.
+     */
+    private static readonly (JsRe Re, string Word)[] MULTI_DOT = DEF.MultiDotAbbrev.Select(a =>
     {
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])до\\s+н\\.\\s?е\\.", "giu"), "до нашої ери"),
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])н\\.\\s?е\\.", "giu"), "нашої ери"),
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])т\\.\\s?п\\.", "giu"), "тому подібне"),
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])т\\.\\s?д\\.", "giu"), "так далі"),
-    };
+        var parts = a.Written.Split(' ');
+        var src = "(?<![\\p{L}\\p{M}])";
+        for (var i = 0; i < parts.Length; i++)
+        {
+            if (i > 0) src += parts[i - 1].EndsWith('.') ? "\\s?" : "\\s+";
+            src += parts[i].Replace(".", "\\.");
+        }
+        return (JsRegex.Compile(src, "giu"), a.Reading);
+    }).ToArray();
+
     private static readonly JsRe SENTENCE_TAIL = JsRegex.Compile("^\\s*[\"\u00bb)']?\\s*$", "u");
     private static readonly JsRe NUMERO = JsRegex.Compile("\u2116\\s?(?=\\d)", "gu");
     private static readonly JsRe SQ_KM = JsRegex.Compile("(\\d)\\s?кв\\.\\s?км(?![\\p{L}\\p{M}])", "gu");
@@ -237,8 +207,11 @@ public static class Normalize
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?\u00f7\\s?", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s?[\u2013\u2014-]\\s?(?=\\d)", "gu");
     private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d\\p{L}])(\\d{1,3})\\/(\\d{1,3})(?![\\d/\\p{L}])", "gu");
-    private static readonly JsRe ODIN_FINAL = JsRegex.Compile("один$", "u");
-    private static readonly JsRe DVA_FINAL = JsRegex.Compile("два$", "u");
+    // ⚠ THE FEMININE 1 AND 2 ARE `numbers.feminine`, the pair the magnitude compositor already uses for the
+    // feminine тисяча (одна тисяча, дві тисячі) — and the masculine forms they replace are `numbers.units[1]`
+    // and `[2]`. The fraction rule held its own copies of all four.
+    private static readonly JsRe ODIN_FINAL = JsRegex.Compile($"{Manifest.DEF.Numbers.Units[1]}$", "u");
+    private static readonly JsRe DVA_FINAL = JsRegex.Compile($"{Manifest.DEF.Numbers.Units[2]}$", "u");
     private static readonly JsRe DOT_DECIMAL = JsRegex.Compile("(?<![\\d.])(\\d{1,2})\\.(\\d)(?![\\d.])", "gu");
 
     /** Normalize one Ukrainian input string. Pure text→text. */
@@ -260,10 +233,10 @@ public static class Normalize
             });
         }
 
-        s = NUMERO.Replace(s, "номер ");
+        s = NUMERO.Replace(s, $"{DEF.NumberSign} ");
 
         s = SQ_KM.Replace(s, "$1 км\u00b2");
-        s = SQ_MILES.Replace(s, $"$1 {SQUARE[2]} миль");
+        s = SQ_MILES.Replace(s, $"$1 {SQUARE_GEN_PL} миль");
 
         s = SUFFIXED.Replace(s, m =>
         {
@@ -286,23 +259,23 @@ public static class Normalize
         s = M_S.Replace(s, m =>
         {
             var n = m.Groups[1].Value;
-            return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), METRE)} на секунду";
+            return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), METRE)} {UNIT_PER} {RATE["с"]}";
         });
         s = METRE_RE.Replace(s, m =>
         {
             var n = m.Groups[1].Value;
             return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), METRE)}";
         });
-        s = PER_HOUR.Replace(s, " на годину");
+        s = PER_HOUR.Replace(s, $" {UNIT_PER} {RATE["год"]}");
         s = DEG_C.Replace(s, m =>
         {
             var n = m.Groups[1].Value;
-            return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), DEGREE)} Цельсія";
+            return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), DEGREE)} {DEF.TemperatureScales["C"]}";
         });
         s = DEG_F.Replace(s, m =>
         {
             var n = m.Groups[1].Value;
-            return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), DEGREE)} Фаренгейта";
+            return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), DEGREE)} {DEF.TemperatureScales["F"]}";
         });
         s = DEG.Replace(s, m =>
         {
@@ -329,16 +302,16 @@ public static class Normalize
             });
         }
 
-        s = MINUS.Replace(s, "$1мінус $2");
-        s = PLUS_MINUS.Replace(s, " плюс мінус ");
-        s = PLUS.Replace(s, "$1плюс $2");
+        s = MINUS.Replace(s, $"$1{SIGN.Minus} $2");
+        s = PLUS_MINUS.Replace(s, $" {SIGN.PlusMinus} ");
+        s = PLUS.Replace(s, $"$1{SIGN.Plus} $2");
 
-        s = EQUALS.Replace(s, " дорівнює ");
-        s = LESS_THAN.Replace(s, " менше ніж ");
-        s = GREATER_THAN.Replace(s, " більше ніж ");
-        s = DIVIDE.Replace(s, " розділене на ");
+        s = EQUALS.Replace(s, $" {SIGN.Equals} ");
+        s = LESS_THAN.Replace(s, $" {SIGN.LessThan} ");
+        s = GREATER_THAN.Replace(s, $" {SIGN.GreaterThan} ");
+        s = DIVIDE.Replace(s, $" {SIGN.DividedBy} ");
 
-        s = RANGE.Replace(s, "$1 до ");
+        s = RANGE.Replace(s, $"$1 {DEF.RangeWord} ");
 
         s = FRACTION.Replace(s, m =>
         {
@@ -347,7 +320,7 @@ public static class Normalize
             var forms = OrdinalForms(den);
             if (FEM_NOM >= forms.Count) return whole;
             var fem = forms[FEM_NOM];
-            var numWord = DVA_FINAL.Replace(ODIN_FINAL.Replace(Cardinal(num), "одна"), "дві");
+            var numWord = DVA_FINAL.Replace(ODIN_FINAL.Replace(Cardinal(num), NUM.Feminine.One), NUM.Feminine.Two);
             return $"{numWord} {fem}";
         });
 

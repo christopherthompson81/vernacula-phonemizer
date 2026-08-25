@@ -107,43 +107,20 @@ public sealed class UkrainianPhonemizer : ILanguage
      */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "на" },
-        Ampersand = "та",
-        Percent = new[] { "відсоток", "відсотки", "відсотків", "відсотка" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["€"] = new[] { "євро" }, // indeclinable
-            ["$"] = new[] { "долар", "долари", "доларів", "долара" },
-            ["£"] = new[] { "фунт", "фунти", "фунтів", "фунта" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["км"] = new[] { "кілометр", "кілометри", "кілометрів", "кілометра" },
-            ["см"] = new[] { "сантиметр", "сантиметри", "сантиметрів", "сантиметра" },
-            ["мм"] = new[] { "міліметр", "міліметри", "міліметрів", "міліметра" },
-            ["кг"] = new[] { "кілограм", "кілограми", "кілограмів", "кілограма" },
-            ["ггц"] = new[] { "гігагерц", "гігагерци", "гігагерців", "гігагерца" },
-            ["мбіт"] = new[] { "мегабіт", "мегабіти", "мегабіт" },
-            ["м"] = new[] { "метр", "метри", "метрів", "метра" },
-            ["m"] = new[] { "метр", "метри", "метрів", "метра" },
-            ["km"] = new[] { "кілометр", "кілометри", "кілометрів", "кілометра" },
-            ["cm"] = new[] { "сантиметр", "сантиметри", "сантиметрів", "сантиметра" },
-            ["mm"] = new[] { "міліметр", "міліметри", "міліметрів", "міліметра" },
-            ["kg"] = new[] { "кілограм", "кілограми", "кілограмів", "кілограма" },
-        },
-        UnitPer = "на", // км/год → кілометрів НА годину; the denominator is accusative
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["год"] = "годину", ["ч"] = "годину", ["h"] = "годину", ["с"] = "секунду", ["s"] = "секунду",
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "квадратний", "квадратні", "квадратних", "квадратного" },
-            Cubed = new[] { "кубічний", "кубічні", "кубічних", "кубічного" },
-            Position = ExponentPosition.Before,
-        },
-        Magnitudes = new[] { "тисячі", "тисяч", "мільйон", "мільйона", "мільйони", "мільйонів",
-            "мільярд", "мільярда", "мільярди", "мільярдів" },
+        // ⚠ ONE SOURCE with Normalize.cs, which applies ⟨×⟩ and ⟨&⟩ in the positions this tier cannot reach —
+        // before the lift the two paths held their own copies of both words. See ukrainian.jsonc `signWords`
+        // for the audio evidence behind `на` and the corpus gloss behind `та`.
+        Multiply = new MultiplyDef { Times = DEF.SignWords.Times },
+        Ampersand = DEF.SignWords.Ampersand,
+        Percent = DEF.Symbols.Percent,
+        Currency = DEF.Symbols.Currency,
+        Units = DEF.Symbols.Units,
+        UnitPer = DEF.Symbols.UnitPer,
+        RateDenominators = DEF.Symbols.RateDenominators,
+        ExponentWords = DEF.Symbols.ExponentWords,
+        Magnitudes = DEF.Symbols.Magnitudes,
+        // A DECIMAL governs the GENITIVE SINGULAR in Ukrainian — 2,4 відсотка — which is a fourth form, because
+        // unlike Russian the 2–4 slot here is the NOMINATIVE PLURAL (два відсотки) and so cannot serve.
         CountForm = n => double.IsInteger(n) ? NormalizeSymbols.SlavicCountForm(n) : 3,
     });
 

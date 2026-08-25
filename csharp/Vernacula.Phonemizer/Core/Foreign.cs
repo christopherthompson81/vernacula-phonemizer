@@ -36,7 +36,16 @@ public static class Foreign
      * engine, so this nests. Synchronous throughout, so a plain stack is sufficient: no AsyncLocal, and
      * deliberately not one — see WithHost below.
      */
-    private static readonly List<string> hosts = new();
+    // ⚠ PER THREAD, AND THIS IS A C#-ONLY CONCERN. The TS field is a plain module-level array and is right to
+    // be: JavaScript has one thread, so "the host currently being read" is unambiguous. .NET does not, and a
+    // shared list makes two concurrent renders push into each other's frames — observed as
+    // `stack=[el,ja,ru,en]`, four languages from four threads, in a suite whose test classes run in parallel.
+    // The visible symptom is NOT an exception: the depth cap trips, `ReadForeignRun` declines, and the
+    // embedded run is DROPPED. An English utterance carrying a Greek word lost the word, intermittently, in
+    // about one run in three. Nothing in the TS needs fixing, so this has no counterpart there.
+    [ThreadStatic]
+    private static List<string>? hostsTls;
+    private static List<string> hosts => hostsTls ??= new List<string>();
 
     public static void PushHost(string lang)
     {
@@ -45,7 +54,8 @@ public static class Foreign
     public static void PopHost()
     {
         // JS Array.prototype.pop() on an empty array is a no-op.
-        if (hosts.Count > 0) hosts.RemoveAt(hosts.Count - 1);
+        var h = hosts;
+        if (h.Count > 0) h.RemoveAt(h.Count - 1);
     }
 
     /**
@@ -100,6 +110,12 @@ public static class Foreign
     private static readonly Dictionary<string, string> foreignOov = new();
     private static readonly Queue<string> foreignOovOrder = new();
 
+    // ⚠ LOCKED, AND UNLIKE THE HOST STACK THIS ONE MUST STAY SHARED. The memo is deliberately process-wide —
+    // a warm cache across languages — so per-thread storage would be the wrong fix. But a bare Dictionary
+    // written from two `PhonemizeAsync` calls at once can corrupt its buckets or throw, and both entry points
+    // reach `AddForeignOov` through the prewarm. C#-only: the TS has one thread and needs nothing here.
+    private static readonly object oovGate = new();
+
     /** Cap the memo — oldest-first eviction. A re-tag costs one BiLSTM call, so a miss is cheap and
      *  correctness never depends on a hit. */
     private const int FOREIGN_OOV_MAX = 20_000;
@@ -107,16 +123,19 @@ public static class Foreign
     /** Record one neural reading for `g2pKey`. Called by the async entries' pre-pass. */
     public static void AddForeignOov(string g2pKey, string ipa)
     {
-        if (foreignOov.Count >= FOREIGN_OOV_MAX)
+        lock (oovGate)
         {
-            while (foreignOovOrder.Count > 0)
+            if (foreignOov.Count >= FOREIGN_OOV_MAX)
             {
-                var oldest = foreignOovOrder.Dequeue();
-                if (foreignOov.Remove(oldest)) break; // skip stale entries (none arise; see note above)
+                while (foreignOovOrder.Count > 0)
+                {
+                    var oldest = foreignOovOrder.Dequeue();
+                    if (foreignOov.Remove(oldest)) break; // skip stale entries (none arise; see note above)
+                }
             }
+            if (!foreignOov.ContainsKey(g2pKey)) foreignOovOrder.Enqueue(g2pKey);
+            foreignOov[g2pKey] = ipa;
         }
-        if (!foreignOov.ContainsKey(g2pKey)) foreignOovOrder.Enqueue(g2pKey);
-        foreignOov[g2pKey] = ipa;
     }
 
     /**
@@ -127,13 +146,16 @@ public static class Foreign
      */
     public static void ClearForeignOov()
     {
-        foreignOov.Clear();
-        foreignOovOrder.Clear();
+        lock (oovGate)
+        {
+            foreignOov.Clear();
+            foreignOovOrder.Clear();
+        }
     }
 
     /** The neural reading for `g2pKey`, or null — the shape English's `oovOverride` expects. */
     public static string? LookupForeignOov(string g2pKey)
     {
-        return foreignOov.TryGetValue(g2pKey, out var ipa) ? ipa : null;
+        lock (oovGate) return foreignOov.TryGetValue(g2pKey, out var ipa) ? ipa : null;
     }
 }

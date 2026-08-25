@@ -40,13 +40,8 @@
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { slavicCountForm } from "../../core/normalizeSymbols.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
-import { eastSlavicNumberWords, type EastSlavicNumbers } from "./numbers.ts";
-
-const DEF = loadManifest<{ numbers: EastSlavicNumbers; acronymLetters: string[] }>(
-    import.meta.url,
-    "ukrainian.jsonc",
-);
+import { MANIFEST as DEF } from "./manifest.ts";
+import { eastSlavicNumberWords } from "./numbers.ts";
 
 /** The cardinal, as words — the same composer the engine's number path uses, so an ordinal's head reads
  *  exactly as a bare numeral would (`1970` → *тисяча дев'ятсот*). */
@@ -65,7 +60,7 @@ function cardinal(n: number): string {
  * beside them — `1,5 км` is *кілометра* — so the same construction got a different agreement
  * depending only on which layer happened to claim the unit.
  */
-function counted(n: number, forms: readonly [string, string, string, string]): string {
+function counted(n: number, forms: readonly string[]): string {
     return Number.isInteger(n) ? forms[Math.min(slavicCountForm(n), 2)]! : forms[3]!;
 }
 
@@ -74,32 +69,10 @@ function counted(n: number, forms: readonly [string, string, string, string]): s
 // ---------------------------------------------------------------------------------------------------
 
 /**
- * Masculine nominative ordinals. Sources: standard Ukrainian ordinal numerals (Український правопис;
- * en.wiktionary.org/wiki/перший#Ukrainian and the numeral tables it links). `третій` is the one SOFT stem;
- * every other form here is hard (-ий), which is what the paradigm below keys on.
- *
- * NOTE this table is MASCULINE, while `romanOrdinals.ts` next door is NEUTER (перше, друге, …). They are
- * not duplicates: that file always modifies століття/сторіччя, a neuter noun, so it needs exactly one
- * form; this one must reach every case, and the masculine nominative is the citation form the paradigm
- * derives the rest from.
+ * The masculine-nominative ordinal tables (ukrainian.jsonc `ordinals`). `третій` is the one SOFT stem;
+ * every other form there is hard (-ий), which is what the paradigm below keys on.
  */
-const ORD_1_19: readonly string[] = [
-    "", "перший", "другий", "третій", "четвертий", "п'ятий", "шостий", "сьомий", "восьмий", "дев'ятий",
-    "десятий", "одинадцятий", "дванадцятий", "тринадцятий", "чотирнадцятий", "п'ятнадцятий",
-    "шістнадцятий", "сімнадцятий", "вісімнадцятий", "дев'ятнадцятий",
-];
-const ORD_TENS: readonly string[] = [
-    "", "десятий", "двадцятий", "тридцятий", "сороковий", "п'ятдесятий", "шістдесятий", "сімдесятий",
-    "вісімдесятий", "дев'яностий",
-];
-const ORD_HUNDREDS: readonly string[] = [
-    "", "сотий", "двохсотий", "трьохсотий", "чотирьохсотий", "п'ятисотий", "шестисотий", "семисотий",
-    "восьмисотий", "дев'ятисотий",
-];
-const ORD_THOUSANDS: readonly string[] = [
-    "", "тисячний", "двохтисячний", "трьохтисячний", "чотирьохтисячний", "п'ятитисячний",
-    "шеститисячний", "семитисячний", "восьмитисячний", "дев'ятитисячний",
-];
+const ORD = DEF.ordinals;
 
 /**
  * Integer → the masculine-nominative ordinal. Only the LAST element inflects (as in Russian, unlike
@@ -108,17 +81,17 @@ const ORD_THOUSANDS: readonly string[] = [
  */
 function ordinalBase(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1) return undefined;
-    if (n < 20) return ORD_1_19[n];
+    if (n < 20) return ORD.oneToNineteen[n];
     if (n < 100) {
         const t = Math.floor(n / 10), u = n % 10;
-        return u === 0 ? ORD_TENS[t] : `${DEF.numbers.tens[String(t * 10)]!} ${ORD_1_19[u]!}`;
+        return u === 0 ? ORD.tens[t] : `${DEF.numbers.tens[String(t * 10)]!} ${ORD.oneToNineteen[u]!}`;
     }
     if (n < 1000) {
         const r = n % 100;
-        if (r === 0) return ORD_HUNDREDS[n / 100];
+        if (r === 0) return ORD.hundreds[n / 100];
         return `${cardinal(n - r)} ${ordinalBase(r)!}`;
     }
-    if (n < 10_000 && n % 1000 === 0) return ORD_THOUSANDS[n / 1000];
+    if (n < 10_000 && n % 1000 === 0) return ORD.thousands[n / 1000];
     if (n < 1_000_000) {
         const r = n % 1000;
         if (r === 0) return undefined; // a round ten-thousand needs its own stem; not attempted
@@ -128,14 +101,18 @@ function ordinalBase(n: number): string | undefined {
 }
 
 /**
- * Ordinal adjective endings, HARD stem then SOFT (третій). Ordered by how likely the reading is, because
- * the written suffix is matched by `endsWith` and several forms can share a final letter: `-й` is claimed
- * by both перший and першій, and the masculine nominative is what `1-й` means.
+ * The ordinal endings (ukrainian.jsonc `ordinals.endings`), in the order the manifest declares — which is a
+ * PREFERENCE order, not a paradigm order, because the written suffix is matched by `endsWith` and several
+ * forms share a final letter: `-й` is claimed by both перший and першій, and the masculine nominative is
+ * what `1-й` means. `caseIndex` is how the clock rule names a case instead of indexing by a magic number.
  */
-const ORD_ENDINGS: readonly (readonly [string, string])[] = [
-    ["ий", "ій"], ["ого", "ього"], ["ому", "ьому"], ["им", "ім"], ["е", "є"], ["і", "і"],
-    ["их", "іх"], ["а", "я"], ["ої", "ьої"], ["ій", "ій"], ["у", "ю"], ["ою", "ьою"], ["ими", "іми"],
-];
+const ORD_ENDINGS = ORD.endings;
+const CASE_INDEX = new Map(ORD_ENDINGS.map((e, i) => [e.case, i]));
+function caseIndex(name: string): number {
+    const i = CASE_INDEX.get(name);
+    if (i === undefined) throw new Error(`ukrainian.jsonc: ordinals.endings has no case "${name}"`);
+    return i;
+}
 
 /** Every case form of the ordinal for `n`, in preference order. Only the final word inflects. */
 function ordinalForms(n: number): string[] {
@@ -146,7 +123,7 @@ function ordinalForms(n: number): string[] {
     const soft = last.endsWith("ій"); // третій — the only soft stem in the tables above
     const stem = last.slice(0, -2); // both "ий" and "ій" are two characters
     const head = words.slice(0, -1).join(" ");
-    return ORD_ENDINGS.map(([hard, sft]) => `${head ? `${head} ` : ""}${stem}${soft ? sft : hard}`);
+    return ORD_ENDINGS.map((e) => `${head ? `${head} ` : ""}${stem}${soft ? e.soft : e.hard}`);
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -160,43 +137,22 @@ function ordinalForms(n: number): string[] {
  * Sources: en.wiktionary.org declension tables for два / три / чотири / п'ять / … / сто.
  * Both halves of a compound decline: 54 → *п'ятдесяти чотирьох*, 78 → *сімдесяти восьми*.
  */
-const GEN_1_19: readonly string[] = [
-    "", "одного", "двох", "трьох", "чотирьох", "п'яти", "шести", "семи", "восьми", "дев'яти",
-    "десяти", "одинадцяти", "дванадцяти", "тринадцяти", "чотирнадцяти", "п'ятнадцяти",
-    "шістнадцяти", "сімнадцяти", "вісімнадцяти", "дев'ятнадцяти",
-];
-const GEN_TENS: readonly string[] = [
-    "", "десяти", "двадцяти", "тридцяти", "сорока", "п'ятдесяти", "шістдесяти", "сімдесяти",
-    "вісімдесяти", "дев'яноста",
-];
-const GEN_HUNDREDS: readonly string[] = [
-    "", "ста", "двохсот", "трьохсот", "чотирьохсот", "п'ятисот", "шестисот", "семисот", "восьмисот",
-    "дев'ятисот",
-];
+const GEN = DEF.genitiveCardinals;
 
 function genitiveCardinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n >= 1000) return undefined;
-    if (n < 20) return GEN_1_19[n];
+    if (n < 20) return GEN.oneToNineteen[n];
     if (n < 100) {
         const t = Math.floor(n / 10), u = n % 10;
-        return u === 0 ? GEN_TENS[t] : `${GEN_TENS[t]!} ${GEN_1_19[u]!}`;
+        return u === 0 ? GEN.tens[t] : `${GEN.tens[t]!} ${GEN.oneToNineteen[u]!}`;
     }
     const h = Math.floor(n / 100), r = n % 100;
-    return r === 0 ? GEN_HUNDREDS[h] : `${GEN_HUNDREDS[h]!} ${genitiveCardinal(r)!}`;
+    return r === 0 ? GEN.hundreds[h] : `${GEN.hundreds[h]!} ${genitiveCardinal(r)!}`;
 }
 
 // ---------------------------------------------------------------------------------------------------
 // INITIALISMS
 // ---------------------------------------------------------------------------------------------------
-
-/** Ukrainian letter NAMES (Український правопис, назви літер). й is *йот*; ь is *м'який знак*. и and е
- *  are included with their Ukrainian values — `ИТ` occurs in the corpus. */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    а: "а", б: "бе", в: "ве", г: "ге", ґ: "ґе", д: "де", е: "е", є: "є", ж: "же", з: "зе",
-    и: "и", і: "і", ї: "ї", й: "йот", к: "ка", л: "ел", м: "ем", н: "ен", о: "о", п: "пе",
-    р: "ер", с: "ес", т: "те", у: "у", ф: "еф", х: "ха", ц: "це", ч: "че", ш: "ша", щ: "ща",
-    ь: "м'який знак", ю: "ю", я: "я",
-};
 
 /** NOTE: every boundary in this file is an explicit lookaround, never `\b` — `\b` is defined on ASCII word
  *  characters and finds none against Cyrillic, so a rule written with it silently matches nothing. That is
@@ -204,25 +160,16 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
 
 /** Ukrainian phonotactics, for the OOV rule in core/initialisms.ts. */
 export const isUnreadableUkrainian = makeUnreadableTest({
-    vowels: /[аеиіїєоуюя]/u,
-    legalOnsets: new Set([
-        "бл", "бр", "вл", "вр", "гл", "гр", "гн", "дв", "др", "дн", "жд", "зв", "зд", "зл", "зм",
-        "зн", "зр", "кл", "кн", "кр", "кв", "мн",
-        "пл", "пр", "сл", "см", "сн", "сп", "ст", "св", "тр", "тв", "фл", "фр", "хл", "хр", "цв",
-        "шк", "шл", "шп", "шт", "щи",
-    ]),
-    legalCodas: new Set([
-        "ст", "нт", "нд", "нс", "рт", "рд", "рс", "рн", "рм", "лт", "лд", "лс", "кт", "кс",
-        "пт", "фт", "зд", "зн", "сн", "см", "тр", "др", "бр", "вр", "гр", "пр", "кр", "нк", "нг",
-        "лм", "лк", "рк", "рг", "рх", "нь", "сь", "ть",
-    ]),
+    vowels: new RegExp(`[${DEF.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(DEF.phonotactics.onsets),
+    legalCodas: new Set(DEF.phonotactics.codas),
 });
 
 /** Ukrainian has no pronunciation dictionary (its g2p is a flat rule scan), so the "is this recorded"
  *  test cannot be answered — acronyms are decided by the lexical list plus the OOV rule alone. */
 export function normalizeUkrainianInitialisms(text: string): string {
     return makeInitialismNormalizer({
-        letterName: (l) => LETTER_NAME[l],
+        letterName: (l) => DEF.letterNames[l],
         acronymLetters: new Set(DEF.acronymLetters),
         isRecorded: () => false,
         isUnreadable: isUnreadableUkrainian,
@@ -233,25 +180,49 @@ export function normalizeUkrainianInitialisms(text: string): string {
 // The rules
 // ---------------------------------------------------------------------------------------------------
 
-const HOUR_CASE: Readonly<Record<string, number>> = {
-    // index into ORD_ENDINGS for the FEMININE form the preposition governs
-    о: 9, об: 9, в: 9, у: 9, на: 9, // locative — о двадцятій
-    з: 8, із: 8, зі: 8, до: 8, від: 8, близько: 8, після: 8, протягом: 8, біля: 8, // genitive — з шостої
-    між: 11, перед: 11, за: 11, // instrumental — між двадцять другою
-};
-const FEM_NOM = 7; // ORD_ENDINGS index — the default when no preposition governs
+/** Preposition → the `ordinals.endings` case it governs (ukrainian.jsonc `clock`), resolved to the index
+ *  `ordinalForms` returns. `FEM_NOM` is the default when no preposition governs. */
+const HOUR_CASE: Readonly<Record<string, number>> = Object.fromEntries(
+    Object.entries(DEF.clock.prepositionCase).map(([prep, name]) => [prep, caseIndex(name)]),
+);
+const FEM_NOM = caseIndex(DEF.clock.defaultCase);
 
-const METRE = ["метр", "метри", "метрів", "метра"] as const;
-const DEGREE = ["градус", "градуси", "градусів", "градуса"] as const;
-/** Only the gen.pl is ever read (step 3), so this one stays three forms. */
-const SQUARE = ["квадратний", "квадратні", "квадратних"] as const;
+// ⚠ THE METRE AND THE SQUARE ADJECTIVE COME FROM THE SYMBOL TIER'S OWN DATA, not from a second copy here.
+// Both rules below hold words the tier already declares (`symbols.units.м`, `symbols.exponentWords.squared`),
+// and before the lift this file carried its own byte-identical duplicates of each — two sources for one fact,
+// with nothing to keep them together.
+const METRE = DEF.symbols.units["м"]!;
+const DEGREE = DEF.degree;
+/** Only the gen.pl is ever read (step 3), which is index 2 of the squared adjective's four forms. */
+const SQUARE_GEN_PL = DEF.symbols.exponentWords.squared[2]!;
 
-/** Abbreviations whose dot is NOT a sentence end. `кв.` is handled separately (step 3) because it is an
- *  adjective that must agree with the following number. */
-const DOTTED_ABBREV: Readonly<Record<string, string>> = {
-    "р": "року", "рр": "років", "стор": "сторінка", "див": "дивись", "ін": "інше",
-};
+// ⚠ ONE SOURCE with the symbol tier in ukrainian.ts: the rate words below are the tier's own
+// `rateDenominators`, and `SIGN.times` / `SIGN.ampersand` are what it declares for ⟨×⟩ and ⟨&⟩. `м/с` and
+// `миль/год` are composed here only because the tier cannot reach them (see step 6), not because they are
+// different words.
+const SIGN = DEF.signWords;
+const UNIT_PER = DEF.symbols.unitPer;
+const RATE = DEF.symbols.rateDenominators;
+
+/** Abbreviations whose dot is NOT a sentence end (ukrainian.jsonc `dottedAbbrev`). */
+const DOTTED_ABBREV = DEF.dottedAbbrev;
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+
+/**
+ * The multi-word dotted abbreviations, compiled from `multiDotAbbrev` IN MANIFEST ORDER — `до н. е.` must be
+ * tried before `н. е.` or the longer reading is unreachable. The written form is reconstructed rather than
+ * stored as a pattern: whitespace AFTER A DOT is optional (both `н. е.` and `н.е.` occur in the corpus),
+ * whitespace after a bare word is required.
+ */
+const MULTI_DOT: readonly (readonly [RegExp, string])[] = DEF.multiDotAbbrev.map(({ written, reading }) => {
+    const parts = written.split(" ");
+    let src = "(?<![\\p{L}\\p{M}])";
+    parts.forEach((part, i) => {
+        if (i > 0) src += parts[i - 1]!.endsWith(".") ? "\\s?" : "\\s+";
+        src += part.replace(/\./gu, "\\.");
+    });
+    return [new RegExp(src, "giu"), reading] as const;
+});
 
 const NOT_LETTER = "(?![\\p{L}\\p{M}'’ʼ])";
 
@@ -276,20 +247,14 @@ export function normalizeUkrainian(input: string): string {
     //    "…проіснував приблизно до 1100 року н. е." lost its sentence-final pause outright — the one
     //    regression the corpus diff caught on the first pass, and the check the German run named:
     //    zero sentence-final pauses may be lost.
-    const multi: readonly [RegExp, string][] = [
-        [/(?<![\p{L}\p{M}])до\s+н\.\s?е\./giu, "до нашої ери"],
-        [/(?<![\p{L}\p{M}])н\.\s?е\./giu, "нашої ери"],
-        [/(?<![\p{L}\p{M}])т\.\s?п\./giu, "тому подібне"],
-        [/(?<![\p{L}\p{M}])т\.\s?д\./giu, "так далі"],
-    ];
-    for (const [re, word] of multi)
+    for (const [re, word] of MULTI_DOT)
         s = s.replace(re, (_m, offset: number, full: string) => {
             const rest = full.slice(offset + _m.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
 
     // 2) НОМЕР. The sign was dropped outright (×3, including the unspaced `№11`).
-    s = s.replace(/№\s?(?=\d)/gu, "номер ");
+    s = s.replace(/№\s?(?=\d)/gu, `${DEF.numberSign} `);
 
     // 3) `кв.` = квадратний, an AGREEING adjective — so it needs the count, which is why it runs before the
     //    de-grouping's output is consumed by anything else and before the shared unit tier. `кв. км` folds
@@ -299,7 +264,7 @@ export function normalizeUkrainian(input: string): string {
     //    `кв. миль` takes the GENITIVE PLURAL adjective outright rather than a count form: the noun is
     //    written миль (gen.pl) in all three corpus instances, so the adjective must agree with what the
     //    text actually says, not with what the numeral would otherwise govern (9 174 квадратних миль).
-    s = s.replace(/(\d)\s?кв\.\s?миль(?![\p{L}\p{M}])/gu, `$1 ${SQUARE[2]} миль`);
+    s = s.replace(/(\d)\s?кв\.\s?миль(?![\p{L}\p{M}])/gu, `$1 ${SQUARE_GEN_PL} миль`);
 
     // 4) NUMERAL + WRITTEN SUFFIX. The suffix is the last letters of the FULL word, not an appendable
     //    ordinal marker, and the word may be an ordinal (`1970-х` = сімдесятих) or an oblique CARDINAL
@@ -346,19 +311,19 @@ export function normalizeUkrainian(input: string): string {
     //    · `миль/год` has a SPELLED-OUT numerator, which the tier (abbreviation keys only) cannot match.
     //    Units run BEFORE the clock and before the decimal fold, because both destroy number adjacency.
     s = s.replace(/(\d+(?:[.,]\d+)?)\s?м\/с(?![\p{L}\p{M}])/gu,
-        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), METRE)} на секунду`);
+        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), METRE)} ${UNIT_PER} ${RATE["с"]!}`);
     s = s.replace(new RegExp(`(\\d+(?:[.,]\\d+)?)\\s?м(?![\\p{L}\\p{M}'’ʼ²³/])`, "gu"),
         (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), METRE)}`);
     //      The 3-letter lookbehind is what keeps this off `км/год`, which the shared tier composes itself.
-    s = s.replace(/(?<=[\p{L}\p{M}]{3})\s?\/\s?год(?![\p{L}\p{M}])/gu, " на годину");
+    s = s.replace(/(?<=[\p{L}\p{M}]{3})\s?\/\s?год(?![\p{L}\p{M}])/gu, ` ${UNIT_PER} ${RATE["год"]!}`);
     //      ⚠ THE SCALE RULES READ THE WHOLE NUMBER, not its last digit. `(\d)` was invisible while the word
     //      was a hard-coded gen.pl (`+30°C` → *плюс 30 градусів Цельсія*, right by luck) and wrong the
     //      moment the count is read off it — and with no agreement applied at all, `1 °C` was
     //      *один градусів Цельсія* regardless of the capture.
     s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?[CСc](?![\p{L}\p{M}])/gui,
-        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)} Цельсія`);
+        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)} ${DEF.temperatureScales["C"]!}`);
     s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?[FФf](?![\p{L}\p{M}])/gui,
-        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)} Фаренгейта`);
+        (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)} ${DEF.temperatureScales["F"]!}`);
     s = s.replace(/(\d+(?:[.,]\d+)?)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)}`);
 
     // 7) CLOCK. The colon is clause punctuation in ukrainian.jsonc, so `20:30` read as *двадцять ,
@@ -380,13 +345,13 @@ export function normalizeUkrainian(input: string): string {
         });
 
     // 8) SIGNS. `+30°C` lost its sign entirely (the ° rule above has already made it `+30 градусів …`).
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1мінус $2");
+    s = s.replace(/(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " плюс мінус ");
-    s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
+    s = s.replace(/±/gu, ` ${SIGN.plusMinus} `);
+    s = s.replace(/(^|[\s(])\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
 
     // 8b) RELATIONAL AND DIVISION SIGNS. uk.wikipedia's division article reads the whole expression
     //     aloud, both signs, operands in place, and — the part that matters for a case language — with the
@@ -411,10 +376,10 @@ export function normalizeUkrainian(input: string): string {
     //     nor evidence against it. `розділене на` is chosen because the gloss above puts it in the exact slot
     //     between two numerals, not because the alternative is wrong. (Italian's `sorella minore di` IS a
     //     different construction — an age adjective plus a partitive — and that distinction is real.)
-    s = s.replace(/\s?=\s?/gu, " дорівнює ");
-    s = s.replace(/\s?<\s?/gu, " менше ніж ");
-    s = s.replace(/\s?>\s?/gu, " більше ніж ");
-    s = s.replace(/\s?÷\s?/gu, " розділене на ");
+    s = s.replace(/\s?=\s?/gu, ` ${SIGN.equals} `);
+    s = s.replace(/\s?<\s?/gu, ` ${SIGN.lessThan} `);
+    s = s.replace(/\s?>\s?/gu, ` ${SIGN.greaterThan} `);
+    s = s.replace(/\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
 
     // 9) NUMERIC RANGES. The dash between two numbers was dropped outright, fusing the endpoints
     //    (`1418-1450` became one run of words). Digits are required on BOTH sides so that `COVID-19`,
@@ -422,14 +387,19 @@ export function normalizeUkrainian(input: string): string {
     //    KNOWN false positives, counted rather than assumed: 3 of the 19 dashes are SCORES (`6-6`, `7–2`,
     //    `26 - 00`) where "до" is the wrong connective — but the endpoints were fusing there too, so no
     //    reading is lost, only a wrong-ish connective gained.
-    s = s.replace(/(\d)\s?[–—-]\s?(?=\d)/gu, "$1 до ");
+    s = s.replace(/(\d)\s?[–—-]\s?(?=\d)/gu, `$1 ${DEF.rangeWord} `);
 
     // 10) FRACTIONS — feminine, agreeing with the elided *частина*: 1/5 is *одна п'ята*.
+    //     ⚠ THE FEMININE 1 AND 2 ARE `numbers.feminine`, the pair the magnitude compositor already uses for
+    //     the feminine тисяча (одна тисяча, дві тисячі) — and the masculine forms they replace are
+    //     `numbers.units[1]` and `[2]`. This rule held its own copies of all four.
     s = s.replace(/(?<![\d\p{L}])(\d{1,3})\/(\d{1,3})(?![\d/\p{L}])/gu, (whole, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         const fem = ordinalForms(den)[FEM_NOM];
         if (fem === undefined) return whole;
-        const numWord = cardinal(num).replace(/один$/u, "одна").replace(/два$/u, "дві");
+        const numWord = cardinal(num)
+            .replace(new RegExp(`${DEF.numbers.units[1]!}$`, "u"), DEF.numbers.feminine.one)
+            .replace(new RegExp(`${DEF.numbers.units[2]!}$`, "u"), DEF.numbers.feminine.two);
         return `${numWord} ${fem}`;
     });
 
