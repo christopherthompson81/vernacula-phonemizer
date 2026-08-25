@@ -943,8 +943,18 @@ async function main(): Promise<void> {
             .join(" ");
         // The language's .jsonc files, read ONCE — both the manifest-symbols arm and the decimalWord arm
         // below consume this list, so the file-selection rule cannot drift between them.
-        const jsoncSrcs = readdirSync(join("src/languages", dir)).filter((n) => n.endsWith(".jsonc"))
-            .map((f) => readFileSync(join("src/languages", dir, f), "utf8"));
+        // ⚠ THE MANIFESTS ARE IN `data/`, NOT `src/`, AND THIS PATH WAS STALE. Data moved out of the engine
+        // tree so neither port owns it, and this arm kept reading `src/languages/<dir>` — where no .jsonc
+        // has existed since. `jsoncSrcs` was therefore EMPTY for every manifest-backed language, so the
+        // manifest arm this comment block describes never ran and the gate reported "could not read it"
+        // for a language whose declarations were all present and typed. The symbol-tier sweep made that
+        // the common case rather than the rare one: ~38 languages moved their tier into the .jsonc.
+        // ⚠ BOTH ROOTS ARE READ, not just the new one — a few languages still keep a .jsonc beside the
+        // engine, and silently dropping those would trade one blind spot for another.
+        const jsoncSrcs = [join("data/languages", dir), join("src/languages", dir)]
+            .filter((d) => existsSync(d))
+            .flatMap((d) => readdirSync(d).filter((n) => n.endsWith(".jsonc"))
+                .map((f) => readFileSync(join(d, f), "utf8")));
         // A TIER MAY BE MANIFEST-DRIVEN — `percent: [MANIFEST.symbols.percent]`, currencies built with
         // Object.fromEntries over MANIFEST.symbols.currencies — which is the house direction (data lives in
         // the .jsonc, not in code). The literal extractors see no strings there, and without this arm the
@@ -962,7 +972,12 @@ async function main(): Promise<void> {
         // sign-in-corpus rule as the inline `used()` arm, folded because `hay.text` is folded (an
         // unfolded "US$" can never match a lowercased haystack).
         const manifestSymbols = (): string[] => {
-            if (!/MANIFEST\.symbols/u.test(`${engineSrc}\n${tierSrc}\n${readFileSync(normPath, "utf8")}`)) return [];
+            // ⚠ AND THE ACTIVATION GUARD WAS STALE TOO, for the same reason the path was. It tested for
+            // `MANIFEST.symbols`, and the symbol-tier sweep renamed that key to `symbolTier` fleet-wide
+            // (and some engines reach it as `DEF.symbolTier` or `def.symbolTier`, not through a MANIFEST
+            // alias at all). So the arm switched itself off for exactly the languages the sweep had just
+            // made manifest-backed. Match the FIELD, not one spelling of the object holding it.
+            if (!/\.(symbols|symbolTier)\b/u.test(`${engineSrc}\n${tierSrc}\n${readFileSync(normPath, "utf8")}`)) return [];
             const out: string[] = [];
             const walk = (v: unknown): void => {
                 if (typeof v === "string") { out.push(v); return; }
@@ -975,9 +990,15 @@ async function main(): Promise<void> {
                 }
                 // nested Records (e.g. a scales→numbers-key map) hold REFERENCES, not words — skipped.
             };
+            // ⚠ BOTH KEYS. `symbols` is the older name and still means two different tables depending on
+            // the language — a symbol-WORD bag in yo, a bare-sign map in the Indic group — while
+            // `symbolTier` is what the sweep standardised the SHARED tier on. Reading only the first left
+            // el and sw blind after their tiers moved, so both are walked and the union is the candidate
+            // set; a word that is not in the corpus contributes nothing either way.
             for (const src of jsoncSrcs) {
-                const doc = parseJsonc(src) as { symbols?: Record<string, unknown> };
+                const doc = parseJsonc(src) as { symbols?: Record<string, unknown>; symbolTier?: Record<string, unknown> };
                 for (const v of Object.values(doc.symbols ?? {})) walk(v);
+                for (const v of Object.values(doc.symbolTier ?? {})) walk(v);
             }
             return out;
         };
