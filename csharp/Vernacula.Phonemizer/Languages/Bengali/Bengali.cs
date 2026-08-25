@@ -31,6 +31,8 @@ public class BengaliDef : AbugidaDef
     public Dictionary<string, IReadOnlyList<string>>? UnitWords { get; set; }
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public BengaliSymbolTier SymbolTier { get; init; } = new();
+    /** The suppletive 1–10 series and the regular suffixes. LONGEST FIRST. See the jsonc. */
+    public BengaliOrdinals Ordinals { get; init; } = new();
 }
 
 /** The four entry points `makeNativeBengali` returns — the shape Assamese wraps. */
@@ -313,4 +315,16 @@ public sealed class BengaliSymbolTier
     public ExponentWordsDef ExponentWords { get; init; } = new();
     public string Ampersand { get; init; } = "";
     public MultiplyDef Multiply { get; init; } = null!;
+}
+
+public sealed class BengaliOrdinals
+{
+    /**
+     * ⚠ KEYED BY STRING, NOT INT, AND THAT IS A JS/.NET DIVERGENCE RATHER THAN A CHOICE. JSON object keys
+     * are always strings; the TS side declares `Record<number, string>` and gets away with it because JS
+     * coerces a numeric index to a string on lookup. C# does not, so the DTO holds what the file holds and
+     * the call site converts. Deserializing to `int` keys would work too and would hide the asymmetry.
+     */
+    public IReadOnlyDictionary<string, string> Suppletive { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyList<string> Suffixes { get; init; } = Array.Empty<string>();
 }

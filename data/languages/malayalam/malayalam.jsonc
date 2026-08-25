@@ -146,5 +146,14 @@
         "units": { "km": ["കിലോമീറ്റർ"], "m": ["മീറ്റർ"], "mm": ["മില്ലിമീറ്റർ"] },
         // `ചതുരശ്ര കിലോമീറ്റർ` ×2 and `ക്യൂബിക് മീറ്റർ` ×1, both word-first, both from the corpus's own prose.
         "exponentWords": { "squared": ["ചതുരശ്ര"], "cubed": ["ക്യൂബിക്"], "position": "before" }
-    }
+    },
+
+    // ⚠ ORDER IS LOAD-BEARING: LONGEST FIRST. These are matched by prefix against the text after the
+    // numeral, so a shorter clitic listed first shadows a longer one that contains it. A JSON array
+    // preserves order; an object or a set would not, which is why this stays a list.
+    // THE CLITICS MALAYALAM WELDS ONTO A NUMERAL, each with the stem it selects. ⚠ A CLOSED list, closed to
+    // what is ATTESTED — an open "digits + any Malayalam run" rule swallows ordinary nouns that merely follow
+    // a number ("100 അടി", "56 വ്യത്യസ്ത"). ത്തിൽ/ത്തിലെ carry their own -ത്തി- linker, which is precisely the
+    // oblique stem of a ം-final magnitude, so they fold to ൽ/ലെ and take the same path.
+    "ordinalEndings": ["ാമത്തേത്", "ാമത്തെ", "മത്തേത്", "ാമത്", "മത്തെ", "മത്", "ആം", "ാം"]
 }

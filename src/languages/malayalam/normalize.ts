@@ -60,16 +60,9 @@ const SYMBOLS = makeSymbolNormalizer({
     multiply: MANIFEST.symbolTier.multiply,
 });
 
-/**
- * The clitics Malayalam welds onto a numeral, each with the stem it selects. ⚠ A CLOSED list, closed to
- * what is ATTESTED — an open "digits + any Malayalam run" rule swallows ordinary nouns that merely follow
- * a number ("100 അടി", "56 വ്യത്യസ്ത").
- *
- * Longest first, so ത്തിലെ is not shadowed by ലെ. ത്തിൽ/ത്തിലെ carry their own -ത്തി- linker, which is
- * precisely the oblique stem of a ം-final magnitude, so they are folded to ൽ/ലെ and take the same path
- * (2000-ത്തിലെ → ആയിരത്തിലെ, one word, correctly linked).
- */
-const ORDINAL_ENDINGS = ["ാമത്തേത്", "ാമത്തെ", "മത്തേത്", "ാമത്", "മത്തെ", "മത്", "ആം", "ാം"];
+/** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+const ORDINAL_ENDINGS = MANIFEST.ordinalEndings;
+
 const OBLIQUE_CLITICS = ["ത്തിലെ", "ത്തിൽ", "ത്തില്", "ലാണ്", "ന്റെ", "ലോ", "നും", "ലെ", "ൽ", "ന്"];
 const PLURAL_CLITICS = ["കളുടെ", "കളിലെ", "കളിൽ", "കൾ"];
 const longestFirst = (a: string[]): string =>

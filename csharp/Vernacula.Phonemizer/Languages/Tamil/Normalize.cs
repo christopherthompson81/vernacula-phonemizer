@@ -55,8 +55,9 @@ public static class Normalize
     private static readonly JsRe INITIALISM_RE = JsRegex.Compile(
         $"{NB}{LETTER}(?:\\s*\\.\\s*{LETTER})+(?:\\s*\\.(?=\\s+[\\p{{L}}]))?{NA}", "gu");
 
-    /** Ordinal suffixes, longest first: ஆவது / வது take -ஆவது, ஆம் / ம் take -ஆம். */
-    private static readonly string[] ORDINAL_SUFFIX = { "ஆவது", "ஆம்", "வது", "ம்" };
+    /** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+    private static IReadOnlyList<string> ORDINAL_SUFFIX => Manifest.MANIFEST.OrdinalSuffixes;
+
     private static readonly JsRe ORDINAL_RE = JsRegex.Compile(
         $"(?<![\\d.,])(\\d+)\\s*-?\\s*({string.Join("|", ORDINAL_SUFFIX)}){NA}", "gu");
 

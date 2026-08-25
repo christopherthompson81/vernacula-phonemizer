@@ -105,8 +105,9 @@ const INITIALISM_RE = new RegExp(
     "gu",
 );
 
-/** Ordinal suffixes, longest first: ஆவது / வது take -ஆவது, ஆம் / ம் take -ஆம். */
-const ORDINAL_SUFFIX = ["ஆவது", "ஆம்", "வது", "ம்"];
+/** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+const ORDINAL_SUFFIX = MANIFEST.ordinalSuffixes;
+
 const ORDINAL_RE = new RegExp(
     `(?<![\\d.,])(\\d+)\\s*-?\\s*(${ORDINAL_SUFFIX.join("|")})${NOT_LETTER_AFTER}`,
     "gu",

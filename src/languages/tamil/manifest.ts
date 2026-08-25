@@ -56,6 +56,8 @@ export interface TamilManifest extends AbugidaDef {
         multiply: { times: string; by?: string };
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
+    /** Ordinal suffixes, LONGEST FIRST — order is load-bearing. See the jsonc. */
+    ordinalSuffixes: string[];
 }
 
 /** The consolidated Tamil data (abugida def + post-pass tables; see tamil.jsonc). */

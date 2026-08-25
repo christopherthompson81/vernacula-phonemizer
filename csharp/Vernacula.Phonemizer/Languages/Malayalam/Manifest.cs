@@ -18,6 +18,8 @@ public sealed class MalayalamManifest : AbugidaDef
     public Dictionary<string, string> ClausePunctuation { get; set; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public MalayalamSymbolTier SymbolTier { get; init; } = new();
+    /** The clitics welded onto a numeral, LONGEST FIRST — order is load-bearing. See the jsonc. */
+    public IReadOnlyList<string> OrdinalEndings { get; init; } = Array.Empty<string>();
 }
 
 public static class Manifest

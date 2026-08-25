@@ -16,6 +16,7 @@
  * danda and comma reaches the output as a raw non-IPA character. Both live in bengali.jsonc. What belongs here is
  * ordinal suffixes, the clock, Bengali unit abbreviations, signs and fractions.
  */
+import { MANIFEST as DEF } from "./manifest.ts";
 import { BENGALI_DIGITS } from "../../core/unicode.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
@@ -42,19 +43,14 @@ const DATE_SUPPLETIVE: Readonly<Record<number, string>> = {
     1: "পহেলা", 2: "দোসরা", 3: "তেসরা", 4: "চৌঠা",
 };
 
-/**
- * The CLASSICAL ordinal series, 1–10, which is suppletive and not the cardinal plus a suffix: ৮ম is অষ্টম,
- * not *আটম. From 11 up the regular তম form takes over (১৭তম → সতেরোতম), so the table stops at ten.
- */
-const ORDINAL_SUPPLETIVE: Readonly<Record<number, string>> = {
-    1: "প্রথম", 2: "দ্বিতীয়", 3: "তৃতীয়", 4: "চতুর্থ", 5: "পঞ্চম",
-    6: "ষষ্ঠ", 7: "সপ্তম", 8: "অষ্টম", 9: "নবম", 10: "দশম",
-};
+/** The suppletive 1–10 series, from the manifest — see the jsonc for why it stops at ten. */
+const ORDINAL_SUPPLETIVE: Readonly<Record<number, string>> = DEF.ordinals.suppletive;
+
 /** Suffixes that mark the classical series rather than the date series. */
 const CLASSICAL_SUFFIX = new Set(["ম", "য়", "র্থ", "ষ্ঠ", "তম"]);
 const DATE_SUFFIX = new Set(["শে", "ই", "লা", "রা", "ঠা"]);
-/** The suffixes, longest first so তম is not matched as ম. */
-const ORDINAL_SUFFIX = ["তম", "শে", "ই", "ম", "য়", "র্থ", "ষ্ঠ", "লা", "রা", "ঠা"];
+/** Read from the manifest — LONGEST FIRST, and the order is load-bearing (see the jsonc). */
+const ORDINAL_SUFFIX = DEF.ordinals.suffixes;
 
 /** Bengali unit abbreviations → the full word. The shared symbol tier is keyed on the Latin forms. */
 const UNIT_WORD: Readonly<Record<string, string>> = {

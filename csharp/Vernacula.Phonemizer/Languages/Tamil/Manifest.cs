@@ -48,6 +48,8 @@ public sealed class TamilManifest : AbugidaDef
     public IReadOnlyList<string> InitialismLetterForms { get; init; } = Array.Empty<string>();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public TamilSymbolTier SymbolTier { get; init; } = new();
+    /** Ordinal suffixes, LONGEST FIRST — order is load-bearing. See the jsonc. */
+    public IReadOnlyList<string> OrdinalSuffixes { get; init; } = Array.Empty<string>();
 }
 
 public static class Manifest

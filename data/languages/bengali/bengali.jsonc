@@ -246,5 +246,19 @@
         // ⚠ ASSAMESE SHARES THIS TIER and attests no cube word at all: its translation of that same sentence
         // writes `বর্গমিটাৰ`, the SQUARE word, for cubic metres.
         "exponentWords": { "squared": ["বর্গ"], "cubed": ["কিউবিক"], "position": "before" }
+    },
+
+    // ⚠ ORDER IS LOAD-BEARING: LONGEST FIRST. These are matched by prefix against the text after the
+    // numeral, so a shorter suffix listed first shadows a longer one that contains it. A JSON array
+    // preserves order; an object or a set would not, which is why this stays a list.
+    // ⚠ THE CLASSICAL 1–10 SERIES IS SUPPLETIVE, NOT THE CARDINAL PLUS A SUFFIX: ৮ম is অষ্টম, not *আটম.
+    // From 11 up the regular তম form takes over (১৭তম → সতেরোতম), which is why the table stops at ten and
+    // why the two fields are separate — one is a lexicon, the other a morphology.
+    "ordinals": {
+        "suppletive": {
+            "1": "প্রথম", "2": "দ্বিতীয়", "3": "তৃতীয়", "4": "চতুর্থ", "5": "পঞ্চম",
+            "6": "ষষ্ঠ", "7": "সপ্তম", "8": "অষ্টম", "9": "নবম", "10": "দশম"
+        },
+        "suffixes": ["তম", "শে", "ই", "ম", "য়", "র্থ", "ষ্ঠ", "লা", "রা", "ঠা"]
     }
 }

@@ -136,5 +136,12 @@
         "rateDenominators": { "h": "ଘଣ୍ଟା", "s": "ସେକେଣ୍ଡ" },
         "unitPer": "ପ୍ରତି",
         "exponentWords": { "squared": ["ବର୍ଗ"], "cubed": ["ଘନ"], "position": "before" }
-    }
+    },
+
+    // ⚠ ORDER IS LOAD-BEARING: LONGEST FIRST. These are matched by prefix against the text after the
+    // numeral, so a shorter suffix listed first shadows a longer one that contains it. A JSON array
+    // preserves order; an object or a set would not, which is why this stays a list.
+    // Ordinal suffixes, written attached to the numeral. All three occur: ଶ ×11 (11ଶ, 18ଶ ଶତାବ୍ଦୀ),
+    // ତମ ×5 (60 ତମ, 1000ତମ), ମ ×3 (9ମ, 1ମ). Longest first so ତମ is not split by ମ.
+    "ordinalSuffixes": ["ତମ", "ଶ", "ମ"]
 }
