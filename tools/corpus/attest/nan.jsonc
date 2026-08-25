@@ -21,8 +21,58 @@
         "tier": "wikipedia (register-restricted)",
         // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
         // `--context` set to exactly this string.
-        "context": "溫度 度",
+        "context": "sò͘-ha̍k",
         "findings": [
+        {
+                "word": "hū",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 14,
+                "substringOnly": 6,
+                "examples": [
+                "…Hū-koân-chè (-khoân-, eng. patriarchy), he̍k-chiá kóng hū-koân…",
+                "…Hū-koân-chè (-khoân-, eng. patriarchy), he̍k-chiá kóng hū-koân ia̍h ka-hū-tiúⁿ-chè (家父長制), goân-lâi ê ì-sù sī kóng ch…",
+                "…(-khoân-, eng. patriarchy), he̍k-chiá kóng hū-koân ia̍h ka-hū-tiúⁿ-chè (家父長制), goân-lâi ê ì-sù sī kóng chi̍t khoán cha-po…",
+                "…-hòa-sò͘ it-poaⁿ lóng sī chéng-sò͘, i khó-lêng sī chiàⁿ--ê, hū--ê, ia̍h sī lêng. Ū-sî-chūn , phì-lūn-kóng Fe3O4 tiong ê th…",
+                "…Chéng-sò͘ (integer) pau-hâm chū-jiân-sò͘ (1, 2, 3, …), hū-chū-jiân-sò͘ (−1, −2, −3, ...) ham 0. Khah chèng-sek ê kóng…"
+            ]
+            },
+        {
+                "word": "hu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 16,
+                "substringOnly": 4,
+                "examples": [
+                "…Francium (Óa-im: \"hu-lán-si-ùm\") sī 1 ê hoà-ha̍k goân-sò͘. I ê goân-chú-hoan sī…",
+                "…ap bû-hān); in ē-ēng kā sò͘-te̍k thiân-boán. Si̍t-sò͘ chham hu-sò͘ kiōng-tông cho͘-sêng ho̍k-cha̍p-sò͘.…",
+                "…-jîn. 1965 nî kòe-sin. 1905 nî – Hukuda Takeo (Hok-tiân Kiū-hu, 福田赳夫), Ji̍t-pún siú-siòng. 1995 nî kòe-sin. 1925 nî – Misi…",
+                "…iòng. 1995 nî kòe-sin. 1925 nî – Misima Yukio (Sàm-tó Iû-kí-hu, 三島由紀夫), Ji̍t-pún bûn-ha̍k-ka. 1970 nî kòe-sin. 1926 nî – N…",
+                "…tek kok-che̍k iú-thài-lâng. Lí-ò sī ha-hu̍t-tāi-ha̍k su-lá-hu gí-cho̍k ê káng-su, i ēng i chū chhòng ê ko-ap hong-hoat po…",
+                "…12-hoè) , ko-tiong pit-gia̍p, tâng-nî 9-ge̍h ji̍p to̍k thah hu-si ha̍k-īⁿ siu-tāu sò͘-ha̍k; 1909 nî (15-hoè) sî i í chhú-t…"
+            ]
+            },
+        {
+                "word": "hū-sò͘",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 9,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…tī -1 liáu-āu, 1 ê chìn-chêng. 0 m̄-sī chiàⁿ-sò͘, iā m̄-sī hū-sò͘. == Le̍k-s == Maya-lâng pat hoat-bêng te̍k-pia̍t ê hû-hō lâ…",
+                "…óng sī 16 ê pêng-hong-kin, in-ūi 42 = (−4)2 = 16. Só͘-ū hui-hū-sò͘ ê si̍t-sò͘ lóng ū chi̍t ê te̍k-tēng ê hui-hū-sò͘ pêng-hong-…",
+                "…Só͘-ū hui-hū-sò͘ ê si̍t-sò͘ lóng ū chi̍t ê te̍k-tēng ê hui-hū-sò͘ pêng-hong-kin, hō-chò chú-pêng-hong-kin (主平方根), siá chò √a;…",
+                "…kin sī 3, siá chò √9 = 3, in-ūi 32 = 3 · 3 = 9, ah 3 sī hui-hū-sò͘. Só͘-ū chiàⁿ-sò͘ lóng ū 2 ê pêng-hong-kin: √a hām −√a, mā ē…",
+                "…͘ a ê chú-pêng-hong-kin mā ē-tàng siá chò be̍k ūn-sǹg a1/2. Hū-sò͘ ê pêng-hong-kin sī ho̍k-cha̍p-sò͘ thó-lūn ê hoān-ûi. == Chh…",
+                "…í-ū tōa-sè tān-sī bô hong-hiòng ê liōng. Sûn-liōng ē-ēng sī hū-sò͘.…"
+            ]
+            },
         {
                 "word": "負",
                 "verdict": "absent",
@@ -36,15 +86,6 @@
                 "word": "減",
                 "verdict": "absent",
                 "bounded": false,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
-            },
-        {
-                "word": "hū",
-                "verdict": "absent",
-                "bounded": true,
                 "tokenHits": 0,
                 "articles": 0,
                 "substringOnly": 0,

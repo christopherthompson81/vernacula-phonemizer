@@ -209,6 +209,37 @@ export function normalizeMinNan(input: string): string {
     // RE-EMITTED (playbook trap 10) so step 3 still sees `25°C` intact and gives it its Liap-sī reading.
     s = s.replace(/(\d)((?:\s*°\s*C|℃|\s*°|%)?)\s*[–~〜]\s*(?=\d)/gui, "$1$2 到 ");
 
+    // ── 2b. THE MINUS, AND THIS CORPUS GLOSSES ITS OWN SIGN ──────────────────────────────────────
+    // ⚠ THE SENTENCE CARRYING THE SIGN NAMES IT. `(2000 kg) × (−10 m/s) = 20000 kg⋅m/s, hū-hō tāi-piáu
+    // hong-hiòng ǹg sai` — "the MINUS SIGN (hū-hō, 負號) represents the direction toward the west". That is
+    // the sign glossed in the same breath as its own operand, which is stronger evidence than any word count,
+    // and nan.wikipedia's integers article writes the operand form too: `hū-chū-jiân-sò͘ (−1, −2, −3, ...)`.
+    // ⟨負⟩ is emitted as HAN, the way this file emits ⟨度⟩ ⟨點⟩ ⟨攝氏⟩, and the dict reads it hū.
+    //
+    // ⚠ BEFORE THE DEGREE RULES, NOT AFTER — trap 39, a guard's evidence has a lifetime. Arm (a) looks ahead
+    // for a `°`, and step 3 rewrites that `°` into a WORD; placed after it, `溫度 −5 °C` had nothing left to
+    // look at and the sign was dropped while every other shape worked.
+    //
+    // ⚠ TWO ARMS, BECAUSE ONE GUARD CANNOT COVER BOTH SHAPES — the kurmanji pattern.
+    //   (a) a leading minus whose number CARRIES a unit, degree or percent: `(−10 m/s)`;
+    //   (b) a leading minus at a bracket, COMMA or string start: `(−1, −2, −3, ...)`, bare integers in maths
+    //       prose — the comma is in the class because the list's second and third members have nothing else
+    //       to their left, and claiming only the first would sign one of three.
+    //
+    // ⚠ U+2212 ONLY — THE ASCII HYPHEN IS NOT CLAIMED, and that is the whole argument rather than caution.
+    // U+2212's sole Unicode meaning is the arithmetic operator and no keyboard types it, so its identity is
+    // the evidence. The hyphen carries POJ's own compounding (`hū-hō`, `chū-jiân-sò͘`), ISBNs, page spans and
+    // EasyTimeline offsets (`shift:(-10,5)`), none of which this rule should touch; leaving it refused costs
+    // nothing that was ever read and removes the entire hazard class.
+    //
+    // ⚠ AND BOTH REFUSE A PRECEDING `digit + space`, which is the SPACE-SEPARATED NEGATIVE EXPONENT — the
+    // shape a plain leading-position lookbehind cannot see, because it looks one character back and finds
+    // only the space. `9.10938356(11)×10 −31 kg` is 10⁻³¹, not "ten minus thirty-one"; the base is two
+    // characters away. Seven languages in this fleet's corpora write an exponent exactly that way.
+    const NAN_UNIT_AHEAD = "(?=\\p{Nd}[\\d.,]*\\s*(?:°|%|\\p{sc=Latn}))";
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\p{Nd}])(?<!\\p{Nd}\\s)\u2212${NAN_UNIT_AHEAD}`, "gu"), "負");
+    s = s.replace(/(^|[(（,，])\s?\u2212(?=\p{Nd})/gmu, "$1負");
+
     // ── 3. coordinates, then the temperature, then the bare degree ───────────────────────────────
     // ⚠ COORDINATES FIRST: `tang-keng 118°04'04"`, `pak-hūi 24°26'46"`, `118°24′`, `25°10′` — the minute
     // and second marks must be consumed before the bare-degree rule takes the ° and strands them.

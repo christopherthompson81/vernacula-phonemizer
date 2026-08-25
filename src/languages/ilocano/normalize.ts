@@ -286,6 +286,26 @@ export function normalizeIlocano(input: string): string {
     // Step 5's two-digit cap leaves them untouched rather than reading them as a decimal it cannot cap.
     s = s.replace(/(?<![\d.,])(\d{1,3}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
 
+    // ── 1b. THE MINUS — U+2212 ONLY, and the character's identity is the argument ────────────────────────
+    // ⚠ OMITTING A MINUS INVERTS THE VALUE, which is why this is read on weaker evidence than this layer
+    // demands of anything else, with the weakness stated rather than hidden. `negatibo` is ilo.wikipedia
+    // ×12/6, and ×2 of those are `negatibo a numero` in a mathematics list of number kinds — the concept,
+    // in the register the corpus's own instances sit in. What it is NOT is a record of what a reader SAYS
+    // in front of a numeral: every one of the 12 is the ADJECTIVE modifying a noun (`negatibo a kuadratiko
+    // a koepisiente`, `gram-negatibo`). The Spanish `menos` and the English `minus` that speakers reportedly
+    // code-switch to are ×0 here — which a small, formal wiki cannot refute, it simply never writes them.
+    //
+    // ⚠ U+2212 ONLY, AND THE ASCII HYPHEN STAYS REFUSED. The hyphen in this corpus is UTC offsets (×103),
+    // scripture references, ISBNs and Ilocano's own compounding; U+2212's sole Unicode meaning is the
+    // arithmetic operator and no keyboard types it. Claiming only the unambiguous character is what makes
+    // reading it on a caveated word defensible at all.
+    //
+    // ⚠ REFUSES A PRECEDING `digit + space` — the SPACE-SEPARATED NEGATIVE EXPONENT (`×10 −31 kg`), which a
+    // leading-position lookbehind cannot see because it looks one character back and finds only the space.
+    // ⚠ And a preceding LETTER already blocks `UTC−08:00`, the corpus's largest minus-shaped class.
+    // Corpus instances claimed: `−4.6` and `−0.4` (stellar magnitudes), `(−224 °C)`, `−89 °C (−129 °F)`.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, "negatibo ");
+
     // ── 2. CLOCK — BEFORE the tier and before the decimal rule ───────────────────────────────────────────
     // ⚠ THE GUARD IS THE RULE. `\d{1,2}:\d{2}` is ×205 in this corpus and only ~23 are clocks; see the
     // header for the 182 that are not. So the colon alone licenses nothing, and each arm below was counted:

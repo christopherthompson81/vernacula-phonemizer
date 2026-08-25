@@ -37,15 +37,23 @@
  *
  * ── WHAT IS DELIBERATELY NOT DONE, each with the check that refused it ────────────────────────────────
  *
- * ⚠ NO MINUS WORD, AND THIS ONE IS KNOWN-WRONG RATHER THAN ACCEPTABLE — so `review.ts --lang ht` stays RED
- *   on it and it is NOT in `ACCEPTED_SILENT`. Omitting a plus is lossless; omitting a minus INVERTS. There
- *   IS a citation and it is a real self-gloss, from a maths article: `2+ (-2) = 0 i.e de plis (mwen de) fè
- *   zewo … (-2) se mwen de ou byen zewo mwen de`. The word it offers is `mwen`, which is Haitian for **"I /
- *   me"** — the commonest word in the language — while the language's actual comparative is `mwens` (×569,
- *   never once digit-adjacent). One sentence in one article, proposing a reading homographic with the 1SG
- *   pronoun, does not put *mwen de* in a speaker's mouth for `-2`. The residue is 126 leading minuses in
- *   Creole text: ~36 BCE years (`etabli nan -509`, `ant -451 ak -429`), 6 temperatures (`−20°C`, `-17.2°C`),
- *   ~10 in maths prose. The gate comes green the day a Haitian negative-number word is attested.
+ * ⚠ THE MINUS: U+2212 IS NOW READ, THE ASCII HYPHEN IS STILL NOT — and this entry used to say NO MINUS
+ *   WORD at all. What changed is which CHARACTER is claimed, not the evidence for the word.
+ *
+ *   The refusal stands where it was argued. The maths-article self-gloss — `2+ (-2) = 0 i.e de plis (mwen
+ *   de) fè zewo … (-2) se mwen de ou byen zewo mwen de` — offers `mwen`, which is Haitian for **"I / me"**,
+ *   the commonest word in the language. One sentence in one article, proposing a reading homographic with
+ *   the 1SG pronoun, still does not put *mwen de* in a speaker's mouth. And the hyphen's own population here
+ *   is ~36 BCE years (`etabli nan -509`, `ant -451 ak -429`) and ISBNs, so claiming it would read a year as
+ *   a negative ~36 times to fix 6 temperatures.
+ *
+ *   What ships is `mwens` — the language's actual comparative, ×569, the direct reflex of French *moins*,
+ *   which IS the minus word in the parent language — in front of U+2212 alone. ⚠ THE WEAKNESS IS STATED,
+ *   NOT HIDDEN: `mwens` is never once digit-adjacent in those 569 instances, so the concept is sourced and
+ *   the construction inferred. That is the kurmanji `negatîf` shape, taken for the kurmanji reason — omitting
+ *   a minus INVERTS, and `mwens ven degre` is at worst an odd register where the alternative is a temperature
+ *   wrong by forty degrees. U+2212 can only ever be the arithmetic operator and no keyboard types it, which
+ *   is what makes a caveated word defensible on that character and on no other.
  *
  * ⚠ NO PLUS WORD, and here the corpus DISQUALIFIES the reading rather than merely failing to supply one.
  *   55 leading pluses in Creole text and the largest class is `(+ 1987)` / `(† 1867)` — the DEATH marker,
@@ -300,6 +308,21 @@ export function normalizeHaitian(input: string): string {
     //    requiring every group to be exactly three digits does that (`ant 1854 ak 1889` has no 3-digit
     //    group). The corpus uses both U+0020 and U+00A0 here.
     s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]|[ \u00a0\u202f\u2009]\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+
+    // 4b) THE MINUS — U+2212 ONLY. ⚠ THIS REVERSES THIS FILE'S OWN EARLIER REFUSAL (see the header), and
+    //    the reversal is about WHICH CHARACTER is claimed, not about new evidence for the word.
+    //    The refusal stands for the ASCII hyphen and stands for `mwen`: the maths-article self-gloss
+    //    (`(-2) se mwen de`) proposes a word homographic with the 1SG pronoun — the commonest word in the
+    //    language — and the hyphen's own population here is ~36 BCE years (`etabli nan -509`) and ISBNs.
+    //    Reading either would be worse than silence.
+    //    What is claimed instead is `mwens` — the language's actual comparative, ×569, and the direct
+    //    reflex of French *moins*, which is the standard minus word in the parent language — in front of
+    //    U+2212 only. ⚠ THE WEAKNESS, STATED: `mwens` is never once digit-adjacent in 569 instances, so
+    //    this is the CONCEPT sourced and the construction inferred, the kurmanji `negatîf` shape. It is
+    //    read rather than dropped because omitting a minus INVERTS the value, and `mwens ven degre` is at
+    //    worst an odd register for a reading that is otherwise the wrong temperature by forty degrees.
+    //    Corpus instance claimed: `−20°C`. The 6 temperatures written with a hyphen stay silent.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, "mwens ");
 
     // 5) UNITS, before decimals — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten (the playbook's standing coupling), and after de-grouping so `1 250 257,6 km²`
