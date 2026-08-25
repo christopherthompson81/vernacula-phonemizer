@@ -106,7 +106,7 @@ class PolishPhonemizer implements Phonemizer {
                 for (const wd of numberToWords(Number(intPart)).split(" "))
                     sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
-                    sink.emit(phonemizeWord("przecinek")); // the Polish name of the decimal comma
+                    sink.emit(phonemizeWord(MANIFEST.decimalWord)); // the Polish name of the decimal comma
                     for (const d of frac)
                         for (const wd of numberToWords(Number(d)).split(" "))
                             sink.emit(phonemizeWord(wd));

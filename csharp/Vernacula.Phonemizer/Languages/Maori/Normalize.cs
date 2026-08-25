@@ -10,31 +10,14 @@ public static class Normalize
 {
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "whakarea" },
-        Percent = new[] { "ōrau" },
-        // Prefixed forms are their own keys, longest-first: with only a bare `$`, `AUD$45` reads its letters
-        // as a word and drops the sign.
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["US$"] = new[] { "tāra" }, ["AUD$"] = new[] { "tāra" }, ["NZ$"] = new[] { "tāra" },
-            ["$"] = new[] { "tāra" }, ["£"] = new[] { "pauna" },
-        },
-        // ⚠ A magnitude must be declared or the currency word lands INSIDE the number: the sign is adjacent
-        // to the digits, so `$2.3 piriona` emits "tāra" there and strands the magnitude behind it.
-        Magnitudes = new[] { "miriona", "piriona", "mano" },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "kiromita" }, ["m"] = new[] { "mita" }, ["m/h"] = new[] { "maero ia hāora" },
-            ["mm"] = new[] { "mirimita" }, ["ha"] = new[] { "heketea" }, ["l"] = new[] { "rita" }, ["L"] = new[] { "rita" },
-        },
-        UnitPer = "ia",
-        RateDenominators = new Dictionary<string, string> { ["h"] = "hāora", ["s"] = "hēkona" },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "pūrua" },
-            Cubed = new[] { "pūtoru" },
-            Position = ExponentPosition.After,
-        },
+        Percent = MaoriPhonemizer.DEF.Symbols.Percent,
+        Currency = MaoriPhonemizer.DEF.Symbols.Currency,
+        Units = MaoriPhonemizer.DEF.Symbols.Units,
+        RateDenominators = MaoriPhonemizer.DEF.Symbols.RateDenominators,
+        UnitPer = MaoriPhonemizer.DEF.Symbols.UnitPer,
+        ExponentWords = MaoriPhonemizer.DEF.Symbols.ExponentWords,
+        Magnitudes = MaoriPhonemizer.DEF.Symbols.Magnitudes,
+        Multiply = MaoriPhonemizer.DEF.Symbols.Multiply,
     });
 
     private static readonly JsRe AMP_ENTITY = JsRegex.Compile("&amp;", "giu");

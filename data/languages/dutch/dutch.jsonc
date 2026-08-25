@@ -230,5 +230,29 @@
             "ms", "mt", "nd", "ng", "nk", "ns", "nt", "pt", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp",
             "rs", "rt", "sp", "st", "ts", "ks", "ps", "sk"
         ]
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    "symbols": {
+        // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
+        // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — Dutch does
+        // not split dimension from product.
+        "multiply": { "times": "keer" },
+        "percent": ["procent"],
+        "currency": { "€": ["euro"], "$": ["dollar"], "£": ["pond"], "¥": ["yen"] },
+        "units": {
+            "km": ["kilometer"], "cm": ["centimeter"], "mm": ["millimeter"], "m": ["meter"],
+            "kg": ["kilogram"], "mg": ["milligram"], "ha": ["hectare"], "mi": ["mijl"],
+            "mph": ["mijl per uur"],
+        },
+        // ⚠ Denominators ONLY. `s` as a standalone unit makes `Il-76s` read *zesenzeventig seconde*.
+        "rateDenominators": { "u": "uur", "h": "uur", "s": "seconde" },
+        "unitPer": "per",
+        // Dutch puts the measure word BEFORE the unit, spaced, and measure nouns stay singular after a numeral.
+        "exponentWords": { "squared": ["vierkante"], "cubed": ["kubieke"], "position": "before" },
+        "magnitudes": ["miljoen", "miljard", "biljoen"]
     }
 }

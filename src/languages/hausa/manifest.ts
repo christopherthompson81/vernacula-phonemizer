@@ -6,6 +6,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface HausaManifest {
     rules: [string, string, boolean][];
@@ -23,6 +24,15 @@ export interface HausaManifest {
     };
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** The shared symbol tier's data — moved verbatim, comments included. */
+    symbols: {
+        multiply: { times: string; by?: string };
+        percentPrefix: boolean;
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 /** The consolidated hand-authored Hausa data tables (see hausa.jsonc). */

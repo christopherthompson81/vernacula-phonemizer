@@ -8,16 +8,11 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeMaori } from "./normalize.ts";
 
-interface MaoriDef {
-    digraphs: Record<string, string>;
-    graphemes: Record<string, string>;
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<MaoriDef>(import.meta.url, "maori.jsonc");
+const DEF = MANIFEST;
 const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;

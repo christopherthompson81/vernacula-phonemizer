@@ -92,7 +92,7 @@ public static class PolishPhonemizer
                         sink.Emit(PhonemizeWord(wd));
                     if (frac is not null)
                     {
-                        sink.Emit(PhonemizeWord("przecinek")); // the Polish name of the decimal comma
+                        sink.Emit(PhonemizeWord(Manifest.MANIFEST.DecimalWord)); // the Polish name of the decimal comma
                         foreach (var d in Js.CodePoints(frac))
                             foreach (var wd in PolishNumbers.NumberToWords(Js.Number(d)).Split(' '))
                                 sink.Emit(PhonemizeWord(wd));

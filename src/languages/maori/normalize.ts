@@ -1,4 +1,5 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { MANIFEST as DEF } from "./manifest.ts";
 
 /**
  * Māori (mi) text normalization — the pre-tokenizer pass, pure text→text. Runs inside maori.ts's `text()`.
@@ -55,23 +56,14 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * invented — and a digit-adjacent `t` here is usually `tāngata` ("people"), not a tonne.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    multiply: { times: "whakarea" },
-    percent: ["ōrau"],
-    // Prefixed forms are their own keys, longest-first: with only a bare `$`, `AUD$45` read its letters as a word
-    // and dropped the sign. `NZ$` is declared because it is this language's own currency, not on frequency; the
-    // other four do not depend on it.
-    currency: { "US$": ["tāra"], "AUD$": ["tāra"], "NZ$": ["tāra"], $: ["tāra"], "£": ["pauna"] },
-    // ⚠ A magnitude must be declared or the currency word lands INSIDE the number: without these, `$2.3 piriona`
-    // read "rua . toru TĀRA piriona" — the sign is adjacent to the digits, so the word is emitted there and the
-    // magnitude stranded behind it. Māori writes the magnitude first and takes no connective.
-    magnitudes: ["miriona", "piriona", "mano"],
-    units: {
-        km: ["kiromita"], m: ["mita"], "m/h": ["maero ia hāora"],
-        mm: ["mirimita"], ha: ["heketea"], l: ["rita"], L: ["rita"],
-    },
-    unitPer: "ia",
-    rateDenominators: { h: "hāora", s: "hēkona" },
-    exponentWords: { squared: ["pūrua"], cubed: ["pūtoru"], position: "after" },
+    percent: DEF.symbols.percent,
+    currency: DEF.symbols.currency,
+    units: DEF.symbols.units,
+    rateDenominators: DEF.symbols.rateDenominators,
+    unitPer: DEF.symbols.unitPer,
+    exponentWords: DEF.symbols.exponentWords,
+    magnitudes: DEF.symbols.magnitudes,
+    multiply: DEF.symbols.multiply,
 });
 
 /** The Māori normalization pass — the shared symbol tier plus the local sign rules below. */

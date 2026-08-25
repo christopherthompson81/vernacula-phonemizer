@@ -4,6 +4,7 @@
  * punctuation). The open/closed vowel-length lookahead + final devoicing ALGORITHM lives in afrikaans.ts.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import type { SignWords } from "../../core/normalizeSymbols.ts";
 
 export interface AfrikaansManifest {
@@ -69,6 +70,18 @@ export interface AfrikaansManifest {
         stKeep: string[];
         /** Vowel-initial suffixes that resyllabify the stem's final consonant → it does NOT devoice. */
         resyllabifyingSuffixes: string[];
+    };
+    /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
+    decimalWord: string;
+    /** The shared symbol tier's data — moved verbatim from afrikaans.ts, comments included. */
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        rateDenominators: Record<string, string>;
+        unitPer: string;
+        exponentWords: { squared: CountForms; cubed: CountForms; position: "before" | "after" };
+        magnitudes: string[];
     };
 }
 

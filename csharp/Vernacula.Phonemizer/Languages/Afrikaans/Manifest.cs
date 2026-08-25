@@ -95,6 +95,10 @@ public sealed class AfrikaansManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public AfrikaansNumbersDef Numbers { get; init; } = new();
     public AfrikaansMorphologyDef Morphology { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public AfrikaansSymbols Symbols { get; init; } = new();
+    /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
+    public string DecimalWord { get; init; } = "";
 }
 
 public static class Manifest
@@ -107,4 +111,15 @@ public static class Manifest
      * letters.
      */
     public static readonly List<string> FIXED_KEYS = MANIFEST.Fixed.Keys.OrderByDescending(k => k.Length).ToList();
+}
+
+public sealed class AfrikaansSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
 }

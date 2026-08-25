@@ -15,6 +15,8 @@ public sealed class AsturianDef
     public IReadOnlyList<string> VowelLetters { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> FrontLetters { get; init; } = Array.Empty<string>();
     public AsturianNumbers Numbers { get; init; } = new();
+    /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
+    public string DecimalWord { get; init; } = "";
 }
 
 public sealed class AsturianPhonemizer : ILanguage
@@ -134,7 +136,7 @@ public sealed class AsturianPhonemizer : ILanguage
                 foreach (var wd in Numbers.NumberToWords(Js.Number(intPart)).Split(' ')) sink.Emit(PhonemizeWord(wd));
                 if (frac is not null)
                 {
-                    sink.Emit(PhonemizeWord("coma"));
+                    sink.Emit(PhonemizeWord(DEF.DecimalWord));
                     foreach (var dg in frac)
                         foreach (var wd in Numbers.NumberToWords(Js.Number(dg.ToString())).Split(' ')) sink.Emit(PhonemizeWord(wd));
                 }

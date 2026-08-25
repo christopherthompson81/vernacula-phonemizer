@@ -32,22 +32,12 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 // symbol normalization — Hausa: % is "kashi" BEFORE the number (the corpus's "kashi 80%"); nouns
 // stay SINGULAR after numerals; the unit words are the corpus's own borrowings (kilomita, mita).
 const SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
-    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
-    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
-    // omitted and defaults to it — this language does not split dimension from product.
-    multiply: { times: "sau" },
-    percent: ["kashi"],
-    percentPrefix: true,
-    // `dala` is the Hausa dollar, and the corpus proves it in the two places it names the currency —
-    // "dalar Amurka" and "biliyoyin dalolin Amurka". The shipped `dollar` was the English spelling and is
-    // attested nowhere; the review tool's sourcing line flags exactly that. (`dala` is polysemous — it is
-    // also "pyramid", which is what four of its seven corpus hits are — but the tier only emits it after a
-    // currency sign, so the other sense cannot be reached.) `yen` is the standard borrowing and the corpus
-    // does write ¥ ×2, but the word itself is unattested here: a stated assumption, not a source.
-    currency: { "$": ["dala"], "€": ["euro"], "¥": ["yen"], "£": ["fam"] },
-    units: { km: ["kilomita"], m: ["mita"], kg: ["kilogram"], mm: ["milimita"], cm: ["santimita"] },
-    exponentWords: { squared: ["murabba'i"], cubed: ["cubic"] },
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    percentPrefix: MANIFEST.symbols.percentPrefix,
+    multiply: MANIFEST.symbols.multiply,
 });
 
 class HausaPhonemizer implements Phonemizer {

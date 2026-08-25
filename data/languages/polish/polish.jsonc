@@ -103,5 +103,10 @@
             "rk", "rs", "rn", "rm", "rz", "lt", "ld", "lk", "ls", "lm", "łt", "łd", "łk", "kt", "ks", "pt",
             "ft", "zm", "zn", "sk", "sm", "tr", "dr", "br", "gr", "pr", "kr", "wr", "cs", "js", "js"
         ]
-    }
+    },
+
+    // The name of the DECIMAL COMMA, emitted between the integer and fractional parts. ⚠ 35 languages
+    // already declared this; these four alone passed the word to the engine as a bare literal, so the
+    // same fact was manifest data in Dutch and a string in the code next door.
+    "decimalWord": "przecinek"
 }

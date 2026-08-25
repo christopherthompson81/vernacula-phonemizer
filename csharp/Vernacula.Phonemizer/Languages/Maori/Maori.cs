@@ -13,6 +13,8 @@ public sealed class MaoriDef
     public IReadOnlyDictionary<string, string> Graphemes { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public MiNumbers Numbers { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public MaoriSymbols Symbols { get; init; } = new();
 }
 
 /** Read a Latin run with another language's engine — injected from the registry (English). */
@@ -128,4 +130,16 @@ public sealed class MaoriPhonemizer : ILanguage
 
     internal static void RegisterSelf() =>
         Registry.Register("maori", () => CreateMaori(latin => Registry.ReadAsEnglish(latin)));
+}
+
+public sealed class MaoriSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public MultiplyDef Multiply { get; init; } = null!;
 }

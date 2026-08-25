@@ -127,24 +127,17 @@ function numberTokenToWords(tok: string): string {
 // consumed earlier, in normalize.ts step 4, before this tier can break the adjacency.
 /** The unit table, named so the apostrophe-suffix rule below can derive its alternation from the SAME object
  *  the tier is given — a second hand-written list would drift the moment a unit is added. */
-const UNITS = { km: ["kilometre"], cm: ["santimetre"], mm: ["milimetre"], kg: ["kilogram"], m: ["metre"] };
+// ⚠ ONE SOURCE, TWO CONSUMERS: the symbol tier below and `UNIT_ALT`, which keys the apostrophe-suffix rule
+// on the DECLARED units rather than on \p{L}+ (see its header). Both must see the same list.
+const UNITS = MANIFEST.symbols.units;
 
 const SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-    // One word, so `by` defaults to it; this language does not split dimension from product.
-    multiply: { times: "çarpı" },
-    percent: ["yüzde"],
-    percentPrefix: true,
-    currency: { "€": ["avro"], "$": ["dolar"], "£": ["sterlin"], "₺": ["lira"], "¥": ["yen"] },
-    units: UNITS,
-    // THE MEASURE WORD FUSES ONTO THE END, which is the `suffix` position and the reason it exists. This
-    // corpus writes `783.562 kilometrekare` ×4 and `120-160 metreküp` ×2 — one word each. Neither of the
-    // other three positions produces that: `after` gives *kilometre kare*, `compound` gives *karekilometre*.
-    // ⚠ Bare `kare` ×6 is the SHAPE ("küçük kare veya toplardan"), plus one `mil kare` for the imperial
-    // gloss — the fused unit form is the attestation, not the bare word.
-    exponentWords: { squared: ["kare"], cubed: ["küp"], position: "suffix" },
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    percentPrefix: MANIFEST.symbols.percentPrefix,
+    multiply: MANIFEST.symbols.multiply,
 });
 
 /**

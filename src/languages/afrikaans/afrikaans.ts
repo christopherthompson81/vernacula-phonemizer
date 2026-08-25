@@ -457,42 +457,14 @@ const TOKEN = /(['’]?\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Scrip
 
 // Afrikaans measure and currency nouns are INVARIANT after a numeral ("drie persent", "480 kilometer per uur").
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ Declaring `multiply` HERE is what makes ASCII `x` read like `×`: otherwise `6x6 cm` reads the `x` as a
-    // LETTER NAME, and `NxN` is the commoner written form. One word, so `by` defaults to it — Afrikaans does not
-    // split dimension from product.
-    // ⚠ ONE SOURCE with signWords.times — `6 × 6` goes through normalize.ts and `6x6 cm` through this
-    // tier, and they must read the same word.
     multiply: { times: MANIFEST.signWords.times },
-    percent: ["persent"],
-    currency: { "€": ["euro"], "$": ["dollar"], "£": ["pond"], "¥": ["jen"], "U$": ["VS-dollar"], "VS$": ["VS-dollar"] },
-    units: {
-        km: ["kilometer"], cm: ["sentimeter"], mm: ["millimeter"], kg: ["kilogram"],
-        mi: ["myl"], mph: ["myl per uur"],
-        // `m` is declared because `kubieke`/`vierkante` below cannot reach a bare metre without it.
-        // ⚠ THE HAZARD IS `40 m.p.u` (myl per uur, the Afrikaans spelling), which a letter-guard does NOT reject
-        // because a dot is not a letter — but normalize.ts rewrites the dotted abbreviation to words BEFORE the
-        // tier runs, so no bare `m` survives to be misread.
-        // ⚠ RESIDUAL EXPOSURE, stated rather than left to be discovered: normalize.ts step 7 rewrites a version
-        // dot to the WORD "punt" before the tier runs, so the tier's `NOT_VERSION` guard has no dot left to see
-        // and `802.11m` reads as "…elf METER". Bounded and unattested: that rule fires only on THREE-or-more
-        // integer digits plus one trailing letter, so `6.5m` is untouched, and 802.11 comes as a/b/g/n.
-        m: ["meter"],
-        // ⚠ THE ONE-LETTER UNITS, declared because #762 made their absence AUDIBLE: a bare letter is now
-        // spelled as its name, so an undeclared `3 g suiker` read "drie GEE suiker" — a confident wrong
-        // WORD where it used to be a wrong phone. Only these three, all of which follow a numeral in
-        // ordinary text; anything rarer stays undeclared rather than guessed at.
-        // ⚠ ⟨V⟩ AND ⟨W⟩ ARE CAPITAL BECAUSE THEY ARE NAMED AFTER PEOPLE (Volta, Watt), and the resolver
-        // is case-sensitive for one-letter symbols (#763), so a lower-case ⟨v⟩/⟨w⟩ is correctly NOT read
-        // as a unit. ⟨t⟩ is the tonne; ⟨T⟩ would be the tesla and is deliberately not declared.
-        g: ["gram"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
-        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
-        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
-        l: ["liter"], L: ["liter"], t: ["ton"], V: ["volt"], W: ["watt"],
-    },
-    rateDenominators: { h: "uur", u: "uur", s: "sekonde" },
-    unitPer: "per",
-    exponentWords: { squared: ["vierkante"], cubed: ["kubieke"], position: "before" },
-    magnitudes: ["miljoen", "miljard", "biljoen"],
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    rateDenominators: MANIFEST.symbols.rateDenominators,
+    unitPer: MANIFEST.symbols.unitPer,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    magnitudes: MANIFEST.symbols.magnitudes,
 });
 
 class AfrikaansPhonemizer implements Phonemizer {
@@ -507,7 +479,7 @@ class AfrikaansPhonemizer implements Phonemizer {
                 const [intPart, frac] = m[2].replace(/,/gu, "").split(".");
                 for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
-                    sink.emit(phonemizeWord("komma"));
+                    sink.emit(phonemizeWord(MANIFEST.decimalWord));
                     for (const d of frac)
                         for (const wd of numberToWords(Number(d)).split(" ")) sink.emit(phonemizeWord(wd));
                 }
