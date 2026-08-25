@@ -535,8 +535,9 @@ as the decimal point and it is ×11/8 meaning **"share / proportion"** — `ры
   count …") and confirmed antiquated. The supplied string also carries an **Arabic letter پ (U+067E)** where
   Tibetan པ belongs, which is a generation artifact rather than a spelling.
 * **za — HELD.** `Lingzha` ×0, as are `lingzhaj` and `lingz laj`. The parts attest (`lingz` zero ×34, `laj`
-  below ×19) but the juncture is a syntax claim, and the language's own subtraction word `gemj` is a
-  homograph of **cheek**. A calque of 零下 is plausible; its written form is not sourced.
+  below ×19) but the juncture is a syntax claim. ⚠ THIS ENTRY ORIGINALLY ALSO CITED `gemj`/"cheek", WHICH IS
+  THE WRONG CANDIDATE — `gemj` was the EARLIER Zhuang proposal; this phrase proposes `Lingzha`, a different
+  word entirely. See Run 14 for what the right candidate actually measures.
 * **ltg — HELD, and the reason is a spelling one.** The phrase misspells the numeral this repo has sourced,
   so its Latgalian orthography is not something to take on trust for a word that is itself ×0 (`minus`,
   `mīnus`, `komats` all absent). Sister Latvian ships `mīnuss` on 1/1 — the route is real, but whether
@@ -558,3 +559,91 @@ not noticed. `ab_list` turns out to carry a whole sign block with Abkhaz names (
 though its `-` entry is the HYPHEN's name, not a minus reading. Worth sweeping for the languages still open.
 
 **Five remain: ak, bo, ltg, mos, za.**
+
+## Run 13 — a correction: homography is not the disqualifier I kept calling it — 2026-08-25 21:15
+
+Challenged on why a homograph should disqualify a candidate at all. It should not, and I had been leaning on
+it in three places. Unpicking what each refusal actually rested on:
+
+**⚠ THE YORUBA ONE WAS SIMPLY WRONG.** I wrote that a composed `ìsàlẹ̀ òdo` "would be heard as *downriver*"
+because `odo` is RIVER and `òdo` is ZERO, distinguished only by tone marks that half of running Yoruba omits.
+But this layer EMITS the string, and it emits it toned:
+
+```
+  òdo  (zero)   →  o˩do˧
+  odo  (river)  →  o˧do˧
+```
+
+Two different pronunciations, and the g2p produces the right one from the marks we write. The collision is a
+problem for a human READING untoned Yoruba, not for what a phonemizer OUTPUTS. The refusal survives on the
+other ground — the juncture is a syntax claim the two content words do not supply, and Setswana's turned out
+to need a connective (`kwa tlase **ga** lefela`) — but the homograph half of the argument is withdrawn.
+
+**⚠ THE ZHUANG AND TIBETAN ONES WERE MISLABELLED.** I called them homograph failures; they are MISSING-SENSE
+failures, which is a different thing:
+
+* `gemj` — Wiktionary gives ONE sense, **cheek**, from Proto-Tai \*keːmꟲ, and the corpus adds a Chinese-loan
+  verb "to decrease" (`gemj daengz -420m`). Neither is a negative marker. That it also means cheek is
+  incidental; what disqualifies it is that the sense we want is absent.
+* `མོ་གྲངས` — the maths sense exists but is archaic, and the modern one (census "female count") is what a
+  reader meets. Again a sense problem.
+
+**Where homography DOES cost, and it is narrower than I implied:** when the competing sense is a
+high-frequency FUNCTION word that captures the syntactic parse. Haitian `mwen` is the case — the 1SG pronoun,
+so *mwen ven degre* parses as "I twenty degrees" with the sign never read as a sign. That is about parse
+capture, not about two words sharing a spelling. (And it did not change an outcome: `mwens` shipped, not
+`mwen`.)
+
+**The general rule, corrected:** a phonemizer emits a PRONUNCIATION, so a same-sounding homograph costs
+nothing the written form did not already cost — the listener does exactly the disambiguation a reader does.
+Where the senses differ in tone or stress, it costs less than nothing, because we control the marks. Only a
+function-word collision is worth refusing on.
+
+None of the shipped decisions change. Two of the refusals keep their outcome on better-stated grounds, and
+one argument is withdrawn outright.
+
+## Run 14 — web-searching the four held, and closing espeak as a tier — 2026-08-25 21:40
+
+**espeak is not a source for minus words, for anyone.** Swept its dictsource after Run 12 flagged it as
+promising. Two results, and the second is the general one:
+
+* **No dictsource exists at all for ak, bo, za or ltg** — the four still open. The tier is empty for them.
+* For the languages espeak DOES ship, the `-` slot is the HYPHEN'S NAME, never a minus reading: lv
+  `_- defise`, ka `_- tire`. It carries `+`, `%`, `$`, `&`, `=` — lv even has `± plusmi:nuss`, the entry
+  Latvian's `plusMinus` came from — but a minus-sign word is absent across the board. Worth recording so
+  nobody re-runs this tier for this class.
+
+**Web search corroborated none of the four markers**, but returned two contextual findings worth keeping:
+
+* **mos** — Burkina Faso has run bilingual French/Mooré primary classes since 1994, and there is a paper
+  specifically on Mooré mathematical neologisms (*Procédés d'enrichissement du lexique mathématique en moore
+  dans les classes bilingue français/moore au Burkina Faso*, ResearchGate — 403 to automated fetch). So a
+  documented Mooré maths lexicon EXISTS and is reachable by a human; it also makes the supplied English
+  `minus` less likely still, since the classes are French-medium.
+* **ak** — Ghana's mathematics curriculum is English-medium (NaCCA primary syllabus, SHS curriculum), which
+  supports the code-switch reading the Naija argument rests on, but supplies no Akan word.
+* **za** — Wiktionary gives `gemj` exactly one sense, **cheek**, with a Proto-Tai etymology. That is an
+  independent second source for the refusal.
+* **ltg** — the Latgalian dictionaries exist online (`vuordineica.lv`, the LU and RTA projects) but none is
+  queryable from here for this entry.
+
+**Still five: ak, bo, ltg, mos, za** — bo refused, the other four held with a named next step each.
+
+### Run 14b — Zhuang, on the candidate actually proposed — 2026-08-25 22:00
+
+⚠ **I refused Zhuang by answering the wrong word.** `gemj` was the candidate in the FIRST batch of language
+notes; the whole-phrase reading proposes **`Lingzha`**, which is not `gemj` and shares nothing with it. The
+cheek etymology is irrelevant to it. Re-run against the right candidate:
+
+* **`Lingzha` does not parse in Standard Zhuang orthography.** Final consonant letters carry TONE — `lingz`
+  is *ling* + tone 2 (zero), `laj` is *la* + tone 3 (below, Wiktionary: "below; underside; bottom", antonym
+  `gwnz`). A syllable written `ha` is tone 1 and is not the "below" morpheme; `laj` is. So the supplied form
+  is malformed rather than merely unattested.
+* **The grammatically motivated forms are ×0**: `laj lingz`, `lajlingz`, `lingz laj`, `lingzhaj`, `gwnz lingz`.
+* **The parts are solid.** `lingz` ×34 — and the examples show BOTH senses cleanly: `Lingz … dwg cungj
+  doenghduz nyamhcij` is the MONKEY, while `Bak lingz loeg(106)` is the zero of Chinese-style number names
+  (百零六). The zero sense is well attested in exactly the numeral register. `laj` ×19.
+
+So Zhuang is held on the JUNCTURE — which of `laj lingz` / `lingzlaj` / something else a speaker says — and
+not on any collision. (`lingz` is itself a homograph with "monkey", and by Run 13's corrected rule that costs
+nothing: same pronunciation either way, and context disambiguates exactly as it does in writing.)

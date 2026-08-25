@@ -21,6 +21,49 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "laj lingz",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "lajlingz",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "lingz",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Lingz, lij heuh maxlaeuz、duzlingz, dwg cungj doenghduz nyamhcij.…",
+                "…Bak lingz loeg(106) dwg aen swhyienzsoq, beij bak lingz haj hung, bei…",
+                "…Bak lingz loeg(106) dwg aen swhyienzsoq, beij bak lingz haj hung, beij bak lingz caet nyaeq.…",
+                "…106) dwg aen swhyienzsoq, beij bak lingz haj hung, beij bak lingz caet nyaeq.…",
+                "…Bak lingz bat(108) dwg aen swhyienzsoq, beij bak lingz caet hung, bei…",
+                "…Bak lingz bat(108) dwg aen swhyienzsoq, beij bak lingz caet hung, beij bak lingz gouj nyaeq.…"
+            ]
+            },
+        {
+                "word": "gwnz lingz",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
                 "word": "lingzha",
                 "verdict": "absent",
                 "bounded": true,
@@ -55,22 +98,6 @@
                 "articles": 0,
                 "substringOnly": 0,
                 "examples": []
-            },
-        {
-                "word": "lingz",
-                "verdict": "attested",
-                "bounded": true,
-                "tokenHits": 34,
-                "articles": 18,
-                "substringOnly": 0,
-                "examples": [
-                "…Lingz, lij heuh maxlaeuz、duzlingz, dwg cungj doenghduz nyamhcij.…",
-                "…Bak lingz loeg(106) dwg aen swhyienzsoq, beij bak lingz haj hung, bei…",
-                "…Bak lingz loeg(106) dwg aen swhyienzsoq, beij bak lingz haj hung, beij bak lingz caet nyaeq.…",
-                "…106) dwg aen swhyienzsoq, beij bak lingz haj hung, beij bak lingz caet nyaeq.…",
-                "…Bak lingz bat(108) dwg aen swhyienzsoq, beij bak lingz caet hung, bei…",
-                "…Bak lingz bat(108) dwg aen swhyienzsoq, beij bak lingz caet hung, beij bak lingz gouj nyaeq.…"
-            ]
             },
         {
                 "word": "laj",
