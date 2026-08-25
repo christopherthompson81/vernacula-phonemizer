@@ -17,8 +17,39 @@ public sealed class GreekNumbersDef
     public string And { get; init; } = "";
 }
 
+public sealed class GreekOrdinals
+{
+    public string[] Units { get; init; } = [];
+    /** ⚠ All OXYTONE, which selects the second column of `Endings`. */
+    public string[] Tens { get; init; } = [];
+    public IReadOnlyDictionary<string, string[]> Endings { get; init; } = new Dictionary<string, string[]>();
+}
+
+public sealed class GreekClock
+{
+    public string[] HoursFeminine { get; init; } = [];
+    public string[] MinuteUnits { get; init; } = [];
+    public string[] MinuteTeens { get; init; } = [];
+    public string[] MinuteTens { get; init; } = [];
+}
+
 public sealed class GreekManifest
 {
+    /** Accented vowel → its bare letter. ⚠ Greek.cs DERIVES the stressed-vowel set from these keys. */
+    public IReadOnlyDictionary<string, string> Tonos { get; init; } = new Dictionary<string, string>();
+    /** ⚠ Synizesis palatalises λ and ν, which `Palatal` does not cover; κ/γ/χ come from `Palatal`. */
+    public IReadOnlyDictionary<string, string> SynizesisPalatal { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> Homoglyphs { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> WordAcronyms { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> MixedCaseInitialisms { get; init; } = new Dictionary<string, string>();
+    public GreekOrdinals Ordinals { get; init; } = new();
+    public IReadOnlyDictionary<string, int> AlphabeticNumerals { get; init; } = new Dictionary<string, int>();
+    /** ⚠ Hours are FEMININE and minutes NEUTER — two series for the same digits. */
+    public GreekClock Clock { get; init; } = new();
+    /** ⚠ CASE-SENSITIVE: π.Χ. is "before Christ", π.χ. is "for example". */
+    public IReadOnlyDictionary<string, string> Abbreviations { get; init; } = new Dictionary<string, string>();
+
     public string Language { get; init; } = "";
     public string Name { get; init; } = "";
     public IReadOnlyList<string> Script { get; init; } = Array.Empty<string>();

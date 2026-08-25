@@ -120,4 +120,67 @@ public static class Js
         double.TryParse(s, System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out var v)
             ? v
             : double.NaN;
+
+    /**
+     * JS `String.prototype.toLowerCase`, which .NET's `ToLowerInvariant` is NOT.
+     *
+     * ⚠ THE DIFFERENCE IS THE GREEK FINAL SIGMA, and it is a real divergence rather than a nicety. JS
+     * implements the Unicode SpecialCasing `Final_Sigma` condition, so `"ΠΟΙΟΣ".toLowerCase()` is `ποιος`
+     * with ς. .NET returns `ποιοσ` with σ in EVERY culture — invariant, el-GR and current alike, all
+     * checked. The Greek g2p's `isCons` excludes ς by name, so the two engines took different branches and
+     * `ΠΟΙΟΣ` read `pios` in C# against `pços` in Node.
+     *
+     * `Final_Sigma`: Σ lowercases to ς when a cased letter precedes it (skipping case-ignorable characters)
+     * and no cased letter follows it (likewise). Everything else is `ToLowerInvariant`.
+     */
+    public static string ToLowerCase(string s)
+    {
+        if (s.IndexOf('\u03a3') < 0) return s.ToLowerInvariant(); // no Σ ⇒ the two agree
+        var lower = s.ToLowerInvariant().ToCharArray();
+        for (var i = 0; i < s.Length; i++)
+        {
+            if (s[i] != '\u03a3') continue;
+            if (CasedBefore(s, i) && !CasedAfter(s, i)) lower[i] = '\u03c2';
+        }
+        return new string(lower);
+    }
+
+    private static bool IsCaseIgnorable(char c)
+    {
+        var cat = char.GetUnicodeCategory(c);
+        return cat is System.Globalization.UnicodeCategory.NonSpacingMark
+            or System.Globalization.UnicodeCategory.EnclosingMark
+            or System.Globalization.UnicodeCategory.Format
+            or System.Globalization.UnicodeCategory.ModifierLetter
+            or System.Globalization.UnicodeCategory.ModifierSymbol
+            || c is '\'' or '\u2019' or '\u00b7' or '\u0387' or ':' or '.';
+    }
+
+    private static bool IsCased(char c)
+    {
+        var cat = char.GetUnicodeCategory(c);
+        return cat is System.Globalization.UnicodeCategory.UppercaseLetter
+            or System.Globalization.UnicodeCategory.LowercaseLetter
+            or System.Globalization.UnicodeCategory.TitlecaseLetter;
+    }
+
+    private static bool CasedBefore(string s, int i)
+    {
+        for (var k = i - 1; k >= 0; k--)
+        {
+            if (IsCaseIgnorable(s[k])) continue;
+            return IsCased(s[k]);
+        }
+        return false;
+    }
+
+    private static bool CasedAfter(string s, int i)
+    {
+        for (var k = i + 1; k < s.Length; k++)
+        {
+            if (IsCaseIgnorable(s[k])) continue;
+            return IsCased(s[k]);
+        }
+        return false;
+    }
 }

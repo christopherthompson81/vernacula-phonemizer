@@ -215,5 +215,14 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   as "hundred crore" with a leading space — one wrong answer for three quantities, in kn, ml AND te, with
   no error and no golden row to catch it. The C# indexer throws, so three off-golden probes announced it
   (#943). Chase every throw the port produces even where the TS "works".
+- ⚠ **A CORPUS COUNT IS NOT EVIDENCE UNTIL THE INSTANCES ARE READ, and this is the second time.** U+2212
+  occurs 279 times across the mined artifacts, which made a fleet-wide minus rule look well-founded. The
+  instances say otherwise: 223 are a leading sign (`−173 °C`), 37 are spaced arithmetic, but the UNSPACED
+  digit−digit ones are RANGES (`1838−1917`, `41−49`) and scientific notation (`×10−19`). A rule built on
+  the count read a lifespan as a subtraction (#955). ⚠ The same check killed a 9-language sweep that
+  looked free — adding U+2212 to an existing minus class costs one character, but the character has ZERO
+  attestation in every one of those nine corpora, and adding it to a rule tailored to a language's actual
+  orthography is invention. Cf. the Quechua `cm` row above: reading the count said "32 kilometres",
+  reading the instances said 7 of them are centimetres.
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.
