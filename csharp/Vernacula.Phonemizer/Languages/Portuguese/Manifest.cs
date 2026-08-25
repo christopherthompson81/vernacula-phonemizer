@@ -56,7 +56,7 @@ public sealed class PortugueseManifest
     public PortugueseClock Clock { get; init; } = new();
     public PortugueseEraMarkers EraMarkers { get; init; } = new();
     public string NumberSign { get; init; } = "";
-    /** ⚠ `Word` is ALWAYS PLURAL — pre-existing behaviour, not agreement. See portuguese.jsonc. */
+    /** Agrees with the count: exactly 1 → `Singular`, 0 and 2+ → `Plural`. */
     public PortugueseDegree Degree { get; init; } = new();
     public string RealWord { get; init; } = "";
     /** Dollar CODES folded to a bare `$` so the tier's declared key becomes reachable. */
@@ -100,7 +100,8 @@ public sealed class PortugueseEraMarkers
 
 public sealed class PortugueseDegree
 {
-    public string Word { get; init; } = "";
+    public string Singular { get; init; } = "";
+    public string Plural { get; init; } = "";
     public string Celsius { get; init; } = "";
     public string Fahrenheit { get; init; } = "";
 }

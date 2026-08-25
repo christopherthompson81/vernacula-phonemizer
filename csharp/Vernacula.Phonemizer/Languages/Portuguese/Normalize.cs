@@ -15,8 +15,19 @@ public static class Normalize
     // ⚠ ONE SOURCE with the symbol tier in Portuguese.cs, which applies ⟨×⟩ and ⟨&⟩ in positions this file
     // does not reach.
     private static SignWords SIGN => DEF.SignWords;
-    /** ⚠ ALWAYS PLURAL — pre-existing behaviour, not agreement. See portuguese.jsonc `degree`. */
     private static PortugueseDegree DEGREE => DEF.Degree;
+
+    /**
+     * The degree noun, agreeing with the count: *um grau*, *vinte graus*, *zero graus*.
+     *
+     * ⚠ THIS READS THE WHOLE NUMBER, NOT ITS LAST DIGIT. The three rules below used to capture `(\d)` — one
+     * digit — which was invisible while the word was a hard-coded plural (`20 °C` → *vinte graus*, right by
+     * luck: the leading digits pass through untouched) and wrong the moment the count is read off the
+     * capture, since `21 °C` would have matched the `1` and said *grau*. The same trap is recorded in
+     * Ukrainian/Normalize.cs, which hit it first.
+     */
+    private static string DegreeWord(string n) =>
+        Js.Number(Js.ReplaceFirst(n, ",", ".")) == 1 ? DEGREE.Singular : DEGREE.Plural;
 
     /** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare
      *  "no" is an extremely common Portuguese contraction (em + o), so only `nº`/`n.º`/`no` before a DIGIT
@@ -92,9 +103,9 @@ public static class Normalize
     // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following NON-ASCII letter
     // counted as a boundary and this fired when it must not — `25°Cölner` ate the ⟨C⟩ as Celsius. See
     // src/languages/*/normalize.ts, which carries the finding.
-    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C(?![\\p{L}\\p{M}])", "giu");
-    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F(?![\\p{L}\\p{M}])", "giu");
-    private static readonly JsRe DEG = JsRegex.Compile("(\\d)\\s?°", "gu");
+    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?C(?![\\p{L}\\p{M}])", "giu");
+    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?F(?![\\p{L}\\p{M}])", "giu");
+    private static readonly JsRe DEG = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°", "gu");
     private static readonly JsRe CLOCK_H = JsRegex.Compile("\\b([01]?\\d|2[0-3])\\s?h\\s?([0-5]\\d)?(?![\\p{L}\\p{M}\\d])", "gu");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("\\b([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])", "gu");
     private static readonly JsRe MINUS = JsRegex.Compile("(^|[\\s(])[-−–](\\d)", "gu");
@@ -144,9 +155,9 @@ public static class Normalize
         s = DOLLAR_CODE.Replace(s, "$");
 
         // Degrees before the unit tier, or the bare sign is left behind.
-        s = DEG_C.Replace(s, $"$1 {DEGREE.Word} {DEGREE.Celsius}");
-        s = DEG_F.Replace(s, $"$1 {DEGREE.Word} {DEGREE.Fahrenheit}");
-        s = DEG.Replace(s, $"$1 {DEGREE.Word}");
+        s = DEG_C.Replace(s, m => $"{m.Groups[1].Value} {DegreeWord(m.Groups[1].Value)} {DEGREE.Celsius}");
+        s = DEG_F.Replace(s, m => $"{m.Groups[1].Value} {DegreeWord(m.Groups[1].Value)} {DEGREE.Fahrenheit}");
+        s = DEG.Replace(s, m => $"{m.Groups[1].Value} {DegreeWord(m.Groups[1].Value)}");
 
         s = CLOCK_H.Replace(s, m => ClockWords(
             Js.Number(m.Groups[1].Value),
