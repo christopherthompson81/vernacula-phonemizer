@@ -14,20 +14,22 @@ public sealed class GreekPhonemizer : ILanguage
     private static IReadOnlyDictionary<string, string> C => Manifest.MANIFEST.Consonants;
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
 
-    private static readonly IReadOnlyDictionary<string, string> TONOS = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["ά"] = "α", ["έ"] = "ε", ["ή"] = "η", ["ί"] = "ι", ["ό"] = "ο", ["ύ"] = "υ", ["ώ"] = "ω", ["ΐ"] = "ϊ", ["ΰ"] = "ϋ",
-    };
-    private static readonly IReadOnlySet<string> STRESSED = new HashSet<string>(Js.CodePoints("άέήίόύώΐΰ"), StringComparer.Ordinal);
+    private static IReadOnlyDictionary<string, string> TONOS => Manifest.MANIFEST.Tonos;
+    // ⚠ DERIVED FROM `tonos`, not a second literal — the two held the same nine characters.
+    private static readonly IReadOnlySet<string> STRESSED = new HashSet<string>(Manifest.MANIFEST.Tonos.Keys, StringComparer.Ordinal);
 
     private static bool IsCons(string ch) => C.ContainsKey(ch) && ch != "ς";
 
     private static readonly IReadOnlySet<string> VOICELESS = new HashSet<string>(Manifest.MANIFEST.Voiceless, StringComparer.Ordinal);
 
-    private static readonly IReadOnlyDictionary<string, string> SYN_PAL = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["λ"] = "ʎ", ["ν"] = "ɲ", ["κ"] = "c", ["γ"] = "ʝ", ["χ"] = "ç",
-    };
+    // ⚠ κ/γ/χ COME FROM `palatal`, WHICH ALREADY HELD THEM — three values had two homes.
+    private static readonly IReadOnlyDictionary<string, string> SYN_PAL =
+        new Dictionary<string, string>(Manifest.MANIFEST.SynizesisPalatal, StringComparer.Ordinal)
+        {
+            ["κ"] = Manifest.MANIFEST.Palatal["κ"],
+            ["γ"] = Manifest.MANIFEST.Palatal["γ"],
+            ["χ"] = Manifest.MANIFEST.Palatal["χ"],
+        };
 
     private static readonly IReadOnlySet<string> AU_VOICED = new HashSet<string>(Manifest.MANIFEST.AuVoiced, StringComparer.Ordinal);
     private static readonly IReadOnlySet<string> SIGMA_VOICED = new HashSet<string>(Manifest.MANIFEST.SigmaVoiced, StringComparer.Ordinal);
@@ -56,7 +58,9 @@ public sealed class GreekPhonemizer : ILanguage
     /** The rule engine. */
     private static string Scan(string word, bool forceSyn)
     {
-        var raw = word.ToLowerInvariant();
+        // ⚠ Js.ToLowerCase, NOT ToLowerInvariant — .NET has no Greek final-sigma rule in any culture, so
+        // `ΠΟΙΟΣ` lowercased to ποιοσ here and to ποιος in Node, and `isCons` excludes ς by name.
+        var raw = Js.ToLowerCase(word);
         var chars = Js.CodePoints(raw);
         var stressedArr = chars.Select(ch => STRESSED.Contains(ch)).ToArray();
         var w = string.Concat(chars.Select(ch => TONOS.TryGetValue(ch, out var t) ? t : ch));
@@ -198,7 +202,7 @@ public sealed class GreekPhonemizer : ILanguage
     }
 
     /** Bare word→IPA, SHIPPED path (synizesis lexicon → rule engine). For real text. */
-    public static string PhonemizeWord(string word) => Scan(word, Lexicon().Contains(word.ToLowerInvariant()));
+    public static string PhonemizeWord(string word) => Scan(word, Lexicon().Contains(Js.ToLowerCase(word)));
 
     /**
      * Bare word→IPA, RULE-ENGINE ONLY (no lexicon) — the honest, non-circular signal for the referee eval.

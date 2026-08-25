@@ -12,96 +12,45 @@ public static class Normalize
 {
 
     /** Latin→Greek HOMOGLYPHS. */
-    private static readonly IReadOnlyDictionary<string, string> HOMOGLYPH = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["A"] = "Α", ["B"] = "Β", ["E"] = "Ε", ["H"] = "Η", ["I"] = "Ι", ["K"] = "Κ", ["M"] = "Μ",
-        ["N"] = "Ν", ["O"] = "Ο", ["P"] = "Ρ", ["T"] = "Τ", ["X"] = "Χ", ["Y"] = "Υ", ["Z"] = "Ζ",
-        ["a"] = "α", ["e"] = "ε", ["i"] = "ι", ["k"] = "κ", ["o"] = "ο", ["p"] = "ρ", ["t"] = "τ",
-        ["u"] = "υ", ["v"] = "ν", ["x"] = "χ", ["y"] = "υ",
-    };
+    private static IReadOnlyDictionary<string, string> HOMOGLYPH => Manifest.MANIFEST.Homoglyphs;
 
     /** LATIN letter → its GREEK letter name. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "έι", ["b"] = "μπι", ["c"] = "σι", ["d"] = "ντι", ["e"] = "ι", ["f"] = "εφ", ["g"] = "τζι",
-        ["h"] = "έιτς", ["i"] = "άι", ["j"] = "τζέι", ["k"] = "κέι", ["l"] = "ελ", ["m"] = "εμ", ["n"] = "εν",
-        ["o"] = "όου", ["p"] = "πι", ["q"] = "κιου", ["r"] = "αρ", ["s"] = "ες", ["t"] = "τι", ["u"] = "γιου",
-        ["v"] = "βι", ["w"] = "ντάμπλιου", ["x"] = "εξ", ["y"] = "γουάι", ["z"] = "ζετ",
-    };
+    private static IReadOnlyDictionary<string, string> LETTER_NAME => Manifest.MANIFEST.LetterNames;
 
     /** Acronyms Greek reads as a WORD rather than as letters. */
-    private static readonly IReadOnlyDictionary<string, string> WORD_ACRONYM = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["UNESCO"] = "Ουνέσκο", ["NATO"] = "ΝΑΤΟ", ["NASA"] = "Νάσα", ["ISIS"] = "Ίσις",
-        ["COVID"] = "Κόβιντ", ["ASUS"] = "Άσους",
-    };
+    private static IReadOnlyDictionary<string, string> WORD_ACRONYM => Manifest.MANIFEST.WordAcronyms;
 
     /**
      * MIXED-CASE Latin is otherwise left to the foreign fallback, with one exception: `pH` is an initialism
      * that merely happens to carry a lowercase letter, so the all-caps rule cannot reach it.
      */
-    private static readonly IReadOnlyDictionary<string, string> MIXED_CASE_INITIALISM =
-        new Dictionary<string, string>(StringComparer.Ordinal) { ["pH"] = "πι έιτς" };
+    private static IReadOnlyDictionary<string, string> MIXED_CASE_INITIALISM => Manifest.MANIFEST.MixedCaseInitialisms;
 
     /** Ordinals 1–12, masculine nominative — the citation form the inflector works from. */
-    private static readonly string[] ORD_UNITS =
-    {
-        "", "πρώτος", "δεύτερος", "τρίτος", "τέταρτος", "πέμπτος", "έκτος", "έβδομος", "όγδοος",
-        "ένατος", "δέκατος", "ενδέκατος", "δωδέκατος",
-    };
+    private static string[] ORD_UNITS => Manifest.MANIFEST.Ordinals.Units;
 
     /** Ordinal tens, masculine nominative. All OXYTONE (…ός), which changes the endings — see `inflect`. */
-    private static readonly string[] ORD_TENS =
-    {
-        "", "", "εικοστός", "τριακοστός", "τεσσαρακοστός", "πεντηκοστός", "εξηκοστός", "εβδομηκοστός",
-        "ογδοηκοστός", "ενενηκοστός",
-    };
+    private static string[] ORD_TENS => Manifest.MANIFEST.Ordinals.Tens;
 
     /**
      * Written ending → the ordinal's ending, for a BARYTONE stem (πρώτος, δέκατος, όγδοος) and for an OXYTONE
      * one (εικοστός, τριακοστός), which carries the accent on the ending itself.
      */
-    private static readonly IReadOnlyDictionary<string, string[]> ORD_ENDING = new Dictionary<string, string[]>(StringComparer.Ordinal)
-    {
-        ["ος"] = new[] { "ος", "ός" },
-        ["ου"] = new[] { "ου", "ού" },
-        ["ης"] = new[] { "ης", "ής" },
-        ["ο"] = new[] { "ο", "ό" },
-        ["η"] = new[] { "η", "ή" },
-        ["ός"] = new[] { "ος", "ός" },
-        ["ού"] = new[] { "ου", "ού" },
-        ["ής"] = new[] { "ης", "ής" },
-        ["ό"] = new[] { "ο", "ό" },
-        ["ή"] = new[] { "η", "ή" },
-    };
+    private static IReadOnlyDictionary<string, string[]> ORD_ENDING => Manifest.MANIFEST.Ordinals.Endings;
 
     /** LONGEST FIRST, so `ου` is not matched as the shorter `ο` and `ης` not as `η`. */
     private static readonly string ORD_ALT = string.Join("|", ORD_ENDING.Keys.OrderByDescending(k => k.Length));
 
     /** Greek ALPHABETIC numerals, for the regnal/era numbers of step 2. ΣΤ (6) is a two-letter sign. */
-    private static readonly IReadOnlyDictionary<string, int> GREEK_NUMERAL = new Dictionary<string, int>(StringComparer.Ordinal)
-    {
-        ["Α"] = 1, ["Β"] = 2, ["Γ"] = 3, ["Δ"] = 4, ["Ε"] = 5, ["ΣΤ"] = 6, ["Ϛ"] = 6, ["Ζ"] = 7,
-        ["Η"] = 8, ["Θ"] = 9, ["Ι"] = 10, ["Κ"] = 20, ["Λ"] = 30, ["Μ"] = 40, ["Ν"] = 50, ["Ξ"] = 60,
-        ["Ο"] = 70, ["Π"] = 80,
-    };
+    private static IReadOnlyDictionary<string, int> GREEK_NUMERAL => Manifest.MANIFEST.AlphabeticNumerals;
 
     /** FEMININE hour cardinals. */
-    private static readonly string[] HOUR_FEM =
-    {
-        "μηδέν", "μία", "δύο", "τρεις", "τέσσερις", "πέντε", "έξι", "εφτά", "οχτώ", "εννιά", "δέκα",
-        "έντεκα", "δώδεκα", "δεκατρείς", "δεκατέσσερις", "δεκαπέντε", "δεκαέξι", "δεκαεφτά", "δεκαοχτώ",
-        "δεκαεννιά", "είκοσι", "είκοσι μία", "είκοσι δύο", "είκοσι τρεις",
-    };
+    private static string[] HOUR_FEM => Manifest.MANIFEST.Clock.HoursFeminine;
 
     /** Minutes count λεπτά (neuter), so the plain neuter cardinals are right here. */
-    private static readonly string[] MIN_UNITS = { "", "ένα", "δύο", "τρία", "τέσσερα", "πέντε", "έξι", "εφτά", "οχτώ", "εννιά" };
-    private static readonly string[] MIN_TEENS =
-    {
-        "δέκα", "έντεκα", "δώδεκα", "δεκατρία", "δεκατέσσερα", "δεκαπέντε", "δεκαέξι", "δεκαεφτά",
-        "δεκαοχτώ", "δεκαεννιά",
-    };
-    private static readonly string[] MIN_TENS = { "", "", "είκοσι", "τριάντα", "σαράντα", "πενήντα" };
+    private static string[] MIN_UNITS => Manifest.MANIFEST.Clock.MinuteUnits;
+    private static string[] MIN_TEENS => Manifest.MANIFEST.Clock.MinuteTeens;
+    private static string[] MIN_TENS => Manifest.MANIFEST.Clock.MinuteTens;
 
     /** 1–59 as neuter cardinals, for the minutes of a clock time. */
     private static string MinuteWords(double m)
@@ -114,16 +63,7 @@ public static class Normalize
     }
 
     /** Multi-dot and single-dot abbreviations. */
-    private static readonly IReadOnlyDictionary<string, string> DOTTED = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["π.Χ."] = "προ Χριστού",
-        ["μ.Χ."] = "μετά Χριστόν",
-        ["π.χ."] = "παραδείγματος χάριν",
-        ["π.μ."] = "προ μεσημβρίας",
-        ["μ.μ."] = "μετά μεσημβρίας",
-        ["κ.λπ."] = "και λοιπά",
-        ["κ.ά."] = "και άλλα",
-    };
+    private static IReadOnlyDictionary<string, string> DOTTED => Manifest.MANIFEST.Abbreviations;
 
     private static readonly JsRe DOT_ESCAPE = JsRegex.Compile("\\.", "gu");
     private static readonly string DOTTED_ALT = string.Join("|", DOTTED.Keys

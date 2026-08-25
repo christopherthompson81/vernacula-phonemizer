@@ -40,6 +40,78 @@
 
     // Velar palatalisation before a front vowel [e i].
     "palatal": { "κ": "c", "γ": "ʝ", "χ": "ç", "γκ": "ɟ", "γγ": "ɟ" },
+    // ── The tables greek.ts's g2p and normalize.ts read ───────────────────────────────────────────────
+
+    // Accented vowel → its bare letter. ⚠ THE STRESSED-VOWEL SET IS DERIVED FROM THESE KEYS in greek.ts
+    // rather than written a second time; the two were separate literals holding the same nine characters.
+    "tonos": { "ά": "α", "έ": "ε", "ή": "η", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω", "ΐ": "ϊ", "ΰ": "ϋ" },
+
+    // ⚠ SYNIZESIS PALATALISES λ AND ν, WHICH `palatal` ABOVE DOES NOT COVER — that table is the
+    // before-a-front-vowel rule and additionally holds the γκ/γγ digraphs. greek.ts used to spell a third
+    // table combining κ/γ/χ from `palatal` with these two, so three values had two homes and could drift.
+    // It now takes κ/γ/χ from `palatal` and only these from here.
+    "synizesisPalatal": { "λ": "ʎ", "ν": "ɲ" },
+
+    // Latin ↔ Greek lookalikes, folded before anything reads the text as Greek.
+    "homoglyphs": {
+        "A": "Α", "B": "Β", "E": "Ε", "H": "Η", "I": "Ι", "K": "Κ", "M": "Μ", "N": "Ν", "O": "Ο",
+        "P": "Ρ", "T": "Τ", "X": "Χ", "Y": "Υ", "Z": "Ζ",
+        "a": "α", "e": "ε", "i": "ι", "k": "κ", "o": "ο", "p": "ρ", "t": "τ", "u": "υ", "v": "ν",
+        "x": "χ", "y": "υ"
+    },
+
+    // LATIN letter → its Greek letter name. Emitted SPACED: μπ is [b] initially but prenasalised [mb]
+    // medially, so joining «εφ»+«μπι» would read the B of FBI as [mb].
+    "letterNames": {
+        "a": "έι", "b": "μπι", "c": "σι", "d": "ντι", "e": "ι", "f": "εφ", "g": "τζι", "h": "έιτς",
+        "i": "άι", "j": "τζέι", "k": "κέι", "l": "ελ", "m": "εμ", "n": "εν", "o": "όου", "p": "πι",
+        "q": "κιου", "r": "αρ", "s": "ες", "t": "τι", "u": "γιου", "v": "βι", "w": "ντάμπλιου",
+        "x": "εξ", "y": "γουάι", "z": "ζετ"
+    },
+
+    // Acronyms read as a WORD rather than as letters — a LEXICAL fact, so only established ones.
+    "wordAcronyms": { "UNESCO": "Ουνέσκο", "NATO": "ΝΑΤΟ", "NASA": "Νάσα", "ISIS": "Ίσις", "COVID": "Κόβιντ", "ASUS": "Άσους" },
+    // ⚠ Mixed-case Latin goes to the foreign fallback; pH is the one initialism the all-caps rule cannot reach.
+    "mixedCaseInitialisms": { "pH": "πι έιτς" },
+
+    "ordinals": {
+        "units": ["", "πρώτος", "δεύτερος", "τρίτος", "τέταρτος", "πέμπτος", "έκτος", "έβδομος",
+                  "όγδοος", "ένατος", "δέκατος", "ενδέκατος", "δωδέκατος"],
+        // ⚠ ALL OXYTONE (…ός), which is what selects the second column of `endings`.
+        "tens": ["", "", "εικοστός", "τριακοστός", "τεσσαρακοστός", "πεντηκοστός", "εξηκοστός",
+                 "εβδομηκοστός", "ογδοηκοστός", "ενενηκοστός"],
+        // written ending → [barytone, oxytone]. ⚠ Matched LONGEST FIRST (normalize.ts sorts at load), so
+        // `ου` is not taken as `ο`. The accented spellings are the same cases written with the tonos.
+        "endings": {
+            "ος": ["ος", "ός"], "ου": ["ου", "ού"], "ης": ["ης", "ής"], "ο": ["ο", "ό"], "η": ["η", "ή"],
+            "ός": ["ος", "ός"], "ού": ["ου", "ού"], "ής": ["ης", "ής"], "ό": ["ο", "ό"], "ή": ["η", "ή"]
+        }
+    },
+
+    // Greek ALPHABETIC numerals, for regnal and era numbers. ΣΤ (6) is a two-letter sign.
+    "alphabeticNumerals": {
+        "Α": 1, "Β": 2, "Γ": 3, "Δ": 4, "Ε": 5, "ΣΤ": 6, "Ϛ": 6, "Ζ": 7, "Η": 8, "Θ": 9,
+        "Ι": 10, "Κ": 20, "Λ": 30, "Μ": 40, "Ν": 50, "Ξ": 60, "Ο": 70, "Π": 80
+    },
+
+    // The clock. ⚠ HOURS ARE FEMININE (ώρα) and minutes NEUTER (λεπτά) — two different number series for
+    // the same digits, which is why neither can come from `numbers`.
+    "clock": {
+        "hoursFeminine": ["μηδέν", "μία", "δύο", "τρεις", "τέσσερις", "πέντε", "έξι", "εφτά", "οχτώ",
+            "εννιά", "δέκα", "έντεκα", "δώδεκα", "δεκατρείς", "δεκατέσσερις", "δεκαπέντε", "δεκαέξι",
+            "δεκαεφτά", "δεκαοχτώ", "δεκαεννιά", "είκοσι", "είκοσι μία", "είκοσι δύο", "είκοσι τρεις"],
+        "minuteUnits": ["", "ένα", "δύο", "τρία", "τέσσερα", "πέντε", "έξι", "εφτά", "οχτώ", "εννιά"],
+        "minuteTeens": ["δέκα", "έντεκα", "δώδεκα", "δεκατρία", "δεκατέσσερα", "δεκαπέντε", "δεκαέξι",
+            "δεκαεφτά", "δεκαοχτώ", "δεκαεννιά"],
+        "minuteTens": ["", "", "είκοσι", "τριάντα", "σαράντα", "πενήντα"]
+    },
+
+    // ⚠ CASE-SENSITIVE: π.Χ. is "before Christ" and π.χ. is "for example".
+    "abbreviations": {
+        "π.Χ.": "προ Χριστού", "μ.Χ.": "μετά Χριστόν", "π.χ.": "παραδείγματος χάριν",
+        "π.μ.": "προ μεσημβρίας", "μ.μ.": "μετά μεσημβρίας", "κ.λπ.": "και λοιπά", "κ.ά.": "και άλλα"
+    },
+
 
     "clausePunctuation": {
         ".": ".", "!": "!", ";": "?", "?": "?", "…": ",", ",": ",", ":": ",", "·": ","

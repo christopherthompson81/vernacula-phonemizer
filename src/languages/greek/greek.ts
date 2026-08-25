@@ -24,12 +24,19 @@ const C = MANIFEST.consonants;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
 // Stress tonos → base vowel (stress is tracked separately, then stripped from the output).
-const TONOS: Record<string, string> = { ά: "α", έ: "ε", ή: "η", ί: "ι", ό: "ο", ύ: "υ", ώ: "ω", ΐ: "ϊ", ΰ: "ϋ" };
-const STRESSED = new Set("άέήίόύώΐΰ");
+const TONOS = MANIFEST.tonos;
+// ⚠ DERIVED FROM `tonos`, not a second literal. The two used to be written separately and held the same
+// nine characters — one edit to either would have made them disagree silently.
+const STRESSED = new Set(Object.keys(TONOS));
 const isCons = (ch: string): boolean => C[ch] !== undefined && ch !== "ς";
 const VOICELESS = new Set(MANIFEST.voiceless);
 // Palatal replacement of a consonant that swallows a following synizesis [i].
-const SYN_PAL: Record<string, string> = { λ: "ʎ", ν: "ɲ", κ: "c", γ: "ʝ", χ: "ç" };
+// ⚠ κ/γ/χ COME FROM `palatal`, WHICH ALREADY HELD THEM. This table used to spell all five, so three
+// values had two homes; `palatal` additionally covers the γκ/γγ digraphs, which synizesis does not.
+const SYN_PAL: Record<string, string> = {
+    ...MANIFEST.synizesisPalatal,
+    κ: MANIFEST.palatal["κ"]!, γ: MANIFEST.palatal["γ"]!, χ: MANIFEST.palatal["χ"]!,
+};
 // Voiced sounds that turn ⟨αυ ευ⟩ → [av ev] (else [af ef]), and the shorter class that voices ⟨σ⟩ → [z]
 // (before a voiced obstruent/nasal). Both include the voiced-stop DIGRAPHS — see greek.jsonc.
 const AU_VOICED = new Set(MANIFEST.auVoiced);

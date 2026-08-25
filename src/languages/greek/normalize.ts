@@ -29,6 +29,7 @@
  *     worse than the space it currently gets.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { MANIFEST } from "./manifest.ts";
 
 // ── data ────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -36,11 +37,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * Latin→Greek HOMOGLYPHS. Only ever applied where a Latin letter TOUCHES Greek script, i.e. inside a
  * token that is already broken — see step 1 for why the corpus contains these at all.
  */
-const HOMOGLYPH: Readonly<Record<string, string>> = {
-    A: "Α", B: "Β", E: "Ε", H: "Η", I: "Ι", K: "Κ", M: "Μ", N: "Ν", O: "Ο", P: "Ρ", T: "Τ",
-    X: "Χ", Y: "Υ", Z: "Ζ",
-    a: "α", e: "ε", i: "ι", k: "κ", o: "ο", p: "ρ", t: "τ", u: "υ", v: "ν", x: "χ", y: "υ",
-};
+const HOMOGLYPH: Readonly<Record<string, string>> = MANIFEST.homoglyphs;
 
 /**
  * LATIN letter → its GREEK letter name. Greek reads a Latin-script initialism with the ENGLISH letter
@@ -51,37 +48,25 @@ const HOMOGLYPH: Readonly<Record<string, string>> = {
  * The names are emitted SPACED, not joined: μπ is [b] word-initially but prenasalised [mb] medially, so
  * joining «εφ»+«μπι» would read the B of FBI as [mb]. Greek writes them spaced too.
  */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "έι", b: "μπι", c: "σι", d: "ντι", e: "ι", f: "εφ", g: "τζι", h: "έιτς", i: "άι",
-    j: "τζέι", k: "κέι", l: "ελ", m: "εμ", n: "εν", o: "όου", p: "πι", q: "κιου", r: "αρ",
-    s: "ες", t: "τι", u: "γιου", v: "βι", w: "ντάμπλιου", x: "εξ", y: "γουάι", z: "ζετ",
-};
+const LETTER_NAME: Readonly<Record<string, string>> = MANIFEST.letterNames;
 
 /**
  * Acronyms Greek reads as a WORD rather than as letters. A LEXICAL fact, so this holds only established
  * ones — anything absent falls through to letter-spelling, which is always legitimate.
  */
-const WORD_ACRONYM: Readonly<Record<string, string>> = {
-    UNESCO: "Ουνέσκο", NATO: "ΝΑΤΟ", NASA: "Νάσα", ISIS: "Ίσις", COVID: "Κόβιντ", ASUS: "Άσους",
-};
+const WORD_ACRONYM: Readonly<Record<string, string>> = MANIFEST.wordAcronyms;
 
 /**
  * MIXED-CASE Latin is otherwise left to the foreign fallback (see the header), with one exception: `pH`
  * (×3) is an initialism that merely happens to carry a lowercase letter, so the all-caps rule cannot
  * reach it. Japanese made the same single exception for the same token.
  */
-const MIXED_CASE_INITIALISM: Readonly<Record<string, string>> = { pH: "πι έιτς" };
+const MIXED_CASE_INITIALISM: Readonly<Record<string, string>> = MANIFEST.mixedCaseInitialisms;
 
 /** Ordinals 1–12, masculine nominative — the citation form the inflector works from. */
-const ORD_UNITS = [
-    "", "πρώτος", "δεύτερος", "τρίτος", "τέταρτος", "πέμπτος", "έκτος", "έβδομος", "όγδοος",
-    "ένατος", "δέκατος", "ενδέκατος", "δωδέκατος",
-];
+const ORD_UNITS = MANIFEST.ordinals.units;
 /** Ordinal tens, masculine nominative. All OXYTONE (…ός), which changes the endings — see `inflect`. */
-const ORD_TENS = [
-    "", "", "εικοστός", "τριακοστός", "τεσσαρακοστός", "πεντηκοστός", "εξηκοστός", "εβδομηκοστός",
-    "ογδοηκοστός", "ενενηκοστός",
-];
+const ORD_TENS = MANIFEST.ordinals.tens;
 
 /**
  * Written ending → the ordinal's ending, for a BARYTONE stem (πρώτος, δέκατος, όγδοος) and for an
@@ -91,49 +76,24 @@ const ORD_TENS = [
  * neut) ×34, -η (fem.nom) ×15, -ου (gen.masc/neut) ×8, -ης (gen.fem) ×5. Plural and accusative-plural
  * endings inflect the same way but do not occur, so they are not claimed.
  */
-const ORD_ENDING: Readonly<Record<string, readonly [string, string]>> = {
-    //  written    barytone  oxytone
-    "ος": ["ος", "ός"],
-    "ου": ["ου", "ού"],
-    "ης": ["ης", "ής"],
-    "ο": ["ο", "ό"],
-    "η": ["η", "ή"],
-    // The ACCENTED spellings of the same endings. An oxytone ordinal is properly written with its tonos
-    // on the ending (60ό, 21ή); this corpus writes all 55 of them bare, but both spellings occur in Greek
-    // text and both mark the same case.
-    "ός": ["ος", "ός"],
-    "ού": ["ου", "ού"],
-    "ής": ["ης", "ής"],
-    "ό": ["ο", "ό"],
-    "ή": ["η", "ή"],
-};
+const ORD_ENDING: Readonly<Record<string, readonly [string, string]>> = MANIFEST.ordinals.endings;
 /** LONGEST FIRST, so `ου` is not matched as the shorter `ο` and `ης` not as `η`. */
 const ORD_ALT = Object.keys(ORD_ENDING).sort((a, b) => b.length - a.length).join("|");
 
 /** Greek ALPHABETIC numerals, for the regnal/era numbers of step 2. ΣΤ (6) is a two-letter sign. */
-const GREEK_NUMERAL: Readonly<Record<string, number>> = {
-    Α: 1, Β: 2, Γ: 3, Δ: 4, Ε: 5, ΣΤ: 6, Ϛ: 6, Ζ: 7, Η: 8, Θ: 9,
-    Ι: 10, Κ: 20, Λ: 30, Μ: 40, Ν: 50, Ξ: 60, Ο: 70, Π: 80,
-};
+const GREEK_NUMERAL: Readonly<Record<string, number>> = MANIFEST.alphabeticNumerals;
 
 /**
  * FEMININE hour cardinals. Greek numerals 1/3/4 agree in gender and the clock counts ώρες (feminine):
  * «στις τρεις», never «στις τρία». The manifest's `numbers.units` are NEUTER, so a clock built on them
  * would be wrong for exactly those three.
  */
-const HOUR_FEM = [
-    "μηδέν", "μία", "δύο", "τρεις", "τέσσερις", "πέντε", "έξι", "εφτά", "οχτώ", "εννιά", "δέκα",
-    "έντεκα", "δώδεκα", "δεκατρείς", "δεκατέσσερις", "δεκαπέντε", "δεκαέξι", "δεκαεφτά", "δεκαοχτώ",
-    "δεκαεννιά", "είκοσι", "είκοσι μία", "είκοσι δύο", "είκοσι τρεις",
-];
+const HOUR_FEM = MANIFEST.clock.hoursFeminine;
 
 /** Minutes count λεπτά (neuter), so the plain neuter cardinals are right here. */
-const MIN_UNITS = ["", "ένα", "δύο", "τρία", "τέσσερα", "πέντε", "έξι", "εφτά", "οχτώ", "εννιά"];
-const MIN_TEENS = [
-    "δέκα", "έντεκα", "δώδεκα", "δεκατρία", "δεκατέσσερα", "δεκαπέντε", "δεκαέξι", "δεκαεφτά",
-    "δεκαοχτώ", "δεκαεννιά",
-];
-const MIN_TENS = ["", "", "είκοσι", "τριάντα", "σαράντα", "πενήντα"];
+const MIN_UNITS = MANIFEST.clock.minuteUnits;
+const MIN_TEENS = MANIFEST.clock.minuteTeens;
+const MIN_TENS = MANIFEST.clock.minuteTens;
 
 /** 1–59 as neuter cardinals, for the minutes of a clock time. */
 function minuteWords(m: number): string {
@@ -150,15 +110,7 @@ function minuteWords(m: number): string {
  * CASE-SENSITIVELY on the second letter. Every corpus instance confirms the split: the four π.χ. sit
  * before an example, the seven π.Χ. after a year.
  */
-const DOTTED: Readonly<Record<string, string>> = {
-    "π.Χ.": "προ Χριστού",
-    "μ.Χ.": "μετά Χριστόν",
-    "π.χ.": "παραδείγματος χάριν",
-    "π.μ.": "προ μεσημβρίας",
-    "μ.μ.": "μετά μεσημβρίας",
-    "κ.λπ.": "και λοιπά",
-    "κ.ά.": "και άλλα",
-};
+const DOTTED: Readonly<Record<string, string>> = MANIFEST.abbreviations;
 const DOTTED_ALT = Object.keys(DOTTED)
     .sort((a, b) => b.length - a.length)
     .map((s) => s.replace(/\./gu, "\\."))
