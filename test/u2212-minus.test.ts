@@ -168,3 +168,35 @@ describe("pcm reads U+2212 through its own English-nativisation path", () => {
         expect(say("-47.6 °C")).toBe(say("47.6 °C"));
     });
 });
+
+/**
+ * ⚠ ABKHAZ — declared on the BLOCK'S PATTERN, not on a token of its own, and that is stated rather than
+ * blurred. `минус` is ×0 on ab.wikipedia (and so is the a-prefixed `аминус`). What carries it is that every
+ * other symbol word in `abkhaz.jsonc` is a bare Russian loan the full-wiki sweep DID attest — процент,
+ * градус, доллар, евро, фунт, километра, метра, квадрат — so Abkhaz takes its sign vocabulary from Russian
+ * unadapted, and Russian's minus is минус. ky and kk, same contact profile, ship the same word on
+ * attestation. The cost of silence is measured: eleven signed temperatures on ab.wikipedia, every one a
+ * genuine negative.
+ */
+describe("ab reads U+2212 on the Russian-loan pattern its whole symbol block follows", () => {
+    const say = (s: string): string => phonemize(s, "ab");
+
+    test("a negative temperature carries the marker, and the scale still reads", () => {
+        const said = say("−47.6 °C");
+        expect(said).not.toBe(say("47.6 °C"));
+        expect(said.startsWith(say("минус"))).toBe(true);
+        // `Цельси иградус` is the manifest's own sourced Celsius form — the sign must not disturb it.
+        expect(said.endsWith(say("Цельси иградус"))).toBe(true);
+    });
+
+    test("the ASCII hyphen is untouched — in this corpus it is the RANGE mark", () => {
+        // `15-20 километра аҳаракыраҿы` is a span, and step 4 reads it as one.
+        expect(say("15-20 километра")).not.toBe(say("15 20 километра"));
+        expect(say("-47.6 °C")).toBe(say("47.6 °C"));
+    });
+
+    test("range and space-separated exponent are refused", () => {
+        expect(say("1838−1917")).toBe(say("1838 1917"));
+        expect(say("×10 −31 kg")).toBe(say("×10 31 kg"));
+    });
+});

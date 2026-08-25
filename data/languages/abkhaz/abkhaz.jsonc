@@ -184,6 +184,23 @@
     "symbols": {
         "percent": "процент",
         "degree": "градус",
+        // ⚠ THE MINUS, AND IT IS THE ONLY WORD IN THIS BLOCK WITH NO WIKI TOKEN — ×0 for both `минус` and
+        // the a-prefixed `аминус`. It is declared anyway, and the ground is this block's own pattern
+        // rather than a citation for the word itself: EVERY symbol word here is a BARE RUSSIAN LOAN that
+        // the full-wiki sweep did attest — процент, градус, доллар, евро, фунт, километра, метра, квадрат.
+        // Abkhaz takes its sign vocabulary from Russian without adapting it, and Russian's minus is минус.
+        // The sister languages with the same contact profile ship the same word on attestation (ky and kk
+        // both read `минус`), and there is no competing native candidate to be wrong about.
+        //
+        // ⚠ THE COST OF NOT DECLARING IT IS MEASURED: ab.wikipedia has ELEVEN signed temperatures and every
+        // one is a genuine negative — `Кавкасиони араионаҿ - 18, -19 °С`, `абжьаратәи аԥхарра -18 инаркны
+        // -23°C`, `(-173°С)`, `−87 °C`, `(−63 °C)`. Unread, each one inverts.
+        //
+        // ⚠ AND `ахәҭаа` IS REFUSED FOR THE DECIMAL in the same breath, because it arrived in the same
+        // proposed phrase and is the trap this file's sourcing exists to catch: ×11/8, and every instance
+        // is "share / proportion" — `рыхәԥса ахәҭаа — 14%`, `ацифратә кьыԥхь ахәҭаа 9%`. It is `ахәҭа`
+        // ("part") inflected, not a decimal point. The decimal stays unread.
+        "minus": "минус",
         "celsius": "Цельси иградус",
         "hour": "асааҭ",
         // [symbol, word] — matched only AFTER a number by the shared tier. ⚠ THE WORDS ARE THE CORPUS'S

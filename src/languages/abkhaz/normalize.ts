@@ -151,6 +151,17 @@ export function normalizeAbkhaz(text: string): string {
     s = s.replace(/(?<![\d,])\d{1,3}(?:,\d{3}){2,}(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
     s = s.replace(/(?<![\d,.])([1-9]\d{0,2}),(\d{3})(?![\d,])/gu, "$1$2");
 
+    // 2b) THE MINUS — U+2212 ONLY, and BEFORE the symbol step, because step 3 rewrites the ⟨°C⟩ this
+    //    rule's operand sits in front of and the sign would be stranded against a word (trap 39).
+    //    ⚠ `минус` is declared in the manifest on this block's Russian-loan pattern rather than on a token
+    //    of its own — see abkhaz.jsonc. The cost of leaving it unread is eleven signed temperatures on
+    //    ab.wikipedia, every one a genuine negative (`-18, -19 °С`, `(-173°С)`, `−87 °C`, `(−63 °C)`).
+    //    ⚠ U+2212 ONLY. The ASCII hyphen here is the corpus's RANGE mark — `15-20 километра аҳаракыраҿы`
+    //    is a span, and step 4 reads it as one — as well as ordinary hyphenation; U+2212 can only be the
+    //    operator, which is what licenses reading a word this wiki never spells out.
+    //    ⚠ `(?<!\p{Nd}\s)` refuses the space-separated negative exponent, the fleet-wide guard.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, `${MANIFEST.symbols.minus} `);
+
     // 3) SYMBOLS — percent, degrees, currency, км², the clock. The words and their ORDER are the
     //    full-wiki attestations recorded in the manifest `symbols` block (sourcing:
     //    docs/abkhaz_vocabulary_investigation.md).

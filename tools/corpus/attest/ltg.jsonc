@@ -21,6 +21,31 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "komats",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gradi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…. Dagdā i Daugpilī registrāta vysuzamuokuo temperatura (–43 gradi C), i Daugpilī – absoļutuo vysuaugstuokuo (+36 gradi C). De…",
+                "…a (–43 gradi C), i Daugpilī – absoļutuo vysuaugstuokuo (+36 gradi C). Deļ plotuo iudiņbaseina Latgolā lela iudiņa putnu, iudi…",
+                "…kys. Dagdā i Daugpilī registrāta vysuzamuo temperatura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). == D…",
+                "…ura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). == Dzeivinīku pasauļs == Deļ plotuo iudiņbaseina Latgol…",
+                "…kys. Dagdā i Daugpilī registrāta vysuzamuo temperatura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). Deļ…",
+                "…ura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). Deļ plotuo iudiņbaseina Latgolā lela iudiņa putnu, iudi…"
+            ]
+            },
+        {
                 "word": "nulle",
                 "verdict": "absent",
                 "bounded": true,
@@ -772,22 +797,6 @@
             ]
             },
         {
-                "word": "gradi",
-                "verdict": "attested",
-                "bounded": true,
-                "tokenHits": 6,
-                "articles": 3,
-                "substringOnly": 0,
-                "examples": [
-                "…. Dagdā i Daugpilī registrāta vysuzamuokuo temperatura (–43 gradi C), i Daugpilī – absoļutuo vysuaugstuokuo (+36 gradi C). De…",
-                "…a (–43 gradi C), i Daugpilī – absoļutuo vysuaugstuokuo (+36 gradi C). Deļ plotuo iudiņbaseina Latgolā lela iudiņa putnu, iudi…",
-                "…kys. Dagdā i Daugpilī registrāta vysuzamuo temperatura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). == D…",
-                "…ura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). == Dzeivinīku pasauļs == Deļ plotuo iudiņbaseina Latgol…",
-                "…kys. Dagdā i Daugpilī registrāta vysuzamuo temperatura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). Deļ…",
-                "…ura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). Deļ plotuo iudiņbaseina Latgolā lela iudiņa putnu, iudi…"
-            ]
-            },
-        {
                 "word": "Celsija",
                 "verdict": "absent",
                 "bounded": true,
@@ -798,15 +807,6 @@
             },
         {
                 "word": "kvadrats",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
-            },
-        {
-                "word": "komats",
                 "verdict": "absent",
                 "bounded": true,
                 "tokenHits": 0,
