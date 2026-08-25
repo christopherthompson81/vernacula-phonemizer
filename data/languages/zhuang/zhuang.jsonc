@@ -50,6 +50,26 @@
     // `cien` (10³) the next lexical step is `fanh` 萬 = 10⁴, then `ik` 億 = 10⁸ — so there is no "million"
     // word and never was. The field that used to say `"million": "fanh"` was mislabelling 万 by a factor
     // of 100, and nothing read it.
+    // ⚠ THE MINUS, DECLARED ×0 AND ON A PATTERN THIS FILE ALREADY PROVES. `lingzha` is an adaptation of
+    // Chinese 零下 língxià, "below zero", and the FIRST half of it is verified right here: `lingz` — the
+    // zero in "units" below — is itself the Chinese 零 loan, load-bearing in Zhuang's own number names
+    // (`bak lingz haj` = 105). A language whose ZERO is a Chinese numeral loan borrowing 零下 for the
+    // sub-zero reading is the same borrowing continued, not a new claim; the corpus corroborates the wider
+    // habit with `gemj` < 减 for "decrease".
+    //
+    // ⚠ WHAT IS NOT VERIFIED, STATED PLAINLY: `lingzha` is ×0 on za.wikipedia, as are `lingzhaj`,
+    // `lingz laj`, `lajlingz` and `gwnz lingz`. And the SECOND syllable's tone is a guess — a bare `ha` is
+    // tone 1 in the 1982 orthography, while 下 is a falling tone that a Zhuang loan might well write `hah`
+    // or `haq`. The string is well formed either way and the engine reads it [liːŋ˨˦ haː˨˦].
+    //
+    // ⚠ AND IT IS NOT THE NATIVE PHRASE. Zhuang's own "below" is `laj` (Wiktionary: "below; underside;
+    // bottom", antonym `gwnz`), but no juncture of `laj` with `lingz` is attested in either order, and
+    // inventing one is a claim about syntax rather than about vocabulary. The Chinese loan is what the
+    // source names and what the numeral system's own history supports.
+    //
+    // PREPOSED, as 零下 is in Chinese: 零下47.6度 → `lingzha 47.6 du`.
+    "minus": "lingzha",
+
     "numbers": {
         "units": ["lingz", "it", "ngeih", "sam", "seiq", "haj", "roek", "caet", "bet", "gouj"],
         "ten": "cib",

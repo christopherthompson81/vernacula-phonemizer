@@ -204,3 +204,34 @@ describe("ab reads U+2212 on the Russian-loan pattern its whole symbol block fol
         expect(say("×10 −31 kg")).toBe(say("×10 31 kg"));
     });
 });
+
+/**
+ * ⚠ ZHUANG — `lingzha` < Chinese 零下 "below zero", and HALF OF IT IS VERIFIED IN THE MANIFEST ITSELF.
+ * `lingz` is the zero in `numbers.units`, and it is the Chinese 零 loan already carrying Zhuang's own
+ * number names (`bak lingz haj` = 105). A language whose ZERO is a Chinese numeral loan taking 零下 for the
+ * sub-zero reading is that borrowing continued.
+ *
+ * ⚠ WHAT IS NOT VERIFIED: the word is ×0 on za.wikipedia, and the second syllable's tone is a guess — a
+ * bare `ha` is tone 1 in the 1982 orthography while 下 is falling. Recorded in the jsonc, not hidden.
+ * ⚠ AND THE ASCII HYPHEN IS REFUSED EVEN THOUGH IT CARRIES REAL NEGATIVES HERE — the corpus's Dead Sea
+ * elevations are `-418m` / `-420m` — because in this language the hyphen is also the range mark its own
+ * era rule reads (`259BC-210BC`), and the two cannot be told apart.
+ */
+describe("za reads U+2212 as the Chinese-loan `lingzha`", () => {
+    const say = (s: string): string => phonemize(s, "za");
+
+    test("the sign is read, preposed as 零下 is in Chinese", () => {
+        expect(say("−47.6 °C")).not.toBe(say("47.6 °C"));
+        expect(say("−47.6 °C").startsWith(say("lingzha"))).toBe(true);
+    });
+
+    test("the corpus's own sentence", () => {
+        // `Average daily temperatures range between −20 and 30 °C.`
+        expect(say("−20 and 30 °C")).not.toBe(say("20 and 30 °C"));
+    });
+
+    test("the hyphen is refused — it is this language's range mark", () => {
+        expect(say("-418m")).toBe(say("418m"));
+        expect(say("1838−1917")).toBe(say("1838 1917"));
+    });
+});

@@ -131,6 +131,7 @@
  *   `hundredMillion: "ik"` (10⁸) above it, and `numberToWords` composes myriad groups like Chinese.
  *   This layer still emits DIGITS throughout, so nothing here is built on top of either.
  */
+import { MANIFEST } from "./manifest.ts";
 
 /** The CJK-ideograph blocks Sawndip draws on — the same set `sawndip.ts` recognises, as a class body. */
 const HAN = "\\u{3400}-\\u{4dbf}\\u{4e00}-\\u{9fff}\\u{f900}-\\u{faff}\\u{20000}-\\u{2ebef}\\u{2f800}-\\u{2fa1f}\\u{30000}-\\u{323af}";
@@ -316,6 +317,17 @@ export function normalizeZhuang(input: string): string {
         .replace(/’/gu, "'").replace(/[“”‘「」『』]/gu, " ")
         .replace(/[—－～〜]/gu, "-").replace(/[（）《》〈〉【】\u3000]/gu, " ")  // ideographic space
         .replace(/％/gu, "%").replace(/＆/gu, "&");
+
+    // 2b) THE MINUS — U+2212 ONLY, PREPOSED, and BEFORE the era and range rules so a span cannot claim the
+    //    sign's operand first. `lingzha` < Chinese 零下; see zhuang.jsonc for what is verified (`lingz` is
+    //    the 零 loan that already carries Zhuang's own zero) and what is not (the word is ×0, and the second
+    //    syllable's tone is a guess).
+    //    ⚠ U+2212 ONLY. The ASCII hyphen here is the range mark this file's own step 4 reads (`259BC-210BC`,
+    //    `551 BC – 479 BC`) and the corpus's Dead Sea elevations are written with it too — `sang daemq
+    //    Haijdai dwg -418m … gemj daengz -420m`, which is exactly the population that WOULD be worth
+    //    claiming and exactly the character that cannot be told from a span. U+2212 can only be the operator.
+    //    ⚠ `(?<!\p{Nd}\s)` refuses the space-separated negative exponent, the fleet-wide guard.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, `${MANIFEST.minus} `);
 
     // 3) ERA MARKERS, before de-grouping and before the range rule. `BC` ×10, written both glued and
     //    spaced and on BOTH sides of a span (`259BC-210BC`, `273 BC daengz 232BC`, `551 BC – 479 BC`,

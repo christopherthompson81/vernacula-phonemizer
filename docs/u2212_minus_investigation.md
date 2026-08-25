@@ -647,3 +647,43 @@ cheek etymology is irrelevant to it. Re-run against the right candidate:
 So Zhuang is held on the JUNCTURE — which of `laj lingz` / `lingzlaj` / something else a speaker says — and
 not on any collision. (`lingz` is itself a homograph with "monkey", and by Run 13's corrected rule that costs
 nothing: same pronunciation either way, and context disambiguates exactly as it does in writing.)
+
+## Run 15 — Zhuang: the phrase IS in our orthography, and that is what makes it checkable — 2026-08-25 22:40
+
+Asked whether the supplied Zhuang phrase conforms to the orthography this engine reads. **It does** — Standard
+Zhuang, the 1982 Latin orthography, which is what `zhuang.jsonc` declares and what the scanner implements.
+It is not a different writing system (not the 1957 orthography with its ƨ/ɵ/ɯ letters, not Sawndip). So every
+word in it can be parsed against the engine's own rules, and two of them do not survive that:
+
+```
+  Lingzha  →  liːŋ˨˦ haː˨˦     TWO syllables. ⟨z⟩ is a syllable-final TONE letter and never an onset, so
+                               this can only be `lingz` + `ha`; it is not one word in this orthography.
+  siseiq   →  θiː˨˦ θeːiː˧˥    a stray `si` before `seiq` (4). The engine's 47 is `seiq cib caet`.
+  denj     →  teːn˨˦           well formed; a plausible 点 loan for the decimal, ×0 (a separate gap)
+  du weiz  →  tuː˨˦ ʔɯiː˧˩     well formed; `du` is plausibly 度, `weiz` unidentified as Celsius
+```
+
+⚠ **AND ONE TONE LETTER AWAY IS A NUMERAL.** `haj` is **five** — `bak lingz haj` is 105 in the manifest's own
+number names — so `lingz ha` sits beside `lingz haj`, "zero five", in exactly the register a minus marker
+lives in. By Run 13's corrected rule this is NOT a refusal: the two differ in tone (`haː˨˦` vs `haː˥`), the
+engine emits the marks, and a listener hears them apart. It is recorded as the reason the second syllable's
+tone matters rather than as an objection.
+
+### Shipped: za
+
+Clarified that `lingzha` is an adaptation of Chinese 零下 *língxià*. **The first half is verified in this
+repo's own data:** `lingz` is the zero in `numbers.units`, and it is itself the Chinese 零 loan, load-bearing
+in Zhuang number names (`bak lingz haj` = 105, `Bak lingz loeg` = 106 in the corpus). A language whose ZERO
+is a Chinese numeral loan borrowing 零下 for the sub-zero reading is that same borrowing continued — the
+Abkhaz argument in a different contact pair, and the corpus corroborates the wider habit with `gemj` < 减.
+
+Stated as unverified: the word is ×0, and the second syllable's tone is a guess (`ha` is tone 1; 下 is
+falling, so a real spelling might be `hah` or `haq`). Preposed, as 零下 is in Chinese.
+
+**⚠ THE HYPHEN IS REFUSED HERE EVEN THOUGH IT CARRIES REAL NEGATIVES**, which is the opposite of the usual
+reason and worth stating: za's genuine leading negatives are the Dead Sea elevations `-418m` / `-420m`,
+written with the ASCII hyphen. But the hyphen is also the range mark this file's own era rule reads
+(`259BC-210BC`, `551 BC – 479 BC`), and the two cannot be told apart. So the character that carries the
+evidence is the one that cannot be claimed, and U+2212 — which carries one instance — is the one that can.
+
+**Four remain: ak, bo, ltg, mos** — bo refused, the other three held.
