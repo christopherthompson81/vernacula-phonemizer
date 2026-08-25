@@ -120,21 +120,48 @@ The first draft of the numeral test contained `Assert.Equal(x, x)` and a tautolo
 `XII aniversário` must not read like `12 aniversário` (which is what proves the Roman policy is registered
 for the variant at all), and the two varieties must agree on word COUNT while differing in every word.
 
+## Run 9 — 2026-08-25 02:15 — fr-CA, and a docstring that was wrong
+
+**Command.** Port fr-CA (59 lines of TS, no data files) and replay a 53-line Québécois probe.
+
+**Finding (raw).** 106 C#-vs-Node readings identical, sync and async, on first compile. No Roman policy is
+registered and that is not an omission: `fr-CA` is in `ROMAN_NATIVE`, so the shared pass is skipped and
+French resolves numerals in its own normalization, with more context. C#'s `ROMAN_NATIVE` already listed it.
+
+**⚠ A DOC/CODE MISMATCH, found by writing the test from the COMMENT rather than from the behaviour.** The TS
+header claimed the lengthening codas keep the vowel tense in *both* `dire→d͡ziʁ` and `musique→myzik`. The
+first is right; the second is not — both engines say **myzɪk**, and they are correct to.
+
+The lengthening set /ʁ v z ʒ/ is about the coda **after** the vowel. In *musique* the /z/ is an ONSET
+*before* the /i/, and that /i/'s actual coda is /k/, which laxes like any other. The example was simply
+mis-chosen; the rule never claimed it.
+
+Fixed as a COMMENT in the TypeScript (no behaviour change — the 106 probe readings are byte-identical before
+and after), mirrored in the C# header, and the test now asserts the corrected claim rather than the
+documented one.
+
+**Implication.** PORTING.md's correctness lens — "does the docstring match the code" — pays out when the port
+test is written from the prose. Had I written it from the observed output, the wrong comment would have
+survived the port intact.
+
+**Sabotage:** deregistering fails 6/6; widening the affrication class to include back /u/ fails 1; swapping
+the rule ORDER (laxing before affrication, which destroys the /i/ the affrication needs) fails 1.
+
 ## Result
 
-es-419 and pt-BR ported and covered by the gate. The remaining three are named on every parity run instead
+es-419, pt-BR and fr-CA ported and covered by the gate. The remaining two are named on every parity run instead
 of being invisible:
 
 ```
-accent variants: 2/5 build — es-419, pt-BR
-⚠ NOT PORTED, and their base language IS: en-GB (variant of en), en-IN (variant of en), fr-CA (variant of fr)
+accent variants: 3/5 build — es-419, fr-CA, pt-BR
+⚠ NOT PORTED, and their base language IS: en-GB (variant of en), en-IN (variant of en)
 ```
 
 Both tests assert the REGISTRATION rather than the phonology (the goldens cover that), and pt-BR's also
 asserts the LEXICON LOAD. Verified by deregistering the factory (4/4 fail) and by breaking the lexicon
 filename (1/4 fails — the one written for it).
 
-57 languages / 11,400 rows / 0 differ; 410 C# tests, 5,057 TS tests.
+58 languages / 11,600 rows / 0 differ; 418 C# tests, 5,057 TS tests.
 
-**Remaining:** fr-CA (59 lines, IPA-only substitution — the cheap shape), en-IN (72, same shape), and en-GB
-(95 lines plus five TSV lexical sets and word-level context — the only genuinely large one).
+**Remaining:** en-IN (72 lines, IPA-only substitution — the cheap shape) and en-GB (95 lines plus five TSV
+lexical sets and word-level context — the only genuinely large one).
