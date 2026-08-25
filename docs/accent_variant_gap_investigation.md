@@ -168,22 +168,57 @@ TWO ORDERING FACTS the port had to preserve, both now sabotage-verified:
 - **The affricate-tie guard `(?!U+0361)`** is what keeps *church* and *judge* at t͡ʃ / d͡ʒ. Without it they
   become ʈ͡ʃ / ɖ͡ʒ, which is not GIE and not any English. Sabotage fails 1.
 
+## Run 11 — 2026-08-25 03:10 — en-GB, and the estimate that was too high again
+
+**Command.** Port en-GB (95 lines of TS + five TSV lexical sets) and replay a 53-line RP probe.
+
+**Finding (raw).** 106 C#-vs-Node readings identical, sync and async, **on first compile** — the same as the
+other four. The five sets are a single `LoadSet` helper over `LoadTsvMap(...).Keys`; the delta rides the same
+`wordTransform` hook en-IN uses, with the WORD argument en-IN ignores.
+
+**⚠ THE SIZING WAS WRONG A SECOND TIME.** #960 called en-GB "the only genuinely large one" and I repeated it
+in three PRs. It is 95 lines and 2,444 data rows, and none of that is difficulty — the data was already in
+the repo and the hook already existed. What is genuinely true about en-GB is the SHAPE claim: it needs the
+WORD, not just the IPA, because GenAm carries neither the BATH/TRAP nor the CLOTH/THOUGHT split, so
+membership can only be a word list. That is why no declarative variant key could express it. Shape ≠ cost,
+for the second time in this document.
+
+**Set-load check, per the pt-BR lesson.** Breaking all five filenames changes 16 probe rows, so they load and
+are load-bearing. Pinned by a test that reaches one word per set.
+
+**Sabotage:** deregistering fails 6/7 (the seventh calls the class directly, not the registry — correct);
+making BATH global fails 1 (`aftermath` → *ˈɑːftəmˌɑːθ*, converting the later TRAP æ); removing the PALM
+guard fails 2; dropping the linking-r lookahead fails 1.
+
+**THE FIRST-OCCURRENCE RULE IS THE SUBTLEST THING IN THE FILE** and the easiest to lose in a port: four of the
+lexical-set replacements deliberately omit the `g` flag, because a BATH word may carry a plain TRAP æ later in
+the same word. A port that "tidied" them to global would pass every smoke test and quietly corrupt
+`aftermath`.
+
 ## Result
 
-es-419, pt-BR, fr-CA and en-IN ported and covered by the gate. The one that remains is named on every parity run instead
+All five accent variants are ported and covered by the gate. The census that opened this investigation now reads: on every parity run instead
 of being invisible:
 
 ```
-accent variants: 4/5 build — en-IN, es-419, fr-CA, pt-BR
-⚠ NOT PORTED, and their base language IS: en-GB (variant of en)
+accent variants: 5/5 build — en-GB, en-IN, es-419, fr-CA, pt-BR
 ```
 
 Both tests assert the REGISTRATION rather than the phonology (the goldens cover that), and pt-BR's also
 asserts the LEXICON LOAD. Verified by deregistering the factory (4/4 fail) and by breaking the lexicon
 filename (1/4 fails — the one written for it).
 
-59 languages / 11,800 rows / 0 differ; 426 C# tests, 5,057 TS tests.
+60 languages / 12,000 rows / 0 differ; 435 C# tests, 5,057 TS tests.
 
-**Remaining: en-GB alone** — 95 lines plus five TSV lexical sets (bath, cloth, yod, palm, lotr) and a
-transform that needs the WORD, not just the IPA. The only one of the five that was ever genuinely large, and
-the only one a declarative `variantOf` key could not have expressed even in principle.
+## What the whole investigation cost, against what it was estimated at
+
+Five variants, five small files, ~330 lines of C#. Every one matched Node on FIRST COMPILE. The work that
+actually mattered was not the phonology at all — it was noticing the gate could not see the gap, and then
+checking, per variant, that the data files each one depends on had really loaded (pt-BR's open/close lexicon,
+en-GB's five sets), because `optional: true` turns a missing file into a plausible wrong answer rather than
+an error.
+
+⚠ I MIS-SIZED THIS TWICE, both times by reading cost off a SHAPE classification — pt-BR because it was "an
+engine mode", en-GB because it "needed word-level lexical sets". Both statements are true and neither implies
+difficulty. The classification in Run 2 was for deciding whether ONE mechanism could cover all five (it could
+not); it was never a cost model, and I used it as one.
