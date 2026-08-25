@@ -50,5 +50,20 @@
         "belas": "belas", "puluh": "puluh", "ratus": "ratus", "ribu": "ribu", "juta": "juta", "seprefix": "se",
         // Indonesian reads the decimal comma as "koma"; without it "1,5" ran the two numbers together.
         "decimalWord": "koma"
+    },
+
+    "phonotactics": {
+        "vowels": "aeiou",
+        "onsets": [
+            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "y",
+            "z", "ng", "ny", "sy", "kh", "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr",
+            "sl", "sp", "st", "sk", "tr", "sw", "ps", "kw"
+        ],
+        "codas": [
+            "b", "d", "f", "h", "k", "l", "m", "n", "ng", "p", "r", "s", "t", "kh"
+        ],
+        "digraphs": [
+            "ng", "ny", "sy", "kh"
+        ]
     }
 }

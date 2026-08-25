@@ -32,8 +32,14 @@ interface IndonesianDef {
     letterNames: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[]; digraphs: string[] };
 }
 const DEF = loadManifest<IndonesianDef>(import.meta.url, "indonesian.jsonc");
+
+/** The Indonesian data tables, exported under the name every other language uses for its manifest.
+ *  ⚠ Indonesian has no separate manifest.ts — the shape is declared here and loaded here; this alias is so
+ *  callers (and tests) do not have to know that. */
+export { DEF as MANIFEST };
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 
@@ -102,17 +108,10 @@ function stressIndex(segs: Seg[]): number {
  * license, is an acronym and nothing else.
  */
 const isUnreadableIndonesian = makeUnreadableTest({
-    vowels: /[aeiou]/u,
-    digraphs: new Set(["ng", "ny", "sy", "kh"]),
-    legalOnsets: new Set([
-        "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w",
-        "y", "z", "ng", "ny", "sy", "kh",
-        // the borrowed clusters the reformed orthography admits
-        "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr", "sl", "sp", "st", "sk",
-        "tr", "sw", "ps", "kw",
-    ]),
-    legalCodas: new Set(["b", "d", "f", "h", "k", "l", "m", "n", "ng", "p", "r", "s", "t", "kh"]),
-    liquids: /[lr]/u,
+    vowels: new RegExp(`[${DEF.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(DEF.phonotactics.onsets),
+    legalCodas: new Set(DEF.phonotactics.codas),
+    digraphs: new Set(DEF.phonotactics.digraphs),
 });
 
 /**

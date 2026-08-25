@@ -92,16 +92,9 @@ const SUFFIX = "ро|и|ест|аш|ат|ам|он|ҳо";
  * панҷ — and an over-tight coda list would spell out ordinary words.
  */
 export const isUnreadableTajik = makeUnreadableTest({
-    vowels: /[аеёиоуыэюяӣӯ]/u,
-    legalOnsets: new Set([
-        "бл", "бр", "гл", "гр", "др", "кл", "кр", "пл", "пр", "сл", "см", "сп", "ст", "тр",
-        "фл", "фр", "хл", "хр", "шк", "шл", "шп", "шт", "зв", "св", "тв", "дв", "сн",
-    ]),
-    legalCodas: new Set([
-        "ст", "шт", "фт", "хт", "ҳт", "нт", "нд", "нг", "нҷ", "нч", "нз", "нс", "мб", "мп",
-        "рб", "рд", "рг", "рз", "рк", "рқ", "рм", "рн", "рс", "рт", "рф", "рх", "рҳ", "рҷ", "рш",
-        "лб", "лд", "лк", "лм", "лт", "лф", "хш", "шк", "зм", "сб", "ск", "ср", "тр", "др", "бр", "гр",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
 
 const LETTER_NAME = MANIFEST.letterNames;
