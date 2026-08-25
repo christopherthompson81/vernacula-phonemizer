@@ -57,4 +57,15 @@ public class LanguageBootstrapTests
         var async = await Phonemizer.PhonemizeAsync(oov, "af");
         Assert.NotEqual(rules, async);
     }
+
+    [Fact]
+    public async Task SindhiAsyncUsesTheTagger()
+    {
+        // Same invariant one abjad over: the tagger restores the unwritten short vowels between the lexicon
+        // and the default-ə rules, so an OOV word must read differently on the async path.
+        const string oov = "چيو"; // rule t͡ʃˈiːʋ → neural t͡ʃjˈoː, the و glide↔vowel reinterpretation
+        var rules = Languages.Sindhi.SindhiPhonemizer.PhonemizeWordRules(oov);
+        var async = await Phonemizer.PhonemizeAsync(oov, "sd");
+        Assert.NotEqual(rules, async);
+    }
 }

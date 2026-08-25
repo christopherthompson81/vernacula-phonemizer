@@ -296,6 +296,11 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/pashto", "pashto.jsonc", Languages.Pashto.Manifest.DEF,
             "language", "name", "script", "provenance");
 
+    [Fact]
+    public void SindhiManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/sindhi", "sindhi.jsonc", Languages.Sindhi.Manifest.DEF,
+            "language", "name", "script", "provenance");
+
     // ── MODEL SIDECARS ────────────────────────────────────────────────────────────────────────────────────
     //
     // ⚠ THE SAME SILENT FAILURE, ONE DIRECTORY OVER. A `*.meta.json` beside an ONNX model is deserialized by
@@ -348,6 +353,18 @@ public class ManifestMappingTests
         Assert.Equal(256, meta.H);
         Assert.NotEmpty(meta.Src);
         Assert.NotEmpty(meta.Tgt);
+    }
+
+    /// <summary>The Sindhi tagger sidecar really does bind all three of its tables. `src`/`tags`/`charTags`
+    /// are plain camelCase, so the policy leaves them alone — this pins that rather than assuming it.</summary>
+    [Fact]
+    public void SindhiTaggerSidecarBindsItsTables()
+    {
+        var meta = JsonSerializer.Deserialize<Core.TaggerMeta>(
+            File.ReadAllText(DataPath.Resolve("languages/sindhi/sd-g2p-tagger.meta.json")), Opts)!;
+        Assert.Equal(51, meta.Src.Count);
+        Assert.Equal(168, meta.Tags.Count);
+        Assert.NotEmpty(meta.CharTags);
     }
 
     [Fact]
