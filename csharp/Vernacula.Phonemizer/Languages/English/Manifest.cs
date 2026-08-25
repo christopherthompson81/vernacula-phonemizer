@@ -42,6 +42,16 @@ public sealed class EnglishManifest
     public ArpabetDef Arpabet { get; init; } = new();
     public EnglishNumbersDef Numbers { get; init; } = new();
     public G2pClasses G2pClasses { get; init; } = new();
+    /** ⚠ NOT a letter-name table — CMUdict already names all 26. Only the ⟨a⟩ exception is data. */
+    public IReadOnlyDictionary<string, string> LetterNameExceptions { get; init; } = new Dictionary<string, string>();
+    public EnglishPhonotactics Phonotactics { get; init; } = new();
+}
+
+public sealed class EnglishPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
 }
 
 public static class Manifest

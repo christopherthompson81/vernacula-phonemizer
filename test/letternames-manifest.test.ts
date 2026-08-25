@@ -26,6 +26,7 @@ import { MANIFEST as HA } from "../src/languages/hausa/manifest.ts";
 import { MANIFEST as TA } from "../src/languages/tamil/manifest.ts";
 import { MANIFEST as TE } from "../src/languages/telugu/manifest.ts";
 import { MANIFEST as KN } from "../src/languages/kannada/manifest.ts";
+import { MANIFEST as EN } from "../src/languages/english/manifest.ts";
 
 interface Lifted {
     letterNames: Record<string, string>;
@@ -194,5 +195,52 @@ describe.each(RECOGNITION)("%s recognises an initialism run from initialismLette
     test("nothing in the list is emitted as a reading — it is a recognition list", () => {
         // Each form is native script; the IPA never contains native characters.
         for (const f of DEF.initialismLetterForms) expect(say(sentence)).not.toContain(f);
+    });
+});
+
+/**
+ * ⚠ ENGLISH HAS NO letterNames TABLE, AND SHOULD NOT. CMUdict already carries all 26 single letters with
+ * their letter-NAME pronunciations (f = EH1 F, h = EY1 CH, w = D AH1 B AH0 L Y UW0), so the speller emits
+ * the bare letters and the dictionary resolves them — a RULE, not a table. The one EXCEPTION is data: the
+ * dict has ⟨a⟩ as the reduced article AH0, not the letter name, so ⟨a⟩ alone must be respelled.
+ *
+ * ⚠ AND ENGLISH'S PHONOTACTICS ARE NEARLY UNREACHABLE, which is worth knowing before trusting a sweep over
+ * them. `core/initialisms.ts` asks `isRecorded` FIRST, and English is the one language with a pronunciation
+ * dictionary — so every real word short-circuits before the cluster test. Wrecking the vowel class changes
+ * nothing for NASA, TEST or STRENGTH: the dictionary owns all three. What reaches the test is an all-caps
+ * run that is BOTH absent from CMUdict and has a vowel, which took invented tokens to construct.
+ */
+describe("en: the speller is a rule, and the phonotactics are nearly unreachable", () => {
+    const say = (s: string): string => phonemize(s, "en").replace(/[ˈˌ]/gu, "");
+
+    test("only the ⟨a⟩ exception is declared, and it is what a spelled A reads as", () => {
+        // ⚠ CANNOT CATCH ITS OWN DECOUPLING — re-hardcoding `l === "a" ? "ay" : l` is observationally
+        // identical while the data agrees, the same limit the es and pt lifts recorded. The guard is the
+        // manifest-sabotage sweep, where wrecking `letterNameExceptions` moves 1 reading.
+        expect(Object.keys(EN.letterNameExceptions)).toEqual(["a"]);
+        // GWALT is spelled because ⟨gw⟩ is not a licensed onset; its A must be the exception, not the article.
+        expect(say("the GWALT team")).toContain(say(EN.letterNameExceptions["a"]!));
+    });
+
+    test("a run the DICTIONARY owns never reaches the cluster test", () => {
+        // NASA, TEST and STRENGTH are all in CMUdict, so `isRecorded` answers first and the phonotactics
+        // tables are not consulted at all. This is why a sweep over them scored 0 until the probe carried
+        // tokens the dictionary does not have.
+        for (const w of ["NASA", "TEST", "STRENGTH"]) expect(say(`the ${w} team`)).not.toContain(say("ay"));
+    });
+
+    test("an unlisted onset is what forces the spell", () => {
+        expect(EN.phonotactics.onsets).not.toContain("gw");
+        expect(EN.phonotactics.onsets).toContain("zl"); // an odd-looking entry that is genuinely licensed
+        // ⚠ COMPARE AGAINST THE BARE LETTER, not against a spelled-out name: the dictionary renders ⟨w⟩ as
+        // ONE token (dʌbəɫjuː) while the phrase "double you" is two, so a phrase comparison fails on a
+        // correct reading. The letter itself is what the speller emits, so the letter is what to ask for.
+        const wName = say("w");
+        expect(say("the GWEM group")).toContain(wName);       // spelled: G W E M
+        // ⚠ ASK FOR THE LETTER THE RUN ACTUALLY STARTS WITH. The first version compared ZLORP against the
+        // W name — a letter ZLORP does not contain — so it passed whether or not the run was spelled, which
+        // is exactly the failure it was meant to catch. Emptying `legalOnsets` makes ⟨zl⟩ illegal and the
+        // run is spelled Z L O R P; the Z name is the observable.
+        expect(say("the ZLORP unit")).not.toContain(say("z"));
     });
 });
