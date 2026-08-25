@@ -54,7 +54,7 @@ public static class Normalize
      */
     private static readonly JsRe METRE = JsRegex.Compile(
         "(?<![\\p{L}\\p{M}\\d.,])(?<!\\p{Nd}h[ \u00a0])(\\d+(?:\\.\\d+)?)[ \u00a0]?m(?![\\p{L}\\p{M}'’\\d])", "gu");
-    private const string METRE_WORD = "mítà";
+    private static string METRE_WORD => SYM.Metre;
 
     /** The unit nouns this layer expands, and a squared one with no number necessarily beside it. */
     private static readonly IReadOnlyDictionary<string, string> UNIT_WORDS = new Dictionary<string, string>(StringComparer.Ordinal)

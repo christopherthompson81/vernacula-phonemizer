@@ -34,6 +34,8 @@ export interface SwahiliDef {
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc.
      *  Typed off `SymbolData` itself so the declaration cannot drift from what the engine reads. */
     symbolTier: Required<Pick<SymbolData, "percent" | "currency" | "units" | "percentPrefix" | "currencyPrefix" | "unitPrefix" | "unitPer" | "rateDenominators" | "multiply" | "ampersand">>;
+    /** BC/AD era words. Which SPELLINGS trigger them stays in normalize.ts. See the jsonc. */
+    eraWords: { bce: string; ad: string };
 }
 const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;

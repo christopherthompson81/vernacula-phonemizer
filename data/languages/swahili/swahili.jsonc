@@ -98,5 +98,11 @@
         // as kilomita the `/h` was stranded as a bare *h*. "kwa saa" is attested ×34 and "kwa sekunde" ×5.
         "unitPer": "kwa",
         "rateDenominators": { "h": "saa", "s": "sekunde" }
-    }
+    },
+
+    // ERA MARKERS. `Baada ya Kristo` is attested in the corpus itself ("1000-1300 Baada ya Kristo"); its
+    // counterpart `Kabla ya Kristo` is the standard Swahili for BC/BCE. Which SPELLINGS trigger them — the
+    // dotted forms, and the rule that a bare `BC` must follow a NUMBER because two bare capitals are
+    // otherwise an ordinary initialism — is the algorithm and stays in normalize.ts.
+    "eraWords": { "bce": "Kabla ya Kristo", "ad": "Baada ya Kristo" }
 }

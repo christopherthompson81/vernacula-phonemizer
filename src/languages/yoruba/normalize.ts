@@ -79,7 +79,7 @@ const SAID_BEFORE = /(?:[iì]da|[iì]pin)\s*$/u;
  * instances are athletics event names rather than measurements.
  */
 const METRE = /(?<![\p{L}\p{M}\d.,])(?<!\p{Nd}h[ \u00a0])(\d+(?:\.\d+)?)[ \u00a0]?m(?![\p{L}\p{M}'’\d])/gu;  // space, NBSP
-const METRE_WORD = "mítà";
+const METRE_WORD = SYM.metre;
 
 /** The unit nouns this layer expands, and a squared one with no number necessarily beside it. */
 const UNIT_WORDS: Record<string, string> = { km: "kìlómítà", ha: "hẹ́kítà" };

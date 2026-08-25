@@ -28,4 +28,53 @@
         "p": "p", "t": "t", "k": "k", "q": "q", "b": "p", "d": "t", "g": "ɣ", "f": "f", "h": "h", "j": "j",
         "l": "l", "m": "m", "n": "n", "s": "s", "v": "v", "r": "ʁ", "w": "v",
     },
+
+    // THE NUMERAL LEXICON. ⚠ TWO LANGUAGES IN ONE TABLE, AND IT IS A NECESSITY RATHER THAN A SHORTCUT:
+    // 0–12 are NATIVE Kalaallisut, 13 up are DANISH and solid-compounded. The traditional system is a
+    // BODY-PART TALLY and does not scale — the words say so themselves, which is why the glosses are kept
+    // beside them: `arfinillit` (6) is "other hand"+1, so counting has crossed to the second hand;
+    // `aqqanillit` (11) is "going down"+1, i.e. down to the feet. A system anchored to twenty fingers and
+    // toes has nowhere to put a thousand, so speakers borrow Danish for everything above the small counts,
+    // and the engine is reporting that fact rather than economising on it.
+    // ⚠ `nul` AT INDEX 0 IS ITSELF A DANISH LOAN — no native zero exists — so the native list is native
+    // from 1, and index 0 is already where the two systems touch. The boundary at 12 is the corpus's.
+    // The ARITHMETIC stays in numbers.ts: which base applies at which magnitude, the solid compounding, the
+    // `en`-vs-plural choice on million/milliard, and the digit-by-digit fallback above 10¹².
+    "numbers": {
+        "native": [
+            "nul",              // 0 — Danish; the only attested form
+            "ataaseq",          // 1
+            "marluk",           // 2
+            "pingasut",         // 3
+            "sisamat",          // 4
+            "tallimat",         // 5
+            "arfinillit",       // 6 — "other hand" + 1
+            "arfineq marluk",   // 7
+            "arfineq pingasut", // 8
+            "qulingiluat",      // 9
+            "qulit",            // 10
+            "aqqanillit",       // 11 — "going down" (to the feet) + 1
+            "aqqaneq marluk"    // 12
+        ],
+        // ⚠ THE DANISH UNITS ARE THE COMBINING FORMS, not the citation ones: Danish uses `en` (not `et`) in
+        // `enogtyve` and before `hundrede`/`tusind`. Index 0 is empty because no unit word appears there.
+        "danish": {
+            "units": ["", "en", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni"],
+            "teens": ["ti", "elleve", "tolv", "tretten", "fjorten", "femten", "seksten", "sytten", "atten", "nitten"],
+            "tens": {
+                "20": "tyve", "30": "tredive", "40": "fyrre", "50": "halvtreds",
+                "60": "tres", "70": "halvfjerds", "80": "firs", "90": "halvfems"
+            },
+            // `og` joins unit to ten and is written SOLID: enogtyve, otteoghalvfems.
+            "and": "og",
+            "hundred": "hundrede",
+            "thousand": "tusind",
+            // ⚠ THESE FOUR WERE BARE LITERALS IN TEMPLATE STRINGS, which is why they are here rather than
+            // being composed from `units[1]` plus a scale word: the code emitted "en million" and
+            // "millioner" directly, so a grep for the scale words found the tables and missed these.
+            // Stored as the engine emits them, so the lift changes nothing.
+            "million": { "singular": "en million", "plural": "millioner" },
+            "milliard": { "singular": "en milliard", "plural": "milliarder" }
+        }
+    }
 }

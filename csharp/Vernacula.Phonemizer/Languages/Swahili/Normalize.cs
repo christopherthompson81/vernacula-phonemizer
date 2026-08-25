@@ -20,8 +20,8 @@ public static class Normalize
     }
 
     /** Era markers. */
-    private const string BCE_WORD = "Kabla ya Kristo";
-    private const string AD_WORD = "Baada ya Kristo";
+    private static string BCE_WORD => SwahiliPhonemizer.DEF.EraWords.Bce;
+    private static string AD_WORD => SwahiliPhonemizer.DEF.EraWords.Ad;
     private static readonly (JsRe Re, string Word)[] BARE_ERA =
     {
         (JsRegex.Compile("(?<![\\p{L}\\p{M}])BCE(?![\\p{L}\\p{M}])", "gu"), BCE_WORD),

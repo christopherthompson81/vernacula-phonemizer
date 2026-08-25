@@ -23,6 +23,8 @@ export interface YorubaManifest {
         and: string;
         /** The NEGATIVE marker — see the jsonc: yo.wikipedia glosses it against `-1.44, -1`. */
         negative: string;
+        /** The bare metre, read locally rather than through the unit tier. See the jsonc. */
+        metre: string;
         /** The squared measure word, emitted AFTER the unit noun: `kìlómítà onígun mẹ́rin`. */
         squared: string;
         /** ⚠ Temperature is a CIRCUMFIX: `ìwọ̀n` before the number, the scale name after. */
