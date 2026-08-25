@@ -16,10 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 59 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
+- **Languages: 60 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
   or, ast, umb, kn, hi, cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha,
   tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig, sd, su, uz — all
-  **200/200**. 64 gated codes, 12,800 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user
+  **200/200**. 65 gated codes, 13,000 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user
   direction), from `tools/language-catalogue/languages.db`: next lo, zu, ff…
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
@@ -130,6 +130,34 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   `hesperonychus` as *hˌɛspɚənˈaᶦt͡ʃəs* (neural) only because another language had warmed the memo; the
   engine's own answer is the n-gram *ˈɛspɚˌoᶷnˌiːkəs*. Whether the gate SHOULD widen is a measurement,
   not a port decision, so both engines keep the current behaviour and this is recorded.
+
+### From the om/uz/sd/su/ig batch (2026-08-25) — read while porting, both engines agree on every one
+
+⚠ THE PARITY GATE CANNOT SEE ANY OF THESE. It proves the two engines AGREE; a bug both reproduce
+byte-for-byte passes it forever. Every entry below is a TS-side fix owing a test and a golden regen.
+
+- **Thousands de-grouping breaks past three groups — TWICE, in two unrelated languages.** ig's
+  `12,345,678,901` leaves a comma stranded, which then reads as CLAUSE PUNCTUATION: one number becomes
+  two with a pause. uz's space-grouped `1 000 000 000 soʻm` reads *mˈiŋ nˈɒl sˈom*. Both are the same
+  two-pass non-overlapping shape and neither is language-specific — ⚠ **check the whole fleet before
+  fixing either one.** A confidently wrong quantity, not a drop.
+- **su: `0,001 gram` → *hˈid͡ʒi ɡram*, a 1000× error.** The comma arm takes `0,001` as a thousands group.
+  A LEADING ZERO can never be one, so this is not the undecidable comma case the file documents. Found
+  on the mined line that is itself `normalize.ts`'s own citation for its `mg` unit.
+- **sd: an `i` flag dropped in flight.** `UNITS` declares `[/km/giu, …]` but the composing loop reads
+  `re.source` and hard-codes `"gu"`. Every neighbouring rule is `giu`. `12 KM` → *kʰˈeᶦ ˈɛm*.
+- **uz: the docstring and the table disagree about a key.** `uzbek.ts` says the tier claims `cm` and
+  works its example on `6x6 cm`; the table declares `sm`. `5 cm` → *bˈeʃ km*, two bare consonants.
+- **ig: `km³` is dropped silently** (`100 km³` → *otu naɾɪ kilomita*) while `km²` reads. The file's own
+  SQUARED section argues against exactly that loss and its docstring claims the mark is left.
+- **su: four more** — `1500 M.` fails the era arm on a clause-final dot (the `(?!\d)`-not-`(?![\d.,])`
+  finding that file already records twice for its other arms); `I²C` fuses to one word against its
+  docstring; `25°Cölner` glues the word on after the Celsius guard correctly declines; `1000/2000`
+  loses its slash (fraction operands capped at 3 digits).
+- **uz: a word-edge apostrophe becomes a glottal stop** (`'soʻz'` → *ʔsˈozʔ*). Oromo's scanner declines
+  exactly this by design; the tutuq belgisi is never word-initial or word-final in Uzbek either.
+- Hygiene, no output change: ig's `consonants["ṅ"]` is stored precomposed but `phonemizeWord` NFDs first,
+  so the row is unreachable; ig's and su's `foreign` constructor params are never read on any branch.
 
 ## ⚠ Things that will bite
 

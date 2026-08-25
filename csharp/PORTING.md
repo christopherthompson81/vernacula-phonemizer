@@ -111,6 +111,21 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
   reporting the engine as broken.
 - After each language: run the parity tool (`csharp/tools/parity`) against its golden TSV.
   A language is DONE when its rows are byte-identical, not before.
+- ⚠ 200 GOLDEN ROWS IS A NARROW PROBE, and for a rule-dense normalizer it is not enough on its own.
+  Two cheap widenings have each caught things the golden could not, and both are now expected of a port:
+    1. **The corpus-wide differential.** Run EVERY utterance of the language's FLEURS transcript through
+       both engines, sync and async, and diff. It is 10-20x the golden for the cost of one command.
+       ⚠ **THE TEXT IS COLUMN 3, NOT COLUMN 2.** The FLEURS TSVs are `id \t <name>.wav \t text \t
+       lowercased-text`, so the obvious `cut -f2` selects the WAV FILENAME — and a differential over a few
+       thousand filenames PASSES, proving only that both engines agree about digit runs. This is not
+       hypothetical: it is how the Oromo port was first "verified", and two of the four ports in the next
+       batch caught the same trap independently. Use `cut -f3,4 | tr '\t' '\n' | sort -u`, and sanity-check
+       that the first line of the list is a SENTENCE.
+    2. **Off-golden probes.** A hand-built list, one line per arm of `normalize.ts` PLUS the adversarial
+       neighbour each arm must decline, and the g2p corners the corpus happens not to contain. The corpus
+       exercises the common arms; the probes are what reach the rest.
+  A language with no FLEURS text (the lexicon-only goldens) has no (1), so (2) has to carry the weight —
+  say so explicitly rather than leaving the gap unstated.
 - ⚠ ENGINEERING SHORTCOMINGS MAY BE CORRECTED; OBSERVABLE BEHAVIOUR MAY NOT. The line between the
   two is the golden gate. Free to fix: quadratic loops, repeated recompilation of regexes, string
   concatenation in loops, copy-paste that a shared helper collapses, untyped grab-bag objects,
