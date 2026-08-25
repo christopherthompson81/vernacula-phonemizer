@@ -496,3 +496,65 @@ sourced. Separate gap, separate sourcing — and the minus is worth reading with
 degree loses a unit while a dropped minus inverts the quantity.
 
 **Six remain: ab, ak, bo, ltg, mos, za** — and bo is a refusal on evidence, not a gap.
+
+## Run 12 — six phrases at once, graded against the engine — 2026-08-25 20:30
+
+Whole-phrase readings offered for ab, ak, bo, ltg, mos and za. Graded each numeral and each content word
+against what this repo already has sourced, the way the Yoruba phrase was graded. **The grades differ
+sharply by language, and that is the useful part.**
+
+| lang | numeral in the phrase | verdict |
+|---|---|---|
+| **ab** | `ҩынҩажәи быжьба` | **EXACT** match to the engine's 47 |
+| **mos** | `piis naas la yopoe` | matches but for the engine's `a` (`pis naase la a jopoe`) |
+| **za** | `siseiq cib caet` | the engine's 47 is `seiq cib caet`; an extra syllable |
+| **bo** | `ཞེ་བདུན` | correct — but see below |
+| **ltg** | `ketretdasmit septeņi` | **misspelled**; the engine's sourced form is `četrudesmit septeni` |
+| **ak** | `aduonum a ɛtɔ so nkrɔn` | **WRONG — that is 59.** 47 is `aduanan nson` |
+
+Abkhaz also matched on a SECOND independent slot: the phrase ends `Цельси иградус`, which is exactly the
+`celsius` value already in `abkhaz.jsonc` from the full-wiki sweep.
+
+### Shipped: ab
+
+`минус` is ×0 on ab.wikipedia, and so is the a-prefixed `аминус`. It ships anyway, on the block's own
+pattern rather than on a token: **every symbol word in `abkhaz.jsonc` is a bare Russian loan that the
+full-wiki sweep did attest** — процент, градус, доллар, евро, фунт, километра, метра, квадрат. Abkhaz takes
+its sign vocabulary from Russian unadapted, Russian's minus is минус, and ky and kk — same contact profile —
+ship the same word on attestation. The cost of silence is measured: **eleven signed temperatures on
+ab.wikipedia and every one a genuine negative** (`- 18, -19 °С`, `-18 инаркны -23°C`, `(-173°С)`, `−87 °C`,
+`(−63 °C)`).
+
+**⚠ AND `ахәҭаа` FROM THE SAME PHRASE IS REFUSED**, which is why grading the parts matters: it was offered
+as the decimal point and it is ×11/8 meaning **"share / proportion"** — `рыхәԥса ахәҭаа — 14%`, `ацифратә
+кьыԥхь ахәҭаа 9%`. It is `ахәҭа` ("part") inflected. Abkhaz's decimal stays unread.
+
+### Held or refused, each for its own reason
+
+* **bo — REFUSED.** The marker is `མོ་གྲངས`, already refused as the census term ("male count … female
+  count …") and confirmed antiquated. The supplied string also carries an **Arabic letter پ (U+067E)** where
+  Tibetan པ belongs, which is a generation artifact rather than a spelling.
+* **za — HELD.** `Lingzha` ×0, as are `lingzhaj` and `lingz laj`. The parts attest (`lingz` zero ×34, `laj`
+  below ×19) but the juncture is a syntax claim, and the language's own subtraction word `gemj` is a
+  homograph of **cheek**. A calque of 零下 is plausible; its written form is not sourced.
+* **ltg — HELD, and the reason is a spelling one.** The phrase misspells the numeral this repo has sourced,
+  so its Latgalian orthography is not something to take on trust for a word that is itself ×0 (`minus`,
+  `mīnus`, `komats` all absent). Sister Latvian ships `mīnuss` on 1/1 — the route is real, but whether
+  Latgalian writes `minus` or `mīnuss` is exactly the question the source got wrong elsewhere.
+  ⚠ One useful find: **`gradi` ×6/3 IS attested** — a Latgalian degree word, for a different gap.
+* **mos — HELD, on a specific doubt worth naming.** The phrase gives English `minus`, but Burkina Faso is
+  **francophone** and a schooled Mooré speaker code-switches to French — `moins`, not `minus`. The supplied
+  form looks like an artifact of an English-language prompt. Both are ×0 in Mooré prose anyway: `insource`
+  finds `minus` once in an English EP title on a Kenyan musician's page and `moins` once inside a French
+  URL — two foreign-text false positives, not attestations.
+* **ak — HELD.** `mainɔso` and `dɛgrii` are ×0, and this is the language whose numeral the source got
+  wrong by twelve. Ghana is anglophone so a nativised English `minus` is plausible on the Naija argument,
+  but Akan has no `percent`-style precedent in its own file to ride on.
+
+**⚠ A NEW SOURCE TIER, USED FOR THE FIRST TIME HERE: espeak's dictsource.** `lv_list` carries `± plusmi:nuss`
+— which is where Latvian's `plusMinus` came from with 0/0 wiki tokens, a precedent this investigation had
+not noticed. `ab_list` turns out to carry a whole sign block with Abkhaz names (`% ap_r'ocent_`,
+`$ ad'ollar`, `+ acc_'aga`, `& amp_'ersand`), which independently corroborates the Russian-loan pattern —
+though its `-` entry is the HYPHEN's name, not a minus reading. Worth sweeping for the languages still open.
+
+**Five remain: ak, bo, ltg, mos, za.**

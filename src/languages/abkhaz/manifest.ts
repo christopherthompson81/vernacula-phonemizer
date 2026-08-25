@@ -48,6 +48,8 @@ export interface AbkhazManifest {
     symbols: {
         percent: string;
         degree: string;
+        /** The MINUS marker — see the jsonc: declared on the block's Russian-loan pattern, ×0 itself. */
+        minus: string;
         /** ⟨Цельси иградус⟩ — the attested unit NAME, used verbatim; Цельси is never attested bare. */
         celsius: string;
         /** ⟨асааҭ⟩ — goes BEFORE the number ("асааҭ 6 рзы"). */
