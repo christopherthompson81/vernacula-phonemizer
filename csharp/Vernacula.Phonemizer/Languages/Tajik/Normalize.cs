@@ -43,18 +43,9 @@ public static class Normalize
     /** Tajik phonotactics for the OOV half of `core/initialisms.ts`. */
     public static readonly Func<string, bool> IsUnreadableTajik = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[аеёиоуыэюяӣӯ]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "бл", "бр", "гл", "гр", "др", "кл", "кр", "пл", "пр", "сл", "см", "сп", "ст", "тр",
-            "фл", "фр", "хл", "хр", "шк", "шл", "шп", "шт", "зв", "св", "тв", "дв", "сн",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ст", "шт", "фт", "хт", "ҳт", "нт", "нд", "нг", "нҷ", "нч", "нз", "нс", "мб", "мп",
-            "рб", "рд", "рг", "рз", "рк", "рқ", "рм", "рн", "рс", "рт", "рф", "рх", "рҳ", "рҷ", "рш",
-            "лб", "лд", "лк", "лм", "лт", "лф", "хш", "шк", "зм", "сб", "ск", "ср", "тр", "др", "бр", "гр",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     private static IReadOnlyDictionary<string, string> LETTER_NAME => Manifest.MANIFEST.LetterNames;

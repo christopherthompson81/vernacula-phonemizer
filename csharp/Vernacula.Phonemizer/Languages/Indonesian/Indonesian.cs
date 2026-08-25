@@ -29,6 +29,15 @@ public sealed class IndonesianDef
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public IndonesianNumbersDef Numbers { get; init; } = new();
+    public IndonesianPhonotactics Phonotactics { get; init; } = new();
+}
+
+public sealed class IndonesianPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Digraphs { get; init; } = Array.Empty<string>();
 }
 
 public static class IndonesianPhonemizer
@@ -102,20 +111,10 @@ public static class IndonesianPhonemizer
     /** Can this letter run be an Indonesian word at all? */
     private static readonly Func<string, bool> IsUnreadableIndonesian = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiou]", "u"),
-        Digraphs = new HashSet<string>(new[] { "ng", "ny", "sy", "kh" }, StringComparer.Ordinal),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w",
-            "y", "z", "ng", "ny", "sy", "kh",
-            "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr", "sl", "sp", "st", "sk",
-            "tr", "sw", "ps", "kw",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "b", "d", "f", "h", "k", "l", "m", "n", "ng", "p", "r", "s", "t", "kh",
-        }, StringComparer.Ordinal),
-        Liquids = JsRegex.Compile("[lr]", "u"),
+        Vowels = JsRegex.Compile($"[{DEF.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(DEF.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(DEF.Phonotactics.Codas, StringComparer.Ordinal),
+        Digraphs = new HashSet<string>(DEF.Phonotactics.Digraphs, StringComparer.Ordinal),
     });
 
     /** READABLE AND STILL SPELLED OUT — the cases the phonotactic test gets wrong in the other direction. */

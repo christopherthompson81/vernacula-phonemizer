@@ -37,6 +37,7 @@ export interface TajikManifest {
     /** Acronyms read letter-by-letter although phonotactics would pass them as words. */
     acronymLetters: string[];
     clausePunctuation: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[] };
 }
 
 /** The consolidated hand-authored Tajik data tables (see tajik.jsonc). */

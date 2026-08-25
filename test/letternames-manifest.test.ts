@@ -27,6 +27,8 @@ import { MANIFEST as TA } from "../src/languages/tamil/manifest.ts";
 import { MANIFEST as TE } from "../src/languages/telugu/manifest.ts";
 import { MANIFEST as KN } from "../src/languages/kannada/manifest.ts";
 import { MANIFEST as EN } from "../src/languages/english/manifest.ts";
+import { MANIFEST as TG } from "../src/languages/tajik/manifest.ts";
+import { MANIFEST as ID } from "../src/languages/indonesian/indonesian.ts";
 
 interface Lifted {
     letterNames: Record<string, string>;
@@ -242,5 +244,41 @@ describe("en: the speller is a rule, and the phonotactics are nearly unreachable
         // is exactly the failure it was meant to catch. Emptying `legalOnsets` makes ⟨zl⟩ illegal and the
         // run is spelled Z L O R P; the Z name is the observable.
         expect(say("the ZLORP unit")).not.toContain(say("z"));
+    });
+});
+
+/**
+ * ⚠ TWO LANGUAGES THE FIRST COMPLETENESS CHECK MISSED. The sweep was scoped to languages whose LETTER-NAME
+ * table was inline, so `tg` and `id` — whose letter names were already lifted but whose PHONOTACTICS were
+ * not — never appeared in it. Found by re-checking the whole ported set for `legalOnsets: new Set([` rather
+ * than trusting the original list.
+ */
+describe("tg reads its lifted phonotactics", () => {
+    const say = (x: string): string => phonemize(x, "tg").replace(/[ˈˌ]/gu, "");
+    test("a licensed cluster is read and the tables are live", () => {
+        expect(TG.phonotactics.onsets).toContain("ст");
+        expect(TG.phonotactics.vowels.length).toBeGreaterThan(0);
+        expect(say("ин СПОРТ аст")).not.toContain(say(TG.letterNames["с"]!));
+    });
+});
+
+/**
+ * ⚠ INDONESIAN'S `legalCodas` IS ENTIRELY INERT, and unlike Hausa's this is provable rather than merely
+ * likely. `core/initialisms.ts` tests `w.slice(-2)` — a TWO-character tail — against the set, so:
+ *   · 12 of its 14 entries are SINGLE characters and can never match; and
+ *   · the two that could, ⟨ng⟩ and ⟨kh⟩, are BOTH also declared as `digraphs`, which the very same
+ *     condition accepts (`!legalCodas.has(tail) && !digraphs?.has(tail)`).
+ * So deleting the whole list would change nothing — which is exactly what the sweep reported when it scored
+ * `codas` 0 even with ⟨BARANG⟩ and ⟨GUDANG⟩ in the probe.
+ *
+ * NOT FIXED: repairing it means deciding what Indonesian's legal two-consonant codas actually are, which is
+ * language sourcing, not a lift. Pinned so the redundancy is visible and a future edit cannot mistake the
+ * list for load-bearing.
+ */
+describe("id's legalCodas is provably inert — a known redundancy", () => {
+    test("every entry is either too short to match or already a digraph", () => {
+        const idPt = (ID as unknown as { phonotactics: { codas: string[]; digraphs: string[] } }).phonotactics;
+        for (const c of idPt.codas) expect(c.length === 1 || idPt.digraphs.includes(c)).toBe(true);
+        expect(idPt.codas.filter((c) => c.length === 1)).toHaveLength(12);
     });
 });

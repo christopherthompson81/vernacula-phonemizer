@@ -187,9 +187,37 @@ because all four read this engine.
 - And the ⟨a⟩ exception cannot catch its own decoupling — re-hardcoding it is observationally identical while
   the data agrees. Stated in the test; the manifest sweep is what holds it.
 
+## Batch 6 — tg, id — 2026-08-25 08:50 — two the completeness check missed
+
+**⚠ THE FIRST "COMPLETE" CLAIM WAS WRONG, and re-checking is what caught it.** The sweep was scoped from a
+survey of languages whose LETTER-NAME table was inline. `tg` and `id` had already lifted their letter names in
+earlier work but still held their PHONOTACTICS in code, so neither ever appeared in the list. Found by
+re-grepping the whole ported set for `legalOnsets: new Set([` instead of trusting the original scope.
+
+`id` also had no `manifest.ts` and no exported manifest at all; its shape is declared in indonesian.ts, so a
+`MANIFEST` alias was added there rather than restructuring the engine.
+
+**0 of 20 probe readings moved.** Sweep: tg vowels 3 / onsets 1 / codas 2; id vowels 6 / onsets 3 / codas 0.
+
+### ⚠ Indonesian's `legalCodas` is PROVABLY inert — the Hausa finding, but demonstrable
+
+`core/initialisms.ts` tests `w.slice(-2)` — a TWO-character tail — against the set, and the condition is
+`!legalCodas.has(tail) && !digraphs?.has(tail)`. For Indonesian:
+
+  · **12 of its 14 entries are single characters** and can never match a two-character tail; and
+  · the only two that could, ⟨ng⟩ and ⟨kh⟩, are **both also declared as `digraphs`** — so the second half of
+    that condition already accepts them.
+
+Deleting the entire list would therefore change nothing. That is exactly what the sweep reported when `codas`
+scored 0 even with ⟨BARANG⟩ and ⟨GUDANG⟩ in the probe: not a probe gap, a redundant table.
+
+Hausa's list is the same shape and was reported in batch 3; Indonesian's is the one that can be proved rather
+than inferred, because the digraph overlap closes the last escape route. Neither is fixed here: deciding what
+a language's legal two-consonant codas actually ARE is sourcing, not lifting.
+
 ## The sweep is complete
 
-Sixteen languages, five batches. Every `letterNames`/`phonotactics` table the fleet's ported engines carry now
+Eighteen languages, six batches. Every `letterNames`/`phonotactics` table the fleet's ported engines carry now
 lives in a manifest, except where the honest answer was that there is no table:
 
   · **en** — the speller is a rule over CMUdict; only the ⟨a⟩ exception is data.
@@ -197,9 +225,14 @@ lives in a manifest, except where the honest answer was that there is no table:
   · **th, vi, cmn** — spelling maps with no phonotactics, because a Latin run there is spelled for being
     FOREIGN rather than for being unpronounceable.
 
-Three defects were surfaced and left recorded rather than fixed, each because fixing it changes readings and
+⚠ AND THE FIRST COMPLETENESS CLAIM WAS WRONG — see batch 6. The check that found the gap greps the whole
+ported set for the inline SHAPE rather than re-reading the survey the sweep started from; that check now
+reports nothing.
+
+Four defects were surfaced and left recorded rather than fixed, each because fixing it changes readings and
 needs language-specific sourcing a mechanical lift has no business guessing: Hausa's dead cluster lists,
-Italian's degree agreement (since fixed, #968), and Italian's case-sensitive compass class.
+Indonesian's provably redundant `legalCodas`, Italian's degree agreement (since fixed, #968), and Italian's
+case-sensitive compass class.
   · `jv` has no manifest.ts and needs one.
   · `th`, `vi`, `ta`, `te`, `kn`, `cmn` have no phonotactics block — letterNames only.
   · `en` last: the largest engine, neural, and four accent variants read it.

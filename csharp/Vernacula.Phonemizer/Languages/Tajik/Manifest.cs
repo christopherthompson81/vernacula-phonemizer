@@ -32,6 +32,14 @@ public sealed class TajikManifest
     /** Acronyms read letter-by-letter although phonotactics would pass them as words. */
     public string[] AcronymLetters { get; init; } = [];
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
+    public TajikPhonotactics Phonotactics { get; init; } = new();
+}
+
+public sealed class TajikPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
 }
 
 public static class Manifest
