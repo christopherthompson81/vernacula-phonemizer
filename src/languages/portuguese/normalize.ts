@@ -21,7 +21,7 @@ import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { portugueseOrdinal } from "./romanOrdinals.ts";
 
-const GROUP_SPACE = "    ";
+const GROUP_SPACE = "    ";  // NBSP, NNBSP, thin space
 const MONTHS = "janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro";
 
 /** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare "no"
@@ -102,7 +102,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    form is not, and the number token cannot span a space.
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
-    s = s.replace(/[    ]/gu, " ");
+    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first — `a.` is
     //    8 of the 19 dotted abbreviations in the corpus and every one is `a.C.`.
@@ -183,7 +183,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //     claim and the tokenizer then drops, so `preços em US$` would go from spelling the letters to saying
     //     NOTHING. Neither reading is right — *dólares* is — but silence is strictly worse than the letters,
     //     so an unquantified code keeps its existing behaviour and only the useful case is folded.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");  // space, NBSP
 
     // 6) DEGREES, before the unit tier so the bare sign is not left behind.
     // ⚠ THE GUARD IS `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following

@@ -231,7 +231,7 @@ const TO_LEXICON: readonly (readonly [string, string])[] = [["ݔ", "ی"], ["ۏ",
  * probe, which is the third time in this file that the corpus's own typography beat the shape I had in
  * mind. Elongation cannot follow a digit, so admitting it here is safe.
  */
-const ERA_SEP = "[ـ\\s]*\\.?[ـ\\s]*";
+const ERA_SEP = "[ـ\\s]*\\.?[ـ\\s]*";  // tatweel
 
 const ERA: readonly (readonly [string, string])[] = ([
     ["[ھه]", "ق", "هجری کمری"],
@@ -279,7 +279,7 @@ const ERA: readonly (readonly [string, string])[] = ([
  */
 const UNITS: readonly (readonly [string, string])[] = [
     // Longest key first — `m` must not win over `mm` or the `km` tail.
-    ["mm", "میلی‌متر"],
+    ["mm", "میلی‌متر"],  // ZWNJ
     ["km", "کیلومتر"],
     ["m", "متر"],
 ];
@@ -301,7 +301,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         for (const [from, to] of table) out = out.split(from).join(to);
         return out;
     };
-    const WORD = new RegExp(`[${AR}\\u200C]+`, "gu");
+    const WORD = new RegExp(`[${AR}\\u200C]+`, "gu");  // ZWNJ
 
     return function normalizeBalochi(input: string): string {
         // 1) NFC at the entry. Arabic-script text mixes precomposed and decomposed forms, so a rule keyed
@@ -333,7 +333,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    ⚠ RUNS ABOVE STEP 5, because one of the four Hijri abbreviations is itself written in
         //    presentation forms (`ماں ﺳﺎﻝ 1373ﻫـ .ﻕ. وتی وانگ`) — a guard's evidence has a lifetime
         //    (trap 39), and here the evidence does not exist until this step has created it.
-        s = s.replace(/[ﭐ-﷿ﹰ-﻿]/gu, (c) => c.normalize("NFKC"));
+        s = s.replace(/[ﭐ-﷿ﹰ-﻿]/gu, (c) => c.normalize("NFKC"));  // BOM
 
         // 4) ⚠ THE ORTHOGRAPHIC VARIANT FOLD — THIS LANGUAGE'S DEFINING RULE, and by a wide margin. Every
         //    other rule in this file touches at most a handful of instances; this one touches 1,443
@@ -401,7 +401,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    neither arm is a prefix of the other and neither bare letter is claimed alone — a lone `ھ` or
         //    `م` next to a digit is far too common in Balochi to key on.
         for (const [body, word] of ERA) {
-            s = s.replace(new RegExp(`(?<=[${D}])[ـ\\s]*${body}${ERA_SEP}\\.?`, "gu"), ` ${word}`);
+            s = s.replace(new RegExp(`(?<=[${D}])[ـ\\s]*${body}${ERA_SEP}\\.?`, "gu"), ` ${word}`);  // tatweel
             s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${body}${ERA_SEP}\\.?\\s*(?=[${D}])`, "gu"), `${word} `);
         }
 
@@ -452,7 +452,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         s = BARE_UNITS(s);
         for (const [abbr, word] of UNITS) {
             s = s.replace(
-                new RegExp(`(?<![${D}.,٫])([${D}]+(?:[.٫][${D}]+)?)[ \u00a0\u202f\u2009]?${abbr}(?![\\p{L}\\p{M}‌])`, "giu"),
+                new RegExp(`(?<![${D}.,٫])([${D}]+(?:[.٫][${D}]+)?)[ \u00a0\u202f\u2009]?${abbr}(?![\\p{L}\\p{M}‌])`, "giu"),  // space, NBSP, NNBSP, thin space
                 `$1 ${word}`,
             );
         }

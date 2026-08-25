@@ -200,7 +200,7 @@ export function normalizeGuarani(input: string): string {
     // `ñe'ẽ​me`) where it is a line-break hint the dump preserved. It is script COMMON, so the TOKEN class
     // rejects it and the word reads as two: `a​b` → *ˈa b*. Deleted, not spaced — the two halves are one
     // Guaraní word plus its bound postposition.
-    s = s.replace(/[​‌‍﻿]/gu, "");
+    s = s.replace(/[​‌‍﻿]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
 
     // ── 3. `º`/`ª` STANDING IN FOR THE DEGREE SIGN — before step 4 deletes the leftovers ────────────────
     // The masculine/feminine ordinal indicators are used for `°` throughout this corpus: `21º C`, `0º C`,
@@ -276,8 +276,8 @@ export function normalizeGuarani(input: string): string {
     // the `&nbsp;` ENTITY to a plain space, so this corpus's own `21&nbsp;696` arrives here already spaced
     // — but a dump carrying the raw character reaches this rule as U+00A0, and a class written from the
     // decoded form alone would silently miss exactly the shape this corpus writes most. Caught by a test.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:[    ]\d{3})+)(?!\d)/gu,
-        (m) => m.replace(/[\s   ]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+        (m) => m.replace(/[\s\u00a0\u202f\u2009]/gu, ""));  // NBSP, NNBSP, thin space
 
     // ── 7. THE ORDINAL SUFFIX `-ha` GLUED TO DIGITS — trap 14, and Guaraní's own ordinal ────────────────
     // `Nha` ×15 retained, `ordinal-latin` ×639 whole-corpus. Guaraní forms the ordinal by suffixing `-ha` to

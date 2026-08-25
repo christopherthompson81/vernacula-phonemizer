@@ -167,7 +167,7 @@ export function normalizeCroatian(input: string): string {
 
     // 4) DOTTED CAPITAL RUNS — `George W. Bush`. The W. suffix dot is a break. The single-initial form
     //    (W. Bush) needs the lone-initial rule too.
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
+    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     s = s.replace(/(?<=\p{Lu}\p{L}*\s)(\p{Lu})\.(?=\s+\p{Lu}\p{Ll})/gu, "$1");
     // `Dr.` → "doktor"; `SAD` (USA) → the expansion.
     s = s.replace(/(?<![\p{L}\p{M}])Dr\.(\s+)(?=[\p{L}\d])/giu, "Doktor$1");

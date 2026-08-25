@@ -159,7 +159,7 @@ import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 // what the lookbehind-plus-lookahead pair above actually needs: a further `\d{3}` group is already consumed
 // by the `+`, so a match can still neither begin nor end inside a longer run.
 // (The space arm additionally carried a duplicated `\d` inside its class — inert, and gone with it.)
-const GROUPED_SPACE = /(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu;
+const GROUPED_SPACE = /(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu;  // space, NBSP, NNBSP, thin space
 const GROUPED_COMMA = /(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu;
 const GROUPED_DOT = /(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu;
 
@@ -279,7 +279,7 @@ export function normalizeMossi(input: string): string {
     //    ⚠ SPACE FIRST, then comma, then dot. The three arms cannot feed each other — each is anchored on
     //    both sides against `[\d.,]` — but the space arm must run before any rule that inserts a space
     //    between a figure and a following word, and step 4 is one.
-    s = s.replace(GROUPED_SPACE, (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(GROUPED_SPACE, (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     s = s.replace(GROUPED_COMMA, (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     s = s.replace(GROUPED_DOT, (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 

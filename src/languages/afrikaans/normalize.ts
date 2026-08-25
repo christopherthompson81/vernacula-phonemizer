@@ -145,7 +145,7 @@ export function normalizeAfrikaans(input: string): string {
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS. `V.S.`
     //    was *f . s .* — two unpronounceable stops and two spurious phrase breaks. Also `Wêreld Oorlog II`
     //    (the regnal rule below needs the digit, and the roman pass has already converted II → 2).
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
+    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
 
     // 3) SINGLE-DOT ABBREVIATIONS. Three branches. The dotted forms come FIRST: mid-sentence the dot is
     //    CONSUMED so it cannot become a phrase break, and at a phrase end it is kept (there it really is the

@@ -231,7 +231,7 @@ export function normalizeSantali(input: string): string {
     // ZWNJ/ZWJ/ZWSP and the bidi marks are outside `TOKEN`'s word class, so each one ENDS THE WORD and is
     // dropped: `ᱦᱚ‌ᱲ` reads *hɔ ɽ* instead of *hɔɽ*. 23 occurrences (ZWNJ ×15, ZWJ ×7, ZWSP ×1). Ol Chiki
     // is an alphabet with no ligature or half-form for these to control, so they carry nothing.
-    s = s.replace(new RegExp(`(?<=${O})[​‌‍‎‏‬](?=${O})`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=${O})[​‌‍‎‏‬](?=${O})`, "gu"), "");  // ZWSP, ZWNJ, ZWJ, LRM, RLM, PDF
     // `&nbsp;` survives the dump into the artifact and sits BETWEEN A NUMBER AND ITS UNIT
     // (`83,883&nbsp;km²`). Repaired to a space FIRST, because step 10's tier matches a unit only when a
     // number is adjacent, and an unrepaired entity destroys exactly that adjacency (trap 54, `so`'s shape).

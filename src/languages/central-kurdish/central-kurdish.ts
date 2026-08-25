@@ -186,7 +186,7 @@ function number(digits: string): string {
 // readings are filed under words this tokenizer never asks for.
 import { normalizeCentralKurdish } from "./normalize.ts";
 
-const TOKEN = /([ؠ-ۿ‌]+)|(\d+)|([،؛؟.!?…,:])/gu;
+const TOKEN = /([ؠ-ۿ‌]+)|(\d+)|([،؛؟.!?…,:])/gu;  // ZWNJ
 
 export type ForeignPhonemizer = (latin: string) => string;
 

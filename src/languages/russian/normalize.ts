@@ -21,7 +21,7 @@ import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { russianOrdinal } from "./romanOrdinals.ts";
 
-const GROUP_SPACE = "    ";
+const GROUP_SPACE = "    ";  // NBSP, NNBSP, thin space
 
 /**
  * Written case ending → the ordinal's full ending, for a HARD-stem ordinal (пятый, шестой, сороковой) and
@@ -136,7 +136,7 @@ export function normalizeRussian(input: string): string {
     //    "5 000 лет" read as "пять ноль лет".
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
-    s = s.replace(/[    ]/gu, " ");
+    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-letter rule so `н. э.` and `т. е.` are claimed whole —
     //    their interior dots were becoming phrase breaks.

@@ -298,6 +298,6 @@ export function makeTigrinyaNormalizer(
         //     reports `scale-names ??` for exactly this reason.
         s = s.replace(/°/gu, " ዲግሪ ");
 
-        return s.replace(/[ \u00a0]{2,}/gu, " ");
+        return s.replace(/[ \u00a0]{2,}/gu, " ");  // space, NBSP
     };
 }

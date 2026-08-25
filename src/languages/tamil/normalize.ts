@@ -189,7 +189,7 @@ export function normalizeTamil(input: string): string {
     // 1) ZERO-WIDTH characters (×20 in the corpus, mostly a doubled ZWSP after a comma). Removed FIRST:
     //    every later rule asserts letter/digit adjacency, and an invisible character sitting inside a
     //    numeral or between a number and its unit defeats all of them.
-    let s = input.replace(/[​-‍﻿]/gu, "");
+    let s = input.replace(/[​-‍﻿]/gu, "");  // ZWSP, ZWJ, BOM
 
     // 1b) TAMIL DIGITS ௦-௯ → ASCII. None occur in the corpus (a negative result the file header records),
     //     but without the fold the engine returned an EMPTY STRING for them: `\d+` is ASCII-only, so a

@@ -131,7 +131,7 @@ export function normalizeKannada(input: string): string {
     //    out [pˈaːjĩɳʈ ɡˈaɭĩn̪d̪a], two primary stresses where the word has one. Every one of the 1,067
     //    instances sits immediately after a virama ್ (checked by printing the neighbours), so deleting
     //    the joiner leaves the identical akshara sequence and no phoneme changes.
-    let s = input.replace(/[​‌‍﻿]/gu, "");
+    let s = input.replace(/[​‌‍﻿]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
 
     // 2) KANNADA DIGITS ೦-೯ → ASCII (×1). Before every numeric rule below, so that a native-digit
     //    numeral is eligible for the same de-grouping, ordinal, percent and unit handling as an ASCII

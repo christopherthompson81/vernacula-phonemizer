@@ -87,7 +87,7 @@ const SHADDA_AFTER_VOWEL = /([َُِ])ّ/gu;
  * preceding it (⟨اُوتاوا⟩ Ottawa → uːt̪aːwaː, not *uwt̪aːwaː*).
  */
 export function phonemizeArabic(word: string): string {
-    const w = [...word.replace(/[‌ـ]/gu, "").replace(SHADDA_AFTER_VOWEL, "ّ$1")];
+    const w = [...word.replace(/[‌ـ]/gu, "").replace(SHADDA_AFTER_VOWEL, "ّ$1")];  // ZWNJ, tatweel
     const toks: string[] = [];
     for (let i = 0; i < w.length; i++) {
         const c = w[i]!, prev = w[i - 1] ?? "", nxt = w[i + 1] ?? "";
@@ -205,7 +205,7 @@ function number(digits: string): string {
  * rule for is dropped one layer down instead, which is why `balochi.jsonc` gained ݔ and ۏ in the same
  * change. The token class decides where the SCRIPT boundary falls; the manifest decides what is read.
  */
-const TOKEN = new RegExp(`([ؠ-ۿݐ-ݿ‌]+|${LATIN_RUN})|(\\d+)|([،؛؟۔٬.!?…,:])`, "giu");
+const TOKEN = new RegExp(`([ؠ-ۿݐ-ݿ‌]+|${LATIN_RUN})|(\\d+)|([،؛؟۔٬.!?…,:])`, "giu");  // ZWNJ
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where the
  * SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A token

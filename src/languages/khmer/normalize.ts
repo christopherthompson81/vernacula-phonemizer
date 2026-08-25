@@ -109,7 +109,7 @@ const D = "\\d០-៩";
  * Found by reading the artifact scan after the corpus diff was already clean on counts — the residual 43 drops were
  * not a different defect class, they were these rules missing their own trigger.
  */
-const SEP = "[\\s\u200b\u200c]*";
+const SEP = "[\\s\u200b\u200c]*";  // ZWSP, ZWNJ
 
 /** The final word of a Khmer run — the perceptron's answer, or the unigram segmenter's when it is unavailable. */
 function lastWord(run: string): string {
@@ -166,7 +166,7 @@ export function normalizeKhmer(text: string): string {
     // as "pram soun" — "five zero". Khmer groups with a space or a ZWSP as well as a comma, 567 times in the
     // corpus (`៣០ ០០០`, `១១៨ ១៨៣`), and the artifact's own exponent example is `១៨១ ០៣៥ គម²`, which without this
     // is two numbers and a stranded unit. Same three-digit-block guard, so a genuine list of numbers survives.
-    const degroupSpace = new RegExp(`(?<=[${D}])[ \u00a0\u202f\u2009\u200b](?=[${D}]{3}(?![${D}]))`, "gu");
+    const degroupSpace = new RegExp(`(?<=[${D}])[ \u00a0\u202f\u2009\u200b](?=[${D}]{3}(?![${D}]))`, "gu");  // space, NBSP, NNBSP, thin space, ZWSP
     for (let i = 0; i < 4 && degroupSpace.test(s); i++) s = s.replace(degroupSpace, "");
 
     // ── 3. decimal point ─────────────────────────────────────────────────────────────────────────────

@@ -266,9 +266,9 @@ export function normalizeUkrainian(input: string): string {
     //    (3,980 миль)` = 6387 km / 3980 mi — the conversion checks out), and requiring EXACTLY three
     //    digits keeps every comma DECIMAL in the corpus (1,5 · 2,4 · 6,34 · 12,8 · 14,7 — all 1–2 places)
     //    out of this rule. Zero three-decimal-place numbers occur.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[    ](\d{3})(?!\d)/gu, "$1$2");
+    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");  // space, NBSP, NNBSP, thin space
     s = s.replace(/(\d),(\d{3})(?!\d)/gu, "$1$2");
-    s = s.replace(/[    ]/gu, " ");
+    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule (step 5) so `н. е.` and `т. п.` are claimed
     //    whole — their interior dots were becoming phrase breaks. Both spacings occur (`н. е.` and `н.е.`).

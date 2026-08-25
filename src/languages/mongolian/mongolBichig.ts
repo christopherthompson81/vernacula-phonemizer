@@ -20,7 +20,7 @@ const GLYPH: Record<string, string> = {
     "ᠼ": "ц", "ᠽ": "з", "ᠾ": "х", // ᠾ h → х
 };
 // Zero-width joiners, MVS (U+180E), free-variation selectors U+180B–180D, NNBSP — carry no phonemic value.
-const IGNORE = /[\u180B-\u180E\u200C\u200D\u202F]/gu;
+const IGNORE = /[\u180B-\u180E\u200C\u200D\u202f]/gu;
 
 /** Transliterate a Mongol-bichig word to a Cyrillic string (base readings) + the classical→modern contraction rule.
  *  A non-bichig char (e.g. a Cyrillic letter in a mixed-script token) is passed through unchanged, not dropped. */

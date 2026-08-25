@@ -326,12 +326,12 @@ export function normalizeKinyarwanda(input: string): string {
     //    real; rw's commonest shape is the DOTLESS `R.R.A Rwanda Revenue Authority`, and the nya condition
     //    ("a space then a capital follows") would manufacture a sentence break in the middle of an agency's
     //    own name. Same three-case decision otherwise.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run: string, off: number, full: string) => {
-        const letters = run.replace(/[. \u00a0]/gu, "");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run: string, off: number, full: string) => {  // space, NBSP
+        const letters = run.replace(/[. \u00a0]/gu, "");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
         if (!run.endsWith(".")) return letters;
-        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
+        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;  // space, NBSP
     });
 
     // 2) THOUSANDS DE-GROUPING, before every remaining numeric rule AND before the tier. A grouping comma
@@ -358,10 +358,10 @@ export function normalizeKinyarwanda(input: string): string {
     //    a one-letter unit, and the tier's `NOT_VERSION` guard rejects exactly `\d+[.,]\d+[a-zA-Z]` — the
     //    `802.11g` defence. De-grouped first they are `1300m` and the metre reads; left alone the unit leaks
     //    raw. 2 instances, and the alternative was withdrawing the `m` key altogether.
-    const NOT_COORD = "(?![    ]?[°º])";
+    const NOT_COORD = "(?![ \u00a0\u202f\u2009]?[°º])";  // space, NBSP, NNBSP, thin space
     s = s.replace(new RegExp(`(?<![\\d.,])[1-9]\\d{0,2}(?:,\\d{3})+(?!\\d|[.,]\\d)${NOT_COORD}`, "gu"), (w) => w.replace(/,/gu, ""));
     s = s.replace(new RegExp(`(?<![\\d.,])[1-9]\\d{0,2}(?:\\.\\d{3})+(?!\\d|[.,]\\d)${NOT_COORD}`, "gu"), (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 3) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — `km² 26,338`, `m 900`, `cm 25`, `kg 250`, `ml 10`,
     //    `g 200`. The shared tier matches ONLY number-then-unit, so these 30 instances are structurally
@@ -387,7 +387,7 @@ export function normalizeKinyarwanda(input: string): string {
     //    at ×1 does not pay for the exposure.
     const PRE_UNIT = Object.keys(UNIT).filter((k) => k.length > 1 || k === "m").sort((a, b) => b.length - a.length).join("|");
     s = s.replace(
-        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0]\\d)`, "giu"),
+        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0]\\d)`, "giu"),  // space, NBSP
         (_m, key: string, exp?: string) => {
             const noun = UNIT[key.toLowerCase()]!;
             const mod = exp === undefined ? "" : ` ${exp === "²" || exp === "2" ? SQUARED : CUBED}`;
@@ -429,23 +429,23 @@ export function normalizeKinyarwanda(input: string): string {
     //    noun for two figures) and step 7 runs later — left to itself the general range rule would split the
     //    pair and the degree arm would then attach the noun to the SECOND operand only (`40 kugeza kuri
     //    dogere 42`). Trap 14's ordering half: order by who needs the words first.
-    s = s.replace(/(?<![\p{L}\p{M}\d.,-])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)[ \u00a0]?°[ \u00a0]?([CF])?(?![\p{L}\p{M}])/gui,
+    s = s.replace(/(?<![\p{L}\p{M}\d.,-])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)[ \u00a0]?°[ \u00a0]?([CF])?(?![\p{L}\p{M}])/gui,  // space, NBSP
         (w, a: string, b: string, sc: string | undefined, off: number, full: string) =>
             Number(a) < Number(b)
                 ? `${degreeBody(a, off, off + w.length, full, sc?.toUpperCase() === "C" ? `${CELSIUS} ` : "")} kugeza kuri ${b}`
                 : w);
     //    4c) A SCALE TEMPERATURE.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui,  // space, NBSP
         (w, n: string, sc: string, off: number, full: string) =>
             degreeBody(n, off, off + w.length, full, sc?.toUpperCase() === "C" ? `${CELSIUS} ` : ""));
     //    4d) A COORDINATE — `2° 36′ 58″ S`, `1.867 ° S`, `30°33′27″ E`. The compass letter is a DIRECTION,
     //    not a scale; the prime/double-prime marks are left as they are (they carry no reading this repo has
     //    sourced) but the degree and its direction are now spoken.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°((?:[ \u00a0]?\d+[′'][ \u00a0]?)?(?:\d+[″"][ \u00a0]?)?)[ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°((?:[ \u00a0]?\d+[′'][ \u00a0]?)?(?:\d+[″"][ \u00a0]?)?)[ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
         (w, n: string, mid: string, c: string, off: number, full: string) =>
             `${degreeBody(n, off, off + w.length, full, "")} ${mid}${COMPASS[c]!}`);
     //    4e) A BARE DEGREE — `dogere 22°`, `40-42 °`.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu,  // space, NBSP
         (w, n: string, off: number, full: string) => degreeBody(n, off, off + w.length, full, ""));
 
     // 5) THE ENGLISH ORDINAL SUFFIX (`20th`, `3rd`) is NOT stripped here, because there is nothing to strip:
@@ -469,22 +469,22 @@ export function normalizeKinyarwanda(input: string): string {
     //    ⚠ `:00` EMITS THE HOUR ALONE. The alternative is the manifest's zero word, and "saa 10 zeru zeru" is
     //    not a reading of ten o'clock in any language.
     s = s.replace(
-        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${HOUR_MARKER})[ \u00a0]+([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])`, "giu"),
+        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${HOUR_MARKER})[ \u00a0]+([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])`, "giu"),  // space, NBSP
         (_w, mark: string, h: string, m: string) =>
             Number(m) === 0 ? `${mark} ${Number(h)}` : `${mark} ${Number(h)} ${AND} ${MINUTES} ${Number(m)}`,
     );
     //    A THREE-FIELD run WITH a timezone is a timestamp: no duration reading is right for it, so the
     //    colons become spaces and the fields simply stop being three clauses. Nothing is invented.
-    s = s.replace(new RegExp(`(?<![\\d:])(\\d{1,2}):(\\d{2}):(\\d{2})(?=[ \u00a0]*(?:${TZ})(?![\\p{L}\\p{M}]))`, "gu"), "$1 $2 $3");
+    s = s.replace(new RegExp(`(?<![\\d:])(\\d{1,2}):(\\d{2}):(\\d{2})(?=[ \u00a0]*(?:${TZ})(?![\\p{L}\\p{M}]))`, "gu"), "$1 $2 $3");  // space, NBSP
     //    A THREE-FIELD run WITHOUT one is a RACE DURATION — 9 instances, 0 counter-examples — and the wiki
     //    spells out exactly this quantity in exactly this order: *"akoresha amasaha 2, iminota 26, amasegonda
     //    5"* beside *"akoresheje amasaha 2:19:31"*. Composed from that, not from a pace convention.
-    s = s.replace(/(?<![\d:.])(\d{1,2}):[ \u00a0]?(\d{2}):[ \u00a0]?(\d{2})(?![:.\d])/gu,
+    s = s.replace(/(?<![\d:.])(\d{1,2}):[ \u00a0]?(\d{2}):[ \u00a0]?(\d{2})(?![:.\d])/gu,  // space, NBSP
         (_w, h: string, m: string, sec: string) => `${HOURS} ${Number(h)} ${MINUTES} ${Number(m)} ${SECONDS} ${Number(sec)}`);
     //    ANY REMAINING `N:NN` keeps its digits but loses the spurious pause — bible verses, split times
     //    (`3: 05.57`), sports scores. There is no attested Kinyarwanda reading for a pace or a verse
     //    reference (the playbook's `sports-time` class), so the colon is spent on a space and nothing else.
-    s = s.replace(/(?<![\d:])(\d{1,2}):[ \u00a0]?(\d{2})(?![:\d])/gu, "$1 $2");
+    s = s.replace(/(?<![\d:])(\d{1,2}):[ \u00a0]?(\d{2})(?![:\d])/gu, "$1 $2");  // space, NBSP
 
     // 7) RANGES → `kugeza kuri` ("up to"), the corpus's own span joiner: 18 digit-flanked instances
     //    (`imyaka 4 kugeza kuri 2`, `metero 2500 kugeza kuri 3200`, `abantu 2 kugeza kuri 5`, `1967 kugeza
@@ -520,11 +520,11 @@ export function normalizeKinyarwanda(input: string): string {
     //    the sign ONCE, on the second operand, hands step 8 exactly one number to attach it to and matches
     //    what the corpus writes when it spells the span out (`hagati ya 20 na 30 %`) — the noun said once,
     //    trap 12's discipline applied to a range rather than to a redundant word.
-    s = s.replace(/(?<![\d.,])(\d+)[ \u00a0]?%[ \u00a0]?[-–—][ \u00a0]?(\d+)[ \u00a0]?%/gu,
+    s = s.replace(/(?<![\d.,])(\d+)[ \u00a0]?%[ \u00a0]?[-–—][ \u00a0]?(\d+)[ \u00a0]?%/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} kugeza kuri ${b}%` : whole));
     const RANGE_UNIT = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
     s = s.replace(
-        new RegExp(`(?<![-\\d.,\\p{L}\\p{M}])(\\d+)[ \u00a0]?[-–—][ \u00a0]?(\\d+)[ \u00a0]?(${RANGE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "gu"),
+        new RegExp(`(?<![-\\d.,\\p{L}\\p{M}])(\\d+)[ \u00a0]?[-–—][ \u00a0]?(\\d+)[ \u00a0]?(${RANGE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "gu"),  // space, NBSP
         (whole, a: string, b: string, key: string, exp?: string) => {
             if (Number(a) >= Number(b)) return whole;
             const mod = exp === undefined ? "" : ` ${exp === "²" || exp === "2" ? SQUARED : CUBED}`;
@@ -541,7 +541,7 @@ export function normalizeKinyarwanda(input: string): string {
     //    decimal with a comma (`2,2 kugeza kuri 2.8 ° C`, `santimetero 1,5`, `450,1hab/km2`), so a right
     //    operand continuing into `,5` must still be refused. Requiring a DIGIT after the separator refuses it
     //    for the reason it was ever refused — the number continues — while a clause comma no longer counts.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} kugeza kuri ${b}` : whole));
 
     // 8) THE SHARED SYMBOL TIER — percent, currency, units, rate, exponent, ampersand. See SYMBOLS above.
@@ -565,7 +565,7 @@ export function normalizeKinyarwanda(input: string): string {
     //    door: the numeral guard that makes `m` safe everywhere else does not exist in denominator position.
     const DENOM_UNIT = Object.keys(UNIT).filter((k) => k.length > 1).sort((a, b) => b.length - a.length).join("|");
     s = s.replace(
-        new RegExp(`/[ \u00a0]?(${DENOM_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "giu"),
+        new RegExp(`/[ \u00a0]?(${DENOM_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "giu"),  // space, NBSP
         (_w, key: string, exp?: string) => {
             const mod = exp === undefined ? "" : ` ${exp === "²" || exp === "2" ? SQUARED : CUBED}`;
             return ` kuri ${UNIT[key.toLowerCase()]!}${mod}`;

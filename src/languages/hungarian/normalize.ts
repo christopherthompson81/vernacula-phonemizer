@@ -423,8 +423,8 @@ export function normalizeHungarian(input: string): string {
         // split off, `000` spoken as zero, AND a spurious full stop. Hungarian marks the decimal with a
         // comma, so the mark is only a separator when a digit follows: `(?![\d]|,\d)`. Same defect the zu
         // and xh runs found in swahili/normalize.ts, which is where this guard shape came from.
-        s = s.replace(/(\d)[.\u00a0\u202f\u2009 ](\d{3})(?![\d]|,\d)/gu, "$1$2");
-        s = s.replace(/(\d)\.[ \u00a0\u202f\u2009](\d{3})(?![\d]|,\d)/gu, "$1$2"); // the corpus's one `400. 000`
+        s = s.replace(/(\d)[.\u00a0\u202f\u2009 ](\d{3})(?![\d]|,\d)/gu, "$1$2");  // NBSP, NNBSP, thin space
+        s = s.replace(/(\d)\.[ \u00a0\u202f\u2009](\d{3})(?![\d]|,\d)/gu, "$1$2"); // the corpus's one `400. 000`  // space, NBSP, NNBSP, thin space
         s = s.replace(/(\d),(\d{3})(?![\d]|,\d)/gu, "$1$2");
     }
 
@@ -434,7 +434,7 @@ export function normalizeHungarian(input: string): string {
     //    *tizenegy nulla nulla*. Output stays DIGITS so the number path expands them, and so step 10's
     //    suffix rule can still attach (`11:35-re` → `11 35-re` → *harmincötre*).
     //    Two-digit minutes are REQUIRED, which is what keeps the score `3:2-re` out of this rule.
-    s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![\d:])/gu, (_m, h: string, min: string) =>
+    s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![\d:])/gu, (_m, h: string, min: string) =>  // space, NBSP
         Number(min) === 0 ? h : `${h} ${min}`,
     );
 

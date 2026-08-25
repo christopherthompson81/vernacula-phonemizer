@@ -235,7 +235,7 @@ const ELISION = /(?<![\p{L}\p{M}])([bcdfghjklmnprstwyzɲŋ])['’ʼ]([aeɛiɔou]
  * a capital — so a real pause is never deleted.
  */
 function expandDotted(s: string, body: string, word: string): string {
-    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");
+    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");  // space, NBSP
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
@@ -342,7 +342,7 @@ export function normalizeBambara(input: string): string {
         (whole: string, _g: string, off: number, all: string) => {
             const body = whole.replace(/\./gu, "");
             const rest = all.slice(off + whole.length);
-            return /^[ \u00a0]*(?:$|\p{Lu})/u.test(rest) ? `${body}.` : body;
+            return /^[ \u00a0]*(?:$|\p{Lu})/u.test(rest) ? `${body}.` : body;  // space, NBSP
         });
 
     // 5) ISBN, before every numeric rule — an identifier is read DIGIT BY DIGIT, not as a quantity. ×5, all
@@ -376,7 +376,7 @@ export function normalizeBambara(input: string): string {
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a list.
     //    Requiring every group to be exactly three digits does that: `san ba 2 fo 3` has no 3-digit group,
     //    and `tle 26 san 2008` is not `\d{1,3}( \d{3})+` because 2008 is four.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 7) UNITS, before decimals — the number-unit adjacency a unit rule matches on is destroyed the moment
     //    a decimal is rewritten into spaced digits (playbook step 4's standing coupling), and after

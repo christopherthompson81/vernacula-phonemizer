@@ -348,7 +348,7 @@ export function normalizeBavarian(input: string): string {
     //     that merely stand next to each other.
     do {
         prev = s;
-        s = s.replace(/(?<!\p{Nd})(\p{Nd}{1,3})[ \u00a0\u202f\u2009](\p{Nd}{3})(?!\p{Nd})/gu, "$1$2");
+        s = s.replace(/(?<!\p{Nd})(\p{Nd}{1,3})[ \u00a0\u202f\u2009](\p{Nd}{3})(?!\p{Nd})/gu, "$1$2");  // space, NBSP, NNBSP, thin space
     } while (s !== prev);
 
     // 7) DEGREES, before the unit rules so the scale letter is not left to the Latin fallback, and before

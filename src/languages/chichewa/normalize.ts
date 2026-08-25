@@ -153,11 +153,11 @@ export function normalizeChichewa(input: string): string {
     //    ⚠ THE OPTIONAL TRAILING CAPITAL is what makes `B.C.E` — the corpus's commonest era spelling, and
     //    dotless on its last letter — come out `BCE` rather than `BC E`. It is bounded by `(?![\p{L}])`,
     //    so it cannot reach into the next word: `U.S. Census` keeps its `Census` intact.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {
-        const letters = run.replace(/[. \u00a0]/gu, "");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {  // space, NBSP
+        const letters = run.replace(/[. \u00a0]/gu, "");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
-        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
+        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;  // space, NBSP
     });
 
     // 3) THE CLOCK — and the marker is what IDENTIFIES it, not the shape. Tabulating every `N:NN` in the
@@ -181,8 +181,8 @@ export function normalizeChichewa(input: string): string {
     //    `:` is `clausePunctuation`, so every one of these was reading as a comma pause mid-number.
     s = s.replace(
         new RegExp(
-            `(?<![\\d:.,])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])` +
-                `(?:[ \u00a0]*(?:([AaPp])\\.?[Mm]\\.?|(${TZ})(?![\\p{L}\\p{M}])|(${DAYPART})(?![\\p{L}\\p{M}])))`,
+            `(?<![\\d:.,])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])` +  // NBSP
+                `(?:[ \u00a0]*(?:([AaPp])\\.?[Mm]\\.?|(${TZ})(?![\\p{L}\\p{M}])|(${DAYPART})(?![\\p{L}\\p{M}])))`,  // space, NBSP
             "gu",
         ),
         (whole, h: string, m: string, ap?: string, tz?: string, part?: string) => {
@@ -210,7 +210,7 @@ export function normalizeChichewa(input: string): string {
     //    is then read as a decimal by step 10. It only needs to stop a PARTIAL match inside a longer run.
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) DEGREES. `40 °C (104.0 °F)`, `25 ° S`, and a bare `30 °`. The sign was dropped outright and the
     //    scale letter reached the g2p as a phoneme — `C` as [k] and `F` as [f], because Chichewa has no
@@ -226,18 +226,18 @@ export function normalizeChichewa(input: string): string {
     //    BEFORE step 10, which needs `104.0` intact to be recognised as the Fahrenheit reading's operand.
     const degreeBody = (n: string, off: number, end: number, full: string): string =>
         saidNear(full, off, end, DEGREE) ? n : `${DEGREE} ${n}`;
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?[CF](?![\p{L}\p{M}])/gui,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?[CF](?![\p{L}\p{M}])/gui,  // space, NBSP
         (w, n: string, off: number, full: string) => degreeBody(n, off, off + w.length, full));
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
         (w, n: string, c: string, off: number, full: string) =>
             `${degreeBody(n, off, off + w.length, full)} ${COMPASS[c]!}`);
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu,  // space, NBSP
         (w, n: string, off: number, full: string) => degreeBody(n, off, off + w.length, full));
 
     // 6) BARE `m` → *mamita*, the key the shared tier cannot hold — see METRE above for the 6-against-3
     //    measurement. AFTER step 4 (so `10,000 m` is one digit run by now) and BEFORE step 10.
     //    Prefix position, matching every other measure noun in the language (*mamita 1,708*).
-    s = s.replace(/(?<![\d.,])(\d+)[ \u00a0]?m(?![\p{L}\p{M}'’ʼ0-9])/gu, `${METRE} $1`);
+    s = s.replace(/(?<![\d.,])(\d+)[ \u00a0]?m(?![\p{L}\p{M}'’ʼ0-9])/gu, `${METRE} $1`);  // space, NBSP
 
     // 7) THE ENGLISH ORDINAL SUFFIX (`20th century`, `3rd`, `2nd`). Chichewa writes its own ordinals as
     //    WORDS — *wachiwiri*, *lachisanu*, *zaka za zana la 16* — so a Latin suffix here is always foreign
@@ -273,7 +273,7 @@ export function normalizeChichewa(input: string): string {
     //    `30-40,000`; and the ASCENDING-ONLY test above is what declines the truncated second endpoints a
     //    comma would otherwise be guarding by accident (`2018-19,`, `2015–16,`, `2009-10,`, `2-0,`).
     //    +3 segments, all genuine spans, no regression.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}])/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} mpaka ${b}` : whole));
 
     // 9) A LONE `+` BETWEEN OPERANDS IS LEFT UNREAD, deliberately — `(UTC + 7)`, `(GMT+1)`, 2 instances.

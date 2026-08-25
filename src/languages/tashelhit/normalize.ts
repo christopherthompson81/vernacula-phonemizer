@@ -275,7 +275,7 @@ const ERA: readonly (readonly [string, string])[] = [
  * verbatim from the Bambara/Lingala layer.
  */
 function expandDotted(s: string, body: string, word: string): string {
-    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");
+    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");  // space, NBSP
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
@@ -322,7 +322,7 @@ export function normalizeTashelhit(input: string): string {
         (whole: string, _g: string, off: number, all: string) => {
             const body = whole.replace(/\./gu, "");
             const rest = all.slice(off + whole.length);
-            return /^[ \u00a0]*(?:$|\p{Lu})/u.test(rest) ? `${body}.` : body;
+            return /^[ \u00a0]*(?:$|\p{Lu})/u.test(rest) ? `${body}.` : body;  // space, NBSP
         });
 
     // 4) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause
@@ -357,7 +357,7 @@ export function normalizeTashelhit(input: string): string {
     //    to reject a bare adjacency that is really two numbers. Requiring every group to be EXACTLY three
     //    digits does that: `wiss 11 d 57 n tusdadt` has no 3-digit group and `21 mars 2020` is not
     //    `\d{1,3}( \d{3})+` because 2020 is four digits with no separator before it.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) UNITS AND DEGREES, before decimals — the number-unit adjacency these match on is destroyed the
     //    moment a decimal is rewritten into spaced digits (playbook step 4's standing coupling), and after

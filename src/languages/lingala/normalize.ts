@@ -188,7 +188,7 @@ const DOTTED: readonly (readonly [string, string])[] = [
  * `body` is the abbreviation WITHOUT its final dot.
  */
 function expandDotted(s: string, body: string, word: string): string {
-    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");
+    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");  // space, NBSP
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
@@ -252,7 +252,7 @@ export function normalizeLingala(input: string): string {
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a list.
     //    Requiring every group to be exactly three digits does that: `mibu 1600 kino 1850` has no 3-digit
     //    group, and `sanza 9 1946` is not `\d{1,3}( \d{3})+` because 1946 is four.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) UNITS, before decimals — the number-unit adjacency a unit rule matches on is destroyed the moment
     //    a decimal is rewritten into spaced digits (playbook step 4's standing coupling), and after

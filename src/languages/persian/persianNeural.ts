@@ -19,7 +19,7 @@ import { createFaContextRestorer, type FaContextRestorer } from "./contextRestor
 import { createFaTagger } from "./faTagger.ts";
 import { harakatLexicon, normalizePersianOrthography, normalizePersianText, phonemizeWord } from "./persian.ts";
 
-const PERSO = "ء-ۿݐ-ݿ‌‍";
+const PERSO = "ء-ۿݐ-ݿ‌‍";  // ZWNJ, ZWJ
 const WORD = new RegExp(`[${PERSO}]+`, "gu");
 // Digit group FIRST so Persian-Indic digits (۰-۹, which also fall in the PERSO letter range) route to the number
 // path instead of being fed to the word/context model. Groups: 1=digits, 2=word, 3=punctuation.

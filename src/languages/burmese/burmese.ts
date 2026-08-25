@@ -256,8 +256,8 @@ export function segment(token: string): string[] {
     // the opposite of what this guard is for. Sampled over the seg-words concatenations no current input
     // distinguishes the two, so the separator is defensive — but a defence that only exists as an invisible
     // byte is one bad copy-paste from being gone.
-    const whole = sylls.map((s) => s.body).join("\u0001");
-    const split = parts.flatMap((p) => syllabify(p).map((s) => s.body)).join("\u0001");
+    const whole = sylls.map((s) => s.body).join("\u0001");  // U+0001
+    const split = parts.flatMap((p) => syllabify(p).map((s) => s.body)).join("\u0001");  // U+0001
     return whole === split ? parts : [token]; // split changes a syllable body (lost minor-ə) → keep whole
 }
 

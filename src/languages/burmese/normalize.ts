@@ -95,7 +95,7 @@ export function normalizeBurmese(input: string): string {
 
     // 1) ZERO-WIDTH marks. ⚠ Burmese uses ZWSP as a line-break hint INSIDE words, so it lands in the middle
     //    of a token and splits it for the segmenter. Removed outright.
-    t = t.replace(/[​-‍⁠﻿]/gu, "");
+    t = t.replace(/[​-‍⁠﻿]/gu, "");  // ZWSP, ZWJ, word joiner, BOM
 
     // 2) COMMA-GROUPED THOUSANDS, FIRST — before the comma can be read as a clause pause and cut the numeral
     //    in half. Applied repeatedly for numbers with several groups (၁,၂၃၄,၅၆၇).

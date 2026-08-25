@@ -216,7 +216,7 @@ export function normalizeTajik(input: string): string {
     //    ("seventy zero"). 42 occurrences in 24 of 456 segments; 7,348 articles wiki-wide.
     //    FIRST after the invisible-character fold, because a grouping space that survives is later read as
     //    two operands by the range rule and as two numbers by the tier.
-    for (let i = 0; i < 3; i++) s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?![\d])/gu, "$1$2");
+    for (let i = 0; i < 3; i++) s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?![\d])/gu, "$1$2");  // space, NBSP, NNBSP, thin space
 
     // 2) DOTTED ABBREVIATIONS — the three that are TAJIK. Before any single-dot handling, so the interior
     //    dot cannot survive as a phrase break.

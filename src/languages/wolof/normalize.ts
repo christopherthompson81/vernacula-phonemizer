@@ -292,9 +292,9 @@ export function normalizeWolof(input: string): string {
     //    by a lowercase word. The trade is stated instead of being hidden behind a word list.
     const degree = (n: string, off: number, len: number, full: string): string =>
         saidAfter(full, off + len, DEGREE) ? n : `${n} ${DEGREE}`;
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)[ \u00a0]?°[ \u00a0]?(?=\d)/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+)[ \u00a0]?°[ \u00a0]?(?=\d)/gu,  // space, NBSP
         (w, n: string, off: number, full: string) => `${degree(n, off, w.length, full)} `);
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)[ \u00a0]?[°º](?![\d\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+)[ \u00a0]?[°º](?![\d\p{L}\p{M}])/gu,  // space, NBSP
         (w, n: string, off: number, full: string) => degree(n, off, w.length, full));
 
     // 3) THE DOTTED ERA AND HONORIFIC MARKERS — de-dotted, NOT expanded. ~46 in the retained text:
@@ -312,7 +312,7 @@ export function normalizeWolof(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}.])[a-z](?:\.[a-zA-Z]){1,3}\.?(?![\p{L}\p{M}])/gu, (run, off: number, full: string) => {
         const letters = [...run.replace(/\./gu, "")].join(" ");
         const rest = full.slice(off + run.length);
-        return rest === "" || /^[ \u00a0]*$/u.test(rest) || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
+        return rest === "" || /^[ \u00a0]*$/u.test(rest) || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;  // space, NBSP
     });
 
     // 4) THE SHARED SYMBOL TIER — %, currency, units, the exponent and `&`. AFTER step 1 (it needs a real
@@ -335,7 +335,7 @@ export function normalizeWolof(input: string): string {
     //    spaced digit groups — is rejected by the LEADING guard instead, because `602` is preceded by a comma.
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 6) RANGES → `ba`. 21 ascending digit-flanked spans in the retained text once verse references are
     //    excluded: `1906-2001`, `1960-1980`, `1500-1888`, `1884-1885`, `1740 -1786`, `1265 - 1321`, `10-20`.
@@ -368,9 +368,9 @@ export function normalizeWolof(input: string): string {
     //    clause-final dot was already admitted (`15-20.` → *15 ba 20 .*) and adding `\.\d` here would be a
     //    second, unrelated change smuggled into a comma fix.
     //    Same shape as the clause-final period two paragraphs up, and the same trap (58) one step further on.
-    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-:\d\p{L}\p{M}]|,\d)/gu,
+    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-:\d\p{L}\p{M}]|,\d)/gu,  // space, NBSP
         (whole, a: string, b: string, off: number, full: string) =>
-            Number(a) < Number(b) && !/[·∙×][ \u00a0]*$/u.test(full.slice(Math.max(0, off - 3), off))
+            Number(a) < Number(b) && !/[·∙×][ \u00a0]*$/u.test(full.slice(Math.max(0, off - 3), off))  // space, NBSP
                 ? `${a} ${SPAN} ${b}`
                 : whole);
 

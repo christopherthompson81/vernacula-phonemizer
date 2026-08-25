@@ -15,7 +15,7 @@ import { withHost } from "../../core/foreign.ts";
 import { createCentralKurdishTagger, type CentralKurdishTagger } from "./centralKurdishTagger.ts";
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 
-const WORD = /[ؠ-ۿ‌]+/gu;
+const WORD = /[ؠ-ۿ‌]+/gu;  // ZWNJ
 let taggerP: Promise<CentralKurdishTagger | undefined> | undefined;
 let engine: ReturnType<typeof createCentralKurdishEngine> | undefined;
 const ckbEngine = () => (engine ??= createCentralKurdishEngine());

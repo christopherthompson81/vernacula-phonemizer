@@ -216,7 +216,7 @@ const ABBREV_DOT = /(?<=[а-яөүё])\.(?=[а-яөүё])/gu;
  * tidy-up.
  */
 const GROUP_COMMA = /(?<=\d)[,](?=\d{3}(?![\d]))/gu;
-const GROUP_SPACE = /(?<![\d.,])(\d{1,3})[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu;
+const GROUP_SPACE = /(?<![\d.,])(\d{1,3})[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu;  // space, NBSP, NNBSP, thin space
 
 // ---------------------------------------------------------------------------------------------------
 // 4. ORDINALS — `3-р сарын`, `21-р байранд`
@@ -362,7 +362,7 @@ const MAGNITUDES = [MANIFEST.numbers.thousand, MANIFEST.numbers.million, MANIFES
 // Captured as part of the match so it is CONSUMED and re-emitted (trap 10), never copied out of the tail and
 // left behind as a second copy. The trailing `[\p{L}\p{M}]*` is what makes a case-marked magnitude VISIBLE to
 // the callback, which then refuses.
-const MAG = `(?:[ \u00a0](?:их[ \u00a0])?(?:${MAGNITUDES.join("|")})[\\p{L}\\p{M}]*)?`;
+const MAG = `(?:[ \u00a0](?:их[ \u00a0])?(?:${MAGNITUDES.join("|")})[\\p{L}\\p{M}]*)?`;  // space, NBSP
 
 const SAID_CURRENCY = new RegExp(
     `${NOT_LETTER_BEFORE}(?:доллар|евро(?:гийн|гоор|нууд|той|оос|[гдт])?${NOT_LETTER_AFTER})`, "iu");
@@ -381,8 +381,8 @@ const SAID_CURRENCY = new RegExp(
  */
 const currencyWindow = (whole: string, off: number): string =>
     whole.slice(off, off + 40).split(/[.!?…](?!\d)/u)[0]!;
-const CURRENCY_BEFORE = new RegExp(`([$€])[ \u00a0]?(\\d+(?:[.,]\\d+)?)(${MAG})`, "gu");
-const CURRENCY_AFTER = new RegExp(`(\\d+(?:[.,]\\d+)?)[ \u00a0]?([$€])(${MAG})`, "gu");
+const CURRENCY_BEFORE = new RegExp(`([$€])[ \u00a0]?(\\d+(?:[.,]\\d+)?)(${MAG})`, "gu");  // space, NBSP
+const CURRENCY_AFTER = new RegExp(`(\\d+(?:[.,]\\d+)?)[ \u00a0]?([$€])(${MAG})`, "gu");  // space, NBSP
 const CURRENCY_WORD: Readonly<Record<string, string>> = { $: "доллар", "€": "евро" };
 const MAGNITUDE_SUFFIXED = new RegExp(`(?:${MAGNITUDES.join("|")})[\\p{L}\\p{M}]`, "u");
 
@@ -554,7 +554,7 @@ const UNIT_KEYS = Object.keys(UNIT_WORD).sort((a, b) => b.length - a.length).joi
 // The trailing `-суффикс` is CAPTURED so it is consumed and re-emitted (trap 10) rather than left behind to be
 // stranded by accident; the callback decides whether it glues onto the unit noun or stays separate.
 const UNIT = new RegExp(
-    `(?<![\\d.,\\p{L}\\p{M}])(\\d+(?:[.,]\\d+)?)[ \u00a0\u202f\u2009]?(${UNIT_KEYS})([²³23])?(?![\\p{L}\\p{M}\\d/²³])`
+    `(?<![\\d.,\\p{L}\\p{M}])(\\d+(?:[.,]\\d+)?)[ \u00a0\u202f\u2009]?(${UNIT_KEYS})([²³23])?(?![\\p{L}\\p{M}\\d/²³])`  // space, NBSP, NNBSP, thin space
     + `(?:-([а-яөүё]+)${NOT_LETTER_AFTER})?`,
     "gu",
 );

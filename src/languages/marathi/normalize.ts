@@ -171,8 +171,8 @@ export function makeMarathiNormalizer(
         //    words, आपल् + या → [ˈaːpəl jˈaː]. 66 instances. Stripping it is orthographically lossless.
         //    अ‍ॅ / अॅ is the Marathi spelling of the loan vowel /æ/ and is folded to ऍ (candra e), which
         //    the manifest already maps to ɛː; left as अ + ॅ it read as two vowels [ə ɛː].
-        s = s.replace(/अ[‌‍]?ॅ/gu, "ऍ").replace(/अ[‌‍]?ॉ/gu, "ऑ");
-        s = s.replace(/[‌‍]/gu, "");
+        s = s.replace(/अ[‌‍]?ॅ/gu, "ऍ").replace(/अ[‌‍]?ॉ/gu, "ऑ");  // ZWNJ, ZWJ
+        s = s.replace(/[‌‍]/gu, "");  // ZWNJ, ZWJ
 
         // 2) DEVANAGARI DIGITS → ASCII. Second, and before EVERY rule that follows, because all of them
         //    — and the shared symbol tier, whose NUM is `\d+(?:[ ]\d{3}|[.,]\d+)*` — are ASCII-defined.
