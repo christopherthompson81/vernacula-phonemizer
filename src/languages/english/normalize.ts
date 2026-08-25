@@ -625,18 +625,9 @@ export function normalizeEnglish(input: string): string {
  * the failing class (NHS, MP, GDP, DVD, TV, PBS all lack a vowel entirely).
  */
 export const isUnreadableEnglish = makeUnreadableTest({
-    vowels: /[aeiouy]/u,
-    legalOnsets: new Set([
-        "bl", "br", "ch", "cl", "cr", "dr", "dw", "fl", "fr", "gh", "gl", "gr", "gn", "kn", "kl", "kr",
-        "ph", "pl", "pr", "ps", "qu", "rh", "sc", "sh", "sk", "sl", "sm", "sn", "sp", "sq", "st", "sv",
-        "sw", "th", "tr", "tw", "vl", "wh", "wr", "zl",
-    ]),
-    legalCodas: new Set([
-        "ch", "ck", "ct", "ff", "ft", "gh", "gs", "ks", "ld", "lf", "lk", "ll", "lm", "ln", "lp", "ls",
-        "lt", "lv", "mb", "mn", "mp", "ms", "nc", "nd", "ng", "nk", "ns", "nt", "ph", "pt", "ps", "rb",
-        "rc", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rv", "sh", "sk", "sm", "sp",
-        "ss", "st", "th", "ts", "tt", "xt", "zz", "bs", "ds", "ls", "nx", "mf", "lb", "rth", "nth",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
 
 /**
@@ -645,7 +636,8 @@ export const isUnreadableEnglish = makeUnreadableTest({
  * space-separated resolves correctly. The one exception is `a`, which the dict has as the reduced article
  * AH0 rather than the letter name.
  */
-const LETTER_NAME = (l: string): string | undefined => (/^[a-z]$/.test(l) ? (l === "a" ? "ay" : l) : undefined);
+const LETTER_NAME = (l: string): string | undefined =>
+    /^[a-z]$/u.test(l) ? (MANIFEST.letterNameExceptions[l] ?? l) : undefined;
 
 /** LEXICAL: acronyms spelled out although their lowercase form is a dictionary word. Authored in
  *  english.jsonc alongside the language's other hand-authored facts, not here. */

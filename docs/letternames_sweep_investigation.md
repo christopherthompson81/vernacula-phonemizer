@@ -146,9 +146,60 @@ The three assertions that matter: the interior dots do not survive as clause pau
 occurs in the run it was declared for; and **no declared form ever appears in the IPA**, which is what pins
 "recognition list, not spelling map" as a property rather than a comment.
 
-## Remaining
+## Batch 5 — en — 2026-08-25 08:20 — the last one, and the one with no table
 
-1: `en` — the largest engine, neural, and four accent variants read it.
+**⚠ ENGLISH HAS NO `letterNames` TABLE, AND SHOULD NOT HAVE ONE.** Its speller is a FUNCTION:
+
+```ts
+const LETTER_NAME = (l) => /^[a-z]$/.test(l) ? (l === "a" ? "ay" : l) : undefined;
+```
+
+CMUdict already carries all 26 single letters with their letter-NAME pronunciations (f = EH1 F, h = EY1 CH,
+w = D AH1 B AH0 L Y UW0), so emitting the bare letter and letting the dictionary resolve it is correct. That
+is a RULE, not data, and manufacturing a 26-entry table to match the other languages would be inventing a
+fact the language does not have. Only the EXCEPTION is data — the dict has ⟨a⟩ as the reduced article AH0
+rather than the letter name — so `letterNameExceptions: { "a": "ay" }` is what was lifted, and the rule stays
+in code with its explanation.
+
+### ⚠ English's phonotactics are nearly unreachable, and the sweep said so before I understood why
+
+All four keys swept **0** on the first pass. Wrecking the vowel class changed nothing — not for `NASA`, not
+for `TEST`, not for `STRENGTH`.
+
+The reason is structural: `core/initialisms.ts` asks `isRecorded` BEFORE the phonotactics test, and English
+is the one language in the fleet with a pronunciation dictionary. Every real word short-circuits. What can
+reach the cluster tables is an all-caps run that is BOTH absent from CMUdict AND carries a vowel — which took
+invented tokens to construct (`GWALT`, `GWEM`, `ZLORP`, `MELP`, `NURP`). With those, all four keys move:
+letterNameExceptions 1, vowels 3, onsets 1, codas 3.
+
+`ZLORP` is readable because ⟨zl⟩ genuinely IS in English's licensed onsets; `GWALT` is spelled because ⟨gw⟩
+is not. That pair is the whole test.
+
+**0 of 20 probe readings moved**, across `en`, `en-GB` and `en-IN`, sync and async — the variants matter here
+because all four read this engine.
+
+### Two weak assertions, caught by sabotage
+
+- Comparing `ZLORP` against the **W** letter name — a letter ZLORP does not contain — passed whether or not
+  the run was spelled. Asking for the letter the run actually STARTS with is the fix.
+- Comparing a spelled ⟨w⟩ against the phrase `"double you"` fails on a CORRECT reading: the dictionary
+  renders it as ONE token (dʌbəɫjuː) and the phrase is two. Ask for the bare letter.
+- And the ⟨a⟩ exception cannot catch its own decoupling — re-hardcoding it is observationally identical while
+  the data agrees. Stated in the test; the manifest sweep is what holds it.
+
+## The sweep is complete
+
+Sixteen languages, five batches. Every `letterNames`/`phonotactics` table the fleet's ported engines carry now
+lives in a manifest, except where the honest answer was that there is no table:
+
+  · **en** — the speller is a rule over CMUdict; only the ⟨a⟩ exception is data.
+  · **ta, te, kn** — a RECOGNITION list, not a spelling map, lifted as `initialismLetterForms`.
+  · **th, vi, cmn** — spelling maps with no phonotactics, because a Latin run there is spelled for being
+    FOREIGN rather than for being unpronounceable.
+
+Three defects were surfaced and left recorded rather than fixed, each because fixing it changes readings and
+needs language-specific sourcing a mechanical lift has no business guessing: Hausa's dead cluster lists,
+Italian's degree agreement (since fixed, #968), and Italian's case-sensitive compass class.
   · `jv` has no manifest.ts and needs one.
   · `th`, `vi`, `ta`, `te`, `kn`, `cmn` have no phonotactics block — letterNames only.
   · `en` last: the largest engine, neural, and four accent variants read it.

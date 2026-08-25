@@ -167,4 +167,31 @@ public class LetterNamesManifestTests
         // Nothing in the list is emitted — the forms are native script and never reach the IPA.
         foreach (var f in forms) Assert.DoesNotContain(f, Say(code, sentence));
     }
+
+    /**
+     * ⚠ ENGLISH HAS NO LetterNames TABLE, AND SHOULD NOT. CMUdict already carries all 26 single letters with
+     * their letter-NAME pronunciations, so the speller emits the bare letters and the dictionary resolves
+     * them — a RULE, not a table. Only the ⟨a⟩ exception is data: the dict has it as the reduced article.
+     *
+     * ⚠ AND ENGLISH'S PHONOTACTICS ARE NEARLY UNREACHABLE. Initialisms.cs asks `IsRecorded` FIRST, and
+     * English is the one language with a pronunciation dictionary, so every real word short-circuits before
+     * the cluster test. What reaches it is an all-caps run BOTH absent from CMUdict AND carrying a vowel.
+     */
+    [Fact]
+    public void EnglishSpellerIsARuleAndItsPhonotacticsAreNearlyUnreachable()
+    {
+        var en = Languages.English.Manifest.MANIFEST;
+        Assert.Equal(new[] { "a" }, en.LetterNameExceptions.Keys);
+        // GWALT is spelled because ⟨gw⟩ is not licensed; its A must be the exception, not the article.
+        Assert.Contains(Say("en", en.LetterNameExceptions["a"]), Say("en", "the GWALT team"));
+        // A run the DICTIONARY owns never reaches the cluster test.
+        foreach (var w in new[] { "NASA", "TEST", "STRENGTH" })
+            Assert.DoesNotContain(Say("en", "ay"), Say("en", $"the {w} team"));
+        Assert.DoesNotContain("gw", en.Phonotactics.Onsets);
+        Assert.Contains("zl", en.Phonotactics.Onsets);
+        Assert.Contains(Say("en", "w"), Say("en", "the GWEM group"));
+        // ⚠ Ask for the letter the run actually STARTS with — comparing ZLORP against a letter it does not
+        // contain passes whether or not the run was spelled.
+        Assert.DoesNotContain(Say("en", "z"), Say("en", "the ZLORP unit"));
+    }
 }

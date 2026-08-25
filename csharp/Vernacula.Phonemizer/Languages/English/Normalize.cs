@@ -433,27 +433,18 @@ public static class Normalize
     /** English phonotactics, for the fail-safe guard in core/initialisms.ts. */
     public static readonly Func<string, bool> IsUnreadableEnglish = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiouy]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "ch", "cl", "cr", "dr", "dw", "fl", "fr", "gh", "gl", "gr", "gn", "kn", "kl", "kr",
-            "ph", "pl", "pr", "ps", "qu", "rh", "sc", "sh", "sk", "sl", "sm", "sn", "sp", "sq", "st", "sv",
-            "sw", "th", "tr", "tw", "vl", "wh", "wr", "zl",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ch", "ck", "ct", "ff", "ft", "gh", "gs", "ks", "ld", "lf", "lk", "ll", "lm", "ln", "lp", "ls",
-            "lt", "lv", "mb", "mn", "mp", "ms", "nc", "nd", "ng", "nk", "ns", "nt", "ph", "pt", "ps", "rb",
-            "rc", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rv", "sh", "sk", "sm", "sp",
-            "ss", "st", "th", "ts", "tt", "xt", "zz", "bs", "ds", "ls", "nx", "mf", "lb", "rth", "nth",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     private static readonly JsRe SINGLE_LOWER_LETTER = JsRegex.Compile("^[a-z]$");
 
     /** Letter names. */
     private static string? LetterName(string l) =>
-        SINGLE_LOWER_LETTER.IsMatch(l) ? (l == "a" ? "ay" : l) : null;
+        SINGLE_LOWER_LETTER.IsMatch(l)
+            ? (Manifest.MANIFEST.LetterNameExceptions.TryGetValue(l, out var name) ? name : l)
+            : null;
 
     /** LEXICAL: acronyms spelled out although their lowercase form is a dictionary word. Authored in
      *  english.jsonc alongside the language's other hand-authored facts, not here. */
