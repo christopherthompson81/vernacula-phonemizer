@@ -10,23 +10,11 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber, spellDigits } from "../../core/numbers.ts";
-import { eastSlavicNumberWords, type EastSlavicNumbers } from "./numbers.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { eastSlavicNumberWords } from "./numbers.ts";
+import { MANIFEST as DEF } from "./manifest.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { normalizeUkrainian, normalizeUkrainianInitialisms } from "./normalize.ts";
 
-interface UkrainianDef {
-    vowels: Record<string, string>;
-    iotated: Record<string, string>;
-    palatalizers: readonly string[];
-    vowelLetters: readonly string[];
-    plainVowels: readonly string[];
-    consonants: Record<string, string>;
-    /** Western/Slavic base table + the magnitude count forms, feminine 1/2, and the decimal-comma name. */
-    numbers: EastSlavicNumbers & { decimalConnector: string };
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<UkrainianDef>(import.meta.url, "ukrainian.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
 
 const SOFT = "ь";
@@ -132,71 +120,22 @@ function number(digits: string): string {
  * standard dictionary paradigms, not invented.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
-    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
-    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
-    // defaults to it — this language does not split dimension from product.
-    multiply: { times: "на" },
-    // ⚠ CORRECTED FROM `помножити на` BY THE AUDIO. The register guess was too long: the uk_ua speaker of the
-    // universal `4x4` sentence says just **на** — wav2vec2 over uk_ua/train gives
-    // `… tʃ o t e r i  t aɪ … tʃ u t r i  n a  tʃ e t e r e …`, "chotyry NA chetery". `помножити на` is the full
-    // verbal form a textbook uses; a reader saying a dimension uses the bare preposition.
-    // `&` was DROPPED outright, losing the sign from `готелі типу B&B`. `та` is the conjunction used
-    // to join two nouns, and it is the shape every other treated language took here (de *und*, pt *e*,
-    // ru *и*, mi *me*): the plain conjunction, not a transliteration. `і` is the other Ukrainian "and" and
-    // is equally correct as a word; `та` is preferred between two coordinate nouns, which is what an
-    // ampersand always joins. ⚠ Both were checked at TOKEN level rather than by substring — a substring
-    // count is meaningless for these two, since `і` and `та` occur inside hundreds of ordinary words
-    // (3853 and 2290 raw substring hits against 51 and 14 real tokens).
-    // ⚠ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
-    // word — `готелі типу B&B … змагаються у двох основних речах: ліжко та сніданок` ("bed AND breakfast").
-    // That settles the `і` vs `та` question on the corpus's own usage rather than on a preference.
-    ampersand: "та",
-    percent: ["відсоток", "відсотки", "відсотків", "відсотка"],
-    currency: {
-        "€": ["євро"], // indeclinable
-        "$": ["долар", "долари", "доларів", "долара"],
-        "£": ["фунт", "фунти", "фунтів", "фунта"],
-    },
-    units: {
-        "км": ["кілометр", "кілометри", "кілометрів", "кілометра"],
-        "см": ["сантиметр", "сантиметри", "сантиметрів", "сантиметра"],
-        "мм": ["міліметр", "міліметри", "міліметрів", "міліметра"],
-        "кг": ["кілограм", "кілограми", "кілограмів", "кілограма"],
-        "ггц": ["гігагерц", "гігагерци", "гігагерців", "гігагерца"],
-        "мбіт": ["мегабіт", "мегабіти", "мегабіт"],
-        // THE BARE METRE, BOTH SPELLINGS. This was excluded, and the stated reason — the apostrophe in
-        // `41 м\u2019яч` ("41 balls"), where a short key would bite into the following word — is no longer a
-        // reason: the tier's trailing guard rejects `\u0027\u2019\u02bc` explicitly, so `м\u2019яч` cannot
-        // be entered. Verified against that exact corpus string. метрів ×6, and the cube word declared below
-        // could not reach a bare metre without this, so `120 m\u00b3` read as the letter name while
-        // `120 km\u00b3` read correctly.
-        "м": ["метр", "метри", "метрів", "метра"],
-        "m": ["метр", "метри", "метрів", "метра"],
-        // LATIN aliases. uk_ua writes the Cyrillic abbreviation throughout, but the engine's TOKEN drops
-        // Latin runs outright, so a foreign-sourced `120 km` loses the unit entirely rather than merely
-        // mispronouncing it. Same reasoning as Russian's aliases.
-        "km": ["кілометр", "кілометри", "кілометрів", "кілометра"],
-        "cm": ["сантиметр", "сантиметри", "сантиметрів", "сантиметра"],
-        "mm": ["міліметр", "міліметри", "міліметрів", "міліметра"],
-        "kg": ["кілограм", "кілограми", "кілограмів", "кілограма"],
-    },
-    unitPer: "на", // км/год → кілометрів НА годину; the denominator is accusative
-    rateDenominators: { "год": "годину", "ч": "годину", "h": "годину", "с": "секунду", "s": "секунду" },
-    // Ukrainian puts the measure adjective BEFORE the noun as a separate agreeing word — квадратних
-    // кілометрів — the same shape as Russian, not Swedish's fused compound.
-    exponentWords: {
-        squared: ["квадратний", "квадратні", "квадратних", "квадратного"],
-        cubed: ["кубічний", "кубічні", "кубічних", "кубічного"],
-        position: "before",
-    },
-    // Inflected forms too, because running text writes the one its numeral governs (2 мільйони, 5 мільйонів).
-    magnitudes: ["тисячі", "тисяч", "мільйон", "мільйона", "мільйони", "мільйонів",
-        "мільярд", "мільярда", "мільярди", "мільярдів"],
-    // A DECIMAL governs the GENITIVE SINGULAR in Ukrainian — 2,4 відсотка — which is a fourth form,
-    // because unlike Russian the 2–4 slot here is the NOMINATIVE PLURAL (два відсотки) and so cannot
-    // serve. `CountForms` is a plain string[] and `pick` clamps to the array length, so the extra entry
-    // is local data, not a schema change; the three-form languages are untouched.
+    // ⚠ ONE SOURCE with normalize.ts, which applies ⟨×⟩ and ⟨&⟩ in the positions this tier cannot reach —
+    // before the lift the two paths held their own copies of both words. See ukrainian.jsonc `signWords` for
+    // the audio evidence behind `на` and the corpus gloss behind `та`.
+    multiply: { times: DEF.signWords.times },
+    ampersand: DEF.signWords.ampersand,
+    percent: DEF.symbols.percent,
+    currency: DEF.symbols.currency,
+    units: DEF.symbols.units,
+    unitPer: DEF.symbols.unitPer,
+    rateDenominators: DEF.symbols.rateDenominators,
+    exponentWords: DEF.symbols.exponentWords,
+    magnitudes: DEF.symbols.magnitudes,
+    // A DECIMAL governs the GENITIVE SINGULAR in Ukrainian — 2,4 відсотка — which is a fourth form, because
+    // unlike Russian the 2–4 slot here is the NOMINATIVE PLURAL (два відсотки) and so cannot serve.
+    // `CountForms` is a plain string[] and `pick` clamps to the array length, so the extra entry is local
+    // data, not a schema change; the three-form languages are untouched.
     countForm: (n) => (Number.isInteger(n) ? slavicCountForm(n) : 3),
 });
 

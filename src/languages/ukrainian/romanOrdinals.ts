@@ -18,28 +18,15 @@
  *    age/lifetime), so the excluded case is both rarer and the one the table cannot serve.
  *  - REGNAL context is NOT triggered (needs a proper-name list; and a masculine regnal name would want *-ий*).
  */
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST as DEF } from "./manifest.ts";
 import type { RomanPolicy } from "../../core/roman.ts";
 
 /** Cardinal tens, read from the language's own number data (ukrainian.jsonc): двадцять, тридцять, сорок, … */
-const TENS_CARDINAL = loadManifest<{ numbers: { tens: Record<string, string> } }>(
-    import.meta.url,
-    "ukrainian.jsonc",
-).numbers.tens;
-
-/** 1–19, NEUTER nominative. Irregular stems (перше, друге, третє, четверте) → table. Apostrophe is U+0027,
- *  matching the orthography used in ukrainian.jsonc (дев'ять, п'ять). */
-const ORD_1_19: readonly string[] = [
-    "", "перше", "друге", "третє", "четверте", "п'яте", "шосте", "сьоме", "восьме", "дев'яте",
-    "десяте", "одинадцяте", "дванадцяте", "тринадцяте", "чотирнадцяте", "п'ятнадцяте", "шістнадцяте",
-    "сімнадцяте", "вісімнадцяте", "дев'ятнадцяте",
-];
-
-/** Whole tens, NEUTER nominative — own stems (сорокове, дев'яносте). */
-const ORD_TENS: readonly string[] = [
-    "", "десяте", "двадцяте", "тридцяте", "сорокове", "п'ятдесяте", "шістдесяте", "сімдесяте",
-    "вісімдесяте", "дев'яносте",
-];
+const TENS_CARDINAL = DEF.numbers.tens;
+/** The NEUTER ordinal tables (ukrainian.jsonc `romanOrdinals`) — see the header on why they are not the
+ *  masculine ones normalize.ts uses. Apostrophe is U+0027, matching the orthography used throughout the
+ *  manifest (дев'ять, п'ять). */
+const ORD = DEF.romanOrdinals;
 
 /**
  * Integer → Ukrainian ordinal, neuter nominative. Like Russian (and unlike Polish) only the LAST element
@@ -47,21 +34,21 @@ const ORD_TENS: readonly string[] = [
  */
 function ordinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n > 100) return undefined;
-    if (n === 100) return "соте";
-    if (n < 20) return ORD_1_19[n];
+    if (n === 100) return ORD.hundredth;
+    if (n < 20) return ORD.oneToNineteen[n];
     const t = Math.floor(n / 10),
         u = n % 10;
-    if (u === 0) return ORD_TENS[t];
+    if (u === 0) return ORD.tens[t];
     const tens = TENS_CARDINAL[String(t * 10)];
-    return tens === undefined ? undefined : `${tens} ${ORD_1_19[u]}`;
+    return tens === undefined ? undefined : `${tens} ${ORD.oneToNineteen[u]}`;
 }
 
 /**
- * століття / сторіччя in the cases that occur (nom-gen-acc -я, dat -ю, loc -і, instr -ям, loc pl -ях, instr pl
- * -ями, gen pl століть / сторіч), plus річниця ("L річниця") and з'їзд, the ordinal contexts that reach past
- * XXX. вік is excluded on purpose — see the header note on gender.
+ * The nouns a Roman numeral is read as an ordinal next to (ukrainian.jsonc `romanOrdinals.context`) —
+ * століття / сторіччя in the cases that occur, plus річниця ("L річниця") and з'їзд. вік is excluded on
+ * purpose; see the header note on gender, and the jsonc, where the exclusion is visible as an absence.
  */
-const CONTEXT = /^(століт(тя|тю|ті|тям|тях|тями|ь)|сторіч(чя|чю|чі|чям|чях|чями|)|річниц(я|і|ю|ею|ям|ях)|з'їзд(у|і|ом|и|ів|ам|ах)?)$/iu;
+const CONTEXT = new RegExp(`^(?:${ORD.context.join("|")})$`, "iu");
 
 /** This policy always supplies `ordinal`, which is optional on `RomanPolicy` — the intersection makes it
  *  REQUIRED here so tests can call it directly without a non-null assertion. */

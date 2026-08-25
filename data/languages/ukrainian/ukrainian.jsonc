@@ -76,5 +76,249 @@
     // list: США, ДНК, ВВП, ФБР, МРТ, ДВД, СРСР, НБА, ТБ have an illegal onset or no vowel and are spelled
     // automatically; ООН, ЗМІ, АЕС, ВІЛ, ІДІЛ, ОПЕК, ЮНЕСКО, СВАПО are readable AND said as words, so they
     // are deliberately absent. Only the two genuine exceptions are listed.
-    "acronymLetters": ["аол", "ші"]
+    "acronymLetters": ["аол", "ші"],
+    // ---------------------------------------------------------------------------------------------------
+    // ORDINALS (normalize.ts). MASCULINE NOMINATIVE — the citation form the whole paradigm derives from.
+    // Only the LAST element inflects (as in Russian, unlike Polish), so a compound is its cardinal head plus
+    // the ordinal of the final non-zero part: 1970 → *тисяча дев'ятсот* + сімдесятий.
+    // ⚠ NOT the same table as `romanOrdinals` below: that one is NEUTER, because it always modifies
+    // століття/сторіччя (a neuter noun). Two genders, two tables, both needed.
+    "ordinals": {
+        "oneToNineteen": [
+            "", "перший", "другий", "третій", "четвертий", "п'ятий", "шостий", "сьомий", "восьмий", "дев'ятий",
+            "десятий", "одинадцятий", "дванадцятий", "тринадцятий", "чотирнадцятий", "п'ятнадцятий",
+            "шістнадцятий", "сімнадцятий", "вісімнадцятий", "дев'ятнадцятий"
+        ],
+        "tens": [
+            "", "десятий", "двадцятий", "тридцятий", "сороковий", "п'ятдесятий", "шістдесятий", "сімдесятий",
+            "вісімдесятий", "дев'яностий"
+        ],
+        "hundreds": [
+            "", "сотий", "двохсотий", "трьохсотий", "чотирьохсотий", "п'ятисотий", "шестисотий", "семисотий",
+            "восьмисотий", "дев'ятисотий"
+        ],
+        "thousands": [
+            "", "тисячний", "двохтисячний", "трьохтисячний", "чотирьохтисячний", "п'ятитисячний",
+            "шеститисячний", "семитисячний", "восьмитисячний", "дев'ятитисячний"
+        ],
+
+        // Ordinal adjective endings, HARD stem then SOFT (третій). ⚠ THE ORDER IS THE PREFERENCE ORDER, not a
+        // paradigm order: the written suffix is matched by `endsWith` and several forms share a final letter
+        // (`-й` is claimed by both перший and першій), so the first match wins and the masculine nominative
+        // must come first — that is what `1-й` means. Each entry is NAMED so the clock rule below can select
+        // a case by name instead of by a magic index into this list.
+        "endings": [
+            { "case": "mascNom", "hard": "ий", "soft": "ій" },
+            { "case": "gen", "hard": "ого", "soft": "ього" },
+            { "case": "dat", "hard": "ому", "soft": "ьому" },
+            { "case": "instr", "hard": "им", "soft": "ім" },
+            { "case": "neutNom", "hard": "е", "soft": "є" },
+            { "case": "loc", "hard": "і", "soft": "і" },
+            { "case": "genPl", "hard": "их", "soft": "іх" },
+            { "case": "femNom", "hard": "а", "soft": "я" },
+            { "case": "femGen", "hard": "ої", "soft": "ьої" },
+            { "case": "femLoc", "hard": "ій", "soft": "ій" },
+            { "case": "acc", "hard": "у", "soft": "ю" },
+            { "case": "femInstr", "hard": "ою", "soft": "ьою" },
+            { "case": "instrPl", "hard": "ими", "soft": "іми" }
+        ]
+    },
+
+    // GENITIVE cardinals (normalize.ts). Ukrainian writes the oblique cardinal the same way it writes an
+    // ordinal — digits, hyphen, the last letters of the word — so `3-х` is *трьох* (a cardinal) while `1970-х`
+    // is *сімдесятих* (an ordinal). Both halves of a compound decline: 54 → *п'ятдесяти чотирьох*.
+    // Sources: en.wiktionary.org declension tables for два / три / чотири / п'ять / … / сто.
+    "genitiveCardinals": {
+        "oneToNineteen": [
+            "", "одного", "двох", "трьох", "чотирьох", "п'яти", "шести", "семи", "восьми", "дев'яти",
+            "десяти", "одинадцяти", "дванадцяти", "тринадцяти", "чотирнадцяти", "п'ятнадцяти",
+            "шістнадцяти", "сімнадцяти", "вісімнадцяти", "дев'ятнадцяти"
+        ],
+        "tens": [
+            "", "десяти", "двадцяти", "тридцяти", "сорока", "п'ятдесяти", "шістдесяти", "сімдесяти",
+            "вісімдесяти", "дев'яноста"
+        ],
+        "hundreds": [
+            "", "ста", "двохсот", "трьохсот", "чотирьохсот", "п'ятисот", "шестисот", "семисот", "восьмисот",
+            "дев'ятисот"
+        ]
+    },
+
+    // NEUTER nominative ordinals for the ROMAN-NUMERAL century reading (romanOrdinals.ts). The Ukrainian
+    // century noun is neuter (століття, сторіччя), not masculine as in Russian and Polish, so this table is
+    // *-е* rather than *-ий*. `hundredth` is the one form past the tens the century context ever reaches.
+    "romanOrdinals": {
+        "oneToNineteen": [
+            "", "перше", "друге", "третє", "четверте", "п'яте", "шосте", "сьоме", "восьме", "дев'яте",
+            "десяте", "одинадцяте", "дванадцяте", "тринадцяте", "чотирнадцяте", "п'ятнадцяте", "шістнадцяте",
+            "сімнадцяте", "вісімнадцяте", "дев'ятнадцяте"
+        ],
+        "tens": [
+            "", "десяте", "двадцяте", "тридцяте", "сорокове", "п'ятдесяте", "шістдесяте", "сімдесяте",
+            "вісімдесяте", "дев'яносте"
+        ],
+        "hundredth": "соте",
+
+        // The nouns a Roman numeral is read as an ordinal in FRONT OF or BEHIND — століття / сторіччя in the
+        // cases that occur, plus річниця ("L річниця") and з'їзд. ⚠ **вік / віку IS DELIBERATELY ABSENT**: the
+        // table above is neuter, so `XX вік` (masculine) would read *двадцяте вік*. Leaving it out keeps that
+        // as a cardinal, which is the lesser error. Enumerated rather than written as a stem+suffix pattern so
+        // the exclusion is visible as an absence.
+        "context": [
+            "століття", "століттю", "столітті", "століттям", "століттях", "століттями", "століть",
+            "сторіччя", "сторіччю", "сторіччі", "сторіччям", "сторіччях", "сторіччями", "сторіч",
+            "річниця", "річниці", "річницю", "річницею", "річницям", "річницях",
+            "з'їзд", "з'їзду", "з'їзді", "з'їздом", "з'їзди", "з'їздів", "з'їздам", "з'їздах"
+        ]
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // Letter NAMES (Український правопис, назви літер), for the initialism speller. й is *йот*; ь is
+    // *м'який знак*. и and е are included with their Ukrainian values — `ИТ` occurs in the corpus.
+    "letterNames": {
+        "а": "а", "б": "бе", "в": "ве", "г": "ге", "ґ": "ґе", "д": "де", "е": "е", "є": "є", "ж": "же", "з": "зе",
+        "и": "и", "і": "і", "ї": "ї", "й": "йот", "к": "ка", "л": "ел", "м": "ем", "н": "ен", "о": "о", "п": "пе",
+        "р": "ер", "с": "ес", "т": "те", "у": "у", "ф": "еф", "х": "ха", "ц": "це", "ч": "че", "ш": "ша", "щ": "ща",
+        "ь": "м'який знак", "ю": "ю", "я": "я"
+    },
+
+    // Ukrainian PHONOTACTICS, for the OOV spell-it-out test in core/initialisms.ts.
+    "phonotactics": {
+        "vowels": "аеиіїєоуюя",
+        "onsets": [
+            "бл", "бр", "вл", "вр", "гл", "гр", "гн", "дв", "др", "дн", "жд", "зв", "зд", "зл", "зм",
+            "зн", "зр", "кл", "кн", "кр", "кв", "мн",
+            "пл", "пр", "сл", "см", "сн", "сп", "ст", "св", "тр", "тв", "фл", "фр", "хл", "хр", "цв",
+            "шк", "шл", "шп", "шт", "щи"
+        ],
+        "codas": [
+            "ст", "нт", "нд", "нс", "рт", "рд", "рс", "рн", "рм", "лт", "лд", "лс", "кт", "кс",
+            "пт", "фт", "зд", "зн", "сн", "см", "тр", "др", "бр", "вр", "гр", "пр", "кр", "нк", "нг",
+            "лм", "лк", "рк", "рг", "рх", "нь", "сь", "ть"
+        ]
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // CLOCK. Ukrainian says the hour as a FEMININE ORDINAL agreeing with the elided *година*, in the case the
+    // PRECEDING PREPOSITION governs — о двадцятій тридцять, з шостої тридцять, між двадцять другою. Each
+    // preposition names an `ordinals.endings` case; `defaultCase` is what an unprepositioned hour takes.
+    "clock": {
+        "prepositionCase": {
+            "о": "femLoc", "об": "femLoc", "в": "femLoc", "у": "femLoc", "на": "femLoc",
+            "з": "femGen", "із": "femGen", "зі": "femGen", "до": "femGen", "від": "femGen",
+            "близько": "femGen", "після": "femGen", "протягом": "femGen", "біля": "femGen",
+            "між": "femInstr", "перед": "femInstr", "за": "femInstr"
+        },
+        "defaultCase": "femNom"
+    },
+
+    // The DEGREE noun in the four count forms this language's `countForm` selects (nom.sg / nom.pl / gen.pl /
+    // gen.sg-after-a-decimal). ⚠ The metre and the square adjective are NOT repeated here: they are read from
+    // `symbols.units.м` and `symbols.exponentWords.squared`, which already carry exactly these words. Before
+    // the lift `normalize.ts` held its own copies of both, byte-identical to the symbol tier's — two sources
+    // for one fact.
+    "degree": ["градус", "градуси", "градусів", "градуса"],
+    // The temperature scales, keyed by the letter written after ⟨°⟩ (both the Latin and the Cyrillic form of
+    // each are matched by the rule; only one reading exists per scale).
+    "temperatureScales": { "C": "Цельсія", "F": "Фаренгейта" },
+
+    // Abbreviations whose dot is NOT a sentence end. `кв.` is absent on purpose — it is an ADJECTIVE that must
+    // agree with the following number, so it has its own rule.
+    "dottedAbbrev": { "р": "року", "рр": "років", "стор": "сторінка", "див": "дивись", "ін": "інше" },
+
+    // MULTI-WORD dotted abbreviations, claimed whole and BEFORE the single-dot rule so their interior dots
+    // never become phrase breaks. ⚠ ORDER MATTERS: `до н. е.` must precede `н. е.`, or the longer reading can
+    // never be reached. The written form is matched with its spacing optional after a dot (both `н. е.` and
+    // `н.е.` occur) and required after a bare word.
+    "multiDotAbbrev": [
+        { "written": "до н. е.", "reading": "до нашої ери" },
+        { "written": "н. е.", "reading": "нашої ери" },
+        { "written": "т. п.", "reading": "тому подібне" },
+        { "written": "т. д.", "reading": "так далі" }
+    ],
+
+    // The number sign ⟨№⟩, dropped outright before the lift, and the connective a numeric RANGE takes.
+    "numberSign": "номер",
+    "rangeWord": "до",
+
+    // ---------------------------------------------------------------------------------------------------
+    // The SIGN AND MATH WORDS (core/normalizeSymbols.ts `SignWords`) — ± + − & = < > × ÷. ⚠ ONE SOURCE: the
+    // symbol tier in ukrainian.ts reads `times` and `ampersand` from here too, so the two paths cannot drift.
+    //
+    // `times` — ⚠ CORRECTED FROM `помножити на` BY THE AUDIO. The uk_ua speaker of the universal `4x4` sentence
+    // says just **на**: wav2vec2 over uk_ua/train gives `… tʃ o t e r i  t aɪ … tʃ u t r i  n a  tʃ e t e r e …`,
+    // "chotyry NA chetery". `помножити на` is the full verbal form a textbook uses; a reader saying a dimension
+    // uses the bare preposition. One word, so `by` defaults to it — this language does not split dimension from
+    // product.
+    //
+    // `ampersand` — ⚠ THE CORPUS GLOSSES THE ABBREVIATION ITSELF: `готелі типу B&B … змагаються у двох основних
+    // речах: ліжко та сніданок` ("bed AND breakfast"). That settles `та` over the equally-correct `і` on the
+    // corpus's own usage. Both were counted at TOKEN level, not by substring — `і` and `та` occur inside
+    // hundreds of ordinary words (3853 and 2290 raw substring hits against 51 and 14 real tokens).
+    //
+    // `equals` — ⚠ `дорівнює` GOVERNS THE DATIVE IN CAREFUL PROSE (`дорівнює нулю`), which numbers.ts cannot
+    // produce. uk.wikipedia's division article is what makes it shippable: in the arithmetic slot the source
+    // itself writes NOMINATIVE — "двадцять розділене на п'ять дорівнює чотири". No case repair needed.
+    // The COMPARATIVES do still need `ніж`: bare `менше` takes the genitive (`менше нуля`), while `ніж` takes
+    // the nominative and is corpus-attested (`менше ніж` ×6, `більше ніж` ×7 in uk_ua).
+    "signWords": {
+        "plusMinus": "плюс мінус",
+        "plus": "плюс",
+        "minus": "мінус",
+        "ampersand": "та",
+        "equals": "дорівнює",
+        "lessThan": "менше ніж",
+        "greaterThan": "більше ніж",
+        "times": "на",
+        "dividedBy": "розділене на"
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data (ukrainian.ts). CYRILLIC unit abbreviations (км, not km) and the FOUR-way
+    // Slavic agreement — a DECIMAL governs the GENITIVE SINGULAR in Ukrainian (2,4 відсотка), which is a fourth
+    // form, because unlike Russian the 2–4 slot here is the NOMINATIVE PLURAL (два відсотки) and so cannot serve.
+    //
+    // Currency: NOT attested in uk_ua (the corpus spells доларів / фунтів / євро out), but the signs were being
+    // dropped outright, so the three that occur in Ukrainian text at all are declared. Standard dictionary
+    // paradigms, not invented.
+    "symbols": {
+        "percent": ["відсоток", "відсотки", "відсотків", "відсотка"],
+        "currency": {
+            "€": ["євро"],
+            "$": ["долар", "долари", "доларів", "долара"],
+            "£": ["фунт", "фунти", "фунтів", "фунта"]
+        },
+        // ⚠ THE BARE METRE IS DECLARED HERE, BOTH SPELLINGS, and normalize.ts reads these same forms for its
+        // own apostrophe-aware `м` rule. The old exclusion — `41 м’яч` ("41 balls"), where a short key would
+        // bite into the following word — is no longer a reason: the tier's trailing guard rejects ⟨' ’ ʼ⟩
+        // explicitly. Verified against that exact corpus string.
+        // LATIN aliases are declared because the engine's TOKEN drops Latin runs outright, so a foreign-sourced
+        // `120 km` would lose the unit entirely rather than merely mispronouncing it.
+        "units": {
+            "км": ["кілометр", "кілометри", "кілометрів", "кілометра"],
+            "см": ["сантиметр", "сантиметри", "сантиметрів", "сантиметра"],
+            "мм": ["міліметр", "міліметри", "міліметрів", "міліметра"],
+            "кг": ["кілограм", "кілограми", "кілограмів", "кілограма"],
+            "ггц": ["гігагерц", "гігагерци", "гігагерців", "гігагерца"],
+            "мбіт": ["мегабіт", "мегабіти", "мегабіт"],
+            "м": ["метр", "метри", "метрів", "метра"],
+            "m": ["метр", "метри", "метрів", "метра"],
+            "km": ["кілометр", "кілометри", "кілометрів", "кілометра"],
+            "cm": ["сантиметр", "сантиметри", "сантиметрів", "сантиметра"],
+            "mm": ["міліметр", "міліметри", "міліметрів", "міліметра"],
+            "kg": ["кілограм", "кілограми", "кілограмів", "кілограма"]
+        },
+        "unitPer": "на",
+        "rateDenominators": { "год": "годину", "ч": "годину", "h": "годину", "с": "секунду", "s": "секунду" },
+        // Ukrainian puts the measure adjective BEFORE the noun as a separate agreeing word — квадратних
+        // кілометрів — the same shape as Russian, not Swedish's fused compound.
+        "exponentWords": {
+            "squared": ["квадратний", "квадратні", "квадратних", "квадратного"],
+            "cubed": ["кубічний", "кубічні", "кубічних", "кубічного"],
+            "position": "before"
+        },
+        // Inflected forms too, because running text writes the one its numeral governs (2 мільйони, 5 мільйонів).
+        "magnitudes": ["тисячі", "тисяч", "мільйон", "мільйона", "мільйони", "мільйонів",
+            "мільярд", "мільярда", "мільярди", "мільярдів"]
+    }
 }
