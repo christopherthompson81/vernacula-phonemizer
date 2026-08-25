@@ -78,41 +78,22 @@
  *   - ATTESTED RANGE / FALLBACK: 0 … 10¹²−1. At 10¹² and above, and for any non-safe integer, this falls back to
  *     DIGIT-BY-DIGIT over the Danish units (the lexc lists no Danish scale word above `milliard`).
  */
+import { MANIFEST } from "./manifest.ts";
 
-// NATIVE Greenlandic 0–12. Index 0 is the Danish loan `nul` (no native zero exists — see the header).
-const NATIVE = [
-    "nul", // 0 — Danish; the only attested form
-    "ataaseq", // 1
-    "marluk", // 2
-    "pingasut", // 3
-    "sisamat", // 4
-    "tallimat", // 5
-    "arfinillit", // 6 — 'other hand' + 1
-    "arfineq marluk", // 7
-    "arfineq pingasut", // 8
-    "qulingiluat", // 9
-    "qulit", // 10
-    "aqqanillit", // 11 — 'going down' (to the feet) + 1
-    "aqqaneq marluk", // 12
-];
-
-// DANISH, from 13 up. `DK_UNITS` are the combining forms used in og-compounds and before hundrede/tusind
-// (Danish uses `en`, not `et`, in enogtyve and in enhundrede-type compounds).
-const DK_UNITS = ["", "en", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni"];
-const DK_10_19 = ["ti", "elleve", "tolv", "tretten", "fjorten", "femten", "seksten", "sytten", "atten", "nitten"];
-const DK_TENS: Record<string, string> = {
-    "20": "tyve",
-    "30": "tredive",
-    "40": "fyrre",
-    "50": "halvtreds",
-    "60": "tres",
-    "70": "halvfjerds",
-    "80": "firs",
-    "90": "halvfems",
-};
-const DK_AND = "og"; // unit-og-ten, written solid
-const DK_HUNDRED = "hundrede";
-const DK_THOUSAND = "tusind";
+/**
+ * THE NUMERAL LEXICON, from the manifest. ⚠ NATIVE 0–12, DANISH FROM 13, and that is a necessity rather
+ * than a shortcut — the traditional system is a body-part tally (`arfinillit` 6 = "other hand"+1,
+ * `aqqanillit` 11 = "going down" to the feet +1) and has nowhere to put a thousand, so speakers borrow
+ * Danish above the small counts. The words are data; the arithmetic below is not.
+ */
+const NATIVE = MANIFEST.numbers.native;
+const DK = MANIFEST.numbers.danish;
+const DK_UNITS = DK.units;
+const DK_10_19 = DK.teens;
+const DK_TENS = DK.tens;
+const DK_AND = DK.and;
+const DK_HUNDRED = DK.hundred;
+const DK_THOUSAND = DK.thousand;
 
 /** Danish 1 ≤ n < 100, solid (femogtyve). */
 function dkBelow100(n: number): string {
@@ -160,11 +141,11 @@ export function numberToWords(n: number): string {
         const m = Math.floor(n / 1e6),
             r = n % 1e6;
         // million is an en-word: "en million", and the regular Danish plural "millioner" with a count.
-        const head = m === 1 ? "en million" : `${dkBelow1000(m)} millioner`;
+        const head = m === 1 ? DK.million.singular : `${dkBelow1000(m)} ${DK.million.plural}`;
         return r === 0 ? head : `${head} ${dkBelow1e6(r)}`;
     }
     const b = Math.floor(n / 1e9),
         r = n % 1e9;
-    const head = b === 1 ? "en milliard" : `${dkBelow1000(b)} milliarder`;
+    const head = b === 1 ? DK.milliard.singular : `${dkBelow1000(b)} ${DK.milliard.plural}`;
     return r === 0 ? head : `${head} ${numberToWords(r)}`;
 }

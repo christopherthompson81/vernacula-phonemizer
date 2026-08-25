@@ -38,6 +38,7 @@
  * clause breaks ×22, all-caps initialisms ×120 tokens, accented Latin letters ×14, percent ×2, era
  * markers ×6 (BCE ×4, BC ×1, A.D. ×1), n.k. ×2, degrees ×1, currency signs ×0.
  */
+import { MANIFEST as DEF } from "./manifest.ts";
 
 /** Ascending pairs are SPANS, non-ascending ones are scores or seasons. Measured, not assumed: of the 18
  *  `N-N` shapes in the corpus, all 13 ascending ones are genuine spans (1469-1539, 1000-1300, 10-15,
@@ -67,8 +68,8 @@ function expandDotted(s: string, body: string, word: string): string {
  *  first (⚠ a multi-dot abbreviation must be consumed before anything reads its interior
  *  dot as a phrase break), and bare `BC` is required to follow a NUMBER — unlike `BCE`, two bare capitals
  *  are otherwise a perfectly ordinary initialism, and the corpus's one instance is "Takribani 1000 BC". */
-const BCE_WORD = "Kabla ya Kristo";
-const AD_WORD = "Baada ya Kristo";
+const BCE_WORD = DEF.eraWords.bce;
+const AD_WORD = DEF.eraWords.ad;
 const BARE_ERA: readonly (readonly [RegExp, string])[] = [
     [/(?<![\p{L}\p{M}])BCE(?![\p{L}\p{M}])/gu, BCE_WORD],
     [/(?<=\d[ \u00a0])BC(?![\p{L}\p{M}])/gu, BCE_WORD],  // space, NBSP

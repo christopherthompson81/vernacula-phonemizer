@@ -10,33 +10,20 @@ namespace Vernacula.Phonemizer.Languages.Kalaallisut;
 
 public static class Numbers
 {
-    private static readonly string[] NATIVE =
-    {
-        "nul",              // 0 — Danish; the only attested form
-        "ataaseq",          // 1
-        "marluk",           // 2
-        "pingasut",         // 3
-        "sisamat",          // 4
-        "tallimat",         // 5
-        "arfinillit",       // 6 — 'other hand' + 1
-        "arfineq marluk",   // 7
-        "arfineq pingasut", // 8
-        "qulingiluat",      // 9
-        "qulit",            // 10
-        "aqqanillit",       // 11 — 'going down' (to the feet) + 1
-        "aqqaneq marluk",   // 12
-    };
-
-    private static readonly string[] DK_UNITS = { "", "en", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni" };
-    private static readonly string[] DK_10_19 = { "ti", "elleve", "tolv", "tretten", "fjorten", "femten", "seksten", "sytten", "atten", "nitten" };
-    private static readonly IReadOnlyDictionary<string, string> DK_TENS = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["20"] = "tyve", ["30"] = "tredive", ["40"] = "fyrre", ["50"] = "halvtreds",
-        ["60"] = "tres", ["70"] = "halvfjerds", ["80"] = "firs", ["90"] = "halvfems",
-    };
-    private const string DK_AND = "og"; // unit-og-ten, written solid
-    private const string DK_HUNDRED = "hundrede";
-    private const string DK_THOUSAND = "tusind";
+    /**
+     * THE NUMERAL LEXICON, from the manifest. ⚠ NATIVE 0–12, DANISH FROM 13 — a necessity, not a shortcut:
+     * the traditional system is a body-part tally (`arfinillit` 6 = "other hand"+1, `aqqanillit` 11 =
+     * "going down" to the feet +1) with nowhere to put a thousand, so speakers borrow Danish above the
+     * small counts. The words are data; the arithmetic below is not. See the TS module and the jsonc.
+     */
+    private static IReadOnlyList<string> NATIVE => KalaallisutPhonemizer.DEF.Numbers.Native;
+    private static KalaallisutDanish DK => KalaallisutPhonemizer.DEF.Numbers.Danish;
+    private static IReadOnlyList<string> DK_UNITS => DK.Units;
+    private static IReadOnlyList<string> DK_10_19 => DK.Teens;
+    private static IReadOnlyDictionary<string, string> DK_TENS => DK.Tens;
+    private static string DK_AND => DK.And;
+    private static string DK_HUNDRED => DK.Hundred;
+    private static string DK_THOUSAND => DK.Thousand;
 
     /** Danish 1 ≤ n < 100, solid (femogtyve). */
     private static string DkBelow100(double n)
@@ -82,11 +69,11 @@ public static class Numbers
         if (n < 1e9)
         {
             double m = Math.Floor(n / 1e6), r1 = n % 1e6;
-            var head1 = m == 1 ? "en million" : $"{DkBelow1000(m)} millioner";
+            var head1 = m == 1 ? DK.Million.Singular : $"{DkBelow1000(m)} {DK.Million.Plural}";
             return r1 == 0 ? head1 : $"{head1} {DkBelow1e6(r1)}";
         }
         double b = Math.Floor(n / 1e9), r = n % 1e9;
-        var head = b == 1 ? "en milliard" : $"{DkBelow1000(b)} milliarder";
+        var head = b == 1 ? DK.Milliard.Singular : $"{DkBelow1000(b)} {DK.Milliard.Plural}";
         return r == 0 ? head : $"{head} {NumberToWords(r)}";
     }
 }

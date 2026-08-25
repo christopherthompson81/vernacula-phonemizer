@@ -177,6 +177,9 @@
         // Yoruba BUILDS NUMERALS — *márùn dín ní ọgọ́ta* is 55, "five less than sixty" — so a `dín ní`
         // emitted before a figure would be parsed as part of the number.
         "negative": "alòdì",
+        // ⚠ THE BARE METRE IS READ LOCALLY, NOT THROUGH THE UNIT TIER — see normalize.ts for the two
+        // `9h 50m` counter-examples that keep `m` out of `units`. The WORD is data either way.
+        "metre": "mítà",
         // The SQUARED measure word, which follows the unit noun: `kìlómítà onígun mẹ́rin`. 27 occurrences of
         // the phrase, 9 of them directly after a unit word (kìlómítà/mítà/máìlì).
         "squared": "onígun mẹ́rin",

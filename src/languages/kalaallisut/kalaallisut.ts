@@ -7,16 +7,26 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { normalizeKalaallisut } from "./normalize.ts";
 
-interface KalaallisutDef {
+export interface KalaallisutDef {
     vowels: Record<string, string>;
     consonants: Record<string, string>;
+    /** The numeral lexicon — NATIVE 0–12, DANISH from 13. See the jsonc for why. */
+    numbers: {
+        native: string[];
+        danish: {
+            units: string[]; teens: string[]; tens: Record<string, string>;
+            and: string; hundred: string; thousand: string;
+            million: { singular: string; plural: string };
+            milliard: { singular: string; plural: string };
+        };
+    };
 }
-const DEF = loadManifest<KalaallisutDef>(import.meta.url, "kalaallisut.jsonc");
+const DEF = MANIFEST;
 // Letter → IPA tables (kalaallisut.jsonc). Gemination and ng/nng are handled in the scan below.
 const VOWEL = DEF.vowels;
 const CONS = DEF.consonants;

@@ -88,3 +88,60 @@ describe("hu inflects the LAST morph of a compound, from the manifest's morph ta
         expect(HU.ordinalMorphs["millió"]).toBe("milliomodik");
     });
 });
+
+/**
+ * THE WORD CONSTANTS — the last of this sweep, and a different shape from the ordinal tables: not a table
+ * at all, just a word the engine said that nothing outside the engine could see.
+ *
+ * ⚠ KALAALLISUT IS TWO LANGUAGES IN ONE NUMERAL SYSTEM, and that is a necessity rather than an engine
+ * shortcut. The native series is a BODY-PART TALLY — `arfinillit` (6) is "other hand"+1, `aqqanillit` (11)
+ * is "going down" to the feet +1 — and a system anchored to twenty fingers and toes has nowhere to put a
+ * thousand. So 0–12 are native and 13 up are Danish, which is how speakers actually count, and index 0 is
+ * already a Danish loan (`nul`) because no native zero exists.
+ */
+import { MANIFEST as KL } from "../src/languages/kalaallisut/manifest.ts";
+import { MANIFEST as SW } from "../src/languages/swahili/manifest.ts";
+import { MANIFEST as YO } from "../src/languages/yoruba/manifest.ts";
+
+describe("kl counts native to 12 and Danish above it, both from the manifest", () => {
+    const kl = (s: string): string => say(s, "kl");
+
+    test("the boundary is at 12: native below, Danish from 13", () => {
+        expect(KL.numbers.native).toHaveLength(13);
+        expect(kl("12 nunaqarfiit")).toContain(kl(KL.numbers.native[12]!));
+        // 13 is Danish `tretten`, which is NOT in the native list at all.
+        expect(KL.numbers.native).not.toContain(KL.numbers.danish.teens[3]);
+        expect(kl("13 inuit")).toContain(kl(KL.numbers.danish.teens[3]!));
+    });
+
+    test("Danish compounds are SOLID, joined by the declared `og`", () => {
+        // 25 = fem + og + tyve, one word.
+        expect(KL.numbers.danish.and).toBe("og");
+        const solid = KL.numbers.danish.units[5]! + KL.numbers.danish.and + KL.numbers.danish.tens["20"]!;
+        expect(kl("25 ukiut")).toContain(kl(solid));
+        expect(kl("25 ukiut").split(" ")).toHaveLength(2);
+    });
+
+    test("the scale words were bare literals and are now declared", () => {
+        // ⚠ `en million` / `millioner` were typed into template strings, so a grep for the scale words
+        // found the tables and missed these two — the same shape as Amharic's `ከ`.
+        expect(KL.numbers.danish.million.singular).toBe("en million");
+        expect(kl("1000000 kroner")).toContain(kl(KL.numbers.danish.million.singular));
+        expect(kl("2000000 kroner")).toContain(kl(KL.numbers.danish.million.plural));
+    });
+});
+
+describe("sw and yo read their remaining word constants from the manifest", () => {
+    test("sw's era words — and emptying them emits the literal word `undefined`", () => {
+        const era = (SW as unknown as { eraWords: { bce: string; ad: string } }).eraWords;
+        expect(say("Takribani 1000 BC", "sw")).toContain(say(era.bce, "sw"));
+        expect(say("mwaka 300 A.D.", "sw")).toContain(say(era.ad, "sw"));
+    });
+
+    test("yo's bare metre, which is read locally rather than through the unit tier", () => {
+        const metre = (YO.symbols as unknown as { metre: string }).metre;
+        expect(say("ilé gíga 150 m", "yo")).toContain(say(metre, "yo"));
+        // ⚠ AND THE COUNTER-EXAMPLE STILL DECLINES: `9h 50m` is duration notation, not a measurement.
+        expect(say("9h 50m ni", "yo")).not.toContain(say(metre, "yo"));
+    });
+});

@@ -28,6 +28,8 @@ public sealed class SwahiliDef
     public SwahiliNumbersDef Numbers { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public SwahiliSymbolTier SymbolTier { get; init; } = new();
+    /** BC/AD era words. Which SPELLINGS trigger them stays in Normalize.cs. See the jsonc. */
+    public SwahiliEraWords EraWords { get; init; } = new();
 }
 
 public static class SwahiliPhonemizer
@@ -242,4 +244,10 @@ public sealed class SwahiliSymbolTier
     public bool PercentPrefix { get; init; } = false;
     public bool CurrencyPrefix { get; init; } = false;
     public bool UnitPrefix { get; init; } = false;
+}
+
+public sealed class SwahiliEraWords
+{
+    public string Bce { get; init; } = "";
+    public string Ad { get; init; } = "";
 }

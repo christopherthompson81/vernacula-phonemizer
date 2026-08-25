@@ -11,11 +11,13 @@ public sealed class KalaallisutDef
 {
     public IReadOnlyDictionary<string, string> Vowels { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> Consonants { get; init; } = new Dictionary<string, string>();
+    /** The numeral lexicon — NATIVE 0–12, DANISH from 13. See the jsonc for why. */
+    public KalaallisutNumbers Numbers { get; init; } = new();
 }
 
 public sealed class KalaallisutPhonemizer : ILanguage
 {
-    private static readonly KalaallisutDef DEF =
+    internal static readonly KalaallisutDef DEF =
         LoadManifest.Load<KalaallisutDef>("languages/kalaallisut", "kalaallisut.jsonc");
 
     private static IReadOnlyDictionary<string, string> VOWEL => DEF.Vowels;
@@ -84,4 +86,29 @@ public sealed class KalaallisutPhonemizer : ILanguage
     public static ILanguage CreateKalaallisut() => new KalaallisutPhonemizer();
 
     internal static void RegisterSelf() => Registry.Register("kalaallisut", CreateKalaallisut);
+}
+
+public sealed class KalaallisutNumbers
+{
+    public IReadOnlyList<string> Native { get; init; } = Array.Empty<string>();
+    public KalaallisutDanish Danish { get; init; } = new();
+}
+
+public sealed class KalaallisutDanish
+{
+    public IReadOnlyList<string> Units { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Teens { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, string> Tens { get; init; } = new Dictionary<string, string>();
+    public string And { get; init; } = "";
+    public string Hundred { get; init; } = "";
+    public string Thousand { get; init; } = "";
+    /** ⚠ These four were BARE LITERALS in template strings — see the jsonc. */
+    public KalaallisutScale Million { get; init; } = new();
+    public KalaallisutScale Milliard { get; init; } = new();
+}
+
+public sealed class KalaallisutScale
+{
+    public string Singular { get; init; } = "";
+    public string Plural { get; init; } = "";
 }
