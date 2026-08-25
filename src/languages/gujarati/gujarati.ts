@@ -9,6 +9,7 @@ import {
     type HindiDef,
     type ForeignPhonemizer,
 } from "../hindi/hindi.ts";
+import { MANIFEST } from "./manifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -46,43 +47,20 @@ const lexicon = (): Map<string, string> => {
  * unit precisely because ⚠ a one-letter key matchable standalone
  * is confidently wrong far more often than it is right.
  */
+/** ⚠ NON-NULL: gujarati.jsonc declares ; the field is optional on the SHARED HindiDef
+ *  because hi/mr/gu are migrating one at a time. */
+const SYM = MANIFEST.symbolTier!;
+
 const GU_SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
-    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
-    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
-    // defaults to it — this language does not split dimension from product.
-    multiply: { times: "ગુણ્યા" },
-    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
-    // `અને` ×1128 in this corpus. The tier spaces it on both sides, because `B&B` is two
-    // initialisms and joining them would make one token.
-    ampersand: "અને",
-    percent: ["ટકા"], // Hindi's प्रतिशत is not Gujarati — and in Devanagari it was not even audible
-    currency: {
-        "US$": ["ડોલર"], "AUD$": ["ડોલર"], "$": ["ડોલર"],
-        "€": ["યુરો"], "£": ["પાઉન્ડ"], "¥": ["યેન"], "₹": ["રૂપિયા"],
-    },
-    magnitudes: ["મિલિયન", "બિલિયન", "ટ્રિલિયન", "કરોડ", "લાખ", "અબજ", "હજાર"],
-    units: {
-        "કિમી": ["કિલોમીટર"], "કિમિ": ["કિલોમીટર"],
-        "મીમી": ["મીલીમીટર"], "મિમી": ["મીલીમીટર"], "એમએમ": ["મીલીમીટર"],
-        "માઇલ": ["માઇલ"], "માઈલ": ["માઈલ"], // identity — declared so the RATE form માઇલ/કલાક composes
-        km: ["કિલોમીટર"], cm: ["સેન્ટીમીટર"], mm: ["મીલીમીટર"], kg: ["કિલોગ્રામ"],
-        // `m` ADDED so the cube word below has a head noun — without it `120 m³` read as a bare letter
-        // *ˈɛm* and the declaration was dead. મીટર ×28 spelled out, and digit-adjacent bare `m` is ×0 in
-        // this corpus, so the one-letter-key hazard is checked rather than assumed. (Same measurement over
-        // hi/kn/or/sd — all ×0 — and mr ×7, all of them `100m આણિ 200m` swimming events, i.e. metres. Those
-        // five have no cube word yet and are left to the bare-`m` sweep.)
-        m: ["મીટર"],
-    },
-    unitPer: "પ્રતિ",
-    rateDenominators: { "ક": "કલાક", "કલાક": "કલાક", "સેકંડ": "સેકંડ", h: "કલાક", s: "સેકંડ" },
-    // `વર્ગ કિલોમીટર` ×10 — the best-attested measure word in this sweep — and `ક્યુબિક મીટર` ×2, both
-    // word-first. ⚠ NEITHER bare word is the evidence, and both bare counts are traps:
-    //   વર્ગ ×55   is the CLASSROOM ("વિદ્યાર્થીઓ તેમના વર્ગમાં બેસીને")
-    //   ઘન  ×6    is SOLID, the state of matter ("ઘન, પ્રવાહી, વાયુ અને પ્લાઝમા") — and it is the same
-    //             ધન/ઘન cluster that offers confidently wrong plus words to a token count.
-    // The cube word here is the English loan ક્યુબિક, not ઘન. Only the collocation decides it.
-    exponentWords: { squared: ["વર્ગ"], cubed: ["ક્યુબિક"], position: "before" },
+    percent: SYM.percent,
+    currency: SYM.currency,
+    units: SYM.units,
+    rateDenominators: SYM.rateDenominators,
+    unitPer: SYM.unitPer,
+    exponentWords: SYM.exponentWords,
+    magnitudes: SYM.magnitudes,
+    ampersand: SYM.ampersand,
+    multiply: SYM.multiply,
 });
 
 /** Load gujarati.jsonc (beside this file) and build the Gujarati phonemizer. `foreign` handles embedded Latin. */

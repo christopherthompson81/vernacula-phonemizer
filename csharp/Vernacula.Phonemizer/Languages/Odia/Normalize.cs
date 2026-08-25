@@ -17,28 +17,13 @@ public static class Normalize
     {
         Ampersand = "ଏବଂ",
         Multiply = new MultiplyDef { Times = "ଗୁଣନ" },
-        Percent = new[] { "ପ୍ରତିଶତ" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["US$"] = new[] { "ଡଲାର" }, ["$"] = new[] { "ଡଲାର" }, ["¥"] = new[] { "ୟେନ" }, ["£"] = new[] { "ପାଉଣ୍ଡ" },
-        },
-        Magnitudes = new[] { "ହଜାର", "ଲକ୍ଷ", "କୋଟି", "ନିୟୁତ", "ମିଲିୟନ୍", "ମିଲିୟନ", "ବିଲିଅନ୍", "ବିଲିଅନ" },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "କିଲୋମିଟର" },
-            ["mm"] = new[] { "ମିଲିମିଟର" },
-            ["mi"] = new[] { "ମାଇଲ" },
-            ["mph"] = new[] { "ମାଇଲ ପ୍ରତି ଘଣ୍ଟା" },
-            ["kph"] = new[] { "କିଲୋମିଟର ପ୍ରତି ଘଣ୍ଟା" },
-        },
-        RateDenominators = new Dictionary<string, string> { ["h"] = "ଘଣ୍ଟା", ["s"] = "ସେକେଣ୍ଡ" },
-        UnitPer = "ପ୍ରତି",
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "ବର୍ଗ" },
-            Cubed = new[] { "ଘନ" },
-            Position = ExponentPosition.Before,
-        },
+        Percent = OdiaPhonemizer.DEF.SymbolTier.Percent,
+        Currency = OdiaPhonemizer.DEF.SymbolTier.Currency,
+        Units = OdiaPhonemizer.DEF.SymbolTier.Units,
+        RateDenominators = OdiaPhonemizer.DEF.SymbolTier.RateDenominators,
+        UnitPer = OdiaPhonemizer.DEF.SymbolTier.UnitPer,
+        ExponentWords = OdiaPhonemizer.DEF.SymbolTier.ExponentWords,
+        Magnitudes = OdiaPhonemizer.DEF.SymbolTier.Magnitudes,
     });
 
     /** Odia unit abbreviations → the full word, matched only AFTER a number. ⚠ ORDER IS LOAD-BEARING: the

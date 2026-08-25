@@ -32,6 +32,11 @@ public class HindiDef : AbugidaDef
     public Dictionary<string, string> ClausePunctuation { get; set; } = new();
     public Dictionary<string, string>? Symbols { get; set; }
     public string? StripSymbols { get; set; }
+    /**
+     * ⚠ THE SHARED SYMBOL TIER's data — NOT `Symbols` above, which is the BARE-SIGN → word map this engine's
+     * own tokenizer reads. Nullable because hi/mr/gu share this type and are migrating one at a time.
+     */
+    public HindiSymbolTier? SymbolTier { get; init; }
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */
@@ -247,4 +252,19 @@ public static class Hindi
 
     internal static void RegisterSelf() =>
         Registry.Register("hindi", () => new NativeHindiLanguage(CreateHindi(latin => Registry.ReadAsEnglish(latin))));
+}
+
+public sealed class HindiSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string MagnitudeConnective { get; init; } = "";
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public BareExponentDef BareExponent { get; init; } = new();
 }

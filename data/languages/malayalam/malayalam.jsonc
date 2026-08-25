@@ -115,5 +115,36 @@
         // The decimal-point word
         "decimalWord": "ദശാംശം"
 
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    // ⚠ NAMED `symbolTier`, NOT `symbols`, AND THE COLLISION IS REAL. `symbols` already means something else
+    // in every abugida manifest: the BARE-SIGN → word map the Hindi engine's tokenizer reads (`% → প্রতিশত`,
+    // `₹` stripped). This block is the SHARED TIER's data — percent forms, currency, units, exponents — a
+    // different table read by a different pass. Filing both under one name would be the PREFIX_GUESS shape,
+    // and here it would also not compile.
+    "symbolTier": {
+        // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+        // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+        // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+        // defaults to it — this language does not split dimension from product.
+        "multiply": { "times": "ഗുണം" },
+        // `&` is otherwise DROPPED outright, losing the sign from `കോളേജ് ഓഫ് ആർട്സ് & സയൻസസ്`. `ആൻഡ്` is the
+        // TRANSLITERATED English "and", attested in exactly this construction rather than merely as a word:
+        // the hits are English institution names rendered in Malayalam (`ഒബ്സ്റ്റട്രിക്ക്സ് ആൻഡ് ഗൈനക്കോളജി`), and
+        // one such sentence writes the sign itself, `ഒ& ജി`.
+        // ⚠ THE NATIVE OPTIONS DO NOT FIT THE SLOT: `ഉം` is a BOUND suffix — it attaches to BOTH coordinands, so
+        // it cannot stand between two initialisms — and `ഒപ്പം` / `കൂടാതെ` mean "along with" / "besides", the
+        // wrong register for a proper name.
+        "ampersand": "ആൻഡ്",
+        "percent": ["ശതമാനം"],
+        "currency": { "US$": ["ഡോളർ"], "$": ["ഡോളർ"] },
+        "magnitudes": ["ദശലക്ഷം", "മില്യൺ", "ബില്യൺ", "ലക്ഷം", "കോടി"],
+        "units": { "km": ["കിലോമീറ്റർ"], "m": ["മീറ്റർ"], "mm": ["മില്ലിമീറ്റർ"] },
+        // `ചതുരശ്ര കിലോമീറ്റർ` ×2 and `ക്യൂബിക് മീറ്റർ` ×1, both word-first, both from the corpus's own prose.
+        "exponentWords": { "squared": ["ചതുരശ്ര"], "cubed": ["ക്യൂബിക്"], "position": "before" }
     }
 }

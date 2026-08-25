@@ -109,3 +109,48 @@ describe("the ASCII multiply sign survives the lift", () => {
         },
     );
 });
+
+/**
+ * ⚠ THE INDIC GROUP FILES ITS TIER UNDER `symbolTier`, NOT `symbols`, and the collision is real: `symbols`
+ * already means the BARE-SIGN → word map the abugida engine's own tokenizer reads (`% → প্রতিশত`, `₹`
+ * stripped). Two different tables, read by two different passes. Filing both under one name would be the
+ * PREFIX_GUESS shape — and here it also would not compile.
+ */
+import { MANIFEST as BN } from "../src/languages/bengali/manifest.ts";
+import { MANIFEST as GU } from "../src/languages/gujarati/manifest.ts";
+import { MANIFEST as KN2 } from "../src/languages/kannada/manifest.ts";
+import { MANIFEST as OR } from "../src/languages/odia/manifest.ts";
+
+const INDIC: [string, { symbolTier?: { percent?: string[] }; symbols?: Record<string, string> }, string][] = [
+    ["bn", BN, "50 % মানুষ"],
+    ["gu", GU, "50 % લોકો"],
+    ["kn", KN2, "50 % ಜನರು"],
+    ["or", OR, "50 % ଲୋକ"],
+];
+
+describe.each(INDIC)("%s keeps the two symbol tables apart", (code, DEF, pctSentence) => {
+    test("the tier's percent word is read, and it is not the tokenizer's sign map", () => {
+        const pct = DEF.symbolTier?.percent?.[0];
+        expect(pct, `${code}: no symbolTier.percent`).toBeDefined();
+        const say = (s: string): string => phonemize(s, code).replace(/[ˈˌ]/gu, "");
+        expect(say(pctSentence)).toContain(say(pct!));
+    });
+
+    test("a declared unit key is actually read", () => {
+        // ⚠ NOT EVERY LANGUAGE DECLARES `units` HERE: bengali keeps a manifest OVERRIDE with a code fallback
+        // (`def.unitWords ?? BENGALI_UNITS`) and kannada declares none, so the assertion is conditional on
+        // the key existing rather than assuming a uniform shape across the group.
+        const units = (DEF.symbolTier as { units?: Record<string, string[]> } | undefined)?.units;
+        if (units === undefined) return;
+        const [key, forms] = Object.entries(units)[0]!;
+        const say = (x: string): string => phonemize(x, code).replace(/[ˈˌ]/gu, "");
+        const said = say(`5 ${key}`);
+        expect(forms.some((f) => said.includes(say(f))), `${code}: 5 ${key} did not read a declared form`).toBe(true);
+    });
+
+    test("`symbols` — where declared — is the bare-sign map, a DIFFERENT table", () => {
+        // It maps a single sign CHARACTER to a word; the tier maps a unit/currency KEY to count forms.
+        if (DEF.symbols === undefined) return;
+        for (const k of Object.keys(DEF.symbols)) expect([...k]).toHaveLength(1);
+    });
+});

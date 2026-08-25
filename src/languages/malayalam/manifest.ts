@@ -9,6 +9,7 @@
  * Split out of malayalam.ts so numbers.ts and normalize.ts can read the same single load.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
 import type { DravidianNumbersDef } from "../../core/numbers.ts";
 
@@ -26,6 +27,16 @@ export interface MalayalamNumbers extends DravidianNumbersDef {
 export interface MalayalamManifest extends AbugidaDef {
     numbers: MalayalamNumbers;
     clausePunctuation: Record<string, string>;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 export const MANIFEST = loadManifest<MalayalamManifest>(import.meta.url, "malayalam.jsonc");

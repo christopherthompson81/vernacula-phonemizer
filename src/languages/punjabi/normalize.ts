@@ -23,6 +23,7 @@
  * into `text()`) has nothing to do here. The equivalent lead held for Marathi (×597) and not for pa.
  */
 import { postposedSign } from "../../core/postposedSign.ts";
+import { MANIFEST } from "./manifest.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -40,64 +41,13 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * No `magnitudeConnective`: Punjabi takes none ("2.3 ਅਰਬ ਡਾਲਰ", corpus).
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
-    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
-    // ਅਤੇ is ×1441 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
-    //
-    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
-    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
-    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
-    // see the tier, where the spacing exists because `B&B` is two initialisms.
-    ampersand: "ਅਤੇ",
-    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
-    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
-    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
-    // defaults to it — this language does not split dimension from product.
-    multiply: { times: "ਗੁਣਾ" },
-    percent: ["ਪ੍ਰਤੀਸ਼ਤ"],
-    // `5 km` read as *pˈə̃ɲd͡ʒ ˈʊkm*: no unit was declared. Verified in pa_in:
-    // ਕਿਲੋਮੀਟਰ ×31 "50 ਕਿਲੋਮੀਟਰ (31 ਮੀਲ) ਦੂਰ", ਮੀਟਰ ×17 "4892 ਮੀਟਰ ਮਾਉਂਟ ਵਿਨਸ".
-    // ⚠ ਕਿਲੋਗਰਾਮ WAS REFUSED ON THE pa_in CORPUS AND IS NOW DECLARED, and it is the SISTER LANGUAGE that
-    // supplied both halves of the reason. The old note ("×0 in the corpus, not taken from Wikidata's label
-    // alone") was right about pa_in and measured the wrong text: this table is also **pnb**'s — Western
-    // Punjabi in Shahmukhi, registered onto the same engine — and pnb's mined artifact writes `kg` twice,
-    // in its SI article, where the sentence is Punjabi and the symbol is quoted as itself:
-    //   `اکائیاں دے چنھ بہووعدہ وچ نئيں لکھے جایاں۔ ، for example "25 kg" (not "25 kgs")`
-    //   `انک تے چنھ نو‏‏ں اک بلینک سپیس … وکھ کردا اے، "2.21 kg"، "7.3 m²"، "22 K"`
-    // Undeclared, both reached the phoneme stream as the raw run `kg`. The word is now sourced outside this
-    // repo and outside Wikidata: `attest.ts --lang pa --words ਕਿਲੋਗਰਾਮ` returns 5 tokens / 3 articles, and
-    // the read examples are Olympic weight classes (`ਫ੍ਰੀਸਟਾਇਲ 60 ਕਿਲੋਗਰਾਮ ਮੁਕਾਬਲਾ`, `96 ਕਿਲੋਗਰਾਮ`) — the
-    // kilogram sense, digit-adjacent, in the slot. ⚠ `ਕਿਲੋ` alone is 89/19 and is NOT used: its examples are
-    // `ਕਿਲੋ ਮੀਟਰ` and `ਕਿਲੋ ਹਰਟਜ਼`, i.e. the prefix spaced off some other unit, not a word for the kilogram.
-    // ⚠ THE GURMUKHI WORD IS CORRECT FOR THE SHAHMUKHI SIDE TOO, and this is the established mechanism
-    // rather than a new claim: `km` already emits ਕਿਲੋਮੀਟਰ into pnb text and `punjabi.ts` routes per WORD,
-    // so the Gurmukhi spelling takes the Gurmukhi branch of the same phonology — `pnb: "ایہ 50 km دور اے"`
-    // reads *…pə̃ɲd͡ʒˈaːɦ kɪloːmˈiːʈəɾ…*, the Punjabi word, in either script's sentence.
-    units: { km: ["ਕਿਲੋਮੀਟਰ"], m: ["ਮੀਟਰ"], kg: ["ਕਿਲੋਗਰਾਮ"] },
-    // `ਵਰਗ ਕਿਲੋਮੀਟਰ` ×4 and `ਘਣ ਮੀਟਰ` ×1, both word-first.
-    // ⚠ Bare ਵਰਗ is ×12 and its first instance is `ਉੱਚ ਵਰਗ` — "upper CLASS". The bare count would have
-    // triple-counted a different word; only the collocation with the unit noun attests the unit sense.
-    exponentWords: { squared: ["ਵਰਗ"], cubed: ["ਘਣ"], position: "before" },
-    // ⚠ `¥` → ਯੇਨ, AND IT WAS RECORDED AS UNSOURCEABLE UNTIL THE AUDIO ARRIVED. The corpus writes
-    // `ਟਿਕਟਾਂ ਦੀ ਕੀਮਤ ¥2,500 ਅਤੇ ¥130,000` and the sign was DROPPED, so the price lost its currency entirely.
-    // "yen" is ×0 in this corpus's TEXT and in the wiki, i.e. unsourceable — a correct
-    // report about the text tiers and the wrong conclusion about the language. The reader says it: decoded with
-    // facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer, so it cannot echo a glyph back),
-    //   `… t i k t a n d i k iː m a t … ʌ l a k a t iː h i a r r  j e n  d e v i tʃ k a r h o v e ɡ iː …`
-    // — "…hazār YEN de vich…", the loan spoken in slot. ਯੇਨ reads jˈeːn, which is that decode exactly.
-    // ⚠ ONE SPEAKER: pa_in carries a single recording of this sentence, so it is 1 of 1 rather than a majority.
-    // ⚠ CONTRAST or, WHICH HAS THE SAME SENTENCE AND WHOSE READER OMITS THE CURRENCY: or's `¥7,000` decodes as
-    // `… m u l j o p r a j o  s a t o h z e r  h e b a …` — "mūlya prāya sāta hazāra", the bare number. So the
-    // silence is right for or and wrong for pa, and neither could be settled from text.
-    // ⚠ `US$` IS ITS OWN KEY, AND THE BARE `$` CANNOT REACH IT (trap 64). The shared tier wraps every
-    // currency key in `(?<![\p{L}\p{M}])…`, so a sign a LETTER runs into is never matched — and nothing
-    // reports it, because the sign is not dropped, it is simply never seen. The corpus writes `US$130`,
-    // `US$1,500` and `US$500 ملین` (×3), and all three read as a bare number with the letters spoken as
-    // letter names: `قیمت US$130 بلیئن` was *qˈiːmət̪ jˈuː ˈɛs ˈɪkː sˈɔː t̪ˈiːɦ bəliːˈiːn* — "US" recited,
-    // no currency noun anywhere. THE SAME WORD, not a new one: this is the reuse case, since the corpus's
-    // `$` already reads ਡਾਲਰ and a US dollar is that dollar. Nothing new is sourced here.
-    currency: { "US$": ["ਡਾਲਰ"], "$": ["ਡਾਲਰ"], "¥": ["ਯੇਨ"] },
-    magnitudes: ["ਹਜ਼ਾਰ", "ਲੱਖ", "ਕਰੋੜ", "ਮਿਲੀਅਨ", "ਅਰਬ"],
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 /**

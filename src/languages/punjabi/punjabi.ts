@@ -11,6 +11,8 @@
  * The referee-eval strips Chao tone letters, so tones are graded on the synthesis output, not the backbone.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
+import { MANIFEST } from "./manifest.ts";
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
 import { applyWeightStress } from "../../core/weightStress.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
@@ -32,6 +34,26 @@ import {
 export interface PunjabiDef extends AbugidaDef {
     numbers: NumbersDef;
     clausePunctuation: Record<string, string>;
+    /** The shared symbol tier — NOT `symbols`, which is the bare-sign map. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 export type ForeignPhonemizer = (latin: string) => string;
 

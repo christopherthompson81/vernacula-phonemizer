@@ -8,6 +8,7 @@
  * Split out of kannada.ts so numbers.ts and normalize.ts can read the same single load.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
 import type { DravidianForms, DravidianNumbersDef } from "../../core/numbers.ts";
 
@@ -43,6 +44,16 @@ export interface KannadaManifest extends AbugidaDef {
     clausePunctuation: Record<string, string>;
     /** ⚠ WRITTEN forms for RECOGNITION, not a spelling map — see the jsonc. Never emitted as a reading. */
     initialismLetterForms: string[];
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 export const MANIFEST = loadManifest<KannadaManifest>(import.meta.url, "kannada.jsonc");

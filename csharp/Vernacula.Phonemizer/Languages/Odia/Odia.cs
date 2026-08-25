@@ -12,6 +12,8 @@ public sealed class OdiaDef : AbugidaDef
 {
     public NumbersDef Numbers { get; set; } = new();
     public Dictionary<string, string> ClausePunctuation { get; set; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public OdiaSymbolTier SymbolTier { get; init; } = new();
 }
 
 /** Read a Latin run with another language's engine — injected from the registry. */
@@ -98,4 +100,17 @@ public sealed class OdiaPhonemizer : ILanguage
 
     internal static void RegisterSelf() =>
         Registry.Register("odia", () => CreateOdia(latin => Registry.ReadAsEnglish(latin)));
+}
+
+public sealed class OdiaSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

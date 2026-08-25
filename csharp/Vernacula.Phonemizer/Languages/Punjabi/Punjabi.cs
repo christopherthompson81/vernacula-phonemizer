@@ -10,6 +10,8 @@ public class PunjabiDef : AbugidaDef
 {
     public NumbersDef Numbers { get; set; } = new();
     public Dictionary<string, string> ClausePunctuation { get; set; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public PunjabiSymbolTier SymbolTier { get; init; } = new();
 }
 
 /** Variety options. Saraiki (skr) is the NON-tonal Lahnda sibling: it never underwent Punjabi's tonogenesis
@@ -35,6 +37,11 @@ public sealed class NativePunjabiEngine
 
 public static class PunjabiPhonemizer
 {
+    /** ⚠ ONE LOAD, MODULE-LEVEL. `LoadPunjabiManifest()` loaded the file per call; the symbol tier in
+     *  Normalize.cs needs it too, so the load lands here and both read the same object — matching
+     *  punjabi/manifest.ts on the TS side. */
+    internal static readonly PunjabiDef DEF = LoadManifest.Load<PunjabiDef>("languages/punjabi", "punjabi.jsonc");
+
     private const string VOWEL = "əaɪiʊueɛoɔ";
     private static readonly JsRe VOWEL_G = JsRegex.Compile($"[{VOWEL}]", "g");
     private const string GURMUKHI_WORD = "਀-੿";
@@ -277,4 +284,15 @@ public static class PunjabiPhonemizer
         Registry.Register("punjabi", () => CreatePunjabi(Registry.ReadAsEnglish));
         RiderNeural.RegisterRider("pa", HarakatLex);
     }
+}
+
+public sealed class PunjabiSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }
