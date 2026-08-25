@@ -73,36 +73,13 @@ public static class Normalize
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
     /**
-     * Dutch letter NAMES, spelled the way the Dutch g2p reads them — the standard Dutch alphabet, so ⟨y⟩ is
-     * *ij* (Griekse ij) rather than an English name.
-     */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "aa", ["b"] = "bee", ["c"] = "see", ["d"] = "dee", ["e"] = "ee", ["f"] = "ef", ["g"] = "gee",
-        ["h"] = "haa", ["i"] = "ie", ["j"] = "jee",
-        ["k"] = "kaa", ["l"] = "el", ["m"] = "em", ["n"] = "en", ["o"] = "oo", ["p"] = "pee", ["q"] = "kuu",
-        ["r"] = "er", ["s"] = "es", ["t"] = "tee",
-        ["u"] = "uu", ["v"] = "vee", ["w"] = "wee", ["x"] = "iks", ["y"] = "ij", ["z"] = "zet",
-    };
-
-    /**
      * Dutch phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?).
      */
     public static readonly Func<string, bool> IsUnreadableDutch = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiouy]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "ch", "dr", "dw", "fl", "fr", "gl", "gr", "kl", "kn", "kr", "kw", "pl", "pr", "ps",
-            "sc", "sch", "sf", "sj", "sl", "sm", "sn", "sp", "st", "sw", "th", "tj", "tr", "tw", "vl", "vr",
-            "wr", "zw",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ch", "ck", "cht", "ft", "ht", "kt", "ld", "lf", "lg", "lk", "lm", "lp", "ls", "lt", "mp", "ms",
-            "mt", "nd", "ng", "nk", "ns", "nt", "pt", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp", "rs",
-            "rt", "sp", "st", "ts", "ks", "ps", "sk",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     private static readonly IReadOnlySet<string> ACRONYM_LETTERS =
@@ -110,7 +87,7 @@ public static class Normalize
 
     private static readonly Func<string, string> InitialismNormalizer = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
-        LetterName = l => LETTER_NAME.TryGetValue(l, out var v) ? v : null,
+        LetterName = l => Manifest.MANIFEST.LetterNames.TryGetValue(l, out var v) ? v : null,
         AcronymLetters = ACRONYM_LETTERS,
         IsRecorded = _ => false,
         IsUnreadable = w => IsUnreadableDutch(w),
@@ -125,7 +102,7 @@ public static class Normalize
     private static string? SpellCaps(string run)
     {
         var names = Js.CodePoints(run.ToLowerInvariant())
-            .Select(l => LETTER_NAME.TryGetValue(l, out var v) ? v : null).ToList();
+            .Select(l => Manifest.MANIFEST.LetterNames.TryGetValue(l, out var v) ? v : null).ToList();
         return names.All(n => n is not null) ? string.Join(" ", names) : null;
     }
 

@@ -110,4 +110,23 @@
         "zero": "sıfır",
         "decimalConnector": "virgül", // 3,14 → üç virgül bir dört
     },
+
+    "letterNames": {
+        "a": "a", "b": "be", "c": "ce", "ç": "çe", "d": "de", "e": "e", "f": "fe", "g": "ge",
+        "ğ": "yumuşak ge", "h": "he", "ı": "ı", "i": "i", "j": "je", "k": "ke", "l": "le", "m": "me",
+        "n": "ne", "o": "o", "ö": "ö", "p": "pe", "r": "re", "s": "se", "ş": "şe", "t": "te", "u": "u",
+        "ü": "ü", "v": "ve", "y": "ye", "z": "ze"
+    },
+    "phonotactics": {
+        "vowels": "aeıioöuüâîû",
+        "onsets": [
+            "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr", "ps", "sk", "sl", "sm", "sn",
+            "sp", "st", "tr", "ch", "yl", "sf"
+        ],
+        "codas": [
+            "ft", "kt", "ks", "lç", "lf", "lk", "lm", "lp", "ls", "lt", "nç", "nk", "ns", "nt", "nz", "pt",
+            "rç", "rd", "rf", "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rz", "sk", "st", "şt", "zm", "ng",
+            "lg", "ht", "ny", "nc"
+        ]
+    }
 }

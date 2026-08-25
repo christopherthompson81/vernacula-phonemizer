@@ -211,4 +211,24 @@
         "validOnsets": ["st", "sp", "sk", "sl", "sm", "sn", "sw", "sch", "schr", "str", "spr", "spl", "tr", "dr", "kr", "kn", "gr", "gl", "br", "bl", "pr", "pl", "fr", "fl", "vr", "vl", "kw", "tw", "dw", "zw", "kl"],
         "stKeep": []
     },
+
+    "letterNames": {
+        "a": "aa", "b": "bee", "c": "see", "d": "dee", "e": "ee", "f": "ef", "g": "gee", "h": "haa",
+        "i": "ie", "j": "jee", "k": "kaa", "l": "el", "m": "em", "n": "en", "o": "oo", "p": "pee",
+        "q": "kuu", "r": "er", "s": "es", "t": "tee", "u": "uu", "v": "vee", "w": "wee", "x": "iks",
+        "y": "ij", "z": "zet"
+    },
+    "phonotactics": {
+        "vowels": "aeiouy",
+        "onsets": [
+            "bl", "br", "ch", "dr", "dw", "fl", "fr", "gl", "gr", "kl", "kn", "kr", "kw", "pl", "pr", "ps",
+            "sc", "sch", "sf", "sj", "sl", "sm", "sn", "sp", "st", "sw", "th", "tj", "tr", "tw", "vl",
+            "vr", "wr", "zw"
+        ],
+        "codas": [
+            "ch", "ck", "cht", "ft", "ht", "kt", "ld", "lf", "lg", "lk", "lm", "lp", "ls", "lt", "mp",
+            "ms", "mt", "nd", "ng", "nk", "ns", "nt", "pt", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp",
+            "rs", "rt", "sp", "st", "ts", "ks", "ps", "sk"
+        ]
+    }
 }

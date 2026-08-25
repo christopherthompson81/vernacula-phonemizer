@@ -32,6 +32,15 @@ public sealed class TurkishManifest
     public string[] Geminate { get; init; } = [];
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public TurkishNumbersDef Numbers { get; init; } = new();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public TurkishPhonotactics Phonotactics { get; init; } = new();
+}
+
+public sealed class TurkishPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
 }
 
 public static class Manifest

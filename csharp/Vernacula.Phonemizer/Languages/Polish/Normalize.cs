@@ -68,36 +68,14 @@ public static class Normalize
             };
         }));
 
-    /** Polish letter names, for the initialism pass. USA is [u es a], ONZ [o en zet], DVD [de fau de]. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "a", ["ą"] = "a z ogonkiem", ["b"] = "be", ["c"] = "ce", ["ć"] = "cie", ["d"] = "de",
-        ["e"] = "e", ["ę"] = "e z ogonkiem", ["f"] = "ef", ["g"] = "gie", ["h"] = "ha", ["i"] = "i",
-        ["j"] = "jot", ["k"] = "ka", ["l"] = "el", ["ł"] = "eł", ["m"] = "em", ["n"] = "en",
-        ["ń"] = "eń", ["o"] = "o", ["ó"] = "o kreskowane", ["p"] = "pe", ["q"] = "ku", ["r"] = "er",
-        ["s"] = "es", ["ś"] = "eś", ["t"] = "te", ["u"] = "u", ["v"] = "fau", ["w"] = "wu",
-        ["x"] = "iks", ["y"] = "igrek", ["z"] = "zet", ["ź"] = "ziet", ["ż"] = "żet",
-    };
-
     /** Polish phonotactics, for the OOV rule in core/initialisms.ts. Polish tolerates very heavy clusters, so
      *  the onset/coda sets are generous on purpose — the work here is done by the no-vowel test (GMT, DVD,
      *  UTC, XDR, PNG), not by cluster policing, and a false "unreadable" would letter-spell a real acronym. */
     public static readonly Func<string, bool> IsUnreadablePolish = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiouyąęó]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "ch", "cz", "dl", "dr", "dz", "dż", "dź", "gl", "gr", "gd", "gn", "gw", "kl", "kn",
-            "kr", "kt", "kw", "ml", "mł", "mn", "mr", "pl", "pr", "ps", "pt", "rz", "sk", "sl", "sł", "sm",
-            "sn", "sp", "st", "sw", "sz", "śc", "śl", "śm", "śn", "św", "tl", "tr", "tw", "wl", "wł", "wr",
-            "zb", "zd", "zg", "zł", "zn", "zw", "źr", "żr",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ch", "cz", "sz", "rz", "st", "śc", "ść", "zd", "nt", "nd", "nk", "ng", "ns", "nc", "rt", "rd",
-            "rk", "rs", "rn", "rm", "rz", "lt", "ld", "lk", "ls", "lm", "łt", "łd", "łk", "kt", "ks", "pt",
-            "ft", "zm", "zn", "sk", "sm", "tr", "dr", "br", "gr", "pr", "kr", "wr", "cs", "js", "js",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     /** LEXICAL: acronyms Polish spells out although the letters could be read as a word. Authored in
@@ -109,7 +87,7 @@ public static class Normalize
      *  EM-EN. Polish has no pronunciation dictionary (its g2p is rule-based), so `IsRecorded` is always false. */
     private static readonly Func<string, string> INITIALISMS = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
-        LetterName = l => LETTER_NAME.GetValueOrDefault(l),
+        LetterName = l => Manifest.MANIFEST.LetterNames.GetValueOrDefault(l),
         AcronymLetters = ACRONYM_LETTERS,
         IsRecorded = _ => false,
         IsUnreadable = IsUnreadablePolish,

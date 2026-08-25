@@ -28,6 +28,8 @@ export interface PolishManifest {
         hundreds: string[];
         magnitudes: { thousand: Agreement; million: Agreement; billion: Agreement };
     };
+    letterNames: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[] };
 }
 
 export const MANIFEST = loadManifest<PolishManifest>(import.meta.url, "polish.jsonc");

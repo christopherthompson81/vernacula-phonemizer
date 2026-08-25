@@ -81,5 +81,27 @@
             "million": { "sg": "milion", "paucal": "miliony", "plural": "milionów" },
             "billion": { "sg": "miliard", "paucal": "miliardy", "plural": "miliardów" }
         }
+    },
+
+    "letterNames": {
+        "a": "a", "ą": "a z ogonkiem", "b": "be", "c": "ce", "ć": "cie", "d": "de", "e": "e",
+        "ę": "e z ogonkiem", "f": "ef", "g": "gie", "h": "ha", "i": "i", "j": "jot", "k": "ka", "l": "el",
+        "ł": "eł", "m": "em", "n": "en", "ń": "eń", "o": "o", "ó": "o kreskowane", "p": "pe", "q": "ku",
+        "r": "er", "s": "es", "ś": "eś", "t": "te", "u": "u", "v": "fau", "w": "wu", "x": "iks",
+        "y": "igrek", "z": "zet", "ź": "ziet", "ż": "żet"
+    },
+    "phonotactics": {
+        "vowels": "aeiouyąęó",
+        "onsets": [
+            "bl", "br", "ch", "cz", "dl", "dr", "dz", "dż", "dź", "gl", "gr", "gd", "gn", "gw", "kl", "kn",
+            "kr", "kt", "kw", "ml", "mł", "mn", "mr", "pl", "pr", "ps", "pt", "rz", "sk", "sl", "sł", "sm",
+            "sn", "sp", "st", "sw", "sz", "śc", "śl", "śm", "śn", "św", "tl", "tr", "tw", "wl", "wł", "wr",
+            "zb", "zd", "zg", "zł", "zn", "zw", "źr", "żr"
+        ],
+        "codas": [
+            "ch", "cz", "sz", "rz", "st", "śc", "ść", "zd", "nt", "nd", "nk", "ng", "ns", "nc", "rt", "rd",
+            "rk", "rs", "rn", "rm", "rz", "lt", "ld", "lk", "ls", "lm", "łt", "łd", "łk", "kt", "ks", "pt",
+            "ft", "zm", "zn", "sk", "sm", "tr", "dr", "br", "gr", "pr", "kr", "wr", "cs", "js", "js"
+        ]
     }
 }

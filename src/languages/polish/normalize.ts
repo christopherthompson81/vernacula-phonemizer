@@ -102,32 +102,14 @@ function inflectOrdinal(masc: string, c: OrdCase): string {
     }).join(" ");
 }
 
-/** Polish letter names, for the initialism pass. USA is [u es a], ONZ [o en zet], DVD [de fau de]. */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", ą: "a z ogonkiem", b: "be", c: "ce", ć: "cie", d: "de", e: "e", ę: "e z ogonkiem",
-    f: "ef", g: "gie", h: "ha", i: "i", j: "jot", k: "ka", l: "el", ł: "eł", m: "em", n: "en",
-    ń: "eń", o: "o", ó: "o kreskowane", p: "pe", q: "ku", r: "er", s: "es", ś: "eś", t: "te",
-    u: "u", v: "fau", w: "wu", x: "iks", y: "igrek", z: "zet", ź: "ziet", ż: "żet",
-};
-
 /** Polish phonotactics, for the OOV rule in core/initialisms.ts. Polish tolerates very heavy clusters, so
  *  the onset/coda sets are generous on purpose — the work here is done by the no-vowel test (GMT, DVD,
  *  UTC, XDR, PNG), not by cluster policing, and a false "unreadable" would letter-spell a real acronym. */
 export const isUnreadablePolish = makeUnreadableTest({
-    vowels: /[aeiouyąęó]/u,
-    legalOnsets: new Set([
-        "bl", "br", "ch", "cz", "dl", "dr", "dz", "dż", "dź", "gl", "gr", "gd", "gn", "gw", "kl", "kn",
-        "kr", "kt", "kw", "ml", "mł", "mn", "mr", "pl", "pr", "ps", "pt", "rz", "sk", "sl", "sł", "sm",
-        "sn", "sp", "st", "sw", "sz", "śc", "śl", "śm", "śn", "św", "tl", "tr", "tw", "wl", "wł", "wr",
-        "zb", "zd", "zg", "zł", "zn", "zw", "źr", "żr",
-    ]),
-    legalCodas: new Set([
-        "ch", "cz", "sz", "rz", "st", "śc", "ść", "zd", "nt", "nd", "nk", "ng", "ns", "nc", "rt", "rd",
-        "rk", "rs", "rn", "rm", "rz", "lt", "ld", "lk", "ls", "lm", "łt", "łd", "łk", "kt", "ks", "pt",
-        "ft", "zm", "zn", "sk", "sm", "tr", "dr", "br", "gr", "pr", "kr", "wr", "cs", "js", "js",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
-
 /** LEXICAL: acronyms Polish spells out although the letters could be read as a word. Authored in
  *  polish.jsonc beside the language's other hand-authored facts. */
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
@@ -140,7 +122,7 @@ const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
  */
 export function normalizePolishInitialisms(text: string): string {
     return makeInitialismNormalizer({
-        letterName: (l) => LETTER_NAME[l],
+        letterName: (l) => MANIFEST.letterNames[l],
         acronymLetters: ACRONYM_LETTERS,
         isRecorded: () => false,
         isUnreadable: isUnreadablePolish,

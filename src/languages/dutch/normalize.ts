@@ -74,32 +74,12 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
 };
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
-/**
- * Dutch letter NAMES, spelled the way the Dutch g2p reads them: a→aa /aː/, b→bee /beː/, f→ef /ɛf/,
- * g→gee /ɣeː/, h→haa /ɦaː/, i→ie /i/, q→kuu /ky/, u→uu /y/, w→wee /ʋeː/, x→iks /ɪks/, y→ij /ɛi̯/ (the
- * Dutch name for ⟨y⟩ is *Griekse ij*), z→zet /zɛt/. This is the standard Dutch alphabet, not a guess.
- */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "aa", b: "bee", c: "see", d: "dee", e: "ee", f: "ef", g: "gee", h: "haa", i: "ie", j: "jee",
-    k: "kaa", l: "el", m: "em", n: "en", o: "oo", p: "pee", q: "kuu", r: "er", s: "es", t: "tee",
-    u: "uu", v: "vee", w: "wee", x: "iks", y: "ij", z: "zet",
-};
-
 /** Dutch phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?). */
 export const isUnreadableDutch = makeUnreadableTest({
-    vowels: /[aeiouy]/u,
-    legalOnsets: new Set([
-        "bl", "br", "ch", "dr", "dw", "fl", "fr", "gl", "gr", "kl", "kn", "kr", "kw", "pl", "pr", "ps",
-        "sc", "sch", "sf", "sj", "sl", "sm", "sn", "sp", "st", "sw", "th", "tj", "tr", "tw", "vl", "vr",
-        "wr", "zw",
-    ]),
-    legalCodas: new Set([
-        "ch", "ck", "cht", "ft", "ht", "kt", "ld", "lf", "lg", "lk", "lm", "lp", "ls", "lt", "mp", "ms",
-        "mt", "nd", "ng", "nk", "ns", "nt", "pt", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp", "rs",
-        "rt", "sp", "st", "ts", "ks", "ps", "sk",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
-
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
 
 /** Dutch has no pronunciation dictionary that records acronym readings (nl-stems.txt is a morphological
@@ -107,7 +87,7 @@ const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
  *  the manifest's `acronymLetters` and everything else falls to the OOV phonotactic rule. */
 export function normalizeDutchInitialisms(text: string): string {
     return makeInitialismNormalizer({
-        letterName: (l) => LETTER_NAME[l],
+        letterName: (l) => MANIFEST.letterNames[l],
         acronymLetters: ACRONYM_LETTERS,
         isRecorded: () => false,
         isUnreadable: isUnreadableDutch,
@@ -116,7 +96,7 @@ export function normalizeDutchInitialisms(text: string): string {
 
 /** Letter-by-letter reading of an all-caps run, or undefined if any letter has no name. */
 function spellCaps(run: string): string | undefined {
-    const names = [...run.toLowerCase()].map((l) => LETTER_NAME[l]);
+    const names = [...run.toLowerCase()].map((l) => MANIFEST.letterNames[l]);
     return names.every((n) => n !== undefined) ? names.join(" ") : undefined;
 }
 

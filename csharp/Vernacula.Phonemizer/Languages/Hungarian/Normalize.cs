@@ -27,19 +27,6 @@ public static class Normalize
     };
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
-    /** Hungarian letter names (the traditional alphabet naming used when spelling an acronym: *gé-pé-es*,
-     *  *ef-bé-í*, *á-bé-cé*). Vowels take their LONG name, which is what `USA`→*u-es-á* and `ABC`→*ábécé*
-     *  show. `q/w/x/y` are the "foreign" letters but do have established names, so they are included. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "á", ["á"] = "á", ["b"] = "bé", ["c"] = "cé", ["d"] = "dé", ["e"] = "é", ["é"] = "é",
-        ["f"] = "ef", ["g"] = "gé", ["h"] = "há", ["i"] = "í", ["í"] = "í", ["j"] = "jé", ["k"] = "ká",
-        ["l"] = "el", ["m"] = "em", ["n"] = "en", ["o"] = "ó", ["ó"] = "ó", ["ö"] = "ő", ["ő"] = "ő",
-        ["p"] = "pé", ["q"] = "kú", ["r"] = "er", ["s"] = "es", ["t"] = "té", ["u"] = "ú", ["ú"] = "ú",
-        ["ü"] = "ű", ["ű"] = "ű", ["v"] = "vé", ["w"] = "dupla vé", ["x"] = "iksz", ["y"] = "ipszilon",
-        ["z"] = "zé",
-    };
-
     /** Hungarian DIGRAPHS folded to one stand-in letter before the phonotactic test. */
     private static readonly JsRe DIGRAPH = JsRegex.Compile("dzs|sz|zs|cs|gy|ny|ty|ly|dz", "gu");
     private static readonly IReadOnlyDictionary<string, string> DIGRAPH_FOLD = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -54,20 +41,9 @@ public static class Normalize
      *  form (see `fold`). */
     private static readonly Func<string, bool> UnreadableFolded = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aáeéiíoóöőuúüű]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "cl", "cr", "dr", "dv", "fl", "fr", "gl", "gn", "gr", "hr", "kl", "kn", "kr",
-            "kv", "kw", "pl", "pn", "pr", "ps", "sc", "sf", "sk", "sl", "sm", "sn", "sp", "sr", "st",
-            "sv", "sw", "tr", "tv", "tw", "vl", "vr", "zl", "zn", "zv",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ct", "ft", "js", "jt", "kk", "ks", "kt", "lb", "lc", "ld", "lf", "lg", "lj", "lk", "lm",
-            "ln", "lp", "ls", "lt", "lz", "mb", "mp", "ms", "nc", "nd", "ng", "nj", "nk", "ns", "nt",
-            "nz", "ps", "pt", "rb", "rc", "rd", "rf", "rg", "rj", "rk", "rl", "rm", "rn", "rp", "rs",
-            "rt", "rz", "sk", "sp", "st",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
     });
     public static bool IsUnreadableHungarian(string word) => UnreadableFolded(Fold(word.ToLowerInvariant()));
 
@@ -77,7 +53,7 @@ public static class Normalize
     private static string? SpellOut(string acr)
     {
         var names = Js.CodePoints(acr.ToLowerInvariant())
-            .Select(c => LETTER_NAME.TryGetValue(c, out var v) ? v : null).ToList();
+            .Select(c => Manifest.MANIFEST.LetterNames.TryGetValue(c, out var v) ? v : null).ToList();
         return names.All(n => n is not null) ? string.Join(" ", names) : null;
     }
 
@@ -93,7 +69,7 @@ public static class Normalize
      *  the decision rests on the phonotactic OOV test alone. */
     private static readonly Func<string, string> NormalizeInitialisms = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
-        LetterName = l => LETTER_NAME.TryGetValue(l, out var v) ? v : null,
+        LetterName = l => Manifest.MANIFEST.LetterNames.TryGetValue(l, out var v) ? v : null,
         AcronymLetters = new HashSet<string>(StringComparer.Ordinal),
         IsRecorded = _ => false,
         IsUnreadable = IsUnreadableHungarian,

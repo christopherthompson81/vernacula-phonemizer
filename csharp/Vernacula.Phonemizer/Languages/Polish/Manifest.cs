@@ -48,6 +48,15 @@ public sealed class PolishManifest
     /** LEXICAL: acronyms read letter-by-letter even though the letters could form a readable word. */
     public string[] AcronymLetters { get; init; } = [];
     public PolishNumbersDef Numbers { get; init; } = new();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public PolishPhonotactics Phonotactics { get; init; } = new();
+}
+
+public sealed class PolishPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
 }
 
 public static class Manifest
