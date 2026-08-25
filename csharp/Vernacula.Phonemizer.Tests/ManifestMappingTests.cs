@@ -233,6 +233,13 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/polish", "polish.jsonc", Languages.Polish.Manifest.MANIFEST,
             "language", "name", "script", "provenance", "convention");
 
+    // ⚠ ADDED WITH THE es LIFT, WHICH IS WHY IT IS LATE: Spanish was one of the manifests this guard never
+    // covered, and the lift added 21 keys to it — exactly the situation the guard exists for.
+    [Fact]
+    public void SpanishManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/spanish", "spanish.jsonc", Languages.Spanish.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
     [Fact]
     public void UkrainianManifestIsFullyMapped() =>
         AssertFullyMapped("languages/ukrainian", "ukrainian.jsonc", Languages.Ukrainian.Manifest.DEF,

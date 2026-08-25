@@ -86,6 +86,23 @@ composition while the data agrees, so no assertion in that test can separate the
 holds it together is the manifest-sabotage sweep (`letterNames` moves 3). Stated in the test rather than left
 to look like coverage it does not have.
 
+## Run 7 — 2026-08-24 22:35 — the review pass: Spanish was not in the mapping guard
+
+**Question.** Is the structural guard (`ManifestMappingTests` — "does the C# type consume every key its
+manifest declares?") covering Spanish?
+
+**Finding (raw).** It covered 43 manifests and Spanish was **not** one of them. That guard exists for a
+silent, typed failure: System.Text.Json ignores a JSON member no property matches, so a mangled name
+deserializes to the type's DEFAULT — `""` for a string — and the engine emits nothing where that value
+belonged. English's ARPABET block is the case that motivated it: 42 golden rows, nothing thrown.
+
+Adding 21 keys to an unguarded manifest is exactly the situation it exists for. Added, and verified by
+renaming `feminineOne` on the DATA side so no property claims it — the guard fails and names
+`spanish.jsonc.feminineOnes`.
+
+⚠ Renaming the C# PROPERTY instead does not test the guard: the compiler catches that, because the code
+reads it. The failure mode is a key with no consumer at all, which only the data side can produce.
+
 ## Result
 
 `spanish.jsonc` +21 keys. 0 of 162 probe readings moved in Node across both variants and both modes; 324
