@@ -39,6 +39,7 @@
  *   · ORDINALS ABOVE 10 in the `Nይ` shape. Every one of the corpus's 22 is 1–10; `መበል N` (×35) is the
  *     form above ten and it already reads correctly with no rule at all.
  */
+import { MANIFEST } from "./manifest.ts";
 
 /** Ethiopic syllabary letters, EXCLUDING the punctuation (U+1360+) and numeral (U+1369+) sub-blocks. */
 const FID = "[\\u1200-\\u135A]";
@@ -58,28 +59,8 @@ const POINT = "ነጥቢ";
  *  — which is what the hyphenated form abbreviates. ⚠ NOT Amharic's `ከ … እስከ`: that pair is ×0 here. */
 const FROM = "ካብ", UNTIL = "ክሳብ";
 
-/**
- * ORDINALS 1–10. Tigrinya does NOT use Amharic's `ኛ` suffix (×0 in this corpus). It has a Semitic pattern
- * series, and the corpus abbreviates it by writing the digit plus the word's final letter — `6ይ`, `7ይ`,
- * `2ይቲ` (feminine), `10ይን` (with the ን conjunction). 22 instances, EVERY ONE 1–10.
- *
- * SOURCE, and it is split on purpose:
- *   · 1–5 come from THIS CORPUS — ቀዳማይ ×31, ካልኣይ ×29, ሳልሳይ ×13, ራብዓይ ×7, ሓምሻይ ×1.
- *   · 6, 8, 10 come from ti.wikipedia in the right sense — `እቲ ሻድሻይ እምነት` (the sixth article of faith),
- *     `ኣብ ሻሙናይ ደረጃ` (in eighth place), `ዓስራይ ክፍሊ` (tenth grade).
- *   · ⚠ 7 AND 9 REST ON GAIM (arXiv:2601.03403) TABLE 1 ALONE and are absent from ti.wikipedia (0 token /
- *     0 substring, as are ሻውዐይ ታሽዐይ ትሽዓይ ትሽዓተይ). For 7th the wiki instead attests the CLASSICAL `ሳብዓይ`
- *     ×1, in `ሄንሪ ሳብዓይ` (Henry VII) — a different word, recorded here as a competitor rather than adopted,
- *     because Gaim's table is a VERBALIZATION table and is the source this manifest already took its
- *     cardinals from. The slot itself is not in doubt: the corpus writes `7ይ` ×5 and `9ይ` ×3.
- *   · Where the wiki attests a different SPELLING of the same word the attested spelling wins — `ሓምሻይ`
- *     over the paper's `ሓሙሽተ`-stem `ሓሙሻይ`, `ሻሙናይ` over `ሻምናይ`. That is the policy tigrinya.jsonc already
- *     states for the cardinals.
- */
-const ORDINAL: Record<number, string> = {
-    1: "ቀዳማይ", 2: "ካልኣይ", 3: "ሳልሳይ", 4: "ራብዓይ", 5: "ሓምሻይ",
-    6: "ሻድሻይ", 7: "ሻውዓይ", 8: "ሻሙናይ", 9: "ታሽዓይ", 10: "ዓስራይ",
-};
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINAL = MANIFEST.ordinals;
 
 /**
  * ETHIOPIC NUMERALS → the VALUE WORD OF EACH CHARACTER, and deliberately not an arithmetic evaluation.

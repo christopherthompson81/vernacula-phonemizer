@@ -50,5 +50,8 @@
         // stress. This overrides the general stress lexicon for the number path (which abstains on the number-sense
         // homographs isá/lima, pitó/píto 'bird', daán/libo).
         "stressPenult": ["sero", "apat", "anim", "libo", "sanlibo", "labing-apat", "labing-anim"]
-    }
+    },
+
+    // The two CONTRACTED ordinals; `ika-N` is regular and composed in code.
+    "contractedOrdinals": { "2": "ikalawa", "3": "ikatlo" }
 }

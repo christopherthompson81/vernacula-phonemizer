@@ -39,6 +39,7 @@
  *   · THE COMMA-GROUPED form before the DECIMAL rule, or `23,764` becomes "tjuetre komma sju seks fire".
  *   · DEGREES before the unit rule, or the C of `20 °C` is read as the English letter name [seː].
  */
+import { MANIFEST } from "./manifest.ts";
 
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -80,20 +81,8 @@ const SYMBOLS = makeSymbolNormalizer({
     rateDenominators: { t: "timen", h: "timen", s: "sekundet" },
 });
 
-/**
- * ORDINALS 1–31 — enough for dates, centuries and placings, which is every ordinal shape the corpus has.
- * 1–15, 18, 20 are in the NST lexicon; the rest (sekstende, syttende, nittende, the tjue- compounds) go
- * through the rule g2p, which reads them correctly — probed rather than assumed (`syttende` → [ˈsʏtːəndə]).
- */
-const ORDINALS: Readonly<Record<string, string>> = {
-    "1": "første", "2": "andre", "3": "tredje", "4": "fjerde", "5": "femte",
-    "6": "sjette", "7": "sjuende", "8": "åttende", "9": "niende", "10": "tiende",
-    "11": "ellevte", "12": "tolvte", "13": "trettende", "14": "fjortende", "15": "femtende",
-    "16": "sekstende", "17": "syttende", "18": "attende", "19": "nittende", "20": "tjuende",
-    "21": "tjueførste", "22": "tjueandre", "23": "tjuetredje", "24": "tjuefjerde", "25": "tjuefemte",
-    "26": "tjuesjette", "27": "tjuesjuende", "28": "tjueåttende", "29": "tjueniende",
-    "30": "trettiende", "31": "trettiførste",
-};
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINALS = MANIFEST.ordinals;
 
 /** Month names, 1-indexed. All twelve are ordinary Norwegian words and lowercase — which is also what
  *  makes the ordinal-dot guard in step 10 catch every written date. */

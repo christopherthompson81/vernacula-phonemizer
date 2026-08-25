@@ -151,4 +151,12 @@
         "thousand": { "one": "inkulungwane", "many": "izinkulungwane" },
         "million": { "one": "isigidi", "many": "izigidi" },
     },
+
+    // The `ye-` ordinal series, 2–10. ⚠ IT FEEDS THE FRACTION RULE, not an ordinal one: `1/2` reads
+    // *ingxenye yesibili*, so these are the DENOMINATOR forms. Numerator 1 only — see normalize.ts step 14
+    // for why a numerator above one is left unclaimed (its class-8 concord would have to be applied).
+    "ordinalYe": {
+        "2": "yesibili", "3": "yesithathu", "4": "yesine", "5": "yesihlanu", "6": "yesithupha",
+        "7": "yesikhombisa", "8": "yesishiyagalombili", "9": "yesishiyagalolunye", "10": "yeshumi"
+    }
 }

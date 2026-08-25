@@ -100,6 +100,7 @@
  *   `meiu` ×19 · `tersu` ×4 · `kuartu` ×11 · `kintu` ×7 · priméru ×68 · sigundu ×30 · terseru ×5 ·
  *   sestu ×3 · sétimu ×2 · oitavu ×1 · nonu ×1 · désimu ×7 · `antis` ×49 · `dipôs` ×109 · `Kristu` ×1.
  */
+import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
@@ -151,11 +152,8 @@ const SYMBOLS = makeSymbolNormalizer({
     ampersand: "y",
 });
 
-/** The ordinal series, 1–10, every one a corpus token (counts in the header). ⚠ NOTHING ABOVE 10 IS
- *  CLAIMED — see step 6. */
-const ORDINAL: readonly string[] = [
-    "", "priméru", "sigundu", "terseru", "kuartu", "kintu", "sestu", "sétimu", "oitavu", "nonu", "désimu",
-];
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINAL = MANIFEST.ordinals;
 
 /** Fraction denominators, 2–5 — the four the corpus attests IN THE FRACTION SENSE (`un tersu sta kubertu pa
  *  agu`, `un kintu ta trabadja na agrikultura`, `kuazi un kuartu ta trabadja na indústria`, `mudansa di

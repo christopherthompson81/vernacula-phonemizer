@@ -25,9 +25,11 @@ interface NumbersDef {
     billion: string;
     conjunction: string;
 }
-interface TigrinyaDef {
+export interface TigrinyaDef {
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
+    /** ORDINALS 1–10, the Semitic pattern series. See the jsonc. */
+    ordinals: Record<string, string>;
 }
 const DEF = loadManifest<TigrinyaDef>(import.meta.url, "tigrinya.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;

@@ -42,6 +42,7 @@
  * SOURCING — every word below is either read in `tools/corpus/mined/hyw.jsonc` itself or a TOKEN
  * attestation against hyw.wikipedia whose examples were read; see `tools/corpus/attest/hyw.jsonc`.
  */
+import { MANIFEST } from "./manifest.ts";
 import { westernNumberWords } from "../../core/numbers.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
@@ -71,12 +72,8 @@ const MAGNITUDE_ABBREV: readonly (readonly [string, string])[] = [
     ["հզր", "հազար"],
 ];
 
-/** 1–4 are suppletive; every one is in this corpus (`Երկրորդ համաշխարհային`, `երրորդ ամէնաշատ`,
- *  `չորրորդ սերունդը`). Everything else composes with `-երորդ` — հինգերորդ ×24, տասներորդ ×24,
- *  քսաներորդ ×21, հարիւրերորդ ×6 on hyw.wikipedia. */
-const IRREGULAR_ORDINAL: Readonly<Record<number, string>> = {
-    1: "առաջին", 2: "երկրորդ", 3: "երրորդ", 4: "չորրորդ",
-};
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const IRREGULAR_ORDINAL = MANIFEST.irregularOrdinals;
 
 /** Integer → the Western Armenian cardinal as SPACE-SEPARATED WORDS, through the engine's own composer
  *  and spellings, so this pass and the tokenizer can never disagree about a numeral. */

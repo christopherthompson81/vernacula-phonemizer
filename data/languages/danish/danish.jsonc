@@ -60,5 +60,16 @@
         "thousand": { "one": "et tusind", "word": "tusind" },
         "million": { "one": "en million", "plural": "millioner" },
         "billion": { "one": "en milliard", "plural": "milliarder" }
+    },
+
+    // The ordinal series. The composition above the table stays in normalize.ts.
+    "ordinals": {
+        "1": "første", "2": "anden", "3": "tredje", "4": "fjerde", "5": "femte",
+        "6": "sjette", "7": "syvende", "8": "ottende", "9": "niende", "10": "tiende",
+        "11": "ellevte", "12": "tolvte", "13": "trettende", "14": "fjortende", "15": "femtende",
+        "16": "sekstende", "17": "syttende", "18": "attende", "19": "nittende", "20": "tyvende",
+        "21": "enogtyvende", "22": "toogtyvende", "23": "treogtyvende", "24": "fireogtyvende",
+        "25": "femogtyvende", "26": "seksogtyvende", "27": "syvogtyvende", "28": "otteogtyvende",
+        "29": "niogtyvende", "30": "tredivte", "31": "enogtredivte"
     }
 }

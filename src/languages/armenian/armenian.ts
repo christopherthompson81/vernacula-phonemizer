@@ -32,6 +32,8 @@ export interface ArmenianDef {
     postConsonantDigraphs?: Record<string, string>;
     numbers: NumbersDef; // includes the optional `hundreds` field read by westernNumberWords
     clausePunctuation: Record<string, string>;
+    /** Irregular ordinals; the regular suffix rule stays in normalize.ts. Shared with hyw. */
+    irregularOrdinals: Record<string, string>;
 }
 
 const isVowelPh = (p: string): boolean => /[ɑeiouəʏœ]/u.test(p); // a phoneme that carries a vowel (je/vo/jev included)

@@ -87,4 +87,43 @@
         "million": { "one": "ein milljón", "plural": "milljónir" },
         "billion": { "one": "einn milljarður", "plural": "milljarðar" }
     },
+
+    // THE ORDINAL SERIES, three agreement forms each: `masc` is the masculine nominative, `common` covers
+    // masculine oblique / feminine nominative / all neuter (-a), and `femOblique` is the feminine oblique
+    // (-u), which the corpus needs for the genitive `aldar`. ⚠ NAMED FIELDS RATHER THAN A POSITIONAL TRIPLE:
+    // the code built these through an `ORD(masc, common, femOblique)` helper, and a bare 3-array in the
+    // manifest would put the reader one indirection away from knowing which slot is which.
+    "ordinals": {
+        "1": { "masc": "fyrsti", "common": "fyrsta", "femOblique": "fyrstu" },
+        "2": { "masc": "annar", "common": "annan", "femOblique": "annarrar" },
+        "3": { "masc": "þriðji", "common": "þriðja", "femOblique": "þriðju" },
+        "4": { "masc": "fjórði", "common": "fjórða", "femOblique": "fjórðu" },
+        "5": { "masc": "fimmti", "common": "fimmta", "femOblique": "fimmtu" },
+        "6": { "masc": "sjötti", "common": "sjötta", "femOblique": "sjöttu" },
+        "7": { "masc": "sjöundi", "common": "sjöunda", "femOblique": "sjöundu" },
+        "8": { "masc": "áttundi", "common": "áttunda", "femOblique": "áttundu" },
+        "9": { "masc": "níundi", "common": "níunda", "femOblique": "níundu" },
+        "10": { "masc": "tíundi", "common": "tíunda", "femOblique": "tíundu" },
+        "11": { "masc": "ellefti", "common": "ellefta", "femOblique": "elleftu" },
+        "12": { "masc": "tólfti", "common": "tólfta", "femOblique": "tólftu" },
+        "13": { "masc": "þrettándi", "common": "þrettánda", "femOblique": "þrettándu" },
+        "14": { "masc": "fjórtándi", "common": "fjórtánda", "femOblique": "fjórtándu" },
+        "15": { "masc": "fimmtándi", "common": "fimmtánda", "femOblique": "fimmtándu" },
+        "16": { "masc": "sextándi", "common": "sextánda", "femOblique": "sextándu" },
+        "17": { "masc": "sautjándi", "common": "sautjánda", "femOblique": "sautjándu" },
+        "18": { "masc": "átjándi", "common": "átjánda", "femOblique": "átjándu" },
+        "19": { "masc": "nítjándi", "common": "nítjánda", "femOblique": "nítjándu" },
+        "20": { "masc": "tuttugasti", "common": "tuttugasta", "femOblique": "tuttugustu" },
+        "21": { "masc": "tuttugasti og fyrsti", "common": "tuttugasta og fyrsta", "femOblique": "tuttugustu og fyrstu" },
+        "22": { "masc": "tuttugasti og annar", "common": "tuttugasta og annan", "femOblique": "tuttugustu og annarrar" },
+        "23": { "masc": "tuttugasti og þriðji", "common": "tuttugasta og þriðja", "femOblique": "tuttugustu og þriðju" },
+        "24": { "masc": "tuttugasti og fjórði", "common": "tuttugasta og fjórða", "femOblique": "tuttugustu og fjórðu" },
+        "25": { "masc": "tuttugasti og fimmti", "common": "tuttugasta og fimmta", "femOblique": "tuttugustu og fimmtu" },
+        "26": { "masc": "tuttugasti og sjötti", "common": "tuttugasta og sjötta", "femOblique": "tuttugustu og sjöttu" },
+        "27": { "masc": "tuttugasti og sjöundi", "common": "tuttugasta og sjöunda", "femOblique": "tuttugustu og sjöundu" },
+        "28": { "masc": "tuttugasti og áttundi", "common": "tuttugasta og áttunda", "femOblique": "tuttugustu og áttundu" },
+        "29": { "masc": "tuttugasti og níundi", "common": "tuttugasta og níunda", "femOblique": "tuttugustu og níundu" },
+        "30": { "masc": "þrítugasti", "common": "þrítugasta", "femOblique": "þrítugustu" },
+        "31": { "masc": "þrítugasti og fyrsti", "common": "þrítugasta og fyrsta", "femOblique": "þrítugustu og fyrstu" }
+    }
 }

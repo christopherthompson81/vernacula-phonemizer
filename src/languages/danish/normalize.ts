@@ -21,6 +21,7 @@
  * standard's name several times over to fix a single clock. The colon form carries the real clocks and is
  * claimed instead.
  */
+import { MANIFEST } from "./manifest.ts";
 
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -62,19 +63,8 @@ const SYMBOLS = makeSymbolNormalizer({
     rateDenominators: { t: "timen", h: "timen", s: "sekundet" },
 });
 
-/**
- * ORDINALS 1–31. Danish builds 21–29 units-first (enogtyvende, "one-and-twentieth"), matching the
- * cardinal system in unitsFirstNumbers.ts.
- */
-const ORDINALS: Readonly<Record<string, string>> = {
-    "1": "første", "2": "anden", "3": "tredje", "4": "fjerde", "5": "femte",
-    "6": "sjette", "7": "syvende", "8": "ottende", "9": "niende", "10": "tiende",
-    "11": "ellevte", "12": "tolvte", "13": "trettende", "14": "fjortende", "15": "femtende",
-    "16": "sekstende", "17": "syttende", "18": "attende", "19": "nittende", "20": "tyvende",
-    "21": "enogtyvende", "22": "toogtyvende", "23": "treogtyvende", "24": "fireogtyvende",
-    "25": "femogtyvende", "26": "seksogtyvende", "27": "syvogtyvende", "28": "otteogtyvende",
-    "29": "niogtyvende", "30": "tredivte", "31": "enogtredivte",
-};
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINALS = MANIFEST.ordinals;
 
 /** Dotted abbreviations (84 in the corpus). The dot is CONSUMED — it is an abbreviation dot, not a
  *  sentence end, and it was reaching clausePunctuation as a full stop mid-phrase. */

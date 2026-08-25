@@ -18,7 +18,7 @@ import { normalizeIcelandic } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-interface IcelandicDef {
+export interface IcelandicDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     frontVowels: readonly string[];
@@ -26,6 +26,8 @@ interface IcelandicDef {
     longNuclei: readonly string[];
     collapsingDoubles: readonly string[];
     clausePunctuation: Record<string, string>;
+    /** The ordinal series, three agreement forms each. See the jsonc. */
+    ordinals: Record<string, { masc: string; common: string; femOblique: string }>;
 }
 const DEF = loadManifest<IcelandicDef>(import.meta.url, "icelandic.jsonc");
 const DIGRAPHS = DEF.digraphs;

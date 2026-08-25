@@ -13,13 +13,15 @@ import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 import { normalizeGuarani } from "./normalize.ts";
 
-interface GuaraniDef {
+export interface GuaraniDef {
     acuteVowels: readonly string[];
     nasalVowels: readonly string[];
     frontLetters: readonly string[];
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    /** The ordinal suffix, glued to the numeral. */
+    ordinalSuffix: string;
 }
 const DEF = loadManifest<GuaraniDef>(import.meta.url, "guarani.jsonc");
 const DIGRAPHS = DEF.digraphs;

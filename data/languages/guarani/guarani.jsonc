@@ -39,4 +39,8 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // ⚠ THE ORDINAL SUFFIX, GLUED: `12ha` is *twelfth*, not twelve hectares — see normalize.ts step 7 for
+    // the guard that tells them apart. ×15 retained in the corpus.
+    "ordinalSuffix": "ha"
 }

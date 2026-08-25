@@ -44,5 +44,12 @@
         "tens": { "20": "ዕስራ", "30": "ሰላሳ", "40": "ኣርብዓ", "50": "ሓምሳ", "60": "ስሳ", "70": "ሰብዓ", "80": "ሰማንያ", "90": "ተስዓ" },
         "hundred": "ሚእቲ", "hundredConjoined": "ሚእትን", "thousand": "ሽሕ", "million": "ሚልዮን", "billion": "ቢልዮን",
         "conjunction": "ን"
+    },
+
+    // ORDINALS 1–10, the Semitic pattern series. ⚠ Tigrinya does NOT use Amharic's ኛ suffix (×0 here);
+    // its own abbreviated form is `Nይ`, and every one of the corpus's 22 instances is 1–10.
+    "ordinals": {
+        "1": "ቀዳማይ", "2": "ካልኣይ", "3": "ሳልሳይ", "4": "ራብዓይ", "5": "ሓምሻይ",
+        "6": "ሻድሻይ", "7": "ሻውዓይ", "8": "ሻሙናይ", "9": "ታሽዓይ", "10": "ዓስራይ"
     }
 }

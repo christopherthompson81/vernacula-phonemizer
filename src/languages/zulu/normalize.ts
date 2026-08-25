@@ -25,6 +25,7 @@
  * the g2p raw is confidently wrong rather than merely mute: `°C` read [kǀ], `B.C.` read [ɓ kǀ], `sq mi` read
  * [skǃ mˈiː]. That is why the degree, era and `sq mi` rules exist at all — the alternative is not silence.
  */
+import { MANIFEST } from "./manifest.ts";
 
 /** Metric / imperial unit words, all the same `ama-` + borrowed-stem frame. */
 const UNIT_WORD: Record<string, string> = {
@@ -43,13 +44,8 @@ const COMPASS: Record<string, string> = {
     N: "enyakatho", S: "eningizimu", E: "empumalanga", W: "entshonalanga",
 };
 
-/** Fraction denominators as the `ye-` ORDINAL — `ingxenye yesithathu` (a third). ⚠ EXPLICIT rather than
- *  derived: `ishumi` is class 5 and takes `yeshumi`, not the `*yesishumi` a derivation from the isi- nouns
- *  would give. */
-const ORDINAL_YE: Record<number, string> = {
-    2: "yesibili", 3: "yesithathu", 4: "yesine", 5: "yesihlanu", 6: "yesithupha",
-    7: "yesikhombisa", 8: "yesishiyagalombili", 9: "yesishiyagalolunye", 10: "yeshumi",
-};
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINAL_YE = MANIFEST.ordinalYe;
 
 /** `ngaphambi kukaKristu` — before Christ. No `AD`/`A.D.` form is declared. */
 const BCE_WORD = "ngaphambi kukaKristu";
