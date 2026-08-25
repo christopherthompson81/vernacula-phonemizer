@@ -16,10 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 56 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
+- **Languages: 57 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
   or, ast, umb, kn, hi, cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha,
-  tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om — all **200/200**.
-  61 gated codes, 12,200 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig — all **200/200**.
+  62 gated codes, 12,400 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`: next uz, sd, su…
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
