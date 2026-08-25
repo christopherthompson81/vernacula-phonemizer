@@ -73,14 +73,6 @@ function inflectOrdinal(base: string, written: string): string | undefined {
     return words.join(" ");
 }
 
-/** Cyrillic letter names, for initialisms. США is [эс ша а], ДНК [дэ эн ка], ТВ [тэ вэ]. */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    а: "а", б: "бэ", в: "вэ", г: "гэ", д: "дэ", е: "е", ё: "ё", ж: "жэ", з: "зэ", и: "и",
-    й: "и краткое", к: "ка", л: "эль", м: "эм", н: "эн", о: "о", п: "пэ", р: "эр", с: "эс",
-    т: "тэ", у: "у", ф: "эф", х: "ха", ц: "цэ", ч: "че", ш: "ша", щ: "ща", ы: "ы",
-    э: "э", ю: "ю", я: "я",
-};
-
 /** NOTE: every boundary in this file is an explicit lookaround, never `\b` — `\b` is defined on ASCII
  *  word characters and finds none against Cyrillic, so a rule written with it silently matches nothing.
  *  The same trap has now appeared in French, Hindi, Bengali, Mandarin and here, including inside
@@ -88,17 +80,10 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
 
 /** Russian phonotactics, for the OOV rule in core/initialisms.ts. */
 export const isUnreadableRussian = makeUnreadableTest({
-    vowels: /[аеёиоуыэюя]/u,
-    legalOnsets: new Set([
-        "бл", "бр", "вл", "вр", "гл", "гр", "дв", "др", "жд", "зв", "зд", "кл", "кр", "пл", "пр",
-        "сл", "см", "сн", "сп", "ст", "тр", "фл", "фр", "хл", "хр", "цв", "шк", "шл", "шп", "шт", "щи",
-    ]),
-    legalCodas: new Set([
-        "ст", "сть", "нт", "нд", "нс", "рт", "рд", "рс", "рн", "рм", "лт", "лд", "лс", "кт", "кс",
-        "пт", "фт", "зд", "зн", "сн", "см", "тр", "др", "бр", "вр", "гр", "пр", "кр", "нк", "нг",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
-
 /** LEXICAL: acronyms spelled out. Authored in russian.jsonc beside the other hand-authored facts. */
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
 
@@ -106,7 +91,7 @@ const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
  *  "is this recorded" test. Acronyms are decided by the lexical list plus the OOV rule alone. */
 export function normalizeRussianInitialisms(text: string): string {
     return makeInitialismNormalizer({
-        letterName: (l) => LETTER_NAME[l],
+        letterName: (l) => MANIFEST.letterNames[l],
         acronymLetters: ACRONYM_LETTERS,
         isRecorded: () => false,
         isUnreadable: isUnreadableRussian,

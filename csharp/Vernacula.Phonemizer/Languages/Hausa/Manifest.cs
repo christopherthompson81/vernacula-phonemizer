@@ -29,6 +29,15 @@ public sealed class HausaManifest
     public IReadOnlyDictionary<string, string> ToneChao { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public HausaNumbersDef Numbers { get; init; } = new();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public HausaPhonotactics Phonotactics { get; init; } = new();
+}
+
+public sealed class HausaPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
 }
 
 /** One row of the orthography→IPA table: the grapheme, its IPA, and whether it is a syllable NUCLEUS. */

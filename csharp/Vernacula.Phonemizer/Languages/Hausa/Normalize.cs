@@ -11,30 +11,14 @@ public static class Normalize
 {
     /** Hausa letter names — the standard Boko alphabet (a, ba, bi, ca, da, e, fa, ga, ha, i, ja, ka, la,
      *  ma, na, o, pa, ku, ra, sa, ta, u, wa, ya, za). */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "a", ["b"] = "ba", ["c"] = "ca", ["d"] = "da", ["e"] = "e", ["f"] = "fa", ["g"] = "ga",
-        ["h"] = "ha", ["i"] = "i", ["j"] = "ja", ["k"] = "ka", ["l"] = "la", ["m"] = "ma", ["n"] = "na",
-        ["o"] = "o", ["p"] = "pa", ["q"] = "ku", ["r"] = "ra", ["s"] = "sa", ["t"] = "ta", ["u"] = "u",
-        ["v"] = "fa", ["w"] = "wa", ["x"] = "iks", ["y"] = "ya", ["z"] = "za",
-        ["ɓ"] = "ɓa", ["ɗ"] = "ɗa", ["ƙ"] = "ƙa", ["ƴ"] = "ƴa",
-    };
-
-    /**
+        /**
      * Hausa phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?).
      */
     public static readonly Func<string, bool> IsUnreadableHausa = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiou]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "ɓ", "ɗ", "ƙ", "ƴ", "sh", "ts", "ch", "gw", "kw", "hw", "gy", "ky", "ny", "b", "d", "f",
-            "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "b", "d", "f", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y", "n",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     /** Lexical: acronyms READ AS WORDS despite being unreadable by phonotactics. */
@@ -43,7 +27,7 @@ public static class Normalize
 
     private static readonly Func<string, string> NormalizeInitialisms = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
-        LetterName = l => LETTER_NAME.GetValueOrDefault(l.ToLowerInvariant()),
+        LetterName = l => Manifest.MANIFEST.LetterNames.GetValueOrDefault(l.ToLowerInvariant()),
         AcronymLetters = new HashSet<string>(new[]
         {
             "aol", "au", "pstn", "a1gp", "gps", "npws", "oha", "unaids", "ungu", "nc", "nsw", "xdr-tb",
@@ -211,7 +195,7 @@ public static class Normalize
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
-            return $"{LETTER_NAME.GetValueOrDefault(a.ToLowerInvariant()) ?? a} da {LETTER_NAME.GetValueOrDefault(b.ToLowerInvariant()) ?? b}{m.Groups[3].Value}";
+            return $"{Manifest.MANIFEST.LetterNames.GetValueOrDefault(a.ToLowerInvariant()) ?? a} da {Manifest.MANIFEST.LetterNames.GetValueOrDefault(b.ToLowerInvariant()) ?? b}{m.Groups[3].Value}";
         });
         s = JsRegex.Replace(s, AMP_SPACED, _ => " da ");
         s = JsRegex.Replace(s, EQUALS, m => $"{m.Groups[1].Value} daidai {m.Groups[2].Value}");

@@ -47,35 +47,12 @@ public static class Normalize
         ["dr"] = "docteur", ["pr"] = "professeur",
     };
 
-    /** French letter names, for initialisms. Verified individually through this engine: bé=[be], cé=[se],
-     *  effe=[ɛf], ache=[aʃ], ku=[ky], esse=[ɛs] (NOT "èse", which voices to [ɛz]), ixe=[iks], zède=[zɛd].
-     *  `w` and `y` are genuinely two words in French (double vé, i grec). */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "a", ["b"] = "bé", ["c"] = "cé", ["d"] = "dé", ["e"] = "e", ["f"] = "effe", ["g"] = "gé", ["h"] = "ache", ["i"] = "i",
-        ["j"] = "ji", ["k"] = "ka", ["l"] = "elle", ["m"] = "emme", ["n"] = "enne", ["o"] = "o", ["p"] = "pé", ["q"] = "ku",
-        ["r"] = "erre", ["s"] = "esse", ["t"] = "té", ["u"] = "u", ["v"] = "vé", ["w"] = "double vé", ["x"] = "ixe",
-        ["y"] = "i grec", ["z"] = "zède",
-    };
-
     /** French phonotactics, for the OOV rule in core/initialisms.ts. */
     public static readonly Func<string, bool> IsUnreadableFrench = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiouyàâäéèêëîïôöûüùœæ]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "kl", "kr",
-            "ch", "ph", "th", "gn", "qu", "sc", "sp", "st", "ps", "pn", "pt", "sm", "sn", "gu", "rh", "ct",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "ch", "gn",
-            "st", "sc", "sk", "sp", "ct", "pt", "ft", "xt", "ss", "tt", "ll", "mm", "nn", "pp", "rr", "ff",
-            "rt", "rd", "rs", "rc", "rl", "rm", "rn", "rp", "rb", "rg", "rf", "rv", "rq",
-            "lt", "ld", "ls", "lc", "lm", "lp", "lb", "lf", "lk", "lv",
-            "nt", "nd", "ns", "nc", "nk", "ng", "mp", "mb",
-            "cs", "ks", "ts", "ps", "bs", "ds", "gs", "fs", "ms",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     /** LEXICAL: acronyms spelled out although their lowercase form is an ordinary French word. */
@@ -174,7 +151,7 @@ public static class Normalize
 
         s = NAME_INITIAL.Replace(s, m =>
         {
-            var name = LETTER_NAME.GetValueOrDefault(m.Groups[1].Value.ToLowerInvariant());
+            var name = Manifest.MANIFEST.LetterNames.GetValueOrDefault(m.Groups[1].Value.ToLowerInvariant());
             return name is null ? m.Value : $"{name}{m.Groups[2].Value}";
         });
 
@@ -233,7 +210,7 @@ public static class Normalize
         // the TS `makeInitialismNormalizer({...})(text)` is.
         return Initialisms.MakeInitialismNormalizer(new InitialismData
         {
-            LetterName = l => LETTER_NAME.GetValueOrDefault(l),
+            LetterName = l => Manifest.MANIFEST.LetterNames.GetValueOrDefault(l),
             AcronymLetters = ACRONYM_LETTERS,
             IsRecorded = isRecorded,
             IsUnreadable = IsUnreadableFrench,

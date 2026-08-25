@@ -61,16 +61,6 @@ public static class Normalize
         return string.Join(" ", words);
     }
 
-    /** Cyrillic letter names, for initialisms. США is [эс ша а], ДНК [дэ эн ка], ТВ [тэ вэ]. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["а"] = "а", ["б"] = "бэ", ["в"] = "вэ", ["г"] = "гэ", ["д"] = "дэ", ["е"] = "е", ["ё"] = "ё",
-        ["ж"] = "жэ", ["з"] = "зэ", ["и"] = "и", ["й"] = "и краткое", ["к"] = "ка", ["л"] = "эль",
-        ["м"] = "эм", ["н"] = "эн", ["о"] = "о", ["п"] = "пэ", ["р"] = "эр", ["с"] = "эс", ["т"] = "тэ",
-        ["у"] = "у", ["ф"] = "эф", ["х"] = "ха", ["ц"] = "цэ", ["ч"] = "че", ["ш"] = "ша", ["щ"] = "ща",
-        ["ы"] = "ы", ["э"] = "э", ["ю"] = "ю", ["я"] = "я",
-    };
-
     /**
      * ⚠ Every boundary in this file is an explicit lookaround, never `\b`: the JS `\b` this port reproduces is
      * defined on ASCII word characters and finds none against Cyrillic, so a rule written with it matches
@@ -80,17 +70,9 @@ public static class Normalize
     /** Russian phonotactics, for the OOV rule in core/initialisms.ts. */
     public static readonly Func<string, bool> IsUnreadableRussian = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[аеёиоуыэюя]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "бл", "бр", "вл", "вр", "гл", "гр", "дв", "др", "жд", "зв", "зд", "кл", "кр", "пл", "пр",
-            "сл", "см", "сн", "сп", "ст", "тр", "фл", "фр", "хл", "хр", "цв", "шк", "шл", "шп", "шт", "щи",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ст", "сть", "нт", "нд", "нс", "рт", "рд", "рс", "рн", "рм", "лт", "лд", "лс", "кт", "кс",
-            "пт", "фт", "зд", "зн", "сн", "см", "тр", "др", "бр", "вр", "гр", "пр", "кр", "нк", "нг",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     /** LEXICAL: acronyms spelled out. Authored in russian.jsonc beside the other hand-authored facts. */
@@ -99,7 +81,7 @@ public static class Normalize
 
     private static readonly Func<string, string> InitialismNormalizer = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
-        LetterName = l => LETTER_NAME.TryGetValue(l, out var v) ? v : null,
+        LetterName = l => Manifest.MANIFEST.LetterNames.TryGetValue(l, out var v) ? v : null,
         AcronymLetters = ACRONYM_LETTERS,
         IsRecorded = _ => false,
         IsUnreadable = w => IsUnreadableRussian(w),

@@ -10,7 +10,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import {
     scanAksara,
@@ -18,24 +18,8 @@ import {
     aksaraPada,
 } from "./aksara.ts";
 
-interface NumbersDef {
-    units: string[];
-    teens: string[];
-    likur: string[];
-    mult: string[];
-    tens: Record<string, string>;
-    magnitudes: { thousand: string[]; million: string[]; billion: string[] };
-    hundredOne: string;
-    hundred: string;
-}
-interface JavaneseDef {
-    digraphs: Record<string, string>;
-    consonants: Record<string, string>;
-    vowels: Record<string, string>;
-    clausePunctuation: Record<string, string>;
-    numbers: NumbersDef;
-}
-const DEF = loadManifest<JavaneseDef>(import.meta.url, "javanese.jsonc");
+const DEF = MANIFEST;
+
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 

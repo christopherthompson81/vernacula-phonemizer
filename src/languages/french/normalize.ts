@@ -68,16 +68,6 @@ const DOT_ONLY: ReadonlySet<string> = new Set(["etc", "mme", "mmes", "mlle", "ml
  *  French words, so expanding them unconditionally is safe. */
 const UNDOTTED_ABBREV: Readonly<Record<string, string>> = { dr: "docteur", pr: "professeur" };
 
-/** French letter names, for initialisms. Verified individually through this engine: bé=[be], cé=[se],
- *  effe=[ɛf], ache=[aʃ], ku=[ky], esse=[ɛs] (NOT "èse", which voices to [ɛz]), ixe=[iks], zède=[zɛd].
- *  `w` and `y` are genuinely two words in French (double vé, i grec). */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", b: "bé", c: "cé", d: "dé", e: "e", f: "effe", g: "gé", h: "ache", i: "i",
-    j: "ji", k: "ka", l: "elle", m: "emme", n: "enne", o: "o", p: "pé", q: "ku",
-    r: "erre", s: "esse", t: "té", u: "u", v: "vé", w: "double vé", x: "ixe",
-    y: "i grec", z: "zède",
-};
-
 /**
  * French phonotactics, for the OOV rule in core/initialisms.ts. Legal onsets are obstruent + liquid plus
  * the s-/p- clusters and the digraphs standing for one sound; legal codas are broadly the liquid- and
@@ -86,21 +76,10 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
  * /tv/ onset of TVA.
  */
 export const isUnreadableFrench = makeUnreadableTest({
-    vowels: /[aeiouyàâäéèêëîïôöûüùœæ]/u,
-    legalOnsets: new Set([
-        "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "kl", "kr",
-        "ch", "ph", "th", "gn", "qu", "sc", "sp", "st", "ps", "pn", "pt", "sm", "sn", "gu", "rh", "ct",
-    ]),
-    legalCodas: new Set([
-        "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "ch", "gn",
-        "st", "sc", "sk", "sp", "ct", "pt", "ft", "xt", "ss", "tt", "ll", "mm", "nn", "pp", "rr", "ff",
-        "rt", "rd", "rs", "rc", "rl", "rm", "rn", "rp", "rb", "rg", "rf", "rv", "rq",
-        "lt", "ld", "ls", "lc", "lm", "lp", "lb", "lf", "lk", "lv",
-        "nt", "nd", "ns", "nc", "nk", "ng", "mp", "mb",
-        "cs", "ks", "ts", "ps", "bs", "ds", "gs", "fs", "ms",
-    ]),
+    vowels: new RegExp(`[${FR_MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(FR_MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(FR_MANIFEST.phonotactics.codas),
 });
-
 /** LEXICAL: acronyms spelled out although their lowercase form is an attested French word. Authored in
  *  french.jsonc alongside the language's other hand-authored facts, not here. */
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(FR_MANIFEST.acronymLetters);
@@ -184,7 +163,7 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //    ("n. wayne hale" → "enne wayne hale"). Runs after step 3 so the honorifics (m., p.) win.
     s = s.replace(/\b([a-zà-ÿ])\.(\s+)(?=[\p{L}])/giu,
         (m0, ltr: string, sp: string) => {
-            const name = LETTER_NAME[ltr.toLowerCase()];
+            const name = FR_MANIFEST.letterNames[ltr.toLowerCase()];
             return name === undefined ? m0 : `${name}${sp}`;
         });
 
@@ -298,7 +277,7 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
  */
 export function normalizeFrenchInitialisms(text: string, isRecorded: (lower: string) => boolean): string {
     return makeInitialismNormalizer({
-        letterName: (l) => LETTER_NAME[l],
+        letterName: (l) => FR_MANIFEST.letterNames[l],
         acronymLetters: ACRONYM_LETTERS,
         isRecorded,
         isUnreadable: isUnreadableFrench,
