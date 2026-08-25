@@ -16,29 +16,23 @@
  *     no such attestation, and a wrong expansion is worse than the written abbreviation.
  *   · NO BIRR RULE. ብር is almost entirely a false positive — ብርሃን "light", መቃብር "grave", ክብር "honour".
  */
+import { MANIFEST as DEF } from "./manifest.ts";
 
 /** Ethiopic syllabary letters, EXCLUDING the punctuation and numeral sub-blocks (U+135F and up). */
 const FID = "[\\u1200-\\u135A]";
 
-/** Amharic decimal point. */
-const POINT = "ነጥብ";
-
-/** Range connective — Amharic writes "ከ 100 እስከ 250 ሜትር" out in full, which the hyphenated form abbreviates. */
-const UNTIL = "እስከ";
 
 /**
- * ORDINALS. Amharic forms the ordinal on the LAST word of the cardinal with the suffix ኛ, and ⚠ A
- * CONSONANT-FINAL (6th-order, ɨ) CARDINAL TAKES ITS 1st-ORDER COUNTERPART before it: አንድ→አንደኛ (ድ→ደ),
- * ሁለት→ሁለተኛ (ት→ተ), ዘጠኝ→ዘጠነኛ (ኝ→ነ), አስር→አስረኛ (ር→ረ). Vowel-final cardinals just suffix: ሃያ→ሃያኛ, which is the
- * regular rule 30–90, መቶ and ሺ follow. A teen composes as አስራ + the unit's ORDINAL (በአስራስድስተኛው, "in the 16th").
+ * ORDINALS, THE DECIMAL POINT AND THE RANGE FRAME — all four read from the manifest now. The cardinal→
+ * ordinal pairing, the point word and both halves of `ከ … እስከ …` are Amharic VOCABULARY; which word of a
+ * composed numeral takes the suffix, and the ኛው definite re-attachment, are the algorithm and stay here.
+ * ⚠ `rangeFrom` IS THE ONE THAT WAS INVISIBLE: `እስከ` had a named constant while the `ከ` that opens the same
+ * frame was typed straight into the replacement template, so a grep for the range words found one of two.
  */
-const ORDINAL: Record<string, string> = {
-    "አንድ": "አንደኛ", "ሁለት": "ሁለተኛ", "ሦስት": "ሦስተኛ", "አራት": "አራተኛ", "አምስት": "አምስተኛ",
-    "ስድስት": "ስድስተኛ", "ሰባት": "ሰባተኛ", "ስምንት": "ስምንተኛ", "ዘጠኝ": "ዘጠነኛ", "አስር": "አስረኛ",
-    "ሃያ": "ሃያኛ", "ሰላሳ": "ሰላሳኛ", "አርባ": "አርባኛ", "ሃምሳ": "ሃምሳኛ", "ስልሳ": "ስልሳኛ",
-    "ሰባ": "ሰባኛ", "ሰማንያ": "ሰማንያኛ", "ዘጠና": "ዘጠናኛ",
-    "መቶ": "መቶኛ", "ሺ": "ሺኛ", "ሚሊዮን": "ሚሊዮንኛ", "ቢሊዮን": "ቢሊዮንኛ", "ዜሮ": "ዜሮኛ",
-};
+const ORDINAL = DEF.ordinals;
+const POINT = DEF.words.decimalPoint;
+const FROM = DEF.words.rangeFrom;
+const UNTIL = DEF.words.rangeUntil;
 
 /**
  * Build the Amharic normalizer.
@@ -135,7 +129,7 @@ export function makeAmharicNormalizer(
         //    spans ("7-2", "26 – 00", "(1644-1912)"), which must NOT become "from…to". They are left as two
         //    adjacent numbers, which is what they already were: TOKEN drops the hyphen and emits no pause.
         s = s.replace(/(?<![\p{L}\p{M}])ከ\s?(\d[\d.]*)\s?[-–—]\s?(\d[\d.]*)/gu,
-            (_m, a: string, b: string) => `ከ ${a} ${UNTIL} ${b}`);
+            (_m, a: string, b: string) => `${FROM} ${a} ${UNTIL} ${b}`);
 
         // 8b. TWO LOCAL WORKAROUNDS for the shared currency tier, reported as core limitations rather than
         //     fixed there — a `core/` change would touch every language.

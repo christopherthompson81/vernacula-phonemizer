@@ -22,8 +22,20 @@ public sealed class AmharicDef
 {
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public AmharicNumbersDef Numbers { get; init; } = new();
+    /** Cardinal → ordinal, for the FINAL word of a composed numeral. See the jsonc. */
+    public IReadOnlyDictionary<string, string> Ordinals { get; init; } = new Dictionary<string, string>();
+    /** The non-numeral, non-symbol words this layer speaks: the decimal point and the range frame. */
+    public AmharicWords Words { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public AmharicSymbolTier SymbolTier { get; init; } = new();
+}
+
+public sealed class AmharicWords
+{
+    public string DecimalPoint { get; init; } = "";
+    /** ⚠ `RangeFrom` WAS A BARE LITERAL in the replacement template on both sides — see the jsonc. */
+    public string RangeFrom { get; init; } = "";
+    public string RangeUntil { get; init; } = "";
 }
 
 /** Read a Latin run with another language's engine — injected from the registry. */
@@ -31,7 +43,7 @@ public delegate string ForeignPhonemizer(string latin);
 
 public sealed class AmharicPhonemizer : ILanguage
 {
-    private static readonly AmharicDef DEF = LoadManifest.Load<AmharicDef>("languages/amharic", "amharic.jsonc");
+    internal static readonly AmharicDef DEF = LoadManifest.Load<AmharicDef>("languages/amharic", "amharic.jsonc");
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => DEF.ClausePunctuation;
     private static AmharicNumbersDef NUM => DEF.Numbers;
 

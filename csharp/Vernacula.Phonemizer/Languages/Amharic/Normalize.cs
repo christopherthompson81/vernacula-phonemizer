@@ -12,24 +12,17 @@ public static class Normalize
 {
     private const string FID = "[\\u1200-\\u135A]";
 
-    /** Amharic decimal point. */
-    private const string POINT = "ነጥብ";
-
     /**
-     * Range connective — Amharic writes "ከ 100 እስከ 250 ሜትር" out in full, which the hyphenated form
-     * abbreviates.
+     * ORDINALS, THE DECIMAL POINT AND THE RANGE FRAME — all read from the manifest. The cardinal→ordinal
+     * pairing, the point word and both halves of `ከ … እስከ …` are Amharic VOCABULARY; which word of a
+     * composed numeral takes the suffix, and the ኛው definite re-attachment, are the algorithm and stay here.
+     * ⚠ `FROM` IS THE ONE THAT WAS INVISIBLE: `UNTIL` had a named constant while the `ከ` opening the same
+     * frame was typed straight into the replacement string, so a grep for the range words found one of two.
      */
-    private const string UNTIL = "እስከ";
-
-    /** ORDINALS. */
-    private static readonly IReadOnlyDictionary<string, string> ORDINAL = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["አንድ"] = "አንደኛ", ["ሁለት"] = "ሁለተኛ", ["ሦስት"] = "ሦስተኛ", ["አራት"] = "አራተኛ", ["አምስት"] = "አምስተኛ",
-        ["ስድስት"] = "ስድስተኛ", ["ሰባት"] = "ሰባተኛ", ["ስምንት"] = "ስምንተኛ", ["ዘጠኝ"] = "ዘጠነኛ", ["አስር"] = "አስረኛ",
-        ["ሃያ"] = "ሃያኛ", ["ሰላሳ"] = "ሰላሳኛ", ["አርባ"] = "አርባኛ", ["ሃምሳ"] = "ሃምሳኛ", ["ስልሳ"] = "ስልሳኛ",
-        ["ሰባ"] = "ሰባኛ", ["ሰማንያ"] = "ሰማንያኛ", ["ዘጠና"] = "ዘጠናኛ",
-        ["መቶ"] = "መቶኛ", ["ሺ"] = "ሺኛ", ["ሚሊዮን"] = "ሚሊዮንኛ", ["ቢሊዮን"] = "ቢሊዮንኛ", ["ዜሮ"] = "ዜሮኛ",
-    };
+    private static string POINT => AmharicPhonemizer.DEF.Words.DecimalPoint;
+    private static string FROM => AmharicPhonemizer.DEF.Words.RangeFrom;
+    private static string UNTIL => AmharicPhonemizer.DEF.Words.RangeUntil;
+    private static IReadOnlyDictionary<string, string> ORDINAL => AmharicPhonemizer.DEF.Ordinals;
 
     private static readonly JsRe DOUBLE_WORDSPACE = JsRegex.Compile("፡፡", "gu");
     private static readonly JsRe TIME_SEP = JsRegex.Compile("(\\d)፡(\\d)", "gu");
@@ -108,7 +101,7 @@ public static class Normalize
 
             // RANGES are restricted to the ከ ("from") frame — ⚠ the restriction IS the rule, because most
             // hyphenated number pairs are scores or year spans and must NOT become "from…to".
-            s = RANGE.Replace(s, m => $"ከ {m.Groups[1].Value} {UNTIL} {m.Groups[2].Value}");
+            s = RANGE.Replace(s, m => $"{FROM} {m.Groups[1].Value} {UNTIL} {m.Groups[2].Value}");
 
             // Two LOCAL workarounds for the shared currency tier: a letter-code prefix ("US$14.7") blocks the
             // tier's own key, and its "the text already says it" prefix test misses Amharic plural morphology.
