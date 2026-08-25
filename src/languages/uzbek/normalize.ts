@@ -209,7 +209,9 @@ export function normalizeUzbek(input: string): string {
     // 9b) PERCENT with a POSSESSIVE SUFFIX — `93%i ulangan` = "its 93% are connected" → *toʻqson uch foizi
     //     ulangan*. The plain `N%` is left for the shared symbol tier (→ foiz); only the suffixed form is
     //     claimed here because the tier's regex cannot see past the trailing letter.
-    s = s.replace(/(\d+)%i\b/gu, "$1 foizi");
+    // ⚠ `(?![\p{L}\p{M}])`, NOT `\b`. JS defines `\b` on ASCII `\w`, so the modifier letters Uzbek writes
+    //    constantly — the ʻ of oʻ/gʻ — counted as a boundary and let the rule fire into them. See #949.
+    s = s.replace(/(\d+)%i(?![\p{L}\p{M}])/gu, "$1 foizi");
 
     // 10) RATES, before the shared symbol tier: the corpus's own prose reads them PREFIXED ("soatiga 240
     //     kilometr", "soniyasiga 1,5 km") and the tier only emits "N kilometr soatiga"-shaped. km/s in the

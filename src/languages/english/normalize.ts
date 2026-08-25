@@ -376,7 +376,10 @@ export function normalizeEnglish(input: string): string {
 
     // 0f1) MONEY with cents. Read as "five dollars fifty", not "five point five zero dollars" — a decimal
     //      reading of a price is wrong in a way listeners notice. Must precede the general currency rule.
-    s = s.replace(/([$£€¥])\s?(\d[\d,]*)\.(\d{2})\b/g,
+    // ⚠ `(?![\p{L}\p{M}])`, NOT `\b` — and the `u` flag is required for it. JS defines `\b` on ASCII `\w`,
+    // so `$1.50é` was read as money while `$1.50a` was not (#949, #950). The `u` flag alone changes nothing
+    // here; the guard is the change.
+    s = s.replace(/([$£€¥])\s?(\d[\d,]*)\.(\d{2})(?![\p{L}\p{M}])/gu,
         (_m, sym: string, int: string, cents: string) => {
             const [sg, pl] = CURRENCY[sym]!;
             const unit = /^1$/.test(int.replace(/,/g, "")) ? sg : pl;
