@@ -13,20 +13,17 @@ public static class Normalize
      * Ordinal suffixes → the agreement slot they mark. Marathi attaches these to the cardinal and the suffix
      * itself carries the agreement, so it is read off the text, not guessed. Matched LONGEST FIRST.
      */
-    private static readonly IReadOnlyDictionary<string, int> SUFFIX_FORM = new Dictionary<string, int>(StringComparer.Ordinal)
-    {
-        ["व्या"] = 3, ["वा"] = 0, ["वी"] = 1, ["वे"] = 2,
-    };
+    // ⚠ FROM THE MANIFEST, VIA THE ONE LOADED DEF. The TS binds these inside the factory so two
+    // normalizers built from different defs cannot share them; here they are static because the derived
+    // regexes below are built at type-init and there is exactly one Marathi manifest. Same values, same
+    // readings — see src/languages/marathi/normalize.ts for the contract.
+    private static MarathiDef D => MarathiPhonemizer.DEF;
+    private static readonly IReadOnlyDictionary<string, int> SUFFIX_FORM = D.Ordinals.SuffixForm;
     private static readonly string SUFFIX_ALT = string.Join("|", SUFFIX_FORM.Keys.OrderByDescending(k => k.Length));
 
-    /** Suppletive ordinals 1-4, indexed [masc, fem, plural/neuter, oblique]. */
-    private static readonly IReadOnlyDictionary<int, string[]> IRREGULAR = new Dictionary<int, string[]>
-    {
-        [1] = new[] { "पहिला", "पहिली", "पहिले", "पहिल्या" },
-        [2] = new[] { "दुसरा", "दुसरी", "दुसरे", "दुसऱ्या" },
-        [3] = new[] { "तिसरा", "तिसरी", "तिसरे", "तिसऱ्या" },
-        [4] = new[] { "चौथा", "चौथी", "चौथे", "चौथ्या" },
-    };
+    /** Suppletive ordinals 1-4, indexed [masc, fem, plural/neuter, oblique] — the order is the contract. */
+    private static readonly IReadOnlyDictionary<int, string[]> IRREGULAR =
+        D.Ordinals.Irregular.ToDictionary(kv => int.Parse(kv.Key), kv => kv.Value);
 
     /**
      * Devanagari consonant letters (base + nukta block) — used to test whether a cardinal ends in a bare
@@ -40,24 +37,7 @@ public static class Normalize
     private static readonly JsRe DEV_CONSONANT_FINAL = JsRegex.Compile("[क-हक़-य़]$", "u");
 
     /** Devanagari unit abbreviations → the full Marathi word. */
-    private static readonly IReadOnlyDictionary<string, string> UNIT_WORD = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["किमी/ताशी"] = "किलोमीटर ताशी", // ताशी already means "per hour"; प्रति would double it
-        ["किमी/तास"] = "किलोमीटर प्रति तास",
-        ["मी/से"] = "मीटर प्रति सेकंद",
-        ["किमी²"] = "चौरस किलोमीटर", ["किमी2"] = "चौरस किलोमीटर",
-        ["सेमी²"] = "चौरस सेंटीमीटर", ["सेमी2"] = "चौरस सेंटीमीटर",
-        ["मिमी²"] = "चौरस मिलीमीटर", ["मिमी2"] = "चौरस मिलीमीटर",
-        ["मी²"] = "चौरस मीटर", ["मी2"] = "चौरस मीटर",
-        ["किमी"] = "किलोमीटर", ["सेमी"] = "सेंटीमीटर", ["मिमी"] = "मिलीमीटर",
-        ["किग्रॅ"] = "किलोग्रॅम", ["ग्रॅ"] = "ग्रॅम",
-        ["मी"] = "मीटर",
-        ["km²"] = "चौरस किलोमीटर", ["km2"] = "चौरस किलोमीटर",
-        ["m²"] = "चौरस मीटर", ["cm²"] = "चौरस सेंटीमीटर",
-        ["mm²"] = "चौरस मिलीमीटर", ["mm2"] = "चौरस मिलीमीटर",
-        ["km"] = "किलोमीटर", ["cm"] = "सेंटीमीटर", ["mm"] = "मिलीमीटर", ["kg"] = "किलोग्रॅम",
-        ["ha"] = "हेक्टर", ["l"] = "लिटर", ["L"] = "लिटर",
-    };
+    private static readonly IReadOnlyDictionary<string, string> UNIT_WORD = D.UnitWords;
     // Longest key first, and each key is guarded by `(?![\p{L}\p{M}])` at the use site — that is what keeps
     // मी (metre) out of मीटर, मिनिटे and the pronoun मी.
     private static readonly JsRe UNIT_ESC = JsRegex.Compile("[.*+?^${}()|[\\]\\\\/]", "g");
@@ -69,13 +49,10 @@ public static class Normalize
      *  marathi.jsonc for the evidence that settled £. */
 
     /** Magnitude words that hop over the currency sign — "$२.३ बिलियन" is said "…बिलियन डॉलर". */
-    private const string MAGNITUDE_ALT = "बिलियन|ट्रिलियन|मिलियन|दशलक्ष|अब्ज|कोटी|लाख|हजार";
+    private static readonly string MAGNITUDE_ALT = string.Join("|", D.MagnitudeWords);
 
     /** The -तः adverbs, commonly written with an ASCII colon standing in for the visarga. */
-    private static readonly string TAH_ADVERB_ALT = string.Join("|", new[]
-    {
-        "विशेषत", "सामान्यत", "साधारणत", "संभाव्यत", "मुख्यत", "अंशत", "स्वत", "दुख",
-    });
+    private static readonly string TAH_ADVERB_ALT = string.Join("|", D.VisargaAdverbs);
 
     // The step patterns. The TS builds each inline in the returned closure; JsRegex.Compile caches, so
     // hoisting them here is a readability choice and not a behaviour one.
@@ -159,7 +136,7 @@ public static class Normalize
         string Clock(double h, double min) =>
             min == 0
                 ? CardinalText(h)
-                : $"{CardinalText(h)} वाजून {CardinalText(min)} मिनिटे";
+                : $"{CardinalText(h)} {D.Clock.Past} {CardinalText(min)} {D.Clock.Minutes}";
 
         return input =>
         {
@@ -175,11 +152,11 @@ public static class Normalize
             s = JsRegex.Replace(s, COLON_INTERNAL, _ => "ः");
             s = JsRegex.Replace(s, TAH_COLON, m => $"{m.Groups[1].Value}ः");
 
-            s = JsRegex.Replace(s, ERA_BCE_FULL, _ => "इसवी सन पूर्व");
-            s = JsRegex.Replace(s, ERA_BCE_SHORT, _ => "इसवी सन पूर्व");
-            s = JsRegex.Replace(s, ERA_CE, _ => "इसवी सन");
+            s = JsRegex.Replace(s, ERA_BCE_FULL, _ => D.EraMarkers.Bc);
+            s = JsRegex.Replace(s, ERA_BCE_SHORT, _ => D.EraMarkers.Bc);
+            s = JsRegex.Replace(s, ERA_CE, _ => D.EraMarkers.Ad);
 
-            s = JsRegex.Replace(s, DOCTOR, m => $"डॉक्टर{m.Groups[1].Value}");
+            s = JsRegex.Replace(s, DOCTOR, m => $"{D.Abbreviations["डॉ"]}{m.Groups[1].Value}");
 
             s = JsRegex.Replace(s, ORDINAL, m =>
                 Ordinal(Js.Number(m.Groups[1].Value), SUFFIX_FORM[m.Groups[2].Value], m.Groups[2].Value) ?? m.Value);
@@ -210,17 +187,17 @@ public static class Normalize
                 var body = Clock(Js.Number(h), Js.Number(min));
                 if (Js.Number(min) != 0) return body;
                 var rest = whole7b[(m.Index + m.Length)..];
-                return !string.IsNullOrEmpty(vaajta) || !VAAJ_NEXT.IsMatch(rest) ? $"{body} वाजता" : body;
+                return !string.IsNullOrEmpty(vaajta) || !VAAJ_NEXT.IsMatch(rest) ? $"{body} {D.Clock.Oclock}" : body;
             });
             s = JsRegex.Replace(s, CLOCK_DOT_TZ, m => Clock(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
 
-            s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} अंश सेल्सिअस");
-            s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} अंश फॅरेनहाइट");
-            s = JsRegex.Replace(s, DEG_N, m => $"{m.Groups[1].Value} अंश उत्तर");
-            s = JsRegex.Replace(s, DEG_S, m => $"{m.Groups[1].Value} अंश दक्षिण");
-            s = JsRegex.Replace(s, DEG_E, m => $"{m.Groups[1].Value} अंश पूर्व");
-            s = JsRegex.Replace(s, DEG_W, m => $"{m.Groups[1].Value} अंश पश्चिम");
-            s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} अंश");
+            s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.Celsius}");
+            s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.Fahrenheit}");
+            s = JsRegex.Replace(s, DEG_N, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.North}");
+            s = JsRegex.Replace(s, DEG_S, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.South}");
+            s = JsRegex.Replace(s, DEG_E, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.East}");
+            s = JsRegex.Replace(s, DEG_W, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.West}");
+            s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} {D.Degree.Word}");
 
             s = JsRegex.Replace(s, PERCENT, m =>
             {
@@ -239,30 +216,30 @@ public static class Normalize
             {
                 var a = m.Groups[1].Value;
                 var b = m.Groups[2].Value;
-                return Js.Number(b) > Js.Number(a) ? $"{a} ते {b}" : m.Value;
+                return Js.Number(b) > Js.Number(a) ? $"{a} {D.RangeWord} {b}" : m.Value;
             });
 
             s = JsRegex.Replace(s, FRACTION, m =>
             {
                 double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
-                if (num == 1 && den == 2) return "अर्धा";
-                if (num == 1 && den == 4) return "पाव";
-                if (num == 3 && den == 4) return "पाऊण";
+                if (num == 1 && den == 2) return D.Fractions.Half;
+                if (num == 1 && den == 4) return D.Fractions.Quarter;
+                if (num == 3 && den == 4) return D.Fractions.ThreeQuarters;
                 var nw = CardinalText(num);
                 var dw = CardinalText(den);
-                return nw == "" || dw == "" ? m.Value : $"{nw} भागिले {dw}";
+                return nw == "" || dw == "" ? m.Value : $"{nw} {D.Fractions.DividedBy} {dw}";
             });
 
-            s = JsRegex.Replace(s, BARE_HUNDRED, _ => "शंभर");
+            s = JsRegex.Replace(s, BARE_HUNDRED, _ => D.BareHundred);
 
-            s = JsRegex.Replace(s, PLUS, _ => " अधिक ");
-            s = JsRegex.Replace(s, TILDE, _ => " सुमारे ");
+            s = JsRegex.Replace(s, PLUS, _ => $" {D.SymbolWords.Plus} ");
+            s = JsRegex.Replace(s, TILDE, _ => $" {D.SymbolWords.Approximately} ");
 
-            s = JsRegex.Replace(s, PLUSMINUS, _ => " अधिक उणे ");
-            s = PostposedSignPass.PostposedSign(s, "<", "पेक्षा कमी");
-            s = PostposedSignPass.PostposedSign(s, ">", "पेक्षा जास्त");
-            s = PostposedSignPass.PostposedSign(s, "÷", "ने भागणे");
-            s = JsRegex.Replace(s, EQUALS, _ => " बरोबर ");
+            s = JsRegex.Replace(s, PLUSMINUS, _ => $" {D.SymbolWords.PlusMinus} ");
+            s = PostposedSignPass.PostposedSign(s, "<", D.SymbolWords.LessThan);
+            s = PostposedSignPass.PostposedSign(s, ">", D.SymbolWords.GreaterThan);
+            s = PostposedSignPass.PostposedSign(s, "÷", D.SymbolWords.Divide);
+            s = JsRegex.Replace(s, EQUALS, _ => $" {D.SymbolWords.Equals} ");
             s = JsRegex.Replace(s, DOUBLE_SPACE, _ => " ");
 
             return s;

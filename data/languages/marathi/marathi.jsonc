@@ -255,6 +255,96 @@
     "currency": { "$": "डॉलर", "€": "युरो", "¥": "येन", "£": "पाउंड", "₹": "रुपये" },
     "stripSymbols": "₹",
 
+    // ── The words Marathi's own normalizer and its symbol tier speak ────────────────────────────────
+    // ⚠ AUTHORED HERE, READ IN BOTH PLACES. normalize.ts and marathi.ts's tier each used to spell their
+    // own copies, and where the two disagreed the reading depended on which path claimed the token
+    // first — that is how £ came to read पौंड before a number and पाउंड after one.
+
+    // The two words the tier still needs beyond percent/currency.
+    "ampersand": "आणि",   // `आणि` ×1073; the tier spaces it both sides so `B&B` stays two initialisms
+    "multiply": "गुणिले",
+
+    // The Latin unit abbreviations the SHARED TIER is keyed on.
+    "units": {
+        "km": "किलोमीटर", "cm": "सेंटीमीटर", "mm": "मिलिमीटर", "kg": "किलोग्रॅम",
+        "ha": "हेक्टर", "l": "लिटर", "L": "लिटर"
+    },
+
+    // ⚠ A SECOND UNIT TABLE ON PURPOSE, and merging the two would be wrong. This one is normalize.ts's:
+    // it carries the DEVANAGARI abbreviations the corpus actually writes (किमी ×14, मिमी ×8, मी ×3), and
+    // it re-declares the Latin keys because step 14's bare-hundred rewrite turns `100 km` into `शंभर km`,
+    // which the tier can no longer match — its NUM is a digit run. Left to the tier, `100 ha` read
+    // *ˈeːk ʃˈeː ɦˈeːkʈəɾ*. Single-letter `m` and `g` are deliberately ABSENT: `100m`/`200m` are swim
+    // events, and `802.11 g` is a spaced version designation this local rule has no guard against.
+    // Key order is not significant — normalize.ts sorts longest-first at load.
+    "unitWords": {
+        "किमी/ताशी": "किलोमीटर ताशी",
+        "किमी/तास": "किलोमीटर प्रति तास",
+        "मी/से": "मीटर प्रति सेकंद",
+        "किमी²": "चौरस किलोमीटर", "किमी2": "चौरस किलोमीटर",
+        "सेमी²": "चौरस सेंटीमीटर", "सेमी2": "चौरस सेंटीमीटर",
+        "मिमी²": "चौरस मिलीमीटर", "मिमी2": "चौरस मिलीमीटर",
+        "मी²": "चौरस मीटर", "मी2": "चौरस मीटर",
+        "किमी": "किलोमीटर", "सेमी": "सेंटीमीटर", "मिमी": "मिलीमीटर",
+        "किग्रॅ": "किलोग्रॅम", "ग्रॅ": "ग्रॅम",
+        "मी": "मीटर",
+        "km²": "चौरस किलोमीटर", "km2": "चौरस किलोमीटर",
+        "m²": "चौरस मीटर", "cm²": "चौरस सेंटीमीटर",
+        "mm²": "चौरस मिलीमीटर", "mm2": "चौरस मिलीमीटर",
+        "km": "किलोमीटर", "cm": "सेंटीमीटर", "mm": "मिलीमीटर", "kg": "किलोग्रॅम",
+        "ha": "हेक्टर", "l": "लिटर", "L": "लिटर"
+    },
+
+    // Magnitude words that hop over the currency sign — "$२.३ बिलियन" is said "…बिलियन डॉलर".
+    "magnitudeWords": ["बिलियन", "ट्रिलियन", "मिलियन", "दशलक्ष", "अब्ज", "कोटी", "लाख", "हजार"],
+
+    "ordinals": {
+        // Suffix → the agreement slot it marks. व्या ×36 (oblique), वा ×6, वे ×3.
+        "suffixForm": { "व्या": 3, "वा": 0, "वी": 1, "वे": 2 },
+        // Suppletive 1-4, indexed [masc, fem, plural/neuter, oblique]. ⚠ THE INDEX ORDER IS THE CONTRACT:
+        // it must match the slots in `suffixForm`. Marathi's differ from Hindi's (पहिला not पहला).
+        "irregular": {
+            "1": ["पहिला", "पहिली", "पहिले", "पहिल्या"],
+            "2": ["दुसरा", "दुसरी", "दुसरे", "दुसऱ्या"],
+            "3": ["तिसरा", "तिसरी", "तिसरे", "तिसऱ्या"],
+            "4": ["चौथा", "चौथी", "चौथे", "चौथ्या"]
+        },
+        // Stem alternations before the suffix. The bare-hundred ordinal, नऊ→नव, and -ीस→-िसा.
+        "stemHundred": "शंभरा",
+        "stemNine": ["नऊ", "नव"],
+        "stemTens": ["ीस", "िसा"]
+    },
+
+    // The -तः adverbs, written with an ASCII colon for the visarga. ⚠ A CLOSED LIST, not the pattern
+    // `त:` — that would also claim the genuine list colons in आहेत: ×5 and करतात: ×1.
+    "visargaAdverbs": ["विशेषत", "सामान्यत", "साधारणत", "संभाव्यत", "मुख्यत", "अंशत", "स्वत", "दुख"],
+
+    "clock": { "past": "वाजून", "minutes": "मिनिटे", "oclock": "वाजता" },
+    "eraMarkers": { "bc": "इसवी सन पूर्व", "ad": "इसवी सन" },
+    "abbreviations": { "डॉ": "डॉक्टर" },
+    "degree": {
+        "word": "अंश", "celsius": "सेल्सिअस", "fahrenheit": "फॅरेनहाइट",
+        "north": "उत्तर", "south": "दक्षिण", "east": "पूर्व", "west": "पश्चिम"
+    },
+    "fractions": { "half": "अर्धा", "quarter": "पाव", "threeQuarters": "पाऊण", "dividedBy": "भागिले" },
+    // ⚠ NOT THE FLEET'S `signWords`, AND THE NAME DIFFERS ON PURPOSE. That key is the shape the SHARED
+    // symbol tier reads, and test/manifest-signwords.test.ts requires all nine of its slots — including
+    // `minus`. Marathi REFUSES a minus rule outright (normalize.ts: "reading उणे एक is worse than
+    // silence"), so declaring one here would be dead data contradicting that refusal. This set also needs
+    // `approximately`, for which the shared shape has no slot. Marathi's own rules read these.
+    "symbolWords": {
+        "plus": "अधिक", "approximately": "सुमारे", "plusMinus": "अधिक उणे",
+        "lessThan": "पेक्षा कमी", "greaterThan": "पेक्षा जास्त", "divide": "ने भागणे", "equals": "बरोबर",
+        // ⚠ THE MINUS WORD IS DECLARED BUT NO ASCII-HYPHEN RULE READS IT, and that is deliberate: the
+        // hyphen before a digit is a DESIGNATION here ("चंद्रयान -1") or a compound (आस-पास), so the
+        // trigger is refused, not the vocabulary. It is `plusMinus`'s second half already. वजा is the
+        // attested alternative and a one-word change if it is ever preferred.
+        "minus": "उणे"
+    },
+    "rangeWord": "ते",
+    // The STANDALONE hundred. `magnitudes.hundred` is शे, the COMBINING form; a bare 100 is शंभर.
+    "bareHundred": "शंभर",
+
     // Clause / phrase punctuation → canonical inline pause marks (Devanagari danda ।/॥ + ASCII).
     "clausePunctuation": {
         "।": ".",

@@ -12,12 +12,17 @@ import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { makeMarathiNormalizer } from "./normalize.ts";
+import { makeMarathiNormalizer, type MarathiWords } from "./normalize.ts";
 
-/** Marathi's manifest adds the two word tables Hindi's def does not carry. */
-export interface MarathiDef extends HindiDef {
-    percent: { plural: string; singular: string };
-    currency: Record<string, string>;
+/**
+ * Marathi's manifest adds the word tables Hindi's def does not carry. ⚠ `MarathiWords` is normalize.ts's
+ * half; the tier below reads `percent`, `currency`, `ampersand`, `multiply` and `units` from the SAME
+ * object, which is the whole point — see the £ note in marathi.jsonc.
+ */
+export interface MarathiDef extends HindiDef, MarathiWords {
+    ampersand: string;
+    multiply: string;
+    units: Record<string, string>;
 }
 
 // ⚠ ONE LOAD, MODULE-LEVEL. The tier below is built at import time and must read the same object the engine
@@ -45,11 +50,10 @@ const MR_SYMBOLS = makeSymbolNormalizer({
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
-    multiply: { times: "गुणिले" },
+    multiply: { times: DEF.multiply },
     // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `आणि` ×1073 in this corpus. The tier spaces it on both sides, because `B&B` is two
-    // initialisms and joining them would make one token.
-    ampersand: "आणि",
+    ampersand: DEF.ampersand,
     percent: [DEF.percent.plural], // Hindi's प्रतिशत is not Marathi
     // From the manifest, and shared with normalize.ts — the two paths claim the sign in different positions
     // and used to answer with different words for £.
@@ -71,8 +75,9 @@ const MR_SYMBOLS = makeSymbolNormalizer({
     // exactly the spaced shape. Verified against a language that does declare ⟨g⟩: `802.11 g` reads
     // *… ɛlf ɡʁam* in de and *… wˈʌn ɡɹˈæmz* in en. Undecidable at this layer, so mr declines the key.
     // ⚠ ⟨m⟩ stays refused for the reason `normalize.ts` already records — `100m`/`200m` are swim events.
-    units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलिमीटर"], kg: ["किलोग्रॅम"],
-        ha: ["हेक्टर"], l: ["लिटर"], L: ["लिटर"] },
+    // From the manifest, shared with normalize.ts's own (larger) table — marathi.jsonc records why the
+    // two tables exist and must not be merged.
+    units: Object.fromEntries(Object.entries(DEF.units).map(([k, v]) => [k, [v]])),
 });
 
 export function createMarathi(foreign?: ForeignPhonemizer): {
