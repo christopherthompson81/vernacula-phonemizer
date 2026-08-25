@@ -65,6 +65,7 @@ public static class Bootstrap
             Russian.RussianPhonemizer.RegisterSelf();
             Spanish.SpanishPhonemizer.RegisterSelf();
             Spanish419.Spanish419.RegisterSelf();
+            Sundanese.SundanesePhonemizer.RegisterSelf();
             Umbundu.UmbunduPhonemizer.RegisterSelf();
             Urdu.UrduPhonemizer.RegisterSelf();
             Punjabi.PunjabiPhonemizer.RegisterSelf();

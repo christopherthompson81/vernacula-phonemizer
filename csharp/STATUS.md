@@ -16,11 +16,19 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 57 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
+- **Languages: 58 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
   or, ast, umb, kn, hi, cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha,
-  tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig — all **200/200**.
-  62 gated codes, 12,400 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
-  `tools/language-catalogue/languages.db`: next uz, sd, su…
+  tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig, sd, su — all
+  **200/200**. 63 gated codes, 12,600 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user
+  direction), from `tools/language-catalogue/languages.db`: next uz, lo, zu…
+- **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
+  word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
+  weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,
+  both sync and async, 0 diff. ⚠ The two mined lines that DO differ carry embedded Armenian and Khmer runs
+  and are `Registry.PortPending: armenian, khmer` — blocked, not wrong.
+- **sd is the second NEURAL language** (after af/fa): a per-letter BiLSTM restores the abjad's unwritten
+  short vowels on OOV words. `Bootstrap.cs` installs the `NeuralRegistry` entry beside the sync engine, and
+  `SindhiAsyncUsesTheTagger` pins that the async reading actually differs from the rule one.
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
