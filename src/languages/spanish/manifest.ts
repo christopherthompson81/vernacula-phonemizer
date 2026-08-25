@@ -6,6 +6,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms, SignWords } from "../../core/normalizeSymbols.ts";
 
 export interface SpanishManifest {
     vowels: {
@@ -30,6 +31,35 @@ export interface SpanishManifest {
         connector: string;
         decimalConnector: string;
         scales: { value: number; one: string; many: string }[];
+    };
+    months: string[];
+    dottedAbbrev: Record<string, string>;
+    /** ⚠ Also the source of the clock half-day reading: `a. m.` is ⟨a⟩ + ⟨m⟩ said as letter names. */
+    letterNames: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** MASCULINE — the feminine is derived (-o → -a on every element of a compound). */
+    ordinals: {
+        units: string[];
+        teens: string[];
+        tens: string[];
+        hundreds: string[];
+        thousandth: string;
+    };
+    /** ⚠ `numeratorOne` is the APOCOPATED "un", a different word from `numbers.ones[1]`. */
+    fractions: { denominators: Record<string, string>; numeratorOne: string };
+    feminineOne: string;
+    eraMarkers: { beforeChrist: string; afterChrist: string };
+    unitedStates: string;
+    numberSign: string;
+    signWords: SignWords;
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        exponentWords: { squared: CountForms; cubed: CountForms };
+        bareExponent: { squared: string; cubed: string; power: string; negative: string };
+        magnitudes: string[];
+        magnitudeConnective: string;
     };
 }
 

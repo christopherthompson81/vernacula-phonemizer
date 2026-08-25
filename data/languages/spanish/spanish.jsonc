@@ -159,4 +159,161 @@
             { "value": 1000000, "one": "un millón", "many": "millones" },
         ],
     },
+    // ---------------------------------------------------------------------------------------------------
+    // Month names, for the DATE rule (the first of the month is an ordinal in America and a cardinal in
+    // Spain). Both spellings of September occur and both are matched.
+    "months": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+        "septiembre", "setiembre", "octubre", "noviembre", "diciembre"],
+
+    // Dotted abbreviations → the spoken words. Each was checked against its corpus context. ⚠ `no.` is
+    // deliberately ABSENT — bare "no" is one of the commonest words in Spanish, and only `no.` followed by a
+    // DIGIT is the number sign, so it has its own rule with that guard.
+    "dottedAbbrev": {
+        "sr": "señor", "sra": "señora", "srta": "señorita", "sres": "señores",
+        "dr": "doctor", "dra": "doctora", "lic": "licenciado", "ing": "ingeniero", "prof": "profesor",
+        "d": "don", "dña": "doña", "dna": "doña", "ud": "usted", "uds": "ustedes", "vd": "usted", "vds": "ustedes",
+        "etc": "etcétera", "pág": "página", "págs": "páginas", "pag": "página",
+        "núm": "número", "num": "número", "cap": "capítulo", "art": "artículo", "vol": "volumen",
+        "av": "avenida", "avda": "avenida", "cía": "compañía", "cia": "compañía",
+        "sto": "santo", "sta": "santa", "vs": "versus", "aprox": "aproximadamente", "dpto": "departamento"
+    },
+
+    // Spanish letter names, each verified through this engine: be=[be], ce=[se], efe=[ˈefe], hache=[ˈat͡ʃe],
+    // cu=[ku], equis=[ˈekis], zeta=[ˈseta]. ⟨w⟩ and ⟨x⟩/⟨y⟩ are the pan-American names (uve, doble uve, ye).
+    // ⚠ ALSO THE SOURCE OF THE CLOCK HALF-DAY READING. `a. m.` and `p. m.` are said as the LETTER NAMES in
+    // Spanish ([a ˈeme], [pe ˈeme]), not expanded to the Latin — so normalize.ts composes them from ⟨a⟩/⟨p⟩
+    // plus ⟨m⟩ here rather than holding "a eme" and "pe eme" as two more literals.
+    "letterNames": {
+        "a": "a", "b": "be", "c": "ce", "d": "de", "e": "e", "f": "efe", "g": "ge", "h": "hache", "i": "i",
+        "j": "jota", "k": "ka", "l": "ele", "m": "eme", "n": "ene", "ñ": "eñe", "o": "o", "p": "pe", "q": "cu",
+        "r": "erre", "s": "ese", "t": "te", "u": "u", "v": "uve", "w": "doble uve", "x": "equis", "y": "ye",
+        "z": "zeta"
+    },
+
+    // Spanish PHONOTACTICS, for the OOV spell-it-out test in core/initialisms.ts. Spanish syllable structure
+    // is strict — no word begins with two stops, and codas are limited — so the illegal-cluster tests carry
+    // real weight here: `CD` [kð] and `ADN` [aðn] were both unpronounceable output.
+    "phonotactics": {
+        "vowels": "aeiouáéíóúü",
+        "onsets": [
+            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "tl",
+            "ch", "ll", "rr", "qu", "gu", "ps", "gn", "mn"
+        ],
+        "codas": [
+            "ch", "ll", "rr", "ns", "rs", "ls", "ds", "bs", "st", "rt", "rd", "rn", "rl", "rm",
+            "lt", "ld", "ln", "nt", "nd", "nz", "nc", "ng", "rz", "rc", "rg", "sc", "sm", "cs", "ps", "ns"
+        ]
+    },
+
+    // MASCULINE ordinals, 1 … 1000 (romanOrdinals.ts). Read by the Roman-numeral policy, by the ordinal
+    // INDICATORS (1º / 1ª / 1er) and by the fraction rule, which is why they live here rather than beside
+    // one of those three. The feminine is DERIVED (-o → -a on every element of a compound), so only the
+    // masculine is data.
+    "ordinals": {
+        "units": ["", "primero", "segundo", "tercero", "cuarto", "quinto", "sexto", "séptimo", "octavo", "noveno"],
+        "teens": [
+            "décimo", "undécimo", "duodécimo", "decimotercero", "decimocuarto",
+            "decimoquinto", "decimosexto", "decimoséptimo", "decimoctavo", "decimonoveno"
+        ],
+        "tens": ["", "", "vigésimo", "trigésimo", "cuadragésimo", "quincuagésimo",
+            "sexagésimo", "septuagésimo", "octogésimo", "nonagésimo"],
+        "hundreds": ["", "centésimo", "ducentésimo", "tricentésimo", "cuadringentésimo",
+            "quingentésimo", "sexcentésimo", "septingentésimo", "octingentésimo", "noningentésimo"],
+        "thousandth": "milésimo"
+    },
+
+    // FRACTIONS. Only 1/2 and 1/3 have a suppletive name; every other denominator takes the ordinal
+    // (1/5 = un quinto). `numeratorOne` is the APOCOPATED form the fraction noun takes — "un quinto", never
+    // *"uno quinto" — so it is a different word from `numbers.ones[1]`.
+    "fractions": { "denominators": { "2": "medio", "3": "tercio" }, "numeratorOne": "un" },
+
+    // The FEMININE "one", for the clock: *hora* is feminine, so 1 and 21 take *una* (a la una, las
+    // veintiuna). Derived from `numbers.ones[1]` by a final -o → -a, but declared because the rule that
+    // applies it matches on the written word.
+    "feminineOne": "una",
+
+    // ERA MARKERS and the two fixed expansions that are WORDS rather than letters. `EE. UU.` is by far the
+    // most frequent abbreviation in the corpus (×31) and must be claimed before the generic dotted rule,
+    // which would otherwise see two abbreviations and leave two pauses.
+    "eraMarkers": { "beforeChrist": "antes de Cristo", "afterChrist": "después de Cristo" },
+    "unitedStates": "Estados Unidos",
+    "numberSign": "número",
+
+    // ---------------------------------------------------------------------------------------------------
+    // The SIGN AND MATH WORDS (core/normalizeSymbols.ts `SignWords`) — ± + − & = < > × ÷. ⚠ ONE SOURCE: the
+    // symbol tier in spanish.ts reads `times` and `ampersand` from here too.
+    //
+    // ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is genuinely absent from the corpus — every
+    // `<` in the fleet is an HTML tag `stripMarkup` removes — but the readings are ordinary comparative
+    // prose, and those words are in es_419 in quantity: `menor que` ×9, `igual a` ×5, `mayor que` ×3,
+    // `dividido` ×1.
+    //
+    // ⚠ `dividedBy` NEEDED THE REGISTER TIER, and general Wikipedia would have answered wrong. Both
+    // `dividido entre` (the school reading in most of the Spanish-speaking world) and `dividido por` are
+    // real, and `dividido` appears once in the whole corpus. Restricting the article sample to maths prose
+    // (`attest.ts --context "matemáticas aritmética división"`) puts the canonical División article in the
+    // net, and it reads the operation aloud in exactly this slot: "veinte dividido por cinco es igual a
+    // cuatro" — sourcing the division word AND the equals word in one sentence, between two operands.
+    //
+    // The copula is dropped (`igual a`, not `es igual a`) because the sign occurs in running text where the
+    // verb is already present or absent for its own reasons — the same call `en` makes.
+    //
+    // `times` — ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus attestation: the sweep's plausible hits were
+    // homographs of PREPOSITIONS (es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the
+    // operator). One word, so `by` defaults to it; this language does not split dimension from product.
+    "signWords": {
+        "plusMinus": "más menos",
+        "plus": "más",
+        "minus": "menos",
+        "ampersand": "y",
+        "equals": "igual a",
+        "lessThan": "menor que",
+        "greaterThan": "mayor que",
+        "times": "por",
+        "dividedBy": "dividido por"
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data (spanish.ts). Longest keys match first (the builder sorts by length), so
+    // km/h beats km and °c beats c.
+    "symbols": {
+        "percent": ["por ciento"],
+        "currency": {
+            "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["yen", "yenes"]
+        },
+        "units": {
+            "km/h": ["kilómetro por hora", "kilómetros por hora"],
+            "m/s": ["metro por segundo", "metros por segundo"],
+            "°c": ["grado Celsius", "grados Celsius"],
+            "°f": ["grado Fahrenheit", "grados Fahrenheit"],
+            "°": ["grado", "grados"],
+            "m": ["metro", "metros"],
+            // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+            // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+            // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+            "l": ["litro", "litros"], "L": ["litro", "litros"], "ml": ["mililitro", "mililitros"],
+            "g": ["gramo", "gramos"], "t": ["tonelada", "toneladas"], "ha": ["hectárea", "hectáreas"],
+            // ⚠ SI CASE: ⟨kW⟩ ⟨W⟩ ⟨Hz⟩ are capitalised because watt and hertz are named after people.
+            // Declared exactly so, since a one-letter symbol resolves case-SENSITIVELY — a lower-case ⟨w⟩ is
+            // not a unit. The multi-letter ones still fold, so ⟨kw⟩/⟨KW⟩/⟨hz⟩ in shouty text still read.
+            "kW": ["kilovatio", "kilovatios"], "W": ["vatio", "vatios"], "Hz": ["hercio", "hercios"],
+            "gb": ["gigabyte", "gigabytes"], "mb": ["megabyte", "megabytes"],
+            "km": ["kilómetro", "kilómetros"], "cm": ["centímetro", "centímetros"],
+            "mm": ["milímetro", "milímetros"],
+            "kg": ["kilogramo", "kilogramos"], "mg": ["miligramo", "miligramos"]
+        },
+        "exponentWords": { "squared": ["cuadrado", "cuadrados"], "cubed": ["cúbico", "cúbicos"] },
+        // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`). ⚠ Cannot reuse
+        // `exponentWords`: that is the unit MODIFIER and this is the PREDICATE, and in Spanish they are
+        // different words (kilómetros cuadrados but veinte al cuadrado).
+        // ⚠ PROVENANCE, stated because it is weaker than most data here: STANDARD MATHEMATICAL REGISTER, not
+        // a corpus attestation. The power words are ×0 in this language's artifact, and the apparent hits
+        // for other languages were substring traps of the kind tools/normalization/attest.ts warns about.
+        "bareExponent": {
+            "squared": "{n} al cuadrado", "cubed": "{n} al cubo", "power": "{n} elevado a {e}",
+            "negative": "menos"
+        },
+        "magnitudes": ["millones", "millón"],
+        "magnitudeConnective": "de"
+    }
 }

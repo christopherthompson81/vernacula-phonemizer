@@ -122,47 +122,19 @@ function wordIpa(word: string): string {
 
 // symbol normalization — Spanish (shared by es and es-419; the words are variety-neutral).
 const SYMBOLS = makeSymbolNormalizer({
-    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
-    // `y` ×1141 in this corpus. The tier spaces it on both sides, because `B&B` is two
-    // initialisms and joining them would make one token.
-    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-    // One word, so `by` defaults to it; this language does not split dimension from product.
-    multiply: { times: "por" },
-    ampersand: "y",
-    percent: ["por ciento"],
-    currency: { "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["yen", "yenes"] },
-    // Longest keys match first (the builder sorts by length), so km/h beats km and °c beats c.
-    units: { "km/h": ["kilómetro por hora", "kilómetros por hora"], "m/s": ["metro por segundo", "metros por segundo"],
-        "°c": ["grado Celsius", "grados Celsius"], "°f": ["grado Fahrenheit", "grados Fahrenheit"],
-        "°": ["grado", "grados"],
-        m: ["metro", "metros"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
-        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
-        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
-        l: ["litro", "litros"], L: ["litro", "litros"], ml: ["mililitro", "mililitros"],
-        g: ["gramo", "gramos"], t: ["tonelada", "toneladas"], ha: ["hectárea", "hectáreas"],
-        // ⚠ SI CASE: ⟨kW⟩ ⟨W⟩ ⟨Hz⟩ are capitalised because watt and hertz are named after people. Declared
-        // exactly so, since #763 resolves a one-letter symbol case-SENSITIVELY — a lower-case ⟨w⟩ is not a
-        // unit. The multi-letter ones still fold, so ⟨kw⟩/⟨KW⟩/⟨hz⟩ in shouty or sloppy text still read.
-        kW: ["kilovatio", "kilovatios"], W: ["vatio", "vatios"], Hz: ["hercio", "hercios"],
-        gb: ["gigabyte", "gigabytes"], mb: ["megabyte", "megabytes"],
-        km: ["kilómetro", "kilómetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
-        kg: ["kilogramo", "kilogramos"], mg: ["miligramo", "miligramos"] },
-    exponentWords: { squared: ["cuadrado", "cuadrados"], cubed: ["cúbico", "cúbicos"] },
-    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
-    // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
-    // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
-    // they are different words (kilómetros cuadrados but veinte al cuadrado).
-    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
-    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
-    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
-    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
-    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
-    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n} al cuadrado", cubed: "{n} al cubo", power: "{n} elevado a {e}" , negative: "menos" },
-    magnitudes: ["millones", "millón"],
-    magnitudeConnective: "de", // cinco millones DE dólares
+    // ⚠ ONE SOURCE with normalize.ts, which applies the other seven signs in positions this tier does not
+    // reach. See spanish.jsonc `signWords` for the register argument behind `por` and the corpus count
+    // behind `y` (×1141). The tier spaces the ampersand on both sides, because `B&B` is two initialisms and
+    // joining them would make one token.
+    multiply: { times: MANIFEST.signWords.times },
+    ampersand: MANIFEST.signWords.ampersand,
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    bareExponent: MANIFEST.symbols.bareExponent,
+    magnitudes: MANIFEST.symbols.magnitudes,
+    magnitudeConnective: MANIFEST.symbols.magnitudeConnective, // cinco millones DE dólares
 });
 
 class SpanishPhonemizer implements Phonemizer {

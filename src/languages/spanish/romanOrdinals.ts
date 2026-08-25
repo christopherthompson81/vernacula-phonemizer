@@ -37,30 +37,25 @@
  * acquiring a wrong-gender ordinal.
  */
 import type { RomanPolicy } from "../../core/roman.ts";
+import { MANIFEST } from "./manifest.ts";
 
-const UNITS = ["", "primero", "segundo", "tercero", "cuarto", "quinto", "sexto", "séptimo", "octavo", "noveno"];
-const TEENS = [
-    "décimo", "undécimo", "duodécimo", "decimotercero", "decimocuarto",
-    "decimoquinto", "decimosexto", "decimoséptimo", "decimoctavo", "decimonoveno",
-];
-const TENS = ["", "", "vigésimo", "trigésimo", "cuadragésimo", "quincuagésimo",
-    "sexagésimo", "septuagésimo", "octogésimo", "nonagésimo"];
-const HUNDREDS = ["", "centésimo", "ducentésimo", "tricentésimo", "cuadringentésimo",
-    "quingentésimo", "sexcentésimo", "septingentésimo", "octingentésimo", "noningentésimo"];
+/** The masculine ordinal tables (spanish.jsonc `ordinals`). Shared with normalize.ts, which reads them for
+ *  the ordinal INDICATORS (1º / 1ª / 1er) and for fractions — one table, three callers. */
+const ORD = MANIFEST.ordinals;
 
 /** Spanish masculine ordinal, 1 … 1000; `undefined` above that (a Roman-numeral year reads as a cardinal).
  *  Exported so normalize.ts can reuse it for the ordinal INDICATORS (1º/1ª/1er) and for fractions. */
 export function spanishOrdinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n > 1000) return undefined;
-    if (n === 1000) return "milésimo";
-    if (n < 10) return UNITS[n];
-    if (n < 20) return TEENS[n - 10];
+    if (n === 1000) return ORD.thousandth;
+    if (n < 10) return ORD.units[n];
+    if (n < 20) return ORD.teens[n - 10];
     if (n < 100) {
         const t = Math.floor(n / 10), u = n % 10;
-        return u === 0 ? TENS[t] : `${TENS[t]} ${UNITS[u]}`;
+        return u === 0 ? ORD.tens[t] : `${ORD.tens[t]} ${ORD.units[u]}`;
     }
     const h = Math.floor(n / 100), r = n % 100;
-    return r === 0 ? HUNDREDS[h] : `${HUNDREDS[h]} ${spanishOrdinal(r)}`;
+    return r === 0 ? ORD.hundreds[h] : `${ORD.hundreds[h]} ${spanishOrdinal(r)}`;
 }
 
 /** This policy always supplies `ordinal`, which is optional on `RomanPolicy` — the intersection makes it
