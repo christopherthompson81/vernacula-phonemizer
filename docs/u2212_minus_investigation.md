@@ -373,3 +373,44 @@ sample understates a class:
 named candidate probed, both concepts absent from Wikidata and from every one of the eight wikis, and no
 gloss sentence anywhere in their own text. There is nothing to read the sign with that would not be invented.
 What changed is that the silence is now reported rather than exempted.
+
+## Run 9 — Yoruba, taken on its own — 2026-08-25 17:50
+
+`yọ kúrò` / `yọ` offered again as the Yoruba minus. Rather than re-probe the word, went to the seven
+articles the sign actually occurs in and read their PROSE. Three findings, and together they close Yoruba.
+
+**1. The corpus's own negative-temperature prose contradicts the subtraction verb.** Yoruba does write about
+sub-zero temperatures, and when it does it reaches for a LOCATIVE or a COMPARATIVE, never for `yọ`:
+
+```
+ìwọ̀n otútù tó wà ní ÌSÀLẸ̀ −50 °C            "temperatures that were BELOW −50 °C"
+iwọn otutu kekere ti o KERE JU ti −38 °C     "a low temperature of LESS THAN −38 °C"
+ìwọ̀n otútù tó LỌ SÍLẸ̀ ní oṣù January        "the temperature that WENT DOWN in January"
+```
+
+So `yọ` is not merely unattested in the slot — the slot is occupied, by a different construction. And `yọ`
+is a high-traffic verb with several senses (remove, emerge, sprout, be slippery); emitted before a numeral it
+forms a bare VP that reads as an imperative — *yọ mẹ́tàdínlógójì dígírì*, "remove thirty-eight degrees".
+
+**2. No Yoruba article glosses its own minus.** Pulled the full text of the four articles carrying negative
+temperatures (`Ìgbì ooru Antarctica ti ọdún 2024`, `Ìgbì òtútù ilẹ̀ Yúróòpù ti ọdún 2006`, `Ìkún omi Zadar ti
+ọdun 2017`, `Oju-ọjọ Milwaukee`). Every temperature is the DIGIT form — `−47.6 °C (−53.7 °F)`, `−39.8 °C`,
+`−65 °C`, `-26 °F (-32 °C)`. Not one is spelled out.
+
+**3. ⚠ AND THE COMPOSABLE PHRASE IS A HOMOGRAPH.** Both halves of "below zero" are well sourced here —
+`ìsàlẹ̀` "below" in a temperature sentence above, and `òdo` "zero" glossed against the digit in the corpus's
+own scoreline `góòlù mẹ́rin sí òdo (4–0)`. But the only attestation of the two together is:
+
+```
+… tó tó ìdá méjì nínú mẹ́ta sí ÌSÀLẸ̀ ODO Niger      "…two-thirds of the way DOWN the river Niger"
+```
+
+`odo` is RIVER and `òdo` is ZERO, distinguished only by tone marks that half of running Yoruba omits. A
+composed *ìsàlẹ̀ òdo* would be heard as **"downriver"** — the Zhuang `gemj`/"cheek" failure again, in the
+language this fleet ports to C#.
+
+**What is actually missing for Yoruba is the FRAME, not the vocabulary.** Both content words are sourced.
+What no route here can supply is how a speaker joins them in front of a figure — Setswana's answer turned out
+to be a postposed relative clause (*dikirii tse di kwa tlase ga lefela di le thataro ntlha botlhano*), which
+is not something the two words predict. The answerable question is not "what is the Yoruba for minus" but
+"how does a Yoruba speaker say `−47.6 °C` aloud, as a whole phrase".
