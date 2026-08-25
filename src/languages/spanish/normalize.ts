@@ -32,47 +32,27 @@ import { spanishOrdinal } from "./romanOrdinals.ts";
 /** Space characters used as digit-group separators: regular, NBSP, narrow NBSP, thin. */
 const GROUP_SPACE = "    ";
 
-const MONTHS = "enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre";
+const MONTHS = MANIFEST.months.join("|");
 
-/**
- * Dotted abbreviations → the spoken words. Each was checked against its corpus context. `no.` is
- * deliberately absent from this table and handled separately, because bare "no" is one of the commonest
- * words in Spanish and only `no.` followed by a DIGIT is the number sign.
- */
-const DOTTED_ABBREV: Readonly<Record<string, string>> = {
-    sr: "señor", sra: "señora", srta: "señorita", sres: "señores",
-    dr: "doctor", dra: "doctora", lic: "licenciado", ing: "ingeniero", prof: "profesor",
-    d: "don", "dña": "doña", dna: "doña", ud: "usted", uds: "ustedes", vd: "usted", vds: "ustedes",
-    etc: "etcétera", "pág": "página", "págs": "páginas", pag: "página",
-    "núm": "número", num: "número", cap: "capítulo", art: "artículo", vol: "volumen",
-    av: "avenida", avda: "avenida", "cía": "compañía", cia: "compañía",
-    sto: "santo", sta: "santa", vs: "versus", aprox: "aproximadamente", dpto: "departamento",
-};
+/** Dotted abbreviations → the spoken words (spanish.jsonc `dottedAbbrev`). `no.` is deliberately absent
+ *  there and handled separately — bare "no" is one of the commonest words in Spanish, and only `no.`
+ *  followed by a DIGIT is the number sign. */
+const DOTTED_ABBREV = MANIFEST.dottedAbbrev;
 
 /** Longest first, so `págs` is not matched as `pág` plus a stray s. */
-const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+// ⚠ ONE SOURCE with the symbol tier in spanish.ts, which applies ⟨×⟩ and ⟨&⟩ in the positions this file
+// does not reach.
+const SIGN = MANIFEST.signWords;
 
-/** Spanish letter names, each verified through this engine: be=[be], ce=[se], efe=[ˈefe], hache=[ˈat͡ʃe],
- *  cu=[ku], equis=[ˈekis], zeta=[ˈseta]. `w` and `x`/`y` are the pan-American names (uve, doble uve, ye). */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", b: "be", c: "ce", d: "de", e: "e", f: "efe", g: "ge", h: "hache", i: "i",
-    j: "jota", k: "ka", l: "ele", m: "eme", n: "ene", "ñ": "eñe", o: "o", p: "pe", q: "cu",
-    r: "erre", s: "ese", t: "te", u: "u", v: "uve", w: "doble uve", x: "equis", y: "ye", z: "zeta",
-};
+const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
 /** Spanish phonotactics, for the OOV rule in core/initialisms.ts. Spanish syllable structure is strict —
  *  no word begins with two stops, and codas are limited — so the illegal-cluster tests carry real weight
  *  here: `CD` [kð] and `ADN` [aðn] were both unpronounceable output. */
 export const isUnreadableSpanish = makeUnreadableTest({
-    vowels: /[aeiouáéíóúü]/u,
-    legalOnsets: new Set([
-        "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "tl",
-        "ch", "ll", "rr", "qu", "gu", "ps", "gn", "mn",
-    ]),
-    legalCodas: new Set([
-        "ch", "ll", "rr", "ns", "rs", "ls", "ds", "bs", "st", "rt", "rd", "rn", "rl", "rm",
-        "lt", "ld", "ln", "nt", "nd", "nz", "nc", "ng", "rz", "rc", "rg", "sc", "sm", "cs", "ps", "ns",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
 
 /** LEXICAL: acronyms spelled out although the OOV rule would leave them alone. Authored in spanish.jsonc
@@ -81,7 +61,7 @@ const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
 
 const INITIALISMS = (isRecorded: (lower: string) => boolean) =>
     makeInitialismNormalizer({
-        letterName: (l) => LETTER_NAME[l],
+        letterName: (l) => MANIFEST.letterNames[l],
         acronymLetters: ACRONYM_LETTERS,
         isRecorded,
         isUnreadable: isUnreadableSpanish,
@@ -102,7 +82,7 @@ function feminineOrdinal(masc: string): string {
 /** Non-negative integer → words with the final *uno* feminized (hora and minuto agreement: la una, las
  *  veintiuna). */
 function feminineCardinal(n: number): string {
-    return numberToWords(n).replace(/uno$/u, "una");
+    return numberToWords(n).replace(new RegExp(`${MANIFEST.numbers.ones[1]!}$`, "u"), MANIFEST.feminineOne);
 }
 
 /** An hour/minute pair → "las once", "la una quince". `hora` is feminine, so 1 and 21 take *una*. */
@@ -111,15 +91,16 @@ function timeWords(h: number, min: number): string {
     return min === 0 ? head : `${head} ${feminineCardinal(min)}`;
 }
 
-/** Fraction denominators with a suppletive name; the rest take the ordinal (1/5 = un quinto). */
-const DENOMINATOR: Readonly<Record<number, string>> = { 2: "medio", 3: "tercio" };
+/** Fraction denominators with a suppletive name (spanish.jsonc `fractions`); the rest take the ordinal
+ *  (1/5 = un quinto). */
+const DENOMINATOR = MANIFEST.fractions.denominators;
 
 function fractionWords(num: number, den: number): string | undefined {
     if (den < 2 || num < 1) return undefined;
-    const base = DENOMINATOR[den] ?? spanishOrdinal(den);
+    const base = DENOMINATOR[String(den)] ?? spanishOrdinal(den);
     if (base === undefined) return undefined;
     // The numerator apocopates before the fraction noun: "un quinto", not "uno quinto".
-    return `${num === 1 ? "un" : numberToWords(num)} ${num > 1 ? `${base}s` : base}`;
+    return `${num === 1 ? MANIFEST.fractions.numeratorOne : numberToWords(num)} ${num > 1 ? `${base}s` : base}`;
 }
 
 export interface SpanishNormalizeOptions {
@@ -162,23 +143,26 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
 
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first. Usually
     //    written with a space in the corpus ("356 a. C.", 9 of 11 occurrences).
-    s = s.replace(/\ba\.\s?de\s?C\.|\ba\.\s?C\./giu, "antes de Cristo");
-    s = s.replace(/\bd\.\s?de\s?C\.|\bd\.\s?C\./giu, "después de Cristo");
+    s = s.replace(/\ba\.\s?de\s?C\.|\ba\.\s?C\./giu, MANIFEST.eraMarkers.beforeChrist);
+    s = s.replace(/\bd\.\s?de\s?C\.|\bd\.\s?C\./giu, MANIFEST.eraMarkers.afterChrist);
 
     // 2) EE. UU. — the most frequent abbreviation in the corpus, and it expands to WORDS. Claimed before
     //    the generic rule, which would otherwise see two separate abbreviations and leave two pauses.
-    s = s.replace(/\bEE\.\s?UU\.?/gu, "Estados Unidos");
-    s = s.replace(/\bee\.\s?uu\.?/gu, "Estados Unidos");
+    s = s.replace(/\bEE\.\s?UU\.?/gu, MANIFEST.unitedStates);
+    s = s.replace(/\bee\.\s?uu\.?/gu, MANIFEST.unitedStates);
 
     // 2b) a. m. / p. m. — read as the LETTER NAMES in Spanish ([a ˈeme], [pe ˈeme]), not expanded to the
     //     Latin. Handled here rather than in the generic table because the interior dots would otherwise
     //     survive as two phrase breaks ("a las 10:08 p. m." kept both).
-    s = s.replace(/\b([ap])\.\s?m\./giu, (_m, ap: string) => (ap.toLowerCase() === "a" ? "a eme" : "pe eme"));
+    //     ⚠ COMPOSED FROM `letterNames`, not held as two more literals: the reading IS ⟨a⟩/⟨p⟩ followed by
+    //     ⟨m⟩, said as letter names, so a change to either name must reach here.
+    s = s.replace(/\b([ap])\.\s?m\./giu, (_m, ap: string) =>
+        `${MANIFEST.letterNames[ap.toLowerCase()]!} ${MANIFEST.letterNames["m"]!}`);
 
     // 3) NÚMERO. `no.` only counts before a digit — bare "no" is one of the commonest Spanish words.
     //    Spanish writes it several ways, and `n.º` — n + period + the ORDINAL INDICATOR — is the form that
     //    actually occurs in the corpus. A single-character class missed it and left a bare º in the output.
-    s = s.replace(/\b(?:n\.º|nº|n°|n\.|no\.)\s?(?=\d)/giu, "número ");
+    s = s.replace(/\b(?:n\.º|nº|n°|n\.|no\.)\s?(?=\d)/giu, `${MANIFEST.numberSign} `);
 
     // 4) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues, so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
@@ -207,10 +191,10 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " más menos ");
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 más $2");
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1más $2");
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1menos $2");
+    s = s.replace(/±/gu, ` ${SIGN.plusMinus} `);
+    s = s.replace(/(\S)\+\s?(\d)/gu, `$1 ${SIGN.plus} $2`);
+    s = s.replace(/(^|\s)\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
+    s = s.replace(/(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
 
     // 6b) RELATIONAL AND DIVISION SIGNS. ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
     //     genuinely absent from the corpus — every `<` in the fleet is an HTML tag `stripMarkup` removes — but
@@ -236,10 +220,10 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     //
     //     The copula is dropped (`igual a`, not `es igual a`) because the sign occurs in running text where the
     //     verb is already present or absent for its own reasons — the same call `en` makes with `equals`.
-    s = s.replace(/\s?=\s?/gu, " igual a ");
-    s = s.replace(/\s?<\s?/gu, " menor que ");
-    s = s.replace(/\s?>\s?/gu, " mayor que ");
-    s = s.replace(/\s?÷\s?/gu, " dividido por ");
+    s = s.replace(/\s?=\s?/gu, ` ${SIGN.equals} `);
+    s = s.replace(/\s?<\s?/gu, ` ${SIGN.lessThan} `);
+    s = s.replace(/\s?>\s?/gu, ` ${SIGN.greaterThan} `);
+    s = s.replace(/\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
 
     // 7) FRACTIONS, guarded against a date and a unit ratio by requiring digits both sides.
     s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) =>
@@ -252,7 +236,10 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
 
     // 9) DATES. The day is a cardinal, except the first of the month in American usage (see the option).
     s = s.replace(new RegExp(`\\b1\\.?º?\\s+de\\s+(${MONTHS})\\b`, "giu"),
-        (m0, mon: string) => (americas ? `primero de ${mon}` : m0.replace(/1\.?º?/u, "uno")));
+        (m0, mon: string) =>
+            (americas
+                ? `${MANIFEST.ordinals.units[1]!} de ${mon}`
+                : m0.replace(/1\.?º?/u, MANIFEST.numbers.ones[1]!)));
 
     return s;
 }

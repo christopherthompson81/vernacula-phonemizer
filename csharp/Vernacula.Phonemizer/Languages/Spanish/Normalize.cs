@@ -18,48 +18,27 @@ public static class Normalize
     /** Space characters used as digit-group separators: regular, NBSP, narrow NBSP, thin. */
     private const string GROUP_SPACE = "    ";
 
-    private const string MONTHS = "enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre";
+    private static SpanishManifest DEF => Manifest.MANIFEST;
+    private static readonly string MONTHS = string.Join("|", DEF.Months);
 
     /** Dotted abbreviations → the spoken words. */
-    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["sr"] = "señor", ["sra"] = "señora", ["srta"] = "señorita", ["sres"] = "señores",
-        ["dr"] = "doctor", ["dra"] = "doctora", ["lic"] = "licenciado", ["ing"] = "ingeniero", ["prof"] = "profesor",
-        ["d"] = "don", ["dña"] = "doña", ["dna"] = "doña", ["ud"] = "usted", ["uds"] = "ustedes",
-        ["vd"] = "usted", ["vds"] = "ustedes",
-        ["etc"] = "etcétera", ["pág"] = "página", ["págs"] = "páginas", ["pag"] = "página",
-        ["núm"] = "número", ["num"] = "número", ["cap"] = "capítulo", ["art"] = "artículo", ["vol"] = "volumen",
-        ["av"] = "avenida", ["avda"] = "avenida", ["cía"] = "compañía", ["cia"] = "compañía",
-        ["sto"] = "santo", ["sta"] = "santa", ["vs"] = "versus", ["aprox"] = "aproximadamente", ["dpto"] = "departamento",
-    };
+    /** Dotted abbreviations → the spoken words (spanish.jsonc `dottedAbbrev`). `no.` is deliberately absent
+     *  there and handled separately — bare "no" is one of the commonest words in Spanish, and only `no.`
+     *  followed by a DIGIT is the number sign. */
+    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = DEF.DottedAbbrev;
 
-    /** Longest first, so `págs` is not matched as `pág` plus a stray s. */
+    // ⚠ ONE SOURCE with the symbol tier in Spanish.cs, which applies ⟨×⟩ and ⟨&⟩ in the positions this file
+    // does not reach.
+    private static SignWords SIGN => DEF.SignWords;
+
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
     /** Spanish letter names, each verified through this engine. `w`/`x`/`y` are the pan-American names. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "a", ["b"] = "be", ["c"] = "ce", ["d"] = "de", ["e"] = "e", ["f"] = "efe", ["g"] = "ge",
-        ["h"] = "hache", ["i"] = "i", ["j"] = "jota", ["k"] = "ka", ["l"] = "ele", ["m"] = "eme", ["n"] = "ene",
-        ["ñ"] = "eñe", ["o"] = "o", ["p"] = "pe", ["q"] = "cu", ["r"] = "erre", ["s"] = "ese", ["t"] = "te",
-        ["u"] = "u", ["v"] = "uve", ["w"] = "doble uve", ["x"] = "equis", ["y"] = "ye", ["z"] = "zeta",
-    };
-
-    /** Spanish phonotactics, for the OOV rule in core/initialisms.ts. Spanish syllable structure is strict —
-     *  `CD` [kð] and `ADN` [aðn] were both unpronounceable output. */
     public static readonly Func<string, bool> IsUnreadableSpanish = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiouáéíóúü]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "tl",
-            "ch", "ll", "rr", "qu", "gu", "ps", "gn", "mn",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ch", "ll", "rr", "ns", "rs", "ls", "ds", "bs", "st", "rt", "rd", "rn", "rl", "rm",
-            "lt", "ld", "ln", "nt", "nd", "nz", "nc", "ng", "rz", "rc", "rg", "sc", "sm", "cs", "ps",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{DEF.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(DEF.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(DEF.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     /** LEXICAL: acronyms spelled out although the OOV rule would leave them alone. */
@@ -68,7 +47,7 @@ public static class Normalize
 
     private static readonly Func<string, string> InitialismNormalizer = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
-        LetterName = l => LETTER_NAME.TryGetValue(l, out var v) ? v : null,
+        LetterName = l => DEF.LetterNames.TryGetValue(l, out var v) ? v : null,
         AcronymLetters = ACRONYM_LETTERS,
         IsRecorded = _ => false,
         IsUnreadable = w => IsUnreadableSpanish(w),
@@ -84,10 +63,10 @@ public static class Normalize
     private static string FeminineOrdinal(string masc) =>
         string.Join(" ", masc.Split(' ').Select(w => FINAL_O.Replace(w, "a")));
 
-    private static readonly JsRe FINAL_UNO = JsRegex.Compile("uno$", "u");
+    private static readonly JsRe FINAL_UNO = JsRegex.Compile($"{Manifest.MANIFEST.Numbers.Ones[1]}$", "u");
 
     /** Non-negative integer → words with the final *uno* feminized (hora and minuto agreement). */
-    private static string FeminineCardinal(double n) => FINAL_UNO.Replace(Numbers.NumberToWords(n), "una");
+    private static string FeminineCardinal(double n) => FINAL_UNO.Replace(Numbers.NumberToWords(n), DEF.FeminineOne);
 
     /** An hour/minute pair → "las once", "la una quince". `hora` is feminine, so 1 and 21 take *una*. */
     private static string TimeWords(double h, double min)
@@ -96,19 +75,17 @@ public static class Normalize
         return min == 0 ? head : $"{head} {FeminineCardinal(min)}";
     }
 
-    /** Fraction denominators with a suppletive name; the rest take the ordinal (1/5 = un quinto). */
-    private static readonly IReadOnlyDictionary<int, string> DENOMINATOR = new Dictionary<int, string>
-    {
-        [2] = "medio", [3] = "tercio",
-    };
+    /** Fraction denominators with a suppletive name (spanish.jsonc `fractions`); the rest take the ordinal
+     *  (1/5 = un quinto). */
+    private static readonly IReadOnlyDictionary<string, string> DENOMINATOR = DEF.Fractions.Denominators;
 
     private static string? FractionWords(double num, double den)
     {
         if (den < 2 || num < 1) return null;
-        var bas = DENOMINATOR.TryGetValue((int)den, out var d) ? d
+        var bas = DENOMINATOR.TryGetValue(Js.NumberToString(den), out var d) ? d
             : double.IsInteger(den) && den >= 1 && den <= 1000 ? RomanOrdinals.SpanishOrdinal((int)den) : null;
         if (bas is null) return null;
-        return $"{(num == 1 ? "un" : Numbers.NumberToWords(num))} {(num > 1 ? $"{bas}s" : bas)}";
+        return $"{(num == 1 ? DEF.Fractions.NumeratorOne : Numbers.NumberToWords(num))} {(num > 1 ? $"{bas}s" : bas)}";
     }
 
     private static readonly JsRe SPACE_GROUP_RE = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
@@ -153,15 +130,18 @@ public static class Normalize
 
         // ⚠ ERA MARKERS before the generic abbreviation rule, or the bare `a.` is claimed first; then
         //   `EE. UU.`, before the generic rule too, or it splits into two abbreviations and two pauses.
-        s = ERA_BC.Replace(s, "antes de Cristo");
-        s = ERA_AD.Replace(s, "después de Cristo");
+        s = ERA_BC.Replace(s, DEF.EraMarkers.BeforeChrist);
+        s = ERA_AD.Replace(s, DEF.EraMarkers.AfterChrist);
 
-        s = EEUU_UPPER.Replace(s, "Estados Unidos");
-        s = EEUU_LOWER.Replace(s, "Estados Unidos");
+        s = EEUU_UPPER.Replace(s, DEF.UnitedStates);
+        s = EEUU_LOWER.Replace(s, DEF.UnitedStates);
 
-        s = AM_PM.Replace(s, m => m.Groups[1].Value.ToLowerInvariant() == "a" ? "a eme" : "pe eme");
+        // ⚠ COMPOSED FROM `LetterNames`, not held as two more literals: the reading IS ⟨a⟩/⟨p⟩ followed by ⟨m⟩,
+        // said as letter names, so a change to either name must reach here.
+        s = AM_PM.Replace(s, m =>
+            $"{DEF.LetterNames[m.Groups[1].Value.ToLowerInvariant()]} {DEF.LetterNames["m"]}");
 
-        s = NUMERO_SIGN.Replace(s, "número ");
+        s = NUMERO_SIGN.Replace(s, $"{DEF.NumberSign} ");
 
         s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
         s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
@@ -176,15 +156,15 @@ public static class Normalize
             return masc;
         });
 
-        s = PLUS_MINUS.Replace(s, " más menos ");
-        s = PLUS_ATTACHED.Replace(s, "$1 más $2");
-        s = PLUS_LEADING.Replace(s, "$1más $2");
-        s = MINUS.Replace(s, "$1menos $2");
+        s = PLUS_MINUS.Replace(s, $" {SIGN.PlusMinus} ");
+        s = PLUS_ATTACHED.Replace(s, $"$1 {SIGN.Plus} $2");
+        s = PLUS_LEADING.Replace(s, $"$1{SIGN.Plus} $2");
+        s = MINUS.Replace(s, $"$1{SIGN.Minus} $2");
 
-        s = EQUALS.Replace(s, " igual a ");
-        s = LESS_THAN.Replace(s, " menor que ");
-        s = GREATER_THAN.Replace(s, " mayor que ");
-        s = DIVIDE.Replace(s, " dividido por ");
+        s = EQUALS.Replace(s, $" {SIGN.Equals} ");
+        s = LESS_THAN.Replace(s, $" {SIGN.LessThan} ");
+        s = GREATER_THAN.Replace(s, $" {SIGN.GreaterThan} ");
+        s = DIVIDE.Replace(s, $" {SIGN.DividedBy} ");
 
         s = FRACTION.Replace(s, m =>
             FractionWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);
@@ -192,7 +172,7 @@ public static class Normalize
         s = CLOCK.Replace(s, m => TimeWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
 
         s = FIRST_OF_MONTH.Replace(s, m =>
-            americas ? $"primero de {m.Groups[1].Value}" : ONE_INDICATOR.Replace(m.Value, "uno"));
+            americas ? $"{DEF.Ordinals.Units[1]} de {m.Groups[1].Value}" : ONE_INDICATOR.Replace(m.Value, DEF.Numbers.Ones[1]));
 
         return s;
     }

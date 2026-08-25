@@ -9,6 +9,7 @@ namespace Vernacula.Phonemizer.Languages.Spanish;
 
 public sealed class SpanishPhonemizer : ILanguage
 {
+    private static SpanishManifest DEF => Manifest.MANIFEST;
     private static readonly IReadOnlySet<string> NASALS = new HashSet<string>(Manifest.MANIFEST.Nasals, StringComparer.Ordinal);
     private static IReadOnlyDictionary<string, string> STOP_TO_FRIC => Manifest.MANIFEST.Spirantize;
     private static readonly JsRe FINAL_VOWEL = JsRegex.Compile("[aeiouáéíóú]$", "i");
@@ -115,45 +116,19 @@ public sealed class SpanishPhonemizer : ILanguage
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "por" },
-        Ampersand = "y",
-        Percent = new[] { "por ciento" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["€"] = new[] { "euro", "euros" }, ["$"] = new[] { "dólar", "dólares" },
-            ["£"] = new[] { "libra", "libras" }, ["¥"] = new[] { "yen", "yenes" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km/h"] = new[] { "kilómetro por hora", "kilómetros por hora" },
-            ["m/s"] = new[] { "metro por segundo", "metros por segundo" },
-            ["°c"] = new[] { "grado Celsius", "grados Celsius" },
-            ["°f"] = new[] { "grado Fahrenheit", "grados Fahrenheit" },
-            ["°"] = new[] { "grado", "grados" },
-            ["m"] = new[] { "metro", "metros" },
-            // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre — the one exception to the one-letter case rule.
-            ["l"] = new[] { "litro", "litros" }, ["L"] = new[] { "litro", "litros" },
-            ["ml"] = new[] { "mililitro", "mililitros" },
-            ["g"] = new[] { "gramo", "gramos" }, ["t"] = new[] { "tonelada", "toneladas" },
-            ["ha"] = new[] { "hectárea", "hectáreas" },
-            ["kW"] = new[] { "kilovatio", "kilovatios" }, ["W"] = new[] { "vatio", "vatios" },
-            ["Hz"] = new[] { "hercio", "hercios" },
-            ["gb"] = new[] { "gigabyte", "gigabytes" }, ["mb"] = new[] { "megabyte", "megabytes" },
-            ["km"] = new[] { "kilómetro", "kilómetros" }, ["cm"] = new[] { "centímetro", "centímetros" },
-            ["mm"] = new[] { "milímetro", "milímetros" },
-            ["kg"] = new[] { "kilogramo", "kilogramos" }, ["mg"] = new[] { "miligramo", "miligramos" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "cuadrado", "cuadrados" },
-            Cubed = new[] { "cúbico", "cúbicos" },
-        },
-        BareExponent = new BareExponentDef
-        {
-            Squared = "{n} al cuadrado", Cubed = "{n} al cubo", Power = "{n} elevado a {e}", Negative = "menos",
-        },
-        Magnitudes = new[] { "millones", "millón" },
-        MagnitudeConnective = "de", // cinco millones DE dólares
+        // ⚠ ONE SOURCE with Normalize.cs, which applies the other seven signs in positions this tier does not
+        // reach. See spanish.jsonc `signWords` for the register argument behind `por` and the corpus count
+        // behind `y` (×1141). The tier spaces the ampersand on both sides, because `B&B` is two initialisms
+        // and joining them would make one token.
+        Multiply = new MultiplyDef { Times = DEF.SignWords.Times },
+        Ampersand = DEF.SignWords.Ampersand,
+        Percent = DEF.Symbols.Percent,
+        Currency = DEF.Symbols.Currency,
+        Units = DEF.Symbols.Units,
+        ExponentWords = DEF.Symbols.ExponentWords,
+        BareExponent = DEF.Symbols.BareExponent,
+        Magnitudes = DEF.Symbols.Magnitudes,
+        MagnitudeConnective = DEF.Symbols.MagnitudeConnective, // cinco millones DE dólares
     });
 
     private readonly bool _americas;
