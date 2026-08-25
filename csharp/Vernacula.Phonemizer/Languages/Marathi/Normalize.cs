@@ -91,7 +91,7 @@ public static class Normalize
     // ⚠ U+2212 MINUS SIGN — NOT the ASCII hyphen, which stays refused (a Devanagari compound or a
     // designation, "चंद्रयान -1"). U+2212 carries none of that ambiguity and was simply DROPPED, so
     // `−२५°C` lost its sign. See src/languages/marathi/normalize.ts.
-    private static readonly JsRe MINUS_SIGN = JsRegex.Compile("\\u2212\\s?(?=\\d)", "gu");
+    private static readonly JsRe MINUS_SIGN = JsRegex.Compile("(?<![\\p{L}\\p{M}\\p{Nd}])\\u2212\\s?(?=\\d)", "gu");
     private static readonly JsRe TILDE = JsRegex.Compile("~\\s?(?=\\d)", "gu");
     private static readonly JsRe PLUSMINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe EQUALS = JsRegex.Compile("\\s?=\\s?", "gu");

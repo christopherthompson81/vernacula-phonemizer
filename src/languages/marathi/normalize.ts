@@ -332,7 +332,15 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     0 times in the 200-row golden, so nothing measures this rule — it fills a gap rather than
         //     fixing an observed defect, and the sabotage count for `minus` is 0 against any corpus probe.
         s = s.replace(/\+\s?(?=\d)/gu, ` ${SIGN.plus} `);
-        s = s.replace(/−\s?(?=\d)/gu, ` ${SIGN.minus} `);  // U+2212 MINUS SIGN — NOT the ASCII hyphen
+        //     ⚠ LEADING POSITION ONLY, and the left guard is the correction rather than the rule. A first
+        //     version fired on any U+2212 before a digit, which read `१८३८−१९१७` as "1838 minus 1917".
+        //     Reading the 279 U+2212 instances across the mined corpora rather than counting them: 223 are
+        //     a LEADING sign (−173 °C, −12.71 м) and the digit−digit ones are mostly RANGES (a lifespan
+        //     `1838−1917`, a page span `41−49`) or scientific notation (`1.602×10−19`). So a digit to the
+        //     left is exactly the case that must NOT be claimed — the same shape as this file's own
+        //     refusal of the ASCII hyphen, for the same reason. `५−३` goes back to silence, which is the
+        //     right answer when the alternative is a confident misreading.
+        s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])−\s?(?=\d)/gu, ` ${SIGN.minus} `);  // U+2212 MINUS SIGN
         s = s.replace(/~\s?(?=\d)/gu, ` ${SIGN.approximately} `);
 
         // 15b) THE RELATIONAL AND DIVISION SIGNS, and ±. ⚠ All sourced from running text rather than from
