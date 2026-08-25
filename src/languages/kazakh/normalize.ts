@@ -258,7 +258,9 @@ export function normalizeKazakh(input: string): string {
             }
             return base;
         });
-    s = s.replace(/(^|[\s(])-(\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?/giu,
+    // ⚠ U+2212 HERE TOO — the degree arm runs BEFORE the general sign rule and consumes the number, so a
+    // class fixed only at the end would leave `−30 °C` reading as a bare thirty. Same reasoning as there.
+    s = s.replace(/(^|[\s(])[-−](\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?/giu,
         (_m, lead: string, n: string, sfx: string) => {
             const base = `${lead}минус ${orthographic(Number(n))} градус Цельсий`;
             if (sfx !== undefined && sfx !== "") {
@@ -383,7 +385,14 @@ export function normalizeKazakh(input: string): string {
     //    OPERATION names, which is what ± needs: it marks a TOLERANCE, not an addition.
     s = s.replace(/±/gu, " плюс минус ");
     s = s.replace(/(?<=[A-Z])\s?\+\s?(\d)/gu, " плюс $1");
-    s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "минус $1");
+    // ⚠ U+2212 IS IN THE CLASS AND THE ASCII HYPHEN'S GUARDS ARE UNCHANGED. The MINUS SIGN is a distinct
+    // code point whose only Unicode meaning is the arithmetic operator, and it is not on any keyboard —
+    // whoever typed it meant a minus. It is not attested in this language's mined corpus, which is why an
+    // earlier sweep declined it as invention; the character's identity is the evidence, not the corpus, and
+    // dropping a sign INVERTS the value it belongs to. The hyphen is the ambiguous one and keeps every
+    // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
+    // still refused by the lookbehind.
+    s = s.replace(/(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "минус $1");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 есе $2");
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 тең $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 аз $2");

@@ -67,7 +67,11 @@ public static class Normalize
     private static readonly JsRe RATE_MBIT = JsRegex.Compile("(?<!\\d)(\\d+)\\s?Mbit\\/s(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe UNIT_BEFORE_NUM = JsRegex.Compile("(?<![\\p{L}\\p{M}\\p{Nd}])(km|kg|mm|cm)(?=\\s\\p{Nd})", "gu");
     private static readonly JsRe PLUS = JsRegex.Compile("\\+\\s?(?=\\d)", "gu");
-    private static readonly JsRe MINUS = JsRegex.Compile("(?<![\\p{L}\\p{Nd}])-(\\d+)(?!\\s*[-\\d])", "gu");
+    // ⚠ U+2212 IS IN THE CLASS AND THE HYPHEN'S GUARDS ARE UNCHANGED — see the TS module. The MINUS SIGN's
+    // only Unicode meaning is the arithmetic operator and no keyboard types it, so it is read on the
+    // character's identity rather than on corpus attestation; leading position only, so a range and a
+    // negative exponent are still refused by the lookbehind.
+    private static readonly JsRe MINUS = JsRegex.Compile("(?<![\\p{L}\\p{Nd}])[-\u2212](\\d+)(?!\\s*[-\\d])", "gu");
     private static readonly JsRe AMP_INITIALS = JsRegex.Compile("(?<![\\p{L}\\p{M}])(\\p{Lu})&(\\p{Lu})(s?)(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe AMP_SPACED = JsRegex.Compile("\\s&\\s", "gu");
     private static readonly JsRe EQUALS = JsRegex.Compile("(\\S)\\s*=\\s*(\\S)", "gu");
