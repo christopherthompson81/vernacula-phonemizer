@@ -18,8 +18,76 @@
     {
         "language": "mt",
         "wiki": "mt.wikipedia.org",
-        "tier": "wikipedia",
+        "tier": "wikipedia (register-restricted)",
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // `--context` set to exactly this string.
+        "context": "temperatura gradi",
         "findings": [
+        {
+                "word": "nieqes",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "inqas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 105,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…li jinħaraq jipproduċi l-karbonju. L-elju jinħaraq f'ħafna inqas ħin mill-idroġenu, għalhekk jiġi kkonsmat f'perijodu iqsar.…",
+                "…qed jgħodd il-gżira ewlenija, mhux it-Tasmania). Il-ħames l-inqas post fl-Oċeanja jinsab fil-Lag Eyre (Eyre Lake), li jilħaq…",
+                "…-eqdem, l-aktar ċatt, u l-iktar kontinent abitat niexef, bl-inqas ħamrija fertili. Huwa pajjiż megadiversi, u d-daqs tiegħu j…",
+                "…li jiġbru b'ekonomiji u soċjetajiet diversi, li jkopru mill-inqas 250 grupp lingwistiku differenti. L-istimi tal-popolazzjoni…",
+                "…tazzjoni annwali medja tagħha fuq iż-żona kontinentali hija inqas minn 500 mm. Id-densità tal-popolazzjoni hija ta' 3.4 abita…",
+                "…ni moderati kostali huma endemiċi. L-Awstralja għandha mill-inqas 755 speċi ta' rettili, aktar minn kwalunkwe pajjiż ieħor fi…"
+            ]
+            },
+        {
+                "word": "taħt iż-żero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…oll bejn Frar u Marzu, it-temperatura jaf tinżel ftit gradi taħt iż-żero. Fis-sajf ikun hemm ħafna jiem b'35-36 °C u xi drabi anke j…",
+                "…L-inqas temperatura rreġistrata fil-pajjiż kienet ta' 38 °C taħt iż-żero (−36.4 °F) fit-22 ta' Jannar 1918, f'Grímsstaðir u f'Möðrud…",
+                "…iss permezz ta 'ftit perjodi iqsar b'temperaturi tas-silġ u taħt iż-żero; il-ħarifa tista' tinbidel fir-rebbiegħa hemmhekk, mingħajr…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ħat-territorju tal-Marka Babenberg. Fl-1156, il-Privilegium Minus elevat lill-Awstrija għall-istatus ta' dukat. Fl-1192, il-B…"
+            ]
+            },
+        {
+                "word": "naqqas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…1, kunflitt ta' intensità għolja miġġieled fuq front wiesa' naqqas il-kontroll tal-Kroazja għal madwar żewġ terzi tat-territor…",
+                "…bikamerali tagħha għall-forma unikamerali storika tagħha u naqqas is-setgħat presidenzjali. Il-Kroazja ngħaqdet mas-Sħubija g…",
+                "…vić, impjega taħlita ta' intimidazzjoni u manuvri politiċi, naqqas drastikament l-istatus awtonomu speċjali tal-Kosovo fi ħdan…",
+                "…ment tat-territorji li ffurmaw il-Viċi-realtà tal-Perù; Dan naqqas il-poter, il-prominenza u l-importanza ta' Lima bħala kapit…",
+                "…Sa mit-tmiem tal-kriżi fil-Perù fl-2000, il-gvern federali naqqas b'mod sinifikanti l-infiq tad-difiża annwali. Fil-baġit 201…",
+                "…l-abbozz tagħhom permezz ta' servizz alternattiv. It-Tajwan naqqas il-konskrizzjoni għal erba' xhur fl-2013, iżda se jespandi…"
+            ]
+            },
         {
                 "word": "kilometru fis-sekonda",
                 "verdict": "attested",
@@ -491,33 +559,6 @@
                 "…azju bejn kull grupp ta 'tliet ċifri, kif muri hawn fuq. Il-punt deċimali huwa miktub bħala perjodu (punt) jew virgola, skont il-pref…",
                 "…tess mod ippronunzjat bħala Punto jew Virgula. Ċifri wara l-punt deċimali huma sempliċement elenkati: tre punto un cuatro un ses – 3.…",
                 "…ex jisseparaw l-oġġetti ta' lista. Meta tikteb in-numri, il-punt deċimali jista 'jinkiteb jew bħala virgola jew punt (tikka). Gruppi…"
-            ]
-            },
-        {
-                "word": "nieqes",
-                "verdict": "attested",
-                "bounded": true,
-                "tokenHits": 1,
-                "articles": 1,
-                "substringOnly": 0,
-                "examples": [
-                "…nti. == Kritika == Il-Premju Nobel matul l-istorja ma kienx nieqes mill-kritika, partikolarment fl-istorja riċenti tiegħu. L-i…"
-            ]
-            },
-        {
-                "word": "minus",
-                "verdict": "attested",
-                "bounded": true,
-                "tokenHits": 8,
-                "articles": 7,
-                "substringOnly": 0,
-                "examples": [
-                "…oriġinali. Numri negattivi huma normalment miktuba b'sinjal minus quddiem. Pereżempju, -3 tirrappreżenta kwantità negattiva b…",
-                "…ant is-sinjal negattiv jitqiegħed kemmxejn ogħla mis-sinjal minus (bħala superscript). Bil-maqlub, numru li huwa akbar minn ż…",
-                "…t aritmetiċi fundamentali. Huwa normalment indikat b'sinjal minus infiss (\"-\"). Minħabba żewġ numri naturali n u m, l-ewwel i…",
-                "…gun tal-aġġettivi huma espressi permezz tal-avverbji plus u minus. === Verbi === Il-verbi fl-Interlingua m'għandhomx konjugaz…",
-                "…ħat-territorju tal-Marka Babenberg. Fl-1156, il-Privilegium Minus elevat lill-Awstrija għall-istatus ta' dukat. Fl-1192, il-B…",
-                "…ittizji fil-Gżejjer Bonin. Fil-film kaiju tal-2023 Godzilla Minus One, Koichi Shikishima u l-ekwipaġġ tiegħu jivvjaġġaw fil-G…"
             ]
             },
         {

@@ -1,25 +1,53 @@
 // WIKIPEDIA WORD ATTESTATION — rw. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "rw",
-    "wiki": "rw.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "rw",
+        "wiki": "rw.wikipedia.org",
+        "tier": "wikipedia (register-restricted)",
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // `--context` set to exactly this string.
+        "context": "ubushyuhe dogere",
+        "findings": [
+        {
+                "word": "minus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gukuramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…imbere n`agahu k`imbere mu itunda ni byiza kubirya cyangwa gukuramo umutobe, n`ibindi biribwa biryohera bishobora gukorwamo mu…",
+                "…guru mbere yo kubihunika kandi bigahunikwa ahantu humutse – gukuramo ibitunguru byafashwe kugirango bitanduza ibindi – kubibika…",
+                "…nshi rukaba umwijima nyuma yuko urubura rushonga, batangira gukuramo ubushyuhe bwinshi . Ububiko bwa karubone bwaho bwirabura ku…",
+                "…ze. Ibikorwa byabantu kuva Revolisiyo yinganda, cyane cyane gukuramo no gutwika ibicanwa biva mu kirere ( amakara, peteroli, na…",
+                "…u kirere. Kugeza ubu ntiharamenyekana neza niba tekinike yo gukuramo karubone izashobora kugira uruhare runini mu kugabanya ubus…",
+                "…kaba umwijima nyuma yuko urubura rumaze gushonga, batangira gukuramo ubushyuhe bwinshi. Ububiko bwa karubone bwaho bwirabura kur…"
+            ]
+            },
         {
             "word": "mililitiro",
             "verdict": "attested",
@@ -147,22 +175,6 @@
             "articles": 0,
             "substringOnly": 0,
             "examples": []
-        },
-        {
-            "word": "gukuramo",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 34,
-            "articles": 20,
-            "substringOnly": 0,
-            "examples": [
-                "…: Locking clothing) ni imyenda ibuza umuntu wambaye imyenda gukuramo imyenda. Urugero rumwe rwaba imyenda yagenewe kubuza umuntu…",
-                "…ashobora kwomekwa kumyenda isanzwe kugirango birinde umuntu gukuramo imyenda. Nubwo amazina menshi akoreshwa kuri ibyo bintu, ri…",
-                "…ni cyane kugirango gisubire muri buto. Abarwayi barashobora gukuramo buto, ariko. Utubuto tumwe na tumwe, cyane cyane twometse k…",
-                "…asanzwe ufata ishati n'ipantaro hamwe. Ibi birinda abarwayi gukuramo ishati cyangwa gukuramo ipantaro. == Reba ibindi == Medical…",
-                "…pantaro hamwe. Ibi birinda abarwayi gukuramo ishati cyangwa gukuramo ipantaro. == Reba ibindi == Medical restraint Straitjacket…",
-                "…amazi bikoresha imiti itandukanye hashingiwe ku cyo ushaka gukuramo cyangwa urwego amazi agezeho atunganywa: Imiti y'ibanze n'i…"
-            ]
         },
         {
             "word": "kuramo",
@@ -451,5 +463,6 @@
                 "…o ibanzirizwa na octave yayo, yanditswe nkumubare wongeyeho akadomo ko hejuru: ⟨':' ⟩ 5 8va, ⟨''' ⟩ 2 8va, nibindi 4th-8va C-wh…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

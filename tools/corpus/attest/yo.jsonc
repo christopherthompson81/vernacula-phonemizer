@@ -18,8 +18,88 @@
     {
         "language": "yo",
         "wiki": "yo.wikipedia.org",
-        "tier": "wikipedia",
+        "tier": "wikipedia (register-restricted)",
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // `--context` set to exactly this string.
+        "context": "ìwọ̀n oòrùn otutu",
         "findings": [
+        {
+                "word": "lábẹ́ òdo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ìsàlẹ̀ òdo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ìdàkejì òdo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ìyọkúrò",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…náà láti inú iṣẹ́ ènìyàn àti àwọn ètò àdánidá) àti àwọn ibi ìyọkúrò (yíyọ gáàsì náà kúrò nínú afẹ́fẹ́ nípasẹ̀ yíyí i padà sí àk…",
+                "…s) m {\\displaystyle m} (ní kg) ti X nínú box náà àti oṣuwọn ìyọkúrò rẹ̀ (removal rate), èyí tí ó jẹ́ àpapọ̀ ìṣàn X tó ń jáde kú…",
+                "…orí ipò rẹ̀ tí ó dá wà, ọmọ àkọ́kọ́ Ọlọ́run ṣe bí ó ti ṣe.\" Ìyọkúrò ìbálòpọ̀ kejì àti ẹ̀mí láti inú ènìyàn ni èyí tí àṣà ìkọ́là…",
+                "…àpapọ̀. Ìdí ni pé àwọn òkun máa ń pàdánù ooru púpọ̀ nípasẹ̀ ìyọkúrò omi sí afẹ́fẹ́ (evaporation), wọ́n sì tún lè pa ooru púpọ̀…",
+                "…sí òfurufú (albedo), àti iye ooru tí a máa ń pàdánù nípasẹ̀ ìyọkúrò omi (evaporation). Fún àpẹẹrẹ, yíyí padà láti igbó dudu sí…",
+                "…éé. Faransé lílo lẹ́tá a-pa-mọ́ra, fáwẹ́lì a-gbà-mú-hó, àti ìyọkúrò, lè dàbí ẹni pé ó kùnà láti ní ìbáṣepọ̀ púpọ̀ láàárín ìkọ-ọ…"
+            ]
+            },
+        {
+                "word": "òdì",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…Oòrùn ni ìdí tí Venus fi gbóná ju Ilẹ̀ Ayé lọ, kóòdà ó jẹ́ òdì kejì ohun tí a lè rò. Nítorí titẹ̀ afẹ́fẹ́ rẹ̀ tó ga, carbo…",
+                "…àfi nígbà àwọn ayẹyẹ pàtàkì, èyí tí ó dín agbára rẹ̀ kù. Ní òdì kejì, Àrẹmọ sábà máa ń jáde kúrò ní ààfin. Èyí mú kí òpìtàn…",
+                "…dínkù, ó sinmi lórí bóyá èrè pọ̀ ju àdánù lọ, tàbí tóbá jẹ́ òdì kejì rẹ̀. == Ipò tí ó wà lọ́wọ́lọ́wọ́ nípa kọ́ńtínẹ́ntì, ẹk…",
+                "…àn pé wọ́n fẹ́ràn àwọn Igbo tó pọ̀ jù lọ yí èrò wọn padà sí òdì. Ìfura ńlá ni wọ́n fi kàn àwọn kéréje-kéréje ẹ̀yà àti àwọn…",
+                "…ú irúfẹ́ àwọn fáwẹ́lì Gẹ̀ẹ́sì ṣáájú Ìyípadà Fáwẹ́lì Ńlá. Ní òdì kejì, àwọn orúkọ F, L, M, N, àti S (/ɛf, ɛl, ɛm, ɛn, ɛs/) d…",
+                "…gbà gbogbo tí wọ́n bá fún un ní ìkọ rẹ̀, àti nítorí náà, ní òdì kejì. Bótilẹ̀jẹ́pé, ipele gíga yìí kò sábà máa ń ṣẹlẹ̀ nínú…"
+            ]
+            },
+        {
+                "word": "náígátífì",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "minus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "ẹsẹ̀ bàtà",
                 "verdict": "attested",

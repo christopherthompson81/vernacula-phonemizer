@@ -71,16 +71,24 @@ of these, and is wrong on every one:
 | the sign NAMED, not applied | haw, ti | `ka lawenahelu (−)`, `disorder − እዚ` | not before a digit — inert, no rule needed |
 | genuine but SPACED from its digit | tl, mos | `singil ng − 1 / 3`, `+5 − 2` | `[-−](\d)` requires adjacency; these stay silent either way |
 
-**The remaining 17 are genuine and worth reading** — ab, ak, bo, hak, ht, ilo, ky, ltg, mt, nan, pcm, rw, tn,
-za, plus the genuine subset of hy, yo, bar. Almost all are temperatures or elevations: `−173 °C`, `−12.71 м`,
+**The remaining 18 are genuine and worth reading** — ab, ak, bar, bo, hak, ht, hy, ilo, ky, ltg, mos, mt,
+nan, pcm, rw, tn, yo, za. (An earlier draft of this list said 17 and dropped **mos**, whose single instance
+`n yɩɩg −1 °C la 2 °C` is as genuine as any of them. bar, hy and yo are MIXED — each has genuine leading
+negatives alongside a range or an exponent — and are counted here because the genuine instances are real,
+not because the language is clean.) Almost all are temperatures or elevations: `−173 °C`, `−12.71 м`,
 `−154m`, `−89 °C (−129 °F)`, `−27.2 °C`, `−6.0 °C`, `−20 and 30 °C`.
 
-**⚠ AND NONE OF THE 17 HAS A MINUS WORD.** Checked every manifest and engine file: not one declares `minus`
+**Three are CONTESTED and get no rule without their own decision:** `ee` (a judo weight CLASS, `−63 kg`,
+where "minus 63 kg" is a register question rather than an arithmetic one), `tg` (four of seven instances are
+apposition dashes — *занҳо −76,2*, "women — 76.2" — indistinguishable by form from a genuine leading
+negative), and `wuu` (one genuine `m = −1` against three space-separated exponents).
+
+**⚠ AND NONE OF THE 18 HAS A MINUS WORD.** Checked every manifest and engine file: not one declares `minus`
 or `plusMinus`. That is the actual cost the #955 deferral named, and it is unchanged by the premise — the
 character tells you a minus is meant, it does not tell you what this language CALLS one. Each needs a sourced
 word before a rule can be written, which is per-language attestation work, not a sweep.
 
-**Next:** source the minus word for the 17, one language at a time, and pair each with the trigger its own
+**Next:** source the minus word for the 18, one language at a time, and pair each with the trigger its own
 corpus supports (a unit or degree sign follows, in almost every genuine instance) rather than the bare
 leading-position guard that the exponent and range shapes above defeat.
 
@@ -121,3 +129,63 @@ silent where `1838-1917` reads as a range. Reading it as a range would serve the
 (#955 counted 18 such instances) and mis-serve the flattened exponents (`×10−19`) in the same set. The premise
 this work rests on — U+2212 means the arithmetic operator — argues for minus semantics, not range semantics,
 so silence stays. Noted as an open option, not a gap.
+
+## Run 5 — the minus word, sourced against each language's own wiki — 2026-08-25 14:05
+
+Candidate words supplied for all 18. Probed every one with `tools/normalization/attest.ts`, in the
+temperature/degree register the corpus instances actually sit in, and READ the examples.
+
+### ⚠ First, a correction to Run 3's list: SEVEN of the 18 already read U+2212
+
+Run 3 classified engines by `phonemize("−5")`. That is the wrong probe for a language with a NARROW,
+measured trigger — several claim a minus only before a degree or a percent word, and refuse a bare number on
+purpose. Re-probed across four shapes (`−5`, `−5 °C`, `−5 m`, `−5 %`):
+
+```
+  bar  hak  hy  ky  mt  rw  tn     read U+2212 already, and symmetric with the hyphen
+```
+
+Their readings, and this is the finding that reshapes the remaining work — **not one uses the subtraction
+verb**:
+
+```
+  bar  −5 °C → minus fimf ɡ̥rɑd̥ kelsius              the loanword, preposed
+  mt   −5 °C → mɪnus ħamsa ɡradɪ t͡ʃɛlsju             the loanword, preposed
+  hy   −5 °C → minus tɑsnhinɡ t͡sʰelsiusi ɑstit͡ʃɑn    the loanword, preposed
+  ky   −5 °C → minus on ʁrɑdus                        the loanword, preposed
+  rw   −5 °C → doɡeɾe selisijusi ɡatanu munsi ja zeɾu   "below zero", POSTPOSED
+  tn   −5 °C → dikirii t͡sa kɪlkius … kwa t͡ɬasɪ χa lɪfɪla   "below zero", POSTPOSED
+  hak  −5 °C → … laŋ˩˩ ha˦˦ …                          零下, "below zero"
+```
+
+So the real gap is **11 languages**: ab, ak, bo, ht, ilo, ltg, mos, nan, pcm, yo, za.
+
+### The sourcing result: 0 of 11
+
+| lang | candidate | verdict | what the examples actually say |
+|---|---|---|---|
+| tn | `ntsha` | ×23 / 3 arts | **"to emit"** — *di ntsha digase* "they emit gases", *go ntsha gase ya carbon dioxide*. The Fula `hakkunde` shape exactly. |
+| rw | `gukuramo` | ×15 / 9 arts | **"to extract"** — *gukuramo umutobe* "extract juice", *gukuramo karubone* "carbon extraction". |
+| yo | `ìyọkúrò` | ×6 / 4 arts | **"removal"**, physical — gas removal, water removal (*evaporation*). `òdì` ×28 is "opposite" (*òdì kejì*). |
+| ht | `mwens` | ×16 / 11 arts | **the COMPARATIVE** — *mwens pase* "less than", *pi plis oswa mwens*. The kurmanji `kêm` refusal. `negatif` ×2 is the adjective (*negatif chaje*). |
+| mt | `naqqas` | ×8 / 6 arts | **"reduced"**, past tense — *naqqas il-kontroll*. And `minus` ×1 is **`Privilegium Minus`, a Latin charter title**, not Maltese. |
+| ilo | `negatibo` | ×12 / 6 arts | **the ADJECTIVE** — negative coefficient, *gram-negatibo* bacteria. Modifies a noun, never a numeral. |
+| bo | `འཐེན` | ×23, unspaced | **"to pull"** — *ཐ་མག་འཐེན་པ* "to smoke", drawing a bow, pulse terminology. |
+| hy | `հանած` | ×10 / 7 arts | set subtraction — *"Asia is Eurasia **minus** Europe"*, *"plus or **minus** a leap second"*. Real, wrong slot. |
+| ab, ak, ilo, ltg, pcm, za, nan, hak | all candidates | **×0** | absent outright. `nan`/`hak` are written in ROMANIZATION on their wikis, so the Han forms cannot hit. |
+
+**⚠ THE SUPPLIED WORDS ARE DICTIONARY-CORRECT AND SLOT-WRONG, AND THAT IS THE WHOLE FINDING.** Every one of
+them is a real word meaning "to subtract". None of them is what a reader says in front of a number. The
+distinction is not pedantry: `ntsha`, `gukuramo`, `ìyọkúrò` and `naqqas` are TRANSITIVE VERBS OF REMOVAL that
+take an object, so emitting one before a numeral produces "emit six point zero degrees". The seven languages
+that already work prove what the slot actually wants — the loanword *minus*, or a postposed "below zero".
+
+**Second round, with the corrected target** (`lábẹ́ òdo` / `ìsàlẹ̀ òdo` for yo, `anba zewo` for ht,
+`baba ngem ti sero` for ilo, `mīnus` / `zam nullis` for ltg): **all ×0**. These are small wikis and the
+phrasings are guesses. Stopped there rather than continuing to try spellings until one returned a hit —
+probing variants until something attests is how invention gets laundered into evidence.
+
+**Where this leaves the 11.** They need a source this repo cannot reach by wiki search: a speaker, a
+maths textbook, or a corpus with spoken temperatures. Until then the sign stays dropped, which INVERTS the
+value and is the worse failure — but a confidently wrong word in the slot is not an improvement on it, and
+"emit six degrees" is what the available candidates would produce.

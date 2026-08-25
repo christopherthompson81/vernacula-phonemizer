@@ -18,8 +18,81 @@
     {
         "language": "ilo",
         "wiki": "ilo.wikipedia.org",
-        "tier": "wikipedia",
+        "tier": "wikipedia (register-restricted)",
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // `--context` set to exactly this string.
+        "context": "temperatura",
         "findings": [
+        {
+                "word": "baba ngem ti sero",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "nababa ngem sero",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "negatibo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…parang-ay iti sabali a kita ti aloy ti invar nga addaan iti negatibo a kuadratiko a koepisiente iti panagpadakkel. Ti panggep it…",
+                "…ig iti Amianan (wenno Abagatan) nga Ungto ket kaaduanna iti negatibo a pateg daytoy ket no ti init ket addaan iti kaadaywan iti…",
+                "…agbalin a naammuan a kas linteg ni Richardson': \"No idin ti negatibo a radiasion ket gapu ti korpuskula a rumrummuar iti metal,…",
+                "…akairamanan dagiti bakteria, birus, ken fungus. Dagiti gram-negatibo ken gram-positibo a bakteria ket kaaduan a pakaigapuan ti s…",
+                "…0. Kalpasan ti pannakairuar dagiti antibiotiko, dagiti gram-negatibo a bakteria ket nagbalin a kangrunaan a pakaigapuan ti sepsi…",
+                "…nflammatory Response Syndrome) tapno mailasin ti sepsis. No negatibo ti SIRS, saan unay a mabalin nga adda sepsis ti maysa a tao…"
+            ]
+            },
+        {
+                "word": "nababbaba ngem zero",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "minus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "menos",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kissayan",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "kilogramo",
                 "verdict": "attested",
