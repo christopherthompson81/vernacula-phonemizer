@@ -34,9 +34,11 @@ public sealed class ItalianDef
     /** 1–10 only — everything above is COMPOSED from the cardinal, so there is no tens/hundreds row. */
     public IReadOnlyDictionary<string, string> Ordinals { get; init; } = new Dictionary<string, string>();
     public ItalianFractions Fractions { get; init; } = new();
+    /** ⚠ ONE FACT, TWO CALLERS: *un quinto* (fraction) and *un grado* (degree) are the same apocope. */
+    public string ApocopatedOne { get; init; } = "";
     public ItalianEraMarkers EraMarkers { get; init; } = new();
     public string NumberSign { get; init; } = "";
-    /** ⚠ `Word` is ALWAYS PLURAL — a pre-existing defect, not agreement. See italian.jsonc. */
+    /** Agrees with the count: exactly 1 → `Singular` + the apocopated numeral; otherwise `Plural`. */
     public ItalianDegree Degree { get; init; } = new();
     public IReadOnlyDictionary<string, string> Compass { get; init; } = new Dictionary<string, string>();
     public string DecimalWord { get; init; } = "";
@@ -54,7 +56,6 @@ public sealed class ItalianPhonotactics
 public sealed class ItalianFractions
 {
     public IReadOnlyDictionary<string, string> Denominators { get; init; } = new Dictionary<string, string>();
-    public string NumeratorOne { get; init; } = "";
 }
 
 public sealed class ItalianEraMarkers
@@ -65,7 +66,8 @@ public sealed class ItalianEraMarkers
 
 public sealed class ItalianDegree
 {
-    public string Word { get; init; } = "";
+    public string Singular { get; init; } = "";
+    public string Plural { get; init; } = "";
     public string Celsius { get; init; } = "";
     public string Fahrenheit { get; init; } = "";
 }

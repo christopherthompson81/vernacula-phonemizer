@@ -50,10 +50,13 @@ public class ItalianManifestLiftedTests
     }
 
     [Fact]
-    public void TheFractionNumeratorIsApocopatedAndAHalfIsSuppletive()
+    public void TheApocopatedOneIsOneFactServingTwoCallers()
     {
         Assert.Contains(Say(DEF.Fractions.Denominators["2"]), Say("1/2 della torta"));
-        Assert.Contains(Say(DEF.Fractions.NumeratorOne), Say("1/5 del totale"));
+        Assert.Contains(Say(DEF.ApocopatedOne), Say("1/5 del totale"));
+        // ⚠ THE SAME WORD, THE OTHER CALLER: *uno* apocopates before a masculine noun, and the degree noun
+        // is one. It was `fractions.numeratorOne` until the degree fix needed it too.
+        Assert.Contains(Say(DEF.ApocopatedOne), Say("1 °C soltanto"));
         Assert.Contains(Say("quarti"), Say("3/4 di ora"));
     }
 
@@ -77,12 +80,27 @@ public class ItalianManifestLiftedTests
     }
 
     [Fact]
-    public void TheDegreeNounIsAlwaysPluralWhichIsAKnownDefect()
+    public void TheDegreeNounAgreesAndTakesTheApocopatedNumeralAtOne()
     {
-        // `1 °C` reads *uno gradi Celsius*. ⚠ Italian needs MORE than the pt fix did: the noun must agree
-        // AND the numeral must apocopate (*un grado*). Left for its own change; asserted so it is visible.
-        Assert.Contains(Say(DEF.Degree.Word), Say("1 °C soltanto"));
-        Assert.Contains(Say(DEF.Degree.Word), Say("20 °C"));
+        // ⚠ THIS TEST USED TO PIN THE OPPOSITE — `1 °C` read *uno gradi Celsius* and this recorded it as a
+        // known defect. Its flipping is what says the defect is gone. Compared as whole TOKENS.
+        string[] Words(string t) => Say(t).Split(' ');
+        string sg = Say(DEF.Degree.Singular), pl = Say(DEF.Degree.Plural);
+        Assert.NotEqual(sg, pl);
+        Assert.Contains(sg, Words("1 °C soltanto"));
+        Assert.DoesNotContain(pl, Words("1 °C soltanto"));
+        Assert.Contains(pl, Words("20 °C"));
+        // ⚠ THE COUNT IS THE WHOLE NUMBER, NOT ITS LAST DIGIT — the rule captured `(\d)` before the fix.
+        Assert.Contains(pl, Words("21 °C"));
+        Assert.DoesNotContain(sg, Words("21 °C"));
+        Assert.Contains(pl, Words("0 °C"));
+        Assert.Contains(pl, Words("1,5 °C"));
+        // The Fahrenheit and COMPASS rules take the same helper, not their own copy of the noun.
+        Assert.Contains(sg, Words("1 °F soltanto"));
+        Assert.Contains(sg, Words("1° N di latitudine"));
+        Assert.Contains(pl, Words("45° N di latitudine"));
+        // ⚠ A COMPOUND ENDING IN -uno IS LEFT ALONE ON PURPOSE: *ventuno gradi*, not *ventun gradi*.
+        Assert.Contains(Say("ventuno"), Say("21 °C"));
     }
 
     [Fact]

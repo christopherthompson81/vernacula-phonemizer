@@ -46,9 +46,12 @@ describe("italian reads its lifted tables", () => {
         expect(say("il 1000º giorno")).toContain(say("millesimo"));
     });
 
-    test("the fraction numerator is the apocopated un, and 1/2 is suppletive", () => {
+    test("the apocopated one is ONE fact serving the fraction and the degree alike", () => {
         expect(say("1/2 della torta")).toContain(say(MANIFEST.fractions.denominators["2"]!));
-        expect(say("1/5 del totale")).toContain(say(MANIFEST.fractions.numeratorOne));
+        expect(say("1/5 del totale")).toContain(say(MANIFEST.apocopatedOne));
+        // ⚠ THE SAME WORD, THE OTHER CALLER: *uno* apocopates before a masculine noun, and the degree noun
+        // is one. It was `fractions.numeratorOne` until the degree fix needed it too.
+        expect(say("1 °C soltanto")).toContain(say(MANIFEST.apocopatedOne));
         // …and every other denominator takes the ordinal, pluralised -o → -i.
         expect(say("3/4 di ora")).toContain(say("quarti"));
     });
@@ -69,12 +72,29 @@ describe("italian reads its lifted tables", () => {
         expect(say("il 1º della lista")).toContain(say(MANIFEST.ordinals["1"]!));
     });
 
-    test("⚠ the degree noun is ALWAYS PLURAL — pinned as a KNOWN DEFECT, not as correct", () => {
-        // `1 °C` reads *uno gradi Celsius*. Pre-existing; this lift moved the word, not the agreement.
-        // ⚠ Italian needs MORE than the pt fix did: the noun must agree AND the numeral must apocopate
-        // (*un grado*, not *uno grado*). Left for its own change; asserted so the bug is visible here.
-        expect(say("1 °C soltanto")).toContain(say(MANIFEST.degree.word));
-        expect(say("20 °C")).toContain(say(MANIFEST.degree.word));
+    test("the degree noun agrees, and takes the apocopated numeral at exactly one", () => {
+        // ⚠ THIS TEST USED TO PIN THE OPPOSITE. Until the fix, `1 °C` read *uno gradi Celsius* and this
+        // recorded that as a known defect. Its flipping is what says the defect is gone.
+        // ⚠ COMPARED AS WHOLE TOKENS: the plural CONTAINS the singular ([ɡrˈado] is not a prefix of
+        // [ɡrˈadi], but the pt lift found the reverse case, so the habit is worth keeping.)
+        const words = (t: string): string[] => say(t).split(" ");
+        const SG = say(MANIFEST.degree.singular), PL = say(MANIFEST.degree.plural);
+        expect(SG).not.toBe(PL);
+        expect(words("1 °C soltanto")).toContain(SG);
+        expect(words("1 °C soltanto")).not.toContain(PL);
+        expect(words("20 °C")).toContain(PL);
+        // ⚠ THE COUNT IS THE WHOLE NUMBER, NOT ITS LAST DIGIT — the rule captured `(\d)` before the fix.
+        expect(words("21 °C")).toContain(PL);
+        expect(words("21 °C")).not.toContain(SG);
+        expect(words("0 °C")).toContain(PL);
+        expect(words("1,5 °C")).toContain(PL);
+        // The Fahrenheit and COMPASS rules take the same helper, not their own copy of the noun.
+        expect(words("1 °F soltanto")).toContain(SG);
+        expect(words("1° N di latitudine")).toContain(SG);
+        expect(words("45° N di latitudine")).toContain(PL);
+        // ⚠ A COMPOUND ENDING IN -uno IS LEFT ALONE ON PURPOSE: *ventuno gradi*, not *ventun gradi*. Both are
+        // correct Italian; the compound apocope is the more literary register and is not claimed here.
+        expect(say("21 °C")).toContain(say("ventuno"));
     });
 
     test("every other lifted table is reached by some reading", () => {

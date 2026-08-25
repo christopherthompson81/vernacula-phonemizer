@@ -27,6 +27,21 @@ public static class Normalize
     private static SignWords SIGN => DEF.SignWords;
     private static ItalianDegree DEG => DEF.Degree;
 
+    /**
+     * A degree reading: the numeral as it should be WRITTEN, then the noun agreeing with it. Exactly 1 takes
+     * the singular noun and the APOCOPATED numeral (*un grado*, never *uno grado*), so the digit is replaced
+     * by the word — the number path would otherwise read it as *uno*. Everything else keeps its digits.
+     *
+     * ⚠ A COMPOUND ENDING IN -uno IS LEFT ALONE: `21 °C` stays *ventuno gradi* rather than *ventun gradi*.
+     * Both are correct and Treccani records both; the compound apocope is the more literary register.
+     *
+     * ⚠ AND THIS READS THE WHOLE NUMBER, NOT ITS LAST DIGIT — the rules captured `(\d)` before the fix.
+     */
+    private static string Degrees(string n) =>
+        Js.Number(Js.ReplaceFirst(n, ",", ".")) == 1
+            ? $"{DEF.ApocopatedOne} {DEG.Singular}"
+            : $"{n} {DEG.Plural}";
+
     private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = DEF.DottedAbbrev;
 
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(a => a.Length));
@@ -88,7 +103,7 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
             ? sup
             : Ordinal(den);
         if (basew is null) return null;
-        return $"{(num == 1 ? DEF.Fractions.NumeratorOne : Js.NumberToString(num))} {(num > 1 ? JsRegex.Replace(basew, FINAL_O_TO_I, _ => "i") : basew)}";
+        return $"{(num == 1 ? DEF.ApocopatedOne : Js.NumberToString(num))} {(num > 1 ? JsRegex.Replace(basew, FINAL_O_TO_I, _ => "i") : basew)}";
     }
 
     /** The currency noun already spelled out right after the amount — see step 10. */
@@ -107,9 +122,9 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
     private static readonly JsRe NUMERO = JsRegex.Compile($"{L}(?:n\\.º|n\\.|nr\\.|nº)\\s?(?=\\d)", "giu");
     private static readonly JsRe ABBREV_MID = JsRegex.Compile($"{L}({ABBREV_ALT})\\.(\\s+)(?=[\\p{{L}}\\p{{N}}])", "giu");
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"{L}({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))", "giu");
-    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C(?![\\p{L}\\p{M}])", "gui");
-    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F(?![\\p{L}\\p{M}])", "gui");
-    private static readonly JsRe DEG_COMPASS = JsRegex.Compile("(\\d)\\s?°\\s?([NSEW])(?![\\p{L}\\p{M}])", "gu");
+    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?C(?![\\p{L}\\p{M}])", "gui");
+    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?F(?![\\p{L}\\p{M}])", "gui");
+    private static readonly JsRe DEG_COMPASS = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?([NSEW])(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe ORDINAL_IND = JsRegex.Compile("(\\d+)\\.?(?:º|ª|°)", "gu");
     private static readonly JsRe FEM_IND = JsRegex.Compile("ª", "u");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])", "gu");
@@ -156,10 +171,10 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
         //    in step 6 claims every remaining `\d°`. Temperature and coordinate are identified by the LETTER
         //    glued to the sign; the ordinal never has one. Also before the shared unit tier, which would
         //    otherwise leave the bare sign behind.
-        s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} {DEG.Word} {DEG.Celsius}");
-        s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} {DEG.Word} {DEG.Fahrenheit}");
+        s = JsRegex.Replace(s, DEG_C, m => $"{Degrees(m.Groups[1].Value)} {DEG.Celsius}");
+        s = JsRegex.Replace(s, DEG_F, m => $"{Degrees(m.Groups[1].Value)} {DEG.Fahrenheit}");
         s = JsRegex.Replace(s, DEG_COMPASS, m =>
-            $"{m.Groups[1].Value} {DEG.Word} {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
+            $"{Degrees(m.Groups[1].Value)} {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
 
         // 6) ORDINAL INDICATORS `°`/`º`/`ª`. The temperature and coordinate senses were consumed in step 5,
         //    so what reaches here is the ordinal.

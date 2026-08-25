@@ -34,11 +34,13 @@ export interface ItalianManifest {
     dottedAbbrev: Record<string, string>;
     /** 1–10 only — everything above is COMPOSED from the cardinal, so there is no tens/hundreds row. */
     ordinals: Record<string, string>;
-    fractions: { denominators: Record<string, string>; numeratorOne: string };
+    fractions: { denominators: Record<string, string> };
+    /** ⚠ ONE FACT, TWO CALLERS: *un quinto* (fraction) and *un grado* (degree) are the same apocope. */
+    apocopatedOne: string;
     eraMarkers: { beforeChrist: string; afterChrist: string };
     numberSign: string;
-    /** ⚠ `word` is ALWAYS PLURAL — a pre-existing defect, not agreement. See italian.jsonc. */
-    degree: { word: string; celsius: string; fahrenheit: string };
+    /** Agrees with the count: exactly 1 → `singular` + the apocopated numeral; otherwise `plural`. */
+    degree: { singular: string; plural: string; celsius: string; fahrenheit: string };
     compass: Record<string, string>;
     decimalWord: string;
     signWords: SignWords;

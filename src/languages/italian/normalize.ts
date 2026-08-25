@@ -76,6 +76,24 @@ const isRomanNumeral = (lower: string): boolean => lower.length >= 2 && romanToI
 const SIGN = MANIFEST.signWords;
 const DEG = MANIFEST.degree;
 
+/**
+ * A degree reading: the numeral as it should be WRITTEN, then the noun agreeing with it. Exactly 1 takes the
+ * singular noun and the APOCOPATED numeral (*un grado*, never *uno grado*), so the digit is replaced by the
+ * word — the number path would otherwise read it as *uno*. Everything else keeps its digits.
+ *
+ * ⚠ A COMPOUND ENDING IN -uno IS LEFT ALONE: `21 °C` stays *ventuno gradi* rather than *ventun gradi*. Both
+ * are correct and Treccani records both; the compound apocope is the more literary register and taking it
+ * would mean rewriting the numeral the number path produces, not substituting one word.
+ *
+ * ⚠ AND THIS READS THE WHOLE NUMBER, NOT ITS LAST DIGIT — the rules captured `(\d)` before the fix, which
+ * was invisible while the noun was a hard-coded plural and wrong the moment a count is read off it.
+ */
+function degrees(n: string): string {
+    return Number(n.replace(",", ".")) === 1
+        ? `${MANIFEST.apocopatedOne} ${DEG.singular}`
+        : `${n} ${DEG.plural}`;
+}
+
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
 
 /** Italian has no pronunciation dictionary — the g2p is fully rule-based — so nothing is "recorded" in the
@@ -105,7 +123,7 @@ function fractionWords(num: number, den: number): string | undefined {
     const base = DENOMINATOR[String(den)] ?? ordinal(den);
     if (base === undefined) return undefined;
     // The numerator apocopates before the fraction noun: "un quinto", not "uno quinto".
-    return `${num === 1 ? MANIFEST.fractions.numeratorOne : String(num)} ${num > 1 ? base.replace(/o$/u, "i") : base}`;
+    return `${num === 1 ? MANIFEST.apocopatedOne : String(num)} ${num > 1 ? base.replace(/o$/u, "i") : base}`;
 }
 
 /** The currency noun already spelled out right after the amount — see step 10. */
@@ -152,10 +170,10 @@ export function normalizeItalian(input: string): string {
     //    below claims every remaining `\d°`. Temperature (`30°C`, `90 °F`) and coordinate (`35°W`) are
     //    identified by the LETTER glued to the sign; the ordinal never has one (`1° gennaio` has a space).
     //    This also has to run before the shared unit tier, which would otherwise leave the bare sign behind.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, `$1 ${DEG.word} ${DEG.celsius}`);
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, `$1 ${DEG.word} ${DEG.fahrenheit}`);
-    s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/gu,
-        (_m, d: string, dir: string) => `${d} gradi ${COMPASS[dir.toLowerCase()]!}`);
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, (_m, n: string) => `${degrees(n)} ${DEG.celsius}`);
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])/gui, (_m, n: string) => `${degrees(n)} ${DEG.fahrenheit}`);
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?([NSEW])(?![\p{L}\p{M}])/gu,
+        (_m, d: string, dir: string) => `${degrees(d)} ${COMPASS[dir.toLowerCase()]!}`);
 
     // 6) ORDINAL INDICATORS. Three characters, all attested. `º`/`ª` (U+00BA/U+00AA) were reaching the
     //    phoneme string RAW — they are Script=Latin, so core/clauses.ts hands them to the foreign fallback
