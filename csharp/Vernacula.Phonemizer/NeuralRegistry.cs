@@ -14,6 +14,7 @@ public static class NeuralRegistry
         ["fr"] = Languages.French.FrenchNeural.PhonemizeFrNeural,
         ["ur"] = t => RiderNeural.PhonemizeRiderNeural(t, "ur"),
         ["fa"] = Languages.Persian.PersianNeural.PhonemizeFaNeural,
+        ["sd"] = Languages.Sindhi.SindhiNeural.PhonemizeSdNeural, // per-letter BiLSTM restoring the abjad's unwritten short vowels on OOV words
     };
 
     /** The language's best ASYNC path, or null when its best path is the sync engine. */
