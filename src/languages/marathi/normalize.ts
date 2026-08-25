@@ -316,11 +316,23 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     `शंभरm` from the swim event "100m आणि 200m" — the guard leaves any digits+Latin pair alone.
         s = s.replace(/(?<![\d,.\-–—])100(?![\d,.\-–—])(?!\s*[A-Za-z])/gu, def.bareHundred);
 
-        // 15) SIGNS. Plus and the approximation tilde only. ⚠ THE MINUS RULE IS DELIBERATELY NOT APPLIED:
-        //     Devanagari compounds are written with a hyphen (आस-पास), and the hyphen-before-digit that
-        //     occurs outside a range is a designation — "चंद्रयान -1", a spacecraft name — where reading
-        //     "उणे एक" ("minus one") is worse than silence.
+        // 15) SIGNS. ⚠ THE ASCII HYPHEN IS STILL REFUSED, AND THE REFUSAL IS ABOUT THE TRIGGER RATHER THAN
+        //     THE WORD: Devanagari compounds are written with a hyphen (आस-पास), and a hyphen before a
+        //     digit outside a range is a designation — "चंद्रयान -1", a spacecraft name — where reading
+        //     "उणे एक" is worse than silence. No choice of word fixes that, so no choice of word unlocks it.
+        //
+        //     ⚠ U+2212 IS A DIFFERENT CHARACTER AND CARRIES NONE OF THAT AMBIGUITY. It is the MINUS SIGN:
+        //     never a compound hyphen, never a designation dash, and not in step 12's range class
+        //     `[-–—]` either. Until now it was simply DROPPED, so `−२५°C` read *पंचवीस अंश सेल्सिअस* — a
+        //     negative temperature with the sign silently gone, which is the one reading here that is
+        //     wrong rather than merely absent. उणे is not new vocabulary: `plusMinus` below is
+        //     अधिक + उणे, so this file already asserts it. (वजा is the attested alternative.)
+        //
+        //     ⚠ ZERO CORPUS OCCURRENCES, STATED PLAINLY. U+2212 appears 0 times in the mined artifact and
+        //     0 times in the 200-row golden, so nothing measures this rule — it fills a gap rather than
+        //     fixing an observed defect, and the sabotage count for `minus` is 0 against any corpus probe.
         s = s.replace(/\+\s?(?=\d)/gu, ` ${SIGN.plus} `);
+        s = s.replace(/−\s?(?=\d)/gu, ` ${SIGN.minus} `);  // U+2212 MINUS SIGN — NOT the ASCII hyphen
         s = s.replace(/~\s?(?=\d)/gu, ` ${SIGN.approximately} `);
 
         // 15b) THE RELATIONAL AND DIVISION SIGNS, and ±. ⚠ All sourced from running text rather than from

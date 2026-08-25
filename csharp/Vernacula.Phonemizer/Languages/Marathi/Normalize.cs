@@ -88,6 +88,10 @@ public static class Normalize
     private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})\\/(\\d{1,3})(?![\\d\\/])", "gu");
     private static readonly JsRe BARE_HUNDRED = JsRegex.Compile("(?<![\\d,.\\-–—])100(?![\\d,.\\-–—])(?!\\s*[A-Za-z])", "gu");
     private static readonly JsRe PLUS = JsRegex.Compile("\\+\\s?(?=\\d)", "gu");
+    // ⚠ U+2212 MINUS SIGN — NOT the ASCII hyphen, which stays refused (a Devanagari compound or a
+    // designation, "चंद्रयान -1"). U+2212 carries none of that ambiguity and was simply DROPPED, so
+    // `−२५°C` lost its sign. See src/languages/marathi/normalize.ts.
+    private static readonly JsRe MINUS_SIGN = JsRegex.Compile("\\u2212\\s?(?=\\d)", "gu");
     private static readonly JsRe TILDE = JsRegex.Compile("~\\s?(?=\\d)", "gu");
     private static readonly JsRe PLUSMINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe EQUALS = JsRegex.Compile("\\s?=\\s?", "gu");
@@ -233,6 +237,7 @@ public static class Normalize
             s = JsRegex.Replace(s, BARE_HUNDRED, _ => D.BareHundred);
 
             s = JsRegex.Replace(s, PLUS, _ => $" {D.SymbolWords.Plus} ");
+            s = JsRegex.Replace(s, MINUS_SIGN, _ => $" {D.SymbolWords.Minus} ");
             s = JsRegex.Replace(s, TILDE, _ => $" {D.SymbolWords.Approximately} ");
 
             s = JsRegex.Replace(s, PLUSMINUS, _ => $" {D.SymbolWords.PlusMinus} ");
