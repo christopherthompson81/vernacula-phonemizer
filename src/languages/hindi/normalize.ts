@@ -20,23 +20,20 @@ import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 
 /**
- * Ordinal suffix → the gender/number it marks. Hindi writes the ordinal as the numeral plus this suffix
- * (16वीं), and the suffix itself carries the agreement, so it is read off the text rather than guessed.
- *   वाँ / वां  masculine singular      वीं  feminine        वें / वे  masculine plural / oblique
+ * ⚠ THESE TABLES ARE HINDI'S AND THEY SERVE THE WHOLE FAMILY, which is inherited behaviour and is now at
+ * least VISIBLE. This normalizer is built per language (`makeHindiNormalizer(def.numbers, def)`), but the
+ * ordinal data used to be a literal in this file, so awa/bho/mag/hne/mai have always read Hindi's ordinal
+ * words. That is defensible for the REGULAR suffixes — वाँ/वीं/वें are pan-Hindi-belt — and an assumption
+ * for the WORDS. It is kept as the DEFAULT rather than changed, because removing it would take the working
+ * regular arm away from five languages; a family member that sources its own forms declares them in its
+ * own jsonc and overrides this, which is now a one-line change instead of a fork.
  */
-const SUFFIX_FORM: Readonly<Record<string, 0 | 1 | 2>> = {
-    "वाँ": 0, "वां": 0, "वा": 0,
-    "वीं": 1, "वी": 1,
-    "वें": 2, "वे": 2,
-};
+const DEFAULT_SUFFIXES = MANIFEST.ordinalSuffixes;
 
-/**
- * Irregular ordinals, from the manifest. ⚠ INDEXED BY NUMBER IN CODE BUT BY STRING IN JSON — JSON keys
- * are always strings and JS coerces a numeric index on lookup, so the cast is where that asymmetry is
- * paid. The C# port cannot coerce and converts at the call site instead.
- */
-const IRREGULAR = MANIFEST.irregularOrdinals as unknown as
-    Readonly<Record<number, readonly [string, string, string]>>;
+/** Longest-first alternation, with the regex metacharacters escaped. */
+const alt = (keys: string[]): string => keys.sort((a, b) => b.length - a.length)
+    .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("|");
+
 
 /**
  * Devanagari unit abbreviations → the full word. The existing symbol tier is keyed on the LATIN
@@ -62,7 +59,17 @@ const ABBREV_ALT = Object.keys(ABBREV).sort((a, b) => b.length - a.length).join(
 
 /** Build the Hindi normalizer. Takes the numbers definition so the ordinal rule can compose the cardinal
  *  words it attaches its suffix to — the same data the engine's own number path uses. */
-export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => string {
+export function makeHindiNormalizer(
+    numbers: NumbersDef,
+    /** The LANGUAGE's own ordinal data, when it declares any; Hindi's is the default. */
+    own?: { irregularOrdinals?: Record<string, readonly string[]>; ordinalSuffixes?: typeof DEFAULT_SUFFIXES },
+): (text: string) => string {
+    const IRREGULAR_L = (own?.irregularOrdinals ?? MANIFEST.irregularOrdinals) as unknown as
+        Readonly<Record<number, readonly [string, string, string]>>;
+    const ORD_SUF = own?.ordinalSuffixes ?? DEFAULT_SUFFIXES;
+    const SUFFIX_FORM: Readonly<Record<string, 0 | 1 | 2>> = ORD_SUF?.regular ?? {};
+    const SUPPLETIVE_CONS: Readonly<Record<string, string>> = ORD_SUF?.suppletiveConsonants ?? {};
+    const VOWEL_FORM: Readonly<Record<string, 0 | 1 | 2>> = ORD_SUF?.vowelForms ?? {};
     /** Integer → its Devanagari cardinal words, as the engine's number path would render them. */
     const cardinal = (n: number): string[] => indicNumberWords(n, numbers).map((w) => w ?? "");
 
@@ -72,7 +79,7 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
      * separately is what made the suffix a stray syllable ([sˈoːləɦ ʋˈiː̃], "sixteen vee").
      */
     const ordinal = (n: number, form: 0 | 1 | 2, suffix: string): string | undefined => {
-        const irr = IRREGULAR[n];
+        const irr = IRREGULAR_L[n];
         if (irr !== undefined) return irr[form];
         const words = cardinal(n);
         if (words.length === 0 || words.some((w) => w === "")) return undefined;
@@ -100,9 +107,32 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         //    वाहन and — in the eight languages that inherit this normalizer — वाजता, वादळे, वाईल्ड. The
         //    Marathi run measured 13 live corruptions of that shape in its own corpus. This is trap #1 in
         //    ⚠ never a bare match where a letter may follow.
-        s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?(${Object.keys(SUFFIX_FORM).join("|")})(?![\\p{L}\\p{M}])`, "gu"),
-            (whole, digits: string, suffix: string) =>
-                ordinal(Number(digits), SUFFIX_FORM[suffix]!, suffix) ?? whole);
+        //    ⚠ BOTH ARMS ARE SKIPPED WHEN THE LANGUAGE DECLARES NO SUFFIXES. This normalizer is shared, and
+        //    a family member that has not sourced its own ordinal orthography must get NO rule rather than
+        //    Hindi's — an empty alternation would otherwise compile to `()` and match everywhere.
+        if (Object.keys(SUFFIX_FORM).length > 0)
+            s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?(${alt(Object.keys(SUFFIX_FORM))})(?![\\p{L}\\p{M}])`, "gu"),
+                (whole, digits: string, suffix: string) =>
+                    ordinal(Number(digits), SUFFIX_FORM[suffix]!, suffix) ?? whole);
+
+        // 2b) THE SUPPLETIVE SPELLINGS — `1ला`, `2रा`, `4था`, `6ठा`, which are ordinary Hindi orthography
+        //     and which step 2 never reached, so `1ला` read as the CARDINAL plus a stranded syllable
+        //     (*ˈeːk lˈaː*) while `1वाँ` was correct all along. The words were already in `irregularOrdinals`;
+        //     only the trigger was missing.
+        //     ⚠ THREE GUARDS, AND THE MIDDLE ONE IS THE LOAD-BEARING ONE:
+        //       · GLUED, never `\s?` — `था`/`थी` are the past copula, so `2 था` is "there were 2" and a
+        //         spaced match would misread a very common shape. A copula is always its own word.
+        //       · THE CONSONANT MUST BE THAT NUMBER'S OWN, so `2था` cannot match on 4's consonant.
+        //       · the trailing letter-boundary, so `2राज्य` ("2 states") is not claimed as `2रा` + ज्य.
+        if (Object.keys(SUPPLETIVE_CONS).length > 0)
+            s = s.replace(
+                new RegExp(`(?<![\\d.,])(\\d)(${alt([...new Set(Object.values(SUPPLETIVE_CONS))])})`
+                    + `(${alt(Object.keys(VOWEL_FORM))})(?![\\p{L}\\p{M}])`, "gu"),
+                (whole, d: string, cons: string, vowel: string) => {
+                    if (SUPPLETIVE_CONS[d] !== cons) return whole;
+                    return IRREGULAR_L[Number(d)]?.[VOWEL_FORM[vowel]!] ?? whole;
+                },
+            );
 
         // 3) ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a phrase
         //    break; डॉ is matched with the dot OPTIONAL because that is how it is usually written.

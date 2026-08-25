@@ -66,6 +66,17 @@ export interface HindiDef extends AbugidaDef {
      * [masculine, feminine, neuter, oblique]. Each engine indexes the width its own language has.
      */
     irregularOrdinals: Record<string, readonly string[]>;
+    /**
+     * The written ordinal suffixes and the agreement form each marks. ⚠ OPTIONAL: this Def is SHARED, and
+     * a language in the family that has not sourced its own ordinal orthography declares nothing and gets
+     * no ordinal rule rather than Hindi's.
+     */
+    ordinalSuffixes?: {
+        regular: Record<string, 0 | 1 | 2>;
+        /** Per-NUMBER, which is the guard — see the jsonc. */
+        suppletiveConsonants: Record<string, string>;
+        vowelForms: Record<string, 0 | 1 | 2>;
+    };
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */
@@ -240,7 +251,7 @@ export function makeNativeHindi(
     // suffixes, Devanagari unit abbreviations, abbreviations, clock, signs, fractions.
     // Roman numerals need no ordering care: `hi` is not in the registry's ROMAN_NATIVE set, so the shared
     // pass has already run at the registry seam.
-    const normalize = overrides.normalize ?? makeHindiNormalizer(def.numbers);
+    const normalize = overrides.normalize ?? makeHindiNormalizer(def.numbers, def);
     const symbolTier = overrides.symbols ?? SYMBOLS;
 
     function text(input: string): string {

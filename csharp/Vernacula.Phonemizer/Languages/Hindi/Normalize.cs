@@ -11,12 +11,16 @@ namespace Vernacula.Phonemizer.Languages.Hindi;
 public static class Normalize
 {
     /** Ordinal suffix → the gender/number it marks. */
-    private static readonly IReadOnlyDictionary<string, int> SUFFIX_FORM = new Dictionary<string, int>(StringComparer.Ordinal)
-    {
-        ["वाँ"] = 0, ["वां"] = 0, ["वा"] = 0,
-        ["वीं"] = 1, ["वी"] = 1,
-        ["वें"] = 2, ["वे"] = 2,
-    };
+    /**
+     * ⚠ HINDI'S TABLES SERVE THE WHOLE FAMILY, which is inherited behaviour and now at least VISIBLE — see
+     * the TS module for the argument. Kept as the DEFAULT; a family member that sources its own declares
+     * them in its own jsonc.
+     */
+    private static HindiOrdinalSuffixes? DEFAULT_SUFFIXES => Hindi.DEF.OrdinalSuffixes;
+
+    /** Longest-first alternation, regex metacharacters escaped. */
+    private static string Alt(IEnumerable<string> keys) =>
+        string.Join("|", keys.OrderByDescending(k => k.Length).Select(System.Text.RegularExpressions.Regex.Escape));
 
     /**
      * Irregular ordinals, from the manifest. ⚠ THE JSON KEYS ARE STRINGS and this code indexes by INT,
@@ -44,8 +48,6 @@ public static class Normalize
 
     private static readonly JsRe ERA_ISP = JsRegex.Compile("(?<![\\p{L}\\p{M}])ई\\.?\\s?स\\.?\\s?पू\\.?", "gu");
     private static readonly JsRe ERA_IP = JsRegex.Compile("(?<![\\p{L}\\p{M}])ई\\.?\\s?पू\\.?", "gu");
-    private static readonly JsRe ORDINAL_RE = JsRegex.Compile(
-        $"(?<![\\d.,])(\\d+)\\s?({string.Join("|", SUFFIX_FORM.Keys)})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe ABBREV_RE = JsRegex.Compile(
         $"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.?(\\s+)(?=[\\p{{L}}])", "gu");
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(\\d)\\s?({UNIT_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
@@ -73,15 +75,24 @@ public static class Normalize
 
     /** Build the Hindi normalizer. Takes the numbers definition so the ordinal rule can compose the cardinal
      *  words it attaches its suffix to — the same data the engine's own number path uses. */
-    public static Func<string, string> MakeHindiNormalizer(NumbersDef numbers)
+    public static Func<string, string> MakeHindiNormalizer(NumbersDef numbers, HindiDef? own = null)
     {
+        var irregular = own?.IrregularOrdinals is { Count: > 0 } o ? o : Hindi.DEF.IrregularOrdinals;
+        var ordSuf = own?.OrdinalSuffixes ?? DEFAULT_SUFFIXES;
+        var suffixForm = ordSuf?.Regular ?? new Dictionary<string, int>();
+        var suppletive = ordSuf?.SuppletiveConsonants ?? new Dictionary<string, string>();
+        var vowelForm = ordSuf?.VowelForms ?? new Dictionary<string, int>();
+        var ordinalRe = suffixForm.Count == 0 ? null : JsRegex.Compile(
+            $"(?<![\\d.,])(\\d+)\\s?({Alt(suffixForm.Keys)})(?![\\p{{L}}\\p{{M}}])", "gu");
+        var suppletiveRe = suppletive.Count == 0 ? null : JsRegex.Compile(
+            $"(?<![\\d.,])(\\d)({Alt(suppletive.Values.Distinct())})({Alt(vowelForm.Keys)})(?![\\p{{L}}\\p{{M}}])", "gu");
         /** Integer → its Devanagari cardinal words, as the engine's number path would render them. */
         List<string> Cardinal(double n) => Core.Numbers.indicNumberWords(n, numbers).Select(w => w ?? "").ToList();
 
         /** The ordinal, agreeing with whatever the written suffix marked. */
         string? Ordinal(double n, int form, string suffix)
         {
-            if (double.IsInteger(n) && n >= int.MinValue && n <= int.MaxValue && IRREGULAR.TryGetValue(((int)n).ToString(CultureInfo.InvariantCulture), out var irr))
+            if (double.IsInteger(n) && n >= int.MinValue && n <= int.MaxValue && irregular.TryGetValue(((int)n).ToString(CultureInfo.InvariantCulture), out var irr))
                 return irr[form];
             var words = Cardinal(n);
             if (words.Count == 0 || words.Any(w => w == "")) return null;
@@ -101,8 +112,21 @@ public static class Normalize
 
             // 2) ORDINAL SUFFIXES. THE TRAILING BOUNDARY IS LOAD-BEARING: without it the suffix matches the
             //    START of an ordinary word and `10 वापस` glues into one token.
-            s = ORDINAL_RE.Replace(s, m =>
-                Ordinal(Js.Number(m.Groups[1].Value), SUFFIX_FORM[m.Groups[2].Value], m.Groups[2].Value) ?? m.Value);
+            if (ordinalRe is not null)
+                s = ordinalRe.Replace(s, m =>
+                    Ordinal(Js.Number(m.Groups[1].Value), suffixForm[m.Groups[2].Value], m.Groups[2].Value) ?? m.Value);
+
+            // 2b) THE SUPPLETIVE SPELLINGS — `1ला`, `2रा`, `4था`, `6ठा`. See the TS module: GLUED only
+            //     (`था`/`थी` are the past copula), the consonant must be that NUMBER's own, and the
+            //     trailing boundary keeps `2राज्य` out.
+            if (suppletiveRe is not null)
+                s = suppletiveRe.Replace(s, m =>
+                {
+                    var d = m.Groups[1].Value;
+                    if (!suppletive.TryGetValue(d, out var c) || c != m.Groups[2].Value) return m.Value;
+                    return irregular.TryGetValue(d, out var forms) && vowelForm.TryGetValue(m.Groups[3].Value, out var f)
+                        && f < forms.Length ? forms[f] : m.Value;
+                });
 
             s = ABBREV_RE.Replace(s, m => $"{ABBREV[m.Groups[1].Value]}{m.Groups[2].Value}");
 

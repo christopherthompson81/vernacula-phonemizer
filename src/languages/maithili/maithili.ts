@@ -58,7 +58,7 @@ const UDATTA_AS_AVAGRAHA = /॑/gu;
 let MAI: ReturnType<typeof makeNativeHindi> | undefined;
 function engine(foreign?: ForeignPhonemizer) {
     const def = loadManifest<HindiDef>(import.meta.url, "maithili.jsonc");
-    const hindi = makeHindiNormalizer(def.numbers);
+    const hindi = makeHindiNormalizer(def.numbers, def);
     return makeNativeHindi(
         def,
         loadSharedPhonology(),

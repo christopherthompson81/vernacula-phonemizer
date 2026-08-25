@@ -43,6 +43,13 @@ public class HindiDef : AbugidaDef
      * SHARED, and Hindi marks [masc, fem, oblique] where Gujarati adds a neuter.
      */
     public IReadOnlyDictionary<string, string[]> IrregularOrdinals { get; init; } = new Dictionary<string, string[]>();
+
+    /**
+     * The written ordinal suffixes and the agreement form each marks. ⚠ NULLABLE: this Def is SHARED, and a
+     * family member that has not sourced its own ordinal orthography declares nothing and inherits Hindi's
+     * rather than getting a half-built rule. See the jsonc.
+     */
+    public HindiOrdinalSuffixes? OrdinalSuffixes { get; init; }
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */
@@ -200,7 +207,7 @@ public static class Hindi
         }
 
         // ⚠ The Hindi-specific rewrites run BEFORE the shared symbol tier, whose unit keys are LATIN.
-        var normalize = normalizeOverride ?? Normalize.MakeHindiNormalizer(def.Numbers);
+        var normalize = normalizeOverride ?? Normalize.MakeHindiNormalizer(def.Numbers, def);
         var symbolTier = symbolsOverride ?? SYMBOLS;
 
         string Text(string input)
@@ -261,4 +268,12 @@ public sealed class HindiSymbolTier
     public MultiplyDef Multiply { get; init; } = null!;
     public ExponentWordsDef ExponentWords { get; init; } = new();
     public BareExponentDef BareExponent { get; init; } = new();
+}
+
+public sealed class HindiOrdinalSuffixes
+{
+    public IReadOnlyDictionary<string, int> Regular { get; init; } = new Dictionary<string, int>();
+    /** Per-NUMBER, which is the guard — a single alternation would claim `2था`. See the jsonc. */
+    public IReadOnlyDictionary<string, string> SuppletiveConsonants { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, int> VowelForms { get; init; } = new Dictionary<string, int>();
 }

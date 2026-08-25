@@ -428,6 +428,27 @@
         "bareExponent": { "squared": "{n} का वर्ग", "cubed": "{n} का घन", "power": "{n} की घात {e}" , "negative": "ऋण" }
     },
 
+    // THE WRITTEN ORDINAL SUFFIXES, and which agreement form each one marks: 0 masculine, 1 feminine,
+    // 2 oblique.
+    //
+    // ⚠ `suppletiveConsonants` IS THE HALF THAT WAS MISSING, AND ITS ABSENCE WAS A MISREADING. The rule
+    // only ever matched the REGULAR suffixes, so `1ला` — ordinary Hindi orthography — never reached
+    // `irregularOrdinals` even though पहला is sitting in it, and read as the CARDINAL plus a stranded
+    // syllable: *ˈeːk lˈaː*, "one laa". `1वाँ` was correct the whole time, which is why it went unnoticed.
+    //
+    // ⚠ THE CONSONANT IS DECLARED PER NUMBER, NOT AS ONE ALTERNATION, and that is the guard. A bare
+    // `\d(ला|रा|था|ठा)` would claim `2था`; requiring 2's own consonant र means only `2रा` matches. Together
+    // with GLUING (no space) and the trailing letter-boundary this is what keeps the rule off ordinary
+    // words — ⚠ `था` IS THE MASCULINE PAST COPULA and `थी` the feminine, so `2 था` is "there were 2" and
+    // must never be claimed; a copula is always a separate word, which is exactly what gluing tests.
+    // (Gujarati excludes `4થી` outright because its થી is a glued ABLATIVE postposition. Hindi's ablative
+    // is the separate से, so no such exclusion is needed here — the difference is recorded, not assumed.)
+    "ordinalSuffixes": {
+        "regular": { "वाँ": 0, "वां": 0, "वा": 0, "वीं": 1, "वी": 1, "वें": 2, "वे": 2 },
+        "suppletiveConsonants": { "1": "ल", "2": "र", "3": "र", "4": "थ", "6": "ठ" },
+        "vowelForms": { "ा": 0, "ी": 1, "े": 2 }
+    },
+
     // Irregular ordinals, indexed [masculine, feminine, oblique]. 1–4 and 6 are suppletive; 5 (पाँचवाँ)
     // and everything from 7 up are regular — the cardinal plus the suffix, which is the rule.
     "irregularOrdinals": {
