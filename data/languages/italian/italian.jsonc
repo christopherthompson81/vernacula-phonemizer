@@ -37,5 +37,154 @@
         "teens": ["dieci", "undici", "dodici", "tredici", "quattordici", "quindici", "sedici", "diciassette", "diciotto", "diciannove"],
         "tens": ["", "", "venti", "trenta", "quaranta", "cinquanta", "sessanta", "settanta", "ottanta", "novanta"],
         "hundred": "cento", "thousand": "mille", "thousands": "mila", "million": "milione", "millions": "milioni", "and": "e"
+    },
+    // ---------------------------------------------------------------------------------------------------
+    // THE INITIALISM TIER's data — the three tables core/initialisms.ts reads for this language.
+
+    // LEXICAL: readable letter runs Italian nevertheless spells out. ⚠ DELIBERATELY SHORT — the phonotactics
+    // below already catch every unpronounceable run, and a wrong entry here is a confidently wrong reading.
+    // These three are where Italian usage is not in doubt (`ia` = intelligenza artificiale, ×3 in the
+    // corpus). USA, NASA, PIL, REM, COVID are ABSENT on purpose: Italian reads them as words and the g2p
+    // already does. ⚠ This was a bare `new Set([...])` in normalize.ts — Italian was the only ported
+    // language whose acronym list was not in its manifest.
+    "acronymLetters": ["ia", "ip", "hiv"],
+
+    // Italian letter names, each verified through this engine's own g2p: a=[ˈa], bi=[bˈi], ci=[t͡ʃˈi],
+    // effe=[ˈeffe], gi=[d͡ʒˈi], acca=[ˈakka], cappa=[kˈappa], cu=[kˈu], ics=[ˈiks], ipsilon=[ipsˈilon],
+    // zeta=[t͡sˈeta]. The five letters outside the native 21 take their conventional Italian names
+    // (Treccani, *alfabeto*): j *i lunga*, k *cappa*, w *doppia vu*, x *ics*, y *ipsilon*.
+    "letterNames": {
+        "a": "a", "b": "bi", "c": "ci", "d": "di", "e": "e", "f": "effe", "g": "gi", "h": "acca", "i": "i",
+        "j": "i lunga", "k": "cappa", "l": "elle", "m": "emme", "n": "enne", "o": "o", "p": "pi", "q": "cu",
+        "r": "erre", "s": "esse", "t": "ti", "u": "u", "v": "vu", "w": "doppia vu", "x": "ics",
+        "y": "ipsilon", "z": "zeta"
+    },
+
+    // Italian PHONOTACTICS, for the OOV spell-it-out test. Italian syllable structure is strict and native
+    // words end in a VOWEL, so a two-consonant tail is the strongest single signal that a letter run cannot
+    // be read as a word — it is what separates `USB` (→ *u esse bi*) from `ISIS`, `OPEC`, `COVID` and `NASA`,
+    // all read as words. The codas listed are the ones Italian tolerates in the established loanwords it
+    // does pronounce as words (film, sport, test, record, trend, camp, rock).
+    "phonotactics": {
+        "vowels": "aeiouàèéìíîòóùú",
+        "onsets": [
+            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr",
+            "ch", "gh", "gn", "qu", "ps", "pn", "sc", "sp", "st", "sf", "sb", "sd", "sg",
+            "sl", "sm", "sn", "sq", "sv", "sr", "sk", "tl"
+        ],
+        "codas": [
+            "lm", "rt", "rd", "rn", "rm", "rs", "rk", "st", "nt", "nd", "nk", "ng", "mp",
+            "ck", "sh", "ss", "ll", "tt", "nn", "rc", "lt"
+        ]
+    },
+    // ---------------------------------------------------------------------------------------------------
+    // Dotted abbreviations → the spoken words. `n.` is absent and handled separately: it only means *numero*
+    // before a digit. Longest key first at the call site, so `pagg` is not matched as `pag` plus a stray g.
+    "dottedAbbrev": {
+        "sig": "signor", "sigg": "signori", "sigra": "signora", "signa": "signorina",
+        "dott": "dottor", "dr": "dottor", "prof": "professor", "ing": "ingegner", "avv": "avvocato",
+        "on": "onorevole", "ecc": "eccetera", "es": "esempio",
+        "pag": "pagina", "pagg": "pagine", "art": "articolo", "artt": "articoli",
+        "cap": "capitolo", "vol": "volume", "fig": "figura", "tel": "telefono"
+    },
+
+    // ORDINALS 1–10, which are NOT derivable from the cardinal (primo ≠ uno-esimo). Everything above 10 is
+    // COMPOSED by romanOrdinals.ts from the cardinal, so only the irregular head is data — which is why
+    // there is no tens or hundreds row here, unlike es and pt.
+    "ordinals": {
+        "1": "primo", "2": "secondo", "3": "terzo", "4": "quarto", "5": "quinto",
+        "6": "sesto", "7": "settimo", "8": "ottavo", "9": "nono", "10": "decimo"
+    },
+
+    // FRACTIONS. Only 1/2 has a suppletive name; every other denominator takes the ordinal (1/5 = un quinto),
+    // and the plural is the regular masculine -o → -i (tre quarti). `numeratorOne` is the APOCOPATED form the
+    // fraction noun takes — *un quinto*, never *uno quinto*.
+    "fractions": { "denominators": { "2": "mezzo" }, "numeratorOne": "un" },
+
+    "eraMarkers": { "beforeChrist": "avanti Cristo", "afterChrist": "dopo Cristo" },
+    "numberSign": "numero",
+
+    // DEGREES. ⚠ ALWAYS PLURAL, which is PRE-EXISTING and WRONG — `1 °C` reads *uno gradi Celsius*. NOT fixed
+    // in this lift: two things are broken and they must be fixed together, since the noun must agree
+    // (*un grado* / *venti gradi*) AND the numeral must APOCOPATE before it (*un*, not *uno*) — which the
+    // equivalent Portuguese fix (#966) did not need. The same rule shape there also hid a single-digit
+    // capture that the agreement fix had to widen; Italian's `(\d)` capture has it too.
+    "degree": { "word": "gradi", "celsius": "Celsius", "fahrenheit": "Fahrenheit" },
+
+    // Compass points after a degree sign — a geographic COORDINATE, not a temperature and not an ordinal.
+    "compass": { "n": "nord", "s": "sud", "e": "est", "w": "ovest" },
+
+    // The DECIMAL COMMA's name. Applied in its own pass, AFTER the symbol tier: rewriting `1,5 km/s` first
+    // would leave the tier looking at `5 km/s` and destroy the number-unit adjacency it matches on.
+    "decimalWord": "virgola",
+
+    // ---------------------------------------------------------------------------------------------------
+    // The SIGN AND MATH WORDS (core/normalizeSymbols.ts `SignWords`). ⚠ ONE SOURCE: the symbol tier in
+    // italian.ts reads `times` and `ampersand` from here too.
+    //
+    // ⚠ THE RELATIONAL WORDS CARRY THE COPULA (`è uguale a`, not `uguale a`), unlike es and pt, and that is
+    // SOURCED rather than stylistic: the register tier's Italian arithmetic prose writes the full predicate
+    // between operands — "ogni numero dispari maggiore di 5 è somma di tre primi", "tre volte un quarto è
+    // uguale a un quarto di tre", "ogni a minore di zero (negativo)", "39 non può essere diviso per 15".
+    //
+    // `times` — ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a sweep for the operator returns
+    // homographs of PREPOSITIONS in every language tried (it `per` ×25 is the preposition, never the
+    // operator). `ampersand` — `e` ×1067 in this corpus.
+    "signWords": {
+        "plusMinus": "più meno",
+        "plus": "più",
+        "minus": "meno",
+        "ampersand": "e",
+        "equals": "è uguale a",
+        "lessThan": "è minore di",
+        "greaterThan": "è maggiore di",
+        "times": "per",
+        "dividedBy": "diviso per"
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data (italian.ts). Longest keys match first, so km² beats km and km/h beats km.
+    "symbols": {
+        "percent": ["per cento"],
+        // ⚠ SINGULAR AND PLURAL. *euro* and *yen* are INVARIABLE in Italian (Accademia della Crusca: «euro»
+        // is unchanged in the plural), so both forms being the same word is the fact, not an oversight.
+        // ⚠ READ BY TWO PATHS: the tier claims the POSTPOSED sign, and normalize.ts claims the PREPOSED form,
+        // which needs the partitive *di* the shared magnitude hop cannot insert.
+        "currency": {
+            "€": ["euro", "euro"],
+            "$": ["dollaro", "dollari"],
+            "£": ["sterlina", "sterline"],
+            "¥": ["yen", "yen"]
+        },
+        // The nouns the preposed rule recognises as ALREADY SPELLED OUT after the amount, so it does not add
+        // a second currency word. Stems, matched case-insensitively at the start of what follows.
+        "currencyStems": ["dollar", "euro", "sterlin", "yen", "franch"],
+        // ⚠ DECLARED FOR THE UNIT PATH, and the reason it was once withheld no longer applies. The list was
+        // absent so the CURRENCY magnitude hop could not emit `5 milioni dollari` without the partitive —
+        // but `magnitudes` also gates the UNIT path's connective hop, so withholding it left the tier unable
+        // to cross `milioni di` to reach a unit and `2,2 milioni di km²` read as *due virgola due milioni di
+        // KM*: the exponent dropped AND the unit noun left raw. One field, two consumers, one problem.
+        "magnitudes": ["miliardi", "miliardo", "milioni", "milione", "mila"],
+        "magnitudeConnective": "di",
+        "units": {
+            "km/h": ["chilometro orario", "chilometri orari"],
+            "km/s": ["chilometro al secondo", "chilometri al secondo"],
+            "m/s": ["metro al secondo", "metri al secondo"],
+            "mph": ["miglio orario", "miglia orarie"],
+            "km": ["chilometro", "chilometri"], "cm": ["centimetro", "centimetri"],
+            "mm": ["millimetro", "millimetri"], "m": ["metro", "metri"],
+            "kg": ["chilogrammo", "chilogrammi"], "mg": ["milligrammo", "milligrammi"],
+            "gb": ["gigabyte"], "mb": ["megabyte"], "tb": ["terabyte"],
+            "kw": ["chilowatt"], "mw": ["megawatt"], "hz": ["hertz"]
+        },
+        "exponentWords": { "squared": ["quadrato", "quadrati"], "cubed": ["cubo", "cubi"] },
+        // BARE EXPONENT — the PREDICATE for a power with no unit to modify, a different word from the unit
+        // MODIFIER above: *chilometri quadrati* but *venti al quadrato*.
+        // ⚠ PROVENANCE: STANDARD MATHEMATICAL REGISTER, not a corpus attestation — the power words are ×0 in
+        // this language's artifact.
+        "bareExponent": {
+            "squared": "{n} al quadrato", "cubed": "{n} al cubo", "power": "{n} elevato a {e}",
+            "negative": "meno"
+        }
     }
 }

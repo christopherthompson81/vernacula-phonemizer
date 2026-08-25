@@ -27,17 +27,16 @@
  */
 import type { RomanPolicy } from "../../core/roman.ts";
 import { numberWords } from "./italian.ts";
+import { MANIFEST } from "./manifest.ts";
 
-/** 1–10: not derivable from the cardinal (primo ≠ uno-esimo). */
-const IRREGULAR: Readonly<Record<number, string>> = {
-    1: "primo", 2: "secondo", 3: "terzo", 4: "quarto", 5: "quinto",
-    6: "sesto", 7: "settimo", 8: "ottavo", 9: "nono", 10: "decimo",
-};
+/** 1–10 (italian.jsonc `ordinals`): not derivable from the cardinal (primo ≠ uno-esimo). Everything above
+ *  10 is composed from the cardinal below, which is why the manifest carries only this irregular head. */
+const IRREGULAR = MANIFEST.ordinals;
 
 /** Italian masculine ordinal for any n a Roman numeral can encode, or `undefined` where we decline to guess. */
 function italianOrdinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1) return undefined;
-    const irr = IRREGULAR[n];
+    const irr = IRREGULAR[String(n)];
     if (irr !== undefined) return irr;
     const card = numberWords(n);
     if (card.includes(" ")) return undefined; // millions split into words (un milione …) — not worth guessing

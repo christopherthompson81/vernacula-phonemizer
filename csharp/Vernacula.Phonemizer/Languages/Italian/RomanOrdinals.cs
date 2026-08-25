@@ -9,11 +9,9 @@ namespace Vernacula.Phonemizer.Languages.Italian;
 public static class RomanOrdinals
 {
     /** 1–10: not derivable from the cardinal (primo ≠ uno-esimo). */
-    private static readonly IReadOnlyDictionary<int, string> IRREGULAR = new Dictionary<int, string>
-    {
-        [1] = "primo", [2] = "secondo", [3] = "terzo", [4] = "quarto", [5] = "quinto",
-        [6] = "sesto", [7] = "settimo", [8] = "ottavo", [9] = "nono", [10] = "decimo",
-    };
+    /** 1–10 (italian.jsonc `ordinals`): not derivable from the cardinal (primo ≠ uno-esimo). Everything
+     *  above 10 is composed from the cardinal below, which is why the manifest carries only this head. */
+    private static IReadOnlyDictionary<string, string> IRREGULAR => ItalianPhonemizer.DEF.Ordinals;
 
     private static readonly JsRe ENDS_VOWEL = JsRegex.Compile("[aeiou]$", "u");
 
@@ -24,7 +22,7 @@ public static class RomanOrdinals
     public static string? ItalianOrdinal(int n)
     {
         if (n < 1) return null;
-        if (IRREGULAR.TryGetValue(n, out var irr)) return irr;
+        if (IRREGULAR.TryGetValue(Js.NumberToString(n), out var irr)) return irr;
         var card = ItalianPhonemizer.NumberWords(n);
         if (card.Contains(' ')) return null; // millions split into words (un milione …) — not worth guessing
         if (card.EndsWith("tré", StringComparison.Ordinal)) return $"{card[..^1]}eesimo"; // ventitré → ventitreesimo
