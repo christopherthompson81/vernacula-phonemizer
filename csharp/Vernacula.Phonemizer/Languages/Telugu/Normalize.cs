@@ -60,18 +60,8 @@ public static class Normalize
     };
     private static readonly JsRe ERA_RE = JsRegex.Compile($"{NB}క్రీ\\s*\\.\\s*(శ|పూ)\\.?{NA}", "gu");
 
-    /**
-     * Telugu renderings of the LATIN letter names, which is what a dotted Telugu initialism is made of. A
-     * CLOSED LIST on purpose; a generic "short token, dot, short token" rule matches sentence boundaries.
-     */
-    private static readonly string[] LETTER_NAME =
-    {
-        "ఏ", "బి", "బీ", "సి", "సీ", "డి", "డీ", "ఇ", "ఈ", "ఎఫ్", "జి", "జీ", "హెచ్", "ఐ", "జే",
-        "కే", "ఎల్", "ఎం", "యం", "ఎన్", "ఓ", "పి", "పీ", "క్యూ", "ఆర్", "ఎస్", "టి", "టీ",
-        "యు", "యూ", "వి", "వీ", "డబ్ల్యూ", "ఎక్స్", "వై", "జెడ్",
-    };
     private static readonly string LETTER =
-        "(?:" + string.Join("|", LETTER_NAME.OrderByDescending(a => a.Length)) + ")";
+        "(?:" + string.Join("|", Manifest.MANIFEST.InitialismLetterForms.OrderByDescending(a => a.Length)) + ")";
     /** A run of ≥2 dot-separated letter names. The run's TRAILING dot is consumed only when the sentence
      *  visibly continues, so a true sentence-final pause is never lost. */
     private static readonly JsRe INITIALISM_RE = JsRegex.Compile(

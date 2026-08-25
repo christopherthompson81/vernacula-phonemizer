@@ -60,16 +60,6 @@ public static class Normalize
         ["பி"] = "கிறிஸ்துவுக்கு பின்",
     };
 
-    /**
-     * Tamil renderings of the LATIN letter names, which is what a dotted Tamil initialism is made of. A
-     * CLOSED LIST on purpose; a generic "short token, dot, short token" rule matches sentence boundaries.
-     */
-    private static readonly string[] LETTER_NAME =
-    {
-        "ஏ", "பி", "சி", "டி", "இ", "எஃப்", "ஜி", "எச்", "ஐ", "ஜே", "கே", "எல்", "எம்", "என்",
-        "ஓ", "க்யூ", "ஆர்", "எஸ்", "யு", "வி", "டபிள்யூ", "எக்ஸ்", "ஒய்", "இசட்", "நா",
-    };
-
     private static string Alt(IEnumerable<string> keys) =>
         string.Join("|", keys.OrderByDescending(a => a.Length));
 
@@ -77,7 +67,7 @@ public static class Normalize
     private static readonly JsRe TAMIL_UNIT_DOT_RE = JsRegex.Compile($"{NB}(கி|மி|செ)\\s*\\.\\s*(மீ|மி){NA}", "gu");
     private static readonly JsRe TAMIL_UNIT_SPACED_RE = JsRegex.Compile($"(?<=\\d\\s?)(கி|மி|செ)\\s(மீ|மி){NA}", "gu");
     private static readonly JsRe ERA_RE = JsRegex.Compile($"{NB}கி\\s*\\.?\\s*(மு|பி)\\.?{NA}", "gu");
-    private static readonly string LETTER = $"(?:{Alt(LETTER_NAME)})";
+    private static readonly string LETTER = $"(?:{Alt(Manifest.MANIFEST.InitialismLetterForms)})";
     private static readonly JsRe INITIALISM_RE = JsRegex.Compile(
         $"{NB}{LETTER}(?:\\s*\\.\\s*{LETTER})+(?:\\s*\\.(?=\\s+[\\p{{L}}]))?{NA}", "gu");
 

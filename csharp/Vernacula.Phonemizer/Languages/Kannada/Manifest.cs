@@ -16,6 +16,8 @@ public sealed class KannadaManifest : AbugidaDef
 {
     public KannadaNumbers Numbers { get; set; } = new();
     public Dictionary<string, string> ClausePunctuation { get; set; } = new();
+    /** ⚠ WRITTEN forms for RECOGNITION, not a spelling map — see the jsonc. Never emitted. */
+    public IReadOnlyList<string> InitialismLetterForms { get; init; } = Array.Empty<string>();
 }
 
 public static class Manifest

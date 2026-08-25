@@ -23,6 +23,9 @@ import { MANIFEST as FR } from "../src/languages/french/manifest.ts";
 import { MANIFEST as RU } from "../src/languages/russian/manifest.ts";
 import { MANIFEST as JV } from "../src/languages/javanese/manifest.ts";
 import { MANIFEST as HA } from "../src/languages/hausa/manifest.ts";
+import { MANIFEST as TA } from "../src/languages/tamil/manifest.ts";
+import { MANIFEST as TE } from "../src/languages/telugu/manifest.ts";
+import { MANIFEST as KN } from "../src/languages/kannada/manifest.ts";
 
 interface Lifted {
     letterNames: Record<string, string>;
@@ -151,5 +154,45 @@ describe.each(LANGS)("%s reads its lifted initialism tables", (code, DEF, senten
         // would therefore fail on correct data, which is what the first version of this test did.
         const named = DEF.phonotactics.vowels.split("").filter((v) => DEF.letterNames[v] !== undefined);
         expect(named.length).toBeGreaterThan(0);
+    });
+});
+
+/**
+ * ⚠ A DIFFERENT FACT UNDER A DIFFERENT NAME. ta, te and kn do NOT have a `letterNames` map. They have a
+ * closed list of the letter-name spellings AS WRITTEN — யு.எஸ். , యూ.ఎస్. , ಯು.ಎಸ್. — used to build the
+ * regex that RECOGNISES a dot-separated initialism run so its interior dots can be deleted. Nothing in the
+ * list is ever emitted as a reading; the names reach the output as the corpus's own spellings, unchanged.
+ *
+ * Filing that under `letterNames` (character → spoken name, everywhere else in the fleet) would put two
+ * facts under one name — the `PREFIX_GUESS` shape — so it is `initialismLetterForms`.
+ *
+ * ⚠ THE LIST IS CLOSED BY NECESSITY, not by laziness: a generic "short token, dot, short token" rule cannot
+ * be written safely against a script with NO CASE DISTINCTION, because it matches sentence boundaries. The
+ * Tamil header records probing exactly that and hitting "…ஆவர். கட்பேக்தான்".
+ */
+const RECOGNITION: [string, { initialismLetterForms: string[] }, string, string][] = [
+    ["ta", TA, "யு.எஸ். அரசு", "யு.எஸ்."],
+    ["te", TE, "యూ.ఎస్. ప్రభుత్వం", "యూ.ఎస్."],
+    ["kn", KN, "ಯು.ಎಸ್. ಸರ್ಕಾರ", "ಯು.ಎಸ್."],
+];
+
+describe.each(RECOGNITION)("%s recognises an initialism run from initialismLetterForms", (code, DEF, sentence, run) => {
+    const say = (s: string): string => phonemize(s, code).replace(/[ˈˌ]/gu, "");
+
+    test("the interior dots are deleted, so the run is one phrase and not three", () => {
+        // With the list empty the regex matches nothing and every dot survives as a clause pause.
+        expect(say(sentence)).not.toContain(" . ");
+        expect(DEF.initialismLetterForms.length).toBeGreaterThan(0);
+    });
+
+    test("every declared form actually appears in the run it was declared for", () => {
+        // The forms are WRITTEN spellings, so they must be substrings of the source text — not of the IPA.
+        const used = DEF.initialismLetterForms.filter((f) => run.includes(f));
+        expect(used.length, `${code}: no declared form occurs in ${run}`).toBeGreaterThan(0);
+    });
+
+    test("nothing in the list is emitted as a reading — it is a recognition list", () => {
+        // Each form is native script; the IPA never contains native characters.
+        for (const f of DEF.initialismLetterForms) expect(say(sentence)).not.toContain(f);
     });
 });

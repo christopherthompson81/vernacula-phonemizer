@@ -123,9 +123,32 @@ which is also why Hausa is excluded from the batch's cluster assertions.
 
 Both failures looked like port bugs and were assertions written from an assumption about the language.
 
+## Batch 4 — ta, te, kn — 2026-08-25 07:50 — the recognition lists
+
+The three batch 2 deferred, because what they hold is not a `letterNames` map.
+
+**What it actually is.** A CLOSED list of the letter-name spellings AS WRITTEN — யு.எஸ். , యూ.ఎస్. ,
+ಯು.ಎಸ್. — used to build the regex that RECOGNISES a dot-separated initialism run so its interior dots can be
+deleted. Nothing in the list is ever EMITTED: the names reach the output as the corpus's own spellings,
+passed through unchanged. Everywhere else in the fleet `letterNames` is character → SPOKEN name, so filing
+both under that name would be one name over two facts. Lifted as **`initialismLetterForms`**.
+
+**Why the list is closed by necessity, not laziness.** A generic "short token, dot, short token" rule cannot
+be written safely against a script with NO CASE DISTINCTION: the Tamil header records probing exactly that
+and matching SENTENCE BOUNDARIES — "…ஆவர். கட்பேக்தான்", "…அல்ல. செங்குத்தாக". Restricting the members to
+actual letter names is what makes the rule sound. Kannada's list is four entries for the same reason: only
+what the corpus attests, so nothing is invented.
+
+**0 of 11 probe readings moved.** Sweep: ta 4, te 4, kn 3 — live on the first pass, because the probe was
+written from what the rule is FOR rather than from a generic template.
+
+The three assertions that matter: the interior dots do not survive as clause pauses; every declared form
+occurs in the run it was declared for; and **no declared form ever appears in the IPA**, which is what pins
+"recognition list, not spelling map" as a property rather than a comment.
+
 ## Remaining
 
-4: en, and the ta/te/kn recognition-list batch.
+1: `en` — the largest engine, neural, and four accent variants read it.
   · `jv` has no manifest.ts and needs one.
   · `th`, `vi`, `ta`, `te`, `kn`, `cmn` have no phonotactics block — letterNames only.
   · `en` last: the largest engine, neural, and four accent variants read it.

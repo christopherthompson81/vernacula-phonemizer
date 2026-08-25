@@ -213,4 +213,19 @@
             "one": "ஒரு",
         },
     },
+
+    // ⚠ WRITTEN FORMS FOR RECOGNITION, NOT A SPELLING MAP. These are the letter-name spellings as they
+    // appear IN TEXT (யு.எஸ். = U.S., ஏ.டி. = A.D.), used to build the regex that finds a dot-separated
+    // initialism run so its interior dots can be deleted. Nothing here is ever EMITTED as a reading — the
+    // names pass through as the corpus's own spellings. That is why this is not `letterNames`, which in
+    // every other language is character → spoken name.
+    //
+    // ⚠ A CLOSED LIST, and it has to be: a generic "short token, dot, short token" rule cannot be written
+    // safely against a script with no case distinction. Probing one against the corpus matched SENTENCE
+    // BOUNDARIES — "…ஆவர். கட்பேக்தான்", "…அல்ல. செங்குத்தாக". Restricting the members to actual letter
+    // names is what makes the rule sound.
+    "initialismLetterForms": [
+        "ஏ", "பி", "சி", "டி", "இ", "எஃப்", "ஜி", "எச்", "ஐ", "ஜே", "கே", "எல்", "எம்", "என்", "ஓ", "க்யூ",
+        "ஆர்", "எஸ்", "யு", "வி", "டபிள்யூ", "எக்ஸ்", "ஒய்", "இசட்", "நா"
+    ]
 }

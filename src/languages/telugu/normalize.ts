@@ -34,6 +34,7 @@
  * as clause breaks (step 5).
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { MANIFEST } from "./manifest.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -120,18 +121,7 @@ const ERA: Readonly<Record<string, string>> = {
 };
 const ERA_RE = new RegExp(`${NOT_LETTER_BEFORE}క్రీ\\s*\\.\\s*(శ|పూ)\\.?${NOT_LETTER_AFTER}`, "gu");
 
-/**
- * Telugu renderings of the LATIN letter names, which is what a dotted Telugu initialism is made of
- * (యూ.ఎస్. = U.S., ఏ.డి. = A.D., పి.యం. = p.m.). A CLOSED LIST, for the reason the Tamil run recorded:
- * a generic "short token, dot, short token" rule cannot be written safely against a script with no case
- * distinction, because it matches sentence boundaries.
- */
-const LETTER_NAME = [
-    "ఏ", "బి", "బీ", "సి", "సీ", "డి", "డీ", "ఇ", "ఈ", "ఎఫ్", "జి", "జీ", "హెచ్", "ఐ", "జే",
-    "కే", "ఎల్", "ఎం", "యం", "ఎన్", "ఓ", "పి", "పీ", "క్యూ", "ఆర్", "ఎస్", "టి", "టీ",
-    "యు", "యూ", "వి", "వీ", "డబ్ల్యూ", "ఎక్స్", "వై", "జెడ్",
-];
-const LETTER = `(?:${[...LETTER_NAME].sort((a, b) => b.length - a.length).join("|")})`;
+const LETTER = `(?:${[...MANIFEST.initialismLetterForms].sort((a, b) => b.length - a.length).join("|")})`;
 /** A run of ≥2 dot-separated letter names. The run's TRAILING dot is consumed only when the sentence
  *  visibly continues, so a true sentence-final pause is never lost. */
 const INITIALISM_RE = new RegExp(
