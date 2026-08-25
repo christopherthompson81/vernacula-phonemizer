@@ -1062,7 +1062,11 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "is \u00d7169 here and is the COPULA standing in for the absent verb (`Bolvi () \u2014 m\u012bsts p\u016bstumu "
             + "Latgol\u0101`, `Golvysm\u012bsts \u2014 Santjago`), which is Karakalpak's finding arriving from the "
             + "other side; the ONE em dash that is a minus (`temperatura beja \u2014 43\u00b0 C`) cannot be "
-            + "separated from the other 168. Registered with the price stated rather than papered over",
+            + "separated from the other 168. Registered with the price stated rather than papered over. "
+            + "\u26a0 AND THE WORD SEARCH IS NOW EXHAUSTED, which is what keeps this an argued refusal "
+            + "rather than a TODO in disguise: `minus`, `m\u012bnus`, `atjimt`, `atjimšona`, `zam nullis` "
+            + "are all \u00d70 on ltg.wikipedia, `nulle` is \u00d70, and Wikidata has no ltg label and "
+            + "ltg.wikipedia no article for either \"minus sign\" or \"negative number\"",
         plus: "measured: `+` \u00d75. Four are the temperature sign (`+17\u00b0C`, `+36\u00b0 C`, `(+36 gradi C)` "
             + "\u00d72) and the fifth is English text (`Baltic language + samogitian = bat-smg`). A plus does "
             + "not invert its operand \u2014 `+36\u00b0` and `36\u00b0` are the same temperature \u2014 so unlike the minus "
@@ -2608,10 +2612,21 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     yo: {
         // Yoruba's referees (wikipron yor, kaikki yor) are word→IPA: they can check how a word is pronounced,
         // never whether it is the right word for a sign. So every reason below is a corpus measurement.
-        minus: "measured: the digit-flanked dash in Yoruba is a RANGE, not a minus — 3,378 hyphens and 4,159 en "
-            + "dashes sit between digits, and the corpus glosses the reading twice: `ọgọ́rùn-ún méjì sí mẹ́fà "
-            + "(200-600 kg)` and, for a scoreline, `góòlù mẹ́rin sí òdo (4–0)`. `sí` IS read for the range, 1,427 "
-            + "digit-flanked instances — see ig/nl/mr/ta/yue, which record the same shape",
+        // ⚠ THE `minus` EXEMPTION WAS REMOVED, AND IT WAS THIS BLOCK'S OWN WARNING COMING TRUE. It read
+        // "the digit-flanked dash in Yoruba is a RANGE, not a minus", which is TRUE OF THE HYPHEN AND THE
+        // EN DASH — 3,378 and 4,159 of them sit between digits, `sí` is read for the range on 1,427
+        // digit-flanked instances, and the corpus glosses it twice (`ọgọ́rùn-ún méjì sí mẹ́fà (200-600 kg)`,
+        // `góòlù mẹ́rin sí òdo (4–0)`). It says NOTHING about U+2212, and the class was exempted anyway.
+        //
+        // yo.wikipedia has 81 U+2212 instances. Many are infobox UTC offsets, but a parenthesised-degree
+        // probe returns seven articles whose Yoruba PROSE carries genuine negative temperatures —
+        // `ìwọ̀n otútù àròpín ti −47.6 °C (−53.7 °F)`, `−38 °C (−36 °F)`, `−39.8 °C (−39.6 °F)`,
+        // `−65 °C (−85 °F)`. Those are not ranges and nothing reads them, so the operand INVERTS.
+        //
+        // This map is for a class where "no reading is shippable at all", argued in the language's own
+        // file. Yoruba's minus is a TODO with no attested word (every candidate probed: `ìyọkúrò` is
+        // physical removal, `yọ kúrò` ×2 the same, `òdì` is "opposite", `àmì ìyọkúrò` ×0, and no wiki
+        // article exists for "negative number" or "minus sign"). A TODO must keep failing.
         degrees: "measured: only the BARE ° with no scale letter — 128 occurrences, of which 55 are "
             + "digit-flanked geographic coordinates (`7°30′S 3°21′E`). °C and °F ARE read (`ìwọ̀n 38 Celsius`). "
             + "The angular `digiri` has 1 hit and three of its four total hits are ACADEMIC degrees "

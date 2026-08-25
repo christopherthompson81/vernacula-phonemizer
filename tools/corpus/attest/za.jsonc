@@ -21,6 +21,47 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "lingz",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Lingz, lij heuh maxlaeuz、duzlingz, dwg cungj doenghduz nyamhcij.…",
+                "…Bak lingz loeg(106) dwg aen swhyienzsoq, beij bak lingz haj hung, bei…",
+                "…Bak lingz loeg(106) dwg aen swhyienzsoq, beij bak lingz haj hung, beij bak lingz caet nyaeq.…",
+                "…106) dwg aen swhyienzsoq, beij bak lingz haj hung, beij bak lingz caet nyaeq.…",
+                "…Bak lingz bat(108) dwg aen swhyienzsoq, beij bak lingz caet hung, bei…",
+                "…Bak lingz bat(108) dwg aen swhyienzsoq, beij bak lingz caet hung, beij bak lingz gouj nyaeq.…"
+            ]
+            },
+        {
+                "word": "laj",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…Boux vunz gaj faenh de heuhguh gaggaj. Youq laj daixbaj coenggyaj, gaggaj dwg cungj coih.…",
+                "…dauj（Balkan） dwg benq dieg youh baihdoengnamz ouhcouh, youq laj Yadwzlijyahaij caueq Hwzhaij. Benq dieg neix miz 550000 bin…",
+                "…1096 nienz - 1291 nienz, youq laj lozmaj dencujgyau gyauvuengz baecinj, Saeyouh funghgen ling…",
+                "…Sawgun：𦨍湳淰），dwg dingz hongdawz gyaudoeng naengz bongh youq laj raemx ndeu。…",
+                "…gqvunz caueq gvajdaeuz cwngci、dogcaiz dungjci doxbeij, youq laj cungj cidu ngeih neix, cwngci gienzleih caebcomz youq siujs…",
+                "…oengj'it cansen cujci, youz Cunghgoz Gungcanjdangj dazyinx. Laj de leab miz Cunghgoz Yinzminz Cwngci Hezsangh Veiyi Cenzgoz…"
+            ]
+            },
+        {
+                "word": "gemq",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
                 "word": "gemj",
                 "verdict": "attested",
                 "bounded": true,
