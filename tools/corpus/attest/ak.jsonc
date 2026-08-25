@@ -17,9 +17,30 @@
     // speech and the sense against the examples before using any of this to justify a reading.
     {
         "language": "ak",
-        "wiki": "fat.wikipedia.org",
-        "tier": "wikipedia",
+        "wiki": "ak.wikipedia.org",
+        "tier": "wikipedia (register-restricted)",
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // `--context` set to exactly this string.
+        "context": "atemperetsɛ",
         "findings": [
+        {
+                "word": "minus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ntefirimu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "ahinanan",
                 "verdict": "attested",

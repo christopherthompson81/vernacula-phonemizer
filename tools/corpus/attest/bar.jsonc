@@ -18,8 +18,62 @@
     {
         "language": "bar",
         "wiki": "bar.wikipedia.org",
-        "tier": "wikipedia",
+        "tier": "wikipedia (register-restricted)",
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // `--context` set to exactly this string.
+        "context": "Temparatua",
         "findings": [
+        {
+                "word": "Minusgrod",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Minusgrad",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…paratua im Jenna bei 23 Grad minus im Noadostn und bei zehn Minusgrad im Südn; im Juli iss duachschnittli 17 bis 23 Grad woam. Vu…"
+            ]
+            },
+        {
+                "word": "minusgrad",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…paratua im Jenna bei 23 Grad minus im Noadostn und bei zehn Minusgrad im Südn; im Juli iss duachschnittli 17 bis 23 Grad woam. Vu…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…liegt de duachschnittliche Temparatua im Jenna bei 23 Grad minus im Noadostn und bei zehn Minusgrad im Südn; im Juli iss dua…"
+            ]
+            },
+        {
+                "word": "weniga",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "Prozent",
                 "verdict": "attested",
@@ -178,22 +232,6 @@
                 "…fdreher (5:00-9:00 Uhr) Bayern 3 - Am Vormittag (9:00-12:00 Uhr) Bayern 3 - Update (12:00-13:00 Uhr) Bayern 3 - Am Nachmitt…",
                 "…m Vormittag (9:00-12:00 Uhr) Bayern 3 - Update (12:00-13:00 Uhr) Bayern 3 - Am Nachmittag (13:00-16:00 Uhr) Bayern 3 - Die…",
                 "…ate (12:00-13:00 Uhr) Bayern 3 - Am Nachmittag (13:00-16:00 Uhr) Bayern 3 - Die Zwei für euren Feierabend (16:00-19:00 Uhr)…"
-            ]
-            },
-        {
-                "word": "minus",
-                "verdict": "attested",
-                "bounded": true,
-                "tokenHits": 19,
-                "articles": 15,
-                "substringOnly": 0,
-                "examples": [
-                "…Foam van Privilegium Maius de oafoche Foam van Privilegium Minus Weahnd's Privilegium Minus duach's Breve easetzd worn is, i…",
-                "…de oafoche Foam van Privilegium Minus Weahnd's Privilegium Minus duach's Breve easetzd worn is, is on de Stej van Privilegiu…",
-                "…da Abendzeitung. De vakaffte Auflog san 114.612 Stickln, a Minus vo 23,6 Prozent seit 1998. De tz is 1968 ois Oblega vom Mün…",
-                "…knde Regl zan schnejn Umrechna vo m/s za km/h is: \"Moi via, minus 10%\". == Oanige Gschwindigkeitn in m/s ==…",
-                "…s za 1900 Millimeta. Im Winta sinkt's Thermometa sejtn unta minus 15 Grod, wärnd im Summa de middlan Temperatuan zwischn 20 u…",
-                "…Nui/Oans, Woah/Foisch, Straum/koa Straum, ...) kauna mit an Minus nix aunfaunga. Deswegn muass des Vuazeichn aa duach Nui oda…"
             ]
             },
         {

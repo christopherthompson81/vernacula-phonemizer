@@ -18,8 +18,47 @@
     {
         "language": "ltg",
         "wiki": "ltg.wikipedia.org",
-        "tier": "wikipedia",
+        "tier": "wikipedia (register-restricted)",
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // `--context` set to exactly this string.
+        "context": "temperatura",
         "findings": [
+        {
+                "word": "mīnus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "zam nullis",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "minus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "atjimt",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "kvadratkilometru",
                 "verdict": "attested",
@@ -107,15 +146,6 @@
                 "…aizraksteits Jaunajā Testamentā. Tys nūtics trešā dīnā piec Krystus mieršonys (nuovis dīnu skaitūt kai pyrmū dīnu). Leldīne lel…",
                 "…dāla īveicis par smierti. Nazcik saprasmēs svareiguoka irā Krystus mieršonys, a na augšonceļšonuos dīna, partū ka taišni mierd…"
             ]
-            },
-        {
-                "word": "mīnus",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
             },
         {
                 "word": "dalejums",
@@ -725,15 +755,6 @@
             },
         {
                 "word": "komats",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
-            },
-        {
-                "word": "minus",
                 "verdict": "absent",
                 "bounded": true,
                 "tokenHits": 0,

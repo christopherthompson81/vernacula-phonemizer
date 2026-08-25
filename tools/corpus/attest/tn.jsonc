@@ -18,8 +18,36 @@
     {
         "language": "tn",
         "wiki": "tn.wikipedia.org",
-        "tier": "wikipedia",
+        "tier": "wikipedia (register-restricted)",
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // `--context` set to exactly this string.
+        "context": "themphereitšha dikgato",
         "findings": [
+        {
+                "word": "minus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ntsha",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…go rema dikgwa le mekgwa mengwe ya temothuo le madirelo di ntsha digase tse di golang mo tikologong. Digase tse di tshwara m…",
+                "…ka bophara, mme bontsi jwa mafatshe a ikaelela go emisa go ntsha gase ya carbon dioxide. Mafura a a dirilweng ka masalela a…",
+                "…r dioxide. Sulphur dioxide e baka pula ya asiti, mme gape e ntsha di-aerosol tsa sulfate mo lefaufaung, tse di bontshang lese…",
+                "…e fela le le thuthafetseng. Di-aerosol tsa mo lefaufaung di ntsha phelelo e nnye, e e tsidifatsang. Dikgweetsi tse dingwe, ja…",
+                "…faufaung go gotetsa boalogodimo jwa Lefatshe. Lefatshe le e ntsha e le mogote, mme digase tsa di tshwarang mogote mo lefaufau…",
+                "…o ya batho fa e sale ka Phetogo ya Madirelo, bogolo jang go ntsha le go fisa mahura a masalela a dilo tse di epolotsweng bogo…"
+            ]
+            },
         {
                 "word": "khubiki",
                 "verdict": "attested",
