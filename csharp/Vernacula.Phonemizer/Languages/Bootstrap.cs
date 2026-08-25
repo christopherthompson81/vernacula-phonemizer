@@ -56,6 +56,7 @@ public static class Bootstrap
             Occitan.OccitanPhonemizer.RegisterSelf();
             Odia.OdiaPhonemizer.RegisterSelf();
             Portuguese.PortuguesePhonemizer.RegisterSelf();
+            PortugueseBr.PortugueseBr.RegisterSelf();
             Russian.RussianPhonemizer.RegisterSelf();
             Spanish.SpanishPhonemizer.RegisterSelf();
             Spanish419.Spanish419.RegisterSelf();
