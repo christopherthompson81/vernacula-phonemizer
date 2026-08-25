@@ -9,6 +9,7 @@
  * b/d/g→β/ð/ɣ) are folded/deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
@@ -25,6 +26,15 @@ interface AsturianDef {
     frontLetters: readonly string[];
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     decimalWord: string;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 const DEF = loadManifest<AsturianDef>(import.meta.url, "asturian.jsonc");
 const DIGRAPHS = DEF.digraphs;
@@ -95,15 +105,12 @@ export function phonemizeWord(word: string): string {
  * in this repo see `$` prefixed in their own corpora.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: ["por cientu"],
-    currency: { "€": ["euru", "euros"], "£": ["llibra", "llibres"], "$": ["dólar", "dólares"] },
-    units: {
-        "km": ["quilómetru", "quilómetros"], "m": ["metru", "metros"], "cm": ["centímetru", "centímetros"],
-        "mm": ["milímetru", "milímetros"], "kg": ["quilogramu", "quilogramos"], "ha": ["hectárea", "hectárees"],
-    },
-    exponentWords: { squared: ["cuadráu", "cuadraos"], cubed: ["cúbicu", "cúbicos"], position: "after" },
-    ampersand: "y",
-    magnitudes: ["millón", "millones", "billón", "billones"],
+    percent: DEF.symbols.percent,
+    currency: DEF.symbols.currency,
+    units: DEF.symbols.units,
+    exponentWords: DEF.symbols.exponentWords,
+    magnitudes: DEF.symbols.magnitudes,
+    ampersand: DEF.symbols.ampersand,
 });
 
 // ⚠ THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause

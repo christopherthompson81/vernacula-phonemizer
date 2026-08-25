@@ -17,6 +17,8 @@ public sealed class AsturianDef
     public AsturianNumbers Numbers { get; init; } = new();
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     public string DecimalWord { get; init; } = "";
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public AsturianSymbols Symbols { get; init; } = new();
 }
 
 public sealed class AsturianPhonemizer : ILanguage
@@ -92,25 +94,12 @@ public sealed class AsturianPhonemizer : ILanguage
     /** The shared SYMBOL tier. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Percent = new[] { "por cientu" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["€"] = new[] { "euru", "euros" }, ["£"] = new[] { "llibra", "llibres" }, ["$"] = new[] { "dólar", "dólares" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "quilómetru", "quilómetros" }, ["m"] = new[] { "metru", "metros" },
-            ["cm"] = new[] { "centímetru", "centímetros" }, ["mm"] = new[] { "milímetru", "milímetros" },
-            ["kg"] = new[] { "quilogramu", "quilogramos" }, ["ha"] = new[] { "hectárea", "hectárees" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "cuadráu", "cuadraos" },
-            Cubed = new[] { "cúbicu", "cúbicos" },
-            Position = ExponentPosition.After,
-        },
         Ampersand = "y",
-        Magnitudes = new[] { "millón", "millones", "billón", "billones" },
+        Percent = AsturianPhonemizer.DEF.Symbols.Percent,
+        Currency = AsturianPhonemizer.DEF.Symbols.Currency,
+        Units = AsturianPhonemizer.DEF.Symbols.Units,
+        ExponentWords = AsturianPhonemizer.DEF.Symbols.ExponentWords,
+        Magnitudes = AsturianPhonemizer.DEF.Symbols.Magnitudes,
     });
 
     private static readonly JsRe TOKEN = JsRegex.Compile(
@@ -152,4 +141,14 @@ public sealed class AsturianPhonemizer : ILanguage
     public static ILanguage CreateAsturian() => new AsturianPhonemizer();
 
     internal static void RegisterSelf() => Registry.Register("asturian", CreateAsturian);
+}
+
+public sealed class AsturianSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
 }

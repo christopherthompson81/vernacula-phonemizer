@@ -8,6 +8,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface KoreanManifest {
     jamo: { onset: string; vowel: string; coda: string };
@@ -34,6 +35,12 @@ export interface KoreanManifest {
         myriadUnits: string[];
         /** The native series in prenominal form, for normalize.ts's counter rule (see korean.jsonc). */
         native: { ones: string[]; tens: string[]; twenty: string };
+    };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        multiply: { times: string; by?: string };
     };
 }
 

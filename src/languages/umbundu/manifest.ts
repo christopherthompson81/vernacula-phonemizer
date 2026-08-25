@@ -4,6 +4,7 @@
  * punctuation. The ALGORITHM (the greedy longest-match scan + tone-accent stripping) stays in code (umbundu.ts).
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface UmbunduManifest {
     language: string;
@@ -12,6 +13,12 @@ export interface UmbunduManifest {
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: UmbunduNumbers;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbols: {
+        percent: CountForms;
+        units: Record<string, CountForms>;
+        ampersand: string;
+    };
 }
 
 /** The Umbundu cardinal number words (see umbundu.jsonc "numbers"; the compositor is numbers.ts). Each magnitude

@@ -29,6 +29,7 @@
  * *ika kaluhaan nga siglo*, because ⟨ika⟩ is an ordinary Cebuano prefix and the hyphen falls out. ×34.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { MANIFEST } from "./manifest.ts";
 
 /**
  * The shared symbol tier. Cebuano marks plurality with the particle `mga`, not on the noun, and its Spanish
@@ -40,24 +41,15 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  *   ug ×1,176 · pilo ×14 (`8 ka pilo sa gidaghanong tubig` — the MULTIPLICATION sense) · kada ×129 (per)
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: ["porsyento"],
-    currency: {
-        "US$": ["dolyar sa Estados Unidos"], "AUD$": ["dolyar"], $: ["dolyar"], "€": ["euro"],
-        // ⚠ `pound` ×3 IS THE CURRENCY AND `libra` ×5 IS NOT, which is why the sense had to be read rather
-        // than the count. `libra` is the unit of WEIGHT here — *sobra sa 1,000 ka libras* — while the money
-        // word appears as `Falkland pound (FKP)`. Taking the bigger number would have priced things in
-        // pounds-avoirdupois.
-        "£": ["pound"],
-    },
-    magnitudes: ["libo", "milyon", "bilyon", "bilyones", "trilyon", "trilyones"],
-    units: { km: ["kilometro"], m: ["metro"], cm: ["sentimetro"], mm: ["milimetro"], kg: ["kilo"] },
-    // `kwadrado` ×3, attested in exactly this frame — `783,562 kilometro kwadrado (300,948 sq mi)`. No cube
-    // word occurs, so `cubed` is left undeclared rather than guessed.
-    exponentWords: { squared: ["kwadrado"] },
-    unitPer: "kada",
-    rateDenominators: { h: "oras", s: "segundo" },
-    ampersand: "ug",
-    multiply: { times: "ka pilo" },
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    rateDenominators: MANIFEST.symbols.rateDenominators,
+    unitPer: MANIFEST.symbols.unitPer,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    magnitudes: MANIFEST.symbols.magnitudes,
+    ampersand: MANIFEST.symbols.ampersand,
+    multiply: MANIFEST.symbols.multiply,
 });
 
 /** Dotted abbreviations, and the list is SHORT ON PURPOSE — see the header note at step 6. */

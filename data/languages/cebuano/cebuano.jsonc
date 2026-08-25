@@ -42,5 +42,30 @@
         "hundred": "gatos",
         "thousand": "libo",
         "million": "milyon"
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    "symbols": {
+        "percent": ["porsyento"],
+        "currency": {
+            "US$": ["dolyar sa Estados Unidos"], "AUD$": ["dolyar"], "$": ["dolyar"], "€": ["euro"],
+            // ⚠ `pound` ×3 IS THE CURRENCY AND `libra` ×5 IS NOT, which is why the sense had to be read rather
+            // than the count. `libra` is the unit of WEIGHT here — *sobra sa 1,000 ka libras* — while the money
+            // word appears as `Falkland pound (FKP)`. Taking the bigger number would have priced things in
+            // pounds-avoirdupois.
+            "£": ["pound"],
+        },
+        "magnitudes": ["libo", "milyon", "bilyon", "bilyones", "trilyon", "trilyones"],
+        "units": { "km": ["kilometro"], "m": ["metro"], "cm": ["sentimetro"], "mm": ["milimetro"], "kg": ["kilo"] },
+        // `kwadrado` ×3, attested in exactly this frame — `783,562 kilometro kwadrado (300,948 sq mi)`. No cube
+        // word occurs, so `cubed` is left undeclared rather than guessed.
+        "exponentWords": { "squared": ["kwadrado"] },
+        "unitPer": "kada",
+        "rateDenominators": { "h": "oras", "s": "segundo" },
+        "ampersand": "ug",
+        "multiply": { "times": "ka pilo" }
     }
 }

@@ -78,9 +78,27 @@ while its `DEF` lived in maori.ts — importing across would have been a cycle).
 0 probe readings moved for any of the nine. Parity 60 languages / 12,000 rows / 0 differ; 459 C# tests,
 5,129 TS tests.
 
+## Batch 2 — ast, oc, umb, ko, ceb — 2026-08-25 10:20
+
+**⚠ `4x4` IS NOW IN EVERY PROBE, because batch 1's worst bug was one no probe covered.** Dropping `Multiply`
+made Afrikaans read `4x4` as *fˈir ˈɛks fˈir* — "four EX four", the letter name — and only the single `4x4`
+row in the af GOLDEN caught it. ASCII ⟨x⟩ between digits is the case a symbol-tier port loses most quietly,
+because the output stays plausible. Both the probes and the coupling test now carry it, and the test is
+verified by dropping `Multiply` again.
+
+**The C# applier is fixed at the source too.** Its keep-in-code filter required `=>` on the line, which is
+why `Multiply = new MultiplyDef { … }` fell through. It now keeps any key whose value is not a manifest
+reference.
+
+**Two more languages needed a `manifest.ts`** for the reason Māori did: the symbol tier lives in normalize.ts
+while `DEF` lives in the engine file, so importing across would be a cycle. `ceb` joined `mi`, `jv` and `it`
+in that group.
+
+**0 of 36 probe readings moved** across the five, sync and async; C# matches Node in both.
+
 ## Remaining
 
-33 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
+28 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
 german, greek, gujarati, hungarian, indonesian, japanese, javanese, kannada, korean, malayalam, mandarin,
 marathi, occitan, odia, polish, punjabi, quechua, russian, swahili, tajik, tamil, telugu, thai, umbundu,
 urdu, vietnamese.
