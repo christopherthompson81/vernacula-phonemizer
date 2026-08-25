@@ -146,13 +146,17 @@
     },
     "phonotactics": {
         "vowels": "aeiou",
-        "onsets": [
-            "ɓ", "ɗ", "ƙ", "ƴ", "sh", "ts", "ch", "gw", "kw", "hw", "gy", "ky", "ny", "b", "d", "f", "g",
-            "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y"
-        ],
-        "codas": [
-            "b", "d", "f", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y", "n"
-        ]
+        // ⚠ TWO-CHARACTER ENTRIES ONLY, AND THAT IS NOT A STYLE CHOICE — `makeUnreadableTest` queries these
+        // sets with `w.slice(0, 2)` and `w.slice(-2)` and with nothing else, so a ONE-character entry can
+        // never be looked up. This list carried 20 of them and the coda list was 16 for 16, i.e. entirely
+        // unreachable: the data said Hausa licensed a set of codas while the code could consult none of it.
+        // Removing them is provably inert (measured: 120 word types in the mined corpus have a two-consonant
+        // edge and not one changes verdict), and what is left is the part that was ever doing work.
+        "onsets": ["sh", "ts", "ch", "gw", "kw", "hw", "gy", "ky", "ny"],
+        // ⚠ EMPTY, AND IT IS A STATEMENT RATHER THAN A GAP. Hausa licenses no two-consonant coda outside a
+        // digraph, so every entry this list used to hold was a single letter the lookup could not reach.
+        // The old list also carried "n" TWICE, which is the tell that nothing was reading it.
+        "codas": []
     },
 
     // ---------------------------------------------------------------------------------------------------

@@ -124,7 +124,11 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"{L}({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))", "giu");
     private static readonly JsRe DEG_C = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?C(?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_F = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?F(?![\\p{L}\\p{M}])", "gui");
-    private static readonly JsRe DEG_COMPASS = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?([NSEW])(?![\\p{L}\\p{M}])", "gu");
+    /** ⚠ TWO BRANCHES — see the TS module. GLUED in either case (`35°W`, `35°w`), or SPACED but only
+     *  UPPERCASE (`35° W`). Case-folding the spaced form too would turn `il 1° e il 2°` — "the 1st and the
+     *  2nd" — into *primo EST il secondo*, because lowercase ⟨e⟩ is Italian for "and". */
+    private static readonly JsRe DEG_COMPASS = JsRegex.Compile(
+        "(\\d+(?:[.,]\\d+)?)\\s?°(?:([nsewNSEW])|\\s+([NSEW]))(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe ORDINAL_IND = JsRegex.Compile("(\\d+)\\.?(?:º|ª|°)", "gu");
     private static readonly JsRe FEM_IND = JsRegex.Compile("ª", "u");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])", "gu");
@@ -174,7 +178,10 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
         s = JsRegex.Replace(s, DEG_C, m => $"{Degrees(m.Groups[1].Value)} {DEG.Celsius}");
         s = JsRegex.Replace(s, DEG_F, m => $"{Degrees(m.Groups[1].Value)} {DEG.Fahrenheit}");
         s = JsRegex.Replace(s, DEG_COMPASS, m =>
-            $"{Degrees(m.Groups[1].Value)} {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
+        {
+            var dir = m.Groups[2].Success ? m.Groups[2].Value : m.Groups[3].Value;
+            return $"{Degrees(m.Groups[1].Value)} {COMPASS[dir.ToLowerInvariant()]}";
+        });
 
         // 6) ORDINAL INDICATORS `°`/`º`/`ª`. The temperature and coordinate senses were consumed in step 5,
         //    so what reaches here is the ordinal.

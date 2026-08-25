@@ -64,20 +64,24 @@ public class LetterNamesManifestTests
     }
 
     /**
-     * ⚠ HAUSA IS EXCLUDED FROM THE CLUSTER ASSERTIONS, and the reason is a PRE-EXISTING DEFECT this lift
-     * surfaced rather than caused: its `LegalCodas` are ALL single characters, and 20 of its 29 `LegalOnsets`
-     * are too. Initialisms.cs tests `w[..2]` against those sets — a two-character slice — so a one-character
-     * entry can never match. Hausa's entire coda list is dead. NOT fixed here: repairing it changes readings
-     * and needs Hausa-specific sourcing. This pins the defect so it is visible and will fail when fixed.
+     * ⚠ THIS TEST PINNED A DEFECT AND HAS NOW BEEN INVERTED, exactly as its old body said it would be:
+     * "this pins the defect so it is visible and will fail when fixed". It did fail when fixed.
+     *
+     * The defect: `LegalCodas` were ALL single characters and 20 of 29 `LegalOnsets` were too, while
+     * Initialisms.cs tests `w[..2]` against those sets — a TWO-character slice — so a one-character entry
+     * can never match. Hausa's whole coda list was unreachable. The repair turned out to change no reading
+     * at all (0 of 200 golden rows, both ports), because unreachable data cannot: what was needed was
+     * deleting it, not sourcing more. The fleet-wide guard is test/phonotactics-shape.test.ts.
      */
     [Fact]
-    public void HausaPhonotacticsListsAreDeadDataWhichIsAKnownDefect()
+    public void HausaPhonotacticsListsAreReachable()
     {
         var ha = Languages.Hausa.Manifest.MANIFEST;
-        Assert.All(ha.Phonotactics.Codas, c => Assert.Single(c));
-        Assert.True(ha.Phonotactics.Onsets.Count(c => c.Length == 1) > 15);
+        Assert.DoesNotContain(ha.Phonotactics.Onsets, c => c.Length == 1);
         Assert.Contains("sh", ha.Phonotactics.Onsets);
-        // The letter names ARE live even though the clusters are not.
+        // ⚠ EMPTY ON PURPOSE: Hausa licenses no two-consonant coda outside a digraph.
+        Assert.Empty(ha.Phonotactics.Codas);
+        // The letter names were always live, and still are.
         foreach (var ch in "cd")
             Assert.Contains(Say("ha", ha.LetterNames[ch.ToString()]), Say("ha", "CD da DNA"));
     }

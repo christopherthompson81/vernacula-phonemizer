@@ -172,8 +172,24 @@ export function normalizeItalian(input: string): string {
     //    This also has to run before the shared unit tier, which would otherwise leave the bare sign behind.
     s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, (_m, n: string) => `${degrees(n)} ${DEG.celsius}`);
     s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])/gui, (_m, n: string) => `${degrees(n)} ${DEG.fahrenheit}`);
-    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?([NSEW])(?![\p{L}\p{M}])/gu,
-        (_m, d: string, dir: string) => `${degrees(d)} ${COMPASS[dir.toLowerCase()]!}`);
+    //    ⚠ THE COMPASS ARM IS CASE-INSENSITIVE **AND** REQUIRES THE LETTER GLUED, and the two changes are
+    //    one fix. It was case-SENSITIVE while the C and F arms above were not, so `35°w` fell through to the
+    //    ordinal rule and read *trentacinquesimo w* — thirty-FIFTH double-u. The corpus writes `35°W`
+    //    uppercase so prose was unaffected, but ANY lowercased input hit it, which is why the it golden
+    //    recorded the wrong reading verbatim (its source text is lowercased).
+    //    ⚠ AND CASE-FOLDING ALONE WOULD HAVE BEEN WORSE THAN THE BUG. `[NSEW]` folded to lowercase includes
+    //    ⟨e⟩, which is Italian for "and" — with the `\s?` this arm used to carry, `il 1° e il 2°` ("the 1st
+    //    and the 2nd") would have become *primo EST il secondo*, turning the commonest conjunction in the
+    //    language into a compass point. Gluing is the discriminator this step's own header already claims
+    //    ("identified by the LETTER glued to the sign; the ordinal never has one"), and the regex simply had
+    //    not implemented it. The one corpus instance is glued; C and F keep `\s?` because `90 °F` is
+    //    attested spaced and neither letter collides with an Italian word.
+    //    Two branches, so nothing that worked before is lost: GLUED in either case (`35°W`, `35°w`), or
+    //    SPACED but only UPPERCASE (`35° W`) — an uppercase ⟨E⟩ after a space is not the conjunction, a
+    //    lowercase one is, and that asymmetry is the whole reason this arm needs branches at all.
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°(?:([nsewNSEW])|\s+([NSEW]))(?![\p{L}\p{M}])/gu,
+        (_m, d: string, glued: string | undefined, spaced: string | undefined) =>
+            `${degrees(d)} ${COMPASS[(glued ?? spaced)!.toLowerCase()]!}`);
 
     // 6) ORDINAL INDICATORS. Three characters, all attested. `º`/`ª` (U+00BA/U+00AA) were reaching the
     //    phoneme string RAW — they are Script=Latin, so core/clauses.ts hands them to the foreign fallback
