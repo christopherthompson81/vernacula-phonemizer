@@ -63,6 +63,15 @@ public sealed class DutchManifest
     public string[] AcronymLetters { get; init; } = [];
     public DutchNumbersDef Numbers { get; init; } = new();
     public DutchMorphologyDef Morphology { get; init; } = new();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public DutchPhonotactics Phonotactics { get; init; } = new();
+}
+
+public sealed class DutchPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
 }
 
 public static class Manifest

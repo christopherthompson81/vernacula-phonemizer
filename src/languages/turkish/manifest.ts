@@ -27,6 +27,8 @@ export interface TurkishManifest {
         zero: string;
         decimalConnector: string;
     };
+    letterNames: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[] };
 }
 
 /** The consolidated hand-authored Turkish data tables (see turkish.jsonc). */

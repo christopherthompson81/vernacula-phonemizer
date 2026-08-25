@@ -21,6 +21,8 @@ export interface HungarianManifest {
         million: string;
         milliard: string;
     };
+    letterNames: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[] };
 }
 
 /** The consolidated hand-authored Hungarian data tables (see hungarian.jsonc). */

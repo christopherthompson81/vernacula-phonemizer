@@ -56,6 +56,7 @@
  *     exactly as it was rather than spelled with an invented name.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { MANIFEST } from "./manifest.ts";
 import { trLower } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -119,30 +120,13 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
 };
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
-/** Turkish letter names (TDK alphabet, 29 letters). q/w/x are NOT Turkish letters and are deliberately
- *  absent — see the file header. */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", b: "be", c: "ce", "ç": "çe", d: "de", e: "e", f: "fe", g: "ge", "ğ": "yumuşak ge",
-    h: "he", "ı": "ı", i: "i", j: "je", k: "ke", l: "le", m: "me", n: "ne", o: "o", "ö": "ö",
-    p: "pe", r: "re", s: "se", "ş": "şe", t: "te", u: "u", "ü": "ü", v: "ve", y: "ye", z: "ze",
-};
-
 /** Turkish phonotactics, for the OOV rule in core/initialisms.ts. Native Turkish words admit NO initial
  *  cluster at all; the onsets listed are the obstruent+liquid and s+stop clusters loanwords brought in. */
 export const isUnreadableTurkish = makeUnreadableTest({
-    vowels: /[aeıioöuüâîû]/u,
-    legalOnsets: new Set([
-        "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr", "ps", "sk", "sl", "sm",
-        "sn", "sp", "st", "tr",
-        "ch", "yl", "sf",
-    ]),
-    legalCodas: new Set([
-        "ft", "kt", "ks", "lç", "lf", "lk", "lm", "lp", "ls", "lt", "nç", "nk", "ns", "nt", "nz",
-        "pt", "rç", "rd", "rf", "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rz", "sk", "st", "şt",
-        "zm", "ng", "lg", "ht", "ny", "nc",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
-
 /** Turkish has no pronunciation dictionary here (the g2p is rule-based), so nothing is "recorded" and the
  *  decision rests on the phonotactic OOV test alone. `acronymLetters` is empty on purpose — see the header. */
 const normalizeInitialisms = makeInitialismNormalizer({
@@ -152,7 +136,7 @@ const normalizeInitialisms = makeInitialismNormalizer({
     // `LETTER_NAME` cannot have, so `spellOut` declined and `İETT` was read as the WORD /iˈetː/. The g2p
     // already owns this function; the pass now borrows it rather than keeping a second, wrong copy.
     lower: trLower,
-    letterName: (l) => LETTER_NAME[l],
+    letterName: (l) => MANIFEST.letterNames[l],
     acronymLetters: new Set<string>(),
     isRecorded: () => false,
     isUnreadable: isUnreadableTurkish,

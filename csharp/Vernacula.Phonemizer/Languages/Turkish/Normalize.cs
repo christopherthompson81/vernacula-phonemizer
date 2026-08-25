@@ -67,34 +67,13 @@ public static class Normalize
     };
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(a => a.Length));
 
-    /** Turkish letter names (TDK alphabet, 29 letters). q/w/x are NOT Turkish letters and are deliberately
-     *  absent — see the file header. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "a", ["b"] = "be", ["c"] = "ce", ["ç"] = "çe", ["d"] = "de", ["e"] = "e", ["f"] = "fe",
-        ["g"] = "ge", ["ğ"] = "yumuşak ge", ["h"] = "he", ["ı"] = "ı", ["i"] = "i", ["j"] = "je",
-        ["k"] = "ke", ["l"] = "le", ["m"] = "me", ["n"] = "ne", ["o"] = "o", ["ö"] = "ö", ["p"] = "pe",
-        ["r"] = "re", ["s"] = "se", ["ş"] = "şe", ["t"] = "te", ["u"] = "u", ["ü"] = "ü", ["v"] = "ve",
-        ["y"] = "ye", ["z"] = "ze",
-    };
-
     /** Turkish phonotactics, for the OOV rule in core/initialisms.ts. Native Turkish words admit NO initial
      *  cluster at all; the onsets listed are the obstruent+liquid and s+stop clusters loanwords brought in. */
     public static readonly Func<string, bool> IsUnreadableTurkish = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeıioöuüâîû]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr", "ps", "sk", "sl", "sm",
-            "sn", "sp", "st", "tr",
-            "ch", "yl", "sf",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ft", "kt", "ks", "lç", "lf", "lk", "lm", "lp", "ls", "lt", "nç", "nk", "ns", "nt", "nz",
-            "pt", "rç", "rd", "rf", "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rz", "sk", "st", "şt",
-            "zm", "ng", "lg", "ht", "ny", "nc",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     /** Turkish has no pronunciation dictionary here (the g2p is rule-based), so nothing is "recorded" and the
@@ -102,7 +81,7 @@ public static class Normalize
     private static readonly Func<string, string> NormalizeInitialisms = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
         Lower = G2p.TrLower,
-        LetterName = l => LETTER_NAME.GetValueOrDefault(l),
+        LetterName = l => Manifest.MANIFEST.LetterNames.GetValueOrDefault(l),
         AcronymLetters = new HashSet<string>(StringComparer.Ordinal),
         IsRecorded = _ => false,
         IsUnreadable = IsUnreadableTurkish,

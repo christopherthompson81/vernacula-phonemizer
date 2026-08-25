@@ -34,6 +34,7 @@
  * words plus harmony, not a string substitution — the shape `attachSuffix` handles for apostrophe suffixes.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { multiplicativeWords, numberToWords, ordinalWords, stemForSuffix } from "./numbers.ts";
 
@@ -58,47 +59,6 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV)
     .sort((a, b) => b.length - a.length)
     .join("|");
-
-/** Hungarian letter names (the traditional alphabet naming used when spelling an acronym: *gé-pé-es*,
- *  *ef-bé-í*, *á-bé-cé*). Vowels take their LONG name, which is what `USA`→*u-es-á* and `ABC`→*ábécé*
- *  show. `q/w/x/y` are the "foreign" letters but do have established names, so they are included. */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "á",
-    "á": "á",
-    b: "bé",
-    c: "cé",
-    d: "dé",
-    e: "é",
-    "é": "é",
-    f: "ef",
-    g: "gé",
-    h: "há",
-    i: "í",
-    "í": "í",
-    j: "jé",
-    k: "ká",
-    l: "el",
-    m: "em",
-    n: "en",
-    o: "ó",
-    "ó": "ó",
-    "ö": "ő",
-    "ő": "ő",
-    p: "pé",
-    q: "kú",
-    r: "er",
-    s: "es",
-    t: "té",
-    u: "ú",
-    "ú": "ú",
-    "ü": "ű",
-    "ű": "ű",
-    v: "vé",
-    w: "dupla vé",
-    x: "iksz",
-    y: "ipszilon",
-    z: "zé",
-};
 
 /**
  * Hungarian DIGRAPHS folded to one stand-in letter before the phonotactic test. Without this the test
@@ -125,101 +85,9 @@ const fold = (w: string): string => w.replace(DIGRAPH, (d) => DIGRAPH_FOLD[d]!);
  *  initial cluster; the onsets listed are the ones loanwords brought in. Applied to the digraph-folded
  *  form (see `fold`). */
 const unreadableFolded = makeUnreadableTest({
-    vowels: /[aáeéiíoóöőuúüű]/u,
-    legalOnsets: new Set([
-        "bl",
-        "br",
-        "cl",
-        "cr",
-        "dr",
-        "dv",
-        "fl",
-        "fr",
-        "gl",
-        "gn",
-        "gr",
-        "hr",
-        "kl",
-        "kn",
-        "kr",
-        "kv",
-        "kw",
-        "pl",
-        "pn",
-        "pr",
-        "ps",
-        "sc",
-        "sf",
-        "sk",
-        "sl",
-        "sm",
-        "sn",
-        "sp",
-        "sr",
-        "st",
-        "sv",
-        "sw",
-        "tr",
-        "tv",
-        "tw",
-        "vl",
-        "vr",
-        "zl",
-        "zn",
-        "zv",
-    ]),
-    legalCodas: new Set([
-        "ct",
-        "ft",
-        "js",
-        "jt",
-        "kk",
-        "ks",
-        "kt",
-        "lb",
-        "lc",
-        "ld",
-        "lf",
-        "lg",
-        "lj",
-        "lk",
-        "lm",
-        "ln",
-        "lp",
-        "ls",
-        "lt",
-        "lz",
-        "mb",
-        "mp",
-        "ms",
-        "nc",
-        "nd",
-        "ng",
-        "nj",
-        "nk",
-        "ns",
-        "nt",
-        "nz",
-        "ps",
-        "pt",
-        "rb",
-        "rc",
-        "rd",
-        "rf",
-        "rg",
-        "rj",
-        "rk",
-        "rl",
-        "rm",
-        "rn",
-        "rp",
-        "rs",
-        "rt",
-        "rz",
-        "sk",
-        "sp",
-        "st",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
 export const isUnreadableHungarian = (word: string): boolean => unreadableFolded(fold(word.toLowerCase()));
 
@@ -227,7 +95,7 @@ export const isUnreadableHungarian = (word: string): boolean => unreadableFolded
  *  leaves the token alone rather than emitting a partial reading. Mirrors core/initialisms.ts's own
  *  `spellOut`, which is private to it. */
 function spellOut(acr: string): string | undefined {
-    const names = [...acr.toLowerCase()].map((c) => LETTER_NAME[c]);
+    const names = [...acr.toLowerCase()].map((c) => MANIFEST.letterNames[c]);
     return names.every((n) => n !== undefined) ? names.join(" ") : undefined;
 }
 
@@ -240,7 +108,7 @@ const ACRONYM_WORD: Readonly<Record<string, string>> = { WC: "vécé" };
  *  the decision rests on the phonotactic OOV test alone. `acronymLetters` is empty on purpose — see the
  *  header on AOL/CEP/HIV/SUV. */
 const normalizeInitialisms = makeInitialismNormalizer({
-    letterName: (l) => LETTER_NAME[l],
+    letterName: (l) => MANIFEST.letterNames[l],
     acronymLetters: new Set<string>(),
     isRecorded: () => false,
     isUnreadable: isUnreadableHungarian,

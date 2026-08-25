@@ -30,6 +30,15 @@ public sealed class HungarianManifest
     public IReadOnlyList<string> VoicedTriggers { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public HungarianNumbersDef Numbers { get; init; } = new();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public HungarianPhonotactics Phonotactics { get; init; } = new();
+}
+
+public sealed class HungarianPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
 }
 
 /** One row of the orthography→IPA table: the grapheme, its IPA, and whether it is a VOWEL. */
