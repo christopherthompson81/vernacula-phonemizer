@@ -84,12 +84,18 @@ const SPELL_ONLY: [string, Record<string, string>, string, string][] = [
  * two-consonant codas?), which a mechanical lift has no business guessing. The lift preserves the behaviour
  * exactly; this test pins the defect so it is visible in the suite, and will fail when it is fixed.
  */
-describe("ha's phonotactics lists are dead data — a known defect", () => {
-    test("every coda and most onsets are single characters, which cannot match a 2-char slice", () => {
-        expect(HA.phonotactics.codas.every((c) => c.length === 1)).toBe(true);
-        expect(HA.phonotactics.onsets.filter((c) => c.length === 1).length).toBeGreaterThan(15);
-        // The nine genuine clusters are the only entries the core can ever see.
-        expect(HA.phonotactics.onsets.filter((c) => c.length > 1)).toContain("sh");
+describe("ha's phonotactics lists — the dead entries are gone", () => {
+    // ⚠ THIS TEST USED TO PIN THE DEFECT. It asserted that every coda was a single character and that more
+    // than fifteen onsets were, because that was true and the reason the lists could not work:
+    // `makeUnreadableTest` looks them up with a 2-char slice and never sees a 1-char entry. The data is
+    // fixed now, so the expectation is inverted — see test/phonotactics-shape.test.ts for the fleet guard.
+    test("no entry is too short for the lookup, and the nine genuine clusters survive", () => {
+        expect(HA.phonotactics.codas.filter((c) => c.length === 1)).toEqual([]);
+        expect(HA.phonotactics.onsets.filter((c) => c.length === 1)).toEqual([]);
+        expect(HA.phonotactics.onsets).toContain("sh");
+        // ⚠ AND THE CODA LIST IS EMPTY ON PURPOSE: Hausa licenses no two-consonant coda outside a digraph,
+        // which is a statement about the language rather than a table nobody filled in.
+        expect(HA.phonotactics.codas).toEqual([]);
     });
 
     test("the letter names are live even though the clusters are not", () => {
@@ -275,10 +281,16 @@ describe("tg reads its lifted phonotactics", () => {
  * language sourcing, not a lift. Pinned so the redundancy is visible and a future edit cannot mistake the
  * list for load-bearing.
  */
-describe("id's legalCodas is provably inert — a known redundancy", () => {
-    test("every entry is either too short to match or already a digraph", () => {
-        const idPt = (ID as unknown as { phonotactics: { codas: string[]; digraphs: string[] } }).phonotactics;
-        for (const c of idPt.codas) expect(c.length === 1 || idPt.digraphs.includes(c)).toBe(true);
-        expect(idPt.codas.filter((c) => c.length === 1)).toHaveLength(12);
+describe("id's legalCodas — the inert list is gone", () => {
+    // ⚠ THIS TEST USED TO PIN THE REDUNDANCY: every one of the 14 entries was either a single character the
+    // 2-char lookup could not reach (12 of them) or a digraph the same test already licenses through its
+    // `|| digraphs.has(tail)` arm (`ng`, `kh`). The list could not change one verdict, and removing it moved
+    // 0 of 200 golden rows. The expectation is now the fixed state.
+    test("the coda list is empty, and the onsets that remain are all reachable", () => {
+        const idPt = (ID as unknown as { phonotactics: { codas: string[]; onsets: string[]; digraphs: string[] } }).phonotactics;
+        expect(idPt.codas).toEqual([]);
+        expect(idPt.onsets.filter((c) => c.length === 1)).toEqual([]);
+        // The real consonant clusters — the part that was ever doing work — are untouched.
+        for (const c of ["bl", "br", "kr", "st", "tr"]) expect(idPt.onsets).toContain(c);
     });
 });

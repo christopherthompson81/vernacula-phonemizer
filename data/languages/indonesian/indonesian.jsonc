@@ -54,14 +54,21 @@
 
     "phonotactics": {
         "vowels": "aeiou",
+        // ⚠ TWO-CHARACTER ENTRIES ONLY — `makeUnreadableTest` looks these up with a 2-char slice and never
+        // with anything else, so the 20 single letters this list used to carry were unreachable. The four
+        // digraphs (`ng ny sy kh`) are kept although `digraphs` below already licenses them: the two fields
+        // are read by different arms of that test and the overlap is deliberate, not redundancy to prune.
         "onsets": [
-            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "y",
-            "z", "ng", "ny", "sy", "kh", "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr",
+            "ng", "ny", "sy", "kh", "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr",
             "sl", "sp", "st", "sk", "tr", "sw", "ps", "kw"
         ],
-        "codas": [
-            "b", "d", "f", "h", "k", "l", "m", "n", "ng", "p", "r", "s", "t", "kh"
-        ],
+        // ⚠ EMPTY, AND PROVABLY SO. The old list was 12 single letters the lookup could not reach plus `ng`
+        // and `kh` — and BOTH of those are in `digraphs` below, which the same test consults with
+        // `|| digraphs.has(tail)`. So every entry was either unreachable or already licensed elsewhere: the
+        // list could not change a single verdict. Measured over the mined corpus: 142 word types have a
+        // two-consonant edge, 0 change. Indonesian's codas are single consonants plus those two digraphs,
+        // which is exactly what an empty two-character list says.
+        "codas": [],
         "digraphs": [
             "ng", "ny", "sy", "kh"
         ]
