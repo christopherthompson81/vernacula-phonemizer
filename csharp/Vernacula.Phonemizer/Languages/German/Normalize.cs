@@ -145,8 +145,11 @@ public static class Normalize
     private static readonly JsRe CLOCK = JsRegex.Compile("\\b([01]?\\d|2[0-3])[:.]([0-5]\\d)\\b(?!\\.?\\d)(\\s*Uhr)?", "giu");
     private static readonly JsRe KMH = JsRegex.Compile("(\\d)\\s?km\\/h\\b", "gu");
     private static readonly JsRe MS = JsRegex.Compile("(\\d)\\s?m\\/s\\b", "gu");
-    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C\\b", "giu");
-    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F\\b", "giu");
+    // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following NON-ASCII letter
+    // counted as a boundary and this fired when it must not — `25°Cölner` ate the ⟨C⟩ as Celsius. See
+    // src/languages/*/normalize.ts, which carries the finding.
+    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C(?![\\p{L}\\p{M}])", "giu");
+    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe DEG = JsRegex.Compile("(\\d)\\s?°", "gu");
     private static readonly JsRe MINUS = JsRegex.Compile("(^|[\\s(])[-−–](\\d)", "gu");
     private static readonly JsRe PLUS_MINUS = JsRegex.Compile("±", "gu");

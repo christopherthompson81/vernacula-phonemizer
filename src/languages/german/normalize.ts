@@ -242,8 +242,12 @@ export function normalizeGerman(input: string): string {
     //    uppercase-only rule drops it through to the bare-`°` arm below, leaving the `c` as a loose
     //    letter for the g2p (`c` → /k/ context-free): *zweiunddreissig Grad k*. Fleet-wide invariant,
     //    asserted in test/degree-scale-case.test.ts.
-    s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 Grad Celsius");
-    s = s.replace(/(\d)\s?°\s?F\b/giu, "$1 Grad Fahrenheit");
+    // ⚠ THE GUARD IS `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following
+    // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
+    // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
+    // orthography is what supplies the accented letter. 71 other engines already guard it this way.
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 Grad Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 Grad Fahrenheit");
     s = s.replace(/(\d)\s?°/gu, "$1 Grad");
 
     // 6) SIGNS.

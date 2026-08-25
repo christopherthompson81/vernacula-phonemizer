@@ -328,8 +328,12 @@ export function normalizeSomali(input: string): string {
     // ── 9. DEGREES ─────────────────────────────────────────────────────────────────────────────────────
     // `°` ×664 dropped outright; `°C` additionally read the C as /ʕ/. `darajo` ×105, and the corpus writes
     // the full phrase — `5 darajo Celsius` — which is where both words come from.
-    s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 darajo Celsius");
-    s = s.replace(/(\d)\s?°\s?F\b/giu, "$1 darajo Fahrenheit");
+    // ⚠ THE GUARD IS `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following
+    // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
+    // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
+    // orthography is what supplies the accented letter. 71 other engines already guard it this way.
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 darajo Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 darajo Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
         (_m, d: string, dir: string) => `${d} darajo ${COMPASS[dir.toLowerCase()]!}`);
     s = s.replace(/(\d)\s?°/gu, "$1 darajo");
