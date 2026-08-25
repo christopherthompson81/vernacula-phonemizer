@@ -144,6 +144,10 @@ public static class Normalize
         $"(?<![\\p{{L}}\\p{{M}}\\d])(\\d[\\d.]*)\\s?({UNITS_ALT})(?:\\s?²|2)(?![\\p{{L}}\\p{{M}}\\d])", "giu");
     private static readonly JsRe CUBED = JsRegex.Compile(
         $"(?<![\\p{{L}}\\p{{M}}\\d])(\\d[\\d.]*)\\s?({UNITS_ALT})(?:\\s?³|3)(?![\\p{{L}}\\p{{M}}\\d])", "giu");
+    private static readonly JsRe SQUARED_FIRST = JsRegex.Compile(
+        $"(?<![\\p{{L}}\\p{{M}}\\d])({UNITS_ALT})(?:\\s?²|2)\\s?(?=\\d)", "giu");
+    private static readonly JsRe CUBED_FIRST = JsRegex.Compile(
+        $"(?<![\\p{{L}}\\p{{M}}\\d])({UNITS_ALT})(?:\\s?³|3)\\s?(?=\\d)", "giu");
     private static readonly JsRe UNIT_BEFORE = JsRegex.Compile(
         $"(?<![\\p{{L}}\\p{{M}}\\d])({UNITS_ALT})\\s?(?=\\d)", "giu");
     private static readonly JsRe UNIT_AFTER = JsRegex.Compile(
@@ -218,6 +222,9 @@ public static class Normalize
         s = SQ_MI.Replace(s, "iskuweer maayilii $1");
         s = SQUARED.Replace(s, m => $"iskuweer {UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
         s = CUBED.Replace(s, m => $"kubiik {UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
+        // ⚠ BEFORE UNIT_BEFORE, which would otherwise claim the abbreviation and orphan the power.
+        s = SQUARED_FIRST.Replace(s, m => $"iskuweer {UNIT[Js.ToLowerCase(m.Groups[1].Value)]} ");
+        s = CUBED_FIRST.Replace(s, m => $"kubiik {UNIT[Js.ToLowerCase(m.Groups[1].Value)]} ");
         s = UNIT_BEFORE.Replace(s, m => $"{UNIT[Js.ToLowerCase(m.Groups[1].Value)]} ");
         s = UNIT_AFTER.Replace(s, m => $"{UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
         s = BARE_UNITS(s);

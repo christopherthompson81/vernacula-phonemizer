@@ -286,6 +286,32 @@ describe("Oromo text normalization", () => {
         expect(phonemize("km 2-3", "om")).toBe("kiːloːmˈeːtira lˈama hˈanɡa sadˈiː"); // guard still holds
     });
 
+    // …and the SAME TWO POWERS IN THE UNIT-FIRST ORDER, which is the order this language actually uses.
+    // The exponent arms above require the number FIRST; arm (c) does not know about powers; the shared
+    // bare-unit helper declines anything before one. So the noun-initial square — the shape fact 1 of the
+    // header is about — LEAKED its abbreviation into the phoneme stream as raw letters.
+    test("the squared/cubed measure word, UNIT-FIRST", () => {
+        // the leak: `km` reached the sink as [km], a cluster Oromo phonotactics do not even permit
+        expect(phonemize("Balʼina km² 100", "om")).toBe("balʔˈina iskuwˈeːr kiːloːmˈeːtira ᶑˈibːa");
+        expect(phonemize("Balʼina km² 100", "om")).not.toMatch(/km/u);
+        // the mirror failure: arm (c) took the GLUED exponent as the number, reading `km2 100` as "km 2 100"
+        expect(phonemize("km2 100", "om")).toBe("iskuwˈeːr kiːloːmˈeːtira ᶑˈibːa");
+        expect(phonemize("m³ 12", "om")).toBe("kubˈiːk mˈeːtira kˈuᶑa lˈama");
+        expect(phonemize("m3 12", "om")).toBe("kubˈiːk mˈeːtira kˈuᶑa lˈama");
+        // ⚠ THE SPACED-ASCII-2 GUARD IS WHAT THIS RULE COULD HAVE BROKEN, and both real corpus forms hold:
+        // a spaced `2` is the next NUMBER, never a power.
+        expect(phonemize("km 2", "om")).toBe("kiːloːmˈeːtira lˈama");
+        expect(phonemize("km 2-3", "om")).toBe("kiːloːmˈeːtira lˈama hˈanɡa sadˈiː");
+        expect(phonemize("km 6,387", "om")).toContain("kiːloːmˈeːtira kˈuma");
+        // …and the number-first arms are untouched
+        expect(phonemize("12 km²", "om")).toBe("iskuwˈeːr kiːloːmˈeːtira kˈuᶑa lˈama");
+        expect(phonemize("120-160 m3", "om")).toContain("kubˈiːk mˈeːtira");
+        // KNOWN LIMIT, recorded rather than fixed: a power with NO number anywhere still leaks, because
+        // declining that shape is the SHARED helper's declared behaviour and widening it is a fleet
+        // decision, not Oromo's. `km²` alone is a caption, and captions are where it would show.
+        expect(phonemize("km²", "om")).toBe("km");
+    });
+
     test("the multiplication sign runs BEFORE the unit block — unitPrefix moves the noun", () => {
         // ⚠ Oromo's unit rules honour `unitPrefix` and MOVE the noun ahead of its number, so `6 × 6 cm` became
         // `6 × seentiimeetira 6` — the sign's `(\d+)…(\d+)` no longer had a digit after it and *si’a* was

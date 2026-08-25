@@ -302,6 +302,24 @@ export function normalizeOromo(input: string): string {
     //         language's own noun-first order: "iibame boba'aa kubiik metirii 120-160 of irraa qaba ture".
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?:\\s?³|3)(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, n: string, u: string) => `kubiik ${UNIT[u.toLowerCase()]!} ${n}`);
+    //     (b4/b5) …and the SAME TWO POWERS IN THE UNIT-FIRST ORDER — `km² 100`, `m³ 12`. ⚠ THIS IS THE
+    //         WORD ORDER THE WHOLE FILE EXISTS FOR (fact 1 in the header), and it was the one shape the
+    //         exponent arms could not see: (b2)/(b3) require the number FIRST, (c) below does not know
+    //         about exponents, and the shared bare-unit helper declines anything before a power. So
+    //         `Balʼina km² 100` read *balʔˈina **km** ᶑˈibːa* — the abbreviation reached the phoneme
+    //         stream as its own letters, a LEAK, in the language whose measure phrases are noun-initial.
+    //         `km2 100` failed the mirror way, arm (c) taking the glued exponent as the number: *km 2 100*.
+    //         ⚠ ZERO CORPUS INSTANCES — the om FLEURS text writes no `km²` in either order, and the
+    //         noun-first square is spelled out there (`iskuweer kiloometiiri 783,562`). These are the
+    //         ADVERSARIAL NEIGHBOURS of (b2)/(b3), declared on the same footing as (d) below, which was
+    //         added for the same reason with the same absence of instances. They must precede (c), which
+    //         would otherwise claim the unit and orphan the power.
+    //         The `(?:\s?²|2)` asymmetry is (b2)'s, unchanged and for its reason: a spaced ASCII `2` is
+    //         the next NUMBER, so `km 2` stays six kilometres' neighbour and never becomes a square one.
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(${units})(?:\\s?²|2)\\s?(?=\\d)`, "giu"),
+        (_m, u: string) => `iskuweer ${UNIT[u.toLowerCase()]!} `);
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(${units})(?:\\s?³|3)\\s?(?=\\d)`, "giu"),
+        (_m, u: string) => `kubiik ${UNIT[u.toLowerCase()]!} `);
     //     (c) the abbreviation BEFORE its number (`mm 5`, `km 6,387`) — and this must come BEFORE (d),
     //         which was found by the corpus's `mm 36 mm 24n` (a 36×24 mm negative): with (d) first, the
     //         SECOND `mm` was eaten as the postposed unit of `36`, and the first was left as the raw
