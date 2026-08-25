@@ -50,6 +50,12 @@ public class LanguageBootstrapTests
     // linking vowel its stem demands, and the measure noun leads its number (head-initial).
     [InlineData("om", "1994tti", "kˈuma ᶑˈibːa saɡˈal saɡaltamˈiː afurˈitːi")]
     [InlineData("om", "mm 5", "miːliːmˈeːtira ʃˈan")]
+    // Sundanese's three defining shapes: the SECOND SCRIPT (Aksara Sunda, assembled back to the Latin
+    // orthography and read by the same g2p), the same-vowel hiatus glottal, and the schwa penult that
+    // cannot bear stress so the mark shifts to the final vowel.
+    [InlineData("su", "ᮃᮊ᮪ᮞᮛ ᮞᮥᮔ᮪ᮓ", "ʔaksˈara sˈunda")]
+    [InlineData("su", "naam", "nˈaʔam")]
+    [InlineData("su", "hese", "həsˈə")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 
