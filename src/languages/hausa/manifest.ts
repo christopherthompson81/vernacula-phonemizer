@@ -21,6 +21,8 @@ export interface HausaManifest {
         million: string;
         billion: string;
     };
+    letterNames: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[] };
 }
 
 /** The consolidated hand-authored Hausa data tables (see hausa.jsonc). */

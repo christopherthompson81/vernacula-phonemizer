@@ -41,6 +41,8 @@ export interface RussianManifest {
         thousandFeminine: { one: string; two: string };
         decimalConnector: string;
     };
+    letterNames: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[] };
 }
 
 /** The consolidated hand-authored Russian data tables (see russian.jsonc). */

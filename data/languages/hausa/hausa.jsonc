@@ -137,4 +137,21 @@
         "million": "miliyan",
         "billion": "biliyan",
     },
+
+    "letterNames": {
+        "a": "a", "b": "ba", "c": "ca", "d": "da", "e": "e", "f": "fa", "g": "ga", "h": "ha", "i": "i",
+        "j": "ja", "k": "ka", "l": "la", "m": "ma", "n": "na", "o": "o", "p": "pa", "q": "ku", "r": "ra",
+        "s": "sa", "t": "ta", "u": "u", "v": "fa", "w": "wa", "x": "iks", "y": "ya", "z": "za", "ɓ": "ɓa",
+        "ɗ": "ɗa", "ƙ": "ƙa", "ƴ": "ƴa"
+    },
+    "phonotactics": {
+        "vowels": "aeiou",
+        "onsets": [
+            "ɓ", "ɗ", "ƙ", "ƴ", "sh", "ts", "ch", "gw", "kw", "hw", "gy", "ky", "ny", "b", "d", "f", "g",
+            "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y"
+        ],
+        "codas": [
+            "b", "d", "f", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y", "n"
+        ]
+    }
 }

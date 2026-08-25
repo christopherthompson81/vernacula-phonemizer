@@ -32,6 +32,15 @@ public sealed class JavaneseDef
     public IReadOnlyDictionary<string, string> Vowels { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public JavaneseNumbersDef Numbers { get; init; } = new();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public JavanesePhonotactics Phonotactics { get; init; } = new();
+}
+
+public sealed class JavanesePhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
 }
 
 /** A phoneme segment: `V` is the SOURCE vowel letter for a nucleus, "" for a consonant. */

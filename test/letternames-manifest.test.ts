@@ -19,6 +19,10 @@ import { MANIFEST as TR } from "../src/languages/turkish/manifest.ts";
 import { MANIFEST as TH } from "../src/languages/thai/manifest.ts";
 import { MANIFEST as VI } from "../src/languages/vietnamese/manifest.ts";
 import { MANIFEST as CMN } from "../src/languages/mandarin/manifest.ts";
+import { MANIFEST as FR } from "../src/languages/french/manifest.ts";
+import { MANIFEST as RU } from "../src/languages/russian/manifest.ts";
+import { MANIFEST as JV } from "../src/languages/javanese/manifest.ts";
+import { MANIFEST as HA } from "../src/languages/hausa/manifest.ts";
 
 interface Lifted {
     letterNames: Record<string, string>;
@@ -38,6 +42,14 @@ const LANGS: [string, Lifted, string, string, string, string][] = [
     ["pl", PL, "port USB działa", "usb", "ten SPORT dzisiaj", "s"],
     ["hu", HU, "az USB port működik", "usb", "a SPORT ma", "s"],
     ["tr", TR, "USB bağlantı noktası", "usb", "bu SPOR bugün", "s"],
+    ["fr", FR, "le port USB fonctionne", "usb", "un TEST de sport", "t"],
+    // ⚠ RUSSIAN'S TABLE IS CYRILLIC-KEYED, so the spelled run must be Cyrillic too: a Latin run inside
+    // Russian goes through the script router to English and never reaches this table at all.
+    ["ru", RU, "ВВП растёт", "ввп", "СПОРТ сегодня", "с"],
+    // ⚠ JAVANESE GENUINELY SPELLS `SPORT`, so it is the wrong "readable" case: jv licenses only ⟨ng⟩ and
+    // ⟨ny⟩ as codas, so the ⟨rt⟩ tail is illegal and the run is spelled — correctly. `PRO` reaches the
+    // ONSET table instead (⟨pr⟩ is licensed) and ends in a vowel, so nothing tests the codas there.
+    ["jv", JV, "port USB mlaku", "usb", "PRO dina iki", "p"],
 ];
 
 /**
@@ -54,6 +66,31 @@ const SPELL_ONLY: [string, Record<string, string>, string, string][] = [
     ["vi", VI.letterNames, "cổng USB hoạt động", "USB"],
     ["cmn", CMN.letterNames, "USB接口可以用", "USB"],
 ];
+
+/**
+ * ⚠ HAUSA IS EXCLUDED FROM THE CLUSTER ASSERTIONS ABOVE, and the reason is a PRE-EXISTING DEFECT this lift
+ * surfaced rather than caused: its `legalCodas` are ALL SINGLE CHARACTERS, and 20 of its 29 `legalOnsets`
+ * are too. `core/initialisms.ts` tests `w.slice(0, 2)` against those sets — a two-character slice — so a
+ * one-character entry can never match. Hausa's entire coda list is therefore dead, and any Hausa run ending
+ * in two consonants is judged unreadable no matter what the list says.
+ *
+ * NOT FIXED HERE: repairing it changes readings and needs Hausa-specific sourcing (what ARE its legal
+ * two-consonant codas?), which a mechanical lift has no business guessing. The lift preserves the behaviour
+ * exactly; this test pins the defect so it is visible in the suite, and will fail when it is fixed.
+ */
+describe("ha's phonotactics lists are dead data — a known defect", () => {
+    test("every coda and most onsets are single characters, which cannot match a 2-char slice", () => {
+        expect(HA.phonotactics.codas.every((c) => c.length === 1)).toBe(true);
+        expect(HA.phonotactics.onsets.filter((c) => c.length === 1).length).toBeGreaterThan(15);
+        // The nine genuine clusters are the only entries the core can ever see.
+        expect(HA.phonotactics.onsets.filter((c) => c.length > 1)).toContain("sh");
+    });
+
+    test("the letter names are live even though the clusters are not", () => {
+        const say = (x: string): string => phonemize(x, "ha").replace(/[ˈˌ]/gu, "");
+        for (const ch of "cd") expect(say("CD da DNA")).toContain(say(HA.letterNames[ch]!));
+    });
+});
 
 describe.each(SPELL_ONLY)("%s spells an embedded Latin run from letterNames", (code, letters, sentence, run) => {
     const say = (s: string): string => phonemize(s, code).replace(/[ˈˌ]/gu, "");

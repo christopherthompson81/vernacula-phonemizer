@@ -30,6 +30,19 @@ public class LetterNamesManifestTests
             "az USB port működik", "usb", "a SPORT ma", "s");
         d.Add("tr", tr.LetterNames, tr.Phonotactics.Vowels, tr.Phonotactics.Onsets, tr.Phonotactics.Codas,
             "USB bağlantı noktası", "usb", "bu SPOR bugün", "s");
+        var fr = Languages.French.Manifest.MANIFEST;
+        var ru = Languages.Russian.Manifest.MANIFEST;
+        var jv = Languages.Javanese.JavanesePhonemizer.DEF;
+        d.Add("fr", fr.LetterNames, fr.Phonotactics.Vowels, fr.Phonotactics.Onsets, fr.Phonotactics.Codas,
+            "le port USB fonctionne", "usb", "un TEST de sport", "t");
+        // ⚠ RUSSIAN'S TABLE IS CYRILLIC-KEYED, so the spelled run must be Cyrillic: a Latin run inside
+        // Russian goes through the script router to English and never reaches this table.
+        d.Add("ru", ru.LetterNames, ru.Phonotactics.Vowels, ru.Phonotactics.Onsets, ru.Phonotactics.Codas,
+            "ВВП растёт", "ввп", "СПОРТ сегодня", "с");
+        // ⚠ JAVANESE GENUINELY SPELLS `SPORT` — it licenses only ⟨ng⟩/⟨ny⟩ as codas, so the ⟨rt⟩ tail is
+        // illegal and the run is spelled, correctly. `PRO` reaches the ONSET table instead.
+        d.Add("jv", jv.LetterNames, jv.Phonotactics.Vowels, jv.Phonotactics.Onsets, jv.Phonotactics.Codas,
+            "port USB mlaku", "usb", "PRO dina iki", "p");
         return d;
     }
 
@@ -48,6 +61,25 @@ public class LetterNamesManifestTests
         d.Add("vi", Languages.Vietnamese.Manifest.MANIFEST.LetterNames, "cổng USB hoạt động", "USB");
         d.Add("cmn", Languages.Mandarin.Manifest.MANIFEST.LetterNames, "USB接口可以用", "USB");
         return d;
+    }
+
+    /**
+     * ⚠ HAUSA IS EXCLUDED FROM THE CLUSTER ASSERTIONS, and the reason is a PRE-EXISTING DEFECT this lift
+     * surfaced rather than caused: its `LegalCodas` are ALL single characters, and 20 of its 29 `LegalOnsets`
+     * are too. Initialisms.cs tests `w[..2]` against those sets — a two-character slice — so a one-character
+     * entry can never match. Hausa's entire coda list is dead. NOT fixed here: repairing it changes readings
+     * and needs Hausa-specific sourcing. This pins the defect so it is visible and will fail when fixed.
+     */
+    [Fact]
+    public void HausaPhonotacticsListsAreDeadDataWhichIsAKnownDefect()
+    {
+        var ha = Languages.Hausa.Manifest.MANIFEST;
+        Assert.All(ha.Phonotactics.Codas, c => Assert.Single(c));
+        Assert.True(ha.Phonotactics.Onsets.Count(c => c.Length == 1) > 15);
+        Assert.Contains("sh", ha.Phonotactics.Onsets);
+        // The letter names ARE live even though the clusters are not.
+        foreach (var ch in "cd")
+            Assert.Contains(Say("ha", ha.LetterNames[ch.ToString()]), Say("ha", "CD da DNA"));
     }
 
     [Theory]

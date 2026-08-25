@@ -45,6 +45,7 @@
  * Neither is an attestation, and a Javanese speaker reviewing this layer should start with these two.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
 /** Not-a-letter, on both sides. `\b` cannot be used — see the header. */
@@ -157,49 +158,12 @@ const SYMBOLS = makeSymbolNormalizer({
     magnitudes: ["èwu", "ewu", "yuta", "juta", "milyar", "triliun"],
 });
 
-/**
- * LATIN LETTER NAMES — for `core/initialisms.ts`, which is why `PBB` no longer reads [pbb].
- *
- * ⚠ THE INVENTORY IS INFERRED, THE PHONOLOGY IS NOT, and that split is what makes this shippable. Nothing
- * attests these names: the corpus never spells an acronym out (its acronyms come with their EXPANSION
- * instead — `PDB (paritas daya tuku)`, `KB (Program Keluarga Berencana)`), espeak ships no Javanese at all,
- * and every jv.wikipedia probe refuted itself on sense — ⟨èks⟩ is the prefix *ex-* (`èks Karésidhènan`),
- * ⟨èl⟩ is *El Salvador*, ⟨zèt⟩/⟨èf⟩ are absent, and ⟨tivi⟩ ×71 is the lexicalised loan for TV rather than a
- * letter spelling. So the NAMES are the Indonesian ones, which is how Latin letters are named in Java.
- *
- * But they are emitted as ORTHOGRAPHY, not as IPA, so this language's own g2p supplies the sound — and it
- * audibly does: ⟨a⟩ → [ɔ] and ⟨ka⟩ → [kɔ] by the a→ɔ open-final rule, ⟨té⟩ → [t̪e] and ⟨dé⟩ → [d̪e] with
- * the dental series. Those are Javanese signatures, not Indonesian ones. (Indonesian's own table maps
- * straight to IPA; copying it would have imported its phonology with its inventory.)
- *
- * ⚠ SPELLED WITH EXPLICIT ⟨é⟩/⟨è⟩. Javanese ⟨e⟩ is ambiguous between pepet and taling — the homograph
- * ceiling this language's maturity row is 🟡 for — so a bare ⟨e⟩ here would be a coin flip.
- *
- * ⚠ AND THE BLAST RADIUS IS SMALL BY DESIGN: `core/initialisms.ts` spells only what its OOV test says
- * CANNOT be read as a word, so an acronym Javanese says as a word keeps that reading (UNESCO stays
- * [unˈəst͡ʃo]) and only the impossible clusters are spelled. The inference is load-bearing for `PBB`,
- * `PDB`, `UGM`, `LS`, `BT` — not for the corpus at large.
- */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", b: "bé", c: "cé", d: "dé", e: "é", f: "èf", g: "gé", h: "ha", i: "i", j: "jé",
-    k: "ka", l: "èl", m: "èm", n: "èn", o: "o", p: "pé", q: "ki", r: "èr", s: "ès", t: "té",
-    u: "u", v: "fé", w: "wé", x: "èks", y: "yé", z: "zèt",
-};
-
 /** Javanese phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?). */
 export const isUnreadableJavanese = makeUnreadableTest({
-    vowels: /[aeiouéèê]/u,
-    // The clusters Javanese actually permits word-initially: the liquid and glide series, the prenasalised
-    // stops, and the aspirate/retroflex digraphs the orthography writes with ⟨h⟩.
-    legalOnsets: new Set([
-        "pr", "br", "tr", "dr", "kr", "gr", "cr", "jr", "sr", "pl", "bl", "kl", "gl", "sl",
-        "tw", "dw", "kw", "sw", "ny", "ng", "th", "dh", "mb", "nd", "nj", "ns", "mp", "nt", "nc", "nk",
-    ]),
-    // Javanese codas are single consonants plus the two digraphs; a two-consonant tail is otherwise illegal,
-    // which is exactly what makes `UNS`, `UGM` and `PDB` spell out.
-    legalCodas: new Set(["ng", "ny"]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
-
 /**
  * LEXICAL, not derivable from spelling: acronyms READ AS LETTERS although their lowercase form is a
  * perfectly readable Javanese-looking word, so the OOV test alone would leave them. Every one is attested
@@ -216,7 +180,7 @@ const ACRONYM_LETTERS: ReadonlySet<string> = new Set(["as", "us", "sa", "ri", "l
 const WORD_ACRONYMS: ReadonlySet<string> = new Set(["wib", "wita", "wit", "unesco", "nasa", "asean"]);
 
 const normalizeInitialisms = makeInitialismNormalizer({
-    letterName: (l) => LETTER_NAME[l.toLowerCase()],
+    letterName: (l) => MANIFEST.letterNames[l.toLowerCase()],
     acronymLetters: ACRONYM_LETTERS,
     isRecorded: (w) => WORD_ACRONYMS.has(w),
     isUnreadable: isUnreadableJavanese,

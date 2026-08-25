@@ -330,4 +330,25 @@
         },
         "decimalSeparator": "virgule",
     },
+
+    "letterNames": {
+        "a": "a", "b": "bé", "c": "cé", "d": "dé", "e": "e", "f": "effe", "g": "gé", "h": "ache", "i": "i",
+        "j": "ji", "k": "ka", "l": "elle", "m": "emme", "n": "enne", "o": "o", "p": "pé", "q": "ku",
+        "r": "erre", "s": "esse", "t": "té", "u": "u", "v": "vé", "w": "double vé", "x": "ixe",
+        "y": "i grec", "z": "zède"
+    },
+    "phonotactics": {
+        "vowels": "aeiouyàâäéèêëîïôöûüùœæ",
+        "onsets": [
+            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "kl", "kr", "ch",
+            "ph", "th", "gn", "qu", "sc", "sp", "st", "ps", "pn", "pt", "sm", "sn", "gu", "rh", "ct"
+        ],
+        "codas": [
+            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "ch", "gn", "st",
+            "sc", "sk", "sp", "ct", "pt", "ft", "xt", "ss", "tt", "ll", "mm", "nn", "pp", "rr", "ff", "rt",
+            "rd", "rs", "rc", "rl", "rm", "rn", "rp", "rb", "rg", "rf", "rv", "rq", "lt", "ld", "ls", "lc",
+            "lm", "lp", "lb", "lf", "lk", "lv", "nt", "nd", "ns", "nc", "nk", "ng", "mp", "mb", "cs", "ks",
+            "ts", "ps", "bs", "ds", "gs", "fs", "ms"
+        ]
+    }
 }

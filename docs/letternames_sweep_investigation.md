@@ -86,9 +86,46 @@ done/deferred status list, read by neither engine and not declared in the TypeSc
 The `note` case, not the tg `numbers.and` case, so they are listed as metadata rather than given C#
 properties that would model a field neither side has.
 
+## Batch 3 — fr, ru, jv, ha — 2026-08-25 07:20
+
+`jv` had no `manifest.ts`: javanese.ts declared the shape inline and loaded the file itself. Added one, as
+Italian needed.
+
+**0 of 24 probe readings moved.** Sweep: letterNames fr 3, ru 2, jv 4, ha 4; vowels 1/3/1/1; ru onsets 2 and
+codas 1; fr/jv/ha onsets and codas 0 — see below for why two of those zeros are NOT probe gaps.
+
+## ⚠ Three defects the batch surfaced, none of them caused by it
+
+**1. A tooling bug that would have shipped silently.** The C# applier decided whether to emit a `Digraphs`
+line by testing `if "digraphs" in inner` — and matched the word in a COMMENT. Javanese got
+`digraphs: new Set(MANIFEST.phonotactics.digraphs)` pointing at a key the generator never emitted.
+`new Set(undefined)` is an EMPTY SET, so the digraph collapse would have stopped working and more runs would
+have been spelled out — with nothing thrown and the type checker satisfied once the field was declared.
+Caught by reading the emitted diff. The condition now matches `digraphs\s*:`.
+
+**2. Hausa's phonotactics lists are dead data.** `legalCodas` is 16 entries and ALL SIXTEEN are single
+characters; 20 of the 29 `legalOnsets` are too. `core/initialisms.ts` tests `w.slice(0, 2)` against those
+sets — a two-character slice — so a one-character entry can never match. Hausa's coda list is therefore
+entirely inert, and any Hausa run ending in two consonants is judged unreadable regardless of what the list
+says. The core's own comment states the invariant the data violates: "`legalOnsets`/`legalCodas` stay lists of
+genuine two-PHONEME clusters".
+
+NOT FIXED: repairing it changes readings and needs Hausa-specific sourcing — what ARE its legal two-consonant
+codas? — which a mechanical lift has no business guessing. Pinned in both coupling tests as a known defect,
+which is also why Hausa is excluded from the batch's cluster assertions.
+
+**3. Two of my test rows were wrong about the language, not the code.**
+  · **Russian's `letterNames` is CYRILLIC-keyed.** A Latin run inside Russian goes through the script router
+    to English and never reaches the table, so `USB` was the wrong spelled-run probe; `ВВП` is right.
+  · **Javanese genuinely spells `SPORT`.** It licenses only ⟨ng⟩ and ⟨ny⟩ as codas, so the ⟨rt⟩ tail is
+    illegal and the run is spelled — correctly. `PRO` is the right readable case: ⟨pr⟩ is a licensed ONSET and
+    the word ends in a vowel, so it reaches the onset table without touching the codas.
+
+Both failures looked like port bugs and were assertions written from an assumption about the language.
+
 ## Remaining
 
-8: fr, ru, jv, ha, en, and the ta/te/kn recognition-list batch.
+4: en, and the ta/te/kn recognition-list batch.
   · `jv` has no manifest.ts and needs one.
   · `th`, `vi`, `ta`, `te`, `kn`, `cmn` have no phonotactics block — letterNames only.
   · `en` last: the largest engine, neural, and four accent variants read it.

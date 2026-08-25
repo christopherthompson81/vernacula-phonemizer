@@ -10,40 +10,24 @@
  * the three silently mishandles the others.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { MANIFEST } from "./manifest.ts";
 import { numberToWords as hausaNumber } from "./numbers.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** Hausa letter names — the standard Boko alphabet (a, ba, bi, ca, da, e, fa, ga, ha, i, ja, ka, la,
- *  ma, na, o, pa, ku, ra, sa, ta, u, wa, ya, za). */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", b: "ba", c: "ca", d: "da", e: "e", f: "fa", g: "ga", h: "ha", i: "i", j: "ja",
-    k: "ka", l: "la", m: "ma", n: "na", o: "o", p: "pa", q: "ku", r: "ra", s: "sa", t: "ta",
-    u: "u", v: "fa", w: "wa", x: "iks", y: "ya", z: "za", "ɓ": "ɓa", "ɗ": "ɗa", "ƙ": "ƙa", "ƴ": "ƴa",
-};
-
 /** Hausa phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?). */
 export const isUnreadableHausa = makeUnreadableTest({
-    // ɓ ɗ ƙ ƴ are the hooked CONSONANTS, not vowels — they are already in `legalOnsets` below. Listing
-    // them here made any run containing one count as pronounceable, so a letter-run with a hooked letter
-    // would never be spelled out.
-    vowels: /[aeiou]/u,
-    legalOnsets: new Set([
-        "ɓ", "ɗ", "ƙ", "ƴ", "sh", "ts", "ch", "gw", "kw", "hw", "gy", "ky", "ny", "b", "d", "f",
-        "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y",
-    ]),
-    legalCodas: new Set([
-        "b", "d", "f", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y", "n",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
-
 /** Lexical: acronyms READ AS WORDS despite being unreadable by phonotactics. */
 const WORD_ACRONYMS: ReadonlySet<string> = new Set(["opec", "un", "nasa", "aids", "laser", "covid"]);
 
 const normalizeInitialisms = makeInitialismNormalizer({
-    letterName: (l) => LETTER_NAME[l.toLowerCase()],
+    letterName: (l) => MANIFEST.letterNames[l.toLowerCase()],
     acronymLetters: new Set([
         "aol", "au", "pstn", "a1gp", "gps", "npws", "oha", "unaids", "ungu", "nc", "nsw", "xdr-tb",
         "h5n1", "dna", "hiv", "dvd", "cd", "tv", "pc", "pdf", "fbi", "cia", "nsa", "faa", "bbc",
@@ -198,7 +182,7 @@ export function normalizeHausa(input: string): string {
     s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "rashin $1");
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
         (_m, a: string, b: string, pl: string) =>
-            `${LETTER_NAME[a.toLowerCase()] ?? a} da ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
+            `${MANIFEST.letterNames[a.toLowerCase()] ?? a} da ${MANIFEST.letterNames[b.toLowerCase()] ?? b}${pl}`);
     s = s.replace(/\s&\s/gu, " da ");
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 daidai $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 kasa da $2");

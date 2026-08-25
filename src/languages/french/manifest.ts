@@ -37,6 +37,8 @@ export interface FrenchManifest {
         };
         decimalSeparator: string;
     };
+    letterNames: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[] };
 }
 
 /** The consolidated hand-authored French data tables (see french.jsonc). */

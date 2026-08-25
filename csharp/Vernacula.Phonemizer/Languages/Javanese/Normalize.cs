@@ -33,27 +33,14 @@ public static class Normalize
 
     });
 
-    /** LATIN LETTER NAMES — for `core/initialisms.ts`, which is why `PBB` no longer reads [pbb]. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "a", ["b"] = "bé", ["c"] = "cé", ["d"] = "dé", ["e"] = "é", ["f"] = "èf", ["g"] = "gé",
-        ["h"] = "ha", ["i"] = "i", ["j"] = "jé", ["k"] = "ka", ["l"] = "èl", ["m"] = "èm", ["n"] = "èn",
-        ["o"] = "o", ["p"] = "pé", ["q"] = "ki", ["r"] = "èr", ["s"] = "ès", ["t"] = "té",
-        ["u"] = "u", ["v"] = "fé", ["w"] = "wé", ["x"] = "èks", ["y"] = "yé", ["z"] = "zèt",
-    };
-
     /**
      * Javanese phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?).
      */
     public static readonly Func<string, bool> IsUnreadableJavanese = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiouéèê]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "pr", "br", "tr", "dr", "kr", "gr", "cr", "jr", "sr", "pl", "bl", "kl", "gl", "sl",
-            "tw", "dw", "kw", "sw", "ny", "ng", "th", "dh", "mb", "nd", "nj", "ns", "mp", "nt", "nc", "nk",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[] { "ng", "ny" }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{JavanesePhonemizer.DEF.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(JavanesePhonemizer.DEF.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(JavanesePhonemizer.DEF.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     /**
@@ -69,7 +56,7 @@ public static class Normalize
 
     private static readonly Func<string, string> NormalizeInitialisms = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
-        LetterName = l => LETTER_NAME.GetValueOrDefault(l.ToLowerInvariant()),
+        LetterName = l => JavanesePhonemizer.DEF.LetterNames.GetValueOrDefault(l.ToLowerInvariant()),
         AcronymLetters = ACRONYM_LETTERS,
         IsRecorded = w => WORD_ACRONYMS.Contains(w),
         IsUnreadable = IsUnreadableJavanese,
