@@ -98,6 +98,7 @@
  *     where silence is right. Left dropped.
  */
 import { westernNumberWords } from "../../core/numbers.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { ArmenianDef } from "./armenian.ts";
 
@@ -109,8 +110,6 @@ const NUMBERS = loadManifest<ArmenianDef>(import.meta.url, "armenian.jsonc").num
 
 /** An Armenian letter or a combining mark — the "inside a word" test. Never `\b` (trap 1), and `\p{M}` is
  *  present beside `\p{L}` because a guard that means "not inside a word" needs both (trap 23). */
-const NOT_LETTER_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_LETTER_AFTER = "(?![\\p{L}\\p{M}])";
 /** Armenian lowercase letters, for a bound suffix. `և` (U+0587) sits outside the ա–ֆ range. */
 const ARM_LOWER = "[\\u0561-\\u0586\\u0587]";
 

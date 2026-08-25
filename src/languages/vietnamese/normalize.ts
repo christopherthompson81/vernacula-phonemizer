@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /**
  * Vietnamese (vi) text normalization — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable Vietnamese syllable into Vietnamese words the pipeline speaks. Pure text→text; no IPA.
@@ -50,9 +51,6 @@ const VI_ABBREV: readonly [string, string][] = [
 
 /** ⚠ `\b` is ASCII-defined and mis-fires against Vietnamese's precomposed diacritics (Tây, đầy). Every
  *  letter-edge guard in this file is an explicit lookaround over `\p{L}\p{M}` instead. */
-const NL = "(?![\\p{L}\\p{M}])";
-const NLB = "(?<![\\p{L}\\p{M}])";
-
 /** Value of a possibly grouped / comma-decimal Vietnamese numeral, for the ascending test at step 7. */
 const numVal = (s: string): number => Number(s.replace(/\./gu, "").replace(/,/u, "."));
 
@@ -87,7 +85,7 @@ export function normalizeVietnamese(input: string): string {
     // a legal clock, and the clock rule would claim the first half and leave `,30` to be read as a clause
     // pause. A trailing "phút" is CONSUMED for the same reason the clock consumes "giờ" — the text writes
     // "2:11,60 phút", and re-emitting it gives "…giây 60 phút".
-    s = s.replace(new RegExp(`(?<!\\d)(\\d{1,2}):([0-5]\\d),(\\d{1,2})(?!\\d)(\\s+phút${NL})?`, "gu"),
+    s = s.replace(new RegExp(`(?<!\\d)(\\d{1,2}):([0-5]\\d),(\\d{1,2})(?!\\d)(\\s+phút${NOT_LETTER_AFTER})?`, "gu"),
         (_m, mi: string, se: string, hu: string) => `${Number(mi)} phút ${Number(se)} giây ${Number(hu)}`);
     // 3c. Clocks. ⚠ EXACTLY TWO MINUTE DIGITS IN 00–59, which is what excludes a RATIO — `3:2` (aspect) and
     // `2:2` (a UK degree class) are the same shape as a bare `\d:\d`.
@@ -97,7 +95,7 @@ export function normalizeVietnamese(input: string): string {
     // sports-time hundredths that 3b owns, but a comma followed by anything else is an ordinary sentence
     // comma, and the blunter guard silently skips "Vào lúc 11:20, cảnh sát …".
     s = s.replace(
-        new RegExp(`(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?!,\\d)(\\s+giờ${NL})?`, "gu"),
+        new RegExp(`(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?!,\\d)(\\s+giờ${NOT_LETTER_AFTER})?`, "gu"),
         (_m, hh: string, mm: string) => clock(hh, mm),
     );
 
@@ -105,9 +103,9 @@ export function normalizeVietnamese(input: string): string {
     // BEFORE the symbol tier. The target forms are the ones Vietnamese prose writes out — `km/giờ`,
     // `dặm/giờ`. `/` is dropped by the tokenizer without a pause, so `165 km/giờ` reads "…ki lô mét giờ".
     // The digit guard keeps this off ordinary word slashes (và/hoặc, đi/đến).
-    s = s.replace(new RegExp(`(?<=\\d\\s?)km/h${NL}`, "giu"), "km/giờ");
-    s = s.replace(new RegExp(`(?<=\\d\\s?)kph${NL}`, "giu"), "km/giờ");
-    s = s.replace(new RegExp(`(?<=\\d\\s?)mph${NL}`, "giu"), "dặm/giờ");
+    s = s.replace(new RegExp(`(?<=\\d\\s?)km/h${NOT_LETTER_AFTER}`, "giu"), "km/giờ");
+    s = s.replace(new RegExp(`(?<=\\d\\s?)kph${NOT_LETTER_AFTER}`, "giu"), "km/giờ");
+    s = s.replace(new RegExp(`(?<=\\d\\s?)mph${NOT_LETTER_AFTER}`, "giu"), "dặm/giờ");
 
     // ── 5. degree sign ───────────────────────────────────────────────────────────────────────────
     // °C before a bare ° — otherwise the C is stranded and routes to the English phonemizer as "sˈiː".
@@ -211,7 +209,7 @@ export function normalizeVietnamese(input: string): string {
     // ⚠ ERA MARKERS BEFORE GENERIC INITIALISMS, and it is load-bearing: TCN and SCN are all-caps runs, so 12b
     // would otherwise spell "trước Công nguyên" as "tê xê en nờ".
     for (const [from, to] of VI_ABBREV)
-        s = s.replace(new RegExp(`${NLB}${from}${NL}`, "gu"), to);
+        s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${from}${NOT_LETTER_AFTER}`, "gu"), to);
     // 12b. All-caps runs → Vietnamese letter names. Gated on the text containing lowercase: an all-caps
     // DOCUMENT carries no initialism signal and spelling every word would be absurd (core/initialisms.ts
     // makes the same exemption). Flanked by neither letter nor digit, which excludes A1GP and JAS 39C where

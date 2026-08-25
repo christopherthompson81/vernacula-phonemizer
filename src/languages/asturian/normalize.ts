@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /**
  * Asturian (ast) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -53,9 +54,6 @@
  */
 
 /** ⚠ NEVER `\b` — Asturian carries `á é í ó ú ñ ḷ ḥ`, which `\b` treats as boundaries (trap 1/23). */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /** The Roman month numerals, 1–12, for the `24-X-1793` date form. Asturian month names, attested:
  *  `marzu` ×57, `xineru` ×34, `ochobre` ×27, `avientu` ×27 on ast.wikipedia. */
 const MONTHS: readonly string[] = [
@@ -98,8 +96,8 @@ export function normalizeAsturian(input: string): string {
     //    "del añu 996 d. C." — both spacings. They were reaching the g2p letter-by-letter with two false
     //    clause pauses each. The final dot is kept at a sentence end (trap 10).
     const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}e\\s?\\.\\s?C\\s?\\.`, "gu"), "enantes de Cristu"],
-        [new RegExp(`${NOT_BEFORE}d\\s?\\.\\s?C\\s?\\.`, "gu"), "dempués de Cristu"],
+        [new RegExp(`${NOT_LETTER_BEFORE}e\\s?\\.\\s?C\\s?\\.`, "gu"), "enantes de Cristu"],
+        [new RegExp(`${NOT_LETTER_BEFORE}d\\s?\\.\\s?C\\s?\\.`, "gu"), "dempués de Cristu"],
     ];
     for (const [re, word] of multi)
         s = s.replace(re, (m0: string, offset: number, full: string) => {
@@ -111,7 +109,7 @@ export function normalizeAsturian(input: string): string {
     //    `1-III-1700`, `1-X-1929`. ⚠ THE ROMAN NUMERAL HERE IS BOUNDED AT 12 AND MUST BE, because that is
     //    the whole of what distinguishes a month from the year it sits between — and the shared roman
     //    pass has already declined the lone `X`, which is why the letter was reaching the g2p as [ʃ].
-    s = s.replace(new RegExp(`${NOT_BEFORE}(\\d{1,2})\\s?-\\s?(I{1,3}|IV|V|VI{1,3}|IX|XI{0,2})\\s?-\\s?(\\d{3,4})${NOT_AFTER}`, "gu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,2})\\s?-\\s?(I{1,3}|IV|V|VI{1,3}|IX|XI{0,2})\\s?-\\s?(\\d{3,4})${NOT_LETTER_AFTER}`, "gu"),
         (whole, day: string, roman: string, year: string) => {
             const m = ROMAN_MONTH[roman];
             return m === undefined ? whole : `${day} de ${MONTHS[m]} de ${year}`;
@@ -123,7 +121,7 @@ export function normalizeAsturian(input: string): string {
     //     intact. Both are the same date form and both are claimed; the month bound of 12 is what keeps
     //     this off an ordinary hyphen-joined trio, and the 3-or-4-digit year is what keeps it off a
     //     dental formula's `0-1/0-1`.
-    s = s.replace(new RegExp(`${NOT_BEFORE}(\\d{1,2})\\s?-\\s?(\\d{1,2})\\s?-\\s?(\\d{3,4})${NOT_AFTER}`, "gu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,2})\\s?-\\s?(\\d{1,2})\\s?-\\s?(\\d{3,4})${NOT_LETTER_AFTER}`, "gu"),
         (whole, day: string, mon: string, year: string) => {
             const m = Number(mon);
             return m >= 1 && m <= 12 ? `${day} de ${MONTHS[m]} de ${year}` : whole;

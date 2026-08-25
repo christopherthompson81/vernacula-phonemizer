@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 /**
  * Classical Nahuatl (nci) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -106,8 +107,6 @@
 /** ⚠ NEVER `\b` — Nahuatl carries the macrons `ā ē ī ō ū` and the colonial acutes `á é í ó ú`, all of
  *  which `\b` treats as word boundaries (trap 1/23). `\p{M}` is in the class because the corpus is not
  *  uniformly NFC and a macron may arrive as a combining mark. */
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /**
  * Units this layer reads, and the two it refuses.
  *
@@ -184,7 +183,7 @@ export function normalizeNahuatl(input: string): string {
     //    contenido") and two are a Spanish poetry title and a gloss; `hora` ×3 is two NOVEL TITLES ("La
     //    mala hora", "La hora de todos") and one true hour ("azo ya ipan matlactli hora"). Thin, read, and
     //    in the right slot. ⚠ THE TRAILING DOT IS NOT CONSUMED (trap 10) — `4:00 hrs.` ends a sentence.
-    s = s.replace(new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:.,])(\\s?)hrs${NOT_AFTER}`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:.,])(\\s?)hrs${NOT_LETTER_AFTER}`, "gu"),
         "$1 $2$3horas");
 
     // 7) DEGREES. ⚠ `°` U+00B0 ONLY — `º` U+00BA is the Spanish ordinal in this corpus (see the header) and

@@ -15,9 +15,6 @@ public static class Normalize
      *  TS `\d` is ASCII — neither is the set Pashto actually writes. */
     private const string D = "0-9\u06f0-\u06f9\u0660-\u0669";
     /** "not inside a word": `\p{M}` beside `\p{L}`, never `\b` — `\b` is ASCII-word-based in both runtimes. */
-    private const string NW_B = "(?<![\\p{L}\\p{M}])";
-    private const string NW_A = "(?![\\p{L}\\p{M}])";
-
     private static readonly IReadOnlyDictionary<string, string> EASTERN = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["۰"] = "0", ["۱"] = "1", ["۲"] = "2", ["۳"] = "3", ["۴"] = "4", ["۵"] = "5", ["۶"] = "6", ["۷"] = "7", ["۸"] = "8", ["۹"] = "9",
@@ -101,7 +98,7 @@ public static class Normalize
     private static readonly JsRe ENTITIES = JsRegex.Compile("&nbsp;|&#(?:x[0-9a-f]+|\\d+);", "giu");
     private static readonly JsRe BOM = JsRegex.Compile("[\ufeff]", "gu");
     private static readonly JsRe ESCAPE = JsRegex.Compile("[.*+?^${}()|[\\]\\\\]", "gu");
-    private static readonly JsRe QM_ERA = JsRegex.Compile($"([{D}])\\s*ق\\s*\\.?\\s*م\\s*\\.?{NW_A}", "gu");
+    private static readonly JsRe QM_ERA = JsRegex.Compile($"([{D}])\\s*ق\\s*\\.?\\s*م\\s*\\.?{Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe GROUP_AR_COMMA = JsRegex.Compile(
         $"(?<![{D}.,،])([{D}]{{1,3}})((?:،[{D}]{{3}})+)(?![{D}]|،[{D}])", "gu");
     private static readonly JsRe GROUP_COMMA = JsRegex.Compile(
@@ -112,7 +109,7 @@ public static class Normalize
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe DEG_C = JsRegex.Compile(
-        $"(?<![{D}.,،])([{D}]+(?:[.,،][{D}]+)?)\\s?°\\s?[CcسS]{NW_A}", "gu");
+        $"(?<![{D}.,،])([{D}]+(?:[.,،][{D}]+)?)\\s?°\\s?[CcسS]{Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe DEG_SIGN = JsRegex.Compile($"(?<![{D}.,،])([{D}]+(?:[.,،][{D}]+)?)\\s?℃", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile($"(?<![{D}:.])([{D}]{{1,2}}):([{D}]{{2}})(?![{D}:.])", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile(
@@ -152,7 +149,7 @@ public static class Normalize
             foreach (var suffix in ORD_SUFFIX)
             {
                 var cutoff = suffix == "م" ? 100d : double.PositiveInfinity; // the bare-`م` era/ordinal split, see ORD_SUFFIX
-                s = JsRegex.Compile($"{NW_B}([{D}]+)\\s?{suffix}{NW_A}", "gu").Replace(s, m =>
+                s = JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}([{D}]+)\\s?{suffix}{Boundaries.NOT_LETTER_AFTER}", "gu").Replace(s, m =>
                 {
                     var n = Js.Number(ToAscii(m.Groups[1].Value));
                     if (!IsSafeInteger(n) || n < 1 || n >= cutoff) return m.Value;

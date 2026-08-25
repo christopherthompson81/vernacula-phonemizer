@@ -43,6 +43,7 @@
  * attestation against hyw.wikipedia whose examples were read; see `tools/corpus/attest/hyw.jsonc`.
  */
 import { westernNumberWords } from "../../core/numbers.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { ArmenianDef } from "../armenian/armenian.ts";
 
@@ -54,8 +55,6 @@ const NUMBERS = loadManifest<ArmenianDef>(import.meta.url, "westarmenian.jsonc")
 
 /** ⚠ NEVER `\b` — it is ASCII and finds no boundary against Armenian (trap 1); and a "not inside a word"
  *  guard carries `\p{M}` beside `\p{L}` (trap 23). Explicit lookarounds throughout. */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
 /** Armenian lowercase, for a bound suffix. `և` (U+0587) sits outside the ա–ֆ range. */
 const ARM_LOWER = "[\\u0561-\\u0586\\u0587]";
 
@@ -152,17 +151,17 @@ export function normalizeWestArmenian(input: string): string {
 
     // 2) MAGNITUDE ABBREVIATIONS, before any single-dot rule — they reach the IPA as clusters otherwise.
     for (const [abbrev, word] of MAGNITUDE_ABBREV)
-        s = s.replace(new RegExp(`${NOT_BEFORE}${abbrev}\\.?${NOT_AFTER}`, "giu"), word);
+        s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${abbrev}\\.?${NOT_LETTER_AFTER}`, "giu"), word);
 
     // 3) THE ERA MARKERS. Both abbreviations occur in this corpus and the wiki glosses each by the other
     //    in one parenthesis — "714 Քրիստոսէ առաջ (Մեր թուարկութենէն Առաջ)" — so neither expansion is
     //    inferred. ⚠ THE LONGER FORM MUST BE TRIED FIRST, or the bare `մ.թ.` rule eats the prefix of
     //    `մ.թ.ա.` and strands its final letter. The final dot is kept at a sentence end (trap 10).
     const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}մ\\s?\\.\\s?թ\\s?\\.\\s?ա\\s?\\.?`, "giu"), "մեր թուարկութենէն առաջ"],
-        [new RegExp(`${NOT_BEFORE}ք\\s?\\.\\s?ա\\s?\\.?${NOT_AFTER}`, "giu"), "Քրիստոսէ առաջ"],
-        [new RegExp(`${NOT_BEFORE}ք\\s?\\.\\s?ե\\s?\\.?${NOT_AFTER}`, "giu"), "Քրիստոսէ ետք"],
-        [new RegExp(`${NOT_BEFORE}մ\\s?\\.\\s?թ\\s?\\.`, "giu"), "մեր թուարկութեամբ"],
+        [new RegExp(`${NOT_LETTER_BEFORE}մ\\s?\\.\\s?թ\\s?\\.\\s?ա\\s?\\.?`, "giu"), "մեր թուարկութենէն առաջ"],
+        [new RegExp(`${NOT_LETTER_BEFORE}ք\\s?\\.\\s?ա\\s?\\.?${NOT_LETTER_AFTER}`, "giu"), "Քրիստոսէ առաջ"],
+        [new RegExp(`${NOT_LETTER_BEFORE}ք\\s?\\.\\s?ե\\s?\\.?${NOT_LETTER_AFTER}`, "giu"), "Քրիստոսէ ետք"],
+        [new RegExp(`${NOT_LETTER_BEFORE}մ\\s?\\.\\s?թ\\s?\\.`, "giu"), "մեր թուարկութեամբ"],
     ];
     for (const [re, word] of multi)
         s = s.replace(re, (m0: string, offset: number, full: string) => {
@@ -181,7 +180,7 @@ export function normalizeWestArmenian(input: string): string {
     //    ⚠ ORDER: the ORDINAL first (its suffix is a different morpheme), then the DECADE, then the rest.
 
     // 5a. ORDINAL RANGE — `19-20-րդ դարերի`, `2-1 հազ`: the suffix is written once, at the end.
-    s = s.replace(new RegExp(`${NOT_BEFORE}(\\d{1,4})\\s?-\\s?(\\d{1,4})\\s?-\\s?(ր|եր|րոր)դ${NOT_AFTER}`, "gu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,4})\\s?-\\s?(\\d{1,4})\\s?-\\s?(ր|եր|րոր)դ${NOT_LETTER_AFTER}`, "gu"),
         (whole, a: string, b: string) => {
             const first = ordinalWords(Number(a)), second = ordinalWords(Number(b));
             return first === undefined || second === undefined ? whole : `${first}, ${second}`;
@@ -190,7 +189,7 @@ export function normalizeWestArmenian(input: string): string {
     // 5b. ORDINAL. The corpus writes `-րդ` (`2-րդ`, `8-րդ`, `4-րդ`, `5-րդ`) and once the fuller `-րորդ`
     //     (`3-րորդ`); the spelled word is the same either way, so the alternation covers both without
     //     the reading depending on which the writer typed.
-    s = s.replace(new RegExp(`${NOT_BEFORE}(\\d{1,4})\\s?-\\s?(?:ր|եր|րոր)դ(${ARM_LOWER}*)${NOT_AFTER}`, "gu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,4})\\s?-\\s?(?:ր|եր|րոր)դ(${ARM_LOWER}*)${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, tail: string) => {
             const ord = ordinalWords(Number(digits));
             return ord === undefined ? whole : `${ord}${tail}`;
@@ -201,7 +200,7 @@ export function normalizeWestArmenian(input: string): string {
     // 5d. EVERY OTHER BOUND SUFFIX, in one rule. ⚠ The alternation is CLOSED to Armenian lowercase and
     //     requires the hyphen, which is what keeps `1915-1923` (a range) and `13-11-2020` (a date) out:
     //     both have a DIGIT after the hyphen, and this rule needs a letter.
-    s = s.replace(new RegExp(`${NOT_BEFORE}(\\d+)\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(\\d+)\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, suffix: string) => {
             const cardinal = cardinalWords(Number(digits));
             return cardinal === undefined ? whole : attachSuffix(cardinal, suffix);
@@ -214,11 +213,11 @@ export function normalizeWestArmenian(input: string): string {
     //    ⚠ AND THE CASE SUFFIX SITS ON THE SIGN — `3800±200°C-ին`, `104 °F-ը`, `40°-ին`, `13.2 °C-էն`.
     // ⚠ THE LOWERCASE SCALE LETTER GOES IN THE CLASS, NOT IN AN `i` FLAG — the suffix class beside it
     //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gu"), "$1 սելսիուս աստիճան$2");
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[Ff]\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gu"), "$1 ֆարենհայթ աստիճան$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), "$1 սելսիուս աստիճան$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[Ff]\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), "$1 ֆարենհայթ աստիճան$2");
     // ⚠ NO SCALE LETTER IN THIS ARM, so a case-insensitive flag fixes nothing and only folds ARM_LOWER
     //    into matching uppercase Armenian: `20 °-Ը` would match where it must not.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gu"), "$1 աստիճան$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), "$1 աստիճան$2");
     s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 սելսիուս աստիճան");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 ֆարենհայթ աստիճան");
     s = s.replace(/(\d)\s?°/gu, "$1 աստիճան ");

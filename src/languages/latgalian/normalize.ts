@@ -122,15 +122,13 @@
  * concept and the wrong spelling.
  */
 import { makeSymbolNormalizer, type CountForms } from "../../core/normalizeSymbols.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /**
  * ⚠ NEVER `\b` — Latgalian carries `ā ē ī ō ū y č š ž ģ ķ ļ ņ`, which `\b` treats as boundaries
  * (playbook trap 1/23). The apostrophe is word-internal in the engine's own TOKEN class, so it is excluded
  * here too.
  */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /**
  * The East-Baltic count form, and it is NOT a new claim: `numbers.ts` already implements exactly this rule
  * as `agree()` for its own magnitude nouns (*tyukstūša* vs *tyukstūšys*). SINGULAR after a count ending in
@@ -265,10 +263,10 @@ function degrees(text: string): string {
     return (
         text
             // the writer's own `NN gradi C` — keep the word, spend the letter
-            .replace(new RegExp(`(\\d[\\d.,]*\\s+gradi)\\s+C${NOT_AFTER}`, "gu"), "$1 pa Celseja skolai")
+            .replace(new RegExp(`(\\d[\\d.,]*\\s+gradi)\\s+C${NOT_LETTER_AFTER}`, "gu"), "$1 pa Celseja skolai")
             // `°C` / `° C` — the scale phrase is POSTPOSED and prepositional, which is why it is spelled
             // out here rather than declared as a tier modifier: "…temperatura … -9° pa Celseja skolai".
-            .replace(new RegExp(`(\\d)\\s?°\\s?C${NOT_AFTER}`, "gui"), "$1 gradi pa Celseja skolai")
+            .replace(new RegExp(`(\\d)\\s?°\\s?C${NOT_LETTER_AFTER}`, "gui"), "$1 gradi pa Celseja skolai")
             // …and the bare sign: `56,4°`, `9,6° augšuok horizonta`, and the coordinate `55° 53′ 0″ N`.
             // ⚠ THE LOOKAHEAD STOPS A DOUBLING where the sentence already writes the word.
             .replace(/(\d)\s?°(?!\s*gradi)/gu, "$1 gradi ")
@@ -289,7 +287,7 @@ function degrees(text: string): string {
  * mirror of the defect this step exists to fix).
  */
 function eraMarker(text: string): string {
-    return text.replace(new RegExp(`${NOT_BEFORE}p\\s?\\.\\s?Kr\\s?\\.`, "gu"),
+    return text.replace(new RegExp(`${NOT_LETTER_BEFORE}p\\s?\\.\\s?Kr\\s?\\.`, "gu"),
         (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) || /^\s+\p{Lu}/u.test(rest)
@@ -316,9 +314,9 @@ export function normalizeLatgalian(input: string): string {
         const rest = full.slice(offset + m0.length);
         return /^\s*["»)']?\s*$/u.test(rest) || /^\s+\p{Lu}/u.test(rest) ? `${word}.` : word;
     };
-    s = s.replace(new RegExp(`${NOT_BEFORE}u\\.c\\.`, "gu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}u\\.c\\.`, "gu"),
         (m0, off: number, full: string) => others(m0, off, full, "i cyti"));
-    s = s.replace(new RegExp(`${NOT_BEFORE}ct\\.`, "gu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}ct\\.`, "gu"),
         (m0, off: number, full: string) => others(m0, off, full, "cyti"));
 
     // 3) THE ORDINAL PERIOD — above the range step (see `ordinalPeriod`'s first arm) and above everything

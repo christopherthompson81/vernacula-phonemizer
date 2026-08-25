@@ -101,11 +101,10 @@
  *   sestu ×3 · sétimu ×2 · oitavu ×1 · nonu ×1 · désimu ×7 · `antis` ×49 · `dipôs` ×109 · `Kristu` ×1.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** ⚠ NEVER `\b` — Kabuverdianu carries `á é í ó ú â ê ô à è ò` and the ALUPEC apostrophe, which `\b` treats
  *  as boundaries (trap 1/23). Written as an explicit lookaround and reused, so the hazard is stated once. */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-
 /**
  * The shared SYMBOL tier. Every form declared here is a kea CORPUS token read in slot — see the header;
  * there is no wiki and no espeak to fall back on.
@@ -224,7 +223,7 @@ export function normalizeKabuverdianu(input: string): string {
     //    "riatoris Númeru 1 y 2 di se sentral di Shika fitxadu". Trap 36 records that № must NOT be folded
     //    to a Latin `No`, because that substitutes an English word for a dropped sign; it needs the
     //    language's own word, and kea has one. Guarded on a FOLLOWING DIGIT so a bare `Nº` cannot match.
-    s = s.replace(new RegExp(`${NOT_BEFORE}N\\s?[º°]\\s?(?=\\d)`, "gu"), "númeru ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}N\\s?[º°]\\s?(?=\\d)`, "gu"), "númeru ");
 
     // 6) THE ORDINAL INDICATOR — before the degree step, which would otherwise claim it.
     //    ⚠ THIS IS THE ROUND'S CONFUSABLE, AND IT POINTS THE OPPOSITE WAY FROM THE LAST THREE. Aragonese

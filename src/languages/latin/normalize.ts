@@ -60,12 +60,10 @@
  * decline is two guesses stacked; the signs stay visible to the leak gates instead.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** ⚠ NEVER `\b` here even though Latin is ASCII-adjacent: the alphabet carries macrons and diaereses
  *  (`ā ē ī ō ū ȳ ë ï ö ü ÿ`), which `\b` treats as boundaries and would cut a word in half (trap 1/23). */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /** Normalize one Latin input string. Pure text→text. Steps are ORDER-DEPENDENT. */
 export function normalizeLatin(input: string): string {
     let s = foldNativeDigits(input);
@@ -97,10 +95,10 @@ export function normalizeLatin(input: string): string {
     //    two-letter rule eats its prefix and strands the `n.`. The final dot is kept at a sentence end
     //    (trap 10), or the pause is lost outright.
     const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}a\\s?\\.\\s?C\\s?\\.\\s?n\\s?\\.`, "gu"), "ante Christum natum"],
-        [new RegExp(`${NOT_BEFORE}p\\s?\\.\\s?C\\s?\\.\\s?n\\s?\\.`, "gu"), "post Christum natum"],
-        [new RegExp(`${NOT_BEFORE}a\\s?\\.\\s?C\\s?\\.${NOT_AFTER}`, "gu"), "ante Christum"],
-        [new RegExp(`${NOT_BEFORE}p\\s?\\.\\s?C\\s?\\.${NOT_AFTER}`, "gu"), "post Christum"],
+        [new RegExp(`${NOT_LETTER_BEFORE}a\\s?\\.\\s?C\\s?\\.\\s?n\\s?\\.`, "gu"), "ante Christum natum"],
+        [new RegExp(`${NOT_LETTER_BEFORE}p\\s?\\.\\s?C\\s?\\.\\s?n\\s?\\.`, "gu"), "post Christum natum"],
+        [new RegExp(`${NOT_LETTER_BEFORE}a\\s?\\.\\s?C\\s?\\.${NOT_LETTER_AFTER}`, "gu"), "ante Christum"],
+        [new RegExp(`${NOT_LETTER_BEFORE}p\\s?\\.\\s?C\\s?\\.${NOT_LETTER_AFTER}`, "gu"), "post Christum"],
     ];
     for (const [re, word] of multi)
         s = s.replace(re, (m0: string, offset: number, full: string) => {

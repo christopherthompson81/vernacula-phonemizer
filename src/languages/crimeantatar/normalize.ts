@@ -61,11 +61,9 @@
  * noted) a form the mined artifact itself supplies; see `tools/corpus/attest/crh.jsonc`.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** ⚠ NEVER `\b` — Crimean Tatar carries `â ç ğ ı ñ ö ş ü`, which `\b` treats as boundaries (trap 1/23). */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /**
  * The shared SYMBOL tier. ⚠ THE SQUARE MEASURE WORD PRECEDES ITS UNIT, as in Karakalpak and unlike every
  * Romance layer here: "5 **kvadrat km** qaplağan", "565 biñ **kvadrat metri**", "10 biñ **kvadrat km**-ge
@@ -106,14 +104,14 @@ export function normalizeCrimeanTatar(input: string): string {
     //    unit abbreviation is no longer adjacent to its number — "5 kvadrat km qaplağan", "10 biñ kvadrat
     //    km-ge yaqın" — and the tier's number-adjacency requirement cannot bridge the word the writer
     //    supplied. The exponent word is already there, so only the unit needs expanding.
-    s = s.replace(new RegExp(`${NOT_BEFORE}kvadrat(\\s+)km${NOT_AFTER}`, "gu"), "kvadrat$1kilometr");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}kvadrat(\\s+)km${NOT_LETTER_AFTER}`, "gu"), "kvadrat$1kilometr");
     //    …and the RUSSIAN MAGNITUDE ABBREVIATIONS, which belong here for the same reason and carry an
     //    optional dot: "106,2 mln. km² meydanlıqqa", "$167,8 mlrd UMV bar edi". Expanded before the tier,
     //    `106,2 million km²` composes as a magnitude + unit + exponent in one match.
-    s = s.replace(new RegExp(`${NOT_BEFORE}mln\\s?\\.\\s?`, "gu"), "million ");
-    s = s.replace(new RegExp(`${NOT_BEFORE}mlrd\\s?\\.\\s?`, "gu"), "milliard ");
-    s = s.replace(new RegExp(`${NOT_BEFORE}mln${NOT_AFTER}`, "gu"), "million");
-    s = s.replace(new RegExp(`${NOT_BEFORE}mlrd${NOT_AFTER}`, "gu"), "milliard");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mln\\s?\\.\\s?`, "gu"), "million ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mlrd\\s?\\.\\s?`, "gu"), "milliard ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mln${NOT_LETTER_AFTER}`, "gu"), "million");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mlrd${NOT_LETTER_AFTER}`, "gu"), "milliard");
 
     // 3) THE SHARED SYMBOL TIER, as the Punjabi/Saraiki/Karakalpak layers order it: its own numeral pattern
     //    reads `38.765` and `1,5` as ONE token, and steps 3 and 4 split precisely those.
@@ -141,7 +139,7 @@ export function normalizeCrimeanTatar(input: string): string {
     //    "Zemaneviy Alupka topraqlarında insannıñ yerleşmeleri **milâttan evel** VIII biñyıllıqta peyda
     //    oldı", "**milâttan evel** III asırda meydanğa kelgen" — beside `m.e. 753 senesi` abbreviated.
     //    ⚠ THE FINAL DOT IS KEPT AT A SENTENCE END, or the pause is lost outright (trap 10).
-    s = s.replace(new RegExp(`${NOT_BEFORE}m\\s?\\.\\s?e\\s?\\.`, "gu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}m\\s?\\.\\s?e\\s?\\.`, "gu"),
         (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? "milâttan evel." : "milâttan evel";
@@ -164,7 +162,7 @@ export function normalizeCrimeanTatar(input: string): string {
         ["ğ\\s?\\.\\s?b\\s?\\.", "ğarbiy", "boyluq"],
     ];
     for (const [pat, adj, noun] of coords)
-        s = s.replace(new RegExp(`${NOT_BEFORE}${pat}(\\s*)(${noun}\\p{L}*)?`, "gu"),
+        s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${pat}(\\s*)(${noun}\\p{L}*)?`, "gu"),
             (_m, gap: string, head?: string) => (head === undefined ? `${adj} ${noun}${gap}` : `${adj}${gap}${head}`));
 
     // 8) RANGES — ⚠ AND THEY RUN BEFORE THE SIGNS, WHICH INVERTS THE FLEET ORDER. See the header: this

@@ -11,9 +11,6 @@ namespace Vernacula.Phonemizer.Languages.Asturian;
 
 public static class Normalize
 {
-    private const string NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-    private const string NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
     /** The Roman month numerals, 1–12, for the `24-X-1793` date form. */
     private static readonly string[] MONTHS =
     {
@@ -41,13 +38,13 @@ public static class Normalize
     private static readonly JsRe SENTENCE_TAIL = JsRegex.Compile("^\\s*[\"»)']?\\s*$", "u");
     private static readonly List<(JsRe Re, string Word)> MULTI = new()
     {
-        (JsRegex.Compile($"{NOT_BEFORE}e\\s?\\.\\s?C\\s?\\.", "gu"), "enantes de Cristu"),
-        (JsRegex.Compile($"{NOT_BEFORE}d\\s?\\.\\s?C\\s?\\.", "gu"), "dempués de Cristu"),
+        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}e\\s?\\.\\s?C\\s?\\.", "gu"), "enantes de Cristu"),
+        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}d\\s?\\.\\s?C\\s?\\.", "gu"), "dempués de Cristu"),
     };
     private static readonly JsRe ROMAN_DATE = JsRegex.Compile(
-        $"{NOT_BEFORE}(\\d{{1,2}})\\s?-\\s?(I{{1,3}}|IV|V|VI{{1,3}}|IX|XI{{0,2}})\\s?-\\s?(\\d{{3,4}}){NOT_AFTER}", "gu");
+        $"{Boundaries.NOT_LETTER_BEFORE}(\\d{{1,2}})\\s?-\\s?(I{{1,3}}|IV|V|VI{{1,3}}|IX|XI{{0,2}})\\s?-\\s?(\\d{{3,4}}){Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe NUMERIC_DATE = JsRegex.Compile(
-        $"{NOT_BEFORE}(\\d{{1,2}})\\s?-\\s?(\\d{{1,2}})\\s?-\\s?(\\d{{3,4}}){NOT_AFTER}", "gu");
+        $"{Boundaries.NOT_LETTER_BEFORE}(\\d{{1,2}})\\s?-\\s?(\\d{{1,2}})\\s?-\\s?(\\d{{3,4}}){Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d)(?![\\d:.,])", "gu");
     private static readonly JsRe DEG_SCALE = JsRegex.Compile("(\\d)\\s?[°º]\\s?([CF])(?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_MIN = JsRegex.Compile("(\\d)\\s?[°º]\\s?(\\d+)\\s?[′']", "gu");

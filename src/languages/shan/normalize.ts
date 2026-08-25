@@ -49,11 +49,10 @@
  *     instances do not license inventing one. The asymmetry is the evidence's, not a shortcut.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 
 /** ⚠ EVERY BOUNDARY HERE IS AN EXPLICIT LOOKAROUND, NEVER `\b` — `\b` is ASCII-defined and sees no
  *  Myanmar-block letter as a word character at all (trap 1). */
-const NOT_LETTER = "(?![\\p{L}\\p{M}])";
-
 /** Normalize one Shan input string. Pure text→text. Steps are ORDER-DEPENDENT. */
 export function normalizeShan(input: string): string {
     // 0) NATIVE DIGITS FIRST, and ⚠ THIS LAYER FOLDS THEM ITSELF rather than relying on the engine's own
@@ -84,7 +83,7 @@ export function normalizeShan(input: string): string {
     //    letter names. `ပီၶရိတ်ႉ` is this corpus's own word for the era ("ၼႂ်းပီၶရိတ်ႉ 1054",
     //    "ပီၶရိတ်ႉ 1953 တေႃႇ 1956", "ပီၵေႃးၸႃႇ 1320 ပီၶရိတ်ႉ 1950").
     //    ⚠ `B.C` IS NOT CLAIMED — see the header. Three instances do not license inventing a compound.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])A\\.?\\s?D\\.?${NOT_LETTER}`, "gu"), "ပီၶရိတ်ႉ");
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])A\\.?\\s?D\\.?${NOT_LETTER_AFTER}`, "gu"), "ပီၶရိတ်ႉ");
 
     // 3) THE CLOCK. The colon is clause punctuation in shan.ts, so `5:23` read as *ႁႃႈ , သၢဝ်းသၢမ်* — a
     //    phrase break inside a time, and `09:00 – 10:00 မူင်း` took two of them. The corpus writes the

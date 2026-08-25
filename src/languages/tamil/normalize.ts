@@ -21,14 +21,12 @@
  * inventory is entirely ASCII — so there is no digit fold here. Same negative result as Persian.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalStem } from "./numbers.ts";
 
 /** Tamil letter+mark boundary. Never `\b`. */
-const NB = "(?<![\\p{L}\\p{M}])";
-const NA = "(?![\\p{L}\\p{M}])";
-
 /**
  * The SHARED symbol tier (percent / currency / units / rate / exponent). Kept here rather than in
  * tamil.ts because its position in the ordering matters and the ordering is this file's job — see step 6.
@@ -83,7 +81,7 @@ const SYMBOLS = makeSymbolNormalizer({
  * the Latin spellings and cannot see these. Longest first so கி.மீ is not clipped to கி.
  *
  * Trap #2 (loose patterns over-count) applies hard here: `கி மி` spaced matched *சுருக்கி மிகவும்* until
- * the trailing `NA` boundary was added, and `கிமு` would otherwise fire inside எஸ்கிமோ. Both boundaries
+ * the trailing `NOT_LETTER_AFTER` boundary was added, and `கிமு` would otherwise fire inside எஸ்கிமோ. Both boundaries
  * are asserted; the spaced variants additionally require a preceding digit, which is the only shape they
  * take in the corpus (12.8 கி மி).
  */
@@ -123,29 +121,29 @@ const LETTER_NAME = [
 const alt = (keys: readonly string[]): string =>
     [...keys].sort((a, b) => b.length - a.length).join("|");
 
-const TAMIL_UNIT_RE = new RegExp(`${NB}(${alt(Object.keys(TAMIL_UNIT))})${NA}`, "gu");
+const TAMIL_UNIT_RE = new RegExp(`${NOT_LETTER_BEFORE}(${alt(Object.keys(TAMIL_UNIT))})${NOT_LETTER_AFTER}`, "gu");
 const TAMIL_UNIT_DOT_RE = new RegExp(
-    `${NB}(கி|மி|செ)\\s*\\.\\s*(மீ|மி)${NA}`,
+    `${NOT_LETTER_BEFORE}(கி|மி|செ)\\s*\\.\\s*(மீ|மி)${NOT_LETTER_AFTER}`,
     "gu",
 );
-const TAMIL_UNIT_SPACED_RE = new RegExp(`(?<=\\d\\s?)(கி|மி|செ)\\s(மீ|மி)${NA}`, "gu");
+const TAMIL_UNIT_SPACED_RE = new RegExp(`(?<=\\d\\s?)(கி|மி|செ)\\s(மீ|மி)${NOT_LETTER_AFTER}`, "gu");
 // The trailing `\.?` deliberately has NO `\s*` in front of it: with one, the rule swallowed the space
 // after the abbreviation and produced "கிறிஸ்துவுக்கு முன்10000" as a single token (caught by the corpus
 // diff, ×2 — not by any probe).
-const ERA_RE = new RegExp(`${NB}கி\\s*\\.?\\s*(மு|பி)\\.?${NA}`, "gu");
+const ERA_RE = new RegExp(`${NOT_LETTER_BEFORE}கி\\s*\\.?\\s*(மு|பி)\\.?${NOT_LETTER_AFTER}`, "gu");
 const LETTER = `(?:${alt(LETTER_NAME)})`;
 // A run of ≥2 dot-separated letter names. The run's TRAILING dot is consumed only when the sentence
 // visibly continues (whitespace + another letter); at a true sentence end it is left in place, so that
 // "…1 யு.எஸ்." keeps its final pause. Zero sentence-final pauses are lost by this rule.
 const INITIALISM_RE = new RegExp(
-    `${NB}${LETTER}(?:\\s*\\.\\s*${LETTER})+(?:\\s*\\.(?=\\s+[\\p{L}]))?${NA}`,
+    `${NOT_LETTER_BEFORE}${LETTER}(?:\\s*\\.\\s*${LETTER})+(?:\\s*\\.(?=\\s+[\\p{L}]))?${NOT_LETTER_AFTER}`,
     "gu",
 );
 
 /** Ordinal suffixes, longest first: ஆவது / வது take -ஆவது, ஆம் / ம் take -ஆம். */
 const ORDINAL_SUFFIX = ["ஆவது", "ஆம்", "வது", "ம்"];
 const ORDINAL_RE = new RegExp(
-    `(?<![\\d.,])(\\d+)\\s*-?\\s*(${ORDINAL_SUFFIX.join("|")})${NA}`,
+    `(?<![\\d.,])(\\d+)\\s*-?\\s*(${ORDINAL_SUFFIX.join("|")})${NOT_LETTER_AFTER}`,
     "gu",
 );
 
@@ -208,7 +206,7 @@ export function normalizeTamil(input: string): string {
     // 3) ERA markers, BEFORE the initialism rule (step 4) — கி.மு. is a letter pair by shape and would
     //    otherwise be spelled out as [kɪ mʊ] with the era lost.
     s = s.replace(ERA_RE, (_m, k: string) => ERA[k]!);
-    s = s.replace(new RegExp(`${NB}எ\\s*\\.\\s*கா\\s*\\.?${NA}`, "gu"), "எடுத்துக்காட்டாக");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}எ\\s*\\.\\s*கா\\s*\\.?${NOT_LETTER_AFTER}`, "gu"), "எடுத்துக்காட்டாக");
 
     // 4) MULTI-DOT ABBREVIATIONS before single-dot ones, else the interior dot survives as a phrase break:
     //    எம்.ஆர்.ஐ was reading as [ˈem . ˈaːr . ˈaᶦ], three clauses. Dotted Tamil unit abbreviations
@@ -221,7 +219,7 @@ export function normalizeTamil(input: string): string {
     s = s.replace(TAMIL_UNIT_RE, (_m, u: string) => TAMIL_UNIT[u]!);
     s = s.replace(INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());
     //    திரு. (Mr.) — a single-dot abbreviation, ×3; its dot was a phrase break mid-sentence.
-    s = s.replace(new RegExp(`${NB}திரு\\s*\\.\\s*(?=[\\p{L}])`, "gu"), "திரு ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}திரு\\s*\\.\\s*(?=[\\p{L}])`, "gu"), "திரு ");
 
     // 5) RATE units, before the shared unit tier (step 6) claims the numerator and strands the `/x`.
     //    Prefix + dative, which is the Tamil idiom and is attested verbatim in this corpus
@@ -237,7 +235,7 @@ export function normalizeTamil(input: string): string {
             return `${dative(d, full, off)}${n} ${num}`;
         },
     );
-    s = s.replace(new RegExp(`(\\d[\\d.]*)\\s?mph${NA}`, "giu"),
+    s = s.replace(new RegExp(`(\\d[\\d.]*)\\s?mph${NOT_LETTER_AFTER}`, "giu"),
         (_m, n: string, off: number, full: string) => `${dative("மணிக்கு", full, off)}${n} மைல்`);
 
     // 6) The SHARED symbol tier: percent, currency, units, exponents. UNITS BEFORE DECIMALS (step 8) —

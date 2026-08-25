@@ -22,6 +22,7 @@
  * Latin→Malayalam letter-name table would be invented data.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import {
@@ -35,8 +36,6 @@ import {
 } from "./numbers.ts";
 
 /** Malayalam letter+mark boundary. Never `\b`. */
-const NA = "(?![\\p{L}\\p{M}])";
-
 /**
  * ZWJ chillu ligatures — the legacy encoding of the six chillu letters as base + virama + ZWJ.
  * malayalam.ts already knows the atomic characters and expands them correctly; this only converts the
@@ -130,7 +129,7 @@ export function normalizeMalayalam(input: string): string {
     //    a bare consonant; 18-ആം was [pˈad̪ineʈːɨ ˈaːm], two stresses; 150-നും was [… nˈum].
     //    The hyphen itself is optional because the corpus writes both "2010 ൽ" and "1789-ൽ".
     const clitic = (list: string[]): RegExp =>
-        new RegExp(`(?<![\\d.,])(\\d+)\\s*[-–]?\\s*(${longestFirst(list)})${NA}`, "gu");
+        new RegExp(`(?<![\\d.,])(\\d+)\\s*[-–]?\\s*(${longestFirst(list)})${NOT_LETTER_AFTER}`, "gu");
     //    (a) ORDINALS first: -ാമത്തെ must not be claimed by a shorter ending, and ordinal endings are
     //        not a subset of the oblique ones, so the two lists cannot be merged.
     s = s.replace(clitic(ORDINAL_ENDINGS), (whole, digits: string, end: string) => {

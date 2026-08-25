@@ -68,11 +68,9 @@
  * `tools/corpus/attest/kaa.jsonc`.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** ⚠ NEVER `\b` — Karakalpak Latin carries `á ó ú ı ń ǵ í`, which `\b` treats as boundaries (trap 1/23). */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /**
  * The shared SYMBOL tier. ⚠ THE SQUARE MEASURE WORD PRECEDES ITS UNIT, which is the opposite of every
  * Romance layer in this sweep and is what `position: "before"` is for: the corpus writes "9,065,000
@@ -129,14 +127,14 @@ export function normalizeKarakalpak(input: string): string {
     //    DOT IS OPTIONAL in this corpus ("9,5 mln adam", "$205,539 mlrd (2018)" beside "21 mln. jılı",
     //    "23,3 mlrd. kvt/saat"), and `139,2 mln.ga` puts the unit straight after the dot. Expanded before
     //    the tier, that becomes "139,2 million ga" and the tier's magnitude arm can then reach `ga`.
-    s = s.replace(new RegExp(`${NOT_BEFORE}mln\\s?\\.\\s?`, "gu"), "million ");
-    s = s.replace(new RegExp(`${NOT_BEFORE}mlrd\\s?\\.\\s?`, "gu"), "milliard ");
-    s = s.replace(new RegExp(`${NOT_BEFORE}mln${NOT_AFTER}`, "gu"), "million");
-    s = s.replace(new RegExp(`${NOT_BEFORE}mlrd${NOT_AFTER}`, "gu"), "milliard");
-    s = s.replace(new RegExp(`${NOT_BEFORE}m\\s?\\.\\s?kv\\s?\\.`, "gu"), "kvadrat metr");
-    s = s.replace(new RegExp(`${NOT_BEFORE}km\\s?\\.?\\s?kv\\s?\\.`, "gu"), "kvadrat kilometr");
-    s = s.replace(new RegExp(`${NOT_BEFORE}km\\s+kv${NOT_AFTER}`, "gu"), "kvadrat kilometr");
-    s = s.replace(new RegExp(`${NOT_BEFORE}kvt\\s?[/\\-]\\s?saat`, "gu"), "kilovatt saat");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mln\\s?\\.\\s?`, "gu"), "million ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mlrd\\s?\\.\\s?`, "gu"), "milliard ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mln${NOT_LETTER_AFTER}`, "gu"), "million");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mlrd${NOT_LETTER_AFTER}`, "gu"), "milliard");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}m\\s?\\.\\s?kv\\s?\\.`, "gu"), "kvadrat metr");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}km\\s?\\.?\\s?kv\\s?\\.`, "gu"), "kvadrat kilometr");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}km\\s+kv${NOT_LETTER_AFTER}`, "gu"), "kvadrat kilometr");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}kvt\\s?[/\\-]\\s?saat`, "gu"), "kilovatt saat");
 
     // 3) THE SHARED SYMBOL TIER, as the Punjabi and Saraiki layers order it: its own numeral pattern reads
     //    `19,605,052` and `1.65` as ONE token, and steps 3 and 4 split precisely those.
@@ -169,7 +167,7 @@ export function normalizeKarakalpak(input: string): string {
     //    g2p as three letters with three false sentence breaks: "b . e . sh. 776-jılı". `biziń` ×22,
     //    `eramız` ×1 (thin, but it is the corpus's own phrase: "Biziń eramız basında"), `shekem` ×105.
     //    ⚠ THE FINAL DOT IS KEPT AT A SENTENCE END, or the pause is lost outright (trap 10).
-    s = s.replace(new RegExp(`${NOT_BEFORE}b\\s?\\.\\s?e\\s?\\.\\s?sh\\s?\\.`, "giu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}b\\s?\\.\\s?e\\s?\\.\\s?sh\\s?\\.`, "giu"),
         (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? "biziń eramızǵa shekem." : "biziń eramızǵa shekem";
@@ -185,7 +183,7 @@ export function normalizeKarakalpak(input: string): string {
     s = s.replace(new RegExp(`(\\d)-j\\s?\\.`, "gu"), "$1 jıl");
     //    …and the HYPHEN-CUT abbreviation, which no dot rule can see: `t-rası` is *temperaturası*, in the
     //    chemistry articles ("Suyıqlanıw t-rası 323°, qaynaw t-rası 1403°").
-    s = s.replace(new RegExp(`${NOT_BEFORE}t-r(ası|a)${NOT_AFTER}`, "gu"), "temperatur$1");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}t-r(ası|a)${NOT_LETTER_AFTER}`, "gu"), "temperatur$1");
 
     // 8) THE CLOCK. The colon is clause punctuation in karakalpak.ts, so `saat 8:00 de` read as *saat segiz
     //    , nol de* — a phrase break inside a time. The writer supplies `saat` ("saat 8:00 de", "saat

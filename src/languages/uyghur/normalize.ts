@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /**
  * Uyghur / ئۇيغۇرچە (ug) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -101,8 +102,6 @@
  *  a digit the tokenizer will not read. See the header for why the eastern arms are near-dead here. */
 const D = "0-9۰-۹٠-٩";
 /** "not inside a word", the trap-1/23 form: `\p{M}` beside `\p{L}`, never `\b`. */
-const NW_B = "(?<![\\p{L}\\p{M}])";
-const NW_A = "(?![\\p{L}\\p{M}])";
 /** A number with an optional decimal tail — the operand every symbol rule takes. Anchored to END in a digit
  *  so the class cannot eat a trailing clause comma (trap 14's second hazard). */
 const NUM = `[${D}]+(?:[.][${D}]+)?`;
@@ -312,7 +311,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    `م.ك` are already unambiguous as pairs and the corpus writes both `م.ب 130` and `م. ب 1250`.
         for (const [body, word] of ERA) {
             const dot = body === "م" || body === "ھ" ? "\\s?\\." : "";
-            s = s.replace(new RegExp(`${NW_B}${body}${dot}${ERA_TAIL}(?=[${D}])`, "gu"), `${word} `);
+            s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${body}${dot}${ERA_TAIL}(?=[${D}])`, "gu"), `${word} `);
         }
 
         // 6) DIGIT DE-GROUPING, before the ordinal so a grouped operand is one number, and before every
@@ -363,7 +362,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    ordinal. 4 of 390. The alternative — a closed noun list — is trap 8's table, correct exactly
         //    where I looked: the tail of that tally is 76 distinct nouns and 40 of them occur once.
         s = s.replace(
-            new RegExp(`${NW_B}([${D}]+)\\s*${DASH}\\s*(?=(?!${ERA_HEADS})[\\u0620-\\u06FF]{2,})`, "gu"),
+            new RegExp(`${NOT_LETTER_BEFORE}([${D}]+)\\s*${DASH}\\s*(?=(?!${ERA_HEADS})[\\u0620-\\u06FF]{2,})`, "gu"),
             (whole: string, num: string) => {
                 const n = Number(toAscii(num));
                 if (!Number.isSafeInteger(n) || n < 1) return whole;
@@ -428,7 +427,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    (`36.6 مىلىيون كىلومېتر² لىق`). No symbol key can reach that, because there is no symbol — the
         //    exponent has to be lifted onto the WORD, in the preposed position `كۋادرات` takes.
         s = s.replace(
-            new RegExp(`${NW_B}(كىلومېت[ىې]?ر|مېت[ىې]?ر|مىتىر)\\s?²`, "gu"),
+            new RegExp(`${NOT_LETTER_BEFORE}(كىلومېت[ىې]?ر|مېت[ىې]?ر|مىتىر)\\s?²`, "gu"),
             "كۋادرات $1",
         );
 
@@ -466,7 +465,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //     confidently wrong English letter, which is the trade ps made for the same class.
         //     ⚠ AND THE ARC-MINUTE IS LEFT UNREAD. `113°53` is 113°53′; the minutes get no word, because
         //     none is attested. Same partial as ps's bare `°`, in the other half of the class.
-        s = s.replace(new RegExp(`(?<![${D}.,،])(${NUM})\\s?°\\s?[CF]${NW_A}`, "gui"), "$1 گرادۇس");
+        s = s.replace(new RegExp(`(?<![${D}.,،])(${NUM})\\s?°\\s?[CF]${NOT_LETTER_AFTER}`, "gui"), "$1 گرادۇس");
         s = s.replace(new RegExp(`(?<![${D}.,،])(${NUM})\\s?°`, "gu"), "$1 گرادۇس ");
 
         // 11) PERCENT — ×129 signs in 429 segments and every one of them is silent today.
@@ -486,7 +485,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //     RAWMARK: the rule failed exactly where it most needed to fall back. Inside the bracket the
         //     alternation backtracks to "no suffix" instead, so `%نىسبەت` reads as the sign plus its own
         //     word while `%نى` still reads as the sign plus its case.
-        const PCT_TAIL = `(?:(${PCT_ALT})${NW_A})?`;
+        const PCT_TAIL = `(?:(${PCT_ALT})${NOT_LETTER_AFTER})?`;
         //     ⚠ AND THE WORD MAY ALREADY BE THERE (trap 12) — the reading must say it ONCE. ×0 in this
         //     corpus, so this arm is robustness rather than a measured repair, and it says so.
         const NAMED = `(\\s*پ[ېى]رسەنت)?`;

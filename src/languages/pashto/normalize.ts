@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /**
  * Pashto / پښتو (ps) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -76,9 +77,6 @@
  *  rule can emit a digit the tokenizer will not read. */
 const D = "0-9۰-۹٠-٩";
 /** "not inside a word", the trap-1/23 form: `\p{M}` beside `\p{L}`, never `\b`. */
-const NW_B = "(?<![\\p{L}\\p{M}])";
-const NW_A = "(?![\\p{L}\\p{M}])";
-
 const EASTERN: Record<string, string> = {
     "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4", "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
     "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4", "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9",
@@ -227,7 +225,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         for (const suffix of ORD_SUFFIX) {
             const cutoff = suffix === "م" ? 100 : Infinity; // the bare-`م` era/ordinal split, see ORD_SUFFIX
             s = s.replace(
-                new RegExp(`${NW_B}([${D}]+)\\s?${suffix}${NW_A}`, "gu"),
+                new RegExp(`${NOT_LETTER_BEFORE}([${D}]+)\\s?${suffix}${NOT_LETTER_AFTER}`, "gu"),
                 (whole: string, num: string) => {
                     const n = Number(toAscii(num));
                     if (!Number.isSafeInteger(n) || n < 1 || n >= cutoff) return whole;
@@ -246,7 +244,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    reproduced in another language, which is why the count was read before it was used (trap 2).
         //    The expansion is the corpus's dominant phrase: `له ميلاد څخه مخکې` ×526.
         s = s.replace(
-            new RegExp(`([${D}])\\s*ق\\s*\\.?\\s*م\\s*\\.?${NW_A}`, "gu"),
+            new RegExp(`([${D}])\\s*ق\\s*\\.?\\s*م\\s*\\.?${NOT_LETTER_AFTER}`, "gu"),
             "$1 له ميلاد څخه مخکې",
         );
         //    ⚠ THE TRAILING GUARD MUST REJECT A ZWNJ AS WELL AS A LETTER. U+200C is category `Cf`, so
@@ -313,7 +311,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    arc or for the primes. Reading the scale but not the bare sign is a PARTIAL fix, and the
         //    alternative it replaces was `°C` → a bare English letter name [siː].
         s = s.replace(
-            new RegExp(`(?<![${D}.,،])([${D}]+(?:[.,،][${D}]+)?)\\s?°\\s?[CcسS]${NW_A}`, "gu"),
+            new RegExp(`(?<![${D}.,،])([${D}]+(?:[.,،][${D}]+)?)\\s?°\\s?[CcسS]${NOT_LETTER_AFTER}`, "gu"),
             "$1 سانتيګراد",
         );
         s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]+(?:[.,،][${D}]+)?)\\s?℃`, "gu"), "$1 سانتيګراد");

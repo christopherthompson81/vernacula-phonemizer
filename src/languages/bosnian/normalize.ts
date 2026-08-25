@@ -55,6 +55,7 @@
  * against `č ć š ž đ` or against Cyrillic — the trap that made `core/initialisms.ts` a no-op for Russian.
  */
 import { normalizeSerbianInitialisms } from "../serbian/normalize.ts";
+import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -259,8 +260,6 @@ const DOTTED_ALT = Object.keys(DOTTED)
     .sort((a, b) => b.length - a.length)
     .join("|");
 
-const NOT_LETTER = "(?![\\p{L}\\p{M}])";
-
 /**
  * The shared symbol tier. Unit abbreviations are written in LATIN even in Cyrillic prose, so the keys are
  * Latin only; the tier lowercases before lookup, which is what lets `Ghz` match `ghz`.
@@ -461,7 +460,7 @@ export function normalizeBosnian(input: string): string {
     //    whenever ANY character follows; the corpus writes `krajem 1970-ih;` and `1850-ih i predstavlja`,
     //    so the plain not-a-letter guard is the one that claims them. The 2-letter cap also excludes
     //    COMPOUND ADJECTIVES (`24-časovnom`), which need a combining stem this file does not model.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER}`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, rawSuffix: string) => {
             const suffix = lat(rawSuffix);
             return ordinalForms(Number(digits)).find((f) => f.endsWith(suffix)) ?? whole;

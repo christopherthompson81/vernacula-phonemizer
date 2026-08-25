@@ -33,14 +33,12 @@
  * KANNADA spellings, whose interior dots were being read as clause breaks (step 6).
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalToWords, ordinalStem, DECIMAL_WORD } from "./numbers.ts";
 
 /** Kannada letter+mark boundary. Never `\b`. */
-const NB = "(?<![\\p{L}\\p{M}])";
-const NA = "(?![\\p{L}\\p{M}])";
-
 /**
  * The SHARED symbol tier (percent / currency / units / exponent). Kept in this file rather than in
  * kannada.ts because its position in the ordering matters and the ordering is this file's job.
@@ -78,7 +76,7 @@ const SYMBOLS = makeSymbolNormalizer({
  * `ಕಿ ಮೀ` occurs zero times here, and ಕಿ is a common Kannada dative clitic — trap #2, checked, not
  * assumed.
  */
-const KM_RE = new RegExp(`${NB}(?:ಕಿ\\s*\\.\\s*ಮ[ೀಿ]|ಕಿಮ[ೀಿ])`, "gu");
+const KM_RE = new RegExp(`${NOT_LETTER_BEFORE}(?:ಕಿ\\s*\\.\\s*ಮ[ೀಿ]|ಕಿಮ[ೀಿ])`, "gu");
 /** ಮೈ for ಮೈಲಿ — ONLY as a rate numerator (40 ಮೈ/ಗಂ, ×1). The `/ಗಂ` guard is what keeps this off the
  *  many real Kannada words beginning ಮೈ (ಮೈಲಿಗಲ್ಲು, ಮೈಲರ್, ಮೈದಾನ) — trap #2. */
 const MI_RATE_RE = new RegExp(`(\\d[\\d.]*)\\s?ಮೈ\\s*\\/\\s*ಗಂ\\.?`, "gu");
@@ -102,7 +100,7 @@ const LETTER = `(?:${[...LETTER_NAME].sort((a, b) => b.length - a.length).join("
 /** A run of ≥2 dot-separated letter names. The run's TRAILING dot is consumed only when the sentence
  *  visibly continues, so a true sentence-final pause is never lost. */
 const INITIALISM_RE = new RegExp(
-    `${NB}${LETTER}(?:\\s*\\.\\s*${LETTER})+(?:\\s*\\.(?=\\s*[\\p{L}]))?${NA}`,
+    `${NOT_LETTER_BEFORE}${LETTER}(?:\\s*\\.\\s*${LETTER})+(?:\\s*\\.(?=\\s*[\\p{L}]))?${NOT_LETTER_AFTER}`,
     "gu",
 );
 
@@ -154,7 +152,7 @@ export function normalizeKannada(input: string): string {
     //    is written both welded (16ನೇ) and spaced (15 ನೇ) in this corpus, hence the optional space, and
     //    may carry the nominaliser ದು (60ನೆಯದು), which rides along on the fused form.
     s = s.replace(
-        new RegExp(`(?<![\\d.,])(\\d+)\\s*-?\\s*(ನೇ|ನೆಯ)(ದು)?${NA}`, "gu"),
+        new RegExp(`(?<![\\d.,])(\\d+)\\s*-?\\s*(ನೇ|ನೆಯ)(ದು)?${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, suffix: string, du: string | undefined) => {
             const n = Number(digits);
             if (!Number.isSafeInteger(n) || n === 0) return whole;
@@ -170,7 +168,7 @@ export function normalizeKannada(input: string): string {
     //    welded straight onto the abbreviation (ಕ್ರಿ.ಪೂದಲ್ಲಿ, ಕ್ರಿ.ಪೂವರೆಗೂ); it is left attached, which
     //    is grammatical on the expansion too — ಕ್ರಿಸ್ತ ಪೂರ್ವದಲ್ಲಿ, ಕ್ರಿಸ್ತ ಪೂರ್ವವರೆಗೂ.
     s = s.replace(
-        new RegExp(`${NB}ಕ್ರಿ\\s*\\.\\s*(ಪೂ|ಶ)(?:\\s*\\.(?=\\s*[\\p{L}\\d]))?`, "gu"),
+        new RegExp(`${NOT_LETTER_BEFORE}ಕ್ರಿ\\s*\\.\\s*(ಪೂ|ಶ)(?:\\s*\\.(?=\\s*[\\p{L}\\d]))?`, "gu"),
         (_m, k: string) => ERA[k]!,
     );
 
@@ -188,7 +186,7 @@ export function normalizeKannada(input: string): string {
         new RegExp(`^[\\p{L}\\p{M}]`, "u").test(full.slice(off + m.length))
             ? m.replace(/\s*\.\s*/gu, "")
             : "ಕಿಲೋಮೀಟರ್");
-    s = s.replace(new RegExp(`${NB}ಮಿ\\s*\\.\\s*ಮೀ`, "gu"), "ಮಿಮೀ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}ಮಿ\\s*\\.\\s*ಮೀ`, "gu"), "ಮಿಮೀ");
     s = s.replace(INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());
 
     // 7) RATE units, BEFORE the shared symbol tier (step 9) can claim the numerator and strand the
@@ -196,7 +194,7 @@ export function normalizeKannada(input: string): string {
     //    ("ಗಂಟೆಗೆ 83 ಕಿಮೀ", "ಸೆಕೆಂಡಿಗೆ 1.5 ಕಿಮಿ"), which is why `unitPer` is not declared on the shared
     //    tier. Step 6 has already folded ಕಿ.ಮೀ/ಕಿಮೀ to ಕಿಲೋಮೀಟರ್, so this matches the expanded word.
     s = s.replace(
-        new RegExp(`(\\d[\\d.]*)\\s?ಕಿಲೋಮೀಟರ್\\s*\\/\\s*(ಗಂ|ಸೆ)\\.?${NA}`, "gu"),
+        new RegExp(`(\\d[\\d.]*)\\s?ಕಿಲೋಮೀಟರ್\\s*\\/\\s*(ಗಂ|ಸೆ)\\.?${NOT_LETTER_AFTER}`, "gu"),
         (_m, n: string, den: string, off: number, full: string) =>
             `${dative(RATE_DENOM[den]!, full, off)}${n} ಕಿಲೋಮೀಟರ್`,
     );

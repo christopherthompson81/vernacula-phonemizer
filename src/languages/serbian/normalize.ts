@@ -54,6 +54,7 @@
  * Russian (США → [sʂa]).
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -209,8 +210,6 @@ const DOTTED_ALT = Object.keys(DOTTED)
     .flatMap((k) => [k, cyr(k)])
     .sort((a, b) => b.length - a.length)
     .join("|");
-
-const NOT_LETTER = "(?![\\p{L}\\p{M}])";
 
 /**
  * The shared symbol tier. Unit abbreviations are written in LATIN even in Cyrillic prose, so the keys are
@@ -391,7 +390,7 @@ export function normalizeSerbian(input: string): string {
     //    at 2 letters and may not be followed by a letter, which excludes COMPOUND ADJECTIVES
     //    (`24-часовном`, `11-годишња`): those need the combining stem (dvadesetčetvoro-, jedanaesto-), a
     //    different word-formation, and are left as the cardinal plus the word.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER}`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, rawSuffix: string) => {
             const suffix = lat(rawSuffix);
             return ordinalForms(Number(digits)).find((f) => f.endsWith(suffix)) ?? whole;

@@ -34,14 +34,12 @@
  * as clause breaks (step 5).
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalToWords, yearToWords, isCenturyYear } from "./numbers.ts";
 
 /** Telugu letter+mark boundary. Never `\b`. */
-const NB = "(?<![\\p{L}\\p{M}])";
-const NA = "(?![\\p{L}\\p{M}])";
-
 /** Telugu letters and marks, EXCLUDING the digit block ౦-౯ (U+0C66-0C6F) — used by the ౦ fold. */
 const TE_LETTER = "\\u0C00-\\u0C65\\u0C70-\\u0C7F";
 
@@ -110,17 +108,17 @@ const SYMBOLS = makeSymbolNormalizer({
  * మీ is the 2nd-person possessive). There is NO spaced variant in this corpus, so there is no spaced
  * rule. Only కి.మీ (×7, with and without a trailing dot) and కిమీ (×1) are real.
  */
-const KM_RE = new RegExp(`${NB}కి\\s*\\.\\s*మీ\\.?${NA}|${NB}కిమీ${NA}`, "gu");
+const KM_RE = new RegExp(`${NOT_LETTER_BEFORE}కి\\s*\\.\\s*మీ\\.?${NOT_LETTER_AFTER}|${NOT_LETTER_BEFORE}కిమీ${NOT_LETTER_AFTER}`, "gu");
 /** మై for మైళ్ళు, ×2, only ever after a digit — the digit guard is what keeps it off the many real words
  *  beginning మై (మైదానం, మైనస్…). */
-const MI_RE = new RegExp(`(?<=\\d\\s?)మై${NA}`, "gu");
+const MI_RE = new RegExp(`(?<=\\d\\s?)మై${NOT_LETTER_AFTER}`, "gu");
 
 /** Era markers. Both are written without a trailing dot in this corpus (క్రీ.శ 1000, క్రీ.పూ 5000). */
 const ERA: Readonly<Record<string, string>> = {
     "శ": "క్రీస్తు శకం",
     "పూ": "క్రీస్తు పూర్వం",
 };
-const ERA_RE = new RegExp(`${NB}క్రీ\\s*\\.\\s*(శ|పూ)\\.?${NA}`, "gu");
+const ERA_RE = new RegExp(`${NOT_LETTER_BEFORE}క్రీ\\s*\\.\\s*(శ|పూ)\\.?${NOT_LETTER_AFTER}`, "gu");
 
 /**
  * Telugu renderings of the LATIN letter names, which is what a dotted Telugu initialism is made of
@@ -137,7 +135,7 @@ const LETTER = `(?:${[...LETTER_NAME].sort((a, b) => b.length - a.length).join("
 /** A run of ≥2 dot-separated letter names. The run's TRAILING dot is consumed only when the sentence
  *  visibly continues, so a true sentence-final pause is never lost. */
 const INITIALISM_RE = new RegExp(
-    `${NB}${LETTER}(?:\\s*\\.\\s*${LETTER})+(?:\\s*\\.(?=\\s*[\\p{L}]))?${NA}`,
+    `${NOT_LETTER_BEFORE}${LETTER}(?:\\s*\\.\\s*${LETTER})+(?:\\s*\\.(?=\\s*[\\p{L}]))?${NOT_LETTER_AFTER}`,
     "gu",
 );
 
@@ -198,7 +196,7 @@ export function normalizeTelugu(input: string): string {
     //    All 28 digit-adjacent వ are ordinals — checked by tabulating what follows, which is
     //    శతాబ్దం / సంవత్సరం / స్థానం every time. `వది` (60వది) is the same suffix plus the nominaliser.
     s = s.replace(
-        new RegExp(`(?<![\\d.,])(\\d+)\\s*-?\\s*వ(ది)?${NA}`, "gu"),
+        new RegExp(`(?<![\\d.,])(\\d+)\\s*-?\\s*వ(ది)?${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, di: string | undefined) => {
             const n = Number(digits);
             if (!Number.isSafeInteger(n) || n === 0) return whole;
@@ -232,7 +230,7 @@ export function normalizeTelugu(input: string): string {
     //    otherwise survive as two letters with the era lost. Also ఉదా. (= e.g., ×2), whose single dot
     //    was a mid-sentence phrase break.
     s = s.replace(ERA_RE, (_m, k: string) => ERA[k]!);
-    s = s.replace(new RegExp(`${NB}ఉదా\\s*\\.\\s*(?=[\\p{L}])`, "gu"), "ఉదాహరణకు ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}ఉదా\\s*\\.\\s*(?=[\\p{L}])`, "gu"), "ఉదాహరణకు ");
 
     // 7) MULTI-DOT ABBREVIATIONS before single-dot ones, else the interior dot survives as a phrase
     //    break: కి.మీ was reading as [kˈi . mˈiː], two clauses, and యూ.ఎస్. as three. The Telugu unit
@@ -259,7 +257,7 @@ export function normalizeTelugu(input: string): string {
     //    83కిలోమీటర్లు/గం.). Same dative guard: "గాలులు గంటకు 83కి.మీ/గం." already says గంటకు and must
     //    not say it twice, while "(165 కి.మీ./గం)" stands alone in its parenthesis and needs it.
     s = s.replace(
-        new RegExp(`(\\d[\\d.]*)\\s?కిలోమీటర్లు\\s*\\/\\s*గం\\.?${NA}`, "gu"),
+        new RegExp(`(\\d[\\d.]*)\\s?కిలోమీటర్లు\\s*\\/\\s*గం\\.?${NOT_LETTER_AFTER}`, "gu"),
         (_m, n: string, off: number, full: string) => `${dative("గంటకు", full, off)}${n} కిలోమీటర్లు`,
     );
 

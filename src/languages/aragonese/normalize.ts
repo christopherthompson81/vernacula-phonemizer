@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /**
  * Aragonese (an) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -68,9 +69,6 @@
 
 /** ⚠ NEVER `\b` — Aragonese carries `á é í ó ú ñ ü ï` and the interpunct, which `\b` treats as
  *  boundaries (trap 1/23). */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /**
  * ⚠ THE ALLOW-LISTED CONTINUATION IS THE WHOLE OF THE DEGREE RULE — see the header. The sign reads as a
  * degree only before one of the shapes that actually follows a degree in this corpus: a scale letter, a
@@ -107,8 +105,8 @@ export function normalizeAragonese(input: string): string {
     //    the g2p letter-by-letter with two false clause pauses. `d. C.` is its counterpart.
     //    ⚠ THE FINAL DOT IS KEPT AT A SENTENCE END, or the pause is lost outright (trap 10).
     const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}a\\s?\\.\\s?C\\s?\\.`, "gu"), "antes de Cristo"],
-        [new RegExp(`${NOT_BEFORE}d\\s?\\.\\s?C\\s?\\.`, "gu"), "dimpués de Cristo"],
+        [new RegExp(`${NOT_LETTER_BEFORE}a\\s?\\.\\s?C\\s?\\.`, "gu"), "antes de Cristo"],
+        [new RegExp(`${NOT_LETTER_BEFORE}d\\s?\\.\\s?C\\s?\\.`, "gu"), "dimpués de Cristo"],
     ];
     for (const [re, word] of multi)
         s = s.replace(re, (m0: string, offset: number, full: string) => {
@@ -127,8 +125,8 @@ export function normalizeAragonese(input: string): string {
     //    ⚠ AND `hab.` LOSES ITS DOT RATHER THAN GAINING A WORD, because the shared tier reads `hab/km²` as
     //    a rate and cannot see through the abbreviation point — `413 hab./km²` and `43,5 hab/km²` are the
     //    same measurement written two ways, and this is what makes them one shape.
-    s = s.replace(new RegExp(`${NOT_BEFORE}n\\s?[º°]\\s?\\.?(?=\\s*\\d)`, "gu"), "numero ");
-    s = s.replace(new RegExp(`${NOT_BEFORE}lum\\s?\\.(?=\\s*\\d)`, "gu"), "lumero");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}n\\s?[º°]\\s?\\.?(?=\\s*\\d)`, "gu"), "numero ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}lum\\s?\\.(?=\\s*\\d)`, "gu"), "lumero");
     s = s.replace(/(\d)\s?hab\s?\.\s?(?=\/)/gu, "$1 hab");
     //    ⚠ AND `m.a.` IS CLAIMED BECAUSE THE TIER WOULD OTHERWISE READ ITS `m` AS METRES. "En o Devoniano
     //    (fa ±415 - ±360 m.a.) se formó la penya calsinera" — *millons d'anyadas*, the geological unit,

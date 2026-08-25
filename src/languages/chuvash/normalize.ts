@@ -54,6 +54,7 @@
  * `tools/corpus/attest/chv.jsonc`.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { numberToWords } from "./numbers.ts";
 
 /** The cardinal as words, in the series the slot calls for. */
@@ -121,7 +122,6 @@ export function normalizeChuvashInitialisms(text: string): string {
 
 /** ⚠ EVERY BOUNDARY IN THIS FILE IS AN EXPLICIT LOOKAROUND, NEVER `\b` — `\b` is ASCII-defined and finds
  *  none against Cyrillic, which is how `core/initialisms.ts` was a total no-op for Russian (trap 1). */
-const NOT_LETTER = "(?![\\p{L}\\p{M}])";
 /** The Chuvash-Cyrillic letters a written suffix can be spelt with. */
 const SFX = "[а-яёӑӗҫӳ]";
 /** A Chuvash word, for the attributive pass and the fraction's `пай` guard. */
@@ -172,9 +172,9 @@ export function normalizeChuvash(input: string): string {
 
     // 1) THE MAGNITUDE ABBREVIATIONS, before any single-dot rule — `1,3 млн. çын`, `143,8 млн. çын`,
     //    `$4,2 млрд`, `$1,915 трлн`. The dot is optional because the corpus writes both.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])млрд\\.?${NOT_LETTER}`, "giu"), "миллиард");
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])трлн\\.?${NOT_LETTER}`, "giu"), "триллион");
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])млн\\.?${NOT_LETTER}`, "giu"), "миллион");
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])млрд\\.?${NOT_LETTER_AFTER}`, "giu"), "миллиард");
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])трлн\\.?${NOT_LETTER_AFTER}`, "giu"), "триллион");
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])млн\\.?${NOT_LETTER_AFTER}`, "giu"), "миллион");
 
     // 1b) THE ERA MARKER AND THE YEAR ABBREVIATION, which the corpus supplies together:
     //     "Вӑтам патшалӑх — Авалхи Египет кун-ҫулӗнчи **п. эрч.** 2040 тата 1783 …" gives the
@@ -227,7 +227,7 @@ export function normalizeChuvash(input: string): string {
     //    `1-5-мӗш класӗсенче`, `1 - 19-мĕшĕсенче`. Three hyphens in one token, two of which open a range
     //    and one of which introduces the suffix; nothing downstream can tell them apart once either rule
     //    has spent a hyphen. The suffix is written ONCE, on the second endpoint, and belongs to both.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,8})${NOT_LETTER}`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,8})${NOT_LETTER_AFTER}`, "gu"),
         (whole, a: string, b: string, sfx: string) => {
             const first = attachOrdinal(whole, a, sfx);
             const second = attachOrdinal(whole, b, sfx);
@@ -241,7 +241,7 @@ export function normalizeChuvash(input: string): string {
     //    (the writer types the ordinal and declines that), so an open alternation would have nothing to
     //    gain and every space-separated noun to lose.
     //    MUST run before the range rule (step 9), which would otherwise eat the hyphen.
-    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,6})${NOT_LETTER}`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,6})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, sfx: string) => attachOrdinal(whole, digits, sfx.replace(/ĕ/gu, "ӗ")));
 
     // 7) SIGNS. This corpus's climate prose writes the true MINUS (U+2212) as well as the hyphen, on both

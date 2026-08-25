@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /**
  * Occitan (oc) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -46,9 +47,6 @@
  */
 
 /** ⚠ NEVER `\b` — Occitan carries `à è ò ó ç ï ú` and the interpunct, which `\b` treats as boundaries. */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /** Normalize one Occitan input string. Pure text→text. Steps are ORDER-DEPENDENT. */
 export function normalizeOccitan(input: string): string {
     let s = input;
@@ -65,8 +63,8 @@ export function normalizeOccitan(input: string): string {
     // 2) THE ERA MARKER, in both spellings. ⚠ IT IS NOT A LEAK, WHICH IS WHY NO GATE SAW IT: Occitan's
     //    TOKEN treats a letter run as a word, so `abC` reached the g2p as the syllable [abk]. `Crist`
     //    ×98, `abans` ×53, `après` ×72 on oc.wikipedia.
-    s = s.replace(new RegExp(`${NOT_BEFORE}a[bv]\\.?\\s?C\\.?${NOT_AFTER}`, "gu"), "abans Crist");
-    s = s.replace(new RegExp(`${NOT_BEFORE}ap\\.?\\s?C\\.?${NOT_AFTER}`, "gu"), "après Crist");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}a[bv]\\.?\\s?C\\.?${NOT_LETTER_AFTER}`, "gu"), "abans Crist");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}ap\\.?\\s?C\\.?${NOT_LETTER_AFTER}`, "gu"), "après Crist");
 
     // 3) THE CLOCK. The colon is clause punctuation in occitan.ts, so `12:30 h` read as *dotze , trenta*.
     //    The Aranese radio listings are where this class lives — "de 8h enquiara 9h e er aute de 12h a

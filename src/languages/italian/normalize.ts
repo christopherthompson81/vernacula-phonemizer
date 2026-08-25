@@ -25,14 +25,12 @@
  * into digits before text() runs.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { romanToInt } from "../../core/roman.ts";
 import { ROMAN_POLICY } from "./romanOrdinals.ts";
 
 /** Word boundaries as explicit lookarounds. `\b` is ASCII-defined and matches INSIDE `città`/`perché` at
  *  the accent, which is precisely how the French rule came to fire in the middle of `siècle`. */
-const L = "(?<![\\p{L}\\p{M}])";
-const R = "(?![\\p{L}\\p{M}])";
-
 /**
  * Dotted abbreviations → the spoken words, restricted to what the corpus attests plus the standard
  * courtesy titles. Every candidate was counted WITH a boundary before being admitted: a naive
@@ -158,20 +156,20 @@ export function normalizeItalian(input: string): string {
     // 2) ERA MARKERS, before the generic dotted-abbreviation rule (multi-dot before single-dot: otherwise
     //    the interior dot of `a.C.` survives as a phrase break). Both spacings occur in the wild; the
     //    corpus writes them closed (a.C. ×7, d.C. ×3).
-    s = s.replace(new RegExp(`${L}a\\.\\s?C\\.`, "gu"), "avanti Cristo");
-    s = s.replace(new RegExp(`${L}d\\.\\s?C\\.`, "gu"), "dopo Cristo");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}a\\.\\s?C\\.`, "gu"), "avanti Cristo");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}d\\.\\s?C\\.`, "gu"), "dopo Cristo");
 
     // 3) NUMERO — only before a digit. Both corpus occurrences are `n. 1` / `n. 11`; a bare `n.` at the end
     //    of a sentence is an ordinary word's last letter far more often than it is an abbreviation.
-    s = s.replace(new RegExp(`${L}(?:n\\.º|n\\.|nr\\.|nº)\\s?(?=\\d)`, "giu"), "numero ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(?:n\\.º|n\\.|nr\\.|nº)\\s?(?=\\d)`, "giu"), "numero ");
 
     // 4) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues, so it cannot become a
     //    phrase break; at a phrase end it is kept, because there it really is the sentence end. What
     //    follows may be a DIGIT as well as a letter — `art. 5` and `pag. 12` are the normal shapes for
     //    half this table, and a letter-only lookahead left both unexpanded with the dot still a pause.
-    s = s.replace(new RegExp(`${L}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\p{N}])`, "giu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\p{N}])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
-    s = s.replace(new RegExp(`${L}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))`, "giu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
 
     // 5) DEGREE SIGN, in three senses, and they must be separated in this order because the ordinal rule

@@ -141,10 +141,9 @@
  *  this language's digit runs) and rather than `\p{Nd}` (which would admit Devanagari and friends). Must
  *  agree with the ENGINE's number token, which is `\d+` after the registry's native-digit fold. */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
+import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 const D = "0-9۰-۹٠-٩";
 /** "not inside a word", the trap-1/23 form: `\p{M}` beside `\p{L}`, and never `\b`. */
-const NW_B = "(?<![\\p{L}\\p{M}])";
-
 /** The Arabic-script letter range this language actually uses, INCLUDING the Arabic Supplement — ݔ U+0754
  *  is outside U+0620–U+06FF and is ×506 here. Same range the engine's TOKEN class now carries. */
 const AR = "\\u0620-\\u06FF\\u0750-\\u077F";
@@ -403,7 +402,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    `م` next to a digit is far too common in Balochi to key on.
         for (const [body, word] of ERA) {
             s = s.replace(new RegExp(`(?<=[${D}])[ـ\\s]*${body}${ERA_SEP}\\.?`, "gu"), ` ${word}`);
-            s = s.replace(new RegExp(`${NW_B}${body}${ERA_SEP}\\.?\\s*(?=[${D}])`, "gu"), `${word} `);
+            s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${body}${ERA_SEP}\\.?\\s*(?=[${D}])`, "gu"), `${word} `);
         }
 
         // 7) SI LENGTH UNITS — the Latin abbreviation after a number, rewritten to the Balochi word. See
