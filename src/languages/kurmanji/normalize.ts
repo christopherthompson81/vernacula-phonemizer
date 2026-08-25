@@ -184,7 +184,11 @@ export function normalizeKurmanji(input: string): string {
     //    comparative "less" and takes a whole clause (*"273.15 pileyan ji sifira Selsiyusî kêm"*) — a real
     //    word in the wrong slot, the Fula `hakkunde` failure. Omitting a minus INVERTS the value, so it is
     //    read rather than dropped, and the caveat is recorded rather than hidden.
-    const TEMP = String.raw`(-?)(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°\s*`;
+    // ⚠ U+2212 JOINS THE HYPHEN IN THE SIGN SLOT, AND THE NARROW TRIGGER IS UNCHANGED. The minus is claimed
+    // only inside the temperature arm here, for the measured reason above; widening the CHARACTER class does
+    // not widen that claim. U+2212's sole Unicode meaning is the arithmetic operator and no keyboard types it
+    // by accident, so a `−` before a degree figure is a negative temperature on the same evidence a `-` is.
+    const TEMP = String.raw`([-−]?)(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°\s*`;
     const neg = (sg: string): string => (sg ? "negatîf " : "");
     // ⚠ The scale NAME is separate from the degree word and only `Selsiyus` is sourced — the wiki's own
     // article title is *"Pileya Celsius an jî selsiyus … / ºC"*. No Fahrenheit spelling is attested beyond
@@ -203,7 +207,7 @@ export function normalizeKurmanji(input: string): string {
     // it is aimed at, and here the miss was worse than the gap. ⚠ The refusal is ONE letter only, not any
     // letter: the corpus's `carna 40° germ dibe` ("becomes 40 degrees hot") is a degree followed by a WORD
     // and must still read, so only an unhandled SCALE letter (`°K`, `°R`) is left visible.
-    s = s.replace(new RegExp(String.raw`(-?)(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°(?!\s*\p{L}(?!\p{L}))`, "gu"),
+    s = s.replace(new RegExp(String.raw`([-−]?)(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°(?!\s*\p{L}(?!\p{L}))`, "gu"),
         (_m, sg: string, n: string) => `${neg(sg)}${n} pile`);
     // …and a negative that has already lost its `°` to the two rules above, or that leads a `pile` phrase
     // the corpus wrote out itself (`heta -24 û -30 pileyan`).
@@ -212,14 +216,18 @@ export function normalizeKurmanji(input: string): string {
     //    that one — the first `-24` read as a bare positive, i.e. the sign silently inverted on half the
     //    phrase. The window now allows one intervening `û -N`.
     s = s.replace(
-        /(?<![\p{L}\p{Nd}])-(\p{Nd}+(?:[.,]\p{Nd}+)?)(?=(?:\s*û\s*-?\p{Nd}+(?:[.,]\p{Nd}+)?)?[^.,\p{Nd}]{0,4}\s?pile)/giu,
+        /(?<![\p{L}\p{Nd}])[-−](\p{Nd}+(?:[.,]\p{Nd}+)?)(?=(?:\s*û\s*[-−]?\p{Nd}+(?:[.,]\p{Nd}+)?)?[^.,\p{Nd}]{0,4}\s?pile)/giu,
         "negatîf $1",
     );
     //    ⚠ ONE MORE ARM, AND IT IS STRING-START ONLY — deliberately narrower than the Hindi shape it copies.
     //    A string that BEGINS `-5` is a negative and the corpus has no counter-example, but the bracket arm
     //    Hindi could take is unavailable here: this corpus's `(`-opening dashes are EasyTimeline label
     //    offsets (`shift:(-10,5)` ×3), which are pixel coordinates in chart markup, not numbers in prose.
-    s = s.replace(/^-(?=\p{Nd})/u, "negatîf ");
+    //    ⚠ U+2212 IS IN ALL FOUR ARMS. Every one of them was written with an ASCII hyphen, so the real MINUS
+    //    SIGN — the one code point that can only mean the operator — was the single spelling this language
+    //    refused. The trigger is unchanged in each: string-start here, a degree figure above, a `pile` phrase
+    //    before that. Widening the character class does not widen any claim.
+    s = s.replace(/^[-−](?=\p{Nd})/u, "negatîf ");
 
     // 7) THE DECIMAL SEPARATOR IS REMOVED AND NOT REPLACED, and this is a sourced REFUSAL rather than an
     //    oversight. **No Kurmanji decimal-separator word is attested anywhere this repo can reach**, and it

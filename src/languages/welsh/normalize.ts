@@ -362,7 +362,14 @@ export function normalizeWelsh(input: string): string {
     //    OPERATION names, which is what ± needs: it marks a TOLERANCE, not an addition.
     s = s.replace(/±/gu, " plws minws ");
     s = s.replace(/\+\s?(?=\d)/gu, " plws ");
-    s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "minws $1");
+    // ⚠ U+2212 IS IN THE CLASS AND THE ASCII HYPHEN'S GUARDS ARE UNCHANGED. The MINUS SIGN is a distinct
+    // code point whose only Unicode meaning is the arithmetic operator, and it is not on any keyboard —
+    // whoever typed it meant a minus. It is not attested in this language's mined corpus, which is why an
+    // earlier sweep declined it as invention; the character's identity is the evidence, not the corpus, and
+    // dropping a sign INVERTS the value it belongs to. The hyphen is the ambiguous one and keeps every
+    // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
+    // still refused by the lookbehind.
+    s = s.replace(/(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "minws $1");
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
         (_m, a: string, b: string, pl: string) =>
             `${LETTER_NAME[a.toLowerCase()] ?? a} a ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
