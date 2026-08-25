@@ -687,3 +687,34 @@ written with the ASCII hyphen. But the hyphen is also the range mark this file's
 evidence is the one that cannot be claimed, and U+2212 — which carries one instance — is the one that can.
 
 **Four remain: ak, bo, ltg, mos** — bo refused, the other three held.
+
+## Run 16 — Akan: `Mainɔso` is nowhere, and the Naija argument does NOT transfer — 2026-08-25 23:10
+
+`Mainɔso` searched directly. **×0 on ak.wikipedia and ×0 on the indexed web** — the query returns generic
+English subtraction pages and a Japanese logic puzzle, nothing in any Akan or mathematics-education context.
+Same for `mainoso` and `dɛgrii`. That is a clean negative on the word itself.
+
+**⚠ AND THE ARGUMENT I HAD BEEN HOLDING IN RESERVE FOR AKAN IS WRONG.** I had noted that Ghana's maths
+curriculum is English-medium, so a code-switched English `minus` might carry the Naija reasoning. It does
+not, and Akan's own file says why: **Akan's percent word is NATIVE, and heavily so.**
+
+```
+  50%  →  ɔha mu ŋt͡ɕɪt͡ɕɛmu adwonum        `ɔha mu nkyekyɛmu` — "division of a hundred"
+```
+
+That word is 1,387 instances in tw and 215 in fat, and **893 of the corpus's 5,154 percent signs already
+have it written in front of them**. Compare Naija, where the tier declares the bare English `percent`
+because that is what pcm.wikipedia writes. The two languages resolve the same slot in opposite directions,
+and Akan resolves it natively.
+
+There is no English-nativisation path here either — the Naija reading works because that engine sends a
+known English spelling through the English dict; Akan's `percent` comes out `perkent`, letter-wise, not
+[pəsɛnt]. So an imported `minus` would be read as a foreign string, not nativised, and it would be against
+this layer's documented pattern rather than consistent with it.
+
+**Akan holds, and the next step is now specific:** it needs a NATIVE construction, the shape
+`ɔha mu nkyekyɛmu` has — not a loan. (Its `$`/`€`/`£` and its ampersand are already deliberately silent for
+related reasons.)
+
+⚠ Also noted, not fixed: `−47.6 °C` reads `adwanan nson at͡ɕiri pɔ nsia k` — the degree sign dropped and ⟨C⟩
+surfacing as a bare `k`. That is the third language in this run with an unsourced degree word (pcm, za, ak).
