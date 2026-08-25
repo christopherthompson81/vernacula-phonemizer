@@ -147,21 +147,43 @@ survived the port intact.
 **Sabotage:** deregistering fails 6/6; widening the affrication class to include back /u/ fails 1; swapping
 the rule ORDER (laxing before affrication, which destroys the /i/ the affrication needs) fails 1.
 
+## Run 10 — 2026-08-25 02:40 — en-IN, and the first variant whose ASYNC path is neural
+
+**Command.** Port en-IN (72 lines of TS, no data files) and replay a 54-line GIE probe.
+
+**Finding (raw).** 108 C#-vs-Node readings identical, sync AND async, on first compile. ⚠ This is a stronger
+check than es-419, pt-BR or fr-CA got: `en` is a NEURAL language, so the async half runs the ONNX tagger and
+then the delta on its output. The other three variants have rule-only bases where sync and async agree
+trivially.
+
+**⚠ THE DELTA IS APPLIED PER WORD, unlike the other two substitution variants.** es-419 and fr-CA wrap the
+assembled utterance; en-IN threads its remap through English's `Text(input, wordTransform, oovOverride)`, so
+the transform sees one word's IPA at a time. Wrapping the utterance instead would expose the delta to clause
+punctuation and to whatever the assembler puts between words. Ported the same way and pinned by a test.
+
+TWO ORDERING FACTS the port had to preserve, both now sabotage-verified:
+- **Retroflexion runs BEFORE TH-stopping.** Reversed, the dental stops [t̪ʰ d̪] that TH-stopping creates get
+  swept into [ʈ ɖ] by the retroflexion, collapsing *thin* into *tin* — the exact distinction GIE keeps by
+  PLACE. Sabotage fails 1.
+- **The affricate-tie guard `(?!U+0361)`** is what keeps *church* and *judge* at t͡ʃ / d͡ʒ. Without it they
+  become ʈ͡ʃ / ɖ͡ʒ, which is not GIE and not any English. Sabotage fails 1.
+
 ## Result
 
-es-419, pt-BR and fr-CA ported and covered by the gate. The remaining two are named on every parity run instead
+es-419, pt-BR, fr-CA and en-IN ported and covered by the gate. The one that remains is named on every parity run instead
 of being invisible:
 
 ```
-accent variants: 3/5 build — es-419, fr-CA, pt-BR
-⚠ NOT PORTED, and their base language IS: en-GB (variant of en), en-IN (variant of en)
+accent variants: 4/5 build — en-IN, es-419, fr-CA, pt-BR
+⚠ NOT PORTED, and their base language IS: en-GB (variant of en)
 ```
 
 Both tests assert the REGISTRATION rather than the phonology (the goldens cover that), and pt-BR's also
 asserts the LEXICON LOAD. Verified by deregistering the factory (4/4 fail) and by breaking the lexicon
 filename (1/4 fails — the one written for it).
 
-58 languages / 11,600 rows / 0 differ; 418 C# tests, 5,057 TS tests.
+59 languages / 11,800 rows / 0 differ; 426 C# tests, 5,057 TS tests.
 
-**Remaining:** en-IN (72 lines, IPA-only substitution — the cheap shape) and en-GB (95 lines plus five TSV
-lexical sets and word-level context — the only genuinely large one).
+**Remaining: en-GB alone** — 95 lines plus five TSV lexical sets (bath, cloth, yod, palm, lotr) and a
+transform that needs the WORD, not just the IPA. The only one of the five that was ever genuinely large, and
+the only one a declarative `variantOf` key could not have expressed even in principle.

@@ -41,6 +41,7 @@ public static class Bootstrap
             Bulgarian.BulgarianPhonemizer.RegisterSelf();
             Cebuano.CebuanoPhonemizer.RegisterSelf();
             English.EnglishFactory.RegisterSelf();
+            EnglishIn.EnglishIn.RegisterSelf();
             French.FrenchPhonemizer.RegisterSelf();
             FrenchCa.FrenchCa.RegisterSelf();
             German.GermanPhonemizer.RegisterSelf();
