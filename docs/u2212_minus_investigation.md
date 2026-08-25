@@ -718,3 +718,65 @@ related reasons.)
 
 ⚠ Also noted, not fixed: `−47.6 °C` reads `adwanan nson at͡ɕiri pɔ nsia k` — the degree sign dropped and ⟨C⟩
 surfacing as a bare `k`. That is the third language in this run with an unsourced degree word (pcm, za, ak).
+
+## Run 17 — the financial register, and a much worse problem it uncovered — 2026-08-26 09:30
+
+Suggested: try the FINANCIAL register — a negative balance, a deficit — since banking and economics are
+better covered on small wikis than mathematics is. Probed ltg/mos/ak for `negatīvs`, `negativs`, `mīnusā`,
+`deficits`, `zauds`, `negatif`, `deficit`. **Almost all ×0**; the single hit is ltg `deficits` ×1, a noun and
+not a sign reading. The idea is sound and cost nothing to test — but running it exposed why none of these
+probes were ever going to return anything.
+
+### ⚠ ak.wikipedia HAS ZERO ARTICLES
+
+```
+  ak     articles:        0        ← every Akan probe in this investigation measured NOTHING
+  ltg    articles:    1,156
+  mos    articles:    1,325
+  pcm    articles:    1,655
+  za     articles:    3,023
+  tw     articles:    4,735        ← Akan's REAL live wiki
+  ab     articles:    6,732
+  tn     articles:    5,579        rw 9,903 · bo 8,113 · ilo 15,527 · yo 39,575 · ht 72,095 · nan 434,582
+```
+
+Every `absent` verdict I reported for Akan — `minus`, `mainɔso`, `ntefirimu`, `yi firi mu`, `negatif`,
+`dɛgrii` — came from an **empty haystack**, and I read them as measurements. They were not. Akan's evidence
+lives in the tw + fat dumps (35,517 segments, which is where its `ɔha mu nkyekyɛmu` percent came from), and
+its live wiki is **tw.wikipedia**, reachable only by passing `--wiki tw` — which nothing prompted anyone to do.
+
+**This reframes the whole negative-result column.** For ltg, mos, ak — and to a lesser degree pcm, za, ab —
+a `×0` was never a measured refusal, only an unmeasurable one. It also retroactively justifies shipping ab,
+za and pcm on in-language PATTERN arguments rather than waiting for attestation their corpora are too small
+to supply.
+
+### Akan, re-probed against the right wiki
+
+```
+  minus  ×1   ⚠ AN ENGLISH WORD BEING GLOSSED, not Akan usage:
+              "wɔyi firii asɛmfua 'minus' mu a ɛkyerɛ \"less\"" — "derived from the word 'minus',
+              which means 'less'". In quotes, in an etymology.
+  zero   ×4   ⚠ THIS ONE IS REAL — Akan prose borrowing the English noun: "sen zero" (than zero),
+              "bɛbɛn zero" (near zero), "coefficient of inbreeding no boro zero".
+  ase    ×70  "under / below", the ordinary postposition.
+```
+
+So the two halves of a "below zero" exist and are attested in Akan prose. **Every composed form is still
+×0** — `zero ase`, `ase zero`, `zero no ase` — and `hwee ase` ×2 is a trap, meaning "collapsed"
+(*Chan Chan hwee ase*, and the Iron Curtain falling), not "below zero".
+
+### Fixed: `attest.ts` now says how big the haystack is
+
+The tool printed a `×0` from a 434,000-article wiki and a `×0` from an empty one identically. It now fetches
+`siteinfo` and labels the header:
+
+```
+  ── yo.wikipedia.org — TOKEN attestation ──  (39,575 articles)
+  ── ltg.wikipedia.org — … ──  ⚠ SMALL WIKI (1,156 articles) — an `absent` verdict is weak evidence…
+  ── ak.wikipedia.org — … ──  ⚠ THIS WIKI HAS ZERO ARTICLES — an `absent` verdict here measures NOTHING.
+                                 Pass --wiki <code> for the variety that has one.
+```
+
+That is the defence this tool was missing. Its header already warns that a token hit proves existence and
+not fitness; it said nothing about what a MISS proves, and the answer turns out to depend entirely on a
+number it was not printing.

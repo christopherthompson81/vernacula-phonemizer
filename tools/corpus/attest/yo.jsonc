@@ -21,6 +21,19 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…idi; ati pe ti a ba s'aropo gbongbo alagbarameji idin okan (minus one) po mo nomba gidi lati fun wa ni nomba tosoro, esi yi n…",
+                "…gun; armea - ti ogunti ológun; militista - ti ogunti ológun minus - yô kúrò, dínkù; (10 - 6 = 4 dek minus ses faras kvar;) mi…",
+                "…- ti ogunti ológun minus - yô kúrò, dínkù; (10 - 6 = 4 dek minus ses faras kvar;) minut/o - ìÿëjú, ìròhìn ohun tí a ÿe ní àj…"
+            ]
+            },
+        {
                 "word": "alòdì",
                 "verdict": "attested",
                 "bounded": true,
@@ -193,15 +206,6 @@
             },
         {
                 "word": "náígátífì",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
-            },
-        {
-                "word": "minus",
                 "verdict": "absent",
                 "bounded": true,
                 "tokenHits": 0,

@@ -21,6 +21,62 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "minus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "negatīvs",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "negativs",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mīnusā",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "deficits",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ierdzeibys partnerim. Nasaverūt iz tū, ka īmūšais saskaitys deficits palīk lels, vaļsteibys budžets tur €151 miljonu viersejumu.…"
+            ]
+            },
+        {
+                "word": "zauds",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
                 "word": "komats",
                 "verdict": "absent",
                 "bounded": true,
@@ -111,15 +167,6 @@
             },
         {
                 "word": "zam nullis",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
-            },
-        {
-                "word": "minus",
                 "verdict": "absent",
                 "bounded": true,
                 "tokenHits": 0,

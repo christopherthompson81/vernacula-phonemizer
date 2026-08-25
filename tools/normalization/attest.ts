@@ -658,7 +658,27 @@ if (IS_CLI) {
     for (const w of wordList) findings.push(await probe(w));
 
     const pad = (s: string, n: number): string => s.padEnd(n);
-    console.log(`\n── ${wiki}.wikipedia.org — TOKEN attestation ──\n`);
+    /**
+     * ⚠ HOW BIG IS THE HAYSTACK. A `×0` from a wiki with a thousand articles is not the same claim as a
+     * `×0` from one with four hundred thousand, and this tool used to print them identically — so the
+     * reader had no way to tell "the language does not use this word" from "there was nothing to search".
+     *
+     * ⚠ THE CASE THAT FOUND IT: `--lang ak` defaults to ak.wikipedia, which has **ZERO articles**. Every
+     * Akan probe in the U+2212 sweep came back `absent` from an empty haystack and was read as a
+     * measurement. Akan's real corpus is the tw + fat dumps, and its live wiki is tw.wikipedia — reachable
+     * only by passing `--wiki tw`, which nothing prompted anyone to do.
+     */
+    let siteNote = "";
+    try {
+        const st = await api({ action: "query", meta: "siteinfo", siprop: "statistics" });
+        const arts = Number(st?.query?.statistics?.articles ?? -1);
+        if (arts === 0)
+            siteNote = "  ⚠ THIS WIKI HAS ZERO ARTICLES — an `absent` verdict here measures NOTHING. Pass --wiki <code> for the variety that has one.";
+        else if (arts > 0 && arts < 5000)
+            siteNote = `  ⚠ SMALL WIKI (${arts.toLocaleString()} articles) — an \`absent\` verdict is weak evidence, not a measured refusal.`;
+        else if (arts > 0) siteNote = `  (${arts.toLocaleString()} articles)`;
+    } catch { siteNote = "  (article count unavailable)"; }
+    console.log(`\n── ${wiki}.wikipedia.org — TOKEN attestation ──${siteNote}\n`);
     console.log(`  ${pad("word", 16)} ${pad("token", 6)} ${pad("arts", 5)} ${pad("substr-only", 12)} verdict`);
     for (const f of findings)
         console.log(`  ${pad(f.word, 16)} ${pad(String(f.tokenHits), 6)} ${pad(String(f.articles), 5)} `
