@@ -63,12 +63,12 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         //    dot survives as a phrase break. Also `George W. Bush` — the W. suffix dot is a break. A dotted
         //    Bengali run (ইউ.এছ.অ.চি, USOC) is the same shape and loses its dots so the letters read as one
         //    run (the spaces keep them distinct aksharas).
-        s = s.replace(/(?<![\p{L}\p{M}])[A-Za-z]\.(?:[ \u00a0]?[A-Za-z]\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
+        s = s.replace(/(?<![\p{L}\p{M}])[A-Za-z]\.(?:[ \u00a0]?[A-Za-z]\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
         // A LONE capital + dot is an initial (`George W. Bush`, the corpus's only instance). Keying on any
         // capital before the dot also stripped the SENTENCE period after an acronym — `NASA. Bush` and
         // `the U.S. The next` lost their pause — so the initial must be a single letter.
         s = s.replace(/(?<![\p{L}\p{M}])([A-Z])\.(?=\s+[A-Z])/gu, "$1");
-        s = s.replace(/(?<![\p{L}\p{M}])[\p{Script=Bengali}\p{M}]+\.(?:[ \u00a0]?[\p{Script=Bengali}\p{M}]+\.)+/gu, (m0) => m0.replace(/\./gu, " ").replace(/\s+/gu, " "));
+        s = s.replace(/(?<![\p{L}\p{M}])[\p{Script=Bengali}\p{M}]+\.(?:[ \u00a0]?[\p{Script=Bengali}\p{M}]+\.)+/gu, (m0) => m0.replace(/\./gu, " ").replace(/\s+/gu, " "));  // space, NBSP
 
         // 2) THE `Nশ` CLASSICAL ORDINALS (11–20) and `1শ` = একশ. The শ suffix is the ordinal for a
         //    two-digit 11–20 (century ordinals — the corpus's dominant use), but `1শ` is "one hundred".

@@ -184,7 +184,7 @@ const SYMBOLS = makeSymbolNormalizer({
  * `5 Mart'ta` safe even though `m` is a unit key: after `m` comes `a`, not `'`.
  */
 const UNIT_ALT = Object.keys(UNITS).sort((a, b) => b.length - a.length).join("|");
-const SUFFIX_MARK = "\u0001"; // never occurs in input; the glue step below removes it again
+const SUFFIX_MARK = "\u0001"; // never occurs in input; the glue step below removes it again  // U+0001
 const SUFFIXED_UNIT = new RegExp(`(\\d[\\d.,]*\\s?(?:${UNIT_ALT})(?:\\s?[²³23])?)['’](\\p{L}+)`, "gu");
 const MARKED_SUFFIX = new RegExp(`(\\S+)\\s${SUFFIX_MARK}(\\p{L}+)`, "gu");
 

@@ -123,8 +123,8 @@ export function normalizeCrimeanTatar(input: string): string {
     //    `+24,6°C`, `1,5 million`, `5.9%`). The three-digit test decides all three marks.
     //    ⚠ THE WHOLE NUMBER AT ONCE (trap 63), and the trailing guard rejects a DIGIT and nothing else
     //    (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu,

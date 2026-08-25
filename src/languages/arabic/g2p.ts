@@ -45,7 +45,7 @@ const HARAKAT = new Set([
 export interface Seg {
     ph: string; // IPA phoneme(s)
     vowel: boolean; // is a syllable nucleus
-    article?: boolean; // this vowel is the definite-article nucleus (الـ) — a variety may raise it (arz a→i, il-)
+    article?: boolean;  // tatweel — this vowel is the definite-article nucleus (الـ) — a variety may raise it (arz a→i, il-)
 }
 
 /**
@@ -163,7 +163,7 @@ export function toSegments(word: string): Seg[] {
     ) {
         pushCons(PROCLITIC[s[i]!]!);
         pushVowel(short[s[i + 1]!]!);
-        i = emitArticle(i + 3); // proclitic + الـ (alif elides)
+        i = emitArticle(i + 3);  // tatweel — proclitic + الـ (alif elides)
     } else if (s[i] === "ل" && s[i + 1] === KASRA && s[i + 2] === "ل") {
         // لِلـ = li + article (alif dropped)
         pushCons("l");

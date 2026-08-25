@@ -191,7 +191,7 @@ export function normalizeGalician(input: string): string {
 
     // 3) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass (step 14) reads them as LETTERS.
     //    ⚠ `\p{Lu}`, never `[A-Z]` — Galician's own ⟨Á É Í Ó Ú Ñ⟩ are capitals outside ASCII (trap 1/7).
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
+    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     //    A single initial before a surname: the dot is a break, not a full stop.
     s = s.replace(/(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
 
@@ -246,7 +246,7 @@ export function normalizeGalician(input: string): string {
     //    the tier's guard — the one that stops a key biting into a word — correctly refuses the `$` and the
     //    sign vanishes. `US$` ×6 in the retained text. Only where a NUMBER follows: a bare `US$` folded to a
     //    lone `$` would be dropped by the tokenizer, and silence is worse than the letters (pt's finding).
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD|CAD)\$(?=[ \u00a0]?\d)/gu, "$");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD|CAD)\$(?=[ \u00a0]?\d)/gu, "$");  // space, NBSP
     //    R$ is the Brazilian real; the tier has no entry for the R and read it as a stray [ʁ].
     s = s.replace(/(?<![\p{L}\p{M}])R\$\s?(\d[\d.,]*)/gu, "$1 reais");
 

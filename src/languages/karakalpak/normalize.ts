@@ -154,8 +154,8 @@ export function normalizeKarakalpak(input: string): string {
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     //    …and the SPACE, which this corpus also uses — "Maydanı 1 098 581 km²", "9 686 AQSh dolları",
     //    "1/299 792 458 sekund ishinde". Same idiom, same trap-63 whole-number match.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) THE DECIMAL SEPARATORS, NEUTRALISED — see the header for why no word is spoken. What is left with
     //    a comma between digits is a decimal; what is left with a dot is a decimal ONLY IF THE RUN CARRIES

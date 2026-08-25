@@ -148,7 +148,7 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2"); // millions: 1 234 567
     //    Remaining non-breaking spaces become ordinary ones so every later pattern can use \s.
-    s = s.replace(/[   ]/gu, " ");
+    s = s.replace(/[\u00a0\u202f\u2009]/gu, " ");
 
     // 1) ERA MARKERS, before the generic `av.` → avenue: every "av." in the corpus is this.
     s = s.replace(/\bav(?:ant)?\.?\s*j\.?\s*-?\s*c\.?/giu, "avant Jésus-Christ");

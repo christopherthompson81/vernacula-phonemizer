@@ -134,7 +134,7 @@ const SAID_BEFORE = /(?:[iì]da|[iì]pin)\s*$/u;
  * ⚠ POSTPOSED, like every other unit here — see the units note above for why the corpus's preposed
  * instances are athletics event names rather than measurements.
  */
-const METRE = /(?<![\p{L}\p{M}\d.,])(?<!\p{Nd}h[ \u00a0])(\d+(?:\.\d+)?)[ \u00a0]?m(?![\p{L}\p{M}'’\d])/gu;
+const METRE = /(?<![\p{L}\p{M}\d.,])(?<!\p{Nd}h[ \u00a0])(\d+(?:\.\d+)?)[ \u00a0]?m(?![\p{L}\p{M}'’\d])/gu;  // space, NBSP
 const METRE_WORD = "mítà";
 
 /** The unit nouns this layer expands, and a squared one with no number necessarily beside it. */

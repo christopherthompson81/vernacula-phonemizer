@@ -84,9 +84,9 @@ export function normalizeLatin(input: string): string {
     //    clause-final probe after I wrote `(?![\d.,])` and lost the whole grouping on `1 320 000,`. A
     //    guard carrying a bare `.` or `,` declines every clause-final figure; what it has to exclude is a
     //    separator that is CONTINUING the number (`.5`), which is `(?![.,]\d)`.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
-    s = s.replace(/[    ]/gu, " ");
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 2) THE ERA MARKER — Latin's own, and its own expansion. `a.C.n.` = *ante Christum natum*,
     //    `p.C.n.` = *post Christum natum*, written in this corpus as "anno 31 a.C.n.", "anno 15 a.C.n.",

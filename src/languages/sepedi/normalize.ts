@@ -307,12 +307,12 @@ export function normalizeSepedi(input: string): string {
     //    ⚠ NO LETTER-NAME TABLE EXISTS FOR nso (`sources.ts`: espeak does not ship this language at all), so
     //    `core/initialisms.ts` would be a no-op and this is the best available: the SENTENCE PAUSES go, which
     //    is the measured defect, and no name is invented.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run: string, off: number, full: string) => {
-        const letters = [...run.replace(/[. \u00a0]/gu, "")].join("-");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run: string, off: number, full: string) => {  // space, NBSP
+        const letters = [...run.replace(/[. \u00a0]/gu, "")].join("-");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
         if (!run.endsWith(".")) return letters;
-        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;
+        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;  // space, NBSP
     });
 
     // 2) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping comma reads as a CLAUSE
@@ -350,7 +350,7 @@ export function normalizeSepedi(input: string): string {
     //    a normalization one, and is recorded in the investigation doc rather than worked around here.
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3}){1,4}(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3}){1,4}(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 3) THE ENGLISH ORDINAL SUFFIX (`4th`, `16th`, `19th`). Sepedi writes its own ordinals as WORDS and this
     //    corpus does exactly that beside the Latin form — *"mokgatlokgolo wa lesome senyane (19th)"*,
@@ -381,11 +381,11 @@ export function normalizeSepedi(input: string): string {
     //    order (`diranta tše dimilione tše 100`) and what the tier does for `$` two steps earlier.
     const MAG = "dimilione|milione|dibilione|bilione|dipilione|pilione";
     s = s.replace(
-        new RegExp(String.raw`(?<![\p{L}\p{M}\d])R[ \u00a0]?(\d+\.\d+|\d{4,})([ \u00a0](?:${MAG}))?(?![\p{L}\p{M}\d])`, "giu"),
+        new RegExp(String.raw`(?<![\p{L}\p{M}\d])R[ \u00a0]?(\d+\.\d+|\d{4,})([ \u00a0](?:${MAG}))?(?![\p{L}\p{M}\d])`, "giu"),  // space, NBSP
         (_w, num: string, mag: string | undefined) => `${RAND}${mag ?? ""} ${num}`,
     );
     s = s.replace(
-        new RegExp(String.raw`(?<![\p{L}\p{M}\d])R[ \u00a0]?(\d+)([ \u00a0](?:${MAG}))(?![\p{L}\p{M}\d])`, "giu"),
+        new RegExp(String.raw`(?<![\p{L}\p{M}\d])R[ \u00a0]?(\d+)([ \u00a0](?:${MAG}))(?![\p{L}\p{M}\d])`, "giu"),  // space, NBSP
         (_w, num: string, mag: string) => `${RAND}${mag} ${num}`,
     );
 
@@ -409,8 +409,8 @@ export function normalizeSepedi(input: string): string {
     //    two) is not read as an area while `km ²` is.
     s = s.replace(
         new RegExp(
-            `${NOT_VERSION}(\\d+(?:[ \u00a0\u202f\u2009]\\d{3}(?!\\d)|[.,]\\d+)*)(?![\\d.,])[ \u00a0\u202f\u2009]?(${UNIT_ALT})` +
-                `(?:[    ]?/[    ]?(${DENOM_ALT})|[    ]?(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?` +
+            `${NOT_VERSION}(\\d+(?:[ \u00a0\u202f\u2009]\\d{3}(?!\\d)|[.,]\\d+)*)(?![\\d.,])[ \u00a0\u202f\u2009]?(${UNIT_ALT})` +  // NBSP, NNBSP, thin space
+                `(?:[ \u00a0\u202f\u2009]?/[ \u00a0\u202f\u2009]?(${DENOM_ALT})|[ \u00a0\u202f\u2009]?(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?` +  // NBSP, NNBSP, thin space
                 `(?![\\p{L}\\p{M}\\d'’ʼ])`,
             "giu",
         ),
@@ -458,12 +458,12 @@ export function normalizeSepedi(input: string): string {
     //    would leave every one of them raw in the IPA.
     const degreeC = (n: string, off: number, end: number, full: string): string =>
         saidNear(full, off, end, CELSIUS) ? n : `${n} ${CELSIUS}`;
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?C(?![\p{L}\p{M}])/gui,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?C(?![\p{L}\p{M}])/gui,  // space, NBSP
         (w: string, n: string, off: number, full: string) => degreeC(n, off, off + w.length, full));
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?F(?![\p{L}\p{M}])/gui, "$1");
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?F(?![\p{L}\p{M}])/gui, "$1");  // space, NBSP
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
         (_w, n: string, c: string) => `${n} ${COMPASS[c]!}`);
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, "$1");
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, "$1");  // space, NBSP
 
     // 8) RANGES → `go ya go`. See UNTIL for the three in-corpus attestations and for why DESCENDING spans are
     //    admitted here where the nya/rw siblings admit only ascending ones.
@@ -496,7 +496,7 @@ export function normalizeSepedi(input: string): string {
     //    silent at exactly a sentence end (playbook trap 58, reported by `review.ts`'s `clause-final` check).
     //    What the separator exclusion is for is a CONTINUATION of the number into step 9's decimal, and a
     //    following digit is what tests that: `9.84-9.90` is still declined and so is a grouped `1-1,000`.
-    s = s.replace(/(?<![-–—\d.,\p{L}\p{M}])(?<![-–—][ \u00a0])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-–—\d\p{L}\p{M}]|[.,]\d)(?![ \u00a0][-–—])/gu,
+    s = s.replace(/(?<![-–—\d.,\p{L}\p{M}])(?<![-–—][ \u00a0])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-–—\d\p{L}\p{M}]|[.,]\d)(?![ \u00a0][-–—])/gu,  // space, NBSP
         (whole: string, a: string, b: string) =>
             Math.abs(a.length - b.length) >= 2 ? whole : `${a} ${UNTIL} ${b}`);
 

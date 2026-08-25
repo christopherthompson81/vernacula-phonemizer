@@ -137,7 +137,7 @@ function buildRestoredText(word: string, lexicon: ReadonlyMap<string, string>): 
 }
 
 // Arabic word token (letters + harakat) — everything else (spaces, digits, punctuation) passes through unchanged.
-const WORD = /[ء-يٰٱً-ْـ]+/gu;
+const WORD = /[ء-يٰٱً-ْـ]+/gu;  // tatweel
 
 /**
  * The supplement pass: for each Arabic word in the diacritizer's output whose g2p is a SKELETON, override its

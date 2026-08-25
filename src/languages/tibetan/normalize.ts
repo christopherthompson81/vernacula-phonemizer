@@ -224,7 +224,7 @@ export function normalizeTibetan(input: string): string {
     //    (`རྒྱལ་​དབང་​ལྔ་​པའི་`, 99 in one paragraph), and U+200B is outside tibetan.ts's word class — so the
     //    token breaks at each ZWSP and every syllable is read as word-INITIAL. Lhasa tone is contrastive only
     //    on syllable 1, so that is not cosmetic: it hands each syllable a tone the word does not have.
-    t = t.replace(/[­​-‏⁠﻿]/gu, "");
+    t = t.replace(/[­​-‏⁠﻿]/gu, "");  // soft hyphen, ZWSP, RLM, word joiner, BOM
 
     // 2) COMPATIBILITY FORMS OF THE SIGNS THIS LAYER READS. ⚠ Only these — never blanket NFKC, which would
     //    turn `²` into a plain `2` and erase the exponent readings below (playbook trap 36). The corpus writes

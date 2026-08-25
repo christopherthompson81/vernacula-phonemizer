@@ -81,7 +81,7 @@ export function phonemizeWord(word: string): string {
         const next = raw[i + 1]?.ph;
         if (next === undefined || /^[ɡɢkxχq]/u.test(next)) raw[i]!.ph = "ŋ";
     }
-    const bound = /^[-­]/u.test(word); // a -suffix entry (hyphen / soft-hyphen): its leading vowel is non-initial
+    const bound = /^[-­]/u.test(word);  // soft hyphen — a -suffix entry (hyphen / soft-hyphen): its leading vowel is non-initial
     // A word mixing BACK (а/о/у/я/ё/ю) and FRONT (э/ө/ү/е) vowels violates Mongolian vowel harmony → it is a loanword
     // (Герман, Австри), whose non-initial vowels stay FULL rather than reducing. (и/ы are neutral.)
     const loan = /[аоуяёю]/u.test(w) && /[эөүе]/u.test(w);
@@ -94,7 +94,7 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const TOKEN = /([Ѐ-ӿᠠ-ᡂ᠋-᠎‌‍ ]+)|(\d+)|([.!?…,;:])/gu;
+const TOKEN = /([Ѐ-ӿᠠ-ᡂ᠋-᠎‌‍\u202f]+)|(\d+)|([.!?…,;:])/gu;  // NNBSP
 
 class MongolianPhonemizer implements Phonemizer {
     text(input: string): string {

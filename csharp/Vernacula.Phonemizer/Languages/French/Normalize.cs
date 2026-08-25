@@ -114,7 +114,7 @@ public static class Normalize
         string.Join("|", DOTTED_ABBREV.Keys.Concat(DOT_ONLY).OrderByDescending(k => k.Length));
 
     private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
-    private static readonly JsRe NBSP_RUN = JsRegex.Compile("[   ]", "gu");
+    private static readonly JsRe NBSP_RUN = JsRegex.Compile("[\\u00a0\\u202f\\u2009]", "gu");
     private static readonly JsRe ERA_BC = JsRegex.Compile("\\bav(?:ant)?\\.?\\s*j\\.?\\s*-?\\s*c\\.?", "giu");
     private static readonly JsRe ERA_AD = JsRegex.Compile("\\bapr(?:ès)?\\.?\\s*j\\.?\\s*-?\\s*c\\.?", "giu");
     private static readonly JsRe DEGREE_SPACED = JsRegex.Compile("(\\d)\\s*°\\s*(?=[CF](?![\\p{L}\\p{M}]))", "gui");

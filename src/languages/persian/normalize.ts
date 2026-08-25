@@ -80,7 +80,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         if (w === undefined) return undefined;
         const parts = w.split(" ");
         const last = parts[parts.length - 1]!;
-        parts[parts.length - 1] = last === "سه" ? "سوم" : last.endsWith("ی") ? `${last}‌ام` : `${last}م`;
+        parts[parts.length - 1] = last === "سه" ? "سوم" : last.endsWith("ی") ? `${last}‌ام` : `${last}م`;  // ZWNJ
         return parts.join(" ");
     };
 
@@ -149,7 +149,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //     `19،500 km` would match only its last three digits.
         //     ⚠ THE EXPONENT ARM MUST PRECEDE THE PLAIN ONE, or the plain rule eats the unit and strands the `²`.
         const FA_UNIT: Readonly<Record<string, string>> = {
-            km: "کیلومتر", cm: "سانتی‌متر", mm: "میلی‌متر", kg: "کیلوگرم", m: "متر",
+            km: "کیلومتر", cm: "سانتی‌متر", mm: "میلی‌متر", kg: "کیلوگرم", m: "متر",  // ZWNJ
         };
         const faUnits = Object.keys(FA_UNIT).sort((a, b) => b.length - a.length).join("|");
         //     ⚠ A DOTTED DESIGNATION IS NOT A QUANTITY: `802.11m` read as "802.11 metres". This is `NOT_VERSION`
@@ -217,7 +217,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //      through with them: `20 °C` read *bist si* — the sign dropped and the C spoken as an English letter
         //      name. Persian puts the unit AFTER the number, so unlike Korean's 섭씨 this rule reorders nothing
         //      and cannot strand a sign to its left.
-        s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 درجه سانتی‌گراد");
+        s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 درجه سانتی‌گراد");  // ZWNJ
         s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 درجه فارنهایت");
         s = s.replace(/(\d)\s?°/gu, "$1 درجه");
 
@@ -261,7 +261,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    restoration layer that supplies every other short vowel in Persian text.
         //    ⚠ Only the ⟨ام⟩ spelling is matched. A bare ⟨م⟩ suffix is also legal Persian, but matching it would
         //    let the rule reach into ordinary digit+word sequences.
-        s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\u200C?ام${NOT_WORD}`, "gu"),
+        s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\u200C?ام${NOT_WORD}`, "gu"),  // ZWNJ
             (whole, digits: string) => {
                 const n = Number(digits);
                 if (!Number.isSafeInteger(n)) return whole;

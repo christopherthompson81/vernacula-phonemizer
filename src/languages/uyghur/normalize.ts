@@ -269,7 +269,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    The split is decidable from the FORM: ە has no initial or medial shape in Uyghur, so an
         //    ISOLATED or FINAL plain heh is the vowel and an INITIAL or MEDIAL one is the consonant.
         //    `ﻫﻪﺳﻪﻥ` — ھەسەن, the name Hesen — carries both in one word and settles it.
-        s = s.replace(/[ﭐ-﷿ﹰ-﻿]/gu, (c) => (c === "ﻩ" || c === "ﻪ" ? "ە" : c.normalize("NFKC")));
+        s = s.replace(/[ﭐ-﷿ﹰ-﻿]/gu, (c) => (c === "ﻩ" || c === "ﻪ" ? "ە" : c.normalize("NFKC")));  // BOM
 
         // 4) ⚠ ه U+0647 → ھ U+06BE. The Arabic heh is NOT a letter of the Uyghur alphabet — Uyghur writes /h/
         //    as ھ (×1,099 here) and the vowel /ɛ/ as ە U+06D5 — but writers type it anyway (×40), and the

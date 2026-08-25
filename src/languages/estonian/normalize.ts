@@ -652,8 +652,8 @@ export function normalizeEstonian(input: string): string {
     //    `\d,\d{3}` in the retained text is a genuine three-place DECIMAL — `120,758 miljardit USA dollarit`
     //    is 120.758 billion — against two English-convention groupings quoted from a poker-tournament report
     //    (`€2,400`, `R$5,000`). A comma arm would corrupt the real decimals to fix two foreign figures.
-    t = t.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (_m, head: string, rest: string) =>
-        `${head}${rest.replace(/[ \u00a0\u202f\u2009]/gu, "")}`);
+    t = t.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (_m, head: string, rest: string) =>  // space, NBSP, NNBSP, thin space
+        `${head}${rest.replace(/[ \u00a0\u202f\u2009]/gu, "")}`);  // space, NBSP, NNBSP, thin space
 
     // 2) ERA MARKERS (1,319 whole-corpus; 25 in the retained text), before the abbreviations for the usual
     //    reason and — critically — before the shared unit tier, so `632 m.a.j.` cannot read as 632 metres.

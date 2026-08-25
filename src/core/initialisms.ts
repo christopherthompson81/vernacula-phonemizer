@@ -103,8 +103,8 @@ export const LATIN_MARK = "\\u0300-\\u036F\\u1AB0-\\u1AFF\\u1DC0-\\u1DFF\\uFE20-
 const RUN_OR_CODE = new RegExp(
     `(?<![\\p{L}${LATIN_MARK}])\\p{Lu}{2,}(?![\\p{L}${LATIN_MARK}])`
     + `|(?<![\\p{L}${LATIN_MARK}])\\p{Lu}+(?=\\d)`, "gu");
-const INITIAL_RUN = new RegExp(`(?<![\\p{L}${LATIN_MARK}])(?:\\p{Lu}\\.[  ]*){2,}`, "gu");
-const LONE_INITIAL = /(?<=\p{Lu}\p{L}*[  ])(\p{Lu})\.(?=[  ]+\p{Lu}\p{Ll})/gu;
+const INITIAL_RUN = new RegExp(`(?<![\\p{L}${LATIN_MARK}])(?:\\p{Lu}\\.[ \u00a0]*){2,}`, "gu");  // space, NBSP
+const LONE_INITIAL = /(?<=\p{Lu}\p{L}*[ \u00a0])(\p{Lu})\.(?=[ \u00a0]+\p{Lu}\p{Ll})/gu;  // space, NBSP
 
 /**
  * Build the text→text initialism pass.

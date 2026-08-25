@@ -93,7 +93,7 @@ const SYMBOLS = makeSymbolNormalizer({
     magnitudes: ["දහස", "ලක්ෂ", "කෝටි", "මිලියන", "බිලියන"],
     units: {
         km: ["කිලෝමීටර්"], m: ["මීටර්"], cm: ["සෙන්ටිමීටර්"], mm: ["මිලිමීටර්"],
-        kg: ["කිලෝග්‍රෑම්"], ml: ["මිලිලීටර්"], ha: ["හෙක්ටයාර්"],
+        kg: ["කිලෝග්‍රෑම්"], ml: ["මිලිලීටර්"], ha: ["හෙක්ටයාර්"],  // ZWJ
     },
     unitPrefix: true,
     // `position: "before"` — a spaced word ahead of the unit noun, the Russian shape, which is exactly what
@@ -144,9 +144,9 @@ const abbrev = (body: string, word: string): readonly [RegExp, string] =>
 
 const DOTTED_ABBREV: readonly (readonly [RegExp, string])[] = [
     // Era markers first (playbook step 4: era before generic abbreviations), longest key first.
-    abbrev(String.raw`ක්රි\.\s?පූ\.?`, "ක්‍රිස්තු පූර්ව"),
-    abbrev(String.raw`ක්රි\.\s?පු\.?`, "ක්‍රිස්තු පූර්ව"),
-    abbrev(String.raw`ක්රි\.\s?ව\.?`, "ක්‍රිස්තු වර්ෂ"),
+    abbrev(String.raw`ක්රි\.\s?පූ\.?`, "ක්‍රිස්තු පූර්ව"),  // ZWJ
+    abbrev(String.raw`ක්රි\.\s?පු\.?`, "ක්‍රිස්තු පූර්ව"),  // ZWJ
+    abbrev(String.raw`ක්රි\.\s?ව\.?`, "ක්‍රිස්තු වර්ෂ"),  // ZWJ
     // Measure and currency abbreviations. `කි.මී` ×2 (`වර්ග කි.මී 65,610`, wiki `පැයට කි.මී. 250`),
     // `සෙ.මී.` ×2, `ඇ.ඩො.` from the wiki's own `(ඇ.ඩො. මිලියන 7.4)`. The trailing dot is optional
     // because the corpus writes it both ways.

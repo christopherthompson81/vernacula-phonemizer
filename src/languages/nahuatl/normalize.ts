@@ -136,7 +136,7 @@ export function normalizeNahuatl(input: string): string {
     //    modern-Nahuatl articles ("uan ​​eli nopa ompa ueyi tlanemakaketl", "uan ​​moneki kipixtos").
     //    Invisible, so it can only ever be noise; U+FEFF is stripped with it. ⚠ ZWJ/ZWNJ are NOT touched —
     //    they are contrastive in several scripts and this rule has no business generalising.
-    s = s.replace(/[​﻿]/gu, "");
+    s = s.replace(/[​﻿]/gu, "");  // ZWSP, BOM
 
     // 2) THE `&nbsp;` ENTITY, ×10 AND LITERAL. The dump extractor left it in text, so `45.9&nbsp;km`
     //    reaches the g2p as the word *nbsp* AND hides the `km` from step 8 (`133&nbsp;km`, `12&nbsp;km`,
@@ -152,8 +152,8 @@ export function normalizeNahuatl(input: string): string {
     //    so a figure at a clause end (`… (480 000) xihuitl`) is not declined by its own bracket.
     //    ⚠ AND THE HEAD GUARD IS WHAT DECLINES A SPACE-GROUPED DECIMAL TAIL: `1,602 176 487(40)` in the
     //    Spanish physics infobox has a comma two characters back, so no start position qualifies.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 4) DE-GROUPING THE COMMA, same test — `384,400 km`, `3,746 km`, `37,932,330 km²`,
     //    `21,860,000,000 km³`, `1,500,000`, `2,600,000`, `222,297`, `100,000`, `18,980`.

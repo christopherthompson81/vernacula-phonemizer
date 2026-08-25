@@ -214,7 +214,7 @@ export function normalizeHebrew(input: string): string {
     //    here is cheaper and safer than remembering that in fifteen places.
     //    ⚠ DELETED RATHER THAN SPACED, which is the one place trap 26 does not apply: these are zero-width
     //    by definition, so they never separated two tokens that a space now has to keep apart.
-    s = s.replace(/[‎‏‪-‮⁦-⁩​-‍﻿]/gu, "");
+    s = s.replace(/[‎‏‪-‮⁦-⁩​-‍﻿]/gu, "");  // LRM, RLM, LRE, RLO, LRI, PDI, ZWSP, ZWJ, BOM
     s = s.replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ");
 
     // 3) DIGIT DE-GROUPING, FIRST among the numeric rules — a grouping comma is otherwise read as CLAUSE

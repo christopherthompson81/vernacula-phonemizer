@@ -57,7 +57,7 @@ const RANGE = /(?<![\d.,\p{L}])(\d+)\s?[-–]\s?(\d+)(?![\d.,\p{L}])/gu;
  * letter starting the next sentence. `body` is the abbreviation WITHOUT its final dot.
  */
 function expandDotted(s: string, body: string, word: string): string {
-    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");
+    const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");  // space, NBSP
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
@@ -71,7 +71,7 @@ const BCE_WORD = "Kabla ya Kristo";
 const AD_WORD = "Baada ya Kristo";
 const BARE_ERA: readonly (readonly [RegExp, string])[] = [
     [/(?<![\p{L}\p{M}])BCE(?![\p{L}\p{M}])/gu, BCE_WORD],
-    [/(?<=\d[ \u00a0])BC(?![\p{L}\p{M}])/gu, BCE_WORD],
+    [/(?<=\d[ \u00a0])BC(?![\p{L}\p{M}])/gu, BCE_WORD],  // space, NBSP
 ];
 
 /** Dotted abbreviations, as `[body-without-final-dot, words]`. Only one shape occurs: `n.k.` ×2 =

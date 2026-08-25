@@ -104,7 +104,7 @@ export function normalizeSaraiki(input: string): string {
     //    percent sign, so the tier — which allows a space and nothing else there — never saw a percentage
     //    at all. ⚠ THE RULE IS NARROW ON PURPOSE: ZWNJ is meaningful Perso-Arabic orthography INSIDE a
     //    word, and only a joiner sitting between a DIGIT and a SIGN can be certain to carry no meaning.
-    s = s.replace(/(?<=\d)[\u200c\u200d]+(?=[%\u066a\u00b0\u066b])/gu, "");
+    s = s.replace(/(?<=\d)[\u200c\u200d]+(?=[%\u066a\u00b0\u066b])/gu, "");  // ZWNJ, ZWJ
 
     // 1) THE SHARED SYMBOL TIER FIRST, exactly as the Punjabi sibling does it and for the same reason: the
     //    tier's own numeral pattern reads `2,500` and `2.3` as ONE token, and steps 2 and 5 below split

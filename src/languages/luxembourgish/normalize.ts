@@ -53,7 +53,7 @@ const FEM_DATIVE = new Set(["der"]);
 /** ⚠ THE SPACE BETWEEN A NUMBER AND ITS NEIGHBOUR IS USUALLY NOT A PLAIN SPACE. Real text writes NBSP
  *  (U+00A0) and NARROW NBSP (U+202F) almost everywhere — `88 %`, `1.000 $`, `9 000`, `1894 – 1895`,
  *  `v. Chr.` — so a rule keyed on ` ` alone matches almost nothing. */
-const SP = "[ \\u00a0\\u202f\\u2009]";
+const SP = "[ \\u00a0\\u202f\\u2009]";  // space, NBSP, NNBSP, thin space
 /** Coordinators that chain a list of ordinals: `am 11., 12. an 13. Joerhonnert`, `dem 10. bis 11.`. */
 const ORDINAL_LIST = new RegExp(
     String.raw`^(?:,|${SP}+(?:an|a|bis|oder))(?:${SP}+[\p{L}'’-]+){0,2}${SP}+\d{1,4}\.`, "u");
@@ -300,12 +300,12 @@ export function normalizeLuxembourgish(input: string): string {
     s = s.replace(PLUS_INITIAL, "$1plus $2");
 
     // RELATIONAL AND ARITHMETIC SIGNS, and the AMPERSAND.
-    s = s.replace(/[ \u00a0]*[=≈][ \u00a0]*/gu, " ass gläich ");
-    s = s.replace(/[ \u00a0]*<[ \u00a0]*/gu, " méi kleng ewéi ");
-    s = s.replace(/[ \u00a0]*>[ \u00a0]*/gu, " méi grouss ewéi ");
-    s = s.replace(/(\d)[ \u00a0]*×[ \u00a0]*(?=\d)/gu, "$1 mol ");
-    s = s.replace(/[ \u00a0]*÷[ \u00a0]*/gu, " dividéiert duerch ");
-    s = s.replace(/[ \u00a0]*[&＆][ \u00a0]*/gu, " an ");
+    s = s.replace(/[ \u00a0]*[=≈][ \u00a0]*/gu, " ass gläich ");  // space, NBSP
+    s = s.replace(/[ \u00a0]*<[ \u00a0]*/gu, " méi kleng ewéi ");  // space, NBSP
+    s = s.replace(/[ \u00a0]*>[ \u00a0]*/gu, " méi grouss ewéi ");  // space, NBSP
+    s = s.replace(/(\d)[ \u00a0]*×[ \u00a0]*(?=\d)/gu, "$1 mol ");  // space, NBSP
+    s = s.replace(/[ \u00a0]*÷[ \u00a0]*/gu, " dividéiert duerch ");  // space, NBSP
+    s = s.replace(/[ \u00a0]*[&＆][ \u00a0]*/gu, " an ");  // space, NBSP
 
     // 14) FRACTIONS (`1/5` → *ee Fënneftel*). ⚠ Denominator 2 is the ADJECTIVE `hallef`, not a noun;
     //     everything else composes as ordinal stem + `el` (see fractionNoun). The numerator 1 is

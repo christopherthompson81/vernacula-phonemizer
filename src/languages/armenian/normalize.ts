@@ -257,8 +257,8 @@ export function normalizeArmenian(input: string): string {
 
     // 1a. SPACE-grouped (36 hard / 5 sample): `29 743`, `36 260 130`, `1 500 000`, `250 000-ը`.
     s = s.replace(
-        /(?<!\d)(?<!\d[.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""),
+        /(?<!\d)(?<!\d[.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""),  // space, NBSP, NNBSP, thin space
     );
     // 1b. TWO OR MORE `.`/`,` groups — grouping with no ambiguity left to resolve.
     s = s.replace(

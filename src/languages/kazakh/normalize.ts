@@ -160,7 +160,7 @@ export function normalizeKazakh(input: string): string {
 
     // 0) SPACE-GROUPED THOUSANDS — the corpus writes 17 000, 5 000 000 (space, not comma/period). The
     //    TOKEN `\d+` splits these on the space. De-group FIRST, before anything reads a pause.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");
+    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");  // space, NBSP, NNBSP, thin space
 
     // 1) DOTTED ABBREVIATIONS and ERA MARKERS — `б.д.д.` (біздің дәуірге дейін = before our era, BC),
     //    `т.б.` (тағы басқа = etc), `т.с.с.` (тағы сол сияқты = and the like). BEFORE the single-dot

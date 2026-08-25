@@ -32,7 +32,7 @@ function harOf(label: string): string {
 // A Perso-Arabic word run: letters/joiners in U+0600–06FF + U+0750–077F, PLUS the ZWNJ/ZWJ (U+200C/200D) that
 // glue morphemes in Persian/Urdu compounds — the model was trained on those as ONE sequence (a ZWNJ-split would
 // change the LSTM context and the predicted harakat), MINUS the harakat (handled separately).
-const WORD = /[؀-ۿݐ-ݿ‌‍]+/gu;
+const WORD = /[؀-ۿݐ-ݿ‌‍]+/gu;  // ZWNJ, ZWJ
 
 export interface RiderDiacritizerMeta {
     chars: Record<string, number>;

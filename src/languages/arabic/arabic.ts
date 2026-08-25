@@ -155,7 +155,7 @@ const EXTENDED = Object.keys(MANIFEST.consonants)
     .map((c) => `\\u${c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`)
     .join("");
 const TOKEN = new RegExp(
-    `([ء-يٰٱً-ْـ${EXTENDED}]+)|(\\d+(?:,\\d{3})*(?:\\.\\d+)?)|([۔.!؟?،,؛;:…])`,
+    `([ء-يٰٱً-ْـ${EXTENDED}]+)|(\\d+(?:,\\d{3})*(?:\\.\\d+)?)|([۔.!؟?،,؛;:…])`,  // tatweel
     "gu",
 );
 /** Arabic-Indic digits ٠..٩ → ASCII. */
@@ -321,7 +321,7 @@ function restoreLex(): ReadonlyMap<string, string> {
 // the repair never fires on it (كتبت → kutˈibat). If ary ever gains true schwa-deletion, gate this repair
 // per variety (or raise its run threshold for ary) BEFORE shipping that change.
 const REPAIR_VOWELS = IPA_VOWEL;
-const REPAIR_SKIP = new Set([..."ˈˌːˤ\u0651\u0640"]);
+const REPAIR_SKIP = new Set([..."ˈˌːˤ\u0651\u0640"]);  // tatweel
 
 interface RUnit { text: string; vowel: boolean }
 function repairUnits(word: string): RUnit[] {

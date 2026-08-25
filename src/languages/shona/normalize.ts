@@ -203,16 +203,16 @@ export function normalizeShonaPre(input: string): string {
     //    ⚠ THE FINAL DOT IS KEPT WHEN THE SENTENCE VISIBLY ENDS, or a real break is lost. Three cases, told
     //    apart by what follows: a letter with no space is a glued word, a space then a capital (or the end
     //    of input) is a sentence end, anything else is mid-sentence.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {
-        const letters = run.replace(/[. \u00a0]/gu, "");
+    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {  // space, NBSP
+        const letters = run.replace(/[. \u00a0]/gu, "");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
         // ⚠ PUT BACK THE SPACE THE RUN SWALLOWED (trap 10). `(?:\p{Lu}\.[ \u00a0]?){2,}` lets a space follow the
         // LAST dot too, so `(1000 C.E. - 1830)` matched through it and came out `CE- 1830` — a word glued to
         // the dash, which then also puts the range rule's left guard out of reach. The corpus's own era
         // marker is that exact string.
-        const tail = /[ \u00a0]$/u.test(run) ? " " : "";
-        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.${tail}` : `${letters}${tail}`;
+        const tail = /[ \u00a0]$/u.test(run) ? " " : "";  // space, NBSP
+        return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.${tail}` : `${letters}${tail}`;  // space, NBSP
     });
 
     // 4) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping comma reads as a CLAUSE PAUSE,
@@ -226,7 +226,7 @@ export function normalizeShonaPre(input: string): string {
     //    grouped number that is followed by a clause comma or a sentence period, and step 9 would then read
     //    the leftover separator as a decimal.
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) THE ENGLISH ORDINAL SUFFIX (`19th Century`, ×1 here). Shona writes its own ordinals as WORDS with a
     //    `chi-`/`re-` prefix — this corpus has *mwaka wechizana 19*, *zana ramakore rechi20*, *kechiviri*,
@@ -263,7 +263,7 @@ export function normalizeShonaPre(input: string): string {
     //    would otherwise be guarding by accident. +2 segments, both `March 20-21, ...`, no regression.
     //    ⚠ A DECIMAL RIGHT OPERAND IS STILL DECLINED, by the LEFT guard rather than this one: in `2.1-3.4m`
     //    the only candidate pair is `1-3`, and its `1` is preceded by a `.`.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}])/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     return tidy(s);
@@ -290,7 +290,7 @@ export function normalizeShonaPost(input: string): string {
     //    Shona has none (see the header).
     //    ⚠ AFTER the tier (which gets first refusal on every shape it can do) and BEFORE step 10, which is
     //    what still leaves the decimal intact for this pattern to see.
-    s = s.replace(/(?<![\d.,])(\d+[.,]\d+)[ \u00a0]?m([²³])?(?![\p{L}\p{M}'’ʼ\d])/gu,
+    s = s.replace(/(?<![\d.,])(\d+[.,]\d+)[ \u00a0]?m([²³])?(?![\p{L}\p{M}'’ʼ\d])/gu,  // space, NBSP
         (_w, n: string, exp: string | undefined) => (exp === "²" ? `${SQUARED} mamita ${n}` : `mamita ${n}`));
 
     // 7b) A BARE COUNT OF HOURS → *maawa N*. `hr`/`hrs` were declared only as rate DENOMINATORS (shona.ts),
@@ -315,7 +315,7 @@ export function normalizeShonaPost(input: string): string {
     //    ⚠ AND NO SPACE IS ALLOWED BEFORE `hr` ON THE RATE SIDE by construction: this arm needs a DIGIT
     //    immediately before (bar one space), and `km/hr` has a slash there, so the rate path is untouched.
     //    AFTER the tier, like step 7, and BEFORE step 9 so the concord pass agrees the numeral.
-    s = s.replace(/(?<![\d.,:\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?hrs?(?![\p{L}\p{M}\d])/gu, "maawa $1");
+    s = s.replace(/(?<![\d.,:\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?hrs?(?![\p{L}\p{M}\d])/gu, "maawa $1");  // space, NBSP
 
     // 8) DEGREES. `32 ° C / 90 ° F`, `17°51′50″S`, a bare `ne180 °`, and the mojibake-ish bare `o` this wiki
     //    writes for the sign in a dozen places (`0 o C`, `66.5 o N`, `+23.5 o`). The sign was dropped outright
@@ -332,8 +332,8 @@ export function normalizeShonaPost(input: string): string {
     //    BEFORE step 9, which needs `104.0` intact to be this reading's operand.
     const degreeBody = (n: string, off: number, end: number, full: string): string =>
         saidNear(full, off, end, DEGREE) ? n : `${DEGREE} ${n}`;
-    const DEG = "(?:[ \u00a0]?°|[ \u00a0]o)";
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}[ \u00a0]?([CF])(?![\\p{L}\\p{M}])`, "gui"),
+    const DEG = "(?:[ \u00a0]?°|[ \u00a0]o)";  // space, NBSP
+    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}[ \u00a0]?([CF])(?![\\p{L}\\p{M}])`, "gui"),  // space, NBSP
         (w, n: string, c: string, off: number, full: string) =>
             `${degreeBody(n, off, off + w.length, full)} ${SCALE[c.toUpperCase()]!}`);
     s = s.replace(new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}(?![\\p{L}\\p{M}])`, "gu"),
@@ -354,7 +354,7 @@ export function normalizeShonaPost(input: string): string {
     //    Shona puts the noun FIRST, so there is no adjacency left to lose.
     //    ⚠ `(?![.,]\d)` KEEPS IT OFF A DECIMAL: `masendimita 5.5` must not become "masendimita mashanu . 5".
     //    That is also why this precedes step 10 rather than following it.
-    s = s.replace(new RegExp(`((?:${MA_NOUNS})[ \u00a0])(\\d+)(?![.,]?\\d)`, "gu"),
+    s = s.replace(new RegExp(`((?:${MA_NOUNS})[ \u00a0])(\\d+)(?![.,]?\\d)`, "gu"),  // space, NBSP
         (whole, noun: string, digits: string) => {
             const n = Number(digits);
             if (!Number.isSafeInteger(n) || n >= 1e6) return whole;

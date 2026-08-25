@@ -165,7 +165,7 @@ export function normalizeTelugu(input: string): string {
     //    of them. It also fixes a defect of its own — the engine's word class excludes U+200C, so
     //    వైట్‌హాల్ tokenized as TWO words and came out [ʋˈaiʈ hˈaːl], two primary stresses where the
     //    word has one. Deleting the joiner leaves the same akshara sequence, so no phoneme changes.
-    let s = input.replace(/[​-‍﻿]/gu, "");
+    let s = input.replace(/[​-‍﻿]/gu, "");  // ZWSP, ZWJ, BOM
 
     // 2) The ౦-for-ం HOMOGLYPH (×144). Before the digit rules, because ౦ is in the engine's digit class
     //    and any numeric rule below would otherwise be free to read it as a zero. Guarded on BOTH sides
@@ -351,7 +351,7 @@ export function normalizeTelugu(input: string): string {
     s = s.replace(/\s?÷\s?/gu, " భాగించడం ");
 
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 డిగ్రీల సెల్సియస్");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 డిగ్రీల ఫారెన్‌హీట్");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 డిగ్రీల ఫారెన్‌హీట్");  // ZWNJ
     s = s.replace(/(\d)\s?°/gu, "$1 డిగ్రీలు");
 
     return s;

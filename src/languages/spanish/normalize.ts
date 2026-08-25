@@ -142,7 +142,7 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     //    token cannot span a space, so "5 000 años" read as "cinco cero años".
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
-    s = s.replace(/[    ]/gu, " ");
+    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 0b) ⚠ THE DOT ALSO DECIMATES, AND THE THREE-DIGIT TEST TELLS THE TWO APART. Spanish groups thousands
     //     with a period and the number token reads that (`17.000` → diecisiete mil), but BOTH corpora carry

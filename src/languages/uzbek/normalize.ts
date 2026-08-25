@@ -99,8 +99,8 @@ export function normalizeUzbek(input: string): string {
     //    that splits the number. Two passes, because the groups overlap on the shared digit (783 562 948).
     //    A space is only grouping when the block is exactly three digits ("800 000" but not "3000 mil").
     for (let i = 0; i < 2; i++)
-        s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");
-    s = s.replace(/[    ]/gu, " ");
+        s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");  // space, NBSP, NNBSP, thin space
+    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) ERA MARKERS, before the single-dot rules so the interior dots cannot survive as breaks. `m.a.` =
     //    miloddan avval (BC, ×4), `m.` = milodiy (AD, ×1). Each is claimed only before a number or another
@@ -151,7 +151,7 @@ export function normalizeUzbek(input: string): string {
     //    "Capitalized N." as regnal — "Sahifa 12." became *Sahifa oʻn ikkinchi* — and bought nothing, since
     //    no corpus instance takes that shape. The rule declines on scores and percents ("Gingrich 32 foiz",
     //    "Betten 2,3 milliard", "Oxirgi 3 oy"), and the comma-guard keeps "Izmir 3,7 million" cardinal.
-    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=[ \u00a0](?:ning|hukmron))/gu,
+    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=[ \u00a0](?:ning|hukmron))/gu,  // space, NBSP
         (_m: string, name: string, d: string): string => {
             const n = Number(d);
             const ord = ordinalWords(n);
@@ -241,7 +241,7 @@ export function normalizeUzbek(input: string): string {
     //     period before a LOWERCASE word, so the letter reached the g2p as a bare consonant plus a break.
     //     Claimed only when a LETTER follows the dot (a name or a word); "S. 42" — a period before a digit
     //     — stays a page reference. The shared pass still handles "D. K. Arya" (two initials) itself.
-    s = s.replace(/(?<![\p{L}\p{M}])([A-Z])\.(?=[ \u00a0]+[A-Za-z])/gu, (_m: string, l: string) =>
+    s = s.replace(/(?<![\p{L}\p{M}])([A-Z])\.(?=[ \u00a0]+[A-Za-z])/gu, (_m: string, l: string) =>  // space, NBSP
         LETTER_NAME[l.toLowerCase()] ?? l);
 
     // 11) INITIALISMS, LAST of the letter rules: it must run after the era markers (else m.a. → *em a*)

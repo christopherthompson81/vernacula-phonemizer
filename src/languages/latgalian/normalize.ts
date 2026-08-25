@@ -330,8 +330,8 @@ export function normalizeLatgalian(input: string): string {
     //    ⚠ AND THE TRAILING GUARD REJECTS A DIGIT AND NOTHING ELSE (playbook trap 58) — `(?![\d.,])` would
     //    decline `700 000.` at the end of a sentence and lose the whole grouping.
     //    The SPACE first: `83 871 km²`, `9 223 766 dzeivuotuojim`, `700 000 daļderu`, `11 858 puslopys`.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    …then the COMMA, by the three-digit test: `1,500 solu`, `548,000 cylvāku`, `3,555 km2`,
     //    `450,295 km²`, `2,300 km²`. The `(?!\d)` after the run is what leaves `0,702804` and `55,883333`
     //    alone — a fourth digit after the group means the comma was a decimal all along.

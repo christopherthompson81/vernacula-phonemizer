@@ -99,16 +99,16 @@ const ERA: readonly (readonly [string, string])[] = [
     // longest body first, and the qualified Hijri forms before bare هـ — `۶۳هـ ق` is Hijri LUNAR (هجري
     // قمري ×199) and `۱۴۰۰ هـ ش` Hijri SOLAR (هجري شمسي ×26), so claiming bare هـ first would strand the
     // qualifier as a one-letter token. Same multi-part-before-single-part coupling the dotted rules use.
-    ["هـ\\s?ق", "هجري قمري"],
-    ["هـ\\s?[شس]", "هجري شمسي"],
-    ["هـ\\s?ل", "هجري لمريز"],
-    ["هـ\\.?", "هجري"],
+    ["هـ\\s?ق", "هجري قمري"],  // tatweel
+    ["هـ\\s?[شس]", "هجري شمسي"],  // tatweel
+    ["هـ\\s?ل", "هجري لمريز"],  // tatweel
+    ["هـ\\.?", "هجري"],  // tatweel
     // ⚠ `م.ز` IS BC AND MUST BE CLAIMED BEFORE THE BARE `م`, or the era is read as its own OPPOSITE. It is
     // written four ways — `م.ز` ×128, `م ز` ×382, `م‌ز` (ZWNJ-joined) ×21, `مز` ×4 — and every instance read
     // is a pre-Common-Era date: `افلاطون (۴۲۹ تر ۳۴۷ م‌ز)` is Plato, `۱۳۳۶ م.ز.` is Akhenaten. The bare `م`
     // arm below would take the `م`, emit میلادي (AD) and leave the `ز` stranded as a consonant — which is
     // exactly what the corpus diff caught. The expansion is the corpus's own word: `مخزېږديز` ×641.
-    [`م\\s?[.‌ ]?\\s?ز`, "مخزېږديز"],
+    [`م\\s?[.‌ ]?\\s?ز`, "مخزېږديز"],  // ZWNJ
     // `ز.ک` ×53 — the era letter plus an abbreviated کال. Claimed whole so the `ک.` is not left behind.
     ["ز\\s?\\.\\s?ک\\.?", "زېږديز کال"],
     // `ل ل` ×629 and `ل.ل` ×30 are the doubled form (لمريز + a second ل), always the same year slot as the
@@ -253,7 +253,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    plus an orphaned consonant. A guard meaning "not inside a word" has to know what this script
         //    uses to stay inside one.
         for (const [body, word] of ERA) {
-            s = s.replace(new RegExp(`([${D}])\\s?${body}(?![\\p{L}\\p{M}‌])`, "gu"), `$1 ${word}`);
+            s = s.replace(new RegExp(`([${D}])\\s?${body}(?![\\p{L}\\p{M}‌])`, "gu"), `$1 ${word}`);  // ZWNJ
         }
 
         // 4) DIGIT DE-GROUPING. A grouping mark is otherwise read as CLAUSE PUNCTUATION and the tail as a

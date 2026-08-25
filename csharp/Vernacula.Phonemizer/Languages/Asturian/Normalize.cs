@@ -29,8 +29,8 @@ public static class Normalize
         "(?:\\s?[CF]|\\s?[NSEW]|\\s?\\d+\\s?[′']|\\s*(?:de|y|col|na)(?![\\p{L}\\p{M}])|\\s*[.,;:)»]|\\s*$)";
 
     private static readonly JsRe SPACE_GROUP = JsRegex.Compile(
-        "(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:[    ]\\d{3})+)(?!\\d)", "gu");
-    private static readonly JsRe SPACE_SEPS = JsRegex.Compile("[    ]", "gu");
+        "(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:[ \\u00a0\\u202f\\u2009]\\d{3})+)(?!\\d)", "gu");  // space, NBSP, NNBSP, thin space
+    private static readonly JsRe SPACE_SEPS = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe DOT_GROUP = JsRegex.Compile(
         "(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:\\.\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "gu");

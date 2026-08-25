@@ -211,7 +211,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    must not be touched, and they have no sign in front. Case is honoured (`M` and `m` both scale here)
     //    because after a sign neither can be anything else.
     s = s.replace(
-        /((?:US[ \u00a0]?\$|\$|£|P|R)[ \u00a0]?\d[\d \u00a0.,]*)(bn|M|m)(?![\p{L}\p{M}\d])/gu,
+        /((?:US[ \u00a0]?\$|\$|£|P|R)[ \u00a0]?\d[\d \u00a0.,]*)(bn|M|m)(?![\p{L}\p{M}\d])/gu,  // space, NBSP
         (_w, amount: string, suf: string) => `${amount} ${MAGNITUDE_SUFFIX[suf]!}`,
     );
 
@@ -225,12 +225,12 @@ export function normalizeSetswanaPre(input: string): string {
     //    swallow the clause comma the moment the rule stopped re-emitting its operand verbatim.
     s = s.replace(
         new RegExp(
-            `(?<![\\p{L}\\p{M}\\d])R[ \u00a0]?(\\d[\\d \u00a0.,]*\\d|\\d)(?![\\p{L}\\p{M}])([ \u00a0]*(?:${MAGNITUDE_WORD})(?![\\p{L}\\p{M}]))?`,
+            `(?<![\\p{L}\\p{M}\\d])R[ \u00a0]?(\\d[\\d \u00a0.,]*\\d|\\d)(?![\\p{L}\\p{M}])([ \u00a0]*(?:${MAGNITUDE_WORD})(?![\\p{L}\\p{M}]))?`,  // space, NBSP
             "gu",
         ),
         (whole: string, n: string, mag: string | undefined) => {
             const scaled = mag !== undefined && mag !== "";
-            if (!scaled && !/[., \u00a0]/u.test(n)) return whole; // a bare small integer is a road, not money
+            if (!scaled && !/[., \u00a0]/u.test(n)) return whole; // a bare small integer is a road, not money  // NBSP
             return `diranta di le ${n}${mag ?? ""}`;
         },
     );
@@ -243,7 +243,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    letter so a range's second operand cannot be read as a negative; rejected there, the engine simply
     //    starts later and matches the bare number (trap 52), which is the safe outcome rather than a miss.
     s = s.replace(
-        /(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui,
+        /(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui,  // space, NBSP
         (_w, sign: string, n: string, sc: string) =>
             sign === ""
                 ? `${DEGREE} tsa ${SCALE[sc.toUpperCase()]!} di le ${n}`
@@ -252,7 +252,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    A BARE degree — a coordinate (`21° 57' 0"`, `(26°)`) or the open end of a temperature span
     //    (`17° go ya go 31 °C`). `º` (U+00BA) is accepted beside `°` because it stands in for it in
     //    imported text, which the playbook records for hi and it.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, `${DEGREE} di le $1`);
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, `${DEGREE} di le $1`);  // space, NBSP
 
     return s;
 }
@@ -287,8 +287,8 @@ export function normalizeSetswanaPost(input: string): string {
     //    the time they belong to, and each was one more sentence break mid-clause.
     s = s.replace(
         new RegExp(
-            `(?<![\\d:.,])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])` +
-                `(?:[ \u00a0]*(?:([AaPp])\\.?[Mm]\\.?|(${TZ})(?![\\p{L}\\p{M}])|(${DAYPART})(?![\\p{L}\\p{M}])))`,
+            `(?<![\\d:.,])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])` +  // NBSP
+                `(?:[ \u00a0]*(?:([AaPp])\\.?[Mm]\\.?|(${TZ})(?![\\p{L}\\p{M}])|(${DAYPART})(?![\\p{L}\\p{M}])))`,  // space, NBSP
             "gu",
         ),
         (whole: string, h: string, m: string, ap?: string, tz?: string, part?: string) => {
@@ -316,7 +316,7 @@ export function normalizeSetswanaPost(input: string): string {
     //    then read as a decimal by step 10.
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 7) THE ENGLISH ORDINAL SUFFIX (`20th`, `3rd`, `2nd`). Setswana writes its own ordinals as words —
     //    *wa ntlha*, *ya bobedi*, *la bo 18 la dingwaga* — so a Latin suffix on a digit is always foreign
@@ -347,7 +347,7 @@ export function normalizeSetswanaPost(input: string): string {
     //    `/` is not in the lookbehind) are still declined.
     //    ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA as well as the comma group,
     //    so `5–13,7` must not be claimed with its fraction left behind.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     // 9) DECIMALS, LAST of the numeric rules — steps 5 to 8 all need their number intact, the shared tier

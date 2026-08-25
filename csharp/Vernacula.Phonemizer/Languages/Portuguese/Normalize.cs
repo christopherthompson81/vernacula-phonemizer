@@ -92,7 +92,7 @@ public static class Normalize
     }
 
     private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
-    private static readonly JsRe THIN_SPACES = JsRegex.Compile("[    ]", "gu");
+    private static readonly JsRe THIN_SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe ERA_BC = JsRegex.Compile("\\ba\\.\\s?C\\.", "giu");
     private static readonly JsRe ERA_AD = JsRegex.Compile("\\bd\\.\\s?C\\.", "giu");
     private static readonly JsRe NUMERO = JsRegex.Compile("\\b(?:n\\.º|nº|n°|no|núm\\.)\\s?(?=\\d)", "giu");
@@ -104,7 +104,7 @@ public static class Normalize
     private static readonly JsRe FEMININE_MARK = JsRegex.Compile("ª", "u");
     private static readonly JsRe GROUPING_DOT = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe REAIS = JsRegex.Compile("R\\$\\s?(\\d[\\d.,]*)", "gu");
-    private static readonly JsRe DOLLAR_CODE = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|AUD)\\$(?=[  ]?\\d)", "gu");
+    private static readonly JsRe DOLLAR_CODE = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|AUD)\\$(?=[ \\u00a0]?\\d)", "gu");  // space, NBSP
     // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following NON-ASCII letter
     // counted as a boundary and this fired when it must not — `25°Cölner` ate the ⟨C⟩ as Celsius. See
     // src/languages/*/normalize.ts, which carries the finding.

@@ -129,7 +129,7 @@ export function normalizeAbkhaz(text: string): string {
 
     // 1) ZERO-WIDTH marks (×51 in the corpus) — dropped before anything measures adjacency, since a ZWSP
     //    between a number and its unit makes the two non-adjacent and every later rule miss.
-    s = s.replace(/[​‌‍﻿]/gu, "");
+    s = s.replace(/[​‌‍﻿]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
 
     // 2) DE-GROUP a thousands-separated numeral (×13: 125 000, 12 364, 180 000) — FIRST among the number
     //    rules, per the playbook: the separator is otherwise read as clause punctuation or, here, as a
@@ -139,7 +139,7 @@ export function normalizeAbkhaz(text: string): string {
     //    ⚠ THE LEFT GUARD IS LOAD-BEARING: without `(?<!\d)` the 1–3 digit group BACKTRACKS into the tail
     //    of a longer number, so "1877 250 ҩык" (a year beside a count) joined into 1877250 and was read as
     //    one seven-figure number. The comment used to claim the 3-digit rule covered that; it did not.
-    s = s.replace(/(?<!\d)(\d{1,3})(?:[ \u00a0\u202f\u2009](\d{3}))+(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = s.replace(/(?<!\d)(\d{1,3})(?:[ \u00a0\u202f\u2009](\d{3}))+(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     //    ⚠ COMMA-GROUPING TOO. Two-plus groups are unambiguous (£29,721,250 — the wiki spells that very
     //    sum de-grouped, "29,721,250 фунт стерлинг"). A SINGLE comma group collides with the decimal

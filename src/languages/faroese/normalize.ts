@@ -58,8 +58,8 @@ export function normalizeFaroese(input: string): string {
     // 2) THE THOUSANDS GROUP — exactly three digits after the dot, and the no-break space this corpus
     //    also uses (`7 737 fólkini`, `48 219`, `12 000–10 000 f. Kr.`). ⚠ THE WHOLE NUMBER AT ONCE, not
     //    one join per pass (trap 63); the trailing guard rejects a DIGIT and nothing else (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
@@ -102,7 +102,7 @@ export function normalizeFaroese(input: string): string {
     //    and a bare `\p{L}` lookahead, this rule ate the SENTENCE-FINAL dot in `Tað var 1998. Síðan kom`
     //    — the fifth job of the full stop, and the one that must survive untouched (trap 58's family).
     //    The test caught it; the corpus diff could not, because a lost pause is not a lost reading.
-    s = s.replace(/(?<![\d.,])(\d{1,4})\.(\u00a0)(?=\p{L})/gu, "$1$2");
+    s = s.replace(/(?<![\d.,])(\d{1,4})\.(\u00a0)(?=\p{L})/gu, "$1$2");  // NBSP
 
     // 6) DEGREES. `stig` ×64 / `stigum` ×59 is the Faroese degree; `Celsius` ×23. The corpus's angular
     //    instances are coordinates (`62° norðurbreidd`, `57°71° … n.br.`, `47° and 50° N`) and its

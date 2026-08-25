@@ -177,7 +177,7 @@ const SYMBOLS = makeSymbolNormalizer({
  * ESCAPES rather than literal characters — the three are indistinguishable on the page, and a rule whose
  * correctness cannot be read off the source is a rule nobody can review.
  */
-const GROUP_SPACE = /(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu;
+const GROUP_SPACE = /(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu;  // space, NBSP, NNBSP, thin space
 
 /**
  * 2. DOTTED ABBREVIATIONS — and the reason this runs before the ordinal step is that its periods are the
