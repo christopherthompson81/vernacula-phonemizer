@@ -8,6 +8,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms, SignWords } from "../../core/normalizeSymbols.ts";
 
 export interface PortugueseManifest {
     /** Acronyms read letter-by-letter; see portuguese.jsonc. */
@@ -37,6 +38,34 @@ export interface PortugueseManifest {
         millionPlural: string;
         connector: string;
         decimalConnector: string;
+    };
+    months: string[];
+    dottedAbbrev: Record<string, string>;
+    letterNames: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** MASCULINE. ⚠ No `teens` row — Portuguese composes them regularly from `tens[1]` + a unit. */
+    ordinals: { units: string[]; tens: string[]; hundreds: string[]; thousandth: string };
+    /** ⚠ No `numeratorOne` — Portuguese does not apocopate before the fraction noun, unlike Spanish. */
+    fractions: { denominators: Record<string, string> };
+    feminineOne: string;
+    /** Portuguese SPEAKS the clock noun where Spanish elides it — *sete horas e dezenove*. */
+    clock: { hour: string; hours: string; connector: string };
+    eraMarkers: { beforeChrist: string; afterChrist: string };
+    numberSign: string;
+    /** ⚠ `word` is ALWAYS PLURAL — pre-existing behaviour, not agreement. See portuguese.jsonc. */
+    degree: { word: string; celsius: string; fahrenheit: string };
+    realWord: string;
+    /** Dollar CODES folded to a bare `$` so the tier's declared key becomes reachable. */
+    dollarCodes: string[];
+    signWords: SignWords;
+    symbols: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        exponentWords: { squared: CountForms; cubed: CountForms };
+        bareExponent: { squared: string; cubed: string; power: string; negative: string };
+        magnitudes: string[];
+        magnitudeConnective: string;
     };
 }
 

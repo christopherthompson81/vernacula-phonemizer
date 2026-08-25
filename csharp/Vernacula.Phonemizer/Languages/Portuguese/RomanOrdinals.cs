@@ -9,11 +9,9 @@ namespace Vernacula.Phonemizer.Languages.Portuguese;
 
 public static class RomanOrdinals
 {
-    private static readonly string[] UNITS = { "", "primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto", "sétimo", "oitavo", "nono" };
-    private static readonly string[] TENS = { "", "décimo", "vigésimo", "trigésimo", "quadragésimo", "quinquagésimo",
-        "sexagésimo", "septuagésimo", "octogésimo", "nonagésimo" };
-    private static readonly string[] HUNDREDS = { "", "centésimo", "ducentésimo", "trecentésimo", "quadringentésimo",
-        "quingentésimo", "seiscentésimo", "septingentésimo", "octingentésimo", "noningentésimo" };
+    /** The masculine ordinal tables (portuguese.jsonc `ordinals`). Shared with Normalize.cs, which reads
+     *  them for the ordinal INDICATORS (1º / 5ª) and for fractions — one table, three callers. */
+    private static PortugueseOrdinals ORD => Manifest.MANIFEST.Ordinals;
 
     /**
      * Portuguese masculine ordinal, 1 … 1000; null above that (a Roman-numeral year reads as a cardinal).
@@ -22,15 +20,15 @@ public static class RomanOrdinals
     public static string? PortugueseOrdinal(int n)
     {
         if (n < 1 || n > 1000) return null;
-        if (n == 1000) return "milésimo";
-        if (n < 10) return UNITS[n];
+        if (n == 1000) return ORD.Thousandth;
+        if (n < 10) return ORD.Units[n];
         if (n < 100)
         {
             int t = n / 10, u = n % 10;
-            return u == 0 ? TENS[t] : $"{TENS[t]} {UNITS[u]}"; // décimo primeiro, vigésimo quinto
+            return u == 0 ? ORD.Tens[t] : $"{ORD.Tens[t]} {ORD.Units[u]}"; // décimo primeiro, vigésimo quinto
         }
         int h = n / 100, r = n % 100;
-        return r == 0 ? HUNDREDS[h] : $"{HUNDREDS[h]} {PortugueseOrdinal(r)}";
+        return r == 0 ? ORD.Hundreds[h] : $"{ORD.Hundreds[h]} {PortugueseOrdinal(r)}";
     }
 
     public static readonly RomanPolicy ROMAN_POLICY = new()

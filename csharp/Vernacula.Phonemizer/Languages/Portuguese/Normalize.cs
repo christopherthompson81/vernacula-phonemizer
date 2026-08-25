@@ -10,44 +10,30 @@ namespace Vernacula.Phonemizer.Languages.Portuguese;
 public static class Normalize
 {
     private const string GROUP_SPACE = "    ";
-    private const string MONTHS = "janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro";
+    private static PortugueseManifest DEF => Manifest.MANIFEST;
+    private static readonly string MONTHS = string.Join("|", DEF.Months);
+    // ⚠ ONE SOURCE with the symbol tier in Portuguese.cs, which applies ⟨×⟩ and ⟨&⟩ in positions this file
+    // does not reach.
+    private static SignWords SIGN => DEF.SignWords;
+    /** ⚠ ALWAYS PLURAL — pre-existing behaviour, not agreement. See portuguese.jsonc `degree`. */
+    private static PortugueseDegree DEGREE => DEF.Degree;
 
     /** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare
      *  "no" is an extremely common Portuguese contraction (em + o), so only `nº`/`n.º`/`no` before a DIGIT
      *  counts. */
-    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["sr"] = "senhor", ["sra"] = "senhora", ["srta"] = "senhorita", ["srs"] = "senhores",
-        ["dr"] = "doutor", ["dra"] = "doutora", ["prof"] = "professor", ["profa"] = "professora", ["eng"] = "engenheiro",
-        ["etc"] = "etcétera", ["pág"] = "página", ["pag"] = "página", ["págs"] = "páginas",
-        ["cap"] = "capítulo", ["art"] = "artigo", ["vol"] = "volume", ["av"] = "avenida", ["ex"] = "exemplo",
-        ["ltda"] = "limitada", ["cia"] = "companhia", ["núm"] = "número", ["aprox"] = "aproximadamente",
-    };
+    /** Dotted abbreviations → the spoken words (portuguese.jsonc `dottedAbbrev`). `no.` is deliberately
+     *  absent there: bare "no" is the contraction em+o and is everywhere, so only `nº`/`n.º`/`no` before a
+     *  DIGIT counts. */
+    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = DEF.DottedAbbrev;
+
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
     /** Portuguese letter names, each verified through this engine. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "a", ["b"] = "bê", ["c"] = "cê", ["d"] = "dê", ["e"] = "é", ["f"] = "éfe", ["g"] = "gê", ["h"] = "agá", ["i"] = "i",
-        ["j"] = "jota", ["k"] = "cá", ["l"] = "éle", ["m"] = "eme", ["n"] = "ene", ["o"] = "ó", ["p"] = "pê", ["q"] = "quê",
-        ["r"] = "erre", ["s"] = "esse", ["t"] = "tê", ["u"] = "u", ["v"] = "vê", ["w"] = "dábliu", ["x"] = "xis", ["y"] = "ípsilon", ["z"] = "zê",
-    };
-
-    /** Portuguese phonotactics, for the OOV rule in core/initialisms.ts. */
     public static readonly Func<string, bool> IsUnreadablePortuguese = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiouáéíóúâêôãõà]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr",
-            "ch", "lh", "nh", "qu", "gu", "ps", "rr", "ss", "sc", "tl",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ch", "lh", "nh", "rr", "ss", "ns", "rs", "ls", "is", "us", "as", "es", "os",
-            "st", "rt", "rd", "rn", "rl", "rm", "lt", "ld", "nt", "nd", "nc", "ng", "mp", "mb",
-            "sc", "sm", "cs", "ps", "ts", "ks", "bs", "ds",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{DEF.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(DEF.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(DEF.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     /** LEXICAL: acronyms spelled out. Authored in portuguese.jsonc beside the other hand-authored facts. */
@@ -57,7 +43,7 @@ public static class Normalize
     private static readonly Func<string, string> InitialismNormalizer =
         Initialisms.MakeInitialismNormalizer(new InitialismData
         {
-            LetterName = l => LETTER_NAME.GetValueOrDefault(l),
+            LetterName = l => DEF.LetterNames.GetValueOrDefault(l),
             AcronymLetters = ACRONYM_LETTERS,
             IsRecorded = _ => false,
             IsUnreadable = IsUnreadablePortuguese,
@@ -76,17 +62,15 @@ public static class Normalize
         string.Join(" ", masc.Split(' ').Select(w => FINAL_O.Replace(w, "a")));
 
     /** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora). */
-    private static string FeminineCardinal(double n) => FINAL_UM.Replace(Numbers.NumberToWords(n), "uma");
+    private static string FeminineCardinal(double n) => FINAL_UM.Replace(Numbers.NumberToWords(n), DEF.FeminineOne);
 
-    private static readonly IReadOnlyDictionary<int, string> DENOMINATOR = new Dictionary<int, string>
-    {
-        [2] = "meio", [3] = "terço",
-    };
+    /** Suppletive fraction denominators (portuguese.jsonc `fractions`); the rest take the ordinal. */
+    private static readonly IReadOnlyDictionary<string, string> DENOMINATOR = DEF.Fractions.Denominators;
 
     private static string? FractionWords(int num, int den)
     {
         if (den < 2 || num < 1) return null;
-        var baseWord = DENOMINATOR.GetValueOrDefault(den) ?? RomanOrdinals.PortugueseOrdinal(den);
+        var baseWord = DENOMINATOR.GetValueOrDefault(Js.NumberToString(den)) ?? RomanOrdinals.PortugueseOrdinal(den);
         if (baseWord is null) return null;
         return $"{Numbers.NumberToWords(num)} {(num > 1 ? $"{baseWord}s" : baseWord)}";
     }
@@ -104,7 +88,7 @@ public static class Normalize
     private static readonly JsRe FEMININE_MARK = JsRegex.Compile("ª", "u");
     private static readonly JsRe GROUPING_DOT = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe REAIS = JsRegex.Compile("R\\$\\s?(\\d[\\d.,]*)", "gu");
-    private static readonly JsRe DOLLAR_CODE = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|AUD)\\$(?=[ \\u00a0]?\\d)", "gu");  // space, NBSP
+    private static readonly JsRe DOLLAR_CODE = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])(?:{string.Join("|", DEF.DollarCodes)})\\$(?=[ \\u00a0]?\\d)", "gu");  // space, NBSP
     // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following NON-ASCII letter
     // counted as a boundary and this fired when it must not — `25°Cölner` ate the ⟨C⟩ as Celsius. See
     // src/languages/*/normalize.ts, which carries the finding.
@@ -134,10 +118,10 @@ public static class Normalize
         s = THIN_SPACES.Replace(s, " ");
 
         // Era markers run BEFORE the dotted-abbreviation rule, or the bare `a.` is claimed first.
-        s = ERA_BC.Replace(s, "antes de Cristo");
-        s = ERA_AD.Replace(s, "depois de Cristo");
+        s = ERA_BC.Replace(s, DEF.EraMarkers.BeforeChrist);
+        s = ERA_AD.Replace(s, DEF.EraMarkers.AfterChrist);
 
-        s = NUMERO.Replace(s, "número ");
+        s = NUMERO.Replace(s, $"{DEF.NumberSign} ");
 
         s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
         s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
@@ -160,31 +144,31 @@ public static class Normalize
         s = DOLLAR_CODE.Replace(s, "$");
 
         // Degrees before the unit tier, or the bare sign is left behind.
-        s = DEG_C.Replace(s, "$1 graus Celsius");
-        s = DEG_F.Replace(s, "$1 graus Fahrenheit");
-        s = DEG.Replace(s, "$1 graus");
+        s = DEG_C.Replace(s, $"$1 {DEGREE.Word} {DEGREE.Celsius}");
+        s = DEG_F.Replace(s, $"$1 {DEGREE.Word} {DEGREE.Fahrenheit}");
+        s = DEG.Replace(s, $"$1 {DEGREE.Word}");
 
         s = CLOCK_H.Replace(s, m => ClockWords(
             Js.Number(m.Groups[1].Value),
             m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? Js.Number(m.Groups[2].Value) : null));
         s = CLOCK_COLON.Replace(s, m => ClockWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
 
-        s = MINUS.Replace(s, "$1menos $2");
+        s = MINUS.Replace(s, $"$1{SIGN.Minus} $2");
         // ± is a single character (U+00B1), not a `+`, so no `+` rule can ever match inside it.
-        s = PLUS_MINUS.Replace(s, " mais menos ");
-        s = PLUS_ATTACHED.Replace(s, "$1 mais $2");
-        s = PLUS_LEADING.Replace(s, "$1mais $2");
+        s = PLUS_MINUS.Replace(s, $" {SIGN.PlusMinus} ");
+        s = PLUS_ATTACHED.Replace(s, $"$1 {SIGN.Plus} $2");
+        s = PLUS_LEADING.Replace(s, $"$1{SIGN.Plus} $2");
 
-        s = EQUALS_RE.Replace(s, " igual a ");
-        s = LESS_THAN.Replace(s, " menor que ");
-        s = GREATER_THAN.Replace(s, " maior que ");
-        s = DIVIDE.Replace(s, " dividido por ");
+        s = EQUALS_RE.Replace(s, $" {SIGN.Equals} ");
+        s = LESS_THAN.Replace(s, $" {SIGN.LessThan} ");
+        s = GREATER_THAN.Replace(s, $" {SIGN.GreaterThan} ");
+        s = DIVIDE.Replace(s, $" {SIGN.DividedBy} ");
 
         s = FRACTION.Replace(s, m =>
             FractionWords((int)Js.Number(m.Groups[1].Value), (int)Js.Number(m.Groups[2].Value)) ?? m.Value);
 
         if (brazilian)
-            s = FIRST_OF_MONTH.Replace(s, m => $"primeiro de {m.Groups[1].Value}");
+            s = FIRST_OF_MONTH.Replace(s, m => $"{DEF.Ordinals.Units[1]} de {m.Groups[1].Value}");
 
         return s;
     }
@@ -192,7 +176,7 @@ public static class Normalize
     /** An hour/minute pair → "sete horas e dezenove" / "uma hora". */
     private static string ClockWords(double h, double? min)
     {
-        var head = $"{FeminineCardinal(h)} {(h == 1 ? "hora" : "horas")}";
-        return min is null || min == 0 ? head : $"{head} e {FeminineCardinal(min.Value)}";
+        var head = $"{FeminineCardinal(h)} {(h == 1 ? DEF.Clock.Hour : DEF.Clock.Hours)}";
+        return min is null || min == 0 ? head : $"{head} {DEF.Clock.Connector} {FeminineCardinal(min.Value)}";
     }
 }

@@ -34,25 +34,24 @@
  * the cardinal reading rather than acquiring a wrong-gender ordinal.
  */
 import type { RomanPolicy } from "../../core/roman.ts";
+import { MANIFEST } from "./manifest.ts";
 
-const UNITS = ["", "primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto", "sétimo", "oitavo", "nono"];
-const TENS = ["", "décimo", "vigésimo", "trigésimo", "quadragésimo", "quinquagésimo",
-    "sexagésimo", "septuagésimo", "octogésimo", "nonagésimo"];
-const HUNDREDS = ["", "centésimo", "ducentésimo", "trecentésimo", "quadringentésimo",
-    "quingentésimo", "seiscentésimo", "septingentésimo", "octingentésimo", "noningentésimo"];
+/** The masculine ordinal tables (portuguese.jsonc `ordinals`). Shared with normalize.ts, which reads them
+ *  for the ordinal INDICATORS (1º / 5ª) and for fractions — one table, three callers. */
+const ORD = MANIFEST.ordinals;
 
 /** Portuguese masculine ordinal, 1 … 1000; `undefined` above that (a Roman-numeral year reads as a cardinal). */
 /** Exported so normalize.ts can reuse it for the ordinal INDICATORS (1º/5ª) and for fractions. */
 export function portugueseOrdinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n > 1000) return undefined;
-    if (n === 1000) return "milésimo";
-    if (n < 10) return UNITS[n];
+    if (n === 1000) return ORD.thousandth;
+    if (n < 10) return ORD.units[n];
     if (n < 100) {
         const t = Math.floor(n / 10), u = n % 10;
-        return u === 0 ? TENS[t] : `${TENS[t]} ${UNITS[u]}`; // décimo primeiro, vigésimo quinto
+        return u === 0 ? ORD.tens[t] : `${ORD.tens[t]} ${ORD.units[u]}`; // décimo primeiro, vigésimo quinto
     }
     const h = Math.floor(n / 100), r = n % 100;
-    return r === 0 ? HUNDREDS[h] : `${HUNDREDS[h]} ${portugueseOrdinal(r)}`;
+    return r === 0 ? ORD.hundreds[h] : `${ORD.hundreds[h]} ${portugueseOrdinal(r)}`;
 }
 
 /** This policy always supplies `ordinal`, which is optional on `RomanPolicy` — the intersection makes it

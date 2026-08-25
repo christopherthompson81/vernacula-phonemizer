@@ -42,6 +42,81 @@ public sealed class PortugueseManifest
     public IReadOnlyList<string> FunctionWords { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public PortugueseNumberData Numbers { get; init; } = new();
+    /** ⚠ READ ONLY ON THE BRAZILIAN PATH — see portuguese.jsonc; a sweep against `pt` scores it dead. */
+    public IReadOnlyList<string> Months { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, string> DottedAbbrev { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public PortuguesePhonotactics Phonotactics { get; init; } = new();
+    /** MASCULINE. ⚠ No `Teens` row — Portuguese composes them regularly from `Tens[1]` + a unit. */
+    public PortugueseOrdinals Ordinals { get; init; } = new();
+    /** ⚠ No `NumeratorOne` — Portuguese does not apocopate before the fraction noun, unlike Spanish. */
+    public PortugueseFractions Fractions { get; init; } = new();
+    public string FeminineOne { get; init; } = "";
+    /** Portuguese SPEAKS the clock noun where Spanish elides it — *sete horas e dezenove*. */
+    public PortugueseClock Clock { get; init; } = new();
+    public PortugueseEraMarkers EraMarkers { get; init; } = new();
+    public string NumberSign { get; init; } = "";
+    /** ⚠ `Word` is ALWAYS PLURAL — pre-existing behaviour, not agreement. See portuguese.jsonc. */
+    public PortugueseDegree Degree { get; init; } = new();
+    public string RealWord { get; init; } = "";
+    /** Dollar CODES folded to a bare `$` so the tier's declared key becomes reachable. */
+    public IReadOnlyList<string> DollarCodes { get; init; } = Array.Empty<string>();
+    public SignWords SignWords { get; init; } = null!;
+    public PortugueseSymbols Symbols { get; init; } = new();
+}
+
+public sealed class PortuguesePhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
+}
+
+public sealed class PortugueseOrdinals
+{
+    public IReadOnlyList<string> Units { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Tens { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Hundreds { get; init; } = Array.Empty<string>();
+    public string Thousandth { get; init; } = "";
+}
+
+public sealed class PortugueseFractions
+{
+    public IReadOnlyDictionary<string, string> Denominators { get; init; } = new Dictionary<string, string>();
+}
+
+public sealed class PortugueseClock
+{
+    public string Hour { get; init; } = "";
+    public string Hours { get; init; } = "";
+    public string Connector { get; init; } = "";
+}
+
+public sealed class PortugueseEraMarkers
+{
+    public string BeforeChrist { get; init; } = "";
+    public string AfterChrist { get; init; } = "";
+}
+
+public sealed class PortugueseDegree
+{
+    public string Word { get; init; } = "";
+    public string Celsius { get; init; } = "";
+    public string Fahrenheit { get; init; } = "";
+}
+
+/** The shared symbol tier's data (Portuguese.cs). */
+public sealed class PortugueseSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public BareExponentDef BareExponent { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string MagnitudeConnective { get; init; } = "";
 }
 
 public static class Manifest
