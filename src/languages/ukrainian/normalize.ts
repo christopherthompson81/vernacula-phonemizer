@@ -191,18 +191,18 @@ const FEM_NOM = caseIndex(DEF.clock.defaultCase);
 // Both rules below hold words the tier already declares (`symbols.units.м`, `symbols.exponentWords.squared`),
 // and before the lift this file carried its own byte-identical duplicates of each — two sources for one fact,
 // with nothing to keep them together.
-const METRE = DEF.symbols.units["м"]!;
+const METRE = DEF.symbolTier.units["м"]!;
 const DEGREE = DEF.degree;
 /** Only the gen.pl is ever read (step 3), which is index 2 of the squared adjective's four forms. */
-const SQUARE_GEN_PL = DEF.symbols.exponentWords.squared[2]!;
+const SQUARE_GEN_PL = DEF.symbolTier.exponentWords.squared[2]!;
 
 // ⚠ ONE SOURCE with the symbol tier in ukrainian.ts: the rate words below are the tier's own
 // `rateDenominators`, and `SIGN.times` / `SIGN.ampersand` are what it declares for ⟨×⟩ and ⟨&⟩. `м/с` and
 // `миль/год` are composed here only because the tier cannot reach them (see step 6), not because they are
 // different words.
 const SIGN = DEF.signWords;
-const UNIT_PER = DEF.symbols.unitPer;
-const RATE = DEF.symbols.rateDenominators;
+const UNIT_PER = DEF.symbolTier.unitPer;
+const RATE = DEF.symbolTier.rateDenominators;
 
 /** Abbreviations whose dot is NOT a sentence end (ukrainian.jsonc `dottedAbbrev`). */
 const DOTTED_ABBREV = DEF.dottedAbbrev;

@@ -25,22 +25,11 @@ const TOKEN = /([a-zà-ỹăâđêôơưÀ-Ỹ̀-̣]+)|(\d+)|([.!?…,;:])/giu;
 // symbol normalization — Vietnamese: unit words emitted as SEPARATE SYLLABLES (ki lô mét), because
 // the engine phonemizes per syllable and "kilômét" is not one valid syllable.
 const SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
-    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
-    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
-    // omitted and defaults to it — this language does not split dimension from product.
-    multiply: { times: "nhân" },
-    percent: ["phần trăm"],
-    currency: { "$": ["đô la"], "¥": ["yên"] },
-    // `m` = mét is safe here because the tier requires a NUMBER immediately to the left and no letter to
-    // the right; the longer keys are matched first, so km/mm/cm are never split. Attested after a digit
-    // in the corpus as "(30 m)" and "133 m/giây".
-    units: {
-        km: ["ki lô mét"], mm: ["mi li mét"], cm: ["xen ti mét"], kg: ["ki lô gam"], m: ["mét"],
-    },
-    // MIGRATION TEST: squared units composed by the shared tier. Vietnamese puts the measure word
-    // AFTER the unit and has no count agreement, so one form suffices.
-    exponentWords: { squared: ["vuông"], cubed: ["khối"] },
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 class VietnamesePhonemizer implements Phonemizer {

@@ -127,7 +127,7 @@ function fractionWords(num: number, den: number): string | undefined {
 }
 
 /** The currency noun already spelled out right after the amount — see step 10. */
-const CURRENCY_WORD = new RegExp(`^\\s*(?:di\\s+)?(?:${MANIFEST.symbols.currencyStems.join("|")})`, "iu");
+const CURRENCY_WORD = new RegExp(`^\\s*(?:di\\s+)?(?:${MANIFEST.symbolTier.currencyStems.join("|")})`, "iu");
 
 /** Compass letters after a degree sign — a geographic coordinate, not a temperature and not an ordinal. */
 const COMPASS = MANIFEST.compass;

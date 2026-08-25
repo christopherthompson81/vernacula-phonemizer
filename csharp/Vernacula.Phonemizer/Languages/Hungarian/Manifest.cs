@@ -33,7 +33,7 @@ public sealed class HungarianManifest
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public HungarianPhonotactics Phonotactics { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public HungarianSymbols Symbols { get; init; } = new();
+    public HungarianSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class HungarianPhonotactics
@@ -59,7 +59,7 @@ public static class Manifest
         .ToList();
 }
 
-public sealed class HungarianSymbols
+public sealed class HungarianSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

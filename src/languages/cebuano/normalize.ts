@@ -41,15 +41,15 @@ import { MANIFEST } from "./manifest.ts";
  *   ug ×1,176 · pilo ×14 (`8 ka pilo sa gidaghanong tubig` — the MULTIPLICATION sense) · kada ×129 (per)
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    rateDenominators: MANIFEST.symbols.rateDenominators,
-    unitPer: MANIFEST.symbols.unitPer,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    magnitudes: MANIFEST.symbols.magnitudes,
-    ampersand: MANIFEST.symbols.ampersand,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    rateDenominators: MANIFEST.symbolTier.rateDenominators,
+    unitPer: MANIFEST.symbolTier.unitPer,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 /** Dotted abbreviations, and the list is SHORT ON PURPOSE — see the header note at step 6. */

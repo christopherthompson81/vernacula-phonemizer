@@ -53,5 +53,33 @@
 
     // a standalone 2 before one of these classifiers reads colloquial 兩 loeng5 (兩個, 兩座, 兩種), not
     // 二. 月 and 日 are excluded on purpose — "2 月" is February (二月), a date, not a count of months.
-    "measureWords": "個位本張隻條件對群種次天年歲塊層排組步口面首部台輛架座間扇頁杯碗瓶盒袋斤磅噸"
+    "measureWords": "個位本張隻條件對群種次天年歲塊層排組步口面首部台輛架座間扇頁杯碗瓶盒袋斤磅噸",
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    // ⚠ NAMED `symbolTier`, one name fleet-wide. In the abugida manifests `symbols` already means the
+    // BARE-SIGN → word map the engine's tokenizer reads, so the shared tier cannot use that name there —
+    // and having the same table under two names depending on the language is exactly the kind of split this
+    // sweep exists to remove.
+    "symbolTier": {
+        // ⚠ `multiply` is STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
+        // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it; Cantonese
+        // does not split dimension from product.
+        "multiply": { "times": "乘" },
+        "ampersand": "和",
+        "percent": ["百分之"],
+        "percentPrefix": true,
+        // ⚠ THE HK REGISTER, NOT THE MAINLAND ONE: 公里/公斤, not the 千米/千克 a concept label offers. A label gives
+        // the language's term for a concept, not the register the text is in.
+        // ⚠ `m` IS DELIBERATELY ABSENT. 米 is a one-character unit, and in an UNSPACED script that is inseparable
+        // from any name containing it — 米勒 is "Miller". Declaring it would read every such name as a measurement.
+        "units": { "km": ["公里"], "kg": ["公斤"] },
+        "currency": { "$": ["美元"], "€": ["歐元"], "£": ["英鎊"] },
+        // 平方公里 is fused and word-first. Cubed is undeclared, and could not be read anyway while 米 stays
+        // undeclared for the 米勒 reason above — the two gaps are the same gap.
+        "exponentWords": { "squared": ["平方"], "position": "compound" },
+        "unspacedScript": true
+    }
 }

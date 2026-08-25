@@ -126,14 +126,14 @@ const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|(\d{1,3}(?:\.\d{3})+|\
 // pond"), so each entry is a single form and no count agreement is needed.
 // ⚠ `g` IS DELIBERATELY NOT A UNIT: the Wi-Fi standards are written "802.11a/b/g", and "11g" is not 11 grams.
 const SYMBOLS = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    rateDenominators: MANIFEST.symbols.rateDenominators,
-    unitPer: MANIFEST.symbols.unitPer,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    magnitudes: MANIFEST.symbols.magnitudes,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    rateDenominators: MANIFEST.symbolTier.rateDenominators,
+    unitPer: MANIFEST.symbolTier.unitPer,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 class DutchPhonemizer implements Phonemizer {

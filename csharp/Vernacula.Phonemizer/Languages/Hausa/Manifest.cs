@@ -32,7 +32,7 @@ public sealed class HausaManifest
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public HausaPhonotactics Phonotactics { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public HausaSymbols Symbols { get; init; } = new();
+    public HausaSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class HausaPhonotactics
@@ -57,7 +57,7 @@ public static class Manifest
         .ToList();
 }
 
-public sealed class HausaSymbols
+public sealed class HausaSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

@@ -156,7 +156,7 @@
 
     // ---------------------------------------------------------------------------------------------------
     // THE SHARED SYMBOL TIER's data (italian.ts). Longest keys match first, so km² beats km and km/h beats km.
-    "symbols": {
+    "symbolTier": {
         "percent": ["per cento"],
         // ⚠ SINGULAR AND PLURAL. *euro* and *yen* are INVARIABLE in Italian (Accademia della Crusca: «euro»
         // is unchanged in the plural), so both forms being the same word is the fact, not an oversight.

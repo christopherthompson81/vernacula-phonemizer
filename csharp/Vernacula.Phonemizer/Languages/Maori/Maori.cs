@@ -14,7 +14,7 @@ public sealed class MaoriDef
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public MiNumbers Numbers { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public MaoriSymbols Symbols { get; init; } = new();
+    public MaoriSymbolTier SymbolTier { get; init; } = new();
 }
 
 /** Read a Latin run with another language's engine — injected from the registry (English). */
@@ -132,7 +132,7 @@ public sealed class MaoriPhonemizer : ILanguage
         Registry.Register("maori", () => CreateMaori(latin => Registry.ReadAsEnglish(latin)));
 }
 
-public sealed class MaoriSymbols
+public sealed class MaoriSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

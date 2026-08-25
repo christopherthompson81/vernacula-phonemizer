@@ -67,7 +67,7 @@ public sealed class GreekManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public GreekNumbersDef Numbers { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public GreekSymbols Symbols { get; init; } = new();
+    public GreekSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
@@ -77,7 +77,7 @@ public static class Manifest
         LoadManifest.Load<GreekManifest>("languages/greek", "greek.jsonc");
 }
 
-public sealed class GreekSymbols
+public sealed class GreekSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

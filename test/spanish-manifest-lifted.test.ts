@@ -92,9 +92,9 @@ describe("spanish reads its lifted tables", () => {
 
     test("the bare exponent is the PREDICATE, not the unit modifier", () => {
         // "veinte al cuadrado" vs "kilómetros cuadrados" — different words, two keys.
-        expect(MANIFEST.symbols.bareExponent.squared).not.toBe(MANIFEST.symbols.exponentWords.squared[0]);
+        expect(MANIFEST.symbolTier.bareExponent.squared).not.toBe(MANIFEST.symbolTier.exponentWords.squared[0]);
         expect(say("20² es el resultado")).toContain(say("al cuadrado"));
-        expect(say("25 km² de área")).toContain(say(MANIFEST.symbols.exponentWords.squared[1]!));
+        expect(say("25 km² de área")).toContain(say(MANIFEST.symbolTier.exponentWords.squared[1]!));
     });
 
     test("every other lifted table is reached by some reading", () => {
@@ -103,8 +103,8 @@ describe("spanish reads its lifted tables", () => {
         expect(say("EE. UU.")).toContain(say(MANIFEST.unitedStates));
         expect(say("n.º 5")).toContain(say(MANIFEST.numberSign));
         expect(say("El Sr. García")).toContain(say(MANIFEST.dottedAbbrev["sr"]!));
-        expect(say("50 %")).toContain(say(MANIFEST.symbols.percent[0]!));
-        expect(say("5 km")).toContain(say(MANIFEST.symbols.units["km"]![1]!));
+        expect(say("50 %")).toContain(say(MANIFEST.symbolTier.percent[0]!));
+        expect(say("5 km")).toContain(say(MANIFEST.symbolTier.units["km"]![1]!));
         expect(MANIFEST.phonotactics.onsets).toContain("pl");
         expect(MANIFEST.phonotactics.codas).toContain("st");
     });

@@ -46,7 +46,7 @@ public sealed class UmbunduManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public UmbunduNumbers Numbers { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public UmbunduSymbols Symbols { get; init; } = new();
+    public UmbunduSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
@@ -58,7 +58,7 @@ public static class Manifest
     public static readonly List<string> GRAPHEME_KEYS = MANIFEST.Graphemes.Keys.OrderByDescending(k => k.Length).ToList();
 }
 
-public sealed class UmbunduSymbols
+public sealed class UmbunduSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

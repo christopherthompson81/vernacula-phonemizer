@@ -8,6 +8,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import type { ThaiConsonantClass, ThaiTone, ThaiToneMark } from "./thaiTone.ts";
 
 export interface ThaiManifest {
@@ -35,6 +36,16 @@ export interface ThaiManifest {
     tcc: string[];
     /** ⚠ Keyed by UPPERCASE Latin — see the jsonc. */
     letterNames: Record<string, string>;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        unspacedScript: boolean;
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 /** The consolidated hand-authored Thai data tables (see thai.jsonc). */

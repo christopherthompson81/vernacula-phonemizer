@@ -37,7 +37,7 @@ export interface KoreanManifest {
         native: { ones: string[]; tens: string[]; twenty: string };
     };
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         multiply: { times: string; by?: string };

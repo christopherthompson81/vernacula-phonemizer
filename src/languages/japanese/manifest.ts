@@ -7,6 +7,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface JapaneseManifest {
     vowels: Record<string, string>;
@@ -29,6 +30,17 @@ export interface JapaneseManifest {
         particles: string;
         copula: string[];
         copulaFinalParticles: string;
+    };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        unspacedScript: boolean;
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+        bareExponent: { squared: string; cubed: string; power: string; negative: string };
     };
 }
 

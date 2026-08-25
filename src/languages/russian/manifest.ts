@@ -45,7 +45,7 @@ export interface RussianManifest {
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         units: Record<string, CountForms>;

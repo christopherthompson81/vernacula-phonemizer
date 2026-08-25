@@ -253,13 +253,13 @@ public static class PortuguesePhonemizer
         // count behind `e` (×1118).
         Multiply = new MultiplyDef { Times = Manifest.MANIFEST.SignWords.Times },
         Ampersand = Manifest.MANIFEST.SignWords.Ampersand,
-        Percent = Manifest.MANIFEST.Symbols.Percent,
-        Currency = Manifest.MANIFEST.Symbols.Currency,
-        Units = Manifest.MANIFEST.Symbols.Units,
-        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
-        BareExponent = Manifest.MANIFEST.Symbols.BareExponent,
-        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
-        MagnitudeConnective = Manifest.MANIFEST.Symbols.MagnitudeConnective, // cinco milhões DE dólares
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        BareExponent = Manifest.MANIFEST.SymbolTier.BareExponent,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
+        MagnitudeConnective = Manifest.MANIFEST.SymbolTier.MagnitudeConnective, // cinco milhões DE dólares
     });
 
     private sealed class PortugueseEngine : ILanguage

@@ -281,7 +281,7 @@
     // Currency: NOT attested in uk_ua (the corpus spells доларів / фунтів / євро out), but the signs were being
     // dropped outright, so the three that occur in Ukrainian text at all are declared. Standard dictionary
     // paradigms, not invented.
-    "symbols": {
+    "symbolTier": {
         "percent": ["відсоток", "відсотки", "відсотків", "відсотка"],
         "currency": {
             "€": ["євро"],

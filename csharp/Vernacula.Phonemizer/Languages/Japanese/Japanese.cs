@@ -22,34 +22,14 @@ public static class JapanesePhonemizer
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "かける" },
-        Percent = new[] { "パーセント" },
-        Ampersand = "アンド",
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "キロメートル" }, ["cm"] = new[] { "センチメートル" }, ["mm"] = new[] { "ミリメートル" },
-            ["nm"] = new[] { "ナノメートル" }, ["m"] = new[] { "メートル" },
-            ["kg"] = new[] { "キログラム" }, ["mg"] = new[] { "ミリグラム" }, ["g"] = new[] { "グラム" },
-            ["t"] = new[] { "トン" }, ["ha"] = new[] { "ヘクタール" },
-            ["ml"] = new[] { "ミリリットル" },
-            // Both cases are declared on purpose — ⟨L⟩ and ⟨l⟩ are the same unit here, the one exception to
-            // the one-letter case rule in Core/NormalizeSymbols.cs. Do not dedupe.
-            ["l"] = new[] { "リットル" }, ["L"] = new[] { "リットル" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "平方" }, Cubed = new[] { "立方" }, Position = "compound",
-        },
-        BareExponent = new BareExponentDef
-        {
-            Squared = "{n}の二乗", Cubed = "{n}の三乗", Power = "{n}の{e}乗", Negative = "マイナス",
-        },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["$"] = new[] { "ドル" }, ["€"] = new[] { "ユーロ" }, ["£"] = new[] { "ポンド" },
-            ["¥"] = new[] { "円" }, ["₩"] = new[] { "ウォン" },
-        },
-        UnspacedScript = true,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        BareExponent = Manifest.MANIFEST.SymbolTier.BareExponent,
+        Ampersand = Manifest.MANIFEST.SymbolTier.Ampersand,
+        Multiply = Manifest.MANIFEST.SymbolTier.Multiply,
+        UnspacedScript = Manifest.MANIFEST.SymbolTier.UnspacedScript,
     });
 
     private static readonly JsRe FULLWIDTH_DIGIT = JsRegex.Compile("[０-９]", "gu");

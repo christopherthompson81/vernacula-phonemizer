@@ -34,7 +34,7 @@ export interface PolishManifest {
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     decimalWord: string;
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
-    symbols: {
+    symbolTier: {
         units: Record<string, CountForms>;
         percent: CountForms;
         currency: Record<string, CountForms>;

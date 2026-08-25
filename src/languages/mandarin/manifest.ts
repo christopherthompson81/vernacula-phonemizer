@@ -7,6 +7,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface CmnManifest {
     tones: Record<string, string>;
@@ -23,6 +24,18 @@ export interface CmnManifest {
     };
     /** ⚠ Keyed by UPPERCASE Latin — see the jsonc. */
     letterNames: Record<string, string>;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        unspacedScript: boolean;
+        percentPrefix: boolean;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+        bareExponent: { squared: string; cubed: string; power: string; negative: string };
+    };
 }
 
 /** The consolidated hand-authored Mandarin data tables (see cmn.jsonc). */

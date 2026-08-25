@@ -145,7 +145,7 @@
     // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
     // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
     // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
-    "symbols": {
+    "symbolTier": {
         // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
         // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
         // és is ×2257 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.

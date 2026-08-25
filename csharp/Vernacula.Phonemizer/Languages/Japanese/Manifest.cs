@@ -41,6 +41,8 @@ public sealed class JapaneseManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public JapaneseNumberData Numbers { get; init; } = new();
     public PitchStripDef PitchStrip { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public JapaneseSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
@@ -48,4 +50,16 @@ public static class Manifest
     /** The consolidated hand-authored Japanese data tables (see japanese.jsonc). */
     public static readonly JapaneseManifest MANIFEST =
         LoadManifest.Load<JapaneseManifest>("languages/japanese", "japanese.jsonc");
+}
+
+public sealed class JapaneseSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public BareExponentDef BareExponent { get; init; } = new();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
+    public bool UnspacedScript { get; init; } = false;
 }

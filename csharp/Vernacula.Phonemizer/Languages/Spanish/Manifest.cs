@@ -57,7 +57,7 @@ public sealed class SpanishManifest
     public string UnitedStates { get; init; } = "";
     public string NumberSign { get; init; } = "";
     public SignWords SignWords { get; init; } = null!;
-    public SpanishSymbols Symbols { get; init; } = new();
+    public SpanishSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class SpanishPhonotactics
@@ -90,7 +90,7 @@ public sealed class SpanishEraMarkers
 }
 
 /** The shared symbol tier's data (Spanish.cs). */
-public sealed class SpanishSymbols
+public sealed class SpanishSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } =

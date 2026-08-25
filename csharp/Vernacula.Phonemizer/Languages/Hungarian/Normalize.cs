@@ -79,12 +79,12 @@ public static class Normalize
     private static readonly Func<string, string> NormalizeSymbolsFn = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
         Ampersand = "és",
-        Percent = Manifest.MANIFEST.Symbols.Percent,
-        Currency = Manifest.MANIFEST.Symbols.Currency,
-        Units = Manifest.MANIFEST.Symbols.Units,
-        RateDenominators = Manifest.MANIFEST.Symbols.RateDenominators,
-        UnitPer = Manifest.MANIFEST.Symbols.UnitPer,
-        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        RateDenominators = Manifest.MANIFEST.SymbolTier.RateDenominators,
+        UnitPer = Manifest.MANIFEST.SymbolTier.UnitPer,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
     });
 
     /** Unit abbreviations that may carry a hyphen-attached suffix directly (`km-re`, `mm-es`, `km²-en`). */

@@ -62,7 +62,7 @@ public sealed class PortugueseManifest
     /** Dollar CODES folded to a bare `$` so the tier's declared key becomes reachable. */
     public IReadOnlyList<string> DollarCodes { get; init; } = Array.Empty<string>();
     public SignWords SignWords { get; init; } = null!;
-    public PortugueseSymbols Symbols { get; init; } = new();
+    public PortugueseSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class PortuguesePhonotactics
@@ -107,7 +107,7 @@ public sealed class PortugueseDegree
 }
 
 /** The shared symbol tier's data (Portuguese.cs). */
-public sealed class PortugueseSymbols
+public sealed class PortugueseSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } =

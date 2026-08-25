@@ -88,13 +88,13 @@ public sealed class RussianPhonemizer : ILanguage
     {
         Multiply = new MultiplyDef { Times = "умножить на" },
         Ampersand = "и",
-        Percent = Manifest.MANIFEST.Symbols.Percent,
-        Currency = Manifest.MANIFEST.Symbols.Currency,
-        Units = Manifest.MANIFEST.Symbols.Units,
-        UnitPer = Manifest.MANIFEST.Symbols.UnitPer,
-        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
-        BareExponent = Manifest.MANIFEST.Symbols.BareExponent,
-        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        UnitPer = Manifest.MANIFEST.SymbolTier.UnitPer,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        BareExponent = Manifest.MANIFEST.SymbolTier.BareExponent,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
         CountForm = NormalizeSymbols.SlavicCountForm,
     });
 

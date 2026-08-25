@@ -128,13 +128,13 @@ public static class FrenchPhonemizer
     {
         Ampersand = "et",
         Multiply = new MultiplyDef { Times = "fois" },
-        Percent = Manifest.MANIFEST.Symbols.Percent,
-        Currency = Manifest.MANIFEST.Symbols.Currency,
-        Units = Manifest.MANIFEST.Symbols.Units,
-        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
-        BareExponent = Manifest.MANIFEST.Symbols.BareExponent,
-        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
-        MagnitudeConnective = Manifest.MANIFEST.Symbols.MagnitudeConnective,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        BareExponent = Manifest.MANIFEST.SymbolTier.BareExponent,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
+        MagnitudeConnective = Manifest.MANIFEST.SymbolTier.MagnitudeConnective,
     });
 
     /** numeral normalization, run before tokenization. */

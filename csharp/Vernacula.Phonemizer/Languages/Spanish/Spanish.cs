@@ -122,13 +122,13 @@ public sealed class SpanishPhonemizer : ILanguage
         // and joining them would make one token.
         Multiply = new MultiplyDef { Times = DEF.SignWords.Times },
         Ampersand = DEF.SignWords.Ampersand,
-        Percent = DEF.Symbols.Percent,
-        Currency = DEF.Symbols.Currency,
-        Units = DEF.Symbols.Units,
-        ExponentWords = DEF.Symbols.ExponentWords,
-        BareExponent = DEF.Symbols.BareExponent,
-        Magnitudes = DEF.Symbols.Magnitudes,
-        MagnitudeConnective = DEF.Symbols.MagnitudeConnective, // cinco millones DE dólares
+        Percent = DEF.SymbolTier.Percent,
+        Currency = DEF.SymbolTier.Currency,
+        Units = DEF.SymbolTier.Units,
+        ExponentWords = DEF.SymbolTier.ExponentWords,
+        BareExponent = DEF.SymbolTier.BareExponent,
+        Magnitudes = DEF.SymbolTier.Magnitudes,
+        MagnitudeConnective = DEF.SymbolTier.MagnitudeConnective, // cinco millones DE dólares
     });
 
     private readonly bool _americas;

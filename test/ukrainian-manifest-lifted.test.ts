@@ -27,12 +27,12 @@ describe("ukrainian reads its lifted tables", () => {
         // The rule in normalize.ts (`6 м`, apostrophe-aware) and the shared tier (`6 км`) must answer with
         // words from the same entry. If either re-hardcodes its own copy this still passes on equal data —
         // so the assertion that matters is the one below it: the reading must follow the manifest.
-        expect(MANIFEST.symbols.units["м"]).toEqual(["метр", "метри", "метрів", "метра"]);
-        expect(say("6 м завширшки")).toContain(say(MANIFEST.symbols.units["м"]![2]!));
-        expect(say("1 м завширшки")).toContain(say(MANIFEST.symbols.units["м"]![0]!));
+        expect(MANIFEST.symbolTier.units["м"]).toEqual(["метр", "метри", "метрів", "метра"]);
+        expect(say("6 м завширшки")).toContain(say(MANIFEST.symbolTier.units["м"]![2]!));
+        expect(say("1 м завширшки")).toContain(say(MANIFEST.symbolTier.units["м"]![0]!));
         // `кв. миль` takes the gen.pl of the SAME adjective the exponent seam uses for км².
-        expect(say("9 кв. миль")).toContain(say(MANIFEST.symbols.exponentWords.squared[2]!));
-        expect(say("9 км²")).toContain(say(MANIFEST.symbols.exponentWords.squared[2]!));
+        expect(say("9 кв. миль")).toContain(say(MANIFEST.symbolTier.exponentWords.squared[2]!));
+        expect(say("9 км²")).toContain(say(MANIFEST.symbolTier.exponentWords.squared[2]!));
     });
 
     test("the masculine and neuter ordinal tables are both live and are different words", () => {
@@ -97,7 +97,7 @@ describe("ukrainian reads its lifted tables", () => {
         expect(say("32 °F")).toContain(say(MANIFEST.temperatureScales["F"]!));
         expect(say("45°")).toContain(say(MANIFEST.degree[2]!));
         expect(say("стор. 45")).toContain(say(MANIFEST.dottedAbbrev["стор"]!));
-        expect(say("10 м/с")).toContain(say(MANIFEST.symbols.rateDenominators["с"]!));
+        expect(say("10 м/с")).toContain(say(MANIFEST.symbolTier.rateDenominators["с"]!));
         expect(say("АОЛ")).toContain(say(MANIFEST.letterNames["а"]!));
         expect(MANIFEST.phonotactics.onsets).toContain("ст");
         expect(MANIFEST.phonotactics.codas).toContain("рк");

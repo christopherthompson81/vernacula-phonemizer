@@ -44,7 +44,7 @@ export interface ItalianManifest {
     compass: Record<string, string>;
     decimalWord: string;
     signWords: SignWords;
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         currencyStems: string[];

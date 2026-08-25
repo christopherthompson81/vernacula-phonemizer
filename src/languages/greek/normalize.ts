@@ -131,13 +131,13 @@ const DOTTED_ALT = Object.keys(DOTTED)
  * like Russian — «783.562 τετραγωνικά χιλιόμετρα» — so `position: "before"`.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    magnitudes: MANIFEST.symbols.magnitudes,
-    ampersand: MANIFEST.symbols.ampersand,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 // ── helpers ─────────────────────────────────────────────────────────────────────────────────────────

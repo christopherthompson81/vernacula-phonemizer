@@ -117,14 +117,14 @@ public sealed class DutchPhonemizer : ILanguage
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Percent = Manifest.MANIFEST.Symbols.Percent,
-        Currency = Manifest.MANIFEST.Symbols.Currency,
-        Units = Manifest.MANIFEST.Symbols.Units,
-        RateDenominators = Manifest.MANIFEST.Symbols.RateDenominators,
-        UnitPer = Manifest.MANIFEST.Symbols.UnitPer,
-        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
-        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
-        Multiply = Manifest.MANIFEST.Symbols.Multiply,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        RateDenominators = Manifest.MANIFEST.SymbolTier.RateDenominators,
+        UnitPer = Manifest.MANIFEST.SymbolTier.UnitPer,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
+        Multiply = Manifest.MANIFEST.SymbolTier.Multiply,
     });
 
     public string Text(string input)

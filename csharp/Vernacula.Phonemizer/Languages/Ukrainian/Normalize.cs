@@ -139,18 +139,18 @@ public static class Normalize
     // Both rules below hold words the tier already declares (`symbols.units.м`, `symbols.exponentWords.squared`),
     // and before the lift this file carried its own byte-identical duplicates of each — two sources for one fact,
     // with nothing to keep them together.
-    private static readonly IReadOnlyList<string> METRE = DEF.Symbols.Units["м"];
+    private static readonly IReadOnlyList<string> METRE = DEF.SymbolTier.Units["м"];
     private static readonly IReadOnlyList<string> DEGREE = DEF.Degree;
     /** Only the gen.pl is ever read (step 3), which is index 2 of the squared adjective's four forms. */
-    private static readonly string SQUARE_GEN_PL = DEF.Symbols.ExponentWords.Squared![2];
+    private static readonly string SQUARE_GEN_PL = DEF.SymbolTier.ExponentWords.Squared![2];
 
     // ⚠ ONE SOURCE with the symbol tier in Ukrainian.cs: the rate words below are the tier's own
     // `RateDenominators`, and `SIGN.Times` / `SIGN.Ampersand` are what it declares for ⟨×⟩ and ⟨&⟩. `м/с` and
     // `миль/год` are composed here only because the tier cannot reach them (see step 6), not because they are
     // different words.
     private static SignWords SIGN => DEF.SignWords;
-    private static string UNIT_PER => DEF.Symbols.UnitPer;
-    private static IReadOnlyDictionary<string, string> RATE => DEF.Symbols.RateDenominators;
+    private static string UNIT_PER => DEF.SymbolTier.UnitPer;
+    private static IReadOnlyDictionary<string, string> RATE => DEF.SymbolTier.RateDenominators;
 
     /** Abbreviations whose dot is NOT a sentence end (ukrainian.jsonc `dottedAbbrev`). `кв.` is absent on
      *  purpose — it is an ADJECTIVE that must agree with the following number, so it has its own rule. */

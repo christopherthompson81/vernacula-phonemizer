@@ -109,8 +109,8 @@ describe("portuguese reads its lifted tables", () => {
         expect(say("44 d. C.")).toContain(say(MANIFEST.eraMarkers.afterChrist));
         expect(say("n.º 5")).toContain(say(MANIFEST.numberSign));
         expect(say("O Sr. Silva")).toContain(say(MANIFEST.dottedAbbrev["sr"]!));
-        expect(say("50 %")).toContain(say(MANIFEST.symbols.percent[0]!));
-        expect(say("5 km")).toContain(say(MANIFEST.symbols.units["km"]![1]!));
+        expect(say("50 %")).toContain(say(MANIFEST.symbolTier.percent[0]!));
+        expect(say("5 km")).toContain(say(MANIFEST.symbolTier.units["km"]![1]!));
         // ⚠ LOWERCASE CONTEXT REQUIRED. "O CD" is entirely uppercase, which trips initialisms.ts's
         // all-caps-DOCUMENT guard and skips the pass altogether — the exact trap portuguese.ts's own note
         // records about an earlier "verification" of the US$ key. The probe needs a lowercase word beside it.

@@ -40,6 +40,8 @@ public sealed class VietnameseManifest
     /** ⚠ Keyed by UPPERCASE Latin — see the jsonc. Dictionary keys are not touched by the loader's
      *  camelCase PROPERTY policy, which is what mangled English's ARPABET block. */
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public VietnameseSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
@@ -50,4 +52,13 @@ public static class Manifest
     /** The onset table as (orthography, IPA) pairs, projected once out of their JSON arrays. */
     public static readonly IReadOnlyList<(string Orth, string Ipa)> ONSETS =
         MANIFEST.Onsets.Select(r => (r[0].GetString()!, r[1].GetString()!)).ToList();
+}
+
+public sealed class VietnameseSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public MultiplyDef Multiply { get; init; } = null!;
 }

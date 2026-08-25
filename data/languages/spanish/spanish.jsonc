@@ -276,7 +276,7 @@
     // ---------------------------------------------------------------------------------------------------
     // THE SHARED SYMBOL TIER's data (spanish.ts). Longest keys match first (the builder sorts by length), so
     // km/h beats km and °c beats c.
-    "symbols": {
+    "symbolTier": {
         "percent": ["por ciento"],
         "currency": {
             "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["yen", "yenes"]

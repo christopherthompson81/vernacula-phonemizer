@@ -52,7 +52,7 @@ export interface SpanishManifest {
     unitedStates: string;
     numberSign: string;
     signWords: SignWords;
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         units: Record<string, CountForms>;

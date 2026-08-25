@@ -16,7 +16,7 @@ public sealed class CebuanoDef
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public CebNumbers Numbers { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public CebuanoSymbols Symbols { get; init; } = new();
+    public CebuanoSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class CebuanoPhonemizer : ILanguage
@@ -120,7 +120,7 @@ public sealed class CebuanoPhonemizer : ILanguage
     internal static void RegisterSelf() => Registry.Register("cebuano", CreateCebuano);
 }
 
-public sealed class CebuanoSymbols
+public sealed class CebuanoSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

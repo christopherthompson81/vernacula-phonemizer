@@ -95,9 +95,9 @@ public class SpanishManifestLiftedTests
     [Fact]
     public void TheBareExponentIsThePredicateNotTheUnitModifier()
     {
-        Assert.NotEqual(DEF.Symbols.ExponentWords.Squared![0], DEF.Symbols.BareExponent.Squared);
+        Assert.NotEqual(DEF.SymbolTier.ExponentWords.Squared![0], DEF.SymbolTier.BareExponent.Squared);
         Assert.Contains(Say("al cuadrado"), Say("20² es el resultado"));
-        Assert.Contains(Say(DEF.Symbols.ExponentWords.Squared![1]), Say("25 km² de área"));
+        Assert.Contains(Say(DEF.SymbolTier.ExponentWords.Squared![1]), Say("25 km² de área"));
     }
 
     [Fact]
@@ -108,8 +108,8 @@ public class SpanishManifestLiftedTests
         Assert.Contains(Say(DEF.UnitedStates), Say("EE. UU."));
         Assert.Contains(Say(DEF.NumberSign), Say("n.º 5"));
         Assert.Contains(Say(DEF.DottedAbbrev["sr"]), Say("El Sr. García"));
-        Assert.Contains(Say(DEF.Symbols.Percent[0]), Say("50 %"));
-        Assert.Contains(Say(DEF.Symbols.Units["km"][1]), Say("5 km"));
+        Assert.Contains(Say(DEF.SymbolTier.Percent[0]), Say("50 %"));
+        Assert.Contains(Say(DEF.SymbolTier.Units["km"][1]), Say("5 km"));
         Assert.Contains("pl", DEF.Phonotactics.Onsets);
         Assert.Contains("st", DEF.Phonotactics.Codas);
     }

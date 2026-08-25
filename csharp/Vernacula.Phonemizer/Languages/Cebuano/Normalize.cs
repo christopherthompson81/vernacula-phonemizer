@@ -14,13 +14,13 @@ public static class Normalize
     {
         Ampersand = "ug",
         Multiply = new MultiplyDef { Times = "ka pilo" },
-        Percent = CebuanoPhonemizer.DEF.Symbols.Percent,
-        Currency = CebuanoPhonemizer.DEF.Symbols.Currency,
-        Units = CebuanoPhonemizer.DEF.Symbols.Units,
-        RateDenominators = CebuanoPhonemizer.DEF.Symbols.RateDenominators,
-        UnitPer = CebuanoPhonemizer.DEF.Symbols.UnitPer,
-        ExponentWords = CebuanoPhonemizer.DEF.Symbols.ExponentWords,
-        Magnitudes = CebuanoPhonemizer.DEF.Symbols.Magnitudes,
+        Percent = CebuanoPhonemizer.DEF.SymbolTier.Percent,
+        Currency = CebuanoPhonemizer.DEF.SymbolTier.Currency,
+        Units = CebuanoPhonemizer.DEF.SymbolTier.Units,
+        RateDenominators = CebuanoPhonemizer.DEF.SymbolTier.RateDenominators,
+        UnitPer = CebuanoPhonemizer.DEF.SymbolTier.UnitPer,
+        ExponentWords = CebuanoPhonemizer.DEF.SymbolTier.ExponentWords,
+        Magnitudes = CebuanoPhonemizer.DEF.SymbolTier.Magnitudes,
     });
 
     /** Dotted abbreviations, and the list is SHORT ON PURPOSE — see the header note at step 6. */

@@ -458,13 +458,13 @@ const TOKEN = /(['’]?\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Scrip
 // Afrikaans measure and currency nouns are INVARIANT after a numeral ("drie persent", "480 kilometer per uur").
 const SYMBOLS = makeSymbolNormalizer({
     multiply: { times: MANIFEST.signWords.times },
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    rateDenominators: MANIFEST.symbols.rateDenominators,
-    unitPer: MANIFEST.symbols.unitPer,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    magnitudes: MANIFEST.symbols.magnitudes,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    rateDenominators: MANIFEST.symbolTier.rateDenominators,
+    unitPer: MANIFEST.symbolTier.unitPer,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
 });
 
 class AfrikaansPhonemizer implements Phonemizer {

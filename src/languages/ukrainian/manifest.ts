@@ -61,7 +61,7 @@ export interface UkrainianManifest {
     numberSign: string;
     rangeWord: string;
     signWords: SignWords;
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         units: Record<string, CountForms>;

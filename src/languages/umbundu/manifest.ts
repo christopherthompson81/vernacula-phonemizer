@@ -14,7 +14,7 @@ export interface UmbunduManifest {
     clausePunctuation: Record<string, string>;
     numbers: UmbunduNumbers;
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         units: Record<string, CountForms>;
         ampersand: string;

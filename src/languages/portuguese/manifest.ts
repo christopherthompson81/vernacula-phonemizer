@@ -58,7 +58,7 @@ export interface PortugueseManifest {
     /** Dollar CODES folded to a bare `$` so the tier's declared key becomes reachable. */
     dollarCodes: string[];
     signWords: SignWords;
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         units: Record<string, CountForms>;

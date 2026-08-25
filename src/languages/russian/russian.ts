@@ -100,15 +100,15 @@ const TOKEN = /([а-яёА-ЯЁ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 // symbol normalization — Russian: CYRILLIC unit abbreviations (км, not km) and three-way agreement.
 const SYMBOLS = makeSymbolNormalizer({
     countForm: slavicCountForm,
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    unitPer: MANIFEST.symbols.unitPer,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    bareExponent: MANIFEST.symbols.bareExponent,
-    magnitudes: MANIFEST.symbols.magnitudes,
-    ampersand: MANIFEST.symbols.ampersand,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    unitPer: MANIFEST.symbolTier.unitPer,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    bareExponent: MANIFEST.symbolTier.bareExponent,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 class RussianPhonemizer implements Phonemizer {

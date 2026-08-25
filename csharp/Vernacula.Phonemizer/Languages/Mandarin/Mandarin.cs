@@ -38,41 +38,15 @@ public sealed class MandarinPhonemizer : ILanguage
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "乘以" },
-        Percent = new[] { "百分之" },
-        PercentPrefix = true,
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["$"] = new[] { "美元" }, ["€"] = new[] { "欧元" }, ["£"] = new[] { "英镑" },
-            ["¥"] = new[] { "元" }, ["₤"] = new[] { "英镑" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["mm"] = new[] { "毫米" }, ["cm"] = new[] { "厘米" }, ["km"] = new[] { "公里" },
-            ["m"] = new[] { "米" }, ["kg"] = new[] { "千克" }, ["g"] = new[] { "克" },
-            ["km/h"] = new[] { "公里每小时" }, ["°c"] = new[] { "摄氏度" }, ["°f"] = new[] { "华氏度" },
-            ["°"] = new[] { "度" },
-            // ℃ and ℉ are SINGLE code points (U+2103, U+2109), not `°`+letter, so the "°c"/"°f" keys above
-            // cannot reach them. Neither pair is redundant.
-            ["℃"] = new[] { "摄氏度" }, ["℉"] = new[] { "华氏度" },
-        },
-        // The measure word PRECEDES the unit and fuses to it with no space — hence Compound, not Before,
-        // which would split one Han run into two and hide the compound from the segmenter.
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "平方" },
-            Cubed = new[] { "立方" },
-            Position = ExponentPosition.Compound,
-        },
-        BareExponent = new BareExponentDef
-        {
-            Squared = "{n}的平方", Cubed = "{n}的立方", Power = "{n}的{e}次方", Negative = "负",
-        },
-        // Chinese groups by MYRIADS, so the magnitude word between a number and its unit is 万 (10⁴) or 亿.
-        Magnitudes = new[] { "万", "亿", "兆" },
-        // No spaces between words, so a unit or currency sign is normally flanked by Han — which the tier's
-        // letter-boundary guards otherwise reject.
-        UnspacedScript = true,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        BareExponent = Manifest.MANIFEST.SymbolTier.BareExponent,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
+        Multiply = Manifest.MANIFEST.SymbolTier.Multiply,
+        PercentPrefix = Manifest.MANIFEST.SymbolTier.PercentPrefix,
+        UnspacedScript = Manifest.MANIFEST.SymbolTier.UnspacedScript,
     });
 
     private readonly Func<string, string> _pinyinToIpa;

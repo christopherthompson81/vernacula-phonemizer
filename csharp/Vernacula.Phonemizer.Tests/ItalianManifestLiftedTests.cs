@@ -111,8 +111,8 @@ public class ItalianManifestLiftedTests
         Assert.Contains(Say(DEF.NumberSign), Say("n. 1 della lista"));
         Assert.Contains(Say(DEF.DottedAbbrev["sig"]), Say("il Sig. Rossi"));
         Assert.Contains(Say(DEF.DecimalWord), Say("14,7 miliardi"));
-        Assert.Contains(Say(DEF.Symbols.Percent[0]), Say("50 %"));
-        Assert.Contains(Say(DEF.Symbols.Units["km"][1]), Say("5 km"));
-        Assert.Contains(Say(DEF.Symbols.Currency["$"][1]), Say("banconote da 5 $"));
+        Assert.Contains(Say(DEF.SymbolTier.Percent[0]), Say("50 %"));
+        Assert.Contains(Say(DEF.SymbolTier.Units["km"][1]), Say("5 km"));
+        Assert.Contains(Say(DEF.SymbolTier.Currency["$"][1]), Say("banconote da 5 $"));
     }
 }

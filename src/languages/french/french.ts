@@ -159,15 +159,15 @@ function stripLatent(ipa: string, c: string): string {
 
 // French words for %, currency signs, and unit abbreviations.
 const SYMBOLS = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    bareExponent: MANIFEST.symbols.bareExponent,
-    magnitudes: MANIFEST.symbols.magnitudes,
-    magnitudeConnective: MANIFEST.symbols.magnitudeConnective,
-    ampersand: MANIFEST.symbols.ampersand,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    bareExponent: MANIFEST.symbolTier.bareExponent,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    magnitudeConnective: MANIFEST.symbolTier.magnitudeConnective,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 

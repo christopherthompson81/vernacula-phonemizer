@@ -49,52 +49,15 @@ export type ForeignPhonemizer = (latin: string) => string;
 
 // symbol normalization — Mandarin: 百分之 PRECEDES the number (百分之九十三); units follow.
 const SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
-    // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
-    // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
-    multiply: { times: "乘以" },
-    percent: ["百分之"],
-    percentPrefix: true,
-    // Currency: the sign was DROPPED outright ($50 read as 五十, losing 美元). Mandarin says the unit after
-    // the number, which is what the shared tier emits. Degrees likewise: °C was falling through to the
-    // English reading of the bare letter C.
-    currency: { "$": ["美元"], "€": ["欧元"], "£": ["英镑"], "¥": ["元"], "₤": ["英镑"] },
-    units: { mm: ["毫米"], cm: ["厘米"], km: ["公里"], m: ["米"], kg: ["千克"], g: ["克"],
-        "km/h": ["公里每小时"], "°c": ["摄氏度"], "°f": ["华氏度"], "°": ["度"],
-        // ℃ and ℉ are SINGLE CODE POINTS (U+2103, U+2109), not `°`+letter, so the two keys above could not
-        // reach them and `20℃` read as bare 二十 — the whole unit gone, not merely the degree sign. They are
-        // in the RAWMARK leak class for exactly this reason. Found while reviewing the hi change, which had
-        // the identical gap; measured across the fleet, most languages still do.
-        "℃": ["摄氏度"], "℉": ["华氏度"] },
-    // `km²` → 平方公里. The measure word PRECEDES the unit and fuses to it with no space, which is the
-    // `compound` position — the same one Japanese uses for 平方キロメートル. `before` would emit "平方 公里",
-    // splitting one Han run into two and losing the segmenter's chance to see the compound.
-    // Attested in the artifact itself: 公园占地 19500 平方公里 · 783,562 平方公里（300,948 平方英里）.
-    // One form each, because a Chinese measure word does not agree with its count.
-    exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
-    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
-    // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
-    // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
-    // they are different words (平方公里 but 二十的平方).
-    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
-    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
-    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
-    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
-    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
-    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n}的平方", cubed: "{n}的立方", power: "{n}的{e}次方" , negative: "负" },
-    // Chinese groups by MYRIADS, so the magnitude word between a number and its unit is 万 (10⁴) or 亿 (10⁸),
-    // not "million". Undeclared, the tier's number–unit adjacency broke on it and the unit fell through to
-    // the English letter reading: `5 万 km²` came out as *ˈʊkm*, which is worse than the raw text. The
-    // artifact writes the magnitude against a currency NOUN (13 万日元, 40 万例) rather than against a Latin
-    // unit, so this guards a plausible input rather than a sampled one.
-    magnitudes: ["万", "亿", "兆"],
-    // Chinese has NO SPACES between words, so a unit or a currency sign is normally flanked by Han — which is
-    // exactly what the tier's letter-boundary guards were rejecting. Only punctuation-adjacent instances
-    // worked: `38℃。` read 摄氏度 and `38℃很热` dropped the ℃; `$500。` read 美元 and `為$500，` dropped the sign;
-    // `50 km²的面积` lost the exponent; `20°C很热` read the C as English *sˈiː*. Found by the zh.wikipedia fill,
-    // because the FLEURS corpus writes its units as words (平方公里) and its few signs sit next to punctuation.
-    unspacedScript: true,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    bareExponent: MANIFEST.symbolTier.bareExponent,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    unspacedScript: MANIFEST.symbolTier.unspacedScript,
+    multiply: MANIFEST.symbolTier.multiply,
+    percentPrefix: MANIFEST.symbolTier.percentPrefix,
 });
 
 class MandarinPhonemizer implements Phonemizer {

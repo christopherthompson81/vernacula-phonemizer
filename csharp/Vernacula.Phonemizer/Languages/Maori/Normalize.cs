@@ -10,14 +10,14 @@ public static class Normalize
 {
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Percent = MaoriPhonemizer.DEF.Symbols.Percent,
-        Currency = MaoriPhonemizer.DEF.Symbols.Currency,
-        Units = MaoriPhonemizer.DEF.Symbols.Units,
-        RateDenominators = MaoriPhonemizer.DEF.Symbols.RateDenominators,
-        UnitPer = MaoriPhonemizer.DEF.Symbols.UnitPer,
-        ExponentWords = MaoriPhonemizer.DEF.Symbols.ExponentWords,
-        Magnitudes = MaoriPhonemizer.DEF.Symbols.Magnitudes,
-        Multiply = MaoriPhonemizer.DEF.Symbols.Multiply,
+        Percent = MaoriPhonemizer.DEF.SymbolTier.Percent,
+        Currency = MaoriPhonemizer.DEF.SymbolTier.Currency,
+        Units = MaoriPhonemizer.DEF.SymbolTier.Units,
+        RateDenominators = MaoriPhonemizer.DEF.SymbolTier.RateDenominators,
+        UnitPer = MaoriPhonemizer.DEF.SymbolTier.UnitPer,
+        ExponentWords = MaoriPhonemizer.DEF.SymbolTier.ExponentWords,
+        Magnitudes = MaoriPhonemizer.DEF.SymbolTier.Magnitudes,
+        Multiply = MaoriPhonemizer.DEF.SymbolTier.Multiply,
     });
 
     private static readonly JsRe AMP_ENTITY = JsRegex.Compile("&amp;", "giu");

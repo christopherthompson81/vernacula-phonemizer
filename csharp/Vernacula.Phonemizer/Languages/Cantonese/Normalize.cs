@@ -18,20 +18,14 @@ public static class Normalize
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "乘" },
-        Ampersand = "和",
-        Percent = new[] { "百分之" },
-        PercentPrefix = true,
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "公里" }, ["kg"] = new[] { "公斤" },
-        },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "美元" }, ["€"] = new[] { "歐元" }, ["£"] = new[] { "英鎊" },
-        },
-        ExponentWords = new ExponentWordsDef { Squared = new[] { "平方" }, Position = ExponentPosition.Compound },
-        UnspacedScript = true,
+        Percent = CantonesePhonemizer.DEF.SymbolTier.Percent,
+        Currency = CantonesePhonemizer.DEF.SymbolTier.Currency,
+        Units = CantonesePhonemizer.DEF.SymbolTier.Units,
+        ExponentWords = CantonesePhonemizer.DEF.SymbolTier.ExponentWords,
+        Ampersand = CantonesePhonemizer.DEF.SymbolTier.Ampersand,
+        Multiply = CantonesePhonemizer.DEF.SymbolTier.Multiply,
+        PercentPrefix = CantonesePhonemizer.DEF.SymbolTier.PercentPrefix,
+        UnspacedScript = CantonesePhonemizer.DEF.SymbolTier.UnspacedScript,
     });
 
     // The step patterns. The TS builds several of these inline; JsRegex.Compile caches, so hoisting them

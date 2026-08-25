@@ -67,39 +67,13 @@ function numberToThaiWords(n: number): string[] {
 // tier's letter-boundary guard would reject exactly that ordinary case — `$5ของ` dropped the sign while `$5`
 // alone read it.
 const SYMBOLS = makeSymbolNormalizer({
-    // `&` was DROPPED outright, losing the sign from `ที่พักประเภท B&B`. `และ` is the ordinary
-    // conjunction and the corpus's own word, ×1711 — the most frequent candidate by a wide margin (`กับ`
-    // ×674 is "with", and `แอนด์`, the transliterated English "and", is ×0 here).
-    // ⚠ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
-    // word — `ที่พักประเภท B&B แข่งขันกันในสองสิ่งเป็นหลัก คือ ที่นอนและอาหารเช้า` ("bed AND breakfast").
-    // The text states what the sign expands to, in the same breath, with the conjunction chosen here.
-    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
-    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
-    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
-    // omitted and defaults to it — this language does not split dimension from product.
-    multiply: { times: "คูณ" },
-    ampersand: "และ",
-    percent: ["เปอร์เซ็นต์"],
-    // `5 km` read as *hˈaː˥˩ ˈʊkm*: no unit was declared. Verified in th_th, each immediately after a
-    // numeral: กิโลเมตร ×25 "ห่างจากบัวโนสไอเรส 50 กิโลเมตร", เมตร ×46 "ยอดเขาวินสันสูง 4,892 เมตร",
-    // เซนติเมตร ×1 "อยู่ห่างกันเพียง 69 เซนติเมตร". มิลลิเมตร and กิโลกรัม are ×0 and stay undeclared.
-    units: { km: ["กิโลเมตร"], m: ["เมตร"], cm: ["เซนติเมตร"] },
-    currency: { $: ["ดอลลาร์"], "€": ["ยูโร"], "£": ["ปอนด์"], "¥": ["เยน"] },
-    // `ตารางกิโลเมตร` ×5 and `ลูกบาศก์เมตร` ×1.
-    // ⚠ Bare ตาราง substring-matches ×11 and its first instance is `ตารางธาตุ` — the periodic TABLE, which
-    // is what ตาราง means on its own. In an unspaced script the bare count cannot be a token count at all
-    // (⚠ a word-boundary test is meaningless in an unspaced script), so only the full compound is evidence.
-    // `before` RATHER THAN `compound`, against the orthography, because the fused form is MIS-SYLLABIFIED by
-    // this G2P and the spaced one is not:
-    //   5 ตารางกิโลเมตร  → …mˌeː˧to˧n      5 ตาราง กิโลเมตร  → …mˌeː˦˥t   (= bare กิโลเมตร)
-    //   5 ลูกบาศก์เมตร   → lˈuːkbaː˧sˌa˨˩meː…   spaced → lˈuːkbaː˨˩t mˈeː˦˥t
-    // The second is the clearer one: ลูกบาศก์ ends in a KARAN (ก์, a silencing mark) and only the spaced
-    // reading honours it. This is not a defect introduced by the choice — the corpus's own
-    // `2.2 ล้านตารางกิโลเมตรภายใน` already reads mˌeː˧to˧n as written, so the Thai compound path is broken
-    // independently and is recorded as such. The space is an intermediate-representation hint to the G2P,
-    // never output, so taking the correct reading costs nothing here.
-    exponentWords: { squared: ["ตาราง"], cubed: ["ลูกบาศก์"], position: "before" },
-    unspacedScript: true,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    unspacedScript: MANIFEST.symbolTier.unspacedScript,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 class ThaiPhonemizer implements Phonemizer {

@@ -111,5 +111,32 @@
         "J": "gi", "K": "ca", "L": "e lờ", "M": "em mờ", "N": "en nờ", "O": "o", "P": "pê", "Q": "quy",
         "R": "e rờ", "S": "ét sì", "T": "tê", "U": "u", "V": "vê", "W": "vê kép", "X": "ích", "Y": "i",
         "Z": "dét"
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    // ⚠ NAMED `symbolTier`, one name fleet-wide. In the abugida manifests `symbols` already means the
+    // BARE-SIGN → word map the engine's tokenizer reads, so the shared tier cannot use that name there —
+    // and having the same table under two names depending on the language is exactly the kind of split this
+    // sweep exists to remove.
+    "symbolTier": {
+        // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+        // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+        // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+        // omitted and defaults to it — this language does not split dimension from product.
+        "multiply": { "times": "nhân" },
+        "percent": ["phần trăm"],
+        "currency": { "$": ["đô la"], "¥": ["yên"] },
+        // `m` = mét is safe here because the tier requires a NUMBER immediately to the left and no letter to
+        // the right; the longer keys are matched first, so km/mm/cm are never split. Attested after a digit
+        // in the corpus as "(30 m)" and "133 m/giây".
+        "units": {
+            "km": ["ki lô mét"], "mm": ["mi li mét"], "cm": ["xen ti mét"], "kg": ["ki lô gam"], "m": ["mét"],
+        },
+        // MIGRATION TEST: squared units composed by the shared tier. Vietnamese puts the measure word
+        // AFTER the unit and has no count agreement, so one form suffices.
+        "exponentWords": { "squared": ["vuông"], "cubed": ["khối"] }
     }
 }

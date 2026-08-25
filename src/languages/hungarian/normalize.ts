@@ -128,13 +128,13 @@ const normalizeInitialisms = makeInitialismNormalizer({
  * like these — the hazard `rateDenominators` exists for.
  */
 const normalizeSymbols = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    rateDenominators: MANIFEST.symbols.rateDenominators,
-    unitPer: MANIFEST.symbols.unitPer,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    ampersand: MANIFEST.symbols.ampersand,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    rateDenominators: MANIFEST.symbolTier.rateDenominators,
+    unitPer: MANIFEST.symbolTier.unitPer,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    ampersand: MANIFEST.symbolTier.ampersand,
 });
 
 /** Unit abbreviations that may carry a hyphen-attached suffix directly (`km-re`, `mm-es`, `km²-en`).

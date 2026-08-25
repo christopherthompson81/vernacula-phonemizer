@@ -13,6 +13,8 @@ public sealed class CantoneseDef
     public IReadOnlyDictionary<string, string> Tones { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public string MeasureWords { get; init; } = "";
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public CantoneseSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class CantonesePhonemizer
@@ -219,4 +221,16 @@ public static class CantonesePhonemizer
 
     internal static void RegisterSelf() =>
         Registry.Register("cantonese", () => CreateCantonese(Registry.ReadAsEnglish));
+}
+
+public sealed class CantoneseSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
+    public bool PercentPrefix { get; init; } = false;
+    public bool UnspacedScript { get; init; } = false;
 }

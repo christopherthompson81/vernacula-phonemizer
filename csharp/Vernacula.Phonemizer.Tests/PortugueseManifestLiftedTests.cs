@@ -110,8 +110,8 @@ public class PortugueseManifestLiftedTests
         Assert.Contains(Say(DEF.EraMarkers.AfterChrist), Say("44 d. C."));
         Assert.Contains(Say(DEF.NumberSign), Say("n.º 5"));
         Assert.Contains(Say(DEF.DottedAbbrev["sr"]), Say("O Sr. Silva"));
-        Assert.Contains(Say(DEF.Symbols.Percent[0]), Say("50 %"));
-        Assert.Contains(Say(DEF.Symbols.Units["km"][1]), Say("5 km"));
+        Assert.Contains(Say(DEF.SymbolTier.Percent[0]), Say("50 %"));
+        Assert.Contains(Say(DEF.SymbolTier.Units["km"][1]), Say("5 km"));
         // ⚠ LOWERCASE CONTEXT REQUIRED — an all-uppercase probe trips initialisms.cs's all-caps-DOCUMENT
         // guard and skips the pass, the trap Portuguese.cs's own note records.
         Assert.Contains(Say(DEF.LetterNames["c"]), Say("o CD tocou"));

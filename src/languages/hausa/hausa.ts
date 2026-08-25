@@ -32,12 +32,12 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 // symbol normalization — Hausa: % is "kashi" BEFORE the number (the corpus's "kashi 80%"); nouns
 // stay SINGULAR after numerals; the unit words are the corpus's own borrowings (kilomita, mita).
 const SYMBOLS = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    percentPrefix: MANIFEST.symbols.percentPrefix,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    percentPrefix: MANIFEST.symbolTier.percentPrefix,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 class HausaPhonemizer implements Phonemizer {

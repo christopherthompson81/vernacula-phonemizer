@@ -12,7 +12,7 @@ export interface MaoriManifest {
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
     /** The shared symbol tier's data — moved verbatim, comments included. */
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         units: Record<string, CountForms>;

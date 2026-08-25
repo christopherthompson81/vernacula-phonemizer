@@ -7,19 +7,12 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { spellHanDigits } from "../../core/sinitic.ts";
 import { DIGITS, normalizeCantonese } from "./normalize.ts";
 
-interface CantoneseDef {
-    initials: Record<string, string>;
-    finals: Record<string, string>;
-    tones: Record<string, string>;
-    clausePunctuation: Record<string, string>;
-    measureWords: string;
-}
-const DEF = loadManifest<CantoneseDef>(import.meta.url, "cantonese.jsonc");
+const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;
 // Initials tried longest-first so ng/gw/kw win over n/g/k.
 const INITIALS = Object.keys(DEF.initials).sort((a, b) => b.length - a.length);

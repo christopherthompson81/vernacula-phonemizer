@@ -21,12 +21,12 @@ public static class HausaPhonemizer
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Percent = Manifest.MANIFEST.Symbols.Percent,
-        Currency = Manifest.MANIFEST.Symbols.Currency,
-        Units = Manifest.MANIFEST.Symbols.Units,
-        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
-        Multiply = Manifest.MANIFEST.Symbols.Multiply,
-        PercentPrefix = Manifest.MANIFEST.Symbols.PercentPrefix,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Multiply = Manifest.MANIFEST.SymbolTier.Multiply,
+        PercentPrefix = Manifest.MANIFEST.SymbolTier.PercentPrefix,
     });
 
     private sealed class Engine : ILanguage

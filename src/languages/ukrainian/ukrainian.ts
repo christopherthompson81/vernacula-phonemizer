@@ -125,13 +125,13 @@ const SYMBOLS = makeSymbolNormalizer({
     // the audio evidence behind `на` and the corpus gloss behind `та`.
     multiply: { times: DEF.signWords.times },
     ampersand: DEF.signWords.ampersand,
-    percent: DEF.symbols.percent,
-    currency: DEF.symbols.currency,
-    units: DEF.symbols.units,
-    unitPer: DEF.symbols.unitPer,
-    rateDenominators: DEF.symbols.rateDenominators,
-    exponentWords: DEF.symbols.exponentWords,
-    magnitudes: DEF.symbols.magnitudes,
+    percent: DEF.symbolTier.percent,
+    currency: DEF.symbolTier.currency,
+    units: DEF.symbolTier.units,
+    unitPer: DEF.symbolTier.unitPer,
+    rateDenominators: DEF.symbolTier.rateDenominators,
+    exponentWords: DEF.symbolTier.exponentWords,
+    magnitudes: DEF.symbolTier.magnitudes,
     // A DECIMAL governs the GENITIVE SINGULAR in Ukrainian — 2,4 відсотка — which is a fourth form, because
     // unlike Russian the 2–4 slot here is the NOMINATIVE PLURAL (два відсотки) and so cannot serve.
     // `CountForms` is a plain string[] and `pick` clamps to the array length, so the extra entry is local

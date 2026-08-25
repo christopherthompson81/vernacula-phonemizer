@@ -356,7 +356,7 @@
     // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
     // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
     // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
-    "symbols": {
+    "symbolTier": {
         // ⚠ THE AMPERSAND IS A LATIN-SCRIPT PRINTING LIGATURE, so what it takes is a READING and not a
         // translation. For a language written in Latin script that is its own conjunction; for one that is not,
         // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —

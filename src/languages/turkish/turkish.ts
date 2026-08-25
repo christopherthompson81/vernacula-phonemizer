@@ -129,15 +129,15 @@ function numberTokenToWords(tok: string): string {
  *  the tier is given — a second hand-written list would drift the moment a unit is added. */
 // ⚠ ONE SOURCE, TWO CONSUMERS: the symbol tier below and `UNIT_ALT`, which keys the apostrophe-suffix rule
 // on the DECLARED units rather than on \p{L}+ (see its header). Both must see the same list.
-const UNITS = MANIFEST.symbols.units;
+const UNITS = MANIFEST.symbolTier.units;
 
 const SYMBOLS = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    percentPrefix: MANIFEST.symbols.percentPrefix,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    percentPrefix: MANIFEST.symbolTier.percentPrefix,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 /**

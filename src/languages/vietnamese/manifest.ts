@@ -7,6 +7,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 
 export interface VietnameseManifest {
     tones: {
@@ -29,6 +30,14 @@ export interface VietnameseManifest {
     };
     /** ⚠ Keyed by UPPERCASE Latin — see the jsonc. */
     letterNames: Record<string, string>;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 /** The consolidated hand-authored Vietnamese data tables (see vietnamese.jsonc). */
