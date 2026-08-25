@@ -21,6 +21,8 @@ export interface CmnManifest {
         decimalPoint: string;
         zeroDigit: string;
     };
+    /** ⚠ Keyed by UPPERCASE Latin — see the jsonc. */
+    letterNames: Record<string, string>;
 }
 
 /** The consolidated hand-authored Mandarin data tables (see cmn.jsonc). */

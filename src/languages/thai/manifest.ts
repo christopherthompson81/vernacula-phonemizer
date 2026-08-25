@@ -33,6 +33,8 @@ export interface ThaiManifest {
     };
     clausePunctuation: Record<string, string>;
     tcc: string[];
+    /** ⚠ Keyed by UPPERCASE Latin — see the jsonc. */
+    letterNames: Record<string, string>;
 }
 
 /** The consolidated hand-authored Thai data tables (see thai.jsonc). */

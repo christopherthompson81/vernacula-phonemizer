@@ -90,4 +90,14 @@
             "C# mirror (if pursued)",
         ],
     },
+
+    // ⚠ KEYED BY UPPERCASE LATIN. The engine looks a run up by the character as WRITTEN, and an
+    // embedded initialism in this script is always upper-case; lower-casing the keys would silently
+    // miss every one. (Dictionary keys are not touched by the loader's camelCase property policy —
+    // verified, not assumed, because that policy is exactly what mangled English's ARPABET block.)
+    "letterNames": {
+        "A": "诶", "B": "比", "C": "西", "D": "迪", "E": "伊", "F": "艾弗", "G": "吉", "H": "艾尺", "I": "艾",
+        "J": "杰", "K": "开", "L": "艾勒", "M": "艾姆", "N": "恩", "O": "欧", "P": "皮", "Q": "丘", "R": "阿儿",
+        "S": "艾丝", "T": "提", "U": "优", "V": "维", "W": "大布留", "X": "艾克斯", "Y": "歪", "Z": "兹"
+    }
 }

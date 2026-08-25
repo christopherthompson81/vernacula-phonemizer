@@ -15,17 +15,6 @@ public static class Normalize
         "ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า",
     };
 
-    /** Latin letter → its THAI letter name. Thai reads an initialism as these (GPS = จีพีเอส), which is what
-     *  keeps it inside the Thai phoneme inventory instead of routing to the English phonemizer. Probed: every
-     *  one of the 26 phonemizes to a well-formed Thai syllable (เอฟ → ʔˈeː˨˩p, ดับเบิลยู → dˈa˨˩pbɤ˥˩njˌuː˧). */
-    private static readonly IReadOnlyDictionary<string, string> THAI_LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["A"] = "เอ", ["B"] = "บี", ["C"] = "ซี", ["D"] = "ดี", ["E"] = "อี", ["F"] = "เอฟ", ["G"] = "จี",
-        ["H"] = "เอช", ["I"] = "ไอ", ["J"] = "เจ", ["K"] = "เค", ["L"] = "แอล", ["M"] = "เอ็ม", ["N"] = "เอ็น",
-        ["O"] = "โอ", ["P"] = "พี", ["Q"] = "คิว", ["R"] = "อาร์", ["S"] = "เอส", ["T"] = "ที", ["U"] = "ยู",
-        ["V"] = "วี", ["W"] = "ดับเบิลยู", ["X"] = "เอกซ์", ["Y"] = "วาย", ["Z"] = "แซด",
-    };
-
     private sealed class Abbrev
     {
         public required string From { get; init; }
@@ -155,7 +144,7 @@ public static class Normalize
         s = JsRegex.Replace(s, DEG_BARE, _ => " องศา");
 
         s = JsRegex.Replace(s, CAPS_RUN, m =>
-            string.Join(" ", Js.CodePoints(m.Value).Select(c => THAI_LETTER_NAME[c])));
+            string.Join(" ", Js.CodePoints(m.Value).Select(c => Manifest.MANIFEST.LetterNames[c])));
 
         return s;
     }

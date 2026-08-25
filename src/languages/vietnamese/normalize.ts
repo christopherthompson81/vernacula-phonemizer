@@ -1,4 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
+import { MANIFEST } from "./manifest.ts";
 /**
  * Vietnamese (vi) text normalization — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable Vietnamese syllable into Vietnamese words the pipeline speaks. Pure text→text; no IPA.
@@ -29,16 +30,6 @@ import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
  *     exist but are not confidently sourceable, and a wrong word is worse than a dropped sign.
  *   · A dash between a number and a NON-number. That is a dropped sign, not a corruption.
  */
-
-/** Latin letter → its VIETNAMESE letter name, space-separated where the name is polysyllabic — the standard
- *  bảng chữ cái naming set. Reading an initialism as its letter names is what keeps it inside the Vietnamese
- *  phoneme inventory instead of routing to the English phonemizer. */
-const VI_LETTER_NAME: Readonly<Record<string, string>> = {
-    A: "a", B: "bê", C: "xê", D: "dê", E: "e", F: "ép", G: "giê",
-    H: "hát", I: "i", J: "gi", K: "ca", L: "e lờ", M: "em mờ", N: "en nờ",
-    O: "o", P: "pê", Q: "quy", R: "e rờ", S: "ét sì", T: "tê", U: "u",
-    V: "vê", W: "vê kép", X: "ích", Y: "i", Z: "dét",
-};
 
 /** Vietnamese-native abbreviations, expanded to their spoken form. ⚠ These are NOT foreign initialisms —
  *  TCN/SCN are the Vietnamese era markers (BC/AD) and spelling them as letters is simply wrong. Longest key
@@ -217,7 +208,7 @@ export function normalizeVietnamese(input: string): string {
     // registry.ts's ROMAN_NATIVE, so `XVI` has already become `16` before text() runs.
     if (/\p{Ll}/u.test(s) || !/\s/u.test(s.trim()))
         s = s.replace(/(?<![\p{L}\p{M}\d])[A-Z]{2,6}(?![\p{L}\p{M}\d])/gu, (run) =>
-            [...run].map((c) => VI_LETTER_NAME[c] ?? c).join(" "));
+            [...run].map((c) => MANIFEST.letterNames[c] ?? c).join(" "));
 
     return s;
 }

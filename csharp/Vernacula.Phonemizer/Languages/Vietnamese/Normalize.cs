@@ -9,16 +9,6 @@ namespace Vernacula.Phonemizer.Languages.Vietnamese;
 
 public static class Normalize
 {
-    /** Latin letter → its VIETNAMESE letter name, space-separated where the name is polysyllabic — the
-     *  standard bảng chữ cái naming set. */
-    private static readonly IReadOnlyDictionary<string, string> VI_LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["A"] = "a", ["B"] = "bê", ["C"] = "xê", ["D"] = "dê", ["E"] = "e", ["F"] = "ép", ["G"] = "giê",
-        ["H"] = "hát", ["I"] = "i", ["J"] = "gi", ["K"] = "ca", ["L"] = "e lờ", ["M"] = "em mờ", ["N"] = "en nờ",
-        ["O"] = "o", ["P"] = "pê", ["Q"] = "quy", ["R"] = "e rờ", ["S"] = "ét sì", ["T"] = "tê", ["U"] = "u",
-        ["V"] = "vê", ["W"] = "vê kép", ["X"] = "ích", ["Y"] = "i", ["Z"] = "dét",
-    };
-
     /** Vietnamese-native abbreviations, expanded to their spoken form. ⚠ LONGEST KEY FIRST, so CNTT is
      *  consumed before a shorter prefix could claim part of it — the array order is the rule order. */
     private static readonly (string From, string To)[] VI_ABBREV =
@@ -142,7 +132,7 @@ public static class Normalize
             s = JsRegex.Replace(s, JsRegex.Compile($"{NLB}{from}{NL}", "gu"), _ => to);
         if (HAS_LOWER.IsMatch(s) || !HAS_SPACE.IsMatch(s.Trim()))
             s = JsRegex.Replace(s, CAPS_RUN, m =>
-                string.Join(" ", Js.CodePoints(m.Value).Select(c => VI_LETTER_NAME.GetValueOrDefault(c) ?? c)));
+                string.Join(" ", Js.CodePoints(m.Value).Select(c => Manifest.MANIFEST.LetterNames.GetValueOrDefault(c) ?? c)));
 
         return s;
     }

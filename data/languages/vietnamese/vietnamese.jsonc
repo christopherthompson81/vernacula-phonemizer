@@ -101,4 +101,15 @@
         "unitFiveAfterTen": "lăm", // 15/25 → mười/hai mươi lăm
         "zeroTens": "linh", // 105 → một trăm linh năm
     },
+
+    // ⚠ KEYED BY UPPERCASE LATIN. The engine looks a run up by the character as WRITTEN, and an
+    // embedded initialism in this script is always upper-case; lower-casing the keys would silently
+    // miss every one. (Dictionary keys are not touched by the loader's camelCase property policy —
+    // verified, not assumed, because that policy is exactly what mangled English's ARPABET block.)
+    "letterNames": {
+        "A": "a", "B": "bê", "C": "xê", "D": "dê", "E": "e", "F": "ép", "G": "giê", "H": "hát", "I": "i",
+        "J": "gi", "K": "ca", "L": "e lờ", "M": "em mờ", "N": "en nờ", "O": "o", "P": "pê", "Q": "quy",
+        "R": "e rờ", "S": "ét sì", "T": "tê", "U": "u", "V": "vê", "W": "vê kép", "X": "ích", "Y": "i",
+        "Z": "dét"
+    }
 }

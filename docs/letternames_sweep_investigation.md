@@ -52,9 +52,43 @@ the code is right is worth less than no assertion, because it looks like coverag
 coupling test on each side. 0 readings moved; C# matches Node in both modes for all four. Parity 60 languages
 / 12,000 rows / 0 differ; 447 C# tests, 5,081 TS tests.
 
+## Batch 2 — th, vi, cmn — 2026-08-25 06:40
+
+**⚠ THE BATCH SPLIT ITSELF ON INSPECTION.** Six languages were queued as "letterNames only"; three turned out
+to hold something else entirely.
+
+- **th, vi, cmn** hold a Record keyed by UPPERCASE LATIN — a SPELLING map, for an embedded foreign run. These
+  lift as `letterNames`.
+- **ta, te, kn** hold an ARRAY of native-script letter names used to BUILD A REGEX that RECOGNISES a
+  dot-separated initialism run in the native script. That is a different fact with a different shape and a
+  different purpose, and calling it `letterNames` would file two things under one name — the `PREFIX_GUESS`
+  shape. Deferred to its own batch, to be lifted under a name that says what it is.
+
+**No phonotactics for any of the three**, and that is not an omission: the OOV spell-it-out test does not
+apply. A Latin run inside a Thai, Vietnamese or Chinese sentence is spelled because it is FOREIGN, not
+because its consonant clusters are illegal.
+
+**0 of 24 probe readings moved**, sync and async. Sweep: th 2, vi 4, cmn 4.
+
+### ⚠ The ARPABET shape, checked rather than assumed
+
+These tables are keyed by UPPERCASE Latin, and the engine looks a run up by the character as WRITTEN. The C#
+loader applies a camelCase policy — which is exactly what mangled English's ARPABET block into 42 wrong golden
+rows. Dictionary KEYS are not covered by that policy (it applies to property names), but "not covered" is a
+claim, so it was tested: `ThaiManifest.LetterNames` contains `"A"` and does not contain `"a"`, 26 entries.
+Both coupling tests now assert the keys are uppercase, and lower-casing them at the lookup fails.
+
+### Two more things the guard found
+
+`ManifestMappingTests` did not cover **Mandarin**. Adding it immediately reported two unmapped keys —
+`resolve` and `phases` — which turn out to be PROSE: an ordered description of the pipeline and a
+done/deferred status list, read by neither engine and not declared in the TypeScript's `CmnManifest` either.
+The `note` case, not the tg `numbers.and` case, so they are listed as metadata rather than given C#
+properties that would model a field neither side has.
+
 ## Remaining
 
-11: fr, ru, jv, th, vi, ta, te, kn, ha, cmn, en.
+8: fr, ru, jv, ha, en, and the ta/te/kn recognition-list batch.
   · `jv` has no manifest.ts and needs one.
   · `th`, `vi`, `ta`, `te`, `kn`, `cmn` have no phonotactics block — letterNames only.
   · `en` last: the largest engine, neural, and four accent variants read it.

@@ -16,6 +16,9 @@ import { MANIFEST as NL } from "../src/languages/dutch/manifest.ts";
 import { MANIFEST as PL } from "../src/languages/polish/manifest.ts";
 import { MANIFEST as HU } from "../src/languages/hungarian/manifest.ts";
 import { MANIFEST as TR } from "../src/languages/turkish/manifest.ts";
+import { MANIFEST as TH } from "../src/languages/thai/manifest.ts";
+import { MANIFEST as VI } from "../src/languages/vietnamese/manifest.ts";
+import { MANIFEST as CMN } from "../src/languages/mandarin/manifest.ts";
 
 interface Lifted {
     letterNames: Record<string, string>;
@@ -36,6 +39,37 @@ const LANGS: [string, Lifted, string, string, string, string][] = [
     ["hu", HU, "az USB port működik", "usb", "a SPORT ma", "s"],
     ["tr", TR, "USB bağlantı noktası", "usb", "bu SPOR bugün", "s"],
 ];
+
+/**
+ * Languages whose ONLY lifted table is `letterNames` — no phonotactics block, because the OOV
+ * spell-it-out test does not apply: an embedded Latin run in a Thai, Vietnamese or Chinese sentence is
+ * spelled because it is FOREIGN, not because its consonant clusters are illegal.
+ *
+ * ⚠ THESE TABLES ARE KEYED BY UPPERCASE LATIN, and that is load-bearing: the engine looks a run up by the
+ * character as written. Verified that the loader does not lower-case dictionary keys — the camelCase policy
+ * applies to PROPERTY names, and that policy is exactly what mangled English's ARPABET block.
+ */
+const SPELL_ONLY: [string, Record<string, string>, string, string][] = [
+    ["th", TH.letterNames, "ระบบ USB ใหม่", "USB"],
+    ["vi", VI.letterNames, "cổng USB hoạt động", "USB"],
+    ["cmn", CMN.letterNames, "USB接口可以用", "USB"],
+];
+
+describe.each(SPELL_ONLY)("%s spells an embedded Latin run from letterNames", (code, letters, sentence, run) => {
+    const say = (s: string): string => phonemize(s, code).replace(/[ˈˌ]/gu, "");
+
+    test("every letter of the run is read as its declared name", () => {
+        for (const ch of run) {
+            expect(letters[ch], `${code}: no letterNames entry for ${ch}`).toBeDefined();
+            expect(say(sentence)).toContain(say(letters[ch]!));
+        }
+    });
+
+    test("the table is keyed UPPERCASE, which is how the engine looks a run up", () => {
+        expect(Object.keys(letters).every((k) => k === k.toUpperCase())).toBe(true);
+        expect(Object.keys(letters)).toHaveLength(26);
+    });
+});
 
 describe.each(LANGS)("%s reads its lifted initialism tables", (code, DEF, sentence, spelled, readable, initial) => {
     const say = (s: string): string => phonemize(s, code).replace(/[ˈˌ]/gu, "");
