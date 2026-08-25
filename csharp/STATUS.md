@@ -16,11 +16,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 58 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
+- **Languages: 59 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
   or, ast, umb, kn, hi, cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha,
-  tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig, sd, su — all
-  **200/200**. 63 gated codes, 12,600 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user
-  direction), from `tools/language-catalogue/languages.db`: next uz, lo, zu…
+  tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig, sd, su, uz — all
+  **200/200**. 64 gated codes, 12,800 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user
+  direction), from `tools/language-catalogue/languages.db`: next lo, zu, ff…
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,

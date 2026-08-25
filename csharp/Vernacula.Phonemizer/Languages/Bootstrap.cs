@@ -68,6 +68,7 @@ public static class Bootstrap
             Sundanese.SundanesePhonemizer.RegisterSelf();
             Umbundu.UmbunduPhonemizer.RegisterSelf();
             Urdu.UrduPhonemizer.RegisterSelf();
+            Uzbek.UzbekPhonemizer.RegisterSelf();
             Punjabi.PunjabiPhonemizer.RegisterSelf();
             Persian.PersianPhonemizer.RegisterSelf();
             Tajik.TajikPhonemizer.RegisterSelf();
