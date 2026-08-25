@@ -25,22 +25,11 @@ public static class Normalize
     {
         Multiply = new MultiplyDef { Times = "ഗുണം" },
         Ampersand = "ആൻഡ്",
-        Percent = new[] { "ശതമാനം" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["US$"] = new[] { "ഡോളർ" }, ["$"] = new[] { "ഡോളർ" },
-        },
-        Magnitudes = new[] { "ദശലക്ഷം", "മില്യൺ", "ബില്യൺ", "ലക്ഷം", "കോടി" },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "കിലോമീറ്റർ" }, ["m"] = new[] { "മീറ്റർ" }, ["mm"] = new[] { "മില്ലിമീറ്റർ" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "ചതുരശ്ര" },
-            Cubed = new[] { "ക്യൂബിക്" },
-            Position = ExponentPosition.Before,
-        },
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
     });
 
     private static readonly string[] ORDINAL_ENDINGS = { "ാമത്തേത്", "ാമത്തെ", "മത്തേത്", "ാമത്", "മത്തെ", "മത്", "ആം", "ാം" };

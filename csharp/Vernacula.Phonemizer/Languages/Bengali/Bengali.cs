@@ -29,6 +29,8 @@ public class BengaliDef : AbugidaDef
      * UNIT ABBREVIATION → the reusing language's OWN unit nouns, replacing the Bengali table below wholesale.
      */
     public Dictionary<string, IReadOnlyList<string>>? UnitWords { get; set; }
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public BengaliSymbolTier SymbolTier { get; init; } = new();
 }
 
 /** The four entry points `makeNativeBengali` returns — the shape Assamese wraps. */
@@ -42,6 +44,10 @@ public sealed class NativeBengaliEngine
 
 public static class Bengali
 {
+    /** ⚠ ONE LOAD, MODULE-LEVEL. The factory below loaded the manifest itself; the symbol tier needs it too,
+     *  so the load moves here and both read the same object — matching bengali/manifest.ts on the TS side. */
+    internal static readonly BengaliDef DEF = LoadManifest.Load<BengaliDef>("languages/bengali", "bengali.jsonc");
+
     private static Dictionary<string, string>? LEXICON;
 
     private static Dictionary<string, string> Lexicon()
@@ -97,19 +103,15 @@ public static class Bengali
         var g2p = Abugida.MakeAbugidaG2P(def, phon);
         var SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
         {
-            Ampersand = "এবং",
-            Multiply = new MultiplyDef { Times = "গুণ" },
-            Percent = new[] { "শতাংশ" },
-            Currency = new Dictionary<string, IReadOnlyList<string>>
-            {
-                ["৳"] = new[] { "টাকা" }, ["₹"] = new[] { "রুপি" }, ["$"] = new[] { "ডলার" },
-                ["€"] = new[] { "ইউরো" }, ["£"] = new[] { "পাউন্ড" }, ["¥"] = new[] { "ইয়েন" },
-            },
+            Ampersand = DEF.SymbolTier!.Ampersand,
+            Multiply = DEF.SymbolTier!.Multiply,
+            Percent = DEF.SymbolTier!.Percent,
+            Currency = DEF.SymbolTier!.Currency,
+            ExponentWords = DEF.SymbolTier!.ExponentWords,
+            // ⚠ STAYS IN CODE, exactly as the TS does: a manifest OVERRIDE with a built-in fallback, not a
+            // plain table. `def` here is the per-call manifest the factory was handed, which is not always
+            // the module-level DEF.
             Units = def.UnitWords ?? BENGALI_UNITS,
-            ExponentWords = new ExponentWordsDef
-            {
-                Squared = new[] { "বর্গ" }, Cubed = new[] { "কিউবিক" }, Position = "before",
-            },
         });
         var normalize = Normalize.MakeBengaliNormalizer(def.Numbers);
 
@@ -302,4 +304,13 @@ public static class Bengali
 
     internal static void RegisterSelf() =>
         Registry.Register("bengali", () => new BengaliLanguage(CreateBengali(Registry.ReadAsEnglish)));
+}
+
+public sealed class BengaliSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

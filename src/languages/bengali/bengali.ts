@@ -15,6 +15,8 @@
  * Stress is word-initial and weak in Bengali; the broad referee does not mark it, so we leave it unmarked.
  */
 import { makeAbugidaG2P } from "../../core/abugida.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
+import { MANIFEST } from "./manifest.ts";
 import { LATIN_RUN } from "../../core/hostWord.ts";
 import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
@@ -70,6 +72,14 @@ export interface BengaliDef extends AbugidaDef {
      * have known — so the words are language data, not engine data, and a reuser may bring its own.
      */
     unitWords?: Record<string, string[]>;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */
@@ -114,43 +124,13 @@ export function makeNativeBengali(
     // Without a symbol tier, % and every currency sign are DROPPED outright ("3%" reads as just "তিন") and the
     // Latin unit abbreviations go unexpanded. শতাংশ FOLLOWS the number.
     const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND IS A LATIN-SCRIPT PRINTING LIGATURE, so what it takes is a READING and not a translation.
-    // In a non-Latin script it only ever arrives inside a Latin run, and the tier substitutes the language's own
-    // conjunction either way — SPACED, because `B&B` is two initialisms.
-    ampersand: "এবং",
-    // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
-    // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — Bengali does
-    // not split dimension from product.
-    multiply: { times: "গুণ" },
-        percent: ["শতাংশ"],
-        // ⚠ `¥` IS VOICED EVEN THOUGH READERS OMIT IT. Recordings of a Bengali price list read the amounts and
-        // no currency at all, straight on to the next number. That is a deliberate policy call, not an
-        // oversight: for TTS an explicitly typed character is CONTENT, and a speaker's omission is evidence
-        // about reading habit rather than licence to delete.
-        //
-        // So the audio bounds what it can: it proves no *other* word is there to compete with this one. `ইয়েন`
-        // is the standard Bengali form of the currency name — ordinary lexis, not an audio finding, and marked
-        // as such so a later pass does not credit the corpus with attesting it.
-        currency: { "৳": ["টাকা"], "₹": ["রুপি"], $: ["ডলার"], "€": ["ইউরো"], "£": ["পাউন্ড"], "¥": ["ইয়েন"] },
-        // ⚠ THE DEFAULT IS BENGALI VOCABULARY — a reusing language declares `unitWords` in its manifest and
-        // gets its own spellings; see the field's note for the Assamese `cm` that made the override necessary.
-        // ⚠ THE DEFAULT IS A NAMED CONSTANT, NOT AN INLINE OBJECT, so the sourcing tools can still read the
-        // words. `sources.ts` reads a tier's `units` value as a literal or through ONE named identifier;
-        // `def.unitWords ?? { … }` was neither, and bn's seven declared words went from readable to
-        // `[??] the words are computed, not written`.
-        units: def.unitWords ?? BENGALI_UNITS,
-        // `বর্গকিলোমিটার` ×8. SPACED rather than fused, because this tier is shared with ASSAMESE and the
-        // two corpora disagree about the space — bn fuses it onto কিলোমিটার but writes `বর্গ মাইল` spaced in
-        // the very same sentence, and as writes `বৰ্গ কিলোমিটাৰ` (×7) spaced throughout. `before` is
-        // therefore attested in both, where `compound` would have been wrong for one of them.
-        // The cube word is the LOAN `কিউবিক`, word-first: `120-160 কিউবিক মিটার জ্বালানি তেল`.
-        // ⚠ PROBING THE NATIVE WORD REPORTS IT ABSENT AND IS MISLEADING: ঘন occurs, but as the REDUPLICATED
-        // ADVERB `ঘন ঘন` ("frequently") — a count that says nothing about the unit sense — while
-        // `ঘন মিটার` and `ঘনমিটার` are both zero. The corpus uses none of them.
-        // ⚠ ASSAMESE SHARES THIS TIER and attests no cube word at all: its translation of that same sentence
-        // writes `বর্গমিটাৰ`, the SQUARE word, for cubic metres.
-        exponentWords: { squared: ["বর্গ"], cubed: ["কিউবিক"], position: "before" },
-    });
+    units: def.unitWords ?? BENGALI_UNITS,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
+});
     const normalize = makeBengaliNormalizer(def.numbers);
 
     const CLAUSE_MARK = def.clausePunctuation;

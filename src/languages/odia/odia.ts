@@ -6,19 +6,16 @@
  * first-syllable (weak) stress. No intervocalic voicing (Indo-Aryan, unlike the Dravidian trio).
  */
 import type { Phonemizer } from "../../registry.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
 import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { foldNativeDigits } from "../../core/unicode.ts";
 import { makeOdiaNormalizer } from "./normalize.ts";
 
-interface OdiaDef extends AbugidaDef {
-    numbers: NumbersDef;
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<OdiaDef>(import.meta.url, "odia.jsonc");
+const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ODIA_WORD = "଀-୥୰-୷"; // Odia block EXCLUDING the digits ୦-୯ (U+0B66–0B6F, matched by the digit branch)
 const ODIA_DIGITS: Record<string, string> = {

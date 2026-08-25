@@ -121,9 +121,47 @@ earlier — auto-detection by regex over a file with several classes is not wort
 The honest assertion is that the reading contains ANY declared form, because which one is right is exactly
 the language-specific fact the tier exists to encode.
 
+## Batch 4 — bn, gu, kn, ml, or, pa — 2026-08-25 11:30 — the Indic group, and a name that was already taken
+
+**⚠ `symbols` WAS ALREADY IN USE, AND IT MEANS SOMETHING ELSE.** Every abugida manifest declares
+`symbols` as the BARE-SIGN → word map the engine's own tokenizer reads — `{"%": "प्रतिशत"}`, with `₹`
+stripped. The shared tier's data is a different table read by a different pass, so filing both under one
+name would be the `PREFIX_GUESS` shape. Here it also simply would not compile. Lifted as **`symbolTier`**.
+
+**⚠ AND THAT CORRECTS AN EARLIER COUNT IN THIS DOCUMENT.** Run 1 reported "6 languages already read the tier
+from their manifest" by looking for `"symbols"` in the jsonc — which for the Indic languages matched the SIGN
+MAP. Hindi and Yoruba both still have inline tiers, so the real figure was **4** (uk, es, pt, it) and the
+remaining count was two higher than stated throughout batches 1–3.
+
+**Five languages needed a `manifest.ts` or a module-level `DEF`**, all for the same reason and all found the
+same way — the tier lives in normalize.ts while the manifest was loaded in the engine file, or loaded lazily
+inside a factory. bn, gu, pa (TS) and bn, pa (C#) got one; `or` joined it, jv, mi and ceb.
+
+**0 of 37 probe readings moved.** C# matches Node in both modes.
+
+### ⚠ Three tooling defects, and the third is the one worth remembering
+
+**1. Indentation is not structure.** `bengali.ts` declares its tier inside a function, so some keys sit at 4
+spaces and others at 8. Preserving that put top-level keys at two depths in the jsonc and broke every tool
+that finds them by indentation. The transliterator now re-indents from BRACE DEPTH.
+
+**2. A non-literal value is code, not data.** The guard added in batch 1 only caught an UPPERCASE identifier
+and missed `units: def.unitWords ?? BENGALI_UNITS` — a manifest OVERRIDE with a built-in fallback. It was
+copied into the jsonc and surfaced only when the manifest failed to parse. The rule is now: a literal starts
+with a quote, brace, bracket, digit or boolean; anything else stays in the .ts.
+
+**3. ⚠ AND THE SAME EXPRESSION WAS SILENTLY DROPPED ON THE C# SIDE.** The C# applier kept a hand-list of
+three key names (`Multiply`, `Ampersand`, `CountForm`) and dropped everything else it was not wiring — so
+Bengali's `Units = def.UnitWords ?? BENGALI_UNITS` vanished and `25 km²` read *pɔ̃t͡ʃiʃ ˈʊkm* instead of
+*pɔ̃t͡ʃiʃ bɔɾɡo kilomiʈaɾ*: the unit gone, the raw letters spoken, on the C# side ONLY. The probe caught it.
+The applier now keeps EVERY key the manifest is not taking over, rather than three named ones.
+
+That is the second time this sweep that a hand-list in the tooling silently dropped a key, and both times the
+loss was invisible to the compiler and visible only in a reading.
+
 ## Remaining
 
-22 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
+16 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
 german, greek, gujarati, hungarian, indonesian, japanese, javanese, kannada, korean, malayalam, mandarin,
 marathi, occitan, odia, polish, punjabi, quechua, russian, swahili, tajik, tamil, telugu, thai, umbundu,
 urdu, vietnamese.

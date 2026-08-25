@@ -18,22 +18,11 @@ public static class Normalize
     {
         Ampersand = "ಮತ್ತು",
         Multiply = new MultiplyDef { Times = "ಗುಣಿಸಿ" },
-        Percent = new[] { "ಪ್ರತಿಶತ" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["US$"] = new[] { "ಡಾಲರ್" }, ["$"] = new[] { "ಡಾಲರ್" },
-        },
-        Magnitudes = new[] { "ಮಿಲಿಯನ್", "ಬಿಲಿಯನ್", "ದಶಲಕ್ಷ", "ಶತಕೋಟಿ", "ಲಕ್ಷ", "ಕೋಟಿ" },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "ಕಿಲೋಮೀಟರ್" }, ["m"] = new[] { "ಮೀಟರ್" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "ಚದರ" },
-            Cubed = new[] { "ಘನ" },
-            Position = ExponentPosition.Before,
-        },
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
     });
 
     /** Kannada unit abbreviations. */

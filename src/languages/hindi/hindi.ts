@@ -8,6 +8,7 @@
  * Latin runs → an injected foreign (en) phonemizer.
  */
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { applyWeightStress } from "../../core/weightStress.ts";
 import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
@@ -38,6 +39,24 @@ export interface HindiDef extends AbugidaDef {
     clausePunctuation: Record<string, string>;
     symbols?: Record<string, string>;
     stripSymbols?: string;
+    /**
+     * ⚠ THE SHARED SYMBOL TIER's data — NOT the same thing as `symbols` above, which is the BARE-SIGN → word
+     * map this engine's own tokenizer reads. Optional because the three languages sharing this interface are
+     * migrating one at a time.
+     */
+    symbolTier?: {
+        percent?: CountForms;
+        currency?: Record<string, CountForms>;
+        units?: Record<string, CountForms>;
+        rateDenominators?: Record<string, string>;
+        unitPer?: string;
+        magnitudes?: string[];
+        magnitudeConnective?: string;
+        ampersand?: string;
+        multiply?: { times: string; by?: string };
+        exponentWords?: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+        bareExponent?: { squared: string; cubed: string; power: string; negative: string };
+    };
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */

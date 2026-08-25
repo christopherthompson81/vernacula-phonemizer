@@ -22,6 +22,7 @@
  * Latin→Malayalam letter-name table would be invented data.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { MANIFEST } from "./manifest.ts";
 import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -50,25 +51,13 @@ const ZWJ_CHILLU: Readonly<Record<string, string>> = {
  * malayalam.ts because its position in the ordering matters and the ordering is this file's job.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
-    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
-    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
-    // defaults to it — this language does not split dimension from product.
-    multiply: { times: "ഗുണം" },
-    // `&` is otherwise DROPPED outright, losing the sign from `കോളേജ് ഓഫ് ആർട്സ് & സയൻസസ്`. `ആൻഡ്` is the
-    // TRANSLITERATED English "and", attested in exactly this construction rather than merely as a word:
-    // the hits are English institution names rendered in Malayalam (`ഒബ്സ്റ്റട്രിക്ക്സ് ആൻഡ് ഗൈനക്കോളജി`), and
-    // one such sentence writes the sign itself, `ഒ& ജി`.
-    // ⚠ THE NATIVE OPTIONS DO NOT FIT THE SLOT: `ഉം` is a BOUND suffix — it attaches to BOTH coordinands, so
-    // it cannot stand between two initialisms — and `ഒപ്പം` / `കൂടാതെ` mean "along with" / "besides", the
-    // wrong register for a proper name.
-    ampersand: "ആൻഡ്",
-    percent: ["ശതമാനം"],
-    currency: { "US$": ["ഡോളർ"], "$": ["ഡോളർ"] },
-    magnitudes: ["ദശലക്ഷം", "മില്യൺ", "ബില്യൺ", "ലക്ഷം", "കോടി"],
-    units: { km: ["കിലോമീറ്റർ"], m: ["മീറ്റർ"], mm: ["മില്ലിമീറ്റർ"] },
-    // `ചതുരശ്ര കിലോമീറ്റർ` ×2 and `ക്യൂബിക് മീറ്റർ` ×1, both word-first, both from the corpus's own prose.
-    exponentWords: { squared: ["ചതുരശ്ര"], cubed: ["ക്യൂബിക്"], position: "before" },
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 /**
