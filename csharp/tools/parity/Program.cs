@@ -71,4 +71,36 @@ if (dependencyGaps.Count > 0)
     Console.WriteLine("⚠ a PORTED language reached for an engine that is not ported (its rows cannot pass yet): "
                       + string.Join(", ", dependencyGaps));
 foreach (var d in firstDiff) Console.WriteLine(d);
+
+// ─── ACCENT-VARIANT CENSUS ─────────────────────────────────────────────────────────────────────────
+//
+// ⚠ THE LOOP ABOVE ITERATES GOLDEN FILES, SO A CODE WITH NO GOLDEN IS INVISIBLE TO IT. That is not a
+// gap for an unported LANGUAGE — those are tracked by the porting queue and their absence is expected.
+// It is a gap for an accent VARIANT of a language that IS ported, because the base shows green and a
+// reader reasonably concludes the locale works. `es-419` sat in exactly that state: `Registry.Build`
+// has carried `case "es-419": return Create("spanish-419")` since the switch was mirrored from the
+// TypeScript, nothing ever registered that factory, every call threw `port pending: spanish-419`, and
+// the gate said "55 languages byte-identical" without a word about it.
+//
+// So the variants are named explicitly and BUILT, whether or not they have a golden. An explicit list
+// is the same call Languages/Bootstrap.cs makes and for the same reason: five entries in one place
+// beats the answer being spread across the registry switch, and "which variants exist?" stays one grep.
+// A variant that gains a golden is checked by the loop above as well; this only answers "does it exist".
+var variants = new (string Code, string Base)[]
+{
+    ("en-GB", "en"), ("en-IN", "en"), ("es-419", "es"), ("fr-CA", "fr"), ("pt-BR", "pt"),
+};
+var variantPending = new List<string>();
+var variantOk = new List<string>();
+foreach (var (code, baseCode) in variants)
+{
+    try { Phonemizer.Phonemize("1", code); variantOk.Add(code); }
+    catch (NotImplementedException) { variantPending.Add($"{code} (variant of {baseCode})"); }
+    catch { variantOk.Add(code); } // it built; a render failure is the loop above's business, not this census
+}
+Console.WriteLine($"\naccent variants: {variantOk.Count}/{variants.Length} build"
+                  + (variantOk.Count > 0 ? $" — {string.Join(", ", variantOk)}" : ""));
+if (variantPending.Count > 0)
+    Console.WriteLine("⚠ NOT PORTED, and their base language IS: " + string.Join(", ", variantPending));
+
 return langsBad == 0 ? 0 : 1;
