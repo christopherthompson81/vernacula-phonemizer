@@ -97,19 +97,31 @@
     },
 
     // FRACTIONS. Only 1/2 has a suppletive name; every other denominator takes the ordinal (1/5 = un quinto),
-    // and the plural is the regular masculine -o → -i (tre quarti). `numeratorOne` is the APOCOPATED form the
-    // fraction noun takes — *un quinto*, never *uno quinto*.
-    "fractions": { "denominators": { "2": "mezzo" }, "numeratorOne": "un" },
+    // and the plural is the regular masculine -o → -i (tre quarti).
+    "fractions": { "denominators": { "2": "mezzo" } },
+
+    // ⚠ ONE FACT, TWO CALLERS. *uno* apocopates to *un* before a masculine noun, which is the same rule in
+    // *un quinto* (the fraction numerator) and *un grado* (the degree noun). It was `fractions.numeratorOne`
+    // until the degree rule needed it too; promoted here rather than written twice.
+    "apocopatedOne": "un",
 
     "eraMarkers": { "beforeChrist": "avanti Cristo", "afterChrist": "dopo Cristo" },
     "numberSign": "numero",
 
-    // DEGREES. ⚠ ALWAYS PLURAL, which is PRE-EXISTING and WRONG — `1 °C` reads *uno gradi Celsius*. NOT fixed
-    // in this lift: two things are broken and they must be fixed together, since the noun must agree
-    // (*un grado* / *venti gradi*) AND the numeral must APOCOPATE before it (*un*, not *uno*) — which the
-    // equivalent Portuguese fix (#966) did not need. The same rule shape there also hid a single-digit
-    // capture that the agreement fix had to widen; Italian's `(\d)` capture has it too.
-    "degree": { "word": "gradi", "celsius": "Celsius", "fahrenheit": "Fahrenheit" },
+    // DEGREES, agreeing with the count: *un grado*, *venti gradi*. Exactly 1 takes the singular and the
+    // APOCOPATED numeral above (*un grado*, never *uno grado*); everything else takes the plural and keeps
+    // its digits for the number path to read.
+    //
+    // ⚠ A COMPOUND ENDING IN -uno IS DELIBERATELY LEFT ALONE. `21 °C` stays *ventuno gradi* rather than the
+    // apocopated *ventun gradi*. Both are correct Italian and Treccani records both; the apocope in compounds
+    // is the more literary register, and choosing it would mean rewriting the numeral the number path
+    // produces rather than substituting one word. Only the unambiguous bare `1` is claimed here.
+    //
+    // ⚠ AND THE AGREEMENT NEEDS THE WHOLE NUMBER, NOT ITS LAST DIGIT. The rules captured `(\d)` — one digit
+    // — which was invisible while the word was a hard-coded plural (`20 °C` → *venti gradi*, right by luck,
+    // the leading digits passing through untouched) and wrong the moment the count is read off the capture:
+    // `21 °C` would have seen the `1`. Widened with the fix, exactly as pt's was (#966).
+    "degree": { "singular": "grado", "plural": "gradi", "celsius": "Celsius", "fahrenheit": "Fahrenheit" },
 
     // Compass points after a degree sign — a geographic COORDINATE, not a temperature and not an ordinal.
     "compass": { "n": "nord", "s": "sud", "e": "est", "w": "ovest" },

@@ -77,3 +77,35 @@ identical, sync and async, 0 threw. 60 languages / 12,000 rows / 0 differ; 443 C
 ## Remaining in this sweep
 
 15: en, fr, ru, jv, tr, pl, th, vi, ta, te, kn, hu, nl, ha, cmn.
+
+
+## Run 6 — 2026-08-25 05:20 — the degree agreement, fixed
+
+**Blast radius, checked first.** The `it` golden has two `°` rows and BOTH are the ORDINAL indicator, not a
+degree: `il 1° luglio 2020`, and `35°w`. And its three `grado` hits are the ordinary idiom *in grado di*, not
+the noun. So the fix moves 0 golden rows — verified after: `it OK 200 rows`.
+
+**⚠ A SEPARATE BUG FOUND WHILE LOOKING, REPORTED NOT FIXED.** `35°w` reads *trentacinquesimo w* — the ordinal
+rule claims it and leaves a stray letter. The compass rule's class is `[NSEW]` with no `i` flag, so a
+LOWERCASE direction misses it entirely and falls through to the ordinal rule below. The golden records the
+wrong reading today. Out of scope for an agreement fix; noted here so it is not lost.
+
+**Italian needed strictly more than Portuguese.** Portuguese only had to pick a noun form. Italian must also
+replace the NUMERAL, because *uno* apocopates to *un* before a masculine noun and the digit `1` would
+otherwise be read as *uno* by the number path. So the helper emits the word in place of the digit at exactly
+one, and keeps digits everywhere else.
+
+**⚠ AND THAT TURNED OUT TO BE A DUPLICATE.** *un quinto* (the fraction numerator, lifted two runs ago as
+`fractions.numeratorOne`) and *un grado* are the SAME apocope — one fact with two callers. Promoted to a
+top-level `apocopatedOne` rather than written twice; both rules now read it, and the coupling test asserts
+both callers.
+
+**A compound ending in -uno is deliberately left alone.** `21 °C` stays *ventuno gradi*, not *ventun gradi*.
+Both are correct Italian and Treccani records both; the compound apocope is the more literary register, and
+taking it would mean rewriting the numeral the number path produces rather than substituting one word. Only
+the unambiguous bare `1` is claimed. Asserted in both tests so the choice is visible rather than accidental.
+
+The `(\d)` capture was widened in the same change, exactly as pt's was — same latent second bug underneath.
+
+**Measured.** The 115-line probe moves exactly ONE row: `1 °C soltanto`, *uno gradi* → *un grado*. 32 degree
+readings agree C#-vs-Node, sync and async. Golden untouched; 60 languages / 12,000 rows / 0 differ.
