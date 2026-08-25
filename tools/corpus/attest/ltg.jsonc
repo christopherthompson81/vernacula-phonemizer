@@ -18,11 +18,45 @@
     {
         "language": "ltg",
         "wiki": "ltg.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "matematika",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "nulle",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "zam",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…Oknu sīrs - latgaļu nacionalais iedīņs nu samoltu i zam slūga samīgtu oknu. === Sataiseišonys parāds === oknys gale…",
+                "…lis tuklumeņu samaļ, damat garžu, līk sīra kuleitē i nūmīdz zam akmiņa kai sīru. Izīt oknu sīrs.…",
+                "…lvys sīrs — iedīņs nu gabalenim sagrīztys, sasteivynuotys i zam slūga samīgtys vyrtys cyukys golvys. Cyukys golvu izvard la…",
+                "…agrīž smolkim gabalenim. Saber sagrīztū gali sīra kulē, līk zam akmiņa i nūmīdz. Da goldam padūd sagrīztu škēlem.…",
+                "…piliskolns. Ar olūtvapnu sacementāta kvartara žvyra blučs, zam kura pasadarejuse lāva ola. Pyrma 1991 godā padareituos tei…",
+                "…adarejuse lāva ola. Pyrma 1991 godā padareituos teireišonys zam 4 m plotuo i 1,5 m augstuo konglomeratu bluča redzējuos apm…"
+            ]
+            },
+        {
+                "word": "zamuok",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…byun leluokys izškireibys: vīnim jūzmiņs augšuok, a cytim — zamuok puponys. Sīvītem jūzmiņs cik nacik plotuoks na veirīšim, vy…",
+                "…rūnu pasaukom. Roksta ISO 15924 kods irā Goth. == Literi == Zamuok teikt izlykta gotu alfabeta tabele. Kai greku alfabetā, got…"
+            ]
+            },
         {
                 "word": "atjimšona",
                 "verdict": "absent",

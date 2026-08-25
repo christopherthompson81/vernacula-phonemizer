@@ -295,3 +295,81 @@ an ASCII hyphen, twice, in ordinary prose. Zhuang's single U+2212 instance under
 
 **Nothing changed in any engine.** Eight languages remain unread — ab, ak, bo, ltg, mos, pcm, yo, za — and
 every named candidate for each is now probed rather than assumed.
+
+## Run 8 — three routes, no word, and the accounting was the thing that was wrong — 2026-08-25 17:10
+
+Pressed again: for the remaining eight the outcome is still silence, and silence inverts. Ran the two routes
+I had not tried, and then fixed what they exposed.
+
+### Route 2 — concept-first (`tools/normalization/concept.ts`), which I should have used from the start
+
+The word-first search asks "does this word occur?" and needs a candidate. The concept-first one asks what a
+language CALLS a thing, via Wikidata labels and interlanguage links. Run for **minus sign** (Q10764194) and
+**negative real number** (Q200227) across all eight:
+
+```
+       minus sign   negative number      article in that wiki
+  ab   —            —                    no article, either concept
+  ak   —            —                    no article
+  bo   —            —                    no article
+  ltg  —            —                    no article
+  mos  —            —                    no article
+  pcm  —            —                    no article
+  yo   —            —                    no article
+  za   —            —                    no article
+```
+
+Only **subtraction** exists, and only for four: bo `འཕྲི་རྩིས།`, yo `Ìyọkúrò`, za `Gemjfap`, nan `Kiám-hoat`
+— the OPERATION, which is the distinction this tool's own header is built around (Hindi's `जोड़` is addition,
+`धन` is the plus SIGN, and only the second belongs in `+5`).
+
+### Route 3 — the gloss hunt, which is how tn/nan/kmr were actually found
+
+Setswana's reading was never composed; it was FOUND, as a sentence writing both forms:
+*"degree Celsius tse di kwa tlase ga lefela di le thataro ntlha botlhano (−6.5 °C)"*. So I searched each of
+the eight wikis with `insource:` regex for a signed number and read the surrounding prose.
+
+**Every hit is the digit form. Not one wiki glosses its own minus.** ab's are planetary temperatures
+(`(−173 °C)`, `(−108 °C)`, `(−43 °C)`) and an SI-unit table; ltg's are the two already known; mos's are a
+climate table; pcm's is Uranus; bo's include an algebra article writing `−0 = 0`, `−(−a) = a` — the sign in
+formulae, never spoken.
+
+**⚠ AND COMPOSITION IS NOT AVAILABLE EITHER.** "Below zero" looks composable — `zam` (ltg, ×16), `laj` +
+`lingz` (za, ×19/×34) all attest. But Setswana's phrase is `kwa tlase **ga** lefela`, with a connective
+between the parts that having the two words would never supply. Assembling a phrase is a claim about the
+language's syntax, and getting it wrong produces something that is not the language.
+
+### ⚠ WHAT WAS ACTUALLY WRONG: YORUBA'S SILENCE WAS EXEMPTED, NOT REPORTED
+
+`ACCEPTED_SIGN_SILENCE` quiets the gate for a class where *no reading is shippable at all*, argued in the
+language's own file. Its header warns: **"'no rule yet' is a TODO and must keep failing. Adding a real gap
+here to quiet the gate is exactly the wrong use of it."** Yoruba's `minus` entry was doing precisely that.
+
+The entry argued that a digit-flanked dash in Yoruba is a RANGE — **true of the hyphen and the en dash**,
+3,378 and 4,159 of them between digits, with `sí` read on 1,427 instances and glossed twice by the corpus.
+It says nothing about U+2212. And yo.wikipedia carries **81 U+2212 instances**; many are infobox UTC offsets,
+but a parenthesised-degree probe returns seven articles whose Yoruba PROSE carries genuine negative
+temperatures — `ìwọ̀n otútù àròpín ti −47.6 °C (−53.7 °F)`, `−38 °C (−36 °F)`, `−39.8 °C (−39.6 °F)`,
+`−65 °C (−85 °F)`. Those are not ranges, nothing reads them, and the operand inverts.
+
+**Exemption removed. `review.ts --lang yo` now prints `minus -5 DROPPED` — a hard fail.** That is the
+principle made operational: the gap is a TODO, so it fails until a word is found.
+
+Latgalian's entry stays, because it argues the whole class and states the price (*"Daugpils's record low
+reads as +43"*) — but it is now strengthened with the exhausted word search (`minus`, `mīnus`, `atjimt`,
+`atjimšona`, `zam nullis`, `nulle` all ×0; no Wikidata label, no article for either concept), so it is an
+argued refusal rather than a TODO in disguise.
+
+### The enlarged accounting
+
+Two languages' need is bigger than the mined corpus showed — the same lesson twice, that a small mined
+sample understates a class:
+
+* **yo** — 5 instances mined, **81** on the wiki, with genuine prose temperatures.
+* **za** — 1 U+2212 mined, but the Dead Sea sentence writes `-418m` and `-420m` with an ASCII hyphen in
+  ordinary prose, so the real population is elevations below sea level as well.
+
+**Still eight, and now for a stated reason rather than an untried one:** three independent routes — every
+named candidate probed, both concepts absent from Wikidata and from every one of the eight wikis, and no
+gloss sentence anywhere in their own text. There is nothing to read the sign with that would not be invented.
+What changed is that the silence is now reported rather than exempted.

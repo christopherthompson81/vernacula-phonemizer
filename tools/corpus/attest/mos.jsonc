@@ -18,11 +18,49 @@
     {
         "language": "mos",
         "wiki": "mos.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "temperatiir",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "zero",
+                "verdict": "substring-only",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 1,
+                "examples": []
+            },
+        {
+                "word": "tẽngre",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…gãnd-a ne gãnd sẽn yaa gãndo. Zʋg-zʋg-kãens kẽeda yĩngri la tẽngre. Woto yaa toor ne gitaar sẽn tar wĩy sẽn kẽed ne taaba. B s…",
+                "…asem 10 soabã n tar yõod n yɩɩda. B na n sɩngame n ta tãnga tẽngre, la b na n yalsa wẽnd-do-kɩds a taabã taoore, n yaool n ta…",
+                "…erlabi lʋɩɩsa Ghanã tẽmsã raosẽ, sẽn yaa Manya Krobo sẽn be tẽngre wã, n paam n paam n yãk n yãk n na n yɩ a NDC n na n tõog n…",
+                "…Afro-Aziat buud-gomdã zakẽ, la a yii Nile Delta tẽngr Egypt tẽngre. B yetame tɩ Egypt nebã sõor sõor sõorã sõor yaa milyõ 111.…",
+                "…aan tɩ zɩɩm sõngã maandẽ wã yaa tʋʋm-no-kãsenga sẽn na n yɩ tẽngre, yʋʋm kob-gĩnd 13 soabã saabẽ. Yʋʋmd 1303 wã, sã n pa pĩndã…",
+                "…ddi (\"riz la zĩm\"). B rɩta-a-la kãn-kãe, n ningd zom-peellã tẽngre, la b ningd zĩmã, sẽn nong n yaa mogrã (Epinephelus aeneus)…"
+            ]
+            },
+        {
+                "word": "yaoolem",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…kẽesa kug-kãng zuloees ning sẽn pʋgdã pʋgẽ. Sã n yaa kug-a yaoolem n lʋɩ zuloeeg sẽn be a to wã nugẽ, la zuloe-kãngã sã n tara…",
+                "…da kug-rãmbã n bĩngd-b a soab kazna pʋgẽ. B sã n ning kug-a yaoolem kugã a to wã bokẽ, a soab me sã n tar kug-a tãabo, b makda…",
+                "…tõe n maana tuz a ye bala. B pa tõe n kɩt tɩ b zabd-n-taag yaoolem zulungã (a zulung a wɛ la sẽn be rɩtg n yɩɩdã) lebg zulung…",
+                "…aa yʋʋm a yiib fãa la b maand Togyzkumalak dũni gill reemã. Yaoolem reemã yɩɩ Pardubice, Cɛɛk tẽnga, yʋʋmd 2012. Togyzkumalak /…",
+                "…mak kasenga lislaamd roog me tɩ yɩ neer bãng-minim sẽn sẽeg yaoolem tẽnga zĩisa a taaba. Yaoolem toeeng sẽn zĩind zĩiga pʋgẽ ya…",
+                "…tɩ yɩ neer bãng-minim sẽn sẽeg yaoolem tẽnga zĩisa a taaba. Yaoolem toeeng sẽn zĩind zĩiga pʋgẽ ya miisrã rot yalgre sẽn yɩ yʋʋ…"
+            ]
+            },
         {
                 "word": "yãk",
                 "verdict": "absent",

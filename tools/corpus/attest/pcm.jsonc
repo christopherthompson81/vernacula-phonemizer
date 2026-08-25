@@ -18,11 +18,42 @@
     {
         "language": "pcm",
         "wiki": "pcm.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "matematiks nomba",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "zero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…f dem bi: Sword Art online, Puella Magi Madoka Magica, Fate/Zero, The Garden of Sinners, an Pandora Hearts. As pesin wey sab…",
+                "…i dat. Di risot wey smol pass wey pesin fit get for UTME na zero an di score wey hi pass wey pesin fit get na 400. Di ezam d…",
+                "…sikal) Maxwell–Boltzmann distribushion. Haweva, nia absolut zero, di Maxwell–Boltzmann distribushion fail to akaunt for di o…",
+                "…ffair, Omo Ghetto: The Saga, The Bling Lagosians, Catch.er, Zero Hour, The First lady, Lagos Cougar, an Weekend Getaway. Ins…",
+                "…knowledge of price,quality of di products and utility with zero incur cost for course of dia transactions. Di market also p…",
+                "…politics as member of New Dimension. Him participate in the zero-party local government election of 1996 come later join han…"
+            ]
+            },
+        {
+                "word": "bilo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "anda",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "comot",
                 "verdict": "absent",
