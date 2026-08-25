@@ -33,6 +33,8 @@ public sealed class TajikManifest
     public string[] AcronymLetters { get; init; } = [];
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public TajikPhonotactics Phonotactics { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public TajikSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class TajikPhonotactics
@@ -46,4 +48,15 @@ public static class Manifest
 {
     /** The consolidated hand-authored Tajik data tables (see tajik.jsonc). */
     public static readonly TajikManifest MANIFEST = LoadManifest.Load<TajikManifest>("languages/tajik", "tajik.jsonc");
+}
+
+public sealed class TajikSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
 }

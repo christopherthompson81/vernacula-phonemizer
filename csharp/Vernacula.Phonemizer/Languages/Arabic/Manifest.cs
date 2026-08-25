@@ -70,6 +70,8 @@ public sealed class ArabicManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public ArabicNumberData Numbers { get; init; } = new();
     public DiacritizerDef Diacritizer { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public ArabicSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
@@ -77,4 +79,13 @@ public static class Manifest
     /** The consolidated hand-authored Arabic data tables (see arabic.jsonc). */
     public static readonly ArabicManifest MANIFEST =
         LoadManifest.Load<ArabicManifest>("languages/arabic", "arabic.jsonc");
+}
+
+public sealed class ArabicSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public string Ampersand { get; init; } = "";
 }

@@ -179,22 +179,11 @@ public static class Arabic
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Ampersand = "وَ",
-        Percent = new[] { "فِي الْمِئَة" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["$"] = new[] { "دُولَار" }, ["€"] = new[] { "يُورُو" }, ["£"] = new[] { "جُنَيْه" }, ["¥"] = new[] { "يِن" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "كِيلُومِتْر" }, ["cm"] = new[] { "سِنْتِيمِتْر" }, ["mm"] = new[] { "مِلِّيمِتْر" },
-            ["kg"] = new[] { "كِيلُوجِرَام" }, ["m"] = new[] { "مِتْر" }, ["g"] = new[] { "جِرَام" },
-            ["km/h"] = new[] { "كِيلُومِتْر فِي السَّاعَة" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "مُرَبَّع" }, Cubed = new[] { "مُكَعَّب" }, Position = "after",
-        },
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Ampersand = Manifest.MANIFEST.SymbolTier.Ampersand,
     });
 
     private static readonly JsRe GROUPING_COMMA = JsRegex.Compile(",", "gu");

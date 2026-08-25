@@ -38,4 +38,71 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    "symbolTier": {
+        /**
+         * The dollar, declared as TWO SPELLINGS OF ONE WORD rather than as a singular/plural pair. `thular`
+         * ×4/3 and `dular` ×2/2 are both attested beside the sign in Quechua sentences, and the currency's own
+         * article names both (*"Amirikanu dollar icha Amirikamanta thular"*). The tier's "already said it"
+         * suppression tests EVERY declared form, so listing both is what stops `$20 hunu dular qullqita` — the
+         * corpus's own shape, and playbook trap 12 — from being read as "twenty million dollar dollars".
+         * `countForm` below pins the emitted form to index 0 so the second entry is only ever a suppression
+         * key; Quechua has no numeral agreement to express here.
+         */
+        // ⚠ THE `$` KEY IS QUOTED DELIBERATELY. `review.ts`'s sourcing check reads currency entries with
+        // `/"([^"]+)"\s*:/`, so an unquoted `$:` key is invisible to it — declared this way the gate reported
+        // "a tier IS declared but this check could not read it", i.e. it went BLIND rather than passing. The
+        // quotes cost nothing and keep the one gate that can catch an unsourced currency word switched on.
+        "currency": { "US$": ["thular", "dular"], "$": ["thular", "dular"] },
+        /**
+         * The magnitude words, which Quechua's own `numbers.ts` already "composes": `hunu` 10⁶, `waranqa` 10³,
+         * `lluna` 10⁹ (the highest Wiktionary lemmatises).
+         *
+         * ⚠ DECLARED FOR THE UNIT PATH, NOT THE CURRENCY PATH, and that is the "one declaration, two consumers"
+         * note arriving from the useful side. `magnitudes` also gates `magAltU`, the UNIT step's connective hop,
+         * and this corpus writes a magnitude BETWEEN the number and its "unit": `1.28 hunu km2 (0.5 hunu mi2)` —
+         * Peru's area. Without the field the number is not adjacent to `km`, the whole match is declined, and
+         * the reading was `… hunu km ISKAY` — a raw `km` plus the ASCII exponent spoken as the NUMBER TWO,
+         * which is trap 53's Igbo defect in a language that declares the key. Quechua takes no connective
+         * (`5 hunu thular`, not `*5 hunu de thular`), so `magnitudeConnective` is correctly absent.
+         */
+        "magnitudes": ["waranqa hunu", "hunu", "waranqa", "lluna"],
+        "units": {
+            "km": ["kilumitru"],
+            // ⚠ THE ONE-LETTER KEY, AND ITS COST IS STATED (trap 46). `m` is ×64 digit-adjacent here and every
+            // instance is a genuine metre — Andean elevations (`6880 m`, `4.294 m`, `6.110 m`), lengths and the
+            // `200 m` swimming events. The residual exposure is a DOTTED VERSION whose trailing letter is
+            // exactly `m`; the tier's `NOT_VERSION` guard rejects it, and that guard works by seeing the DOT,
+            // which is why step 5 (the decimal step) runs AFTER this one and not before — traps 39 and 46.
+            // This corpus's only version string is `802.11n`, so the guard is exercised by a test, not by data.
+            "m": ["mitru"],
+            "cm": ["sintimitru"],
+            "mm": ["milimitru"],
+            "nm": ["nanumitru"],
+            "kg": ["kilugramu"],
+            // Ångström — ×3 here (`10 Å`, `22–26 Å`, `3.3 Å`), all in the DNA article, and qu.wikipedia names
+            // the sign beside the word: *"Ångström icha angstrom (sanancha: Å)"*.
+            "Å": ["angstrom"],
+            "m/s": ["mitru sikunduman"],
+            "km/s": ["kilumitru sikunduman"],
+            "m³/s": ["machina mitru sikunduman"],
+        },
+        /**
+         * ⚠ `cubed` IS DECLARED ON THIN EVIDENCE, AND THAT IS A TRAP-53 DECISION RATHER THAN A CONFIDENT ONE.
+         * Refusing it is NOT "neutral": the tier RE-EMITS an exponent it cannot name, so `1.28 hunu km2` would
+         * read "…km TWO" — an ASCII `2` is a NUMBER, not a visible leak, which is exactly what `790 km2` did to
+         * Igbo. The alternatives were (a) declare `machina` on one slot-hit plus one independent definition, or
+         * (b) refuse the WHOLE match for a key followed by 2/3/²/³, as `ak` does, which would keep `km²` ×11
+         * reading as a raw `km`. (a) was chosen because the square word is solidly attested and shares the
+         * branch; the cube's own evidence is quoted in full in the header so the next reader can weigh it.
+         * Position is `before` for both, which is what every attestation "writes": *t'asra kilumitru*,
+         * *machina mitru* — never the postposed order.
+         */
+        "exponentWords": { "squared": ["t'asra"], "cubed": ["machina"], "position": "before" },
+        "ampersand": "wan"
+    }
 }

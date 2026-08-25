@@ -60,5 +60,98 @@
         "codas": [
             "ng", "ny"
         ]
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    "symbolTier": {
+        "ampersand": "lan",
+        "percent": ["persèn"],
+        // ⚠ ⟨cm⟩ IS DECLARED AND ⟨m⟩ IS NOT, and the difference is an attested INSTANCE rather than an attested
+        // word. Both words are attested — jv.wikipedia writes `Dawané udakara 15 sèntimèter, lan ambane 10
+        // sèntimèter` and the metric ladder `milimèter << sèntimèter << dhèsimèter << mèter` — and the same
+        // article even states the abbreviation convention outright ("Mèter asring dicekak nganggo aksara m.").
+        // But the CORPUS writes `cm` after a number (`10-15(-17) cm × 3-4,5`) and never a bare `m`, so declaring
+        // the metre would be a rule with no instance to justify it (trap 9), on the one key whose length makes a
+        // misfire likeliest.
+        // ⟨g⟩ is declared for the DENSITY shape the corpus writes (`3,95 g/cm³`, `15g/cm³`, `1,66 g/cm³`),
+        // where the tier needs the numerator to engage its rate path at all. jv.wikipedia defines the word
+        // outright — "Gram (basa Yunani/Latin: grámma) yaiku ékan saka massa" — and ⟨kilogram⟩ is corpus-attested.
+        //
+        // ⚠ ⟨mm⟩, ⟨l⟩/⟨L⟩ AND ⟨ha⟩ WERE MISSING AND ALL FOUR HAD A CORPUS INSTANCE, which is the part that makes
+        // the omission a defect rather than a judgement. `10 mm` reached the IPA as *səpˈulʊh mm* — the raw
+        // letters — and `10 ha` as *səpˈulʊh hˈɔ*, the g2p reading ⟨ha⟩ as a Javanese word.
+        //   ⟨mm⟩ — jv.wikipedia has a MILIMÈTER ARTICLE that opens by disambiguating from the symbol: "Milimèter
+        //         utawi millimèter punika salah satunggalipun unit SI ingkang…", and the metric ladder is written
+        //         out in five separate articles (`milimèter << sèntimèter << dhèsimèter << mèter`). The corpus
+        //         writes the abbreviation after a number twice — `2000 mm/taun` (rainfall) and `105 x 45 x 18
+        //         mm` (a phone's dimensions). The ⟨è⟩ spelling is the one the ladder and the article title use.
+        //   ⟨l⟩/⟨L⟩ — jv.wikipedia's LITER article defines the unit ("Liter yaiku unit ukur saka volume") and
+        //         then states the SYMBOL CONVENTION itself: "Simbol liter yaiku huruf l cilik, utawa hurup
+        //         kapitale, L" — the lower-case letter or its capital. That sentence is the attestation for the
+        //         KEYS as much as the word, and it is why both cases are declared (the module's own note: ⟨L⟩ and
+        //         ⟨l⟩ are both official, so the exact branch must resolve either). `liter` probes ×77 in 20
+        //         articles. ⚠ TRAP 46, MEASURED RATHER THAN ASSUMED: digit-adjacent bare `l` in the mined
+        //         artifact is **×0** — no dotted designation, no bound clitic, nothing for the key to eat.
+        //   ⟨ha⟩ — the corpus writes it FIVE TIMES after a number and always capitalised (`198.000 Ha`,
+        //         `183.000 Ha`, `2000 Ha`, `13.000 Ha`, `5 Ha`); the folded index resolves the case, since ⟨ha⟩
+        //         is multi-character and no other unit is spelt with those letters. jv.wikipedia's km² article
+        //         glosses the symbol against the word in one line — "100 ha (hèktar)" — and gives the conversion
+        //         "1 hèktar = 0.01 (10−2) km2". The ⟨è⟩ spelling is that article's, and matches this file's
+        //         register (`mèter`, `sèntimèter`); `hektar` ×30 and `héktar` ×34 are the other two spellings in
+        //         running text and are unaffected, because the tier only rewrites the ABBREVIATION.
+        // ⚠ ⟨mg⟩ WAS THE ONE METRIC KEY LEFT OUT OF THE LADDER ABOVE, and the corpus writes it FOUR TIMES in
+        // the measure slot — `14 mg kalsium`, `28 mg fosfor`, `1,1&nbsp;mg besi`, `0,02&nbsp;mg vitamin B1`,
+        // plus `49 mg saben 100 g` and `80-100 mg saben dina` — all in one nutrition table. Undeclared, they
+        // reached the IPA as *mɡ*, the raw letters, which is the `RAW-LATIN` class's three jv hits.
+        // `miligram` is 40 tokens / 13 articles on jv.wikipedia, in this exact slot after a figure
+        // (`Kalium (K) 133 miligram`, `Fosfor (P) 12 miligram`, `Vitamin C 34,4 miligram`) and DEFINED
+        // against the gram in the gram article — "1 miligram = 0.001 gram". ⚠ THE SPELLING IS THE ATTESTED
+        // ONE, not the one this file's ⟨è⟩ register would compose: the metre words are `mèter`/`milimèter`
+        // because that is what jv.wikipedia writes, and the gram words are `gram`/`miligram` for the same
+        // reason. `milligram` ×2 with the double ⟨l⟩ is the same word spelt the Dutch way and is the loser.
+        // ⚠ AND THE ELEMENT SYMBOL IS NOT AT RISK. The nutrition tables also write `Magnesium (Mg)`, but the
+        // bare-unit path is EXACT CASE (core/normalizeSymbols.ts) and the counted path needs a numeral in
+        // front, so capital ⟨Mg⟩ is untouched.
+        "units": {
+            "km": ["kilomèter"], "kg": ["kilogram"], "cm": ["sèntimèter"], "g": ["gram"], "m": ["mèter"],
+            "mm": ["milimèter"], "mg": ["miligram"], "l": ["liter"], "L": ["liter"], "ha": ["hèktar"],
+        },
+        // ⚠ STANDARD MEASUREMENT REGISTER, NOT A CORPUS ATTESTATION — flagged the way Cantonese flags the same
+        // field. All 10 of the corpus's ⟨×⟩ are BOTANICAL DIMENSIONS (`10-15(-17) cm × 3-4,5(-1) cm`, a leaf),
+        // and ⟨kaping⟩ is the language's "times" word — but every attested instance of it is FREQUENCY or
+        // ordinal (`kaping 4 saben dina`, `juwara liga kaping loro`), never a dimension. The word is right and
+        // the slot is an inference; one word, so `by` defaults to it.
+        "multiply": { "times": "kaping" },
+        // ⚠ ⟨taun⟩ IS HERE BECAUSE THE CORPUS'S OWN ⟨mm⟩ INSTANCE IS A RATE: `2000 mm/taun`, the annual rainfall
+        // of a regency. With the numerator declared and the denominator not, the tier matches `2000 mm`, leaves
+        // `/taun` behind, and the tokenizer drops the slash — so the reading was *milimèter taun*, "millimetre
+        // year", with the relation deleted. `taun` is the ordinary Javanese word for a year and is on hundreds
+        // of corpus lines; `unitPer` already supplies "per", which is the corpus's own rate word
+        // (`mèter kubik per detik`). Denominator keys are not matchable standalone, so this cannot make a bare
+        // `taun` into a unit.
+        "rateDenominators": { "jam": "jam", "detik": "detik", "s": "detik", "taun": "taun" },
+        "unitPer": "per",
+        "exponentWords": { "squared": ["persegi"], "cubed": ["kubik"], "position": "after" },
+        // `$` is the sign the corpus actually writes (`$64 juta dolar AS`, `AS$143 milyar`, `1$ = Rp.`), and both
+        // readings are corpus-attested. `€`/`£` are absent from the corpus and are left unread rather than guessed.
+        // ⚠ MULTI-CHARACTER KEYS, LONGEST FIRST — a bare `$` cannot match inside `AS$143`, where the sign is
+        // preceded by a letter and the tier's word-guard correctly refuses it. (Indonesian hit the identical
+        // symptom on `US$` and folded the code away locally; the tier has since grown multi-character keys, so
+        // this declares the form instead of rewriting the text.) `AS` is Amérika Sarékat and the corpus writes
+        // the target reading out: `$64 juta dolar AS`.
+        // `Rp` is letters, not a sign, and is the other prefix this corpus writes (`1$ = Rp.`, `milyar rupiah`).
+        // ⚠ BOTH `AS$` AND `US$` — the corpus writes the Javanese abbreviation (`AS$143 milyar`, `AS$3.262`)
+        // and the English one (`US$100 milyar`, `US$39,85 yuta`) side by side, and neither can be reached by a
+        // bare `$` key: the sign is preceded by a letter and the tier's word-guard correctly refuses it.
+        "currency": { "AS$": ["dolar AS"], "US$": ["dolar AS"], "$": ["dolar"], "Rp": ["rupiah"] },
+        // ⚠ THE CURRENCY WORD MUST HOP THE MAGNITUDE, and the corpus writes the target form itself:
+        // `$64 juta dolar AS` and `AS$143 milyar` — the magnitude sits between the number and the currency
+        // noun, so without this `$64 juta` read *sewidak papat DOLAR juta*, the noun stranded before it.
+        // Spellings as they appear in running jv text, both the Javanese and the Indonesian-form magnitudes,
+        // since the corpus mixes them (`yuta` ×17 beside `juta` ×3, `milyar` ×12, `triliun` ×2).
+        "magnitudes": ["èwu", "ewu", "yuta", "juta", "milyar", "triliun"]
     }
 }

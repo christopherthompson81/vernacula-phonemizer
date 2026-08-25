@@ -15,22 +15,15 @@ public static class Normalize
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Ampersand = "lan",
-        Percent = new[] { "persèn" },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "kilomèter" }, ["kg"] = new[] { "kilogram" }, ["cm"] = new[] { "sèntimèter" }, ["g"] = new[] { "gram" }, ["m"] = new[] { "mèter" }, ["mm"] = new[] { "milimèter" }, ["mg"] = new[] { "miligram" }, ["l"] = new[] { "liter" }, ["L"] = new[] { "liter" }, ["ha"] = new[] { "hèktar" },
-        },
-        Multiply = new MultiplyDef { Times = "kaping" },
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal) { ["jam"] = "jam", ["detik"] = "detik", ["s"] = "detik", ["taun"] = "taun" },
-        UnitPer = "per",
-        ExponentWords = new ExponentWordsDef { Squared = new[] { "persegi" }, Cubed = new[] { "kubik" }, Position = ExponentPosition.After },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["AS$"] = new[] { "dolar AS" }, ["US$"] = new[] { "dolar AS" }, ["$"] = new[] { "dolar" }, ["Rp"] = new[] { "rupiah" },
-        },
-        Magnitudes = new[] { "èwu", "ewu", "yuta", "juta", "milyar", "triliun" },
-
+        Percent = JavanesePhonemizer.DEF.SymbolTier.Percent,
+        Currency = JavanesePhonemizer.DEF.SymbolTier.Currency,
+        Units = JavanesePhonemizer.DEF.SymbolTier.Units,
+        RateDenominators = JavanesePhonemizer.DEF.SymbolTier.RateDenominators,
+        UnitPer = JavanesePhonemizer.DEF.SymbolTier.UnitPer,
+        ExponentWords = JavanesePhonemizer.DEF.SymbolTier.ExponentWords,
+        Magnitudes = JavanesePhonemizer.DEF.SymbolTier.Magnitudes,
+        Ampersand = JavanesePhonemizer.DEF.SymbolTier.Ampersand,
+        Multiply = JavanesePhonemizer.DEF.SymbolTier.Multiply,
     });
 
     /**

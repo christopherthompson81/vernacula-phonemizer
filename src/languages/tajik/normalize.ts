@@ -141,48 +141,13 @@ export function normalizeTajikInitialisms(text: string): string {
  * *метр*. One instance in 456 segments, recorded rather than hidden.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ `дарсад`, NOT `фоиз`, AND IT IS THE CLOSEST CALL IN THIS LAYER. Both are real Tajik words for
-    // "percent" and both are attested; фоиз is even Wikidata's own tg label for the concept. дарсад wins on
-    // every SLOT-specific measure: ×19 in 11 mined segments against фоиз ×3 in 3; `/[0-9] дарсад/` 303
-    // articles against `/[0-9] фоиз/` 248; and two segments write the sign AND the word together —
-    // `аз 45 % дарсад ба 66 %` and `23,1% дарсад` — which is the only direct evidence anywhere of how the
-    // SIGN is spoken, and it says дарсад both times.
-    // ⚠ The phrase probe that looked like it settled this was lying: `insource:"% фоиз"` returns exactly the
-    // same 541 as `insource:"фоиз"`, because the search analyzer strips `%`. Only `insource:/…/` sees a sign.
-    percent: ["дарсад"],
-    // `1 доллар = 100 сент` is tg.wikipedia's own definition of the sign's currency; сомонӣ ×70/12 is the
-    // national one but has no sign in the corpus, so it is not declared. €/£ are declared because the tier
-    // only spends a currency word when its sign is present.
-    currency: { "$": ["доллар"], "€": ["евро"], "£": ["фунт"] },
-    units: {
-        // squared/cubed FIRST in intent — the tier sorts longest-first, so these win over the bare key.
-        // Sourced from tg.wikipedia's own unit article, which defines the abbreviation in its first line:
-        // «Километри мураббаъ (км², км кв., англ. km²) — воҳиди ченаки масоҳат» … «километри мукааб — km³».
-        // ⚠ THE ASCII EXPONENT IS DECLARED BESIDE THE SUPERSCRIPT ONE, in both scripts. The corpus writes
-        // `24,751 km2` and `2,65 нафар/км2` as well as `135 620 км²`, and an undeclared `km2` leaves the `2`
-        // to be read as a SEPARATE NUMBER — *…километр ду*, which is the `mm2` defect trap 37 found in
-        // fr/id/ne, arriving here through a different door.
-        "км²": ["километри мураббаъ"], "м²": ["метри мураббаъ"], "см²": ["сантиметри мураббаъ"],
-        "км³": ["километри мукааб"], "м³": ["метри мукааб"], "см³": ["сантиметри мукааб"],
-        "км2": ["километри мураббаъ"], "м2": ["метри мураббаъ"], "км3": ["километри мукааб"],
-        "km²": ["километри мураббаъ"], "km2": ["километри мураббаъ"], "km³": ["километри мукааб"],
-        "км": ["километр"], "м": ["метр"], "см": ["сантиметр"], "мм": ["миллиметр"],
-        "кг": ["килограмм"], "т": ["тонна"], "га": ["гектар"],
-        "МВт": ["мегаватт"], "кВт": ["киловатт"], "ГВт": ["гигаватт"],
-        // LATIN KEYS TOO, for the same reason kk needed them: the corpus writes both, and the Latin form
-        // reaches the ENGLISH foreign fallback — `24,751 km2` read as the cluster [ˈʊkm] (trap 38). Bare
-        // Latin `m` is deliberately absent (trap 46: `802.11m`); the Cyrillic `м` is not exposed that way
-        // because a version's trailing letter is never Cyrillic.
-        km: ["километр"], cm: ["сантиметр"], mm: ["миллиметр"], kg: ["килограмм"],
-    },
-    // `нафар дар километри квадратӣ` is how tg.wikipedia spells out its own `нафар/км²`, and `Километр/соат`
-    // is the title of its km/h article — so the connective is `дар` and the hour noun is `соат` (×71/20).
-    unitPer: "дар",
-    rateDenominators: { "соат": "соат", "сония": "сония", "сон": "сония" },
-    magnitudes: ["миллиард", "миллион", "ҳазор", "триллион"],
-    // `&` was dropped outright (×3 DROP + ×4 inside a foreign run). `ва` is the Tajik conjunction and the
-    // tier spaces it, because `Blohm & Voss` is two tokens and joining them would make one.
-    ampersand: "ва",
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    unitPer: MANIFEST.symbolTier.unitPer,
+    rateDenominators: MANIFEST.symbolTier.rateDenominators,
+    ampersand: MANIFEST.symbolTier.ampersand,
 });
 
 // ---------------------------------------------------------------------------------------------------

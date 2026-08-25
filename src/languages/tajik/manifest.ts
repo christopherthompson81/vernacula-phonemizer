@@ -14,6 +14,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { SymbolData } from "../../core/normalizeSymbols.ts";
 
 export interface TajikManifest {
     vowels: Record<string, string>;
@@ -38,6 +39,9 @@ export interface TajikManifest {
     acronymLetters: string[];
     clausePunctuation: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc.
+     *  Typed off `SymbolData` itself so the declaration cannot drift from what the engine reads. */
+    symbolTier: Required<Pick<SymbolData, "percent" | "currency" | "units" | "magnitudes" | "unitPer" | "rateDenominators" | "ampersand">>;
 }
 
 /** The consolidated hand-authored Tajik data tables (see tajik.jsonc). */

@@ -4,6 +4,7 @@
  * numbers; the ALGORITHM stays in code (yoruba.ts, numbers.ts).
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { SymbolData } from "../../core/normalizeSymbols.ts";
 
 export interface YorubaManifest {
     consonants: Record<string, string>;
@@ -60,6 +61,9 @@ export interface YorubaManifest {
         /** Joins a magnitude to its remainder: `irinwó ó lé ọgọ́rin` (480). */
         join: string;
     };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc.
+     *  Typed off `SymbolData` itself so the declaration cannot drift from what the engine reads. */
+    symbolTier: Required<Pick<SymbolData, "currency" | "units" | "unitPer" | "rateDenominators">>;
 }
 
 /** The consolidated hand-authored Yoruba data tables (see yoruba.jsonc). */

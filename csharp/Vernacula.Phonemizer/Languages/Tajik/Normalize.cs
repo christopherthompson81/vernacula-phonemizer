@@ -69,29 +69,13 @@ public static class Normalize
      */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Percent = new[] { "дарсад" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "доллар" }, ["€"] = new[] { "евро" }, ["£"] = new[] { "фунт" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["км²"] = new[] { "километри мураббаъ" }, ["м²"] = new[] { "метри мураббаъ" }, ["см²"] = new[] { "сантиметри мураббаъ" },
-            ["км³"] = new[] { "километри мукааб" }, ["м³"] = new[] { "метри мукааб" }, ["см³"] = new[] { "сантиметри мукааб" },
-            ["км2"] = new[] { "километри мураббаъ" }, ["м2"] = new[] { "метри мураббаъ" }, ["км3"] = new[] { "километри мукааб" },
-            ["km²"] = new[] { "километри мураббаъ" }, ["km2"] = new[] { "километри мураббаъ" }, ["km³"] = new[] { "километри мукааб" },
-            ["км"] = new[] { "километр" }, ["м"] = new[] { "метр" }, ["см"] = new[] { "сантиметр" }, ["мм"] = new[] { "миллиметр" },
-            ["кг"] = new[] { "килограмм" }, ["т"] = new[] { "тонна" }, ["га"] = new[] { "гектар" },
-            ["МВт"] = new[] { "мегаватт" }, ["кВт"] = new[] { "киловатт" }, ["ГВт"] = new[] { "гигаватт" },
-            ["km"] = new[] { "километр" }, ["cm"] = new[] { "сантиметр" }, ["mm"] = new[] { "миллиметр" }, ["kg"] = new[] { "килограмм" },
-        },
-        UnitPer = "дар",
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["соат"] = "соат", ["сония"] = "сония", ["сон"] = "сония",
-        },
-        Magnitudes = new[] { "миллиард", "миллион", "ҳазор", "триллион" },
-        Ampersand = "ва",
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        RateDenominators = Manifest.MANIFEST.SymbolTier.RateDenominators,
+        UnitPer = Manifest.MANIFEST.SymbolTier.UnitPer,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
+        Ampersand = Manifest.MANIFEST.SymbolTier.Ampersand,
     });
 
     private static string[] MONTHS => Manifest.MANIFEST.Months;

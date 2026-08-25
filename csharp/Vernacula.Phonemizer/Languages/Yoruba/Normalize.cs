@@ -10,32 +10,24 @@ public static class Normalize
 {
     private static YorubaSymbols SYM => Manifest.MANIFEST.Symbols;
 
+    /**
+     * ⚠ NO `Percent` AND NO `PercentPrefix`, AND THE SABOTAGE SWEEP IS WHAT PROVED IT. Both were declared and
+     * both were DEAD: rule 3 below consumes every `%` in the string before this tier ever runs, because Yoruba's
+     * percent is a CIRCUMFIX (`ìdá 84 nínú ọgọ́rùn-ún`) and `PercentPrefix` can only move ONE word to the front.
+     * Wrecking the manifest key moved zero readings. Removed rather than left as documentation: a tier field
+     * read by nothing is a false statement about where this language's percent word comes from.
+     */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        /** `US$` is its own key: with only a bare `$`, the letters read as a word and the sign is dropped. */
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["US$"] = new[] { "dọ́là Amẹ́ríkà" }, ["₦"] = new[] { "náírà" }, ["$"] = new[] { "dọ́là" },
-        },
-        Percent = new[] { Manifest.MANIFEST.Symbols.PercentBefore },
-        PercentPrefix = true,
         Ampersand = Manifest.MANIFEST.Symbols.And,
-        /** ⚠ NO `m` KEY HERE — the bare metre is claimed locally instead; see `METRE` below. */
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "kìlómítà" }, ["ha"] = new[] { "hẹ́kítà" }, ["mi"] = new[] { "máìlì" },
-            ["mm"] = new[] { "mílímítà" }, ["l"] = new[] { "lítà" }, ["L"] = new[] { "lítà" },
-            ["ft"] = new[] { "ẹsẹ̀ bàtà" },
-        },
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["w"] = "wákàtí kan", ["h"] = "wákàtí kan",
-        },
-        UnitPer = "ni",
         ExponentWords = new ExponentWordsDef
         {
             Squared = new[] { Manifest.MANIFEST.Symbols.Squared }, Position = ExponentPosition.After,
         },
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        RateDenominators = Manifest.MANIFEST.SymbolTier.RateDenominators,
+        UnitPer = Manifest.MANIFEST.SymbolTier.UnitPer,
     });
 
     private static readonly JsRe GROUPED = JsRegex.Compile("(\\d),(\\d{3})(?!\\d)", "gu");
