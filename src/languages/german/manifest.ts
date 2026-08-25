@@ -8,6 +8,18 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface GermanManifest {
+    months: string[];
+    /** ⚠ Includes the corpus's own misspelling `Jahrunderts`, so the rule still fires on it. */
+    ordinalNouns: string[];
+    weakEn: string[];
+    /** ⚠ The full licenser set is `weakEn` PLUS these — articles license the reading, not the -en ending. */
+    ordinalLicensersExtra: string[];
+    ordinals: { irregularStems: Record<string, string>; suffixBelow20: string; suffixFrom20: string };
+    dottedAbbrev: Record<string, string>;
+    letterNames: Record<string, string>;
+    phonotactics: { vowels: string; onsets: string[]; codas: string[]; digraphs: string[] };
+    /** ⚠ STEMS — the rule appends `\p{L}*`, so each matches its inflected forms. */
+    measureStems: string[];
     /** Acronyms read letter-by-letter; see german.jsonc. */
     acronymLetters: string[];
     vowelChars: string;

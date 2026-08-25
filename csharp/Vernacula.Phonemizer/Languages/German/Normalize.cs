@@ -9,25 +9,20 @@ namespace Vernacula.Phonemizer.Languages.German;
 
 public static class Normalize
 {
-    private const string MONTHS = "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember";
+    private static readonly string MONTHS = string.Join("|", Manifest.MANIFEST.Months);
     /** Nouns that follow an ordinal numeral. `Jahrunderts` is the corpus's own misspelling, kept so the rule
      *  still fires on it. */
-    private const string ORDINAL_NOUN = MONTHS + "|Jahrhundert|Jahrhunderts|Jahrunderts|Jh";
+    private static readonly string ORDINAL_NOUN = MONTHS + "|" + string.Join("|", Manifest.MANIFEST.OrdinalNouns);
     /**
      * Articles and prepositions that license an ordinal reading, and which of the two endings they govern.
      */
-    private static readonly IReadOnlySet<string> WEAK_EN = new HashSet<string>(new[]
-    {
-        "am", "im", "vom", "zum", "beim", "dem", "des", "den", "ins", "seit", "bis", "ab", "nach", "vor", "zur",
-    }, StringComparer.Ordinal);
+    private static readonly IReadOnlySet<string> WEAK_EN = new HashSet<string>(Manifest.MANIFEST.WeakEn, StringComparer.Ordinal);
     private static readonly IReadOnlySet<string> LICENSER =
-        new HashSet<string>(WEAK_EN.Concat(new[] { "das", "der", "die", "ein", "eine", "sein", "ihr" }), StringComparer.Ordinal);
+        new HashSet<string>(WEAK_EN.Concat(Manifest.MANIFEST.OrdinalLicensersExtra), StringComparer.Ordinal);
 
     /** Integer → the German ordinal STEM. */
-    private static readonly IReadOnlyDictionary<int, string> IRREGULAR_STEM = new Dictionary<int, string>
-    {
-        [1] = "erst", [3] = "dritt", [7] = "siebt", [8] = "acht",
-    };
+    private static readonly IReadOnlyDictionary<int, string> IRREGULAR_STEM =
+        Manifest.MANIFEST.Ordinals.IrregularStems.ToDictionary(kv => int.Parse(kv.Key), kv => kv.Value);
 
     private static readonly JsRe HAS_DIGIT = JsRegex.Compile("\\d", "u");
 
@@ -37,46 +32,24 @@ public static class Normalize
         if (IRREGULAR_STEM.TryGetValue((int)n, out var irr)) return irr;
         var card = Numbers.NumberToWords(n);
         if (card == "" || HAS_DIGIT.IsMatch(card)) return null;
-        return n < 20 ? $"{card}t" : $"{card}st";
+        return n < 20 ? card + Manifest.MANIFEST.Ordinals.SuffixBelow20 : card + Manifest.MANIFEST.Ordinals.SuffixFrom20;
     }
 
     /** Dotted abbreviations → the spoken words; unexpanded, each reads as a consonant cluster plus a
      *  spurious phrase break. */
-    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["bzw"] = "beziehungsweise", ["usw"] = "und so weiter", ["ca"] = "circa", ["evtl"] = "eventuell", ["ggf"] = "gegebenenfalls",
-        ["inkl"] = "inklusive", ["exkl"] = "exklusive", ["bzgl"] = "bezüglich", ["einschl"] = "einschließlich",
-        ["dr"] = "Doktor", ["prof"] = "Professor", ["st"] = "Sankt", ["hr"] = "Herr", ["fr"] = "Frau", ["nr"] = "Nummer",
-        ["mio"] = "Millionen", ["mrd"] = "Milliarden", ["jh"] = "Jahrhundert", ["bd"] = "Band", ["s"] = "Seite", ["vgl"] = "vergleiche",
-    };
+    private static IReadOnlyDictionary<string, string> DOTTED_ABBREV => Manifest.MANIFEST.DottedAbbrev;
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
     /** German letter names, for initialisms: USA is [uː ʔɛs ʔaː], not the word *usa*. */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["a"] = "a", ["b"] = "be", ["c"] = "ze", ["d"] = "de", ["e"] = "e", ["f"] = "eff", ["g"] = "ge", ["h"] = "ha", ["i"] = "i", ["j"] = "jott",
-        ["k"] = "ka", ["l"] = "ell", ["m"] = "emm", ["n"] = "enn", ["o"] = "o", ["p"] = "pe", ["q"] = "ku", ["r"] = "err", ["s"] = "ess", ["t"] = "te",
-        ["u"] = "u", ["v"] = "vau", ["w"] = "we", ["x"] = "iks", ["y"] = "üpsilon", ["z"] = "zett", ["ä"] = "ä", ["ö"] = "ö", ["ü"] = "ü",
-    };
+    private static IReadOnlyDictionary<string, string> LETTER_NAME => Manifest.MANIFEST.LetterNames;
 
     /** German phonotactics, for the OOV rule in core/initialisms.ts. */
     public static readonly Func<string, bool> IsUnreadableGerman = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        Vowels = JsRegex.Compile("[aeiouäöüy]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "ch", "dr", "fl", "fr", "gl", "gr", "kl", "kn", "kr", "pf", "pl", "pr", "ps",
-            "qu", "sc", "sch", "sh", "sk", "sl", "sm", "sn", "sp", "st", "sw", "th", "tr", "tw", "vl", "vr", "zw",
-            "ph", "gn", "schw", "wl",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "ch", "ck", "ft", "ht", "lb", "ld", "lf", "lk", "lm", "ln", "lp", "ls", "lt", "lz", "mm",
-            "mp", "ms", "nd", "nf", "ng", "nk", "ns", "nt", "nz", "pf", "ps", "rb", "rd", "rf", "rg",
-            "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rz", "sch", "sk", "sp", "st", "ss", "tt", "tz", "ts", "ks",
-            "nn", "bt", "hl", "gt", "hr", "kt", "hn", "zt", "hm", "mt", "ll", "rr", "cht", "ngt",
-        }, StringComparer.Ordinal),
-        Digraphs = new HashSet<string>(new[] { "ch", "sch", "tz", "ck", "ph", "th", "ng", "qu", "ss", "sh" }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{Manifest.MANIFEST.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Codas, StringComparer.Ordinal),
+        Digraphs = new HashSet<string>(Manifest.MANIFEST.Phonotactics.Digraphs, StringComparer.Ordinal),
     });
 
     private static readonly IReadOnlySet<string> ACRONYM_LETTERS =
@@ -97,13 +70,7 @@ public static class Normalize
 
     /** Measure-noun STEMS, matched with a trailing `\p{L}*` because German inflects them — the guard that
      *  keeps a counted quantity from being read as a year. */
-    private static readonly string MEASURE_STEM = string.Join("|", new[]
-    {
-        "Prozent", "Grad", "Euro", "Cent", "Dollar", "Pfund", "Franken", "Kilometer", "Meter", "Zentimeter",
-        "Millimeter", "Meile", "Kilogramm", "Gramm", "Tonne", "Liter", "Hektar", "Quadrat", "Kubik", "Volt",
-        "Watt", "Stück", "Mal", "mal", "Million", "Milliarde", "Jahr", "Monat", "Tag", "Stunde", "Minute",
-        "Sekunde", "Mann", "Mensch", "Einwohner", "Person", "Soldat", "Mitarbeiter", "Teilnehmer", "Besucher",
-    });
+    private static readonly string MEASURE_STEM = string.Join("|", Manifest.MANIFEST.MeasureStems);
     private static readonly string NOT_A_YEAR = $"(?!\\s*(?:{MEASURE_STEM})\\p{{L}}*)";
     private static readonly JsRe YEAR_RE =
         JsRegex.Compile($"(?<![\\d.,€$£¥₽₴])(1[1-9]\\d\\d)(?![.,]?\\d)(?![\\p{{L}}\\p{{M}}]){NOT_A_YEAR}", "giu");
