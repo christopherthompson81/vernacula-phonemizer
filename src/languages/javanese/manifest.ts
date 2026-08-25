@@ -7,6 +7,7 @@
  * needed two more tables and would have loaded it a second time.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { SymbolData } from "../../core/normalizeSymbols.ts";
 
 export interface JavaneseNumbers {
     units: string[];
@@ -27,6 +28,9 @@ export interface JavaneseManifest {
     numbers: JavaneseNumbers;
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc.
+     *  Typed off `SymbolData` itself so the declaration cannot drift from what the engine reads. */
+    symbolTier: Required<Pick<SymbolData, "percent" | "currency" | "units" | "magnitudes" | "unitPer" | "rateDenominators" | "exponentWords" | "multiply" | "ampersand">>;
 }
 
 /** The consolidated hand-authored Javanese data tables (see javanese.jsonc). */

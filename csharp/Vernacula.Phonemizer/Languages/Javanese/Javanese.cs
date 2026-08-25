@@ -34,6 +34,8 @@ public sealed class JavaneseDef
     public JavaneseNumbersDef Numbers { get; init; } = new();
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public JavanesePhonotactics Phonotactics { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public JavaneseSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class JavanesePhonotactics
@@ -298,4 +300,17 @@ public static class JavanesePhonemizer
     public static ILanguage CreateJavanese() => new Engine();
 
     internal static void RegisterSelf() => Registry.Register("javanese", CreateJavanese);
+}
+
+public sealed class JavaneseSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

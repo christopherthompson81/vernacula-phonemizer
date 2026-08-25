@@ -13,33 +13,12 @@ public static class Normalize
     /** The shared symbol tier. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["US$"] = new[] { "thular", "dular" },
-            ["$"] = new[] { "thular", "dular" },
-        },
         CountForm = _ => 0,
-        Magnitudes = new[] { "waranqa hunu", "hunu", "waranqa", "lluna" },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "kilumitru" },
-            ["m"] = new[] { "mitru" },
-            ["cm"] = new[] { "sintimitru" },
-            ["mm"] = new[] { "milimitru" },
-            ["nm"] = new[] { "nanumitru" },
-            ["kg"] = new[] { "kilugramu" },
-            ["Å"] = new[] { "angstrom" },
-            ["m/s"] = new[] { "mitru sikunduman" },
-            ["km/s"] = new[] { "kilumitru sikunduman" },
-            ["m³/s"] = new[] { "machina mitru sikunduman" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "t'asra" },
-            Cubed = new[] { "machina" },
-            Position = ExponentPosition.Before,
-        },
-        Ampersand = "wan",
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
+        Ampersand = Manifest.MANIFEST.SymbolTier.Ampersand,
     });
 
     private static readonly IReadOnlyDictionary<string, string> ENTITY = new Dictionary<string, string>

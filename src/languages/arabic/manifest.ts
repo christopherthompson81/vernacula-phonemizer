@@ -6,6 +6,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { SymbolData } from "../../core/normalizeSymbols.ts";
 
 export interface ArabicManifest {
     marks: {
@@ -54,6 +55,9 @@ export interface ArabicManifest {
         classicalSpelling: Record<string, string>;
         defectiveSpelling: Record<string, string>;
     };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc.
+     *  Typed off `SymbolData` itself so the declaration cannot drift from what the engine reads. */
+    symbolTier: Required<Pick<SymbolData, "percent" | "currency" | "units" | "exponentWords" | "ampersand">>;
 }
 
 /** The consolidated hand-authored Arabic data tables (see arabic.jsonc). */

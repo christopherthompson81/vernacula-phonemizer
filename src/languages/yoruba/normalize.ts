@@ -13,77 +13,21 @@ import { MANIFEST } from "./manifest.ts";
  */
 const SYM = MANIFEST.symbols;
 
+/**
+ * ⚠ NO `percent` AND NO `percentPrefix`, AND THE SABOTAGE SWEEP IS WHAT PROVED IT. Both were declared here and
+ * both were DEAD: rule 3 below consumes every `%` in the string before this tier ever runs, because Yoruba's
+ * percent is a CIRCUMFIX (`ìdá 84 nínú ọgọ́rùn-ún`) and `percentPrefix` can only move ONE word to the front.
+ * Wrecking the manifest key moved zero readings — the declaration claimed a route the text never takes. It is
+ * removed rather than left as documentation: a tier field that is read by nothing is a false statement about
+ * where this language's percent word comes from. See `SYM.percentBefore`/`SYM.percentAfter` at rule 3.
+ */
 const SYMBOLS = makeSymbolNormalizer({
-    /** `US$` is its own key: with only a bare `$`, the letters read as a word and the sign is dropped. */
-    currency: { "US$": ["dọ́là Amẹ́ríkà"], "₦": ["náírà"], $: ["dọ́là"] },
-    percent: [SYM.percentBefore],
-    percentPrefix: true,
     ampersand: SYM.and,
-    /**
-     * ⚠ `mm` AND `l` JOIN `km`/`ha`/`mi`; `m` IS STILL NOT HERE, and it is claimed locally instead — see
-     * `METRE` below for the two counter-examples that decide it. Cubed is undeclared because no cube word
-     * exists in the language's usage here.
-     *
-     * · `mm` → *mílímítà*, yo.wikipedia 1 token / 1 article and a flood article at that: *"ó sì mú kí òjò
-     *   tó ju MÍLÍMÍTÀ 250 rọ̀"* ("rain of more than 250 mm fell"). ⚠ One article is a lead, so the
-     *   UNTONED spelling was probed as its own word and carries the finding: `milimita` is 12 tokens / 9
-     *   articles, every readable hit rainfall or a botanical measurement — *"1189.7 milimita gbogbo òjò"*,
-     *   *"òjò tí ó ju milimita 150 (5.9 in) lọ"*, *"10 nípasẹ 10 milimita"*, *"àwọn milimita 61.59 ti
-     *   ojoriro"*. Same word, tone marks written or not, which is this corpus's normal condition; the
-     *   TONED form is emitted because every other unit noun in this file is toned and the g2p reads it.
-     * · `l` → *lítà*, 10 tokens / 5 articles, senses read and all volume: *"tó lítà 298 (ẹsẹ̀ onígun mẹ́ta
-     *   10.5)"* (a car's boot), *"ẹ̀rọ Ford OHC lítà 2.0"*, *"Jala Porimala Jojona (35,000 lítà)"*, *"lítà
-     *   omi bílíọ̀nù 61.7 lójoojúmọ́"*, and a Wikipedia style note that glosses the English outright:
-     *   *"wọ́n lè kọ \"one litre\" (LÍTÀ KAN)"*. `líta` is ×0; `lita` ×9 is mostly the footballer Leroy
-     *   Lita and a Ford engine displacement, which is why the toned form is the one taken.
-     *
-     * ⚠ THE ONE-LETTER KEY `l` IS SAFE HERE, AND THE MEASUREMENT IS THE OPPOSITE OF WHAT THE RAW COUNT
-     * SAYS (trap 46). A bare grep for a digit then `l` finds THIRTEEN hits in the mined artifact and not
-     * one is a litre: every one is Yoruba's proclitic `l-` glued to the next word after a number —
-     * `1975 lẹ́yìn`, `1829 látàrí`, `2.8 làti`, `30,000 lábẹ́`, `2015 lọ`, `1985 lóri`, `2012 láti`. That
-     * is exactly the shape that bit `mad`, `rn` and `hmn` this session. What saves it is that the tier's
-     * trailing guard is `(?![\p{L}\p{M}'’ʼ])` and a Yoruba letter follows the `l` in all thirteen: rebuilt
-     * with the guard, the count is 0 matches, so declaring `l` claims nothing the corpus would refuse.
-     * ⚠ `L` IS DECLARED ALONGSIDE `l` — the litre's documented exception to the one-letter rule
-     * (`resolveUnitSymbol`): both cases are official for this unit and the exact branch is case-sensitive.
-     *
-     * ⚠ POSTPOSED, AND THE MIXED COUNT RESOLVES ON A READING. Over the mined artifact the unit noun follows
-     * its number 4 times and precedes it 6, which looks like the `hil`/`rw` question — but the six are all
-     * ATHLETICS EVENT NAMES (`mita 5000`, `mita 3000`, `kilomita 10`, "the 5000 metres"), an idiom naming a
-     * race rather than measuring anything, while every genuine MEASUREMENT is digit-first: `4,180 kìlómítà
-     * (2,600 miles)`, `500 mítà (1,600 ẹsẹ̀ bàtà)`, `8.62 mítà (28.3 ft)`, `10,000 mita`. 4:0 once the
-     * event names are set aside, so the tier's default order stands and no `unitPrefix` is declared.
-     */
-    /**
-     * ⚠ `ft` IS DECLARED, AND IT IS THE ONE PLACE THIS FILE PARTS COMPANY WITH THE FLEET-WIDE IMPERIAL
-     * REFUSAL. ak, sn, mos and jv all leave `ft` reported inside a metric-glossing parenthetical, and the
-     * reason each of them gives is that the language has NO FOOT WORD to give it. Yoruba has one, and this
-     * corpus's own line is the gloss: `tí ọkọọkan tó 150 ẹsẹ̀ (FT) ní gíga` — the abbreviation set beside
-     * the Yoruba noun, in the same sentence, as the definition of it. The layer's `METRE` note already
-     * quotes a second: `500 mítà (1,600 ẹsẹ̀ bàtà)`.
-     *
-     * · `ẹsẹ̀ bàtà` — 19 tokens / 15 articles on yo.wikipedia (tools/corpus/attest/yo.jsonc), and every
-     *   example read is the imperial foot in a metric gloss: *"ẹ̀ẹ́dẹ́gbẹ̀rún mítà (900m), ìwọ̀n ẹsẹ̀ bàtà
-     *   ẹ́ẹ́tà lé-láádọ̀ta-lé-lẹ́gbẹ̀rún méjì (2,953ft)"*, *"mítà méje (ẹsẹ̀ bàtà mẹ́tàlélógún àti ìnṣì)"*,
-     *   *"ère … tí ó tó ẹsẹ bàtà mẹrin (1.2 m)"*. The untoned `ẹsẹ bàtà` ×9/8 is the same word.
-     * ⚠ THE COMPOUND, NEVER BARE `ẹsẹ̀`, and the header already says why: bare `ẹsẹ̀` is a foot/leg and a
-     *   verse-line, which is exactly the wrong-sense argument that keeps it out of the decimal-point slot.
-     *   `bàtà` ("shoe") is what makes the measure sense unambiguous, and it is the collocation the corpus
-     *   writes.
-     * ⚠ POSTPOSED LIKE THE REST, AND THE COUNT LOOKS PREPOSED UNTIL IT IS READ — the same trap this file's
-     *   `units` note records for the athletics event names. Six of the attested hits put the noun first,
-     *   and in every one of those the number is SPELLED OUT (`ẹsẹ bàtà mẹrin`, `ẹsẹ̀ bàtà mẹ́tàlélógún`) or
-     *   the phrase is framed by `ìwọ̀n` ("the measure of"). Where a DIGIT is involved — which is the only
-     *   shape this rule can ever match — the corpus writes `1,600 ẹsẹ̀ bàtà` and `150 ẹsẹ̀`, number first.
-     */
-    units: {
-        km: ["kìlómítà"], ha: ["hẹ́kítà"], mi: ["máìlì"], mm: ["mílímítà"], l: ["lítà"], L: ["lítà"],
-        ft: ["ẹsẹ̀ bàtà"],
-    },
-    /** ⚠ `w` is the YORUBA abbreviation — wákàtí, "hour" — so both `km/w` and the borrowed `km/h` occur. */
-    rateDenominators: { w: "wákàtí kan", h: "wákàtí kan" },
-    unitPer: "ni",
     exponentWords: { squared: [SYM.squared], position: "after" },
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    unitPer: MANIFEST.symbolTier.unitPer,
+    rateDenominators: MANIFEST.symbolTier.rateDenominators,
 });
 
 const GROUPED = /(\d),(\d{3})(?!\d)/gu;

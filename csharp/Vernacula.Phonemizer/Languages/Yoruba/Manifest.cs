@@ -80,10 +80,20 @@ public sealed class YorubaManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public YorubaSymbols Symbols { get; init; } = new();
     public YorubaNumbersDef Numbers { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public YorubaSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
 {
     /** The consolidated hand-authored Yoruba data tables (see yoruba.jsonc). */
     public static readonly YorubaManifest MANIFEST = LoadManifest.Load<YorubaManifest>("languages/yoruba", "yoruba.jsonc");
+}
+
+public sealed class YorubaSymbolTier
+{
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
 }

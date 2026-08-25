@@ -26,6 +26,8 @@ public sealed class SwahiliDef
     public IReadOnlyDictionary<string, string> Vowels { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public SwahiliNumbersDef Numbers { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public SwahiliSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class SwahiliPhonemizer
@@ -182,27 +184,16 @@ public static class SwahiliPhonemizer
     /** Shared symbol tier: ampersand, multiply, percent, currency, units and rates. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Ampersand = "na",
-        Multiply = new MultiplyDef { Times = "mara" },
-        Percent = new[] { "asilimia" },
-        PercentPrefix = true,
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "dola" }, ["€"] = new[] { "euro" }, ["£"] = new[] { "pauni" }, ["¥"] = new[] { "yeni" },
-            ["KSh"] = new[] { "shilingi" }, ["TSh"] = new[] { "shilingi" },
-        },
-        CurrencyPrefix = true,
-        UnitPrefix = true,
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "kilomita" }, ["m"] = new[] { "mita" }, ["cm"] = new[] { "sentimita" },
-            ["kg"] = new[] { "kilogramu" },
-        },
-        UnitPer = "kwa",
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["h"] = "saa", ["s"] = "sekunde",
-        },
+        Percent = DEF.SymbolTier.Percent,
+        Currency = DEF.SymbolTier.Currency,
+        Units = DEF.SymbolTier.Units,
+        RateDenominators = DEF.SymbolTier.RateDenominators,
+        UnitPer = DEF.SymbolTier.UnitPer,
+        Ampersand = DEF.SymbolTier.Ampersand,
+        Multiply = DEF.SymbolTier.Multiply,
+        PercentPrefix = DEF.SymbolTier.PercentPrefix,
+        CurrencyPrefix = DEF.SymbolTier.CurrencyPrefix,
+        UnitPrefix = DEF.SymbolTier.UnitPrefix,
     });
 
     private sealed class Engine : ILanguage
@@ -237,4 +228,18 @@ public static class SwahiliPhonemizer
     public static ILanguage CreateSwahili() => new Engine();
 
     internal static void RegisterSelf() => Registry.Register("swahili", CreateSwahili);
+}
+
+public sealed class SwahiliSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
+    public bool PercentPrefix { get; init; } = false;
+    public bool CurrencyPrefix { get; init; } = false;
+    public bool UnitPrefix { get; init; } = false;
 }

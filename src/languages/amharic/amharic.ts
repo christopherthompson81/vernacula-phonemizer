@@ -7,10 +7,11 @@
  * Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ.
  */
 import type { Phonemizer } from "../../registry.ts";
+import type { SymbolData } from "../../core/normalizeSymbols.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeGeezG2P } from "../../core/geez.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { makeAmharicNormalizer } from "./normalize.ts";
 
 interface NumbersDef {
@@ -23,11 +24,14 @@ interface NumbersDef {
     million: string;
     billion: string;
 }
-interface AmharicDef {
+export interface AmharicDef {
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc.
+     *  Typed off `SymbolData` itself so the declaration cannot drift from what the engine reads. */
+    symbolTier: Required<Pick<SymbolData, "percent" | "currency" | "units" | "magnitudes" | "exponentWords" | "multiply" | "ampersand">>;
 }
-const DEF = loadManifest<AmharicDef>(import.meta.url, "amharic.jsonc");
+const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 
@@ -92,37 +96,13 @@ export type ForeignPhonemizer = (latin: string) => string;
 // inserted BEFORE the written magnitude ("…ዶላር ቢሊዮን"). ቢልየን is a spelling variant listed so it is MATCHED,
 // not so it is emitted. No `magnitudeConnective` — Amharic takes none (አንድ ሚሊዮን ዶላር).
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
-    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
-    // እና is ×1545 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
-    //
-    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
-    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
-    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
-    // see the tier, where the spacing exists because `B&B` is two initialisms.
-    ampersand: "እና",
-    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
-    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
-    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
-    // defaults to it — this language does not split dimension from product.
-    multiply: { times: "በ" },
-    percent: ["በመቶ"],
-    currency: { "$": ["ዶላር"], "¥": ["የን"], "£": ["ፓውንድ"] },
-    // `5 km` read as *amɨst ˈʊkm*: no km or m was declared at all. Verified in am_et:
-    // ሜትር ×15 "ከፍታ 15 ሜትር ነው", ኪሎ ሜትር ×3 "ሰባ ኪሎ ሜትር ያህል ርቆ ነበር", ኪሎ ግራም ×3 "(16 ኪሎ ግራም) ይመዝናል".
-    // NOTED, NOT CHANGED: the corpus writes ኪሎ ሜትር and ኪሎ ግራም with a SPACE, and the ኪሎግራም already declared
-    // here occurs ×0. Both are current Amharic and the space does not change the reading, so the closed
-    // spelling stays for kg while the corpus's own spaced forms are used for the two new keys — a
-    // spelling-preference finding for the sweep, recorded rather than silently harmonised.
-    units: { kg: ["ኪሎግራም"], km: ["ኪሎ ሜትር"], m: ["ሜትር"] },
-    // THE TWO POWERS SIT ON OPPOSITE SIDES, which is why `position` takes a per-power record. This corpus
-    // writes `783,562 ስኩዌር ኪ.ሜ.` (×4, the English loan, word BEFORE) and `120-160 ሜትር ኪዩብ` (×3, word
-    // AFTER) — two borrowings that came in from different directions and kept their source order.
-    // ⚠ ካሬ ×8 is NOT the squared word to use, despite outnumbering ስኩዌር: every instance is the SQUARE MILE
-    // in the parenthetical gloss beside a square-kilometre figure (`783,562 ስኩዌር ኪ.ሜ. (300,948 ካሬ ኪ.ሜ.)`),
-    // so the corpus attests it as this text's rendering of *mi²*, not of *km²*.
-    exponentWords: { squared: ["ስኩዌር"], cubed: ["ኪዩብ"], position: { squared: "before", cubed: "after" } },
-    magnitudes: ["ሚሊዮን", "ቢሊዮን", "ቢልየን", "ትሪሊዮን"],
+    percent: DEF.symbolTier.percent,
+    currency: DEF.symbolTier.currency,
+    units: DEF.symbolTier.units,
+    magnitudes: DEF.symbolTier.magnitudes,
+    exponentWords: DEF.symbolTier.exponentWords,
+    multiply: DEF.symbolTier.multiply,
+    ampersand: DEF.symbolTier.ampersand,
 });
 
 /** Text normalization. SYMBOLS is threaded through it — the ordering is load-bearing (normalize.ts §9). */

@@ -7,9 +7,10 @@
  * Arabic-loan fricatives dh/th/gh/kh→ð/θ/ɣ/x. Vowels [a e i o u].
  */
 import type { Phonemizer } from "../../registry.ts";
+import type { SymbolData } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { normalizeSwahili } from "./normalize.ts";
 
@@ -22,7 +23,7 @@ interface NumbersDef {
     million: string;
     and: string;
 }
-interface SwahiliDef {
+export interface SwahiliDef {
     velarNasal: string;
     prenasal: Record<string, string>;
     digraphs: Record<string, string>;
@@ -30,8 +31,11 @@ interface SwahiliDef {
     vowels: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc.
+     *  Typed off `SymbolData` itself so the declaration cannot drift from what the engine reads. */
+    symbolTier: Required<Pick<SymbolData, "percent" | "currency" | "units" | "percentPrefix" | "currencyPrefix" | "unitPrefix" | "unitPer" | "rateDenominators" | "multiply" | "ampersand">>;
 }
-const DEF = loadManifest<SwahiliDef>(import.meta.url, "swahili.jsonc");
+const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 const TWO = { ...DEF.prenasal, ...DEF.digraphs }; // all 2-letter graphemes
@@ -200,39 +204,16 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'")})|(\\d+)|([.?!,;:])`, "
 // Kimarekani", "kilomita 70 kwa saa" — which is why the local rule existed. Verified byte-identical over
 // the whole sw_ke corpus.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
-    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
-    // na is ×3577 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
-    //
-    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
-    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
-    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
-    // see the tier, where the spacing exists because `B&B` is two initialisms.
-    ampersand: "na",
-    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-    // One word, so `by` defaults to it; this language does not split dimension from product.
-    multiply: { times: "mara" },
-    percent: ["asilimia"],
-    percentPrefix: true,
-    currency: {
-        "$": ["dola"], "€": ["euro"], "£": ["pauni"], "¥": ["yeni"],
-        "KSh": ["shilingi"], "TSh": ["shilingi"],
-    },
-    currencyPrefix: true,
-    // `5 km` read as *tˈano kˈm̩*: no unit was declared, and until now none COULD be, because Swahili
-    // puts the measure noun FIRST and the tier only emitted it after. Counted over sw_ke's four attested unit
-    // words: 82 unit-before to 0 unit-after — "Mbuga hiyo inachukua kilomita 19,500 mraba", "mtindo huru wa
-    // mita 100 na mita 200". Hence `unitPrefix`, the mirror of the `currencyPrefix` already set above.
-    // Verified: kilomita ×59, mita ×23, kilogramu ×6, sentimita ×2.
-    unitPrefix: true,
-    units: { km: ["kilomita"], m: ["mita"], cm: ["sentimita"], kg: ["kilogramu"] },
-    // THE RATE, because declaring the unit alone left a stray letter. sw_ke writes `160 Km/h` ×2 — with a
-    // CAPITAL K, which a case-sensitive grep misses and the tier's `giu` pattern does not — and once `Km` read
-    // as kilomita the `/h` was stranded as a bare *h*. "kwa saa" is attested ×34 and "kwa sekunde" ×5.
-    unitPer: "kwa",
-    rateDenominators: { h: "saa", s: "sekunde" },
+    percent: DEF.symbolTier.percent,
+    currency: DEF.symbolTier.currency,
+    units: DEF.symbolTier.units,
+    percentPrefix: DEF.symbolTier.percentPrefix,
+    currencyPrefix: DEF.symbolTier.currencyPrefix,
+    unitPrefix: DEF.symbolTier.unitPrefix,
+    unitPer: DEF.symbolTier.unitPer,
+    rateDenominators: DEF.symbolTier.rateDenominators,
+    multiply: DEF.symbolTier.multiply,
+    ampersand: DEF.symbolTier.ampersand,
 });
 
 class SwahiliPhonemizer implements Phonemizer {

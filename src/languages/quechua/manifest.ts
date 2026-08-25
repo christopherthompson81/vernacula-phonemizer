@@ -5,6 +5,7 @@
  * loadManifest calls would read and JSONC-parse the same file twice at startup.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { SymbolData } from "../../core/normalizeSymbols.ts";
 
 export interface QuechuaManifest {
     language: string;
@@ -15,6 +16,9 @@ export interface QuechuaManifest {
     /** The SPELLING vowels — see quechua.jsonc; not the IPA vowels, which core/ipa.ts owns. */
     spellingVowels: readonly string[];
     clausePunctuation: Record<string, string>;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc.
+     *  Typed off `SymbolData` itself so the declaration cannot drift from what the engine reads. */
+    symbolTier: Required<Pick<SymbolData, "currency" | "units" | "magnitudes" | "exponentWords" | "ampersand">>;
 }
 
 /** The consolidated hand-authored Quechua data tables (see quechua.jsonc). */

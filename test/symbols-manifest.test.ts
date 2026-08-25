@@ -217,7 +217,128 @@ describe("the HindiDef family is manifest-backed by three different routes", () 
     test("both read the same declared percent word as the engine emits", () => {
         const sayHi = (x: string): string => phonemize(x, "hi").replace(/[ˈˌ]/gu, "");
         const sayMr = (x: string): string => phonemize(x, "mr").replace(/[ˈˌ]/gu, "");
-        expect(sayHi("50% लोग")).toContain(sayHi((HI as never as { symbolTier: { percent: string[] } }).symbolTier.percent[0]));
+        const hiPercent = (HI as never as { symbolTier: { percent: string[] } }).symbolTier.percent[0];
+        expect(hiPercent, "hi: symbolTier.percent is empty").toBeTypeOf("string");
+        expect(sayHi("50% लोग")).toContain(sayHi(hiPercent!));
         expect(sayMr("50% लोक")).toContain(sayMr((MR as never as { percent: { plural: string } }).percent.plural));
+    });
+});
+
+/**
+ * BATCH 7 — the last seven. Two of them are the reason this block is separate from the generic table above.
+ *
+ * ⚠ SWAHILI PUTS THE NOUN FIRST, AND THE TWO FLAGS THAT SAY SO WERE ALMOST LOST. `currencyPrefix` and
+ * `unitPrefix` reached the manifest and would have been dropped on the way back: the sweep's applier carried
+ * a HAND-WRITTEN list of tier keys that predated both fields, so the data would have sat in the jsonc with
+ * nothing reading it and *dola 30* / *kilomita 19* would have quietly become *30 dola* / *19 kilomita* — the
+ * `percentPrefix` failure from batch 1, twice over. Both appliers now derive their key list from `SymbolData`
+ * itself. Pinned here on the reading, which is the only place the flags are visible.
+ */
+import { MANIFEST as AM } from "../src/languages/amharic/manifest.ts";
+import { MANIFEST as AR } from "../src/languages/arabic/manifest.ts";
+import { MANIFEST as JV } from "../src/languages/javanese/manifest.ts";
+import { MANIFEST as QU } from "../src/languages/quechua/manifest.ts";
+import { MANIFEST as SW } from "../src/languages/swahili/manifest.ts";
+import { MANIFEST as TG } from "../src/languages/tajik/manifest.ts";
+import { MANIFEST as YO } from "../src/languages/yoruba/manifest.ts";
+
+const BATCH7: [string, { symbolTier: { units: Record<string, string[]>; currency: Record<string, string[]> } }, string, string][] = [
+    ["am", AM as never, "70 km ርቀት", "$50 እና"],
+    ["ar", AR as never, "70 km مَسَافَة", "$50 وَ"],
+    ["jv", JV as never, "70 km adoh", "$50 lan"],
+    ["qu", QU as never, "70 km karu", "$30 qullqi"],
+    ["sw", SW as never, "70 km umbali", "$50 na"],
+    ["tg", TG as never, "70 km дур", "$50 ва"],
+    ["yo", YO as never, "70 km jìnnà", "$30 owó"],
+];
+
+describe.each(BATCH7)("%s reads its symbol tier from the manifest", (code, DEF, kmSentence, dollarSentence) => {
+    const say = (s: string): string => phonemize(s, code).replace(/[ˈˌ]/gu, "");
+
+    test("the km noun in the reading is a form the manifest declares", () => {
+        const forms = DEF.symbolTier.units["km"] ?? DEF.symbolTier.units["км"]!;
+        expect(forms.some((f) => say(kmSentence).includes(say(f))), `${code}: no declared km form`).toBe(true);
+    });
+
+    test("the dollar noun in the reading is a form the manifest declares", () => {
+        const forms = DEF.symbolTier.currency["$"]!;
+        expect(forms.some((f) => say(dollarSentence).includes(say(f))), `${code}: no declared $ form`).toBe(true);
+    });
+});
+
+describe("swahili emits the measure noun BEFORE the number, as the manifest's two flags say", () => {
+    const say = (s: string): string => phonemize(s, "sw").replace(/[ˈˌ]/gu, "");
+    const tier = SW.symbolTier as { unitPrefix: boolean; currencyPrefix: boolean; units: Record<string, string[]>; currency: Record<string, string[]> };
+
+    test("both flags are declared in the manifest", () => {
+        expect(tier.unitPrefix, "sw: unitPrefix missing").toBe(true);
+        expect(tier.currencyPrefix, "sw: currencyPrefix missing").toBe(true);
+    });
+
+    test("the unit noun leads the reading of `70 km`", () => {
+        // Whole-token comparison, not `startsWith`: a prefix match would also pass on *kilomitaXX*.
+        expect(say("70 km").split(" ")[0]).toBe(say(tier.units["km"]![0]!));
+    });
+
+    test("the currency noun leads the reading of `$50`", () => {
+        expect(say("$50").split(" ")[0]).toBe(say(tier.currency["$"]![0]!));
+    });
+});
+
+/**
+ * ⚠ TWO LANGUAGES DECLARE NO PERCENT AND BOTH ARE RIGHT, for two DIFFERENT reasons — which is why this is a
+ * test and not a lint rule that would flag them as incomplete:
+ *   · `qu` — no sourceable word. The field is optional precisely so a language can take the tier for
+ *     everything else and leave the sign where the leak gates can see it.
+ *   · `yo` — the percent is a CIRCUMFIX (`ìdá 84 nínú ọgọ́rùn-ún`), which the tier cannot express: its
+ *     `percentPrefix` moves ONE word to the front. Yoruba's own rule consumes every `%` before the tier
+ *     runs, so the `percent`/`percentPrefix` pair declared here was DEAD — wrecking the manifest key moved
+ *     zero readings. Both were removed. This test is what stops them coming back.
+ */
+describe("a missing percent is a decision, not a gap", () => {
+    test("qu declares no percent word, and invents none", () => {
+        expect((QU.symbolTier as { percent?: string[] }).percent).toBeUndefined();
+        // ⚠ THE SIGN IS NOT IN THE IPA — the tokenizer drops it downstream, so the leak gates see it in the
+        // NORMALIZED string, not here. What this asserts is the part that matters at the output: the reading
+        // of `50%` is exactly the reading of `50`, with no word conjured for a sign the language cannot say.
+        expect(phonemize("50% runa", "qu")).toBe(phonemize("50 runa", "qu"));
+    });
+
+    test("yo declares neither percent nor percentPrefix in the tier", () => {
+        const tier = YO.symbolTier as { percent?: string[]; percentPrefix?: boolean };
+        expect(tier.percent, "yo: the tier's percent is dead — rule 3 consumes every %").toBeUndefined();
+        expect(tier.percentPrefix, "yo: percentPrefix cannot express a circumfix").toBeUndefined();
+    });
+
+    test("yo still reads its circumfix, from the OTHER manifest table", () => {
+        const say = (s: string): string => phonemize(s, "yo").replace(/[ˈˌ]/gu, "");
+        const sym = YO.symbols as unknown as { percentBefore: string; percentAfter: string };
+        const said = say("50% àwọn ènìyàn");
+        expect(said.startsWith(say(sym.percentBefore)), "yo: no percent word before the number").toBe(true);
+        expect(said).toContain(say(sym.percentAfter));
+    });
+});
+
+/**
+ * ⚠ THE RATE IS ITS OWN ASSERTION, because unwiring `unitPer` broke NOTHING in the tests above. The sabotage
+ * sweep proved the manifest key was live (wrecking it moved readings), but nothing in the coupling test read
+ * it — and a key the tests do not touch is one a later refactor can drop in silence. `A per B` needs both
+ * halves: the connective AND the denominator noun the abbreviation stands for.
+ */
+const RATES: [string, { symbolTier: { unitPer: string; rateDenominators: Record<string, string> } }, string, string][] = [
+    ["jv", JV as never, "120 km/jam banter", "jam"],
+    ["sw", SW as never, "120 km/h kasi", "h"],
+    ["tg", TG as never, "120 км/соат тез", "соат"],
+    ["yo", YO as never, "120 km/h yara", "h"],
+];
+
+describe.each(RATES)("%s reads both halves of a rate from the manifest", (code, DEF, sentence, denom) => {
+    const say = (s: string): string => phonemize(s, code).replace(/[ˈˌ]/gu, "");
+
+    test("the connective and the denominator noun both come from the tier", () => {
+        const said = say(sentence);
+        expect(said, `${code}: unitPer missing from the reading`).toContain(say(DEF.symbolTier.unitPer));
+        const word = DEF.symbolTier.rateDenominators[denom]!;
+        expect(said, `${code}: rateDenominators.${denom} missing from the reading`).toContain(say(word));
     });
 });

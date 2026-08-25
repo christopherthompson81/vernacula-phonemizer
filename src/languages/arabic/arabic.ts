@@ -204,30 +204,11 @@ export const ipaOnly = (value: string): string | undefined => {
 // written form, matching FLEURS' MSA-leaning register) reads cleanly through the diacritizer as
 // fi ilmiʔa; the Egyptian colloquial المية spelling vocalized worse. Shared path — only arz has corpus %.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
-    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
-    // وَ is ×71 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
-    //
-    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
-    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
-    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
-    // see the tier, where the spacing exists because `B&B` is two initialisms.
-    ampersand: "وَ",
-    // Every emitted word carries HARAKAT: the engine reads undiacritized Arabic as a consonant skeleton,
-    // so "في المئة" came out [fj almʔ] where "فِي الْمِئَة" gives [fˈiː almˈiʔa].
-    percent: ["فِي الْمِئَة"],
-    // Absent entirely before: a currency sign was DROPPED ($50 read as just "خمسون").
-    currency: { $: ["دُولَار"], "€": ["يُورُو"], "£": ["جُنَيْه"], "¥": ["يِن"] },
-    units: { km: ["كِيلُومِتْر"], cm: ["سِنْتِيمِتْر"], mm: ["مِلِّيمِتْر"], kg: ["كِيلُوجِرَام"],
-        m: ["مِتْر"], g: ["جِرَام"], "km/h": ["كِيلُومِتْر فِي السَّاعَة"] },
-    // `كيلومتر مربع` ×8 — the adjective FOLLOWS its noun, as Arabic adjectives do. Vocalised to match the
-    // rest of this table; the corpus writes it bare, and the diacritizer would have to guess otherwise.
-    // No cubed word: `متر مكعب` is zero in this corpus, so `m³` keeps the documented unit-plus-`³` fallback
-    // rather than a plausible invention.
-    // `متراً مكعّباً` — the corpus's cubic-metre sentence, adjective FOLLOWING as Arabic adjectives do, same
-    // side as مربع above. (An earlier pass probed the bare `متر مكعب` and read ×0; the corpus writes it with
-    // case endings, which a token probe for the bare form cannot match — the sentence is the evidence.)
-    exponentWords: { squared: ["مُرَبَّع"], cubed: ["مُكَعَّب"], position: "after" },
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    ampersand: MANIFEST.symbolTier.ampersand,
 });
 
 class ArabicPhonemizer implements Phonemizer {

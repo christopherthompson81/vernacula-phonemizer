@@ -22,6 +22,8 @@ public sealed class AmharicDef
 {
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public AmharicNumbersDef Numbers { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public AmharicSymbolTier SymbolTier { get; init; } = new();
 }
 
 /** Read a Latin run with another language's engine — injected from the registry. */
@@ -80,24 +82,13 @@ public sealed class AmharicPhonemizer : ILanguage
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Ampersand = "እና",
-        Multiply = new MultiplyDef { Times = "በ" },
-        Percent = new[] { "በመቶ" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["$"] = new[] { "ዶላር" }, ["¥"] = new[] { "የን" }, ["£"] = new[] { "ፓውንድ" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["kg"] = new[] { "ኪሎግራም" }, ["km"] = new[] { "ኪሎ ሜትር" }, ["m"] = new[] { "ሜትር" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "ስኩዌር" },
-            Cubed = new[] { "ኪዩብ" },
-            Position = new ExponentPositionSpec { Squared = ExponentPosition.Before, Cubed = ExponentPosition.After },
-        },
-        Magnitudes = new[] { "ሚሊዮን", "ቢሊዮን", "ቢልየን", "ትሪሊዮን" },
+        Percent = DEF.SymbolTier.Percent,
+        Currency = DEF.SymbolTier.Currency,
+        Units = DEF.SymbolTier.Units,
+        ExponentWords = DEF.SymbolTier.ExponentWords,
+        Magnitudes = DEF.SymbolTier.Magnitudes,
+        Ampersand = DEF.SymbolTier.Ampersand,
+        Multiply = DEF.SymbolTier.Multiply,
     });
 
     /**
@@ -127,4 +118,15 @@ public sealed class AmharicPhonemizer : ILanguage
 
     internal static void RegisterSelf() =>
         Registry.Register("amharic", () => CreateAmharic(latin => Registry.ReadAsEnglish(latin)));
+}
+
+public sealed class AmharicSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

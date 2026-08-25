@@ -216,9 +216,58 @@ module scope while the manifest was loaded per call inside the factory.
 
 **0 of 39 probe readings moved.** C# matches Node in both modes.
 
+## Batch 7 — am, ar, jv, qu, sw, tg, yo — 2026-08-25 11:00
+
+The last seven in the ported set. Probes: 100 lines across the seven, each covering every key its language
+declares, plus a `4x4` line and a rate line. **0 readings moved**, both modes, and C# matches Node on all
+fourteen runs.
+
+**⚠ THE HAND-WRITTEN KEY LIST WAS THE BUG, THREE TIMES OVER, AND IT IS NOW DERIVED.** Both appliers (TS and
+C#) carried a literal list of tier key names that predated three `SymbolData` fields. Swahili declares two of
+them — `currencyPrefix` and `unitPrefix` — so the lift would have moved both flags into `swahili.jsonc` and
+then wired back neither: the data present, nothing reading it, and *dola 30* / *kilomita 19* quietly becoming
+*30 dola* / *19 kilomita*. That is the batch-1 `percentPrefix` failure repeating on a wider surface. Both
+scripts now read the field list out of `SymbolData` itself, and the TS interface is emitted as
+`Required<Pick<SymbolData, …>>` rather than a hand-typed shape — a hand-typed one would also have made
+`cubed` required (Yoruba declares no cube word) and `position` a bare string (Amharic splits it per power).
+
+**⚠ THE LITERAL-VALUE GUARD FAILED ON SINGLE-LINE OBJECTS.** `_is_literal` stripped quoted strings and then
+looked for a surviving identifier — but an object's own BARE KEYS survive that strip, so
+`currency: { $: [...] }` and `units: { km: [...] }` were misfiled as code. Multi-line tables had been passing
+only by accident: the check read the key's line alone, which for them is just `{`. The guard now takes the
+value to its matching bracket and strips comments, strings, and object keys before looking.
+
+**⚠ A KEPT KEY MUST BE KEPT WHOLE (C#).** The depth-tracking filter kept only the LINE a top-level key sits
+on, so Yoruba's `ExponentWords = new ExponentWordsDef` — which stays in code because it reads a different
+manifest table — lost its initializer body and the file stopped compiling. Balance alone is not the end of an
+entry either: that line is already balanced. The entry ends at its trailing comma.
+
+**⚠ YORUBA'S TIER `percent`/`percentPrefix` WERE DEAD, AND THE SABOTAGE SWEEP IS WHAT PROVED IT.** Wrecking
+`percentPrefix` moved zero readings. Yoruba's percent is a CIRCUMFIX (`ìdá 84 nínú ọgọ́rùn-ún`) and
+`percentPrefix` can only move ONE word to the front, so `normalize.ts` rule 3 consumes every `%` before the
+tier ever runs. Both were REMOVED, on both sides, rather than left as documentation: a tier field read by
+nothing is a false statement about where the language's percent word comes from. Second genuinely dead key
+the sweep has found, after Italian's `ordinals`.
+
+**Four other zeros were probe gaps, not dead keys** — qu `magnitudes` (needs a currency sign to hop with, and
+the probe spelled the magnitude in text), tg `unitPer`/`rateDenominators` (the probe wrote `дар соат` in
+words rather than `км/соат`), tg `magnitudes`. Extended the probes; all four moved. Every key in all seven
+languages is now proven live.
+
+**Coupling tests: `unitPer` was live and untested.** Unwiring it in the code broke nothing, because nothing
+in the test file read a rate. The sabotage sweep and the coupling test answer different questions — one asks
+whether the data is reachable, the other whether a refactor can drop it in silence — and a key can pass the
+first while failing the second. Added a rate assertion for the four languages that declare one (jv, sw, tg,
+yo); each verified by unwiring the code, not the data.
+
+Amharic and Swahili gained a `manifest.ts` so the tests can read the tables without importing the engine.
+
 ## Remaining
 
-7 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
-german, greek, gujarati, hungarian, indonesian, japanese, javanese, kannada, korean, malayalam, mandarin,
-marathi, occitan, odia, polish, punjabi, quechua, russian, swahili, tajik, tamil, telugu, thai, umbundu,
-urdu, vietnamese.
+**None in the ported set.** Re-grepped all 60 C#-ported languages for a `makeSymbolNormalizer({...})` holding
+any literal top-level value: zero hits. This is the check that caught the premature "complete" claim in the
+letterNames sweep, and it is the claim being made here — not a running tally.
+
+Roughly 90 UNPORTED languages still declare their tier inline (hiligaynon, sinhala, estonian, finnish, czech,
+… ). That is deliberate and out of scope: the sweep exists so the C# port and the TypeScript cannot drift on
+hand-authored data, and a language with no C# side has nothing to drift from. Those lift when they port.
