@@ -13,9 +13,10 @@
  * cost readability and the C# port's verbatim-pattern rule for no safety gain. This test pins their spelling
  * instead, which is the property that actually matters.
  */
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../src/core/boundaries.ts";
+import { phonemize } from "../src/index.ts";
 
 const FILES = readdirSync("src/languages", { withFileTypes: true })
     .filter((d) => d.isDirectory())
@@ -41,29 +42,37 @@ describe("the letter boundary is defined once", () => {
         expect(() => new RegExp(`${NOT_LETTER_BEFORE}a`, "u")).not.toThrow();
     });
 
-    /**
-     * ⚠ TWO SITES ARE KNOWN AND NOT FIXED HERE, listed so this test still catches NEW ones.
-     *
-     * `\b` after a word character holds for any NON-ASCII letter, so both of these fire where the lookahead
-     * would not. Neither is folded into the boundary cleanup, because each needs its own measurement:
-     *
-     *   en  /([$£€¥])\s?(\d[\d,]*)\.(\d{2})\b/g   `$1.50é` reads as money, `$1.50a` does not.
-     *   uz  /(\d+)%i\b/gu                        blocked behind a SEPARATE defect — `50%i` already reads
-     *                                            `50NaN` on this path, before any boundary question arises.
-     */
-    const KNOWN_B = [
-        "src/languages/english/normalize.ts",
-        "src/languages/uzbek/normalize.ts",
-    ];
-
-    test("no NEW engine uses \\b where the letter boundary is meant", () => {
+    test("no engine uses \\b where the letter boundary is meant", () => {
+        // The signature that bit us: a symbol-adjacent rule guarded by `\b`. After a word character it holds
+        // for any NON-ASCII letter, so the rule fires into the following word.
         const offenders: string[] = [];
         for (const f of FILES) {
-            if (KNOWN_B.includes(f)) continue;
             for (const m of code(f).matchAll(/\/[^/\n]*[°%$€£¥][^/\n]*\\b[^/\n]*\/[a-z]*/gu)) {
                 offenders.push(`${f}: ${m[0]}`);
             }
         }
         expect(offenders).toEqual([]);
+    });
+});
+
+/**
+ * ⚠ A CORRECTION IS RECORDED HERE BECAUSE IT NEARLY BECAME A BUG REPORT.
+ *
+ * While auditing the Uzbek `%i` site, a probe printed `50%i` as `50NaN` and it was written up as a live
+ * defect. It was the PROBE: Node's `console.log` reads `%i` in its first argument as a printf integer
+ * specifier and substitutes the next argument. Uzbek was always correct — `50%i` reads *ellik foizi*.
+ *
+ * The lesson is about the instrument, not the language: a harness that formats its own output cannot be
+ * used to inspect text containing format specifiers. Every probe in this repo writes to a FILE for exactly
+ * this reason; the one that lied was an ad-hoc `console.log` written in a hurry.
+ */
+
+describe("the probe harness does not reinterpret the text it prints", () => {
+    test("a percent-letter sequence survives a round trip through a file", () => {
+        const reading = phonemize("50%i", "uz");
+        writeFileSync("/tmp/.vernacula-probe-check", `50%i\t${reading}\n`);
+        expect(reading).not.toContain("NaN");
+        // The possessive suffix is read, not dropped: ellik foizi.
+        expect(reading).toBe(phonemize("ellik foizi", "uz"));
     });
 });
