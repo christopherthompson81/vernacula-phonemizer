@@ -27,6 +27,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { romanToInt } from "../../core/roman.ts";
+import { MANIFEST } from "./manifest.ts";
 import { ROMAN_POLICY } from "./romanOrdinals.ts";
 
 /** Word boundaries as explicit lookarounds. `\b` is ASCII-defined and matches INSIDE `città`/`perché` at
@@ -39,29 +40,10 @@ import { ROMAN_POLICY } from "./romanOrdinals.ts";
  * boundary the real counts are `ecc.` ×4, `n.` ×2, `es.` ×2, `dott.` ×1 — so `ca.` is absent from this
  * table, and `n.` is handled separately below because it only means *numero* before a digit.
  */
-const DOTTED_ABBREV: Readonly<Record<string, string>> = {
-    sig: "signor", sigg: "signori", sigra: "signora", signa: "signorina",
-    dott: "dottor", dr: "dottor", prof: "professor", ing: "ingegner", avv: "avvocato",
-    on: "onorevole", ecc: "eccetera", es: "esempio",
-    pag: "pagina", pagg: "pagine", art: "articolo", artt: "articoli",
-    cap: "capitolo", vol: "volume", fig: "figura", tel: "telefono",
-};
+const DOTTED_ABBREV = MANIFEST.dottedAbbrev;
+
 /** Longest key first, so `pagg` is not matched as `pag` plus a stray g. */
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
-
-/**
- * Italian letter names, each verified through this engine's own g2p:
- * a=[ˈa], bi=[bˈi], ci=[t͡ʃˈi], di=[dˈi], effe=[ˈeffe], gi=[d͡ʒˈi], acca=[ˈakka], cappa=[kˈappa],
- * elle=[ˈelle], emme=[ˈemme], enne=[ˈenne], cu=[kˈu], erre=[ˈerre], esse=[ˈesse], vu=[vˈu],
- * ics=[ˈiks], ipsilon=[ipsˈilon], zeta=[t͡sˈeta]. The five letters outside the native 21 take their
- * conventional Italian names (Treccani, *alfabeto*): j *i lunga*, k *cappa*, w *doppia vu*, x *ics*,
- * y *ipsilon*.
- */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", b: "bi", c: "ci", d: "di", e: "e", f: "effe", g: "gi", h: "acca", i: "i",
-    j: "i lunga", k: "cappa", l: "elle", m: "emme", n: "enne", o: "o", p: "pi", q: "cu",
-    r: "erre", s: "esse", t: "ti", u: "u", v: "vu", w: "doppia vu", x: "ics", y: "ipsilon", z: "zeta",
-};
 
 /**
  * Italian phonotactics, for the OOV rule in core/initialisms.ts. Italian syllable structure is strict and
@@ -72,16 +54,9 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
  * words (film, sport, test, record, trend, camp, rock), so those are not spelled out.
  */
 export const isUnreadableItalian = makeUnreadableTest({
-    vowels: /[aeiouàèéìíîòóùú]/u,
-    legalOnsets: new Set([
-        "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr",
-        "ch", "gh", "gn", "qu", "ps", "pn", "sc", "sp", "st", "sf", "sb", "sd", "sg",
-        "sl", "sm", "sn", "sq", "sv", "sr", "sk", "tl",
-    ]),
-    legalCodas: new Set([
-        "lm", "rt", "rd", "rn", "rm", "rs", "rk", "st", "nt", "nd", "nk", "ng", "mp",
-        "ck", "sh", "ss", "ll", "tt", "nn", "rc", "lt",
-    ]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
 
 /**
@@ -93,20 +68,21 @@ export const isUnreadableItalian = makeUnreadableTest({
  */
 const isRomanNumeral = (lower: string): boolean => lower.length >= 2 && romanToInt(lower) !== null;
 
-/**
- * LEXICAL: readable letter runs that Italian nevertheless spells out. Kept deliberately short — the OOV
- * rule above already catches every unpronounceable run, and a wrong entry here is a confidently wrong
- * reading. `ia` (intelligenza artificiale, ×3 in this corpus), `ip` and `hiv` are the three where Italian
- * usage is not in doubt; `USA`, `NASA`, `PIL`, `REM`, `COVID` are deliberately absent because Italian reads
- * them as words and the g2p already does.
- */
-const ACRONYM_LETTERS: ReadonlySet<string> = new Set(["ia", "ip", "hiv"]);
+/** LEXICAL: readable letter runs Italian nevertheless spells out (italian.jsonc `acronymLetters`). ⚠ It
+ *  was a bare `new Set([...])` here — Italian was the only ported language whose acronym list was not in
+ *  its manifest. See the jsonc for why the list is deliberately short and what is absent from it. */
+/** ⚠ ONE SOURCE with the symbol tier in italian.ts. See italian.jsonc `signWords` for why the relational
+ *  readings carry the copula, and `degree` for the agreement defect this lift did NOT fix. */
+const SIGN = MANIFEST.signWords;
+const DEG = MANIFEST.degree;
+
+const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
 
 /** Italian has no pronunciation dictionary — the g2p is fully rule-based — so nothing is "recorded" in the
  *  sense core/initialisms.ts means except the Roman-numeral guard above. */
 export function normalizeItalianInitialisms(text: string): string {
     return makeInitialismNormalizer({
-        letterName: (l) => LETTER_NAME[l],
+        letterName: (l) => MANIFEST.letterNames[l],
         acronymLetters: ACRONYM_LETTERS,
         isRecorded: isRomanNumeral,
         isUnreadable: isUnreadableItalian,
@@ -122,21 +98,21 @@ const feminine = (masc: string): string => masc.replace(/o$/u, "a");
 
 /** Fraction denominators with a suppletive name; the rest take the ordinal (1/5 = un quinto). Plural is the
  *  regular masculine -o → -i (tre quarti). */
-const DENOMINATOR: Readonly<Record<number, string>> = { 2: "mezzo" };
+const DENOMINATOR = MANIFEST.fractions.denominators;
 
 function fractionWords(num: number, den: number): string | undefined {
     if (den < 2 || num < 1) return undefined;
-    const base = DENOMINATOR[den] ?? ordinal(den);
+    const base = DENOMINATOR[String(den)] ?? ordinal(den);
     if (base === undefined) return undefined;
     // The numerator apocopates before the fraction noun: "un quinto", not "uno quinto".
-    return `${num === 1 ? "un" : String(num)} ${num > 1 ? base.replace(/o$/u, "i") : base}`;
+    return `${num === 1 ? MANIFEST.fractions.numeratorOne : String(num)} ${num > 1 ? base.replace(/o$/u, "i") : base}`;
 }
 
 /** The currency noun already spelled out right after the amount — see step 10. */
-const CURRENCY_WORD = /^\s*(?:di\s+)?(?:dollar|euro|sterlin|yen|franch)/iu;
+const CURRENCY_WORD = new RegExp(`^\\s*(?:di\\s+)?(?:${MANIFEST.symbols.currencyStems.join("|")})`, "iu");
 
 /** Compass letters after a degree sign — a geographic coordinate, not a temperature and not an ordinal. */
-const COMPASS: Readonly<Record<string, string>> = { n: "nord", s: "sud", e: "est", w: "ovest" };
+const COMPASS = MANIFEST.compass;
 
 /**
  * Normalize one Italian input string. Pure text→text. Runs BEFORE the shared symbol tier; the decimal comma
@@ -156,12 +132,12 @@ export function normalizeItalian(input: string): string {
     // 2) ERA MARKERS, before the generic dotted-abbreviation rule (multi-dot before single-dot: otherwise
     //    the interior dot of `a.C.` survives as a phrase break). Both spacings occur in the wild; the
     //    corpus writes them closed (a.C. ×7, d.C. ×3).
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}a\\.\\s?C\\.`, "gu"), "avanti Cristo");
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}d\\.\\s?C\\.`, "gu"), "dopo Cristo");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}a\\.\\s?C\\.`, "gu"), MANIFEST.eraMarkers.beforeChrist);
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}d\\.\\s?C\\.`, "gu"), MANIFEST.eraMarkers.afterChrist);
 
     // 3) NUMERO — only before a digit. Both corpus occurrences are `n. 1` / `n. 11`; a bare `n.` at the end
     //    of a sentence is an ordinary word's last letter far more often than it is an abbreviation.
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(?:n\\.º|n\\.|nr\\.|nº)\\s?(?=\\d)`, "giu"), "numero ");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(?:n\\.º|n\\.|nr\\.|nº)\\s?(?=\\d)`, "giu"), `${MANIFEST.numberSign} `);
 
     // 4) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues, so it cannot become a
     //    phrase break; at a phrase end it is kept, because there it really is the sentence end. What
@@ -176,8 +152,8 @@ export function normalizeItalian(input: string): string {
     //    below claims every remaining `\d°`. Temperature (`30°C`, `90 °F`) and coordinate (`35°W`) are
     //    identified by the LETTER glued to the sign; the ordinal never has one (`1° gennaio` has a space).
     //    This also has to run before the shared unit tier, which would otherwise leave the bare sign behind.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 gradi Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 gradi Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, `$1 ${DEG.word} ${DEG.celsius}`);
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, `$1 ${DEG.word} ${DEG.fahrenheit}`);
     s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/gu,
         (_m, d: string, dir: string) => `${d} gradi ${COMPASS[dir.toLowerCase()]!}`);
 
@@ -215,10 +191,10 @@ export function normalizeItalian(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    immediately below.
-    s = s.replace(/±/gu, " più meno ");
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 più $2");
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1più $2");
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1meno $2");
+    s = s.replace(/±/gu, ` ${SIGN.plusMinus} `);
+    s = s.replace(/(\S)\+\s?(\d)/gu, `$1 ${SIGN.plus} $2`);
+    s = s.replace(/(^|\s)\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
+    s = s.replace(/(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
 
     // 8b) RELATIONAL AND DIVISION SIGNS. ⚠ TIER 2 LOOKED SUFFICIENT AND WAS THE WRONG SENSE TWICE —
     //     this language is the clearest case in the issue for why the examples get read rather than the counts.
@@ -244,10 +220,10 @@ export function normalizeItalian(input: string): string {
     //     Italian admits — the adjective needs its verb — so the bare form de/es/en use has nothing to drop to
     //     here. `diviso per` is a participle and stands without one. `lb` (`ass gläich`) and `nb` (`er lik`)
     //     already ship the copular shape, so both are in the fleet.
-    s = s.replace(/\s?=\s?/gu, " è uguale a ");
-    s = s.replace(/\s?<\s?/gu, " è minore di ");
-    s = s.replace(/\s?>\s?/gu, " è maggiore di ");
-    s = s.replace(/\s?÷\s?/gu, " diviso per ");
+    s = s.replace(/\s?=\s?/gu, ` ${SIGN.equals} `);
+    s = s.replace(/\s?<\s?/gu, ` ${SIGN.lessThan} `);
+    s = s.replace(/\s?>\s?/gu, ` ${SIGN.greaterThan} `);
+    s = s.replace(/\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
 
     // 9) FRACTIONS, guarded against a date and a unit ratio by requiring digits on both sides and nothing
     //    numeric after.
@@ -269,7 +245,7 @@ export function normalizeItalian(input: string): string {
     //     UTC offset has a digit on at least one side and is left for a later rule to claim. Spaced on output
     //     because the inputs are closed up (`volo+hotel` is one token to the tokenizer, and *volopiùhotel* is
     //     not a word).
-    s = s.replace(/(?<=[\p{L}\p{M}])\+(?=[\p{L}\p{M}])/gu, " più ");
+    s = s.replace(/(?<=[\p{L}\p{M}])\+(?=[\p{L}\p{M}])/gu, ` ${SIGN.plus} `);
 
     // 10) CURRENCY WRITTEN BEFORE THE AMOUNT. The corpus only ever postposes the sign ("banconote da 5 $",
     //     "2.500 ¥"), which the shared symbol tier handles correctly, so this rule exists for the preposed
@@ -323,5 +299,5 @@ export const CURRENCY: Readonly<Record<string, readonly [string, string]>> = {
  * (`nel 1990, 1995`), which always carries the space a decimal never does.
  */
 export function normalizeItalianDecimals(input: string): string {
-    return input.replace(/(\d),(\d)/gu, "$1 virgola $2");
+    return input.replace(/(\d),(\d)/gu, `$1 ${MANIFEST.decimalWord} $2`);
 }

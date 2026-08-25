@@ -11,29 +11,12 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { MANIFEST } from "./manifest.ts";
 import { CURRENCY, normalizeItalian, normalizeItalianDecimals, normalizeItalianInitialisms } from "./normalize.ts";
 
-interface NumbersDef {
-    units: string[];
-    teens: string[];
-    tens: string[];
-    hundred: string;
-    thousand: string;
-    thousands: string;
-    million: string;
-    millions: string;
-    and: string;
-}
-interface ItalianDef {
-    consonants: Record<string, string>;
-    vowels: Record<string, string>;
-    accented: Record<string, string>;
-    clausePunctuation: Record<string, string>;
-    numbers: NumbersDef;
-}
-const DEF = loadManifest<ItalianDef>(import.meta.url, "italian.jsonc");
+const DEF = MANIFEST;
+
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 
@@ -334,56 +317,20 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
  * real, and `l'` before a vowel would be claimed as *litri* since an apostrophe is not a letter.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
-    // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — this
-    // language does not split dimension from product.
-    multiply: { times: "per" },
-    // Unread, `&` is DROPPED outright and `B&B` loses the sign entirely.
-    // `e` ×1067 in this corpus. The tier spaces it on both sides, because `B&B` is two
-    // initialisms and joining them would make one token.
-    ampersand: "e",
-    percent: ["per cento"],
-    // Only the POSTPOSED sign reaches here — normalize.ts step 10 has already claimed the preposed form,
-    // which needs the partitive *di* the shared magnitude hop cannot insert.
-    currency: Object.fromEntries(Object.entries(CURRENCY).map(([sign, forms]) => [sign, [...forms]])),
-    // DECLARED FOR THE UNIT PATH, and the reason it was withheld no longer applies. This list was
-    // deliberately absent so the CURRENCY magnitude hop could not emit `5 milioni dollari` without the
-    // partitive. But `magnitudes` also gates `magAltU`, the UNIT path's connective hop — so withholding it to
-    // protect currency left the tier unable to cross `milioni di` to reach a unit, and
-    // `2,2 milioni di km²` read as *due virgola due milioni di KM*: the exponent dropped AND the unit noun
-    // left raw in the IPA. One field, two consumers, and only one of them had a problem.
-    //
-    // Safe because step 10 runs FIRST and consumes the whole preposed shape — sign, amount, magnitude and
-    // partitive together — so the currency path here never sees a magnitude to hop. Measured: the corpus has
-    // exactly ONE currency-sign sentence (`tra 2.500 ¥ e 130.000 ¥`), postposed, with no magnitude word
-    // anywhere near it, and ZERO sentences carrying both a currency sign and *milioni*/*miliardi*.
-    magnitudes: ["miliardi", "miliardo", "milioni", "milione", "mila"],
-    magnitudeConnective: "di", // due virgola due milioni DI chilometri quadrati
-    // Longest keys match first (the builder sorts by length), so km² beats km and km/h beats km.
-    units: {
-        "km/h": ["chilometro orario", "chilometri orari"],
-        "km/s": ["chilometro al secondo", "chilometri al secondo"],
-        "m/s": ["metro al secondo", "metri al secondo"],
-        mph: ["miglio orario", "miglia orarie"],
-        km: ["chilometro", "chilometri"], cm: ["centimetro", "centimetri"],
-        mm: ["millimetro", "millimetri"], m: ["metro", "metri"],
-        kg: ["chilogrammo", "chilogrammi"], mg: ["milligrammo", "milligrammi"],
-        gb: ["gigabyte"], mb: ["megabyte"], tb: ["terabyte"],
-        kw: ["chilowatt"], mw: ["megawatt"], hz: ["hertz"],
-    },
-    // MIGRATION TEST: the composite km²/m² keys are gone, composed by the shared tier instead.
-    exponentWords: { squared: ["quadrato", "quadrati"], cubed: ["cubo", "cubi"] },
-    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
-    // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
-    // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
-    // they are different words (chilometri quadrati but venti al quadrato).
-    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
-    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
-    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
-    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
-    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
-    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n} al quadrato", cubed: "{n} al cubo", power: "{n} elevato a {e}" , negative: "meno" },
+    // ⚠ ONE SOURCE with normalize.ts, which applies the other seven signs in positions this tier does not
+    // reach. See italian.jsonc `signWords` for the register argument behind `per` and the corpus count
+    // behind `e` (×1067).
+    multiply: { times: MANIFEST.signWords.times },
+    ampersand: MANIFEST.signWords.ampersand,
+    percent: MANIFEST.symbols.percent,
+    // Only the POSTPOSED sign reaches here — normalize.ts has already claimed the preposed form, which needs
+    // the partitive *di* the shared magnitude hop cannot insert.
+    currency: MANIFEST.symbols.currency,
+    magnitudes: MANIFEST.symbols.magnitudes,
+    magnitudeConnective: MANIFEST.symbols.magnitudeConnective, // due virgola due milioni DI km quadrati
+    units: MANIFEST.symbols.units,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    bareExponent: MANIFEST.symbols.bareExponent,
 });
 
 class ItalianPhonemizer implements Phonemizer {

@@ -26,6 +26,64 @@ public sealed class ItalianDef
     public IReadOnlyDictionary<string, string> Accented { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public ItalianNumbersDef Numbers { get; init; } = new();
+    /** Readable letter runs Italian nevertheless spells out; see italian.jsonc for what is absent and why. */
+    public IReadOnlyList<string> AcronymLetters { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public ItalianPhonotactics Phonotactics { get; init; } = new();
+    public IReadOnlyDictionary<string, string> DottedAbbrev { get; init; } = new Dictionary<string, string>();
+    /** 1–10 only — everything above is COMPOSED from the cardinal, so there is no tens/hundreds row. */
+    public IReadOnlyDictionary<string, string> Ordinals { get; init; } = new Dictionary<string, string>();
+    public ItalianFractions Fractions { get; init; } = new();
+    public ItalianEraMarkers EraMarkers { get; init; } = new();
+    public string NumberSign { get; init; } = "";
+    /** ⚠ `Word` is ALWAYS PLURAL — a pre-existing defect, not agreement. See italian.jsonc. */
+    public ItalianDegree Degree { get; init; } = new();
+    public IReadOnlyDictionary<string, string> Compass { get; init; } = new Dictionary<string, string>();
+    public string DecimalWord { get; init; } = "";
+    public SignWords SignWords { get; init; } = null!;
+    public ItalianSymbols Symbols { get; init; } = new();
+}
+
+public sealed class ItalianPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public IReadOnlyList<string> Onsets { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Codas { get; init; } = Array.Empty<string>();
+}
+
+public sealed class ItalianFractions
+{
+    public IReadOnlyDictionary<string, string> Denominators { get; init; } = new Dictionary<string, string>();
+    public string NumeratorOne { get; init; } = "";
+}
+
+public sealed class ItalianEraMarkers
+{
+    public string BeforeChrist { get; init; } = "";
+    public string AfterChrist { get; init; } = "";
+}
+
+public sealed class ItalianDegree
+{
+    public string Word { get; init; } = "";
+    public string Celsius { get; init; } = "";
+    public string Fahrenheit { get; init; } = "";
+}
+
+/** The shared symbol tier's data (Italian.cs). */
+public sealed class ItalianSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+    /** Nouns the PREPOSED currency rule treats as already spelled out; stems, matched case-insensitively. */
+    public IReadOnlyList<string> CurrencyStems { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string MagnitudeConnective { get; init; } = "";
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public BareExponentDef BareExponent { get; init; } = new();
 }
 
 public static class ItalianPhonemizer
@@ -323,33 +381,20 @@ public static class ItalianPhonemizer
     /** symbol normalization — Italian. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "per" },
-        Ampersand = "e",
-        Percent = new[] { "per cento" },
-        // Only the POSTPOSED sign reaches here — Normalize has already claimed the preposed form, which
+        // ⚠ ONE SOURCE with Normalize.cs, which applies the other seven signs in positions this tier does not
+        // reach. See italian.jsonc `signWords` for the register argument behind `per` and the corpus count
+        // behind `e` (×1067).
+        Multiply = new MultiplyDef { Times = DEF.SignWords.Times },
+        Ampersand = DEF.SignWords.Ampersand,
+        Percent = DEF.Symbols.Percent,
+        // Only the POSTPOSED sign reaches here — Normalize.cs has already claimed the preposed form, which
         // needs the partitive *di* the shared magnitude hop cannot insert.
-        Currency = Normalize.CURRENCY.ToDictionary(
-            kv => kv.Key, kv => (IReadOnlyList<string>)new[] { kv.Value.Singular, kv.Value.Plural }, StringComparer.Ordinal),
-        Magnitudes = new[] { "miliardi", "miliardo", "milioni", "milione", "mila" },
-        MagnitudeConnective = "di", // due virgola due milioni DI chilometri quadrati
-        // Longest keys match first (the builder sorts by length), so km² beats km and km/h beats km.
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km/h"] = new[] { "chilometro orario", "chilometri orari" },
-            ["km/s"] = new[] { "chilometro al secondo", "chilometri al secondo" },
-            ["m/s"] = new[] { "metro al secondo", "metri al secondo" },
-            ["mph"] = new[] { "miglio orario", "miglia orarie" },
-            ["km"] = new[] { "chilometro", "chilometri" }, ["cm"] = new[] { "centimetro", "centimetri" },
-            ["mm"] = new[] { "millimetro", "millimetri" }, ["m"] = new[] { "metro", "metri" },
-            ["kg"] = new[] { "chilogrammo", "chilogrammi" }, ["mg"] = new[] { "milligrammo", "milligrammi" },
-            ["gb"] = new[] { "gigabyte" }, ["mb"] = new[] { "megabyte" }, ["tb"] = new[] { "terabyte" },
-            ["kw"] = new[] { "chilowatt" }, ["mw"] = new[] { "megawatt" }, ["hz"] = new[] { "hertz" },
-        },
-        ExponentWords = new ExponentWordsDef { Squared = new[] { "quadrato", "quadrati" }, Cubed = new[] { "cubo", "cubi" } },
-        BareExponent = new BareExponentDef
-        {
-            Squared = "{n} al quadrato", Cubed = "{n} al cubo", Power = "{n} elevato a {e}", Negative = "meno",
-        },
+        Currency = DEF.Symbols.Currency,
+        Magnitudes = DEF.Symbols.Magnitudes,
+        MagnitudeConnective = DEF.Symbols.MagnitudeConnective,
+        Units = DEF.Symbols.Units,
+        ExponentWords = DEF.Symbols.ExponentWords,
+        BareExponent = DEF.Symbols.BareExponent,
     });
 
     private sealed class Engine : ILanguage

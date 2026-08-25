@@ -21,15 +21,14 @@ public static class Normalize
      * Dotted abbreviations → the spoken words. `n.` is handled separately below, because it only means
      * *numero* before a digit.
      */
-    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["sig"] = "signor", ["sigg"] = "signori", ["sigra"] = "signora", ["signa"] = "signorina",
-        ["dott"] = "dottor", ["dr"] = "dottor", ["prof"] = "professor", ["ing"] = "ingegner", ["avv"] = "avvocato",
-        ["on"] = "onorevole", ["ecc"] = "eccetera", ["es"] = "esempio",
-        ["pag"] = "pagina", ["pagg"] = "pagine", ["art"] = "articolo", ["artt"] = "articoli",
-        ["cap"] = "capitolo", ["vol"] = "volume", ["fig"] = "figura", ["tel"] = "telefono",
-    };
-    /** Longest key first, so `pagg` is not matched as `pag` plus a stray g. */
+    private static ItalianDef DEF => ItalianPhonemizer.DEF;
+    /** ⚠ ONE SOURCE with the symbol tier in Italian.cs. See italian.jsonc `signWords` for why the relational
+     *  readings carry the copula, and `degree` for the agreement defect this lift did NOT fix. */
+    private static SignWords SIGN => DEF.SignWords;
+    private static ItalianDegree DEG => DEF.Degree;
+
+    private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = DEF.DottedAbbrev;
+
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(a => a.Length));
 
     /**
@@ -37,43 +36,28 @@ public static class Normalize
      * native 21 take their conventional Italian names: j *i lunga*, k *cappa*, w *doppia vu*, x *ics*,
      * y *ipsilon*.
      */
-    private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
+public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.MakeUnreadableTest(new PhonotacticsData
     {
-        ["a"] = "a", ["b"] = "bi", ["c"] = "ci", ["d"] = "di", ["e"] = "e", ["f"] = "effe", ["g"] = "gi",
-        ["h"] = "acca", ["i"] = "i", ["j"] = "i lunga", ["k"] = "cappa", ["l"] = "elle", ["m"] = "emme",
-        ["n"] = "enne", ["o"] = "o", ["p"] = "pi", ["q"] = "cu", ["r"] = "erre", ["s"] = "esse", ["t"] = "ti",
-        ["u"] = "u", ["v"] = "vu", ["w"] = "doppia vu", ["x"] = "ics", ["y"] = "ipsilon", ["z"] = "zeta",
-    };
-
-    /** Italian phonotactics, for the OOV rule in core/initialisms.ts. */
-    public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.MakeUnreadableTest(new PhonotacticsData
-    {
-        Vowels = JsRegex.Compile("[aeiouàèéìíîòóùú]", "u"),
-        LegalOnsets = new HashSet<string>(new[]
-        {
-            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr",
-            "ch", "gh", "gn", "qu", "ps", "pn", "sc", "sp", "st", "sf", "sb", "sd", "sg",
-            "sl", "sm", "sn", "sq", "sv", "sr", "sk", "tl",
-        }, StringComparer.Ordinal),
-        LegalCodas = new HashSet<string>(new[]
-        {
-            "lm", "rt", "rd", "rn", "rm", "rs", "rk", "st", "nt", "nd", "nk", "ng", "mp",
-            "ck", "sh", "ss", "ll", "tt", "nn", "rc", "lt",
-        }, StringComparer.Ordinal),
+        Vowels = JsRegex.Compile($"[{DEF.Phonotactics.Vowels}]", "u"),
+        LegalOnsets = new HashSet<string>(DEF.Phonotactics.Onsets, StringComparer.Ordinal),
+        LegalCodas = new HashSet<string>(DEF.Phonotactics.Codas, StringComparer.Ordinal),
     });
 
     /** A canonical Roman numeral must never be letter-spelled. */
     private static bool IsRomanNumeral(string lower) => lower.Length >= 2 && Roman.RomanToInt(lower) is not null;
 
     /** LEXICAL: readable letter runs that Italian nevertheless spells out. */
+    /** LEXICAL: readable letter runs Italian nevertheless spells out (italian.jsonc `acronymLetters`).
+     *  ⚠ It was a bare set literal here — Italian was the only ported language whose acronym list was not
+     *  in its manifest. */
     private static readonly IReadOnlySet<string> ACRONYM_LETTERS =
-        new HashSet<string>(new[] { "ia", "ip", "hiv" }, StringComparer.Ordinal);
+        new HashSet<string>(DEF.AcronymLetters, StringComparer.Ordinal);
 
     /** Italian has no pronunciation dictionary — the g2p is fully rule-based — so nothing is "recorded" in the
      *  sense core/initialisms.ts means except the Roman-numeral guard above. */
     private static readonly Func<string, string> INITIALISMS = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
-        LetterName = l => LETTER_NAME.GetValueOrDefault(l),
+        LetterName = l => DEF.LetterNames.GetValueOrDefault(l),
         AcronymLetters = ACRONYM_LETTERS,
         IsRecorded = IsRomanNumeral,
         IsUnreadable = IsUnreadableItalian,
@@ -94,29 +78,26 @@ public static class Normalize
 
     /** Fraction denominators with a suppletive name; the rest take the ordinal (1/5 = un quinto). Plural is the
      *  regular masculine -o → -i (tre quarti). */
-    private static readonly IReadOnlyDictionary<int, string> DENOMINATOR = new Dictionary<int, string> { [2] = "mezzo" };
+    private static readonly IReadOnlyDictionary<string, string> DENOMINATOR = DEF.Fractions.Denominators;
     private static readonly JsRe FINAL_O_TO_I = JsRegex.Compile("o$", "u");
 
     private static string? FractionWords(double num, double den)
     {
         if (den < 2 || num < 1) return null;
-        var basew = double.IsInteger(den) && den >= int.MinValue && den <= int.MaxValue && DENOMINATOR.TryGetValue((int)den, out var sup)
+        var basew = DENOMINATOR.TryGetValue(Js.NumberToString(den), out var sup)
             ? sup
             : Ordinal(den);
         if (basew is null) return null;
-        return $"{(num == 1 ? "un" : Js.NumberToString(num))} {(num > 1 ? JsRegex.Replace(basew, FINAL_O_TO_I, _ => "i") : basew)}";
+        return $"{(num == 1 ? DEF.Fractions.NumeratorOne : Js.NumberToString(num))} {(num > 1 ? JsRegex.Replace(basew, FINAL_O_TO_I, _ => "i") : basew)}";
     }
 
     /** The currency noun already spelled out right after the amount — see step 10. */
-    private static readonly JsRe CURRENCY_WORD = JsRegex.Compile("^\\s*(?:di\\s+)?(?:dollar|euro|sterlin|yen|franch)", "iu");
+    private static readonly JsRe CURRENCY_WORD = JsRegex.Compile($"^\\s*(?:di\\s+)?(?:{string.Join("|", DEF.Symbols.CurrencyStems)})", "iu");
 
     /**
      * Compass letters after a degree sign — a geographic coordinate, not a temperature and not an ordinal.
      */
-    private static readonly IReadOnlyDictionary<string, string> COMPASS = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["n"] = "nord", ["s"] = "sud", ["e"] = "est", ["w"] = "ovest",
-    };
+    private static readonly IReadOnlyDictionary<string, string> COMPASS = DEF.Compass;
 
     // The step patterns. The TS builds several inline; JsRegex.Compile caches, so hoisting them here is a
     // readability choice and not a behaviour one.
@@ -161,10 +142,10 @@ public static class Normalize
 
         // 2) ERA MARKERS, before the generic dotted-abbreviation rule (multi-dot before single-dot, or the
         //    interior dot of `a.C.` survives as a phrase break).
-        s = JsRegex.Replace(s, ERA_BC, _ => "avanti Cristo");
-        s = JsRegex.Replace(s, ERA_AD, _ => "dopo Cristo");
+        s = JsRegex.Replace(s, ERA_BC, _ => DEF.EraMarkers.BeforeChrist);
+        s = JsRegex.Replace(s, ERA_AD, _ => DEF.EraMarkers.AfterChrist);
 
-        s = JsRegex.Replace(s, NUMERO, _ => "numero ");
+        s = JsRegex.Replace(s, NUMERO, _ => $"{DEF.NumberSign} ");
 
         s = JsRegex.Replace(s, ABBREV_MID, m =>
             $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
@@ -175,10 +156,10 @@ public static class Normalize
         //    in step 6 claims every remaining `\d°`. Temperature and coordinate are identified by the LETTER
         //    glued to the sign; the ordinal never has one. Also before the shared unit tier, which would
         //    otherwise leave the bare sign behind.
-        s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} gradi Celsius");
-        s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} gradi Fahrenheit");
+        s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} {DEG.Word} {DEG.Celsius}");
+        s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} {DEG.Word} {DEG.Fahrenheit}");
         s = JsRegex.Replace(s, DEG_COMPASS, m =>
-            $"{m.Groups[1].Value} gradi {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
+            $"{m.Groups[1].Value} {DEG.Word} {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
 
         // 6) ORDINAL INDICATORS `°`/`º`/`ª`. The temperature and coordinate senses were consumed in step 5,
         //    so what reaches here is the ordinal.
@@ -196,20 +177,20 @@ public static class Normalize
         s = JsRegex.Replace(s, CLOCK_DOT, m =>
             $"{m.Groups[1].Value}{(Js.Number(m.Groups[3].Value) == 0 ? m.Groups[2].Value : $"{m.Groups[2].Value} e {m.Groups[3].Value}")}");
 
-        s = JsRegex.Replace(s, PLUSMINUS, _ => " più meno ");
-        s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} più {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}più {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, MINUS, m => $"{m.Groups[1].Value}meno {m.Groups[2].Value}");
+        s = JsRegex.Replace(s, PLUSMINUS, _ => $" {SIGN.PlusMinus} ");
+        s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} {SIGN.Plus} {m.Groups[2].Value}");
+        s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}{SIGN.Plus} {m.Groups[2].Value}");
+        s = JsRegex.Replace(s, MINUS, m => $"{m.Groups[1].Value}{SIGN.Minus} {m.Groups[2].Value}");
 
-        s = JsRegex.Replace(s, EQUALS, _ => " è uguale a ");
-        s = JsRegex.Replace(s, LESS_THAN, _ => " è minore di ");
-        s = JsRegex.Replace(s, GREATER_THAN, _ => " è maggiore di ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " diviso per ");
+        s = JsRegex.Replace(s, EQUALS, _ => $" {SIGN.Equals} ");
+        s = JsRegex.Replace(s, LESS_THAN, _ => $" {SIGN.LessThan} ");
+        s = JsRegex.Replace(s, GREATER_THAN, _ => $" {SIGN.GreaterThan} ");
+        s = JsRegex.Replace(s, DIVIDE, _ => $" {SIGN.DividedBy} ");
 
         s = JsRegex.Replace(s, FRACTION, m =>
             FractionWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);
 
-        s = JsRegex.Replace(s, PLUS_JOINER, _ => " più ");
+        s = JsRegex.Replace(s, PLUS_JOINER, _ => $" {SIGN.Plus} ");
 
         // 10) CURRENCY WRITTEN BEFORE THE AMOUNT — claimed here because the shared tier's magnitude hop emits
         //     `5 milioni dollari` and Italian needs the partitive *di*. After step 1, so the amount is one run.
@@ -252,5 +233,5 @@ public static class Normalize
      * looking at `5 km/s`. ItalianPhonemizer therefore calls this AFTER the symbol tier.
      */
     public static string NormalizeItalianDecimals(string input) =>
-        JsRegex.Replace(input, DECIMAL_COMMA, m => $"{m.Groups[1].Value} virgola {m.Groups[2].Value}");
+        JsRegex.Replace(input, DECIMAL_COMMA, m => $"{m.Groups[1].Value} {DEF.DecimalWord} {m.Groups[2].Value}");
 }
