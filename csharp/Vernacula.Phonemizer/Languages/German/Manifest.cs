@@ -45,8 +45,36 @@ public sealed class GermanNumberData
     public GermanMillion Million { get; init; } = new();
 }
 
+public sealed class GermanOrdinals
+{
+    public IReadOnlyDictionary<string, string> IrregularStems { get; init; } = new Dictionary<string, string>();
+    public string SuffixBelow20 { get; init; } = "";
+    public string SuffixFrom20 { get; init; } = "";
+}
+
+public sealed class GermanPhonotactics
+{
+    public string Vowels { get; init; } = "";
+    public string[] Onsets { get; init; } = [];
+    public string[] Codas { get; init; } = [];
+    public string[] Digraphs { get; init; } = [];
+}
+
 public sealed class GermanManifest
 {
+    public string[] Months { get; init; } = [];
+    /** ⚠ Includes the corpus's own misspelling `Jahrunderts`, so the rule still fires on it. */
+    public string[] OrdinalNouns { get; init; } = [];
+    public string[] WeakEn { get; init; } = [];
+    /** ⚠ The full licenser set is `WeakEn` PLUS these — articles license the reading, not the -en ending. */
+    public string[] OrdinalLicensersExtra { get; init; } = [];
+    public GermanOrdinals Ordinals { get; init; } = new();
+    public IReadOnlyDictionary<string, string> DottedAbbrev { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    public GermanPhonotactics Phonotactics { get; init; } = new();
+    /** ⚠ STEMS — the rule appends `\p{L}*`, so each matches its inflected forms. */
+    public string[] MeasureStems { get; init; } = [];
+
     /** Acronyms read letter-by-letter; see german.jsonc. */
     public IReadOnlyList<string> AcronymLetters { get; init; } = Array.Empty<string>();
     public string VowelChars { get; init; } = "";

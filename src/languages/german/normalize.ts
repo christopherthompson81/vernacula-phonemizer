@@ -23,61 +23,42 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-const MONTHS = "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember";
+const MONTHS = MANIFEST.months.join("|");
 /** Nouns that follow an ordinal numeral. `Jahrunderts` is the corpus's own misspelling, kept so the rule
  *  still fires on it. */
-const ORDINAL_NOUN = `${MONTHS}|Jahrhundert|Jahrhunderts|Jahrunderts|Jh`;
+const ORDINAL_NOUN = [MONTHS, ...MANIFEST.ordinalNouns].join("|");
 /** Articles and prepositions that license an ordinal reading, and which of the two endings they govern. */
-const WEAK_EN = new Set(["am", "im", "vom", "zum", "beim", "dem", "des", "den", "ins", "seit", "bis", "ab", "nach", "vor", "zur"]);
-const LICENSER = new Set([...WEAK_EN, "das", "der", "die", "ein", "eine", "sein", "ihr"]);
+const WEAK_EN = new Set(MANIFEST.weakEn);
+const LICENSER = new Set([...WEAK_EN, ...MANIFEST.ordinalLicensersExtra]);
 
 /**
  * Integer → the German ordinal STEM. Below 20 the stem is the cardinal plus -t, above it plus -st, with
  * four suppletive stems (erst, dritt, siebt, and acht which already ends in t).
  */
-const IRREGULAR_STEM: Readonly<Record<number, string>> = { 1: "erst", 3: "dritt", 7: "siebt", 8: "acht" };
+const IRREGULAR_STEM: Readonly<Record<string, string>> = MANIFEST.ordinals.irregularStems;
 function ordinalStem(n: number): string | undefined {
     if (!Number.isSafeInteger(n) || n < 1) return undefined;
-    const irr = IRREGULAR_STEM[n];
+    const irr = IRREGULAR_STEM[String(n)];
     if (irr !== undefined) return irr;
     const card = numberToWords(n);
     if (card === "" || /\d/u.test(card)) return undefined;
-    return n < 20 ? `${card}t` : `${card}st`;
+    return n < 20 ? `${card}${MANIFEST.ordinals.suffixBelow20}` : `${card}${MANIFEST.ordinals.suffixFrom20}`;
 }
 
 /** Dotted abbreviations → the spoken words. `bzw.` ×13 and `usw.` ×7 are the frequent ones, and both were
  *  read as a consonant cluster plus a phrase break. */
-const DOTTED_ABBREV: Readonly<Record<string, string>> = {
-    bzw: "beziehungsweise", usw: "und so weiter", ca: "circa", evtl: "eventuell", ggf: "gegebenenfalls",
-    inkl: "inklusive", exkl: "exklusive", bzgl: "bezüglich", einschl: "einschließlich",
-    dr: "Doktor", prof: "Professor", st: "Sankt", hr: "Herr", fr: "Frau", nr: "Nummer",
-    mio: "Millionen", mrd: "Milliarden", jh: "Jahrhundert", bd: "Band", s: "Seite", vgl: "vergleiche",
-};
+const DOTTED_ABBREV: Readonly<Record<string, string>> = MANIFEST.dottedAbbrev;
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
 /** German letter names, for initialisms: USA is [uː ʔɛs ʔaː], not the word *usa*. */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", b: "be", c: "ze", d: "de", e: "e", f: "eff", g: "ge", h: "ha", i: "i", j: "jott",
-    k: "ka", l: "ell", m: "emm", n: "enn", o: "o", p: "pe", q: "ku", r: "err", s: "ess", t: "te",
-    u: "u", v: "vau", w: "we", x: "iks", y: "üpsilon", z: "zett", "ä": "ä", "ö": "ö", "ü": "ü",
-};
+const LETTER_NAME: Readonly<Record<string, string>> = MANIFEST.letterNames;
 
 /** German phonotactics, for the OOV rule in core/initialisms.ts. */
 export const isUnreadableGerman = makeUnreadableTest({
-    vowels: /[aeiouäöüy]/u,
-    legalOnsets: new Set([
-        "bl", "br", "ch", "dr", "fl", "fr", "gl", "gr", "kl", "kn", "kr", "pf", "pl", "pr", "ps",
-        "qu", "sc", "sch", "sh", "sk", "sl", "sm", "sn", "sp", "st", "sw", "th", "tr", "tw", "vl", "vr", "zw",
-        "ph", "gn", "schw", "wl",
-    ]),
-    legalCodas: new Set([
-        "ch", "ck", "ft", "ht", "lb", "ld", "lf", "lk", "lm", "ln", "lp", "ls", "lt", "lz", "mm",
-        "mp", "ms", "nd", "nf", "ng", "nk", "ns", "nt", "nz", "pf", "ps", "rb", "rd", "rf", "rg",
-        "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rz", "sch", "sk", "sp", "st", "ss", "tt", "tz", "ts", "ks",
-        "nn", "bt", "hl", "gt", "hr", "kt", "hn", "zt", "hm", "mt", "ll", "rr", "cht", "ngt",
-    ]),
-    // ONE phoneme each — see PhonotacticsData.digraphs.
-    digraphs: new Set(["ch", "sch", "tz", "ck", "ph", "th", "ng", "qu", "ss", "sh"]),
+    vowels: new RegExp(`[${MANIFEST.phonotactics.vowels}]`, "u"),
+    legalOnsets: new Set(MANIFEST.phonotactics.onsets),
+    legalCodas: new Set(MANIFEST.phonotactics.codas),
+    digraphs: new Set(MANIFEST.phonotactics.digraphs),
 });
 
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
@@ -113,15 +94,7 @@ export function normalizeGermanInitialisms(text: string): string {
  *  size with a measure noun and writes a year bare — after a noun (*Festung 1620*), after a verb, at a
  *  sentence start. A preposition list reaches none of those. So the year reading is the default and
  *  NOT_A_YEAR carries the exceptions; widen that guard, not the cue. */
-const MEASURE_STEM = [
-    // ⚠ STEMS, matched with a trailing `\p{L}*`, because GERMAN INFLECTS THESE and an exact match with a
-    //   `\b` misses every oblique case: *mit 1200 Einwohnern* is a count, and `Einwohner\b` fails on the
-    //   dative -n. The stem list is what the shared tier and the unit table already spell out.
-    "Prozent", "Grad", "Euro", "Cent", "Dollar", "Pfund", "Franken", "Kilometer", "Meter", "Zentimeter",
-    "Millimeter", "Meile", "Kilogramm", "Gramm", "Tonne", "Liter", "Hektar", "Quadrat", "Kubik", "Volt",
-    "Watt", "Stück", "Mal", "mal", "Million", "Milliarde", "Jahr", "Monat", "Tag", "Stunde", "Minute",
-    "Sekunde", "Mann", "Mensch", "Einwohner", "Person", "Soldat", "Mitarbeiter", "Teilnehmer", "Besucher",
-].join("|");
+const MEASURE_STEM = MANIFEST.measureStems.join("|");
 // ⚠ NO `\b` AFTER THE ALTERNATION and no bare symbols in it. `\b` is a WORD-boundary assertion, so after a
 //   non-word character (`%`, `°`, `€`, `$`) it only holds when a word character follows — `%\b` never
 //   matches `1200 %` at all, and every symbol alternative written that way is dead. Symbols are already
