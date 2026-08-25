@@ -192,9 +192,33 @@ and failed. Restored with the reason recorded in the assertion itself.
 **Verification of the rename specifically:** all 27 previously-lifted languages re-probed after it, 0 moved,
 plus a C# spot check on one language per earlier batch.
 
+## Batch 6 — hi, ur, ta, te, id (and mr, which needed nothing) — 2026-08-25 12:50
+
+**⚠ MARATHI CAME OUT EMPTY, AND THAT WAS THE RIGHT ANSWER.** Every key in its tier is an expression reading
+`DEF.percent`, `DEF.currency`, `DEF.units`, `DEF.multiply`, `DEF.ampersand` — its symbol data was already
+lifted in #953, under TOP-LEVEL keys rather than a `symbolTier` block. The transliterator correctly rejected
+all five as code, leaving an empty block, and the honest move was to REVERT Marathi entirely rather than add
+a `symbolTier: {}` to make the shape uniform.
+
+The invariant worth holding is not "every language has the same key". It is that **no language reads a
+hard-coded table** — and Marathi already didn't. The coupling test records the three routes the `HindiDef`
+family took rather than flattening them.
+
+**⚠ AND THE RENAME HIT THE WRONG KEY IN HINDI.** `hindi.jsonc` has BOTH tables: the sign map
+`"symbols": { "%": "प्रतिशत" }` near the top, and the tier appended at the end. A first-occurrence
+`.replace(..., 1)` renamed the SIGN MAP to `symbolTier` and left the tier as `symbols`, so the tier loaded
+as `{}` and `50% लोग` lost its percent word, `$50` its currency, `4x4` its multiply, `25 km²` its unit — four
+readings gone at once. The probe caught it. Hindi was the only language in the sweep with both tables in one
+file, which is exactly why a positional rename was the wrong tool.
+
+**Two more languages needed a module-level manifest** — hi (TS and C#) — because the tier is built once at
+module scope while the manifest was loaded per call inside the factory.
+
+**0 of 39 probe readings moved.** C# matches Node in both modes.
+
 ## Remaining
 
-11 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
+7 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
 german, greek, gujarati, hungarian, indonesian, japanese, javanese, kannada, korean, malayalam, mandarin,
 marathi, occitan, odia, polish, punjabi, quechua, russian, swahili, tajik, tamil, telugu, thai, umbundu,
 urdu, vietnamese.

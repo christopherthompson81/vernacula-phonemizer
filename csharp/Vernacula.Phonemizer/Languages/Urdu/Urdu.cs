@@ -64,23 +64,12 @@ public static class UrduPhonemizer
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Ampersand = "اور",
-        Multiply = new MultiplyDef { Times = "ضرب" },
-        Percent = new[] { "فیصد" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["₨"] = new[] { "روپے" }, ["$"] = new[] { "ڈالر" }, ["€"] = new[] { "یورو" }, ["£"] = new[] { "پاؤنڈ" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "کلومیٹر" }, ["cm"] = new[] { "سینٹیمیٹر" }, ["mm"] = new[] { "ملیمیٹر" },
-            ["kg"] = new[] { "کلوگرام" }, ["m"] = new[] { "میٹر" }, ["g"] = new[] { "گرام" },
-            ["km/h"] = new[] { "کلومیٹر فی گھنٹہ" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "مربع" }, Cubed = new[] { "کیوبک" }, Position = "before",
-        },
+        Percent = DEF.SymbolTier.Percent,
+        Currency = DEF.SymbolTier.Currency,
+        Units = DEF.SymbolTier.Units,
+        ExponentWords = DEF.SymbolTier.ExponentWords,
+        Ampersand = DEF.SymbolTier.Ampersand,
+        Multiply = DEF.SymbolTier.Multiply,
     });
 
     private static readonly JsRe TOKEN = JsRegex.Compile(

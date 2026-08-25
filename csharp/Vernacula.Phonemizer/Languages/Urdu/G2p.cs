@@ -20,6 +20,8 @@ public sealed class UrduDef
     public string InherentVowel { get; init; } = "";
     public NumbersDef Numbers { get; init; } = new();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public UrduSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class G2p
@@ -172,4 +174,14 @@ public static class G2p
         }
         return @out.Normalize(System.Text.NormalizationForm.FormC);
     }
+}
+
+public sealed class UrduSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

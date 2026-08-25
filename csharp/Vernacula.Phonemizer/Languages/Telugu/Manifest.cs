@@ -25,9 +25,22 @@ public sealed class TeluguManifest : AbugidaDef
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; set; } = new Dictionary<string, string>();
     /** ⚠ WRITTEN forms for RECOGNITION, not a spelling map — see the jsonc. Never emitted. */
     public IReadOnlyList<string> InitialismLetterForms { get; init; } = Array.Empty<string>();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public TeluguSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
 {
     public static readonly TeluguManifest MANIFEST = LoadManifest.Load<TeluguManifest>("languages/telugu", "telugu.jsonc");
+}
+
+public sealed class TeluguSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

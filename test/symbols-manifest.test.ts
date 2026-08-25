@@ -188,3 +188,36 @@ describe.each(UNSPACED)("%s declares unspacedScript and reads a sign with no spa
             `${code}: $ dropped from an unspaced context`).toBe(true);
     });
 });
+
+/**
+ * ⚠ THE THREE LANGUAGES THAT SHARE `HindiDef` NOW AGREE ON WHERE THE TIER LIVES — but they got there by
+ * three different routes, and the test records that rather than flattening it:
+ *   · `hi` and `gu` declare a `symbolTier` block in their own jsonc;
+ *   · `mr` was ALREADY fully manifest-backed from an earlier lift (#953) under TOP-LEVEL keys
+ *     (`percent`, `currency`, `units`, `multiply`, `ampersand`), so it has no `symbolTier` at all and
+ *     lifting it again would have created an empty block. Its tier reads `DEF.*` directly.
+ * The invariant that matters is not "every language has the same key" — it is that NO language reads a
+ * hard-coded table.
+ */
+import { MANIFEST as HI } from "../src/languages/hindi/manifest.ts";
+import { DEF as MR } from "../src/languages/marathi/marathi.ts";
+
+describe("the HindiDef family is manifest-backed by three different routes", () => {
+    test("hi declares a symbolTier block", () => {
+        expect((HI as { symbolTier?: object }).symbolTier).toBeDefined();
+    });
+
+    test("mr has NO symbolTier, and that is correct — its tier reads top-level keys", () => {
+        expect((MR as { symbolTier?: object }).symbolTier).toBeUndefined();
+        // The keys its tier actually reads, lifted in #953.
+        for (const k of ["percent", "currency", "units", "multiply", "ampersand"])
+            expect(MR, `mr: ${k} missing`).toHaveProperty(k);
+    });
+
+    test("both read the same declared percent word as the engine emits", () => {
+        const sayHi = (x: string): string => phonemize(x, "hi").replace(/[ˈˌ]/gu, "");
+        const sayMr = (x: string): string => phonemize(x, "mr").replace(/[ˈˌ]/gu, "");
+        expect(sayHi("50% लोग")).toContain(sayHi((HI as never as { symbolTier: { percent: string[] } }).symbolTier.percent[0]));
+        expect(sayMr("50% लोक")).toContain(sayMr((MR as never as { percent: { plural: string } }).percent.plural));
+    });
+});

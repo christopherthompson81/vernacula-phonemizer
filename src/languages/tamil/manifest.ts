@@ -7,6 +7,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
 
 /**
@@ -45,6 +46,16 @@ export interface TamilManifest extends AbugidaDef {
     numbers: TamilNumbers;
     /** ⚠ WRITTEN forms for RECOGNITION, not a spelling map — see the jsonc. Never emitted as a reading. */
     initialismLetterForms: string[];
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 
 /** The consolidated Tamil data (abugida def + post-pass tables; see tamil.jsonc). */

@@ -19,31 +19,13 @@ public static class Normalize
     /** The SHARED symbol tier (percent / currency / units / exponent). */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Ampersand = "మరియు",
-        Multiply = new MultiplyDef { Times = "గుణించి" },
-        Percent = new[] { "శాతం" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["US$"] = new[] { "డాలరు", "డాలర్లు" }, ["$"] = new[] { "డాలరు", "డాలర్లు" },
-        },
-        Magnitudes = new[] { "మిలియన్", "బిలియన్", "ట్రిలియన్", "లక్ష", "కోటి" },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "కిలోమీటరు", "కిలోమీటర్లు" },
-            ["cm"] = new[] { "సెంటీమీటరు", "సెంటీమీటర్లు" },
-            ["mm"] = new[] { "మిల్లీమీటరు", "మిల్లీమీటర్లు" },
-            ["kg"] = new[] { "కిలోగ్రాము", "కిలోగ్రాములు" },
-            ["mi"] = new[] { "మైలు", "మైళ్లు" },
-            ["m"] = new[] { "మీటరు", "మీటర్లు" },
-            ["miles"] = new[] { "మైలు", "మైళ్లు" },
-            ["inches"] = new[] { "అంగుళం", "అంగుళాలు" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "చదరపు" },
-            Cubed = new[] { "క్యూబిక్" },
-            Position = ExponentPosition.Before,
-        },
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
+        Ampersand = Manifest.MANIFEST.SymbolTier.Ampersand,
+        Multiply = Manifest.MANIFEST.SymbolTier.Multiply,
     });
 
     /** Telugu unit abbreviations, dotted and undotted. */
