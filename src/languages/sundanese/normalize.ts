@@ -296,8 +296,12 @@ export function normalizeSundanese(input: string): string {
     // `°` ×707 was dropped outright and `°C` ×247 additionally read the C as Sundanese ⟨c⟩ = [t͡ʃ]:
     // `40,9 °C` came out *opat puluh , salapan t͡ʃ*. `darajat` ×182.
     // Scale letters first, then compass, then the bare sign — the specific before the general.
-    s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 darajat Celsius");
-    s = s.replace(/(\d)\s?°\s?F\b/giu, "$1 darajat Fahrenheit");
+    // ⚠ THE GUARD IS `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following
+    // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
+    // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
+    // orthography is what supplies the accented letter. 71 other engines already guard it this way.
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 darajat Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 darajat Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
         (_m, d: string, dir: string) => `${d} darajat ${COMPASS[dir.toLowerCase()]!}`);
     s = s.replace(/(\d)\s?°/gu, "$1 darajat");

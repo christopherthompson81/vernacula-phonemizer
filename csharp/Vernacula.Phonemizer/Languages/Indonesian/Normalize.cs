@@ -42,8 +42,11 @@ public static class Normalize
     private static readonly JsRe ABBREV_MID = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))", "giu");
     private static readonly JsRe SLASH_UNIT = JsRegex.Compile($"(\\d)\\s?({UNIT_ALT})(?![\\p{{L}}])", "gu");
-    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C\\b", "giu");
-    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F\\b", "giu");
+    // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following NON-ASCII letter
+    // counted as a boundary and this fired when it must not — `25°Cölner` ate the ⟨C⟩ as Celsius. See
+    // src/languages/*/normalize.ts, which carries the finding.
+    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C(?![\\p{L}\\p{M}])", "giu");
+    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe DEG_COORD = JsRegex.Compile("(\\d)\\s?°\\s?([NSEW])(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe DEG = JsRegex.Compile("(\\d)\\s?°", "gu");
     private static readonly JsRe MINUS = JsRegex.Compile("(^|[\\s(])[-−–](\\d)", "gu");

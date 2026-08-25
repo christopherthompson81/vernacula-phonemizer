@@ -85,8 +85,12 @@ export function normalizeIndonesian(input: string): string {
         (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`);
 
     // 5) DEGREES. °C was falling through to the English reading of the letter C.
-    s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 derajat Celsius");
-    s = s.replace(/(\d)\s?°\s?F\b/giu, "$1 derajat Fahrenheit");
+    // ⚠ THE GUARD IS `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following
+    // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
+    // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
+    // orthography is what supplies the accented letter. 71 other engines already guard it this way.
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 derajat Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 derajat Fahrenheit");
     //    COORDINATES, the third sense of the sign, and it was UNREACHABLE UNTIL THE MOJIBAKE REPAIR. The
     //    corpus writes `di timur 35Â°W` — the coordinate's degree sign was half of a broken `°` in
     //    double-encoded text, so the bare arm below could never see it and the `W` was never a problem.

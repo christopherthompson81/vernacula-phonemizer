@@ -186,8 +186,12 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");
 
     // 6) DEGREES, before the unit tier so the bare sign is not left behind.
-    s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 graus Celsius");
-    s = s.replace(/(\d)\s?°\s?F\b/giu, "$1 graus Fahrenheit");
+    // ⚠ THE GUARD IS `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following
+    // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
+    // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
+    // orthography is what supplies the accented letter. 71 other engines already guard it this way.
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 graus Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 graus Fahrenheit");
     s = s.replace(/(\d)\s?°/gu, "$1 graus");
 
     // 7) CLOCK. Two forms occur and BOTH were broken: the `h` form (×28) dropped its marker entirely
