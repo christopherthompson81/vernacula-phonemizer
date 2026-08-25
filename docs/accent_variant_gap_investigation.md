@@ -82,10 +82,59 @@ An explicit five-entry list, the same call `Languages/Bootstrap.cs` makes and fo
 "which variants exist?" stays one grep. A variant that later gains a golden is checked by the main loop as
 well; the census only answers "does it exist at all".
 
+## Run 6 — 2026-08-25 01:40 — pt-BR, and the classification that was right about shape and wrong about cost
+
+**Question.** Run 2 filed pt-BR as "engine MODE", the shape a `variantOf` key could not reach. Does that make
+it expensive?
+
+**Finding (raw).** No. The C# Portuguese engine already carried `dialect: "bp"` through `ToSegments`,
+`Sibilants` and `Realize`, and `CreatePortuguese(string dialect = "ep", Func<string,string,string>? postWord)`
+already took both arguments pt-BR supplies. `data/languages/portuguese-br/pt-br-openclose.tsv` (1,369 rows)
+was already in the repo. The port is one 50-line file.
+
+**Implication, worth stating because I made the wrong inference myself:** "it is a mode, not a substitution"
+is a statement about SHAPE. It says a declarative variant key cannot express it. It says nothing about cost,
+and reading cost off it was an assumption. 286 C#-vs-Node probe readings matched sync and async on first
+compile.
+
+## Run 7 — 2026-08-25 01:48 — the lexicon load, which the probe would not have witnessed
+
+**Question.** The 286 readings matched — but does the open/close lexicon actually LOAD in C#, or did the
+probe simply never touch it?
+
+**⚠ THE FAILURE MODE IS SILENT.** `LoadTsvMap(optional: true)` returns an EMPTY map when the file is missing,
+and the engine then answers with the rule-only reading — plausible IPA, in the right language, with the wrong
+stressed vowel. Nothing throws.
+
+**Command.** Probe the first ten lexicon entries through both engines, then break the filename in C# and
+re-probe.
+
+**Finding (raw).** `abacote` → `abakˈɔt͡ʃi` in both; with the filename broken, all ten readings change. So the
+file is read AND is load-bearing. Pinned by a test asserting `abacote` carries [ɔ] — a target the rules do
+not produce — and that the rule-only path (which the referee eval scores) does NOT carry the override.
+
+## Run 8 — two vacuous assertions I wrote and caught
+
+The first draft of the numeral test contained `Assert.Equal(x, x)` and a tautology
+(`Assert.Contains("séc", … ? "séc" : "")`). Both passed by construction. Replaced with a test that can fail:
+`XII aniversário` must not read like `12 aniversário` (which is what proves the Roman policy is registered
+for the variant at all), and the two varieties must agree on word COUNT while differing in every word.
+
 ## Result
 
-es-419 ported and covered by the gate. The remaining four are named on every parity run instead of being
-invisible. The C# test asserts the REGISTRATION, not just the substitution — verified by deregistering the
-factory, which fails all four assertions.
+es-419 and pt-BR ported and covered by the gate. The remaining three are named on every parity run instead
+of being invisible:
 
-56 languages / 11,200 rows / 0 differ; 396 C# tests, 5,049 TS tests.
+```
+accent variants: 2/5 build — es-419, pt-BR
+⚠ NOT PORTED, and their base language IS: en-GB (variant of en), en-IN (variant of en), fr-CA (variant of fr)
+```
+
+Both tests assert the REGISTRATION rather than the phonology (the goldens cover that), and pt-BR's also
+asserts the LEXICON LOAD. Verified by deregistering the factory (4/4 fail) and by breaking the lexicon
+filename (1/4 fails — the one written for it).
+
+57 languages / 11,400 rows / 0 differ; 410 C# tests, 5,057 TS tests.
+
+**Remaining:** fr-CA (59 lines, IPA-only substitution — the cheap shape), en-IN (72, same shape), and en-GB
+(95 lines plus five TSV lexical sets and word-level context — the only genuinely large one).
