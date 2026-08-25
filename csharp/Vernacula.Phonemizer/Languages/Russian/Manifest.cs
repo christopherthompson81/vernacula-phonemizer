@@ -62,6 +62,8 @@ public sealed class RussianManifest
     public RussianPhonotactics Phonotactics { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public RussianSymbolTier SymbolTier { get; init; } = new();
+    /** Roman-numeral ordinals 1–19; index 0 is empty. */
+    public IReadOnlyList<string> RomanOrdinals { get; init; } = Array.Empty<string>();
 }
 
 public sealed class RussianPhonotactics

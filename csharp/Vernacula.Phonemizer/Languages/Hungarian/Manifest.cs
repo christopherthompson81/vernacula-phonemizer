@@ -36,6 +36,8 @@ public sealed class HungarianManifest
     public HungarianSymbolTier SymbolTier { get; init; } = new();
     /** The ordinal form of each morph that can END a cardinal. See the jsonc. */
     public IReadOnlyDictionary<string, string> OrdinalMorphs { get; init; } = new Dictionary<string, string>();
+    /** Multiplicative form of each morph that can END a cardinal (-szor/-szer/-ször). */
+    public IReadOnlyDictionary<string, string> MultiplicativeMorphs { get; init; } = new Dictionary<string, string>();
 }
 
 public sealed class HungarianPhonotactics

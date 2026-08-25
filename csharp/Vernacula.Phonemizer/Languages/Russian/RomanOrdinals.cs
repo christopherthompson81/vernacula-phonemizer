@@ -11,13 +11,8 @@ public static class RomanOrdinals
     /** Cardinal tens, reused from the language's own number data (russian.jsonc): двадцать, тридцать, … */
     private static IReadOnlyList<string> TENS_CARDINAL => Manifest.MANIFEST.Numbers.Tens;
 
-    /** 1–19 — irregular stems throughout (первый … четвёртый), so a table, not a rule. */
-    private static readonly string[] ORD_1_19 =
-    {
-        "", "первый", "второй", "третий", "четвёртый", "пятый", "шестой", "седьмой", "восьмой", "девятый",
-        "десятый", "одиннадцатый", "двенадцатый", "тринадцатый", "четырнадцатый", "пятнадцатый",
-        "шестнадцатый", "семнадцатый", "восемнадцатый", "девятнадцатый",
-    };
+    /** Read from the manifest — see the jsonc. */
+    private static IReadOnlyList<string> ORD_1_19 => Manifest.MANIFEST.RomanOrdinals;
 
     /** Whole tens — their own stems (сороковой, пятидесятый), not derivable from the cardinal. */
     private static readonly string[] ORD_TENS =

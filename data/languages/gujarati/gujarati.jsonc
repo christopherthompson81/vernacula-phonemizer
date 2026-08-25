@@ -136,5 +136,14 @@
         //             ધન/ઘન cluster that offers confidently wrong plus words to a token count.
         // The cube word here is the English loan ક્યુબિક, not ઘન. Only the collocation decides it.
         "exponentWords": { "squared": ["વર્ગ"], "cubed": ["ક્યુબિક"], "position": "before" }
+    },
+
+    // Irregular ordinals, indexed [masculine, feminine, neuter, oblique]. 1–4 and 6 are suppletive.
+    "irregularOrdinals": {
+    "1": ["પહેલો", "પહેલી", "પહેલું", "પહેલા"],
+    "2": ["બીજો", "બીજી", "બીજું", "બીજા"],
+    "3": ["ત્રીજો", "ત્રીજી", "ત્રીજું", "ત્રીજા"],
+    "4": ["ચોથો", "ચોથી", "ચોથું", "ચોથા"],
+    "6": ["છઠ્ઠો", "છઠ્ઠી", "છઠ્ઠું", "છઠ્ઠા"]
     }
 }

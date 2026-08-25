@@ -1,3 +1,4 @@
+using System.Globalization;
 /**
  * Hindi (hi) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
  * pronounceable word into words the pipeline speaks.
@@ -17,15 +18,12 @@ public static class Normalize
         ["वें"] = 2, ["वे"] = 2,
     };
 
-    /** Irregular ordinals, indexed [masculine, feminine, oblique]. */
-    private static readonly IReadOnlyDictionary<int, string[]> IRREGULAR = new Dictionary<int, string[]>
-    {
-        [1] = new[] { "पहला", "पहली", "पहले" },
-        [2] = new[] { "दूसरा", "दूसरी", "दूसरे" },
-        [3] = new[] { "तीसरा", "तीसरी", "तीसरे" },
-        [4] = new[] { "चौथा", "चौथी", "चौथे" },
-        [6] = new[] { "छठा", "छठी", "छठे" },
-    };
+    /**
+     * Irregular ordinals, from the manifest. ⚠ THE JSON KEYS ARE STRINGS and this code indexes by INT,
+     * which is where a JS/.NET divergence is paid: the TS side writes `IRREGULAR[n]` and JS coerces the
+     * numeric index; C# does not, so the conversion is explicit at the call site.
+     */
+    private static IReadOnlyDictionary<string, string[]> IRREGULAR => Hindi.DEF.IrregularOrdinals;
 
     /** Devanagari unit abbreviations → the full word. */
     private static readonly IReadOnlyDictionary<string, string> UNIT_WORD = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -83,7 +81,7 @@ public static class Normalize
         /** The ordinal, agreeing with whatever the written suffix marked. */
         string? Ordinal(double n, int form, string suffix)
         {
-            if (double.IsInteger(n) && n >= int.MinValue && n <= int.MaxValue && IRREGULAR.TryGetValue((int)n, out var irr))
+            if (double.IsInteger(n) && n >= int.MinValue && n <= int.MaxValue && IRREGULAR.TryGetValue(((int)n).ToString(CultureInfo.InvariantCulture), out var irr))
                 return irr[form];
             var words = Cardinal(n);
             if (words.Count == 0 || words.Any(w => w == "")) return null;

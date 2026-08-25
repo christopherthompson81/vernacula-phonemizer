@@ -37,6 +37,12 @@ public class HindiDef : AbugidaDef
      * own tokenizer reads. Nullable because hi/mr/gu share this type and are migrating one at a time.
      */
     public HindiSymbolTier? SymbolTier { get; init; }
+    /**
+     * Irregular ordinals, 1–4 and 6 only. ⚠ KEYED BY STRING (JSON keys always are; the TS side gets
+     * number-coercion for free and C# does not) and the TUPLE WIDTH IS LANGUAGE-SPECIFIC — this Def is
+     * SHARED, and Hindi marks [masc, fem, oblique] where Gujarati adds a neuter.
+     */
+    public IReadOnlyDictionary<string, string[]> IrregularOrdinals { get; init; } = new Dictionary<string, string[]>();
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */

@@ -151,5 +151,12 @@
             "squared": ["kwadratowy", "kwadratowe", "kwadratowych", "kwadratowego"],
             "cubed": ["sześcienny", "sześcienne", "sześciennych", "sześciennego"],
         }
-    }
+    },
+
+    // Roman-numeral ordinals 1–19 — irregular stems, so a table and not a rule. Index 0 is empty.
+    "romanOrdinals": [
+    "", "pierwszy", "drugi", "trzeci", "czwarty", "piąty", "szósty", "siódmy", "ósmy", "dziewiąty",
+    "dziesiąty", "jedenasty", "dwunasty", "trzynasty", "czternasty", "piętnasty", "szesnasty",
+    "siedemnasty", "osiemnasty", "dziewiętnasty"
+    ]
 }

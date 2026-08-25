@@ -60,6 +60,8 @@ export interface DutchManifest {
         magnitudes: string[];
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
+    /** Ordinals 1–19; index 0 is empty. The -ste rule from 20 up stays in normalize.ts. */
+    ordinalsBelow20: string[];
 }
 
 /** The consolidated hand-authored Dutch data tables (see dutch.jsonc). */

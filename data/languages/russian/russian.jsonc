@@ -324,5 +324,13 @@
         // side and read *пять долларов миллионов*. The inflected forms are listed because running text writes
         // the one its numeral governs (5 миллионов, 2 миллиона).
         "magnitudes": ["тысячи", "тысяч", "миллион", "миллиона", "миллионов", "миллиард", "миллиарда", "миллиардов"]
-    }
+    },
+
+    // Roman-numeral ordinals 1–19 — irregular stems throughout (первый … четвёртый), so a table and not
+    // a rule. Index 0 is empty; the composition above 19 stays in romanOrdinals.ts.
+    "romanOrdinals": [
+    "", "первый", "второй", "третий", "четвёртый", "пятый", "шестой", "седьмой", "восьмой", "девятый",
+    "десятый", "одиннадцатый", "двенадцатый", "тринадцатый", "четырнадцатый", "пятнадцатый",
+    "шестнадцатый", "семнадцатый", "восемнадцатый", "девятнадцатый"
+    ]
 }

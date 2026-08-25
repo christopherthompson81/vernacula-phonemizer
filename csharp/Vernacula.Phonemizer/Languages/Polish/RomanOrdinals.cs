@@ -9,13 +9,8 @@ namespace Vernacula.Phonemizer.Languages.Polish;
 
 public static class RomanOrdinals
 {
-    /** 1–19, masculine nominative. Irregular stems (pierwszy, drugi, trzeci, ósmy) → table. */
-    private static readonly string[] ORD_1_19 =
-    {
-        "", "pierwszy", "drugi", "trzeci", "czwarty", "piąty", "szósty", "siódmy", "ósmy", "dziewiąty",
-        "dziesiąty", "jedenasty", "dwunasty", "trzynasty", "czternasty", "piętnasty", "szesnasty",
-        "siedemnasty", "osiemnasty", "dziewiętnasty",
-    };
+    /** Read from the manifest — see the jsonc. */
+    private static IReadOnlyList<string> ORD_1_19 => Manifest.MANIFEST.RomanOrdinals;
 
     /** Whole tens, masculine nominative. */
     private static readonly string[] ORD_TENS =

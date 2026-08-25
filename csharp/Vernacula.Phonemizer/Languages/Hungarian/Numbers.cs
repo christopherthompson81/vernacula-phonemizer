@@ -91,19 +91,9 @@ public static class Numbers
     private static readonly IReadOnlyList<string> ORDINAL_KEYS =
         ORDINAL_MORPH.Keys.OrderByDescending(k => k.Length).ToList();
 
-    /**
-     * MULTIPLICATIVE (-szor / -szer / -ször), which is how Hungarian reads a dimension `×` — `6 × 6 cm` is
-     * *hatszor hat centiméter*.
-     */
-    private static readonly IReadOnlyDictionary<string, string> MULTIPLICATIVE_MORPH = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["nulla"] = "nullaszor", ["egy"] = "egyszer", ["kettő"] = "kétszer", ["három"] = "háromszor", ["négy"] = "négyszer",
-        ["öt"] = "ötször", ["hat"] = "hatszor", ["hét"] = "hétszer", ["nyolc"] = "nyolcszor", ["kilenc"] = "kilencszer",
-        ["tíz"] = "tízszer", ["húsz"] = "húszszor", ["harminc"] = "harmincszor", ["negyven"] = "negyvenszer",
-        ["ötven"] = "ötvenszer", ["hatvan"] = "hatvanszor", ["hetven"] = "hetvenszer", ["nyolcvan"] = "nyolcvanszor",
-        ["kilencven"] = "kilencvenszer", ["száz"] = "százszor", ["ezer"] = "ezerszer", ["millió"] = "milliószor",
-        ["milliárd"] = "milliárdszor",
-    };
+    /** Read from the manifest — see the jsonc. */
+    private static IReadOnlyDictionary<string, string> MULTIPLICATIVE_MORPH => Manifest.MANIFEST.MultiplicativeMorphs;
+
     // LONGEST FIRST, for the reason ORDINAL_KEYS gives.
     private static readonly IReadOnlyList<string> MULTIPLICATIVE_KEYS =
         MULTIPLICATIVE_MORPH.Keys.OrderByDescending(k => k.Length).ToList();

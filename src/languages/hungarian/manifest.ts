@@ -36,6 +36,8 @@ export interface HungarianManifest {
     };
     /** The ordinal form of each morph that can END a cardinal. See the jsonc. */
     ordinalMorphs: Record<string, string>;
+    /** Multiplicative form of each morph that can END a cardinal (-szor/-szer/-ször). */
+    multiplicativeMorphs: Record<string, string>;
 }
 
 /** The consolidated hand-authored Hungarian data tables (see hungarian.jsonc). */
