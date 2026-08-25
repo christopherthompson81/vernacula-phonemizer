@@ -106,8 +106,12 @@ describe.each(["nan", "ilo", "ht"] as const)("%s refuses the shapes that are not
 /**
  * ⚠ YORUBA — AND THE TERM WAS FOUND BY READING THE ARTICLE, NOT BY PROBING A WORD. Three earlier rounds
  * refused `ìyọkúrò` / `yọ kúrò` (physical removal — methane removed, water evaporated) and a composed
- * "below zero" (`ìsàlẹ̀ òdo` collides with `ìsàlẹ̀ odo` = DOWNRIVER, the tone marks half of running Yoruba
- * omits). What settled it was yo.wikipedia's own article `Nọ́mbà alòdì àti nọ́mbà adájú`, which defines the
+ * "below zero", whose juncture is a syntax claim the two content words do not supply. ⚠ AN EARLIER VERSION
+ * OF THIS COMMENT ALSO CALLED `ìsàlẹ̀ òdo` A HOMOGRAPH OF `ìsàlẹ̀ odo` ("downriver") AND THAT ARGUMENT WAS
+ * WRONG: `òdo` is [o˩do˧] and `odo` is [o˧do˧], so the two differ in TONE and this layer emits the tone
+ * marks — the g2p would render the zero word. A collision that only exists for a human reading UNTONED
+ * text is not a collision in what a phonemizer outputs. The refusal stands on the syntax, not the spelling.
+ * What settled it was yo.wikipedia's own article `Nọ́mbà alòdì àti nọ́mbà adájú`, which defines the
  * term beside its own operand:
  *
  *     "Nomba alodi ni awon nomba tiwonkere ju òdo lo fun apere -√2, -1.44, -1"
