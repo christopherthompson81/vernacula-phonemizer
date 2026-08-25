@@ -21,92 +21,61 @@
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 
-/** Ordinal suffixes → the agreement slot they mark. Marathi attaches these to the cardinal (सोळावा,
- *  पंधराव्या) and the suffix itself carries the agreement, so it is read off the text, not guessed.
- *  Corpus: व्या ×36 (oblique, by far the most common — "१६व्या शतकात"), वा ×6, वे ×3. Longest first. */
-const SUFFIX_FORM: Readonly<Record<string, 0 | 1 | 2 | 3>> = {
-    "व्या": 3, "वा": 0, "वी": 1, "वे": 2,
-};
-const SUFFIX_ALT = Object.keys(SUFFIX_FORM)
-    .sort((a, b) => b.length - a.length)
-    .join("|");
-
-/** Suppletive ordinals 1-4, indexed [masc, fem, plural/neuter, oblique]. Marathi's differ from Hindi's
- *  (पहिला not पहला, तिसरा not तीसरा, and the oblique is -ऱ्या not -े). 5 upward are regular: the
- *  cardinal stem plus the suffix. All four rows are corpus-attested (पहिल्या ×21, दुसऱ्या ×18,
- *  तिसऱ्या ×2, चौथ्या ×1, चौथा ×2). */
-const IRREGULAR: Readonly<Record<number, readonly [string, string, string, string]>> = {
-    1: ["पहिला", "पहिली", "पहिले", "पहिल्या"],
-    2: ["दुसरा", "दुसरी", "दुसरे", "दुसऱ्या"],
-    3: ["तिसरा", "तिसरी", "तिसरे", "तिसऱ्या"],
-    4: ["चौथा", "चौथी", "चौथे", "चौथ्या"],
-};
-
 /** Devanagari consonant letters (base + nukta block) — used to test whether a cardinal ends in a bare
  *  consonant, which is what conditions the ordinal's linking -आ- (साठ → साठावा). */
 const DEV_CONSONANT_FINAL = /[क-हक़-य़]$/u;
 
 /**
- * Devanagari unit abbreviations → the full Marathi word. The shared symbol tier
- * (`core/normalizeSymbols.ts`) is keyed on the LATIN abbreviations, which is not what this corpus
- * writes: किमी ×14, मिमी ×8, मी ×3, किमी/तास ×3, किमी² ×2, मिमी2 ×1. Unexpanded, किमी was read as a
- * word, [kˈɪmiː]. The Latin `km²`/`mm2` forms are here too because Hindi's symbol tier declares no
- * `exponentWords`, so its ² was dropped silently. Longest key first (किमी/तास must beat किमी).
- * चौरस = "square", and it PRECEDES the unit in Marathi (चौरस किलोमीटर), unlike Italian/Polish.
+ * The Marathi word tables, all of them from marathi.jsonc. ⚠ THE TIER IN marathi.ts READS THE SAME KEYS —
+ * `percent`, `currency`, `ampersand`, `multiply` and `units` are shared with it, and the rest are this
+ * file's. Two readers, one authored copy; see the £ note in the manifest for what happened when there
+ * were two copies.
  */
-const UNIT_WORD: Readonly<Record<string, string>> = {
-    "किमी/ताशी": "किलोमीटर ताशी", // ताशी already means "per hour"; प्रति would double it
-    "किमी/तास": "किलोमीटर प्रति तास",
-    "मी/से": "मीटर प्रति सेकंद",
-    "किमी²": "चौरस किलोमीटर", "किमी2": "चौरस किलोमीटर",
-    "सेमी²": "चौरस सेंटीमीटर", "सेमी2": "चौरस सेंटीमीटर",
-    "मिमी²": "चौरस मिलीमीटर", "मिमी2": "चौरस मिलीमीटर",
-    "मी²": "चौरस मीटर", "मी2": "चौरस मीटर",
-    "किमी": "किलोमीटर", "सेमी": "सेंटीमीटर", "मिमी": "मिलीमीटर",
-    "किग्रॅ": "किलोग्रॅम", "ग्रॅ": "ग्रॅम",
-    "मी": "मीटर",
-    "km²": "चौरस किलोमीटर", "km2": "चौरस किलोमीटर",
-    "m²": "चौरस मीटर", "cm²": "चौरस सेंटीमीटर",
-    "mm²": "चौरस मिलीमीटर", "mm2": "चौरस मिलीमीटर",
-    // The plain Latin units too. Hindi's shared tier already renders these and its words happen to be
-    // Marathi's as well, but the bare-hundred rewrite in step 14 turns `100 km` into `शंभर km`, which
-    // that tier can no longer match (its NUM is a digit run) — the Latin would have been stranded and
-    // read out as letter names. Owning them here settles the ordering. Single-letter `m` is deliberately
-    // NOT here: ⚠ a one-letter unit key matches alphanumeric designations, and the `100m`/`200m`
-    // that occur are swim events, not measurements.
-    // ⚠ ⟨ha⟩ ⟨l⟩ ⟨L⟩ BELONG HERE FOR THE SAME REASON, and declaring them ONLY in the shared tier is
-    // audibly wrong rather than merely redundant. Left to the tier, `100 ha` read *ˈeːk ʃˈeː ɦˈeːkʈəɾ* —
-    // शे is the COMBINING hundred, and the bare-hundred rewrite that produces शंभर for `100 km` never got
-    // to run. Same path, same number word: `100 ha` → शंभर हेक्टर. Their words are sourced in marathi.ts.
-    // ⚠ Single-letter ⟨g⟩ is NOT here either, and its counter-example is the one `NOT_VERSION` cannot
-    // see — a SPACED version designation, `802.11 g`. The shared guard requires the letter glued to the
-    // number, because `12.5 g` is a real measurement of exactly the spaced shape; this local rule has no
-    // version guard at all, so the key would be worse here than in the tier.
-    "km": "किलोमीटर", "cm": "सेंटीमीटर", "mm": "मिलीमीटर", "kg": "किलोग्रॅम",
-    "ha": "हेक्टर", "l": "लिटर", "L": "लिटर",
-};
-const UNIT_ALT = Object.keys(UNIT_WORD)
-    .sort((a, b) => b.length - a.length)
-    .map((k) => k.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&"))
-    .join("|");
-
-/** Magnitude words that hop over the currency sign — "$२.३ बिलियन" is said "…बिलियन डॉलर". */
-const MAGNITUDE_ALT = "बिलियन|ट्रिलियन|मिलियन|दशलक्ष|अब्ज|कोटी|लाख|हजार";
-
-/** The -तः adverbs, written in this corpus with an ASCII colon for the visarga (विशेषत: ×12,
- *  सामान्यत: ×9, स्वत: ×3, साधारणत: ×2, संभाव्यत: ×1, अंशत: ×1). A CLOSED LIST, not the pattern
- *  `त:` — that would also claim the genuine list colons in आहेत: ×5 and करतात: ×1, turning a phrase
- *  break into a stray [h]. */
-const TAH_ADVERB_ALT = [
-    "विशेषत", "सामान्यत", "साधारणत", "संभाव्यत", "मुख्यत", "अंशत", "स्वत", "दुख",
-].join("|");
+export interface MarathiWords {
+    numbers: NumbersDef;
+    currency: Record<string, string>;
+    percent: { plural: string; singular: string };
+    unitWords: Record<string, string>;
+    magnitudeWords: string[];
+    ordinals: {
+        suffixForm: Record<string, 0 | 1 | 2 | 3>;
+        /** ⚠ Indexed [masc, fem, plural/neuter, oblique] — the order IS the contract with `suffixForm`. */
+        irregular: Record<string, readonly [string, string, string, string]>;
+        stemHundred: string;
+        stemNine: readonly [string, string];
+        stemTens: readonly [string, string];
+    };
+    visargaAdverbs: string[];
+    clock: { past: string; minutes: string; oclock: string };
+    eraMarkers: { bc: string; ad: string };
+    abbreviations: Record<string, string>;
+    degree: { word: string; celsius: string; fahrenheit: string; north: string; south: string; east: string; west: string };
+    fractions: { half: string; quarter: string; threeQuarters: string; dividedBy: string };
+    symbolWords: { plus: string; approximately: string; plusMinus: string; lessThan: string; greaterThan: string; divide: string; equals: string; minus: string };
+    rangeWord: string;
+    bareHundred: string;
+}
 
 /** Build the Marathi normalizer. Takes the numbers definition so the ordinal and clock rules compose
  *  their cardinals from the same data the engine's own number path uses. */
-export function makeMarathiNormalizer(
-    def: { numbers: NumbersDef; currency: Record<string, string>; percent: { plural: string; singular: string } },
-): (text: string) => string {
+export function makeMarathiNormalizer(def: MarathiWords): (text: string) => string {
     const numbers = def.numbers;
+    // ⚠ EVERY WORD BELOW COMES FROM marathi.jsonc, and every one of them is FACTORY-SCOPED rather than
+    // module-level: two normalizers built from different defs must not share a table. The tier in
+    // marathi.ts reads the same keys, which is the point — where the two used to disagree, the reading
+    // depended on which path claimed the token first.
+    const SUFFIX_FORM = def.ordinals.suffixForm;
+    const SUFFIX_ALT = Object.keys(SUFFIX_FORM).sort((a, b) => b.length - a.length).join("|");
+    const IRREGULAR = def.ordinals.irregular;
+    const UNIT_WORD = def.unitWords;
+    const UNIT_ALT = Object.keys(UNIT_WORD)
+        .sort((a, b) => b.length - a.length)
+        .map((k) => k.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&"))
+        .join("|");
+    const MAGNITUDE_ALT = def.magnitudeWords.join("|");
+    const TAH_ADVERB_ALT = def.visargaAdverbs.join("|");
+    const CLOCK = def.clock, ERA = def.eraMarkers, DEG = def.degree;
+    const FRAC = def.fractions, SIGN = def.symbolWords;
     /** Currency sign → the Marathi noun, from the manifest and SHARED with marathi.ts's symbol tier. The two
      *  paths claim the sign in different positions (here before the amount, the tier after it) and used to
      *  answer with different words for £; marathi.jsonc records the evidence that settled it. ⚠ Scoped to
@@ -133,9 +102,9 @@ export function makeMarathiNormalizer(
      * at the suffix and cannot be told apart by spelling alone.
      */
     const ordinalStem = (w: string): string => {
-        if (w === numbers.magnitudes.hundred) return "शंभरा"; // शे is the combining form; the ordinal is शंभरावा
-        if (w === "नऊ") return "नव"; // 9 → नववा, the one unit with a stem change
-        if (/ीस$/u.test(w)) return w.replace(/ीस$/u, "िसा");
+        if (w === numbers.magnitudes.hundred) return def.ordinals.stemHundred; // शे is the combining form; the ordinal is शंभरावा
+        if (w === def.ordinals.stemNine[0]) return def.ordinals.stemNine[1]; // 9 → नववा, the one unit with a stem change
+        if (w.endsWith(def.ordinals.stemTens[0])) return w.slice(0, -def.ordinals.stemTens[0].length) + def.ordinals.stemTens[1];
         if (UNITS.has(w) || TEENS.has(w)) return w;
         return DEV_CONSONANT_FINAL.test(w) ? `${w}ा` : w;
     };
@@ -160,7 +129,7 @@ export function makeMarathiNormalizer(
     const clock = (h: number, min: number): string =>
         min === 0
             ? cardinalText(h)
-            : `${cardinalText(h)} वाजून ${cardinalText(min)} मिनिटे`;
+            : `${cardinalText(h)} ${CLOCK.past} ${cardinalText(min)} ${CLOCK.minutes}`;
 
     return (input: string): string => {
         let s = input;
@@ -204,13 +173,13 @@ export function makeMarathiNormalizer(
         //    ईसा पूर्व; once Marathi supplied its own normalizer through the engine's override the Hindi
         //    rule no longer ran and the dots reached the output as two spurious pauses. Claimed here now,
         //    with Marathi's own wording rather than Hindi's.
-        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?स\.?\s?प[ूु]\.?/gu, "इसवी सन पूर्व");
-        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?प[ूु]\.?/gu, "इसवी सन पूर्व");
-        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?स\./gu, "इसवी सन");
+        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?स\.?\s?प[ूु]\.?/gu, ERA.bc);
+        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?प[ूु]\.?/gu, ERA.bc);
+        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?स\./gu, ERA.ad);
 
         // 5) ABBREVIATIONS. डॉ. is the only one in this corpus (×6, always with the dot). The dot is
         //    consumed so it cannot become a phrase break.
-        s = s.replace(/(?<![\p{L}\p{M}])डॉ\.?(\s+)(?=[\p{L}])/gu, "डॉक्टर$1");
+        s = s.replace(/(?<![\p{L}\p{M}])डॉ\.?(\s+)(?=[\p{L}])/gu, `${def.abbreviations["डॉ"]}$1`);
 
         // 6) ORDINALS. Before the numeral-spelling rule in step 6b, which exists only to mop up what
         //    this step legitimately leaves behind.
@@ -261,7 +230,7 @@ export function makeMarathiNormalizer(
                 const body = clock(Number(h), Number(min));
                 if (Number(min) !== 0) return body;
                 const rest = whole.slice(offset + m.length);
-                return vaajta || !/^\s*वाज/u.test(rest) ? `${body} वाजता` : body;
+                return vaajta || !/^\s*वाज/u.test(rest) ? `${body} ${CLOCK.oclock}` : body;
             },
         );
         //    7c) The same clock written with a DOT, which only occurs beside a timezone marker in this
@@ -275,13 +244,13 @@ export function makeMarathiNormalizer(
         // 8) DEGREES, before the signs in step 14 so the ° still has its digit adjacent ("+30°से."). अंश
         //    is the Marathi word (corpus-attested in "90(फ)- अंश तापमानात"), not Hindi's डिग्री. से. is
         //    the corpus's abbreviation for सेल्सिअस and its dot must be eaten, or it becomes a break.
-        s = s.replace(/(\d)\s?°\s?(?:C|से\.?)(?![\p{L}\p{M}])/giu, "$1 अंश सेल्सिअस");
-        s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 अंश फॅरेनहाइट");
-        s = s.replace(/(\d)\s?°\s?N(?![\p{L}\p{M}])/gu, "$1 अंश उत्तर");
-        s = s.replace(/(\d)\s?°\s?S(?![\p{L}\p{M}])/gu, "$1 अंश दक्षिण");
-        s = s.replace(/(\d)\s?°\s?E(?![\p{L}\p{M}])/gu, "$1 अंश पूर्व");
-        s = s.replace(/(\d)\s?°\s?W(?![\p{L}\p{M}])/gu, "$1 अंश पश्चिम");
-        s = s.replace(/(\d)\s?°/gu, "$1 अंश");
+        s = s.replace(/(\d)\s?°\s?(?:C|से\.?)(?![\p{L}\p{M}])/giu, `$1 ${DEG.word} ${DEG.celsius}`);
+        s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, `$1 ${DEG.word} ${DEG.fahrenheit}`);
+        s = s.replace(/(\d)\s?°\s?N(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.north}`);
+        s = s.replace(/(\d)\s?°\s?S(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.south}`);
+        s = s.replace(/(\d)\s?°\s?E(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.east}`);
+        s = s.replace(/(\d)\s?°\s?W(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.west}`);
+        s = s.replace(/(\d)\s?°/gu, `$1 ${DEG.word}`);
 
         // 9) PERCENT. Must precede the shared symbol tier, which is Hindi's and says प्रतिशत: the
         //    corpus's own word, nine times over, is टक्के. (The ASCII-digit half of the corpus was
@@ -324,7 +293,7 @@ export function makeMarathiNormalizer(
         //     and 4.2-3.9, a descending "million years ago" span).
         s = s.replace(
             /(?<![\d.,])(\d+(?:\.\d+)?)\s?[-–—]\s?(\d+(?:\.\d+)?)(?![\d.,])/gu,
-            (m, a: string, b: string) => (Number(b) > Number(a) ? `${a} ते ${b}` : m),
+            (m, a: string, b: string) => (Number(b) > Number(a) ? `${a} ${def.rangeWord} ${b}` : m),
         );
 
         // 13) FRACTIONS. अर्धा / पाव / पाऊण are suppletive; anything else is the ordinary spoken
@@ -332,11 +301,11 @@ export function makeMarathiNormalizer(
         //     would otherwise emit into Marathi output). Corpus: १/२, ३/४, 1/5 — all in measurements.
         s = s.replace(/(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
             const num = Number(a), den = Number(b);
-            if (num === 1 && den === 2) return "अर्धा";
-            if (num === 1 && den === 4) return "पाव";
-            if (num === 3 && den === 4) return "पाऊण";
+            if (num === 1 && den === 2) return FRAC.half;
+            if (num === 1 && den === 4) return FRAC.quarter;
+            if (num === 3 && den === 4) return FRAC.threeQuarters;
             const nw = cardinalText(num), dw = cardinalText(den);
-            return nw === "" || dw === "" ? m0 : `${nw} भागिले ${dw}`;
+            return nw === "" || dw === "" ? m0 : `${nw} ${FRAC.dividedBy} ${dw}`;
         });
 
         // 14) THE BARE HUNDRED. The manifest's `hundred` is शे, the COMBINING form (दोनशे, आठशे); a
@@ -345,14 +314,14 @@ export function makeMarathiNormalizer(
         //     digits, and is guarded against the dash on both sides so "100-200 मैल" and "100-मीटर"
         //     keep theirs. `(?!\s*[A-Za-z])` was added after the corpus diff caught this rule producing
         //     `शंभरm` from the swim event "100m आणि 200m" — the guard leaves any digits+Latin pair alone.
-        s = s.replace(/(?<![\d,.\-–—])100(?![\d,.\-–—])(?!\s*[A-Za-z])/gu, "शंभर");
+        s = s.replace(/(?<![\d,.\-–—])100(?![\d,.\-–—])(?!\s*[A-Za-z])/gu, def.bareHundred);
 
         // 15) SIGNS. Plus and the approximation tilde only. ⚠ THE MINUS RULE IS DELIBERATELY NOT APPLIED:
         //     Devanagari compounds are written with a hyphen (आस-पास), and the hyphen-before-digit that
         //     occurs outside a range is a designation — "चंद्रयान -1", a spacecraft name — where reading
         //     "उणे एक" ("minus one") is worse than silence.
-        s = s.replace(/\+\s?(?=\d)/gu, " अधिक ");
-        s = s.replace(/~\s?(?=\d)/gu, " सुमारे ");
+        s = s.replace(/\+\s?(?=\d)/gu, ` ${SIGN.plus} `);
+        s = s.replace(/~\s?(?=\d)/gu, ` ${SIGN.approximately} `);
 
         // 15b) THE RELATIONAL AND DIVISION SIGNS, and ±. ⚠ All sourced from running text rather than from
         //      Marathi's own arithmetic articles, which write the notation instead of reading it — `बरोबर`,
@@ -379,11 +348,11 @@ export function makeMarathiNormalizer(
         // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the
         //    preceding word: `तापमान±5` reads *t̪ˈaːpmaːnəəd̪ʱɪk*, one token, with the stress of neither.
         //    The shared symbol tier's `ampersand` note records the same hazard for the same reason.
-        s = s.replace(/±/gu, " अधिक उणे ");
-        s = postposedSign(s, "<", "पेक्षा कमी");
-        s = postposedSign(s, ">", "पेक्षा जास्त");
-        s = postposedSign(s, "÷", "ने भागणे");
-        s = s.replace(/\s?=\s?/gu, " बरोबर ");
+        s = s.replace(/±/gu, ` ${SIGN.plusMinus} `);
+        s = postposedSign(s, "<", SIGN.lessThan);
+        s = postposedSign(s, ">", SIGN.greaterThan);
+        s = postposedSign(s, "÷", SIGN.divide);
+        s = s.replace(/\s?=\s?/gu, ` ${SIGN.equals} `);
         s = s.replace(/ {2,}/gu, " ");
 
         return s;

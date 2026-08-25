@@ -13,6 +13,52 @@ public sealed class MarathiDef : HindiDef
 {
     public PercentDef Percent { get; set; } = new();
     public Dictionary<string, string> Currency { get; set; } = new();
+    public string Ampersand { get; set; } = "";
+    public string Multiply { get; set; } = "";
+    /** The LATIN unit abbreviations the shared tier is keyed on. */
+    public Dictionary<string, string> Units { get; set; } = new();
+    /** ⚠ A SECOND unit table on purpose — normalize.ts's, with the Devanagari forms. See marathi.jsonc. */
+    public Dictionary<string, string> UnitWords { get; set; } = new();
+    public string[] MagnitudeWords { get; set; } = [];
+    public OrdinalsDef Ordinals { get; set; } = new();
+    public string[] VisargaAdverbs { get; set; } = [];
+    public ClockDef Clock { get; set; } = new();
+    public EraDef EraMarkers { get; set; } = new();
+    public Dictionary<string, string> Abbreviations { get; set; } = new();
+    public DegreeDef Degree { get; set; } = new();
+    public FractionsDef Fractions { get; set; } = new();
+    public SymbolWordsDef SymbolWords { get; set; } = new();
+    public string RangeWord { get; set; } = "";
+    public string BareHundred { get; set; } = "";
+
+    public sealed class OrdinalsDef
+    {
+        public Dictionary<string, int> SuffixForm { get; set; } = new();
+        /** ⚠ Indexed [masc, fem, plural/neuter, oblique] — the order IS the contract with SuffixForm. */
+        public Dictionary<string, string[]> Irregular { get; set; } = new();
+        public string StemHundred { get; set; } = "";
+        public string[] StemNine { get; set; } = [];
+        public string[] StemTens { get; set; } = [];
+    }
+    public sealed class ClockDef { public string Past { get; set; } = ""; public string Minutes { get; set; } = ""; public string Oclock { get; set; } = ""; }
+    public sealed class EraDef { public string Bc { get; set; } = ""; public string Ad { get; set; } = ""; }
+    public sealed class DegreeDef
+    {
+        public string Word { get; set; } = ""; public string Celsius { get; set; } = ""; public string Fahrenheit { get; set; } = "";
+        public string North { get; set; } = ""; public string South { get; set; } = ""; public string East { get; set; } = ""; public string West { get; set; } = "";
+    }
+    public sealed class FractionsDef
+    {
+        public string Half { get; set; } = ""; public string Quarter { get; set; } = "";
+        public string ThreeQuarters { get; set; } = ""; public string DividedBy { get; set; } = "";
+    }
+    public sealed class SymbolWordsDef
+    {
+        public string Plus { get; set; } = ""; public string Approximately { get; set; } = ""; public string PlusMinus { get; set; } = "";
+        public string LessThan { get; set; } = ""; public string GreaterThan { get; set; } = ""; public string Divide { get; set; } = ""; public string Equals { get; set; } = "";
+        /** Declared, but no ASCII-hyphen rule reads it — see marathi.jsonc. */
+        public string Minus { get; set; } = "";
+    }
 
     public sealed class PercentDef
     {
