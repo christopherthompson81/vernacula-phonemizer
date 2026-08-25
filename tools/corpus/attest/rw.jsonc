@@ -18,11 +18,42 @@
     {
         "language": "rw",
         "wiki": "rw.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "ubushyuhe dogere",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "gukuraho",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…gukuraho ishyamba ni inzira yo gutema ibiti, ikintu cyibikorwa byo g…",
+                "…Amasezerano hagati y'Abanyamerika yerekeye gukuraho ivangura iryo ari ryo ryose rikorerwa ababana n'ubumuga Yas…",
+                "…da, Jenoside ashinjwa nabo yongeyeho. Hatanzwe icyemezo cyo gukuraho. Nibwo bwa mbere bwabaye muri Leta Zunze Ubumwe za Amerika…",
+                "…mbere bwabaye muri Leta Zunze Ubumwe za Amerika itegeko ryo gukuraho ibirego bya Jenoside. Amerika yakoresheje 18 USC §2340a kug…",
+                "…. == Icyerekezo cya SADC == Ibihugu bigize SADC birateganya gukuraho imisoro n’amahoro (Free Trade Area) mu wa 2008, bityo rikab…",
+                "…GM / C ) no gukebwa kw'abagore, ni umuhango wo guca cyangwa gukuraho bimwe cyangwa byose. Imyitozo iboneka mu bihugu bimwe na bi…"
+            ]
+            },
+        {
+                "word": "ichenyo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ukukuramo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "minus",
                 "verdict": "absent",

@@ -18,11 +18,32 @@
     {
         "language": "bar",
         "wiki": "bar.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "Temparatua",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "oziang",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…rnstoa sogoa an kloana Blitz mocha oda kloane Papiaschnipsl oziang). Des Elektron is a Bstandtei voum Atom (und Atom hoasst au…",
+                "…s ea eam „dalesn“ hod miassn. Untam Vorwand, doss ea no wos oziang wui, geht da oide Pankraz alloa ins Haus und wead kuaz draf…",
+                "…d gring. Und vo de hod ma nu den Ploz fia de Aufschtigshüfn oziang missn, ob Schtiagn oda Loatan. Ois Logaraim oda Kontore woa…",
+                "…eng fakaufn deafn und daun mid dem Göd und mid eanare Kinda oziang kinan und in a protestantisches Laund gee deafn. Aso san 16…",
+                "…daun netta nu des 2 a b {\\displaystyle 2ab} auf beide Seitn oziang, und schau steht da Sotz vum Pythagoras do: a 2 + b 2 = c 2…"
+            ]
+            },
+        {
+                "word": "abaziang",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "Minusgrod",
                 "verdict": "absent",

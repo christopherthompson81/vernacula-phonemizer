@@ -21,8 +21,33 @@
         "tier": "wikipedia (register-restricted)",
         // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
         // `--context` set to exactly this string.
-        "context": "tanperati nimewo",
+        "context": "matematik",
         "findings": [
+        {
+                "word": "siy mwen",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "soustraksyon",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…y nimewo a souvan sèvi tankou èd pou montre adisyon senp ou soustraksyon, espesyalman le itilize nonm negatif. Liy la divize nan de…",
+                "…etik ak kantite sinusoidal == Pou fè operasyon adisyon oswa soustraksyon kantite sinusoidal, nou itilize reprezantasyon Fresnel oswa…",
+                "…, ... epi nou ekri sou chak liy ki vin aprè valè absoli nan soustraksyon ant de valè ki vin youn aprè lòt nan liy ki vin anvan an, (…",
+                "…ik pou nou elimine youn nan faktè yo. Operasyon nesesè-a se soustraksyon. Retire ekwazion (2) nan ekwazyon (1), nou jwenn rezilta sa…",
+                "…= Operasyon === Teknik pou kat operasyon debaz yo (adisyon, soustraksyon, miltiplikasyon ak divizyon) rete ekzakteman menm ak notasy…",
+                "…). vle di \"kat\" epi yo pa \"san\", elatriye). ==== Adisyon ak soustraksyon ==== Nou ale soti nan yon nimewo binè nan pwochen an lè nou…"
+            ]
+            },
         {
                 "word": "mwens ke zewo",
                 "verdict": "absent",
