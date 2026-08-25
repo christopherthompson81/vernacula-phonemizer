@@ -13,6 +13,8 @@ export interface ZhuangManifest {
     vowels: Record<string, string>;
     tones: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    /** The MINUS marker — `lingzha` < Chinese 零下. See the jsonc: ×0, declared on the loan pattern. */
+    minus: string;
     numbers: {
         units: string[];
         ten: string;
