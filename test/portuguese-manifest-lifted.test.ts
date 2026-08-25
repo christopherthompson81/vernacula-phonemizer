@@ -69,12 +69,29 @@ describe("portuguese reads its lifted tables", () => {
         for (const code of MANIFEST.dollarCodes) expect(say(`${code}$ 100`)).toContain(say("$100"));
     });
 
-    test("⚠ the degree noun is ALWAYS PLURAL — pinned as a KNOWN DEFECT, not as correct", () => {
-        // `1 °C` reads *um graus Celsius*. This is pre-existing behaviour and the lift did not change it;
-        // the words moved to the manifest, the missing agreement did not. Asserted so the bug is visible in
-        // the suite rather than only in a doc — when it is fixed, this test is what says so.
-        expect(say("1 °C apenas")).toContain(say(MANIFEST.degree.word));
-        expect(say("20 °C")).toContain(say(MANIFEST.degree.word));
+    test("the degree noun AGREES with the count, and reads the whole number", () => {
+        // ⚠ THIS TEST USED TO PIN THE OPPOSITE. Until the fix, the rule emitted the plural whatever the
+        // count (`1 °C` → *um graus Celsius*) and this assertion recorded that as a known defect. It is the
+        // test flipping that says the defect is gone.
+        // ⚠ COMPARED AS WHOLE TOKENS, NOT SUBSTRINGS. The plural CONTAINS the singular — [ɡɾˈaw] is a prefix
+        // of [ɡɾˈawʃ] — so `toContain` cannot tell them apart and a substring assertion passes either way.
+        const words = (s: string): string[] => say(s).split(" ");
+        const SG = say(MANIFEST.degree.singular), PL = say(MANIFEST.degree.plural);
+        expect(SG).not.toBe(PL);
+        expect(words("1 °C apenas")).toContain(SG);
+        expect(words("1 °C apenas")).not.toContain(PL);
+        expect(words("20 °C")).toContain(PL);
+        expect(words("20 °C")).not.toContain(SG);
+        // ⚠ AND THE COUNT IS THE WHOLE NUMBER, NOT ITS LAST DIGIT — the rule captured `(\d)` before the fix,
+        // so `21` would have been read off the `1` and taken the singular.
+        expect(words("21 °C")).toContain(PL);
+        expect(words("21 °C")).not.toContain(SG);
+        // 0 and a decimal both take the plural, the same selector the shared symbol tier defaults to.
+        expect(words("0 °C")).toContain(PL);
+        expect(words("1,5 °C")).toContain(PL);
+        // The bare-degree rule agrees too, not just the scaled ones.
+        expect(words("1° de ângulo")).toContain(SG);
+        expect(words("35° de ângulo")).toContain(PL);
         expect(say("20 °C")).toContain(say(MANIFEST.degree.celsius));
         expect(say("70 °F")).toContain(say(MANIFEST.degree.fahrenheit));
     });

@@ -66,11 +66,29 @@ public class PortugueseManifestLiftedTests
     }
 
     [Fact]
-    public void TheDegreeNounIsAlwaysPluralWhichIsAKnownDefect()
+    public void TheDegreeNounAgreesWithTheCountAndReadsTheWholeNumber()
     {
-        // `1 °C` reads *um graus Celsius*. Pre-existing; the lift moved the words, not the missing agreement.
-        // Asserted so the bug is visible in the suite — when it is fixed, this test is what says so.
-        Assert.Contains(Say(DEF.Degree.Word), Say("1 °C apenas"));
+        // ⚠ THIS TEST USED TO PIN THE OPPOSITE — the rule emitted the plural whatever the count
+        // (`1 °C` → *um graus Celsius*) and this recorded it as a known defect. Its flipping is what says
+        // the defect is gone.
+        // ⚠ COMPARED AS WHOLE TOKENS, NOT SUBSTRINGS: the plural CONTAINS the singular ([ɡɾˈaw] is a prefix
+        // of [ɡɾˈawʃ]), so a substring assertion passes either way.
+        string[] Words(string t) => Say(t).Split(' ');
+        string sg = Say(DEF.Degree.Singular), pl = Say(DEF.Degree.Plural);
+        Assert.NotEqual(sg, pl);
+        Assert.Contains(sg, Words("1 °C apenas"));
+        Assert.DoesNotContain(pl, Words("1 °C apenas"));
+        Assert.Contains(pl, Words("20 °C"));
+        Assert.DoesNotContain(sg, Words("20 °C"));
+        // ⚠ THE COUNT IS THE WHOLE NUMBER, NOT ITS LAST DIGIT — the rule captured `(\d)` before the fix, so
+        // `21` would have been read off the `1` and taken the singular.
+        Assert.Contains(pl, Words("21 °C"));
+        Assert.DoesNotContain(sg, Words("21 °C"));
+        Assert.Contains(pl, Words("0 °C"));
+        Assert.Contains(pl, Words("1,5 °C"));
+        // The bare-degree rule agrees too, not just the scaled ones.
+        Assert.Contains(sg, Words("1° de ângulo"));
+        Assert.Contains(pl, Words("35° de ângulo"));
         Assert.Contains(Say(DEF.Degree.Celsius), Say("20 °C"));
         Assert.Contains(Say(DEF.Degree.Fahrenheit), Say("70 °F"));
     }

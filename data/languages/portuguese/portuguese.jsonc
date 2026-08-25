@@ -291,11 +291,14 @@
     "eraMarkers": { "beforeChrist": "antes de Cristo", "afterChrist": "depois de Cristo" },
     "numberSign": "número",
 
-    // DEGREES. ⚠ ALWAYS PLURAL, and that is pre-existing behaviour rather than an oversight introduced here:
-    // the rule emits `graus` whatever the count, so `1 °C` reads *um graus Celsius*. Lifting the words does
-    // not change it — a fix is a reading change and needs the TypeScript, a test and regenerated goldens
-    // first. Recorded so the next reader does not take the shape for agreement.
-    "degree": { "word": "graus", "celsius": "Celsius", "fahrenheit": "Fahrenheit" },
+    // DEGREES, agreeing with the count: *um grau*, *vinte graus*. Exactly 1 takes the singular; 0 and 2+ take
+    // the plural, which is the same selector the shared symbol tier defaults to.
+    // ⚠ THE AGREEMENT NEEDS THE WHOLE NUMBER, NOT ITS LAST DIGIT, and the rule used to capture `(\d)` — one
+    // digit. That was invisible while the word was a hard-coded plural (`20 °C` → *vinte graus*, right by
+    // luck, the leading digits simply passing through untouched) and wrong the moment the count is read off
+    // the capture: `21 °C` would have seen the `1` and said *grau*. Widened to the full numeral with the fix.
+    // The identical trap is recorded in ukrainian/normalize.ts, which hit it first.
+    "degree": { "singular": "grau", "plural": "graus", "celsius": "Celsius", "fahrenheit": "Fahrenheit" },
 
     // The BRAZILIAN REAL, whose sign the shared tier cannot claim (`R$` was read as a stray [ʁ] followed by
     // "dólares"), and the dollar CODES that are folded to a bare `$` so the tier's declared key becomes

@@ -21,8 +21,20 @@ import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { portugueseOrdinal } from "./romanOrdinals.ts";
 
-/** ⚠ ALWAYS PLURAL — pre-existing, not agreement. See portuguese.jsonc `degree`. */
 const DEG = MANIFEST.degree;
+
+/**
+ * The degree noun, agreeing with the count: *um grau*, *vinte graus*, *zero graus*.
+ *
+ * ⚠ THIS READS THE WHOLE NUMBER, NOT ITS LAST DIGIT. The three rules below used to capture `(\d)` — one
+ * digit — which was invisible while the word was a hard-coded plural (`20 °C` → *vinte graus*, right by
+ * luck: the leading digits pass through untouched) and wrong the moment the count is read off the capture,
+ * since `21 °C` would have matched the `1` and said *grau*. The same trap is recorded in
+ * ukrainian/normalize.ts, which hit it first.
+ */
+function degreeWord(n: string): string {
+    return Number(n.replace(",", ".")) === 1 ? DEG.singular : DEG.plural;
+}
 
 const GROUP_SPACE = "    ";  // NBSP, NNBSP, thin space
 const MONTHS = MANIFEST.months.join("|");
@@ -180,9 +192,11 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
     // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
     // orthography is what supplies the accented letter. 71 other engines already guard it this way.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, `$1 ${DEG.word} ${DEG.celsius}`);
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, `$1 ${DEG.word} ${DEG.fahrenheit}`);
-    s = s.replace(/(\d)\s?°/gu, `$1 ${DEG.word}`);
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/giu,
+        (_m, n: string) => `${n} ${degreeWord(n)} ${DEG.celsius}`);
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])/giu,
+        (_m, n: string) => `${n} ${degreeWord(n)} ${DEG.fahrenheit}`);
+    s = s.replace(/(\d+(?:[.,]\d+)?)\s?°/gu, (_m, n: string) => `${n} ${degreeWord(n)}`);
 
     // 7) CLOCK. Two forms occur and BOTH were broken: the `h` form (×28) dropped its marker entirely
     //    ("07h19" → "sete dezenove") and the colon form (×17) turned the colon into a PAUSE with a

@@ -103,3 +103,39 @@ on every run. 56 languages / 11,200 rows / 0 differ; 404 C# tests, 5,057 TS test
 ## Remaining in this sweep
 
 16: en, fr, ru, jv, tr, it, pl, th, vi, ta, te, kn, hu, nl, ha, cmn.
+
+
+## Run 8 — 2026-08-25 03:50 — the `graus` fix, TypeScript first
+
+**Question.** Run 5 recorded `1 °C` → *um graus Celsius* as a known defect and deferred it. Fix it.
+
+**Blast radius, checked before touching anything.** Zero degree signs in either the `pt` or the `pt-BR`
+golden, so the fix moves 0 golden rows and no regeneration is needed.
+
+**⚠ AND THE RULE HAD A SECOND, LATENT BUG UNDER THE FIRST.** The three degree rules captured `(\d)` — ONE
+digit, the last one before the sign. That was invisible while the word was a hard-coded plural (`20 °C` →
+*vinte graus*, right by luck: the leading digits simply pass through untouched) and would have become wrong
+the instant the count was read off the capture — `21 °C` would have matched the `1` and said *grau*. So the
+agreement fix required widening the capture in the same change, or it would have shipped a new bug while
+closing an old one.
+
+⚠ ukrainian/normalize.ts already carries a comment about exactly this trap, from when it hit it first. Two
+languages, same shape.
+
+**Order, per the bidirectional policy.** Manifest (`degree.word` → `singular`/`plural`) → TypeScript rule +
+capture → TS test flipped from "known defect" to the corrected claim → C# manifest, rule and test. Verified
+by reverting each half separately: the always-plural word fails the test, and so does the single-digit
+capture.
+
+**⚠ THE TEST NEEDED TOKEN COMPARISON, NOT SUBSTRINGS.** The plural CONTAINS the singular — [ɡɾˈaw] is a
+prefix of [ɡɾˈawʃ] — so `toContain(singular)` passes on the plural reading and the first version of the test
+was useless in exactly the direction that matters. Split on spaces and compare whole tokens.
+
+**Measured.** The 143-line probe moves exactly ONE row in each variant — line 57, `1 °C apenas`, *graus* →
+*grau*. 48 degree readings agree between C# and Node across both variants and both modes.
+
+**Fleet scan, reported rather than swept.** 40+ other languages capture `(\d)` before a degree sign. Every
+one of them emits a FIXED word, so the narrow capture is harmless there — the digits pass through untouched,
+exactly as Portuguese's did. Whether any of those languages *should* agree by count is a per-language
+question about that language's grammar (Japanese, Korean, Malay mark no plural at all; German *Grad* is
+invariant after a numeral), not a mechanical fix. Not swept.

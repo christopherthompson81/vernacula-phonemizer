@@ -52,8 +52,8 @@ export interface PortugueseManifest {
     clock: { hour: string; hours: string; connector: string };
     eraMarkers: { beforeChrist: string; afterChrist: string };
     numberSign: string;
-    /** ⚠ `word` is ALWAYS PLURAL — pre-existing behaviour, not agreement. See portuguese.jsonc. */
-    degree: { word: string; celsius: string; fahrenheit: string };
+    /** Agrees with the count: exactly 1 → `singular`, 0 and 2+ → `plural`. */
+    degree: { singular: string; plural: string; celsius: string; fahrenheit: string };
     realWord: string;
     /** Dollar CODES folded to a bare `$` so the tier's declared key becomes reachable. */
     dollarCodes: string[];
