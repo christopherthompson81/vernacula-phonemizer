@@ -390,11 +390,16 @@ export function normalizeUkrainian(input: string): string {
     s = s.replace(/(\d)\s?[–—-]\s?(?=\d)/gu, `$1 ${DEF.rangeWord} `);
 
     // 10) FRACTIONS — feminine, agreeing with the elided *частина*: 1/5 is *одна п'ята*.
+    //     ⚠ THE FEMININE 1 AND 2 ARE `numbers.feminine`, the pair the magnitude compositor already uses for
+    //     the feminine тисяча (одна тисяча, дві тисячі) — and the masculine forms they replace are
+    //     `numbers.units[1]` and `[2]`. This rule held its own copies of all four.
     s = s.replace(/(?<![\d\p{L}])(\d{1,3})\/(\d{1,3})(?![\d/\p{L}])/gu, (whole, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         const fem = ordinalForms(den)[FEM_NOM];
         if (fem === undefined) return whole;
-        const numWord = cardinal(num).replace(/один$/u, "одна").replace(/два$/u, "дві");
+        const numWord = cardinal(num)
+            .replace(new RegExp(`${DEF.numbers.units[1]!}$`, "u"), DEF.numbers.feminine.one)
+            .replace(new RegExp(`${DEF.numbers.units[2]!}$`, "u"), DEF.numbers.feminine.two);
         return `${numWord} ${fem}`;
     });
 

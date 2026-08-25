@@ -142,6 +142,26 @@ relies on, per thread. **8/8 clean runs afterwards.**
 The same file's neural-OOV memo has the same exposure but needs the opposite fix: it is *deliberately*
 process-wide (a warm cache across languages), so it takes a lock, not thread-local storage.
 
+## Run 7 — 2026-08-24 21:10 — a fourth duplicate, found in the review pass
+
+**Question.** Any Cyrillic reading still written as a literal in the code?
+
+**Command.** `grep -nE '"[а-яіїєґ\x27]{3,}"' src/languages/ukrainian/*.ts` (and the C# equivalent).
+
+**Finding (raw).** One hit that matters — the FRACTION rule:
+
+```ts
+const numWord = cardinal(num).replace(/один$/u, "одна").replace(/два$/u, "дві");
+```
+
+All four words were already in the manifest: одна/дві are `numbers.feminine`, the pair the magnitude
+compositor uses for the feminine тисяча, and один/два are `numbers.units[1]` and `[2]`. A fourth duplicate,
+missed on the first pass because I was reading the file for TABLES and this one is two inline `.replace`
+arguments. Sabotaging `numbers.feminine` now moves 5 readings; before the fix it moved 0 through this path.
+
+The only literals left are MATCHED ORTHOGRAPHY inside bespoke regexes (`кв.`, `год`, `миль`) — what the rule
+looks for, not what it says. Readings go to the manifest; match patterns stay with the rule they belong to.
+
 ## Result
 
 `ukrainian.jsonc` 82 → 305 lines, 21 new keys. 0 of 158 probe readings moved in Node; 316 C#-vs-Node probe

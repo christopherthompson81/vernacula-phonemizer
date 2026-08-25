@@ -82,6 +82,14 @@ describe("ukrainian reads its lifted tables", () => {
         expect(say("1100 року н.е.")).toBe(say("1100 року н. е."));
     });
 
+    test("the fraction numerator feminises through numbers.feminine, not a fourth copy", () => {
+        // The same pair the magnitude compositor uses for the feminine тисяча — and the masculine forms it
+        // replaces are `units[1]` and `[2]`. The rule held its own copies of all four before the lift.
+        expect(say("1/2 склянки")).toContain(say(MANIFEST.numbers.feminine.one));
+        expect(say("1/2 склянки")).not.toContain(say(MANIFEST.numbers.units[1]!));
+        expect(say("2/3 населення")).toContain(say(MANIFEST.numbers.feminine.two));
+    });
+
     test("every other lifted table is reached by some reading", () => {
         expect(say("№11")).toContain(say(MANIFEST.numberSign));
         expect(say("1418-1450")).toContain(say(MANIFEST.rangeWord));

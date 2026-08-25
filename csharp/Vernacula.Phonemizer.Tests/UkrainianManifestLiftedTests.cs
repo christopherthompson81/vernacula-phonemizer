@@ -79,6 +79,14 @@ public class UkrainianManifestLiftedTests
     }
 
     [Fact]
+    public void TheFractionNumeratorFeminisesThroughNumbersFeminine()
+    {
+        Assert.Contains(Say(DEF.Numbers.Feminine.One), Say("1/2 склянки"));
+        Assert.DoesNotContain(Say(DEF.Numbers.Units[1]), Say("1/2 склянки"));
+        Assert.Contains(Say(DEF.Numbers.Feminine.Two), Say("2/3 населення"));
+    }
+
+    [Fact]
     public void EveryOtherLiftedTableIsReachedBySomeReading()
     {
         Assert.Contains(Say(DEF.NumberSign), Say("№11"));
