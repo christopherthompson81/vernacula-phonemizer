@@ -302,6 +302,11 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance");
 
     [Fact]
+    public void UzbekManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/uzbek", "uzbek.jsonc", Languages.Uzbek.Manifest.DEF,
+            "language", "name", "script", "provenance");
+
+    [Fact]
     public void PashtoManifestIsFullyMapped() =>
         AssertFullyMapped("languages/pashto", "pashto.jsonc", Languages.Pashto.Manifest.DEF,
             "language", "name", "script", "provenance");

@@ -56,6 +56,11 @@ public class LanguageBootstrapTests
     [InlineData("su", "ᮃᮊ᮪ᮞᮛ ᮞᮥᮔ᮪ᮓ", "ʔaksˈara sˈunda")]
     [InlineData("su", "naam", "nˈaʔam")]
     [InlineData("su", "hese", "həsˈə")]
+    // Uzbek's three defining shapes: the `N-word` hyphen is the ORDINAL writing, the comma-letter ⟨oʻ⟩ is
+    // [o] against ⟨o⟩'s [ɒ] (and the ng/gʻ guard keeps toʻngʻiz off [ŋ]), and a Roman century is ordinal.
+    [InlineData("uz", "1978-yildagi", "mˈiŋ toqqˈiz jˈuz jetmˈiʃ sakkizint͡ʃˈi jildaɡˈi")]
+    [InlineData("uz", "toʻngʻiz", "tonʁˈiz")]
+    [InlineData("uz", "XIX asr", "ˈon toqqizint͡ʃˈi ˈasr")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 
