@@ -84,6 +84,7 @@
  *   `ROMAN_NATIVE` (only en/fr are), so `core/roman.ts` has already turned `XIX` into digits before `text()`
  *   runs. The 2,180 romans the artifact counts are handled upstream.
  */
+import { MANIFEST } from "./manifest.ts";
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -185,38 +186,8 @@ const BARE_EXPONENT_UNITS: readonly (readonly [RegExp, string])[] = UNITS
  *  `1 a 1,5m` and `50cm a 1,80m` — so `5–13,7` must not be claimed with its fraction left behind. */
 const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)\s?[-–—]\s?(\d+)(?![\d\p{L}\p{M}-]|[.,]\d)/gu;
 
-/**
- * ⚠ THE ORDINAL IS A TAIL REWRITE OF THE CARDINAL WORD, and every pair here is attested in the corpus's own
- *  Creole prose (counts are whole-word, Creole-only). `20yèm` reads today as *ven* plus a separate *yèm* —
- *  the [t] of *ventyèm* simply missing — so the rule must build the WORD, which is trap 14's fix shape:
- *  convert the operand to words inside the rule and apply the morphology there.
- *
- *      de→dezyèm 10983 · twa→twazyèm 515 · kat→katriyèm 200 · senk→senkyèm 151 · sis→sizyèm 94 ·
- *      sèt→setyèm 76 · uit→wityèm 34 · nèf→nevyèm 53 · dis→dizyèm 86 · onz→onzyèm 8 · douz→douzyèm 31 ·
- *      trèz→trèzyèm 13 · katòz→katòzyèm 8 · kenz→kenzyèm 14 · sèz→sèzyèm 18 · ven→ventyèm 40 ·
- *      trant→trantyèm 5 · karant→karantyèm 3 · senkant→senkantyèm 1 · swasant→swasantyèm 2 ·
- *      san→santyèm 6 · mil→milyèm 1
- *
- *  ⚠ MATCHED AS A LONGEST SUFFIX, WHICH IS WHAT MAKES IT COMPOSE RATHER THAN TABULATE (trap 8, trap 13).
- *  The corpus's own compound ordinals ARE these tails: `disèt`→`disetyèm` ✓×9, `dizuit`→`dizwityèm` ✓×23,
- *  `diznèf`→`diznevyèm` ✓×35, `katrevendis`→`katrevendizyèm` ✓×1 — four attested forms that the tail rule
- *  reproduces exactly. It then derives `swasanndis`→swasanndizyèm, `swasannonz`→swasannonzyèm and
- *  `katreven`→katreventyèm the same way, none of which the corpus writes.
- *
- *  ⚠ AND THE REFUSAL FALLS OUT OF THE SAME MECHANISM. `venteyen` (21) and `katrevenen` (81) end in `-en`,
- *  which is not a key, so no tail matches and the rule returns the input untouched — `21yèm` ×22, `31yèm`
- *  ×6, and ~8 more. Nothing in 800,158 paragraphs writes any of those out, and the one external description
- *  found (howtocreole.com: "numbers ending in 1 … end in -eyinyèm, except 71st and 91st which end in
- *  -onzyèm") names exactly that set as irregular. Its other two claims — multiples of ten in `-tyèm` except
- *  70th/90th in `-dizyèm` — are what the composition already produces, which is why the composition is
- *  trusted and the one gap is left unread rather than filled from a single blog. */
-const ORDINAL_TAIL: readonly (readonly [string, string])[] = [
-    ["senkant", "senkantyèm"], ["swasant", "swasantyèm"], ["karant", "karantyèm"], ["katòz", "katòzyèm"],
-    ["trant", "trantyèm"], ["douz", "douzyèm"], ["trèz", "trèzyèm"], ["kenz", "kenzyèm"], ["senk", "senkyèm"],
-    ["onz", "onzyèm"], ["sèz", "sèzyèm"], ["ven", "ventyèm"], ["nèf", "nevyèm"], ["sis", "sizyèm"],
-    ["sèt", "setyèm"], ["uit", "wityèm"], ["dis", "dizyèm"], ["san", "santyèm"], ["mil", "milyèm"],
-    ["kat", "katriyèm"], ["twa", "twazyèm"], ["de", "dezyèm"],
-];
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINAL_TAIL: readonly (readonly [string, string])[] = MANIFEST.ordinalTails;
 
 /** The Haitian ordinal for `n`, or `undefined` when the composition has no attested tail (the `-en` band). */
 function ordinalWord(n: number): string | undefined {

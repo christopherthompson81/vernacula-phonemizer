@@ -70,6 +70,7 @@
  *   · `200m.s.n.m.` is NOT in this class and is worth saying so: it reads *mokõisa metro*, "200 metres",
  *     which is what `m.s.n.m.` (metres above sea level) means. The one-letter `m` key is right there.
  */
+import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -182,8 +183,8 @@ const SYMBOLS = makeSymbolNormalizer({
  */
 const PUSO = /[ʼ’ꞌꞋ]/gu;
 
-/** Guaraní's ordinal is the cardinal plus `-ha`, attaching with no orthographic change. */
-const ORDINAL_SUFFIX = "ha";
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINAL_SUFFIX = MANIFEST.ordinalSuffix;
 
 /** Every rule emits DIGITS where a number is involved and lets the engine's own number path speak them. */
 export function normalizeGuarani(input: string): string {

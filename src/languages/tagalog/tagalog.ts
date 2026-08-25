@@ -7,6 +7,7 @@
  * the penult default (the referee eval folds stress). Intervocalic/word-final glottal stops are likewise phonemic
  * but unwritten (bata 'child' [ˈbataʔ] vs bata 'robe' [ˈbata]) — a lexical residual.
  */
+import { MANIFEST } from "./manifest.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
@@ -28,13 +29,15 @@ interface NumbersDef {
     and: string; // at → 't after a vowel
     stressPenult: string[]; // number roots that are penult- not final-stressed (séro, ápat, líbo, …)
 }
-interface TagalogDef {
+export interface TagalogDef {
     digraphs: Record<string, string>;
     consonants: Record<string, string>;
     vowels: Record<string, string>;
     specialWords: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
+    /** The two CONTRACTED ordinals; `ika-N` is regular and composed in code. */
+    contractedOrdinals: Record<string, string>;
 }
 const DEF = loadManifest<TagalogDef>(import.meta.url, "tagalog.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
@@ -384,7 +387,8 @@ const SYMBOLS = makeSymbolNormalizer({
  */
 const ORDINAL_ONE = "una";
 const ORDINAL_PREFIX = "ika";
-const ORDINAL_CONTRACTED: Readonly<Record<number, string>> = { 2: "ikalawa", 3: "ikatlo" };
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINAL_CONTRACTED = MANIFEST.contractedOrdinals;
 
 // Order is load-bearing: times before the number class (else 12:23 is two numbers and a colon pause),
 // ika- ordinals before LATIN_RUN (else ⟨ika⟩ is a word and the digits are a stray cardinal), and the number

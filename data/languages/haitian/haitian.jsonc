@@ -64,4 +64,13 @@
         // ⟨dis⟩ (10) elides its ⟨s⟩ before a magnitude noun: LSP "10,000 di mil", "10 million di milyon".
         "tenElided": "di",
     },
+
+    // Ordinal tails. Which tail a numeral takes is the rule; the WORDS are here.
+    "ordinalTails": [
+        ["senkant", "senkantyèm"], ["swasant", "swasantyèm"], ["karant", "karantyèm"], ["katòz", "katòzyèm"],
+        ["trant", "trantyèm"], ["douz", "douzyèm"], ["trèz", "trèzyèm"], ["kenz", "kenzyèm"], ["senk", "senkyèm"],
+        ["onz", "onzyèm"], ["sèz", "sèzyèm"], ["ven", "ventyèm"], ["nèf", "nevyèm"], ["sis", "sizyèm"],
+        ["sèt", "setyèm"], ["uit", "wityèm"], ["dis", "dizyèm"], ["san", "santyèm"], ["mil", "milyèm"],
+        ["kat", "katriyèm"], ["twa", "twazyèm"], ["de", "dezyèm"]
+    ]
 }

@@ -19,6 +19,8 @@ export interface NorwegianManifest {
     retroflex: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
+    /** The ordinal series. */
+    ordinals: Record<string, string>;
 }
 
 export const MANIFEST = loadManifest<NorwegianManifest>(import.meta.url, "norwegian.jsonc");

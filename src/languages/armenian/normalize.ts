@@ -97,6 +97,7 @@
  *   · `՛` (U+055B) ×9, every one an arc-minute in a coordinate; it is otherwise Armenian's emphasis mark,
  *     where silence is right. Left dropped.
  */
+import { MANIFEST } from "./manifest.ts";
 import { westernNumberWords } from "../../core/numbers.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
@@ -168,14 +169,8 @@ const MONTH_GENITIVE: readonly string[] = [
     "հուլիսի", "օգոստոսի", "սեպտեմբերի", "հոկտեմբերի", "նոյեմբերի", "դեկտեմբերի",
 ];
 
-/** Ordinals 1–4 are suppletive and ONLY as standalone values — 22 is քսաներկուերորդ (երկու + երորդ), not
- *  *քսաներկրորդ, which `քսաներկուերորդ` ×13/12 settles. All four are attested in the corpus. */
-const IRREGULAR_ORDINAL: Readonly<Record<number, string>> = {
-    1: "առաջին",
-    2: "երկրորդ",
-    3: "երրորդ",
-    4: "չորրորդ",
-};
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const IRREGULAR_ORDINAL = MANIFEST.irregularOrdinals;
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // NUMBER WORDS + ARMENIAN SUFFIX MORPHOPHONOLOGY

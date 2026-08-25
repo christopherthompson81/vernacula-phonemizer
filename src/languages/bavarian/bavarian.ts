@@ -23,10 +23,12 @@ import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeBavarian } from "./normalize.ts";
 
-interface BarDef {
+export interface BarDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    /** Ordinal stems, ONLY where sourced — an absent index falls back to the cardinal. */
+    ordinalStems: Record<string, string>;
 }
 const DEF = loadManifest<BarDef>(import.meta.url, "bavarian.jsonc");
 const DIGRAPHS = DEF.digraphs;

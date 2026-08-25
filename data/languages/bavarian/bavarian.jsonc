@@ -69,4 +69,23 @@
         "million": { "one": "oa Million", "plural": "Millionen" },
         "billion": { "one": "oa Milliarde", "plural": "Milliardn" }
     },
+
+    // ⚠ A TABLE, DELIBERATELY, AND ONLY WHERE IT IS SOURCED — an unsourced index falls back to the cardinal
+    // rather than being invented. The per-entry corpus citations travel with the values they justify.
+    "ordinalStems": {
+        // `easchte` — "om 1. Jenna 2002 is donn s easchte Moi Eiro-Bargejd in Umlaff kemma" (the Eiro article,
+        // which puts `1.` and `easchte` in one sentence), "de easchte Voikszöhlung" (corpus), "de easchtn Schpuan".
+        "1": "eascht",
+        // `zwoate` — "da zwoate Tei van ISO-Standard", "Ludwig da Zwoate", "da zwoate Buachstob vom griachischn
+        // Alphabet", "wors da zwoate Dog"; corpus "ois zwoate offiziäie Omtssprouch".
+        "2": "zwoat",
+        // `dritte` — "as Dritte Fernsehprogramm", "afm drittn Platz", "de dritte Ziffa den Regierungsbeziak";
+        // corpus "bei da drittn grossn Erweitarung".
+        "3": "dritt",
+        // `zehnte` — "da zehnte Buachstob im Hebräischn Alphabet", "da Dezemba da zehnte Monat"; corpus
+        // "nua Favoritn ois zehnta Hieb".
+        "10": "zehnt",
+        // `zwanzigste` — "bis ins zwanzigste Joahundat", "da zwanzigste Buachstob im Hebräischen Alphabet".
+        "20": "zwanzigst"
+    }
 }

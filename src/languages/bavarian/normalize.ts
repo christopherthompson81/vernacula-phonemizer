@@ -26,6 +26,7 @@
  * all of which are German book titles. Same shape for the clock noun (`A Uah (dt.: Uhr…)`). Every word
  * this file emits was probed on bar.wikipedia with `tools/normalization/attest.ts` and its prose read.
  */
+import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -67,38 +68,8 @@ const LICENSER = new Set([
     "vo", "von", "da", "dea", "de", "des", "dem", "den", "d", "ois", "as", "s",
 ]);
 
-/**
- * ORDINAL WORDS — A TABLE, DELIBERATELY, AND ONLY WHERE IT IS SOURCED.
- *
- * ⚠ THE COMPOSITIONAL ROUTE IS REFUTED BY THIS LANGUAGE'S OWN CARDINALS. The German rule is cardinal + `-t`
- * below 20 and + `-st` above, and applying it to `bavarian.jsonc`'s cardinal table gives the WRONG WORD for
- * both values I can check against bar.wikipedia: the cardinals are `zeah` (10) and `zwånzg` (20), which
- * compose to *zeaht and *zwånzgst, while the wiki writes **`zehnte`** ("da zehnte Buachstob im Hebräischn
- * Alphabet", "da Dezemba da zehnte Monat") and **`zwanzigste`** ("bis ins zwanzigste Joahundat", "da
- * zwanzigste Buachstob"). Bavarian's ordinal series sits on a different, German-shaped stem from its own
- * counting numerals — so composing here would have invented a word in every slot, which is playbook trap 8's
- * advice failing against trap 13's warning that a rule's branches and a corpus's instances are different sets.
- *
- * So each entry below is a word read in bar.wikipedia prose, in the ordinal sense, and nothing is
- * extrapolated. An unsourced value returns `undefined` and the rule declines — leaving that `N.` exactly as
- * it reads today rather than guessing a suffix.
- */
-const ORDINAL: Readonly<Record<number, string>> = {
-    // `easchte` — "om 1. Jenna 2002 is donn s easchte Moi Eiro-Bargejd in Umlaff kemma" (the Eiro article,
-    // which puts `1.` and `easchte` in one sentence), "de easchte Voikszöhlung" (corpus), "de easchtn Schpuan".
-    1: "eascht",
-    // `zwoate` — "da zwoate Tei van ISO-Standard", "Ludwig da Zwoate", "da zwoate Buachstob vom griachischn
-    // Alphabet", "wors da zwoate Dog"; corpus "ois zwoate offiziäie Omtssprouch".
-    2: "zwoat",
-    // `dritte` — "as Dritte Fernsehprogramm", "afm drittn Platz", "de dritte Ziffa den Regierungsbeziak";
-    // corpus "bei da drittn grossn Erweitarung".
-    3: "dritt",
-    // `zehnte` — "da zehnte Buachstob im Hebräischn Alphabet", "da Dezemba da zehnte Monat"; corpus
-    // "nua Favoritn ois zehnta Hieb".
-    10: "zehnt",
-    // `zwanzigste` — "bis ins zwanzigste Joahundat", "da zwanzigste Buachstob im Hebräischen Alphabet".
-    20: "zwanzigst",
-};
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINAL = MANIFEST.ordinalStems;
 
 /**
  * DOTTED ABBREVIATIONS, and every expansion is a word the **Bavarian subset itself** spells out elsewhere —

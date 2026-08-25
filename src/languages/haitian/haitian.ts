@@ -15,11 +15,13 @@ import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeHaitian } from "./normalize.ts";
 
-interface HaitianDef {
+export interface HaitianDef {
     digraphs: Record<string, string>;
     hiatusVowels: readonly string[];
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    /** Ordinal tails as [writtenEnding, spokenTail] pairs; the matching rule stays in normalize.ts. */
+    ordinalTails: readonly (readonly [string, string])[];
 }
 const DEF = loadManifest<HaitianDef>(import.meta.url, "haitian.jsonc");
 const DIGRAPHS = DEF.digraphs;

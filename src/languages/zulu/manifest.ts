@@ -27,6 +27,8 @@ export interface ZuluManifest {
         thousand: NounClassMagnitude;
         million: NounClassMagnitude;
     };
+    /** The `ye-` ordinal series. */
+    ordinalYe: Record<string, string>;
 }
 
 /** The consolidated hand-authored Zulu data tables (see zulu.jsonc). */

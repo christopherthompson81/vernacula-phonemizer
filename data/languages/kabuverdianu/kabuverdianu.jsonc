@@ -61,4 +61,9 @@
         "thousand": "mil",
         "million": { "one": "un milion", "word": "milion" },
     },
+
+    // The ordinal series.
+    "ordinals": [
+        "", "priméru", "sigundu", "terseru", "kuartu", "kintu", "sestu", "sétimu", "oitavu", "nonu", "désimu"
+    ]
 }

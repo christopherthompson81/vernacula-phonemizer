@@ -20,6 +20,8 @@ export interface DanishManifest {
         million: { one: string; plural: string };
         billion: { one: string; plural: string };
     };
+    /** The ordinal series. */
+    ordinals: Record<string, string>;
 }
 
 /** The consolidated hand-authored Danish data tables (see danish.jsonc). */

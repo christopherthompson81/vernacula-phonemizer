@@ -14,12 +14,14 @@ import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeKabuverdianu } from "./normalize.ts";
 
-interface KabuverdianuDef {
+export interface KabuverdianuDef {
     digraphs: Record<string, string>;
     accentedVowels: readonly string[];
     vowelLetters: readonly string[];
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    /** The ordinal series. */
+    ordinals: string[];
 }
 const DEF = loadManifest<KabuverdianuDef>(import.meta.url, "kabuverdianu.jsonc");
 const DI = DEF.digraphs;

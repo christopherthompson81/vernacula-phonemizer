@@ -34,6 +34,7 @@
  *   · DE-GROUPING FIRST, before the ordinal rule, or `1.234` is read as an ordinal followed by a numeral.
  *   · THE ORDINAL RULE AFTER de-grouping and after the decimal rule, both of which own a period too.
  */
+import { MANIFEST } from "./manifest.ts";
 
 /**
  * Ordinals 1–31 in the three weak endings. `masc` is the masculine NOMINATIVE (`-i`); `common` covers
@@ -43,39 +44,8 @@
 interface OrdinalForms { masc: string; common: string; femOblique: string }
 const ORD = (masc: string, common: string, femOblique: string): OrdinalForms => ({ masc, common, femOblique });
 
-const ORDINALS: Readonly<Record<string, OrdinalForms>> = {
-    "1": ORD("fyrsti", "fyrsta", "fyrstu"),
-    "2": ORD("annar", "annan", "annarrar"),
-    "3": ORD("þriðji", "þriðja", "þriðju"),
-    "4": ORD("fjórði", "fjórða", "fjórðu"),
-    "5": ORD("fimmti", "fimmta", "fimmtu"),
-    "6": ORD("sjötti", "sjötta", "sjöttu"),
-    "7": ORD("sjöundi", "sjöunda", "sjöundu"),
-    "8": ORD("áttundi", "áttunda", "áttundu"),
-    "9": ORD("níundi", "níunda", "níundu"),
-    "10": ORD("tíundi", "tíunda", "tíundu"),
-    "11": ORD("ellefti", "ellefta", "elleftu"),
-    "12": ORD("tólfti", "tólfta", "tólftu"),
-    "13": ORD("þrettándi", "þrettánda", "þrettándu"),
-    "14": ORD("fjórtándi", "fjórtánda", "fjórtándu"),
-    "15": ORD("fimmtándi", "fimmtánda", "fimmtándu"),
-    "16": ORD("sextándi", "sextánda", "sextándu"),
-    "17": ORD("sautjándi", "sautjánda", "sautjándu"),
-    "18": ORD("átjándi", "átjánda", "átjándu"),
-    "19": ORD("nítjándi", "nítjánda", "nítjándu"),
-    "20": ORD("tuttugasti", "tuttugasta", "tuttugustu"),
-    "21": ORD("tuttugasti og fyrsti", "tuttugasta og fyrsta", "tuttugustu og fyrstu"),
-    "22": ORD("tuttugasti og annar", "tuttugasta og annan", "tuttugustu og annarrar"),
-    "23": ORD("tuttugasti og þriðji", "tuttugasta og þriðja", "tuttugustu og þriðju"),
-    "24": ORD("tuttugasti og fjórði", "tuttugasta og fjórða", "tuttugustu og fjórðu"),
-    "25": ORD("tuttugasti og fimmti", "tuttugasta og fimmta", "tuttugustu og fimmtu"),
-    "26": ORD("tuttugasti og sjötti", "tuttugasta og sjötta", "tuttugustu og sjöttu"),
-    "27": ORD("tuttugasti og sjöundi", "tuttugasta og sjöunda", "tuttugustu og sjöundu"),
-    "28": ORD("tuttugasti og áttundi", "tuttugasta og áttunda", "tuttugustu og áttundu"),
-    "29": ORD("tuttugasti og níundi", "tuttugasta og níunda", "tuttugustu og níundu"),
-    "30": ORD("þrítugasti", "þrítugasta", "þrítugustu"),
-    "31": ORD("þrítugasti og fyrsti", "þrítugasta og fyrsta", "þrítugustu og fyrstu"),
-};
+/** Read from the manifest — see the jsonc, where the evidence lives. */
+const ORDINALS = MANIFEST.ordinals;
 
 /** Month names select the MASCULINE NOMINATIVE — *sautjándi september*. 22 of the corpus's 46 ordinals. */
 const MONTHS = /^(janúar|febrúar|mars|apríl|maí|júní|júlí|ágúst|september|október|nóvember|desember)/u;
