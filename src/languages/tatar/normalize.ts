@@ -59,6 +59,7 @@
  * `tools/corpus/attest/tt.jsonc`.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { numberToWords } from "./numbers.ts";
 
 // ---------------------------------------------------------------------------------------------------
@@ -185,8 +186,6 @@ export function normalizeTatarInitialisms(text: string): string {
 
 /** ⚠ EVERY BOUNDARY IN THIS FILE IS AN EXPLICIT LOOKAROUND, NEVER `\b` — `\b` is ASCII-defined and finds
  *  none against Cyrillic, which is how `core/initialisms.ts` was a total no-op for Russian (trap 1). */
-const NOT_LETTER = "(?![\\p{L}\\p{M}])";
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
 /** The Tatar-Cyrillic letters a written suffix can be spelt with. */
 const SFX = "[а-яёәөүҗңһ]";
 
@@ -249,14 +248,14 @@ export function normalizeTatar(input: string): string {
     //    `млн.`/`млрд.` are the magnitude abbreviations (`8 млн. т каты`).
     //    The FINAL dot is kept at a sentence end, or the pause is lost outright (trap 10).
     const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}б\\s?\\.\\s?э\\s?\\.?\\s?к\\s?\\.?`, "giu"), "безнең эрага кадәр"],
-        [new RegExp(`${NOT_BEFORE}я\\s?\\.\\s?э\\s?\\.?\\s?к\\s?\\.?`, "giu"), "яңа эрага кадәр"],
-        [new RegExp(`${NOT_BEFORE}б\\s?\\.\\s?э\\s?\\.`, "giu"), "безнең эра"],
-        [new RegExp(`${NOT_BEFORE}я\\s?\\.\\s?э\\s?\\.`, "giu"), "яңа эра"],
-        [new RegExp(`${NOT_BEFORE}һ\\s?\\.\\s?б\\s?\\.`, "giu"), "һәм башкалар"],
-        [new RegExp(`${NOT_BEFORE}ш\\s?\\.\\s?и\\s?\\.`, "giu"), "шул исәптән"],
-        [new RegExp(`${NOT_BEFORE}млрд\\s?\\.`, "giu"), "миллиард"],
-        [new RegExp(`${NOT_BEFORE}млн\\s?\\.`, "giu"), "миллион"],
+        [new RegExp(`${NOT_LETTER_BEFORE}б\\s?\\.\\s?э\\s?\\.?\\s?к\\s?\\.?`, "giu"), "безнең эрага кадәр"],
+        [new RegExp(`${NOT_LETTER_BEFORE}я\\s?\\.\\s?э\\s?\\.?\\s?к\\s?\\.?`, "giu"), "яңа эрага кадәр"],
+        [new RegExp(`${NOT_LETTER_BEFORE}б\\s?\\.\\s?э\\s?\\.`, "giu"), "безнең эра"],
+        [new RegExp(`${NOT_LETTER_BEFORE}я\\s?\\.\\s?э\\s?\\.`, "giu"), "яңа эра"],
+        [new RegExp(`${NOT_LETTER_BEFORE}һ\\s?\\.\\s?б\\s?\\.`, "giu"), "һәм башкалар"],
+        [new RegExp(`${NOT_LETTER_BEFORE}ш\\s?\\.\\s?и\\s?\\.`, "giu"), "шул исәптән"],
+        [new RegExp(`${NOT_LETTER_BEFORE}млрд\\s?\\.`, "giu"), "миллиард"],
+        [new RegExp(`${NOT_LETTER_BEFORE}млн\\s?\\.`, "giu"), "миллион"],
     ];
     for (const [re, word] of multi)
         s = s.replace(re, (m0, offset: number, full: string) => {
@@ -275,7 +274,7 @@ export function normalizeTatar(input: string): string {
     //    to the seconds: `13:23:58дә` (the Chernobyl article) and `9:51:13-тә` (the Mars opposition).
     //    Both are claimed; a two-field rule alone would have left the seconds as a stranded number.
     //    Runs BEFORE the ordinal rule so a time is not first claimed as a numeral-plus-suffix.
-    const timeSuffix = `(?:\\s?-\\s?|)(${SFX}{1,5})${NOT_LETTER}`;
+    const timeSuffix = `(?:\\s?-\\s?|)(${SFX}{1,5})${NOT_LETTER_AFTER}`;
     s = s.replace(
         new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d):([0-5]\\d)(?![\\d:.,])(?:${timeSuffix})?`, "gu"),
         (whole, h: string, mi: string, sec: string, sfx: string | undefined) => {
@@ -296,9 +295,9 @@ export function normalizeTatar(input: string): string {
     //    ⚠ HYPHENATED AND GLUED TAKE THE FULL CLOSED SET, because the boundary is unambiguous there:
     //    `3-нче`, `2009-нчы`, `19-ынчы`, `2000-гә`, `2005нченең`.
     //    MUST run before the range rule (step 7), which would otherwise eat the hyphen.
-    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(${SFX}{1,6})${NOT_LETTER}`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(${SFX}{1,6})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, sfx: string) => attach(whole, digits, sfx));
-    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d+)(${SFX}{1,6})${NOT_LETTER}`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d+)(${SFX}{1,6})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, sfx: string) => attach(whole, digits, sfx));
 
     // 5) SIGNS. `−2.88-гә` uses the true MINUS (U+2212); the corpus's own arithmetic uses `=` and `×`.
@@ -318,7 +317,7 @@ export function normalizeTatar(input: string): string {
     //    The suffix must be glued to *минут*, not left standing as its own word: an isolated *ында* is a
     //    bound morpheme read aloud as a word, which is the trap-56 shape — a defect that produces a
     //    reading. `\s?` before it, because the corpus writes both `41°11'ында` and `81°49' ында`.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?(\\d+)\\s?[′']\\s?(${SFX}{1,5})${NOT_LETTER}`, "gu"),
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?(\\d+)\\s?[′']\\s?(${SFX}{1,5})${NOT_LETTER_AFTER}`, "gu"),
         (whole, deg: string, min: string, sfx: string) => {
             const glued = attachToWords(whole, `${deg} градус ${min} минут`, sfx);
             return glued === whole ? `${deg} градус ${min} минут ${sfx}` : `${glued} `;
@@ -341,7 +340,7 @@ export function normalizeTatar(input: string): string {
     // 7) THE SPACED ORDINAL, and ⚠ ONLY THE ORDINAL. `1 нче президенты`, `1917 нче елда`, `1930 нчы
     //    елга`, `1914 – 1917 нче елларда`. Runs AFTER the range rule below would have wanted to, so it is
     //    ordered before it and the range rule is given the leftovers — see step 8.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s(${ORD_SUFFIX})${NOT_LETTER}`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s(${ORD_SUFFIX})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, sfx: string) => attach(whole, digits, sfx));
 
     // 8) NUMERIC RANGES. The dash was dropped outright and the endpoints fused into one run of words —

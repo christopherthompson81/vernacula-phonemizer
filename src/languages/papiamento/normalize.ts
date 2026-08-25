@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /**
  * Papiamento (pap) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -45,9 +46,6 @@
  */
 
 /** ⚠ NEVER `\b` — Papiamento carries `á é í ó ú ñ ò è ù`, which `\b` treats as boundaries (trap 1/23). */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /** Normalize one Papiamento input string. Pure text→text. Steps are ORDER-DEPENDENT. */
 export function normalizePapiamento(input: string): string {
     let s = input;
@@ -72,8 +70,8 @@ export function normalizePapiamento(input: string): string {
     //    Sorano de Efeso (98–138 d.C.) y Galeno (129–216 d.C.)". `antes` ×26, `despues` ×133,
     //    `Cristo` ×21 on pap.wikipedia. The final dot is kept at a sentence end (trap 10).
     const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}a\\s?\\.\\s?C\\s?\\.`, "gu"), "antes di Cristo"],
-        [new RegExp(`${NOT_BEFORE}d\\s?\\.\\s?C\\s?\\.`, "gu"), "despues di Cristo"],
+        [new RegExp(`${NOT_LETTER_BEFORE}a\\s?\\.\\s?C\\s?\\.`, "gu"), "antes di Cristo"],
+        [new RegExp(`${NOT_LETTER_BEFORE}d\\s?\\.\\s?C\\s?\\.`, "gu"), "despues di Cristo"],
     ];
     for (const [re, word] of multi)
         s = s.replace(re, (m0: string, offset: number, full: string) => {

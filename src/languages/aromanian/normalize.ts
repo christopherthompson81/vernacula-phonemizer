@@ -55,12 +55,10 @@
  * phrase quoted from this artifact; see `tools/corpus/attest/rup.jsonc`.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** ⚠ NEVER `\b` — Aromanian carries `ã â ľ ț ş ș ñ` and the digraph apostrophes, which `\b` treats as
  *  boundaries (trap 1/23). */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /**
  * The shared SYMBOL tier. `la sutã` is the corpus's own phrase (see the header); `metru` ×7, `kilometru` ×2,
  * `hectar` ×3, `milion` ×3 / `milioani` ×4, `miliardzã` ×2, `shi` ×140.
@@ -118,8 +116,8 @@ export function normalizeAromanian(input: string): string {
     //    (×12), `dupu` (×56) not `dupã` (×22) — see the header.
     //    ⚠ THE FINAL DOT IS KEPT AT A SENTENCE END, or the pause is lost outright (trap 10).
     const era: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}n\\s?\\.\\s?Hr\\s?\\.`, "gu"), "ninti di Hristo"],
-        [new RegExp(`${NOT_BEFORE}d\\s?\\.\\s?Hr\\s?\\.`, "gu"), "dupu Hristo"],
+        [new RegExp(`${NOT_LETTER_BEFORE}n\\s?\\.\\s?Hr\\s?\\.`, "gu"), "ninti di Hristo"],
+        [new RegExp(`${NOT_LETTER_BEFORE}d\\s?\\.\\s?Hr\\s?\\.`, "gu"), "dupu Hristo"],
     ];
     for (const [re, word] of era)
         s = s.replace(re, (m0: string, offset: number, full: string) => {
@@ -141,7 +139,7 @@ export function normalizeAromanian(input: string): string {
     //    where a BRACKET follows. Keeping the dot only when the clause actually ends is the same shape the
     //    era rule above uses, and it is right for the same reason (trap 10).
     for (const [ab, word] of abbrev)
-        s = s.replace(new RegExp(`${NOT_BEFORE}${ab}\\s?\\.`, "gu"),
+        s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${ab}\\s?\\.`, "gu"),
             (m0: string, offset: number, full: string) => {
                 const rest = full.slice(offset + m0.length);
                 return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
@@ -151,7 +149,7 @@ export function normalizeAromanian(input: string): string {
     //    requirement cannot bridge it. Aromanian writes both orders — `6650 km di la izvuri` (bare) and
     //    `largu 18 di km.di Tetova, 53 di km.di Scopia` (with the particle) — and only the first reaches
     //    the tier. Expanding the unit here leaves the particle exactly where the writer put it.
-    s = s.replace(new RegExp(`(\\d+\\s+di\\s+)km${NOT_AFTER}`, "gu"), "$1kilometru");
+    s = s.replace(new RegExp(`(\\d+\\s+di\\s+)km${NOT_LETTER_AFTER}`, "gu"), "$1kilometru");
 
     // 6) THE SHARED SYMBOL TIER — `%` and the units. It must see the number still ADJACENT to its unit,
     //    which is why it runs after the separators (a grouped figure is one token by now) and before the

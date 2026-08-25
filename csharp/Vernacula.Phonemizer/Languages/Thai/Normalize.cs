@@ -63,10 +63,8 @@ public static class Normalize
 
     /** `\b` is ASCII-defined and matches NOTHING against Thai script — the trap that bit six of the first
      *  thirteen languages. Every left-edge guard in this file is this explicit lookbehind instead. */
-    private const string NOT_LETTER_BEFORE = "(?<![\\p{L}\\p{M}])";
-
     private static readonly (JsRe Re, string To)[] ABBREV_RULES = ABBREV.Select(a => (
-        Re: JsRegex.Compile((a.UnitOnly ? "(?<=\\d\\s?)" : NOT_LETTER_BEFORE) + Esc(a.From), "gu"),
+        Re: JsRegex.Compile((a.UnitOnly ? "(?<=\\d\\s?)" : Boundaries.NOT_LETTER_BEFORE) + Esc(a.From), "gu"),
         To: a.To)).ToArray();
 
     /** Digits of a numeral, spelled one at a time — how Thai reads the fractional part of a decimal

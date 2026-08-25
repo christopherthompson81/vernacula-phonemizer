@@ -45,6 +45,7 @@
  * `tools/corpus/attest/tk.jsonc`.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { numberToWords } from "./numbers.ts";
 
 /** The cardinal as words — the same composer the engine's number path uses. */
@@ -134,8 +135,6 @@ export function normalizeTurkmenInitialisms(text: string): string {
 
 /** ⚠ EVERY BOUNDARY IN THIS FILE IS AN EXPLICIT LOOKAROUND, NEVER `\b` — `\b` is ASCII-defined and does
  *  not see ⟨ň ý ş ž ä ö ü⟩ as word characters, so it would cut Turkmen words in half (trap 1). */
-const NOT_LETTER = "(?![\\p{L}\\p{M}])";
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
 /** The Turkmen letters a written suffix can be spelt with. */
 const SFX = "[a-zäçžňöşüý]";
 
@@ -204,8 +203,8 @@ export function normalizeTurkmen(input: string): string {
     // 2) THE MAGNITUDE ABBREVIATIONS, before any single-dot rule. `30,3 mln km²`, `2 mln. 361,8 müň`,
     //    `16 mln adamdy` — `mln` was reaching the g2p as a raw consonant cluster and the leak gate saw it
     //    (LEAK RAW-LATIN mln ×15). The dot is optional because the corpus writes both.
-    s = s.replace(new RegExp(`${NOT_BEFORE}mlrd\\.?${NOT_LETTER}`, "giu"), "milliard");
-    s = s.replace(new RegExp(`${NOT_BEFORE}mln\\.?${NOT_LETTER}`, "giu"), "million");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mlrd\\.?${NOT_LETTER_AFTER}`, "giu"), "milliard");
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}mln\\.?${NOT_LETTER_AFTER}`, "giu"), "million");
 
     // 3) THE ERA MARKER. `b.e. öň` = *biziň eramyzdan öň* (BCE) and `b.e.` = *biziň eramyz*, written five
     //    ways in the retained text — `b.e. öñ`, `B.e. öñ`, `B.e. öňki`, `B.e.ö.`, `b.e.sepgidinde` — with
@@ -213,9 +212,9 @@ export function normalizeTurkmen(input: string): string {
     //    BE TRIED BEFORE THE BARE `b.e.`, or the bare rule consumes the prefix and strands the "öň".
     //    The FINAL dot is kept at a sentence end, or the pause is lost outright (trap 10).
     const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}b\\.\\s?e\\.\\s?ö\\.()`, "giu"), "biziň eramyzdan öň"],
-        [new RegExp(`${NOT_BEFORE}b\\.\\s?e\\.\\s?öň(ki)?${NOT_LETTER}`, "giu"), "biziň eramyzdan öň"],
-        [new RegExp(`${NOT_BEFORE}b\\.\\s?e\\.()(?=\\s|$)`, "giu"), "biziň eramyz"],
+        [new RegExp(`${NOT_LETTER_BEFORE}b\\.\\s?e\\.\\s?ö\\.()`, "giu"), "biziň eramyzdan öň"],
+        [new RegExp(`${NOT_LETTER_BEFORE}b\\.\\s?e\\.\\s?öň(ki)?${NOT_LETTER_AFTER}`, "giu"), "biziň eramyzdan öň"],
+        [new RegExp(`${NOT_LETTER_BEFORE}b\\.\\s?e\\.()(?=\\s|$)`, "giu"), "biziň eramyz"],
     ];
     for (const [re, word] of multi)
         s = s.replace(re, (m0: string, g1: string | undefined, offset: number, full: string) => {
@@ -229,13 +228,13 @@ export function normalizeTurkmen(input: string): string {
     //     as its own word (*altmyş göterim ini*). Claimed here, before the tier, which is the only place
     //     the figure and the suffix are still adjacent. The word is the tier's own `göterim`, repeated
     //     deliberately rather than left to a rule that cannot reach.
-    s = s.replace(new RegExp(`(\\d+)\\s?%\\s?-\\s?(${SFX}{1,5})${NOT_LETTER}`, "gu"), "$1 göterim$2");
+    s = s.replace(new RegExp(`(\\d+)\\s?%\\s?-\\s?(${SFX}{1,5})${NOT_LETTER_AFTER}`, "gu"), "$1 göterim$2");
 
     // 3c) THE YEAR ABBREVIATION `ý.` — written after a figure inside the era prose the attestation probe
     //     surfaced: "Biziň eramyzdan öň 500-494**ý.**", "480-479**ý** – Kserksiň Gresiýa ýörişi". It was
     //     reaching the g2p as the bare glide [j]. ⚠ Anchored on a preceding DIGIT, because a bare `ý` is
     //     also the commonest letter in the language.
-    s = s.replace(new RegExp(`(\\d)\\s?ý\\.?${NOT_LETTER}`, "gu"), "$1 ýyl");
+    s = s.replace(new RegExp(`(\\d)\\s?ý\\.?${NOT_LETTER_AFTER}`, "gu"), "$1 ýyl");
 
     // 4) НОМЕР / NUMBER SIGN. The sign was dropped outright.
     s = s.replace(/№\s?(?=\d)/gu, "belgi ");
@@ -247,7 +246,7 @@ export function normalizeTurkmen(input: string): string {
     //    bare case suffix on a figure (the writer types the ordinal and declines that), so an open
     //    alternation would have nothing to gain and every space-separated noun to lose.
     //    MUST run before the range rule (step 9), which would otherwise eat the hyphen.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?((?:[yiuü])?nj[yi]${SFX}{0,6})${NOT_LETTER}`, "giu"),
+    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?((?:[yiuü])?nj[yi]${SFX}{0,6})${NOT_LETTER_AFTER}`, "giu"),
         (whole, digits: string, sfx: string) => attachOrdinal(whole, digits, sfx));
 
     // 6) THE FRACTION, and ⚠ ONLY WHERE THE READING IS UNAMBIGUOUS. See the header: this corpus writes the
@@ -286,7 +285,7 @@ export function normalizeTurkmen(input: string): string {
     //    this branch the ⟨C⟩ was read as [k] and the suffix stranded as its own word.
     // ⚠ THE LOWERCASE SCALE LETTER GOES IN THE CLASS, NOT IN AN `i` FLAG — the suffix class beside it
     //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[Cc]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 gradus Selsi$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[Cc]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 gradus Selsi$2");
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 gradus Selsi");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 gradus Farengeýt");
     //    ⚠ AND THE ABLATIVE SITS ON THE SIGN — `+10° dan demirgazyga` ("from +10° northward"). Glued, or

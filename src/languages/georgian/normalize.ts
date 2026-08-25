@@ -188,6 +188,7 @@
  * ═══ ORDER IS LOAD-BEARING; each step states its coupling ═══
  */
 import { MANIFEST } from "./manifest.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { numberToWords } from "./numbers.ts";
 
 const N = MANIFEST.numbers;
@@ -364,9 +365,6 @@ const MAG_WORD = "მილიარდ|მილიონ|ათას|მლ�
 
 const GEO = "\\p{Script=Georgian}";
 /** Trap 1: never `\b`. A Georgian word edge, spelled out. */
-const NOT_LETTER_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_LETTER_AFTER = "(?![\\p{L}\\p{M}])";
-
 /** Compose the cardinal for a written figure that may still carry its decimal separator. Returns the
  *  phrase and, separately, whether it had a fractional tail (the ending attaches to the TAIL's last word). */
 function figureToWords(fig: string): string {

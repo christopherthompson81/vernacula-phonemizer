@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /**
  * Hebrew / עברית (he) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -86,8 +87,6 @@
  */
 
 /** "not inside a word", the trap-1/23 form: `\p{M}` beside `\p{L}`, never `\b`. */
-const NW_B = "(?<![\\p{L}\\p{M}])";
-const NW_A = "(?![\\p{L}\\p{M}])";
 /** A number with an optional decimal tail — the operand every symbol rule takes. Anchored to END in a digit
  *  so the class cannot eat a trailing clause comma (trap 14's second hazard). Written `[0-9]` rather than
  *  `\d` for the trap-1 reason, and to agree with the ENGINE's own number token, which is `\d+(\.\d+)?`. */
@@ -247,7 +246,7 @@ export function normalizeHebrew(input: string): string {
     for (const [body, expansion, head] of ABBREV) {
         const tail = expansion.slice(head.length);
         s = s.replace(
-            new RegExp(`${NW_B}(${PRO_DASH}?)${body}${NW_A}`, "gu"),
+            new RegExp(`${NOT_LETTER_BEFORE}(${PRO_DASH}?)${body}${NOT_LETTER_AFTER}`, "gu"),
             (_m: string, pre: string) => `${pre === "" ? expansion : (PROCLITIC[pre] ?? pre) + head + tail} `,
         );
     }
@@ -285,11 +284,11 @@ export function normalizeHebrew(input: string): string {
     //    sync path stops emitting a spurious word boundary. The acronyms that are NOT read as a word are
     //    the eight at step 4, which is why step 4 runs first.
     s = s.replace(
-        new RegExp(`${NW_B}(${PRO_QUOTE}{1,2})${GERSHAYIM}(?=[א-ת]{2,})`, "gu"),
+        new RegExp(`${NOT_LETTER_BEFORE}(${PRO_QUOTE}{1,2})${GERSHAYIM}(?=[א-ת]{2,})`, "gu"),
         (_m: string, run: string) => `${vocalize(run)} "`,
     );
     s = s.replace(
-        new RegExp(`${NW_B}([א-ת]{1,6})${GERSHAYIM}([א-ת]{1,8})${NW_A}`, "gu"),
+        new RegExp(`${NOT_LETTER_BEFORE}([א-ת]{1,6})${GERSHAYIM}([א-ת]{1,8})${NOT_LETTER_AFTER}`, "gu"),
         "$1$2",
     );
 
@@ -309,7 +308,7 @@ export function normalizeHebrew(input: string): string {
     //    the u-/va- morphophonology `hebrew.jsonc` records as unmodelled. Zero non-proclitic letters occur
     //    in this position in the corpus, so the class is closed by measurement rather than by assumption.
     s = s.replace(
-        new RegExp(`${NW_B}(${PRO_DASH}{1,2})${DASH}(?=[0-9A-Za-z])`, "gu"),
+        new RegExp(`${NOT_LETTER_BEFORE}(${PRO_DASH}{1,2})${DASH}(?=[0-9A-Za-z])`, "gu"),
         (_m: string, run: string) => `${vocalize(run)} `,
     );
 
@@ -378,7 +377,7 @@ export function normalizeHebrew(input: string): string {
     //     (`קו הרוחב 78° דרום`, `קו רוחב 40°`, `זווית קשר של 104.5°`), where מעלות is the same word. The
     //     ARC-MINUTE is left unread: `36°30′` is ×2 and no minutes word is attested — the same partial ug
     //     and ps both shipped, stated rather than guessed at.
-    s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?°\\s?[CF]${NW_A}`, "gui"), "$1 מַעֲלוֹת צֶלְזִיוּס ");
+    s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?°\\s?[CF]${NOT_LETTER_AFTER}`, "gui"), "$1 מַעֲלוֹת צֶלְזִיוּס ");
     s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?°`, "gu"), "$1 מַעֲלוֹת ");
 
     // 11) THE EXPONENT, and the corpus glosses its own symbol TWICE — the strongest attestation available
@@ -392,8 +391,8 @@ export function normalizeHebrew(input: string): string {
     //     ⚠ ONLY MULTI-LETTER LATIN KEYS (traps 28/46). A bare `m` key would claim `802.11m`-shaped
     //     designations and the corpus's heavy Latin residue; `version-dot` is ×4 here, so the exposure is
     //     real, and neither `m²` nor `m³` occurs at all.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km³${NW_A}`, "gu"), "$1 קִילוֹמֶטֶר מְעֻקָּב ");
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km²${NW_A}`, "gu"), "$1 קִילוֹמֶטֶר רָבוּעַ ");
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km³${NOT_LETTER_AFTER}`, "gu"), "$1 קִילוֹמֶטֶר מְעֻקָּב ");
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km²${NOT_LETTER_AFTER}`, "gu"), "$1 קִילוֹמֶטֶר רָבוּעַ ");
     s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?²`, "gu"), "$1 בְּרִיבּוּעַ ");
 
     // 12) THE CLOCK COLON → A SPACE, and this is `ug`'s decimal refusal in another class: the defect is a

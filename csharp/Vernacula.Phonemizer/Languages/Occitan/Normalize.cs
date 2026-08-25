@@ -10,15 +10,12 @@ namespace Vernacula.Phonemizer.Languages.Occitan;
 public static class Normalize
 {
     // ⚠ NEVER `\b` — Occitan carries `à è ò ó ç ï ú` and the interpunct, which `\b` treats as boundaries.
-    private const string NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-    private const string NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
     private static readonly JsRe SPACE_GROUP = JsRegex.Compile(
         "(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:[    ]\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe GROUP_SEPS = JsRegex.Compile("[    ]", "gu");
     private static readonly JsRe DOT_DECIMAL = JsRegex.Compile("(?<!\\d)(\\d+)\\.(\\d+)(?!\\d)", "gu");
-    private static readonly JsRe ERA_BC = JsRegex.Compile($"{NOT_BEFORE}a[bv]\\.?\\s?C\\.?{NOT_AFTER}", "gu");
-    private static readonly JsRe ERA_AD = JsRegex.Compile($"{NOT_BEFORE}ap\\.?\\s?C\\.?{NOT_AFTER}", "gu");
+    private static readonly JsRe ERA_BC = JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}a[bv]\\.?\\s?C\\.?{Boundaries.NOT_LETTER_AFTER}", "gu");
+    private static readonly JsRe ERA_AD = JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}ap\\.?\\s?C\\.?{Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d)(?![\\d:.,])", "gu");
     private static readonly JsRe MINUS = JsRegex.Compile("(^|(?<!\\d)[\\s(])[-−–]\\s?(\\d)", "gu");
     private static readonly JsRe DEG_SCALE = JsRegex.Compile("(?<!in-\\d{0,3})(\\d)\\s?°\\s?([CF])(?![\\p{L}\\p{M}])", "gui");

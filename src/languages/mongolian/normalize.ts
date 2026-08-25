@@ -133,15 +133,13 @@
  *     is written. Recorded here so the next reader does not re-source it.
  */
 import { numberToWords } from "./numbers.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
 
 /** Mongolian Cyrillic letters, upper and lower. Used as the "inside a word" guard everywhere below —
  *  `\b` is ASCII-defined and finds NO boundary against Cyrillic, which is how `core/initialisms.ts` was once
  *  a total no-op for Russian (США → [sʂa]). Every boundary here is an explicit lookaround (trap 1). */
-const NOT_LETTER = "(?![\\p{L}\\p{M}])";
-const NOT_LETTER_BEFORE = "(?<![\\p{L}\\p{M}])";
-
 // ---------------------------------------------------------------------------------------------------
 // 1. PERSONAL INITIALS — `Ц.Элбэгдорж`, `Б.Б.Полынов`
 // ---------------------------------------------------------------------------------------------------
@@ -252,7 +250,7 @@ const GROUP_SPACE = /(?<![\d.,])(\d{1,3})[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu;
  * The lookahead demands LOWERCASE after the hyphen, which is what excludes the corpus's list markers
  * (`7-Зургаадугаар`, `1-Москва`, `5-Ан`, `2-Бүс`) — those are a numbered entry, not an ordinal.
  */
-const ORDINAL = new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d{1,4})-р(т?)${NOT_LETTER}`, "gu");
+const ORDINAL = new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d{1,4})-р(т?)${NOT_LETTER_AFTER}`, "gu");
 const BACK_VOWELS = new RegExp(`[${MANIFEST.backVowels}]`, "u");
 
 /** `n` → its Mongolian ordinal word string. The marker goes on the LAST word of the cardinal only; its vowel
@@ -367,7 +365,7 @@ const MAGNITUDES = [MANIFEST.numbers.thousand, MANIFEST.numbers.million, MANIFES
 const MAG = `(?:[ \u00a0](?:их[ \u00a0])?(?:${MAGNITUDES.join("|")})[\\p{L}\\p{M}]*)?`;
 
 const SAID_CURRENCY = new RegExp(
-    `${NOT_LETTER_BEFORE}(?:доллар|евро(?:гийн|гоор|нууд|той|оос|[гдт])?${NOT_LETTER})`, "iu");
+    `${NOT_LETTER_BEFORE}(?:доллар|евро(?:гийн|гоор|нууд|той|оос|[гдт])?${NOT_LETTER_AFTER})`, "iu");
 /**
  * The redundancy window: the 40 characters after the figure, TRUNCATED AT THE FIRST CLAUSE TERMINATOR. The
  * truncation is what stops a NEW sentence that happens to mention the currency from suppressing this one's
@@ -557,7 +555,7 @@ const UNIT_KEYS = Object.keys(UNIT_WORD).sort((a, b) => b.length - a.length).joi
 // stranded by accident; the callback decides whether it glues onto the unit noun or stays separate.
 const UNIT = new RegExp(
     `(?<![\\d.,\\p{L}\\p{M}])(\\d+(?:[.,]\\d+)?)[ \u00a0\u202f\u2009]?(${UNIT_KEYS})([²³23])?(?![\\p{L}\\p{M}\\d/²³])`
-    + `(?:-([а-яөүё]+)${NOT_LETTER})?`,
+    + `(?:-([а-яөүё]+)${NOT_LETTER_AFTER})?`,
     "gu",
 );
 

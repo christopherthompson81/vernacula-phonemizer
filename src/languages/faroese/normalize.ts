@@ -1,3 +1,4 @@
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /**
  * Faroese (fo) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -44,9 +45,6 @@
  */
 
 /** ⚠ NEVER `\b` — Faroese carries `á í ó ú ý æ ø ð`, which `\b` treats as boundaries (trap 1/23). */
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-const NOT_AFTER = "(?![\\p{L}\\p{M}])";
-
 /** Normalize one Faroese input string. Pure text→text. Steps are ORDER-DEPENDENT — the five jobs of the
  *  full stop are resolved from the most constrained shape to the least. */
 export function normalizeFaroese(input: string): string {
@@ -76,15 +74,15 @@ export function normalizeFaroese(input: string): string {
     //    `Kristus` ×24), `e.m.`/`f.m.` are `eftir`/`fyri middag` (`middag` ×3), `mió.` is milliónir.
     //    ⚠ THE FINAL DOT IS KEPT AT A SENTENCE END, or the pause is lost outright (trap 10).
     const abbrev: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}n\\s?\\.\\s?br\\s?\\.`, "gu"), "norðurbreidd"],
-        [new RegExp(`${NOT_BEFORE}v\\s?\\.\\s?l\\s?\\.`, "gu"), "vesturlongd"],
-        [new RegExp(`${NOT_BEFORE}f\\s?\\.\\s?Kr\\s?\\.`, "gu"), "fyri Kristus"],
-        [new RegExp(`${NOT_BEFORE}e\\s?\\.\\s?Kr\\s?\\.`, "gu"), "eftir Kristus"],
-        [new RegExp(`${NOT_BEFORE}e\\s?\\.\\s?m\\s?\\.`, "gu"), "eftir middag"],
-        [new RegExp(`${NOT_BEFORE}f\\s?\\.\\s?m\\s?\\.`, "gu"), "fyri middag"],
-        [new RegExp(`${NOT_BEFORE}kl\\s?\\.`, "gu"), "klokkan"],
-        [new RegExp(`${NOT_BEFORE}mió\\s?\\.`, "gu"), "milliónir"],
-        [new RegExp(`${NOT_BEFORE}uml\\s?\\.`, "gu"), "umleið"],
+        [new RegExp(`${NOT_LETTER_BEFORE}n\\s?\\.\\s?br\\s?\\.`, "gu"), "norðurbreidd"],
+        [new RegExp(`${NOT_LETTER_BEFORE}v\\s?\\.\\s?l\\s?\\.`, "gu"), "vesturlongd"],
+        [new RegExp(`${NOT_LETTER_BEFORE}f\\s?\\.\\s?Kr\\s?\\.`, "gu"), "fyri Kristus"],
+        [new RegExp(`${NOT_LETTER_BEFORE}e\\s?\\.\\s?Kr\\s?\\.`, "gu"), "eftir Kristus"],
+        [new RegExp(`${NOT_LETTER_BEFORE}e\\s?\\.\\s?m\\s?\\.`, "gu"), "eftir middag"],
+        [new RegExp(`${NOT_LETTER_BEFORE}f\\s?\\.\\s?m\\s?\\.`, "gu"), "fyri middag"],
+        [new RegExp(`${NOT_LETTER_BEFORE}kl\\s?\\.`, "gu"), "klokkan"],
+        [new RegExp(`${NOT_LETTER_BEFORE}mió\\s?\\.`, "gu"), "milliónir"],
+        [new RegExp(`${NOT_LETTER_BEFORE}uml\\s?\\.`, "gu"), "umleið"],
     ];
     for (const [re, word] of abbrev)
         s = s.replace(re, (m0: string, offset: number, full: string) => {

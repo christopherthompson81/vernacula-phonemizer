@@ -42,6 +42,7 @@
  * ("не менш за 20 гадоў", "больш за 4 млн").
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { eastSlavicNumberWords, type EastSlavicNumbers } from "../ukrainian/numbers.ts";
@@ -269,8 +270,6 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
 const NOT_LETTER = "(?![\\p{L}\\p{M}'’ʼ])";
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
-
 /** Normalize one Belarusian input string. Pure text→text. Steps are ORDER-DEPENDENT. */
 export function normalizeBelarusian(input: string): string {
     let s = input;
@@ -288,10 +287,10 @@ export function normalizeBelarusian(input: string): string {
     //    is kept when the abbreviation ends the sentence, or the corpus's `…у 438 г. н.э.` loses its
     //    sentence-final pause outright (the German run's check: zero sentence-final pauses may be lost).
     const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}да\\s+н\\.\\s?э\\.`, "giu"), "да нашай эры"],
-        [new RegExp(`${NOT_BEFORE}н\\.\\s?э\\.`, "giu"), "нашай эры"],
-        [new RegExp(`${NOT_BEFORE}і\\s+г\\.\\s?д\\.`, "giu"), "і гэтак далей"],
-        [new RegExp(`${NOT_BEFORE}т\\.\\s?зв\\.`, "giu"), "так званы"],
+        [new RegExp(`${NOT_LETTER_BEFORE}да\\s+н\\.\\s?э\\.`, "giu"), "да нашай эры"],
+        [new RegExp(`${NOT_LETTER_BEFORE}н\\.\\s?э\\.`, "giu"), "нашай эры"],
+        [new RegExp(`${NOT_LETTER_BEFORE}і\\s+г\\.\\s?д\\.`, "giu"), "і гэтак далей"],
+        [new RegExp(`${NOT_LETTER_BEFORE}т\\.\\s?зв\\.`, "giu"), "так званы"],
     ];
     for (const [re, word] of multi)
         s = s.replace(re, (m0, offset: number, full: string) => {
@@ -326,11 +325,11 @@ export function normalizeBelarusian(input: string): string {
 
     // 4) DOTTED ABBREVIATIONS. The dot is consumed before a following word or a comma so it cannot become a
     //    phrase break; at a real sentence end it is kept.
-    s = s.replace(new RegExp(`${NOT_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
-    s = s.replace(new RegExp(`${NOT_BEFORE}(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
         (_m, ab: string) => DOTTED_ABBREV[ab.toLowerCase()]!);
-    s = s.replace(new RegExp(`${NOT_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
+    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
 
     // 5) NUMERAL + WRITTEN SUFFIX — the ordinal notation, ×23 in the retained text and `ordinal-latin`

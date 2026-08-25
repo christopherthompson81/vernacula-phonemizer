@@ -56,6 +56,7 @@
  *     available Thai reading, so it is the safe default for the whole class.
  */
 import { segment } from "./segment.ts";
+import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** Thai digit words, indexed by value. Single source: thai.ts's cardinal compositor imports this, and
  *  step 7 below spells a decimal's fractional digits one at a time from the same array. */
@@ -114,8 +115,6 @@ const esc = (s: string): string => s.replace(/[.$*+?^{}()|[\]\\/]/gu, "\\$&");
 
 /** `\b` is ASCII-defined and matches NOTHING against Thai script — the trap that bit six of the first
  *  thirteen languages. Every left-edge guard in this file is this explicit lookbehind instead. */
-const NOT_LETTER_BEFORE = "(?<![\\p{L}\\p{M}])";
-
 const ABBREV_RULES = ABBREV.map((a) => ({
     re: new RegExp(
         (a.unitOnly ? "(?<=\\d\\s?)" : NOT_LETTER_BEFORE) + esc(a.from),

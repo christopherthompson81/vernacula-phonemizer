@@ -59,6 +59,7 @@
  * climate prose; the gap is recorded rather than papered over.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { numberToWords } from "./numbers.ts";
 
 // ---------------------------------------------------------------------------------------------------
@@ -152,8 +153,6 @@ export function normalizeBashkirInitialisms(text: string): string {
 // The rules
 // ---------------------------------------------------------------------------------------------------
 
-const NOT_LETTER = "(?![\\p{L}\\p{M}])";
-const NOT_BEFORE = "(?<![\\p{L}\\p{M}])";
 /** The Bashkir-Cyrillic letters a written suffix can be spelt with. */
 const SFX = "[а-яёәөүҙҫңғҡһ]";
 
@@ -183,9 +182,9 @@ export function normalizeBashkir(input: string): string {
     //    йылдарҙа"); `һ. б.` = *һәм башҡалар*, the Bashkir "etc.", ×18 in the retained text and also
     //    spelled out there. The FINAL dot is kept at a sentence end, or the pause is lost outright.
     const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_BEFORE}б\\.\\s?э\\.\\s?т\\.`, "giu"), "беҙҙең эраға тиклем"],
-        [new RegExp(`${NOT_BEFORE}б\\.\\s?э\\.`, "giu"), "беҙҙең эра"],
-        [new RegExp(`${NOT_BEFORE}һ\\.\\s?б\\.`, "giu"), "һәм башҡалар"],
+        [new RegExp(`${NOT_LETTER_BEFORE}б\\.\\s?э\\.\\s?т\\.`, "giu"), "беҙҙең эраға тиклем"],
+        [new RegExp(`${NOT_LETTER_BEFORE}б\\.\\s?э\\.`, "giu"), "беҙҙең эра"],
+        [new RegExp(`${NOT_LETTER_BEFORE}һ\\.\\s?б\\.`, "giu"), "һәм башҡалар"],
     ];
     for (const [re, word] of multi)
         s = s.replace(re, (m0, offset: number, full: string) => {
@@ -199,14 +198,14 @@ export function normalizeBashkir(input: string): string {
     // 3) THE YEAR ABBREVIATION `й.` — Bashkir's own, written after a figure (`1991 й.`); it was reaching
     //    the g2p as the bare glide [j]. ⚠ `г.` is NOT given a Bashkir reading: every one of its instances
     //    is inside a Russian-language passage, where it is Russian *года* (see the header).
-    s = s.replace(new RegExp(`(\\d)\\s?й\\.${NOT_LETTER}`, "gu"), "$1 йыл");
+    s = s.replace(new RegExp(`(\\d)\\s?й\\.${NOT_LETTER_AFTER}`, "gu"), "$1 йыл");
 
     // 4) CLOCK, and the case suffix that may sit on it. The colon is clause punctuation in bashkir.ts, so
     //    `10:30` read as *ун , утыҙ* — a phrase break inside a time. ⚠ THE SUFFIX ATTACHES TO THE SPOKEN
     //    MINUTE, which is why the clock must be worded here rather than left as digits: `8:30-ҙа` is
     //    *һигеҙ утыҙҙа*, and gluing the written suffix to a DIGIT can never produce that (trap 14).
     //    Runs BEFORE the ordinal rule so a time is not first claimed as a numeral-plus-suffix.
-    s = s.replace(new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d)(?![\\d:.,])(?:\\s?-\\s?(${SFX}{1,4})${NOT_LETTER})?`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d)(?![\\d:.,])(?:\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER})?`, "gu"),
         (whole, h: string, min: string, sfx: string | undefined) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 24) return whole;
@@ -227,7 +226,7 @@ export function normalizeBashkir(input: string): string {
     //    The ordinal is tried FIRST and the `endsWith` guard is what makes the fallback safe — a suffix no
     //    ordinal produces falls through to the cardinal rather than inventing morphology.
     //    MUST run before the range rule (step 9), which would otherwise eat the hyphen.
-    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(${SFX}{1,5})${NOT_LETTER}`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(${SFX}{1,5})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, rawSuffix: string) => {
             const n = Number(digits);
             if (!Number.isSafeInteger(n)) return whole;
@@ -279,12 +278,12 @@ export function normalizeBashkir(input: string): string {
     //    writer's own choice implies; `Цельсий градусытан` is not a word. Honest lossiness, not an oversight.
     // ⚠ THE LOWERCASE SCALE LETTER GOES IN THE CLASS, NOT IN AN `i` FLAG — the suffix class beside it
     //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 градус$2");
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 градус$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 градус$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 градус$2");
     //    ⚠ AND THE CORPUS ALSO WRITES THE SIGN AFTER THE LETTER — `−41 С°`, `+35С°`, `0С° аҙағында`. That
     //    is a typo for `°С` and it is the only reason the degree class still reported after the rules above
     //    were in; claimed here on the same terms, letter first.
-    s = s.replace(new RegExp(`(\\d)\\s?[CСcс]\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 градус$2");
+    s = s.replace(new RegExp(`(\\d)\\s?[CСcс]\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 градус$2");
     s = s.replace(/(\d)\s?[CС]\s?°(?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
     s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
     s = s.replace(/(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусы");
