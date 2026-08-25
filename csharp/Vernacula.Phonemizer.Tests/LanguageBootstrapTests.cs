@@ -40,6 +40,12 @@ public class LanguageBootstrapTests
     [InlineData("ru", "XIX веке", "dʲɪvʲɪtnˈat͡sətɨj vʲˈekʲe")]   // the Roman pass takes ru's ORDINAL policy
     [InlineData("el", "15ο", "ðekato pempto")]   // the Greek ending is the CASE, and both members inflect
     [InlineData("en", "The word λόγος means word", "ðə wˈɝd loɣos mˈiːnz wˈɝd")]   // the script router reaches el
+    // Igbo reads tone ONLY where the diacritic is written, and the dotted vowels are the [-ATR] set — the
+    // same reading whether the input arrives precomposed or decomposed.
+    [InlineData("ig", "Ábụ̄jà", "a˥bʊ˧d͡ʒa˩")]
+    // The unit noun LEADS its number, and the English ordinal tail becomes `nke` + the Igbo cardinal.
+    [InlineData("ig", "10 km", "kilomita iɾi")]
+    [InlineData("ig", "8th", "nke asatɔ")]
     // Oromo's two defining shapes: the enclitic GLUED TO THE DIGITS attaches to the numeral word with the
     // linking vowel its stem demands, and the measure noun leads its number (head-initial).
     [InlineData("om", "1994tti", "kˈuma ᶑˈibːa saɡˈal saɡaltamˈiː afurˈitːi")]
