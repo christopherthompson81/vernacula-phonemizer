@@ -21,8 +21,29 @@
         "tier": "wikipedia (register-restricted)",
         // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
         // `--context` set to exactly this string.
-        "context": "temperatura",
+        "context": "matematika numero",
         "findings": [
+        {
+                "word": "menos",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "negatibo a numero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…a tawen tapno mairaman dagiti numero a kas ti sero, dagiti negatibo a numero, dagiti rasional a numero, dagiti irrasional a numero, ken…",
+                "…ti taaw a panangiturong a [[timon], ti panag-usar kadagiti negatibo a numero iti matematika, ti naiparabaw a mapa, ti napataray ti hidra…"
+            ]
+            },
         {
                 "word": "baba ngem ti sero",
                 "verdict": "absent",
@@ -68,15 +89,6 @@
             },
         {
                 "word": "minus",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
-            },
-        {
-                "word": "menos",
                 "verdict": "absent",
                 "bounded": true,
                 "tokenHits": 0,

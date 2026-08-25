@@ -53,3 +53,52 @@ describe("kmr keeps its narrow trigger, for both spellings alike", () => {
         expect(phonemize("heta -5", "kmr")).toBe(phonemize("heta 5", "kmr"));
     });
 });
+
+/**
+ * ⚠ THREE LANGUAGES THAT READ NO MINUS AT ALL NOW READ U+2212, ON A CAVEATED WORD — and the caveat is the
+ * reason the claim is restricted to this one character.
+ *
+ * Silence is not the safe option: omitting a minus INVERTS the value, so `−6.0 °C` read as "six degrees" is
+ * wrong by twelve and on the wrong side of freezing. But that argument only buys a word that MEANS negative.
+ * The candidates rejected for these languages were transitive verbs of removal (`ntsha` "emit", `gukuramo`
+ * "extract", `ìyọkúrò` "removal"), a comparative, and Tibetan `མོ་གྲངས` — which reads as "number of FEMALES"
+ * in every modern instance, i.e. census counts. Those do not convey negativity, so they do not make the
+ * trade; these three do.
+ *
+ *   nan  負 / hū    — the corpus GLOSSES ITS OWN SIGN: `(−10 m/s) … hū-hō tāi-piáu hong-hiòng`
+ *   ilo  negatibo  — ×12/6, `negatibo a numero` in a maths list; the ADJECTIVE, not a reader's word
+ *   ht   mwens     — ×569 comparative, the reflex of French *moins*; never digit-adjacent
+ *
+ * ⚠ THE ASCII HYPHEN IS NOT CLAIMED IN ANY OF THE THREE, and that is what makes reading a caveated word
+ * defensible: the hyphen carries BCE years, ISBNs, UTC offsets, POJ compounding and page spans, while
+ * U+2212 can only be the operator.
+ */
+describe.each([
+    ["nan", "(−10 m/s)", "(-10 m/s)"],
+    ["ilo", "−4.6", "-4.6"],
+    ["ht", "−20°C", "-20°C"],
+] as const)("%s reads U+2212 and leaves the hyphen alone", (code, minus, hyphen) => {
+    test("the sign is read", () => {
+        expect(phonemize(minus, code)).not.toBe(phonemize(minus.replace("−", ""), code));
+    });
+
+    test("the ASCII hyphen is still refused — the ambiguous character keeps its refusal", () => {
+        expect(phonemize(hyphen, code)).toBe(phonemize(hyphen.replace("-", ""), code));
+    });
+});
+
+/**
+ * ⚠ THE SPACE-SEPARATED NEGATIVE EXPONENT IS THE SHAPE A LEADING-POSITION GUARD CANNOT SEE. `×10 −31 kg` is
+ * 10⁻³¹ with the superscript flattened by mining; the lookbehind looks ONE character back, finds a space,
+ * and fires — reading "ten minus thirty-one". Seven languages in this fleet's corpora write it that way, so
+ * all three rules carry a second lookbehind refusing a preceding `digit + space`.
+ */
+describe.each(["nan", "ilo", "ht"] as const)("%s refuses the shapes that are not a minus", (code) => {
+    test("a space-separated negative exponent", () => {
+        expect(phonemize("×10 −31 kg", code)).toBe(phonemize("×10 31 kg", code));
+    });
+
+    test("a digit−digit range", () => {
+        expect(phonemize("1838−1917", code)).toBe(phonemize("1838 1917", code));
+    });
+});

@@ -204,9 +204,12 @@ describe("Ilocano text normalization", () => {
 
     test("degrees — one word serves the coordinate and the two scales", () => {
         // ×954 digit-adjacent `°`; the sign was dropped and the scale letter read as a bare consonant.
+        // ⚠ THE SIGN IS NOW READ TOO, and this expectation used to PIN THE DEFECT: both rows are the same
+        // corpus sentence, and the U+2212 in front of them was silent, so `−224 °C` read as +224 °C — a
+        // temperature wrong by 448 degrees. See step 1b for the word and the caveat on it.
         expect(say("temperatura ti −224 °C")).toBe(
-            "tɛmpɛɾatˈuɾa tˈi dwaɡˈasut kˈɛt dwapˈulo kˈɛt ʔˈuppat ɡɾˈado kˈɛlsjus");
-        expect(say("−129 °F")).toBe("saŋaɡˈasut kˈɛt dwapˈulo kˈɛt sjˈam ɡɾˈado pahɾɛnhˈɛʔit");
+            "tɛmpɛɾatˈuɾa tˈi nɛɡatˈibo dwaɡˈasut kˈɛt dwapˈulo kˈɛt ʔˈuppat ɡɾˈado kˈɛlsjus");
+        expect(say("−129 °F")).toBe("nɛɡatˈibo saŋaɡˈasut kˈɛt dwapˈulo kˈɛt sjˈam ɡɾˈado pahɾɛnhˈɛʔit");
         // ⚠ THE BARE ARM IS THE BIG ONE — coordinates and angles are ×871 of the ×954, and a coordinate IS
         // degrees, so no second reading has to be sourced.
         expect(say("iti 16°Am 26'")).toBe(

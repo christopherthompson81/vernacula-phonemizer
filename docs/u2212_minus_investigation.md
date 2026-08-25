@@ -189,3 +189,56 @@ probing variants until something attests is how invention gets laundered into ev
 maths textbook, or a corpus with spoken temperatures. Until then the sign stays dropped, which INVERTS the
 value and is the worse failure — but a confidently wrong word in the slot is not an improvement on it, and
 "emit six degrees" is what the available candidates would produce.
+
+## Run 6 — silence is not the safe option, but only a word that MEANS negative buys the trade — 2026-08-25 15:20
+
+Challenged on Run 5's conclusion: a dropped minus INVERTS the value, so silence is probably worse than a
+dictionary-correct word that is not attested in the slot. That is right, and this repo already agrees with
+it — kurmanji ships `negatîf` on exactly that reasoning, with the register caveat in the file, and
+`defects.ts` carries a `minus` DROP gate so a silent sign is tracked rather than accepted.
+
+**But Run 5 ran two different failures together, and only one of them supports silence.**
+
+| class | candidates | does emitting it buy the trade? |
+|---|---|---|
+| **A — means "negative", wrong register** | `negatibo` (adj.), `mwens` (comparative), `hū` 負 | **Yes.** A listener gets "negative", which is the fact that would otherwise be lost. |
+| **B — means something else entirely** | `ntsha` "emit", `gukuramo` "extract", `ìyọkúrò` "removal", `naqqas` "reduced", `འཐེན` "pull" | **No.** "emit six degrees" does not tell anyone the temperature is below zero. Nothing is recovered. |
+
+Class B is not a register problem, it is a different word. And the languages those candidates belong to —
+tn, rw, mt — already read the sign anyway (Run 5's correction), so the question was moot for all three.
+
+**Tibetan is the sharpest case and it is a REFUSAL, confirmed by the user as an antiquated term.**
+`མོ་གྲངས` "female number" is the traditional name for a negative, but ×17 of its ×19 modern instances are
+census counts — `ཕོ་གྲངས་༤༩༧༨༩༥༡དང་མོ་གྲངས་༥༢༤༥༤༡`, "male count 4,978,951 and **female count** 524,541".
+Emitting it would misread demographic sentences, which Tibetan text is full of.
+
+### Shipped: three languages that read no minus at all now read U+2212
+
+| lang | word | evidence | strength |
+|---|---|---|---|
+| `nan` | ⟨負⟩ / *hū* | **the corpus glosses its own sign**: `(2000 kg) × (−10 m/s) = 20000 kg⋅m/s, hū-hō tāi-piáu hong-hiòng` — "the MINUS SIGN represents the direction". Plus `hū-chū-jiân-sò͘ (−1, −2, −3, ...)` in the integers article. | strong |
+| `ilo` | `negatibo` | ×12/6 arts, ×2 as `negatibo a numero` in a maths list of number kinds. The ADJECTIVE — not a record of what a reader says. | caveated |
+| `ht` | `mwens` | ×569 comparative, the direct reflex of French *moins*. **Never once digit-adjacent.** Concept sourced, construction inferred — the kurmanji shape. | caveated |
+
+**⚠ U+2212 ONLY IN ALL THREE, AND THAT IS WHAT MAKES A CAVEATED WORD DEFENSIBLE.** The ASCII hyphen keeps its
+existing refusal, because the hyphen is where the hazards live: Haitian's ~36 BCE years (`etabli nan -509`),
+Ilocano's 103 UTC offsets, POJ's own compounding (`hū-hō`), ISBNs, page spans, EasyTimeline offsets
+(`shift:(-10,5)`). Claiming only the character that can *only* be the operator costs nothing that was ever
+read correctly and removes the whole class.
+
+**⚠ EVERY RULE CARRIES A SECOND LOOKBEHIND: `(?<!\p{Nd}\s)`.** This is Run 3's exponent finding turned into a
+guard. `×10 −31 kg` is 10⁻³¹ with the superscript flattened by mining, and a leading-position lookbehind
+cannot see it — it looks ONE character back, finds a space, and fires. Seven languages in this fleet's
+corpora write an exponent exactly that way.
+
+Min Nan needed two arms and the placement mattered: arm (a) looks ahead for a unit/degree/percent, arm (b)
+takes a bracket, comma or line start (`(−1, −2, −3, ...)` — the comma is in the class because the second and
+third members have nothing else to their left, and claiming only the first would sign one of three). Placed
+after the degree rules it silently failed on `溫度 −5 °C`, because step 3 had already spent the `°` that arm
+(a) looks for — trap 39 again.
+
+**An existing test was pinning the defect.** `test/ilocano.test.ts` asserted `−224 °C` reading as *224 °C*.
+Same corpus sentence, a temperature wrong by 448 degrees, expected verbatim. Updated.
+
+**Still unsourced — 8 of the 11:** ab, ak, bo, ltg, mos, pcm, yo, za. bo is a refusal on evidence; the other
+seven returned ×0 on every candidate, so there is no word to caveat, only one to invent.

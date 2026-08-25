@@ -21,8 +21,44 @@
         "tier": "wikipedia (register-restricted)",
         // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
         // `--context` set to exactly this string.
-        "context": "ìwọ̀n oòrùn otutu",
+        "context": "mathematiki nọ́mbà",
         "findings": [
+        {
+                "word": "nọ́mbà òdì",
+                "verdict": "substring-only",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 2,
+                "examples": []
+            },
+        {
+                "word": "àìdáa",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "negatifu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "òdì nọ́mbà",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "lábẹ́ òdo",
                 "verdict": "absent",
