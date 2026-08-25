@@ -248,39 +248,18 @@ public static class PortuguesePhonemizer
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "vezes" },
-        Ampersand = "e",
-        Percent = new[] { "por cento" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["€"] = new[] { "euro", "euros" }, ["$"] = new[] { "dólar", "dólares" }, ["£"] = new[] { "libra", "libras" },
-            ["¥"] = new[] { "iene", "ienes" },
-        },
-        // The tier matches longest key first, so km/h beats km.
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km/h"] = new[] { "quilômetro por hora", "quilômetros por hora" },
-            ["m/s"] = new[] { "metro por segundo", "metros por segundo" },
-            ["km"] = new[] { "quilômetro", "quilômetros" }, ["cm"] = new[] { "centímetro", "centímetros" },
-            ["mm"] = new[] { "milímetro", "milímetros" }, ["kg"] = new[] { "quilograma", "quilogramas" },
-            ["mg"] = new[] { "miligrama", "miligramas" }, ["m"] = new[] { "metro", "metros" },
-            // ⟨L⟩ and ⟨l⟩ are both official for the litre, so BOTH are declared — the one exception to the
-            // one-letter case rule in Core/NormalizeSymbols.cs. Neither entry is redundant.
-            ["l"] = new[] { "litro", "litros" }, ["L"] = new[] { "litro", "litros" },
-            ["ml"] = new[] { "mililitro", "mililitros" }, ["g"] = new[] { "grama", "gramas" },
-            ["t"] = new[] { "tonelada", "toneladas" }, ["ha"] = new[] { "hectare", "hectares" },
-            ["kw"] = new[] { "quilowatt", "quilowatts" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "quadrado", "quadrados" }, Cubed = new[] { "cúbico", "cúbicos" },
-        },
-        BareExponent = new BareExponentDef
-        {
-            Squared = "{n} ao quadrado", Cubed = "{n} ao cubo", Power = "{n} elevado a {e}", Negative = "menos",
-        },
-        Magnitudes = new[] { "milhões", "milhão", "bilhões", "bilhão" },
-        MagnitudeConnective = "de", // cinco milhões DE dólares
+        // ⚠ ONE SOURCE with Normalize.cs, which applies the other seven signs in positions this tier does not
+        // reach. See portuguese.jsonc `signWords` for the register argument behind `vezes` and the corpus
+        // count behind `e` (×1118).
+        Multiply = new MultiplyDef { Times = Manifest.MANIFEST.SignWords.Times },
+        Ampersand = Manifest.MANIFEST.SignWords.Ampersand,
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        BareExponent = Manifest.MANIFEST.Symbols.BareExponent,
+        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
+        MagnitudeConnective = Manifest.MANIFEST.Symbols.MagnitudeConnective, // cinco milhões DE dólares
     });
 
     private sealed class PortugueseEngine : ILanguage

@@ -222,4 +222,151 @@
         "connector": "e",
         "decimalConnector": "vírgula", // 3,14 → três vírgula um quatro
     },
+    // ---------------------------------------------------------------------------------------------------
+    // Month names, for the DATE rule. ⚠ READ ONLY ON THE BRAZILIAN PATH: Brazil says *primeiro de julho*
+    // where Portugal normally says *um de julho*, and an EXPLICIT `1º` is honoured in both because there the
+    // writer marked it. So a sweep run against `pt` alone scores this table dead — the same shape the es lift
+    // found with its own `months`.
+    "months": ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto",
+        "setembro", "outubro", "novembro", "dezembro"],
+
+    // Dotted abbreviations → the spoken words. ⚠ `no.` is deliberately ABSENT — bare "no" is the contraction
+    // em+o and is everywhere in Portuguese, so only `nº`/`n.º`/`no` before a DIGIT is the number sign.
+    "dottedAbbrev": {
+        "sr": "senhor", "sra": "senhora", "srta": "senhorita", "srs": "senhores",
+        "dr": "doutor", "dra": "doutora", "prof": "professor", "profa": "professora", "eng": "engenheiro",
+        "etc": "etcétera", "pág": "página", "pag": "página", "págs": "páginas",
+        "cap": "capítulo", "art": "artigo", "vol": "volume", "av": "avenida", "ex": "exemplo",
+        "ltda": "limitada", "cia": "companhia", "núm": "número", "aprox": "aproximadamente"
+    },
+
+    // Portuguese letter names, each verified through this engine.
+    "letterNames": {
+        "a": "a", "b": "bê", "c": "cê", "d": "dê", "e": "é", "f": "éfe", "g": "gê", "h": "agá", "i": "i",
+        "j": "jota", "k": "cá", "l": "éle", "m": "eme", "n": "ene", "o": "ó", "p": "pê", "q": "quê",
+        "r": "erre", "s": "esse", "t": "tê", "u": "u", "v": "vê", "w": "dábliu", "x": "xis", "y": "ípsilon",
+        "z": "zê"
+    },
+
+    // Portuguese PHONOTACTICS, for the OOV spell-it-out test in core/initialisms.ts.
+    "phonotactics": {
+        "vowels": "aeiouáéíóúâêôãõà",
+        "onsets": [
+            "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr",
+            "ch", "lh", "nh", "qu", "gu", "ps", "rr", "ss", "sc", "tl"
+        ],
+        "codas": [
+            "ch", "lh", "nh", "rr", "ss", "ns", "rs", "ls", "is", "us", "as", "es", "os",
+            "st", "rt", "rd", "rn", "rl", "rm", "lt", "ld", "nt", "nd", "nc", "ng", "mp", "mb",
+            "sc", "sm", "cs", "ps", "ts", "ks", "bs", "ds"
+        ]
+    },
+
+    // MASCULINE ordinals, 1 … 1000 (romanOrdinals.ts). Three callers: the Roman-numeral policy, the ordinal
+    // INDICATORS (1º / 5ª) and the fraction rule. ⚠ NO `teens` ROW, unlike Spanish: Portuguese composes the
+    // teens regularly from `tens[1]` + a unit (décimo primeiro), so a table would be a second way to say the
+    // same thing.
+    "ordinals": {
+        "units": ["", "primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto", "sétimo", "oitavo", "nono"],
+        "tens": ["", "décimo", "vigésimo", "trigésimo", "quadragésimo", "quinquagésimo",
+            "sexagésimo", "septuagésimo", "octogésimo", "nonagésimo"],
+        "hundreds": ["", "centésimo", "ducentésimo", "trecentésimo", "quadringentésimo",
+            "quingentésimo", "seiscentésimo", "septingentésimo", "octingentésimo", "noningentésimo"],
+        "thousandth": "milésimo"
+    },
+
+    // FRACTIONS. Only 1/2 and 1/3 have a suppletive name; every other denominator takes the ordinal.
+    // ⚠ NO `numeratorOne` HERE, unlike Spanish: Portuguese does not apocopate before the fraction noun
+    // (*um quinto*, where Spanish has *un quinto* against its own *uno*), so the plain cardinal serves.
+    "fractions": { "denominators": { "2": "meio", "3": "terço" } },
+
+    // The FEMININE "one", for the clock: *hora* is feminine, so 1 takes *uma* (uma hora).
+    "feminineOne": "uma",
+
+    // The CLOCK's own noun, which Portuguese speaks aloud where Spanish elides it — *sete horas e dezenove*.
+    // Both numbers are the feminine cardinal; `connector` joins the minutes.
+    "clock": { "hour": "hora", "hours": "horas", "connector": "e" },
+
+    // ERA MARKERS and the number sign.
+    "eraMarkers": { "beforeChrist": "antes de Cristo", "afterChrist": "depois de Cristo" },
+    "numberSign": "número",
+
+    // DEGREES. ⚠ ALWAYS PLURAL, and that is pre-existing behaviour rather than an oversight introduced here:
+    // the rule emits `graus` whatever the count, so `1 °C` reads *um graus Celsius*. Lifting the words does
+    // not change it — a fix is a reading change and needs the TypeScript, a test and regenerated goldens
+    // first. Recorded so the next reader does not take the shape for agreement.
+    "degree": { "word": "graus", "celsius": "Celsius", "fahrenheit": "Fahrenheit" },
+
+    // The BRAZILIAN REAL, whose sign the shared tier cannot claim (`R$` was read as a stray [ʁ] followed by
+    // "dólares"), and the dollar CODES that are folded to a bare `$` so the tier's declared key becomes
+    // reachable — see normalize.ts step 5b for why a compound `US$` key there would be inert.
+    "realWord": "reais",
+    "dollarCodes": ["US", "AUD"],
+
+    // ---------------------------------------------------------------------------------------------------
+    // The SIGN AND MATH WORDS (core/normalizeSymbols.ts `SignWords`) — ± + − & = < > × ÷. ⚠ ONE SOURCE: the
+    // symbol tier in portuguese.ts reads `times` and `ampersand` from here too.
+    //
+    // ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is absent from pt_br; the vocabulary is
+    // ordinary comparative prose and is present: `maior` ×100 tokens, `menor` ×29, `dividido` ×3 — and
+    // `igual` ×0, absent entirely, so the corpus cannot source the equals word at all.
+    //
+    // ⚠ THE EQUALS WORD CAME FROM THE REGISTER TIER, and Portuguese produced the best evidence in the whole
+    // issue: pt.wikipedia's Divisão article does not merely use the words, it NAMES THE SIGNS and reads the
+    // notation back — "o sinal de menor que ( < ), o sinal de maior que ( > )" and "a ÷ b = c (a dividido por
+    // b é igual a c)" — the sign and its reading in one sentence, operands in place. The copula is dropped
+    // because those strings are what the source calls the SIGNS themselves.
+    //
+    // `times` — ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus attestation; the sweep's plausible hits for
+    // other languages were homographs of prepositions. `ampersand` — `e` ×1118 in this corpus.
+    "signWords": {
+        "plusMinus": "mais menos",
+        "plus": "mais",
+        "minus": "menos",
+        "ampersand": "e",
+        "equals": "igual a",
+        "lessThan": "menor que",
+        "greaterThan": "maior que",
+        "times": "vezes",
+        "dividedBy": "dividido por"
+    },
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data (portuguese.ts). Longest keys match first, so km/h beats km.
+    "symbols": {
+        "percent": ["por cento"],
+        // ⚠ NO COMPOUND `US$` KEY — it would be unreachable. The INITIALISM pass runs before this tier and
+        // splits `US` into letters, leaving the `$` preceded by a letter where the tier's guard correctly
+        // refuses it. `dollarCodes` above folds them to a bare `$` instead. `dólar` ×9 / `dólares` ×8 are the
+        // corpus's own words.
+        "currency": {
+            "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"],
+            "¥": ["iene", "ienes"]
+        },
+        "units": {
+            "km/h": ["quilômetro por hora", "quilômetros por hora"],
+            "m/s": ["metro por segundo", "metros por segundo"],
+            "km": ["quilômetro", "quilômetros"], "cm": ["centímetro", "centímetros"],
+            "mm": ["milímetro", "milímetros"],
+            "kg": ["quilograma", "quilogramas"], "mg": ["miligrama", "miligramas"],
+            "m": ["metro", "metros"],
+            // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+            // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+            // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+            "l": ["litro", "litros"], "L": ["litro", "litros"], "ml": ["mililitro", "mililitros"],
+            "g": ["grama", "gramas"], "t": ["tonelada", "toneladas"], "ha": ["hectare", "hectares"],
+            "kw": ["quilowatt", "quilowatts"]
+        },
+        "exponentWords": { "squared": ["quadrado", "quadrados"], "cubed": ["cúbico", "cúbicos"] },
+        // BARE EXPONENT — the PREDICATE for a power with no unit to modify, which is a different word from
+        // the unit MODIFIER above: *quilómetros quadrados* but *vinte ao quadrado*.
+        // ⚠ PROVENANCE: STANDARD MATHEMATICAL REGISTER, not a corpus attestation. The power words are ×0 in
+        // this language's artifact.
+        "bareExponent": {
+            "squared": "{n} ao quadrado", "cubed": "{n} ao cubo", "power": "{n} elevado a {e}",
+            "negative": "menos"
+        },
+        "magnitudes": ["milhões", "milhão", "bilhões", "bilhão"],
+        "magnitudeConnective": "de"
+    }
 }

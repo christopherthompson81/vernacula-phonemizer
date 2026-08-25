@@ -264,49 +264,19 @@ function wordIpa(
 
 // symbol normalization — Portuguese (quilômetro: the BR spelling; pt-BR is the corpus variety).
 const SYMBOLS = makeSymbolNormalizer({
-    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
-    // `e` ×1118 in this corpus. The tier spaces it on both sides, because `B&B` is two
-    // initialisms and joining them would make one token.
-    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-    // One word, so `by` defaults to it; this language does not split dimension from product.
-    multiply: { times: "vezes" },
-    ampersand: "e",
-    percent: ["por cento"],
-    // THE DOLLAR CODES ARE FOLDED TO `$` IN normalize.ts STEP 5b, so no compound key is declared here — one
-    // would be unreachable. The earlier note on this line said the declared `US$` key was "verified on the
-    // direct form, inert on the corpus, and the difference is not yet explained". It is now explained: the
-    // INITIALISM pass runs before this tier and split `US` into letters, leaving the `$` preceded by a letter
-    // where this tier's guard correctly refuses it — and the "verification" had used an all-caps probe string,
-    // which trips initialisms.ts's all-caps-document guard and skips the pass. See step 5b for the evidence,
-    // including the two pt_br speakers who say *dólares* and never voice the code.
-    // `dólar` ×9 / `dólares` ×8 are the corpus's own words.
-    currency: { "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"],
-        "¥": ["iene", "ienes"] },
-    // Longest keys match first, so km/h beats km. The slash unit was dropping its /h entirely.
-    units: { "km/h": ["quilômetro por hora", "quilômetros por hora"], "m/s": ["metro por segundo", "metros por segundo"],
-        km: ["quilômetro", "quilômetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
-        kg: ["quilograma", "quilogramas"], mg: ["miligrama", "miligramas"], m: ["metro", "metros"],
-        // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
-        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
-        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
-        l: ["litro", "litros"], L: ["litro", "litros"], ml: ["mililitro", "mililitros"], g: ["grama", "gramas"],
-        t: ["tonelada", "toneladas"], ha: ["hectare", "hectares"], kw: ["quilowatt", "quilowatts"] },
-    exponentWords: { squared: ["quadrado", "quadrados"], cubed: ["cúbico", "cúbicos"] },
-    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
-    // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
-    // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
-    // they are different words (quilómetros quadrados but vinte ao quadrado).
-    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
-    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
-    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
-    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
-    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
-    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n} ao quadrado", cubed: "{n} ao cubo", power: "{n} elevado a {e}" , negative: "menos" },
-    magnitudes: ["milhões", "milhão", "bilhões", "bilhão"],
-    magnitudeConnective: "de", // cinco milhões DE dólares
+    // ⚠ ONE SOURCE with normalize.ts, which applies the other seven signs in positions this tier does not
+    // reach. See portuguese.jsonc `signWords` for the register argument behind `vezes` and the corpus count
+    // behind `e` (×1118). The tier spaces the ampersand on both sides, because `B&B` is two initialisms and
+    // joining them would make one token.
+    multiply: { times: MANIFEST.signWords.times },
+    ampersand: MANIFEST.signWords.ampersand,
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    bareExponent: MANIFEST.symbols.bareExponent,
+    magnitudes: MANIFEST.symbols.magnitudes,
+    magnitudeConnective: MANIFEST.symbols.magnitudeConnective, // cinco milhões DE dólares
 });
 
 class PortuguesePhonemizer implements Phonemizer {
