@@ -18,11 +18,54 @@
     {
         "language": "yo",
         "wiki": "yo.wikipedia.org",
-        "tier": "wikipedia (register-restricted)",
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // `--context` set to exactly this string.
-        "context": "ìṣirò nọ́mbà",
+        "tier": "wikipedia",
         "findings": [
+        {
+                "word": "alòdì",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Jije alòdì tabi àìlòdì je ohun ini nomba kan to je gidi, tabi ara omoa…",
+                "…lùdarí gbogboogbo ti NIPSS àti Mallam Nuhu Ribadu, tí ó jẹ́ alòdì sí ìwà ìbàjẹ́ nílùú. == Àwọn akẹ́kọ̀ó tó gboyè tó sì ti làà…"
+            ]
+            },
+        {
+                "word": "nọ́mbà alòdì",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dín ní",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Ikọ̀ agbábọ́ọ̀lù Turkish ra a ní ọdún 1999 ni ìyè owó tí kò dín ní ($2,400,000). Ṣùgbọ́n lẹ́yìn ó reyìn, wọ́n padà fi í sílẹ̀…",
+                "…– c. 18 June 1928) je oniwakiri ara Norway. ọmọ ọdún márùn dín ní ọgọ́ta ni. Ẹni àkọ́kọ́ tí ó dé póólù gúsù. Ó ṣe alábápàdá i…",
+                "…í ìtọ́ka agbègbè, Ìpínlẹ̀ Èkó jé ilẹ̀ omi tí ìdá-mẹ́rin rẹ̀ dín ní díẹ̀ kúnfún òṣà, itọ́ àti àwọn odò. Èyí tí ó fẹ̀ jù nínú àw…",
+                "…tí gbogbo ènìyàn ń gbé. Ó lè jẹ́ ìjìyà pẹ̀lú ìtanràn tí kò dín ní 50,000 tàbí ju 100,000.00 naira lọ, tàbí nípa ẹ̀wọ̀n sí àkó…",
+                "…àbí ju 100,000.00 naira lọ, tàbí nípa ẹ̀wọ̀n sí àkókò tí kò dín ní ọdún mẹ́wàá tàbí ìgbésí ayé rẹ, tàbí nípa ìtanràn àti ìgbẹ́…",
+                "…̀ Nínú oṣù yí, wọ́n tú ní akọsílẹ̀ ènìyàn ọgọ́rùún márùún ó dín ní ẹyọ kan ṣoṣo, tí ó mú kí gbogbo àwọn tí wọ́n ti ní àrùn Kòr…"
+            ]
+            },
+        {
+                "word": "àmì-ìdáná",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
                 "word": "àmì ìyọkúrò",
                 "verdict": "absent",

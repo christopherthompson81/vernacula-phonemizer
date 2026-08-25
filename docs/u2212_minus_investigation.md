@@ -414,3 +414,43 @@ What no route here can supply is how a speaker joins them in front of a figure �
 to be a postposed relative clause (*dikirii tse di kwa tlase ga lefela di le thataro ntlha botlhano*), which
 is not something the two words predict. The answerable question is not "what is the Yoruba for minus" but
 "how does a Yoruba speaker say `−47.6 °C` aloud, as a whole phrase".
+
+## Run 10 — Yoruba reads it, and the term came from the article, not the word list — 2026-08-25 18:40
+
+`yọ kúrò` / `yọ` offered again inside a full spoken phrase. Checked the phrase against the engine first, and
+**two of its five slots are wrong in ways this repo can prove**:
+
+```
+  "…mọ́kànlélógójì…"    the engine renders 41 as exactly that. −47.6 needs mẹ́tàdínláàádọ́ta (47).
+  "…àmì-ìdáná…"        ×0 on yo.wikipedia. Yoruba's decimal word is `àti dásímà`, already in the
+                       manifest on 18 unanimous corpus instances, and the engine already reads
+                       47.6 as `mẹ́tàdínláàádọ́ta àti dásímà mẹ́fà`.
+```
+
+**But the phrase carried the real word, which no word-list round had produced: `alòdì`.** Probing it led to
+yo.wikipedia's own article **`Nọ́mbà alòdì àti nọ́mbà adájú`** — "negative numbers and positive numbers":
+
+> *"Nomba alodi ni awon nomba tiwonkere ju òdo lo fun apere -√2, **-1.44, -1**"*
+> negative numbers are the numbers less than ZERO, for example −√2, −1.44, −1
+
+**The term named beside its own operand** — the same gloss shape that settled tn (`kwa tlase ga lefela`
+beside `(−6.5 °C)`) and nan (`hū-hō tāi-piáu hong-hiòng` beside `(−10 m/s)`). `alòdì` ×4/2, `nọ́mbà alòdì`
+×2/1. The other sense is ordinary ("*alòdì sí ìwà ìbàjẹ́*", opposed to corruption) and a temperature is not
+that context.
+
+**⚠ `dín ní` IS REFUSED, AND IT IS WORSE THAN MERELY WRONG.** Offered in the same phrase, ×7 attested — and
+every instance is Yoruba's SUBTRACTIVE NUMERAL frame: *márùn dín ní ọgọ́ta* is **55**, "five less than
+sixty". A `dín ní` emitted before a figure would be parsed as part of the number.
+
+Shipped: U+2212 only, leading, with the `(?<!\p{Nd}\s)` exponent guard this corpus needs (`1.98739x10 −21 s`).
+Mirrored in C#, which matches Node on all six probe shapes. Parity holds — U+2212 is ×0 in yo.tsv.
+
+**The hyphen stays refused, and now on Yoruba's own measurement rather than by inheritance:** all four
+leading hyphens before a digit in the mined artifact are SPANS — `1897 -1957` (a lifespan), `1803 -1832`
+(a reign), and the German century ranges `13.-15.` / `8.-12.` that escape the range rule because the dot
+breaks its digit adjacency. Zero are negatives. The `minus` exemption is re-added for the hyphen with that
+measurement, replacing the removed one that had exempted the whole class on a range argument that never
+mentioned U+2212.
+
+**Measured effect on the corpus, not just synthetic probes:** `review.ts --lang yo` artifact scan went from
+`DROP minus ×3` to `×1`.

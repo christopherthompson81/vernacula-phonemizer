@@ -33,6 +33,10 @@ public static class Normalize
     private static readonly JsRe GROUPED = JsRegex.Compile("(\\d),(\\d{3})(?!\\d)", "gu");
     /** A digit-flanked dash. See rule 2: in Yoruba this is a RANGE, never a minus. */
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s*[-–—]\\s*(?=\\d)", "gu");
+    /** U+2212 ONLY, and LEADING — see the TS module. The hyphen is this language's range mark and its own
+     *  compounding; `(?<!\p{Nd}\s)` refuses the space-separated exponent this corpus writes. */
+    private static readonly JsRe MINUS = JsRegex.Compile(
+        "(?<![\\p{L}\\p{M}\\p{Nd}])(?<!\\p{Nd}\\s)\u2212(?=\\p{Nd})", "gu");
     /** `60%`, `8.3%` — the sign FOLLOWS the number here; none lead it. */
     private static readonly JsRe PERCENT = JsRegex.Compile("(\\d+(?:\\.\\d+)?)\\s*%", "gu");
     private static readonly JsRe PERCENT_PAREN = JsRegex.Compile("\\(\\s*(\\d+(?:\\.\\d+)?)\\s*%\\s*\\)", "gu");
@@ -82,6 +86,7 @@ public static class Normalize
         // without the reset.
         while (GROUPED.IsMatch(s)) s = GROUPED.Replace(s, "$1$2");
         s = RANGE.Replace(s, $"$1 {SYM.Range} ");
+        s = MINUS.Replace(s, $"{SYM.Negative} ");
         {
             var subject = s;
             s = PERCENT_PAREN.Replace(s, m =>

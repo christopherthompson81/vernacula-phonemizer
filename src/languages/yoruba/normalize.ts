@@ -104,6 +104,16 @@ export function normalizeYoruba(text: string): string {
     }
     // 2. ⚠ A DIGIT-FLANKED DASH IS A RANGE, NOT A MINUS — `sí` ("to") is what occurs between digits.
     s = s.replace(RANGE, `$1 ${SYM.range} `);
+    // 2b. THE MINUS — U+2212 ONLY, and a LEADING one. ⚠ THE RANGE ABOVE IS WHY: this language's
+    //     digit-flanked dash is a range 7,537 times over, so the sign is claimed only where a dash cannot
+    //     be one. `alòdì` is sourced in `yoruba.jsonc` against yo.wikipedia's own `-1.44, -1` gloss.
+    //     ⚠ U+2212 AND NOT THE HYPHEN. The hyphen is the range's own character and Yoruba's compounding
+    //     (`ọgọ́rùn-ún`, `gram-negatibo`); U+2212 can only be the operator, which is what licenses reading
+    //     a sign this corpus never spells out. 81 U+2212 on yo.wikipedia, with genuine prose temperatures
+    //     (`ìwọ̀n otútù àròpín ti −47.6 °C`, `−38 °C`, `−39.8 °C`, `−65 °C`) that read as POSITIVE until now.
+    //     ⚠ `(?<!\p{Nd}\s)` REFUSES THE SPACE-SEPARATED EXPONENT — this corpus writes one
+    //     (`1.98739x10 −21 s`), and a one-character lookbehind sees only the space before it.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, `${SYM.negative} `);
     // 3. ⚠ YORUBA'S PERCENT IS A CIRCUMFIX: a word BEFORE the number and a phrase AFTER it. A parenthesised
     //    percentage restating one already spelled out is dropped rather than read twice.
     s = s.replace(/\(\s*(\d+(?:\.\d+)?)\s*%\s*\)/gu, (m, num: string, at: number, whole: string) =>

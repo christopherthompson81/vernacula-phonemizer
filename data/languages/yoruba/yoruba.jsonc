@@ -158,6 +158,25 @@
         "decimalWord": "àti dásímà",
         // The ordinary connective, 42,897 whole-word hits, 430 of them digit-flanked.
         "and": "àti",
+        // ⚠ THE NEGATIVE MARKER, AND yo.wikipedia GLOSSES IT AGAINST THE SIGNED DIGITS. The article
+        // `Nọ́mbà alòdì àti nọ́mbà adájú` ("negative numbers and positive numbers") defines the term with
+        // examples written as figures: *"Nomba alodi ni awon nomba tiwonkere ju òdo lo fun apere -√2,
+        // -1.44, -1"* — "negative numbers are the numbers less than ZERO, for example −√2, −1.44, −1".
+        // That is the same gloss shape that settled tn (`kwa tlase ga lefela` beside `(−6.5 °C)`) and nan
+        // (`hū-hō tāi-piáu hong-hiòng` beside `(−10 m/s)`), and it is the strongest evidence available for
+        // a sign reading: the term named beside its own operand.
+        //
+        // `alòdì` ×4/2 whole-word; `nọ́mbà alòdì` ×2/1. ⚠ TWO SENSES, and the other one is ordinary:
+        // *alòdì sí ìwà ìbàjẹ́* is "opposed to corruption". A temperature or a bare figure is not that
+        // context, and the alternative is a reading that INVERTS.
+        //
+        // ⚠ NOT `ìyọkúrò` AND NOT `yọ kúrò`, which are the dictionary's answer for "subtract": both are
+        // physical REMOVAL in every corpus instance (methane removed from the air, water removed by
+        // evaporation), and a transitive verb before a numeral reads as an imperative — *yọ …dígírì*,
+        // "remove … degrees". ⚠ AND NOT `dín ní` ("less than"), which is worse than wrong here: it is how
+        // Yoruba BUILDS NUMERALS — *márùn dín ní ọgọ́ta* is 55, "five less than sixty" — so a `dín ní`
+        // emitted before a figure would be parsed as part of the number.
+        "negative": "alòdì",
         // The SQUARED measure word, which follows the unit noun: `kìlómítà onígun mẹ́rin`. 27 occurrences of
         // the phrase, 9 of them directly after a unit word (kìlómítà/mítà/máìlì).
         "squared": "onígun mẹ́rin",

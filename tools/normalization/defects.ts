@@ -2612,6 +2612,29 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     yo: {
         // Yoruba's referees (wikipron yor, kaikki yor) are word→IPA: they can check how a word is pronounced,
         // never whether it is the right word for a sign. So every reason below is a corpus measurement.
+        // ⚠ THE `minus` EXEMPTION IS BACK, BUT IT IS A DIFFERENT CLAIM FROM THE ONE THAT WAS REMOVED, and
+        // the difference is the whole point. The old entry said "the digit-flanked dash in Yoruba is a
+        // RANGE" and used that to exempt the WHOLE class — including U+2212, which it never mentioned.
+        // That was this block's own warning coming true: a real gap quieted by an argument that did not
+        // reach it. It was removed, and yo.wikipedia's own maths article then supplied the term
+        // (`Nọ́mbà alòdì àti nọ́mbà adájú`, glossing `alòdì` against `-1.44, -1`), so **U+2212 IS NOW READ**
+        // — see src/languages/yoruba/normalize.ts step 2b.
+        //
+        // What stays refused is the ASCII HYPHEN, which is what this gate probes with `-5`, and that
+        // refusal is MEASURED rather than inherited. Every leading hyphen-before-a-digit in the mined
+        // artifact is a SPAN, four of four: `1897 -1957` and `1803 -1832` are a lifespan and a reign, and
+        // `13.-15.`/`8.-12.` are German bibliography century ranges — the last two escape the range rule
+        // because the dot breaks its digit adjacency, so claiming the hyphen would misread them outright.
+        // Against that, zero leading hyphens in the artifact are negatives. Add the 3,378 digit-flanked
+        // hyphens and 4,159 en dashes that `sí` correctly reads as a range (glossed twice by the corpus:
+        // `ọgọ́rùn-ún méjì sí mẹ́fà (200-600 kg)`, `góòlù mẹ́rin sí òdo (4–0)`) and the hyphen is this
+        // language's range mark, not its minus.
+        minus: "measured: U+2212 IS read (`alòdì`, sourced from yo.wikipedia's `Nọ́mbà alòdì` article, "
+            + "which glosses it against `-1.44, -1`). The ASCII hyphen this case probes is REFUSED on its "
+            + "own measurement: 4 of 4 leading hyphens before a digit in the artifact are SPANS — `1897 "
+            + "-1957`, `1803 -1832`, and the German century ranges `13.-15.`/`8.-12.` that escape the range "
+            + "rule — and 0 are negatives, on top of 7,537 digit-flanked dashes that `sí` reads as ranges",
+        // ⚠ THE HISTORY IS KEPT because the removal is what produced the fix.
         // ⚠ THE `minus` EXEMPTION WAS REMOVED, AND IT WAS THIS BLOCK'S OWN WARNING COMING TRUE. It read
         // "the digit-flanked dash in Yoruba is a RANGE, not a minus", which is TRUE OF THE HYPHEN AND THE
         // EN DASH — 3,378 and 4,159 of them sit between digits, `sí` is read for the range on 1,427

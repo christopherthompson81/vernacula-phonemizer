@@ -31,6 +31,8 @@ public sealed class YorubaSymbols
     /** `àti dásímà` — "and decimal"; the fraction that follows is read digit by digit. */
     public string DecimalWord { get; init; } = "";
     public string And { get; init; } = "";
+    /** The NEGATIVE marker — see the jsonc: yo.wikipedia glosses it against `-1.44, -1`. */
+    public string Negative { get; init; } = "";
     /** The squared measure word, emitted AFTER the unit noun: `kìlómítà onígun mẹ́rin`. */
     public string Squared { get; init; } = "";
     /** ⚠ Temperature is a CIRCUMFIX: `ìwọ̀n` before the number, the scale name after. */
