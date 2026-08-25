@@ -10,9 +10,13 @@
  *   • AFFRICATION — the signature: /t d/ → [t͡s d͡z] before the HIGH FRONT vowels /i y/ and the glides /j ɥ/
  *     (tu→t͡sy, dire→d͡ziʁ, tuile→t͡sɥil, dimanche→d͡zimɑ̃ʃ). NOT before back /u/ (tout stays [tu]).
  *   • HIGH-VOWEL LAXING — /i y u/ → [ɪ ʏ ʊ] in a CLOSED syllable, UNLESS the coda is a "lengthening" consonant
- *     /ʁ v z ʒ/ which keeps the vowel tense/long (petite→pt͡sɪt, six→sɪs, jupe→ʒʏp, route→ʁʊt; but dire→d͡ziʁ,
- *     musique→myzik stay tense — ʁ/z lengthen). Open syllables keep the tense vowel (petit→pt͡si, difficile→d͡zifisɪl:
- *     only the final closed ⟨il⟩ laxes).
+ *     /ʁ v z ʒ/ which keeps the vowel tense/long (petite→pt͡sɪt, six→sɪs, jupe→ʒʏp, route→ʁʊt; but dire→d͡ziʁ
+ *     stays tense — ʁ lengthens). Open syllables keep the tense vowel (petit→pt͡si, difficile→d͡zifisɪl: only the
+ *     final closed ⟨il⟩ laxes).
+ *     ⚠ THE EXAMPLE `musique→myzik` USED TO BE LISTED HERE AS TENSE AND IT IS NOT — the engine says myzɪk, and
+ *     is right to. The lengthening set is about the coda AFTER the vowel; in *musique* the /z/ is an ONSET
+ *     BEFORE /i/, and that /i/'s actual coda is /k/, which laxes like any other. A doc/code mismatch, caught
+ *     by a C# port test written from the comment rather than from the behaviour.
  *   • WORD-FINAL /a/ → [ɑ] (posterior): Canada→kanadɑ.
  *
  * Deliberately DEFERRED (fine-grained, variable, and no fr-CA pronunciation corpus exists to adjudicate): the
