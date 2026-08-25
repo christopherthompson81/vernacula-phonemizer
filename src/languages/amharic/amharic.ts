@@ -27,6 +27,10 @@ interface NumbersDef {
 export interface AmharicDef {
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
+    /** Cardinal → ordinal, for the FINAL word of a composed numeral. See the jsonc. */
+    ordinals: Record<string, string>;
+    /** The non-numeral, non-symbol words this layer speaks: the decimal point and the range frame. */
+    words: { decimalPoint: string; rangeFrom: string; rangeUntil: string };
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc.
      *  Typed off `SymbolData` itself so the declaration cannot drift from what the engine reads. */
     symbolTier: Required<Pick<SymbolData, "percent" | "currency" | "units" | "magnitudes" | "exponentWords" | "multiply" | "ampersand">>;

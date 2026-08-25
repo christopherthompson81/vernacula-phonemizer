@@ -35,6 +35,37 @@
     // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
     // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
     // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    // ORDINALS. Amharic forms the ordinal on the LAST word of the cardinal with the suffix ኛ, and ⚠ A
+    // CONSONANT-FINAL (6th-order, ɨ) CARDINAL TAKES ITS 1st-ORDER COUNTERPART before it: አንድ→አንደኛ (ድ→ደ),
+    // ሁለት→ሁለተኛ (ት→ተ), ዘጠኝ→ዘጠነኛ (ኝ→ነ), አስር→አስረኛ (ር→ረ). Vowel-final cardinals just suffix: ሃያ→ሃያኛ, which is
+    // the regular rule 30–90, መቶ and ሺ follow. A teen composes as አስራ + the unit's ORDINAL (በአስራስድስተኛው,
+    // "in the 16th"), so only the FINAL word is looked up here and the composition stays in the engine.
+    //
+    // ⚠ THE TABLE IS DATA AND THE INFLECTION IS NOT. What lives here is the cardinal→ordinal pairing, which
+    // is a fact about Amharic vocabulary; which word of a composed numeral gets inflected is an algorithm
+    // and stays in normalize.ts, as does the ኛው definite suffix the rule re-attaches.
+    "ordinals": {
+        "አንድ": "አንደኛ", "ሁለት": "ሁለተኛ", "ሦስት": "ሦስተኛ", "አራት": "አራተኛ", "አምስት": "አምስተኛ",
+        "ስድስት": "ስድስተኛ", "ሰባት": "ሰባተኛ", "ስምንት": "ስምንተኛ", "ዘጠኝ": "ዘጠነኛ", "አስር": "አስረኛ",
+        "ሃያ": "ሃያኛ", "ሰላሳ": "ሰላሳኛ", "አርባ": "አርባኛ", "ሃምሳ": "ሃምሳኛ", "ስልሳ": "ስልሳኛ",
+        "ሰባ": "ሰባኛ", "ሰማንያ": "ሰማንያኛ", "ዘጠና": "ዘጠናኛ",
+        "መቶ": "መቶኛ", "ሺ": "ሺኛ", "ሚሊዮን": "ሚሊዮንኛ", "ቢሊዮን": "ቢሊዮንኛ", "ዜሮ": "ዜሮኛ"
+    },
+
+    // THE THREE WORDS THIS LAYER SPEAKS THAT ARE NOT NUMERALS AND NOT SYMBOLS.
+    // ⚠ `rangeFrom` WAS A BARE LITERAL IN THE REPLACEMENT TEMPLATE. `እስከ` had a named constant while the
+    // `ከ` that opens the same frame was typed straight into the replacement string — so two thirds of the
+    // range frame were declared and the third was not. Same word either way; what differs is whether
+    // anything can find it.
+    "words": {
+        // The decimal point: "12.5 ሜትር" → *አስራ ሁለት ነጥብ አምስት ሜትር*.
+        "decimalPoint": "ነጥብ",
+        // The range frame, which Amharic writes out in full — "ከ 100 እስከ 250 ሜትር" — where the hyphenated
+        // form abbreviates it. Both halves are needed: `ከ` opens the span and `እስከ` joins the endpoints.
+        "rangeFrom": "ከ",
+        "rangeUntil": "እስከ"
+    },
+
     "symbolTier": {
         // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
         // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
