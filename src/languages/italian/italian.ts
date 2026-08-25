@@ -322,15 +322,15 @@ const SYMBOLS = makeSymbolNormalizer({
     // behind `e` (×1067).
     multiply: { times: MANIFEST.signWords.times },
     ampersand: MANIFEST.signWords.ampersand,
-    percent: MANIFEST.symbols.percent,
+    percent: MANIFEST.symbolTier.percent,
     // Only the POSTPOSED sign reaches here — normalize.ts has already claimed the preposed form, which needs
     // the partitive *di* the shared magnitude hop cannot insert.
-    currency: MANIFEST.symbols.currency,
-    magnitudes: MANIFEST.symbols.magnitudes,
-    magnitudeConnective: MANIFEST.symbols.magnitudeConnective, // due virgola due milioni DI km quadrati
-    units: MANIFEST.symbols.units,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    bareExponent: MANIFEST.symbols.bareExponent,
+    currency: MANIFEST.symbolTier.currency,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    magnitudeConnective: MANIFEST.symbolTier.magnitudeConnective, // due virgola due milioni DI km quadrati
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    bareExponent: MANIFEST.symbolTier.bareExponent,
 });
 
 class ItalianPhonemizer implements Phonemizer {

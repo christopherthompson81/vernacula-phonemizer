@@ -20,9 +20,9 @@ const TOKEN = /([가-힣]+)|(\d+)|([.!?…,;:])/gu;
 // (this tier always inserts a space); % and the currency sign stay here, where the shared machinery
 // already places the word after the number, which is also Korean's order.
 const SYMBOLS = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 class KoreanPhonemizer implements Phonemizer {

@@ -52,24 +52,13 @@ public static class ThaiPhonemizer
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "คูณ" },
-        Ampersand = "และ",
-        Percent = new[] { "เปอร์เซ็นต์" },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "กิโลเมตร" }, ["m"] = new[] { "เมตร" }, ["cm"] = new[] { "เซนติเมตร" },
-        },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "ดอลลาร์" }, ["€"] = new[] { "ยูโร" }, ["£"] = new[] { "ปอนด์" }, ["¥"] = new[] { "เยน" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "ตาราง" },
-            Cubed = new[] { "ลูกบาศก์" },
-            Position = ExponentPosition.Before,
-        },
-        UnspacedScript = true,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Ampersand = Manifest.MANIFEST.SymbolTier.Ampersand,
+        Multiply = Manifest.MANIFEST.SymbolTier.Multiply,
+        UnspacedScript = Manifest.MANIFEST.SymbolTier.UnspacedScript,
     });
 
     private sealed class Engine : ILanguage

@@ -128,13 +128,13 @@ const SYMBOLS = makeSymbolNormalizer({
     // joining them would make one token.
     multiply: { times: MANIFEST.signWords.times },
     ampersand: MANIFEST.signWords.ampersand,
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    bareExponent: MANIFEST.symbols.bareExponent,
-    magnitudes: MANIFEST.symbols.magnitudes,
-    magnitudeConnective: MANIFEST.symbols.magnitudeConnective, // cinco millones DE dólares
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    bareExponent: MANIFEST.symbolTier.bareExponent,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    magnitudeConnective: MANIFEST.symbolTier.magnitudeConnective, // cinco millones DE dólares
 });
 
 class SpanishPhonemizer implements Phonemizer {

@@ -312,13 +312,13 @@ public sealed class AfrikaansPhonemizer : ILanguage
         // a LETTER NAME, and `NxN` is the commoner written form. ⚠ ONE SOURCE with SignWords.Times — `6 × 6`
         // goes through Normalize.cs and `6x6 cm` through this tier, and they must read the same word.
         Multiply = new MultiplyDef { Times = Manifest.MANIFEST.SignWords.Times },
-        Percent = Manifest.MANIFEST.Symbols.Percent,
-        Currency = Manifest.MANIFEST.Symbols.Currency,
-        Units = Manifest.MANIFEST.Symbols.Units,
-        RateDenominators = Manifest.MANIFEST.Symbols.RateDenominators,
-        UnitPer = Manifest.MANIFEST.Symbols.UnitPer,
-        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
-        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        RateDenominators = Manifest.MANIFEST.SymbolTier.RateDenominators,
+        UnitPer = Manifest.MANIFEST.SymbolTier.UnitPer,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
     });
 
     public string Text(string input) => Text(input, null);

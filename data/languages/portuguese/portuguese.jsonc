@@ -336,7 +336,7 @@
 
     // ---------------------------------------------------------------------------------------------------
     // THE SHARED SYMBOL TIER's data (portuguese.ts). Longest keys match first, so km/h beats km.
-    "symbols": {
+    "symbolTier": {
         "percent": ["por cento"],
         // ⚠ NO COMPOUND `US$` KEY — it would be unreachable. The INITIALISM pass runs before this tier and
         // splits `US` into letters, leaving the `$` preceded by a letter where the tier's guard correctly

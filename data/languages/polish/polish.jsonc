@@ -114,7 +114,7 @@
     // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
     // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
     // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
-    "symbols": {
+    "symbolTier": {
         // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
         // `i` ×846 in this corpus. The tier spaces it on both sides, because `B&B` is two
         // initialisms and joining them would make one token.

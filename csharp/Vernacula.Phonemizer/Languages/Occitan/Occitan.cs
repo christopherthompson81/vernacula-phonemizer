@@ -21,7 +21,7 @@ public sealed class OccitanDef
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     public string DecimalWord { get; init; } = "";
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public OccitanSymbols Symbols { get; init; } = new();
+    public OccitanSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class OccitanPhonemizer : ILanguage
@@ -168,11 +168,11 @@ public sealed class OccitanPhonemizer : ILanguage
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
         Ampersand = "e",
-        Percent = OccitanPhonemizer.DEF.Symbols.Percent,
-        Currency = OccitanPhonemizer.DEF.Symbols.Currency,
-        Units = OccitanPhonemizer.DEF.Symbols.Units,
-        ExponentWords = OccitanPhonemizer.DEF.Symbols.ExponentWords,
-        Magnitudes = OccitanPhonemizer.DEF.Symbols.Magnitudes,
+        Percent = OccitanPhonemizer.DEF.SymbolTier.Percent,
+        Currency = OccitanPhonemizer.DEF.SymbolTier.Currency,
+        Units = OccitanPhonemizer.DEF.SymbolTier.Units,
+        ExponentWords = OccitanPhonemizer.DEF.SymbolTier.ExponentWords,
+        Magnitudes = OccitanPhonemizer.DEF.SymbolTier.Magnitudes,
     });
 
     // ⚠ The number branch must SPAN the decimal comma, or the tokenizer's own `,` claims it as a clause pause
@@ -220,7 +220,7 @@ public sealed class OccitanPhonemizer : ILanguage
     internal static void RegisterSelf() => Registry.Register("occitan", CreateOccitan);
 }
 
-public sealed class OccitanSymbols
+public sealed class OccitanSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

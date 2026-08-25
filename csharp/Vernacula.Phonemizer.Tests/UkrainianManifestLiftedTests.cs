@@ -17,11 +17,11 @@ public class UkrainianManifestLiftedTests
     [Fact]
     public void MetreAndSquaredHaveOneSourceSharedWithTheSymbolTier()
     {
-        Assert.Equal(new[] { "метр", "метри", "метрів", "метра" }, DEF.Symbols.Units["м"]);
-        Assert.Contains(Say(DEF.Symbols.Units["м"][2]), Say("6 м завширшки"));
-        Assert.Contains(Say(DEF.Symbols.Units["м"][0]), Say("1 м завширшки"));
-        Assert.Contains(Say(DEF.Symbols.ExponentWords.Squared![2]), Say("9 кв. миль"));
-        Assert.Contains(Say(DEF.Symbols.ExponentWords.Squared![2]), Say("9 км²"));
+        Assert.Equal(new[] { "метр", "метри", "метрів", "метра" }, DEF.SymbolTier.Units["м"]);
+        Assert.Contains(Say(DEF.SymbolTier.Units["м"][2]), Say("6 м завширшки"));
+        Assert.Contains(Say(DEF.SymbolTier.Units["м"][0]), Say("1 м завширшки"));
+        Assert.Contains(Say(DEF.SymbolTier.ExponentWords.Squared![2]), Say("9 кв. миль"));
+        Assert.Contains(Say(DEF.SymbolTier.ExponentWords.Squared![2]), Say("9 км²"));
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class UkrainianManifestLiftedTests
         Assert.Contains(Say(DEF.TemperatureScales["F"]), Say("32 °F"));
         Assert.Contains(Say(DEF.Degree[2]), Say("45°"));
         Assert.Contains(Say(DEF.DottedAbbrev["стор"]), Say("стор. 45"));
-        Assert.Contains(Say(DEF.Symbols.RateDenominators["с"]), Say("10 м/с"));
+        Assert.Contains(Say(DEF.SymbolTier.RateDenominators["с"]), Say("10 м/с"));
         Assert.Contains(Say(DEF.LetterNames["а"]), Say("АОЛ"));
         Assert.Contains("ст", DEF.Phonotactics.Onsets);
         Assert.Contains("рк", DEF.Phonotactics.Codas);

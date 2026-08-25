@@ -38,6 +38,8 @@ public sealed class CmnManifest
     /** ⚠ Keyed by UPPERCASE Latin — see the jsonc. Dictionary keys are not touched by the loader's
      *  camelCase PROPERTY policy, which is what mangled English's ARPABET block. */
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public MandarinSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
@@ -45,4 +47,17 @@ public static class Manifest
     /** The consolidated hand-authored Mandarin data tables (see cmn.jsonc). */
     public static readonly CmnManifest MANIFEST =
         LoadManifest.Load<CmnManifest>("languages/mandarin", "cmn.jsonc");
+}
+
+public sealed class MandarinSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public BareExponentDef BareExponent { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public MultiplyDef Multiply { get; init; } = null!;
+    public bool PercentPrefix { get; init; } = false;
+    public bool UnspacedScript { get; init; } = false;
 }

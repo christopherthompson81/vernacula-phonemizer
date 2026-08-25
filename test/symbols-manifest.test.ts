@@ -23,7 +23,7 @@ import { MANIFEST as HU } from "../src/languages/hungarian/manifest.ts";
 import { MANIFEST as RU } from "../src/languages/russian/manifest.ts";
 import { MANIFEST as FR } from "../src/languages/french/manifest.ts";
 
-interface Tier { symbols: { percent: string[]; units: Record<string, string[]>; currency: Record<string, string[]> } }
+interface Tier { symbolTier: { percent: string[]; units: Record<string, string[]>; currency: Record<string, string[]> } }
 
 const LANGS: [string, Tier, string][] = [
     ["af", AF, "dit is 5 km ver"],
@@ -46,13 +46,13 @@ describe.each(LANGS)("%s reads its symbol tier from the manifest", (code, DEF, k
     test("the unit noun comes from the manifest", () => {
         // ⚠ ANY DECLARED FORM, not index 0. The count decides which one a language uses, and 5 takes the
         // PLURAL in Greek (χιλιόμετρα) — asserting the singular fails on a correct reading.
-        const forms = DEF.symbols.units["km"]!;
+        const forms = DEF.symbolTier.units["km"]!;
         expect(forms.some((f) => say(kmSentence).includes(say(f))), `no declared km form in the reading`).toBe(true);
     });
 
     test("percent and currency are declared and reached", () => {
-        expect(DEF.symbols.percent.length).toBeGreaterThan(0);
-        expect(Object.keys(DEF.symbols.currency).length).toBeGreaterThan(0);
+        expect(DEF.symbolTier.percent.length).toBeGreaterThan(0);
+        expect(Object.keys(DEF.symbolTier.currency).length).toBeGreaterThan(0);
     });
 });
 
@@ -66,7 +66,7 @@ describe.each([["tr", TR, "% 50 insan", "yüzde"], ["ha", HA, "50 % na mutane", 
     "%s puts the percent word before the number", (code, DEF, sentence, word) => {
         test("the reading leads with the percent word, not the numeral", () => {
             const words = phonemize(sentence, code).replace(/[ˈˌ]/gu, "").split(" ");
-            const pct = phonemize(DEF.symbols.percent[0]!, code).replace(/[ˈˌ]/gu, "").split(" ")[0]!;
+            const pct = phonemize(DEF.symbolTier.percent[0]!, code).replace(/[ˈˌ]/gu, "").split(" ")[0]!;
             expect(words[0], `${code}: expected ${word} first`).toBe(pct);
         });
     },
@@ -149,8 +149,42 @@ describe.each(INDIC)("%s keeps the two symbol tables apart", (code, DEF, pctSent
     });
 
     test("`symbols` — where declared — is the bare-sign map, a DIFFERENT table", () => {
+        // ⚠ THIS ASSERTION IS ABOUT `symbols`, NOT `symbolTier`, and a blanket rename over test/ rewrote it
+        // to the wrong one — turning the test that documents the distinction into a test that denied it.
         // It maps a single sign CHARACTER to a word; the tier maps a unit/currency KEY to count forms.
-        if (DEF.symbols === undefined) return;
-        for (const k of Object.keys(DEF.symbols)) expect([...k]).toHaveLength(1);
+        const signMap = (DEF as { symbols?: Record<string, string> }).symbols;
+        if (signMap === undefined) return;
+        for (const k of Object.keys(signMap)) expect([...k]).toHaveLength(1);
+    });
+});
+
+/**
+ * ⚠ `unspacedScript` IS A BOOLEAN THAT CHANGES GUARDS, AND LOSING IT IS SILENT — the shape `percentPrefix`
+ * already demonstrated in batch 1. The tier's boundary guards assume spaces between words; Chinese, Japanese
+ * and Thai have none, so without the flag the ORDINARY case is the one the guard rejects and `為$500` drops
+ * its currency sign entirely. Probed on UNSPACED input, which is the only input that can tell.
+ */
+import { MANIFEST as YUE } from "../src/languages/cantonese/manifest.ts";
+import { MANIFEST as JA } from "../src/languages/japanese/manifest.ts";
+import { MANIFEST as CMN2 } from "../src/languages/mandarin/manifest.ts";
+import { MANIFEST as TH2 } from "../src/languages/thai/manifest.ts";
+
+const UNSPACED: [string, { symbolTier: { unspacedScript?: boolean; currency: Record<string, string[]> } }, string][] = [
+    ["yue", YUE as never, "為$500。"],
+    ["ja", JA as never, "$500の価格。"],
+    ["cmn", CMN2 as never, "价格$500。"],
+    ["th", TH2 as never, "ราคา $500."],
+];
+
+describe.each(UNSPACED)("%s declares unspacedScript and reads a sign with no space", (code, DEF, sentence) => {
+    test("the flag is declared", () => {
+        expect(DEF.symbolTier.unspacedScript, `${code}: unspacedScript missing`).toBe(true);
+    });
+
+    test("the currency sign is READ, not dropped", () => {
+        const say = (x: string): string => phonemize(x, code).replace(/[ˈˌ]/gu, "");
+        const forms = DEF.symbolTier.currency["$"]!;
+        expect(forms.some((f) => say(sentence).includes(say(f))),
+            `${code}: $ dropped from an unspaced context`).toBe(true);
     });
 });

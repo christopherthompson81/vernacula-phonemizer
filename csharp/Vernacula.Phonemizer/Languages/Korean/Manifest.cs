@@ -63,7 +63,7 @@ public sealed class KoreanManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public KoreanNumbersDef Numbers { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public KoreanSymbols Symbols { get; init; } = new();
+    public KoreanSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
@@ -72,7 +72,7 @@ public static class Manifest
     public static readonly KoreanManifest MANIFEST = LoadManifest.Load<KoreanManifest>("languages/korean", "korean.jsonc");
 }
 
-public sealed class KoreanSymbols
+public sealed class KoreanSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

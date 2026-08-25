@@ -56,14 +56,14 @@ import { MANIFEST as DEF } from "./manifest.ts";
  * invented — and a digit-adjacent `t` here is usually `tāngata` ("people"), not a tonne.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: DEF.symbols.percent,
-    currency: DEF.symbols.currency,
-    units: DEF.symbols.units,
-    rateDenominators: DEF.symbols.rateDenominators,
-    unitPer: DEF.symbols.unitPer,
-    exponentWords: DEF.symbols.exponentWords,
-    magnitudes: DEF.symbols.magnitudes,
-    multiply: DEF.symbols.multiply,
+    percent: DEF.symbolTier.percent,
+    currency: DEF.symbolTier.currency,
+    units: DEF.symbolTier.units,
+    rateDenominators: DEF.symbolTier.rateDenominators,
+    unitPer: DEF.symbolTier.unitPer,
+    exponentWords: DEF.symbolTier.exponentWords,
+    magnitudes: DEF.symbolTier.magnitudes,
+    multiply: DEF.symbolTier.multiply,
 });
 
 /** The Māori normalization pass — the shared symbol tier plus the local sign rules below. */

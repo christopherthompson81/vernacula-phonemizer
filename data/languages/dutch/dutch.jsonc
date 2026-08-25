@@ -236,7 +236,7 @@
     // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
     // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
     // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
-    "symbols": {
+    "symbolTier": {
         // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
         // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — Dutch does
         // not split dimension from product.

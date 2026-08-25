@@ -27,7 +27,7 @@ interface AsturianDef {
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     decimalWord: string;
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         units: Record<string, CountForms>;
@@ -105,12 +105,12 @@ export function phonemizeWord(word: string): string {
  * in this repo see `$` prefixed in their own corpora.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: DEF.symbols.percent,
-    currency: DEF.symbols.currency,
-    units: DEF.symbols.units,
-    exponentWords: DEF.symbols.exponentWords,
-    magnitudes: DEF.symbols.magnitudes,
-    ampersand: DEF.symbols.ampersand,
+    percent: DEF.symbolTier.percent,
+    currency: DEF.symbolTier.currency,
+    units: DEF.symbolTier.units,
+    exponentWords: DEF.symbolTier.exponentWords,
+    magnitudes: DEF.symbolTier.magnitudes,
+    ampersand: DEF.symbolTier.ampersand,
 });
 
 // ⚠ THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause

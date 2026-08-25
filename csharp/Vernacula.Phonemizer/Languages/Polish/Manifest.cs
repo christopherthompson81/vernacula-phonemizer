@@ -53,7 +53,7 @@ public sealed class PolishManifest
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     public string DecimalWord { get; init; } = "";
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public PolishSymbols Symbols { get; init; } = new();
+    public PolishSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class PolishPhonotactics
@@ -68,7 +68,7 @@ public static class Manifest
     public static readonly PolishManifest MANIFEST = LoadManifest.Load<PolishManifest>("languages/polish", "polish.jsonc");
 }
 
-public sealed class PolishSymbols
+public sealed class PolishSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

@@ -43,7 +43,7 @@ public sealed class UkrainianDef
     public string NumberSign { get; init; } = "";
     public string RangeWord { get; init; } = "";
     public SignWords SignWords { get; init; } = null!;
-    public UkrainianSymbols Symbols { get; init; } = new();
+    public UkrainianSymbolTier SymbolTier { get; init; } = new();
 }
 
 /** One ordinal adjective ending, hard stem and soft (третій), under the case name the clock rule selects by. */
@@ -99,7 +99,7 @@ public sealed class MultiDotAbbrev
 }
 
 /** The shared symbol tier's data (Ukrainian.cs) — see ukrainian.jsonc for why the metre is declared here. */
-public sealed class UkrainianSymbols
+public sealed class UkrainianSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } =

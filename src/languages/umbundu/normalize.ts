@@ -120,9 +120,9 @@ import { MANIFEST } from "./manifest.ts";
  * refused. ⚠ NO `exponentWords`, NO `unitPer`, NO `magnitudes`, and NEITHER PREFIX FLAG.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    units: MANIFEST.symbols.units,
-    ampersand: MANIFEST.symbols.ampersand,
+    percent: MANIFEST.symbolTier.percent,
+    units: MANIFEST.symbolTier.units,
+    ampersand: MANIFEST.symbolTier.ampersand,
 });
 
 /** Normalize one Umbundu input string. Pure text→text. Steps are ORDER-DEPENDENT. */

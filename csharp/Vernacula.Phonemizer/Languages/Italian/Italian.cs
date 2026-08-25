@@ -43,7 +43,7 @@ public sealed class ItalianDef
     public IReadOnlyDictionary<string, string> Compass { get; init; } = new Dictionary<string, string>();
     public string DecimalWord { get; init; } = "";
     public SignWords SignWords { get; init; } = null!;
-    public ItalianSymbols Symbols { get; init; } = new();
+    public ItalianSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class ItalianPhonotactics
@@ -73,7 +73,7 @@ public sealed class ItalianDegree
 }
 
 /** The shared symbol tier's data (Italian.cs). */
-public sealed class ItalianSymbols
+public sealed class ItalianSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } =
@@ -388,15 +388,15 @@ public static class ItalianPhonemizer
         // behind `e` (×1067).
         Multiply = new MultiplyDef { Times = DEF.SignWords.Times },
         Ampersand = DEF.SignWords.Ampersand,
-        Percent = DEF.Symbols.Percent,
+        Percent = DEF.SymbolTier.Percent,
         // Only the POSTPOSED sign reaches here — Normalize.cs has already claimed the preposed form, which
         // needs the partitive *di* the shared magnitude hop cannot insert.
-        Currency = DEF.Symbols.Currency,
-        Magnitudes = DEF.Symbols.Magnitudes,
-        MagnitudeConnective = DEF.Symbols.MagnitudeConnective,
-        Units = DEF.Symbols.Units,
-        ExponentWords = DEF.Symbols.ExponentWords,
-        BareExponent = DEF.Symbols.BareExponent,
+        Currency = DEF.SymbolTier.Currency,
+        Magnitudes = DEF.SymbolTier.Magnitudes,
+        MagnitudeConnective = DEF.SymbolTier.MagnitudeConnective,
+        Units = DEF.SymbolTier.Units,
+        ExponentWords = DEF.SymbolTier.ExponentWords,
+        BareExponent = DEF.SymbolTier.BareExponent,
     });
 
     private sealed class Engine : ILanguage

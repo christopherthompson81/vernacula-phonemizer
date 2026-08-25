@@ -31,7 +31,7 @@ export interface TurkishManifest {
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
     /** The shared symbol tier's data — moved verbatim, comments included. */
-    symbols: {
+    symbolTier: {
         multiply: { times: string; by?: string };
         percentPrefix: boolean;
         percent: CountForms;

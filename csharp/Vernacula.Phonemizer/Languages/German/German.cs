@@ -366,12 +366,12 @@ public static class GermanPhonemizer
     {
         Multiply = new MultiplyDef { Times = "mal" },
         Ampersand = "und",
-        Percent = Manifest.MANIFEST.Symbols.Percent,
-        Currency = Manifest.MANIFEST.Symbols.Currency,
-        Units = Manifest.MANIFEST.Symbols.Units,
-        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
-        BareExponent = Manifest.MANIFEST.Symbols.BareExponent,
-        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        BareExponent = Manifest.MANIFEST.SymbolTier.BareExponent,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
     });
 
     private sealed class Engine : ILanguage

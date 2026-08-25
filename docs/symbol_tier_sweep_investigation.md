@@ -159,9 +159,42 @@ The applier now keeps EVERY key the manifest is not taking over, rather than thr
 That is the second time this sweep that a hand-list in the tooling silently dropped a key, and both times the
 loss was invisible to the compiler and visible only in a reading.
 
+## Batch 5 — yue, ja, cmn, th, vi — 2026-08-25 12:10 — the unspaced scripts, and one name fleet-wide
+
+**`unspacedScript` is the `percentPrefix` shape again**, and it was probed as such rather than trusted. The
+tier's boundary guards assume spaces between words; Chinese, Japanese and Thai have none, so without the flag
+the ORDINARY case is the one the guard rejects and `為$500` drops its currency sign outright. Every probe in
+this batch is written UNSPACED, because spaced input cannot tell the difference. Verified by dropping the
+flag from Cantonese and watching the test fail.
+
+**⚠ AND THE KEY NAME WAS UNIFIED ACROSS THE WHOLE SWEEP.** Batch 4 had to call the Indic block `symbolTier`
+because `symbols` was already the abugida sign map. Leaving batches 1–3 on `symbols` would have meant the
+same table under two names depending on the language — the split this sweep exists to remove. All 31
+manifests now use `symbolTier`, and `symbols` means one thing everywhere: the bare-sign map.
+
+### ⚠ Three more tooling defects, two of them mine twice over
+
+**1. "Keep every key" kept the wrong lines.** The batch-4 fix told the C# applier to keep any key the
+manifest was not taking over — matched on line SHAPE, so it also kept the INNER lines of a multi-line nested
+initializer. Japanese's `ExponentWords = new ExponentWordsDef { Squared = …, Cubed = …, Position = … }`
+produced three bogus top-level assignments to fields `SymbolData` does not have. The compiler caught it; the
+filter now tracks BRACE DEPTH and keeps depth-1 keys only.
+
+**2. A blanket rename over `test/` hit languages outside the sweep.** `abkhaz` and two shared test files use
+`symbols` for their own purposes and were rewritten. Reverted. This is the third blanket-identifier rename in
+this project to overreach — the `\p{L}` corruption in #950 was the first.
+
+**3. ⚠ AND THE SAME RENAME CORRUPTED THE TEST THAT DOCUMENTS THE DISTINCTION.** The Indic coupling test
+deliberately asserts that `symbols` — the SIGN MAP — has single-character keys. The rename rewrote it to
+`symbolTier`, so the test that exists to keep the two tables apart began asserting they were the same one,
+and failed. Restored with the reason recorded in the assertion itself.
+
+**Verification of the rename specifically:** all 27 previously-lifted languages re-probed after it, 0 moved,
+plus a C# spot check on one language per earlier batch.
+
 ## Remaining
 
-16 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
+11 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
 german, greek, gujarati, hungarian, indonesian, japanese, javanese, kannada, korean, malayalam, mandarin,
 marathi, occitan, odia, polish, punjabi, quechua, russian, swahili, tajik, tamil, telugu, thai, umbundu,
 urdu, vietnamese.

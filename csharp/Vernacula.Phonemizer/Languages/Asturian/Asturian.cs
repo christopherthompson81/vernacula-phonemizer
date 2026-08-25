@@ -18,7 +18,7 @@ public sealed class AsturianDef
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     public string DecimalWord { get; init; } = "";
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public AsturianSymbols Symbols { get; init; } = new();
+    public AsturianSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class AsturianPhonemizer : ILanguage
@@ -95,11 +95,11 @@ public sealed class AsturianPhonemizer : ILanguage
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
         Ampersand = "y",
-        Percent = AsturianPhonemizer.DEF.Symbols.Percent,
-        Currency = AsturianPhonemizer.DEF.Symbols.Currency,
-        Units = AsturianPhonemizer.DEF.Symbols.Units,
-        ExponentWords = AsturianPhonemizer.DEF.Symbols.ExponentWords,
-        Magnitudes = AsturianPhonemizer.DEF.Symbols.Magnitudes,
+        Percent = AsturianPhonemizer.DEF.SymbolTier.Percent,
+        Currency = AsturianPhonemizer.DEF.SymbolTier.Currency,
+        Units = AsturianPhonemizer.DEF.SymbolTier.Units,
+        ExponentWords = AsturianPhonemizer.DEF.SymbolTier.ExponentWords,
+        Magnitudes = AsturianPhonemizer.DEF.SymbolTier.Magnitudes,
     });
 
     private static readonly JsRe TOKEN = JsRegex.Compile(
@@ -143,7 +143,7 @@ public sealed class AsturianPhonemizer : ILanguage
     internal static void RegisterSelf() => Registry.Register("asturian", CreateAsturian);
 }
 
-public sealed class AsturianSymbols
+public sealed class AsturianSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

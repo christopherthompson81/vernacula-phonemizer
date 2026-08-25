@@ -16,18 +16,11 @@ public static class VietnamesePhonemizer
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "nhân" },
-        Percent = new[] { "phần trăm" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "đô la" }, ["¥"] = new[] { "yên" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "ki lô mét" }, ["mm"] = new[] { "mi li mét" }, ["cm"] = new[] { "xen ti mét" },
-            ["kg"] = new[] { "ki lô gam" }, ["m"] = new[] { "mét" },
-        },
-        ExponentWords = new ExponentWordsDef { Squared = new[] { "vuông" }, Cubed = new[] { "khối" } },
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Multiply = Manifest.MANIFEST.SymbolTier.Multiply,
     });
 
     private sealed class Engine : ILanguage

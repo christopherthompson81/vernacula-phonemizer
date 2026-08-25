@@ -74,7 +74,7 @@ export interface AfrikaansManifest {
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     decimalWord: string;
     /** The shared symbol tier's data — moved verbatim from afrikaans.ts, comments included. */
-    symbols: {
+    symbolTier: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         units: Record<string, CountForms>;

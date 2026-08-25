@@ -112,13 +112,13 @@ public sealed class UkrainianPhonemizer : ILanguage
         // for the audio evidence behind `на` and the corpus gloss behind `та`.
         Multiply = new MultiplyDef { Times = DEF.SignWords.Times },
         Ampersand = DEF.SignWords.Ampersand,
-        Percent = DEF.Symbols.Percent,
-        Currency = DEF.Symbols.Currency,
-        Units = DEF.Symbols.Units,
-        UnitPer = DEF.Symbols.UnitPer,
-        RateDenominators = DEF.Symbols.RateDenominators,
-        ExponentWords = DEF.Symbols.ExponentWords,
-        Magnitudes = DEF.Symbols.Magnitudes,
+        Percent = DEF.SymbolTier.Percent,
+        Currency = DEF.SymbolTier.Currency,
+        Units = DEF.SymbolTier.Units,
+        UnitPer = DEF.SymbolTier.UnitPer,
+        RateDenominators = DEF.SymbolTier.RateDenominators,
+        ExponentWords = DEF.SymbolTier.ExponentWords,
+        Magnitudes = DEF.SymbolTier.Magnitudes,
         // A DECIMAL governs the GENITIVE SINGULAR in Ukrainian — 2,4 відсотка — which is a fourth form, because
         // unlike Russian the 2–4 slot here is the NOMINATIVE PLURAL (два відсотки) and so cannot serve.
         CountForm = n => double.IsInteger(n) ? NormalizeSymbols.SlavicCountForm(n) : 3,

@@ -33,6 +33,7 @@
  * because the same statement folds `／`, which the fraction rule in step 6 does still need.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { MANIFEST } from "./manifest.ts";
 import { degroupThousands, HAN_DIGITS, spellHanDigits, readDegrees, reorderFraction } from "../../core/sinitic.ts";
 
 /** 0–9 as Han numerals — RE-EXPORTED FROM `core/sinitic.ts`, not declared here.
@@ -54,23 +55,14 @@ const spellDigits = (s: string): string => spellHanDigits(s);
 //
 // `¥` is DELIBERATELY ABSENT — neither 日圓 nor 日元 is attested here, and an unsourced word is left unread.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ `multiply` is STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
-    // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it; Cantonese
-    // does not split dimension from product.
-    multiply: { times: "乘" },
-    ampersand: "和",
-    percent: ["百分之"],
-    percentPrefix: true,
-    // ⚠ THE HK REGISTER, NOT THE MAINLAND ONE: 公里/公斤, not the 千米/千克 a concept label offers. A label gives
-    // the language's term for a concept, not the register the text is in.
-    // ⚠ `m` IS DELIBERATELY ABSENT. 米 is a one-character unit, and in an UNSPACED script that is inseparable
-    // from any name containing it — 米勒 is "Miller". Declaring it would read every such name as a measurement.
-    units: { km: ["公里"], kg: ["公斤"] },
-    currency: { $: ["美元"], "€": ["歐元"], "£": ["英鎊"] },
-    // 平方公里 is fused and word-first. Cubed is undeclared, and could not be read anyway while 米 stays
-    // undeclared for the 米勒 reason above — the two gaps are the same gap.
-    exponentWords: { squared: ["平方"], position: "compound" },
-    unspacedScript: true,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    unspacedScript: MANIFEST.symbolTier.unspacedScript,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
+    percentPrefix: MANIFEST.symbolTier.percentPrefix,
 });
 
 /**

@@ -96,7 +96,7 @@ public sealed class AfrikaansManifest
     public AfrikaansNumbersDef Numbers { get; init; } = new();
     public AfrikaansMorphologyDef Morphology { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public AfrikaansSymbols Symbols { get; init; } = new();
+    public AfrikaansSymbolTier SymbolTier { get; init; } = new();
     /** The name of the DECIMAL COMMA, between the integer and fractional parts. */
     public string DecimalWord { get; init; } = "";
 }
@@ -113,7 +113,7 @@ public static class Manifest
     public static readonly List<string> FIXED_KEYS = MANIFEST.Fixed.Keys.OrderByDescending(k => k.Length).ToList();
 }
 
-public sealed class AfrikaansSymbols
+public sealed class AfrikaansSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

@@ -40,14 +40,14 @@ export function phonemizeWord(word: string): string {
  * noun ("pięć milionów dolarów"), so `magnitudeConnective` is deliberately omitted.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    units: MANIFEST.symbols.units,
+    units: MANIFEST.symbolTier.units,
     countForm: plCountForm,
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    magnitudes: MANIFEST.symbols.magnitudes,
-    ampersand: MANIFEST.symbols.ampersand,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 // The number token carries its DECIMAL COMMA (Polish's decimal mark) so the comma is not read as clause

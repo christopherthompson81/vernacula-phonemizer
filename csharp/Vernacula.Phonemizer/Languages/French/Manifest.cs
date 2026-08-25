@@ -60,7 +60,7 @@ public sealed class FrenchManifest
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public FrenchPhonotactics Phonotactics { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public FrenchSymbols Symbols { get; init; } = new();
+    public FrenchSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class FrenchPhonotactics
@@ -77,7 +77,7 @@ public static class Manifest
         LoadManifest.Load<FrenchManifest>("languages/french", "french.jsonc");
 }
 
-public sealed class FrenchSymbols
+public sealed class FrenchSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

@@ -13,8 +13,8 @@ public static class Normalize
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
         Ampersand = "kwenda",
-        Percent = Manifest.MANIFEST.Symbols.Percent,
-        Units = Manifest.MANIFEST.Symbols.Units,
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
     });
 
     private static readonly JsRe IOTA_LOWER = JsRegex.Compile("ῖ", "gu");

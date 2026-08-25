@@ -403,14 +403,14 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // German measure and currency words are INVARIANT plurals (Prozent, Euro, Kilometer).
 const SYMBOLS = makeSymbolNormalizer({
-    percent: MANIFEST.symbols.percent,
-    currency: MANIFEST.symbols.currency,
-    units: MANIFEST.symbols.units,
-    exponentWords: MANIFEST.symbols.exponentWords,
-    bareExponent: MANIFEST.symbols.bareExponent,
-    magnitudes: MANIFEST.symbols.magnitudes,
-    ampersand: MANIFEST.symbols.ampersand,
-    multiply: MANIFEST.symbols.multiply,
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    bareExponent: MANIFEST.symbolTier.bareExponent,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 class GermanPhonemizer implements Phonemizer {

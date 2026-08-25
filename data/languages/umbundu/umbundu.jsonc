@@ -96,7 +96,7 @@
     // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
     // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
     // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
-    "symbols": {
+    "symbolTier": {
         "percent": ["porcento"],
         // ⚠ ONE-LETTER KEY, AND ITS SAFETY IS THE ORDERING BELOW. The tier's `NOT_VERSION` guard works by seeing
         // the DOT (traps 39/46), and this corpus writes `802.11n` — so the tier MUST run before step 4 spends

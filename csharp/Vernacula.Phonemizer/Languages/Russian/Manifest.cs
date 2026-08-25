@@ -61,7 +61,7 @@ public sealed class RussianManifest
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public RussianPhonotactics Phonotactics { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public RussianSymbols Symbols { get; init; } = new();
+    public RussianSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class RussianPhonotactics
@@ -78,7 +78,7 @@ public static class Manifest
         LoadManifest.Load<RussianManifest>("languages/russian", "russian.jsonc");
 }
 
-public sealed class RussianSymbols
+public sealed class RussianSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

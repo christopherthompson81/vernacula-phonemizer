@@ -103,8 +103,8 @@ describe("italian reads its lifted tables", () => {
         expect(say("n. 1 della lista")).toContain(say(MANIFEST.numberSign));
         expect(say("il Sig. Rossi")).toContain(say(MANIFEST.dottedAbbrev["sig"]!));
         expect(say("14,7 miliardi")).toContain(say(MANIFEST.decimalWord));
-        expect(say("50 %")).toContain(say(MANIFEST.symbols.percent[0]!));
-        expect(say("5 km")).toContain(say(MANIFEST.symbols.units["km"]![1]!));
-        expect(say("banconote da 5 $")).toContain(say(MANIFEST.symbols.currency["$"]![1]!));
+        expect(say("50 %")).toContain(say(MANIFEST.symbolTier.percent[0]!));
+        expect(say("5 km")).toContain(say(MANIFEST.symbolTier.units["km"]![1]!));
+        expect(say("banconote da 5 $")).toContain(say(MANIFEST.symbolTier.currency["$"]![1]!));
     });
 });

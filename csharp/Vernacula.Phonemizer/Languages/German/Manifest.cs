@@ -87,7 +87,7 @@ public sealed class GermanManifest
     public GermanMorphologyData Morphology { get; init; } = new();
     public GermanNumberData Numbers { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
-    public GermanSymbols Symbols { get; init; } = new();
+    public GermanSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
@@ -97,7 +97,7 @@ public static class Manifest
         LoadManifest.Load<GermanManifest>("languages/german", "german.jsonc");
 }
 
-public sealed class GermanSymbols
+public sealed class GermanSymbolTier
 {
     public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();

@@ -107,7 +107,7 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
     }
 
     /** The currency noun already spelled out right after the amount — see step 10. */
-    private static readonly JsRe CURRENCY_WORD = JsRegex.Compile($"^\\s*(?:di\\s+)?(?:{string.Join("|", DEF.Symbols.CurrencyStems)})", "iu");
+    private static readonly JsRe CURRENCY_WORD = JsRegex.Compile($"^\\s*(?:di\\s+)?(?:{string.Join("|", DEF.SymbolTier.CurrencyStems)})", "iu");
 
     /**
      * Compass letters after a degree sign — a geographic coordinate, not a temperature and not an ordinal.

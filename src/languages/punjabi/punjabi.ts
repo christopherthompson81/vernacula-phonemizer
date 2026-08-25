@@ -34,16 +34,6 @@ import {
 export interface PunjabiDef extends AbugidaDef {
     numbers: NumbersDef;
     clausePunctuation: Record<string, string>;
-    /** The shared symbol tier — NOT `symbols`, which is the bare-sign map. See the jsonc. */
-    symbolTier: {
-        percent: CountForms;
-        currency: Record<string, CountForms>;
-        units: Record<string, CountForms>;
-        magnitudes: string[];
-        ampersand: string;
-        multiply: { times: string; by?: string };
-        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
-    };
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
     symbolTier: {
         percent: CountForms;
