@@ -141,3 +141,30 @@ describe("yo reads U+2212 with the term its own maths article glosses", () => {
         expect(say("1.98739x10 −21 s")).toBe(say("1.98739x10 21 s"));
     });
 });
+
+/**
+ * ⚠ NAIJA READS THE ENGLISH WORD, AND THAT IS THE LANGUAGE BEING ITSELF RATHER THAN A SHORTCUT. Nigerian
+ * Pidgin is English-lexified, and this layer already declares `percent: ["percent"]` — the bare English
+ * word, sourced from pcm.wikipedia's own "85 percent", read as [pasɛnt] because the engine nativises a
+ * known English spelling through the English dict. `minus` takes the identical route and comes out
+ * [mainas]. Attestation is ×1 and recorded as a LEAD: *"Sovereign credit rating (of BB minus)"*, the word
+ * in Naija prose in the modifier sense.
+ */
+describe("pcm reads U+2212 through its own English-nativisation path", () => {
+    const say = (s: string): string => phonemize(s, "pcm");
+
+    test("the sign is read, and through the nativiser rather than spelled out", () => {
+        expect(say("−47.6 °C")).not.toBe(say("47.6 °C"));
+        expect(say("−47.6 °C").startsWith(say("minus"))).toBe(true);
+    });
+
+    test("the corpus's own sentence — both signs in one parenthetical", () => {
+        // `get di lowes minimum temperashor of 49 K (−224 °C; −371 °F)` — Uranus, the only U+2212 mined.
+        expect(say("(−224 °C; −371 °F)").split(say("minus")).length - 1).toBe(2);
+    });
+
+    test("the hyphen is untouched — it is this language's compounding mark", () => {
+        expect(say("planet-dem")).toBe(say("planet dem"));
+        expect(say("-47.6 °C")).toBe(say("47.6 °C"));
+    });
+});

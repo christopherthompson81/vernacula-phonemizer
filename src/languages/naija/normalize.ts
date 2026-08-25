@@ -50,7 +50,38 @@ const ABBREV_RE = new RegExp(`\\b(${Object.keys(ABBREV).join("|")})\\.?(?![\\p{L
  */
 const MAGNITUDE_ABBREV = /(?<=\d)\s?bn(?![\p{L}\p{M}\d])/gu;
 
+/**
+ * THE MINUS — U+2212 ONLY, and the word is `minus`, in English, because Naija is an English-lexified creole
+ * and this layer already works that way.
+ *
+ * ⚠ THE PRECEDENT IS IN THIS LANGUAGE'S OWN TIER: `percent: ["percent"]` — the bare English word, declared
+ * on pcm.wikipedia's own "85 percent" / "reduce by about 0.87 percent", and read as [pasɛnt] because the
+ * engine NATIVISES a known English spelling through the English dict rather than spelling it out. `minus`
+ * takes the identical route and comes out [mainas], which is the ordinary Naija reflex of /ˈmaɪnəs/.
+ *
+ * ⚠ THE ATTESTATION IS ×1 AND IS RECORDED AS A LEAD, NOT A FINDING — pcm.wikipedia's Ngozi Okonjo-Iweala
+ * article writes *"kolet loan for Sovereign credit rating (of BB minus) fom fitch rating"*, which is the
+ * word in Naija prose in the MODIFIER sense, though not in front of a numeral. What carries the rest of the
+ * argument is that the register around the sign is English-lexified throughout — the corpus sentence holding
+ * the only U+2212 reads *"get di lowes minimum temperashor of 49 K (−224 °C; −371 °F)"* — and that a creole
+ * whose maths vocabulary is its lexifier's has no competing native candidate to be wrong about. Omitting the
+ * sign INVERTS the value; `mainas` is the reading a Naija speaker gives it.
+ *
+ * ⚠ U+2212 ONLY. The hyphen here is compounding and ranges (`planet-dem`, `63°F to 98°F` written with dashes
+ * elsewhere), and it is the ambiguous character; U+2212 can only be the operator.
+ * ⚠ `(?<!\p{Nd}\s)` refuses the space-separated exponent, the fleet-wide guard.
+ *
+ * ⚠ NOTED, NOT FIXED: `°C` IS STILL DROPPED HERE — `47.6 °C` reads *foti sɛvin pɔint siks si*, the degree
+ * sign gone and ⟨C⟩ read as the English letter name. pcm.wikipedia has seven digit-adjacent degrees
+ * (`37.5°C`, `70°C`, `63°F`) and writes the noun as `temperazho` / `tempireshon`, but no DEGREE word is
+ * sourced yet. That is a separate gap with its own sourcing, and the minus is worth reading without it:
+ * a dropped degree loses a unit, a dropped minus inverts the quantity.
+ */
+const MINUS = /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu;
+
 /** Naija text → text, before tokenization. */
 export function normalizeNaija(input: string): string {
-    return input.replace(ABBREV_RE, (_m, w: string) => ABBREV[w]!).replace(MAGNITUDE_ABBREV, " billion");
+    return input.replace(ABBREV_RE, (_m, w: string) => ABBREV[w]!)
+        .replace(MAGNITUDE_ABBREV, " billion")
+        .replace(MINUS, "minus ");
 }

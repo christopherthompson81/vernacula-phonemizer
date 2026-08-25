@@ -454,3 +454,45 @@ mentioned U+2212.
 
 **Measured effect on the corpus, not just synthetic probes:** `review.ts --lang yo` artifact scan went from
 `DROP minus ×3` to `×1`.
+
+## Run 11 — Naija, where the English word IS the language's answer — 2026-08-25 19:20
+
+Offered: a Naija speaker reads `−47.6 °C` as "minus forty-seven point six degrees Celsius" — English, because
+an English-lexified creole code-switches for maths. Checked, and this one is well founded, for a reason
+already sitting in the file:
+
+**⚠ THE PRECEDENT IS IN NAIJA'S OWN TIER.** `naija.ts` declares `percent: ["percent"]` — the bare English
+word, sourced from pcm.wikipedia's "85 percent" — and it reads as [pasɛnt] because the engine NATIVISES a
+known English spelling through the English dict rather than spelling it out. `minus` takes the identical
+route and comes out **[mainas]**, the ordinary Naija reflex of /ˈmaɪnəs/. The word is not being imported;
+the language's own machinery is being used the way it already is for `percent`.
+
+Attestation is ×1 and recorded as a lead, not a finding: pcm.wikipedia writes *"kolet loan for Sovereign
+credit rating (of **BB minus**) fom fitch rating"* — the word in Naija prose, in the modifier sense, though
+not before a numeral. What carries the rest is that the register around the sign is English-lexified
+throughout — the corpus sentence holding the only U+2212 is *"get di lowes minimum **temperashor** of 49 K
+(−224 °C; −371 °F)"* — and a creole whose maths vocabulary is its lexifier's has no competing native
+candidate to be wrong about.
+
+**⚠ AND THE HYPHEN REFUSAL IS THE CLEANEST MEASUREMENT IN THIS INVESTIGATION.** Of the ten leading hyphens
+before a digit in the mined artifact, NINE are not negatives:
+
+```
+  U -20 Women's world cup   ·  onda -10 to onda -15 levu  ·  onda -17 team     AGE GROUPS  ×5
+  (1999 -2000)              ·  Di 2017 -18 PGA tour                            ranges      ×2
+  start:-750                ·  shift:(0,-5)                                    EasyTimeline ×2
+  between -78.5C|F to 5.7C|F                                                   a NEGATIVE  ×1
+```
+
+The age-group shape (`onda -20`, "under-20") is Naija-specific and would have been invisible to a
+count. Claiming the hyphen misreads nine to fix one, so U+2212 only — measured for this language rather
+than inherited from the others. Registered in `ACCEPTED_SIGN_SILENCE.pcm` with that measurement, so the
+gate reports INTENT rather than a permanently red line.
+
+**⚠ NOTED, NOT FIXED: `°C` IS STILL DROPPED IN pcm.** `47.6 °C` reads *foti sɛvin pɔint siks si* — the
+degree sign gone and ⟨C⟩ read as the English letter name. pcm.wikipedia has seven digit-adjacent degrees
+(`37.5°C`, `70°C`, `63°F`) and writes the noun as `temperazho` / `tempireshon`, but no DEGREE word is
+sourced. Separate gap, separate sourcing — and the minus is worth reading without it, because a dropped
+degree loses a unit while a dropped minus inverts the quantity.
+
+**Six remain: ab, ak, bo, ltg, mos, za** — and bo is a refusal on evidence, not a gap.

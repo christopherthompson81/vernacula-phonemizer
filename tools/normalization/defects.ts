@@ -2609,6 +2609,24 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "yo shape, and the two temperatures write the scale word out themselves (`26.5° sentigrado`), "
             + "so voicing ° would double it. \"digri Selsiyus\" has 0 tl.wikipedia phrase hits",
     },
+    pcm: {
+        // ⚠ U+2212 IS READ (`minus`, nativised to [mainas] through the English dict — see
+        // src/languages/naija/normalize.ts, and the `percent: ["percent"]` precedent in its tier). The
+        // ASCII HYPHEN this case probes is refused, and the measurement is unusually clean: of the ten
+        // leading hyphens before a digit in the mined artifact, NINE are not negatives —
+        //   · FIVE are AGE-GROUP designations, which is a Naija-specific shape worth naming:
+        //     `U -20 Women's world cup`, `onda -10 to onda -15 levu`, `onda -17 team`;
+        //   · TWO are ranges (`(1999 -2000)`, `Di 2017 -18 PGA tour`);
+        //   · TWO are EasyTimeline markup (`start:-750`, `shift:(0,-5)`).
+        // The one genuine negative is `between -78.5C|F to 5.7C|F`, a Mars surface temperature. Claiming
+        // the hyphen would misread nine to fix one.
+        minus: "measured: U+2212 IS read (`minus` \u2192 [mainas], via this language's English "
+            + "nativisation, the same route its declared `percent` takes). The ASCII hyphen this case "
+            + "probes is REFUSED: 9 of 10 leading hyphens before a digit in the artifact are not negatives "
+            + "\u2014 five AGE GROUPS (`U -20`, `onda -10`, `onda -15`, `onda -17`), two ranges "
+            + "(`1999 -2000`, `2017 -18`) and two EasyTimeline directives (`start:-750`, `shift:(0,-5)`). "
+            + "The single genuine one is `between -78.5C|F to 5.7C|F`",
+    },
     yo: {
         // Yoruba's referees (wikipron yor, kaikki yor) are word→IPA: they can check how a word is pronounced,
         // never whether it is the right word for a sign. So every reason below is a corpus measurement.
