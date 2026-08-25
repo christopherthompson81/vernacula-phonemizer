@@ -89,5 +89,14 @@
         },
 
         "decimalWord": "ದಶಾಂಶ"
-    }
+    },
+
+    // ⚠ WRITTEN FORMS FOR RECOGNITION, NOT A SPELLING MAP — see the tamil manifest for the full argument.
+    // ⚠ AND DELIBERATELY TINY. Only the four forms the corpus actually attests are listed: the rule merely
+    // deletes the interior dots, so the letter names reaching the output are the corpus's own spellings
+    // passed through unchanged, and nothing is invented. A generic short-token rule cannot be written safely
+    // against a script with no case distinction.
+    "initialismLetterForms": [
+        "ಯು", "ಎಸ್", "ಡಿ", "ಕೆ"
+    ]
 }

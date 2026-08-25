@@ -23,6 +23,8 @@ public sealed class TeluguManifest : AbugidaDef
 {
     public TeluguNumbers Numbers { get; set; } = new();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; set; } = new Dictionary<string, string>();
+    /** ⚠ WRITTEN forms for RECOGNITION, not a spelling map — see the jsonc. Never emitted. */
+    public IReadOnlyList<string> InitialismLetterForms { get; init; } = Array.Empty<string>();
 }
 
 public static class Manifest

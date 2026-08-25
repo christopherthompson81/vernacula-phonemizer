@@ -33,6 +33,7 @@
  * KANNADA spellings, whose interior dots were being read as clause breaks (step 6).
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { MANIFEST } from "./manifest.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -87,16 +88,7 @@ const ERA: Readonly<Record<string, string>> = {
     "ಶ": "ಕ್ರಿಸ್ತ ಶಕ",
 };
 
-/**
- * Kannada renderings of the LATIN letter names that this corpus actually uses in a dotted initialism:
- * ಯು.ಎಸ್ (U.S., ×5) and ಡಿ.ಕೆ (D.K., ×1). A CLOSED list, and closed to what is ATTESTED, for the reason
- * the Tamil run recorded: a generic "short token, dot, short token" rule cannot be written safely
- * against a script with no case distinction, because it matches sentence boundaries. Nothing is
- * invented — the rule only deletes the interior dots, so the letter names themselves are the corpus's
- * own spellings passed through unchanged.
- */
-const LETTER_NAME = ["ಯು", "ಎಸ್", "ಡಿ", "ಕೆ"];
-const LETTER = `(?:${[...LETTER_NAME].sort((a, b) => b.length - a.length).join("|")})`;
+const LETTER = `(?:${[...MANIFEST.initialismLetterForms].sort((a, b) => b.length - a.length).join("|")})`;
 /** A run of ≥2 dot-separated letter names. The run's TRAILING dot is consumed only when the sentence
  *  visibly continues, so a true sentence-final pause is never lost. */
 const INITIALISM_RE = new RegExp(

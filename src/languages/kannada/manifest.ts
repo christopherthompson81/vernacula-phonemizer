@@ -41,6 +41,8 @@ export interface KannadaNumbers extends DravidianNumbersDef {
 export interface KannadaManifest extends AbugidaDef {
     numbers: KannadaNumbers;
     clausePunctuation: Record<string, string>;
+    /** ⚠ WRITTEN forms for RECOGNITION, not a spelling map — see the jsonc. Never emitted as a reading. */
+    initialismLetterForms: string[];
 }
 
 export const MANIFEST = loadManifest<KannadaManifest>(import.meta.url, "kannada.jsonc");

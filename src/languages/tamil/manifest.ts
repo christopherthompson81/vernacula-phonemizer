@@ -43,6 +43,8 @@ export interface TamilManifest extends AbugidaDef {
     };
     clausePunctuation: Record<string, string>;
     numbers: TamilNumbers;
+    /** ⚠ WRITTEN forms for RECOGNITION, not a spelling map — see the jsonc. Never emitted as a reading. */
+    initialismLetterForms: string[];
 }
 
 /** The consolidated Tamil data (abugida def + post-pass tables; see tamil.jsonc). */

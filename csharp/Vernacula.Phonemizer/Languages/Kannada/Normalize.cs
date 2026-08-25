@@ -52,10 +52,8 @@ public static class Normalize
         ["ಶ"] = "ಕ್ರಿಸ್ತ ಶಕ",
     };
 
-    /** Kannada renderings of the LATIN letter names that occur in a dotted initialism (ಯು.ಎಸ್, ಡಿ.ಕೆ). */
-    private static readonly string[] LETTER_NAME = { "ಯು", "ಎಸ್", "ಡಿ", "ಕೆ" };
     private static readonly string LETTER =
-        $"(?:{string.Join("|", LETTER_NAME.OrderByDescending(x => x.Length))})";
+        $"(?:{string.Join("|", Manifest.MANIFEST.InitialismLetterForms.OrderByDescending(x => x.Length))})";
 
     /** A run of ≥2 dot-separated letter names. The run's TRAILING dot is consumed only when the sentence
      *  visibly continues, so a true sentence-final pause is never lost. */

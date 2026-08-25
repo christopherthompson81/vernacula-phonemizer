@@ -21,6 +21,7 @@
  * inventory is entirely ASCII — so there is no digit fold here. Same negative result as Persian.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { MANIFEST } from "./manifest.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -104,20 +105,6 @@ const ERA: Readonly<Record<string, string>> = {
     "பி": "கிறிஸ்துவுக்கு பின்",
 };
 
-/**
- * Tamil renderings of the LATIN letter names, which is what a dotted Tamil initialism is made of
- * (யு.எஸ் = U.S., எம்.ஆர்.ஐ = MRI, ஜி. டி. பி = GDP), plus நா — the clipped நாடுகள் in ஐ.நா. (UN).
- *
- * This is a CLOSED LIST on purpose. A generic "short Tamil token, dot, short Tamil token" rule cannot be
- * written safely: probing it against the corpus matched sentence boundaries such as "…ஆவர். கட்பேக்தான்"
- * and "…அல்ல. செங்குத்தாக", because Tamil has no case distinction to mark a sentence start. Restricting
- * the members to actual letter names is what makes the rule sound — trap #2 again.
- */
-const LETTER_NAME = [
-    "ஏ", "பி", "சி", "டி", "இ", "எஃப்", "ஜி", "எச்", "ஐ", "ஜே", "கே", "எல்", "எம்", "என்",
-    "ஓ", "க்யூ", "ஆர்", "எஸ்", "யு", "வி", "டபிள்யூ", "எக்ஸ்", "ஒய்", "இசட்", "நா",
-];
-
 const alt = (keys: readonly string[]): string =>
     [...keys].sort((a, b) => b.length - a.length).join("|");
 
@@ -131,7 +118,7 @@ const TAMIL_UNIT_SPACED_RE = new RegExp(`(?<=\\d\\s?)(கி|மி|செ)\\s(�
 // after the abbreviation and produced "கிறிஸ்துவுக்கு முன்10000" as a single token (caught by the corpus
 // diff, ×2 — not by any probe).
 const ERA_RE = new RegExp(`${NOT_LETTER_BEFORE}கி\\s*\\.?\\s*(மு|பி)\\.?${NOT_LETTER_AFTER}`, "gu");
-const LETTER = `(?:${alt(LETTER_NAME)})`;
+const LETTER = `(?:${alt(MANIFEST.initialismLetterForms)})`;
 // A run of ≥2 dot-separated letter names. The run's TRAILING dot is consumed only when the sentence
 // visibly continues (whitespace + another letter); at a true sentence end it is left in place, so that
 // "…1 யு.எஸ்." keeps its final pause. Zero sentence-final pauses are lost by this rule.

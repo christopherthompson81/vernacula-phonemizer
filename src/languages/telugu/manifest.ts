@@ -27,6 +27,8 @@ export interface TeluguNumbers extends NumbersDef {
 export interface TeluguManifest extends AbugidaDef {
     numbers: TeluguNumbers;
     clausePunctuation: Record<string, string>;
+    /** ⚠ WRITTEN forms for RECOGNITION, not a spelling map — see the jsonc. Never emitted as a reading. */
+    initialismLetterForms: string[];
 }
 
 export const MANIFEST = loadManifest<TeluguManifest>(import.meta.url, "telugu.jsonc");

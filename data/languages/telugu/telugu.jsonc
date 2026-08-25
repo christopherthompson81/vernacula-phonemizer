@@ -122,5 +122,16 @@
             "lakh": { "bare": "లక్ష", "combining": "లక్ష", "plural": "లక్షలు", "pluralOblique": "లక్షల" },
             "crore": { "bare": "కోటి", "combining": "కోటి", "plural": "కోట్లు", "pluralOblique": "కోట్ల" }
         }
-    }
+    },
+
+    // ⚠ WRITTEN FORMS FOR RECOGNITION, NOT A SPELLING MAP — see the tamil manifest for the full argument.
+    // These are the letter-name spellings as they appear IN TEXT (యూ.ఎస్. = U.S., ఏ.డి. = A.D.,
+    // పి.యం. = p.m.), used to find a dot-separated run so its interior dots can be deleted; nothing here is
+    // emitted as a reading. A CLOSED LIST, for the reason the Tamil run recorded: a generic short-token rule
+    // matches sentence boundaries in a script with no case distinction.
+    "initialismLetterForms": [
+        "ఏ", "బి", "బీ", "సి", "సీ", "డి", "డీ", "ఇ", "ఈ", "ఎఫ్", "జి", "జీ", "హెచ్", "ఐ", "జే", "కే",
+        "ఎల్", "ఎం", "యం", "ఎన్", "ఓ", "పి", "పీ", "క్యూ", "ఆర్", "ఎస్", "టి", "టీ", "యు", "యూ", "వి",
+        "వీ", "డబ్ల్యూ", "ఎక్స్", "వై", "జెడ్"
+    ]
 }

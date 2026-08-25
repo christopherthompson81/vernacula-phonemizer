@@ -136,4 +136,35 @@ public class LetterNamesManifestTests
             Assert.NotEqual("", k);
         }
     }
+
+    /**
+     * ⚠ A DIFFERENT FACT UNDER A DIFFERENT NAME. ta, te and kn have no `LetterNames` map — they have a
+     * CLOSED list of the letter-name spellings AS WRITTEN, used to build the regex that RECOGNISES a
+     * dot-separated initialism run so its interior dots can be deleted. Nothing in it is ever emitted as a
+     * reading. Filing that under `letterNames` would put two facts under one name.
+     *
+     * ⚠ Closed by NECESSITY: a generic "short token, dot, short token" rule cannot be written safely against
+     * a script with no case distinction — it matches sentence boundaries.
+     */
+    public static TheoryData<string, IReadOnlyList<string>, string, string> Recognition()
+    {
+        var d = new TheoryData<string, IReadOnlyList<string>, string, string>();
+        d.Add("ta", Languages.Tamil.Manifest.MANIFEST.InitialismLetterForms, "யு.எஸ். அரசு", "யு.எஸ்.");
+        d.Add("te", Languages.Telugu.Manifest.MANIFEST.InitialismLetterForms, "యూ.ఎస్. ప్రభుత్వం", "యూ.ఎస్.");
+        d.Add("kn", Languages.Kannada.Manifest.MANIFEST.InitialismLetterForms, "ಯು.ಎಸ್. ಸರ್ಕಾರ", "ಯು.ಎಸ್.");
+        return d;
+    }
+
+    [Theory]
+    [MemberData(nameof(Recognition))]
+    public void AnInitialismRunIsRecognisedFromTheWrittenForms(
+        string code, IReadOnlyList<string> forms, string sentence, string run)
+    {
+        // With the list empty the regex matches nothing and every interior dot survives as a clause pause.
+        Assert.DoesNotContain(" . ", Say(code, sentence));
+        Assert.NotEmpty(forms);
+        Assert.Contains(forms, f => run.Contains(f, StringComparison.Ordinal));
+        // Nothing in the list is emitted — the forms are native script and never reach the IPA.
+        foreach (var f in forms) Assert.DoesNotContain(f, Say(code, sentence));
+    }
 }
