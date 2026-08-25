@@ -96,9 +96,34 @@ in that group.
 
 **0 of 36 probe readings moved** across the five, sync and async; C# matches Node in both.
 
+## Batch 3 — de, el, pl, hu, ru, fr — 2026-08-25 10:50
+
+The European group, and the first batch where the tiers carry real per-language machinery: Polish keeps
+`plCountForm` (its count agreement is NOT Russian's — a numeral ending in "jeden" takes the genitive plural)
+and Russian keeps `slavicCountForm`. Both are code and stayed in code; only the tables moved.
+
+**Polish's `units` was a cross-file export.** `normalize.ts` declared `export const UNITS` and `polish.ts`
+imported it purely to hand to the tier — one consumer, one direction, and a table living in the wrong file
+to reach the manifest. Moved into `symbols.units` and the export dropped.
+
+**0 of 57 probe readings moved** across the six, sync and async; C# matches Node in both.
+
+### ⚠ Two mistakes of my own, one caught by the compiler and one by a test
+
+**Auto-detecting the C# class name grabbed the wrong class.** The helper picked the FIRST `*Manifest|*Def`
+in each file, which for Greek, Polish, Hungarian and Russian is a nested helper (`GreekNumbersDef`,
+`AdjectiveStressDef`) rather than the top-level manifest. Four `Symbols` properties landed on the wrong type.
+The compiler caught it; naming the class explicitly is the fix, and the same shape bit the letterNames sweep
+earlier — auto-detection by regex over a file with several classes is not worth the keystrokes it saves.
+
+**And the batch's generic unit assertion was wrong about count agreement.** It compared the reading against
+`units.km[0]`, the SINGULAR — but `5 km` takes the PLURAL in Greek (χιλιόμετρα), so a correct reading failed.
+The honest assertion is that the reading contains ANY declared form, because which one is right is exactly
+the language-specific fact the tier exists to encode.
+
 ## Remaining
 
-28 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
+22 languages with an inline symbol tier: amharic, arabic, asturian, bengali, cantonese, cebuano, french,
 german, greek, gujarati, hungarian, indonesian, japanese, javanese, kannada, korean, malayalam, mandarin,
 marathi, occitan, odia, polish, punjabi, quechua, russian, swahili, tajik, tamil, telugu, thai, umbundu,
 urdu, vietnamese.

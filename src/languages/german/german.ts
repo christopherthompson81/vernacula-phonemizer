@@ -403,49 +403,14 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // German measure and currency words are INVARIANT plurals (Prozent, Euro, Kilometer).
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ The tier spaces `und` on both sides, because `B&B` is two initialisms and joining them would make one
-    // token.
-    // ⚠ `multiply` is STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the
-    // operator returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it —
-    // German does not split dimension from product.
-    multiply: { times: "mal" },
-    ampersand: "und",
-    percent: ["Prozent"],
-    currency: { "€": ["Euro"], "$": ["Dollar"], "£": ["Pfund"], "¥": ["Yen"] },
-    // `m` is declared because a digit-adjacent bare `m` in German is a metre (`4892 m Höhe`, `133 m/s`).
-    // ⚠ Without it `Kubik`/`Quadrat` below cannot reach a bare metre, so `5 m³` reads as the raw letter while
-    // `5 km³` reads correctly.
-    // ⚠ ⟨g⟩ ⟨ha⟩ ⟨l⟩ ⟨L⟩ WERE NOT LEAKING, THEY WERE MIS-READING — the class `tools/normalization/misread.ts`
-    // exists to see. `10 ha` read *t͡seːn haː*, which is a German interjection; `10 g` read as the letter.
-    // Nothing in the tree could flag either, because neither the ASCII nor a DROP survives into the IPA.
-    // Each word is definitional on de.wikipedia and each names its own symbol:
-    //   Gramm  176/17  "Ein Gramm ist eine physikalische Einheit für die Masse, sein EINHEITENZEICHEN IST G"
-    //   Hektar 356/20  "Das oder der Hektar … ist eine Maßeinheit der Fläche … in Deutschland, Österreich
-    //                   und der Schweiz eine gesetzliche Einheit"
-    //   Liter  468/18  "Der … Liter ist eine Einheit für das Volumen … mit \mathrm{L} symbolisiert"
-    // ⚠ ⟨l⟩ AND ⟨L⟩ BOTH, the litre's documented exception to the one-letter rule (`resolveUnitSymbol`).
-    // ⚠ THE ONE-LETTER KEYS MEASURED, not assumed (trap 46), and measured against the shape the tier will
-    // actually build — a number, an optional MAGNITUDE, then the key. Over the artifact `<digit> g` is ×1
-    // and it is `802.11g`, a Wi-Fi standard, which `NOT_VERSION` already rejects; `<digit> l` and
-    // `<digit> L` are ×0. German's magnitudes are `Million(en)`/`Milliarde(n)` and none of them ends in a
-    // unit letter, so the ligature trap that refused Tagalog's ⟨g⟩ does not arise here.
-    units: { km: ["Kilometer"], cm: ["Zentimeter"], mm: ["Millimeter"], kg: ["Kilogramm"], mg: ["Milligramm"],
-        m: ["Meter"], g: ["Gramm"], ha: ["Hektar"], l: ["Liter"], L: ["Liter"] },
-    // ⚠ AN UNDECLARED MEASURE WORD MAKES THE TIER ABANDON THE WHOLE MATCH, so `5 km²` reads as *fʏnf km* —
-    // the abbreviation reaching the phoneme sink verbatim and the QUANTITY lost, not merely its power.
-    // German FUSES the measure word onto the front, which is `compound`: *Quadratkilometer*, *Kubikmeter*.
-    exponentWords: { squared: ["Quadrat"], cubed: ["Kubik"], position: "compound" },
-    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`).
-    // ⚠ THIS CANNOT REUSE `exponentWords` ABOVE: that is the unit MODIFIER and this is the PREDICATE, and in
-    // most languages they are different words — Quadratkilometer, but zwanzig zum Quadrat.
-    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
-    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
-    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
-    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
-    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
-    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n} zum Quadrat", cubed: "{n} hoch drei", power: "{n} hoch {e}" , negative: "minus" },
-    magnitudes: ["Millionen", "Million", "Milliarden", "Milliarde"],
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    bareExponent: MANIFEST.symbols.bareExponent,
+    magnitudes: MANIFEST.symbols.magnitudes,
+    ampersand: MANIFEST.symbols.ampersand,
+    multiply: MANIFEST.symbols.multiply,
 });
 
 class GermanPhonemizer implements Phonemizer {

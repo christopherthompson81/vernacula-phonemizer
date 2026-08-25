@@ -59,6 +59,8 @@ public sealed class FrenchManifest
     public FrenchNumberData Numbers { get; init; } = new();
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public FrenchPhonotactics Phonotactics { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public FrenchSymbols Symbols { get; init; } = new();
 }
 
 public sealed class FrenchPhonotactics
@@ -73,4 +75,17 @@ public static class Manifest
     /** The consolidated hand-authored French data tables (see french.jsonc). */
     public static readonly FrenchManifest MANIFEST =
         LoadManifest.Load<FrenchManifest>("languages/french", "french.jsonc");
+}
+
+public sealed class FrenchSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public BareExponentDef BareExponent { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string MagnitudeConnective { get; init; } = "";
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

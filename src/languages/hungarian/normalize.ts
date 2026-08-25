@@ -128,66 +128,13 @@ const normalizeInitialisms = makeInitialismNormalizer({
  * like these — the hazard `rateDenominators` exists for.
  */
 const normalizeSymbols = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
-    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
-    // és is ×2257 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
-    //
-    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
-    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
-    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
-    // see the tier, where the spacing exists because `B&B` is two initialisms.
-    ampersand: "és",
-    percent: ["százalék"],
-    /**
-     * CURRENCY. `$5` read as bare *ˈøt* — the sign contributed nothing, which is worse than a wrong
-     * word because nothing in the output marks the loss. hu_hu contains ZERO `$` against 57 `%`, so the
-     * corpus-driven gate that caught the percent could not see this; the WORDS are nonetheless in that same
-     * corpus, spelled out:
-     *
-     *   dollár  ×6   "11,000 és 22,500 amerikai dollár közötti áron"
-     *   font    ×10  "hivatalos pénzneme a falklandi font (FKP)"
-     *
-     * ONE FORM EACH, because Hungarian takes the SINGULAR after a numeral (öt dollár, not *öt dollárok).
-     *
-     * `euró` and `jen` are DELIBERATELY ABSENT: both are 0 in the corpus under a token test. An unsourced
-     * currency word is left unread rather than guessed.
-     */
-    currency: { $: ["dollár"], "£": ["font"] },
-    units: {
-        km: ["kilométer"],
-        m: ["méter"],
-        cm: ["centiméter"],
-        mm: ["milliméter"],
-        kg: ["kilogramm"],
-        "mérföld": ["mérföld"],
-        mbit: ["megabit"],
-        /**
-         * ⚠ `mp` IS THE SECOND, AND IT IS A NUMERATOR KEY EVEN THOUGH `s` IS A DENOMINATOR-ONLY ONE. The
-         * artifact's `133 m/s, 300 mp/h` left `ˈmp ˈh` raw: the tier resolved neither half, so the rate arm
-         * declined and the whole phrase reached the IPA as ASCII. `s` cannot be promoted to fix it (see the
-         * docblock above — a standalone `s` bites into `802.11a`-shaped codes), and `mp` has no such second
-         * life: it is two letters, vowel-free, and not a Hungarian word.
-         *
-         * SOURCING — hu.wikipedia states the equivalence twice, from both ends, and `attest.ts --lang hu`
-         * has both cached:
-         *   · the *másodperc* article: "…(szövegben – az **mp** rövidítést is)" — the second, abbreviated
-         *     ⟨mp⟩ in running text. 110 tokens / 19 articles.
-         *   · the ⟨mp⟩ disambiguation page: "mp, Mp – időre vonatkozó mértékegységként a másodperc egyik
-         *     jelölése, helyesen: s". 156 tokens / 18 articles.
-         * ⚠ THAT SAME PAGE LISTS A SECOND UNIT SENSE AND IT IS READ AND REJECTED, not skipped: `mp` is also
-         * the MILLIPOND, a CGS-era force unit. It is obsolete, it is not what a Hungarian text with a figure
-         * in front of it means, and the ⟨s⟩-gloss above is the wiki's own account of ordinary written usage.
-         * Declaring the millipond instead would be the *kong-si* error — the attested sense that is not the
-         * one in the slot.
-         * ⚠ AND THE CORPUS SENTENCE IS ITSELF A MISTRANSLATION — English "300 mph" rendered as `300 mp/h`,
-         * so what it MEANS is miles per hour. That is not this layer's business and must not become it: the
-         * layer reads the Hungarian that is written, and *háromszáz másodperc per óra* is what is written.
-         */
-        mp: ["másodperc"],
-    },
-    unitPer: "per",
-    rateDenominators: { h: "óra", s: "másodperc", "ó": "óra", "óra": "óra", "órás": "órás" },
-    exponentWords: { squared: ["négyzet"], cubed: ["köb"], position: "compound" },
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    rateDenominators: MANIFEST.symbols.rateDenominators,
+    unitPer: MANIFEST.symbols.unitPer,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    ampersand: MANIFEST.symbols.ampersand,
 });
 
 /** Unit abbreviations that may carry a hyphen-attached suffix directly (`km-re`, `mm-es`, `km²-en`).

@@ -79,32 +79,12 @@ public static class Normalize
     private static readonly Func<string, string> NormalizeSymbolsFn = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
         Ampersand = "és",
-        Percent = new[] { "százalék" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["$"] = new[] { "dollár" }, ["£"] = new[] { "font" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "kilométer" },
-            ["m"] = new[] { "méter" },
-            ["cm"] = new[] { "centiméter" },
-            ["mm"] = new[] { "milliméter" },
-            ["kg"] = new[] { "kilogramm" },
-            ["mérföld"] = new[] { "mérföld" },
-            ["mbit"] = new[] { "megabit" },
-            /** ⚠ `mp` IS THE SECOND, AND IT IS A NUMERATOR KEY EVEN THOUGH `s` IS A DENOMINATOR-ONLY ONE. */
-            ["mp"] = new[] { "másodperc" },
-        },
-        UnitPer = "per",
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["h"] = "óra", ["s"] = "másodperc", ["ó"] = "óra", ["óra"] = "óra", ["órás"] = "órás",
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "négyzet" }, Cubed = new[] { "köb" }, Position = ExponentPosition.Compound,
-        },
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        RateDenominators = Manifest.MANIFEST.Symbols.RateDenominators,
+        UnitPer = Manifest.MANIFEST.Symbols.UnitPer,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
     });
 
     /** Unit abbreviations that may carry a hyphen-attached suffix directly (`km-re`, `mm-es`, `km²-en`). */

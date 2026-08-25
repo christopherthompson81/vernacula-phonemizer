@@ -128,39 +128,13 @@ public static class FrenchPhonemizer
     {
         Ampersand = "et",
         Multiply = new MultiplyDef { Times = "fois" },
-        Percent = new[] { "pour cent" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["€"] = new[] { "euro", "euros" }, ["$"] = new[] { "dollar", "dollars" },
-            ["£"] = new[] { "livre", "livres" }, ["¥"] = new[] { "yen", "yens" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "kilomètre", "kilomètres" }, ["cm"] = new[] { "centimètre", "centimètres" },
-            ["mm"] = new[] { "millimètre", "millimètres" }, ["kg"] = new[] { "kilogramme", "kilogrammes" },
-            ["mg"] = new[] { "milligramme", "milligrammes" }, ["g"] = new[] { "gramme", "grammes" },
-            ["t"] = new[] { "tonne", "tonnes" }, ["m"] = new[] { "mètre", "mètres" },
-            ["l"] = new[] { "litre", "litres" }, ["L"] = new[] { "litre", "litres" },
-            ["ml"] = new[] { "millilitre", "millilitres" }, ["cl"] = new[] { "centilitre", "centilitres" },
-            ["dl"] = new[] { "décilitre", "décilitres" }, ["ha"] = new[] { "hectare", "hectares" },
-            ["km/h"] = new[] { "kilomètre par heure", "kilomètres par heure" },
-            ["m/s"] = new[] { "mètre par seconde", "mètres par seconde" },
-            ["°c"] = new[] { "degré Celsius", "degrés Celsius" }, ["°f"] = new[] { "degré Fahrenheit", "degrés Fahrenheit" },
-            ["kw"] = new[] { "kilowatt", "kilowatts" }, ["W"] = new[] { "watt", "watts" }, ["hz"] = new[] { "hertz" },
-            ["khz"] = new[] { "kilohertz" }, ["mhz"] = new[] { "mégahertz" },
-            ["go"] = new[] { "gigaoctet", "gigaoctets" }, ["mo"] = new[] { "mégaoctet", "mégaoctets" },
-            ["ko"] = new[] { "kilooctet", "kilooctets" }, ["min"] = new[] { "minute", "minutes" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "carré", "carrés" }, Cubed = new[] { "cube", "cubes" }, Position = "after",
-        },
-        BareExponent = new BareExponentDef
-        {
-            Squared = "{n} au carré", Cubed = "{n} au cube", Power = "{n} puissance {e}", Negative = "moins",
-        },
-        Magnitudes = new[] { "millions", "million", "milliards", "milliard" },
-        MagnitudeConnective = "de", // cinq millions DE dollars
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        BareExponent = Manifest.MANIFEST.Symbols.BareExponent,
+        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
+        MagnitudeConnective = Manifest.MANIFEST.Symbols.MagnitudeConnective,
     });
 
     /** numeral normalization, run before tokenization. */

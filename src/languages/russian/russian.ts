@@ -99,47 +99,16 @@ const TOKEN = /([а-яёА-ЯЁ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
 // symbol normalization — Russian: CYRILLIC unit abbreviations (км, not km) and three-way agreement.
 const SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
-    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
-    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
-    // defaults to it — this language does not split dimension from product.
-    multiply: { times: "умножить на" },
-    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
-    // `и` ×1129 in this corpus. The tier spaces it on both sides, because `B&B` is two
-    // initialisms and joining them would make one token.
-    ampersand: "и",
-    percent: ["процент", "процента", "процентов"],
-    currency: { "€": ["евро"], "$": ["доллар", "доллара", "долларов"], "£": ["фунт", "фунта", "фунтов"] },
-    units: { "км": ["километр", "километра", "километров"], "см": ["сантиметр", "сантиметра", "сантиметров"],
-        "мм": ["миллиметр", "миллиметра", "миллиметров"], "кг": ["килограмм", "килограмма", "килограммов"],
-        // LATIN aliases. The corpus writes Cyrillic км, but Latin `km` occurs in foreign-sourced text and
-        // reached the g2p raw — "120 km/h" came out as the cluster [ˈʊkm] plus the ENGLISH letter H.
-        "km": ["километр", "километра", "километров"], "cm": ["сантиметр", "сантиметра", "сантиметров"],
-        "mm": ["миллиметр", "миллиметра", "миллиметров"], "kg": ["килограмм", "килограмма", "килограммов"],
-        "ч": ["час", "часа", "часов"], "h": ["час", "часа", "часов"],
-        // THE BARE METRE, both spellings. метров ×6 / метра ×2, and digit-adjacent bare Latin `m` is ×0 in
-        // this corpus. `кубический` was already declared below but unreachable without a head noun, so
-        // `120 m³` read as the letter name while `120 km³` read correctly. The apostrophe hazard that kept
-        // Ukrainian's `м` out is guarded by the tier itself (`'’ʼ` are rejected after a unit key).
-        "м": ["метр", "метра", "метров"], "m": ["метр", "метра", "метров"] },
-    unitPer: "в",
-    exponentWords: { squared: ["квадратный", "квадратных"], cubed: ["кубический", "кубических"], position: "before" },
-    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
-    // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
-    // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
-    // they are different words (квадратных километров but двадцать в квадрате).
-    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
-    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
-    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
-    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
-    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
-    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n} в квадрате", cubed: "{n} в кубе", power: "{n} в степени {e}" , negative: "минус" },
-    // Without these the magnitude never matched, so "$5 миллионов" hopped the currency word to the WRONG
-    // side and read *пять долларов миллионов*. The inflected forms are listed because running text writes
-    // the one its numeral governs (5 миллионов, 2 миллиона).
-    magnitudes: ["тысячи", "тысяч", "миллион", "миллиона", "миллионов", "миллиард", "миллиарда", "миллиардов"],
     countForm: slavicCountForm,
+    percent: MANIFEST.symbols.percent,
+    currency: MANIFEST.symbols.currency,
+    units: MANIFEST.symbols.units,
+    unitPer: MANIFEST.symbols.unitPer,
+    exponentWords: MANIFEST.symbols.exponentWords,
+    bareExponent: MANIFEST.symbols.bareExponent,
+    magnitudes: MANIFEST.symbols.magnitudes,
+    ampersand: MANIFEST.symbols.ampersand,
+    multiply: MANIFEST.symbols.multiply,
 });
 
 class RussianPhonemizer implements Phonemizer {

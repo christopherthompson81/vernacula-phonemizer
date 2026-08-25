@@ -60,6 +60,8 @@ public sealed class RussianManifest
     public RussianNumbersDef Numbers { get; init; } = new();
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public RussianPhonotactics Phonotactics { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public RussianSymbols Symbols { get; init; } = new();
 }
 
 public sealed class RussianPhonotactics
@@ -74,4 +76,17 @@ public static class Manifest
     /** The consolidated hand-authored Russian data tables (see russian.jsonc). */
     public static readonly RussianManifest MANIFEST =
         LoadManifest.Load<RussianManifest>("languages/russian", "russian.jsonc");
+}
+
+public sealed class RussianSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public BareExponentDef BareExponent { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

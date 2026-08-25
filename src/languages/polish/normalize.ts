@@ -153,17 +153,6 @@ const DOTTED: Readonly<Record<string, string>> = {
 };
 const DOTTED_ALT = Object.keys(DOTTED).sort((a, b) => b.length - a.length).join("|");
 
-/** Units the shared symbol tier can express (matched only when a NUMBER is adjacent). [sg, paucal, gen-pl]. */
-export const UNITS: Readonly<Record<string, string[]>> = {
-    km: ["kilometr", "kilometry", "kilometrów", "kilometra"],
-    m: ["metr", "metry", "metrów", "metra"],
-    cm: ["centymetr", "centymetry", "centymetrów", "centymetra"],
-    mm: ["milimetr", "milimetry", "milimetrów", "milimetra"],
-    kg: ["kilogram", "kilogramy", "kilogramów", "kilograma"],
-    mln: ["milion", "miliony", "milionów", "miliona"],
-    mld: ["miliard", "miliardy", "miliardów", "miliarda"],
-};
-
 /** Clock hour → masculine-nominative ordinal, later inflected to feminine. Hour 0 returns undefined: it is
  *  read "zero" rather than as an ordinal, and the rule declines to claim it rather than say *dwudziesta
  *  czwarta*. No `0:MM` occurs in the corpus. */

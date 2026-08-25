@@ -88,43 +88,13 @@ public sealed class RussianPhonemizer : ILanguage
     {
         Multiply = new MultiplyDef { Times = "умножить на" },
         Ampersand = "и",
-        Percent = new[] { "процент", "процента", "процентов" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["€"] = new[] { "евро" },
-            ["$"] = new[] { "доллар", "доллара", "долларов" },
-            ["£"] = new[] { "фунт", "фунта", "фунтов" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["км"] = new[] { "километр", "километра", "километров" },
-            ["см"] = new[] { "сантиметр", "сантиметра", "сантиметров" },
-            ["мм"] = new[] { "миллиметр", "миллиметра", "миллиметров" },
-            ["кг"] = new[] { "килограмм", "килограмма", "килограммов" },
-            ["km"] = new[] { "километр", "километра", "километров" },
-            ["cm"] = new[] { "сантиметр", "сантиметра", "сантиметров" },
-            ["mm"] = new[] { "миллиметр", "миллиметра", "миллиметров" },
-            ["kg"] = new[] { "килограмм", "килограмма", "килограммов" },
-            ["ч"] = new[] { "час", "часа", "часов" },
-            ["h"] = new[] { "час", "часа", "часов" },
-            ["м"] = new[] { "метр", "метра", "метров" },
-            ["m"] = new[] { "метр", "метра", "метров" },
-        },
-        UnitPer = "в",
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "квадратный", "квадратных" },
-            Cubed = new[] { "кубический", "кубических" },
-            Position = ExponentPosition.Before,
-        },
-        BareExponent = new BareExponentDef
-        {
-            Squared = "{n} в квадрате",
-            Cubed = "{n} в кубе",
-            Power = "{n} в степени {e}",
-            Negative = "минус",
-        },
-        Magnitudes = new[] { "тысячи", "тысяч", "миллион", "миллиона", "миллионов", "миллиард", "миллиарда", "миллиардов" },
+        Percent = Manifest.MANIFEST.Symbols.Percent,
+        Currency = Manifest.MANIFEST.Symbols.Currency,
+        Units = Manifest.MANIFEST.Symbols.Units,
+        UnitPer = Manifest.MANIFEST.Symbols.UnitPer,
+        ExponentWords = Manifest.MANIFEST.Symbols.ExponentWords,
+        BareExponent = Manifest.MANIFEST.Symbols.BareExponent,
+        Magnitudes = Manifest.MANIFEST.Symbols.Magnitudes,
         CountForm = NormalizeSymbols.SlavicCountForm,
     });
 

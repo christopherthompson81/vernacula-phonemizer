@@ -32,6 +32,8 @@ public sealed class HungarianManifest
     public HungarianNumbersDef Numbers { get; init; } = new();
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public HungarianPhonotactics Phonotactics { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public HungarianSymbols Symbols { get; init; } = new();
 }
 
 public sealed class HungarianPhonotactics
@@ -55,4 +57,15 @@ public static class Manifest
     public static readonly IReadOnlyList<HungarianRule> RULES = MANIFEST.Rules
         .Select(r => new HungarianRule(r[0].GetString()!, r[1].GetString()!, r[2].GetBoolean()))
         .ToList();
+}
+
+public sealed class HungarianSymbols
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, string> RateDenominators { get; init; } = new Dictionary<string, string>();
+    public UnitPerSpec UnitPer { get; init; } = null!;
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public string Ampersand { get; init; } = "";
 }
