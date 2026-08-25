@@ -30,6 +30,8 @@ public sealed class IndonesianDef
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public IndonesianNumbersDef Numbers { get; init; } = new();
     public IndonesianPhonotactics Phonotactics { get; init; } = new();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public IndonesianSymbolTier SymbolTier { get; init; } = new();
 }
 
 public sealed class IndonesianPhonotactics
@@ -212,23 +214,13 @@ public static class IndonesianPhonemizer
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "kali" },
-        Ampersand = "dan",
-        Percent = new[] { "persen" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["$"] = new[] { "dolar" }, ["€"] = new[] { "euro" }, ["£"] = new[] { "pound" }, ["¥"] = new[] { "yen" },
-        },
-        Magnitudes = new[] { "triliun", "miliar", "juta", "ribu" },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "kilometer" }, ["cm"] = new[] { "sentimeter" }, ["mm"] = new[] { "milimeter" },
-            ["kg"] = new[] { "kilogram" }, ["m"] = new[] { "meter" }, ["g"] = new[] { "gram" },
-            // ⟨L⟩ and ⟨l⟩ are both official for the litre — the one exception to the one-letter case rule in
-            // Core/NormalizeSymbols, which exists for symbols whose two cases are DIFFERENT units.
-            ["l"] = new[] { "liter" }, ["L"] = new[] { "liter" }, ["ha"] = new[] { "hektar" },
-        },
-        ExponentWords = new ExponentWordsDef { Squared = new[] { "persegi" }, Position = "after" },
+        Percent = DEF.SymbolTier.Percent,
+        Currency = DEF.SymbolTier.Currency,
+        Units = DEF.SymbolTier.Units,
+        ExponentWords = DEF.SymbolTier.ExponentWords,
+        Magnitudes = DEF.SymbolTier.Magnitudes,
+        Ampersand = DEF.SymbolTier.Ampersand,
+        Multiply = DEF.SymbolTier.Multiply,
     });
 
     // The word group spans ALL of Latin, not just ASCII: with `[a-zA-Z]+` a diacritic ended the token and the
@@ -304,4 +296,15 @@ public static class IndonesianPhonemizer
 
     internal static void RegisterSelf() =>
         Registry.Register("indonesian", () => CreateIndonesian(Registry.ReadAsEnglish));
+}
+
+public sealed class IndonesianSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

@@ -16,29 +16,13 @@ public static class Normalize
     /** The SHARED symbol tier (percent / currency / units / rate / exponent). */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "பெருக்கல்" },
-        Ampersand = "மற்றும்",
-        Percent = new[] { "சதவீதம்" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["US$"] = new[] { "டாலர்" }, ["$"] = new[] { "டாலர்" },
-        },
-        Magnitudes = new[] { "மில்லியன்", "பில்லியன்", "ட்ரில்லியன்", "லட்சம்", "கோடி" },
-        Units = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
-        {
-            ["km"] = new[] { "கிலோமீட்டர்" },
-            ["cm"] = new[] { "சென்டிமீட்டர்" },
-            ["mm"] = new[] { "மில்லிமீட்டர்" },
-            ["kg"] = new[] { "கிலோகிராம்" },
-            ["mi"] = new[] { "மைல்" },
-            ["m"] = new[] { "மீட்டர்" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "சதுர" },
-            Cubed = new[] { "கன" },
-            Position = ExponentPosition.Before,
-        },
+        Percent = Manifest.MANIFEST.SymbolTier.Percent,
+        Currency = Manifest.MANIFEST.SymbolTier.Currency,
+        Units = Manifest.MANIFEST.SymbolTier.Units,
+        ExponentWords = Manifest.MANIFEST.SymbolTier.ExponentWords,
+        Magnitudes = Manifest.MANIFEST.SymbolTier.Magnitudes,
+        Ampersand = Manifest.MANIFEST.SymbolTier.Ampersand,
+        Multiply = Manifest.MANIFEST.SymbolTier.Multiply,
     });
 
     /** Tamil unit abbreviations, written with or without the interior dot. */

@@ -133,5 +133,45 @@
         "ఏ", "బి", "బీ", "సి", "సీ", "డి", "డీ", "ఇ", "ఈ", "ఎఫ్", "జి", "జీ", "హెచ్", "ఐ", "జే", "కే",
         "ఎల్", "ఎం", "యం", "ఎన్", "ఓ", "పి", "పీ", "క్యూ", "ఆర్", "ఎస్", "టి", "టీ", "యు", "యూ", "వి",
         "వీ", "డబ్ల్యూ", "ఎక్స్", "వై", "జెడ్"
-    ]
+    ],
+
+    // ---------------------------------------------------------------------------------------------------
+    // THE SHARED SYMBOL TIER's data. Moved here VERBATIM, comments included: the evidence for every
+    // declared unit and currency — why a one-letter symbol is or is not declared, which hazards are
+    // bounded — is the part that cannot be reconstructed, so it travels with the data it explains.
+    // ⚠ NAMED `symbolTier`, one name fleet-wide — `symbols` is the BARE-SIGN → word map the tokenizer reads.
+    "symbolTier": {
+        // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
+        // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+        // మరియు is ×1003 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+        //
+        // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+        // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+        // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+        // see the tier, where the spacing exists because `B&B` is two initialisms.
+        "ampersand": "మరియు",
+        // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+        // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+        // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+        // defaults to it — this language does not split dimension from product.
+        "multiply": { "times": "గుణించి" },
+        "percent": ["శాతం"],
+        "currency": { "US$": ["డాలరు", "డాలర్లు"], "$": ["డాలరు", "డాలర్లు"] },
+        "magnitudes": ["మిలియన్", "బిలియన్", "ట్రిలియన్", "లక్ష", "కోటి"],
+        "units": {
+            "km": ["కిలోమీటరు", "కిలోమీటర్లు"],
+            "cm": ["సెంటీమీటరు", "సెంటీమీటర్లు"],
+            "mm": ["మిల్లీమీటరు", "మిల్లీమీటర్లు"],
+            "kg": ["కిలోగ్రాము", "కిలోగ్రాములు"],
+            "mi": ["మైలు", "మైళ్లు"],
+            "m": ["మీటరు", "మీటర్లు"],
+            // The corpus writes two units out in English words rather than abbreviated (8 miles, 24½ inches);
+            // the tier's keys are plain strings, so they cost nothing to declare.
+            "miles": ["మైలు", "మైళ్లు"],
+            "inches": ["అంగుళం", "అంగుళాలు"],
+        },
+        // `120–160 క్యూబిక్ మీటర్ల ఇంధనాన్ని` — the loan, word-first. ఘన ×2 in this corpus is "solid/volume"
+        // (`నీటి ఘన పరిమాణం`, the volume of water) and not the measure word, so the sentence decides it.
+        "exponentWords": { "squared": ["చదరపు"], "cubed": ["క్యూబిక్"], "position": "before" }
+    }
 }

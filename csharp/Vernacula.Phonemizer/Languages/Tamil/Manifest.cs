@@ -46,10 +46,23 @@ public sealed class TamilManifest : AbugidaDef
     public TamilNumbers Numbers { get; set; } = new();
     /** ⚠ WRITTEN forms for RECOGNITION, not a spelling map — see the jsonc. Never emitted. */
     public IReadOnlyList<string> InitialismLetterForms { get; init; } = Array.Empty<string>();
+    /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
+    public TamilSymbolTier SymbolTier { get; init; } = new();
 }
 
 public static class Manifest
 {
     /** The consolidated Tamil data (abugida def + post-pass tables; see tamil.jsonc). */
     public static readonly TamilManifest MANIFEST = LoadManifest.Load<TamilManifest>("languages/tamil", "tamil.jsonc");
+}
+
+public sealed class TamilSymbolTier
+{
+    public IReadOnlyList<string> Percent { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Currency { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Units { get; init; } = new Dictionary<string, IReadOnlyList<string>>();
+    public ExponentWordsDef ExponentWords { get; init; } = new();
+    public IReadOnlyList<string> Magnitudes { get; init; } = Array.Empty<string>();
+    public string Ampersand { get; init; } = "";
+    public MultiplyDef Multiply { get; init; } = null!;
 }

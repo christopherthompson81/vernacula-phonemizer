@@ -46,35 +46,13 @@ import { numberToWords, ordinalStem } from "./numbers.ts";
  * forms are handled locally in step 5.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
-    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
-    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
-    // defaults to it — this language does not split dimension from product.
-    multiply: { times: "பெருக்கல்" },
-    // `&` was DROPPED outright, so `B&Bs` lost the sign and read as two bare consonants. `மற்றும்`
-    // is the ordinary conjunction, ×997 in the corpus, and the wiki examples put it in exactly this slot —
-    // inside an institution name: `எண்ணெய் மற்றும் இயற்கை எரிவாயுக் கழகம்` (Oil and Natural Gas Corporation).
-    // ⚠ `அண்ட்`, the transliterated English "and", was the adversarial candidate and is REJECTED on the
-    // corpus: ×1 there against மற்றும்'s 997. It is common in the wiki (121 tokens) because that haystack is
-    // full of transliterated company names, which is a fact about the haystack and not about how this
-    // language reads an ampersand.
-    // ⚠ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
-    // word — `B&Bs இரண்டு முக்கிய விஷயங்களில் போட்டியிடுகின்றன: படுக்கை மற்றும் காலை உணவு` ("bed AND
-    // breakfast"). The text states what the sign expands to, in the same breath, with the conjunction chosen
-    // here. Frequency counts are the weaker argument; this is the slot, glossed.
-    ampersand: "மற்றும்",
-    percent: ["சதவீதம்"],
-    currency: { "US$": ["டாலர்"], "$": ["டாலர்"] },
-    magnitudes: ["மில்லியன்", "பில்லியன்", "ட்ரில்லியன்", "லட்சம்", "கோடி"],
-    units: {
-        km: ["கிலோமீட்டர்"],
-        cm: ["சென்டிமீட்டர்"],
-        mm: ["மில்லிமீட்டர்"],
-        kg: ["கிலோகிராம்"],
-        mi: ["மைல்"],
-        m: ["மீட்டர்"],
-    },
-    exponentWords: { squared: ["சதுர"], cubed: ["கன"], position: "before" },
+    percent: MANIFEST.symbolTier.percent,
+    currency: MANIFEST.symbolTier.currency,
+    units: MANIFEST.symbolTier.units,
+    exponentWords: MANIFEST.symbolTier.exponentWords,
+    magnitudes: MANIFEST.symbolTier.magnitudes,
+    ampersand: MANIFEST.symbolTier.ampersand,
+    multiply: MANIFEST.symbolTier.multiply,
 });
 
 /**

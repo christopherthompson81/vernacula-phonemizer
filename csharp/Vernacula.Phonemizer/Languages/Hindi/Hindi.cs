@@ -72,6 +72,11 @@ public sealed class NativeHindiLanguage : ILanguage
 
 public static class Hindi
 {
+    /** ⚠ ONE LOAD, MODULE-LEVEL. `CreateHindi()` loaded the file per call; the symbol tier is built once at
+     *  class scope and needs it too, so the load lands here and both read the same object — matching
+     *  hindi/manifest.ts on the TS side. */
+    internal static readonly HindiDef DEF = LoadManifest.Load<HindiDef>("languages/hindi", "hindi.jsonc");
+
     private static readonly JsRe VOWEL_G = JsRegex.Compile($"[{Unicode.IPA_VOWELS}]", "g");
     private static readonly JsRe CONS_LONG_FINAL = JsRegex.Compile($"[^{Unicode.IPA_VOWELS}]ː$");
     private static readonly JsRe AFFRICATES = JsRegex.Compile("t͡ʃ|d͡ʒ|t͡s|d͡z", "g");
@@ -218,35 +223,18 @@ public static class Hindi
     /** प्रतिशत is invariant, and the units follow the number. (Full sourcing notes: hindi.ts.) */
     internal static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
-        Multiply = new MultiplyDef { Times = "गुणा" },
-        Percent = new[] { "प्रतिशत" },
-        Currency = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["$"] = new[] { "डॉलर" }, ["€"] = new[] { "यूरो" }, ["£"] = new[] { "पाउंड" },
-            ["₹"] = new[] { "रुपये" }, ["¥"] = new[] { "येन" }, ["¢"] = new[] { "सेंट" },
-        },
-        Units = new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["km"] = new[] { "किलोमीटर" }, ["cm"] = new[] { "सेंटीमीटर" }, ["mm"] = new[] { "मिलीमीटर" },
-            ["kg"] = new[] { "किलोग्राम" }, ["m"] = new[] { "मीटर" }, ["g"] = new[] { "ग्राम" },
-            ["l"] = new[] { "लीटर" }, ["L"] = new[] { "लीटर" }, ["ha"] = new[] { "हेक्टेयर" }, ["nm"] = new[] { "नैनोमीटर" },
-        },
-        ExponentWords = new ExponentWordsDef
-        {
-            Squared = new[] { "वर्ग" },
-            Cubed = new[] { "घन" },
-            Position = ExponentPosition.Before,
-        },
-        BareExponent = new BareExponentDef
-        {
-            Squared = "{n} का वर्ग", Cubed = "{n} का घन", Power = "{n} की घात {e}", Negative = "ऋण",
-        },
+        Percent = DEF.SymbolTier!.Percent,
+        Currency = DEF.SymbolTier!.Currency,
+        Units = DEF.SymbolTier!.Units,
+        ExponentWords = DEF.SymbolTier!.ExponentWords,
+        BareExponent = DEF.SymbolTier!.BareExponent,
+        Multiply = DEF.SymbolTier!.Multiply,
     });
 
     /** Load hindi.jsonc and build the Hindi phonemizer. `foreign` handles embedded Latin. */
     public static NativeHindiEngine CreateHindi(ForeignPhonemizer? foreign = null) =>
         MakeNativeHindi(
-            LoadManifest.Load<HindiDef>("languages/hindi", "hindi.jsonc"),
+            DEF,
             PhonologyLoader.LoadSharedPhonology(),
             foreign);
 

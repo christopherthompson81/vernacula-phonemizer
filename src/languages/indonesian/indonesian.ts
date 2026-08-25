@@ -5,6 +5,7 @@
  * diphthongs ai/au/oi, and syllable-final ⟨k⟩ → glottal stop [ʔ]. Penultimate stress (skips a schwa nucleus).
  */
 import type { Phonemizer } from "../../registry.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -33,6 +34,16 @@ interface IndonesianDef {
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
     phonotactics: { vowels: string; onsets: string[]; codas: string[]; digraphs: string[] };
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        magnitudes: string[];
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 const DEF = loadManifest<IndonesianDef>(import.meta.url, "indonesian.jsonc");
 
@@ -240,35 +251,13 @@ function numberWords(n: number): string {
 // Times (11.00) are claimed earlier by normalize.ts, so only real numbers reach this.
 // Indonesian had no symbol tier at all: "3%" read as just "tiga", losing the percent.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
-    // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — this
-    // language does not split dimension from product.
-    multiply: { times: "kali" },
-    // Unread, `&` is DROPPED outright and `B&B` loses the sign entirely.
-    // `dan` ×1053 in this corpus. The tier spaces it on both sides, because `B&B` is two
-    // initialisms and joining them would make one token.
-    ampersand: "dan",
-    percent: ["persen"],
-    currency: { $: ["dolar"], "€": ["euro"], "£": ["pound"], "¥": ["yen"] },
-    // REQUIRED BY THE `US$` FOLD, and found only because the fold exposed it. Unfolding `US$ 14,7
-    // miliar` let the tier place the currency noun at last, and it placed it in the WRONG SLOT:
-    // *empat belas koma tujuh DOLAR MILIAR*, because without this list the magnitude is not part of the
-    // quantity and the noun lands directly after the digits. Indonesian puts the noun after the magnitude —
-    // *14,7 miliar dolar*. So the fold turned a silent DROP into an audible word-order error, which is a
-    // reminder that closing a drop is not finished until the reading is checked, not just the differential.
-    //
-    // NO `magnitudeConnective`: Indonesian juxtaposes (*miliar dolar*, not *miliar de dolar*), unlike
-    // Catalan's *de* or Italian's *di*. Attested in this corpus as `juta` ×8, `miliar` and `ribu`.
-    magnitudes: ["triliun", "miliar", "juta", "ribu"],
-    units: { km: ["kilometer"], cm: ["sentimeter"], mm: ["milimeter"], kg: ["kilogram"], m: ["meter"],
-        g: ["gram"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
-        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
-        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
-        l: ["liter"], L: ["liter"], ha: ["hektar"] },
-    // `kilometer persegi` ×3 — the modifier follows. Bare `persegi` ×9 includes the SHAPE ("persegi yang
-    // tidak memiliki sisi bawahnya"), so the collocation is what attests the unit sense. `kubik` ×0, so
-    // `m³` keeps the fallback.
-    exponentWords: { squared: ["persegi"], position: "after" },
+    percent: DEF.symbolTier.percent,
+    currency: DEF.symbolTier.currency,
+    units: DEF.symbolTier.units,
+    exponentWords: DEF.symbolTier.exponentWords,
+    magnitudes: DEF.symbolTier.magnitudes,
+    ampersand: DEF.symbolTier.ampersand,
+    multiply: DEF.symbolTier.multiply,
 });
 
 // ⚠ THE WORD GROUP SPANS ALL OF LATIN, not just ASCII, and `[a-zA-Z]+` was silently shredding foreign names.

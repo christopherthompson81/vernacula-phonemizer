@@ -5,6 +5,7 @@
  * undiacritized text is DEFERRED (the g2p inserts a default [ə]).
  */
 import type { Phonemizer } from "../../registry.ts";
+import type { CountForms } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN } from "../../core/hostWord.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -20,6 +21,15 @@ import { phonemizeWord as g2p } from "./g2p.ts";
 interface UrduTextDef {
     numbers: NumbersDef;
     clausePunctuation: Record<string, string>;
+    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
+    symbolTier: {
+        percent: CountForms;
+        currency: Record<string, CountForms>;
+        units: Record<string, CountForms>;
+        ampersand: string;
+        multiply: { times: string; by?: string };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+    };
 }
 const DEF = loadManifest<UrduTextDef>(import.meta.url, "urdu.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
@@ -89,27 +99,12 @@ export function phonemizeWord(word: string): string {
 
 // Urdu had no symbol tier at all: "3%" read as just "تین", losing the percent.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
-    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
-    // اور is ×1476 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
-    //
-    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
-    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
-    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
-    // see the tier, where the spacing exists because `B&B` is two initialisms.
-    ampersand: "اور",
-    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
-    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
-    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
-    // defaults to it — this language does not split dimension from product.
-    multiply: { times: "ضرب" },
-    percent: ["فیصد"],
-    currency: { "₨": ["روپے"], $: ["ڈالر"], "€": ["یورو"], "£": ["پاؤنڈ"] },
-    units: { km: ["کلومیٹر"], cm: ["سینٹیمیٹر"], mm: ["ملیمیٹر"], kg: ["کلوگرام"], m: ["میٹر"],
-        g: ["گرام"], "km/h": ["کلومیٹر فی گھنٹہ"] },
-    // `مربع کلومیٹر` ×9 and `کیوبک میٹر` ×1, both word-first — note Urdu puts مربع BEFORE its noun where
-    // Arabic puts the cognate مربع after it. Bare مربع ×20 is mostly the shape, as in French and Turkish.
-    exponentWords: { squared: ["مربع"], cubed: ["کیوبک"], position: "before" },
+    percent: DEF.symbolTier.percent,
+    currency: DEF.symbolTier.currency,
+    units: DEF.symbolTier.units,
+    exponentWords: DEF.symbolTier.exponentWords,
+    ampersand: DEF.symbolTier.ampersand,
+    multiply: DEF.symbolTier.multiply,
 });
 
 // The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
