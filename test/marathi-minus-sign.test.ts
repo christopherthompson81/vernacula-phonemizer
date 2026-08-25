@@ -27,9 +27,19 @@ describe("marathi reads U+2212 and still refuses the hyphen", () => {
         expect(say("−0.5")).toContain(minus);
     });
 
-    test("subtraction between two numbers is read", () => {
-        expect(say("५−३")).toContain(minus);
+    /**
+     * ⚠ SPACING DECIDES IT BETWEEN TWO NUMBERS, and that is corpus evidence rather than a convention I
+     * picked. Reading the 279 U+2212 instances across the mined artifacts instead of counting them: the
+     * UNSPACED digit−digit form is a RANGE — a lifespan `Liliʻuokalani (1838−1917)`, a page span `41−49`,
+     * scientific notation `1.602×10−19` — while the SPACED form is arithmetic, as Scottish Gaelic writes
+     * it: `(22 − 14) + (−7)`. So an unspaced pair goes back to silence, which is the right answer when
+     * the alternative is reading a lifespan as a subtraction.
+     */
+    test("a SPACED pair is subtraction; an UNSPACED pair is a range and stays silent", () => {
         expect(say("5 − 3")).toContain(minus);
+        expect(say("५−३")).not.toContain(minus);
+        expect(say("१८३८−१९१७")).not.toContain(minus);
+        expect(say("41−49")).not.toContain(minus);
     });
 
     test("⚠ the ASCII hyphen is UNCHANGED — compounds and designations must stay silent", () => {
