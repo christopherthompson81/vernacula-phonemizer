@@ -102,3 +102,42 @@ describe.each(["nan", "ilo", "ht"] as const)("%s refuses the shapes that are not
         expect(phonemize("1838−1917", code)).toBe(phonemize("1838 1917", code));
     });
 });
+
+/**
+ * ⚠ YORUBA — AND THE TERM WAS FOUND BY READING THE ARTICLE, NOT BY PROBING A WORD. Three earlier rounds
+ * refused `ìyọkúrò` / `yọ kúrò` (physical removal — methane removed, water evaporated) and a composed
+ * "below zero" (`ìsàlẹ̀ òdo` collides with `ìsàlẹ̀ odo` = DOWNRIVER, the tone marks half of running Yoruba
+ * omits). What settled it was yo.wikipedia's own article `Nọ́mbà alòdì àti nọ́mbà adájú`, which defines the
+ * term beside its own operand:
+ *
+ *     "Nomba alodi ni awon nomba tiwonkere ju òdo lo fun apere -√2, -1.44, -1"
+ *      negative numbers are the numbers less than ZERO, for example −√2, −1.44, −1
+ *
+ * The same gloss shape that settled tn and nan. ⚠ `dín ní` — offered alongside — is REFUSED and is worse
+ * than merely wrong: it is how Yoruba BUILDS NUMERALS (*márùn dín ní ọgọ́ta* is 55, "five less than sixty"),
+ * so emitted before a figure it would be parsed as part of the number.
+ */
+describe("yo reads U+2212 with the term its own maths article glosses", () => {
+    const say = (s: string): string => phonemize(s, "yo");
+
+    test("a negative temperature carries the marker", () => {
+        expect(say("−47.6 °C")).not.toBe(say("47.6 °C"));
+        expect(say("−47.6 °C").startsWith(say("alòdì"))).toBe(true);
+    });
+
+    test("every member of a signed list is marked, not just the first", () => {
+        // The article's own example shape. Claiming only the leading member signs one of three.
+        const said = say("(−1, −2, −3)");
+        expect(said.split(say("alòdì")).length - 1).toBe(3);
+    });
+
+    test("the HYPHEN is untouched — it is this language's range mark", () => {
+        // 3,378 hyphens and 4,159 en dashes sit between digits here and `sí` reads them as a range.
+        expect(say("-47.6 °C")).toBe(say("47.6 °C"));
+        expect(say("ọgọ́rùn-ún méjì sí mẹ́fà")).toBe(say("ọgọ́rùn-ún méjì sí mẹ́fà"));
+    });
+
+    test("the space-separated exponent this corpus writes is refused", () => {
+        expect(say("1.98739x10 −21 s")).toBe(say("1.98739x10 21 s"));
+    });
+});

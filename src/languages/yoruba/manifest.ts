@@ -21,6 +21,8 @@ export interface YorubaManifest {
         /** `àti dásímà` — "and decimal"; the fraction that follows is read digit by digit. */
         decimalWord: string;
         and: string;
+        /** The NEGATIVE marker — see the jsonc: yo.wikipedia glosses it against `-1.44, -1`. */
+        negative: string;
         /** The squared measure word, emitted AFTER the unit noun: `kìlómítà onígun mẹ́rin`. */
         squared: string;
         /** ⚠ Temperature is a CIRCUMFIX: `ìwọ̀n` before the number, the scale name after. */
