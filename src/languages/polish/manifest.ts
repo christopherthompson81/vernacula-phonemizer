@@ -43,6 +43,8 @@ export interface PolishManifest {
         multiply: { times: string; by?: string };
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
+    /** Roman-numeral ordinals 1–19; index 0 is empty. */
+    romanOrdinals: string[];
 }
 
 export const MANIFEST = loadManifest<PolishManifest>(import.meta.url, "polish.jsonc");

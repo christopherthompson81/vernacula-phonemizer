@@ -67,6 +67,8 @@ public sealed class DutchManifest
     public DutchPhonotactics Phonotactics { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public DutchSymbolTier SymbolTier { get; init; } = new();
+    /** Ordinals 1–19; index 0 is empty. The -ste rule from 20 up stays in Normalize.cs. */
+    public IReadOnlyList<string> OrdinalsBelow20 { get; init; } = Array.Empty<string>();
 }
 
 public sealed class DutchPhonotactics

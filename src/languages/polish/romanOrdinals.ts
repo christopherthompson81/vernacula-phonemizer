@@ -20,14 +20,11 @@
  * Polish needs no cardinal data: unlike Russian, BOTH elements of a compound ordinal inflect
  * (21 → *dwudziesty pierwszy*), so the two ordinal tables compose on their own.
  */
+import { MANIFEST } from "./manifest.ts";
 import type { RomanPolicy } from "../../core/roman.ts";
 
-/** 1–19, masculine nominative. Irregular stems (pierwszy, drugi, trzeci, ósmy) → table. */
-const ORD_1_19: readonly string[] = [
-    "", "pierwszy", "drugi", "trzeci", "czwarty", "piąty", "szósty", "siódmy", "ósmy", "dziewiąty",
-    "dziesiąty", "jedenasty", "dwunasty", "trzynasty", "czternasty", "piętnasty", "szesnasty",
-    "siedemnasty", "osiemnasty", "dziewiętnasty",
-];
+/** Read from the manifest — see the jsonc. */
+const ORD_1_19: readonly string[] = MANIFEST.romanOrdinals;
 
 /** Whole tens, masculine nominative. */
 const ORD_TENS: readonly string[] = [

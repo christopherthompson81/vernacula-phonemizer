@@ -54,6 +54,8 @@ public sealed class PolishManifest
     public string DecimalWord { get; init; } = "";
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public PolishSymbolTier SymbolTier { get; init; } = new();
+    /** Roman-numeral ordinals 1–19; index 0 is empty. */
+    public IReadOnlyList<string> RomanOrdinals { get; init; } = Array.Empty<string>();
 }
 
 public sealed class PolishPhonotactics

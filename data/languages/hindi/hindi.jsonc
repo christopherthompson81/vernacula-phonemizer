@@ -426,5 +426,15 @@
         // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
         // The cardinal is used for the generic power, never the ordinal — see core for that argument.
         "bareExponent": { "squared": "{n} का वर्ग", "cubed": "{n} का घन", "power": "{n} की घात {e}" , "negative": "ऋण" }
+    },
+
+    // Irregular ordinals, indexed [masculine, feminine, oblique]. 1–4 and 6 are suppletive; 5 (पाँचवाँ)
+    // and everything from 7 up are regular — the cardinal plus the suffix, which is the rule.
+    "irregularOrdinals": {
+    "1": ["पहला", "पहली", "पहले"],
+    "2": ["दूसरा", "दूसरी", "दूसरे"],
+    "3": ["तीसरा", "तीसरी", "तीसरे"],
+    "4": ["चौथा", "चौथी", "चौथे"],
+    "6": ["छठा", "छठी", "छठे"]
     }
 }

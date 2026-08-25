@@ -1,3 +1,4 @@
+using System.Globalization;
 /**
  * Gujarati (gu) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
  * pronounceable word into words the pipeline speaks.
@@ -9,15 +10,13 @@ namespace Vernacula.Phonemizer.Languages.Gujarati;
 
 public static class Normalize
 {
-    /** SUPPLETIVE ORDINALS 1-4 and 6, indexed [masc sg, fem, neut sg, oblique/plural]. */
-    private static readonly IReadOnlyDictionary<int, string[]> IRREGULAR = new Dictionary<int, string[]>
-    {
-        [1] = new[] { "પહેલો", "પહેલી", "પહેલું", "પહેલા" },
-        [2] = new[] { "બીજો", "બીજી", "બીજું", "બીજા" },
-        [3] = new[] { "ત્રીજો", "ત્રીજી", "ત્રીજું", "ત્રીજા" },
-        [4] = new[] { "ચોથો", "ચોથી", "ચોથું", "ચોથા" },
-        [6] = new[] { "છઠ્ઠો", "છઠ્ઠી", "છઠ્ઠું", "છઠ્ઠા" },
-    };
+    /**
+     * Irregular ordinals, from the manifest. ⚠ THE JSON KEYS ARE STRINGS and this code indexes by INT,
+     * which is where a JS/.NET divergence is paid: the TS side writes `IRREGULAR[n]` and JS coerces the
+     * numeric index; C# does not, so the conversion is explicit at the call site.
+     */
+    private static IReadOnlyDictionary<string, string[]> IRREGULAR => GujaratiPhonemizer.DEF.IrregularOrdinals;
+
     /** The written vowel of an ordinal suffix → the agreement slot it marks. Read off the text, never
      *  guessed: the suffix itself carries the gender/number in Gujarati (પંદરમી / પંદરમો / પંદરમા). */
     private static readonly IReadOnlyDictionary<string, int> FORM = new Dictionary<string, int>(StringComparer.Ordinal)
@@ -181,10 +180,10 @@ public static class Normalize
                 var vowel = m.Groups[3].Value;
                 if (IRREGULAR_CONSONANT.GetValueOrDefault(n) != cons) return m.Value;
                 if (n == 4 && cons == "થ" && vowel == "ી") return m.Value;
-                return IRREGULAR[n][FORM[vowel]];
+                return IRREGULAR[n.ToString(CultureInfo.InvariantCulture)][FORM[vowel]];
             });
             s = JsRegex.Replace(s, ORD_REGULAR_SUPPL, m =>
-                IRREGULAR[(int)Js.Number(m.Groups[1].Value)][FORM[m.Groups[2].Value]]);
+                IRREGULAR[((int)Js.Number(m.Groups[1].Value)).ToString(CultureInfo.InvariantCulture)][FORM[m.Groups[2].Value]]);
             s = JsRegex.Replace(s, JOIN_RE, m =>
             {
                 var digits = m.Groups[1].Value;

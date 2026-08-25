@@ -56,6 +56,8 @@ export interface RussianManifest {
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
         bareExponent: { squared: string; cubed: string; power: string; negative: string };
     };
+    /** Roman-numeral ordinals 1–19; index 0 is empty. Composition above 19 stays in code. */
+    romanOrdinals: string[];
 }
 
 /** The consolidated hand-authored Russian data tables (see russian.jsonc). */

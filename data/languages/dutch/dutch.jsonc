@@ -254,5 +254,14 @@
         // Dutch puts the measure word BEFORE the unit, spaced, and measure nouns stay singular after a numeral.
         "exponentWords": { "squared": ["vierkante"], "cubed": ["kubieke"], "position": "before" },
         "magnitudes": ["miljoen", "miljard", "biljoen"]
-    }
+    },
+
+    // Dutch ordinals 1–19. The regular ending is the cardinal plus -de; `eerste`, `derde` and `achtste`
+    // are the three suppletive/assimilated forms. From 20 up the ending is -ste, which is the RULE and
+    // stays in normalize.ts.
+    "ordinalsBelow20": [
+    "", "eerste", "tweede", "derde", "vierde", "vijfde", "zesde", "zevende", "achtste", "negende", "tiende",
+    "elfde", "twaalfde", "dertiende", "veertiende", "vijftiende", "zestiende", "zeventiende", "achttiende",
+    "negentiende"
+    ]
 }

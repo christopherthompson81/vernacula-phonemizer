@@ -58,6 +58,14 @@ export interface HindiDef extends AbugidaDef {
         exponentWords?: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
         bareExponent?: { squared: string; cubed: string; power: string; negative: string };
     };
+    /**
+     * Irregular ordinals, 1–4 and 6 only — the rest are the cardinal plus a suffix, which is the rule.
+     * ⚠ THE TUPLE WIDTH IS LANGUAGE-SPECIFIC, which is why this is `string[]` and not a fixed tuple: this
+     * Def is SHARED (hi, mr, gu and the rest of the family load their own jsonc through it), and the
+     * agreement systems differ — Hindi marks [masculine, feminine, oblique] while Gujarati adds a neuter,
+     * [masculine, feminine, neuter, oblique]. Each engine indexes the width its own language has.
+     */
+    irregularOrdinals: Record<string, readonly string[]>;
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */

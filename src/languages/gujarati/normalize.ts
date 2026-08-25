@@ -24,22 +24,18 @@
  * કિલોગ્રામ, રૂપિયા, ભાગ્યા, and દશાંશ (the exact cognate of the दशांश already shipped for Marathi).
  * A wrong word is worse than a dropped sign, so anything not in one of those two categories is omitted.
  */
+import { MANIFEST } from "./manifest.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 
 /**
- * SUPPLETIVE ORDINALS 1-4 and 6, indexed [masc sg, fem, neut sg, oblique/plural]. Gujarati writes these
- * with their own consonant — ૧લી, ૨જી, ૩જી, ૪થો, ૬ઠ્ઠો — not with the regular -મ-, which is why they are
- * keyed by (number, consonant) rather than guessed. Corpus: "1લી અને 3જી ન્યૂ હૅમ્પશાયર" ×1 each; the
- * spelled-out members of the paradigm are attested throughout (પહેલી, બીજા, ત્રીજું, ચોથો, છઠ્ઠો).
+ * Irregular ordinals, from the manifest. ⚠ INDEXED BY NUMBER IN CODE BUT BY STRING IN JSON — JSON keys
+ * are always strings and JS coerces a numeric index on lookup, so the cast is where that asymmetry is
+ * paid. The C# port cannot coerce and converts at the call site instead.
  */
-const IRREGULAR: Readonly<Record<number, readonly [string, string, string, string]>> = {
-    1: ["પહેલો", "પહેલી", "પહેલું", "પહેલા"],
-    2: ["બીજો", "બીજી", "બીજું", "બીજા"],
-    3: ["ત્રીજો", "ત્રીજી", "ત્રીજું", "ત્રીજા"],
-    4: ["ચોથો", "ચોથી", "ચોથું", "ચોથા"],
-    6: ["છઠ્ઠો", "છઠ્ઠી", "છઠ્ઠું", "છઠ્ઠા"],
-};
+const IRREGULAR = MANIFEST.irregularOrdinals as unknown as
+    Readonly<Record<number, readonly [string, string, string, string]>>;
+
 /** The written vowel of an ordinal suffix → the agreement slot it marks. Read off the text, never
  *  guessed: the suffix itself carries the gender/number in Gujarati (પંદરમી / પંદરમો / પંદરમા). */
 const FORM: Readonly<Record<string, 0 | 1 | 2 | 3>> = { "ો": 0, "ી": 1, "ું": 2, "ા": 3, "ે": 3 };

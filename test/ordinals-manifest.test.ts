@@ -145,3 +145,62 @@ describe("sw and yo read their remaining word constants from the manifest", () =
         expect(say("9h 50m ni", "yo")).not.toContain(say(metre, "yo"));
     });
 });
+
+/**
+ * THE NUMERAL-VOCABULARY BATCH — same family as the ordinal tables above, same line: the words are data,
+ * the composition is not. Roman-numeral ordinals, Dutch's sub-20 series, Hungarian's multiplicative morphs
+ * and the Indic irregular-ordinal tables.
+ */
+import { MANIFEST as RU } from "../src/languages/russian/manifest.ts";
+import { MANIFEST as PL } from "../src/languages/polish/manifest.ts";
+import { MANIFEST as NL } from "../src/languages/dutch/manifest.ts";
+import { MANIFEST as HI2 } from "../src/languages/hindi/manifest.ts";
+import { MANIFEST as GU } from "../src/languages/gujarati/manifest.ts";
+
+describe.each([
+    ["ru", (RU as unknown as { romanOrdinals: string[] }).romanOrdinals, "XIX век", 19],
+    ["pl", (PL as unknown as { romanOrdinals: string[] }).romanOrdinals, "XIX wiek", 19],
+    ["nl", (NL as unknown as { ordinalsBelow20: string[] }).ordinalsBelow20, "de 1e keer", 1],
+] as const)("%s reads its 1–19 ordinal series from the manifest", (code, list, sentence, n) => {
+    test("index 0 is empty and the series is 20 long", () => {
+        expect(list[0]).toBe("");
+        expect(list).toHaveLength(20);
+    });
+
+    test("the reading is the declared word for that index", () => {
+        expect(say(sentence, code)).toContain(say(list[n]!, code));
+    });
+});
+
+describe("hu's multiplicative morphs — how a dimension × is read", () => {
+    test("`6 × 6 cm` is *hatszor hat centiméter*, from the declared morph", () => {
+        expect(HU.multiplicativeMorphs["hat"]).toBe("hatszor");
+        expect(say("6 × 6 cm", "hu")).toContain(say(HU.multiplicativeMorphs["hat"]!, "hu"));
+    });
+
+    test("it inflects the LAST morph, exactly as the ordinal table does", () => {
+        expect(Object.keys(HU.multiplicativeMorphs)).toEqual(Object.keys(HU.ordinalMorphs));
+    });
+});
+
+/**
+ * ⚠ hi AND gu SHARE `HindiDef` BUT NOT THE TUPLE WIDTH, which is why the field is typed `string[]` rather
+ * than a fixed tuple: Hindi marks [masculine, feminine, oblique] and Gujarati adds a neuter,
+ * [masculine, feminine, neuter, oblique]. Each engine indexes the width its own language has.
+ */
+describe.each([
+    ["hi", HI2 as unknown as { irregularOrdinals: Record<string, string[]> }, "1वाँ स्थान", 3],
+    ["gu", GU as unknown as { irregularOrdinals: Record<string, string[]> }, "1લો ક્રમ", 4],
+] as const)("%s reads its irregular ordinals from the shared Def", (code, DEF, sentence, width) => {
+    test("1–4 and 6 are suppletive, and only those", () => {
+        expect(Object.keys(DEF.irregularOrdinals).sort()).toEqual(["1", "2", "3", "4", "6"]);
+    });
+
+    test("the agreement width is this language's own", () => {
+        for (const forms of Object.values(DEF.irregularOrdinals)) expect(forms).toHaveLength(width);
+    });
+
+    test("the reading is the declared suppletive form, not the regular formation", () => {
+        expect(say(sentence, code)).toContain(say(DEF.irregularOrdinals["1"]![0]!, code));
+    });
+});

@@ -10,14 +10,8 @@ namespace Vernacula.Phonemizer.Languages.Dutch;
 public static class Normalize
 {
 
-    /** Dutch ordinals 1–19. The regular ending is the cardinal plus -de; `eerste`, `derde` and `achtste` are
-     *  the three suppletive/assimilated forms. From 20 up the ending is -ste (twintigste, zestigste). */
-    private static readonly string[] ORD_BELOW_20 =
-    {
-        "", "eerste", "tweede", "derde", "vierde", "vijfde", "zesde", "zevende", "achtste", "negende", "tiende",
-        "elfde", "twaalfde", "dertiende", "veertiende", "vijftiende", "zestiende", "zeventiende", "achttiende",
-        "negentiende",
-    };
+    /** Read from the manifest — see the jsonc. */
+    private static IReadOnlyList<string> ORD_BELOW_20 => Manifest.MANIFEST.OrdinalsBelow20;
 
     private static readonly JsRe HAS_DIGIT = JsRegex.Compile("\\d", "u");
 

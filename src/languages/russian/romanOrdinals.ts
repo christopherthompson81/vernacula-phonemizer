@@ -25,12 +25,8 @@ import { MANIFEST } from "./manifest.ts";
 /** Cardinal tens, reused from the language's own number data (russian.jsonc): двадцать, тридцать, … */
 const TENS_CARDINAL = MANIFEST.numbers.tens;
 
-/** 1–19 — irregular stems throughout (первый … четвёртый), so a table, not a rule. */
-const ORD_1_19: readonly string[] = [
-    "", "первый", "второй", "третий", "четвёртый", "пятый", "шестой", "седьмой", "восьмой", "девятый",
-    "десятый", "одиннадцатый", "двенадцатый", "тринадцатый", "четырнадцатый", "пятнадцатый",
-    "шестнадцатый", "семнадцатый", "восемнадцатый", "девятнадцатый",
-];
+/** Read from the manifest — see the jsonc. */
+const ORD_1_19: readonly string[] = MANIFEST.romanOrdinals;
 
 /** Whole tens — their own stems (сороковой, пятидесятый), not derivable from the cardinal. */
 const ORD_TENS: readonly string[] = [

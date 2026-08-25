@@ -158,3 +158,44 @@ Roughly 40 sites state their reason in the source. The load-bearing categories:
 - **id `laxVowels`** is in the manifest and deliberately unread — do not "wire it up".
 - **`hungarian.jsonc:111`** already states the principle this whole survey serves: *"Dead data drifts
   silently; a mapped key is not a read one."*
+
+## Numeral-vocabulary batch — hu, ru, pl, nl, hi, gu — 2026-08-26
+
+Six more tables of the same family as the ordinal sweep: Hungarian's multiplicative morphs, the Russian and
+Polish Roman-numeral ordinal series, Dutch's sub-20 ordinals, and the Hindi/Gujarati irregular-ordinal
+tables. 0 of 27 probe readings moved, both modes; C# matches Node on all six; parity holds.
+
+**⚠ hi AND gu SHARE `HindiDef` BUT NOT THE TUPLE WIDTH**, which the shared type now says out loud. Hindi
+marks `[masculine, feminine, oblique]`; Gujarati adds a neuter, `[masculine, feminine, neuter, oblique]`.
+The field is `Record<string, readonly string[]>` rather than a fixed tuple because one Def serves a family
+whose agreement systems differ, and each engine indexes the width its own language has.
+
+**⚠ AND THE JSON-KEY ASYMMETRY BITES AGAIN, in both languages.** The tables are indexed by NUMBER in code
+and JSON keys are always strings; TS gets the coercion for free and C# does not, so the conversion is
+explicit at the call site. Third time this shape has appeared (Bengali's suppletive series was the first).
+
+Sabotage-verified by emptying the data: hu 2 moved, ru 4, pl 1, nl 3, hi 5 (`pˈəɦlaː` → `ˈeːkʋaː̃`, the
+suppletive replaced by the regular formation). Gujarati THREW on an empty table, so it was verified by
+mutating ONE VALUE instead — `પહેલો`→`બીજો` moved exactly one reading, which is the stronger proof anyway.
+
+### ⚠ A DEFECT FOUND WHILE PROBING, RECORDED AND NOT FIXED
+
+Hindi's ordinal rule triggers only on the REGULAR written suffixes (`वाँ वां वा वीं वी वें वे`). The
+SUPPLETIVE spellings — `1ला`, `2रा`, `4था`, `6ठा`, which are ordinary Hindi orthography — are not in
+`SUFFIX_FORM`, so they never reach `IRREGULAR` even though the words are sitting in it:
+
+```
+  1वाँ स्थान  →  pˈəɦlaː st̪ʰˈaːn        correct, via IRREGULAR
+  1ला स्थान   →  ˈeːk lˈaː st̪ʰˈaːn      the CARDINAL plus a stranded syllable
+```
+
+That is exactly the failure the rule's own comment says it exists to prevent. It affects the whole family
+that inherits this normalizer. **Measured, with the trailing-boundary guard applied** (a raw count is
+misleading here — `digit + ला` matches `10 लाख` and `digit + रा` matches राज): across hi/mr/gu/ne/mai/awa/mag
+the genuine instances are hi ×6, mai ×1 and awa ×10, and of those exactly ONE is suppletive — awa's `४था`
+("Bangladesh is 4th"), which today reads *chaar thaa*.
+
+**Not fixed here, because the fix is not the obvious one.** `था` is also the Hindi masculine past copula,
+so `2 था` is "there were 2" and a rule that claimed it would misread a very common shape. The suppletive
+suffixes are only safe GLUED, and the existing rule allows `\s?`. That is its own change with its own
+guard decision and its own measurement.

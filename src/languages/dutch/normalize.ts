@@ -21,13 +21,8 @@ import { numberToWords } from "./numbers.ts";
 // DATA
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** Dutch ordinals 1–19. The regular ending is the cardinal plus -de; `eerste`, `derde` and `achtste` are
- *  the three suppletive/assimilated forms. From 20 up the ending is -ste (twintigste, zestigste). */
-const ORD_BELOW_20: readonly string[] = [
-    "", "eerste", "tweede", "derde", "vierde", "vijfde", "zesde", "zevende", "achtste", "negende", "tiende",
-    "elfde", "twaalfde", "dertiende", "veertiende", "vijftiende", "zestiende", "zeventiende", "achttiende",
-    "negentiende",
-];
+/** Read from the manifest — see the jsonc. */
+const ORD_BELOW_20: readonly string[] = MANIFEST.ordinalsBelow20;
 
 /**
  * Integer → the Dutch ordinal word. Below 20 it is a table lookup. At or above 20 the ending is -ste, EXCEPT

@@ -89,27 +89,9 @@ const ORDINAL_KEYS = Object.keys(ORDINAL_MORPH).sort((a, b) => b.length - a.leng
  * be composed (≥10¹², where `numberToWords` falls back to digit-by-digit). 1 and 2 standing alone are
  * the suppletive *első* / *második*; everything else is the cardinal with its final morph replaced.
  */
-/**
- * MULTIPLICATIVE (-szor / -szer / -ször), which is how Hungarian reads a dimension `×` — `6 × 6 cm` is
- * *hatszor hat centiméter*. Sourced from the corpus's own audio: facebook/wav2vec2-xlsr-53-espeak-cv-ft
- * over hu_hu/train gives `h ɔ t s oː r  h ɔ t  ts ɛ n t i m eː ɾ t ə` and
- * `ɔ n y t v ɛ n  h ɔ t s oː r  y t v ɛ n h ɔ t  m i l i m eː t ə r` — hatszor hat, ötvenhatszor ötvenhat.
- *
- * A TABLE, NOT A HARMONY RULE, and that is the point. The allomorph looks like ordinary back/front harmony on
- * the last vowel — hat→hatszor (back), öt→ötször (front rounded), tíz→tízszer (front unrounded) — but
- * `harminc` breaks it: its only vowel that matters is a front `i`, and the form is *harmincszor*, back. It is
- * one of Hungarian's anti-harmonic stems. The numerals are a closed set, so an exact table cannot be wrong
- * where a derived rule would be, exactly as ORDINAL_MORPH above is a table for the same reason.
- * `kettő` is suppletive here too: *kétszer*, not *kettőszor*.
- */
-const MULTIPLICATIVE_MORPH: Readonly<Record<string, string>> = {
-    "nulla": "nullaszor", "egy": "egyszer", "kettő": "kétszer", "három": "háromszor", "négy": "négyszer",
-    "öt": "ötször", "hat": "hatszor", "hét": "hétszer", "nyolc": "nyolcszor", "kilenc": "kilencszer",
-    "tíz": "tízszer", "húsz": "húszszor", "harminc": "harmincszor", "negyven": "negyvenszer",
-    "ötven": "ötvenszer", "hatvan": "hatvanszor", "hetven": "hetvenszer", "nyolcvan": "nyolcvanszor",
-    "kilencven": "kilencvenszer", "száz": "százszor", "ezer": "ezerszer", "millió": "milliószor",
-    "milliárd": "milliárdszor",
-};
+/** Read from the manifest — see the jsonc. */
+const MULTIPLICATIVE_MORPH: Readonly<Record<string, string>> = MANIFEST.multiplicativeMorphs;
+
 // LONGEST FIRST, for the reason ORDINAL_KEYS gives: `negyven` must not be shadowed by `négy`.
 const MULTIPLICATIVE_KEYS = Object.keys(MULTIPLICATIVE_MORPH).sort((a, b) => b.length - a.length);
 

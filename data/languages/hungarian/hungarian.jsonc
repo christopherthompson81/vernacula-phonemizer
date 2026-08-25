@@ -224,5 +224,17 @@
         "negyven": "negyvenedik", "ötven": "ötvenedik", "hatvan": "hatvanadik", "hetven": "hetvenedik",
         "nyolcvan": "nyolcvanadik", "kilencven": "kilencvenedik", "száz": "századik", "ezer": "ezredik",
         "millió": "milliomodik", "milliárd": "milliárdodik"
+    },
+
+    // THE MULTIPLICATIVE FORM of each morph that can end a cardinal (-szor / -szer / -ször), which is how
+    // Hungarian reads a dimension `×`: `6 × 6 cm` is *hatszor hat centiméter*. Same shape as
+    // `ordinalMorphs` and inflected on the LAST morph for the same reason.
+    "multiplicativeMorphs": {
+    "nulla": "nullaszor", "egy": "egyszer", "kettő": "kétszer", "három": "háromszor", "négy": "négyszer",
+    "öt": "ötször", "hat": "hatszor", "hét": "hétszer", "nyolc": "nyolcszor", "kilenc": "kilencszer",
+    "tíz": "tízszer", "húsz": "húszszor", "harminc": "harmincszor", "negyven": "negyvenszer",
+    "ötven": "ötvenszer", "hatvan": "hatvanszor", "hetven": "hetvenszer", "nyolcvan": "nyolcvanszor",
+    "kilencven": "kilencvenszer", "száz": "százszor", "ezer": "ezerszer", "millió": "milliószor",
+    "milliárd": "milliárdszor"
     }
 }

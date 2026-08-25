@@ -15,6 +15,7 @@
  * ⚠ HINDI TEXT WRITES NUMBERS WITH ASCII DIGITS, not Devanagari ones, so no digit transliteration is needed
  * here — unlike the Perso-Arabic and Bengali engines, where the fold is load-bearing.
  */
+import { MANIFEST } from "./manifest.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 
@@ -30,16 +31,12 @@ const SUFFIX_FORM: Readonly<Record<string, 0 | 1 | 2>> = {
 };
 
 /**
- * Irregular ordinals, indexed [masculine, feminine, oblique]. 1–4 and 6 are suppletive; 5 (पाँचवाँ) and
- * everything from 7 up are regular — the cardinal plus the suffix.
+ * Irregular ordinals, from the manifest. ⚠ INDEXED BY NUMBER IN CODE BUT BY STRING IN JSON — JSON keys
+ * are always strings and JS coerces a numeric index on lookup, so the cast is where that asymmetry is
+ * paid. The C# port cannot coerce and converts at the call site instead.
  */
-const IRREGULAR: Readonly<Record<number, readonly [string, string, string]>> = {
-    1: ["पहला", "पहली", "पहले"],
-    2: ["दूसरा", "दूसरी", "दूसरे"],
-    3: ["तीसरा", "तीसरी", "तीसरे"],
-    4: ["चौथा", "चौथी", "चौथे"],
-    6: ["छठा", "छठी", "छठे"],
-};
+const IRREGULAR = MANIFEST.irregularOrdinals as unknown as
+    Readonly<Record<number, readonly [string, string, string]>>;
 
 /**
  * Devanagari unit abbreviations → the full word. The existing symbol tier is keyed on the LATIN
