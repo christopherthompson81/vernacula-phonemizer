@@ -30,7 +30,7 @@ const SYMBOLS = makeSymbolNormalizer({
     rateDenominators: MANIFEST.symbolTier.rateDenominators,
 });
 
-const GROUPED = /(?<=\d),(?=\d{3}(?!\d))/gu;
+const GROUPED = /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu;
 /** A digit-flanked dash. See rule 2: in Yoruba this is a RANGE, never a minus. */
 const RANGE = /(\d)\s*[-–—]\s*(?=\d)/gu;
 /** `60%`, `8.3%` — the sign FOLLOWS the number here; none lead it. */

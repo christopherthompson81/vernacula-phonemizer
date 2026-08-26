@@ -152,7 +152,7 @@ export function normalizeNahuatl(input: string): string {
     //    so a figure at a clause end (`… (480 000) xihuitl`) is not declined by its own bracket.
     //    ⚠ AND THE HEAD GUARD IS WHAT DECLINES A SPACE-GROUPED DECIMAL TAIL: `1,602 176 487(40)` in the
     //    Spanish physics infobox has a comma two characters back, so no start position qualifies.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 4) DE-GROUPING THE COMMA, same test — `384,400 km`, `3,746 km`, `37,932,330 km²`,
@@ -160,7 +160,7 @@ export function normalizeNahuatl(input: string): string {
     //    ⚠ THE SCRIPTURE CITATIONS ARE DECLINED BY THE TEST ITSELF and need no guard of their own: a
     //    chapter,verse reference has ONE or TWO digits after the comma (`Mt 20,29-34`, `Mc 10,46-52`,
     //    `Lc 3, 23-38`), never three. See the header for the five Spanish decimals this does misread.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
     // 5) THE DECIMAL DOT, NEUTRALISED. ⚠ NO DECIMAL WORD IS SOURCEABLE — `punto` ×0 and `coma` ×0 on

@@ -139,7 +139,7 @@ export function normalizeAbkhaz(text: string): string {
     //    ⚠ THE LEFT GUARD IS LOAD-BEARING: without `(?<!\d)` the 1–3 digit group BACKTRACKS into the tail
     //    of a longer number, so "1877 250 ҩык" (a year beside a count) joined into 1877250 and was read as
     //    one seven-figure number. The comment used to claim the 3-digit rule covered that; it did not.
-    s = s.replace(/(?<!\d)(\d{1,3})(?:[ \u00a0\u202f\u2009](\d{3}))+(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<!\d)([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009](\d{3}))+(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     //    ⚠ COMMA-GROUPING TOO. Two-plus groups are unambiguous (£29,721,250 — the wiki spells that very
     //    sum de-grouped, "29,721,250 фунт стерлинг"). A SINGLE comma group collides with the decimal
@@ -148,7 +148,7 @@ export function normalizeAbkhaz(text: string): string {
     //    the 5 decimals begins ⟨0,⟩ ("0,723", "0,306"). So the INTEGER PART discriminates: a leading 0
     //    keeps the decimal reading, anything else de-groups. (The first version kept every single group
     //    as a decimal and mis-read the majority class its own comment claimed to protect.)
-    s = s.replace(/(?<![\d,])\d{1,3}(?:,\d{3}){2,}(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    s = s.replace(/(?<![\d,])[1-9]\d{0,2}(?:,\d{3}){2,}(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
     s = s.replace(/(?<![\d,.])([1-9]\d{0,2}),(\d{3})(?![\d,])/gu, "$1$2");
 
     // 2b) THE MINUS — U+2212 ONLY, and BEFORE the symbol step, because step 3 rewrites the ⟨°C⟩ this

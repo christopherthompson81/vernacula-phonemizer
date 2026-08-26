@@ -67,7 +67,7 @@ export function normalizeCebuano(input: string): string {
     // the TOKEN splits on `\d+`, so `1,100 km` read *usa , usa ka gatos km* — the value gone.
     // ⚠ EXACTLY THREE DIGITS PER GROUP: `14.7` and `2.5` are decimals and must survive. The trailing guard
     // rejects only a following DIGIT, so a group followed by the decimal point still de-groups (`14,700.5`).
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
 
     // ── 2. CLOCK — BEFORE the decimal rule, and before the tier ─────────────────────────────────────────
     // ×17, and the corpus writes the hour with `alas` ×11 (`mga alas 9:30 sa buntag`, `alas 07:19`). The

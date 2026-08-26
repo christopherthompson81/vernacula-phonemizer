@@ -23,7 +23,7 @@ public static class SeparatorHygienePass
     {
         var s = input;
 
-        s = JsRegex.Compile(@"(?<![\d.,])(\d{1,3})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)", "gu").Replace(s,
+        s = JsRegex.Compile(@"(?<![\d.,])([1-9]\d{0,2})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)", "gu").Replace(s,
             m => m.Groups[1].Value + JsRegex.Compile("[.,]", "gu").Replace(m.Groups[2].Value, ""));
 
         s = JsRegex.Compile(@"(?<![\d.,])(\d+)[.,](\d{1,2})(?!\d)(?![.,]\d)", "gu").Replace(s, "$1 $2");

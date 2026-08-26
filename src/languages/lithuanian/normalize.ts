@@ -334,7 +334,7 @@ export function normalizeLithuanian(input: string): string {
     //    comma, so a `(?![\d,])` guard declined it and the figure read as "18" and "550,72" — two numbers
     //    where the writer wrote one. The comma is Lithuanian's decimal point, so it is exactly what a final
     //    group is allowed to be followed by. Only a fourth digit disqualifies the group.
-    const DEGROUP = new RegExp(`(?<=\\d)${SP}(?=\\d{3}(?!\\d))`, "gu");
+    const DEGROUP = new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)${SP}(?=\\d{3}(?!\\d))`, "gu");
     for (let prev = ""; prev !== t; ) {
         prev = t;
         t = t.replace(DEGROUP, "");

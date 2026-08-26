@@ -268,7 +268,7 @@ const SYMBOLS = makeSymbolNormalizer({
 // that neither the leak classes nor the differential DROP test can see. Found only by reading a corpus diff.
 // `\p{M}` so a DECOMPOSED accent stays with its base rather than ending the token one character later.
 // yue fixed the same defect the same way and pins it (`yue("Müslüm") === phonemize(…, "en")`).
-const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.?!,;:])/gu;
+const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|([1-9]\d{0,2}(?:\.\d{3})+|\d+(?:,\d+)?)|([.?!,;:])/gu;
 /** An ordinary Indonesian word is plain ASCII letters. A diacritic means a FOREIGN name — Indonesian
  *  orthography has none — so such a token goes to the injected foreign reader instead of the native g2p, which
  *  has no rule for `ñ`/`ö`/`ó` and would mangle what it cannot spell. */

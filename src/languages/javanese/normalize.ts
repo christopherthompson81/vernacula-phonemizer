@@ -156,8 +156,8 @@ export function normalizeJavanese(input: string): string {
     // that is BOTH grouped and decimal — `± 1.485,36 km²` — and with `(?![\d,])` the group refused to match
     // at all, leaving BOTH separators as clause pauses. It still refuses a following DOT, which is what
     // keeps the two conventions apart.
-    s = s.replace(/(?<![\d.,])\d{1,3}(?:\.\d{3})+(?![\d.])/gu, (m) => m.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d.])/gu, (m) => m.replace(/\./gu, ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
     // ── 3. decimals ──────────────────────────────────────────────────────────────────────────────
     // AFTER de-grouping, so what is left of a mixed number is only its fractional tail.

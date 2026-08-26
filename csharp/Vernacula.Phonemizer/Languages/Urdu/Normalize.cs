@@ -45,7 +45,7 @@ public static class Normalize
     private static readonly JsRe AR_PERCENT = JsRegex.Compile("٪", "gu");
     private static readonly JsRe AR_DECIMAL = JsRegex.Compile("٫", "gu");
     private static readonly JsRe AR_THOUSANDS = JsRegex.Compile("٬", "gu");
-    private static readonly JsRe AR_COMMA_GROUP = JsRegex.Compile("(?<=\\d)،(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe AR_COMMA_GROUP = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)،(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe ORDINAL_RE = JsRegex.Compile(
         $"(?<![\\d.,])(\\d+)\\s?({string.Join("|", SUFFIX_FORM.Keys)})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(\\d)\\s?({UNIT_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");

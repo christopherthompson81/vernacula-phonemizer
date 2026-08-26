@@ -57,7 +57,7 @@ public static class Normalize
     });
 
     // ── Step 0: digit de-grouping ───────────────────────────────────────────────────────────────────
-    private static readonly JsRe GROUPING = JsRegex.Compile(@"(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))", "gu");
+    private static readonly JsRe GROUPING = JsRegex.Compile(@"(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile(@"[ \u00a0\u202f\u2009]", "gu");
 
     // ── Step 1: era markers ─────────────────────────────────────────────────────────────────────────

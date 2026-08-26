@@ -208,7 +208,7 @@ export function normalizeCherokee(input: string): string {
     //    ⚠ AND THE DATE COMMA IS DECLINED BY THE SAME THREE-DIGIT TEST, not by a separate rule:
     //    `ᏀᎾ ᎦᎶᏂ 28, 1838,` is `\d{1,2}, \d{4}` — a space after the comma and four digits after it, so
     //    neither `,\d{3}` nor the no-digit-follows guard can be satisfied. ×8 dates, all safe.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
     // 3) THE DECIMAL DOT, NEUTRALISED. ⚠ NO DECIMAL WORD IS SOURCEABLE (header), so the mark is spent rather

@@ -168,11 +168,11 @@ export function normalizeZulu(input: string): string {
     //    futhi` and `nangu-2,207.` stay broken while `angu-17,500 ngehora` is fixed. `(?!\d)` is safe
     //    because the block size is EXACTLY three: a comma-decimal is 1–2 digits and can never match, and
     //    `1,000.5` de-groups and reaches the decimal rule intact instead of being skipped.
-    s = s.replace(/(?<![\d.,])(\d{1,3})(,\d{3})+(?!\d)/gu, (whole) => whole.replace(/,/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(,\d{3})+(?!\d)/gu, (whole) => whole.replace(/,/gu, ""));
     //    SPACE GROUPING too (`ku- 100 000 abantu`) — read as two numbers, *ikhulu iqanda*. Blocks of EXACTLY
     //    three digits only, the same discipline the shared tier states for its own `NUM`: without it `30 9`
     //    would fuse two unrelated numbers.
-    s = s.replace(/(?<![\d.,])(\d{1,3})([ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (whole) => whole.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})([ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (whole) => whole.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5b) SPORTS TIMES — `4:41.30`, racing paces. NOT clocks, and the clock rule below correctly refuses
     //     them (a third `.dd` field) — but refusing is not enough: the colon then survives as a CLAUSE PAUSE

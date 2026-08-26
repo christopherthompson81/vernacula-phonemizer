@@ -51,7 +51,7 @@ public static class Normalize
 
     private static readonly JsRe ENTITY = JsRegex.Compile("&(nbsp|lrm|rlm|zwnj|zwj|amp|ndash|mdash)[;؛]", "giu");
     private static readonly JsRe GROUP_INDIAN = JsRegex.Compile("(?<![\\d,])(\\d{1,2}(?:,\\d{2})+,\\d{3})(?![\\d,])", "gu");
-    private static readonly JsRe GROUP_WESTERN = JsRegex.Compile("(?<![\\d,])(\\d{1,3}(?:,\\d{3})+)(?![\\d,])", "gu");
+    private static readonly JsRe GROUP_WESTERN = JsRegex.Compile("(?<![\\d,])([1-9]\\d{0,2}(?:,\\d{3})+)(?![\\d,])", "gu");
     private static readonly JsRe COMMA_G = JsRegex.Compile(",", "gu");
     private static readonly JsRe DECIMAL_DOT = JsRegex.Compile("(\\d)\\.(?=\\d)", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])", "gu");

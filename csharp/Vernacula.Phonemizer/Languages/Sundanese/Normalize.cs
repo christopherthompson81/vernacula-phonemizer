@@ -74,11 +74,11 @@ public static class Normalize
     private static readonly JsRe LATEX_MATH =
         JsRegex.Compile("\\$([^$]*[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+[^$]*)\\$", "gu");
     private static readonly JsRe GROUP_DOT =
-        JsRegex.Compile("(?<![\\d.,])(\\d{1,3}(?:\\.\\d{3})+)(?!\\d)", "gu");
+        JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2}(?:\\.\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe GROUP_COMMA =
-        JsRegex.Compile("(?<![\\d.,])(\\d{1,3}(?:,\\d{3})+)(?!\\d)", "gu");
+        JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2}(?:,\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe GROUP_SPACE =
-        JsRegex.Compile("(?<![\\d.,])(\\d{1,3}(?:[ \\u00a0\\u202f\\u2009]\\d{3})+)(?!\\d)", "gu");
+        JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2}(?:[ \\u00a0\\u202f\\u2009]\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe GROUP_SPACE_CHARS = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");
     private static readonly JsRe CLOCK_WORD = JsRegex.Compile(
         "(?<![\\d.:])\\b(jam|tabuh|pukul)\\s?([01]?\\d|2[0-3])[.:]([0-5]\\d)\\b(?!\\.?\\d)", "giu");

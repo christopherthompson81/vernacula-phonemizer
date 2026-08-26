@@ -119,7 +119,7 @@ export function normalizeKannada(input: string): string {
     //    clause punctuation: 1,000 was reading as "ಒಂದು <pause> ಸೊನ್ನೆ" — a pause plus a single zero,
     //    because the trailing 000 collapsed to one numeral. ×42, all Western 3-digit blocks (no Indian
     //    2-then-3 grouping occurs in this corpus).
-    s = s.replace(/(?<=\d),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
+    s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
 
     // 4) ORDINALS ನೇ / ನೆಯ (×39), AFTER de-grouping — unlike Telugu, this corpus does write an ordinal
     //    on a grouped numeral ("ಅವರ 1,000 ನೇ ಅಂಚೆ ಚೀಟಿ"), which the `(?<![\d.,])` guard would reject

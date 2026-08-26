@@ -301,7 +301,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
     }
 
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        "(['’]?\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*(?:['’]\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)*)|(\\d+\\.\\d+|\\d{1,3}(?:,\\d{3})+|\\d+)|([.!?…,;:])",
+        "(['’]?\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*(?:['’]\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)*)|(\\d+\\.\\d+|[1-9]\\d{0,2}(?:,\\d{3})+|\\d+)|([.!?…,;:])",
         "gu");
 
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");

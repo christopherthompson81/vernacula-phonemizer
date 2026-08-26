@@ -152,7 +152,7 @@ export function normalizeUmbundu(input: string): string {
     //    clause-final figure, and this corpus ends sentences on one (`… lyomanu.`, `… cikale 55.000.`).
     //    ⚠ AND THE EXACT `\d{3}` IS WHAT DECLINES THE VERSION AND THE SECTION NUMBER: `802.11n` and
     //    `ociluvyavya 1.1` have two digits and one, so neither shape can be reached from here.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     // 4) THE DECIMAL COMMA, NEUTRALISED RATHER THAN SPOKEN. There is no decimal word: `sources.ts` reports

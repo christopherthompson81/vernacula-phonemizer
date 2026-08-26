@@ -119,8 +119,8 @@ export function normalizeRussian(input: string): string {
 
     // 0) DIGIT GROUPING with a space — the Russian convention, and the number token cannot span a space, so
     //    "5 000 лет" read as "пять ноль лет".
-    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
     s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-letter rule so `н. э.` and `т. е.` are claimed whole —

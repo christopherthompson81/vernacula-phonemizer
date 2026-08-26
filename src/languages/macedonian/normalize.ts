@@ -151,9 +151,9 @@ export function normalizeMacedonian(input: string): string {
     //    comma stays: it is BOTH the decimal separator (6,5) and a thousands separator in the
     //    English-influenced spots (1,400) — the TOKEN distinguishes them by the block length, like Czech.
     for (let i = 0; i < 2; i++)
-        s = s.replace(new RegExp(`(?<=\\d)\\.(?=\\d{3}(?!\\d))`, "gu"), "");
+        s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)\\.(?=\\d{3}(?!\\d))`, "gu"), "");
     for (let i = 0; i < 2; i++)
-        s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+        s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
 
     // 1) ERA MARKERS (multi-dot) BEFORE the single-dot year rule, so the interior dots never reach
     //    clausePunctuation as breaks: `356 г. п.н.е.` → "356 година пред нашата ера".

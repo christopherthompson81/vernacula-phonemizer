@@ -112,7 +112,7 @@ public sealed class DutchPhonemizer : ILanguage
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        "(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|(\\d{1,3}(?:\\.\\d{3})+|\\d+(?:,\\d+)?)|([.!?…,;:])", "giu");
+        "(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|([1-9]\\d{0,2}(?:\\.\\d{3})+|\\d+(?:,\\d+)?)|([.!?…,;:])", "giu");
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "gu");
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData

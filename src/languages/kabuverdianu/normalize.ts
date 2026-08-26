@@ -183,7 +183,7 @@ export function normalizeKabuverdianu(input: string): string {
     //    as *sˈĩŋku zˈɛɾu* without it, and because the guarded three-digit form cannot fuse two independent
     //    numbers the way a looser one would.
     const degroup = (mark: string) =>
-        new RegExp(`(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:${mark}\\d{3})+)(?!\\d)`, "gu");
+        new RegExp(`(?<!\\d)(?<![\\d][.,])([1-9]\\d{0,2})((?:${mark}\\d{3})+)(?!\\d)`, "gu");
     s = s.replace(degroup("[ \\u00a0\\u202f\\u2009]"), (_m, head: string, rest: string) =>  // space, NBSP, NNBSP, thin space
         head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     s = s.replace(degroup("\\."), (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));

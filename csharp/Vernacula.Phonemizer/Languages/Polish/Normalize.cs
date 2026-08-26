@@ -161,7 +161,7 @@ public static class Normalize
 
     // The step patterns. The TS builds several inline; JsRegex.Compile caches, so hoisting them here is a
     // readability choice and not a behaviour one.
-    private static readonly JsRe DEGROUP = JsRegex.Compile($"(?<=\\d)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
+    private static readonly JsRe DEGROUP = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe GROUP_SPACE_ANY = JsRegex.Compile($"[{GROUP_SPACE}]", "gu");
     private static readonly JsRe KMH_NUM = JsRegex.Compile("(\\d+)\\s?km\\s?\\/\\s?(?:h|godz\\.?)(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe KMH_BARE = JsRegex.Compile("(?<![\\p{L}\\p{M}])km\\s?\\/\\s?(?:h|godz\\.?)(?![\\p{L}\\p{M}])", "giu");

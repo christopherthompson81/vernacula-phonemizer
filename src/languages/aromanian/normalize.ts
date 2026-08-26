@@ -93,10 +93,10 @@ export function normalizeAromanian(input: string): string {
     //    both directions, and one sentence carries a comma doing each.
     //    ⚠ THE WHOLE NUMBER AT ONCE, not one join per pass (trap 63), and the trailing guard rejects a
     //    DIGIT or a mark that continues the number — never a bare clause mark (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[.,]\d{3})+)(?!\d)(?![.,]\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[.,]\d{3})+)(?!\d)(?![.,]\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""));
     //    …and the SPACE, which this corpus also uses (`216 061 bãn.`, `170 000 di mãrchi`, `21 000 000`).
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    ⚠ AND WHAT IS LEFT WITH ONE OR TWO DIGITS IS A DECIMAL, spent rather than spoken: `virgulã` is ×0
     //    on this wiki and no other decimal-point candidate is attested, so the mark becomes a space. The

@@ -102,8 +102,8 @@ export function normalizePortuguese(input: string, brazilian = false): string {
 
     // 0) DIGIT GROUPING with a space. The dot form (1.000) is already in the number tokenizer; the SI space
     //    form is not, and the number token cannot span a space.
-    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
     s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first — `a.` is
@@ -142,7 +142,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    decision Xhosa's ordinal rule records for the English `-st/-nd/-th` suffixes.
     //    Every ordinal in this corpus is within range (`1º` ×5, `37º` ×3, `1.000º` ×3, `60º`, `11º`, `16º`,
     //    `7ª` ×3, `5ª` ×2), so this arm is for arbitrary text rather than for a corpus instance.
-    s = s.replace(/\b(\d{1,3}(?:\.\d{3})+|\d+)\.?(?:º|ª)/gu, (whole, digits: string) => {
+    s = s.replace(/\b([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(?:º|ª)/gu, (whole, digits: string) => {
         const n = Number(digits.replace(/\./gu, ""));
         const masc = portugueseOrdinal(n);
         if (masc === undefined) return digits;

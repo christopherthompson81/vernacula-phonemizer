@@ -11,7 +11,7 @@ public static class Normalize
 {
     // ⚠ NEVER `\b` — Occitan carries `à è ò ó ç ï ú` and the interpunct, which `\b` treats as boundaries.
     private static readonly JsRe SPACE_GROUP = JsRegex.Compile(
-        "(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:[ \\u00a0\\u202f\\u2009]\\d{3})+)(?!\\d)", "gu");  // space, NBSP, NNBSP, thin space
+        "(?<!\\d)(?<![\\d][.,])([1-9]\\d{0,2})((?:[ \\u00a0\\u202f\\u2009]\\d{3})+)(?!\\d)", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe GROUP_SEPS = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe DOT_DECIMAL = JsRegex.Compile("(?<!\\d)(\\d+)\\.(\\d+)(?!\\d)", "gu");
     private static readonly JsRe ERA_BC = JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}a[bv]\\.?\\s?C\\.?{Boundaries.NOT_LETTER_AFTER}", "gu");

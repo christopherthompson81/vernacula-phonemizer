@@ -96,7 +96,7 @@ export function g2pWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Irish groups thousands with COMMAS (1,400 — the TOKEN swallows the comma so the tier can still see the
 // number next to its unit/sign); the dot is a DECIMAL (1.5 → "pointe") or a version, claimed by normalize.
-const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])`, "gu");
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|([1-9]\\d{0,2}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])`, "gu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where

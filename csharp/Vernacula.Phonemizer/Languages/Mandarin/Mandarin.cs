@@ -33,7 +33,7 @@ public sealed class MandarinPhonemizer : ILanguage
     private static readonly JsRe TONE_DIGIT_ANY = JsRegex.Compile("[1-5]");
     private static readonly JsRe FOUR_DIGITS = JsRegex.Compile("^\\d{4}$");
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
-    private static readonly JsRe NUMBER_RE = JsRegex.Compile("\\d{1,3}(?:,\\d{3})+|\\d+(?:\\.\\d+)?", "g");
+    private static readonly JsRe NUMBER_RE = JsRegex.Compile("[1-9]\\d{0,2}(?:,\\d{3})+|\\d+(?:\\.\\d+)?", "g");
     private static readonly JsRe AFTER_WS = JsRegex.Compile("^\\s*(\\S)", "u");
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData

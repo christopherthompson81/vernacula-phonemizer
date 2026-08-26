@@ -60,7 +60,7 @@ public static class Normalize
     // as themselves the source reads as an empty class and the rule looks like a no-op.
     private static readonly JsRe ZWJ_CHILLU_RE = JsRegex.Compile("([ണനരലളക])്\\u200d", "gu");
     private static readonly JsRe ZERO_WIDTH = JsRegex.Compile("[\\u200b\\u200c\\u200d\\ufeff]", "gu");
-    private static readonly JsRe GROUPING_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?:,\\d|[^\\d]|$))", "gu");
+    private static readonly JsRe GROUPING_COMMA = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?:,\\d|[^\\d]|$))", "gu");
     private static readonly JsRe OCLOCK = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3]):\\s?00(?![\\d:.])", "gu");
     private static readonly JsRe TIME_COLON = JsRegex.Compile("(?<=\\d):\\s?(?=\\d)", "gu");
     private static readonly JsRe DOUBLE_PERCENT = JsRegex.Compile("ശതമാനം(\\s+ശതമാനം)+", "gu");

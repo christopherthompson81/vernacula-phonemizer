@@ -285,7 +285,7 @@ export function normalizeGreek(input: string): string {
     // 7) DIGIT DE-GROUPING. FIRST among the number rules: Greek groups thousands with a PERIOD, so
     //    `1.000` was read as «ένα» + a phrase break + «μηδέν». Run twice for `5.000.000`. Only a block of
     //    EXACTLY three digits is grouping — `4:41.30` (a sports time) and `802,11` are left intact.
-    for (let k = 0; k < 2; k++) s = s.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
+    for (let k = 0; k < 2; k++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
 
     // 8) ORDINAL NOTATION. The Greek ending is the CASE and GENDER, not an ordinal marker: `15ο` is
     //    δέκατο πέμπτο, `9ης` ένατης, `18ου` δέκατου όγδοου — and BOTH members of a compound inflect, so

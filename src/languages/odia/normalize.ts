@@ -137,7 +137,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    Indian grouping is unattested in THIS corpus (0 instances) and is carried anyway: it costs
         //    one line and Indic sources write it.
         s = s.replace(/(?<![\d,])(\d{1,2}(?:,\d{2})+,\d{3})(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
-        s = s.replace(/(?<![\d,])(\d{1,3}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+        s = s.replace(/(?<![\d,])([1-9]\d{0,2}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
         // 6) ODIA DOT-ABBREVIATION LEFTOVERS whose expansion is not sourceable — କି.ଗ୍ରା. after a number
         //    is handled in step 2; this catches the standalone-with-trailing-dot shape so the final dot

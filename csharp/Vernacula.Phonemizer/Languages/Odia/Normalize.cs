@@ -55,7 +55,7 @@ public static class Normalize
     private static readonly JsRe RATE_SLASH = JsRegex.Compile(
         $"(?<![\\p{{L}}\\p{{M}}])({string.Join("|", RATE_NUM)})\\s?/\\s?({string.Join("|", RATE_DEN)})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe GROUP_INDIC = JsRegex.Compile("(?<![\\d,])(\\d{1,2}(?:,\\d{2})+,\\d{3})(?![\\d,])", "gu");
-    private static readonly JsRe GROUP_WESTERN = JsRegex.Compile("(?<![\\d,])(\\d{1,3}(?:,\\d{3})+)(?![\\d,])", "gu");
+    private static readonly JsRe GROUP_WESTERN = JsRegex.Compile("(?<![\\d,])([1-9]\\d{0,2}(?:,\\d{3})+)(?![\\d,])", "gu");
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
     private static readonly JsRe KG_STANDALONE = JsRegex.Compile("(?<![\\p{L}\\p{M}])କି\\.ଗ୍ରା\\.?", "gu");
     private static readonly JsRe DECIMAL_DOT = JsRegex.Compile("(\\d)\\.(?=\\d)", "gu");

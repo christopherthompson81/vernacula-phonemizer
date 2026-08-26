@@ -106,7 +106,7 @@ public static class Normalize
     // ── Pass 1 patterns ─────────────────────────────────────────────────────────────────────────────
     private static readonly JsRe AMP_ENTITY = JsRegex.Compile("&amp;", "giu");
     private static readonly JsRe AMP = JsRegex.Compile("&", "gu");
-    private static readonly JsRe GROUPING = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?![\\d]))", "gu");
+    private static readonly JsRe GROUPING = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?![\\d]))", "gu");
     private static readonly JsRe ERA = JsRegex.Compile("(?<![\\p{L}\\p{M}])D\\.?K\\.?D\\.?(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe FKN = JsRegex.Compile("(?<![\\p{L}\\p{M}])fkn\\.(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe KKF = JsRegex.Compile("(?<![\\p{L}\\p{M}])kkf\\.(?![\\p{L}\\p{M}])", "giu");

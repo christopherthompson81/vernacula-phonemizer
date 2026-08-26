@@ -61,6 +61,66 @@ const CASES = [
     { n: 5, bare: "123456789012", grouped: (s: string) => `123${s}456${s}789${s}012` },
 ];
 
+/**
+ * A THOUSANDS GROUP'S HEAD IS NEVER A BARE `0` — fleet-wide, in CI.
+ *
+ * ⚠ A SEPARATE CLASS FROM THE ONE ABOVE, found by the same sweep. No convention on earth writes a grouped
+ * number whose leading group is `0`, so `0,001` is not 1 — but the de-grouping rules accepted any 1-3 digit
+ * head and joined it anyway, a 1000× error:
+ *
+ *     su  `0,001 gram`  →  *hˈid͡ʒi ɡram*   ("one gram" for one milligram)
+ *
+ * ⚠ AND THE CITATION IS THE FILE'S OWN. `sundanese/normalize.ts` quotes *"1 MILIGRAM (MG) = 0,001 gram"* as
+ * the evidence for its `mg` unit; the line it argues from is the line it misreads.
+ *
+ * `separatorHygiene.ts` already states the principle this rests on — a single grouped-looking run is left
+ * alone because "three digits after the mark means grouping in a grouping convention and a three-place
+ * decimal in a decimating one, and nothing here can tell which. Joining it would be a guess with a 1000×
+ * error attached." A ZERO HEAD is the one case where there is nothing to tell apart: no convention groups
+ * from `0`, so joining it is exactly the guess that file refuses to make.
+ *
+ * ⚠ AND ONE LANGUAGE ALREADY KNEW. `madurese/normalize.ts` carried `(?!0,)` on its comma arm and nowhere
+ * else — the same "fixed in one place, never propagated" shape as the de-grouping bug above.
+ *
+ * THE BACKLOG BELOW IS MEASURED, NOT DECIDED. Every remaining entry is a language whose TOKENIZER accepts an
+ * arbitrary separator run inside a number (English's `\d[\d,]*` is the pattern) rather than applying a
+ * grouping rule — a different mechanism with a different fix, since constraining the token changes how
+ * malformed input is read generally. Entries come off by fixing the language, never by re-measuring.
+ */
+describe("a thousands group never has a zero head", () => {
+    const SEPS: Record<string, string> = { comma: ",", dot: ".", space: " " };
+
+    /** Languages whose NUMBER TOKEN swallows arbitrary separators. Remove an entry by FIXING the language. */
+    const TOKENIZER_ACCEPTS_ANY_RUN = new Set([
+        "acm", "acw", "afb", "ajp", "am", "apc", "apd", "ar", "ary", "arz", "as", "awa", "ayl", "az",
+        "bal", "bar", "bgc", "bho", "bn", "bpy", "ca", "cs", "en", "es", "gl", "gu", "he", "hi", "hne",
+        "ka", "kmr", "lo", "mag", "mai", "mg", "mk", "mr", "my", "ne", "pbt", "ps", "pt", "rkt", "sat",
+        "si", "syl", "ta", "ti", "tr", "ug", "ur",
+    ]);
+
+    test("`0,001` is never joined into `1`", () => {
+        const joined: string[] = [];
+        for (const c of CODES) {
+            if (TOKENIZER_ACCEPTS_ANY_RUN.has(c)) continue;
+            for (const [name, sep] of Object.entries(SEPS)) {
+                let a: string, b: string;
+                try { a = phonemize(`0${sep}001`, c); b = phonemize("1", c); } catch { continue; }
+                if (a === b) joined.push(`${c}/${name}`);
+            }
+        }
+        expect(joined).toEqual([]);
+    });
+
+    test("su reads its own citation", () => {
+        // ⚠ NOT `toContain`: the defect was a MISSING word, and a substring assertion on "gram" passes with
+        // the quantity wrong.
+        expect(phonemize("0,001 gram", "su")).not.toBe(phonemize("1 gram", "su"));
+        // …and a legitimate group is still joined
+        expect(phonemize("3,000", "su")).toBe(phonemize("3000", "su"));
+        expect(phonemize("10,001", "su")).toBe(phonemize("10001", "su"));
+    });
+});
+
 describe("thousands de-grouping survives past three groups", () => {
     test("every language that de-groups a separator does so at four and five groups too", () => {
         const broken: string[] = [];

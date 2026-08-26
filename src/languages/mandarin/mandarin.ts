@@ -129,7 +129,7 @@ class MandarinPhonemizer implements Phonemizer {
         // Comma grouping is part of the number, not a clause boundary. Without this, "783,562" was read as
         // two numbers with a PAUSE between them (七百八十三 , 五百六十二) instead of 七十八万三千五百六十二.
         // 61 occurrences in the corpus.
-        const re = /\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?/g;
+        const re = /[1-9]\d{0,2}(?:,\d{3})+|\d+(?:\.\d+)?/g;
         let m: RegExpExecArray | null;
         while ((m = re.exec(input)) !== null) {
             if (m.index > last)

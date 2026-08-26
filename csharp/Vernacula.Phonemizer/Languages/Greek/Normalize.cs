@@ -159,7 +159,7 @@ public static class Normalize
     private static readonly JsRe RATE_M_S = JsRegex.Compile("(\\d)\\s?m\\s?\\/\\s?s(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe XLM_DOT = JsRegex.Compile("(?<![\\p{L}\\p{M}])χλμ\\.(?=\\s+\\p{Ll})", "gu");
     private static readonly JsRe XLM = JsRegex.Compile("(?<![\\p{L}\\p{M}])χλμ(?![\\p{L}\\p{M}.])", "gu");
-    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)\\.(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)\\.(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe ORDINAL_RE = JsRegex.Compile(
         $"(?<![\\p{{L}}\\p{{M}}\\d])(\\d{{1,3}})({ORD_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?![.,]\\d)", "gu");

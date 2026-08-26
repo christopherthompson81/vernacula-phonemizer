@@ -247,12 +247,12 @@ export function normalizeLingala(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma, so `24,000, na wengine` would
     //    split off `000` and speak it as zero.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a list.
     //    Requiring every group to be exactly three digits does that: `mibu 1600 kino 1850` has no 3-digit
     //    group, and `sanza 9 1946` is not `\d{1,3}( \d{3})+` because 1946 is four.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) UNITS, before decimals — the number-unit adjacency a unit rule matches on is destroyed the moment
     //    a decimal is rewritten into spaced digits (playbook step 4's standing coupling), and after

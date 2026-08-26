@@ -56,10 +56,10 @@ public static class Normalize
     private static readonly JsRe ISBN = JsRegex.Compile(
         "(?<![\\p{L}\\p{M}])(ISBN(?:[- ]1[03])?)\\s*:?\\s*([\\d][\\d\u2013 -]*[\\dXx])", "gu");
     private static readonly JsRe ISBN_SEPS = JsRegex.Compile("[\u2013 -]", "gu");
-    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})((?:,\\d{3})+)(?![\\d]|,\\d)", "gu");
-    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})((?:\\.\\d{3})+)(?![\\d]|\\.\\d)", "gu");
+    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})((?:,\\d{3})+)(?![\\d]|,\\d)", "gu");
+    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})((?:\\.\\d{3})+)(?![\\d]|\\.\\d)", "gu");
     private static readonly JsRe GROUP_SPACE = JsRegex.Compile(
-        "(?<![\\d.,])(\\d{1,3})((?:[ \u00a0\u202f\u2009]\\d{3})+)(?![\\d]| \\d)", "gu");
+        "(?<![\\d.,])([1-9]\\d{0,2})((?:[ \u00a0\u202f\u2009]\\d{3})+)(?![\\d]| \\d)", "gu");
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile("[ \u00a0\u202f\u2009]", "gu");

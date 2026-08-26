@@ -255,11 +255,11 @@ export function normalizeEwe(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma, so `24,000, na …` would split off
     //    `000` and speak it as zero (the ln finding).
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
     //    The SPACE form is ×1 in the retained text (`10 955 000`, Greece's population). Requiring every group
     //    to be exactly three digits is what stops it claiming two adjacent numbers — `ƒe 1961 – 25` has no
     //    three-digit group and `Ɔktoba 22 lia le ƒe 1899` is four digits.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 4) UNITS, BEFORE DECIMALS — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten (the playbook's standing coupling), and after de-grouping so `1,904,569 km2`

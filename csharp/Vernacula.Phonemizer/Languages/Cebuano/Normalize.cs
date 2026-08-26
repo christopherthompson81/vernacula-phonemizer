@@ -31,7 +31,7 @@ public static class Normalize
     };
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
-    private static readonly JsRe GROUPED = JsRegex.Compile("(?<![\\d.,])(\\d{1,3}(?:,\\d{3})+)(?!\\d)", "gu");
+    private static readonly JsRe GROUPED = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2}(?:,\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d.:])([01]?\\d|2[0-3]):([0-5]\\d)\\b(?!\\.?\\d)", "gu");
     private static readonly JsRe CLOCK_DOT = JsRegex.Compile(

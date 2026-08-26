@@ -60,8 +60,8 @@ public static class Normalize
     private static readonly JsRe CLOCK_RANGE = JsRegex.Compile("(\\d{1,2})\\.00\\s*([-–])\\s*(\\d{1,2})\\.00(?!\\d)", "gu");
     private static readonly JsRe CLOCK_HOUR = JsRegex.Compile("(?<=jam\\s)(\\d{1,2})\\.00(?!\\d)", "gu");
     private static readonly JsRe RP_DOT = JsRegex.Compile("(?<![\\p{L}\\p{M}])Rp\\.(?=\\s*\\d)", "gu");
-    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<![\\d.,])\\d{1,3}(?:\\.\\d{3})+(?![\\d.])", "gu");
-    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<![\\d.,])\\d{1,3}(?:,\\d{3})+(?![\\d,])", "gu");
+    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<![\\d.,])[1-9]\\d{0,2}(?:\\.\\d{3})+(?![\\d.])", "gu");
+    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<![\\d.,])[1-9]\\d{0,2}(?:,\\d{3})+(?![\\d,])", "gu");
     private static readonly JsRe DOT_G = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe COMMA_G = JsRegex.Compile(",", "gu");
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d+),(\\d{1,2})(?![\\d,])", "gu");

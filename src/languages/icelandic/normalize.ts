@@ -139,7 +139,7 @@ export function normalizeIcelandic(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = t.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
+        t = t.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 2) DECIMAL COMMA (8). The comma is clause punctuation too, so `12,5` read as a PAUSE inside a

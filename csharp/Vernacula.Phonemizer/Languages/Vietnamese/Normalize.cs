@@ -50,8 +50,8 @@ public static class Normalize
     private static readonly JsRe DEG_C = JsRegex.Compile("\\s*°\\s*C(?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_F = JsRegex.Compile("\\s*°\\s*F(?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_BARE = JsRegex.Compile("\\s*°", "gu");
-    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<!\\d)(?<!\\d[.,])\\d{1,3}(?:\\.\\d{3})+(?!\\d)", "gu");
-    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<!\\d)(?<!\\d[.,])\\d{1,3}(?:,\\d{3})+(?!\\d)", "gu");
+    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<!\\d)(?<!\\d[.,])[1-9]\\d{0,2}(?:\\.\\d{3})+(?!\\d)", "gu");
+    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<!\\d)(?<!\\d[.,])[1-9]\\d{0,2}(?:,\\d{3})+(?!\\d)", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile("(?<![\\d.,])(\\d[\\d.,]*)\\s*[-–—]\\s*(\\d[\\d.,]*)(?![\\d.,])", "gu");
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d)", "gu");
     private static readonly JsRe DOTTED_NUM = JsRegex.Compile("(?<=\\d)\\.(?=\\d)", "gu");

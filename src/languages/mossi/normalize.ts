@@ -159,9 +159,9 @@ import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 // what the lookbehind-plus-lookahead pair above actually needs: a further `\d{3}` group is already consumed
 // by the `+`, so a match can still neither begin nor end inside a longer run.
 // (The space arm additionally carried a duplicated `\d` inside its class — inert, and gone with it.)
-const GROUPED_SPACE = /(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu;  // space, NBSP, NNBSP, thin space
-const GROUPED_COMMA = /(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu;
-const GROUPED_DOT = /(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu;
+const GROUPED_SPACE = /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu;  // space, NBSP, NNBSP, thin space
+const GROUPED_COMMA = /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu;
+const GROUPED_DOT = /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu;
 
 /** ⚠ THE CURRENCY NOUN COMES BEFORE THE FIGURE IN MOORÉ, so this rule REORDERS rather than postposing, and
  *  the shared tier could not have said it (playbook §47 reason 2, the Oromo case). The position is not a

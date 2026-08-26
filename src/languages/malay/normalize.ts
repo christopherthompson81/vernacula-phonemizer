@@ -104,7 +104,7 @@ export function normalizeMalay(input: string): string {
     //    or (worse) as Indonesian's decimal comma. The leading `(?<!\d)` anchor matters: without it
     //    `1990,300` would match at `990,300`. Exactly three digits per group, so a decimal comma cannot be
     //    caught by accident (this corpus writes none, but Indonesian's convention leaks in translation).
-    s = s.replace(/(?<!\d)(\d{1,3}(?:,\d{3})+)(?!\d)/gu, (m) => m.replace(/,/gu, ""));
+    s = s.replace(/(?<!\d)([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replace(/,/gu, ""));
 
     // 3) `US$30` — the shared symbol tier is keyed on a sign at a token boundary, so a `$` glued behind
     //    letters was swallowed and the amount lost its currency word entirely (`uɛs tiga puluh`). One space

@@ -161,8 +161,8 @@ public static class Normalize
 
     private const string GROUP_SPACE = " \u00a0\u202f\u2009";
 
-    private static readonly JsRe DEGROUP_SPACE = JsRegex.Compile($"(?<=\\d)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
-    private static readonly JsRe DEGROUP_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe DEGROUP_SPACE = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
+    private static readonly JsRe DEGROUP_COMMA = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile($"[{GROUP_SPACE}]", "gu");
     /**
      * The multi-word dotted abbreviations, compiled from `multiDotAbbrev` IN MANIFEST ORDER — `до н. е.` must

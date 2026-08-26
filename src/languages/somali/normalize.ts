@@ -126,8 +126,8 @@ export function normalizeSomali(input: string): string {
     // clauses. ⚠ EXACTLY THREE DIGITS PER GROUP, REPEATED, is the disambiguation — `0.53` (two) and `2.5`
     // (one) are decimals and must survive untouched. The trailing guard rejects only a following DIGIT, so a
     // group followed by the decimal separator (`1,234.56`, ×49) still de-groups.
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
 
     // ── 2. THE GLUED CALENDAR LETTERS — BEFORE the tier, which would otherwise strand the `M` ──────────
     // ⚠ ORDER IS LOAD-BEARING HERE AND THE PROBE FOUND IT: with this after the shared tier, `$2M` had its

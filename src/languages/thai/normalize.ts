@@ -165,7 +165,7 @@ export function normalizeThai(input: string): string {
     // ── 5. de-group thousands ─────────────────────────────────────────────────────────────────────
     // FIRST among the numeric rules: otherwise the grouping comma is clause punctuation and the number
     // is read in two halves with a pause between them. Exactly-three-digit blocks only.
-    s = s.replace(/(?<=\d),(?=\d{3}(?!\d))/gu, "");
+    s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
 
     // ── 6. clock ─────────────────────────────────────────────────────────────────────────────────
     // BEFORE step 7 (times before decimals — Thai writes the clock with a PERIOD, 09.30 น., so the

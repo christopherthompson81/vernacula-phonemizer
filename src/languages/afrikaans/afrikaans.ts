@@ -453,7 +453,7 @@ export function phonemizeWordRules(word: string): string {
 // Thai letters, claimed the lone U+0E47 as a "word", and split the gap into `เด` + `ก`. The router then read two
 // syllables where Thai reads one: `dˈeː˧ kˈa˨˩ʔ` for what should be `dˈe˨˩k`. Anchoring on a Latin letter means a
 // mark can only ever be claimed as part of a Latin word, which is the only thing it should attach to here.
-const TOKEN = /(['’]?\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*)|(\d+\.\d+|\d{1,3}(?:,\d{3})+|\d+)|([.!?…,;:])/gu;
+const TOKEN = /(['’]?\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*)|(\d+\.\d+|[1-9]\d{0,2}(?:,\d{3})+|\d+)|([.!?…,;:])/gu;
 
 // Afrikaans measure and currency nouns are INVARIANT after a numeral ("drie persent", "480 kilometer per uur").
 const SYMBOLS = makeSymbolNormalizer({

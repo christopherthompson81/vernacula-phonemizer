@@ -36,7 +36,7 @@ public static class Normalize
         ("mm", "ملي ميٽر"),
     ];
 
-    private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d)[,،](?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)[,،](?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe PERIOD_CLOCK =
         JsRegex.Compile("(\\d{1,2})\\.(\\d{2})(?=\\s*(?:GMT|UTC|وڳي|بجي))", "gu");
     private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d+)\\.(\\d+)", "gu");

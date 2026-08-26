@@ -150,11 +150,11 @@ export function normalizeKarakalpak(input: string): string {
     //    what settles it; `19,605,052 akciyanı` and `$100,000 investiciyası` carry no magnitude and stay
     //    grouped.
     const MAG_NEXT = "(?!\\s?(?:mıń|million|milliard))";
-    s = s.replace(new RegExp(`(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:,\\d{3})+)(?!\\d)${MAG_NEXT}`, "gu"),
+    s = s.replace(new RegExp(`(?<!\\d)(?<![\\d][.,])([1-9]\\d{0,2})((?:,\\d{3})+)(?!\\d)${MAG_NEXT}`, "gu"),
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     //    …and the SPACE, which this corpus also uses — "Maydanı 1 098 581 km²", "9 686 AQSh dolları",
     //    "1/299 792 458 sekund ishinde". Same idiom, same trap-63 whole-number match.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) THE DECIMAL SEPARATORS, NEUTRALISED — see the header for why no word is spoken. What is left with

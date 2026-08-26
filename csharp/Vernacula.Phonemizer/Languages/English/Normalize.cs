@@ -184,7 +184,7 @@ public static class Normalize
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "g");
     private static readonly JsRe ERA = JsRegex.Compile("\\b(BCE|BC|CE|AD)\\b", "g");
     private static readonly JsRe SPACE_GROUP = JsRegex.Compile(
-        $"(?<!(?:{MONTH_ALT})[ \u00a0\u202f\u2009])(?<![\\d.,])\\d{{1,3}}(?:[ \u00a0\u202f\u2009]\\d{{3}})+(?![\\d])", "giu");
+        $"(?<!(?:{MONTH_ALT})[ \u00a0\u202f\u2009])(?<![\\d.,])[1-9]\\d{{0,2}}(?:[ \u00a0\u202f\u2009]\\d{{3}})+(?![\\d])", "giu");
     private static readonly JsRe SPACE_GROUP_SEPS = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe SCI_EXPONENT = JsRegex.Compile(
         "(?<=[×x·]\\s?)(10)\\s?(\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+|-\\d+)", "gu");

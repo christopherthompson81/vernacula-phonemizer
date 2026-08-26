@@ -147,9 +147,9 @@ public static class Normalize
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?\u00bb)\\]]|$))", "giu");
     // The three de-grouping classes carry a NON-BREAKING SPACE (U+00A0) beside the plain one, written as an
     // escape so an editor that folds it cannot narrow the class in silence. Same for CLOCK below.
-    private static readonly JsRe GROUP_DOT_SPACE = JsRegex.Compile("(?<=\\d)[.\u00a0\u202f\u2009 ](?=\\d{3}(?![\\d]|,\\d))", "gu");
+    private static readonly JsRe GROUP_DOT_SPACE = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)[.\u00a0\u202f\u2009 ](?=\\d{3}(?![\\d]|,\\d))", "gu");
     private static readonly JsRe GROUP_DOT_THEN_SPACE = JsRegex.Compile("(\\d)\\.[ \u00a0\u202f\u2009](\\d{3})(?![\\d]|,\\d)", "gu");
-    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?![\\d]|,\\d))", "gu");
+    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?![\\d]|,\\d))", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d.,:])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![\\d:])", "gu");
     private static readonly JsRe UNIT_SUFFIX = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({UNIT_ALT})([\u00b2\u00b323])?-([{LOWER}]+)", "giu");
     private static readonly JsRe METRE_SUFFIX = JsRegex.Compile($"(\\d)\\s?m([\u00b2\u00b323])?-([{LOWER}]+)", "gu");

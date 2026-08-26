@@ -252,12 +252,12 @@ export function normalizeArmenian(input: string): string {
 
     // 1a. SPACE-grouped (36 hard / 5 sample): `29 743`, `36 260 130`, `1 500 000`, `250 000-ը`.
     s = s.replace(
-        /(?<!\d)(?<!\d[.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
+        /(?<!\d)(?<!\d[.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""),  // space, NBSP, NNBSP, thin space
     );
     // 1b. TWO OR MORE `.`/`,` groups — grouping with no ambiguity left to resolve.
     s = s.replace(
-        /(?<!\d)(?<!\d[.,])(\d{1,3})((?:([.,])\d{3}){2,})(?!\d)(?![.,]\d)/gu,
+        /(?<!\d)(?<!\d[.,])([1-9]\d{0,2})((?:([.,])\d{3}){2,})(?!\d)(?![.,]\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""),
     );
     // 1c. ONE `.`/`,` group. Grouping unless (b) or (c) fires. ⚠ A DOTTED DATE cannot reach this rule:
@@ -265,7 +265,7 @@ export function normalizeArmenian(input: string): string {
     //     edges stop the engine restarting inside the number (trap 52 — a lookbehind rejects a POSITION).
     const magAlt = MAGNITUDE_WORDS.join("|");
     s = s.replace(
-        new RegExp(`(?<!\\d)(?<!\\d[.,])(\\d{1,3})[.,](\\d{3})(?!\\d)(?![.,]\\d)(\\s*(?:${magAlt})${NOT_LETTER_AFTER}|\\s*[×x%])?`, "gu"),
+        new RegExp(`(?<!\\d)(?<!\\d[.,])([1-9]\\d{0,2})[.,](\\d{3})(?!\\d)(?![.,]\\d)(\\s*(?:${magAlt})${NOT_LETTER_AFTER}|\\s*[×x%])?`, "gu"),
         (m, head: string, group: string, trailer: string | undefined) =>
             head === "0" || trailer !== undefined ? m : `${head}${group}`,
     );

@@ -43,9 +43,9 @@ public static class Normalize
     private static readonly JsRe PCT_SIGN = JsRegex.Compile("٪", "gu");
     private static readonly JsRe ARABIC_DECIMAL = JsRegex.Compile("٫", "gu");
     private static readonly JsRe ARABIC_GROUP = JsRegex.Compile("٬", "gu");
-    private static readonly JsRe ARABIC_COMMA_GROUP = JsRegex.Compile("(?<=\\d)،(?=\\d{3}(?!\\d))", "gu");
-    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})((?:,\\d{3})+)(?![\\d,])", "gu");
-    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})((?:\\.\\d{3})+)(?![\\d.])", "gu");
+    private static readonly JsRe ARABIC_COMMA_GROUP = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)،(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})((?:,\\d{3})+)(?![\\d,])", "gu");
+    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})((?:\\.\\d{3})+)(?![\\d.])", "gu");
     private static readonly JsRe COMMA = JsRegex.Compile(",", "gu");
     private static readonly JsRe DOT = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?![.,]\\d)(\\s*دقیقه)?", "gu");

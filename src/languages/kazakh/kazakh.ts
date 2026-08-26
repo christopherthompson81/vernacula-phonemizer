@@ -71,7 +71,7 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Kazakh Cyrillic words / numbers / punctuation. ⚠ The corpus groups thousands with SPACES (17 000,
 // 5 000 000) and writes decimals with COMMAS (2,3); the TOKEN swallows both so the tier can see the number.
-const TOKEN = /([Ѐ-ӿ]+)|(\d{1,3}(?:[ \u00a0\u202f\u2009]\d{3})+(?:,\d+)?|\d+,\d+|\d+)|([.!?…,;:])/gu;  // space, NBSP, NNBSP, thin space
+const TOKEN = /([Ѐ-ӿ]+)|([1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?:,\d+)?|\d+,\d+|\d+)|([.!?…,;:])/gu;  // space, NBSP, NNBSP, thin space
 
 // symbol normalization — Kazakh: пайыз (percent), CYRILLIC unit abbreviations (the corpus writes
 // км/кг, not km/kg — the same trap as Russian). Kept in the ENGINE file so the review tool's sourcing

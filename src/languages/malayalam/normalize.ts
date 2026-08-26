@@ -99,7 +99,7 @@ export function normalizeMalayalam(input: string): string {
     //    clause punctuation: 1,234 was reading as ഒന്ന് <pause> ഇരുന്നൂറ്റി മുപ്പത്തിനാല് — a phrase
     //    break inside a number, and the leading digit spoken as a separate numeral. All 36 are Western
     //    3-digit blocks; no Indian 2-then-3 grouping occurs here.
-    s = s.replace(/(?<=\d),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
+    s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
 
     // 4) NUMERIC CLITICS (×133 hyphenated + ~40 spaced), AFTER de-grouping — this corpus writes a
     //    clitic on a grouped numeral ("1,000-മത്തെ" shape) which a `(?<![\d,])` guard would reject

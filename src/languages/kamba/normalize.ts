@@ -261,9 +261,9 @@ export function normalizeKamba(input: string): string {
     //    ⚠ THE WHOLE NUMBER AT ONCE (trap 63) — `5,000,000` is three groups and a per-pass join reads it as
     //    two numbers. ⚠ AND THE TRAILING GUARD REJECTS A DIGIT AND NOTHING ELSE (trap 58): `(?![\d.,])`
     //    would decline every clause-final figure, and this corpus ends a clause on a figure 152 times.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     // 8) RANGES → `kũthi`, ABOVE THE DECIMAL STEP and that ordering is a defect this layer would otherwise

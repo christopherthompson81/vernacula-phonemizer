@@ -179,8 +179,8 @@ export function normalizeSundanese(input: string): string {
     // most: in `764.387,59` the period-group is FOLLOWED by the decimal comma, so the guard rejected it and
     // the `.` went back to being a clause pause — *tujuh ratus genep puluh opat . tilu ratus…*. Rejecting only
     // a following DIGIT is right, because a further `.\d{3}` is already consumed by the `+`.
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
     // ⚠ AND THE SPACE-GROUPED FORM, ×24 (`62 262`, `5 165`, `1 000`). Flagged by `review.ts`'s own probe
     // rather than by the corpus tabulation, which counted only the two punctuation separators. The head is
     // capped at three digits and the lookbehind rejects a preceding digit, so an adjacent PAIR of numbers
@@ -190,7 +190,7 @@ export function normalizeSundanese(input: string): string {
     // and read *lˈima pˈuluh ʔənˈol .* — "fifty, zero" — losing the thousand word at exactly a sentence end.
     // Reported by `review.ts`'s `clause-final` check. A decimal tail is safe either way: `1 234.56` de-groups
     // to `1234.56` and the decimal rule reads it whole.
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // ── 2. CLOCK — BEFORE the decimal rule, which would otherwise claim `7.30` as seven-point-three ──────
     // The corpus writes the hour with `jam` ×186, `tabuh` and `pukul`, and both separators (`jam 05.00`,

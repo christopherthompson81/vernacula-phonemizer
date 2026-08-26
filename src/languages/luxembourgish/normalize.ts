@@ -125,8 +125,8 @@ const ABBREV_BEFORE_MARK = new RegExp(
 const ABBREV_END = new RegExp(
     String.raw`(?<![\p{L}\p{M}])(${ABBREV_ALT})\.(?=${SP}*(?:\.|$))`, "giu");
 
-const GROUP_DOT = /(?<![\d.,])\d{1,3}(?:\.\d{3})+(?!\d)/gu;
-const GROUP_SPACE = new RegExp(String.raw`(?<![\d.,])\d{1,3}(?:${SP}\d{3}(?!\d))+`, "gu");
+const GROUP_DOT = /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?!\d)/gu;
+const GROUP_SPACE = new RegExp(String.raw`(?<![\d.,])[1-9]\d{0,2}(?:${SP}\d{3}(?!\d))+`, "gu");
 const SPACE_ANY = new RegExp(SP, "gu");
 
 const ORD = new RegExp(

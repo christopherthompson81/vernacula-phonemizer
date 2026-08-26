@@ -199,7 +199,7 @@ export function normalizePolish(input: string): string {
     //    stay adjacent to the number for the shared unit/percent tier to see it, so polish.ts's TOKEN
     //    swallows it and emits "przecinek" (the Polish name of the decimal comma) between the parts.
     for (let i = 0; i < 2; i++)
-        s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+        s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
     s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule — otherwise the interior

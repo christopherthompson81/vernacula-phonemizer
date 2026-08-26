@@ -120,7 +120,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // separators fall through to clausePunctuation: "400.000" reads *vierhonderd . nul* — a phrase break plus a
 // lost magnitude — and "6,5" reads *zes , vijf*. Clocks are claimed by normalize.ts first, so a period reaching
 // here is grouping and a comma is the decimal point.
-const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.!?…,;:])/giu;
+const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|([1-9]\d{0,2}(?:\.\d{3})+|\d+(?:,\d+)?)|([.!?…,;:])/giu;
 
 // Dutch measure and currency nouns are INVARIANT after a numeral ("vijf euro", "83 kilometer", "27 miljoen
 // pond"), so each entry is a single form and no count agreement is needed.

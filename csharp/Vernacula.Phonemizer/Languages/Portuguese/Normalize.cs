@@ -86,7 +86,7 @@ public static class Normalize
         return $"{Numbers.NumberToWords(num)} {(num > 1 ? $"{baseWord}s" : baseWord)}";
     }
 
-    private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(?<=\\d)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
+    private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe THIN_SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe ERA_BC = JsRegex.Compile("\\ba\\.\\s?C\\.", "giu");
     private static readonly JsRe ERA_AD = JsRegex.Compile("\\bd\\.\\s?C\\.", "giu");
@@ -95,7 +95,7 @@ public static class Normalize
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
     // The grouped alternative must come FIRST, or a bare \d+ matches only the tail of `1.000º`. ° (U+00B0
     // DEGREE SIGN) is deliberately not an ordinal indicator here: "35°" is a temperature.
-    private static readonly JsRe ORDINAL_INDICATOR = JsRegex.Compile("\\b(\\d{1,3}(?:\\.\\d{3})+|\\d+)\\.?(?:º|ª)", "gu");
+    private static readonly JsRe ORDINAL_INDICATOR = JsRegex.Compile("\\b([1-9]\\d{0,2}(?:\\.\\d{3})+|\\d+)\\.?(?:º|ª)", "gu");
     private static readonly JsRe FEMININE_MARK = JsRegex.Compile("ª", "u");
     private static readonly JsRe GROUPING_DOT = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe REAIS = JsRegex.Compile("R\\$\\s?(\\d[\\d.,]*)", "gu");

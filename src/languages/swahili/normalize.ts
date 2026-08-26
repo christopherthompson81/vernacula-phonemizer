@@ -121,7 +121,7 @@ export function normalizeSwahili(input: string): string {
     //    de-group a number followed by its own sentence comma or period, so `24,000, na wengine` reads
     //    *ishirini na nne , SIFURI ,* — the group splits off and `000` is spoken as zero. The mark is only a
     //    separator when a DIGIT follows it: `(?![\d]|,\d)`.
-    s = s.replace(/(?<![\d.,])(\d{1,3})(,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
 
     // 4) CURRENCY is the SHARED tier's now (`currencyPrefix` in swahili.ts). Safe to move because
     //    swahili.ts runs SYMBOLS *before* this pass, so the tier still sees the sign adjacent to its

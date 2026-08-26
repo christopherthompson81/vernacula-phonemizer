@@ -107,15 +107,15 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    grouping mark, not punctuation; left alone it is a clause break, so "19،500 کیلومتر" reads as
         //    "nineteen … five hundred". ONLY the digit-flanked, exactly-3-digit-block case is folded — ⟨،⟩ as real
         //    punctuation is by far the commonest mark in Persian text and must stay untouched.
-        s = s.replace(/(?<=\d)،(?=\d{3}(?!\d))/gu, ",");
+        s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)،(?=\d{3}(?!\d))/gu, ",");
 
         // 3) DIGIT DE-GROUPING. FIRST among the numeric rules: a grouping comma or period is otherwise read as
         //    clause punctuation — "1,000" → [ˈiːk , sˈefɾ] "one, zero".
         //    Both separators occur. The period form requires whole 3-digit blocks, which is what keeps it off
         //    genuine decimals ("3.50 متر") and off the "15.00 UTC" clock of step 5.
-        s = s.replace(/(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?![\d,])/gu,
+        s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d,])/gu,
             (_m, a: string, rest: string) => a + rest.replace(/,/gu, ""));
-        s = s.replace(/(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?![\d.])/gu,
+        s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d.])/gu,
             (_m, a: string, rest: string) => a + rest.replace(/\./gu, ""));
 
         // 4) CLOCK. BEFORE any rule that reads a bare number, so 11:30 is not claimed piecewise. The colon is a
