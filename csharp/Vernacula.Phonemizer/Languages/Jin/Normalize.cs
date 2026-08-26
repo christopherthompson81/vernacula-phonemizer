@@ -1,0 +1,51 @@
+/**
+ * Jin Chinese (cjy, Taiyuan) text normalization — the pre-tokenizer pass rewriting what is not yet a
+ * pronounceable word into Han the dict speaks. Pure text→text.
+ * Ported from src/languages/jin/normalize.ts — see that file for the corpus evidence and every refusal.
+ */
+using Vernacula.Phonemizer.Core;
+
+namespace Vernacula.Phonemizer.Languages.Jin;
+
+public static class Normalize
+{
+    private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
+    {
+        Ampersand = "和",
+        Percent = new[] { "百分之" },
+        PercentPrefix = true,
+        Units = new Dictionary<string, IReadOnlyList<string>>
+        {
+            ["km"] = new[] { "公里" }, ["kg"] = new[] { "公斤" },
+        },
+        ExponentWords = new ExponentWordsDef
+        {
+            Squared = new[] { "平方" }, Cubed = new[] { "立方" }, Position = ExponentPosition.Compound,
+        },
+        UnspacedScript = true,
+    });
+
+    private static readonly JsRe GROUPED = JsRegex.Compile("(?<![\\d.,])[1-9]\\d{0,2}(?:,\\d{3})+(?![\\d,])", "gu");
+    private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
+    private static readonly JsRe RANGE = JsRegex.Compile(
+        "(?<![\\d.,/\\-\\p{sc=Latn}])(\\d+)\\s*[-–~〜]\\s*(\\d+)(?![\\d.,/\\-\\p{sc=Latn}])", "gu");
+    /** ⚠ A one-character lookbehind cannot express "not after a Latin RUN": `ISO 8859-1` puts a SPACE between
+     *  the identifier and the digits, so the guard saw the space and read the designation as "8859 到 1". */
+    private static readonly JsRe LATIN_BEFORE = JsRegex.Compile("\\p{sc=Latn}[\\s\\p{sc=Latn}]*$", "u");
+
+    public static string NormalizeJin(string input)
+    {
+        var s = input;
+        s = GROUPED.Replace(s, m => COMMAS.Replace(m.Value, ""));
+        s = Sinitic.SpellYears(s, new YearRuleData { RangeWord = "到" });
+        s = Sinitic.ReorderFraction(s, "分之");
+        s = SYMBOLS(s);
+        s = Sinitic.ReadDecimals(s, "點");
+        s = RANGE.Replace(s, m =>
+        {
+            var before = s[Math.Max(0, m.Index - 12)..m.Index];
+            return LATIN_BEFORE.IsMatch(before) ? m.Value : $"{m.Groups[1].Value}到{m.Groups[2].Value}";
+        });
+        return s;
+    }
+}

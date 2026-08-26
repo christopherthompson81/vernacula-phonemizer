@@ -97,6 +97,11 @@ public class LanguageBootstrapTests
     // (台灣 — the non-final syllable takes its sandhi tone), the year+counter shape through the normalizer,
     // and a POJ Latin run folded to Tâi-lô before the g2p (`chit-ê` — POJ ⟨ch⟩ → ⟨ts⟩).
     [InlineData("nan", "台灣", "tai\u032f\u02e7 u\u032fan\u02e8\u02e6")]
+    // The shared Han-dict core (Core/HanDictIpa.cs), through its first C# caller. cjy's golden is only 29
+    // rows — the language has no wikipedia and no FLEURS — so these pin what it cannot: Han numeral
+    // composition, and the year-range path.
+    [InlineData("cjy", "1996-2007\u5e74", "i\u0259\u0294\u02e8 t\u0361\u0255i\u0259u\u02e5\u02e7 t\u0361\u0255i\u0259u\u02e5\u02e7 li\u0259u\u02e6\u02e5 tau\u02e6\u02e5 \u0259\u027b\u02e6\u02e5 li\u014b\u02e9\u02e9 li\u014b\u02e9\u02e9 t\u0361\u0255\u02b0i\u0259\u0294\u02e8 nie\u02e9\u02e9")]
+
     // #1048: POJ is ASCII Latin, so a foreign name used to be read as Min Nan syllables with a tone letter.
     // The dict's own 970 syllable skeletons are the discriminator; a mixed compound keeps both halves.
     [InlineData("nan", "Washington", "w\u02c8\u0251\u02d0\u0283\u026a\u014bt\u0259n")]

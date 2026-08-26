@@ -112,6 +112,7 @@ public static class Bootstrap
             Wu.WuPhonemizer.RegisterSelf();
             Nepali.NepaliPhonemizer.RegisterSelf();
             MinNan.MinNanPhonemizer.RegisterSelf();
+        Jin.JinPhonemizer.RegisterSelf();
         }
     }
 }
