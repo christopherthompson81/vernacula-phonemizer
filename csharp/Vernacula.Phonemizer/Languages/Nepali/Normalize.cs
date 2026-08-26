@@ -96,7 +96,7 @@ public static class Normalize
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(\\d)\\s?({UNIT_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe RATE = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({RATE_NUM})\\s*/\\s*({RATE_DEN})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile("(?<![\\d.,:])(\\d+(?:\\.\\d+)?)\\s?[-–—]\\s?(\\d+(?:\\.\\d+)?)(?![\\d.,:])(?!\\s*देखि(?![\\p{L}\\p{M}]))", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})/(\\d{1,3})(?![\\d/])", "gu");
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
     private static readonly JsRe TILDE = JsRegex.Compile("~\\s?(?=\\d)", "gu");
     private static readonly JsRe DOUBLE_SPACE = JsRegex.Compile(" {2,}", "gu");
 
