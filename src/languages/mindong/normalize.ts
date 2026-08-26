@@ -134,6 +134,11 @@
  * cannot match a bare tone number. ⚠ The exemptions are listed BY INSTANCE above and never by class, so a
  * genuine `km²` regression stays visible — and `km²` is exactly what the tier still claims.
  *
+ * ⚠ THE REFUSAL IS NARROWER THAN IT WAS, AND STILL HOLDS. `bareExponent` remains undeclared, but the shared
+ * tier no longer DELETES an undeclared power: since #1041 it spaces a DIGIT-base run out to its digits
+ * (`10¹⁹` → `10 19`), which the tone-number hazard above cannot reach — every tone run here sits on a LETTER
+ * base, and letter bases are declined outright.
+ *
  * ⚠ NO `unitPer`, WHICH IS WHY ⟨km⟩ STILL LEAKS ONCE — and the refusal is about WORD ORDER, not about a
  * missing word. The residual is `ìng-kēu mik dô dék gèng … dak gáu 5720 nè̤ng/km`, a population density.
  * ⟨km⟩ itself IS declared and reads everywhere else; here the slash makes it a RATE, and a rate is composed

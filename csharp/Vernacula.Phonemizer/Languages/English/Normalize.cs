@@ -219,6 +219,7 @@ public static class Normalize
     /** …spaced off from a following letter first — see the TS for why `I²C` fused into one token. */
     private static readonly JsRe BARE_EXPONENT_GLUED = JsRegex.Compile(
         "(?:\\d[\\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\\s?(?:\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+)(?=[\\p{L}\\p{M}])", "gu");
+    private static readonly JsRe LONE_SUPERSCRIPT_MARK = JsRegex.Compile("^[⁰¹]$", "u");
     private static readonly JsRe HAS_LOWER = JsRegex.Compile("[a-z]");
     private static readonly JsRe CAPS_ROMAN = JsRegex.Compile("\\b([A-Za-z][A-Za-z']*)\\s+([IVXLCDM]{2,})\\b", "g");
     private static readonly JsRe CAP_INITIAL = JsRegex.Compile("^[A-Z]");
@@ -380,6 +381,8 @@ public static class Normalize
         s = BARE_EXPONENT.Replace(s, m =>
         {
             var bas = m.Groups[1].Value;
+            // A lone ⁰ or ¹ is a degree sign or a prime, not a power — see LONE_MARK in Core/NormalizeSymbols.cs.
+            if (LONE_SUPERSCRIPT_MARK.IsMatch(m.Groups[2].Value)) return m.Value;
             var digits = string.Concat(Js.CodePoints(m.Groups[2].Value).Select(c => SUPERSCRIPT_DIGIT[c]));
             var neg = digits.StartsWith("-", StringComparison.Ordinal);
             var mag = neg ? digits[1..] : digits;

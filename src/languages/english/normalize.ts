@@ -546,7 +546,11 @@ export function normalizeEnglish(input: string): string {
     s = s.replace(/(?:\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?(?:\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)(?=[\p{L}\p{M}])/gu,
         (m0) => `${m0} `);
     s = s.replace(/(\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?(\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
-        (_m, base: string, sup: string) => {
+        (whole, base: string, sup: string) => {
+            //     ⚠ A LONE ⁰ OR ¹ IS A DEGREE SIGN OR A PRIME, not a power — see `LONE_MARK` in
+            //     core/normalizeSymbols.ts for the corpus measurement. `360⁰` is a bearing and
+            //     `110⁰04¹05¹` is a coordinate; nobody writes x⁰ or x¹.
+            if (/^[⁰¹]$/u.test(sup)) return whole;
             const digits = [...sup].map((c) => SUPERSCRIPT_DIGIT[c]!).join("");
             //     ⚠ THE SIGN WORD IS EMITTED HERE, not left as an ASCII `-` for the sign rule to pick up:
             //     that rule is step 0f and this is step 6b, so anything written now is downstream of it and

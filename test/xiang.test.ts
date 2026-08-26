@@ -53,7 +53,10 @@ describe("xiang text normalization", () => {
         // exponent. Reading them as powers would turn a pronunciation table into arithmetic.
         expect(normalizeXiang("/ʃɘ̃⁴⁵/")).toBe("/ʃɘ̃⁴⁵/");
         expect(normalizeXiang("/mɔ⁴²/")).toBe("/mɔ⁴²/");
-        expect(normalizeXiang("5.9742×10²⁴公斤")).toBe("5.9742×10²⁴公斤"); // scientific notation, untouched
+        // ⚠ AND THE ONE GENUINE EXPONENT NOW KEEPS ITS DIGITS, which does not weaken the finding above: the
+        // shared tier's undeclared fallback (#1041) rewrites a DIGIT base only, and every tone number in this
+        // corpus sits on a LETTER base. The hazard this refusal exists for cannot reach the fallback.
+        expect(normalizeXiang("5.9742×10²⁴公斤")).toBe("5.9742×10 24 公斤");
         // …but a squared UNIT still reads, because it composes onto the unit noun and cannot match a tone.
         // the shared tier spaces its insertions (`百分之 12`, `50 平方公里`) — identical in cjy, and
         // harmless because a Han engine tokenizes by script run, so the space is not a boundary it can see.

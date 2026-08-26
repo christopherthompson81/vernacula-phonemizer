@@ -50,7 +50,10 @@
  *     shape, never its Igbo half-reading shape).
  *   · NO `·` / `∙` MULTIPLICATION and NO BARE EXPONENT. `1,602 · 10⁻¹⁹` ×3. No Wolof "times" word and no
  *     "to the power of" phrase is attested in the corpus, on wo.wikipedia or in the kaikki referee, so
- *     `multiply` and `bareExponent` are both omitted and the marks stay where the RAWMARK gate can see them.
+ *     `multiply` and `bareExponent` are both omitted. ⚠ THE SECOND HALF OF THAT SENTENCE USED TO SAY THE
+ *     MARKS "STAY WHERE THE RAWMARK GATE CAN SEE THEM", and for the exponent that was never true — the
+ *     tokenizer ate it (#1041). Wolof's instances are NEGATIVE exponents, which the tier's new digit
+ *     fallback also declines (no sign word to spend), so this corpus is unchanged either way.
  *   · NO MINUS. The 2 signs the scan reports are a LIST BULLET (`Doom bi: -Daa tàcc -5 ba 7,5i sàntimet`,
  *     a botanical description) and the spaced exponent inside `10 -19`. The corpus contains no negative
  *     number; same conclusion as the Burmese run, reached from the instances.
