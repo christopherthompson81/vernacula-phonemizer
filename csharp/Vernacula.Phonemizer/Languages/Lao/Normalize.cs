@@ -83,29 +83,29 @@ public static class Normalize
         var s = input;
 
         // 1) THE SOFT HYPHEN GOES AND THE ZERO WIDTH SPACE STAYS — see the TS header.
-        s = INVISIBLE.Re.Replace(NBSP.Re.Replace(s, " "), "");
-        s = US_DOLLAR.Re.Replace(s, "US$$");
+        s = INVISIBLE.Replace(NBSP.Replace(s, " "), "");
+        s = US_DOLLAR.Replace(s, "US$$");
 
         // 2) ERA MARKERS — before anything that reads a dot, and the largest single class in the language.
-        foreach (var (rx, word) in ERA) s = rx.Re.Replace(s, word);
-        s = DOUBLE_SPACE.Re.Replace(s, " ");
+        foreach (var (rx, word) in ERA) s = rx.Replace(s, word);
+        s = DOUBLE_SPACE.Replace(s, " ");
 
         // 3) THE SEPARATORS, BY GROUP SIZE — three digits after the mark is a THOUSANDS group whichever
         //    mark carries it.
         s = JsRegex.Replace(s, GROUP, m => m.Value.Replace(m.Groups[2].Value, "", StringComparison.Ordinal));
 
         // 4) NEGATIVE NUMBERS — U+2212 anywhere, the ASCII hyphen only where it does not follow a number.
-        s = MINUS_SIGN.Re.Replace(s, "ລົບ ");
-        s = MINUS_ASCII.Re.Replace(s, "ລົບ ");
+        s = MINUS_SIGN.Replace(s, "ລົບ ");
+        s = MINUS_ASCII.Replace(s, "ລົບ ");
 
         // 5) DEGREES — `ອົງສາ`, POSTPOSED. Lao writes the scale letter FIRST (`30 - 33 c°`), so both orders
         //    are claimed and the letter is consumed rather than read as an English letter name.
-        s = DEGREE_SCALE.Re.Replace(s, "$1 ອົງສາ");
-        s = DEGREE_BARE.Re.Replace(s, "$1 ອົງສາ");
+        s = DEGREE_SCALE.Replace(s, "$1 ອົງສາ");
+        s = DEGREE_BARE.Replace(s, "$1 ອົງສາ");
 
         // 5b) A PERCENT WORD ALREADY IN THE TEXT SPENDS THE SIGN — on either side of the figure.
-        s = PERCENT_WORD_NUM.Re.Replace(s, "$1$2");
-        s = PERCENT_WORD_SIGN.Re.Replace(s, "$1");
+        s = PERCENT_WORD_NUM.Replace(s, "$1$2");
+        s = PERCENT_WORD_SIGN.Replace(s, "$1");
 
         // 6) THE SHARED TIER — above step 7, because the tier matches a unit only when a NUMBER is adjacent
         //    and the decimal rewrite destroys that adjacency.

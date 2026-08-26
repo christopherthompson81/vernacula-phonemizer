@@ -26,6 +26,11 @@ public static class LaoPhonemizer
 
     private static bool IsCons(string c) => CONS.ContainsKey(c);
 
+    /** JS `CONS[c]?.[k]` — undefined for an absent key AND for a short row. ⚠ THE SECOND HALF IS NOT
+     *  DECORATION: a one-element onset row in lao.jsonc reads as `mid` in the TS and would throw here. */
+    private static string? ConsAt(string c, int k) =>
+        CONS.TryGetValue(c, out var v) && k < v.Length ? v[k] : null;
+
     /** JS `s[i] ?? ""` on a code-point array. */
     private static string At(IReadOnlyList<string> s, int i) => i >= 0 && i < s.Count ? s[i] : "";
 
@@ -199,8 +204,8 @@ public static class LaoPhonemizer
                 if (!(IsCons(nx) && followsVowel)) { coda = CODA.GetValueOrDefault(nx) ?? ""; i++; }
             }
             if (coda == "" && glide == "" && At(s, i) == "ຽ" && (used > 0 || pre != "")) { coda = "j"; i++; }
-            var onset = string.Concat(onsetCs.Select(g => CONS.TryGetValue(g, out var v) ? v[0] : "")) + cluster;
-            var cls = leadHigh ? "high" : (CONS.TryGetValue(onsetCs[0], out var oc) ? oc[1] : "mid");
+            var onset = string.Concat(onsetCs.Select(g => ConsAt(g, 0) ?? "")) + cluster;
+            var cls = leadHigh ? "high" : ConsAt(onsetCs[0], 1) ?? "mid";
             var codaOut = coda != "" ? coda : glide;
             var heavy = @long || quality.Contains("ː", StringComparison.Ordinal);
             var live = codaOut == "" ? heavy : SONORANT_CODA.IsMatch(codaOut);
