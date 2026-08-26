@@ -39,6 +39,7 @@ public static class Bootstrap
             Asturian.AsturianPhonemizer.RegisterSelf();
             Azerbaijani.AzerbaijaniPhonemizer.RegisterSelf();
             Bengali.Bengali.RegisterSelf();
+            Bhojpuri.BhojpuriPhonemizer.RegisterSelf();
             Bulgarian.BulgarianPhonemizer.RegisterSelf();
             Cebuano.CebuanoPhonemizer.RegisterSelf();
             English.EnglishFactory.RegisterSelf();
@@ -49,7 +50,6 @@ public static class Bootstrap
             German.GermanPhonemizer.RegisterSelf();
             Greek.GreekPhonemizer.RegisterSelf();
             Hindi.Hindi.RegisterSelf();
-            Bhojpuri.BhojpuriPhonemizer.RegisterSelf();
             Igbo.IgboPhonemizer.RegisterSelf();
             Indonesian.IndonesianPhonemizer.RegisterSelf();
             Japanese.JapanesePhonemizer.RegisterSelf();

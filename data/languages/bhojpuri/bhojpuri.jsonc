@@ -80,6 +80,9 @@
     },
 
     // Independent vowel letters (word-initial / standalone).
+    // ⚠ THE "short"/"long" IN THE NOTES BELOW DESCRIBES THE DEVANAGARI LETTER PAIR, NOT THIS INVENTORY.
+    // Bhojpuri has NO phonemic length, so इ/ई and उ/ऊ each collapse to one phone (i, u) and no value here
+    // carries ː. The wording is inherited from hindi.jsonc, where the pairs really do contrast.
     "independentVowels": {
         "अ": { "ipa": "ʌ", "note": "short central (schwa)" },
         "आ": { "ipa": "ɑ", "note": "long open" },
@@ -104,7 +107,7 @@
             "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi) — see the filed defect above",
         },
         "ए": { "ipa": "e", "note": "long close-mid front" },
-        "ऐ": { "ipa": "ɛ", "note": "⚠ MONOPHTHONG [ɛ], NOT the diphthong [ai] — बैल→bɛl. An earlier revision of this note claimed Bhojpuri 'KEEPS the diphthong'; `provenance` above records that claim as WRONG, and the mined referee has no [ai] here. Do not 'fix' the value to match the retracted note." },
+        "ऐ": { "ipa": "ɛ", "note": "⚠ MONOPHTHONG [ɛ], NOT the diphthong [ai] — बैल→bɛl. An earlier revision of this note claimed Bhojpuri 'KEEPS the diphthong'; `provenance` above records that claim as WRONG. Do not 'fix' the value to match the retracted note." },
         "ओ": { "ipa": "o", "note": "long close-mid back" },
         "औ": { "ipa": "ɔ", "note": "⚠ MONOPHTHONG [ɔ], NOT the diphthong [au] — कौन→kɔn. Same retraction as ऐ above." },
         "ऍ": { "ipa": "ɛ", "note": "candra e (loans)" },

@@ -26,8 +26,8 @@
  * which are byte-identical to hindi.jsonc's. All inherited, none Bhojpuri-sourced.
  *
  * ⚠ FILED, NOT FIXED: ⟨ऋ⟩/⟨ृ⟩ map to ASCII `ri` — an alveolar TRILL — in a manifest whose only rhotic is
- * ɾ, so कृष्ण reads *krisn* beside कर *kəɾ*. See the long note at the ऋ entry in bhojpuri.jsonc for the
- * evidence and for why the referee needed to settle it is not in the repo.
+ * ɾ, so कृष्ण reads *krisn* beside कर *kəɾ*. The note at the ऋ entry in bhojpuri.jsonc carries the
+ * evidence, and why the referee that would settle it is not available.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

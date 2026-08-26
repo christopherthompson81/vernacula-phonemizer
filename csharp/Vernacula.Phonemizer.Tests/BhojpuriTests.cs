@@ -2,9 +2,10 @@
  * ⚠ THE bho GOLDEN IS HINDI TEXT RE-RENDERED, NOT BHOJPURI. csharp/goldens/bho.tsv is derived from
  * csharp/goldens/hi.tsv by tools/gen_variant_golden.mts — Bhojpuri has no FLEURS corpus and no mined
  * artifact — so 200/200 pins C#↔TS parity on the shared Devanagari machinery and nothing about whether the
- * Bhojpuri-specific readings are the ones the manifest claims. These tests carry that half: they are
- * test/bhojpuri.test.ts's expectations, and each one is a place where a Hindi-shaped engine would still
- * look plausible while being wrong.
+ * Bhojpuri-specific readings are the ones the manifest claims. These tests carry that half. The word
+ * theory is test/bhojpuri.test.ts's expectations; the text theory is running Bhojpuri from
+ * tools/corpus/attest/bho.jsonc, read off the TypeScript engine. Each row is a place where a Hindi-shaped
+ * engine would still look plausible while being wrong.
  */
 using Vernacula.Phonemizer.Languages.Bhojpuri;
 using Xunit;
