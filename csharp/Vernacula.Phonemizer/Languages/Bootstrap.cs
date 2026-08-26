@@ -37,6 +37,7 @@ public static class Bootstrap
             Arabic.Arabic.RegisterSelf();
             Assamese.Assamese.RegisterSelf();
             Asturian.AsturianPhonemizer.RegisterSelf();
+            Azerbaijani.AzerbaijaniPhonemizer.RegisterSelf();
             Bengali.Bengali.RegisterSelf();
             Bulgarian.BulgarianPhonemizer.RegisterSelf();
             Cebuano.CebuanoPhonemizer.RegisterSelf();

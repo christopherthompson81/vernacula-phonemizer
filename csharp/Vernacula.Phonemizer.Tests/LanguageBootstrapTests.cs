@@ -68,6 +68,18 @@ public class LanguageBootstrapTests
     [InlineData("lo", "ຫຼາຍ", "laː˩j")]
     [InlineData("lo", "ວຽງຈັນທນ໌", "ʋiːə˧˥ŋ.t͡ɕa˩n")]
     [InlineData("lo", "ຄ.ສ. 1990", "kʰa˧.li˧t̚.sa˧˥k̚.ka˧˥.laː˥˨t̚ nɯ˧ŋ pʰa˧˥n ka˥˨w hɔː˥˨j ka˥˨w si˧˥p̚")]
+    // Azerbaijani's defining shapes. ⚠ THE DOTTED/DOTLESS I PAIR IS THE ONE TO PIN: ⟨I⟩ names *ı* and ⟨İ⟩
+    // names *i*, and every plain-fold shortcut (JS `toLowerCase`, .NET `ToLower`, a Turkish-locale cast)
+    // collapses the contrast in a direction no golden row happens to expose. Then the Oghuz consonants that
+    // separate az from tr — ⟨q⟩ → [ɡ] devoicing to [x] word-finally, ⟨ğ⟩ → [ɣ] rather than lengthening —
+    // and the Roman century, which this orthography writes as an ordinal with no suffix.
+    [InlineData("az", "ITV", "ˈɯ tˈe vˈe")]
+    [InlineData("az", "İTV", "ˈi tˈe vˈe")]
+    [InlineData("az", "I&O şirkəti", "ˈɯ vˈæ ˈo ʃiɾcætˈi")]
+    [InlineData("az", "oxumaq lazımdır", "oxumˈɑx ɫɑzɯmdˈɯɾ")]
+    [InlineData("az", "dağ və oğul", "dˈɑɣ vˈæ oɣˈuɫ")]
+    [InlineData("az", "XIX əsr", "ˈon doɡːuzund͡ʒˈu ˈæsɾ")]
+    [InlineData("az", "1767-ci ildə", "mˈin jedːˈi jˈyz ɑɫtmˈɯʃ jedːind͡ʒˈi ildˈæ")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 

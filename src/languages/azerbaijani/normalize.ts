@@ -149,8 +149,17 @@ export function normalizeAzerbaijani(input: string): string {
     // 1) ERA MARKERS and MULTI-DOT ABBREVIATIONS. FIRST, before the single-dot rule — otherwise the
     //    single-dot rule consumes `e.`/`b.` and leaves `ə.`/`e.` behind as an interior phrase break.
     //    Also before the dotted-capital rule, so `E.ə.` is not offered to it.
+    //    Two branches, as in step 3: the marker's FINAL dot is KEPT when the marker ends the string, where it
+    //    really is the sentence period, and consumed otherwise.
+    //    ⚠ THE END BRANCH DOES NOT APPEND `\.` — and that is the whole of the fix here. This idiom is
+    //    Dutch's (nl/normalize.ts step 1), where the bodies are written WITHOUT their final dot (`v\.\s?Chr`)
+    //    and both branches supply it. These bodies carry their own (`e\.\s?ə\.`), so appending a second one
+    //    asked for `e.ə..` and the branch never fired at all: a sentence ending "…məbəd e.ə." lost its
+    //    terminal pause outright, silently, because the bare branch below then ate the marker dot and all.
+    //    Measured before the fix: 0 of the 3,838 FLEURS az lines and 0 of the 200 golden rows end on an era
+    //    marker, so nothing observable moved — the branch was dead, not wrong-but-load-bearing.
     for (const [body, word] of MULTI_DOT) {
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=\\s*$)`, "giu"), `${word}.`);
+        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${body}(?=\\s*$)`, "giu"), `${word}.`);
         s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${body}`, "giu"), word);
     }
 
@@ -264,8 +273,14 @@ export function normalizeAzerbaijani(input: string): string {
     // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
     // still refused by the lookbehind.
     s = s.replace(/(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "mənfi $1");
+    // ⚠ `azLower`, NOT `toLowerCase`, for the reason `normalizeInitialisms` states above — and this call
+    // was the one site in the file that still had the plain fold. JS lowercase maps the DOTLESS capital
+    // `I` to dotted `i`, which the letter-name table answers with *i*, so `I&O` read *i və o* where
+    // Azerbaijani says *ı və o* — the same defect the initialism pass was fixed for, in the arm nobody
+    // re-checked. `İ` folds to `i` + U+0307, which the table cannot key on at all, so it fell through to
+    // the bare capital and only reached *i* by way of the tokenizer's own İ→i normalization.
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) =>
-        `${LETTER_NAME[a.toLowerCase()] ?? a} və ${LETTER_NAME[b.toLowerCase()] ?? b}`);
+        `${LETTER_NAME[azLower(a)] ?? a} və ${LETTER_NAME[azLower(b)] ?? b}`);
     s = s.replace(/\s&\s/gu, " və ");
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 bərabərdir $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 kiçikdir $2");
