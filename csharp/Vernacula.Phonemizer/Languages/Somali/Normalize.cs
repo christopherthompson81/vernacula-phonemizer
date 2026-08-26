@@ -67,7 +67,10 @@ public static class Normalize
     private static readonly JsRe GLUED_H = JsRegex.Compile("(?<![\\p{L}\\p{M}])(\\d+)H(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe GLUED_M = JsRegex.Compile("(?<![\\p{L}\\p{M}])(\\d+)M(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe YEAR_CONTEXT = JsRegex.Compile("[Ss]anad|[Bb]ish|[Qq]arni|Hijri|=", "u");
-    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d.:])([01]?\\d|2[0-3]):([0-5]\\d)\\b(?!\\.?\\d)", "gu");
+    // ⚠ `(?!:\d)` and the meridiem alternation are load-bearing — an h:mm followed by `:digit` is a ratio,
+    // an h:m:s or an ISO stamp, not a clock; and JS `\b` is ASCII-only so a glued `PM` blocked the match.
+    private static readonly JsRe CLOCK = JsRegex.Compile(
+        "(?<![\\d.:])([01]?\\d|2[0-3]):([0-5]\\d)(?!:\\d)(?!\\.?\\d)(?:(?=\\s?[AaPp]\\.?[Mm]\\.?)|\\b)", "gu");
     private static readonly JsRe ORDINAL_TAIL = JsRegex.Compile("(?<![\\p{L}\\p{M}])(\\d+)(?:st|nd|rd|th)(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe BARE_RATE = JsRegex.Compile(
         $@"(?<=[\d\p{{L}}])\s*/\s*(?=(?:sq |cu )?(?:{UNIT_KEYS})(?:[²³23])?(?![\p{{L}}\p{{M}}\d]))", "gu");

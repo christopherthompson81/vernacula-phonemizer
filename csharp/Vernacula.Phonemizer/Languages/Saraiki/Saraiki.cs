@@ -44,7 +44,7 @@ public static class SaraikiPhonemizer
             PunjabiPhonemizer.LoadPunjabiManifest(),
             PhonologyLoader.LoadSharedPhonology(),
             foreign,
-            new PunjabiOpts { Saraiki = true, Normalize = Normalize.NormalizeSaraiki }));
+            new PunjabiOpts { Saraiki = true, Normalize = Normalize.NormalizeSaraiki, WordLexicon = SaraikiLexicon }));
 
     internal static void RegisterSelf() =>
         Registry.Register("saraiki", () => CreateSaraiki(Registry.ReadAsEnglish));

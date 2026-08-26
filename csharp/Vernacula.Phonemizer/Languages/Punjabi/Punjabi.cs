@@ -22,6 +22,9 @@ public class PunjabiDef : AbugidaDef
 public sealed class PunjabiOpts
 {
     public bool Saraiki { get; init; }
+    /** The variety's OWN short-vowel coverage lexicon, consulted by ShippedWord when Saraiki is set.
+     *  Null for pa/pnb, which use the Punjabi lexicons. A thunk, so the file is read lazily. */
+    public Func<IReadOnlyDictionary<string, string>>? WordLexicon { get; init; }
     /** The variety's OWN pre-tokenizer pass, replacing the Punjabi one. Saraiki supplies
      *  `normalizeSaraiki`; without it the `saraiki` flag leaves the text unnormalized (which is what it did
      *  before that layer existed — see the comment on `normalize` below). */
@@ -181,7 +184,11 @@ public static class PunjabiPhonemizer
          */
         string ShippedWord(string w)
         {
-            if (opts.Saraiki) return Word(w);
+            // The variety supplies its own coverage tier via WordLexicon; the Punjabi lexicons stay gated
+            // off (Gurmukhi keys, pa cross-script pairs). Without the hook skr's documented word path was
+            // unreachable from Text() — see the TS for the account.
+            if (opts.Saraiki)
+                return Word(opts.WordLexicon is null ? w : HarakatLexicon.RestoreHarakat(w, opts.WordLexicon()));
             if (GuruLexicon().TryGetValue(w, out var g)) return g;
             if (CrossScriptLexicon().TryGetValue(w, out var c)) return c;
             return Word(HarakatLexicon.RestoreHarakat(w, HarakatLex()));

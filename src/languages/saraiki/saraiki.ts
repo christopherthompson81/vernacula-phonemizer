@@ -51,5 +51,12 @@ export function phonemizeWord(w: string): string {
 
 /** Build the Saraiki phonemizer. `foreign` handles embedded Latin. */
 export function createSaraiki(foreign?: ForeignPhonemizer): { text(input: string): string } {
-    return makeNativePunjabi(loadPunjabiManifest(), loadSharedPhonology(), foreign, { saraiki: true, normalize: normalizeSaraiki });
+    // ⚠ `wordLexicon` IS WHAT MAKES `phonemizeWord`'s DOCSTRING TRUE. Without it the shipped path
+    // (`text` → `shippedWord`) skipped the coverage tier this module loads, so the documented word path had
+    // no caller and the product consulted no lexicon — `pa`'s own defect, one variety over (#1049).
+    return makeNativePunjabi(loadPunjabiManifest(), loadSharedPhonology(), foreign, {
+        saraiki: true,
+        normalize: normalizeSaraiki,
+        wordLexicon: saraikiLexicon,
+    });
 }

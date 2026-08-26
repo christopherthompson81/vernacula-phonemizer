@@ -164,7 +164,26 @@ export function normalizeSomali(input: string): string {
     // are joined with `iyo` ("and"), which is how Somali builds every compound numeral and needs no separate
     // sourcing — it is the same ×76,283 conjunction the ampersand rule spends.
     // ⚠ ON THE HOUR THE MINUTES DROP OUT, as in every language treated so far.
-    s = s.replace(/(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)/gu,
+    // ⚠ THREE GUARDS, AND THE COLON CHAIN IS THE ONE THAT MATTERS. `h:mm` is a clock only when nothing
+    //   further is chained onto it, and this corpus writes four things that are NOT clocks:
+    //     `NPK 19:19:19` ×2   a fertiliser ratio, read as *19 iyo 19* with a stray `:19` left as a PAUSE
+    //     `2:15:16`           an Olympic time, read as *2 iyo 15* + `:16`
+    //     `(12:00:00) GMT`    h:m:s, truncated to *12*
+    //     `2019-02-07T23:28:34+04:00`  an ISO 8601 stamp, read as *23 iyo 28* + `:34` + *ku dar 4*
+    //   `(?!:\d)` declines all four. It does NOT touch `13:25: 13:35`, two real clocks separated by a
+    //   colon and a SPACE, which still read — the guard is a colon followed by a DIGIT.
+    // ⚠ AND THE TIMEZONE OFFSET IS LEFT TO THE CLOCK RULE ON PURPOSE — I tried excluding it and it was a
+    //   REGRESSION. `UTC+04:00` reads *UTC ku dar 4*, and that is the correct reading of an offset: the `+`
+    //   rule says "plus", the clock rule turns `04:00` into the bare hour, and "UTC plus four" is exactly
+    //   what the string means. Adding `+` to the lookbehind produced *UTC ku dar 04:00*, leaving a raw
+    //   colon to become a clause PAUSE. A rule getting the right answer by an unintended route is still
+    //   the right answer, and the measurement is what said so.
+    // ⚠ AND THE GLUED MERIDIEM, which is what the header above promised and did not deliver: JS `\b` is
+    //   ASCII-`\w`-based, so `8:28PM` has no boundary between `8` and `P` and the whole match FAILED —
+    //   the time was not read at all, the opposite of the documented "reads the TIME, leaves the meridiem
+    //   visible". The alternation lets a meridiem satisfy the boundary; the meridiem itself is still left
+    //   for the reader, unsourced, exactly as the header says.
+    s = s.replace(/(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)(?!:\d)(?!\.?\d)(?:(?=\s?[AaPp]\.?[Mm]\.?)|\b)/gu,
         (_m, h: string, min: string) => (Number(min) === 0 ? `${Number(h)}` : `${Number(h)} iyo ${Number(min)}`));
 
     // ── 3b. THE ENGLISH SPELLINGS OF THINGS SOMALI ALREADY WRITES ITS OWN WAY ──────────────────────────

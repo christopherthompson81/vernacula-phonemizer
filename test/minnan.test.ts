@@ -259,3 +259,48 @@ describe("min nan normalization: the raw-Latin units", () => {
         expect(normalizeMinNan("5 mg")).not.toBe(normalizeMinNan("5 kg"));
     });
 });
+
+describe("Min Nan: a foreign name is not a Min Nan word (#1048)", () => {
+    const say = (t: string): string => phonemize(t, "nan").trim();
+
+    // ⚠ `foreign` WAS STORED AND NEVER CALLED. `createMinnan`'s docstring promised it "handles embedded
+    // (non-Tâi-lô) Latin runs"; because `NATIVE_CLASS` starts `[A-Za-z…]` every Latin run counted as native,
+    // so a foreign name was read out as Min Nan syllables WITH A TONE LETTER. 796 of the 6,836 tokens in the
+    // shipped golden carried a letter Min Nan's IPA cannot produce; after the fix, 0.
+    test("a foreign proper noun routes to the English reader instead of gaining a tone", () => {
+        for (const w of ["Iran", "Washington", "Ukraina", "Lietuva", "Khorasan"])
+            expect(say(w), w).not.toMatch(/[˥˦˧˨˩]/u);
+        expect(say("Iran")).toBe("ɪɹˈɑːn");
+        expect(say("Washington")).toBe("wˈɑːʃɪŋtən");
+    });
+
+    test("…and real POJ is untouched, including the shapes a naive fold gets wrong", () => {
+        // ⚠ THE FOLD ORDER IS LOAD-BEARING. Tone marks are stripped BEFORE `pojToTailo`, as `syllableParts`
+        // does. Folding first means `he̍k` never matches `ek`→`ik` and `sòa` never matches `oa`→`ua`, and 65
+        // real POJ words are misclassified as foreign. These two are the regression guard for that.
+        expect(say("he̍k-chiá")).toBe("hiə̯k̚˧˨ t͡ɕi̯a˥˩");
+        expect(say("chit-ê lâng")).toBe("t͡ɕit̚˥ e˨˦ laŋ˨˦");
+        expect(say("台灣")).toBe("tai̯˧ u̯an˨˦"); // the Han path is not involved at all
+    });
+
+    test("⚠ A MIXED COMPOUND KEEPS BOTH HALVES — and a foreign particle does not become Min Nan", () => {
+        // `Ukraina-gí` is a foreign stem plus the native noun "language"; splitting is right. But French
+        // `la`/`le` and the Persian ezafe `-e` are legal Tâi-lô skeletons BY ACCIDENT, so membership alone
+        // read `Fontaine-la-Soret` as English + Min Nan + English. The discriminator, measured over the
+        // golden's 26 mixed runs: all 5 real native morphemes carry a POJ TONE DIACRITIC and none of the 20
+        // particles do.
+        expect(say("Ukraina-gí")).toBe("ˈuːkɹæˌiːnə ɡi˥˩"); // split: English + Min Nan
+        expect(say("Italia-bûn")).toBe("itʰˈæliʲə bun˨˦");
+        expect(say("Fontaine-la-Soret")).not.toMatch(/[˥˦˧˨˩]/u); // wholly French, `la` included
+        expect(say("Kahriz-e")).not.toMatch(/[˥˦˧˨˩]/u); // the Persian ezafe
+        expect(say("Ji-ye")).not.toMatch(/[˥˦˧˨˩]/u);
+    });
+
+    test("⚠ A WHOLLY-NATIVE RUN IS NEVER SPLIT — tone sandhi is word-internal", () => {
+        // Splitting a native word at its hyphens would give every syllable citation tone and silently
+        // delete the sandhi, so the mark test above applies ONLY to mixed runs. An unmarked tone-1
+        // compound must still read as one tone group.
+        expect(say("chit-ê")).toBe("t͡ɕit̚˥ e˨˦");
+        expect(say("sî-chūn")).toBe("ɕi˧ t͡sun˧");
+    });
+});

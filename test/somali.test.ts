@@ -177,3 +177,40 @@ describe("Somali normalization: the raw-Latin runs", () => {
         );
     });
 });
+
+describe("Somali clock — h:mm is a clock only when nothing is chained onto it (#1050)", () => {
+    const n = (t: string): string => normalizeSomali(t);
+
+    test("⚠ THE GLUED MERIDIEM: the header promised this reading and JS `\\b` withheld it", () => {
+        // `\b` is ASCII-`\w`-based, so `8:28PM` had no boundary between `8` and `P` and the whole match
+        // failed — the TIME was not read either, the opposite of the documented "reads the TIME, leaves
+        // the meridiem visible". The meridiem itself is still left for the reader, unsourced, as the
+        // header says: `pm ×1` buys no Somali word.
+        expect(n("saacaddu marka ay ahayd 8:28PM")).toContain("8 iyo 28PM");
+        expect(n("10:50 pm")).toBe("10 iyo 50 pm"); // the spaced form, which always worked
+    });
+
+    test("⚠ A COLON CHAIN IS NOT A CLOCK — four shapes this corpus writes and the rule was eating", () => {
+        expect(n("NPK 19:19:19 ah")).toBe("NPK 19:19:19 ah"); // a FERTILISER RATIO, ×2 in the corpus
+        expect(n("wakhtigaas oo ahaa 2:15:16.")).toBe("wakhtigaas oo ahaa 2:15:16."); // an Olympic time
+        expect(n("duhurka (12:00:00) GMT")).toBe("duhurka (12:00:00) GMT"); // h:m:s
+        expect(n("sida 2019-02-07T23:28:34+04:00.")).toContain("2019-02-07T23:28:34"); // ISO 8601
+    });
+
+    test("the guard is a colon followed by a DIGIT — two real clocks in a row still read", () => {
+        expect(n("13:25: 13:35")).toBe("13 iyo 25: 13 iyo 35");
+        expect(n("9:00 Subaxnimo")).toBe("9 Subaxnimo"); // on the hour, minutes drop
+        // a RANGE of clocks — FLEURS's own line. Both operands read AND the dash becomes the range word,
+        // which is why `-` must stay out of the lookbehind however tempting the `+04:00` offset makes it.
+        expect(n("Intii u dhaxeyse 10:00-11:00 pm")).toBe("Intii u dhaxeyse 10 ilaa 11 pm");
+    });
+
+    test("⚠ THE TIMEZONE OFFSET IS LEFT TO THE CLOCK RULE, and excluding it MEASURED WORSE", () => {
+        // `UTC+04:00` → *UTC ku dar 4*: the `+` rule says "plus", the clock rule reduces `04:00` to the
+        // bare hour, and "UTC plus four" is exactly what an offset means. Adding `+` to the lookbehind
+        // gave *UTC ku dar 04:00*, leaving a raw colon to become a clause PAUSE. Right answer by an
+        // unintended route is still the right answer.
+        expect(n("UTC+04:00 waa")).toBe("UTC ku dar 4 waa");
+        expect(n("UTC ee +04:00.")).toBe("UTC ee ku dar 4.");
+    });
+});
