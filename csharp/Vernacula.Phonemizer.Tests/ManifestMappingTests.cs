@@ -492,4 +492,17 @@ public class ManifestMappingTests
     public void ArabicEgyptianVarietyIsFullyMapped() =>
         AssertFullyMapped("languages/arabic", "egyptian.jsonc",
             Core.LoadManifest.Load<Languages.Arabic.Arabic.VarietyDef>("languages/arabic", "egyptian.jsonc"));
+
+    // hak carries two blocks no other Han-dict manifest has — `pfsOnsets` and `pfsTones`, whose KEYS are
+    // bare combining marks and the empty string. Checked structurally for the reason the file gives.
+    [Fact]
+    public void XiangManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/xiang", "xiang.jsonc",
+            Core.LoadManifest.Load<Core.HanDictDef>("languages/xiang", "xiang.jsonc"),
+            "language", "name", "script");
+
+    [Fact]
+    public void HakkaManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/hakka", "hakka.jsonc", Languages.Hakka.HakkaPhonemizer.DEF,
+            "language", "name", "script");
 }
