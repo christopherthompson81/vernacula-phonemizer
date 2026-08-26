@@ -311,3 +311,17 @@ describe("the Nguni loan lexicon", () => {
             expect(await phonemize(w, "zu"), w).toMatch(CLICK);
     });
 });
+
+describe("Zulu: the plus is claimed once, by step 8c", () => {
+    it("reads a signed degree identically through every degree arm", () => {
+        // Step 8c's comment claimed `[+]?` was gone from "both" degree patterns; two of the FOUR still
+        // carried it — the compass and bare arms. Unreachable, since 8c claims every `+` before a digit
+        // (spaces and NBSP included), so it was a false comment over a vestige. Removed; these pin that
+        // the readings are unchanged, which is what made the removal safe rather than a guess.
+        expect(normalizeZulu("+35°W")).toBe(" plas amazinga angu-35 entshonalanga");
+        expect(normalizeZulu("+ 35°W")).toBe(" plas amazinga angu-35 entshonalanga");
+        expect(normalizeZulu("+30°")).toBe(" plas amazinga angu-30");
+        expect(normalizeZulu("35°W")).toBe("amazinga angu-35 entshonalanga");
+        expect(normalizeZulu("±5°")).toBe(" plas o mayinas amazinga angu-5");
+    });
+});
