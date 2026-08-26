@@ -36,7 +36,7 @@ public static class Normalize
         ("mm", "ملي ميٽر"),
     ];
 
-    private static readonly JsRe GROUPED = JsRegex.Compile("(\\d)[,،](\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d)[,،](?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe PERIOD_CLOCK =
         JsRegex.Compile("(\\d{1,2})\\.(\\d{2})(?=\\s*(?:GMT|UTC|وڳي|بجي))", "gu");
     private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d+)\\.(\\d+)", "gu");
@@ -86,7 +86,7 @@ public static class Normalize
         do
         {
             prev = t;
-            t = GROUPED.Replace(t, "$1$2");
+            t = GROUPED.Replace(t, "");
         } while (t != prev);
 
         // 2) THE PERIOD CLOCK, but ONLY when a timezone marks it — before the decimal rule.

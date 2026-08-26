@@ -374,7 +374,7 @@ export function normalizeFinnish(input: string): string {
     //    `4 096 × 2 304` stays two numbers around its multiplication sign).
     do {
         prev = t;
-        t = t.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");  // space, NBSP, NNBSP, thin space
+        t = t.replace(/(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     } while (t !== prev);
 
     // 2) DOTTED ABBREVIATIONS (630) — multi-dot before single-dot (playbook step 4), era markers before

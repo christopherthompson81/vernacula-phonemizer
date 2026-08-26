@@ -35,7 +35,12 @@ function below1000(n: number): string[] {
 
 /** Non-negative integer → Hausa words. */
 export function numberToWords(n: number): string {
-    if (!Number.isFinite(n) || n < 0 || n >= 1e12) return "";
+    // ⚠ INTEGERS ONLY, EXPLICITLY. This used to lean on a JS accident: a FRACTIONAL array index is
+    // `undefined` (`ONES[1.234]`), so a non-integer fell through the tables and `join` swallowed it.
+    // .NET truncates instead (`ONES[(int)1.234]` is ONES[1]), so the two engines read `1,234.5`
+    // differently — the top invariant broken by an implicit cast. The caller already has a
+    // digit-at-a-time fallback for "" and that is the honest reading of a value with a fraction.
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0 || n >= 1e12) return "";
     if (n === 0) return ONES[0]!; // sifili
     // Magnitude-first, largest scale first (Hausa says the scale word then its multiplier: dubu biyu = 2 000).
     // The chain previously stopped at dubu and fed the whole quotient to below1000(), which indexes ONES[h] with

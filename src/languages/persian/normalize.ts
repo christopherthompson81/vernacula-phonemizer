@@ -107,7 +107,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    grouping mark, not punctuation; left alone it is a clause break, so "19،500 کیلومتر" reads as
         //    "nineteen … five hundred". ONLY the digit-flanked, exactly-3-digit-block case is folded — ⟨،⟩ as real
         //    punctuation is by far the commonest mark in Persian text and must stay untouched.
-        s = s.replace(/(\d)،(\d{3})(?!\d)/gu, "$1,$2");
+        s = s.replace(/(?<=\d)،(?=\d{3}(?!\d))/gu, ",");
 
         // 3) DIGIT DE-GROUPING. FIRST among the numeric rules: a grouping comma or period is otherwise read as
         //    clause punctuation — "1,000" → [ˈiːk , sˈefɾ] "one, zero".

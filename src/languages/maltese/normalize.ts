@@ -355,13 +355,7 @@ function numeralValue(num: string): number {
  * consumes the digit the second match would have started on.
  */
 function degroup(text: string): string {
-    let out = text,
-        prev: string;
-    do {
-        prev = out;
-        out = out.replace(/(\p{Nd})[,](\p{Nd}{3})(?!\p{Nd})/gu, "$1$2");
-    } while (out !== prev);
-    return out;
+    return text.replace(/(?<=\p{Nd})[,](?=\p{Nd}{3}(?!\p{Nd}))/gu, "");
 }
 
 /**

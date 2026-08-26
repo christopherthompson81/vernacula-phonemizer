@@ -43,7 +43,7 @@ public static class Normalize
     private static readonly JsRe PCT_SIGN = JsRegex.Compile("٪", "gu");
     private static readonly JsRe ARABIC_DECIMAL = JsRegex.Compile("٫", "gu");
     private static readonly JsRe ARABIC_GROUP = JsRegex.Compile("٬", "gu");
-    private static readonly JsRe ARABIC_COMMA_GROUP = JsRegex.Compile("(\\d)،(\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe ARABIC_COMMA_GROUP = JsRegex.Compile("(?<=\\d)،(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})((?:,\\d{3})+)(?![\\d,])", "gu");
     private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})((?:\\.\\d{3})+)(?![\\d.])", "gu");
     private static readonly JsRe COMMA = JsRegex.Compile(",", "gu");
@@ -126,7 +126,7 @@ public static class Normalize
             s = JsRegex.Replace(s, ARABIC_GROUP, _ => ",");
             // ⚠ The Arabic comma DOUBLES as the thousands separator (19،500). Only the digit-flanked,
             // exactly-3-digit case is folded — ⟨،⟩ as real punctuation is the commonest mark in Persian text.
-            s = JsRegex.Replace(s, ARABIC_COMMA_GROUP, m => $"{m.Groups[1].Value},{m.Groups[2].Value}");
+            s = ARABIC_COMMA_GROUP.Replace(s, ",");
 
             // De-grouping FIRST among the numeric rules: a grouping comma or period is otherwise read as clause
             // punctuation. The period form requires whole 3-digit blocks, which keeps it off genuine decimals.

@@ -82,7 +82,7 @@ public static class Normalize
 
     // The step patterns. The TS builds several inline; JsRegex.Compile caches, so hoisting them here is a
     // readability choice and not a behaviour one.
-    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(\\d),(\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
     private const string SPAN = "\\d[\\d.]*(?:\\s?[-–—~〜～]\\s?\\d[\\d.]*)?";
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(?<=\\d)\\s?({UNIT_ALT})([²³2-3])?(?![A-Za-z\\d])", "gu");
     private static readonly JsRe DEG_C = JsRegex.Compile("([-−–±]?)(\\d+)\\s?°\\s?C(?![\\p{sc=Latn}\\p{M}])", "gui");
@@ -114,7 +114,7 @@ public static class Normalize
         for (var prev = ""; prev != s;)
         {
             prev = s;
-            s = JsRegex.Replace(s, GROUP_COMMA, m => m.Groups[1].Value + m.Groups[2].Value);
+            s = GROUP_COMMA.Replace(s, "");
         }
 
         // 2) SPEED UNITS, before the range rule splits a range: 시속 / 초속 precede the number, so the whole

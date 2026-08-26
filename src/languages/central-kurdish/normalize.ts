@@ -72,7 +72,7 @@ export function normalizeCentralKurdish(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = t.replace(/(\d)[,،](\d{3})(?!\d)/gu, "$1$2");
+        t = t.replace(/(?<=\d)[,،](?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 2b) LATIN UNIT ALIASES AND THEIR POWERS. No new vocabulary — a second KEY onto the words step 6b

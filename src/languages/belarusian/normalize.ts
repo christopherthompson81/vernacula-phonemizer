@@ -279,7 +279,7 @@ export function normalizeBelarusian(input: string): string {
     //    whole. ⚠ THIS IS THE LARGEST WRONG-MAGNITUDE DEFECT IN THE LANGUAGE, not a tidy-up: `3 000 000`
     //    read as *тры нуль нуль*. Two passes, because adjacent groups share the digit the first consumes
     //    (`5 000 000`); `X 000` is 7 of the corpus's 21 grouped figures.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule (step 4) so their interior dots do not first

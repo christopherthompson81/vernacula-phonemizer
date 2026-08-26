@@ -45,7 +45,10 @@ public static class HausaNumbers
     /** Non-negative integer → Hausa words. */
     public static string NumberToWords(double n)
     {
-        if (!double.IsFinite(n) || n < 0 || n >= 1e12) return "";
+        // ⚠ INTEGERS ONLY, EXPLICITLY — and this is a JS/.NET GAP, not a tidy-up. A fractional array
+        // index is `undefined` in JS but TRUNCATES here, so `ONES[(int)1.234]` read as ONES[1] and the
+        // two engines disagreed on `1,234.5`. See the TS for the measurement.
+        if (!double.IsFinite(n) || !double.IsInteger(n) || n < 0 || n >= 1e12) return "";
         if (n == 0) return ONES[0]; // sifili
         // Magnitude-first, largest scale first — Hausa says the scale word then its multiplier (dubu biyu =
         // 2 000). Each scale consumes its own decade band and recurses on the rest.

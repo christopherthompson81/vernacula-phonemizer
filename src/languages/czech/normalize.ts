@@ -202,7 +202,7 @@ export function normalizeCzech(input: string): string {
     //    unit/percent tier to see it, so czech.ts's TOKEN swallows it and emits "čárka" (the Czech name of
     //    the decimal comma) between the parts.
     for (let i = 0; i < 2; i++)
-        s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
+        s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
     s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
 
     // 1) MULTI-DOT ABBREVIATIONS (the era markers), before the single-dot rule —

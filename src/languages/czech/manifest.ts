@@ -28,7 +28,7 @@ export interface CzechManifest {
         teens: string[];
         tens: string[];
         hundreds: string[];
-        magnitudes: { thousand: Agreement; million: Agreement };
+        magnitudes: { thousand: Agreement; million: Agreement; billion: Agreement };
     };
 }
 

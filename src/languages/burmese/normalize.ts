@@ -99,11 +99,7 @@ export function normalizeBurmese(input: string): string {
 
     // 2) COMMA-GROUPED THOUSANDS, FIRST — before the comma can be read as a clause pause and cut the numeral
     //    in half. Applied repeatedly for numbers with several groups (၁,၂၃၄,၅၆၇).
-    let prev: string;
-    do {
-        prev = t;
-        t = t.replace(new RegExp(`(${d()})[,٬](${d(3)})(?!${d()})`, "gu"), "$1$2");
-    } while (t !== prev);
+    t = t.replace(new RegExp(`(?<=${d()})[,٬](?=${d(3)}(?!${d()}))`, "gu"), "");
 
     // 2b) RATES — `၃၀ mg/kg`, the drug-dose shape. ⚠ HERE, before the clock, the decimal and the range rules,
     //     because this rule MOVES the numeral and every one of those three needs it intact to match; see

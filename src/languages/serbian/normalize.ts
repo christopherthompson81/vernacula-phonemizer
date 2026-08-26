@@ -266,7 +266,7 @@ export function normalizeSerbian(input: string): string {
     //    period reads as clause punctuation and the number splits in two (`1.300` → *jedan . trista*).
     //    Two passes, because adjacent groups share a digit (`800.000`). EXACTLY three digits and no space,
     //    which keeps `802.11` (a Wi-Fi standard), `12.00 сати` (step 2) and every sentence-final `N.` out.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)\.(\d{3})(?!\d)/gu, "$1$2");
+    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
 
     // 1) MULTI-DOT ERA MARKER, before the single-dot abbreviation rule (step 3) and before the `N.` ordinal
     //    rule (step 7) — `1000. п. н. е.` contains both, and its interior dots become phrase breaks.

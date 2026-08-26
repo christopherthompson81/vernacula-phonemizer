@@ -43,12 +43,28 @@ function agree(
           : forms.plural;
 }
 
-/** A non-negative integer → space-separated Czech cardinal words. */
+/**
+ * A non-negative integer → space-separated Czech cardinal words.
+ *
+ * ⚠ THE TOP MAGNITUDE IS A HARD CEILING, and it used to be silent. `sub1000` is only defined to 999, so a
+ * millions count of 1,000 or more — i.e. any n ≥ 10⁹ — indexed past its table and the template literal
+ * stringified the `undefined` INTO the text: `1000000000` read *ˈundɛfˌɪnɛt mˈɪlɪjˌonuː*, the engine
+ * SPEAKING the word "undefined". The billion is now declared (miliarda/miliardy/miliard, corpus-attested),
+ * and anything above the declared top falls back to digit-at-a-time — the fleet's convention for
+ * out-of-range, and what fi and fr already do at this size.
+ */
 export function numberToWords(n: number): string {
     if (n < 0 || !Number.isFinite(n)) return "";
     n = Math.floor(n);
     if (n === 0) return UNITS[0]!; // nula
+    if (n >= 1e12) return [...String(n)].map((d) => UNITS[Number(d)]!).join(" ");
     const parts: string[] = [];
+    const bil = Math.floor(n / 1000000000);
+    n %= 1000000000;
+    if (bil)
+        parts.push(
+            (bil === 1 ? "" : `${sub1000(bil)} `) + agree(bil, MAG.billion),
+        );
     const mil = Math.floor(n / 1000000);
     n %= 1000000;
     if (mil)

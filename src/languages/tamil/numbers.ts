@@ -63,10 +63,20 @@ function thousands(count: number, hasRemainder: boolean): string[] {
     return [...below1000(count), bare];
 }
 
-/** Non-negative integer → Tamil words. */
+/**
+ * Non-negative integer → Tamil words.
+ *
+ * ⚠ THE CRORE IS THE TOP MAGNITUDE AND ITS COUNT IS CAPPED AT 999, so 10¹⁰ is the ceiling. Above it
+ * `below1000(crore)` indexed past `HUND` — and the two engines FAILED DIFFERENTLY, which is the worst
+ * shape a shared bug can take: JS yields `undefined`, `Array.join` renders it as the empty string, and
+ * 10¹⁰, 10¹¹ and 10¹² all read as the bare word *கோடி* — three different quantities, one reading, no
+ * error. .NET throws `IndexOutOfRangeException` on the same input. Neither is acceptable and the goldens
+ * could not see either: no corpus row is that large. Digit-at-a-time above the ceiling, as cs and jv do.
+ */
 export function numberToWords(n: number): string {
     if (!Number.isFinite(n) || n < 0) return "";
     if (n === 0) return ONES[0]!;
+    if (n >= 1e10) return [...String(n)].map((d) => ONES[Number(d)]!).join(" ");
     const parts: string[] = [];
     const crore = Math.floor(n / 10000000);
     n %= 10000000;

@@ -161,7 +161,7 @@ public static class Normalize
 
     // The step patterns. The TS builds several inline; JsRegex.Compile caches, so hoisting them here is a
     // readability choice and not a behaviour one.
-    private static readonly JsRe DEGROUP = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
+    private static readonly JsRe DEGROUP = JsRegex.Compile($"(?<=\\d)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe GROUP_SPACE_ANY = JsRegex.Compile($"[{GROUP_SPACE}]", "gu");
     private static readonly JsRe KMH_NUM = JsRegex.Compile("(\\d+)\\s?km\\s?\\/\\s?(?:h|godz\\.?)(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe KMH_BARE = JsRegex.Compile("(?<![\\p{L}\\p{M}])km\\s?\\/\\s?(?:h|godz\\.?)(?![\\p{L}\\p{M}])", "giu");
@@ -203,7 +203,7 @@ public static class Normalize
         //    (5 000 000). The decimal COMMA is deliberately left in place: it must stay adjacent to the number
         //    for the shared unit/percent tier, and Polish.cs's TOKEN swallows it.
         for (var i = 0; i < 2; i++)
-            s = JsRegex.Replace(s, DEGROUP, m => m.Groups[1].Value + m.Groups[2].Value);
+            s = DEGROUP.Replace(s, "");
         s = JsRegex.Replace(s, GROUP_SPACE_ANY, _ => " ");
 
         // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule — otherwise the interior dot of p.n.e./m.in.

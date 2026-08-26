@@ -63,8 +63,8 @@ public static class Normalize
         (JsRegex.Compile("\u00f7", "gu"), " împărțit la "),
     };
 
-    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(\\d)\\.(\\d{3})(?!\\d)", "gu");
-    private static readonly JsRe GROUP_SPACE = JsRegex.Compile("(\\d)[ \u00a0\u202f\u2009](\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<=\\d)\\.(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe GROUP_SPACE = JsRegex.Compile("(?<=\\d)[ \u00a0\u202f\u2009](?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(\\d+),(\\d+)", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(\\d{1,2}):(\\d{2})(?!\\d)", "gu");
     private static readonly JsRe PERCENT = JsRegex.Compile("(\\d+)\\s*%", "gu");
@@ -97,13 +97,13 @@ public static class Normalize
         do
         {
             prev = t;
-            t = GROUP_DOT.Replace(t, "$1$2");
+            t = GROUP_DOT.Replace(t, "");
         } while (t != prev);
 
         do
         {
             prev = t;
-            t = GROUP_SPACE.Replace(t, "$1$2");
+            t = GROUP_SPACE.Replace(t, "");
         } while (t != prev);
 
         t = DECIMAL_COMMA.Replace(t, m =>

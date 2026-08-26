@@ -57,7 +57,7 @@ public static class Normalize
     });
 
     // ── Step 0: digit de-grouping ───────────────────────────────────────────────────────────────────
-    private static readonly JsRe GROUPING = JsRegex.Compile(@"(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)", "gu");
+    private static readonly JsRe GROUPING = JsRegex.Compile(@"(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile(@"[ \u00a0\u202f\u2009]", "gu");
 
     // ── Step 1: era markers ─────────────────────────────────────────────────────────────────────────
@@ -141,8 +141,9 @@ public static class Normalize
     {
         var s = input;
 
-        // 0) DIGIT DE-GROUPING, first — two passes, because the groups overlap on the shared digit.
-        for (var i = 0; i < 2; i++) s = GROUPING.Replace(s, "$1$2");
+        // 0) DIGIT DE-GROUPING, first. ONE pass: the separator is matched zero-width, so every
+        //    separator in the run is claimed at once.
+        s = GROUPING.Replace(s, "");
         s = SPACES.Replace(s, " ");
 
         // 1) ERA MARKERS, before the single-dot rules so the interior dots cannot survive as breaks.

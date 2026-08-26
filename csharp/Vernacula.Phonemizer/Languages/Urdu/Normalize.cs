@@ -45,7 +45,7 @@ public static class Normalize
     private static readonly JsRe AR_PERCENT = JsRegex.Compile("٪", "gu");
     private static readonly JsRe AR_DECIMAL = JsRegex.Compile("٫", "gu");
     private static readonly JsRe AR_THOUSANDS = JsRegex.Compile("٬", "gu");
-    private static readonly JsRe AR_COMMA_GROUP = JsRegex.Compile("(\\d)،(\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe AR_COMMA_GROUP = JsRegex.Compile("(?<=\\d)،(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe ORDINAL_RE = JsRegex.Compile(
         $"(?<![\\d.,])(\\d+)\\s?({string.Join("|", SUFFIX_FORM.Keys)})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(\\d)\\s?({UNIT_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
@@ -82,7 +82,7 @@ public static class Normalize
             var s = ARABIC_DIGIT.Replace(input, m => FoldDigit(m.Value));
 
             s = AR_THOUSANDS.Replace(AR_DECIMAL.Replace(AR_PERCENT.Replace(s, "%"), "."), ",");
-            s = AR_COMMA_GROUP.Replace(s, "$1,$2");
+            s = AR_COMMA_GROUP.Replace(s, ",");
 
             s = ORDINAL_RE.Replace(s, m =>
                 Ordinal(Js.Number(m.Groups[1].Value), SUFFIX_FORM[m.Groups[2].Value], m.Groups[2].Value) ?? m.Value);

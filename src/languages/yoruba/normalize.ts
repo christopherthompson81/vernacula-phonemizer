@@ -30,7 +30,7 @@ const SYMBOLS = makeSymbolNormalizer({
     rateDenominators: MANIFEST.symbolTier.rateDenominators,
 });
 
-const GROUPED = /(\d),(\d{3})(?!\d)/gu;
+const GROUPED = /(?<=\d),(?=\d{3}(?!\d))/gu;
 /** A digit-flanked dash. See rule 2: in Yoruba this is a RANGE, never a minus. */
 const RANGE = /(\d)\s*[-–—]\s*(?=\d)/gu;
 /** `60%`, `8.3%` — the sign FOLLOWS the number here; none lead it. */
@@ -98,10 +98,7 @@ export function normalizeYoruba(text: string): string {
     let s = text;
     // 1. De-group thousands FIRST: a grouping comma left in place makes one number into two with a clause pause
     //    (`2,500` → *méjì , ẹgbẹ̀rún márùn-ún*). Exactly three following digits so a decimal comma survives.
-    while (GROUPED.test(s)) {
-        GROUPED.lastIndex = 0;
-        s = s.replace(GROUPED, "$1$2");
-    }
+    s = s.replace(GROUPED, "");
     // 2. ⚠ A DIGIT-FLANKED DASH IS A RANGE, NOT A MINUS — `sí` ("to") is what occurs between digits.
     s = s.replace(RANGE, `$1 ${SYM.range} `);
     // 2b. THE MINUS — U+2212 ONLY, and a LEADING one. ⚠ THE RANGE ABOVE IS WHY: this language's

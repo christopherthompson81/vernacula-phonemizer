@@ -102,8 +102,8 @@ export function normalizePortuguese(input: string, brazilian = false): string {
 
     // 0) DIGIT GROUPING with a space. The dot form (1.000) is already in the number tokenizer; the SI space
     //    form is not, and the number token cannot span a space.
-    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
-    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
+    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
     s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first — `a.` is

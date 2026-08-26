@@ -70,7 +70,7 @@ export function normalizeSindhi(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = t.replace(/(\d)[,،](\d{3})(?!\d)/gu, "$1$2");
+        t = t.replace(/(?<=\d)[,،](?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 2) THE PERIOD CLOCK, but ONLY when a timezone marks it. `HH.MM` occurs 18 times and is mostly

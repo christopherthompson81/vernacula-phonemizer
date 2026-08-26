@@ -124,8 +124,8 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //    number class does not span a space, so "5 000 ans" read as "cinq zéro ans" — two numbers, and
     //    the thousand lost. Degroup to one digit run, but ONLY for exact 3-digit blocks, or "30 9" would
     //    fuse two unrelated numbers.
-    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
-    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2"); // millions: 1 234 567
+    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), ""); // millions: 1 234 567
     //    Remaining non-breaking spaces become ordinary ones so every later pattern can use \s.
     s = s.replace(/[\u00a0\u202f\u2009]/gu, " ");
 

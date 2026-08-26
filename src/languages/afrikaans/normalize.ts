@@ -206,7 +206,7 @@ export function normalizeAfrikaans(input: string): string {
     //    a decimal. It is consumed before the symbol tier so the tier sees a plain digit run, and before the
     //    ordinal rule's lookbehind could misfire. Two passes, because the groups overlap on the shared digit.
     for (let i = 0; i < 2; i++)
-        s = s.replace(/(\d),(\d{3})(?!\d)/gu, "$1$2");
+        s = s.replace(/(?<=\d),(?=\d{3}(?!\d))/gu, "");
 
     // 6b) A COMMA DECIMAL, folded onto the dot form. STANDARD Afrikaans marks the decimal with a COMMA
     //     (South Africa's official convention, as in Dutch); this corpus is the exception, not the rule,
