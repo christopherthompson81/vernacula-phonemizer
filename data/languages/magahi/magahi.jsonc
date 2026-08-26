@@ -1,6 +1,6 @@
 // Native canonical-IPA definition for Hindi (hi) — re-derived from the Devanagari orthography and
 // standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
-// This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
+// This file IS the language data: the native G2P engine (src/languages/hindi/hindi.ts) reads it
 // directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
 // only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
 //
@@ -188,7 +188,7 @@
 
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
     // running these through the same native G2P (no hand-written phonemes). The
-    // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
+    // compositor (src/core/numbers.ts, indicNumberWords) assembles them with Indian lakh/crore grouping.
     // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
     // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
     "numbers": {
@@ -311,8 +311,13 @@
     },
 
     // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत). Symbols
-    // in `stripSymbols` are dropped so a currency amount reads as the bare number (₹500 → पाँच सौ), matching
-    // the amount reads as the bare number.
+    // in `stripSymbols` are dropped, so the ₹ GLYPH is not spoken.
+    // ⚠ THAT DOES NOT MAKE THE AMOUNT BARE, and this comment claimed it did — the claim was the Hindi
+    // template's, copied verbatim into five Devanagari manifests and measured false in four of them.
+    // Magahi reads ₹500 as *pˈɑ̃t͡ʃ sˈɔ ɾˈupd͡ʒe*: the shared symbol tier claims ₹ beside an amount and
+    // supplies the currency WORD before `stripSymbols` ever sees the glyph. (The same sentence is TRUE
+    // in nepali.jsonc, which really does read ₹500 as *pˈãt͡s sˈʌj* — which is why this needed measuring
+    // per language rather than sweeping.) The trailing half-sentence was an orphaned fragment.
     "symbols": { "%": "प्रतिशत" },
     "stripSymbols": "₹",
 

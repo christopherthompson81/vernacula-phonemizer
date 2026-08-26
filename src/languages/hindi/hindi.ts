@@ -258,6 +258,24 @@ export function makeNativeHindi(
     // Roman numerals need no ordering care: `hi` is not in the registry's ROMAN_NATIVE set, so the shared
     // pass has already run at the registry seam.
     const normalize = overrides.normalize ?? makeHindiNormalizer(def.numbers, def);
+    // ⚠ A SIBLING'S `symbolTier` IS NOT READ HERE, AND SAYING SO LOUDLY IS THE POINT. `SYMBOLS` is built
+    // once, at module load, from HINDI's manifest — so a language that declares its own `symbolTier` block
+    // and does NOT also pass `overrides.symbols` gets Hindi's words, silently. The block deserializes, it
+    // passes ManifestMappingTests, and nothing anywhere reports it; the Chhattisgarhi port proved that with
+    // a sentinel. `symbolTier` is optional on the SHARED HindiDef because hi/mr/gu are migrating one at a
+    // time (gujarati.ts is the worked example: it reads its OWN MANIFEST.symbolTier and passes the result
+    // through `overrides.symbols`), and an optional field that six manifests can set but only a wired one
+    // can use is exactly the shape that invites a silent no-op.
+    // Comparing against `MANIFEST.symbolTier` rather than just testing for presence is what keeps Hindi
+    // itself out of the guard: hi legitimately declares the very block SYMBOLS was built from.
+    if (def.symbolTier !== undefined && overrides.symbols === undefined && def.symbolTier !== MANIFEST.symbolTier) {
+        throw new Error(
+            "makeNativeHindi: this manifest declares its own `symbolTier`, but no `overrides.symbols` was "
+            + "passed — the block would be silently ignored and Hindi's symbol words used instead. Build a "
+            + "normalizer from it with makeSymbolNormalizer and pass it as `overrides.symbols` (see "
+            + "src/languages/gujarati/gujarati.ts), or remove the block.",
+        );
+    }
     const symbolTier = overrides.symbols ?? SYMBOLS;
 
     function text(input: string): string {

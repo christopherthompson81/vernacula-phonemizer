@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 
+import { readFileSync } from "node:fs";
+
 import { phonemize } from "../src/index.ts";
+import { parseJsonc } from "../src/core/jsonc.ts";
+import { makeNativeHindi, type HindiDef } from "../src/languages/hindi/hindi.ts";
 import {
     phonemizeWord,
     phonemizeWordRules,
@@ -189,5 +193,29 @@ describe("gujarati canonical IPA", () => {
         expect(phonemize("20.2 લાખ km²", "gu")).toContain("lˈakʰ ʋˈəɾɡ kˈilomiʈəɾ"); // hops the magnitude
         expect(phonemize("120 m³", "gu")).toContain("kjˈubik mˈiʈəɾ");
         expect(phonemize("802.11m", "gu")).toContain("ˈɛm"); // a dotted designation is not a quantity
+    });
+});
+
+describe("Gujarati: both constructions agree, and a stray symbolTier is loud", () => {
+    test("the word-only build and the full engine use the same symbol words", () => {
+        // `build()` (behind phonemizeWord / the referee eval) used to construct without overrides, so its
+        // `text()` would have answered with HINDI's symbol words. Neither override touches `word()`, so
+        // no reading moved — but two constructions of one language disagreeing is the trap the guard in
+        // makeNativeHindi exists to catch.
+        // ટકા, not Hindi's प्रतिशत — and rendered as IPA, so compare against Hindi rather than orthography.
+        expect(phonemize("50%", "gu")).toContain("ʈˈəka");
+        expect(phonemize("50%", "gu")).not.toBe(phonemize("50%", "hi"));
+        expect(phonemize("₹500", "gu")).not.toBe(phonemize("₹500", "hi"));
+    });
+
+    test("a manifest that declares symbolTier without wiring it throws", () => {
+        // The block would otherwise deserialize, pass ManifestMappingTests, and be silently ignored —
+        // proved with a sentinel by the Chhattisgarhi port. Hindi itself is exempt by identity: it
+        // declares the very block the shared SYMBOLS was built from.
+        const def = parseJsonc<HindiDef>(
+            readFileSync(new URL("../data/languages/gujarati/gujarati.jsonc", import.meta.url), "utf8"),
+        );
+        expect(() => makeNativeHindi(def, undefined, undefined, undefined, undefined, {}))
+            .toThrow(/declares its own `symbolTier`/u);
     });
 });

@@ -2,9 +2,10 @@
 // Devanagari, read by the shared Hindi engine (src/languages/hindi/hindi.ts `makeNativeHindi`) and by
 // its C# port. ⚠ THIS HEADER WAS THE HINDI TEMPLATE: its second line was an ORPHANED FRAGMENT
 // ("standard Hindi phonology.") left behind when the first was rewritten, and it named
-// src/Phonemize/native/nativeG2p.ts, a path that has never existed in this tree. The same stale
-// header still sits on awadhi.jsonc, magahi.jsonc, maithili.jsonc, marathi.jsonc, nepali.jsonc and
-// hindi.jsonc itself. A shallow abugida, so pronunciation is almost entirely rule-derivable; the one
+// src/Phonemize/native/nativeG2p.ts, a path that has never existed in this tree. That citation has
+// since been corrected everywhere it appeared — awadhi.jsonc, magahi.jsonc, maithili.jsonc,
+// marathi.jsonc, nepali.jsonc and hindi.jsonc itself — to src/languages/hindi/hindi.ts, and the
+// companion src/Phonemize/native/abugidaNumbers.ts to src/core/numbers.ts, indicNumberWords. A shallow abugida, so pronunciation is almost entirely rule-derivable; the one
 // genuinely hard part is schwa deletion (a documented algorithm, not a lexicon).
 //
 // ⚠ EVERY WORD THIS LANGUAGE SPEAKS THAT IS NOT IN THIS FILE IS HINDI'S, by three DIFFERENT

@@ -1,6 +1,6 @@
 // Native canonical-IPA definition for Hindi (hi) — re-derived from the Devanagari orthography and
 // standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
-// This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
+// This file IS the language data: the native G2P engine (src/languages/hindi/hindi.ts) reads it
 // directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
 // only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
 //

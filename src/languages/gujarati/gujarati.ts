@@ -79,12 +79,19 @@ export function createGujarati(foreign?: ForeignPhonemizer): {
 }
 
 function build() {
+    // ⚠ THE SAME OVERRIDES AS createGujarati, though this is the WORD-ONLY path. Neither override touches
+    // `word()` — both are read by `text()` alone — so this changes no reading here. It is for consistency
+    // and for the guard in makeNativeHindi: constructing the same language two ways, one of which would
+    // silently answer `text()` with HINDI's symbol words, is precisely the trap that guard exists to
+    // catch, and exempting this call site would have meant weakening the guard for every language.
+    const def = loadManifest<HindiDef>(import.meta.url, "gujarati.jsonc");
     return (WORD ??= makeNativeHindi(
-        loadManifest<HindiDef>(import.meta.url, "gujarati.jsonc"),
+        def,
         loadSharedPhonology(),
         undefined,
         { word: GUJARATI_WORD, digits: GUJARATI_DIGITS, avagraha: "\u0ABD" },
         lexicon(),
+        { normalize: makeGujaratiNormalizer(def.numbers), symbols: GU_SYMBOLS },
     ));
 }
 /** Bare word→IPA, SHIPPED path (lexicon → rule engine). For tests and real text. */
