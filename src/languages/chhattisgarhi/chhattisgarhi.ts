@@ -21,19 +21,30 @@
  * with this engine being a labelled cannot-verify approximation served via the Hindi engine. Do not replace
  * them with a guess: an unsourced word is confidently wrong, where an inherited one is merely borrowed.
  *
- * ⚠ AND THE INHERITANCE IS WIDER THAN THE NORMALIZER WORDS. No overrides are passed and chhattisgarhi.jsonc
- * declares no `symbolTier`, no `ordinalSuffixes` and no `irregularOrdinals`, so `makeNativeHindi` and
- * normalize.ts fall back to hindi.jsonc's for all three. The shared symbol tier runs BEFORE the engine's own
- * `symbols`/`stripSymbols`, so ₹500 reads *pˈaː̃t͡ʃ sˈɔː ɾˈʊpjeː* (Hindi's रुपये) and NOT the bare number the
- * manifest's `stripSymbols` comment used to claim — the same wrong claim retracted in bhojpuri.jsonc. The
- * 21–99 numerals are byte-identical to hindi.jsonc's too. All inherited, none Chhattisgarhi-sourced.
+ * ⚠ AND THE INHERITANCE IS WIDER THAN THE NORMALIZER WORDS — by three DIFFERENT mechanisms, only one of
+ * which is a fallback the manifest can override:
+ *   · `ordinalSuffixes`/`irregularOrdinals` ARE a real per-file fallback (`own?.x ?? MANIFEST.x` in
+ *     hindi/normalize.ts). Declared here, they would win. They are not declared, so they are Hindi's.
+ *   · ⚠ THE SYMBOL TIER IS NOT A FALLBACK. `makeNativeHindi` never reads `def.symbolTier` — it takes
+ *     `overrides.symbols ?? SYMBOLS`, and SYMBOLS is built ONCE at hindi.ts module scope from hindi.jsonc's
+ *     tier. A `symbolTier` block added to chhattisgarhi.jsonc would deserialize, pass ManifestMappingTests,
+ *     and be SILENTLY IGNORED; changing a currency or unit word here means passing a `symbols` override
+ *     from this file. That tier also runs BEFORE the engine's own `symbols`/`stripSymbols`, which is why
+ *     ₹500 reads *pˈaː̃t͡ʃ sˈɔː ɾˈʊpjeː* (Hindi's रुपये) and NOT the bare number the manifest's
+ *     `stripSymbols` comment used to claim — the same wrong claim retracted in bhojpuri.jsonc.
+ *   · THE CLOCK AND UNIT WORDS ARE IN NEITHER MANIFEST: बजकर/मिनट/बजे and किमी→किलोमीटर are hardcoded in
+ *     hindi/normalize.ts, so grepping hindi.jsonc for them finds nothing.
+ * The 21–99 numerals ARE in this file and are byte-identical to hindi.jsonc's. All inherited, none
+ * Chhattisgarhi-sourced.
  *
  * ⚠ FILED, NOT FIXED: ज्ञ reads as its literal parts, [d͡ʒɲ]. hindi.jsonc carries a corpus-measured ज्ञ→ɡj
- * rule (73/73 FLEURS hi_in rows) and DELIBERATELY scopes it to Hindi, naming Awadhi/Bhojpuri/Magahi as
+ * rule (73/73 FLEURS hi_in rows) and scopes it to Hindi, naming Marathi and Awadhi/Bhojpuri/Magahi as
  * languages that "likely pattern with Hindi but have no corpus evidence here". Chhattisgarhi belongs in that
- * list and is not in it. There is no hne corpus in this repo (no FLEURS, no tools/corpus/mined/hne.jsonc, no
- * tools/corpus/attest/hne.jsonc — verified, not assumed), so the omission cannot be settled here either; it
- * is visible in 5 of the 200 golden rows. Fixing it would need a Chhattisgarhi source, not a Hindi analogy.
+ * list and is not in it — so upstream did not DECIDE about hne, it did not CONSIDER hne. There is no hne
+ * corpus in this repo (no FLEURS, no tools/corpus/mined/hne.jsonc, no tools/corpus/attest/hne.jsonc —
+ * verified, not assumed), so the omission cannot be settled here either. ⚠ The 5 golden rows carrying d͡ʒɲ
+ * are NOT evidence either way: they are Hindi words re-rendered, so that is the engine reporting on itself.
+ * Fixing this would need a Chhattisgarhi source, not a Hindi analogy.
  * ⚠ AND IT IS FAMILY-WIDE, measured: hindi.jsonc is the ONLY one of the nine Devanagari manifests in the
  * fleet that carries the rule. awadhi, bhojpuri, magahi, maithili, nepali, rangpuri, marathi and this file
  * all read the ligature as its literal parts — including marathi, which hindi.jsonc's note says reads it

@@ -45,15 +45,23 @@ describe("chhattisgarhi canonical IPA (corroborated vs the 1921 grammar)", () =>
         expect(phonemizeWord("विज्ञान")).toBe("ʋɪd͡ʒɲˈaːn"); // Hindi: ʋɪɡjˈaːn
     });
 
-    // ⚠ NOT LINGUISTIC CLAIMS. These pin what chhattisgarhi.jsonc INHERITS from hindi.jsonc — it declares no
-    // `symbolTier`, no `ordinalSuffixes` and no `irregularOrdinals`, so all three fall back to Hindi's. An edit
-    // to the shared Devanagari data then surfaces here instead of silently changing what Chhattisgarhi says.
-    test("the inherited Hindi tiers, pinned (no hne source exists for any of them)", () => {
-        // ⚠ `stripSymbols: "₹"` does NOT silence the rupee: the inherited symbol tier speaks it FIRST, before
+    // ⚠ NOT LINGUISTIC CLAIMS. These pin the words Chhattisgarhi speaks that are NOT in chhattisgarhi.jsonc,
+    // so an edit to the shared Devanagari machinery surfaces here instead of silently changing what this
+    // language says. ⚠ LITERALS, NEVER `toBe(phonemize(…, "hi"))` — a self-comparison against Hindi moves on
+    // BOTH sides when the shared data changes and stays green through exactly the drift it claims to catch.
+    test("the inherited Hindi words, pinned (no hne source exists for any of them)", () => {
+        // ⚠ `stripSymbols: "₹"` does NOT silence the rupee: hindi.jsonc's symbol tier speaks it FIRST, before
         // the strip can apply. The manifest comment used to claim ₹500 read as the bare number; it does not.
         expect(phonemize("₹500", "hne")).toBe("pˈaː̃t͡ʃ sˈɔː ɾˈʊpjeː");
-        expect(phonemize("50%", "hne")).toBe("pət͡ʃˈaːs pɾˈət̪ɪsət̪"); // hne's own `symbols`, with श→s applied
-        expect(phonemize("16वीं", "hne")).toBe(phonemize("16वीं", "hi")); // ordinals: Hindi's, entire
-        expect(phonemize("11:20", "hne")).toBe(phonemize("11:20", "hi")); // clock: Hindi's बजकर/मिनट, unattested here
+        // ⚠ THESE TWO TAKE DIFFERENT PATHS TO THE SAME STRING, which is why the equal output proves nothing
+        // on its own: `pctRe` (core/normalizeSymbols.ts) requires an adjacent digit, so `50%` is consumed by
+        // the inherited tier's प्रतिशत, and only a bare `%` ever reaches this manifest's own `symbols` map.
+        expect(phonemize("50%", "hne")).toBe("pət͡ʃˈaːs pɾˈət̪ɪsət̪"); // inherited tier
+        expect(phonemize("%", "hne")).toBe("pɾˈət̪ɪsət̪"); // hne's own `symbols`, with श→s applied
+        expect(phonemize("16वीं", "hne")).toBe("soːlˈəɦʋiː̃"); // ordinals: hindi.jsonc's table, entire
+        // Clock and unit words are in NEITHER manifest — hardcoded in hindi/normalize.ts. बजकर in particular
+        // is unattested for Chhattisgarhi and unattestable: this repo holds no hne text to check it against.
+        expect(phonemize("11:20", "hne")).toBe("ɡjˈaːɾəɦ bˈəd͡ʒkəɾ bˈiːs mˈɪnəʈ");
+        expect(phonemize("5 किमी", "hne")).toBe("pˈaː̃t͡ʃ kɪloːmˈiːʈəɾ");
     });
 });

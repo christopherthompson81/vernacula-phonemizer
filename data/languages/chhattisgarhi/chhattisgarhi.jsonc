@@ -7,11 +7,21 @@
 // hindi.jsonc itself. A shallow abugida, so pronunciation is almost entirely rule-derivable; the one
 // genuinely hard part is schwa deletion (a documented algorithm, not a lexicon).
 //
-// ⚠ WHAT THIS FILE DOES NOT DECLARE, IT INHERITS FROM hindi.jsonc. No `symbolTier`, no
-// `ordinalSuffixes` and no `irregularOrdinals` are set here, so `makeNativeHindi` and normalize.ts
-// fall back to Hindi's — every currency, unit, ordinal and clock word this language speaks is
-// Hindi's, none of them Chhattisgarhi-sourced. That is deliberate (see `provenance`), not an
-// oversight, but it is the reason `stripSymbols` does not do what its comment used to claim.
+// ⚠ EVERY WORD THIS LANGUAGE SPEAKS THAT IS NOT IN THIS FILE IS HINDI'S, by three DIFFERENT
+// mechanisms — worth separating, because only one of them is a fallback you could override here:
+//   · `ordinalSuffixes` and `irregularOrdinals` are a REAL PER-FILE FALLBACK
+//     (`own?.x ?? MANIFEST.x`, src/languages/hindi/normalize.ts) — declare them here and they win.
+//   · THE SYMBOL TIER IS NOT. ⚠ `makeNativeHindi` never reads `def.symbolTier`: it uses
+//     `overrides.symbols ?? SYMBOLS`, and SYMBOLS is built ONCE at module scope from hindi.jsonc's
+//     own tier (src/languages/hindi/hindi.ts). A `symbolTier` block added to THIS file would
+//     deserialize, satisfy ManifestMappingTests, and be SILENTLY IGNORED. Changing the currency or
+//     unit words for Chhattisgarhi means passing a `symbols` override from chhattisgarhi.ts.
+//   · THE CLOCK AND UNIT WORDS ARE IN NEITHER MANIFEST. बजकर/मिनट/बजे and the Devanagari unit
+//     abbreviations (किमी → किलोमीटर …) are HARDCODED in src/languages/hindi/normalize.ts, so
+//     grepping hindi.jsonc for them finds nothing.
+// All of it is deliberate (see `provenance`), not an oversight — Hindi's words are the only
+// available answer for a language with no corpus — but it is the reason `stripSymbols` below does
+// not do what its comment used to claim.
 //
 // Format: plain JSONC. Verbose, self-describing keys. Every phoneme value is CANONICAL IPA.
 {
@@ -162,10 +172,10 @@
     // is the fleet-wide Indic convention. ⚠ THIS COMMENT USED TO CREDIT "the offglide + अय→ɛ", which are
     // hindi.jsonc's `finalRules` and are NOT in this file at all (`finalRules` is empty — see below).
     // ⚠ ALSO ABSENT: Hindi's ज्ञ → ɡj rule, so ज्ञान reads [d͡ʒɲˈaːn] here where hi reads [ɡjˈaːn]. That
-    // omission is DELIBERATE UPSTREAM — hindi.jsonc's own note scopes the rule to Hindi and says the
-    // Eastern-Hindi siblings "likely pattern with Hindi but have no corpus evidence here" — but no such
-    // evidence exists for Chhattisgarhi either (this repo holds no hne text at all), so the literal
-    // reading stands unrefereed rather than endorsed. FILED, NOT FIXED.
+    // omission is UNDECIDED UPSTREAM RATHER THAN DELIBERATE: hindi.jsonc's note scopes the rule to Hindi
+    // and names Marathi and Awadhi/Bhojpuri/Magahi, but it never mentions Chhattisgarhi — upstream did not
+    // decide about hne, it did not consider hne. No corpus evidence exists here either (this repo holds no
+    // hne text at all), so the literal reading stands unrefereed rather than endorsed. FILED, NOT FIXED.
     "postRules": [
         {
             "from": "((?:t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|[kɡptbmnlʃsɳŋɽ]ʰ?ʱ?|t̪|d̪))\\1(?!͡)",
