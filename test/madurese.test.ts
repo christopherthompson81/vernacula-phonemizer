@@ -198,6 +198,17 @@ describe("text normalization", () => {
         expect(normalizeMadurese("mèter è attas parmuka'an tasè' (dpl)")).toContain("(dpl)");
         // The emitted phrase ends in an apostrophe, a LETTER in this orthography, and reaches the IPA as such.
         expect(phonemize("sirkana 8 mèter dpl", "mad")).toContain("ɛ atːas tasɛʔ");
+        // ⚠ AND THE BOUNDARY IS A LOOKAROUND, NOT `\b` — this rule was the one place in this file that used
+        // the ASCII-defined `\b` the header forbids, and it fired on a following NON-ASCII letter: `dplè`
+        // came out `è attas tasè'è`, the abbreviation eaten out of an ordinary word. Zero corpus instances,
+        // found by reading. `dpl` must be a token of its own on BOTH sides.
+        expect(normalizeMadurese("8 mèter dplè")).toBe("8 mèter dplè");
+        expect(normalizeMadurese("8 mèter dpl2")).toBe("8 mèter dpl2");
+        // …and the digit-adjacent metre word, the unspaced shape this corpus writes for `40m`, now reaches
+        // it — `\b` refused it because a digit is an ASCII word character.
+        expect(normalizeMadurese("40mèter dpl")).toBe("40mèter è attas tasè'");
+        // The compound metre words are still declined on both spellings: the rule binds to the WORD.
+        expect(normalizeMadurese("8 kilomèter dpl")).toBe("8 kilomèter dpl");
     });
 
     // ⚠ TWO SEAMS THAT ALREADY WORKED AND MUST NOT BE "FIXED" (playbook trap 16). Pinned through the real

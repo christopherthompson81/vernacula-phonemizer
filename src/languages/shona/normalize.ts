@@ -352,8 +352,12 @@ export function normalizeShonaPost(input: string): string {
     //    ⚠ TRAP 14's SECOND CLAUSE IS SATISFIED BY THE ORDER, not by extra work. Words-ifying an operand
     //    normally destroys the number-unit adjacency the tier matches on — here the tier has already run AND
     //    Shona puts the noun FIRST, so there is no adjacency left to lose.
-    //    ⚠ `(?![.,]\d)` KEEPS IT OFF A DECIMAL: `masendimita 5.5` must not become "masendimita mashanu . 5".
+    //    ⚠ `(?![.,]?\d)` KEEPS IT OFF A DECIMAL: `masendimita 5.5` must not become "masendimita mashanu . 5".
     //    That is also why this precedes step 10 rather than following it.
+    //    ⚠ THE `?` IS LOAD-BEARING AND THIS COMMENT USED TO OMIT IT. Without it the lookahead only rejects a
+    //    SEPARATOR-then-digit, so on a two-digit integer part the engine backtracks `\d+` one digit short and
+    //    the truncated run passes the guard: `madhora 25.5` came out `madhora <2>5.5` — the wrong quantity,
+    //    with the tail left as loose digits. `madhora 2.5` hid it, because a one-digit run cannot backtrack.
     s = s.replace(new RegExp(`((?:${MA_NOUNS})[ \u00a0])(\\d+)(?![.,]?\\d)`, "gu"),  // space, NBSP
         (whole, noun: string, digits: string) => {
             const n = Number(digits);

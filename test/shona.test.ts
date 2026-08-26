@@ -160,6 +160,18 @@ describe("Shona normalization — the local rules", () => {
         expect(phonemize("0 o C", "sn")).toBe("mad̤iɡiriji zero kelsius");
     });
 
+    test("the concord pass declines a decimal operand, on BOTH digit lengths", () => {
+        // ⚠ THE TWO-DIGIT CASE IS THE ONE A ONE-DIGIT FIXTURE HIDES. The guard is `(?![.,]?\\d)`; drop the
+        // `?` and `\\d+` backtracks one digit short, so `madhora 25.5` claims a truncated `2` and reads a
+        // different quantity with the tail left as loose digits. `masendimita 5.5` cannot backtrack and so
+        // passes either way — which is why it alone was not enough.
+        expect(normalizeShonaPost("masendimita 5.5")).toBe("masendimita 5 poyindi 5");
+        expect(normalizeShonaPost("madhora 25.5")).toBe("madhora 25 poyindi 5");
+        expect(normalizeShonaPost("makiromita 12,5")).toBe("makiromita 12 koma 5");
+        // …while the integer beside the same noun IS concorded.
+        expect(normalizeShonaPost("madhora 25")).toBe("madhora makumi maviri ne mashanu");
+    });
+
     test("decimals: one word per mark, and the fractional digits are read one at a time", () => {
         // sn.wikipedia's own worked reading does exactly this — 0,286 → "koma mbiri nomwe nhanhatu".
         // Reading `25` in `1.25` as a NUMBER would say *makumi maviri ne shanu*, a different quantity.

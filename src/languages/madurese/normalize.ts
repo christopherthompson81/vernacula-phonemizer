@@ -378,7 +378,16 @@ export function normalizeMadurese(input: string): string {
     // ⚠ THE EMITTED PHRASE ENDS IN AN APOSTROPHE, which in this orthography is a LETTER (the glottal stop)
     // and not punctuation — the hazard this language's file and `attest.ts`'s boundary test both record.
     // It reaches the IPA as [tasɛʔ], the same as every corpus instance of the word.
-    s = s.replace(/\b(m[èe]t[èe]r)\s+dpl\b/giu, "$1 è attas tasè'");
+    // ⚠ AND THE BOUNDARIES ARE LOOKAROUNDS, NOT `\b` — this rule was the ONE PLACE in this file that broke
+    // the header's own rule, and it broke it in exactly the way the header predicts. JS defines `\b` on
+    // ASCII `\w`, and this language writes ⟨è⟩ in the very word the rule matches: `dpl\b` counted a
+    // following NON-ASCII letter as a boundary, so `8 mèter dplè` fired and came out
+    // `8 mèter è attas tasè'è` — the abbreviation eaten out of an ordinary word. Zero corpus instances (all
+    // four are `mèter dpl`/`meter dpl`), which is why it survived; found by reading, not by the corpus.
+    // The leading side changes nothing the corpus reaches — `kilomèter dpl` is declined by BOTH spellings,
+    // since the metre word has to be a token of its own — but a digit-adjacent `40mèter dpl` now fires,
+    // which is the same unspaced shape this corpus writes for `40m`.
+    s = s.replace(/(?<![\p{L}\p{M}])(m[èe]t[èe]r)\s+dpl(?![\p{L}\p{M}\d])/giu, "$1 è attas tasè'");
 
     // ── 9. RANGES → `sampè'` ──────────────────────────────────────────────────────────────────────
     // ⚠ LAST OF THE RULES THAT OWN A DASH. Every earlier rule has already taken the dashes it owns — the

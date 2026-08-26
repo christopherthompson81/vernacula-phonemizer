@@ -120,6 +120,10 @@ public static class Bootstrap
             Sinhala.SinhalaPhonemizer.RegisterSelf();
             Zhuang.ZhuangPhonemizer.RegisterSelf();
             Chichewa.ChichewaPhonemizer.RegisterSelf();
+            Kazakh.KazakhPhonemizer.RegisterSelf();
+            Madurese.MaduresePhonemizer.RegisterSelf();
+            Shona.ShonaPhonemizer.RegisterSelf();
+            Sylheti.SylhetiPhonemizer.RegisterSelf();
         }
     }
 }

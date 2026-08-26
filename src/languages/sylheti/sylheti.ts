@@ -72,7 +72,9 @@ function number(digits: string): string {
  * silently deleted. 226 instances of ꠨ alone in the mined artifact's excerpt tier.
  *
  * The punctuation class gains ⁕ (U+2055) — the corpus's actual SENTENCE TERMINATOR, ×476, previously
- * unread entirely — plus ॥ and ꠫ ꠪. See `sylheti.jsonc`'s `clausePunctuation` for the evidence.
+ * unread entirely — plus ॥ and ꠫ ꠪. It also gains `৷` U+09F7, a FOURTH terminator the first survey missed:
+ * 9 instances in the mined artifact, all sentence-final, more than either ॥ or ꠫. See
+ * `sylheti.jsonc`'s `clausePunctuation` for both accounts.
  *
  * ⚠ THE NUMBER ARM STAYS `\d+` AND THAT IS DELIBERATE, even though this corpus writes 63% of its digits
  * in Bengali (৫২৬). `registry.ts` folds native digits to ASCII at the single dispatch point before any
@@ -80,7 +82,7 @@ function number(digits: string): string {
  * hand `number()` a string `Number()` cannot value if the engine were ever driven without that wrapper.
  * `normalize.ts` keys every one of its own patterns on `\p{Nd}` instead, because it inspects SHAPES.
  */
-const TOKEN = /([ꠀ-ꠧ꠬]+)|(\d+)|([꠨꠩꠪꠫।॥⁕.?!,])/gu;
+const TOKEN = /([ꠀ-ꠧ꠬]+)|(\d+)|([꠨꠩꠪꠫।॥৷⁕.?!,])/gu;
 
 class SylhetiPhonemizer implements Phonemizer {
     text(input: string): string {

@@ -54,6 +54,15 @@ public static class Registry
         get { lock (PortPendingRequested) return PortPendingRequested.ToArray(); }
     }
 
+    /// <summary>Reset the pending set. ⚠ FOR THE PARITY GATE, and for the same reason
+    /// <c>Foreign.ClearForeignOov</c> exists: the set is process-wide, so once ANY language has asked for an
+    /// unported engine every later row inherits the entry and "did THIS row block?" becomes unanswerable.
+    /// Clearing per row is what makes blocked-vs-wrong a per-row verdict instead of a run-wide guess.</summary>
+    public static void ClearPortPending()
+    {
+        lock (PortPendingRequested) PortPendingRequested.Clear();
+    }
+
     /**
      * Run the language bootstrap once — the C# stand-in for registry.ts's static imports.
      *
