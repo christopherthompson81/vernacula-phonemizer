@@ -11,7 +11,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 | `JsRegex.cs` | the pattern translator (407 lines) — **all** regexes route through it |
 | `DataPath.cs` | resolves the shared root `data/` tree; mirrors `src/core/dataPath.ts` |
 | `Registry.cs` | 859 lines, self-registration (`Registry.Register("thai", () => …)`); languages slot in without editing it |
-| Goldens | 169 files in `csharp/goldens/` (100 FLEURS-text, 68 mined-corpus, 1 lexicon-only). ⚠ ASYNC-MODE output — the gate calls `PhonemizeAsync` |
+| Goldens | 185 files in `csharp/goldens/` — 100 FLEURS-text, 68 mined-corpus, 11 variant-derived, 5 accent variants, 1 lexicon-only. ⚠ ASYNC-MODE output — the gate calls `PhonemizeAsync`. ⚠ A VARIANT-DERIVED golden is rendered over its BASE language's text and pins C#↔TS parity only — it is not corpus coverage of the variant |
 
 ## State
 
@@ -35,9 +35,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   has any corpus artifact. They lack a dump-scale written corpus IN THEIR OWN CODE, and speaker count does
   not predict it — apd is 32M, apc 30M, zsm 80M. Of the nine Arabic varieties, exactly the two with a
   Wikipedia (arz, ary) have mined text. What DOES work for 11 of them is the existing
-  `tools/gen_variant_golden.mts`: measured, the 7 Arabic dialects plus bho/rkt/grc read MSA-or-Hindi text
-  0/25 identically to their base, so a variant golden pins something real. zsm/pbt/bgc read 25/25
-  identically and a golden there would only restate the base file. See the investigation doc.
+  `tools/gen_variant_golden.mts`, and **11 of them now have one**: apc apd acm afb ayl ajp acw (over MSA),
+  bho rkt hne (over Hindi), grc (over Modern Greek). All 11 pass byte-identically, and the seven dialects
+  are distinct both from `ar` (105–121 rows of 200) and from EACH OTHER — closest pair apc/ajp at 15, the
+  two halves of Levantine, which is the expected answer. zsm/pbt/bgc were SKIPPED: they read 25/25
+  identically to their base, so a golden would only restate the base file and "it has a golden" would
+  imply more than it delivers. **13 codes still have no golden.** See the investigation doc.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,
