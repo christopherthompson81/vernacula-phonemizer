@@ -129,9 +129,25 @@ export function reorderFraction(s: string, fractionWord: string): string {
  * DECIMALS — the separator is a word and the FRACTIONAL PART IS READ DIGIT BY DIGIT: 6.34 is 六點三四, never
  * 六點三十四. The integer part stays ASCII so the engine's own cardinal path reads it.
  *
- * ⚠ `(?!\.\d)` KEEPS A DOTTED DESIGNATION OUT — `1.2.3` and `802.11n` share the decimal's shape. Earned in
- * the jv layer (`nomer 1.2.3` read *siji koma loro . telu*) and carried by nan and cjy.
+ * ⚠ `(?!\.\d)` KEEPS A THREE-PART DESIGNATION OUT — `1.2.3`. Earned in the jv layer (`nomer 1.2.3` read
+ * *siji koma loro . telu*) and carried by nan and cjy.
  * ⚠ THE FRACTION IS CAPPED AT 3 DIGITS, which also keeps a DOI (`10.1016`) out.
+ * ⚠ `802.11n` IS **NOT** GUARDED, AND THE DOCSTRING USED TO CLAIM IT WAS. `(?!\.\d)` stops `1.2.3` on its
+ * THIRD dotted group; `802.11n` has no third group, so it reads *802點一一n*. The claim came from the ten
+ * Latin-script layers (es, sw, umb, qu, sn, bo …) whose guard is a trailing LETTER — a different rule.
+ *
+ * ⚠ NEITHER REPAIR SURVIVED MEASUREMENT, and both were tried. Counted across every corpus of the six layers
+ * that call this function (cdo, cjy, gan, hak, hsn, nan):
+ *     802.11-shaped designations   0
+ *     decimal + unit or word      32   `1.3m/s²`, `4.68km/h`, `2.32g/cm³`, `0.1mol/L`, `2.45GHz`, `36.1±2.6ka`
+ *   · A TRAILING-LETTER REFUSAL breaks all 32 and fixes nothing here. Those layers' `m` is a declared unit,
+ *     so the trade lands the other way for them; here the decimal would go unread AND the bare `.` would
+ *     survive as a CLAUSE PAUSE — the leak this function exists to stop.
+ *   · REFUSING `802.11` BY NAME (the shape English's `NOT_VERSION` carries) does the same thing on the one
+ *     string it saves: `802.11n` came out *pat̚ pak̚ laŋ ŋi · səp it ˈɛn*, the pause traded for the misread.
+ * So the reading stays as it is and the DOCSTRING is what changes. ⚠ The shape is attested ×8 in the sibling
+ * Sinitic corpora (cmn ×4, yue ×4) that have their own decimal rules today — if either migrates onto this
+ * helper, this decision is worth re-running against a corpus where the count is not 0.
  */
 export function readDecimals(s: string, decimalWord: string, digits: readonly string[] = HAN_DIGITS): string {
     return s.replace(
