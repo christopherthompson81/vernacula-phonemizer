@@ -30,6 +30,17 @@ import { MANIFEST } from "./manifest.ts";
 const UNIT_CARD: readonly string[] = [
     "", "бір", "екі", "үш", "төрт", "бес", "алты", "жеті", "сегіз", "тоғыз",
 ];
+/** ⚠ `UNIT_CARD[0]` is EMPTY ON PURPOSE — the table is indexed positionally, and a zero digit inside a
+ *  larger number contributes no word (`20` is *жиырма*, not *жиырма нөл*). But `orthographic(0)` reached
+ *  that same empty string and returned it, so a standalone zero simply vanished: `00:43` read *қырық үш*,
+ *  `0.5` read *нүкте бес*, and `00:00` read as the EMPTY STRING. The zero word is needed only at the top
+ *  of `orthographic`, never in the positional path.
+ *  ⚠ KNOWN, PRE-EXISTING, AND NOT SPECIFIC TO ZERO: a word emitted by `orthographic` goes through the
+ *  g2p, and numbers.ts records that three number words do not follow it — *нөл* has ø, *жиырма* is
+ *  final-stressed, *алпыс* has a clear l. So this reads [nˈɵl] where the manifest's own digit reading is
+ *  [nˈøɫ]. Every orthographic-path word already inherits that approximation; restoring a slightly
+ *  off zero beats dropping it, and closing the gap properly means teaching the g2p these three. */
+const ZERO_CARD = "нөл";
 const TENS_CARD: readonly string[] = [
     "", "он", "жиырма", "отыз", "қырық", "елу", "алпыс", "жетпіс", "сексен", "тоқсан",
 ];
@@ -228,8 +239,14 @@ export function normalizeKazakh(input: string): string {
 
     // 3b) DOT-CLOCK before a timezone — `15.00 UTC`, `0230 UTC` (the corpus's 24h times). The dot is
     //     otherwise a version (step 8b). The 4-digit `0230` (military time) is a bare number.
-    s = s.replace(/(?<![\d.,])(\d{1,2})\.(\d{2})\s*(UTC|GMT)/giu, (_m, h: string, min: string, tz: string) =>
-        `${orthographic(Number(h))} ${orthographic(Number(min))} ${tz}`);
+    //     ⚠ ZERO MINUTES ARE OMITTED, the same convention the `:`-clock rule above already applies
+    //     (`mv === 0 ? hour : hour minute`). It used to fall out of `orthographic(0)` returning the
+    //     EMPTY STRING, so `15.00 UTC` read *он бес UTC* by accident; with zero now rendering as a word
+    //     the omission has to be stated, or the clock reads *он бес нөл* — "fifteen zero".
+    s = s.replace(/(?<![\d.,])(\d{1,2})\.(\d{2})\s*(UTC|GMT)/giu, (_m, h: string, min: string, tz: string) => {
+        const mv = Number(min);
+        return `${orthographic(Number(h))}${mv === 0 ? "" : ` ${orthographic(mv)}`} ${tz}`;
+    });
 
     // 4) THE CASE SUFFIX — `200-ге`, `8-ден`, `80-нен`, `60-тан`, `1000-нан`, `11:00-ден`, `9:30-да`,
     //    `160 км/сағ-қа`. The suffix tells the CASE; the number becomes words; the ending attaches to
@@ -241,6 +258,8 @@ export function normalizeKazakh(input: string): string {
             const caseName = CASE_BY_SUFFIX[sfx.toLowerCase()];
             if (caseName === undefined) return m0;
             const n = Number(d);
+            // ⚠ This is the OUT-OF-RANGE guard — `orthographic` returns "" above 1e6. It used to catch
+            // zero as well, so `0-ге` was left as raw digits; zero now renders and reads *нөлге*.
             if (orthographic(n) === "") return m0;
             return withCase(orthographic(n), caseName);
         });
@@ -297,7 +316,11 @@ export function normalizeKazakh(input: string): string {
     s = s.replace(/(\d[\d ]*)\s?(км)\s*\/\s*(сағ|сағат)(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
         (_m, d: string, u: string, denom: string, sfx: string) => {
             const n = Number(d.replace(/ /gu, ""));
-            const base = `${orthographic(n)} километр ${denom === "сағат" ? "сағат" : "сағат"}`;
+            // ⚠ The ternary this replaced had two identical branches. Here that is CORRECT rather than a
+            // bug — the alternation is `(сағ|сағат)`, an abbreviation and its full form, and both read
+            // *сағат*. Stated plainly so it does not read as an unfinished branch. (Fula had the same
+            // shape and there the branches genuinely should have differed.)
+            const base = `${orthographic(n)} километр сағат`;
             if (sfx !== undefined && sfx !== "") {
                 const caseName = CASE_BY_SUFFIX[sfx.toLowerCase()];
                 if (caseName !== undefined) return withCase(base, caseName);
@@ -355,6 +378,14 @@ export function normalizeKazakh(input: string): string {
 
     // 8b) DOT DECIMALS/VERSIONS — `1.1 суретті` (Figure 1.1, the corpus's only dot-decimal; Kazakh
     //     writes decimals with commas, so a dot is a version/figure number). Read "нүкте" (point).
+    //     ⚠ THE SIGNED CASE IS CLAIMED FIRST. Step 9's minus rule needs `[-−]` followed by DIGITS, and
+    //     this rule rewrites those digits to words — so run unsigned-first and `-1.5` lost its sign
+    //     entirely, reading *бір нүкте бес*. The comma path never had the bug because step 8 only swaps
+    //     the separator and leaves the digits for the sign rule to find.
+    //     The `(?<![\p{L}\p{Nd}])` guard is step 9's own, and it is what keeps a RANGE out: in
+    //     `1.5-2.5` the character before the dash is a digit, so the sign arm declines.
+    s = s.replace(/(?<![\p{L}\p{Nd}])[-−](\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
+        `минус ${orthographic(Number(i))} нүкте ${orthographic(Number(f))}`);
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${orthographic(Number(i))} нүкте ${orthographic(Number(f))}`);
 
@@ -404,6 +435,7 @@ export function normalizeKazakh(input: string): string {
 /** Orthographic Kazakh cardinal (the manifest stores IPA; restated here in orthography for the case
  *  suffix and clock rules, which must emit words the g2p reads). */
 function orthographic(n: number): string {
+    if (n === 0) return ZERO_CARD; // see ZERO_CARD — the positional table has "" here
     if (n < 10) return UNIT_CARD[n]!;
     if (n < 100) {
         const t = Math.floor(n / 10), u = n % 10;
