@@ -26,7 +26,7 @@ sandhi) + **2,857 simplified aliases** (OpenCC `TSCharacters`, Apache-2.0) → *
 **Shared engine (the 2nd-consumer refactor).** Jin and Hakka are the two "IPA-already-in-the-dict" Sinitic
 bring-ups (Wu and Min Nan instead carry a romanization → IPA layer). Rather than copy `jin.ts`, the shared logic
 — greedy longest-match Han segmentation, superscript-tone → Chao contour-letter conversion (surface tone after
-the `⁻` sandhi arrow), and Han numeral composition — was extracted to `src/languages/sinitic/hanDictIpa.ts`; each
+the `⁻` sandhi arrow), and Han numeral composition — was extracted to `src/languages/sinitic/hanDictIpa.ts` (since moved to `src/core/hanDictIpa.ts` — it is a core module, and `languages/sinitic/` was never a language); each
 language module supplies only its dict + Chao map + punctuation. Jin was refactored onto it in the same change
 (byte-identical output, its 6 tests still pass). This is the project's "gate from day one, lift the parameter
 data on the 2nd consumer" convention applied to the shared engine.

@@ -10,7 +10,7 @@
  * currency 1**. This is the hak situation, not the cjy one.
  *
  * ⚠ TIER 1, AND IT IS A HARD GATE: THE SHIPPED DICT DECIDES WHETHER A WORD SPEAKS AT ALL. The shared engine
- * (`sinitic/hanDictIpa.ts`) segments by greedy longest match and **skips an uncovered character SILENTLY** —
+ * (`core/hanDictIpa.ts`) segments by greedy longest match and **skips an uncovered character SILENTLY** —
  * so an unsourced word is not mispronounced, it VANISHES, which is worse than leaving the symbol unread.
  * Every word this file emits was run through `phonemizeWord` first:
  *

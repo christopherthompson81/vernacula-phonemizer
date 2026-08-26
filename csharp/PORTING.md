@@ -132,18 +132,27 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
   corpus files, and had to synthesise all 346 Adlam probe lines from the tables — the core defect it
   found (an unpaired surrogate throwing in `LatinPhones`) was unreachable from any real corpus line. When
   the differential comes back clean, state what fraction of the corpus actually exercised the new code.
-  ⚠ **PUT THE PROBE PROJECT IN `.probe/` INSIDE YOUR OWN WORKTREE. NOT IN THE SESSION SCRATCHPAD.**
-  `.probe/` is gitignored (so `git add -A` cannot sweep it into a commit) and it lives inside the
-  worktree, so two concurrent agents cannot reach the same path even by accident. Build it there, point
-  its `.csproj` at `../csharp/Vernacula.Phonemizer/Vernacula.Phonemizer.csproj` — YOUR worktree's copy —
-  and run with `VERNACULA_DATA_DIR` pointing at YOUR worktree's `data/`.
-  ⚠ **THE SESSION SCRATCHPAD IS SHARED BETWEEN AGENTS AND THIS HAS GONE WRONG THREE TIMES.** It is not
-  per-agent. In three separate fan-outs an agent had its probe `Program.cs` and `.csproj` overwritten
-  mid-run and repointed at ANOTHER agent's worktree, so its differential was silently measuring someone
-  else's build; one also had the shared `obj/` corrupted underneath it. Warning agents about it did not
-  stop it happening again, twice — which is why the instruction is now a path rather than a caution. If
-  you have already run a differential out of the shared scratchpad, re-verify the `.csproj` target and
-  re-run before trusting a single number from it.
+  ⚠ **PUT THE PROBE PROJECT IN `.probe/<lang>/` — YOUR LANGUAGE'S OWN SUBDIRECTORY.** Not the session
+  scratchpad, and NOT `.probe/` root. Build it there, point its `.csproj` at
+  `../../../csharp/Vernacula.Phonemizer/Vernacula.Phonemizer.csproj` and run with `VERNACULA_DATA_DIR`
+  pointing at the `data/` of the tree you are actually building. `.probe/` is gitignored, so `git add -A`
+  cannot sweep it into a commit.
+  ⚠ **THIS HAS NOW GONE WRONG FOUR TIMES, AND THE FOURTH IS WHY THE PATH HAS A `<lang>` IN IT.** The first
+  three were the session scratchpad: an agent's probe `Program.cs` and `.csproj` were overwritten mid-run
+  and repointed at ANOTHER agent's worktree, so its differential silently measured someone else's build;
+  one also had the shared `obj/` corrupted underneath it. The fix then was "use `.probe/` in your own
+  worktree" — which assumed every agent HAD its own worktree. **A fan-out launched without worktree
+  isolation puts every agent in one checkout, and `.probe/` root is then exactly as shared as the
+  scratchpad was.** That is what happened on the nan/skr/mg/so wave: `.probe/cs/Program.cs` changed hands,
+  and one agent's `probes.txt` came back as 1,416 lines of a sibling's integers. A stray `.csproj` left in
+  a shared `.probe/cs/` also broke a sibling's build with MSB1050.
+  ⚠ **THE FAILURE MODE IS SILENT, WHICH IS THE WHOLE PROBLEM.** It is not a crash — it is a differential
+  that measures the wrong build and comes back GREEN. If you have run anything out of a shared path,
+  re-verify the `.csproj` target and `VERNACULA_DATA_DIR`, rebuild, and re-run before trusting one number
+  from it; then say in your report which conclusions rested on the contaminated run.
+  ⚠ **DO NOT TIDY A SHARED `.probe/`.** A sibling may be mid-write, and deleting its harness turns a
+  measurement problem into lost work. Report it and leave it; whoever coordinates the fan-out clears it
+  once everyone has landed.
 - ⚠ ENGINEERING SHORTCOMINGS MAY BE CORRECTED; OBSERVABLE BEHAVIOUR MAY NOT. The line between the
   two is the golden gate. Free to fix: quadratic loops, repeated recompilation of regexes, string
   concatenation in loops, copy-paste that a shared helper collapses, untyped grab-bag objects,

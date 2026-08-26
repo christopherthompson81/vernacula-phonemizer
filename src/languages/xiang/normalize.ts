@@ -13,7 +13,7 @@
  * saying which is which at every rule. It follows the Jin (cjy) layer, which is the same situation.
  *
  * ⚠ TIER 1, A HARD GATE: THE SHIPPED DICT DECIDES WHETHER A WORD SPEAKS AT ALL. The shared engine
- * (`sinitic/hanDictIpa.ts`) segments by greedy longest match and **skips an uncovered character SILENTLY**,
+ * (`core/hanDictIpa.ts`) segments by greedy longest match and **skips an uncovered character SILENTLY**,
  * so an unsourced word does not mispronounce — it VANISHES, which is worse than leaving the symbol unread.
  * Every word below was checked through the engine:
  *

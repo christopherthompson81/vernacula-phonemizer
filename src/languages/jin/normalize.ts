@@ -14,7 +14,7 @@
  * two tiers instead, and says which is which at every rule.
  *
  * ⚠ TIER 1, AND IT IS A HARD GATE: THE SHIPPED DICT DECIDES WHETHER A WORD SPEAKS AT ALL. The shared engine
- * (`sinitic/hanDictIpa.ts`) segments by greedy longest match and **skips an uncovered character SILENTLY** —
+ * (`core/hanDictIpa.ts`) segments by greedy longest match and **skips an uncovered character SILENTLY** —
  * so an unsourced word is not mispronounced, it VANISHES, which is worse than leaving the symbol unread.
  * Every word this file emits was checked through the engine:
  *

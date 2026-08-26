@@ -15,7 +15,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
-import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord } from "../sinitic/hanDictIpa.ts";
+import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord } from "../../core/hanDictIpa.ts";
 import { normalizeXiang } from "./normalize.ts";
 
 const DEF = loadManifest<HanDictDef>(import.meta.url, "xiang.jsonc");
