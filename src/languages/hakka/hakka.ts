@@ -15,7 +15,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
-import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord, readingToIpa } from "../sinitic/hanDictIpa.ts";
+import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord, readingToIpa } from "../../core/hanDictIpa.ts";
 import { hostWordRun } from "../../core/hostWord.ts";
 import { normalizeHakka } from "./normalize.ts";
 import { type PfsDef, pfsTable, readPfs } from "./pfs.ts";
@@ -42,7 +42,7 @@ function dict(): Map<string, string> {
  * Build the Hakka Chinese phonemizer. `foreign` handles embedded Latin runs.
  *
  * ⚠ THE NORMALIZER WRAPS the shared engine rather than being wired inside it, for the reason `jin.ts` gives:
- * `sinitic/hanDictIpa.ts` also serves gan and hsn, which have no normalization layer, so a hook there would
+ * `core/hanDictIpa.ts` also serves gan and hsn, which have no normalization layer, so a hook there would
  * either apply Hakka's rules to them or need a per-language branch in shared code.
  */
 export function createHakka(foreign?: ForeignPhonemizer): Phonemizer {

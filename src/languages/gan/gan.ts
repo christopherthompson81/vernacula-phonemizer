@@ -14,7 +14,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
-import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord } from "../sinitic/hanDictIpa.ts";
+import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord } from "../../core/hanDictIpa.ts";
 import { normalizeGan } from "./normalize.ts";
 
 const DEF = loadManifest<HanDictDef>(import.meta.url, "gan.jsonc");
@@ -28,7 +28,7 @@ function dict(): Map<string, string> {
  * Build the Gan Chinese phonemizer. `foreign` handles embedded Latin runs.
  *
  * ⚠ THE NORMALIZER WRAPS the shared engine rather than being wired inside it, for the reason cjy, hak and
- * hsn each give: `sinitic/hanDictIpa.ts` serves all four, and a hook there would either apply one lect's
+ * hsn each give: `core/hanDictIpa.ts` serves all four, and a hook there would either apply one lect's
  * rules to the others or need a per-language branch in shared code. Wrapping keeps the blast radius at one
  * language.
  */

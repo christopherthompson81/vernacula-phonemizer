@@ -6,9 +6,9 @@
  * superscript-tone → Chao contour-letter conversion (taking the SURFACE tone after a sandhi arrow ⁻), and Han
  * numeral composition. A language module supplies only its dict + its Chao map + its punctuation.
  */
-import type { Phonemizer } from "../../registry.ts";
-import { assembleClauses, clauseSink } from "../../core/clauses.ts";
-import { LATIN_RUN } from "../../core/hostWord.ts";
+import type { Phonemizer } from "../registry.ts";
+import { assembleClauses, clauseSink } from "./clauses.ts";
+import { LATIN_RUN } from "./hostWord.ts";
 
 export interface HanDictDef {
     /** Pitch digit ("1".."5") → Chao contour letter (˩..˥). */

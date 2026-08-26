@@ -2310,7 +2310,7 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     gan: {
         // ⚠ THE HARD GATE FOR THIS LANGUAGE IS THE DICT, NOT THE CORPUS — gan HAS a real corpus (a
         // gan.wikipedia dump, 3,020 segments, 29/35 cells), which cjy and hsn did not. But
-        // `sinitic/hanDictIpa.ts` skips an uncovered character SILENTLY, so an unsourced word does not
+        // `core/hanDictIpa.ts` skips an uncovered character SILENTLY, so an unsourced word does not
         // mispronounce — it VANISHES, which is worse than leaving the symbol unread. Every refusal below
         // names which of the two evidences decided it.
         plus: "measured: the corpus's 20-odd `+` contain NO arithmetic. They are a GRAMMAR NOTATION "
@@ -2354,7 +2354,7 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     hsn: {
         // ⚠ THERE IS NO hsn.wikipedia AND NO REFEREE. Every reason below is read off the Wikimedia Incubator's
         // `Wp/hsn` — 153 pages, 30,640 characters, the only Xiang text that exists — plus a DICT CHECK through
-        // the shipped engine, which is the harder gate: `sinitic/hanDictIpa.ts` skips an uncovered character
+        // the shipped engine, which is the harder gate: `core/hanDictIpa.ts` skips an uncovered character
         // SILENTLY, so an unsourced word does not mispronounce, it VANISHES.
         times: "measured: `×` occurs ONCE in the whole corpus and it is SCIENTIFIC NOTATION — `質量5.9742×"
             + "10²⁴公斤`, the mass of the Earth — which this layer reads for no language. And the word is not "
