@@ -26,13 +26,16 @@ public static class Js
         return outp;
     }
 
-    /// <summary>The ECMAScript `WhiteSpace ∪ LineTerminator` set that `String.prototype.trim` strips.
-    /// ⚠ IT IS NOT `char.IsWhiteSpace`, IN BOTH DIRECTIONS: .NET does not count U+FEFF (the BOM, which JS
-    /// does) and does count U+0085 (which JS does not). Measured on wuu, whose engine
-    /// tests `WUGNIU.test(input.trim())` as a whole-string fast path — a BOM-prefixed romanized reading took
-    /// the fast path in Node and the English foreign reader in .NET, and a U+0085-prefixed one did the
-    /// reverse. Same table as `Sinitic.JsNumberIndex`, for the same reason.</summary>
-    private static bool IsJsTrimmable(char c) =>
+    /// <summary>The ECMAScript `WhiteSpace ∪ LineTerminator` set — the set `String.prototype.trim` strips
+    /// AND the set `Number(s)` reads as 0, which are the same set. ⚠ IT IS NOT `char.IsWhiteSpace`, IN BOTH
+    /// DIRECTIONS: .NET does not count U+FEFF (the BOM, which JS does) and does count U+0085 (which JS does
+    /// not). Measured on wuu, whose engine tests `WUGNIU.test(input.trim())` as a whole-string fast path — a
+    /// BOM-prefixed romanized reading took the fast path in Node and the English foreign reader in .NET, and
+    /// a U+0085-prefixed one did the reverse.
+    /// ⚠ ONE TABLE. `Sinitic.JsNumberIndex` carried a second copy of these same 21 code points; a table
+    /// spelled twice is a table that drifts, which is the argument `normalize.ts` already makes for
+    /// re-exporting `DIGITS` rather than redeclaring it.</summary>
+    public static bool IsJsWhiteSpace(char c) =>
         c is '\t' or '\n' or '\v' or '\f' or '\r' or ' ' or '\u00A0' or '\u1680'
             or (>= '\u2000' and <= '\u200A') or '\u2028' or '\u2029' or '\u202F' or '\u205F'
             or '\u3000' or '\uFEFF';
@@ -42,8 +45,8 @@ public static class Js
     {
         var a = 0;
         var b = s.Length;
-        while (a < b && IsJsTrimmable(s[a])) a++;
-        while (b > a && IsJsTrimmable(s[b - 1])) b--;
+        while (a < b && IsJsWhiteSpace(s[a])) a++;
+        while (b > a && IsJsWhiteSpace(s[b - 1])) b--;
         return s[a..b];
     }
 

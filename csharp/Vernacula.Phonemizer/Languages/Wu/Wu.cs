@@ -97,6 +97,7 @@ public static class WuPhonemizer
         var count = offs.Count - 1;
 
         var outp = new List<string>();
+        var d = Dict(); // hoisted: Dict() takes a lock, and this is the innermost loop of the segmenter
         for (var i = 0; i < count;)
         {
             var matchedLen = 0;
@@ -104,7 +105,7 @@ public static class WuPhonemizer
             for (var len = Math.Min(MAX_WORD, count - i); len >= 1; len--)
             {
                 var word = run[offs[i]..offs[i + len]];
-                if (Dict().TryGetValue(word, out var hit) && hit != "")
+                if (d.TryGetValue(word, out var hit) && hit != "")
                 {
                     matchedLen = len;
                     reading = hit;
