@@ -211,10 +211,17 @@ export function normalizeSomali(input: string): string {
     //       nothing the tier would have done differently.
     //       ⚠ ONLY BEFORE A DECLARED UNIT: `sq ft` stays raw, because Somali has no foot and half a
     //       reading is worse than a visible leak — the same rule the shared tier applies to rates.
+    //       ⚠ BOTH CAPTURES ARE CASE-FOLDED BEFORE THE LOOKUP, and the unit one was not: this rule is the
+    //       only arm in step 3b carrying the `i` flag, so `SQ MI` matched and then indexed `UNIT` with
+    //       `"MI"`, which is not a key — the template stringified `undefined` and the LITERAL WORD reached
+    //       the phoneme sink as *ʔundefined*, a leak strictly worse than the one the rule removes. Folding
+    //       here does not weaken the tier's case-SENSITIVE unit keys (the note above `M`, step 2): what
+    //       makes `2407M` ambiguous is a bare magnitude letter after a digit, and an `M` preceded by
+    //       `sq `/`cu ` is the English measure frame and nothing else.
     s = s.replace(
         new RegExp(String.raw`(?<![\p{L}\p{M}])(sq|cu)\s+(${UNIT_KEYS})(?![\p{L}\p{M}\d])`, "giu"),
         (_m, mod: string, u: string) =>
-            `${UNIT[u as keyof typeof UNIT]} ${mod.toLowerCase() === "sq" ? EXPONENT[2] : EXPONENT[3]}`,
+            `${UNIT[u.toLowerCase() as keyof typeof UNIT]} ${mod.toLowerCase() === "sq" ? EXPONENT[2] : EXPONENT[3]}`,
     );
 
     // 3b-v. `mph` ×1 — spelled as the rate it abbreviates, so the tier reads it with words this file has

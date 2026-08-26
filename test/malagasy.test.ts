@@ -37,6 +37,19 @@ describe("Malagasy canonical IPA", () => {
         expect(d.text("100").trim()).toBe("zˈatu"); // zato
         expect(d.text("1000").trim()).toBe("arˈivu"); // arivo
     });
+
+    // ⚠ THE COMPOUND ALLOMORPH REACHES THE TAPITRISA REMAINDER TOO. `iraika` is the unit-1 form inside an
+    // `amby` compound and `iray` is the free form; the two scales put their remainder in the SAME slot, so
+    // they must spell it the same way. 1 000 001 read *iray amby iray tapitrisa* against 1 001's
+    // *iraika amby arivo* until numberToWords threaded `compound` through its own recursion.
+    test("the unit-1 allomorph is the same at the arivo and tapitrisa scales", () => {
+        const d = createMalagasy();
+        expect(d.text("1001").trim()).toBe("irˈajka ˈaᵐbi arˈivu");
+        expect(d.text("1000001").trim()).toBe("irˈajka ˈaᵐbi ˈiraj tapiʈʂˈisa");
+        // …and the free form still stands alone, at both scales.
+        expect(d.text("1").trim()).toBe("ˈiraj");
+        expect(d.text("1000000").trim()).toBe("ˈiraj tapiʈʂˈisa");
+    });
 });
 
 // The layer's evidence and its counter-examples both live in src/languages/malagasy/normalize.ts; these

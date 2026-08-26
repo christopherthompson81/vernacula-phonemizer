@@ -32,12 +32,17 @@ function below1000(n: number, compound = false): string {
 }
 
 /** Non-negative integer (< 10⁹) → Malagasy words; larger / non-finite → digit-by-digit. Units-first "amby"
- *  chaining across the arivo (10³) and tapitrisa (10⁶) scales. */
-export function numberToWords(n: number): string {
+ *  chaining across the arivo (10³) and tapitrisa (10⁶) scales.
+ *
+ *  `compound` is the same allomorph flag the two helpers take, threaded through the RECURSION: the
+ *  tapitrisa branch reads its remainder with this function, and that remainder sits in an `amby` compound
+ *  exactly as the arivo branch's does. Without it 1 000 001 read *iray amby iray tapitrisa* while 1 001
+ *  read *iraika amby arivo* — the same slot, two different unit words. */
+export function numberToWords(n: number, compound = false): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
         return [...String(Math.abs(n))].map((d) => ONES[Number(d)] || N.zero).join(" ");
     if (n === 0) return N.zero;
-    if (n < 1000) return below1000(n);
+    if (n < 1000) return below1000(n, compound);
     if (n < 1e6) {
         const th = Math.floor(n / 1000),
             r = n % 1000;
@@ -48,5 +53,5 @@ export function numberToWords(n: number): string {
     const mil = Math.floor(n / 1e6),
         r = n % 1e6;
     const million = `${below1000(mil)} ${N.million}`; // iray tapitrisa, roa tapitrisa, …
-    return r ? `${numberToWords(r)} ${N.connector} ${million}` : million;
+    return r ? `${numberToWords(r, true)} ${N.connector} ${million}` : million;
 }

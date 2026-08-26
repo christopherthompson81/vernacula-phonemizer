@@ -143,6 +143,16 @@ describe("Somali normalization: the raw-Latin runs", () => {
         expect(normalizeSomali("(430 sq ft) qofkiiba")).toBe("(430 sq ft) qofkiiba");
     });
 
+    test("⚠ an UPPERCASE `sq`/`cu` folded to a declared unit, not to the literal word \"undefined\"", () => {
+        // This is the only arm in step 3b with the `i` flag, and only the MODIFIER capture was folded
+        // before use — the unit capture indexed the table with `"MI"`, which is not a key, so the template
+        // stringified `undefined` and the WORD reached the phoneme sink. A leak strictly worse than the one
+        // the rule removes, and invisible to every fixture because all six corpus hits are lowercase.
+        expect(normalizeSomali("(430 SQ MI)")).toBe("(430 mayl laba jibaaran)");
+        expect(normalizeSomali("(12 Cu M)")).toBe("(12 mitir cubo)");
+        expect(phonemize("430 SQ MI", "so")).not.toContain("undefined");
+    });
+
     test("⚠ three `km` lines, four different shapes, and one of them was a MIS-READING", () => {
         // `91 km 2` read as *kiiloomitir 2* — the kilometre correctly and then a stray "two", a number the
         // source never said. That is not a leak and no leak counter would ever have found it.

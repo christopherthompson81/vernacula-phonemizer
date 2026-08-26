@@ -239,6 +239,11 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance", "convention");
 
     [Fact]
+    public void MinNanManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/minnan", "minnan.jsonc", Languages.MinNan.MinNanPhonemizer.DEF,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
     public void WuManifestIsFullyMapped() =>
         AssertFullyMapped("languages/wu", "wu.jsonc", Languages.Wu.WuPhonemizer.DEF,
             "language", "name", "script", "provenance", "convention");
@@ -332,9 +337,19 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance");
 
     [Fact]
+    public void MalagasyManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/malagasy", "malagasy.jsonc", Languages.Malagasy.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
     public void OromoManifestIsFullyMapped() =>
         AssertFullyMapped("languages/oromo", "oromo.jsonc", Languages.Oromo.Manifest.DEF,
             "language", "name", "script", "provenance");
+
+    [Fact]
+    public void SomaliManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/somali", "somali.jsonc", Languages.Somali.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
 
     [Fact]
     public void SundaneseManifestIsFullyMapped() =>
