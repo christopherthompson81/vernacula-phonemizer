@@ -169,6 +169,11 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance", "convention");
 
     [Fact]
+    public void ChhattisgarhiManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/chhattisgarhi", "chhattisgarhi.jsonc", Languages.Chhattisgarhi.ChhattisgarhiPhonemizer.DEF,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
     public void MaithiliManifestIsFullyMapped() =>
         AssertFullyMapped("languages/maithili", "maithili.jsonc", Languages.Maithili.MaithiliPhonemizer.DEF,
             "language", "name", "script", "provenance", "convention");
