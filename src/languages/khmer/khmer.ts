@@ -331,6 +331,13 @@ export function phonemizeWordRules(word: string): string {
             // shortened the raw output of every ី word; four goldens caught it).
             if (u < units.length - 1 && (unit.vs === "ិ" || unit.vs === "ី") && !unit.coda)
                 nucleus = unit.vs === "ី" ? "iː" : gov === "a" ? "e" : "i";
+            // ⚠ THIS LINE MAKES `SHORTEN` DEAD FOR ⟨ី⟩, AND THAT IS CURRENTLY UNDECIDABLE, NOT A BUG TO FIX.
+            // `SHORTEN` maps iː→i for a bantaq-closed syllable and this unconditionally puts the length
+            // back, so bantaq shortening never applies to ⟨ី⟩. Found by the C# port. ⚠ MEASURE BEFORE
+            // "FIXING" IT: the shape `ី C ់` has ZERO occurrences across km-lexicon.tsv,
+            // km-lexicon-kaikki.tsv, km-lexicon-dict.tsv, km-wordfreq.tsv AND the FLEURS corpus, so there is
+            // no evidence to choose with and nothing depends on the answer. Deleting the interaction would
+            // be a guess wearing a cleanup's clothes.
             if (unit.vs === "ី" && unit.coda) nucleus = "iː";
         } else if (u === units.length - 1) {
             // stressed (last) syllable. Open → LONG inherent (ក kɑː). Closed: LONG by default (a PLAIN coda —

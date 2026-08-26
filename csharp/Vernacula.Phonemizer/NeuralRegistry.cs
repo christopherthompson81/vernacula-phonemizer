@@ -24,6 +24,8 @@ public static class NeuralRegistry
         // (*bˈaːəs* for *bˈaːɪs*, *məɦd̪ˈoːd̪* for *məɦd̪ˈuːd̪*). It stayed invisible because pnb had no
         // golden until the mined tier gave it one.
         ["pnb"] = t => RiderNeural.PhonemizeRiderNeural(t, "pa"),
+        // per-character BiLSTM restoring the WORD BOUNDARIES Khmer does not write
+        ["km"] = Languages.Khmer.KhmerNeural.PhonemizeKmNeural,
     };
 
     /** The language's best ASYNC path, or null when its best path is the sync engine. */

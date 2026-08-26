@@ -22,15 +22,33 @@ function readings(): ReadonlyMap<string, string> {
     return (READINGS ??= loadTsvMap(import.meta.url, "sawndip-readings.tsv"));
 }
 
-/** Is `cp` a CJK ideograph code point (the blocks Sawndip draws on: Unified + Ext A–G + Compatibility)? */
+/**
+ * Is `cp` a Sawndip-capable code point (the blocks the shipped dictionary draws on)?
+ *
+ * ⚠ THE RANGES ARE ANSWERABLE FROM THE DICTIONARY, AND FOR 24 KEYS THEY WERE WRONG. This predicate is the
+ * ONLY gate on the Sawndip front-end — `zhuang.ts`'s TOKEN class and `normalize.ts`'s HAN class are the same
+ * set spelled twice more — so a key outside it is a row nobody can ever reach. Sweeping every key of
+ * `sawndip-readings.tsv` through `isSawndip` found 24 of 2,412 (1.0%) that no input could reach:
+ *
+ *     U+3007 〇 (`lingz`)                    — the ideographic number ZERO, which is not in an ideograph
+ *                                              block at all (CJK Symbols and Punctuation, category Nl)
+ *     U+2ECAD, U+2ECC3                       — CJK Ext I (U+2EBF0–2EE5F), added in Unicode 15.1
+ *     U+323B6 … U+32FD9, ×21                 — CJK Ext J (U+323B0–3347F), added in Unicode 17.0
+ *
+ * The old bounds `0x2ebef` and `0x323af` were the ENDS OF Ext F AND Ext H when this was written; the extract
+ * the dictionary is built from has since moved past both. The upper bounds now run to the end of Ext I and
+ * Ext J respectively, and `test/zhuang-sawndip.test.ts` asserts EVERY key is reachable, so the next block
+ * that appears in the extract fails as a test rather than as 24 silent glyphs.
+ */
 function isIdeograph(cp: number): boolean {
     return (
+        cp === 0x3007 || // 〇 — a numeral, not an ideograph, but a Sawndip reading (`lingz`) all the same
         (cp >= 0x3400 && cp <= 0x4dbf) || // Ext A
         (cp >= 0x4e00 && cp <= 0x9fff) || // Unified
         (cp >= 0xf900 && cp <= 0xfaff) || // Compatibility
-        (cp >= 0x20000 && cp <= 0x2ebef) || // Ext B–F
+        (cp >= 0x20000 && cp <= 0x2ee5f) || // Ext B–F, I
         (cp >= 0x2f800 && cp <= 0x2fa1f) || // Compatibility Supplement
-        (cp >= 0x30000 && cp <= 0x323af) // Ext G–H
+        (cp >= 0x30000 && cp <= 0x3347f) // Ext G–H, J
     );
 }
 

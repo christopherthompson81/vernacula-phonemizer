@@ -344,7 +344,7 @@ export function normalizeSinhala(input: string): string {
     //       so the reading would have to be invented as well as the guard.
 
     // 12) RE-STRIP — the words emitted above are written with their ordinary joiners (`ක්‍රිස්තු`,
-    //     `කිලෝග්‍රෑම්`, `ට්‍රිලියන`), which is what a Sinhala reader expects to see in this file. Without
+    //     `කිලෝග්‍රෑම්`), which is what a Sinhala reader expects to see in this file. Without
     //     this pass the tokenizer would split each of them exactly as it split the input at step 1.
     return stripJoiners(s);
 }

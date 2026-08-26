@@ -68,6 +68,13 @@ public class LanguageBootstrapTests
     [InlineData("lo", "ຫຼາຍ", "laː˩j")]
     [InlineData("lo", "ວຽງຈັນທນ໌", "ʋiːə˧˥ŋ.t͡ɕa˩n")]
     [InlineData("lo", "ຄ.ສ. 1990", "kʰa˧.li˧t̚.sa˧˥k̚.ka˧˥.laː˥˨t̚ nɯ˧ŋ pʰa˧˥n ka˥˨w hɔː˥˨j ka˥˨w si˧˥p̚")]
+    // Sinhala's four defining shapes: the ZWJ conjunct must stay ONE token (U+200D is outside the word
+    // class, so an unstripped joiner read ශ්‍රී as *s rˈiː*), the homorganic anusvara, the schwa
+    // alternation, and the degree sign written as U+2070 SUPERSCRIPT ZERO.
+    [InlineData("si", "ශ්‍රී ලංකා", "srˈiː lˈaŋkaː")]
+    [InlineData("si", "සංචාරක", "sˈaɲt͡ʃaːrˌəkə")]
+    [InlineData("si", "පාසල", "pˈaːsələ")]
+    [InlineData("si", "133 ⁰C", "sˈelsijəs ˈaŋsəkə sˈijəjə t̪ˈist̪unə")]
     // Azerbaijani's defining shapes. ⚠ THE DOTTED/DOTLESS I PAIR IS THE ONE TO PIN: ⟨I⟩ names *ı* and ⟨İ⟩
     // names *i*, and every plain-fold shortcut (JS `toLowerCase`, .NET `ToLower`, a Turkish-locale cast)
     // collapses the contrast in a direction no golden row happens to expose. Then the Oghuz consonants that

@@ -40,4 +40,25 @@ describe("Zhuang Sawndip (second-script front-end)", () => {
             expect(phonemizeWord(reading).length).toBeGreaterThan(0); // no broken reading
         }
     });
+
+    // ⚠ WELL-FORMED IS NOT REACHABLE, AND THAT GAP HID 24 ROWS. The test above proves every reading is
+    // phonemizable; nothing proved the GLYPH could ever be presented to the reader. `isIdeograph`'s upper
+    // bounds were the ends of Ext F and Ext H, and the extract the dictionary is built from has since moved
+    // into Ext I and Ext J — so 24 of 2,412 keys (1.0%) were dead rows: `isSawndip` said no, the TOKEN class
+    // never claimed them, and `za.text(glyph)` returned the empty string. U+3007 〇 was outside every
+    // ideograph block to begin with. See sawndip.ts.
+    //
+    // ⚠ AND THE PROBE ASSERTS A NON-EMPTY READING, not merely that the two paths agree: a glyph that both
+    // the predicate and the engine silently drop is exactly what this is here to catch.
+    test("⚠ EVERY dictionary key is REACHABLE from the shipped entry point", () => {
+        const dict = loadTsvMap(import.meta.url, "../data/languages/zhuang/sawndip-readings.tsv");
+        const unreachable = [...dict.keys()].filter((g) => !isSawndip(g) || za.text(g) === "");
+        expect(unreachable).toEqual([]);
+        // the four blocks the old bounds excluded, named so a regression says which one came back
+        expect(za.text("〇")).toBe(phonemizeWord("lingz")); // U+3007, not an ideograph block at all
+        expect(za.text("\u{2ECAD}")).toBe(phonemizeWord("congz")); // Ext I
+        expect(za.text("\u{323B6}")).toBe(phonemizeWord("fuj")); // Ext J
+        // …and an ideograph with no documented reading is still dropped, not invented
+        expect(za.text("龘")).toBe("");
+    });
 });

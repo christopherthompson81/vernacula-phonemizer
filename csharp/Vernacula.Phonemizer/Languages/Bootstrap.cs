@@ -116,6 +116,10 @@ public static class Bootstrap
             Xiang.XiangPhonemizer.RegisterSelf();
             Gan.GanPhonemizer.RegisterSelf();
             Hakka.HakkaPhonemizer.RegisterSelf();
+            Khmer.KhmerPhonemizer.RegisterSelf();
+            Sinhala.SinhalaPhonemizer.RegisterSelf();
+            Zhuang.ZhuangPhonemizer.RegisterSelf();
+            Chichewa.ChichewaPhonemizer.RegisterSelf();
         }
     }
 }
