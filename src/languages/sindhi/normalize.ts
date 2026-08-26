@@ -118,8 +118,14 @@ export function normalizeSindhi(input: string): string {
     // سيڪنڊ؛ 300 ميل في ڪلاڪ)" — `في` is "per", `ڪلاڪ` the hour, `سيڪنڊ` the second.
     t = t.replace(/(?<!\p{L})km\s*\/\s*h(?![\p{L}\p{M}])/giu, "ڪلوميٽر في ڪلاڪ");
     t = t.replace(/(?<!\p{L})m\s*\/\s*s(?![\p{L}\p{M}])/giu, "ميٽر في سيڪنڊ");
+    // ⚠ `re.flags`, NOT A HARD-CODED "gu" — the table declares `/km/giu` and the composed regex was
+    // throwing the `i` away, so an UPPERCASE abbreviation fell through to the initialism reading:
+    // `12 KM پري` read *ɓˈaːɾəhənə kʰˈeᶦ ˈɛm pˈəɾeː* ("twelve kay em door") while `15 km پري` read the
+    // unit. Every other rule in this file is `giu`, and the rate rules above kept their own flags, which
+    // is why `480 KM/H` was never affected. Reading the flags off the declaration is what makes the
+    // declaration mean something.
     for (const [re, word] of UNITS)
-        t = t.replace(new RegExp(`(\\d)\\s*(?:${re.source})(?!\\p{L})`, "gu"), `$1 ${word}`);
+        t = t.replace(new RegExp(`(\\d)\\s*(?:${re.source})(?!\\p{L})`, re.flags), `$1 ${word}`);
 
     // 9) RANGES (48). Sindhi uses a CIRCUMFIX — کان … تائين, "from … until" — not a single connective
     //    word like the European languages' `til` / `până la` / `до`. Both halves are attested (1446 and

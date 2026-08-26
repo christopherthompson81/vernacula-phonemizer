@@ -672,7 +672,7 @@ public static class Registry
             case "yo":
                 return Create("yoruba"); // TS: createYoruba(readAsEnglish)
             case "ig":
-                return Create("igbo"); // TS: createIgbo(readAsEnglish)
+                return Create("igbo");
             case "my":
                 return Create("burmese"); // TS: createBurmese(readAsEnglish)
             case "sn":

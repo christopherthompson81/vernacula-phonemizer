@@ -88,8 +88,7 @@ public sealed class IgboPhonemizer : ILanguage
     // A word = Latin letters (incl. accented/dotted) plus combining marks.
     private static readonly JsRe TOKEN = JsRegex.Compile("([A-Za-zÀ-ɏḀ-ỿ̀-ͯ]+)|(\\d+)|([.?!,;:])", "gu");
 
-    private readonly Func<string, string>? _foreign;
-    private IgboPhonemizer(Func<string, string>? foreign) => _foreign = foreign;
+    private IgboPhonemizer() { }
 
     public string Text(string input)
     {
@@ -98,7 +97,9 @@ public sealed class IgboPhonemizer : ILanguage
         return Clauses.AssembleClauses(Normalize.NormalizeIgbo(input), TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));
-            // ⚠ DIGITS GO TO THE IGBO COMPOSITOR, NEVER TO `_foreign`, which the registry wires to ENGLISH.
+            // ⚠ DIGITS GO TO THE IGBO COMPOSITOR, NEVER TO A FOREIGN READER. And this engine takes no
+            // `foreign` parameter: it never read the one it used to declare, and an unclaimed Latin run
+            // reaches English through Clauses' FLEET DEFAULT instead.
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
             {
                 foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value)).Split(' '))
@@ -112,8 +113,8 @@ public sealed class IgboPhonemizer : ILanguage
     }
 
     /** Build the Igbo phonemizer. */
-    public static ILanguage CreateIgbo(Func<string, string>? foreign = null) => new IgboPhonemizer(foreign);
+    public static ILanguage CreateIgbo() => new IgboPhonemizer();
 
     internal static void RegisterSelf() =>
-        Registry.Register("igbo", () => CreateIgbo(Registry.ReadAsEnglish));
+        Registry.Register("igbo", CreateIgbo);
 }

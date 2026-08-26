@@ -32,7 +32,13 @@ public static class Normalize
         /** Derived from the ONE table above, so the tier and rule 2b can never disagree about which keys exist. */
         Units = UNIT.ToDictionary(e => e.Key, e => (IReadOnlyList<string>)new[] { e.Value }, StringComparer.Ordinal),
         UnitPrefix = true,
-        ExponentWords = new ExponentWordsDef { Squared = new[] { "skwea" }, Position = ExponentPosition.After },
+        // ⚠ PER-POWER POSITION: `skwea` FOLLOWS its noun, `kubik` PRECEDES it. Both corpus-attested.
+        ExponentWords = new ExponentWordsDef
+        {
+            Squared = new[] { "skwea" },
+            Cubed = new[] { "kubik" },
+            Position = new ExponentPositionSpec { Squared = ExponentPosition.After, Cubed = ExponentPosition.Before },
+        },
         Ampersand = "na",
     });
 

@@ -109,8 +109,15 @@
  *   *"kilomita skwea 7,223 (maịl skwea 2,789)"* · *"kilomita skwea 900"* · *"kilomita skwea 49,800"*
  *
  * NOUN, then modifier, then number — so `position: "after"`, which `unitPrefix` then completes into the
- * attested three-part shape without any further arrangement. `cubed` stays undeclared: no `km³` anywhere in
- * the artifact and no candidate word found, so the fallback keeps the unit's reading and leaves the mark.
+ * attested three-part shape without any further arrangement.
+ *
+ * ⚠ AND `cubed` IS ATTESTED AFTER ALL, IN THE OTHER POSITION. An earlier pass recorded "no candidate word
+ * found" and left the power to a fallback it also described wrongly: the mark was not "left", it was
+ * SILENTLY DROPPED — `100 km³` read *otu naɾɪ kilomita*, a wrong quantity with nothing to hear, which is
+ * exactly the failure the SQUARED note above argues against. The word is `kubik`, and the corpus writes the
+ * whole shape: *"the luno nwere kubik mita 120-160 nke mmanụ n'ime ya"*. MODIFIER, then noun, then number —
+ * the mirror of `skwea`, which is why `position` is now per-power rather than one value. (The same FLEURS
+ * sentence in Oromo spells it `kubiik`, in the same slot — an independent witness to the borrowing.)
  *
  * `cm` is the one key with ZERO artifact exposure, declared on the word's own evidence rather than the
  * abbreviation's — said here rather than hidden.
@@ -174,9 +181,11 @@ const SYMBOLS = makeSymbolNormalizer({
     /**
      * `skwea`, position `after` — *kilomita skwea 7,223*. See SQUARED in the header: the modifier follows its
      * noun in every attestation and `unitPrefix` then puts the number after both, which is the attested
-     * three-part shape exactly. `cubed` is deliberately absent — no `km³` in the artifact and no word found.
+     * three-part shape exactly. `cubed` is `kubik`, corpus-attested modifier-FIRST — see the header.
      */
-    exponentWords: { squared: ["skwea"], position: "after" },
+    // ⚠ PER-POWER POSITION: `skwea` FOLLOWS its noun (kilomita skwea 7,223) and `kubik` PRECEDES it
+    //   (kubik mita 120-160). Both corpus-attested in exactly those slots; see the header.
+    exponentWords: { squared: ["skwea"], cubed: ["kubik"], position: { squared: "after", cubed: "before" } },
     /** `na` — the ordinary Igbo connective, and the same word the number compositor uses to join parts. */
     ampersand: "na",
 });

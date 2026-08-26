@@ -117,7 +117,6 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin", "Sundanese"])})|(\\d+)|([.?!,
 const NATIVE_CLASS = "[a-zéÉ\\u{1B80}-\\u{1BAF}\\u{1BBA}-\\u{1BBF}]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
-export type ForeignPhonemizer = (latin: string) => string;
 
 class SundanesePhonemizer implements Phonemizer {
     text(input: string): string {

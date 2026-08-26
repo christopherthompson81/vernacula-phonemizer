@@ -55,10 +55,10 @@ public static class Normalize
     private static readonly JsRe KMH = JsRegex.Compile("(?<!\\p{L})km\\s*\\/\\s*h(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe MS = JsRegex.Compile("(?<!\\p{L})m\\s*\\/\\s*s(?![\\p{L}\\p{M}])", "giu");
 
-    /** ⚠ The composed unit regex takes "gu", NOT the `giu` of the UNITS entries' own literals — the `i` is
-     *  dropped exactly as the TypeScript drops it. */
+    /** ⚠ `giu`, from the UNITS entries' own declared flags — the TS used to hard-code "gu" here and throw
+     *  the `i` away, so `12 KM` read as an initialism. See the TS for the measurement. */
     private static readonly JsRe[] UNIT_RES =
-        UNITS.Select(u => JsRegex.Compile($"(\\d)\\s*(?:{u.Source})(?!\\p{{L}})", "gu")).ToArray();
+        UNITS.Select(u => JsRegex.Compile($"(\\d)\\s*(?:{u.Source})(?!\\p{{L}})", "giu")).ToArray();
 
     private static readonly JsRe RANGE =
         JsRegex.Compile("(?<![-–—])(\\d+)\\s*[-–—]\\s*(\\d+)(?!\\d)(?!\\s*[-–—]\\s*\\d)", "gu");

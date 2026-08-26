@@ -51,7 +51,12 @@ export function phonemizeWord(word: string): string {
         const c = chars[i]!;
         if (c === APOS_C) {
             // A comma not consumed by an oʻ/gʻ digraph is the tutuq belgisi → glottal stop.
-            out.push(DEF.glottal);
+            // ⚠ WORD-INTERIOR ONLY. The tutuq belgisi separates two letters (sanʼat, isʼhoq) and is never
+            // word-initial or word-final in Uzbek; at an edge the mark is a QUOTATION mark, which the
+            // tokenizer's lead-legal apostrophe class hands over with the word. Unguarded, `'soʻz'` read
+            // *ʔsˈozʔ* — a glottal stop on each side of a quoted word, in every quoted word. This is the
+            // same guard Oromo's scanner states for the same character and the same reason.
+            if (i > 0 && i + 1 < chars.length) out.push(DEF.glottal);
             i++;
             continue;
         }
@@ -89,17 +94,25 @@ const DECIMAL_IPA = phonemizeWord(DEF.numbers.decimalWord!);
 
 // symbol normalization — Uzbek. The corpus's own prose fixes the conventions: percent is POSTPOSED
 // ("8 foizga" — foiz = percent), rates are PREFIXED ("soatiga 240 kilometr"), and squared units are a
-// PREFIX adjective ("kvadrat kilometr"). km/mm/cm are claimed here so the tier's "only after a number"
+// PREFIX adjective ("kvadrat kilometr"). km/mm/sm/m are claimed here so the tier's "only after a number"
 // guard applies; the m/s and km/s compounds are consumed earlier, in normalize.ts step 10.
+// ⚠ THE UZBEK ABBREVIATION IS `sm`, NOT `cm` — santimetr, and the corpus writes `sm` ×4 against `cm` ×0.
+// Two comments here used to say `cm` (one of them working its example on `6x6 cm`) while the table said
+// `sm`, so the docstring and the code disagreed about which key existed. The table was right.
 const SYMBOLS = makeSymbolNormalizer({
     // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
-    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 sm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.
     multiply: { times: "karra" },
     percent: ["foiz"],
     currency: { "$": ["dollar"], "¥": ["iyena"] },
-    units: { km: ["kilometr"], mm: ["millimetr"], sm: ["santimetr"], m: ["metr"] },
+    // ⚠ `cm` IS THE SAME WORD BY ITS INTERNATIONAL SPELLING, not a new claim. The attestation above is for
+    //   the WORD (santimetr ×4), which is already declared; `cm` ×0 here only says this corpus writes the
+    //   Uzbek abbreviation. Unclaimed, a digit-adjacent `cm` reached the g2p raw and `5 cm` read *bˈeʃ km* —
+    //   ⟨c⟩ has no Uzbek value so it folds to [k], giving a vowel-less cluster Uzbek phonotactics do not
+    //   permit. An audible nonsense reading is worse than the second key.
+    units: { km: ["kilometr"], mm: ["millimetr"], sm: ["santimetr"], cm: ["santimetr"], m: ["metr"] },
     // `bortida 120–160 kubometr yonilg'i` — FUSED, and fused the other way round from `kvadrat`, which the
     // same corpus writes spaced (`783 562 kvadrat kilometerni`). Hence the per-power position record: one
     // value could not spell both. `kub`/`kubik` are ×0 here; the closed `kubometr` is what this corpus has.

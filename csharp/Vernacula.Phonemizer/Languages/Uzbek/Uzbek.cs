@@ -39,7 +39,8 @@ public static class UzbekPhonemizer
             var c = chars[i];
             if (c == APOS_C)
             {
-                outp.Add(DEF.Glottal); // a comma not consumed by an oʻ/gʻ digraph is the tutuq belgisi
+                // ⚠ WORD-INTERIOR ONLY — at an edge the mark is a quotation mark, not the tutuq belgisi.
+                if (i > 0 && i + 1 < chars.Count) outp.Add(DEF.Glottal);
                 i++;
                 continue;
             }
@@ -96,6 +97,8 @@ public static class UzbekPhonemizer
             ["km"] = new[] { "kilometr" },
             ["mm"] = new[] { "millimetr" },
             ["sm"] = new[] { "santimetr" },
+            // ⚠ `cm` is the SAME WORD by its international spelling, not a new claim — see the TS.
+            ["cm"] = new[] { "santimetr" },
             ["m"] = new[] { "metr" },
         },
         ExponentWords = new ExponentWordsDef
