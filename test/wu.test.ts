@@ -53,4 +53,16 @@ describe("wu (Shanghainese) canonical IPA", () => {
     test("numbers (Han-numeral composition)", () => {
         expect(phonemize("123", "wuu")).toBe("iʔ˥ paʔ˧˩ ɲi˨ zəʔ˦ sɛ˦"); // 一百二十三
     });
+
+    // ⚠ A SYLLABLE BODY IS A LOWERCASE RUN THE CALLER SUPPLIES, and the finals/syllabic tables are plain
+    // objects, so a bare index reads Object.prototype. `constructor` is a lowercase word: before the
+    // `Object.hasOwn` guard, "constructor1" came back as "function Object() { [native code] }˥˧" — the
+    // function's own source, in the phoneme stream. The Han path cannot reach it (dict readings are real
+    // Wugniu), which is exactly why 200 golden rows and the parity gate never saw it.
+    test("an inherited Object.prototype key is NOT a rime", () => {
+        expect(phonemize("constructor1", "wuu")).toBe("constructor1");
+        expect(phonemizeWord("constructor")).toBe("constructor");
+        expect(phonemizeWord("cconstructor1")).toBe("cconstructor1"); // ⟨c⟩ onset + inherited rime
+        expect(phonemizeWord("tostring1")).toBe("tostring1");
+    });
 });

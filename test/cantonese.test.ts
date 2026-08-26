@@ -30,6 +30,14 @@ describe("cantonese canonical IPA", () => {
             "jɐt̚˥ t͡sʰiːn˥ kɐu˧˥ paːk̚˧ lʊk̚˨ sɐp̚˨ kɐu˧˥",
         );
     });
+
+    // ⚠ A SYLLABLE BODY IS A LOWERCASE RUN THE CALLER SUPPLIES and `DEF.finals` is a plain object, so a bare
+    // index reads Object.prototype. Before the `Object.hasOwn` guard, "constructor1" came back as
+    // "function Object() { [native code] }˥". Found while porting wuu, which carried the identical shape.
+    test("an inherited Object.prototype key is NOT a rime", () => {
+        expect(phonemize("constructor1", "yue")).toBe("constructor1");
+        expect(phonemizeWord("constructor")).toBe("constructor");
+    });
 });
 
 // TEXT NORMALIZATION. Counts in the comments are instances in FLEURS yue_hant_hk (1,726 utterances);

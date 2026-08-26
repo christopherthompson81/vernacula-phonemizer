@@ -39,6 +39,15 @@ const VOWEL = "aeiouy";
 // in the language — was half ASCII. 44 of the dict's 328 unmapped syllable tokens.
 const SYLLABIC: Record<string, string> = { m: "m̩", n: "n̩", ng: "ŋ̍", mh: "ʔm̩", nh: "ʔn̩", ngh: "ʔŋ̍" };
 
+// ⚠ OWN PROPERTY ONLY — a bare `table[key]` READS Object.prototype, and this table is keyed by a lowercase
+// run the caller supplies. `constructor` is a lowercase word, so `constructor1` is a syllable whose body hits
+// the INHERITED constructor and concatenates the function's source into the phoneme stream:
+// phonemize("constructor1", "wuu") returned "function Object() { [native code] }˥˧". Reachable from the
+// whole-string Wugniu fast path in `text()` and from `phonemizeWord`, which is the eval's entry point.
+// (The Han path cannot reach it — dict readings are real Wugniu — which is why 200 golden rows never saw it.)
+const own = (table: Record<string, string>, key: string): string | undefined =>
+    Object.hasOwn(table, key) ? table[key] : undefined;
+
 let DICT: Map<string, string> | undefined;
 function dict(): Map<string, string> {
     return (DICT ??= loadTsvMap(import.meta.url, "dict.tsv"));
@@ -62,17 +71,19 @@ function syllableToIpa(syl: string): string {
     for (const ini of INITIALS) {
         if (!body.startsWith(ini)) continue;
         const rime = body.slice(ini.length);
-        const final = DEF.finals[rime];
+        const final = own(DEF.finals, rime);
         if (final !== undefined) return DEF.initials[ini]! + final + tone;
     }
     // Zero-onset: a whole-body final first (covers front-rounded yu/yun/yuq and the apical bare y), then the
     // glide onsets ⟨y⟩/⟨w⟩ + vowel (yi→ji, wa→wa), then a syllabic nasal.
-    if (DEF.finals[body] !== undefined) return DEF.finals[body]! + tone;
+    const whole = own(DEF.finals, body);
+    if (whole !== undefined) return whole + tone;
     if ((body[0] === "y" || body[0] === "w") && VOWEL.includes(body[1] ?? "")) {
-        const rest = DEF.finals[body.slice(1)];
+        const rest = own(DEF.finals, body.slice(1));
         if (rest !== undefined) return (body[0] === "y" ? "j" : "w") + rest + tone;
     }
-    if (SYLLABIC[body] !== undefined) return SYLLABIC[body]! + tone;
+    const nasal = own(SYLLABIC, body);
+    if (nasal !== undefined) return nasal + tone;
     return syl; // unknown rime → leave the romanization visible
 }
 

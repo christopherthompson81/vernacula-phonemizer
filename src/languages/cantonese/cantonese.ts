@@ -28,6 +28,14 @@ const HAN = /\p{Script=Han}/u;
 // `MP3` matched, found no rime, and came back VERBATIM through the "leave the jyutping visible" fallback.
 const JYUTPING = /^[a-z]+[1-6](?:\s+[a-z]+[1-6])*$/u;
 
+// ⚠ OWN PROPERTY ONLY — a bare `DEF.finals[key]` READS Object.prototype, and the key here is a lowercase run
+// the caller supplies. `constructor` is a lowercase word, so `constructor1` is a syllable whose body hit the
+// INHERITED constructor and concatenated the function's source into the phoneme stream:
+// phonemize("constructor1", "yue") returned "function Object() { [native code] }˥". Found while porting wuu,
+// which carried the same shape; the Han path cannot reach it, so no golden row ever did.
+const own = (table: Record<string, string>, key: string): string | undefined =>
+    Object.hasOwn(table, key) ? table[key] : undefined;
+
 /** One Jyutping syllable (e.g. "hoeng1") → IPA. */
 function syllableToIpa(syl: string): string {
     const m = /^([a-z]+?)([1-6])$/i.exec(syl);
@@ -36,17 +44,17 @@ function syllableToIpa(syl: string): string {
     const tone = DEF.tones[m[2]!] ?? "";
     // Syllabic nasal (m / ng stand alone, no initial).
     if (body === "m" || body === "ng")
-        return (DEF.finals[body] ?? body) + tone;
+        return (own(DEF.finals, body) ?? body) + tone;
     // Parse initial (longest match) + final.
     let initial = "",
         rest = body;
     for (const ini of INITIALS)
-        if (body.startsWith(ini) && DEF.finals[body.slice(ini.length)]) {
+        if (body.startsWith(ini) && own(DEF.finals, body.slice(ini.length))) {
             initial = DEF.initials[ini]!;
             rest = body.slice(ini.length);
             break;
         }
-    const final = DEF.finals[rest];
+    const final = own(DEF.finals, rest);
     if (final === undefined) return syl; // unknown rime → leave the jyutping visible
     return initial + final + tone;
 }
