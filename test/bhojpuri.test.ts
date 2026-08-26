@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/bhojpuri/bhojpuri.ts";
 
 // Canonical-IPA goldens for Bhojpuri (bho) — Indo-Aryan, Devanagari. Anchored on "A Grammar of Bhojpuri"
@@ -32,5 +33,19 @@ describe("Bhojpuri canonical IPA — from the reference grammar", () => {
         expect(phonemizeWord("कर")).toBe("kˈəɾ"); // the same word WITHOUT it — still deleted
         expect(phonemizeWord("देखऽ")).toBe("d̪ˈekʰə"); // referee dekʰʌ
         expect(phonemizeWord("खइलऽ")).toBe("kʰˈəilə"); // referee kʰʌilʌ — participial
+    });
+});
+
+describe("Bhojpuri: one rhotic, one symbol", () => {
+    test("writes the tap for ऋ/ृ, as it does for र", () => {
+        // ऋ and ृ shipped ASCII ⟨r⟩ — IPA's alveolar TRILL, and the only r in a manifest whose
+        // `consonants` declare र→ɾ and no trill. कृष्ण read krisn with a trill beside कर kəɾ with a tap.
+        // bho and magahi were the only two of eight Devanagari engines doing this.
+        expect(phonemize("कृष्ण", "bho")).toBe("kɾˈisn");
+        expect(phonemize("ऋषि", "bho")).toBe("ɾˈisi");
+        expect(phonemize("वृत्त", "bho")).toBe("wɾˈit̪ː");
+        // the tap it already used for र is unchanged, and no ASCII r survives anywhere
+        expect(phonemize("कर", "bho")).toBe("kˈəɾ");
+        expect(phonemize("कृष्ण ऋषि कर", "bho")).not.toMatch(/r/u);
     });
 });

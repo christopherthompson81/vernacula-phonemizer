@@ -36,3 +36,13 @@ describe("Magahi — `nm`, and the tier it inherits from Hindi", () => {
         expect(say("५८० nm")).not.toContain("nm");
     });
 });
+
+describe("Magahi: one rhotic, one symbol", () => {
+    test("writes the tap for ऋ/ृ, as it does for र", () => {
+        // Inherited from bhojpuri.jsonc, which this manifest was derived from. Fixed with it.
+        expect(phonemize("कृष्ण", "mag")).toBe("kɾˈisn");
+        expect(phonemize("ऋषि", "mag")).toBe("ɾˈisi");
+        expect(phonemize("कर", "mag")).toBe("kˈəɾ");
+        expect(phonemize("कृष्ण ऋषि कर", "mag")).not.toMatch(/r/u);
+    });
+});

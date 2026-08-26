@@ -104,7 +104,21 @@
         "उ": { "ipa": "u", "note": "short near-close back" },
         "ऊ": { "ipa": "u", "note": "long close back" },
         "ऋ": {
-            "ipa": "ri",
+            "ipa": "ɾi",
+            // ⚠ WAS ASCII ⟨r⟩ (IPA: alveolar TRILL) — the only r in this manifest, beside `consonants`
+            // र→ɾ and no declared trill, so कृष्ण read krisn with a trill while कर read kəɾ with a tap in
+            // one language. bho and magahi were the ONLY two of the eight Devanagari engines doing this;
+            // hi/awa/mai/hne/mr write ɾɪ and rkt ɾi. The slip's shape was visible in the file: the
+            // Bhojpuri revision was about LENGTH (ɪ→i) and ɾɪ→ri dropped the hook along with the laxness.
+            // ⚠ RESOLVED ON INTERNAL CONSISTENCY, BECAUSE THE REFEREE CANNOT ARBITRATE — and the earlier
+            // deferral turned on finding it. The 1622-pair grammar-mined artifact IS in the repo, at
+            // tools/referee-eval/referees/bho.grammar-mined.tsv (it was searched for under tools/corpus/
+            // and /mnt/data). It transcribes the rhotic as ASCII r in 370 rows and ɾ in ZERO, and
+            // tools/referee-eval/langs/bho.jsonc already folds ɾ→r for exactly that reason ("the ⟨र⟩ tap
+            // [ɾ] ~ the grammar's [r]"). So the grammar's `r` in drisʈi/srij/vrit is its notation for the
+            // rhotic in general, not a trill claim, and it cannot witness this question either way.
+            // The fold is also why the referee score is INVARIANT under this change — measured, unchanged
+            // at 71.041% — so nothing here is being traded for a number.
             // ⚠ SUSPECTED DEFECT, FILED RATHER THAN FIXED — the rhotic here is ASCII ⟨r⟩ (IPA: alveolar
             // TRILL), and it is the ONLY r in this manifest. `consonants` gives र→ɾ and declares no trill,
             // so कृष्ण reads krisn with a trill while कर reads kəɾ with a tap, in one language. Every
@@ -112,12 +126,7 @@
             // itself says "ɾɪ". The shape of the slip is visible: the Bhojpuri revision was about LENGTH
             // (ɪ→i), and ɾɪ→ri drops the hook as well as the laxness; magahi.jsonc, derived from this file,
             // carries the same ⟨r⟩ while independently-revised rangpuri.jsonc has ɾi.
-            // NOT CHANGED HERE because the change moves shipped IPA and this language's only witness —
-            // the 1622-pair grammar-mined referee named in `provenance` — is not in the repo, so nothing
-            // available can confirm what it transcribed. Fix it WITH that artifact, in both engines, and
-            // regenerate csharp/goldens/bho.tsv via `tools/gen_variant_golden.mts hi bho` (bho has no
-            // corpus of its own; gen_parity_goldens.mts produces nothing for it).
-            "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi) — see the filed defect above",
+            "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi, ɾi here — no phonemic length)",
         },
         "ए": { "ipa": "e", "note": "long close-mid front" },
         "ऐ": { "ipa": "ɛ", "note": "⚠ MONOPHTHONG [ɛ], NOT the diphthong [ai] — बैल→bɛl. An earlier revision of this note claimed Bhojpuri 'KEEPS the diphthong'; `provenance` above records that claim as WRONG. Do not 'fix' the value to match the retracted note." },
@@ -135,7 +144,7 @@
         "ी": { "ipa": "i" },
         "ु": { "ipa": "u" },
         "ू": { "ipa": "u" },
-        "ृ": { "ipa": "ri" }, // ⚠ the same filed ⟨r⟩-for-ɾ defect as ऋ above; the two must move together
+        "ृ": { "ipa": "ɾi" }, // moved with ऋ above, as its note requires
         "े": { "ipa": "e" },
         "ै": { "ipa": "ɛ" },
         "ो": { "ipa": "o" },
