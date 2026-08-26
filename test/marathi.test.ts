@@ -191,3 +191,17 @@ describe("marathi text normalization", () => {
         expect(mr("मराठी भाषा। नवीन")).toContain(" . ");
     });
 });
+
+describe("Marathi: ज्ञ is dnya, not its parts", () => {
+    test("the ligature reads d͡ʒn", () => {
+        // Composing ज + ् + ञ literally gives d͡ʒɲ, which is neither reading anyone attests — Hindi says
+        // /ɡj/ and Marathi says *dnya*. hindi.jsonc's note already named the Marathi reading while
+        // correctly scoping its own ɡj rule away from this file; nobody wrote the rule that implies.
+        // wikipron mar_deva broad: 16 of 17 ज्ञ rows read `d͡ʑ n`, folded onto our d͡ʒ.
+        expect(phonemize("ज्ञान", "mr")).toBe("d͡ʒnˈaːn");
+        expect(phonemize("विज्ञान", "mr")).toBe("ʋɪd͡ʒnˈaːn");
+        expect(phonemize("ज्ञात", "mr")).toBe("d͡ʒnˈaːt̪");
+        // ...and Marathi is NOT Hindi here: no ɡj anywhere.
+        expect(phonemize("ज्ञान", "mr")).not.toContain("ɡj");
+    });
+});

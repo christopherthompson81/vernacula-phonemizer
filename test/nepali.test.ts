@@ -182,3 +182,16 @@ describe("Nepali — the geminate rule collapses every consonant EXCEPT the dent
         expect(phonemizeWord("अच्छा")).toBe("ˈʌt͡st͡sʰa");
     });
 });
+
+describe("Nepali: ज्ञ patterns with Hindi, not with Marathi", () => {
+    test("the ligature reads ɡj", () => {
+        // Composing ज (d͡z, dental in Nepali) + ् + ञ literally gives d͡zɲ. wikipron nep_deva narrow is
+        // unambiguous on all 4 of its ज्ञ rows: ɡ j. hindi.jsonc's rule scoped itself to Hindi and never
+        // mentions Nepali — so this was not decided against, it was not considered.
+        expect(phonemize("ज्ञान", "ne")).toBe("ɡjˈan");
+        expect(phonemize("विज्ञान", "ne")).toBe("wˈiɡjan");
+        expect(phonemize("ज्ञात", "ne")).toBe("ɡjˈat̪");
+        // ...and Nepali is NOT Marathi here: no d͡zɲ / d͡zn survives.
+        expect(phonemize("ज्ञान", "ne")).not.toContain("ɲ");
+    });
+});
