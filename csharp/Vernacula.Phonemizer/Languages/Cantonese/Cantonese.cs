@@ -61,7 +61,7 @@ public static class CantonesePhonemizer
 
     /** A space-separated Jyutping string → IPA. */
     private static string JyutpingToIpa(string jp) =>
-        string.Join(" ", SplitWs(jp.Trim()).Select(SyllableToIpa));
+        string.Join(" ", SplitWs(Js.Trim(jp)).Select(SyllableToIpa));
 
     /** JS `s.split(/\s+/u)` — a leading empty piece is possible and is preserved, as there. */
     private static List<string> SplitWs(string s)
@@ -187,7 +187,7 @@ public static class CantonesePhonemizer
 
         public string Text(string input)
         {
-            if (JYUTPING.IsMatch(input.Trim())) return JyutpingToIpa(input);
+            if (JYUTPING.IsMatch(Js.Trim(input))) return JyutpingToIpa(input);
             input = Normalize.NormalizeCantonese(input, DEF.MeasureWords);
             var marks = string.Concat(CLAUSE_MARK.Keys.Select(k => JsRegex.Replace(k, MARK_ESC, mm => "\\" + mm.Value)));
             var tok = JsRegex.Compile(

@@ -26,6 +26,30 @@ public static class Js
         return outp;
     }
 
+    /// <summary>The ECMAScript `WhiteSpace ∪ LineTerminator` set — the set `String.prototype.trim` strips
+    /// AND the set `Number(s)` reads as 0, which are the same set. ⚠ IT IS NOT `char.IsWhiteSpace`, IN BOTH
+    /// DIRECTIONS: .NET does not count U+FEFF (the BOM, which JS does) and does count U+0085 (which JS does
+    /// not). Measured on wuu, whose engine tests `WUGNIU.test(input.trim())` as a whole-string fast path — a
+    /// BOM-prefixed romanized reading took the fast path in Node and the English foreign reader in .NET, and
+    /// a U+0085-prefixed one did the reverse.
+    /// ⚠ ONE TABLE. `Sinitic.JsNumberIndex` carried a second copy of these same 21 code points; a table
+    /// spelled twice is a table that drifts, which is the argument `normalize.ts` already makes for
+    /// re-exporting `DIGITS` rather than redeclaring it.</summary>
+    public static bool IsJsWhiteSpace(char c) =>
+        c is '\t' or '\n' or '\v' or '\f' or '\r' or ' ' or '\u00A0' or '\u1680'
+            or (>= '\u2000' and <= '\u200A') or '\u2028' or '\u2029' or '\u202F' or '\u205F'
+            or '\u3000' or '\uFEFF';
+
+    /// <summary>Port of `s.trim()`. Use this, not `string.Trim()`, wherever the TS wrote `.trim()`.</summary>
+    public static string Trim(string s)
+    {
+        var a = 0;
+        var b = s.Length;
+        while (a < b && IsJsWhiteSpace(s[a])) a++;
+        while (b > a && IsJsWhiteSpace(s[b - 1])) b--;
+        return s[a..b];
+    }
+
     /// <summary>Port of `s.replace(search, replacement)` with a STRING first argument: replaces only
     /// the FIRST occurrence (C#'s string.Replace replaces all — a silent porting trap).</summary>
     public static string ReplaceFirst(string s, string search, string replacement)
