@@ -88,16 +88,21 @@ for (const f of files) {
         }
     }
 }
-const newAtBase = unreadable === 0 ? "" : `, ${unreadable} with no version at ${base} (new, or the base predates a tree move)`;
+// ⚠ SAME RULE AS THE EMPTY-DIFF BRANCH ABOVE, and it must be decided BEFORE anything prints "ok": changed
+// files that were all unreadable at the base compared nothing, and "ok" over nothing is the vacuous pass
+// that let #755 ship.
+if (bad === 0 && compared === 0) {
+    console.error(
+        `check-manifest-headers: NOTHING WAS ACTUALLY COMPARED against ${base}.\n` +
+        `  ${files.length} changed manifest(s), none of them readable at ${base} — a base that predates the\n` +
+        `  data-tree move does this to every file. Pick a base where these paths exist.`,
+    );
+    process.exit(2);
+}
+const newAtBase = unreadable === 0 ? "" : `, ${unreadable} with no version at ${base} (new file(s))`;
 console.log(
     bad === 0
         ? `ok — ${files.length} changed manifest(s), ${compared} compared${newAtBase}; every pre-existing key kept its own header`
         : `${bad} orphaned header(s)`,
 );
-// ⚠ SAME RULE AS THE EMPTY-DIFF BRANCH ABOVE: changed files that were all unreadable at the base compared
-// nothing, and "ok" over nothing is the vacuous pass that let #755 ship. Distinguished from a real pass.
-if (bad === 0 && compared === 0) {
-    console.error(`check-manifest-headers: NOTHING WAS ACTUALLY COMPARED — ${files.length} changed manifest(s), none readable at ${base}.`);
-    process.exit(2);
-}
 process.exit(bad === 0 ? 0 : 1);
