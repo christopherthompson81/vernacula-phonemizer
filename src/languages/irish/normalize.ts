@@ -226,6 +226,17 @@ export function normalizeIrish(input: string): string {
             return encloses && noun !== undefined ? head : `${head}${spaced ?? ""}`;
         });
 
+    // 5a) THE TIMEZONE-OFFSET HYPHEN IS A SIGN, NOT A WORD HYPHEN — `UTC-08:00`, `GMT-0:44`,
+    //     `UTC-00:25:21` (10 instances across the mined corpora, 5 of them carrying a colon). It has to
+    //     be settled HERE, before the clock rule, because that rule turns the digits into WORDS and the
+    //     hyphen is then between two letter runs — indistinguishable from a compound joint, and the g2p
+    //     strips it and fuses them: `GMT-00:43` read *tʲˈeːn̪ˠɑːⁱdʲ*, one word. The initialism pass runs
+    //     last in this file, so by the time it could see the hyphen the digits are gone.
+    //     ⚠ Gated on a preceding LETTER and a following DIGIT. A hyphen between two letter runs is
+    //     load-bearing elsewhere in the fleet (Estonian glues a case ending across it, `SKP-st` →
+    //     *ess kaa peest*; Mongolian likewise), which is why this is not a shared rule.
+    s = s.replace(/(?<=\p{L})[-–](?=\d)/gu, " ");
+
     // 5) RANGES and SCORES — `10-60 nóiméad`, `6-6`, `4.2-3.9 milliún`, `AD 1000-1300`. Irish reads
     //    these with "go dtí" (to) or the range just as two numbers. The corpus's prose uses "idir X
     //    agus Y" (between X and Y). A leading minus stays a sign (handled later).

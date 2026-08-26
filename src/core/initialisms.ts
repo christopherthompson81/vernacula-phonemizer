@@ -104,7 +104,15 @@ const RUN_OR_CODE = new RegExp(
     `(?<![\\p{L}${LATIN_MARK}])\\p{Lu}{2,}(?![\\p{L}${LATIN_MARK}])`
     + `|(?<![\\p{L}${LATIN_MARK}])\\p{Lu}+(?=\\d)`, "gu");
 const INITIAL_RUN = new RegExp(`(?<![\\p{L}${LATIN_MARK}])(?:\\p{Lu}\\.[ \u00a0]*){2,}`, "gu");  // space, NBSP
-const LONE_INITIAL = /(?<=\p{Lu}\p{L}*[ \u00a0])(\p{Lu})\.(?=[ \u00a0]+\p{Lu}\p{Ll})/gu;  // space, NBSP
+// ⚠ `^` IS IN THE LOOKBEHIND because an initial can OPEN an utterance — `M. Bayramov`, and the pass
+// requires a preceding capitalised word, so a lone opening initial kept its bare letter and read as a
+// consonant ([m], not *em*). Widening here and not for the general case is deliberate: the KNOWN FALSE
+// POSITIVE documented above is a SENTENCE that ends in a lone capital before a new capitalised sentence,
+// and at the start of the text there is no preceding sentence for it to be. Measured over the 163 mined
+// corpora: 34 utterances across 18 of them open with this shape, and every one is a personal-name
+// initial in a citation or a biography (`C. Gledhill, The Grammar of Esperanto`, `M. Yunıs 1927 yılda`,
+// `H. Shapleyk 1917an`). No list-marker or sentence-fragment case in the set.
+const LONE_INITIAL = /(?<=^|\p{Lu}\p{L}*[ \u00a0])(\p{Lu})\.(?=[ \u00a0]+\p{Lu}\p{Ll})/gu;  // space, NBSP
 
 /**
  * Build the text→text initialism pass.
