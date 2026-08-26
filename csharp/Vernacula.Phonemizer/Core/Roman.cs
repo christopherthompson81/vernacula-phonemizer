@@ -66,11 +66,11 @@ public static class Roman
     /** Valid canonical Roman numerals that are overwhelmingly NOT numerals in running text: metric and
      *  size abbreviations, and short words. Applied regardless of case — `CD`/`CM`/`XL` uppercase are the
      *  abbreviations, not 400/900/40. */
-    private static readonly IReadOnlySet<string> COLLISIONS = new HashSet<string>
+    internal static readonly IReadOnlySet<string> COLLISIONS = new HashSet<string>
     {
         "mm", "cm", "ml", "dl", "cl", "cc", // metric: millimetre, centimetre, millilitre, …
         "xl", "xxl", // clothing sizes
-        "cd", // compact disc
+        "cd", "dc", "dv", "dx", "lv", "mv", "mc", "md", "cv", "ccc", // measured abbreviations; see the TS
         "mi", "di", "ci", "li", "vi", "xi", // short words across Romance/Slavic/Nordic/Turkic; `xi` is also a name
         "mix", "div", "civ", "liv", "dix", // words/abbreviations: mix, div, civ, Nordic "liv", French "dix"
     };

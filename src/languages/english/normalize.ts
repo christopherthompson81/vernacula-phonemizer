@@ -14,7 +14,7 @@
 
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { resolveUnitSymbol } from "../../core/normalizeSymbols.ts";
-import { romanToInt } from "../../core/roman.ts";
+import { COLLISIONS as ROMAN_COLLISIONS, romanToInt } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // ── Roman numerals ──────────────────────────────────────────────────────────────────────────────────
@@ -565,13 +565,24 @@ export function normalizeEnglish(input: string): string {
     //     these. Case makes them unambiguous, but an acronym is also all-caps ("the CD player"), so the
     //     preceding word must itself be evidence: a known numbered-event noun, or Capitalized as a name
     //     would be. That keeps "size XL" and "a CD" out while letting the real numerals through.
+    //     ⚠ THE CAPITALIZED-PREVIOUS-WORD SIGNAL IS THE WEAK ONE, and on its own it read every all-caps
+    //     abbreviation after a name as a numeral: `Washington DC` → *the six hundredth*, and equally
+    //     `Sony CD` → *the four hundredth*, `Detroit MI` → *the one thousand first*, `Boeing MD`,
+    //     `Ocean Express MV`, `Honda CIV`, `Paris DX`. "a CD" was kept out only by the lowercase "a".
+    //     core/roman.ts already owned the measured list of these; English simply was not consulting it.
+    //     Sharing it puts BOTH engines on one list rather than two that drift.
+    //     ⚠ The stoplist applies only to the weak signal. An explicit numbered-event noun still licenses
+    //     a stoplisted token, exactly as core's `licensed` does — `Apollo XI` is 11 and `WrestleMania XL`
+    //     is 40, and both would be lost to a blanket check.
     if (/[a-z]/.test(s)) {
         s = s.replace(/\b([A-Za-z][A-Za-z']*)\s+([IVXLCDM]{2,})\b/g, (m0, prev: string, rom: string) => {
             const n = romanToInt(rom);
             if (n === null) return m0;
-            const evidence = ROMAN_CARDINAL_CTX.test(prev) || /^[A-Z]/.test(prev);
+            const named = ROMAN_CARDINAL_CTX.test(prev);
+            const evidence = named || /^[A-Z]/.test(prev);
             if (!evidence) return m0;
-            if (ROMAN_CARDINAL_CTX.test(prev)) return `${prev} ${n}`;
+            if (!named && ROMAN_COLLISIONS.has(rom.toLowerCase())) return m0;
+            if (named) return `${prev} ${n}`;
             const suf = n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd"
                 : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th";
             return `${prev} the ${n}${suf}`;

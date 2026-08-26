@@ -101,11 +101,34 @@ export function romanToInt(token: string): number | null {
 
 /** Valid canonical Roman numerals that are overwhelmingly NOT numerals in running text: metric and
  *  size abbreviations, and short words. Applied regardless of case — `CD`/`CM`/`XL` uppercase are the
- *  abbreviations, not 400/900/40. */
-const COLLISIONS: ReadonlySet<string> = new Set([
+ *  abbreviations, not 400/900/40.
+ *
+ *  ⚠ A STOPLISTED TOKEN STILL CONVERTS IN AN EXPLICIT NUMERAL CONTEXT (see `licensed` below): `XL
+ *  aniversario` is the 40th, not a clothing size. The list costs nothing where the text says outright
+ *  that a numeral is meant; it only refuses the ambiguous bare case.
+ *
+ *  ⚠ THE ALL-CAPS ABBREVIATIONS WERE MEASURED, not guessed, because the first pass added only `DC` —
+ *  the one instance that happened to be reported — and `DC` is not special. Every all-caps token in the
+ *  163 mined corpora that is a canonical Roman numeral and would convert today was counted and its
+ *  contexts read. The genuine numerals are the low ones (`II` ×657, `III` ×295, `IV` ×183, `XX` ×140,
+ *  `XIX` ×117 …). Below them sits a clean band with ZERO numeral uses between them:
+ *
+ *      DC   50   Washington DC, DC Comics, direct current, Deputy Commissioner, Douglas DC-3
+ *      MV   19   motor vessel — `MV Gojira`, `MV Iron Baron`, `MV Nyayo`
+ *      MC   10   master of ceremonies, McGraw Hill, cassette (`LP & MC`)
+ *      MD   10   medical doctor, MD Pictures, McDonnell Douglas MD-80, Azerbaijani MDİ
+ *      CV    8   consonant-vowel (linguistics), curriculum vitae, horsepower — Somali `140 CV`
+ *      DV    8   digital video, Latgalian DV = dienvidvakari (southwest), % daily value
+ *      LV    6   Latvia (`lv-LV`, `LV-4332`), Louis Vuitton, launch vehicle `Atlas LV-3`
+ *      DX    6   radio DX-listening (Finnish `DX-kuuntelu`), a trim level
+ *      CCC   4   Computer Center Corporation
+ *
+ *  Nine tokens, 121 occurrences, not one of them a number. `CV` is the one that mis-read loudest, since
+ *  it takes a preceding quantity: Somali `140 CV` read as `140 105`. */
+export const COLLISIONS: ReadonlySet<string> = new Set([
     "mm", "cm", "ml", "dl", "cl", "cc", // metric: millimetre, centimetre, millilitre, …
     "xl", "xxl", // clothing sizes
-    "cd", // compact disc
+    "cd", "dc", "dv", "dx", "lv", "mv", "mc", "md", "cv", "ccc", // see the measurement above
     "mi", "di", "ci", "li", "vi", "xi", // short words across Romance/Slavic/Nordic/Turkic; `xi` is also a name
     "mix", "div", "civ", "liv", "dix", // words/abbreviations: mix, div, civ, Nordic "liv", French "dix"
 ]);
