@@ -214,3 +214,52 @@ rows per pair, asking whether the variant's reading actually DIFFERS from its ba
 dialects most of all, since running MSA text through a variety reader is exactly what those engines are
 FOR. For `zsm`, `pbt` and `bgc` it would only restate the base file, and "it has a golden" would imply
 more than it delivers.
+
+
+## Run 6 — 2026-08-25 23:05
+
+**Command.** Generated the 11 variant goldens run 5 identified as worth having, via the existing
+`tools/gen_variant_golden.mts`; skipped `zsm`, `pbt` and `bgc`, which read 25/25 identically to their base
+and whose golden would only restate the base file.
+
+**Distinctness, re-measured at full scale.** Run 5's sample said 0/25 identical for the Arabic dialects,
+which OVERSTATED it: that sample was the first 25 rows of `ar.tsv`, which are mined running text, while
+the file also carries lexicon headwords from the top-up — single words that rarely show a dialect feature.
+Over the whole 200:
+
+    apc 121/200 differ from ar      bho 200/200 differ from hi
+    ajp 121                         rkt 200
+    ayl 116                         hne 158
+    afb 109                         grc 200/200 differ from el
+    apd 113
+    acw 113
+    acm 105
+
+So roughly 53–60% of rows carry a dialect-distinguishing feature, not all of them. That is the honest
+number and it is still plenty.
+
+**The seven dialects are also distinct FROM EACH OTHER**, which is the check that matters if seven goldens
+are to be worth seven files rather than one. Pairwise rows differing, of 200:
+
+    apc/ajp  15   ← the closest pair by far, and the linguistically expected one:
+                    North vs South Levantine
+    acm/afb  46   apd/acm 65   afb/ayl 65   acm/acw 66   afb/acw 78
+    everything else 82–116
+
+**Result.** All 11 pass the gate byte-identically on the first run.
+
+    gate      71 → 78 languages, 14,200 → 15,600 rows, 0 differ
+    newly gated: acm acw afb ajp apc apd ayl — the seven Arabic dialects, all served through
+                 C#'s ARABIC_VARIETY table and none previously gateable
+    bho, rkt, hne, grc now have goldens but are not yet ported to C#
+    C# tests  650 → 672        TS tests 5,402, unchanged
+
+Re-running the 11 generations produces byte-identical files.
+
+⚠ **WHAT THESE 11 GOLDENS DO NOT CLAIM.** The text is the BASE language's corpus — MSA for the seven
+dialects, Hindi for bho/rkt/hne, Modern Greek for grc. They pin C#↔TS parity for the variant's engine over
+that text. They are NOT coverage of the variant's own corpus, and nothing here should be read as saying
+the variant has been corpus-verified. `gen_variant_golden.mts` states this about its own output and the
+same caveat carries to these files. For the Arabic dialects the gap is narrowest — a variety reader over
+MSA text is precisely what those engines are for — and widest for `grc`, where Modern Greek text is a
+long way from what an Ancient Greek engine exists to read.
