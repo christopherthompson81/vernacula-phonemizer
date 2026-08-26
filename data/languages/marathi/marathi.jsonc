@@ -154,6 +154,11 @@
     // is the fleet-wide Indic convention; the offglide + अय→ɛ are systematic Hindi realizations.
     "postRules": [
         {
+            "from": "d͡ʒɲ",
+            "to": "d͡ʒn",
+            "note": "⚠ ज्ञ IS NOT ITS PARTS, and Marathi's answer is not Hindi's. Composing ज (d͡ʒ) + ् + ञ (ɲ) literally gives d͡ʒɲ, which is neither reading anyone attests: Hindi says /ɡj/ (hindi.jsonc has that rule) and Marathi says *dnya* — d͡ʒn. The literal composition was simply the un-ruled default, and hindi.jsonc's own note already NAMES the Marathi reading (\"Marathi reads the same ligature as `dnya` (dnyaan)\") while correctly scoping its own ɡj rule away from this file. Nobody then wrote the rule that note implies. MEASURED against wikipron mar_deva broad (human): 16 of its 17 ज्ञ rows read `d͡ʑ n`, which the eval folds onto our d͡ʒ (see the alveolo-palatal fold in tools/referee-eval/langs/mr.jsonc), and the 17th is the bare letter ज्ञ as `d ɲ ə`. The primary referee score moves 91.605% → 91.933%, +16 words folded — exactly the rows in question. 10 golden rows move, all of this shape (ज्ञान d͡ʒɲˈaːn → d͡ʒnˈaːn).",
+        },
+        {
             "from": "((?:t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|[kɡptbmnlʃsɳŋɽ]ʰ?ʱ?|t̪|d̪))\\1(?!͡)",
             "to": "$1ː",
             "note": "geminate → single + length (क्क→kː, च्च→t͡ʃː)",
