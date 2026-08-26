@@ -46,7 +46,11 @@ const SYLLABIC_NASAL: Record<string, string> = { m: "m̩", n: "n̩", ng: "ŋ̍" 
 /** A toneless BUC base syllable → segmental IPA: [initial] + rime, with the 韻變 register (tight/loose) selecting the
  *  rime variant. `register` is "L" (loose) or "T" (tight), from the tone diacritic (see syllableParts). */
 function baseToIpa(base: string, register: "T" | "L"): string {
-    if (base in SYLLABIC_NASAL) return SYLLABIC_NASAL[base]!;
+    // ⚠ `Object.hasOwn`, not `in`: an object LITERAL inherits Object.prototype, so `"constructor" in
+    // SYLLABIC_NASAL` was true and this returned a FUNCTION, throwing at `seg.endsWith` one frame up. The
+    // manifest records are null-prototype (core/jsonc.ts) — this one is spelled in source, so it needs the
+    // guard here.
+    if (Object.hasOwn(SYLLABIC_NASAL, base)) return SYLLABIC_NASAL[base]!;
     let ini = "";
     for (const k of INITIALS)
         if (base.startsWith(k)) { ini = k; break; }
