@@ -126,6 +126,17 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
        exercises the common arms; the probes are what reach the rest.
   A language with no FLEURS text (the lexicon-only goldens) has no (1), so (2) has to carry the weight —
   say so explicitly rather than leaving the gap unstated.
+  ⚠ **MEASURE WHETHER THE HAYSTACK CONTAINS THE THING BEFORE TRUSTING A CLEAN DIFFERENTIAL.** A corpus
+  that carries none of the script, code point, or construct you are porting will report 0 differ while
+  proving nothing about it. The Fula port measured ZERO Adlam code points across FLEURS `ff_sn` and both
+  corpus files, and had to synthesise all 346 Adlam probe lines from the tables — the core defect it
+  found (an unpaired surrogate throwing in `LatinPhones`) was unreachable from any real corpus line. When
+  the differential comes back clean, state what fraction of the corpus actually exercised the new code.
+  ⚠ **A SHARED SCRATCHPAD IS A SHARED WORKSPACE.** When several ports run concurrently, the scratchpad
+  directory is NOT per-agent. Two of four agents in one batch collided there, and one had its probe
+  `Program.cs` and `.csproj` overwritten mid-run — repointed at another agent's worktree, so its
+  differential was measuring someone else's build. Put a scratch probe project in a uniquely-named
+  subdirectory and re-verify the `.csproj` target before trusting any number it produced.
 - ⚠ ENGINEERING SHORTCOMINGS MAY BE CORRECTED; OBSERVABLE BEHAVIOUR MAY NOT. The line between the
   two is the golden gate. Free to fix: quadratic loops, repeated recompilation of regexes, string
   concatenation in loops, copy-paste that a shared helper collapses, untyped grab-bag objects,

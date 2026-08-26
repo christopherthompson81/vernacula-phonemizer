@@ -16,11 +16,17 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 60 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
+- **Languages: 64 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
   or, ast, umb, kn, hi, cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha,
-  tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig, sd, su, uz — all
-  **200/200**. 65 gated codes, 13,000 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION (user
-  direction), from `tools/language-catalogue/languages.db`: next lo, zu, ff…
+  tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig, sd, su, uz, ff, lo,
+  zu, az — all **200/200**. 69 gated codes, 13,800 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION
+  (user direction), from `tools/language-catalogue/languages.db`.
+  ⚠ **THE QUEUE HAS BIFURCATED.** Every remaining language above ~22M speakers has NO GOLDEN — pcm (121M),
+  tl (88M), wuu (83M), zsm (80M), pnb (66M), bho (52M), and the rest of the Sinitic and Indic tails. 114
+  goldens exist and 69 are gated, so **45 unported languages already have one** and are portable today;
+  the largest are so (22M), xh (19M), si (18M), km (17M), ne (16M), za (16M), nso (14M), st (14M),
+  kk (13M), sr (12M). Porting order now trades population against whether a corpus has to be sourced
+  first — those are two different jobs and the population ranking no longer picks between them.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,
@@ -130,6 +136,97 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   `hesperonychus` as *hˌɛspɚənˈaᶦt͡ʃəs* (neural) only because another language had warmed the memo; the
   engine's own answer is the n-gram *ˈɛspɚˌoᶷnˌiːkəs*. Whether the gate SHOULD widen is a measurement,
   not a port decision, so both engines keep the current behaviour and this is recorded.
+
+### From the ff/lo/zu/az batch (2026-08-25) — four ported, four agents, all 200/200 first run
+
+⚠ Same caveat as the ledger below: the gate proves AGREEMENT. Every defect in this batch was found by
+READING the source or by a purpose-built probe. **Not one was found by the gate**, and the two most
+serious were invisible to the corpus differential as well.
+
+Fixed in this batch (TS first, then C#, per the bidirectional policy):
+
+- **ff — `Core/LatinPhones.cs` threw on half an astral letter.** A CORE defect, and the only C#-only one
+  in the programme so far: Fula's g2p indexes UTF-16 code units, so an unmapped astral character reaches
+  `LatinPhone` one surrogate at a time, and .NET's `Normalize` rejects an unpaired surrogate where JS
+  returns it unchanged. `ArgumentException` on every Adlam line carrying an unmapped code point. The TS
+  has no defect here (NFD is a no-op, `baseCh === c`, returns `undefined`), so there was no paired TS fix.
+  No golden can move — the old behaviour was an exception.
+  ⚠ **The corpus could not have found this.** FLEURS `ff_sn` plus `mined/ff.jsonc` plus `attest/ff.jsonc`
+  hold **ZERO** code points in U+1E900–1E95F, measured not assumed. All 346 Adlam probe lines had to be
+  synthesised from the tables in `fulaAdlam.ts`. This is the SECOND time an Adlam defect has escaped a
+  differential for want of a probe carrying Adlam — see the `[]`-is-not-the-empty-set note above.
+- **lo — the `Cຼ → Cl` onset branch was unreachable in both contexts where the ligature occurs.** The
+  `[l]` was dropped and the leftovers re-scanned as EXTRA SYLLABLES. ⚠ That is an INSERTION, which a leak
+  gate and a drop gate both miss by construction. Two arms: `reorder()` carried a cluster member across a
+  leading vowel only for ⟨ຫ⟩ (`ເບຼຊິນ` "Brazil" → *beː˩.si˧˥n*; `ເກຼັກ` "Greek" → two syllables for one),
+  and the coda lookahead claimed a coda-able consonant carrying the ligature (`ອະບຼາຮາມ` "Abraham" →
+  *ʔa˧˥p̚.haː˧˥m*). The second arm hit `ກິໂລກຼາມ` — **the kg unit word `normalize.ts` itself ships** — so
+  every "5 kg" read *ki˧˥.loː˥˨k̚.ma˧*. Four golden lines moved across three distinct texts, each a Cຼ loan
+  recovering its `[l]`; the neighbours `ຫຼາຍ`/`ເຫຼັກ`/`ເວລາ` are pinned against disturbance.
+- **zu — `kma` was a table row nothing reached.** `UNIT_WORD` declares `kma: "amakhilomitha"` with its
+  corpus citation, and no pattern in the file spells `kma`; every alternation is `(km|mi|m|mm|cm|kg)` and
+  the shared tier's key is `km`, letter-bounded. `1600 kma` → *kʼmˈaː* against `1600 km` →
+  *amakʰilɔmˈiːtʰa*. Postposed like every other measure noun, and a preceding number is required: unlike
+  `mph`/`kph`, `kma` is a MISSPELLING and could collide with a word. 0 golden rows moved.
+- **az — five, all from reading, 0 golden rows moved.** (1) `X&Y` used JS `toLowerCase` rather than
+  `azLower`, so dotless `I` folded to dotted `i` and `I&O` read *i və o* for *ı və o* — the same defect the
+  initialism pass had already been fixed for, in an arm that was missed. (2) The era-marker
+  end-of-string branch was DEAD: the idiom is Dutch's, where bodies omit their final dot and both branches
+  append one, but these bodies carry their own, so the branch asked for `e.ə..` and a sentence ending
+  "…məbəd e.ə." lost its terminal pause. (3) **`b.e.` read as BCE where it is the COMMON era**
+  (*bizim eramız*) — every date it touched was three thousand years out; the corpus settles it with
+  "(BE 1000-1300)", the Early Middle Ages. (4) `b.e.ə.` had no entry and `e.ə.` ate its tail, since a dot
+  is not a letter and the lookbehind allowed it. (5) ⟨q⟩ and ⟨ğ⟩ had no letter name, and `spellOut`
+  declines the WHOLE run if any letter is unnamed, so `HQ`→*hx*, `QVC`→*ɡvd͡ʒ* put raw ASCII in the
+  phoneme stream.
+
+Found, not fixed — all corpus-attested, both engines agreeing, no golden reaching them:
+
+- **ff: `133m/s` reads *per hour*.** Rule 10's ternary is `d === "h" ? "gootel" : "gootel"` — two identical
+  branches — so the declared `rateDenominators: { s: "sahaawa" }` is unreachable, and would compose wrong
+  anyway (`unitPer` already contains "wakkati"). Corpus has one wind speed glossed three ways,
+  `480 km/h (133m/s; 300mph)`. NOT FIXED: `gootel` is a noun-class concord agreeing with `wakkati`, and
+  whether `sahaawa` takes it is a speaker's judgement.
+- **ff: the 24h clock the docstring claims to handle has no rule.** Step 6 says "`0230 UTC` is handled here
+  too"; every clock regex requires a colon, so the corpus's `9:30 fajiri (0230 UTC)` reads *two hundred and
+  thirty*. n=1, and a bare `\d{4}` arm would also claim years.
+- **ff: `STEM_ORD` keys `miliyon`/`milion` where `numbers.ts` emits `million`/`milyar`.** Two dead rows, and
+  every ordinal ≥10⁶ falls through to the bare English suffix the header opens by saying the rule prevents.
+  `milionaɓal` vs `millionaɓal` is an orthography question.
+- **ff: the `¾`/`½` arms are unreachable** — `Unicode.FoldVulgarFractions` rewrites `1¾`→`1 3/4` upstream, so
+  `1¾` reads *goo tati e nayi*, never the authored *goo e teemedere*. ×0 in corpus: two inert readings, not
+  a mis-read.
+- **lo: the degree rule loses its scale letter when the number is not directly adjacent, and the letter
+  leaks as an ENGLISH LETTER NAME.** The mined corpus's own `(-4) - (0) c°` puts a bracket between digits
+  and token, so `(0) c°` reads *suː˩n **sˈiː*** — "zero see", degree word gone. That is precisely the
+  failure `normalize.ts` says the rule exists to prevent ("`20 °C` was reading as *saːw sˈiː*"), one bracket
+  over. Related: the `(?![\p{L}])` guard is ineffective in its intended direction (`20 °Cx` declines arm 1
+  but the bare-degree rule fires anyway) and in an unspaced script it rejects the ORDINARY case — trap 27,
+  which this very file invokes for the symbol tier. The glued-to-Lao shape is ×0 in both haystacks.
+- **zu: compound tone threading declines per-part lookup** — `phonemizeCompound` passes an explicit `""`, so
+  a compound whose whole-word lookup misses leaves every part untoned. MEASURED before judging: 1,050
+  compound tokens in the corpus, 29 with a part in `tone.tsv` while the whole word is not, and **27 of the
+  29 are a concord prefix** (`isi`, `le`, `lezi`, `lo`, `lobu`) colliding with an unrelated headword, where
+  toning would be WRONG. Only `kweNkosi`/`Nkosi` and `loMkhaya` are genuine misses. Current behaviour is the
+  better trade — an instance of [[measure-dont-judge]].
+- **zu: above 10⁹ the cardinal compositor repeats *izigidi***, because `zulu.jsonc` declares no word above
+  *isigidi*. Needs sourced Zulu magnitude words.
+- **zu: a stale comment over dead code.** Step 8c claims "`[+]?` is gone from both degree patterns"; it is
+  still in the compass and bare-degree arms. Unreachable in practice, so a false comment over a vestige.
+- **az: the SHARED Roman pass reads `Washington DC` as 600 in every language checked** — en *the six
+  hundredth*, tr/az *altı yüz*, uz *oltı yuz*. `DC` is a canonical all-caps numeral appearing in text that
+  is otherwise lowercase. A per-language `ROMAN_EXCLUSIONS` entry would paper over one language; the
+  decision belongs in `core/roman.ts` and is therefore a FLEET call, not a port call.
+- **az: a lone dotted initial** (`M. Bayramov`) correctly loses its dot, but the surviving single capital
+  reads as bare [m] rather than the letter name *em* — the initialism pass needs a 2+ run. Shared shape,
+  documented TS behaviour, not an az regression.
+
+⚠ **PROCESS, for the next fan-out: THE SCRATCHPAD IS SHARED BETWEEN AGENTS, NOT PER-AGENT.** Two of the
+four agents collided in it. One had its probe `Program.cs` and `.csproj` overwritten mid-run by another
+agent, repointing the project reference at a DIFFERENT WORKTREE — so its differential was silently
+measuring someone else's build until it noticed. Any brief that tells an agent to build a scratch probe
+project must also tell it to use a uniquely-named subdirectory and to re-verify the `.csproj` target
+before trusting a number.
 
 ### From the om/uz/sd/su/ig batch (2026-08-25) — read while porting, both engines agree on every one
 
