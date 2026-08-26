@@ -155,3 +155,30 @@ describe("Nepali — a clause-final currency figure still sounds", () => {
         expect(phonemize("$5.5", "ne").trim()).toBe("pˈãt͡s d̪ʌsˈʌmlʌw pˈãt͡s ɖˈʌlʌɾ");
     });
 });
+
+// ⚠ A FOUND-NOT-FIXED FINDING, PINNED SO IT CANNOT DRIFT SILENTLY (from the C# port). nepali.jsonc's
+// geminate→length postRule is inherited from hindi.jsonc and its alternation names the PALATAL affricates
+// t͡ʃ/t͡ʃʰ/d͡ʒ/d͡ʒʱ, none of which Nepali produces — its च/छ/ज/झ are the DENTAL t͡s/t͡sʰ/d͡z/d͡zʱ, and none of
+// those four is listed. So every other geminate in the same manifest collapses and the affricates alone do
+// not. Measured over the ne_np FLEURS corpus on the denominator normalize.ts's own header uses (1,993
+// unique utterances, column 3): 113 carry an uncollapsed affricate geminate — t͡st͡s ×107, d͡zd͡z ×6 — as do
+// 22 of the 200 parity-golden rows (all 22 t͡st͡s; d͡zd͡z is 0/200). ⚠ COUNT BOTH PHONES: an earlier draft of
+// this note quoted the t͡st͡s figure alone and silently dropped the six d͡zd͡z lines (लज्जा and its like),
+// under-sizing the finding it exists to size. Fixing the rule is a one-line alternation change, but it
+// moves 11% of the golden and no wikipron nep_deva referee is in this repo to settle whether the geminate
+// surfaces as [t͡sː] — so both engines keep the current reading. See postRules[0]'s note in nepali.jsonc.
+describe("Nepali — the geminate rule collapses every consonant EXCEPT the dental affricates", () => {
+    test("the collapse that does happen", () => {
+        expect(phonemizeWord("मक्का")).toBe("mˈʌkːa");
+        expect(phonemizeWord("सत्तरी")).toBe("sˈʌt̪ːʌɾi");
+        expect(phonemizeWord("गद्दी")).toBe("ɡˈʌd̪ːi");
+        expect(phonemizeWord("एकाउन्न")).toBe("ˈekaunːʌ");
+    });
+    test("and the one that does not — the filed finding", () => {
+        expect(phonemizeWord("बच्चा")).toBe("bˈʌt͡st͡sa"); // not bˈʌt͡sːa
+        expect(phonemizeWord("पच्चीस")).toBe("pˈʌt͡st͡sis"); // and this word is in `numbers.compound`
+        expect(phonemizeWord("लज्जा")).toBe("lˈʌd͡zd͡za"); // not lˈʌd͡zːa
+        // …so postRules[1]'s aspiration reorder never fires on अच्छा either: no length mark to move.
+        expect(phonemizeWord("अच्छा")).toBe("ˈʌt͡st͡sʰa");
+    });
+});

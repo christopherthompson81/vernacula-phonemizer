@@ -81,7 +81,11 @@ const UNIT_ALT = Object.keys(UNIT_WORD).sort((a, b) => b.length - a.length).join
  *  "yards-or-metres", not "yards per metre", so मिटर must NOT be a denominator. */
 const RATE_NUM = "किलोमिटर|मिलिमिटर|सेन्टिमिटर|मिटर|माइल|किमी|मिमी|गज";
 const RATE_DEN = "घण्टा|सेकेण्ड|सेकेन्ड|मिनेट";
-/** The denominators that are genuinely rates. `मिटर` appears in RATE_NUM but not here, by the note above. */
+/** The denominators that are genuinely rates. `मिटर` appears in RATE_NUM but not here, by the note above.
+ *  ⚠ THIS SET IS A BELT-AND-BRACES RE-STATEMENT OF `RATE_DEN`, NOT A NARROWING OF IT — the two lists are the
+ *  same four words, so the callback's decline branch cannot fire today. It is kept as a TRIPWIRE: the day a
+ *  word is added to RATE_DEN for its numerator sense (as मिटर would have been), the rule declines it here
+ *  instead of silently reading "yards PER metre". Delete one and the other stops being a guard. */
 const RATE_DEN_OK = new Set(["घण्टा", "सेकेण्ड", "सेकेन्ड", "मिनेट"]);
 
 /**
@@ -240,6 +244,15 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    The numeral alternative accepts a COMMA-GROUPED number first: the corpus writes "1,000 औँ
         //    टिकट", and with a bare `(\d+)` the leading `(?<![\d.,:])` guard refused the "000" and the
         //    whole match failed, leaving [ˈek ɦˈʌd͡zaɾ ˈʌũ] with the suffix stranded.
+        //    ⚠ FOUND, NOT FIXED — THAT ALTERNATIVE IS WESTERN GROUPING (`,\d{3}`) IN A LAKH-CRORE LANGUAGE.
+        //    `numbers.grouping` is "indian-lakh-crore" and this corpus writes `5,67,890`, so an ordinal
+        //    spelled `1,00,000 औं` matches neither alternative and strands its suffix exactly as the bare
+        //    `(\d+)` did. ×0 in the corpus (`1,000 औँ` is the only grouped ordinal, ×1) and the same shape is
+        //    inherited by every Devanagari sibling, so it is filed rather than fixed here alone.
+        //    ⚠ Also filed: when the rule DECLINES — n = 6 (छैटौं un-attested; see `ordinal`) or n above 2⁵³ —
+        //    the numeral is left as written and the suffix reads on its own as [ˈʌũ], which is the stray
+        //    stressed syllable this whole rule exists to remove. Both are ×0 in the corpus: every `6 औँ` hit
+        //    is the tail of `16 औँ`.
         s = s.replace(
             /(?<![\d.,:])([1-9]\d{0,2}(?:,\d{3})+|\d+)\s?(औं|औँ)(?![\p{L}\p{M}])/gu,
             (whole, digits: string, suffix: string) => {
@@ -279,7 +292,11 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
             },
         );
 
-        // 8) DEGREES, before the signs and before the unit rules so the ° still has its digit adjacent.
+        // 8) THE SIGNS AND THE DEGREES, in that order in the code, and before the unit rules so the ° still
+        //    has its digit adjacent. ⚠ THE TWO HALVES OF THIS STEP ARE ORDER-INDEPENDENT and the code
+        //    order is not the load-bearing thing: every sign rule RE-EMITS the digit it guards on
+        //    (`+30°C` → `प्लस 30°C`), so the degree rules below still see `\d°`. What matters is that both
+        //    run before step 10.
         //    डिग्री is Hindi's word and is ALSO Nepali's (corpus ×3) — kept. What was broken is the
         //    SCALE letter: Hindi's rule has `(?![\p{L}])`, and this corpus writes "+30°Cभन्दा" with a
         //    Devanagari letter immediately after the C, so the rule failed and the C was read as the
@@ -289,8 +306,13 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    THE TRAILING SPACE in each replacement is load-bearing for the same reason: "+30°Cभन्दा"
         //    has a Devanagari postposition welded to the C, and without it सेल्सियस and भन्दा became one
         //    token [selsijʌsbʱˈʌnd̪a]. The double-space collapse at step 13 cleans up the rest.
-        // THE SIGNS. प्लस is the reading for a signed quantity (`UTC+1`, `+30°C`). The degree rule below
-        //    re-emits the digit it captures, so the two are order-independent.
+        //    ⚠ FOUND, NOT FIXED, TWO GAPS AROUND THE SCALE LETTER, both ×0 in this corpus (its only two
+        //    degrees are `35°W` and `+30°Cभन्दा`, and both read correctly). (a) When `(?![A-Za-z])` DOES
+        //    decline — `20°Cx` — the bare-° arm on the last line still fires, so the ° is spoken and the
+        //    scale letter LEAKS to the English reader as a letter name: [bˈis ɖˈiɡɾi ks]. (b) A ° written
+        //    AFTER its letter (`(0) c°`) matches no arm at all: the degree word is lost and the c reads
+        //    [sˈiː]. Both are the shapes the lo port recorded for the same rule family.
+        // THE SIGNS. प्लस is the reading for a signed quantity (`UTC+1`, `+30°C`).
         //
         //    ⚠ WHETHER A MINUS RULE IS SAFE IS A FACT ABOUT THE TEXT, NOT ABOUT THE GUARD. The shape no guard
         //    can reject is `word · space · hyphen · digit`, indistinguishable from a spaced range or a dashed
@@ -360,6 +382,15 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //          digit adjacency left, so the exponent was dropped and the area read as a length. वर्ग goes
         //          BEFORE the noun here, which is the position the tier declares and the corpus attests
         //          (`3,850 वर्ग किलोमिटर`).
+        //          ⚠ THE CORPUS'S OWN INSTANCE IS `किमि` (short ि) AND UNIT_WORD KEYS `किमी` (long ी), so this
+        //          rule does NOT claim it — the shared tier does, because `nepali.ts` declares both spellings
+        //          in its `units`. `19,500 किमि²` reads correctly either way (…वर्ग किलोमिटर), so the two
+        //          tables overlap rather than leaving a hole; measured, not assumed.
+        //          ⚠ FOUND, NOT FIXED — THERE IS NO CUBED ARM, and the argument above applies unchanged one
+        //          power up: `5 किमी³` loses its `³` (the plain rule below consumes the abbreviation, the
+        //          exponent is stranded with no digit adjacency, and the volume reads as a length), while the
+        //          Latin `5 km³` reads *घन किलोमिटर* through the tier. ×0 in ne_np FLEURS, ×0 in
+        //          tools/corpus/mined/ne.jsonc and ×0 in the parity golden — an inert asymmetry today.
         s = s.replace(
             new RegExp(`(\\d)\\s?(${UNIT_ALT})(?:\\s?²|2)(?![\\p{L}\\p{M}\\d])`, "gu"),
             (_m, d: string, u: string) => `${d} वर्ग ${UNIT_WORD[u]!}`,
@@ -409,6 +440,11 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
 
         // 13) THE APPROXIMATION TILDE. लगभग is Nepali's own word for it. (Plus and minus are claimed in
         //     step 8, not here.)
+        //     ⚠ FOUND, NOT FIXED — THE REPLACEMENT HAS NO LEADING SPACE, so a tilde welded to the preceding
+        //     word FUSES the two tokens: `करिब~5` → `करिबलगभग 5` → [kʌɾiblˈʌɡbʱʌɡ], one word with one stress.
+        //     Step 8's `+` rule handles exactly this shape with a `(\S)` capture and a re-emitted space; this
+        //     one does not. ×0 in the corpus — its single tilde is space-preceded (`लागि ~500 कंगोको`) — so
+        //     the fix is unmotivated by evidence and would be a behaviour change on a hypothetical.
         s = s.replace(/~\s?(?=\d)/gu, "लगभग ");
         s = s.replace(/ {2,}/gu, " ");
 
