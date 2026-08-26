@@ -109,4 +109,25 @@ describe("Czech normalization", () => {
     it("ordinary Czech text is untouched", () => {
         expect(normalizeCzech("Čeština je jazyk.")).toBe("Čeština je jazyk.");
     });
+
+    // `s.` (strana) is ONE LETTER, and the shared abbreviation rule's lookahead admits a following letter —
+    // so every Latin initial spelled `S.` was read as the word *strana*. Both corpus instances are `s. 109`.
+    it("the one-letter page abbreviation is claimed only before a digit", () => {
+        expect(normalizeCzech("viz s. 109")).toBe("viz strana 109");
+        expect(normalizeCzech("J. S. Bach")).toBe("J. S. Bach");
+        expect(normalizeCzech("A. S. Puškin napsal")).toBe("A. S. Puškin napsal");
+    });
+});
+
+// #1059: the overflow fallback derived its digits from the DOUBLE, so above 1e21 `String(n)` was exponent
+// form and `1000000000000000000001` read *jˈɛdɛn dvˈa jˈɛdɛn* — "1 e+ 2 1", the last digit gone.
+describe("Czech large numerals", () => {
+    it("a 22-digit run keeps its own digits", () => {
+        const a = phonemize("1000000000000000000001", "cs");
+        const b = phonemize("1000000000000000000009", "cs");
+        expect(a).not.toBe(b);
+        expect(a.endsWith("jˈɛdɛn")).toBe(true);
+        expect(b.endsWith("dˈɛvjɛt")).toBe(true);
+        expect(a.split(" ").length).toBe(22);
+    });
 });

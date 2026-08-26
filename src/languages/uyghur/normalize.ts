@@ -66,7 +66,7 @@ import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
  *   CIRCUMFIX `-دىن … -غىچە` ("from … until"), which needs case suffixes on BOTH operands and therefore both
  *   operands as words. That is trap 14's fix shape applied to a class whose connective is not attested as an
  *   infix anywhere — the `ff hakkunde` refusal, a preposition asked to be an infix. The corpus's own
- *   `1918-1941-يىلىدىكى` shows the convention: the ordinal lands on the SECOND operand, which step 6 does
+ *   `1918-1941-يىلىدىكى` shows the convention: the ordinal lands on the SECOND operand, which step 7 does
  *   claim, and the pair is left as the juxtaposition it already was. `～` (×10, a fullwidth tilde used as a
  *   range mark under Chinese influence) is refused for the same reason.
  *
@@ -143,12 +143,12 @@ const ERA: readonly (readonly [string, string])[] = [
  *  read `m . p . … m . k .`: the rule typechecked, ran, and did nothing. Caught only by probing the
  *  corpus's own line rather than the shape I had in mind. */
 const ERA_TAIL = `\\s?\\.?\\s*`;
-/** The first word of every ERA expansion, for the ordinal rule's guard — see step 6. */
+/** The first word of every ERA expansion, for the ordinal rule's guard — see step 7. */
 const ERA_HEADS = "مىلادى|ھىجرىيە";
 
 /**
  * ⚠ THE UNIT TABLE IS LOCAL RATHER THAN `makeSymbolNormalizer`, and the reason is trap 47's third: the
- * shared tier runs AFTER this file, and this file spends the decimal point at step 12. A tier rule
+ * shared tier runs AFTER this file, and this file spends the decimal point at step 13. A tier rule
  * downstream of that has no number-unit adjacency left to match on, and its `NOT_VERSION` guard — which
  * works by SEEING THE DOT — would have nothing to reject. Same position ps, fa and ckb are in.
  *
@@ -257,18 +257,23 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    (`ﭼﻮﻟﭙﯩﻨﻰ ﺷﺎﻛﻮﺋﯩﻞ` → ""). This is the largest single reading defect in the corpus and it is
         //    invisible to every DROP class, which hunt a symbol that SURVIVES.
         //    ⚠ NFKC PER CHARACTER, OVER A CURATED RANGE — never `s.normalize("NFKC")` (trap 36). Blanket
-        //    NFKC would fold `²` to `2` and erase step 7's exponent, fold `…` into three clause breaks, and
-        //    fold `￥` into `¥` under step 11's feet. Restricted to the two presentation blocks the fold is
+        //    NFKC would fold `²` to `2` and erase step 8's exponent, fold `…` into three clause breaks, and
+        //    fold `￥` into `¥` under step 12's feet. Restricted to the two presentation blocks the fold is
         //    exact: 83 of the 86 distinct forms in the corpus map to their correct Uyghur letter (ﯞ→ۋ, ﮬ→ھ,
         //    ﯔ→ڭ, ﯧ→ې, ﻼ→لا), which was checked by enumerating them rather than assumed.
         //    ⚠ AND THE OTHER THREE ARE THE HEH, WHICH NFKC GETS WRONG FOR UYGHUR — caught by the corpus
         //    diff's SAMPLE tier and by nothing else, which is exactly what that tier is for. The legacy
-        //    presentation encoding uses the PLAIN heh forms for the VOWEL ە U+06D5 and the heh-goal /
-        //    doachashmee forms for the CONSONANT ھ U+06BE, and NFKC flattens both onto ه U+0647 — so step 4
-        //    below then read every one as /h/ and `ﺧﻪﻟﻖ` (خەلق, "people") came out *χhlq* for *χɛlq*.
+        //    presentation encoding uses the PLAIN heh forms U+FEE9-U+FEEC for BOTH the vowel ە U+06D5 and
+        //    the consonant ھ U+06BE, and NFKC flattens all four onto ه U+0647 — so step 4 below then read
+        //    every one as /h/ and `ﺧﻪﻟﻖ` (خەلق, "people") came out *χhlq* for *χɛlq*.
         //    The split is decidable from the FORM: ە has no initial or medial shape in Uyghur, so an
         //    ISOLATED or FINAL plain heh is the vowel and an INITIAL or MEDIAL one is the consonant.
         //    `ﻫﻪﺳﻪﻥ` — ھەسەن, the name Hesen — carries both in one word and settles it.
+        //    ⚠ THE DOACHASHMEE FORMS NEED NO ARM AND THE HEH-GOAL ONES ARE UNREACHABLE, both measured
+        //    rather than assumed: ﮪ-ﮭ U+FBAA-U+FBAD already NFKC to ھ U+06BE itself, and ﮦ-ﮩ U+FBA6-U+FBA9
+        //    fold to the Urdu heh-goal ہ U+06C1, which the grapheme table does not carry and would
+        //    therefore DROP — ×0 in the 429 mined segments and ×0 in the golden, so it is recorded here
+        //    rather than keyed.
         s = s.replace(/[ﭐ-﷿ﹰ-﻿]/gu, (c) => (c === "ﻩ" || c === "ﻪ" ? "ە" : c.normalize("NFKC")));  // BOM
 
         // 4) ⚠ ه U+0647 → ھ U+06BE. The Arabic heh is NOT a letter of the Uyghur alphabet — Uyghur writes /h/
@@ -295,12 +300,20 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    (برای, تاریخ, قمری, شیعه, شیرازی) — a Persian span inside a Uyghur article, which the detector's
         //    same-script filter cannot separate — and Uyghur, unlike Persian, keeps ي /j/ and ى /i/ APART, so
         //    the unified Farsi yeh has no single Uyghur value to fold to. Left reported rather than guessed.
+        //    ⚠ AND THE HAMZA-CARRIER ALIFS ARE THE SAME REFUSAL, FOUND BY THE C# PORT'S CENSUS AND RECORDED
+        //    HERE SO THE NEXT RUN DOES NOT HAVE TO RE-MEASURE IT. أ إ آ ء (U+0623/0625/0622/0621) are absent
+        //    from `uyghur.jsonc`, so the g2p DELETES them: ×19 tokens in the 429 mined segments and ×7 in
+        //    the 200 golden rows, and every one sits inside an embedded ARABIC quotation — a duʿā and the
+        //    sūra title `سورة الإسراء` in the golden, the hadith paragraph in the corpus. Uyghur itself
+        //    never writes them (the hamza is always the carrier ئ, ×0 counter-examples), so the value they
+        //    would take is an ARABIC one this engine has no referee for — wikipron `uig_arab_broad` carries
+        //    no headword with any of them. Same shape as ی above: measured, reported, not guessed.
         s = s.replace(/ک/gu, "ك").replace(/ڧ/gu, "ف");
 
-        // 5) ERA MARKERS, digit-anchored, and ABOVE the ordinal rule at step 6 for two separate reasons.
-        //    (a) The abbreviation's anchor is the YEAR'S DIGITS, and step 6 turns those into words — running
+        // 5) ERA MARKERS, digit-anchored, and ABOVE the ordinal rule at step 7 for two separate reasons.
+        //    (a) The abbreviation's anchor is the YEAR'S DIGITS, and step 7 turns those into words — running
         //        after it would leave `م. 656- يىلى` with no digit for `م\.` to attach to (trap 39).
-        //    (b) Step 6's own two-letter guard is what rejects these abbreviations in the first place; see
+        //    (b) Step 7's own two-letter guard is what rejects these abbreviations in the first place; see
         //        the ERA_HEADS note there for the false positive this ordering CREATES and how it is closed.
         //    ⚠ THE DIGIT MAY BE ON EITHER SIDE. `م.ب. 55` and `1100 – م. ب. 771` are both attested, and so is
         //    the free-standing `م.ب. بىرنىچى مىڭ يىلنىڭ` — but a marker with no digit anywhere near it is not
@@ -372,7 +385,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         );
 
         // 8) UNITS, before decimals — the number-unit adjacency a unit rule matches on is destroyed the
-        //    moment step 12 rewrites the decimal point (the playbook's standing coupling) — and after
+        //    moment step 13 rewrites the decimal point (the playbook's standing coupling) — and after
         //    de-grouping, so a grouped operand is already one token. See UNITS for the sourcing and for why
         //    the shared tier cannot own this. `450,295 km²` read as `ˈʊkm skwˈɛɹd`, English through the
         //    Latin fallback, and `1،145.6 كم²` leaked a raw `km`.

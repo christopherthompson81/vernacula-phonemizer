@@ -47,6 +47,28 @@ describe("Hebrew canonical IPA — niqqud→IPA (Modern Israeli)", () => {
         expect(phonemize("2000000","he")).toBe("ʃne miljon"); // construct שְׁנֵי
         expect(phonemize("3.14", "he")).toBe("ʃaloʃ nkuda ʔaχat ʔaʁba"); // decimal → נְקֻדָּה + digits
     });
+
+    // ⚠ A MAGNITUDE MULTIPLIER OF EXACTLY TEN USED TO THROW. `magnitude`'s unit arm ran to `mult <= 10` and
+    // read `unitsM[10]`, which does not exist — the compositor handed `undefined` to `phonemizeWord` and
+    // `phonemize("10000000", "he")` died with a TypeError, as did every value in 10,000,000-10,999,999 and
+    // 10,000,000,000-10,999,999,999. There is no masculine ten in this data model (sub100's own ten arm
+    // ignores `masc`), so ten takes the sub-1000 route like every multiplier above it.
+    test("a magnitude multiplier of exactly ten reads, rather than throwing", () => {
+        expect(phonemize("10000000", "he")).toBe("ʔeseʁ miljon");
+        expect(phonemize("10000000000", "he")).toBe("ʔeseʁ miljaʁd");
+        expect(phonemize("10500000", "he")).toBe("ʔeseʁ miljon χameʃ meot ʔelef");
+        expect(phonemize("9000000", "he")).toBe("tiʃʔa miljon"); // …and 3-9 still take the masculine unit
+        expect(phonemize("11000000", "he")).toBe("ʔaχat ʔesʁe miljon"); // …and ≥11 is unchanged
+    });
+
+    // ⚠ A DIGIT RUN TOO LONG FOR A DOUBLE READS THE TOKEN'S OWN DIGITS (#1059). The overflow fallback used
+    // to derive them from `String(n)`, i.e. from a value that had already rounded, so a 22-digit run lost
+    // its tail. `he` came off large-numeral-fidelity's ACCEPTED_LOSSY list with this.
+    test("a 22-digit run keeps its last digit", () => {
+        expect(phonemize("1000000000000000000001", "he"))
+            .not.toBe(phonemize("1000000000000000000009", "he"));
+        expect(phonemize("1000000000000000000009", "he").split(" ").at(-1)).toBe("teʃa");
+    });
 });
 
 // ── TEXT NORMALIZATION (src/languages/hebrew/normalize.ts) ────────────────────────────────────────────

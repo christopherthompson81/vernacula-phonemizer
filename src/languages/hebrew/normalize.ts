@@ -4,12 +4,20 @@ import { spacedBareExponent } from "../../core/normalizeSymbols.ts";
  * Hebrew / עברית (he) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * ⚠ THERE IS NO FLEURS FOR HEBREW. The evidence is `tools/corpus/mined/he.jsonc` — he.wikipedia, 5,141
- * paragraphs, 380 mined segments (180 hard + 200 sample), `covered 29/35` — plus `attest.ts` and targeted
- * `insource:` searches against he.wikipedia, the en.wiktionary vocalized→Modern-Israeli referee (2,561
- * words), and the engine's own `hebrew.jsonc`. **espeak ships no Hebrew at all**, so `sources.ts` reports
- * `[NONE] letter-names` and there is no dictsource tier. Full log:
+ * ⚠ EVERY `×N` BELOW IS COUNTED OVER `tools/corpus/mined/he.jsonc` — he.wikipedia, 5,141 paragraphs, 380
+ * mined segments (180 hard + 200 sample), `covered 29/35` — plus `attest.ts` and targeted `insource:`
+ * searches against he.wikipedia, the en.wiktionary vocalized→Modern-Israeli referee (2,561 words), and the
+ * engine's own `hebrew.jsonc`. **espeak ships no Hebrew at all**, so `sources.ts` reports `[NONE]
+ * letter-names` and there is no dictsource tier. Full log:
  * `docs/investigations/he_normalization_investigation.md`.
+ * ⚠ THIS HEADER USED TO OPEN "THERE IS NO FLEURS FOR HEBREW", AND THAT IS NO LONGER TRUE — `he_il` landed
+ * later, 3,991 unique transcript texts, and the parity golden is now drawn from it. It was swept for every
+ * refusal below while porting to C#, and it CORROBORATES all of them rather than overturning any: ₪ ×0,
+ * `%`-before-a-digit ×0, a dot with a 3-digit tail ×0, an arc-minute ′ ×0, `D/D` ×2 (both an inch measure
+ * in one sentence), a leading minus ×20 of which not one is a negative (all date ranges: `1894 - 1895`),
+ * and a bare en-dash range ×2 (one sentence). The live classes are the same ones, at FLEURS scale:
+ * proclitic-dash ×485, geresh digraph ×432, comma-grouped digits ×98. The counts below are still the
+ * MINED ones — they are what each rule was sourced from — and are left as they were measured.
  *
  * ⚠ THE ENGINE READS VOCALIZED HEBREW. `phonemize(x, "he")` is the Phase-1 rule g2p, so an UNVOCALIZED word
  * comes out as its bare consonants; the neural nakdan (`hebrewNeural.ts`) is the Phase-2 path that supplies

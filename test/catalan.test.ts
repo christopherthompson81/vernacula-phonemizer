@@ -204,6 +204,12 @@ describe("Catalan text normalization", () => {
         expect(ph("Durant els anys 1920s")).toBe("duɾˈan əɫs ˈaɲs mˈiɫ nˈɔw sˈens βˈin");
         // B&Bs — the plural s lands on the last letter name.
         expect(ph("els B&Bs")).toBe("əɫs βˈe i βˈes");
+        // `Nns` is the PLURAL of the segon series, and the one-word ordinal must pluralise too — the
+        // anchor used to require a leading space, so 2ns kept the singular while 22ns did not.
+        expect(normalizeCatalan("els 2ns classificats")).toBe("els segons classificats");
+        expect(normalizeCatalan("els 22ns classificats")).toBe("els vint i segons classificats");
+        // …and the guard still refuses a shape Catalan does not write: 5n is not an ordinal (5è is).
+        expect(normalizeCatalan("h5n1")).toBe("h5n1");
     });
 
     test("the Nè/Na/Nr ordinal reads the Catalan ordinal (masculine/feminine)", () => {

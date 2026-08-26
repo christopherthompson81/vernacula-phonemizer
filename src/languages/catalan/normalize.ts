@@ -165,7 +165,11 @@ export function normalizeCatalan(input: string): string {
         if (m === "n" && last !== "segon") return m0;
         if (m === "ns" && last !== "segon") return m0;
         if (m === "t" && last !== "quart") return m0;
-        if (m === "ns") return ord.replace(/ segon$/u, " segons");
+        // ⚠ ANCHOR ON THE WORD, NOT ON A LEADING SPACE. It was `/ segon$/`, which cannot match the
+        // one-word ordinal — so `2ns`, the only shape this branch exists for that the language actually
+        // writes, silently kept the SINGULAR *segon* while `22ns` ("vint i segon") pluralised correctly.
+        // The guard above already proves the last word IS `segon`, so the anchor needs nothing more.
+        if (m === "ns") return ord.replace(/segon$/u, "segons");
         return ord;
     });
 
@@ -181,6 +185,9 @@ export function normalizeCatalan(input: string): string {
     //    is clause punctuation and must be claimed here. `11:35 PM` → onze trenta-cinc PM; `06:30` → sis
     //    trenta. The 24h form with `h` (`10:00h`) and the AM/PM marker are consumed. NOT a sports time:
     //    a THIRD `\d.\d\d` field after the minutes (4:41.30) means the number is a pace, not a clock — the
+    //    `(?![:.\d])` after the minutes is what declines it, and the colon then falls through to the
+    //    tokenizer as ordinary clause punctuation (a pause), which is the reading a pace wants anyway.
+    //    (This sentence used to stop at "— the"; the guard it describes was always in the pattern.)
     s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])\s*(h)?\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)?/giu,
         (m0, h: string, min: string, hh: string, ap: string) => {
             const hv = Number(h), mv = Number(min);

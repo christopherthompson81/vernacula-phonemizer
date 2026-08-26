@@ -545,4 +545,24 @@ public class ManifestMappingTests
     public void SylhetiManifestIsFullyMapped() =>
         AssertFullyMapped("languages/sylheti", "sylheti.jsonc", Languages.Sylheti.SylhetiPhonemizer.DEF,
             "name", "script", "provenance");
+
+    [Fact]
+    public void UyghurManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/uyghur", "uyghur.jsonc", Languages.Uyghur.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
+    public void CatalanManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/catalan", "catalan.jsonc", Languages.Catalan.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
+    public void CzechManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/czech", "czech.jsonc", Languages.Czech.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
+    public void HebrewManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/hebrew", "hebrew.jsonc", Languages.Hebrew.Manifest.MANIFEST,
+            "provenance", "convention");
 }

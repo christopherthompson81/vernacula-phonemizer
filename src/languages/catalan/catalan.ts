@@ -1,8 +1,13 @@
 /**
  * Catalan (ca) phonemizer — General Eastern/Central Catalan, canonical IPA. Rule-based g2p
  * (g2p.ts) → rule stress (2R + written accent) → UNSTRESSED VOWEL REDUCTION (a/e→ə, o→u) → spirantization →
- * palatal nasal assimilation → word-final devoicing + final-r deletion. No lexicon; stressed open/close mids
- * default (lexical ceiling).
+ * palatal nasal assimilation → word-final devoicing + final-r deletion.
+ *
+ * ⚠ NOT "no lexicon", which this header claimed until the C# port read it against the code: two WORD LISTS
+ * are consulted per word — `mid-vowels.tsv` (10,414 rows) for the stressed open/close mid height, which is
+ * not spelling-derivable, and `bl-gl-geminate.tsv` (578 rows) for the popular ⟨bl⟩/⟨gl⟩ geminate. What is
+ * absent is a PRONUNCIATION dictionary: every segment still comes from the rules, and a word in neither
+ * list takes the open mid (ɛ/ɔ) by default — that default is the lexical ceiling the eval folds.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -291,7 +296,7 @@ class CatalanPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Catalan phonemizer (fully rule-based; no data files beyond the manifest). */
+/** Build the Catalan phonemizer (rule g2p + the manifest + the two word lists named in the header). */
 export function createCatalan(): Phonemizer {
     return new CatalanPhonemizer();
 }

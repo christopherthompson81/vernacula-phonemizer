@@ -19,7 +19,7 @@
         "hamza": "ئ → ʔ (glottal onset before a word-initial / hiatus vowel)",
         "consonants": "⟨چ ج⟩→t͡ʃ d͡ʒ, ⟨غ⟩→ʁ, ⟨خ⟩→χ, ⟨ق⟩→q, ⟨ڭ⟩→ŋ, ⟨ژ⟩→ʒ, ⟨ھ⟩→h, ⟨ۋ⟩→w",
         "fNativised": "⟨ف⟩ → [p] (Uyghur natively lacks /f/, so it is nativised to [p] — atmosfera → atmospera)",
-        "finalDevoicing": "word-final ⟨د⟩ /d/ → [t] only (final z/ʒ/ʁ/b stay voiced) — handled in code",
+        "finalDevoicing": "word-final voiced STOPS ⟨ب د گ⟩ b/d/ɡ → p/t/k (كىتاب → kitɑp); the fricatives and affricates do NOT devoice (ئاز → ʔɑz, ئاغ → ʔɑʁ) — handled in code",
         "arabicLoans": "ص→s, ع→ʔ, ذ→z, ظ→z, ح→h, ط→t, ث→s (nativised)"
     },
 

@@ -118,10 +118,10 @@ class CzechPhonemizer implements Phonemizer {
                 // error, and the reading dropped the zero entirely rather than saying it.
                 if (frac !== undefined && frac.length === 3 && intPart !== "0") {
                     // "19,500" is 19500 — a grouped thousand, read as one number.
-                    for (const wd of numberToWords(Number(`${intPart}${frac}`)).split(" "))
+                    for (const wd of numberToWords(Number(`${intPart}${frac}`), `${intPart}${frac}`).split(" "))
                         sink.emit(phonemizeWord(wd));
                 } else {
-                    for (const wd of numberToWords(Number(intPart)).split(" "))
+                    for (const wd of numberToWords(Number(intPart), intPart).split(" "))
                         sink.emit(phonemizeWord(wd));
                     if (frac !== undefined) {
                         sink.emit(phonemizeWord("čárka")); // the Czech name of the decimal comma
