@@ -13,13 +13,31 @@
  *   · The DECIMAL spell-out and the CONCORD pass must run AFTER the tier: the tier needs the digit adjacent
  *     to its sign, and the concord pass needs to know which measure noun the tier just attached.
  *
- * ⚠ SHONA HAS NO REFEREE FOR THIS LAYER AT ALL. There is no FLEURS corpus, no wikipron, and the kaikki
- * extract has fewer than 25 IPA entries; `epitran sna-Latn` is programmatic and word-only, so
- * `referee-eval.ts sn` is a regression tripwire on the g2p and says nothing about any rule below. espeak does
- * not ship Shona either, so `sources.ts`'s haystack is the corpus, the mined artifact and `attest.ts` against
- * sn.wikipedia — plus, for two words, cited web sources named at their declaration. Every count below is over
- * the 439 deduplicated segments of `tools/corpus/mined/sn.jsonc`; the artifact's own `counts` block carries
- * the whole-dump figures and is quoted as such where used.
+ * ⚠ SHONA HAS NO REFEREE FOR THIS LAYER AT ALL — no wikipron, and the kaikki extract has fewer than 25 IPA
+ * entries; `epitran sna-Latn` is programmatic and word-only, so `referee-eval.ts sn` is a regression tripwire
+ * on the g2p and says nothing about any rule below. espeak does not ship Shona either.
+ *
+ * ⚠ BUT THERE **IS** A FLEURS CORPUS, AND THIS FILE USED TO SAY THERE WAS NOT (#1064). `sn_zw` carries
+ * train+dev+test — **1,901 distinct transcripts** — and `csharp/goldens/sn.tsv` is generated FROM it
+ * (`gen_parity_goldens.mts sn` reports `1 FLEURS + 0 mined`). The claim mattered because this file argues
+ * its refusals from the size of its haystack, and the counts below were taken over the mined artifact
+ * alone. They are now over BOTH, and where the number moved it is stated.
+ * ⚠ 1,901 IS THE DISTINCT-SENTENCE COUNT. The generator reads columns 3 AND 4, so a naive row count says
+ * 3,802 — column 4 is the lowercased duplicate of column 3, not a second sentence.
+ *
+ * So the haystack is FLEURS + the mined artifact + `attest.ts` against sn.wikipedia — plus, for two words,
+ * cited web sources named at their declaration. The mined artifact's own `counts` block carries the
+ * whole-dump figures and is quoted as such where used.
+ * ⚠ NOTHING BELOW CHANGED ITS READING when FLEURS was swept: all 1,901 transcripts were run through both
+ * engines during the C# port and produced no disagreement. What the wider haystack changes is the EVIDENCE
+ * for two counts, and it confirms one refusal outright — see step 4 and the `min` note.
+ *
+ * ⚠ AND THE TWO SOURCES ARE COMPLEMENTARY, NOT ALTERNATIVES. The mined artifact is selected ADVERSARIALLY
+ * against the pattern cells, so it is far richer per line in the shapes a rule has to decide; FLEURS is
+ * read-aloud running text, so it is frequency-shaped and most of its lines exercise nothing here. That is
+ * why the mined counts are not simply a subset — `°` is ×14 mined against ×2 FLEURS, and comma-DECIMALS
+ * ×6 against ×2 — while FLEURS carries 20 of the 21 space-grouped thousands. Counting either alone
+ * understates a different arm.
  *
  * ⚠ TRAP 14/15 OCCURS HERE, MIRRORED TO THE LEFT, AND IS HARMLESS — measured rather than assumed, because it
  * is the defining rule of several Bantu and Turkic layers. Shona binds its associative/locative particle to
@@ -217,8 +235,15 @@ export function normalizeShonaPre(input: string): string {
 
     // 4) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping comma reads as a CLAUSE PAUSE,
     //    so `1,606,000` came out *mot͡si , zana tan̤atu ne tan̤atu , zero* — three numbers and two pauses where
-    //    the text has one number. 20 comma groups over 18 distinct tokens here (`431,257,698`, `$480,000,000`,
-    //    `6,650km`, `25,339 m³`); `US$7 000` is the one space-grouped instance; period-grouping is ×0.
+    //    the text has one number.
+    //    ⚠ RECOUNTED OVER FLEURS + MINED (#1064); the mined-only figures this comment used to carry are in
+    //    brackets, and the space-grouped one was wrong by a factor of twenty:
+    //        comma-grouped   39  (was "20")   `431,257,698`, `$480,000,000`, `6,650km`, `25,339 m³`
+    //        space-grouped   21  (was "1")    `1 000`, `120 000–160 000`, `104 500`, `US$11 000`, `330 000`
+    //        period-grouped   0  (unchanged)
+    //    The space arm was carrying 20 instances of real FLEURS text on the evidence of a single `US$7 000`.
+    //    ⚠ THE ONE PERIOD-SHAPED CANDIDATE IS A DECIMAL, NOT A GROUP: `101.365kPa`, atmospheric pressure.
+    //    It is the counter-example a period-grouping arm would have to decline, and it is why there is none.
     //    ⚠ EXACTLY THREE DIGITS PER BLOCK, which is what keeps the six genuine comma-DECIMALS (`0,5m²` ×4,
     //    `273,15K` ×2) out of this rule and out of harm's way until step 9. 20 against 0 counter-examples.
     //    ⚠ THE HEAD MUST START 1–9, so a leading-zero run is never treated as a grouped thousand.
@@ -293,6 +318,14 @@ export function normalizeShonaPost(input: string): string {
     s = s.replace(/(?<![\d.,])(\d+[.,]\d+)[ \u00a0]?m([²³])?(?![\p{L}\p{M}'’ʼ\d])/gu,  // space, NBSP
         (_w, n: string, exp: string | undefined) => (exp === "²" ? `${SQUARED} mamita ${n}` : `mamita ${n}`));
 
+    // ⚠ AND MINUTES ARE NOT GIVEN THE SAME ARM, ON A COUNT NOW TAKEN OVER BOTH HAYSTACKS. `min` has the
+    //    identical shape — declared only as a rate denominator, so a bare `30 min` reads *makumi matatu min*
+    //    with raw ASCII in the stream, exactly the defect 7b exists to fix for hours. It stays unfixed
+    //    because `[0-9] ?min` is **×0 in the mined artifact AND ×0 across all 1,901 FLEURS transcripts**
+    //    (#1064). That is the file's own trap-9 rule — do not widen a guard for a shape nobody has counted —
+    //    and the FLEURS sweep is what makes the zero worth trusting rather than an artefact of a small
+    //    artifact. The hours arm earned itself on six RAW-LATIN hits; minutes has none.
+    //
     // 7b) A BARE COUNT OF HOURS → *maawa N*. `hr`/`hrs` were declared only as rate DENOMINATORS (shona.ts),
     //    so `50 km/hr` composed correctly while a bare count had no reading at all and `(8hr)`, `(8hrs)`
     //    and `2hrs` reached the IPA as *sere hr* — raw ASCII, and six of this language's twelve `RAW-LATIN`
