@@ -43,6 +43,7 @@ public static class Bootstrap
             Bhojpuri.BhojpuriPhonemizer.RegisterSelf();
             Bulgarian.BulgarianPhonemizer.RegisterSelf();
             Cebuano.CebuanoPhonemizer.RegisterSelf();
+            Chhattisgarhi.ChhattisgarhiPhonemizer.RegisterSelf();
             English.EnglishFactory.RegisterSelf();
             EnglishGb.EnglishGb.RegisterSelf();
             EnglishIn.EnglishIn.RegisterSelf();

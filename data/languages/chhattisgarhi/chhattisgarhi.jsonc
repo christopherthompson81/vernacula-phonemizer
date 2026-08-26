@@ -1,15 +1,34 @@
-// Native canonical-IPA definition for Chhattisgarhi (hne) — Eastern Indo-Aryan (Eastern-Hindi), Devanagari.
-// standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
-// This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
-// directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
-// only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
+// Native canonical-IPA definition for CHHATTISGARHI (hne) — Eastern Indo-Aryan (Eastern-Hindi),
+// Devanagari, read by the shared Hindi engine (src/languages/hindi/hindi.ts `makeNativeHindi`) and by
+// its C# port. ⚠ THIS HEADER WAS THE HINDI TEMPLATE: its second line was an ORPHANED FRAGMENT
+// ("standard Hindi phonology.") left behind when the first was rewritten, and it named
+// src/Phonemize/native/nativeG2p.ts, a path that has never existed in this tree. The same stale
+// header still sits on awadhi.jsonc, magahi.jsonc, maithili.jsonc, marathi.jsonc, nepali.jsonc and
+// hindi.jsonc itself. A shallow abugida, so pronunciation is almost entirely rule-derivable; the one
+// genuinely hard part is schwa deletion (a documented algorithm, not a lexicon).
+//
+// ⚠ EVERY WORD THIS LANGUAGE SPEAKS THAT IS NOT IN THIS FILE IS HINDI'S, by three DIFFERENT
+// mechanisms — worth separating, because only one of them is a fallback you could override here:
+//   · `ordinalSuffixes` and `irregularOrdinals` are a REAL PER-FILE FALLBACK
+//     (`own?.x ?? MANIFEST.x`, src/languages/hindi/normalize.ts) — declare them here and they win.
+//   · THE SYMBOL TIER IS NOT. ⚠ `makeNativeHindi` never reads `def.symbolTier`: it uses
+//     `overrides.symbols ?? SYMBOLS`, and SYMBOLS is built ONCE at module scope from hindi.jsonc's
+//     own tier (src/languages/hindi/hindi.ts). A `symbolTier` block added to THIS file would
+//     deserialize, satisfy ManifestMappingTests, and be SILENTLY IGNORED. Changing the currency or
+//     unit words for Chhattisgarhi means passing a `symbols` override from chhattisgarhi.ts.
+//   · THE CLOCK AND UNIT WORDS ARE IN NEITHER MANIFEST. बजकर/मिनट/बजे and the Devanagari unit
+//     abbreviations (किमी → किलोमीटर …) are HARDCODED in src/languages/hindi/normalize.ts, so
+//     grepping hindi.jsonc for them finds nothing.
+// All of it is deliberate (see `provenance`), not an oversight — Hindi's words are the only
+// available answer for a language with no corpus — but it is the reason `stripSymbols` below does
+// not do what its comment used to claim.
 //
 // Format: plain JSONC. Verbose, self-describing keys. Every phoneme value is CANONICAL IPA.
 {
     "language": "hne",
     "name": "Chhattisgarhi (छत्तीसगढ़ी)",
     "script": ["Devanagari"],
-    "provenance": "Authored from standard Chhattisgarhi phonology (Grierson LSI VI-ii; Chhattisgarhi is Eastern-Hindi, segmentally near-identical to Awadhi/Bhojpuri). Reuses the Hindi Devanagari engine. CORROBORATED against Hira Lal Kavyopadhyaya's 'A Grammar of the Chhattisgarhi Dialect of Eastern Hindi' (1921, rev. Grierson LSI) — its phoneme inventory + the attested UDHR Article-1 sample. This CONFIRMED श/ष→[s] (the inventory has no /ʃ/) but CORRECTED an initial error: ऐ/औ are MONOPHTHONGS [ɛː]/[ɔː] like Hindi (गौरव→[ɡɔrəʋ] in the sample), NOT the Bhojpuri-style diphthongs [ai]/[au] — so Chhattisgarhi's SOLE confident segmental divergence from Hindi is श/ष→[s]. A further documented feature (reduced schwa deletion — लोगन→[loɡən], बरोबरी→[bərobəri]) is noted but not modelled (needs more data). CANNOT-VERIFY: no phonetic corpus / independent referee exists — the anchor is the distinctive-feature gold, corroborated by the 1921 grammar.",
+    "provenance": "Authored from standard Chhattisgarhi phonology (Grierson LSI VI-ii; Chhattisgarhi is Eastern-Hindi, segmentally near-identical to Awadhi/Bhojpuri). Reuses the Hindi Devanagari engine. CORROBORATED against Hira Lal Kavyopadhyaya's 'A Grammar of the Chhattisgarhi Dialect of Eastern Hindi' (1921, rev. Grierson LSI) — its phoneme inventory + the attested UDHR Article-1 sample. This CONFIRMED श/ष→[s] (the inventory has no /ʃ/) but CORRECTED an initial error: ऐ/औ are MONOPHTHONGS [ɛː]/[ɔː] like Hindi (गौरव→[ɡɔrəʋ] in the sample), NOT the Bhojpuri-style diphthongs [ai]/[au]. ⚠ SCOPE OF 'SOLE': श/ष→[s] is the only LETTER that maps differently from Hindi, but this file diverges a second time by carrying NO finalRules at all, which drops Hindi's əɦə→ɛɦɛ lowering (शहर→[sˈəɦəɾ], not [ʃˈɛɦɛɾ], pinned in test/chhattisgarhi.test.ts) and its अय→ɛj and ɪ-offglide conventions; and by not carrying Hindi's ज्ञ→ɡj postRule (ज्ञान→[d͡ʒɲˈaːn], not [ɡjˈaːn]). A further documented feature (reduced schwa deletion — लोगन→[loɡən], बरोबरी→[bərobəri]) is noted but not modelled (needs more data). CANNOT-VERIFY: no phonetic corpus / independent referee exists — the anchor is the distinctive-feature gold, corroborated by the 1921 grammar.",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
@@ -150,7 +169,13 @@
     },
 
     // Post-rules applied to the raw akshara IPA (declarative, ordered regex — portable). Geminate→length
-    // is the fleet-wide Indic convention; the offglide + अय→ɛ are systematic Hindi realizations.
+    // is the fleet-wide Indic convention. ⚠ THIS COMMENT USED TO CREDIT "the offglide + अय→ɛ", which are
+    // hindi.jsonc's `finalRules` and are NOT in this file at all (`finalRules` is empty — see below).
+    // ⚠ ALSO ABSENT: Hindi's ज्ञ → ɡj rule, so ज्ञान reads [d͡ʒɲˈaːn] here where hi reads [ɡjˈaːn]. That
+    // omission is UNDECIDED UPSTREAM RATHER THAN DELIBERATE: hindi.jsonc's note scopes the rule to Hindi
+    // and names Marathi and Awadhi/Bhojpuri/Magahi, but it never mentions Chhattisgarhi — upstream did not
+    // decide about hne, it did not consider hne. No corpus evidence exists here either (this repo holds no
+    // hne text at all), so the literal reading stands unrefereed rather than endorsed. FILED, NOT FIXED.
     "postRules": [
         {
             "from": "((?:t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|[kɡptbmnlʃsɳŋɽ]ʰ?ʱ?|t̪|d̪))\\1(?!͡)",
@@ -166,11 +191,17 @@
     // Final conventions applied AFTER schwa deletion.
     "finalRules": [],
     // No Hindi-style finalRules: Chhattisgarhi keeps intervocalic əɦə (शहर→sahar, not the Hindi ɛɦɛ) and has no
-    // और-offglide / अय→ɛj convention.
+    // ɪ-offglide / अय→ɛj convention. ⚠ THIS IS A SECOND SEGMENTAL DIVERGENCE FROM HINDI, so `provenance`'s
+    // "SOLE confident divergence" is scoped to the GRAPHEME TABLES only: श/ष→[s] is the only letter that
+    // maps differently, but dropping all three of Hindi's finalRules moves शहर, जहर and समय too — and
+    // test/chhattisgarhi.test.ts pins शहर→[sˈəɦəɾ] against Hindi's [ʃˈɛɦɛɾ] on exactly that basis.
+    // ⚠ This line used to call the first rule the "और-offglide". hindi.jsonc's own note reads "और
+    // i-offglide before a vowel", where और is just the Hindi word "and" — the rule is ɪ → ɪʲ before a
+    // vowel and has nothing to do with और.
 
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
     // running these through the same native G2P (no hand-written phonemes). The
-    // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
+    // compositor (src/core/numbers.ts `indicNumberWords`) assembles them with Indian lakh/crore grouping.
     // NOTE: Hindi-belt 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); all 80 compound spellings
     // (21-99) + the round tens + 0-20 + magnitudes are present below (the Hindi set, shared by Eastern-Hindi).
     "numbers": {
@@ -292,9 +323,12 @@
         "decimalWord": "दशमलव",
     },
 
-    // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत). Symbols
-    // in `stripSymbols` are dropped so a currency amount reads as the bare number (₹500 → पाँच सौ), matching
-    // the amount reads as the bare number.
+    // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत).
+    // ⚠ `stripSymbols` DOES NOT MAKE ₹ SILENT, and this comment used to claim it did (and then trailed
+    // off mid-sentence). The shared symbol tier this file inherits from hindi.jsonc runs BEFORE the
+    // engine's own `symbols`/`stripSymbols`, so ₹ is already spoken by the time the strip would apply:
+    // measured, ₹500 → [pˈaː̃t͡ʃ sˈɔː ɾˈʊpjeː] (Hindi's रुपये), not the bare number. Same shape as the
+    // claim retracted in bhojpuri.jsonc.
     "symbols": { "%": "प्रतिशत" },
     "stripSymbols": "₹",
 
