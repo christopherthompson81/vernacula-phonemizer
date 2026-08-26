@@ -103,13 +103,14 @@
  * before this layer existed. Re-ordering does not help (the `%` sits between the digit and the dash either
  * way); it would need a percent-range rule of its own, for one instance. Counted and declined.
  *
- * ⚠ FOUND AND NOT FIXED HERE, BECAUSE IT IS IN `src/core` AND A CORE CHANGE IS THE REVIEWER'S CALL: the
- * shared number path SILENTLY EMITS NOTHING above `Number.MAX_SAFE_INTEGER`. Bisected exactly —
- * `9007199254740991` reads, `9007199254740992` is the empty string. De-grouping (step 1) is what exposes
+ * ⚠ FOUND HERE, FIXED IN `src/core` SINCE, AND THE NOTE IS KEPT BECAUSE THIS LAYER IS WHAT EXPOSED IT: the
+ * shared number path used to SILENTLY EMIT NOTHING above `Number.MAX_SAFE_INTEGER`. Bisected exactly —
+ * `9007199254740991` read, `9007199254740992` was the empty string. De-grouping (step 1) is what exposes
  * it: this corpus's `9,460,730,472,580,800 米` (a light-year in metres) used to read as six comma-separated
- * fragments and now reads as silence. ×1 here, and the only other ≥16-digit run in the corpus is a 59-digit
- * expansion of π that was silent before and after. Reported rather than patched around, because a local cap
- * on de-grouping would hide a defect that belongs to all 191 languages.
+ * fragments, and then as silence. `core/hanDictIpa.ts` now falls back to DIGIT-AT-A-TIME above 2^53 rather
+ * than composing a numeral the float has already corrupted, so the magnitude survives as a digit string —
+ * the ×1 here and the corpus's only other ≥16-digit run (a 59-digit expansion of π) both read.
+ * `test/sinitic-core.test.ts` pins it across every engine that shared the defect.
  *
  * ⚠ `\b` IS NEVER USED — ASCII-defined, and it finds no boundary against Han (playbook trap 1/19).
  * ⚠ ℃/℉ arrive already folded to `°C`/`°F`, HTML entities are already decoded and markup already stripped,

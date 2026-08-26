@@ -113,6 +113,19 @@ public class LanguageBootstrapTests
     [InlineData("skr", "\u06b3\u0648\u0759\u0627 \u0628\u06be\u0684\u0768", "\u0260\u02c8o\u02d0\u0257a\u02d0 b\u02b1\u02c8\u0259\u0284\u0259\u0273")]
     [InlineData("skr", "\u0668\u0665\u066a", "p\u02c8\u0259\u0303\u0272d\u0361\u0292 \u02c8\u0259s\u02d0i\u02d0 f\u02c8i\u02d0s\u0259d\u032a")]
     [InlineData("skr", "US$20 \u0645\u0644\u06cc\u0646", "\u028b\u02c8i\u02d0\u0266 m\u0259l\u02c8i\u02d0n \u0256\u02c8a\u02d0l\u0259\u027e")]
+    // Hakka's own arms, which its 200-row golden does NOT reach: the golden carries zero degree signs and
+    // zero per-mille, 13 Han rows out of 200, and no grouped-thousands-plus-classifier. The first row is the
+    // strongest of them — the Han and Pha̍k-fa-sṳ spellings of 客家人 in ONE sentence, byte-identical,
+    // sandhi included, out of two separate artifacts (dict.tsv/hanRun against pfs.tsv/readPfs).
+    [InlineData("hak", "客家人 lâu Hak-kâ-ngìn he siông-thùng ke.",
+        "hak̚˩ ka˧˥ ŋin˩˩ lau˦˦ hak̚˩ ka˧˥ ŋin˩˩ he˥˧ ɕiɔŋ˦˦ tʰʊŋ˩˩ ke˥˧ .")]
+    [InlineData("hak", "20°C", "ŋiap̚˩ sz̩˥˧ ŋi˥˧ səp̚˥ tʰu˥˧")]
+    [InlineData("hak", "27°58′38″", "ŋi˥˧ səp̚˥ t͡ɕʰit̚˩ tʰu˥˧ n̩˧˩ səp̚˥ pat̚˩ pun˦˦ sam˦˦ səp̚˥ pat̚˩ miau˧˩")]
+    [InlineData("hak", "30-34‰", "t͡ɕʰiɛn˦˦ pun˦˦ t͡sz̩˦˦ sam˦˦ səp̚˥ t͡sz̩˥˧ sam˦˦ səp̚˥ ɕi˥˧")]
+    [InlineData("hak", "1,000人", "it̚˩ t͡ɕʰiɛn˦˦ ŋin˩˩")]
+    // Above 2^53 the double has lost its low digits, so the Han-dict core degrades to digit-at-a-time.
+    [InlineData("hak", "12345678901234567890",
+        "it̚˩ ŋi˥˧ sam˦˦ ɕi˥˧ n̩˧˩ liʊk̚˩ t͡ɕʰit̚˩ pat̚˩ kiu˧˩ laŋ˩˩ it̚˩ ŋi˥˧ sam˦˦ ɕi˥˧ n̩˧˩ liʊk̚˩ t͡ɕʰit̚˩ pat̚˩ kiu˧˩ laŋ˩˩")]
     // Malagasy's signature values (⟨o⟩→/u/, ⟨tr⟩→ʈʂ, prenasalized ⟨mb⟩) with penultimate stress, and the
     // units-first `amby` cardinal reached through the number arm.
     [InlineData("mg", "olona mandeha", "ulˈuna maⁿdˈeha")]
