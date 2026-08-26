@@ -96,6 +96,7 @@ public static class Bootstrap
             Lingala.LingalaPhonemizer.RegisterSelf();
             Pashto.PashtoPhonemizer.RegisterSelf();
             Sindhi.SindhiPhonemizer.RegisterSelf();
+            Fula.FulaPhonemizer.RegisterSelf();
         }
     }
 }

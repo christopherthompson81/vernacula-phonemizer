@@ -103,9 +103,26 @@ public static class LatinPhones
         var c = ch.ToLowerInvariant();
         var direct = TablePhone(c, opts);
         if (direct != null) return direct;
+        // ⚠ .NET `Normalize` THROWS on an UNPAIRED SURROGATE where JS returns the string unchanged, and a
+        // caller that indexes UTF-16 units (Fula's g2p walks `w[i]`, so an astral pass-through arrives one
+        // half at a time) reaches this with exactly that. Unchanged is what the JS then does: NFD is a
+        // no-op, the mark strip is a no-op, `baseCh === c`, and the function returns undefined. So does this.
+        if (!IsWellFormedUtf16(c)) return null;
         var baseCh = MarksRun.Replace(c.Normalize(NormalizationForm.FormD), "");
         if (baseCh == c || baseCh.Length != 1) return null;
         return TablePhone(baseCh, opts);
+    }
+
+    /** Does every surrogate in `s` sit in a well-formed pair? `string.Normalize` demands it; JS does not. */
+    private static bool IsWellFormedUtf16(string s)
+    {
+        for (var i = 0; i < s.Length; i++)
+        {
+            if (!char.IsSurrogate(s[i])) continue;
+            if (!char.IsHighSurrogate(s[i]) || i + 1 >= s.Length || !char.IsLowSurrogate(s[i + 1])) return false;
+            i++;
+        }
+        return true;
     }
 }
 
