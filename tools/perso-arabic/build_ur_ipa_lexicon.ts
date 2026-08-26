@@ -7,11 +7,11 @@
  *      wikipron referee (both parse Wiktionary; verified 91% raw-string identical) → NOT non-circular vs wikipron.
  *   2. silver.hindiurdu.tsv — real Urdu spellings, gold IPA from the hi g2p (independent of Wiktionary → the
  *      non-circular backbone), carries short vowels AND majhūl. Fills kaikki gaps.
- *   3. the existing harakat lexicon (src/languages/urdu/lexicon.tsv), converted to IPA via our g2p, for the tail.
+ *   3. the existing harakat lexicon (data/languages/urdu/lexicon.tsv), converted to IPA via our g2p, for the tail.
  * Canonical-convention normalisation: strip stress; drop the redundant vowel-nasalisation our Hindi source emits
  * before a full nasal consonant (ə̃nd̪→ənd̪), matching our own g2p (which nasalises via the n→ŋ/m rule, not the vowel)
  * and wikipron; g→ɡ.
- *   npx tsx tools/perso-arabic/build_ur_ipa_lexicon.ts   # → src/languages/urdu/lexicon-ipa.tsv
+ *   npx tsx tools/perso-arabic/build_ur_ipa_lexicon.ts   # → data/languages/urdu/lexicon-ipa.tsv
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { phonemizeWord as g2p } from "../../src/languages/urdu/g2p.ts";

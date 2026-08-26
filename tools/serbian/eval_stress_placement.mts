@@ -24,7 +24,7 @@ import { phonemizeWord } from "../../src/languages/serbian/serbian.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REF = join(HERE, "..", "referee-eval", "referees", "sr.wikipron-hbs-latn.tsv");
-const LEX = join(HERE, "..", "..", "src", "languages", "serbian", "stress.tsv");
+const LEX = join(HERE, "..", "..", "data", "languages", "serbian", "stress.tsv");
 
 const ACC = new Set([0x300, 0x301, 0x30f, 0x311, 0x30c, 0x302]);
 const V = new Set([..."aeiou"]);

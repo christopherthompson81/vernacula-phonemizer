@@ -4,7 +4,7 @@
  * kaikki Standard-Zhuang IPA (segmentally, tones folded)?
  *
  * Source (not committed — too big): $DUMPS/kaikki-Zhuang.jsonl (kaikki.org-dictionary-Zhuang.jsonl).
- * Output (committed): src/languages/zhuang/sawndip-readings.tsv  (glyph \t reading).
+ * Output (committed): data/languages/zhuang/sawndip-readings.tsv  (glyph \t reading).
  *
  * Polyphonic glyphs (one glyph → several Standard-Zhuang words) get a MOST-COMMON DEFAULT via a salience proxy —
  * the candidate word with the most senses, tie-broken by shorter reading then alphabetical (deterministic). This is

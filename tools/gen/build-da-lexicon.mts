@@ -1,5 +1,5 @@
 /**
- * Build the Danish pronunciation lexicon (src/languages/danish/da-lexicon.tsv) from the en.wiktionary Danish IPA
+ * Build the Danish pronunciation lexicon (data/languages/danish/da-lexicon.tsv) from the en.wiktionary Danish IPA
  * referee. Danish vowel quality / soft-d,g / reduction / stress are largely UNRECOVERABLE from spelling by rule
  * (the deepest European orthography), so a word→IPA lexicon is the primary path; the rule g2p (danish.ts) is the OOV
  * fallback. Each raw narrow transcription is NORMALISED to canonical Danish IPA by stripping the suprasegmental /

@@ -1,5 +1,5 @@
 /**
- * Build the German loanword -ER-restoration lexicon — src/languages/german/er.tsv.
+ * Build the German loanword -ER-restoration lexicon — data/languages/german/er.tsv.
  * (Fifth per-position kaikki lexicon, companion to length/quality/consonant.)
  *
  * German ⟨er⟩+C reduces to a vocalic ɐ natively (Wasser → vasɐ, Wanderer → vandəʁɐ), but in LOANWORDS an

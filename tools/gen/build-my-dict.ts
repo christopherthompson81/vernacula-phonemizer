@@ -1,5 +1,5 @@
 /**
- * Build the Burmese pronunciation lexicon (src/languages/burmese/dictionary.tsv) — the →layer. The rule g2p is
+ * Build the Burmese pronunciation lexicon (data/languages/burmese/dictionary.tsv) — the →layer. The rule g2p is
  * correct for the derivable bulk; the residual is a per-word LEXICAL tail (rime variation ည→i~ɛ / ေ→e~i, colloquial
  * forms, Pali gemination, loanword ⟨ရ⟩→ɹ). This mines the kaikki gold for the words our g2p gets wrong and stores
  * the CORRECT pronunciation IN OUR CONVENTION as a per-word override (the Thai dictionary.tsv pattern).
@@ -52,5 +52,5 @@ const header =
     "# extraction of https://en.wiktionary.org Burmese pronunciations; CC-BY-SA 4.0 — this derived TSV inherits it)\n" +
     "# by tools/gen/build-my-dict.ts; tone diacritics converted to our Chao letters. Applied in burmese.ts (an exact-word\n" +
     "# override before the g2p rules); OOV words keep the rule reading.\n";
-writeFileSync(join(HERE, "..", "..", "src", "languages", "burmese", "dictionary.tsv"), header + rows.join("\n") + "\n");
+writeFileSync(join(HERE, "..", "..", "data", "languages", "burmese", "dictionary.tsv"), header + rows.join("\n") + "\n");
 console.log(`kaikki words: rule-g2p already right ${agree} · corrections stored ${corrections} → dictionary.tsv`);

@@ -134,7 +134,7 @@ function main(): void {
     console.log(
         `Gurmukhi entries ${entries}, with Shahmukhi form ${withShah} → kept ${kept} (gated out ${gated} skeleton-mismatches)`,
     );
-    console.log(`  wrote src/languages/punjabi/crossscript.tsv`);
+    console.log(`  wrote data/languages/punjabi/crossscript.tsv`);
 }
 
 main();

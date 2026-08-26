@@ -31,7 +31,7 @@ const KAIKKI = (process.env["DUMPS"] ?? ".") + "/kaikki-Sindhi.jsonl";
 const OUT = join(HERE, "sd.crossscript.tsv");
 
 // ── Devanagari (Sindhi) → IPA ────────────────────────────────────────────────────────────────────────────
-// Values deliberately mirror src/languages/sindhi/sindhi.jsonc so both scripts land in ONE inventory: ɾ (not r),
+// Values deliberately mirror data/languages/sindhi/sindhi.jsonc so both scripts land in ONE inventory: ɾ (not r),
 // ʋ (not v), dental t̪/d̪, and the four implosives. Sindhi Devanagari carries the implosives as dedicated letters
 // ॻ ॼ ॾ ॿ — the same census gap the Perso-Arabic side spells ڳ ڄ ڏ ٻ.
 const CONS: Record<string, string> = {

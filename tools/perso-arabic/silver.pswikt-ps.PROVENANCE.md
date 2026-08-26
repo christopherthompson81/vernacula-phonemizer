@@ -71,4 +71,4 @@ skeleton-check failures, 14 with characters the map does not cover.
 
 ⚠ **It does not move the referee, and that is expected** — 427 of its rows are words wikipron and kaikki do
 not contain, so there is nothing for them to score. Same posture as the espeak tranche; see
-`src/languages/pashto/lexicon.PROVENANCE.md`.
+`data/languages/pashto/lexicon.PROVENANCE.md`.

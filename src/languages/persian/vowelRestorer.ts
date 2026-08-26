@@ -10,7 +10,7 @@
  *
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the .onnx models — are absent,
  * createFaVowelRestorer() resolves to `undefined` and callers fall back to the lexicon+default sync path (no throw).
- * See src/languages/persian/fa-vowel-restorer.PROVENANCE.md and tools/persian/export_s2s_onnx.py.
+ * See data/languages/persian/fa-vowel-restorer.PROVENANCE.md and tools/persian/export_s2s_onnx.py.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";

@@ -23,7 +23,7 @@ function arg(name: string): string {
     return process.argv[i + 1]!;
 }
 
-const DIR = new URL("../../src/languages/mandarin/", import.meta.url).pathname;
+const DIR = new URL("../../data/languages/mandarin/", import.meta.url).pathname;
 const chars = new Map<string, string[]>();
 for (const l of readFileSync(DIR + "chars.tsv", "utf8").split("\n")) {
     const [c, v] = l.split("\t");

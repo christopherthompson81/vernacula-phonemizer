@@ -17,7 +17,7 @@ The riders have no diacritized corpus, so harakat labels are MINED by g2p-invers
 `(skeleton, reference-IPA)` wikipron/kaikki pair, search the harakat vocalization whose deterministic g2p output
 reproduces the reference IPA under the referee-eval fold. Reference IPA is from **wikipron** + **kaikki**
 (Wiktionary, **CC-BY-SA 4.0**); the model is a derived work and inherits **CC-BY-SA 4.0**. The Arabic warm-start is
-a permissive CATT-teacher → Arabic-Wikipedia silver model (see `src/languages/arabic/diacritizer.PROVENANCE.md`).
+a permissive CATT-teacher → Arabic-Wikipedia silver model (see `data/languages/arabic/diacritizer.PROVENANCE.md`).
 
 ## Build
 `tools/perso-arabic/export_onnx.py` — loads `$ARDIAC/bilstm_multilingual.pt`, exports fp32 ONNX,

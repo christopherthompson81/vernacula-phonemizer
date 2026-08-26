@@ -55,7 +55,7 @@ for (const row of rows) {
 
 const write = (file: string, words: string[]): void => {
     words.sort();
-    writeFileSync(join(HERE, "..", "..", "src", "languages", "english-gb", file), words.map((w) => `${w}\t1`).join("\n") + "\n");
+    writeFileSync(join(HERE, "..", "..", "data", "languages", "english-gb", file), words.map((w) => `${w}\t1`).join("\n") + "\n");
     console.log(`  ${file}: ${words.length}`);
 };
 write("en-gb-bath.tsv", bath);

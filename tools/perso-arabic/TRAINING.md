@@ -2,7 +2,7 @@
 
 Fine-tune the existing Arabic diacritizer (`src/languages/arabic/diacritizer.onnx`) into a **multilingual** harakat
 restorer for the Perso-Arabic abjad languages. This doc is the recipe; the actual run is an **offline GPU job** (as
-for the Arabic model — staged outside CI, per `src/languages/arabic/diacritizer.PROVENANCE.md`).
+for the Arabic model — staged outside CI, per `data/languages/arabic/diacritizer.PROVENANCE.md`).
 
 ## Inputs (all committed under `tools/perso-arabic/`)
 | file | role |

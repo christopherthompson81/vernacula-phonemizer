@@ -7,7 +7,7 @@
  * word-level, nails ezafe) but can HALLUCINATE on short/modern out-of-domain text. It is therefore an OPTIONAL
  * path (createFaContextRestorer + phonemizeFaContext in faNeural.ts), NOT wired into the default modern runtime.
  * Shipping a modern context restorer needs modern contextualised data.
- * and src/languages/persian/fa-context-restorer.PROVENANCE.md.
+ * and data/languages/persian/fa-context-restorer.PROVENANCE.md.
  *
  * `onnxruntime-node` is optional (lazy import); createFaContextRestorer() resolves to `undefined` (no-op) if it or
  * the .onnx models are absent. Output is already Iranian (trained on the Iranian-normalised corpus); this adds

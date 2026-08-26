@@ -1,5 +1,5 @@
 /**
- * Build the vernacula Irish (ga) Connacht pronunciation lexicon — src/languages/irish/lexicon.tsv.
+ * Build the vernacula Irish (ga) Connacht pronunciation lexicon — data/languages/irish/lexicon.tsv.
  *
  * SOURCE: the author's repaired ga engine (the canonical oracle) run over the 50k frequency corpus. Regenerate
  * the intermediate oracle TSV (word<TAB>IPA) from inside that repo with:

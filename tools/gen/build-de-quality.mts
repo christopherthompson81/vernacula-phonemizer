@@ -1,5 +1,5 @@
 /**
- * Build the German unstressed-vowel QUALITY-correction lexicon — src/languages/german/quality.tsv.
+ * Build the German unstressed-vowel QUALITY-correction lexicon — data/languages/german/quality.tsv.
  * (Generalises the earlier reduction lexicon: same per-position kaikki-alignment, now with several target vowels.)
  *
  * German unstressed vowel quality is LEXICAL: native words reduce ⟨e⟩ to [ə] (schiebedach → ʃiːbədaχ) and keep

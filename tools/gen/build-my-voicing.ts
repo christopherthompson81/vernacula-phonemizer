@@ -1,5 +1,5 @@
 /**
- * Build the Burmese intervocalic-voicing lexicon (src/languages/burmese/voicing-lexicon.tsv) from the kaikki gold.
+ * Build the Burmese intervocalic-voicing lexicon (data/languages/burmese/voicing-lexicon.tsv) from the kaikki gold.
  *
  * Burmese voicing sandhi is LEXICAL (compound-boundary governed, only ~68% rule-predictable), so it is a per-word
  * lexicon, not a rule. For each kaikki word we SYLLABIFY it with our own g2p, then greedily align our syllables to
@@ -66,5 +66,5 @@ rows.sort();
 const header =
     "# Burmese intervocalic-voicing lexicon — undiacritized word ⇥ per-syllable voicing flags ('1' = voice onset).\n" +
     "# Mined from the kaikki gold by tools/gen/build-my-voicing.ts (CC-BY-SA). Applied in burmese.ts; OOV → voiceless.\n";
-writeFileSync(join(HERE, "..", "..", "src", "languages", "burmese", "voicing-lexicon.tsv"), header + rows.join("\n") + "\n");
+writeFileSync(join(HERE, "..", "..", "data", "languages", "burmese", "voicing-lexicon.tsv"), header + rows.join("\n") + "\n");
 console.log(`kaikki words ${seen} · fully-alignable ${voiceable} · with voicing (emitted) ${emitted} → voicing-lexicon.tsv`);

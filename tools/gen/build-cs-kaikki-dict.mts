@@ -1,5 +1,5 @@
 /**
- * Build the Czech LOANWORD lexicon (src/languages/czech/loanwords.tsv) from the kaikki.org Wiktionary Czech dump —
+ * Build the Czech LOANWORD lexicon (data/languages/czech/loanwords.tsv) from the kaikki.org Wiktionary Czech dump —
  * the words the native rules mis-derive, chiefly di/ti/ni NON-palatalization in loanwords (stadion→stadɪjon, not
  * the native staɟɪjon; studie, technik) + loanword long í + foreign names. The rules correctly palatalize NATIVE
  * di/ti/ni (tisíc→cɪsiːts), so ONLY the exceptions are dictionaried.

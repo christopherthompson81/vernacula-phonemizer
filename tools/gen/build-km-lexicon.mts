@@ -1,5 +1,5 @@
 /**
- * Build the Khmer exceptions lexicon — src/languages/khmer/km-lexicon.tsv.
+ * Build the Khmer exceptions lexicon — data/languages/khmer/km-lexicon.tsv.
  *
  * Khmer inherent-vowel LENGTH, internal-doubling minor-syllable vs coda, and the Pali/Sanskrit loanword vowels
  * are LEXICAL — not derivable from the spelling (Huffman 1970). The Romanian-stress / akan-tone pattern applies:
