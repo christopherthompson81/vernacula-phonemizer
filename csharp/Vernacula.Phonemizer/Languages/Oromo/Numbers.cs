@@ -39,10 +39,10 @@ public static class Numbers
         return r == 0 ? head : $"{head} {Below100(r)}";
     }
 
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e9)
-            return string.Join(" ", Js.NumberToString(Math.Abs(n))
+            return string.Join(" ", (raw ?? Js.NumberToString(Math.Abs(n)))
                 .Where(c => c >= '0' && c <= '9').Select(c => ONES[c - '0']));
         if (n == 0) return ONES[0];
         if (n < 1000) return Below1000(n);

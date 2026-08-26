@@ -166,9 +166,9 @@ function bucUnder10000(n: number): string[] {
 }
 
 /** An integer → the ordered Bàng-uâ-cê number words that speak it (myriad grouping 萬/億). */
-export function numberToBucWords(n: number): string[] {
+export function numberToBucWords(n: number, raw?: string): string[] {
     if (!Number.isSafeInteger(n) || n < 0) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => BUC_DIGITS[Number(d)]!);
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => BUC_DIGITS[Number(d)]!);
     }
     if (n === 0) return [BUC_DIGITS[0]!];
     const yi = Math.floor(n / 1_0000_0000);
@@ -204,7 +204,7 @@ class MinDongPhonemizer implements Phonemizer {
         const nfd = normalizeMinDong(input).normalize("NFD");
         return assembleClauses(nfd, tok, (m, sink) => {
             if (m[1]) sink.emit(bucToIpa(m[1]));
-            else if (m[2]) sink.emit(bucToIpa(numberToBucWords(Number(m[2])).join("-")));
+            else if (m[2]) sink.emit(bucToIpa(numberToBucWords(Number(m[2]), m[2]).join("-")));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

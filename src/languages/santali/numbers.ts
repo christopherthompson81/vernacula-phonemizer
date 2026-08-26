@@ -123,8 +123,8 @@ export function readDigits(digits: string): string {
  * Non-negative integer → Santali cardinal words in Ol Chiki, space-separated. Indian 2-2-3 grouping with
  * lakh/crore; the crore multiplier recurses, so 10⁹ reads ᱢᱤᱫ ᱥᱟᱭ ᱠᱚᱨᱚᱲ ('a hundred crore'). Non-safe → digits.
  */
-export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0) return readDigits(String(n));
+export function numberToWords(n: number, raw?: string): string {
+    if (!Number.isSafeInteger(n) || n < 0) return readDigits(raw ?? String(n));
     if (n === 0) return UNITS[0]!;
     if (n < 1e7) return below1e7(n);
     const c = Math.floor(n / 1e7),

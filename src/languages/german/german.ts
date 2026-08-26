@@ -427,7 +427,7 @@ class GermanPhonemizer implements Phonemizer {
                 // The PERIOD is thousands grouping in German and the COMMA is the decimal point. Splitting
                 // on either made "1.000" a decimal — *eins komma null null null*.
                 const [intPart, frac] = m[2].replace(/\./gu, "").split(",");
-                for (const wd of numberToWords(Number(intPart)).split(" "))
+                for (const wd of numberToWords(Number(intPart), intPart).split(" "))
                     sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
                     sink.emit(phonemizeWord("Komma"));

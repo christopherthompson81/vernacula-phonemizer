@@ -159,7 +159,7 @@ class GuaraniPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 // ≤9 digits stays inside the attested range (< 10⁹); longer reads the raw digit string.
-                const words = m[2].length <= 9 ? numberToWords(Number(m[2])) : readDigits(m[2]);
+                const words = m[2].length <= 9 ? numberToWords(Number(m[2]), m[2]) : readDigits(m[2]);
                 for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
             }
             else if (m[3]) {

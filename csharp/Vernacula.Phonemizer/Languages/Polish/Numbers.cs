@@ -58,12 +58,12 @@ public static class PolishNumbers
         }));
 
     /** A non-negative integer (< 10^12) → space-separated Polish cardinal words. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (n < 0 || !double.IsFinite(n)) return "";
         n = Math.Floor(n);
         if (n == 0) return UNITS[0]; // zero
-        if (n >= 1e12) return ReadDigits(Js.NumberToString(n));
+        if (n >= 1e12) return ReadDigits(raw ?? Js.NumberToString(n));
         var parts = new List<string>();
         var bil = Math.Floor(n / 1e9);
         n %= 1e9;

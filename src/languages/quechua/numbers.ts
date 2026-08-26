@@ -75,9 +75,9 @@ function compose(n: number): string {
 }
 
 /** Non-negative integer → Southern Quechua words. 10¹² and above (no attested magnitude) → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!).join(" ");
     }
     return n === 0 ? UNITS[0]! : compose(n);
 }

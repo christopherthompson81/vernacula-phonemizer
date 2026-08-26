@@ -48,11 +48,11 @@ public static class ZhuangNumberWords
     }
 
     /** Non-negative integer (&lt; 10¹²) → Zhuang words; larger / non-finite → digit-by-digit. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsFinite(n) && n == Math.Floor(n) && Math.Abs(n) <= 9007199254740991.0) || n < 0 || n >= 1e12)
         {
-            var digits = Js.CodePoints(Js.NumberToString(Math.Abs(n)))
+            var digits = Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n))))
                 .Select(d =>
                 {
                     // JS `N.units[Number(d)] ?? d`: a non-digit character (the `.`/`e`/`+` of an

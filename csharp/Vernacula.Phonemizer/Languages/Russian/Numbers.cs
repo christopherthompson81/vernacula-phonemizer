@@ -42,10 +42,10 @@ public static class Numbers
     private static readonly JsRe DVA_FINAL = JsRegex.Compile("два$");
 
     /** Non-negative integer (< 10⁹) → Russian words; larger / non-finite → digit-by-digit. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e9)
-            return string.Join(" ", Js.NumberToString(Math.Abs(n))
+            return string.Join(" ", (raw ?? Js.NumberToString(Math.Abs(n)))
                 .Select(d => d >= '0' && d <= '9' && d - '0' < ONES.Count ? ONES[d - '0'] : d.ToString()));
         if (n < 20) return ONES[(int)n];
         if (n < 1000) return Below1000(n);

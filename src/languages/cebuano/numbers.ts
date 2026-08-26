@@ -40,9 +40,9 @@ function below1000(n: number): string {
 
 /** Non-negative integer (< 10⁹) → Cebuano words; larger / non-finite → digit-by-digit. Chains the libo (10³) and
  *  milyon (10⁶) scales with the "ug" connector. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // sero
     if (n < 1000) return below1000(n);
     if (n < 1e6) {

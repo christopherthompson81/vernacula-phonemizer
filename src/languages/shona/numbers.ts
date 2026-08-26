@@ -68,9 +68,9 @@ function below1e6(n: number): string {
  * `480,000,000`, `2,800,000`, `1,606,000`, `1,392,000`, `1,081,000`, `1,100,000`, `1,886,068`).
  * The words and the order both come from the corpus's own worked reading of 431,257,698 — see shona.jsonc.
  */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!;
     if (n < 1e6) return below1e6(n);
     // ⚠ THE COUNT OF A MAGNITUDE IS ITSELF A FULL NUMERAL and takes class-6 concord from the magnitude noun,

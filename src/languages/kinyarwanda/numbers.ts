@@ -62,7 +62,7 @@
 import { MANIFEST, type RwandaRundiNumbers } from "./manifest.ts";
 
 /** Compose `n` in a Rwanda-Rundi language from its own word table. */
-export function composeRwandaRundi(n: number, N: RwandaRundiNumbers): string {
+export function composeRwandaRundi(n: number, N: RwandaRundiNumbers, raw?: string): string {
     /** 1 ≤ n < 100. */
     const below100 = (v: number): string => {
         if (v < 10) return N.units[v]!;
@@ -105,7 +105,7 @@ export function composeRwandaRundi(n: number, N: RwandaRundiNumbers): string {
     // this language has no word for is a refusal to COMPOSE, never a licence to go silent.
     const ceiling = N.billion ? 1e12 : 1e9;
     if (!Number.isSafeInteger(n) || n < 0 || n >= ceiling)
-        return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!;
     if (n < 1e9) return below1e9(n);
     const b = Math.floor(n / 1e9);

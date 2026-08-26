@@ -75,7 +75,7 @@ class KalaallisutPhonemizer implements Phonemizer {
             else if (m[2]) {
                 // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string so the
                 // Number() conversion can't lose precision. Native 0–12, Danish above — see numbers.ts.
-                const words = m[2].length <= 12 ? numberToWords(Number(m[2])) : readDigits(m[2]);
+                const words = m[2].length <= 12 ? numberToWords(Number(m[2]), m[2]) : readDigits(m[2]);
                 for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
             }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

@@ -152,8 +152,8 @@ public static class Normalize
         // SPORTS TIME, and without them the rule claims `4:41` and restarts inside the rest.
         static string Clock(string h, string min, string? uur)
         {
-            var head = $"{Numbers.NumberToWords(Js.Number(h))}{uur ?? " uur"}";
-            return Js.Number(min) == 0 ? head : $"{head} {Numbers.NumberToWords(Js.Number(min))}";
+            var head = $"{Numbers.NumberToWords(Js.Number(h), h)}{uur ?? " uur"}";
+            return Js.Number(min) == 0 ? head : $"{head} {Numbers.NumberToWords(Js.Number(min), min)}";
         }
         // JS hands an unmatched optional group as `undefined`, which the `??` above turns into " uur"; .NET
         // hands an EMPTY string, so the group's Success is what decides here.

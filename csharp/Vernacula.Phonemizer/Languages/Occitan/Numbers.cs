@@ -61,10 +61,10 @@ public static class Numbers
     /**
      * Non-negative integer → Occitan words. Out-of-range / unsafe values read digit-by-digit (never empty).
      */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e12)
-            return string.Join(" ", Js.NumberToString(Math.Abs(n)).Select(d =>
+            return string.Join(" ", (raw ?? Js.NumberToString(Math.Abs(n))).Select(d =>
                 d >= '0' && d <= '9' && d - '0' < ONES.Count ? ONES[d - '0'] : d.ToString()));
         if (n == 0) return ONES[0]; // zèro
         if (n < 1e6) return Below1e6(n);

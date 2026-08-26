@@ -15,11 +15,11 @@ public static class ThaiPhonemizer
     private static readonly (double V, string W)[] TH_MAG =
         { (1e6, "ล้าน"), (1e5, "แสน"), (1e4, "หมื่น"), (1e3, "พัน"), (100, "ร้อย") };
 
-    private static List<string> NumberToThaiWords(double n)
+    private static List<string> NumberToThaiWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0)
         {
-            return Js.CodePoints(Js.NumberToString(Math.Abs(n)))
+            return Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n))))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
                 .Select(d => TH_UNITS[(int)Js.Number(d)])
                 .ToList();
@@ -68,7 +68,7 @@ public static class ThaiPhonemizer
             {
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(G2p.PhonemizeWord(m.Groups[1].Value));
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
-                    foreach (var wd in NumberToThaiWords(Js.Number(m.Groups[2].Value))) sink.Emit(G2p.PhonemizeWord(wd));
+                    foreach (var wd in NumberToThaiWords(Js.Number(m.Groups[2].Value), m.Groups[2].Value)) sink.Emit(G2p.PhonemizeWord(wd));
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
                 {
                     var mk = CLAUSE_MARK.GetValueOrDefault(m.Groups[3].Value);

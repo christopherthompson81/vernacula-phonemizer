@@ -187,15 +187,15 @@ public static class FrenchPhonemizer
                     var split = DECIMAL_SPLIT.Re.Split(m.Groups[2].Value);
                     var intPart = split[0];
                     var frac = split.Length > 1 ? split[1] : null;
-                    foreach (var w in Numbers.NumberToWords(Js.Number(intPart)).Split(' '))
+                    foreach (var w in Numbers.NumberToWords(Js.Number(intPart), intPart).Split(' '))
                         items.Add(new WordItem(w));
                     if (frac is not null)
                     {
                         items.Add(new WordItem(Manifest.MANIFEST.Numbers.DecimalSeparator));
                         var asNumber = frac.Length <= 3 && !frac.StartsWith("0", StringComparison.Ordinal);
                         var parts = asNumber
-                            ? Numbers.NumberToWords(Js.Number(frac)).Split(' ').AsEnumerable()
-                            : frac.SelectMany(d => Numbers.NumberToWords(Js.Number(d.ToString())).Split(' '));
+                            ? Numbers.NumberToWords(Js.Number(frac), frac).Split(' ').AsEnumerable()
+                            : frac.SelectMany(d => Numbers.NumberToWords(Js.Number(d.ToString()), d.ToString()).Split(' '));
                         foreach (var w in parts) items.Add(new WordItem(w));
                     }
                 }

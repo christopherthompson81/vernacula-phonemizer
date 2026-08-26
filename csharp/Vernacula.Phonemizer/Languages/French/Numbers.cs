@@ -48,10 +48,10 @@ public static class Numbers
     }
 
     /** Non-negative integer (< 10⁹) → French words; larger / non-finite → digit-by-digit. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e9)
-            return string.Join(" ", Js.NumberToString(Math.Abs(n))
+            return string.Join(" ", (raw ?? Js.NumberToString(Math.Abs(n)))
                 .Select(d => d >= '0' && d <= '9' ? SMALL[d - '0'] : d.ToString()));
         var v = (int)n;
         if (v == 0) return SMALL[0]; // zéro

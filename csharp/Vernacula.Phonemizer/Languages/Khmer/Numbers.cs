@@ -24,11 +24,11 @@ public static class Numbers
         { (1e6, "លាន"), (1e5, "សែន"), (1e4, "ម៉ឺន"), (1e3, "ពាន់"), (100, "រយ") };
 
     /** An integer → the ordered Khmer number words that speak it. */
-    public static List<string> NumberToKhmerWords(double n)
+    public static List<string> NumberToKhmerWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0)
         {
-            return Js.CodePoints(Js.NumberToString(Math.Abs(n)))
+            return Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n))))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
                 .Select(d => UNITS[(int)Js.Number(d)])
                 .ToList();

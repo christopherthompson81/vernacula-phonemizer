@@ -176,7 +176,7 @@ public sealed class OromoPhonemizer : ILanguage
             }
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
             {
-                foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value)).Split(' '))
+                foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value), m.Groups[2].Value).Split(' '))
                     sink.Emit(PhonemizeWord(wd));
             }
             else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)

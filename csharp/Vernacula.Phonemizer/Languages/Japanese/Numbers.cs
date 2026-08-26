@@ -29,10 +29,10 @@ public static class Numbers
     }
 
     /** Non-negative integer → kana (万/億/兆 groups). 0 → れい; too large → digit-by-digit. */
-    public static string NumberToKana(double n)
+    public static string NumberToKana(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0)
-            return string.Concat(Js.NumberToString(Math.Abs(n))
+            return string.Concat((raw ?? Js.NumberToString(Math.Abs(n)))
                 .Select(d =>
                 {
                     var idx = d >= '0' && d <= '9' ? d - '0' : -1;

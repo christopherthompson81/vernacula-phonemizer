@@ -64,9 +64,9 @@ function below1000(n: number, d: UnitsFirstDef): string {
 }
 
 /** Non-negative integer (< 10¹²) → number words, largest magnitude first; larger / non-finite → digit-by-digit. */
-export function unitsFirstNumberToWords(n: number, d: UnitsFirstDef): string {
+export function unitsFirstNumberToWords(n: number, d: UnitsFirstDef, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...String(Math.abs(n))].map((c) => d.ones[Number(c)] ?? c).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((c) => d.ones[Number(c)] ?? c).join(" ");
     if (n === 0) return d.ones[0]!;
     const parts: string[] = [];
     const bil = Math.floor(n / 1e9),

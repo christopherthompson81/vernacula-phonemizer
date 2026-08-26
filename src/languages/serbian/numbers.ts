@@ -22,7 +22,7 @@ import { MANIFEST } from "./manifest.ts";
 type NumberData = (typeof MANIFEST)["numbers"];
 
 /** Compose a Serbo-Croatian cardinal from the given number-word table `N` (Serbian or Croatian). */
-export function composeSlavicNumber(n: number, N: NumberData): string {
+export function composeSlavicNumber(n: number, N: NumberData, raw?: string): string {
     /** 1 ≤ n < 100. */
     const below100 = (n: number): string => {
         if (n < 10) return N.units[n]!;
@@ -56,7 +56,7 @@ export function composeSlavicNumber(n: number, N: NumberData): string {
             : words;
 
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // nula
     if (n < 1000) return below1000(n);
     const parts: string[] = [];

@@ -53,9 +53,9 @@ function multiplier(k: number): string {
 }
 
 /** A non-negative integer → space-separated Umbundu cardinal words. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0)
-        return [...String(Math.abs(n))].map((d) => (d === "0" ? N.zero : (N.units[Number(d)] ?? d))).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => (d === "0" ? N.zero : (N.units[Number(d)] ?? d))).join(" ");
     if (n === 0) return N.zero;
     return join(components(n, true));
 }

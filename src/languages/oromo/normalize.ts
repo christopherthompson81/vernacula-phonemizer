@@ -133,7 +133,7 @@ function attachEnclitic(word: string, suffix: string): string {
  *  digit by digit — the reading the decimal rule below produces for the un-suffixed case. */
 function numeralWords(num: string): string {
     const [int, frac] = num.split(".");
-    const head = numberToWords(Number(int));
+    const head = numberToWords(Number(int), int);
     if (frac === undefined) return head;
     return `${head} ${POINT} ${[...frac].map((d) => numberToWords(Number(d))).join(" ")}`;
 }

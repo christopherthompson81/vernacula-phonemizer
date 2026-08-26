@@ -864,7 +864,7 @@ export function normalizeSlovenian(input: string): string {
     //    are irregular (*dveh*, not *dvaih*) and which the corpus never writes this way — are declined
     //    rather than guessed.
     s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d{1,4})\s?-\s?ih(?![\p{L}\p{M}])/gu, (m0, digits: string) => {
-        const words = numberToWords(Number(digits));
+        const words = numberToWords(Number(digits), digits);
         return /[aeiou]$/u.test(words) ? m0 : `${words}ih`;
     });
 
@@ -1031,8 +1031,8 @@ export function normalizeSlovenian(input: string): string {
     // numerals, which is a wrong word rather than an accent.
     const SL_VOICELESS = /^[ptksšcčfh]/u;
     s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) => {
-        const y = numberToWords(Number(b));
-        return `${numberToWords(Number(a))} deljeno ${SL_VOICELESS.test(y) ? "s" : "z"} ${y}`;
+        const y = numberToWords(Number(b), b);
+        return `${numberToWords(Number(a), a)} deljeno ${SL_VOICELESS.test(y) ? "s" : "z"} ${y}`;
     });
 
     s = s.replace(/\s*[&＆]\s*/gu, " in ");

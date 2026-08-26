@@ -134,12 +134,12 @@ class PapiamentoPhonemizer implements Phonemizer {
             // A digit run reads as Papiamentu number WORDS, each phonemized like any other word.
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(",");
-                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToWords(Number(intPart), intPart).split(" ")) sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
                     // `koma` ×18 on pap.wikipedia — the separator's own name. The fractional part is read
                     // digit by digit, the same call every other layer in this sweep makes.
                     sink.emit(phonemizeWord("koma"));
-                    for (const dg of frac) for (const wd of numberToWords(Number(dg)).split(" ")) sink.emit(phonemizeWord(wd));
+                    for (const dg of frac) for (const wd of numberToWords(Number(dg), dg).split(" ")) sink.emit(phonemizeWord(wd));
                 }
             }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

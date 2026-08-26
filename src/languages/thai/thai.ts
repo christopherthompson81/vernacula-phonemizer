@@ -23,9 +23,9 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TH_UNITS = THAI_DIGIT_WORDS;
 const TH_MAG: [number, string][] = [[1e6, "ล้าน"], [1e5, "แสน"], [1e4, "หมื่น"], [1e3, "พัน"], [100, "ร้อย"]];
 
-function numberToThaiWords(n: number): string[] {
+function numberToThaiWords(n: number, raw?: string): string[] {
     if (!Number.isSafeInteger(n) || n < 0) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => TH_UNITS[Number(d)]!);
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => TH_UNITS[Number(d)]!);
     }
     if (n === 0) return [TH_UNITS[0]!];
     const out: string[] = [];
@@ -84,7 +84,7 @@ class ThaiPhonemizer implements Phonemizer {
         return assembleClauses(normalizeThai(SYMBOLS(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
-                for (const wd of numberToThaiWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToThaiWords(Number(m[2]), m[2])) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

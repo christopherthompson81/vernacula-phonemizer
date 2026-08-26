@@ -90,7 +90,7 @@ class NamaPhonemizer implements Phonemizer {
             else if (m[2]) {
                 // Cardinals 1 … 10¹²−1 compose natively; 0 emits the flagged Afrikaans stopgap `nul` and anything
                 // above the ceiling reads digit-by-digit. Never silently dropped. See numbers.ts.
-                const words = m[2].length <= 12 ? numberToWords(Number(m[2])) : readDigits(m[2]);
+                const words = m[2].length <= 12 ? numberToWords(Number(m[2]), m[2]) : readDigits(m[2]);
                 for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
             }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

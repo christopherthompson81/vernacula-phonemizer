@@ -170,7 +170,7 @@ class AragonesePhonemizer implements Phonemizer {
             // A digit run reads as Aragonese number WORDS, each phonemized like any other word.
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(",");
-                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToWords(Number(intPart), intPart).split(" ")) sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
                     // ⚠ `coma` ×74 on an.wikipedia, but MOSTLY AS A LANDFORM — "Una coma u nava ye una
                     // plana situada en un zona…", the Pyrenean hollow. The punctuation sense is attested
@@ -178,7 +178,7 @@ class AragonesePhonemizer implements Phonemizer {
                     // se veiga Coma (puntuación)") and through its metric glossary ("0,1 dam - zero coma
                     // un decametro"). The homograph costs nothing, since both senses are the same word.
                     sink.emit(phonemizeWord("coma"));
-                    for (const dg of frac) for (const wd of numberToWords(Number(dg)).split(" ")) sink.emit(phonemizeWord(wd));
+                    for (const dg of frac) for (const wd of numberToWords(Number(dg), dg).split(" ")) sink.emit(phonemizeWord(wd));
                 }
             }
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }

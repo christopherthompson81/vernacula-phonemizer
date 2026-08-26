@@ -357,7 +357,7 @@ export function normalizeHungarian(input: string): string {
     };
     s = s.replace(
         /(\d+)\s?÷\s?(\d+)/gu,
-        (_m, a: string, b: string) => `${numberToWords(Number(a))} ${huInstrumental(numberToWords(Number(b)))} osztva`,
+        (_m, a: string, b: string) => `${numberToWords(Number(a), a)} ${huInstrumental(numberToWords(Number(b), b))} osztva`,
     );
 
     // 8) DECIMALS. The comma was reaching `clausePunctuation` as a COMMA PAUSE mid-number. Hungarian says

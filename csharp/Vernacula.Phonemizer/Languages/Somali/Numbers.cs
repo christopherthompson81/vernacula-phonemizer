@@ -31,10 +31,10 @@ public static class Numbers
     }
 
     /** Non-negative integer (< 10⁹) → Somali words; larger / non-finite → digit-by-digit. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e9)
-            return string.Join(" ", Js.CodePoints(Js.NumberToString(Math.Abs(n))).Select(d =>
+            return string.Join(" ", Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n)))).Select(d =>
             {
                 // `ONES[Number(d)] ?? d` — a non-digit character (the "." of a fraction, the "e" of an
                 // exponent form) indexes with NaN in JS and falls through to the character itself.

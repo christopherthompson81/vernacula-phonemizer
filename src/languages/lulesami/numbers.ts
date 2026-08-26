@@ -103,8 +103,8 @@ export function readDigits(digits: string): string {
  * Non-negative integer → Lule Sami cardinal words, space-separated ONLY at the 10⁶/10⁹ seams (everything below
  * a million is one solid word). ≥10¹² or non-safe → digit-by-digit.
  */
-export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return readDigits(String(n));
+export function numberToWords(n: number, raw?: string): string {
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return readDigits(raw ?? String(n));
     if (n === 0) return ZERO;
     if (n < 1e6) return below1e6(n);
     if (n < 1e9) {

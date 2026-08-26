@@ -25,9 +25,9 @@ function below1000(n: number): string {
 }
 
 /** Non-negative integer (< 10⁹) → Kurmanji words; larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // sifir
     const parts: string[] = [];
     const mil = Math.floor(n / 1e6),

@@ -28,9 +28,9 @@ function below10000(n: number): string {
 }
 
 /** Non-negative integer → kana (万/億/兆 groups). 0 → れい; too large → digit-by-digit. */
-export function numberToKana(n: number): string {
+export function numberToKana(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0)
-        return [...String(Math.abs(n))]
+        return [...(raw ?? String(Math.abs(n)))]
             .map((d) => ONES[Number(d)] || N.zero)
             .join("");
     if (n === 0) return N.zero;

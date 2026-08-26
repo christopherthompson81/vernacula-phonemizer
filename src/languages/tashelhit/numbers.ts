@@ -169,8 +169,8 @@ export function readDigits(digits: string): string {
  * Berber 1–3, largest→smallest joined by `u`, units-first in the final tens+units pair. ≥10¹² or non-safe →
  * digit-by-digit.
  */
-export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return readDigits(String(n));
+export function numberToWords(n: number, raw?: string): string {
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return readDigits(raw ?? String(n));
     if (n === 0) return UNITS[0]!;
     if (n < 1e6) return below1e6(n);
     if (n < 1e9) {

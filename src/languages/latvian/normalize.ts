@@ -502,8 +502,8 @@ function decimalComma(text: string): string {
         const zeros = /^0*/u.exec(frac)![0];
         const rest = frac.slice(zeros.length);
         const spoken = [...zeros].map(() => numberToWords(0));
-        if (rest !== "") spoken.push(numberToWords(Number(rest)));
-        return `${numberToWords(Number(head))} komats ${spoken.join(" ")}`.trimEnd();
+        if (rest !== "") spoken.push(numberToWords(Number(rest), rest));
+        return `${numberToWords(Number(head), head)} komats ${spoken.join(" ")}`.trimEnd();
     });
 }
 

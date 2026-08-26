@@ -181,7 +181,7 @@ class SwedishPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);
-                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToWords(Number(intPart), intPart).split(" ")) sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
                     sink.emit(phonemizeWord("komma"));
                     for (const d of frac)

@@ -85,10 +85,10 @@ function below1000(n: number): string {
 }
 
 /** Non-negative integer → Bambara words; beyond the attested magnitudes (≥ 10¹²) → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) {
         // No attested Bambara numeral above miliyari — read the digits rather than invent a "trillion".
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
     }
     if (n < 1000) return below1000(n);
     if (n < 1e6) {

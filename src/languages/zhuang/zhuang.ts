@@ -201,7 +201,7 @@ class ZhuangPhonemizer implements Phonemizer {
         return assembleClauses(normalizeZhuang(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
-                for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) // Sawndip: one glyph = one syllable → look up its reading, phonemize each through the za g2p.
                 for (const reading of sawndipToReadings(m[3])) sink.emit(phonemizeWord(reading));
             else if (m[4]) {

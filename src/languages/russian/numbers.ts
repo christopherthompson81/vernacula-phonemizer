@@ -35,9 +35,9 @@ function below1000(n: number): string {
 }
 
 /** Non-negative integer (< 10⁹) → Russian words; larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...String(Math.abs(n))]
+        return [...(raw ?? String(Math.abs(n)))]
             .map((d) => ONES[Number(d)] ?? d)
             .join(" ");
     if (n < 20) return ONES[n]!;

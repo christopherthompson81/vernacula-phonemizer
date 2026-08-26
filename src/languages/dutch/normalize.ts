@@ -172,8 +172,8 @@ export function normalizeDutch(input: string): string {
     //        because the hour is range-checked — `802.11` and `figuur 1.1` both fail it.
     //    An existing `uur` is CAPTURED and reused rather than appended, so the reading is never doubled.
     const clock = (h: string, min: string, uur?: string): string => {
-        const head = `${numberToWords(Number(h))}${uur ?? " uur"}`;
-        return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min))}`;
+        const head = `${numberToWords(Number(h), h)}${uur ?? " uur"}`;
+        return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min), min)}`;
     };
     s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![:\d])(\s*uur)?/gu,
         (_m, h: string, min: string, uur?: string) => clock(h, min, uur));

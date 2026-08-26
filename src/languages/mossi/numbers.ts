@@ -123,9 +123,9 @@ function scaled(n: number, scale: number, word: string, rest: (r: number) => str
 }
 
 /** Non-negative integer → Mooré words; ≥ 10¹² (nothing above milyaar is attested) → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
     }
     if (n < 1e6) return below1e6(n);
     if (n < 1e9) return scaled(n, 1e6, MILLION, below1e6);

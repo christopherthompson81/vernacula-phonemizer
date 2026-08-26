@@ -68,10 +68,10 @@ function below1e6(n: number, d: ArabicNumberData): string {
 }
 
 /** Non-negative integer (< 10⁹) → Arabic IPA words. Larger / invalid → digit-by-digit (digits only). */
-export function numberToIpa(n: number, data?: ArabicNumberData): string {
+export function numberToIpa(n: number, data?: ArabicNumberData, raw?: string): string {
     const d = data ?? MSA;
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) {
-        return [...String(Math.abs(n))]
+        return [...(raw ?? String(Math.abs(n)))]
             .map((x) => d.ones[Number(x)])
             .filter(Boolean)
             .join(" ");

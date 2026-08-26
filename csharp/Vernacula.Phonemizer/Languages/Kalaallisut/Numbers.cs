@@ -61,9 +61,9 @@ public static class Numbers
             : d));
 
     /** Non-negative integer → Kalaallisut cardinal words. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
-        if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e12) return ReadDigits(Js.NumberToString(n));
+        if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e12) return ReadDigits(raw ?? Js.NumberToString(n));
         if (n <= 12) return NATIVE[(int)n]; // the native series — only when the WHOLE figure is ≤12
         if (n < 1e6) return DkBelow1e6(n);
         if (n < 1e9)

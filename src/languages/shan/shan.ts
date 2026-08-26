@@ -154,9 +154,9 @@ export function phonemizeWord(word: string): string {
 const NUM = DEF.numbers;
 const SHN_UNITS = NUM.units;
 
-function numberToShanWords(n: number): string[] {
+function numberToShanWords(n: number, raw?: string): string[] {
     if (!Number.isSafeInteger(n) || n < 0) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => SHN_UNITS[Number(d)]!);
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => SHN_UNITS[Number(d)]!);
     }
     if (n === 0) return [SHN_UNITS[0]!];
     const out: string[] = [];
@@ -255,14 +255,14 @@ class ShanPhonemizer implements Phonemizer {
             }
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(".");
-                for (const wd of numberToShanWords(Number(intPart))) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToShanWords(Number(intPart), intPart)) sink.emit(phonemizeWord(wd));
                 // ⚠ NO SEPARATOR WORD, AND THAT IS A MEASURED REFUSAL. Every other layer in this sweep
                 // emits the decimal point's own name — ba өтөр, tt өтер, chv хӳрешке, uk кома — and Shan
                 // has none this corpus will source: `မၢၵ်ႉ` ×116 is the given name *Mark* and the shop
                 // *City Mart*. The fractional digits are read ONE AT A TIME, which is what a reader does
                 // anyway, and the sentence break the ASCII dot was producing is gone.
                 if (frac !== undefined)
-                    for (const dg of frac) for (const wd of numberToShanWords(Number(dg))) sink.emit(phonemizeWord(wd));
+                    for (const dg of frac) for (const wd of numberToShanWords(Number(dg), dg)) sink.emit(phonemizeWord(wd));
             }
             else if (m[3]) sink.pause(m[3] === "။" || m[3] === "." || m[3] === "!" || m[3] === "?" ? "." : ",");
         });

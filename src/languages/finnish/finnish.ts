@@ -126,7 +126,7 @@ class FinnishPhonemizer implements Phonemizer {
             else if (m[2]) {
                 // ≤9 digits fits a safe integer (<1e9) → compose; longer → read the raw string digit-by-digit so the
                 // float conversion can't lose precision or go exponential (1e21 → "1e+21").
-                const words = m[2].length <= 9 ? numberToWords(Number(m[2])) : readDigits(m[2]);
+                const words = m[2].length <= 9 ? numberToWords(Number(m[2]), m[2]) : readDigits(m[2]);
                 for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
             }
             else if (m[3]) {

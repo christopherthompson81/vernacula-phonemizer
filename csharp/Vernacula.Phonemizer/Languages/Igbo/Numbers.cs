@@ -69,10 +69,10 @@ public static class Numbers
     }
 
     /** An Igbo cardinal for `n`, or a digit-by-digit reading when it is out of range or not a finite integer. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
-        if (!double.IsFinite(n) || !double.IsInteger(n) || n < 0) return Digits(Js.NumberToString(n));
+        if (!double.IsFinite(n) || !double.IsInteger(n) || n < 0) return Digits(raw ?? Js.NumberToString(n));
         var words = ToWords(n);
-        return words == "" ? Digits(Js.NumberToString(n)) : words;
+        return words == "" ? Digits(raw ?? Js.NumberToString(n)) : words;
     }
 }

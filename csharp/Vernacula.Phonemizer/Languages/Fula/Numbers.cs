@@ -48,12 +48,12 @@ public static class FulaNumbers
         count == 1 ? sg : $"{pl} {Below1000(count)}";
 
     /** Non-negative integer → Fula words; out of range → digit-by-digit. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         // JS `Number.isSafeInteger`: a finite integer within ±(2^53 − 1).
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e12)
         {
-            return string.Join(" ", Js.CodePoints(Js.NumberToString(Math.Abs(n)))
+            return string.Join(" ", Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n))))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
                 .Select(d => ONES[(int)Js.Number(d)]));
         }

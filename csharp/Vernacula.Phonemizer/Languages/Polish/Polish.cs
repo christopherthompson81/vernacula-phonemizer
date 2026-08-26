@@ -74,7 +74,7 @@ public static class PolishPhonemizer
                     var bits = m.Groups[2].Value.Split(',');
                     var intPart = bits[0];
                     var frac = bits.Length > 1 ? bits[1] : null;
-                    foreach (var wd in PolishNumbers.NumberToWords(Js.Number(intPart)).Split(' '))
+                    foreach (var wd in PolishNumbers.NumberToWords(Js.Number(intPart), intPart).Split(' '))
                         sink.Emit(PhonemizeWord(wd));
                     if (frac is not null)
                     {

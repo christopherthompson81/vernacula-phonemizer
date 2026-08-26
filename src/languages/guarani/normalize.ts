@@ -300,7 +300,7 @@ export function normalizeGuarani(input: string): string {
     // starts one digit later (`1932ha` would otherwise match as `932ha`).
     s = s.replace(
         /(?<![\d.,])(\d{1,6})ha(?![\p{L}\p{M}]|\s*\d)/gu,
-        (_m, n: string) => `${numberToWords(Number(n))}${ORDINAL_SUFFIX}`,
+        (_m, n: string) => `${numberToWords(Number(n), n)}${ORDINAL_SUFFIX}`,
     );
 
     // ── 8. THE SHARED TIER — %, $, units, the squared/cubed words ───────────────────────────────────────

@@ -52,9 +52,9 @@ function below1000(n: number): string {
 }
 
 /** Non-negative integer → Welsh words; out of range → digit-by-digit (digits only). */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
     }
     if (n === 0) return ONES[0]!; // dim
     if (n < 1000) return below1000(n);

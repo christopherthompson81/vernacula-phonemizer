@@ -123,7 +123,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 /** A number token (with thousands-dots / decimal-comma) → spoken words. */
 function numberTokenToWords(tok: string): string {
     const [intRaw, frac] = tok.split(",");
-    let words = numberToWords(Number(intRaw!.replace(/\./g, "")));
+    let words = numberToWords(Number(intRaw!.replace(/\./g, "")), intRaw!.replace(/\./g, ""));
     if (frac !== undefined)
         words +=
             ` ${MANIFEST.numbers.decimalConnector} ` +

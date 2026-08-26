@@ -95,9 +95,9 @@ function below1e6(n: number): string {
 }
 
 /** Non-negative integer → Haitian Creole words. Out-of-range / unsafe values read digit-by-digit (never empty). */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...String(Math.abs(n))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // zewo
     if (n < 1e6) return below1e6(n);
     // ⟨milyon⟩ / ⟨milya⟩ are NOUNS and keep their "en" (LSP: en milyon, en milya) — unlike the bare ⟨mil⟩.

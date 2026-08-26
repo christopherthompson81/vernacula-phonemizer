@@ -69,9 +69,9 @@ function below1000(n: number): string {
 }
 
 /** Non-negative integer → Cherokee syllabary number words. ≥ 10⁶ (no trusted magnitude) → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e6) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!).join(" ");
     }
     if (n < 1000) return below1000(n);
     const th = Math.floor(n / 1000), r = n % 1000;

@@ -27,9 +27,9 @@ const TENS: Record<number, string[]> = {
 const MAG: [number, string][] = [[1e6, "roob"], [1e3, "txhiab"], [100, "puas"]];
 
 /** An integer → the ordered White Hmong (RPA) number words that speak it. */
-export function numberToHmongWords(n: number): string[] {
+export function numberToHmongWords(n: number, raw?: string): string[] {
     if (!Number.isSafeInteger(n) || n < 0) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!);
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!);
     }
     if (n === 0) return [UNITS[0]!];
     const out: string[] = [];
