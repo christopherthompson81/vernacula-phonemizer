@@ -1,5 +1,5 @@
 /**
- * Build the Khmer word-frequency table — src/languages/khmer/km-wordfreq.tsv.
+ * Build the Khmer word-frequency table — data/languages/khmer/km-wordfreq.tsv.
  *
  * WHY KHMER NEEDS A WORD LIST AT ALL. Khmer writes no space between words, so `khmer.ts`'s tokenizer takes a
  * MAXIMAL run of Khmer letters as one unit (`TOKEN = /([ក-៓ៜ-៝]+)|…/`). That is adequate for syllable-driven

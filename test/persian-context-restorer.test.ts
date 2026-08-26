@@ -5,7 +5,7 @@ import { createFaContextRestorer } from "../src/languages/persian/contextRestore
 // The Persian CONTEXT restorer (sentence-level seq2seq, int8 ONNX). Optional at runtime: if onnxruntime-node or the
 // model is absent, createFaContextRestorer() is undefined and the suite skips. ⚠ CLASSICAL-scoped — excellent on
 // Shahnameh-style verse (resolves ezafe/connectors from context), can hallucinate on modern text. See
-// src/languages/persian/fa-context-restorer.PROVENANCE.md.
+// data/languages/persian/fa-context-restorer.PROVENANCE.md.
 describe("Persian context restorer (sentence-level, ezafe/connector from context)", async () => {
     const restorer = await createFaContextRestorer();
 

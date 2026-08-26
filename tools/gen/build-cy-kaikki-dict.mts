@@ -1,5 +1,5 @@
 /**
- * Build the Welsh LEXICON (src/languages/welsh/lexicon.tsv) from the kaikki.org Wiktionary Welsh dump — the words
+ * Build the Welsh LEXICON (data/languages/welsh/lexicon.tsv) from the kaikki.org Wiktionary Welsh dump — the words
  * the rules mis-derive: per-word ⟨ae⟩/⟨ai⟩ diphthong QUALITY (aeres→eɨ), lexical ⟨y⟩-obscure/clear irregularities,
  * loanword vowels, and monosyllable LENGTH. kaikki tags dialects, so we take the NORTH-WALES pron (our target + the
  * NW referee). Only exceptions are dictionaried (the rules-can't-derive methodology, as cs/th).

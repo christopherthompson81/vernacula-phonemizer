@@ -1,5 +1,5 @@
 /**
- * Build the Greek SYNIZESIS lexicon (src/languages/greek/greek-synizesis.tsv) from the CROSS-SOURCE CONSENSUS of
+ * Build the Greek SYNIZESIS lexicon (data/languages/greek/greek-synizesis.tsv) from the CROSS-SOURCE CONSENSUS of
  * wikipron ∩ kaikki. A word is added iff: (a) the two referees AGREE on its pronunciation (consensus), (b) our
  * rule engine's DEFAULT output differs from that consensus, and (c) forcing synizesis at every site EXACTLY matches
  * the consensus. So the lexicon records the lexical fact "this word fully synizes", verified by two referees and

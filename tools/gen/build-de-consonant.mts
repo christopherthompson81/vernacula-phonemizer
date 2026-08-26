@@ -1,5 +1,5 @@
 /**
- * Build the German loanword CONSONANT-correction lexicon — src/languages/german/consonant.tsv.
+ * Build the German loanword CONSONANT-correction lexicon — data/languages/german/consonant.tsv.
  * (Companion to the vowel quality.tsv: same per-position kaikki-alignment, for the lexical consonant splits.)
  *
  * German consonant letters are read natively but keep a FOREIGN value in loanwords: ⟨v⟩ → /f/ natively (Vater),

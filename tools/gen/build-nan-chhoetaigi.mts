@@ -12,8 +12,8 @@
  * crowdsourced neologisms); first reading wins within a source.
  *
  * Outputs:
- *   src/languages/minnan/dict.tsv        multi-char word → Tâi-lô
- *   src/languages/minnan/dict-chars.tsv  single char → Tâi-lô, from (a) explicit single-char
+ *   data/languages/minnan/dict.tsv        multi-char word → Tâi-lô
+ *   data/languages/minnan/dict-chars.tsv  single char → Tâi-lô, from (a) explicit single-char
  *     entries, then (b) per-character majority vote over the aligned word entries (votes ≥ 2 and
  *     ≥ 60% agreement) for chars with no explicit entry — closing the single-char coverage gap the
  *     old MOE/Kam extraction served.
@@ -186,7 +186,7 @@ if (kaikkiPath) {
 }
 for (const [ch, best] of soleAttested) { chars.set(ch, best); singleVote++; } // last resort
 
-const outDir = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "src", "languages", "minnan");
+const outDir = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data", "languages", "minnan");
 writeFileSync(join(outDir, "dict.tsv"),
     [...words.entries()].sort().map(([k, v]) => `${k}\t${v}`).join("\n") + "\n");
 const charHeader = `# Min Nan single-char Han→Tâi-lô SUPPLEMENT — rebuilt from ChhoeTaigi's permissive components

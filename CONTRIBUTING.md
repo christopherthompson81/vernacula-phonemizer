@@ -66,5 +66,12 @@ token-identical to their originals; that check is what makes a large comment pas
 
 Any new data file or model lands with a `*.PROVENANCE.md` sidecar or a header naming its source and
 license, a row in [`LICENSES/PROVENANCE.md`](LICENSES/PROVENANCE.md), and — where attribution is owed —
-an entry in [`NOTICE.md`](NOTICE.md). See [`LICENSES/licencing_posture.md`](LICENSES/licencing_posture.md)
+an entry in [`NOTICE.md`](NOTICE.md).
+
+⚠ **THE SIDECAR LIVES BESIDE THE DATA IT DESCRIBES**, i.e. under `data/`, not next to the code that
+loads it. Both engines resolve data through `data/` (`core/dataPath.ts`, `DataPath.Resolve`), and the
+30 sidecars were left behind in `src/languages/<lang>/` when the data tree was split out — so the file
+saying where a lexicon came from was two directories away from the lexicon, and a language whose data
+had all moved was left holding nothing but a provenance note. A sidecar that does not travel with its
+artifact stops being provenance and becomes trivia. See [`LICENSES/licencing_posture.md`](LICENSES/licencing_posture.md)
 for how facts-vs-expression is applied.

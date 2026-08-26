@@ -1,5 +1,5 @@
 /**
- * Generate the Russian loanword hard-е/и correction table (src/languages/russian/hard-e.tsv) from kaikki. For
+ * Generate the Russian loanword hard-е/и correction table (data/languages/russian/hard-e.tsv) from kaikki. For
  * each word we run the rule engine and record the vowel ordinals where the engine emits a SOFT-context e/i but
  * the referee has a HARD-consonant ɛ/ɨ (loanword: тест → tɛst, not tʲest). Row: word<TAB>ord[,ord...].
  * Usage: npx tsx tools/gen/ru-gen-lexicon.mts

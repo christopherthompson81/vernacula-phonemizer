@@ -1,5 +1,5 @@
 /**
- * Build the Burmese word-segmentation set (src/languages/burmese/seg-words.txt) — Burmese is SPACELESS, so text()
+ * Build the Burmese word-segmentation set (data/languages/burmese/seg-words.txt) — Burmese is SPACELESS, so text()
  * must split a connected run into words before phonemizing (and before the per-word voicing lexicon can fire).
  *
  * The set is the MULTI-SYLLABLE headwords from the kaikki + wikipron referee lists (both committed, CC-BY-SA).
@@ -33,5 +33,5 @@ const header =
     "# Burmese word-segmentation set — MULTI-SYLLABLE headwords from kaikki + wikipron mya (CC-BY-SA), one per line.\n" +
     "# Built by tools/gen/build-my-segwords.ts. Used by burmese.ts (segmentByDag over syllable boundaries) to split the\n" +
     "# spaceless script into words so the voicing lexicon can fire. Single-syllable words are excluded on purpose.\n";
-writeFileSync(join(HERE, "..", "..", "src", "languages", "burmese", "seg-words.txt"), header + rows.join("\n") + "\n");
+writeFileSync(join(HERE, "..", "..", "data", "languages", "burmese", "seg-words.txt"), header + rows.join("\n") + "\n");
 console.log(`seg-words: ${rows.length} multi-syllable words → seg-words.txt`);

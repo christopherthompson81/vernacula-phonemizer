@@ -205,7 +205,7 @@ consulted-not-shipped for every language but Pashto, where `pashto/lexicon.tsv` 
    espeak's phoneme strings are never copied — each is fed to `invert_harakat.ts`, which searches
    the vocalization whose output from *our own* g2p reproduces it, so the consonants are ours and
    espeak's variety disagreements (ږ → ʁ where we read ʐ) do not enter. Full derivation, the
-   measured yield and the fallbacks: `src/languages/pashto/lexicon.PROVENANCE.md`.
+   measured yield and the fallbacks: `data/languages/pashto/lexicon.PROVENANCE.md`.
    ⚠ **This moves espeak-ng out of §5 for Pashto only.** It remains "consulted, not shipped" for
    every other language; `ps` is the one place bytes derive from it.
 4. **tools-only, same espeak lineage as item 3** — `perso-arabic/harakat.ps.silver.tsv` (19,400

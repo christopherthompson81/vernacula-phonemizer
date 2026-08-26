@@ -1,5 +1,5 @@
 /**
- * Generate the Portuguese lexical CORRECTION table (src/languages/portuguese/lexicon.tsv) from wikipron
+ * Generate the Portuguese lexical CORRECTION table (data/languages/portuguese/lexicon.tsv) from wikipron
  * European Portuguese. For each word we run the rule engine and record ONLY what it cannot predict:
  *   - the STRESSED mid vowel is open (ɛ/ɔ) where the engine defaults close (e/o),
  *   - grapheme x realizes as s/z/ks (not the default ʃ), and

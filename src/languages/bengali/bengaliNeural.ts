@@ -11,7 +11,7 @@
  * clause/pause assembly, and lexicon precedence are the SYNC engine's, byte-identical to `phonemize(text, "bn")` —
  * ONLY the OOV word readings change. When `onnxruntime-node` or the model is absent the tagger is `undefined` and
  * this returns exactly the sync path (no throw). This is a SEPARATE async path; the sync engine and its C#-parity
- * are untouched. See src/languages/bengali/bn-g2p-tagger.PROVENANCE.md.
+ * are untouched. See data/languages/bengali/bn-g2p-tagger.PROVENANCE.md.
  */
 import { createBengali, bengaliLexicon } from "./bengali.ts";
 import { withHost } from "../../core/foreign.ts";

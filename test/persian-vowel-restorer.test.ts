@@ -4,7 +4,7 @@ import { createFaVowelRestorer } from "../src/languages/persian/vowelRestorer.ts
 
 // The Persian OOV neural short-vowel restorer (seq2seq abjad→IPA, int8 ONNX). Optional at runtime: if
 // onnxruntime-node or the model is absent, createFaVowelRestorer() is undefined and the suite skips (the sync
-// lexicon+default path is unaffected). See src/languages/persian/fa-vowel-restorer.PROVENANCE.md.
+// lexicon+default path is unaffected). See data/languages/persian/fa-vowel-restorer.PROVENANCE.md.
 describe("Persian OOV vowel restorer (seq2seq abjad→IPA)", async () => {
     const restorer = await createFaVowelRestorer();
 

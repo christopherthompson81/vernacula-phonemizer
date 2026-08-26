@@ -7,7 +7,7 @@
  *
  * When `onnxruntime-node` or the model is absent the tagger is `undefined` and this returns exactly the sync
  * (rule-engine, vocalized-only) path — no throw. Separate async path; the sync engine and its tests are untouched.
- * See src/languages/hebrew/he-tagger.PROVENANCE.md.
+ * See data/languages/hebrew/he-tagger.PROVENANCE.md.
  */
 import { assembleClauses } from "../../core/clauses.ts";
 import { withHost } from "../../core/foreign.ts";

@@ -20,7 +20,7 @@ extension (this line of work). Both are char-level BiLSTMs with the same 19-labe
 - **Vocab:** 39 chars (`<pad>`=0, `<unk>`=1, `<sp>`=2, then 36 Arabic letters), 19 labels. In `diacritizer.meta.json`.
 - **Provenance (permissive):** teacher = **CATT** (Char-based Arabic Tashkeel Transformer, Apache-2.0) → silver-
   labels **Arabic Wikipedia** (CC-BY-SA); trained silver-only. No Tashkeela/Leipzig in the model. See
-  `src/languages/arabic/diacritizer.PROVENANCE.md`. (`diacritization.tsv` is a separate 259k Tashkeela-derived
+  `data/languages/arabic/diacritizer.PROVENANCE.md`. (`diacritization.tsv` is a separate 259k Tashkeela-derived
   lexicon used by `restore.ts` as a fallback — Tashkeela is ANCIENT public-domain text, not a licence blocker.)
 - **Checkpoints in `$ARDIAC`** (all emb 39×128, fc 19×1024, 3-layer LSTM): `bilstm_pausal.pt` is the one whose
   char+label maps **exactly match** the committed `diacritizer.meta.json` → **use it for warm-start**. The

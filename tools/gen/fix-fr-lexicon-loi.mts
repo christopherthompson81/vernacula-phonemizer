@@ -5,7 +5,7 @@
  * keeps ⟨au⟩/⟨ô⟩→[o]). For each lexicon entry where the g2p agrees with Lexique on EVERYTHING EXCEPT o↔ɔ, adopt the
  * g2p's value (correct o/ɔ + same segments elsewhere); otherwise keep Lexique (real irregular). Self-contained.
  *
- *   npx tsx tools/gen/fix-fr-lexicon-loi.mts            # rewrite src/languages/french/lexicon.tsv
+ *   npx tsx tools/gen/fix-fr-lexicon-loi.mts            # rewrite data/languages/french/lexicon.tsv
  *   npx tsx tools/gen/fix-fr-lexicon-loi.mts --dry      # report counts only
  */
 import { readFileSync, writeFileSync } from "node:fs";

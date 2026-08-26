@@ -4,7 +4,7 @@
  *   - pitch accent (1|2): NST field 12 SAMPA primary-stress marker — `""` = accent 2, `"` = accent 1.
  *   - primary-stress ORDINAL (0-based syllable index): the `$`-delimited syllable that carries the `"` marker.
  * Restricted to the 50k frequency corpus (the same compaction); homographs resolve by
- * majority. Output: src/languages/swedish/accent-stress.tsv — word<TAB>accent<TAB>stressOrd (ord omitted when 0,
+ * majority. Output: data/languages/swedish/accent-stress.tsv — word<TAB>accent<TAB>stressOrd (ord omitted when 0,
  * i.e. first-syllable = the engine default). NST is CC0; only the derived abstract features are committed.
  *
  * Usage: npx tsx tools/gen/build-sv-lexicon.mts [--nst <path>] [--corpus <path>]
