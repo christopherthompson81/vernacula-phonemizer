@@ -654,14 +654,14 @@ export function normalizeSlovenian(input: string): string {
     //    (17), which is the Croatian convention and the opposite of Slovak's. EXACTLY three digits and no
     //    space, which is what keeps this rule off the clock (`23.35`, two digits), off `802.11` and off
     //    every `N.` ordinal. Two passes, because groups overlap on the shared digit (`5.000.000`).
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
+    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     //    …and the SPACE-grouped form, which the corpus does not use (0 instances of `\d[ ]\d{3}`) but which
     //    Slovene orthography also permits, and which read as two separate numbers: `5 000` → *pet nič*.
     //    Reported by the review tool's ordinary-text probe, not by the corpus — ⚠ zero corpus
     //    instances is not evidence of correctness. Exactly three digits, so `100 in 200 m` cannot fuse.
     //    NBSP is folded to a plain space AFTERWARDS, never before: this corpus uses it 22 times and always
     //    as an ORDINARY inter-word space (`Umrl je v torek`), never as a separator.
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ERA MARKERS, before the single-dot rule (⚠ coupling) — otherwise the interior

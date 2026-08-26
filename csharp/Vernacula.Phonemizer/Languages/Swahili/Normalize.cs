@@ -54,7 +54,7 @@ public static class Normalize
     // The step patterns. The TS builds several inline; JsRegex.Compile caches, so hoisting is a
     // readability choice and not a behaviour one.
     private static readonly JsRe ORDINAL_INDICATOR = JsRegex.Compile("º", "gu");
-    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})(,\\d{3})+(?![\\d]|,\\d)", "gu");
+    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})(,\\d{3})+(?![\\d]|,\\d)", "gu");
     private static readonly JsRe COMMA_G = JsRegex.Compile(",", "gu");
     private static readonly JsRe PLUSMINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe MINUS = JsRegex.Compile("(?<![\\p{L}\\p{M}\\p{Nd}])[-−–](?=\\d)", "gu");

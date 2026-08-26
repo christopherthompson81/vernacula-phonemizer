@@ -121,8 +121,8 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     // 0) DIGIT GROUPING with a space. Spanish groups thousands with a period (17.000), which the number
     //    tokenizer already reads, but the SI space form also occurs (15× in the corpus) and the number
     //    token cannot span a space, so "5 000 años" read as "cinco cero años".
-    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
     s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 0b) ⚠ THE DOT ALSO DECIMATES, AND THE THREE-DIGIT TEST TELLS THE TWO APART. Spanish groups thousands

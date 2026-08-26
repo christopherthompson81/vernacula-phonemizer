@@ -249,7 +249,7 @@ export function normalizeTibetan(input: string): string {
     //    (`༤༧་༠༠༠`, ×3) against 87 periods that are decimal, and it is exactly the same character in both
     //    roles — so de-grouping those would merge two numbers and INVENT a quantity wherever it guessed wrong.
     //    A comma before exactly three digits is unambiguous here; the others are left as they are.
-    t = t.replace(new RegExp(`(?<=[${D}]),(?=[${D}]{3}(?![${D}]))`, "gu"), "");
+    t = t.replace(new RegExp(`(?<=[${D}])(?<!(?<![${D}\\.,])0),(?=[${D}]{3}(?![${D}]))`, "gu"), "");
 
     // 4) RATES — `118-149km/h`. ⚠ HERE, ahead of the unit, span and clock rules, because this rule MOVES the
     //    operand and every one of those needs it intact to match; once relocated it is read by those same

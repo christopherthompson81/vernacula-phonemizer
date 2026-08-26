@@ -284,7 +284,7 @@ export function normalizeIlocano(input: string): string {
     // ⚠ AND THE PERIOD-THOUSANDS FORM IS NOT HANDLED, because it does not exist here: every
     // `\d{1,3}\.\d{3}` in this corpus is a three-decimal DECIMAL (`0.625`, `0.443`, `6.271 a riwriw`).
     // Step 5's two-digit cap leaves them untouched rather than reading them as a decimal it cannot cap.
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
 
     // ── 1b. THE MINUS — U+2212 ONLY, and the character's identity is the argument ────────────────────────
     // ⚠ OMITTING A MINUS INVERTS THE VALUE, which is why this is read on weaker evidence than this layer

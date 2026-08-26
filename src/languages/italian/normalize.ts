@@ -144,8 +144,8 @@ export function normalizeItalian(input: string): string {
     //    "diciannove [PAUSE] cinquecento". Applied twice so a two-separator number (5.000.000) collapses
     //    fully; the `(?!\d)` tail keeps it to real 3-digit blocks. Every later step then sees one unbroken
     //    digit run — the clock, the ordinal and the unit tier all depend on that.
-    s = s.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
-    s = s.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
+    s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+    s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
 
     // 2) ERA MARKERS, before the generic dotted-abbreviation rule (multi-dot before single-dot: otherwise
     //    the interior dot of `a.C.` survives as a phrase break). Both spacings occur in the wild; the

@@ -215,8 +215,8 @@ const ABBREV_DOT = /(?<=[а-яөүё])\.(?=[а-яөүё])/gu;
  * which this corpus writes for other reasons. Widening it is a change that needs its own measurement, not a
  * tidy-up.
  */
-const GROUP_COMMA = /(?<=\d)[,](?=\d{3}(?![\d]))/gu;
-const GROUP_SPACE = /(?<![\d.,])(\d{1,3})[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu;  // space, NBSP, NNBSP, thin space
+const GROUP_COMMA = /(?<=\d)(?<!(?<![\d\.,])0)[,](?=\d{3}(?![\d]))/gu;
+const GROUP_SPACE = /(?<![\d.,])([1-9]\d{0,2})[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu;  // space, NBSP, NNBSP, thin space
 
 // ---------------------------------------------------------------------------------------------------
 // 4. ORDINALS — `3-р сарын`, `21-р байранд`

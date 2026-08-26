@@ -57,7 +57,7 @@ export function separatorHygiene(input: string): string {
     //    sentence kept all of its false stops. The pinned test is what caught it. The same three characters
     //    are wrong in the same way in eleven shipped layers, which is what `test/clause-final-range.test.ts`
     //    exists to stop; all three rules below carry the corrected form.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)/gu,
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""));
 
     // 2) A mark with ONE OR TWO digits after it is a decimal in every convention — `3,5`, `1.5`, `19.95`,

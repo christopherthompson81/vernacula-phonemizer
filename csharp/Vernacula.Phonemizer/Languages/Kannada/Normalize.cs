@@ -65,7 +65,7 @@ public static class Normalize
     };
 
     private static readonly JsRe ZERO_WIDTH = JsRegex.Compile("[​‌‍﻿]", "gu");
-    private static readonly JsRe GROUPING = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?:,\\d|[^\\d]|$))", "gu");
+    private static readonly JsRe GROUPING = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?:,\\d|[^\\d]|$))", "gu");
     private static readonly JsRe ORDINAL_RE = JsRegex.Compile($"(?<![\\d.,])(\\d+)\\s*-?\\s*(ನೇ|ನೆಯ)(ದು)?{NA}", "gu");
     private static readonly JsRe ERA_RE = JsRegex.Compile($"{NB}ಕ್ರಿ\\s*\\.\\s*(ಪೂ|ಶ)(?:\\s*\\.(?=\\s*[\\p{{L}}\\d]))?", "gu");
     private static readonly JsRe DOTTED = JsRegex.Compile("\\s*\\.\\s*", "gu");

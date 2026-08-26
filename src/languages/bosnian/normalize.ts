@@ -348,7 +348,7 @@ export function normalizeBosnian(input: string): string {
     //    trista osamdeset sedam*. Two passes, because adjacent groups share a digit (`10.000`). EXACTLY
     //    three digits and no space, and every exclusion that guard buys is LIVE in this corpus:
     //    `802.11a/b/g/n` (a Wi-Fi standard, ×2), `12.00 GMT` (step 8's note) and all 222 `N.` ordinals.
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
+    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
 
     // 1) THE ERA MARKER, before the dotted-abbreviation rule (step 2) and the `N.` ordinal rule (step 9) —
     //    its interior dots would otherwise become phrase breaks and its `e.` would look like a licensor.

@@ -57,11 +57,11 @@ export function normalizePapiamento(input: string): string {
     //    every decimal has one or two (`24,6%`, `27.3°C`).
     //    ⚠ THE WHOLE NUMBER AT ONCE, not one join per pass (trap 63); the trailing guard rejects a DIGIT
     //    and nothing else, or every clause-final figure is declined (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     //    …and what is left with one or two digits after a DOT is a decimal, folded onto the comma.
     s = s.replace(/(?<!\d)(\d+)\.(\d{1,2})(?!\d)/gu, "$1,$2");

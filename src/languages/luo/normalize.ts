@@ -154,7 +154,7 @@ export function normalizeLuo(input: string): string {
     //    Septemba 17,2007` write the American date with no space; both are declined by `\d{3}`, which is
     //    the same test that identifies the grouping, so no extra guard is needed — recorded because the
     //    shape is invisible until you look for it.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
     // 2) THE DOTTED DESIGNATION, BEFORE THE DECIMAL RULE — trap 39, a guard's evidence has a lifetime: the

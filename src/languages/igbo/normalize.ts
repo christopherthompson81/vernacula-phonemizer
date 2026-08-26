@@ -182,7 +182,7 @@ const SYMBOLS = makeSymbolNormalizer({
 });
 
 /** The thousands separator is a COMMA and the decimal separator a PERIOD — the Nigerian/English convention. */
-const GROUPED = /(?<=\d),(?=\d{3}(?!\d))/gu;
+const GROUPED = /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu;
 /** A decimal period. Voiced as `ntụkpọ` — see rule 4. */
 const DECIMAL = /(\d)\.(\d+)/gu;
 /** A digit-flanked dash. See rule 2 for why this is a RANGE and never a minus. */

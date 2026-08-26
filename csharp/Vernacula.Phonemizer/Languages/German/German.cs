@@ -354,7 +354,7 @@ public static class GermanPhonemizer
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
     private static readonly JsRe TOKEN =
-        JsRegex.Compile($"({HostWord.LATIN_RUN})|(\\d{{1,3}}(?:\\.\\d{{3}})+|\\d+(?:,\\d+)?)|([.!?…,;:])", "gu");
+        JsRegex.Compile($"({HostWord.LATIN_RUN})|([1-9]\\d{{0,2}}(?:\\.\\d{{3}})+|\\d+(?:,\\d+)?)|([.!?…,;:])", "gu");
 
     /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zäöüßA-ZÄÖÜ]";

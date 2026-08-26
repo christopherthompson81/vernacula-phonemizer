@@ -18,7 +18,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Hausa Boko letters incl. ɓ ɗ ƙ ƴ (and their capitals) + apostrophe (a letter: 'yan, 'a'a).
 // the corpus groups thousands with COMMAS (6,387, 783,562) and writes decimals with DOTS (1.5,
 // 12.8); the TOKEN swallows the separators so the tier can still see the number next to its unit/sign.
-const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])`, "gu");
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|([1-9]\\d{0,2}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])`, "gu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where

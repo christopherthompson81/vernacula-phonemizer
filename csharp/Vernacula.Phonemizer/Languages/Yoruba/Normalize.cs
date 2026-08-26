@@ -30,7 +30,7 @@ public static class Normalize
         UnitPer = Manifest.MANIFEST.SymbolTier.UnitPer,
     });
 
-    private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?!\\d))", "gu");
     /** A digit-flanked dash. See rule 2: in Yoruba this is a RANGE, never a minus. */
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s*[-–—]\\s*(?=\\d)", "gu");
     /** U+2212 ONLY, and LEADING — see the TS module. The hyphen is this language's range mark and its own

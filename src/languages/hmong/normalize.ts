@@ -240,8 +240,8 @@ import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 /** The bare-token pass for the kilometre — see the step that applies it. */
 const BARE_UNITS = makeBareUnitNormalizer([["km", "kis lus mev"]]);
 
-const GROUP_COMMA = /(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?![\d]|,\d)/gu;
-const GROUP_DOT = /(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?![\d]|\.\d)/gu;
+const GROUP_COMMA = /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu;
+const GROUP_DOT = /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu;
 
 /**
  * ⚠ GLUED PAIRS ONLY — STRICTLY NARROWER THAN THE FLEET'S RANGE RULE, and the narrowing is measured. The

@@ -113,11 +113,11 @@ export function normalizeVietnamese(input: string): string {
     // ⚠ THE GUARD IS `(?!\d)`, NOT `(?![\d.,])`. The stricter form looks safer and skips a grouped numeral
     // followed by ordinary sentence punctuation, so `¥130.000,` comes out "130 chấm 000". Dot and comma
     // grouping are separate rules so that a mixed numeral (1.234,5) can de-group and then reach step 8.
-    s = s.replace(/(?<!\d)(?<!\d[.,])\d{1,3}(?:\.\d{3})+(?!\d)/gu, (n) => n.replace(/\./gu, ""));
+    s = s.replace(/(?<!\d)(?<!\d[.,])[1-9]\d{0,2}(?:\.\d{3})+(?!\d)/gu, (n) => n.replace(/\./gu, ""));
     // ⚠ Comma grouping is formally ambiguous under the Vietnamese convention (`7,000` is 7.0 or 7000). It is
     // claimed anyway because a currency context settles the attested case and the alternative reading
     // ("bảy , không") is wrong either way.
-    s = s.replace(/(?<!\d)(?<!\d[.,])\d{1,3}(?:,\d{3})+(?!\d)/gu, (n) => n.replace(/,/gu, ""));
+    s = s.replace(/(?<!\d)(?<!\d[.,])[1-9]\d{0,2}(?:,\d{3})+(?!\d)/gu, (n) => n.replace(/,/gu, ""));
 
     // ── 7. dash ranges → "đến" ───────────────────────────────────────────────────────────────────
     // AFTER de-grouping (so 1.000-1.300 parses) and BEFORE the decimal rules — step 8 would otherwise turn

@@ -79,7 +79,7 @@ public static class Normalize
         ["²"] = "平方", ["³"] = "立方",
     };
 
-    private static readonly JsRe GROUPED_THOUSANDS = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe GROUPED_THOUSANDS = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe BUNNO = JsRegex.Compile("(\\d)分の(?=\\d)", "gu");
     private static readonly JsRe SLASH_FRACTION = JsRegex.Compile("(?<![\\d/])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])", "gu");

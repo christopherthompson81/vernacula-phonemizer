@@ -227,7 +227,7 @@ public static class IndonesianPhonemizer
     // rest of the word restarted, so one name became three. `\p{M}` keeps a DECOMPOSED accent with its base.
     // The number group accepts Indonesian's DOT thousands grouping and COMMA decimal.
     private static readonly JsRe TOKEN =
-        JsRegex.Compile("(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)|(\\d{1,3}(?:\\.\\d{3})+|\\d+(?:,\\d+)?)|([.?!,;:])", "gu");
+        JsRegex.Compile("(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)|([1-9]\\d{0,2}(?:\\.\\d{3})+|\\d+(?:,\\d+)?)|([.?!,;:])", "gu");
     /**
      * An ordinary Indonesian word is plain ASCII letters. A diacritic means a FOREIGN name — Indonesian
      * orthography has none — so such a token goes to the injected foreign reader instead of the native g2p,

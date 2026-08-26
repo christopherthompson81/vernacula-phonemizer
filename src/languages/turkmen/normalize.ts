@@ -196,7 +196,7 @@ export function normalizeTurkmen(input: string): string {
     //    decimal tail, which this corpus writes — while a bare `(?![\d.,])` declines every clause-final
     //    figure (trap 58). The separator here is a SPACE, and a decimal never has one before its
     //    fraction, so `(?!\d)` is the whole guard.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 

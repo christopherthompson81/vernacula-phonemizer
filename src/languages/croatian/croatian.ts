@@ -23,7 +23,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // is written exclusively in Latin (the Serbian engine's Cyrillic path is not exposed here).
 // the corpus groups thousands with PERIODS (2.500, 40.000) and writes decimals with COMMAS (2,4 Ghz).
 // The de-grouping happens in normalize.ts; the TOKEN here swallows the comma so the tier can see the number.
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d{1,3}(?:\\.\\d{3})+(?:,\\d+)?|\\d+,\\d+|\\d+)|([.!?…,;:])`, "giu");
+const TOKEN = new RegExp(`(${LATIN_RUN})|([1-9]\\d{0,2}(?:\\.\\d{3})+(?:,\\d+)?|\\d+,\\d+|\\d+)|([.!?…,;:])`, "giu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where

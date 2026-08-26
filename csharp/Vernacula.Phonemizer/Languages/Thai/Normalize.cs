@@ -78,7 +78,7 @@ public static class Normalize
     private static readonly JsRe LA = JsRegex.Compile("ฯลฯ", "gu");
     private static readonly JsRe MAIYAMOK = JsRegex.Compile("([ก-ๅ็-๎]*)\\s*ๆ", "gu");
     private static readonly JsRe PAIYANNOI = JsRegex.Compile("ฯ", "gu");
-    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe CLOCK_RANGE = JsRegex.Compile("(\\d{1,2})[.:](\\d{2})\\s*[-–—]\\s*(\\d{1,2})[.:](\\d{2})\\s*น\\.", "gu");
     private static readonly JsRe CLOCK_ONE = JsRegex.Compile("(\\d{1,2})[.:](\\d{2})\\s*น\\.", "gu");
     private static readonly JsRe CLOCK_HOUR = JsRegex.Compile("(\\d{1,2})\\s*น\\.", "gu");

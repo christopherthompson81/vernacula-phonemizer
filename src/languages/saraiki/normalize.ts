@@ -116,7 +116,7 @@ export function normalizeSaraiki(input: string): string {
     //    THREE DIGITS AFTER THE MARK decides everything.
     //    ⚠ THE WHOLE NUMBER IS MATCHED AT ONCE, not one join per pass (trap 63), and the trailing guard
     //    rejects a DIGIT and nothing else, or every clause-final figure is declined (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,،])(\d{1,3})((?:[,،]\s?\d{3})+)(?!\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,،])([1-9]\d{0,2})((?:[,،]\s?\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/[,،\s]/gu, ""));
 
     // 3) DEGREES. `ڈگری` ×55 is the corpus's own word in exactly this slot ("28 ڈگری سینٹی گریڈ توں 42

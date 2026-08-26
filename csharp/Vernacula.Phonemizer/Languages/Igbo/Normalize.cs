@@ -37,7 +37,7 @@ public static class Normalize
     });
 
     /** The thousands separator is a COMMA and the decimal separator a PERIOD. */
-    private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?!\\d))", "gu");
     /** A decimal period. Voiced as `ntụkpọ` — see rule 4. */
     private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)\\.(\\d+)", "gu");
     /** A digit-flanked dash. See rule 2 for why this is a RANGE and never a minus. */

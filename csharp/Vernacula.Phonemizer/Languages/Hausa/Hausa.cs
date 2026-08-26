@@ -11,7 +11,7 @@ public static class HausaPhonemizer
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
     private static readonly string LATIN_WITH_APOSTROPHE = HostWord.HostWordRun(new[] { "Latin" }, "'’");
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        $"({LATIN_WITH_APOSTROPHE})|(\\d{{1,3}}(?:,\\d{{3}})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])", "gu");
+        $"({LATIN_WITH_APOSTROPHE})|([1-9]\\d{{0,2}}(?:,\\d{{3}})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])", "gu");
 
     /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zɓɗƙƴA-ZƁƊƘƳ'’]";

@@ -60,7 +60,7 @@ export function spellHanDigits(s: string, digits: readonly string[] = HAN_DIGITS
  * and the corpus writes it. A looser pattern would mangle it.
  */
 export function degroupThousands(s: string): string {
-    return s.replace(/(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    return s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 }
 
 /** Word data for the year rules. `rangeWord` omitted ⇒ the range arms are skipped, single years still spell. */

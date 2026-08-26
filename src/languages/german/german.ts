@@ -390,7 +390,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // German groups thousands with a PERIOD and takes a COMMA decimal. The old class accepted either as a
 // decimal, so "1.000" read as *eins komma null null null*. Times are claimed by normalize.ts first, so a
 // dot reaching here is grouping.
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d{1,3}(?:\\.\\d{3})+|\\d+(?:,\\d+)?)|([.!?…,;:])`, "gu");
+const TOKEN = new RegExp(`(${LATIN_RUN})|([1-9]\\d{0,2}(?:\\.\\d{3})+|\\d+(?:,\\d+)?)|([.!?…,;:])`, "gu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where

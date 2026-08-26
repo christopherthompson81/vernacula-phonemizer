@@ -241,7 +241,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    टिकट", and with a bare `(\d+)` the leading `(?<![\d.,:])` guard refused the "000" and the
         //    whole match failed, leaving [ˈek ɦˈʌd͡zaɾ ˈʌũ] with the suffix stranded.
         s = s.replace(
-            /(?<![\d.,:])(\d{1,3}(?:,\d{3})+|\d+)\s?(औं|औँ)(?![\p{L}\p{M}])/gu,
+            /(?<![\d.,:])([1-9]\d{0,2}(?:,\d{3})+|\d+)\s?(औं|औँ)(?![\p{L}\p{M}])/gu,
             (whole, digits: string, suffix: string) => {
                 const n = Number(digits.replace(/,/gu, ""));
                 return Number.isSafeInteger(n) ? ordinal(n, suffix) ?? whole : whole;

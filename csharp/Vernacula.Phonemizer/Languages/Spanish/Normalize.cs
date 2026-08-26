@@ -88,7 +88,7 @@ public static class Normalize
         return $"{(num == 1 ? DEF.Fractions.NumeratorOne : Numbers.NumberToWords(num))} {(num > 1 ? $"{bas}s" : bas)}";
     }
 
-    private static readonly JsRe SPACE_GROUP_RE = JsRegex.Compile($"(?<=\\d)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
+    private static readonly JsRe SPACE_GROUP_RE = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe DOT_DECIMAL = JsRegex.Compile("(?<![\\d.,:])(?<!:\\d\\d)(\\d+)\\.(\\d{1,2})(?![\\d.,\\p{L}])", "gu");
     private static readonly JsRe ERA_BC = JsRegex.Compile("\\ba\\.\\s?de\\s?C\\.|\\ba\\.\\s?C\\.", "giu");

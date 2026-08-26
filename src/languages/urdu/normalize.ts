@@ -74,7 +74,7 @@ export function makeUrduNormalizer(numbers: NumbersDef): (text: string) => strin
         //    The ARABIC COMMA is also used as a THOUSANDS SEPARATOR here (11،000). Between digits it is a
         //    grouping mark, not punctuation — left alone it was a clause break, so "11،000" read as
         //    "eleven … zero". Only the digit-flanked case is folded; ، as real punctuation is untouched.
-        s = s.replace(/(?<=\d)،(?=\d{3}(?!\d))/gu, ",");
+        s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)،(?=\d{3}(?!\d))/gu, ",");
 
         // 2) ORDINAL SUFFIXES, attached or spaced.
         s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?(${Object.keys(SUFFIX_FORM).join("|")})(?![\\p{L}\\p{M}])`, "gu"),

@@ -127,7 +127,7 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    Both groupings: Indian 2-2-3 (1,00,000) and Western 3-3 (5,000,000). A final 3-digit group is
         //    REQUIRED, which is what keeps a list separator ("1990, 1991" — a space) out of the match.
         s = s.replace(/(?<![\d,])(\d{1,2}(?:,\d{2})+,\d{3})(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
-        s = s.replace(/(?<![\d,])(\d{1,3}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+        s = s.replace(/(?<![\d,])([1-9]\d{0,2}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
         // 3) DECIMALS — after de-grouping (a grouped numeral may carry a decimal tail) and before the clock,
         //    so a stray dot cannot survive into a time match. The dot is NEUTRALISED, not spoken: there is

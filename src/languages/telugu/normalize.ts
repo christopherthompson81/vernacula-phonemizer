@@ -189,7 +189,7 @@ export function normalizeTelugu(input: string): string {
     //    punctuation: 17,000 was reading as "పదిహేడు <pause> సున్నా" — the pause plus a single zero,
     //    because the trailing 000 collapsed to one numeral. Western 3-digit blocks are the only grouping
     //    in this corpus (no Indian 2-then-3 form occurs).
-    s = s.replace(/(?<=\d),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
+    s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
 
     // 6) ERA markers BEFORE the initialism rule (step 7) — క్రీ.శ is a dotted pair by shape and would
     //    otherwise survive as two letters with the era lost. Also ఉదా. (= e.g., ×2), whose single dot

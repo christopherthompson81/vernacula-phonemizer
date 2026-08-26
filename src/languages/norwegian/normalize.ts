@@ -132,14 +132,14 @@ export function normalizeNorwegian(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = t.replace(/(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+        t = t.replace(/(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     } while (t !== prev);
 
     // 2) ENGLISH-STYLE COMMA GROUPING (5) — before the decimal rule, which would otherwise read 23,764 as
     //    "tjuetre komma sju seks fire". Exactly three digits and no more; see disambiguation 2 in the header.
     do {
         prev = t;
-        t = t.replace(/(?<=\d)[,](?=\d{3}(?!\d))/gu, "");
+        t = t.replace(/(?<=\d)(?<!(?<![\d\.,])0)[,](?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 3) DECIMAL COMMA (34). The comma is clause punctuation, so `12,5` read as "tolv , fem" — a PAUSE

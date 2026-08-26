@@ -165,7 +165,7 @@ export function normalizeHiligaynon(input: string): string {
     // 17.865 ka pumuluyo`, in an article about a GERMAN town, i.e. the source's own imported convention —
     // against 1,643 period-decimals. Claiming it would need a rule that cannot tell the two apart. Step 5's
     // two-digit cap means this one instance falls through untouched rather than being read as a decimal.
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
 
     // ── 2. CLOCK — BEFORE the tier and before the decimal rule ───────────────────────────────────────────
     // ×1: `halin Sabado sa alas-5:00 sang aga tubtob sa Domingo`. The colon is clause punctuation, so it

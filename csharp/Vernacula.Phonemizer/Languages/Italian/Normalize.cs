@@ -116,7 +116,7 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
 
     // The step patterns. The TS builds several inline; JsRegex.Compile caches, so hoisting them here is a
     // readability choice and not a behaviour one.
-    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)\\.(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)\\.(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe ERA_BC = JsRegex.Compile($"{L}a\\.\\s?C\\.", "gu");
     private static readonly JsRe ERA_AD = JsRegex.Compile($"{L}d\\.\\s?C\\.", "gu");
     private static readonly JsRe NUMERO = JsRegex.Compile($"{L}(?:n\\.º|n\\.|nr\\.|nº)\\s?(?=\\d)", "giu");

@@ -173,7 +173,7 @@ export function normalizeOromo(input: string): string {
     //    what the corpus produced (`ᶑˈibːa tˈorba … sadˈiː , ᶑˈibːa ʃˈan …` — one number as two).
     //    THREE-digit blocks only; a 1–2 digit block after a comma is a decimal, and the corpus has none
     //    (`\d,\d{1,2}(?!\d)` → 0 instances), but the decimal rule in pass 2 still covers it.
-    s = s.replace(/(?<=\d),(?=\d{3}(?![\d]))/gu, "");
+    s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?![\d]))/gu, "");
 
     // 3) ERA MARKER — `D.K.D 5000` (×1). *dhaloota Kiristoos dura* ("before the birth of Christ") is the
     //    corpus's own spelled-out form, ×3. BEFORE the dotted-abbreviation step (era markers

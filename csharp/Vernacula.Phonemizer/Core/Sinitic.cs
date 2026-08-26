@@ -49,7 +49,7 @@ public static class Sinitic
      */
     public static string DegroupThousands(string s)
     {
-        return JsRegex.Compile(@"(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d,])", "gu")
+        return JsRegex.Compile(@"(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])", "gu")
             .Replace(s, m => JsRegex.Compile(",", "gu").Replace(m.Value, ""));
     }
 

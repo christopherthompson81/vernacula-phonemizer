@@ -19,7 +19,7 @@ public static class Normalize
 
     private static readonly JsRe IOTA_LOWER = JsRegex.Compile("ῖ", "gu");
     private static readonly JsRe IOTA_UPPER = JsRegex.Compile("Ῑ", "gu");
-    private static readonly JsRe DOT_GROUP = JsRegex.Compile("(?<!\\d)(?<![\\d][.,])(\\d{1,3})((?:\\.\\d{3})+)(?!\\d)", "gu");
+    private static readonly JsRe DOT_GROUP = JsRegex.Compile("(?<!\\d)(?<![\\d][.,])([1-9]\\d{0,2})((?:\\.\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(\\d),(?=\\d)", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?!\\.\\d)", "gu");

@@ -24,7 +24,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // the corpus groups thousands with COMMAS (2,243, 100,000) and writes decimals with DOTS (1.5, 3.50);
 // the TOKEN swallows the separators so the tier can still see the number next to its unit/sign.
 const TOKEN = new RegExp(
-    `(${hostWordRun(["Latin", "Adlam"])})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+[\\u{1E950}-\\u{1E959}]*|\\d*[\\u{1E950}-\\u{1E959}]+)|([.!?…,;:])`,
+    `(${hostWordRun(["Latin", "Adlam"])})|([1-9]\\d{0,2}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+[\\u{1E950}-\\u{1E959}]*|\\d*[\\u{1E950}-\\u{1E959}]+)|([.!?…,;:])`,
     "gu",
 );
 

@@ -95,7 +95,7 @@ public static class Normalize
     private const string CLOCK_BODY = "([01]?\\d|2[0-3])[.:]\\s?([0-5]\\d)(?![\\d]|\\.\\d)";
 
     private static readonly JsRe AMPERSAND = JsRegex.Compile("\\s*(?:&amp;|&(?!\\w+;))\\s*", "gu");
-    private static readonly JsRe COMMA_THOUSANDS = JsRegex.Compile("(?<!\\d)(\\d{1,3}(?:,\\d{3})+)(?!\\d)", "gu");
+    private static readonly JsRe COMMA_THOUSANDS = JsRegex.Compile("(?<!\\d)([1-9]\\d{0,2}(?:,\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe COMMA_G = JsRegex.Compile(",", "gu");
     private static readonly JsRe DOT_G = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe CURRENCY_CODE_PREFIX = JsRegex.Compile($"({L}(?:US|AS|HK|NZ|CAD?))\\$(?=\\d)", "gu");

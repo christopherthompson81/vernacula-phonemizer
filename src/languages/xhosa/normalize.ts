@@ -205,10 +205,10 @@ export function normalizeXhosa(input: string): string {
     //    followed by a CLAUSE comma or a sentence period declines to de-group, and the leftover comma is then
     //    read as a decimal separator by step 6 — `¥130,000,` comes out "one hundred and thirty zero zero zero
     //    yen". The guard only needs to stop a PARTIAL grouped match (`1,234` inside `1,234,5`), i.e. `,\d`.
-    s = s.replace(/(?<![\d.,])(\d{1,3})(?:,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
     //    SPACE grouping. The shared tier's `NUM` understands it but the TOKEN does not, so `6 500` reads
     //    "six five hundred". Blocks of exactly three digits, or "30 9" would fuse two unrelated numbers.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d])/gu,  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d])/gu,  // space, NBSP, NNBSP, thin space
         (whole) => whole.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) THE CURRENCY SIGN, PRISED OFF ITS CONCORD PREFIX. ⚠ The shared tier is letter-bounded on the left,

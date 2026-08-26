@@ -160,13 +160,13 @@ export function normalizeKhmer(text: string): string {
     // clause punctuation, so `១,០០០,០០០` reads as three sentences — "one", "zero", "zero" — instead of one
     // million. Exactly-three-digit blocks only, so a genuine list `៣,៤,៥` is untouched. 2,788 in the corpus.
     // Applied repeatedly because the lookbehind cannot span a group it has already consumed.
-    const degroup = new RegExp(`(?<=[${D}]),(?=[${D}]{3}(?![${D}]))`, "gu");
+    const degroup = new RegExp(`(?<=[${D}])(?<!(?<![${D}\\.,])0),(?=[${D}]{3}(?![${D}]))`, "gu");
     for (let i = 0; i < 4 && degroup.test(s); i++) s = s.replace(degroup, "");
     // ⚠ AND THE SPACE-GROUPED FORM, which this rule missed and `review.ts` surfaced: it printed `5 000` reading
     // as "pram soun" — "five zero". Khmer groups with a space or a ZWSP as well as a comma, 567 times in the
     // corpus (`៣០ ០០០`, `១១៨ ១៨៣`), and the artifact's own exponent example is `១៨១ ០៣៥ គម²`, which without this
     // is two numbers and a stranded unit. Same three-digit-block guard, so a genuine list of numbers survives.
-    const degroupSpace = new RegExp(`(?<=[${D}])[ \u00a0\u202f\u2009\u200b](?=[${D}]{3}(?![${D}]))`, "gu");  // space, NBSP, NNBSP, thin space, ZWSP
+    const degroupSpace = new RegExp(`(?<=[${D}])(?<!(?<![${D}\\.,])0)[ \u00a0\u202f\u2009\u200b](?=[${D}]{3}(?![${D}]))`, "gu");  // space, NBSP, NNBSP, thin space, ZWSP
     for (let i = 0; i < 4 && degroupSpace.test(s); i++) s = s.replace(degroupSpace, "");
 
     // ── 3. decimal point ─────────────────────────────────────────────────────────────────────────────

@@ -107,7 +107,7 @@ public static class Normalize
     };
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
-    private static readonly JsRe GROUP_1 = JsRegex.Compile($"(?<=\\d)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
+    private static readonly JsRe GROUP_1 = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe NUMERO = JsRegex.Compile("№\\s?(?=\\d)", "gu");
     private static readonly JsRe ORDINAL_NOTATION = JsRegex.Compile($"\\b(\\d+)\\s?-\\s?({CASE_ALT})(?![а-яё])", "giu");

@@ -255,8 +255,8 @@ export function normalizeMadurese(input: string): string {
     // refusing the period is what keeps the two conventions apart and leaves the corpus's malformed
     // `87.017.41 km²` alone rather than half-reading it.
     // ⚠ THE COMMA ARM CARRIES `(?!0,)`, WHICH IS A MEASURED GUARD AND NOT A STYLE CHOICE: see the header.
-    s = s.replace(/(?<![\d.,])\d{1,3}(?:\.\d{3})+(?![\d.])/gu, (m) => m.replaceAll(".", ""));
-    s = s.replace(/(?<![\d.,])(?!0,)\d{1,3}(?:,\d{3})+(?![\d,])/gu, (m) => m.replaceAll(",", ""));
+    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d.])/gu, (m) => m.replaceAll(".", ""));
+    s = s.replace(/(?<![\d.,])(?!0,)[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replaceAll(",", ""));
 
     // ── 3. THE COORDINATE RANGE'S DASH ────────────────────────────────────────────────────────────
     // ⚠ BEFORE the degree rules, which destroy the adjacency this needs, and before step 8, which cannot

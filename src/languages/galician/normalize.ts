@@ -173,8 +173,8 @@ export function normalizeGalician(input: string): string {
     //    tokenizer and is deliberately left alone here; the space form is not, and a number token cannot
     //    span a space. Twice, because `299 792 458` has two group boundaries and the first match consumes
     //    the space the second would need.
-    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
     s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " "); // the leftover no-break spaces are ordinary ones
 
     // 1) ERA MARKERS, before the abbreviation rule so the bare `a.`/`d.` is not claimed first, and before the
@@ -216,7 +216,7 @@ export function normalizeGalician(input: string): string {
     //    cardinal stands — it loses the ordinality, which is honest lossiness, and it invents no
     //    morphology; reading those as *graos* was declined because three instances cannot license inventing
     //    a temperature on a genuine `o 1000º aniversario`. Recorded in the investigation doc, run 3.
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?:\.\d{3})+|\d+)\.?(º|ª)(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(º|ª)(?![\p{L}\p{M}])/gu,
         (_m, digits: string, ind: string) => {
             const n = Number(digits.replace(/\./gu, ""));
             const masc = n <= ORDINAL_INDICATOR_MAX ? galicianOrdinal(n) : undefined;

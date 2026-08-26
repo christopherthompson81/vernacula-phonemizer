@@ -348,8 +348,8 @@ export function normalizeTashelhit(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    would refuse to de-group a number followed by its own sentence comma and speak the last group as
     //    a separate figure.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?![\d]|,\d)(?!\s?%)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)(?!\s?%)/gu, (w) => w.replace(/,/gu, ""));
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    ⚠ U+066C ARABIC THOUSANDS SEPARATOR, ×2 — `¥ 106٬710٬325`. Moroccan text mixes the digit sets and the
     //    engine's tokenizer already accepts ٠-٩, so the separator has to be de-grouped on the same terms.
     s = s.replace(/(?<![\d٬])([\d٠-٩]{1,3})((?:٬[\d٠-٩]{3})+)(?![\d٠-٩]|٬[\d٠-٩])/gu, (w) => w.replace(/٬/gu, ""));
@@ -357,7 +357,7 @@ export function normalizeTashelhit(input: string): string {
     //    to reject a bare adjacency that is really two numbers. Requiring every group to be EXACTLY three
     //    digits does that: `wiss 11 d 57 n tusdadt` has no 3-digit group and `21 mars 2020` is not
     //    `\d{1,3}( \d{3})+` because 2020 is four digits with no separator before it.
-    s = s.replace(/(?<![\d.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) UNITS AND DEGREES, before decimals — the number-unit adjacency these match on is destroyed the
     //    moment a decimal is rewritten into spaced digits (playbook step 4's standing coupling), and after

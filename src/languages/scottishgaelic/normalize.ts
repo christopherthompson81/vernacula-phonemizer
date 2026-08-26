@@ -116,11 +116,11 @@ export function normalizeScottishGaelic(input: string): string {
     //    `−224.2`) untouched for step 5 — all of them one or two places.
     //    Two passes each, because adjacent groups share the digit the first consumes.
     for (let i = 0; i < 3; i++) {
-        s = s.replace(/(?<=\d),(?=\d{3}(?!\d))/gu, "");
-        s = s.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
+        s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
+        s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     }
     //    The SI space form, for completeness — it does not occur in the retained text.
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
 
     // 1) DOTTED ABBREVIATIONS. The dot is consumed before a following word so it cannot become a phrase
     //    break; at a real sentence end it is kept.

@@ -82,7 +82,7 @@ public static class Normalize
 
     // The step patterns. The TS builds several inline; JsRegex.Compile caches, so hoisting them here is a
     // readability choice and not a behaviour one.
-    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?!\\d))", "gu");
     private const string SPAN = "\\d[\\d.]*(?:\\s?[-–—~〜～]\\s?\\d[\\d.]*)?";
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(?<=\\d)\\s?({UNIT_ALT})([²³2-3])?(?![A-Za-z\\d])", "gu");
     private static readonly JsRe DEG_C = JsRegex.Compile("([-−–±]?)(\\d+)\\s?°\\s?C(?![\\p{sc=Latn}\\p{M}])", "gui");

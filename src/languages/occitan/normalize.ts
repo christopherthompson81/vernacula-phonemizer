@@ -54,7 +54,7 @@ export function normalizeOccitan(input: string): string {
     // 1) SEPARATORS. The SPACE groups and BOTH marks decimate — see the header. ⚠ THE WHOLE NUMBER IS
     //    MATCHED AT ONCE, not one join per pass (trap 63), and the trailing guard rejects a DIGIT and
     //    nothing else, or every clause-final figure is declined (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    ⚠ AND THE DOT DECIMAL FOLDS ONTO THE COMMA, unconditionally — unlike Asturian, no dot in this
     //    corpus ever groups, so the three-digit test that language needs would be wrong here.

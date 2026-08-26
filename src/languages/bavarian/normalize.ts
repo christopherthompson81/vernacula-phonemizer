@@ -308,7 +308,7 @@ export function normalizeBavarian(input: string): string {
     //    ⚠ AFTER the clock (a dot form would have been eaten) and BEFORE the tier, whose `NOT_VERSION` guard
     //    needs the dot of `8140.43P` to still be there — traps 39 and 46. `.43` is two digits, so this rule
     //    cannot touch it, which is the whole reason the group size is pinned at exactly three.
-    s = s.replace(/(?<=\p{Nd})\.(?=\p{Nd}{3}(?!\p{Nd}))/gu, "");
+    s = s.replace(/(?<=\p{Nd})(?<!(?<![\p{Nd}\.,])0)\.(?=\p{Nd}{3}(?!\p{Nd}))/gu, "");
     // 6b) SPACE-GROUPED THOUSANDS (2: `549 000 €` and `43 000 €`, both in one municipality's finance
     //     paragraph). Small, but the reading is *fimfhundadneinafiazg **nul*** — the group read as a separate
     //     numeral. Same three-digit discipline as the dot form, which is what stops it claiming two numbers
