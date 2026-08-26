@@ -80,6 +80,7 @@ public static class Bootstrap
             Turkish.TurkishPhonemizer.RegisterSelf();
             Tamil.TamilPhonemizer.RegisterSelf();
             Swahili.SwahiliPhonemizer.RegisterSelf();
+            Tagalog.TagalogPhonemizer.RegisterSelf();
             Cantonese.CantonesePhonemizer.RegisterSelf();
             Vietnamese.VietnamesePhonemizer.RegisterSelf();
             Korean.KoreanPhonemizer.RegisterSelf();

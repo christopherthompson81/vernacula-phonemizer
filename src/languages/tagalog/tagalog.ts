@@ -43,8 +43,6 @@ const DEF = loadManifest<TagalogDef>(import.meta.url, "tagalog.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 
-export type ForeignPhonemizer = (latin: string) => string;
-
 const isVowelLetter = (c: string): boolean => "aeiou".includes(c);
 const VOWEL_PH = "aeiou";
 
@@ -387,6 +385,15 @@ const SYMBOLS = makeSymbolNormalizer({
  */
 const ORDINAL_ONE = "una";
 const ORDINAL_PREFIX = "ika";
+/**
+ * ⟨ika⟩'s own vowel count, and why the fused token cannot be looked up whole. `numberStressIdx` recovers the
+ * cardinal ROOT to test it against `stressPenult` — it strips the ⟨-ng⟩ ligature and the ⟨'t⟩ contraction for
+ * exactly that reason — but the ordinal prefix FUSES onto the cardinal, so `ikaapat` missed the set and took
+ * the final-stress default while the SAME root in `ika-104` (a separate word after ⟨at⟩) took the penult:
+ * *ʔikaʔapˈat* against *… ʔˈapat*, one root read two ways inside one feature. The prefix adds two nuclei and
+ * no stress of its own, so the index is computed on the bare cardinal and shifted by this.
+ */
+const ORDINAL_PREFIX_NUCLEI = [...ORDINAL_PREFIX].filter((c) => isVowelLetter(c)).length;
 /** Read from the manifest — see the jsonc, where the evidence lives. */
 const ORDINAL_CONTRACTED = MANIFEST.contractedOrdinals;
 
@@ -419,7 +426,6 @@ const NATIVE_CLASS = "[A-Za-zÑñ‑-]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class TagalogPhonemizer implements Phonemizer {
-    constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         // Normalization BEFORE tokenizing (entities, digit ranges), then the symbol tier — that order is
         // load-bearing: the tier's ampersand rule voices every ⟨&⟩, and the corpus's 44 HTML entities must be
@@ -460,8 +466,19 @@ class TagalogPhonemizer implements Phonemizer {
                 // ⚠ ⟨una⟩ goes through the PROSE path: it is not a number token (penult stress, ʔˈuna), and
                 // the number-sense stress default would wrongly finalise it (*ʔunˈa).
                 if (n === 1) { sink.emit(phonemizeWord(ORDINAL_ONE)); return; }
-                const words = ORDINAL_CONTRACTED[n] ?? ORDINAL_PREFIX + numberWords(n);
-                for (const wd of words.split(" ")) sink.emit(phonemizeCore(wd, numberStressIdx(wd)));
+                const contracted = ORDINAL_CONTRACTED[n];
+                if (contracted !== undefined) {
+                    for (const wd of contracted.split(" ")) sink.emit(phonemizeCore(wd, numberStressIdx(wd)));
+                    return;
+                }
+                // ⚠ THE STRESS INDEX IS TAKEN ON THE BARE CARDINAL, then shifted past the prefix — see
+                // ORDINAL_PREFIX_NUCLEI. Only the first word is fused; the rest are ordinary number words.
+                numberWords(n).split(" ").forEach((wd, i) => {
+                    const idx = numberStressIdx(wd);
+                    if (i !== 0) { sink.emit(phonemizeCore(wd, idx)); return; }
+                    sink.emit(phonemizeCore(ORDINAL_PREFIX + wd,
+                        idx === undefined ? undefined : idx + ORDINAL_PREFIX_NUCLEI));
+                });
             } else if (m[5] !== undefined) {
                 sink.emit(phonemizeWord(nat(m[5])));
             } else if (m[6] !== undefined) {

@@ -39,6 +39,19 @@ describe("JSONC parser", () => {
         ).toEqual({ q: 'an escaped " quote // still string' });
     });
 
+    it("⚠ objects are NULL-PROTOTYPE — a manifest is indexed by text and ⟨constructor⟩ is a word", () => {
+        const parsed = parseJsonc<Record<string, unknown>>(
+            '{ "a": 1, "n": { "b": 2 }, "arr": [{ "c": 3 }] }',
+        );
+        expect(Object.getPrototypeOf(parsed)).toBe(null);
+        expect(Object.getPrototypeOf(parsed["n"])).toBe(null);
+        expect(Object.getPrototypeOf((parsed["arr"] as unknown[])[0])).toBe(null);
+        expect(Array.isArray(parsed["arr"])).toBe(true); // arrays keep THEIR prototype — .map/.filter still work
+        // The defect this closes: seven engines threw because this lookup returned Object.prototype.constructor.
+        expect(parsed["constructor"]).toBeUndefined();
+        expect(parsed["toString"]).toBeUndefined();
+    });
+
     it("stripJsonc leaves a comment-free, trailing-comma-free document", () => {
         expect(stripJsonc('{ "a": 1, /* c */ }').replace(/\s+/g, "")).toBe(
             '{"a":1}',

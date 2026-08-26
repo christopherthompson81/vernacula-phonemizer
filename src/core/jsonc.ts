@@ -76,7 +76,22 @@ export function stripJsonc(src: string): string {
     return out;
 }
 
-/** Parse JSONC (JSON + comments + trailing commas) to a typed value. */
+/**
+ * Parse JSONC (JSON + comments + trailing commas) to a typed value.
+ *
+ * ⚠ NULL-PROTOTYPE OBJECTS, and the reason is a CRASH rather than tidiness. A manifest record is indexed BY
+ * TEXT — `specialWords[word]`, `digraphs[pair]`, `finals[seg]` — and `JSON.parse` returns objects that
+ * inherit `Object.prototype`, so the ordinary English word ⟨constructor⟩ in a code-switched sentence
+ * resolves to a FUNCTION and the lookup's `!== undefined` / truthiness test passes. Seven engines threw on
+ * that one word — `tl`, `ceb`, `hil` ("w is not iterable"), `fr`, `fr-CA` ("entry.cases is not iterable"),
+ * `cdo` ("seg.endsWith is not a function"), `nan` ("fin.replace is not a function") — and the C# port,
+ * whose `Dictionary` inherits nothing, read them all normally, so this was a TS/C# divergence as well as a
+ * defect. Stripping the prototype at the parse boundary closes the whole class in one place instead of
+ * asking every lookup site to remember `Object.hasOwn`.
+ */
 export function parseJsonc<T = unknown>(src: string): T {
-    return JSON.parse(stripJsonc(src)) as T;
+    return JSON.parse(stripJsonc(src), (_k, v: unknown) =>
+        typeof v === "object" && v !== null && !Array.isArray(v)
+            ? Object.setPrototypeOf(v, null)
+            : v) as T;
 }

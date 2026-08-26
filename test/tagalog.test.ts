@@ -154,6 +154,26 @@ describe("tagalog normalization — symbols, numbers, ordinals, times", () => {
         expect(phonemize("ika-1", "tl")).toBe("ʔˈuna");
     });
 
+    test("⚠ the prefix does NOT move the cardinal's stress — the penult roots keep it through the fusion", () => {
+        // The bug this pins: the penult lookup is on the cardinal ROOT, and ⟨ika⟩ fuses onto it, so
+        // `ikaapat` missed `stressPenult` and finalised (*ʔikaʔapˈat) while the SAME root read *ʔˈapat* one
+        // word later in ika-104. One root, one feature, two readings.
+        expect(phonemize("ika-4", "tl")).toBe("ʔikaʔˈapat");
+        expect(phonemize("ika-6", "tl")).toBe("ʔikaʔˈanim");
+        expect(phonemize("ika-14", "tl")).toBe("ʔikalabiŋʔˈapat");
+        expect(phonemize("ika-1000", "tl")).toBe("ʔikasanlˈibo");
+        // …and the untouched half: a FINAL-stressed cardinal stays final, and the tail words are unaffected.
+        expect(phonemize("ika-5", "tl")).toBe("ʔikalimˈa");
+        expect(phonemize("ika-104", "tl")).toBe("ʔikasandaʔˈan ʔˈat ʔˈapat");
+    });
+
+    test("⚠ ⟨constructor⟩ is a WORD, not a prototype member — the specialWords lookup must not find it", () => {
+        // Tagalog text is heavily code-switched with English, so this is an ordinary token here. It used to
+        // resolve to Object.prototype.constructor and throw "w is not iterable" (core/jsonc.ts).
+        expect(phonemize("constructor", "tl")).toBe("konstɾˈuktoɾ");
+        expect(phonemize("ang constructor pattern", "tl")).toContain("konstɾˈuktoɾ");
+    });
+
     test("ampersand — ⟨at⟩; HTML entities are disposed of first and never voiced", () => {
         expect(phonemize("A & B", "tl")).toBe("ʔˈa ʔˈat b");
         expect(phonemize("14 &ndash; 16", "tl")).toBe("labiŋʔˈapat haŋɡˈaŋ labiŋʔˈanim"); // entity → range, not "at ndash"
