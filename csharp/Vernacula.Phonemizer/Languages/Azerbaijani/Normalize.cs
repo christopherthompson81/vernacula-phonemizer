@@ -70,13 +70,15 @@ public static class Normalize
         return string.Join(" ", words);
     }
 
-    /** Multi-dot abbreviations and era markers, handled BEFORE the single-dot rule. */
+    /** Multi-dot abbreviations and era markers, handled BEFORE the single-dot rule. ⚠ ORDER IS LOAD-BEARING:
+     *  `b.e.ə.` ends in `e.ə.` and the shorter entry's lookbehind rejects only a letter, so it must go first. */
     private static readonly (string Body, string Word)[] MULTI_DOT =
     {
+        (@"b\.\s?e\.\s?ə\.", "eramızdan əvvəl"),
         (@"e\.\s?ə\.", "eramızdan əvvəl"),
         (@"E\.\s?ə\.", "eramızdan əvvəl"),
-        (@"b\.\s?e\.", "bizim eradan əvvəl"),
-        (@"\bBE(?=\s+\d)", "bizim eradan əvvəl"),
+        (@"b\.\s?e\.", "bizim eramız"),
+        (@"\bBE(?=\s+\d)", "bizim eramız"),
     };
 
     /** The MULTI_DOT patterns, compiled once in the order the pass applies them (end-of-phrase, then bare). */
@@ -98,10 +100,10 @@ public static class Normalize
     private static readonly IReadOnlyDictionary<string, string> LETTER_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["a"] = "a", ["b"] = "be", ["c"] = "ce", ["ç"] = "çe", ["d"] = "de", ["e"] = "e", ["ə"] = "ə",
-        ["f"] = "fe", ["g"] = "ge", ["h"] = "he", ["x"] = "xı", ["ı"] = "ı", ["i"] = "i", ["j"] = "je",
-        ["k"] = "ke", ["l"] = "el", ["m"] = "em", ["n"] = "en", ["o"] = "o", ["ö"] = "ö", ["p"] = "pe",
-        ["r"] = "er", ["s"] = "se", ["ş"] = "şe", ["t"] = "te", ["u"] = "u", ["ü"] = "ü", ["v"] = "ve",
-        ["y"] = "ye", ["z"] = "ze",
+        ["f"] = "fe", ["g"] = "ge", ["ğ"] = "ğe", ["h"] = "he", ["x"] = "xı", ["ı"] = "ı", ["i"] = "i",
+        ["j"] = "je", ["k"] = "ke", ["q"] = "qe", ["l"] = "el", ["m"] = "em", ["n"] = "en", ["o"] = "o",
+        ["ö"] = "ö", ["p"] = "pe", ["r"] = "er", ["s"] = "se", ["ş"] = "şe", ["t"] = "te", ["u"] = "u",
+        ["ü"] = "ü", ["v"] = "ve", ["y"] = "ye", ["z"] = "ze",
     };
 
     /** Azerbaijani phonotactics, for the OOV rule in Core/Initialisms.cs. */

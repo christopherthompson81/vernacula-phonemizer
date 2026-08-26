@@ -80,6 +80,8 @@ public class LanguageBootstrapTests
     [InlineData("az", "dağ və oğul", "dˈɑɣ vˈæ oɣˈuɫ")]
     [InlineData("az", "XIX əsr", "ˈon doɡːuzund͡ʒˈu ˈæsɾ")]
     [InlineData("az", "1767-ci ildə", "mˈin jedːˈi jˈyz ɑɫtmˈɯʃ jedːind͡ʒˈi ildˈæ")]
+    [InlineData("az", "QHT nümayəndəsi", "ɡˈe hˈe tˈe nymɑjændæsˈi")]
+    [InlineData("az", "b.e.ə. 500-cü ildə", "eɾɑmɯzdˈɑn ævvˈæl bˈeʃ jyzynd͡ʒˈy ildˈæ")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 

@@ -133,9 +133,27 @@ describe("Azerbaijani text normalization", () => {
     // was consumed with the marker.
     test("a sentence-final era marker keeps its clause break", () => {
         expect(normalizeAzerbaijani("Məbəd e.ə.")).toBe("Məbəd eramızdan əvvəl.");
-        expect(normalizeAzerbaijani("Məbəd b.e.")).toBe("Məbəd bizim eradan əvvəl.");
+        expect(normalizeAzerbaijani("Məbəd b.e.ə.")).toBe("Məbəd eramızdan əvvəl.");
         // ...and mid-sentence it must still NOT gain one.
         expect(normalizeAzerbaijani("e.ə. 323-cü ildə")).toBe("eramızdan əvvəl üç yüz iyirmi üçüncü ildə");
+    });
+
+    // ⚠ `b.e.` IS THE COMMON ERA, NOT BEFORE IT — *bizim eramız*. Reading it as BCE inverted every date it
+    // touched, and the corpus's own instance is the Early Middle Ages, "(BE 1000-1300)", which are CE.
+    // `b.e.ə.` is the full spelling of BCE, and it must beat the `e.ə.` entry to its own tail.
+    test("the two eras are different abbreviations: b.e. is CE, e.ə. and b.e.ə. are BCE", () => {
+        expect(normalizeAzerbaijani("b.e. 1200-cü ildə")).toBe("bizim eramız min iki yüzüncü ildə");
+        expect(normalizeAzerbaijani("BE 1000")).toBe("bizim eramız 1000");
+        expect(normalizeAzerbaijani("b.e.ə. 500-cü ildə")).toBe("eramızdan əvvəl beş yüzüncü ildə"); // was *b. eramızdan…*
+        expect(normalizeAzerbaijani("e.ə. 500-cü ildə")).toBe("eramızdan əvvəl beş yüzüncü ildə");
+    });
+
+    // ⚠ A MISSING LETTER NAME IS NOT A PARTIAL SPELLING: `spellOut` declines the WHOLE run, so the token
+    // reaches the phoneme sink as raw ASCII. ⟨q⟩ and ⟨ğ⟩ are the language's own letters and were absent.
+    test("q and ğ have letter names, so an acronym carrying them spells out", () => {
+        expect(ph("QHT nümayəndəsi")).toBe("ɡˈe hˈe tˈe nymɑjændæsˈi"); // was *ɡht*
+        expect(ph("QVC kanalı")).toBe("ɡˈe vˈe d͡ʒˈe kɑnɑɫˈɯ"); // was *ɡvd͡ʒ*
+        expect(ph("Q&A bölməsi")).toBe("ɡˈe vˈæ ˈɑ bœlmæsˈi"); // was *x və a*, the q devoiced word-finally
     });
 
     test("percent takes ANY case suffix, with the linking vowel an n-initial one needs", () => {

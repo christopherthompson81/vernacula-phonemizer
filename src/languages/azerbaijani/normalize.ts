@@ -82,14 +82,28 @@ export function ordinalWords(n: number): string | undefined {
     return words.join(" ");
 }
 
-/** Multi-dot abbreviations and era markers. Handled BEFORE the single-dot rule so no interior dot survives
- *  as a phrase break. `e.ə.` = eramızdan əvvəl (BC); `b.e.` = bizim eradan əvvəl (BC variant); `b.e.` also
- *  covers the corpus's `BE` (before era). */
+/**
+ * Multi-dot abbreviations and era markers. Handled BEFORE the single-dot rule so no interior dot survives
+ * as a phrase break.
+ *
+ * ⚠ THE TWO ERAS ARE DIFFERENT ABBREVIATIONS AND THIS TABLE USED TO CONFLATE THEM. Azerbaijani writes the
+ * COMMON ERA as `b.e.` — *bizim eramız*, "our era" — and the one BEFORE it as `e.ə.` (*eramızdan əvvəl*) or,
+ * spelled in full, `b.e.ə.`. The table read `b.e.` as "bizim eradan əvvəl", i.e. as BCE, which INVERTS every
+ * date it touches. The corpus settles it rather than the grammar: its one instance is
+ *     "…Erkən Orta Əsrlər olaraq bilinir (BE 1000-1300)."
+ * — the Early Middle Ages, which are 1000-1300 CE. Read as BCE it came out three thousand years wrong.
+ *
+ * ⚠ `b.e.ə.` MUST BE TRIED FIRST. Its tail IS `e.ə.`, and the `e.ə.` entry's lookbehind rejects only a
+ * LETTER before the match — a dot is not one — so the shorter pattern matched inside the longer one and left
+ * a bare `b.` behind: `b.e.ə. 500-cü ildə` read *b . eramızdan əvvəl…*, a stray consonant plus the very
+ * phrase break this step exists to prevent.
+ */
 const MULTI_DOT: readonly (readonly [string, string])[] = [
+    ["b\\.\\s?e\\.\\s?ə\\.", "eramızdan əvvəl"],
     ["e\\.\\s?ə\\.", "eramızdan əvvəl"],
     ["E\\.\\s?ə\\.", "eramızdan əvvəl"],
-    ["b\\.\\s?e\\.", "bizim eradan əvvəl"],
-    ["\\bBE(?=\\s+\\d)", "bizim eradan əvvəl"],
+    ["b\\.\\s?e\\.", "bizim eramız"],
+    ["\\bBE(?=\\s+\\d)", "bizim eramız"],
 ];
 
 /** Single-dot abbreviations → the spoken words. `Dr.` = Doktor, `Şək.` = şəkil (figure). The dot is a phrase
@@ -100,11 +114,22 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
     "şək": "şəkil",
 };
 
-/** Azerbaijani letter names — the standard alphabet (a, be, ce, çe, de, e, ə, fe, ge, he, xı, ı, i, je,
- *  ke, el, em, en, o, ö, pe, er, se, şe, te, u, ü, ve, ye, ze). The g2p spells them through itself. */
+/**
+ * Azerbaijani letter names — the standard 32-letter alphabet (a, be, ce, çe, de, e, ə, fe, ge, ğe, he, xı,
+ * ı, i, je, ke, qe, el, em, en, o, ö, pe, er, se, şe, te, u, ü, ve, ye, ze). The g2p spells them through
+ * itself.
+ *
+ * ⚠ ⟨q⟩ AND ⟨ğ⟩ WERE MISSING, AND A MISSING NAME IS NOT A PARTIAL SPELLING. `core/initialisms.ts`'s
+ * `spellOut` returns undefined if ANY letter of the run is unnamed, so the whole token falls through to the
+ * word path as raw ASCII — and ⟨q⟩ is one of the language's own letters, not a foreign import. Measured on
+ * the FLEURS corpus, which carries `HQ` and `QVC`: HQ → *hx* (the word-final q devoicing, on an acronym),
+ * QVC → *ɡvd͡ʒ*. The commonest casualty is not in FLEURS at all: QHT (*Qeyri-Hökumət Təşkilatı*, NGO) read
+ * *ɡht*. Both names follow the table's own exceptionless consonant pattern, letter + ⟨e⟩ (be ce çe de fe ge
+ * he je ke pe se şe te ve ye ze) — ⟨x⟩'s *xı* is the one deviation and it is already recorded here.
+ */
 const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", b: "be", c: "ce", ç: "çe", d: "de", e: "e", ə: "ə", f: "fe", g: "ge", h: "he",
-    x: "xı", ı: "ı", i: "i", j: "je", k: "ke", l: "el", m: "em", n: "en", o: "o", ö: "ö",
+    a: "a", b: "be", c: "ce", ç: "çe", d: "de", e: "e", ə: "ə", f: "fe", g: "ge", ğ: "ğe", h: "he",
+    x: "xı", ı: "ı", i: "i", j: "je", k: "ke", q: "qe", l: "el", m: "em", n: "en", o: "o", ö: "ö",
     p: "pe", r: "er", s: "se", ş: "şe", t: "te", u: "u", ü: "ü", v: "ve", y: "ye", z: "ze",
 };
 
