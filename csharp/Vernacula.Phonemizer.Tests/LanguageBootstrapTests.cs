@@ -88,12 +88,19 @@ public class LanguageBootstrapTests
     // range that ENDS A CLAUSE, which used to fall through to the minus rule and read as a subtraction.
     [InlineData("so", "dhagax abbaan soo'maali", "ɖaɡaħ abːaːn soːʔmaːli")]
     [InlineData("so", "$2M iyo Sanadkii 1999M", "laba miljan doːlar ijo sanadkiː kun ijo saɡaːl boqol ijo saɡaːl ijo saɡaːʃan miːlaːdi")]
+    // #1050: an h:mm followed by `:digit` is a ratio/h:m:s/ISO stamp, not a clock; and a glued meridiem
+    // used to block the match entirely because JS `\b` is ASCII-only.
+    [InlineData("so", "NPK 19:19:19 ah", "npk sa\u0261a\u02d0l ijo toban , sa\u0261a\u02d0l ijo toban , sa\u0261a\u02d0l ijo toban ah")]
     [InlineData("so", "430 SQ MI", "afar boqol ijo sodːon majl laba d͡ʒibaːran")]
     [InlineData("so", "Sanadihii 1960 -1969.", "sanadihiː kun ijo saɡaːl boqol ijo liħdan ilaː kun ijo saɡaːl boqol ijo saɡaːl ijo liħdan .")]
     // Min Nan's three paths, which no other row in this file reaches: the Han dictionary with tone sandhi
     // (台灣 — the non-final syllable takes its sandhi tone), the year+counter shape through the normalizer,
     // and a POJ Latin run folded to Tâi-lô before the g2p (`chit-ê` — POJ ⟨ch⟩ → ⟨ts⟩).
     [InlineData("nan", "台灣", "tai\u032f\u02e7 u\u032fan\u02e8\u02e6")]
+    // #1048: POJ is ASCII Latin, so a foreign name used to be read as Min Nan syllables with a tone letter.
+    // The dict's own 970 syllable skeletons are the discriminator; a mixed compound keeps both halves.
+    [InlineData("nan", "Washington", "w\u02c8\u0251\u02d0\u0283\u026a\u014bt\u0259n")]
+    [InlineData("nan", "Ukraina-g\u00ed", "\u02c8u\u02d0k\u0279\u00e6\u02cci\u02d0n\u0259 \u0261i\u02e5\u02e9")]
     [InlineData("nan", "chit-\u00ea l\u00e2ng", "t\u0361\u0255it\u031a\u02e5 e\u02e8\u02e6 la\u014b\u02e8\u02e6")]
     // Saraiki's defining shapes: the four implosives plus the voiced aspirate the Punjabi sibling turns into
     // tone (skr keeps it as a segment), the ZWJ/ZWNJ that used to hide a percentage from the symbol tier, the

@@ -259,6 +259,82 @@ function hanNumeralRun(han: string): string {
  * that catches a word SPELLING reaching the phoneme sink. A false positive, but the gate cannot tell a
  * script identifier from a word, and a permanently red line teaches nothing.
  */
+/**
+ * THE LEGAL SYLLABLE INVENTORY, DERIVED FROM THIS ENGINE'S OWN DICT — the instrument that tells a POJ word
+ * from a foreign name.
+ *
+ * ⚠ NO CHARACTER-CLASS TEST CAN DO THIS. POJ **is** ASCII Latin, so `pêng-hong` and `Washington` are the same
+ * script, the same alphabet, and (before this) the same code path: `NATIVE_CLASS` begins `[A-Za-z…]`, so every
+ * Latin run counted as native, `foreign` was never called despite being stored and documented, and a foreign
+ * name was read out as Min Nan syllables WITH A TONE LETTER — *iran˥*, *ukraina˥*, *washington˥*, and the
+ * EasyTimeline keywords `text˧˨ from˥ color˥` that reach this corpus from template debris. 796 of the 6,836
+ * tokens in the shipped golden carried a letter Min Nan's IPA cannot produce (#1048).
+ *
+ * The discriminator is PHONOTACTIC, and the dict already contains it: 63,561 entries whose readings decompose
+ * into **970 distinct toneless syllable skeletons**. A hyphen-part that is not one of them is not a Min Nan
+ * syllable. `Iran` fails on ⟨ran⟩ (Tâi-lô has no ⟨r⟩), `Islam` on ⟨is⟩, `commune` on ⟨com⟩.
+ *
+ * ⚠ THE FOLD ORDER IS THE ENGINE'S, AND GETTING IT WRONG INVERTS THE ANSWER. Tone marks are stripped BEFORE
+ * `pojToTailo`, exactly as `syllableParts` does — fold first and `he̍k` never matches `ek`→`ik`, `sòa` never
+ * matches `oa`→`ua`, and 65 real POJ words (`he̍k-chiá`, `Lō͘-sòa`) are misread as foreign. ⚠ And U+0358 is a
+ * VOWEL, not a tone mark, so it must survive the strip or `o͘`→`oo` never fires.
+ */
+/** The seven Tâi-lô tone marks plus ⟨o͘⟩/⟨ⁿ⟩ — the orthography's own evidence that a syllable is POJ. */
+const POJ_TONE = /[\u0300\u0301\u0302\u0304\u030B\u030C\u030D\u0358\u207F]/u;
+let SKELETONS: Set<string> | undefined;
+function skeletons(): Set<string> {
+    if (SKELETONS) return SKELETONS;
+    SKELETONS = new Set<string>();
+    for (const reading of dict().values())
+        for (const syl of reading.split(/[-\s/]+/u)) if (syl) SKELETONS.add(toSkeleton(syl));
+    return SKELETONS;
+}
+/** A syllable → its toneless Tâi-lô skeleton, by the same route `syllableParts` takes. */
+function toSkeleton(syl: string): string {
+    const nfd = syl.normalize("NFD");
+    return pojToTailo([...nfd].filter((c) => !(c in TONE_MARK)).join("").normalize("NFC").toLowerCase());
+}
+/** Is this hyphen-part a legal Min Nan syllable? */
+function nativeSyllable(part: string): boolean {
+    return part.length > 0 && skeletons().has(toSkeleton(part));
+}
+
+/**
+ * Split a Latin run into maximal same-class stretches, so a MIXED compound keeps both halves.
+ *
+ * ⚠ THE RUN IS NOT SPLIT WHEN IT IS ALL ONE CLASS, and that is deliberate: tone sandhi applies
+ * WORD-INTERNALLY across hyphenated syllables, so splitting a wholly-native word at its hyphens would give
+ * every syllable citation tone and silently delete the sandhi. Only a run that genuinely mixes the two —
+ * `Ukraina-gí` (a foreign name plus the native noun "language"), ×12 in the golden — is cut.
+ */
+function latinParts(run: string): { text: string; native: boolean }[] {
+    const parts = run.split(/(?<=-)|(?=-)/u).filter((p) => p !== "");
+    const words = parts.filter((p) => p !== "-");
+    if (words.length === 0) return [{ text: run, native: false }];
+    const allNative = words.every(nativeSyllable);
+    if (allNative || words.every((w) => !nativeSyllable(w))) return [{ text: run, native: allNative }];
+    // ⚠ INSIDE A MIXED RUN, A BARE-ASCII PART IS NOT MIN NAN — IT IS THE FOREIGN LANGUAGE'S OWN PARTICLE.
+    // Measured on the golden's 26 mixed runs: 5 are real compounds of a foreign stem and a native morpheme
+    // (`Ukraina-gí`, `Bulgaria-gí`, `Lietuva-gí`, `Italia-bûn`, `chhaim-tēng`) and 20 are French `la`/`le`
+    // and the Persian ezafe `-e` — all of which are legal Tâi-lô skeletons BY ACCIDENT (`la`, `le`, `e`,
+    // `ye`, `ji` are all real syllables), so membership alone splits `Fontaine-la-Soret` into three pieces
+    // and reads the `la` as Min Nan.
+    // The discriminator is in the data: every one of the 5 real native morphemes carries a POJ TONE
+    // DIACRITIC and not one of the 20 particles does. A native syllable inside a foreign compound is a
+    // content morpheme, and running POJ marks its tone. ⚠ This test is applied ONLY to mixed runs — a
+    // wholly-native run is already settled above, so an unmarked tone-1 word like `chit-e` is untouched.
+    if (!words.some((w) => nativeSyllable(w) && POJ_TONE.test(w.normalize("NFD"))))
+        return [{ text: run, native: false }];
+    const isNative = (p: string): boolean => nativeSyllable(p) && POJ_TONE.test(p.normalize("NFD"));
+    const out: { text: string; native: boolean }[] = [];
+    for (const p of parts) {
+        const native = p === "-" ? (out.at(-1)?.native ?? false) : isNative(p);
+        if (out.length > 0 && out.at(-1)!.native === native) out[out.length - 1]!.text += p;
+        else out.push({ text: p, native });
+    }
+    return out;
+}
+
 const TOKEN = new RegExp(
     `(\\p{Script=Han}+)|(\\d+)|(${hostWordRun(["Latin"], "", "-")})|([。，、？！；：.,?!;:])`,
     "gu",
@@ -284,7 +360,15 @@ class MinnanPhonemizer implements Phonemizer {
                 // degraded. Digit-at-a-time is what nan already gives a year.
                 const n = Number(m[2]);
                 sink.emit(hanNumeralRun(Number.isSafeInteger(n) ? integerToHan(n) : spellHanDigits(m[2], HAN_DIGITS)));
-            } else if (m[3]) sink.emit(tailoToIpa(nat(m[3])));
+            } else if (m[3]) {
+                // ⚠ CLASSIFY BEFORE `nat`, NOT AFTER. The nativiser folds away exactly the letters that
+                // prove a run is foreign — ⟨Łódź⟩ becomes ⟨Lodz⟩ — so testing downstream of it destroys the
+                // evidence. `foreign` also receives the ORIGINAL text for the same reason.
+                for (const part of latinParts(m[3]))
+                    sink.emit(part.native || this.foreign === undefined
+                        ? tailoToIpa(nat(part.text))
+                        : this.foreign(part.text));
+            }
             else if (m[4]) {
                 const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);

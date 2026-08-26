@@ -133,6 +133,75 @@ public static class MinNanPhonemizer
     private static readonly JsRe SYL_SPLIT = JsRegex.Compile("[-\\s]+", "gu");
 
     /** A Tâi-lô/POJ word (hyphen/space-joined syllables) → IPA, with word-internal tone sandhi. */
+    /** The seven Tâi-lô tone marks plus ⟨o͘⟩/⟨ⁿ⟩ — the orthography's own evidence a syllable is POJ. */
+    private static readonly JsRe POJ_TONE = JsRegex.Compile(
+        "[\u0300\u0301\u0302\u0304\u030B\u030C\u030D\u0358\u207F]", "u");
+
+    private static HashSet<string>? SKELETONS;
+    private static readonly object SKEL_LOCK = new();
+    /** The legal syllable inventory, derived from this engine's own dict — POJ is ASCII Latin, so no
+     *  character class can tell `pêng-hong` from `Washington`; the phonotactics can. See the TS. */
+    private static HashSet<string> Skeletons()
+    {
+        lock (SKEL_LOCK)
+        {
+            if (SKELETONS is not null) return SKELETONS;
+            var set = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var reading in Dict().Values)
+                foreach (var syl in reading.Split(SKEL_SEPS, StringSplitOptions.RemoveEmptyEntries))
+                    if (syl.Length > 0) set.Add(ToSkeleton(syl));
+            return SKELETONS = set;
+        }
+    }
+    private static readonly char[] SKEL_SEPS = { '-', '/', ' ', '\t' };
+
+    /** A syllable → its toneless Tâi-lô skeleton, by the same route SyllableParts takes. */
+    private static string ToSkeleton(string syl)
+    {
+        var nfd = syl.Normalize(NormalizationForm.FormD);
+        var stripped = new StringBuilder();
+        foreach (var ch in Js.CodePoints(nfd)) if (!TONE_MARK.ContainsKey(ch)) stripped.Append(ch);
+        return PojToTailo(Js.ToLowerCase(stripped.ToString().Normalize(NormalizationForm.FormC)));
+    }
+
+    private static bool NativeSyllable(string part) => part.Length > 0 && Skeletons().Contains(ToSkeleton(part));
+
+    private sealed record LatinPart(string Text, bool Native);
+
+    /** Split a Latin run into maximal same-class stretches. A wholly-native run is NEVER split — tone
+     *  sandhi is word-internal. In a MIXED run a part counts as native only if it carries a POJ tone
+     *  diacritic; French `la`/`le` and the Persian ezafe `-e` are legal skeletons by accident. */
+    private static List<LatinPart> LatinParts(string run)
+    {
+        // `run.split(/(?<=-)|(?=-)/u)` in the TS: each hyphen becomes its own element.
+        var parts = new List<string>();
+        var buf = new StringBuilder();
+        foreach (var ch in run)
+        {
+            if (ch == '-')
+            {
+                if (buf.Length > 0) { parts.Add(buf.ToString()); buf.Clear(); }
+                parts.Add("-");
+            }
+            else buf.Append(ch);
+        }
+        if (buf.Length > 0) parts.Add(buf.ToString());
+        var words = parts.Where(p => p != "-").ToList();
+        if (words.Count == 0) return new List<LatinPart> { new(run, false) };
+        var allNative = words.All(NativeSyllable);
+        if (allNative || words.All(w => !NativeSyllable(w))) return new List<LatinPart> { new(run, allNative) };
+        bool Marked(string p) => NativeSyllable(p) && POJ_TONE.IsMatch(p.Normalize(NormalizationForm.FormD));
+        if (!words.Any(Marked)) return new List<LatinPart> { new(run, false) };
+        var outp = new List<LatinPart>();
+        foreach (var p in parts)
+        {
+            var native = p == "-" ? (outp.Count > 0 && outp[^1].Native) : Marked(p);
+            if (outp.Count > 0 && outp[^1].Native == native) outp[^1] = outp[^1] with { Text = outp[^1].Text + p };
+            else outp.Add(new LatinPart(p, native));
+        }
+        return outp;
+    }
+
     public static string TailoToIpa(string word)
     {
         var sylls = new List<(string Seg, string Tone)>();
@@ -296,7 +365,15 @@ public static class MinNanPhonemizer
                         ? IntegerToHan(n)
                         : Sinitic.SpellHanDigits(m.Groups[2].Value, HAN_DIGITS)));
                 }
-                else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0) sink.Emit(TailoToIpa(Nat(m.Groups[3].Value)));
+                else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
+                {
+                    // Classify BEFORE Nat — the nativiser folds away the very letters that prove a run is
+                    // foreign (⟨Łódź⟩ → ⟨Lodz⟩), and `foreign` receives the original text for that reason.
+                    foreach (var part in LatinParts(m.Groups[3].Value))
+                        sink.Emit(part.Native || _foreign is null
+                            ? TailoToIpa(Nat(part.Text))
+                            : _foreign(part.Text));
+                }
                 else if (m.Groups[4].Success && m.Groups[4].Value.Length > 0)
                 {
                     var mk = CLAUSE_MARK.GetValueOrDefault(m.Groups[4].Value);

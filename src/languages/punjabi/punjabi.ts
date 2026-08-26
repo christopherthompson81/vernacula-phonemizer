@@ -119,6 +119,10 @@ function tonogenesis(ipa: string): string {
  *  the plain-ن→ɳ infinitive heuristic must not fire. One declarative flag toggles all three (ADR-2). */
 export interface PunjabiOpts {
     saraiki?: boolean;
+    /** The variety's OWN short-vowel coverage lexicon, consulted by `shippedWord` when `saraiki` is set.
+     *  Omitted by pa/pnb, which use the Punjabi lexicons above it. A thunk, so the file is not read until
+     *  a word is actually phonemized. See #1049 for why the absence of this hook was a latent defect. */
+    wordLexicon?: () => ReadonlyMap<string, string>;
     /** The variety's OWN pre-tokenizer pass, replacing the Punjabi one. Saraiki supplies
      *  `normalizeSaraiki`; without it the `saraiki` flag leaves the text unnormalized (which is what it did
      *  before that layer existed — see the comment on `normalize` below). */
@@ -209,7 +213,15 @@ export function makeNativePunjabi(
      * only the factory. Same gate as tonogenesis and the ɳ heuristic above.
      */
     function shippedWord(w: string): string {
-        if (opts.saraiki) return word(w);
+        // ⚠ SARAIKI GETS ITS OWN COVERAGE TIER THROUGH `wordLexicon`, NOT THE PUNJABI ONES. The gate used to
+        // be a bare `return word(w)`, which made `saraiki.ts`'s documented "shipped bare word→IPA: short-vowel
+        // coverage lexicon → rule g2p" false: its `phonemizeWord` had no caller and the shipped path skipped
+        // the tier entirely (#1049). That is `pa`'s own history repeating one variety over — the engine users
+        // reach and the engine the tier was built for were different engines. The hook keeps the Punjabi
+        // lexicons gated off (they are Gurmukhi keys and pa cross-script pairs) while letting the variety
+        // supply its own, exactly as `normalize` already does one field below.
+        if (opts.saraiki)
+            return word(opts.wordLexicon === undefined ? w : restoreHarakat(w, opts.wordLexicon()));
         return (
             guruLexicon().get(w) ??
             crossScriptLexicon().get(w) ??

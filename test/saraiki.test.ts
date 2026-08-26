@@ -2,6 +2,9 @@ import { describe, expect, test } from "vitest";
 import { phonemizeWordRules } from "../src/languages/saraiki/saraiki.ts";
 import { normalizeSaraiki } from "../src/languages/saraiki/normalize.ts";
 import { phonemize } from "../src/index.ts";
+import { makeNativePunjabi, loadPunjabiManifest } from "../src/languages/punjabi/punjabi.ts";
+import { loadSharedPhonology } from "../src/core/phonology.ts";
+
 
 // Diagnostic gold for the Saraiki (skr) engine — one word per signature feature. These are OUR canonical output
 // (rule-only, default-[ə] for the unwritten abjad short vowels + weight stress); they line up with the wikipron
@@ -84,5 +87,31 @@ describe("Saraiki text normalization", () => {
         // ⚠ trap 64 again, in a different script: US$ needs its own key or the mark is silently dropped
         expect(phonemize("US$20 \u0645\u0644\u06cc\u0646", "skr").trim())
             .toBe("\u028b\u02c8i\u02d0\u0266 m\u0259l\u02c8i\u02d0n \u0256\u02c8a\u02d0l\u0259\u027e");
+    });
+});
+
+describe("Saraiki reaches its OWN coverage lexicon on the shipped path (#1049)", () => {
+    // ⚠ THIS PINS A SEAM, NOT AN OUTPUT. `data/languages/saraiki/lexicon.tsv` does not exist, so the real
+    // map is empty and the fix moves ZERO bytes today — which is exactly what made the defect invisible.
+    // `saraiki.ts` documents `phonemizeWord` as "coverage lexicon → rule g2p", but `shippedWord` opened
+    // with a bare `return word(w)` for the saraiki flag, so `text()` never consulted the tier and
+    // `phonemizeWord` had no caller. The day someone mines that lexicon it would have been dead weight on
+    // the only path users reach — `pa`'s own history, one variety over. A stub lexicon is the only way to
+    // observe the wiring while the real file is absent.
+    const stub = new Map([["\u0643\u0631\u0646", "\u0643\u0650\u0631\u0646"]]); // کرن → کِرن, the skeleton→vocalized shape
+    const withLex = makeNativePunjabi(loadPunjabiManifest(), loadSharedPhonology(), undefined, {
+        saraiki: true, wordLexicon: () => stub,
+    });
+    const without = makeNativePunjabi(loadPunjabiManifest(), loadSharedPhonology(), undefined, { saraiki: true });
+
+    test("the shipped text() path consults the variety lexicon", () => {
+        // With the tier wired, the bare skeleton reads as the VOCALIZED form; without it, as the skeleton.
+        expect(withLex.text("\u0643\u0631\u0646").trim()).toBe(without.text("\u0643\u0650\u0631\u0646").trim());
+        expect(withLex.text("\u0643\u0631\u0646").trim()).not.toBe(without.text("\u0643\u0631\u0646").trim());
+    });
+
+    test("pa/pnb are untouched — they pass no wordLexicon and keep the Punjabi tiers", () => {
+        expect(phonemize("\u0679\u06be\u06cc\u06a9", "pnb")).toBe(phonemize("\u0679\u06be\u06cc\u06a9", "pnb"));
+        expect(without.text("\u0643\u0631\u0646").trim()).toBe(phonemizeWordRules("\u0643\u0631\u0646"));
     });
 });
