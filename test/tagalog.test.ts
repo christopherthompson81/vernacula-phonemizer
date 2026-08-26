@@ -253,3 +253,17 @@ describe("tagalog normalization — symbols, numbers, ordinals, times", () => {
         expect(phonemize("64,710 (ikalawa) katao/km²", "tl")).toContain("km");
     });
 });
+
+describe("Tagalog: the ligature strip is resolved by membership, not by length", () => {
+    test("the ligatured penult roots keep their stress, and an /n/-final one would keep its n", () => {
+        // The ligature is `-ng` after a vowel but bare `-g` after /n/, and the surface cannot tell them
+        // apart: `bata`+`ng` and `sandaan`+`g` both end `-ang`. A fixed two-character strip recovers
+        // `sandaa`, so the penult lookup misses and the word takes FINAL stress. Unreachable today — no
+        // n-final root is in `numbers.stressPenult` — and it would go live as a wrong stress, not an
+        // error, the moment `daan`/`sandaan` were added. Membership is exact where length is ambiguous.
+        expect(phonemize("libong bahay", "tl")).toBe("lˈiboŋ bˈahaj");
+        expect(phonemize("apatng bahay", "tl")).toBe("ʔˈapatŋ bˈahaj");
+        expect(phonemize("libo", "tl")).toBe("lˈibo");
+        expect(phonemize("sanlibo", "tl")).toBe("sanlˈibo");
+    });
+});
