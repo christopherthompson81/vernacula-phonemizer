@@ -98,6 +98,7 @@ public static class Bootstrap
             Sindhi.SindhiPhonemizer.RegisterSelf();
             Fula.FulaPhonemizer.RegisterSelf();
             Lao.LaoPhonemizer.RegisterSelf();
+            Zulu.ZuluPhonemizer.RegisterSelf();
         }
     }
 }
