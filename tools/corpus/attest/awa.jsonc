@@ -63,12 +63,21 @@
         },
         {
             "word": "बजे",
-            "verdict": "absent",
+            "verdict": "attested",
             "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
+            // ⚠ CORRECTED BY HAND, AND THE MECHANISM MATTERS. The tool first wrote `absent` / 0 / 0 / 0 here,
+            // and it was wrong: `tools/corpus/mined/awa.jsonc`, mined from a DUMP of this same wiki, carries
+            // the example below. `probe()` reads the top `--limit` CirrusSearch results and only falls back
+            // to an `insource:` query for words CirrusSearch tokenises on their own punctuation — so a word
+            // living in one article that does not rank in that sample is recorded as absent, and `absent`
+            // here means "not in the sampled articles", never "not in the wiki". The morphology test passes
+            // on the example (कय, यकर, आवा, फइला, पय are Awadhi, not quoted Hindi), so this is `attested`.
+            "tokenHits": 1,
+            "articles": 1,
             "substringOnly": 0,
-            "examples": []
+            "examples": [
+                "…22 मार्च 2020 कय भिन्नही लगभग 6:24 बजे (सी.ई.टी) ज़ाग्रेब मा 5.4 या 5.5 कय बल पय भूकंप आवा। यकर केन्द्र…"
+            ]
         },
         {
             "word": "मिनट",

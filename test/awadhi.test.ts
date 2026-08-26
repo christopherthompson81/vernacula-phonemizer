@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/awadhi/awadhi.ts";
 
 // Hand-adjudicated canonical-IPA gold for Awadhi / अवधी (awa) — Eastern Hindi (Indo-Aryan), Devanagari.
@@ -38,6 +39,40 @@ describe("Awadhi canonical IPA (Saksena-documented divergences vs Hindi)", () =>
     test("व → [w] bilabial semivowel (Saksena §12: not Hindi's ʋ) — same eastern reflex as Bhojpuri", () => {
         expect(phonemizeWord("अवधी")).toBe("ˈəwd̪ʱiː"); // 'Awadhi' — व→w (Hindi: əʋd̪ʱiː)
         expect(phonemizeWord("विशाल")).toBe("wɪsˈaːl"); // 'huge' — व→w, श→s
+    });
+
+    test("the flap's lookahead reaches a DIPHTHONG onset — the ʌ in the vowel class is load-bearing", () => {
+        // ɖ before ऐ/औ is ɖ before [ʌi]/[ʌu], so the ʌ that only exists because of divergence (4) is what
+        // lets divergence (2) fire here. Drop ʌ from the class and these two silently stop flapping.
+        expect(phonemizeWord("कडैल")).toBe("kˈəɽʌil"); // Hindi: kəɖˈɛːl
+        expect(phonemizeWord("पडौरा")).toBe("pˈəɽʌuɾaː"); // Hindi: pəɖˈɔːɾaː
+    });
+
+    test("the flap does NOT cross a word boundary, and a geminate ड्ड is not intervocalic", () => {
+        // text() is post-processed whole, so the space between two words is the only thing stopping the
+        // rule from reaching across it — a space is not in the vowel class.
+        expect(phonemize("गोडा डाल", "awa")).toBe("ɡˈoːɽaː ɖˈaːl");
+        expect(phonemizeWord("अड्डा")).toBe("ˈəɖɖaː");
+    });
+
+    test("word-final avagraha ⟨ऽ⟩ RETAINS the schwa (retainOnAvagraha) — Hindi deletes it", () => {
+        expect(phonemizeWord("रामऽ")).toBe("ɾˈaːmə"); // Hindi: ɾˈaːm
+        expect(phonemizeWord("राम")).toBe("ɾˈaːm");
+        expect(phonemizeWord("करऽ")).toBe("kˈəɾə");
+        expect(phonemizeWord("कर")).toBe("kˈəɾ");
+    });
+
+    test("⟨ज्ञ⟩ reads [d͡ʒɲ] — awadhi.jsonc carries no ज्ञ→ɡj post-rule, unlike hindi.jsonc", () => {
+        // ⚠ PINNED, NOT ENDORSED: this is a divergence from Hindi that no Awadhi source licenses, shared
+        // with mr/mai/hne/ne. See the FILED, NOT FIXED note in src/languages/awadhi/awadhi.ts.
+        expect(phonemizeWord("ज्ञान")).toBe("d͡ʒɲˈaːn"); // Hindi: ɡjˈaːn
+        expect(phonemizeWord("विज्ञान")).toBe("wɪd͡ʒɲˈaːn"); // Hindi: ʋɪɡjˈaːn
+    });
+
+    test("⚠ ₹ is NOT stripped — awa declares no symbolTier, so HINDI's claims the sign first", () => {
+        // `stripSymbols: "₹"` in awadhi.jsonc never sees the character; the shared tier runs before it.
+        expect(phonemize("₹500", "awa")).toBe("pˈaː̃t͡ʃ sˈʌu ɾˈʊpjeː");
+        expect(phonemize("५०%", "awa")).toBe("pət͡ʃˈaːs pɾˈət̪ɪsət̪");
     });
 
     test("shared Indo-Aryan core (Hindi-identical where Awadhi does not diverge)", () => {
