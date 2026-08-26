@@ -265,7 +265,15 @@ const SYMBOLS = makeSymbolNormalizer({
     // and read *tu hɔndɛd nɛɾa miljan* — "two hundred naira million", the magnitude stranded after the
     // currency noun — while the lowercase `₦200 million` was already correct. A language whose corpus never
     // capitalises them needs only the one form.
-    magnitudes: ["million", "billion", "Million", "Billion"],
+    // ⚠ ⟨Thousand⟩ WAS MISSING AND HAD THE SAME DEFECT, found by an off-golden probe while porting to C#.
+    // The corpus writes `US$500 Thousand` (×1, in the same sentence as the `US$2 Million` that motivated
+    // the entry above), and undeclared it read *faiv hɔndɛd dola tauzand* — "five hundred dollar thousand",
+    // the stranded-magnitude shape this list exists to prevent, one scale down. NO NEW WORD IS SOURCED: the
+    // hop only reorders text the corpus already writes, and ⟨Thousand⟩ nativises through the English dict
+    // exactly as ⟨Million⟩ does. The lowercase form is ×0 here and is declared anyway, because the
+    // alternation is case-SENSITIVE and the two spellings are one word — leaving one out would make the
+    // reading depend on whether the writer capitalised, which is not a distinction this language draws.
+    magnitudes: ["million", "billion", "Million", "Billion", "thousand", "Thousand"],
     // `&` ×24. The word is ⟨an⟩, this language's own conjunction and the one its number compositor already
     // uses (`numbers.and` in the manifest). ⚠ The corpus writes BOTH ⟨an⟩ ×425 and English ⟨and⟩ ×233; ⟨an⟩
     // is chosen for consistency with the manifest rather than by margin alone.
@@ -306,10 +314,18 @@ class NaijaPhonemizer implements Phonemizer {
                 // COMPOSE is right (the float has already lost the low digits); emitting the token is not a
                 // reading. The ORDINAL fallback keeps the marker and reads the digits after it — `ordinalWords`
                 // is itself `marker + numberWords`, so nothing new is invented; only the quantity is lost.
+                //
+                // ⚠ AND THE FALLBACK WAS DEAD CODE UNTIL THE BRACES WENT IN — a DANGLING ELSE. Written
+                // brace-free, `if (safe) for (…) if (wd) emit(wd); else { … }` parses the `else` onto the
+                // INNER `if (wd)`, not onto the safety test: above 2^53 the whole `for` was skipped and the
+                // ordinal was DELETED from the reading (`9007199254740993rd item` → *aitam*), which is the
+                // exact defect the paragraph above says this branch exists to prevent. The safe path never
+                // reached it — `ordinalWords` cannot yield an empty word — so it failed only where it was
+                // the only thing standing between the numeral and silence.
                 const n = Number(m[3]);
-                if (Number.isSafeInteger(n))
+                if (Number.isSafeInteger(n)) {
                     for (const wd of ordinalWords(n).split(" ")) if (wd) sink.emit(wd);
-                else {
+                } else {
                     sink.emit(ORD.marker);
                     for (const d of m[3]) sink.emit(NUM.units[Number(d)]!);
                 }

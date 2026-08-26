@@ -162,6 +162,13 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         // this engine nativises ⟨US⟩ as the pronoun *us* → [ɔs], which shipped `US$2` as *tu ɔs dola*.
         expect(phonemize("US$2 million", "pcm")).toBe("tu miljan dola");
         expect(phonemize("US$750,000", "pcm")).toBe("sɛvin hɔndɛd an fifti tauzin dola");
+        // ⚠ ⟨Thousand⟩ HAD THE SAME DEFECT ONE SCALE DOWN and was simply missing from the list, found by an
+        // off-golden probe while porting to C#. The corpus's `US$500 Thousand` — the same sentence as the
+        // `US$2 Million` above — read *faiv hɔndɛd dola tauzand*, "five hundred dollar thousand".
+        expect(phonemize("US$500 Thousand", "pcm")).toBe("faiv hɔndɛd tauzand dola");
+        expect(phonemize("US$500 thousand", "pcm")).toBe("faiv hɔndɛd tauzand dola");
+        // …and a magnitude with no currency sign is untouched by the declaration.
+        expect(phonemize("500 thousand pipul", "pcm")).toBe("faiv hɔndɛd tauzand pipul");
     });
 
     /**
@@ -185,6 +192,18 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         expect(phonemize("1ST", "pcm")).toBe("fɛst");
         expect(phonemize("4TH", "pcm")).toBe("nɔmba fo");
         expect(phonemize("21ST", "pcm")).not.toContain("stɾit");
+        // ⚠ ABOVE 2^53 THE FALLBACK MUST STILL SAY SOMETHING. The quantity is unrecoverable (the float has
+        // already lost the low digits), so the branch keeps the marker and reads the digits after it — but
+        // it was a DANGLING ELSE and never ran, so the numeral was deleted outright and `…rd item` read
+        // *aitam*. Found by an off-golden probe while porting to C#; the golden corpus carries no numeral
+        // this large.
+        expect(phonemize("9007199254740993rd item", "pcm")).toBe(
+            "nɔmba nain ziɾo ziɾo sɛvin wan nain nain tu faiv fo sɛvin fo ziɾo nain nain tɾi aitam",
+        );
+        // …and the safe path is unchanged by the braces, which is the other half of the claim.
+        expect(phonemize("9007199254740991st", "pcm")).toBe(
+            "nɔmba nain miliɔn sɛvin tauzin wan hɔndɛd an nainti nain biliɔn tu hɔndɛd an fifti fo miliɔn sɛvin hɔndɛd an foti tauzin nain hɔndɛd an nainti wan",
+        );
     });
 
     test("units and the Dr. abbreviation", () => {
@@ -249,7 +268,7 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
     });
 
     // ⟨bn⟩ GLUED TO A FIGURE — the money magnitude of Nigerian press copy. The artifact's instance glosses
-    // itself one clause later: "sign N195.3BN kontrat … e don pay N150 BILLION fest". ⟨billion⟩ is already
+    // itself one clause later: "sign N195.3bn kontrat … e don pay N150 billion fest". ⟨billion⟩ is already
     // a declared magnitude word in naija.ts, so the abbreviation is expanded into a word the tier and the
     // g2p both already speak, rather than a reading being sourced.
     // ⚠ DIGIT-ANCHORED, because the other ⟨bn⟩ is *ibn* in an Arabic name — routine in northern-Nigerian copy.
