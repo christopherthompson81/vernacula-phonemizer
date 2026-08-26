@@ -89,7 +89,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation; // ¿¡ openers are silent → a
 // A word / number / clause-punctuation token. Numbers use the Spanish convention: dot = thousands separator
 // (1.500), comma = decimal (3,14). Each dot/comma must be followed by digits, so a clause-final "." or ","
 // glued to a number falls through to the punctuation branch. Spanish letters incl. accents + ñ/ü.
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])`, "giu");
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:(?<!(?<!\\d)0)\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])`, "giu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where

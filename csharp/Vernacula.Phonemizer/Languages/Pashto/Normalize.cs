@@ -100,11 +100,11 @@ public static class Normalize
     private static readonly JsRe ESCAPE = JsRegex.Compile("[.*+?^${}()|[\\]\\\\]", "gu");
     private static readonly JsRe QM_ERA = JsRegex.Compile($"([{D}])\\s*ق\\s*\\.?\\s*م\\s*\\.?{Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe GROUP_AR_COMMA = JsRegex.Compile(
-        $"(?<![{D}.,،])([{D}]{{1,3}})((?:،[{D}]{{3}})+)(?![{D}]|،[{D}])", "gu");
+        $"(?<![{D}.,،])([{D}]{{1,3}})((?:(?<!(?<![{D}])0)،[{D}]{{3}})+)(?![{D}]|،[{D}])", "gu");
     private static readonly JsRe GROUP_COMMA = JsRegex.Compile(
-        $"(?<![{D}.,،])([{D}]{{1,3}})((?:,[{D}]{{3}})+)(?![{D}]|,[{D}])", "gu");
+        $"(?<![{D}.,،])([{D}]{{1,3}})((?:(?<!(?<![{D}])0),[{D}]{{3}})+)(?![{D}]|,[{D}])", "gu");
     private static readonly JsRe GROUP_DOT = JsRegex.Compile(
-        $"(?<![{D}.,،])([{D}]{{1,3}})((?:\\.[{D}]{{3}}){{2,}})(?![{D}]|\\.[{D}])", "gu");
+        $"(?<![{D}.,،])([{D}]{{1,3}})((?:(?<!(?<![{D}])0)\\.[{D}]{{3}}){{2,}})(?![{D}]|\\.[{D}])", "gu");
     private static readonly JsRe AR_COMMAS = JsRegex.Compile("،", "gu");
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "gu");

@@ -184,7 +184,10 @@ class MacedonianPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(",");
-                if (frac !== undefined && frac.length === 3) {
+                // ⚠ AND THE INTEGER PART MAY NOT BE A LONE `0`: no convention groups from zero, so `0,001` is
+                // one THOUSANDTH, not one. Without the guard `Number("0" + "001")` read it as 1 — a 1000×
+                // error, and the reading dropped the zero entirely rather than saying it.
+                if (frac !== undefined && frac.length === 3 && intPart !== "0") {
                     // "1,400" is 1400 — a grouped thousand, read as one number.
                     for (const wd of numberToText(Number(`${intPart}${frac}`)).split(" "))
                         sink.emit(phonemizeWord(wd));

@@ -30,7 +30,7 @@ public static class Normalize
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe INTERIOR_DOT = JsRegex.Compile($"(?<={FID})\\.(?={FID})", "gu");
     private static readonly JsRe LONE_WORDSPACE = JsRegex.Compile("፡-?", "gu");
-    private static readonly JsRe GROUPED = JsRegex.Compile("(\\d),(?=\\d{3}(?!\\d))", "gu");
+    private static readonly JsRe GROUPED = JsRegex.Compile("(\\d)(?<!(?<!\\d)0),(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<!\\d)(\\d{1,2}):([0-5]\\d)(?:\\.(\\d+))?(?!\\d)", "gu");
     private static readonly JsRe CLOCK_DOT_TZ = JsRegex.Compile("(?<!\\d)(\\d{1,2})\\.00(?=\\s*(?:GMT|UTC|ዩቲሲ|ጂኤምቲ))", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile("(?<![\\p{L}\\p{M}])ከ\\s?(\\d[\\d.]*)\\s?[-–—]\\s?(\\d[\\d.]*)", "gu");

@@ -73,7 +73,7 @@ public static class UrduPhonemizer
     });
 
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        $"([{URDU_WORD}]+)|({HostWord.LATIN_RUN})|([{DIGIT_CLASS}]+(?:[.,][{DIGIT_CLASS}]+)?)|([۔؟،؛.?!,;:])",
+        $"([{URDU_WORD}]+)|({HostWord.LATIN_RUN})|([{DIGIT_CLASS}]+(?:(?:(?<!(?<![{DIGIT_CLASS}])0),|\\.)[{DIGIT_CLASS}]+)?)|([۔؟،؛.?!,;:])",
         "gu");
 
     /** The Urdu-specific rewrites, built once against the manifest's numbers definition. */

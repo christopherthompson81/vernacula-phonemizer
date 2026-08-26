@@ -100,7 +100,7 @@ public static class Normalize
     // ⚠ THE ZERO-WIDTH CLASS IS ESCAPED, NOT LITERAL. The TS spells it with the four characters themselves;
     // same class, stated by code point.
     private static readonly JsRe ZERO_WIDTH = JsRegex.Compile("[\\u200b-\\u200d\\ufeff]", "gu");
-    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d),(?=\\d{2,3}(?:,\\d|[^\\d]|$))", "gu");
+    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)(?<!(?<!\\d)0),(?=\\d{2,3}(?:,\\d|[^\\d]|$))", "gu");
     private static readonly JsRe EGA_RE = JsRegex.Compile($"{NB}எ\\s*\\.\\s*கா\\s*\\.?{NA}", "gu");
     private static readonly JsRe DOT_RUN = JsRegex.Compile("\\s*\\.\\s*", "gu");
     private static readonly JsRe THIRU_RE = JsRegex.Compile($"{NB}திரு\\s*\\.\\s*(?=[\\p{{L}}])", "gu");

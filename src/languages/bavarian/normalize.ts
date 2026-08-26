@@ -316,7 +316,7 @@ export function normalizeBavarian(input: string): string {
     //     ⚠ THE WHOLE RUN AT ONCE, not one join per pass — see step 6. This arm keeps its HEAD ANCHOR
     //     (`(?<!\p{Nd})` + at most three leading digits), which is what stops `12345 678` merging, so it
     //     cannot use the zero-width form step 6 does and matches the run instead.
-    s = s.replace(/(?<!\p{Nd})(\p{Nd}{1,3})((?:[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu,  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<!\p{Nd})([1-9]\p{Nd}{0,2})((?:[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 7) DEGREES, before the unit rules so the scale letter is not left to the Latin fallback, and before

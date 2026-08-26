@@ -329,7 +329,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    followed by its own sentence comma would lose its last group and speak it as zero.
         for (const mark of ["،", ","]) {
             s = s.replace(
-                new RegExp(`(?<![${D}.,،])[${D}]{1,3}(?:${mark}[${D}]{3})+(?![${D}]|${mark}[${D}])`, "gu"),
+                new RegExp(`(?<![${D}.,،])[${D}]{1,3}(?:(?<!(?<![${D}])0)${mark}[${D}]{3})+(?![${D}]|${mark}[${D}])`, "gu"),
                 (w) => w.replace(new RegExp(mark, "gu"), ""),
             );
         }

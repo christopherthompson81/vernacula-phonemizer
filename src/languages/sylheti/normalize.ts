@@ -232,7 +232,7 @@ export function normalizeSylheti(input: string): string {
     //    supplies the lakh/crore grouping from the VALUE, never from the writing.
     for (let prev = ""; prev !== s; ) {
         prev = s;
-        s = s.replace(/(\p{Nd}),(?=\p{Nd}{2,3}(?!\p{Nd}))/gu, "$1");
+        s = s.replace(/(\p{Nd})(?<!(?<!\p{Nd})0),(?=\p{Nd}{2,3}(?!\p{Nd}))/gu, "$1");
     }
 
     // 6. RANGES, and this step is pinned between two others. AFTER de-grouping, or `১৯,৬০০-২০,০০০` matches

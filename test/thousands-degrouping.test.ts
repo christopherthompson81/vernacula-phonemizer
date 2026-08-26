@@ -82,26 +82,24 @@ const CASES = [
  * ⚠ AND ONE LANGUAGE ALREADY KNEW. `madurese/normalize.ts` carried `(?!0,)` on its comma arm and nowhere
  * else — the same "fixed in one place, never propagated" shape as the de-grouping bug above.
  *
- * THE BACKLOG BELOW IS MEASURED, NOT DECIDED. Every remaining entry is a language whose TOKENIZER accepts an
- * arbitrary separator run inside a number (English's `\d[\d,]*` is the pattern) rather than applying a
- * grouping rule — a different mechanism with a different fix, since constraining the token changes how
- * malformed input is read generally. Entries come off by fixing the language, never by re-measuring.
+ * ⚠ THE BACKLOG IS EMPTY AND THE ALLOWLIST IS GONE. It briefly held 55 language/separator pairs — every
+ * language that joined the run in its TOKENIZER rather than in a grouping rule. Those turned out to be SIX
+ * distinct mechanisms, not one, which is why they could not come out with the grouping rules:
+ *   · a token whose number alternative spans any separator run (en `\d[\d,]*`, ar, ur, hi/bn +17 families);
+ *   · a token that spans DOT groups (ca/es/gl/pt/tr/az);
+ *   · a `frac.length === 3` test in the ENGINE's number branch (cs, mk) — `Number("0"+"001")`;
+ *   · an anchored `{1,3}` head in a normalize rule (he, si, mg, bar, pbt/ps, bal, ug, kmr, lo);
+ *   · a zero-width separator rule the earlier sweep's `{3}` filter missed (ta `{2,3}`, sat, ka);
+ *   · a one-digit-consuming form (`(\d),(?=\d{3})` → `"$1"`) in am and ti.
+ * Each needed its own edit; the GUARD is the same everywhere — a lone `0` head takes no group.
  */
 describe("a thousands group never has a zero head", () => {
     const SEPS: Record<string, string> = { comma: ",", dot: ".", space: " " };
 
-    /** Languages whose NUMBER TOKEN swallows arbitrary separators. Remove an entry by FIXING the language. */
-    const TOKENIZER_ACCEPTS_ANY_RUN = new Set([
-        "acm", "acw", "afb", "ajp", "am", "apc", "apd", "ar", "ary", "arz", "as", "awa", "ayl", "az",
-        "bal", "bar", "bgc", "bho", "bn", "bpy", "ca", "cs", "en", "es", "gl", "gu", "he", "hi", "hne",
-        "ka", "kmr", "lo", "mag", "mai", "mg", "mk", "mr", "my", "ne", "pbt", "ps", "pt", "rkt", "sat",
-        "si", "syl", "ta", "ti", "tr", "ug", "ur",
-    ]);
 
     test("`0,001` is never joined into `1`", () => {
         const joined: string[] = [];
         for (const c of CODES) {
-            if (TOKENIZER_ACCEPTS_ANY_RUN.has(c)) continue;
             for (const [name, sep] of Object.entries(SEPS)) {
                 let a: string, b: string;
                 try { a = phonemize(`0${sep}001`, c); b = phonemize("1", c); } catch { continue; }

@@ -132,7 +132,9 @@ export function normalizeLao(input: string): string {
     //    ⚠ THE COMMA CASE HAD NO SYMPTOM A GATE COULD SEE. `lao.ts` deliberately emits no pause for `,`,
     //    so `US$49,600` read as *…si˧˥p̚ ka˥˨w ho˧˥k̚ hɔː˥˨j* — "forty-nine, six hundred", two numbers where
     //    the text has one, with no leaked character and no dropped symbol to report.
-    const group = /(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:([.,])\p{Nd}{3})+)(?![\p{Nd}.,])/gu;
+    // ⚠ AND A GROUP MAY NOT FOLLOW A LONE `0` — no convention groups from zero, so `0,001` joining to
+    //    `0001` is a 1000× error rather than a reading of it.
+    const group = /(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:([.,])\p{Nd}{3})+)(?![\p{Nd}.,])/gu;
     s = s.replace(group, (m, _g, sep: string) => m.replaceAll(sep, ""));
 
     // 4) NEGATIVE NUMBERS — U+2212 anywhere, and the ASCII hyphen only where it opens a string or a bracket.

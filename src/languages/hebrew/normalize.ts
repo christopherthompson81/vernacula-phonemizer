@@ -230,7 +230,7 @@ export function normalizeHebrew(input: string): string {
     //    *ʔaχat ʔesʁe nkuda ʔaʁba*, with נְקֻדָּה from the manifest).
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, not a clause mark, or a number followed
     //    by its own sentence comma would lose its last group and speak it as zero.
-    s = s.replace(/(?<![0-9.,])[0-9]{1,3}(?:,[0-9]{3})+(?![0-9]|,[0-9])/gu, (w) => w.replace(/,/gu, ""));
+    s = s.replace(/(?<![0-9.,])[1-9][0-9]{0,2}(?:,[0-9]{3})+(?![0-9]|,[0-9])/gu, (w) => w.replace(/,/gu, ""));
 
     // 4) THE GLOSSED ABBREVIATIONS, before the generic acronym join at step 5 (which would otherwise weld
     //    them) and before the proclitic rule at step 6 (whose `PRO_DASH` never sees these — they are glued,

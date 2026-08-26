@@ -100,8 +100,8 @@ export function makeAmharicNormalizer(
 
         // 5. DIGIT DE-GROUPING, before anything reads a comma as punctuation. "5,000" reads as "አምስት , ዜሮ" —
         //    a phrase break plus the word for zero. Amharic groups with commas only, never the period.
-        s = s.replace(/(\d),(?=\d{3}(?!\d))/gu, "$1");
-        s = s.replace(/(\d),(?=\d{3}(?!\d))/gu, "$1"); // second pass for 5,000,000
+        s = s.replace(/(\d)(?<!(?<![\d])0),(?=\d{3}(?!\d))/gu, "$1");
+        s = s.replace(/(\d)(?<!(?<![\d])0),(?=\d{3}(?!\d))/gu, "$1"); // second pass for 5,000,000
 
         // 6. CLOCK, before any rule that could claim a bare number, and before decimals — the corpus's
         //    sports splits are "4:41.30", where the clock must take 4:41 and leave .30 to step 10.

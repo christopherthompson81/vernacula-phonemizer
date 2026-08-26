@@ -90,7 +90,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     private sealed record ForeignToken(string Ipa) : Token;
 
     private static readonly JsRe TOKEN_RE = JsRegex.Compile(
-        "(\\d[\\d,]*(?:\\.\\d+)?)(st|nd|rd|th)?|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*(?:['’]\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)*['’]?)|([.?!,;:])",
+        "(\\d+(?:(?<!(?<!\\d)0),\\d+)*(?:\\.\\d+)?)(st|nd|rd|th)?|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*(?:['’]\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)*['’]?)|([.?!,;:])",
         "gu");
 
     private static readonly JsRe CURLY_APOSTROPHE = JsRegex.Compile("’", "gu");

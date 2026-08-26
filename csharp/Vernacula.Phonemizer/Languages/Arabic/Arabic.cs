@@ -134,7 +134,7 @@ public static class Arabic
             .Where(c => char.ConvertToUtf32(c, 0) > 0x064a)
             .Select(c => $"\\u{char.ConvertToUtf32(c, 0):X4}"));
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        $"([ء-يٰٱً-ْـ{EXTENDED}]+)|(\\d+(?:,\\d{{3}})*(?:\\.\\d+)?)|([۔.!؟?،,؛;:…])",
+        $"([ء-يٰٱً-ْـ{EXTENDED}]+)|(\\d+(?:(?<!(?<!\\d)0),\\d{{3}})*(?:\\.\\d+)?)|([۔.!؟?،,؛;:…])",
         "gu");
 
     private static readonly JsRe ARABIC_INDIC = JsRegex.Compile("[٠-٩]", "g");

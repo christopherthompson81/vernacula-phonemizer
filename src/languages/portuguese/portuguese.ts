@@ -232,7 +232,7 @@ export function phonemizeWord(word: string, dialect: "ep" | "bp" = "ep"): string
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Word / number / clause-punctuation. Portuguese numbers: dot = thousands (1.500), comma = decimal (3,14).
-const TOKEN = /([a-zà-ÿ]+)|(\d+(?:\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
+const TOKEN = /([a-zà-ÿ]+)|(\d+(?:(?<!(?<!\d)0)\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
 
 /** A number token (thousands-dots / decimal-comma) → spoken words. `dialect` selects the BP teen forms (16/17/19
  *  dez-e- vs the EP dez-a-). */

@@ -91,7 +91,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // matters: the ordinal branch precedes the number branch, and its lookahead (whitespace + another token) is
 // exactly the corpus-derived detector — it declines inside `1.234` and `802.11a`, where no space follows the
 // dot, and at end of input, which is the one sentence-final `N.` the corpus contains (`rekoru 7-2.`).
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:\\.\\d{3})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])`, "giu");
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:(?<!(?<!\\d)0)\\.\\d{3})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])`, "giu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
