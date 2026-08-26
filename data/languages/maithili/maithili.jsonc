@@ -108,7 +108,18 @@
         "ृ": { "ipa": "ɾɪ" },
         "े": { "ipa": "e" }, "ॆ": { "ipa": "e" },
         "ै": { "ipa": "əɪ" },
-        "ो": { "ipa": "o" }, "ॊ": { "ipa": "o" }, "ꣿ": { "ipa": "ɛ" },
+        "ो": { "ipa": "o" }, "ॊ": { "ipa": "o" },
+        // ⚠ UNREACHABLE, AND MEASURED SO — the only entry in this file that the engine can never read.
+        // ⟨ꣿ⟩ is U+A8FF, in DEVANAGARI EXTENDED, and the shared word class is `ऀ-ॣॲ-ॿ` (unicode.ts) —
+        // U+0900–U+0963 plus U+0972–U+097F. U+A8FF is outside it, so the tokenizer does not merely drop the
+        // sign, it ENDS THE WORD there: `कꣿ` reads *kˈə* and `मꣿथिली` reads as TWO words, *mˈə t̪ʰˈɪliː*.
+        // The ⟨ɛ⟩ below is never emitted. Kept rather than deleted because the fix is a decision, not an
+        // edit: widening DEVANAGARI_WORD reaches all 17 languages that compose makeNativeHindi, and nothing
+        // justifies that yet — U+A8FF is ×0 in tools/corpus/mined/mai.jsonc, as are U+A8F1 and U+02BC, the
+        // two spellings Unicode documents for the Maithili avagraha (this corpus writes U+0951 instead; see
+        // maithili.ts). Pinned by test/maithili.test.ts so the next reader is not told a reading it will
+        // never hear.
+        "ꣿ": { "ipa": "ɛ" },
         "ौ": { "ipa": "əʊ" },
         "ॅ": { "ipa": "ɛː" },
         "ॉ": { "ipa": "ɔː" },
@@ -299,9 +310,22 @@
         "decimalWord": "दशमलव",
     },
 
-    // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत). Symbols
-    // in `stripSymbols` are dropped so a currency amount reads as the bare number (₹500 → पाँच सौ), matching
-    // the amount reads as the bare number.
+    // Symbol → spoken word, read by THIS engine's own tokenizer AFTER the preceding number (50% → पचास
+    // प्रतिशत). `stripSymbols` drops a sign here instead of reading it.
+    // ⚠ ₹ DOES NOT COME OUT SILENT, AND THIS COMMENT USED TO CLAIM IT DID ("₹500 → पाँच सौ", followed by a
+    // half-sentence that trailed off — the same wrong text bhojpuri.jsonc carried). The SHARED symbol tier
+    // runs first and it is HINDI's: mai declares no `symbolTier`, and the `normalize` override it does pass
+    // (the U+0951 fold, see maithili.ts) leaves `symbols` alone, so makeNativeHindi falls back to
+    // hindi.jsonc's tier — which claims ₹ and appends रुपये before the strip below ever sees the sign.
+    // Measured: `₹500` reads pˈaː̃t͡ʃ sˈəʊ ɾˈʊpje. The strip below is NOT dead, though — it is the second
+    // line of defence, and it fires on a ₹ the shared tier declines: the tier claims the sign only next to
+    // an amount, so `₹ अछि` reads *ˈət͡ʃʰɪ* and bare `₹` reads empty, both by this strip. Pinned in
+    // test/maithili.test.ts, because "the tier always claims ₹, so this entry can never run" is the
+    // plausible-but-wrong reading of the paragraph above.
+    // ⚠ प्रतिशत IS THE ONE INHERITED HINDI WORD THIS LANGUAGE CANNOT CONFIRM — `tools/corpus/attest/mai.jsonc`
+    // has tokenHits 1, and that single hit is a NEPALI sentence (भन्दा अधिक, लागेकाछन्) under a Maithili
+    // title. It is retained because an unsourced substitute is worse than an inherited word, but it is not
+    // inert: `%` occurs 13 times across 7 of the 200 golden rows, so the unconfirmed word is spoken there.
     "symbols": { "%": "प्रतिशत" },
     "stripSymbols": "₹",
 

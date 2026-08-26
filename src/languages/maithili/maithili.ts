@@ -9,6 +9,11 @@
  *
  * ⚠ SINGLE-SOURCE bring-up: the only referee is a small human set (167 pairs), so this is verified rather
  * than convergent.
+ *
+ * ⚠ TWO THINGS THE MANIFEST DECLARES THAT THE ENGINE DOES NOT DO, both annotated at their entry in
+ * maithili.jsonc and pinned in test/maithili.test.ts: ⟨ꣿ⟩ U+A8FF is a `vowelSigns` entry the shared word
+ * class cannot reach (it ENDS the token instead), and ₹ is claimed by the inherited Hindi symbol tier
+ * before `stripSymbols` sees it, so `₹500` reads *pˈaː̃t͡ʃ sˈəʊ ɾˈʊpje* rather than the bare number.
  */
 /**
  * NORMALIZER WORDS. This engine inherits Hindi's. The CLOCK words (बजकर, मिनट) are confirmed for Maithili;
@@ -55,20 +60,33 @@ import { loadSharedPhonology } from "../../core/phonology.ts";
  */
 const UDATTA_AS_AVAGRAHA = /॑/gu;
 
-let MAI: ReturnType<typeof makeNativeHindi> | undefined;
+const fold = (s: string) => s.replace(UDATTA_AS_AVAGRAHA, "ऽ");
+
+let MAI: ReturnType<typeof engine> | undefined;
 function engine(foreign?: ForeignPhonemizer) {
     const def = loadManifest<HindiDef>(import.meta.url, "maithili.jsonc");
     const hindi = makeHindiNormalizer(def.numbers, def);
-    return makeNativeHindi(
+    const e = makeNativeHindi(
         def,
         loadSharedPhonology(),
         foreign,
         undefined,
         undefined,
-        // The fold runs BEFORE the inherited normalizer, so every rule downstream — including the word
-        // tokenizer, which does not carry U+0951 in its class — sees the avagraha the writer meant.
-        { normalize: (input: string) => hindi(input.replace(UDATTA_AS_AVAGRAHA, "ऽ")) },
+        // ⚠ The fold is at the NORMALIZE boundary because that is the earliest hook `makeNativeHindi`
+        // offers, not because the tokenizer would otherwise eat the mark: `DEVANAGARI_WORD` is `ऀ-ॣॲ-ॿ`,
+        // which SPANS U+0951, so ⟨क॑⟩ is already one token. What the placement buys is that the word
+        // reaching `retainOnAvagraha` — an `endsWith("ऽ")` on the SPELLING — carries the sign the writer
+        // meant. (An earlier version of this note claimed the token class excluded U+0951. It does not;
+        // `phonemize("म॑थिली", "hi")`, which has no fold, reads one word.)
+        { normalize: (input: string) => hindi(fold(input)) },
     );
+    // ⚠ …AND THE WORD ENTRY POINTS NEED IT SEPARATELY, because neither runs the normalizer: `text()` is the
+    // only path the override above reaches. Until this wrapper existed the referee eval and the shipped
+    // reading disagreed on this module's own signature construct — `word("अब॑")` gave *ˈəb* against
+    // `text("अब॑")`'s *ˈəbə* — and no golden could show it, since every golden goes through `text()`.
+    // `text` keeps the UNWRAPPED `e.word` by construction (it closes over the inner one), so nothing
+    // double-folds: by the time a token reaches it the normalizer has already replaced every U+0951.
+    return { ...e, word: (w: string) => e.word(fold(w)), wordRules: (w: string) => e.wordRules(fold(w)) };
 }
 
 /** Build the Maithili phonemizer. `foreign` handles embedded Latin runs. */
@@ -76,7 +94,7 @@ export function createMaithili(foreign?: ForeignPhonemizer): { text(input: strin
     return engine(foreign);
 }
 
-/** Bare word→IPA (tests / eval). */
+/** Bare word→IPA (tests / eval). The U+0951 fold rides on `engine()`'s wrapper — see the ⚠ there. */
 export function phonemizeWord(w: string): string {
     return (MAI ??= engine()).word(w);
 }
