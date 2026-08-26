@@ -71,3 +71,11 @@ tools/perso-arabic/lexicon.*.noref.tsv
 # C# build output — the port's bin/obj must never enter the tree
 csharp/**/bin/
 csharp/**/obj/
+
+# ⚠ PER-WORKTREE PROBE PROJECTS. A port's cross-engine differential needs a throwaway C# console project
+# and a Node-side .mts driver. Those used to live in the session scratchpad, which is SHARED between
+# concurrent agents — three fan-outs running, three times an agent had its probe repointed at a sibling's
+# worktree mid-run and measured the wrong build. `.probe/` puts it inside the agent's own worktree
+# instead, where no sibling can reach it, and ignoring it here is the other half: a probe harness must
+# never be able to reach a commit via `git add -A`. See csharp/PORTING.md.
+.probe/

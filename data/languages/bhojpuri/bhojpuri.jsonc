@@ -97,7 +97,27 @@
         // inherent vowel and the siblings, folding ə→ʌ matches `provenance`'s inventory. The 1622-pair
         // grammar-mined referee decides it; it is not in the repo. Whichever way, both engines move
         // together and csharp/goldens/bho.tsv is regenerated with `tools/gen_variant_golden.mts hi bho`.
-        "अ": { "ipa": "ʌ", "note": "short central (schwa) — see the filed defect above" },
+        "अ": {
+            "ipa": "ʌ",
+            // ⚠ THE ʌ/ə SPLIT IS LOAD-BEARING, WHICH IS NOT WHAT IT LOOKS LIKE. `inherentVowel` above is
+            // ə and this is the only ʌ in the file, so on the face of it one phoneme is written two ways:
+            // अब reads ˈʌb beside कर kˈəɾ, and 7 of the 9 Devanagari manifests write ə for BOTH (only
+            // bho and magahi split, the same derived pair that carried the ASCII ⟨r⟩). Unifying on ə is
+            // the obvious tidy-up. IT IS A REGRESSION, measured over all 1,622 referee words:
+            //     77 words change by the SYMBOL ALONE, folded identically — no effect
+            //      3 words change STRUCTURALLY, and lose a phone:
+            //            इअ ˈiʌ → ˈi        उअ ˈuʌ → ˈu        ओअ ˈoʌ → ˈo
+            // Schwa deletion targets the inherent-vowel symbol, so writing अ as ʌ is what keeps an
+            // INDEPENDENT vowel letter out of a rule meant for the vowel the engine INSERTS. The primary
+            // referee drops 71.041% → 70.856% accordingly.
+            // ⚠ So this is a real inconsistency with a real reason, not a slip. Unifying the symbol needs
+            // the deletion rule to distinguish an inserted inherent vowel from a written अ FIRST; doing it
+            // the other way round deletes vowels. `provenance`'s /i e ɛ a ʌ ɔ o u/ names ʌ and not ə,
+            // which is consistent with keeping this value as it stands.
+            // ⚠ The referee cannot arbitrate the symbol either: bho.jsonc folds ə→ʌ ("the schwa: fleet ə ~
+            // the grammar's [ʌ]") and the grammar writes ʌ in 719 rows and ə in ZERO.
+            "note": "short central (schwa) — realised [ʌ]; the split from `inherentVowel` is deliberate, see above",
+        },
         "आ": { "ipa": "ɑ", "note": "long open" },
         "इ": { "ipa": "i", "note": "short near-close front" },
         "ई": { "ipa": "i", "note": "long close front" },
