@@ -51,10 +51,17 @@ if (files.length === 0) {
 }
 
 let bad = 0;
+let compared = 0, unreadable = 0;
 for (const f of files) {
     if (!existsSync(f)) continue; // deleted
     let before;
-    try { before = headers(execSync(`git show ${base}:${f}`, { encoding: "utf8" })); } catch { continue; } // new file
+    // ⚠ `stdio: pipe` so git's "exists on disk, but not in <base>" goes to the catch instead of the
+    // terminal. The catch means "no version at base to compare against" — usually a new manifest, but also
+    // EVERY file when the base predates a tree move, which is how this loop can compare nothing at all.
+    // Counted, and reported below, so an "ok" always states what it actually looked at.
+    try { before = headers(execSync(`git show ${base}:${f}`, { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] })); }
+    catch { unreadable++; continue; }
+    compared++;
     const src = readFileSync(f, "utf8");
     const after = headers(src);
     // The defect is a header SEPARATED from its key — the old comment survives in the file, now heading
@@ -81,9 +88,16 @@ for (const f of files) {
         }
     }
 }
+const newAtBase = unreadable === 0 ? "" : `, ${unreadable} with no version at ${base} (new, or the base predates a tree move)`;
 console.log(
     bad === 0
-        ? `ok — ${files.length} changed manifest(s), every pre-existing key kept its own header`
+        ? `ok — ${files.length} changed manifest(s), ${compared} compared${newAtBase}; every pre-existing key kept its own header`
         : `${bad} orphaned header(s)`,
 );
+// ⚠ SAME RULE AS THE EMPTY-DIFF BRANCH ABOVE: changed files that were all unreadable at the base compared
+// nothing, and "ok" over nothing is the vacuous pass that let #755 ship. Distinguished from a real pass.
+if (bad === 0 && compared === 0) {
+    console.error(`check-manifest-headers: NOTHING WAS ACTUALLY COMPARED — ${files.length} changed manifest(s), none readable at ${base}.`);
+    process.exit(2);
+}
 process.exit(bad === 0 ? 0 : 1);
