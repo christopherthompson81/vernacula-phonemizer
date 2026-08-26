@@ -1,6 +1,7 @@
 // `String.prototype.trim` is NOT `string.Trim()`, and the gap runs in BOTH directions: .NET does not strip
 // U+FEFF (which JS does, and a BOM is the commonest leading character a file-read string can carry) and does
-// strip U+0085 and U+001C-U+001F (which JS does not).
+// strip U+0085 (which JS does not). Measured, not assumed: `char.IsWhiteSpace` is FALSE for U+001C-U+001F on
+// modern .NET, whatever .NET Framework used to do, so U+0085 is the whole of that half of the gap.
 //
 // ⚠ FOUND BY A PROBE, NOT BY THE GATE, and it was a C#-ONLY divergence — the TypeScript was already right.
 // wuu's engine tests `WUGNIU.test(input.trim())` as a whole-string fast path, so "\uFEFFzaon2 he4" took the

@@ -28,7 +28,7 @@ public static class Js
 
     /// <summary>The ECMAScript `WhiteSpace ∪ LineTerminator` set that `String.prototype.trim` strips.
     /// ⚠ IT IS NOT `char.IsWhiteSpace`, IN BOTH DIRECTIONS: .NET does not count U+FEFF (the BOM, which JS
-    /// does) and does count U+0085 and U+001C-U+001F (which JS does not). Measured on wuu, whose engine
+    /// does) and does count U+0085 (which JS does not). Measured on wuu, whose engine
     /// tests `WUGNIU.test(input.trim())` as a whole-string fast path — a BOM-prefixed romanized reading took
     /// the fast path in Node and the English foreign reader in .NET, and a U+0085-prefixed one did the
     /// reverse. Same table as `Sinitic.JsNumberIndex`, for the same reason.</summary>
