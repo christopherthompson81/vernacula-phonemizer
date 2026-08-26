@@ -236,6 +236,30 @@ describe("bare exponent", () => {
         expect(phonemize("&notareal; thing", "en")).toBeTruthy();
     });
 
+    test("⚠ AN ENGINE OFF THE SHARED TIER CALLS THE SAME PASS — ps and he", () => {
+        // 52 engines do not use `makeSymbolNormalizer` at all; each carries its own unit table because the
+        // tier cannot express its word order. They reach the fallback by calling `spacedBareExponent`
+        // themselves, AFTER their own unit rule — one implementation rather than 52.
+        //
+        // ⚠ ps IS THE ONE WITH THE EVIDENCE: 5 rows of its artifact write scientific notation and every one
+        // read as bare *lˈəs* ("ten"). Of the 37 codes still off the fallback after #1044, only ps and he had
+        // a case at all; 30 have no digit-base superscript in their corpus and are deliberately left alone.
+        expect(phonemize("10⁶", "ps")).toBe(phonemize("10 6", "ps"));
+        expect(phonemize("2×10³⁰", "ps")).toContain(phonemize("30", "ps").trim()); // the magnitude survives
+        // …and ps's own refusals are untouched: `km²` still reads as the unit with the power dropped, which
+        // is a missing WORD it has no source for, not a deleted digit.
+        expect(phonemize("۵ km²", "ps")).toContain("mət̪ˈər mərbˈəʔ");
+        expect(phonemize("10⁻¹⁹", "ps")).toBe(phonemize("10", "ps")); // negative still declined
+
+        // he reads `²` with its own ×3-attested בריבוע and must keep first claim on it.
+        expect(phonemize("8² = 64", "he")).toContain("beʁibua");
+        expect(phonemize("10²", "he")).toContain("beʁibua");
+        expect(phonemize("15 km³", "he")).toContain("kilometeʁ meʔukav");
+        // ⚠ ONLY THE POWERS בריבוע CANNOT NAME fall through — and this repairs ZERO rows of he's artifact,
+        // whose 6 superscript rows are all squares. Robustness, stated as such.
+        expect(phonemize("10⁶", "he")).toBe(phonemize("10 6", "he"));
+    });
+
     test("⚠ ENGLISH LEAKS ITS UNIT ACROSS A MAGNITUDE WORD", () => {
         // `2.2 million km2 of ocean` — the archipelago sentence, in en_us — read as *… mˈɪɫjən ˈʊkm tʰˈuː …*:
         // the abbreviation reached the phoneme stream AS RAW LETTERS and the area was lost entirely. Invisible

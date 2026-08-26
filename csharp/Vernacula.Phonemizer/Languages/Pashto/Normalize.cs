@@ -185,6 +185,9 @@ public static class Normalize
                     .Replace(s, $"$1 {word}");
             }
 
+            // A bare exponent's digits, AFTER the unit rule above and never before it — `km²` is the unit's.
+            s = NormalizeSymbols.SpacedBareExponent(s);
+
             s = DEG_C.Replace(s, "$1 سانتيګراد");
             s = DEG_SIGN.Replace(s, "$1 سانتيګراد");
 

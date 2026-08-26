@@ -1,4 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
+import { spacedBareExponent } from "../../core/normalizeSymbols.ts";
 /**
  * Pashto / پښتو (ps) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -70,6 +71,11 @@ import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
  *   writes area as the WORDS `متر مربع` ×446 rather than `m²`, so the symbol form is a Latin-text residue
  *   with no Pashto collocation to source a modifier from (trap 37 wants `<word> <unit-noun>`, and there is
  *   none). `km²` is read as the unit noun with the exponent dropped; that is a PARTIAL fix and is stated.
+ *   ⚠ THE REFUSAL IS ABOUT THE WORD, NOT ABOUT THE DIGITS, and step 5a now draws that line. Declining to
+ *   invent a Pashto modifier is right; deleting a magnitude the corpus DID write is not, and this corpus
+ *   writes scientific notation ×5 — `2×10³⁰`, `3 x 10²⁶`, `10¹¹–10¹²`, `7.2 x 10¹³ jouls/kg`, `4×10¹³` —
+ *   every one of which read as bare *lˈəs* ("ten"). Those five rows now keep their exponent as DIGITS.
+ *   `km²` is unchanged, and so is the refusal above.
  */
 
 /** ASCII + Arabic-Indic + Extended Arabic-Indic. Written out because `\p{Nd}` would also admit Devanagari
@@ -303,6 +309,18 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
                 `$1 ${word}`,
             );
         }
+
+        // 5a) A BARE EXPONENT'S DIGITS, after the unit rule above and never before it — `km²` is the unit's
+        //     and step 5 must have first claim, exactly as the shared tier orders the same pair.
+        //     ⚠ THE HEADER'S EXPONENT REFUSAL STANDS AND THIS DOES NOT WEAKEN IT. There is still no Pashto
+        //     modifier word to source (`متر مربع` ×446 is the WORDS, not a reading for the symbol), so `km²`
+        //     keeps reading as the unit noun with the power dropped. What changes is the case that has no
+        //     unit at all: this corpus writes SCIENTIFIC NOTATION ×8 — `2×10³⁰ باکتریاوې`, `3 x 10²⁶
+        //     باکتریاوې`, `10¹¹–10¹²`, `4.1×10¹⁰ m³` — and every one of them read as bare *lˈəs* ("ten"),
+        //     the magnitude gone. `sources.ts` reports the sign with no reading, which is a refusal to
+        //     INVENT a word; it is not a reason to delete the digits the corpus did write.
+        //     A letter base, a negative and a lone ⁰/¹ are all declined by the shared pass — see it for why.
+        s = spacedBareExponent(s);
 
         // 6) DEGREES — the scale word is `سانتيګراد` ×100, of which ×56 sit directly after a number, so both
         //    the word and its POSITION are attested. `۲۴ سانتيګراد` is the corpus's own phrasing.

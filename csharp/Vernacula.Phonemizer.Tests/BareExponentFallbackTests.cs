@@ -59,6 +59,17 @@ public class BareExponentFallbackTests
     }
 
     [Fact]
+    public void AnEngineOffTheSharedTierCallsTheSamePass()
+    {
+        // ps has its own unit table — the tier cannot express its word order — so it calls the pass itself,
+        // after that table. 5 rows of its artifact write scientific notation and every one read as bare
+        // *lˈəs* ("ten"). ⚠ NO GOLDEN ROW MOVES for this, in either language: the gate cannot see it.
+        Assert.Equal(Say("10 6", "ps"), Say("10⁶", "ps"));
+        Assert.Equal(Say("10", "ps"), Say("10⁻¹⁹", "ps"));            // negative still declined
+        Assert.Contains("mət̪ˈər mərbˈəʔ", Say("۵ km²", "ps"));       // …and its own unit rule untouched
+    }
+
+    [Fact]
     public void ADeclaredLanguageStillReadsTheWord()
     {
         Assert.Contains("skwˈɛɹd", Say("20²", "en"));

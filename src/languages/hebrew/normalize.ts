@@ -1,4 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
+import { spacedBareExponent } from "../../core/normalizeSymbols.ts";
 /**
  * Hebrew / עברית (he) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -394,6 +395,17 @@ export function normalizeHebrew(input: string): string {
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km³${NOT_LETTER_AFTER}`, "gu"), "$1 קִילוֹמֶטֶר מְעֻקָּב ");
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km²${NOT_LETTER_AFTER}`, "gu"), "$1 קִילוֹמֶטֶר רָבוּעַ ");
     s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?²`, "gu"), "$1 בְּרִיבּוּעַ ");
+    //     ⚠ בריבוע COVERS THE SQUARE AND NOTHING ELSE, so every other power was still being deleted — the
+    //     rule above is ×3-attested for `²` and there is no corpus word for a cube or a generic power, and
+    //     that refusal stands. What it does not cover is a CUBE or a generic power on a bare base, and
+    //     those were being deleted rather than declined — `10⁶` read as bare *ʔeseʁ*. The shared pass emits
+    //     the DIGITS for them, after בריבוע has had first claim on every `²`.
+    //     ⚠ THIS REPAIRS ZERO ROWS OF THE CURRENT ARTIFACT, and the number is stated rather than hidden: all
+    //     6 of its superscript-bearing rows are squares, and the rule above already claims every one (`8² =
+    //     64`, `2030 = 27² + 26² + 25²`, `טכניון 10²`). So this is ROBUSTNESS, not a measured repair — kept
+    //     because it is one call to a pass whose four declines were each measured elsewhere, and because
+    //     that zero IS the falsification test passing: nothing this corpus writes is touched.
+    s = spacedBareExponent(s);
 
     // 12) THE CLOCK COLON → A SPACE, and this is `ug`'s decimal refusal in another class: the defect is a
     //     spurious CLAUSE PAUSE, and removing it costs no vocabulary. `:` is declared clause punctuation, so

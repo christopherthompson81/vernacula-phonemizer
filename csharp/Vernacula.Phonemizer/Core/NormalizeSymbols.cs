@@ -255,6 +255,31 @@ public static class NormalizeSymbols
     /** The mark and the separator before it, stripped together — see the TS for why the separator goes too. */
     private static readonly JsRe UNIT_POWER_MARK = JsRegex.Compile("[ \u00a0\u202f\u2009]?[²³]", "u");
 
+    /// <summary>The floor under every exponent refusal: emit a bare power's DIGITS, spaced off
+    /// (`10⁶` → `10 6`). Public because 52 engines do not use this tier and must call it themselves, AFTER
+    /// their own unit rule. Ported from src/core/normalizeSymbols.ts — see it for the evidence.</summary>
+    public static string SpacedBareExponent(string s)
+    {
+        var all = s;
+        return BARE_EXPONENT.Replace(s, m =>
+        {
+            var whole = m.Value;
+            var sup = m.Groups[2].Value;
+            if (LONE_MARK.IsMatch(sup)) return whole;
+            var digits = new StringBuilder();
+            foreach (var c in Js.CodePoints(sup)) digits.Append(SUPERSCRIPT[c]);
+            return SpacedDigits(m.Groups[1].Value, digits.ToString(), all, m.Index + m.Length) ?? whole;
+        });
+    }
+
+    /// <summary>The digit reading, or null where no honest one exists: no letter base, no negative.</summary>
+    private static string? SpacedDigits(string baseText, string digitStr, string all, int end)
+    {
+        if (!DIGIT_BASE.IsMatch(baseText)) return null;
+        if (digitStr.StartsWith('-')) return null;
+        return LETTER_NEXT.IsMatch(all[end..]) ? $"{baseText} {digitStr} " : $"{baseText} {digitStr}";
+    }
+
     private static int DefaultCountForm(double n) => n == 1 ? 0 : 1;
 
     /** The Slavic three-way selector (ru, cs): 1→0 (sg), 2–4→1 (paucal), else→2 — keyed on the final
@@ -805,15 +830,6 @@ public static class NormalizeSymbols
 
             // A BARE EXPONENT, LAST — after the unit path, which must have its chance first or this would steal
             // every `km²` and read it as "kilometre squared" instead of "square kilometres".
-            // The floor under every refusal: emit the exponent's DIGITS, spaced off. Digit bases only, never a
-            // negative. Returns null where no honest digit reading exists, and the mark is left as it was.
-            string? SpacedDigits(string baseText, string digitStr, string all, int end)
-            {
-                if (!DIGIT_BASE.IsMatch(baseText)) return null;
-                if (digitStr.StartsWith('-')) return null;
-                return LETTER_NEXT.IsMatch(all[end..]) ? $"{baseText} {digitStr} " : $"{baseText} {digitStr}";
-            }
-
             if (d.BareExponent is not null)
             {
                 var be = d.BareExponent;
@@ -844,18 +860,7 @@ public static class NormalizeSymbols
             }
             else
             {
-                var allU = s;
-                s = BARE_EXPONENT.Replace(s, m =>
-                {
-                    var whole = m.Value;
-                    var baseText = m.Groups[1].Value;
-                    var sup = m.Groups[2].Value;
-                    var end = m.Index + m.Length;
-                    if (LONE_MARK.IsMatch(sup)) return whole;
-                    var digits = new StringBuilder();
-                    foreach (var c in Js.CodePoints(sup)) digits.Append(SUPERSCRIPT[c]);
-                    return SpacedDigits(baseText, digits.ToString(), allU, end) ?? whole;
-                });
+                s = SpacedBareExponent(s);
             }
             return s;
         };

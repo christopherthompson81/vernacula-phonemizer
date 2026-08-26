@@ -579,6 +579,57 @@ export interface SignWords {
     dividedBy: string;
 }
 
+/**
+ * THE FLOOR UNDER EVERY EXPONENT REFUSAL: emit a bare power's DIGITS, spaced off.
+ *
+ * ⚠ THE REFUSAL DELETED THE MARK, IT DID NOT PRESERVE IT. The shared tier used to leave an undeclared
+ * superscript in the text on the stated grounds that it "stays where the RAWMARK leak gate can see it". It
+ * does not: the mark survives the symbol tier and is then dropped by the language's own tokenizer, which
+ * knows no `²` — so the outcome was precisely the invisible missing reading the choice existed to prevent.
+ * `10⁶` read as *ten* in 169 of 193 registry codes (#1041).
+ *
+ * `10⁶` → `10 6` reads *ten six*: clumsy, audibly not "ten to the sixth", but the MAGNITUDE survives and it
+ * is byte-identical to what the already-spaced `10 6` gives. A language wanting the real phrase declares
+ * `bareExponent` (or writes its own rule); this is the floor beneath that, not a substitute for it.
+ *
+ * ⚠ EXPORTED BECAUSE 49 OF THE 181 LANGUAGE DIRS DO NOT USE THIS TIER. Each carries its own unit table —
+ * the tier cannot express their word order — so each must call this itself, AFTER its own unit rule has had
+ * the text. One implementation rather than 49 is the point: the three declines below were measured once.
+ *
+ * ⚠ THE FOURTH DECLINE IS NOT HERE. Clearing a ²/³ that sits BEFORE a unit noun (`3540² км`) happens at the
+ * top of `makeSymbolNormalizer`, because it has to run before the unit path rather than after it — see the
+ * comment there. A caller off the tier does not get it, so `500² km` would emit a spurious digit. Reachable
+ * only where that shape occurs: it is ×0 in ps's artifact, the first caller, and any future caller should
+ * check its own before wiring this in.
+ */
+export function spacedBareExponent(s: string): string {
+    return s.replace(BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
+        // ⚠ A LONE ⁰ OR ¹ IS A DEGREE SIGN OR A PRIME — see `LONE_MARK`.
+        if (LONE_MARK.test(sup)) return whole;
+        const digits = [...sup].map((c) => SUPERSCRIPT[c]!).join("");
+        return spacedDigits(base, digits, all, at + whole.length) ?? whole;
+    });
+}
+
+/** The digit reading itself, or null where no honest one exists. Shared by the tier's declared branch —
+ *  which falls through to it on a PARTIAL declaration — and by `spacedBareExponent` above. */
+function spacedDigits(base: string, digits: string, all: string, end: number): string | null {
+    // ⚠ DIGIT BASES ONLY. A LETTER base is a unit, a romanization tone number, an isotope or a footnote
+    // marker far more often than a power — which is exactly why seven Sinitic corpora and `so` declined
+    // `bareExponent` outright. Declining letters keeps every one of those refusals intact and still buys the
+    // digit-base powers `so`'s own note counted (×26).
+    if (!DIGIT_BASE.test(base)) return null;
+    // ⚠ A NEGATIVE EXPONENT IS LEFT ALONE. There is no sign word to spend here, and this pass runs AFTER the
+    // language's own minus rule, so an emitted ASCII `-` is downstream of the only thing that could read it
+    // and would be dropped in turn: `10⁻¹⁹` would become *ten nineteen*, the sign silently inverted. A
+    // dropped mark is a bad reading; an INVERTED one is worse than both.
+    if (digits.startsWith("-")) return null;
+    // ⚠ THE BOUNDARY IS ADDED HERE, not by `BARE_EXPONENT_GLUED`. That pass must not fire where this one
+    // declines: run fleet-wide it split `3,850 km²이고` into two Korean tokens whose ² was dropped anyway,
+    // moving a golden row for a reading nothing ever emitted.
+    return LETTER_NEXT.test(all.slice(end)) ? `${base} ${digits} ` : `${base} ${digits}`;
+}
+
 export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // Validate what IS declared, before any of it is compiled into a pattern. See `assertForms`.
     if (d.percent !== undefined) assertForms("percent", d.percent);
@@ -1044,38 +1095,6 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // reaches here a surviving superscript has no unit to modify — the unit's own powers were cleared at
         // the top of this function and the unit path has had the rest — which is exactly the case
         // `bareExponent` describes.
-        /**
-         * THE FLOOR UNDER EVERY REFUSAL ABOVE: emit the exponent's DIGITS, spaced off.
-         *
-         * ⚠ THE OLD REFUSAL DELETED THE MARK, IT DID NOT PRESERVE IT. The comment above used to end at
-         * "the character stays where the RAWMARK leak gate can see it". It does not: the superscript
-         * survives THIS tier and is then dropped by the language's own tokenizer, which knows no `²`. The
-         * outcome was precisely the invisible missing reading the choice existed to prevent — `10⁶` read as
-         * *ten* in 169 of 193 registry codes (sw *kˈumi*, ha *ɡˈo˥ma˩*, id *səpˈuluh*), and `(1.60*10⁻¹⁹)`,
-         * the elementary charge, as *one point six zero ten* in three shipped goldens. 11 instances across
-         * the mined artifacts, so this is corpus-attested rather than hypothetical.
-         *
-         * `10⁶` → `10 6` reads *ten six*: clumsy, audibly not "ten to the sixth", but the MAGNITUDE survives
-         * and it is byte-identical to what the already-spaced `10 6` gives today. A language wanting the real
-         * phrase declares `bareExponent`; this is the floor beneath that, not a substitute for it. Returns
-         * null where no honest digit reading exists, and the mark is then left exactly as before.
-         */
-        const spacedDigits = (base: string, digits: string, all: string, end: number): string | null => {
-            // ⚠ DIGIT BASES ONLY. A LETTER base is a unit, a romanization tone number, an isotope or a
-            // footnote marker far more often than a power — which is exactly why seven Sinitic corpora and
-            // `so` declined `bareExponent` outright. Declining letters keeps every one of those refusals
-            // intact and still buys the digit-base powers `so`'s own note counted (×26).
-            if (!DIGIT_BASE.test(base)) return null;
-            // ⚠ A NEGATIVE EXPONENT IS LEFT ALONE. There is no sign word to spend here, and this tier runs
-            // AFTER the language's own minus rule, so an emitted ASCII `-` is downstream of the only thing
-            // that could read it and would be dropped in turn: `10⁻¹⁹` would become *ten nineteen*, the sign
-            // silently inverted. A dropped mark is a bad reading; an INVERTED one is worse than both.
-            if (digits.startsWith("-")) return null;
-            // ⚠ THE BOUNDARY IS ADDED HERE, not by `BARE_EXPONENT_GLUED`. That pass must not fire where this
-            // one declines: run fleet-wide it split `3,850 km²이고` into two Korean tokens whose ² was
-            // dropped anyway, moving a golden row for a reading nothing ever emitted.
-            return LETTER_NEXT.test(all.slice(end)) ? `${base} ${digits} ` : `${base} ${digits}`;
-        };
         if (d.bareExponent !== undefined) {
             const be = d.bareExponent;
             // ⚠ A FOLLOWING LETTER MUST NOT FUSE ONTO THE EMITTED WORD. The superscript is consumed and the
@@ -1107,11 +1126,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 // ⚠ THE CALLER ADDS THE BOUNDARY — see the `\s?` guard on the returned string below.
             });
         } else {
-            s = s.replace(BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
-                if (LONE_MARK.test(sup)) return whole;
-                const digits = [...sup].map((c) => SUPERSCRIPT[c]!).join("");
-                return spacedDigits(base, digits, all, at + whole.length) ?? whole;
-            });
+            s = spacedBareExponent(s);
         }
 
         return s;

@@ -132,3 +132,57 @@ so each needs its own rule. That is a per-language job, not a shared-tier one.
 Also noted and NOT actioned: English reads `133 ⁰C` as *…three C* — its degree class is `[°º]` and does not
 carry U+2070 the way Sinhala's does. Sinhala measured that from its own corpus; en has no such measurement
 here, so guessing it in would be unsourced.
+
+## Run 7 — 2026-08-26 09:05 — the residual 37, measured before touching any of them
+
+**Question.** Can the 37 codes still dropping `10⁶` be fixed as a sweep?
+
+**No shared seam exists.** `foldPass` is the only fleet-wide text hook and it runs BEFORE each engine's
+normalize — a fallback there would steal `km²` from every language's unit rule, which is the ordering the
+whole design avoids. There is no post-normalize hook, so a sweep means 37 local edits.
+
+**And the evidence does not support 30 of them.** Counted digit-base bare superscripts in each artifact:
+
+| code | × | what it actually is |
+|---|---|---|
+| ps | 8 | genuine scientific notation |
+| he | 11 | all squares — see below |
+| ka | 1 | genuine (`10¹² მ²`) |
+| ki | 2 | one genuine (`10¹⁰⁰`), one dubious (`kilomita 700².`) |
+| mn | 8 | **coordinates** — `110⁰04¹05¹¹` spends ⁰ ¹ ¹¹ for ° ′ ″ |
+| nci | 14 | **a nuclide table** — `0,708 ¹⁸⁰Hf`, `2,137 ⁶³Cu` |
+| ln | 2 | **bibliography edition markers** — `Kinsásá, 2007³` |
+| the other 30 | 0 | nothing to repair |
+
+The last three are false positives, and two of them are shapes the #1044 rules do NOT cover — a doubled `¹¹`
+prime and a space-separated superscript glued to the following word. Neither is reachable (both corpora are
+off the tier), so they are filed as **#1045** with the falsification set: declining `¹¹` outright would break
+genuine `10¹⁰`/`10¹⁰⁰`/`10¹¹` powers in ps, hyw, lv, sq, tt, ki and lo.
+
+## Run 8 — 2026-08-26 09:15 — ps and he
+
+The fallback was hoisted out of the tier closure into an exported `spacedBareExponent`, so an engine off the
+tier gets the same four declines rather than a second implementation.
+
+**ps** — measured before/after over the whole artifact, through the real pipeline:
+
+```
+5 of 9 superscript-bearing rows change, every one a pure insertion of the lost magnitude
+   2×10³⁰            lˈəs            →  lˈəs d̪ˈerəʃ
+   3 x 10²⁶          lˈəs            →  lˈəs ʃəpˈəʐ ˈojʃət̪
+   10¹¹–10¹²         lˈəs lˈəs       →  lˈəs iwˈoləs lˈəs d̪ˈoləs
+   7.2 x 10¹³        lˈəs            →  lˈəs d̪jˈɑrləs
+   4×10¹³            lˈəs            →  lˈəs d̪jˈɑrləs
+```
+
+`km²` is untouched — it still reads as the unit noun with the power dropped, which is a missing WORD ps has
+no source for, not a deleted digit. The header refusal stands and now says which half it covers.
+
+**he — 0 of 6 rows change, and the zero is the point.** Its own ×3-attested `בריבוע` rule already claims
+every superscript the artifact carries (`8² = 64`, `2030 = 27² + 26² + 25²`, `טכניון 10²`). ⚠ An earlier
+count said 11; that was raw pattern matching that did not run he's own rule first. The call is kept as
+ROBUSTNESS for the cube and generic power `בריבוע` cannot name — `10⁶` did read as bare *ʔeseʁ* — and the
+measured zero is recorded in the file rather than left to look like a repair.
+
+⚠ **No golden row moves in either language**, so the parity gate is again blind to the whole change; the
+tests are the only witness.
