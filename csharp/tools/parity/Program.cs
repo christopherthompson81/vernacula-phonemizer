@@ -22,7 +22,8 @@ using Vernacula.Phonemizer.Core;
 var goldens = Path.Combine(AppContext.BaseDirectory, "../../../../../goldens");
 if (!Directory.Exists(goldens)) goldens = "csharp/goldens";
 var only = args.Where(a => !a.StartsWith('-')).ToHashSet();
-int langsOk = 0, langsBad = 0, rowsOk = 0, rowsBad = 0;
+int langsOk = 0, langsBad = 0, langsBlocked = 0, rowsOk = 0, rowsBad = 0, rowsBlocked = 0;
+var blockedRows = new List<string>();
 var firstDiff = new List<string>();
 var dependencyGaps = new SortedSet<string>(StringComparer.Ordinal);
 
@@ -36,6 +37,9 @@ foreach (var file in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, 
     // engine, so a run-wide list named all 105 of them and buried the two entries that matter — the engines a
     // PORTED language reached through the script router and did not get.
     var pendingBefore = Registry.PortPending.ToHashSet(StringComparer.Ordinal);
+    var blocked = 0;
+    var blockedOn = new SortedSet<string>(StringComparer.Ordinal);
+    string? blockedSample = null;
     // ⚠ AND THE FOREIGN-OOV MEMO IS CLEARED PER LANGUAGE, for the same reason the GENERATOR clears it: it is
     // global, so a mixed-script language's prewarm would otherwise leave BiLSTM readings that a later
     // Latin-script language picks up through the foreign reader — making a row pass because of what ran
@@ -45,6 +49,9 @@ foreach (var file in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, 
     {
         var t = line.Split('\t');
         if (t.Length != 2) continue;
+        // ⚠ CLEARED PER ROW — see Registry.ClearPortPending. Without this the first Hebrew row in the run
+        // poisons every later row's verdict, because the set is process-wide and only grows.
+        Registry.ClearPortPending();
         string got;
         // ⚠ THE NEURAL-CAPABLE ENTRY, per the async-goldens warning above. Calling the sync Phonemize here
         // reported the ENGINE as broken for every neural language: af showed 120/200 rows differing, all of
@@ -52,18 +59,44 @@ foreach (var file in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, 
         try { got = Phonemizer.PhonemizeAsync(t[0], code).GetAwaiter().GetResult(); }
         catch (NotImplementedException) { goto notPorted; }
         catch (Exception e) { got = $"<THREW {e.GetType().Name}: {e.Message}>"; }
-        if (got == t[1]) ok++;
-        else { bad++; sample ??= $"  {code}: \"{t[0][..Math.Min(48, t[0].Length)]}\"\n    want {t[1]}\n    got  {got}"; }
+        if (got == t[1]) { ok++; continue; }
+        // ⚠ A ROW BLOCKED ON AN UNPORTED DEPENDENCY IS NOT A PORTING BUG, AND MUST NOT BE COUNTED AS ONE —
+        // but it must not be waved through either. The script router hands an embedded foreign run to
+        // ANOTHER language's engine; when that engine is unported the run is dropped and the row differs
+        // through no fault of the language under test (syl carries one Hebrew phrase; gan carries five).
+        // The test is PER ROW and evidential: this row is blocked only if phonemizing IT is what newly
+        // registered a PortPending key. A blanket per-language exemption would hide a real regression in
+        // any language that happens to have one blocked row.
+        // ⚠ THE BLIND SPOT, STATED: a blocked row is not checked for anything ELSE. If the same row also
+        // carried a genuine defect in the language under test, this would hide it. That is why blocked rows
+        // are PRINTED with their text rather than merely counted — the set is tiny (1 today) and meant to
+        // be read. It shrinks to nothing when the dependency is ported, which is the only correct exit.
+        var rowPending = Registry.PortPending;
+        if (rowPending.Count > 0)
+        {
+            blocked++;
+            foreach (var k in rowPending) blockedOn.Add(k);
+            blockedSample ??= $"  {code}: {{n}} row(s) blocked on {string.Join(", ", rowPending)} — \"{t[0][..Math.Min(44, t[0].Length)]}\"";
+            continue;
+        }
+        bad++; sample ??= $"  {code}: \"{t[0][..Math.Min(48, t[0].Length)]}\"\n    want {t[1]}\n    got  {got}";
     }
-    rowsOk += ok; rowsBad += bad;
+    rowsOk += ok; rowsBad += bad; rowsBlocked += blocked;
+    if (blockedSample != null) blockedRows.Add(blockedSample.Replace("{n}", blocked.ToString()));
     foreach (var key in Registry.PortPending) if (!pendingBefore.Contains(key)) dependencyGaps.Add($"{code} → {key}");
-    if (bad == 0) { langsOk++; Console.WriteLine($"  {code,-8} OK    {ok} rows"); }
+    if (bad == 0 && blocked > 0) { langsBlocked++; Console.WriteLine($"  {code,-8} OK    {ok} rows, {blocked} BLOCKED"); }
+    else if (bad == 0) { langsOk++; Console.WriteLine($"  {code,-8} OK    {ok} rows"); }
     else { langsBad++; Console.WriteLine($"  {code,-8} DIFF  {bad}/{ok + bad} rows differ"); if (firstDiff.Count < 8 && sample != null) firstDiff.Add(sample); }
     continue;
 notPorted:
     Console.WriteLine($"  {code,-8} not ported");
 }
-Console.WriteLine($"\n{langsOk} languages byte-identical, {langsBad} differ ({rowsOk} rows ok, {rowsBad} differ)");
+Console.WriteLine($"\n{langsOk} languages byte-identical, {langsBad} differ ({rowsOk} rows ok, {rowsBad} differ)"
+                  + (rowsBlocked > 0 ? $"; {langsBlocked} language(s) fully match except {rowsBlocked} row(s) BLOCKED on an unported dependency" : ""));
+// ⚠ BLOCKED IS NAMED, NEVER SILENT. A blocked row is excluded from `differ` because it is not this
+// language's defect, but it is counted, printed, and attributed to the engine it is waiting on — so the
+// number can only go down by porting that engine, not by ignoring it.
+foreach (var b in blockedRows) Console.WriteLine(b);
 // ⚠ A DIFF MAY NOT BE A PORTING BUG. The script router reads an embedded foreign run through ANOTHER
 // language's engine and catches the failure, so an unported target silently drops the run and the row
 // just differs. Naming the keys that were asked for and missing separates "blocked" from "wrong".

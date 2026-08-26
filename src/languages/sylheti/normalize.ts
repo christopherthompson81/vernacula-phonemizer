@@ -13,6 +13,12 @@
  * into three groups, none of which is "the article is in Bengali script" —
  *   (1) Bengali marks typed INSIDE a Syloti Nagri word (ꠝূꠟ꠆ꠎꠝꠣꠘ, ꠙꠞꠤꠝꠣণꠦ, ꠛꠤꠛꠦꠌꠘꠣꠎ়, ꠀঁꠡ, ꠃৎꠙꠣꠖꠘ),
  *       i.e. slips from a Bengali keyboard — 17 of them the bare nukta ়. STEP 2 repairs these;
+ *       ⚠ AND `BN_TO_SYL` HAD A HOLE IN EXACTLY THIS GROUP, found while porting: ৃ U+09C3, the vocalic-R
+ *       vowel sign, is inside `BN_LETTER`'s range — so it makes a run "mixed" and the fold runs — but had
+ *       no table entry, so it survived the fold, fell outside the word class, and SPLIT THE TOKEN: 7
+ *       instances, `ꠙ꠆ꠞꠜৃꠔꠤ` (প্রভৃতি) read `ɸɾɔb t̪i`, which is the same failure `ꠝূꠟ꠆ꠎꠝꠣꠘ` → `mɔ lzɔman`
+ *       is cited for below. All 7 fix the value: প্রভৃতি, ব্যবহৃত, পৃথিবী, বৃহত্তম, পথিকৃত — ৃ is [ri]
+ *       in every one, so it folds to ꠞꠤ (ra + i-sign), and ঋ, its independent counterpart, with it;
  *   (2) genuine Bengali-script GLOSSES, quoted AS Bengali inside a ꠪ language tag (বাংলাদেশ) — step 2
  *       must NOT touch these, which is why its guard is "a Syloti neighbour in the same token";
  *   (3) `৳` U+09F3, the taka sign — a currency fact, not a script choice. Step 9.
@@ -83,6 +89,9 @@ const BN_TO_SYL: Readonly<Record<string, string>> = {
     "ং": "ꠋ", // ং anusvara → ꠋ, which this engine reads as a plain [ŋ]
     "্": "꠆", // ্ virama → ꠆ hasanta
     "ৎ": "ꠔ꠆", // ৎ khanda ta — a bare /t/ (ꠃৎꠙꠣꠖꠘ → ꠃꠔ꠆ꠙꠣꠖꠘ)
+    // vocalic R — [ri] in Bengali-Assamese and in Sylheti, and Syloti Nagri writes that as ꠞꠤ. ×7, and
+    // this sign was the one member of BN_LETTER's range with no entry here (see group (1) above).
+    "ৃ": "ꠞꠤ", "ঋ": "ꠞꠤ",
     // dependent vowel signs
     "া": "ꠣ", "ি": "ꠤ", "ী": "ꠤ", "ু": "ꠥ", "ূ": "ꠥ",
     "ে": "ꠦ", "ৈ": "ꠂ", "ো": "ꠧ", "ৌ": "ꠧ",

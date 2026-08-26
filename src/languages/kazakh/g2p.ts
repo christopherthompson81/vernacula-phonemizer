@@ -4,8 +4,12 @@
  *   - vowels: а ә е о ө ұ ү ы і э → ɑ æ e o ɵ ʊ ʏ ə ɪ ɛ. Word-INITIAL е → je (ел→jel); elsewhere e.
  *   - iotated / glide letters: и → əj (a diphthong), у → w (glide, not a nucleus:
  *     су→sw), я → ja, ю → ju, ё → jo.
- *   - consonants are context-free except л, which is DARK ɫ next to a back vowel (а о ұ ы) and clear l next to
- *     a front vowel (ә е ө ү і э) — the ɫ census contribution. г→ɡ and к→k do NOT palatalize (unlike Turkish).
+ *   - consonants are context-free, л included: it always emits DARK ɫ here and kazakh.ts lightens ɫ→l
+ *     WORD-WIDE when the token carries any front vowel — Kazakh harmony makes a word uniformly front or
+ *     back, so the decision is a property of the word, not of the neighbouring letter. (This header used to
+ *     describe an ADJACENCY rule, "dark next to а о ұ ы, clear next to ә е ө ү і э", which no code here has
+ *     ever implemented; kazakh.jsonc's `convention.darkL` had it right.) The ɫ census contribution.
+ *     г→ɡ and к→k do NOT palatalize (unlike Turkish).
  *   - doubled consonants stay doubled (кк→kk, сс→ss); Kazakh has no gemination-to-length.
  * Stress is applied downstream in kazakh.ts.
  */

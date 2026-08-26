@@ -96,6 +96,14 @@
     //     ⁕ U+2055 FLOWER PUNCTUATION MARK — 476 occurrences in the mined artifact's 122 excerpt
     //     segments, more than every other mark in this table combined, and it read as NOTHING: no
     //     pause, no token. `॥` (8) and `꠫` (6) are the other terminators.
+    //     ⚠ AND THAT SURVEY MISSED A FOURTH ONE, found while porting: `৷` U+09F7 (nominally BENGALI
+    //     CURRENCY NUMERATOR FOUR, universally typed as a DANDA because it is what the glyph looks
+    //     like) occurs 9 times in the mined artifact and ALL 9 are sentence-final after a Syloti
+    //     word — `… ꠔꠣꠘ ꠙꠄꠖꠣ ꠅꠄ৷ ꠔꠣꠘ ꠛꠠ …`, `… ꠡꠝ꠆ꠝꠣꠘ ꠇꠞꠂꠘ৷ ꠔꠣꠘ …`, `… ꠀꠍꠤꠟ৷` — which
+    //     outnumbers both of the terminators that WERE declared. It is not caught anywhere else
+    //     either: `normalize.ts`'s `BN_LETTER` stops at U+09E5, so the Bengali fold never sees it,
+    //     and the old TOKEN punctuation class did not list it. 5 instances in one golden row read
+    //     with no pause at all.
     //  2. ꠨ WAS DECLARED AS A FULL STOP AND IS A COMMA — and the corpus says so in its own words. One
     //     article glosses the punctuation inventory outright: ꠅꠞ ꠝꠣꠏꠈꠣꠘꠧ ꠇꠝꠣ (꠨) ꠀꠞ ꠖꠥꠁ ꠒꠦꠘ꠆ꠒꠣꠞ (॥)
     //     — "…the COMMA (꠨) and the DOUBLE DANDA (॥)". Usage agrees: a list of colleges runs
@@ -107,7 +115,7 @@
     // so the engine's old word class `[ꠀ-꠬]` (U+A800–A82C) claimed them as WORDS before the punctuation
     // arm could see them — a mark declared here was unreachable. See the TOKEN comment in sylheti.ts.
     "clausePunctuation": {
-        "⁕": ".", "꠫": ".", "॥": ".", "।": ".", ".": ".",
+        "⁕": ".", "꠫": ".", "॥": ".", "।": ".", "৷": ".", ".": ".",
         "꠨": ",", "꠩": ",", "꠪": ",",
         "?": "?", "!": "!", ",": ","
     }

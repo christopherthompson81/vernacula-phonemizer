@@ -15,11 +15,8 @@
  * ⚠ Every boundary in this file is an explicit lookaround, never `\b`, which is ASCII-defined and finds none
  * against Cyrillic.
  */
-import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { numberToIpa } from "./numbers.ts";
 import { ROMAN_POLICY } from "./romanOrdinals.ts";
 import { SYMBOLS } from "./kazakh.ts";
-import { MANIFEST } from "./manifest.ts";
 
 // ---------------------------------------------------------------------------------------------------
 // ORDINALS
@@ -44,14 +41,10 @@ const ZERO_CARD = "нөл";
 const TENS_CARD: readonly string[] = [
     "", "он", "жиырма", "отыз", "қырық", "елу", "алпыс", "жетпіс", "сексен", "тоқсан",
 ];
-/** Ordinal UNITS and TENS (from romanOrdinals.ts — the irregularities жиырмасыншы/қырқыншы live there). */
-const ORD_UNITS: readonly string[] = [
-    "", "бірінші", "екінші", "үшінші", "төртінші", "бесінші", "алтыншы", "жетінші", "сегізінші", "тоғызыншы",
-];
-const ORD_TENS: readonly string[] = [
-    "", "оныншы", "жиырмасыншы", "отызыншы", "қырқыншы", "елуінші", "алпысыншы", "жетпісінші", "сексенінші",
-    "тоқсаныншы",
-];
+// ⚠ THE ORDINAL UNITS AND TENS LIVE IN romanOrdinals.ts AND ARE NOT RESTATED HERE. A second copy of both
+// tables used to sit at this spot and NOTHING READ EITHER: `ordinalWord` takes 1–100 from
+// ROMAN_POLICY.ordinal and builds 101–999 from UNIT_CARD, so the duplicates were free to drift away from
+// the irregular жиырмасыншы / қырқыншы without a test noticing.
 const HUNDRED_CARD = "жүз";
 const THOUSAND_CARD = "мың";
 
@@ -104,24 +97,21 @@ const CASE_BY_SUFFIX: Readonly<Record<string, string>> = {
 
 /** The LAST vowel of a word — the harmony class that picks the ending. */
 function lastVowel(w: string): string | undefined {
-    const m = /([аәеиоөұүыі])/gu.exec(w);
     let v: string | undefined;
     for (const match of w.matchAll(/[аәеиоөұүыі]/gu)) v = match[0];
     return v;
 }
-const BACK_VOWELS = "аәоұы";
-const FRONT_VOWELS = "еиөүі";
+const BACK_VOWELS = "аәоұы"; // the complement (е и ө ү і) is FRONT — every ending here is a two-way choice
 
 /** The harmonised ending for a case, given the word's last vowel. */
 function caseEnding(caseName: string, lastVowelChar: string): string {
     const back = BACK_VOWELS.includes(lastVowelChar);
-    const front = FRONT_VOWELS.includes(lastVowelChar);
     switch (caseName) {
         case "dat": return back ? "ға" : "ге";
         case "abl": return back ? "дан" : "ден";
         case "gen": return back ? "ның" : "нің";
         case "loc": return back ? "да" : "де";
-        case "ins": return back ? "мен" : "мен";
+        case "ins": return "мен"; // NOT harmony-conditioned — the instrumental varies by VOICING; see withCase
         default: return "";
     }
 }
@@ -157,6 +147,20 @@ function withCase(numberWord: string, caseName: string): string {
     if (voiceless && caseName === "loc") e = back ? "та" : "те";
     if (voiceless && caseName === "abl") e = back ? "тан" : "тен";
     if (nasal && caseName === "abl") e = back ? "нан" : "нен";
+    // ⚠ THE INSTRUMENTAL IS VOICING-CONDITIONED, NOT HARMONY-CONDITIONED, and `caseEnding` could not say so:
+    // it is handed only the last VOWEL, so both its branches returned -мен and `5-пен` read *бесмен*,
+    // `40-пен` *қырықмен*, `9-бен` *тоғызмен* — none of them Kazakh words. The WRITTEN suffix already had it
+    // right; the rewrite threw that information away and could not rebuild it.
+    // MEASURED, not assumed — every C+мен/бен/пен bigram over the 1,487 distinct FLEURS kk_kz sentences
+    // (411 hits, and each final letter takes exactly ONE of the three, with no counter-examples):
+    //   -пен  қ×23 т×13 с×8 п×6 к×3 ш×2 д×2 г×2 ф×1   (58)
+    //   -бен  з×10                                     (10)
+    //   -мен  vowels ×223, р×43 н×37 у×10 л×5 м×4 й×3 ң×1   (343)
+    // The closed set of words that can END a composed number (нөл бір екі үш төрт бес алты жеті сегіз тоғыз
+    // он жиырма отыз қырық елу алпыс жетпіс сексен тоқсан жүз мың) ends only in л р і ш т с ы з н а қ у ң,
+    // so only the -пен (ш т с қ) and -бен (з) arms are reachable, and only those two are written.
+    if (voiceless && caseName === "ins") e = "пен";
+    if (/[жз]$/u.test(last) && caseName === "ins") e = "бен";
     words[words.length - 1] = last + e;
     return words.join(" ");
 }

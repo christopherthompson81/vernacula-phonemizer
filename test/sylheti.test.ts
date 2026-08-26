@@ -45,6 +45,17 @@ describe("Sylheti normalization — the clause marks", () => {
         expect(phonemize("ꠀꠋꠞꠦꠎꠤ ꠪ ꠐꠦꠈꠣ", "syl")).toBe("aŋɾezi , ʈexa");
     });
 
+    // ⚠ THE FOURTH TERMINATOR, missed by the first survey and found while porting. `৷` U+09F7 is
+    // nominally BENGALI CURRENCY NUMERATOR FOUR and is universally typed as a DANDA because that is what
+    // the glyph looks like: 9 instances in the mined artifact, ALL sentence-final after a Syloti word —
+    // more than either ॥ (8) or ꠫ (6), both of which were declared. It fell through every class: outside
+    // `BN_LETTER` (which stops at U+09E5) so the Bengali fold never saw it, and unlisted in TOKEN.
+    test("৷ U+09F7 is a full stop, not silence", () => {
+        expect(phonemize("ꠔꠣꠘ ꠙꠄꠖꠣ ꠅꠄ৷ ꠔꠣꠘ ꠛꠠ", "syl")).toBe("t̪an ɸɔed̪a ɔe . t̪an bɔɽ");
+        // …and it reads identically to the ⁕ the same corpus writes for the same job.
+        expect(phonemize("ꠔꠣꠘ ꠙꠄꠖꠣ ꠅꠄ⁕ ꠔꠣꠘ ꠛꠠ", "syl")).toBe("t̪an ɸɔed̪a ɔe . t̪an bɔɽ");
+    });
+
     // ⚠ THE BRANCH THE CORPUS DOES NOT EXERCISE MUCH: a sentence-final `.`. Tabulating every dot in the
     // corpus gives 51 abbreviation dots against 3 real sentence-final periods, and the abbreviation rule
     // is narrowed to multi-dot tokens precisely so those 3 pauses survive.
@@ -124,6 +135,18 @@ describe("Sylheti normalization — the script repairs", () => {
         // ꠎ + ় is the ya-nukta digraph and behaves as a vowel carrier, not as [z].
         expect(normalizeSylheti("ꠡꠧꠒꠤꠎ়ꠣꠝ")).toBe("ꠡꠧꠒꠤꠀꠝ");
         expect(phonemize("ꠝূꠟ꠆ꠎꠝꠣꠘ", "syl")).toBe("mulzɔman"); // was `mɔ lzɔman`, two tokens
+    });
+
+    // ⚠ THE HOLE IN THE FOLD TABLE, found while porting. ৃ U+09C3 (vocalic R) is inside `BN_LETTER`'s
+    // range, so it makes a run "mixed" and the fold runs — but it had no `BN_TO_SYL` entry, so it survived
+    // the fold, fell outside the word class, and SPLIT THE TOKEN. ×7 in the artifact, and all 7 fix the
+    // value at [ri]: প্রভৃতি, ব্যবহৃত, পৃথিবী, বৃহত্তম, পথিকৃত.
+    test("the vocalic-R sign ৃ folds to ꠞꠤ instead of splitting the word", () => {
+        expect(normalizeSylheti("ꠙ꠆ꠞꠜৃꠔꠤ")).toBe("ꠙ꠆ꠞꠜꠞꠤꠔꠤ");
+        expect(phonemize("ꠙ꠆ꠞꠜৃꠔꠤ", "syl")).toBe("ɸɾɔbɾit̪i"); // was `ɸɾɔb t̪i`, two tokens
+        // …the same reading the word gets when it is spelled in Syloti Nagri throughout.
+        expect(phonemize("ꠙ꠆ꠞꠜꠞꠤꠔꠤ", "syl")).toBe("ɸɾɔbɾit̪i");
+        expect(normalizeSylheti("ꠛ꠆ꠎꠛꠢৃꠔ")).toBe("ꠛ꠆ꠎꠛꠢꠞꠤꠔ");
     });
 
     // ⚠ THE GUARD IS THE RULE. A genuine Bengali-script gloss must be left for the script router; folding

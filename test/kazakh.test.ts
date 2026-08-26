@@ -115,6 +115,26 @@ describe("Kazakh text normalization", () => {
         expect(normalizeKazakh("11000-нан")).toBe("он бір мыңнан");
     });
 
+    // THE INSTRUMENTAL IS VOICING-CONDITIONED, NOT HARMONY-CONDITIONED. `caseEnding` sees only the last
+    // VOWEL, so both its branches returned -мен and `5-пен` read *бесмен*, `40-пен` *қырықмен*, `9-бен`
+    // *тоғызмен* — none of them Kazakh words. The three-way split is measured off FLEURS kk_kz's own
+    // C+мен/бен/пен bigrams (411 hits, no counter-examples): -пен after қ т с п к ш д г ф, -бен after з,
+    // -мен after a vowel or after р н у л м й ң.
+    it("the instrumental is voicing-conditioned: -пен, -бен, -мен", () => {
+        expect(normalizeKazakh("5-пен")).toBe("беспен");
+        expect(normalizeKazakh("3-пен")).toBe("үшпен");
+        expect(normalizeKazakh("4-пен")).toBe("төртпен");
+        expect(normalizeKazakh("40-пен")).toBe("қырықпен");
+        expect(normalizeKazakh("60-пен")).toBe("алпыспен");
+        expect(normalizeKazakh("9-бен")).toBe("тоғызбен"); // з takes -бен, the corpus's one voiced-sibilant final
+        expect(normalizeKazakh("100-бен")).toBe("жүзбен");
+        // …and -мен everywhere else: the vowel-final, sonorant-final and nasal-final numbers.
+        expect(normalizeKazakh("7-мен")).toBe("жетімен");
+        expect(normalizeKazakh("1-мен")).toBe("бірмен");
+        expect(normalizeKazakh("1000-мен")).toBe("бір мыңмен");
+        expect(normalizeKazakh("20-мен")).toBe("жиырмамен");
+    });
+
     // `N-НОУН` is the ordinal writing with the noun spelled out — 13 corpus instances the case-suffix
     // rule could not see, because the tail is a WORD rather than an ending.
     it("N-noun reads the ordinal and keeps the noun", () => {
