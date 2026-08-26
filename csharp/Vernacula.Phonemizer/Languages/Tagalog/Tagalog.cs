@@ -189,7 +189,13 @@ public sealed class TagalogPhonemizer : ILanguage
      *  kaikki-mined exceptions. */
     private static double? NumberStressIdx(string token)
     {
+        // ⚠ The ligature is `-ng` after a vowel but bare `-g` after /n/, and the surface cannot tell them
+        // apart (`bata`+`ng` and `sandaan`+`g` both end `-ang`). Resolved by MEMBERSHIP, not by length —
+        // see the TS for why, and for why it is behaviour-identical today.
         var root = token.EndsWith("'t", StringComparison.Ordinal) ? token[..^2]
+            : token.EndsWith("ng", StringComparison.Ordinal) && NUM_PENULT.Contains(token[..^2]) ? token[..^2]
+            : token.EndsWith("g", StringComparison.Ordinal) && token[..^1].EndsWith("n", StringComparison.Ordinal)
+                && NUM_PENULT.Contains(token[..^1]) ? token[..^1]
             : token.EndsWith("ng", StringComparison.Ordinal) ? token[..^2]
             : token;
         var nuclei = 0;

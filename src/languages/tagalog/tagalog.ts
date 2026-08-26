@@ -217,11 +217,20 @@ const NUM_PENULT = new Set(NUM.stressPenult);
  *  unchanged; strip them to recover the root for the penult lookup. Overrides the general (prose) stress lexicon,
  *  which abstains on the number-sense homographs (isá, limá, pitó). */
 function numberStressIdx(token: string): number | undefined {
-    const root = token.endsWith("'t")
-        ? token.slice(0, -2)
-        : token.endsWith("ng")
-          ? token.slice(0, -2)
-          : token;
+    // ⚠ THE LIGATURE IS `-ng` AFTER A VOWEL BUT BARE `-g` AFTER /n/, and the surface cannot tell them
+    // apart: `bata`+`ng` and `sandaan`+`g` both end `-ang`. Stripping a fixed two characters recovers
+    // `sandaa`, not `sandaan`, so the penult lookup misses and the word takes final stress.
+    // Unreachable TODAY — `numbers.stressPenult` is sero/apat/anim/libo/sanlibo/labing-apat/labing-anim
+    // and none ends in n — which is why the port filed it rather than fixing it. It goes live the moment
+    // someone adds `daan` or `sandaan`, and it would go live as a WRONG STRESS, not an error.
+    // Resolving by MEMBERSHIP rather than by length is exact where the surface is ambiguous, and is
+    // behaviour-identical while no n-final root is listed.
+    const strip = (n: number): string => token.slice(0, -n);
+    const root = token.endsWith("'t") ? strip(2)
+        : token.endsWith("ng") && NUM_PENULT.has(strip(2)) ? strip(2)
+          : token.endsWith("g") && strip(1).endsWith("n") && NUM_PENULT.has(strip(1)) ? strip(1)
+            : token.endsWith("ng") ? strip(2)
+              : token;
     const nuclei = [...token].filter((c) => "aeiou".includes(c)).length;
     if (nuclei === 0) return undefined;
     return NUM_PENULT.has(root) && nuclei >= 2 ? nuclei - 2 : nuclei - 1;
