@@ -108,10 +108,19 @@ function scan(w: string): string {
 /** One Naija word → canonical IPA. Order: (1) the Naija lexicon (respellings + substrate loans + irregulars);
  *  (2) if `known` resolves it as standard English → NATIVISE that (BBC-Pidgin text is mostly English spelling);
  *  (3) the nativising rule g2p (phonemically-spelled substrate loans: danfo, egusi). Segmental only — Naija tone
- *  is unmarked in the media orthography. `known` is omitted by the referee eval (rule path only; no referee). */
+ *  is unmarked in the media orthography. `known` is omitted by the referee eval (rule path only; no referee).
+ *
+ *  ⚠ `Object.hasOwn`, NOT A BARE `DEF.lexicon[lw]`. The manifest is a `JSON.parse` object, so it inherits
+ *  `Object.prototype` — and the bracket lookup walked the chain. ⟨constructor⟩ is ordinary vocabulary in this
+ *  corpus's construction and road-contract copy, and `DEF.lexicon["constructor"]` resolved to the `Object`
+ *  CONSTRUCTOR FUNCTION, which is `!== undefined`, so it was returned as the word's reading and template-
+ *  concatenated into the clause: `Constructor dey come` shipped *function Object() { [native code] } dɛ kɔm*.
+ *  JS source injected into the phoneme stream, not merely a wrong reading. Found reviewing the C# port, whose
+ *  `TryGetValue` has no prototype chain and read it correctly all along — so the two engines DISAGREED on a
+ *  real English word and the 200-row golden could not see it. */
 export function phonemizeWord(word: string, known?: ForeignPhonemizer): string {
     const lw = word.toLowerCase();
-    const lex = DEF.lexicon[lw];
+    const lex = Object.hasOwn(DEF.lexicon, lw) ? DEF.lexicon[lw] : undefined;
     if (lex !== undefined) return lex;
     const en = known?.(lw);
     if (en !== undefined) return nativise(en).normalize("NFC");
@@ -265,7 +274,15 @@ const SYMBOLS = makeSymbolNormalizer({
     // and read *tu hɔndɛd nɛɾa miljan* — "two hundred naira million", the magnitude stranded after the
     // currency noun — while the lowercase `₦200 million` was already correct. A language whose corpus never
     // capitalises them needs only the one form.
-    magnitudes: ["million", "billion", "Million", "Billion"],
+    // ⚠ ⟨Thousand⟩ WAS MISSING AND HAD THE SAME DEFECT, found by an off-golden probe while porting to C#.
+    // The corpus writes `US$500 Thousand` (×1, in the same sentence as the `US$2 Million` that motivated
+    // the entry above), and undeclared it read *faiv hɔndɛd dola tauzand* — "five hundred dollar thousand",
+    // the stranded-magnitude shape this list exists to prevent, one scale down. NO NEW WORD IS SOURCED: the
+    // hop only reorders text the corpus already writes, and ⟨Thousand⟩ nativises through the English dict
+    // exactly as ⟨Million⟩ does. The lowercase form is ×0 here and is declared anyway, because the
+    // alternation is case-SENSITIVE and the two spellings are one word — leaving one out would make the
+    // reading depend on whether the writer capitalised, which is not a distinction this language draws.
+    magnitudes: ["million", "billion", "Million", "Billion", "thousand", "Thousand"],
     // `&` ×24. The word is ⟨an⟩, this language's own conjunction and the one its number compositor already
     // uses (`numbers.and` in the manifest). ⚠ The corpus writes BOTH ⟨an⟩ ×425 and English ⟨and⟩ ×233; ⟨an⟩
     // is chosen for consistency with the manifest rather than by margin alone.
@@ -306,10 +323,18 @@ class NaijaPhonemizer implements Phonemizer {
                 // COMPOSE is right (the float has already lost the low digits); emitting the token is not a
                 // reading. The ORDINAL fallback keeps the marker and reads the digits after it — `ordinalWords`
                 // is itself `marker + numberWords`, so nothing new is invented; only the quantity is lost.
+                //
+                // ⚠ AND THE FALLBACK WAS DEAD CODE UNTIL THE BRACES WENT IN — a DANGLING ELSE. Written
+                // brace-free, `if (safe) for (…) if (wd) emit(wd); else { … }` parses the `else` onto the
+                // INNER `if (wd)`, not onto the safety test: above 2^53 the whole `for` was skipped and the
+                // ordinal was DELETED from the reading (`9007199254740993rd item` → *aitam*), which is the
+                // exact defect the paragraph above says this branch exists to prevent. The safe path never
+                // reached it — `ordinalWords` cannot yield an empty word — so it failed only where it was
+                // the only thing standing between the numeral and silence.
                 const n = Number(m[3]);
-                if (Number.isSafeInteger(n))
+                if (Number.isSafeInteger(n)) {
                     for (const wd of ordinalWords(n).split(" ")) if (wd) sink.emit(wd);
-                else {
+                } else {
                     sink.emit(ORD.marker);
                     for (const d of m[3]) sink.emit(NUM.units[Number(d)]!);
                 }
@@ -319,7 +344,9 @@ class NaijaPhonemizer implements Phonemizer {
             } else if (m[5]) {
                 const w = foldLatinToBase(m[5]);
                 // A bare ALL-CAPS run is an initialism unless the dict lexifies it (see spellOut's note).
-                if (isInitialism(w) && DEF.lexicon[w.toLowerCase()] === undefined && this.foreign?.(w.toLowerCase()) === undefined)
+                // `hasOwn` for the same reason `phonemizeWord` uses it. Unreachable as written — `isInitialism`
+                // admits only vowel-less 2-6 letter runs — but the guard is what keeps widening it safe.
+                if (isInitialism(w) && !Object.hasOwn(DEF.lexicon, w.toLowerCase()) && this.foreign?.(w.toLowerCase()) === undefined)
                     for (const ph of spellOut(w)) sink.emit(ph);
                 else sink.emit(phonemizeWord(w, this.foreign));
             } else if (m[6]) {

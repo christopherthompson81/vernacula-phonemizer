@@ -34,12 +34,17 @@ const ABBREV_RE = new RegExp(`\\b(${Object.keys(ABBREV).join("|")})\\.?(?![\\p{L
  * ⟨bn⟩ GLUED TO A FIGURE — the money magnitude of Nigerian press copy, and the one raw-Latin residual in
  * this corpus that has a reading already shipped in this engine.
  *
- * The artifact's instance GLOSSES ITSELF one clause later: *"Sim Fabura sign N195.3BN kontrat wit Julius
- * Berger … Di govnor tok sey e don pay N150 BILLION fest"* — the same figure class, abbreviated once and
+ * The artifact's instance GLOSSES ITSELF one clause later: *"Sim Fabura sign N195.3bn kontrat wit Julius
+ * Berger … Di govnor tok sey e don pay N150 billion fest"* — the same figure class, abbreviated once and
  * spelled once, by the same writer in the same sentence. `naija.ts` already declares ⟨billion⟩ as a
  * magnitude word (×13 beside a currency sign in this corpus), so nothing is being sourced here: the
  * abbreviation is expanded into a word the tier and the g2p both already speak, and the magnitude then
  * hops the currency exactly as the written-out form does.
+ *
+ * ⚠ THAT QUOTATION IS IN THE CORPUS'S OWN CASE, AND IT IS LOWERCASE IN BOTH HALVES. An earlier version of
+ * this note wrote ⟨BN⟩ and ⟨BILLION⟩, which made the case-sensitive pattern below look as though it failed
+ * on its own motivating instance — it does not, and re-casing the quote is cheaper than the next reader
+ * re-deriving that.
  *
  * ⚠ DIGIT-ANCHORED AND GLUED, which is what makes it safe against the other ⟨bn⟩. Outside a figure the
  * string is *ibn* in an Arabic name — routine in northern-Nigerian copy — and a bare-token rule would have
