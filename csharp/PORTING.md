@@ -132,11 +132,18 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
   corpus files, and had to synthesise all 346 Adlam probe lines from the tables — the core defect it
   found (an unpaired surrogate throwing in `LatinPhones`) was unreachable from any real corpus line. When
   the differential comes back clean, state what fraction of the corpus actually exercised the new code.
-  ⚠ **A SHARED SCRATCHPAD IS A SHARED WORKSPACE.** When several ports run concurrently, the scratchpad
-  directory is NOT per-agent. Two of four agents in one batch collided there, and one had its probe
-  `Program.cs` and `.csproj` overwritten mid-run — repointed at another agent's worktree, so its
-  differential was measuring someone else's build. Put a scratch probe project in a uniquely-named
-  subdirectory and re-verify the `.csproj` target before trusting any number it produced.
+  ⚠ **PUT THE PROBE PROJECT IN `.probe/` INSIDE YOUR OWN WORKTREE. NOT IN THE SESSION SCRATCHPAD.**
+  `.probe/` is gitignored (so `git add -A` cannot sweep it into a commit) and it lives inside the
+  worktree, so two concurrent agents cannot reach the same path even by accident. Build it there, point
+  its `.csproj` at `../csharp/Vernacula.Phonemizer/Vernacula.Phonemizer.csproj` — YOUR worktree's copy —
+  and run with `VERNACULA_DATA_DIR` pointing at YOUR worktree's `data/`.
+  ⚠ **THE SESSION SCRATCHPAD IS SHARED BETWEEN AGENTS AND THIS HAS GONE WRONG THREE TIMES.** It is not
+  per-agent. In three separate fan-outs an agent had its probe `Program.cs` and `.csproj` overwritten
+  mid-run and repointed at ANOTHER agent's worktree, so its differential was silently measuring someone
+  else's build; one also had the shared `obj/` corrupted underneath it. Warning agents about it did not
+  stop it happening again, twice — which is why the instruction is now a path rather than a caution. If
+  you have already run a differential out of the shared scratchpad, re-verify the `.csproj` target and
+  re-run before trusting a single number from it.
 - ⚠ ENGINEERING SHORTCOMINGS MAY BE CORRECTED; OBSERVABLE BEHAVIOUR MAY NOT. The line between the
   two is the golden gate. Free to fix: quadratic loops, repeated recompilation of regexes, string
   concatenation in loops, copy-paste that a shared helper collapses, untyped grab-bag objects,

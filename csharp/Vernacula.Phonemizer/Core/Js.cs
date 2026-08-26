@@ -40,6 +40,18 @@ public static class Js
             or (>= '\u2000' and <= '\u200A') or '\u2028' or '\u2029' or '\u202F' or '\u205F'
             or '\u3000' or '\uFEFF';
 
+    /// <remarks>
+    /// ⚠ 23 BARE `.Trim()` CALL SITES REMAIN IN THIS TREE AND WERE AUDITED RATHER THAN SWEPT. A blind
+    /// replacement would be a behaviour change wearing a cleanup's clothes, so each was classified:
+    /// roughly half are DATA LOADERS (LoadTsv, the Afrikaans/Dutch morphology line readers, Core/Segment,
+    /// the English dictionary, the Arabic diacritizer's line scan) and the rest run over engine text.
+    /// A cross-engine differential over 86 gated languages x 8 BOM/NEL-bearing probes was byte-identical
+    /// in the IPA column, so none of them diverges today.
+    /// The loader half is safe for ONE reason — no file they read starts with a BOM — and that premise is
+    /// now pinned by test/data-no-bom.test.ts rather than left as a coincidence. If it ever breaks, JS
+    /// strips the mark from the first key and .NET keeps it, and one lexicon entry goes missing in C#
+    /// alone, invisible to the gate unless a golden row happens to use that exact first headword.
+    /// </remarks>
     /// <summary>Port of `s.trim()`. Use this, not `string.Trim()`, wherever the TS wrote `.trim()`.</summary>
     public static string Trim(string s)
     {
