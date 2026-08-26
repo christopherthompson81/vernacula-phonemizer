@@ -124,6 +124,10 @@ public static class Bootstrap
             Madurese.MaduresePhonemizer.RegisterSelf();
             Shona.ShonaPhonemizer.RegisterSelf();
             Sylheti.SylhetiPhonemizer.RegisterSelf();
+            Uyghur.UyghurPhonemizer.RegisterSelf();
+            Catalan.CatalanPhonemizer.RegisterSelf();
+            Czech.CzechPhonemizer.RegisterSelf();
+            Hebrew.HebrewPhonemizer.RegisterSelf();
         }
     }
 }

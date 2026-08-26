@@ -43,6 +43,11 @@ function agree(
           : forms.plural;
 }
 
+/** Read a raw digit STRING digit-by-digit — the fallback above the declared top magnitude. */
+function readDigits(digits: string): string {
+    return [...digits].map((d) => UNITS[Number(d)] ?? d).join(" ");
+}
+
 /**
  * A non-negative integer → space-separated Czech cardinal words.
  *
@@ -52,12 +57,17 @@ function agree(
  * SPEAKING the word "undefined". The billion is now declared (miliarda/miliardy/miliard, corpus-attested),
  * and anything above the declared top falls back to digit-at-a-time — the fleet's convention for
  * out-of-range, and what fi and fr already do at this size.
+ *
+ * ⚠ THE FALLBACK READS `raw`, THE TOKEN STRING, NOT THE DOUBLE (#1059). `n` reached here via
+ * `Number(token)`, so above 2^53 its digits have already rounded and above 1e21 `String(n)` is EXPONENT
+ * form — `1000000000000000000001` read as *jˈɛdɛn dvˈa jˈɛdɛn* ("1 e+ 2 1", the `e` and `+` silently
+ * dropped as undefined table lookups). The caller has the digits; it passes them.
  */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (n < 0 || !Number.isFinite(n)) return "";
     n = Math.floor(n);
     if (n === 0) return UNITS[0]!; // nula
-    if (n >= 1e12) return [...String(n)].map((d) => UNITS[Number(d)]!).join(" ");
+    if (n >= 1e12) return readDigits(raw ?? String(n));
     const parts: string[] = [];
     const bil = Math.floor(n / 1000000000);
     n %= 1000000000;

@@ -33,8 +33,12 @@ const B = "1000000000000000000009";
  * fixed, plus tn) — so this is a latent wrong reading, not a live one.
  *
  * They divide into two classes and only the first is mechanical:
- *   · ANOTHER STRINGIFICATION SHAPE — cs and he inline `[...String(n)]` at the fallback rather than calling
- *     a helper, so the sweep's pattern missed them. Same fix, same threading.
+ *   · ⚠ THE "ANOTHER STRINGIFICATION SHAPE" CLASS IS NOW EMPTY. `cs` and `he` were the two — both inlined
+ *     `[...String(n)]` at the fallback rather than calling a helper, which is why the sweep's pattern
+ *     missed them — and both took the same threading fix while being ported to C#. Neither was merely a
+ *     rounded tail: `String(1e21)` is `"1e+21"`, so `e` and `+` became `undefined` table lookups joined as
+ *     empty strings, and Czech read BOTH probes as *jˈɛdɛn dvˈa jˈɛdɛn*. What remains below is one class
+ *     only, and it is the one that needs evidence rather than a rewrite.
  *   · NO FALLBACK AT ALL — tr returns "" above its range and zu composes right past it. Giving these a
  *     digit-at-a-time arm is a per-language behaviour ADDITION, not a mechanical repair, and wants the
  *     language's own evidence.
@@ -42,7 +46,7 @@ const B = "1000000000000000000009";
  */
 const ACCEPTED_LOSSY = new Set(
     ("ar arz apc apd acm afb ary ayl ajp acw pt pt-BR tr az vi ta gd ga cy ff si kk tg zu xh sr hr bs da " +
-        "cs mk lb fo sq la bar rw ki kam af he rn grc").split(" "),
+        "mk lb fo sq la bar rw ki kam af rn grc").split(" "),
 );
 
 const CODES = [

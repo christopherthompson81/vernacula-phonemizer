@@ -132,7 +132,14 @@ const DOTTED: Readonly<Record<string, string>> = {
     co: "společnost", inc: "společnost", mil: "milionů", s: "strana",
     cca: "cirka",  // corpus: `rychlosti cca 83 km/h`; read as the cluster [t͡st͡sˈa] before this
 };
-const DOTTED_ALT = Object.keys(DOTTED).sort((a, b) => b.length - a.length).join("|");
+/**
+ * ⚠ `s` IS HELD OUT OF THE SHARED ALTERNATION and gets its own digit-guarded rule below. It is ONE LETTER,
+ * and the shape-1 lookahead admits a following LETTER, so every Latin initial spelled `S.` was being read
+ * as the word *strana*: `J. S. Bach` → "J. strana Bach", `A. S. Puškin` → "A. strana Puškin". Both corpus
+ * instances are `s. 109` — a page number — which is the only shape the abbreviation actually takes, and
+ * what this file's own comment already claimed the rule did.
+ */
+const DOTTED_ALT = Object.keys(DOTTED).filter((k) => k !== "s").sort((a, b) => b.length - a.length).join("|");
 
 const HOUR: readonly string[] = ["hodina", "hodiny", "hodin"];
 
@@ -215,12 +222,13 @@ export function normalizeCzech(input: string): string {
 
     // 2) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break. Two shapes:
     //    followed by a word, and followed by another mark or end of clause (`apod.` at the end of a
-    //    list), where the sentence period is kept. `s.` (strana) is matched only before a digit so the
-    //    shape-1 lookahead alone decides it, exactly as the numeral shapes below keep their own guards.
+    //    list), where the sentence period is kept.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED[ab.toLowerCase()]!}${sp}`);
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED[ab.toLowerCase()]!}.`);
+    //    `s.` (strana), DIGIT-GUARDED — see DOTTED_ALT above for why it cannot ride the shared rule.
+    s = s.replace(/(?<![\p{L}\p{M}.])s\.(\s+)(?=\d)/giu, (_m, sp: string) => `${DOTTED["s"]!}${sp}`);
 
     // 3) CLOCK. ⚠ Before any rule that looks for a bare number: `11:30` must not be
     //    claimed by the range or ordinal rules. The colon is clause punctuation in czech.jsonc, so every

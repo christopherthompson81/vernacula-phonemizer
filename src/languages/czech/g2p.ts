@@ -81,6 +81,10 @@ function scan(word: string): Seg[] {
             segs.push({ ph: PALAT[ch]!, nucleus: false });
             continue;
         }
+        // ⚠ ⟨x⟩ IS TWO SEGMENTS, AND THIS BRANCH IS NOT REDUNDANT WITH `consonants.x`. The manifest also
+        // carries x→"ks", and that row is DEAD — this branch claims the letter first. Deleting the branch
+        // as "already in the table" would emit ONE segment whose ph is "ks", which is a key of neither
+        // voicing map, so assimilation and final devoicing would silently stop crossing the cluster.
         if (ch === "x") {
             segs.push({ ph: "k", nucleus: false }, { ph: "s", nucleus: false });
             continue;

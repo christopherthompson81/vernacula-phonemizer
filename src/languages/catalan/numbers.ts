@@ -12,7 +12,7 @@ function below100(n: number): string {
     if (n < 20) return ONES[n]!;
     const t = Math.floor(n / 10), u = n % 10;
     if (u === 0) return TENS[t]!;
-    const conn = t === 2 ? " i " : " "; // vint i un; trenta un
+    const conn = t === 2 ? ` ${N.and} ` : " "; // vint i un; trenta un
     return `${TENS[t]}${conn}${ONES[u]}`;
 }
 

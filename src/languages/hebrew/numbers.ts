@@ -13,7 +13,7 @@
  * proclitic וְ realises its sheva-na → [ve] (hebrew.ts). The u-/va- morphophonology before labials is not modelled.
  * Fully correct across 0–9999 + round magnitudes + millions/milliards; very large MIXED numbers (a single-term
  * hundreds remainder after a magnitude, or an 11-19× teen multiplier) may carry a minor extra vav / feminine teen.
- * Handles 0 … 10¹²-1; beyond that (or an unsafe int) it falls back to reading the digits one-by-one. Decimals
+ * Handles 0 … 10¹²-1; beyond that (or an unsafe int) it falls back to reading the TOKEN's digits one-by-one. Decimals
  * ("3.14") read as integer · נְקֻדָּה · fractional digits one-by-one.
  */
 import { phonemizeWord } from "./hebrew.ts";
@@ -49,11 +49,20 @@ function sub1000(n: number, masc: boolean): string[][] {
 }
 
 /** A magnitude group: `mult` copies of `word` (masculine agreement). 1 → [word]; 2 → construct שְׁנֵי + word;
- *  3-10 → masculine unit + word; ≥11 → a masculine sub-1000 multiplier + the singular word (no vav on `word`). */
+ *  3-9 → masculine unit + word; ≥10 → a sub-1000 multiplier + the singular word (no vav on `word`).
+ *  ⚠ THE UNIT ARM STOPS AT 9, AND 10 IS NOT AN OFF-BY-ONE THAT WENT UNNOTICED — IT THREW. `unitsM` is the
+ *  masculine units 0-9 and this arm read `unitsM[10]`, which is `undefined`: `phonemize("10000000", "he")`
+ *  died with *Cannot read properties of undefined (reading 'normalize')*, and so did every value in
+ *  10,000,000-10,999,999 and 10,000,000,000-10,999,999,999. Found while porting to C#, where the same index
+ *  raises IndexOutOfRangeException. There is no masculine ten in this data model BY CONSTRUCTION — `sub100`'s
+ *  own `n === 10` arm ignores `masc` and returns the feminine עֶשֶׂר — so ten routes there like every other
+ *  multiplier the unit arm does not cover, giving *ʔeseʁ miljon*. That is the same feminine leakage the
+ *  module header already records for the 11-19 multipliers, not a new register choice, and it needs no
+ *  number word this manifest does not carry. */
 function magnitude(mult: number, word: string): string[][] {
     if (mult === 1) return [[word]];
     if (mult === 2) return [[N.twoConstruct, word]];
-    if (mult <= 10) return [[N.unitsM[mult]!, word]];
+    if (mult < 10) return [[N.unitsM[mult]!, word]];
     return sub1000(mult, true).concat([[word]]);
 }
 
@@ -75,18 +84,20 @@ function compose(n: number): string[][] {
     return r ? joinRem(g, compose(r)) : g;
 }
 
-/** An integer → its ordered niqqud number-words. Digit-by-digit past 10¹²-1 or unsafe. */
-function integerWords(n: number): string[] {
+/** An integer → its ordered niqqud number-words. Digit-by-digit past 10¹²-1 or unsafe — from `raw`, the
+ *  TOKEN's own digits, because above 2^53 the double the caller parsed has already lost them (#1059). */
+function integerWords(n: number, raw?: string): string[] {
     if (n === 0) return [N.unitsF[0]!];
-    if (n >= 1e12 || !Number.isSafeInteger(n)) return String(n).split("").map((d) => N.unitsF[Number(d)] ?? d);
+    if (n >= 1e12 || !Number.isSafeInteger(n))
+        return [...(raw ?? String(n))].map((d) => N.unitsF[Number(d)] ?? d);
     return compose(n).flat();
 }
 
 /** Phonemize a digit token (integer or decimal) to Modern Israeli IPA via the rule g2p. */
 export function numberToIpa(digits: string): string {
     const dot = digits.indexOf(".");
-    if (dot < 0) return integerWords(Number(digits)).map(phonemizeWord).join(" ");
-    const intWords = integerWords(Number(digits.slice(0, dot)));
+    if (dot < 0) return integerWords(Number(digits), digits).map(phonemizeWord).join(" ");
+    const intWords = integerWords(Number(digits.slice(0, dot)), digits.slice(0, dot));
     const fracWords = [...digits.slice(dot + 1)].map((d) => N.unitsF[Number(d)]!); // fractional digits read one-by-one
     return [...intWords, N.point, ...fracWords].map(phonemizeWord).join(" ");
 }
