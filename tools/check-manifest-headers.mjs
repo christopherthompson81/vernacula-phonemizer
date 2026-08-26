@@ -38,7 +38,7 @@ function headers(src) {
     return map;
 }
 
-const files = execSync(`git diff --name-only ${base}...HEAD -- 'src/languages/**/*.jsonc'`, { encoding: "utf8" })
+const files = execSync(`git diff --name-only ${base}...HEAD -- 'data/languages/**/*.jsonc'`, { encoding: "utf8" })
     .trim().split("\n").filter(Boolean);
 
 if (files.length === 0) {
@@ -66,6 +66,13 @@ for (const f of files) {
         if (comment === "") continue; // had no header to lose
         const now = after.get(key);
         if (now === undefined) continue; // key removed — a different question
+        // ⚠ AN EXTENDED HEADER IS NOT AN ORPHANED ONE, and this exemption is what makes the gate usable:
+        // appending a caveat to a header leaves the old text in the file AND still above its own key, which
+        // is indistinguishable from an orphaning by the `normalized.includes` test alone. In a real
+        // orphaning the old text has moved to a DIFFERENT key, so `now` cannot contain it. Without this the
+        // gate fires on every deliberate header improvement — the same "train people to ignore it" failure
+        // the comment above guards against, just from the other direction.
+        if (now.includes(comment)) continue;
         if (now !== comment && normalized.includes(comment)) {
             bad++;
             console.error(`✗ ${f}: "${key}" no longer carries its own header`);
