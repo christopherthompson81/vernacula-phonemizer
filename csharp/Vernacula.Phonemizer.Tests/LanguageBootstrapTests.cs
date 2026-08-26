@@ -61,6 +61,13 @@ public class LanguageBootstrapTests
     [InlineData("uz", "1978-yildagi", "mˈiŋ toqqˈiz jˈuz jetmˈiʃ sakkizint͡ʃˈi jildaɡˈi")]
     [InlineData("uz", "toʻngʻiz", "tonʁˈiz")]
     [InlineData("uz", "XIX asr", "ˈon toqqizint͡ʃˈi ˈasr")]
+    // Lao's four defining shapes: the Cຼ ligature survives the leading-vowel REORDER and the coda
+    // lookahead (both dropped the [l] until #1018), ຫ + sonorant is one HIGH-class onset, the karan ໌
+    // silences a whole final cluster down to one coda, and the era marker expands to a word.
+    [InlineData("lo", "ກິໂລກຼາມ", "ki˧˥.loː˧˥.klaː˩m")]
+    [InlineData("lo", "ຫຼາຍ", "laː˩j")]
+    [InlineData("lo", "ວຽງຈັນທນ໌", "ʋiːə˧˥ŋ.t͡ɕa˩n")]
+    [InlineData("lo", "ຄ.ສ. 1990", "kʰa˧.li˧t̚.sa˧˥k̚.ka˧˥.laː˥˨t̚ nɯ˧ŋ pʰa˧˥n ka˥˨w hɔː˥˨j ka˥˨w si˧˥p̚")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 

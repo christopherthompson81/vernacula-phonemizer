@@ -70,11 +70,16 @@ function reorder(w: string): string {
             // move the lead vowel past the consonant (+ a ຫ/ວ/ຼ cluster member)
             let j = i + 1;
             let cons = s[j++]!;
-            // carry a ຫ-led cluster member across the reorder, incl. the ຼ lam-ligature (U+0EBC, not a base
-            // consonant) so ເຫຼັກ → ຫຼ|ເັກ keeps ຫຼ together → [l] HIGH (else the lead vowel splits the ligature).
+            // carry a cluster member across the reorder.
+            // ⚠ THE ຼ LAM-LIGATURE (U+0EBC) CARRIES AFTER **ANY** CONSONANT, not only ຫ. It is not a base
+            // consonant, so a lead vowel left in front of it orphans it: the scanner's Cຼ cluster branch never
+            // sees it, the [l] is DROPPED, and what is left of the syllable re-scans as junk. Measured on the
+            // FLEURS transcript, every Cຼ loan behind a lead vowel was wrong — ເບຼຊິນ "Brazil" read *beː.si˧˥n*
+            // (no l), ເກຼັກ "Greek" read *keː.ka* (two syllables for one), ໄຮໂດຼເຈນ "hydrogen" *haj.doː.t͡ɕeːn*,
+            // ໂປຣແກຼມ "program" *poː.la.kɛː.ma*. ເຫຼັກ → ຫຼ|ເັກ is the same rule with ຫ as the base.
             // NOT ວ: after a lead vowel ວ is the onset itself (ເວລາ → ʋeː.laː), it must not swallow the next
-            // consonant. ຫ leads ONLY a sonorant/ຼ (ເຫດ = ຫ onset + ດ coda → heːt̚, NOT a ຫດ lead).
-            if (cons === "ຫ" && (HSON.has(s[j] ?? "") || s[j] === "ຼ")) cons += s[j++]!;
+            // consonant. ຫ additionally leads a SONORANT (ເຫດ = ຫ onset + ດ coda → heːt̚, NOT a ຫດ lead).
+            if (s[j] === "ຼ" || (cons === "ຫ" && HSON.has(s[j] ?? ""))) cons += s[j++]!;
             out.push(cons, s[i]!);
             i = j - 1;
         } else out.push(s[i]!);
@@ -222,7 +227,10 @@ function scanFeatures(word: string): SylF[] {
             const vsigns = ["ະ", "າ", "ິ", "ີ", "ຸ", "ູ", "ຶ", "ື", "ັ", "ົ", "ຳ", "ໍ", "ຽ"];
             const oIsOwnVowel = (after === "ອ" || after === "ວ")
                 && !(vsigns.includes(after2) || LEAD.has(after2) || after2 === "ອ" || after2 === "ວ");
-            const followsVowel = vsigns.includes(after) || LEAD.has(after) || oIsOwnVowel;
+            // ⚠ AND A ຼ AFTER nx MAKES nx AN ONSET TOO — a Cຼ CLUSTER onset. Without this the coda lookahead
+            // claims the C first and the cluster branch below never runs: ອະບຼາຮາມ "Abraham" read *ʔap̚.haːm*,
+            // ໂທບຼຸກ "Tobruk" *tʰoːp̚.ka*, ກິໂລກຼາມ (the kg unit word normalize.ts ships) *ki.loːk̚.ma*.
+            const followsVowel = vsigns.includes(after) || LEAD.has(after) || after === "ຼ" || oIsOwnVowel;
             if (!(isCons(nx) && followsVowel)) { coda = CODA[nx] ?? ""; i++; }
         }
         // a ຽ AFTER a nucleus is a [j] offglide coda (ຕາຽ→taːj, ຜູ້ຮ້າຽ→…haːj, ມວຽ→muːəj), not the iːə vowel

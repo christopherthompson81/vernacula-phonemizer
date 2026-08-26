@@ -164,6 +164,32 @@ describe("Lao manifest: the vowel pattern table", () => {
     });
 });
 
+// ⚠ THE Cຼ CLUSTER, IN THE TWO PLACES ITS BRANCH USED NOT TO BE REACHED. The scanner has always had a
+// `Cຼ → Cl` onset branch, but two earlier passes took the ⟨ຼ⟩'s consonant away before it ran, so the [l]
+// was simply DROPPED and the leftovers re-scanned as extra syllables — an INSERTION, invisible to a leak
+// or drop gate. Both arms are FLEURS-attested; the readings below are the pre-fix output in the comment.
+describe("Lao Cຼ clusters", () => {
+    it("a leading vowel does not split the ligature off its consonant", () => {
+        expect(phonemizeWord("ເບຼຊິນ")).toBe("bleː˩.si˧˥n"); // "Brazil" — was beː˩.si˧˥n
+        expect(phonemizeWord("ເກຼັກ")).toBe("kle˧˥k̚"); // "Greek" — was keː˩.ka˧˥, two syllables for one
+        expect(phonemizeWord("ໄຮໂດຼເຈນ")).toBe("ha˧˥j.dloː˩.t͡ɕeː˩n"); // "hydrogen" — was …doː˩.t͡ɕeː˩n
+        expect(phonemizeWord("ແກຼນວິນ")).toBe("klɛː˩n.ʋi˧˥n"); // was kɛː˩.nuːə˧˥.na˧
+    });
+
+    it("the coda lookahead declines a consonant that carries the ligature", () => {
+        expect(phonemizeWord("ອະບຼາຮາມ")).toBe("ʔa˧˥.blaː˩.haː˧˥m"); // "Abraham" — was ʔa˧˥p̚.haː˧˥m
+        expect(phonemizeWord("ໂທບຼຸກ")).toBe("tʰoː˧˥.blu˧˥k̚"); // "Tobruk" — was tʰoː˥˨p̚.ka˧˥
+        // …and the kg unit word normalize.ts ships, which read *ki˧˥.loː˥˨k̚.ma˧* on every "5 kg".
+        expect(phonemizeWord("ກິໂລກຼາມ")).toBe("ki˧˥.loː˧˥.klaː˩m");
+    });
+
+    it("and the ຫ-led sonorants it shares the pass with are untouched", () => {
+        expect(phonemizeWord("ຫຼາຍ")).toBe("laː˩j"); // ຫຼ → [l] HIGH class
+        expect(phonemizeWord("ເຫຼັກ")).toBe("le˧˥k̚"); // the lead-vowel form of the same
+        expect(phonemizeWord("ເວລາ")).toBe("ʋeː˧˥.laː˧˥"); // NOT ວ: after a lead vowel ວ is the onset
+    });
+});
+
 // ⚠ THE CANCELLATION MARK ໌ (karan) SILENCES the consonant it sits on. Unhandled it was not a DROP but an
 // INSERTION — the silent letter took its inherent vowel and became a whole extra syllable — so no leak or
 // drop gate could see it. ×65 in the mined corpus and ×6 in the kaikki referee, where all six were wrong.
