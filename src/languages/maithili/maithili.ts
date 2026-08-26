@@ -9,6 +9,11 @@
  *
  * ⚠ SINGLE-SOURCE bring-up: the only referee is a small human set (167 pairs), so this is verified rather
  * than convergent.
+ *
+ * ⚠ TWO THINGS THE MANIFEST DECLARES THAT THE ENGINE DOES NOT DO, both annotated at their entry in
+ * maithili.jsonc and pinned in test/maithili.test.ts: ⟨ꣿ⟩ U+A8FF is a `vowelSigns` entry the shared word
+ * class cannot reach (it ENDS the token instead), and ₹ is claimed by the inherited Hindi symbol tier
+ * before `stripSymbols` sees it, so `₹500` reads *pˈaː̃t͡ʃ sˈəʊ ɾˈʊpje* rather than the bare number.
  */
 /**
  * NORMALIZER WORDS. This engine inherits Hindi's. The CLOCK words (बजकर, मिनट) are confirmed for Maithili;
@@ -65,8 +70,12 @@ function engine(foreign?: ForeignPhonemizer) {
         foreign,
         undefined,
         undefined,
-        // The fold runs BEFORE the inherited normalizer, so every rule downstream — including the word
-        // tokenizer, which does not carry U+0951 in its class — sees the avagraha the writer meant.
+        // ⚠ The fold is at the NORMALIZE boundary because that is the earliest hook `makeNativeHindi`
+        // offers, not because the tokenizer would otherwise eat the mark: `DEVANAGARI_WORD` is `ऀ-ॣॲ-ॿ`,
+        // which SPANS U+0951, so ⟨क॑⟩ is already one token. What the placement buys is that the word
+        // reaching `retainOnAvagraha` — an `endsWith("ऽ")` on the SPELLING — carries the sign the writer
+        // meant. (An earlier version of this note claimed the token class excluded U+0951. It does not;
+        // `phonemize("म॑थिली", "hi")`, which has no fold, reads one word.)
         { normalize: (input: string) => hindi(input.replace(UDATTA_AS_AVAGRAHA, "ऽ")) },
     );
 }
@@ -76,7 +85,15 @@ export function createMaithili(foreign?: ForeignPhonemizer): { text(input: strin
     return engine(foreign);
 }
 
-/** Bare word→IPA (tests / eval). */
+/**
+ * Bare word→IPA (tests / eval).
+ *
+ * ⚠ THE U+0951 FOLD IS APPLIED HERE TOO, and it has to be, because `engine().word()` does NOT run the
+ * normalizer — the override above reaches `text()` only. Until this line existed the referee eval and the
+ * shipped path disagreed on the module's own signature construct: `phonemizeWord("अब॑")` read *ˈəb* while
+ * `phonemize("अब॑", "mai")` read *ˈəbə*. No golden moves — goldens go through `text()` — so the gate could
+ * never have shown it.
+ */
 export function phonemizeWord(w: string): string {
-    return (MAI ??= engine()).word(w);
+    return (MAI ??= engine()).word(w.replace(UDATTA_AS_AVAGRAHA, "ऽ"));
 }
