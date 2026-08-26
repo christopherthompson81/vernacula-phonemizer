@@ -1,8 +1,10 @@
-// Native canonical-IPA definition for Hindi (hi) — re-derived from the Devanagari orthography and
-// standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
-// This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
-// directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
-// only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
+// Native canonical-IPA definition for BHOJPURI (bho) — Devanagari, read by the shared Hindi engine
+// (src/languages/hindi/hindi.ts `makeNativeHindi`) and by its C# port. ⚠ THIS HEADER USED TO SAY "for
+// Hindi (hi)" and to name a module path that no longer exists; the file has always been Bhojpuri's, and
+// the divergences from Hindi are in `provenance` below. A shallow abugida, so pronunciation is almost
+// entirely rule-derivable; the one genuinely hard part is schwa deletion (a documented algorithm, not a
+// lexicon). ⚠ The same stale Hindi header still sits on hindi.jsonc's siblings magahi.jsonc and
+// marathi.jsonc.
 //
 // Format: plain JSONC. Verbose, self-describing keys. Every phoneme value is CANONICAL IPA.
 {
@@ -57,7 +59,7 @@
         "य": { "ipa": "j", "note": "palatal approximant" },
         "र": { "ipa": "ɾ", "note": "alveolar tap" },
         "ल": { "ipa": "l", "note": "alveolar lateral" },
-        "व": { "ipa": "w", "note": "labiodental approximant" },
+        "व": { "ipa": "w", "note": "labial-velar approximant — Bhojpuri [w], NOT Hindi's labiodental ʋ (the description this note used to carry, copied from hindi.jsonc)" },
         "श": { "ipa": "s", "note": "Bhojpuri merges श → [s] (NO /ʃ/) — शहर→sahar (vs Hindi ʃ)" },
         "ष": { "ipa": "s", "note": "Bhojpuri ष → [s] (no /ʃ/ or /ʂ/)" },
         "स": { "ipa": "s", "note": "alveolar sibilant" },
@@ -87,12 +89,24 @@
         "ऊ": { "ipa": "u", "note": "long close back" },
         "ऋ": {
             "ipa": "ri",
-            "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi)",
+            // ⚠ SUSPECTED DEFECT, FILED RATHER THAN FIXED — the rhotic here is ASCII ⟨r⟩ (IPA: alveolar
+            // TRILL), and it is the ONLY r in this manifest. `consonants` gives र→ɾ and declares no trill,
+            // so कृष्ण reads krisn with a trill while कर reads kəɾ with a tap, in one language. Every
+            // sibling Devanagari manifest writes the tap — hi/awa/mai/hne/mr ɾɪ, rkt ɾi — and this note
+            // itself says "ɾɪ". The shape of the slip is visible: the Bhojpuri revision was about LENGTH
+            // (ɪ→i), and ɾɪ→ri drops the hook as well as the laxness; magahi.jsonc, derived from this file,
+            // carries the same ⟨r⟩ while independently-revised rangpuri.jsonc has ɾi.
+            // NOT CHANGED HERE because the change moves shipped IPA and this language's only witness —
+            // the 1622-pair grammar-mined referee named in `provenance` — is not in the repo, so nothing
+            // available can confirm what it transcribed. Fix it WITH that artifact, in both engines, and
+            // regenerate csharp/goldens/bho.tsv via `tools/gen_variant_golden.mts hi bho` (bho has no
+            // corpus of its own; gen_parity_goldens.mts produces nothing for it).
+            "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi) — see the filed defect above",
         },
         "ए": { "ipa": "e", "note": "long close-mid front" },
-        "ऐ": { "ipa": "ɛ", "note": "Bhojpuri KEEPS the diphthong [ai] (बैल→bail) — Hindi monophthongised to ɛː" },
+        "ऐ": { "ipa": "ɛ", "note": "⚠ MONOPHTHONG [ɛ], NOT the diphthong [ai] — बैल→bɛl. An earlier revision of this note claimed Bhojpuri 'KEEPS the diphthong'; `provenance` above records that claim as WRONG, and the mined referee has no [ai] here. Do not 'fix' the value to match the retracted note." },
         "ओ": { "ipa": "o", "note": "long close-mid back" },
-        "औ": { "ipa": "ɔ", "note": "Bhojpuri KEEPS the diphthong [au] (कौन→kaun) — Hindi monophthongised to ɔː" },
+        "औ": { "ipa": "ɔ", "note": "⚠ MONOPHTHONG [ɔ], NOT the diphthong [au] — कौन→kɔn. Same retraction as ऐ above." },
         "ऍ": { "ipa": "ɛ", "note": "candra e (loans)" },
         "ऑ": { "ipa": "ɔ", "note": "candra o (loans, e.g. English 'o')" },
         "ॐ": { "ipa": "õm", "note": "Om sign (U+0950) — a whole syllable" },
@@ -105,7 +119,7 @@
         "ी": { "ipa": "i" },
         "ु": { "ipa": "u" },
         "ू": { "ipa": "u" },
-        "ृ": { "ipa": "ri" },
+        "ृ": { "ipa": "ri" }, // ⚠ the same filed ⟨r⟩-for-ɾ defect as ऋ above; the two must move together
         "े": { "ipa": "e" },
         "ै": { "ipa": "ɛ" },
         "ो": { "ipa": "o" },
@@ -124,7 +138,7 @@
         "anusvara": {
             "char": "ं",
             "effect": "nasalizeVowel",
-            "note": "nasalizes the preceding vowel (canonical Hindi + wikipron: कांग्रेस→kãɡɾeːs, not a homorganic nasal consonant). Nasal vowels are short.",
+            "note": "nasalizes the preceding vowel. ⚠ THE PARENTHETICAL THIS NOTE USED TO CARRY WAS HINDI'S AND WAS ALSO FALSE OF THE ENGINE: the shared abugida g2p DOES restore a homorganic nasal before a stop, so कांग्रेस reads kɑ̃ŋɡɾes and इंटरनेट ĩɳʈəɾneʈ — the [ɳ] is an inserted allophone and is deliberately absent from `consonants` above, where ण→n. And 'nasal vowels are short' is vacuous here: see `nasalVowelsAreShort` at the foot of the file.",
         },
         "chandrabindu": {
             "char": "ँ",
@@ -150,7 +164,7 @@
         // elision sign. All 31 avagraha forms in the grammar-mined referee keep the vowel; none delete it.
         "retainOnAvagraha": true,
         "medialRule": "ohala-VCaCV",
-        "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱaːɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context).",
+        "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱɑɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context). ⚠ The example used to be written with Hindi's LONG aː, which this language does not have.",
     },
 
     // Post-rules applied to the raw akshara IPA (declarative, ordered regex — portable). Geminate→length
@@ -174,9 +188,10 @@
 
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
     // running these through the same native G2P (no hand-written phonemes). The
-    // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
-    // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
-    // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
+    // compositor (core/numbers.ts) assembles them with Indian lakh/crore grouping.
+    // NOTE: 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस), so all 72 are spelled out in
+    // `compound` below. ⚠ These are HINDI's spellings, unrevised: no Bhojpuri numeral source has been
+    // applied to this table, and Bhojpuri numerals are not uniformly identical to Hindi's.
     "numbers": {
         "units": [
             "शून्य",
@@ -296,9 +311,13 @@
         "decimalWord": "दशमलव",
     },
 
-    // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत). Symbols
-    // in `stripSymbols` are dropped so a currency amount reads as the bare number (₹500 → पाँच सौ), matching
-    // the amount reads as the bare number.
+    // Symbol → spoken word, read by THIS engine's own tokenizer AFTER the preceding number (50% → पचास
+    // प्रतिशत). `stripSymbols` drops a sign here instead of reading it.
+    // ⚠ ₹ DOES NOT COME OUT SILENT, AND THIS COMMENT USED TO CLAIM IT DID ("₹500 → पाँच सौ", plus a
+    // half-sentence that trailed off). The SHARED symbol tier runs first and it is HINDI's — bho declares no
+    // `symbolTier`, so makeNativeHindi falls back to hindi.jsonc's — and that tier claims ₹ and appends
+    // रुपये before the strip below ever sees the sign. Measured: `₹500` reads pɑ̃t͡ʃ sɔ ɾupje. The strip is
+    // the second line of defence, for a ₹ the shared tier did not claim.
     "symbols": { "%": "प्रतिशत" },
     "stripSymbols": "₹",
 
@@ -314,8 +333,12 @@
         ":": ",",
     },
 
-    // Nasalization does NOT change vowel length: the WikiPron hin_deva narrow referee keeps nasal vowels
-    // long (नहीं→nɐɦĩː, कांग्रेस→kãːŋ, यहाँ→jɐɦãː, गांव→ɡãː), so a long vowel + anusvara/chandrabindu stays
-    // long (kaː̃) and a short one stays short (गंगा→ɡə̃ŋ). Setting this false keeps the length mark.
+    // ⚠ INERT IN THIS LANGUAGE, AND KEPT ONLY SO THE FAMILY'S FILES READ ALIKE. The flag's whole effect is
+    // `out.replace(/ː$/, "")` before the nasal tilde (core/abugida.ts), and BHOJPURI HAS NO PHONEMIC LENGTH:
+    // not one entry in `independentVowels` or `vowelSigns` above carries ː, and the only ː this engine ever
+    // writes comes from the geminate `postRules`, which run AFTER g2p. So neither setting can move a byte.
+    // ⚠ The evidence this note used to cite was HINDI's — the WikiPron hin_deva narrow referee's nɐɦĩː /
+    // jɐɦãː / ɡãː — which is not a Bhojpuri source and, in a language with no length contrast, not an
+    // argument for either value. Flipping it is safe; sourcing it is not required, because nothing reads it.
     "nasalVowelsAreShort": false,
 }
