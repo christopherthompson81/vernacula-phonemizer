@@ -61,3 +61,24 @@ uncovered character silently, so `攝氏20度` would have read *ŋiap̚ sz̩ ŋi
 line drawn here: a character this layer EMITS gets sourced or the rule is declined (which is what the Jin layer
 did with the same gap). 於 and the rest of the 1,282 uncovered characters are NOT added — they are the engine's
 coverage gap, recorded in `docs/investigations/hak_normalization_investigation.md`, not this layer's.
+
+## ⚠ Eleven keys are UNREACHABLE, and that is a property of the extract, not a defect
+
+11 of the 9,220 keys can never be looked up, because they contain characters the tokenizer breaks a Han run
+on — 7 carry `，`, and 4 carry `……` or `——`:
+
+```
+人比人，气死人        人比人，氣死人        冬至羊，夏至狗
+成事不足，敗事有餘     成事不足，败事有余     早知拉尿，企到天光
+自家脧仔歪，嫌人尿桶漏  紧……紧……            緊……緊……
+老公拨扇——凄凉       老公撥扇——淒涼
+```
+
+They are proverbs and 歇後語 that arrived whole from the kaikki extract. The shared engine
+(`core/hanDictIpa.ts`) segments with a greedy longest match over a run the tokenizer has ALREADY split at
+that punctuation, so no lookup can present them — the longest key it can ever offer stops at the comma.
+
+**0.12% of the dict, no behavioural effect, and both engines agree byte-for-byte** (#1056). Recorded rather
+than stripped: deleting them means re-running the generator and taking a diff against the upstream extract
+for no reading that changes. ⚠ If a future extract adds many more, that is a signal the generator's key
+filter changed — the number to compare against is 11.
