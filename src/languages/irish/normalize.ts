@@ -227,7 +227,8 @@ export function normalizeIrish(input: string): string {
         });
 
     // 5a) THE TIMEZONE-OFFSET HYPHEN IS A SIGN, NOT A WORD HYPHEN — `UTC-08:00`, `GMT-0:44`,
-    //     `UTC-00:25:21` (10 instances across the mined corpora, 5 of them carrying a colon). It has to
+    //     `UTC-00:25:21` — 10 instances across the mined corpora, 5 carrying a colon, though they sit in
+    //     the ky and crh text rather than this language's (ky's own ordering already reads them). It has to
     //     be settled HERE, before the clock rule, because that rule turns the digits into WORDS and the
     //     hyphen is then between two letter runs — indistinguishable from a compound joint, and the g2p
     //     strips it and fuses them: `GMT-00:43` read *tʲˈeːn̪ˠɑːⁱdʲ*, one word. The initialism pass runs
