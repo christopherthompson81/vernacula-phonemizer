@@ -108,10 +108,19 @@ function scan(w: string): string {
 /** One Naija word → canonical IPA. Order: (1) the Naija lexicon (respellings + substrate loans + irregulars);
  *  (2) if `known` resolves it as standard English → NATIVISE that (BBC-Pidgin text is mostly English spelling);
  *  (3) the nativising rule g2p (phonemically-spelled substrate loans: danfo, egusi). Segmental only — Naija tone
- *  is unmarked in the media orthography. `known` is omitted by the referee eval (rule path only; no referee). */
+ *  is unmarked in the media orthography. `known` is omitted by the referee eval (rule path only; no referee).
+ *
+ *  ⚠ `Object.hasOwn`, NOT A BARE `DEF.lexicon[lw]`. The manifest is a `JSON.parse` object, so it inherits
+ *  `Object.prototype` — and the bracket lookup walked the chain. ⟨constructor⟩ is ordinary vocabulary in this
+ *  corpus's construction and road-contract copy, and `DEF.lexicon["constructor"]` resolved to the `Object`
+ *  CONSTRUCTOR FUNCTION, which is `!== undefined`, so it was returned as the word's reading and template-
+ *  concatenated into the clause: `Constructor dey come` shipped *function Object() { [native code] } dɛ kɔm*.
+ *  JS source injected into the phoneme stream, not merely a wrong reading. Found reviewing the C# port, whose
+ *  `TryGetValue` has no prototype chain and read it correctly all along — so the two engines DISAGREED on a
+ *  real English word and the 200-row golden could not see it. */
 export function phonemizeWord(word: string, known?: ForeignPhonemizer): string {
     const lw = word.toLowerCase();
-    const lex = DEF.lexicon[lw];
+    const lex = Object.hasOwn(DEF.lexicon, lw) ? DEF.lexicon[lw] : undefined;
     if (lex !== undefined) return lex;
     const en = known?.(lw);
     if (en !== undefined) return nativise(en).normalize("NFC");
@@ -335,7 +344,9 @@ class NaijaPhonemizer implements Phonemizer {
             } else if (m[5]) {
                 const w = foldLatinToBase(m[5]);
                 // A bare ALL-CAPS run is an initialism unless the dict lexifies it (see spellOut's note).
-                if (isInitialism(w) && DEF.lexicon[w.toLowerCase()] === undefined && this.foreign?.(w.toLowerCase()) === undefined)
+                // `hasOwn` for the same reason `phonemizeWord` uses it. Unreachable as written — `isInitialism`
+                // admits only vowel-less 2-6 letter runs — but the guard is what keeps widening it safe.
+                if (isInitialism(w) && !Object.hasOwn(DEF.lexicon, w.toLowerCase()) && this.foreign?.(w.toLowerCase()) === undefined)
                     for (const ph of spellOut(w)) sink.emit(ph);
                 else sink.emit(phonemizeWord(w, this.foreign));
             } else if (m[6]) {

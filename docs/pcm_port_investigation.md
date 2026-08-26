@@ -32,6 +32,12 @@ probe file, both emitting `text \t sync \t async` and diffed. Four probe sets:
 router hands to the `sylheti` engine, which is not ported. `Registry.PortPending` reports `sylheti`, so it
 reads as blocked, not wrong.
 
+⚠ **AMENDED BY RUN 6.** "1 divergence" was true of these four sets and NOT true of the language: none of
+them contained an `Object.prototype` key, and `constructor` is a real second divergence they could not
+reach. The 22,000-word English slice is drawn from dict headwords, where `constructor`/`valueOf`/
+`hasOwnProperty` do not appear, and no hand-built line thought to include one. A probe set is only ever
+evidence about what is in it.
+
 **⚠ What the haystack did NOT contain.** No FLEURS, and no corpus-wide differential is possible. Also: the
 22,000-word English set is 100% dict hits, so it exercises `nativise()` exhaustively and the rule `scan()`
 barely at all — the synthetic set and the mined rows are what cover `scan()`. And nothing here measures
@@ -92,6 +98,43 @@ actually writes `N195.3bn … N150 billion`, lowercase in both halves. The patte
 case-sensitive, so the mis-cased quote made it look as though the rule fails on the very instance it cites.
 Prose only; re-cased in `normalize.ts` and in the test comment that copied it.
 
+## Run 6 — 2026-08-25 23:00 · DEFECT: the lexicon lookup walked `Object.prototype`
+
+**Command.** Self-review of the PR, then:
+
+    phonemize("Constructor dey come", "pcm")
+      →  function Object() { [native code] } dɛ kɔm
+
+**Raw finding.** `DEF.lexicon` is a `JSON.parse` object, so `DEF.lexicon["constructor"]` resolves the
+INHERITED `Object` constructor — a function, therefore `!== undefined`, therefore returned as the word's
+reading and template-concatenated into the clause. `phonemize("constructor", "pcm")` returns the function
+itself, not a string. This is JS source injected into the phoneme stream, not a wrong reading, and
+⟨constructor⟩ is ordinary vocabulary in this corpus's construction and road-contract copy.
+
+The C# has read it correctly all along — `Dictionary.TryGetValue` has no prototype chain — so **the two
+engines disagreed on an ordinary English word and the gate could not see it**, which is the same shape as
+run 3 with the sides swapped.
+
+**Reachability, measured.** `phonemizeWord` is the only reachable site. `scan()`'s `c in DEF.consonants`
+and `spellOut`'s `LETTER[c]` take single code points, and no prototype key is one character; the initialism
+gate's lookup is restricted by `isInitialism` to vowel-less 2-6 letter runs. The gate was hardened anyway,
+so that widening `isInitialism` cannot reintroduce the class.
+
+Fixed with `Object.hasOwn` in the TypeScript, with a test. **0 golden rows moved.** Nineteen prototype-key
+lines were added to the probe set and the differential re-run: still one divergence, still `sylheti`.
+
+**⚠ NOT PCM-ONLY, AND NOT FIXED HERE.** Probing 54 codes for the same shape:
+
+    pcm  constructor → function Object() { [native code] }
+    nl   constructor → function Object() { [native code] }
+    cy   constructor → function Object() { [native code] }
+    sv   constructor → function Object() { [native code] }
+
+`nl` is already ported, so that pair is diverged in `main` today. The root cause is shared —
+`core/loadManifest.ts` hands every engine a prototype-bearing object — and the general fix (a
+null-prototype or `Map` manifest) touches every language at once. That is a fleet-wide decision and a
+separate change; recorded here with the reproduction rather than attempted inside a port PR.
+
 ## Not fixed, recorded
 
 - **Caret exponents drop the exponent, fleet-wide.** `10^6` reads *ten* in pcm. The registry pre-pass folds
@@ -102,3 +145,7 @@ Prose only; re-cased in `normalize.ts` and in the test comment that copied it.
   the ⟨fut⟩ trap (all four corpus hits are *fut-bola*, football) in full.
 - **Indian-style grouping** `1,00,000` reads as three clauses. pcm's number class wants `,\d{3}`; the lakh
   grouping is not a pcm convention and no corpus instance exists.
+- **The prototype-key class is fleet-wide** — `nl`, `cy`, `sv` reproduce run 6's defect, and `nl` is
+  already ported, so that pair is diverged in `main` today. The root cause is `core/loadManifest.ts`
+  handing every engine a prototype-bearing object; the general fix touches every language at once and is a
+  fleet-wide decision, not a port PR's.

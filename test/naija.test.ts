@@ -70,6 +70,16 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         // An OOV substrate loan is NOT routed through English — the rule g2p reads it phonemically:
         expect(phonemize("danfo", "pcm")).toBe("danfo");
         expect(phonemize("egusi", "pcm")).toBe("eɡusi");
+        // ⚠ AN INHERITED PROPERTY IS NOT A LEXICON ENTRY. The manifest is a `JSON.parse` object, so a bare
+        // `DEF.lexicon[lw]` walked `Object.prototype`: ⟨constructor⟩ — ordinary vocabulary in this corpus's
+        // construction and road-contract copy — resolved to the `Object` CONSTRUCTOR FUNCTION, which is
+        // `!== undefined`, and got concatenated into the clause as *function Object() { [native code] } dɛ kɔm*.
+        // JS source in the phoneme stream. Found reviewing the C# port, whose dictionary lookup has no
+        // prototype chain and had been reading it correctly all along.
+        expect(phonemize("constructor", "pcm")).toBe("kanstɾɔkta");
+        expect(phonemize("Constructor dey come", "pcm")).toBe("kanstɾɔkta dɛ kɔm");
+        // …and the referee path (no `known` callback) reads it with the rule g2p rather than the prototype.
+        expect(phonemizeWord("constructor")).toBe("konstɾuktoɾ");
     });
 
     test("numbers (nativised English, compositional)", () => {
