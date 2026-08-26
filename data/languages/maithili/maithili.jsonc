@@ -1,6 +1,6 @@
 // Native canonical-IPA definition for Maithili (mai) — Eastern Indo-Aryan (Bihari group), Devanagari. Reuses
 // standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
-// This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
+// This file IS the language data: the native G2P engine (src/languages/hindi/hindi.ts) reads it
 // directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
 // only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
 //
@@ -188,7 +188,7 @@
 
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
     // running these through the same native G2P (no hand-written phonemes). The
-    // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
+    // compositor (src/core/numbers.ts, indicNumberWords) assembles them with Indian lakh/crore grouping.
     // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
     // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
     "numbers": {
