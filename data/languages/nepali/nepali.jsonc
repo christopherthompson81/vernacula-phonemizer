@@ -1,8 +1,8 @@
 // Native canonical-IPA definition for Nepali (ne) — Indo-Aryan, Devanagari. Reuses the Hindi Devanagari
-// standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
-// This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
-// directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
-// only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
+// ENGINE (`makeNativeHindi`, src/languages/hindi/hindi.ts) but NOT Hindi's phoneme values: see
+// `provenance` for the six divergences. This file IS the language data — the engine reads it directly.
+// Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the only
+// genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
 //
 // Format: plain JSONC. Verbose, self-describing keys. Every phoneme value is CANONICAL IPA.
 {
@@ -78,7 +78,7 @@
         "ऊ": { "ipa": "u", "note": "no phonemic length" },
         "ऋ": {
             "ipa": "ɾɪ",
-            "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi)",
+            "note": "vocalic r (Sanskrit); Nepali realizes it ɾɪ, as the whole Devanagari fleet does — कृष्ण → kɾˈɪsɳʌ",
         },
         "ए": { "ipa": "e" },
         "ऐ": { "ipa": "ʌi", "note": "diphthong (ʌ+i offglide)" },
@@ -115,7 +115,7 @@
         "anusvara": {
             "char": "ं",
             "effect": "nasalizeVowel",
-            "note": "nasalizes the preceding vowel (canonical Hindi + wikipron: कांग्रेस→kãɡɾeːs, not a homorganic nasal consonant). Nasal vowels are short.",
+            "note": "nasalizes the preceding vowel rather than becoming a homorganic nasal consonant — कांग्रेस → kˈãŋɡɾes (⚠ the Nepali reading: no vowel length, unlike Hindi's kãɡɾeːs), अंश → ˈʌ̃s. Length is governed by `nasalVowelsAreShort` below, NOT here.",
         },
         "chandrabindu": {
             "char": "ँ",
@@ -138,7 +138,7 @@
         "retainInMonosyllable": true,
         "retainFinalAfterCluster": true,
         "medialRule": "ohala-VCaCV",
-        "note": "Final-first (but RETAINED after a word-final cluster/geminate — the Marathi rule Nepali shares: एकाउन्न→ekäunʌ), then medial VCəCV → VCCV right-to-left.",
+        "note": "Final-first (but RETAINED after a word-final cluster/geminate — the Marathi rule Nepali shares: एकाउन्न → ˈekaunːʌ), then medial VCəCV → VCCV right-to-left.",
     },
 
     // Post-rules applied to the raw akshara IPA (declarative, ordered regex — portable). Geminate→length
@@ -147,12 +147,12 @@
         {
             "from": "((?:t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|[kɡptbmnlʃsɳŋɽ]ʰ?ʱ?|t̪|d̪))\\1(?!͡)",
             "to": "$1ː",
-            "note": "geminate → single + length (क्क→kː, च्च→t͡ʃː)",
+            "note": "geminate → single + length (क्क→kː, त्त→t̪ː, द्द→d̪ː, न्न→nː). ⚠ FOUND, NOT FIXED — THE AFFRICATE ARMS OF THIS ALTERNATION ARE DEAD IN NEPALI. The pattern is inherited from hindi.jsonc and names the PALATAL affricates t͡ʃ/t͡ʃʰ/d͡ʒ/d͡ʒʱ (and ʃ), none of which this file's `consonants` can produce — Nepali's च/छ/ज/झ are the DENTAL t͡s/t͡sʰ/d͡z/d͡zʱ and श/ष merge to s, and none of those four is listed. So every other geminate collapses and the affricates do not: मक्का→mˈʌkːa and सत्तरी→sˈʌt̪ːʌɾi beside बच्चा→bˈʌt͡st͡sa, पच्चीस→pˈʌt͡st͡sis, लज्जा→lˈʌd͡zd͡za. Measured: 206 of 3,923 ne_np FLEURS utterances and 22 of the 200 parity-golden rows carry an uncollapsed t͡st͡s or d͡zd͡z. Adding `t͡sʰ|d͡zʱ|t͡s|d͡z` is a one-line change, but it moves 11% of the golden and no wikipron nep_deva referee is present in this repo to settle whether Nepali's affricate geminate surfaces as [t͡sː] — so both engines keep the current reading and the finding is recorded here.",
         },
         {
             "from": "ː([ʰʱ])",
             "to": "$1ː",
-            "note": "aspiration-before-length reorder: differing-aspiration conjunct द्ध→d̪ːʱ→d̪ʱː (fleet convention, matches bn/si); avoids stranding ʰ/ʱ after the length mark (युद्ध बुद्ध अच्छा पत्थर)",
+            "note": "aspiration-before-length reorder: differing-aspiration conjunct द्ध→d̪ːʱ→d̪ʱː (fleet convention, matches bn/si); avoids stranding ʰ/ʱ after the length mark — युद्ध→jˈud̪ʱːʌ, बुद्ध→bˈud̪ʱːʌ, पत्थर→pˈʌt̪ʰːʌɾ. ⚠ अच्छा is NOT one of them in Nepali (it reads ˈʌt͡st͡sʰa, no length mark at all): rule 1 above never fires on the dental affricates, so this rule has nothing to reorder there. See that rule's note.",
         },
     ],
     // Final conventions applied AFTER schwa deletion.
@@ -191,8 +191,10 @@
     },
 
     // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत). Symbols
-    // in `stripSymbols` are dropped so a currency amount reads as the bare number (₹500 → पाँच सौ), matching
-    // the amount reads as the bare number.
+    // in `stripSymbols` are dropped so a currency amount reads as the bare number — ₹500 → पाँच सय
+    // [pˈãt͡s sˈʌj], with Nepali's सय, NOT Hindi's सौ. ⚠ ₹ is dropped rather than spoken ON PURPOSE: it does
+    // not occur in the ne_np corpus and no ne referee in this repo spells the noun, so the sign keeps
+    // falling through instead of being given a confidently-wrong word (normalize.ts's CURRENCY note).
     "symbols": { "%": "प्रतिशत" },
     "stripSymbols": "₹",
 
@@ -208,8 +210,12 @@
         ":": ",",
     },
 
-    // Nasalization does NOT change vowel length: the WikiPron hin_deva narrow referee keeps nasal vowels
-    // long (नहीं→nɐɦĩː, कांग्रेस→kãːŋ, यहाँ→jɐɦãː, गांव→ɡãː), so a long vowel + anusvara/chandrabindu stays
-    // long (kaː̃) and a short one stays short (गंगा→ɡə̃ŋ). Setting this false keeps the length mark.
+    // Nasalization does NOT shorten the vowel it sits on — `false` keeps whatever length mark the vowel
+    // already carried. ⚠ THE SETTING IS INHERITED FROM HINDI, WHERE IT IS LOAD-BEARING (the WikiPron
+    // hin_deva narrow referee keeps nasal vowels long: नहीं→nɐɦĩː, यहाँ→jɐɦãː) AND HERE IT IS VACUOUS:
+    // Nepali has NO phonemic vowel length, so no `vowelSigns` or `independentVowels` entry an anusvara can
+    // follow carries a ː in the first place (नहीं→nˈʌɦĩ, यहाँ→jˈʌɦã, गंगा→ɡˈʌ̃ŋɡa). The two candidates that
+    // DO carry one, ऍ/ॅ→ɛː and ऑ/ॉ→ɔː, are loan vowels. Kept explicit rather than dropped so the value is
+    // a recorded decision and not a silent default.
     "nasalVowelsAreShort": false,
 }
