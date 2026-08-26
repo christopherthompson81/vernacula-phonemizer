@@ -1,7 +1,7 @@
 // Native canonical-IPA definition for Awadhi (awa) — Eastern Hindi (Indo-Aryan), Devanagari. Reuses the Hindi
 // Devanagari engine (makeNativeHindi) with the Saksena-documented Awadhi divergences. A shallow abugida.
-// This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
-// directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
+// This file IS the language data: the shared Devanagari engine (src/languages/hindi/hindi.ts,
+// makeNativeHindi) reads it directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
 // only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
 //
 // Format: plain JSONC. Verbose, self-describing keys. Every phoneme value is CANONICAL IPA.
@@ -9,7 +9,7 @@
     "language": "awa",
     "name": "Awadhi",
     "script": ["Devanagari"],
-    "provenance": "Authored from Baburam Saksena, Evolution of Awadhi (1937), Lakhimpuri dialect basis; audited against Saksena's §12 consonant chart and §9/§90–100 vowel chart. Reuses the Hindi Devanagari engine; the DOCUMENTED Awadhi divergences implemented are: (1) SIBILANT MERGER श/ष→[s] (§12/§87: the dental sibilant is the only one in Awadhi; ś/ṣ of foreign words are always [s]); (2) INTERVOCALIC FLAP ड/ढ→ɽ/ɽʱ except after a nasal or nasalisation (handled in awadhi.ts, §12 'Flapped'); (3) व→[w] bilabial semivowel (§12: the semivowels are w and j, NOT Hindi's labiodental ʋ — same eastern reflex as Bhojpuri); (4) ऐ/औ→[ʌi]/[ʌu] diphthongs with a CENTRAL onset — Saksena §2395 confirms Lakhimpuri keeps ʌi/ʌu where Eastern dialects (Bhojpuri) monophthongise to ʌe~ɛ / ʌo~ɔ, so the diphthong is CORRECT for the Lakhimpuri basis and must NOT be flattened to the Bhojpuri monophthong (no longer 'provisional'). Per Saksena/Bloch the Eastern-Indo-Aryan phonologies are near-identical, so remaining rules are shared with Hindi/Bhojpuri BY ATTESTATION, not by defaulting. NOTED but not encoded (fine phonetic detail from §12/§95/§103): the OIA-a reflex / inherent short vowel is realized [ʌ] (half-open central, §95/§103) not [ə], but the engine keeps the literal 'ə' because schwa-deletion keys on it (adopting ʌ would break deletion, same tradeoff as Bhojpuri); and Saksena classes र as a trill [r] (§12 'Rolled') where we keep the Hindi tap [ɾ] (tap~trill free variation).SINGLE-SOURCE: the divergences and the anchoring gold both come from ONE documented source (Saksena) — that is what requires; it does NOT require an independent second referee (no wikipron/kaikki/epitran Awadhi exists, and a machine Hindi-clone would be circular). Not : Saksena is a real Awadhi-specific grammar with IPA, not a Hindi clone, so grading against it measures something. DEFERRED (documented, larger follow-up): a MINED single-source grade from Saksena's example/appendix forms (the bho pattern; the OCR IPA is corrupt so it needs visual reading) would strengthen the anchor beyond the current hand-adjudicated gold; whispered/voiceless final vowels (§113–119); short e/o quality.",
+    "provenance": "Authored from Baburam Saksena, Evolution of Awadhi (1937), Lakhimpuri dialect basis; audited against Saksena's §12 consonant chart and §9/§90–100 vowel chart. Reuses the Hindi Devanagari engine; the DOCUMENTED Awadhi divergences implemented are: (1) SIBILANT MERGER श/ष→[s] (§12/§87: the dental sibilant is the only one in Awadhi; ś/ṣ of foreign words are always [s]); (2) INTERVOCALIC FLAP ड/ढ→ɽ/ɽʱ except after a nasal or nasalisation (handled in awadhi.ts, §12 'Flapped'); (3) व→[w] bilabial semivowel (§12: the semivowels are w and j, NOT Hindi's labiodental ʋ — same eastern reflex as Bhojpuri); (4) ऐ/औ→[ʌi]/[ʌu] diphthongs with a CENTRAL onset — Saksena §2395 confirms Lakhimpuri keeps ʌi/ʌu where Eastern dialects (Bhojpuri) monophthongise to ʌe~ɛ / ʌo~ɔ, so the diphthong is CORRECT for the Lakhimpuri basis and must NOT be flattened to the Bhojpuri monophthong (no longer 'provisional'). Per Saksena/Bloch the Eastern-Indo-Aryan phonologies are near-identical, so remaining rules are shared with Hindi/Bhojpuri BY ATTESTATION, not by defaulting. NOTED but not encoded (fine phonetic detail from §12/§95/§103): the OIA-a reflex / inherent short vowel is realized [ʌ] (half-open central, §95/§103) not [ə], but the engine keeps the literal 'ə' because schwa-deletion keys on it (adopting ʌ would break deletion, same tradeoff as Bhojpuri); and Saksena classes र as a trill [r] (§12 'Rolled') where we keep the Hindi tap [ɾ] (tap~trill free variation). ⚠ FILED, NOT FIXED — AN UNDOCUMENTED DIVERGENCE: hindi.jsonc carries a postRule d͡ʒɲ→ɡj for the ⟨ज्ञ⟩ conjunct and this file does not, so विज्ञान reads *wɪd͡ʒɲaːn* against Hindi's *ʋɪɡjaːn* and Bhojpuri's *wid͡ʒnɑn*. No Awadhi source licenses [d͡ʒɲ]; it is what falls out of ञ→ɲ with the rule absent. Not corrected because the Awadhi value is unsourced (Saksena is not consulted for it here) and the same gap is in marathi/maithili/chhattisgarhi/nepali/rangpuri — a family-wide decision, not an awa one. ⚠ SINGLE-SOURCE: the divergences and the anchoring gold both come from ONE documented source (Saksena), and there is no independent second referee — no wikipron/kaikki/epitran ships Awadhi, and a machine Hindi-clone check would be circular. That is not vacuous: Saksena is a real Awadhi-specific grammar with IPA rather than a Hindi clone, so grading against it measures something — but it cannot catch an error Saksena himself makes. DEFERRED (documented, larger follow-up): a MINED single-source grade from Saksena's example/appendix forms (the bho pattern; the OCR IPA is corrupt so it needs visual reading) would strengthen the anchor beyond the current hand-adjudicated gold; whispered/voiceless final vowels (§113–119); short e/o quality.",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
@@ -186,10 +186,11 @@
     // और-offglide / अय→ɛj convention.
 
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
-    // running these through the same native G2P (no hand-written phonemes). The
-    // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
-    // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
-    // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
+    // running these through the same G2P (no hand-written phonemes). The compositor
+    // (src/core/numbers.ts, the Indic branch) assembles them with Indian lakh/crore grouping.
+    // NOTE: 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस), so all 72 non-round spellings
+    // are written out in `compound` below — nothing is outstanding. They are byte-identical to
+    // hindi.jsonc's: INHERITED, not Awadhi-sourced.
     "numbers": {
         "units": [
             "शून्य",
@@ -309,9 +310,13 @@
         "decimalWord": "दशमलव",
     },
 
-    // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत). Symbols
-    // in `stripSymbols` are dropped so a currency amount reads as the bare number (₹500 → पाँच सौ), matching
-    // the amount reads as the bare number.
+    // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत).
+    // ⚠ `stripSymbols` NEVER SEES ₹, so the bare-number reading this entry used to claim does not happen.
+    // awa declares no `symbolTier`, so makeNativeHindi falls back to hindi.jsonc's, and that tier runs
+    // BEFORE this engine's own symbols/stripSymbols: ₹500 reads *pˈaː̃t͡ʃ sˈʌu ɾˈʊpjeː* with Hindi's
+    // रुपये. Measured on the golden — csharp/goldens/awa.tsv row 186 is a ₹20 salary and reads
+    // *bˈiːs ɾˈʊpjeː*. `ordinalSuffixes` and `irregularOrdinals` are inherited from Hindi the same way,
+    // for the same reason. The entry stays because it is what makes ₹ inert if awa ever declares a tier.
     "symbols": { "%": "प्रतिशत" },
     "stripSymbols": "₹",
 
