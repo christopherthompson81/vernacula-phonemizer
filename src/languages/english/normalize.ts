@@ -539,6 +539,12 @@ export function normalizeEnglish(input: string): string {
     //     one" is confidently wrong. Variables are short, prose words are not.
     //     ⚠ AND THE CAP NEEDS `(?<![A-Za-z])`, or it caps nothing: `{1,3}` happily matches the LAST three
     //     letters of a long word, so `Smith¹` matches `ith` and still reads as arithmetic.
+    //     ⚠ AND A FOLLOWING LETTER MUST BE SPACED OFF FIRST. The superscript is consumed and the replacement
+    //     is a WORD, so whatever stood after the mark fuses onto it: `I²C` read *aᶦ skwˈɛɹd**k*** — one token
+    //     where there were two. Nothing is dropped and no raw mark survives, so it is a WRONG-WORD defect
+    //     that no leak gate can reach. The shared tier had the identical bug in its `bareExponent` arm.
+    s = s.replace(/(?:\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?(?:\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)(?=[\p{L}\p{M}])/gu,
+        (m0) => `${m0} `);
     s = s.replace(/(\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?(\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
         (_m, base: string, sup: string) => {
             const digits = [...sup].map((c) => SUPERSCRIPT_DIGIT[c]!).join("");

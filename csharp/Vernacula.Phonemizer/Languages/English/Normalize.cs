@@ -216,6 +216,9 @@ public static class Normalize
         $"\\b({MONTH_ALT})((?:\\s+\\d{{1,2}}(?:st|nd|rd|th))?,?)\\s+(1[1-9]\\d\\d|20\\d\\d)\\b(?![.,]?\\d)", "gi");
     private static readonly JsRe BARE_EXPONENT = JsRegex.Compile(
         "(\\d[\\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\\s?(\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+)", "gu");
+    /** …spaced off from a following letter first — see the TS for why `I²C` fused into one token. */
+    private static readonly JsRe BARE_EXPONENT_GLUED = JsRegex.Compile(
+        "(?:\\d[\\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\\s?(?:\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+)(?=[\\p{L}\\p{M}])", "gu");
     private static readonly JsRe HAS_LOWER = JsRegex.Compile("[a-z]");
     private static readonly JsRe CAPS_ROMAN = JsRegex.Compile("\\b([A-Za-z][A-Za-z']*)\\s+([IVXLCDM]{2,})\\b", "g");
     private static readonly JsRe CAP_INITIAL = JsRegex.Compile("^[A-Z]");
@@ -373,6 +376,7 @@ public static class Normalize
             return $"{num}{mag ?? ""} {measure}{(one ? forms[0] : forms[1])}";
         });
 
+        s = BARE_EXPONENT_GLUED.Replace(s, m => $"{m.Value} ");
         s = BARE_EXPONENT.Replace(s, m =>
         {
             var bas = m.Groups[1].Value;

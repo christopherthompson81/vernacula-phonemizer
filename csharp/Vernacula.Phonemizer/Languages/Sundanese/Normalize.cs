@@ -65,6 +65,13 @@ public static class Normalize
         [""] = "", ["²"] = " pasagi", ["³"] = " kubik",
     };
 
+    /** …and the ASCII spellings of the same two powers, folded to the superscript before lookup. */
+    private static readonly IReadOnlyDictionary<string, string> EXP_ASCII = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["2"] = "²", ["3"] = "³",
+    };
+
+
     /** Compass points for the COORDINATE sense of `°`, keyed lowercase — the rule matches case-insensitively. */
     private static readonly IReadOnlyDictionary<string, string> COMPASS = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -85,18 +92,24 @@ public static class Normalize
     private static readonly JsRe CLOCK_BARE = JsRegex.Compile(
         "(?<![\\d.:])([01]?\\d|2[0-3]):([0-5]\\d)\\b(?!\\.?\\d)", "gu");
     private static readonly JsRe SLASH_UNIT = JsRegex.Compile(
-        "(?<=[\\p{L}\\p{M}])\\/(km|m|cm|mm|kg|g|ha|l|c)(²|³)?(?![\\p{L}\\p{M}\\d])", "giu");
+        "(?<=[\\p{L}\\p{M}])\\/(km|m|cm|mm|kg|g|ha|l|c)(²|³|2|3)?(?![\\p{L}\\p{M}\\d])", "giu");
     private static readonly JsRe PER_UNIT = JsRegex.Compile(
-        "\\bper\\s+(km|m|cm|mm|kg|g|ha|l)(²|³)?(?![\\p{L}\\p{M}\\d])", "giu");
+        "\\bper\\s+(km|m|cm|mm|kg|g|ha|l)(²|³|2|3)?(?![\\p{L}\\p{M}\\d])", "giu");
     private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)[.,](\\d{1,2})(?![\\d.,])", "gu");
     private static readonly JsRe ERA_SM = JsRegex.Compile("(\\d+(?:-an)?)\\s*SM\\b(?![\\p{L}\\p{M}])", "gu");
-    private static readonly JsRe ERA_M = JsRegex.Compile("(\\d+(?:-an)?)\\s*M\\b(?![\\p{L}\\p{M}.])", "gu");
+    private static readonly JsRe ERA_M = JsRegex.Compile("(\\d+(?:-an)?)\\s*M\\b(?![\\p{L}\\p{M}]|\\.\\p{L})", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile(
         "(?<!\\b(?:nepi ka|tepi ka|dugi ka|ti|antara)\\s)(?<![\\d.,\\p{L}-])(\\d+)\\s?[-–]\\s?(\\d+)(?![\\d,-])", "gu");
+    /** ⚠ Consecutive four-digit operands are a YEAR SPAN — the only shape the corpus writes with a
+     *  slash at that width — and the fraction cap below declined them and dropped the slash. */
+    private static readonly JsRe YEAR_SPAN = JsRegex.Compile("(?<![\\d/])(\\d{4})\\/(\\d{4})(?![\\d/])", "gu");
     private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
     private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe DEG_COMPASS = JsRegex.Compile("(\\d)\\s?°\\s?([NSEW])(?![\\p{L}\\p{M}])", "giu");
+    /** ⚠ Spaced off from a following letter first — the scale arms decline `25°Cölner` and this one
+     *  then produced `25 darajatCölner`, one fused token. */
+    private static readonly JsRe DEG_BARE_GLUED = JsRegex.Compile("(\\d)\\s?°(?=[\\p{L}\\p{M}])", "gu");
     private static readonly JsRe DEG_BARE = JsRegex.Compile("(\\d)\\s?°", "gu");
     private static readonly JsRe PLUS_MINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe PLUS_AFTER = JsRegex.Compile("(\\S)\\+\\s?(\\(?\\s?[-−]?\\d)", "gu");
@@ -139,13 +152,15 @@ public static class Normalize
         s = SLASH_UNIT.Replace(s, m =>
         {
             var u = m.Groups[1].Value;
-            var exp = m.Groups[2].Success ? m.Groups[2].Value : "";
+            var exp0 = m.Groups[2].Success ? m.Groups[2].Value : "";
+            var exp = EXP_ASCII.TryGetValue(exp0, out var sup) ? sup : exp0;
             var word = UNIT_WORD.TryGetValue(Js.ToLowerCase(u), out var uw) ? uw : u;
             return $" per {word}{(EXP_WORD.TryGetValue(exp, out var ew) ? ew : "")}";
         });
         s = PER_UNIT.Replace(s, m =>
         {
-            var exp = m.Groups[2].Success ? m.Groups[2].Value : "";
+            var exp0 = m.Groups[2].Success ? m.Groups[2].Value : "";
+            var exp = EXP_ASCII.TryGetValue(exp0, out var sup) ? sup : exp0;
             return $"per {UNIT_WORD[Js.ToLowerCase(m.Groups[1].Value)]}{(EXP_WORD.TryGetValue(exp, out var ew) ? ew : "")}";
         });
 
@@ -164,6 +179,9 @@ public static class Normalize
         s = RANGE.Replace(s, "$1 nepi ka $2");
 
         // 8. Fractions.
+        s = YEAR_SPAN.Replace(s, m => Js.Number(m.Groups[2].Value) == Js.Number(m.Groups[1].Value) + 1
+            ? $"{m.Groups[1].Value} nepi ka {m.Groups[2].Value}"
+            : m.Value);
         s = FRACTION.Replace(s, m =>
             Js.Number(m.Groups[1].Value) == 1 && Js.Number(m.Groups[2].Value) == 2
                 ? "satengah"
@@ -173,6 +191,7 @@ public static class Normalize
         s = DEG_C.Replace(s, "$1 darajat Celsius");
         s = DEG_F.Replace(s, "$1 darajat Fahrenheit");
         s = DEG_COMPASS.Replace(s, m => $"{m.Groups[1].Value} darajat {COMPASS[Js.ToLowerCase(m.Groups[2].Value)]}");
+        s = DEG_BARE_GLUED.Replace(s, "$1 darajat ");
         s = DEG_BARE.Replace(s, "$1 darajat");
 
         // 10. Signs. ⚠ MINUS AFTER PLUS — the order is forced by the bracketed operand.

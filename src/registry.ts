@@ -888,7 +888,7 @@ function build(lang: string): Phonemizer {
         case "yo":
             return createYoruba(readAsEnglish);
         case "ig":
-            return createIgbo(readAsEnglish);
+            return createIgbo();
         case "my":
             return createBurmese(readAsEnglish);
         case "sn":

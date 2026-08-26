@@ -238,6 +238,11 @@ public static class NormalizeSymbols
     private static readonly JsRe BARE_EXPONENT = JsRegex.Compile(
         "(\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(" + SUPERSCRIPT_RUN + ")",
         "gu");
+    /** The same shape with a LETTER after the superscript — spaced off first, so the WORD the rule below
+     *  emits cannot fuse with what follows (`I²C` read as one token). */
+    private static readonly JsRe BARE_EXPONENT_GLUED = JsRegex.Compile(
+        "(?:\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(?:" + SUPERSCRIPT_RUN + ")(?=[\\p{L}\\p{M}])",
+        "gu");
 
     private static int DefaultCountForm(double n) => n == 1 ? 0 : 1;
 
@@ -781,6 +786,7 @@ public static class NormalizeSymbols
             if (d.BareExponent is not null)
             {
                 var be = d.BareExponent;
+                s = BARE_EXPONENT_GLUED.Replace(s, m => $"{m.Value} ");
                 s = BARE_EXPONENT.Replace(s, m =>
                 {
                     var whole = m.Value;

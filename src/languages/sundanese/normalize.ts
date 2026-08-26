@@ -138,6 +138,8 @@ const UNIT_WORD: Readonly<Record<string, string>> = {
     kg: "kilogram", g: "gram", ha: "héktar", l: "liter", c: "c",
 };
 const EXP_WORD: Readonly<Record<string, string>> = { "": "", "²": " pasagi", "³": " kubik" };
+/** …and the ASCII spellings of the same two powers, folded to the superscript before the lookup. */
+const EXP_ASCII: Readonly<Record<string, string>> = { "2": "²", "3": "³" };
 
 /** Compass points for the COORDINATE sense of `°`, keyed lowercase because the rule matches case-insensitively. */
 const COMPASS: Readonly<Record<string, string>> = {
@@ -222,10 +224,13 @@ export function normalizeSundanese(input: string): string {
     // `MeV/c²`. The tier's `unitPer` composes a rate only when a NUMBER leads, so these leaked the bare `km`
     // into the IPA: *d͡ʒiwa km pasagi*. Restricted to a LETTER before the slash so a numeric `3/4` stays a
     // fraction for step 8 and `km/jam` stays the tier's.
-    s = s.replace(/(?<=[\p{L}\p{M}])\/(km|m|cm|mm|kg|g|ha|l|c)(²|³)?(?![\p{L}\p{M}\d])/giu,
-        (_m, u: string, exp: string | undefined) => ` per ${UNIT_WORD[u.toLowerCase()] ?? u}${EXP_WORD[exp ?? ""] ?? ""}`);
-    s = s.replace(/\bper\s+(km|m|cm|mm|kg|g|ha|l)(²|³)?(?![\p{L}\p{M}\d])/giu,
-        (_m, u: string, exp: string | undefined) => `per ${UNIT_WORD[u.toLowerCase()]!}${EXP_WORD[exp ?? ""] ?? ""}`);
+    // ⚠ THE EXPONENT MAY BE ASCII, and only the superscript was accepted — so `27 per km2` leaked the unit
+    // as raw letters (*…pər **km** dua*), the ASCII `2` then read as a separate number. GLUED ONLY, which is
+    // the same asymmetry the fleet's exponent arms use: a SPACED `2` after a unit is the next number.
+    s = s.replace(/(?<=[\p{L}\p{M}])\/(km|m|cm|mm|kg|g|ha|l|c)(²|³|2|3)?(?![\p{L}\p{M}\d])/giu,
+        (_m, u: string, exp: string | undefined) => ` per ${UNIT_WORD[u.toLowerCase()] ?? u}${EXP_WORD[EXP_ASCII[exp ?? ""] ?? exp ?? ""] ?? ""}`);
+    s = s.replace(/\bper\s+(km|m|cm|mm|kg|g|ha|l)(²|³|2|3)?(?![\p{L}\p{M}\d])/giu,
+        (_m, u: string, exp: string | undefined) => `per ${UNIT_WORD[u.toLowerCase()]!}${EXP_WORD[EXP_ASCII[exp ?? ""] ?? exp ?? ""] ?? ""}`);
 
     // ── 4. THE SHARED TIER — percent, currency, units, rates, exponents, `&`, `×` ──────────────────────
     // ⚠ BEFORE THE DECIMAL RULE, WHICH IS THE COUPLING THE PLAYBOOK NAMES ("units before decimals"): the tier
@@ -253,7 +258,12 @@ export function normalizeSundanese(input: string): string {
     // `170-an SM` ("the 170s BC") left the letters unread as *sm*. The corpus diff is what showed this — the
     // probe `100 SM` passed all along, because the suffix only appears in running text.
     s = s.replace(/(\d+(?:-an)?)\s*SM\b(?![\p{L}\p{M}])/gu, "$1 saméméh Maséhi");
-    s = s.replace(/(\d+(?:-an)?)\s*M\b(?![\p{L}\p{M}.])/gu, "$1 Maséhi");
+    // ⚠ THE TRAILING GUARD REJECTS A DOT THAT CONTINUES AN ABBREVIATION (`M.A.`), NOT A CLAUSE-FINAL
+    // ONE — trap 58, which this same file already records twice for its other arms and then repeated
+    // here. A bare `.` in the class refused every era marker that ends a sentence: `taun 1500 M.`
+    // came back untouched and read *…lima ratus **m** .*, the letter bare and a spurious pause after
+    // it. A name initial cannot reach this rule anyway — it requires a NUMBER immediately before.
+    s = s.replace(/(\d+(?:-an)?)\s*M\b(?![\p{L}\p{M}]|\.\p{L})/gu, "$1 Maséhi");
 
     // ── 7. RANGES → `nepi ka` ("up to") ─────────────────────────────────────────────────────────────────
     // ×4,055, overwhelmingly year spans — `(1350-1357)`, `(669-1579 M)`, `(1482–1521)`. The hyphen was
@@ -289,6 +299,14 @@ export function normalizeSundanese(input: string): string {
     // ×727. `1/2` read as *hiji dua* — the slash dropped, two bare numbers. `satengah` ("half") ×many is the
     // idiomatic reading of the one that matters; everything else is "numerator per denominator", using the
     // same `per` ×726 the rate rule takes.
+    // ⚠ THE THREE-DIGIT CAP IS RIGHT AND THE SILENCE BEHIND IT WAS NOT. Every slash in this corpus with a
+    // four-digit operand is a YEAR SPAN, not a fraction — `2013/2014` and `1524/1525`, the only two — so
+    // widening the fraction rule would read both as "2013 per 2014". But declining them dropped the slash
+    // outright and ran the two years together with no connective at all. Claimed as a SPAN instead, with
+    // the same `nepi ka` the hyphen range above uses, and bounded to CONSECUTIVE years, which is the
+    // academic/regnal shape both instances have and the only one attested.
+    s = s.replace(/(?<![\d/])(\d{4})\/(\d{4})(?![\d/])/gu, (m0, a: string, b: string) =>
+        Number(b) === Number(a) + 1 ? `${a} nepi ka ${b}` : m0);
     s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (_m, a: string, b: string) =>
         Number(a) === 1 && Number(b) === 2 ? "satengah" : `${a} per ${b}`);
 
@@ -304,6 +322,11 @@ export function normalizeSundanese(input: string): string {
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 darajat Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
         (_m, d: string, dir: string) => `${d} darajat ${COMPASS[dir.toLowerCase()]!}`);
+    // ⚠ AND THE BARE ARM MUST NOT GLUE THE NEXT WORD ON. The scale arms above correctly DECLINE
+    // `25°Cölner` (the ⟨C⟩ belongs to a word), and this one then claimed the bare `°` and produced
+    // `25 darajatCölner` — one fused token, read *…daraɟatt͡ʃˈolnər*. The specific-before-general
+    // ordering is right; what was missing is that the general arm inherits the boundary problem.
+    s = s.replace(/(\d)\s?°(?=[\p{L}\p{M}])/gu, "$1 darajat ");
     s = s.replace(/(\d)\s?°/gu, "$1 darajat");
 
     // ── 10. SIGNS ────────────────────────────────────────────────────────────────────────────────────────

@@ -42,6 +42,12 @@ const SUPERSCRIPT_RUN = `[${Object.keys(SUPERSCRIPT).join("")}]+`;
  * the host language reads its own way. `\p{Nd}` not `\d`, because a language may write its own numerals and
  * `foldNativeDigits` is applied per engine rather than fleet-wide (see core/unicode.ts).
  */
+/** The same shape, but with a LETTER immediately after the superscript — spaced off before the rule below
+ *  consumes the mark, so the word it emits cannot fuse with what follows. */
+const BARE_EXPONENT_GLUED = new RegExp(
+    `(?:\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(?:${SUPERSCRIPT_RUN})(?=[\\p{L}\\p{M}])`,
+    "gu",
+);
 const BARE_EXPONENT = new RegExp(
     `(\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(${SUPERSCRIPT_RUN})`,
     "gu",
@@ -981,6 +987,13 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // visible gap in one language's data beats an invisible missing reading.
         if (d.bareExponent !== undefined) {
             const be = d.bareExponent;
+            // ⚠ A FOLLOWING LETTER MUST NOT FUSE ONTO THE EMITTED WORD. The superscript is consumed and the
+            // replacement is a WORD, so whatever stood after the mark ends up glued to it: `I²C` read
+            // *aᶦ skwˈɛɹd**k*** in English, *ʔi pasˈaɡi**t͡ʃ*** in Sundanese, *iː t͡suːm kvˈadʁat**k*** in
+            // German — one token where there were two, in every language that declares `bareExponent`.
+            // Invisible to every gate: nothing is dropped and no raw mark survives, so it is a WRONG-WORD
+            // defect, the class the leak gates cannot reach.
+            s = s.replace(BARE_EXPONENT_GLUED, (m0: string) => `${m0} `);
             s = s.replace(BARE_EXPONENT, (whole, base: string, sup: string) => {
                 const digits = [...sup].map((c) => SUPERSCRIPT[c]!).join("");
                 // `2` and `3` have their own words in every language that has any; everything else — including
@@ -996,6 +1009,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 if (neg && be.negative === undefined) return whole; // sign unreadable → leave it visible
                 const exponent = neg ? `${be.negative} ${mag}` : mag;
                 return tpl.replace(/\{n\}/gu, base).replace(/\{e\}/gu, exponent);
+                // ⚠ THE CALLER ADDS THE BOUNDARY — see the `\s?` guard on the returned string below.
             });
         }
         return s;

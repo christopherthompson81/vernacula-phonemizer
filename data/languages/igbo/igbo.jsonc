@@ -14,6 +14,10 @@
     "digraphs": { "ch": "t͡ʃ", "gb": "ɡ͡b", "gh": "ɣ", "gw": "ɡʷ", "kp": "k͡p", "kw": "kʷ", "nw": "ŋʷ", "ny": "ɲ", "sh": "ʃ" },
 
     // Single consonant letters → IPA. ⟨j⟩→d͡ʒ, ⟨y⟩→j (glide), ⟨r⟩→tap ɾ, ⟨ṅ⟩/⟨ŋ⟩→ŋ (velar nasal).
+    // ⚠ THE `ṅ` KEY IS STORED PRECOMPOSED (U+1E45) AND IS UNREACHABLE. `phonemizeWord` normalizes to NFD
+    // before scanning, so the letter arrives as ⟨n⟩ + U+0307 and is read by the explicit dot-above rule
+    // instead. Kept because it costs nothing and states the correspondence beside its ⟨ŋ⟩ twin, and
+    // recorded because a table row nothing consults is otherwise indistinguishable from one that works.
     "consonants": {
         "b": "b", "p": "p", "d": "d", "t": "t", "j": "d͡ʒ", "g": "ɡ", "k": "k",
         "f": "f", "v": "v", "s": "s", "z": "z", "h": "h", "m": "m", "n": "n",

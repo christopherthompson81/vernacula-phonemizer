@@ -87,19 +87,19 @@ export function phonemizeWord(word: string): string {
 // A word = Latin letters (incl. accented/dotted) plus combining marks.
 const TOKEN = /([A-Za-zÀ-ɏḀ-ỿ̀-ͯ]+)|(\d+)|([.?!,;:])/gu;
 
-export type ForeignPhonemizer = (latin: string) => string;
 
 class IgboPhonemizer implements Phonemizer {
-    constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         // Normalization BEFORE tokenizing: TOKEN is a three-way split that skips every symbol it does not name,
         // so a symbol has to become an Igbo word before it gets here. See normalize.ts for each reading's source.
         return assembleClauses(normalizeIgbo(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            // ⚠ DIGITS GO TO THE IGBO COMPOSITOR, NEVER TO `foreign`. The registry wires `foreign` to the ENGLISH
-            // phonemizer for Latin-script fallback, so `1945` used to read *wˈʌn θˈaᶷzənd nˈaᶦn hˈʌndɹəd
-            // fˈɔːɹt̬i fˈaᶦv* — fluent English inside Igbo speech. numbers.ts always answers (digit-by-digit in
-            // Igbo units beyond its range), so no digit can reach the foreign path again.
+            // ⚠ DIGITS GO TO THE IGBO COMPOSITOR, NEVER TO A FOREIGN READER: `1945` once read *wˈʌn θˈaᶷzənd
+            // nˈaᶦn hˈʌndɹəd fˈɔːɹt̬i fˈaᶦv* — fluent English inside Igbo speech. numbers.ts always answers
+            // (digit-by-digit in Igbo units beyond its range), so no digit can reach a foreign path.
+            // ⚠ AND THIS ENGINE TAKES NO `foreign` PARAMETER, because it never read the one it used to
+            // declare. An unclaimed Latin run reaches English through `clauses.ts`'s FLEET DEFAULT, not
+            // through a per-language reader — an inert parameter documented an intent the code did not have.
             else if (m[2]) { for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
@@ -110,6 +110,6 @@ class IgboPhonemizer implements Phonemizer {
 }
 
 /** Build the Igbo phonemizer. */
-export function createIgbo(foreign?: ForeignPhonemizer): Phonemizer {
-    return new IgboPhonemizer(foreign);
+export function createIgbo(): Phonemizer {
+    return new IgboPhonemizer();
 }
