@@ -169,7 +169,7 @@ describe("Zulu text normalization", () => {
         // The corpus's own misspelling of km. The UNIT_WORD entry for it shipped with NO rule that reached
         // it, so `kma` read as the word [kʼmˈaː]; `km` beside it is the shared tier's and already worked.
         expect(normalizeZulu("ongama-1600 kma kusuka")).toBe("ongama-1600 amakhilomitha kusuka");
-        expect(normalizeZulu("engu-2.5 kma")).toBe("engu-2 5 amakhilomitha"); // the fraction still splits
+        expect(normalizeZulu("engu-2.5 kma")).toBe("engu-2 5 amakhilomitha"); // the decimal still splits
         expect(normalizeZulu("ikma yakhe")).toBe("ikma yakhe"); // no number → declined, it may be a word
         // ⚠ A DEGREE PATTERN THAT OPENS WITH `[+]?` MATCHES THE SIGN AND NEVER RE-EMITS IT, so `+30°C` loses
         // it silently — the same shape sw's `([+-]?)` had. `plas` is sourced (step 14b) and the sign is

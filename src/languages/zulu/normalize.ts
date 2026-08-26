@@ -284,14 +284,14 @@ export function normalizeZulu(input: string): string {
     //     on a DECIMAL does, and step 13 claims it.
     s = s.replace(/(\d[\d.,]*)[ \u00a0]?sq[ \u00a0]?mi(?![\p{L}\p{M}])/giu, `$1 ${UNIT_WORD["mi"]!} skwele`);  // space, NBSP
 
-    // 12b) `kma`, THE CORPUS'S OWN MISSPELLING OF km (`ongama-1600 kma kusuka`). \u26a0 THE TABLE ENTRY ABOVE
+    // 12b) `kma`, THE CORPUS'S OWN MISSPELLING OF km (`ongama-1600 kma kusuka`). ⚠ THE TABLE ENTRY ABOVE
     //      EXISTED WITHOUT A RULE THAT REACHED IT: every unit pattern in this file spells `km`, and the
     //      shared tier's key is `km` too and is letter-bounded, so `kma` matched nothing and reached the g2p
-    //      as [k\u02bcm\u02c8a\u02d0] \u2014 exactly the reading the entry was added to remove. Postposed, like every other
+    //      as [kʼmˈaː] — exactly the reading the entry was added to remove. Postposed, like every other
     //      measure noun here (the head-noun slot is already filled by the written concord).
     //      A NUMBER IS REQUIRED, unlike `mph`/`kph`: those two are never Zulu words, while `kma` is a
     //      misspelling and an unguarded match would have nothing to distinguish it from one.
-    //      BEFORE the decimal rules, so `1600.5 kma` still splits its fraction at step 13.
+    //      BEFORE the decimal rules, so `1600.5 kma` still splits its decimal at step 13.
     s = s.replace(/(?<!\d)(\d[\d.,]*)[ \u00a0]?kma(?![\p{L}\p{M}])/giu, `$1 ${UNIT_WORD["kma"]!}`);  // space, NBSP
 
     // 13) DECIMALS. The currency and unit arms come first because this rewrite is the one that destroys
