@@ -38,7 +38,8 @@ describe("Maithili canonical IPA", () => {
         expect(phonemize("अब", "mai")).toBe("ˈəb"); // the adversarial neighbour: no mark, no retention
         // On a MONOSYLLABLE `retainInMonosyllable` already keeps the vowel, so the two spellings agree
         // whether or not the fold runs — 44 of the artifact's 45 occurrences are this shape.
-        for (const [udatta, avagraha] of [["क॑", "कऽ"], ["म॑", "मऽ"], ["स॑", "सऽ"], ["न॑", "नऽ"], ["ल॑", "लऽ"]]) {
+        const pairs = [["क॑", "कऽ"], ["म॑", "मऽ"], ["स॑", "सऽ"], ["न॑", "नऽ"], ["ल॑", "लऽ"]] as const;
+        for (const [udatta, avagraha] of pairs) {
             expect(phonemize(udatta, "mai")).toBe(phonemize(avagraha, "mai"));
         }
         // ⚠ AND THE EVAL PATH TOO. `word()` does not run the normalizer, so `phonemizeWord` needs its own
