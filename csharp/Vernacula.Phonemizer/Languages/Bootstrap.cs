@@ -60,6 +60,7 @@ public static class Bootstrap
             Maithili.MaithiliPhonemizer.RegisterSelf();
             Malayalam.MalayalamPhonemizer.RegisterSelf();
             Mandarin.MandarinPhonemizer.RegisterSelf();
+            Malagasy.MalagasyPhonemizer.RegisterSelf();
             Malay.MalayPhonemizer.RegisterSelf();
             Maori.MaoriPhonemizer.RegisterSelf();
             Naija.NaijaPhonemizer.RegisterSelf();
@@ -72,10 +73,12 @@ public static class Bootstrap
             Spanish.SpanishPhonemizer.RegisterSelf();
             Spanish419.Spanish419.RegisterSelf();
             Sundanese.SundanesePhonemizer.RegisterSelf();
+            Somali.SomaliPhonemizer.RegisterSelf();
             Umbundu.UmbunduPhonemizer.RegisterSelf();
             Urdu.UrduPhonemizer.RegisterSelf();
             Uzbek.UzbekPhonemizer.RegisterSelf();
             Punjabi.PunjabiPhonemizer.RegisterSelf();
+            Saraiki.SaraikiPhonemizer.RegisterSelf();
             Persian.PersianPhonemizer.RegisterSelf();
             Tajik.TajikPhonemizer.RegisterSelf();
             Thai.ThaiPhonemizer.RegisterSelf();
@@ -108,6 +111,7 @@ public static class Bootstrap
             Zulu.ZuluPhonemizer.RegisterSelf();
             Wu.WuPhonemizer.RegisterSelf();
             Nepali.NepaliPhonemizer.RegisterSelf();
+            MinNan.MinNanPhonemizer.RegisterSelf();
         }
     }
 }

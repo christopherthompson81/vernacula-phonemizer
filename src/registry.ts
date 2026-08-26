@@ -615,11 +615,11 @@ function build(lang: string): Phonemizer {
         // Perso-Arabic script and applies the shared phonology (tonogenesis, gemination, nasal assimilation).
         case "pnb":
             return createPunjabi(readAsEnglish);
+        case "ro":
+            return createRomanian();
         // Saraiki (Shahmukhi, Pakistan) — the NON-tonal Lahnda sibling of Punjabi: reuses the shared Shahmukhi
         // front-end + Lahnda phonology but keeps the voiced aspirates & aspirated sonorants (no tonogenesis) and
         // adds the four implosives ٻɓ ڄʄ ڳɠ ݙɗ.
-        case "ro":
-            return createRomanian();
         case "skr":
             return createSaraiki(readAsEnglish);
         case "mr":

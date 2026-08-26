@@ -82,6 +82,30 @@ public class LanguageBootstrapTests
     [InlineData("az", "1767-ci ildə", "mˈin jedːˈi jˈyz ɑɫtmˈɯʃ jedːind͡ʒˈi ildˈæ")]
     [InlineData("az", "QHT nümayəndəsi", "ɡˈe hˈe tˈe nymɑjændæsˈi")]
     [InlineData("az", "b.e.ə. 500-cü ildə", "eɾɑmɯzdˈɑn ævvˈæl bˈeʃ jyzynd͡ʒˈy ildˈæ")]
+    // Somali's defining shapes: the Cushitic pharyngeals/retroflex plus gemination and vowel length; the
+    // glued calendar letter SPLIT BY DIGIT COUNT (1-2 digits is the million idiom, 3-4 with a year word is
+    // the Miilaadi era); the `sq`/`cu` measure word folded case-insensitively onto a declared unit; and the
+    // range that ENDS A CLAUSE, which used to fall through to the minus rule and read as a subtraction.
+    [InlineData("so", "dhagax abbaan soo'maali", "ɖaɡaħ abːaːn soːʔmaːli")]
+    [InlineData("so", "$2M iyo Sanadkii 1999M", "laba miljan doːlar ijo sanadkiː kun ijo saɡaːl boqol ijo saɡaːl ijo saɡaːʃan miːlaːdi")]
+    [InlineData("so", "430 SQ MI", "afar boqol ijo sodːon majl laba d͡ʒibaːran")]
+    [InlineData("so", "Sanadihii 1960 -1969.", "sanadihiː kun ijo saɡaːl boqol ijo liħdan ilaː kun ijo saɡaːl boqol ijo saɡaːl ijo liħdan .")]
+    // Min Nan's three paths, which no other row in this file reaches: the Han dictionary with tone sandhi
+    // (台灣 — the non-final syllable takes its sandhi tone), the year+counter shape through the normalizer,
+    // and a POJ Latin run folded to Tâi-lô before the g2p (`chit-ê` — POJ ⟨ch⟩ → ⟨ts⟩).
+    [InlineData("nan", "台灣", "tai\u032f\u02e7 u\u032fan\u02e8\u02e6")]
+    [InlineData("nan", "chit-\u00ea l\u00e2ng", "t\u0361\u0255it\u031a\u02e5 e\u02e8\u02e6 la\u014b\u02e8\u02e6")]
+    // Saraiki's defining shapes: the four implosives plus the voiced aspirate the Punjabi sibling turns into
+    // tone (skr keeps it as a segment), the ZWJ/ZWNJ that used to hide a percentage from the symbol tier, the
+    // `US$` key declared ahead of `$`, and the ء year marker sitting between a figure and a range dash.
+    [InlineData("skr", "\u06b3\u0648\u0759\u0627 \u0628\u06be\u0684\u0768", "\u0260\u02c8o\u02d0\u0257a\u02d0 b\u02b1\u02c8\u0259\u0284\u0259\u0273")]
+    [InlineData("skr", "\u0668\u0665\u066a", "p\u02c8\u0259\u0303\u0272d\u0361\u0292 \u02c8\u0259s\u02d0i\u02d0 f\u02c8i\u02d0s\u0259d\u032a")]
+    [InlineData("skr", "US$20 \u0645\u0644\u06cc\u0646", "\u028b\u02c8i\u02d0\u0266 m\u0259l\u02c8i\u02d0n \u0256\u02c8a\u02d0l\u0259\u027e")]
+    // Malagasy's signature values (⟨o⟩→/u/, ⟨tr⟩→ʈʂ, prenasalized ⟨mb⟩) with penultimate stress, and the
+    // units-first `amby` cardinal reached through the number arm.
+    [InlineData("mg", "olona mandeha", "ulˈuna maⁿdˈeha")]
+    [InlineData("mg", "trano 21", "ʈʂˈanu irˈajka ˈaᵐbi ruapˈulu")]
+    [InlineData("mg", "5 km² sy 2 kg", "dˈimi kilometˈaʈʂa turaɖʐˈua sˈi rˈua kˈilo")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 
