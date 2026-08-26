@@ -16,10 +16,10 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 64 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
+- **Languages: 68 of 182**, plus the 5 accent variants — en, af, el, qu, ru, kl, mi, ceb, am, oc, bg,
   or, ast, umb, kn, hi, cmn, es, ar, arz, pt, bn, as, fr, ja, de, id, ms, ur, pa, fa, tg, th, mr, te, ha,
   tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig, sd, su, uz, ff, lo,
-  zu, az — all **200/200**. 69 gated codes, 13,800 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION
+  zu, az, pcm, tl, wuu, bho — all **200/200**. 82 gated codes, 16,400 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION
   (user direction), from `tools/language-catalogue/languages.db`.
   ⚠ **THE QUEUE WAS BIFURCATED AND IS LARGELY UN-BIFURCATED AGAIN.** Every remaining language above ~22M
   speakers used to have NO GOLDEN, which made "no golden" the binding constraint on the port: a language
@@ -150,6 +150,85 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   `hesperonychus` as *hˌɛspɚənˈaᶦt͡ʃəs* (neural) only because another language had warmed the memo; the
   engine's own answer is the n-gram *ˈɛspɚˌoᶷnˌiːkəs*. Whether the gate SHOULD widen is a measurement,
   not a port decision, so both engines keep the current behaviour and this is recorded.
+
+### From the pcm/tl/wuu/bho batch (2026-08-25) — the first ports gated on MINED goldens
+
+All four 200/200 on the first parity run. Gate **78 → 82 languages, 15,600 → 16,400 rows, 0 differ**;
+C# tests 672 → 732. **pcm (121M), tl (88M) and wuu (83M) are the three largest languages in the fleet**,
+and none of them had a golden a day earlier — they were unportable until the mined tier landed (#1022).
+
+⚠ **THE DEFECT OF THIS BATCH RAN THE OTHER WAY: `Object.prototype`, and C# WAS ALREADY RIGHT.** Manifests
+are indexed by TEXT, and `JSON.parse` returns objects that inherit `Object.prototype` — so
+`specialWords["constructor"]` returned a FUNCTION. A `Dictionary` inherits nothing, so every one of these
+was a TS-side bug and the fix moves TYPESCRIPT ONTO C#, the first time in the programme that direction has
+been needed. Three agents hit it independently in three different tables:
+
+    tl   #1026  specialWords → `w is not iterable` in tl/ceb/hil, `entry.cases is not iterable` in
+                fr/fr-CA, `fin.replace is not a function` in nan, `seg.endsWith` in cdo. Fixed CENTRALLY:
+                `parseJsonc` now applies a null prototype at the parse boundary, so all 184 manifests are
+                safe at the source instead of at each call site.
+    tl   #1026  ...and again in `loadJson`, the bare-`JSON.parse` sibling used for the 5.7 MB English
+                models. `PosModel.tagdict["constructor"]` was a function, the `cached !== undefined` fast
+                path fired, and the perceptron's prediction was silently replaced by the `?? "NN"`
+                fallback — for all twelve prototype member names. C# always predicted.
+    pcm  #1027  `DEF.lexicon["constructor"]` shipped `function Object() { [native code] } dɛ kɔm` into
+                the phoneme stream.
+    wuu  #1028  an inherited key was a valid RIME in wuu and yue: `phonemize("constructor1","wuu")`
+                returned `"function Object() { [native code] }˥˧"`.
+
+⚠ **THE GATE CANNOT SEE ANY OF IT** — no golden contains the word "constructor", and it is ordinary input
+for exactly these languages (Tagalog and Naija code-switch with English constantly). Re-swept on `main`
+after all four landed: **193 registry codes × 10 prototype keys, 0 hits**, and 810 cross-engine rows sync
+and async, 0 differ. Issue #1030 filed the class as still-open with 11 engines affected; it was measured
+before the rebase onto #1026 and is closed with that evidence. The remaining `loadJson` consumer,
+`EnglishG2pModel.ngram`, is safe BY CONSTRUCTION — its keys are `${o}|${ctx}` and always contain a `|`.
+
+Also fixed in this batch:
+
+- **pcm: an above-2⁵³ ordinal fallback that had never run.** Brace-free `if (safe) for (…) if (wd) emit(wd);
+  else {…}` binds the `else` to the INNER `if`, so above 2⁵³ the numeral was deleted:
+  `9007199254740993rd item` → *aitam*. C# had the intended behaviour, so the engines disagreed only
+  off-golden. Plus ⟨Thousand⟩ missing from the magnitude list (`US$500 Thousand` → *faiv hɔndɛd dola
+  tauzand*, the stranded magnitude one scale below the documented `₦200 Million` case).
+- **tl: `ika-N` moved the cardinal's stress**, provable from the repo's own data — `ika-4` → *ʔikaʔapˈat*
+  while the same root one word later in `ika-104` → *ʔˈapat*. The prefix fuses onto the cardinal so the
+  `stressPenult` root lookup missed. **2 golden rows moved** (the batch's only movement); the other 12
+  `ika-N` rows are final-stressed roots and are byte-identical.
+- **wuu: `string.Trim()` ≠ `String.prototype.trim`** (C#-only). .NET skips U+FEFF, JS strips it; .NET
+  strips U+0085, JS does not. A BOM-prefixed Wugniu reading took the romanization path in Node and the
+  ENGLISH FOREIGN READER in .NET. New `Js.Trim` shim. ⚠ 24 unaudited `.Trim()` call sites remain in the
+  C# tree — each needs its own probe, and a blind sweep would be a behaviour change wearing a cleanup's
+  clothes.
+- **bho: six wrong claims in the shared manifest**, all header/comment text that would mislead the next
+  reader — the file said "for Hindi (hi)", annotated ऐ/औ as *"Bhojpuri KEEPS the diphthong"* against ɛ/ɔ
+  values `provenance` already retracts, and claimed ₹500 reads bare when it reads *pɑ̃t͡ʃ sɔ ɾupje*.
+- **A repo gate that had been dead since the tree move.** `tools/check-manifest-headers.mjs` globbed
+  `src/languages/**/*.jsonc`, but all 184 manifests live under `data/` — so it had exited 2
+  unconditionally. Revived (#1029), and it immediately caught live header orphaning in `amharic.jsonc`.
+
+⚠ **WHAT A MINED GOLDEN CANNOT DO, measured rather than assumed.** bho's golden is VARIANT-DERIVED from
+Hindi text, and the agent counted its divergence triggers: ⟨ै⟩ 148/200, ⟨व⟩ 146, ⟨श⟩ 113, ⟨औ⟩ 107, ⟨ष⟩ 57,
+⟨ण⟩ 39 — the grapheme layer is exercised hard, and all 200 rows differ from `hi.tsv`. But ⟨ऽ⟩ avagraha,
+Bhojpuri's signature mark, is **0/200**, as is ₹. wuu's golden carries **2 astral code points in 200 rows**
+while `dict.tsv` carries **260 astral keys** including 𠲎, an ordinary sentence-final particle. In both
+cases the gap was the PROBE, not the language, and both agents synthesised the missing coverage. A mined
+golden pins the common path well and says nothing about the rare one.
+
+Found, not fixed, from this batch:
+
+- **bho ⟨ऋ⟩/⟨ृ⟩ → ASCII `ri`** — an alveolar TRILL in a manifest whose only rhotic is ɾ (`कृष्ण` *krisn*
+  beside `कर` *kəɾ*). Every sibling writes the tap.
+- **bho ⟨अ⟩ ships [ʌ] while `inherentVowel` ships [ə]** — one phoneme, two symbols, and `provenance`'s
+  declared inventory contains ʌ but not ə. **ʌ is in 99/200 golden rows**, so this is not obscure. Both
+  need the 1622-pair grammar-mined referee, which is NOT in the repo (searched `tools/corpus/` and
+  `/mnt/data`).
+- **bho `बजकर` is unattested** (`tokenHits: 0`) yet the inherited Hindi clock rule emits it in 5/200 rows.
+- **tl `numberStressIdx` strips `"ng"` from an /n/-final ligated root** — `sandaan` + `g` → `sandaang`,
+  but the stripper removes two characters and recovers `sandaa`. Unreachable today (no /n/-final root is
+  in `numbers.stressPenult`) and live the moment one is added.
+- **Caret exponents drop fleet-wide** — `10^6` reads *ten* in pcm, ha, yo, sw and id. Shared-core.
+- **wuu `A&B` never reaches the letter-name rule** — the symbol tier emits ` 搭 ` WITH SPACES, so the
+  capitals are space-adjacent rather than Han-adjacent at step 14.
 
 ### From the ff/lo/zu/az batch (2026-08-25) — four ported, four agents, all 200/200 first run
 
