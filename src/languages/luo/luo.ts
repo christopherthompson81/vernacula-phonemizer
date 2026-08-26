@@ -70,7 +70,7 @@ class LuoPhonemizer implements Phonemizer {
         return assembleClauses(normalizeLuo(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1]))); // phonemizeWord normalises the ’/ʼ apostrophe + citation accents
             // numbers: composed to Dholuo words (numbers.ts: decimal + the gi-elision), then the same g2p
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

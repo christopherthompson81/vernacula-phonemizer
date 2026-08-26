@@ -421,7 +421,7 @@ export function createKhmer(opts: { segment?: boolean } = {}): Phonemizer {
                 else if (m[2]) {
                     // Khmer digits ០–៩ (U+17E0–17E9) → ASCII, then compose (see numbers.ts).
                     const ascii = [...m[2]].map((d) => (d >= "០" && d <= "៩" ? String(d.codePointAt(0)! - 0x17e0) : d)).join("");
-                    for (const wd of numberToKhmerWords(Number(ascii))) sink.emit(phonemizeWord(wd));
+                    for (const wd of numberToKhmerWords(Number(ascii), ascii)) sink.emit(phonemizeWord(wd));
                 }
                 else if (m[3]) {
                     const mk = DEF.clausePunctuation[m[3]];

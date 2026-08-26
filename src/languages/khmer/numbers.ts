@@ -30,9 +30,9 @@ const TENS: Record<number, string> = {
 const MAG: [number, string][] = [[1e6, "លាន"], [1e5, "សែន"], [1e4, "ម៉ឺន"], [1e3, "ពាន់"], [100, "រយ"]];
 
 /** An integer → the ordered Khmer number words that speak it. */
-export function numberToKhmerWords(n: number): string[] {
+export function numberToKhmerWords(n: number, raw?: string): string[] {
     if (!Number.isSafeInteger(n) || n < 0) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!);
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!);
     }
     if (n === 0) return [UNITS[0]!];
     const out: string[] = [];

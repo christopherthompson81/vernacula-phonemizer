@@ -228,7 +228,7 @@ export function normalizeFula(input: string): string {
     //    both corpora — unsourced as well as unreachable. Two authored readings, one wrong and one
     //    unsourced, standing in front of a correct upstream fold.
     s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) =>
-        `${numberToWords(Number(a))} e ${numberToWords(Number(b))}`);
+        `${numberToWords(Number(a), a)} e ${numberToWords(Number(b), b)}`);
 
     // 9) DEGREES. `30°C` came out as the bare consonant [tʃ]. `digiri` is the degree word.
     s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/giu, "$1 digiri Celsius");
@@ -246,13 +246,13 @@ export function normalizeFula(input: string): string {
     //     agrees with `wakkati`'s noun class and the form for `sahaawa` is unsourced; see fula.ts.
     s = s.replace(/(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string) =>
-            `${numberToWords(Number(n))} ${({ km: "kilometre", m: "metre", kg: "kilogram", mm: "milimeta", cm: "santimeta" } as Record<string, string>)[u.toLowerCase()]!} e wakkati gootel`);
+            `${numberToWords(Number(n), n)} ${({ km: "kilometre", m: "metre", kg: "kilogram", mm: "milimeta", cm: "santimeta" } as Record<string, string>)[u.toLowerCase()]!} e wakkati gootel`);
     s = s.replace(/(?<!\d)(\d+)\s?(mph|kph)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string) =>
-            `${numberToWords(Number(n))} ${u.toLowerCase() === "mph" ? "miles e wakkati gootel" : "kilometre e wakkati gootel"}`);
+            `${numberToWords(Number(n), n)} ${u.toLowerCase() === "mph" ? "miles e wakkati gootel" : "kilometre e wakkati gootel"}`);
     s = s.replace(/(?<!\d)(\d+)o\s?(km\/h)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string) =>
-            `${numberToWords(Number(n))} kilometre e wakkati gootel`);
+            `${numberToWords(Number(n), n)} kilometre e wakkati gootel`);
 
     // 11) GIGAHERTZ — handled in step 7 on the raw digits (before the fraction becomes words).
 

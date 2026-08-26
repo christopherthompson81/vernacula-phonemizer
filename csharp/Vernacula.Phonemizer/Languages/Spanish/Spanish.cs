@@ -97,7 +97,7 @@ public sealed class SpanishPhonemizer : ILanguage
         var bits = tok.Split(',');
         var intRaw = bits[0];
         string? frac = bits.Length > 1 ? bits[1] : null;
-        var words = Numbers.NumberToWords(Js.Number(THOUSAND_DOTS.Replace(intRaw, "")));
+        var words = Numbers.NumberToWords(Js.Number(THOUSAND_DOTS.Replace(intRaw, "")), THOUSAND_DOTS.Replace(intRaw, ""));
         if (frac is not null)
             words += $" {Manifest.MANIFEST.Numbers.DecimalConnector} "
                 + string.Join(" ", Js.CodePoints(frac).Select(d => Numbers.NumberToWords(Js.Number(d))));

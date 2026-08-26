@@ -303,7 +303,7 @@ public static class KhmerPhonemizer
                             string.CompareOrdinal(d, "០") >= 0 && string.CompareOrdinal(d, "៩") <= 0
                                 ? Js.NumberToString(Js.CodePointAt0(d) - 0x17e0)
                                 : d));
-                        foreach (var wd in Numbers.NumberToKhmerWords(Js.Number(ascii))) sink.Emit(PhonemizeWord(wd));
+                        foreach (var wd in Numbers.NumberToKhmerWords(Js.Number(ascii), ascii)) sink.Emit(PhonemizeWord(wd));
                     }
                     else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
                     {

@@ -180,7 +180,7 @@ class HmongPhonemizer implements Phonemizer {
         
         return assembleClauses(normalizeHmong(input), tok, (m, sink) => {
             if (m[1]) readRun(nat(m[1]), m[1], sink);
-            else if (m[2]) for (const wd of numberToHmongWords(Number(m[2]))) sink.emit(syllableToIpa(wd));
+            else if (m[2]) for (const wd of numberToHmongWords(Number(m[2]), m[2])) sink.emit(syllableToIpa(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

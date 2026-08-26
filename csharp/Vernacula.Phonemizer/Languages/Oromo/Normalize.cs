@@ -93,7 +93,7 @@ public static class Normalize
     private static string NumeralWords(string num)
     {
         var parts = num.Split('.');
-        var head = Numbers.NumberToWords(Js.Number(parts[0]));
+        var head = Numbers.NumberToWords(Js.Number(parts[0]), parts[0]);
         if (parts.Length < 2) return head;
         return $"{head} {POINT} {string.Join(" ", Js.CodePoints(parts[1]).Select(d => Numbers.NumberToWords(Js.Number(d))))}";
     }

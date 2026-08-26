@@ -100,7 +100,7 @@ class IgboPhonemizer implements Phonemizer {
             // ⚠ AND THIS ENGINE TAKES NO `foreign` PARAMETER, because it never read the one it used to
             // declare. An unclaimed Latin run reaches English through `clauses.ts`'s FLEET DEFAULT, not
             // through a per-language reader — an inert parameter documented an intent the code did not have.
-            else if (m[2]) { for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); }
+            else if (m[2]) { for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd)); }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

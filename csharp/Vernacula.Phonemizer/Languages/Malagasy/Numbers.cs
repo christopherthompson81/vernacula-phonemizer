@@ -44,10 +44,10 @@ public static class Numbers
 
     /** Non-negative integer (< 10⁹) → Malagasy words; larger / non-finite → digit-by-digit. `compound` is
      *  threaded through the recursion so the tapitrisa remainder takes the same allomorph the arivo one does. */
-    public static string NumberToWords(double n, bool compound = false)
+    public static string NumberToWords(double n, bool compound = false, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e9)
-            return string.Join(" ", Js.NumberToString(Math.Abs(n)).Select(DigitWord));
+            return string.Join(" ", (raw ?? Js.NumberToString(Math.Abs(n))).Select(DigitWord));
         if (n == 0) return N.Zero;
         if (n < 1000) return Below1000(n, compound);
         if (n < 1e6)

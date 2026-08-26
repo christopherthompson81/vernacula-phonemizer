@@ -148,7 +148,7 @@ class DutchPhonemizer implements Phonemizer {
             else if (m[2]) {
                 // The PERIOD is thousands grouping and the COMMA is the decimal point (see TOKEN).
                 const [intPart, frac] = m[2].replace(/\./gu, "").split(",");
-                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToWords(Number(intPart), intPart).split(" ")) sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
                     sink.emit(phonemizeWord(MANIFEST.numbers.decimalWord));
                     for (const d of frac)

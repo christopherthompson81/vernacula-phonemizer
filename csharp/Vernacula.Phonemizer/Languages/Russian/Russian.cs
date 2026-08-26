@@ -111,12 +111,12 @@ public sealed class RussianPhonemizer : ILanguage
                 var bits = DECIMAL_SEP.Re.Split(m.Groups[2].Value);
                 var intPart = bits[0];
                 string? frac = bits.Length > 1 ? bits[1] : null;
-                foreach (var wd in Numbers.NumberToWords(Js.Number(intPart)).Split(' ')) sink.Emit(PhonemizeWord(wd));
+                foreach (var wd in Numbers.NumberToWords(Js.Number(intPart), intPart).Split(' ')) sink.Emit(PhonemizeWord(wd));
                 if (frac is not null)
                 {
                     sink.Emit(PhonemizeWord(Manifest.MANIFEST.Numbers.DecimalConnector));
                     foreach (var dch in frac)
-                        foreach (var wd in Numbers.NumberToWords(Js.Number(dch.ToString())).Split(' '))
+                        foreach (var wd in Numbers.NumberToWords(Js.Number(dch.ToString()), dch.ToString()).Split(' '))
                             sink.Emit(PhonemizeWord(wd));
                 }
             }

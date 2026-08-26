@@ -36,8 +36,8 @@ export function readDigits(digits: string): string {
 
 /** A non-negative integer → its Finnish cardinal reading (space-separated at the tuhat/miljoona magnitude joints).
  *  Callers with a raw digit string longer than 9 digits should use readDigits directly (a float would already be lossy). */
-export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) return readDigits(String(n)); // out of range → digit-by-digit
+export function numberToWords(n: number, raw?: string): string {
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) return readDigits(raw ?? String(n)); // out of range → digit-by-digit
     if (n === 0) return N.zero;
     const parts: string[] = [];
     const mil = Math.floor(n / 1e6);

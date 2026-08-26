@@ -27,9 +27,9 @@ function below1000(n: number): string {
     return r ? `${hundred} ${N.and} ${below100(r)}` : hundred;
 }
 
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e6)
-        return [...String(Math.abs(n))].map((d) => (d === "0" ? N.zero : N.units[Number(d)])).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => (d === "0" ? N.zero : N.units[Number(d)])).join(" ");
     if (n === 0) return N.zero;
     if (n < 1000) return below1000(n);
     const th = Math.floor(n / 1000);

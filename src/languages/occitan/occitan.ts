@@ -182,12 +182,12 @@ class OccitanPhonemizer implements Phonemizer {
             // A digit run reads as Occitan number WORDS, each phonemized like any other word.
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(",");
-                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToWords(Number(intPart), intPart).split(" ")) sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
                     // `virgula` ×36 on oc.wikipedia — the separator's own name, the same call every other
                     // layer in this sweep makes. The fractional part is read digit by digit.
                     sink.emit(phonemizeWord(DEF.decimalWord));
-                    for (const dg of frac) for (const wd of numberToWords(Number(dg)).split(" ")) sink.emit(phonemizeWord(wd));
+                    for (const dg of frac) for (const wd of numberToWords(Number(dg), dg).split(" ")) sink.emit(phonemizeWord(wd));
                 }
             }
             else if (m[3]) {

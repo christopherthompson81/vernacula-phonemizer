@@ -803,7 +803,10 @@ public static class NormalizeSymbols
                             // ⚠ NO MEASURE WORD DECLARED — emit the UNIT and hand the exponent back rather than abandoning the
                             // match. Returning `whole` would lose the QUANTITY too; re-emitting `²` leaves the gap where the leak
                             // gate can see it.
-                            return q + " " + head + exp;
+                            // ⚠ AND IT HONOURS UnitPrefix like every sibling branch — this one returned
+                            // number-first unconditionally, giving a partially-declaring UnitPrefix language
+                            // two word orders from one rule (#1060).
+                            return d.UnitPrefix ? head + exp + " " + q : q + " " + head + exp;
                         }
                         // Count forms, because in Romance the measure word is an ADJECTIVE and agrees.
                         var word = Pick(eForms, n, cf);

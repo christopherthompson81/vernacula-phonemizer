@@ -38,10 +38,10 @@ public static class Numbers
         count == 1 ? $"{singular} {N.ClassNineOne}" : $"{plural} {Below1000(count, N.ClassSix)}";
 
     /** Non-negative integer (< 10¹²) → Chichewa words; larger / non-finite → digit-by-digit. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e12)
-            return string.Join(" ", Js.CodePoints(Js.NumberToString(Math.Abs(n))).Select(d =>
+            return string.Join(" ", Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n)))).Select(d =>
             {
                 // JS `N.units[Number(d)] ?? d`: a non-digit code point (the `e`/`+` of an exponential
                 // String(n), a `.`) indexes with NaN, misses, and falls back to the character itself.

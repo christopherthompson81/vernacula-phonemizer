@@ -54,9 +54,9 @@ const SCALES: readonly (readonly [number, string])[] = [
 /** The largest authored magnitude × 1000 — the first quantity this series cannot name. */
 const CAP = 1e15;
 
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= CAP)
-        return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!;
     for (const [value, word] of SCALES) {
         if (n < value) continue;

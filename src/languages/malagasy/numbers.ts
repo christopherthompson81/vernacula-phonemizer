@@ -38,9 +38,9 @@ function below1000(n: number, compound = false): string {
  *  tapitrisa branch reads its remainder with this function, and that remainder sits in an `amby` compound
  *  exactly as the arivo branch's does. Without it 1 000 001 read *iray amby iray tapitrisa* while 1 001
  *  read *iraika amby arivo* — the same slot, two different unit words. */
-export function numberToWords(n: number, compound = false): string {
+export function numberToWords(n: number, compound = false, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...String(Math.abs(n))].map((d) => ONES[Number(d)] || N.zero).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] || N.zero).join(" ");
     if (n === 0) return N.zero;
     if (n < 1000) return below1000(n, compound);
     if (n < 1e6) {

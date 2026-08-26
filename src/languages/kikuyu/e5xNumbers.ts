@@ -76,9 +76,9 @@ function render(n: number, T: E5xNumberTable): string {
 
 /** A non-negative integer → space-separated E5x cardinal words. Composes every value up to 2⁵³ (billions are
  *  "thousands of millions"); only a digit string too long to be an exact double degrades to digit-by-digit. */
-export function renderE5xNumber(n: number, T: E5xNumberTable): string {
+export function renderE5xNumber(n: number, T: E5xNumberTable, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0)
-        return [...String(Math.abs(n))].map((d) => (d === "0" ? T.zero : (T.units[Number(d)] ?? d))).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => (d === "0" ? T.zero : (T.units[Number(d)] ?? d))).join(" ");
     if (n === 0) return T.zero;
     return render(n, T);
 }

@@ -228,7 +228,7 @@ class FrenchPhonemizer implements Phonemizer {
             if (m[1]) items.push({ word: m[1] });
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);
-                for (const w of numberToWords(Number(intPart)).split(" "))
+                for (const w of numberToWords(Number(intPart), intPart).split(" "))
                     items.push({ word: w });
                 if (frac !== undefined) {
                     // Decimal: "virgule" + the fractional part. French reads that part as a NUMBER
@@ -239,7 +239,7 @@ class FrenchPhonemizer implements Phonemizer {
                     items.push({ word: MANIFEST.numbers.decimalSeparator });
                     const asNumber = frac.length <= 3 && !frac.startsWith("0");
                     const parts = asNumber
-                        ? numberToWords(Number(frac)).split(" ")
+                        ? numberToWords(Number(frac), frac).split(" ")
                         : [...frac].flatMap((d) => numberToWords(Number(d)).split(" "));
                     for (const w of parts) items.push({ word: w });
                 }

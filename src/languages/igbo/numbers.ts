@@ -75,8 +75,8 @@ function toWords(n: number): string {
 }
 
 /** An Igbo cardinal for `n`, or a digit-by-digit reading when it is out of range or not a finite integer. */
-export function numberToWords(n: number): string {
-    if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) return digits(String(n));
+export function numberToWords(n: number, raw?: string): string {
+    if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) return digits(raw ?? String(n));
     const words = toWords(n);
-    return words === "" ? digits(String(n)) : words;
+    return words === "" ? digits(raw ?? String(n)) : words;
 }

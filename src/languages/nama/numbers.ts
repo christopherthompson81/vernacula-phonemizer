@@ -127,8 +127,8 @@ export function readDigits(digits: string): string {
  * Non-negative integer → Khoekhoegowab cardinal words. 0 yields the flagged Afrikaans stopgap `nul` (no native
  * zero is attested); ≥10¹² or non-safe falls back to digit-by-digit. Never returns "".
  */
-export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return readDigits(String(n));
+export function numberToWords(n: number, raw?: string): string {
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return readDigits(raw ?? String(n));
     if (n === 0) return ZERO_STOPGAP;
     if (n < 1e6) return below1e6(n);
     if (n < 1e9) {

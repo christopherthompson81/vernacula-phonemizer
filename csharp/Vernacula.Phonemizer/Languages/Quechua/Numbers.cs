@@ -62,12 +62,12 @@ public static class Numbers
     }
 
     /** Non-negative integer → Southern Quechua words. 10¹² and above → digit-by-digit. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e12)
         {
             var sb = new StringBuilder();
-            foreach (var c in Js.NumberToString(Math.Abs(n)))
+            foreach (var c in (raw ?? Js.NumberToString(Math.Abs(n))))
             {
                 if (c < '0' || c > '9') continue;
                 if (sb.Length > 0) sb.Append(' ');

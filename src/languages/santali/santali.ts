@@ -135,7 +135,7 @@ class SantaliPhonemizer implements Phonemizer {
                 // for `st`/`th`, none of which is attested (the `hmn` refusal).
                 const foreign = getDefaultForeign();
                 if (foreign !== undefined) sink.emit(foreign(m[2]));
-                else for (const wd of numberToWords(Number(m[2].replace(/\D+$/u, ""))).split(" ")) sink.emit(phonemizeWord(wd));
+                else for (const wd of numberToWords(Number(m[2].replace(/\D+$/u, "")), m[2].replace(/\D+$/u, "")).split(" ")) sink.emit(phonemizeWord(wd));
             }
             else if (m[3]) {
                 // Ol Chiki digits and Western digits are the same numbers — normalise, then compose. ≤15 digits

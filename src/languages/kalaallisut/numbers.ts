@@ -133,8 +133,8 @@ export function readDigits(digits: string): string {
  * the corpus evidence). `million`/`milliard` are separate words; everything below 10⁶ is one solid Danish word.
  * ≥10¹² or non-safe → digit-by-digit.
  */
-export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return readDigits(String(n));
+export function numberToWords(n: number, raw?: string): string {
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return readDigits(raw ?? String(n));
     if (n <= 12) return NATIVE[n]!; // the native series — only when the WHOLE figure is ≤12
     if (n < 1e6) return dkBelow1e6(n);
     if (n < 1e9) {

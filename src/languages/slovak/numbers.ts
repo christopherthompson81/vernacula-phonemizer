@@ -49,11 +49,11 @@ export function readDigits(digits: string): string {
 }
 
 /** A non-negative integer (< 1e9) → space-separated Slovak cardinal words. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (n < 0 || !Number.isFinite(n)) return "";
     n = Math.floor(n);
     if (n === 0) return UNITS[0]!; // nula
-    if (n >= 1e9) return readDigits(String(n)); // no miliarda tier → digit-by-digit
+    if (n >= 1e9) return readDigits(raw ?? String(n)); // no miliarda tier → digit-by-digit
     const parts: string[] = [];
     const mil = Math.floor(n / 1000000);
     n %= 1000000;

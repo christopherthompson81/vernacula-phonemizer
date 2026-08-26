@@ -82,7 +82,7 @@ class PolishPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(",");
-                for (const wd of numberToWords(Number(intPart)).split(" "))
+                for (const wd of numberToWords(Number(intPart), intPart).split(" "))
                     sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
                     sink.emit(phonemizeWord(MANIFEST.decimalWord)); // the Polish name of the decimal comma

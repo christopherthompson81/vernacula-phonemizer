@@ -38,9 +38,9 @@ function below1000(n: number, dialect: "ep" | "bp"): string {
 
 /** Non-negative integer (< 10⁹) → Portuguese words (`dialect`: European default, Brazilian teens for "bp");
  *  larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number, dialect: "ep" | "bp" = "ep"): string {
+export function numberToWords(n: number, dialect: "ep" | "bp" = "ep", raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...String(Math.abs(n))]
+        return [...(raw ?? String(Math.abs(n)))]
             .map((d) => small(Number(d), dialect) ?? d)
             .join(" ");
     if (n < 1000) return below1000(n, dialect);

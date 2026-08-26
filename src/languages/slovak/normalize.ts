@@ -532,7 +532,7 @@ export function normalizeSlovak(input: string): string {
     s = s.replace(/(?<![\d/.,])(\d{1,3})\/(\d{1,2})(?![\d/.,])/gu, (m0, a: string, b: string) => {
         const forms = DENOMINATOR[Number(b)];
         if (forms === undefined) return m0;
-        return `${feminine(numberToWords(Number(a)))} ${counted(Number(a), forms)}`;
+        return `${feminine(numberToWords(Number(a), a))} ${counted(Number(a), forms)}`;
     });
 
     // 14) RELATIONAL SIGNS and the ampersand. None of the relational signs occurs in this corpus, but a

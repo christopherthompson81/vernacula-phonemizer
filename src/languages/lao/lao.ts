@@ -264,9 +264,9 @@ const TOKEN = /([຀-໿]+)|(\d+)|([.!?…,;:])/gu;
 const NUM = MANIFEST.numbers;
 const LO_UNITS = NUM.units;
 
-function numberToLaoWords(n: number): string[] {
+function numberToLaoWords(n: number, raw?: string): string[] {
     if (!Number.isSafeInteger(n) || n < 0) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => LO_UNITS[Number(d)]!);
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => LO_UNITS[Number(d)]!);
     }
     if (n === 0) return [LO_UNITS[0]!];
     const out: string[] = [];
@@ -309,7 +309,7 @@ class LaoPhonemizer implements Phonemizer {
         // is dropped (core/unicode.ts).
         return assembleClauses(foldNativeDigits(normalizeLao(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) for (const wd of numberToLaoWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
+            else if (m[2]) for (const wd of numberToLaoWords(Number(m[2]), m[2])) sink.emit(phonemizeWord(wd));
             // Canonical, UNPADDED pause marks: a padded value reaches the output as a double space, and
             // ? and ! must stay distinct from "." or the sentence type is lost. Hardcoded rather than a
             // manifest clausePunctuation table, deliberately: , ; : produce NO pause here.

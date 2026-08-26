@@ -33,9 +33,9 @@ function below1000(n: number): string {
 }
 
 /** Non-negative integer (< 10¹²) → Dutch words; larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...String(Math.abs(n))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // nul
     if (n < 1000) return below1000(n);
     const parts: string[] = [];

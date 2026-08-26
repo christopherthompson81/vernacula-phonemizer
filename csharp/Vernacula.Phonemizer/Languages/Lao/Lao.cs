@@ -231,11 +231,11 @@ public static class LaoPhonemizer
     private static readonly (double V, string W)[] MAGNITUDES =
         NUM.Magnitudes.Select(r => (r[0].GetDouble(), r[1].GetString() ?? "")).ToArray();
 
-    private static List<string> NumberToLaoWords(double n)
+    private static List<string> NumberToLaoWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0)
         {
-            return Js.CodePoints(Js.NumberToString(Math.Abs(n)))
+            return Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n))))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
                 .Select(d => LO_UNITS[(int)Js.Number(d)])
                 .ToList();
@@ -283,7 +283,7 @@ public static class LaoPhonemizer
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
-                    foreach (var wd in NumberToLaoWords(Js.Number(m.Groups[2].Value))) sink.Emit(PhonemizeWord(wd));
+                    foreach (var wd in NumberToLaoWords(Js.Number(m.Groups[2].Value), m.Groups[2].Value)) sink.Emit(PhonemizeWord(wd));
                 }
                 else if (m.Groups[3].Success && m.Groups[3].Value == "?") sink.Pause("?");
                 else if (m.Groups[3].Success && m.Groups[3].Value == "!") sink.Pause("!");

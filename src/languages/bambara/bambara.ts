@@ -77,7 +77,7 @@ class BambaraPhonemizer implements Phonemizer {
         return assembleClauses(normalizeBambara(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // numbers: N'Ko digits folded to ASCII, composed to Bambara words, then through the same g2p
-            else if (m[2]) for (const wd of numberToWords(Number(foldNkoDigits(m[2]))).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) for (const wd of numberToWords(Number(foldNkoDigits(m[2])), foldNkoDigits(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

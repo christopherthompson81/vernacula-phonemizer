@@ -43,11 +43,11 @@ export function readDigits(digits: string): string {
 }
 
 /** A non-negative integer (< 1e12) → space-separated Slovene cardinal words. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (n < 0 || !Number.isFinite(n)) return "";
     n = Math.floor(n);
     if (n === 0) return UNITS[0]!; // nič
-    if (n >= 1e12) return readDigits(String(n)); // above the milijarda tier → digit-by-digit
+    if (n >= 1e12) return readDigits(raw ?? String(n)); // above the milijarda tier → digit-by-digit
     const parts: string[] = [];
     const mrd = Math.floor(n / 1e9);
     n %= 1e9;

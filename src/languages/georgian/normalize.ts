@@ -369,7 +369,7 @@ const GEO = "\\p{Script=Georgian}";
  *  phrase and, separately, whether it had a fractional tail (the ending attaches to the TAIL's last word). */
 function figureToWords(fig: string): string {
     const parts = fig.split(/[.,]/u);
-    return parts.map((p) => (p === "" ? "" : numberToWords(Number(p)))).filter((p) => p !== "").join(" ");
+    return parts.map((p) => (p === "" ? "" : numberToWords(Number(p), p))).filter((p) => p !== "").join(" ");
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -465,7 +465,7 @@ export function normalizeGeorgian(input: string): string {
             const ending = sfx ?? (hourWord === undefined ? undefined : hourWord.slice("საათ".length) || undefined);
             const parts: string[] = [`${numberToWords(hv)} საათი`];
             if (mv !== 0 || se !== undefined) parts.push(`${numberToWords(mv)} წუთი`);
-            if (se !== undefined) parts.push(`${numberToWords(Number(se))} წამი`);
+            if (se !== undefined) parts.push(`${numberToWords(Number(se), se)} წამი`);
             const joined = parts.length === 1 ? parts[0]!
                 : `${parts.slice(0, -1).join(", ")} და ${parts[parts.length - 1]}`;
             return attach(joined, ending);
@@ -474,7 +474,7 @@ export function normalizeGeorgian(input: string): string {
     //        and it stays as written (the shared foreign-run pass reads it).
     s = s.replace(/(?<![\d:.,])(\d{1,2}):([0-5]\d)(?![\d:])(?=\s*(?:UTC|GMT))/gu,
         (m0, h: string, mi: string) => (Number(h) > 23 ? m0
-            : `${numberToWords(Number(h))} საათი და ${numberToWords(Number(mi))} წუთი`));
+            : `${numberToWords(Number(h), h)} საათი და ${numberToWords(Number(mi), mi)} წუთი`));
 
     // 4) ORDINALS. Both halves of the circumfix, and the CENTURY.
     //    4a) `მე-N` — the prefix half, ×7. Guarded on the left so the 1sg pronoun მე cannot start a match

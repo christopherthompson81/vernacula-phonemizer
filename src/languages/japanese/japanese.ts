@@ -83,7 +83,7 @@ class JapanesePhonemizer implements Phonemizer {
                         placeDownstep(morae, accentNucleus(m[1], reading)),
                     ); // pitch: surface m[1] disambiguates
             } else if (m[2]) {
-                const ipa = kanaToIpa(numberToKana(Number(m[2])));
+                const ipa = kanaToIpa(numberToKana(Number(m[2]), m[2]));
                 if (ipa) sink.emit(ipa);
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

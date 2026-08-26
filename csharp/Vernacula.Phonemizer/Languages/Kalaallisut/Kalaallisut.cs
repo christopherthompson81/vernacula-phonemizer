@@ -71,7 +71,7 @@ public sealed class KalaallisutPhonemizer : ILanguage
                 // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string, so
                 // the JS-`Number` conversion (Js.Number) can't lose precision.
                 var digits = m.Groups[2].Value;
-                var words = digits.Length <= 12 ? Numbers.NumberToWords(Js.Number(digits)) : Numbers.ReadDigits(digits);
+                var words = digits.Length <= 12 ? Numbers.NumberToWords(Js.Number(digits), digits) : Numbers.ReadDigits(digits);
                 foreach (var wd in words.Split(' ')) sink.Emit(PhonemizeWord(wd));
             }
             else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)

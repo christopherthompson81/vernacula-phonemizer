@@ -103,8 +103,8 @@ export function readDigits(digits: string): string {
  * Non-negative integer → Guaraní cardinal words in the Decoud Larrosa neologism system (see the header for why
  * this register and not the colloquial Spanish loans). ≥10⁹ or non-safe → digit-by-digit.
  */
-export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) return readDigits(String(n));
+export function numberToWords(n: number, raw?: string): string {
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) return readDigits(raw ?? String(n));
     if (n < 1e6) return below1e6(n);
     const m = Math.floor(n / 1e6),
         r = n % 1e6;

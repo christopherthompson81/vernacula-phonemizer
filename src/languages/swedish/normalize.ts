@@ -370,7 +370,7 @@ export function normalizeSwedish(input: string): string {
     //    andra because those END in -a — so the table decides, not the written suffix. An unclaimable
     //    number (>100) keeps its digits and its colon rather than getting a guessed ending.
     t = t.replace(/(?<![\d:.,])(\d{1,3}):(a|e|s|or)(?![\p{L}\p{M}])/gu, (m, n: string, suf: string) => {
-        if (suf === "or") return `${numberToWords(Number(n))}or`;
+        if (suf === "or") return `${numberToWords(Number(n), n)}or`;
         const ord = ordinal(Number(n));
         return ord === undefined ? m : suf === "s" ? `${ord}s` : ord;
     });

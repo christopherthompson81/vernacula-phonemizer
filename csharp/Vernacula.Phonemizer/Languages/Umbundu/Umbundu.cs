@@ -59,7 +59,7 @@ public sealed class UmbunduPhonemizer : ILanguage
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(CURLY.Replace(m.Groups[1].Value, "'")));
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
-                foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value)).Split(' ')) sink.Emit(PhonemizeWord(wd));
+                foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value), m.Groups[2].Value).Split(' ')) sink.Emit(PhonemizeWord(wd));
             else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
             {
                 if (CLAUSE_MARK.TryGetValue(m.Groups[3].Value, out var mk) && mk.Length > 0) sink.Pause(mk);

@@ -67,7 +67,7 @@ public static class JapanesePhonemizer
                 }
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
-                    var ipa = Kana.KanaToIpa(Numbers.NumberToKana(Js.Number(m.Groups[2].Value)));
+                    var ipa = Kana.KanaToIpa(Numbers.NumberToKana(Js.Number(m.Groups[2].Value), m.Groups[2].Value));
                     if (!string.IsNullOrEmpty(ipa)) sink.Emit(ipa);
                 }
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)

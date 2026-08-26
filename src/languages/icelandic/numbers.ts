@@ -72,9 +72,9 @@ function below1000(n: number, g: Gender): string {
 }
 
 /** Non-negative integer (< 10¹²) → Icelandic words; larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...String(Math.abs(n))].map((c) => N.ones[Number(c)] ?? c).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((c) => N.ones[Number(c)] ?? c).join(" ");
     if (n === 0) return N.ones[0]!; // núll
     const parts: string[] = [];
     const bil = Math.floor(n / 1e9),

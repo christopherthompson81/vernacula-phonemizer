@@ -74,11 +74,11 @@ export function readDigits(digits: string): string {
 }
 
 /** A non-negative integer (< 10^12) → space-separated Georgian cardinal words. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (n < 0 || !Number.isFinite(n)) return "";
     n = Math.floor(n);
     if (n === 0) return UNITS[0]!; // ნული
-    if (n >= 1e12) return readDigits(String(n));
+    if (n >= 1e12) return readDigits(raw ?? String(n));
     const parts: string[] = [];
     const bil = Math.floor(n / 1e9);
     n %= 1e9;

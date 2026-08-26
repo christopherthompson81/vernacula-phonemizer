@@ -47,12 +47,12 @@ public static class Numbers
     }
 
     /** Non-negative integer (< 10⁹) → Arabic IPA words. Larger / invalid → digit-by-digit (digits only). */
-    public static string NumberToIpa(double n, ArabicNumberData? data = null)
+    public static string NumberToIpa(double n, ArabicNumberData? data = null, string? raw = null)
     {
         var d = data ?? MSA;
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e9)
         {
-            return string.Join(" ", Js.NumberToString(Math.Abs(n))
+            return string.Join(" ", (raw ?? Js.NumberToString(Math.Abs(n)))
                 .Where(x => x >= '0' && x <= '9')
                 .Select(x => d.Ones[x - '0'])
                 .Where(w => !string.IsNullOrEmpty(w)));

@@ -57,10 +57,10 @@ function below1000(n: number): string {
 }
 
 /** Non-negative integer → Ewe words; beyond the attested magnitudes (≥ 10⁹) → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) {
         // No attested Ewe numeral above miliɔn — read the digits rather than invent a "billion".
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
     }
     if (n < 1000) return below1000(n);
     if (n < 1e6) {

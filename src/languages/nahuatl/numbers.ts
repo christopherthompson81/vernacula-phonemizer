@@ -96,9 +96,9 @@ function magnitudeWords(d: number, mag: string): string[] {
 }
 
 /** Non-negative integer → Classical Nahuatl words. ≥ 20⁷ (no further magnitude noun) → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 20 ** 7) {
-        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9")
+        return [...(raw ?? String(Math.abs(n)))].filter((c) => c >= "0" && c <= "9")
             .map((d) => (d === "0" ? ZERO : UNITS[Number(d)]!)).join(" ");
     }
     if (n === 0) return ZERO;

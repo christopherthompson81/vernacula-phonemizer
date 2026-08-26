@@ -233,7 +233,7 @@ public static class Normalize
 
         // 8) FRACTIONS.
         s = FRACTION.Replace(s, m =>
-            $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} e {FulaNumbers.NumberToWords(Js.Number(m.Groups[2].Value))}");
+            $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} e {FulaNumbers.NumberToWords(Js.Number(m.Groups[2].Value), m.Groups[2].Value)}");
 
         // 9) DEGREES.
         s = DEGREE_C.Replace(s, "$1 digiri Celsius");
@@ -242,13 +242,13 @@ public static class Normalize
 
         // 10) RATES. AFTER the version-dot rule, BEFORE the tier.
         s = RATE.Replace(s, m =>
-            $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} " +
+            $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} " +
             $"{RATE_UNIT_WORDS[m.Groups[2].Value.ToLowerInvariant()]} e wakkati gootel");
         s = RATE_WORD.Replace(s, m =>
-            $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} " +
+            $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} " +
             (m.Groups[2].Value.ToLowerInvariant() == "mph" ? "miles e wakkati gootel" : "kilometre e wakkati gootel"));
         s = RATE_TYPO.Replace(s, m =>
-            $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} kilometre e wakkati gootel");
+            $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} kilometre e wakkati gootel");
 
         // 11) GIGAHERTZ — handled in step 7 on the raw digits (before the fraction becomes words).
 

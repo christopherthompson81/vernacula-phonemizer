@@ -53,9 +53,9 @@ function below1000(n: number): string {
 }
 
 /** Non-negative integer (< 10¹²) → Hungarian words; larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // nulla
     const parts: string[] = [];
     const mrd = Math.floor(n / 1e9),

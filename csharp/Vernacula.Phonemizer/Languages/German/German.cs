@@ -388,13 +388,13 @@ public static class GermanPhonemizer
                     var split = GROUPING_DOT.Replace(m.Groups[2].Value, "").Split(',');
                     var intPart = split[0];
                     var frac = split.Length > 1 ? split[1] : null;
-                    foreach (var wd in Numbers.NumberToWords(Js.Number(intPart)).Split(' '))
+                    foreach (var wd in Numbers.NumberToWords(Js.Number(intPart), intPart).Split(' '))
                         sink.Emit(PhonemizeWord(wd));
                     if (frac is not null)
                     {
                         sink.Emit(PhonemizeWord("Komma"));
                         foreach (var dch in frac)
-                            foreach (var wd in Numbers.NumberToWords(Js.Number(dch.ToString())).Split(' '))
+                            foreach (var wd in Numbers.NumberToWords(Js.Number(dch.ToString()), dch.ToString()).Split(' '))
                                 sink.Emit(PhonemizeWord(wd));
                     }
                 }

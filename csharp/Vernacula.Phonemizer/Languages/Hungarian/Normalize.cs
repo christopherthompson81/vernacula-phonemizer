@@ -287,8 +287,8 @@ public static class Normalize
         s = LESS_THAN.Replace(s, " kisebb mint ");
         s = GREATER_THAN.Replace(s, " nagyobb mint ");
         s = DIVIDE.Replace(s, m =>
-            $"{Numbers.NumberToWords(Js.Number(m.Groups[1].Value))} " +
-            $"{HuInstrumental(Numbers.NumberToWords(Js.Number(m.Groups[2].Value)))} osztva");
+            $"{Numbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} " +
+            $"{HuInstrumental(Numbers.NumberToWords(Js.Number(m.Groups[2].Value), m.Groups[2].Value))} osztva");
 
         s = DECIMAL.Replace(s, "$1 egész ");
 

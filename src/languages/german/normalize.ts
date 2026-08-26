@@ -204,8 +204,8 @@ export function normalizeGerman(input: string): string {
     //    echoed back, so a lowercase or shouted `UHR` still yields the one properly-cased noun.
     s = s.replace(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b(?!\.?\d)(\s*Uhr)?/giu,
         (_m, h: string, min: string) => {
-            const head = `${numberToWords(Number(h))} Uhr`;
-            return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min))}`;
+            const head = `${numberToWords(Number(h), h)} Uhr`;
+            return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min), min)}`;
         });
 
     // 5) UNITS the shared tier cannot express, and the degree signs.

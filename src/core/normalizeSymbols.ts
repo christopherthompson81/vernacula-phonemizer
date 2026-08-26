@@ -1061,7 +1061,14 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                             // the abbreviation reaches the phoneme sink verbatim. Re-emitting the exponent keeps
                             // the unit's reading and leaves `²` where the leak gate can see it, turning an
                             // invisible missing reading into a visible missing WORD in one language's data.
-                            return `${q} ${head}${exp}`;
+                            // ⚠ AND IT MUST HONOUR `unitPrefix` LIKE EVERY SIBLING BRANCH. This one returned
+                            // number-first unconditionally, so a `unitPrefix` language that declares SOME
+                            // powers and not others got two different word orders out of one rule (#1060):
+                            // Chichewa declares `squared` and not `cubed`, so `5 km²` read
+                            // *sikweja makiɽomita zisanu* (correct) and `5 km³` read *zisanu makiɽomita* —
+                            // the wrong order AND the cube gone. The failure was doubled and only the
+                            // second half was visible.
+                            return d.unitPrefix ? `${head}${exp} ${q}` : `${q} ${head}${exp}`;
                         }
                         // Count forms, because in Romance the measure word is an ADJECTIVE and agrees:
                         // "un kilómetro cuadrado" vs "cincuenta kilómetros cuadrados".
