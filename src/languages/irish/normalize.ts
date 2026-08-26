@@ -229,7 +229,12 @@ export function normalizeIrish(input: string): string {
     // 5) RANGES and SCORES — `10-60 nóiméad`, `6-6`, `4.2-3.9 milliún`, `AD 1000-1300`. Irish reads
     //    these with "go dtí" (to) or the range just as two numbers. The corpus's prose uses "idir X
     //    agus Y" (between X and Y). A leading minus stays a sign (handled later).
-    s = s.replace(/(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])/gu, "$1 go dtí $2");
+    // ⚠ EACH OPERAND MUST END ON A DIGIT. `(\d[\d,]*)` also accepts a trailing separator, so in
+    //    `1, -2` the left operand matched `1,` — the sentence comma — and `\s*` then reached the minus
+    //    and read a RANGE where the text has a negative number: *a haon, go dtí a dó*. Same trailing-separator shape as
+    //    the tokenizer bug closed in #1015. With the operand anchored on a digit, `\s*` can no longer
+    //    straddle the comma and the rule declines, leaving the sign rule to claim `-2`.
+    s = s.replace(/(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])/gu, "$1 go dtí $2");
 
     // 6) CLOCK, in the COLON form. `11:35 i.n.` → aon déag tríocha a cúig iarnóin; `8:30 p.m.` →
     //    ocht tríocha p.m. The i.n./r.n./p.m./a.m. marker (WITH the dots) expands to the Irish

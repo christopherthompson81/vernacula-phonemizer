@@ -82,7 +82,12 @@ export function normalizeHausa(input: string): string {
     //     matched, the decimal rule then turned each side into words, and the hyphen was dropped with no
     //     joiner at all (*huɗu maki biyu uku maki tara*).
     s = s.replace(/(?<![\d.,])(\d+\.\d+)\s*[-–]\s*(\d+\.\d+)(?![\d.])/gu, "$1 zuwa $2");
-    s = s.replace(/(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])/gu, "$1 zuwa $2");
+    // ⚠ EACH OPERAND MUST END ON A DIGIT. `(\d[\d,]*)` also accepts a trailing separator, so in
+    //    `1, -2` the left operand matched `1,` — the sentence comma — and `\s*` then reached the minus
+    //    and read a RANGE where the text has a negative number: *one, up to two*. Same trailing-separator shape as
+    //    the tokenizer bug closed in #1015. With the operand anchored on a digit, `\s*` can no longer
+    //    straddle the comma and the rule declines, leaving the sign rule to claim `-2`.
+    s = s.replace(/(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])/gu, "$1 zuwa $2");
 
     // 5) CLOCK, in the COLON form. `8:46 na safe` → takwas da arba'in da shida na safe; `11:29` → goma
     //     sha ɗaya da ashirin da tara. The corpus's own "na safe"/"na yamma" (a.m./p.m.) stay. The

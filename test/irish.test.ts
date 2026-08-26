@@ -208,3 +208,11 @@ describe("dotted abbreviations the corpus writes without their dot", () => {
         expect(phonemize("iompar ar thalamh, srl.", "ga")).toContain("ˈaɡəsˠ əɾˠˈalʲə");
     });
 });
+
+describe("Irish: a comma before a minus is not a range", () => {
+    test("reads `1, -2` as a negative, and a real range as a range", () => {
+        expect(phonemize("1, -2", "ga")).not.toContain("ɡˈɔ dʲˈiː");
+        expect(phonemize("1-2", "ga")).toContain("ɡˈɔ dʲˈiː");
+        expect(phonemize("1,234-5,678", "ga")).toContain("ɡˈɔ dʲˈiː");
+    });
+});

@@ -143,3 +143,14 @@ describe("Hausa — the unit symbol BEFORE its numeral, which is Hausa's own ord
     });
 
 });
+
+describe("Hausa: a comma before a minus is not a range", () => {
+    it("reads `1, -2` as a negative, and a real range as a range", () => {
+        // `(\d[\d,]*)` accepted a trailing separator, so the left operand matched the SENTENCE COMMA in
+        // `1,` and `\s*` reached the minus — one number and a negative became a range, sign deleted.
+        expect(phonemize("1, -2", "ha")).not.toContain("zˈu˥wa˩");
+        expect(phonemize("5, -3 degrees", "ha")).not.toContain("zˈu˥wa˩");
+        expect(phonemize("1-2", "ha")).toContain("zˈu˥wa˩");
+        expect(phonemize("1,234-5,678", "ha")).toContain("zˈu˥wa˩"); // grouped operands still join
+    });
+});

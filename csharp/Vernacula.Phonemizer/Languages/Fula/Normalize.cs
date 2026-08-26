@@ -114,7 +114,9 @@ public static class Normalize
     private static readonly JsRe DOTTED_CAPS_STRIP = JsRegex.Compile(@"[.\s]", "gu");
     private static readonly JsRe SUFFIX_DOT = JsRegex.Compile(@"(?<=\p{Lu})\.(?=\s+\p{Lu})", "gu");
     private static readonly JsRe ORDINAL = JsRegex.Compile(@"(?<![\d.,])(\d[\d,]*)(st|nd|rd|th)(?![\p{L}\p{M}])", "giu");
-    private static readonly JsRe RANGE = JsRegex.Compile(@"(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])", "gu");
+    // ⚠ Each operand must END ON A DIGIT — see the TS. A trailing separator let `1,` match and the
+    // range rule claimed the minus of `1, -2`, reading a range where the text has a negative number.
+    private static readonly JsRe RANGE = JsRegex.Compile(@"(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])", "gu");
     private static readonly JsRe CLOCK_SUFFIX = JsRegex.Compile(@"(?<![\d.,])(\d{1,2}):(\d{2})(nje)(?![\p{L}\p{M}])", "giu");
     private static readonly JsRe CLOCK = JsRegex.Compile(
         @"(?<![\d:,])(\d{1,2}):(\d{2})(?![:.\d])(?:\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?))?", "giu");

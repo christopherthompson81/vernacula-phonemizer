@@ -217,3 +217,11 @@ describe("Fula: the three dead tables the port batch found", () => {
         expect(phonemize("1¾ kilometre", "ff")).toBe(phonemize("1 3/4 kilometre", "ff"));
     });
 });
+
+describe("Fula: a comma before a minus is not a range", () => {
+    it("reads `1, -2` as a negative, and a real range as a range", () => {
+        expect(normalizeFula("1, -2")).not.toContain("haa");
+        expect(normalizeFula("1-2")).toContain("haa");
+        expect(normalizeFula("1,234-5,678")).toContain("haa");
+    });
+});

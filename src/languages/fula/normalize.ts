@@ -157,7 +157,12 @@ export function normalizeFula(input: string): string {
     //    the corpus writes "hakkunde India be Pakistan" (between X and Y), never "X hakkunde Y", so an
     //    infix `N hakkunde M` is the wrong construction for all twelve of the corpus's ranges.
     //    A leading minus stays a sign (handled later).
-    s = s.replace(/(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])/gu, "$1 haa $2");
+    // ⚠ EACH OPERAND MUST END ON A DIGIT. `(\d[\d,]*)` also accepts a trailing separator, so in
+    //    `1, -2` the left operand matched `1,` — the sentence comma — and `\s*` then reached the minus
+    //    and read a RANGE where the text has a negative number: *one, up to two*. Same trailing-separator shape as
+    //    the tokenizer bug closed in #1015. With the operand anchored on a digit, `\s*` can no longer
+    //    straddle the comma and the rule declines, leaving the sign rule to claim `-2`.
+    s = s.replace(/(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])/gu, "$1 haa $2");
 
     // 5b) GLUED CLOCK SUFFIX — `11:00nje` (the Fula locative -nje "at"; the corpus's only glued
     //     instance). The suffix is a separate word, not glued to the time; spaced out so the clock rule
