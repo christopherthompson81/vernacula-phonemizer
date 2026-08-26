@@ -215,7 +215,18 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
                 frac,
                 `${lang} vs ${primary!.source}: ${primary!.folded}/${primary!.total}`,
             ).toBeGreaterThanOrEqual(floor);
-        }, 30000); // ONNX diacritizer (ar) is slow; generous per-test timeout
+        // ⚠ 120s IS A HANG GUARD, NOT A BUDGET, and it was 30s. Two agents in a four-way fan-out each
+        // reported a non-reproducing failure in this suite while three sibling agents were running
+        // `dotnet build` concurrently. Idle, the slowest test here is `en` at ~3.6s and everything but
+        // ar/ajp/acw/ary is under 500ms — roughly 8x headroom, which is exactly what a loaded machine
+        // eats. Nothing about these floors means anything different at 120s, a real hang is still caught,
+        // and a floor suite that cries wolf is one a reader stops believing.
+        // ⚠ Neither report was CONFIRMED to be a timeout — see docs/referee_flakiness_investigation.md,
+        // which also records the more interesting hypothesis this replaced: the global foreign-OOV memo
+        // is never cleared here though 171 languages render in one process, which `core/foreign.ts`
+        // documents as a reproducibility hazard for batch tools. Measured and ruled out — a language
+        // scores identically alone and after a full `en` prewarm, `tl` included.
+        }, 120000); // ONNX diacritizer (ar) is slow; generous per-test timeout
     }
 
     // Frequency-weighted floors: for languages whose referee is dictionary-shaped (over-sampling rare inflections),
