@@ -161,8 +161,8 @@ public static class Normalize
 
     private const string GROUP_SPACE = " \u00a0\u202f\u2009";
 
-    private static readonly JsRe DEGROUP_SPACE = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
-    private static readonly JsRe DEGROUP_COMMA = JsRegex.Compile("(\\d),(\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe DEGROUP_SPACE = JsRegex.Compile($"(?<=\\d)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
+    private static readonly JsRe DEGROUP_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile($"[{GROUP_SPACE}]", "gu");
     /**
      * The multi-word dotted abbreviations, compiled from `multiDotAbbrev` IN MANIFEST ORDER — `до н. е.` must
@@ -219,8 +219,8 @@ public static class Normalize
     {
         var s = input;
 
-        for (var i = 0; i < 2; i++) s = DEGROUP_SPACE.Replace(s, "$1$2");
-        s = DEGROUP_COMMA.Replace(s, "$1$2");
+        s = DEGROUP_SPACE.Replace(s, "");
+        s = DEGROUP_COMMA.Replace(s, "");
         s = SPACES.Replace(s, " ");
 
         foreach (var (re, word) in MULTI_DOT)

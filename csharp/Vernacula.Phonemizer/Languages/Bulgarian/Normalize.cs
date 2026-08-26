@@ -55,7 +55,7 @@ public static class Normalize
     private static readonly JsRe RATE_M_S = JsRegex.Compile("(?<!\\p{L})м\\s*\\/\\s*(?:сек|с)(?!\\p{L})", "giu");
     private static readonly JsRe RATE_KM_H_LAT = JsRegex.Compile("(?<!\\p{L})km\\s*\\/\\s*h(?!\\p{L})", "giu");
     private static readonly JsRe RATE_M_S_LAT = JsRegex.Compile("(?<!\\p{L})m\\s*\\/\\s*s(?!\\p{L})", "giu");
-    private static readonly JsRe SPACE_GROUP = JsRegex.Compile("(\\d)[ \u00a0\u202f\u2009](\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe SPACE_GROUP = JsRegex.Compile("(?<=\\d)[ \u00a0\u202f\u2009](?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d+),(\\d+)", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(\\d{1,2}):(\\d{2})(?!\\d)", "gu");
     private static readonly JsRe NUMERO = JsRegex.Compile("№\\s?(?=\\d)", "gu");
@@ -102,7 +102,7 @@ public static class Normalize
         do
         {
             prev = t;
-            t = SPACE_GROUP.Replace(t, "$1$2");
+            t = SPACE_GROUP.Replace(t, "");
         } while (t != prev);
 
         t = DECIMAL.Replace(t, m =>

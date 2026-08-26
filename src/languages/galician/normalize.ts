@@ -173,8 +173,8 @@ export function normalizeGalician(input: string): string {
     //    tokenizer and is deliberately left alone here; the space form is not, and a number token cannot
     //    span a space. Twice, because `299 792 458` has two group boundaries and the first match consumes
     //    the space the second would need.
-    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
-    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
+    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
     s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " "); // the leftover no-break spaces are ordinary ones
 
     // 1) ERA MARKERS, before the abbreviation rule so the bare `a.`/`d.` is not claimed first, and before the

@@ -96,7 +96,7 @@ public static class Normalize
         "(?<![\\d.,:])([01]?\\d|2[0-3])\\.([0-5]\\d)(?![\\d.,:-])(?=\\s*(?:GUT|UTC|SAST|GMT|vm|nm))(\\s*(?:vm|nm))?", "giu");
     private static readonly JsRe CLOCK_MILITARY = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3])([0-5]\\d)(?=\\s*(?:UTC|GUT))", "gu");
     private static readonly JsRe CLOCK_BARE_VM = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3])(vm)(?![\\p{L}\\p{M}])", "giu");
-    private static readonly JsRe GROUPED = JsRegex.Compile("(\\d),(\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe COMMA_DECIMAL = JsRegex.Compile("(?<![\\d.,])(\\d+),(\\d{1,2})(?![\\d,.])", "gu");
     private static readonly JsRe VERSION_DOT = JsRegex.Compile("(?<![\\d.,])(\\d{3,})\\.(\\d+)(?=[a-z](?![a-z]))", "giu");
     private static readonly JsRe FIGURE_DOT = JsRegex.Compile("Figuur (\\d+)\\.(\\d+)", "giu");
@@ -181,7 +181,7 @@ public static class Normalize
         s = CLOCK_BARE_VM.Replace(s, m =>
             $"{Numbers.NumberToWords(Js.Number(m.Groups[1].Value))} {MANIFEST.ClockPeriods["vm"]}");
 
-        for (var i = 0; i < 2; i++) s = GROUPED.Replace(s, "$1$2");
+        s = GROUPED.Replace(s, "");
 
         s = COMMA_DECIMAL.Replace(s, "$1.$2");
 

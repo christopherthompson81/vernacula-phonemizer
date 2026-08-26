@@ -159,7 +159,7 @@ public static class Normalize
     private static readonly JsRe RATE_M_S = JsRegex.Compile("(\\d)\\s?m\\s?\\/\\s?s(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe XLM_DOT = JsRegex.Compile("(?<![\\p{L}\\p{M}])χλμ\\.(?=\\s+\\p{Ll})", "gu");
     private static readonly JsRe XLM = JsRegex.Compile("(?<![\\p{L}\\p{M}])χλμ(?![\\p{L}\\p{M}.])", "gu");
-    private static readonly JsRe DEGROUP = JsRegex.Compile("(\\d)\\.(\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)\\.(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe ORDINAL_RE = JsRegex.Compile(
         $"(?<![\\p{{L}}\\p{{M}}\\d])(\\d{{1,3}})({ORD_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?![.,]\\d)", "gu");
@@ -222,7 +222,7 @@ public static class Normalize
 
         // DIGIT DE-GROUPING, first among the number rules: Greek groups thousands with a PERIOD. Run twice
         // for `5.000.000`. ⚠ Only a block of EXACTLY three digits is grouping, so a sports time is intact.
-        for (var k = 0; k < 2; k++) s = DEGROUP.Replace(s, "$1$2");
+        s = DEGROUP.Replace(s, "");
 
         s = ORDINAL_RE.Replace(s, m => Ordinal(Js.Number(m.Groups[1].Value), m.Groups[2].Value) ?? m.Value);
 

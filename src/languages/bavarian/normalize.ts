@@ -308,19 +308,16 @@ export function normalizeBavarian(input: string): string {
     //    ⚠ AFTER the clock (a dot form would have been eaten) and BEFORE the tier, whose `NOT_VERSION` guard
     //    needs the dot of `8140.43P` to still be there — traps 39 and 46. `.43` is two digits, so this rule
     //    cannot touch it, which is the whole reason the group size is pinned at exactly three.
-    let prev: string;
-    do {
-        prev = s;
-        s = s.replace(/(\p{Nd})\.(\p{Nd}{3})(?!\p{Nd})/gu, "$1$2");
-    } while (s !== prev);
+    s = s.replace(/(?<=\p{Nd})\.(?=\p{Nd}{3}(?!\p{Nd}))/gu, "");
     // 6b) SPACE-GROUPED THOUSANDS (2: `549 000 €` and `43 000 €`, both in one municipality's finance
     //     paragraph). Small, but the reading is *fimfhundadneinafiazg **nul*** — the group read as a separate
     //     numeral. Same three-digit discipline as the dot form, which is what stops it claiming two numbers
     //     that merely stand next to each other.
-    do {
-        prev = s;
-        s = s.replace(/(?<!\p{Nd})(\p{Nd}{1,3})[ \u00a0\u202f\u2009](\p{Nd}{3})(?!\p{Nd})/gu, "$1$2");  // space, NBSP, NNBSP, thin space
-    } while (s !== prev);
+    //     ⚠ THE WHOLE RUN AT ONCE, not one join per pass — see step 6. This arm keeps its HEAD ANCHOR
+    //     (`(?<!\p{Nd})` + at most three leading digits), which is what stops `12345 678` merging, so it
+    //     cannot use the zero-width form step 6 does and matches the run instead.
+    s = s.replace(/(?<!\p{Nd})(\p{Nd}{1,3})((?:[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 7) DEGREES, before the unit rules so the scale letter is not left to the Latin fallback, and before
     //    the sign rule so `−20 °C` still has its `°C` visible when the sign is judged. 11 in the Bavarian

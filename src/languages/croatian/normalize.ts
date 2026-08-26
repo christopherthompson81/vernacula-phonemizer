@@ -135,7 +135,7 @@ export function normalizeCroatian(input: string): string {
     // 1) DIGIT DE-GROUPING, FIRST — Croatian groups thousands with a PERIOD, and until it is removed the
     //    period is read as clause punctuation. EXACTLY three digits, no space (keeps `802.11` and the
     //    `N.` ordinals out). The comma-decimal and the en-dash range are handled separately.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)\.(\d{3})(?!\d)/gu, "$1$2");
+    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
     // The EN-DASH RANGE between two dotted numbers (`1000. – 1300. n. e.`) must be claimed before the
     //    era-ordinal rule (step 2) consumes the second dotted number.
     s = s.replace(/(\d{1,4})\.\s*[-–—]\s*(\d{1,4})\.(?=\s*(?:n\.\s?e\.|p\.\s?n\.\s?e\.))/gu, "$1 do $2");

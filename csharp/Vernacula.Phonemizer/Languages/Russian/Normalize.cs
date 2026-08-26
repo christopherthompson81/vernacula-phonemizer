@@ -107,7 +107,7 @@ public static class Normalize
     };
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
 
-    private static readonly JsRe GROUP_1 = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
+    private static readonly JsRe GROUP_1 = JsRegex.Compile($"(?<=\\d)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe NUMERO = JsRegex.Compile("№\\s?(?=\\d)", "gu");
     private static readonly JsRe ORDINAL_NOTATION = JsRegex.Compile($"\\b(\\d+)\\s?-\\s?({CASE_ALT})(?![а-яё])", "giu");
@@ -150,8 +150,8 @@ public static class Normalize
     {
         var s = input;
 
-        s = GROUP_1.Replace(s, "$1$2");
-        s = GROUP_1.Replace(s, "$1$2");
+        s = GROUP_1.Replace(s, "");
+        s = GROUP_1.Replace(s, "");
         s = SPACES.Replace(s, " ");
 
         foreach (var (re, words) in MULTI_DOT)

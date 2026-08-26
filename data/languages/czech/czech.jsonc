@@ -193,6 +193,15 @@
                 "paucal": "miliony",
                 "plural": "milionů",
             },
+            // 10⁹. Corpus-attested in the two forms the compositor actually reaches: `miliardy` ×17
+            // (the paucal, 2-4) and `miliard` ×4 (the genitive plural, 5+). The singular `miliarda`
+            // is not written there — a text saying "one billion" spells the digit — and is the
+            // dictionary form of the same paradigm as tisíc/milion above.
+            "billion": {
+                "sg": "miliarda",
+                "paucal": "miliardy",
+                "plural": "miliard",
+            },
         },
     },
 }

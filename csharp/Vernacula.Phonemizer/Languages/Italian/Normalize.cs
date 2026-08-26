@@ -116,7 +116,7 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
 
     // The step patterns. The TS builds several inline; JsRegex.Compile caches, so hoisting them here is a
     // readability choice and not a behaviour one.
-    private static readonly JsRe DEGROUP = JsRegex.Compile("(\\d)\\.(\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)\\.(?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe ERA_BC = JsRegex.Compile($"{L}a\\.\\s?C\\.", "gu");
     private static readonly JsRe ERA_AD = JsRegex.Compile($"{L}d\\.\\s?C\\.", "gu");
     private static readonly JsRe NUMERO = JsRegex.Compile($"{L}(?:n\\.º|n\\.|nr\\.|nº)\\s?(?=\\d)", "giu");
@@ -156,8 +156,7 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
         // 1) DIGIT DE-GROUPING — FIRST: `.` is clause punctuation, so `19.500` would read as two numbers
         //    with a pause. Applied twice so a two-separator number (5.000.000) collapses fully. Every later
         //    step — the clock, the ordinal, the unit tier — depends on seeing one unbroken digit run.
-        s = JsRegex.Replace(s, DEGROUP, m => m.Groups[1].Value + m.Groups[2].Value);
-        s = JsRegex.Replace(s, DEGROUP, m => m.Groups[1].Value + m.Groups[2].Value);
+        s = DEGROUP.Replace(s, "");
 
         // 2) ERA MARKERS, before the generic dotted-abbreviation rule (multi-dot before single-dot, or the
         //    interior dot of `a.C.` survives as a phrase break).

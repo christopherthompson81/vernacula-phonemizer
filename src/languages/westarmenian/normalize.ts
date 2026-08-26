@@ -143,7 +143,7 @@ export function normalizeWestArmenian(input: string): string {
     s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
-    s = s.replace(/(\d),(\d{3})(?![\d,])/gu, "$1$2");
+    s = s.replace(/(?<=\d),(?=\d{3}(?![\d,]))/gu, "");
     s = s.replace(/(\d),\s?(\d+)/gu, "$1.$2");
 
     // 2) MAGNITUDE ABBREVIATIONS, before any single-dot rule — they reach the IPA as clusters otherwise.

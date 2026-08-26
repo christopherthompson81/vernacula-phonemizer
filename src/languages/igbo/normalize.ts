@@ -182,7 +182,7 @@ const SYMBOLS = makeSymbolNormalizer({
 });
 
 /** The thousands separator is a COMMA and the decimal separator a PERIOD — the Nigerian/English convention. */
-const GROUPED = /(\d),(\d{3})(?!\d)/gu;
+const GROUPED = /(?<=\d),(?=\d{3}(?!\d))/gu;
 /** A decimal period. Voiced as `ntụkpọ` — see rule 4. */
 const DECIMAL = /(\d)\.(\d+)/gu;
 /** A digit-flanked dash. See rule 2 for why this is a RANGE and never a minus. */
@@ -216,10 +216,7 @@ export function normalizeIgbo(text: string): string {
     //    between them (`1,500` → *otu , naɾɪ ise*, "one, five hundred").
     //    ⚠ EXACTLY THREE FOLLOWING DIGITS, so a decimal comma cannot be eaten. Applied repeatedly for numbers
     //    with several groups (1,234,567).
-    while (GROUPED.test(s)) {
-        GROUPED.lastIndex = 0;
-        s = s.replace(GROUPED, "$1$2");
-    }
+    s = s.replace(GROUPED, "");
 
     // 1b. THE ENGLISH ORDINAL TAIL — `8th` → `nke 8`, which the number path then reads as *nke asatọ*.
     //

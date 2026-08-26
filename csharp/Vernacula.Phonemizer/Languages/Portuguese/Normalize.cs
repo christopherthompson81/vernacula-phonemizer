@@ -86,7 +86,7 @@ public static class Normalize
         return $"{Numbers.NumberToWords(num)} {(num > 1 ? $"{baseWord}s" : baseWord)}";
     }
 
-    private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(\\d)[{GROUP_SPACE}](\\d{{3}})(?!\\d)", "gu");
+    private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(?<=\\d)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe THIN_SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe ERA_BC = JsRegex.Compile("\\ba\\.\\s?C\\.", "giu");
     private static readonly JsRe ERA_AD = JsRegex.Compile("\\bd\\.\\s?C\\.", "giu");
@@ -124,8 +124,8 @@ public static class Normalize
     {
         var s = input;
 
-        s = GROUP_SPACE_RE.Replace(s, "$1$2");
-        s = GROUP_SPACE_RE.Replace(s, "$1$2");
+        s = GROUP_SPACE_RE.Replace(s, "");
+        s = GROUP_SPACE_RE.Replace(s, "");
         s = THIN_SPACES.Replace(s, " ");
 
         // Era markers run BEFORE the dotted-abbreviation rule, or the bare `a.` is claimed first.

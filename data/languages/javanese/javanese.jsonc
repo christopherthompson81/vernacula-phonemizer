@@ -42,7 +42,12 @@
         "likur": ["", "selikur", "rolikur", "telulikur", "patlikur", "selawé", "nemlikur", "pitulikur", "wolulikur", "sangalikur"],
         "mult": ["", "", "rong", "telung", "patang", "limang", "nem", "pitung", "wolung", "sangang"],
         "tens": { "2": "rong puluh", "3": "telung puluh", "4": "patang puluh", "5": "seket", "6": "sewidak", "7": "pitung puluh", "8": "wolung puluh", "9": "sangang puluh" },
-        "magnitudes": { "thousand": ["sewu", "ewu"], "million": ["sayuta", "yuta"], "billion": ["semilyar", "milyar"] },
+        // ⚠ 10¹² IS DECLARED, and the corpus writes the whole compositional shape for it: `36.900.000.000.000`
+        // is spelled out there as "Telung puluh enem triliun sangang atus milyar rupiah" — the count, the
+        // trillion word, then the billions, exactly as this table composes them. `triliun` ×4. The FUSED
+        // 1-form `satriliun` is NOT attested (a text saying "one trillion" writes the digits); it is the
+        // regular sa- derivation the other three magnitudes all show (sa+ewu, sa+yuta, sa+milyar).
+        "magnitudes": { "thousand": ["sewu", "ewu"], "million": ["sayuta", "yuta"], "billion": ["semilyar", "milyar"], "trillion": ["satriliun", "triliun"] },
         "hundredOne": "satus", "hundred": "atus"
     },
 

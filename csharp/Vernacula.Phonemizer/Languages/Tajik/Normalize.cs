@@ -84,7 +84,7 @@ public static class Normalize
     // them is a readability choice and not a behaviour one.
     private static readonly JsRe SOFT_HYPHEN = JsRegex.Compile("\\u00ad", "gu");
     private static readonly JsRe NBSP_ENTITY = JsRegex.Compile("&nbsp;?", "gu");
-    private static readonly JsRe GROUP_SPACE = JsRegex.Compile("(\\d)[ \u00a0\u202f\u2009](\\d{3})(?![\\d])", "gu");
+    private static readonly JsRe GROUP_SPACE = JsRegex.Compile("(?<=\\d)[ \u00a0\u202f\u2009](?=\\d{3}(?![\\d]))", "gu");
     private static readonly JsRe SOLI = JsRegex.Compile("(?<![\\p{L}\\p{M}])[Сс]\\.\\s?(?=\\d{3,4}(?![\\d]))", "gu");
     private static readonly JsRe DIGAR = JsRegex.Compile("(?<![\\p{L}\\p{M}])диг\\.", "gu");
     private static readonly JsRe GHAYRA = JsRegex.Compile("(?<![\\p{L}\\p{M}])ғ\\.(?=\\s|$|\\))", "gu");
@@ -123,7 +123,7 @@ public static class Normalize
 
         s = JsRegex.Replace(JsRegex.Replace(s, SOFT_HYPHEN, _ => ""), NBSP_ENTITY, _ => " ");
 
-        for (var i = 0; i < 3; i++) s = JsRegex.Replace(s, GROUP_SPACE, m => m.Groups[1].Value + m.Groups[2].Value);
+        s = GROUP_SPACE.Replace(s, "");
 
         s = JsRegex.Replace(s, SOLI, _ => "соли ");
         s = JsRegex.Replace(s, DIGAR, _ => "дигар");

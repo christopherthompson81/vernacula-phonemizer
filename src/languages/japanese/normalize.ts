@@ -158,7 +158,7 @@ export function normalizeJapanese(input: string): string {
     //    and "2:2" style pairs are left alone. Looped, so 1,000,000 collapses across both separators.
     for (let prev = ""; prev !== s; ) {
         prev = s;
-        s = s.replace(/(\d),(\d{3})(?!\d)/gu, "$1$2");
+        s = s.replace(/(?<=\d),(?=\d{3}(?!\d))/gu, "");
     }
 
     // 2) UNITS, while a digit is still adjacent to them and the number is still plain ASCII — see

@@ -336,7 +336,7 @@ export function normalizeKyrgyz(input: string): string {
     //    convention and the one Kyrgyz uses; 34 occurrences in the hard tier and 7 in the sample. The
     //    engine's `\d+` splits on the space, so `1 000 000` read *bir nøl nøl* — "one zero zero".
     //    FIRST after the invisible fold, because a surviving grouping space is later seen as two operands.
-    for (let i = 0; i < 4; i++) s = s.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?![\d])/gu, "$1$2");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 4; i++) s = s.replace(/(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?![\d]))/gu, "");  // space, NBSP, NNBSP, thin space
 
     // 2) THE COMMA AS A THOUSANDS SEPARATOR, but ONLY when it groups more than once — `2,774,460`,
     //    `5,294,000`, `17,840,000`. Multi-group is unambiguous; a SINGLE `\d,\d{3}` is not, and is refused at

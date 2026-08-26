@@ -111,13 +111,13 @@ export function normalizeRomanian(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = t.replace(/(\d)\.(\d{3})(?!\d)/gu, "$1$2");
+        t = t.replace(/(?<=\d)\.(?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 2) SPACE-GROUPED THOUSANDS (12). A space is a token boundary, so the numeral arrived as two.
     do {
         prev = t;
-        t = t.replace(/(\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1$2");  // space, NBSP, NNBSP, thin space
+        t = t.replace(/(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     } while (t !== prev);
 
     // 3) DECIMAL COMMA (35). The comma is clause punctuation too, so `12,5` read as "doisprezece , cinci"

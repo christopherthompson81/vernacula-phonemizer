@@ -169,10 +169,23 @@ function magnitude(count: number, [fused, word]: string[]): string {
     if (count <= 9) return `${NUM.mult[count]} ${word}`;
     return `${belowThousand(count)} ${word}`;
 }
-/** Non-negative integer → standard Javanese ngoko numeral spelling. */
+/**
+ * Non-negative integer → standard Javanese ngoko numeral spelling.
+ *
+ * ⚠ THE TOP MAGNITUDE IS A HARD CEILING, and it used to be silent. Above the largest declared magnitude the
+ * count handed to `magnitude` exceeds 999, `belowThousand` indexes past `NUM.mult`, and the template literal
+ * stringified the `undefined` INTO the text: `1000000000000` read *ʊnd̪əfˈinəd̪ ˈat̪ʊs mˈɪljar*, the engine
+ * SPEAKING the word "undefined". 10¹² is now declared (corpus-attested), and anything above the declared top
+ * falls back to digit-at-a-time — the fleet's convention for out-of-range.
+ */
 function numberToText(n: number): string {
     if (n === 0) return NUM.units[0]!;
+    if (n >= 1e15) return [...String(n)].map((d) => NUM.units[Number(d)]!).join(" ");
     const parts: string[] = [];
+    if (n >= 1_000_000_000_000) {
+        parts.push(magnitude(Math.floor(n / 1_000_000_000_000), NUM.magnitudes.trillion));
+        n %= 1_000_000_000_000;
+    }
     if (n >= 1_000_000_000) {
         parts.push(magnitude(Math.floor(n / 1_000_000_000), NUM.magnitudes.billion));
         n %= 1_000_000_000;

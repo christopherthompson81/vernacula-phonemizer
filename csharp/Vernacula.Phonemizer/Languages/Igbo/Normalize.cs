@@ -37,7 +37,7 @@ public static class Normalize
     });
 
     /** The thousands separator is a COMMA and the decimal separator a PERIOD. */
-    private static readonly JsRe GROUPED = JsRegex.Compile("(\\d),(\\d{3})(?!\\d)", "gu");
+    private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d),(?=\\d{3}(?!\\d))", "gu");
     /** A decimal period. Voiced as `ntụkpọ` — see rule 4. */
     private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)\\.(\\d+)", "gu");
     /** A digit-flanked dash. See rule 2 for why this is a RANGE and never a minus. */
@@ -54,7 +54,7 @@ public static class Normalize
         var s = text;
 
         // 1. De-group thousands FIRST, repeatedly, so `1,234,567` becomes one number.
-        while (GROUPED.IsMatch(s)) s = GROUPED.Replace(s, "$1$2");
+        s = GROUPED.Replace(s, "");
 
         // 1b. `8th` → `nke 8` — the ordinal marker is a corpus word and the DIGITS go to the compositor.
         s = ORDINAL_TAIL.Replace(s, "nke $1");

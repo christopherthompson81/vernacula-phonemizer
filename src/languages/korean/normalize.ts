@@ -133,7 +133,7 @@ export function normalizeKorean(input: string): string {
     let s = input;
     for (let prev = ""; prev !== s; ) {
         prev = s;
-        s = s.replace(/(\d),(\d{3})(?!\d)/gu, "$1$2");
+        s = s.replace(/(?<=\d),(?=\d{3}(?!\d))/gu, "");
     }
 
     // 2) SPEED UNITS, before rule 5 splits a range. Korean puts 시속 / 초속 ("per hour" / "per second")

@@ -11,6 +11,7 @@ public sealed class JavaneseMagnitudes
     public string[] Thousand { get; init; } = [];
     public string[] Million { get; init; } = [];
     public string[] Billion { get; init; } = [];
+    public string[] Trillion { get; init; } = [];
 }
 
 public sealed class JavaneseNumbersDef
@@ -207,11 +208,21 @@ public static class JavanesePhonemizer
         return $"{BelowThousand(count)} {word}";
     }
 
-    /** Non-negative integer → standard Javanese ngoko numeral spelling. */
+    /**
+     * Non-negative integer → standard Javanese ngoko numeral spelling.
+     * ⚠ THE TOP MAGNITUDE IS A HARD CEILING: above it the count exceeds 999, `BelowThousand` indexes past
+     * `NUM.Mult`, and JS stringified the resulting `undefined` INTO the text — the engine spoke the word.
+     */
     private static string NumberToText(double n)
     {
         if (n == 0) return NUM.Units[0];
+        if (n >= 1e15) return string.Join(" ", Js.NumberToString(n).Select(c => NUM.Units[c - '0']));
         var parts = new List<string>();
+        if (n >= 1_000_000_000_000)
+        {
+            parts.Add(Magnitude(Math.Floor(n / 1_000_000_000_000), NUM.Magnitudes.Trillion));
+            n %= 1_000_000_000_000;
+        }
         if (n >= 1_000_000_000)
         {
             parts.Add(Magnitude(Math.Floor(n / 1_000_000_000), NUM.Magnitudes.Billion));

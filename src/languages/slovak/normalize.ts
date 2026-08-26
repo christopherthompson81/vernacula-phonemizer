@@ -363,7 +363,7 @@ export function normalizeSlovak(input: string): string {
     //    (19 500 000). NBSP is folded to a plain space AFTERWARDS, never before — the corpus uses it both
     //    as the separator (`11 000 $`) and as an ordinary inter-word space (28 instances).
     for (let i = 0; i < 2; i++)
-        s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
+        s = s.replace(new RegExp(`(?<=\\d)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
     s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
 
     // 1) MULTI-DOT ABBREVIATIONS (era markers, `n. m.`, `t. j.`), before the single-dot rule (⚠

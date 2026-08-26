@@ -15,7 +15,7 @@ export interface JavaneseNumbers {
     likur: string[];
     mult: string[];
     tens: Record<string, string>;
-    magnitudes: { thousand: string[]; million: string[]; billion: string[] };
+    magnitudes: { thousand: string[]; million: string[]; billion: string[]; trillion: string[] };
     hundredOne: string;
     hundred: string;
 }
