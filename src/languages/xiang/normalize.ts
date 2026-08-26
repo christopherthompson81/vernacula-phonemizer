@@ -44,6 +44,11 @@
  * and `test/accepted-silent.test.ts` predicted it here by name. A squared/cubed UNIT is still read, because
  * that composes with a unit noun and cannot match a bare tone number.
  *
+ * ⚠ THE REFUSAL IS NARROWER THAN IT WAS, AND STILL HOLDS. `bareExponent` remains undeclared, but the shared
+ * tier no longer DELETES an undeclared power: since #1041 it spaces a DIGIT-base run out to its digits
+ * (`10²⁴` → `10 24`), which the tone-number hazard above cannot reach — every tone run here sits on a LETTER
+ * base, and letter bases are declined outright.
+ *
  * ⚠ NO DEGREE. ⟨度⟩ is SILENT in this dict, so `20°C` would lose the WORD as well as the sign — strictly
  * worse than the raw sign, which at least survives as a RAWMARK the scan can see. ⟨攝氏⟩ is HALF. And the
  * corpus's only two `°` are coordinates anyway (`東經111°53'－114°5'`, `北緯27°51'－28°40'`), where the

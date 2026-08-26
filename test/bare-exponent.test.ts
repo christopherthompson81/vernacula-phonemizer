@@ -71,19 +71,67 @@ describe("bare exponent", () => {
         expect(phonemize("Ο Πούτιν και ο Владимир", "el")).toContain("vɫɐdʲ");
     });
 
-    test("an UNDECLARED language is unchanged — the gap stays visible, not silently guessed", () => {
-        // `bareExponent` is optional and most of the fleet has not declared it. Those languages keep the old
-        // behaviour rather than borrowing another language's word order, and the superscript stays where the
-        // RAWMARK leak gate can see it — the same choice the unit branch makes for a missing measure word.
+    test("⚠ AN UNDECLARED LANGUAGE KEEPS THE DIGITS — the mark was NOT staying visible, it was being eaten", () => {
+        // ⚠ THIS TEST USED TO CERTIFY THE BUG. It asserted only that the BASE survived (`slice(0, 4)` of
+        // `phonemize("20")`), so it passed while the exponent was deleted, and its comment claimed the mark
+        // "stays where the RAWMARK leak gate can see it". It does not: the mark survives the symbol tier and
+        // is then dropped by the language's own tokenizer, which knows no `²`. 169 of 193 registry codes
+        // read `10⁶` as *ten* — sw *kˈumi*, ha *ɡˈo˥ma˩*, id *səpˈuluh* — and `(1.60*10⁻¹⁹)`, the elementary
+        // charge, as *one point six zero ten* in three shipped goldens.
+        // An undeclared language cannot say "squared", but it CAN say the digit, so it now does.
+        expect(phonemize("10⁶", "sw")).toBe(phonemize("10 6", "sw"));
+        expect(phonemize("20²", "sw")).toBe(phonemize("20 2", "sw"));
+        expect(phonemize("10⁶", "id")).toBe(phonemize("10 6", "id"));
+        expect(phonemize("10⁶", "ha")).toBe(phonemize("10 6", "ha"));
+        // …and the base is still there, which is all the old assertion ever checked.
         const before = phonemize("20", "sw");
         expect(phonemize("20²", "sw")).toContain(before.replace(/[ˈˌ]/gu, "").trim().slice(0, 4));
     });
 
-    test("`¹` and `⁰` read plainly through the generic form", () => {
-        // Not special-cased: "to the power of one" is correct and vanishingly rare, where inventing a word for
-        // it would not be.
-        expect(phonemize("10⁰", "en")).toContain("pʰˈaᶷɚ ʌv zˈɪɹoᶷ");
-        expect(phonemize("10¹", "en")).toContain("pʰˈaᶷɚ ʌv wˈʌn");
+    test("⚠ THE FALLBACK IS DIGIT-BASE ONLY, and that is the axis the Sinitic dirs declined on", () => {
+        // A LETTER base is a unit, a tone number, an isotope or a footnote far more often than a power —
+        // which is precisely why seven Sinitic corpora and `so` refused to declare `bareExponent` at all.
+        // The fallback declines every one of those and keeps only the digit-base powers `so`'s own note
+        // counted as the prize (×26). `mc²` loses nothing it had: it was already silent here.
+        expect(phonemize("E = mc²", "sw")).toBe(phonemize("E = mc", "sw"));
+        expect(phonemize("/ʃɘ̃⁴⁵/", "hsn")).toBe(phonemize("/ʃɘ̃/", "hsn")); // a Xiang romanization TONE
+        // …while the one real exponent in the same corpus now reads its magnitude.
+        expect(phonemize("5.9742×10²⁴", "hsn")).not.toBe(phonemize("5.9742×10", "hsn"));
+    });
+
+    test("⚠ A UNIT BESIDE THE MARK OWNS IT — the Kirundi regression, and its mirror image", () => {
+        // `km²` is the unit path's, and it must not be starved by the fallback: Kirundi reads
+        // `93 personnes/km²` as *kiɾometeɾo kwadaɾato* through its own step 8, and an earlier version of this
+        // fallback turned it into *kiɾometeɾo kabiɾi* — kilometre TWO.
+        expect(phonemize("93 personnes/km²", "rn")).toContain("kiɾometeɾo kwadaɾato");
+        // ⚠ AND THE UNIT MAY STAND ON EITHER SIDE. Abkhaz writes the mark BEFORE the noun — `3540² км`,
+        // `5,23² км`, `0,5 ² км` — where the digit base makes it look bare and it is not: those are SQUARE
+        // kilometres, and reading the mark out gives a second numeral beside a real one. Clearing it also
+        // RESTORES the unit, whose adjacency to the number the mark was breaking: a raw `kʼm` in three
+        // Abkhaz golden rows became *kʼilometʼra*.
+        expect(phonemize("3540² км", "ab")).toBe(phonemize("3540 км", "ab"));
+        expect(phonemize("0,5 ² км", "ab")).toBe(phonemize("0,5 км", "ab"));
+        expect(phonemize("3540² km", "sw")).toBe(phonemize("3540 km", "sw"));
+        // ⚠ ONLY A SQUARE OR A CUBE. No text writes a kilometre to the sixth, so a larger power beside a unit
+        // is the NUMBER's magnitude and keeps its digits — `10⁶ km` is a million kilometres.
+        // (the word ORDER differs from `10 6 km`, whose unit rule binds the unit to the `6`; what matters is
+        // that both the magnitude and the unit are spoken.)
+        expect(phonemize("10⁶ km", "sw")).toBe("kˈumi sˈita kilomˈita");
+    });
+
+    test("⚠ A LONE ⁰ OR ¹ IS A DEGREE SIGN OR A PRIME, not a power", () => {
+        // Measured over the mined artifacts: every lone one is a MARK. Sinhala writes latitude `6⁰03 '` and
+        // temperature `133 ⁰C` (its own layer already lists U+2070 in its degree class); Mongolian writes a
+        // whole coordinate as `110⁰04¹05¹`, spending ⁰ ¹ ¹ for ° ′ ″; Kinyarwanda numbers a list `4⁰ Ihame`.
+        // Nothing writes x⁰ or x¹ — both are identities no author states — so the reading declined here has
+        // no case to serve and one attested class of text to damage. It was *three hundred sixty to the
+        // power of zero* before.
+        expect(phonemize("360⁰", "en")).toBe(phonemize("360", "en"));
+        expect(phonemize("4⁰ Ihame", "rw")).toBe(phonemize("4 Ihame", "rw"));
+        // ⚠ MULTI-DIGIT RUNS STARTING WITH EITHER ARE UNTOUCHED — `10¹⁰`, `10¹⁰⁰` and `10⁵⁰` are real powers.
+        expect(phonemize("10¹⁰", "en")).toContain("pʰˈaᶷɚ ʌv tʰˈɛn");
+        expect(phonemize("10¹⁰⁰", "en")).toContain("pʰˈaᶷɚ ʌv wˈʌn hˈʌndɹəd");
+        expect(phonemize("2⁰⁵", "en")).toContain("pʰˈaᶷɚ");
     });
 
     test("⚠ A FOOTNOTE MARKER IS NOT AN EXPONENT — the length cap and its boundary guard", () => {

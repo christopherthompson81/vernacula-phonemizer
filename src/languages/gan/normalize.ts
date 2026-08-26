@@ -67,6 +67,11 @@
  * hak and hsn each hit the same hazard from a different source. A squared UNIT is still read: it composes
  * with a unit noun and so cannot match a bare tone number.
  *
+ * ⚠ THE REFUSAL IS NARROWER THAN IT WAS, AND STILL HOLDS. `bareExponent` remains undeclared, but the shared
+ * tier no longer DELETES an undeclared power: since #1041 it spaces a DIGIT-base run out to its digits
+ * (`10¹⁹` → `10 19`, one of the five genuine exponents listed above), which the tone-number hazard above cannot reach — every tone run here sits on a LETTER
+ * base, and letter bases are declined outright.
+ *
  * ⚠ CUBED WAS DECLINED ON THE CORPUS AND RESTORED BY THE WIKI. ⟨立方⟩ is ×0 in the artifact against ⟨平方⟩'s
  * ×29, which is exactly the evidence hak used to decline its cognate — but `attest.ts` finds it ×3 on
  * gan.wikipedia in the volume slot, once onto this layer's own unit (`3210平方公里，含水量係25.2立方公里`).

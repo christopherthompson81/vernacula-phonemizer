@@ -243,6 +243,17 @@ public static class NormalizeSymbols
     private static readonly JsRe BARE_EXPONENT_GLUED = JsRegex.Compile(
         "(?:\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(?:" + SUPERSCRIPT_RUN + ")(?=[\\p{L}\\p{M}])",
         "gu");
+    private static readonly JsRe DIGIT_BASE = JsRegex.Compile("^\\p{Nd}", "u");
+    private static readonly JsRe LETTER_NEXT = JsRegex.Compile("^[\\p{L}\\p{M}]", "u");
+    private static readonly JsRe LONE_MARK = JsRegex.Compile("^[⁰¹]$", "u");
+    /** A digit base, a lone ² or ³, and a short letter run that may be a unit key — the shape whose power
+     *  belongs to the UNIT rather than to the number. Separators: space, NBSP, NNBSP, thin space. */
+    private static readonly JsRe UNIT_POWER_BEFORE = JsRegex.Compile(
+        // separators: space, NBSP, NNBSP, thin space
+        "\\p{Nd}[\\p{Nd}.,]*[ \u00a0\u202f\u2009]?[²³](?=[ \u00a0\u202f\u2009]?([\\p{L}\\p{M}]{1,4})(?![\\p{L}\\p{M}]))",
+        "gu");
+    /** The mark and the separator before it, stripped together — see the TS for why the separator goes too. */
+    private static readonly JsRe UNIT_POWER_MARK = JsRegex.Compile("[ \u00a0\u202f\u2009]?[²³]", "u");
 
     private static int DefaultCountForm(double n) => n == 1 ? 0 : 1;
 
@@ -596,6 +607,18 @@ public static class NormalizeSymbols
             if (d.Ampersand is not null)
                 text = AMP_SIGN.Replace(AMP_ENTITY.Replace(text, "&"), " " + d.Ampersand + " ");
             var s = text;
+
+            bool IsUnitKey(string k) =>
+                (d.Units is not null && d.Units.ContainsKey(k))
+                || unitsFolded.ContainsKey(k.ToLowerInvariant())
+                || (d.RateDenominators is not null && d.RateDenominators.ContainsKey(k))
+                || denomFolded.ContainsKey(k.ToLowerInvariant());
+
+            // A square or cube standing BEFORE a unit noun is the UNIT's power — dropped here, first, because
+            // the unit path rewrites the key into a word and the mark breaks the number↔unit adjacency.
+            s = UNIT_POWER_BEFORE.Replace(s, m =>
+                IsUnitKey(m.Groups[1].Value) ? UNIT_POWER_MARK.Replace(m.Value, "") : m.Value);
+
             string Join(string? mag) =>
                 mag is not null && mag != "" && d.MagnitudeConnective is not null ? d.MagnitudeConnective + " " : "";
             // Both orders emit through one shape so the magnitude and its connective travel with the number
@@ -781,17 +804,28 @@ public static class NormalizeSymbols
             s = bareUnit(s);
 
             // A BARE EXPONENT, LAST — after the unit path, which must have its chance first or this would steal
-            // every `km²` and read it as "kilometre squared" instead of "square kilometres". Undeclared, nothing
-            // changes and the character stays where the RAWMARK leak gate can see it.
+            // every `km²` and read it as "kilometre squared" instead of "square kilometres".
+            // The floor under every refusal: emit the exponent's DIGITS, spaced off. Digit bases only, never a
+            // negative. Returns null where no honest digit reading exists, and the mark is left as it was.
+            string? SpacedDigits(string baseText, string digitStr, string all, int end)
+            {
+                if (!DIGIT_BASE.IsMatch(baseText)) return null;
+                if (digitStr.StartsWith('-')) return null;
+                return LETTER_NEXT.IsMatch(all[end..]) ? $"{baseText} {digitStr} " : $"{baseText} {digitStr}";
+            }
+
             if (d.BareExponent is not null)
             {
                 var be = d.BareExponent;
                 s = BARE_EXPONENT_GLUED.Replace(s, m => $"{m.Value} ");
+                var allD = s;
                 s = BARE_EXPONENT.Replace(s, m =>
                 {
                     var whole = m.Value;
                     var baseText = m.Groups[1].Value;
                     var sup = m.Groups[2].Value;
+                    var end = m.Index + m.Length;
+                    if (LONE_MARK.IsMatch(sup)) return whole;
                     var digits = new StringBuilder();
                     foreach (var c in Js.CodePoints(sup)) digits.Append(SUPERSCRIPT[c]);
                     // `2` and `3` have their own words in every language that has any; everything else — including `1`, `0`
@@ -801,10 +835,26 @@ public static class NormalizeSymbols
                     var mag = neg ? digitStr[1..] : digitStr;
                     // A NEGATIVE exponent always takes the generic `power` form.
                     var tpl = neg ? be.Power : mag == "2" ? be.Squared : mag == "3" ? be.Cubed : be.Power;
-                    if (tpl is null) return whole; // this language declares only some powers
-                    if (neg && be.Negative is null) return whole; // sign unreadable → leave it visible
+                    // A PARTIAL declaration falls through to the digits, not back to the drop.
+                    if (tpl is null) return SpacedDigits(baseText, digitStr, allD, end) ?? whole;
+                    if (neg && be.Negative is null) return SpacedDigits(baseText, digitStr, allD, end) ?? whole;
                     var exponent = neg ? be.Negative + " " + mag : mag;
                     return TPL_E.Replace(TPL_N.Replace(tpl, baseText), exponent);
+                });
+            }
+            else
+            {
+                var allU = s;
+                s = BARE_EXPONENT.Replace(s, m =>
+                {
+                    var whole = m.Value;
+                    var baseText = m.Groups[1].Value;
+                    var sup = m.Groups[2].Value;
+                    var end = m.Index + m.Length;
+                    if (LONE_MARK.IsMatch(sup)) return whole;
+                    var digits = new StringBuilder();
+                    foreach (var c in Js.CodePoints(sup)) digits.Append(SUPERSCRIPT[c]);
+                    return SpacedDigits(baseText, digits.ToString(), allU, end) ?? whole;
                 });
             }
             return s;

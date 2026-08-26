@@ -48,6 +48,38 @@ const BARE_EXPONENT_GLUED = new RegExp(
     `(?:\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(?:${SUPERSCRIPT_RUN})(?=[\\p{L}\\p{M}])`,
     "gu",
 );
+/**
+ * A DIGIT base, the only one the undeclared fallback below will touch.
+ *
+ * ⚠ THE LETTER BASE IS A UNIT MOST OF THE TIME, and a unit's power belongs to `exponentWords` — or to a rule
+ * in the language's OWN normalize.ts, which runs after this tier and can therefore be starved by it. Kirundi
+ * is the case that measured it: `93 personnes/km²` reads *kiɾometeɾo kwadaɾato* (square kilometre) through
+ * kirundi's step 8, and a fallback that spaced every base turned it into *kiɾometeɾo kabiɾi* — kilometre TWO.
+ * Declining on letters costs the fallback only `mc²`-shaped bases, where the digits add little; every
+ * corpus-attested loss (`10⁶`, `6,02 X 10²³`, `१०⁻¹⁵`) has a digit base.
+ */
+const DIGIT_BASE = /^\p{Nd}/u;
+/** A following LETTER, for the boundary the fallback below adds by hand. */
+const LETTER_NEXT = /^[\p{L}\p{M}]/u;
+/**
+ * A LONE ⁰ OR ¹ IS NOT A POWER — it is a degree sign or a prime, typed as a superscript.
+ *
+ * Measured over the mined artifacts and the goldens, every lone one is a MARK, not an exponent: Sinhala
+ * writes latitude `6⁰03 '`, longitude `79⁰ 51"` and temperature `133 ⁰C`; Mongolian writes whole coordinates
+ * as `110⁰04¹05¹`, spending ⁰ ¹ ¹ for ° ′ ″. Nothing writes x⁰ or x¹ — both are identities no author states —
+ * so the reading this rule declines to give (*three hundred sixty to the power of zero*) has no case to serve
+ * and one attested class of text to damage. Multi-digit runs starting with either are untouched: `10¹⁰`,
+ * `10¹⁰⁰` and `10⁵⁰` are all real powers.
+ */
+const LONE_MARK = /^[⁰¹]$/u;
+/** A DIGIT base, a lone ² or ³, and a short letter run that may be a unit key — the shape whose power belongs
+ *  to the UNIT rather than to the number. The unit itself is checked by `isUnitKey` in the closure.
+ *  The separator class is space, NBSP, NNBSP, thin space, as `NUM` uses. */
+const UNIT_POWER_BEFORE = new RegExp(
+    // separators: space, NBSP, NNBSP, thin space
+    "\\p{Nd}[\\p{Nd}.,]*[ \\u00a0\\u202f\\u2009]?[²³](?=[ \\u00a0\\u202f\\u2009]?([\\p{L}\\p{M}]{1,4})(?![\\p{L}\\p{M}]))",
+    "gu",
+);
 const BARE_EXPONENT = new RegExp(
     `(\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(${SUPERSCRIPT_RUN})`,
     "gu",
@@ -183,7 +215,9 @@ export interface SymbolData {
      * the modifier and the predicate are DIFFERENT WORDS. English reads *square kilometres* but *twenty
      * squared*; Italian *chilometri quadrati* but *venti al quadrato*, which needs a connective the modifier
      * form does not carry. Reusing `exponentWords` here yields "twenty square". Without this field the
-     * exponent is dropped entirely — the rest of the machinery is unit-only.
+     * exponent is not SPOKEN — the rest of the machinery is unit-only — but it is no longer dropped either:
+     * see the undeclared fallback at the foot of this file, which spaces a digit-base power out to its
+     * digits so the magnitude survives without borrowing another language's phrase.
      *
      * TEMPLATES, not bare words, because word order and connectives are language data. `{n}` is the base as
      * written and `{e}` the exponent in ASCII digits, so the engine's own number path speaks it:
@@ -781,6 +815,32 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         if (d.ampersand !== undefined)
             text = text.replace(/&amp;/giu, "&").replace(/[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
         let s = text;
+        const isUnitKey = (k: string): boolean =>
+            d.units?.[k] !== undefined ||
+            unitsFolded[k.toLowerCase()] !== undefined ||
+            d.rateDenominators?.[k] !== undefined ||
+            denomFolded[k.toLowerCase()] !== undefined;
+        // A SQUARE OR CUBE STANDING BEFORE A UNIT NOUN — `3540² км`, `5,23² км`, `0,5 ² км`, all Abkhaz —
+        // IS THE UNIT'S POWER, and it is dropped here, deliberately and explicitly.
+        //
+        // ⚠ IT MUST RUN FIRST, NOT BESIDE THE EXPONENT RULE AT THE FOOT OF THIS FUNCTION, and two separate
+        // measurements say so. The unit path rewrites a standing `km` into the unit's WORD, so a rule reading
+        // the text afterwards can no longer tell `3540² km` (the unit's square) from `10⁶ km` (the number's
+        // magnitude beside a unit) — Swahili read the first as *three thousand five hundred forty TWO
+        // kilometres*. And the mark itself BREAKS the number↔unit adjacency the unit rule needs, so clearing
+        // it early is what lets the unit read at all: three Abkhaz golden rows went from a raw `kʼm` in the
+        // phoneme stream to *kʼilometʼra*. Deleting a mark this language could never have voiced costs
+        // nothing; delaying it costs both readings.
+        //
+        // ⚠ ONLY A LONE ² OR ³, AND ONLY ON A DIGIT BASE. A unit is squared or cubed and nothing else — no
+        // text writes a kilometre to the sixth — so `10⁶ km` is the NUMBER's magnitude and keeps its digits.
+        // A letter base is `km²` itself, which belongs to the unit path above and to the language's own
+        // normalize.ts after it (Kirundi's step 8 reads exactly that shape).
+        s = s.replace(UNIT_POWER_BEFORE, (whole: string, unit: string) =>
+            // `0,5 ² км` would otherwise be left holding two spaces, its adjacency still broken, so the
+            // separator goes with the mark — space, NBSP, NNBSP, thin space.
+            isUnitKey(unit) ? whole.replace(/[ \u00a0\u202f\u2009]?[²³]/u, "") : whole);
+
         // "cinco millones DE dólares" — emitted only when a magnitude was actually matched.
         const join = (mag: string | undefined): string =>
             mag !== undefined && mag !== "" && d.magnitudeConnective !== undefined ? `${d.magnitudeConnective} ` : "";
@@ -981,10 +1041,41 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
 
         // A BARE EXPONENT, LAST — after the unit path, which must have its chance first or this would steal
         // every `km²` and read it as "kilometre squared" instead of "square kilometres". By the time control
-        // reaches here a surviving superscript has no unit to modify, which is exactly the case `bareExponent`
-        // describes. Undeclared, nothing changes and the character stays where the RAWMARK leak gate can see
-        // it — the same choice the unit branch makes for a missing measure word, and for the same reason: a
-        // visible gap in one language's data beats an invisible missing reading.
+        // reaches here a surviving superscript has no unit to modify — the unit's own powers were cleared at
+        // the top of this function and the unit path has had the rest — which is exactly the case
+        // `bareExponent` describes.
+        /**
+         * THE FLOOR UNDER EVERY REFUSAL ABOVE: emit the exponent's DIGITS, spaced off.
+         *
+         * ⚠ THE OLD REFUSAL DELETED THE MARK, IT DID NOT PRESERVE IT. The comment above used to end at
+         * "the character stays where the RAWMARK leak gate can see it". It does not: the superscript
+         * survives THIS tier and is then dropped by the language's own tokenizer, which knows no `²`. The
+         * outcome was precisely the invisible missing reading the choice existed to prevent — `10⁶` read as
+         * *ten* in 169 of 193 registry codes (sw *kˈumi*, ha *ɡˈo˥ma˩*, id *səpˈuluh*), and `(1.60*10⁻¹⁹)`,
+         * the elementary charge, as *one point six zero ten* in three shipped goldens. 11 instances across
+         * the mined artifacts, so this is corpus-attested rather than hypothetical.
+         *
+         * `10⁶` → `10 6` reads *ten six*: clumsy, audibly not "ten to the sixth", but the MAGNITUDE survives
+         * and it is byte-identical to what the already-spaced `10 6` gives today. A language wanting the real
+         * phrase declares `bareExponent`; this is the floor beneath that, not a substitute for it. Returns
+         * null where no honest digit reading exists, and the mark is then left exactly as before.
+         */
+        const spacedDigits = (base: string, digits: string, all: string, end: number): string | null => {
+            // ⚠ DIGIT BASES ONLY. A LETTER base is a unit, a romanization tone number, an isotope or a
+            // footnote marker far more often than a power — which is exactly why seven Sinitic corpora and
+            // `so` declined `bareExponent` outright. Declining letters keeps every one of those refusals
+            // intact and still buys the digit-base powers `so`'s own note counted (×26).
+            if (!DIGIT_BASE.test(base)) return null;
+            // ⚠ A NEGATIVE EXPONENT IS LEFT ALONE. There is no sign word to spend here, and this tier runs
+            // AFTER the language's own minus rule, so an emitted ASCII `-` is downstream of the only thing
+            // that could read it and would be dropped in turn: `10⁻¹⁹` would become *ten nineteen*, the sign
+            // silently inverted. A dropped mark is a bad reading; an INVERTED one is worse than both.
+            if (digits.startsWith("-")) return null;
+            // ⚠ THE BOUNDARY IS ADDED HERE, not by `BARE_EXPONENT_GLUED`. That pass must not fire where this
+            // one declines: run fleet-wide it split `3,850 km²이고` into two Korean tokens whose ² was
+            // dropped anyway, moving a golden row for a reading nothing ever emitted.
+            return LETTER_NEXT.test(all.slice(end)) ? `${base} ${digits} ` : `${base} ${digits}`;
+        };
         if (d.bareExponent !== undefined) {
             const be = d.bareExponent;
             // ⚠ A FOLLOWING LETTER MUST NOT FUSE ONTO THE EMITTED WORD. The superscript is consumed and the
@@ -994,24 +1085,35 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             // Invisible to every gate: nothing is dropped and no raw mark survives, so it is a WRONG-WORD
             // defect, the class the leak gates cannot reach.
             s = s.replace(BARE_EXPONENT_GLUED, (m0: string) => `${m0} `);
-            s = s.replace(BARE_EXPONENT, (whole, base: string, sup: string) => {
+            s = s.replace(BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
+                if (LONE_MARK.test(sup)) return whole;
                 const digits = [...sup].map((c) => SUPERSCRIPT[c]!).join("");
+                const fallback = (): string => spacedDigits(base, digits, all, at + whole.length) ?? whole;
                 // `2` and `3` have their own words in every language that has any; everything else — including
-                // `1`, `0` and a multi-digit power — goes through the generic form. `¹` is deliberately NOT
-                // special-cased to "to the power of one": it is vanishingly rare and reading it plainly is
-                // correct, where inventing "itself" would not be.
+                // `1`, `0` and a multi-digit power — goes through the generic form.
                 const neg = digits.startsWith("-");
                 const mag = neg ? digits.slice(1) : digits;
                 // A NEGATIVE exponent always takes the generic `power` form: no language has a word for
                 // "negative squared", and `10⁻²` is "to the power of minus two", not "minus squared".
                 const tpl = neg ? be.power : mag === "2" ? be.squared : mag === "3" ? be.cubed : be.power;
-                if (tpl === undefined) return whole; // this language declares only some powers
-                if (neg && be.negative === undefined) return whole; // sign unreadable → leave it visible
+                // ⚠ A PARTIAL DECLARATION FALLS THROUGH TO THE DIGITS, it does not fall back to the drop.
+                // Galician declares `squared`/`cubed` and no `power`, so `10⁶` reached this line and was
+                // eaten — a language that CAN say "ao cadrado" losing the magnitude entirely on any other
+                // exponent. Same for a `negative` nobody sourced.
+                if (tpl === undefined) return fallback(); // this language declares only some powers
+                if (neg && be.negative === undefined) return fallback(); // sign unreadable
                 const exponent = neg ? `${be.negative} ${mag}` : mag;
                 return tpl.replace(/\{n\}/gu, base).replace(/\{e\}/gu, exponent);
                 // ⚠ THE CALLER ADDS THE BOUNDARY — see the `\s?` guard on the returned string below.
             });
+        } else {
+            s = s.replace(BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
+                if (LONE_MARK.test(sup)) return whole;
+                const digits = [...sup].map((c) => SUPERSCRIPT[c]!).join("");
+                return spacedDigits(base, digits, all, at + whole.length) ?? whole;
+            });
         }
+
         return s;
     };
 }
