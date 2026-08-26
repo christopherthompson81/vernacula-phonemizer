@@ -28,7 +28,16 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   the count went **109 goldens / 84 empty → 169 goldens / 24 empty**. pcm (121M), tl (88M), wuu (83M),
   pnb (66M) and 56 others are portable today. 169 goldens, 71 gated, so **98 unported languages already
   have one.** The 24 that remain are the 5 accent variants (own generator), 7 Arabic dialects, and 12
-  codes served by another language's engine with no text of their own — those need a mining run.
+  codes served by another language's engine with no text of their own.
+  ⚠ **THOSE 24 ARE NOT WAITING ON A MINING RUN — the mining route is already exhausted.** The miner
+  reaches into Wikimedia Incubator and records per language where the road ends ("no Hmong Wikipedia
+  exists at any code"; "no Balochi Wikipedia exists at any code"). Of the 19 non-variant codes exactly one
+  has any corpus artifact. They lack a dump-scale written corpus IN THEIR OWN CODE, and speaker count does
+  not predict it — apd is 32M, apc 30M, zsm 80M. Of the nine Arabic varieties, exactly the two with a
+  Wikipedia (arz, ary) have mined text. What DOES work for 11 of them is the existing
+  `tools/gen_variant_golden.mts`: measured, the 7 Arabic dialects plus bho/rkt/grc read MSA-or-Hindi text
+  0/25 identically to their base, so a variant golden pins something real. zsm/pbt/bgc read 25/25
+  identically and a golden there would only restate the base file. See the investigation doc.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,

@@ -152,8 +152,9 @@ the intended coupling and it is why that test reads the directory instead of a l
     rkt bho bgc hne grc               no module TSV and no mined artifact — genuinely sourceless
 
 Each of the 12 in the last group is served by another language's engine (zsm by Malay, pbt by Pashto,
-bho/bgc/hne by the Hindi family) and has no text of its own. Closing them means a mining run
-(`tools/normalization/mine.ts`), which is a different job from this one.
+bho/bgc/hne by the Hindi family) and has no text of its own.
+
+⚠ **"Closing them means a mining run" — WHICH IS WRONG, and run 5 corrects it.**
 
 ## Outcome
 
@@ -164,3 +165,52 @@ bho/bgc/hne by the Hindi family) and has no text of its own. Closing them means 
 
 The porting queue is no longer blocked on corpus sourcing for the top of the list: pcm (121M), tl (88M),
 wuu (83M), pnb (66M) and 56 others now have a golden to be byte-identical to.
+
+
+## Run 5 — 2026-08-25 22:45
+
+Prompted by a correction: those 24 are likely low-resource codes that will not turn up minable artifacts
+at all, so "needs a mining run" is the wrong diagnosis. Checked, and it is wrong — the mining route is
+already EXHAUSTED, not un-attempted.
+
+**Command.** Read the `// source:` line of all 92 mined artifacts, and checked `attest`/`mined`/`terms`
+coverage for the 19 non-variant codes.
+
+**Finding: the miner already went well past Wikipedia, and documented where the road ends.** Of 92
+artifacts, 83 are `<code>.wikipedia.org dump`. The other nine are the interesting ones:
+
+    Wp/hsn      "the only Xiang corpus that exists — there is no <code>.wikipedia"
+    Wp/cjy      "the only Jin corpus that exists — there is no <code>.wikipedia"
+    Wp/mww      "no Hmong Wikipedia exists at any code: hmn, mww and hnj all fail to resolve;
+                 Wp/hnj does not exist and Wp/hmn is a one-page note saying hmn is a macrolanguage"
+    Wp-bcc      "SOUTHERN Balochi, the only Southern corpus that exists (no Balochi Wikipedia
+                 exists at any code)" — and filter-by-language dropped 37.4% as Persian or Urdu
+    Wp/hil, ilo  incubator and small-wiki dumps
+    FLEURS zu_za, FLEURS yue_hant_hk
+
+So the miner already reaches into Wikimedia Incubator and records, per language, that no wiki exists.
+Of the 19 remaining non-variant codes, exactly ONE (`bho`) has any corpus artifact at all (an `attest`
+file, no mined). These are not waiting for someone to run the miner. **They lack a dump-scale written
+corpus in their own code**, which is a sourcing problem of a different kind — and speaker count does not
+predict it: `apd` is 32M, `apc` 30M, `zsm` 80M.
+
+The Arabic cluster makes the point cleanly: of the nine Arabic varieties in the fleet, exactly the two
+with a Wikipedia — `arz` and `ary` — have mined artifacts. The other seven have none, and dialect Arabic
+is written in speech and social media rather than encyclopedically.
+
+**A route that DOES exist for some of them, and it is already built.** `tools/gen_variant_golden.mts`
+re-renders a base language's golden TEXT through a variant's engine. Its own header is careful about what
+that buys: it pins C#↔TS parity for the variant, NOT coverage of the variant's own corpus. Measured on 25
+rows per pair, asking whether the variant's reading actually DIFFERS from its base:
+
+    apc apd acm afb ayl ajp acw  <- ar    0/25 identical   each dialect engine genuinely transforms MSA
+    bho <- hi                             0/25 identical
+    rkt <- hi                             0/25 identical
+    grc <- el                             0/25 identical
+    hne <- hi                             9/25 identical   partially distinct
+    zsm <- ms, pbt <- ps, bgc <- hi      25/25 identical   a byte-duplicate of the base golden
+
+0 threw in all 14 pairs. So a variant golden is worth generating for the 11 that differ — the 7 Arabic
+dialects most of all, since running MSA text through a variety reader is exactly what those engines are
+FOR. For `zsm`, `pbt` and `bgc` it would only restate the base file, and "it has a golden" would imply
+more than it delivers.
