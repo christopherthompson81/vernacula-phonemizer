@@ -50,9 +50,12 @@ const HUNDRED = "teemedere";
 const HUNDRED_PL = "teemedde";
 const THOUSAND = "ujundere";
 const THOUSAND_PL = "ujunaaje";
-const MILLION = "million";
+/** ⚠ EXPORTED because normalize.ts's `STEM_ORD` has to key on them. Hand-copied keys drifted once
+ *  already: the table spelled them `miliyon`/`milion` while the compositor emitted `million`/`milyar`,
+ *  so the two rows were dead and `ordinalWords(1e6)` returned undefined. */
+export const MILLION = "million";
 const MILLION_PL = "milionji";
-const BILLION = "milyar";
+export const BILLION = "milyar";
 const BILLION_PL = "milyarji";
 
 /** 0–99: sappo / noogaas / cappanɗe + multiplier, units added with e. */

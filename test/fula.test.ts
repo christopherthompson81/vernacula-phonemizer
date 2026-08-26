@@ -3,6 +3,7 @@ import { phonemize } from "../src/index.ts";
 import { normalizeFula } from "../src/languages/fula/normalize.ts";
 import { createFula, phonemizeWord } from "../src/languages/fula/fula.ts";
 import { numberToWords } from "../src/languages/fula/numbers.ts";
+import { ordinalWords } from "../src/languages/fula/normalize.ts";
 
 describe("Fula g2p (authored)", () => {
     it("implosives, prenasalized digraphs, geminates, length", () => {
@@ -185,4 +186,42 @@ describe("Fula text normalization", () => {
         expect(phonemizeWord("acchugo")).toBe("at͡ʃːˈuɡo");
     });
 
+});
+
+describe("Fula: the three dead tables the port batch found", () => {
+    it("does not assert 'per hour' for a per-second rate", () => {
+        // Rule 10's trailing word was chosen by `d === "h" ? "gootel" : "gootel"` — two identical
+        // branches — so the corpus's `480 km/h (133m/s; 300mph)`, one wind speed glossed three ways,
+        // read the second gloss as an hour rate. `gootel` agrees with `wakkati`'s noun class and the
+        // form for `sahaawa` is unsourced, so `/s` now declines and reads its letters instead.
+        expect(normalizeFula("133m/s")).not.toContain("wakkati");
+        expect(normalizeFula("20 m/s")).not.toContain("wakkati");
+        expect(normalizeFula("480 km/h")).toContain("e wakkati gootel"); // the sourced half is unchanged
+        expect(normalizeFula("300mph")).toContain("e wakkati gootel");
+    });
+
+    it("forms an ordinal at exactly 1e6 and 1e9", () => {
+        // STEM_ORD keyed `miliyon`/`milion`; the compositor emits `million`/`milyar`. Both rows were
+        // dead, and these are the only two magnitudes where the magnitude word is itself the LAST word.
+        expect(ordinalWords(1e6)).toBe("millionaɓal");
+        expect(ordinalWords(1e9)).toBe("milyaraɓal");
+        expect(ordinalWords(2e6)).toBe("milionji ɗiɗaɓal"); // the multiplier still carries it
+    });
+
+    it("reads a vulgar fraction as a ratio, not as a percentage", () => {
+        // `(\d+)¾` → `$1 e teemedere` was character-for-character the percent phrase, so `1¾` read as
+        // *one per hundred*. Unreachable through phonemize (the fold runs first) but not through the
+        // exported normalizer, which the C# port exposes too.
+        expect(normalizeFula("1¾ kilometre")).not.toContain("e teemedere");
+        expect(phonemize("5%", "ff")).toContain("teːmedˈeɾe"); // the real percent reading survives
+        expect(phonemize("1¾ kilometre", "ff")).toBe(phonemize("1 3/4 kilometre", "ff"));
+    });
+});
+
+describe("Fula: a comma before a minus is not a range", () => {
+    it("reads `1, -2` as a negative, and a real range as a range", () => {
+        expect(normalizeFula("1, -2")).not.toContain("haa");
+        expect(normalizeFula("1-2")).toContain("haa");
+        expect(normalizeFula("1,234-5,678")).toContain("haa");
+    });
 });

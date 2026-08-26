@@ -53,8 +53,9 @@ public static class Initialisms
     /** PERSONAL INITIALS — `J. R. R.` — where each dotted letter is read by name. */
     private static readonly JsRe INITIAL_RUN =
         JsRegex.Compile("(?<![\\p{L}" + LATIN_MARK + "])(?:\\p{Lu}\\.[ \\u00a0]*){2,}", "gu");  // space, NBSP
+    // ⚠ `^` is in the lookbehind so an initial may OPEN an utterance — see the TS for the measurement.
     private static readonly JsRe LONE_INITIAL =
-        JsRegex.Compile("(?<=\\p{Lu}\\p{L}*[ \\u00a0])(\\p{Lu})\\.(?=[ \\u00a0]+\\p{Lu}\\p{Ll})", "gu");  // space, NBSP
+        JsRegex.Compile("(?<=^|\\p{Lu}\\p{L}*[ \\u00a0])(\\p{Lu})\\.(?=[ \\u00a0]+\\p{Lu}\\p{Ll})", "gu");  // space, NBSP
 
     private static readonly JsRe UPPER = JsRegex.Compile("\\p{Lu}", "gu");
     private static readonly JsRe LOWER_TEST = JsRegex.Compile("\\p{Ll}", "u");

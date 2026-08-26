@@ -396,9 +396,13 @@ public static class Normalize
                 var prev = m.Groups[1].Value;
                 var n = Roman.RomanToInt(m.Groups[2].Value);
                 if (n is null) return m.Value;
-                var evidence = ROMAN_CARDINAL_CTX.IsMatch(prev) || CAP_INITIAL.IsMatch(prev);
+                var named = ROMAN_CARDINAL_CTX.IsMatch(prev);
+                var evidence = named || CAP_INITIAL.IsMatch(prev);
                 if (!evidence) return m.Value;
-                if (ROMAN_CARDINAL_CTX.IsMatch(prev)) return $"{prev} {n}";
+                // The capitalized-previous-word signal is the weak one; the shared measured stoplist
+                // applies to it, but an explicit numbered-event noun still licenses a stoplisted token.
+                if (!named && Roman.COLLISIONS.Contains(m.Groups[2].Value.ToLowerInvariant())) return m.Value;
+                if (named) return $"{prev} {n}";
                 var v = n.Value;
                 var suf = v % 10 == 1 && v % 100 != 11 ? "st" : v % 10 == 2 && v % 100 != 12 ? "nd"
                     : v % 10 == 3 && v % 100 != 13 ? "rd" : "th";

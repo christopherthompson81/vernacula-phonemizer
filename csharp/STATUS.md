@@ -180,6 +180,10 @@ Fixed in this batch (TS first, then C#, per the bidirectional policy):
   declines the WHOLE run if any letter is unnamed, so `HQ`→*hx*, `QVC`→*ɡvd͡ʒ* put raw ASCII in the
   phoneme stream.
 
+⚠ **MOST OF THE "FOUND, NOT FIXED" LIST BELOW IS NOW FIXED** — see the ff/lo/zu/az follow-up section
+after it. What survives is what needs SOURCING, and it is named there. The list is kept in full because
+the evidence in each entry is what made the fix decidable.
+
 Found, not fixed — all corpus-attested, both engines agreeing, no golden reaching them:
 
 - **ff: `133m/s` reads *per hour*.** Rule 10's ternary is `d === "h" ? "gootel" : "gootel"` — two identical
@@ -220,6 +224,82 @@ Found, not fixed — all corpus-attested, both engines agreeing, no golden reach
 - **az: a lone dotted initial** (`M. Bayramov`) correctly loses its dot, but the surviving single capital
   reads as bare [m] rather than the letter name *em* — the initialism pass needs a 2+ run. Shared shape,
   documented TS behaviour, not an az regression.
+
+### The follow-up pass on those findings (2026-08-25) — nine fixed, five left to sourcing
+
+Every entry below was fixed in TypeScript first with a test, goldens regenerated, then C#. **7 golden
+rows move in total**, all one shape and all improvements. Full gate stayed 69 / 13,800 / 0 throughout.
+
+- **`roman`: an all-caps abbreviation is not a numeral.** Reported as az reading `Washington DC` as 600.
+  Neither an az bug nor a DC bug — the first instinct was to stoplist `DC`, which would have fixed the
+  one token that happened to be reported. Counting instead: every all-caps canonical Roman numeral in the
+  163 mined corpora that would convert, with contexts read. Below the genuine numerals (`II` ×657,
+  `III` ×295, `IV` ×183 …) is a band of NINE tokens, 121 occurrences, **zero of them numbers** — DC, MV,
+  MC, MD, CV, DV, LV, DX, CCC. `CV` mis-read loudest because it takes a preceding quantity: Somali
+  `140 CV` read as `140 105`.
+  ⚠ **English had the same hole from the other side and wider than reported.** Rule 7a accepts a
+  Capitalized previous word as evidence, so every abbreviation after a name was a numeral: `Sony CD` →
+  *the four hundredth*, `Detroit MI` → *the one thousand first*, plus `Boeing MD`, `Ocean Express MV`,
+  `Honda CIV`, `Paris DX`. `cd` and `mi` were ALREADY in core's list; English simply was not consulting
+  it. One list now, not two that drift. The stoplist applies only to the weak signal — a numbered-event
+  noun still licenses a stoplisted token, so `Apollo XI` is 11 and `WrestleMania XL` is 40.
+- **ff rates, ordinals and fractions** — all three of the dead tables. `/s` now DECLINES rather than
+  asserting *per hour*; deleting the arm alone was not enough, because the shared tier then composed
+  *e wakkati gootel sahaawa*, "per hour second". `unitPer` is now just the preposition and
+  `rateDenominators` carries the noun plus its agreeing "one", which is what `per + dPhrase` can express.
+  `STEM_ORD`'s magnitude keys are DERIVED from the compositor's constants so a rename cannot recreate the
+  dead rows. The `¾` arm turned out to be worse than inert — `$1 e teemedere` is character-for-character
+  the percent phrase, so `1¾` read as *one per hundred*.
+- **ff/ha/ga: `1, -2` is a sign, not a range.** Open since before the om/uz batch. `(\d[\d,]*)` accepts
+  `1,` — the SENTENCE comma — as a complete left operand, after which `\s*` reaches the minus. Same
+  trailing-separator shape as #1015. Swept the fleet: exactly these three rules have it.
+- **kk: a standalone zero was the empty string.** `UNIT_CARD[0]` is "" so a zero digit contributes no word
+  positionally, but `orthographic(0)` returned that same empty string — so `00:43` read *қырық үш*, `0.5`
+  read *нүкте бес*, and **`00:00` read as the empty string**. Restoring it exposed three more sites: the
+  dot-clock-before-timezone rule emitted zero minutes (an existing test caught it), the case-suffix rule's
+  `orthographic(n) === ""` out-of-range guard was catching zero by accident, and
+  `denom === "сағат" ? "сағат" : "сағат"` — the Fula shape again, though CORRECT here.
+  Separately, the dot-decimal rule rewrote its digits to words before the sign rule could find them, so
+  `-1.5` read *бір нүкте бес*. The comma path never had it.
+- **An initial may OPEN an utterance.** `LONE_INITIAL` required a preceding capitalised word, so
+  `M. Bayramov` read `m . …` — a bare consonant and a stranded pause. Widening at `^` is safe because the
+  documented false positive is a SENTENCE ending in a lone capital, and at the start there is no
+  preceding sentence. 34 utterances across 18 corpora open with this shape and every one is a
+  personal-name initial. **This is where the 7 golden rows move** — be, de ×2, es, it, lt, pl, all the
+  same FLEURS sentence: `n . vˈaːyːnə` → `ɛn vˈaːyːnə`. Cyrillic `Н.` comes free.
+- **cy/ga: a timezone-offset hyphen is a sign.** `GMT-00:43` fused into one word (*tˈidim*,
+  *tʲˈeːn̪ˠɑːⁱdʲ*): the clock rule makes the digits words, the hyphen is then between two letter runs, and
+  the g2p strips it. 10 corpus instances, 5 with a colon.
+  ⚠ **FIXED PER-LANGUAGE, AND THE SHARED ATTEMPT FAILED FIRST — worth recording.** A boundary in the
+  initialism pass broke three tests at once: **a hyphen between two letter runs is LOAD-BEARING.**
+  Estonian attaches a case ending across it (`SKP-st` → *ess kaa peest*) while keeping a compound
+  hyphenated but unspaced (`TGV-rongile`), a distinction it measured at 4 suffixes / 4 compounds;
+  Mongolian does the same. Gating on a following digit does not rescue it either, because cy runs the
+  initialism pass LAST — by then the digits are words. So it belongs before the clock rule, per language.
+- **zu: the degree rules now hold the invariant step 8c claimed.** `[+]?` was gone from two of four
+  patterns, not "both". Unreachable, so the readings were pinned first and are byte-identical.
+
+**Left to sourcing, and these are the honest remainder:**
+
+- **ff `133m/s`** — the concord form of "one" agreeing with `sahaawa`'s noun class. The corpus cannot
+  settle it: all 16 `wakkati` instances are "time" in the general sense, not one a rate. `/s` declines.
+- **ff's 24h clock** (n=1; a bare `\d{4}` arm would also claim years) and **`milionaɓal` vs
+  `millionaɓal`** as an orthography question — sidestepped by deriving from the emitter, not answered.
+- **lo's degree rule** loses its scale letter when the number is not adjacent (`(0) c°` → *suː˩n sˈiː*).
+  Needs a corpus argument about how far number–unit adjacency should stretch; ×0 glued-to-Lao.
+- **zu above 10⁹** repeats *izigidi* — needs sourced Zulu magnitude words. And **zu compound tone
+  threading** stays as it is: 27 of its 29 candidates are concord prefixes where toning would be wrong.
+- **kk's `orthographic` path loses three irregular readings** the manifest documents — *нөл* has ø,
+  *жиырма* is final-stressed, *алпыс* has a clear l — so the restored zero reads [nˈɵl] where the digit
+  reading is [nˈøɫ]. Pre-existing and shared by every orthographic-path word; closing it means teaching
+  the g2p those three. Related: `1,05` and `1,5` read IDENTICALLY on both the comma and dot paths, a
+  distinct-numbers violation whose fix needs Kazakh's convention for a leading-zero fraction.
+- **cy/ga/az strip a lone initial's dot before the shared pass sees it**, so the `^` widening does not
+  reach them; only `lt` and its ordering-peers benefit. Per-language rule ordering, not a shared fix.
+- Still open from earlier: **`Washington DC` as an ORDINAL in languages with a roman policy** is now
+  fixed, but **`az`'s lone dotted initial** reading bare [m] is the ordering case above; **°C with no
+  sourced degree word** in pcm/za/ak; **U+2212 minus unsourced** for ak/bo/ltg/mos; **ha never reads the
+  fractional part of a grouped decimal**.
 
 ⚠ **PROCESS, for the next fan-out: THE SCRATCHPAD IS SHARED BETWEEN AGENTS, NOT PER-AGENT.** Two of the
 four agents collided in it. One had its probe `Program.cs` and `.csproj` overwritten mid-run by another

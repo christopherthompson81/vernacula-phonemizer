@@ -215,3 +215,30 @@ describe("the Cyrillic signs denote no sound of their own", () => {
             expect(await phonemize(w, "kk"), w).not.toContain("ʔ");
     });
 });
+
+describe("Kazakh: a standalone zero, and a signed dot-decimal", () => {
+    it("the zero word is not the empty string", () => {
+        // `UNIT_CARD[0]` is "" so that a zero digit inside a larger number contributes no word, but
+        // `orthographic(0)` returned that same empty string — so a standalone zero simply vanished.
+        expect(phonemize("00:43", "kk")).toContain("nˈɵl");
+        expect(phonemize("0.5", "kk")).toContain("nˈɵl");
+        expect(phonemize("00:00", "kk")).not.toBe(""); // read as nothing at all
+        expect(phonemize("20", "kk")).not.toContain("nˈɵl"); // the positional path is unaffected
+        expect(phonemize("10:00", "kk")).not.toContain("nˈɵl");
+    });
+
+    it("a dot-decimal keeps its minus", () => {
+        // Step 9's sign rule needs `-` followed by DIGITS; the dot-decimal rule had already rewritten
+        // them to words, so the sign was orphaned and dropped. The comma path never had the bug.
+        expect(phonemize("-1.5", "kk")).toContain("mˈəjnws");
+        expect(phonemize("-0.5", "kk")).toContain("mˈəjnws");
+        expect(phonemize("−0.5", "kk")).toContain("mˈəjnws"); // U+2212 too
+        expect(phonemize("-0,5", "kk")).toContain("mˈəjnws"); // the comma path still works
+    });
+
+    it("…and a range of decimals is not a sign", () => {
+        // The sign arm carries step 9's own `(?<![\p{L}\p{Nd}])` guard: in `1.5-2.5` the character
+        // before the dash is a digit, so it declines.
+        expect(phonemize("1.5-2.5", "kk")).not.toContain("mˈəjnws");
+    });
+});

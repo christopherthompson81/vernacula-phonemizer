@@ -61,3 +61,16 @@ describe("the seven strings whose verdict the fix flips — read through the rea
         expect(phonemize("ҶФШСР", "tg").trim()).toBe("d͡ʒˈe fˈe ʃˈe sˈe rˈe");
     });
 });
+
+describe("core/initialisms: an initial may OPEN an utterance", () => {
+    test("a lone opening initial reads its letter name, not a bare consonant", () => {
+        // The pass required a PRECEDING capitalised word, so an initial at the start of an utterance
+        // kept its bare letter and left the dot stranded as a pause: `m . bɐiːrɐmoːʋ`. Safe to widen at
+        // `^` specifically — the known false positive is a SENTENCE ending in a lone capital before a
+        // new capitalised one, and at the start of the text there is no preceding sentence to be.
+        // Measured over the 163 mined corpora: 34 utterances across 18 open with this shape and every
+        // one is a personal-name initial in a citation or a biography.
+        expect(phonemize("M. Bayramov", "lt")).toContain("ɛm");
+        expect(phonemize("Dr M. Bayramov", "lt")).toContain("ɛm"); // the pre-existing path still works
+    });
+});

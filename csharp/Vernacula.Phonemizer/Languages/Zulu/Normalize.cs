@@ -118,8 +118,10 @@ public static class Normalize
     private static readonly JsRe SAID_DEGREES = JsRegex.Compile("amazinga[^.!?;]*$", "u");
     private static readonly JsRe DEG_C = JsRegex.Compile("(\\d[\\d.,]*)[  ]?[°º][  ]?C(?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_F = JsRegex.Compile("(\\d[\\d.,]*)[  ]?[°º][  ]?F(?![\\p{L}\\p{M}])", "gui");
-    private static readonly JsRe DEG_COMPASS = JsRegex.Compile("[+]?(\\d[\\d.,]*)[  ]?[°º][  ]?([NSEW])(?![\\p{L}\\p{M}])", "gu");
-    private static readonly JsRe DEG_BARE = JsRegex.Compile("[+]?(\\d[\\d.,]*)[  ]?[°º]", "gu");
+    // ⚠ `[+]?` removed from these two — step 8c claims every `+` before a digit, so it was unreachable
+    // and the comment there already claimed it was gone. See the TS.
+    private static readonly JsRe DEG_COMPASS = JsRegex.Compile("(\\d[\\d.,]*)[  ]?[°º][  ]?([NSEW])(?![\\p{L}\\p{M}])", "gu");
+    private static readonly JsRe DEG_BARE = JsRegex.Compile("(\\d[\\d.,]*)[  ]?[°º]", "gu");
     private static readonly JsRe RANGE_DECIMAL = JsRegex.Compile("(?<![\\d.,])(\\d+\\.\\d+)[  ]*[-–—][  ]*(\\d+\\.\\d+)(?![\\d.,])", "gu");
     private static readonly JsRe RANGE_INT = JsRegex.Compile("(?<![\\d.,])(\\d[\\d,]*\\d|\\d)[  ]*[-–—][  ]*(\\d[\\d,]*\\d|\\d)(?![\\d.,])", "gu");
     private static readonly JsRe RATE = JsRegex.Compile(

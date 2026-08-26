@@ -41,8 +41,12 @@ public static class FulaPhonemizer
             ["km"] = new[] { "kilometre" }, ["m"] = new[] { "metre" }, ["kg"] = new[] { "kilogram" },
             ["mm"] = new[] { "milimeta" }, ["cm"] = new[] { "santimeta" },
         },
-        UnitPer = "e wakkati gootel",
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal) { ["h"] = "wakkati", ["s"] = "sahaawa" },
+        // The preposition is the only denominator-independent part; the noun AND the class-agreeing
+        // "one" after it belong to the denominator, because the shared tier composes `per + dPhrase`
+        // with no slot after the noun. `s` is deliberately absent — the form of "one" agreeing with
+        // `sahaawa`'s class is unsourced, so the tier returns the text untouched. See the TS.
+        UnitPer = "e",
+        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal) { ["h"] = "wakkati gootel" },
         ExponentWords = new ExponentWordsDef
         {
             Squared = new[] { "kaaree" },

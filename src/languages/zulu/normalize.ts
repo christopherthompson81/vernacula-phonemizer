@@ -206,8 +206,12 @@ export function normalizeZulu(input: string): string {
     // 8c) THE PLUS AND ±, claimed HERE rather than with the other signs at step 14b — ⚠ THE ORDERING IS
     //     LOAD-BEARING and step 14b deliberately has no plus arm. The degree rule below consumes its
     //     operand, so after it runs the text reads `+amazinga…` and a digit lookahead can no longer match.
-    //     Taking the sign first is the only position that works, and `[+]?` is gone from both degree
+    //     Taking the sign first is the only position that works, and `[+]?` is gone from ALL FOUR degree
     //     patterns so a form this arm misses cannot be quietly eaten there either.
+    //     ⚠ The comment used to say "both", and two of the four still carried `[+]?` — the compass and
+    //     bare-degree arms. Unreachable in practice, since the arm below claims every `+` that precedes a
+    //     digit (spaces and NBSP included), so it was a false comment over a vestige rather than a
+    //     behaviour defect. Removed so the stated invariant is the one the code holds.
     //     ⚠ SPELLED `plas`, NOT `plus`: this orthography is phonemic and the vowel is [a], so `plus` would
     //     read pʼlˈuːs. The conventional isiZulu spelling of the loan is unsourced; these spellings are
     //     chosen to reproduce the phones. `o` is the reduced English "or", not Zulu's own conjunction
@@ -239,10 +243,10 @@ export function normalizeZulu(input: string): string {
         (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
     s = s.replace(/(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?F(?![\p{L}\p{M}])/gui,  // space, NBSP
         (m0, d: string, off: number, full: string) => deg(m0, d, " Fahrenheit", off, full));
-    s = s.replace(/[+]?(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
+    s = s.replace(/(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
         (m0, d: string, c: string, off: number, full: string) =>
             deg(m0, d, ` ${COMPASS[c.toUpperCase()]!}`, off, full));
-    s = s.replace(/[+]?(\d[\d.,]*)[ \u00a0]?[°º]/gu,  // space, NBSP
+    s = s.replace(/(\d[\d.,]*)[ \u00a0]?[°º]/gu,  // space, NBSP
         (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
 
     // 10) RANGES → `kuya ku-` ("going to"). The `ku-` is class-17 locative and INVARIANT, which is exactly

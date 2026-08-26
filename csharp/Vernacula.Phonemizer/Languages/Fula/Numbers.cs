@@ -20,9 +20,9 @@ public static class FulaNumbers
     private const string HUNDRED_PL = "teemedde";
     private const string THOUSAND = "ujundere";
     private const string THOUSAND_PL = "ujunaaje";
-    private const string MILLION = "million";
+    internal const string MILLION = "million";
     private const string MILLION_PL = "milionji";
-    private const string BILLION = "milyar";
+    internal const string BILLION = "milyar";
     private const string BILLION_PL = "milyarji";
 
     /** 0–99: sappo / noogaas / cappanɗe + multiplier, units added with e. */

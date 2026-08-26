@@ -150,3 +150,54 @@ describe("initial runs are not numerals", () => {
         expect(phonemize("A JAS 39C Gripen", "hu")).not.toContain("saːzɒdik");
     });
 });
+
+describe("all-caps abbreviations that are canonical numerals", () => {
+    // The stoplist was measured over the 163 mined corpora, not guessed: every all-caps token that is a
+    // canonical Roman numeral and would convert was counted and its contexts read. Below the genuine
+    // numerals (II ×657, III ×295, IV ×183 …) sits a band of nine tokens, 121 occurrences, with ZERO
+    // numeral uses among them. Each case here is a real corpus line.
+    test("the measured band never converts", () => {
+        expect(normalizeRomans("i Washington DC")).toBe("i Washington DC"); // 600
+        expect(normalizeRomans("MV Nyayo na MV Harambee")).toBe("MV Nyayo na MV Harambee"); // 1005
+        expect(normalizeRomans("Daniel McGuire, MD, a me")).toBe("Daniel McGuire, MD, a me"); // 1500
+        expect(normalizeRomans("iyo 140 CV oo loo rogay")).toBe("iyo 140 CV oo loo rogay"); // 105
+        expect(normalizeRomans("Atlas LV-3 Agena-D ar")).toBe("Atlas LV-3 Agena-D ar"); // 55
+        expect(normalizeRomans("Suomen DX-Liitto ja")).toBe("Suomen DX-Liitto ja"); // 510
+        expect(normalizeRomans("1 km iz DV nu Rasnupļu")).toBe("1 km iz DV nu Rasnupļu"); // 505
+        expect(normalizeRomans("Gael-Linn CEF 080 & MC, 1979")).toBe("Gael-Linn CEF 080 & MC, 1979"); // 1100
+        expect(normalizeRomans("ႁွင်ႈလုမ်း CCC ၶဝ်သေ")).toBe("ႁွင်ႈလုမ်း CCC ၶဝ်သေ"); // 300
+    });
+
+    test("…but an explicit numeral context still licenses one", () => {
+        // The stoplist refuses the ambiguous bare case; it must not refuse text that says outright a
+        // numeral is meant. `XL` is a clothing size AND the 40th anniversary.
+        expect(phonemize("el XL aniversario", "es")).toContain("kwaðɾaxˈesimo");
+        expect(phonemize("el siglo XIX", "es")).toContain("ðjeθinwˈeβe");
+    });
+});
+
+describe("English 7a: the capitalized-previous-word signal is the weak one", () => {
+    // On its own it read every all-caps abbreviation following a name as a numeral. core/roman.ts
+    // already owned the measured list; English simply was not consulting it. One list, two engines.
+    test("an abbreviation after a name is not a numeral", () => {
+        expect(phonemize("Washington DC is the capital", "en")).not.toContain("hˈʌndɹədθ");
+        expect(phonemize("a Sony CD player", "en")).not.toContain("hˈʌndɹədθ");
+        expect(phonemize("Detroit MI has", "en")).not.toContain("θˈaᶷzənd");
+        expect(phonemize("Boeing MD is old", "en")).not.toContain("hˈʌndɹədθ");
+        expect(phonemize("Ocean Express MV docked", "en")).not.toContain("θˈaᶷzənd");
+        expect(phonemize("Paris DX radio", "en")).not.toContain("tʰˈɛnθ");
+    });
+
+    test("…while a numbered-event noun still licenses a stoplisted token", () => {
+        // Both of these are IN the stoplist and both are genuine numerals here. A blanket check loses them.
+        expect(phonemize("Apollo XI landed", "en")).toContain("ɪlˈɛvən");
+        expect(phonemize("WrestleMania XL was", "en")).toContain("fˈɔːɹt̬i");
+    });
+
+    test("…and the ordinary regnal and event readings are untouched", () => {
+        expect(phonemize("Louis XVI reigned", "en")).toContain("sɪkstˈiːnθ");
+        expect(phonemize("Queen Elizabeth II spoke", "en")).toContain("sˈɛkənd");
+        expect(phonemize("Super Bowl LVIII was", "en")).toContain("fˈɪfti ˈeᶦt");
+        expect(phonemize("World War II ended", "en")).toContain("tʰˈuː");
+    });
+});

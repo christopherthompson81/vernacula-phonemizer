@@ -202,3 +202,17 @@ describe("Welsh — a score that ends the sentence is still a score", () => {
         expect(phonemize("5-3.5", "cy").trim().split(/\s+/u)).not.toContain("ˈiː");
     });
 });
+
+describe("Welsh: a timezone-offset hyphen is a sign, not a word hyphen", () => {
+    test("`GMT-00:43` does not fuse the initialism into the clock", () => {
+        // The clock rule turns the digits into WORDS, after which the hyphen sits between two letter
+        // runs — indistinguishable from a compound joint — and the g2p strips it and fuses them.
+        // Settled before the clock rule, since the initialism pass runs last in that file.
+        const glued = phonemize("mae'r amser yn GMT-00:43 heddiw", "cy");
+        expect(glued).toContain("tˈiː dˈɪm");
+        expect(glued).toBe(phonemize("mae'r amser yn GMT -00:43 heddiw", "cy"));
+        // a real corpus shape, and the plain offset is unaffected
+        expect(phonemize("mae'r amser yn UTC-08:00 heddiw", "cy")).toContain("tˈiː");
+        expect(phonemize("mae'r amser yn GMT-5 heddiw", "cy")).toContain("tˈiː");
+    });
+});

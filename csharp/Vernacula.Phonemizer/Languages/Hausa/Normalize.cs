@@ -49,7 +49,9 @@ public static class Normalize
     private static readonly JsRe VERSUS = JsRegex.Compile("(?<=\\p{L})\\s+v\\.\\s+(?=[A-Z])", "gu");
     private static readonly JsRe US_DOLLAR = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|uS)\\s?\\$\\s?(?=\\d)", "giu");
     private static readonly JsRe RANGE_DECIMAL = JsRegex.Compile("(?<![\\d.,])(\\d+\\.\\d+)\\s*[-–]\\s*(\\d+\\.\\d+)(?![\\d.])", "gu");
-    private static readonly JsRe RANGE_PLAIN = JsRegex.Compile("(?<![\\d.,])(\\d[\\d,]*)\\s*[-–]\\s*(\\d[\\d,]*)(?![\\d.])", "gu");
+    // ⚠ Each operand must END ON A DIGIT — see the TS. A trailing separator let `1,` match and the
+    // range rule claimed the minus of `1, -2`, reading a range where the text has a negative number.
+    private static readonly JsRe RANGE_PLAIN = JsRegex.Compile("(?<![\\d.,])(\\d(?:[\\d,]*\\d)?)\\s*[-–]\\s*(\\d(?:[\\d,]*\\d)?)(?![\\d.])", "gu");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d:,])([01]?\\d|2[0-3]):([0-5]\\d)(?![:.\\d])(?:\\s*([Aa]\\.?[Mm]\\.?|[Pp]\\.?[Mm]\\.?))?", "giu");
     private static readonly JsRe CLOCK_DOT_TZ = JsRegex.Compile("(?<![\\d.,])(\\d{1,2})\\.(\\d{2})\\s*(UTC|GMT)", "giu");
     private static readonly JsRe GHZ = JsRegex.Compile("(?<![\\d.,])(\\d+\\.\\d+)\\s?Ghz?(?![\\p{L}\\p{M}])", "giu");

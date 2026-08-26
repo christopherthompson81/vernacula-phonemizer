@@ -208,3 +208,25 @@ describe("dotted abbreviations the corpus writes without their dot", () => {
         expect(phonemize("iompar ar thalamh, srl.", "ga")).toContain("ˈaɡəsˠ əɾˠˈalʲə");
     });
 });
+
+describe("Irish: a comma before a minus is not a range", () => {
+    test("reads `1, -2` as a negative, and a real range as a range", () => {
+        expect(phonemize("1, -2", "ga")).not.toContain("ɡˈɔ dʲˈiː");
+        expect(phonemize("1-2", "ga")).toContain("ɡˈɔ dʲˈiː");
+        expect(phonemize("1,234-5,678", "ga")).toContain("ɡˈɔ dʲˈiː");
+    });
+});
+
+describe("Irish: a timezone-offset hyphen is a sign, not a word hyphen", () => {
+    test("`GMT-00:43` does not fuse the initialism into the clock", () => {
+        // The clock rule turns the digits into WORDS, after which the hyphen sits between two letter
+        // runs — indistinguishable from a compound joint — and the g2p strips it and fuses them.
+        // Settled before the clock rule, since the initialism pass runs last in that file.
+        const glued = phonemize("mae'r amser yn GMT-00:43 heddiw", "ga");
+        expect(glued).toContain("tʲˈeː n̪ˠˈɑːⁱdʲ");
+        expect(glued).toBe(phonemize("mae'r amser yn GMT -00:43 heddiw", "ga"));
+        // a real corpus shape, and the plain offset is unaffected
+        expect(phonemize("mae'r amser yn UTC-08:00 heddiw", "ga")).toContain("tʲˈeː");
+        expect(phonemize("mae'r amser yn GMT-5 heddiw", "ga")).toContain("tʲˈeː");
+    });
+});
