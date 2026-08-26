@@ -11,7 +11,7 @@
     "language": "bho",
     "name": "Bhojpuri",
     "script": ["Devanagari"],
-    "provenance": "REVISED from 'A Grammar of Bhojpuri' (dissertation, Shukla-tradition), whose glossed examples were g2p-mined (1622 Devanagari→IPA pairs) as a falsifiable anchor. Reuses the Hindi Devanagari engine with the Bhojpuri divergences: an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic length (0/1622 mined length marks), ऐ→ɛ/औ→ɔ MONOPHTHONGS (the earlier 'diphthong' claim was WRONG), श/ष→s (only /s ɦ/ fricatives), व→w (not Hindi ʋ), ण/ञ→n. Single published source → .",
+    "provenance": "REVISED from 'A Grammar of Bhojpuri' (dissertation, Shukla-tradition), whose glossed examples were g2p-mined (1622 Devanagari→IPA pairs) as a falsifiable anchor. Reuses the Hindi Devanagari engine with the Bhojpuri divergences: an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic length (0/1622 mined length marks), ऐ→ɛ/औ→ɔ MONOPHTHONGS (the earlier 'diphthong' claim was WRONG), श/ष→s (only /s ɦ/ fricatives), व→w (not Hindi ʋ), ण/ञ→n. Single published source → [confidence grade TRUNCATED — the generator that wrote this string dropped the token after the arrow; magahi.jsonc has the same wound. Not reconstructed here, because guessing a confidence grade is worse than showing that one is missing].",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
@@ -84,7 +84,20 @@
     // Bhojpuri has NO phonemic length, so इ/ई and उ/ऊ each collapse to one phone (i, u) and no value here
     // carries ː. The wording is inherited from hindi.jsonc, where the pairs really do contrast.
     "independentVowels": {
-        "अ": { "ipa": "ʌ", "note": "short central (schwa)" },
+        // ⚠ SECOND SUSPECTED DEFECT, ALSO FILED RATHER THAN FIXED — ONE PHONEME, TWO SYMBOLS. This letter
+        // ships [ʌ] while `inherentVowel` above ships [ə], and that comment calls the [ʌ] realisation
+        // "folded", i.e. the same sound. So अञ्जन reads ʌnd͡ʒən — both symbols, one word, two syllables
+        // apart. `provenance` compounds it: the declared inventory is /i e ɛ a ʌ ɔ o u/, which contains ʌ
+        // and NOT ə, so neither value matches the file's own statement of the system.
+        // NOT A COSMETIC SPLIT: ʌ is in 99 of the 200 golden rows and ə in all 200.
+        // Every non-derived Devanagari sibling writes ə here (hi/mr/awa/mai/hne); only magahi.jsonc, which
+        // was derived from this file, copies the ʌ. rangpuri.jsonc also splits (अ→ɔ over an ə inherent)
+        // but documents an Eastern-Indic reason; this file documents none.
+        // ⚠ THE DIRECTION IS NOT OBVIOUS, which is why this is filed and not fixed: folding ʌ→ə matches the
+        // inherent vowel and the siblings, folding ə→ʌ matches `provenance`'s inventory. The 1622-pair
+        // grammar-mined referee decides it; it is not in the repo. Whichever way, both engines move
+        // together and csharp/goldens/bho.tsv is regenerated with `tools/gen_variant_golden.mts hi bho`.
+        "अ": { "ipa": "ʌ", "note": "short central (schwa) — see the filed defect above" },
         "आ": { "ipa": "ɑ", "note": "long open" },
         "इ": { "ipa": "i", "note": "short near-close front" },
         "ई": { "ipa": "i", "note": "long close front" },

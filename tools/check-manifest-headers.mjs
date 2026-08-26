@@ -38,7 +38,7 @@ function headers(src) {
     return map;
 }
 
-const files = execSync(`git diff --name-only ${base}...HEAD -- 'src/languages/**/*.jsonc'`, { encoding: "utf8" })
+const files = execSync(`git diff --name-only ${base}...HEAD -- 'data/languages/**/*.jsonc'`, { encoding: "utf8" })
     .trim().split("\n").filter(Boolean);
 
 if (files.length === 0) {
@@ -51,10 +51,17 @@ if (files.length === 0) {
 }
 
 let bad = 0;
+let compared = 0, unreadable = 0;
 for (const f of files) {
     if (!existsSync(f)) continue; // deleted
     let before;
-    try { before = headers(execSync(`git show ${base}:${f}`, { encoding: "utf8" })); } catch { continue; } // new file
+    // ⚠ `stdio: pipe` so git's "exists on disk, but not in <base>" goes to the catch instead of the
+    // terminal. The catch means "no version at base to compare against" — usually a new manifest, but also
+    // EVERY file when the base predates a tree move, which is how this loop can compare nothing at all.
+    // Counted, and reported below, so an "ok" always states what it actually looked at.
+    try { before = headers(execSync(`git show ${base}:${f}`, { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] })); }
+    catch { unreadable++; continue; }
+    compared++;
     const src = readFileSync(f, "utf8");
     const after = headers(src);
     // The defect is a header SEPARATED from its key — the old comment survives in the file, now heading
@@ -66,6 +73,13 @@ for (const f of files) {
         if (comment === "") continue; // had no header to lose
         const now = after.get(key);
         if (now === undefined) continue; // key removed — a different question
+        // ⚠ AN EXTENDED HEADER IS NOT AN ORPHANED ONE, and this exemption is what makes the gate usable:
+        // appending a caveat to a header leaves the old text in the file AND still above its own key, which
+        // is indistinguishable from an orphaning by the `normalized.includes` test alone. In a real
+        // orphaning the old text has moved to a DIFFERENT key, so `now` cannot contain it. Without this the
+        // gate fires on every deliberate header improvement — the same "train people to ignore it" failure
+        // the comment above guards against, just from the other direction.
+        if (now.includes(comment)) continue;
         if (now !== comment && normalized.includes(comment)) {
             bad++;
             console.error(`✗ ${f}: "${key}" no longer carries its own header`);
@@ -74,9 +88,21 @@ for (const f of files) {
         }
     }
 }
+// ⚠ SAME RULE AS THE EMPTY-DIFF BRANCH ABOVE, and it must be decided BEFORE anything prints "ok": changed
+// files that were all unreadable at the base compared nothing, and "ok" over nothing is the vacuous pass
+// that let #755 ship.
+if (bad === 0 && compared === 0) {
+    console.error(
+        `check-manifest-headers: NOTHING WAS ACTUALLY COMPARED against ${base}.\n` +
+        `  ${files.length} changed manifest(s), none of them readable at ${base} — a base that predates the\n` +
+        `  data-tree move does this to every file. Pick a base where these paths exist.`,
+    );
+    process.exit(2);
+}
+const newAtBase = unreadable === 0 ? "" : `, ${unreadable} with no version at ${base} (new file(s))`;
 console.log(
     bad === 0
-        ? `ok — ${files.length} changed manifest(s), every pre-existing key kept its own header`
+        ? `ok — ${files.length} changed manifest(s), ${compared} compared${newAtBase}; every pre-existing key kept its own header`
         : `${bad} orphaned header(s)`,
 );
 process.exit(bad === 0 ? 0 : 1);
