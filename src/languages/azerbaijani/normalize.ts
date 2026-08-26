@@ -82,14 +82,28 @@ export function ordinalWords(n: number): string | undefined {
     return words.join(" ");
 }
 
-/** Multi-dot abbreviations and era markers. Handled BEFORE the single-dot rule so no interior dot survives
- *  as a phrase break. `e.ə.` = eramızdan əvvəl (BC); `b.e.` = bizim eradan əvvəl (BC variant); `b.e.` also
- *  covers the corpus's `BE` (before era). */
+/**
+ * Multi-dot abbreviations and era markers. Handled BEFORE the single-dot rule so no interior dot survives
+ * as a phrase break.
+ *
+ * ⚠ THE TWO ERAS ARE DIFFERENT ABBREVIATIONS AND THIS TABLE USED TO CONFLATE THEM. Azerbaijani writes the
+ * COMMON ERA as `b.e.` — *bizim eramız*, "our era" — and the one BEFORE it as `e.ə.` (*eramızdan əvvəl*) or,
+ * spelled in full, `b.e.ə.`. The table read `b.e.` as "bizim eradan əvvəl", i.e. as BCE, which INVERTS every
+ * date it touches. The corpus settles it rather than the grammar: its one instance is
+ *     "…Erkən Orta Əsrlər olaraq bilinir (BE 1000-1300)."
+ * — the Early Middle Ages, which are 1000-1300 CE. Read as BCE it came out three thousand years wrong.
+ *
+ * ⚠ `b.e.ə.` MUST BE TRIED FIRST. Its tail IS `e.ə.`, and the `e.ə.` entry's lookbehind rejects only a
+ * LETTER before the match — a dot is not one — so the shorter pattern matched inside the longer one and left
+ * a bare `b.` behind: `b.e.ə. 500-cü ildə` read *b . eramızdan əvvəl…*, a stray consonant plus the very
+ * phrase break this step exists to prevent.
+ */
 const MULTI_DOT: readonly (readonly [string, string])[] = [
+    ["b\\.\\s?e\\.\\s?ə\\.", "eramızdan əvvəl"],
     ["e\\.\\s?ə\\.", "eramızdan əvvəl"],
     ["E\\.\\s?ə\\.", "eramızdan əvvəl"],
-    ["b\\.\\s?e\\.", "bizim eradan əvvəl"],
-    ["\\bBE(?=\\s+\\d)", "bizim eradan əvvəl"],
+    ["b\\.\\s?e\\.", "bizim eramız"],
+    ["\\bBE(?=\\s+\\d)", "bizim eramız"],
 ];
 
 /** Single-dot abbreviations → the spoken words. `Dr.` = Doktor, `Şək.` = şəkil (figure). The dot is a phrase
@@ -100,11 +114,22 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
     "şək": "şəkil",
 };
 
-/** Azerbaijani letter names — the standard alphabet (a, be, ce, çe, de, e, ə, fe, ge, he, xı, ı, i, je,
- *  ke, el, em, en, o, ö, pe, er, se, şe, te, u, ü, ve, ye, ze). The g2p spells them through itself. */
+/**
+ * Azerbaijani letter names — the standard 32-letter alphabet (a, be, ce, çe, de, e, ə, fe, ge, ğe, he, xı,
+ * ı, i, je, ke, qe, el, em, en, o, ö, pe, er, se, şe, te, u, ü, ve, ye, ze). The g2p spells them through
+ * itself.
+ *
+ * ⚠ ⟨q⟩ AND ⟨ğ⟩ WERE MISSING, AND A MISSING NAME IS NOT A PARTIAL SPELLING. `core/initialisms.ts`'s
+ * `spellOut` returns undefined if ANY letter of the run is unnamed, so the whole token falls through to the
+ * word path as raw ASCII — and ⟨q⟩ is one of the language's own letters, not a foreign import. Measured on
+ * the FLEURS corpus, which carries `HQ` and `QVC`: HQ → *hx* (the word-final q devoicing, on an acronym),
+ * QVC → *ɡvd͡ʒ*. The commonest casualty is not in FLEURS at all: QHT (*Qeyri-Hökumət Təşkilatı*, NGO) read
+ * *ɡht*. Both names follow the table's own exceptionless consonant pattern, letter + ⟨e⟩ (be ce çe de fe ge
+ * he je ke pe se şe te ve ye ze) — ⟨x⟩'s *xı* is the one deviation and it is already recorded here.
+ */
 const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "a", b: "be", c: "ce", ç: "çe", d: "de", e: "e", ə: "ə", f: "fe", g: "ge", h: "he",
-    x: "xı", ı: "ı", i: "i", j: "je", k: "ke", l: "el", m: "em", n: "en", o: "o", ö: "ö",
+    a: "a", b: "be", c: "ce", ç: "çe", d: "de", e: "e", ə: "ə", f: "fe", g: "ge", ğ: "ğe", h: "he",
+    x: "xı", ı: "ı", i: "i", j: "je", k: "ke", q: "qe", l: "el", m: "em", n: "en", o: "o", ö: "ö",
     p: "pe", r: "er", s: "se", ş: "şe", t: "te", u: "u", ü: "ü", v: "ve", y: "ye", z: "ze",
 };
 
@@ -149,8 +174,17 @@ export function normalizeAzerbaijani(input: string): string {
     // 1) ERA MARKERS and MULTI-DOT ABBREVIATIONS. FIRST, before the single-dot rule — otherwise the
     //    single-dot rule consumes `e.`/`b.` and leaves `ə.`/`e.` behind as an interior phrase break.
     //    Also before the dotted-capital rule, so `E.ə.` is not offered to it.
+    //    Two branches, as in step 3: the marker's FINAL dot is KEPT when the marker ends the string, where it
+    //    really is the sentence period, and consumed otherwise.
+    //    ⚠ THE END BRANCH DOES NOT APPEND `\.` — and that is the whole of the fix here. This idiom is
+    //    Dutch's (nl/normalize.ts step 1), where the bodies are written WITHOUT their final dot (`v\.\s?Chr`)
+    //    and both branches supply it. These bodies carry their own (`e\.\s?ə\.`), so appending a second one
+    //    asked for `e.ə..` and the branch never fired at all: a sentence ending "…məbəd e.ə." lost its
+    //    terminal pause outright, silently, because the bare branch below then ate the marker dot and all.
+    //    Measured before the fix: 0 of the 3,838 FLEURS az lines and 0 of the 200 golden rows end on an era
+    //    marker, so nothing observable moved — the branch was dead, not wrong-but-load-bearing.
     for (const [body, word] of MULTI_DOT) {
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=\\s*$)`, "giu"), `${word}.`);
+        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${body}(?=\\s*$)`, "giu"), `${word}.`);
         s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${body}`, "giu"), word);
     }
 
@@ -264,8 +298,14 @@ export function normalizeAzerbaijani(input: string): string {
     // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
     // still refused by the lookbehind.
     s = s.replace(/(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "mənfi $1");
+    // ⚠ `azLower`, NOT `toLowerCase`, for the reason `normalizeInitialisms` states above — and this call
+    // was the one site in the file that still had the plain fold. JS lowercase maps the DOTLESS capital
+    // `I` to dotted `i`, which the letter-name table answers with *i*, so `I&O` read *i və o* where
+    // Azerbaijani says *ı və o* — the same defect the initialism pass was fixed for, in the arm nobody
+    // re-checked. `İ` folds to `i` + U+0307, which the table cannot key on at all, so it fell through to
+    // the bare capital and only reached *i* by way of the tokenizer's own İ→i normalization.
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) =>
-        `${LETTER_NAME[a.toLowerCase()] ?? a} və ${LETTER_NAME[b.toLowerCase()] ?? b}`);
+        `${LETTER_NAME[azLower(a)] ?? a} və ${LETTER_NAME[azLower(b)] ?? b}`);
     s = s.replace(/\s&\s/gu, " və ");
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 bərabərdir $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 kiçikdir $2");

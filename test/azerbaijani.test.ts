@@ -128,6 +128,34 @@ describe("Azerbaijani text normalization", () => {
         expect(ph("Corc V. Buş")).toBe("d͡ʒˈoɾd͡ʒ v bˈuʃ");
     });
 
+    // ⚠ AN ERA MARKER MAY END THE SENTENCE, and then its final dot IS the sentence period. The end-of-string
+    // branch used to ask for a doubled dot (the bodies already carry one), so it never fired and the pause
+    // was consumed with the marker.
+    test("a sentence-final era marker keeps its clause break", () => {
+        expect(normalizeAzerbaijani("Məbəd e.ə.")).toBe("Məbəd eramızdan əvvəl.");
+        expect(normalizeAzerbaijani("Məbəd b.e.ə.")).toBe("Məbəd eramızdan əvvəl.");
+        // ...and mid-sentence it must still NOT gain one.
+        expect(normalizeAzerbaijani("e.ə. 323-cü ildə")).toBe("eramızdan əvvəl üç yüz iyirmi üçüncü ildə");
+    });
+
+    // ⚠ `b.e.` IS THE COMMON ERA, NOT BEFORE IT — *bizim eramız*. Reading it as BCE inverted every date it
+    // touched, and the corpus's own instance is the Early Middle Ages, "(BE 1000-1300)", which are CE.
+    // `b.e.ə.` is the full spelling of BCE, and it must beat the `e.ə.` entry to its own tail.
+    test("the two eras are different abbreviations: b.e. is CE, e.ə. and b.e.ə. are BCE", () => {
+        expect(normalizeAzerbaijani("b.e. 1200-cü ildə")).toBe("bizim eramız min iki yüzüncü ildə");
+        expect(normalizeAzerbaijani("BE 1000")).toBe("bizim eramız 1000");
+        expect(normalizeAzerbaijani("b.e.ə. 500-cü ildə")).toBe("eramızdan əvvəl beş yüzüncü ildə"); // was *b. eramızdan…*
+        expect(normalizeAzerbaijani("e.ə. 500-cü ildə")).toBe("eramızdan əvvəl beş yüzüncü ildə");
+    });
+
+    // ⚠ A MISSING LETTER NAME IS NOT A PARTIAL SPELLING: `spellOut` declines the WHOLE run, so the token
+    // reaches the phoneme sink as raw ASCII. ⟨q⟩ and ⟨ğ⟩ are the language's own letters and were absent.
+    test("q and ğ have letter names, so an acronym carrying them spells out", () => {
+        expect(ph("QHT nümayəndəsi")).toBe("ɡˈe hˈe tˈe nymɑjændæsˈi"); // was *ɡht*
+        expect(ph("QVC kanalı")).toBe("ɡˈe vˈe d͡ʒˈe kɑnɑɫˈɯ"); // was *ɡvd͡ʒ*
+        expect(ph("Q&A bölməsi")).toBe("ɡˈe vˈæ ˈɑ bœlmæsˈi"); // was *x və a*, the q devoiced word-finally
+    });
+
     test("percent takes ANY case suffix, with the linking vowel an n-initial one needs", () => {
         expect(ph("30%-i")).toBe("otˈuz fɑizˈi");
         expect(ph("88%-ni")).toBe("sæcsˈæn sæcːˈiz fɑizinˈi"); // faizini — *faizni is not a possible cluster
@@ -179,5 +207,14 @@ describe("Azerbaijani text normalization", () => {
     test("initialisms spell out by Azerbaijani letter name; ABŞ stays the word [ɑbʃ]", () => {
         expect(ph("BMT həm də")).toBe("bˈe ˈem tˈe hˈæm dˈæ");
         expect(ph("ABŞ imperializminin")).toBe("ˈɑbʃ impeɾiɑlizminˈin");
+    });
+
+    // ⚠ THE DOTLESS I IS THE WHOLE TEST. `I` names the letter *ı*, and JS `toLowerCase` folds it to dotted
+    // `i` — which the letter-name table happily answers with *i*, the WRONG letter. The initialism pass
+    // was fixed with `azLower`; the `X&Y` arm still had the plain fold, so it read *i və o*.
+    test("the ampersand letter-pair uses AZERBAIJANI lowercase, so I names ı and not i", () => {
+        expect(normalizeAzerbaijani("I&O şirkəti")).toBe("ı və o şirkəti");
+        expect(normalizeAzerbaijani("A&B şirkəti")).toBe("a və be şirkəti");
+        expect(ph("I&O şirkəti")).toBe("ˈɯ vˈæ ˈo ʃiɾcætˈi");
     });
 });
