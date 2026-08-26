@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { phonemizeWord } from "../src/languages/maithili/maithili.ts";
+import { createMaithili, phonemizeWord } from "../src/languages/maithili/maithili.ts";
 
 // Canonical-IPA goldens for Maithili / मैथिली (mai) — Eastern Indo-Aryan (Bihari group), Devanagari. Reuses the
 // Hindi engine with the Maithili divergences: SHORT e/o (incl. the dedicated short-e/short-o letters ऎ/ऒ), the
@@ -45,6 +45,10 @@ describe("Maithili canonical IPA", () => {
         // fold or the referee scores a different engine from the shipped one.
         expect(phonemizeWord("अब॑")).toBe("ˈəbə");
         expect(phonemizeWord("करल॑")).toBe(phonemizeWord("करलऽ"));
+        // …and on the PUBLIC engine, not only on this module's convenience wrapper.
+        const e = createMaithili() as unknown as { word(w: string): string; wordRules(w: string): string };
+        expect(e.word("अब॑")).toBe("ˈəbə");
+        expect(e.wordRules("अब॑")).toBe("ˈəbə");
     });
 
     // ⚠ Hindi does NOT fold U+0951 — the mark is Maithili data, and this pins that the sibling engine is
@@ -66,6 +70,10 @@ describe("Maithili canonical IPA", () => {
     test("₹ is read by the inherited Hindi symbol tier, not stripped", () => {
         expect(phonemize("₹500", "mai")).toBe("pˈaː̃t͡ʃ sˈəʊ ɾˈʊpje");
         expect(phonemize("50%", "mai")).toBe("pət͡ʃˈaːs pɾˈət̪ɪʃət̪"); // the unconfirmed inherited word
+        // ⚠ …but `stripSymbols: "₹"` is NOT thereby dead. The tier claims the sign only beside an amount,
+        // so a stranded ₹ still reaches the strip and comes out silent rather than as a stray रुपये.
+        expect(phonemize("₹ अछि", "mai")).toBe("ˈət͡ʃʰɪ");
+        expect(phonemize("₹", "mai")).toBe("");
     });
 
     test("shared Indo-Aryan core (Hindi-identical where Maithili does not diverge)", () => {

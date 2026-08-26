@@ -60,11 +60,13 @@ import { loadSharedPhonology } from "../../core/phonology.ts";
  */
 const UDATTA_AS_AVAGRAHA = /॑/gu;
 
-let MAI: ReturnType<typeof makeNativeHindi> | undefined;
+const fold = (s: string) => s.replace(UDATTA_AS_AVAGRAHA, "ऽ");
+
+let MAI: ReturnType<typeof engine> | undefined;
 function engine(foreign?: ForeignPhonemizer) {
     const def = loadManifest<HindiDef>(import.meta.url, "maithili.jsonc");
     const hindi = makeHindiNormalizer(def.numbers, def);
-    return makeNativeHindi(
+    const e = makeNativeHindi(
         def,
         loadSharedPhonology(),
         foreign,
@@ -76,8 +78,15 @@ function engine(foreign?: ForeignPhonemizer) {
         // reaching `retainOnAvagraha` — an `endsWith("ऽ")` on the SPELLING — carries the sign the writer
         // meant. (An earlier version of this note claimed the token class excluded U+0951. It does not;
         // `phonemize("म॑थिली", "hi")`, which has no fold, reads one word.)
-        { normalize: (input: string) => hindi(input.replace(UDATTA_AS_AVAGRAHA, "ऽ")) },
+        { normalize: (input: string) => hindi(fold(input)) },
     );
+    // ⚠ …AND THE WORD ENTRY POINTS NEED IT SEPARATELY, because neither runs the normalizer: `text()` is the
+    // only path the override above reaches. Until this wrapper existed the referee eval and the shipped
+    // reading disagreed on this module's own signature construct — `word("अब॑")` gave *ˈəb* against
+    // `text("अब॑")`'s *ˈəbə* — and no golden could show it, since every golden goes through `text()`.
+    // `text` keeps the UNWRAPPED `e.word` by construction (it closes over the inner one), so nothing
+    // double-folds: by the time a token reaches it the normalizer has already replaced every U+0951.
+    return { ...e, word: (w: string) => e.word(fold(w)), wordRules: (w: string) => e.wordRules(fold(w)) };
 }
 
 /** Build the Maithili phonemizer. `foreign` handles embedded Latin runs. */
@@ -85,15 +94,7 @@ export function createMaithili(foreign?: ForeignPhonemizer): { text(input: strin
     return engine(foreign);
 }
 
-/**
- * Bare word→IPA (tests / eval).
- *
- * ⚠ THE U+0951 FOLD IS APPLIED HERE TOO, and it has to be, because `engine().word()` does NOT run the
- * normalizer — the override above reaches `text()` only. Until this line existed the referee eval and the
- * shipped path disagreed on the module's own signature construct: `phonemizeWord("अब॑")` read *ˈəb* while
- * `phonemize("अब॑", "mai")` read *ˈəbə*. No golden moves — goldens go through `text()` — so the gate could
- * never have shown it.
- */
+/** Bare word→IPA (tests / eval). The U+0951 fold rides on `engine()`'s wrapper — see the ⚠ there. */
 export function phonemizeWord(w: string): string {
-    return (MAI ??= engine()).word(w.replace(UDATTA_AS_AVAGRAHA, "ऽ"));
+    return (MAI ??= engine()).word(w);
 }

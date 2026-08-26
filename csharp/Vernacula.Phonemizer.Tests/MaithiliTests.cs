@@ -54,6 +54,10 @@ public class MaithiliTests
     {
         Assert.Equal("ˈəbə", MaithiliPhonemizer.PhonemizeWord("अब॑"));
         Assert.Equal(MaithiliPhonemizer.PhonemizeWord("करलऽ"), MaithiliPhonemizer.PhonemizeWord("करल॑"));
+        // …and on the PUBLIC engine, whose Word/WordRules a caller can reach directly.
+        var e = MaithiliPhonemizer.CreateMaithili();
+        Assert.Equal("ˈəbə", e.Word("अब॑"));
+        Assert.Equal("ˈəbə", e.WordRules("अब॑"));
         // …and Hindi, which shares the engine, must not have acquired the fold.
         Assert.Equal("ˈəb", Phonemizer.Phonemize("अब॑", "hi"));
     }
@@ -73,6 +77,10 @@ public class MaithiliTests
     [Theory]
     [InlineData("₹500", "pˈaː̃t͡ʃ sˈəʊ ɾˈʊpje")]
     [InlineData("50%", "pət͡ʃˈaːs pɾˈət̪ɪʃət̪")]
+    // ⚠ …but `stripSymbols: "₹"` is NOT thereby dead: the tier claims the sign only beside an amount, so a
+    // stranded ₹ still reaches the strip and comes out silent rather than as a stray रुपये.
+    [InlineData("₹ अछि", "ˈət͡ʃʰɪ")]
+    [InlineData("₹", "")]
     public void TheInheritedHindiSymbolTierClaimsTheSign(string text, string ipa) =>
         Assert.Equal(ipa, Phonemizer.Phonemize(text, "mai"));
 }
