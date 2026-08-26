@@ -143,7 +143,7 @@ public static class Hindi
         // ⚠ The Latin group spans ALL of Latin, not just ASCII: the group already means "foreign" (its
         // match goes straight to the injected reader), and narrowing it shreds accented foreign names.
         var tokenRe = JsRegex.Compile(
-            $"([{script.Word}]+)|(\\p{{Script=Latin}}[\\p{{Script=Latin}}\\p{{M}}]*)|([{DIGIT_CLASS}]+(?:,[{DIGIT_CLASS}]+)*(?:\\.[{DIGIT_CLASS}]+)?)"
+            $"([{script.Word}]+)|(\\p{{Script=Latin}}[\\p{{Script=Latin}}\\p{{M}}]*)|([{DIGIT_CLASS}]+(?:(?<!(?<![{DIGIT_CLASS}])0),[{DIGIT_CLASS}]+)*(?:\\.[{DIGIT_CLASS}]+)?)"
             + $"|([।॥.?!,;:]){(symbolClass.Length > 0 ? $"|([{symbolClass}])" : "")}",
             "gu");
 

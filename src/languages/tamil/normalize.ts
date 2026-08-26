@@ -167,7 +167,7 @@ export function normalizeTamil(input: string): string {
     //    "ஐந்து <pause> பூஜ்ஜியம் <pause> பூஜ்ஜியம்". BOTH grouping systems occur: Western 3-digit blocks
     //    (100,000) and Indian 2-then-3 (7,83,562), so the block is 2 OR 3 digits. Requiring ≥2 digits
     //    after the comma is what keeps a genuine list ("11, 12 வது" — always spaced) out of the rule.
-    s = s.replace(/(?<=\d),(?=\d{2,3}(?:,\d|[^\d]|$))/gu, "");
+    s = s.replace(/(?<=\d)(?<!(?<![\d])0),(?=\d{2,3}(?:,\d|[^\d]|$))/gu, "");
 
     // 3) ERA markers, BEFORE the initialism rule (step 4) — கி.மு. is a letter pair by shape and would
     //    otherwise be spelled out as [kɪ mʊ] with the era lost.

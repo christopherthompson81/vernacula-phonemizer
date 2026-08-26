@@ -214,7 +214,7 @@ public static class PortuguesePhonemizer
         RenderWord(word, Lexicon().GetValueOrDefault(word.ToLowerInvariant()), dialect);
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
-    private static readonly JsRe TOKEN = JsRegex.Compile("([a-zà-ÿ]+)|(\\d+(?:\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])", "giu");
+    private static readonly JsRe TOKEN = JsRegex.Compile("([a-zà-ÿ]+)|(\\d+(?:(?<!(?<!\\d)0)\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])", "giu");
 
     private static readonly JsRe DOT_G = JsRegex.Compile("\\.", "g");
 

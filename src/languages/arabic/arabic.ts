@@ -155,7 +155,9 @@ const EXTENDED = Object.keys(MANIFEST.consonants)
     .map((c) => `\\u${c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`)
     .join("");
 const TOKEN = new RegExp(
-    `([ء-يٰٱً-ْـ${EXTENDED}]+)|(\\d+(?:,\\d{3})*(?:\\.\\d+)?)|([۔.!؟?،,؛;:…])`,  // tatweel
+    // ⚠ A GROUPING COMMA MAY NOT FOLLOW A LONE `0` — the run was joined and `0,001` read as *waːħid*,
+    // one, for one-thousandth. No convention groups from zero. Reaches the whole Arabic family.
+    `([ء-يٰٱً-ْـ${EXTENDED}]+)|(\\d+(?:(?<!(?<!\\d)0),\\d{3})*(?:\\.\\d+)?)|([۔.!؟?،,؛;:…])`,  // tatweel
     "gu",
 );
 /** Arabic-Indic digits ٠..٩ → ASCII. */

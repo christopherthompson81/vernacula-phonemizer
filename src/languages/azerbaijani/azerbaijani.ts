@@ -31,7 +31,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // "400 000" reads *dörd yüz sıfır* and "6,5" *altı , beş*. normalize.ts claims clocks and the version dot
 // first, so a comma reaching here is a decimal, a period-thousands is a group, and a plain digit run is a
 // bare number.
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+\\.\\d{3}(?:\\.\\d{3})*|\\d+,\\d+|\\d+)|([.!?…,;:])`, "giu");
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?<!(?<!\\d)0)\\.\\d{3}(?:\\.\\d{3})*|\\d+,\\d+|\\d+)|([.!?…,;:])`, "giu");
 
 /**
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted

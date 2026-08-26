@@ -84,7 +84,11 @@ type Token =
 // and the run was shattered around them: `తెలుగు` reached the Telugu engine as three bare consonants and
 // read "ta la ga" instead of "telugu". Marks may follow a Latin letter; they may not begin a token.
 const TOKEN_RE =
-    /(\d[\d,]*(?:\.\d+)?)(st|nd|rd|th)?|(\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*['’]?)|([.?!,;:])/gu;
+    // ⚠ A GROUPING COMMA MAY NOT FOLLOW A LONE `0`. `[\d,]*` accepted any comma run and the reader
+    // strips `[,.]` before BigInt, so `0,001` became `0001` and read as ONE — a 1000× error on the
+    // European decimal an English engine most often meets. `\d+(?:,\d+)*` is the same language
+    // otherwise, minus a TRAILING comma, which is a clause mark and now reads as the pause it is.
+    /(\d+(?:(?<!(?<!\d)0),\d+)*(?:\.\d+)?)(st|nd|rd|th)?|(\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*['’]?)|([.?!,;:])/gu;
 
 export class EnglishPhonemizer {
     constructor(

@@ -111,7 +111,10 @@ const SYMBOLS = makeSymbolNormalizer({
 // diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
 // engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix.
 const TOKEN = new RegExp(
-    `([${URDU_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+(?:[.,][${DIGIT_CLASS}]+)?)|([۔؟،؛.?!,;:])`,
+    // ⚠ A GROUPING COMMA MAY NOT FOLLOW A LONE `0`: `toAscii` strips every comma, so `0,001` became
+    // `0001` and read as ONE. The DOT arm is untouched — it is Urdu's decimal.
+    `([${URDU_WORD}]+)|(${LATIN_RUN})`
+        + `|([${DIGIT_CLASS}]+(?:(?:(?<!(?<![${DIGIT_CLASS}])0),|\\.)[${DIGIT_CLASS}]+)?)|([۔؟،؛.?!,;:])`,
     "gu",
 );
 

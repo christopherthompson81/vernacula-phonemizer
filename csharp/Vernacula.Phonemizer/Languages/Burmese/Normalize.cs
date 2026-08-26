@@ -79,7 +79,7 @@ public static class Normalize
         // ⚠ ZERO-WIDTH, so every separator in the run is claimed in ONE pass. The consuming form ate the
         // trailing group, the scan resumed inside the remainder, and alternate commas survived into a
         // six-digit block the three-digit rule could never claim again — see test/thousands-degrouping.
-        t = JsRegex.Compile($"(?<={Digit()})[,\u066c](?={Digit(3)}(?!{Digit()}))", "gu").Replace(t, "");
+        t = JsRegex.Compile($"(?<={Digit()})(?<!(?<!{Digit()})0)[,\u066c](?={Digit(3)}(?!{Digit()}))", "gu").Replace(t, "");
 
         foreach (var (nre, nword) in UNITS)
             foreach (var (dre, dword) in RATE_DENOMINATORS)

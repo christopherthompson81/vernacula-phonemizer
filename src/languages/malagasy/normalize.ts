@@ -196,7 +196,7 @@ export function normalizeMalagasy(input: string): string {
     //    ⚠ The trailing guard rejects a following DIGIT only, not a following mark, because the French
     //    convention combines both in one number: `299 792,458 km/s` (the speed of light) is space-grouped
     //    AND comma-decimal, and a `(?![\p{Nd}.,])` guard left its integer part as two separate numbers.
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:(?<!(?<!\p{Nd})0)[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 3) THOUSANDS GROUPED WITH A PERIOD — only at exactly three digits, and only when no `°` follows.
     //    ⚠ THE DEGREE IS THE DISCRIMINATOR, and it is the corpus's own: every period-decimal that is not a
@@ -204,7 +204,7 @@ export function normalizeMalagasy(input: string): string {
     //    `44.872°`), while the thousands are populations and money (`25.000fmg`, `30.000 eo ho eo`,
     //    `isam-ponina dia 5.196`). 3 of 3 thousands right, 4 of 5 decimals right; the miss is `~1.666 km`,
     //    a miles-to-kilometres factor, ×1.
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:\.\p{Nd}{3})+)(?![\p{Nd}.,°])/gu, (m) => m.replaceAll(".", ""));
+    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:(?<!(?<!\p{Nd})0)\.\p{Nd}{3})+)(?![\p{Nd}.,°])/gu, (m) => m.replaceAll(".", ""));
 
     // 4) DEGREES — `degre`, POSTPOSED, which is how the corpus writes it (`4.27471 degre`, `3.10228 degre`).
     //    `degrees` is 23,806 in the dump but that is overwhelmingly the commune coordinate stubs; the human

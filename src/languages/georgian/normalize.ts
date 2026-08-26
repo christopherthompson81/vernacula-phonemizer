@@ -390,7 +390,8 @@ export function normalizeGeorgian(input: string): string {
     //    into separate numbers and the grouping comma reads as a CLAUSE PAUSE — `5 000` came out
     //    *χutʰi nuli*, "five zero". This must precede every rule that reads a number or a pause.
     //    Space grouping ×45 in the artifact (`5 000`, `83 500`, `1 900 000`), run twice for two groups.
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1");  // space, NBSP, NNBSP, thin space
+    // ⚠ AND A GROUPING SPACE MAY NOT FOLLOW A LONE `0`, the guard the COMMA arm below already states.
+    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d])0)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1");  // space, NBSP, NNBSP, thin space
     //    Comma grouping ×7, all English-style imports; `,`+1–2 digits (×105) is the decimal and is NOT
     //    touched. A leading `0,` is excluded — that is where a genuine 3-place Georgian decimal would be.
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d.,])/gu, (_m, head: string, rest: string) =>

@@ -194,7 +194,7 @@ export function normalizeSinhala(input: string): string {
     // 4) THOUSANDS SEPARATOR — before anything that reads a dot or a digit run, or the comma is clause
     //    punctuation: `1,001,450` read *ˈekə , ˈekə , hˈat̪ərə sˈijəjə pˈanəhə*. `grouped` ×6,913 in the dump.
     //    Only 3-digit groups, so a genuine clause comma between numbers (`ලකුණු 156ක්, තරග 90කදී`) is safe.
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:,\p{Nd}{3})+)(?![\p{Nd}])/gu, (m) => m.replaceAll(",", ""));
+    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:(?<!(?<!\p{Nd})0),\p{Nd}{3})+)(?![\p{Nd}])/gu, (m) => m.replaceAll(",", ""));
 
     //    A TRUNCATED DECIMAL — `ස්කන්ධයෙන් .9% ක්` writes `0.9%` without its zero, and the leading dot then
     //    survived the percent rule and became a sentence break (*…ස්කන්ධයෙන් . සියයට 9…*). Restoring the zero

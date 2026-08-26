@@ -141,7 +141,9 @@ export function normalizeKurmanji(input: string): string {
     //    conventions (the table in the header). Three digits after the mark is a THOUSANDS group, whichever
     //    mark it is, so `15.354` and `10,000` both de-group and `1.000.000.000` de-groups throughout.
     //    Must run before the suffix rule at step 4, which needs a bare integer to speak.
-    const group = /(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:([.,])\p{Nd}{3})+)(?![\p{Nd}.,])/gu;
+    // ⚠ AND A GROUP MAY NOT FOLLOW A LONE `0` — no convention groups from zero, so `0,001` joining to
+    //    `0001` is a 1000× error rather than a reading of it.
+    const group = /(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:([.,])\p{Nd}{3})+)(?![\p{Nd}.,])/gu;
     s = s.replace(group, (m, _g, sep: string) => m.replaceAll(sep, ""));
 
     // 4) PERCENT — `ji sedî` is a PHRASE whose first word the corpus already writes before the sign, and

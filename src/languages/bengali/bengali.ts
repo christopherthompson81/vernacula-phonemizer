@@ -143,7 +143,11 @@ export function makeNativeBengali(
     // diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
     // engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix.
     const tokenRe = new RegExp(
-        `([${BENGALI_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
+        // ⚠ A GROUPING COMMA MAY NOT FOLLOW A LONE `0` — `0,001` joined to `0001` and read as ONE. Same
+        // nested-lookbehind guard the de-grouping rules take, against DIGIT_CLASS so it covers the
+        // native digits this token also spans.
+        `([${BENGALI_WORD}]+)|(${LATIN_RUN})`
+        + `|([${DIGIT_CLASS}]+(?:(?<!(?<![${DIGIT_CLASS}])0),[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
             `|([।॥.?!,;:])${symbolClass ? `|([${symbolClass}])` : ""}`,
         "gu",
     );

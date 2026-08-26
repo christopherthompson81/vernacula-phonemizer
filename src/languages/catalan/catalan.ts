@@ -217,7 +217,7 @@ export function phonemizeWord(word: string, unstressed = false): string {
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Catalan letters incl. accents + ç + the l·l middot; numbers: dot = thousands, comma = decimal.
-const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "·")})|(\\d+(?:\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])`, "giu");
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "·")})|(\\d+(?:(?<!(?<!\\d)0)\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])`, "giu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where

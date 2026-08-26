@@ -72,7 +72,7 @@ public static class TurkishPhonemizer
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        $"({HostWord.LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:\\.\\d{{3}})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])", "giu");
+        $"({HostWord.LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:(?<!(?<!\\d)0)\\.\\d{{3}})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])", "giu");
 
     /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zçğıiöşüâîûİ]";

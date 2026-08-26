@@ -122,7 +122,7 @@ public static class Bengali
         var strip = def.StripSymbols ?? "";
         var symbolClass = string.Concat(symbols.Keys) + strip;
         var tokenRe = JsRegex.Compile(
-            $"([{Unicode.BENGALI_WORD}]+)|({HostWord.LATIN_RUN})|([{DIGIT_CLASS}]+(?:,[{DIGIT_CLASS}]+)*(?:\\.[{DIGIT_CLASS}]+)?)"
+            $"([{Unicode.BENGALI_WORD}]+)|({HostWord.LATIN_RUN})|([{DIGIT_CLASS}]+(?:(?<!(?<![{DIGIT_CLASS}])0),[{DIGIT_CLASS}]+)*(?:\\.[{DIGIT_CLASS}]+)?)"
                 + $"|([।॥.?!,;:]){(symbolClass.Length > 0 ? $"|([{symbolClass}])" : "")}",
             "gu");
 

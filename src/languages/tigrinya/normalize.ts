@@ -193,11 +193,11 @@ export function makeTigrinyaNormalizer(
         //    `451,170.7` are untouched because the fraction is not exactly three digits.
         //    RESIDUAL RISK, stated: a genuine 3-decimal-place figure written without any comma group would
         //    be de-grouped. The artifact contains none, and 4-against-1 is the whole argument.
-        s = s.replace(/(?<![\d,.])[\d.]+(?![\d,.])/gu, (n) => n.replace(/(\d)\.(?=\d{3}(?!\d))/gu, "$1"));
+        s = s.replace(/(?<![\d,.])[\d.]+(?![\d,.])/gu, (n) => n.replace(/(\d)(?<!(?<![\d])0)\.(?=\d{3}(?!\d))/gu, "$1"));
         //    Then the comma, ×66. `1,600` read as `ħadə , ʃɨdʃtə miʔti` — "one, six hundred", a phrase break
         //    inside a number.
-        s = s.replace(/(\d),(?=\d{3}(?!\d))/gu, "$1");
-        s = s.replace(/(\d),(?=\d{3}(?!\d))/gu, "$1"); // second pass for 5,000,000
+        s = s.replace(/(\d)(?<!(?<![\d])0),(?=\d{3}(?!\d))/gu, "$1");
+        s = s.replace(/(\d)(?<!(?<![\d])0),(?=\d{3}(?!\d))/gu, "$1"); // second pass for 5,000,000
 
         // 7. RANGES, restricted to the ካብ ("from") frame — `ካብ 51-70 ኪ.ሜ` → `ካብ 51 ክሳብ 70 ኪ.ሜ`. ×5, and
         //    the frame is not invented: the corpus writes `ካብ N ክሳብ M` out in full 15 times.

@@ -291,8 +291,9 @@ export function normalizeSantali(input: string): string {
     // 126 occurrences. ⚠ BOTH CONVENTIONS ARE PRESENT: western 3-3-3 (`᱒᱙᱙,᱗᱙᱒,᱔᱕᱘`) and Indian 2-2-3
     // (`᱑,᱒᱓,᱔᱕᱖`), which is why the group is `{2,3}` and repeated rather than a single `{3}` — a
     // 3-only guard would have left the language's own lakh/crore grouping half-degrouped.
-    s = s.replace(new RegExp(`(?<=${D})(?:,(?=${D}{2,3}(?!${D})))`, "gu"), "");
-    s = s.replace(new RegExp(`(?<=${D}),(?=${D}{3}(?!${D}))`, "gu"), "");
+    // ⚠ AND A GROUPING COMMA MAY NOT FOLLOW A LONE `0` — no convention groups from zero, so `0,001`
+    // joining to `0001` is a 1000× error, not a reading.
+    s = s.replace(new RegExp(`(?<=${D})(?<!(?<!${D})0)(?:,(?=${D}{2,3}(?!${D})))`, "gu"), "");
 
     // ── 5. THE NATIVE DOTTED UNIT ABBREVIATIONS `ᱠ.ᱢ.` AND `ᱢ.` ───────────────────────────────────────
     // The corpus abbreviates its units in OL CHIKI letters with dots — `᱑᱐᱕ ᱠ.ᱢ.` ×4, `᱘00 ᱢ.` ×4 — which

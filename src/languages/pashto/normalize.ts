@@ -274,12 +274,12 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //
         //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK, or a number
         //    followed by its own sentence comma would have its last group split off and spoken as zero.
-        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:،[${D}]{3})+)(?![${D}]|،[${D}])`, "gu"),
+        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0)،[${D}]{3})+)(?![${D}]|،[${D}])`, "gu"),
             (w) => w.replace(/،/gu, ""));
-        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:,[${D}]{3})+)(?![${D}]|,[${D}])`, "gu"),
+        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0),[${D}]{3})+)(?![${D}]|,[${D}])`, "gu"),
             (w) => w.replace(/,/gu, ""));
         //    The DOT form only in its multi-group shape (×35), where a decimal reading is impossible.
-        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:\\.[${D}]{3}){2,})(?![${D}]|\\.[${D}])`, "gu"),
+        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0)\\.[${D}]{3}){2,})(?![${D}]|\\.[${D}])`, "gu"),
             (w) => w.replace(/\./gu, ""));
         //    ⚠ THERE IS NO SPACE ARM, AND THAT IS A MEASUREMENT RATHER THAN AN OMISSION. `D{1,3}( D{3})+`
         //    matches 115 times and NOT ONE of them is a Western-style space grouping. They are phone

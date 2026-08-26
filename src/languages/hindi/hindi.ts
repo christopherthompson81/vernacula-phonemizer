@@ -171,7 +171,13 @@ export function makeNativeHindi(
     // group is its NATIVE word group, so widening there also needed a native-vs-foreign decision.
     // `\p{M}` so a DECOMPOSED accent stays with its base instead of ending the token one character later.
     // ⚠ REACHES 17 LANGUAGES, every one that composes `makeNativeHindi`.
-    `([${script.word}]+)|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)|([${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
+    // ⚠ A GROUPING COMMA MAY NOT FOLLOW A LONE `0`. The number group accepted any comma run, so the
+    // digits were joined and `0,001` read as *एक* — one, for one-thousandth. No convention groups from
+    // zero, so the guard is unambiguous; it is the same nested lookbehind the de-grouping RULES take,
+    // written against `DIGIT_CLASS` rather than `\\d` because this token spans NATIVE digits too.
+    // ⚠ REACHES 17 LANGUAGES, like the Latin widening above.
+    `([${script.word}]+)|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)`
+        + `|([${DIGIT_CLASS}]+(?:(?<!(?<![${DIGIT_CLASS}])0),[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
             `|([।॥.?!,;:])${symbolClass ? `|([${symbolClass}])` : ""}`,
         "gu",
     );
