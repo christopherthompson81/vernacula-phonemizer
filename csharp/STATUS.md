@@ -11,7 +11,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 | `JsRegex.cs` | the pattern translator (407 lines) — **all** regexes route through it |
 | `DataPath.cs` | resolves the shared root `data/` tree; mirrors `src/core/dataPath.ts` |
 | `Registry.cs` | 859 lines, self-registration (`Registry.Register("thai", () => …)`); languages slot in without editing it |
-| Goldens | 109 files in `csharp/goldens/` (100 FLEURS-text, 9 lexicon-only). ⚠ ASYNC-MODE output — the gate calls `PhonemizeAsync` |
+| Goldens | 169 files in `csharp/goldens/` (100 FLEURS-text, 68 mined-corpus, 1 lexicon-only). ⚠ ASYNC-MODE output — the gate calls `PhonemizeAsync` |
 
 ## State
 
@@ -21,12 +21,14 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   tr, ta, sw, yue, vi, ko, jv, it, gu, pl, uk, ro, nl, hu, yo, my, ln, ps, ml, om, ig, sd, su, uz, ff, lo,
   zu, az — all **200/200**. 69 gated codes, 13,800 rows, 0 differ. ORDER IS DESCENDING SPEAKER POPULATION
   (user direction), from `tools/language-catalogue/languages.db`.
-  ⚠ **THE QUEUE HAS BIFURCATED.** Every remaining language above ~22M speakers has NO GOLDEN — pcm (121M),
-  tl (88M), wuu (83M), zsm (80M), pnb (66M), bho (52M), and the rest of the Sinitic and Indic tails. 114
-  goldens exist and 69 are gated, so **45 unported languages already have one** and are portable today;
-  the largest are so (22M), xh (19M), si (18M), km (17M), ne (16M), za (16M), nso (14M), st (14M),
-  kk (13M), sr (12M). Porting order now trades population against whether a corpus has to be sourced
-  first — those are two different jobs and the population ranking no longer picks between them.
+  ⚠ **THE QUEUE WAS BIFURCATED AND IS LARGELY UN-BIFURCATED AGAIN.** Every remaining language above ~22M
+  speakers used to have NO GOLDEN, which made "no golden" the binding constraint on the port: a language
+  with nothing to be byte-identical to cannot be ported at all. `tools/gen_parity_goldens.mts` now has a
+  MINED TIER between the ledger and the lexicon fallback (see `docs/mined_goldens_investigation.md`), and
+  the count went **109 goldens / 84 empty → 169 goldens / 24 empty**. pcm (121M), tl (88M), wuu (83M),
+  pnb (66M) and 56 others are portable today. 169 goldens, 71 gated, so **98 unported languages already
+  have one.** The 24 that remain are the 5 accent variants (own generator), 7 Arabic dialects, and 12
+  codes served by another language's engine with no text of their own — those need a mining run.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,

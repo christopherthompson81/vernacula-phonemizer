@@ -22,8 +22,35 @@
  * enumeration export, and a hand-kept list here would silently rot as languages land.
  *
  * Per language: up to 200 rows of (text \t ipa). Text comes from the FLEURS transcript where the
- * language has one (real running text pins normalization too); otherwise from the module's own
- * lexicon/dictionary TSV headwords (pins the g2p, thinner but real).
+ * language has one (real running text pins normalization too); failing that from `tools/corpus/mined`,
+ * the normalization-mining artifacts (also real running text, see below); and only then from the module's
+ * own lexicon/dictionary TSV headwords (pins the g2p, thinner but real).
+ *
+ * ⚠ THE MINED TIER EXISTS BECAUSE "NO GOLDEN" HAD BECOME THE BINDING CONSTRAINT ON THE PORT. 84 codes had
+ * no text source at all and so shipped no golden, and every unported language above ~22M speakers was in
+ * that set — pcm (121M), tl (88M), wuu (83M), pnb (66M). A language with no golden cannot be ported at
+ * all, because there is nothing to be byte-identical to.
+ * `tools/corpus/mined/<code>.jsonc` already holds real running text for 60 of those 84: `sample` (a
+ * uniform deterministic stride — the language's real distribution when the artifact is dump-sourced) and
+ * `hard` (excerpts selected ADVERSARIALLY to challenge the normalization layer, which is exactly what a
+ * golden wants to pin). Both are fed to the same single `phonemize()` call as every other tier, so the
+ * port's contract is untouched.
+ * ⚠ FOUR THINGS ARE FILTERED, each measured over the 23,214 candidate rows — see
+ * `docs/mined_goldens_investigation.md` for the numbers:
+ *   · RESIDUAL MEDIAWIKI MARKUP (~1.2%: `]]`, `{{`, `== heading ==`, `| table`, a URL, a stray tag). A
+ *     golden row should be text the engine is MEANT to read.
+ *   · LENGTH. `segmentMode` is `paragraph`, so these are paragraphs, not sentences: median 199 characters
+ *     against the existing goldens' 124, and a tail to 1,200 where the existing max is 366. A
+ *     1,200-character row is a bad reference artifact — when it differs, the diff cannot be localised.
+ *   · DUPLICATES, since `hard` and `sample` overlap.
+ *   · nothing else. Brace code-switch notation, which the ledger tier has to skip, occurs ONCE in 23,214.
+ * ⚠ CLEAN ROWS FIRST, and this is the ordering that matters. Mined text is Wikipedia, which cites
+ * Latin-script sources and names constantly, so a foreign-script run — which the script router hands to
+ * ANOTHER engine — is far commoner here than in the ledger corpus (chv 150 rows of 200, cdo 113, wuu 100;
+ * only 8 of the 60 codes have none). A row whose reading needs an unported engine is `Registry.PortPending`
+ * on the C# side: blocked, not wrong, but not gateable either. Putting the self-contained rows first makes
+ * each golden gateable as early as possible. It is deliberately NOT filtered on "is the target ported
+ * today" — that would make a reference artifact a function of the port's progress.
  *
  *   npx tsx tools/gen_parity_goldens.mts    -> csharp/goldens/<code>.tsv
  */
@@ -31,6 +58,8 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { phonemizeAsync } from "../src/index.ts";
 import { clearForeignOov } from "../src/core/foreign.ts";
+import { parseJsonc } from "../src/core/jsonc.ts";
+import { scriptOf } from "../src/core/scripts.ts";
 
 const FLEURS = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 /** The alignment ledger. `read_text.py` and its siblings own it; this reads it and never writes. */
@@ -49,6 +78,56 @@ const fleursFor = new Map<string, string>();
 for (const d of readdirSync(FLEURS)) {
   const code = VARIETY[d] ?? d.split("_")[0];
   if (!fleursFor.has(code)) fleursFor.set(code, d);
+}
+
+const MINED = "tools/corpus/mined";
+/** Residual MediaWiki syntax the miner did not strip, plus the brace notation the ledger tier skips. */
+const MARKUP = /\[\[|\]\]|\{\{|\}\}|<[a-z/!]|https?:\/\/|^\s*\||^=+\s|\s=+$|\{[a-z-]{2,7}:/iu;
+const MIN_LEN = 20, MAX_LEN = 400;
+const LETTER_RUN = /[\p{L}\p{M}]+/gu;
+
+/**
+ * Running text from the mining artifact, filtered and ordered as the header describes: markup and
+ * out-of-band lengths rejected, duplicates dropped, then the rows whose every letter run is in the
+ * language's OWN script first.
+ *
+ * ⚠ "Own script" is the artifact's own MODE, not a declared property — the manifest does not carry one and
+ * a hand-kept table here would rot exactly like the language list would. Taking the most frequent script
+ * across the language's own text is self-correcting and needs no new data.
+ */
+function minedRows(code: string): string[] {
+  const path = `${MINED}/${code}.jsonc`;
+  if (!existsSync(path)) return [];
+  let doc: { sample?: unknown[]; hard?: { text?: unknown }[] };
+  try { doc = parseJsonc(readFileSync(path, "utf8")); } catch { return []; }
+  const raw = [
+    ...(doc.sample ?? []),
+    ...(doc.hard ?? []).map((h) => h?.text),
+  ].filter((t): t is string => typeof t === "string");
+  const kept: string[] = [];
+  const seen = new Set<string>();
+  for (const t of raw) {
+    const s = t.trim().replace(/\s+/gu, " ");
+    if (s.length < MIN_LEN || s.length > MAX_LEN || MARKUP.test(s) || seen.has(s)) continue;
+    seen.add(s);
+    kept.push(s);
+  }
+  const freq = new Map<string, number>();
+  for (const t of kept) for (const m of t.matchAll(LETTER_RUN)) {
+    const sc = scriptOf(m[0]);
+    if (sc !== undefined) freq.set(sc, (freq.get(sc) ?? 0) + 1);
+  }
+  const own = [...freq].sort((a, b) => b[1] - a[1])[0]?.[0];
+  const isClean = (t: string): boolean => {
+    for (const m of t.matchAll(LETTER_RUN)) {
+      const sc = scriptOf(m[0]);
+      if (sc !== undefined && sc !== own) return false;
+    }
+    return true;
+  };
+  // ⚠ A STABLE PARTITION, not a sort — `Array.prototype.sort` is not required to be stable across engines
+  // for a comparator, and the row ORDER inside each half is the artifact's own and must not move.
+  return [...kept.filter(isClean), ...kept.filter((t) => !isClean(t))];
 }
 
 /** First TSV under the language's likely module dirs, first column = headwords. */
@@ -78,7 +157,7 @@ function lexiconWords(code: string): string[] {
 }
 
 mkdirSync(OUT, { recursive: true });
-let full = 0, thin = 0;
+let full = 0, mined = 0, thin = 0;
 const skipped: string[] = [];
 /**
  * `read_text` per language, out of the alignment ledger, keyed by this repo's language code.
@@ -134,8 +213,23 @@ for (const code of codes) {
   // function of the language alone, which is the whole point of a reference file.
   clearForeignOov();
   let rows: string[] = (readTextFor.get(code) ?? []).slice(0, N);
-  const isThin = !rows.length;
-  if (isThin) rows = lexiconWords(code);
+  let tier: "full" | "mined" | "thin" = "full";
+  if (!rows.length) {
+    rows = minedRows(code).slice(0, N);
+    tier = "mined";
+    // ⚠ TOPPED UP FROM THE LEXICON, so introducing this tier cannot make any golden THINNER. `ar`'s mined
+    // pool yields 82 usable rows against the 200 headwords it had; without this, adding running text
+    // would have cost it 118 rows of g2p coverage to buy 82 of normalization coverage. The two kinds of
+    // row pin different things and a golden is free to hold both — `su`'s already was a word list.
+    if (rows.length > 0 && rows.length < N) {
+      const have = new Set(rows);
+      for (const w of lexiconWords(code)) {
+        if (rows.length >= N) break;
+        if (!have.has(w)) { have.add(w); rows.push(w); }
+      }
+    }
+  }
+  if (!rows.length) { rows = lexiconWords(code); tier = "thin"; }
   const out: string[] = [];
   for (const text of rows) {
     try {
@@ -145,6 +239,6 @@ for (const code of codes) {
   }
   if (!out.length) { skipped.push(code); continue; }
   writeFileSync(`${OUT}/${code}.tsv`, out.join("\n") + "\n", "utf8");
-  isThin ? thin++ : full++;
+  if (tier === "thin") thin++; else if (tier === "mined") mined++; else full++;
 }
-console.log(`${full} full + ${thin} lexicon-only goldens; ${skipped.length} empty: ${skipped.join(" ")}`);
+console.log(`${full} FLEURS + ${mined} mined + ${thin} lexicon-only goldens; ${skipped.length} empty: ${skipped.join(" ")}`);

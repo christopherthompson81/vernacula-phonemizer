@@ -15,6 +15,15 @@ public static class NeuralRegistry
         ["ur"] = t => RiderNeural.PhonemizeRiderNeural(t, "ur"),
         ["fa"] = Languages.Persian.PersianNeural.PhonemizeFaNeural,
         ["sd"] = Languages.Sindhi.SindhiNeural.PhonemizeSdNeural, // per-letter BiLSTM restoring the abjad's unwritten short vowels on OOV words
+        // ⚠ Western Punjabi (Shahmukhi) is registry code `pnb`, but the rider keys its Perso-Arabic lexicon
+        // under `pa` — so the model token and the registry code differ, exactly as in the TS.
+        // ⚠ THIS ENTRY WAS MISSING AND NOTHING COULD SEE IT. `pnb`'s SYNC engine is served (it is the same
+        // Punjabi engine, and the scanner auto-detects Shahmukhi), so `PhonemizeAsync(…, "pnb")` did not
+        // report port-pending — it silently served the sync reading, which is the failure this file's own
+        // Bootstrap note warns about. 188 of 200 golden rows differed on restored short vowels alone
+        // (*bˈaːəs* for *bˈaːɪs*, *məɦd̪ˈoːd̪* for *məɦd̪ˈuːd̪*). It stayed invisible because pnb had no
+        // golden until the mined tier gave it one.
+        ["pnb"] = t => RiderNeural.PhonemizeRiderNeural(t, "pa"),
     };
 
     /** The language's best ASYNC path, or null when its best path is the sync engine. */
