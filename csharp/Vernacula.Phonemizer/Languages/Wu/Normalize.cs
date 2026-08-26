@@ -33,7 +33,6 @@ public static class Normalize
         UnspacedScript = true,
     });
 
-    /** The coordinate minute/second marks, in every encoding the corpus uses. */
     private const string MINUTE = "[′´ˊ’']";
     private const string SECOND = "[″〃”\"]";
 

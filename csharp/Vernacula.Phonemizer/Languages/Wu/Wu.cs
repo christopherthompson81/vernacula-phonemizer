@@ -26,7 +26,6 @@ public static class WuPhonemizer
     private static readonly IReadOnlyList<string> INITIALS = DEF.Initials.Keys.OrderByDescending(k => k.Length).ToList();
     private const string VOWEL = "aeiouy";
 
-    /** ⚠ THE GLOTTALIZED SYLLABIC NASALS ARE SEPARATE ENTRIES, not the plain ones with an onset. */
     private static readonly IReadOnlyDictionary<string, string> SYLLABIC = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["m"] = "m̩", ["n"] = "n̩", ["ng"] = "ŋ̍", ["mh"] = "ʔm̩", ["nh"] = "ʔn̩", ["ngh"] = "ʔŋ̍",
@@ -41,7 +40,6 @@ public static class WuPhonemizer
     private const int MAX_WORD = 8; // greedy segmentation window
 
     private static readonly JsRe HAN = JsRegex.Compile("\\p{Script=Han}", "u");
-    /** ⚠ CASE-SENSITIVE — with `i`, `MP3` matched the whole-string fast path and came back verbatim. */
     private static readonly JsRe WUGNIU = JsRegex.Compile("^[a-z]+[0-9](?:\\s+[a-z]+[0-9])*$", "u");
     private static readonly JsRe SYLLABLE = JsRegex.Compile("^([a-z]+?)([0-9])?$", "i");
     private static readonly JsRe WHITESPACE = JsRegex.Compile("\\s+", "u");
