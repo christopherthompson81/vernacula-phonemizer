@@ -16,7 +16,7 @@
  * TOKEN swallows the separators.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
-import { numberToWords } from "./numbers.ts";
+import { BILLION, MILLION, numberToWords } from "./numbers.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -82,7 +82,14 @@ const STEM_ORD: Readonly<Record<string, string>> = {
     jeegom: "jeegaɓal", jeeɗiɗi: "jeeɗiɗaɓal", jeetati: "jeetataɓal", jeenayi: "jeenayaɓal",
     sappo: "sappaɓal", noogaas: "noogaasaɓal", cappanɗe: "cappanɗaɓal", teemedere: "teemederaɓal",
     teemedde: "teemeddaɓal", ujundere: "ujunderaɓal", ujunaaje: "ujunajaɓal",
-    miliyon: "miliyonaɓal", milion: "milionaɓal",
+    // ⚠ DERIVED FROM THE COMPOSITOR'S OWN CONSTANTS, not hand-copied. These two rows previously read
+    // `miliyon: "miliyonaɓal", milion: "milionaɓal"` while numbers.ts emitted `million` and `milyar`,
+    // so neither key could ever match and `ordinalWords` returned undefined for exactly 1e6 and 1e9 —
+    // the only magnitudes where the magnitude word is itself the LAST word (2e6 is `milionji ɗiɗi`, and
+    // the multiplier carries the ordinal). Deriving them means a rename in numbers.ts cannot silently
+    // recreate the dead rows. The stem rule is the documented one and needs no new orthography: these
+    // loans are consonant-final, so there is no vowel to drop and the suffix simply attaches.
+    [MILLION]: `${MILLION}aɓal`, [BILLION]: `${BILLION}aɓal`,
 };
 
 /**
@@ -206,10 +213,15 @@ export function normalizeFula(input: string): string {
     s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (m0, i: string, f: string) =>
         `${i} toɓɓere ${[...f].map((d) => numberToWords(Number(d))).join(" ")}`);
 
-    // 8) FRACTIONS. `1/5 inch` → *goo e joyi* (the corpus's one fraction, read as a ratio). ¾/½ after
-    //    a whole read "e teemedere"/"e hecci". The corpus's only fraction is 1/5.
-    s = s.replace(/(\d+)¾/gu, "$1 e teemedere");
-    s = s.replace(/(\d+)½/gu, "$1 e hecci");
+    // 8) FRACTIONS. `1/5 inch` → *goo e joyi* (the corpus's one fraction, read as a ratio).
+    //    ⚠ THE ¾/½ ARMS ARE GONE, and removing them is a fix rather than a tidy-up. They were dead in the
+    //    pipeline — `Unicode.foldVulgarFractions` rewrites `1¾`→`1 3/4` before this pass runs, so the
+    //    ratio arm above already handles them and gives *goo tati e nayi*, the same reading the corpus's
+    //    only attested fraction gets. But they were still reachable through the exported `normalizeFula`,
+    //    and what they produced there was wrong: `$1 e teemedere` is character-for-character the PERCENT
+    //    phrase built two steps below, so `1¾` read as *one per hundred*. The ½ arm's `hecci` is ×0 in
+    //    both corpora — unsourced as well as unreachable. Two authored readings, one wrong and one
+    //    unsourced, standing in front of a correct upstream fold.
     s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) =>
         `${numberToWords(Number(a))} e ${numberToWords(Number(b))}`);
 
@@ -223,9 +235,13 @@ export function normalizeFula(input: string): string {
     //     writes the TYPO `16okm/h` for 160km/h (the "o" is a stray 0-letter). mph/kph are handled here
     //     (glued to the number). AFTER the version-dot rule (12.8km has already been claimed), BEFORE
     //     the tier.
-    s = s.replace(/(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h|s)(?![\p{L}\p{M}])/giu,
-        (m0, n: string, u: string, d: string) =>
-            `${numberToWords(Number(n))} ${({ km: "kilometre", m: "metre", kg: "kilogram", mm: "milimeta", cm: "santimeta" } as Record<string, string>)[u.toLowerCase()]!} e wakkati ${d.toLowerCase() === "h" ? "gootel" : "gootel"}`);
+    //     ⚠ ONLY `/h`. This arm used to claim `(h|s)` and choose the trailing word with
+    //     `d === "h" ? "gootel" : "gootel"` — two identical branches, so `133m/s` (a real corpus line,
+    //     `480 km/h (133m/s; 300mph)`, one wind speed glossed three ways) asserted *per hour*. `gootel`
+    //     agrees with `wakkati`'s noun class and the form for `sahaawa` is unsourced; see fula.ts.
+    s = s.replace(/(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h)(?![\p{L}\p{M}])/giu,
+        (m0, n: string, u: string) =>
+            `${numberToWords(Number(n))} ${({ km: "kilometre", m: "metre", kg: "kilogram", mm: "milimeta", cm: "santimeta" } as Record<string, string>)[u.toLowerCase()]!} e wakkati gootel`);
     s = s.replace(/(?<!\d)(\d+)\s?(mph|kph)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string) =>
             `${numberToWords(Number(n))} ${u.toLowerCase() === "mph" ? "miles e wakkati gootel" : "kilometre e wakkati gootel"}`);

@@ -79,7 +79,8 @@ public static class Normalize
         ["jeegom"] = "jeegaɓal", ["jeeɗiɗi"] = "jeeɗiɗaɓal", ["jeetati"] = "jeetataɓal", ["jeenayi"] = "jeenayaɓal",
         ["sappo"] = "sappaɓal", ["noogaas"] = "noogaasaɓal", ["cappanɗe"] = "cappanɗaɓal", ["teemedere"] = "teemederaɓal",
         ["teemedde"] = "teemeddaɓal", ["ujundere"] = "ujunderaɓal", ["ujunaaje"] = "ujunajaɓal",
-        ["miliyon"] = "miliyonaɓal", ["milion"] = "milionaɓal",
+        // Derived from the compositor's constants — hand-copied keys drifted once and went dead.
+        [FulaNumbers.MILLION] = FulaNumbers.MILLION + "aɓal", [FulaNumbers.BILLION] = FulaNumbers.BILLION + "aɓal",
     };
 
     private static readonly JsRe DIGIT_TEST = JsRegex.Compile(@"\d", "u");
@@ -123,13 +124,12 @@ public static class Normalize
         @"(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|mph|kph)(?![\p{L}\p{M}])", "giu");
     private static readonly JsRe DECIMAL_DOT = JsRegex.Compile(@"(?<![\d.,])(\d+)\.(\d+)(?![\d.])", "giu");
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile(@"(?<![\d.,])(\d+),(\d{1,2})(?![\d,])", "gu");
-    private static readonly JsRe THREE_QUARTERS = JsRegex.Compile(@"(\d+)¾", "gu");
-    private static readonly JsRe HALF = JsRegex.Compile(@"(\d+)½", "gu");
     private static readonly JsRe FRACTION = JsRegex.Compile(@"(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])", "gu");
     private static readonly JsRe DEGREE_C = JsRegex.Compile(@"(\d)\s?[°º]\s?C(?![\p{L}\p{M}])", "giu");
     private static readonly JsRe DEGREE_F = JsRegex.Compile(@"(\d)\s?[°º]\s?F(?![\p{L}\p{M}])", "giu");
     private static readonly JsRe DEGREE = JsRegex.Compile(@"(\d)\s?[°º](?![\p{L}\p{M}])", "gu");
-    private static readonly JsRe RATE = JsRegex.Compile(@"(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h|s)(?![\p{L}\p{M}])", "giu");
+    // ⚠ ONLY `/h` — see the TS. `/s` asserted an hour rate through two identical ternary branches.
+    private static readonly JsRe RATE = JsRegex.Compile(@"(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h)(?![\p{L}\p{M}])", "giu");
     private static readonly JsRe RATE_WORD = JsRegex.Compile(@"(?<!\d)(\d+)\s?(mph|kph)(?![\p{L}\p{M}])", "giu");
     private static readonly JsRe RATE_TYPO = JsRegex.Compile(@"(?<!\d)(\d+)o\s?(km\/h)(?![\p{L}\p{M}])", "giu");
     private static readonly JsRe PLUS = JsRegex.Compile(@"\+\s?(?=\d)", "gu");
@@ -230,8 +230,6 @@ public static class Normalize
         s = DECIMAL_COMMA.Replace(s, m => $"{m.Groups[1].Value} toɓɓere {SpellDigits(m.Groups[2].Value)}");
 
         // 8) FRACTIONS.
-        s = THREE_QUARTERS.Replace(s, "$1 e teemedere");
-        s = HALF.Replace(s, "$1 e hecci");
         s = FRACTION.Replace(s, m =>
             $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} e {FulaNumbers.NumberToWords(Js.Number(m.Groups[2].Value))}");
 
@@ -242,10 +240,8 @@ public static class Normalize
 
         // 10) RATES. AFTER the version-dot rule, BEFORE the tier.
         s = RATE.Replace(s, m =>
-            // ⚠ BOTH DENOMINATORS READ `gootel` in the TS — see the "found, not fixed" note there.
             $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} " +
-            $"{RATE_UNIT_WORDS[m.Groups[2].Value.ToLowerInvariant()]} e wakkati " +
-            (m.Groups[3].Value.ToLowerInvariant() == "h" ? "gootel" : "gootel"));
+            $"{RATE_UNIT_WORDS[m.Groups[2].Value.ToLowerInvariant()]} e wakkati gootel");
         s = RATE_WORD.Replace(s, m =>
             $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} " +
             (m.Groups[2].Value.ToLowerInvariant() == "mph" ? "miles e wakkati gootel" : "kilometre e wakkati gootel"));

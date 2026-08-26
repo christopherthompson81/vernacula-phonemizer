@@ -49,8 +49,20 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["e teemedere"],
     currency: { "$": ["dollar"], "€": ["euro"], "¥": ["yen"], "£": ["pound"] },
     units: { km: ["kilometre"], m: ["metre"], kg: ["kilogram"], mm: ["milimeta"], cm: ["santimeta"] },
-    unitPer: "e wakkati gootel", // 160 km/h -> teemedere e cappanɗe jeegom kilometre e wakkati gootel
-    rateDenominators: { h: "wakkati", s: "sahaawa" },
+    // ⚠ THE PREPOSITION IS THE ONLY PART THAT IS DENOMINATOR-INDEPENDENT, so it is all `unitPer` holds.
+    // The rest — the noun AND the class-agreeing "one" after it — belongs to the denominator, because the
+    // shared tier composes `${per} ${dPhrase}` and there is no slot for a word AFTER the noun. Declaring
+    // the whole phrase as `unitPer` (as this did) appended the denominator to a phrase that already named
+    // one: `133m/s` composed *e wakkati gootel sahaawa*, "per hour second".
+    unitPer: "e", // 160 km/h -> teemedere e cappanɗe jeegom kilometre e wakkati gootel
+    // ⚠ `s` IS DELIBERATELY ABSENT, and its absence is the reading. `gootel` is not the plain numeral —
+    // `numberToWords(1)` is *goo* — it is the form of "one" agreeing with `wakkati`'s noun class, and the
+    // form agreeing with `sahaawa`'s class is UNSOURCED. The corpus cannot settle it: all 16 `wakkati`
+    // instances are "time" in the general sense (`ha wakkati sare`, `wakkati gulɗum`), not one of them a
+    // rate, and `gootel` occurs once. With `s` undeclared the shared tier returns the text untouched, so
+    // `133m/s` reads its letters — recoverable — instead of asserting *per hour*, which it did before and
+    // which is the "wrong word is worse than a dropped sign" case this file already argues for `percent`.
+    rateDenominators: { h: "wakkati gootel" },
     // ⚠ POSTPOSED — kiloomeeteer kaaree (squared), meeteer kubik (cubed). Both come from ff.wikipedia rather
     // than from spoken-corpus text, which attests no measure word at all: `kaaree` recurs across country and
     // place articles, the class that cannot state its subject without an area figure. That is where a unit's
