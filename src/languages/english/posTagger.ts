@@ -193,8 +193,14 @@ export class PosTagger {
         for (let i = 0; i < norm.length; i++) {
             const word = norm[i] ?? "";
             const cached = this.tagdict[word];
+            // ⚠ `typeof === "number"`, not `!== undefined`. The tagdict comes from `loadJson` (a bare
+            // JSON.parse — the models are too large for the jsonc loader's null-prototype reviver), so it
+            // inherits Object.prototype and `tagdict["constructor"]` is a FUNCTION: the fast path was taken
+            // for the ordinary English word ⟨constructor⟩, `classes[fn]` was undefined, and the perceptron's
+            // prediction was silently replaced by the "NN" fallback. The C# port's Dictionary inherits
+            // nothing and always predicted, so this was a divergence too.
             const tag =
-                cached !== undefined
+                typeof cached === "number"
                     ? (this.classes[cached] ?? "NN")
                     : this.predict(
                           extractFeatures(i, word, context, prev, prev2),

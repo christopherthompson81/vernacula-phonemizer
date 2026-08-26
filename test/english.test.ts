@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
+import { PosTagger, type PosModel } from "../src/languages/english/posTagger.ts";
 
 // Canonical-IPA goldens for English. Pronunciation from the CMUdict lexicon + n-gram OOV G2P + POS
 // heteronyms; sentence prosody = function-word de-accenting + nuclear tonic on the clause-final word.
@@ -77,5 +78,26 @@ describe("a dotted letter run is an initialism whatever its case", () => {
     });
     test("and the capitalised form is unchanged", () => {
         expect(phonemize("former U.S. speaker", "en")).toContain("jˈuː ˈɛs");
+    });
+});
+
+// ⚠ THE TAGDICT IS A BARE `JSON.parse` OBJECT, so it inherits Object.prototype and every prototype member
+// name looked up as a WORD. `tagdict["constructor"]` was a function, `cached !== undefined` took the cached
+// branch, `classes[fn]` was undefined, and the perceptron's prediction was silently replaced by the "NN"
+// fallback — for ⟨constructor⟩ and eleven other names. The C# Dictionary inherits nothing and always
+// predicted, so the two engines disagreed. The lookup now tests `typeof cached === "number"`.
+describe("POS tagger — a word that is also a prototype member name", () => {
+    test("the perceptron is consulted, not the NN fallback", () => {
+        const model: PosModel = {
+            scale: 1,
+            classes: ["JJ", "VB"], // deliberately WITHOUT "NN", so the old fallback is visible
+            tagdict: { dog: 0 },
+            weights: { bias: { "1": 5 } }, // any un-cached word predicts VB
+        };
+        const tagger = new PosTagger(model);
+        expect(tagger.tag(["dog"])).toEqual(["JJ"]); // a real tagdict hit still short-circuits
+        expect(tagger.tag(["cat"])).toEqual(["VB"]); // an ordinary miss predicts
+        for (const name of ["constructor", "toString", "valueOf", "hasOwnProperty", "__proto__"])
+            expect(tagger.tag([name])).toEqual(["VB"]); // …and so does every prototype member name
     });
 });
