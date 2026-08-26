@@ -133,8 +133,10 @@
  */
 import { MANIFEST } from "./manifest.ts";
 
-/** The CJK-ideograph blocks Sawndip draws on — the same set `sawndip.ts` recognises, as a class body. */
-const HAN = "\\u{3400}-\\u{4dbf}\\u{4e00}-\\u{9fff}\\u{f900}-\\u{faff}\\u{20000}-\\u{2ebef}\\u{2f800}-\\u{2fa1f}\\u{30000}-\\u{323af}";
+/** The CJK-ideograph blocks Sawndip draws on — the same set `sawndip.ts` recognises, as a class body.
+ *  ⚠ KEEP IN STEP WITH `sawndip.ts`'s `isIdeograph` AND `zhuang.ts`'s TOKEN: the three are one set spelled
+ *  three times, and when the ideograph bounds lagged the dictionary it was 24 unreachable readings. */
+const HAN = "\\u{3007}\\u{3400}-\\u{4dbf}\\u{4e00}-\\u{9fff}\\u{f900}-\\u{faff}\\u{20000}-\\u{2ee5f}\\u{2f800}-\\u{2fa1f}\\u{30000}-\\u{3347f}";
 const HAN_RUN = new RegExp(`[${HAN}]+`, "gu");
 const HAS_HAN = new RegExp(`[${HAN}]`, "u");
 /** A script/language LABEL the corpus itself writes in front of a foreign-script gloss. `Sawgun` is

@@ -505,4 +505,24 @@ public class ManifestMappingTests
     public void HakkaManifestIsFullyMapped() =>
         AssertFullyMapped("languages/hakka", "hakka.jsonc", Languages.Hakka.HakkaPhonemizer.DEF,
             "language", "name", "script");
+
+    [Fact]
+    public void KhmerManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/khmer", "khmer.jsonc", Languages.Khmer.KhmerPhonemizer.DEF,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
+    public void SinhalaManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/sinhala", "sinhala.jsonc", Languages.Sinhala.Manifest.MANIFEST,
+            "language", "name", "script");
+
+    [Fact]
+    public void ZhuangManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/zhuang", "zhuang.jsonc", Languages.Zhuang.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
+    public void ChichewaManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/chichewa", "chichewa.jsonc", Languages.Chichewa.Manifest.MANIFEST,
+            "provenance", "convention");
 }

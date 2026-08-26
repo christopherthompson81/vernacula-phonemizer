@@ -68,3 +68,50 @@ disambiguation of the polyphonic ~8% is EXPLICITLY out of scope (no Sawndip corp
 BiLSTM/perceptron homograph approach is a separate cmn-first effort). Tests:
 test/zhuang-sawndip.test.ts (goldens + detection + OOV + a dict well-formedness guard
 that phonemizes every reading).
+
+## Run 3 — 2026-08-26 — the C# port's dictionary sweep: 24 keys nothing could reach
+
+Question: does the shipped entry point actually reach every row of the 2,412-key dictionary?
+Asked while porting za to C#; the existing well-formedness guard in
+`test/zhuang-sawndip.test.ts` checks that every READING phonemizes, and nothing checked that
+the GLYPH could ever be presented to the reader.
+
+Command: sweep every key of `data/languages/zhuang/sawndip-readings.tsv` through `isSawndip`
+and `za.text`, both engines, plus a 35,719-line TS↔C# differential.
+
+Raw finding — **24 of 2,412 keys (1.0%) were dead rows**: `isSawndip` returned false, the
+`TOKEN` class never claimed them, and `za.text(glyph)` returned the empty string.
+
+    U+3007 〇 (`lingz`)        the ideographic number ZERO — category Nl, in CJK Symbols and
+                              Punctuation, so in NO ideograph block at all
+    U+2ECAD, U+2ECC3          CJK Ext I (U+2EBF0–2EE5F), Unicode 15.1
+    U+323B6 … U+32FD9 ×21     CJK Ext J (U+323B0–3347F), Unicode 17.0
+
+`isIdeograph`'s upper bounds, `0x2ebef` and `0x323af`, were the ends of Ext F and Ext H when
+the predicate was written; the kaikki extract the generator reads has since moved past both.
+The same set is spelled three times — `sawndip.ts`'s `isIdeograph`, `zhuang.ts`'s `TOKEN`
+class and `normalize.ts`'s `HAN` — and all three lagged together.
+
+Implication and fix: bounds widened to the ends of Ext I and Ext J, and `U+3007` added
+explicitly (it is a numeral rather than an ideograph, but it is a Sawndip glyph with a Zhuang
+reading, and `lingz` is Zhuang's own zero). A reachability assertion now pins it, so the next
+block that appears in the extract fails as a test rather than as silent glyphs.
+
+⚠ **THE PARITY GATE COULD NOT HAVE SEEN THIS.** None of the 24 code points occurs in
+`csharp/goldens/za.tsv` or in `tools/corpus/mined/za.jsonc`; regenerating the goldens after
+the fix changed **0 rows**, in either direction. The finding came from sweeping the table
+itself, which is the only instrument that had the glyphs in it.
+
+Negative result kept: `𠀀` (U+20000) and `龘` are inside the widened class and still read as
+nothing — they are ideographs with no documented Zhuang reading, which is the intended OOV
+drop, not a coverage gap.
+
+Adjacent hazard, MEASURED AND NOT FIXED: a multi-letter onset (`gv gy by mb nd ng ny my kv
+ngv mby`) after an **open, untoned** syllable is unreachable — CODA-FIRST claims its first
+letter as a coda before the onset loop runs. After a tone letter or a stop coda all eleven
+fire normally. Over 4,760 distinct words from the goldens and the mined corpus, 159 present
+that context, and most are genuinely ambiguous under an orthography that marks syllable
+boundaries only with `'` (`diegyouq` = dieg|youq reads correctly; `ndeigyaez` = ndei|gyaez
+reads *ɗeːiːk˥jai˧˩* with a spurious /k/ and a plain [j] for ⟨gy⟩). Deciding between the two
+parses needs a Zhuang syllable inventory this engine does not have, and CODA-FIRST is a
+stated deliberate choice (see `zhuang.ts`), so this is recorded rather than changed.

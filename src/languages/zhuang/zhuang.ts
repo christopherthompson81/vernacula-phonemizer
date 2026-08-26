@@ -181,7 +181,9 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word (Zhuang Latin letters) / number / SAWNDIP run (CJK ideographs — the logographic script) / punctuation token.
-const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'")})|(\\d+)|([㐀-䶿一-鿿豈-﫿\\u{20000}-\\u{2ebef}\\u{2f800}-\\u{2fa1f}\\u{30000}-\\u{323af}]+)|([.!?…,;:])`, "giu");
+// ⚠ THE SAWNDIP CLASS IS `sawndip.ts`'s `isIdeograph` SPELLED AGAIN (and `normalize.ts`'s HAN a third
+// time) — keep the three in step. See sawndip.ts for the 24 keys the old Ext-F/Ext-H bounds stranded.
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'")})|(\\d+)|([〇㐀-䶿一-鿿豈-﫿\\u{20000}-\\u{2ee5f}\\u{2f800}-\\u{2fa1f}\\u{30000}-\\u{3347f}]+)|([.!?…,;:])`, "giu");
 /**
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
