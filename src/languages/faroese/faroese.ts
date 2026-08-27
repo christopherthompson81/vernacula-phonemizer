@@ -223,7 +223,11 @@ class FaroesePhonemizer implements Phonemizer {
             // Numbers: the units-first compositor (numbers.ts) → each word back through the same g2p.
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(",");
-                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                // ⚠ `intPart`, NOT `m[2]`, IS THE `raw` (#1080). This arm's match carries the DECIMAL COMMA and
+                // is split above, so the token text for the integer is the piece before the comma — handing
+                // the whole match would read the fraction's digits into the integer. Croatian's call site
+                // had the same shape and the same trap; the shape is checked per call site, never copied.
+                for (const wd of numberToWords(Number(intPart), intPart).split(" ")) sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
                     // `komma` ×7 on fo.wikipedia — the separator's own name. The fractional part is read
                     // digit by digit, the same call every other layer in this sweep makes.

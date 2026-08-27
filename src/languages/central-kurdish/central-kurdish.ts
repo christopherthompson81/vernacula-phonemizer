@@ -183,6 +183,28 @@ function scanWord(word: string): string {
     return toks.join("");
 }
 
+/**
+ * ⚠ THE ZERO WORD READ WITHOUT A VOWEL, AND IT WAS IN THE SHIPPED GOLDEN. ⟨سفر⟩ is the only entry in the
+ * numbers table whose written form carries none of its vowels, so the rule scan produced *sfɾ* — a
+ * vowel-less token, which is the class this module's header calls "not a variant, IMPOSSIBLE". It reached
+ * 2 of the 200 parity rows (`3.50 مەتر` → *seː xaːɫ peːnd͡ʒ **sfɾ** matɪɾ*), 43 corpus occurrences, and every
+ * one of the 22 colon-clock instances routed through it.
+ *
+ * ⚠ THE READING IS THE ENGINE'S OWN, NOT A HAND-WRITTEN ONE, and that is what makes this a routing fix
+ * rather than a sourcing claim. Written as a WORD, `سفر` already reads *sɪfɪɾ* on the shipped async path —
+ * the bizroke tagger supplies it. The number path simply never asks: `renderNumber` calls `phonemizeWord`,
+ * whose chain is lexicon → oovOverride → rules, and the oovOverride is installed by the neural layer for
+ * words present in the TEXT. A COMPOSED number word is not in the text, so it never reaches the tagger, and
+ * both sync and async fell through to the rules.
+ *
+ * ⚠ WHY NOT THE LEXICON, which is where every other bizroke lives: `سفر` is a genuine HOMOGRAPH. AsoSoft
+ * pairs it with *safar* ("journey"), which is why the lexicon builder's bizroke-only filter dropped it on
+ * purpose — a whole-word entry would pick one reading of two and make the ordinary noun wrong to fix the
+ * numeral. The numeral CONTEXT is unambiguous in a way the word is not, so the reading belongs here.
+ */
+const NUMERAL_READING: Readonly<Record<string, string>> = { "سفر": "sɪfɪɾ" };
+const numberWord = (w: string): string => NUMERAL_READING[w] ?? phonemizeWord(w);
+
 /** A run of ASCII digits → the spoken Sorani cardinal in canonical IPA (out-of-range integers pass through). */
 function number(digits: string): string {
     const n = Number(digits);
@@ -191,8 +213,8 @@ function number(digits: string): string {
     // wrong — but the refusal returned the digit string, which no g2p in this fleet reads. Read it out
     // digit-at-a-time through this engine's own number words instead; see core/numbers.ts `spellDigits`
     // for the full account and the cost (above 2^53 the reading is a digit string, not a quantity).
-    if (!Number.isSafeInteger(n)) return spellDigits(digits, DEF.numbers, phonemizeWord);
-    return renderNumber(n, DEF.numbers, phonemizeWord, iranianNumberWords);
+    if (!Number.isSafeInteger(n)) return spellDigits(digits, DEF.numbers, numberWord);
+    return renderNumber(n, DEF.numbers, numberWord, iranianNumberWords);
 }
 
 // A word (Sorani Perso-Arabic letters, U+0620–U+06FF incl. ZWNJ) / number / punctuation token.

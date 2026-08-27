@@ -71,14 +71,33 @@ public sealed class CentralKurdishPhonemizer : ILanguage
     }
 
     /** A run of ASCII digits → the spoken Sorani cardinal in canonical IPA. */
+    /// <summary>⚠ THE ZERO WORD READ WITHOUT A VOWEL, AND IT WAS IN THE SHIPPED GOLDEN. ⟨سفر⟩ is the only
+    /// entry in the numbers table whose written form carries none of its vowels, so the rule scan produced
+    /// *sfɾ* — a vowel-less token, the class this engine's header calls "not a variant, IMPOSSIBLE". It
+    /// reached 2 of the 200 parity rows and every one of the 22 colon-clock instances.
+    /// <para>⚠ THE READING IS THE ENGINE'S OWN. Written as a WORD, `سفر` already reads *sɪfɪɾ* on the async
+    /// path — the bizroke tagger supplies it. The number path never asks: a COMPOSED number word is not in
+    /// the text, so the oovOverride the neural layer installs never sees it and both modes fell to rules.
+    /// </para>
+    /// <para>⚠ NOT THE LEXICON, because `سفر` is a genuine HOMOGRAPH — AsoSoft pairs it with *safar*
+    /// ("journey"), which is why the builder's bizroke-only filter dropped it. The numeral CONTEXT is
+    /// unambiguous where the word is not, so the reading belongs here. See the TS docstring.</para></summary>
+    private static readonly Dictionary<string, string> NUMERAL_READING = new(StringComparer.Ordinal)
+    {
+        ["سفر"] = "sɪfɪɾ",
+    };
+
+    private static string NumberWord(string w) =>
+        NUMERAL_READING.TryGetValue(w, out var ipa) ? ipa : PhonemizeWord(w);
+
     private static string Number(string digits)
     {
         var n = Js.Number(digits);
         // ⚠ Above 2^53 the float has lost the low digits, so composing a quantity is refused; the reading
         // is digit-at-a-time through this engine's own number words rather than a raw digit leak.
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d))
-            return Core.Numbers.SpellDigits(digits, DEF.Numbers, w => PhonemizeWord(w));
-        return Core.Numbers.RenderNumber(n, DEF.Numbers, w => PhonemizeWord(w), Numbers.IranianNumberWords);
+            return Core.Numbers.SpellDigits(digits, DEF.Numbers, NumberWord);
+        return Core.Numbers.RenderNumber(n, DEF.Numbers, NumberWord, Numbers.IranianNumberWords);
     }
 
     // A word (Sorani Perso-Arabic letters, U+0620–U+06FF incl. ZWNJ) / number / punctuation token.
