@@ -132,7 +132,7 @@ There is a second, in `tools/corpus/attest/tn.jsonc`:
 `ka motsotswana`. Two points, not one: the instance count behind "did not earn a third pass" is wrong, and
 the reading is worse than the "bare juxtaposition" the comment prices it at — the first operand is stranded
 in front of the measure noun of the second, so `12-13 m3` reads as one quantity phrase with a loose number
-in front of it rather than as two operands with a missing joiner. Filed as **#1103**, not fixed: it is a
+in front of it rather than as two operands with a missing joiner. Filed as **#1104**, not fixed: it is a
 TS-first change and it moves goldens.
 
 **FINDING 2 — the manifest's own numbers note contradicts the code by two orders of magnitude.**
@@ -143,7 +143,7 @@ TS-first change and it moves goldens.
     100000   → dikɪtɪ t͡sɪ lɪk͡χʰʊlʊ         (composed)
     1000000  → bʊŋwɪ lɪfɪla ×6              (digit-by-digit)
 
-The code and `numbers.ts` agree; the manifest comment is stale. Filed with #1103.
+The code and `numbers.ts` agree; the manifest comment is stale. Filed with #1104.
 
 Questions 2 and 3 came back clean: all three manifest tables are reached (`graphemes`,
 `clausePunctuation`, `numbers` — `ManifestMappingTests` pins that structurally), `NATIVE_CLASS` `[a-zšêô]`

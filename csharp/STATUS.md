@@ -54,7 +54,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   0 throws**, plus a leak sweep in which **0 of 838 outputs carry a raw digit or symbol**. The golden never
   exercises the decimal comma, the currency magnitude suffix or the clock's only matching branch, and the
   English-ordinal step is ×0 in BOTH artifacts (argued from the corpus-wide `ordinal-latin` cell, not the
-  retained text). See `docs/tn_port_investigation.md`, which files step 8's "one known loss" as TWO (#1103 —
+  retained text). See `docs/tn_port_investigation.md`, which files step 8's "one known loss" as TWO (#1104 —
   the second is quoted in the same file's own `unitPer` comment).
   ⚠ **AND THE mn FLEURS DEFECT IS A CLASS, NOT A ONE-OFF.** Sweeping every `normalize.ts` that states its
   language has no FLEURS against the transcript directory: **ln, lt, lg, mt, ps, nso and mn all have one**
