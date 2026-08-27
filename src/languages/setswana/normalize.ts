@@ -351,10 +351,9 @@ export function normalizeSetswanaPost(input: string): string {
     //    one quantity phrase with a loose `twelve` before it — not as two operands with a missing joiner.
     //    A missing joiner is neutral; a number standing in front of somebody else's measure noun is not,
     //    and that is the trap-53 calculus this note is applying, with the wrong number in it.
-    //    ⚠ STILL NOT FIXED HERE, and deliberately: the objection above stands, so a repair means the range
-    //    rule LEARNING TO SEE an already-rewritten second operand (`\d+` dash measure-noun-phrase, then
-    //    reorder) — a new pattern shape rather than a move, against a count of two. Priced properly now so
-    //    the next reader decides on the real number.
+    //    ⚠ AND IT IS FIXED, BY THE RANGE RULE LEARNING TO SEE AN ALREADY-REWRITTEN SECOND OPERAND — see
+    //    step 8b below. Moving the range ABOVE the tier is still wrong for the reason stated; what works is
+    //    matching the tier's own OUTPUT and reordering around it.
     //    AFTER step 6, so a grouped endpoint is already one run of digits, and AFTER step 5.
     //    ⚠ THE TRAILING GUARD EXCLUDES A DOT THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK — `(?![\d]|[.,]\d)`
     //    is the form step 6 above already argues for, and this arm did not follow it. A plain `.` in the
@@ -367,6 +366,26 @@ export function normalizeSetswanaPost(input: string): string {
     //    so `5–13,7` must not be claimed with its fraction left behind.
     s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
+
+    // 8b) A SPAN WHOSE UNIT SITS AFTER THE SECOND OPERAND — the two losses step 8 records (#1104).
+    //     `bokete jwa 4 -5 kg` and `12-13 m3 ka motsotswana` reach here as `4 -5 dikilogerama di le 5`,
+    //     because the TIER has already rewritten the second operand and `unitPrefix` put its measure noun in
+    //     FRONT of it. So step 8 sees no pair of digits, declines, and the first operand is left standing in
+    //     front of somebody else's measure noun: *twelve │ cubic-metres thirteen │ per second*.
+    //     ⚠ MATCHED ON THE TIER'S OUTPUT, WHICH IS WHY THIS IS AN ARM AND NOT A MOVE. Running ranges above
+    //     the tier only relocates the damage (`4 go ya go dikilogerama di le 5`); the phrase has to be seen
+    //     whole and reordered around, which nothing upstream of the tier can do.
+    //     ⚠ THE MEASURE NOUN GOES IN FRONT AND IS SAID ONCE, which is the corpus's own shape for exactly
+    //     this — `bokete jwa dikilogerama di le 350 le 700`, the citation on `kg` in setswana.ts.
+    //     ⚠ KEYED ON `di le` RATHER THAN ON THE UNIT TABLE, deliberately: the table lives in setswana.ts,
+    //     which imports THIS file, so reading it here would be a cycle. `di le` is the counted-quantity
+    //     concord every entry in that table ends with (and the currency ones too, `didolara di le`), so the
+    //     shape is the tier's contract rather than a guess at its vocabulary.
+    //     ⚠ ASCENDING ONLY, the same test step 8 applies, so a descending pair stays the juxtaposition it is.
+    s = s.replace(
+        /(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?((?:\p{L}+[ \u00a0])?\p{L}+[ \u00a0]di[ \u00a0]le[ \u00a0])(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
+        (whole, a: string, noun: string, b: string) =>
+            (Number(a) < Number(b) ? `${noun}${a} ${RANGE} ${b}` : whole));
 
     // 9) DECIMALS, LAST of the numeric rules — steps 5 to 8 all need their number intact, the shared tier
     //    (which runs before this pass) needs the digit adjacent to its sign, and the tier's `NOT_VERSION`

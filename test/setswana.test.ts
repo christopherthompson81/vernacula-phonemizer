@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { phonemize } from "../src/index.ts";
 
 import { phonemizeWord, createSetswana } from "../src/languages/setswana/setswana.ts";
 
@@ -209,5 +210,39 @@ describe("Setswana normalization — the symbols a reader says aloud", () => {
         expect(normalizeSetswanaPost(normalizeSetswanaPre(plain))).toBe(plain);
         // and a sentence end survives the layer
         expect(say("Ke motse. Ke motse.")).toContain(".");
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1104 — a span whose unit sits AFTER the second operand.
+//
+// The tier rewrites `5 kg` into `dikilogerama di le 5` and `unitPrefix` puts the measure noun in FRONT of
+// it, so by the time the range rule runs there is no pair of digits left: it declines, and the first
+// operand is stranded in front of somebody else's measure noun — *twelve │ cubic-metres thirteen │ per
+// second*. Both instances the file records are here, plus the km case they generalise to.
+//
+// ⚠ MATCHED ON THE TIER'S OUTPUT, not moved above it. Running ranges first only relocates the damage
+// (`4 go ya go dikilogerama di le 5`) — the objection step 8 raises, which still stands.
+describe("a span whose unit follows the second operand (#1104)", () => {
+    test.each([
+        ["bokete jwa 4 -5 kg", "bʊkɪtɪ d͡ʒwa dikilʊχɪrama di lɪ bʊnɪ χʊ ja χʊ bʊt͡ɬʰanʊ"],
+        ["5-10 km", "dikilʊmɪtara di lɪ bʊt͡ɬʰanʊ χʊ ja χʊ lɪsʊmɪ"],
+    ])("%s", (input, want) => expect(phonemize(input, "tn").trim()).toBe(want));
+
+    test("the corpus's own instance reads as one quantity phrase, not two", () => {
+        expect(phonemize("ke 12-13 m3 ka motsotswana", "tn").trim())
+            .toBe("kɪ dikʰubikimitara di lɪ lɪsʊmɪ lɪ bʊbɪdi χʊ ja χʊ lɪsʊmɪ lɪ bʊrarʊ ka mʊt͡sʊt͡swana");
+    });
+
+    test("⚠ THE MEASURE NOUN IS SAID ONCE AND IN FRONT — the corpus's own shape", () => {
+        // `bokete jwa dikilogerama di le 350 le 700` is the citation on `kg` in setswana.ts.
+        const out = phonemize("bokete jwa 4 -5 kg", "tn").trim();
+        expect(out.match(/dikilʊχɪrama/gu)?.length ?? 0).toBe(1);
+        expect(out.indexOf("dikilʊχɪrama")).toBeLessThan(out.indexOf("bʊnɪ"));
+    });
+
+    test("⚠ ASCENDING ONLY, and the ordinary ranges are untouched", () => {
+        expect(phonemize("10-5 km", "tn").trim()).toBe("lɪsʊmɪ dikilʊmɪtara di lɪ bʊt͡ɬʰanʊ"); // descending
+        expect(phonemize("bokete jwa 4-5", "tn").trim()).toBe("bʊkɪtɪ d͡ʒwa bʊnɪ χʊ ja χʊ bʊt͡ɬʰanʊ");
     });
 });
