@@ -73,6 +73,18 @@ describe("Danish canonical IPA", () => {
         expect(phonemize("90", "da").trim()).toBe("halˈfɛmˀs"); // halvfems
         expect(phonemize("1000", "da").trim()).toBe("ˈɛd ˈtuːˀsen"); // et tusind
     });
+
+    // ⚠ #1059: THE DIGIT-AT-A-TIME FALLBACK MUST READ THE TOKEN, NOT THE DOUBLE. Above 2^53 the double has
+    // already rounded, so re-deriving the digits from `n` is a confidently wrong quantity rather than a drop:
+    // `9007199254740993` read as its neighbour `…992`, and `12345678901234567890` ended *nul nul nul*.
+    test("a 22-digit run keeps its own digits (#1059)", () => {
+        expect(numberToWords(9007199254740993, "9007199254740993").split(" ").at(-1)).toBe("tre");
+        expect(numberToWords(9007199254740992, "9007199254740992").split(" ").at(-1)).toBe("to");
+        expect(numberToWords(12345678901234567890, "12345678901234567890").split(" ").slice(-3))
+            .toEqual(["otte", "ni", "nul"]);
+        // …and the engine threads it: the two neighbours must not read alike.
+        expect(phonemize("9007199254740993", "da")).not.toBe(phonemize("9007199254740992", "da"));
+    });
 });
 
 // TEXT NORMALIZATION. Every count is measured over the FLEURS da_dk corpus (column 3), and
@@ -96,6 +108,20 @@ describe("danish normalization", () => {
         expect(normalizeDanish("25 %")).toBe("25 procent");
         expect(normalizeDanish("20 °C")).toBe("20 grader celsius");
         expect(normalizeDanish("23 km²")).toBe("23 kvadratkilometer");
+    });
+
+    // ⚠ THE DEGREE NOUN MUST NOT FUSE WITH WHAT FOLLOWS — the repair step 12 already carries for currency.
+    // The scale-letter arms decline a letter RUN on purpose, and the bare arm then left `grader` abutting
+    // it: the compass bearing `35°V` (×2 distinct FLEURS sentences) read as the one-token pseudo-word
+    // *ɡʁˈaðeʁv* instead of the noun plus the letter name.
+    test("the degree noun keeps its boundary (trap 56)", () => {
+        expect(normalizeDanish("35°V")).toBe("35 grader V");
+        expect(normalizeDanish("25°Cölner")).toBe("25 grader Cölner"); // the Celsius guard correctly declined
+        expect(phonemize("35°V", "da").trim()).toBe("fˈemoɡtʁeðivə ˈɡʁɑːðɐ ˈveːˀ");
+        // …and nothing that was already separated gains a space, nor does a bare sign.
+        expect(normalizeDanish("20°")).toBe("20 grader");
+        expect(normalizeDanish("20 ° C")).toBe("20 grader celsius");
+        expect(normalizeDanish("20 °F")).toBe("20 grader fahrenheit");
     });
 
     test("a dotted numeral is an ORDINAL (112 instances), except at a sentence end", () => {

@@ -28,7 +28,12 @@ const DEF: UnitsFirstDef = {
     groupJoin: OG, // "tolv tusind og tre hundrede og femogfyrre"
 };
 
-/** Non-negative integer (< 10¹²) → Danish words; larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number): string {
-    return unitsFirstNumberToWords(n, DEF);
+/** Non-negative integer (< 10¹²) → Danish words; larger / non-finite → digit-by-digit.
+ *
+ * ⚠ `raw` IS THE TOKEN TEXT AND IT MUST BE THREADED (#1059). The digit-at-a-time fallback exists precisely
+ * because the double cannot be trusted above 2^53, so re-deriving the digits from `n` reads the ROUNDED
+ * value back out: `9007199254740993` read *…to* (its neighbour's last digit) and `12345678901234567890`
+ * ended in *nul nul nul* against a written `890` — a confidently wrong quantity, not a drop. */
+export function numberToWords(n: number, raw?: string): string {
+    return unitsFirstNumberToWords(n, DEF, raw);
 }

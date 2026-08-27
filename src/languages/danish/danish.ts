@@ -92,12 +92,16 @@ export function phonemizeWordRules(word: string): string {
             continue;
         }
 
-        // ── context consonants ──
+        // ── context consonants. ⚠ THE DEFAULT PHONE COMES FROM THE MANIFEST, not from a literal: these four
+        // letters never reach the `C[c]` fall-through below, so a literal copy here made `consonants.t`,
+        // `.d`, `.r` and `.c` DEAD KEYS that both engines agreed about (the #901 shape — a sabotage sweep
+        // over danish.jsonc found all four). Only the CONTEXT ALLOPHONES stay literal; the manifest header
+        // says so ("d/g/r/h are overridden by context rules in g2p.ts"). ──
         // soft d: ⟨d⟩ → ð only INTERVOCALICALLY or word-finally after a vowel; before a consonant it stays [d].
-        if (c === "d") { C_(isV(prev) && (isV(next) || next === "") ? "ð" : "d"); continue; }
-        if (c === "r") { C_("ʁ"); continue; } // ⟨r⟩ → uvular ʁ everywhere (folded ʁ~r in the eval)
-        if (c === "t") { C_(final && isV(prev) ? "d" : "t"); continue; } // final ⟨t⟩ after a vowel → [d]
-        if (c === "c") { C_("eiyæø".includes(next) ? "s" : "k"); continue; } // c soft/hard
+        if (c === "d") { C_(isV(prev) && (isV(next) || next === "") ? "ð" : C[c]!); continue; }
+        if (c === "r") { C_(C[c]!); continue; } // ⟨r⟩ → uvular ʁ everywhere (folded ʁ~r in the eval)
+        if (c === "t") { C_(final && isV(prev) ? "d" : C[c]!); continue; } // final ⟨t⟩ after a vowel → [d]
+        if (c === "c") { C_("eiyæø".includes(next) ? "s" : C[c]!); continue; } // c soft/hard
         const cp = C[c];
         if (cp !== undefined) C_(cp); // else: unknown char → skip
     }
@@ -127,10 +131,12 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     return lexicon().get(w) ?? oovOverride?.(word) ?? phonemizeWordRules(word);
 }
 
-// A Danish word (Latin incl. æ ø å + loanword accents é ö ä ü ó è ã à) / number / punctuation token.
-// ⚠ THE ACCENT SET MUST COVER EVERY LETTER APPEARING IN A da-lexicon.tsv KEY, or that entry is unreachable and
-// the word splits at the missing character (voilà → "voil"). It also feeds the neural WORD regex in
-// danishNeural.ts — keep the two in sync.
+// A Danish word (any Latin run) / number / punctuation token. LATIN_RUN rather than a hand-listed alphabet,
+// so no lexicon key can be split at a letter the list forgot (voilà → "voil"); the INVENTORY question is
+// `nat` below, which is a different question (see core/hostWord.ts).
+// ⚠ danishNeural.ts's pre-pass MUST TOKENIZE AND KEY THE SAME WAY — it imports this module's `LATIN_RUN`
+// and `nat` rather than restating them, because a hand-listed copy drifted and silently skipped the tagger
+// tier for every word the nativiser rewrites. See the ⚠ on `WORD` there.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
 
 /**
@@ -159,7 +165,7 @@ class DanishPhonemizer implements Phonemizer {
         return assembleClauses(normalizeDanish(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1]), oovOverride));
             // Numbers: the vigesimal/units-first compositor (numbers.ts) → each word through the same 3-tier g2p.
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd, oovOverride));
+            else if (m[2]) for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd, oovOverride));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }

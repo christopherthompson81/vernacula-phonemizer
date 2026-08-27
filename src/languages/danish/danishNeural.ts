@@ -11,12 +11,25 @@
  */
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 import { withHost } from "../../core/foreign.ts";
-import { createDanish, danishLexicon } from "./danish.ts";
+import { LATIN_RUN } from "../../core/hostWord.ts";
+import { createDanish, danishLexicon, nat } from "./danish.ts";
 import { createDanishTagger, type DanishTagger } from "./danishTagger.ts";
 
-// The da TOKEN word class (danish.ts) — the pre-pass keys the tagged map by the raw match, which is what the sync
-// engine hands `oovOverride`, so precedence lexicon → tagger → rule is preserved for capitalised OOV words too.
-const WORD = /[a-zæøåéöäüóèãà]+/giu;
+/**
+ * ⚠ THE PRE-PASS MUST TOKENIZE AND KEY EXACTLY AS THE SYNC ENGINE DOES, and for 22 corpus tokens it did not —
+ * so the tagger tier this file exists to install was SKIPPED for them and the rule engine answered instead.
+ * `danish.ts` hands `oovOverride` the NATIVISED spelling of a LATIN_RUN match (`nat(m[1])`); this file used a
+ * hand-listed letter class keyed by the RAW match. Both halves miss:
+ *   · a letter the nativiser rewrites is a KEY MISS — `Galápagosøer` was tagged under its own spelling while
+ *     the engine asked for `Galapagosøer`, so it read *ɡˈalapaɡosøɐ* by rule against the tagger's
+ *     *ɡaˈlaːˀpaˌɡɐsˌøːˀɐ*; likewise `taínoer` (×2), `Guaraníerne`, `Haldarsvík`, `Chişinău`, `Asunción`, …
+ *   · a letter the hand list omits SPLITS the word — `Cañitas` was tagged as `Ca` + `itas`, two readings the
+ *     engine never asks for, while it asked for `Canitas` and got nothing.
+ * 21 distinct types over FLEURS da_dk, every one of which the tagger CAN read (it declines nothing here,
+ * because the fold has already removed the out-of-vocab letter). Deriving both from danish.ts's own exports
+ * is what keeps the two tokenizers from drifting again.
+ */
+const WORD = new RegExp(LATIN_RUN, "giu");
 let taggerP: Promise<DanishTagger | undefined> | undefined;
 let engine: ReturnType<typeof createDanish> | undefined;
 const daEngine = (): ReturnType<typeof createDanish> => (engine ??= createDanish());
@@ -34,6 +47,7 @@ export async function phonemizeDaNeural(text: string): Promise<string> {
     const lex = danishLexicon();
     return wordLevelNeuralPrepass(text, {
         word: WORD,
+        key: nat, // …the spelling danish.ts's text() hands oovOverride; see the ⚠ on WORD
         lexHas: (w) => lex.has(w.toLowerCase()), // lexicon-covered words are served by the sync lexicon path
         tag: (w) => tagger.tag(w), // tagger lowercases+NFCs internally; "" = declined → left to the rule g2p
         // `withHost` — the engine is built here rather than by the registry, so nothing else pushes the host

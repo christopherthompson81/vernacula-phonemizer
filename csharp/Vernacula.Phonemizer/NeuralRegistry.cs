@@ -33,6 +33,9 @@ public static class NeuralRegistry
         // per-character BiLSTM restoring the WORD BOUNDARIES Khmer does not write
         ["km"] = Languages.Khmer.KhmerNeural.PhonemizeKmNeural,
         ["he"] = Languages.Hebrew.HebrewNeural.PhonemizeHebrewNeural, // the NAKDAN — restores niqqud on bare Hebrew
+        // per-grapheme BiLSTM reading the OOV tail of the deepest European orthography (the ~37k NST lexicon
+        // serves the rest); trained on the full 199k NST, ~96% symbol held-out
+        ["da"] = Languages.Danish.DanishNeural.PhonemizeDaNeural,
     };
 
     /** The language's best ASYNC path, or null when its best path is the sync engine. */

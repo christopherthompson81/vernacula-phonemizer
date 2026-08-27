@@ -212,5 +212,32 @@ public class LanguageBootstrapTests
         var neural = await Phonemizer.PhonemizeAsync(oov, "ckb");
         Assert.NotEqual(rules, neural);
         Assert.Equal(rules, neural.Replace("ɪ", ""));
+    public async Task DanishAsyncUsesTheTagger()
+    {
+        // Danish is the deepest European orthography, so the ~37k NST lexicon carries the shipped path and
+        // the tagger owns everything after it. On an OOV word the async reading must differ from the rule
+        // one, or the tier is not wired — and the da golden is ASYNC-mode output, so a sync-only
+        // registration differs on the 2,919 of 3,756 FLEURS lines the tagger touches.
+        const string oov = "madretter"; // rule mˈadʁetɐ → neural ˈmaðˌʁɛdɐ (soft-d + the compound's ˌ)
+        var rules = Languages.Danish.DanishPhonemizer.PhonemizeWordRules(oov);
+        var async = (await Phonemizer.PhonemizeAsync(oov, "da")).Trim();
+        Assert.NotEqual(rules, async);
+        Assert.Equal("ˈmaðˌʁɛdɐ", async);
+    }
+
+    [Fact]
+    public void DanishLexiconIsLoadedThroughItsOwnNativiser()
+    {
+        // ⚠ #1068: `Text()` folds a word to NATIVE_CLASS before it looks it up, so `joão` could never reach
+        // its own row — the fold option on LoadTsvMap is what aliases it. Three of da's four folded keys
+        // already exist unfolded in the file and WIN (one of them, `genève`, with a different value), which
+        // is the precedence this asserts alongside the alias.
+        var lex = Languages.Danish.DanishPhonemizer.Lexicon();
+        Assert.True(lex.ContainsKey("joão"));
+        Assert.Equal(lex["joão"], lex["joao"]);            // the alias landed in the free slot
+        Assert.Equal("ʃeˈnɛːv", lex["geneve"]);            // …and the unfolded key in the file still wins
+        Assert.Equal("ʃeˈnɛv", lex["genève"]);
+        Assert.Equal(Languages.Danish.DanishPhonemizer.PhonemizeWord("joão"),
+            Languages.Danish.DanishPhonemizer.PhonemizeWord("joao"));
     }
 }

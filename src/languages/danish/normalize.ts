@@ -145,6 +145,14 @@ export function normalizeDanish(input: string): string {
     t = t.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
     t = t.replace(/(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grader celsius");
     t = t.replace(/(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grader fahrenheit");
+    //    ⚠ THE NOUN MUST NOT FUSE WITH WHAT FOLLOWS — the same repair step 12 carries for the currency arm,
+    //    and the corpus needs it here too. The scale-letter arms above decline a letter RUN on purpose
+    //    (`25°Cölner` is not Celsius), and the bare arm then left `grader` abutting it: the compass bearing
+    //    `35°V` — ×2 distinct FLEURS sentences, longitude west — became one token `graderV` and read as the
+    //    OOV pseudo-word *ɡʁˈaðeʁv*, where the space gives *ˈɡʁɑːðɐ ˈveːˀ* (the lexicon's noun plus the
+    //    letter name). A plausible Danish-looking word no leak class can see (trap 56). The trailing space
+    //    is emitted only when a letter actually follows; `tidy` collapses the run.
+    t = t.replace(/(\d)\s*°(?=[\p{L}\p{M}])/gu, "$1 grader ");
     t = t.replace(/(\d)\s*°/gu, "$1 grader");
 
     // 7) SQUARED / CUBED UNITS (3). The exponent was dropped, losing the area.
