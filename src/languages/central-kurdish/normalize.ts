@@ -16,9 +16,10 @@
  * and Norwegian are all the other way round, and reading `30,000` as a decimal turns thirty thousand into
  * "thirty point zero zero zero".
  *
- * ⚠ `802.11` IS A DESIGNATION, NOT A QUANTITY. The decimal rule accepts one or two fractional digits, so the
- * Wi-Fi standard's `.11` is claimed as a decimal — harmless, since it is spoken as a number either way —
- * while the three-digit `,000` grouping is not.
+ * ⚠ `802.11` IS A DESIGNATION, NOT A QUANTITY. The decimal rule puts no cap on the fractional part (it reads
+ * it digit by digit), so the Wi-Fi standard's `.11` is claimed as a decimal — harmless, since the fractional
+ * digits are spoken one at a time either way. Only the UNIT rule needs to tell the two apart, and it has its
+ * own `NOT_VERSION` guard for it (step 2b), which is why that step must run BEFORE this one.
  *
  * ORDERING:
  *   · THE DIGIT FOLD IS FIRST. Every rule below counts digits, and none would match a native one.
@@ -174,13 +175,20 @@ export function normalizeCentralKurdish(input: string): string {
         t = t.replace(new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
     }
 
-    // 9) SIGNED NUMBERS — a sign PREFIXED to a number, `UTC+1` (2 instances). The boundary here must
-    //    admit a LETTER before the sign, unlike the European languages where that shape is a hyphenated
-    //    compound: a timezone offset is written directly against its abbreviation.
+    // 9) SIGNED NUMBERS — a sign PREFIXED to a number, `UTC+1`. The boundary must admit a LETTER before
+    //    the sign, unlike the European languages where that shape is a hyphenated compound: a timezone
+    //    offset is written directly against its abbreviation.
+    //    ⚠ BUT ONLY FOR ⟨+⟩, AND THE CORPUS DECIDES IT PER SIGN RATHER THAN PER RULE. Reading the instances
+    //    instead of counting them: the single letter-adjacent PLUS is `(UTC+1)`, the timezone this rule was
+    //    written for — while all 20 letter-adjacent MINUSES are designations, not quantities. `کۆڤید-19`,
+    //    `نوێ-COVID-19`, `HJR-3`, `Il-76s`, `چانداریان-1`: every one read as a subtraction, so COVID-19 was
+    //    *koːviːd kam noːzda*, "covid MINUS nineteen". A hyphen after a letter is a compound mark in this
+    //    corpus and never a sign, so the minus arm takes the ordinary non-letter boundary and the plus arm
+    //    keeps the wider one. (An unsigned `کۆڤید-19` then reads as its two parts, which is what it is.)
     //    The replacement carries a LEADING space: the sign sits directly against the abbreviation
     //    (`UTC+1`), so without it the word fuses on as `UTCکۆ`. The trailing collapse tidies the double.
-    t = t.replace(/(?<![\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
-        ` ${sign === "+" ? "کۆ" : "کەم"} ${n}`);
+    t = t.replace(/(?<![\d])(\+)(\d+)/gu, (_m, _sign: string, n: string) => ` کۆ ${n}`);
+    t = t.replace(/(?<![\d\p{L}\p{M}])([-−])(\d+)/gu, (_m, _sign: string, n: string) => ` کەم ${n}`);
 
     // 10) ARITHMETIC AND RELATIONAL SIGNS — infix between digits is where arithmetic lives; the relational
     //    signs are read in every position, because a dropped sign is inaudible.
