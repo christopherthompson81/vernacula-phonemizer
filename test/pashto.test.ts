@@ -309,3 +309,28 @@ describe("pashto — the ten is the first of the fused teens", () => {
         expect(numberToText(11)).not.toBe(`${numberToText(1)} ${numberToText(10)}`);
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1102 — the hour noun was said TWICE when the text already wrote it.
+//
+// The clock rule reads the corpus's own idiom (`۷ بجې او ۲۰ دقیقې`) and emits `بجې` itself. FLEURS `ps_af`
+// writes the noun after the figure in **5 of its 11 clock instances** — `11:20 بجو`, `11:00 بجو` ×2,
+// `۸:۴۶ بجو`, `10:00 بجې` — a shape the mined artifact carries ZERO times, so the redundancy could not be
+// seen from it. Trap 12.
+describe("the written hour noun is consumed, not doubled (#1102)", () => {
+    test.each([
+        ["په 11:20 بجو پولیسو", "بجو"],
+        ["لږ څه د پاسه په 11:00 بجو", "بجو"],
+        ["د سهار 10:00 بجې پیل", "بجې"],
+    ])("%s", (input) => {
+        const out = phonemize(input, "ps").trim();
+        // `بجې` reads as bəd͡ʒe / bəd͡ʒo — it must appear ONCE, not once per source.
+        expect(out.match(/bəd͡ʒ/gu)?.length ?? 0).toBe(1);
+    });
+
+    test("⚠ AND THE CLOCK WITHOUT ONE IS UNCHANGED, as is the sports time", () => {
+        expect(phonemize("اور په 11:35 د شپې", "ps").trim()).toContain("bəd͡ʒ");
+        // `۴:۴۱.۳۰` is a pace — a third field is not a clock, and the rule still requires the minutes to end.
+        expect(phonemize("د ۴:۴۱.۳۰ ګډ", "ps").trim()).not.toContain("bəd͡ʒ");
+    });
+});

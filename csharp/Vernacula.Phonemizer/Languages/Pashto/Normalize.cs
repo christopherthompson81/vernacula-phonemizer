@@ -111,7 +111,11 @@ public static class Normalize
     private static readonly JsRe DEG_C = JsRegex.Compile(
         $"(?<![{D}.,،])([{D}]+(?:[.,،][{D}]+)?)\\s?°\\s?[CcسS]{Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe DEG_SIGN = JsRegex.Compile($"(?<![{D}.,،])([{D}]+(?:[.,،][{D}]+)?)\\s?℃", "gu");
-    private static readonly JsRe CLOCK = JsRegex.Compile($"(?<![{D}:.])([{D}]{{1,2}}):([{D}]{{2}})(?![{D}:.])", "gu");
+    /** ⚠ THE TRAILING GROUP SWALLOWS AN HOUR NOUN THE TEXT ALREADY WROTE (trap 12, #1102) — 5 of the 11
+     *  clock instances in FLEURS `ps_af` carry one, and without this the rule's own `بجې` is said in front
+     *  of the corpus's. See the TS for the counts. */
+    private static readonly JsRe CLOCK = JsRegex.Compile(
+        $"(?<![{D}:.])([{D}]{{1,2}}):([{D}]{{2}})(?![{D}:.])(\\s*(?:بجو|بجې|بجه))?", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile(
         $"(?<![{D}.,،:\\p{{L}}\\p{{M}}-])([{D}]+)\\s?[-–—]\\s?([{D}]+)(?![{D}\\p{{L}}\\p{{M}}-]|[,،][{D}])", "gu");
     private static readonly JsRe PCT_AFTER = JsRegex.Compile($"([{D}]+(?:[.,،][{D}]+)?)\\s?[٪%](\\s*سلنه)?", "gu");
