@@ -43,9 +43,16 @@ const SUPERSCRIPT_RUN = `[${Object.keys(SUPERSCRIPT).join("")}]+`;
  * `foldNativeDigits` is applied per engine rather than fleet-wide (see core/unicode.ts).
  */
 /** The same shape, but with a LETTER immediately after the superscript — spaced off before the rule below
- *  consumes the mark, so the word it emits cannot fuse with what follows. */
+ *  consumes the mark, so the word it emits cannot fuse with what follows.
+ *
+ *  ⚠ AND NOT WHEN A SPACE PRECEDES THE SUPERSCRIPT (#1045/#1086). A space-separated superscript glued to a
+ *  word is that word's NUCLIDE, and firing here inserts a space that HIDES the shape from `NUCLIDE_FOLLOWS`
+ *  below, which tests for a letter IMMEDIATELY after. #1085 guarded both branches and this pass defeated
+ *  the guard in the DECLARED one — found by the #1086 differential, because the probe that had passed
+ *  earlier declared the wrong field and fell through to the fallback, where the glued pass does not run
+ *  first. `10⁶km` still spaces: nothing separates its base from its mark. */
 const BARE_EXPONENT_GLUED = new RegExp(
-    `(?:\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(?:${SUPERSCRIPT_RUN})(?=[\\p{L}\\p{M}])`,
+    `(?:\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})(?:${SUPERSCRIPT_RUN})(?=[\\p{L}\\p{M}])`,
     "gu",
 );
 /**

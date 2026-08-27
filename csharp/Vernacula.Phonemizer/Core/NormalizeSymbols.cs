@@ -247,8 +247,12 @@ public static class NormalizeSymbols
         "gu");
     /** The same shape with a LETTER after the superscript — spaced off first, so the WORD the rule below
      *  emits cannot fuse with what follows (`I²C` read as one token). */
+    /// <summary>⚠ AND NOT WHEN A SPACE PRECEDES THE SUPERSCRIPT (#1045/#1086): a space-separated superscript
+    /// glued to a word is that word's NUCLIDE, and firing here inserts a space that HIDES the shape from
+    /// NUCLIDE_FOLLOWS below, which tests for a letter IMMEDIATELY after. #1085 guarded both branches and
+    /// this pass defeated the guard in the DECLARED one. `10⁶km` still spaces.</summary>
     private static readonly JsRe BARE_EXPONENT_GLUED = JsRegex.Compile(
-        "(?:\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(?:" + SUPERSCRIPT_RUN + ")(?=[\\p{L}\\p{M}])",
+        "(?:\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})(?:" + SUPERSCRIPT_RUN + ")(?=[\\p{L}\\p{M}])",
         "gu");
     private static readonly JsRe DIGIT_BASE = JsRegex.Compile("^\\p{Nd}", "u");
     private static readonly JsRe LETTER_NEXT = JsRegex.Compile("^[\\p{L}\\p{M}]", "u");
