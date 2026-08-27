@@ -81,6 +81,19 @@ export function toSegments(
         const c = w[i]!,
             nx = w[i + 1] ?? "",
             nx2 = w[i + 2] ?? "";
+        // ⚠ THE APOSTROPHE IS ORTHOGRAPHY, NOT A PHONE. Dropped HERE rather than stripped from the word,
+        // because the NST lexicon spells its five headwords WITH it (`o'brien`): the lookup upstream needs
+        // the original string and only the segmental pass needs it gone. Left to fall through it reached the
+        // bottom of the loop, where an unread character is PASSED THROUGH rather than deleted, and leaked
+        // into the IPA verbatim — *ɔ'brˈiːɛn*.
+        //
+        // ⚠ NOT IN `core/latinPhones.ts`, AND THAT IS THE POINT OF ASKING. The shared floor is already wired
+        // at this g2p's fall-through and it is the right net for a LETTER the language cannot read (⟨q⟩ in
+        // Qatar). But it answers "what phone does this letter denote", and an apostrophe is not a letter —
+        // it correctly declines. Nor could a central rule DROP it, because the apostrophe is not the same
+        // thing in every language: Hausa writes `'yan` with a phonemic glottalised /ʲ/ on it, which is why
+        // `hostWord.ts` gives it a lead-legal `extra` slot there. Its status is per-language, so is this.
+        if (c === "'" || c === "\u2019") { i++; continue; }
         const three = w.slice(i, i + 3);
         const two = w.slice(i, i + 2);
         // Consonant softening (k→ɕ, sk→ɧ, g→j, c→s) fires at a STRESSED-syllable onset: the first syllable, and —
@@ -187,7 +200,11 @@ export function toSegments(
                 if (isFront(after) || after === "é") { push("k"); push("s"); } else push("k");
             }
             else if (CONS[c]) push(CONS[c]! + "ː");
-            // any other doubled letter with no rule: the shared floor, never the raw character.
+            // Any other doubled letter with no rule: the shared floor first, and the raw character only if
+            // even that declines — the same last resort as the single-character branch at the bottom of the
+            // loop. ⚠ The comment here used to claim "never the raw character", which the `: c` plainly is;
+            // passing an unread character through is deliberate (a deletion is silent, a leak is visible to
+            // the scan) but it must be described as what it is.
             else { const p = latinPhone(c, { initial: i === 0, includeH: false }); push(p !== undefined ? p + "ː" : c); }
             i += 2;
             continue;

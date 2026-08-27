@@ -30,4 +30,25 @@ public class LexiconFoldTests
         // headword with no folded competitor; it must be untouched by the aliasing pass.
         Assert.Equal("hʉːs", Phonemizer.Phonemize("hus", "sv"));
     }
+
+    [Theory]
+    // ⚠ THE SECOND, DISJOINT DEFECT. #1068 described five of Swedish's keys as "split", as though widening
+    // the word arm were a cheap partial of the fold fix. The sets do not overlap: Nat("o'brien") returns it
+    // UNCHANGED — an apostrophe is not a letter the nativiser maps — so these were never a reachability
+    // problem, they were a TOKENIZER one, and both fixes are wanted.
+    [InlineData("o'brien", "ɔbrˈiːɛn")]        // was `uː brˈìːɛn` — two words, "oo" + "breen"
+    [InlineData("rock'n'roll", "rɔkːnrˈɔlː")]  // was `rɔkː n rɔlː`
+    [InlineData("mcdonald's", "mkdɔnˈalds")]   // was `mkdɔnˈald s`
+    [InlineData("Xi'an", "ksˈìːan")]           // one of the six the mined corpus writes
+    public void AnApostropheBearingHeadwordIsOneWord(string input, string want) =>
+        Assert.Equal(want, Phonemizer.Phonemize(input, "sv"));
+
+    [Theory]
+    // ⚠ …AND A CLOSING QUOTE IS NOT PART OF THE WORD. `medialOnly` only bars the apostrophe from LEADING a
+    // run, so `'ordet'` tokenized as `ordet'` — missing its lexicon entry and changing the accent to
+    // *ˈùːɖɛt'*. Requiring a LETTER after the apostrophe separates a possessive from a quote.
+    [InlineData("'ordet'", "ˈuːɖɛt")]
+    [InlineData("Han sa 'nej'", "hɑːn sɑː neːj")]
+    public void AClosingQuoteIsNotPartOfTheWord(string input, string want) =>
+        Assert.Equal(want, Phonemizer.Phonemize(input, "sv"));
 }
