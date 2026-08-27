@@ -221,6 +221,27 @@ describe("lexicon keys must survive their own engine's nativiser (#1068)", () =>
         expect(phonemize("abstrakten", "sl")).toBe("apstrˈaktɛn");
     });
 
+    // ⚠ THE SECOND, DISJOINT DEFECT #1068 CONFLATED WITH THE FOLD. The issue described five of Swedish's
+    // keys as "split", as though widening the word arm were a cheap partial of the fold fix. Measured, the
+    // sets do not overlap at all: `nat("o'brien")` returns it UNCHANGED — an apostrophe is not a letter the
+    // nativiser maps — so these were never a reachability problem, they were a TOKENIZER one.
+    test("sv reads an apostrophe-bearing headword as ONE word", () => {
+        expect(phonemize("o'brien", "sv")).toBe("ɔbrˈiːɛn"); //     was `uː brˈìːɛn` — two words, "oo" + "breen"
+        expect(phonemize("rock'n'roll", "sv")).toBe("rɔkːnrˈɔlː"); // was `rɔkː n rɔlː`
+        expect(phonemize("mcdonald's", "sv")).toBe("mkdɔnˈalds"); //  was `mkdɔnˈald s`
+        // …and the corpus's own instances, which are foreign names and possessives.
+        expect(phonemize("Xi'an", "sv")).toBe("ksˈìːan");
+    });
+
+    test("⚠ …AND A CLOSING QUOTE IS NOT PART OF THE WORD, which is why the guard is a lookahead", () => {
+        // `hostWordRun`'s `medialOnly` only bars the apostrophe from LEADING a run, so `'ordet'` tokenized as
+        // `ordet'` — missing its lexicon entry and changing the word's accent to *ˈùːɖɛt'*. Requiring a
+        // LETTER after the apostrophe is what separates a possessive from a quote. Both must stay as they
+        // were before the change.
+        expect(phonemize("'ordet'", "sv")).toBe("ˈuːɖɛt");
+        expect(phonemize("Han sa 'nej'", "sv")).toBe("hɑːn sɑː neːj");
+    });
+
     test("⚠ AN UNFOLDED KEY ALREADY IN THE FILE STILL WINS — which is why no golden moved", () => {
         // An alias goes only into a FREE slot. `bleste` is written in stress.tsv with nucleus 1; `bləste`
         // folds onto it with nucleus 0 and must NOT displace it.

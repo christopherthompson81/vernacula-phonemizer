@@ -115,8 +115,17 @@ public sealed class SwedishPhonemizer : ILanguage
     /** NFC fold, hoisted OUT of `Text()` on purpose — see swedish.ts (normalization/review.ts's trap-6 check). */
     private static string Nfc(string s) => s.Normalize(System.Text.NormalizationForm.FormC);
 
+    /// <summary>⚠ THE WORD ARM CARRIES A MEDIAL APOSTROPHE, guarded by a LOOKAHEAD rather than a character
+    /// class. LATIN_RUN stops at `\u0027`, so a name or possessive carrying one arrived as two runs and read as
+    /// two words — `o'brien` → *uː brˈìːɛn*. Five NST headwords are spelled this way and could never be
+    /// matched. `medialOnly` is NOT enough: it only bars the apostrophe from LEADING a run, so a CLOSING
+    /// QUOTE still joined (`'ordet'` → the token `ordet'`, which misses its entry and changes the accent).
+    /// The apostrophe must be FOLLOWED BY A LETTER to belong to the word. See the TS docstring.</summary>
+    private const string SV_LETTER = "(?!\\p{Nd})[\\p{Script=Latin}]";
+    private static readonly string SV_WORD =
+        $"{SV_LETTER}(?:{SV_LETTER}|\\p{{M}}|['\u2019](?={SV_LETTER}))*";
     private static readonly JsRe TOKEN =
-        JsRegex.Compile($"({HostWord.LATIN_RUN})|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])", "gu");
+        JsRegex.Compile($"({SV_WORD})|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])", "gu");
     private static readonly JsRe DECIMAL_SEP = JsRegex.Compile("[.,]");
 
     /** This language's OWN inventory — an INVENTORY question, distinct from the TOKEN class's routing one. */

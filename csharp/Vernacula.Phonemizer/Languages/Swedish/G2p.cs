@@ -90,6 +90,14 @@ public static class G2p
         while (i < n)
         {
             string c = CharAt(w, i), nx = CharAt(w, i + 1), nx2 = CharAt(w, i + 2);
+            // ⚠ THE APOSTROPHE IS ORTHOGRAPHY, NOT A PHONE. Dropped HERE rather than stripped from the word:
+            // the NST lexicon spells its five headwords WITH it, so the lookup upstream needs the original
+            // string and only the segmental pass needs it gone. Left to fall through it reached the bottom of
+            // the loop, where an unread character is PASSED THROUGH, and leaked into the IPA — *ɔ'brˈiːɛn*.
+            // ⚠ NOT in Core/LatinPhones: that net is already wired at this g2p's fall-through and is right for
+            // a LETTER the language cannot read, but an apostrophe is not a letter and it correctly declines.
+            // Nor could a central rule drop it — Hausa writes `'yan` with a phonemic glottalised /ʲ/ on it.
+            if (c == "'" || c == "\u2019") { i++; continue; }
             var three = Slice(w, i, i + 3);
             var two = Slice(w, i, i + 2);
             var softenOnset =

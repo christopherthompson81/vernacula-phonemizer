@@ -127,7 +127,21 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
  *  unphonemized spelling. It is the first false positive that check has produced (see the PR); moving the
  *  call out of the scanned body costs nothing and keeps the check meaningful. */
 const nfc = (s: string): string => s.normalize("NFC");
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])`, "gu");
+/**
+ * ⚠ THE WORD ARM CARRIES A MEDIAL APOSTROPHE, and the guard is a LOOKAHEAD rather than a character class.
+ * `LATIN_RUN` stops at `'`, so a name or possessive carrying one arrived as two runs and was read as two
+ * words — `o'brien` → *uː brˈìːɛn* ("oo" + "breen"), `rock'n'roll` → *rɔkː n rɔlː*. Five NST headwords are
+ * spelled this way (`mcdonald's o'boy o'brien o'neill rock'n'roll`) and could never be matched; the mined
+ * corpus writes six more (`Bush's`, `People's`, `Xi'an`, `O'Shannessy` …). Zero are in the parity golden.
+ *
+ * ⚠ `hostWordRun`'s `medialOnly` IS NOT ENOUGH, and trying it first is what showed why: it only bars the
+ * apostrophe from LEADING a run, so a CLOSING QUOTE still joined — `'ordet'` became the token `ordet'`,
+ * which misses its lexicon entry and changed the word's accent. The apostrophe must be followed by a letter
+ * to be part of the word, which only a lookahead can say.
+ */
+const SV_LETTER = "(?!\\p{Nd})[\\p{Script=Latin}]";
+const SV_WORD = `${SV_LETTER}(?:${SV_LETTER}|\\p{M}|['\u2019](?=${SV_LETTER}))*`;
+const TOKEN = new RegExp(`(${SV_WORD})|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])`, "gu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
