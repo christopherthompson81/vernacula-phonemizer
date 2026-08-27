@@ -399,7 +399,10 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|([1-9]\\d{0,2}(?:\\.\\d{3})+|\\d+(?:,\\
  * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zäöüßA-ZÄÖÜ]";
-const nat = makeNativiser(NATIVE_CLASS, "u");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // German measure and currency words are INVARIANT plurals (Prozent, Euro, Kilometer).
 const SYMBOLS = makeSymbolNormalizer({

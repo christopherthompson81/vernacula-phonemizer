@@ -216,7 +216,10 @@ const TOKEN = new RegExp(
  * this class REJECTS carries a letter the language does not use — i.e. a foreign name. See core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zA-ZéèêÉÈÊ]";
-const nat = makeNativiser(NATIVE_CLASS, "u");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "u");
 
 /** Speak an integer: emit each ngoko numeral word separately (so word-final laxing / a→ɔ apply per word). */
 function emitNumber(n: number, sink: { emit: (s: string) => void }, digits?: string): void {

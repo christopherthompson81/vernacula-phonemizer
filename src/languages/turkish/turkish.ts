@@ -108,7 +108,10 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:(?<!
  * tokenizing — see azerbaijani.ts.)
  */
 const NATIVE_CLASS = "[a-zçğıiöşüâîûİ]";
-const nat = makeNativiser(NATIVE_CLASS, "iu");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 /** A number token (Turkish thousands-dots / decimal-comma) → spoken words. */
 function numberTokenToWords(tok: string): string {

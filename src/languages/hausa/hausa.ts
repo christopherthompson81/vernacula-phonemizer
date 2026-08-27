@@ -27,7 +27,10 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|([1-9]\\d{0,2}(?:,
  * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zɓɗƙƴA-ZƁƊƘƳ'’]";
-const nat = makeNativiser(NATIVE_CLASS, "u");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // symbol normalization — Hausa: % is "kashi" BEFORE the number (the corpus's "kashi 80%"); nouns
 // stay SINGULAR after numerals; the unit words are the corpus's own borrowings (kilomita, mita).

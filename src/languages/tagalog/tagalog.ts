@@ -432,7 +432,10 @@ const NATIVE_CLASS = "[A-Za-zÑñ‑-]";
  * above is the inventory — a word it rejects carries a letter this language does not use. See
  * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
-const nat = makeNativiser(NATIVE_CLASS, "u");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class TagalogPhonemizer implements Phonemizer {
     text(input: string): string {

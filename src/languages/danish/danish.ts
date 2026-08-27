@@ -141,7 +141,10 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
  * the G2P, and `test/native-inventory.test.ts` measures it rather than trusting it.
  */
 const NATIVE_CLASS = "[a-zæøåéöäü]";
-const nat = makeNativiser(NATIVE_CLASS, "iu");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class DanishPhonemizer implements Phonemizer {
     // `oovOverride` (neural path only, daNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
