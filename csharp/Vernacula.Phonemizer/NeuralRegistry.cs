@@ -15,6 +15,9 @@ public static class NeuralRegistry
         ["ur"] = t => RiderNeural.PhonemizeRiderNeural(t, "ur"),
         ["fa"] = Languages.Persian.PersianNeural.PhonemizeFaNeural,
         ["sd"] = Languages.Sindhi.SindhiNeural.PhonemizeSdNeural, // per-letter BiLSTM restoring the abjad's unwritten short vowels on OOV words
+        // BiLSTM placing the BIZROKE — Sorani's one unwritten vowel — on the words the AsoSoft-derived
+        // lexicon misses. Precedence is lexicon → tagger → rules.
+        ["ckb"] = Languages.CentralKurdish.CentralKurdishNeural.PhonemizeCkbNeural,
         // ⚠ Western Punjabi (Shahmukhi) is registry code `pnb`, but the rider keys its Perso-Arabic lexicon
         // under `pa` — so the model token and the registry code differ, exactly as in the TS.
         // ⚠ THIS ENTRY WAS MISSING AND NOTHING COULD SEE IT. `pnb`'s SYNC engine is served (it is the same

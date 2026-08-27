@@ -138,6 +138,9 @@ public class LanguageBootstrapTests
     [InlineData("mg", "olona mandeha", "ulˈuna maⁿdˈeha")]
     [InlineData("mg", "trano 21", "ʈʂˈanu irˈajka ˈaᵐbi ruapˈulu")]
     [InlineData("mg", "5 km² sy 2 kg", "dˈimi kilometˈaʈʂa turaɖʐˈua sˈi rˈua kˈilo")]
+    // ckb: the Latin unit alias, the degree scale, the preposed clause mark, and the detached izafe ⟨ی⟩.
+    [InlineData("ckb", "5 km لە 25 °C، ٢٠٢٤ی ئەیلول.",
+        "peːnd͡ʒ kiːloːmatɪɾ la biːstu peːnd͡ʒ pɪlaj saliːziː , duː hazaːɾu biːstu t͡ʃwaːɾ iː ʔajlul .")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 
@@ -161,5 +164,19 @@ public class LanguageBootstrapTests
         var rules = Languages.Sindhi.SindhiPhonemizer.PhonemizeWordRules(oov);
         var async = await Phonemizer.PhonemizeAsync(oov, "sd");
         Assert.NotEqual(rules, async);
+    }
+
+    [Fact]
+    public async Task CentralKurdishAsyncUsesTheBizrokeTagger()
+    {
+        // Sorani's one unwritten vowel: the tagger sits between the AsoSoft lexicon and the rules, so a
+        // word neither covers must read differently on the async path — and the difference is /ɪ/ ALONE,
+        // which is the whole guarantee the consonant-consistency mask gives (see the TS tagger header).
+        const string oov = "درووستکردنی";
+        Assert.False(Languages.CentralKurdish.CentralKurdishPhonemizer.BizrokeLexiconHas(oov));
+        var rules = Languages.CentralKurdish.CentralKurdishPhonemizer.PhonemizeWordRules(oov);
+        var neural = await Phonemizer.PhonemizeAsync(oov, "ckb");
+        Assert.NotEqual(rules, neural);
+        Assert.Equal(rules, neural.Replace("ɪ", ""));
     }
 }
