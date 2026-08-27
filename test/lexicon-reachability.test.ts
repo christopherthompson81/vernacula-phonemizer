@@ -242,7 +242,11 @@ describe("lexicon keys must survive their own engine's nativiser (#1068)", () =>
         expect(phonemize("Han sa 'nej'", "sv")).toBe("hɑːn sɑː neːj");
     });
 
-    test("⚠ AN UNFOLDED KEY ALREADY IN THE FILE STILL WINS — which is why no golden moved", () => {
+    // ⚠ THE INVARIANT IS ABOUT LEXICON-RESOLVED READINGS, NOT ABOUT GOLDENS. #1072 claimed the second and
+    // was wrong: a FREE slot is free because the word was an OOV MISS, and an OOV miss is not silence — it
+    // is the fallback rule, whose answer the goldens record. Slovene's 680 added headwords moved 8 of
+    // `sl.tsv`'s 200 rows, and no gate caught it because sl was unported, so nothing ran its golden.
+    test("⚠ AN UNFOLDED KEY ALREADY IN THE FILE STILL WINS — no reading resolved THROUGH THE LEXICON moves", () => {
         // An alias goes only into a FREE slot. `bleste` is written in stress.tsv with nucleus 1; `bləste`
         // folds onto it with nucleus 0 and must NOT displace it.
         expect(slovenianLex().get("bleste")).toBe(1);
