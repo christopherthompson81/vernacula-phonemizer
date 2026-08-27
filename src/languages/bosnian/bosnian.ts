@@ -47,8 +47,8 @@ class BosnianPhonemizer implements Phonemizer {
             // script normaliser is already native spelling. Without it ⟨q w x y⟩ are DELETED.
             if (m[1]) sink.emit(phonemizeWord(nat(foreignLetters(m[1])))); // shared Serbo-Croatian g2p
             else if (m[2])
-                // ⚠ THE TOKEN STRING IS PASSED AS `raw` (#1059): above 2^53 the double has rounded and above
-                // 1e21 `String(n)` is exponent form, so the digit-by-digit fallback needs the digits.
+                // ⚠ THE TOKEN STRING IS PASSED AS `raw` (#1059) — the digit-by-digit fallback cannot recover
+                // the digits from the double. The arm is bare `\d+`, so the token IS the digit string.
                 for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd)); // Bosnian numbers
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

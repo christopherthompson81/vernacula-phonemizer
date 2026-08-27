@@ -288,10 +288,15 @@ const FOLD_OPT_OUT: ReadonlySet<string> = new Set(["te"]);
  *  can — with the "and" that joins a mixed number. ca says *vint-i-nou I tres quarts* and mk *…ˈи три
  *  четврт…*; the fold, which only rewrites `¾` to ` 3/4`, drops that conjunction because supplying it needs a
  *  per-language word in a per-language position. Measured over the artifacts: 36 languages carry a vulgar
- *  fraction, 27 DROP it and these 9 already handle it, so the fold is for the 27 and must not pre-empt the 9.
+ *  fraction, 27 DROP it and these 10 already handle it, so the fold is for the 27 and must not pre-empt the 10.
  *  Found by the test suite — ca's and mk's fraction tests failed on the missing conjunction, which is exactly
- *  the regression an opt-out exists to prevent. */
-const VULGAR_FOLD_OPT_OUT: ReadonlySet<string> = new Set(["az", "ca", "el", "ga", "hr", "kn", "mk", "te", "uz"]);
+ *  the regression an opt-out exists to prevent.
+ *  ⚠ `bs` WAS MISSING FROM THIS LIST AND ITS RULE WAS THEREFORE DEAD, which no test and no golden could see —
+ *  the fold predates the Bosnian port by twelve days, so `bosnian/normalize.ts` step 14 was authored against a
+ *  `¾` that had already become ` 3/4` before the engine ran. bs has no general `n/m` fraction rule, so the
+ *  slash was then dropped outright and the parchment sentence read *dvadeset devet TRI ČETIRI inča* — "three
+ *  four", a worse reading than the drop the fold exists to repair. Its own rule says *i tri četvrtine*. */
+const VULGAR_FOLD_OPT_OUT: ReadonlySet<string> = new Set(["az", "bs", "ca", "el", "ga", "hr", "kn", "mk", "te", "uz"]);
 
 const cache = new Map<string, Phonemizer>();
 

@@ -255,6 +255,13 @@ const DOTTED: Readonly<Record<string, string>> = {
 /** ⚠ BOTH SCRIPTS in the alternation. Latin keys alone make the rule a no-op on Cyrillic prose — `итд.`
  *  still reads as [itd] plus a phrase break. Digraphia bites the same way `\b` does: a rule that looks
  *  right matches nothing. Longest-first so `str` cannot be pre-empted by a shorter key. */
+/** The connectives that coordinate two ordinals (step 9b), in both scripts. `do` is unambiguous inside that
+ *  pattern — it is flanked by two dotted numerals and followed by a licensing word. */
+const CONNECTIVE_ALT = ["i", "ili", "do"]
+    .flatMap((k) => [k, cyr(k)])
+    .sort((a, b) => b.length - a.length)
+    .join("|");
+
 const DOTTED_ALT = Object.keys(DOTTED)
     .flatMap((k) => [k, cyr(k)])
     .sort((a, b) => b.length - a.length)
@@ -362,10 +369,19 @@ export function normalizeBosnian(input: string): string {
     //    ⚠ THE FINAL DOT IS TWO DIFFERENT THINGS. `p.n.e. u požaru` runs on and the dot must be consumed;
     //    at a sentence end it must be kept. The discriminator is CASE and the test must run in the
     //    CALLBACK — `\p{Lu}` inside an `i`-flagged pattern matches lowercase too.
-    s = s.replace(/(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(\s*)(\S?)/giu, replaceEra("prije nove ere"));
-    //    THE FINAL DOT IS SOMETIMES ABSENT (`p.n.e,`), so a second pass claims the dotless form. Guarded
-    //    against a following letter so it cannot bite into a real word.
-    s = s.replace(/(?<![\p{L}\p{M}])p\.\s?n\.\s?e(?![\p{L}\p{M}.])/giu, "prije nove ere");
+    //    ⚠ BOTH SCRIPTS, AND THIS RULE WAS THE ONE THAT HAD ONLY ONE. Cyrillic ⟨п н е⟩ and Latin ⟨p n e⟩
+    //    are distinct code points that look alike, so a Latin-only class is a NO-OP on Cyrillic prose — the
+    //    exact failure this file's header states for the digraphia ("a rule that looks right matches
+    //    nothing") and that DOTTED_ALT, LICENSOR and the degree scale all already guard against. Untreated,
+    //    `п.н.е. у пожару` read as *p . n . e .* — four letter names and four spurious phrase breaks, which
+    //    is the defect this file mostly exists for, arriving through the script it does not measure.
+    //    Serbian's own era rule already ships both spellings; nothing here is invented, only transliterated.
+    for (const marker of ["p\\.\\s?n\\.\\s?e", "п\\.\\s?н\\.\\s?е"]) {
+        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${marker}\\.(\\s*)(\\S?)`, "giu"), replaceEra("prije nove ere"));
+        //    THE FINAL DOT IS SOMETIMES ABSENT (`p.n.e,`), so a second pass claims the dotless form. Guarded
+        //    against a following letter so it cannot bite into a real word.
+        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${marker}(?![\\p{L}\\p{M}.])`, "giu"), "prije nove ere");
+    }
 
     // 2) DOTTED ABBREVIATIONS, three arms. The dot is consumed before a following word so it cannot become
     //    a phrase break; at a real sentence end it is kept.
@@ -534,6 +550,33 @@ export function normalizeBosnian(input: string): string {
             const a = ordinalBase(Number(from)), b = ordinalBase(Number(to));
             if (a === undefined || b === undefined) return whole; // round thousands — see ordinalBase
             return `${inflect(a, "f.gen")!} do ${inflect(b, "f.gen")!}`;
+        });
+
+    // 9b) A COORDINATED ORDINAL PAIR — `10. i 11. stoljeća`, `1. i 3. pukovniju`, `2015. ili 2016. godini`.
+    //     ⚠ THE EVIDENCE IS ALREADY WRITTEN ABOVE AND WAS ONLY HALF USED. Step 9's argument is that when a
+    //     span's dot is licensed BOTH endpoints are ordinal, and its citation is precisely these longhand
+    //     sentences — `u sezoni od 1995. do 1996. godine`, `u 2015. ili 2016. godini`. Step 9 then claimed
+    //     only the DASH form and left the longhand ones to steps 10/11, which see one numeral at a time:
+    //       · a NON-YEAR first conjunct is claimed by NEITHER (step 10 needs the licensor adjacent, step 11
+    //         needs 1000–2100), so `10. i 11. stoljeća` read *deset . i jedanaestog stoljeća* — a cardinal
+    //         plus the spurious clause boundary this whole file exists to remove. ×3 distinct sentences,
+    //         and the LICENSOR table's own tally cites two of them (`10. i 11. stoljeća`, `1. i 3.
+    //         pukovniju`) as its evidence for `stoljeća` and `pukovniju`.
+    //       · a YEAR first conjunct IS claimed, by step 11 — but step 11 only knows the ELIDED *godine*, so
+    //         it always emits f.gen. When the written licensor governs another slot the pair disagrees with
+    //         itself: `u 2015. ili 2016. godini` read *dvije hiljade petnaestE ili dvije hiljade
+    //         šesnaestOJ godini*, one construction with two cases in it. ×1.
+    //     Both endpoints take the slot the WRITTEN licensor governs, which is step 9's rule stated for a
+    //     word connective instead of a dash. The three connectives are the three the corpus writes (`i`
+    //     ×2 sentences, `do` ×2, `ili` ×1); both scripts, as everywhere else in this file.
+    s = s.replace(
+        new RegExp(`(?<![\\d.,])(\\d{1,4})\\.\\s+(${CONNECTIVE_ALT})\\s+(\\d{1,4})\\.\\s+(\\p{Ll}[\\p{L}\\p{M}]*)`, "gu"),
+        (whole, from: string, conn: string, to: string, word: string) => {
+            const slot = LICENSOR[lat(word)];
+            if (slot === undefined) return whole;
+            const a = ordinalBase(Number(from)), b = ordinalBase(Number(to));
+            if (a === undefined || b === undefined) return whole; // round thousands — see ordinalBase
+            return `${inflect(a, slot)!} ${conn} ${inflect(b, slot)!} ${word}`;
         });
 
     // 10) THE `N.` ORDINAL — the rule this file mostly exists for (see the header and LICENSOR). Claimed

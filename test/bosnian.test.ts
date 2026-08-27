@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
 import { createBosnian } from "../src/languages/bosnian/bosnian.ts";
 import { phonemizeWord } from "../src/languages/serbian/serbian.ts";
 
@@ -321,6 +322,45 @@ describe("Bosnian text normalization", () => {
         expect(say("u SAD živi")).toBe("u sad ʒˈiː˥˩ʋi");
     });
 
+    /**
+     * ⚠ A COORDINATED PAIR IS ONE CONSTRUCTION, AND THE FIRST CONJUNCT WAS FALLING THROUGH BOTH ORDINAL
+     * RULES. Step 10 needs the licensor adjacent and step 11 needs a 1000–2100 year, so `10. i 11. stoljeća`
+     * — a sentence the LICENSOR table itself cites as its evidence for `stoljeća` — read as a CARDINAL plus
+     * the spurious clause boundary this file exists to remove.
+     */
+    test("a coordinated ordinal pair inflects BOTH conjuncts, in the written licensor's slot", () => {
+        // `Gotički stil dostigao je vrhunac između 10. i 11. stoljeća i 14. stoljeća.` — was *deset . i…*
+        expect(say("10. i 11. stoljeća i 14. stoljeća")).toBe(
+            "dˈesetoɡ i jedanˈaestoɡ stˈoʎet͡ɕa i t͡ʃetrnˈaestoɡ stˈoʎet͡ɕa");
+        // `…uključivale su 1. i 3. pukovniju iz New Hampshira…` — was *jedan . i treću…*
+        expect(say("1. i 3. pukovniju")).toBe("pˈrʋu i trˈet͡ɕu pˈukoʋniju");
+        // ⚠ AND THE YEAR CASE IS A DIFFERENT DEFECT WITH THE SAME CAUSE. Step 11 knows only the ELIDED
+        // *godine*, so it always emitted f.gen: `u 2015. ili 2016. godini` read *petnaestE … šesnaestOJ*,
+        // one construction carrying two cases. The written licensor governs both conjuncts.
+        expect(say("u 2015. ili 2016. godini")).toBe(
+            "u dʋˈi˥˩je xˈiʎade pˈetnaestoj ˈi˥˩li dʋˈi˥˩je xˈiʎade ʃˈesnaestoj ɡˈodini");
+        // `do` is the third attested connective, and here f.gen is what both conjuncts already took — the
+        // rule must not MOVE a reading that was right by coincidence.
+        expect(say("od 1995. do 1996. godine")).toBe(
+            "od xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set pˈete do xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set ʃˈeste ɡˈodine");
+        // An UNLICENSED follower is refused outright — the closed list is what protects sentence ends.
+        expect(say("5. i 6. nepoznata")).toBe("peː˥˩t . i ʃeː˥˩st . nˈepoznata");
+        // …as is a round thousand, which `ordinalBase` declines (the fused *dvijehiljaditi* is not attempted).
+        expect(say("2000. i 3000. godine")).toBe("dʋˈi˥˩je xˈiʎade . i triː˥˩ xˈiʎade . ɡˈodine");
+        // ⚠ BOTH SCRIPTS, like every other word-keyed rule here.
+        expect(say("10. и 11. стољећа")).toBe("dˈesetoɡ i jedanˈaestoɡ stˈoʎet͡ɕa");
+    });
+
+    /**
+     * ⚠ THE ERA MARKER WAS THE ONE WORD-KEYED RULE WITH A SINGLE SCRIPT. Cyrillic ⟨п н е⟩ and Latin ⟨p n e⟩
+     * are distinct code points that look alike, so the Latin-only pattern was a no-op on Cyrillic prose and
+     * `п.н.е.` read as four letter names with four phrase breaks.
+     */
+    test("the era marker is claimed in BOTH scripts", () => {
+        expect(say("п.н.е. у пожару")).toBe("prˈi˥˩je nˈoʋe ˈere u pˈoʒaru");
+        expect(say("356. godine p.n.e.")).toBe("trˈi˥˩sta pedˈe˩˥set ʃˈeste ɡˈodine prˈi˥˩je nˈoʋe ˈere .");
+    });
+
     test("ordinary prose is untouched", () => {
         expect(say("Dobar dan, Sarajevo!")).toBe("dˈo˥˩bar daː˥˩n , sˈa˩˥rajeʋo !");
     });
@@ -342,5 +382,49 @@ describe("Bosnian text normalization", () => {
         test("a 16-digit run past 2^53 reads its written digits", () => {
             expect(say("9007199254740993").endsWith("triː˥˩")).toBe(true);
         });
+    });
+});
+
+/**
+ * ⚠ THESE GO THROUGH `phonemize`, NOT THROUGH `createBosnian().text` — and the distinction is the whole point
+ * of the first one. Every test above builds the engine directly, so none of them can see the shared pre-passes
+ * `getPhonemizer` wraps around it, and step 14 of `bosnian/normalize.ts` was DEAD for exactly that reason: the
+ * vulgar-fraction fold rewrites `¾` to ` 3/4` before the engine runs, and bs — which has no general `n/m`
+ * fraction rule — then dropped the slash and read *tri četiri*, "three four". Direct-engine tests pass on a
+ * rule the product never reaches.
+ */
+describe("Bosnian through the registry — the shared pre-passes are part of the reading", () => {
+    /**
+     * The corpus's one parchment sentence, `(29¾ inča sa 24½ inča)`. bs is in `VULGAR_FOLD_OPT_OUT` because
+     * its own rule supplies the `i` that joins a mixed number, which the fold cannot.
+     * ⚠ `i po`, NOT Croatian's `i pol` — the one place bs and hr genuinely part company in this vocabulary.
+     */
+    test("a vulgar fraction reads through the language's OWN rule, not the shared fold", () => {
+        expect(phonemize("29¾ inča sa 24½ inča", "bs").trim()).toBe(
+            "dʋˈaː˩˥deset dˈe˥˩ʋet i triː˥˩ t͡ʃˈetʋrtine ˈiː˥˩nt͡ʃa sa dʋˈaː˩˥deset t͡ʃˈe˩˥tiri i po ˈiː˥˩nt͡ʃa",
+        );
+        // …and the fold's own output is what it must NOT be: the slash is dropped and the two operands are
+        // read as bare digits.
+        expect(phonemize("29¾", "bs").trim()).not.toBe(phonemize("29 3/4", "bs").trim());
+    });
+
+    /**
+     * ⚠ #1059, WHICH DID NOT PROPAGATE TO THE TWO STANDARDS THAT WRAP THE SHARED COMPOSITOR. `raw` is the
+     * token string and the caller must pass it: above 2^53 the double has already ROUNDED, and above 1e21
+     * `String(n)` is exponent form whose `e`/`+` are table misses.
+     */
+    test("an integer past the float's exact range is read from its DIGITS, not from the double", () => {
+        // 2^53 + 1 and its neighbour differ in one digit, so they must differ in the reading. Before the fix
+        // `…993` read as `…992` — its neighbour's answer, silently.
+        const a = phonemize("9007199254740993", "bs").trim();
+        const b = phonemize("9007199254740994", "bs").trim();
+        expect(a).not.toBe(b);
+        expect(a.endsWith("triː˥˩")).toBe(true);
+        // Above 1e21 the exponent form leaked: `1e+21` read *jedan e dva jedan*, four words for 22 digits.
+        const big = phonemize("1" + "0".repeat(21), "bs").trim();
+        expect(big.split(" ").length).toBe(22);
+        expect(big).not.toMatch(/\d/u);
+        // ⚠ AND THE COMPOSED PATH BELOW THE CAP IS UNTOUCHED — a small number is still a numeral.
+        expect(phonemize("12", "bs").trim()).toBe("dʋˈaː˩˥naest");
     });
 });
