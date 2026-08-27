@@ -283,3 +283,43 @@ describe("Mongolian text normalization", () => {
         expect(phonemize("Дундаж температур нь -25°С", "mn").trim()).toBe("tʊntət͡ʃ tʰempʰeratʰʊr n χasəχ χɔrəŋ tʰaf xem");
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1099 — a colon between two digit runs is never clause punctuation.
+//
+// `:` is in mn's `clausePunctuation`, so every digit-colon-digit figure took a PHRASE BREAK mid-figure:
+// `8:46 минутад` read *naim **,** tɵt͡ʃʰəŋ t͡sʊrɢaː minʊtʰət*. The file refused a clock rule on the count
+// "would fix 2 and claim 10" — which prices a rule that EMITS `цаг`. This one emits nothing, so it does
+// not have to tell a clock from a race time from a census bracket, and the count does not bind it.
+//
+// ⚠ AND THE COUNT WAS ONE CORPUS. Over FLEURS `mn_mn`, 15 of 15 distinct sentences carrying a d:dd are a
+// time of day, every one with `цаг`/`минут` beside it — 0 sports times, 0 census brackets. Both
+// distributions are real; the refusal had only seen the first.
+describe("a digit-colon-digit run loses the colon, and nothing else (#1099)", () => {
+    test("the clock shapes stop taking a phrase break mid-figure", () => {
+        expect(phonemize("Өглөөний яг 8:46 минутад", "mn").trim())
+            .toBe("ɵɡɮɵːniː jaɢ naim tɵt͡ʃʰəŋ t͡sʊrɢaː minʊtʰət");
+        expect(phonemize("Бямба гарагийн шөнийн 1:15 цагт", "mn").trim())
+            .toBe("paməp ɢarəɡiːŋ ʃɵniːŋ neɡ arwəŋ tʰaf t͡sʰaɢtʰ");
+        // ⚠ A WHOLE RUN, so a three-field figure does not have its first colon spent and its second kept.
+        expect(phonemize("4:39:51.79 амжилт", "mn").trim()).not.toContain(",");
+    });
+
+    test("⚠ NO WORD IS EMITTED — the rule names none of the three populations", () => {
+        // The mined text's sports times and glued census brackets pass through it too, and gain nothing
+        // but the removal of a break they should never have had.
+        // ⚠ Asserted on the FULL pass, so the decimal and percent steps have run too — the point of these
+        // two is the `15-64 56` and `4 39 51`, i.e. that every colon in the run was spent on a space.
+        expect(normalizeMongolian("15-64:56.1%")).toBe("15-64 56 цэг 1 хувь");
+        expect(normalizeMongolian("4:39:51.79")).toBe("4 39 51 цэг 79");
+        // …and no hour noun appears anywhere.
+        expect(phonemize("1:15 цагт", "mn").trim()).toBe("neɡ arwəŋ tʰaf t͡sʰaɢtʰ");
+    });
+
+    test("⚠ A COLON THAT IS REALLY INTRODUCING SOMETHING KEEPS ITS PAUSE", () => {
+        // A space after it means it is not between two digit runs — the census bracket the refusal cites
+        // is written this way, and so is every list and quotation colon.
+        expect(phonemize("0-14: 40.8%", "mn").trim()).toContain(",");
+        expect(phonemize("гэж хэлэв: тийм", "mn").trim()).toContain(",");
+    });
+});

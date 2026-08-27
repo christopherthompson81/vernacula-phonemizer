@@ -2,7 +2,12 @@
  * Mongolian / Khalkha (mn) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * ⚠ THE SOURCING SITUATION, STATED PLAINLY. There is NO FLEURS corpus for Mongolian. The evidence is
+ * ⚠ THE SOURCING SITUATION, STATED PLAINLY. There is NO FLEURS corpus for Mongolian.
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `mn_mn` landed later, 1,991 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
+ * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
+ * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
+ * count over the mined artifact alone until someone re-runs it. The evidence is
  * `tools/corpus/mined/mn.jsonc` (233,098 paragraphs of the mn.wikipedia dump, 452 retained) plus `attest.ts`
  * against mn.wikipedia — WHICH IS THE WIKI THE ARTIFACT WAS MINED FROM, so that is a bigger sample of ONE
  * source and never two. What Mongolian has that Luganda did not is espeak: `dictsource/mn_list` ships a
@@ -100,12 +105,17 @@
  *     `Warcraft: Orc & Humans`, `Global Banking & Finance Review` — so a Mongolian conjunction would be
  *     inserted into an English film title. espeak's `& ampersand` is the English word transliterated and is
  *     not a reading for this slot.
- *   · NO CLOCK (`clock` ×2967; 14 digit-colon-digit in the retained text). Reading them settles it the way it
- *     settled `ilo`, `hil` and `lg`: six are SPORTS TIMES with their result noun already in front
- *     (`1:53.43 амжилт`, `2:26.65 амжилтаар`, `30:05.6 амжилт`, `4:39:51.79`), four are census brackets
- *     (`0-14: 40.8%`, `15-64:56.1%`), and only TWO are a time of day — and both already carry `цагт`
- *     ("at N o'clock") after them, so the hour noun is not missing. A `\d{1,2}:\d{2}` rule would fix 2 and
- *     claim 10. `минут` is never written after a colon anywhere in the retained text.
+ *   · NO CLOCK **WORD** (`clock` ×2967; 14 digit-colon-digit in the retained text). Reading them settles
+ *     the WORD the way it settled `ilo`, `hil` and `lg`: six are SPORTS TIMES with their result noun
+ *     already in front (`1:53.43 амжилт`, `2:26.65 амжилтаар`, `30:05.6 амжилт`, `4:39:51.79`), four are
+ *     census brackets (`0-14: 40.8%`, `15-64:56.1%`), and only TWO are a time of day — and both already
+ *     carry `цагт` ("at N o'clock") after them, so the hour noun is not missing. `минут` is never written
+ *     after a colon anywhere in the retained text. So no word is emitted, and that still holds.
+ *     ⚠ THIS BULLET ALSO SAID "a `\d{1,2}:\d{2}` rule would fix 2 and claim 10", AND THAT PRICED A
+ *     DIFFERENT RULE (#1099). It prices one that emits `цаг`. The colon itself is `clausePunctuation`, so
+ *     every one of the fourteen was ALSO taking a phrase break mid-figure, and removing that costs nothing
+ *     in any of the three populations because it names none of them — see step 3b, which does exactly that
+ *     and no more. ⚠ AND THE 6/4/2 SPLIT WAS ONE CORPUS: over FLEURS `mn_mn` it is 15 of 15 times of day.
  *   · NO ERA PHRASE (`era-marker` ×152; `МЭӨ` ×4, `МЭ` ×2, `НТӨ` ×1). Expanding `МЭӨ` to `манай эриний өмнө`
  *     is a fixed phrase, and although the wiki's era article does write it out (×29/20), espeak does not and
  *     the retained text never puts the phrase where the abbreviation stands — so the LETTER reading is taken
@@ -601,17 +611,15 @@ const DECIMAL_COMMA = /(?<![\d.,])(\d+),(\d{1,2})(?![\d.,])/gu;
  * word in two consonants routinely (морд, гурв, харш, найрт), and the epenthesis rule in `mongolian.ts`
  * exists precisely because those clusters are real.
  *
- * ⚠ ONE SHARED-FILE DEFECT REPORTED AND DELIBERATELY NOT EDITED HERE, because a core change must not land as
- * a side effect of one language's commit. `makeUnreadableTest`'s signal 2 breaks a 3+ consonant run only
- * when the run contains an ASCII `[lr]`, so Cyrillic ⟨л⟩/⟨р⟩ never satisfy the exemption and it is switched
- * OFF for the whole script — the same family as trap 1's `\b`. It applies equally to ky, ru, uk and tg.
- * ⚠ AND IT IS LIVE, NOT LATENT. Measured over the retained text's 6491 Cyrillic word types: 859 carry a 3+
- * consonant run, the ASCII exemption fires on exactly 0 of them, and a Cyrillic ⟨л⟩/⟨р⟩ exemption would fire
- * on 525 — so the signal is running with its brake disconnected. One of those FIRES IN THE RETAINED TEXT —
- * `ХӨГЖЛИЙН`, an ordinary word (genitive of "development") inside a
- * shouted programme title in an otherwise lowercase paragraph, is spelled out as
- * *хэ ө гэ жэ эл и хагас и эн* because ⟨гжл⟩ has no ASCII liquid in it. That is a false positive shipping
- * today, and the fix belongs in `core/initialisms.ts` where every Cyrillic language gets it at once.
+ * ⚠ A SHARED-FILE DEFECT WAS REPORTED FROM HERE AND HAS SINCE LANDED (#1100). This paragraph used to say
+ * that `makeUnreadableTest`'s signal 2 breaks a 3+ consonant run only when the run contains an ASCII
+ * `[lr]`, so Cyrillic ⟨л⟩/⟨р⟩ never satisfied the exemption and it was "switched OFF for the whole
+ * script" — with `ХӨГЖЛИЙН` spelled out as *хэ ө гэ жэ эл и хагас и эн* as "a false positive shipping
+ * today". `core/initialisms.ts`'s `LIQUIDS` is now `/[lrлр]/u` and carries its own measured note; that
+ * exact word is one of the seven the fix was measured on, and it reads *xɵɡt͡ʃɮiːŋ* — a word, not a
+ * spelling-out. Retired here rather than left standing: PORTING.md makes the TypeScript the permanent
+ * home of the measured evidence, so a claim that has been falsified there is the drift a second copy was
+ * supposed to avoid.
  */
 export const isUnreadableMongolian = makeUnreadableTest({
     vowels: /[аеёиоөуүыэюя]/u,
@@ -679,6 +687,25 @@ const spellInitialisms = makeInitialismNormalizer({
  *   · INITIALISMS (11) last, after the abbreviation dot (2) and the personal initials (1), or `ам.доллар`
  *     and `Ц.Э` become caps runs to spell out.
  */
+/**
+ * A COLON BETWEEN TWO DIGIT RUNS IS NEVER CLAUSE PUNCTUATION — and that is ALL this claims (#1099).
+ *
+ * ⚠ IT EMITS NO WORD, WHICH IS WHY IT CAN FIRE ON EVERY POPULATION AT ONCE. `:` is in
+ * `clausePunctuation`, so `8:46 минутад` read *naim **,** tɵt͡ʃʰəŋ t͡sʊrɢaː minʊtʰət* — a phrase break
+ * inside one time expression. Spending the colon on a SPACE removes the break and asserts nothing about
+ * whether the figure is a clock, a race time or a census bracket, so the three do not have to be told
+ * apart. The refusal one screen up declined a `\d{1,2}:\d{2}` rule because it "would fix 2 and claim 10";
+ * that arithmetic is about a rule that emits `цаг`, and this one does not.
+ * ⚠ AND THE COUNT IT WAS DECIDED ON WAS ONE CORPUS. Over FLEURS `mn_mn`, **15 of 15 distinct sentences
+ * carrying a d:dd are a TIME OF DAY** — every one with `цаг`/`минут` beside it, zero sports times, zero
+ * census brackets. The mined text's 6/4/2 split and this one are both true; the refusal read only the first.
+ * ⚠ A WHOLE RUN, so a three-field `4:39:51.79` does not have its first colon spent and its second kept.
+ * ⚠ AND A COLON FOLLOWED BY A SPACE IS UNTOUCHED — `0-14: 40.8%` keeps it, because there the colon really
+ * is introducing something and the pause belongs.
+ */
+const DIGIT_COLON_RUN = /(?<![\d:])(\d{1,2})((?::\d{2})+)(?![\d])/gu;
+const COLON_G = /:/gu;
+
 export function normalizeMongolian(input: string): string {
     let s = input;
 
@@ -691,6 +718,10 @@ export function normalizeMongolian(input: string): string {
 
     // 3. De-grouping.
     s = s.replace(GROUP_COMMA, "").replace(GROUP_SPACE, "$1$2");
+
+    // 3b. The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. Here rather than later because
+    //     every numeric step below reads a digit run, and the colon was splitting one in half.
+    s = s.replace(DIGIT_COLON_RUN, (_m, head: string, rest: string) => head + rest.replace(COLON_G, " "));
 
     // 4. Ordinals. Above the percent and unit steps only because nothing else spends a hyphen before a ⟨р⟩.
     s = s.replace(ORDINAL, (m, digits: string, tail: string) => {

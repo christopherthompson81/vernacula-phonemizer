@@ -37,7 +37,7 @@ export interface AlbanianNumbers {
 }
 
 /** Build the sq integer→words renderer over one numeral table (albanian.jsonc `numbers`). */
-export function makeNumberToWords(N: AlbanianNumbers): (n: number) => string {
+export function makeNumberToWords(N: AlbanianNumbers): (n: number, raw?: string) => string {
     const E = ` ${N.connector} `; // the obligatory group connector
 
     /** 1–99. */
@@ -72,9 +72,9 @@ export function makeNumberToWords(N: AlbanianNumbers): (n: number) => string {
     }
 
     /** Non-negative integer → Standard Albanian words. Out-of-range input falls back to digit-by-digit. */
-    return function numberToWords(n: number): string {
+    return function numberToWords(n: number, raw?: string): string {
         if (!Number.isSafeInteger(n) || n < 0) {
-            return [...String(n)].filter((c) => c >= "0" && c <= "9").map((d) => N.units[Number(d)]!).join(" ");
+            return [...(raw ?? String(n))].filter((c) => c >= "0" && c <= "9").map((d) => N.units[Number(d)]!).join(" ");
         }
         if (n === 0) return N.units[0]!; // zero
         return compose(n).replace(/\s+/gu, " ").trim();

@@ -153,7 +153,7 @@ export function normalizeRomanian(input: string): string {
 
     // 9) LATIN UNIT ABBREVIATIONS after a number (45).
     for (const [re, word] of UNITS)
-        t = t.replace(new RegExp(`(\\d)\\s*(?:${re.source.replace(/\\b/gu, "")})(?![\\p{L}])`, "gu"), `$1 ${word}`);
+        t = t.replace(new RegExp(`(\\d)\\s*(?:${re.source.replace(/\\b/gu, "")})(?![\\p{L}\\d²³/])`, "gu"), `$1 ${word}`);
     //    …and the same abbreviations with NO number — see BARE_UNITS. After the loop, so every reading the
     //    counted rule can make is already made and only what it could not reach is left for this.
     t = BARE_UNITS(t);

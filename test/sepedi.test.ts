@@ -189,3 +189,30 @@ describe("Sepedi text normalization", () => {
         expect(phonemize("40%", "nso")).toBe("dipʼeresentʼe t͡ʃʼe masomenne");
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1108 — a colon between two digit runs is never clause punctuation.
+//
+// The refusal above is right that the mined artifact retains no `N:NN`, so it had nothing to tabulate a
+// marker distribution from. FLEURS `nso_za` has 13 sentences and 16 instances, 13 of 13 a TIME OF DAY, and
+// zero verse references / sports times / census brackets in EITHER corpus. With no population to tell
+// apart, the rule needs no marker guard — and because it emits no word it needs no sourced hour noun,
+// which is what the refusal was actually blocked on.
+describe("a digit-colon-digit run loses the colon, and nothing else (#1108)", () => {
+    test("the clock stops taking a phrase break mid-figure", () => {
+        expect(phonemize("Ka 8:46 mesong thwii setu", "nso").trim())
+            .toBe("kʼa seswai masomenne t͡sʰela mesoŋ tʰwii setʼu");
+        expect(phonemize("mollo ka 11:35 pm.", "nso").trim()).toBe("mollo kʼa lesometʼee masometʰaro ɬano pʼm .");
+        // ⚠ AND THE FOUR THAT CARRY NO MARKER ARE FIXED TOO, which a marker-keyed rule would have missed.
+        expect(normalizeSepedi("Ka 11:20, maphodisa")).toContain("11 20");
+    });
+
+    test("⚠ NO WORD IS EMITTED — no hour noun is sourced for nso and none is invented", () => {
+        expect(phonemize("Ka 8:46 mesong", "nso").trim()).not.toMatch(/iri|nako ya/u);
+    });
+
+    test("⚠ A COLON THAT IS REALLY INTRODUCING SOMETHING KEEPS ITS PAUSE", () => {
+        // A space after it means it is not between two digit runs.
+        expect(phonemize("0-14: 40.8%", "nso").trim()).toContain(",");
+    });
+});

@@ -215,7 +215,8 @@ public static class Arabic
                     var split = GROUPING_COMMA.Replace(ToAscii(m.Groups[2].Value), "").Split('.');
                     var intPart = split[0];
                     var frac = split.Length > 1 ? split[1] : null;
-                    var parts = new List<string> { Numbers.NumberToIpa(Js.Number(intPart), nums) };
+                    // ⚠ `intPart` IS PASSED AS `raw` (#1095) — separator-stripped, because that is what the fallback reads.
+                    var parts = new List<string> { Numbers.NumberToIpa(Js.Number(intPart), nums, intPart) };
                     if (frac is not null)
                     {
                         parts.Add(PhonemizeWord("فَاصِلَة", _variety));

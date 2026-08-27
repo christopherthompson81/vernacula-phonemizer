@@ -103,11 +103,11 @@ function compose(n: number): string {
 }
 
 /** Non-negative integer → Irish words. Out-of-range/non-integer input falls back to digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     // Out of range → digit-by-digit over the DIGITS only; a stray "-" or "." must not reach the g2p as a word.
     // (Unreachable from the text path — the tokenizer matches \d+ — but this is an exported entry point.)
     if (!Number.isSafeInteger(n) || n < 0) {
-        return [...String(n)].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
+        return [...(raw ?? String(n))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
     }
     if (n === 0) return ONES[0]!; // náid — a bare zero takes no "a" particle
     return compose(n).replace(/\s+/g, " ").trim();

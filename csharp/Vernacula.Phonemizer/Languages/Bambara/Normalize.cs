@@ -160,7 +160,7 @@ public static class Normalize
         {
             var key = LIT.Replace(sym, m => "\\" + m.Value);
             s = JsRegex.Compile(
-                    $"(?<![\\d.,:\\p{{L}}\\p{{M}}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d])",
+                    $"(?<![\\d.,:\\p{{L}}\\p{{M}}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d²³/])",
                     "giu")
                 .Replace(s, m =>
                 {
@@ -172,7 +172,7 @@ public static class Normalize
             // arm above just declined must reach RANGE whole, not with its tail already rewritten.
             s = JsRegex.Compile(
                     $"(?<![\\p{{L}}\\p{{M}}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)(\\s+(?:{MAG}))?\\s?{key}"
-                    + "(?![\\p{L}\\p{M}\\d])",
+                    + "(?![\\p{L}\\p{M}\\d²³/])",
                     "giu")
                 .Replace(s, m =>
                     $"{word} {m.Groups[1].Value}{(m.Groups[2].Success ? m.Groups[2].Value : "")}");

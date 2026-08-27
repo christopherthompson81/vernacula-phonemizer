@@ -400,10 +400,10 @@ export function normalizeAkan(input: string): string {
     //      own lookahead still refuses a `3`/`³` (`km2` yes, `km23` no, `km3` no — there is no cube word).
     //      See SQUARED for the citation and for why this is where ak's raw-Latin leak lived.
     for (const [sym, word] of UNITS) {
-        s = s.replace(new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?:²|2)(?![\\p{L}\\p{M}\\d²³])`, "gu"), `$1 ${word} ${SQUARED}`);
+        s = s.replace(new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?:²|2)(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `$1 ${word} ${SQUARED}`);
     }
     for (const [sym, word] of UNITS) {
-        s = s.replace(new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³])`, "gu"), `$1 ${word}`);
+        s = s.replace(new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `$1 ${word}`);
     }
     // …and the ones with no numeral at all — see BARE_UNITS. Last, so the counted arm above keeps every
     // match it can make and only what it could not reach is left for this.
