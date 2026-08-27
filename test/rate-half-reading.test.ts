@@ -27,25 +27,58 @@ import { phonemize } from "../src/index.ts";
 const SHAPES = [["km", "h"], ["m", "s"], ["km²", "h"], ["m³", "s"], ["kg", "m"]] as const;
 
 /**
- * ⚠ STILL HALF-READING, LISTED BY CODE SO THE LIST CAN ONLY SHRINK. Each of these keeps a LOCAL unit table
- * in its own `normalize.ts` — the shape 14 languages use because their unit noun PRECEDES the number and
- * the shared tier can only postpose — and each such table hand-wrote the trailing guard rather than taking
- * the shared one. The core fix cannot reach them; every entry is a per-file edit of the same one character,
- * and each needs its own before/after because the arms are all shaped differently.
+ * ⚠ STILL HALF-READING, LISTED BY CODE SO THE LIST CAN ONLY SHRINK.
+ *
+ * Most of these keep a LOCAL unit rewrite in their own engine — the shape a language reaches for when its
+ * unit noun PRECEDES the number, since the shared tier can only postpose — and each such arm hand-wrote its
+ * trailing guard instead of taking the shared one. The core fix cannot reach them, and every entry is a
+ * per-file edit needing its own before/after, because the arms are all shaped differently.
+ *
+ * ⚠ THAT IS "MOST", NOT "EACH", AND THE DIFFERENCE IS DELIBERATE. Four of the codes here were checked by
+ * reading the file (`en`, `nya`, `ckb`, `fa` — all local, though `nya` keeps its tier call in `chichewa.ts`
+ * rather than `normalize.ts`, which a grep of the wrong file will miss); the rest are classified by
+ * behaviour alone. Writing "each" would be the same unmeasured blanket #1095 was filed about.
+ *
+ * ⚠ EVERY ENTRY HERE IS PRE-EXISTING, verified by running this sweep on both sides of the change: the
+ * fix moved 290 half readings to 37 and introduced none. `smj` was on an earlier draft of this list and
+ * came off as a FALSE POSITIVE of the instrument — see `spokeAWord`.
  * ⚠ A NEW LANGUAGE MUST NOT JOIN THIS LIST. It exists to be emptied.
  */
 const ACCEPTED_HALF = new Set(
-    ("bg ckb da en en-GB en-IN fa is ka ko lg lt mr ms my nb nso nya om pbt ps ro sd smj so ug yo za " +
-        "zsm").split(" "),
+    ("bg cjy ckb da en en-GB en-IN fa gan hak hmn hsn is ka ko lg lt mr ms my nb nso nya om or pbt ps " +
+        "ro sd skr so ug wuu yo yue za zsm").split(" "),
 );
 
 const CODES = [
     ...new Set([...readFileSync("src/registry.ts", "utf8").matchAll(/^\s*case "([^"]+)":/gmu)].map((m) => m[1]!)),
 ];
 
-/** The English foreign reader's signature. A run routed OUT of the language is a different class — the
- *  language never claimed the unit, so there is no numerator of its own to half-read. */
-const FOREIGN = /kjˈuːbd|ˈɛm |skwˈɛəd/u;
+/**
+ * Did the unit contribute a WORD of its own, or is the engine just spelling the letters?
+ *
+ * ⚠ A LENGTH TEST IS NOT ENOUGH AND smj IS WHY. Lule Sámi reads `5 km` as *ˈvihtːɑ ˈkʰm* — the raw
+ * letters, four characters, indistinguishable by length from Akan's genuine *mita*. It declares no unit
+ * word at all, so `5 km/h` is a FULL leak and not half a reading, and an instrument that cannot see the
+ * difference puts a language on this ledger for a defect it does not have. A unit word has a VOWEL in it;
+ * a vowel-less run of consonants is the abbreviation itself.
+ * ⚠ AND THE NUMERAL IS REMOVED WHEREVER IT SITS, not sliced off the front: ~30 engines are unit-PREFIX
+ * (*mamita 5*), and a prefix test silently excused every one of them.
+ */
+const spokeAWord = (plain: string, five: string): boolean =>
+    /[əaeiouɪʊɛɔɐæyøɘɤʌɯɵœɜɞʉɨɶɑɒʏ]/u.test(plain.replace(five, ""));
+
+/**
+ * ⚠ A RUN ROUTED TO THE ENGLISH READER IS A DIFFERENT CLASS — the language never claimed the unit, so
+ * there is no numerator of its own to half-read. Detected by asking English what it would say rather than
+ * by pattern-matching its output: an earlier `/kjˈuːbd|ˈɛm |skwˈɛəd/` missed `ˈɛm` at end-of-string and
+ * put nine languages on this ledger for the foreign reader's behaviour.
+ */
+const EN_READS = new Map<string, string>();
+const routedToEnglish = (plain: string, sym: string, code: string): boolean => {
+    if (code === "en") return false;
+    if (!EN_READS.has(sym)) EN_READS.set(sym, phonemize(sym, "en").trim());
+    return plain.endsWith(EN_READS.get(sym)!);
+};
 
 const say = (s: string, code: string): string | null => {
     try {
@@ -65,8 +98,8 @@ describe("an unreadable rate declines to a visible leak (#1093)", () => {
             for (const [sym, den] of SHAPES) {
                 const plain = say(`5 ${sym}`, code);
                 const rate = say(`5 ${sym}/${den}`, code);
-                if (plain === null || rate === null || FOREIGN.test(plain)) continue;
-                if (plain.length - five.length < 5) continue; // the unit contributed no word of its own
+                if (plain === null || rate === null || routedToEnglish(plain, sym, code)) continue;
+                if (!spokeAWord(plain, five)) continue; // the unit contributed no word of its own
                 if (!rate.startsWith(plain)) continue;
                 const tail = rate.length - plain.length;
                 if (tail > 0 && tail <= 4) half.push(`${code} ${sym}/${den} → ${JSON.stringify(rate)}`);
@@ -84,8 +117,8 @@ describe("an unreadable rate declines to a visible leak (#1093)", () => {
             for (const [sym, den] of SHAPES) {
                 const plain = say(`5 ${sym}`, code);
                 const rate = say(`5 ${sym}/${den}`, code);
-                if (plain === null || rate === null || FOREIGN.test(plain)) continue;
-                if (plain.length - five.length < 5 || !rate.startsWith(plain)) continue;
+                if (plain === null || rate === null || routedToEnglish(plain, sym, code)) continue;
+                if (!spokeAWord(plain, five) || !rate.startsWith(plain)) continue;
                 const tail = rate.length - plain.length;
                 if (tail > 0 && tail <= 4) stillHalf = true;
             }
