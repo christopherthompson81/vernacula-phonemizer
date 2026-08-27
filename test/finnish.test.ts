@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createFinnish } from "../src/languages/finnish/finnish.ts";
-import { ordinal } from "../src/languages/finnish/normalize.ts";
+import { normalizeFinnish, ordinal } from "../src/languages/finnish/normalize.ts";
 import { phonemize } from "../src/index.ts";
 
 // Finnish (fi) — Uralic (Finnic), Latin, one of the most PHONEMICALLY TRANSPARENT orthographies in the world. Greedy
@@ -195,5 +195,46 @@ describe("Finnish normalization — initialisms and abbreviations", () => {
         const fi = createFinnish();
         expect(fi.text("Perrault’n")).toBe("perːɑu̯ltn");
         expect(fi.text("raa'asti")).toBe("rɑː ɑsti");
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1114 — the marker gate is right; its ADJACENCY was too tight.
+//
+// Over FLEURS `fi_fi` there are 18 valid clock-shaped instances and the `kello`/`klo` gate claimed 14. All
+// four misses are genuine clocks, and each is in a sentence where the rule ALREADY FIRED — so each took a
+// sentence break mid-number in the clause the rule had just repaired.
+//
+// ⚠ THE GATE IS NOT WIDENED. 24 of FLEURS's 26 `d.dd`-bearing sentences carry `kello`/`klo`, which
+// confirms it; the two arms below add CONTEXT the marker already licensed.
+describe("the clock's marker licenses its whole span (#1114)", () => {
+    test("a range's second operand — and the ORDER is the whole of it", () => {
+        expect(normalizeFinnish("kello 6.30 ja 7.30 välisenä")).toBe("kello 6 30 ja 7 30 välisenä");
+        // Written after the single arm it claims nothing: that arm has already rewritten `6.30`, so the
+        // lookbehind has no digit left to anchor on. Pinned because the failure is SILENT.
+        expect(normalizeFinnish("klo 6.30 ja 7.30")).toBe("klo 6 30 ja 7 30");
+    });
+
+    test("the parenthetical timezone gloss, keyed on the ZONE NAME and not on the bracket", () => {
+        expect(normalizeFinnish("kello 9.30 paikallista aikaa (2.30 UTC)"))
+            .toBe("kello 9 30 paikallista aikaa (2 30 UTC)");
+        // `koordinoitua` is the corpus's own spelling-out of UTC and is what the second instance carries.
+        // `:00` takes the zero WORDS, exactly as `kello 10.00` already does — the arm reuses `minutes()`.
+        expect(normalizeFinnish("(15.00 koordinoitua yleisaikaa)"))
+            .toBe("(15 nolla nolla koordinoitua yleisaikaa)");
+        // A bracket ALONE licenses nothing.
+        expect(normalizeFinnish("(2.30 jotain)")).toBe("(2.30 jotain)");
+    });
+
+    test("⚠ THE COUNTER-EXAMPLES THE GATE EXISTS FOR ARE STILL REJECTED", () => {
+        // The ski results — the fractional part of `4.41,30`, which the `(?![\d.,])` tail refuses.
+        expect(normalizeFinnish("yhteistuloksella 4.41,30 joka")).toContain("4.41");
+        expect(normalizeFinnish("9.29,43")).toContain("9.29");
+    });
+
+    test("⚠ `Noin 11.29` IS DELIBERATELY LEFT — one instance is not a marker", () => {
+        // `noin` is a general quantity hedge: once before a `d.dd` in FLEURS, otherwise before decimal
+        // COMMAS (`noin 3,7`, `noin 12,8`), and zero times before a clock in the mined text.
+        expect(normalizeFinnish("Noin 11.29 protesti")).toBe("Noin 11.29 protesti");
     });
 });
