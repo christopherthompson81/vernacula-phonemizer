@@ -120,7 +120,7 @@ the single entry point.
 
 ## Gates
 
-    csharp tests            1,880 pass (93 new in WolofTests.cs), 0 fail
+    csharp tests            1,880 pass (88 new in WolofTests.cs), 0 fail
     parity, wo              200/200 byte-identical, 0 differ, 0 BLOCKED
     parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
     differential            8,118 comparisons (sync + async), 0 differ, 0 throws

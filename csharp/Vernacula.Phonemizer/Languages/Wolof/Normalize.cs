@@ -142,8 +142,16 @@ public static class Normalize
         var s = input.Normalize(System.Text.NormalizationForm.FormC);
         s = AMP_ENTITY.Replace(s, "&");
         s = NAMED_ENTITY.Replace(s, m =>
+        {
             // JS `e.slice(1).replace(";", "")` — a STRING replace, so only the FIRST `;` goes.
-            ENTITY["&" + Js.ToLowerCase(ReplaceFirst(m.Value[1..], ";", ""))]);
+            var key = "&" + Js.ToLowerCase(ReplaceFirst(m.Value[1..], ";", ""));
+            // ⚠ THE MISS BRANCH IS REACHABLE AND MUST NOT THROW. The pattern carries `i`, and JS Unicode
+            // case folding maps U+017F LONG S onto `s`, so `&ſup2` MATCHES while the key does not exist —
+            // and long s occurs in OCR'd and historic-orthography wiki text. JS returns `undefined` from
+            // the callback, which `String.replace` stringifies to "undefined"; that is the behaviour the
+            // golden is defined against, so it is reproduced rather than repaired here. Filed TS-side.
+            return ENTITY.TryGetValue(key, out var v) ? v : "undefined";
+        });
         s = FORMAT_CHARS.Replace(s, "");
 
         // 2) DEGREES → `aj`, BEFORE the tier and before de-grouping. The two-operand arm comes FIRST, or the
