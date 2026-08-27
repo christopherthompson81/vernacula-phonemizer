@@ -228,3 +228,20 @@ describe("lingala — the suppletive first ordinal is read from the manifest", (
         expect(normalizeLingala("16ème siècle")).toBe("ya 16 siècle");
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1102 — the marked clock. The refusal is right about the MINED text, where most `N:NN` are scripture
+// references (`Kol 1:26`); FLEURS `ln_cd` has more true clocks, and keying on the day-part/timezone marker
+// serves both — no verse reference carries one.
+describe("a marked clock keeps its pause off (#1102)", () => {
+    test.each([
+        ["Na 8:46 na ntongo, kimya", "Na 8 46 na ntongo, kimya"],
+        ["na 10:08 ya butu na mokolo", "na 10 08 ya butu na mokolo"],
+        ["(15.00 UTC)", "(15 00 UTC)"],
+    ])("%s", (a, b) => expect(normalizeLingala(a)).toBe(b));
+
+    test("⚠ THE VERSE REFERENCE AND THE BARE CLOCK BOTH KEEP THEIR PAUSE", () => {
+        expect(normalizeLingala("Kol 1:26")).toBe("Kol 1:26");
+        expect(normalizeLingala("Na 11:20, polisi")).toBe("Na 11:20, polisi");
+    });
+});

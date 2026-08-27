@@ -4,10 +4,10 @@
  *
  * ⚠ THERE IS NO FLEURS FOR LINGALA.
  * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `ln_cd` landed later, 1,920 unique transcript texts, and it is a
- * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
- * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
- * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
- * count over the mined artifact alone until someone re-runs it.
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ AND THE RE-MEASUREMENT HAS NOW BEEN
+ * DONE FOR THE CLOCK, which is the class it changed — see the clock note below. Every OTHER "only N
+ * times" in this file is still a count over the mined artifact alone: the sweep was per CLASS, not per
+ * file, and the rest of #1102's expensive half is still open.
  * The evidence is `tools/corpus/mined/ln.jsonc` (dump-sourced, so its
  * `sample` tier IS the real distribution) plus a fresh ln.wikipedia dump — 23,678 paragraphs after
  * `wikidump-to-text.py` + `filter-markup.py`. Every count below is over that dump unless it says
@@ -204,7 +204,28 @@ function expandDotted(s: string, body: string, word: string): string {
  *  in the header is orthogonal to it. ⚠ THE ONE EXCEPTION IS THE SUPPLETIVE FIRST ORDINAL of step 12, and it
  *  is READ FROM THE MANIFEST (`FIRST_ORDINAL`) rather than spelled here, so the exception cannot drift from
  *  the language's own data. */
+/**
+ * A CLOCK'S COLON LOSES ITS PAUSE BEHIND A DAY-PART OR TIMEZONE MARKER — and nothing else (#1102).
+ *
+ * ⚠ THE REFUSAL ABOVE IS RIGHT ABOUT THE MINED TEXT, where most `N:NN` are SCRIPTURE REFERENCES
+ * (`Kol 1:26`) and "only a handful are true clocks". Over FLEURS `ln_cd` the mix is the other way — but the
+ * conclusion is unchanged, because the rule is keyed on the MARKER rather than on the shape: `10:08 ya
+ * butu`, `1:15 na ntongo`, `8:46 na ntongo`, `11:35 ya butu`, `15.00 UTC`, `10:00-11:00 ya butu MDT`.
+ * ⚠ NO VERSE REFERENCE CARRIES ONE, and neither do the FLEURS sports times `4:41.30` / `2:11.60` /
+ * `1:09.02`. The bare clocks (`Na 11:20`, `Pene ya 11:29`) keep their pause; a shape-keyed rule that
+ * reached them would reach `Kol 1:26` too.
+ * ⚠ NO WORD IS EMITTED — the day-part is already written.
+ * ⚠ THE TRAILING GUARD REJECTS A DIGIT OR A SEPARATOR THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK. Written
+ * as `(?![\d.,:])` it declined every clock that ENDS A CLAUSE — `kusaawa 11:29,` and `ssaawa 11:00,` came
+ * back untouched, which is trap 58 and is how half the marked instances were being missed.
+ */
+const CLOCK_MARKED =
+    /(?<![\d.,:])([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)(?=\s*(?:na\s+ntongo|ya\s+butu|UTC|GMT|MDT)\b)/giu;
+
 export function normalizeLingala(input: string): string {
+    // 0) THE MARKED CLOCK loses the colon's pause — see CLOCK_MARKED. First, so every numeric step below
+    //    sees one digit run rather than two.
+    input = input.replace(CLOCK_MARKED, "$1 $2");
     // 0) NFC at the entry, so a literal in this file matches whichever normalization the corpus used.
     //    Lingala writes `é á ó ô ǒ` (which precompose) beside `ɛ́ ɔ́` (which cannot), so its text is
     //    inherently mixed-normalization and a rule keyed on `bôngó` would otherwise match about half its

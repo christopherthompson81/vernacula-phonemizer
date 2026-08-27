@@ -229,3 +229,24 @@ describe("Luganda normalization — the trap-12 guards and the shapes the corpus
         expect(normalizeLuganda("1,500–2,000 mmita")).toBe("1500 okutuuka ku 2000 mmita");
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1102 — the marked clock. `saawa` is written in front and is the discriminator; the spelling varies
+// (`saawa`/`ssaawa`, glued in `kusaawa`) and the trailing markers catch the ones written without it.
+describe("a marked clock keeps its pause off (#1102)", () => {
+    test.each([
+        ["Awo kusaawa 11:29, okwekalakaasa", "Awo kusaawa 11 29, okwekalakaasa"], // glued, and clause-final
+        ["ku ssaawa 11:00, abeekalakaasi", "ku ssaawa 11 00, abeekalakaasi"],
+        ["ku saawa 8:46 am zenyini", "ku saawa 8 46 am zenyini"],
+        ["saawa 12.00 GMT", "saawa 12 00 GMT"],
+        ["1:15 ezekiro kulwomukaag", "1 15 ezekiro kulwomukaag"],   // the day-part is `ez` + ANY letter
+        ["07:19 ez’okumakya", "07 19 ez’okumakya"],
+    ])("%s", (a, b) => expect(normalizeLuganda(a)).toBe(b));
+
+    test("⚠ THE COUNTER-EXAMPLES ARE IN THIS CORPUS AND IN THE GOLDEN", () => {
+        expect(normalizeLuganda("bwa 3.50 m.")).toContain("3 5 0");        // a MEASUREMENT — lg.tsv's own row
+        expect(normalizeLuganda("akebanga 4:41.30")).toContain("4:41");    // a ski result
+        expect(normalizeLuganda("ne 802.11a")).toBe("ne 802.11a");
+        expect(normalizeLuganda("wa 06:30 ne 07:30.")).toBe("wa 06:30 ne 07:30."); // unmarked range
+    });
+});

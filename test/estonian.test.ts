@@ -344,3 +344,23 @@ describe("Estonian — the end-to-end orderings that only the real phonemizer ca
         expect(say("WC").trim()).toBe("kˈɑksisveː tsˈeː");
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1102 — the marked clock loses the separator's pause. This layer had no clock rule AND no refusal,
+// because the mined artifact gave it nothing to decide; FLEURS `et_ee` has 13 true clocks and 10 carry
+// `kell`/`kella` in front. NO WORD IS EMITTED — the hour noun is already written.
+describe("a marked clock keeps its pause off (#1102)", () => {
+    test.each([
+        ["Kell 11.20 palus politsei", "Kell 11 20 palus politsei"],
+        ["Kella 11.29 paiku liikus", "Kella 11 29 paiku liikus"],
+        ["kell 22:08 mõõdukas", "kell 22 08 mõõdukas"],
+        ["kella 11.35-ks.", "kella 11 35-ks."],          // ⚠ clause-final: the guard must not reject a `,`/`.`
+    ])("%s", (a, b) => expect(normalizeEstonian(a)).toBe(b));
+
+    test("⚠ AND THE MARKER IS NOT A PRECAUTION — this corpus has real counter-examples", () => {
+        // `21:20` is a SPORTS SCORE ("a one-point win"), not a time.
+        expect(normalizeEstonian("võit, 21:20, mis lõpetas")).toBe("võit, 21:20, mis lõpetas");
+        expect(normalizeEstonian("Standard 802.11n toimib")).toBe("Standard 802.11n toimib");
+        expect(normalizeEstonian("6.30 ja 7.30 vahel")).toBe("6.30 ja 7.30 vahel"); // unmarked range
+    });
+});
