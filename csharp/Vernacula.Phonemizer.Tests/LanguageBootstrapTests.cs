@@ -257,4 +257,25 @@ public class LanguageBootstrapTests
     [InlineData("Anders'", "ˈɑnɐs")]            // …and so does the s-final genitive
     public void DanishJoinsAMedialApostropheExceptAfterAnAbbreviation(string input, string want) =>
         Assert.Equal(want, Phonemizer.Phonemize(input, "da"));
+
+    [Theory]
+    // The zero numeral had no vowel, and unlike almost everything else this session it WAS in the golden:
+    // ⟨سفر⟩ is the only entry in the numbers table written with none of its vowels, so the rule scan gave
+    // the vowel-less token *sfɾ* in 2 of the 200 parity rows and in all 22 colon-clock instances.
+    // ⚠ The reading is the ENGINE'S OWN — written as a word, `سفر` already reads *sɪfɪɾ* on the async path;
+    // a composed number word is never in the text, so it never reaches the tagger that knows it.
+    [InlineData("٠", "sɪfɪɾ")]
+    [InlineData("0", "sɪfɪɾ")]
+    [InlineData("3.50 مەتر", "seː xaːɫ peːnd͡ʒ sɪfɪɾ matɪɾ")]
+    public void CentralKurdishZeroNumeralHasANucleus(string input, string want) =>
+        Assert.Equal(want, Phonemizer.Phonemize(input, "ckb"));
+
+    [Fact]
+    public void CentralKurdishOrdinaryWordIsUntouchedByTheNumeralReading()
+    {
+        // ⚠ `سفر` is a genuine HOMOGRAPH (*safar*, "journey"), which is why the lexicon builder dropped it.
+        // The numeral CONTEXT is unambiguous where the word is not, so the fix is scoped to the number path
+        // — a lexicon entry would have changed both readings to repair one.
+        Assert.Equal("sfɾ", Phonemizer.Phonemize("سفر", "ckb"));
+    }
 }

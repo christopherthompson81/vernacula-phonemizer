@@ -52,7 +52,7 @@ const B = "1000000000000000000009";
  */
 const ACCEPTED_LOSSY = new Set(
     ("ar arz apc apd acm afb ary ayl ajp acw pt pt-BR tr az vi ta gd ga cy ff si kk tg zu xh " +
-        "mk lb fo sq la bar ki kam af grc").split(" "),
+        "mk sq la ki kam af grc").split(" "),
 );
 
 const CODES = [

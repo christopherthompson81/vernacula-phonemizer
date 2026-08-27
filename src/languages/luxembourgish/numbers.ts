@@ -66,6 +66,6 @@ const DEF: UnitsFirstDef = {
 };
 
 /** Non-negative integer (< 10¹²) → Luxembourgish words; larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number): string {
-    return unitsFirstNumberToWords(n, DEF);
+export function numberToWords(n: number, raw?: string): string {
+    return unitsFirstNumberToWords(n, DEF, raw);
 }

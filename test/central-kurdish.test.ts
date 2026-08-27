@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { phonemize } from "../src/index.ts";
+import { phonemize, phonemizeAsync } from "../src/index.ts";
 import { normalizeCentralKurdish } from "../src/languages/central-kurdish/normalize.ts";
 
 import { phonemizeWord, phonemizeWordRules, bizrokeLexiconHas } from "../src/languages/central-kurdish/central-kurdish.ts";
@@ -175,5 +175,33 @@ describe("Central Kurdish — the bizroke lexicon", () => {
         expect(phonemizeWord("زۆر")).toBe("zoːɾ");
         expect(phonemizeWord("ماڵ")).toBe("maːɫ");
         expect(phonemizeWord("ئێمە")).toBe("ʔeːma");
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// The zero numeral had no vowel — and unlike almost everything in this session, it WAS in the golden.
+// ⟨سفر⟩ is the only entry in the numbers table written with none of its vowels, so the rule scan gave the
+// vowel-less token *sfɾ* in 2 of the 200 parity rows and in all 22 colon-clock instances.
+//
+// ⚠ THE READING IS THE ENGINE'S OWN, which is what makes this a routing fix rather than a sourcing claim:
+// written as a WORD, `سفر` already reads *sɪfɪɾ* on the async path. A COMPOSED number word is never in the
+// text, so it never reaches the tagger that knows it.
+// ⚠ AND NOT VIA THE LEXICON: `سفر` is a genuine homograph (*safar*, "journey"), which is why the builder
+// dropped it. The numeral CONTEXT is unambiguous where the word is not.
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+describe("the zero numeral has a nucleus", () => {
+    test("the numeral reads the same in both modes", async () => {
+        expect(phonemize("٠", "ckb").trim()).toBe("sɪfɪɾ"); // was `sfɾ`
+        expect(phonemize("0", "ckb").trim()).toBe("sɪfɪɾ");
+        expect((await phonemizeAsync("٠", "ckb")).trim()).toBe("sɪfɪɾ");
+        // …and inside a composed number, which is where the golden rows carried it.
+        expect(phonemize("3.50 مەتر", "ckb").trim()).toBe("seː xaːɫ peːnd͡ʒ sɪfɪɾ matɪɾ");
+    });
+
+    test("⚠ the ORDINARY WORD is untouched — it is a homograph and the tagger owns it", async () => {
+        // Sync is the documented bizroke limit (see the module header); async is the tagger's job. Neither
+        // is this fix's business, and a lexicon entry would have changed both to fix the numeral.
+        expect(phonemize("سفر", "ckb").trim()).toBe("sfɾ");
+        expect((await phonemizeAsync("سفر", "ckb")).trim()).toBe("sɪfɪɾ");
     });
 });

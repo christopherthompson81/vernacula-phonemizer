@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { phonemize } from "../src/index.ts";
 
 import { createBavarian, phonemizeWord } from "../src/languages/bavarian/bavarian.ts";
 import { numberToWords } from "../src/languages/bavarian/numbers.ts";
@@ -258,5 +259,28 @@ describe("Bavarian text normalization", () => {
         // The ampersand: 83 of 83 in the Bavarian subset are `&nbsp;`, and the only real ones are German
         // publisher names. Folding the entity must not leave the bare sign readable as a word.
         expect(normalizeBavarian("Königshausen & Neumann")).toBe("Königshausen & Neumann");
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1080 — the bignum fallback used to re-read the float it exists to bypass.
+//
+// `unitsFirstNumbers.ts` is shared by da, fo, lb and bar; Danish's call site was threaded in #1079 and the
+// other three were reported rather than copied, because a sibling is a hypothesis and each call site's
+// SHAPE had to be read first. bar's arm is a bare `\\d+`, so the token IS the digit string.
+//
+// ⚠ The reading was a confidently WRONG quantity, not a drop — the sentence still scans, so no leak gate
+// and no referee names it, and this golden's longest digit run is far short of the fallback.
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+describe("a numeral past 2^53 reads the digits the writer typed", () => {
+    const words = (s: string): string[] => phonemize(s, "bar").trim().split(" ");
+
+    test("the low digits are the token's, not the double's", () => {
+        // 9007199254740993 is 2^53+1; as a double it IS 2^53, so re-stringifying reads …992.
+        expect(words("9007199254740993").slice(-1)[0]).toBe("d̥rɑɛ̯"); // …993, was its neighbour's …992
+    });
+
+    test("and above 1e21, where String(n) is exponent form, every digit is still read", () => {
+        expect(words("1000000000000000000000")).toHaveLength(22);
     });
 });

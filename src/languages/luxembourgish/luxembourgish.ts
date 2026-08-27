@@ -262,7 +262,11 @@ class LuxembourgishPhonemizer implements Phonemizer {
             // inside applyEifelerRegel, because the numeral CONNECTOR *an* → *a* is a two-letter function
             // word that the rule also governs and that no `-en` test matches.
             else if (m[2]) {
-                const words = numberToWords(Number(m[2])).split(" ");
+                // ⚠ THE TOKEN STRING IS PASSED AS `raw` (#1080) — the digit-at-a-time fallback cannot recover
+                // the digits from the double it exists to bypass. This arm is a bare `\d+`, so the token IS
+                // the digit string (fo's is not: its match carries a decimal comma and must pass the split
+                // piece). Checked here rather than assumed.
+                const words = numberToWords(Number(m[2]), m[2]).split(" ");
                 // ⚠ The follower must be a LETTER — before a pause the ⟨n⟩ is RETAINED. Trimming
                 // whitespace alone hands the rule a `.`, which is outside the keeper set, so the sandhi
                 // fires across a sentence boundary (`Et sinn 7.` → *siwe*).
