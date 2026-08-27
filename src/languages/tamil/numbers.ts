@@ -73,10 +73,10 @@ function thousands(count: number, hasRemainder: boolean): string[] {
  * error. .NET throws `IndexOutOfRangeException` on the same input. Neither is acceptable and the goldens
  * could not see either: no corpus row is that large. Digit-at-a-time above the ceiling, as cs and jv do.
  */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isFinite(n) || n < 0) return "";
     if (n === 0) return ONES[0]!;
-    if (n >= 1e10) return [...String(n)].map((d) => ONES[Number(d)]!).join(" ");
+    if (n >= 1e10) return [...(raw ?? String(n))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
     const parts: string[] = [];
     const crore = Math.floor(n / 10000000);
     n %= 10000000;

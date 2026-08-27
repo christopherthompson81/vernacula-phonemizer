@@ -631,7 +631,11 @@ public static class NormalizeSymbols
                   NOT_VERSION + "(" + NUM + ")" + magAltU + "\\s?(" + unitAlt + ")"
                       + "(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(" + denomKeys + ")(\u00b2|\u00b3)?"
                       + "|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?"
-                      + "(?![" + wordCont + "\\p{M}\u0027\u2019\u02bc])",
+                      + "(?![" + wordCont + "\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])"
+                      // ⚠ AN UNREADABLE RATE DECLINES RATHER THAN HALF-READING (#1093) — see the TS for the
+                      // two measured counter-examples that put the line at an ASCII-Latin denominator rather
+                      // than at any slash, and for why the exponent is rejected here too.
+                      + "(?!\\s?/\\s?[A-Za-z])(?!(?<=[a-zA-Z])[23]\\s?/\\s?[A-Za-z])",
                   "giu")
             : null;
         /**

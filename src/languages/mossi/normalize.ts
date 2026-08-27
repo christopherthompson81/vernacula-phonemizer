@@ -254,7 +254,7 @@ const CURRENCY: readonly (readonly [string, string])[] = [
 const BARE_UNITS = makeBareUnitNormalizer([["km", "kilometr"]]);
 
 const KM_PRE = /(?<![\p{L}\p{M}\d])km(?:\^?2|²)?\s+(?=\d)/gu;
-const KM_POST = /(?<![\d.,\p{L}\p{M}])(\d+(?:[.,]\d+)?(?:\s?-{1,2}\s?\d+(?:[.,]\d+)?)?)\s?km(?:\^?2|²)?(?![\p{L}\p{M}\d])/gu;
+const KM_POST = /(?<![\d.,\p{L}\p{M}])(\d+(?:[.,]\d+)?(?:\s?-{1,2}\s?\d+(?:[.,]\d+)?)?)\s?km(?:\^?2|²)?(?![\p{L}\p{M}\d²³/])/gu;
 
 /** Mooré normalization. A numbered, order-dependent sequence; the coupling is stated at each step. */
 export function normalizeMossi(input: string): string {

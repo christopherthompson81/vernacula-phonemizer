@@ -45,9 +45,21 @@ const isVowelLetter = (c: string | undefined): boolean => c !== undefined && VOW
 const isVowelSeg = (s: string | undefined): boolean => s !== undefined && [...s.normalize("NFD")].some((c) => IPA_VOWEL.has(c));
 // Lax→tense map: a nasalized long vowel takes the CLOSE quality (referee: -em→ẽː, -um→ũː, not ɛ̃ː/ʊ̃ː).
 const TENSE_BASE: Record<string, string> = { "ɛ": "e", "ɪ": "i", "ɔ": "o", "ʊ": "u" };
-/** Add nasalization (U+0303) + length to a vowel segment (final ⟨-m⟩ / pre-fricative nasal): [ɛ]→[ẽː], [aː]→[ãː]. */
+/**
+ * Add nasalization (U+0303) + length to a vowel segment (final ⟨-m⟩ / pre-fricative nasal): [ɛ]→[ẽː], [aː]→[ãː].
+ *
+ * ⚠ THE NON-SYLLABIC MARK IS STRIPPED TOO, AND THAT IS THE WHOLE OF #1097. A diphthong OFFGLIDE reaches
+ * here whenever the last two letters spell one — `Nicolaum` scans as `a` + `u̯` — and without this the
+ * result was `ũ̯ː`, a long nasalized NON-SYLLABIC vowel, which is not a segment any language has. It also
+ * cost the word a syllable, because `placeStress` skips anything carrying U+032F, so a four-syllable word
+ * was stressed as a three-syllable one.
+ * ⚠ MAKING IT SYLLABIC IS THE REFEREE'S OWN ANSWER, not a choice between two repairs. Of the 45
+ * `la.wikipron-lat-clas-narrow` rows spelled ⟨a|o|e⟩⟨u|e⟩m, **not one nasalizes an offglide** — every
+ * single one ends in a syllabic `ũː`/`ẽː`, and `Boleslaum` is `b ɔ ɫ ɛ s ɫ a ũː` exactly. So `-aum` is a
+ * HIATUS (`la.um`) and not the diphthong the scan assumed, which is what this restores.
+ */
 function nasalizeLong(seg: string): string {
-    let base = seg.replace(/ː/gu, "").replace(/̃/gu, "");
+    let base = seg.replace(/ː/gu, "").replace(/̃/gu, "").replace(/̯/gu, "");
     base = TENSE_BASE[base] ?? base;
     return (base + "̃").normalize("NFC") + "ː";
 }
@@ -230,7 +242,7 @@ class LatinPhonemizer implements Phonemizer {
         return assembleClauses(SYMBOLS(normalizeLatin(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Numbers: compose the Latin cardinal phrase (subtractive x8/x9, mīlle/mīlia), then phonemize each word.
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

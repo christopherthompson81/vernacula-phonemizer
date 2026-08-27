@@ -116,11 +116,42 @@ Questions 2 and 3 came back clean: all three manifest tables are reached (`graph
 `numbers`, the last with all three concord series — `ManifestMappingTests` pins that structurally), and
 `text()` → `phonemizeWord` is the single entry point.
 
+## Run 4 — 2026-08-27 15:35 — the rebase, and the one thing that had to be re-confirmed rather than assumed
+
+st filed no finding, so nothing of its own landed upstream and **`src/languages/sesotho/` is untouched by
+every commit since the branch point** — verified by diff, not assumed. What the merge brings is three
+shared-core changes that reach st: #1093's rate fix, #1095's large-numeral work and #1118's
+`Js.ToLowerCase` repair.
+
+⚠ **THE BLOCKED ROW HAD TO BE RE-MEASURED, NOT CARRIED FORWARD.** A row that is BLOCKED and a row that is
+WRONG look identical in a diff, and the thing that distinguishes them — whether the target engine is ported
+— is exactly the kind of fact that changes while a branch sits. Re-run: Georgian is still absent from
+`Bootstrap.cs`, and `Registry.PortPending` for that row is still `[georgian]`. So the differential is
+**1,514 identical, 0 wrong, 2 BLOCKED**, unchanged in substance.
+
+⚠ And the pending probe was built in a directory of its OWN this time. On the first run it lived inside
+`.probe/st/`, where the parent `probe.csproj`'s `**/*.cs` glob swallowed its `Main` and broke the sibling
+build — the `.probe` hygiene hazard PORTING.md warns about, met from a new direction.
+
+Re-gated against the three core changes:
+
+    5 m/h                   dimitʰɑrɑ t͡sʼɛ ɬɑnɔ kʼɑ ɦɔrɑ    the rate still composes
+    76s · 1 h · 100 l/h     still DECLINE — no half reading
+    İ · İx · ẞ              agree
+
+Differential re-run after the merge: **1,516 comparisons, 1,514 identical, 2 BLOCKED, 0 throws.**
+
+## Recount
+
+`la`, `mn` and `tn` merged first, so main is at 130 / 25,627 and this branch is **131 languages /
+25,827 rows**.
+
 ## Gates
 
-    csharp tests            1,858 pass (66 new in SesothoTests.cs), 0 fail
+    csharp tests            2,152 pass (66 in SesothoTests.cs), 0 fail
     parity, st              200/200 byte-identical, 0 differ, 0 BLOCKED
-    parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
-    differential            1,516 comparisons (sync + async) — 1,514 identical, 0 wrong, 2 BLOCKED on `georgian`
+    parity, fleet           131 languages, 25,827 rows, 0 differ, 0 BLOCKED
+    differential            1,516 comparisons (sync + async) — 1,514 identical, 0 wrong, 2 BLOCKED on
+                            `georgian`, RE-MEASURED after the merge rather than carried forward
     leak sweep              0 of 758 outputs carry a raw digit or symbol
     typescript              unchanged
