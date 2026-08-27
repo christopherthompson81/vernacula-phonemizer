@@ -149,6 +149,7 @@ public static class Bootstrap
             Bavarian.BavarianPhonemizer.RegisterSelf();
             Bambara.BambaraPhonemizer.RegisterSelf();
             AncientGreek.AncientGreekPhonemizer.RegisterSelf();
+            Wolof.WolofPhonemizer.RegisterSelf();
         }
     }
 }
