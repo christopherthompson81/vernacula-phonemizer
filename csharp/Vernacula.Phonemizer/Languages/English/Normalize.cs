@@ -216,9 +216,18 @@ public static class Normalize
         $"\\b({MONTH_ALT})((?:\\s+\\d{{1,2}}(?:st|nd|rd|th))?,?)\\s+(1[1-9]\\d\\d|20\\d\\d)\\b(?![.,]?\\d)", "gi");
     private static readonly JsRe BARE_EXPONENT = JsRegex.Compile(
         "(\\d[\\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\\s?(\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+)", "gu");
-    /** …spaced off from a following letter first — see the TS for why `I²C` fused into one token. */
+    /** …spaced off from a following letter first — see the TS for why `I²C` fused into one token.
+     *  ⚠ AND NOT WHEN A SPACE PRECEDES THE SUPERSCRIPT (#1045): a space-separated superscript glued to a
+     *  word is that word's NUCLIDE (`0,708 ¹⁸⁰Hf`), and firing here would insert the space and hide the
+     *  shape from the decline below, which tests for a letter IMMEDIATELY after. `10⁶km` still spaces. */
     private static readonly JsRe BARE_EXPONENT_GLUED = JsRegex.Compile(
-        "(?:\\d[\\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\\s?(?:\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+)(?=[\\p{L}\\p{M}])", "gu");
+        "(?:\\d[\\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})(?:\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+)(?=[\\p{L}\\p{M}])", "gu");
+    /** ⚠ ENGLISH KEEPS ITS OWN COPY of the exponent pass, so the core's #1045 guards do not reach it — see
+     *  the TS. The seconds prime (`110⁰04¹05¹¹`) and the nuclide (`0,708 ¹⁸⁰Hf`) are declined here too. */
+    private static readonly JsRe EN_PRIME_CHAIN = JsRegex.Compile("\\d+⁰\\d+¹$", "u");
+    private static readonly JsRe EN_ONLY_ONES = JsRegex.Compile("^¹+$", "u");
+    private static readonly JsRe EN_NUCLIDE_FOLLOWS = JsRegex.Compile("^[\\p{L}\\p{M}]", "u");
+    private static readonly JsRe EN_HAS_SPACE = JsRegex.Compile("\\s", "u");
     private static readonly JsRe LONE_SUPERSCRIPT_MARK = JsRegex.Compile("^[⁰¹]$", "u");
     private static readonly JsRe HAS_LOWER = JsRegex.Compile("[a-z]");
     private static readonly JsRe CAPS_ROMAN = JsRegex.Compile("\\b([A-Za-z][A-Za-z']*)\\s+([IVXLCDM]{2,})\\b", "g");
@@ -378,11 +387,18 @@ public static class Normalize
         });
 
         s = BARE_EXPONENT_GLUED.Replace(s, m => $"{m.Value} ");
+        var allE = s;
         s = BARE_EXPONENT.Replace(s, m =>
         {
             var bas = m.Groups[1].Value;
             // A lone ⁰ or ¹ is a degree sign or a prime, not a power — see LONE_MARK in Core/NormalizeSymbols.cs.
             if (LONE_SUPERSCRIPT_MARK.IsMatch(m.Groups[2].Value)) return m.Value;
+            // ⚠ …and the SECONDS prime is two of them, and a spaced superscript before a word is a NUCLIDE
+            // (#1045). See the TS: this file's own note already cited `110⁰04¹05¹` and stopped one short.
+            if (EN_ONLY_ONES.IsMatch(m.Groups[2].Value)
+                && EN_PRIME_CHAIN.IsMatch(allE[Math.Max(0, m.Index - 24)..m.Index])) return m.Value;
+            if (EN_HAS_SPACE.IsMatch(m.Value)
+                && EN_NUCLIDE_FOLLOWS.IsMatch(allE[Math.Min(m.Index + m.Length, allE.Length)..])) return m.Value;
             var digits = string.Concat(Js.CodePoints(m.Groups[2].Value).Select(c => SUPERSCRIPT_DIGIT[c]));
             var neg = digits.StartsWith("-", StringComparison.Ordinal);
             var mag = neg ? digits[1..] : digits;

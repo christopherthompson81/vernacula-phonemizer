@@ -12,6 +12,7 @@
  */
 import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
+import { spacedBareExponent } from "../src/core/normalizeSymbols.ts";
 
 /** The declared languages, and the reading each must produce. */
 const CASES: [string, string, string][] = [
@@ -275,5 +276,82 @@ describe("bare exponent", () => {
         // otherwise read "kilometre".
         expect(phonemize("1 million km", "en")).toContain("kəlˈɑːmʌt̬ɚz");
         expect(phonemize("1 m³", "en")).toContain("kjˈuːbɪk mˈiːt̬ɚ"); // …and the real singular still works
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1045 — two superscript shapes the fallback would misread. NEITHER IS REACHABLE TODAY: both occur only
+// in languages that do not use the shared symbol tier, so these assertions are the ONLY instrument on
+// them. They go live the moment one of those languages adopts the tier, or a corpus lands with the shape.
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+describe("a run of only ¹ after a coordinate chain is a double prime, not a power", () => {
+    // `LONE_MARK` declines a single ¹ because every one in the artifacts is a prime. Mongolian carries the
+    // convention one character further and writes SECONDS as two: `110⁰04¹05¹¹` is 110°04′05″, ×8 in mn's
+    // artifact and every one a coordinate. Unguarded, `05¹¹` read as *five eleven*.
+    test("mn's coordinates keep their seconds", () => {
+        expect(spacedBareExponent("110⁰04¹05¹¹")).toBe("110⁰04¹05¹¹");
+        expect(spacedBareExponent("46⁰37¹55¹¹")).toBe("46⁰37¹55¹¹");
+        expect(spacedBareExponent("108⁰50¹25¹¹, 42⁰23¹43¹¹")).toBe("108⁰50¹25¹¹, 42⁰23¹43¹¹");
+    });
+
+    // ⚠ THE OBVIOUS WIDENING WOULD DAMAGE SIX LANGUAGES. Declining `¹¹` outright hits genuine powers, so
+    // the discriminator is the unspaced `digits⁰digits¹` CHAIN immediately before — not the digits.
+    test("…and a genuine power is untouched, even with a ⁰ nearby", () => {
+        expect(spacedBareExponent("10¹¹–10¹²")).toBe("10 11–10 12"); // ps
+        expect(spacedBareExponent("4×10¹⁰")).toBe("4×10 10"); //         hyw
+        expect(spacedBareExponent("10¹⁰⁰")).toBe("10 100"); //           ki, lo, tt
+        expect(spacedBareExponent("10¹⁰Ω")).toBe("10 10 Ω"); //          sq
+        // ⚠ THE CASE THAT MAKES THE ANCHOR NECESSARY: a ⁰ is within reach, and these are still two powers.
+        // A window test rather than an anchored, space-free one would have declined the second.
+        expect(spacedBareExponent("10¹⁰ 10¹¹")).toBe("10 10 10 11");
+    });
+});
+
+describe("a spaced superscript glued to a word belongs to what follows", () => {
+    // `BARE_EXPONENT` allows a space between base and superscript, so a leading NUCLIDE mass number bound
+    // to the PRECEDING number: nci's decay table writes `0,708 ¹⁸⁰Hf`, which emitted *0,708 180 Hf* — the
+    // mass number as a separate numeral on the wrong operand. `so`'s refusal note already names isotopes;
+    // this is that hazard reaching the fallback through a DIGIT base, which the letter-base decline misses.
+    test("nci's nuclides stay with their element", () => {
+        expect(spacedBareExponent("0,708 ¹⁸⁰Hf ¹⁸⁰W")).toBe("0,708 ¹⁸⁰Hf ¹⁸⁰W");
+        expect(spacedBareExponent("2,137 ⁶³Cu")).toBe("2,137 ⁶³Cu");
+        expect(spacedBareExponent("133 ⁰C")).toBe("133 ⁰C"); // si — already declined by LONE_MARK
+    });
+
+    test("⚠ both conditions are required, or a real power is lost", () => {
+        // Without the SPACE it is an ordinary power and the trailing letter is a unit, not an element.
+        expect(spacedBareExponent("10¹⁰Ω")).toBe("10 10 Ω");
+        // Without a FOLLOWING LETTER there is no word for the superscript to belong to.
+        expect(spacedBareExponent("2 ¹⁰")).toBe("2 10");
+        // …and the shape the pass exists for still works.
+        expect(spacedBareExponent("500² km")).toBe("500 2 km");
+    });
+});
+
+// ⚠ ENGLISH KEEPS ITS OWN COPY OF THIS PASS, and both had to be fixed. `english/normalize.ts`'s header
+// states the rule — each shared-tier feature "has a local equivalent here or it does not exist" — so the
+// core guards do not reach it. Its own comment already cited the coordinate `110⁰04¹05¹` as the reason for
+// the lone-mark decline and stopped one character short of the seconds prime.
+// ⚠ Both shapes are ×0 in en's artifact, so these are latent there too.
+describe("English's local copy declines the same two shapes", () => {
+    test("the seconds prime is not a power", () => {
+        // Was *…fˈaᶦv tʰuː ðə pʰˈaᶷɚ ʌv ɪlˈɛvən* — "five to the power of eleven" inside a coordinate.
+        expect(phonemize("110⁰04¹05¹¹", "en")).toBe(phonemize("110⁰04¹05", "en"));
+    });
+
+    test("a nuclide belongs to its element", () => {
+        // ⚠ THE GLUED PASS HAD TO MOVE TOO. It spaces a mark off so the word cannot fuse with a following
+        // unit — but firing on `0,708 ¹⁸⁰Hf` inserted the space and thereby HID the shape from the decline
+        // below, which tests for a letter immediately after. It no longer fires when a space precedes.
+        expect(phonemize("0,708 ¹⁸⁰Hf", "en")).toBe(phonemize("0,708 Hf", "en"));
+        expect(phonemize("2,137 ⁶³Cu", "en")).toBe(phonemize("2,137 Cu", "en"));
+    });
+
+    test("…and every real power English already read still reads", () => {
+        expect(phonemize("10¹¹", "en")).toContain("pʰˈaᶷɚ ʌv ɪlˈɛvən");
+        expect(phonemize("20²", "en")).toContain("skwˈɛɹd");
+        expect(phonemize("2 ¹⁰", "en")).toContain("pʰˈaᶷɚ ʌv tʰˈɛn");
+        expect(phonemize("E = mc²", "en")).toContain("skwˈɛɹd");
+        expect(phonemize("2¹⁰x", "en")).toContain("pʰˈaᶷɚ ʌv tʰˈɛn"); // the glued case still spaces
     });
 });

@@ -543,14 +543,32 @@ export function normalizeEnglish(input: string): string {
     //     is a WORD, so whatever stood after the mark fuses onto it: `I²C` read *aᶦ skwˈɛɹd**k*** — one token
     //     where there were two. Nothing is dropped and no raw mark survives, so it is a WRONG-WORD defect
     //     that no leak gate can reach. The shared tier had the identical bug in its `bareExponent` arm.
-    s = s.replace(/(?:\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?(?:\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)(?=[\p{L}\p{M}])/gu,
+    //     ⚠ AND NOT WHEN A SPACE PRECEDES THE SUPERSCRIPT (#1045). This pass spaces the mark off so the word
+    //     it becomes cannot fuse with a following unit — but a SPACE-separated superscript glued to a word
+    //     is that word's NUCLIDE, not this number's power (`0,708 ¹⁸⁰Hf`). Firing here would insert the
+    //     space and thereby hide the shape from the decline below, which tests for a letter IMMEDIATELY
+    //     after. `10⁶km` still spaces, because nothing separates its base from its mark.
+    s = s.replace(/(?:\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})(?:\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)(?=[\p{L}\p{M}])/gu,
         (m0) => `${m0} `);
     s = s.replace(/(\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?(\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
-        (whole, base: string, sup: string) => {
+        (whole, base: string, sup: string, at: number, all: string) => {
             //     ⚠ A LONE ⁰ OR ¹ IS A DEGREE SIGN OR A PRIME, not a power — see `LONE_MARK` in
             //     core/normalizeSymbols.ts for the corpus measurement. `360⁰` is a bearing and
             //     `110⁰04¹05¹` is a coordinate; nobody writes x⁰ or x¹.
             if (/^[⁰¹]$/u.test(sup)) return whole;
+            //     ⚠ …AND THE SECONDS PRIME IS TWO OF THEM (#1045). The note above already cites the
+            //     coordinate `110⁰04¹05¹` as its reason and stops one character short: Mongolian writes
+            //     the seconds as `05¹¹`, which is not lone, so it read as *five eleven*. The discriminator
+            //     is the unspaced `digits⁰digits¹` chain immediately before — NOT the digits, because
+            //     `10¹¹` is a real power and six languages write one. ⚠ ENGLISH KEEPS ITS OWN COPY of this
+            //     pass (see the header: each tier feature "has a local equivalent here or it does not
+            //     exist"), so the shared tier's guard does not reach it and both had to be fixed.
+            if (/^¹+$/u.test(sup) && /\d+⁰\d+¹$/u.test(all.slice(Math.max(0, at - 24), at))) return whole;
+            //     ⚠ …AND A SPACED SUPERSCRIPT GLUED TO A WORD IS THAT WORD'S NUCLIDE, not this number's
+            //     power: `0,708 ¹⁸⁰Hf` would read the mass number as a separate numeral on the wrong
+            //     operand. Both conditions are required — without the space `10¹⁰Ω` is 10¹⁰ ohms, and
+            //     without a following letter there is no word for the superscript to belong to.
+            if (/\s/u.test(whole) && /^[\p{L}\p{M}]/u.test(all.slice(at + whole.length))) return whole;
             const digits = [...sup].map((c) => SUPERSCRIPT_DIGIT[c]!).join("");
             //     ⚠ THE SIGN WORD IS EMITTED HERE, not left as an ASCII `-` for the sign rule to pick up:
             //     that rule is step 0f and this is step 6b, so anything written now is downstream of it and

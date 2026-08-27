@@ -72,6 +72,30 @@ const LETTER_NEXT = /^[\p{L}\p{M}]/u;
  * `10¹⁰⁰` and `10⁵⁰` are all real powers.
  */
 const LONE_MARK = /^[⁰¹]$/u;
+/**
+ * ⚠ A RUN OF ONLY ¹ AFTER A COORDINATE CHAIN IS A DOUBLE PRIME, NOT A POWER (#1045). `LONE_MARK` declines a
+ * single ¹ because every one in the artifacts is a prime; Mongolian carries the convention one character
+ * further and writes SECONDS as two — `110⁰04¹05¹¹` is 110°04′05″, ×8 and every one a coordinate.
+ *
+ * ⚠ THE OBVIOUS WIDENING IS WRONG AND WOULD DAMAGE SIX LANGUAGES. Declining `¹¹` outright hits genuine
+ * powers: ps `10¹¹–10¹²`, hyw `4×10¹⁰`, ki/lo/tt `10¹⁰⁰`, sq `10¹⁰Ω`, lv `10¹⁰`. The discriminator is not
+ * the digits — it is the CHAIN: mn's run is `digits⁰digits¹` immediately before, unspaced. `10¹⁰ 10¹¹` has
+ * a ⁰ nearby and is still two powers, which is why the test is anchored and space-free rather than a window.
+ */
+const PRIME_CHAIN = /\p{Nd}+⁰\p{Nd}+¹$/u;
+const ONLY_ONES = /^¹+$/u;
+/**
+ * ⚠ A SPACED SUPERSCRIPT GLUED TO A WORD BELONGS TO WHAT FOLLOWS (#1045). `BARE_EXPONENT` allows a space
+ * between base and superscript, so a leading NUCLIDE mass number binds to the preceding number instead:
+ * nci's decay table writes `0,708 ¹⁸⁰Hf` and `2,137 ⁶³Cu`, which would emit *0,708 180 Hf* — the mass
+ * number read as a separate numeral, attached to the wrong operand. `so`'s refusal note already names
+ * isotopes as its reason for declining `bareExponent`; this is that hazard reaching the fallback through a
+ * DIGIT base, which the letter-base decline does not cover.
+ * ⚠ Both conditions are required. Without the space it is an ordinary power (`10¹⁰Ω` is 10¹⁰ ohms, and the
+ * Ω must not make it a nuclide); without the following letter there is no word for the superscript to
+ * belong to.
+ */
+const NUCLIDE_FOLLOWS = /^[\p{L}\p{M}]/u;
 /** A DIGIT base, a lone ² or ³, and a short letter run that may be a unit key — the shape whose power belongs
  *  to the UNIT rather than to the number. The unit itself is checked by `isUnitKey` in the closure.
  *  The separator class is space, NBSP, NNBSP, thin space, as `NUM` uses. */
@@ -626,6 +650,10 @@ export function spacedBareExponent(s: string): string {
     return s.replace(BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
         // ⚠ A LONE ⁰ OR ¹ IS A DEGREE SIGN OR A PRIME — see `LONE_MARK`.
         if (LONE_MARK.test(sup)) return whole;
+        // ⚠ …AND A RUN OF ONLY ¹ AFTER AN UNSPACED COORDINATE CHAIN IS THE SECONDS PRIME — see `PRIME_CHAIN`.
+        if (ONLY_ONES.test(sup) && PRIME_CHAIN.test(all.slice(Math.max(0, at - 24), at))) return whole;
+        // ⚠ …AND A SPACED SUPERSCRIPT GLUED TO A WORD IS THAT WORD'S NUCLIDE — see `NUCLIDE_FOLLOWS`.
+        if (/\s/u.test(whole) && NUCLIDE_FOLLOWS.test(all.slice(at + whole.length))) return whole;
         const digits = [...sup].map((c) => SUPERSCRIPT[c]!).join("");
         return spacedDigits(base, digits, all, at + whole.length) ?? whole;
     });
@@ -1169,6 +1197,14 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             s = s.replace(BARE_EXPONENT_GLUED, (m0: string) => `${m0} `);
             s = s.replace(BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
                 if (LONE_MARK.test(sup)) return whole;
+                // ⚠ THE SAME TWO REFUSALS AS THE FALLBACK, AND THIS IS THE SITE #1045 IS ACTUALLY ABOUT.
+                // Both shapes occur only in languages that do NOT declare `bareExponent` today — so the
+                // issue's own framing, "it goes live the moment one of those adopts the tier", means it
+                // goes live HERE, in the declared branch, not in the fallback the undeclared ones use.
+                // Guarding only the fallback would have left the live path open. See `PRIME_CHAIN` and
+                // `NUCLIDE_FOLLOWS`.
+                if (ONLY_ONES.test(sup) && PRIME_CHAIN.test(all.slice(Math.max(0, at - 24), at))) return whole;
+                if (/\s/u.test(whole) && NUCLIDE_FOLLOWS.test(all.slice(at + whole.length))) return whole;
                 const digits = [...sup].map((c) => SUPERSCRIPT[c]!).join("");
                 const fallback = (): string => spacedDigits(base, digits, all, at + whole.length) ?? whole;
                 // `2` and `3` have their own words in every language that has any; everything else — including

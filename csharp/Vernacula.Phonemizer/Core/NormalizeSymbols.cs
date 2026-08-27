@@ -253,6 +253,24 @@ public static class NormalizeSymbols
     private static readonly JsRe DIGIT_BASE = JsRegex.Compile("^\\p{Nd}", "u");
     private static readonly JsRe LETTER_NEXT = JsRegex.Compile("^[\\p{L}\\p{M}]", "u");
     private static readonly JsRe LONE_MARK = JsRegex.Compile("^[⁰¹]$", "u");
+    /// <summary>⚠ A RUN OF ONLY ¹ AFTER A COORDINATE CHAIN IS A DOUBLE PRIME, NOT A POWER (#1045). LONE_MARK
+    /// declines a single ¹ as a prime; Mongolian writes SECONDS as two — `110⁰04¹05¹¹` is 110°04′05″, ×8 and
+    /// every one a coordinate. ⚠ Declining `¹¹` outright would damage six languages that write real powers
+    /// (`10¹¹`, `10¹⁰⁰`, `10¹⁰Ω`), so the discriminator is the unspaced `digits⁰digits¹` chain immediately
+    /// before — anchored and space-free, because `10¹⁰ 10¹¹` has a ⁰ nearby and is still two powers.</summary>
+    private static readonly JsRe PRIME_CHAIN = JsRegex.Compile(@"\p{Nd}+⁰\p{Nd}+¹$", "u");
+    private static readonly JsRe ONLY_ONES = JsRegex.Compile("^¹+$", "u");
+    /// <summary>⚠ A SPACED SUPERSCRIPT GLUED TO A WORD BELONGS TO WHAT FOLLOWS (#1045) — a leading NUCLIDE
+    /// mass number would otherwise bind to the preceding number (`0,708 ¹⁸⁰Hf` → *0,708 180 Hf*). Both
+    /// conditions are required: without the space `10¹⁰Ω` is 10¹⁰ ohms, and without a following letter
+    /// there is no word for the superscript to belong to.</summary>
+    private static readonly JsRe NUCLIDE_FOLLOWS = JsRegex.Compile(@"^[\p{L}\p{M}]", "u");
+    private static readonly JsRe HAS_SPACE = JsRegex.Compile(@"\s", "u");
+
+    /// <summary>The two #1045 refusals, shared by the fallback and the declared branch.</summary>
+    private static bool IsPrimeOrNuclide(string whole, string sup, int at, string all) =>
+        (ONLY_ONES.IsMatch(sup) && PRIME_CHAIN.IsMatch(all[Math.Max(0, at - 24)..at]))
+        || (HAS_SPACE.IsMatch(whole) && NUCLIDE_FOLLOWS.IsMatch(all[Math.Min(at + whole.Length, all.Length)..]));
     /** A digit base, a lone ² or ³, and a short letter run that may be a unit key — the shape whose power
      *  belongs to the UNIT rather than to the number. Separators: space, NBSP, NNBSP, thin space. */
     private static readonly JsRe UNIT_POWER_BEFORE = JsRegex.Compile(
@@ -273,6 +291,7 @@ public static class NormalizeSymbols
             var whole = m.Value;
             var sup = m.Groups[2].Value;
             if (LONE_MARK.IsMatch(sup)) return whole;
+            if (IsPrimeOrNuclide(whole, sup, m.Index, all)) return whole;
             var digits = new StringBuilder();
             foreach (var c in Js.CodePoints(sup)) digits.Append(SUPERSCRIPT[c]);
             return SpacedDigits(m.Groups[1].Value, digits.ToString(), all, m.Index + m.Length) ?? whole;
@@ -887,6 +906,10 @@ public static class NormalizeSymbols
                     var sup = m.Groups[2].Value;
                     var end = m.Index + m.Length;
                     if (LONE_MARK.IsMatch(sup)) return whole;
+                    // ⚠ THE SAME TWO REFUSALS, AND THIS IS THE SITE #1045 IS ACTUALLY ABOUT: both shapes
+                    // occur only in languages that do not declare `bareExponent` TODAY, so "it goes live
+                    // when one adopts the tier" means it goes live HERE, not in the fallback.
+                    if (IsPrimeOrNuclide(whole, sup, m.Index, allD)) return whole;
                     var digits = new StringBuilder();
                     foreach (var c in Js.CodePoints(sup)) digits.Append(SUPERSCRIPT[c]);
                     // `2` and `3` have their own words in every language that has any; everything else — including `1`, `0`
