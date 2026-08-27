@@ -47,6 +47,11 @@ const B = "1000000000000000000009";
  *   · **NO PARAMETER, BUT A COMPLETE DIGIT TABLE** — `scottishgaelic`, `irish`, `macedonian`,
  *     `albanian`, `latin`, `ancientgreek`, `afrikaans`, `tamil`. Seven more codes; adding `raw?: string`
  *     and threading the token is the whole change.
+ *   · **AND THE WRAPPER SHAPE, ONE DELEGATION FURTHER DOWN** — `ki` and `kam` share
+ *     `kikuyu/e5xNumbers.ts`, which has taken `raw` all along; both wrappers dropped it and both call
+ *     sites never passed one. Two more codes, and the same lesson as hr/bs a second time: a grep of the
+ *     language's own `numbers.ts` for `String(n)` finds nothing, because the stringification is in the
+ *     shared file.
  * What remains below is the one class that genuinely needs evidence rather than a rewrite:
  *   · ⚠ A FIX DOES NOT PROPAGATE ALONG A SHARED CORE. `hr` and `bs` compose through the SAME
  *     `serbian/numbers.ts` that took the #1059 threading with `sr`, and both stayed broken for a year of
@@ -65,7 +70,7 @@ const B = "1000000000000000000009";
  *     sibling `zu` has no such precedent in its own file and stays listed.
  * ⚠ A NEW LANGUAGE MUST NOT JOIN THIS LIST. It exists to be emptied.
  */
-const ACCEPTED_LOSSY = new Set("tr az vi si kk tg zu ki kam".split(" "));
+const ACCEPTED_LOSSY = new Set("tr az vi si kk tg zu".split(" "));
 
 const CODES = [
     ...new Set([...readFileSync("src/registry.ts", "utf8").matchAll(/^\s*case "([^"]+)":/gmu)].map((m) => m[1]!)),
