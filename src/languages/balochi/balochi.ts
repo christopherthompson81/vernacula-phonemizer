@@ -218,7 +218,10 @@ const TOKEN = new RegExp(`([ؠ-ۿݐ-ݿ‌]+|${LATIN_RUN})|(\\d+)|([،؛؟۔٬.!?
  * class against the upper case of its own letters, not by a corpus.
  */
 const NATIVE_CLASS = "[a-zāēīōūšžčǰṭḍṛġ\\u030C]";
-const nat = makeNativiser(NATIVE_CLASS, "iu");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 export type ForeignPhonemizer = (latin: string) => string;
 

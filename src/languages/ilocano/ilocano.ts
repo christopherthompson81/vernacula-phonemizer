@@ -103,7 +103,10 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'ʼ-")})|(\\d+)|([.?!,;:])`
  * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zñ'ʼ-]";
-const nat = makeNativiser(NATIVE_CLASS, "iu");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class IlocanoPhonemizer implements Phonemizer {
     text(input: string): string {

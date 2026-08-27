@@ -191,7 +191,10 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'")})|(\\d+)|([〇㐀-�
  * deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-z']";
-const nat = makeNativiser(NATIVE_CLASS, "iu");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class ZhuangPhonemizer implements Phonemizer {
     text(input: string): string {

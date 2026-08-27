@@ -422,4 +422,7 @@ const NATIVE_CLASS =
     // U+0300 ̀ (3) U+0301 ́ (2) U+0302 ̂ (5) U+0304 ̄ (7) U+030B ̋ (9) U+030C ̌ (6) U+030D ̍ (8), and
     // U+0358 ͘ — the ⟨o͘⟩ vowel, not a tone.
     "̀-̂̄̋-̍͘]";
-const nat = makeNativiser(NATIVE_CLASS, "u");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "u");

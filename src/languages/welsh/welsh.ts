@@ -110,7 +110,10 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|([1-9]\\d{0,2
  * class against the upper case of its own letters, not by a corpus.
  */
 const NATIVE_CLASS = "[a-zâêîôûŵŷàèìòùïëöäüA-ZÂÊÎÔÛŴŶÀÈÌÒÙÏËÖÄÜ]";
-const nat = makeNativiser(NATIVE_CLASS, "u");
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
+ *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
+ *  engines agree on the miss, so the parity gate cannot see it (#1068). */
+export const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // symbol normalization — Welsh: "y cant" after the number (40 y cant, the BBC Cymru convention);
 // nouns stay SINGULAR after numerals in Welsh, so one form suffices (deg doler, not *doleri*).
