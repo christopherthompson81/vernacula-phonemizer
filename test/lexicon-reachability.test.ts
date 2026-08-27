@@ -153,7 +153,11 @@ describe("lexicon keys must survive their own engine's nativiser (#1068)", () =>
         const folded = keys.filter((k) => NATIVISERS[lang]!(k) !== k);
         if (!folded.length) return { folded, lost: [] as string[], shadowed: 0 };
         const load = LOADED[id];
-        expect(load, `${id} rewrites ${folded.length} keys under its own fold but is not in LOADED`).toBeTruthy();
+        // ⚠ THIS IS THE FOLLOW-UP PATH, not an internal error. The other 25 lexicons carry no `fold` at their
+        // `loadTsvMap` call sites, and correctly so — nothing in them is unreachable today, and aliasing on
+        // spec would be an unmeasured change. If one of them GAINS a key its engine cannot spell, it lands
+        // here: wire `fold: (k) => nat(k)` into that lexicon's `loadTsvMap` call and add it to LOADED above.
+        expect(load, `${id} rewrites ${folded.length} keys under its own fold (e.g. ${folded.slice(0, 3).map((k) => `${k}→${NATIVISERS[lang]!(k)}`).join(", ")}) but its loadTsvMap call has no \`fold\` — see #1068`).toBeTruthy();
         const map = load!();
 
         const resolved = new Map(raw); // unfolded keys, exactly as the file writes them
