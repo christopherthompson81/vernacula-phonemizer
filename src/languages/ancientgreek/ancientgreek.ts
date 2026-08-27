@@ -121,7 +121,7 @@ class AncientGreekPhonemizer implements Phonemizer {
         return assembleClauses(normalizeAncientGreek(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             // Numbers: compose the Greek numeral phrase (καὶ-linked, myriad-grouped), then phonemize each word.
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === ";" || m[3] === ";" ? "." : ",");
         });
     }
