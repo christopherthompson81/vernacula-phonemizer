@@ -44,4 +44,27 @@ public class HaitianTests
     [InlineData(1000000000, "en milya")]
     public void NumberToWordsMatchesTheLspTable(int n, string expected) =>
         Assert.Equal(expected, HaitianNumbers.NumberToWords(n));
+
+    [Theory]
+    // A decimal with a letter against it. ⚠ DECLINING IS NOT NEUTRAL — the guard that refused these left the
+    // separator in place and the tokenizer read it as CLAUSE PUNCTUATION, so the "safe" branch emitted a full
+    // stop mid-phrase AND lost the fractional part's leading zero. ×0 in the golden; twelve in the corpora,
+    // six real and six DOI/URL fragments that the LEADING guard already refused.
+    [InlineData("17.09m.", "disɛt viɡil zewo nɛf m .")]  // was `disɛt . nɛf m .` — and the 0 was gone
+    [InlineData("1.00mm", "ɛ̃ viɡil zewo zewo milimɛt")]
+    [InlineData("7.5cm", "sɛt viɡil sɛ̃k sãtimɛt")]
+    [InlineData("442.7k", "kat sã kaɣãnde viɡil sɛt k")]
+    [InlineData("1.9pwen", "ɛ̃ viɡil nɛf pwɛ̃")]
+    // ⚠ TWO OF THE TWELVE ARE normalize.ts's OWN QUOTED ATTESTATIONS — cited as evidence for other rules
+    // while they were reading a spurious full stop.
+    [InlineData("1 a 1,5m", "ɛ̃ a ɛ̃ viɡil sɛ̃k m")]
+    [InlineData("50cm a 1,80m", "sɛ̃kãt sãtimɛt a ɛ̃ viɡil katɣevɛ̃ m")]
+    // …and a dotted CHAIN still declines, from either direction.
+    [InlineData("1.2.3", "ɛ̃ . de . twa")]
+    [InlineData("jpcl.16.1.07par", "ʒpkl . sɛz . ɛ̃ . sɛt paɣ")]
+    // A spaced decimal is unmoved, and so is the leading-zero rule.
+    [InlineData("17.09 m", "disɛt viɡil zewo nɛf m")]
+    [InlineData("0,4 rebon", "zewo viɡil kat ɣebɔ̃")]
+    public void ADecimalIsStillADecimalWhenALetterTouchesIt(string input, string want) =>
+        Assert.Equal(want, Phonemizer.Phonemize(input, "ht"));
 }

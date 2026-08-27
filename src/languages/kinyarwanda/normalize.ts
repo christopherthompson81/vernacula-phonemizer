@@ -328,8 +328,30 @@ const spell = (int: string, frac: string): string => `${int} ${[...frac].join(" 
  *  corpus's own instance puts the noun BEFORE — *"hagati ya dogere 22° na 35°"* — while a gloss would put it
  *  after. */
 function saidNear(full: string, offset: number, end: number, word: string): boolean {
-    return full.slice(Math.max(0, offset - 45), end + 45).includes(word);
+    return full.slice(Math.max(0, offset - 45), end + 45).replaceAll(INSERTED + word, "").includes(word);
 }
+
+/**
+ * ⚠ THE MARK THAT KEEPS THE REDUNDANCY GUARD FROM READING ITS OWN OUTPUT.
+ *
+ * `saidNear` asks one question — DID THE WRITER ALREADY WRITE THIS WORD? — so it must look at what the
+ * writer wrote. It reads the string `String.replace` handed the callback, which is the PRE-replacement one,
+ * and within a single pass that is exactly right: two matches in the same pass are invisible to each other.
+ * Across passes it was not: by the time 4c runs, the string already carries 4a's INSERTED `dogere`, and 4c
+ * mistook the engine's own output for the source text. So one construction got two answers depending on
+ * which arm happened to claim each half:
+ *
+ *     −27.2 °C (−17.0 °F)   both figures negative → both 4a, one pass → `dogere` TWICE
+ *     −14.4 °C (6.1 °F)     first 4a, second 4c   → 4c sees 4a's insertion → `dogere` ONCE, and the
+ *                                                   parenthetical lost its noun AND its scale: bare *(6 1)*
+ *
+ * Every `dogere` this file emits is prefixed with U+0000, the guard strips a MARKED occurrence from the
+ * window before testing, and the marks are removed at the end of the degree block. That is exact where a
+ * pre-block snapshot is not: the arms rewrite as they go, so any offset into a frozen copy drifts.
+ * ⚠ U+0000 cannot appear in the input — `core/clauses.ts` never emits it and no corpus line carries one —
+ * and the strip is unconditional, so a mark cannot survive into the phoneme stream even if an arm declines.
+ */
+const INSERTED = "\u0000";
 
 /** Normalize one Kinyarwanda input string. Steps are ORDER-DEPENDENT; each states its coupling. */
 export function normalizeKinyarwanda(input: string): string {
@@ -439,7 +461,7 @@ export function normalizeKinyarwanda(input: string): string {
         return m ? spell(m[1]!, m[2]!) : n;
     };
     const degreeBody = (n: string, off: number, end: number, full: string, scale: string): string =>
-        `${saidNear(full, off, end, DEGREE) ? "" : `${DEGREE} `}${scale}${spellDec(n)}`;
+        `${saidNear(full, off, end, DEGREE) ? "" : `${INSERTED}${DEGREE} `}${scale}${spellDec(n)}`;
 
     //    4a) A NEGATIVE TEMPERATURE — `−27.2 °C`, `−20.1 °C`, `–7 °C`. This is the ONLY slot with an attested
     //    reading for the sign (`munsi ya zeru`, postposed; see BELOW_ZERO), and it is worth having because
@@ -471,6 +493,12 @@ export function normalizeKinyarwanda(input: string): string {
     //    4e) A BARE DEGREE — `dogere 22°`, `40-42 °`.
     s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu,  // space, NBSP
         (w, n: string, off: number, full: string) => degreeBody(n, off, off + w.length, full, ""));
+    //    ⚠ THE MARKS COME OFF HERE — AFTER 4e, WHICH IS THE LAST ARM. Stripping them a step earlier (my
+    //    first attempt) would blind 4e to the distinction the mark exists to draw: a bare `°` following a
+    //    `dogere` this file inserted would then read as one the WRITER wrote, and 4e would suppress a noun
+    //    it should emit. Unconditional and once, so no mark can reach the phoneme stream even if an arm
+    //    declines. See `INSERTED`.
+    s = s.replaceAll(INSERTED, "");
 
     // 5) THE ENGLISH ORDINAL SUFFIX (`20th`, `3rd`) is NOT stripped here, because there is nothing to strip:
     //    the artifact contains ZERO `\d+(st|nd|rd|th)` instances. Kinyarwanda writes its ordinals as

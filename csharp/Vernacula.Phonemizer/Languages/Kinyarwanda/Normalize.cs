@@ -162,9 +162,22 @@ public static class Normalize
     }
 
     /** Is `word` written within ~45 characters either side of this offset? The redundancy guard for
-     *  `dogere`, checked on BOTH sides. */
+     *  `dogere`, checked on BOTH sides. ⚠ A MARKED occurrence is stripped first — see INSERTED. */
     private static bool SaidNear(string full, int offset, int end, string word) =>
-        Slice(full, offset - 45, end + 45).Contains(word, StringComparison.Ordinal);
+        Slice(full, offset - 45, end + 45).Replace(INSERTED + word, "", StringComparison.Ordinal)
+            .Contains(word, StringComparison.Ordinal);
+
+    /// <summary>⚠ THE MARK THAT KEEPS THE REDUNDANCY GUARD FROM READING ITS OWN OUTPUT.
+    /// <para>SaidNear asks one question — did the WRITER already write this word? — so it must look at what
+    /// the writer wrote. It reads the pre-replacement string, which within one pass is exactly right (two
+    /// matches in the same pass are invisible to each other). Across passes it was not: by 4c the string
+    /// carried 4a's INSERTED `dogere`, so one construction got two answers —
+    /// `−27.2 °C (−17.0 °F)` said it twice (both figures 4a, one pass) while `−14.4 °C (6.1 °F)` said it
+    /// once, and the parenthetical lost its noun AND its scale, reading a bare *(6 1)*.</para>
+    /// <para>Every emitted `dogere` is prefixed with U+0000; the guard strips a marked occurrence before
+    /// testing; the marks come off after 4e, the LAST arm. Exact where a pre-block snapshot is not — the
+    /// arms rewrite as they go, so any offset into a frozen copy drifts.</para></summary>
+    private const string INSERTED = "\u0000";
 
     private static string SpellDec(string n)
     {
@@ -173,7 +186,7 @@ public static class Normalize
     }
 
     private static string DegreeBody(string n, int off, int end, string full, string scale) =>
-        $"{(SaidNear(full, off, end, DEGREE) ? "" : $"{DEGREE} ")}{scale}{SpellDec(n)}";
+        $"{(SaidNear(full, off, end, DEGREE) ? "" : $"{INSERTED}{DEGREE} ")}{scale}{SpellDec(n)}";
 
     /** The scale slot: Celsius is NAMED, Fahrenheit is CLAIMED but left unsaid — see the TS header. */
     private static string Scale(Group sc) =>
@@ -240,6 +253,10 @@ public static class Normalize
         var src4e = s;
         s = DEGREE_BARE.Replace(s, mm =>
             DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src4e, ""));
+        // ⚠ THE MARKS COME OFF HERE — AFTER 4e, the LAST arm. A step earlier and 4e would read a `dogere`
+        // this file inserted as one the WRITER wrote, and suppress a noun it should emit. Unconditional and
+        // once, so no mark reaches the phoneme stream even if an arm declines.
+        s = s.Replace(INSERTED, "", StringComparison.Ordinal);
 
         // 5) The English ordinal suffix is NOT stripped — there is nothing to strip. See the TS.
 

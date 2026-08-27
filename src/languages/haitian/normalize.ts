@@ -456,9 +456,23 @@ export function normalizeHaitian(input: string): string {
     //     ⚠ SO A SHORT TAIL IS LEFT AS A NUMBER AND A LONG ONE IS SPACED OUT. Two digits is what the
     //     citation covers (`,50` → *senkant*); at three or more, reading `365,256` as "two hundred fifty-six"
     //     is a claim nothing supports, so those digits go one at a time.
-    //     ⚠ THE TRAILING LETTER GUARD keeps a dotted designation (`802.11a`) out, the same robustness
-    //     argument as step 5.
-    s = s.replace(/(?<![\d.,])(\d+)[.,](\d+)(?![\d\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
+    //     ⚠ THE GUARD IS A DOTTED CHAIN, NOT A TRAILING LETTER, AND THE SWAP IS MEASURED. It used to refuse
+    //     any decimal a letter touched, for the robustness argument step 5 gives (`802.11a`). But DECLINING
+    //     IS NOT NEUTRAL: the separator survives, and the tokenizer then reads it as CLAUSE PUNCTUATION. So
+    //     the guard did not protect the designation, it merely broke the sentence in a different place —
+    //     `17.09m.` came out *disɛt **.** nɛf m .*, a full stop mid-phrase AND a dropped leading zero.
+    //     Counted over the mined + attest corpora, twelve runs put a letter against a decimal:
+    //       SIX ARE REAL     `1.00mm` · `17.09m.` · `7.5cm` · `442.7k` · `1.9pwen` · `8.5x11`
+    //       SIX ARE NOT      four DOI segments (`jpcl.16.1.07par`) and two URL anchors (`#.C3.89Eta`)
+    //     …and the six that are not were ALREADY handled, by the LEADING guard: every one sits inside a
+    //     dotted chain, so `(?<![\d.,])` refuses it before the trailing guard is ever consulted. The
+    //     trailing guard was therefore buying nothing and costing six.
+    //     ⚠ WHAT IT COSTS, STATED: `802.11a` now reads *ɥit sã de vigil ɔ̃z a* — a spurious *vigil* where it
+    //     used to be a spurious full stop. Both are wrong; a false WORD is the cheaper of the two, because a
+    //     false clause boundary re-prosodies the whole utterance. And the shape is ×0 in this corpus — it
+    //     was always a hypothesis, while the six are attested.
+    //     The chain guard is kept on the RIGHT as well, so `1.2.3` still declines from either direction.
+    s = s.replace(/(?<![\d.,])(\d+)[.,](\d+)(?![\d]|[.,]\d)/gu, (_m, int: string, frac: string) =>
         frac.length <= 2 && !frac.startsWith("0") ? `${int} vigil ${frac}` : `${int} vigil ${[...frac].join(" ")}`);
 
     // 11) FRACTIONS → the ordinal-denominator idiom, which is the language's own: `prèske yon senkyèm se
