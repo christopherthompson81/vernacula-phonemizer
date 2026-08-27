@@ -145,10 +145,13 @@ public static class Normalize
     private static readonly JsRe RAND_MAGNITUDE = JsRegex.Compile(
         $"(?<![\\p{{L}}\\p{{M}}\\d])R[ \\u00a0]?(\\d+)([ \\u00a0](?:{MAG}))(?![\\p{{L}}\\p{{M}}\\d])", "giu");  // space, NBSP
 
-    // ⚠ A TEMPLATE LITERAL in the TS, so the separators are the CHARACTERS, not the escapes.
+    // ⚠ A TEMPLATE LITERAL in the TS, so the compiled pattern receives the separator CHARACTERS, not the
+    // regex escapes — which is what these C# string escapes produce. ⚠ SPELLED AS ESCAPES DELIBERATELY: a
+    // literal NBSP in source is exactly what went wrong here once (see SepediTests), and it is invisible to
+    // review, to the golden and to every corpus line but one.
     private static readonly JsRe UNIT_RE = JsRegex.Compile(
-        $"{NOT_VERSION}(\\d+(?:[    ]\\d{{3}}(?!\\d)|[.,]\\d+)*)(?![\\d.,])[    ]?({UNIT_ALT})"  // NBSP, NNBSP, thin space
-        + $"(?:[    ]?/[    ]?({DENOM_ALT})|[    ]?(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{{L}}])))?"  // NBSP, NNBSP, thin space
+        $"{NOT_VERSION}(\\d+(?:[\u0020\u00a0\u202f\u2009]\\d{{3}}(?!\\d)|[.,]\\d+)*)(?![\\d.,])[\u0020\u00a0\u202f\u2009]?({UNIT_ALT})"  // NBSP, NNBSP, thin space
+        + $"(?:[\u0020\u00a0\u202f\u2009]?/[\u0020\u00a0\u202f\u2009]?({DENOM_ALT})|[\u0020\u00a0\u202f\u2009]?(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{{L}}])))?"  // NBSP, NNBSP, thin space
         + "(?![\\p{L}\\p{M}\\d'’ʼ])",
         "giu");
 
