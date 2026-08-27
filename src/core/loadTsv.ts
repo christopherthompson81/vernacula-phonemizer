@@ -31,19 +31,50 @@ function readDataLines(
     return text.split(/\r?\n/).filter((l) => l !== "" && !l.startsWith("#"));
 }
 
+/**
+ * ⚠ `fold` MAKES A LEXICON REACHABLE THROUGH ITS OWN ENGINE'S NATIVISER (#1068). An engine folds a word to
+ * its declared inventory BEFORE looking it up, so a headword spelled with a letter the fold rewrites can
+ * never be matched from `text()` — it does not throw and it does not drop a phone, the word just takes the
+ * OOV path and gets a plausible wrong reading. Passing the engine's own `nat` here adds the folded spelling
+ * as an ALIAS for the same value, which is what closes the gap. Measured in
+ * `docs/investigations/nativiser_lexicon_seam_investigation.md`; guarded by `test/lexicon-reachability`.
+ *
+ * ⚠ AN UNFOLDED KEY ALREADY IN THE FILE WINS, ALWAYS. An alias is written only into a FREE slot, so no
+ * reading that the engine can already reach today can change — which is also why the parity goldens cannot
+ * move. Without this, Slovene alone would have 99 keys where the two spellings disagree about which nucleus
+ * is stressed (`bləste`=0 against `bleste`=1) and the loser would be decided by file order.
+ *
+ * ⚠ AND THE RAW KEY IS KEPT, not replaced. Aliasing is additive: some callers (evals, `phonemizeWord` used
+ * bare) look words up without nativising first, and dropping the original spelling would break them for no
+ * gain — the alias is what the shipped path needs, not the absence of the original.
+ *
+ * ⚠ ITERATION IS OVER THE FILE'S ROWS IN ORDER, not over the Map. Two different keys can fold onto the same
+ * free slot, so "first one wins" must mean first IN THE FILE — a Map happens to preserve insertion order and
+ * .NET's Dictionary does not, and a port that iterated the dictionary would silently pick a different winner.
+ */
 export function loadTsvMap<V = string>(
     metaUrl: string,
     filename: string,
     parse: (value: string, key: string) => V | undefined = (v) =>
         v as unknown as V,
-    opts: { optional?: boolean } = {},
+    opts: { optional?: boolean; fold?: (key: string) => string } = {},
 ): Map<string, V> {
     const map = new Map<string, V>();
+    const rows: Array<[string, V]> = [];
     for (const line of readDataLines(metaUrl, filename, opts.optional ?? false)) {
         const tab = line.indexOf("\t");
         if (tab <= 0) continue;
         const v = parse(line.slice(tab + 1), line.slice(0, tab));
-        if (v !== undefined) map.set(line.slice(0, tab), v);
+        if (v !== undefined) {
+            map.set(line.slice(0, tab), v);
+            rows.push([line.slice(0, tab), v]);
+        }
+    }
+    if (opts.fold) {
+        for (const [k, v] of rows) {
+            const f = opts.fold(k);
+            if (f !== k && !map.has(f)) map.set(f, v);
+        }
     }
     return map;
 }

@@ -109,3 +109,42 @@ different question from the one #1068 asks.
 ⚠ **None of this is reachable from the parity gate.** Both engines fold identically, so every count above is
 a defect both sides reproduce byte-for-byte. The instrument was a purpose-built sweep, and the durable
 version of it is a test, not a gate row.
+
+---
+
+## Run 2 — 2026-08-26 ~19:35
+
+**Command.** Landed the fix (`loadTsvMap`'s `fold` option, unfolded-key-wins) and re-measured through
+`test/lexicon-reachability.test.ts`, which re-derives the rule against the LOADED maps rather than
+re-stating Run 1's numbers.
+
+**Question.** Does folding the keys at load actually close all 1,289, and is Run 1's collision count right?
+
+### Raw finding
+
+All 30 lexicons now report **zero rows lost** — every TSV row resolves through its engine's nativiser.
+`phonemize("München", "sv")` moved from *mˈɵ̀nkhɛn* to *mˈɵnkhɛn*: the grave is accent 2, and NST records
+accent 1, so the reading is now the lexicon's rather than the OOV rule's.
+
+**⚠ RUN 1'S COLLISION COUNT WAS WRONG — 106, not 103, and Slovene is 102 rather than 99.** The three extra:
+
+```
+bləsteł=0  lost slot `blestel` to  blesteł=1
+səsał=0    lost slot `sesal`   to  sesał=1
+səzuł=0    lost slot `sezul`   to  sezuł=1
+```
+
+Run 1's hand-rolled sweep only counted a fold landing on a key **the file already writes**. In these three
+pairs BOTH spellings are folded — `bləsteł` and `blesteł` each reduce to `blestel` — so the collision is
+between two *aliases* and the sweep had no way to see it.
+
+### What it implies
+
+The fix holds, and Run 1's central conclusions are unchanged: option 3 closes both symptom classes, 684
+Slovene keys are added rather than un-hidden, and no reading reachable before the fix has moved.
+
+But the correction is the more useful finding. **A guard that re-derives the rule finds what a guard that
+re-states a number cannot** — the ledger in `test/lexicon-reachability.test.ts` is computed from the loaded
+maps every run, so it caught its own author's arithmetic. That is the argument for landing the test BEFORE
+the fix rather than alongside it: had the ledger simply been transcribed from Run 1, the three pairs would
+have been silently accepted as correct and the number would have been wrong in the repo forever.

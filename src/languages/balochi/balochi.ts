@@ -45,10 +45,14 @@ const VOWEL_LETTERS = new Set(DEF.vowelLetters);
 // Cross-script lexicon (arabic <TAB> roman <TAB> ipa). Loaded once; keyed by BOTH spellings → full-voweled IPA.
 let LEX_AR: Map<string, string> | undefined;
 let LEX_RO: Map<string, string> | undefined;
-function lexicon(): { ar: Map<string, string>; ro: Map<string, string> } {
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts` — see swedish.ts. */
+export function lexicon(): { ar: Map<string, string>; ro: Map<string, string> } {
     if (LEX_AR === undefined) {
         // loadTsvMap gives arabic → "roman\tipa"; split into the two views.
-        const raw = loadTsvMap(import.meta.url, "balochi-lexicon.tsv");
+        // ⚠ #1068: alias each key to its nativised spelling — `text()` folds before it looks up. 4 keys, all
+        // the same shape: the alef-madda ⟨آ⟩ folds to bare ⟨ا⟩ (آپ→اپ, آس→اس, آتک→اتک), so the headword the
+        // dictionary actually writes could never be matched.
+        const raw = loadTsvMap(import.meta.url, "balochi-lexicon.tsv", undefined, { fold: (k) => nat(k) });
         LEX_AR = new Map();
         LEX_RO = new Map();
         for (const [ar, rest] of raw) {

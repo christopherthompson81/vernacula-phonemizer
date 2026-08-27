@@ -136,8 +136,12 @@ export function phonemizeWordRules(word: string): string {
 // orthography underdetermines (absorbere→ɑbsɔɾˈbeːɾə), so a known word is looked up at reference quality; the rule
 // engine is the OOV fallback. NST is independent of Wiktionary (the referee) → non-circular.
 let LEX: Map<string, string> | undefined;
-function lexicon(): Map<string, string> {
-    if (LEX === undefined) LEX = loadTsvMap(import.meta.url, "nb-lexicon.tsv", undefined, { optional: true });
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts` — see swedish.ts. */
+export function lexicon(): Map<string, string> {
+    if (LEX === undefined) LEX = loadTsvMap(import.meta.url, "nb-lexicon.tsv", undefined,
+        // ⚠ #1068: alias each key to its nativised spelling — `text()` folds before it looks up. 14 keys,
+        // `señor`, `malmö`, `göring` among them.
+        { optional: true, fold: (k) => nat(k) });
     return LEX;
 }
 

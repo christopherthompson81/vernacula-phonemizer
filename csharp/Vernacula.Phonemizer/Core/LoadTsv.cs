@@ -44,20 +44,40 @@ public static class LoadTsv
     public static Dictionary<string, string> LoadTsvMap(string moduleDir, string filename, bool optional = false) =>
         LoadTsvMap<string>(moduleDir, filename, (v, _) => v, optional);
 
+    /// <summary>⚠ <c>fold</c> MAKES A LEXICON REACHABLE THROUGH ITS OWN ENGINE'S NATIVISER (#1068). An engine
+    /// folds a word to its declared inventory BEFORE looking it up, so a headword spelled with a letter the
+    /// fold rewrites can never be matched from Text() — the word silently takes the OOV path and gets a
+    /// plausible wrong reading. Passing the engine's own nativiser adds the folded spelling as an ALIAS for
+    /// the same value.
+    /// <para>⚠ AN UNFOLDED KEY ALREADY IN THE FILE WINS, ALWAYS — an alias is written only into a FREE slot,
+    /// so no reading the engine can already reach today can change.</para>
+    /// <para>⚠ AND THE ITERATION IS OVER THE FILE'S ROWS IN ORDER, which is why the rows are collected into a
+    /// list first. Two keys can fold onto the same free slot, and "first wins" only means anything if the
+    /// order is the file's. A Dictionary happens to preserve insertion order here, but relying on that for a
+    /// tie-break would be relying on an implementation detail the TS side does not share.</para>
+    /// See docs/investigations/nativiser_lexicon_seam_investigation.md and test/lexicon-reachability.</summary>
     public static Dictionary<string, V> LoadTsvMap<V>(
         string moduleDir,
         string filename,
         Func<string, string, V?> parse,
-        bool optional = false) where V : class
+        bool optional = false,
+        Func<string, string>? fold = null) where V : class
     {
         var map = new Dictionary<string, V>();
+        var rows = new List<(string Key, V Value)>();
         foreach (var line in ReadDataLines(moduleDir, filename, optional))
         {
             var tab = line.IndexOf('\t');
             if (tab <= 0) continue;
             var v = parse(line[(tab + 1)..], line[..tab]);
-            if (v is not null) map[line[..tab]] = v;
+            if (v is not null) { map[line[..tab]] = v; rows.Add((line[..tab], v)); }
         }
+        if (fold is not null)
+            foreach (var (k, v) in rows)
+            {
+                var f = fold(k);
+                if (f != k && !map.ContainsKey(f)) map[f] = v;
+            }
         return map;
     }
 
