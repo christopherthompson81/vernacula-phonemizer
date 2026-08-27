@@ -1,16 +1,13 @@
 /**
- * Bavarian (bar) phonemizer — Boarisch, Upper German (Austro-Bavarian), Latin script, canonical IPA.
- * Ported from src/languages/bavarian/bavarian.ts — see that file for the referee, the orthographic
- * convention (bar.wikipedia's de-facto German-derived one: ⟨å⟩ for the dark [ɔ], ⟨ä ö ü⟩, ⟨ß⟩), and for
- * what is folded (vowel LENGTH and the fine dialect qualities; the referee is a NARROW transcription with
- * ~1.29 dialect variants per headword, credited any).
- *
- * A greedy longest-match grapheme scan plus the rules the table cannot express: the FALLING diphthongs
- * ⟨ia ua oa⟩, the voiceless-LENIS stops ⟨b d g⟩→[b̥ d̥ ɡ̥], r-vocalization, the ich/ach dorsal split,
+ * Bavarian (bar) phonemizer — Boarisch, Upper German (Austro-Bavarian), Latin script, canonical IPA. A
+ * greedy longest-match grapheme scan plus the rules the table cannot express: the falling diphthongs
+ * ⟨ia ua oa⟩, the voiceless-lenis stops ⟨b d g⟩→[b̥ d̥ ɡ̥], r-vocalization, the ich/ach dorsal split,
  * initial ⟨st sp⟩, ⟨gn⟩ coalescence, geminate collapse.
+ *
+ * Ported from src/languages/bavarian/bavarian.ts — see that file for the referee, the orthographic
+ * convention it reads, and what is folded.
  */
 using System.Text;
-using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.Bavarian;
@@ -22,20 +19,17 @@ public static class BavarianPhonemizer
     private static IReadOnlyDictionary<string, string> G => DEF.Graphemes;
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => DEF.ClausePunctuation;
 
-    // Multi-letter graphemes scanned longest-first so ⟨sch⟩ beats ⟨s⟩+⟨ch⟩, ⟨tsch⟩ beats ⟨t⟩+⟨sch⟩, etc.
-    // JS `Object.keys(...).sort((a, b) => b.length - a.length)` is a STABLE sort over the manifest's own key
-    // order; LINQ's OrderByDescending is stable too. (Every remaining key here is exactly two characters and
-    // they are all distinct, so at any one scan position at most one of them can match anyway.)
+    // Longest-first, so ⟨sch⟩ beats ⟨s⟩+⟨ch⟩ and ⟨tsch⟩ beats ⟨t⟩+⟨sch⟩. JS's Array.prototype.sort is stable
+    // and OrderByDescending is too; every remaining key is exactly two distinct characters, so at any one scan
+    // position at most one of them can match and their relative order is immaterial.
     private static readonly string[] ORDER = DIGRAPHS.Keys.OrderByDescending(k => k.Length).ToArray();
 
-    /** IPA vowel heads (for r-vocalization + the ch front/back test). */
     private static IReadOnlySet<string> VOWEL_PH => Ipa.IPA_VOWEL;
 
-    /** A FRONT vowel head triggers the ⟨ch⟩→[ç] realization; anything else (a back vowel) → [x]. */
+    /** A front vowel head triggers ⟨ch⟩→[ç]; anything else (a back vowel) → [x]. */
     private static readonly HashSet<string> FRONT_VOWEL = new(Js.CodePoints("eiyɛœøɐ"));
 
-    /** One scan token: the IPA phones for a grapheme + a flag marking a single ⟨r⟩ (may vocalize to
-     *  [ɐ̯]/[ɐ] in a coda) and a single ⟨ch⟩ (front/back realization, resolved in code). */
+    /** One scan token: a grapheme's phones plus the two flags whose realization is resolved in code. */
     private sealed class Tok
     {
         public string Ph = "";
@@ -43,9 +37,8 @@ public static class BavarianPhonemizer
         public bool ChVar;
     }
 
-    // The base characters of a phone, dropping combining diacritics (U+0300–036F incl. the ◌̯ offglide + the
-    // ◌̥ lenis under-ring + the ◌͡ tie) and the length mark ◌ː — so a diphthong (iɐ̯) / long vowel (aː) is
-    // still recognised as vowel-{initial,final} and a lenis [b̥] as its base [b].
+    /** A phone's base characters, dropping U+0300–036F and the length mark ◌ː, so a diphthong or long vowel
+     *  is still recognised as vowel-{initial,final} and a lenis [b̥] as its base [b]. */
     private static List<string> CoreChars(string ph) =>
         Js.CodePoints(ph.Normalize(NormalizationForm.FormD))
             .Where(c =>
@@ -73,9 +66,7 @@ public static class BavarianPhonemizer
         return a.Count > 0 && FRONT_VOWEL.Contains(a[^1]);
     }
 
-    /** Scan a lowercased Bavarian word into phone tokens (longest-match digraphs, then single graphemes).
-     *  ⟨ch⟩ is kept as a marked token so its front/back realization can be resolved against the PRECEDING
-     *  vowel in code. */
+    /** Scan a lowercased word into phone tokens: longest-match digraphs, then single graphemes. */
     private static List<Tok> Scan(string word)
     {
         var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
@@ -86,7 +77,7 @@ public static class BavarianPhonemizer
             var matched = false;
             foreach (var key in ORDER)
             {
-                // JS `w.startsWith(key, i)` — a UTF-16 code-unit comparison, which ordinal is.
+                // JS `w.startsWith(key, i)` is a UTF-16 code-unit comparison, which ordinal is.
                 if (i + key.Length > w.Length || string.CompareOrdinal(w, i, key, 0, key.Length) != 0) continue;
                 toks.Add(new Tok { Ph = DIGRAPHS[key], ChVar = key == "ch" });
                 i += key.Length;
@@ -104,8 +95,7 @@ public static class BavarianPhonemizer
         return toks;
     }
 
-    /** The DORSAL FRICATIVE split: ⟨ch⟩ → [ç] after a front vowel or word-initially/after a consonant, but
-     *  [x] after a back vowel (the German ich/ach allophony; ⟨sch⟩ is [ʃ], handled by the digraph). */
+    /** The dorsal fricative split — the German ich/ach allophony. */
     private static void ResolveCh(List<Tok> toks)
     {
         for (var i = 0; i < toks.Count; i++)
@@ -116,8 +106,7 @@ public static class BavarianPhonemizer
         }
     }
 
-    /** R-VOCALIZATION: a syllable-CODA ⟨r⟩ vocalizes to the offglide [ɐ̯]; the very common ending ⟨-er⟩ → the
-     *  syllabic vowel [ɐ]. A prevocalic onset ⟨r⟩ (rot, Boarisch) stays the trill/tap [r]. */
+    /** A coda ⟨r⟩ vocalizes to [ɐ̯] and the ending ⟨-er⟩ to [ɐ]; a prevocalic onset ⟨r⟩ stays [r]. */
     private static void VocalizeR(List<Tok> toks)
     {
         var last = toks.Count - 1;
@@ -128,16 +117,14 @@ public static class BavarianPhonemizer
             if (!t.RVar) continue;
             var nextVowel = i < last && StartsWithVowel(toks[i + 1].Ph);
             if (nextVowel) continue; // prevocalic onset → keep [r]
-            // An UNSTRESSED ⟨-er⟩ collapses to a single [ɐ] — word-final (Dreier→…ɐ) or when the ⟨e⟩ is not
-            // the first (stressed) vowel (Glumpert→…bɐt). A STRESSED ⟨er⟩ keeps vowel + offglide (Bersch).
+            // An unstressed ⟨-er⟩ collapses to one [ɐ]; a stressed one keeps vowel + offglide (Bersch).
             var prevIsE = i > 0 && toks[i - 1].Ph == "e";
             if (prevIsE && (i == last || i - 1 != firstVowelIdx)) { toks[i - 1].Ph = "ɐ"; t.Ph = ""; }
             else t.Ph = "ɐ̯";
         }
     }
 
-    /** Word-final ⟨gn⟩ [ɡ̥n] COALESCES to the velar nasal [ŋ] (Regn→reːŋ, Fliagn→fliɐ̯ŋ) — a regular Bavarian
-     *  coda process (the preceding vowel lengthens, folded). */
+    /** Word-final ⟨gn⟩ coalesces to [ŋ] (Regn→reŋ). */
     private static void CoalesceGN(List<Tok> toks)
     {
         var last = toks.Count - 1;
@@ -148,23 +135,20 @@ public static class BavarianPhonemizer
         }
     }
 
-    /** Initial ⟨st sp⟩ → [ʃt ʃp] (the German rule). The stop itself is the Bavarian LENIS [d̥]/[b̥] (⟨t p⟩
-     *  lenite, see the manifest), so the cluster surfaces as [ʃd̥]/[ʃb̥]. */
+    /** Initial ⟨st sp⟩ → [ʃd̥ ʃb̥] — the German rule over Bavarian's already-lenited stops. */
     private static void InitialSCluster(List<Tok> toks)
     {
         if (toks.Count >= 2 && toks[0].Ph == "s" && (toks[1].Ph == "d̥" || toks[1].Ph == "b̥")) toks[0].Ph = "ʃ";
     }
 
-    /** POST-VOCALIC ⟨h⟩ is SILENT — a German vowel-length/hiatus marker, not the fricative [h] (Fruah→fruɐ̯,
-     *  Gfüh→ɡ̥fy). ⟨h⟩ keeps its [h] only as a syllable ONSET. */
+    /** Post-vocalic ⟨h⟩ is a silent length marker; it keeps its [h] only as a syllable onset. */
     private static void SilentH(List<Tok> toks)
     {
         for (var i = 1; i < toks.Count; i++)
             if (toks[i].Ph == "h" && EndsWithVowel(toks[i - 1].Ph)) toks[i].Ph = "";
     }
 
-    /** ⟨k⟩ LENITES to [ɡ̥] everywhere EXCEPT a word-initial prevocalic onset — i.e. non-initially and
-     *  word-initially before a LIQUID (Klass→ɡ̥lɑs). Only word-initial prevocalic ⟨k⟩ keeps fortis [k]. */
+    /** ⟨k⟩ lenites to [ɡ̥] everywhere but a word-initial PREVOCALIC onset (Klass→ɡ̥lɑs, Kaas→kaːs). */
     private static void LenitK(List<Tok> toks)
     {
         for (var i = 0; i < toks.Count; i++)
@@ -176,23 +160,21 @@ public static class BavarianPhonemizer
         }
     }
 
-    /** Word-final unstressed ⟨-a⟩ [ɑ] REDUCES to [ɐ] (Bana→b̥ɑːnɐ) — the Bavarian counterpart of the German
-     *  final-schwa. Only a single final ⟨a⟩ after a consonant. */
+    /** A single word-final ⟨-a⟩ after a consonant reduces to [ɐ] — the Bavarian final-schwa. */
     private static void ReduceFinalA(List<Tok> toks)
     {
         var last = toks.Count - 1;
         if (last > 0 && toks[last].Ph == "ɑ" && !EndsWithVowel(toks[last - 1].Ph)) toks[last].Ph = "ɐ";
     }
 
-    /** ⟨n⟩ → [ŋ] before a velar [k]/[ɡ̥] (⟨ng⟩ is already [ŋ]; this catches ⟨nk⟩ Bånk→b̥ɔŋɡ̥). */
+    /** ⟨n⟩ → [ŋ] before a velar — this catches ⟨nk⟩ (Bånk→b̥ɔŋɡ̥); ⟨ng⟩ is already [ŋ]. */
     private static void VelarNasal(List<Tok> toks)
     {
         for (var i = 0; i < toks.Count - 1; i++)
             if (toks[i].Ph == "n" && (toks[i + 1].Ph == "k" || toks[i + 1].Ph == "ɡ̥")) toks[i].Ph = "ŋ";
     }
 
-    /** Geminate collapse: a doubled consonant letter surfaces as a single phone (Bappn→bɑbm) — Bavarian has
-     *  no phonemic coda length contrast in this orthography. */
+    /** A doubled consonant letter surfaces as a single phone — no coda length contrast in this orthography. */
     private static void Degeminate(List<Tok> toks)
     {
         for (var i = toks.Count - 1; i > 0; i--)
@@ -202,16 +184,16 @@ public static class BavarianPhonemizer
         }
     }
 
-    /** Phonemize a single Bavarian word to canonical IPA (segmental; fine vowel qualities + length folded). */
+    /** Phonemize a single Bavarian word to canonical IPA. */
     public static string PhonemizeWord(string word)
     {
         var toks = Scan(word);
         ResolveCh(toks);
         SilentH(toks);
         InitialSCluster(toks);
-        // Degeminate + CoalesceGN run BEFORE LenitK: gemination must collapse while both stops are still
-        // identical, and ⟨gn⟩-coalescence must see only a GENUINE ⟨g⟩→[ɡ̥] — not a ⟨k⟩ that LenitK turned
-        // into [ɡ̥] (else Dackn→d̥ɑŋ).
+        // ⚠ Degeminate and CoalesceGN run BEFORE LenitK: gemination must collapse while both stops are still
+        // identical, and ⟨gn⟩-coalescence must see only a GENUINE ⟨g⟩→[ɡ̥] and not a ⟨k⟩ LenitK turned into
+        // one (else Dackn→d̥ɑŋ).
         Degeminate(toks);
         CoalesceGN(toks);
         LenitK(toks);
@@ -221,16 +203,11 @@ public static class BavarianPhonemizer
         return string.Concat(toks.Select(t => t.Ph));
     }
 
-    // A word (Bavarian Latin letters incl. å ä ö ü é ß + accents) / number / punctuation token. ⟨ß⟩ is part
-    // of the de-facto Bavarian-Wikipedia orthography this engine reads (dreißg), so it must not split a word.
+    // A word / number / punctuation token.
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"({HostWord.HostWordRun(new[] { "Latin" }, "'-")})|(\\d+)|([.!?…,;:])", "gu");
 
-    /**
-     * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides
-     * where the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these
-     * letters. A token this class REJECTS carries a letter the language does not use — i.e. a foreign name.
-     */
+    /** This language's OWN inventory — a different question from TOKEN's script boundary above. */
     private const string NATIVE_CLASS = "[a-zåäöüéèáàâßA-ZÅÄÖÜÉÈÁÀÂ'-]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "u");
 
@@ -238,17 +215,13 @@ public static class BavarianPhonemizer
     {
         public string Text(string input)
         {
-            // NORMALIZATION FIRST — see Normalize.cs. It rewrites `&nbsp;`, the grouping dot, the ordinal
-            // `N.`, the abbreviations, the clock, the degree signs and the symbol tier into words, so
-            // everything reaching TOKEN below is already something this g2p can speak.
+            // Normalization first, so everything reaching TOKEN is something this g2p can speak.
             return Clauses.AssembleClauses(Normalize.NormalizeBavarian(input), TOKEN, (m, sink) =>
             {
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0)
                     sink.Emit(PhonemizeWord(Nat(m.Groups[1].Value)));
-                // Numbers: the units-first compositor (Numbers.cs) → each word back through the same g2p.
-                // ⚠ THE TOKEN STRING IS PASSED AS `raw` (#1080) — the digit-at-a-time fallback cannot
-                // recover the digits from the double it exists to bypass. A bare `\d+` arm, so the token IS
-                // the digit string.
+                // ⚠ THE TOKEN STRING IS PASSED AS `raw` (#1080): the digit-at-a-time fallback cannot recover
+                // the digits from the double it exists to bypass. A bare `\d+` arm, so the token IS the digits.
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
                     var tok = m.Groups[2].Value;
@@ -263,7 +236,7 @@ public static class BavarianPhonemizer
         }
     }
 
-    /** Build the Bavarian phonemizer (grapheme g2p + falling diphthongs + German-style rules). */
+    /** Build the Bavarian phonemizer. */
     public static ILanguage CreateBavarian() => new Engine();
 
     internal static void RegisterSelf() => Registry.Register("bavarian", () => CreateBavarian());

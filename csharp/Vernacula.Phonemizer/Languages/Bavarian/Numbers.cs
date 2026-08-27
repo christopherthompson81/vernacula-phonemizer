@@ -1,10 +1,9 @@
 /**
- * Bavarian cardinal number → words. Units-FIRST and fused like German, but with the connector reduced from
- * ⟨und⟩ to a bare linking ⟨-a-⟩: oanazwånzg = 21, fimfazwånzg = 25. The composition is the shared
- * units-first Germanic algorithm — see Languages/Danish/UnitsFirstNumbers.cs (housed in the Danish
- * directory only because that is where the TS put it; it is language-neutral). Covers 0 … <10¹².
+ * Bavarian cardinal number → words. Units-first and fused like German, but with the connector reduced from
+ * ⟨und⟩ to a bare linking ⟨-a-⟩ (oanazwånzg = 21). The composition is the shared, language-neutral
+ * units-first algorithm in Languages/Danish/UnitsFirstNumbers.cs.
  * Ported from src/languages/bavarian/numbers.ts — see that file for the provenance of every numeral and
- * for the spelling-variant choices (Bavarian has no codified orthography, so each had 2–4 attested forms).
+ * the spelling-variant choices behind it.
  */
 using Vernacula.Phonemizer.Languages.Danish;
 
@@ -25,11 +24,8 @@ public static class Numbers
         Thousand = N.Thousand,
         Million = N.Million,
         Billion = N.Billion,
-        // Bavarian has no codified orthography, so the multi-word spelling ("drei hundad fimfafiazg") is
-        // chosen over the German-style closed one. Two reasons: nothing standardises the closed form here,
-        // and the closed form walks straight into a compound-boundary artifact — Bavarian's post-vocalic
-        // ⟨h⟩ is a silent length marker, so *dreihundad scans as [d̥rɑɛ̯undɑd̥] with the ⟨h⟩ of hundad
-        // swallowed. Only 21–99 stays fused (oanazwånzg), where the source's spellings are unambiguous.
+        // The multi-word spelling, not the German-style closed one: a closed *dreihundad would lose the ⟨h⟩
+        // of hundad to the silent post-vocalic-h rule. Only 21–99 stays fused.
         MulJoin = " ",
         HundredRemJoin = " ",
         GroupJoin = " ",

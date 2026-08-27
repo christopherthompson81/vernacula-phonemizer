@@ -13,11 +13,8 @@ using Vernacula.Phonemizer.Languages.Danish;
 
 namespace Vernacula.Phonemizer.Languages.Bavarian;
 
-/**
- * The `numbers` block. ⚠ The magnitude shapes are `DanishOneWord`/`DanishOnePlural` — the units-first
- * composer's own types, which live beside the composer in Languages/Danish because that is where the TS
- * houses `unitsFirstNumbers.ts`. Nothing about either type is Danish; see UnitsFirstNumbers.cs.
- */
+/** The `numbers` block. The magnitude shapes are the shared units-first composer's own types, which live
+ *  beside it in Languages/Danish; nothing about either is Danish. */
 public sealed class BarNumbersDef
 {
     public string[] Ones { get; init; } = [];
@@ -36,7 +33,6 @@ public sealed class BarDef
     public string Name { get; init; } = "";
     public IReadOnlyList<string> Script { get; init; } = [];
 
-    /** Multi-letter graphemes, scanned longest-first by the engine. */
     public IReadOnlyDictionary<string, string> Digraphs { get; init; } = new Dictionary<string, string>();
 
     public IReadOnlyDictionary<string, string> Graphemes { get; init; } = new Dictionary<string, string>();
