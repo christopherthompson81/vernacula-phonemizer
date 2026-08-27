@@ -148,6 +148,7 @@ public static class Bootstrap
             Rangpuri.RangpuriPhonemizer.RegisterSelf();
             Bavarian.BavarianPhonemizer.RegisterSelf();
             Bambara.BambaraPhonemizer.RegisterSelf();
+            AncientGreek.AncientGreekPhonemizer.RegisterSelf();
         }
     }
 }
