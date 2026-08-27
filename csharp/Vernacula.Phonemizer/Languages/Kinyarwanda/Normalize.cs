@@ -80,6 +80,12 @@ public static class Normalize
             ["Rwf"] = new[] { "amafaranga y'u Rwanda" },
         },
         CurrencyPrefix = true,
+        // ⚠ Magnitudes IS NOW DECLARED, AND SO IS THE ORDER. The old refusal was true and was also the
+        // defect: the tier's magAlt matched NUMBER-then-magnitude, Kinyarwanda writes the other order
+        // (30 corpus instances, no counter-example), so the hop never fired and the currency arm claimed
+        // the number alone — putting the noun BETWEEN the magnitude and its count. See the TS docstring.
+        Magnitudes = ["miliyari", "miliyoni", "igihumbi", "ibihumbi"],
+        MagnitudePrecedes = true,
         // Derived from the ONE table above, so the tier and step 3 can never name different words for one key.
         Units = UNIT.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)new[] { kv.Value }, StringComparer.Ordinal),
         UnitPrefix = true,

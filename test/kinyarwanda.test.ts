@@ -145,7 +145,20 @@ describe("Kinyarwanda text normalization", () => {
         expect(N("$1,000")).toBe("amadolari 1000");
         expect(N("US $ 115,600,000")).toBe("US amadolari 115600000");
         expect(N("Rwf120,250")).toBe("amafaranga y'u Rwanda 120250");
-        expect(N("miliyari 290 Frw")).toBe("miliyari amafaranga y'u Rwanda 290");
+        // ⚠ THIS LINE USED TO PIN THE DEFECT AS THE ANSWER. `miliyari amafaranga y'u Rwanda 290` is the
+        // currency noun landing BETWEEN the magnitude and the count it belongs to — "billion francs
+        // two-hundred-ninety" — and the assertion froze it. The tier's magnitude arms all assumed
+        // NUMBER-then-magnitude, and Kinyarwanda writes the other order (30 corpus instances, no
+        // counter-example), so the hop could never fire and the currency arm claimed the number alone.
+        // `magnitudePrecedes` is the opt-in that gives the tier the other order.
+        expect(N("miliyari 290 Frw")).toBe("amafaranga y'u Rwanda miliyari 290");
+        expect(N("miliyoni 158$")).toBe("amadolari miliyoni 158");   // the sign AFTER the number
+        expect(N("miliyoni $800")).toBe("amadolari miliyoni 800");   // …and BETWEEN magnitude and number
+        expect(N("miliyoni 2 Frw")).toBe("amafaranga y'u Rwanda miliyoni 2"); // the one golden row this moves
+        // ⚠ NEITHER HALF ALONE IS TOUCHED: a magnitude with no currency keeps its written order, and a
+        // currency with no magnitude keeps the reading it already had.
+        expect(N("miliyari 290")).toBe("miliyari 290");
+        expect(N("290 Frw")).toBe("amafaranga y'u Rwanda 290");
         // ⚠ THE EURO IS DELIBERATELY UNREAD — one hit in one article, and that article is the one the corpus
         // already carries. A dropped sign is missing; a wrong currency word is confidently wrong.
         expect(N("ni iyero (€)")).toBe("ni iyero (€)");

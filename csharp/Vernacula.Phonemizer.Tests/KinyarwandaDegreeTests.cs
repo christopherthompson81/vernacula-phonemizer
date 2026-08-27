@@ -45,4 +45,20 @@ public class KinyarwandaDegreeTests
         Assert.DoesNotContain("\u0000", RwNormalize.NormalizeKinyarwanda(input), StringComparison.Ordinal);
         Assert.DoesNotContain("\u0000", Phonemizer.Phonemize(input, "rw"), StringComparison.Ordinal);
     }
+
+    [Theory]
+    // ⚠ THE MAGNITUDE MUST STAY AGAINST ITS NUMBER. Every magnitude arm in the shared tier assumed
+    // NUMBER-then-magnitude; Kinyarwanda writes the other order (30 corpus instances, no counter-example),
+    // so the hop never fired and the currency arm claimed the number-and-sign pair alone — putting the noun
+    // BETWEEN the magnitude and the count it belongs to. `MagnitudePrecedes` is the opt-in that fixes it,
+    // opt-in because 131 languages declare Magnitudes and all of them mean the postposed order.
+    [InlineData("miliyari 290 Frw", "amafaranga y'u Rwanda miliyari 290")] // was `miliyari amafaranga … 290`
+    [InlineData("miliyoni 158$", "amadolari miliyoni 158")]                 // the sign AFTER the number
+    [InlineData("miliyoni $800", "amadolari miliyoni 800")]                 // …and BETWEEN the two
+    [InlineData("miliyoni 2 Frw", "amafaranga y'u Rwanda miliyoni 2")]      // the one golden row this moves
+    // ⚠ NEITHER HALF ALONE IS TOUCHED.
+    [InlineData("miliyari 290", "miliyari 290")]
+    [InlineData("290 Frw", "amafaranga y'u Rwanda 290")]
+    public void AMagnitudeStaysAgainstItsNumber(string input, string want) =>
+        Assert.Equal(want, RwNormalize.NormalizeKinyarwanda(input));
 }
