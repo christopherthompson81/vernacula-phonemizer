@@ -281,7 +281,7 @@ export function normalizeLingala(input: string): string {
     for (const [sym, word] of UNITS) {
         const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
         s = s.replace(
-            new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d])`, "gu"),
+            new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),
             (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${word} ${a} kino ${b}` : whole),
         );
         // ⚠ AND THE SINGLE-OPERAND ARM MUST REFUSE A SPAN'S SECOND HALF, which is the defect above stated as
@@ -290,7 +290,7 @@ export function normalizeLingala(input: string): string {
         // lookbehind, which would also have blocked a genuine negative measurement.
         s = s.replace(
             new RegExp(
-                `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d])`,
+                `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`,
                 "gu",
             ),
             `${word} $1`,

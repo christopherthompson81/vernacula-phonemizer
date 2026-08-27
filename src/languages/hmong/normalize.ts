@@ -318,7 +318,7 @@ export function normalizeHmong(input: string): string {
     //    ⚠ ORDER-INSENSITIVE WITH RESPECT TO STEP 11 by construction, and checked: if the decimal rule ran
     //    first, `9,85 lab km²` would already be `9 8 5 lab km²` and the lookbehind still matches on the `5`.
     //    It is placed here rather than at the end only so it sits with the other vocabulary rules.
-    s = s.replace(/(?<=\d\s?|\d\s(?:lab|vam|roob)\s)km²?(?![\p{L}\p{M}\d])/gu, "kis lus mev");
+    s = s.replace(/(?<=\d\s?|\d\s(?:lab|vam|roob)\s)km²?(?![\p{L}\p{M}\d²³/])/gu, "kis lus mev");
     //    …and a bare `km` with no figure, which the lookbehind above cannot reach. Shared guards
     //    (core/normalizeSymbols.ts): multi-letter vowel-free keys ONLY, which is what keeps this away from
     //    the RPA tone-letter hazard — no one-letter key can ever qualify.

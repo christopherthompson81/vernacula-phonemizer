@@ -302,13 +302,15 @@ describe("Maltese text normalization — the rules' branches", () => {
         expect(normalizeMaltese("5 cm/s")).toBe("5 ċentimetri fis-sekonda");
         expect(normalizeMaltese("20 km / h")).toBe("20 kilometru fis-siegħa"); // spaced slash, either side
         // ⚠ THE DENOMINATOR TABLE IS CLOSED — `h` and `s` are the only two this corpus writes (×0 of anything
-        // else) — AND THE RESIDUAL IS PINNED HERE RATHER THAN HIDDEN. An unlisted denominator falls through
-        // to the SHARED TIER, which matches the head unit and strands what follows the slash. That is the same
-        // half-a-reading this rule just closed for `m/s`, and it cannot be closed from this file: the fix is a
-        // guard on the tier's unit match in `core/normalizeSymbols.ts`, which is reported, not edited here.
-        // If that guard ever lands, these two assertions fail and should become `5 km/j` / `5 m/kg` unchanged.
-        expect(normalizeMaltese("5 km/j")).toBe("5 kilometri/j");
-        expect(normalizeMaltese("5 m/kg")).toBe("5 metri/kg");
+        // else) — AND THE RESIDUAL IS NOW CLOSED RATHER THAN PINNED. This block used to assert
+        // `5 kilometri/j` and `5 metri/kg`, the shared tier matching the head unit and stranding what follows
+        // the slash, with the note that "the fix is a guard on the tier's unit match in
+        // `core/normalizeSymbols.ts`, which is reported, not edited here … if that guard ever lands, these two
+        // assertions fail and should become `5 km/j` / `5 m/kg` unchanged." THE GUARD LANDED (#1093), and this
+        // is that instruction carried out: an unlisted denominator now declines whole, so the abbreviation
+        // stays visible to the leak gates instead of half a reading reaching the phoneme stream.
+        expect(normalizeMaltese("5 km/j")).toBe("5 km/j");
+        expect(normalizeMaltese("5 m/kg")).toBe("5 m/kg");
     });
 
     // ── THE `-il` LINKER BETWEEN A NUMBER AND ITS UNIT. The tier's number→unit pattern allows only
