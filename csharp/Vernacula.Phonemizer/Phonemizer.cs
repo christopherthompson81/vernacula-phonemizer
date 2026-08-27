@@ -65,6 +65,14 @@ public static class Phonemizer
      *  directly and so never reach the wrapper `GetPhonemizer` installs. */
     public static async Task<string> PhonemizeAsync(string text, string lang)
     {
+        // ⚠ THE BOOTSTRAP RUNS FIRST, BEFORE THE PREWARM GATE READS `PrewarmForeignEnglish`. C#-only ordering:
+        // the TS reaches `prewarmForeignEnglish` through a static import, while here the slot is filled by
+        // `Bootstrap.EnsureRegistered`. Testing it before the bootstrap made it null on the FIRST
+        // `PhonemizeAsync` of a process, so that one call skipped the prewarm and its embedded Latin words got
+        // the n-gram reading instead of the BiLSTM one — `ኣብ Wolaytta ዝብል` read *wˈʌleᶦt̬ˌeᶦ* against Node's
+        // *woᶷlˈeᶦt̬ə*. Invisible to the gate: the memo is process-wide, so row 2 onward warmed it and no
+        // golden's FIRST row carries a Latin OOV word.
+        Registry.EnsureLanguages();
         // FOREIGN RUNS FIRST. An embedded Latin run is read by a synchronous reader (core/foreign.ts), so its OOV
         // words have to be tagged BEFORE the host renders — there is no await available once the host's tokenizer is
         // running. Skipped for English itself, whose entry tags its own OOV tail. Never throws the host's render:
@@ -80,9 +88,8 @@ public static class Phonemizer
                 // A missing model or a tagger failure must not take the utterance down.
             }
         }
-        // ⚠ The language bootstrap installs the neural table; without this the FIRST async call in a
-        // process finds it empty and silently serves the sync reading (see Registry.EnsureLanguages).
-        Registry.EnsureLanguages();
+        // ⚠ The language bootstrap (called above) installs the neural table too; without it the FIRST async
+        // call in a process finds it empty and silently serves the sync reading.
         var neural = GetNeuralPhonemizer(lang);
         return neural is not null ? await neural(text).ConfigureAwait(false) : Phonemize(text, lang);
     }

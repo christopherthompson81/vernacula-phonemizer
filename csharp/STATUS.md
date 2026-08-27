@@ -16,11 +16,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 115 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 119 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67 — those languages have no wikipedia and no FLEURS, so their goldens are what exists).
-  **22,696 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **23,496 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mai mg mi ml mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th tl tr ug uk umb ur uz vi wuu yo yue za zu.
+  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mag mai mg mi ml mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th ti tl tr ug uk umb ur uz vi wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -877,6 +877,117 @@ Fixed in TypeScript first, with tests, goldens regenerated, then ported:
   degree word, U+2212 between digits, and `007` → *ħawt* (`Number` drops leading zeros — the DECIMAL path
   is safe, because the fractional part never goes through `Number`).
 
+### From the xh port (2026-08-27) — the reported `\p{Lu}` guard was DEAD, and the `/i` was doing a second job
+
+**xh (Xhosa / isiXhosa, ~8M L1)** — 4 files, ~470 C# lines over a 592-line TS module. It is the Nguni
+sibling of `zu` and REUSES the ported `Zulu/G2p.cs` scan, `NguniLoans.cs` and `ZuluManifest` shape with its
+own table (⟨rh⟩→[x], the Xhosa number words); the shared core needed no change. Gate **118 → 119 languages,
+23,296 → 23,496 rows, 0 differ, 0 BLOCKED**; C# tests 1,360 → 1,385. **200/200 on the first parity run**,
+before and after the fourth fix. Full log in `docs/xh_port_investigation.md`.
+
+`createXhosa` takes TWO English hooks and both are live: `readAsEnglish` for an embedded Latin run, and a
+PREDICATE asking whether the English LEXICON knows a word — the third of the three signals that decide
+click-vs-foreign. ⚠ Those are different questions, and the C# already had the right one: `EnglishKnownWord`
+is `KnownWord` (CMUdict + heteronyms, `string?`) and the registry threads `w => … is not null`, matching the
+TS's `knownWord(w) !== undefined`. The engine's `KnownWord`/`CanPronounce` distinction would have widened
+signal 2 onto every OOV word.
+
+Fixed in TypeScript first with tests, goldens regenerated — **0 of 200 golden rows moved for all four**:
+
+- ⚠ **THE `\p{Lu}`-UNDER-`/i` GUARD REPORTED BY THE sl PORT IS REAL, AND THE REPAIR IS NOT "DROP THE FLAG".**
+  `(u?)Mnu\.?(?=[  ]\p{Lu})` under `giu`: the lookahead requires only a letter, so the honorific's
+  "expanded ONLY before a capitalised name" guard requires nothing. Unlike Slovenian — where the identical
+  shape made `ga.` fire on the accusative pronoun and the regnal rule match ordinary prose — **xh has no
+  attested false positive**: all 10 corpus instances are honorific + name, and `mnu`/`umnu` is not a Xhosa
+  word. ⚠ **But the `i` was doing a SECOND job the report could not see**: the corpus writes the concord
+  three ways — `Mnu.`, `uMnu` and sentence-initial `UMnu.` — and `(u?)` is case-sensitive material under
+  that flag, so dropping it alone would stop `UMnu. Costello` expanding, a regression in the properly-cased
+  column. Fixed the sl way, by spelling the concord's own case into the class (`([uU]?)`). Measured cost,
+  stated: 5 occurrences over 4 corpus lines change and **every one is FLEURS' all-lowercase column 4** — a
+  transcript artifact. **The fleet sweep for this shape is now down to one site**, `slovenian`'s `CLOCK_GOV`,
+  which that port filed deliberately.
+- ⚠ **THE a.m./p.m. MARKER HAD NO RIGHT EDGE, AND `ama-` IS A NOUN-CLASS PREFIX.** Step 8's optional group
+  `[  ]*([AaPp])\.?[Mm]\.?` ended wherever it liked, so ` Am` of the FOLLOWING WORD matched it:
+  `9:30 amaXhosa` read *ithoba namashumi amathathu **kusasa**aXhosa* — the word destroyed and a spurious
+  "in the morning" emitted; `14:00 Amabini` → *…kusasaabini*. `ama-` heads some of the commonest nouns in
+  the language (*amaqondo, amashumi, amakhulu, amapolisa*), so the neighbour is ordinary text rather than an
+  adversarial construction. ×0 attested, and trap 56 exactly: the pseudo-word it leaves is invisible to every
+  leak and DROP class. Fixed with `(?![\p{L}\p{M}])`; `9:30 AM` and `10:30p.m.` still read.
+- ⚠ **xh COMES OFF `ACCEPTED_LOSSY`, ON ITS OWN FILE'S EVIDENCE.** It was in the list's "NO FALLBACK AT ALL"
+  class ("a per-language behaviour ADDITION … wants the language's own evidence"), and the compositor has no
+  ceiling — it recurses through `izigidi` multipliers — so above 2⁵³ it composed right past the rounding and
+  `…001` and `…009` both read *izigidi izigidi izigidi iwaka*. The evidence was in `normalize.ts`: `spell()`
+  already reads a decimal's fractional part DIGIT AT A TIME through the same compositor, for the reason its
+  docstring gives. The fallback emits the string that path already emits (`KU[d]`, and the manifest's `zero`
+  for 0 — ⚠ `KU[0]` is the EMPTY STRING), so nothing is invented. ⚠ The call site passes the
+  SEPARATOR-STRIPPED token by construction: step 4 de-groups the TEXT, so the `\d+` match is already clean.
+  Its sibling `zu` has no such precedent in its own file and stays listed.
+- ⚠ **A DECLINED CLOCK STRANDED ITS COLON, AND `:` IS DECLARED CLAUSE PUNCTUATION.** Step 8 refuses a sports
+  time on purpose (`4: 41.30` is a pace, not 4:41), and the colon then reached the tokenizer as a PAUSE in
+  the middle of a quantity. **8 occurrences across three constructions** — the two paces and the UK degree
+  class `2:2 isidanga seklasi` — and not one surviving digit-colon-digit in the corpus is punctuation. The
+  playbook's "safe branch strands a separator the tokenizer reads as clause punctuation", live. A colon with
+  a digit on BOTH sides is dropped after the two clock rules have had their claim; nothing is invented,
+  because the operands already read as bare numbers. `Umzekelo: 5 abantu` and `ngo-2007: kwathi` keep theirs.
+
+**Widenings.** Corpus-wide differential over **3,047 unique lines** (3,018 FLEURS `xh_za` col 3+4, 134 mined,
+95 golden texts) × sync AND async = **6,094 comparisons, 0 differ, 0 throws**, plus **184 off-golden probes**
+(one per arm plus the adversarial neighbour each arm must decline, the g2p corners and the loan lexicon) ×
+both modes = 368 more, 0 differ. ⚠ **sync and async are byte-identical for every corpus line, and that is
+correct here**: xh has no tagger of its own and its embedded English hits the already-filed "a Latin-script
+host never prewarms" path, so the foreign reader serves the n-gram reading in both modes. ⚠ The corpus
+carries **ZERO** instances of the relational signs `= ≈ < >`, `÷`, U+2212, a caret exponent, the euro sign, a
+16+-digit run, a comma decimal with a 3+ digit tail, a decimal range carrying a unit, or spaced personal
+initials — all of those rest on the probe list alone. Literal-inventory audit: no control characters either
+side, and every one-sided code point is explained (the C# writes U+00A0/202F/2009 literally where the TS
+escapes them; the IPA letters appear only in TS comment text). Reachability: every `UNIT_WORD`, `PER`,
+`CUR_WORD`, `COMPASS`, `MAGNITUDES`, `WORD_ACRONYMS` and `NGUNI_LETTER_NAME` row fires.
+
+**Found and NOT fixed — filed, with the count that decided it:**
+
+- **The compass arm is case-SENSITIVE while the Celsius arm one line above is `/i`**, so `35°w` matches
+  neither: the degree sign is DROPPED and the `w` reaches the g2p as a bare [w] — the exact class step 12
+  exists to prevent. ×1, and it is FLEURS' lowercased column 4; a longitude is written `35°W`. Widening the
+  arm on the strength of a transcript artifact would also admit a bare one-letter `n`/`s`/`e`/`w` after a
+  degree sign, which Xhosa's vowel-initial locatives make less far-fetched than it looks. Recorded instead.
+- **`0230UTC` reads *amakhulu amabini amashumi amathathu*** — "two hundred and thirty". Two defects in one
+  token, both deliberate elsewhere: `Number("0230")` drops the leading zero (the fleet's filed shape), and
+  the all-caps rule's `\d` lookbehind leaves a digit-adjacent acronym alone, so `UTC` reaches the g2p raw as
+  [ˈuːtʼkǀ] — a DENTAL CLICK, which is the reading the letter-name table was written to remove. ×1 line, and
+  a compact `HHMM`+timezone rule invented on n=1 is #955. The same guard costs `I-JAS 39C Gripen`, where the
+  `C` reads [kǀ]; ×1.
+- **`20 °Cx` loses the sign and reads BOTH letters as clicks** (*…kǀkǁ*) — the su/lo/sl `°Cx` shape, and
+  worse here because c and x are clicks. All three degree arms decline on the trailing letter. ×0 attested;
+  the repair is the same fleet decision, not an xh edit.
+- **`1 / 5` and `1/2` lose the slash** — xh has no fraction rule at all (the fleet-wide su finding). ×0.
+- **The euro sign is declared NOWHERE** — not in the tier, not in `CUR_WORD` — so `€14.7` reads *ishumi nane
+  isixhenxe* with the sign silently gone, while `$`/`£`/`¥` all read. ×0 attested, and the four declared
+  words are corpus tokens; a fifth would be invention.
+- **A decimal range carrying a unit loses its joiner**: `1.5-2.5 km` → *kunye kuhlanu kubini kuhlanu
+  iikhilomitha*. Step 6's unit arm claims `2.5 km` before step 7 can see a decimal on the right of the dash —
+  and step 7's own comment lists its couplings to steps 10 and 15 but not to 6. ×0 attested.
+- **SPACED personal initials keep both dots**: `N. W. Wayne` → *n . w . wayne*, two sentence breaks and two
+  bare letters. Step 2's dotted-run rule needs the capitals CONTIGUOUS and its glued-initial arm needs the
+  next capital adhering, so a conventionally spaced pair matches neither. ×0 attested (the corpus's initials
+  are all glued, `uN.Wayne`).
+- **`802.11m` reads as a measurement** — *amakhulu asibhozo nambini kunye kunye iimitha* — because step 6's
+  unit arm has no version guard. The ckb `NOT_VERSION` shape. ×0.
+- **A version number keeps one dot as a pause**: `1.2.3` → *kunye kubini . kuthathu*; the decimal rule
+  consumes the first dot and the scan resumes past it. ×0.
+- **`100 200` fuses into one number** (*amawaka ikhulu amakhulu amabini*), the space-degrouping rule's known
+  ambiguity — the blocks are exactly three digits, which is the only discriminator available. ×0 in this
+  shape.
+- ⚠ **`csharp/regex-corpus.jsonl` IS STALE — a shared artifact, not an xh one.** Re-extracting it produces a
+  579-line diff in languages this port never touched: `zulu/normalize.ts` records `(\d{1,3})(,\d{3})+` where
+  the source now reads `([1-9]\d{0,2})(,\d{3})+`, and it still carries the DOUBLED PLAIN SPACE classes that
+  #925/#935 widened. Re-running `csharp/tools/regex-diff` from the checked-in copy therefore exercises
+  patterns that no longer exist and misses the ones that do. Run over the FRESH extraction it is clean
+  (**117,045 results identical, 0 differ, 0 refused**, xh's patterns included). Reverted rather than
+  regenerated here — a 579-line refresh of a shared artifact does not belong in a language bring-up.
+- **`COALESCE` has three dead keys** (`e`, `o`, `u`): `connective()` looks the table up on the first letter
+  of a numeral head, and every head the compositor can produce begins with `i` or `a`. Inert, not wrong —
+  the file says the three-way set is written for completeness — and recorded so nobody re-derives it.
+
 ## ⚠ Things that will bite
 
 - **`\d` is the single worst hazard**: 1,914 uses, JS ASCII-only vs .NET all-Unicode-digits, and the
@@ -1058,11 +1169,14 @@ only, and the currency table is declared on the strength of the spelled nouns.
 
 **Found and NOT fixed — filed, with the count that decided it:**
 
-- ⚠ **THE SHAPE IS A FLEET CLASS, AND TWO SITES REMAIN.** Swept `tools/extract_regexes.mts`'s 2,289-pattern
-  corpus for `\p{Lu}`/`\p{Ll}` inside an `i`-flagged pattern: after the two sl fixes, exactly two are left.
-    · **`xhosa/normalize.ts:194`** — `(u?)Mnu\.?(?=[ \u00a0]\p{Lu})` under `giu`, the identical DEAD
-      positive guard: the honorific expands before a lowercase word there too. Reported rather than fixed,
-      per trap 55 — xh is a separate bring-up and a sibling is a hypothesis, not a source.
+- ⚠ **THE SHAPE IS A FLEET CLASS, AND ONE SITE REMAINS.** Swept `tools/extract_regexes.mts`'s pattern
+  corpus for `\p{Lu}`/`\p{Ll}` inside an `i`-flagged pattern: after the two sl fixes, two were left; the xh
+  port has since closed one, so the sweep now returns exactly ONE.
+    · ~~**`xhosa/normalize.ts:194`**~~ — `(u?)Mnu\.?(?=[ \u00a0]\p{Lu})` under `giu`, the identical DEAD
+      positive guard. Reported rather than fixed here, per trap 55; **verified and fixed by the xh port**,
+      which found the report right about the guard and wrong about the repair — the `i` was also carrying
+      the case-sensitive `(u?)` concord, so dropping the flag alone would have broken `UMnu.`. See the xh
+      section below.
     · **`slovenian/normalize.ts`'s own `CLOCK_GOV`** — `[\p{Ll}\p{M}]+` under `iu`, the "ONE intervening
       adverb" slot, which therefore also admits a Capitalised word, so `do Ljubljane 15.00` takes the
       genitive slot the preposition governs rather than the ungoverned nominative. Left as it is: the
@@ -1090,3 +1204,293 @@ only, and the currency table is declared on the strength of the spelled nouns.
 - **`53-50 km` is read as a SCORE** (*triinpetdeset proti petdeset*), because step 5a's discriminator is
   direction and a non-ascending two-digit pair is a score by construction. Documented design; recorded
   because a descending range is a real construction and the ht port filed the mirror case.
+
+### From the rkt port (2026-08-27) — 200/200 first run; full log in `docs/rkt_port_investigation.md`
+
+**rkt (Rangpuri / KRNB, ~15M — the largest unported language)** — ONE 27-line C# file plus a `Bootstrap`
+line. Gate **118 → 119 languages, 23,296 → 23,496 rows, 0 differ, 0 BLOCKED**; C# tests 1,358 → 1,381.
+`rangpuri.ts` is 40 lines and composes `makeNativeHindi` with **no overrides, no lexicon, no script
+override** — the thinnest composition in the family — so every KRNB fact is in `rangpuri.jsonc` and **the
+shared Hindi core needed no change**. ⚠ Per trap 55 the ported siblings (bho, hne, mai, awa, mr, ne, gu)
+were used only to confirm the COMPOSITION SHAPE; no rule, value or reasoning was borrowed from any of them.
+
+⚠ **rkt HAS NO CORPUS AT ALL, AND ITS GOLDEN IS VARIANT-DERIVED.** No FLEURS split, no
+`tools/corpus/mined/rkt.jsonc`, no `attest/`, no rkt.wikipedia, nothing under `/mnt/data`.
+`csharp/goldens/rkt.tsv` is 200 rows of **HINDI FLEURS text** re-rendered by `tools/gen_variant_golden.mts`,
+so 200/200 pins C#↔TS parity and says nothing about Rangpuri. Its one source is
+`tools/referee-eval/referees/rkt.toulmin-rp.tsv` — 370 Deva→IPA pairs machine-extracted from a two-column
+PDF, which the eval config itself annotates as ~15% alignment noise. All the weight is on the widenings:
+**6,851 unique lines** (3,395 FLEURS `hi_in` cols 3+4, 1,427 Devanagari strings from six sibling mined
+artifacts, the 200 golden texts, the 370 referee headwords, 1,717 hand-built) × sync AND async =
+**13,702 comparisons, 13,700 identical, 0 throws, 2 BLOCKED** (one mined line carrying an embedded TIBETAN
+run — `bo` is unported, so TS reads `ལ་དྭགས` and C# drops it).
+
+⚠ **AND FOUR FLEET SHAPES ARE UNREACHABLE FROM ANY TEXT rkt CAN BE SHOWN**, measured not assumed: space-grouped
+thousands **0**, `0,NNN` **0**, caret exponents **0** (and `10^6` READS here, unlike pcm/ha/yo/sw/id), digit
+runs >15 **0**. They rest entirely on the hand-built lines. Avagraha is 214 in the corpora and **every one is
+mai/mag** (`कऽ`, `करलऽ`) — 0 in the golden, 0 in FLEURS, 0 in the referee, and rkt sets no `retainOnAvagraha`.
+
+**Reachability sweep** (sabotage each of 124 manifest leaves, re-render all 6,851 lines): **116 live, 8 dead,
+and every dead one is a DECLARATIVE STRING** — the five `signs.*.effect` fields (which the manifest's own
+anusvara note already says are not dispatched), `schwaDeletion.medialRule`, `numbers.grouping`, and
+`nasalVowelsAreShort` (inert because rkt declares no long vowels at all). **No lexical table is unreached.**
+⚠ `schwaDeletion.medialRule` and `numbers.grouping` are dead in **nine** Devanagari manifests and
+`ManifestMappingTests` cannot see either: it diffs the TOP-LEVEL key set, and both parents are claimed whole.
+
+**Fixed in TypeScript: NOTHING, and that is the honest outcome.** No defect was found in rkt's own 40 lines
+or its manifest that any available source could adjudicate. The manifest's strongest claim was tested against
+the referee and HOLDS: positional voiceless deaspiration is **24 of 25 word-initial keeping [ʰ], 0 of 9
+elsewhere**; voiced-aspirate retention 29/29; deaffrication 11/11. Folded backbone 236/370 (63.8%), symbol
+accuracy 86.8%, residual dominated by PDF extraction noise. ⚠ Path check: `phonemizeWord` (what the referee
+eval scores) and the shipped `text()` path are the SAME function here — rkt passes no lexicon, so
+`word === wordRules`. Not the `pa` shape.
+
+**Found and NOT fixed:**
+
+- ⚠ **THE 80 WORD HAS NO FINAL VOWEL AND IT IS IN THE GOLDEN.** `numbers.tens["80"]` is ⟨आइस⟩ → ***ˈais***,
+  in 2 of the 200 golden rows (`80 प्रतिशत`, `380 मीटर`). Every other ten is a transparent respelling of the
+  Bengali/KRNB form with ই written ⟨इ⟩ — बिस/বিশ, चाइलिस/চল্লিশ, षाइठ/ষাট, सत्तइर/সত্তর, नब्बइ/নব্বই — and
+  on that pattern 80 আশি is ⟨आशि⟩ *aʃi*, not ⟨आइस⟩ with the sibilant and vowel transposed and the wrong
+  sibilant letter. NOT FIXED: the referee has NO numerals, `rangpuri.ts` states "numbers deferred", and the
+  change would move golden rows on a hypothesis. Needs a KRNB numeral source — which the module header
+  already names as the missing thing.
+- **21–99 read as two words** (`21` → *ˈek bˈis*, `56` → *sˈɔj pˈɔsas*): `numbers.compound` is `{}`, so
+  `indicNumberWords` takes its documented unit-then-tens fallback. KRNB, like Bengali, has fused irregulars
+  for the whole band. Same blocker.
+- **छय (6) and सय (100) are HOMOPHONES here** — both *sɔj*, because छ→s lands on the phone सय already has,
+  so `356` reads *t̪ˈin sˈɔj sˈɔj pˈɔsas*. A genuine consequence of the sourced deaffrication, not an error
+  in it. Recorded because the reading looks like a bug and is not.
+- ⚠ **THE GEMINATE postRule GIVES ONE CONSTRUCTION TWO ANSWERS, DECIDED BY PLACE.** Its LETTER class carries
+  `ʰ?ʱ?` so घ्घ→*ɡʱː* and भ्भ→*bʱː*, but `t̪ d̪ ʈ ɖ d͡z` sit in the bare tail without it, so ध्ध, ढ्ढ and
+  झ्झ keep two full segments. ×0 attested — Devanagari writes द्ध, ड्ढ, ज्झ, and all three of THOSE geminate
+  correctly (`बुद्ध` → *bˈud̪ːʱ*). The LIVE half is the omission of **`ɾ`**: `ɽ` is in the class and `ɾ` is
+  not, र्र is the 9th most frequent geminate in the Devanagari corpora at **67 instances**, and the golden
+  itself carries the ungeminated pair (`दर्रा` → *d̪ˈɔɾɾa*). Whether a geminate tap should be `ɾː` has no rkt
+  referee; व्व, य्य, ह्ह, ञ्ञ are in the same bucket.
+- **A guard's safe branch strands a separator the tokenizer reads as CLAUSE PUNCTUATION.**
+  `makeNativeHindi`'s number token carries a nested lookbehind so a grouping comma may not follow a lone zero
+  — which correctly killed the su 1000× shape (`0,001` → *एक*). The residue is that the comma then falls to
+  the clause arm: `0,001` reads ***ʃˈunj , ˈek***, one number becoming two with a pause. ×0 attested
+  (Devanagari text writes the decimal point) and it reaches all **17** languages built from this maker, so it
+  is a family decision, not a port one.
+- **The leading-zero shape is LIVE but HARMLESS here, and reading the instances is what said so.** `007` →
+  *sˈat̪*. All ~45 leading-zero runs in the Devanagari corpora are clock or date fields (`06:30`, `07:30`,
+  `01-01-1923`, `08.11.1992`), one UTC offset and one ISBN — in every one, dropping the zero is the RIGHT
+  reading. The 100× shape needs `0` plus a fraction and no rkt-reachable text has one. ⚠ The same check
+  killed a second scare: five apparent comma-decimals (`9,86`, `82,40`, `1,18`…) are all clipped INDIAN LAKH
+  GROUPS (`1,72,96,455`) the tokenizer joins correctly.
+- **Checked and DECLINED as a defect**: `abugida.ts` emits a plain `h` for the visarga while all nine
+  Devanagari manifests map ह to `ɦ` (125 instances; `क्रमशः` → *kɾˈɔmʃɔh*). The visarga is classically
+  voiceless, so the split reads as deliberate. Recorded so the next reader does not re-open it.
+- **Shared shapes confirmed live, already filed elsewhere**: `1 000` → *ˈek ʃˈunj*; `2 − 2` → *d̪ˈui d̪ˈui*;
+  `25°Cx` → *… ɖˈiɡɾi ks*; `1500 ई.` → *… ˈi .* (the era arm handles only ई.पू./ई.स.पू.); `11:20:30` → two
+  stranded colons as pauses.
+- **Inherited Hindi words in KRNB sound**, which `rangpuri.ts` already flags and refuses to guess at: the
+  clock (`11:20` → *ˈeɡaɾo bˈɔd͡zkɔɾ bˈis mˈinɔʈ*), the ordinals (`1ला` → *pˈɔɦla*, Hindi पहला), प्रतिशत, the
+  unit words and the whole shared symbol tier. Confirmed reachable and confirmed unsourceable — the Toulmin
+  list contains none of them.
+### From the ti port (2026-08-27) — the SHARED Ge'ez core needed nothing, and the C# had a cold-memo hole
+
+**ti (Tigrinya, ~9M)** — 2 files, 279 C# lines over a 483-line TS module trio, on top of the shared Ge'ez
+core Amharic already uses (`manifest.ts` folds into the engine file, as am's did). Gate **118 → 119 languages, 23,296 → 23,496 rows, 0 differ, 0 BLOCKED**;
+C# tests 1,358 → 1,369; TS tests 5,552 → 5,553 (one new `describe`, 8 assertions).
+
+⚠ **THE SHARED CORE (`Core/Geez.cs`) WAS NOT TOUCHED, AND THAT IS THE FINDING, NOT AN OMISSION.** Tigrinya
+keeps the laryngeals ⟨ሀ ሐ ኀ⟩ / ⟨አ ዐ⟩ and the labiovelars that Amharic has merged, so the first question was
+which side of the seam each lives on. Every one of them is a per-CODEPOINT reading, and the core's only
+per-codepoint step is `map().get(ch)` over the language's own `fidel.tsv` — `ሐ` is ħa in
+`data/languages/tigrinya/fidel.tsv` and ha in Amharic's, and neither engine knows the difference. The two
+things the core DOES own are shared Ethiosemitic phonotactics (the epenthetic-ɨ deletion, keyed on
+`illegalCluster`) and the wordspace split, and neither is language-specific: `ʕ`/`ħ` are not in `NASAL` or
+`FRICATIVE`'s stop-vs-fricative split in a way that differs by language, and the labiovelars classify by
+their BASE code point (`kʼʷ` → `kʼ`) exactly as the core's own comment says. Measured rather than argued:
+2,155 off-golden probe lines including **every one of the 311 fidel rows in four positions** (bare, onset,
+medial, coda) plus 360 synthesised ɨ-cluster pairs, sync and async, 0 differ.
+
+Fixed in TypeScript first with a test, golden regenerated:
+
+- **THE COMMA IS A DECIMAL POINT IN ti, AND STEP 6'S OWN ARGUMENT SAYS SO IN REVERSE.** `normalize.ts`
+  Run 8 established that ti groups with the period as well as the comma, and measured all five `\d\.\d{3}`
+  instances to build the discriminator. The mirror question — is `\d,\d{1,2}` a decimal? — was never asked.
+  Of the **67 `\d,\d` instances in the artifact, 62 are three-digit thousands groups and FIVE are decimals**
+  (`2,5 ሜ.` ×2, `1,2 ሜ.`, `99,7%`, `A 2,2`), and every one emitted a CLAUSE PAUSE inside the number and read
+  its fraction as a whole number: `2,5 ሜ.` → *kɨltə , ħamuʃtə me .* — "two, five metres". A confidently wrong
+  quantity, not a drop. ⚠ **ZERO instances are a comma followed by four or more digits**, so "whatever step 6
+  declined" and "a one-or-two-digit fraction" name the same five strings; step 10 is written as the former
+  because that is the property that decides, and because the PERIOD arm has always behaved that way
+  (`2010.2011` already read as a decimal). `0,001` is the su finding one step on — step 6's leading-zero
+  guard is RIGHT to refuse it as a thousands group, and the comma it correctly declines to spend then read as
+  punctuation, so the guard's safe branch stranded the separator. **3 of 200 golden rows moved; 4 of 323
+  corpus lines; nothing else.** `1,741.980`, the one number in the artifact carrying both marks, is untouched
+  — step 6 spends its comma first, so only one mark ever survives to step 10.
+- **Hygiene, no output change: step 13 claimed the °-scale letter "stays dropped", and it is READ.** It is
+  outside TOKEN's alphabet, but a Latin run never reaches TOKEN — the script router splits it out and hands
+  it to the English reader, so `፭°C` reads *ħamuʃtə diɡɨɾi sˈiː*, "five degrees see". ×3 in the artifact. The
+  comment now states the measured behaviour; which reading is better is a fleet question about unreadable
+  Latin residue, and inventing ሴልሲየስ is the refusal Run 5 already made.
+
+Fixed in C# — **the port's second core-level C#-only defect, after ff's `LatinPhones`**:
+
+- ⚠ **`PhonemizeAsync` READ THE PREWARM SLOT BEFORE THE BOOTSTRAP FILLED IT, so the FIRST async call of every
+  process skipped the foreign-English prewarm.** `if (lang != "en" && MixedLatin(text) && PrewarmForeignEnglish
+  is not null)` ran ABOVE `Registry.EnsureLanguages()`, and that call is what installs
+  `PrewarmForeignEnglish` — so on call #1 the slot was null and the embedded Latin words got the n-gram
+  reading instead of the BiLSTM one. `ኣብ Wolaytta ዝብል` read *ʔab wˈʌleᶦt̬ˌeᶦ zɨbl* against Node's
+  *ʔab woᶷlˈeᶦt̬ə zɨbl*. C#-only: the TS reaches `prewarmForeignEnglish` through a static import.
+  ⚠ **INVISIBLE TO THE GATE, AND THE REASON IS THE SAME ONE THAT MADE IT SURVIVE 118 LANGUAGES**: the memo is
+  process-wide, so row 2 onward warms it, and no golden's FIRST row happens to carry a Latin OOV word. **0 of
+  23,496 rows moved when it was fixed** — it was found by a one-line differential against Node, on the first
+  line of ti's own corpus. It is the same family as af's "the bootstrap ran only on the sync path", in the
+  arm that fix did not cover. Pinned by `AsyncPrewarmsAnEmbeddedLatinRunFromACOLDMemo`.
+
+**Widenings.** No FLEURS transcript exists for ti, so the golden is MINED and the corpus-wide differential is
+only the 323 deduplicated lines of `tools/corpus/mined/ti.jsonc` — run in full, sync AND async, **0 differ, 0
+throws**. Off-golden probes: **2,155 hand-and-table-built lines**, sync and async, 0 differ, 0 empty readings
+among the reachable ones, 0 digits leaked into the IPA. Coverage of what the corpus does NOT exercise, stated
+rather than assumed: the corpus has **0 kg, 0 bare `m`, 0 `€`/`£`, 0 `%`-prefix, 0 `ትሪልዮን` beside a sign, 0
+Ge'ez numeral above ፻, 0 integer above 10⁵ and 0 Ethiopic-Extended code points** — all carried by the probes
+only. A separate numeric sweep read **every integer 0–1,200 plus the scale boundaries to 10¹³**: every reading
+is non-empty, vowel-bearing, digit-free and DISTINCT from its neighbour (the ckb vowel-less-zero class and the
+"distinct numbers" property, both clean). ti's `number()` passes the TOKEN TEXT to its over-cap fallback, so
+it is not on `ACCEPTED_LOSSY` and does not belong there.
+
+**Found and NOT fixed — filed, with the count that decided it:**
+
+- ⚠ **FOUR FIDEL ROWS NO INPUT CAN REACH, in ti AND in am.** `fidel.tsv` declares ⟨ⶓ ⶔ ⶕ ⶖ⟩ (U+2D93–2D96,
+  the ŋʷ labiovelars) in **both** tables, but `TOKEN`'s letter class is `[ሀ-ፚ]` = U+1200–U+135A and Ethiopic
+  Extended is a different block, so no character of it ever reaches `phonemizeWord` through `text()`. The zu
+  `kma` shape. ⚠ **AND THE TWO PATHS DISAGREE**: the exported `phonemizeWord` — which `test/tigrinya.test.ts`
+  calls — DOES read them, so the tested path and the shipped path are not the same path here. ×0 in the mined
+  artifact, ×0 in `attest/ti.jsonc`, ×0 in the golden, and the series is missing its ʷa member, so widening
+  the class would be inventing coverage. Reported rather than fixed, and NOT fixed in am (trap 55).
+- **`ሜ.` reads as the letter-run *me*** — ×2, both `2,5 ሜ.` / `1,2 ሜ.`, i.e. both number-adjacent. The symbol
+  tier declares `m: ["ሜተር"]` but keys it on the ASCII abbreviation, and step 4 deliberately leaves a
+  single-dot abbreviation's TRAILING dot because that shape "is indistinguishable from a word plus a sentence
+  period" — so the reading is *me* plus a spurious STOP. A fix needs that discriminator decided, and n=2.
+- **A leading zero is dropped from a bare integer**: `007` → *ʃəwʕatə* (seven), `0830` → *ʃəmontə miʔɨtn
+  səlasan* (eight hundred thirty). The sl `0830-ih` finding without the hyphen; ×0 attested, and both engines
+  agree.
+- **`መበል`-less `Nይ` above ten still emits the orphan syllable the step exists to remove**: `11ይ` →
+  *ʕasəɾtə ħadə jɨ*, `0ይ` → *zeɾo jɨ*. The out-of-table branch is documented as "left alone", but "left alone"
+  is the defect state, not a neutral one. ×0 attested (all 22 corpus instances are 1–10) and the fix needs an
+  ordinal series above ten that the manifest does not have.
+- **One SPACE-grouped figure, and ti has no space de-grouping**: `100,000 000 ኣቶማት` reads *miʔti ʃɨħ zeɾo* —
+  "one hundred thousand zero atoms" for 100 million. ×1, and it is a MIXED comma+space figure; a `(\d) (?=\d{3})`
+  rule would also merge an unspaced two-number list. The #935 fleet instrument is the right way to settle it.
+- **Already-filed fleet classes that ti also carries**, each ×0–1 attested: the caret exponent drops
+  (`10^6` → *ʕasəɾtə ʃɨdʃtə*), a fraction slash drops (`1000/2000` → *ʃɨħ kɨltə ʃɨħ*), and `°C`'s scale letter
+  is read as an English letter name (above).
+### From the mag port (2026-08-27) — 200/200 first run; full log in `docs/mag_port_investigation.md`
+
+**mag (Magahi, ~13M)** — ONE new C# file (27 lines, the `Bhojpuri.cs` shape), one `Bootstrap` line, one
+`ManifestMappingTests` fact; `Registry.cs` already carried `case "mag"`. Gate **118 → 119 languages, 23,296 →
+23,496 rows, 0 differ, 0 BLOCKED**; C# tests 1,359 → 1,394, vitest +4.
+⚠ **THE SHARED HINDI CORE NEEDED NO CHANGE** — mag is `makeNativeHindi(magahi.jsonc, …)` and reaches only
+`Hindi`, `LoadManifest`, `PhonologyLoader` and `Registry.ReadAsEnglish`, all ported for `hi`.
+
+⚠ **ITS GOLDEN IS THE MINED TIER OVER REAL MAGAHI, NOT A VARIANT RENDER** — and that was worth checking rather
+than assuming, because bho's *is* Hindi text. `mag` is not a target in `gen_variant_golden.mts`, has no FLEURS
+directory, and `gen_parity_goldens.mts` reports it as `0 FLEURS + 1 mined`. So 200/200 is corpus coverage of
+the language. ⚠ **The cost of having no FLEURS is that the corpus-wide differential is 302 LINES, not
+thousands** — the whole mined artifact plus the golden texts (the 200 golden rows are a subset and add none).
+Off-golden probes carry more weight here than in a FLEURS language, and the run that mattered proved it.
+
+Fixed in TypeScript first with tests, goldens regenerated, then ported:
+
+- ⚠ **MAGAHI'S ORDINAL SUFFIX IS मा, AND HINDI'S INHERITED TABLE WAS 100% UNREACHABLE.**
+  `makeHindiNormalizer` takes `own?.ordinalSuffixes ?? MANIFEST.ordinalSuffixes` and magahi.jsonc declared
+  none, so mag used Hindi's वाँ/वीं/वें — which `hindi/normalize.ts`'s own header defends as "pan-Hindi-belt"
+  and therefore safe for the family. Measured over mag's 302 lines: **15 `digit + मा`, ALL ordinals, and 0
+  of वाँ/वीं/वें and 0 of ला/रा/था/ठा.** The suffix therefore fell through to the tokenizer as its own word,
+  and मा is an ordinary Magahi word ("mother"), so the failure read as fluent nonsense rather than a gap:
+  `१७मा शताब्दी` → *sˈət̪ɾəɦ **mˈɑ** sət̪ˈɑbd̪ime*, `१०मा बेर` → *d̪ˈəs **mˈɑ** bˈeɾ*. Now
+  *sət̪ɾˈəɦmɑ sət̪ˈɑbd̪i* / *d̪ˈəsmɑ bˈeɾ*. **4 golden rows move.**
+- ⚠ **AND THE FIRST DRAFT OF THAT FIX WAS A REGRESSION NO GOLDEN AND NO CORPUS DIFFERENTIAL COULD SEE.**
+  `own?.x ?? MANIFEST.x` overrides **WHOLESALE**, so a block declaring only `{"मा": 0}` silently took Hindi's
+  rows AND the entire suppletive arm away: `१६वीं सदी` went *solˈəɦbĩ sˈəd̪i* → *sˈoləɦ **bˈĩ** sˈəd̪i* and
+  `१ला` went *pˈəɦlɑ* → *ˈek **lˈɑ*** — the same stray-syllable defect, traded from one spelling onto another.
+  Both shapes are ×0 in the mag corpus, so only the hand-built probe list (one line per ARM, including the
+  arms the corpus never uses) showed it. The shipped block repeats Hindi's rows verbatim and ADDS मा; both
+  suites now pin the Hindi arms and their guards (`२था` is the past copula, not 2's suffix) so it cannot be
+  narrowed again. **⚠ A PER-FILE FALLBACK IS AN OVERRIDE, NOT A MERGE — declaring one row of it deletes the
+  rest, and the deletion is invisible wherever the deleted rows are unattested.**
+- **Manifest hygiene, 0 output change — and it is the bho class recurring, which STATUS predicted.**
+  magahi.jsonc was derived from bhojpuri.jsonc and **carries copies of claims that were RETRACTED in bho and
+  left standing here**: the header still said *"Native canonical-IPA definition for **Hindi (hi)**"*, ⟨ऐ⟩ and
+  ⟨औ⟩ still claimed *"Bhojpuri KEEPS the diphthong"* against their own ɛ/ɔ values, ⟨श⟩/⟨ष⟩ and the
+  `finalRules` note attributed Bihari-core features to *"Bhojpuri"* in a Magahi file, `provenance` ended on
+  the orphaned fragment *"→ ."*, and the numbers note still called the 21–99 table *"a bounded remaining
+  authoring task"* when it is complete (72 rows, hindi.jsonc's byte for byte). ⚠ **Worst of the set: ⟨य⟩ was
+  annotated "palatal approximant" and ⟨व⟩ "labiodental approximant" — the descriptions of the values this
+  language exists to NOT have.** The header now separates the three mechanisms by which mag speaks Hindi words,
+  as chhattisgarhi.jsonc does, and magahi.ts names the hardcoded normalizer words it inherits and cannot see
+  (डिग्री, प्लस, ऋण, बराबर, गुणा, भाग, बटा/आधा, और, किमी→किलोमीटर, डॉ→डॉक्टर) beside the four it confirms.
+- **`nasalVowelsAreShort` IS INERT IN MAGAHI, and the inherited note argued for it from a Hindi referee.** Its
+  only effect is stripping a trailing ː, and no value in this manifest carries one — Magahi has no phonemic
+  length. **Sabotage-verified: flipping it moves 0 of 302 corpus lines.** Stated rather than deleted.
+
+**Found and NOT fixed:**
+
+- ⚠ **THE GLIDE HARDENING IS CITED WORD-INITIALLY AND APPLIED IN EVERY POSITION — the whole of what makes mag
+  a separate engine, and the implementation is 5× wider than its source.** magahi.ts, magahi.jsonc's
+  `provenance` and test/magahi.test.ts all state Vinod Kumar 2026 §6.2 as *word-initial* व→[b] / य→[d͡ʒ]; the
+  manifest implements it as a flat `consonants` map. Counted across the 302 lines: **व word-initial 481 vs
+  1,178 elsewhere; य 182 vs 1,586** — ~81% of the applications are outside the cited position, on ordinary
+  words (महाकाव्य → *məɦɑkˈɑbd͡ʒ*, पाण्डव → *pˈɑnɖəb*, भारतीय → *bʱˈɑɾt̪id͡ʒ*, कौरवके → *kɔɾˈəbke*). The
+  engine COULD express the narrow rule (map व→w / य→j, add `^w`→b / `^j`→d͡ʒ `postRules`, which run per word),
+  so this is a decision about the source and not a machinery limit. **NOT TAKEN because there is no instrument
+  to take it with**: mag has no referee (`tools/referee-eval/langs` carries awa/bho/hne, not mag) and no FLEURS
+  audio, and the change would move essentially every golden row on a coin flip. Both engines keep the current
+  reading; it is now PINNED by `GlideHardeningIsNotPositional` in both suites so nobody who reads only the
+  words "word-initial" can narrow it silently.
+- **Three of the seven shared Hindi abbreviations can essentially never fire, and the stranded dot becomes a
+  CLAUSE BREAK.** Step 3's context is `\.?(\s+)(?=[\p{L}])` — a LETTER must follow — but `सं` is "number",
+  `पृ` is "page" and `अध्या` is "chapter", whose complement is a NUMERAL: `सं. १०` → *sˈə̃ **.** d̪ˈəs*,
+  `पृ. २५` → *pɾˈi **.** pˈət͡ʃːis*. Both halves fail at once. ×0 attested in mag; it is hindi/normalize.ts's
+  table and reaches eleven languages, so reported rather than repaired here (trap 55).
+- **The abbreviation and unit tables are keyed on the ASCII dot and mag writes U+0970 ॰**, ×20 in corpus:
+  `डॉ॰ बाबासाहेब` → *ɖˈɔ …* against `डॉ. …` → *ɖˈɔkʈəɾ …* (×3, plus `प्रो॰`), and `कि॰मी॰` → *kˈi mˈi* against
+  `किमी` → *kˈilomiʈəɾ*. Two spellings of one abbreviation, one read and one not. Fleet-shaped (hi/mr/ne write
+  ॰ too).
+- **`किमी` is claimed only with an ADJACENT digit and no following letter — 8 of its 16 instances fail.**
+  `वर्ग किमी` ×6 (the number is two words away) and `२०० किमीसे` / `६५० किमीमे` ×2 — **Magahi glues its
+  postpositions, which is the feature the corpus is judged by**, so the trailing `(?![\p{L}\p{M}])` rejects
+  exactly the normal orthography. All eight read the pseudo-word *kˈimi*/*kˈimise*, which is what UNIT_WORD's
+  docstring says the table exists to prevent. The new ordinal rule has the identical exposure (`१०मासे` →
+  *d̪ˈəs mˈɑse*, ×0). Widening either guard is a fleet decision.
+- **km² reads two different wrong ways**: `५६,०१९ किमी²` drops the square entirely and `२,००,००० किमी२` reads
+  it as a following number (*… kˈilomiʈəɾ d̪ˈo*). ×1 each — the shared exponent tier is keyed on LATIN unit
+  keys, so a Devanagari unit never reaches it. The ig `km³` shape.
+- **`२२°उ॰` → *ɖˈiɡɾiu*** — the bare-degree replacement `"$1 डिग्री"` has no trailing space and the next letter
+  fuses onto the degree word. ⚠ **×1 ATTESTED, which is the first REAL corpus instance of a shape filed
+  constructed for su (`25°Cölner`), lo and sl (`20 °Cx`).**
+- **Twelve Vedic citations read as fractions.** `ऋ॰ १०/१३७/१-७` → *… sˈɛ̃n̪t̪is **bˈəʈɑ** ˈek sˈɑt̪*: step 8's
+  leading `(?<![\d.,])` lets the match start mid-citation. 12 of the corpus's 14 slash-with-digits are this and
+  the other 2 are seat pairs — **mag has ZERO true fractions**, so the rule is a net loss in this language. A
+  corpus call on a shared rule.
+- **`25/12सीट` → *pˈət͡ʃːis bˈəʈɑ **bɑɾˈəɦsiʈ*** — step 8's `(?![\d/])` admits a LETTER and the composed words
+  fuse onto it: one pseudo-token with the stress of neither. ×1. Trap #1 of the file's own step 2, one step on.
+- **`ऋ०` injects a spurious "zero"** — the abbreviation is written with DEVANAGARI DIGIT ZERO instead of ॰,
+  `foldNativeDigits` makes it `0`, and the tokenizer reads a number: *ɾˈi **sˈund͡ʒ***. ×1. Its twin `ऋ॰` is
+  dropped silently instead. A hazard of the shared fold.
+- **A ratio reads as pause-separated numbers.** `३:३:२:१ के अनुपात` → *t̪ˈin , t̪ˈin , d̪ˈo , ˈek …*: the clock
+  arm correctly declines and `clausePunctuation` then maps every `:` to a comma. ×1, and both of the corpus's
+  digit-colon-digit instances are this shape — declining is not neutral (the `lo`/`ckb` class).
+- **`0,001` strands its comma as CLAUSE PUNCTUATION** → *sˈund͡ʒ **,** ˈek*, the residue of the lone-`0`
+  grouping guard in `hindi.ts`'s tokenizer (the ig/uz shape). ×0 attested, and the comma is a GROUPING mark in
+  this orthography so `0,001` is not a well-formed Magahi decimal to begin with. `००७` → *sˈɑt̪* is the fleet
+  `Number("007")` shape; the DECIMAL path is safe because `number()` maps the fractional run digit by digit.
+- Shared shapes, ×0 here, filed elsewhere: `१०००/२०००` loses its slash, `१०^६` drops its caret, `(0) c°` loses
+  the scale letter.
+- Hygiene for the hi owner: `hindi/normalize.ts`'s header states *"HINDI TEXT WRITES NUMBERS WITH ASCII DIGITS
+  … so no digit transliteration is needed here"*. True of hi; **false of mag, where 135 of 158 digit runs are
+  Devanagari.** Nothing breaks — `registry.ts`'s `foldNativeDigits` runs first — but a reader of the shared file
+  would conclude the family is ASCII-only.
+
+**Widenings.** Corpus-wide differential over all **302 unique mag lines** (the whole mined artifact + the 200
+golden texts, which are a subset) plus **208 hand-built probe lines**, × sync AND async = **1,020 comparisons,
+0 differ, 0 throws**, 4 BLOCKED on `tibetan` from two lines carrying an embedded Tibetan run. 13 of the 510
+lines read differently sync vs async in BOTH engines — all embedded Latin reaching English's BiLSTM; mag has no
+neural tier of its own. ⚠ **Coverage of the probe-only arms, stated rather than assumed**: currency signs other
+than ₹, space-grouped thousands, caret exponents, U+2212, ± ÷ × < >, `℃`/`℉`, a true fraction, a `:00` clock, an
+above-2⁵³ digit run and every ASCII-dotted abbreviation are ×0 in the corpus and rest entirely on the probes.

@@ -11,11 +11,32 @@ const KU = N.ku,
     NA = N.na,
     AMA = N.ama;
 
-/** A non-negative integer → space-separated Xhosa cardinal words. */
-export function numberToWords(n: number): string {
+/**
+ * Read a digit STRING one digit at a time, in the standalone counting stems — the same reading
+ * `normalize.ts`'s `spell()` already gives a decimal's fractional part, and for the same reason: `34` read as
+ * a number is *amashumi amathathu nane*, a different quantity. ⚠ `KU[0]` is the empty string (there is no
+ * `ku-` form of zero), so the zero word is taken from the manifest directly.
+ */
+function readDigits(digits: string): string {
+    return [...digits].map((d) => (d === "0" ? N.zero : (KU[Number(d)] ?? d))).join(" ");
+}
+
+/**
+ * A non-negative integer → space-separated Xhosa cardinal words.
+ *
+ * ⚠ ABOVE 2⁵³ THE DOUBLE IS NO LONGER THE NUMBER, so the compositor is handed digits it does not have.
+ * It has no ceiling of its own — it recurses through `izigidi` multipliers forever — so it composed right
+ * past the rounding and `1000000000000000000001` and `…009` both read *izigidi izigidi izigidi iwaka*
+ * (#1059's "no fallback at all" class). `raw` is the TOKEN STRING the caller matched, which still has every
+ * digit; above the safe range the digits are read one at a time. ⚠ The caller must pass the
+ * SEPARATOR-STRIPPED string — for xh it is, by construction: step 4 of `normalize.ts` removes the grouping
+ * commas and spaces from the text, so the tokenizer's `\d+` match is already separator-free.
+ */
+export function numberToWords(n: number, raw?: string): string {
     if (n < 0 || !Number.isFinite(n)) return "";
     n = Math.floor(n);
     if (n === 0) return N.zero;
+    if (!Number.isSafeInteger(n)) return readDigits(raw ?? String(n));
     if (n >= 1000000) {
         const m = Math.floor(n / 1000000),
             rem = n % 1000000;

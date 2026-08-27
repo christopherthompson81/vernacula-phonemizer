@@ -20,6 +20,32 @@
  *
  * बजकर, Hindi's clock connective, is NOT attested for Magahi. It stands unconfirmed rather than being
  * replaced — an unsourced substitute is worse than an inherited word.
+ *
+ * ⚠ AND THE FOUR ARE A SMALL PART OF WHAT IS INHERITED. The clock, sign, unit and abbreviation words are
+ * hardcoded in ../hindi/normalize.ts, not in any manifest, so no amount of reading magahi.jsonc finds
+ * them: डिग्री, प्लस, ऋण, बराबर, गुणा, भाग, धन ऋण, और, बटा/आधा/चौथाई/तिहाई, किमी→किलोमीटर, डॉ→डॉक्टर.
+ * All Hindi's, all unconfirmed for Magahi, all live.
+ */
+
+/**
+ * THE ORDINAL SUFFIX IS THE ONE PLACE THE INHERITANCE WAS MEASURABLY WRONG, and magahi.jsonc now declares
+ * its own. Magahi writes the ordinal `१७मा`; Hindi's inherited वाँ/वीं/वें table claimed none of the 15
+ * corpus instances, so the suffix was tokenized apart and spoken as the stray word मा. See the
+ * `ordinalSuffixes` block in magahi.jsonc for the counts and for why only the regular arm is declared.
+ */
+
+/**
+ * ⚠ FILED, NOT FIXED — THE GLIDE HARDENING IS CITED WORD-INITIALLY AND APPLIED EVERYWHERE. The header
+ * above, `magahi.jsonc`'s `provenance` and test/magahi.test.ts all state the rule as word-initial; the
+ * manifest implements it as a flat `consonants` mapping, because this engine has no positional consonant
+ * machinery. Over the 302-line mag corpus that is 481 word-initial व against 1178 elsewhere and 182
+ * word-initial य against 1586 elsewhere — ~81% of the applications are outside the cited position, and
+ * they are not marginal words (महाकाव्य → *məɦɑkˈɑbd͡ʒ*, पाण्डव → *pˈɑnɖəb*, भारतीय → *bʱˈɑɾt̪id͡ʒ*).
+ * The engine COULD express the cited rule — map व→w / य→j and add `^w`→b, `^j`→d͡ʒ post-rules, which run
+ * per word — so this is a decision about the source, not a limitation. It is not taken here because there
+ * is no instrument to take it with: mag has no referee (tools/referee-eval/langs carries awa/bho/hne and
+ * no mag) and no FLEURS audio, and the change would move essentially every golden row. Both engines keep
+ * the current behaviour and the finding is recorded; see the ⚠ in provenance.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

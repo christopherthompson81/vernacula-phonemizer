@@ -191,7 +191,14 @@ export function normalizeXhosa(input: string): string {
     //    claimed inside anything else. `Jr.` has no Xhosa reading to give it, so only its DOT is removed, and
     //    only when a lowercase word follows — i.e. when the sentence visibly continues. `St.` is deliberately
     //    untouched: it is an English place name (St James Gate).
-    s = s.replace(/(?<![\p{L}\p{M}])(u?)Mnu\.?(?=[ \u00a0]\p{Lu})/giu, "$1Mnumzana");  // space, NBSP
+    //    ⚠ THE CASE IS SPELLED INTO THE CLASS, NOT LEFT TO AN `i` FLAG. `\p{Lu}` under `/i` matches a
+    //    LOWERCASE letter, so a `giu` pattern's "followed by a capitalised name" guard requires nothing at
+    //    all — the fleet-wide shape #1079 found in Slovenian (there it read `Vzel ga. je` as *Vzel gospa je*).
+    //    ⚠ AND THE FLAG WAS DOING A SECOND JOB: the corpus writes the concord three ways — `Mnu.`, `uMnu`
+    //    and sentence-initial `UMnu.` — so simply dropping `i` would stop the third expanding. Both letters
+    //    of the concord are therefore written out. Cost, counted: 5 corpus lines change and all five are
+    //    FLEURS' all-lowercase column 4 (`umnu reid`), which is a transcript artifact, not Xhosa text.
+    s = s.replace(/(?<![\p{L}\p{M}])([uU]?)Mnu\.?(?=[ \u00a0]\p{Lu})/gu, "$1Mnumzana");  // space, NBSP
     s = s.replace(/(?<![\p{L}\p{M}])Jr\.(?=[ \u00a0]\p{Ll})/gu, "Jr");  // space, NBSP
     // `njl.` / `njll.` is *njalonjalo* ("et cetera") — corpus: `izinto zokuthutha, njll.`, previously
     // the cluster [ɲd͡ʒ̤l] plus a leaked break. Dot optional: FLEURS strips it.
@@ -252,7 +259,12 @@ export function normalizeXhosa(input: string): string {
     //    it — a third field.
     //    The a.m./p.m. marker is consumed in the SAME match, because after words-ification nothing downstream
     //    can associate it with the time, and its own dots were two more sentence breaks.
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![:.\d])(?:[ \u00a0]*([AaPp])\.?[Mm]\.?)?/gu,  // space, NBSP
+    //    ⚠ THE MARKER NEEDS A RIGHT EDGE, and without one it ate the next word. `[ \u00a0]*([AaPp])\.?[Mm]\.?`
+    //    ends wherever it likes, and `ama-` is one of the commonest Xhosa noun-class prefixes, so
+    //    `9:30 amaXhosa` matched ` Am` and read *…namashumi amathathu kusasa*+`aXhosa` — a word destroyed and
+    //    a spurious "in the morning" emitted. ×0 attested; the neighbour is ordinary Xhosa, and the pseudo-word
+    //    it leaves is invisible to every leak and DROP class.
+    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![:.\d])(?:[ \u00a0]*([AaPp])\.?[Mm]\.?(?![\p{L}\p{M}]))?/gu,  // space, NBSP
         (whole, h: string, m: string, ap: string | undefined) => {
             const hv = Number(h), mv = Number(m);
             if (hv > 23 || mv > 59) return whole;
@@ -268,6 +280,15 @@ export function normalizeXhosa(input: string): string {
             const hv = Number(h);
             return hv > 23 ? whole : `${clockWords(hv, Number(m))} ${tz}`;
         });
+
+    // 9b) A COLON LEFT BETWEEN TWO DIGITS IS NOT A CLAUSE BREAK. `:` is declared clause punctuation in the
+    //     manifest, so every numeric colon the two clock rules DECLINE reaches the tokenizer as a PAUSE —
+    //     which is a spurious phrase boundary in the middle of a quantity. Attested 8 times: the sports paces
+    //     step 8 refuses on purpose (`le-4: 41.30`, `2: 11.60`, `eyi-1: 09.02`) and the UK degree class
+    //     `2:2 isidanga seklasi`, i.e. every surviving instance in the corpus is a numeric relation and none
+    //     is punctuation. Nothing is invented — the operands were already read as bare numbers; only the
+    //     false pause goes. AFTER both clock rules, which have first claim on a colon.
+    s = s.replace(/(\d)[ \u00a0]?:[ \u00a0]?(?=\d)/gu, "$1 ");  // space, NBSP
 
     // 10) RANGES → `ukuya ku` ("going to"). ⚠ ASCENDING ONLY: a non-ascending `N-N` is a score (`5-3`,
     //     `26 - 00`) or a season (`1995-96`), which read as a bare juxtaposition and must keep it.

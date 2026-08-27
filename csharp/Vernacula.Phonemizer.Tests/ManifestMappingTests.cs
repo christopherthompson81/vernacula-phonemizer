@@ -115,6 +115,13 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance", "convention");
 
     [Fact]
+    public void TigrinyaManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/tigrinya", "tigrinya.jsonc",
+            typeof(Languages.Tigrinya.TigrinyaPhonemizer).GetField("DEF",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.GetValue(null)!,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
     public void QuechuaManifestIsFullyMapped() =>
         AssertFullyMapped("languages/quechua", "quechua.jsonc", Languages.Quechua.Manifest.MANIFEST);
 
@@ -181,6 +188,16 @@ public class ManifestMappingTests
     [Fact]
     public void ChhattisgarhiManifestIsFullyMapped() =>
         AssertFullyMapped("languages/chhattisgarhi", "chhattisgarhi.jsonc", Languages.Chhattisgarhi.ChhattisgarhiPhonemizer.DEF,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
+    public void RangpuriManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/rangpuri", "rangpuri.jsonc", Languages.Rangpuri.RangpuriPhonemizer.DEF,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
+    public void MagahiManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/magahi", "magahi.jsonc", Languages.Magahi.MagahiPhonemizer.DEF,
             "language", "name", "script", "provenance", "convention");
 
     [Fact]
@@ -384,6 +401,11 @@ public class ManifestMappingTests
     [Fact]
     public void ZuluManifestIsFullyMapped() =>
         AssertFullyMapped("languages/zulu", "zulu.jsonc", Languages.Zulu.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
+    public void XhosaManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/xhosa", "xhosa.jsonc", Languages.Xhosa.Manifest.MANIFEST,
             "language", "name", "script", "provenance", "convention");
 
     [Fact]

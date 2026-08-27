@@ -121,6 +121,27 @@ describe("Tigrinya text normalization", () => {
         expect(phonemize("1.24", "ti")).toBe("ħadə nətʼbi kɨltə ʔaɾbaʕtə");
     });
 
+    test("⚠ …AND IT POINTS WITH THE COMMA TOO — the other half of the same argument", () => {
+        // Of the 67 `\d,\d` instances in the artifact, 62 are three-digit thousands groups (step 6) and
+        // FIVE are decimals. Every one of the five used to emit a CLAUSE PAUSE inside the number and read
+        // the fraction as a whole number: a confidently wrong quantity, not a drop.
+        expect(phonemize("2,5 ሜ.", "ti")).toBe("kɨltə nətʼbi ħamuʃtə me ."); // was *kɨltə , ħamuʃtə*
+        expect(phonemize("99,7%", "ti")).toBe("təsʕan tɨʃʕatən nətʼbi ʃəwʕatə miʔtawit");
+        expect(phonemize("ኣስታት 2,5 ሚልዮን", "ti")).toBe("ʔastat kɨltə nətʼbi ħamuʃtə miljon");
+        // ⚠ THE TWO MARKS READ IDENTICALLY, which is the property the split is for: a leading zero can
+        // never be a thousands group, so step 6 declines `0,001` and step 10 must claim it.
+        expect(phonemize("0,001 ግራም", "ti")).toBe(phonemize("0.001 ግራም", "ti"));
+        expect(phonemize("0,001 ግራም", "ti")).toBe("zeɾo nətʼbi zeɾo zeɾo ħadə ɡɨɾam");
+        // ⚠ AND THE THOUSANDS GROUP MUST NOT MOVE. Three digits is still a group, both marks, including
+        // the one number in the artifact that carries both — its comma is spent by step 6 and only the
+        // period survives to become the point.
+        expect(phonemize("1,600", "ti")).toBe("ʃɨħn ʃɨdʃtə miʔɨtn");
+        expect(phonemize("1,741.980", "ti"))
+            .toBe("ʃɨħn ʃəwʕatə miʔɨtn ʔaɾbʕan ħadən nətʼbi tɨʃʕatə ʃəmontə zeɾo");
+        // A SPACED pair is a list and cannot match — the fraction has to be digit-adjacent.
+        expect(phonemize("ኣብ 2010, 2011", "ti")).toBe("ʔab kɨltə ʃɨħn ʕasəɾtən , kɨltə ʃɨħn ʕasəɾtə ħadən");
+    });
+
     test("percent, currency and the decimal point", () => {
         // ሚእታዊት: this corpus ×2, ti.wikipedia ×2, and Gaim (arXiv:2601.03403) Table 1 — the paper this
         // manifest already cites for its cardinals. POSTPOSED. The fraction is read one digit at a time.

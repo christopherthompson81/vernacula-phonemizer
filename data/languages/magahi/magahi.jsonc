@@ -1,15 +1,33 @@
-// Native canonical-IPA definition for Hindi (hi) — re-derived from the Devanagari orthography and
-// standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
-// This file IS the language data: the native G2P engine (src/languages/hindi/hindi.ts) reads it
-// directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
-// only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
+// Native canonical-IPA definition for MAGAHI (mag) — Indo-Aryan (Bihari, Magadhan), Devanagari, read by
+// the shared Hindi engine (src/languages/hindi/hindi.ts `makeNativeHindi`) and by its C# port.
+// ⚠ THIS HEADER SAID "for Hindi (hi)". It was the Hindi template, and the first line survived the
+// derivation unchanged — the same class of orphaned claim chhattisgarhi.jsonc records for its own header
+// and bhojpuri.jsonc for six of its notes. Several of THOSE six were copied into this file too and are
+// corrected below (see ऐ, औ, व, य, श, ष and the `finalRules` note); the copies were retracted in
+// bhojpuri.jsonc and left standing here, which is exactly what makes a copied comment a liability.
+// A shallow abugida, so pronunciation is almost entirely rule-derivable; the only genuinely hard part is
+// schwa deletion (a documented algorithm, not a lexicon).
+//
+// ⚠ EVERY WORD THIS LANGUAGE SPEAKS THAT IS NOT IN THIS FILE IS HINDI'S, by three DIFFERENT mechanisms —
+// the same three chhattisgarhi.jsonc separates, and only one of them can be overridden from here:
+//   · `ordinalSuffixes` and `irregularOrdinals` are a REAL PER-FILE FALLBACK (`own?.x ?? MANIFEST.x`,
+//     src/languages/hindi/normalize.ts). ⚠ mag NOW DECLARES `ordinalSuffixes` — see that block for the
+//     measurement that forced it; `irregularOrdinals` is still Hindi's and still unreached.
+//   · THE SYMBOL TIER IS NOT. `makeNativeHindi` uses `overrides.symbols ?? SYMBOLS`, and SYMBOLS is built
+//     ONCE at module scope from hindi.jsonc. A `symbolTier` block added here would deserialize, satisfy
+//     ManifestMappingTests, and be SILENTLY IGNORED.
+//   · THE CLOCK, SIGN AND UNIT WORDS ARE IN NEITHER MANIFEST. बजकर/बजे/मिनट, डिग्री, प्लस, ऋण, बराबर,
+//     गुणा, भाग, बटा/आधा/चौथाई/तिहाई, और, and the Devanagari unit and abbreviation tables (किमी →
+//     किलोमीटर, डॉ → डॉक्टर …) are HARDCODED in src/languages/hindi/normalize.ts, so grepping any
+//     manifest for them finds nothing. src/languages/magahi/magahi.ts names the four that are CONFIRMED
+//     for Magahi; the rest are inherited and unconfirmed.
 //
 // Format: plain JSONC. Verbose, self-describing keys. Every phoneme value is CANONICAL IPA.
 {
     "language": "mag",
     "name": "Magahi",
     "script": ["Devanagari"],
-    "provenance": "Magahi (mag) — Indo-Aryan, Devanagari. Bespoke: the Bhojpuri engine + phonology (shared Bihari features: no vowel length, single sibilant श/ष→s, ण/ञ→n) plus the DOCUMENTED Magahi-specific GLIDE HARDENING from the comparative phonology (Vinod Kumar 2026): word-initial व→[b] (वंश→bans) and य→[d͡ʒ] (यन्त्र→jantar), where Bhojpuri preserves the glides. Single comparative-source delta on a grammar-anchored base → .",
+    "provenance": "Magahi (mag) — Indo-Aryan, Devanagari. Bespoke: the Bhojpuri engine + phonology (shared Bihari features: no vowel length, single sibilant श/ष→s, ण/ञ→n) plus the DOCUMENTED Magahi-specific GLIDE HARDENING from the comparative phonology (Vinod Kumar 2026): word-initial व→[b] (वंश→bans) and य→[d͡ʒ] (यन्त्र→jantar), where Bhojpuri preserves the glides. Single comparative-source delta on a grammar-anchored base. ⚠ SCOPE OF THE DELTA, MEASURED AND NOT AS CITED: the source states the hardening WORD-INITIALLY, and `consonants` below applies it UNCONDITIONALLY — there is no positional consonant machinery in this engine. Over the 302-line mag corpus that is 481 word-initial व against 1178 elsewhere and 182 word-initial य against 1586 elsewhere, so ~81% of the rule's applications are outside the position the citation covers (महाकाव्य → *məɦɑkˈɑbd͡ʒ*, पाण्डव → *pˈɑnɖəb*). FILED, NOT FIXED: mag has no referee (tools/referee-eval/langs has awa/bho/hne and no mag) and no FLEURS audio, so there is no instrument here that can decide between the cited scope and the shipped one. ⚠ The trailing '→ .' this sentence used to end on was an orphaned fragment.",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
@@ -54,12 +72,12 @@
         "ब": { "ipa": "b", "note": "labial stop, voiced" },
         "भ": { "ipa": "bʱ", "note": "labial stop, voiced breathy" },
         "म": { "ipa": "m", "note": "labial nasal" },
-        "य": { "ipa": "d͡ʒ", "note": "palatal approximant" },
+        "य": { "ipa": "d͡ʒ", "note": "⚠ THE MAGAHI GLIDE HARDENING, not a glide — the note here read \"palatal approximant\" (bhojpuri.jsonc's, where the value IS j) while the value is the affricate d͡ʒ, describing the one letter this language exists to differ on as though it were unchanged. यन्त्र→d͡ʒənt̪ɾ. ⚠ Applied in EVERY position; see `provenance` for the measured scope gap against the word-initial citation." },
         "र": { "ipa": "ɾ", "note": "alveolar tap" },
         "ल": { "ipa": "l", "note": "alveolar lateral" },
-        "व": { "ipa": "b", "note": "labiodental approximant" },
-        "श": { "ipa": "s", "note": "Bhojpuri merges श → [s] (NO /ʃ/) — शहर→sahar (vs Hindi ʃ)" },
-        "ष": { "ipa": "s", "note": "Bhojpuri ष → [s] (no /ʃ/ or /ʂ/)" },
+        "व": { "ipa": "b", "note": "⚠ THE MAGAHI GLIDE HARDENING, not a glide — the note read \"labiodental approximant\" (hindi.jsonc's ʋ description, two derivations back) while the value is the stop b. वंश→bə̃s. ⚠ Applied in EVERY position; see `provenance`." },
+        "श": { "ipa": "s", "note": "the shared Bihari merge श → [s] (NO /ʃ/) — शहर→səɦəɾ (vs Hindi ʃ). The note used to attribute this to \"Bhojpuri\" in a Magahi file; it is a feature of the Bihari core BOTH languages have, not an import." },
+        "ष": { "ipa": "s", "note": "ष → [s] (no /ʃ/ or /ʂ/) — the same Bihari merge as श above; likewise not \"Bhojpuri's\"." },
         "स": { "ipa": "s", "note": "alveolar sibilant" },
         "ह": { "ipa": "ɦ", "note": "voiced glottal fricative (Hindi ह = ɦ)" },
         "ळ": {
@@ -93,9 +111,9 @@
             "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi)",
         },
         "ए": { "ipa": "e", "note": "long close-mid front" },
-        "ऐ": { "ipa": "ɛ", "note": "Bhojpuri KEEPS the diphthong [ai] (बैल→bail) — Hindi monophthongised to ɛː" },
+        "ऐ": { "ipa": "ɛ", "note": "⚠ MONOPHTHONG [ɛ], NOT the diphthong [ai] — बैल→bɛl. This note used to claim \"KEEPS the diphthong [ai] (बैल→bail)\", copied from bhojpuri.jsonc, where the identical claim was RETRACTED as wrong. It contradicted the value beside it. Do not 'fix' the value to match the retracted note." },
         "ओ": { "ipa": "o", "note": "long close-mid back" },
-        "औ": { "ipa": "ɔ", "note": "Bhojpuri KEEPS the diphthong [au] (कौन→kaun) — Hindi monophthongised to ɔː" },
+        "औ": { "ipa": "ɔ", "note": "⚠ MONOPHTHONG [ɔ], NOT the diphthong [au] — कौन→kɔn. Same retraction as ऐ above." },
         "ऍ": { "ipa": "ɛ", "note": "candra e (loans)" },
         "ऑ": { "ipa": "ɔ", "note": "candra o (loans, e.g. English 'o')" },
         "ॐ": { "ipa": "õm", "note": "Om sign (U+0950) — a whole syllable" },
@@ -127,7 +145,7 @@
         "anusvara": {
             "char": "ं",
             "effect": "nasalizeVowel",
-            "note": "nasalizes the preceding vowel (canonical Hindi + wikipron: कांग्रेस→kãɡɾeːs, not a homorganic nasal consonant). Nasal vowels are short.",
+            "note": "nasalizes the preceding vowel (canonical Hindi + wikipron: कांग्रेस→kãɡɾes, not a homorganic nasal consonant). ⚠ The note used to end \"Nasal vowels are short.\", contradicting `nasalVowelsAreShort: false` at the foot of this file. Neither statement is decidable here: Magahi has NO phonemic vowel length, no vowel in this manifest carries ː, and the flag only strips a trailing ː — so it is INERT for mag either way (verified by flipping it: 0 of 302 corpus lines move).",
         },
         "chandrabindu": {
             "char": "ँ",
@@ -183,14 +201,17 @@
     ],
     // Final conventions applied AFTER schwa deletion.
     "finalRules": [],
-    // No Hindi-style finalRules: Bhojpuri keeps intervocalic əɦə (शहर→sahar, not the Hindi ɛɦɛ) and has no
-    // और-offglide / अय→ɛj convention.
+    // No Hindi-style finalRules: Magahi, like the rest of the Bihari core, keeps intervocalic əɦə
+    // (शहर→səɦəɾ, not the Hindi ɛɦɛ) and has no और-offglide / अय→ɛj convention. ⚠ This note used to say
+    // "Bhojpuri keeps…", naming the sister language in the file that is not it.
 
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
     // running these through the same native G2P (no hand-written phonemes). The
     // compositor (src/core/numbers.ts, indicNumberWords) assembles them with Indian lakh/crore grouping.
-    // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
-    // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
+    // NOTE: 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस). ⚠ This note used to end "the ~80
+    // irregular 21-99 spellings are a bounded remaining authoring task" — a stale claim from the Hindi
+    // template: the `compound` block below is COMPLETE (all 72 of them), and has been since this file was
+    // derived. The forms are hindi.jsonc's, byte for byte, and unconfirmed for Magahi.
     "numbers": {
         "units": [
             "शून्य",
@@ -321,6 +342,57 @@
     "symbols": { "%": "प्रतिशत" },
     "stripSymbols": "₹",
 
+    // THE WRITTEN ORDINAL SUFFIX, and which agreement form it marks (0 masculine, 1 feminine, 2 oblique —
+    // the Hindi tuple this shared engine indexes).
+    //
+    // ⚠ WITHOUT THIS BLOCK THE ORDINAL RULE WAS ENTIRELY DEAD IN MAGAHI, AND THE SUFFIX WAS SPOKEN AS ITS
+    // OWN WORD — the exact defect src/languages/hindi/normalize.ts step 2 exists to prevent, one language
+    // over. `own?.ordinalSuffixes ?? MANIFEST.ordinalSuffixes` fell back to HINDI's वाँ/वीं/वें, and
+    // normalize.ts's own header calls those "pan-Hindi-belt" and therefore defensible for the family.
+    // Measured over the 302-line mag corpus (tools/corpus/mined/mag.jsonc + the 200 golden texts) that
+    // claim is false here:
+    //     digit + मा            15   ALL of them ordinals — १०मा बेर, २३मा मुख्यमन्त्री, ९मा/१२मा/१४मा/
+    //                                १५मा/१७मा/१८मा/१९मा/३६मा शताब्दी | मण्डल | दिन | मरुस्थल
+    //     digit + वाँ|वीं|वें    0
+    //     digit + ला|रा|था|ठा    0
+    // So the inherited table was 100% unreachable and `१७मा शताब्दी` read *sˈət̪ɾəɦ mˈɑ sˈət̪ɑbd̪ime* —
+    // the cardinal plus a stray मा, which is itself an ordinary Magahi word (माँ/मा, "mother"). With the
+    // suffix declared it composes as one token, सत्रहमा → *sət̪ɾəɦmˈɑ*.
+    //
+    // ⚠ THIS BLOCK IS STRICTLY ADDITIVE — HINDI'S ROWS ARE REPEATED, NOT REPLACED, and that is not
+    // decoration. Declaring `ordinalSuffixes` OVERRIDES the fallback wholesale (`own?.x ?? MANIFEST.x`),
+    // so a block containing only मा would have taken वाँ/वीं/वें AND the whole suppletive arm AWAY: the
+    // first draft of this file did exactly that and `१६वीं सदी` regressed from *solˈəɦbĩ sˈəd̪i* to
+    // *sˈoləɦ bˈĩ sˈəd̪i* and `१ला` from *pˈəɦlɑ* to *ˈek lˈɑ* — the very stray-syllable failure this
+    // block exists to remove, traded from one spelling onto another. मा is ADDED to Hindi's table; every
+    // reading mag could already produce is unchanged, which is why 4 golden rows move and not 40.
+    // The Hindi rows keep their Hindi form indices; ×0 of them occur in the mag corpus, so they are a
+    // fallback for quoted Hindi and nothing more.
+    //
+    //   · ONE FORM FOR मा, INDEX 0. It is invariant across the corpus's genders — १७मा शताब्दी (f.) and
+    //     २३मा मुख्यमन्त्री (m.) take the same suffix, which is what a Bihari language with reduced gender
+    //     agreement is expected to do. The index only ever selects from `irregularOrdinals`.
+    //   · `irregularOrdinals` is NOT declared here, so 1-4 and 6 still fall back to Hindi's पहला/दूसरा/
+    //     तीसरा/चौथा/छठा — and मा now REACHES them (`१मा` → *pˈəɦlɑ*). ×0 of १मा|२मा|३मा|४मा|६मा in the
+    //     corpus, so no attested reading depends on it; leaving it inherited rather than inventing Magahi
+    //     forms follows this family's rule that an unsourced substitute is worse than an inherited word
+    //     (see the बजकर note in src/languages/magahi/magahi.ts).
+    //
+    // ⚠ THE SHARED RULE'S `\\s?` IS NOT SOURCED HERE AND IS LEFT ALONE. All 15 instances are GLUED; a
+    // spaced `digit + मा` is ×0. The corpus does carry one standalone मा (`… स्थल मा भद्रकाली मन्दिर …`),
+    // and it is not digit-adjacent, so the spaced arm has no false positive to answer for either.
+    //
+    // ⚠ FILED, NOT FIXED — THE TRAILING BOUNDARY DECLINES AN AGGLUTINATED POSTPOSITION. Magahi glues
+    // के/से/मे onto the preceding word (it is the feature the corpus is judged by), so `१०मासे` "from the
+    // 10th" fails `(?![\\p{L}\\p{M}])` and reads *d̪ˈəs mˈɑse*. ×0 attested for the ordinal; the same
+    // shape IS attested ×2 on the unit table (`२०० किमीसे`, `६५० किमीमे` → *kˈimise* / *kˈimime*), which
+    // is normalize.ts's own hazard, not this file's. Widening the guard is a fleet decision.
+    "ordinalSuffixes": {
+        "regular": { "मा": 0, "वाँ": 0, "वां": 0, "वा": 0, "वीं": 1, "वी": 1, "वें": 2, "वे": 2 },
+        "suppletiveConsonants": { "1": "ल", "2": "र", "3": "र", "4": "थ", "6": "ठ" },
+        "vowelForms": { "ा": 0, "ी": 1, "े": 2 }
+    },
+
     // Clause / phrase punctuation → canonical inline pause marks (Devanagari danda ।/॥ + ASCII).
     "clausePunctuation": {
         "।": ".",
@@ -333,8 +405,12 @@
         ":": ",",
     },
 
-    // Nasalization does NOT change vowel length: the WikiPron hin_deva narrow referee keeps nasal vowels
-    // long (नहीं→nɐɦĩː, कांग्रेस→kãːŋ, यहाँ→jɐɦãː, गांव→ɡãː), so a long vowel + anusvara/chandrabindu stays
-    // long (kaː̃) and a short one stays short (गंगा→ɡə̃ŋ). Setting this false keeps the length mark.
+    // Nasalization does NOT change vowel length. ⚠ INERT IN THIS LANGUAGE, and the inherited note did not
+    // say so: the flag's only effect is to strip a trailing ː from the nasalized vowel, and Magahi has no
+    // phonemic vowel length — not one value in `independentVowels` or `vowelSigns` carries ː, and the only
+    // ː this engine produces comes from the geminate `postRules`, which run AFTER g2p. Flipping it moves 0
+    // of 302 corpus lines. Kept at the Bihari-sister value rather than deleted, so the key stays declared
+    // if a length contrast is ever sourced. (The Hindi justification it used to carry — the WikiPron
+    // hin_deva narrow referee, नहीं→nɐɦĩː, कांग्रेस→kãːŋ — is about a language that HAS the contrast.)
     "nasalVowelsAreShort": false,
 }

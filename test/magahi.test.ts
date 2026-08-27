@@ -46,3 +46,52 @@ describe("Magahi: one rhotic, one symbol", () => {
         expect(phonemize("कृष्ण ऋषि कर", "mag")).not.toMatch(/r/u);
     });
 });
+
+describe("Magahi ordinals — its own suffix मा, not Hindi's वाँ/वीं/वें", () => {
+    const say = (t: string): string => phonemize(t, "mag").trim();
+
+    // ⚠ THE INHERITED HINDI TABLE WAS 100% UNREACHABLE HERE. `own?.ordinalSuffixes ?? MANIFEST.…` gave mag
+    // Hindi's वाँ/वीं/वें, of which the mag corpus has ZERO; all 15 of its ordinals are `digit + मा`. The
+    // suffix was therefore tokenized apart and spoken as its own word — मा is an ordinary Magahi word
+    // ("mother"), so the failure was a plausible extra syllable, not a gap. See magahi.jsonc.
+    test("the suffix FUSES onto the cardinal instead of standing as a word", () => {
+        expect(say("१७मा शताब्दी")).toBe("sət̪ɾˈəɦmɑ sət̪ˈɑbd̪i");
+        expect(say("१०मा बेर")).toBe("d̪ˈəsmɑ bˈeɾ");
+        expect(say("२३मा मुख्यमन्त्री")).toBe("t̪eˈismɑ mukʰd͡ʒəmˈənt̪ɾi");
+        // the before-picture: a stray मा as its own token
+        expect(say("१७मा शताब्दी")).not.toMatch(/ mˈ?ɑ /u);
+    });
+
+    test("मा as an ordinary word is untouched — it is only claimed after a digit", () => {
+        // Attested in the corpus and NOT digit-adjacent: "… स्थल मा भद्रकाली मन्दिर …".
+        expect(say("स्थल मा भद्रकाली")).toBe("st̪ʰˈəl mˈɑ bʱˈəd̪ɾəkɑli");
+    });
+
+    // ⚠ THE DECLARATION IS ADDITIVE, AND THIS IS THE TEST THAT MAKES THAT LOAD-BEARING. `own?.
+    // ordinalSuffixes ?? MANIFEST.ordinalSuffixes` overrides WHOLESALE, so a block containing only मा
+    // removes Hindi's rows — the first draft did, and `१६वीं सदी` regressed to a stray *bˈĩ* and `१ला`
+    // to a stray *lˈɑ*, which is the same defect one spelling over.
+    test("Hindi's inherited suffixes and its suppletive arm still fire", () => {
+        expect(say("१६वीं सदी")).toBe("solˈəɦbĩ sˈəd̪i");
+        expect(say("१ला")).toBe("pˈəɦlɑ");
+        expect(say("२रा")).toBe("d̪ˈusɾɑ");
+        // …and the guards those arms carry are intact: था is the past copula, not 2's suffix.
+        expect(say("२था")).toBe("d̪ˈo t̪ʰˈɑ");
+        expect(say("२राज्य")).toBe("d̪ˈo ɾˈɑd͡ʒː");
+        expect(say("१० वापस")).toBe("d̪ˈəs bˈɑpəs");
+    });
+});
+
+describe("Magahi glide hardening — PINNED IN EVERY POSITION, which is not what the source cites", () => {
+    // ⚠ DO NOT "FIX" THIS TO WORD-INITIAL WITHOUT A REFEREE. Vinod Kumar 2026 §6.2 states the hardening
+    // word-initially; magahi.jsonc applies it as a flat consonant mapping, so it fires medially and
+    // finally too — 1178 non-initial व and 1586 non-initial य across the mag corpus, against 481 + 182
+    // initial. Filed in src/languages/magahi/magahi.ts: mag has no referee and no FLEURS audio, so there
+    // is nothing here that can decide it. These expectations pin the SHIPPED behaviour so the divergence
+    // is visible rather than silent.
+    test("medial and final व / य harden too", () => {
+        expect(phonemizeWord("पाण्डव")).toBe("pˈɑnɖəb");   // word-FINAL व
+        expect(phonemizeWord("महाकाव्य")).toBe("məɦɑkˈɑbd͡ʒ"); // medial व AND final य
+        expect(phonemizeWord("भारतीय")).toBe("bʱˈɑɾt̪id͡ʒ");  // word-final य
+    });
+});

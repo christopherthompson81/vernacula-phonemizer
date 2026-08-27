@@ -164,8 +164,10 @@ class XhosaPhonemizer implements Phonemizer {
                     sink.emit(this.foreign(m[1]));
                 else sink.emit(phonemizeWord(nat(m[1])));
             }
+            // ⚠ THE TOKEN STRING GOES WITH THE DOUBLE (#1059): above 2^53 `Number(m[2])` has already lost
+            // digits, and `m[2]` is the separator-stripped run (normalize.ts step 4 de-groups the text).
             else if (m[2])
-                for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

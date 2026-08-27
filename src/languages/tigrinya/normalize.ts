@@ -10,7 +10,8 @@
  *
  * ⚠ AMHARIC IS THE NEAR NEIGHBOUR AND IS NOT THE SAME LANGUAGE. Every `am` rule was re-measured against
  * this corpus and SEVEN DID NOT SURVIVE — the ordinal suffix ኛ (×0 here; ti writes `Nይ` and `መበል N`), the
- * comma-only de-grouping (ti also groups with the period), the ASCII-colon clock (ti's only `d:dd` is a
+ * comma-only de-grouping (ti groups with the period as well, and POINTS with the comma as well — steps 6
+ * and 10), the ASCII-colon clock (ti's only `d:dd` is a
  * scripture citation), the `12.00 GMT` clock (×0), the `US$`/plural-currency workarounds (×0), the plus
  * (×1, declined) and the relational/division signs (×0 — the two `=` are wiki markup and a URL). The
  * script makes an Amharic word look right in Tigrinya; only the count tells them apart.
@@ -228,11 +229,29 @@ export function makeTigrinyaNormalizer(
         //    adjacency — `ብ1.65 ቢልዮን ዶላር` must reach it intact.
         s = symbols(s);
 
-        // 10. DECIMALS. Integer part as a number, ነጥቢ, then the fraction ONE DIGIT AT A TIME. 57 instances;
-        //     before this, `48.33%` read "forty eight . thirty three" — a sentence STOP inside the number
-        //     and the fraction read as a whole number. After the clock (step 2), the de-grouping (step 6)
-        //     and the symbol tier (step 9); the abbreviation dots are long gone (step 4).
-        s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
+        // 10. DECIMALS, ON EITHER MARK. Integer part as a number, ነጥቢ, then the fraction ONE DIGIT AT A TIME.
+        //     57 period instances; before this, `48.33%` read "forty eight . thirty three" — a sentence STOP
+        //     inside the number and the fraction read as a whole number. After the clock (step 2), the
+        //     de-grouping (step 6) and the symbol tier (step 9); the abbreviation dots are long gone (step 4).
+        //
+        //     ⚠ THE COMMA IS A DECIMAL POINT HERE TOO, AND THAT IS THE SAME ARGUMENT STEP 6 ALREADY MAKES IN
+        //     REVERSE. Step 6 established that ti groups with BOTH marks; the mirror of that is that ti also
+        //     points with both, and the comma half was missing. Measured over all 67 `\d,\d` instances in the
+        //     artifact: 62 are three-digit thousands groups, which step 6 has already spent, and the
+        //     remaining FIVE are decimals — `2,5 ሜ.` ×2 (a lion "2.5 m from head to tail"), `1,2 ሜ.`,
+        //     `99,7%` (Samoa's Christian share) and `A 2,2` (a CEFR sub-level). ⚠ ZERO instances are a
+        //     comma followed by four or more digits, so "whatever step 6 declined" and "a one-or-two-digit
+        //     fraction" name the same five strings here; the rule is written as the former because it is the
+        //     property that makes the split decidable rather than a count that could change.
+        //     Before this, every one of the five emitted a CLAUSE PAUSE inside the number and read the
+        //     fraction as a whole number: `2,5 ሜ.` → *kɨltə , ħamuʃtə*, "two, five" — a confidently wrong
+        //     quantity, not a drop. `0,001` is the same shape one step further on: step 6's leading-zero
+        //     guard correctly refuses to de-group it (a leading zero can never be a thousands group — the su
+        //     finding), and the comma it leaves behind then read as punctuation.
+        //     ⚠ The RUN of the two marks is deliberately shared: `1,741.980` is the artifact's one number
+        //     carrying both, and step 6 spends its comma as a group first, so only one mark ever survives to
+        //     here. A spaced pair (`ኣብ 2010, 2011`) cannot match — the fraction must be digit-adjacent.
+        s = s.replace(/(?<![\d.])(\d+)[.,](\d+)(?![\d.])/gu,
             (_m, i: string, f: string) => ` ${words(i)} ${POINT} ${eachDigit(f)} `);
 
         // 11. ORDINALS — `Nይ`, ti's own abbreviated form, ×22 and EVERY ONE 1–10. Before this, `6ይ` read as
@@ -274,9 +293,15 @@ export function makeTigrinyaNormalizer(
         //     SOURCED IN THE NUMBER-ADJACENT ANGULAR SENSE, which matters because the word is polysemous:
         //     ti.wikipedia has ዲግሪ ×16, of which `30 ዲግሪ ጽላታት` and `360 ዲግሪ ዝዓቐኑ` are the angular measure
         //     and the rest are the ACADEMIC degree (`ማስተርስ ዲግሪ`). Trap 37, and the numeric slot settles it.
-        //     ⚠ Only the SIGN is resolved: the Latin scale letter after it (C, W) is outside TOKEN's
-        //     alphabet and stays dropped, and no Tigrinya spelling of Celsius is sourceable — `sources.ts`
+        //     ⚠ Only the SIGN is resolved, and no Tigrinya spelling of Celsius is sourceable — `sources.ts`
         //     reports `scale-names ??` for exactly this reason.
+        //     ⚠ THE SCALE LETTER DOES NOT "STAY DROPPED", WHICH IS WHAT THIS COMMENT USED TO CLAIM. It is
+        //     outside TOKEN's alphabet, but a Latin run never reaches TOKEN: the script router splits it out
+        //     first and hands it to the English reader, so `፭°C` reads *ħamuʃtə diɡɨɾi sˈiː* — "five degrees
+        //     see", the English LETTER NAME. ×2 in the artifact (both `&nbsp;°C` after a bare figure) plus
+        //     `፭°C`. Left as it is rather than dropped: which of the two readings is better is a fleet
+        //     question about unreadable Latin residue, not a ti one, and inventing ሴልሲየስ is the refusal
+        //     above. Recorded so the next reader measures it instead of trusting the old claim.
         s = s.replace(/°/gu, " ዲግሪ ");
 
         return s.replace(/[ \u00a0]{2,}/gu, " ");  // space, NBSP

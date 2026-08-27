@@ -461,3 +461,67 @@ Declined, with counts: the minus (1 true / 1 false), the plus (×1), the ampersa
 all the town), `ብር` (×41, all inside longer words), `ዓ.ም` as a calendar (×19, `ዓመተ ምሕረት` absent from the
 wiki), a cube word (×0 — trap 51's floor), and `Nይ` ordinals above 10 (×0).
 
+
+---
+
+## Run 12 — 2026-08-27 08:40 — the C# port's reading, and the half of Run 8 that was never asked
+
+**Question.** Run 8 asked "ti groups with the comma — is `\d\.\d{3}` a second GROUPING convention or a
+decimal?" and answered it. The mirror question was never put: **ti points with the period — is `\d,\d{1,2}`
+a decimal?** Asked while porting `ti` to C#, where the gate can only prove the two engines agree.
+
+**Command.**
+
+```
+grep -oE '[0-9]+,[0-9]+' corpus.txt | sort | uniq -c | sort -rn      # 67 instances, 323 lines
+```
+
+**Raw finding.** 62 of the 67 are three-digit thousands groups. The other five are:
+
+```
+2,5 ሜ.     ×2   ተባዕታይ ኣንበሳ ንውሓቱ ( ካብ ርእሱ ክሳብ ጭራኡ) 2,5 ሜ. ኣቢሉ ይበጽሕ   a lion, 2.5 m nose to tail
+1,2 ሜ.           ( ካብ ርእሱ ክሳብ እግሩ) ከኣ ካብ 1,2 ሜ. ንላዕሊ ኢዩ            1.2 m at the shoulder
+99,7%            99,7% ካብ ቶም ሰባት ድማ ክርስትና ሃይማኖት ኣለዎም                 Samoa's Christian share
+A 2,2            (ናይ መጀመርታ ደረጃ A 2,2 ዒላማ ደረጃ B.1-B1.2)              a CEFR sub-level
+```
+
+**Every one is a decimal, and every one read with a CLAUSE PAUSE inside the number and its fraction as a
+whole number:**
+
+```
+2,5 ሜ. ኣቢሉ    kɨltə , ħamuʃtə me . ʔabilu        "two, five"     → kɨltə nətʼbi ħamuʃtə me .
+99,7% ካብ ሰባት  təsʕan tɨʃʕatən , ʃəwʕatə miʔtawit  "ninety-nine, seven percent"
+0,001 ግራም     zeɾo , ħadə ɡɨɾam                   "zero, one gram"
+```
+
+⚠ **A CONFIDENTLY WRONG QUANTITY, NOT A DROP** — and the third line is the su finding one step on: step 6's
+leading-zero guard is *right* to refuse `0,001` as a thousands group, and the comma it correctly declines to
+spend then read as punctuation. The guard's safe branch stranded the separator.
+
+⚠ **ZERO instances are a comma followed by four or more digits.** So "whatever step 6 declined" and "a
+one-or-two-digit fraction" name exactly the same five strings in this artifact. Step 10 is written as the
+former, because that is the property that makes the split decidable rather than a count that could change;
+it is also what the period arm has always done (`2010.2011` already read as a decimal).
+
+**Implication.** Step 10 claims `[.,]`, not `.`. Measured over the 323 corpus lines: **4 lines move, and
+they are the four carrying those five instances; the other 319 are byte-identical.** Three of the 200 golden
+rows move. `1,741.980`, the one number carrying both marks, is untouched — step 6 spends its comma as a
+group first, so only one mark ever survives to step 10.
+
+---
+
+## Run 13 — 2026-08-27 08:55 — the scale letter does not "stay dropped"
+
+**Question.** Step 13's comment claimed "the Latin scale letter after [°] (C, W) is outside TOKEN's
+alphabet and stays dropped". Is that true?
+
+**Command.** `phonemize("ኣብ ለይቲ ክሳዕ ፭°C ኣቢሉ ይብጽሕ።", "ti")`
+
+**Raw finding.** `ʔab ləjti kɨsaʕ ħamuʃtə diɡɨɾi sˈiː ʔabilu jɨbɨt͡sʼħ .` — *sˈiː*. The letter is outside
+TOKEN, but a Latin run never reaches TOKEN: `core/scripts.ts` splits it out first and hands it to the English
+reader, which says the LETTER NAME. ×3 in the artifact (`፭°C`, and two `&nbsp;°C`).
+
+**Implication.** The code was doing something the comment denied, which is the gap the correctness lens
+exists to find. Not changed: which reading is better — the English letter name or silence — is a fleet
+question about unreadable Latin residue, and inventing ሴልሲየስ is the refusal Run 5 already made. The comment
+now states the measured behaviour.

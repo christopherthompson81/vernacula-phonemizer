@@ -47,11 +47,15 @@ const B = "1000000000000000000009";
  *     Croatian's number token carries the thousands periods and the decimal comma.
  *   · NO FALLBACK AT ALL — tr returns "" above its range and zu composes right past it. Giving these a
  *     digit-at-a-time arm is a per-language behaviour ADDITION, not a mechanical repair, and wants the
- *     language's own evidence.
+ *     language's own evidence. ⚠ `xh` CAME OFF THE LIST ON EXACTLY THAT EVIDENCE, and it was in its own
+ *     file: `xhosa/normalize.ts`'s `spell()` already reads a decimal's fractional part digit-at-a-time in
+ *     the standalone ku- stems, for the reason its docstring gives ("`34` read as a number is a different
+ *     quantity"). The fallback emits the string that path already emits, so nothing was invented. Its
+ *     sibling `zu` has no such precedent in its own file and stays listed.
  * ⚠ A NEW LANGUAGE MUST NOT JOIN THIS LIST. It exists to be emptied.
  */
 const ACCEPTED_LOSSY = new Set(
-    ("ar arz apc apd acm afb ary ayl ajp acw pt pt-BR tr az vi ta gd ga cy ff si kk tg zu xh " +
+    ("ar arz apc apd acm afb ary ayl ajp acw pt pt-BR tr az vi ta gd ga cy ff si kk tg zu " +
         "mk sq la ki kam af grc").split(" "),
 );
 
