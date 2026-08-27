@@ -11,10 +11,16 @@ public static class NeuralRegistry
         ["en"] = Languages.English.EnglishNeural.PhonemizeEnNeural, // BiLSTM OOV reader (else the sync n-gram OOV G2P)
         ["af"] = Languages.Afrikaans.AfrikaansNeural.PhonemizeAfNeural,
         ["bn"] = Languages.Bengali.BengaliNeural.PhonemizeBnNeural,
+        // per-grapheme BiLSTM reading the words the NST lexicon misses; its tag alphabet embeds the stress
+        // mark, which is the deep-orthography win the first-syllable rule heuristic cannot reach
+        ["nb"] = Languages.Norwegian.NorwegianNeural.PhonemizeNbNeural,
         ["fr"] = Languages.French.FrenchNeural.PhonemizeFrNeural,
         ["ur"] = t => RiderNeural.PhonemizeRiderNeural(t, "ur"),
         ["fa"] = Languages.Persian.PersianNeural.PhonemizeFaNeural,
         ["sd"] = Languages.Sindhi.SindhiNeural.PhonemizeSdNeural, // per-letter BiLSTM restoring the abjad's unwritten short vowels on OOV words
+        // BiLSTM placing the BIZROKE — Sorani's one unwritten vowel — on the words the AsoSoft-derived
+        // lexicon misses. Precedence is lexicon → tagger → rules.
+        ["ckb"] = Languages.CentralKurdish.CentralKurdishNeural.PhonemizeCkbNeural,
         // ⚠ Western Punjabi (Shahmukhi) is registry code `pnb`, but the rider keys its Perso-Arabic lexicon
         // under `pa` — so the model token and the registry code differ, exactly as in the TS.
         // ⚠ THIS ENTRY WAS MISSING AND NOTHING COULD SEE IT. `pnb`'s SYNC engine is served (it is the same
@@ -27,6 +33,9 @@ public static class NeuralRegistry
         // per-character BiLSTM restoring the WORD BOUNDARIES Khmer does not write
         ["km"] = Languages.Khmer.KhmerNeural.PhonemizeKmNeural,
         ["he"] = Languages.Hebrew.HebrewNeural.PhonemizeHebrewNeural, // the NAKDAN — restores niqqud on bare Hebrew
+        // per-grapheme BiLSTM reading the OOV tail of the deepest European orthography (the ~37k NST lexicon
+        // serves the rest); trained on the full 199k NST, ~96% symbol held-out
+        ["da"] = Languages.Danish.DanishNeural.PhonemizeDaNeural,
     };
 
     /** The language's best ASYNC path, or null when its best path is the sync engine. */

@@ -31,6 +31,20 @@ describe("danish neural OOV tagger", () => {
             expect(neural).toMatch(/tɐb$/u); // ⟨-top⟩ → r-vocalised + lenited [tɐb]
         });
 
+        // ⚠ THE PRE-PASS MUST TOKENIZE AND KEY AS THE SYNC ENGINE DOES. It used a hand-listed letter class
+        // keyed by the RAW match, while danish.ts hands `oovOverride` the NATIVISED spelling of a LATIN_RUN
+        // match — so every word the nativiser rewrites was tagged under a key the engine never asks for and
+        // silently fell through to the RULE tier. 21 distinct types over FLEURS da_dk, 1 golden row.
+        test("a word the nativiser rewrites still reaches the tagger (the key must be nat())", async () => {
+            for (const w of ["Galápagosøer", "taínoer", "Guaraníerne", "Haldarsvík", "Cañitas"]) {
+                const neural = (await phonemizeDaNeural(w)).trim();
+                expect(neural, w).not.toBe(phonemize(w, "da").trim());
+            }
+            expect((await phonemizeDaNeural("Galápagosøer")).trim()).toBe("ɡaˈlaːˀpaˌɡɐsˌøːˀɐ");
+            // …and the fold is what makes it readable: the accented spelling and the folded one agree.
+            expect(await phonemizeDaNeural("Galápagosøer")).toBe(await phonemizeDaNeural("Galapagosøer"));
+        });
+
         test("out-of-vocab letter: tagger.tag() declines (returns \"\")", async () => {
             const tagger = await createDanishTagger();
             expect(tagger).toBeDefined();

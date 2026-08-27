@@ -1,4 +1,4 @@
-# C# port — state as of 2026-08-26
+# C# port — state as of 2026-08-27
 
 Resume here. Read `PORTING.md` first; it is the contract and it has been amended five times — most recently to REVERSE the "keep comment text" rule.
 
@@ -16,11 +16,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 111 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 115 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67 — those languages have no wikipedia and no FLEURS, so their goldens are what exists).
-  **21,896 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **22,696 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn bs ca ceb cjy cmn cs de el en en-GB en-IN es es-419 fa ff fr fr-CA gan gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mai mg mi ml mr ms my nan ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu ro ru rw sd si skr sn so sr su sv sw syl ta te tg th tl tr ug uk umb ur uz vi wuu yo yue za zu.
+  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mai mg mi ml mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th tl tr ug uk umb ur uz vi wuu yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -55,6 +55,9 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 - **sd is the second NEURAL language** (after af/fa): a per-letter BiLSTM restores the abjad's unwritten
   short vowels on OOV words. `Bootstrap.cs` installs the `NeuralRegistry` entry beside the sync engine, and
   `SindhiAsyncUsesTheTagger` pins that the async reading actually differs from the rule one.
+- **nb is the third**, and the one where the tagger carries the most weight: 2,926 of 3,718 corpus lines read
+  differently sync vs async, so a port registering only the sync engine would have missed almost every golden
+  row rather than one. It is also the first port to need `LoadTsvMap`'s `fold` (#1068) — see the nb section.
 - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
@@ -524,6 +527,163 @@ neighbour each arm must decline, × both modes, 0 differ.
   class is `[-–—]` and the minus class is `[-−–]`; ×0 U+2212 in bs_ba, so per #955 this is filed, not swept.
 - **A triple coordination claims only its last pair** (`1. i 3. i 5. pukovniju`), and **`GMT-00:43`** loses
   its sign (the cy/ga finding). Both ×0.
+### From the nb port (2026-08-27) — the third NEURAL language, 200/200 first run, FIVE TS-side defects
+
+**nb (Norwegian Bokmål)** — 5 files, ~430 C# lines: an NST pronunciation lexicon (38k forms) over a
+complementary-length rule g2p, plus a per-grapheme BiLSTM tagger reading the OOV tail. It is the third
+tagger language after af and sd, and `NorwegianAsyncUsesTheTagger` pins that the async reading really
+differs from the rule one (`dreinsystemene` → rules *ˈdɾeːɪnsʏstəmənə*, neural *ˈdɾæɪnsʏˌsteːmənə*). The
+tagger is not a garnish here: **2,926 of the corpus's 3,718 lines read differently sync vs async**, which is
+also why a port registering only the sync engine would have failed almost every golden row rather than one.
+
+⚠ **THE #1068 FOLD IS PART OF THE PORT, NOT OF THE DATA.** `nb-lexicon.tsv` has 14 keys the engine's own
+nativiser rewrites (`señor`, `malmö`, `göring`, `bogotá`, `reykjavík`, `värmland`, `fjällbacka` …), and the TS
+`loadTsvMap` call passes `fold: (k) => nat(k)`. The C# `LoadTsvMap` had to pass it too — the two engines would
+otherwise LOAD DIFFERENT LEXICONS and disagree on any row touching one of those words. All 14 resolve
+identically in both engines, and the three value-CLASHES ledgered in `test/lexicon-reachability.test.ts`
+(`á`→`a`, `fór`→`for`, `märta`→`marta`) resolve to the UNFOLDED row's value on both sides, as the precedence
+rule requires. `NorwegianLexiconIsLoadedThroughItsOwnNativiser` pins it in C#; the ledger is unchanged at 3.
+
+Widenings: FLEURS `nb_no` col 3+4, **3,718 lines × sync and async, 0 differ, 0 throws**, plus **238 off-golden
+probe lines × both modes, 0 differ**. Coverage of the corpus, measured: 860 lines carry a digit, 117 an
+ordinal dot, 40 `km`, 37 a range, 32 a decimal comma, 30 a colon clock, 29 a dotted abbreviation, 19 `ca.`,
+14 a rate slash, 12 `mm`, 10 an era marker, 10 a percent, 8 an intra-word apostrophe, 6 `²`, 2 a currency
+sign, 2 `°` — and **0 a `³`**, which is why the cubed finding below is filed rather than fixed.
+
+Fixed in TypeScript first, with tests, goldens regenerated (**9 of 200 rows move**, all the `ca.` fix), then
+ported. ⚠ **NOT ONE OF THE FIVE WAS VISIBLE TO THE GATE** — every one was found by reading the TS and by
+probing, and the engines agreed byte-for-byte on all five wrong answers beforehand.
+
+- ⚠ **THE MOST FREQUENT MEMBER OF THE ABBREVIATION TABLE WAS THE ONE MISSING FROM IT.** `ca.` occurs **21**
+  times in nb_no — more than `osv.` 10, `kl.` 10, `nr.` 5, `dr.` 3, `bl.a.` 2, `dvs.` 1, every one of which
+  was already declared. The word read correctly (the lexicon maps the token `ca`), so nothing looked wrong;
+  it was the DOT that survived into `clausePunctuation`, which is precisely the defect that table's docstring
+  says it exists to remove. `ca. én amerikansk cent` — **a line of the parity golden** — read *ˈsɪɾkɑ . ˈeːn*.
+  This is where all 9 golden rows move.
+- ⚠ **THE ERA MARKER WAS NOT MERELY UNREAD, IT WAS READ AS MONEY.** `f.Kr.` tokenized as `f` + `Kr`, and `kr`
+  is the lexicon's own abbreviation for *kroner* — so `323 f.Kr. etter at…` read *ˈɛf . ˈkɾuːnəɾ .*, "eff
+  kroner" plus two spurious clause breaks. 12 instances in four spellings (`f.Kr.`, `f.Kr`, `f.kr`, and once
+  `f.Kr!`), with `e.Kr.`/`e.kr` for the common era. Both words of each expansion are in the NST lexicon. The
+  trailing dot is optional and a trailing LETTER is refused, or `f. Kristian` would become *før Kristusistian*.
+- ⚠ **THE CURRENCY NOUN FUSED WITH THE NEXT WORD, AND THE CORPUS SENTENCE THAT SHOWS IT ALSO SHOWS WHY IT
+  WAS INVISIBLE.** `(\d[\d ]*)` is greedy over spaces with nothing after it to force a backtrack, so it
+  swallowed the space SEPARATING the amount from the following word — and the noun was written where that
+  space had been. `mellom ¥2500 og ¥130 000` read *ˈyːənɔɡ* for the first figure ("yenog", ONE token, and no
+  longer a lexicon word so the vowel changed too) and correctly *ˈjɛn* for the second — because a COMMA
+  followed it. Same construction, two answers, decided by the next character. All four signs had it.
+- ⚠ **AN INTRA-WORD APOSTROPHE SPLIT THE WORD IN TWO** — the sv #1073 shape, measured on nb's own corpus
+  rather than inherited: 8 instances, 4 types (`O'Shannessy`, `O'Flynn`, `l'Oyapock`, `President's`), every
+  one arriving as two runs, separately phonemized and separately stressed (*ˈuː ʃɑnəsːʏ*, *ˈɛl ˈɔjɑpɔkː*).
+  ⚠ The guard is a LOOKAHEAD, not a class member, and Norwegian is the language that proves why: the genitive
+  of an s-final name is written with a TRAILING apostrophe (`Anders' bok`), which must keep declining, as
+  must a closing quote (`sa 'nei'`). 0 golden rows reach any of it, and 0 NST headwords are spelled this way
+  — the tokenizer is the only instrument that sees it.
+- **`jr.` read as the bare onset cluster *jɾ*** plus the stranded stop — no vowel, so not even a word. ×3,
+  every one the name suffix, and `junior` is in the lexicon. `sr.` was NOT added beside it (×0 — the #955
+  invention), and `m.` (×2, `James m. flere`) stays out because it is genuinely ambiguous with a lone initial.
+
+**Found and NOT fixed:**
+
+- **`km³`/`cm³` are dropped silently while `km²` reads** — `100 km³` → *hʊndɾə çiːlʊmeːtəɾ*, the volume gone.
+  ig's and bs's finding in a third language. `SQUARED` declares `m³` but neither cubed compound, and **`³` is
+  ×0 in nb_no** (measured, not assumed), so *kubikkilometer* would be sourced on nothing.
+- **`fahrenheit` and `kvadratcentimeter` are NOT in the NST lexicon**, against normalize.ts's header claim
+  that "EVERY WORD EMITTED BELOW is in the NST lexicon … Checked before authoring, not assumed". Both take
+  the rule path, and `fahrenheit` gets a spurious medial [h] (*ˈfɑhɾənhəɪt*) the engine has no silent-h rule
+  to remove. ×0 °F in the corpus. Five ordinals (`sekstende`, `syttende`, `nittende`, `tjueførste`,
+  `trettiende`, `trettiførste`) are missing for the same reason and read acceptably by rule.
+- **nb SHIPS NO LETTER NAMES**, so an initialism reads as a bare consonant cluster: `Washington DC` → *ds*,
+  `NPK` → *npk*, neither carrying a vowel or a stress mark. rw's shape; a data decision, not a port one.
+- **`19:19:19` loses its third component to a clause break** (*nɪtn nɪtn , nɪtn*) — the so #1050 shape, ×0.
+- **`20 °Cx` FUSES the degree word onto the following letters** (*ˈɡɾɑːdəɾsks*). The Celsius arm correctly
+  declines on the trailing letter and the bare-degree arm then fires without leaving a boundary. ×0.
+- Shared shapes already filed elsewhere: `(0) c°` loses its scale letter (lo); `VI. verdenskrig` reads the
+  roman numeral as the Norwegian word *vi* plus a stranded pause (hr); `10^6` drops its caret (fleet);
+  a period between digits stays and becomes clause punctuation (`802.11n`, `9.174 mi²`) — though that one is
+  a DOCUMENTED decision, measured at 24 corpus instances of which exactly one is a clock.
+### From the da port (2026-08-27) — 200/200 first run, four TS-side fixes, ONE golden row moved
+
+**da (Danish, ~6M)** — 7 files, ~640 C# lines. The THIRD neural language after af/fa (sd, ckb since):
+`DanishNeural.cs` + `DanishTagger.cs` install a per-grapheme BiLSTM beside the sync engine, and
+`Bootstrap.cs` installs the `NeuralRegistry` entry with it. `DanishAsyncUsesTheTagger` pins that the async
+reading differs from the rule one. Gate **114 → 115 languages, 22,496 → 22,696 rows, 0 differ, 0 BLOCKED**.
+Widenings: the FLEURS `da_dk` differential is 3,756 lines (col 3+4) × normalize/sync/async = **11,268 rows,
+0 differ**; off-golden probes are 184 + 95 hand-built lines (one per normalize arm plus the adversarial
+neighbour, the four space characters against seven separator-bearing shapes, every g2p rule, the number
+corners) × the same three modes, **0 differ, 0 throws**. Corpus coverage of the arms, measured not assumed:
+746 lines carry a digit, 108 a dotted ordinal, 82 a period-grouped thousand, 46 `km`, 38 a dotted
+abbreviation, 33 a span, 32 a decimal comma, 26 a colon clock, 18 a rate slash, 12 a currency sign, 8 a
+percent, 4 a degree sign, 4 an exponent, 4 an ampersand — and **ZERO** relational signs, U+2212, infix `+`,
+`NxN`, space-grouped thousands or >12-digit runs, so those arms rest on the probes alone.
+
+⚠ **THE LEXICON IS LOADED THROUGH ITS OWN NATIVISER (#1068) AND THE PORT HAD TO PASS THE `fold`.** Four of
+da-lexicon.tsv's 37,008 keys are unreachable through `text()`'s own fold (`joão`, `jón`, `voilà`, `genève`);
+three of the four folded spellings are already in the file and WIN, one of them — `geneve` ʃeˈnɛːv against
+`genève` ʃeˈnɛv — with a DIFFERENT value, which is da's single row in `lexicon-reachability`'s shadowed
+ledger. `joão` is the one free slot. Pinned in C# by `DanishLexiconIsLoadedThroughItsOwnNativiser`.
+
+Fixed in TypeScript first, each with a test, then ported:
+
+- ⚠ **THE NEURAL PRE-PASS TOKENIZED AND KEYED DIFFERENTLY FROM THE ENGINE IT FEEDS, so the tagger tier was
+  SKIPPED for every word the nativiser rewrites.** `danish.ts` hands `oovOverride` the NATIVISED spelling of
+  a `LATIN_RUN` match (`nat(m[1])`); `danishNeural.ts` used a hand-listed letter class keyed by the RAW
+  match. Both halves miss: an accented letter is a KEY MISS (`Galápagosøer` tagged under its own spelling
+  while the engine asked for `Galapagosøer`, so it read the rule's *ɡˈalapaɡosøɐ* against the tagger's
+  *ɡaˈlaːˀpaˌɡɐsˌøːˀɐ*), and a letter the list omits SPLITS the word (`Cañitas` tagged as `Ca` + `itas`, two
+  readings nothing asks for). 21 distinct types / 22 tokens over FLEURS da_dk, and the tagger declines NONE
+  of them once the fold has removed the out-of-vocab letter. Both files now derive the tokenizer and the key
+  from `danish.ts`'s own exports. **1 golden row moved** — the only one of the four fixes that moves any.
+  ⚠ The comment asserting the false premise was IN the file ("the pre-pass keys the tagged map by the raw
+  match, which is what the sync engine hands `oovOverride`"): question 1 of the correctness lens, again.
+- **#1059: the number call site dropped `raw`.** `danish.ts` called `numberToWords(Number(m[2]))` and
+  `numbers.ts` did not declare the parameter, so the digit-at-a-time fallback — which exists *precisely
+  because the double cannot be trusted* — read the rounded float back out. `9007199254740993` read as its
+  neighbour `…992` and `12345678901234567890` ended *nul nul nul* against a written `890`. da is off
+  `large-numeral-fidelity`'s ACCEPTED_LOSSY, the list that may only shrink. **0 golden rows** (the golden's
+  longest digit run is 5). ⚠ `fo`, `lb` and `bar` share `unitsFirstNumbers.ts` and are STILL on that list —
+  reported, not fixed here (separate bring-ups; trap 55).
+- **The degree noun FUSED with the following letter — corpus-attested, ×2 distinct FLEURS sentences.** The
+  scale-letter arms decline a letter RUN on purpose (`25°Cölner` is not Celsius) and the bare `(\d)\s*°`
+  arm then left `grader` abutting it, so the compass bearing `35°V` (longitude west) became the one token
+  `graderV` and read *ɡʁˈaðeʁv* — a plausible Danish-looking pseudo-word no leak class can see (trap 56)
+  — where the space gives *ˈɡʁɑːðɐ ˈveːˀ*. ⚠ **The repair was ALREADY IN THIS FILE**, in step 12, for
+  exactly this shape (`$110m` → *dˈolaʁm*); the degree arm simply never got it. **0 golden rows** (the
+  golden carries no degree sign at all).
+- **Four dead manifest keys, the #901 shape.** A sabotage sweep over `danish.jsonc` (each of its 132 string
+  leaves corrupted in turn, against a probe of every letter × 8 shapes + every integer 0–120 + every ordinal
+  1–31 + every clause mark) found `consonants.t`, `.d`, `.r` and `.c` unreached: those four letters are
+  intercepted by context rules that carried a LITERAL COPY of the manifest's value, so both engines agreed
+  about a value neither read. The default phone now comes from the manifest; only the context ALLOPHONES
+  (ð, final-⟨t⟩ [d], soft-⟨c⟩ [s]) stay literal, which is what the manifest header already says. **0 golden
+  rows**, and the re-run sweep is 26 → 22 unreached leaves, all 22 prose.
+
+**Found and NOT fixed — filed, with the count that decided it:**
+
+- **`km³` is dropped silently while `km²` reads** (ig's finding, third language). SQUARED declares `m³` but
+  not `km³`, and the shared tier then claims the bare `km` and STRANDS the `³`, which the tokenizer drops:
+  `5 km³` → *fem kilometer*. ×0 in da_dk (all 4 exponent instances are `km²`), so declaring *kubikkilometer*
+  is the #955 invention trap even though it is compositional from two words already in the table.
+- **An `h:mm:ss` stamp keeps a stranded colon.** The clock arm claims the first pair and leaves `:19`, which
+  IS clause punctuation: `19:19:19` → *nitten nitten , nitten*. so's #1050 shape; ×0 in da_dk.
+- **U+2212 between digits fuses a range** (`1838−1917` → two years, nothing between) and a spaced one is
+  dropped (`2 − 2` → *to to*). The range class is `[-–—]`; ×0 U+2212 in da_dk, so #955 files it.
+- **A second comma strands itself as CLAUSE PUNCTUATION.** `(\d+),(\d+)` claims the first pair only, so
+  `12,345,678` → *tolv komma tre fire fem , seks hundrede og otteoghalvfjerds*. The file argues the Danish
+  comma is purely decimal and the corpus agrees (×0 multi-comma numerals), so the shape is unreachable from
+  real Danish — but it is one paste of English-grouped text away.
+- **The ordinal arms disagree about a leading zero.** Step 8 keys `ORDINALS[String(Number(a))]` and steps
+  9/10 key the raw digits, so `01.-02. maj` reads *første til anden* while `01. maj` is left as a cardinal
+  plus a full stop. ×0 (the corpus's three `0N.` instances are all the period CLOCK the header declines on
+  purpose), so this is an inconsistency rather than a live defect.
+- **A three-term span claims only its last pair**: `1990-1995-2000` → *1990-1995 til 2000*, the first dash
+  dropped outright. ×0. And **space-grouped thousands are not de-grouped** (`1 000 km` → *en nul
+  kilometer*) — but the file's header DECLARES that decision, and it is right: ×0 across all four space
+  characters in da_dk, which group with periods (×82).
+- Hygiene, no output change: `normalize.ts` says its `percent` tier declaration "never fires" because the
+  local rule claims every `%` — the local rule is `(\d+)\s*%` and does NOT claim a PREFIXED sign, so the
+  tier is what reads `%50`. And `phonemizeWordRules`'s `lw[2] !== "r"` guard is redundant: the character
+  class it guards already excludes ⟨r⟩.
+
 ### From the rw port (2026-08-26) — 200/200 first run, one TS fix, two filed
 
 **rw (Kinyarwanda, ~12M)** — 4 files, ~470 C# lines: a greedy longest-match grapheme scan (the ⟨Cy⟩
@@ -649,6 +809,74 @@ Found, not fixed:
 - Hygiene, no output change: step 1's zero-width class was written with the four INVISIBLE characters, so
   the line read as an empty class. Escaped in both engines (the #931 rule).
 
+### From the ckb port (2026-08-27) — 200/200 first run; full log in `docs/ckb_port_investigation.md`
+
+**ckb (Central Kurdish / Sorani, ~8M)** — 6 files, ~430 C# lines, gate **114 → 115 languages, 22,496 →
+22,696 rows, 0 differ, 0 BLOCKED**. ⚠ **NO PERSO-ARABIC CORE WAS INVOLVED, and that was worth checking
+rather than assuming**: ckb is a Perso-Arabic script but imports none of the shared abjad machinery — the
+SORANI alphabet writes every long vowel and the short /a/, so there is no short-vowel wall to restore and
+nothing in `Core/HarakatLexicon.cs` / `Core/RiderDiacritizer.cs` is reachable. It shares only `Clauses`,
+`LoadManifest`, `LoadTsv`, `Numbers`, `Unicode`, `Foreign` and `StructuralTagger`, and the neural tier is
+`CreateWordStructuralTagger` + `WordLevelNeuralPrepass` unchanged, as in sd/bn/af/fr. **The shared core
+needed no change.**
+
+Widenings: corpus-wide differential over **4,275 unique lines** (8,696 FLEURS `ckb_iq` col 3+4, 143 mined,
+the 200 golden texts, 261 hand-built) × sync AND async = **8,550 comparisons, 0 differ, 0 throws**.
+⚠ The corpus alone covers NONE of the degree sign, the currency signs, the relational signs, U+2212 or an
+above-2⁵³ digit run — all five are 0 in FLEURS + mined and rest entirely on the hand-built lines. 3,292 of
+the 4,275 lines read differently on the async path in both engines, so the tagger tier is live on both
+sides rather than silently serving the sync reading.
+
+Fixed in TypeScript first, with tests, goldens regenerated, then ported:
+
+- ⚠ **A FIX WITH A STATED ARGUMENT DID NOT REACH THE SECOND CASE THE ARGUMENT COVERS.** `scanWord`
+  special-cases the one-letter word ⟨و⟩ because "a bare [w] is not pronounceable as a word" — and Sorani
+  has TWO matres lectionis. The one-letter ⟨ی⟩ is the detached IZAFE (`٢٤ ی ئەیلول` "the 24th OF
+  September", `16ی ئەیلوول`, `80%ی داهات`) and read as a bare **[j]**, 405 times across the corpus; the
+  next one-letter token down is 14 instances of a fragment, so it is one construction, not a tail.
+  Measured exactly as the ⟨و⟩ note was (min of wav2vec2 and allosaurus, 151 affected rows): median
+  0.3575 → 0.3558, mean 0.3849 → 0.3794, **72 closer / 1 further**. `i` and `iː` score IDENTICALLY —
+  `fold` strips length — so the quality is decided on the language, and deletion again wins on rows
+  (149/2) and loses on the mean, which is the ⟨و⟩ note's own connected-speech finding. **15 golden rows
+  move.**
+- ⚠ **AN ERA-SHAPED DISCRIMINATOR QUESTION, ANSWERED PER SIGN.** The signed-number rule admits a LETTER
+  before the sign for `UTC+1`, and applied that to the minus as well. Reading the instances rather than
+  counting them: the one letter-adjacent PLUS is `(UTC+1)`; all **20** letter-adjacent MINUSES are
+  designations — `کۆڤید-19`, `نوێ-COVID-19`, `HJR-3`, `Il-76s`, `چانداریان-1` — and not one is a
+  subtraction, so COVID-19 read *koːviːd kam noːzda*, "covid MINUS nineteen". Split into two arms; the
+  minus takes the ordinary non-letter boundary. **0 golden rows move.** (Cf. kmr's digit guard and
+  Serbian's case guard for the same class: the discriminator each corpus supports is different, and here
+  it is the SIGN.)
+- Hygiene: `normalize.ts`'s header claimed the decimal rule "accepts one or two fractional digits". It has
+  no cap; the fractional part is read digit by digit either way, and it is the UNIT rule's `NOT_VERSION`
+  guard that tells `802.11m` from a quantity.
+
+**Found and NOT fixed:**
+
+- ⚠ **THE ZERO NUMERAL HAS NO NUCLEUS, IT IS ALREADY IN THE GOLDEN, AND THE LEXICON IS THE WRONG PLACE
+  FOR IT.** `سفر` reads *sfɾ* — the only word in the numbers table with no vowel — and it is not obscure:
+  2 of the 200 golden rows carry it (`3.50 مەتر` → *seː xaːɫ peːnd͡ʒ **sfɾ** matɪɾ*), 43 occurrences
+  corpus-wide, and every one of the 22 colon-clock instances routes through it. This is precisely the
+  class the module header cites as "not a variant, IMPOSSIBLE" (ملیۆن → *mljoːn*). All three obvious
+  fixes are closed: the AsoSoft builder's pair for سفر is *safar*, so the bizroke-only filter dropped the
+  row on purpose and a whole-word entry would pick one reading of a genuine homograph; the tagger DOES
+  read it *sɪfɪɾ* but the number path never consults the OOV resolver and `wordLevelNeuralPrepass` keys
+  its map off words present in the TEXT, which a composed number word is not; and the manifest states
+  "no hand IPA" for this table. It needs a NUMERAL-CONTEXT reading — the zero word is unambiguously
+  *sifir* in a numeral — which is a design decision, not a port one.
+- **The lexicon is looked up on the UNSTRIPPED token while the scan strips ZWNJ + tatweel**, so a headword
+  whose corpus spelling carries either mark can never hit it. Measured: ×0 reachable in FLEURS + mined.
+  `loadTsvMap`'s `fold` option (#1072) is the mechanism the day one appears.
+- **A rate declines when its denominator is inflected**: `٨٣ کیلۆمەتر/کاتژمێرێك` — the
+  `(?![\p{L}\p{M}\d])` guard rejects the ـێك suffix, the slash is then dropped, and the "per" is lost.
+  ×2, plus `300میل/کاتژمێر` ×1 where میل is simply not in the numerator table. The `lo` degree shape:
+  how far number–unit adjacency should stretch is a corpus argument.
+- **`1 / 5` loses its slash** — ckb has no fraction rule at all. ×1, and inventing one on n=1 is #955.
+- Shared shapes, ×0 attested here and already filed elsewhere: space-grouped thousands
+  (`1 000 000` → *jak sfɾ sfɾ*), caret exponents (`10^6` → *da*), `25°Cx` gluing the letters onto the
+  degree word, U+2212 between digits, and `007` → *ħawt* (`Number` drops leading zeros — the DECIMAL path
+  is safe, because the fractional part never goes through `Number`).
+
 ## ⚠ Things that will bite
 
 - **`\d` is the single worst hazard**: 1,914 uses, JS ASCII-only vs .NET all-Unicode-digits, and the
@@ -752,3 +980,113 @@ Found, not fixed:
   reading the instances said 7 of them are centimetres.
 - **Data lives in `data/`, owned by neither engine.** Both resolve the same keys. The generator
   tools under `tools/` write there too — that was a review catch, not something a test found.
+
+### From the sl port (2026-08-27) — ⚠ THE GOLDEN ITSELF WAS WRONG, and six more defects no golden can see
+
+**sl (Slovenian, ~2.5M)** — 5 files, ~1,020 C# lines over a 1,587-line TS module, the largest normalizer in
+this wave (1,068 lines). Gate **114 → 115 languages, 22,496 → 22,696 rows, 0 differ, 0 BLOCKED**; C# tests
+1,320 → 1,333.
+
+⚠ **THE FIRST PARITY RUN REPORTED 8/200 DIFFER, AND THE C# WAS RIGHT.** Running the TypeScript against the
+same golden reported *the same eight rows*: `csharp/goldens/sl.tsv` had been stale since #1072 landed the
+`loadTsvMap` fold a day earlier. That commit's own summary said "the goldens did not move and the parity
+gate stayed at 0 differ", which was true only because **sl was unported, so nothing ran its golden.** The
+reasoning behind the claim is the durable finding: "an alias is written only into a FREE slot, so no reading
+the engine can already reach can change" is about LEXICON-RESOLVED readings, and a free slot is free
+precisely because the word was an OOV MISS — whose fallback answer the goldens record. Slovene's fold adds
+680 headwords, and eight golden rows moved off the penultimate fallback onto the lexicon
+(`umrl`: *ˈumərl* → *umˈərl*). sv/nb/da/bal were re-checked the same way and are all 0 differ, because in
+those four the fold repairs a broken agreement rather than adding entries. Corrected in `loadTsv.ts`'s
+docstring, its C# counterpart, and Run 3 of `docs/investigations/nativiser_lexicon_seam_investigation.md`.
+**A change that touches a lexicon must regenerate the goldens of every language reading it, PORTED OR NOT.**
+
+⚠ **THE FOLD IS THE PORT'S ONE MANDATORY PIECE OF WIRING.** `stress.tsv` is the fleet's worst case: 1,252 of
+37,340 keys are ə/ł kaikki respellings no Slovene input can spell. Both engines now dump a **byte-identical
+38,020-key map** (37,340 file keys + 680 aliases), and the **102 shadowed pairs resolve identically** under
+the unfolded-key-wins rule, whose tie-break needs the FILE'S row order — `LoadTsvMapV` gained the same
+`fold` parameter its reference-type sibling already had. Pinned in `LexiconFoldTests`.
+
+Fixed in TypeScript first with tests, goldens regenerated — **0 of 200 rows moved for all six**:
+
+- **A 100× ERROR IN THE DECIMAL, the sr/hr/bs shape (#1076) in a fourth language that groups the same way.**
+  Step 16 replaced the comma and left the fractional run as its own token, which the tokenizer reads with
+  `Number()` — so `Number("001")` is 1 and `0,001 grama` read *nič vejica ena grama*, "zero point one gram".
+  On top of the magnitude error it is a distinct-numbers violation: `1,05 km` and `1,5 km` read IDENTICALLY.
+  The zeros are emitted as DIGITS, as in Serbian, because the number arm already reads a bare `0` as *nič*.
+- ⚠ **`\p{Lu}` UNDER `/i` MATCHES A LOWERCASE LETTER, AND sl HAD TWO CAPITALISATION GUARDS BUILT ON IT.**
+  Both were therefore absent, and both files state the guard as load-bearing:
+    · the HONORIFIC rule ("expanded ONLY before a capitalised word, and that guard is not cosmetic" — `ga.`
+      is the accusative pronoun *ga*) read `Vzel ga. je` as *Vzel gospa je*, the exact reading it was written
+      to prevent;
+    · the REGNAL rule claims "the intervening words must all be capitalised, so the shape … cannot match
+      anything else" — and instead matched ORDINARY PROSE: `kralj je bil 12 let` → *dvanajsti let*,
+      `cesar je umrl pri 40 letih` → *štirideseti letih*, `papež je bil star 78 let` →
+      *oseminsedemdeseti let*, `poglavar je govoril 2 uri` → *drugi uri*. All four titles take a bare
+      quantity like that in ordinary Slovene, so this is not an exotic false positive.
+  Fixed by spelling the abbreviation's/title's own case into the class and dropping the flag. ⚠ **MEASURED
+  COST, stated rather than hidden: 10 corpus lines change, and every one is FLEURS' all-lowercase column 4**
+  (`ga. kirchner`, `dr. damadian`, `kraljica elizabeta 2`) — a transcript artifact, not Slovene text. The
+  properly-cased column 3, which is what the goldens use, is untouched. ⚠ **`xhosa/normalize.ts:194` has the
+  same shape** (`(?=[ ]\p{Lu})` under `giu`) and is NOT fixed here — see below.
+- **The era marker's `i` flag ate a person's initials** — `N. Š.` is also two capital letters with stops, and
+  this block runs BEFORE the dotted-capital-run rule, so `N. Š. Kovač je prišel` read *našega štetja. Kovač*:
+  a name replaced by a date. Exactly the defect `croatian/normalize.ts` was fixed for in #1074, in a file
+  that inherited the shape. All ELEVEN era instances in sl_si are lowercase, counted.
+- **The degree rule TRUNCATED its count, so a decimal could never reach the fifth slot** — the Ukrainian #920
+  shape. `slovenian.ts` declares that slot as "the genitive SINGULAR a decimal governs" and `counted()`
+  indexes the same table the shared tier does, but `intOf` truncated first: one construction had three
+  answers — `1,5 °C` → *stopinja* (nom.sg), `2,4 °C` → *stopinji* (DUAL), `0,5 °C` → *stopinje* — while
+  `1,5 km` through the tier read the gen.sg *kilometra*.
+- **`slCountForm` routed ZERO to the paucal**, the form for 3–4: `n <= 4` is true of 0, so `0 %` read *nič
+  odstotki* and `0 km` *nič kilometri*. The shared `slavicCountForm`'s mod-10 arithmetic sends 0 to its
+  many-slot, and Slovene takes the genitive plural (*nič odstotkov*). The kk `orthographic(0)` shape: a
+  guard catching zero by accident. ×0 in sl_si, which writes no zero quantity at all.
+- **Hygiene, no output change:** `slovenian.jsonc`'s header listed `EVA` among "the genuinely word-read ones
+  … left to the g2p" while `acronymLetters` contains it — and the corpus's one instance is
+  `dejavnost človeka zunaj plovila (EVA)`, an initialism. The data was right and the comment was not.
+
+**Widenings.** Corpus-wide differential: 3,806 FLEURS `sl_si` lines (col 3+4), sync AND async, 0 differ, 0
+throws. Off-golden probes: 325 hand-built lines (one per arm plus the adversarial neighbour each arm must
+decline), × normalize, sync and async, 0 differ. Reachability swept: all 20 `acronymLetters` rows fire and
+none is redundant (the shared OOV test would spell none of them); every `LETTER_NAME`, `DENOMINATOR`, `URA`,
+`GOV_SLOT` and `COUNTED` row is reached. Coverage of the new code, measured not assumed: of 3,806 corpus
+lines, 784 carry a digit, 187 an `N.` ordinal, 120 an all-caps run, 74 a colon/period clock, 60 a regnal
+title, 52 a slash, 42 a period-grouped figure, 37 a unit key, 32 a numeral-initial compound, 30 a decimal
+comma, 30 a dotted abbreviation, 24 a range dash, 10 an era marker, 8 a percent, 8 an exponent, 4 a degree
+sign. **Currency signs and space-grouped thousands are ×0 in the corpus** — both are carried by the probes
+only, and the currency table is declared on the strength of the spelled nouns.
+
+**Found and NOT fixed — filed, with the count that decided it:**
+
+- ⚠ **THE SHAPE IS A FLEET CLASS, AND TWO SITES REMAIN.** Swept `tools/extract_regexes.mts`'s 2,289-pattern
+  corpus for `\p{Lu}`/`\p{Ll}` inside an `i`-flagged pattern: after the two sl fixes, exactly two are left.
+    · **`xhosa/normalize.ts:194`** — `(u?)Mnu\.?(?=[ \u00a0]\p{Lu})` under `giu`, the identical DEAD
+      positive guard: the honorific expands before a lowercase word there too. Reported rather than fixed,
+      per trap 55 — xh is a separate bring-up and a sibling is a hypothesis, not a source.
+    · **`slovenian/normalize.ts`'s own `CLOCK_GOV`** — `[\p{Ll}\p{M}]+` under `iu`, the "ONE intervening
+      adverb" slot, which therefore also admits a Capitalised word, so `do Ljubljane 15.00` takes the
+      genitive slot the preposition governs rather than the ungoverned nominative. Left as it is: the
+      preposition alternation needs the `i` for a sentence-initial *Ob*/*Med*, the effect is on the CASE
+      SLOT rather than on which words are read, and ×0 in the corpus has an intervening capital.
+  `german/normalize.ts:191` has the shape too but is built from a template and is not in the extracted
+  corpus; there the `\p{Lu}` sits in a NEGATIVE lookbehind, so `/i` widens what the rule REFUSES — the
+  conservative direction — and it is noted rather than filed.
+- **`20 °Cx` glues the degree noun onto the letters** — *dvajset stˈɔpint͡sks*. The `(?![\p{L}\p{M}])` guard
+  correctly declines the °C arm, and the BARE-degree arm then fires on the same digits. Identical to the su
+  `25°Cölner` and lo `20 °Cx` findings; the repair is the same fleet decision, not an sl edit. ×0 attested.
+- **`(0) c°` reads *nič t͡s*** — the scale letter is lost and the degree word never appears, the lo finding
+  one bracket over. ×0 attested in sl_si.
+- **A hyphen-suffixed numeral drops a leading zero**: `0830-ih` → *osemsto tridesetih*. Step 7 passes `raw`
+  but `numberToWords` only consults it above 1e12, so the four-digit token goes through `Number()`. Same
+  class as the decimal fix above; ×0 attested, and the shape only exists for clock hours written with a
+  leading zero.
+- **`UTC-5` keeps its hyphen** where `UTC+1` is read: step 11's timezone arm claims only the `+` (the
+  corpus's one sign), and the g2p then drops the hyphen. ×0 attested. The cy/ga `GMT-00:43` shape.
+- **`1000/2000` loses its slash** (fraction operands capped at 3 digits — the su finding, fleet-wide) and
+  **a trillion reads digit-by-digit** (`numbers.ts` declares no magnitude above *milijarda*; needs a sourced
+  Slovene *bilijon*, and the manifest's `magnitudes` block is the place for it).
+- **`ordinalBase` accepts n < 1,000,000 but no caller can exceed four digits** — every ordinal rule's
+  numeral group is `\d{1,4}`, so the 10⁴–10⁶ band of the compositor is unreachable. Inert, not wrong.
+- **`53-50 km` is read as a SCORE** (*triinpetdeset proti petdeset*), because step 5a's discriminator is
+  direction and a non-ascending two-digit pair is a score by construction. Documented design; recorded
+  because a descending range is a real construction and the ht port filed the mirror case.

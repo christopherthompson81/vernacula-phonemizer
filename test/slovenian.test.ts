@@ -173,6 +173,12 @@ describe("Slovenian — the four-way DUAL count agreement", () => {
     test("slCountForm is four-way + a decimal slot, and is NOT the Slavic final-digit rule", () => {
         expect([1, 2, 3, 4, 5, 21, 22, 25, 12, 101].map(slCountForm)).toEqual([0, 1, 2, 2, 3, 3, 3, 3, 3, 3]);
         expect(slCountForm(2.5)).toBe(4); // a decimal governs the genitive SINGULAR
+        // ⚠ ZERO IS THE GENITIVE PLURAL, not the paucal — `n <= 4` used to catch it by accident, so
+        // `0 %` read *nič odstotki*, the 3–4 form. The shared slavicCountForm sends 0 to its many-slot too.
+        expect(slCountForm(0)).toBe(3);
+        expect(normalizeSlovenian("0 %")).toBe("0 odstotkov");
+        expect(normalizeSlovenian("0 °C")).toBe("0 stopinj Celzija");
+        expect(normalizeSlovenian("0 km")).toBe("0 kilometrov");
     });
 
     test("percent takes all four forms + the decimal one", () => {
@@ -200,6 +206,15 @@ describe("Slovenian — grouping, decimals, clocks, ranges, units", () => {
         expect(normalizeSlovenian("5.000.000 posameznikov")).toBe("5000000 posameznikov"); // two passes
         expect(normalizeSlovenian("magnitude 6,5.")).toBe("magnitude 6 vejica 5.");
         expect(normalizeSlovenian("2,4 GHz")).toBe("2 vejica 4 gigaherca"); // gen.sg after a decimal
+        // ⚠ THE FRACTIONAL PART'S LEADING ZEROS SURVIVE THE COMMA — a 100× error otherwise, because the
+        // tokenizer reads the surviving run with `Number()` and `Number("001")` is 1. Emitted as DIGITS,
+        // which the number arm already reads as this language's zero word.
+        expect(normalizeSlovenian("0,001 grama")).toBe("0 vejica 0 0 1 grama");
+        expect(normalizeSlovenian("0,05 grama")).toBe("0 vejica 0 5 grama");
+        expect(normalizeSlovenian("1,50 km")).toBe("1 vejica 50 kilometra"); // no leading zero: untouched
+        // …and the two distinct numbers must not read alike, which they did
+        expect(normalizeSlovenian("1,05 km")).not.toBe(normalizeSlovenian("1,5 km"));
+        expect(getPhonemizer("sl").text("0,001 grama")).toBe(getPhonemizer("sl").text("nič vejica nič nič ena grama"));
     });
 
     test("the clock: an ORDINAL hour + *ura* in the case the PREPOSITION governs", () => {
@@ -254,6 +269,12 @@ describe("Slovenian — abbreviations, signs, fractions, initialisms", () => {
         expect(normalizeSlovenian("leta 323 pr. n. š. obnovili.")).toBe("leta 323 pred našim štetjem obnovili.");
         expect(normalizeSlovenian("do 1100 n. š.")).toBe("do 1100 našega štetja."); // sentence period restored
         expect(normalizeSlovenian("leto 5000 pr. n. št.!")).toBe("leto 5000 pred našim štetjem!"); // no double mark
+        // ⚠ …and NOT a person's spaced INITIALS. `n. š.` is also two capital letters with stops, and this
+        // block runs before the dotted-capital-run rule, so an `i` flag replaced a name with a date. All
+        // eleven era instances in sl_si are lowercase (#1074's Croatian shape).
+        // the initials fall to step 20's dotted-capital-run rule, which is what reads them
+        expect(normalizeSlovenian("N. Š. Kovač je prišel")).toBe("ne še Kovač je prišel");
+        expect(normalizeSlovenian("Pr. N. Š. Kovač je prišel")).toBe("Pr. ne še Kovač je prišel");
     });
 
     test("dotted abbreviations; `ga.` is expanded ONLY before a capital", () => {
@@ -265,6 +286,34 @@ describe("Slovenian — abbreviations, signs, fractions, initialisms", () => {
         expect(normalizeSlovenian("meni dr. Moll, in")).toBe("meni doktor Moll, in");
         // …and NOT the pronoun *ga*, which ends 23 of the 24 corpus sentences containing that string
         expect(normalizeSlovenian("zato ga nisem zares poslušal ga.")).toBe("zato ga nisem zares poslušal ga.");
+        // ⚠ AND THE CAPITAL GUARD MUST ACTUALLY BE ONE. `\p{Lu}` under `/i` matches a LOWERCASE letter, so
+        // for as long as this rule carried the flag the guard did not exist: `Vzel ga. je` read *Vzel
+        // gospa je*, which is the exact reading the guard was written to prevent.
+        expect(normalizeSlovenian("Vzel ga. je")).toBe("Vzel ga. je");
+        expect(normalizeSlovenian("dr. lee je prišel")).toBe("dr. lee je prišel");
+    });
+
+    test("the REGNAL rule's capitalised-names guard is real, not an /i-folded one", () => {
+        // the three corpus shapes still read
+        expect(normalizeSlovenian("kraljica Elizabeta 2 je")).toBe("kraljica Elizabeta druga je");
+        expect(normalizeSlovenian("kraljice Elizabete 2 je")).toBe("kraljice Elizabete druge je");
+        // ⚠ …and ORDINARY PROSE does not. Under `/i` the `\p{Lu}` in the names group matched lowercase, so
+        // a title plus any 1–3 words plus a bare quantity became a regnal ordinal.
+        expect(normalizeSlovenian("kralj je bil 12 let")).toBe("kralj je bil 12 let");
+        expect(normalizeSlovenian("cesar je umrl pri 40 letih")).toBe("cesar je umrl pri 40 letih");
+        expect(normalizeSlovenian("papež je bil star 78 let")).toBe("papež je bil star 78 let");
+        expect(normalizeSlovenian("poglavar je govoril 2 uri")).toBe("poglavar je govoril 2 uri");
+    });
+
+    test("the DEGREE noun agrees with the WHOLE value, so a decimal reaches the fifth slot", () => {
+        // one construction had three answers: nom.sg, dual and gen.sg, decided by the truncated integer
+        expect(normalizeSlovenian("1,5 °C")).toBe("1 vejica 5 stopinje Celzija");
+        expect(normalizeSlovenian("2,4 °C")).toBe("2 vejica 4 stopinje Celzija");
+        expect(normalizeSlovenian("0,5 °C")).toBe("0 vejica 5 stopinje Celzija");
+        // …and the integers are unmoved
+        expect(normalizeSlovenian("1 °C")).toBe("1 stopinja Celzija");
+        expect(normalizeSlovenian("2 °C")).toBe("dve stopinji Celzija"); // step 15's feminine dual repair
+        expect(normalizeSlovenian("90 °F")).toBe("90 stopinj Fahrenheita");
     });
 
     test("degrees, signs, the ampersand and the fractions", () => {

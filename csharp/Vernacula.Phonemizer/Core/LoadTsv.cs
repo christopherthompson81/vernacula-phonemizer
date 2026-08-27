@@ -50,7 +50,8 @@ public static class LoadTsv
     /// plausible wrong reading. Passing the engine's own nativiser adds the folded spelling as an ALIAS for
     /// the same value.
     /// <para>⚠ AN UNFOLDED KEY ALREADY IN THE FILE WINS, ALWAYS — an alias is written only into a FREE slot,
-    /// so no reading the engine can already reach today can change.</para>
+    /// so no LEXICON-RESOLVED reading can change. ⚠ That is not "no golden moves": a free slot is free
+    /// because the word was an OOV miss, and the fallback rule's answer is in the goldens. See the TS.</para>
     /// <para>⚠ AND THE ITERATION IS OVER THE FILE'S ROWS IN ORDER, which is why the rows are collected into a
     /// list first. Two keys can fold onto the same free slot, and "first wins" only means anything if the
     /// order is the file's. A Dictionary happens to preserve insertion order here, but relying on that for a
@@ -82,21 +83,31 @@ public static class LoadTsv
     }
 
     /// <summary>Value-type variant of <see cref="LoadTsvMap{V}(string,string,Func{string,string,V},bool)"/>:
-    /// the TS `Number` parses become `double?` here, and a null skips the row as `undefined` does there.</summary>
+    /// the TS `Number` parses become `double?` here, and a null skips the row as `undefined` does there.
+    /// <para>⚠ <c>fold</c> CARRIES THE SAME CONTRACT AS THE REFERENCE-TYPE OVERLOAD — unfolded key wins, and
+    /// the alias pass iterates the FILE'S ROWS IN ORDER rather than the dictionary. See that overload.</para></summary>
     public static Dictionary<string, V> LoadTsvMapV<V>(
         string moduleDir,
         string filename,
         Func<string, string, V?> parse,
-        bool optional = false) where V : struct
+        bool optional = false,
+        Func<string, string>? fold = null) where V : struct
     {
         var map = new Dictionary<string, V>();
+        var rows = new List<(string Key, V Value)>();
         foreach (var line in ReadDataLines(moduleDir, filename, optional))
         {
             var tab = line.IndexOf('\t');
             if (tab <= 0) continue;
             var v = parse(line[(tab + 1)..], line[..tab]);
-            if (v.HasValue) map[line[..tab]] = v.Value;
+            if (v.HasValue) { map[line[..tab]] = v.Value; rows.Add((line[..tab], v.Value)); }
         }
+        if (fold is not null)
+            foreach (var (k, v) in rows)
+            {
+                var f = fold(k);
+                if (f != k && !map.ContainsKey(f)) map[f] = v;
+            }
         return map;
     }
 

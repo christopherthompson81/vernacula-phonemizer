@@ -173,8 +173,17 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
  * Declared HERE, beside the tier that consumes it, so the two cannot drift apart, and so the module graph
  * has no initialisation cycle (normalize.ts imports this file, never the reverse at init time).
  */
+/**
+ * ⚠ ZERO IS THE GENITIVE PLURAL, AND THE FIRST VERSION CAUGHT IT BY ACCIDENT IN THE PAUCAL. `n <= 4` is
+ * true of 0, so `0 %` read *nič odstotki* and `0 °C` *nič stopinje* — the 3–4 form, where Slovene (like
+ * every Slavic language, and like the shared `slavicCountForm`, whose mod-10 arithmetic sends 0 to its
+ * many-slot) takes the genitive plural: *nič odstotkov*, *nič stopinj*. The dual and the paucal are
+ * literally the forms for 2 and for 3–4; nothing else may reach them. ×0 in sl_si — the corpus writes no
+ * zero quantity at all — so this is the kk `orthographic(0)` shape: a guard that was catching zero by
+ * accident, found by reading the selector against the table it indexes.
+ */
 export const slCountForm = (n: number): number =>
-    !Number.isInteger(n) ? 4 : n === 1 ? 0 : n === 2 ? 1 : n <= 4 ? 2 : 3;
+    !Number.isInteger(n) ? 4 : n === 1 ? 0 : n === 2 ? 1 : n >= 3 && n <= 4 ? 2 : 3;
 
 /** A counted noun in the five slots `slCountForm` indexes, plus its grammatical GENDER — which the tier
  *  does not need but normalize.ts step 15 does, because Slovene marks gender on the numerals 1–4 and the

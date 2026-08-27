@@ -43,6 +43,7 @@ public static class Bootstrap
             Bhojpuri.BhojpuriPhonemizer.RegisterSelf();
             Bulgarian.BulgarianPhonemizer.RegisterSelf();
             Cebuano.CebuanoPhonemizer.RegisterSelf();
+            CentralKurdish.CentralKurdishPhonemizer.RegisterSelf();
             Chhattisgarhi.ChhattisgarhiPhonemizer.RegisterSelf();
             English.EnglishFactory.RegisterSelf();
             EnglishGb.EnglishGb.RegisterSelf();
@@ -64,6 +65,7 @@ public static class Bootstrap
             Malay.MalayPhonemizer.RegisterSelf();
             Maori.MaoriPhonemizer.RegisterSelf();
             Naija.NaijaPhonemizer.RegisterSelf();
+            Norwegian.NorwegianPhonemizer.RegisterSelf();
             Occitan.OccitanPhonemizer.RegisterSelf();
             Odia.OdiaPhonemizer.RegisterSelf();
             Oromo.OromoPhonemizer.RegisterSelf();
@@ -136,6 +138,8 @@ public static class Bootstrap
             Armenian.Armenian.RegisterSelf();
             Haitian.HaitianPhonemizer.RegisterSelf();
             Kinyarwanda.KinyarwandaPhonemizer.RegisterSelf();
+            Slovenian.SlovenianPhonemizer.RegisterSelf();
+            Danish.DanishPhonemizer.RegisterSelf();
         }
     }
 }

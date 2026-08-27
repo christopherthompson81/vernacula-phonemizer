@@ -93,6 +93,11 @@ public class ManifestMappingTests
             "provenance", "convention");
 
     [Fact]
+    public void DanishManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/danish", "danish.jsonc", Languages.Danish.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
     public void GreekManifestIsFullyMapped() =>
         AssertFullyMapped("languages/greek", "greek.jsonc", Languages.Greek.Manifest.MANIFEST,
             "provenance", "convention");
@@ -342,6 +347,11 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance", "convention");
 
     [Fact]
+    public void NorwegianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/norwegian", "norwegian.jsonc", Languages.Norwegian.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
     public void OromoManifestIsFullyMapped() =>
         AssertFullyMapped("languages/oromo", "oromo.jsonc", Languages.Oromo.Manifest.DEF,
             "language", "name", "script", "provenance");
@@ -384,6 +394,11 @@ public class ManifestMappingTests
     [Fact]
     public void TagalogManifestIsFullyMapped() =>
         AssertFullyMapped("languages/tagalog", "tagalog.jsonc", Languages.Tagalog.Manifest.MANIFEST,
+            "language", "name", "script", "provenance");
+
+    [Fact]
+    public void CentralKurdishManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/central-kurdish", "central-kurdish.jsonc", Languages.CentralKurdish.Manifest.DEF,
             "language", "name", "script", "provenance");
 
     [Fact]
@@ -587,6 +602,11 @@ public class ManifestMappingTests
     public void BosnianManifestIsFullyMapped() =>
         AssertFullyMapped("languages/bosnian", "bosnian.jsonc", Languages.Bosnian.Manifest.MANIFEST,
             "language", "name", "script");
+
+    [Fact]
+    public void SlovenianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/slovenian", "slovenian.jsonc", Languages.Slovenian.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
 
     [Fact]
     public void SerbianManifestIsFullyMapped() =>

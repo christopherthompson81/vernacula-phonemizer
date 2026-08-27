@@ -91,9 +91,27 @@ const MONTHS: readonly (string | undefined)[] = [
     "juli", "august", "september", "oktober", "november", "desember",
 ];
 
-/** Dotted abbreviations that occur, longest first. The dot is CONSUMED — it is an abbreviation dot, not a
- *  sentence end, and it was reaching clausePunctuation as a full stop mid-phrase. */
+/**
+ * Dotted abbreviations that occur, longest first. The dot is CONSUMED — it is an abbreviation dot, not a
+ * sentence end, and it was reaching clausePunctuation as a full stop mid-phrase.
+ *
+ * ⚠ `ca.` IS THE MOST FREQUENT MEMBER OF THIS TABLE AND WAS THE ONE MISSING FROM IT. 21 instances in
+ * nb_no against `osv.` 10, `kl.` 10, `nr.` 5, `dr.` 3, `bl.a.` 2, `dvs.` 1 — every one of which was
+ * already here. The word itself read fine (the lexicon maps the token `ca` to [ˈsɪɾkɑ]); it was the DOT
+ * that survived, so `ca. én amerikansk cent` — a line of the parity golden — read *ˈsɪɾkɑ . ˈeːn*, the
+ * mid-phrase full stop this table exists to remove. `cirka` and `ca` are the same reading in the lexicon.
+ *
+ * ⚠ AND THE ERA MARKER, which was not merely unread but read as MONEY. `f.Kr.` tokenized as `f` + `Kr`,
+ * and `kr` is the lexicon's currency abbreviation — so `323 f.Kr. etter at…` read *ˈɛf . ˈkɾuːnəɾ .*,
+ * "eff kroner" plus two spurious clause breaks. 12 instances across nb_no in four spellings (`f.Kr.`,
+ * `f.Kr`, `f.kr`, and once `f.Kr!` where the sentence ends in an exclamation), with `e.Kr.`/`e.kr` for the
+ * common era. The trailing dot is OPTIONAL and a trailing LETTER is refused, or `f. Kristian` would be
+ * claimed; both words of each expansion are in the NST lexicon (før, etter, Kristus).
+ */
 const ABBREV: [RegExp, string][] = [
+    [/\bf\.kr\.?(?![\p{L}\p{M}])/giu, "før Kristus"],
+    [/\be\.kr\.?(?![\p{L}\p{M}])/giu, "etter Kristus"],
+    [/\bca\./giu, "cirka"],
     [/\bkl\./giu, "klokka"],
     [/\bdvs\./giu, "det vil si"],
     [/\bbl\.a\./giu, "blant annet"],
@@ -101,6 +119,12 @@ const ABBREV: [RegExp, string][] = [
     [/\bosv\./giu, "og så videre"],
     [/\bnr\./giu, "nummer"],
     [/\bdr\./giu, "doktor"],
+    // ⚠ `jr.` READ AS A BARE ONSET CLUSTER, *jɾ*, plus the stranded stop — no vowel, so not even a word. ×3
+    // in nb_no, every one the name suffix (`Piquet jr.`, `Truex, jr.`, `n. wayne hale jr.`), and `junior` is
+    // in the NST lexicon. ⚠ `sr.` is NOT added beside it: ×0 here, and `senior` on zero attestation is the
+    // #955 invention. `m.` (×2, `James m. flere` = *med flere*) stays out for the opposite reason — it is
+    // genuinely ambiguous with a lone initial and with the metre abbreviation.
+    [/\bjr\./giu, "junior"],
 ];
 
 /**
@@ -203,8 +227,14 @@ export function normalizeNorwegian(input: string): string {
     //     carries ¥ only (3 instances, all `¥N`), and the sign was dropped outright so the amount read as
     //     a bare number. The others are included because a phonemizer is handed arbitrary text, not only
     //     this corpus — a phonemizer is handed arbitrary text, not only a corpus.
+    //     ⚠ THE AMOUNT MAY NOT END IN A SPACE. `(\d[\d ]*)` is greedy over spaces with nothing after it to
+    //     force a backtrack, so it swallowed the space SEPARATING the amount from the next word — and the
+    //     currency noun was then written where that space had been. The corpus's own sentence
+    //     `mellom ¥2500 og ¥130 000` read *ˈyːənɔɡ*, "yenog" as ONE token (and, being no longer a lexicon
+    //     word, with the wrong vowel too); the `¥130 000,` beside it was right only because a COMMA followed.
+    //     All four signs had it. The amount now has to end in a digit.
     for (const [sign, word] of Object.entries(CURRENCY))
-        t = t.replace(new RegExp(`${sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\s*(\\d[\\d ]*)`, "gu"), `$1 ${word}`);
+        t = t.replace(new RegExp(`${sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\s*(\\d(?:[\\d ]*\\d)?)`, "gu"), `$1 ${word}`);
 
     // 14) SIGNED NUMBERS. A bare `+` before a number is a POSITIVE sign and was dropped outright —
     //     `+30°C` read as plain "tretti grader" and `UTC +1` lost the offset entirely. Measured, the plus

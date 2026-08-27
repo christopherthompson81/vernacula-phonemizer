@@ -148,3 +148,51 @@ re-states a number cannot** — the ledger in `test/lexicon-reachability.test.ts
 maps every run, so it caught its own author's arithmetic. That is the argument for landing the test BEFORE
 the fix rather than alongside it: had the ledger simply been transcribed from Run 1, the three pairs would
 have been silently accepted as correct and the number would have been wrong in the repo forever.
+
+---
+
+## Run 3 — 2026-08-27, during the C# port of `sl`
+
+**Command.** `npx tsx tools/gen_parity_goldens.mts sl`, then
+`dotnet run --project csharp/tools/parity -- sl`, plus a cross-engine dump of the LOADED stress map from
+both engines (`.probe/sl/`, not committed).
+
+**Question.** Does the C# `LoadTsvMap`'s `fold` load the same lexicon the TypeScript does, and does Run 2's
+"no reading reachable before the fix has moved" hold as stated?
+
+### Raw finding
+
+The two engines load **byte-identical** maps: 38,020 keys each, same values, dumped sorted and diffed.
+37,340 file keys + **680 aliases** — 684 keys whose fold is not a file key, four pairs of which fold onto
+the same new slot. 102 clashes, resolved identically on both sides by the unfolded-key-wins rule.
+
+**⚠ BUT `csharp/goldens/sl.tsv` WAS STALE, AND HAD BEEN SINCE #1072 LANDED.** The first parity run of the
+new C# engine reported **8 of 200 rows differ** — and running the TypeScript against the same golden
+reported *the same 8 rows*. The golden was generated before the fold; #1072 changed the reading and did not
+regenerate it.
+
+```
+… pɔznˈɛjɛ ˈumərl .      golden (pre-fold: the PENULTIMATE fallback)
+… pɔznˈɛjɛ umˈərl .      both engines today (the lexicon, via the alias umrł → umrl)
+```
+
+`sv`, `nb`, `da` and `bal` were checked the same way and are all 0 differ, which is consistent: Slovene is
+the only one of the five where the fold ADDS headwords rather than repairing a broken agreement.
+
+### What it implies
+
+**Run 2's claim was true of a narrower thing than it said, and the wording is what hid this.** "An alias is
+written only into a FREE slot, so no reading the engine can already reach today can change — which is also
+why the parity goldens cannot move" conflates two different statements. A free slot is free *because the
+word was an OOV miss*, and **an OOV miss is not silence**: it is the penultimate fallback, whose answer the
+goldens record. So the correct invariant is about **LEXICON-RESOLVED** readings, not about goldens; adding
+680 headwords necessarily moves every golden row that contains one of them, and eight did.
+
+**No gate could have caught it, for a reason worth naming: `sl` was UNPORTED.** The parity tool only runs
+the goldens of languages in `Bootstrap.cs`, so `sl.tsv` sat in the repo for a day being compared against
+nothing. A golden for an unported language is not a gate, it is a file — and #1072's own summary asserted
+the gate had stayed at 0 differ "through a change to how five lexicons load", which was true only because
+the one lexicon that moved belonged to the one language nothing measured. **A change that touches a
+lexicon should regenerate the goldens of every language reading it, ported or not.**
+
+Corrected in `src/core/loadTsv.ts`'s docstring and its C# counterpart, and the golden is regenerated.

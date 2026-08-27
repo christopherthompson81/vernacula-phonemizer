@@ -149,6 +149,20 @@ function scanWord(word: string): string {
     // ⚠ Deleting it instead scores MORE ROWS closer (1,312/25) but a WORSE median and mean — that is the
     // connected-speech reduction, and the standard form is what we emit.
     if (w.length === 1 && w[0] === "و") return "u";
+    // ⚠ AND THE SAME HOLE WAS LEFT STANDING FOR ⟨ی⟩, WHICH IS THE IZAFE. The rule above was written for the
+    // conjunction and its argument — "a bare glide is not pronounceable as a word" — is exactly as true of
+    // the other matres lectionis, so a one-letter ⟨ی⟩ read as [j] instead of the linker vowel /î/. It is the
+    // second commonest one-letter word in the corpus (405 of 3,040 FLEURS sentences + the mined artifact,
+    // against ⟨و⟩'s 5,848), and it is ONE construction in every instance: the detached izafe after a
+    // numeral or a noun — `٢٤ ی ئەیلول` "the 24th OF September", `16ی ئەیلوول`, `80%ی داهات`,
+    // `هیسپەرۆنیچەس ی پێدراوە`. Every other one-letter word in the corpus is ≤14 instances of a fragment.
+    // Measured the same way as ⟨و⟩ (151 affected rows, min of wav2vec2 and allosaurus): median 0.3575 →
+    // 0.3558, mean 0.3849 → 0.3794, 72 closer / 1 further = 72:1.
+    // ⚠ `iː`, matching what non-glide ⟨ی⟩ produces below and what the izafe /î/ is: the eval cannot tell
+    // `i` from `iː` (`fold` strips length) — both score identically — so the length is decided on the
+    // language, as it was for ⟨و⟩. ⚠ And deleting it again scores more rows closer (149/2) on a WORSE mean:
+    // the connected-speech reduction, not the standard form.
+    if (w.length === 1 && w[0] === "ی") return "iː";
     const toks: string[] = [];
     for (let i = 0; i < w.length; i++) {
         const c = w[i]!;

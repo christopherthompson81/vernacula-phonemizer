@@ -138,6 +138,20 @@ public class LanguageBootstrapTests
     [InlineData("mg", "olona mandeha", "ulˈuna maⁿdˈeha")]
     [InlineData("mg", "trano 21", "ʈʂˈanu irˈajka ˈaᵐbi ruapˈulu")]
     [InlineData("mg", "5 km² sy 2 kg", "dˈimi kilometˈaʈʂa turaɖʐˈua sˈi rˈua kˈilo")]
+    // ckb: the Latin unit alias, the degree scale, the preposed clause mark, and the detached izafe ⟨ی⟩.
+    [InlineData("ckb", "5 km لە 25 °C، ٢٠٢٤ی ئەیلول.",
+        "peːnd͡ʒ kiːloːmatɪɾ la biːstu peːnd͡ʒ pɪlaj saliːziː , duː hazaːɾu biːstu t͡ʃwaːɾ iː ʔajlul .")]
+    // Norwegian's four defining shapes. The complementary-length rule picks the vowel QUALITY as well as its
+    // length; the era marker and `ca.` are abbreviation dots that used to reach clausePunctuation (and `kr`
+    // used to reach the lexicon's CURRENCY reading); and a medial apostrophe keeps one word whole while the
+    // genitive's trailing one does not.
+    [InlineData("nb", "bok og takk", "ˈbuːk ˈoːɡ ˈtɑk")]
+    [InlineData("nb", "323 f.Kr.", "ˈtɾeːhʉndɾə ˈtjʉːə ˈtɾeː ˈføːɾ ˈkɾɪstʊs")]
+    [InlineData("nb", "ca. én cent", "ˈsɪɾkɑ ˈeːn ˈsɛnt")]
+    [InlineData("nb", "mellom ¥2500 og", "ˈmɛlɔm ˈtuː ˈtʉːsn ˈfɛmhʉndɾə ˈjɛn ˈoːɡ")]
+    [InlineData("nb", "O'Shannessy", "ˈɔshɑnːəsːʏ")]
+    [InlineData("nb", "Anders' bok", "ˈɑnəʂ ˈbuːk")]
+    [InlineData("nb", "133 m/s", "ˈhʊndɾə ˈtɾɛtɪ ˈtɾeː ˈmeːtəɾ ˈiː səˈkʊnə")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 
@@ -153,6 +167,29 @@ public class LanguageBootstrapTests
     }
 
     [Fact]
+    public async Task NorwegianAsyncUsesTheTagger()
+    {
+        // The tagger tier sits between the NST lexicon and the rules, and its tag alphabet embeds the stress
+        // mark — so on an OOV word the async reading must differ from the rule one, or the tier is not wired.
+        const string oov = "dreinsystemene"; // rules ˈdɾeːɪnsʏstəmənə → neural ˈdɾæɪnsʏˌsteːmənə
+        var rules = Languages.Norwegian.NorwegianPhonemizer.PhonemizeWordRules(oov);
+        var async = await Phonemizer.PhonemizeAsync(oov, "nb");
+        Assert.NotEqual(rules, async);
+    }
+
+    [Fact]
+    public void NorwegianLexiconIsLoadedThroughItsOwnNativiser()
+    {
+        // ⚠ #1068: `text()` folds a word to the declared inventory BEFORE the lookup, so 14 nb-lexicon keys
+        // are unreachable unless `loadTsvMap` aliases each to its nativised spelling. Both spellings must
+        // read the same, and the three value-CLASHES must resolve to the UNFOLDED row's value (`a`, not `á`).
+        Assert.Equal(Phonemizer.Phonemize("malmö", "nb"), Phonemizer.Phonemize("malmo", "nb"));
+        Assert.Equal("ˈɡøːɾɪŋ", Phonemizer.Phonemize("göring", "nb"));
+        Assert.Equal("sənˈjoːɾ", Phonemizer.Phonemize("señor", "nb"));
+        Assert.Equal("ˈɑː", Phonemizer.Phonemize("á", "nb")); // shadowed by `a`, which wins
+    }
+
+    [Fact]
     public async Task SindhiAsyncUsesTheTagger()
     {
         // Same invariant one abjad over: the tagger restores the unwritten short vowels between the lexicon
@@ -162,4 +199,62 @@ public class LanguageBootstrapTests
         var async = await Phonemizer.PhonemizeAsync(oov, "sd");
         Assert.NotEqual(rules, async);
     }
+
+    [Fact]
+    public async Task CentralKurdishAsyncUsesTheBizrokeTagger()
+    {
+        // Sorani's one unwritten vowel: the tagger sits between the AsoSoft lexicon and the rules, so a
+        // word neither covers must read differently on the async path — and the difference is /ɪ/ ALONE,
+        // which is the whole guarantee the consonant-consistency mask gives (see the TS tagger header).
+        const string oov = "درووستکردنی";
+        Assert.False(Languages.CentralKurdish.CentralKurdishPhonemizer.BizrokeLexiconHas(oov));
+        var rules = Languages.CentralKurdish.CentralKurdishPhonemizer.PhonemizeWordRules(oov);
+        var neural = await Phonemizer.PhonemizeAsync(oov, "ckb");
+        Assert.NotEqual(rules, neural);
+        Assert.Equal(rules, neural.Replace("ɪ", ""));
+    }
+
+    [Fact]
+    public async Task DanishAsyncUsesTheTagger()
+    {
+        // Danish is the deepest European orthography, so the ~37k NST lexicon carries the shipped path and
+        // the tagger owns everything after it. On an OOV word the async reading must differ from the rule
+        // one, or the tier is not wired — and the da golden is ASYNC-mode output, so a sync-only
+        // registration differs on the 2,919 of 3,756 FLEURS lines the tagger touches.
+        const string oov = "madretter"; // rule mˈadʁetɐ → neural ˈmaðˌʁɛdɐ (soft-d + the compound's ˌ)
+        var rules = Languages.Danish.DanishPhonemizer.PhonemizeWordRules(oov);
+        var async = (await Phonemizer.PhonemizeAsync(oov, "da")).Trim();
+        Assert.NotEqual(rules, async);
+        Assert.Equal("ˈmaðˌʁɛdɐ", async);
+    }
+
+    [Fact]
+    public void DanishLexiconIsLoadedThroughItsOwnNativiser()
+    {
+        // ⚠ #1068: `Text()` folds a word to NATIVE_CLASS before it looks it up, so `joão` could never reach
+        // its own row — the fold option on LoadTsvMap is what aliases it. Three of da's four folded keys
+        // already exist unfolded in the file and WIN (one of them, `genève`, with a different value), which
+        // is the precedence this asserts alongside the alias.
+        var lex = Languages.Danish.DanishPhonemizer.Lexicon();
+        Assert.True(lex.ContainsKey("joão"));
+        Assert.Equal(lex["joão"], lex["joao"]);            // the alias landed in the free slot
+        Assert.Equal("ʃeˈnɛːv", lex["geneve"]);            // …and the unfolded key in the file still wins
+        Assert.Equal("ʃeˈnɛv", lex["genève"]);
+        Assert.Equal(Languages.Danish.DanishPhonemizer.PhonemizeWord("joão"),
+            Languages.Danish.DanishPhonemizer.PhonemizeWord("joao"));
+    }
+
+    [Theory]
+    // The medial apostrophe, which in Danish is NATIVE orthography — 31 instances / 17 distinct types in
+    // FLEURS da_dk, and ZERO in the parity golden. Reported by the nb port as a sibling note, confirmed
+    // against da's own corpus. ⚠ Danish needed a guard sv and nb did not: it attaches the suffix to an
+    // ABBREVIATION read as LETTER NAMES, so joining destroys the reading rather than repairing it.
+    [InlineData("Haiti's", "hˈaitis")]          // was `haˈiti ˈɛs` — the -s read as the letter name S
+    [InlineData("O'Brien", "ˈobʁiən")]          // was `ˈoːˀ bʁˈiən`
+    [InlineData("FN's", "ˈɛfˌɛn ˈɛs")]          // ≥2 capitals → the initialism path is kept
+    [InlineData("DNA'et", "deːɛˈnaːˀ ˈɛd")]     // …joining gave the vowel-less *dnˈaəð*
+    [InlineData("sagde 'nej'", "ˈsaːə ˈnɑjˀ")]  // a closing quote still declines
+    [InlineData("Anders'", "ˈɑnɐs")]            // …and so does the s-final genitive
+    public void DanishJoinsAMedialApostropheExceptAfterAnAbbreviation(string input, string want) =>
+        Assert.Equal(want, Phonemizer.Phonemize(input, "da"));
 }

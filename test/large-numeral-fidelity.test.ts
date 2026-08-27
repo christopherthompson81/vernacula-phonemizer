@@ -51,7 +51,7 @@ const B = "1000000000000000000009";
  * ⚠ A NEW LANGUAGE MUST NOT JOIN THIS LIST. It exists to be emptied.
  */
 const ACCEPTED_LOSSY = new Set(
-    ("ar arz apc apd acm afb ary ayl ajp acw pt pt-BR tr az vi ta gd ga cy ff si kk tg zu xh da " +
+    ("ar arz apc apd acm afb ary ayl ajp acw pt pt-BR tr az vi ta gd ga cy ff si kk tg zu xh " +
         "mk lb fo sq la bar ki kam af grc").split(" "),
 );
 

@@ -65,6 +65,19 @@ describe("central kurdish normalization", () => {
         expect(normalizeCentralKurdish("UTC+1")).toBe("UTC کۆ 1");
     });
 
+    /** ⚠ …BUT ONLY FOR ⟨+⟩. The wide boundary was written for the timezone and applied to the minus too,
+     *  where the corpus is unanimous the other way: all 20 letter-adjacent hyphens are designations
+     *  (`کۆڤید-19`, `نوێ-COVID-19`, `HJR-3`, `Il-76s`, `چانداریان-1`) and not one is a subtraction, so
+     *  COVID-19 read as *koːviːd kam noːzda*, "covid MINUS nineteen". A genuine leading minus still reads. */
+    test("a hyphen after a LETTER is a compound mark, not a minus", () => {
+        expect(normalizeCentralKurdish("کۆڤید-19")).toBe("کۆڤید-19");
+        expect(normalizeCentralKurdish("HJR-3")).toBe("HJR-3");
+        expect(phonemize("کۆڤید-19", "ckb")).toBe("koːviːd noːzda");
+        expect(normalizeCentralKurdish("-5 پلە")).toBe(" کەم 5 پلە");
+        expect(normalizeCentralKurdish("لە -5 پلە")).toBe("لە کەم 5 پلە");
+        expect(normalizeCentralKurdish("UTC-5")).toBe("UTC-5"); // the minus arm declines; ⟨+⟩ above does not
+    });
+
     test("ordinary Kurdish text is untouched", () => {
         expect(normalizeCentralKurdish("کوردی زمانێکە.")).toBe("کوردی زمانێکە.");
     });
@@ -145,6 +158,17 @@ describe("Central Kurdish — the bizroke lexicon", () => {
         expect(phonemizeWord("و")).toBe("u");
         expect(phonemizeWord("وتی")).toBe("wtiː");   // word-INITIAL ⟨و⟩ is still the glide
         expect(phonemizeWord("گەورە")).toBe("ɡawɾa"); // and so is intervocalic ⟨و⟩
+    });
+
+    /** ⚠ AND THE OTHER MATRES LECTIONIS HAD THE SAME HOLE. A one-letter ⟨ی⟩ is the detached IZAFE, 405
+     *  instances across the corpus and one construction in all of them (`٢٤ ی ئەیلول`, `16ی ئەیلوول`,
+     *  `80%ی داهات`) — it read as a bare [j], which is no more a word than the bare [w] the ⟨و⟩ rule above
+     *  exists to prevent. Measured the same way: 151 rows, median 0.3575 → 0.3558, 72 closer / 1 further. */
+    test("standalone ⟨ی⟩ is the izafe [iː], not the glide", () => {
+        expect(phonemizeWord("ی")).toBe("iː");
+        expect(phonemize("٢٤ ی ئەیلول", "ckb")).toBe("biːstu t͡ʃwaːɾ iː ʔajlul");
+        expect(phonemizeWord("یەک")).toBe("jak");    // word-INITIAL ⟨ی⟩ is still the glide
+        expect(phonemizeWord("کوردی")).toBe("kuɾdiː"); // and word-final after a consonant is still the vowel
     });
 
     test("words with written vowels are unaffected", () => {
