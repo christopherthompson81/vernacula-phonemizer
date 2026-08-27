@@ -153,7 +153,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 1. **Finish Core** (the two above), then `dotnet sln add csharp/tools/parity` — it is deliberately
    out of the solution so it cannot fail the build gate before the engine API exists.
 2. ~~Differential regex harness~~ **BUILT AND RUN — CLEAN.** `tools/extract_regexes.mts` +
-   `csharp/tools/regex-diff/`. 2,314 distinct patterns × 51 probes = **118,014 assertions**, all
+   `csharp/tools/regex-diff/`. 2,310 distinct patterns × 54 probes = **124,740 assertions**, all
    identical to Node, 0 patterns refused. Re-run with:
    `npx tsx tools/extract_regexes.mts && dotnet run --project csharp/tools/regex-diff`
    ⚠ Probes are chosen for the DIALECT GAP, not for plausible text — an ordinary-word probe set
@@ -166,6 +166,14 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
        re-derives the .NET half at test time so a runtime casing change fails loudly.
      - **...but only under /u.** Legacy /i refuses non-ASCII→ASCII folds; applying the fold on `i`
        alone regressed `scottishgaelic/numbers.ts`. The harness caught the regression immediately.
+     - **...and the fold widens `\w` and `\b` too (#1127).** JS defines both over ASCII
+       `[A-Za-z0-9_]` — except with `i` AND `u` set, where every character whose scf lands in that
+       set joins it: exactly `\u017F` and `\u212A`. So JS sees NO boundary between a long s and a
+       following ASCII letter, while .NET (whose `\w` is Unicode) did. French's name-initial rule
+       read `ſt. Foo` as *té Foo*. ⚠ The harness had carried an ISOLATED `\u017F` probe from its first
+       run and reported CLEAN throughout: a boundary defect needs the fold character ADJACENT TO an
+       ASCII one, so the probe set now also carries `ſt. Foo`, `maſse Kg` and `aſ bK c` — written
+       with U+017F and U+212A, which is the whole point of them.
      - **`[^\S\n]`** (4 patterns) and **`\p{ASCII}`** were refused outright — both are now
        translated (.NET class subtraction, and the trivial range).
      - **Astral members in a class** (`[\u{20000}-\u{2a6df}]`, cmn/ja/Adlam) were refused; they now

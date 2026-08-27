@@ -75,6 +75,12 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
        — fall back to the match for a table of rewrites, or refuse the whole match for a table of
        readings (trap 53). ⚠ The trigger is not exotic: `csharp/goldens/nci.tsv` already ships
        `Caſtellana`, and no corpus differential can find this until a corpus happens to contain one.
+       ⚠ AND THE SAME FOLD MOVES `\b` AND `\w` (#1127). JS defines both over ASCII `[A-Za-z0-9_]`,
+       but under `i`+`u` together every character whose fold lands in that set joins it — exactly
+       `\u017F` and `\u212A`. So JS sees NO word boundary between a long s and a following ASCII
+       letter where .NET, whose `\w` is Unicode, sees one: `/\b([a-zà-ÿ])\./giu` declines `ſt.` in
+       Node and matched it in `JsRegex`. Handled inside `JsRegex` — nothing for a port to do — but it
+       is why a `\b` pattern is not automatically safe just because the class beside it was widened.
     Code points vs code units — .NET matches one UTF-16 UNIT, JS under `u` matches one CODE POINT.
        `\p{L}` gains an astral half, `[^x]`/`\D`/`\W`/`\S`/`.` take a whole surrogate pair rather
        than matching half a character, and global iteration is driven by `JsRe` because JS uses two

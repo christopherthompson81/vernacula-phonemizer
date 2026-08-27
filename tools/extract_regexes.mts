@@ -14,6 +14,11 @@
  * hazard (1,914 uses), non-Latin scripts are the \p{Script=} hazard, and the empty/space/newline
  * rows are \b's. A probe set of ordinary words would pass while the gap stayed open.
  *
+ * ⚠ AND A FOLD CHARACTER MUST APPEAR ADJACENT TO ASCII, not only alone. The isolated \u017F probe
+ * was in the set from the start and the harness still reported CLEAN on \b for a year: /iu widens
+ * the WORD-CHARACTER set, so the divergence is a boundary BETWEEN a long s and an ASCII letter and
+ * needs a probe that puts them side by side (#1127).
+ *
  *   npx tsx tools/extract_regexes.mts
  *
  * ⚠ AND THE CHECKED-IN CORPUS MUST NOT DRIFT BEHIND src/. It did, for long enough that a re-extraction
@@ -39,7 +44,7 @@ const strip = (s: string) =>
    .replace(/`(?:[^`\\]|\\.)*`/g, "``");
 const LITERAL = /(?<![\w)\]])\/((?:[^/\\\n[]|\\.|\[(?:[^\]\\]|\\.)*\])+)\/([dgimsuvy]*)/g;
 
-const PROBES: string[] = ["abc def", "ABC DEF", "hello, world.", "  spaced  out  ", "123 456", "1.5", "1,500", "10:08", "2026-08-23", "007", "٢٠٢٤ ٣", "৩৫ ২৪", "१२३", "๑๒๓", "café naïve", "ÅNGSTRÖM", "Grüße", "İstanbul", "ĳsselmeer", "Ελληνικά", "Русский", "עברית", "العربية", "हिन्दी", "ไทย", "中文", "日本語", "한국어", "ǀclick ǁtwo", "kʼeʼ ɓaɗ", "ˈstrʌk.tʃɚ", "tʰˈɛn əklˈɑːk", "<b>tag</b>", "a&amp;b", "km<sup>2</sup>", "{en:five}", "h5n1", "covid19", "", " ", "\t", "a\nb", "-", "—", "…", "'’‘", "\"quoted\"", "\u017f\u212a\u2126\u1e9e\u0131\u0345", "\u00df\u0130i\u0307", "\u{1E950}\u{1E94F}", "\u{20001}\u{2B740}\u{1F600}"];
+const PROBES: string[] = ["abc def", "ABC DEF", "hello, world.", "  spaced  out  ", "123 456", "1.5", "1,500", "10:08", "2026-08-23", "007", "٢٠٢٤ ٣", "৩৫ ২৪", "१२३", "๑๒๓", "café naïve", "ÅNGSTRÖM", "Grüße", "İstanbul", "ĳsselmeer", "Ελληνικά", "Русский", "עברית", "العربية", "हिन्दी", "ไทย", "中文", "日本語", "한국어", "ǀclick ǁtwo", "kʼeʼ ɓaɗ", "ˈstrʌk.tʃɚ", "tʰˈɛn əklˈɑːk", "<b>tag</b>", "a&amp;b", "km<sup>2</sup>", "{en:five}", "h5n1", "covid19", "", " ", "\t", "a\nb", "-", "—", "…", "'’‘", "\"quoted\"", "\u017f\u212a\u2126\u1e9e\u0131\u0345", "\u017ft. Foo", "ma\u017fse \u212ag", "a\u017f b\u212a c", "\u00df\u0130i\u0307", "\u{1E950}\u{1E94F}", "\u{20001}\u{2B740}\u{1F600}"];
 
 // A non-u pattern can match HALF a surrogate pair, and JSON cannot carry a lone surrogate (the C#
 // reader rejects it outright). Encode those code units as a sentinel the harness decodes back —
