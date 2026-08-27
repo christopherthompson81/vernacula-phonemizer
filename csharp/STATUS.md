@@ -16,11 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 119 of 193 registry codes**, all **200/200** except where a golden is thinner
-  (cjy 29, hsn 67 — those languages have no wikipedia and no FLEURS, so their goldens are what exists).
-  **23,496 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+- **Languages: 125 of 193 registry codes**, all **200/200** except where a golden is thinner
+  (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
+  so their goldens are what exists).
+  **24,627 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bg bho bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mag mai mg mi ml mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th ti tl tr ug uk umb ur uz vi wuu xh yo yue za zu.
+  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mag mai mg mi ml mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th ti tl tr ug uk umb ur uz vi wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -640,8 +641,10 @@ Fixed in TypeScript first, each with a test, then ported:
   because the double cannot be trusted* — read the rounded float back out. `9007199254740993` read as its
   neighbour `…992` and `12345678901234567890` ended *nul nul nul* against a written `890`. da is off
   `large-numeral-fidelity`'s ACCEPTED_LOSSY, the list that may only shrink. **0 golden rows** (the golden's
-  longest digit run is 5). ⚠ `fo`, `lb` and `bar` share `unitsFirstNumbers.ts` and are STILL on that list —
-  reported, not fixed here (separate bring-ups; trap 55).
+  longest digit run is 5). ⚠ `fo`, `lb` and `bar` share `unitsFirstNumbers.ts` and were STILL on that
+  list when this entry was written — reported, not fixed here (separate bring-ups; trap 55). All three
+  have since been threaded and removed from it; `bar`'s C# call site carries the same `raw` and the same
+  two assertions.
 - **The degree noun FUSED with the following letter — corpus-attested, ×2 distinct FLEURS sentences.** The
   scale-letter arms decline a letter RUN on purpose (`25°Cölner` is not Celsius) and the bare `(\d)\s*°`
   arm then left `grader` abutting it, so the compass bearing `35°V` (longitude west) became the one token

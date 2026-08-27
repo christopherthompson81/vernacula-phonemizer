@@ -134,7 +134,8 @@ function silentH(toks: Tok[]): void {
 /** ⟨k⟩ LENITES to [ɡ̥] everywhere EXCEPT a word-initial prevocalic onset — i.e. non-initially (coda/medial: Dackn→dɑɡ̥…,
  *  Unterflack→…flɑɡ̥, ⟨nk⟩ Dånkschee→…ŋɡ̥ʃ) and word-initially before a LIQUID (Klass→ɡ̥lɑs). This completes the
  *  Bavarian fortis/lenis neutralization for the velar (⟨t p⟩ lenite unconditionally in the manifest); only the
- *  word-initial prevocalic ⟨k⟩ keeps its fortis [k] (Kaas→kʰɑːs). */
+ *  word-initial prevocalic ⟨k⟩ keeps its fortis [k] (Kaas→kaːs — plain [k], since aspiration is not modelled
+ *  here, and ⟨aa⟩ is the long [aː] of the digraph table). */
 function lenitK(toks: Tok[]): void {
     for (let i = 0; i < toks.length; i++) {
         if (toks[i]!.ph !== "k") continue;
