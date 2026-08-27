@@ -403,7 +403,7 @@ export function normalizeBambara(input: string): string {
     for (const [sym, word] of UNITS) {
         const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
         s = s.replace(
-            new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d])`, "giu"),
+            new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`, "giu"),
             (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${word} ${a} fo ${b}` : whole),
         );
         // ⚠ AND THE SINGLE-OPERAND ARM MUST REFUSE A SPAN'S SECOND HALF, which is the defect above stated
@@ -412,7 +412,7 @@ export function normalizeBambara(input: string): string {
         s = s.replace(
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)(\\s+(?:${MAG}))?\\s?${key}`
-                + `(?![\\p{L}\\p{M}\\d])`,
+                + `(?![\\p{L}\\p{M}\\d²³/])`,
                 "giu",
             ),
             (_m: string, n: string, mag: string | undefined) => `${word} ${n}${mag ?? ""}`,

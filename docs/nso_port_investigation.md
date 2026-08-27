@@ -130,18 +130,54 @@ otherwise."* The engine file knows the corpus exists and used it to fix a vowel;
 away says it does not exist and declines a rule for want of instances. Filed as **#1108**.
 
 Per PORTING.md the C# ports the CURRENT behaviour and the finding is filed: a clock rule moves goldens, so
-it is TS-first. **NO TYPESCRIPT WAS CHANGED BY THIS PORT.**
+it is TS-first. **NO TYPESCRIPT WAS CHANGED BY THIS PORT.** ⚠ It has since landed upstream — see Run 5.
 
 Questions 2 and 3 came back clean: all three manifest tables are reached (`ManifestMappingTests` pins it
 structurally) and `text()` → `phonemizeWord` is the single entry point. The engine's own above-2^53 defect
 (`2.658e+42` spelled digit-by-digit with the ⟨e⟩ voiced) is already recorded in the TS header as an engine
 defect and is reproduced faithfully rather than worked around.
 
+## Run 5 — 2026-08-27 15:50 — #1108 landed, and the fix is UNGUARDED where mn's is not
+
+#1108 was fixed upstream (#1117) while the port was in review, and it moved two rows of
+`csharp/goldens/nso.tsv`. Same shape as mn's: spend the COLON, emit no word — which is what lets it fire
+without a sourced hour noun, since nso has none.
+
+⚠ **BUT THE nso ARM IS UNGUARDED WHERE mn's IS THE SAME PATTERN AND wo's IS MARKER-KEYED, AND THAT
+DIFFERENCE IS THE MEASUREMENT.** The refusal this replaces was right that the mined artifact retains no
+`N:NN` at all — which means it has no counter-examples either. Over FLEURS `nso_za` it is **13 of 13 a time
+of day**, zero verse references, zero sports times, zero census brackets. With no population to tell apart,
+a marker guard would only cost the four instances that carry no marker (`Ka 11:20`, `ka morago ga 11:00`).
+wo's corpus has 33 scripture references, so wo's arm IS marker-keyed. The three languages get three answers
+from the same question, which is the point.
+
+Ported as step **0** — before everything, including the shared-tier call on the function's first line,
+which is where the TS puts it:
+
+    ka 11:35 pm             kʼa lesometʼee , masometʰaro ɬano pʼm  →  … lesometʼee masometʰaro ɬano pʼm
+    Ka 8:46 mesong          the phrase break is gone
+    gare ga 06:30 le 07:30  both operands
+    0-14: 40.8%             keeps its pause — a colon followed by a SPACE is untouched
+
+Re-gated after the merge: **parity nso 200/200 against the NEW golden**, and the differential re-run is
+**8,530 comparisons, 0 differ, 0 throws**.
+
+⚠ **AND THE #1121 SWEEP WAS CHECKED AGAINST THIS PORT'S OWN CODE, not assumed.** PORTING.md now says a WORD
+path lowercases through `Js.ToLowerCase` and `ToLowerInvariant` is for keys and captures whose alphabet you
+control. nso has three sites: `PhonemizeWord` already used `Js.ToLowerCase`, and the two in `Normalize.cs`
+are the unit key and the rate denominator — captures from `(km|m|cm|mm|kg)` and `(…|h|s)`, alphabets this
+file defines. Correct under the new rule as written. `İ`, `İx`, `5 KM`, `5 Km` all agree.
+
+## Recount
+
+`la`, `mn`, `tn` and `st` merged first, so main is at 131 / 25,827 and this branch is **132 languages /
+26,027 rows**.
+
 ## Gates
 
-    csharp tests            1,876 pass (84 new in SepediTests.cs + 1 ManifestMappingTests case), 0 fail
-    parity, nso             200/200 byte-identical, 0 differ, 0 BLOCKED
-    parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
-    differential            8,530 comparisons (sync + async), 0 differ, 0 throws — after the separator fix
+    csharp tests            2,250 pass (84 in SepediTests.cs + 1 ManifestMappingTests case), 0 fail
+    parity, nso             200/200 byte-identical against the POST-#1117 golden, 0 differ, 0 BLOCKED
+    parity, fleet           132 languages, 26,027 rows, 0 differ, 0 BLOCKED
+    differential            8,530 comparisons (sync + async), 0 differ, 0 throws — re-run after the merge
     leak sweep              0 of 4,265 outputs carry a raw digit or symbol
     typescript              unchanged

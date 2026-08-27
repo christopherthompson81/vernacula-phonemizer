@@ -27,7 +27,7 @@ public static class EnglishNeural
      *  resolveWord() consults `oovOverride` with, so the pre-pass map lines up. */
     private static string G2pKeyOf(string word)
     {
-        var lower = word.ToLowerInvariant();
+        var lower = Js.ToLowerCase(word);
         var lookup = lower;
         if (lower.EndsWith("'s", StringComparison.Ordinal) && lower.Length > 2) lookup = lower[..^2];
         else if (lower.EndsWith("'", StringComparison.Ordinal) && lower.Length > 2 && lower[^2] == 's') lookup = lower[..^1];

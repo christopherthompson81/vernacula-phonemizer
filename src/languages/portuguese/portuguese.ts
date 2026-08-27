@@ -238,7 +238,10 @@ const TOKEN = /([a-zà-ÿ]+)|(\d+(?:(?<!(?<!\d)0)\.\d+)*(?:,\d+)?)|([.!?…,;:])
  *  dez-e- vs the EP dez-a-). */
 function numberTokenToWords(tok: string, dialect: "ep" | "bp"): string {
     const [intRaw, frac] = tok.split(",");
-    let words = numberToWords(Number(intRaw!.replace(/\./g, "")), dialect);
+    // ⚠ THE DOT-STRIPPED STRING IS PASSED AS `raw` (#1095): Portuguese writes thousands with periods, so
+    // the fallback must see the digits without them, not the double they were parsed into.
+    const intDigits = intRaw!.replace(/\./g, "");
+    let words = numberToWords(Number(intDigits), dialect, intDigits);
     if (frac !== undefined)
         words +=
             ` ${MANIFEST.numbers.decimalConnector} ` +

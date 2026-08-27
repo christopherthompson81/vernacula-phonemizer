@@ -120,6 +120,18 @@ public static class Normalize
 
     private const string MAG = "dimilione|milione|dibilione|bilione|dipilione|pilione";
 
+    /**
+     * A COLON BETWEEN TWO DIGIT RUNS LOSES ITS PAUSE, and that is ALL it does (#1108).
+     * ⚠ IT EMITS NO WORD, so it makes no claim about what the figure is and needs no sourced hour noun —
+     * which nso does not have. ⚠ UNGUARDED, and that is MEASURED: the mined artifact retains no `N:NN` at
+     * all, so it has no counter-examples either, and over FLEURS `nso_za` it is 13 of 13 a time of day.
+     * With no population to tell apart, a marker guard would only cost the four that carry no marker.
+     * ⚠ A COLON FOLLOWED BY A SPACE IS UNTOUCHED. See the TS for the counts.
+     */
+    private static readonly JsRe DIGIT_COLON_RUN =
+        JsRegex.Compile("(?<![\\d:])(\\d{1,2})((?::\\d{2})+)(?![\\d])", "gu");
+    private static readonly JsRe COLON_G = JsRegex.Compile(":", "gu");
+
     // ── the patterns, in step order ─────────────────────────────────────────
     private static readonly JsRe DOTTED_CAPS =
         JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:\\p{Lu}\\.[ \\u00a0]?){2,}(?:\\p{Lu}(?![\\p{L}\\p{M}]))?", "gu");
@@ -178,6 +190,10 @@ public static class Normalize
     public static string NormalizeSepedi(string input)
     {
         var s = SYMBOLS(input);
+
+        // 0) The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. First, because every numeric
+        //    step below reads a digit run and the colon was splitting one in half.
+        s = DIGIT_COLON_RUN.Replace(s, m => m.Groups[1].Value + COLON_G.Replace(m.Groups[2].Value, " "));
 
         // 1) DOTTED CAPITAL RUNS → the bare letters. ⚠ THE LETTERS ARE JOINED WITH A HYPHEN, NOT GLUED, and
         //    in this language that is not cosmetic: glued, `T.L.` meets the g2p's DIGRAPH table and reads as

@@ -276,10 +276,10 @@ export function normalizeEwe(input: string): string {
     //      must READ), so the anchor here is robustness rather than a measured repair.
     //    ⚠ `NOT_MAGNITUDE` keeps the table off `$400mm`. See its definition.
     for (const [sym, word] of UNITS) {
-        s = s.replace(new RegExp(`${NOT_MAGNITUDE}(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?:²|2)(?![\\p{L}\\p{M}\\d²³])`, "gu"), `${word} $1`);
+        s = s.replace(new RegExp(`${NOT_MAGNITUDE}(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?:²|2)(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `${word} $1`);
     }
     for (const [sym, word] of UNITS) {
-        s = s.replace(new RegExp(`${NOT_MAGNITUDE}(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³])`, "gu"), `${word} $1`);
+        s = s.replace(new RegExp(`${NOT_MAGNITUDE}(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `${word} $1`);
     }
     //    …and the ones with no numeral at all. Last, so the counted arms keep every match they can make.
     s = BARE_UNITS(s);

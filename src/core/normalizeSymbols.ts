@@ -879,7 +879,47 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               // still drop it, and that is a per-language DATA gap (no `с`/`s` denominator declared), not
               // this regex — be `55 м³/с` loses the unit as well, which is a Belarusian finding, not a
               // tier one.
-              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc])`,
+              //
+              // ⚠ BUT THE TIER'S RESPONSE TO THAT DATA GAP WAS ITS OWN DEFECT, AND THE TRAILING GUARD NOW
+              // REJECTS A SLASH (#1093). When the denominator is UNDECLARED the rate alternative fails, the
+              // optional group matches EMPTY, and the arm used to claim the numerator anyway — speaking the
+              // unit noun and stranding `/с` as a bare letter. That is a HALF READING, and
+              // `makeBareUnitNormalizer` two screens below refuses exactly this ("a half reading is worse
+              // than a visible leak"); the two arms disagreed, and the bare one was right. With `/` in the
+              // guard an unreadable rate DECLINES and the symbol stays visible to the leak gates instead.
+              //
+              // ⚠ AND THE SLASH IS FATAL ONLY BEFORE AN ASCII-LATIN DENOMINATOR, which is where the leak
+              // actually is: a bare `h`, `s`, `yr`, `kg` is an ABBREVIATION with no word behind it, and it
+              // reaches the sink as raw letters (or, in a non-Latin script, as English letter names). Two
+              // measured counter-examples fix the line here rather than at "any slash":
+              //   · `120mg/100ml` (Min Nan's blood-sugar article) is a RATIO of two readable quantities —
+              //     this arm reads the first and its own next match reads the second, so nothing is
+              //     stranded and declining would leak BOTH units raw;
+              //   · `12.8 km/秒` (a Japanese golden row) has a denominator that IS a word the engine reads.
+              //     Declining it took `12.8 kilometre byou` — very nearly right — to *kʰˈeᶦəm*, the ENGLISH
+              //     LETTER NAMES for `km` routed out of Japanese. A regression, not a gap.
+              // ⚠ A CYRILLIC ⟨/с⟩ IS THEREFORE STILL HALF-READ (ab, ba) and that residual is left pinned in
+              // test/abkhaz.test.ts rather than swept in here: the symbol there is Cyrillic too, so the
+              // trade a decline would make is a different one and wants its own evidence.
+              //
+              // ⚠ AND IT REJECTS THE EXPONENT TOO, for the same reason and in the same breath. With only `/`
+              // the group BACKTRACKS: `5 m³/s` failed the rate alternative (no `s` declared), failed the
+              // exponent alternative on the new slash guard, then matched the group EMPTY — claiming a bare
+              // `5 m` and stranding `³/s`. A superscript or an ASCII 2/3 after the unit means the exponent
+              // branch should have taken it, so if control reaches the guard still holding one, the match is
+              // wrong and must not stand.
+              //
+              // ⚠ AND IT DOES **NOT** REJECT A PLAIN DIGIT, which was tried and reverted on the goldens. A
+              // digit after the unit is a SEPARATE class — `2005 MM13` (an asteroid designation su reads as
+              // *millimetre 13*) — and refusing it there also refused Japanese `約20 km15マイル`, where the
+              // digit is the parenthesised conversion the FLEURS text lost its brackets around and `km` is a
+              // genuine kilometre. Worse, a non-Latin script has no visible leak to decline TO: the raw `km`
+              // routes to the English foreign reader and `20 km` read *nid͡ʑɯᵝː kʰˈeᶦəm* — "twenty kay-em"
+              // inside Japanese, which is a confident error, not a gap. The designation class is reported
+              // rather than folded in here. What it DOES reject is an ASCII 2/3 that is itself followed by
+              // an unreadable slash — `5 m2/s`, the exponent branch's own condition read backwards, which is
+              // the one digit case that is unambiguously this defect and not the designation one.
+              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])(?!\\s?/\\s?[A-Za-z])(?!(?<=[a-zA-Z])[23]\\s?/\\s?[A-Za-z])`,
               "giu",
           )
         : null;

@@ -80,11 +80,11 @@ public static class Numbers
     private static readonly JsRe SPACES = JsRegex.Compile("\\s+", "gu");
 
     /** Non-negative integer → Ancient Greek words. Out-of-range input falls back to digit-by-digit. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!IsSafeInteger(n) || n < 0)
             // JS `String(n)` — NOT `Math.abs`, so a negative keeps its sign character, which the filter drops.
-            return string.Join(" ", Js.CodePoints(Js.NumberToString(n))
+            return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(n))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
                 .Select(d => UNITS[(int)Js.Number(d)]));
         if (n == 0) return UNITS[0]; // οὐδέν — Classical Greek has no cardinal zero

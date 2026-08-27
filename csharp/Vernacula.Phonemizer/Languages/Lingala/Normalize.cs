@@ -123,7 +123,7 @@ public static class Normalize
         {
             var key = ESCAPE.Replace(sym, "\\$&");
             s = JsRegex.Compile(
-                    $"(?<![\\d.,:\\p{{L}}\\p{{M}}-])(\\d+)\\s?[-\u2013\u2014]\\s?(\\d+)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d])",
+                    $"(?<![\\d.,:\\p{{L}}\\p{{M}}-])(\\d+)\\s?[-\u2013\u2014]\\s?(\\d+)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d²³/])",
                     "gu")
                 .Replace(s, m =>
                 {
@@ -131,7 +131,7 @@ public static class Normalize
                     return Js.Number(a) < Js.Number(b) ? $"{word} {a} kino {b}" : m.Value;
                 });
             s = JsRegex.Compile(
-                    $"(?<![\\p{{L}}\\p{{M}}\\d.,])(?<!\\d\\s?[-\u2013\u2014]\\s?)(\\d+(?:[.,]\\d+)?)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d])",
+                    $"(?<![\\p{{L}}\\p{{M}}\\d.,])(?<!\\d\\s?[-\u2013\u2014]\\s?)(\\d+(?:[.,]\\d+)?)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d²³/])",
                     "gu")
                 // ⚠ The single-operand arm must refuse a span's second half (`(?<!\d\s?[-–—]\s?)`), so a
                 // span it declined reaches RANGE whole rather than with its tail already rewritten.

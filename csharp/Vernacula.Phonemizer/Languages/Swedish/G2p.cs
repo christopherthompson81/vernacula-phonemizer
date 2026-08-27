@@ -80,7 +80,7 @@ public static class G2p
     /** Scan a lowercased Swedish word into IPA segments (no stress mark). */
     public static List<Seg> ToSegments(string word, double stressOrd = 0, bool oLong = false, Compound? compound = null)
     {
-        var w = word.ToLowerInvariant();
+        var w = Js.ToLowerCase(word);
         var n = w.Length;
         var segs = new List<Seg>();
         var i = 0;

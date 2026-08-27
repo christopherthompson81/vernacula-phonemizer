@@ -128,11 +128,11 @@ public static class Normalize
         return new UnitArms(
             rate,
             JsRegex.Compile(
-                $@"(?<![\p{{L}}\p{{M}}\d.,])(\d+(?:[.,]\d+)?)\s?(milyon|milya|mil)\s?{key}(?![\p{{L}}\p{{M}}\d/])", "gu"),
+                $@"(?<![\p{{L}}\p{{M}}\d.,])(\d+(?:[.,]\d+)?)\s?(milyon|milya|mil)\s?{key}(?![\p{{L}}\p{{M}}\d²³/])", "gu"),
             JsRegex.Compile(
-                $@"(?<![\d.,:\p{{L}}\p{{M}}-])(\d+)\s?[-–—]\s?(\d+)\s?{key}(?![\p{{L}}\p{{M}}\d/])", "gu"),
+                $@"(?<![\d.,:\p{{L}}\p{{M}}-])(\d+)\s?[-–—]\s?(\d+)\s?{key}(?![\p{{L}}\p{{M}}\d²³/])", "gu"),
             JsRegex.Compile(
-                $@"(?<![\p{{L}}\p{{M}}\d.,])(?<!\d\s?[-–—]\s?)(\d+(?:[.,]\d+)?)\s?{key}(?![\p{{L}}\p{{M}}\d/])", "gu"),
+                $@"(?<![\p{{L}}\p{{M}}\d.,])(?<!\d\s?[-–—]\s?)(\d+(?:[.,]\d+)?)\s?{key}(?![\p{{L}}\p{{M}}\d²³/])", "gu"),
             u.Value);
     }).ToList();
 
