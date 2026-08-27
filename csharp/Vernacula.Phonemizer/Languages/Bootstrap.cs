@@ -84,6 +84,7 @@ public static class Bootstrap
             Persian.PersianPhonemizer.RegisterSelf();
             Tajik.TajikPhonemizer.RegisterSelf();
             Thai.ThaiPhonemizer.RegisterSelf();
+            Tigrinya.TigrinyaPhonemizer.RegisterSelf();
             Marathi.MarathiPhonemizer.RegisterSelf();
             Telugu.TeluguPhonemizer.RegisterSelf();
             Hausa.HausaPhonemizer.RegisterSelf();

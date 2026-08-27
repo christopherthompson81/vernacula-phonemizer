@@ -1,5 +1,6 @@
 // The registration seam — the C# stand-in for registry.ts's static imports, and the two ways it can be wrong.
 using Vernacula.Phonemizer;
+using Vernacula.Phonemizer.Core;
 using Vernacula.Phonemizer.Languages.Afrikaans;
 using Xunit;
 
@@ -152,6 +153,20 @@ public class LanguageBootstrapTests
     [InlineData("nb", "O'Shannessy", "ˈɔshɑnːəsːʏ")]
     [InlineData("nb", "Anders' bok", "ˈɑnəʂ ˈbuːk")]
     [InlineData("nb", "133 m/s", "ˈhʊndɾə ˈtɾɛtɪ ˈtɾeː ˈmeːtəɾ ˈiː səˈkʊnə")]
+    // Tigrinya's defining shapes, none of which its 200-row golden reaches on its own. The preserved Semitic
+    // gutturals are the split from Amharic (⟨ሐ⟩→ħ, ⟨ዐ⟩→ʕ, ⟨አ⟩→ʔ) and the labiovelar orders are what a fidel
+    // with no row silently deletes; the ን conjunction attaches to EVERY term of a chain of ≥2 and to nothing
+    // in a chain of 1; ⟨Nይ⟩ is ti's ordinal (never Amharic's ኛ) and the Ge'ez-numeral spelling of it must be
+    // claimed before the numeral rule strips the ይ; ፡ is a CLAUSE BREAK, not a word separator; and both
+    // marks group AND point.
+    [InlineData("ti", "ዓሰርተ ሓሙሽተ ዕርዲ", "ʕasəɾtə ħamuʃtə ʕɨɾdi")]
+    [InlineData("ti", "ኲናት ቈለ ቋንቋ", "kʷinat kʼʷələ kʼʷankʼʷa")]
+    [InlineData("ti", "309", "sələstə miʔɨtn tɨʃʕatən")]
+    [InlineData("ti", "40", "ʔaɾbʕa")]
+    [InlineData("ti", "፮ይ ክፍሊ", "ʃadʃaj kɨfli")]
+    [InlineData("ti", "ገጀረት፡ሰምበል፡ሰኒታ", "ɡəd͡ʒəɾət , səmbəl , sənita")]
+    [InlineData("ti", "2,5 ሜ. ኣቢሉ", "kɨltə nətʼbi ħamuʃtə me . ʔabilu")]
+    [InlineData("ti", "200.000 ሰባት", "kɨltə miʔti ʃɨħ səbat")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 
@@ -269,6 +284,22 @@ public class LanguageBootstrapTests
     [InlineData("3.50 مەتر", "seː xaːɫ peːnd͡ʒ sɪfɪɾ matɪɾ")]
     public void CentralKurdishZeroNumeralHasANucleus(string input, string want) =>
         Assert.Equal(want, Phonemizer.Phonemize(input, "ckb"));
+
+    [Fact]
+    public async Task AsyncPrewarmsAnEmbeddedLatinRunFromACOLDMemo()
+    {
+        // ⚠ THE BOOTSTRAP GATE AND THE PREWARM GATE ARE READ IN A FIXED ORDER, and they used to be read in
+        // the wrong one. `PhonemizeAsync` tested `PrewarmForeignEnglish is not null` BEFORE calling
+        // `Registry.EnsureLanguages()`, and that slot is filled BY the bootstrap — so the FIRST async call
+        // of a process found it null and skipped the prewarm entirely. C#-only: the TS reaches
+        // `prewarmForeignEnglish` through a static import and has no such window.
+        // ⚠ INVISIBLE TO THE PARITY GATE. The memo is process-wide, so every row after the first warmed it,
+        // and no golden's FIRST row carries a Latin OOV word — 0 of 23,496 rows moved when this was fixed.
+        // Found by a one-line differential against Node: `ኣብ Wolaytta ዝብል` read *wˈʌleᶦt̬ˌeᶦ* (the n-gram)
+        // against Node's *woᶷlˈeᶦt̬ə* (the BiLSTM).
+        Foreign.ClearForeignOov();
+        Assert.Equal("ʔab woᶷlˈeᶦt̬ə zɨbl", await Phonemizer.PhonemizeAsync("ኣብ Wolaytta ዝብል", "ti"));
+    }
 
     [Fact]
     public void CentralKurdishOrdinaryWordIsUntouchedByTheNumeralReading()
