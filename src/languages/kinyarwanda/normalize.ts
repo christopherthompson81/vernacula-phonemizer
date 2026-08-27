@@ -87,6 +87,30 @@
  *   · NO LETTER NAMES, so no initialisms (12,856 in the corpus). `core/initialisms.ts` needs a `letterName`
  *     table; espeak ships no Kinyarwanda and no in-repo source carries one, so wiring the pass would be a
  *     NO-OP. A sourcing gap, not a seam gap (trap 16 checked, and the answer here really is "no data").
+ *
+ * ── FILED WHILE PORTING TO C# (2026-08-26), NOT FIXED — each needs a decision this file cannot make ────
+ *   · ⚠ `saidNear` GIVES ONE CONSTRUCTION TWO ANSWERS. It reads the ±45-character window of the string
+ *     `String.replace` handed the callback — the PRE-replacement one — so a sibling match in the SAME pass
+ *     is invisible to it while one in a LATER pass is not. The corpus's own °C/(°F) glosses split on it:
+ *     `−27.2 °C (−17.0 °F)` says `dogere` TWICE (both figures negative, both claimed by step 4a) while
+ *     `−14.4 °C (6.1 °F)` says it ONCE (the second figure falls to 4c, whose snapshot already carries 4a's
+ *     insertion). `25.3°C na 27.7°C` likewise doubles it, where the corpus's own spell-out
+ *     (`dogere 22° na 35° z'amajyepfo`) writes the noun once for two signs. ⚠ THE BLANKET FIX REGRESSES 4d:
+ *     `2° 36′ 58″ S, 29° 44′ 34″ E` is 14 characters apart and rw repeats the noun per AXIS on purpose. So
+ *     the fix is per-arm — within-pass memory for 4a/4b/4c, none for 4d — and it moves both of the golden's
+ *     degree-bearing rows on n=1 and n=5. Recorded rather than guessed at.
+ *   · ⚠ MAGNITUDE + NUMBER + CURRENCY IS SPLIT DOWN THE MIDDLE, ×7. `miliyari 290 Frw` reads *miliyari
+ *     amafaranga y'u Rwanda 290* — the magnitude noun and its count separated by the currency phrase; same
+ *     for `miliyoni 158$`, `miliyoni 20 $`, `miliyoni 2 Frw`, `miliyoni $800`, `miliyoni $440`,
+ *     `miliyoni $247`. The `magnitudes` refusal above is stated as a fact about the TIER'S CAPABILITY
+ *     ("`magAlt` matches NUMBER-then-magnitude, so the hop can never fire") — which is true, and is the
+ *     defect: `core/normalizeSymbols.ts` has no magnitude-BEFORE-number arm at all. nya is the mirror case
+ *     (NOUN+NUMBER+MAGNITUDE), so the tier already meets at least three orders. A FLEET call on the shared
+ *     tier, not a per-language patch — the `roman`/`DC` shape.
+ *   · Step 1 FUSES a person's spaced initials into a pseudo-word — `P. W. Botha` → *pw botha*, `H. W. Bush`
+ *     → *hw buʃ*, both corpus lines. The discriminator is clean (all 6 abbreviation instances are UNSPACED,
+ *     both initial runs are SPACED), but with NO LETTER NAMES every available output is wrong, so the
+ *     blocker is the sourcing gap two bullets up rather than this rule's shape.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
