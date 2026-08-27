@@ -16,12 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 130 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 131 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
   so their goldens are what exists).
-  **25,627 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **25,827 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wuu xh yo yue za zu.
+  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -82,6 +82,15 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   language has no FLEURS against the transcript directory: **ln, lt, lg, mt, ps, nso and mn all have one**
   (1,758–1,991 unique sentences each). `he`'s header records the same error being found and fixed once
   already, which is what makes it a class — transcripts landed and the headers were never re-swept (#1102).
+- **st is the first port whose differential turns up a BLOCKED row rather than a clean sweep.** One mined
+  line carries an embedded GEORGIAN run (`ილია`): TS reads it through the `ka` engine, C# drops it, and
+  `Registry.PortPending` for that row is `[georgian]` — measured per line, not inferred. Georgian is unported,
+  so this is BLOCKED, not wrong; it is not in the golden. **1,514 of 1,516 comparisons identical, 0 wrong,
+  0 throws**, plus a leak sweep in which **0 of 758 outputs carry a raw digit or symbol**. st has no FLEURS
+  (checked, not assumed) and the golden never exercises the currency-glued magnitude letter or the rate
+  branch. ⚠ st and tn are CLOSE SIBLINGS ported back to back (trap 55): nothing was carried across, and every
+  count in st's header was re-measured on st's own artifacts — all of them verify exactly.
+  See `docs/st_port_investigation.md`.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,

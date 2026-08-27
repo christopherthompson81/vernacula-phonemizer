@@ -152,6 +152,7 @@ public static class Bootstrap
             Latin.LatinPhonemizer.RegisterSelf();
             Mongolian.MongolianPhonemizer.RegisterSelf();
             Setswana.SetswanaPhonemizer.RegisterSelf();
+            Sesotho.SesothoPhonemizer.RegisterSelf();
         }
     }
 }
