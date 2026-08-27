@@ -139,6 +139,15 @@ describe("Serbian normalization", () => {
         expect(say("Око 1000. н. е. Асирци")).toBe("ˈo˥˩ko xˈiʎadite nˈoʋe ˈere . asˈiː˩˥rt͡si");
         expect(say("Око 1000. н.е.")).toBe("ˈo˥˩ko xˈiʎadite nˈoʋe ˈere ."); // the dotless-interior spelling
         expect(say("1300. n. e.")).toBe("xˈiʎadu tristˈote nˈoʋe ˈere ."); // and in Latin script
+        // ⚠ AND THE MARKER IS LOWERCASE-ONLY, which the CE arm made worth checking: `н.е.` / `n.e.` is also
+        // two INITIALS with stops, and the rule was case-insensitive — `N. E. Kovač` read *nˈoʋe ˈere .
+        // kˈoʋat͡ʃ*. All eight era instances across the sr and hr corpora are lowercase and initials are
+        // capitals, so case separates them with nothing measured lost. They now read as letter names, which
+        // is unread-as-an-era rather than confidently wrong.
+        // ⚠ kmr's digit-adjacency guard would NOT have worked here: sr writes `у трећем веку п.н.е`, the
+        // century spelled as a WORD with no digit near the marker — and that instance must keep firing.
+        expect(say("N. E. Kovač")).toBe("en e kˈo˩˥ʋat͡ʃ");
+        expect(say("веку п.н.е, једна")).toBe("ʋˈeku pre˥˩ nˈoʋe ˈere , jednˈa");
     });
 
     test("degrees consume the degree noun the text already wrote", () => {

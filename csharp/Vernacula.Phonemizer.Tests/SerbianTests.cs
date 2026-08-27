@@ -105,6 +105,13 @@ public class SerbianTests
     [InlineData("Око 1000. н. е. Асирци", "ˈo˥˩ko xˈiʎadite nˈoʋe ˈere . asˈiː˩˥rt͡si")]
     [InlineData("Око 1000. н.е.", "ˈo˥˩ko xˈiʎadite nˈoʋe ˈere .")]
     [InlineData("1300. n. e.", "xˈiʎadu tristˈote nˈoʋe ˈere .")]
+    // ⚠ AND LOWERCASE-ONLY. `н.е.` / `n.e.` is also two INITIALS with stops, and the rule was
+    // case-insensitive — `N. E. Kovač` read *nˈoʋe ˈere . kˈoʋat͡ʃ*. All eight era instances across the sr
+    // and hr corpora are lowercase; initials are capitals. They now read as letter names instead.
+    [InlineData("N. E. Kovač", "en e kˈo˩˥ʋat͡ʃ")]
+    // ⚠ …and kmr's digit-adjacency guard would NOT have worked here: this instance spells the century as a
+    // WORD, with no digit near the marker, and it must keep firing.
+    [InlineData("веку п.н.е, једна", "ʋˈeku pre˥˩ nˈoʋe ˈere , jednˈa")]
     // Dotted abbreviations, in both scripts; `)` is not a pause, so the dot stays.
     [InlineData("прича, итд.)", "prˈiː˥˩t͡ʃa , i tˈa˩˥ko dˈa˥˩ʎe .")]
     [InlineData("npr. ovo", "na prˈiː˩˥mer ˈo˩˥ʋo")]

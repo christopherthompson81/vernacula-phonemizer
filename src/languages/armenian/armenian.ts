@@ -40,15 +40,6 @@ const isVowelPh = (p: string): boolean => /[ɑeiouəʏœ]/u.test(p); // a phonem
 const isSonorant = (p: string): boolean => /^[lmnɾrj]/u.test(p); // sonorants (for final-cluster sonority)
 
 /**
- * Build a full Armenian engine (phonemizer + word g2p) from one dialect manifest.
- *
- * `pre` is the dialect's own text-normalization pass, applied to the raw input before tokenizing. It is a
- * PARAMETER rather than a fixed import because the two standards do not share one: hy's `normalize.ts` is
- * measured against hy's own corpus, and Western Armenian has neither a layer nor a mined artifact to
- * measure one against. A sibling is a hypothesis, not a source (trap 55) — so hyw passes nothing and its
- * reading is byte-identical to what it was.
- */
-/**
  * THE THREE MARKS ARMENIAN WRITES *INSIDE* A WORD, undone before the tokenizer ever sees them.
  * ՛ (շեշտ, emphasis), ՜ (բացականչական, exclamation) and ՞ (հարցական, question) are not placed after the
  * word the way Latin punctuation is — they sit over its last vowel, i.e. among the letters. The TOKEN class
@@ -89,6 +80,20 @@ function unbreakMarks(s: string): string {
     });
 }
 
+/**
+ * Build a full Armenian engine (phonemizer + word g2p) from one dialect manifest.
+ *
+ * `pre` is the dialect's own text-normalization pass, applied to the raw input before tokenizing. It is a
+ * PARAMETER rather than a fixed import because the two standards do not share one: each is measured against
+ * its OWN corpus (`tools/corpus/mined/hy.jsonc`, `tools/corpus/mined/hyw.jsonc`) and the two disagree on
+ * more than an accent — hyw writes `տոլար` not `դոլար`, `մեթր` not `մետր`. A sibling is a hypothesis, not a
+ * source (trap 55), so neither layer may be borrowed for the other.
+ *
+ * ⚠ WHAT IS NOT DIALECTAL GOES ABOVE, NOT INTO A `pre`. `unbreakMarks` is the worked example and the reason
+ * it sits where it does: ՛ ՜ ՞ break a word because TOKEN breaks it, and TOKEN is shared. Written into one
+ * dialect's `pre` — which is how it started — the other dialect keeps the defect. An orthographic fact about
+ * the SCRIPT belongs to the engine; a reading choice about the STANDARD belongs to `pre`.
+ */
 export function makeArmenianEngine(def: ArmenianDef, pre: (s: string) => string = (s) => s) {
     const CLAUSE_MARK = def.clausePunctuation;
     const MAP: Record<string, string> = { ...def.consonants, ...def.vowels }; // vowels win the shared ⟨ո⟩ key (→o bare)

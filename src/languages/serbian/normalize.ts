@@ -288,17 +288,30 @@ export function normalizeSerbian(input: string): string {
     //    serves it — writes CE 3× (`1000. – 1300. n. e.`, `400. g. n. e.`, `1100. g. n. e.`). What settles
     //    it is the asymmetry itself: the current reading is not a REFUSAL to expand, it is an expansion that
     //    fires halfway and strands a break the same rule removes one alternation-branch away.
-    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(?=(?:[пp]\.\s?)?[нn]\.\s?[еe](?![\p{L}\p{M}]))/giu,
+    //    ⚠ LOWERCASE ONLY, AND THAT IS A GUARD RATHER THAN AN OVERSIGHT — found reviewing the CE arm above.
+    //    `н.е.` / `n.e.` is also two INITIALS with stops, and the rule was case-insensitive, so `N. E. Kovač`
+    //    read *nove ere. Kovač* — "of the new era Kovač" — and with the CE arm added it would take the
+    //    preceding year as an ordinal too. All EIGHT era instances across the sr and hr corpora are written
+    //    lowercase (`п.н.е`, `п. н. е.`, `p.n.e.`, `n. e.`, `g. n. e.`) and initials are by definition
+    //    capitals, so case separates them with nothing measured lost.
+    //    ⚠ A DIGIT-ADJACENCY GUARD WOULD NOT HAVE WORKED HERE, which is why this differs from the same fix
+    //    in kmr: sr writes `у трећем веку п.н.е` — the century spelled as a WORD, no digit anywhere near the
+    //    marker. Requiring a year would have dropped a real instance to catch a hypothetical one.
+    //    ⚠ The classes hold BOTH scripts' letters (Cyrillic ⟨п н е⟩ and Latin ⟨p n e⟩ are distinct code
+    //    points that look alike); dropping the `i` flag is what makes them lowercase-only, not script-only.
+    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(?=(?:[пp]\.\s?)?[нn]\.\s?[еe](?![\p{L}\p{M}]))/gu,
         (whole, digits: string) => {
             const base = ordinalBase(Number(digits));
             return base === undefined ? whole : `${inflect(base, "f.gen")!} `;
         });
     for (const [pat, words] of [["п\\.\\s?н\\.\\s?е", "pre nove ere"], ["p\\.\\s?n\\.\\s?e", "pre nove ere"],
         ["н\\.\\s?е", "nove ere"], ["n\\.\\s?e", "nove ere"]] as const) {
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${pat}\\.(\\s*)(\\S?)`, "giu"), replaceEra(words));
+        //    ⚠ `gu`, NOT `giu` — see the lowercase guard above. Case-insensitive, this loop expanded a
+        //    person's INITIALS: `N. E. Kovač` → *nove ere. Kovač*.
+        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${pat}\\.(\\s*)(\\S?)`, "gu"), replaceEra(words));
         //    THE FINAL DOT IS SOMETIMES ABSENT (`п.н.е,`), so a second pass claims the dotless form. Guarded
         //    against a following letter so it cannot bite into a real word.
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${pat}(?![\\p{L}\\p{M}.])`, "giu"), words);
+        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${pat}(?![\\p{L}\\p{M}.])`, "gu"), words);
     }
 
     // 2) DOT-WRITTEN CLOCK — `12.00 сати`. Claimed only when the hour noun is already WRITTEN, which is what

@@ -193,8 +193,14 @@ public static class Normalize
     // CE marker took the cardinal and KEPT its ordinal dot, which the tokenizer then read as a phrase break
     // (`Око 1000. н. е.` → *oko hiljadu . nove ere .*), while BCE read correctly. See the TS for why the
     // asymmetry settles it without a frequency claim: sr's own 4 era instances are all BCE.
+    // ⚠ AND LOWERCASE-ONLY (`gu`, not `giu`) — `н.е.` / `n.e.` is also two INITIALS with stops, so the
+    // case-insensitive rule read `N. E. Kovač` as *nove ere. Kovač*. All eight era instances across the sr
+    // and hr corpora are lowercase; initials are capitals. The classes still hold BOTH scripts' letters —
+    // Cyrillic ⟨п н е⟩ and Latin ⟨p n e⟩ are distinct code points that look alike.
+    // ⚠ kmr's digit-adjacency guard would NOT have worked here: sr writes `у трећем веку п.н.е`, the century
+    // spelled as a word with no digit near the marker.
     private static readonly JsRe ERA_YEAR =
-        JsRegex.Compile("(?<![\\d.,])(\\d{1,4})\\.\\s+(?=(?:[пp]\\.\\s?)?[нn]\\.\\s?[еe](?![\\p{L}\\p{M}]))", "giu");
+        JsRegex.Compile("(?<![\\d.,])(\\d{1,4})\\.\\s+(?=(?:[пp]\\.\\s?)?[нn]\\.\\s?[еe](?![\\p{L}\\p{M}]))", "gu");
 
     private static readonly (string Pat, string Words)[] ERAS =
     {
@@ -202,8 +208,8 @@ public static class Normalize
         ("н\\.\\s?е", "nove ere"), ("n\\.\\s?e", "nove ere"),
     };
     private static readonly (JsRe Dotted, JsRe Bare, string Words)[] ERA_RES = ERAS.Select(e =>
-        (JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){e.Pat}\\.(\\s*)(\\S?)", "giu"),
-         JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){e.Pat}(?![\\p{{L}}\\p{{M}}.])", "giu"),
+        (JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){e.Pat}\\.(\\s*)(\\S?)", "gu"),
+         JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){e.Pat}(?![\\p{{L}}\\p{{M}}.])", "gu"),
          e.Words)).ToArray();
 
     private static readonly JsRe CLOCK_DOT =
