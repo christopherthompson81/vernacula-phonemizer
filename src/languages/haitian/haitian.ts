@@ -82,8 +82,21 @@ export function phonemizeWord(word: string): string {
     return toks.join("");
 }
 
-// A word (Haitian Latin letters incl. è ò é à and the apostrophe elisions m'/l'/w') / number / punctuation token.
-const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'-")})|(\\d+)|([.!?…,;:])`, "gu");
+/**
+ * A word (Haitian Latin letters incl. è ò é à, the apostrophe elisions m'/l'/w' and the intra-word hyphen)
+ * / number / punctuation token.
+ *
+ * ⚠ BOTH APOSTROPHE CHARACTERS, and the typographic one was MISSING. The elision is the same construction
+ * however the source types it, and this corpus types it both ways: 73 intra-word U+0027 against 13
+ * intra-word U+2019 in `tools/corpus/mined/ht.jsonc` + `attest/ht.jsonc`, and TWO of the 200 parity rows
+ * carry U+2019. With only U+0027 in the class the word SPLIT AT THE MARK and the two halves were
+ * phonemized separately, so one construction had two readings: `l'Hôpital` → *lhopital* against
+ * `l’Hôpital` → *l hopital*, a stranded [l] in front of the noun. That is the ht instance of the class
+ * fixed for Swedish in #1073 — and the second half of that fix is not needed here, because this g2p has
+ * no fall-through: `scan` drops a character `graphemes` does not name, so the mark cannot leak into the
+ * IPA. A leading or trailing quote is dropped exactly as U+0027 already was (`’moun` → *mun*).
+ */
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’-")})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
@@ -91,7 +104,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'-")})|(\\d+)|([.!?…,;:])
  * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
  * core/hostWord.ts.
  */
-const NATIVE_CLASS = "[a-zèòéàA-ZÈÒÉÀ'-]";
+const NATIVE_CLASS = "[a-zèòéàA-ZÈÒÉÀ'’-]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class HaitianPhonemizer implements Phonemizer {

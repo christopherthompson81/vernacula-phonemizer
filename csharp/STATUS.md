@@ -16,11 +16,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 110 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 111 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67 — those languages have no wikipedia and no FLEURS, so their goldens are what exists).
-  **21,696 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **21,896 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn ca ceb cjy cmn cs de el en-GB en-IN en es-419 es fa ff fr-CA fr gan gu ha hak he hi hne hsn hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mai mg mi ml mr ms my nan ne nl nya oc om or pa pcm pl pnb ps pt-BR pt qu ro ru sd si skr sn so sr su sv sw syl ta te tg th tl tr ug uk umb ur uz vi wuu yo yue za zu.
+  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn ca ceb cjy cmn cs de el en-GB en-IN en es-419 es fa ff fr-CA fr gan gu ha hak he hi hne hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mai mg mi ml mr ms my nan ne nl nya oc om or pa pcm pl pnb ps pt-BR pt qu ro ru sd si skr sn so sr su sv sw syl ta te tg th tl tr ug uk umb ur uz vi wuu yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -434,6 +434,46 @@ byte-for-byte passes it forever. Every entry below is a TS-side fix owing a test
   exactly this by design; the tutuq belgisi is never word-initial or word-final in Uzbek either.
 - Hygiene, no output change: ig's `consonants["ṅ"]` is stored precomposed but `phonemizeWord` NFDs first,
   so the row is unreachable; ig's and su's `foreign` constructor params are never read on any branch.
+
+### From the ht port (2026-08-26) — 200/200 first run; full log in `docs/ht_port_investigation.md`
+
+⚠ **THE INTRA-WORD MARK CLASS IS LIVE IN ht, AND IT IS THE TYPOGRAPHIC APOSTROPHE, NOT THE ASCII ONE.**
+Haitian writes `l'ap`, `n'ap`, `ki-sa`, `pa-t`, and the word arm already carried `"'-"` — measured over
+mined + attest + the 200 golden texts, 73+46 intra-word U+0027 and 229+35 intra-word hyphens all read as
+ONE token. **U+2019 did not**: 13 mined + 2 golden instances, every one an elision, and every one split at
+the mark — `l’Hôpital` → *l hopital* against `l'Hôpital` → *lhopital*, a stranded [l] in front of the
+noun. `core/clauses.ts`'s own `LATIN_RUN`/`FOREIGN_RUN` list U+2019 and ~20 sibling Latin engines do too;
+ht simply missed it. Fixed TS-first (`"'-"` → `"'’-"`, and the same in `NATIVE_CLASS`), **2 golden rows
+moved**, pinned in both suites as "the two spellings must read IDENTICALLY".
+⚠ The second half of the Swedish fix (#1073) was NOT needed and that was checked, not assumed: `scan` has
+no fall-through — an unnamed character is dropped, never passed into the IPA — so a leading or trailing
+quote still reads as nothing (`’moun` → *mun*).
+
+Found, not fixed:
+
+- **A decimal glued to a letter reads its separator as a CLAUSE BREAK — ×8 attested.** Step 10's trailing
+  `(?![\d\p{L}\p{M}])` is documented as keeping a dotted designation (`802.11a`) out; declining is not
+  neutral, because the surviving `.`/`,` is then CLAUSE PUNCTUATION. `17.09m.` → *disɛt . nɛf m .*,
+  `1.9pwen` → *ɛ̃ . nɛf pwɛ̃*, `442.7k` → *… kaɣãnde . sɛt k*, `802.11n` → *ɥit sã de . ɔ̃z n*. ⚠ **Two of
+  the eight are `normalize.ts`'s OWN attestations** — `1 a 1,5m` and `50cm a 1,80m`, quoted twice in the
+  file as the evidence for the `a` connective, read *ɛ̃ a ɛ̃ , sɛ̃k m*. 3 of the 12 corpus instances are
+  genuine quantities, 5 are designations/DOIs, 2 are already rescued by the unit tier — and the current
+  reading is wrong for ALL of them. NOT FIXED because the repair (read the separator as `vigil`) trades a
+  bogus full stop for a bogus *vigil* in the designation half; that is a corpus call, not a port call.
+  0 golden rows reach the shape.
+- **A NON-ASCENDING span drops its unit entirely.** `53-50 km` → *sɛ̃kãntwa sɛ̃kãt km* against `50-53 km`
+  → *… kilomɛt*. Step 5's `(?<!\d\s?[-–—]\s?)` on the single-operand arm is only ever REACHED when the
+  span arm declined (a successful span rewrites the dash away), so its whole effect is to delete the unit
+  in exactly that branch. ×0 attested — the `tl numberStressIdx` shape, live the moment one appears.
+- **The `-eyen` ordinal band strands a bare *jɛm*** — the before-picture step 12 exists to fix, surviving
+  wherever `ordinalTails` has no match: `20yèm` → *vɛ̃tjɛm* but `21yèm` → *vɛ̃tejɛ̃ jɛm*, and likewise 31,
+  41, 81, 101, 0 and every magnitude. Needs a sourced Haitian ordinal for the decade+`eyen` band; all 22
+  `ordinalTails` rows themselves ARE reached (checked by composing every band).
+- Shared shapes, already filed for other languages: `2 − 2` reads *de de* (step 4b claims the LEADING
+  U+2212 only, deliberately); `20 °Cx` → *vɛ̃ kks* and `(0) c°` → *zewo k* (the `lo` degree finding);
+  `ISBN`/`US`/`X` read as Haitian words because espeak ships no Haitian Creole letter names.
+- Hygiene, no output change: step 1's zero-width class was written with the four INVISIBLE characters, so
+  the line read as an empty class. Escaped in both engines (the #931 rule).
 
 ## ⚠ Things that will bite
 

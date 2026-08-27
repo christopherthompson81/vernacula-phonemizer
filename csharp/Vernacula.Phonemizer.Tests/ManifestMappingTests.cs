@@ -590,4 +590,20 @@ public class ManifestMappingTests
     public void ArmenianManifestIsFullyMapped() =>
         AssertFullyMapped("languages/armenian", "armenian.jsonc", Languages.Armenian.Manifest.MANIFEST,
             "language", "name", "script", "provenance");
+
+    // haitian.jsonc is read by TWO independent types, mirroring the TypeScript's module split: the engine's
+    // `HaitianDef` (which does not declare `numbers`, so numbers.ts can load the file without an import
+    // cycle) and `HaitianNumbersDef`. Each is checked against the whole file with the other's keys listed
+    // as metadata, so a key claimed by NEITHER still fails.
+    [Fact]
+    public void HaitianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/haitian", "haitian.jsonc", Languages.Haitian.Manifest.MANIFEST,
+            "language", "name", "script", "numbers");
+
+    [Fact]
+    public void HaitianNumbersManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/haitian", "haitian.jsonc",
+            new { numbers = Languages.Haitian.Numbers.N },
+            "language", "name", "script", "digraphs", "hiatusVowels", "graphemes", "clausePunctuation",
+            "ordinalTails");
 }
