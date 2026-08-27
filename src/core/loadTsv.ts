@@ -40,9 +40,16 @@ function readDataLines(
  * `docs/investigations/nativiser_lexicon_seam_investigation.md`; guarded by `test/lexicon-reachability`.
  *
  * ⚠ AN UNFOLDED KEY ALREADY IN THE FILE WINS, ALWAYS. An alias is written only into a FREE slot, so no
- * reading that the engine can already reach today can change — which is also why the parity goldens cannot
- * move. Without this, Slovene alone would have 99 keys where the two spellings disagree about which nucleus
- * is stressed (`bləste`=0 against `bleste`=1) and the loser would be decided by file order.
+ * reading the engine already resolves THROUGH THE LEXICON can change. Without this, Slovene alone would
+ * have 99 keys where the two spellings disagree about which nucleus is stressed (`bləste`=0 against
+ * `bleste`=1) and the loser would be decided by file order.
+ *
+ * ⚠ …BUT THAT IS NOT "THE GOLDENS CANNOT MOVE", AND #1072 SAID SO AND WAS WRONG. A free slot is free
+ * because the word was an OOV MISS, and an OOV miss is not silence — it is the engine's fallback rule,
+ * which the goldens record. Slovene's 684 orphan aliases are 680 new headwords, and eight of `sl.tsv`'s
+ * 200 rows moved from the penultimate fallback onto the lexicon (`umrl` → *umˈərl* where the fallback said
+ * *ˈumərl*). No gate caught it because sl was unported at the time, so nothing ran its golden; the sl port
+ * regenerated it. The invariant to state is about LEXICON-RESOLVED readings, not about goldens.
  *
  * ⚠ AND THE RAW KEY IS KEPT, not replaced. Aliasing is additive: some callers (evals, `phonemizeWord` used
  * bare) look words up without nativising first, and dropping the original spelling would break them for no

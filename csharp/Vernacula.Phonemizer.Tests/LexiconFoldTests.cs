@@ -43,6 +43,28 @@ public class LexiconFoldTests
     public void AnApostropheBearingHeadwordIsOneWord(string input, string want) =>
         Assert.Equal(want, Phonemizer.Phonemize(input, "sv"));
 
+    [Fact]
+    public void SloveneLoadsTheFoldedLexiconAndItIsTheFleetsWorstCase()
+    {
+        // ⚠ THE `fold` IS NOT OPTIONAL WIRING — 1,252 of stress.tsv's 37,340 keys are ə/ł respellings no
+        // Slovene input can spell, and 684 of them alias onto a word the file does not otherwise contain
+        // (680 distinct new slots, four pairs colliding). A port that omitted `fold` would load a smaller
+        // lexicon than the TypeScript and diverge on every row touching one of them.
+        var lex = Languages.Slovenian.SlovenianPhonemizer.StressDict();
+        Assert.Equal(38020, lex.Count);
+        // `umrł` is the file's spelling; `umrl` is the word Slovene actually writes, and it exists ONLY as
+        // an alias. Without the fold it takes the penultimate fallback and reads *ˈumərl* — which is what
+        // eight rows of the sl golden said until this port regenerated it.
+        Assert.Equal(1d, lex["umrł"]);
+        Assert.Equal(1d, lex["umrl"]);
+        Assert.Equal("umˈərl", Phonemizer.Phonemize("umrl", "sl"));
+        // ⚠ AND THE UNFOLDED KEY WINS AMONG THE 102 SHADOWED PAIRS. `blesteł`=1 is a file key; `bləsteł`=0
+        // folds onto the same slot `blestel` and must LOSE it, and the iteration order that decides this is
+        // the FILE'S, not the dictionary's.
+        Assert.Equal(1d, lex["blestel"]);
+        Assert.Equal(0d, lex["bləsteł"]);
+    }
+
     [Theory]
     // ⚠ …AND A CLOSING QUOTE IS NOT PART OF THE WORD. `medialOnly` only bars the apostrophe from LEADING a
     // run, so `'ordet'` tokenized as `ordet'` — missing its lexicon entry and changing the accent to

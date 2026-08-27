@@ -55,7 +55,7 @@
     // the readable ones convention spells: ZDA ×11 is the most frequent acronym in the corpus and would
     // otherwise have been read as the word *zda*. The vowel-less and illegal-cluster ones (ZN, BDP, DVD,
     // GMT, GPS, DNK, UTC, DSLR, NBA, FBI, ABC, USD, TV, GP …) need no entry — the OOV test already spells
-    // them — and the genuinely word-read ones (COVID, UNESCO, OPEC, ISIS, ASUS, ACTA, REM, EVA) are left to
+    // them — and the genuinely word-read ones (COVID, UNESCO, OPEC, ISIS, ASUS, ACTA, REM) are left to
     // the g2p, which is what that test is for.
     "acronymLetters": [
         "zda", "usa", "eu", "it", "ai", "ip", "im", "oi", "et", "uw", "mri", "aol", "faa",

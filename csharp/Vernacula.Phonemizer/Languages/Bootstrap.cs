@@ -138,6 +138,7 @@ public static class Bootstrap
             Armenian.Armenian.RegisterSelf();
             Haitian.HaitianPhonemizer.RegisterSelf();
             Kinyarwanda.KinyarwandaPhonemizer.RegisterSelf();
+            Slovenian.SlovenianPhonemizer.RegisterSelf();
         }
     }
 }

@@ -512,6 +512,13 @@ function keepFinal(expansion: string, matched: string, rest: readonly unknown[])
 }
 
 /**
+ * ⚠ NO `i` FLAG, AND THAT IS THE POINT: `n. š.` is also two capital INITIALS with stops, and this block
+ * runs BEFORE the dotted-capital-run rule (step 20), so a case-insensitive `n\.\s?š\.` claimed
+ * `N. Š. Kovač je prišel` and read it *našega štetja. Kovač* — a person's name replaced by a date. This is
+ * exactly the defect croatian/normalize.ts was fixed for (#1074), in a file that inherited the same shape.
+ * All ELEVEN era instances across sl_si are lowercase, counted rather than assumed, so the flag bought
+ * nothing and cost a name.
+ *
  * MULTI-DOT abbreviations — the ERA MARKERS, ×10. ⚠ Claimed FIRST, or their interior dots
  * survive as phrase breaks and the letters as a bogus word ([pər . n . ʃ .]). `pr. n. š.` is matched before
  * the bare `n. š.` so the *pr-* is read into the instrumental. The final dot is optional (`pr. n. št.!`
@@ -524,8 +531,8 @@ function keepFinal(expansion: string, matched: string, rest: readonly unknown[])
  * corpus.
  */
 const MULTI_DOT: ReadonlyArray<readonly [RegExp, string]> = [
-    [/(?<![\p{L}\p{M}])pr\.\s?n\.\s?(?:št|š)\.?(?![\p{L}\p{M}])/giu, "pred našim štetjem"],
-    [/(?<![\p{L}\p{M}])n\.\s?(?:št|š)\.?(?![\p{L}\p{M}])/giu, "našega štetja"],
+    [/(?<![\p{L}\p{M}])pr\.\s?n\.\s?(?:št|š)\.?(?![\p{L}\p{M}])/gu, "pred našim štetjem"],
+    [/(?<![\p{L}\p{M}])n\.\s?(?:št|š)\.?(?![\p{L}\p{M}])/gu, "našega štetja"],
 ];
 
 /** SINGLE-DOT abbreviations → their expansion, sourced word by word: `itd.` = *in tako dalje* (in ×986,
@@ -688,8 +695,11 @@ export function normalizeSlovenian(input: string): string {
     );
     //    HONORIFICS, gated on a following CAPITAL — see the HONORIFIC comment: `ga.` is the pronoun *ga*
     //    in 23 of its 24 corpus sentences, and only the capital tells them apart.
+    //    ⚠ NO `i` FLAG — `\p{Lu}` UNDER `/i` MATCHES A LOWERCASE LETTER, so the capital guard this rule is
+    //    built on did not exist and `Vzel ga. je` read *Vzel gospa je*. The abbreviation's own case is
+    //    spelled out in the class instead; `Dr.`/`dr.`/`Ga.`/`ga.`/`G.`/`g.` are the attested spellings.
     s = s.replace(
-        /(?<![\p{L}\p{M}.])(dr|ga|g)\.(\s+)(?=\p{Lu})/giu,
+        /(?<![\p{L}\p{M}.])([Dd]r|[Gg]a|[Gg])\.(\s+)(?=\p{Lu})/gu,
         (_m, ab: string, sp: string) => `${HONORIFIC[ab.toLowerCase()]!}${sp}`,
     );
     //    DOT-ONLY abbreviations — the dot is a separate defect from the word, and removing it needs no
@@ -782,8 +792,16 @@ export function normalizeSlovenian(input: string): string {
     //     every feminine name in -ija (Marija, Sofija, Lucija) would have been read as a masculine
     //     genitive. The title list is closed and the intervening words must all be capitalised, so the
     //     shape matches 3 times in 1,903 utterances and cannot match anything else.
+    //
+    //     ⚠ …AND THAT LAST CLAIM WAS FALSE FOR AS LONG AS THIS RULE CARRIED `i`: `\p{Lu}` UNDER `/i`
+    //     MATCHES A LOWERCASE LETTER, so the "must all be capitalised" constraint did not exist and the
+    //     rule read ORDINARY PROSE as a regnal number — `kralj je bil 12 let` → *dvanajsti let*,
+    //     `cesar je umrl pri 40 letih` → *štirideseti letih*, `papež je bil star 78 let` →
+    //     *oseminsedemdeseti let*, `poglavar je govoril 2 uri` → *drugi uri*. All four titles take a bare
+    //     quantity like that in ordinary Slovene, so the false positive is not exotic. The titles' own
+    //     case is spelled into the class now and the flag is gone.
     s = s.replace(
-        /(?<![\p{L}\p{M}])(kralj[\p{L}\p{M}]*|cesar[\p{L}\p{M}]*|papež[\p{L}\p{M}]*|poglavar[\p{L}\p{M}]*)(\s+(?:\p{Lu}[\p{L}\p{M}]*\s+){1,3})(\d{1,2})(\.?)(?![\p{L}\p{M}\d,])/giu,
+        /(?<![\p{L}\p{M}])([Kk]ralj[\p{L}\p{M}]*|[Cc]esar[\p{L}\p{M}]*|[Pp]apež[\p{L}\p{M}]*|[Pp]oglavar[\p{L}\p{M}]*)(\s+(?:\p{Lu}[\p{L}\p{M}]*\s+){1,3})(\d{1,2})(\.?)(?![\p{L}\p{M}\d,])/gu,
         (m0, title: string, names: string, digits: string, dot: string, ...rest: unknown[]) => {
             const t = title.toLowerCase();
             const slot: Slot = t.endsWith("ica")
@@ -880,15 +898,22 @@ export function normalizeSlovenian(input: string): string {
     //    reason as `štetje`: they are what the abbreviation stands for, and merging the two scales into a
     //    bare *stopinj* would make `90 °F` and `90 °C` read identically — confidently wrong, which is the
     //    one outcome that cannot be right.
+    //     ⚠ THE COUNT IS THE WHOLE VALUE, NOT ITS INTEGER PART. `counted` indexes the SAME five-slot table
+    //     the tier indexes, whose fifth slot exists precisely for the genitive singular a decimal governs
+    //     (`slCountForm`: a non-integer is slot 4). Truncating first could never reach it, so one
+    //     construction had three answers — `1,5 °C` → *stopinja* (nom.sg), `2,4 °C` → *stopinji* (dual),
+    //     `0,5 °C` → *stopinje* — while `1,5 km` through the tier reads the gen.sg *kilometra*. The
+    //     Ukrainian #920 shape: when a language keeps a unit out of the shared tier, the agreement it
+    //     declared there is the specification the local rule owes.
     s = s.replace(
         /(\d+(?:,\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui,
-        (_m, n: string) => `${n} ${counted(intOf(n), STOPINJA())} Celzija`,
+        (_m, n: string) => `${n} ${counted(numOf(n), STOPINJA())} Celzija`,
     );
     s = s.replace(
         /(\d+(?:,\d+)?)\s?°\s?F(?![\p{L}\p{M}])/gui,
-        (_m, n: string) => `${n} ${counted(intOf(n), STOPINJA())} Fahrenheita`,
+        (_m, n: string) => `${n} ${counted(numOf(n), STOPINJA())} Fahrenheita`,
     );
-    s = s.replace(/(\d+(?:,\d+)?)\s?°/gu, (_m, n: string) => `${n} ${counted(intOf(n), STOPINJA())}`);
+    s = s.replace(/(\d+(?:,\d+)?)\s?°/gu, (_m, n: string) => `${n} ${counted(numOf(n), STOPINJA())}`);
 
     // 10) `x`/`×` between digits → *krat* ×2 (`36 x 24 mm`, `avtomobila 4 x 4`), where the ASCII letter was
     //     read as [ks]. The corpus writes the word itself in the very sentence the sign appears in
@@ -976,8 +1001,18 @@ export function normalizeSlovenian(input: string): string {
         }
     }
 
-    // 16) DECIMAL COMMA
-    s = s.replace(/(?<=\d),(?=\d)/gu, ` ${N.decimalWord} `);
+    // 16) DECIMAL COMMA — AND THE FRACTIONAL PART'S LEADING ZEROS SURVIVE IT.
+    //     ⚠ THIS WAS A 100× ERROR, not a mispronunciation, and it is the sr/hr/bs shape (#1076) in a
+    //     language that groups the same way. Replacing the comma leaves the fractional run as its own
+    //     token and the tokenizer's number arm reads it with `Number()`, so `Number("001")` is 1 and
+    //     `0,001 grama` came out *nič vejica ena grama*, "zero point one gram" — and `1,05 km` read
+    //     IDENTICALLY to `1,5 km`, a distinct-numbers violation on top of the magnitude error. The zeros
+    //     are emitted as DIGITS rather than as *nič*, because the number arm already reads a bare `0` as
+    //     this language's zero word; `1,50` is untouched, its whole-number reading being correct.
+    s = s.replace(/(?<=\d),(\d+)/gu, (_m, frac: string) => {
+        const zeros = /^0*/u.exec(frac)![0].length;
+        return zeros === 0 ? ` ${N.decimalWord} ${frac}` : ` ${N.decimalWord} ${"0 ".repeat(zeros)}${frac.slice(zeros)}`;
+    });
 
     // 17) FRACTIONS ×3, all of them MIXED numbers or a bare ratio: `meri 29 3/4 palca krat 24 1/2 palca`
     //     and `5 mm (1/5 palca)`. The rule COMPOSES from the denominator noun and a FEMININE numerator
@@ -1057,9 +1092,10 @@ export function normalizeSlovenian(input: string): string {
     return s;
 }
 
-/** Integer part of a Slovene-written number ("2,4" → 2), for the local agreement calls. */
-function intOf(n: string): number {
-    return Math.trunc(Number(n.replace(",", ".")));
+/** The VALUE of a Slovene-written number ("2,4" → 2.4), for the local agreement calls — the fractional
+ *  part is what selects `slCountForm`'s fifth slot, so it must survive. */
+function numOf(n: string): number {
+    return Number(n.replace(",", "."));
 }
 
 /** Escape a literal for embedding in a RegExp source. */
