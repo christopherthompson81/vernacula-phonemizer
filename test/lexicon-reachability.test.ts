@@ -27,22 +27,24 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
+
 import { nat as akan } from "../src/languages/akan/akan.ts";
-import { nat as balochi } from "../src/languages/balochi/balochi.ts";
+import { nat as balochi, lexicon as balochiLex } from "../src/languages/balochi/balochi.ts";
 import { nat as catalan } from "../src/languages/catalan/catalan.ts";
 import { nat as czech } from "../src/languages/czech/czech.ts";
-import { nat as danish } from "../src/languages/danish/danish.ts";
+import { nat as danish, lexicon as danishLex } from "../src/languages/danish/danish.ts";
 import { nat as german } from "../src/languages/german/german.ts";
 import { nat as hausa } from "../src/languages/hausa/hausa.ts";
 import { nat as ilocano } from "../src/languages/ilocano/ilocano.ts";
 import { nat as irish } from "../src/languages/irish/irish.ts";
 import { nat as javanese } from "../src/languages/javanese/javanese.ts";
 import { nat as minnan } from "../src/languages/minnan/minnan.ts";
-import { nat as norwegian } from "../src/languages/norwegian/norwegian.ts";
+import { nat as norwegian, lexicon as norwegianLex } from "../src/languages/norwegian/norwegian.ts";
 import { nat as romanian } from "../src/languages/romanian/romanian.ts";
 import { nat as serbian } from "../src/languages/serbian/serbian.ts";
-import { nat as slovenian } from "../src/languages/slovenian/slovenian.ts";
-import { nat as swedish } from "../src/languages/swedish/swedish.ts";
+import { nat as slovenian, stressDict as slovenianLex } from "../src/languages/slovenian/slovenian.ts";
+import { nat as swedish, lexicon as swedishLex } from "../src/languages/swedish/swedish.ts";
 import { nat as tagalog } from "../src/languages/tagalog/tagalog.ts";
 import { nat as turkish } from "../src/languages/turkish/turkish.ts";
 import { nat as welsh } from "../src/languages/welsh/welsh.ts";
@@ -56,31 +58,59 @@ const NATIVISERS: Readonly<Record<string, (s: string) => string>> = {
 };
 
 /**
- * ⚠ THE KNOWN-UNREACHABLE LEDGER, AND IT MAY ONLY SHRINK. Each entry is `<lang>/<file>` → the count measured
- * when #1068 was written up. These are not accepted as correct — they are the open defect, pinned so that
- * fixing them is visible and adding a new one is impossible. A second test below asserts the ledger holds no
- * stale entry, so a fix must delete its line rather than leave a passing overcount behind.
+ * ⚠ THE LOADED MAPS — the only place the #1068 aliases exist. `loadTsvMap`'s `fold` option writes each key's
+ * NATIVISED spelling in as an alias for the same value, so the TSV on disk is unchanged and the reachability
+ * question can only be answered against what was loaded. Only the five engines whose keys the fold rewrites
+ * need one; for the other 25 every key is its own nativised form, so resolution is true by construction.
  */
-const LEDGER: Readonly<Record<string, number>> = {
-    "slovenian/stress.tsv": 1252,
-    "swedish/accent-stress.tsv": 15,
-    "norwegian/nb-lexicon.tsv": 14,
-    "danish/da-lexicon.tsv": 4,
-    "balochi/balochi-lexicon.tsv": 4,
+const LOADED: Readonly<Record<string, () => Map<string, unknown>>> = {
+    "slovenian/stress.tsv": () => slovenianLex() as Map<string, unknown>,
+    "swedish/accent-stress.tsv": () => swedishLex() as Map<string, unknown>,
+    "norwegian/nb-lexicon.tsv": () => norwegianLex() as Map<string, unknown>,
+    "danish/da-lexicon.tsv": () => danishLex() as Map<string, unknown>,
+    "balochi/balochi-lexicon.tsv": () => balochiLex().ar as Map<string, unknown>,
+};
+
+/**
+ * ⚠ THE SHADOWED LEDGER, AND IT MAY ONLY SHRINK. A key whose nativised spelling was ALREADY TAKEN by another
+ * row cannot be aliased — the fold rule is "an unfolded key already in the file wins, always", which is what
+ * guarantees no reading reachable today can change. So these rows resolve, but to the OTHER row's value.
+ *
+ * This is the measured, accepted residual of the fix, not a defect the fix missed. 102 of the 106 are Slovene
+ * pairs where the ə-spelling and the e-spelling disagree about which nucleus is stressed (`bləste`=0 against
+ * `bleste`=1) — a lexicon-PROVENANCE defect that precedence routes around rather than settles, and a separate
+ * question from the one #1068 asks. The remaining 4 are Norwegian (3) and Danish (1).
+ *
+ * ⚠ 102, NOT THE 99 THE INVESTIGATION FIRST REPORTED, and finding the gap is what this test was for. The
+ * hand-rolled sweep only counted a fold landing on a key the FILE already writes. Three Slovene pairs have
+ * BOTH spellings folded — `bləsteł` and `blesteł` both reduce to `blestel`, likewise `səsał`/`sesał` and
+ * `səzuł`/`sezuł` — so the collision is between two aliases and the sweep never saw it. A guard that
+ * re-derives the rule finds what a guard that re-states a number cannot.
+ */
+const SHADOWED: Readonly<Record<string, number>> = {
+    "slovenian/stress.tsv": 102,
+    "norwegian/nb-lexicon.tsv": 3,
+    "danish/da-lexicon.tsv": 1,
 };
 
 /** Every `<lang>/<file>.tsv` under an engine that nativises, discovered rather than listed. */
-function lexicons(): Array<{ lang: string; file: string; keys: string[] }> {
-    const out: Array<{ lang: string; file: string; keys: string[] }> = [];
+function lexicons(): Array<{ lang: string; file: string; keys: string[]; raw: Map<string, string> }> {
+    const out: Array<{ lang: string; file: string; keys: string[]; raw: Map<string, string> }> = [];
     for (const lang of Object.keys(NATIVISERS)) {
         const dir = `data/languages/${lang}`;
         if (!existsSync(dir)) continue;
         for (const file of readdirSync(dir).filter((f) => f.endsWith(".tsv"))) {
-            const keys = readFileSync(`${dir}/${file}`, "utf8").split(/\r?\n/)
-                .filter((l) => l !== "" && !l.startsWith("#"))
-                .map((l) => l.slice(0, l.indexOf("\t")))
-                .filter((k) => k !== "");
-            out.push({ lang, file, keys: [...new Set(keys)] });
+            // ⚠ THE RAW VALUE STRING IS KEPT, not the parsed one. Shadowing is a property of the DATA, and
+            // several of these lexicons parse into OBJECTS — comparing those with !== measures reference
+            // identity, which scored every harmless duplicate as a clash (sv read 3 where the answer is 0).
+            const raw = new Map<string, string>();
+            for (const l of readFileSync(`${dir}/${file}`, "utf8").split(/\r?\n/)) {
+                if (l === "" || l.startsWith("#")) continue;
+                const tab = l.indexOf("\t");
+                if (tab <= 0) continue;
+                if (!raw.has(l.slice(0, tab))) raw.set(l.slice(0, tab), l.slice(tab + 1));
+            }
+            out.push({ lang, file, keys: [...raw.keys()], raw });
         }
     }
     return out;
@@ -109,28 +139,88 @@ describe("lexicon keys must survive their own engine's nativiser (#1068)", () =>
         expect(shipping.filter((l) => !(l in NATIVISERS))).toEqual([]);
     });
 
-    for (const { lang, file, keys } of LEXICONS) {
+    /**
+     * Per row: does its own value survive to the shipped lookup, or does another row's shadow it?
+     *
+     * `lost` is checked against the REAL loaded map, because that is where `loadTsvMap`'s aliases live and
+     * the question is whether the ENGINE can reach the row. `shadowed` re-simulates the alias rule over the
+     * RAW value strings, because the question there is about the data and several engines parse to objects.
+     * ⚠ The simulation must iterate the file's rows IN ORDER, for the reason `loadTsvMap` states: two keys
+     * can fold onto the same free slot, and "first wins" only means anything if the order is the file's.
+     */
+    function classify(lang: string, file: string, keys: string[], raw: Map<string, string>) {
         const id = `${lang}/${file}`;
-        const budget = LEDGER[id] ?? 0;
-        test(`${id} — ${budget === 0 ? "every key is reachable" : `at most ${budget} unreachable keys (ledger)`}`, () => {
-            const bad = unreachable(lang, keys);
-            // The message carries examples, because the count alone does not say WHICH letter is the problem.
-            expect(bad.length, `unreachable in ${id}: ${bad.slice(0, 8).map((k) => `${k}→${NATIVISERS[lang]!(k)}`).join("  ")}`)
-                .toBeLessThanOrEqual(budget);
+        const folded = keys.filter((k) => NATIVISERS[lang]!(k) !== k);
+        if (!folded.length) return { folded, lost: [] as string[], shadowed: 0 };
+        const load = LOADED[id];
+        expect(load, `${id} rewrites ${folded.length} keys under its own fold but is not in LOADED`).toBeTruthy();
+        const map = load!();
+
+        const resolved = new Map(raw); // unfolded keys, exactly as the file writes them
+        for (const [k, v] of raw) {
+            const f = NATIVISERS[lang]!(k);
+            if (f !== k && !resolved.has(f)) resolved.set(f, v);
+        }
+
+        const lost: string[] = [];
+        let shadowed = 0;
+        for (const k of folded) {
+            const f = NATIVISERS[lang]!(k);
+            if (!map.has(f)) lost.push(`${k}→${f}`);
+            else if (resolved.get(f) !== raw.get(k)) shadowed++;
+        }
+        return { folded, lost, shadowed };
+    }
+
+    for (const { lang, file, keys, raw } of LEXICONS) {
+        const id = `${lang}/${file}`;
+        test(`${id} — every row resolves through the nativiser`, () => {
+            const { lost } = classify(lang, file, keys, raw);
+            // ⚠ ZERO, EVERYWHERE, NO LEDGER. Before the fold-at-load fix this stood at 1,289 across five
+            // lexicons; `loadTsvMap`'s `fold` closes it by construction, so any non-zero here is a new
+            // defect — either a lexicon that gained a key its engine cannot spell, or a `fold` that was
+            // dropped from a call site.
+            expect(lost.slice(0, 8), `rows lost in ${id}`).toEqual([]);
+            expect(lost.length).toBe(0);
         });
     }
 
-    // ⚠ SHRINK-ONLY, the shape `test/large-numeral-fidelity.test.ts` uses for its lossy ledger. Without this,
-    // a fix that removed 1,200 of Slovene's 1,252 would still "pass" against a 1,252 budget and the ledger
-    // would quietly become fiction. An entry must be RE-MEASURED down or deleted.
-    test("the ledger holds no stale entry — a fix deletes its line, it does not leave an overcount", () => {
-        const stale: string[] = [];
-        for (const [id, budget] of Object.entries(LEDGER)) {
-            const lex = LEXICONS.find((l) => `${l.lang}/${l.file}` === id);
-            if (!lex) { stale.push(`${id} — no such lexicon (renamed or removed?)`); continue; }
-            const actual = unreachable(lex.lang, lex.keys).length;
-            if (actual < budget) stale.push(`${id} — ledger says ${budget}, actual ${actual}: lower or delete it`);
+    // ⚠ SHRINK-ONLY, the shape `test/large-numeral-fidelity.test.ts` uses. Without it a fix that removed 90
+    // of Slovene's 99 would still pass against a 99 budget and the ledger would quietly become fiction.
+    test("the shadowed ledger is exact — a row rescued must be re-measured down, not left as an overcount", () => {
+        const wrong: string[] = [];
+        for (const { lang, file, keys, raw } of LEXICONS) {
+            const id = `${lang}/${file}`;
+            const actual = classify(lang, file, keys, raw).shadowed;
+            const budget = SHADOWED[id] ?? 0;
+            if (actual !== budget) wrong.push(`${id} — ledger says ${budget}, actual ${actual}`);
         }
-        expect(stale).toEqual([]);
+        expect(wrong).toEqual([]);
+    });
+
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────
+    // The fix made concrete, on the witness #1068 was filed with. Counting rows proves the aliases EXIST;
+    // these prove they are what `text()` actually reaches.
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────
+    test("sv `München` reads the lexicon's accent, not the OOV rule's", () => {
+        // `münchen` is in accent-stress.tsv with NST accent 1. `text()` folded ü→u, looked up `munchen`,
+        // missed, and the OOV shape rule assigned accent 2 — the combining grave in *mˈɵ̀nkhɛn*.
+        expect(phonemize("München", "sv")).toBe("mˈɵnkhɛn");
+        expect(phonemize("münchen", "sv")).toBe("mˈɵnkhɛn");
+        expect(phonemize("munchen", "sv")).toBe("mˈɵnkhɛn"); // the alias, which is what carries it
+    });
+
+    test("sl reaches a stress entry the lexicon only spells phonetically", () => {
+        // `abstraktən` is the only spelling stress.tsv has; no Slovene input will ever contain ə. 684 keys
+        // of this shape alias onto a word the file does not otherwise contain, so the fold ADDS entries.
+        expect(slovenianLex().has("abstrakten")).toBe(true);
+        expect(phonemize("abstrakten", "sl")).toBe("apstrˈaktɛn");
+    });
+
+    test("⚠ AN UNFOLDED KEY ALREADY IN THE FILE STILL WINS — which is why no golden moved", () => {
+        // An alias goes only into a FREE slot. `bleste` is written in stress.tsv with nucleus 1; `bləste`
+        // folds onto it with nucleus 0 and must NOT displace it.
+        expect(slovenianLex().get("bleste")).toBe(1);
+        expect(phonemize("hus", "sv")).toBe("hʉːs"); // an ordinary native headword, untouched
     });
 });

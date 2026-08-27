@@ -26,8 +26,11 @@ const isV = (ch: string): boolean => ch !== "" && ch in V;
 // Pronunciation lexicon (word → canonical IPA, ~37k = NST ∩ top-50k freq, via tools/danish/build_da_nst.py). The
 // PRIMARY path: Danish vowel quality/reduction/length/stød is unrecoverable by rule, so a known word is looked up here.
 let LEX: Map<string, string> | undefined;
-function lexicon(): Map<string, string> {
-    if (LEX === undefined) LEX = loadTsvMap(import.meta.url, "da-lexicon.tsv", undefined, { optional: true });
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts` — see swedish.ts. */
+export function lexicon(): Map<string, string> {
+    if (LEX === undefined) LEX = loadTsvMap(import.meta.url, "da-lexicon.tsv", undefined,
+        // ⚠ #1068: alias each key to its nativised spelling — `text()` folds before it looks up. 4 keys.
+        { optional: true, fold: (k) => nat(k) });
     return LEX;
 }
 

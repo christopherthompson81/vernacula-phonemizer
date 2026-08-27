@@ -28,8 +28,15 @@ import { MANIFEST } from "./manifest.ts";
  * cannot drift apart on nucleus count.
  */
 let STRESS: Map<string, number> | undefined;
-function stressDict(): Map<string, number> {
-    if (STRESS === undefined) STRESS = loadTsvMap(import.meta.url, "stress.tsv", (v) => Number(v));
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts` — see swedish.ts. */
+export function stressDict(): Map<string, number> {
+    if (STRESS === undefined) STRESS = loadTsvMap(import.meta.url, "stress.tsv", (v) => Number(v),
+        // ⚠ #1068, AND THIS LEXICON IS THE FLEET'S WORST CASE — 1,252 of 37,340 keys were unreachable, not
+        // because the fold broke an agreement (Swedish's shape) but because the KEYS are spelled with ə and
+        // ł: kaikki phonetic respellings that leaked into the orthographic key column, so no Slovene input
+        // could ever have matched them. 684 of them alias onto a word this file does not otherwise contain,
+        // which means folding ADDS 684 real stress entries rather than merely un-hiding them.
+        { fold: (k) => nat(k) });
     return STRESS;
 }
 

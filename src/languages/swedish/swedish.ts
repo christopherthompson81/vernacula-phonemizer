@@ -32,7 +32,9 @@ interface LexEntry {
 // nucleus ordinal where it deviates from the first syllable. OOV words fall to the rule (first-syllable stress;
 // accent by the swedishAccentRule). See tools/gen/build-sv-lexicon.mts +.
 let LEXICON: Map<string, LexEntry> | undefined;
-function lexicon(): Map<string, LexEntry> {
+/** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every TSV row RESOLVES through
+ *  the nativiser — the loaded map is the only place the #1068 aliases exist. */
+export function lexicon(): Map<string, LexEntry> {
     if (LEXICON === undefined)
         LEXICON = loadTsvMap(
             import.meta.url,
@@ -55,7 +57,9 @@ function lexicon(): Map<string, LexEntry> {
                     secVowelInitial: tokens.includes("vi"),
                 };
             },
-            { optional: true },
+            // ⚠ #1068: alias each key to its NATIVISED spelling, because `text()` folds before it looks up.
+            // 15 keys were unreachable — `münchen` (NST accent 1) read with the OOV rule's accent 2.
+            { optional: true, fold: (k) => nat(k) },
         );
     return LEXICON;
 }
