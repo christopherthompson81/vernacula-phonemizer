@@ -137,7 +137,7 @@ structurally), and `Text()` → `PhonemizeWord` is the single entry point.
 
 ## Gates
 
-    csharp tests            1,870 pass (83 new in FinnishTests.cs), 0 fail
+    csharp tests            1,870 pass (78 new in FinnishTests.cs + 1 ManifestMappingTests case), 0 fail
     parity, fi              200/200 byte-identical, 0 differ, 0 BLOCKED
     parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
     differential            9,480 comparisons (sync + async), 0 differ, 0 throws
