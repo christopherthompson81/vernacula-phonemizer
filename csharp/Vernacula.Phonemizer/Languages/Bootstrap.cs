@@ -155,6 +155,7 @@ public static class Bootstrap
             Sesotho.SesothoPhonemizer.RegisterSelf();
             Sepedi.SepediPhonemizer.RegisterSelf();
             Wolof.WolofPhonemizer.RegisterSelf();
+            Finnish.FinnishPhonemizer.RegisterSelf();
         }
     }
 }

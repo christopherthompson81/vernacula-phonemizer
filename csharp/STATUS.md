@@ -16,12 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 133 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 134 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
   so their goldens are what exists).
-  **26,227 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **26,427 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nso nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wo wuu xh yo yue za zu.
+  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fi fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nso nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wo wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -117,6 +117,18 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   that no verse reference carries. The refusal's CONCLUSION survives (a bare-colon rule would still break 33
   to fix 8) but its premise does not, and a marker-keyed rule would fix 4 and claim 0 (#1111).
   See `docs/wo_port_investigation.md`.
+- **fi's GOLDEN IS NEARLY BLIND TO ITS NORMALIZER, and that is measured rather than suspected.** Of the
+  rules in `normalize.ts` plus the shared tier, **fourteen have ZERO golden coverage** — the ordinal range,
+  dotted dates, the colon suffix on digits, the apostrophe genitive, every dotted abbreviation, degrees, the
+  minus/plus, the relational signs, the ampersand, percent, currency, units, exponents and `×`. The gate
+  proves the engines agree about 110 sentences of prose; everything else rests on the differential:
+  **9,480 comparisons sync AND async (3,920 FLEURS + 430 artifacts + 385 probes + the golden), 0 differ,
+  0 throws**, leak sweep 0 of 4,740.
+  ⚠ **THE CLOCK'S MARKER GATE IS RIGHT AND ITS ADJACENCY IS TOO TIGHT** — FLEURS carries 37 clock instances
+  and the `kello`/`klo` gate claims 29. The 8 it misses are a parenthetical UTC gloss, a range's second
+  operand and a `Noin`-marked time, each inside a sentence where the rule already fired, each taking a
+  SENTENCE BREAK mid-number. Widening looks free because the sports times are excluded by the TRAILING
+  guard, not by the marker (#1114). See `docs/fi_port_investigation.md`.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,
