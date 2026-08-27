@@ -36,7 +36,7 @@ public static class Pos
         if (word.Length == 4 && ALL_DIGITS.IsMatch(word)) return "!YEAR";
         var first = word.Length > 0 ? word[0] : (char?)null;
         if (first is >= '0' and <= '9') return "!DIGITS";
-        return word.ToLowerInvariant();
+        return Js.ToLowerCase(word);
     }
 
     /** Honnibal/Collins feature set. */

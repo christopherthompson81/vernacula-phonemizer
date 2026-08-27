@@ -16,12 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 128 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 134 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
   so their goldens are what exists).
-  **25,227 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **26,427 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fi fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mag mai mg mi ml mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th ti tl tr ug uk umb ur uz vi wuu xh yo yue za zu.
+  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fi fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nso nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wo wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -48,6 +48,75 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   two halves of Levantine, which is the expected answer. zsm/pbt/bgc were SKIPPED: they read 25/25
   identically to their base, so a golden would only restate the base file and "it has a golden" would
   imply more than it delivers. **13 codes still have no golden.** See the investigation doc.
+- **la's golden contains ZERO literal MACRONS**, and the macron is this engine's whole vowel-length system.
+  `csharp/goldens/la.tsv` is MINED la.wikipedia prose, which is unmacronized, so the `long` table is reached
+  in the gate only INDIRECTLY — through the number composer, whose output (`ūnus`, `mīlle`, `nōngentī`) is
+  macronized by construction. Latin also has NO FLEURS SPLIT (it is a dead language), so widening (1) is
+  unavailable in its usual form. The weight falls on the 493 mined strings + 422 hand probes: **1,830
+  comparisons sync AND async, 0 differ, 0 throws**. `&c.`, currency, space-grouped numbers and the minus
+  sign are likewise ZERO-instance in the golden and covered only by the probes. See
+  `docs/la_port_investigation.md`, which also files the port's one reading finding — the word-final ⟨-Vm⟩
+  rule nasalizes a diphthong OFFGLIDE (`Nicolaum` → *ˈnɪkɔɫaũ̯ː*), attested in golden row 43 and reproduced
+  identically by both engines, so it is FILED (#1097), not fixed here.
+- **mn's `normalize.ts` says Mongolian has NO FLEURS corpus, and it does** — `mn_mn` carries train+dev+test
+  (3,982 unique lines) and `byid/mn_mn.tsv` 3,074 rows. That file argues its refusals from ONE source and says
+  so explicitly, so the second corpus is not bookkeeping: on the CLOCK refusal the measurement inverts —
+  15 of 15 distinct FLEURS sentences with a `d:dd` are times of day (18 instances), against the "would fix 2
+  and claim 10" the mined artifact gave. Filed as #1099 and **since fixed upstream (#1113)**: the repair
+  spends the COLON and emits no word, so it names no population and the "fix 2, claim 10" arithmetic — which
+  prices a rule emitting `цаг` — does not apply to it. This branch carries it as step 3b.
+  ⚠ mn's golden is also thinner than it looks — 200 rows, **103 unique texts**. The differential is
+  **9,722 comparisons sync AND async, 0 differ, 0 throws**; currency, degrees, U+2212, Mongol bichig and the
+  legacy ⟨ї⟩ codepage are ZERO-instance in BOTH the golden and FLEURS and rest on the mined artifact plus the
+  hand probes. See `docs/mn_port_investigation.md`, which also files the stale core-defect claim at step 11
+  (#1100 — the ASCII-liquid bug it calls live was fixed in `core/initialisms.ts`).
+- **tn was picked by the queue's own rule** — highest speaker population (14M) among unported codes with a
+  golden — and it has **no FLEURS**, checked rather than assumed after mn's header turned out to be wrong.
+  The weight falls on the two corpus artifacts + 360 hand probes: **1,676 comparisons sync AND async, 0 differ,
+  0 throws**, plus a leak sweep in which **0 of 838 outputs carry a raw digit or symbol**. The golden never
+  exercises the decimal comma, the currency magnitude suffix or the clock's only matching branch, and the
+  English-ordinal step is ×0 in BOTH artifacts (argued from the corpus-wide `ordinal-latin` cell, not the
+  retained text). See `docs/tn_port_investigation.md`, which files step 8's "one known loss" as TWO (#1104 —
+  the second is quoted in the same file's own `unitPer` comment).
+  ⚠ **AND THE mn FLEURS DEFECT IS A CLASS, NOT A ONE-OFF.** Sweeping every `normalize.ts` that states its
+  language has no FLEURS against the transcript directory: **ln, lt, lg, mt, ps, nso and mn all have one**
+  (1,758–1,991 unique sentences each). `he`'s header records the same error being found and fixed once
+  already, which is what makes it a class — transcripts landed and the headers were never re-swept (#1102).
+- **st is the first port whose differential turns up a BLOCKED row rather than a clean sweep.** One mined
+  line carries an embedded GEORGIAN run (`ილია`): TS reads it through the `ka` engine, C# drops it, and
+  `Registry.PortPending` for that row is `[georgian]` — measured per line, not inferred. Georgian is unported,
+  so this is BLOCKED, not wrong; it is not in the golden. **1,514 of 1,516 comparisons identical, 0 wrong,
+  0 throws**, plus a leak sweep in which **0 of 758 outputs carry a raw digit or symbol**. st has no FLEURS
+  (checked, not assumed) and the golden never exercises the currency-glued magnitude letter or the rate
+  branch. ⚠ st and tn are CLOSE SIBLINGS ported back to back (trap 55): nothing was carried across, and every
+  count in st's header was re-measured on st's own artifacts — all of them verify exactly.
+  See `docs/st_port_investigation.md`.
+- **nso is the port where the DIFFERENTIAL caught a bug the GOLDEN could not — and the numbers say why.**
+  The TS unit pattern's separator class is `[ \u00a0\u202f\u2009]` as CHARACTERS (a template literal); written
+  into C# through a shell heredoc the three non-ASCII members collapsed to plain spaces, so `1 kg` matched and
+  `1\u00a0kg` did not. Measured with escape-only patterns: number+NBSP+unit is **×0 in the golden, ×0 in FLEURS
+  and ×0 in the artifacts** — the only row in 4,265 that reaches the unit rule with a non-ASCII separator is
+  ONE mined line writing `1&nbsp;kg`, which `core/markup.ts` decodes upstream. The gate was 200/200 with the
+  bug live. Fixed, audited by CODE POINT across tn/st/mn as well, and pinned by a test verified to fail 5/5
+  against the buggy class. ⚠ A literal NBSP typed into a heredoc — measurement scripts included — is the trap;
+  spell the separators as escapes.
+  ⚠ **AND nso IS THE SHARPEST INSTANCE OF #1102 YET.** Its `normalize.ts` declines a CLOCK rule saying "there
+  is no instance to tabulate the marker distribution from", while `nso_za` carries 13 sentences / 16 instances,
+  every one a time of day with an `am`/`pm`/`mesong` marker, each currently reading with a clause pause inside
+  the time (`ka 11:35 pm` → *kʼa lesometʼee , masometʰaro ɬano pʼm*). `sepedi.ts`, two files away, cites those
+  same FLEURS utterances as a referee that fixed a vowel defect (#1108). See `docs/nso_port_investigation.md`.
+- **wo's separator classes were audited by CODE POINT before the first run**, because nso had just shipped a
+  collapsed-NBSP bug there (#1109) — all of wo's are regex LITERALS in the TS, so the escapes carry through,
+  and the audit found no all-ASCII-space class in any of the four new files. **8,118 comparisons sync AND
+  async (3,312 FLEURS + 433 artifacts + 310 probes + the golden), 0 differ, 0 throws**; leak sweep 0 of 4,059.
+  The golden exercises no degree, no dash range, no dotted era, no entity and no bare `&`, and the
+  English-ordinal step is ×0 in ALL THREE sources.
+  ⚠ **AND THE #1102 FAMILY APPEARS FROM A THIRD ANGLE.** wo's header never claims FLEURS is absent — it argues
+  the CLOCK refusal from the mined corpus alone ("33 of 33 are SCRIPTURE REFERENCES … Zero clocks"). Over
+  `wo_sn` the same shape is **8 of 8 a time of day**, four with an explicit `ci suba`/`ci ngoon`/`gmt` marker
+  that no verse reference carries. The refusal's CONCLUSION survives (a bare-colon rule would still break 33
+  to fix 8) but its premise does not, and a marker-keyed rule would fix 4 and claim 0 (#1111).
+  See `docs/wo_port_investigation.md`.
 - **fi's GOLDEN IS NEARLY BLIND TO ITS NORMALIZER, and that is measured rather than suspected.** Of the
   rules in `normalize.ts` plus the shared tier, **fourteen have ZERO golden coverage** — the ordinal range,
   dotted dates, the colon suffix on digits, the apostrophe genitive, every dotted abbreviation, degrees, the

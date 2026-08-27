@@ -78,6 +78,14 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
 - Always `RegexOptions.CultureInvariant`. ⚠ Turkish casing (`i`→`İ`) corrupts case-folds on any
   tr-TR machine otherwise — and we ship Turkish.
 - `ToLowerInvariant`/`ToUpperInvariant` ONLY. Bare `ToLower()` is a bug.
+- ⚠ AND `ToLowerInvariant` IS NOT `toLowerCase` EITHER — that rule is about CULTURE, and a site can satisfy
+  it and still diverge. **Lowercasing a WORD — anything reaching a g2p, a tagger, a neural key or a lexicon
+  lookup — goes through `Js.ToLowerCase`; `ToLowerInvariant` is for keys and captures whose alphabet you
+  control.** The two differ on 28 code points (#1116): U+0130 İ is length-changing (`i` + U+0307) and .NET
+  does not map it at all, and 27 more are simply newer than .NET's table. #1119 is what the gap costs when
+  the rule is read as being only about culture: 87 of 132 ported languages diverged on `İ`, 2,544 probe
+  rows, almost all of them through the ENGLISH foreign reader — which lowercases the run before reading it,
+  so a Turkish name inside any of 87 languages leaked its capital raw.
 
 ## Ordering & numbers
 - `Array.prototype.sort` default is LEXICOGRAPHIC (string) — port as `OrdinalIgnoreCase`-free

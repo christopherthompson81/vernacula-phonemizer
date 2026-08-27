@@ -13,6 +13,7 @@ import { MANIFEST } from "./manifest.ts";
 import { renderE5xNumber } from "../kikuyu/e5xNumbers.ts";
 
 /** A non-negative integer → space-separated Kamba cardinal words (10⁹ = milioni ngili ĩmwe, "a thousand million"). */
-export function numberToWords(n: number): string {
-    return renderE5xNumber(n, MANIFEST.numbers);
+// ⚠ THE WRAPPER MUST NOT DROP `raw` (#1095) — see kikuyu/numbers.ts.
+export function numberToWords(n: number, raw?: string): string {
+    return renderE5xNumber(n, MANIFEST.numbers, raw);
 }

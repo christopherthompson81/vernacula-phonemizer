@@ -413,6 +413,35 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/ancientgreek", "ancientgreek.jsonc", Languages.AncientGreek.Manifest.MANIFEST);
 
     [Fact]
+    public void LatinManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/latin", "latin.jsonc", Languages.Latin.Manifest.MANIFEST);
+
+    [Fact]
+    public void MongolianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/mongolian", "mongolian.jsonc", Languages.Mongolian.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
+    public void SetswanaManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/setswana", "setswana.jsonc", Languages.Setswana.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
+    public void SesothoManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/sesotho", "sesotho.jsonc", Languages.Sesotho.Manifest.MANIFEST,
+            "provenance");
+
+    [Fact]
+    public void SepediManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/sepedi", "sepedi.jsonc", Languages.Sepedi.Manifest.MANIFEST,
+            "provenance");
+
+    [Fact]
+    public void WolofManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/wolof", "wolof.jsonc", Languages.Wolof.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
     public void FinnishManifestIsFullyMapped() =>
         AssertFullyMapped("languages/finnish", "finnish.jsonc", Languages.Finnish.Manifest.MANIFEST,
             "provenance", "convention");

@@ -176,6 +176,15 @@ public static class Normalize
     private static readonly JsRe CLOCK =
         JsRegex.Compile("(?<=(?:kello|klo\\.?)\\s)(\\d{1,2})[.:](\\d{2})(?![\\d.,])", "giu");
 
+    /** ⚠ THE GATE IS RIGHT AND ITS ADJACENCY WAS TOO TIGHT (#1114) — these two arms add CONTEXT the marker
+     *  already licensed; they do not widen the marker. The sports times are still rejected by the `(?![\d.,])`
+     *  tail, not by the marker, which is what makes the widening free. See the TS for the FLEURS counts. */
+    private static readonly JsRe CLOCK_RANGE = JsRegex.Compile(
+        "(?<=(?:kello|klo\\.?)\\s)(\\d{1,2})[.:](\\d{2})(\\s+ja\\s+)(\\d{1,2})[.:](\\d{2})(?![\\d.,])", "giu");
+    private static readonly JsRe CLOCK_PAREN = JsRegex.Compile(
+        "(?<=\\()(\\d{1,2})[.:](\\d{2})(?=\\s+(?:UTC|GMT|EET|EEST|koordinoitua)(?![\\p{L}\\p{M}]))", "giu");
+
+
     private static readonly string ORD_TAIL = $"(?=\\s+(?:{MONTH_LOOKAHEAD}|\\p{{Ll}}))";
     private static readonly JsRe ORDINAL_RANGE =
         JsRegex.Compile($"(?<![\\d.,:\\p{{L}}])(\\d{{1,3}})\\.\\s*[–—-]\\s*(\\d{{1,3}})\\.{ORD_TAIL}", "gu");
@@ -258,12 +267,23 @@ public static class Normalize
 
         // 4) CLOCK, GATED ON THE MARKER WORD — the gate is the measurement: a bare-period clock rule would
         //    have fixed 3 and broken the 2 sports times.
-        t = CLOCK.Replace(t, m =>
+        string? ClockBody(string h, string mm) =>
+            Js.Number(h) < 24 && Js.Number(mm) < 60 ? $"{h} {Minutes(mm)}" : null;
+
+        // 4a) THE RANGE FIRST, AND THE ORDER IS THE WHOLE OF IT. `kello 6.30 ja 7.30` is matched as ONE span
+        //     so the marker licenses both operands — which means it must run BEFORE the single arm, or that
+        //     arm has already rewritten `6.30` and the lookbehind no longer sees a digit to anchor on.
+        t = CLOCK_RANGE.Replace(t, m =>
         {
-            var h = Js.Number(m.Groups[1].Value);
-            var mm = m.Groups[2].Value;
-            return h < 24 && Js.Number(mm) < 60 ? $"{m.Groups[1].Value} {Minutes(mm)}" : m.Value;
+            var a = ClockBody(m.Groups[1].Value, m.Groups[2].Value);
+            var b = ClockBody(m.Groups[4].Value, m.Groups[5].Value);
+            return a is not null && b is not null ? $"{a}{m.Groups[3].Value}{b}" : m.Value;
         });
+        t = CLOCK.Replace(t, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value) ?? m.Value);
+        // 4b) THE PARENTHETICAL TIMEZONE GLOSS — keyed on the ZONE NAME rather than on the bracket, because
+        //     a bracket alone licenses nothing. ⚠ `Noin 11.29` IS DELIBERATELY LEFT: `noin` is a general
+        //     quantity hedge, not a time word, and one instance is not a marker.
+        t = CLOCK_PAREN.Replace(t, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value) ?? m.Value);
 
         // 5) THE BARE `N.` ORDINAL — the largest rule in the file. THE ORDINAL RANGE IS CLAIMED FIRST, or its
         //    LEFT operand is stranded and read as a cardinal; only the connective is refused.

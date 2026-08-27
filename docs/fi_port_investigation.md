@@ -120,7 +120,7 @@ And the cost is the defect the rule exists to close, inside the same clause:
 ⚠ **AND WIDENING LOOKS FREE, because the sports times are excluded by a DIFFERENT guard.** `9.29,43` is
 declined by the trailing `(?![\d.,])` — the comma after the minutes — not by the marker, so extending the
 marker context (a preceding `ja`/`Noin`, or an open paren after a marked time) cannot let a sports time in.
-Filed as **#1114**, not fixed: it moves goldens, so it is TS-first.
+Filed as **#1114**; see Run 4 for what landed, and for the two numbers in this section that were wrong.
 
 Two claims checked and CONFIRMED rather than overturned, recorded because a check that passes is also a
 measurement:
@@ -135,12 +135,55 @@ measurement:
 Questions 2 and 3 came back clean: every manifest table is reached (`ManifestMappingTests` pins it
 structurally), and `Text()` → `PhonemizeWord` is the single entry point.
 
+## Run 4 — 2026-08-27 16:35 — #1114 landed, and my instance counts were double
+
+#1114 was fixed upstream (#1120) while the port was in review. The fix adds CONTEXT the marker already
+licensed rather than widening the marker, in two arms plus a deliberate refusal:
+
+    4a  the RANGE     `kello 6.30 ja 7.30` matched as ONE span, so the marker licenses both operands
+                      — and it must run BEFORE the single arm, or that arm has already rewritten `6.30`
+                      and the lookbehind has no digit left to anchor on
+    4b  the PAREN     `(2.30 UTC)`, `(15.00 koordinoitua …)` — keyed on the ZONE NAME, not the bracket,
+                      because a bracket alone licenses nothing
+    ✗   `Noin 11.29`  DELIBERATELY LEFT: `noin` is a general quantity hedge, ×1 before a clock and
+                      otherwise before decimal commas. One instance is not a marker.
+
+Ported and verified end to end: the range's second operand and both parenthetical glosses now read without
+a break, `Noin 11.29` still takes one, `ajalla 9.29,43` still declines, and `kello 21.01` is unchanged.
+
+⚠ **AND THE UPSTREAM COMMIT'S COUNTS ARE 18 / 14 WHERE RUN 3 ABOVE SAYS 37 / 29. MINE WERE DOUBLE, AND THE
+CAUSE IS WORTH MORE THAN THE NUMBER.** `.probe/fi/fleurs.txt` is built with `cut -f3,4`, so it carries BOTH
+the cased transcript AND the lowercased duplicate of every utterance — 3,920 lines for 1,960 sentences.
+Counting instances over that file counts each one twice. Verified:
+
+    over columns 3+4 (my probe file)   37 instances, 29 claimed
+    over column 3 alone               18 instances, 14 claimed     ← the upstream figure
+
+⚠ **AND INCLUDING COLUMN 4 IS RIGHT FOR THE DIFFERENTIAL AND WRONG FOR THE CENSUS**, which is the actual
+lesson: more input shapes make the TS↔C# comparison stronger, and the same duplication makes any
+"how often does the corpus write X" claim inflated. The probe haystack and the measurement corpus are not
+the same object and should not be the same file. The four missed SHAPES I reported are exactly the four the
+fix addresses, so the finding stands — only its headline numbers were wrong.
+
+⚠ This is the second measurement error in this sweep, after wo's (#1111), and they have opposite causes:
+there I measured with the rule's own guard and saw too FEW; here I measured over a duplicated file and saw
+too MANY. Both are the same underlying mistake — letting the measurement inherit something from the thing
+being measured.
+
+Re-gated after the merge: **parity fi 200/200 against the NEW golden**, differential **9,480 comparisons,
+0 differ, 0 throws**, case-folding probe identical.
+
+## Recount
+
+All six earlier ports merged first, so main is at 133 / 26,227 and this branch is **134 languages /
+26,427 rows**.
+
 ## Gates
 
-    csharp tests            1,870 pass (78 new in FinnishTests.cs + 1 ManifestMappingTests case), 0 fail
-    parity, fi              200/200 byte-identical, 0 differ, 0 BLOCKED
-    parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
-    differential            9,480 comparisons (sync + async), 0 differ, 0 throws
+    csharp tests            2,418 pass (78 in FinnishTests.cs + 1 ManifestMappingTests case), 0 fail
+    parity, fi              200/200 byte-identical against the POST-#1120 golden, 0 differ, 0 BLOCKED
+    parity, fleet           134 languages, 26,427 rows, 0 differ, 0 BLOCKED
+    differential            9,480 comparisons (sync + async), 0 differ, 0 throws — re-run after the merge
     case-folding probe      96 comparisons over 48 adversarial lines, 0 differ, 0 throws
     leak sweep              0 of 4,740 outputs carry a raw digit or symbol
     separator audit         0 all-ASCII-space classes in the four new files (by code point)

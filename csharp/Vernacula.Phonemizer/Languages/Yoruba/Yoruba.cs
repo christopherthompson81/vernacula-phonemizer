@@ -30,7 +30,7 @@ public sealed class YorubaPhonemizer : ILanguage
     /** One Yoruba word → canonical IPA (segments + level tones). */
     public static string PhonemizeWord(string word)
     {
-        var s = Js.CodePoints(word.ToLowerInvariant().Normalize(NormalizationForm.FormD));
+        var s = Js.CodePoints(Js.ToLowerCase(word).Normalize(NormalizationForm.FormD));
         var n = s.Count;
         var segs = new List<Seg>();
         Seg? LastNucleus()

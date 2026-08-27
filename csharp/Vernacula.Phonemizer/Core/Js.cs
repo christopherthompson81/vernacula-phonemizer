@@ -4,6 +4,7 @@
 // `String.prototype.replace(searchString, …)` replacing only the FIRST occurrence.
 
 using System.Globalization;
+using System.Text;
 
 namespace Vernacula.Phonemizer.Core;
 
@@ -158,6 +159,111 @@ public static class Js
             : double.NaN;
 
     /**
+     * THE 28 CODE POINTS JS LOWERCASES AND `ToLowerInvariant` DOES NOT (#1116).
+     *
+     * ⚠ MEASURED, NOT READ OFF A         [0x0130] = "\u0069\u0307",
+        [0x1C89] = "\u1c8a",
+        [0xA7CB] = "\u0264",
+        [0xA7CC] = "\ua7cd",
+        [0xA7DA] = "\ua7db",
+        [0xA7DC] = "\u019b",
+        [0x10D50] = char.ConvertFromUtf32(0x10D70),
+        [0x10D51] = char.ConvertFromUtf32(0x10D71),
+        [0x10D52] = char.ConvertFromUtf32(0x10D72),
+        [0x10D53] = char.ConvertFromUtf32(0x10D73),
+        [0x10D54] = char.ConvertFromUtf32(0x10D74),
+        [0x10D55] = char.ConvertFromUtf32(0x10D75),
+        [0x10D56] = char.ConvertFromUtf32(0x10D76),
+        [0x10D57] = char.ConvertFromUtf32(0x10D77),
+        [0x10D58] = char.ConvertFromUtf32(0x10D78),
+        [0x10D59] = char.ConvertFromUtf32(0x10D79),
+        [0x10D5A] = char.ConvertFromUtf32(0x10D7A),
+        [0x10D5B] = char.ConvertFromUtf32(0x10D7B),
+        [0x10D5C] = char.ConvertFromUtf32(0x10D7C),
+        [0x10D5D] = char.ConvertFromUtf32(0x10D7D),
+        [0x10D5E] = char.ConvertFromUtf32(0x10D7E),
+        [0x10D5F] = char.ConvertFromUtf32(0x10D7F),
+        [0x10D60] = char.ConvertFromUtf32(0x10D80),
+        [0x10D61] = char.ConvertFromUtf32(0x10D81),
+        [0x10D62] = char.ConvertFromUtf32(0x10D82),
+        [0x10D63] = char.ConvertFromUtf32(0x10D83),
+        [0x10D64] = char.ConvertFromUtf32(0x10D84),
+        [0x10D65] = char.ConvertFromUtf32(0x10D85),. Every one of the 1,114,112 code points was lowercased in both
+     * engines and the outputs diffed: JS maps 1,460 single code points to something else, .NET 1,432, and
+     * the 28 below are the whole of the difference. There is no code point they map DIFFERENTLY — .NET is
+     * only ever missing one — which is what makes a lookup the right shape.
+     *
+     * They are two distinct causes, and the issue that reported this named only the first:
+     *   · **U+0130** İ LATIN CAPITAL LETTER I WITH DOT ABOVE is the one LENGTH-CHANGING SpecialCasing entry
+     *     that applies unconditionally — it lowercases to `i` + U+0307, two code points. .NET returns it
+     *     unchanged, so every greedy-scan engine that starts with `toLowerCase()` then met a character its
+     *     grapheme table has never heard of and dropped it.
+     *   · **THE OTHER 27 ARE UNICODE VERSION SKEW**, plain single-code-point mappings that .NET's table
+     *     simply predates: U+1C89 (Cyrillic, Unicode 12), U+A7CB/CC/DA/DC (Latin Extended-D, 15–16) and the
+     *     22 Garay capitals U+10D50–65 (16). Nothing special-cased about them; Node's ICU is just newer.
+     *     ⚠ THIS LIST IS THEREFORE VERSION-BOUND. A .NET upgrade shrinks it and a Node upgrade may grow it;
+     *     `JsToLowerCaseTests` re-runs the sweep so the file cannot drift silently.
+     */
+    private static readonly Dictionary<int, string> LOWER_EXTRA = new()
+    {
+        [0x0130] = "\u0069\u0307",
+        [0x1C89] = "\u1c8a",
+        [0xA7CB] = "\u0264",
+        [0xA7CC] = "\ua7cd",
+        [0xA7DA] = "\ua7db",
+        [0xA7DC] = "\u019b",
+        [0x10D50] = char.ConvertFromUtf32(0x10D70),
+        [0x10D51] = char.ConvertFromUtf32(0x10D71),
+        [0x10D52] = char.ConvertFromUtf32(0x10D72),
+        [0x10D53] = char.ConvertFromUtf32(0x10D73),
+        [0x10D54] = char.ConvertFromUtf32(0x10D74),
+        [0x10D55] = char.ConvertFromUtf32(0x10D75),
+        [0x10D56] = char.ConvertFromUtf32(0x10D76),
+        [0x10D57] = char.ConvertFromUtf32(0x10D77),
+        [0x10D58] = char.ConvertFromUtf32(0x10D78),
+        [0x10D59] = char.ConvertFromUtf32(0x10D79),
+        [0x10D5A] = char.ConvertFromUtf32(0x10D7A),
+        [0x10D5B] = char.ConvertFromUtf32(0x10D7B),
+        [0x10D5C] = char.ConvertFromUtf32(0x10D7C),
+        [0x10D5D] = char.ConvertFromUtf32(0x10D7D),
+        [0x10D5E] = char.ConvertFromUtf32(0x10D7E),
+        [0x10D5F] = char.ConvertFromUtf32(0x10D7F),
+        [0x10D60] = char.ConvertFromUtf32(0x10D80),
+        [0x10D61] = char.ConvertFromUtf32(0x10D81),
+        [0x10D62] = char.ConvertFromUtf32(0x10D82),
+        [0x10D63] = char.ConvertFromUtf32(0x10D83),
+        [0x10D64] = char.ConvertFromUtf32(0x10D84),
+        [0x10D65] = char.ConvertFromUtf32(0x10D85),
+    };
+
+    /** Cheap pre-test so the common string keeps the single-pass `ToLowerInvariant` fast path. */
+    private static bool NeedsLowerExtra(string s)
+    {
+        foreach (var c in s)
+            if (c == '\u0130' || c == '\u1C89' || (c >= '\uA7CB' && c <= '\uA7DC') || char.IsHighSurrogate(c))
+                return true;
+        return false;
+    }
+
+    /** Substitute the missing mappings BEFORE the sigma pass — their outputs are already lowercase, so the
+     *  `ToLowerInvariant` that follows is a no-op on them, and the Final_Sigma context test still sees the
+     *  cased letters it needs (a combining dot above is case-IGNORABLE, so it does not break the run). */
+    private static string ApplyLowerExtra(string s)
+    {
+        var sb = new StringBuilder(s.Length);
+        for (var i = 0; i < s.Length; i++)
+        {
+            var cp = char.IsHighSurrogate(s[i]) && i + 1 < s.Length && char.IsLowSurrogate(s[i + 1])
+                ? char.ConvertToUtf32(s[i], s[i + 1])
+                : s[i];
+            if (LOWER_EXTRA.TryGetValue(cp, out var rep)) sb.Append(rep);
+            else sb.Append(char.ConvertFromUtf32(cp));
+            if (cp > 0xFFFF) i++;
+        }
+        return sb.ToString();
+    }
+
+    /**
      * JS `String.prototype.toLowerCase`, which .NET's `ToLowerInvariant` is NOT.
      *
      * ⚠ THE DIFFERENCE IS THE GREEK FINAL SIGMA, and it is a real divergence rather than a nicety. JS
@@ -167,11 +273,16 @@ public static class Js
      * `ΠΟΙΟΣ` read `pios` in C# against `pços` in Node.
      *
      * `Final_Sigma`: Σ lowercases to ς when a cased letter precedes it (skipping case-ignorable characters)
-     * and no cased letter follows it (likewise). Everything else is `ToLowerInvariant`.
+     * and no cased letter follows it (likewise).
+     *
+     * ⚠ AND THE SIGMA IS NOT THE ONLY DIVERGENCE — there are 28, found by sweeping all 1,114,112 code
+     * points through both engines rather than by reading the SpecialCasing table (#1116). See
+     * `LOWER_EXTRA`.
      */
     public static string ToLowerCase(string s)
     {
-        if (s.IndexOf('\u03a3') < 0) return s.ToLowerInvariant(); // no Σ ⇒ the two agree
+        if (s.IndexOf('\u03a3') < 0 && !NeedsLowerExtra(s)) return s.ToLowerInvariant(); // the two agree
+        s = ApplyLowerExtra(s);
         var lower = s.ToLowerInvariant().ToCharArray();
         for (var i = 0; i < s.Length; i++)
         {
@@ -181,41 +292,62 @@ public static class Js
         return new string(lower);
     }
 
-    private static bool IsCaseIgnorable(char c)
+    /**
+     * ⚠ THESE TWO TAKE A CODE POINT, NOT A `char`, AND THAT IS A FIX RATHER THAN A STYLE (#1116).
+     * `char.GetUnicodeCategory(char)` reports `Surrogate` for either half of a surrogate pair, so an ASTRAL
+     * CASED LETTER counted as neither cased nor case-ignorable and the Final_Sigma context test silently
+     * got the wrong answer beside one. Found by fuzzing 20,000 mixed strings against Node with the Garay
+     * capitals (U+10D50–65) in the alphabet: 314 of them diverged, every one a Σ standing next to an astral
+     * letter. The single-code-point sweep cannot see this class at all — it takes two characters to build.
+     */
+    private static bool IsCaseIgnorable(int cp)
     {
-        var cat = char.GetUnicodeCategory(c);
-        return cat is System.Globalization.UnicodeCategory.NonSpacingMark
-            or System.Globalization.UnicodeCategory.EnclosingMark
-            or System.Globalization.UnicodeCategory.Format
-            or System.Globalization.UnicodeCategory.ModifierLetter
-            or System.Globalization.UnicodeCategory.ModifierSymbol
-            || c is '\'' or '\u2019' or '\u00b7' or '\u0387' or ':' or '.';
+        var cat = CharUnicodeInfo.GetUnicodeCategory(char.ConvertFromUtf32(cp), 0);
+        return cat is UnicodeCategory.NonSpacingMark
+            or UnicodeCategory.EnclosingMark
+            or UnicodeCategory.Format
+            or UnicodeCategory.ModifierLetter
+            or UnicodeCategory.ModifierSymbol
+            || cp is '\'' or '\u2019' or '\u00b7' or '\u0387' or ':' or '.';
     }
 
-    private static bool IsCased(char c)
+    private static bool IsCased(int cp)
     {
-        var cat = char.GetUnicodeCategory(c);
-        return cat is System.Globalization.UnicodeCategory.UppercaseLetter
-            or System.Globalization.UnicodeCategory.LowercaseLetter
-            or System.Globalization.UnicodeCategory.TitlecaseLetter;
+        var cat = CharUnicodeInfo.GetUnicodeCategory(char.ConvertFromUtf32(cp), 0);
+        return cat is UnicodeCategory.UppercaseLetter
+            or UnicodeCategory.LowercaseLetter
+            or UnicodeCategory.TitlecaseLetter;
+    }
+
+    /** The code point ENDING at `end` (exclusive), and where it starts — a surrogate pair counts as one. */
+    private static (int Cp, int Start) CodePointBefore(string s, int end)
+    {
+        if (end >= 2 && char.IsLowSurrogate(s[end - 1]) && char.IsHighSurrogate(s[end - 2]))
+            return (char.ConvertToUtf32(s[end - 2], s[end - 1]), end - 2);
+        return (s[end - 1], end - 1);
     }
 
     private static bool CasedBefore(string s, int i)
     {
-        for (var k = i - 1; k >= 0; k--)
+        for (var k = i; k > 0;)
         {
-            if (IsCaseIgnorable(s[k])) continue;
-            return IsCased(s[k]);
+            var (cp, start) = CodePointBefore(s, k);
+            k = start;
+            if (IsCaseIgnorable(cp)) continue;
+            return IsCased(cp);
         }
         return false;
     }
 
     private static bool CasedAfter(string s, int i)
     {
-        for (var k = i + 1; k < s.Length; k++)
+        for (var k = i + 1; k < s.Length;)
         {
-            if (IsCaseIgnorable(s[k])) continue;
-            return IsCased(s[k]);
+            var pair = char.IsHighSurrogate(s[k]) && k + 1 < s.Length && char.IsLowSurrogate(s[k + 1]);
+            var cp = pair ? char.ConvertToUtf32(s[k], s[k + 1]) : s[k];
+            k += pair ? 2 : 1;
+            if (IsCaseIgnorable(cp)) continue;
+            return IsCased(cp);
         }
         return false;
     }

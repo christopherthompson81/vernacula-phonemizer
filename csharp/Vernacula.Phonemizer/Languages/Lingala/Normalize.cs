@@ -91,8 +91,19 @@ public static class Normalize
      * Normalize one Lingala input string. Pure text→text; every rule emits DIGITS wherever a number is
      * involved and lets the engine's own number path speak them (the first ordinal above is the exception).
      */
+    /**
+     * A CLOCK'S COLON LOSES ITS PAUSE BEHIND A DAY-PART OR TIMEZONE MARKER — and nothing else (#1102).
+     * Keyed on the MARKER rather than the shape, because the mined text's `N:NN` are mostly SCRIPTURE
+     * REFERENCES (`Kol 1:26`) and none of those carries one. See the TS for the two corpora's counts.
+     */
+    private static readonly JsRe CLOCK_MARKED = JsRegex.Compile(
+        "(?<![\\d.,:])([01]?\\d|2[0-3])[.:]([0-5]\\d)(?![\\d]|[.,:]\\d)"
+        + "(?=\\s*(?:na\\s+ntongo|ya\\s+butu|UTC|GMT|MDT)\\b)", "giu");
+
     public static string NormalizeLingala(string input)
     {
+        // 0) The marked clock loses the colon's pause — see CLOCK_MARKED.
+        input = CLOCK_MARKED.Replace(input, "$1 $2");
         // NFC at the entry so the literals in this file match whichever normalization the text arrived in;
         // the engine NFDs again downstream.
         var s = input.Normalize(System.Text.NormalizationForm.FormC);
@@ -123,7 +134,7 @@ public static class Normalize
         {
             var key = ESCAPE.Replace(sym, "\\$&");
             s = JsRegex.Compile(
-                    $"(?<![\\d.,:\\p{{L}}\\p{{M}}-])(\\d+)\\s?[-\u2013\u2014]\\s?(\\d+)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d])",
+                    $"(?<![\\d.,:\\p{{L}}\\p{{M}}-])(\\d+)\\s?[-\u2013\u2014]\\s?(\\d+)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d²³/])",
                     "gu")
                 .Replace(s, m =>
                 {
@@ -131,7 +142,7 @@ public static class Normalize
                     return Js.Number(a) < Js.Number(b) ? $"{word} {a} kino {b}" : m.Value;
                 });
             s = JsRegex.Compile(
-                    $"(?<![\\p{{L}}\\p{{M}}\\d.,])(?<!\\d\\s?[-\u2013\u2014]\\s?)(\\d+(?:[.,]\\d+)?)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d])",
+                    $"(?<![\\p{{L}}\\p{{M}}\\d.,])(?<!\\d\\s?[-\u2013\u2014]\\s?)(\\d+(?:[.,]\\d+)?)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d²³/])",
                     "gu")
                 // ⚠ The single-operand arm must refuse a span's second half (`(?<!\d\s?[-–—]\s?)`), so a
                 // span it declined reaches RANGE whole rather than with its tail already rewritten.

@@ -33,10 +33,10 @@ public static class Numbers
         mult == 1 && bareAtOne ? word : $"{Below1000(mult)} {word}";
 
     /** 0 … 10⁹-1 → Afrikaans words; beyond (or unsafe) → digit-by-digit units. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e9)
-            return string.Join(" ", Js.NumberToString(n).Select(d =>
+            return string.Join(" ", (raw ?? Js.NumberToString(n)).Select(d =>
                 d >= '0' && d <= '9' ? N.Units[d - '0'] : d.ToString()));
         if (n < 1000) return Below1000(n);
         var parts = new List<string>();

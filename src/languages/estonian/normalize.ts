@@ -5,6 +5,11 @@
  * the tier can still see number–unit adjacency.
  *
  * ⚠ THE EVIDENCE IS ONE SOURCE, TWICE. There is no FLEURS corpus for Estonian on this machine; the evidence is
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `et_ee` landed later, 1,906 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ AND THE RE-MEASUREMENT HAS NOW BEEN
+ * DONE FOR THE CLOCK, which is the class it changed — see the clock note below. Every OTHER "only N
+ * times" in this file is still a count over the mined artifact alone: the sweep was per CLASS, not per
+ * file, and the rest of #1102's expensive half is still open.
  * `tools/corpus/mined/et.jsonc` (1,931,621 paragraphs of the et.wikipedia dump, 464 retained = 264 hard + 200
  * sample) plus `attest.ts` against et.wikipedia — WHICH IS THE WIKI THE ARTIFACT WAS MINED FROM. That is a
  * bigger sample of ONE source and never an independent second tier. What IS independent is espeak-ng's
@@ -629,7 +634,28 @@ function clauseWindow(full: string, start: number, end: number): string {
  * reason. Verified by probing: `84 000&nbsp;km²` reaches this function as `84 000 km²`. A local copy would
  * have typechecked, run, and repaired nothing.
  */
+/**
+ * A CLOCK'S SEPARATOR LOSES ITS PAUSE BEHIND `kell`/`kella` — and nothing else happens (#1102).
+ *
+ * ⚠ THIS LAYER HAD NO CLOCK RULE AND NO REFUSAL EITHER, because the mined artifact gave it nothing to
+ * decide. Over FLEURS `et_ee` there are 13 true clocks and **10 carry the hour noun in front**:
+ * `kell 12.00`, `Kell 11.20`, `Kella 11.29`, `kell 22:08`, `kell 10:00`, `kell 1.15`, `kella 11.00`,
+ * `kell 8.46`, `kella 11.35` …
+ * ⚠ AND THE MARKER IS NOT A PRECAUTION: `21:20` in this same corpus is a SPORTS SCORE
+ * (*ühepunktiline võit, 21:20* — "a one-point win"), and `802.11a/b/n` is a Wi-Fi designation. A bare
+ * separator rule would claim both.
+ * ⚠ NO WORD IS EMITTED. `kell` is already written; what this removes is the CLAUSE PAUSE the colon was and
+ * the SENTENCE BREAK the full stop of `8.46` was taking mid-figure.
+ * ⚠ THE TRAILING GUARD REJECTS A DIGIT OR A SEPARATOR THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK. Written
+ * as `(?![\d.,:])` it declined every clock that ENDS A CLAUSE — `kusaawa 11:29,` and `ssaawa 11:00,` came
+ * back untouched, which is trap 58 and is how half the marked instances were being missed.
+ */
+const CLOCK_MARKED = /(?<=\bkell[ao]?\s)([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)/giu;
+
 export function normalizeEstonian(input: string): string {
+    // 0) THE MARKED CLOCK loses the separator's pause — see CLOCK_MARKED. First, because the ordinal and
+    //    decimal rules below both read a dot and would spend `8.46`'s before this could see it.
+    input = input.replace(CLOCK_MARKED, "$1 $2");
     let t = input;
 
     // 1) SPACE-GROUPED THOUSANDS (31,010 whole-corpus; 48 in the retained text), FIRST — a space is a token

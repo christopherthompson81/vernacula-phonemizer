@@ -22,6 +22,11 @@
  *      count of any untreated language in this repository.
  *   2. `attest.ts` against lt.wikipedia — WHICH IS THE SAME WIKI THE ARTIFACT WAS MINED FROM. A bigger
  *      sample of ONE source, never a second one. There is no FLEURS corpus for Lithuanian.
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `lt_lt` landed later, 1,966 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ AND THE RE-MEASUREMENT HAS NOW BEEN
+ * DONE FOR THE CLOCK, which is the class it changed — see the clock note below. Every OTHER "only N
+ * times" in this file is still a count over the mined artifact alone: the sweep was per CLASS, not per
+ * file, and the rest of #1102's expensive half is still open.
  *   3. What genuinely IS independent, and what rescues this language: espeak ships Lithuanian, and
  *      `$ESPEAK_NG/dictsource/lt_list` carries a CHARACTER-NAME block and an ABBREVIATION block. Those
  *      state how a SYMBOL is READ rather than merely using it — the register a written corpus lacks by
@@ -277,6 +282,44 @@ const MAGS: readonly [RegExp, LithuanianAgreement][] = [
  * Text→text normalization for Lithuanian. A numbered, ORDER-DEPENDENT sequence; the coupling is stated at
  * each step because a future reader cannot recover it from the code.
  */
+/**
+ * A CLOCK'S SEPARATOR LOSES ITS PAUSE BEHIND `val.` / `a.m.` / `p.m.` — and nothing else happens (#1102).
+ *
+ * ⚠ THE REFUSAL BELOW WAS PRICED ON ONE CORPUS AND FLEURS INVERTS IT. It reads "11 `N:NN` in the retained
+ * text and NOT ONE is a time of day", which is true of the mined artifact. Over `lt_lt` there are **16
+ * true clocks**, and 14 of them carry `val.` (the hour noun) or `a.m.`/`p.m.`: `11:20 val.`, `8.46 val.`,
+ * `12.00 val`, `07:19 a.m.`, `09:19 p.m.` …
+ * ⚠ AND THE REFUSAL HAD ALREADY SEEN THE DISCRIMINATOR AND READ IT BACKWARDS — it cites `19:11 val.` as a
+ * reason NOT to read, because the hour noun "is already there". It is: which is exactly what makes it a
+ * marker no counter-example carries.
+ * ⚠ NO WORD IS EMITTED. `val.` is written, so nothing needs sourcing; what this removes is the CLAUSE
+ * PAUSE the colon was, and the full stop `8.46` was taking mid-figure.
+ * ⚠ EVERY COUNTER-EXAMPLE THE REFUSAL NAMES IS STILL DECLINED, because none carries the marker: the
+ * timestamps `00:58:53 UTC` / `19:14:07 GMT`, the durations `2:15:16` and `5:48:45.98`, the FLEURS sports
+ * times `4:41.30` / `2:11.60` / `1:09.02`, and the Wi-Fi designations `802.11a/b/g/n`.
+ * ⚠ `a.m.`/`p.m.` ARE **NOT** IN THE MARKER SET, AND THAT IS A MEASURED RETREAT RATHER THAN AN OVERSIGHT.
+ * FLEURS carries two (`07:19 a.m.`, `09:19 p.m.`) and adding them fixed both — while BREAKING them, because
+ * removing the colon puts the minute field next to the `a.`, and step 6's century abbreviation then reads
+ * `19 a.` as *devyniolika amžiaus* ("nineteenth century"). Trading a pause for a wrong WORD is the wrong
+ * side of trap 53, so the two instances keep their pause and the collision is left to whoever widens the
+ * abbreviation rule. `val.` reaches 12 of the 16 with no such interaction.
+ * ⚠ THE TRAILING GUARD REJECTS A DIGIT OR A SEPARATOR THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK. Written
+ * as `(?![\d.,:])` it declined every clock that ENDS A CLAUSE — `kusaawa 11:29,` and `ssaawa 11:00,` came
+ * back untouched, which is trap 58 and is how half the marked instances were being missed.
+ */
+const CLOCK_MARKED = /(?<![\d.,:])([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)(?=\s*val\b)/gu;
+/**
+ * ⚠ A SPAN'S FIRST OPERAND IS **NOT** CLAIMED, AND THAT IS A REVERSAL RECORDED RATHER THAN HIDDEN.
+ * `8:00 - 19:00 val.` is the refusal's own opening-hours example, and the marker plainly licenses both
+ * halves — so an arm was written to take them, and it made the reading WORSE. With both colons gone the
+ * range rule below sees a bare `00 - 19` and claims it: *8 nuo 00 iki 19 nulis valandų*, "8 from 00 to 19
+ * zero hours". Exactly tn's known-loss shape (#1104) from the other side — a rule that turns a separator
+ * into a boundary changes what the NEXT rule can see.
+ * So only the operand the marker touches is claimed, and `8:00 - 19 nulis valandų` is where this stops:
+ * one pause removed, one left, and no new wrong word. Fixing it properly means the range rule learning to
+ * see an already-rewritten operand, which is a new pattern shape rather than a move.
+ */
+
 export function normalizeLithuanian(input: string): string {
     // NFC. Lithuanian's ⟨ą č ę ė į š ų ū ž⟩ all have a decomposed encoding, and every literal below —
     // the month names, `tūkst`, `mūsų` — is written precomposed. `core/hostWord.ts` NFCs per TOKEN, which
@@ -284,6 +327,10 @@ export function normalizeLithuanian(input: string): string {
     // (trap 11). ⚠ ROBUSTNESS, NOT A MEASURED DEFECT REPAIR: the retained text is entirely NFC already and
     // this line changes zero corpus readings. Said so rather than implying a fix (trap 22).
     let t = input.normalize("NFC");
+
+    // 0) THE MARKED CLOCK loses the separator's pause — see CLOCK_MARKED. First, because the ordinal and
+    //    decimal rules below both read a dot and would spend `8.46`'s before this could see it.
+    t = t.replace(CLOCK_MARKED, "$1 $2");
 
     // 1) FIXED MULTI-DOT PHRASES, ABOVE EVERY SINGLE-DOT RULE. Two separate reasons, and both bite:
     //    · The playbook's standing coupling — a multi-dot abbreviation must be claimed before a single-dot

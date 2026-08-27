@@ -11,6 +11,11 @@
  * own order — the `ki` position, reached independently on this language's own corpus (trap 55).
  *
  * ⚠ THE SOURCING SITUATION, STATED PLAINLY. There is no FLEURS corpus for Luganda; the evidence is
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `lg_ug` landed later, 1,875 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ AND THE RE-MEASUREMENT HAS NOW BEEN
+ * DONE FOR THE CLOCK, which is the class it changed — see the clock note below. Every OTHER "only N
+ * times" in this file is still a count over the mined artifact alone: the sweep was per CLASS, not per
+ * file, and the rest of #1102's expensive half is still open.
  * `tools/corpus/mined/lg.jsonc` (43,455 paragraphs of the lg.wikipedia dump, 447 retained) plus `attest.ts`
  * against lg.wikipedia — WHICH IS THE SAME WIKI THE ARTIFACT WAS MINED FROM, a bigger sample of one source and
  * never an independent one. espeak does not ship Luganda at all, so `sources.ts` reports `[NONE]` or `[chk?]`
@@ -247,7 +252,33 @@ const spellings = (noun: string): string[] => [noun, ...(ALSO_WRITTEN[noun] ?? [
 /**
  * Luganda text normalization. A numbered, ORDER-DEPENDENT sequence; each step states its coupling.
  */
+/**
+ * A CLOCK'S SEPARATOR LOSES ITS PAUSE BEHIND `saawa` OR A DAY-PART/TIMEZONE MARKER — nothing else (#1102).
+ *
+ * ⚠ THE HOUR NOUN IS WRITTEN IN FRONT and is the discriminator. Over FLEURS `lg_ug`: `saawa 9:30`,
+ * `kusaawa 11:29`, `saawa 12.00 GMT`, `saawa 10:00`, `saawa 8:46 am`, `ssaawa 11:00`, `ssaawa 11:35`,
+ * `ssaawa 8:30 ezekiro` — the spelling varies (`saawa`/`ssaawa`, glued in `kusaawa`) and the lookbehind
+ * tolerates all of it. The trailing markers (`am`, `p.m.`, `GMT`, `UTC`, the `ez-` day-parts) catch the
+ * ones written without it: `1:15 ezekiro`, `07:19 ez'okumakya`, `09:19 p.m. GMT`, `15.00 UTC`.
+ * ⚠ AND THE COUNTER-EXAMPLES ARE IN THIS CORPUS AND IN THE GOLDEN. `3.50 m` is a MEASUREMENT — it is
+ * `lg.tsv`'s own row — and `4:41.30` / `2:11.60` / `1:09.02` are ski results, `802.11a/b` a Wi-Fi
+ * designation. None carries a marker; all four keep their separator.
+ * ⚠ NO WORD IS EMITTED. `saawa` is already written.
+ * ⚠ THE TRAILING GUARD REJECTS A DIGIT OR A SEPARATOR THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK. Written
+ * as `(?![\d.,:])` it declined every clock that ENDS A CLAUSE — `kusaawa 11:29,` and `ssaawa 11:00,` came
+ * back untouched, which is trap 58 and is how half the marked instances were being missed.
+ * ⚠ AND THE DAY-PART MARKER IS `ez` + ANY LETTER, not `ez` + an apostrophe: the corpus writes both
+ * `ez'okumakya` and the unapostrophised `ezekiro` / `ezolwegulo`, and keying on the apostrophe missed the
+ * commoner half.
+ */
+const CLOCK_MARKED =
+    /(?:(?<=s{1,2}aawa\s)([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)|(?<![\d.,:])([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)(?=\s*(?:am\b|p\.?\s?m\.?|GMT|UTC|ez[\p{L}’'])))/giu;
+
 export function normalizeLuganda(input: string): string {
+    // 0) THE MARKED CLOCK loses the separator's pause — see CLOCK_MARKED. First, because the numeric steps
+    //    below read a digit run and the separator was splitting one in half.
+    input = input.replace(CLOCK_MARKED, (m, h1?: string, m1?: string, h2?: string, m2?: string) =>
+        h1 !== undefined ? `${h1} ${m1}` : `${h2} ${m2}`);
     let s = input;
 
     // ⚠ THERE IS NO ENTITY-FOLDING STEP HERE, AND THAT IS A MEASUREMENT RATHER THAN AN OVERSIGHT — a step
