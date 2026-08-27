@@ -59,7 +59,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   and the `kello`/`klo` gate claims 29. The 8 it misses are a parenthetical UTC gloss, a range's second
   operand and a `Noin`-marked time, each inside a sentence where the rule already fired, each taking a
   SENTENCE BREAK mid-number. Widening looks free because the sports times are excluded by the TRAILING
-  guard, not by the marker (#1113). See `docs/fi_port_investigation.md`.
+  guard, not by the marker (#1114). See `docs/fi_port_investigation.md`.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,

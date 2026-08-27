@@ -120,7 +120,7 @@ And the cost is the defect the rule exists to close, inside the same clause:
 ⚠ **AND WIDENING LOOKS FREE, because the sports times are excluded by a DIFFERENT guard.** `9.29,43` is
 declined by the trailing `(?![\d.,])` — the comma after the minutes — not by the marker, so extending the
 marker context (a preceding `ja`/`Noin`, or an open paren after a marked time) cannot let a sports time in.
-Filed as **#1113**, not fixed: it moves goldens, so it is TS-first.
+Filed as **#1114**, not fixed: it moves goldens, so it is TS-first.
 
 Two claims checked and CONFIRMED rather than overturned, recorded because a check that passes is also a
 measurement:
