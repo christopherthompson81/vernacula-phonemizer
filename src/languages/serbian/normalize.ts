@@ -323,14 +323,26 @@ export function normalizeSerbian(input: string): string {
     // 3) DOTTED ABBREVIATIONS. The dot is consumed before a following word so it cannot become a phrase
     //    break; at a real sentence end it is kept.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED[lat(ab)]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED[lat(ab)];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*[,;:])`, "giu"),
         (_m, ab: string) => DOTTED[lat(ab)]!);
     //    ⚠ A CLOSING BRACKET OR QUOTE IS NOT A PAUSE — serbian.jsonc maps only `.!?…,;:` — so the dot must be
     //    KEPT before one, not consumed the way it is before a comma. Grouping `)` with the comma silently
     //    loses the sentence-final pause on `…, итд.)`.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*(?:[.!?”"»)\\]]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED[lat(ab)]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED[lat(ab)];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 3b) SIGNS. ⚠ `±` MUST PRECEDE THE `+` ARMS: it is a single character they cannot see, so a `+` arm
     //     running first would leave the `±` untouched and a later one would never reach it.

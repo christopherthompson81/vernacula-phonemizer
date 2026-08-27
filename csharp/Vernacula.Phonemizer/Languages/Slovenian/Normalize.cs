@@ -415,10 +415,16 @@ public static class Normalize
         }
 
         // 2) SINGLE-DOT ABBREVIATIONS.
-        s = DOTTED_MID.Replace(s, m => $"{DOTTED[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = DOTTED_END.Replace(s, m => $"{DOTTED[m.Groups[1].Value.ToLowerInvariant()]}.");
-        s = DOTTED_ANY.Replace(s, m => DOTTED[m.Groups[1].Value.ToLowerInvariant()]);
-        s = HONORIFIC_RE.Replace(s, m => $"{HONORIFIC[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
+        s = DOTTED_MID.Replace(s, m =>
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
+            // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
+            DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+        s = DOTTED_END.Replace(s, m =>
+            DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
+        s = DOTTED_ANY.Replace(s, m =>
+            DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
+        s = HONORIFIC_RE.Replace(s, m =>
+            HONORIFIC.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
         s = ST_RE.Replace(s, m => m.Groups[1].Value);
         s = INC_RE.Replace(s, m => m.Groups[1].Value);
         s = AL_RE.Replace(s, m => m.Groups[1].Value);

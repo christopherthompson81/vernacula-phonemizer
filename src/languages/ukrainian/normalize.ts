@@ -296,11 +296,23 @@ export function normalizeUkrainian(input: string): string {
     // 5) DOTTED ABBREVIATIONS. The dot is consumed before a following word or a comma, so it cannot become
     //    a phrase break; at a real sentence end it is kept. Runs AFTER step 1 so `н. е.` is already gone.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
         (_m, ab: string) => DOTTED_ABBREV[ab.toLowerCase()]!);
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 6) UNITS the shared symbol tier cannot express.
     //    · `м` is deliberately NOT declared as a shared unit: the tier's trailing guard is

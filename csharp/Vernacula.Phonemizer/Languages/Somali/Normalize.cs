@@ -185,7 +185,12 @@ public static class Normalize
         s = DEG_C.Replace(s, "$1 darajo Celsius");
         s = DEG_F.Replace(s, "$1 darajo Fahrenheit");
         s = DEG_COMPASS.Replace(s, m =>
-            $"{m.Groups[1].Value} darajo {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
+            // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122). The pattern carries `i` AND `u`, so
+            // JS folds U+017F LONG S onto `s` and `12°ſ` MATCHES `[NSEW]` — while `ſ` is no COMPASS key. The
+            // TS asserted non-null and spoke the word "undefined"; the C# indexer THREW.
+            COMPASS.TryGetValue(m.Groups[2].Value.ToLowerInvariant(), out var dir)
+                ? $"{m.Groups[1].Value} darajo {dir}"
+                : m.Value);
         s = DEG_BARE.Replace(s, "$1 darajo");
 
         // 10. Signs. ⚠ PLUS BEFORE MINUS, or the minus arm claims the bracketed operand of `5 + (−3)`.

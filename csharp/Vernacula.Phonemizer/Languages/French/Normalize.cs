@@ -139,15 +139,20 @@ public static class Normalize
             var ab = m.Groups[1].Value;
             var sp = m.Groups[2].Value;
             var key = ab.ToLowerInvariant();
-            return DOT_ONLY.Contains(key) ? $"{ab}{sp}" : $"{DOTTED_ABBREV[key]}{sp}";
+            if (DOT_ONLY.Contains(key)) return $"{ab}{sp}";
+            return DOTTED_ABBREV.TryGetValue(key, out var w) ? $"{w}{sp}" : m.Value;  // ⚠ reachable miss (#1122)
         });
         s = ABBREV_END.Replace(s, m =>
         {
             var ab = m.Groups[1].Value;
-            return DOT_ONLY.Contains(ab.ToLowerInvariant()) ? m.Value : $"{DOTTED_ABBREV[ab.ToLowerInvariant()]}.";
+            if (DOT_ONLY.Contains(ab.ToLowerInvariant())) return m.Value;
+            return DOTTED_ABBREV.TryGetValue(ab.ToLowerInvariant(), out var w) ? $"{w}." : m.Value;
         });
 
-        s = UNDOTTED.Replace(s, m => UNDOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]);
+        s = UNDOTTED.Replace(s, m =>
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
+            // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
+            UNDOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
 
         s = NAME_INITIAL.Replace(s, m =>
         {

@@ -266,9 +266,21 @@ export function normalizeEnglish(input: string): string {
     //     phrase break, and kept at a phrase end where it really is the sentence end — the same discipline
     //     as the st./dr. rule above, and the shape every arm in this step repeats.
     s = s.replace(new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
-        (_m, ab: string, sp: string) => `${PLAIN_ABBREV[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = PLAIN_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
-        (_m, ab: string) => `${PLAIN_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = PLAIN_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
     //     `et al.` is TWO tokens, so it needs its own arm after the single-token rule above has run.
     s = s.replace(/\bet\s+al\.(\s+)(?=\p{L})/giu, "et al$1");
     s = s.replace(/\bet\s+al\.(?=\s*(?:[.,;:!?)]|$))/giu, "et al.");

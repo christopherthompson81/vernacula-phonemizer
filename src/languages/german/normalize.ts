@@ -189,9 +189,21 @@ export function normalizeGerman(input: string): string {
     //    The lookahead admits a DIGIT as well as a letter: `S. 42` and `Nr. 5` are the ordinary forms and
     //    neither matched before, so both leaked a raw letter plus a spurious pause.
     s = s.replace(new RegExp(`(?<!\\p{Lu}\\.[ \u00a0])\\b(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),  // space, NBSP
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 4) CLOCK, before the number tokenizer sees the separator. Both written forms occur and both were
     //    broken: the colon became a PAUSE with a spurious "null", and the dot form was read as a DECIMAL

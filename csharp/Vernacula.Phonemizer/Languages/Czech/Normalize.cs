@@ -246,8 +246,12 @@ public static class Normalize
         }
 
         // 2) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break.
-        s = JsRegex.Replace(s, DOTTED_MID, m => $"{DOTTED[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = JsRegex.Replace(s, DOTTED_END, m => $"{DOTTED[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = JsRegex.Replace(s, DOTTED_MID, m =>
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
+            // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
+            DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+        s = JsRegex.Replace(s, DOTTED_END, m =>
+            DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
         s = JsRegex.Replace(s, PAGE_S, m => $"{DOTTED["s"]}{m.Groups[1].Value}");
 
         // 3) CLOCK. ⚠ Before any rule that looks for a bare number.

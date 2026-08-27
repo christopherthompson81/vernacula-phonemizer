@@ -160,8 +160,14 @@ public static class Normalize
 
         s = DOTTED_CAPS.Replace(s, m => DOT_OR_SPACE.Replace(m.Value, ""));
 
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = ABBREV_MID.Replace(s, m =>
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122). The pattern is built from this table's OWN keys but
+            // carries `i`+`u`, so JS's fold widens it — `ſ`→`s`, and the Cyrillic `ᲀᲃᲅ` forms onto theirs —
+            // and a near-miss MATCHES while its key is absent. The TS asserted non-null and spoke the word
+            // "undefined"; this indexer THREW. Refuse the whole match.
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+        s = ABBREV_END.Replace(s, m =>
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
         s = ABBREV_BARE.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}");
 
         s = ORDINAL.Replace(s, m => OrdinalWord(Js.Number(m.Groups[1].Value)) ?? m.Value);

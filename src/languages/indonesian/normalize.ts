@@ -76,9 +76,21 @@ export function normalizeIndonesian(input: string): string {
     // 3) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
     s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 4) SLASH UNITS, before the shared tier claims the bare `km`.
     s = s.replace(new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}])`, "gu"),
@@ -99,7 +111,12 @@ export function normalizeIndonesian(input: string): string {
     //    letter glued raw into the IPA. Repairing an input EXPOSES the rules that were never exercised on it,
     //    so a mojibake fix has to be followed by a re-read of the sentences it unmasks.
     s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
-        (_m, d: string, dir: string) => `${d} derajat ${COMPASS[dir.toLowerCase()]!}`);
+        (m, d: string, dir: string) => {
+            // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122) — `iu` folds U+017F LONG S onto `s`,
+            // so `12°ſ` matches `[NSEW]` and the `!` made `String.replace` stringify `undefined`.
+            const word = COMPASS[dir.toLowerCase()];
+            return word === undefined ? m : `${d} derajat ${word}`;
+        });
     s = s.replace(/(\d)\s?°/gu, "$1 derajat");
 
     // 6) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.

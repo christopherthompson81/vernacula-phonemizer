@@ -190,7 +190,13 @@ public static class Normalize
         // 9. Degrees — scale letters, then compass, then the bare sign.
         s = DEG_C.Replace(s, "$1 darajat Celsius");
         s = DEG_F.Replace(s, "$1 darajat Fahrenheit");
-        s = DEG_COMPASS.Replace(s, m => $"{m.Groups[1].Value} darajat {COMPASS[Js.ToLowerCase(m.Groups[2].Value)]}");
+        s = DEG_COMPASS.Replace(s, m =>
+            // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122). The pattern carries `i` AND `u`, so
+            // JS folds U+017F LONG S onto `s` and `12°ſ` MATCHES `[NSEW]` — while `ſ` is no COMPASS key. The
+            // TS asserted non-null and spoke the word "undefined"; the C# indexer THREW.
+            COMPASS.TryGetValue(Js.ToLowerCase(m.Groups[2].Value), out var dir)
+                ? $"{m.Groups[1].Value} darajat {dir}"
+                : m.Value);
         s = DEG_BARE_GLUED.Replace(s, "$1 darajat ");
         s = DEG_BARE.Replace(s, "$1 darajat");
 

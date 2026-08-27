@@ -242,6 +242,9 @@ const SYMBOLS = makeSymbolNormalizer({
 const ENTITY: Readonly<Record<string, string>> = {
     "&nbsp;": " ", "&bull;": " ", "&sup2;": "²", "&sup3;": "³",
 };
+/** ⚠ THE LOOKUP FALLS BACK TO THE MATCH, AND THE MISS BRANCH IS REACHABLE (#1122) — the pattern's `iu`
+ *  flags fold U+017F LONG S onto `s`, so `&ſup2;` matches while its key does not exist and the `!` that
+ *  used to be here made `String.replace` stringify `undefined`: `km&ſup2;` read *kmundeˈfined*. */
 
 /**
  * Quechua text normalization. A numbered, ORDER-DEPENDENT sequence; each step states its coupling, because
@@ -260,7 +263,7 @@ export function normalizeQuechua(input: string): string {
     // ⚠ NFC first, so a decomposed letter is one code point before any literal below is matched; the g2p
     // NFCs again downstream and the fold is idempotent, so this costs nothing.
     s = s.normalize("NFC").replace(/&amp;/giu, "&")
-        .replace(/&(?:nbsp|bull|sup2|sup3);/giu, (e) => ENTITY[e.toLowerCase()]!)
+        .replace(/&(?:nbsp|bull|sup2|sup3);/giu, (e) => ENTITY[e.toLowerCase()] ?? e)
         .replace(/\p{Cf}/gu, "");
 
     // ── 2. DE-GROUP THOUSANDS — FIRST among the numeric rules, and the largest defect this layer repairs ─

@@ -250,9 +250,21 @@ export function normalizePolish(input: string): string {
     //    followed by a word, and followed by another mark or end of clause (`itp.` at the end of a list),
     //    where the sentence period is kept.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 6) VERSION / FIGURE DOTS between digits — `802.11n` ×4 and `rysunek 1.1.` ×1 were breaking the
     //    sentence at the interior dot. Before step 7 so the ordinal rule never sees a digit-dot-digit.

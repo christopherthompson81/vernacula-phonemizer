@@ -64,6 +64,17 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
     Simple case folding under `/iu` — JS folds a long s onto `s`, ypogegrammeni onto iota, and the
        pre-1918 Cyrillic letters onto their modern forms; .NET does none of these. A measured table
        widens the class. ⚠ Only under `u`: legacy `/i` deliberately refuses non-ASCII→ASCII folds.
+       ⚠ AND A WIDENED CLASS CAN MATCH WHAT THE CODE'S OWN LOOKUP TABLE WAS NEVER BUILT FOR, which is
+       the other half of this and bites in BOTH engines. `/&(?:sup2|nbsp|…)/giu` matches `&ſup2`, and
+       `/(\d)°([NSEW])/giu` matches `12°ſ`, while the key computed from the match keeps the long s.
+       In TS an `!` on the miss makes `String.replace` stringify `undefined` and the WORD is spoken; in
+       C# the dictionary indexer THROWS out of `Phonemize`. **Sixteen languages carried it** — the
+       dominant shape is a dotted-abbreviation alternation built from the table's OWN keys and then given
+       `i`, so the pattern and the table disagree about their alphabet by construction (#1122).
+       **A callback that indexes a table with the MATCH must handle the miss**
+       — fall back to the match for a table of rewrites, or refuse the whole match for a table of
+       readings (trap 53). ⚠ The trigger is not exotic: `csharp/goldens/nci.tsv` already ships
+       `Caſtellana`, and no corpus differential can find this until a corpus happens to contain one.
     Code points vs code units — .NET matches one UTF-16 UNIT, JS under `u` matches one CODE POINT.
        `\p{L}` gains an astral half, `[^x]`/`\D`/`\W`/`\S`/`.` take a whole surrogate pair rather
        than matching half a character, and global iteration is driven by `JsRe` because JS uses two

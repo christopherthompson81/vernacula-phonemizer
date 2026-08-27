@@ -83,8 +83,14 @@ public static class Normalize
 
         s = NOMOR.Replace(s, "nomor ");
 
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = ABBREV_MID.Replace(s, m =>
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122). The pattern is built from this table's OWN keys but
+            // carries `i`+`u`, so JS's fold widens it — `ſ`→`s`, and the Cyrillic `ᲀᲃᲅ` forms onto theirs —
+            // and a near-miss MATCHES while its key is absent. The TS asserted non-null and spoke the word
+            // "undefined"; this indexer THREW. Refuse the whole match.
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+        s = ABBREV_END.Replace(s, m =>
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
         // Slash units, before the shared symbol tier claims the bare `km`.
         s = SLASH_UNIT.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
@@ -92,7 +98,13 @@ public static class Normalize
         // The three named senses of `°` before the bare arm, or the bare arm strands the scale/compass letter.
         s = DEG_C.Replace(s, "$1 derajat Celsius");
         s = DEG_F.Replace(s, "$1 derajat Fahrenheit");
-        s = DEG_COORD.Replace(s, m => $"{m.Groups[1].Value} derajat {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
+        s = DEG_COORD.Replace(s, m =>
+            // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122). The pattern carries `i` AND `u`, so
+            // JS folds U+017F LONG S onto `s` and `12°ſ` MATCHES `[NSEW]` — while `ſ` is no COMPASS key. The
+            // TS asserted non-null and spoke the word "undefined"; the C# indexer THREW.
+            COMPASS.TryGetValue(m.Groups[2].Value.ToLowerInvariant(), out var dir)
+                ? $"{m.Groups[1].Value} derajat {dir}"
+                : m.Value);
         s = DEG.Replace(s, "$1 derajat");
 
         s = MINUS.Replace(s, "$1minus $2");

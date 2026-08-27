@@ -229,7 +229,13 @@ export function normalizeHiligaynon(input: string): string {
     s = s.replace(/(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
 
     // ── 6. DOTTED ABBREVIATIONS — closed list, see DOTTED_ABBREV ─────────────────────────────────────────
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.`, "giu"), (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}`);
+    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.`, "giu"), (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}`;
+        });
 
     // ── 7. THE ORDINAL'S BOUND LINKER — `ika-5ng` → `ika-5 nga` ──────────────────────────────────────────
     // ×2 (`ika-5ng Gobernador`, `ika-2ng`), and this is trap 14/15: a linker glued to the DIGITS cannot

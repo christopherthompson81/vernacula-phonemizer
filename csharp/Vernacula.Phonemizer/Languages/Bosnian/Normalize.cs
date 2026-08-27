@@ -285,10 +285,11 @@ public static class Normalize
         {
             var after = m.Index + m.Length;
             var next = after < abbrevSubject.Length ? abbrevSubject.Substring(after, 1) : "";
-            return $"{DOTTED[Lat(m.Groups[1].Value)]}{(UPPER.IsMatch(next) ? "." : "")}{m.Groups[2].Value}";
+            if (!DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w)) return m.Value;  // ⚠ reachable miss (#1122)
+            return $"{w}{(UPPER.IsMatch(next) ? "." : "")}{m.Groups[2].Value}";
         });
-        s = ABBREV_COMMA.Replace(s, m => DOTTED[Lat(m.Groups[1].Value)]);
-        s = ABBREV_END.Replace(s, m => $"{DOTTED[Lat(m.Groups[1].Value)]}.");
+        s = ABBREV_COMMA.Replace(s, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? w : m.Value);
+        s = ABBREV_END.Replace(s, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? $"{w}." : m.Value);
 
         // 3) LONE INITIAL IN A NAME, then `Dr.` — case-sensitively, so lowercase `dr.` (the academic *et al.*)
         //    is left alone.

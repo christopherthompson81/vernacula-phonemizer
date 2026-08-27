@@ -361,7 +361,14 @@ export function normalizeSomali(input: string): string {
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 darajo Celsius");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 darajo Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
-        (_m, d: string, dir: string) => `${d} darajo ${COMPASS[dir.toLowerCase()]!}`);
+        (m, d: string, dir: string) => {
+            // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122). The pattern carries `i` AND `u`, so
+            // JS folds U+017F LONG S onto `s` and `12°ſ` MATCHES `[NSEW]` — while `ſ` is not a COMPASS key.
+            // The `!` that used to be here asserted non-null on `undefined`, and `String.replace` stringified
+            // it, so the reading carried the literal word: *laba ijo toban darad͡ʒo undefined*.
+            const word = COMPASS[dir.toLowerCase()];
+            return word === undefined ? m : `${d} darajo ${word}`;
+        });
     s = s.replace(/(\d)\s?°/gu, "$1 darajo");
 
     // ── 10. SIGNS ───────────────────────────────────────────────────────────────────────────────────────

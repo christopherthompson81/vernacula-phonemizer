@@ -173,9 +173,21 @@ export function normalizeRussian(input: string): string {
 
     // 4) DOTTED ABBREVIATIONS. The dot is consumed so it cannot become a phrase break.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 5) UNITS the shared tier cannot express: the Cyrillic slash unit and the degree signs.
     s = s.replace(/(\d)\s?км\/ч(?![а-яё])/giu, "$1 километров в час");

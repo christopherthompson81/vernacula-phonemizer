@@ -152,11 +152,29 @@ export function normalizeAfrikaans(input: string): string {
     //    sentence end). The `m.p.u` form may also appear WITHOUT a trailing dot (before a space, paren or
     //    end) — the bare key covers it last, so a dotted instance is never stripped of its sentence pause.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${BARE_ALT})(?=\\s*(?:[\\p{L}\\d(]|[,.;:!?»)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}`;
+        });
     // The undotted `vm`/`nm` clock suffix (10:00vm, 9:30 vm) — left for the clock rule below.
 
     // 4) ORDINALS — the Afrikaans form is a numeral plus a LETTER suffix (`11de`, `15de`, `9e`, `60ste`),

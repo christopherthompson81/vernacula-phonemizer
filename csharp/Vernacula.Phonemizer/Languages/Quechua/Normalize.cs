@@ -44,7 +44,10 @@ public static class Normalize
         var s = input;
 
         s = AMP.Replace(s.Normalize(NormalizationForm.FormC), "&");
-        s = ENTITIES.Replace(s, m => ENTITY[m.Value.ToLowerInvariant()]);
+        // ⚠ THE MISS BRANCH IS REACHABLE AND FALLS BACK TO THE MATCH (#1122): the pattern's `iu` flags fold
+        // U+017F LONG S onto `s`, so `&ſup2;` matches while its key does not exist. The TS asserted non-null
+        // and spoke the word "undefined"; this indexer THREW `KeyNotFoundException` for the whole caller.
+        s = ENTITIES.Replace(s, m => ENTITY.TryGetValue(m.Value.ToLowerInvariant(), out var v) ? v : m.Value);
         s = FORMAT_CHAR.Replace(s, "");
 
         s = GROUP_DOT.Replace(s, m => DOT.Replace(m.Value, ""));

@@ -162,12 +162,11 @@ public static class Normalize
         {
             // JS `e.slice(1).replace(";", "")` — a STRING replace, so only the FIRST `;` goes.
             var key = "&" + Js.ToLowerCase(ReplaceFirst(m.Value[1..], ";", ""));
-            // ⚠ THE MISS BRANCH IS REACHABLE AND MUST NOT THROW. The pattern carries `i`, and JS Unicode
-            // case folding maps U+017F LONG S onto `s`, so `&ſup2` MATCHES while the key does not exist —
-            // and long s occurs in OCR'd and historic-orthography wiki text. JS returns `undefined` from
-            // the callback, which `String.replace` stringifies to "undefined"; that is the behaviour the
-            // golden is defined against, so it is reproduced rather than repaired here. Filed TS-side.
-            return ENTITY.TryGetValue(key, out var v) ? v : "undefined";
+            // ⚠ THE MISS BRANCH IS REACHABLE AND FALLS BACK TO THE MATCH (#1122). The pattern carries `i`
+            // AND `u`, so JS folds U+017F LONG S onto `s` and `&ſup2` MATCHES while the key does not exist.
+            // Until #1122 the TS asserted non-null and `String.replace` stringified the `undefined`, so the
+            // word was spoken; this port reproduced that deliberately. Both now pass the run through.
+            return ENTITY.TryGetValue(key, out var v) ? v : m.Value;
         });
         s = FORMAT_CHARS.Replace(s, "");
 
