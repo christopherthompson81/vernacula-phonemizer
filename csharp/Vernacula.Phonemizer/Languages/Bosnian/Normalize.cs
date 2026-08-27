@@ -246,7 +246,6 @@ public static class Normalize
     private static readonly JsRe YEAR_TRAIL = JsRegex.Compile("^[\\s)»\"'\\]]+", "u");
     private static readonly JsRe UPPER_START = JsRegex.Compile("^[\\p{Lu}]", "u");
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s?[-–—]\\s?(?=\\d)", "gu");
-    private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d)", "gu");
     private static readonly JsRe THREE_QUARTERS = JsRegex.Compile("(\\d+)¾", "gu");
     private static readonly JsRe ONE_HALF = JsRegex.Compile("(\\d+)½", "gu");
     private static readonly JsRe PLUS_SIGN = JsRegex.Compile("(^|[\\s(])\\+\\s?(\\d)", "gu");
@@ -389,7 +388,9 @@ public static class Normalize
         s = SYMBOLS(s);
 
         // 13) DECIMAL COMMA → *zarez*. LAST among the numeric rules, because it destroys the number.
-        s = DECIMAL_COMMA.Replace(s, " zarez ");
+        // ⚠ FROM THE SHARED CORE — the line was copied into all three standards, which is how the dropped
+        // leading zero (`0,001` → *nula zarez jedan*, a 100× error) was one defect in three places.
+        s = Serbian.Normalize.ReadDecimalComma(s);
 
         // 14) VULGAR FRACTIONS. ⚠ REACHABLE ONLY BECAUSE `bs` IS IN `Registry.VULGAR_FOLD_OPT_OUT` — the
         //     shared fold rewrites `¾` to ` 3/4` before the engine runs, and bs has no `n/m` rule to catch it.

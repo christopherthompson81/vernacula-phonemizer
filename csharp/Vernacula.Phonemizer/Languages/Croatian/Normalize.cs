@@ -162,7 +162,6 @@ public static class Normalize
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s?[-–—]\\s?(?=\\d)", "gu");
     private static readonly JsRe MILJA_RATE =
         JsRegex.Compile("(\\d+(?:,\\d+)?)\\s?milja\\s*\\/\\s*(?:sat|h)(?![\\p{L}\\p{M}])", "giu");
-    private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d)", "gu");
     private static readonly JsRe THREE_QUARTERS = JsRegex.Compile("(\\d+)¾", "gu");
     private static readonly JsRe HALF = JsRegex.Compile("(\\d+)½", "gu");
     private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
@@ -302,7 +301,9 @@ public static class Normalize
         s = CroatianPhonemizer.SYMBOLS(s);
 
         // 11) DECIMAL COMMA → the word.
-        s = DECIMAL_COMMA.Replace(s, " zarez ");
+        // ⚠ FROM THE SHARED CORE — the line was copied into all three standards, which is how the dropped
+        // leading zero (`0,001` → *nula zarez jedan*, a 100× error) was one defect in three places.
+        s = Serbian.Normalize.ReadDecimalComma(s);
 
         // 12) FRACTIONS.
         s = THREE_QUARTERS.Replace(s, "$1 i tri četvrtine");

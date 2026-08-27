@@ -16,7 +16,7 @@
  * the Croatian diacritics.
  */
 import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
-import { normalizeSerbianInitialisms } from "../serbian/normalize.ts";
+import { normalizeSerbianInitialisms, readDecimalComma } from "../serbian/normalize.ts";
 import { slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { SYMBOLS } from "./croatian.ts";
@@ -296,8 +296,10 @@ export function normalizeCroatian(input: string): string {
     //     carry its decimal comma (`2,4 Ghz`), so it runs before step 11 folds the comma into a word.
     s = SYMBOLS(s);
 
-    // 11) DECIMAL COMMA → the word. Croatian reads the decimal comma as "zarez".
-    s = s.replace(/(?<=\d),(?=\d)/gu, " zarez ");
+    // 11) DECIMAL COMMA → the word, from the SHARED core. Croatian reads it as "zarez", identically to sr
+    //     and bs — and the line used to be copied here, which is how `0,001 grama` read *nula zarez jedan*
+    //     (a 100× error: `Number("001")` is 1) in all three at once. See `readDecimalComma`.
+    s = readDecimalComma(s);
 
     // 12) FRACTIONS. `29¾ sa 24½ inča`, `1/5 inča`. The vulgar fractions read "i tri četvrtine"/"i pola";
     //     the ratio reads "jedan peti" (one fifth).

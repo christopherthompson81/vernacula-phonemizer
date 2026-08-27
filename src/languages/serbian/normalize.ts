@@ -469,7 +469,7 @@ export function normalizeSerbian(input: string): string {
 
     // 10) DECIMAL COMMA → *zarez*. LAST among the numeric rules, because it destroys the number: every rule
     //     above that needs the value (units, the clock, the tier's count agreement) has already run.
-    s = s.replace(/(?<=\d),(?=\d)/gu, " zarez ");
+    s = readDecimalComma(s);
 
     // 11) `×`/`x` between digits was dropped outright, fusing `4x4`, `6×2` and `36 x 24 mm` into two bare
     //     numerals; `+` lost its sign.
@@ -487,6 +487,30 @@ export function normalizeSerbian(input: string): string {
 /** Integer part of a Serbian-written number ("3,50" → 3), for the local count-agreement calls. */
 function intOf(n: string): number {
     return Math.trunc(Number(n.replace(/\./gu, "").replace(",", ".")));
+}
+
+/**
+ * THE DECIMAL COMMA → *zarez*, AND THE FRACTIONAL PART'S LEADING ZEROS SURVIVE IT.
+ *
+ * ⚠ THIS WAS A 100× ERROR, not a mispronunciation. Replacing the comma leaves the fractional run as its own
+ * token, and the number arm reads it with `Number()` — so `Number("001")` is 1 and `0,001 grama` came out
+ * *nula zarez jedan grama*, "zero point one gram". The value is wrong by two orders of magnitude and the
+ * sentence still scans perfectly, which is why no leak gate, no referee and no golden ever named it.
+ *
+ * The zeros are emitted as DIGITS rather than as the word, and that is deliberate: the number arm already
+ * reads a bare `0` as this language's zero word, so one line serves all three standards without a fourth
+ * copy of the word table to drift. `0,001` → `0 zarez 0 0 1`; `1,50` is untouched, because 50 has no
+ * leading zero and its whole-number reading is correct.
+ *
+ * ⚠ EXPORTED AND SHARED BY sr, hr AND bs — which is the point. The line it replaces existed THREE TIMES,
+ * once per standard, and that is exactly how the era rule and the hyphen-suffix ordinal came to be fixed in
+ * one standard and left broken in the others (#1074). A rule identical in all three belongs to the core.
+ */
+export function readDecimalComma(s: string): string {
+    return s.replace(/(?<=\d),(\d+)/gu, (_m, frac: string) => {
+        const zeros = /^0*/u.exec(frac)![0].length;
+        return zeros === 0 ? ` zarez ${frac}` : ` zarez ${"0 ".repeat(zeros)}${frac.slice(zeros)}`;
+    });
 }
 
 /**
