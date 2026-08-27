@@ -153,11 +153,18 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 1. **Finish Core** (the two above), then `dotnet sln add csharp/tools/parity` — it is deliberately
    out of the solution so it cannot fail the build gate before the engine API exists.
 2. ~~Differential regex harness~~ **BUILT AND RUN — CLEAN.** `tools/extract_regexes.mts` +
-   `csharp/tools/regex-diff/`. 2,310 distinct patterns × 54 probes = **124,740 assertions**, all
-   identical to Node, 0 patterns refused. Re-run with:
+   `csharp/tools/regex-diff/`. 2,310 distinct patterns × 51 shared probes PLUS probes DERIVED per
+   pattern from the fold table = **124,586 assertions**, all identical to Node, 0 patterns refused.
+   Re-run with:
    `npx tsx tools/extract_regexes.mts && dotnet run --project csharp/tools/regex-diff`
    ⚠ Probes are chosen for the DIALECT GAP, not for plausible text — an ordinary-word probe set
-   would pass with the gap wide open. The first run found SEVEN real defects in JsRegex, all fixed
+   would pass with the gap wide open. ⚠ AND THE SEAM PROBES ARE DERIVED, NOT AUTHORED. A curated set
+   tests what someone thought of: this one carried an ISOLATED U+017F from its first run and still
+   reported CLEAN on `\b` throughout, because that divergence lives at the SEAM between a long s and
+   an ASCII letter (#1127). `derivedProbes` now reads `csharp/fold-pairs.json` — the same measured
+   table `JsRegex` widens classes from — and emits, per pattern, the fold characters THAT PATTERN CAN
+   REACH in every adjacency. It found #1129 on its first run. A new entry in the fold table becomes
+   probe coverage with no edit to the extractor. The first run found SEVEN real defects in JsRegex, all fixed
    and pinned in `Vernacula.Phonemizer.Tests/JsRegexDialectTests.cs` (28 tests):
      - **Simple case folding.** JS /iu folds `\u017F`→s, `\u0345`→ι, `\u1C80-\u1C88`→modern
        Cyrillic; .NET IgnoreCase does none of them. French, Portuguese, Mindong and Lingala
@@ -166,6 +173,13 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
        re-derives the .NET half at test time so a runtime casing change fails loudly.
      - **...but only under /u.** Legacy /i refuses non-ASCII→ASCII folds; applying the fold on `i`
        alone regressed `scottishgaelic/numbers.ts`. The harness caught the regression immediately.
+     - **...and `/i` WITHOUT `/u` needs the opposite — NARROWING (#1129).** .NET's IgnoreCase
+       equates U+212A KELVIN with `k`/`K`; JS legacy `/i` equates nothing non-ASCII onto ASCII. So
+       `[a-z]` under `/i` matched a Kelvin sign in C# and not in Node. .NET cannot fold ASCII-only,
+       and class subtraction runs AFTER folding (`[a-z-[\u212A]]` also removes k and K) — but the
+       inline option scope `(?-i:…)` does work, so the atom is guarded from outside as
+       `(?:(?!(?-i:\u212A))[a-z])`. ⚠ The GROUP is load-bearing: a bare `(?!…)k+` guards only the
+       first k. Found by the derived probes below on their first run.
      - **...and the fold widens `\w` and `\b` too (#1127).** JS defines both over ASCII
        `[A-Za-z0-9_]` — except with `i` AND `u` set, where every character whose scf lands in that
        set joins it: exactly `\u017F` and `\u212A`. So JS sees NO boundary between a long s and a

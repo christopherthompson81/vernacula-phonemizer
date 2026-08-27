@@ -176,7 +176,8 @@ public static class JsRegex
                 default: throw new NotSupportedException($"JsRegex: unknown flag '{f}' in /{pattern}/{flags}");
             }
         }
-        var translated = Translate(pattern, singleline, multiline, unicode && options.HasFlag(RegexOptions.IgnoreCase), unicode);
+        var translated = Translate(pattern, singleline, multiline, unicode && options.HasFlag(RegexOptions.IgnoreCase), unicode,
+                                   foldNarrow: !unicode && options.HasFlag(RegexOptions.IgnoreCase));
         if (sticky) translated = @"\G(?:" + translated + ")";
         return new JsRe(new Regex(translated, options), global, sticky, pattern, flags);
     }
@@ -199,6 +200,41 @@ public static class JsRegex
     // and every \p{...} gains its astral half as an alternation.
     private const string AstralPair = "[\uD800-\uDBFF][\uDC00-\uDFFF]";
     private const string NoSurrogate = "\uD800-\uDFFF";
+    // ⚠ /i WITHOUT /u NEEDS THE OPPOSITE OF THE WIDENING — .NET IgnoreCase equates ONE non-ASCII
+    // character with an ASCII one that JS legacy /i refuses to: U+212A KELVIN with k/K. (Measured,
+    // not assumed: over the whole BMP, .NET equates exactly that pair to an ASCII letter, JS legacy
+    // /i equates NOTHING, and JS /iu equates U+212A and U+017F.) So `[a-z]` under /i matched a
+    // Kelvin sign in .NET and did not in Node — the mirror of #1122's widening, found by the derived
+    // fold probes the moment they existed (#1129).
+    //
+    // .NET cannot be told to fold ASCII-only, and class SUBTRACTION is applied AFTER folding, so
+    // `[a-z-[\u212A]]` removes k and K as well. What does work is an inline option scope: `(?-i:…)`
+    // really does turn IgnoreCase off for what it encloses, so the atom can be guarded from outside.
+    private const string Kelvin = "\\u212A";      // the ESCAPE text, so the translated pattern stays ASCII
+    private const string KelvinLiteral = "\u212A"; // the character itself, for the two probes
+
+    /// <summary>Reconcile one just-emitted ATOM with JS legacy /i on the Kelvin sign. The two probes
+    /// ARE the two dialects for this character: .NET without IgnoreCase folds nothing, which is
+    /// exactly what JS /i does, and .NET with it is what we are about to compile. Only a disagreement
+    /// is rewritten, so an atom that never touches U+212A is emitted untouched.</summary>
+    private static void NarrowLegacyI(StringBuilder sb, int mark)
+    {
+        if (sb.Length <= mark) return;
+        var frag = sb.ToString(mark, sb.Length - mark);
+        bool jsWants, netGives;
+        try
+        {
+            jsWants = new Regex(frag, RegexOptions.CultureInvariant).IsMatch(KelvinLiteral);
+            netGives = new Regex(frag, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase).IsMatch(KelvinLiteral);
+        }
+        catch (ArgumentException) { return; }   // a fragment we cannot re-parse alone: leave it
+        if (jsWants == netGives) return;
+        sb.Length = mark;
+        // ⚠ ALWAYS A GROUP. A bare guard would bind a following quantifier to the guard's atom only:
+        // `(?!…)k+` guards the first k and lets the rest through.
+        sb.Append(netGives ? $"(?:(?!(?-i:{Kelvin}))" : $"(?:(?-i:{Kelvin})|").Append(frag).Append(')');
+    }
+
     private static string WordBoundaryFor(bool foldWide)
     {
         var w = foldWide ? FoldWordInner : AsciiWordInner;
@@ -348,7 +384,7 @@ public static class JsRegex
     /// <param name="foldWide">true only for /iu: legacy /i (no u) deliberately does NOT fold
     /// non-ASCII onto ASCII, so \u017F must stay out of [a-z] there — a real divergence the harness
     /// caught the moment the fold was applied unconditionally.</param>
-    internal static string Translate(string pattern, bool singleline, bool multiline, bool foldWide = false, bool unicode = false)
+    internal static string Translate(string pattern, bool singleline, bool multiline, bool foldWide = false, bool unicode = false, bool foldNarrow = false)
     {
         var sb = new StringBuilder(pattern.Length + 16);
         var i = 0;
@@ -358,12 +394,16 @@ public static class JsRegex
             var c = pattern[i];
             if (c == '\\')
             {
+                var mark = sb.Length;
                 i = AppendEscape(pattern, i, sb, inClass: false, classAstral: null, unicode: unicode, foldWide: foldWide);
+                if (foldNarrow) NarrowLegacyI(sb, mark);
                 continue;
             }
             if (c == '[')
             {
+                var mark = sb.Length;
                 i = TranslateClass(pattern, i, sb, foldWide, unicode);
+                if (foldNarrow) NarrowLegacyI(sb, mark);
                 continue;
             }
             if (c == '.')
@@ -395,6 +435,15 @@ public static class JsRegex
                 // class keeps a following quantifier applying to the one character, as it did before.
                 var extras = FoldExtrasFor(Regex.Escape(c.ToString()));
                 if (extras.Length > 0) { sb.Append('[').Append(Regex.Escape(c.ToString())).Append(extras).Append(']'); i++; continue; }
+            }
+            // A BARE LITERAL k or K matches a Kelvin sign under .NET IgnoreCase and not in JS.
+            if (foldNarrow && (c == 'k' || c == 'K'))
+            {
+                var mark = sb.Length;
+                sb.Append(c);
+                NarrowLegacyI(sb, mark);
+                i++;
+                continue;
             }
             sb.Append(c);
             i++;

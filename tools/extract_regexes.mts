@@ -14,10 +14,16 @@
  * hazard (1,914 uses), non-Latin scripts are the \p{Script=} hazard, and the empty/space/newline
  * rows are \b's. A probe set of ordinary words would pass while the gap stayed open.
  *
- * ⚠ AND A FOLD CHARACTER MUST APPEAR ADJACENT TO ASCII, not only alone. The isolated \u017F probe
- * was in the set from the start and the harness still reported CLEAN on \b for a year: /iu widens
- * the WORD-CHARACTER set, so the divergence is a boundary BETWEEN a long s and an ASCII letter and
- * needs a probe that puts them side by side (#1127).
+ * ⚠ AND THE SHARED SET IS HAND-AUTHORED, WHICH IS HOW IT KEEPS MISSING THINGS. It carried an
+ * ISOLATED \u017F from the first run and still reported CLEAN on \b throughout, because /iu widens
+ * the WORD-CHARACTER set and that divergence lives at the SEAM between a long s and an ASCII letter
+ * — a position no probe in the set occupied (#1127). A curated set tests what someone thought of.
+ *
+ * So the seam probes are DERIVED, not authored: `derivedProbes` reads csharp/fold-pairs.json (the
+ * MEASURED case-equivalence table, the same file JsRegex widens classes from) and, for each pattern,
+ * emits the fold characters THAT PATTERN CAN REACH in every adjacency — alone, before/after/between
+ * their own partner, against an unrelated ASCII letter, and in the dotted-abbreviation shape both
+ * #1122 and #1127 lived in. A new entry in the fold table becomes probe coverage with no edit here.
  *
  *   npx tsx tools/extract_regexes.mts
  *
@@ -44,7 +50,54 @@ const strip = (s: string) =>
    .replace(/`(?:[^`\\]|\\.)*`/g, "``");
 const LITERAL = /(?<![\w)\]])\/((?:[^/\\\n[]|\\.|\[(?:[^\]\\]|\\.)*\])+)\/([dgimsuvy]*)/g;
 
-const PROBES: string[] = ["abc def", "ABC DEF", "hello, world.", "  spaced  out  ", "123 456", "1.5", "1,500", "10:08", "2026-08-23", "007", "٢٠٢٤ ٣", "৩৫ ২৪", "१२३", "๑๒๓", "café naïve", "ÅNGSTRÖM", "Grüße", "İstanbul", "ĳsselmeer", "Ελληνικά", "Русский", "עברית", "العربية", "हिन्दी", "ไทย", "中文", "日本語", "한국어", "ǀclick ǁtwo", "kʼeʼ ɓaɗ", "ˈstrʌk.tʃɚ", "tʰˈɛn əklˈɑːk", "<b>tag</b>", "a&amp;b", "km<sup>2</sup>", "{en:five}", "h5n1", "covid19", "", " ", "\t", "a\nb", "-", "—", "…", "'’‘", "\"quoted\"", "\u017f\u212a\u2126\u1e9e\u0131\u0345", "\u017ft. Foo", "ma\u017fse \u212ag", "a\u017f b\u212a c", "\u00df\u0130i\u0307", "\u{1E950}\u{1E94F}", "\u{20001}\u{2B740}\u{1F600}"];
+const PROBES: string[] = ["abc def", "ABC DEF", "hello, world.", "  spaced  out  ", "123 456", "1.5", "1,500", "10:08", "2026-08-23", "007", "٢٠٢٤ ٣", "৩৫ ২৪", "१२३", "๑๒๓", "café naïve", "ÅNGSTRÖM", "Grüße", "İstanbul", "ĳsselmeer", "Ελληνικά", "Русский", "עברית", "العربية", "हिन्दी", "ไทย", "中文", "日本語", "한국어", "ǀclick ǁtwo", "kʼeʼ ɓaɗ", "ˈstrʌk.tʃɚ", "tʰˈɛn əklˈɑːk", "<b>tag</b>", "a&amp;b", "km<sup>2</sup>", "{en:five}", "h5n1", "covid19", "", " ", "\t", "a\nb", "-", "—", "…", "'’‘", "\"quoted\"", "\u017f\u212a\u2126\u1e9e\u0131\u0345", "\u00df\u0130i\u0307", "\u{1E950}\u{1E94F}", "\u{20001}\u{2B740}\u{1F600}"];
+
+/**
+ * ⚠ THE FOLD TABLE IS THE PROBE SOURCE. Every ordered pair in csharp/fold-pairs.json is one JS
+ * considers case-equivalent under /iu; the pairs with a non-ASCII member are the ones .NET's
+ * IgnoreCase can disagree about, and are exactly what JsRegex widens classes for. Deriving from the
+ * same table the fix reads means the two cannot drift apart.
+ */
+const FOLD_PAIRS: [number, number][] = JSON.parse(readFileSync("csharp/fold-pairs.json", "utf8"));
+const RISKY: [string, string][] = FOLD_PAIRS
+  .filter(([a, b]) => a > 0x7f || b > 0x7f)
+  .map(([a, b]) => [String.fromCodePoint(a), String.fromCodePoint(b)] as [string, string]);
+
+/** At most this many fold characters per pattern, so a `\p{L}` that reaches all of them cannot
+ *  multiply the corpus by two thousand. Taken in table order, so the choice is deterministic. */
+const FOLD_PER_PATTERN = 3;
+
+/**
+ * Every adjacency a fold character can sit in, because WHICH ONE MATTERS DEPENDS ON THE CONSTRUCT:
+ * a widened CLASS shows up with the character alone, a \b shows up only where it touches a word
+ * character, and a table-keyed callback shows up in the dotted-abbreviation shape. `partner` is the
+ * character JS folds it onto — the seam most likely to be mis-cased — and `t`/`x` stand in for an
+ * unrelated ASCII letter so the seam is not always with the pattern's own alphabet.
+ */
+function seams(ch: string, partner: string): string[] {
+  const other = partner === "t" ? "x" : "t";
+  return [ch, partner + ch, ch + partner, partner + ch + partner, ch + other, other + ch,
+          ch + ". Foo", ch + " " + ch];
+}
+
+/** Probes DERIVED from what this particular pattern can reach. Empty for most patterns, which is
+ *  why the corpus stays small: a pattern that cannot match a fold character gets no fold probes. */
+function derivedProbes(re: RegExp, source: string): string[] {
+  const out: string[] = [];
+  // A boundary or \w pattern is fold-sensitive even when it matches neither member on its own —
+  // /iu admits U+017F and U+212A into the WORD-CHARACTER set, which moves \b without either
+  // character ever appearing in the pattern (#1127). Those two are therefore unconditional here.
+  const forced = /\\[bBwW]/u.test(source) ? [["s", "\u017F"], ["k", "\u212A"]] as [string, string][] : [];
+  const reached: [string, string][] = [];
+  for (const [a, b] of RISKY) {
+    if (reached.length >= FOLD_PER_PATTERN) break;
+    let hit = false;
+    try { hit = re.test(b) || re.test(a); } catch { hit = false; }
+    if (hit && !reached.some(([, x]) => x === b)) reached.push([a, b]);
+  }
+  for (const [a, b] of [...forced, ...reached]) out.push(...seams(b, a));
+  return [...new Set(out)];
+}
 
 // A non-u pattern can match HALF a surrogate pair, and JSON cannot carry a lone surrogate (the C#
 // reader rejects it outright). Encode those code units as a sentinel the harness decodes back —
@@ -74,7 +127,9 @@ for (const f of globSync("src/**/*.ts")) {
     const base = flags.replace(/[dgy]/g, "");
     try { new RegExp(pattern, base); } catch { unparseable++; continue; }  // a division, not a regex
     const matches: [string, string[]][] = [];
-    for (const p of PROBES) {
+    // ⚠ `test` on a /g regex is STATEFUL (lastIndex), so the relevance probe gets its own
+    // non-global copy; sharing the loop's regex would make the derivation order-dependent.
+    for (const p of [...PROBES, ...derivedProbes(new RegExp(pattern, base.replace("g", "")), pattern)]) {
       try {
         const got = flags.includes("g")
           ? [...p.matchAll(new RegExp(pattern, base + "g"))].map((x) => x[0])
