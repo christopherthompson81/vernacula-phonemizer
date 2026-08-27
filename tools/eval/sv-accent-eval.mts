@@ -11,11 +11,19 @@
  * ¹ mostly to disambiguate, so the accent-1 referee subset is small + adversarial). Like Japanese pitch, Swedish
  * accent is an inherent ~95% task where two independent lexica disagree on the contested tail.
  *
+ * ⚠ SCORED THROUGH `nat`, THE WAY `text()` PHONEMIZES. This eval used to call `phonemizeWord` bare, which is
+ * a stage the shipped engine never reaches directly, so the number it printed was for a stage rather than a
+ * product. Correcting it moved the score by NOTHING — 0 of the referee's 4,565 words carry a letter outside
+ * Swedish's own inventory, so on THIS referee the two paths coincide exactly. That is the negative result
+ * and it is the point: the instrument was blind by construction, not by accident, and the seam it could not
+ * see (`nat` folds ü→u before the NST lexicon is consulted, so `münchen` never matches its headword — #1068)
+ * is precisely the one an accent eval would be expected to catch. It will catch a regression there now.
+ *
  *   npx tsx tools/eval/sv-accent-eval.mts            # score
  *   npx tsx tools/eval/sv-accent-eval.mts --list     # + list accent disagreements
  */
 import { readFileSync } from "node:fs";
-import { phonemizeWord } from "../../src/languages/swedish/swedish.ts";
+import { nat, phonemizeWord } from "../../src/languages/swedish/swedish.ts";
 
 const REF = new URL(
     "../referee-eval/referees/sv.wikipron-swe.tsv",
@@ -75,7 +83,13 @@ export function evaluateAccent(): AccentEvalResult {
             continue;
         }
         const refAcc = toks[mi] === "²" ? 2 : 1;
-        const out = phonemizeWord(w);
+        // ⚠ THROUGH `nat`, BECAUSE `text()` DOES. This eval used to call `phonemizeWord(w)` bare, which is a
+        // stage the shipped engine never reaches directly — `text()` nativises first. The difference is not
+        // cosmetic: `nat` folds a letter outside Swedish's own inventory (ü→u, é survives) BEFORE the NST
+        // lexicon is consulted, so a headword spelled with one can never be matched and the OOV shape rule
+        // answers instead. Scored bare, the eval read those words out of the lexicon and reported an accent
+        // the product does not emit. See #1068.
+        const out = phonemizeWord(nat(w));
         if (!out.includes("ˈ")) {
             monoSkipped++;
             continue;

@@ -4,11 +4,17 @@
 // (the g2p scan, the complementary-length rule, first-syllable stress, number composition) stay in the sibling
 // code modules (g2p.ts, swedish.ts, numbers.ts) and read these tables.
 //
-// Phase 1 is SEGMENTAL: rule g2p + first-syllable stress. Pitch accent (accent 1 vs 2, the referee's ² marker)
-// is deferred to Phase 2 — it is lexical and needs a lexicon.
+// ⚠ THE "PITCH ACCENT IS DEFERRED TO PHASE 2" NOTE THAT USED TO STAND HERE WAS YEARS STALE. The accent
+// SHIPPED: stress ordinal and accent 1-vs-2 come from the NST lexicon (`accent-stress.tsv`, 42,052 keys),
+// accent 2 is rendered as a combining grave on the primary-stressed vowel, and it is scored against an
+// independent referee by `tools/eval/sv-accent-eval.mts` (96.6% agree, 98.0% accent-2 recall). A header
+// that describes a shipped feature as future work sends the next reader to build it twice.
 //
-// LOAD-BEARING blocks (read via manifest.ts): "vowelChars", "frontVowels", "vowels", "digraphs",
-// "clausePunctuation", "numbers". "convention" / "provenance" are documentation.
+// LOAD-BEARING blocks (read via manifest.ts): "frontVowels", "vowels", "digraphs", "consonants",
+// "retroflex", "exceptions", "clausePunctuation", "numbers". "convention" / "provenance" are documentation.
+// ⚠ "vowelChars" IS NOT LOAD-BEARING AND USED TO BE LISTED AS IF IT WERE. Nothing reads it — sv's stress is
+// lexical, so no pass needs an IPA nucleus set (de does, and reads its own copy). Kept as the language fact
+// it is, and declared documentation so the next reader does not go looking for the consumer.
 {
     "language": "sv",
     "script": ["Latin"],
@@ -17,15 +23,17 @@
 
     // The canonical-IPA conventions the values below are written in (documentation).
     "convention": {
-        "vowelLength": "complementary: a STRESSED syllable is long-V + short-C (bok→buːk) OR short-V + long-C (kött→ɕœtː). Nine long/short vowel pairs; long ⟨o⟩ defaults to uː with a per-word [oː] override from the NST lexicon (telefon, kol) — the o/u split Swedish spelling underdetermines (Phase 3).",
+        "vowelLength": "complementary: a STRESSED syllable is long-V + short-C (bok→buːk) OR short-V + long-C (kött→ɕœtː). Nine long/short vowel pairs; long ⟨o⟩ defaults to uː with a per-word [oː] override from the NST lexicon (telefon, kol) — the o/u split Swedish spelling underdetermines. ⚠ THE OVERRIDE SHIPS; what remains is the OOV guess, and there is no 'Phase 3' — the residual is a known limit, not scheduled work.",
         "sjeTje": "sj/skj/stj/sch, and sk before a front vowel → the sje-sound ɧ; tj/kj, and k before a front vowel → the tje-sound ɕ; g before a front vowel → j.",
         "retroflex": "r + dental → retroflex, absorbing the r: rt→ʈ rd→ɖ rn→ɳ rs→ʂ rl→ɭ (Central Standard). The broad referee is inconsistent here — folded in the eval.",
         "silentDigraphs": "word-initial hj/lj/dj/gj → j; -tion → ɧuːn; final -rg/-lg soften g → j (berg→bɛrj).",
-        "stress": "Phase 1: first syllable (native default). Pitch accent deferred.",
+        "stress": "Ordinal and pitch accent (1 vs 2) from the NST lexicon; first syllable is the OOV default. Accent 2 renders as a combining grave on the primary-stressed vowel.",
         "numbers": "tens-first compounds (tjugoett = 21); split at thousand/million boundaries.",
     },
 
-    // IPA vowel inventory (nucleus detection for stress placement).
+    // IPA vowel inventory. ⚠ DOCUMENTATION, NOT LOAD-BEARING — nothing reads it. It was written for
+    // "nucleus detection for stress placement", which sv does not do: the stress ordinal comes from the NST
+    // lexicon and the OOV fallback works on the ORTHOGRAPHY, not the IPA.
     "vowelChars": "ɑaeɛiɪoɔuʉɵyʏøœæə",
 
     // Orthographic front vowels — trigger sje/tje/g-softening on a preceding s­k / k / g / c.

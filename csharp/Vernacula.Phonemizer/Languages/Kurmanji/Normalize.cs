@@ -57,6 +57,16 @@ public static class Normalize
     private static readonly JsRe NBSP = JsRegex.Compile("&nbsp;", "gu");
     private static readonly JsRe ERA_DOTTED = JsRegex.Compile(@"(?<![\p{L}])b\s?\.\s?z\s?\.?(?![\p{L}])", "giu");
     private static readonly JsRe ERA_BARE = JsRegex.Compile(@"(?<![\p{L}])BZ(?![\p{L}])", "gu");
+
+    // ⚠ THE ERA MARKER MUST SEE A YEAR, or it eats a PERSON'S INITIALS — `B. Z. Goldberg` read
+    // *bɛrˈiː zɑːjiːnˈeː ɡoːldbˈɛrɡ*. All twelve mined instances have a digit against the marker on one side
+    // or the other, so the guard costs nothing measured. See the TS docstring for what it does not catch.
+    private static readonly JsRe ERA_YEAR_BEFORE = JsRegex.Compile(@"\d[\p{L}'’]*\s?$", "u");
+    private static readonly JsRe ERA_YEAR_AFTER = JsRegex.Compile(@"^\s?\d", "u");
+
+    private static bool EraHasYear(string all, int at, int len) =>
+        ERA_YEAR_BEFORE.IsMatch(all[Math.Max(0, at - 12)..at])
+        || ERA_YEAR_AFTER.IsMatch(all[Math.Min(at + len, all.Length)..Math.Min(at + len + 3, all.Length)]);
     private static readonly JsRe GROUP = JsRegex.Compile(
         @"(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:[.,]\p{Nd}{3})+)(?![\p{Nd}]|[.,]\p{Nd})", "gu");
     private static readonly JsRe JI_PERCENT = JsRegex.Compile(@"(?<![\p{L}])ji\s+(?=%\s?\p{Nd})", "giu");
@@ -88,8 +98,10 @@ public static class Normalize
 
         s = JsRegex.Replace(s, NBSP, _ => " ");
 
-        s = JsRegex.Replace(s, ERA_DOTTED, _ => "berî zayînê");
-        s = JsRegex.Replace(s, ERA_BARE, _ => "berî zayînê");
+        var eraSrc = s;
+        s = JsRegex.Replace(s, ERA_DOTTED, m => EraHasYear(eraSrc, m.Index, m.Length) ? "berî zayînê" : m.Value);
+        var eraSrc2 = s;
+        s = JsRegex.Replace(s, ERA_BARE, m => EraHasYear(eraSrc2, m.Index, m.Length) ? "berî zayînê" : m.Value);
 
         s = JsRegex.Replace(s, GROUP, m =>
             m.Value.Replace(".", "", StringComparison.Ordinal).Replace(",", "", StringComparison.Ordinal));

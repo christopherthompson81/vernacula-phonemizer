@@ -132,7 +132,12 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])`, "gu
  * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zåäöéA-ZÅÄÖÉ]";
-const nat = makeNativiser(NATIVE_CLASS, "u");
+/** ⚠ EXPORTED FOR THE EVAL, and that is a finding rather than a convenience. `tools/eval/sv-accent-eval.mts`
+ *  called `phonemizeWord` directly, but `text()` calls `phonemizeWord(nat(w))` — so the eval was scoring a
+ *  path the shipped engine never takes, and the accent number it reported was for a stage, not a product.
+ *  It matters here specifically: `nat` folds ü→u BEFORE the lexicon is consulted, which is exactly the seam
+ *  #1068 is about, so the one instrument that could have caught those readings was looking past them. */
+export const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // symbol normalization — Swedish (procent/kilometer/dollar are invariant plurals).
 const SYMBOLS = makeSymbolNormalizer({

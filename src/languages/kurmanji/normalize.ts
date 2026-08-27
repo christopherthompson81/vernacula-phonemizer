@@ -134,13 +134,26 @@ export function normalizeKurmanji(input: string): string {
     //    bare (`sala 4000 BZ`). Expansion `berî zayînê` ×79 across 20 ku.wikipedia articles, and the corpus
     //    itself spells it out once: *"8.000 salên berê zayînê"*. Position is free — the corpus writes the
     //    marker on both sides of its year — so the rule replaces in place and moves nothing.
-    s = s.replace(/(?<![\p{L}])b\s?\.\s?z\s?\.?(?![\p{L}])/giu, "berî zayînê");
-    s = s.replace(/(?<![\p{L}])BZ(?![\p{L}])/gu, "berî zayînê");
+    //    ⚠ AND IT MUST SEE A YEAR, because otherwise it eats a PERSON'S INITIALS. `b.z.` and `BZ` are also
+    //    two letters with stops, so `B. Z. Goldberg` read *bɛrˈiː zɑːjiːnˈeː ɡoːldbˈɛrɡ* — "before Christ
+    //    Goldberg". The corpus refutes the false positive (no initials in the mined segments) but it also
+    //    supplies the guard for free: ALL TWELVE instances have a digit against the marker, on one side or
+    //    the other — `484 b.z.`, `sedsala 4an b.z.`, `b.z. 550`, `B.Z. 95–36`, `558 b.z.- 530 b.z.` — because
+    //    the marker's whole job is to date a year. So the guard costs nothing measured and removes a class
+    //    that would otherwise be confidently wrong rather than merely unread.
+    //    ⚠ WHAT IT DOES NOT CATCH, stated rather than implied: initials that FOLLOW a year (`1970 B. Z.
+    //    Goldberg`) still match, because the preceding-token test cannot tell a date from a byline. ×0 here.
+    const ERA_HAS_YEAR = (all: string, at: number, len: number): boolean =>
+        /\d[\p{L}'’]*\s?$/u.test(all.slice(Math.max(0, at - 12), at)) || /^\s?\d/u.test(all.slice(at + len, at + len + 3));
+    s = s.replace(/(?<![\p{L}])b\s?\.\s?z\s?\.?(?![\p{L}])/giu,
+        (m, at: number, all: string) => (ERA_HAS_YEAR(all, at, m.length) ? "berî zayînê" : m));
+    s = s.replace(/(?<![\p{L}])BZ(?![\p{L}])/gu,
+        (m, at: number, all: string) => (ERA_HAS_YEAR(all, at, m.length) ? "berî zayînê" : m));
 
     // 3) THE SEPARATORS, BY GROUP SIZE — the only thing that tells them apart in a corpus that carries both
     //    conventions (the table in the header). Three digits after the mark is a THOUSANDS group, whichever
     //    mark it is, so `15.354` and `10,000` both de-group and `1.000.000.000` de-groups throughout.
-    //    Must run before the suffix rule at step 4, which needs a bare integer to speak.
+    //    Must run before the suffix rule at step 9, which needs a bare integer to speak.
     // ⚠ AND A GROUP MAY NOT FOLLOW A LONE `0` — no convention groups from zero, so `0,001` joining to
     //    `0001` is a 1000× error rather than a reading of it.
     //
@@ -333,6 +346,13 @@ export function normalizeKurmanji(input: string): string {
     //      scientific notation (`7.2×109 m3`). No Kurmanji reading of either is attested.
     //    · `bareExponent` — `E=mc²` is the only mined superscript with no unit under it, and no Kurmanji
     //      power phrase is attested. The UNIT exponent (`km²` ×28) is read and is what keeps this honest.
+    //    · A LEADING `+` ON A NUMBER, which is unclaimed and should stay that way. The corpus writes it
+    //      ONCE and it is a UTC offset (`bi dema herêmî (UTC+7) demjimêr 07:5…`), where the sign is not a
+    //      spoken word at all — the timezone reads *UTC heft*, and dropping the `+` silently is the RIGHT
+    //      reading, not a lucky one. (kirundi paid for this the other way round: adding `+` to a rule's
+    //      lookbehind broke `UTC+04:00`, which had been accidentally correct.) A signed quantity — the sense
+    //      that would want a word — is ×0. The negative sign IS claimed, but only inside the temperature arm
+    //      at step 6, and on 9 measured instances; there is no positive counterpart to pair with it.
 
     return s;
 }

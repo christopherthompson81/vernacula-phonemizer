@@ -111,10 +111,9 @@ public static class Normalize
 
     private static readonly JsRe DIGITS_ONLY = JsRegex.Compile(@"^\d+$", "u");
 
-    /** A word with ՛ / ՜ / ՞ written INSIDE it — Armenian puts them over the last vowel, so each one splits
-     *  the word for the tokenizer. See the TS for the corpus measurement and the readings it repairs. */
-    private static readonly JsRe INTRA_WORD_MARK = JsRegex.Compile(@"[Ա-Ֆա-ևև]+(?:[՛՜՞][Ա-Ֆա-ևև]+)+", "gu");
-    private static readonly JsRe MARK_CHARS = JsRegex.Compile(@"[՛՜՞]", "gu");
+    // ⚠ ՛ ՜ ՞ ARE NO LONGER HANDLED HERE — the rule moved to `Armenian.UnbreakMarks`, applied to the input
+    // before this normalizer runs. The word they split is split by the SHARED tokenizer, so keeping the fix
+    // in one dialect's normalizer left the other dialect broken. See the TS docstring.
 
     private const string DOT = "[.\\u2024]";
 
@@ -201,14 +200,6 @@ public static class Normalize
     public static string NormalizeArmenian(string input)
     {
         var s = input;
-
-        // ── 0. THE MARKS WRITTEN INSIDE THE WORD — first, because every later rule that reaches for an
-        //       Armenian letter sees a broken word until this has run.
-        s = INTRA_WORD_MARK.Replace(s, m =>
-        {
-            var bare = MARK_CHARS.Replace(m.Value, "");
-            return m.Value.Contains('՞') ? $"{bare}՞" : bare;
-        });
 
         // ── 1. DE-GROUPING — FIRST, or a grouping mark reads as clause punctuation.
         s = GROUP_SPACE.Replace(s, m => m.Groups[1].Value + GROUP_SPACE_SEP.Replace(m.Groups[2].Value, ""));

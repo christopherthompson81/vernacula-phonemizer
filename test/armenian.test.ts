@@ -87,12 +87,13 @@ describe("Armenian canonical IPA — rule g2p (Eastern Armenian)", () => {
     // ⚠ Not one of them occurs in the parity golden; the evidence is the corpus-wide differential.
     test("՛ ՜ ՞ sit inside the word, and must not break it", () => {
         const hy = createArmenian();
-        expect(normalizeArmenian("կա՛մ մսով")).toBe("կամ մսով"); // ՛ is silent — it just stops splitting
+        // ⚠ ASSERTED THROUGH `text()`, NOT `normalizeArmenian`: the rule moved into the shared engine
+        // (`armenian.ts` `unbreakMarks`), because the tokenizer that breaks the word is shared and hyw was
+        // inheriting the defect without the fix. The normalizer no longer sees the mark at all.
         expect(hy.text("կա՛մ մսով")).toBe("kɑm məsov"); //           was `kɑ mə məsov`
         expect(hy.text("ո՛չ")).toBe("vot͡ʃʰ"); //                     was `vo t͡ʃʰə` — the ո→vo glide on a fragment
         expect(hy.text("Տե՛ս")).toBe("tes"); //                      was `te sə`
         // ՞ is a real clause mark, so it MOVES to the end of the word rather than being dropped.
-        expect(normalizeArmenian("Ինչո՞ւ")).toBe("Ինչու՞");
         expect(hy.text("Ինչո՞ւ")).toBe("int͡ʃʰu ?"); //               was `int͡ʃʰo ? və` — the ու digraph split too
         expect(hy.text("Ինչպե՞ս")).toBe("int͡ʃʰpes ?"); //            was `int͡ʃʰpe ? sə`
         expect(hy.text("Ինչու՞")).toBe("int͡ʃʰu ?"); //               already right, and stays right
