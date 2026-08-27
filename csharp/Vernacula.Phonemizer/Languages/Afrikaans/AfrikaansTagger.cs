@@ -18,6 +18,6 @@ public static class AfrikaansTaggerFactory
             ModelFile = $"{basename}.int8.onnx",
             Context = "Afrikaans neural tagging",
             EpEnv = "AF_ORT_EP",
-            Preprocess = w => w.ToLowerInvariant().Normalize(NormalizationForm.FormC),
+            Preprocess = w => Js.ToLowerCase(w).Normalize(NormalizationForm.FormC),
         });
 }

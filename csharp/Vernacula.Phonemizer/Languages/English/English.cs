@@ -106,7 +106,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
      *  to remap. */
     public string? KnownWord(string word)
     {
-        var lower = word.ToLowerInvariant();
+        var lower = Js.ToLowerCase(word);
         if (_lexicon.TryGetValue(lower, out var v)) return v;
         return _heteronyms.TryGetValue(lower, out var het) ? het.Default : null;
     }
@@ -127,7 +127,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
      *  engine — the sync path passes nothing, so behaviour is byte-identical. */
     private string ResolveWord(string word, PosExpectation? e, Func<string, string?>? oovOverride)
     {
-        var lower = CURLY_APOSTROPHE.Replace(Unicode.FoldLatinDiacritics(word.ToLowerInvariant()), "'");
+        var lower = CURLY_APOSTROPHE.Replace(Unicode.FoldLatinDiacritics(Js.ToLowerCase(word)), "'");
 
         HeteronymEntry? het = _heteronyms.TryGetValue(lower, out var direct) ? direct : null;
         var pluralAllomorph = false;
@@ -320,7 +320,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                 var citation = ResolveWord(w.Text, wi < expect.Count ? expect[wi] : null, oovOverride);
                 wi++;
                 if (citation == "") continue;
-                var lw = w.Text.ToLowerInvariant();
+                var lw = Js.ToLowerCase(w.Text);
                 clauses[^1].Items.Add(new Item
                 {
                     Word = lw,

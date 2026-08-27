@@ -27,7 +27,7 @@ public static class AfrikaansNeural
         return await StructuralTagger.WordLevelNeuralPrepass(text, new NeuralPrepassOptions
         {
             Word = WORD,
-            Key = w => w.Normalize(NormalizationForm.FormC).ToLowerInvariant(),
+            Key = w => Js.ToLowerCase(w.Normalize(NormalizationForm.FormC)),
             LexHas = w => AfrikaansPhonemizer.AfrikaansLexiconHas(w) || AfrikaansPhonemizer.AfrikaansRuleReserved(w),
             Tag = w => tagger.Tag(w),
             Render = (t, oov) => Foreign.WithHost("af", () => AfEngine().Text(t, w => oov(w))),

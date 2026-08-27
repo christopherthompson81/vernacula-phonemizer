@@ -62,7 +62,7 @@ public sealed class SwedishPhonemizer : ILanguage
     /** One Swedish word → canonical IPA. Monosyllables carry no ˈ / accent. */
     public static string PhonemizeWord(string word)
     {
-        var w = word.ToLowerInvariant().Normalize(System.Text.NormalizationForm.FormC);
+        var w = Js.ToLowerCase(word).Normalize(System.Text.NormalizationForm.FormC);
         if (EXCEPTIONS.TryGetValue(w, out var exc)) return exc;
 
         Lexicon().TryGetValue(w, out var lex);
