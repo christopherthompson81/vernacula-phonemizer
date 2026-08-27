@@ -135,6 +135,14 @@ public static class Normalize
     private static readonly JsRe DASH_RANGE = JsRegex.Compile(
         "(?<![-\\d.,\\p{L}\\p{M}])(\\d+)[ \\u00a0]?[-–—][ \\u00a0]?(\\d+)(?![-\\d\\p{L}\\p{M}]|[.,]\\d)", "gu");  // space, NBSP
 
+    /** ⚠ A SPAN WHOSE UNIT SITS AFTER THE SECOND OPERAND (#1104), matched on the TIER'S OUTPUT — by the
+     *  time ranges run, `5 kg` is already `dikilogerama di le 5` with the measure noun in front, so
+     *  `DASH_RANGE` sees no pair of digits. Keyed on the `di le` concord rather than on the unit table,
+     *  which lives in Setswana.cs. See the TS for why moving ranges above the tier does not work. */
+    private static readonly JsRe DASH_RANGE_UNIT = JsRegex.Compile(
+        "(?<![-\\d.,\\p{L}\\p{M}])(\\d+)[ \\u00a0]?[-–—][ \\u00a0]?"  // space, NBSP
+        + "((?:\\p{L}+[ \\u00a0])?\\p{L}+[ \\u00a0]di[ \\u00a0]le[ \\u00a0])(\\d+)(?![-\\d\\p{L}\\p{M}]|[.,]\\d)", "gu");
+
     private static readonly JsRe DECIMAL_DOT = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d{1,2})(?![\\d])", "gu");
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d+),(\\d{1,2})(?![\\d,])", "gu");
     private static readonly JsRe DECIMAL_ZERO_LONG =
@@ -179,6 +187,12 @@ public static class Normalize
         s = DASH_RANGE.Replace(s, m =>
             Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[2].Value)
                 ? $"{m.Groups[1].Value} {RANGE} {m.Groups[2].Value}"
+                : m.Value);
+
+        // 8b) …and the same span with the tier's measure-noun phrase between the operands.
+        s = DASH_RANGE_UNIT.Replace(s, m =>
+            Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[3].Value)
+                ? $"{m.Groups[2].Value}{m.Groups[1].Value} {RANGE} {m.Groups[3].Value}"
                 : m.Value);
 
         // 9) DECIMALS, LAST of the numeric rules — steps 5 to 8 all need their number intact, and the tier's
