@@ -2,7 +2,12 @@
  * Mongolian / Khalkha (mn) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * ⚠ THE SOURCING SITUATION, STATED PLAINLY. There is NO FLEURS corpus for Mongolian. The evidence is
+ * ⚠ THE SOURCING SITUATION, STATED PLAINLY. There is NO FLEURS corpus for Mongolian.
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `mn_mn` landed later, 1,991 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
+ * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
+ * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
+ * count over the mined artifact alone until someone re-runs it. The evidence is
  * `tools/corpus/mined/mn.jsonc` (233,098 paragraphs of the mn.wikipedia dump, 452 retained) plus `attest.ts`
  * against mn.wikipedia — WHICH IS THE WIKI THE ARTIFACT WAS MINED FROM, so that is a bigger sample of ONE
  * source and never two. What Mongolian has that Luganda did not is espeak: `dictsource/mn_list` ships a
@@ -601,17 +606,15 @@ const DECIMAL_COMMA = /(?<![\d.,])(\d+),(\d{1,2})(?![\d.,])/gu;
  * word in two consonants routinely (морд, гурв, харш, найрт), and the epenthesis rule in `mongolian.ts`
  * exists precisely because those clusters are real.
  *
- * ⚠ ONE SHARED-FILE DEFECT REPORTED AND DELIBERATELY NOT EDITED HERE, because a core change must not land as
- * a side effect of one language's commit. `makeUnreadableTest`'s signal 2 breaks a 3+ consonant run only
- * when the run contains an ASCII `[lr]`, so Cyrillic ⟨л⟩/⟨р⟩ never satisfy the exemption and it is switched
- * OFF for the whole script — the same family as trap 1's `\b`. It applies equally to ky, ru, uk and tg.
- * ⚠ AND IT IS LIVE, NOT LATENT. Measured over the retained text's 6491 Cyrillic word types: 859 carry a 3+
- * consonant run, the ASCII exemption fires on exactly 0 of them, and a Cyrillic ⟨л⟩/⟨р⟩ exemption would fire
- * on 525 — so the signal is running with its brake disconnected. One of those FIRES IN THE RETAINED TEXT —
- * `ХӨГЖЛИЙН`, an ordinary word (genitive of "development") inside a
- * shouted programme title in an otherwise lowercase paragraph, is spelled out as
- * *хэ ө гэ жэ эл и хагас и эн* because ⟨гжл⟩ has no ASCII liquid in it. That is a false positive shipping
- * today, and the fix belongs in `core/initialisms.ts` where every Cyrillic language gets it at once.
+ * ⚠ A SHARED-FILE DEFECT WAS REPORTED FROM HERE AND HAS SINCE LANDED (#1100). This paragraph used to say
+ * that `makeUnreadableTest`'s signal 2 breaks a 3+ consonant run only when the run contains an ASCII
+ * `[lr]`, so Cyrillic ⟨л⟩/⟨р⟩ never satisfied the exemption and it was "switched OFF for the whole
+ * script" — with `ХӨГЖЛИЙН` spelled out as *хэ ө гэ жэ эл и хагас и эн* as "a false positive shipping
+ * today". `core/initialisms.ts`'s `LIQUIDS` is now `/[lrлр]/u` and carries its own measured note; that
+ * exact word is one of the seven the fix was measured on, and it reads *xɵɡt͡ʃɮiːŋ* — a word, not a
+ * spelling-out. Retired here rather than left standing: PORTING.md makes the TypeScript the permanent
+ * home of the measured evidence, so a claim that has been falsified there is the drift a second copy was
+ * supposed to avoid.
  */
 export const isUnreadableMongolian = makeUnreadableTest({
     vowels: /[аеёиоөуүыэюя]/u,
