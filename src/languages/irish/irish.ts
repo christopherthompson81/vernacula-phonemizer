@@ -148,7 +148,7 @@ class IrishPhonemizer implements Phonemizer {
         // the number and its suffix still adjacent, which the tier would break.
         return assembleClauses(SYMBOLS(normalizeIrish(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
-            else if (m[2]) for (const wd of numberToWords(Number(m[2].replace(/,/gu, ""))).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) for (const wd of numberToWords(Number(m[2].replace(/,/gu, "")), m[2].replace(/,/gu, "")).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }

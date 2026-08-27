@@ -160,7 +160,14 @@ export function phonemizeWord(word: string): string {
 }
 
 // ── Numbers (decimal; Macedonian) ─────────────────────────────────────────────
-/** One number token → its words, phonemized. The composer lives in numbers.ts (shared with normalize.ts). */
+/**
+ * One number token → its words, phonemized.
+ *
+ * ⚠ DEAD, AND LEFT THAT WAY DELIBERATELY (#1095). Nothing calls this: `text()` below reaches `numberToText`
+ * directly, because it has to split the decimal comma first. It is recorded rather than repaired — its
+ * `return digits` would put a DIGIT STRING into the phoneme stream past 2^53, so it is a live trap for
+ * whoever wires it up, and the fix is to use the arm in `text()` rather than to give this one a `raw`.
+ */
 function number(digits: string): string {
     const n = Number(digits);
     if (!Number.isSafeInteger(n)) return digits;
@@ -189,10 +196,12 @@ class MacedonianPhonemizer implements Phonemizer {
                 // error, and the reading dropped the zero entirely rather than saying it.
                 if (frac !== undefined && frac.length === 3 && intPart !== "0") {
                     // "1,400" is 1400 — a grouped thousand, read as one number.
-                    for (const wd of numberToText(Number(`${intPart}${frac}`)).split(" "))
+                    // ⚠ THE JOINED DIGITS ARE PASSED AS `raw` (#1095) — past 2^53 the double cannot carry them.
+                    const joined = `${intPart}${frac}`;
+                    for (const wd of numberToText(Number(joined), joined).split(" "))
                         sink.emit(phonemizeWord(wd));
                 } else {
-                    for (const wd of numberToText(Number(intPart)).split(" "))
+                    for (const wd of numberToText(Number(intPart), intPart).split(" "))
                         sink.emit(phonemizeWord(wd));
                     if (frac !== undefined) {
                         sink.emit(phonemizeWord("запирка")); // the Macedonian name of the decimal comma

@@ -225,7 +225,9 @@ public static class PortuguesePhonemizer
         var split = tok.Split(',');
         var intRaw = split[0];
         var frac = split.Length > 1 ? split[1] : null;
-        var words = Numbers.NumberToWords(Js.Number(DOT_G.Replace(intRaw, "")), dialect);
+        // ⚠ THE DOT-STRIPPED STRING IS PASSED AS `raw` (#1095): the fallback must see the digits, not the double.
+        var intDigits = DOT_G.Replace(intRaw, "");
+        var words = Numbers.NumberToWords(Js.Number(intDigits), dialect, intDigits);
         if (frac is not null)
             words +=
                 $" {Manifest.MANIFEST.Numbers.DecimalConnector} " +

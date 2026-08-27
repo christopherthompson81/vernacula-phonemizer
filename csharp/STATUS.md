@@ -16,12 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 128 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 129 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
   so their goldens are what exists).
-  **25,227 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **25,427 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th ti tl tr ug uk umb ur uz vi wuu xh yo yue za zu.
+  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th ti tl tr ug uk umb ur uz vi wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -48,12 +48,23 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   two halves of Levantine, which is the expected answer. zsm/pbt/bgc were SKIPPED: they read 25/25
   identically to their base, so a golden would only restate the base file and "it has a golden" would
   imply more than it delivers. **13 codes still have no golden.** See the investigation doc.
+- **la's golden contains ZERO literal MACRONS**, and the macron is this engine's whole vowel-length system.
+  `csharp/goldens/la.tsv` is MINED la.wikipedia prose, which is unmacronized, so the `long` table is reached
+  in the gate only INDIRECTLY — through the number composer, whose output (`ūnus`, `mīlle`, `nōngentī`) is
+  macronized by construction. Latin also has NO FLEURS SPLIT (it is a dead language), so widening (1) is
+  unavailable in its usual form. The weight falls on the 493 mined strings + 422 hand probes: **1,830
+  comparisons sync AND async, 0 differ, 0 throws**. `&c.`, currency, space-grouped numbers and the minus
+  sign are likewise ZERO-instance in the golden and covered only by the probes. See
+  `docs/la_port_investigation.md`, which also files the port's one reading finding — the word-final ⟨-Vm⟩
+  rule nasalizes a diphthong OFFGLIDE (`Nicolaum` → *ˈnɪkɔɫaũ̯ː*), attested in golden row 43 and reproduced
+  identically by both engines, so it is FILED (#1097), not fixed here.
 - **mn's `normalize.ts` says Mongolian has NO FLEURS corpus, and it does** — `mn_mn` carries train+dev+test
   (3,982 unique lines) and `byid/mn_mn.tsv` 3,074 rows. That file argues its refusals from ONE source and says
   so explicitly, so the second corpus is not bookkeeping: on the CLOCK refusal the measurement inverts —
   15 of 15 distinct FLEURS sentences with a `d:dd` are times of day (18 instances), against the "would fix 2
-  and claim 10" the mined artifact gave — and each currently reads with a spurious clause pause inside one
-  time expression (`1:15 цагт` → *neɡ , arwəŋ tʰaf t͡sʰaɢtʰ*). Filed (#1099), not fixed: it moves goldens.
+  and claim 10" the mined artifact gave. Filed as #1099 and **since fixed upstream (#1113)**: the repair
+  spends the COLON and emits no word, so it names no population and the "fix 2, claim 10" arithmetic — which
+  prices a rule emitting `цаг` — does not apply to it. This branch carries it as step 3b.
   ⚠ mn's golden is also thinner than it looks — 200 rows, **103 unique texts**. The differential is
   **9,722 comparisons sync AND async, 0 differ, 0 throws**; currency, degrees, U+2212, Mongol bichig and the
   legacy ⟨ї⟩ codepage are ZERO-instance in BOTH the golden and FLEURS and rest on the mined artifact plus the

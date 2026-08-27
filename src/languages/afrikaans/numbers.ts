@@ -34,9 +34,9 @@ function magnitude(mult: number, word: string, bareAtOne: boolean): string {
 }
 
 /** 0 … 10⁹-1 → Afrikaans words; beyond (or unsafe) → digit-by-digit units. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) {
-        return String(n).split("").map((d) => N.units[Number(d)] ?? d).join(" ");
+        return (raw ?? String(n)).split("").map((d) => N.units[Number(d)] ?? d).join(" ");
     }
     if (n < 1000) return below1000(n);
     const parts: string[] = [];

@@ -228,3 +228,29 @@ describe("Wolof text normalization", () => {
         expect(normalizeWolof("the 20th century")).toBe("the 20 century");
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1111 — the clock's colon loses its pause ONLY behind a marker.
+//
+// Wolof is the language where a bare-colon rule is provably wrong: the mined artifact's 33 `d:dd` are 33
+// SCRIPTURE REFERENCES, and FLEURS `wo_sn` adds a Giant Slalom result. Keyed on the marker instead, the
+// measured trade is 4 fixed and 0 claimed — no verse reference in either corpus carries one, and neither
+// does the race time. It emits NO word: no Wolof hour noun is sourced here.
+describe("a MARKED clock loses the colon, and only a marked one (#1111)", () => {
+    test("the four marked clocks stop taking a phrase break mid-time", () => {
+        expect(normalizeWolof("Ci bi 8:46 ci suba joté")).toContain("8 46 ci suba");
+        expect(normalizeWolof("lakk bi ci 11:35 ci ngoon.")).toContain("11 35 ci ngoon");
+        expect(normalizeWolof("rapooram tay ci ci 12:00 GMT.")).toContain("12 00 GMT");
+    });
+
+    test("⚠ AND EVERY COUNTER-EXAMPLE IS DECLINED — this is the whole reason for the marker", () => {
+        expect(normalizeWolof("Ge 1:26-30")).toBe("Ge 1:26-30");            // scripture, ×33 in the corpus
+        expect(normalizeWolof("1Ki 15:8-24")).toBe("1Ki 15:8-24");
+        expect(normalizeWolof("bu toll ci 4:41.30, 2:11")).toContain("4:41"); // the Giant Slalom result
+        expect(normalizeWolof("Bi 11:20 jotee")).toBe("Bi 11:20 jotee");    // a true clock with NO marker
+    });
+
+    test("⚠ NO WORD IS EMITTED — the colon is spent on a space and nothing else", () => {
+        expect(normalizeWolof("ci 8:46 ci suba")).toBe("ci 8 46 ci suba");
+    });
+});

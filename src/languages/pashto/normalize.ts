@@ -4,7 +4,13 @@ import { spacedBareExponent } from "../../core/normalizeSymbols.ts";
  * Pashto / پښتو (ps) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * ⚠ THERE IS NO FLEURS FOR PASHTO. The evidence is `tools/corpus/mined/ps.jsonc` (dump-sourced, 178,645
+ * ⚠ THERE IS NO FLEURS FOR PASHTO.
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `ps_af` landed later, 1,804 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
+ * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
+ * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
+ * count over the mined artifact alone until someone re-runs it.
+ * The evidence is `tools/corpus/mined/ps.jsonc` (dump-sourced, 178,645
  * segments, so its `sample` tier IS the real distribution) plus a fresh ps.wikipedia dump — 242,649 lines
  * after `wikidump-to-text.py` + `filter-markup.py` + a local category-residue drop. Every count below is
  * over that file. Full log: `docs/investigations/ps_normalization_investigation.md`.

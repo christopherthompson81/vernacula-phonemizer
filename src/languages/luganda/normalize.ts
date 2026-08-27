@@ -11,6 +11,11 @@
  * own order — the `ki` position, reached independently on this language's own corpus (trap 55).
  *
  * ⚠ THE SOURCING SITUATION, STATED PLAINLY. There is no FLEURS corpus for Luganda; the evidence is
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `lg_ug` landed later, 1,875 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
+ * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
+ * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
+ * count over the mined artifact alone until someone re-runs it.
  * `tools/corpus/mined/lg.jsonc` (43,455 paragraphs of the lg.wikipedia dump, 447 retained) plus `attest.ts`
  * against lg.wikipedia — WHICH IS THE SAME WIKI THE ARTIFACT WAS MINED FROM, a bigger sample of one source and
  * never an independent one. espeak does not ship Luganda at all, so `sources.ts` reports `[NONE]` or `[chk?]`

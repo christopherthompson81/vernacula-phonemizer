@@ -41,6 +41,19 @@ public static class Normalize
 
     // 4. ORDINALS — `-р` after a figure, an abbreviation of `-дугаар`/`-дүгээр`. The trailing letters are
     //    re-emitted, not dropped.
+    /**
+     * A COLON BETWEEN TWO DIGIT RUNS IS NEVER CLAUSE PUNCTUATION — and that is ALL this claims (#1099).
+     * ⚠ IT EMITS NO WORD, which is why it can fire on every population at once: spending the colon on a
+     * SPACE removes the phrase break and asserts nothing about whether the figure is a clock, a race time or
+     * a census bracket, so the three do not have to be told apart. ⚠ A WHOLE RUN, so a three-field
+     * `4:39:51.79` does not have its first colon spent and its second kept. ⚠ AND A COLON FOLLOWED BY A
+     * SPACE IS UNTOUCHED — `0-14: 40.8%` keeps it, because there the colon really is introducing something.
+     * See the TS for the FLEURS count that re-priced the refusal this sits beside.
+     */
+    private static readonly JsRe DIGIT_COLON_RUN =
+        JsRegex.Compile("(?<![\\d:])(\\d{1,2})((?::\\d{2})+)(?![\\d])", "gu");
+    private static readonly JsRe COLON_G = JsRegex.Compile(":", "gu");
+
     private static readonly JsRe ORDINAL = JsRegex.Compile(
         $"(?<![\\d.,\\p{{L}}\\p{{M}}])(\\d{{1,4}})-р(т?){Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe BACK_VOWELS = JsRegex.Compile($"[{M.BackVowels}]", "u");
@@ -173,6 +186,10 @@ public static class Normalize
 
         // 3. De-grouping.
         s = GROUP_SPACE.Replace(GROUP_COMMA.Replace(s, ""), "$1$2");
+
+        // 3b. The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. Here rather than later
+        //     because every numeric step below reads a digit run, and the colon was splitting one in half.
+        s = DIGIT_COLON_RUN.Replace(s, m => m.Groups[1].Value + COLON_G.Replace(m.Groups[2].Value, " "));
 
         // 4. Ordinals.
         s = ORDINAL.Replace(s, m =>

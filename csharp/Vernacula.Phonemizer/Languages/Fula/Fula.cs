@@ -67,8 +67,11 @@ public static class FulaPhonemizer
                 // numbers: Adlam digits folded to ASCII, composed to Fula words (quinary 6–9), then g2p
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
-                    var n = Js.Number(GROUPING_COMMA.Replace(FulaNumbers.FoldAdlamDigits(m.Groups[2].Value), ""));
-                    foreach (var wd in FulaNumbers.NumberToWords(n).Split(' ')) sink.Emit(PhonemizeWord(wd));
+                    // ⚠ THE FOLDED, STRIPPED STRING IS PASSED AS `raw` (#1095) — and it is not only the 2^53
+                    // case: `3.50` fell to the same fallback and `Js.NumberToString(3.5)` had already
+                    // thrown the trailing zero away, so a golden row read *three five* for three-point-five-zero.
+                    var digits = GROUPING_COMMA.Replace(FulaNumbers.FoldAdlamDigits(m.Groups[2].Value), "");
+                    foreach (var wd in FulaNumbers.NumberToWords(Js.Number(digits), digits).Split(' ')) sink.Emit(PhonemizeWord(wd));
                 }
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
                 {

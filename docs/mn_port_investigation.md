@@ -137,10 +137,51 @@ reached (vowels, longVowels, diphthongs, consonants, backVowels, letterNames, ac
 clausePunctuation, numbers — `ManifestMappingTests` pins that structurally), and `text()` → `phonemizeWord`
 is the single entry point, so the golden, the eval and the shipped path are the same path.
 
+## Run 5 — 2026-08-27 15:05 — both findings landed upstream, and the branch follows them
+
+#1099 and #1100, the two findings this port filed, were both fixed in the TypeScript while the port was in
+review (#1113 and #1107), and #1099 moved two rows of `csharp/goldens/mn.tsv`.
+
+⚠ **THE FIX IS NARROWER THAN THE RULE THE REFUSAL PRICED, WHICH IS WHY IT COULD LAND AT ALL.** The issue
+argued the clock refusal's premise was corpus-scoped; the fix does not add a clock rule. It spends the
+COLON on a space and emits no word:
+
+    /(?<![\d:])(\d{1,2})((?::\d{2})+)(?![\d])/gu   →  head + rest.replace(/:/gu, " ")
+
+Because it names no population, it does not have to tell a clock from a race time from a census bracket —
+so the "would fix 2 and claim 10" arithmetic, which prices a rule that emits `цаг`, does not apply to it.
+The word is still refused. Ported as step 3b, after de-grouping and before every numeric step, exactly as
+the TS has it:
+
+    1:15 цагт      neɡ , arwəŋ tʰaf t͡sʰaɢtʰ   →  neɡ arwəŋ tʰaf t͡sʰaɢtʰ     the phrase break is gone
+    8:46 минутад   naim , tɵt͡ʃʰəŋ …           →  naim tɵt͡ʃʰəŋ t͡sʊrɢaː minʊtʰət
+    4:39:51.79     the WHOLE run is spent, not just the first colon
+    0-14: 40.8%    keeps its pause — a colon followed by a SPACE is untouched
+
+#1100 was documentation only (the stale ASCII-liquid claim) and needed no C# change; #1102's header
+correction landed with it.
+
+Re-gated after the merge: **parity mn 200/200 against the NEW golden**, and the differential re-run against
+the fixed engine is **9,722 comparisons, 0 differ, 0 throws**.
+
+⚠ **AND A CASE-FOLDING PROBE FOUND A LIVE CORE GAP — #1116, not introduced here.** Seven adversarial lines
+(`ſ`, `İ`, `ẞ`, and the Cyrillic/Latin scale letters) diverge on two: `Js.ToLowerCase` does not apply JS's
+length-changing SpecialCasing for U+0130, so
+
+    Phonemize("İ",  "mn")   TS ˈaᶦ    C# I
+    Phonemize("İх", "mn")   TS ˈiːks  C# Ix
+
+— the C# emits the capital letter itself, a RAW-LATIN leak. mn reaches it through the public path where wo
+could not (no nativiser shields a Latin run inside Cyrillic). It is ×0 in all 4,861 haystack lines, which is
+why the corpus differential is clean. Reported on #1116 with the blast radius measured (6 of 185 goldens
+carry U+0130, all Turkic); NOT fixed here, because a Core change with fleet-wide reach should not land as a
+side effect of one language's port.
+
 ## Gates
 
-    csharp tests            1,878 pass (86 new in MongolianTests.cs), 0 fail
-    parity, mn              200/200 byte-identical, 0 differ, 0 BLOCKED
-    parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
-    differential            9,722 comparisons (sync + async), 0 differ, 0 throws
-    typescript              unchanged
+    csharp tests            1,992 pass (86 in MongolianTests.cs), 0 fail
+    parity, mn              200/200 byte-identical against the POST-#1113 golden, 0 differ, 0 BLOCKED
+    parity, fleet           129 languages, 25,427 rows, 0 differ, 0 BLOCKED
+    differential            9,722 comparisons (sync + async), 0 differ, 0 throws — re-run after the merge
+    case-folding probe      2 of 7 lines diverge on the KNOWN core gap #1116, ×0 in the haystack
+    typescript              unchanged by this branch (#1099/#1100 landed separately)
