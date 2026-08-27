@@ -150,11 +150,42 @@ Questions 2 and 3 came back clean: all three manifest tables are reached (`graph
 covers every grapheme key the table declares (checked, since a key outside the nativiser's class would make
 the g2p reject a genuine Setswana word), and `text()` → `phonemizeWord` is the single entry point.
 
+## Run 5 — 2026-08-27 15:20 — both findings landed upstream, and neither moved a byte
+
+#1102 (the fleet-wide "no FLEURS" sweep) landed as #1107, and #1104 (this port's two findings) landed with
+the same commit family — **both as DOCUMENTATION**, which is the right outcome for what each of them was:
+
+  · **#1104's count and price were corrected in the TS, and the repair deliberately was not made.** The
+    header now says "TWO KNOWN LOSSES", names `12-13 m3 ka motsotswana` as the second, and replaces "the
+    bare juxtaposition the engine already produced" with the measured reading — the first operand stranded
+    in front of the second's measure noun. The objection to moving the range rule still stands, so a repair
+    means the rule LEARNING TO SEE an already-rewritten second operand, against a count of two. Priced
+    properly rather than fixed, which is what the issue asked for.
+  · **The stale `≥10⁴` note in `setswana.jsonc` was corrected to `≥10⁶`**, matching the code.
+
+⚠ **SO THERE IS NOTHING FOR THIS BRANCH TO FOLLOW IN CODE.** Both upstream changes are comments; the C#
+carries neither stale claim (checked by grep, not assumed), `csharp/goldens/tn.tsv` is unchanged, and
+parity is 200/200 before and after the merge.
+
+What the merge DID bring is two shared-core changes that reach tn: #1093's rate fix (an unreadable rate
+now DECLINES instead of half-reading) and #1095's large-numeral work. Re-gated against both:
+
+    116 m³/s     dikʰubikimitara di lɪ … ka mʊt͡sʊt͡swana     the rate still composes
+    100 l/h · 76s · 1 h                                        still DECLINE — no half reading
+    İ · İx                                                      now agree, via #1118's `Js.ToLowerCase` fix
+
+Differential re-run after the merge: **1,676 comparisons, 0 differ, 0 throws.**
+
+## Recount
+
+`la` (#1096) and `mn` (#1101) merged first, so main is at 129 / 25,427 and this branch is **130 languages /
+25,627 rows**.
+
 ## Gates
 
-    csharp tests            1,870 pass (78 new in SetswanaTests.cs), 0 fail
-    parity, tn              200/200 byte-identical, 0 differ, 0 BLOCKED
-    parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
-    differential            1,676 comparisons (sync + async), 0 differ, 0 throws
+    csharp tests            2,085 pass (78 in SetswanaTests.cs), 0 fail
+    parity, tn              200/200 byte-identical, 0 differ, 0 BLOCKED — unchanged by the merge
+    parity, fleet           130 languages, 25,627 rows, 0 differ, 0 BLOCKED
+    differential            1,676 comparisons (sync + async), 0 differ, 0 throws — re-run after the merge
     leak sweep              0 of 838 outputs carry a raw digit or symbol
     typescript              unchanged

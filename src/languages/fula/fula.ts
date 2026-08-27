@@ -96,8 +96,10 @@ class FulaPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // numbers: Adlam digits folded to ASCII, composed to Fula words (numbers.ts: quinary 6–9), then g2p
             else if (m[2]) {
-                const n = Number(foldAdlamDigits(m[2]).replace(/,/gu, ""));
-                for (const wd of numberToWords(n).split(" ")) sink.emit(phonemizeWord(wd));
+                // ⚠ THE FOLDED, STRIPPED STRING IS PASSED AS `raw` (#1095) — Adlam digits first, so the
+                // fallback reads ASCII, and separators removed, so it reads only digits.
+                const digits = foldAdlamDigits(m[2]).replace(/,/gu, "");
+                for (const wd of numberToWords(Number(digits), digits).split(" ")) sink.emit(phonemizeWord(wd));
             }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

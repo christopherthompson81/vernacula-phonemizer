@@ -157,8 +157,10 @@ class WelshPhonemizer implements Phonemizer {
         return assembleClauses(SYMBOLS(normalizeWelsh(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
-                const n = Number(m[2].replace(/,/gu, ""));
-                for (const wd of numberToWords(n).split(" "))
+                // ⚠ THE STRIPPED STRING IS PASSED AS `raw` (#1095) — the fallback exists precisely because
+                // the double cannot carry the digits, so it must not re-derive them from one.
+                const digits = m[2].replace(/,/gu, "");
+                for (const wd of numberToWords(Number(digits), digits).split(" "))
                     sink.emit(phonemizeWord(wd));
             }
             else if (m[3]) {

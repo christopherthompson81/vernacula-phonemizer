@@ -51,7 +51,7 @@ function lenite(w: string): string {
 }
 
 /** Build the gd integer→words renderer over one numeral table (scottishgaelic.jsonc `numbers`). */
-export function makeNumberToWords(N: GaelicNumbers): (n: number) => string {
+export function makeNumberToWords(N: GaelicNumbers): (n: number, raw?: string) => string {
     const ONES = N.ones, ATTR = N.attributive;
 
     /** The counting form with its ⟨a⟩ particle, h- before a vowel: aon → "a h-aon", ochd → "a h-ochd". */
@@ -99,9 +99,9 @@ export function makeNumberToWords(N: GaelicNumbers): (n: number) => string {
     }
 
     /** Non-negative integer → Scottish Gaelic words. Out-of-range input falls back to digit-by-digit. */
-    return function numberToWords(n: number): string {
+    return function numberToWords(n: number, raw?: string): string {
         if (!Number.isSafeInteger(n) || n < 0) {
-            return [...String(n)].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
+            return [...(raw ?? String(n))].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
         }
         if (n === 0) return ONES[0]!; // neoni — a bare zero takes no ⟨a⟩ particle
         return compose(n).replace(/\s+/gu, " ").trim();

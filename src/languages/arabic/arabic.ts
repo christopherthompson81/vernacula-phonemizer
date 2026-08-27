@@ -236,7 +236,10 @@ class ArabicPhonemizer implements Phonemizer {
             else if (m[2]) {
                 const nums = this.variety ? VARIETIES[this.variety]?.numbers : undefined;
                 const [intPart, frac] = toAscii(m[2]).replace(/,/gu, "").split(".");
-                const parts = [numberToIpa(Number(intPart), nums)];
+                // ⚠ `intPart` IS PASSED AS `raw` (#1095): above 2^53 the double has already rounded and
+                // above 1e21 `String(n)` is exponent form, so the digit-at-a-time fallback cannot recover
+                // the digits from it. Separator-stripped, because that is what the fallback must read.
+                const parts = [numberToIpa(Number(intPart), nums, intPart)];
                 if (frac !== undefined) {
                     // A decimal is read "فاصلة" then the fractional digits one by one.
                     parts.push(phonemizeWord("فَاصِلَة", this.variety));

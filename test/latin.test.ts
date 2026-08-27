@@ -154,3 +154,33 @@ describe("Latin text normalization", () => {
         expect(la.text("liber II")).toBe("ˈlɪbɛr ˈduɔ");
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1097 — word-final ⟨-Vm⟩ must nasalize a NUCLEUS, never a diphthong offglide.
+//
+// `isVowelSeg` is true of an offglide (`u̯` decomposes to `u` + U+032F), so a word whose last two letters
+// spell a diphthong had that diphthong's SECOND element nasalized and lengthened in place: `Nicolaum` read
+// *ˈnɪkɔɫaũ̯ː*, a long nasalized NON-SYLLABIC vowel. Two defects in one — no language has that segment, and
+// `placeStress` skips anything carrying U+032F, so the word lost a syllable and was stressed as if it had
+// three. It was live in `csharp/goldens/la.tsv`.
+//
+// ⚠ THE REFEREE DECIDES THIS, not a choice between two plausible repairs. Of the 45
+// `la.wikipron-lat-clas-narrow` rows spelled ⟨a|o|e⟩⟨u|e⟩m, NOT ONE nasalizes an offglide — every one ends
+// in a syllabic ũː/ẽː. So `-aum` is a hiatus, and the fix is to make the offglide syllabic.
+describe("final -Vm nasalizes a nucleus, not an offglide (#1097)", () => {
+    test.each([
+        // Segment-for-segment against the referee row quoted beside each.
+        ["Boleslaum", "bɔˈɫɛsɫaũː"],   // b ɔ ɫ ɛ s ɫ a ũː
+        ["Coeum", "ˈkoe̯ũː"],           // k o e̯ ũː  — the ⟨oe̯⟩ diphthong SURVIVES; only the final u nasalizes
+        ["Idaeum", "ɪˈdae̯ũː"],         // ɪ d a e̯ ũː
+        ["Caesareum", "kae̯ˈsareũː"],   // k a e̯ s a r e ũː
+        ["Nicolaum", "nɪˈkɔɫaũː"],     // the golden row that carried the defect
+    ])("%s → %s", (word, want) => expect(phonemizeWord(word)).toBe(want));
+
+    test("⚠ AND THE ORDINARY CASES ARE UNTOUCHED — the change is to the offglide branch alone", () => {
+        expect(phonemizeWord("bellum")).toBe("ˈbɛllũː");
+        expect(phonemizeWord("aquam")).toBe("ˈakʷãː");
+        expect(phonemizeWord("laudem")).toBe("ˈɫau̯dẽː"); // a diphthong NOT at the -Vm site keeps its offglide
+        expect(phonemizeWord("mensa")).toBe("ˈmẽːsa");    // the pre-fricative nasal shares nasalizeLong
+    });
+});
