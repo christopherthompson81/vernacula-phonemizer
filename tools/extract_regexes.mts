@@ -15,6 +15,12 @@
  * rows are \b's. A probe set of ordinary words would pass while the gap stayed open.
  *
  *   npx tsx tools/extract_regexes.mts
+ *
+ * ⚠ AND THE CHECKED-IN CORPUS MUST NOT DRIFT BEHIND src/. It did, for long enough that a re-extraction
+ * moved 582 lines in languages nobody had touched (#1083) — so `regex-diff` was replaying patterns that
+ * no longer existed while the ones that replaced them went untested. That quietly narrows the ONLY gate
+ * covering the translator, and the narrowing is invisible: the stale patterns still pass.
+ * `test/regex-corpus-fresh.test.ts` fails if this file's output differs from what is committed.
  */
 import { globSync, readFileSync, writeFileSync } from "node:fs";
 
@@ -52,7 +58,11 @@ let files = 0, unparseable = 0;
 for (const f of globSync("src/**/*.ts")) {
   files++;
   for (const m of strip(readFileSync(f, "utf8")).matchAll(LITERAL)) {
-    const [, pattern, flags] = m;
+    // ⚠ NON-NULL, and it is safe by construction: LITERAL's two groups are not optional, so a match has
+    // both. Written out because this module is now IMPORTED by `test/regex-corpus-fresh.test.ts` and so
+    // reaches `tsc` for the first time — the looseness predates that and was simply never typechecked.
+    const pattern = m[1]!;
+    const flags = m[2]!;
     const key = `${pattern}\u0000${flags}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -70,5 +80,15 @@ for (const f of globSync("src/**/*.ts")) {
     rows.push(JSON.stringify({ pattern, flags, file: f, matches }));
   }
 }
-writeFileSync("csharp/regex-corpus.jsonl", rows.join("\n") + "\n", "utf8");
-console.log(`${rows.length} distinct patterns from ${files} files (${unparseable} unparseable, dropped)`);
+export const CORPUS = rows.join("\n") + "\n";
+export const CORPUS_PATH = "csharp/regex-corpus.jsonl";
+
+/**
+ * ⚠ THE WRITE IS GUARDED SO A TEST CAN IMPORT THIS MODULE FOR ITS `CORPUS` WITHOUT REWRITING THE FILE
+ * IT IS ABOUT TO COMPARE AGAINST — which would make the comparison vacuous by construction.
+ * `test/regex-corpus-fresh.test.ts` is that test; see #1083 for why it exists.
+ */
+if (process.argv[1]?.endsWith("extract_regexes.mts")) {
+    writeFileSync(CORPUS_PATH, CORPUS, "utf8");
+    console.log(`${rows.length} distinct patterns from ${files} files (${unparseable} unparseable, dropped)`);
+}
