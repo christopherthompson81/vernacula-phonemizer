@@ -16,12 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 127 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 128 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
   so their goldens are what exists).
-  **25,027 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **25,227 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mag mai mg mi ml mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th ti tl tr ug uk umb ur uz vi wuu xh yo yue za zu.
+  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mag mai mg mi ml mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -48,6 +48,18 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   two halves of Levantine, which is the expected answer. zsm/pbt/bgc were SKIPPED: they read 25/25
   identically to their base, so a golden would only restate the base file and "it has a golden" would
   imply more than it delivers. **13 codes still have no golden.** See the investigation doc.
+- **tn was picked by the queue's own rule** — highest speaker population (14M) among unported codes with a
+  golden — and it has **no FLEURS**, checked rather than assumed after mn's header turned out to be wrong.
+  The weight falls on the two corpus artifacts + 360 hand probes: **1,676 comparisons sync AND async, 0 differ,
+  0 throws**, plus a leak sweep in which **0 of 838 outputs carry a raw digit or symbol**. The golden never
+  exercises the decimal comma, the currency magnitude suffix or the clock's only matching branch, and the
+  English-ordinal step is ×0 in BOTH artifacts (argued from the corpus-wide `ordinal-latin` cell, not the
+  retained text). See `docs/tn_port_investigation.md`, which files step 8's "one known loss" as TWO (#1103 —
+  the second is quoted in the same file's own `unitPer` comment).
+  ⚠ **AND THE mn FLEURS DEFECT IS A CLASS, NOT A ONE-OFF.** Sweeping every `normalize.ts` that states its
+  language has no FLEURS against the transcript directory: **ln, lt, lg, mt, ps, nso and mn all have one**
+  (1,758–1,991 unique sentences each). `he`'s header records the same error being found and fixed once
+  already, which is what makes it a class — transcripts landed and the headers were never re-swept (#1102).
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,
