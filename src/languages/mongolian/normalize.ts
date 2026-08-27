@@ -105,12 +105,17 @@
  *     `Warcraft: Orc & Humans`, `Global Banking & Finance Review` — so a Mongolian conjunction would be
  *     inserted into an English film title. espeak's `& ampersand` is the English word transliterated and is
  *     not a reading for this slot.
- *   · NO CLOCK (`clock` ×2967; 14 digit-colon-digit in the retained text). Reading them settles it the way it
- *     settled `ilo`, `hil` and `lg`: six are SPORTS TIMES with their result noun already in front
- *     (`1:53.43 амжилт`, `2:26.65 амжилтаар`, `30:05.6 амжилт`, `4:39:51.79`), four are census brackets
- *     (`0-14: 40.8%`, `15-64:56.1%`), and only TWO are a time of day — and both already carry `цагт`
- *     ("at N o'clock") after them, so the hour noun is not missing. A `\d{1,2}:\d{2}` rule would fix 2 and
- *     claim 10. `минут` is never written after a colon anywhere in the retained text.
+ *   · NO CLOCK **WORD** (`clock` ×2967; 14 digit-colon-digit in the retained text). Reading them settles
+ *     the WORD the way it settled `ilo`, `hil` and `lg`: six are SPORTS TIMES with their result noun
+ *     already in front (`1:53.43 амжилт`, `2:26.65 амжилтаар`, `30:05.6 амжилт`, `4:39:51.79`), four are
+ *     census brackets (`0-14: 40.8%`, `15-64:56.1%`), and only TWO are a time of day — and both already
+ *     carry `цагт` ("at N o'clock") after them, so the hour noun is not missing. `минут` is never written
+ *     after a colon anywhere in the retained text. So no word is emitted, and that still holds.
+ *     ⚠ THIS BULLET ALSO SAID "a `\d{1,2}:\d{2}` rule would fix 2 and claim 10", AND THAT PRICED A
+ *     DIFFERENT RULE (#1099). It prices one that emits `цаг`. The colon itself is `clausePunctuation`, so
+ *     every one of the fourteen was ALSO taking a phrase break mid-figure, and removing that costs nothing
+ *     in any of the three populations because it names none of them — see step 3b, which does exactly that
+ *     and no more. ⚠ AND THE 6/4/2 SPLIT WAS ONE CORPUS: over FLEURS `mn_mn` it is 15 of 15 times of day.
  *   · NO ERA PHRASE (`era-marker` ×152; `МЭӨ` ×4, `МЭ` ×2, `НТӨ` ×1). Expanding `МЭӨ` to `манай эриний өмнө`
  *     is a fixed phrase, and although the wiki's era article does write it out (×29/20), espeak does not and
  *     the retained text never puts the phrase where the abbreviation stands — so the LETTER reading is taken
@@ -682,6 +687,25 @@ const spellInitialisms = makeInitialismNormalizer({
  *   · INITIALISMS (11) last, after the abbreviation dot (2) and the personal initials (1), or `ам.доллар`
  *     and `Ц.Э` become caps runs to spell out.
  */
+/**
+ * A COLON BETWEEN TWO DIGIT RUNS IS NEVER CLAUSE PUNCTUATION — and that is ALL this claims (#1099).
+ *
+ * ⚠ IT EMITS NO WORD, WHICH IS WHY IT CAN FIRE ON EVERY POPULATION AT ONCE. `:` is in
+ * `clausePunctuation`, so `8:46 минутад` read *naim **,** tɵt͡ʃʰəŋ t͡sʊrɢaː minʊtʰət* — a phrase break
+ * inside one time expression. Spending the colon on a SPACE removes the break and asserts nothing about
+ * whether the figure is a clock, a race time or a census bracket, so the three do not have to be told
+ * apart. The refusal one screen up declined a `\d{1,2}:\d{2}` rule because it "would fix 2 and claim 10";
+ * that arithmetic is about a rule that emits `цаг`, and this one does not.
+ * ⚠ AND THE COUNT IT WAS DECIDED ON WAS ONE CORPUS. Over FLEURS `mn_mn`, **15 of 15 distinct sentences
+ * carrying a d:dd are a TIME OF DAY** — every one with `цаг`/`минут` beside it, zero sports times, zero
+ * census brackets. The mined text's 6/4/2 split and this one are both true; the refusal read only the first.
+ * ⚠ A WHOLE RUN, so a three-field `4:39:51.79` does not have its first colon spent and its second kept.
+ * ⚠ AND A COLON FOLLOWED BY A SPACE IS UNTOUCHED — `0-14: 40.8%` keeps it, because there the colon really
+ * is introducing something and the pause belongs.
+ */
+const DIGIT_COLON_RUN = /(?<![\d:])(\d{1,2})((?::\d{2})+)(?![\d])/gu;
+const COLON_G = /:/gu;
+
 export function normalizeMongolian(input: string): string {
     let s = input;
 
@@ -694,6 +718,10 @@ export function normalizeMongolian(input: string): string {
 
     // 3. De-grouping.
     s = s.replace(GROUP_COMMA, "").replace(GROUP_SPACE, "$1$2");
+
+    // 3b. The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. Here rather than later because
+    //     every numeric step below reads a digit run, and the colon was splitting one in half.
+    s = s.replace(DIGIT_COLON_RUN, (_m, head: string, rest: string) => head + rest.replace(COLON_G, " "));
 
     // 4. Ordinals. Above the percent and unit steps only because nothing else spends a hyphen before a ⟨р⟩.
     s = s.replace(ORDINAL, (m, digits: string, tail: string) => {
