@@ -232,9 +232,52 @@ export function ordinalWords(n: number): string | undefined {
 
 const DIGITS_ONLY = /^\d+$/u;
 
+/**
+ * A WORD WITH ONE OF THE THREE MARKS WRITTEN INSIDE IT. Armenian does not put ՛ (շեշտ, emphasis),
+ * ՜ (բացականչական, exclamation) or ՞ (հարցական, question) AFTER the word the way Latin punctuation does —
+ * it writes them over the word's last vowel, i.e. in the middle of the letters. The tokenizer's word class
+ * is Armenian letters, so every one of them SPLITS the word it belongs to, and the fragments are then
+ * phonemized as separate words — schwa epenthesis and all:
+ *
+ *     կա՛մ     → kɑ mə        two words, and a schwa that is not in the language
+ *     ո՛չ      → vo t͡ʃʰə      the ⟨ո⟩→[vo] initial glide fires on a one-letter fragment
+ *     Տե՛ս     → te sə
+ *     Ինչո՞ւ   → int͡ʃʰo ? və  the mark splits the ⟨ու⟩ DIGRAPH as well, so [u] becomes [o]+[v]+schwa,
+ *                             and the question pause lands in the middle of the word
+ *     Ինչպե՞ս  → int͡ʃʰpe ? sə
+ *
+ * Measured over FLEURS `hy_am` + `tools/corpus/mined/hy.jsonc` (4,465 unique lines): ՛ on 54 lines
+ * (32 of them inside a word — կա՛մ, Խառնի՛ր, սեղմի՛ր, ո՛չ, լսե՛ք, ուշադի՛ր, ստուգե՛ք, Տե՛ս, Հիշի՛ր),
+ * ՞ on 11 (15 inside a word, every one an interrogative — Ինչո՞ւ, Ինչպե՞ս, Արդյո՞ք, Գո՞ւցե, Որտեղի՞ց).
+ * ⚠ NONE OF IT IS IN THE PARITY GOLDEN, which carries zero of all three marks — this is a defect only a
+ * corpus-wide differential can see.
+ *
+ * ՛ and ՜ stay SILENT, which is the reading `clausePunctuation` already gives them (neither has an entry);
+ * all this does is stop them breaking the word. ՞ is a real clause mark and MOVES to the end of the word,
+ * where the tokenizer reads it as the question pause it is.
+ *
+ * ⚠ LETTERS ON BOTH SIDES, which is what keeps the ARC-MINUTE out: `41°24՛` is the other job ՛ does in this
+ * corpus (×9, every one a coordinate) and it is digit-adjacent, so it never matches here and stays dropped.
+ * ⚠ ՝ (U+055D) IS NOT IN THE CLASS. It is Armenian's own inter-word pause (1,096 instances, none inside a
+ * word) and belongs exactly where it is written.
+ * ⚠ ՜ IS UNATTESTED IN THIS CORPUS (×0) and is in the class anyway: it is the same mark — the third member
+ * of the over-the-last-vowel series that Unicode and Armenian orthography both define together — and
+ * leaving it out would keep one third of one defect alive for no measurement's sake.
+ */
+const INTRA_WORD_MARK = /[Ա-Ֆա-ևև]+(?:[՛՜՞][Ա-Ֆա-ևև]+)+/gu;
+const MARK_CHARS = /[՛՜՞]/gu;
+
 /** Eastern Armenian text normalization. Runs inside `text()`, before the shared symbol tier. */
 export function normalizeArmenian(input: string): string {
     let s = input;
+
+    // ── 0. THE MARKS WRITTEN INSIDE THE WORD — first, because every later rule that reaches for an
+    //       Armenian letter (the bound suffixes, the era markers, the unit nouns) sees a broken word until
+    //       this has run. See INTRA_WORD_MARK above for the measurement.
+    s = s.replace(INTRA_WORD_MARK, (w) => {
+        const bare = w.replace(MARK_CHARS, "");
+        return w.includes("՞") ? `${bare}՞` : bare;
+    });
 
     // ── 1. DE-GROUPING — FIRST, because a grouping mark is otherwise read as clause punctuation, which is
     //       precisely what `1 500 000 → mek hinɡhɑɾjuɾ zəɾo` was: three numbers and a spoken "zero".

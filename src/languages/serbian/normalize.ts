@@ -4,8 +4,9 @@
  *
  * ⚠ SERBIAN IS DIGRAPHIC. Every rule accepts BOTH spellings of the words it matches on, via a Cyrillic→Latin
  * transliteration of the captured text, so `1624. године` and `1624. godine` behave alike. Output words are
- * emitted in LATIN, matching what `numbers.ts` emits for cardinals; the g2p maps the two scripts to the same
- * IPA, so the choice is cosmetic. `serbian.ts`'s TOKEN claims both scripts, so nothing here ever reaches
+ * emitted in LATIN, matching what `numbers.ts` emits for cardinals — EXCEPT the sign and relational words of
+ * steps 3b/3c and the tier's `ampersand`, which are written in Cyrillic. The g2p maps the two scripts to the
+ * same IPA, so the split is cosmetic, but it is a split rather than the one rule this paragraph used to claim. `serbian.ts`'s TOKEN claims both scripts, so nothing here ever reaches
  * `core/foreign.ts`.
  *
  * ⚠ AN ORDINAL IS THE NUMERAL PLUS A PERIOD, which collides with the sentence break — the defect this file
@@ -495,6 +496,23 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
     а: "a", б: "be", ц: "ce", ч: "če", ћ: "će", д: "de", ђ: "đe", е: "e", ф: "ef", г: "ge",
     х: "ha", и: "i", ј: "je", к: "ka", л: "el", м: "em", н: "en", о: "o", п: "pe", р: "er",
     с: "es", ш: "eš", т: "te", у: "u", в: "ve", з: "ze", ж: "že",
+    // ⚠ ЉУБЉЕНО, ЊЕГОВО, ЏЕП — Љ U+0459, Њ U+045A and Џ U+045F ARE MISSING ON PURPOSE, and what is
+    // missing is a DECISION, not the names. Unicode names them Lje, Nje and Dzhe, and Serbian says them
+    // ⟨ље⟩ ⟨ње⟩ ⟨џе⟩ — so the values would be "lje", "nje", "dže".
+    //
+    // ⚠ TWO THINGS BLOCK JUST TYPING THEM IN, and both are about this table's own contract:
+    //   · THE STATED PATTERN PREDICTS THE OTHER ANSWER. The docstring's rule is "a continuant takes a
+    //     preceding e-" — which is why л is `el` and н is `en` — and Љ/Њ are continuants, so the pattern
+    //     says `elj`/`enj` while the canonical names say `lje`/`nje`. The names win, but then the rule
+    //     stated above them is not the rule, and that has to be said rather than left to be rediscovered.
+    //   · THE TWO SCRIPTS WOULD STOP AGREEING. This pass is keyed on the LETTER and the header's whole
+    //     claim is that both scripts read alike. Latin writes these as the DIGRAPHS ⟨lj nj dž⟩, which are
+    //     two keys each, so `LJ` spells *el je* while a Cyrillic `Љ` would newly say *lje*. Adding the
+    //     three Cyrillic entries alone buys a reading in one script and a mismatch between them.
+    //
+    // Measured before deciding: Љ/Њ/Џ appear in ZERO of the 102 all-caps Cyrillic runs across all 4,054
+    // FLEURS + mined rows, so nothing reads differently today and abstaining is the safe direction. The
+    // fix is digraph-aware lookup on the Latin side plus these three keys, landed together.
 };
 
 /**

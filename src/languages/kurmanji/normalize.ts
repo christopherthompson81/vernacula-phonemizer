@@ -143,8 +143,23 @@ export function normalizeKurmanji(input: string): string {
     //    Must run before the suffix rule at step 4, which needs a bare integer to speak.
     // ⚠ AND A GROUP MAY NOT FOLLOW A LONE `0` — no convention groups from zero, so `0,001` joining to
     //    `0001` is a 1000× error rather than a reading of it.
-    const group = /(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:([.,])\p{Nd}{3})+)(?![\p{Nd}.,])/gu;
-    s = s.replace(group, (m, _g, sep: string) => m.replaceAll(sep, ""));
+    //
+    // ⚠ THE TAIL GUARD REFUSES A DIGIT, NOT A MARK, and the difference is a sentence's worth of numbers.
+    //    Written `(?![\p{Nd}.,])` it also declined every group that a SENTENCE ends after — the corpus's
+    //    `serjimara Silopî îroj gihiştiye 140.000. Hikûmetên…` read *sˈɛd ˈuː t͡ʃˈɪl **.** sɪfˈɪr* ("140.
+    //    zero"), which is precisely the false clause break this rule exists to remove, reappearing at the
+    //    one position where a full stop is guaranteed. What the guard is FOR is the longer run the group
+    //    would otherwise mis-slice (`27.10-6.11.2003`, `1.000,50`), and that only needs the mark refused
+    //    when a DIGIT follows it. Same fix, same reason, on both decimal arms at step 7.
+    //
+    // ⚠ AND EVERY MARK IN THE RUN IS STRIPPED, not just the last one the group captured. `m.replaceAll(sep)`
+    //    spent only the separator of the FINAL repetition, so a run that mixes them kept the other: the
+    //    corpus's `274.703,340 $` (Tomb Raider's worldwide gross, $274,703,340) became `274.703340` and read
+    //    *dˈʊ sˈɛd ˈuː hɛftˈeː ˈuː t͡ʃˈɑːr **.** hˈɛft sˈɛd ˈuː sˈeː hɛzˈɑːr…* — a clause break inside the
+    //    number and a value 1000× off. This rule's own rule ("three digits after the mark is a thousands
+    //    group, WHICHEVER mark it is") already decided both marks; only the removal disagreed.
+    const group = /(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:[.,]\p{Nd}{3})+)(?![\p{Nd}]|[.,]\p{Nd})/gu;
+    s = s.replace(group, (m) => m.replaceAll(".", "").replaceAll(",", ""));
 
     // 4) PERCENT — `ji sedî` is a PHRASE whose first word the corpus already writes before the sign, and
     //    dropping the duplicate is the trap-12 move applied to a word rather than a symbol. The corpus
@@ -248,9 +263,14 @@ export function normalizeKurmanji(input: string): string {
     //    9 of them genuine) and is NOT one at two (×6: `Ubuntu 6.10`/`6.06` are versions, `27.10-6.11.2003`
     //    is a date, `saet 11.00an` a clock, `36.25–29` a page span — 1 decimal in 6). Using one width for
     //    both read `Ubuntu 6.10` as "six one zero".
+    //    ⚠ AND THE TAIL GUARD REFUSES A DIGIT, NOT A MARK — step 3's fix, for step 3's reason. `(?![\p{Nd}.,])`
+    //    also declined every decimal a SENTENCE punctuates after, and the corpus writes those: `çiya 37,0%,
+    //    deşt 30,6%` reads its second figure ("30 6") and refuses its first, purely because a list comma
+    //    follows it, so `37,0` kept the break this rule removes. What the guard is for is the longer run
+    //    (`1,000.5`, `27.10-6.11.2003`), which needs the mark refused only when a DIGIT follows it.
     const spell = (whole: string, frac: string): string => `${whole} ${[...frac].join(" ")}`;
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}+),(\p{Nd}{1,2})(?![\p{Nd}.,])/gu, (_m, w: string, f: string) => spell(w, f));
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}+)\.(\p{Nd})(?![\p{Nd}.,])/gu, (_m, w: string, f: string) => spell(w, f));
+    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}+),(\p{Nd}{1,2})(?![\p{Nd}]|[.,]\p{Nd})/gu, (_m, w: string, f: string) => spell(w, f));
+    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}+)\.(\p{Nd})(?![\p{Nd}]|[.,]\p{Nd})/gu, (_m, w: string, f: string) => spell(w, f));
 
     // 8) THE DOTTED ORDINAL — `1. rêbaza kevin … 2. rêbaza Êzidiyan … 3. Rêbaza Botanê`, the German-style
     //    `N.`. `ordinal-latin` is 1,484 in the dump and the period was a CLAUSE PAUSE in every one, so a

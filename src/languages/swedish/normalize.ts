@@ -445,9 +445,18 @@ export function normalizeSwedish(input: string): string {
     //     So the numeral keeps its cardinal reading whenever a tier-claimed abbreviation follows.
     //
     //     TIER_CLAIMS IS COUPLED TO `swedish.ts`'s `makeSymbolNormalizer` DECLARATION and cannot be derived
-    //     from it without a circular import, so a test asserts `1 300 km` still says *kilometer*; adding a
-    //     unit there without adding it here breaks that test rather than silently dropping the unit.
-    t = t.replace(/(?<![\d.,:\p{L}])(1[1-9]\d\d)(?![\d,:])(?!\.\d)(?!\p{L})(?!\s*(?:%|[$€£°²³]|(?:km|cm|mm|kg|m)(?![\p{L}\p{M}])))/gu, (m, y: string) =>
+    //     from it without a circular import, so a test asserts EVERY declared unit still speaks after a
+    //     four-digit numeral in range; adding a unit there without adding it here breaks that test rather
+    //     than silently dropping the unit.
+    //
+    //     ⚠ AND IT HAD ALREADY DRIFTED ONCE. `ghz` and `mbit` were added to the tier after this list was
+    //     written and not added here, so `1200 GHz` read *tolvhundra* + the cluster [ɡhs] and `1200 Mbit/s`
+    //     *tolvhundra* + [mbiːt s] — exactly the regression the paragraph above exists to prevent. The one
+    //     test that guarded the coupling only covered `km`, so nothing failed. ⚠ THEY ARE SPELLED
+    //     CASE-INSENSITIVELY and the others are not: the corpus writes `GHz` / `Mbit` cased and `km` / `m`
+    //     lowercase, and widening the whole group to `/i` would newly decline `1500 M` — a behaviour change
+    //     with no evidence behind it — so only the two cased keys carry classes.
+    t = t.replace(/(?<![\d.,:\p{L}])(1[1-9]\d\d)(?![\d,:])(?!\.\d)(?!\p{L})(?!\s*(?:%|[$€£°²³]|(?:km|cm|mm|kg|[Gg][Hh][Zz]|[Mm][Bb][Ii][Tt]|m)(?![\p{L}\p{M}])))/gu, (m, y: string) =>
         hundredsYear(Number(y)) ?? m);
 
     // 12) DEGREES (2), BEFORE any rule that could claim the scale letter — `+30°C` read as *trettio* plus

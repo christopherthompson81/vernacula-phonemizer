@@ -196,6 +196,23 @@ describe("swedish text normalization", () => {
         expect(normalizeSwedish("1300 %")).toBe("1300 %");
     });
 
+    // ⚠ THE COUPLING, PINNED OVER THE WHOLE TIER RATHER THAN OVER `km`. `ghz` and `mbit` were added to
+    // swedish.ts's declaration after step 11's guard list was written and not added to it, so `1200 GHz`
+    // read *tolvhundra* + the cluster [ɡhs] — the unit silently lost, which is the regression the guard
+    // exists to prevent. One case per declared key, so the next addition fails here instead of shipping.
+    test("every unit the symbol tier declares survives a 1100–1999 numeral", () => {
+        const spoken: Readonly<Record<string, string>> = {
+            km: "ɕɪlɔmˈeːtɛr", m: "mˈeːtɛr", cm: "sɛntɪmˈeːtɛr", mm: "mɪlːɪmˈeːtɛr",
+            kg: "ɕɪlɔɡrˈɑːm", GHz: "jˈìːɡahɛʈs", Mbit: "mˈèːɡabɪt",
+        };
+        for (const [unit, ipa] of Object.entries(spoken)) {
+            expect(normalizeSwedish(`1200 ${unit}`)).toBe(`1200 ${unit}`); // the numeral keeps its digits…
+            expect(phonemize(`1200 ${unit}`, "sv")).toContain(ipa); // …so the tier can still see it
+        }
+        // …and the numeral itself still reads as a CARDINAL there, not the hundreds form.
+        expect(phonemize("1200 GHz", "sv")).toContain("ˈɛ̀tːɵsɛn");
+    });
+
     test("clock: the PERIOD form Swedish actually writes, and the shapes that are not clocks", () => {
         expect(normalizeSwedish("kl. 20.30")).toBe("klockan 20 30");
         expect(normalizeSwedish("kl.12.00")).toBe("klockan 12 0 0"); // no space; :00 spoken noll noll
