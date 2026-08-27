@@ -314,3 +314,22 @@ describe("Serbo-Croatian — initialisms, on the attested letter names", () => {
         expect(phonemize("САД", "sr")).toBe("sad");
     });
 });
+
+// #1059: the overflow fallback derived its digits from the DOUBLE, and the CALL SITE never passed the token
+// string, so above 1e21 `String(n)` was exponent form and `1000000000000000000001` read *jˈe˩˥dan e dʋaː˥˩
+// jˈe˩˥dan* — "1 e + 2 1", the twenty-two digits gone.
+describe("Serbian large numerals", () => {
+    test("a 22-digit run keeps its own digits", () => {
+        const a = phonemize("1000000000000000000001", "sr");
+        const b = phonemize("1000000000000000000009", "sr");
+        expect(a).not.toBe(b);
+        expect(a.endsWith("jˈe˩˥dan")).toBe(true);
+        expect(b.endsWith("dˈe˥˩ʋet")).toBe(true);
+        expect(a.split(" ").length).toBe(22);
+    });
+
+    // Above 2^53 the double has already rounded, so the digits must come from the token, not from `n`.
+    test("a 16-digit run past 2^53 reads its written digits", () => {
+        expect(phonemize("9007199254740993", "sr").endsWith("triː˥˩")).toBe(true);
+    });
+});

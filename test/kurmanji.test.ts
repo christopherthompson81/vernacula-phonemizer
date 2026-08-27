@@ -80,6 +80,27 @@ describe("Kurmanji text normalization", () => {
         expect(phonemize("1.234", "kmr")).toBe(phonemize("1234", "kmr"));
     });
 
+    // The tail guard refuses a DIGIT, not a mark. Written `(?![\p{Nd}.,])` it declined every number a
+    // sentence punctuates after — which is where a full stop is guaranteed — and the false clause break
+    // this layer removes came back at exactly that position.
+    it("a group or a decimal still de-groups when a sentence ends on it", () => {
+        expect(normalizeKurmanji("gihiştiye 140.000. Hikûmetên")).toBe("gihiştiye 140000. Hikûmetên");
+        expect(normalizeKurmanji("çiya ji sedî 37,0, deşt")).toBe("çiya ji sedî 37 0, deşt");
+        expect(normalizeKurmanji("Magnitude 7.6.")).toBe("Magnitude 7 6.");
+        // …and the longer run it is actually for is still refused, because a DIGIT follows the mark.
+        expect(normalizeKurmanji("27.10-6.11.2003")).toBe("27.10-6.11.2003");
+        expect(normalizeKurmanji("1.000,50")).toBe("1.000,50");
+        expect(normalizeKurmanji("Ubuntu 6.10.")).toBe("Ubuntu 6.10.");
+    });
+
+    // Every mark in the run is stripped, not just the last one the group matched: the corpus's one
+    // mixed-mark figure kept the other separator and read a clause break inside itself.
+    it("a run that mixes the two marks loses both", () => {
+        expect(normalizeKurmanji("cîhanê 274.703,340 $")).toBe("cîhanê 274703340 dolar");
+        expect(normalizeKurmanji("669,947,865")).toBe("669947865");
+        expect(normalizeKurmanji("1.000.000.000")).toBe("1000000000");
+    });
+
     it("percent leads its number, and the corpus's own `ji` is not said twice", () => {
         expect(normalizeKurmanji("ji %71 çiya")).toBe("ji sedî 71 çiya");
         expect(normalizeKurmanji("% 38,2")).toBe("ji sedî 38 2");

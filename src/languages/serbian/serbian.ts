@@ -1,7 +1,9 @@
 /**
  * Serbian (sr, српски) phonemizer — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully phonemic.
- * A digraph-aware left-to-right scan (g2p reads serbian.jsonc): the Latin digraphs ⟨dž lj nj dj⟩
- * first, then the single Cyrillic OR Latin letters — every grapheme is one phoneme, no vowel reduction. Serbian's
+ * A digraph-aware left-to-right scan (g2p reads serbian.jsonc): the Latin digraphs ⟨dž lj nj⟩
+ * first, then the single Cyrillic OR Latin letters. ⚠ ⟨dj⟩ IS NOT ONE OF THEM — modern Serbian writes ⟨đ⟩
+ * and the native prefix-boundary ⟨d⟩+⟨j⟩ (od·jek, pod·jednako) is far commoner, so it scans as two
+ * phonemes; the header used to list it, which the manifest never did — every grapheme is one phoneme, no vowel reduction. Serbian's
  * lexical PITCH ACCENT is unwritten in ordinary text, so it comes from stress.tsv (101965 entries, both
  * scripts, from kaikki/Wiktionary): POSITION as ˈ before the nucleus, and the FOUR-WAY CONTOUR as a Chao tone
  * letter after it (˩˥ rising, ˥˩ falling) with ː for the accented syllable's length. Post-accentual length
@@ -304,7 +306,7 @@ class SerbianPhonemizer implements Phonemizer {
             // written in both scripts and the Latin side had the same deletion.
             if (m[1]) sink.emit(phonemizeWord(nat(foreignLetters(m[1]))));
             else if (m[2])
-                for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

@@ -16,17 +16,17 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 106 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 110 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67 — those languages have no wikipedia and no FLEURS, so their goldens are what exists).
-  **20,896 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **21,696 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn ca ceb cjy cmn cs de el en-GB en-IN en es-419 es fa ff fr-CA fr gan gu ha hak he hi hne hsn hu id ig it ja jv kk kl km kn ko ln lo mad mai mg mi ml mr ms my nan ne nl nya oc om or pa pcm pl pnb ps pt-BR pt qu ro ru sd si skr sn so su sw syl ta te tg th tl tr ug uk umb ur uz vi wuu yo yue za zu.
+  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn ca ceb cjy cmn cs de el en-GB en-IN en es-419 es fa ff fr-CA fr gan gu ha hak he hi hne hsn hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mai mg mi ml mr ms my nan ne nl nya oc om or pa pcm pl pnb ps pt-BR pt qu ro ru sd si skr sn so sr su sv sw syl ta te tg th tl tr ug uk umb ur uz vi wuu yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
   only grows). The count is 0 today: `he` was ported partly to clear syl's one blocked row, which it did.
-  ⚠ THE NEXT BLOCKING DEPENDENCY IS `hy`/`hyw` (Armenian) — `ug` and `he` each carry one corpus row that
-  reaches it. Neither is in a golden, so the gate is green either way, but a wider differential is not.
+  ⚠ `hy` IS PORTED, so the Armenian blocks in `ug`, `he` and `kmr` are cleared. `hyw` (Western Armenian) is
+  a SEPARATE engine and still unported; no corpus row currently reaches it.
   ⚠ **THE QUEUE WAS BIFURCATED AND IS LARGELY UN-BIFURCATED AGAIN.** Every remaining language above ~22M
   speakers used to have NO GOLDEN, which made "no golden" the binding constraint on the port: a language
   with nothing to be byte-identical to cannot be ported at all. `tools/gen_parity_goldens.mts` now has a

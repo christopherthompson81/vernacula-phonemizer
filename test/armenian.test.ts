@@ -82,6 +82,27 @@ describe("Armenian canonical IPA — rule g2p (Eastern Armenian)", () => {
         expect(normalizeArmenian("1995-ին, ")).toBe("հազար իննհարյուր իննսուն հինգին, ");
     });
 
+    // The three marks Armenian writes OVER THE LAST VOWEL, i.e. inside the letters. Each one used to split
+    // the word it belongs to, and the fragments were phonemized separately — schwa epenthesis and all.
+    // ⚠ Not one of them occurs in the parity golden; the evidence is the corpus-wide differential.
+    test("՛ ՜ ՞ sit inside the word, and must not break it", () => {
+        const hy = createArmenian();
+        expect(normalizeArmenian("կա՛մ մսով")).toBe("կամ մսով"); // ՛ is silent — it just stops splitting
+        expect(hy.text("կա՛մ մսով")).toBe("kɑm məsov"); //           was `kɑ mə məsov`
+        expect(hy.text("ո՛չ")).toBe("vot͡ʃʰ"); //                     was `vo t͡ʃʰə` — the ո→vo glide on a fragment
+        expect(hy.text("Տե՛ս")).toBe("tes"); //                      was `te sə`
+        // ՞ is a real clause mark, so it MOVES to the end of the word rather than being dropped.
+        expect(normalizeArmenian("Ինչո՞ւ")).toBe("Ինչու՞");
+        expect(hy.text("Ինչո՞ւ")).toBe("int͡ʃʰu ?"); //               was `int͡ʃʰo ? və` — the ու digraph split too
+        expect(hy.text("Ինչպե՞ս")).toBe("int͡ʃʰpes ?"); //            was `int͡ʃʰpe ? sə`
+        expect(hy.text("Ինչու՞")).toBe("int͡ʃʰu ?"); //               already right, and stays right
+        // ⚠ THE ARC-MINUTE IS NOT AN EMPHASIS MARK: ՛ after a digit is a coordinate (×9 in the corpus,
+        // every one), it has no letter before it, and it stays dropped.
+        expect(normalizeArmenian("41°24՛")).toBe("41 աստիճան24՛");
+        // ⚠ ՝ is Armenian's own INTER-word pause and is never written inside a word — untouched.
+        expect(normalizeArmenian("Ասաց՝ բարև")).toBe("Ասաց՝ բարև");
+    });
+
     test("de-grouping: hy writes space, period AND comma groups, and two of them also mark the decimal", () => {
         expect(normalizeArmenian("1 500 000")).toBe("1500000"); // `mek hinɡhɑɾjuɾ zəɾo` before this
         expect(normalizeArmenian("3.018.854")).toBe("3018854"); // ≥2 groups is unambiguous
