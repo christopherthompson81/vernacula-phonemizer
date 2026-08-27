@@ -123,6 +123,16 @@ public class SerbianTests
     [InlineData("2000", "dʋeː˥˩ xˈiʎade")]
     [InlineData("21000", "dʋˈaː˩˥deset jednˈa xˈiʎada")]
     [InlineData("2000000", "dʋaː˥˩ miliˈona")]
+    // ⚠ A 100× ERROR, NOT A MISPRONUNCIATION. Replacing the decimal comma leaves the fractional run as its
+    // own token, and a numeric parse of "001" is 1 — `0,001 grama` read *nula zarez jedan grama*, "zero
+    // point one gram". No corpus instance exists (sr and hr write one `5,0` each, which reads the same
+    // either way) and no golden row carries one, so this is pinned rather than gated.
+    // ⚠ The rule lives in the SHARED core now — the line was copied into all three standards, the same
+    // shape that left hr's era rule and hyphen ordinal broken after sr fixed them (#1074).
+    [InlineData("0,001 grama", "nˈu˥˩la zˈarez nˈu˥˩la nˈu˥˩la jˈe˩˥dan ɡrˈama")]
+    [InlineData("0,001", "nˈu˥˩la zˈarez nˈu˥˩la nˈu˥˩la jˈe˩˥dan")]
+    [InlineData("0,5 grama", "nˈu˥˩la zˈarez peː˥˩t ɡrˈama")]   // no leading zero — untouched
+    [InlineData("5,0", "peː˥˩t zˈarez nˈu˥˩la")]                // the one attested shape, unchanged
     public void TextRewritesWhatItClaims(string input, string want) => Assert.Equal(want, Say(input));
 
     // #1059: `serbian.ts`'s number call site never passed the token string, so above 1e21 the digits came

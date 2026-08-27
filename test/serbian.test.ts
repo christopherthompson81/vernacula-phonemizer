@@ -150,6 +150,24 @@ describe("Serbian normalization", () => {
         expect(say("веку п.н.е, једна")).toBe("ʋˈeku pre˥˩ nˈoʋe ˈere , jednˈa");
     });
 
+    // ⚠ A 100× ERROR, NOT A MISPRONUNCIATION, and no corpus instance exists — the sr and hr corpora write
+    // exactly one leading-zero decimal each (`5,0`, which reads the same either way) and the goldens carry
+    // none. Replacing the comma leaves the fractional run as its own token, and `Number("001")` is 1.
+    // ⚠ The rule now lives in the SHARED core (`readDecimalComma`) because the line was copied into all
+    // three standards — the same shape that left hr's era rule and hyphen ordinal broken after sr fixed
+    // them (#1074). `test/croatian.test.ts` and `test/bosnian.test.ts` assert the same readings.
+    test("a decimal's leading zeros survive the comma", () => {
+        expect(say("0,001 grama")).toBe("nˈu˥˩la zˈarez nˈu˥˩la nˈu˥˩la jˈe˩˥dan ɡrˈama"); // was `nula zarez jedan`
+        expect(say("0,001")).toBe("nˈu˥˩la zˈarez nˈu˥˩la nˈu˥˩la jˈe˩˥dan");
+        // …and a fractional part with no leading zero is untouched: its whole-number reading is correct.
+        expect(say("0,5 grama")).toBe("nˈu˥˩la zˈarez peː˥˩t ɡrˈama");
+        expect(say("0,25 m")).toBe("nˈu˥˩la zˈarez dʋˈaː˩˥deset peː˥˩t mˈetara");
+        expect(say("1,5 km")).toBe("jˈe˩˥dan zˈarez peː˥˩t kˈilometara");
+        // ⚠ THE ONE SHAPE THE CORPUS ACTUALLY WRITES (`5,0`, ×1 in sr and ×1 in hr) reads identically
+        // before and after — which is why this fix moves nothing measured and is pinned rather than gated.
+        expect(say("5,0")).toBe("peː˥˩t zˈarez nˈu˥˩la");
+    });
+
     test("degrees consume the degree noun the text already wrote", () => {
         expect(say("32 °C степена")).toBe("trˈiː˩˥deset dʋaː˥˩ stˈepena t͡sˈelzijusa");
         expect(say("90 °F")).toBe("deʋedˈe˩˥set stˈe˥˩peni fˈarenxajta");

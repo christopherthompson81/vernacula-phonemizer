@@ -211,3 +211,33 @@ describe("Kirundi text normalization", () => {
         expect(normalizeKirundi("R & D")).toBe(`R ${MANIFEST.numbers.and} D`);
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1075 — the bignum fallback used to re-read the float it exists to bypass.
+//
+// ⚠ FOUND IN rw AND REPORTED RATHER THAN COPIED (#1074): a sibling is a hypothesis, not a source. What made
+// it rn's defect too is that the compositor is genuinely SHARED — `composeRwandaRundi` already took `raw`;
+// only Kirundi's wrapper and its one call site dropped it. The reading was a confidently WRONG quantity,
+// not a drop: the sentence still scans, which is why no leak gate and no referee named it, and rn's golden
+// carries no digit run long enough to reach it.
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+describe("a numeral past 2^53 reads the digits the writer typed", () => {
+    const words = (s: string): string[] => phonemize(s, "rn").trim().split(" ");
+
+    test("the low digits are the token's, not the double's", () => {
+        // 9007199254740993 is 2^53+1; as a double it IS 2^53, so re-stringifying reads …992.
+        expect(words("9007199254740993").slice(-3).join(" ")).toBe("it͡ʃenda it͡ʃenda ɡatatu"); // …993, was …kabiɾi (…992)
+        expect(words("9007199254740993")).toHaveLength(16);
+    });
+
+    test("and above 1e21, where String(n) is exponent form, every digit is still read", () => {
+        // `String(1e21)` is "1e+21" — the `e` and `+` are table misses that join as empty strings.
+        expect(words("1000000000000000000000")).toHaveLength(22);
+        expect(words("12345678901234567890")).toHaveLength(20);
+    });
+
+    test("the composed path is untouched — this only changes the fallback", () => {
+        expect(phonemize("42", "rn").trim()).toBe("miɾoŋo ine na kabiɾi");
+        expect(phonemize("1000", "rn").trim()).toBe("iɡihumbi");
+    });
+});

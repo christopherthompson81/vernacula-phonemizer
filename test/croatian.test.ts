@@ -276,3 +276,26 @@ describe("Croatian text normalization", () => {
         });
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// The decimal comma's leading zeros — a 100× error shared by all three standards until the rule moved into
+// the Serbian core. ⚠ ASSERTED THROUGH `phonemize()`, NOT the engine's `text()`. The bs port found a defect
+// that had survived seven investigation runs because its suite called `createBosnian().text()` directly,
+// which bypasses every pre-pass: green in its own tests, dead in the product.
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+describe("a decimal's leading zeros survive the comma (shared core)", () => {
+    const say = (s: string): string => phonemize(s, "hr").trim();
+
+    test("the zeros are read, not dropped", () => {
+        // `Number("001")` is 1, so this was *nula zarez jedan* — "zero point one gram".
+        expect(say("0,001 grama")).toBe("nˈu˥˩la zˈarez nˈu˥˩la nˈu˥˩la jˈe˩˥dan ɡrˈama");
+        expect(say("0,001")).toBe("nˈu˥˩la zˈarez nˈu˥˩la nˈu˥˩la jˈe˩˥dan");
+    });
+
+    test("a fractional part with no leading zero is untouched", () => {
+        expect(say("0,5 grama")).toBe("nˈu˥˩la zˈarez peː˥˩t ɡrˈama");
+        expect(say("1,5 km")).toBe("jˈe˩˥dan zˈarez peː˥˩t kˈilometara");
+        // ⚠ The one shape the corpus actually writes (`5,0`, ×1 in hr) reads identically before and after.
+        expect(say("5,0")).toBe("peː˥˩t zˈarez nˈu˥˩la");
+    });
+});

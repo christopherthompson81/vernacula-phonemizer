@@ -241,7 +241,26 @@ public static class Normalize
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s?[-–—]\\s?(?=\\d)", "gu");
     private static readonly JsRe ORDINAL_N = JsRegex.Compile("(?<![\\d.,])(\\d{1,4})\\.\\s+(\\p{Ll}[\\p{L}\\p{M}]*)", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:.,])", "gu");
-    private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<=\\d),(?=\\d)", "gu");
+
+    /// <summary>THE DECIMAL COMMA → *zarez*, AND THE FRACTIONAL PART'S LEADING ZEROS SURVIVE IT.
+    /// <para>⚠ This was a 100× ERROR, not a mispronunciation. Replacing the comma leaves the fractional run
+    /// as its own token and the number arm reads it with a numeric parse, so `001` became 1 and
+    /// `0,001 grama` read *nula zarez jedan grama* — "zero point one gram". The value is wrong by two
+    /// orders of magnitude and the sentence still scans, which is why no gate ever named it.</para>
+    /// <para>The zeros are emitted as DIGITS, not as the word: the number arm already reads a bare `0` as
+    /// this language's zero word, so one implementation serves all three standards without a fourth copy of
+    /// a word table to drift. ⚠ SHARED BY sr, hr AND bs — the line it replaces existed three times, which
+    /// is exactly how the era rule and the hyphen-suffix ordinal came to be fixed in one standard and left
+    /// broken in the others (#1074).</para></summary>
+    public static string ReadDecimalComma(string s) => DECIMAL_FRAC.Replace(s, m =>
+    {
+        var frac = m.Groups[1].Value;
+        var zeros = 0;
+        while (zeros < frac.Length && frac[zeros] == '0') zeros++;
+        return zeros == 0 ? $" zarez {frac}" : $" zarez {string.Concat(Enumerable.Repeat("0 ", zeros))}{frac[zeros..]}";
+    });
+
+    private static readonly JsRe DECIMAL_FRAC = JsRegex.Compile(@"(?<=\d),(\d+)", "gu");
     private static readonly JsRe TIMES = JsRegex.Compile("(?<=\\d)\\s?[x×]\\s?(?=\\d)", "gu");
     private static readonly JsRe PLUS_SIGN = JsRegex.Compile("(^|[\\s(])\\+\\s?(\\d)", "gu");
     private static readonly JsRe GROUP_DOT = JsRegex.Compile("\\.", "gu");
@@ -342,7 +361,7 @@ public static class Normalize
         s = SYMBOLS(s);
 
         // 10) DECIMAL COMMA → *zarez*. LAST among the numeric rules, because it destroys the number.
-        s = DECIMAL_COMMA.Replace(s, " zarez ");
+        s = ReadDecimalComma(s);
 
         // 11) `×`/`x` between digits, and the leading `+`.
         s = TIMES.Replace(s, " puta ");

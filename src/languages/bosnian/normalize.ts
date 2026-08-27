@@ -54,7 +54,7 @@
  * ⚠ Every boundary in this file is an explicit lookaround, never `\b`. `\b` is ASCII-defined and finds none
  * against `č ć š ž đ` or against Cyrillic — the trap that made `core/initialisms.ts` a no-op for Russian.
  */
-import { normalizeSerbianInitialisms } from "../serbian/normalize.ts";
+import { normalizeSerbianInitialisms, readDecimalComma } from "../serbian/normalize.ts";
 import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
@@ -648,7 +648,9 @@ export function normalizeBosnian(input: string): string {
 
     // 13) DECIMAL COMMA → *zarez*. LAST among the numeric rules, because it destroys the number: every rule
     //     above that needs the value (units, the clock, the tier's count agreement) has already run.
-    s = s.replace(/(?<=\d),(?=\d)/gu, " zarez ");
+    //     ⚠ FROM THE SHARED CORE. The line was copied into all three standards, which is how the dropped
+    //     leading zero (`0,001` → *nula zarez jedan*, a 100× error) was one defect in three places.
+    s = readDecimalComma(s);
 
     // 14) VULGAR FRACTIONS — `taj veliki dokument na pergamentu (29¾ inča sa 24½ inča)`, the corpus's one
     //     parchment sentence and the only place either glyph occurs. Both were dropped outright, so the

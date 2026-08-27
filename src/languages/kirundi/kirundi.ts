@@ -65,7 +65,11 @@ class KirundiPhonemizer implements Phonemizer {
         return assembleClauses(normalizeKirundi(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
-                for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+                // ⚠ THE TOKEN STRING IS PASSED AS `raw` (#1075) — the digit-at-a-time fallback cannot
+                // recover the digits from the double it exists to bypass. The arm is a bare `\d+`, so the
+                // token IS the digit string; no call site here strips a separator first (hr's does, and its
+                // `raw` had to be the stripped string — checked before copying the shape).
+                for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
