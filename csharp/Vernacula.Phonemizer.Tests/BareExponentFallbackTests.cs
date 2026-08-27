@@ -75,4 +75,34 @@ public class BareExponentFallbackTests
         Assert.Contains("skwˈɛɹd", Say("20²", "en"));
         Assert.Contains("skwˈɛɹ kəlˈɑːmʌt̬ɚz", Say("19500 km²", "en")); // the unit path keeps first claim
     }
+
+    [Theory]
+    // #1045 — two shapes the fallback would misread. NEITHER IS REACHABLE TODAY (both occur only in
+    // languages that do not use the shared tier), so these assertions are the only instrument on them.
+    // ⚠ A run of only ¹ after an unspaced `digits⁰digits¹` chain is the SECONDS prime: mn writes
+    // `110⁰04¹05¹¹` for 110°04′05″, ×8 and every one a coordinate.
+    [InlineData("110⁰04¹05¹¹", "110⁰04¹05¹¹")]
+    [InlineData("46⁰37¹55¹¹", "46⁰37¹55¹¹")]
+    // ⚠ …and declining `¹¹` outright would damage six languages, so a genuine power is untouched even with
+    // a ⁰ within reach — which is why the guard is anchored and space-free rather than a window.
+    [InlineData("10¹¹–10¹²", "10 11–10 12")]
+    [InlineData("10¹⁰ 10¹¹", "10 10 10 11")]
+    [InlineData("10¹⁰Ω", "10 10 Ω")]
+    // ⚠ A SPACED superscript glued to a word is that word's NUCLIDE, not this number's power.
+    [InlineData("0,708 ¹⁸⁰Hf ¹⁸⁰W", "0,708 ¹⁸⁰Hf ¹⁸⁰W")]
+    [InlineData("2,137 ⁶³Cu", "2,137 ⁶³Cu")]
+    // …both conditions required: no following letter, no nuclide; and the pass's own shape still works.
+    [InlineData("2 ¹⁰", "2 10")]
+    [InlineData("500² km", "500 2 km")]
+    public void ThePrimeAndTheNuclideAreDeclined(string input, string want) =>
+        Assert.Equal(want, Core.NormalizeSymbols.SpacedBareExponent(input));
+
+    [Theory]
+    // ⚠ ENGLISH KEEPS ITS OWN COPY of this pass, so the core guards do not reach it and both were fixed.
+    // Its own comment already cited the coordinate `110⁰04¹05¹` and stopped one character short.
+    [InlineData("110⁰04¹05¹¹", "110⁰04¹05")]
+    [InlineData("0,708 ¹⁸⁰Hf", "0,708 Hf")]
+    [InlineData("2,137 ⁶³Cu", "2,137 Cu")]
+    public void EnglishDeclinesThemToo(string input, string equivalent) =>
+        Assert.Equal(Phonemizer.Phonemize(equivalent, "en"), Phonemizer.Phonemize(input, "en"));
 }
