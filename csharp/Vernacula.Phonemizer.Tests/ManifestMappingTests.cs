@@ -571,6 +571,13 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/kurmanji", "kurmanji.jsonc", Languages.Kurmanji.Manifest.MANIFEST,
             "language", "name", "script", "provenance", "convention");
 
+    /** ⚠ Croatian's `numbers` DESERIALIZES INTO SERBIAN'S TYPE — the shape is shared and only the words
+     *  differ, so this sweep is also what proves the reuse still covers every Croatian key. */
+    [Fact]
+    public void CroatianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/croatian", "croatian.jsonc", Languages.Croatian.Manifest.MANIFEST,
+            "language", "name", "script");
+
     [Fact]
     public void SerbianManifestIsFullyMapped() =>
         AssertFullyMapped("languages/serbian", "serbian.jsonc", Languages.Serbian.Manifest.MANIFEST,

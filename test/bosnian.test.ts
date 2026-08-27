@@ -324,4 +324,23 @@ describe("Bosnian text normalization", () => {
     test("ordinary prose is untouched", () => {
         expect(say("Dobar dan, Sarajevo!")).toBe("dˈo˥˩bar daː˥˩n , sˈa˩˥rajeʋo !");
     });
+
+    /** #1059 did not propagate along the shared core: `serbian/numbers.ts` threads `raw`, but Bosnian's
+     *  wrapper dropped the parameter and bosnian.ts never passed the token, so above 1e21 the fallback
+     *  stringified the DOUBLE and read *jˈe˩˥dan e dʋaː˥˩ jˈe˩˥dan* — "1 e + 2 1". Found while porting hr,
+     *  which had the identical defect. */
+    describe("Bosnian large numerals (#1059)", () => {
+        test("a 22-digit run keeps its own digits", () => {
+            const a = say("1000000000000000000001");
+            const b = say("1000000000000000000009");
+            expect(a).not.toBe(b);
+            expect(a.split(" ").length).toBe(22);
+            expect(a.endsWith("jˈe˩˥dan")).toBe(true);
+            expect(b.endsWith("dˈe˥˩ʋet")).toBe(true);
+        });
+
+        test("a 16-digit run past 2^53 reads its written digits", () => {
+            expect(say("9007199254740993").endsWith("triː˥˩")).toBe(true);
+        });
+    });
 });

@@ -456,9 +456,11 @@ export function normalizeBosnian(input: string): string {
     //    case form and keeps the one that actually ends with those letters — a guard that makes the
     //    paradigm safe and rejects anything it does not cover.
     //    MUST run before the range rule (step 9), which would otherwise eat the hyphen.
-    //    ⚠ SERBIAN'S TRAILING GUARD, NOT CROATIAN'S. Croatian writes `(?![^\p{L}\p{M}]|.)`, which declines
-    //    whenever ANY character follows; the corpus writes `krajem 1970-ih;` and `1850-ih i predstavlja`,
-    //    so the plain not-a-letter guard is the one that claims them. The 2-letter cap also excludes
+    //    ⚠ SERBIAN'S TRAILING GUARD. Croatian USED to write `(?![^\p{L}\p{M}]|.)`, which declines whenever
+    //    ANY character follows — i.e. it only ever fired on an input that was nothing but the numeral. This
+    //    file declined to copy it and said so; the Croatian side was finally fixed while hr was ported to
+    //    C#, so all three standards now share the guard. The corpus writes `krajem 1970-ih;` and
+    //    `1850-ih i predstavlja`, so the plain not-a-letter guard is the one that claims them. The 2-letter cap also excludes
     //    COMPOUND ADJECTIVES (`24-časovnom`), which need a combining stem this file does not model.
     s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, rawSuffix: string) => {
