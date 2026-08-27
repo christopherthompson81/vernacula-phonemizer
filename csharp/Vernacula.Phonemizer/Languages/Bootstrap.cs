@@ -111,6 +111,7 @@ public static class Bootstrap
             Fula.FulaPhonemizer.RegisterSelf();
             Lao.LaoPhonemizer.RegisterSelf();
             Zulu.ZuluPhonemizer.RegisterSelf();
+            Xhosa.XhosaPhonemizer.RegisterSelf();
             Wu.WuPhonemizer.RegisterSelf();
             Nepali.NepaliPhonemizer.RegisterSelf();
             MinNan.MinNanPhonemizer.RegisterSelf();

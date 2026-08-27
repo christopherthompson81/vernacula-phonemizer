@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createXhosa } from "../src/languages/xhosa/xhosa.ts";
 import { normalizeXhosa } from "../src/languages/xhosa/normalize.ts";
+import { numberToWords } from "../src/languages/xhosa/numbers.ts";
 import { phonemize } from "../src/index.ts";
 
 // Canonical-IPA goldens for Xhosa / isiXhosa (xh) — Nguni Bantu, AUTHORED. The sibling of Zulu:
@@ -89,10 +90,38 @@ describe("Xhosa text normalization", () => {
         expect(normalizeXhosa("ngo-12.00 GMT")).toBe("ngo-ishumi nambini ji emu thi");
         expect(normalizeXhosa("(15.00 UTC)")).toBe("(ishumi nanhlanu yu thi si)");
         // A SPORTS TIME IS NOT A CLOCK — a third field. All three corpus paces must fall through.
-        expect(normalizeXhosa("le-4: 41.30")).toBe("le-4: 41 3 0");
-        expect(normalizeXhosa("eyi-1: 09.02")).toBe("eyi-1: 09 0 2");
-        // Out-of-range operands are left alone rather than read as a time.
-        expect(normalizeXhosa("24:45")).toBe("24:45");
+        expect(normalizeXhosa("le-4: 41.30")).toBe("le-4 41 3 0");
+        expect(normalizeXhosa("eyi-1: 09.02")).toBe("eyi-1 09 0 2");
+        // Out-of-range operands lose only their COLON — see the pause test below.
+        expect(normalizeXhosa("24:45")).toBe("24 45");
+    });
+
+    test("⚠ a colon DECLINED by the clock rules is not a clause break", () => {
+        // `:` is declared clause punctuation, so every numeric colon step 8 refuses on purpose reached the
+        // tokenizer as a PAUSE — a phrase boundary in the middle of a quantity. All 8 corpus survivors are
+        // numeric relations: the sports paces and the UK degree class.
+        expect(normalizeXhosa("le-4: 41.30, 2: 11.60 imizuzu")).toBe("le-4 41 3 0, 2 11 6 0 imizuzu");
+        expect(normalizeXhosa("efumana 2:2 isidanga")).toBe("efumana 2 2 isidanga");
+        expect(phonemize("efumana 2:2 isidanga", "xh").trim()).not.toContain(",");
+        // A colon that is real punctuation keeps its pause — the rule needs a digit on BOTH sides.
+        expect(normalizeXhosa("Umzekelo: 5 abantu")).toBe("Umzekelo: 5 abantu");
+        expect(normalizeXhosa("ngo-2007: kwathi")).toBe("ngo-2007: kwathi");
+        // …and a real clock is claimed long before this rule sees it.
+        expect(normalizeXhosa("ngo-11:00")).toBe("ngo-ishumi nanye");
+    });
+
+    test("⚠ the a.m./p.m. marker has a RIGHT EDGE — `ama-` is a noun-class prefix, not a marker", () => {
+        // The marker group ended wherever it liked, so ` Am` of `amaXhosa` matched it: the word was
+        // destroyed and a spurious *kusasa* ("in the morning") emitted. `ama-` is one of the commonest
+        // Xhosa prefixes, so this is an ordinary neighbour and the pseudo-word it left is invisible to
+        // every leak and DROP class.
+        expect(normalizeXhosa("ye 9:30 amaXhosa")).toBe("ye ithoba namashumi amathathu amaXhosa");
+        expect(normalizeXhosa("14:00 Amabini")).toBe("ishumi nane Amabini");
+        expect(normalizeXhosa("11:20 pha")).toBe("ishumi nanye namashumi amabini pha");
+        // …and every real marker still reads, dotted or not, spaced or glued.
+        expect(normalizeXhosa("9:30 AM")).toBe("ithoba namashumi amathathu kusasa");
+        expect(normalizeXhosa("10:30p.m.")).toBe("ishumi namashumi amathathu emva kwemini");
+        expect(normalizeXhosa("07:19 a.m. ixesha")).toBe("isixhenxe neshumi nethoba kusasa ixesha");
     });
 
     test("currency — the compound key, the concord-prefix split, and the decimal path", () => {
@@ -189,6 +218,11 @@ describe("Xhosa text normalization", () => {
         expect(normalizeXhosa("uN.Wayne Hale Jr. uthe")).toBe("uN Wayne Hale Jr uthe");
         expect(normalizeXhosa("UMnu. Costello uthe")).toBe("UMnumzana Costello uthe");
         expect(normalizeXhosa("watsho uMnu Costello.")).toBe("watsho uMnumzana Costello.");
+        // ⚠ THE CAPITAL GUARD IS REAL, not an `i`-flag illusion. Under `/i` a `\p{Lu}` lookahead matches a
+        // LOWERCASE letter, so the "only before a capitalised name" guard required nothing (#1079). Both
+        // spellings of the concord are written into the class instead, so `UMnu.` keeps expanding.
+        expect(normalizeXhosa("Mnu. rudd sokutyikitya")).toBe("Mnu. rudd sokutyikitya");
+        expect(normalizeXhosa("umnu reid ubaleka")).toBe("umnu reid ubaleka");
     });
 
     test("decimals emit NO separator word — none is attested in any source (see normalize.ts)", () => {
@@ -242,6 +276,29 @@ describe("Xhosa text normalization", () => {
 // English word, and c/q/x are CLICK letters, so the result is confidently wrong rather than merely
 // accented: `hurricane center` read [hurrikǀˈaːnɛ kǀˈɛːntʼɛr]. 19.2% of xh and 14.8% of zu FLEURS
 // utterances carry such a word.
+describe("a digit run too long for a double still reads its own digits (#1059)", () => {
+    // The compositor has no ceiling — it recurses through `izigidi` multipliers — so above 2^53 it composed
+    // right past the rounding and both of these read *izigidi izigidi izigidi iwaka*. The token string is
+    // in scope at the call site; it goes with the double.
+    test("two 22-digit runs differing only in the last digit do not read identically", () => {
+        const a = phonemize("1000000000000000000001", "xh").trim();
+        const b = phonemize("1000000000000000000009", "xh").trim();
+        expect(a).not.toBe(b);
+        expect(a.endsWith("kʼˈuːɲɛ")).toBe(true); // …kunye  (1)
+        expect(b.endsWith("itʰˈɔːɓa")).toBe(true); // …ithoba (9)
+    });
+
+    // The fallback reading is the one `normalize.ts`'s `spell()` already gives a fractional part: the
+    // standalone ku- counting stems, and the manifest's own zero word (there is no `ku-` form of zero).
+    test("the digits are read in the standalone stems, zero included", () => {
+        expect(numberToWords(1e21, "1000000000000000000000").split(" ").slice(0, 3))
+            .toEqual(["kunye", "iqanda", "iqanda"]);
+        // …and the ordinary range is untouched, with or without a raw string.
+        expect(numberToWords(1957)).toBe(numberToWords(1957, "1957"));
+        expect(numberToWords(1957)).toBe("iwaka amakhulu athoba amashumi amahlanu nesixhenxe");
+    });
+});
+
 describe("embedded English words route to the foreign reader instead of becoming clicks", () => {
     const CLICK = /[ǀǁǃǂ]/u;
 
