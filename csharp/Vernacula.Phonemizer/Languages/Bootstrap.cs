@@ -150,6 +150,7 @@ public static class Bootstrap
             Bambara.BambaraPhonemizer.RegisterSelf();
             AncientGreek.AncientGreekPhonemizer.RegisterSelf();
             Latin.LatinPhonemizer.RegisterSelf();
+            Mongolian.MongolianPhonemizer.RegisterSelf();
         }
     }
 }
