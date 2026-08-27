@@ -58,6 +58,7 @@ public static class Bootstrap
             Japanese.JapanesePhonemizer.RegisterSelf();
             Kalaallisut.KalaallisutPhonemizer.RegisterSelf();
             Kannada.KannadaPhonemizer.RegisterSelf();
+            Magahi.MagahiPhonemizer.RegisterSelf();
             Maithili.MaithiliPhonemizer.RegisterSelf();
             Malayalam.MalayalamPhonemizer.RegisterSelf();
             Mandarin.MandarinPhonemizer.RegisterSelf();

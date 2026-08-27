@@ -193,6 +193,8 @@ public class ManifestMappingTests
     [Fact]
     public void RangpuriManifestIsFullyMapped() =>
         AssertFullyMapped("languages/rangpuri", "rangpuri.jsonc", Languages.Rangpuri.RangpuriPhonemizer.DEF,
+    public void MagahiManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/magahi", "magahi.jsonc", Languages.Magahi.MagahiPhonemizer.DEF,
             "language", "name", "script", "provenance", "convention");
 
     [Fact]
