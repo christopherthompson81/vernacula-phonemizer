@@ -305,11 +305,16 @@ describe("Lithuanian normalization — the refusals, the anchors, and the two re
     // The "NO CLOCK" refusal is enforced by the OPERAND ANCHORS, not by a comment. Before, two other rules
     // claimed clock fields: the hour rule read a MINUTE as hours and the range rule spanned two clock times.
     test("a colon is rejected on both operand edges, so no rule reads a clock field", () => {
-        expect(normalizeLithuanian("(19:11 val. UTC)").trim()).toBe("(19:11 valandų UTC)"); // not *19:vienuolika*
-        expect(normalizeLithuanian("8:00 - 19:00 val.").trim()).toBe("8:00 - 19:00 valandų"); // no `nuo … iki`
+        // ⚠ THIS BLOCK USED TO PIN `(19:11 val. UTC)` AND `apie 19:11 val.` AS KEEPING THEIR COLON, on the
+        // refusal above. #1102 re-measured that refusal against `lt_lt` — 16 true clocks, 12 carrying
+        // `val.` — and the colon of a MARKED clock is now spent on a space. No word is added: `valandų` was
+        // always emitted from `val.`, and what has gone is the clause pause between the two fields.
+        expect(normalizeLithuanian("(19:11 val. UTC)").trim()).toBe("(19 vienuolika valandų UTC)");
+        expect(normalizeLithuanian("apie 19:11 val.").trim()).toBe("apie 19 vienuolika valandų");
+        // ⚠ AND THE SPAN IS STILL HALF-CLAIMED, deliberately — see CLOCK_MARKED's note. Taking the first
+        // operand too let the range rule read `00 - 19` as *nuo 00 iki 19*, which is worse than the pause.
+        expect(normalizeLithuanian("8:00 - 19:00 val.").trim()).toBe("8:00 - 19 nulis valandų");
         expect(normalizeLithuanian("2:15:16")).toBe("2:15:16");
-        // …but refusing the numeral is not a reason to hand `val.` back to the g2p as a cluster + a break.
-        expect(normalizeLithuanian("apie 19:11 val.").trim()).toBe("apie 19:11 valandų");
         // A RATE still blocks it, or the denominator would be read while the numerator stays raw.
         expect(normalizeLithuanian("515,3 km/val.")).toBe("515 kablelis 3 km/val."); // the unit stays raw
     });
@@ -459,5 +464,30 @@ describe("Lithuanian normalization — the refusals, the anchors, and the two re
     test("de-grouping runs to a fixed point, not to a hard-coded pass count", () => {
         expect(normalizeLithuanian("1 385 000 000 gyventojų")).toBe("1385000000 gyventojų");
         expect(normalizeLithuanian("1 234 567 890 123 x")).toBe("1234567890123 x");
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1102 — the marked clock. The refusal reads "11 `N:NN` in the retained text and NOT ONE is a time of
+// day"; over `lt_lt` there are 16 true clocks and 12 carry `val.`. ⚠ The refusal had already SEEN the
+// discriminator and read it backwards — it cites `19:11 val.` as a reason not to read, because the hour
+// noun is already there. It is, which is what makes it a marker no counter-example carries.
+describe("a marked clock keeps its pause off (#1102)", () => {
+    test.each([
+        ["Vos po 11:00 val. protestuotojai", "Vos po 11 nulis valandų protestuotojai"],
+        ["Šiandien 12.00 val (GMT laiku)", "Šiandien 12 00 val (GMT laiku)"],
+    ])("%s", (a, b) => expect(normalizeLithuanian(a)).toBe(b));
+
+    test("⚠ EVERY COUNTER-EXAMPLE THE REFUSAL NAMES IS STILL DECLINED", () => {
+        expect(normalizeLithuanian("19:14:07 GMT")).toBe("19:14:07 GMT");            // a timestamp
+        expect(normalizeLithuanian("802.11n sparta")).toBe("802.11n sparta");        // Wi-Fi
+        expect(normalizeLithuanian("laikas 4:41.30")).toContain("4:41.30");          // a ski result
+        expect(normalizeLithuanian("tarp 06:30 ir 07:30.")).toBe("tarp 06:30 ir 07:30."); // unmarked range
+    });
+
+    test("⚠ `a.m.`/`p.m.` ARE NOT IN THE MARKER SET, and that is a measured retreat", () => {
+        // Adding them fixed both instances while BREAKING them: with the colon gone, step 6's century
+        // abbreviation reads `19 a.` as *devyniolika amžiaus*. A pause traded for a wrong WORD.
+        expect(normalizeLithuanian("07:19 a.m. vietos laiku")).toBe("07:19 a.m. vietos laiku");
     });
 });
