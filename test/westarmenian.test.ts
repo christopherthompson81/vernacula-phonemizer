@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { normalizeWestArmenian, ordinalWords } from "../src/languages/westarmenian/normalize.ts";
 
-import { phonemizeWord } from "../src/languages/westarmenian/westarmenian.ts";
+import { phonemizeWord, createWestArmenian } from "../src/languages/westarmenian/westarmenian.ts";
 import { phonemizeWord as eastern } from "../src/languages/armenian/armenian.ts";
 
 // Canonical-IPA goldens for WESTERN Armenian (hyw) — արեւմտահայերէն, the Istanbul/diaspora standard. The signature is
@@ -121,5 +121,36 @@ describe("Western Armenian text normalization", () => {
         expect(normalizeWestArmenian("0.96÷1.41")).toBe("0 ամբողջ 96, 1 ամբողջ 41"); // ÷ is a RANGE here
         // ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58).
         expect(normalizeWestArmenian("735-714:")).toBe("735, 714:");
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// The three over-the-vowel marks, which hyw inherited BROKEN: the rule that undoes them was written as
+// Eastern's normalize step 0, but the word they split is split by the SHARED tokenizer. Now in the engine.
+// ⚠ Zero of them are in the parity golden — this is corpus-differential evidence, not gate evidence.
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+describe("՛ ՜ ՞ sit inside the word, and hyw must not break it either", () => {
+    const hyw = createWestArmenian();
+
+    test("the emphasis series — silent, and no longer splitting", () => {
+        expect(hyw.text("կա՛մ")).toBe("ɡɑm"); //  was `ɡɑ mə`
+        expect(hyw.text("ո՛չ")).toBe("vot͡ʃʰ"); // was `vo t͡ʃʰə` — the ո→vo glide fired on a one-letter fragment
+        expect(hyw.text("Տե՛ս")).toBe("des"); //  was `de sə`
+        expect(hyw.text("Ա՜խ")).toBe("ɑχ"); //    was `ɑ χə`
+    });
+
+    test("՞ is a real clause mark, so it moves to the end of the word", () => {
+        expect(hyw.text("Ինչո՞ւ")).toBe("int͡ʃʰu ?"); //   was `int͡ʃʰo ? və` — the ⟨ու⟩ digraph split as well
+        expect(hyw.text("Ինչպէ՞ս")).toBe("int͡ʃʰbes ?"); // was `int͡ʃʰbe ? sə`
+    });
+
+    // ⚠ WESTERN'S OWN SENSE, and the reason sharing the rule is correct rather than merely convenient:
+    // ⟨կ՛⟩ is the verbal proclitic կը before a vowel-initial stem (7 distinct forms in the mined corpus,
+    // against 10 of the emphasis class). It is an ELISION mark, not an accent — but the prefix FUSES with
+    // the stem, so joining the letters is the right reading for it too.
+    test("the կ՛ proclitic fuses with its stem", () => {
+        expect(hyw.text("կ՛երթան")).toBe("ɡeɾtʰɑn");
+        expect(hyw.text("կ՛աւերուին")).toBe("ɡɑveɾuin");
+        expect(hyw.text("Ամէն օր կ՛երթան։")).toBe("ɑmen oɾ ɡeɾtʰɑn .");
     });
 });

@@ -277,7 +277,18 @@ export function normalizeSerbian(input: string): string {
     //    A YEAR immediately before the era marker is an ORDINAL with *godina* ELIDED (`Око 1000. п. н. е.` =
     //    *oko hiljadite pre nove ere*), and step 7 cannot see it because step 1 will have rewritten the
     //    marker by then. Claimed here, in the feminine genitive the elided noun governs.
-    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(?=(?:п\.\s?н\.\s?е|p\.\s?n\.\s?e)(?![\p{L}\p{M}]))/giu,
+    //    ⚠ BOTH ERAS, AND IT WAS BCE-ONLY. The arm listed `п.н.е` / `p.n.e` and stopped there, so the CE
+    //    marker took the cardinal AND kept the ordinal dot, which the tokenizer then read as a phrase break:
+    //    `Око 1000. н. е.` came out *oko hiljadu . nove ere .* — "about one thousand · of the new era" — a
+    //    pause in the middle of a date phrase, against BCE's correct *oko hiljadite pre nove ere*. The two
+    //    markers are the SAME construction (the year is an ordinal with *godina* elided either way); only
+    //    the negation differs, and nothing about the elision depends on it.
+    //    ⚠ THE EVIDENCE IS NEXT DOOR, NOT HERE. sr's own corpus writes the era 4× and every one is BCE, so
+    //    this is not a frequency claim. hr's — the same construction, the same marker, and this core now
+    //    serves it — writes CE 3× (`1000. – 1300. n. e.`, `400. g. n. e.`, `1100. g. n. e.`). What settles
+    //    it is the asymmetry itself: the current reading is not a REFUSAL to expand, it is an expansion that
+    //    fires halfway and strands a break the same rule removes one alternation-branch away.
+    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(?=(?:[пp]\.\s?)?[нn]\.\s?[еe](?![\p{L}\p{M}]))/giu,
         (whole, digits: string) => {
             const base = ordinalBase(Number(digits));
             return base === undefined ? whole : `${inflect(base, "f.gen")!} `;

@@ -8,7 +8,8 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface SwedishManifest {
-    vowelChars: string;
+    // ⚠ NO `vowelChars`. The key is in the JSONC as a language fact, but nothing reads it and declaring it
+    // here implied a consumer that does not exist. sv's stress is lexical; the OOV fallback is orthographic.
     frontVowels: string;
     vowels: {
         long: Record<string, string>;

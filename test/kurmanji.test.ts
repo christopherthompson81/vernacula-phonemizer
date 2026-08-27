@@ -121,6 +121,16 @@ describe("Kurmanji text normalization", () => {
     it("era markers, units and the two powers", () => {
         expect(normalizeKurmanji("sedsala 4an b.z.")).toBe("sedsala çaran berî zayînê");
         expect(normalizeKurmanji("sala 4000 BZ")).toBe("sala 4000 berî zayînê");
+        // ⚠ AND IT MUST SEE A YEAR. `b.z.` / `BZ` are also two letters with stops, so the rule ate a
+        // PERSON'S INITIALS — `B. Z. Goldberg` read *bɛrˈiː zɑːjiːnˈeː ɡoːldbˈɛrɡ*, "before Christ
+        // Goldberg". Every one of the 12 mined instances has a digit against the marker (`484 b.z.`,
+        // `sedsala 4an b.z.`, `b.z. 550`, `B.Z. 95–36`), because dating a year is the marker's whole job —
+        // so the guard is free, and an unguarded initialism is confidently wrong rather than merely unread.
+        expect(normalizeKurmanji("B. Z. Goldberg")).toBe("B. Z. Goldberg");
+        expect(normalizeKurmanji("Rêvebir BZ hat")).toBe("Rêvebir BZ hat");
+        expect(normalizeKurmanji("b.z. 550")).toBe("berî zayînê 550"); // the marker BEFORE its year
+        expect(normalizeKurmanji("(B.Z. 95–36)")).toBe("(berî zayînê 95–36)");
+        expect(normalizeKurmanji("558 b.z.- 530 b.z.")).toBe("558 berî zayînê- 530 berî zayînê");
         expect(normalizeKurmanji("1000&nbsp;mm")).toBe("1000 mîlîmetre");
         expect(normalizeKurmanji("253 milyar m³")).toBe("253 milyar metre kûp");
         expect(normalizeKurmanji("A & B")).toBe("A û B");

@@ -31,7 +31,8 @@ public sealed class SwedishNumbersDef
 
 public sealed class SwedishManifest
 {
-    public string VowelChars { get; init; } = "";
+    // ⚠ REMOVED — nothing read it in either engine, and declaring it implied a consumer. The key stays in
+    // swedish.jsonc as a language fact, marked documentation there. sv's stress is lexical.
     public string FrontVowels { get; init; } = "";
     public SwedishVowels Vowels { get; init; } = new();
     public IReadOnlyDictionary<string, string> Digraphs { get; init; } = new Dictionary<string, string>();

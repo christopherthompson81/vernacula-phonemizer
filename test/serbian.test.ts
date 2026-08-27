@@ -129,6 +129,16 @@ describe("Serbian normalization", () => {
         expect(say("323. године п. н. е.")).toBe("trˈi˥˩sta dʋˈaː˩˥deset trˈet͡ɕe ɡˈodine pre˥˩ nˈoʋe ˈere .");
         // The era marker's final dot is ALSO the sentence end when a capital follows — it must not be eaten.
         expect(say("Око 1000. п. н. е. Асирци")).toBe("ˈo˥˩ko xˈiʎadite pre˥˩ nˈoʋe ˈere . asˈiː˩˥rt͡si");
+        // ⚠ THE CE MARKER TAKES THE SAME ELISION, and the arm used to list only the BCE spellings. The year
+        // before either marker is an ordinal with *godina* elided; only the negation differs. Left BCE-only,
+        // the CE case took the CARDINAL and kept the ordinal dot, which the tokenizer read as a phrase break
+        // — *ˈo˥˩ko xˈiʎadu . nˈoʋe ˈere .*, a pause in the middle of a date.
+        // ⚠ sr's own corpus writes the era 4× and every one is BCE, so this is not a frequency claim; the
+        // attestation is hr's (`1000. – 1300. n. e.`, `400. g. n. e.`, `1100. g. n. e.`), which this core
+        // now serves. What settles it is the asymmetry — one alternation branch away from the same rule.
+        expect(say("Око 1000. н. е. Асирци")).toBe("ˈo˥˩ko xˈiʎadite nˈoʋe ˈere . asˈiː˩˥rt͡si");
+        expect(say("Око 1000. н.е.")).toBe("ˈo˥˩ko xˈiʎadite nˈoʋe ˈere ."); // the dotless-interior spelling
+        expect(say("1300. n. e.")).toBe("xˈiʎadu tristˈote nˈoʋe ˈere ."); // and in Latin script
     });
 
     test("degrees consume the degree noun the text already wrote", () => {

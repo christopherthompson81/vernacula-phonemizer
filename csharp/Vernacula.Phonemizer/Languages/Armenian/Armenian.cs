@@ -140,6 +140,20 @@ public sealed class ArmenianEngine
     }
 
     // Armenian letters (U+0530–058F) + the ligature և; number; Armenian + ASCII punctuation.
+    /** The three marks Armenian writes INSIDE a word (՛ շեշտ, ՜ բացականչական, ՞ հարցական) sit over the
+     *  last vowel, so TOKEN's letter class splits the word at each one. Undone here, in the engine, rather
+     *  than in a dialect's normalizer — the tokenizer is shared, so the defect was too. ՞ moves to the end
+     *  of the word, where it reads as the question pause it is; ՛ and ՜ stay silent. See the TS docstring
+     *  for the corpus measurement and for Western's ⟨կ՛⟩ proclitic, which wants the same treatment. */
+    private static readonly JsRe INTRA_WORD_MARK = JsRegex.Compile(@"[Ա-Ֆա-ևև]+(?:[՛՜՞][Ա-Ֆա-ևև]+)+", "gu");
+    private static readonly JsRe MARK_CHARS = JsRegex.Compile(@"[՛՜՞]", "gu");
+
+    private static string UnbreakMarks(string s) => INTRA_WORD_MARK.Replace(s, m =>
+    {
+        var bare = MARK_CHARS.Replace(m.Value, "");
+        return m.Value.Contains('՞') ? $"{bare}՞" : bare;
+    });
+
     private static readonly JsRe TOKEN = JsRegex.Compile(@"([Ա-Ֆա-ևև]+)|(\d+)|([.?!,;:…՝՞։])", "gu");
 
     private sealed class ArmenianPhonemizer : ILanguage
@@ -148,7 +162,7 @@ public sealed class ArmenianEngine
         internal ArmenianPhonemizer(ArmenianEngine e) => this.e = e;
 
         public string Text(string input) =>
-            Clauses.AssembleClauses(e.pre(input), TOKEN, (m, sink) =>
+            Clauses.AssembleClauses(e.pre(UnbreakMarks(input)), TOKEN, (m, sink) =>
             {
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(e.PhonemizeWord(m.Groups[1].Value));
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0) sink.Emit(e.Number(m.Groups[2].Value));

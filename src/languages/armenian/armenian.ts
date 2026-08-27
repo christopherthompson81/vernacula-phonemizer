@@ -48,6 +48,47 @@ const isSonorant = (p: string): boolean => /^[lmnɾrj]/u.test(p); // sonorants (
  * measure one against. A sibling is a hypothesis, not a source (trap 55) — so hyw passes nothing and its
  * reading is byte-identical to what it was.
  */
+/**
+ * THE THREE MARKS ARMENIAN WRITES *INSIDE* A WORD, undone before the tokenizer ever sees them.
+ * ՛ (շեշտ, emphasis), ՜ (բացականչական, exclamation) and ՞ (հարցական, question) are not placed after the
+ * word the way Latin punctuation is — they sit over its last vowel, i.e. among the letters. The TOKEN class
+ * below is Armenian letters, so each of them SPLITS its own word and the fragments are phonemized apart,
+ * schwa epenthesis and all.
+ *
+ * ⚠ THIS LIVES IN THE ENGINE, NOT IN A DIALECT'S normalize.ts, AND THAT PLACEMENT IS THE FIX. It was
+ * written for Eastern (hy) as normalize step 0 and it worked — but the breakage is caused by TOKEN, which
+ * is shared, so Western (hyw) inherited the defect and none of the rule. hyw read:
+ *
+ *     կա՛մ      → ɡɑ mə          Տե՛ս      → de sə
+ *     ո՛չ       → vo t͡ʃʰə        Ինչո՞ւ    → int͡ʃʰo ? və   (the ⟨ու⟩ digraph split, and the pause mid-word)
+ *
+ * ⚠ WESTERN ADDS A SECOND, LARGER SENSE THAT WANTS THE SAME TREATMENT — and checking that is why this is
+ * safe to share rather than merely convenient. hyw writes the verbal proclitic կը as ⟨կ՛⟩ before a
+ * vowel-initial stem (`կ՛երթան`, `կ՛ընդգրկէ`, `կ՛աւերուին`, 7 distinct forms in the mined corpus against 10
+ * of the emphasis class). That is an ELISION mark, not an accent — but the prefix FUSES with the stem, so
+ * joining the letters is the correct reading for it too, not merely a tolerable one: կ՛երթան → [ɡɛɾtʰɑn].
+ * One rule serves both senses; no dialect fork.
+ *
+ * ՛ and ՜ stay SILENT — the reading CLAUSE_MARK already gives them, since neither has an entry. All this
+ * does is stop them breaking the word. ՞ is a real clause mark and MOVES to the end of the word, where the
+ * tokenizer reads it as the question pause it is.
+ *
+ * ⚠ LETTERS ON BOTH SIDES, which is what keeps the ARC-MINUTE out: `41°24՛` is the other job ՛ does in the
+ * hy corpus (×9, every one a coordinate) and it is digit-adjacent, so it never matches here.
+ * ⚠ ՝ (U+055D) IS NOT IN THE CLASS. It is Armenian's own inter-word pause (1,096 hy instances, none inside
+ * a word) and belongs exactly where it is written.
+ */
+const INTRA_WORD_MARK = /[Ա-Ֆա-ևև]+(?:[՛՜՞][Ա-Ֆա-ևև]+)+/gu;
+const MARK_CHARS = /[՛՜՞]/gu;
+
+/** Rejoin a word the three over-the-vowel marks would otherwise split; ՞ moves to the word's end. */
+function unbreakMarks(s: string): string {
+    return s.replace(INTRA_WORD_MARK, (w) => {
+        const bare = w.replace(MARK_CHARS, "");
+        return w.includes("՞") ? `${bare}՞` : bare;
+    });
+}
+
 export function makeArmenianEngine(def: ArmenianDef, pre: (s: string) => string = (s) => s) {
     const CLAUSE_MARK = def.clausePunctuation;
     const MAP: Record<string, string> = { ...def.consonants, ...def.vowels }; // vowels win the shared ⟨ո⟩ key (→o bare)
@@ -134,7 +175,9 @@ export function makeArmenianEngine(def: ArmenianDef, pre: (s: string) => string 
 
     class ArmenianPhonemizer implements Phonemizer {
         text(input: string): string {
-            return assembleClauses(pre(input), TOKEN, (m, sink) => {
+            // ⚠ unbreakMarks BEFORE `pre`, not after: every dialect rule that reaches for an Armenian letter
+            // (the bound suffixes, the era markers, the unit nouns) sees a broken word until this has run.
+            return assembleClauses(pre(unbreakMarks(input)), TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(m[1]));
                 else if (m[2]) sink.emit(number(m[2]));
                 else if (m[3]) {

@@ -189,8 +189,12 @@ public static class Normalize
     // -----------------------------------------------------------------------------------------------
 
     private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)\\.(?=\\d{3}(?!\\d))", "gu");
+    // ⚠ BOTH ERAS, AND IT WAS BCE-ONLY — the optional `[пp]\.` is the whole of the fix. A year before the
+    // CE marker took the cardinal and KEPT its ordinal dot, which the tokenizer then read as a phrase break
+    // (`Око 1000. н. е.` → *oko hiljadu . nove ere .*), while BCE read correctly. See the TS for why the
+    // asymmetry settles it without a frequency claim: sr's own 4 era instances are all BCE.
     private static readonly JsRe ERA_YEAR =
-        JsRegex.Compile("(?<![\\d.,])(\\d{1,4})\\.\\s+(?=(?:п\\.\\s?н\\.\\s?е|p\\.\\s?n\\.\\s?e)(?![\\p{L}\\p{M}]))", "giu");
+        JsRegex.Compile("(?<![\\d.,])(\\d{1,4})\\.\\s+(?=(?:[пp]\\.\\s?)?[нn]\\.\\s?[еe](?![\\p{L}\\p{M}]))", "giu");
 
     private static readonly (string Pat, string Words)[] ERAS =
     {

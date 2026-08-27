@@ -576,10 +576,15 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/serbian", "serbian.jsonc", Languages.Serbian.Manifest.MANIFEST,
             "language", "name", "script", "provenance", "convention");
 
+    // ⚠ "vowelChars" IS LISTED AS METADATA, and this test is what forced the question. It was declared in
+    // both manifest interfaces and read by NEITHER engine — sv's stress ordinal comes from the NST lexicon
+    // and the OOV fallback works on the orthography, so no pass needs an IPA nucleus set (de does, and reads
+    // its own copy). The key stays in the JSONC as a language fact, marked documentation there; declaring it
+    // here is what keeps the guard honest rather than vacuous.
     [Fact]
     public void SwedishManifestIsFullyMapped() =>
         AssertFullyMapped("languages/swedish", "swedish.jsonc", Languages.Swedish.Manifest.MANIFEST,
-            "language", "name", "script", "provenance", "convention");
+            "language", "name", "script", "provenance", "convention", "vowelChars");
 
     [Fact]
     public void ArmenianManifestIsFullyMapped() =>
