@@ -150,8 +150,16 @@ public static class Normalize
     private static readonly JsRe US_DOLLAR = JsRegex.Compile(@"(?<![\p{L}\p{M}])(US)\s?\$\s?(?=\d)", "giu");
     private static readonly JsRe DOLLAR =
         JsRegex.Compile($"\\$\\s?(\\d(?:[\\d \\u00a0,.]*\\d)?)(\\s?{MAG})?", "giu"); // NBSP
+    /// <summary>⚠ THE GUARD IS A DOTTED CHAIN, NOT A TRAILING LETTER. It used to refuse any decimal a letter
+    /// touched, to keep a designation (`802.11a`) out — but DECLINING IS NOT NEUTRAL: the separator survives
+    /// and the tokenizer reads it as CLAUSE PUNCTUATION, so `17.09m.` came out *disɛt **.** nɛf m .*, a full
+    /// stop mid-phrase and a dropped leading zero. Of the twelve letter-touching decimals in the corpora,
+    /// six are real and six are DOI/URL fragments — and all six of the latter sit inside a dotted chain, so
+    /// the LEADING guard already refused them. The trailing guard bought nothing and cost six.
+    /// ⚠ Cost, stated: `802.11a` now reads a spurious *vigil* where it read a spurious full stop. Both are
+    /// wrong; a false word is cheaper than a false clause boundary, and the shape is ×0 here. See the TS.</summary>
     private static readonly JsRe DECIMAL =
-        JsRegex.Compile(@"(?<![\d.,])(\d+)[.,](\d+)(?![\d\p{L}\p{M}])", "gu");
+        JsRegex.Compile(@"(?<![\d.,])(\d+)[.,](\d+)(?![\d]|[.,]\d)", "gu");
     private static readonly JsRe FRACTION =
         JsRegex.Compile(@"(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])", "gu");
     private static readonly JsRe ORDINAL =

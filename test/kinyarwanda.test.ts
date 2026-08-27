@@ -308,3 +308,46 @@ describe("Kinyarwanda text normalization", () => {
         expect(phonemize("imodoka ya GM", "rw")).not.toContain("ɡaɾama");
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// The `dogere` redundancy guard must not read the engine's OWN insertions.
+//
+// `saidNear` asks one question — did the WRITER already write the noun? — and it reads the pre-replacement
+// string, which within a single pass is exactly right. Across passes it was not: by arm 4c the string
+// carried 4a's inserted `dogere`, so ONE CONSTRUCTION GOT TWO ANSWERS depending on which arm claimed each
+// half. ⚠ Every emitted `dogere` now carries a U+0000 mark, the guard strips a marked occurrence before
+// testing, and the marks come off after 4e — the LAST arm, because a strip one step earlier would blind it.
+// ⚠ 0 golden rows move; the evidence is the corpus's own °C/(°F) glosses.
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+describe("the degree noun's redundancy guard sees only what the writer wrote", () => {
+    test("a mixed-arm pair now reads like a same-arm one", () => {
+        // Both figures negative → both claimed by 4a, one pass, neither sees the other. Already right.
+        expect(N("−27.2 °C (−17.0 °F)"))
+            .toBe("dogere selisiyusi 27 2 munsi ya zeru (dogere 17 0 munsi ya zeru)");
+        // First 4a, second 4c — 4c used to see 4a's insertion and suppress, so the parenthetical lost its
+        // noun AND its scale word and read a bare *(6 1)*.
+        expect(N("−14.4 °C (6.1 °F)"))
+            .toBe("dogere selisiyusi 14 4 munsi ya zeru (dogere 6 1)");
+    });
+
+    test("…and the word the WRITER wrote still suppresses it, for every figure in reach", () => {
+        // The corpus's own spell-out: one noun heads two signs, and the guard looks BOTH ways.
+        expect(N("dogere 22° na 35°")).toBe("dogere 22 na 35");
+        // With no noun in the source, each figure gets its own — including across arms (4a then 4e).
+        expect(N("hagati ya 22° na 35°")).toBe("hagati ya dogere 22 na dogere 35");
+        expect(N("−5 °C na 30°")).toBe("dogere selisiyusi 5 munsi ya zeru na dogere 30");
+    });
+
+    test("the coordinate arm still repeats the noun per AXIS, which rw does on purpose", () => {
+        expect(N("2° 36′ 58″ S, 29° 44′ 34″ E"))
+            .toBe("dogere 2 36′ 58″ amajyepfo, dogere 29 44′ 34″ iburasirazuba");
+    });
+
+    test("⚠ the mark can never reach the output", () => {
+        const NUL = String.fromCharCode(0);
+        for (const c of ["−27.2 °C (−17.0 °F)", "40-42 °", "2° 36′ 58″ S", "dogere 22°", "42", "x"]) {
+            expect(N(c).includes(NUL)).toBe(false);
+            expect(phonemize(c, "rw").includes(NUL)).toBe(false);
+        }
+    });
+});

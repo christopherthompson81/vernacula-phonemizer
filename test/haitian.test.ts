@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { phonemize } from "../src/index.ts";
 
 import { createHaitian, phonemizeWord } from "../src/languages/haitian/haitian.ts";
 import { normalizeHaitian } from "../src/languages/haitian/normalize.ts";
@@ -252,5 +253,39 @@ describe("Haitian Creole text normalization", () => {
         // The clock is deliberately NOT claimed: the majority of colon-numerals here are SCRIPTURE
         // references (`Travay 11:25-26`, `Matye 16:18`), not times.
         expect(normalizeHaitian("Travay 11:25-26")).toBe("Travay 11:25-26");
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// A decimal with a letter against it. ⚠ DECLINING IS NOT NEUTRAL — the guard that refused these left the
+// separator in place, and the tokenizer then read it as CLAUSE PUNCTUATION. So the "safe" branch emitted a
+// full stop in the middle of a phrase AND lost the fractional part's leading zero.
+// ⚠ ×0 in the parity golden; the evidence is the mined + attest corpora, where twelve runs put a letter
+// against a decimal — six real, six DOI/URL fragments, and all six of the latter already refused by the
+// LEADING guard because they sit inside a dotted chain.
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+describe("a decimal is still a decimal when a letter touches it", () => {
+    const say = (s: string): string => phonemize(s, "ht").trim();
+
+    test("the six the corpus actually writes", () => {
+        expect(say("17.09m.")).toBe("disɛt viɡil zewo nɛf m ."); //  was `disɛt . nɛf m .` — and the 0 was gone
+        expect(say("1.00mm")).toBe("ɛ̃ viɡil zewo zewo milimɛt");
+        expect(say("7.5cm")).toBe("sɛt viɡil sɛ̃k sãtimɛt");
+        expect(say("442.7k")).toBe("kat sã kaɣãnde viɡil sɛt k");
+        expect(say("1.9pwen")).toBe("ɛ̃ viɡil nɛf pwɛ̃");
+        // ⚠ TWO OF THE TWELVE ARE normalize.ts's OWN QUOTED ATTESTATIONS — the file cited these lines as
+        // evidence for other rules while they were reading a spurious full stop.
+        expect(say("1 a 1,5m")).toBe("ɛ̃ a ɛ̃ viɡil sɛ̃k m");
+        expect(say("50cm a 1,80m")).toBe("sɛ̃kãt sãtimɛt a ɛ̃ viɡil katɣevɛ̃ m");
+    });
+
+    test("a dotted CHAIN still declines, from either direction", () => {
+        expect(say("1.2.3")).toBe("ɛ̃ . de . twa");
+        expect(say("jpcl.16.1.07par")).toBe("ʒpkl . sɛz . ɛ̃ . sɛt paɣ"); // a DOI segment — the real shape
+    });
+
+    test("a spaced decimal is unmoved, and so is the leading-zero rule", () => {
+        expect(say("17.09 m")).toBe("disɛt viɡil zewo nɛf m");
+        expect(say("0,4 rebon")).toBe("zewo viɡil kat ɣebɔ̃");
     });
 });
