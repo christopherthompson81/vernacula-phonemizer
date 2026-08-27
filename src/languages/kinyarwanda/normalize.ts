@@ -310,6 +310,22 @@ const SYMBOLS = makeSymbolNormalizer({
         Rwf: ["amafaranga y'u Rwanda"],
     },
     currencyPrefix: true,
+    // ⚠ `magnitudes` IS NOW DECLARED, AND SO IS THE ORDER IT COMES IN. The header used to withhold it on a
+    // reason that was TRUE and was also the defect: the tier's `magAlt` matched NUMBER-then-magnitude, and
+    // Kinyarwanda writes MAGNITUDE-then-number, so the hop could never fire — and the currency arm then
+    // matched only the number-and-sign pair, substituting the noun BETWEEN the magnitude and its count.
+    // `miliyari 290 Frw` read *miliyari amafaranga y'u Rwanda magana abiri na mirongo icyenda*.
+    // 30 corpus instances, no counter-example: `miliyoni 14`, `miliyoni $800`, `miliyoni 70 z'amadolari`,
+    // `miliyari 1.1 y'amadolari`, `miliyari 290 Frw`, `hegitari miliyoni 150`.
+    // ⚠ WHAT IT DOES NOT CLAIM: rw's richest form links the currency with a GENITIVE (`z'amadolari`), which
+    // this tier cannot emit. It emits CURRENCY + MAGNITUDE + NUMBER — the order rw's own bare
+    // `amadolari 20.000` shows, with the magnitude in its attested slot. Short of the genitive, and no
+    // longer stranding the magnitude from the number it counts.
+    // ⚠ THE PLAYBOOK'S "one declaration, two consumers" NOTE, re-checked now that the answer changed: the
+    // field also gates `magAltU`, the UNIT path's connective hop. That shape is still ×0 here (rw writes
+    // `km² 2,92`), so the second consumer neither gains nor loses.
+    magnitudes: ["miliyari", "miliyoni", "igihumbi", "ibihumbi"],
+    magnitudePrecedes: true,
     // Derived from the ONE table above, so the tier and step 3 can never name different words for one key.
     units: Object.fromEntries(Object.entries(UNIT).map(([k, w]) => [k, [w]])),
     unitPrefix: true,

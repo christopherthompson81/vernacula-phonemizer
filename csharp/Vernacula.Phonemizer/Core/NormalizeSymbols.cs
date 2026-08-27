@@ -129,6 +129,13 @@ public sealed class SymbolData
     /** Magnitude words that hop with a currency sign ("million" etc., in the language's spelling as it
      *  appears in running text). Omit if the language writes magnitudes after the currency word anyway. */
     public IReadOnlyList<string>? Magnitudes { get; init; }
+    /// <summary>⚠ THIS LANGUAGE WRITES THE MAGNITUDE **BEFORE** ITS NUMBER (`miliyari 290`, not
+    /// `290 miliyari`). Every magnitude arm assumed NUMBER-then-magnitude, so the other order had its
+    /// magnitude STRANDED: the currency arm matched only the number-and-sign pair and put the noun BETWEEN
+    /// the magnitude and its count — rw's `miliyari 290 Frw` read *miliyari amafaranga y'u Rwanda magana
+    /// abiri na mirongo icyenda*. ⚠ OPT-IN: 131 languages declare Magnitudes and all mean the postposed
+    /// order, so nothing that does not set this can move. See the TS for the attestation.</summary>
+    public bool MagnitudePrecedes { get; init; }
     /**
      * The COUNT whose form a magnitude word selects for the noun after it. Defaults to `MANY`; declare it
      * where the language disagrees.
@@ -547,6 +554,21 @@ public static class NormalizeSymbols
         var curAfter = d.Currency is not null
             ? JsRegex.Compile("(" + NUM + ")" + magAlt + OPT_SEP + "(" + CUR + ")", "gu")
             : null;
+
+        // ⚠ THE MAGNITUDE-BEFORE-NUMBER ARMS, built only when MagnitudePrecedes is declared. Two shapes, both
+        // attested in rw: the sign AFTER the number (`miliyari 290 Frw`) and BETWEEN the magnitude and the
+        // number (`miliyoni $800`). They must run BEFORE curAfter/curBefore, or those claim the number-and-sign
+        // pair first and strand the magnitude — which is the whole defect.
+        var magWord = magList.Count > 0
+            ? "(?<![" + wordCont + markCont + "])(?:"
+              + string.Join("|", magList.OrderByDescending(x => x.Length)) + ")" + MAG_END
+            : "";
+        var magFirstAfter = d.Currency is not null && d.MagnitudePrecedes && magWord != ""
+            ? JsRegex.Compile("(" + magWord + ")\\s+(" + NUM + ")" + OPT_SEP + "(" + CUR + ")", "gu")
+            : null;
+        var magFirstBefore = d.Currency is not null && d.MagnitudePrecedes && magWord != ""
+            ? JsRegex.Compile("(" + magWord + ")" + OPT_SEP + "(" + CUR + ")" + OPT_SEP + "(" + NUM + ")", "gu")
+            : null;
         // ⚠ LATENT, not a defect today: unit and denominator keys are NOT regex-escaped, where currency keys
         // are. No declared key contains a metacharacter, but a key like `ኪ.ሜ` would compile its `.` as "any
         // character". A paired fix escapes both sides in the TS first.
@@ -649,11 +671,14 @@ public static class NormalizeSymbols
             // Both orders emit through one shape so the magnitude and its connective travel with the number
             // whichever side the noun goes on. `rest` is the text immediately after the whole match: when it ALREADY
             // spells the currency noun, emitting the word again doubles it.
-            string Money(string num, string? mag, string sym, string rest)
+            string Money(string num, string? mag, string sym, string rest, bool magFirst = false)
             {
                 var forms = d.Currency![sym];
                 var already = SaidAfter(forms);
-                var body = num + (mag ?? "");
+                // ⚠ `magFirst` KEEPS THE MAGNITUDE AGAINST ITS NUMBER for a MagnitudePrecedes language. The
+                // POSTPOSED branch below would otherwise emit `290 miliyari CUR` — right adjacency, wrong
+                // order for this language. The PREFIX branch already places the magnitude before the number.
+                var body = magFirst ? (mag ?? "").Trim() + " " + num : num + (mag ?? "");
                 if (already.IsMatch(rest)) return body; // the text says it; do not say it twice
                 var w = WithMagnitude(forms, mag, NumValue(num), cf, d.MagnitudeCount);
                 /**
@@ -669,6 +694,23 @@ public static class NormalizeSymbols
                 return d.CurrencyPrefix
                     ? WS_RUN.Replace(w + (mag ?? "") + " " + Join(mag) + num + tail, " ")
                     : body + " " + Join(mag) + w + tail;
+            }
+            // BEFORE curBefore/curAfter — see the arms' comment above.
+            if (magFirstAfter is not null)
+            {
+                var full = s;
+                // ⚠ " " + mag — the leading space is what magAlt's capture carries, and the prefix template
+                // in Money is written against that shape. The template itself is UNTOUCHED.
+                s = magFirstAfter.Replace(full, m => Money(
+                    m.Groups[2].Value, " " + m.Groups[1].Value, m.Groups[3].Value,
+                    full[(m.Index + m.Length)..], true));
+            }
+            if (magFirstBefore is not null)
+            {
+                var full = s;
+                s = magFirstBefore.Replace(full, m => Money(
+                    m.Groups[3].Value, " " + m.Groups[1].Value, m.Groups[2].Value,
+                    full[(m.Index + m.Length)..], true));
             }
             if (curBefore is not null)
             {

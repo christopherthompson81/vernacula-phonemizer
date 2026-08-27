@@ -135,6 +135,26 @@ export interface SymbolData {
      *  appears in running text). Omit if the language writes magnitudes after the currency word anyway. */
     magnitudes?: string[];
     /**
+     * ⚠ THIS LANGUAGE WRITES THE MAGNITUDE **BEFORE** ITS NUMBER (`miliyari 290`, not `290 miliyari`).
+     *
+     * Every magnitude arm in this tier assumed NUMBER-then-magnitude, so a language with the other order had
+     * its magnitude STRANDED: the currency arm matched only `290 Frw`, substituted around it, and the noun
+     * landed between the magnitude and the count it belongs to — Kinyarwanda's `miliyari 290 Frw` read
+     * *miliyari amafaranga y'u Rwanda magana abiri na mirongo icyenda*, "billion francs two-hundred-ninety".
+     *
+     * ⚠ OPT-IN, AND DELIBERATELY SO. 131 languages declare `magnitudes` and every one of them means the
+     * postposed order; adding the shape to the shared arms unconditionally would put a new alternation in
+     * front of all of them for one language's benefit. Behind a flag, nothing that does not set it can move.
+     *
+     * Attested for rw with no counter-example (30 instances): `miliyoni 14`, `miliyoni 56.31`,
+     * `miliyoni $800`, `miliyoni 70 z'amadolari`, `miliyari 290 Frw`, `hegitari miliyoni 150`.
+     * ⚠ WHAT THIS DOES NOT CLAIM: rw's own richest form links the currency with a genitive
+     * (`miliyoni 70 z'amadolari`), which this tier cannot emit. It emits CURRENCY + MAGNITUDE + NUMBER —
+     * the order rw's own bare `amadolari 20.000` shows for the no-magnitude case, extended with the
+     * magnitude in its attested slot. Better than a stranded magnitude, and short of the genitive.
+     */
+    magnitudePrecedes?: boolean;
+    /**
      * The COUNT whose form a magnitude word selects for the noun after it. Defaults to `MANY` (5), i.e. the
      * slot a large count takes — right for most of the fleet. Declare it when the language disagrees:
      * Maltese takes the SINGULAR after a magnitude (*745 miljun dollaru*) while still needing the plural for
@@ -726,6 +746,22 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // matches nothing and the sign is DROPPED. `magAlt` is `()?` when a language declares no magnitudes, so
     // the group indices stay fixed either way.
     const curAfter = d.currency ? new RegExp(`(${NUM})${magAlt}${OPT_SEP}(${CUR})`, "gu") : null;
+    /**
+     * ⚠ THE MAGNITUDE-BEFORE-NUMBER ARMS, built only when `magnitudePrecedes` is declared — see the field.
+     * Two shapes, both attested in rw: the sign AFTER the number (`miliyari 290 Frw`, `miliyoni 158$`,
+     * `miliyoni 20 $`) and the sign BETWEEN the magnitude and the number (`miliyoni $800`, `miliyoni $247`).
+     * These must run BEFORE `curAfter`/`curBefore`, or those claim the number-and-sign pair first and strand
+     * the magnitude — which is the whole defect.
+     */
+    const magWord = magList.length
+        ? `(?<![${wordCont}${markCont}])(?:${[...magList].sort((a, b) => b.length - a.length).join("|")})${MAG_END}`
+        : "";
+    const magFirstAfter = d.currency && d.magnitudePrecedes && magWord
+        ? new RegExp(`(${magWord})\\s+(${NUM})${OPT_SEP}(${CUR})`, "gu")
+        : null;
+    const magFirstBefore = d.currency && d.magnitudePrecedes && magWord
+        ? new RegExp(`(${magWord})${OPT_SEP}(${CUR})${OPT_SEP}(${NUM})`, "gu")
+        : null;
     const unitAlt = d.units
         ? Object.keys(d.units)
               .sort((a, b) => b.length - a.length)
@@ -903,10 +939,14 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // "1000 dollar dollar", and `$45 million dollars` as "45 dollar million dollars" — the word
         // inserted before the magnitude while the written one stayed put. Reported by the Nepali run,
         // whose corpus writes `$1000 डलर`.
-        const money = (num: string, mag: string | undefined, sym: string, rest: string): string => {
+        const money = (num: string, mag: string | undefined, sym: string, rest: string, magFirst = false): string => {
             const forms = d.currency![sym]!;
             const already = saidAfter(forms);
-            const body = `${num}${mag ?? ""}`;
+            // ⚠ `magFirst` KEEPS THE MAGNITUDE AGAINST ITS NUMBER for a `magnitudePrecedes` language. Without
+            // it the postposed-currency branch below would emit `290 miliyari CUR` — the right adjacency but
+            // this language's wrong order. The PREFIX branch already places the magnitude before the number,
+            // so it needs no arm of its own.
+            const body = magFirst ? `${(mag ?? "").trim()} ${num}` : `${num}${mag ?? ""}`;
             if (already.test(rest)) return body; // the text says it; do not say it twice
             const w = withMagnitude(forms, mag, numValue(num), cf, d.magnitudeCount);
             /**
@@ -931,6 +971,22 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 ? `${w}${mag ?? ""} ${join(mag)}${num}${tail}`.replace(/\s+/gu, " ")
                 : `${body} ${join(mag)}${w}${tail}`;
         };
+        // BEFORE curBefore/curAfter — see the arms' docstring.
+        if (magFirstAfter)
+            s = s.replace(
+                magFirstAfter,
+                // ⚠ ` ${mag}` — the leading space is what `magAlt`'s capture carries, and the prefix
+                // template below is written against that shape. Passing the bare word would fuse it to the
+                // currency noun. The template itself is UNTOUCHED, so no existing language can move.
+                (m: string, mag: string, num: string, sym: string, offset: number, full: string) =>
+                    money(num, ` ${mag}`, sym, full.slice(offset + m.length), true),
+            );
+        if (magFirstBefore)
+            s = s.replace(
+                magFirstBefore,
+                (m: string, mag: string, sym: string, num: string, offset: number, full: string) =>
+                    money(num, ` ${mag}`, sym, full.slice(offset + m.length), true),
+            );
         if (curBefore)
             s = s.replace(
                 curBefore,
