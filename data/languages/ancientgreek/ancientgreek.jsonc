@@ -3,9 +3,10 @@
 // classical Hellenic counterpart to the Classical-Latin bring-up. The engine (ancientgreek.ts) is a
 // grapheme scan over the NFD-decomposed polytonic text:
 //   ⚠ Vowels α ε η ι ο υ ω → [a e ɛː i o y ɔː] (η/ω are LONG mid; υ is the front-rounded [y]); the MACRON
-//     marks length on α ι υ (ᾱ→aː). DIPHTHONGS: αι→[ai̯], ει→[eː], οι→[oi̯], υι→[yi̯], αυ→[au̯], ευ→[eu̯],
+//     marks length on α ι υ (ᾱ→aː). DIPHTHONGS: αι→[ai̯], ει→[eː], οι→[oi̯], αυ→[au̯], ευ→[eu̯],
 //     ου→[uː], ηυ→[ɛːu̯], ωυ→[ɔːu̯]; the IOTA SUBSCRIPT (ᾳ ῃ ῳ) → long vowel + [i̯]; a DIAERESIS breaks a
-//     diphthong.
+//     diphthong. ⚠ ⟨υι⟩ IS THE MONOPHTHONG [yː] IN THE TABLE BELOW, not [yi̯]: it had monophthongized by the
+//     classical period, and this header used to claim [yi̯] against its own data. υἱός → hyːós.
 //   ⚠ Consonants: the ASPIRATES θ φ χ → [tʰ pʰ kʰ], β γ δ → [b ɡ d], ζ→[zd], ξ→[ks], ψ→[ps]; γ before a
 //     velar (γ κ χ ξ) → [ŋ] (ἄγγελος→áŋɡelos); ρ/σ/etc. direct.
 //   ⚠ ROUGH BREATHING (dasia ῾) on a word-initial vowel → a prefixed [h] (ἵππος→híppos); SMOOTH → ∅.
