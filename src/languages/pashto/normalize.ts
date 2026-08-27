@@ -6,10 +6,10 @@ import { spacedBareExponent } from "../../core/normalizeSymbols.ts";
  *
  * ⚠ THERE IS NO FLEURS FOR PASHTO.
  * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `ps_af` landed later, 1,804 unique transcript texts, and it is a
- * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
- * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
- * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
- * count over the mined artifact alone until someone re-runs it.
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ AND THE RE-MEASUREMENT HAS NOW BEEN
+ * DONE FOR THE CLOCK, which is the class it changed — see the clock note below. Every OTHER "only N
+ * times" in this file is still a count over the mined artifact alone: the sweep was per CLASS, not per
+ * file, and the rest of #1102's expensive half is still open.
  * The evidence is `tools/corpus/mined/ps.jsonc` (dump-sourced, 178,645
  * segments, so its `sample` tier IS the real distribution) plus a fresh ps.wikipedia dump — 242,649 lines
  * after `wikidump-to-text.py` + `filter-markup.py` + a local category-residue drop. Every count below is
@@ -349,11 +349,17 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    `۸:۰۰ بجو` in the same sentence as bare hours.
         //    ⚠ AND A THIRD FIELD IS NOT A CLOCK (the sports-time cell): `4:41.30` is a pace, so the rule
         //    requires the minutes to END the numeral.
+        //    ⚠ AND THE HOUR NOUN IS CONSUMED WHEN THE TEXT ALREADY WROTE IT (trap 12, #1102). FLEURS
+        //    `ps_af` writes `11:20 بجو`, `11:00 بجو` ×2, `۸:۴۶ بجو`, `10:00 بجې` — **5 of its 11 clock
+        //    instances** — and without this the rule emits its own `بجې` in front of the corpus's, so the
+        //    hour noun is said TWICE. Swallowing it puts the reading back into the one idiom the comment
+        //    above cites. This was invisible to the mined artifact, which carries the shape zero times.
         s = s.replace(
-            new RegExp(`(?<![${D}:.])([${D}]{1,2}):([${D}]{2})(?![${D}:.])`, "gu"),
-            (whole: string, h: string, m: string) => {
+            new RegExp(`(?<![${D}:.])([${D}]{1,2}):([${D}]{2})(?![${D}:.])(\\s*(?:بجو|بجې|بجه))?`, "gu"),
+            (whole: string, h: string, m: string, already?: string) => {
                 const mm = Number(toAscii(m));
                 if (!Number.isSafeInteger(mm) || mm > 59) return whole;
+                // `mm === 0` drops the minute field — `۷:۰۰ بجو` is `اووه بجې`, never "and zero minutes".
                 return mm === 0 ? `${h} بجې` : `${h} بجې او ${m} دقیقې`;
             },
         );

@@ -438,3 +438,23 @@ describe("Maltese — the clock, on the frame the audio attests", () => {
         expect(normalizeMaltese("8:46")).toBe("8 u 46");
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// #1102 — the clock guard's marker list was one short.
+//
+// The exclusion above is right and is keyed on the RIGHT CONTEXT, which is what separates `9.40am` from
+// `$88.08 biljun`. FLEURS `mt_mt` writes four dot-separated `d.dd`: two genuine measurements (`6.34
+// pulzieri`, `3.50 m`) that must stay decimals, and two clocks — `id-9.30 am`, which the list caught, and
+// `f'12.00 GMT`, which it did not. That one fell through and read *tnaʃ punt zɛrɔ*, "twelve point zero" —
+// the confidently-wrong reading this guard exists to prevent, and the one its own note quotes.
+describe("the clock guard covers the timezone marker too (#1102)", () => {
+    test("a timezone-marked clock is no longer read as a decimal", () => {
+        expect(normalizeMaltese("f’12.00 GMT illum")).toBe("f’12 GMT illum");
+    });
+
+    test("⚠ AND THE TWO MEASUREMENTS ARE STILL DECIMALS — the guard is a marker, not a shape", () => {
+        expect(normalizeMaltese("3.50 m")).toBe("3 punt 50 metri");
+        expect(normalizeMaltese("laħqet 6.34 pulzieri")).toContain("6 punt 34");
+        expect(normalizeMaltese("88.08 biljun")).toBe("88 punt 08 biljun"); // the note's own counter-example
+    });
+});

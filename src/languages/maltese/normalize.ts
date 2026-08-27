@@ -10,10 +10,10 @@
  *
  * ⚠ THE SOURCING SITUATION, STATED PLAINLY. There is no FLEURS corpus for Maltese.
  * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `mt_mt` landed later, 1,960 unique transcript texts, and it is a
- * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
- * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
- * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
- * count over the mined artifact alone until someone re-runs it. The evidence is
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ AND THE RE-MEASUREMENT HAS NOW BEEN
+ * DONE FOR THE CLOCK, which is the class it changed — see the clock note below. Every OTHER "only N
+ * times" in this file is still a count over the mined artifact alone: the sweep was per CLASS, not per
+ * file, and the rest of #1102's expensive half is still open. The evidence is
  * `tools/corpus/mined/mt.jsonc` (118,526 paragraphs of the mt.wikipedia dump, 449 retained) plus `attest.ts`
  * against mt.wikipedia — WHICH IS THE SAME WIKI THE ARTIFACT WAS MINED FROM. That is a bigger sample of ONE
  * source, never a second independent one, and no count below should be read as corroboration across tiers.
@@ -639,7 +639,13 @@ function euroSpelling(text: string): string {
  * letter is exactly `m` AND no dot, which is not a shape this orthography writes. `version-dot` is ×55 whole
  * corpus and ×0 in the 449 retained segments either way.
  */
-const CLOCK_TAIL = /^\s?(?:[ap]\s?\.?\s?m\b|ta['’’]\s?(?:filg|wara|bil))/iu;
+// ⚠ THE TIMEZONE IS IN THE LIST BECAUSE `f'12.00 GMT` WAS NOT (#1102). The exclusion above is right and
+// its marker list was one short: FLEURS `mt_mt` writes four dot-separated `d.dd`, two of which are genuine
+// measurements (`6.34 pulzieri`, `3.50 m`, correctly decimals) and two of which are clocks — `id-9.30 am`,
+// which the list already caught, and `f'12.00 GMT`, which it did not. That one fell through to the decimal
+// rule and read *tnaʃ punt zɛrɔ*, "twelve point zero" — the exact confidently-wrong reading this guard
+// exists to prevent, quoted in its own note as *disgħa punt erbgħin*.
+const CLOCK_TAIL = /^\s?(?:[ap]\s?\.?\s?m\b|ta['’’]\s?(?:filg|wara|bil)|(?:GMT|UTC|CET|CEST)\b)/iu;
 
 /**
  * ── THE CLOCK ───────────────────────────────────────────────────────────────────────────────────────────
