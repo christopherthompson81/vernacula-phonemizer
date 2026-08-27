@@ -27,6 +27,7 @@ public static class LatinPhonemizer
     private static readonly JsRe OFFGLIDE = JsRegex.Compile("̯", "u");
     private static readonly JsRe TILDE_G = JsRegex.Compile("̃", "gu");
     private static readonly JsRe BREVE_G = JsRegex.Compile("̆", "gu");
+    private static readonly JsRe NONSYLL_G = JsRegex.Compile("̯", "gu");
 
     private static bool IsVowelLetter(string? c) => c is not null && VOWEL_LETTER.Contains(c);
 
@@ -38,10 +39,15 @@ public static class LatinPhonemizer
     private static readonly Dictionary<string, string> TENSE_BASE =
         new() { ["ɛ"] = "e", ["ɪ"] = "i", ["ɔ"] = "o", ["ʊ"] = "u" };
 
-    /** Add nasalization (U+0303) + length to a vowel segment: [ɛ]→[ẽː], [aː]→[ãː]. */
+    /** Add nasalization (U+0303) + length to a vowel segment: [ɛ]→[ẽː], [aː]→[ãː].
+     *
+     * ⚠ THE NON-SYLLABIC MARK IS STRIPPED TOO — the function's contract is "return a nasalized long
+     * NUCLEUS", and it cannot honour that while leaving U+032F on. Without it a word whose last two letters
+     * spell a diphthong got `ũ̯ː`, and `PlaceStress` (which skips U+032F) then lost the syllable. See the TS
+     * for the referee count that settled it. */
     private static string NasalizeLong(string seg)
     {
-        var b = TILDE_G.Replace(LENGTH_G.Replace(seg, ""), "");
+        var b = NONSYLL_G.Replace(TILDE_G.Replace(LENGTH_G.Replace(seg, ""), ""), "");
         if (TENSE_BASE.TryGetValue(b, out var t)) b = t;
         return (b + "̃").Normalize(NormalizationForm.FormC) + "ː";
     }
@@ -230,7 +236,8 @@ public static class LatinPhonemizer
                 // Numbers: compose the Latin cardinal phrase, then phonemize each word.
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
-                    foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value)).Split(' '))
+                    var tok = m.Groups[2].Value;
+                    foreach (var wd in Numbers.NumberToWords(Js.Number(tok), tok).Split(' '))
                         sink.Emit(PhonemizeWord(wd));
                 }
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)

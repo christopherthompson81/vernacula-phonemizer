@@ -98,9 +98,10 @@ stressed as a three-syllable one. **Attested, not hypothetical: `Nicolaum` is in
 and in `csharp/goldens/la.tsv` row 43**, where `nɪkɔɫaũ̯ː` is the shipped reading. `Achaum`, `laum` and the
 bare `aum` reproduce it; `Achaeum` (`aˈkʰae̯ũː`) and `laudem` (`ˈɫau̯dẽː`) are the correct neighbours.
 
-Filed as **#1097**. Per PORTING.md the C# ports the CURRENT behaviour rather than fixing it here: the
+Filed as **#1097**. Per PORTING.md the C# ported the CURRENT behaviour rather than fixing it here: the
 fix is TS-first, and it moves at least one golden row, so it belongs in its own change with the goldens
-regenerated. **NOTHING IN THE TYPESCRIPT WAS CHANGED BY THIS PORT.**
+regenerated. **NOTHING IN THE TYPESCRIPT WAS CHANGED BY THIS PORT.** ⚠ It has since landed upstream — see
+Run 5, which is what this branch is now gated against.
 
 Two more things noticed and deliberately NOT filed, with the reason:
 
@@ -116,10 +117,44 @@ Questions 2 and 3 came back clean: every table `latin.jsonc` declares is reached
 now pins that structurally), and there is one entry point — `text()` → `phonemizeWord` — so the golden,
 the eval and the shipped path are the same path.
 
+## Run 5 — 2026-08-27 14:30 — the finding landed upstream, and the branch follows it
+
+#1097 was fixed in the TypeScript (#1110) while this port was in review, which is the bidirectional flow
+PORTING.md describes working as intended: the port read the code, the reading found a defect, the defect
+went back to the TS with a referee behind it, and the C# now implements the FIXED behaviour rather than the
+one it was written against.
+
+⚠ **THE REFEREE ANSWERED A QUESTION THIS DOC LEFT OPEN.** Run 4 framed the repair as a phonological choice
+— decline on the offglide, or reach past it to the nucleus — and said it wanted a referee check. It got one:
+of the 45 `la.wikipron-lat-clas-narrow` rows spelled ⟨a|o|e⟩⟨u|e⟩m, **not one nasalizes an offglide**. So
+`-aum` is a HIATUS and the answer is neither candidate exactly — make the offglide SYLLABIC.
+
+Merged `origin/main` and applied the three changes the upstream commit carries for this branch:
+
+    Latin.cs   NasalizeLong strips U+032F as well as ː and the tilde (the one-line fix, in the same
+               place the TS put it — the function's contract is "return a nasalized long NUCLEUS")
+    Numbers.cs NumberToWords gained the `raw` parameter the TS added in the same window (#1095's
+               large-numeral work), so the digit fallback reads the TOKEN, not the float's string
+    Latin.cs   the call site passes the raw token through
+
+    Nicolaum   ˈnɪkɔɫaũ̯ː  →  nɪˈkɔɫaũː     the segment is syllabic AND the word gets its syllable back
+    Boleslaum  bɔˈɫɛsɫaũː · Coeum ˈkoe̯ũː · Idaeum ɪˈdae̯ũː · Caesareum kae̯ˈsareũː   — referee-exact
+    bellum ˈbɛllũː · aquam ˈakʷãː · laudem ˈɫau̯dẽː · mensa ˈmẽːsa   — untouched
+
+Re-gated after the merge: **parity la 200/200 against the NEW golden**, and the differential re-run against
+the fixed engine is **1,726 comparisons, 0 differ, 0 throws** (plus the 104-comparison second round, still
+identical). Nine C# assertions mirror the TS's new ones, four of them segment-for-segment against the
+referee rows.
+
+⚠ Plus a 12-line CASE-FOLDING probe (`ſ`, `İ`, `ẞ`, `ﬁ` against the two `gui`-flagged degree patterns),
+added because the wo review found a `KeyNotFoundException` of exactly that shape in another port: **24
+comparisons, 0 differ, 0 throws.** la's callbacks index no dictionary by matched text.
+
 ## Gates
 
-    csharp tests            1,862 pass (70 new in LatinTests.cs), 0 fail
-    parity, la              200/200 byte-identical, 0 differ, 0 BLOCKED
+    csharp tests            1,905 pass (79 in LatinTests.cs incl. 9 new for #1097), 0 fail
+    parity, la              200/200 byte-identical against the POST-#1110 golden, 0 differ, 0 BLOCKED
     parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
-    differential            1,830 comparisons (sync + async), 0 differ, 0 throws
-    typescript              unchanged
+    differential            1,830 comparisons (sync + async), 0 differ, 0 throws — re-run after the merge
+    case-folding probe      24 comparisons, 0 differ, 0 throws
+    typescript              unchanged by this branch (#1097 landed separately as #1110)

@@ -42,6 +42,35 @@ public class LatinTests
     [InlineData("volucris", "ˈwɔɫʊkrɪs")]       // muta cum liquida onsets the ultima
     public void TheClassicalReading(string word, string want) => Assert.Equal(want, LaEngine.PhonemizeWord(word));
 
+    // ─────────────────────────────────────────────────────────────────────────────────────────────
+    // #1097 — word-final ⟨-Vm⟩ must nasalize a NUCLEUS, never a diphthong offglide.
+    //
+    // `IsVowelSeg` is true of an offglide (`u̯` decomposes to `u` + U+032F), so a word whose last two
+    // letters spell a diphthong had that diphthong's SECOND element nasalized and lengthened in place:
+    // `Nicolaum` read *ˈnɪkɔɫaũ̯ː*. Two defects in one — no language has that segment, and `PlaceStress`
+    // skips anything carrying U+032F, so the word lost a syllable. It was live in this port's own golden.
+    //
+    // ⚠ THE REFEREE DECIDED IT: of the 45 `la.wikipron-lat-clas-narrow` rows spelled ⟨a|o|e⟩⟨u|e⟩m, NOT
+    // ONE nasalizes an offglide. `-aum` is a hiatus, so the offglide is made syllabic.
+    [Theory]
+    // Segment-for-segment against the referee row quoted beside each.
+    [InlineData("Boleslaum", "bɔˈɫɛsɫaũː")]   // b ɔ ɫ ɛ s ɫ a ũː
+    [InlineData("Coeum", "ˈkoe̯ũː")]           // k o e̯ ũː — the ⟨oe̯⟩ diphthong SURVIVES; only the final u nasalizes
+    [InlineData("Idaeum", "ɪˈdae̯ũː")]         // ɪ d a e̯ ũː
+    [InlineData("Caesareum", "kae̯ˈsareũː")]   // k a e̯ s a r e ũː
+    [InlineData("Nicolaum", "nɪˈkɔɫaũː")]     // the golden row that carried the defect
+    public void FinalVmNasalizesANucleusNotAnOffglide(string word, string want) =>
+        Assert.Equal(want, LaEngine.PhonemizeWord(word));
+
+    /** ⚠ AND THE ORDINARY CASES ARE UNTOUCHED — the change is to the offglide branch alone. */
+    [Theory]
+    [InlineData("bellum", "ˈbɛllũː")]
+    [InlineData("aquam", "ˈakʷãː")]
+    [InlineData("laudem", "ˈɫau̯dẽː")]   // a diphthong NOT at the -Vm site keeps its offglide
+    [InlineData("mensa", "ˈmẽːsa")]      // the pre-fricative nasal shares NasalizeLong
+    public void TheOrdinaryNasalizationsAreUntouched(string word, string want) =>
+        Assert.Equal(want, LaEngine.PhonemizeWord(word));
+
     [Fact]
     public void RegistryWiring() => Assert.Equal("ˈrɔsa", Phonemizer.Phonemize("rosa", "la").Trim());
 

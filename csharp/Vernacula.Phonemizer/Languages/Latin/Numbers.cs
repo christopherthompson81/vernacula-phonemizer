@@ -96,12 +96,13 @@ public static class Numbers
         return Magnitude(b, BillionSingular, BillionPlural, false) + (rb != 0 ? $" {Compose(rb)}" : "");
     }
 
-    /** Non-negative integer → Classical Latin words. Out-of-range input falls back to digit-by-digit. */
-    public static string NumberToWords(double n)
+    /** Non-negative integer → Classical Latin words. Out-of-range input falls back to digit-by-digit — over
+     *  the RAW token where the caller has one, so the float's exponential form cannot leak. */
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!IsSafeInteger(n) || n < 0)
         {
-            return string.Join(" ", Js.NumberToString(n)
+            return string.Join(" ", (raw ?? Js.NumberToString(n))
                 .Where(c => c >= '0' && c <= '9')
                 .Select(d => UNITS[d - '0']));
         }
