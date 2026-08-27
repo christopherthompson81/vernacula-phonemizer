@@ -139,7 +139,7 @@ defect and is reproduced faithfully rather than worked around.
 
 ## Gates
 
-    csharp tests            1,876 pass (89 new in SepediTests.cs), 0 fail
+    csharp tests            1,876 pass (84 new in SepediTests.cs + 1 ManifestMappingTests case), 0 fail
     parity, nso             200/200 byte-identical, 0 differ, 0 BLOCKED
     parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
     differential            8,530 comparisons (sync + async), 0 differ, 0 throws — after the separator fix
