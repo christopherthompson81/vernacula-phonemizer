@@ -58,7 +58,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   the CLOCK refusal from the mined corpus alone ("33 of 33 are SCRIPTURE REFERENCES … Zero clocks"). Over
   `wo_sn` the same shape is **8 of 8 a time of day**, four with an explicit `ci suba`/`ci ngoon`/`gmt` marker
   that no verse reference carries. The refusal's CONCLUSION survives (a bare-colon rule would still break 33
-  to fix 8) but its premise does not, and a marker-keyed rule would fix 4 and claim 0 (#1110).
+  to fix 8) but its premise does not, and a marker-keyed rule would fix 4 and claim 0 (#1111).
   See `docs/wo_port_investigation.md`.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the

@@ -104,7 +104,7 @@ For contrast, the scripture reading the header defends is unchanged and still de
 `Jëf 19:26-27` → *ɟəf fukː ak ɟuroːm ɲɛːnt , ɲaːr fukː ak ɟuroːm bɛnː ɲaːr fukː ak ɟuroːm ɲaːr*.
 
 ⚠ This is the #1102 family seen from a different angle: wo's header never claims FLEURS does not exist — it
-simply argues a refusal from one corpus without consulting the other. Filed as **#1110**.
+simply argues a refusal from one corpus without consulting the other. Filed as **#1111**.
 
 Per PORTING.md the C# ports the CURRENT behaviour and the finding is filed. **NO TYPESCRIPT WAS CHANGED.**
 
