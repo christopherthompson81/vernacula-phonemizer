@@ -143,8 +143,13 @@ public static class Normalize
 
         s = DOTTED_CAPS.Replace(s, m => DOT_OR_SPACE.Replace(m.Value, ""));
 
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = ABBREV_MID.Replace(s, m =>
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys
+            // but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w)
+                ? $"{w}{m.Groups[2].Value}" : m.Value);
+        s = ABBREV_END.Replace(s, m =>
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
         s = ORDINAL.Replace(s, m => OrdinalWord(Js.Number(m.Groups[1].Value)) ?? m.Value);
 

@@ -255,7 +255,8 @@ public static class Normalize
         s = TITLE_ABBREV.Replace(s, m =>
         {
             var next = m.Groups[2].Value;
-            return $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()](next)} {next}";
+            if (!DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var f)) return m.Value;  // ⚠ reachable miss (#1122)
+            return $"{f(next)} {next}";
         });
         s = TITLE_ABBREV_END.Replace(s, m => m.Groups[1].Value.ToLowerInvariant() switch
         {
@@ -267,8 +268,12 @@ public static class Normalize
             return ABBREV_FUNCTION_NEXT.IsMatch(next) ? m.Value : $"saint {next}";
         });
 
-        s = PLAIN_MID.Replace(s, m => $"{PLAIN_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = PLAIN_END.Replace(s, m => $"{PLAIN_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = PLAIN_MID.Replace(s, m =>
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
+            // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
+            PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+        s = PLAIN_END.Replace(s, m =>
+            PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
         s = ET_AL_MID.Replace(s, "et al$1");
         s = ET_AL_END.Replace(s, "et al.");
         s = CIRCA.Replace(s, "circa ");

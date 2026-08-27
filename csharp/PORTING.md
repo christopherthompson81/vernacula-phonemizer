@@ -68,8 +68,10 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
        the other half of this and bites in BOTH engines. `/&(?:sup2|nbsp|…)/giu` matches `&ſup2`, and
        `/(\d)°([NSEW])/giu` matches `12°ſ`, while the key computed from the match keeps the long s.
        In TS an `!` on the miss makes `String.replace` stringify `undefined` and the WORD is spoken; in
-       C# the dictionary indexer THROWS out of `Phonemize`. Five languages carried it and four of the
-       C# ports crashed (#1122). **A callback that indexes a table with the MATCH must handle the miss**
+       C# the dictionary indexer THROWS out of `Phonemize`. **Sixteen languages carried it** — the
+       dominant shape is a dotted-abbreviation alternation built from the table's OWN keys and then given
+       `i`, so the pattern and the table disagree about their alphabet by construction (#1122).
+       **A callback that indexes a table with the MATCH must handle the miss**
        — fall back to the match for a table of rewrites, or refuse the whole match for a table of
        readings (trap 53). ⚠ The trigger is not exotic: `csharp/goldens/nci.tsv` already ships
        `Caſtellana`, and no corpus differential can find this until a corpus happens to contain one.

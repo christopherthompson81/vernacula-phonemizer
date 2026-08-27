@@ -164,9 +164,21 @@ export function normalizeMalay(input: string): string {
     //    6b) The three abbreviations whose MALAY wording differs from Indonesian's table. Same two-branch
     //        shape: the dot is consumed mid-sentence, kept at a clause end.
     s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
     //    6c) `No.` before a DIGIT (`angkasawan No. 11`) — a letter-lookahead rule cannot claim it, and the
     //        inherited layer has its own digit branch that would otherwise win with Indonesian's `nomor`.
     s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}no\\.\\s?(?=\\d)`, "giu"), "nombor ");

@@ -71,7 +71,10 @@ public static class Normalize
 
         s = RANGE.Replace(s, "$1 ngadto sa $2");
 
-        s = ABBREV.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}");
+        s = ABBREV.Replace(s, m =>
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
+            // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
 
         s = FRACTION.Replace(s, m =>
             Js.Number(m.Groups[1].Value) == 1 && Js.Number(m.Groups[2].Value) == 2

@@ -297,9 +297,10 @@ public static class Normalize
         });
 
         // 3) DOTTED ABBREVIATIONS.
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED[Lat(m.Groups[1].Value)]}{m.Groups[2].Value}");
-        s = ABBREV_COMMA.Replace(s, m => DOTTED[Lat(m.Groups[1].Value)]);
-        s = ABBREV_END.Replace(s, m => $"{DOTTED[Lat(m.Groups[1].Value)]}.");
+        s = ABBREV_MID.Replace(s, m =>  // ⚠ reachable miss (#1122)
+            DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+        s = ABBREV_COMMA.Replace(s, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? w : m.Value);
+        s = ABBREV_END.Replace(s, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? $"{w}." : m.Value);
 
         // 3b) SIGNS. ⚠ `±` MUST PRECEDE THE `+` ARMS.
         var subject = s;

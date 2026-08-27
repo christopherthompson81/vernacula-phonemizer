@@ -247,9 +247,10 @@ public static class Normalize
         s = JsRegex.Replace(s, NR, _ => "numer");
 
         s = JsRegex.Replace(s, DOTTED_MID, m =>
-            $"{DOTTED[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
+            DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w)   // ⚠ reachable miss (#1122)
+                ? $"{w}{m.Groups[2].Value}" : m.Value);
         s = JsRegex.Replace(s, DOTTED_END, m =>
-            $"{DOTTED[m.Groups[1].Value.ToLowerInvariant()]}.");
+            DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
         // 6) VERSION / FIGURE DOTS between digits, BEFORE step 7 so the ordinal rule never sees digit-dot-digit.
         s = JsRegex.Replace(s, VERSION_DOT, m => $"{m.Groups[1].Value} kropka ");

@@ -130,7 +130,13 @@ export function normalizeCebuano(input: string): string {
     // `N.` rule must not claim a sentence-final period, and this corpus proves the hazard is live rather
     // than theoretical. The dot is KEPT, so a genuine sentence end is unaffected either way.
     s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}`;
+        });
 
     // ── 7. FRACTIONS ───────────────────────────────────────────────────────────────────────────────────
     // ×1 in this corpus, so this is robustness for plausible input rather than a measured repair, and it is

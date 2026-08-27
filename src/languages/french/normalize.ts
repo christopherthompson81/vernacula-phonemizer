@@ -150,14 +150,20 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (_m, ab: string, sp: string) => {
             const key = ab.toLowerCase();
-            return DOT_ONLY.has(key) ? `${ab}${sp}` : `${DOTTED_ABBREV[key]!}${sp}`;
+            if (DOT_ONLY.has(key)) return `${ab}${sp}`;
+            const w0 = DOTTED_ABBREV[key];   // ⚠ reachable miss (#1122)
+            return w0 === undefined ? _m : `${w0}${sp}`;
         });
     s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
-        (m0, ab: string) => (DOT_ONLY.has(ab.toLowerCase()) ? m0 : `${DOTTED_ABBREV[ab.toLowerCase()]!}.`));
+        (m0, ab: string) => {
+            if (DOT_ONLY.has(ab.toLowerCase())) return m0;
+            const w0 = DOTTED_ABBREV[ab.toLowerCase()];
+            return w0 === undefined ? m0 : `${w0}.`;
+        });
 
     // 3b) UNDOTTED abbreviations, which is how French normally writes them (le Dr Martin).
     s = s.replace(/\b(dr|pr)\b\.?(?=\s+\p{L})/giu,
-        (_m, ab: string) => UNDOTTED_ABBREV[ab.toLowerCase()]!);
+        (m0, ab: string) => UNDOTTED_ABBREV[ab.toLowerCase()] ?? m0);
 
     // 4) NAME INITIALS: a single letter + dot before a word is an initial, read as the LETTER NAME
     //    ("n. wayne hale" → "enne wayne hale"). Runs after step 3 so the honorifics (m., p.) win.

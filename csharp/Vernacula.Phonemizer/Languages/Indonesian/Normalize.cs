@@ -83,8 +83,14 @@ public static class Normalize
 
         s = NOMOR.Replace(s, "nomor ");
 
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = ABBREV_MID.Replace(s, m =>
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122). The pattern is built from this table's OWN keys but
+            // carries `i`+`u`, so JS's fold widens it — `ſ`→`s`, and the Cyrillic `ᲀᲃᲅ` forms onto theirs —
+            // and a near-miss MATCHES while its key is absent. The TS asserted non-null and spoke the word
+            // "undefined"; this indexer THREW. Refuse the whole match.
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+        s = ABBREV_END.Replace(s, m =>
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
         // Slash units, before the shared symbol tier claims the bare `km`.
         s = SLASH_UNIT.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");

@@ -398,16 +398,24 @@ export function normalizeBosnian(input: string): string {
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
         (_m, ab: string, sp: string, off: number, all: string) => {
             const next = all.slice(off + _m.length, off + _m.length + 1);
-            return `${DOTTED[lat(ab)]!}${/\p{Lu}/u.test(next) ? "." : ""}${sp}`;
+            const w0 = DOTTED[lat(ab)];   // ⚠ reachable miss (#1122)
+            if (w0 === undefined) return _m;
+            return `${w0}${/\p{Lu}/u.test(next) ? "." : ""}${sp}`;
         });
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*[,;:])`, "giu"),
-        (_m, ab: string) => DOTTED[lat(ab)]!);
+        (m0, ab: string) => DOTTED[lat(ab)] ?? m0);
     //    ⚠ A CLOSING BRACKET OR QUOTE IS NOT A PAUSE — bosnian.jsonc maps only `.!?…,;:` — so the dot must
     //    be KEPT before one, not consumed the way it is before a comma. This arm EARNS ITSELF here: the
     //    corpus has `… uređivanje priča, pripovijedanje priča itd.)`, where grouping `)` with the comma
     //    would silently lose the sentence-final pause.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*(?:[.!?”"»)\\]]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED[lat(ab)]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED[lat(ab)];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 3) LONE INITIAL IN A NAME — `George W. Bush` ×2, `Johna F. Kennedyja`, `Lyndona B. Johnsona`. The dot
     //    is a phrase break in a name that has none. Only the dot is dropped; the letter is left to the g2p.

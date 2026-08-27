@@ -202,9 +202,21 @@ export function normalizeAzerbaijani(input: string): string {
     // 3) SINGLE-DOT ABBREVIATIONS. Two branches: mid-sentence the dot is CONSUMED so it cannot become a
     //    phrase break; at a phrase end it is kept. `Şək.` (şəkil, figure) is the corpus's abbreviation.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(dr|prof|şək)\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(dr|prof|şək)\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 4) ORDINALS — the `N-ci` form. The written suffix (ci/cı/cu/cü) implies the harmony class; the spoken
     //    suffix is the cardinal's last word with -ıncı/-inci/-uncu/-üncü. Was *səkkiz d͡ʒi* / *yüz doxsan
