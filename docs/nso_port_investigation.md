@@ -127,7 +127,7 @@ A spurious clause pause inside every time, and `pm` reaching the g2p as [pʼm].
 language: *"It is NOT unverifiable, though — 1,990 FLEURS utterances in the ASR-alignment corpus are a
 referee in another modality, and they carried a quantified vowel defect for as long as this file said
 otherwise."* The engine file knows the corpus exists and used it to fix a vowel; the normalizer two files
-away says it does not exist and declines a rule for want of instances. Filed as **#1107**.
+away says it does not exist and declines a rule for want of instances. Filed as **#1108**.
 
 Per PORTING.md the C# ports the CURRENT behaviour and the finding is filed: a clock rule moves goldens, so
 it is TS-first. **NO TYPESCRIPT WAS CHANGED BY THIS PORT.**

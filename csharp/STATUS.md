@@ -61,7 +61,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   is no instance to tabulate the marker distribution from", while `nso_za` carries 13 sentences / 16 instances,
   every one a time of day with an `am`/`pm`/`mesong` marker, each currently reading with a clause pause inside
   the time (`ka 11:35 pm` → *kʼa lesometʼee , masometʰaro ɬano pʼm*). `sepedi.ts`, two files away, cites those
-  same FLEURS utterances as a referee that fixed a vowel defect (#1107). See `docs/nso_port_investigation.md`.
+  same FLEURS utterances as a referee that fixed a vowel defect (#1108). See `docs/nso_port_investigation.md`.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,
