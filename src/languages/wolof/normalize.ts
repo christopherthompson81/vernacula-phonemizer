@@ -242,6 +242,18 @@ const SPAN = "ba";
 const ENTITY: Readonly<Record<string, string>> = {
     "&sup2": "²", "&sup3": "³", "&nbsp": " ", "&alpha": "alpha",
 };
+/**
+ * ⚠ THE LOOKUP FALLS BACK TO THE MATCH, AND THE MISS BRANCH IS REACHABLE (#1122). The pattern carries `i`
+ * AND `u`, so JS's Unicode simple case folding applies — and it maps U+017F LONG S onto `s`. `&ſup2` and
+ * `&nbſp` therefore MATCH while the computed key keeps the long s and is not in this table, so the `!` that
+ * used to be here asserted non-null on `undefined` and `String.replace` stringified it: `km&ſup2` read
+ * *kmundɛfinɛd*, the word "undefined" spoken aloud in Wolof.
+ * ⚠ NOT HYPOTHETICAL INPUT. Long s is what OCR'd and historic-orthography text carries, and this tree
+ * already ships it — `csharp/goldens/nci.tsv` has `Caſtellana` and `Confeſsionario` in 16th-century book
+ * titles. ⚠ AND THE FALLBACK IS THE MATCH, NOT THE EMPTY STRING: a layer that does not recognise something
+ * should change nothing, so the text passes through and the `&` reads as this language's conjunction
+ * exactly as any other bare `&` does — rather than the characters being silently deleted.
+ */
 
 /** The digits of a fractional part, spaced so the number path speaks them one at a time. ⚠ Reading `85` in
  *  `15.85` as a NUMBER would say *juróom ñett fukk ak juróom* — "eighty-five" — which is a different
@@ -299,7 +311,7 @@ export function normalizeWolof(input: string): string {
     //    dropped letter.
     s = s.normalize("NFC")
         .replace(/&amp;/giu, "&")
-        .replace(/&(?:sup2|sup3|nbsp|alpha);?/giu, (e) => ENTITY[`&${e.slice(1).replace(";", "").toLowerCase()}`]!)
+        .replace(/&(?:sup2|sup3|nbsp|alpha);?/giu, (e) => ENTITY[`&${e.slice(1).replace(";", "").toLowerCase()}`] ?? e)
         .replace(/\p{Cf}/gu, "");
 
     // 2) DEGREES → `aj`, BEFORE the tier (which does not read `°` at all) and before de-grouping, whose

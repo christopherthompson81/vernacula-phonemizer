@@ -92,7 +92,13 @@ public static class Normalize
         // The three named senses of `°` before the bare arm, or the bare arm strands the scale/compass letter.
         s = DEG_C.Replace(s, "$1 derajat Celsius");
         s = DEG_F.Replace(s, "$1 derajat Fahrenheit");
-        s = DEG_COORD.Replace(s, m => $"{m.Groups[1].Value} derajat {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
+        s = DEG_COORD.Replace(s, m =>
+            // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122). The pattern carries `i` AND `u`, so
+            // JS folds U+017F LONG S onto `s` and `12°ſ` MATCHES `[NSEW]` — while `ſ` is no COMPASS key. The
+            // TS asserted non-null and spoke the word "undefined"; the C# indexer THREW.
+            COMPASS.TryGetValue(m.Groups[2].Value.ToLowerInvariant(), out var dir)
+                ? $"{m.Groups[1].Value} derajat {dir}"
+                : m.Value);
         s = DEG.Replace(s, "$1 derajat");
 
         s = MINUS.Replace(s, "$1minus $2");

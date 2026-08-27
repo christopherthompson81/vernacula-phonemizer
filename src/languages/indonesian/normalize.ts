@@ -99,7 +99,12 @@ export function normalizeIndonesian(input: string): string {
     //    letter glued raw into the IPA. Repairing an input EXPOSES the rules that were never exercised on it,
     //    so a mojibake fix has to be followed by a re-read of the sentences it unmasks.
     s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
-        (_m, d: string, dir: string) => `${d} derajat ${COMPASS[dir.toLowerCase()]!}`);
+        (m, d: string, dir: string) => {
+            // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122) — `iu` folds U+017F LONG S onto `s`,
+            // so `12°ſ` matches `[NSEW]` and the `!` made `String.replace` stringify `undefined`.
+            const word = COMPASS[dir.toLowerCase()];
+            return word === undefined ? m : `${d} derajat ${word}`;
+        });
     s = s.replace(/(\d)\s?°/gu, "$1 derajat");
 
     // 6) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.

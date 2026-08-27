@@ -321,7 +321,12 @@ export function normalizeSundanese(input: string): string {
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 darajat Celsius");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 darajat Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
-        (_m, d: string, dir: string) => `${d} darajat ${COMPASS[dir.toLowerCase()]!}`);
+        (m, d: string, dir: string) => {
+            // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122) — `iu` folds U+017F LONG S onto `s`,
+            // so `12°ſ` matches `[NSEW]` and the `!` made `String.replace` stringify `undefined`.
+            const word = COMPASS[dir.toLowerCase()];
+            return word === undefined ? m : `${d} darajat ${word}`;
+        });
     // ⚠ AND THE BARE ARM MUST NOT GLUE THE NEXT WORD ON. The scale arms above correctly DECLINE
     // `25°Cölner` (the ⟨C⟩ belongs to a word), and this one then claimed the bare `°` and produced
     // `25 darajatCölner` — one fused token, read *…daraɟatt͡ʃˈolnər*. The specific-before-general
