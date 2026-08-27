@@ -75,6 +75,48 @@ public class JsRegexFoldTests
         Assert.Equal(!isWord, JsRegex.Compile("^\\W$", flags).IsMatch(input));
     }
 
+    // ⚠ AND THE MIRROR CASE: /i WITHOUT /u must NARROW, not widen. .NET's IgnoreCase equates U+212A
+    // KELVIN with k/K; JS legacy /i equates NOTHING non-ASCII onto ASCII. So `[a-z]` under /i matched
+    // a Kelvin sign in C# and not in Node — the same defect class as the widening, in the opposite
+    // direction, and invisible until the derived fold probes existed (#1129). U+017F is NOT affected:
+    // .NET does not equate it either, which is why it needed widening under /iu in the first place.
+    [Theory]
+    [InlineData("[a-z]", "i", false)]
+    [InlineData("[a-z]", "iu", true)]     // under /iu JS DOES fold it — widened, not narrowed
+    [InlineData("[a-z]", "", false)]
+    [InlineData("k", "i", false)]
+    [InlineData("k", "iu", true)]
+    [InlineData("K", "i", false)]
+    [InlineData("\\w", "i", false)]
+    [InlineData("\\w", "iu", true)]
+    [InlineData("[\u212A]", "i", true)]   // asked for by name, so both engines match it
+    [InlineData("[^a-z]", "i", true)]      // ...and a NEGATED class must still ADMIT it
+    [InlineData("[^a-z]", "iu", false)]
+    public void TheKelvinSignFollowsJsAndNotDotNet(string pattern, string flags, bool matches)
+        => Assert.Equal(matches, JsRegex.Compile(pattern, flags).IsMatch("\u212A"));
+
+    // A guard that refused everything would satisfy the theory above and break every ordinary input,
+    // so the ordinary characters are asserted alongside it (trap 53 in reverse).
+    [Theory]
+    [InlineData("[a-z]", "i", "k")]
+    [InlineData("[a-z]", "i", "K")]
+    [InlineData("k", "i", "K")]
+    [InlineData("\\w", "i", "K")]
+    [InlineData("^([a-z]+?)([0-9])?$", "i", "KK")]
+    public void NarrowingDoesNotCostTheOrdinaryMatch(string pattern, string flags, string input)
+        => Assert.True(JsRegex.Compile(pattern, flags).IsMatch(input));
+
+    // ⚠ THE QUANTIFIER IS THE TRAP. A bare `(?!…)` guard binds to the atom beside it, so `(?!…)k+`
+    // guards the first k and lets every later one through; the guard must wrap the atom in a group.
+    [Fact]
+    public void TheGuardSurvivesAQuantifier()
+    {
+        var re = JsRegex.Compile("^[a-z]+$", "i");
+        Assert.True(re.IsMatch("kkk"));
+        Assert.False(re.IsMatch("kk\u212A"));   // the LAST position, not the first
+        Assert.False(re.IsMatch("\u212Akk"));
+    }
+
     [Fact]
     public void TheMeasurementIsPresentAndPlausible()
     {

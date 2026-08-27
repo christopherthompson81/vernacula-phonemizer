@@ -81,6 +81,10 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
        letter where .NET, whose `\w` is Unicode, sees one: `/\b([a-zà-ÿ])\./giu` declines `ſt.` in
        Node and matched it in `JsRegex`. Handled inside `JsRegex` — nothing for a port to do — but it
        is why a `\b` pattern is not automatically safe just because the class beside it was widened.
+       ⚠ AND `/i` WITHOUT `/u` GOES THE OTHER WAY (#1129): .NET's IgnoreCase equates U+212A KELVIN
+       with `k`, JS legacy `/i` equates nothing non-ASCII onto ASCII, so there the translator has to
+       NARROW what .NET would match. Also inside `JsRegex`. The rule for a port is just: the fold
+       divergence is not one-directional, and neither flag combination is the safe one.
     Code points vs code units — .NET matches one UTF-16 UNIT, JS under `u` matches one CODE POINT.
        `\p{L}` gains an astral half, `[^x]`/`\D`/`\W`/`\S`/`.` take a whole surrogate pair rather
        than matching half a character, and global iteration is driven by `JsRe` because JS uses two
