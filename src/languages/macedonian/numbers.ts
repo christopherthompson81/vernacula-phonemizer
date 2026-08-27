@@ -24,7 +24,7 @@ interface NumbersDef {
 const NUM = loadManifest<{ numbers: NumbersDef }>(import.meta.url, "macedonian.jsonc").numbers;
 
 /** Build the Macedonian words for n; "и" precedes the final component (дваесет и еден; сто и еден). */
-export function numberToText(n: number): string {
+export function numberToText(n: number, raw?: string): string {
     if (n < 0) return "";
     if (n < 10) return NUM.units[n]!;
     if (n === 10) return NUM.ten;
@@ -51,7 +51,7 @@ export function numberToText(n: number): string {
         const milWord = mil === 1 ? NUM.million : `${numberToText(mil)} ${NUM.millions}`; // милион is masculine
         return r ? `${milWord} ${numberToText(r)}` : milWord;
     }
-    return [...String(n)].map((d) => NUM.units[Number(d)]!).join(" ");
+    return [...(raw ?? String(n))].filter((c) => c >= "0" && c <= "9").map((d) => NUM.units[Number(d)]!).join(" ");
 }
 
 /** Masculine-indefinite ordinal words 1–19. */

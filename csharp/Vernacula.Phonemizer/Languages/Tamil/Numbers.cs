@@ -62,13 +62,13 @@ public static class TamilNumbersComposer
     }
 
     /** Non-negative integer → Tamil words. */
-    public static string NumberToWords(double n)
+    public static string NumberToWords(double n, string? raw = null)
     {
         if (!double.IsFinite(n) || n < 0) return "";
         if (n == 0) return ONES[0];
         // ⚠ THE CEILING. Above 10¹⁰ the crore count exceeds 999 and `Below1000` runs off `HUND` — where
         // JS yielded `undefined` and read three different quantities as the bare crore word, .NET threw.
-        if (n >= 1e10) return string.Join(" ", Js.NumberToString(n).Select(c => ONES[c - '0']));
+        if (n >= 1e10) return string.Join(" ", (raw ?? Js.NumberToString(n)).Where(char.IsAsciiDigit).Select(c => ONES[c - '0']));
         var parts = new List<string>();
         var crore = Math.Floor(n / 10000000);
         n %= 10000000;
