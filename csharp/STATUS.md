@@ -57,7 +57,7 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   sign are likewise ZERO-instance in the golden and covered only by the probes. See
   `docs/la_port_investigation.md`, which also files the port's one reading finding — the word-final ⟨-Vm⟩
   rule nasalizes a diphthong OFFGLIDE (`Nicolaum` → *ˈnɪkɔɫaũ̯ː*), attested in golden row 43 and reproduced
-  identically by both engines, so it is FILED, not fixed here.
+  identically by both engines, so it is FILED (#1097), not fixed here.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,

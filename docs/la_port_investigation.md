@@ -98,7 +98,7 @@ stressed as a three-syllable one. **Attested, not hypothetical: `Nicolaum` is in
 and in `csharp/goldens/la.tsv` row 43**, where `nɪkɔɫaũ̯ː` is the shipped reading. `Achaum`, `laum` and the
 bare `aum` reproduce it; `Achaeum` (`aˈkʰae̯ũː`) and `laudem` (`ˈɫau̯dẽː`) are the correct neighbours.
 
-Per PORTING.md the C# ports the CURRENT behaviour and the finding is filed rather than fixed here: the
+Filed as **#1097**. Per PORTING.md the C# ports the CURRENT behaviour rather than fixing it here: the
 fix is TS-first, and it moves at least one golden row, so it belongs in its own change with the goldens
 regenerated. **NOTHING IN THE TYPESCRIPT WAS CHANGED BY THIS PORT.**
 
