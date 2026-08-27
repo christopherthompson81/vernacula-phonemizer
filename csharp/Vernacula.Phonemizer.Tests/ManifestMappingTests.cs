@@ -413,6 +413,11 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/ancientgreek", "ancientgreek.jsonc", Languages.AncientGreek.Manifest.MANIFEST);
 
     [Fact]
+    public void FinnishManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/finnish", "finnish.jsonc", Languages.Finnish.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
     public void BambaraManifestIsFullyMapped() =>
         AssertFullyMapped("languages/bambara", "bambara.jsonc", Languages.Bambara.Manifest.MANIFEST,
             "provenance", "convention");
