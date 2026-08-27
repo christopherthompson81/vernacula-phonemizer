@@ -242,6 +242,8 @@ public static class Normalize
     private static readonly JsRe ORDINAL_N = JsRegex.Compile("(?<![\\d.,])(\\d{1,4})\\.\\s+(\\p{Ll}[\\p{L}\\p{M}]*)", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:.,])", "gu");
 
+    private static readonly JsRe DECIMAL_FRAC = JsRegex.Compile(@"(?<=\d),(\d+)", "gu");
+
     /// <summary>THE DECIMAL COMMA → *zarez*, AND THE FRACTIONAL PART'S LEADING ZEROS SURVIVE IT.
     /// <para>⚠ This was a 100× ERROR, not a mispronunciation. Replacing the comma leaves the fractional run
     /// as its own token and the number arm reads it with a numeric parse, so `001` became 1 and
@@ -260,7 +262,6 @@ public static class Normalize
         return zeros == 0 ? $" zarez {frac}" : $" zarez {string.Concat(Enumerable.Repeat("0 ", zeros))}{frac[zeros..]}";
     });
 
-    private static readonly JsRe DECIMAL_FRAC = JsRegex.Compile(@"(?<=\d),(\d+)", "gu");
     private static readonly JsRe TIMES = JsRegex.Compile("(?<=\\d)\\s?[x×]\\s?(?=\\d)", "gu");
     private static readonly JsRe PLUS_SIGN = JsRegex.Compile("(^|[\\s(])\\+\\s?(\\d)", "gu");
     private static readonly JsRe GROUP_DOT = JsRegex.Compile("\\.", "gu");
