@@ -147,6 +147,7 @@ public static class Bootstrap
             Danish.DanishPhonemizer.RegisterSelf();
             Rangpuri.RangpuriPhonemizer.RegisterSelf();
             Bavarian.BavarianPhonemizer.RegisterSelf();
+            Bambara.BambaraPhonemizer.RegisterSelf();
         }
     }
 }
