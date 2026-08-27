@@ -185,6 +185,12 @@ public static class JsRegex
     // the reverse of .NET's \s on both counts.
     private const string JsWhitespaceInner = "\\t\\n\\v\\f\\r \\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000\\uFEFF";
     private const string AsciiWordInner = "A-Za-z0-9_";
+    // ⚠ /iu WIDENS \w AND \b. JS defines both over the ASCII set above -- EXCEPT under i+u together,
+    // where WordCharacters admits every c whose Canonicalize (scf) lands in it. MEASURED over the BMP
+    // against Node: exactly two do, U+017F LONG S (-> s) and U+212A KELVIN (-> k); /i alone and /u
+    // alone admit neither. So `\bt` does NOT match "ſt" in JS -- the long s is a word character
+    // there, and there is no boundary before the t (#1127).
+    private const string FoldWordInner = AsciiWordInner + "\u017F\u212A";
 
     // ⚠ CODE POINTS vs CODE UNITS — the deepest of the dialect gaps. Under /u JS matches one CODE
     // POINT at a time; .NET always matches one UTF-16 UNIT. So .NET's [^x] happily matches HALF of an
@@ -193,10 +199,16 @@ public static class JsRegex
     // and every \p{...} gains its astral half as an alternation.
     private const string AstralPair = "[\uD800-\uDBFF][\uDC00-\uDFFF]";
     private const string NoSurrogate = "\uD800-\uDFFF";
-    private const string WordBoundary =
-        "(?:(?<![A-Za-z0-9_])(?=[A-Za-z0-9_])|(?<=[A-Za-z0-9_])(?![A-Za-z0-9_]))";
-    private const string NonWordBoundary =
-        "(?:(?<=[A-Za-z0-9_])(?=[A-Za-z0-9_])|(?<![A-Za-z0-9_])(?![A-Za-z0-9_]))";
+    private static string WordBoundaryFor(bool foldWide)
+    {
+        var w = foldWide ? FoldWordInner : AsciiWordInner;
+        return $"(?:(?<![{w}])(?=[{w}])|(?<=[{w}])(?![{w}]))";
+    }
+    private static string NonWordBoundaryFor(bool foldWide)
+    {
+        var w = foldWide ? FoldWordInner : AsciiWordInner;
+        return $"(?:(?<=[{w}])(?=[{w}])|(?<![{w}])(?![{w}]))";
+    }
 
     // ⚠ JS SIMPLE CASE FOLDING vs .NET IgnoreCase. Under /iu, JS folds with scf(), which equates a few
     // pairs .NET's IgnoreCase does not: /[a-z]/iu matches U+017F LATIN SMALL LETTER LONG S, /[ι]/iu
@@ -346,7 +358,7 @@ public static class JsRegex
             var c = pattern[i];
             if (c == '\\')
             {
-                i = AppendEscape(pattern, i, sb, inClass: false, classAstral: null, unicode: unicode);
+                i = AppendEscape(pattern, i, sb, inClass: false, classAstral: null, unicode: unicode, foldWide: foldWide);
                 continue;
             }
             if (c == '[')
@@ -423,7 +435,7 @@ public static class JsRegex
             while (j < closeIdx)
             {
                 if (pattern[j] == '\\' && j + 1 < closeIdx && pattern[j + 1] == 'S') { j += 2; continue; }
-                if (pattern[j] == '\\') { j = AppendEscape(pattern, j, rest, inClass: true, classAstral: null, unicode: unicode); continue; }
+                if (pattern[j] == '\\') { j = AppendEscape(pattern, j, rest, inClass: true, classAstral: null, unicode: unicode, foldWide: foldWide); continue; }
                 rest.Append(pattern[j]);
                 j++;
             }
@@ -480,7 +492,7 @@ public static class JsRegex
             if (TryTakeAstralMember(pattern, ref i, body, astral, negated)) continue;
             if (c == '\\')
             {
-                i = AppendEscape(pattern, i, body, inClass: true, classAstral: astral, unicode: unicode);
+                i = AppendEscape(pattern, i, body, inClass: true, classAstral: astral, unicode: unicode, foldWide: foldWide);
                 continue;
             }
             body.Append(c);
@@ -575,7 +587,7 @@ public static class JsRegex
     /// <paramref name="sb"/> (class BODY text when <paramref name="inClass"/>) and returns the index
     /// after the escape. Astral script ranges inside a class are pushed onto
     /// <paramref name="classAstral"/> for the class translator to OR in.</summary>
-    private static int AppendEscape(string pattern, int i, StringBuilder sb, bool inClass, List<string>? classAstral, bool unicode = false)
+    private static int AppendEscape(string pattern, int i, StringBuilder sb, bool inClass, List<string>? classAstral, bool unicode = false, bool foldWide = false)
     {
         var n = pattern.Length;
         if (i + 1 >= n) throw new ArgumentException($"JsRegex: trailing backslash in {pattern}");
@@ -587,22 +599,30 @@ public static class JsRegex
                 if (inClass) throw new NotSupportedException($"JsRegex: in-class \\D not supported: {pattern}");
                 sb.Append(unicode ? $"(?:{AstralPair}|[^0-9{NoSurrogate}])" : "[^0-9]");
                 return i + 2;
-            case 'w': sb.Append(inClass ? AsciiWordInner : "[" + AsciiWordInner + "]"); return i + 2;
-            case 'W':
-                if (inClass) throw new NotSupportedException($"JsRegex: in-class \\W not supported: {pattern}");
-                sb.Append(unicode ? $"(?:{AstralPair}|[^{AsciiWordInner}{NoSurrogate}])" : "[^" + AsciiWordInner + "]");
+            case 'w':
+            {
+                var w = foldWide ? FoldWordInner : AsciiWordInner;
+                sb.Append(inClass ? w : "[" + w + "]");
                 return i + 2;
+            }
+            case 'W':
+            {
+                if (inClass) throw new NotSupportedException($"JsRegex: in-class \\W not supported: {pattern}");
+                var w = foldWide ? FoldWordInner : AsciiWordInner;
+                sb.Append(unicode ? $"(?:{AstralPair}|[^{w}{NoSurrogate}])" : "[^" + w + "]");
+                return i + 2;
+            }
             case 's': sb.Append(inClass ? JsWhitespaceInner : "[" + JsWhitespaceInner + "]"); return i + 2;
             case 'S':
                 if (inClass) throw new NotSupportedException($"JsRegex: in-class \\S not supported (except the [\\s\\S] idiom): {pattern}");
                 sb.Append(unicode ? $"(?:{AstralPair}|[^{JsWhitespaceInner}{NoSurrogate}])" : "[^" + JsWhitespaceInner + "]");
                 return i + 2;
             case 'b':
-                sb.Append(inClass ? "\\u0008" : WordBoundary); // in-class \b is BACKSPACE in JS
+                sb.Append(inClass ? "\\u0008" : WordBoundaryFor(foldWide)); // in-class \b is BACKSPACE in JS
                 return i + 2;
             case 'B':
                 if (inClass) throw new NotSupportedException($"JsRegex: in-class \\B: {pattern}");
-                sb.Append(NonWordBoundary);
+                sb.Append(NonWordBoundaryFor(foldWide));
                 return i + 2;
             case 'p':
             case 'P':
