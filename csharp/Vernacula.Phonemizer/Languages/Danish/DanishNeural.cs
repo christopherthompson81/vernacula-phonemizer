@@ -10,10 +10,13 @@ namespace Vernacula.Phonemizer.Languages.Danish;
 
 public static class DanishNeural
 {
-    // ⚠ THE PRE-PASS TOKENIZES AND KEYS EXACTLY AS THE SYNC ENGINE DOES — Danish.cs's own LATIN_RUN and
+    // ⚠ THE PRE-PASS TOKENIZES AND KEYS EXACTLY AS THE SYNC ENGINE DOES — Danish.cs's own DA_WORD and
     // `Nat`, not a restated letter class. A hand-listed copy drifted in the TS and silently skipped the
     // tagger tier for every word the nativiser rewrites; see danishNeural.ts for the measurement.
-    private static readonly JsRe WORD = JsRegex.Compile(HostWord.LATIN_RUN, "giu");
+    // ⚠ DA_WORD, NOT core's LATIN_RUN, and `gu` not `giu`. Danish's word arm claims a medial apostrophe and
+    // core's does not; importing the shared one would tokenize differently from the engine this pre-pass
+    // feeds — re-opening the very drift the note above records, one layer down.
+    private static readonly JsRe WORD = JsRegex.Compile(DanishPhonemizer.DA_WORD, "gu");
 
     private static Task<IWordStructuralTagger?>? taggerP;
     private static readonly object Gate = new();

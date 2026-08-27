@@ -176,3 +176,36 @@ describe("danish normalization", () => {
         expect(phonemize("5 km²", "da")).toContain("kvaˈdʁɑːˀdkiloˌmeːˀdɐ"); // local compound still wins
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// The medial apostrophe. `LATIN_RUN` stops at it, so the run split and each half was phonemized as its own
+// word — and in Danish this is NATIVE orthography, not a borrowing: 31 instances / 17 distinct types in
+// FLEURS `da_dk`. ⚠ Zero in the parity golden. Reported by the nb port as a sibling note and confirmed here
+// against da's own corpus.
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+describe("a medial apostrophe joins a word — unless the abbreviation before it wants letter names", () => {
+    const say = (s: string): string => phonemize(s, "da").trim();
+
+    test("names and possessives join", () => {
+        expect(say("Haiti's")).toBe("hˈaitis"); //     was `haˈiti ˈɛs` — the -s read as the LETTER NAME S
+        expect(say("O'Brien")).toBe("ˈobʁiən"); //     was `ˈoːˀ bʁˈiən`
+        expect(say("Xi'an")).toBe("ksˈian");
+        expect(say("People's")).toBe("pˈeoples");
+    });
+
+    // ⚠ DANISH NEEDED A GUARD sv AND nb DID NOT. Its own forms attach the suffix to an ABBREVIATION, which
+    // is read as LETTER NAMES — joining destroys the reading instead of repairing it: `FN's` became the
+    // vowel-less token *fns*, `DNA'et` became *dnˈaəð*. The corpus draws the line cleanly: all seven types
+    // that want the initialism path have ≥2 capitals before the mark, all ten that want joining have ≤1.
+    test("an abbreviation keeps its letter names", () => {
+        expect(say("FN's")).toBe("ˈɛfˌɛn ˈɛs");
+        expect(say("DNA'et")).toBe("deːɛˈnaːˀ ˈɛd");
+        expect(say("USA's")).toBe("uɛsˈaːˀ ˈɛs");
+        expect(say("REM'er")).toBe("ˈʁɛmˀ ˈɛɐ");
+    });
+
+    test("a closing quote and the s-final genitive still decline", () => {
+        expect(say("sagde 'nej'")).toBe("ˈsaːə ˈnɑjˀ");
+        expect(say("Anders'")).toBe("ˈɑnɐs");
+    });
+});

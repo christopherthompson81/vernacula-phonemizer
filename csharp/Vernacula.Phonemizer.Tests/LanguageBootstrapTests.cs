@@ -212,6 +212,9 @@ public class LanguageBootstrapTests
         var neural = await Phonemizer.PhonemizeAsync(oov, "ckb");
         Assert.NotEqual(rules, neural);
         Assert.Equal(rules, neural.Replace("ɪ", ""));
+    }
+
+    [Fact]
     public async Task DanishAsyncUsesTheTagger()
     {
         // Danish is the deepest European orthography, so the ~37k NST lexicon carries the shipped path and
@@ -240,4 +243,18 @@ public class LanguageBootstrapTests
         Assert.Equal(Languages.Danish.DanishPhonemizer.PhonemizeWord("joão"),
             Languages.Danish.DanishPhonemizer.PhonemizeWord("joao"));
     }
+
+    [Theory]
+    // The medial apostrophe, which in Danish is NATIVE orthography — 31 instances / 17 distinct types in
+    // FLEURS da_dk, and ZERO in the parity golden. Reported by the nb port as a sibling note, confirmed
+    // against da's own corpus. ⚠ Danish needed a guard sv and nb did not: it attaches the suffix to an
+    // ABBREVIATION read as LETTER NAMES, so joining destroys the reading rather than repairing it.
+    [InlineData("Haiti's", "hˈaitis")]          // was `haˈiti ˈɛs` — the -s read as the letter name S
+    [InlineData("O'Brien", "ˈobʁiən")]          // was `ˈoːˀ bʁˈiən`
+    [InlineData("FN's", "ˈɛfˌɛn ˈɛs")]          // ≥2 capitals → the initialism path is kept
+    [InlineData("DNA'et", "deːɛˈnaːˀ ˈɛd")]     // …joining gave the vowel-less *dnˈaəð*
+    [InlineData("sagde 'nej'", "ˈsaːə ˈnɑjˀ")]  // a closing quote still declines
+    [InlineData("Anders'", "ˈɑnɐs")]            // …and so does the s-final genitive
+    public void DanishJoinsAMedialApostropheExceptAfterAnAbbreviation(string input, string want) =>
+        Assert.Equal(want, Phonemizer.Phonemize(input, "da"));
 }

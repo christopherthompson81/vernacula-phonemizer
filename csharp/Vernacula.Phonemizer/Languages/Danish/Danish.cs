@@ -130,8 +130,20 @@ public sealed class DanishPhonemizer : ILanguage
     }
 
     // A Danish word (Latin incl. æ ø å + loanword accents) / number / punctuation token.
+    /// <summary>⚠ THE WORD ARM CARRIES A MEDIAL APOSTROPHE, and in Danish that is NATIVE orthography — 31
+    /// instances / 17 distinct types in FLEURS da_dk. LATIN_RUN stops at it, so `Haiti's` read
+    /// *haˈiti ˈɛs*, the genitive -s as the LETTER NAME S.
+    /// <para>⚠ AND IT DECLINES AFTER TWO CAPITALS, which sv and nb did not need: Danish attaches the suffix
+    /// to an ABBREVIATION read as letter names, so joining DESTROYS the reading — `FN's` became the
+    /// vowel-less token *fns*. The corpus draws the line cleanly (≥2 capitals → initialism path).</para>
+    /// <para>⚠ `gu`, NOT `giu`: under /i a character class is case-insensitive, so `[A-ZÆØÅ]` matched
+    /// lowercase and declined `Haiti's` too — the same \p{Lu}-under-/i trap the sl port found. The flag was
+    /// vestigial for every other arm.</para></summary>
+    private const string DA_LETTER = "(?!\\p{Nd})[\\p{Script=Latin}]";
+    internal static readonly string DA_WORD =
+        $"{DA_LETTER}(?:{DA_LETTER}|\\p{{M}}|(?<![A-ZÆØÅ]{{2}})['\u2019](?={DA_LETTER}))*";
     private static readonly JsRe TOKEN =
-        JsRegex.Compile($"({HostWord.LATIN_RUN})|(\\d+)|([.!?…,;:])", "giu");
+        JsRegex.Compile($"({DA_WORD})|(\\d+)|([.!?…,;:])", "gu");
 
     /** ⚠ NARROWER THAN THE TOKEN CLASS ON PURPOSE — ó è ã à are absent because the g2p has no rule for them
      *  and DROPS them; see danish.ts. `test/native-inventory.test.ts` measures the claim. */

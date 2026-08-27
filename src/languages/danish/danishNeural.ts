@@ -11,8 +11,7 @@
  */
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 import { withHost } from "../../core/foreign.ts";
-import { LATIN_RUN } from "../../core/hostWord.ts";
-import { createDanish, danishLexicon, nat } from "./danish.ts";
+import { createDanish, danishLexicon, nat, DA_WORD } from "./danish.ts";
 import { createDanishTagger, type DanishTagger } from "./danishTagger.ts";
 
 /**
@@ -29,7 +28,10 @@ import { createDanishTagger, type DanishTagger } from "./danishTagger.ts";
  * because the fold has already removed the out-of-vocab letter). Deriving both from danish.ts's own exports
  * is what keeps the two tokenizers from drifting again.
  */
-const WORD = new RegExp(LATIN_RUN, "giu");
+// ⚠ `DA_WORD`, NOT core's `LATIN_RUN`. Danish's word arm claims a MEDIAL APOSTROPHE (`FN's`, `DNA'et`) and
+// core's does not, so importing the shared one would tokenize differently from the engine this pre-pass
+// feeds — the exact drift the ⚠ above records, re-opened one layer down.
+const WORD = new RegExp(DA_WORD, "gu"); // `gu` to match danish.ts's TOKEN — see the flag note there
 let taggerP: Promise<DanishTagger | undefined> | undefined;
 let engine: ReturnType<typeof createDanish> | undefined;
 const daEngine = (): ReturnType<typeof createDanish> => (engine ??= createDanish());

@@ -134,10 +134,45 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
 // A Danish word (any Latin run) / number / punctuation token. LATIN_RUN rather than a hand-listed alphabet,
 // so no lexicon key can be split at a letter the list forgot (voilà → "voil"); the INVENTORY question is
 // `nat` below, which is a different question (see core/hostWord.ts).
-// ⚠ danishNeural.ts's pre-pass MUST TOKENIZE AND KEY THE SAME WAY — it imports this module's `LATIN_RUN`
-// and `nat` rather than restating them, because a hand-listed copy drifted and silently skipped the tagger
-// tier for every word the nativiser rewrites. See the ⚠ on `WORD` there.
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
+// ⚠ danishNeural.ts's pre-pass MUST TOKENIZE AND KEY THE SAME WAY — it imports this module's `DA_WORD` and
+// `nat` rather than restating them, because a hand-listed copy drifted and silently skipped the tagger tier
+// for every word the nativiser rewrites. See the ⚠ on `WORD` there. ⚠ IT IMPORTS `DA_WORD`, NOT core's
+// `LATIN_RUN`: once this arm claimed the medial apostrophe the two stopped being the same regex, and
+// importing the shared one would have re-opened the drift that was just closed.
+/**
+ * ⚠ THE WORD ARM CARRIES A MEDIAL APOSTROPHE, and in Danish that is native orthography rather than a
+ * borrowing. `LATIN_RUN` stops at `'`, so the run split and each half was phonemized as its own word:
+ *
+ *     FN's    → ˈɛfˌɛn ˈɛs      the genitive -s read as the LETTER NAME "S"
+ *     DNA'et  → deːɛˈnaːˀ ˈɛd   the definite article read as a separate word
+ *     Haiti's → haˈiti ˈɛs
+ *
+ * 31 instances / 17 distinct types in FLEURS `da_dk` — `USA's`, `FN's`, `DNA'et`, `REM'er` are Danish's own
+ * abbreviation-plus-suffix forms, the rest foreign names and possessives. Zero in the parity golden.
+ * ⚠ THE GUARD IS A LOOKAHEAD, not a character class: the apostrophe must be FOLLOWED BY A LETTER to belong
+ * to the word, or a closing quote joins (`sagde 'nej'` → the token `nej'`) and the s-final genitive
+ * `Anders'` stops declining. Same shape as sv (#1073) and nb.
+ *
+ * ⚠ AND IT DECLINES AFTER TWO CAPITALS, WHICH sv AND nb DID NOT NEED. Danish's own forms attach the suffix
+ * to an ABBREVIATION, and that abbreviation is read as LETTER NAMES — joining the run destroys the reading
+ * instead of repairing it: `FN's` became the single vowel-less token *fns* where splitting gives
+ * *ˈɛfˌɛn ˈɛs*, and `DNA'et` became *dnˈaəð*. So the join is refused when two capitals precede the mark.
+ * That is exactly the line the corpus draws: of the 17 distinct types, the seven that want the initialism
+ * path (`USA's FN's DNA'et REM'er USOC's UNESCO's AOL's`) all have ≥2 capitals before the apostrophe, and
+ * the ten that want joining (`Haiti's Xi'an Io's O'Brien O'Shannessy People's King's Women's Children's
+ * President's`) all have at most one — `O'` is a single capital, `Xi` and `Io` are capital-then-lowercase.
+ * ⚠ The suffix on a declined form is still its own token (`FN` + `s`), which is what it was before this
+ * change; making the genitive attach to a letter-name run is a separate question this does not answer.
+ */
+const DA_LETTER = "(?!\\p{Nd})[\\p{Script=Latin}]";
+export const DA_WORD =
+    `${DA_LETTER}(?:${DA_LETTER}|\\p{M}|(?<![A-ZÆØÅ]{2})['\u2019](?=${DA_LETTER}))*`;
+// ⚠ `gu`, NOT `giu`, AND THE FLAG IS LOAD-BEARING NOW. Under `/i` a character class is case-insensitive,
+// so `[A-ZÆØÅ]` in the apostrophe guard above matched LOWERCASE too and declined `Haiti's` along with
+// `FN's` — the same `\p{Lu}`-under-`/i` trap the sl port found two guards built on. The `i` was vestigial
+// for every other arm here (`\p{Script=Latin}`, `\d`, and a punctuation class carry no case), so dropping
+// it costs nothing and is what lets the guard mean what it says.
+const TOKEN = new RegExp(`(${DA_WORD})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where the
