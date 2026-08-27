@@ -437,6 +437,11 @@ public class ManifestMappingTests
             "provenance");
 
     [Fact]
+    public void WolofManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/wolof", "wolof.jsonc", Languages.Wolof.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
     public void BambaraManifestIsFullyMapped() =>
         AssertFullyMapped("languages/bambara", "bambara.jsonc", Languages.Bambara.Manifest.MANIFEST,
             "provenance", "convention");

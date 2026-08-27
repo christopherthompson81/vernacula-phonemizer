@@ -154,6 +154,7 @@ public static class Bootstrap
             Setswana.SetswanaPhonemizer.RegisterSelf();
             Sesotho.SesothoPhonemizer.RegisterSelf();
             Sepedi.SepediPhonemizer.RegisterSelf();
+            Wolof.WolofPhonemizer.RegisterSelf();
         }
     }
 }
