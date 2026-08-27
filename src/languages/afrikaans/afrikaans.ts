@@ -477,7 +477,7 @@ class AfrikaansPhonemizer implements Phonemizer {
             else if (m[2]) {
                 // A PERIOD is the decimal point (12.8) and a COMMA groups thousands (17,500) — see TOKEN.
                 const [intPart, frac] = m[2].replace(/,/gu, "").split(".");
-                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                for (const wd of numberToWords(Number(intPart), intPart).split(" ")) sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
                     sink.emit(phonemizeWord(MANIFEST.decimalWord));
                     for (const d of frac)

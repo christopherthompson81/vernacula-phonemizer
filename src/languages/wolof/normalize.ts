@@ -32,10 +32,17 @@
  * it onto the numeral's last word would be a word-boundary refinement with no reading to repair. Left alone.
  *
  * Deliberately not done, each with the measurement behind it:
- *   · NO CLOCK. 33 `\d{1,2}:\d{2}` shapes in the retained text and **33 of 33 are SCRIPTURE REFERENCES** —
- *     `Pe 2:1-3:22`, `Jëf 19:26-27`, `Ge 1:26-30`, `Ex 6:20`, `suraat 2:30-38`, `1Ki 15:8-24`. Zero clocks.
- *     A ceb-shaped bare-colon rule would have fixed 0 and broken 33 (playbook trap 55, the ilo/ceb finding).
- *     The `:` reads as a comma pause, which is a defensible reading of a verse reference.
+ *   · NO BARE-COLON CLOCK RULE, AND NO CLOCK WORD. 33 `\d{1,2}:\d{2}` shapes in the retained text and
+ *     **33 of 33 are SCRIPTURE REFERENCES** — `Pe 2:1-3:22`, `Jëf 19:26-27`, `Ge 1:26-30`, `Ex 6:20`,
+ *     `suraat 2:30-38`, `1Ki 15:8-24`. A ceb-shaped bare-colon rule would have broken all 33 (playbook
+ *     trap 55, the ilo/ceb finding). The `:` reads as a comma pause, which is a defensible reading of a
+ *     verse reference. That conclusion stands and is why step 0 is MARKER-keyed rather than shape-keyed.
+ *     ⚠ THE PREMISE "ZERO CLOCKS" DID NOT SURVIVE (#1111). It is true of the mined artifact and false of
+ *     Wolof: FLEURS `wo_sn` carries 9 distinct sentences with a `d:dd`, **8 of them a time of day** (the
+ *     ninth is a Giant Slalom result, `bu toll ci 4:41.30, 2:11`). ⚠ AND #1111 SAID "8 of 8 … 0
+ *     non-clocks" — re-counted here at 9 and 8, because the sports line is a counter-example and the
+ *     marker guard has to be shown to decline it, which it does: it carries no marker and neither does
+ *     any verse reference.
  *   · NO INITIALISMS (~60 retained, 792 corpus-wide: ASF ×5, AOF ×4, OMS ×3, MPLA ×3, IFAN ×2). The seam
  *     exists and I checked it (trap 16): `core/initialisms.ts` needs a `letterName` table, espeak ships no
  *     Wolof at all, and no in-repo source carries one. Wiring it without one is a NO-OP. A sourcing gap.
@@ -257,8 +264,29 @@ function saidAfter(full: string, end: number, word: string): boolean {
 }
 
 /** Normalize one Wolof input string. Steps are ORDER-DEPENDENT; each states its coupling. */
+/**
+ * A CLOCK'S COLON LOSES ITS PAUSE — but ONLY when a day-part or timezone MARKER follows (#1111).
+ *
+ * ⚠ THE MARKER IS THE WHOLE RULE, because Wolof is the language where a bare-colon rule is provably wrong.
+ * The mined artifact's 33 `\d{1,2}:\d{2}` are 33 SCRIPTURE REFERENCES (`Ge 1:26-30`, `1Ki 15:8-24`) where
+ * the comma pause is a defensible reading, and FLEURS `wo_sn` adds a SPORTS TIME (`bu toll ci 4:41.30,
+ * 2:11`). Keyed on the marker instead: **4 fixed, 0 claimed** — no verse reference in either corpus carries
+ * one, and neither does the race time.
+ * ⚠ IT EMITS NO WORD. No Wolof hour noun is sourced here, so the rule spends the colon on a space and
+ * stops; the reading gains nothing but the loss of a phrase break inside one time expression.
+ * ⚠ THE MARKER LIST IS EXACTLY WHAT IS ATTESTED — `ci suba` ("in the morning") ×2, `ci ngoon` ("in the
+ * evening"), `GMT`. Widening it to am/pm would be guessing at a shape this corpus does not write.
+ */
+// space, NBSP
+const CLOCK_MARKED =
+    /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?=[ \u00a0]*(?:ci[ \u00a0]+(?:suba|ngoon)|GMT)(?![\p{L}\p{M}]))/giu;  // space, NBSP
+
 export function normalizeWolof(input: string): string {
     let s = input;
+
+    // 0) A MARKED clock loses the colon's clause pause — see CLOCK_MARKED. First, so every numeric step
+    //    below sees one digit run rather than two.
+    s = s.replace(CLOCK_MARKED, "$1 $2");
 
     // 1) NFC, THE SEMICOLON-LESS HTML ENTITIES, AND FORMAT CHARACTERS — before anything looks for a number,
     //    a sign or an ampersand. `&sup2` ×3 is the load-bearing one: it sits in the EXPONENT slot

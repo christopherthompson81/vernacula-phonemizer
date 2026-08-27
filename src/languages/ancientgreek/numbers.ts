@@ -79,9 +79,9 @@ function myriadTag(k: number, singular: boolean): string {
 }
 
 /** Non-negative integer → Ancient Greek words. Out-of-range input falls back to digit-by-digit. */
-export function numberToWords(n: number): string {
+export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0) {
-        return [...String(n)].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!).join(" ");
+        return [...(raw ?? String(n))].filter((c) => c >= "0" && c <= "9").map((d) => UNITS[Number(d)]!).join(" ");
     }
     if (n === 0) return UNITS[0]!; // οὐδέν
     // Decompose in BASE 10,000 (the myriad), highest group first.

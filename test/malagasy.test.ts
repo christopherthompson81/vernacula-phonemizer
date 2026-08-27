@@ -63,8 +63,11 @@ describe("Malagasy text normalization", () => {
         expect(normalizeMalagasy("1 000 000 $")).toBe("1000000 dolara");
         // …and a YEAR followed by a three-digit number is not a group: the first run must be 1–3 digits.
         expect(normalizeMalagasy("1947 250 olona")).toBe("1947 250 olona");
-        // French convention combines both marks in one number (the speed of light).
-        expect(normalizeMalagasy("299 792,458 km/s")).toBe("299792 faingo 4 5 8 kilaometatra/s");
+        // French convention combines both marks in one number (the speed of light). ⚠ The `km` now stays an
+        // abbreviation: `s` is not a declared denominator here, and since #1093 the tier declines an
+        // unreadable rate rather than speaking the numerator and stranding the ⟨/s⟩ — which for THIS number
+        // is the speed of light read out as a distance. The grouping under test is unaffected.
+        expect(normalizeMalagasy("299 792,458 km/s")).toBe("299792 faingo 4 5 8 km/s");
     });
 
     it("the comma is the decimal at every width", () => {

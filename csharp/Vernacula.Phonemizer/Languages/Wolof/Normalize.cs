@@ -93,6 +93,17 @@ public static class Normalize
         return re.IsMatch(full[from..Math.Min(full.Length, end + 45)]);
     }
 
+    /**
+     * A CLOCK'S COLON LOSES ITS PAUSE — but ONLY when a day-part or timezone MARKER follows (#1111).
+     * ⚠ THE MARKER IS THE WHOLE RULE, because Wolof is the language where a bare-colon rule is provably
+     * wrong: the mined artifact's 33 `d:dd` are 33 SCRIPTURE REFERENCES, and FLEURS adds a SPORTS TIME.
+     * Keyed on the marker instead: 4 fixed, 0 claimed. ⚠ IT EMITS NO WORD — no Wolof hour noun is sourced
+     * here. ⚠ THE MARKER LIST IS EXACTLY WHAT IS ATTESTED. See the TS for the counts.
+     */
+    private static readonly JsRe CLOCK_MARKED = JsRegex.Compile(
+        "(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![:.\\d])(?=[ \\u00a0]*(?:ci[ \\u00a0]+(?:suba|ngoon)|GMT)(?![\\p{L}\\p{M}]))",  // space, NBSP
+        "giu");
+
     // ── the patterns, in step order ─────────────────────────────────────────
     private static readonly JsRe AMP_ENTITY = JsRegex.Compile("&amp;", "giu");
     private static readonly JsRe NAMED_ENTITY = JsRegex.Compile("&(?:sup2|sup3|nbsp|alpha);?", "giu");
@@ -136,10 +147,16 @@ public static class Normalize
     /** Normalize one Wolof input string. Steps are ORDER-DEPENDENT; each coupling is stated in the TS. */
     public static string NormalizeWolof(string input)
     {
+        var s = input;
+
+        // 0) A MARKED clock loses the colon's clause pause — see CLOCK_MARKED. First, so every numeric
+        //    step below sees one digit run rather than two.
+        s = CLOCK_MARKED.Replace(s, "$1 $2");
+
         // 1) NFC, THE SEMICOLON-LESS HTML ENTITIES, AND FORMAT CHARACTERS. ⚠ `&amp;` IS UNFOLDED FIRST, and
         //    the format-character strip is not cosmetic — a zero-width character inside a word splits it
         //    into two tokens.
-        var s = input.Normalize(System.Text.NormalizationForm.FormC);
+        s = s.Normalize(System.Text.NormalizationForm.FormC);
         s = AMP_ENTITY.Replace(s, "&");
         s = NAMED_ENTITY.Replace(s, m =>
         {

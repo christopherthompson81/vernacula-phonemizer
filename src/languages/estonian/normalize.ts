@@ -5,6 +5,11 @@
  * the tier can still see number–unit adjacency.
  *
  * ⚠ THE EVIDENCE IS ONE SOURCE, TWICE. There is no FLEURS corpus for Estonian on this machine; the evidence is
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `et_ee` landed later, 1,906 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
+ * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
+ * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
+ * count over the mined artifact alone until someone re-runs it.
  * `tools/corpus/mined/et.jsonc` (1,931,621 paragraphs of the et.wikipedia dump, 464 retained = 264 hard + 200
  * sample) plus `attest.ts` against et.wikipedia — WHICH IS THE WIKI THE ARTIFACT WAS MINED FROM. That is a
  * bigger sample of ONE source and never an independent second tier. What IS independent is espeak-ng's

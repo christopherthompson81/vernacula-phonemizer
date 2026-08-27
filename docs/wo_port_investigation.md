@@ -104,7 +104,8 @@ For contrast, the scripture reading the header defends is unchanged and still de
 `Jëf 19:26-27` → *ɟəf fukː ak ɟuroːm ɲɛːnt , ɲaːr fukː ak ɟuroːm bɛnː ɲaːr fukː ak ɟuroːm ɲaːr*.
 
 ⚠ This is the #1102 family seen from a different angle: wo's header never claims FLEURS does not exist — it
-simply argues a refusal from one corpus without consulting the other. Filed as **#1111**.
+simply argues a refusal from one corpus without consulting the other. Filed as **#1111**; see Run 4 for what
+landed, and for the count in this section that turned out to be wrong.
 
 Per PORTING.md the C# ports the CURRENT behaviour and the finding is filed. **NO TYPESCRIPT WAS CHANGED.**
 
@@ -118,12 +119,58 @@ Two things checked because they have been defects elsewhere, both clean:
 Questions 2 and 3 came back clean: all three manifest tables are reached and `text()` → `phonemizeWord` is
 the single entry point.
 
+## Run 4 — 2026-08-27 16:05 — #1111 landed MARKER-KEYED, and my count in Run 3 was wrong
+
+#1111 was fixed upstream (#1117) while the port was in review. The rule is **marker-keyed**, which is the
+opposite call from nso's unguarded arm in the same commit — and correctly so: nso's corpus has no `N:NN` at
+all and therefore no counter-examples, while wo's has 33 scripture references. Same question, three
+languages, three answers.
+
+    CLOCK_MARKED  d:dd followed by `ci suba` / `ci ngoon` / `GMT`   4 fixed, 0 claimed
+
+Ported as step 0, before the NFC/entity step, where the TS puts it. Verified end to end:
+
+    8:46 ci suba · 12:00 GMT · 11:35 ci ngoon     the pause is gone
+    11:29 (unmarked)                              KEEPS its pause — the marker guard declines it
+    Jëf 19:26-27                                  keeps its pause
+    bu toll ci 4:41.30, 2:11.                     keeps its pause
+
+⚠ **AND THE UPSTREAM COMMIT CORRECTED MY COUNT, WHICH IS WORTH RECORDING AS A METHOD ERROR RATHER THAN A
+TYPO.** Run 3 above says "8 distinct sentences … 8 of 8 a TIME OF DAY. 0 scripture references." The real
+figure is **9 sentences, 8 of them times of day** — the ninth is a Giant Slalom result, `bu toll ci 4:41.30,
+2:11`. I missed it because I measured the corpus with the RULE'S OWN trailing guard:
+
+    (?<![\d:.,])(\d{1,2}):(\d{2})(?![\d:.,])     ← the `(?![\d.,])` rejects `4:41.30`, `2:11.`, `1:09.`
+
+That guard exists so the rule declines sports times. Reusing it in the MEASUREMENT meant the measurement
+could only ever report what the rule would match — not what the corpus contains — so the one counter-example
+in the haystack was invisible to it by construction. **Measure the haystack with a deliberately loose
+pattern and classify by hand; the needle's own guard is the one thing that must not be in it.**
+
+It also weakens the claim Run 3 made: I wrote that a marker-keyed rule "would fix 4 and claim 0", implying
+there was nothing available to claim. There was — and the marker guard is what declines it, since the race
+time carries no marker either. The conclusion survives; the argument for it was luckier than it looked.
+
+## ⚠ And the TS `undefined` leak is now filed
+
+The review of this PR found the C# throwing where the TS yields the literal string `"undefined"`
+(`&ſup2` matches through JS's long-s fold, and `ENTITY[…]!` is empty). The C# was fixed to reproduce the TS,
+and the commit said the TS half was "filed separately" — it was not, until now: **#1122**.
+
+Re-gated after the merge: **parity wo 200/200 against the NEW golden**, differential **8,118 comparisons,
+0 differ, 0 throws**.
+
+## Recount
+
+`la`, `mn`, `tn`, `st` and `nso` merged first, so main is at 132 / 26,027 and this branch is **133
+languages / 26,227 rows**.
+
 ## Gates
 
-    csharp tests            1,880 pass (88 new in WolofTests.cs), 0 fail
-    parity, wo              200/200 byte-identical, 0 differ, 0 BLOCKED
-    parity, fleet           128 languages, 25,227 rows, 0 differ, 0 BLOCKED
-    differential            8,118 comparisons (sync + async), 0 differ, 0 throws
+    csharp tests            2,339 pass (88 in WolofTests.cs), 0 fail
+    parity, wo              200/200 byte-identical against the POST-#1117 golden, 0 differ, 0 BLOCKED
+    parity, fleet           133 languages, 26,227 rows, 0 differ, 0 BLOCKED
+    differential            8,118 comparisons (sync + async), 0 differ, 0 throws — re-run after the merge
     leak sweep              0 of 4,059 outputs carry a raw digit or symbol
     separator audit         0 all-ASCII-space classes in the four new files (by code point)
     typescript              unchanged

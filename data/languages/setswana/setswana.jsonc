@@ -49,7 +49,9 @@
     // Cardinal number words (Mistry Cycle 29 bo-counting series). 8/9 are the two-word "bofera …" forms (bent
     // fingers); tens/hundreds multiply with the ma- forms (7/8/9 → participial -ang). Composition: descending,
     // joined by ⟨le⟩ "and"; ⟨masome/makgolo a …⟩ = "tens/hundreds of …". Thousands (dikete tse …) best-effort;
-    // ≥10⁴ degrades to digit-by-digit. Numbers are UNMEASURED (the referee is word-only) — best effort.
+    // ≥10⁶ degrades to digit-by-digit (this comment said ≥10⁴ until #1104 — stale by two orders; the code
+    // is `n >= 1e6` and `100000` composes as `dikete tse lekgolo`). Numbers are UNMEASURED (the referee is
+    // word-only) — best effort.
     "numbers": {
         "zero": "lefela",
         "units": ["", "bongwe", "bobedi", "boraro", "bone", "botlhano", "borataro", "bosupa", "bofera bobedi", "bofera bongwe"],

@@ -74,7 +74,7 @@ public static class EnglishGb
     /** GenAm citation IPA → SSBE. `lex` (present on the shipped path) supplies `word`'s set membership. */
     public static string ToRP(string genAm, string word, LexSets? lex = null)
     {
-        var w = word.ToLowerInvariant();
+        var w = Js.ToLowerCase(word);
         var s = FLAP_D.Replace(FLAP_T.Replace(genAm, "t"), "d"); // un-flap the tapped coronal
         s = GOAT.Replace(s, "əʊ");                               // GOAT, before the generic offglide map
         s = OFFGLIDE_U.Replace(OFFGLIDE_I.Replace(s, "ɪ"), "ʊ"); // FACE/PRICE/MOUTH/CHOICE offglides

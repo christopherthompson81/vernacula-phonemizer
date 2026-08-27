@@ -8,7 +8,12 @@
  * transfer, and every word below is sourced from Maltese text. Playbook trap 55, one taxonomic level up —
  * what travels is the procedure.
  *
- * ⚠ THE SOURCING SITUATION, STATED PLAINLY. There is no FLEURS corpus for Maltese. The evidence is
+ * ⚠ THE SOURCING SITUATION, STATED PLAINLY. There is no FLEURS corpus for Maltese.
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `mt_mt` landed later, 1,960 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
+ * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
+ * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
+ * count over the mined artifact alone until someone re-runs it. The evidence is
  * `tools/corpus/mined/mt.jsonc` (118,526 paragraphs of the mt.wikipedia dump, 449 retained) plus `attest.ts`
  * against mt.wikipedia — WHICH IS THE SAME WIKI THE ARTIFACT WAS MINED FROM. That is a bigger sample of ONE
  * source, never a second independent one, and no count below should be read as corroboration across tiers.

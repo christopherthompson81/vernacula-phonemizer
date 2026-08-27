@@ -22,6 +22,11 @@
  *      count of any untreated language in this repository.
  *   2. `attest.ts` against lt.wikipedia — WHICH IS THE SAME WIKI THE ARTIFACT WAS MINED FROM. A bigger
  *      sample of ONE source, never a second one. There is no FLEURS corpus for Lithuanian.
+ * ⚠ AND THAT SENTENCE IS NOW FALSE (#1102): `lt_lt` landed later, 1,966 unique transcript texts, and it is a
+ * genuinely INDEPENDENT read-aloud corpus rather than a second sample of the wiki. ⚠ THE COUNTS BELOW HAVE
+ * NOT BEEN RE-MEASURED AGAINST IT — that is the expensive half of #1102, scoped per language, and where
+ * it has been done it changed a decision (see mn's clock, #1099). Read every "only N times" below as a
+ * count over the mined artifact alone until someone re-runs it.
  *   3. What genuinely IS independent, and what rescues this language: espeak ships Lithuanian, and
  *      `$ESPEAK_NG/dictsource/lt_list` carries a CHARACTER-NAME block and an ABBREVIATION block. Those
  *      state how a SYMBOL is READ rather than merely using it — the register a written corpus lacks by

@@ -78,7 +78,7 @@ public static class Normalize
     private static readonly JsRe BACKSLASH_B = JsRegex.Compile("\\\\b", "gu");
     /** The counted form of each unit rule: the same source, `\b` boundaries stripped, behind a digit. */
     private static readonly (JsRe Re, string Word)[] COUNTED_UNITS = UNITS
-        .Select(u => (JsRegex.Compile($"(\\d)\\s*(?:{BACKSLASH_B.Replace(u.Re.Source, "")})(?![\\p{{L}}])", "gu"), u.Word))
+        .Select(u => (JsRegex.Compile($"(\\d)\\s*(?:{BACKSLASH_B.Replace(u.Re.Source, "")})(?![\\p{{L}}\\d²³/])", "gu"), u.Word))
         .ToArray();
     private static readonly JsRe RANGE = JsRegex.Compile(
         "(?<![-\u2013\u2014])(\\d+)\\s*[-\u2013\u2014]\\s*(\\d+)(?!\\d)(?!\\s*[-\u2013\u2014]\\s*\\d)", "gu");

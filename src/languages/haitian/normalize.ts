@@ -336,18 +336,18 @@ export function normalizeHaitian(input: string): string {
         // tier's `magAltU` hop, done locally for the same reason the rest of this step is local).
         s = s.replace(
             new RegExp(
-                `(?<![\\p{L}\\p{M}\\d.,])(\\d+(?:[.,]\\d+)?)\\s?(milyon|milya|mil)\\s?${key}(?![\\p{L}\\p{M}\\d/])`,
+                `(?<![\\p{L}\\p{M}\\d.,])(\\d+(?:[.,]\\d+)?)\\s?(milyon|milya|mil)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`,
                 "gu",
             ),
             `$1 $2 ${word}`,
         );
         s = s.replace(
-            new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d/])`, "gu"),
+            new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),
             (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${a} a ${b} ${word}` : whole),
         );
         s = s.replace(
             new RegExp(
-                `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d/])`,
+                `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`,
                 "gu",
             ),
             `$1 ${word}`,

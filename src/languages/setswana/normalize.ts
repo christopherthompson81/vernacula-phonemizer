@@ -333,10 +333,28 @@ export function normalizeSetswanaPost(input: string): string {
     //    confidently wrong; they keep the bare juxtaposition the engine already produced.
     //    ⚠ THE GUARD EXCLUDES A HYPHEN ON EITHER SIDE, which is what declines an ISBN chain: without it
     //    `ISBN 978-92-5-1…` and `1-58479-341-4` read as a cascade of spans.
-    //    ⚠ ONE KNOWN LOSS, recorded rather than guarded away: `bokete jwa 4 -5 kg` has its unit AFTER the
-    //    second operand, so the tier has already rewritten `5 kg` into `dikilogerama di le 5` by the time
-    //    this runs and the two operands are no longer both digits. Moving ranges above the tier only moves
-    //    the damage (`4 go ya go dikilogerama di le 5`); one instance did not earn a third pass.
+    //    ⚠ TWO KNOWN LOSSES, recorded rather than guarded away — this said "ONE" until #1104, and both the
+    //    count and the price were wrong.
+    //    THE SHAPE: `bokete jwa 4 -5 kg` has its unit AFTER the second operand, so the tier has already
+    //    rewritten `5 kg` into `dikilogerama di le 5` by the time this runs and the two operands are no
+    //    longer both digits. Moving ranges above the tier only moves the damage
+    //    (`4 go ya go dikilogerama di le 5`).
+    //    ⚠ THE SECOND INSTANCE WAS ALREADY IN THE TREE, as evidence for something else: `12-13 m3 ka
+    //    motsotswana` (`tools/corpus/attest/tn.jsonc`) is quoted in setswana.ts's own `unitPer` comment as
+    //    the attestation for `ka motsotswana`. So "one instance did not earn a third pass" was counting one
+    //    of the two it had.
+    //    ⚠ AND THE PRICE IS NOT "the bare juxtaposition the engine already produced". Measured:
+    //        Selekanyo sa metsi ke 12-13 m3 ka motsotswana.
+    //        → … kɪ lɪsʊmɪ lɪ bʊbɪdi │ dikʰubikimitara di lɪ lɪsʊmɪ lɪ bʊrarʊ │ ka mʊt͡sʊt͡swana
+    //             twelve               cubic-metres THIRTEEN                    per second
+    //    The first operand is stranded IN FRONT OF THE SECOND OPERAND'S MEASURE NOUN, so the span reads as
+    //    one quantity phrase with a loose `twelve` before it — not as two operands with a missing joiner.
+    //    A missing joiner is neutral; a number standing in front of somebody else's measure noun is not,
+    //    and that is the trap-53 calculus this note is applying, with the wrong number in it.
+    //    ⚠ STILL NOT FIXED HERE, and deliberately: the objection above stands, so a repair means the range
+    //    rule LEARNING TO SEE an already-rewritten second operand (`\d+` dash measure-noun-phrase, then
+    //    reorder) — a new pattern shape rather than a move, against a count of two. Priced properly now so
+    //    the next reader decides on the real number.
     //    AFTER step 6, so a grouped endpoint is already one run of digits, and AFTER step 5.
     //    ⚠ THE TRAILING GUARD EXCLUDES A DOT THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK — `(?![\d]|[.,]\d)`
     //    is the form step 6 above already argues for, and this arm did not follow it. A plain `.` in the

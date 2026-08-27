@@ -421,10 +421,47 @@ export function normalizeFinnish(input: string): string {
     //    SPORTS times `9.29,43` / `9.18,54` and must not be claimed. A bare-colon/bare-period clock rule
     //    would have fixed 3 and broken 2 — the ilo-vs-ceb shape of trap 55.
     //    AFTER step 2, so a date's dots are already spent and cannot look like an hour.
+    //
+    //    ⚠ THE GATE IS RIGHT AND ITS ADJACENCY WAS TOO TIGHT (#1114). Over FLEURS `fi_fi` — a corpus the
+    //    counts above never saw — there are 18 valid clock-shaped instances and the marker gate claimed 14.
+    //    The four it missed are all genuine clocks, and every one is in a sentence where the rule ALREADY
+    //    FIRED, so each took a SENTENCE BREAK mid-number in the same clause the rule had just repaired:
+    //        kello 9.30 paikallista aikaa (2.30 UTC)          the parenthetical gloss
+    //        kello 20.30 paikallista aikaa (15.00 koordinoitua …)
+    //        kello 6.30 ja 7.30 välisenä aikana               a range's second operand
+    //        Noin 11.29 protesti eteni …                      marked by `Noin`, not by `kello`
+    //    ⚠ AND THE FLEURS COUNT CONFIRMS THE GATE RATHER THAN LOOSENING IT: 24 of its 26 `d.dd`-bearing
+    //    sentences carry `kello`/`klo`, and its sports times (`4.41,30`, `2.11,60`, `1.09,02`) are still
+    //    rejected by the `(?![\d.,])` tail exactly as the five retained ones were. The two arms below add
+    //    CONTEXT the marker already licensed; they do not widen the marker.
+    const clockBody = (h: string, mm: string): string | undefined =>
+        Number(h) < 24 && Number(mm) < 60 ? `${h} ${minutes(mm)}` : undefined;
+    //    4a) THE RANGE FIRST, AND THE ORDER IS THE WHOLE OF IT. `kello 6.30 ja 7.30` is matched as ONE span
+    //    so the marker licenses both operands — which means it has to run BEFORE the single arm, or that
+    //    arm has already rewritten `6.30` and the lookbehind no longer sees a digit to anchor on. Written
+    //    the other way round first, and it silently claimed nothing.
+    t = t.replace(
+        /(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(\s+ja\s+)(\d{1,2})[.:](\d{2})(?![\d.,])/giu,
+        (m, h1: string, m1: string, sep: string, h2: string, m2: string) => {
+            const a = clockBody(h1, m1), b = clockBody(h2, m2);
+            return a !== undefined && b !== undefined ? `${a}${sep}${b}` : m;
+        },
+    );
     t = t.replace(
         /(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(?![\d.,])/giu,
-        (m, h: string, mm: string) => (Number(h) < 24 && Number(mm) < 60 ? `${h} ${minutes(mm)}` : m),
+        (m, h: string, mm: string) => clockBody(h, mm) ?? m,
     );
+    //    4b) THE PARENTHETICAL TIMEZONE GLOSS. `(2.30 UTC)`, `(15.00 koordinoitua yleisaikaa)` — keyed on
+    //    the ZONE NAME rather than on the bracket, because a bracket alone licenses nothing. `koordinoitua`
+    //    is the corpus's own spelling-out of UTC and is what the second instance carries.
+    t = t.replace(
+        /(?<=\()(\d{1,2})[.:](\d{2})(?=\s+(?:UTC|GMT|EET|EEST|koordinoitua)(?![\p{L}\p{M}]))/giu,
+        (m, h: string, mm: string) => clockBody(h, mm) ?? m,
+    );
+    //    ⚠ `Noin 11.29` IS DELIBERATELY LEFT. `noin` is a general quantity hedge ("about"), not a time
+    //    word: it occurs ONCE before a `d.dd` in FLEURS and otherwise before decimal COMMAS (`noin 3,7`,
+    //    `noin 12,8`), and the mined text has it before a clock zero times. One instance is not a marker,
+    //    and this file's whole discipline is that the marker IS the measurement.
 
     // 5) THE BARE `N.` ORDINAL — the largest rule in the file. See the header for the 333-context table
     //    and for the sentence-period invariant. THE ORDINAL RANGE IS CLAIMED FIRST (20 instances,

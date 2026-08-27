@@ -25,7 +25,7 @@ public sealed class UmbunduPhonemizer : ILanguage
     /** Phonemize a single Umbundu word to canonical IPA (segmental; tone unwritten/deferred). */
     public static string PhonemizeWord(string word)
     {
-        var w = StripTone(word.ToLowerInvariant());
+        var w = StripTone(Js.ToLowerCase(word));
         var outSb = new StringBuilder();
         var i = 0;
         while (i < w.Length)
