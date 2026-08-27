@@ -16,12 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 131 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 132 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
   so their goldens are what exists).
-  **25,827 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **26,027 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wuu xh yo yue za zu.
+  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nso nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -91,6 +91,20 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
   branch. ⚠ st and tn are CLOSE SIBLINGS ported back to back (trap 55): nothing was carried across, and every
   count in st's header was re-measured on st's own artifacts — all of them verify exactly.
   See `docs/st_port_investigation.md`.
+- **nso is the port where the DIFFERENTIAL caught a bug the GOLDEN could not — and the numbers say why.**
+  The TS unit pattern's separator class is `[ \u00a0\u202f\u2009]` as CHARACTERS (a template literal); written
+  into C# through a shell heredoc the three non-ASCII members collapsed to plain spaces, so `1 kg` matched and
+  `1\u00a0kg` did not. Measured with escape-only patterns: number+NBSP+unit is **×0 in the golden, ×0 in FLEURS
+  and ×0 in the artifacts** — the only row in 4,265 that reaches the unit rule with a non-ASCII separator is
+  ONE mined line writing `1&nbsp;kg`, which `core/markup.ts` decodes upstream. The gate was 200/200 with the
+  bug live. Fixed, audited by CODE POINT across tn/st/mn as well, and pinned by a test verified to fail 5/5
+  against the buggy class. ⚠ A literal NBSP typed into a heredoc — measurement scripts included — is the trap;
+  spell the separators as escapes.
+  ⚠ **AND nso IS THE SHARPEST INSTANCE OF #1102 YET.** Its `normalize.ts` declines a CLOCK rule saying "there
+  is no instance to tabulate the marker distribution from", while `nso_za` carries 13 sentences / 16 instances,
+  every one a time of day with an `am`/`pm`/`mesong` marker, each currently reading with a clause pause inside
+  the time (`ka 11:35 pm` → *kʼa lesometʼee , masometʰaro ɬano pʼm*). `sepedi.ts`, two files away, cites those
+  same FLEURS utterances as a referee that fixed a vowel defect (#1108). See `docs/nso_port_investigation.md`.
 - **su is the first LEXICON-ONLY golden to be gated with a second script.** `csharp/goldens/su.tsv` is a
   word list (no FLEURS text exists for Sundanese), so the corpus-wide differential is unavailable and the
   weight falls on off-golden probes: 269 adversarial lines + 471 lines lifted from `tools/corpus/mined/su.jsonc`,

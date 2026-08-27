@@ -153,6 +153,7 @@ public static class Bootstrap
             Mongolian.MongolianPhonemizer.RegisterSelf();
             Setswana.SetswanaPhonemizer.RegisterSelf();
             Sesotho.SesothoPhonemizer.RegisterSelf();
+            Sepedi.SepediPhonemizer.RegisterSelf();
         }
     }
 }
