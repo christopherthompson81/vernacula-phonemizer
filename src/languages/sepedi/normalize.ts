@@ -2,12 +2,19 @@
  * Sepedi / Northern Sotho (nso) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is
  * not already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * ⚠ THIS LANGUAGE HAS NO REFEREE AT ALL — no wikipron, no kaikki, no epitran, no espeak, no FLEURS (see
- * sepedi.jsonc's own header, which records the engine as `cannot-verify`). So nothing here rests on a referee
- * score, and none is quoted. What every rule below rests on instead is (a) a SOURCED word form, cited at the
- * constant that holds it, and (b) a reading that was produced by running the phonemizer. The sourcing tiers
- * available for nso are exactly two: the mined artifact (`tools/corpus/mined/nso.jsonc`, nso.wikipedia dump,
- * 12,077 paragraphs) and `attest.ts` against nso.wikipedia. `sources.ts --lang nso` reports
+ * ⚠ THIS LANGUAGE HAS NO REFEREE AT ALL — no wikipron, no kaikki, no epitran, no espeak (see
+ * sepedi.jsonc's own header, which records the engine as `cannot-verify`).
+ * ⚠ THIS LIST USED TO END "no FLEURS", AND THAT WAS TWO ERRORS IN ONE (#1102). `nso_za` EXISTS — 1,758
+ * unique transcript texts — and FLEURS was never a referee in the first place: it supplies TEXT to read,
+ * not IPA to score against, so its absence never belonged in a list of referees and its presence does not
+ * give nso one. What it does give is a second, INDEPENDENT source for the counts below, which still rest
+ * on the mined artifact alone; re-measuring them is the expensive half of #1102 and is not done here.
+ * So nothing here rests on a referee score, and none is quoted. What every rule below rests on instead
+ * is (a) a SOURCED word form, cited at the constant that holds it, and (b) a reading that was produced by
+ * running the phonemizer. The sourcing tiers available for nso are THREE: the mined artifact
+ * (`tools/corpus/mined/nso.jsonc`, nso.wikipedia dump,
+ * 12,077 paragraphs), `attest.ts` against nso.wikipedia — and `nso_za` above, which no count below uses
+ * yet. `sources.ts --lang nso` reports
  * `letter-names NONE · decimal-point NONE · scale-names NONE · fraction-series NONE`.
  *
  * ⚠ IT RUNS *AFTER* THE SHARED SYMBOL TIER — `normalizeSepedi(SYMBOLS(input))`, the Chichewa/Swahili order.
