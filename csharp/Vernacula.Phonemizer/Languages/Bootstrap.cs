@@ -140,6 +140,7 @@ public static class Bootstrap
             Kinyarwanda.KinyarwandaPhonemizer.RegisterSelf();
             Slovenian.SlovenianPhonemizer.RegisterSelf();
             Danish.DanishPhonemizer.RegisterSelf();
+            Rangpuri.RangpuriPhonemizer.RegisterSelf();
         }
     }
 }
