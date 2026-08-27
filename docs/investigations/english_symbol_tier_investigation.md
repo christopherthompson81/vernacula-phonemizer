@@ -100,3 +100,76 @@ consequence — so migration is **tractable**. It is not, however, free or obvio
 implementations agree on the shapes they both claim, with the two known differences pinned as expected. That
 converts "duplication with a demonstrated cost" into "duplication with a gate" — the third instance fails
 before it ships, and the test is also the harness a future migration would need anyway.
+
+---
+
+## Run 2 — 2026-08-27 — is ONE COPY feasible?
+
+Run 1 established the separation is historical and gated the divergence. It did not answer the question
+that decides what to do next: **can this be got down to one copy?**
+
+⚠ THE DIRECTION IS FORCED. English's version is richer in places, but migrating English's shape UP into the
+tier is not an option: the tier's guards exist because ~100 languages have different word boundaries, and
+its narrowness is deliberate. Whatever happens, English adopts the tier or nothing does.
+
+### Feature-by-feature, for the overlapping steps
+
+| capability | tier | English | one copy? |
+|---|---|---|---|
+| ampersand, incl. the `&amp;` entity | ✓ | ✓ | yes |
+| `×` / ASCII `x`, two words with a discriminator | ✓ `multiply: {times, by}` | ✓ | yes |
+| percent | ✓ | ✓ | yes |
+| currency + SPELLED magnitude | ✓ | ✓ | yes |
+| units + count + square/cubic measure | ✓ | ✓ | yes |
+| bare exponent | ✓ | ✓ | yes — 16/18 verified in Run 1 |
+| **currency + ABBREVIATED magnitude** (`$1.5m`) | ✗ **refuses on principle** | ✓ | needs a new field |
+| **relational signs** `<` `>` `÷` | ✗ no feature at all | ✓ | needs new fields |
+
+The tier's refusal is explicit and reasoned, not an omission:
+
+> ⚠ SEPARATE, DO NOT REFUSE … Reading the magnitude is **a language's own job** (`magnitudes`), not
+> something this tier can invent from one letter.
+
+Which is right: `m` after a number is a metre in most of the fleet, and English's own step 1 says it consumes
+`$1.5m` there precisely so the unit step cannot claim the `m` as a metre.
+
+### The ordering contradiction — checked, and it is theoretical
+
+The tier runs the ampersand **first** ("a `&` between two initialisms must become three tokens, and any
+later rule that reads a token boundary needs the split to have happened already"). English runs it **last**
+("deliberately … inserting words between them first would break those adjacencies"). Both are reasoned, and
+they contradict.
+
+⚠ **Measured, it does not bite.** Simulating an ampersand-first pass and then running English's normalizer
+gives byte-identical output on every probe, including the adjacency cases English's comment names:
+
+```
+Arts & Sciences in 1950 · $5 & $6 · B&Bs · 6x6 cm & 4x4 · AT&T's $1.5m grant · 100m & 200m
+R&D spending of $2.3 billion                                          → 7/7 identical
+```
+
+Recorded because it weakens the argument it was raised to support. English's "LAST, deliberately" is a
+defensible precaution with no measured consequence here — the same shape as Run 1's interleave finding.
+
+### Verdict: ONE COPY IS NOT ACHIEVABLE, and the near miss is not worth buying
+
+Two readings of the question, and they answer differently:
+
+- **One copy of the FILE — impossible.** ~13 of English's ~18 steps have no tier concept at all: dotted
+  abbreviations, era markers, space digit-grouping, scientific notation, negatives, fractions, times, dates,
+  years, two roman-numeral passes, relational signs. English keeps a large local normalizer either way, so
+  the choice was never one file versus two.
+- **One copy of the overlapping SYMBOL logic — possible, at a price.** It saves ~5 duplicated steps and
+  costs at least two new tier fields **whose only consumer would be English** — one of which the tier
+  currently refuses on a stated principle. That is the pattern `magnitudePrecedes` used, so it is a known
+  shape and not novel risk; but it is trading duplication in a leaf for single-consumer configuration in
+  the shared core, which the tier's own docstrings resist.
+
+⚠ And the risk is concentrated where it is worst: English is the fleet's **foreign reader**, so any
+divergence introduced by the migration reaches ~50 other languages' embedded Latin runs — a blast radius
+out of all proportion to five deduplicated steps.
+
+**Recommendation: move on.** Keep `test/english-tier-agreement.test.ts`, which is the actual protection
+against the cost this issue was filed for. Revisit only if a THIRD duplicated defect appears, or if a second
+language ever needs the abbreviated money magnitude — at which point the new field earns its place on
+merit rather than on tidiness.
