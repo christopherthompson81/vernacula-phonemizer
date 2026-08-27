@@ -101,9 +101,9 @@ public static class Normalize
     private static readonly JsRe PERCENT_ONE = JsRegex.Compile($@"(?<![\d.,])({NUM})\s?%", "gu");
 
     private static readonly JsRe[] UNIT_SQUARED = UNITS.Select(u => JsRegex.Compile(
-        $@"(?<![$€£₵][^\d]{{0,3}}[\d.,]{{0,12}})(?<![\d.,\p{{L}}\p{{M}}])({NUM})\s?{u.Sym}(?:²|2)(?![\p{{L}}\p{{M}}\d²³])", "gu")).ToArray();
+        $@"(?<![$€£₵][^\d]{{0,3}}[\d.,]{{0,12}})(?<![\d.,\p{{L}}\p{{M}}])({NUM})\s?{u.Sym}(?:²|2)(?![\p{{L}}\p{{M}}\d²³/])", "gu")).ToArray();
     private static readonly JsRe[] UNIT_PLAIN = UNITS.Select(u => JsRegex.Compile(
-        $@"(?<![$€£₵][^\d]{{0,3}}[\d.,]{{0,12}})(?<![\d.,\p{{L}}\p{{M}}])({NUM})\s?{u.Sym}(?![\p{{L}}\p{{M}}\d²³])", "gu")).ToArray();
+        $@"(?<![$€£₵][^\d]{{0,3}}[\d.,]{{0,12}})(?<![\d.,\p{{L}}\p{{M}}])({NUM})\s?{u.Sym}(?![\p{{L}}\p{{M}}\d²³/])", "gu")).ToArray();
     private static readonly JsRe[] CURRENCY_RE = CURRENCY.Select(c => JsRegex.Compile(
         $@"{NLB}{c.Sym}\s?({NUM})", "gu")).ToArray();
 
