@@ -78,9 +78,14 @@
  *   · NO FRACTION RULE. `sources.ts` reports `[NONE] fraction-series`, and of the corpus's 13 `N/N` shapes
  *     exactly ONE is a fraction (`ke 1/100 ya metšo ya mašeleng`); the rest are financial years (`2017/18`,
  *     `2015/16`, `2020/2021`), award years (`1995/1996`) and a time signature (`4/4`).
- *   · NO CLOCK RULE. The retained corpus contains no `N:NN` at all. The whole-corpus `clock` cell is 65, but
- *     with nothing retained there is no instance to tabulate the marker distribution from, and the ilo
- *     lesson is that a colon-number shape guessed from a sibling breaks more than it fixes (trap 55).
+ *   · NO CLOCK **WORD**. The retained corpus contains no `N:NN` at all; the whole-corpus `clock` cell is
+ *     65, and with nothing retained there is no instance to tabulate the marker distribution from. No hour
+ *     noun is sourced, so none is emitted, and that half of the refusal stands.
+ *     ⚠ BUT "THERE IS NOTHING TO MEASURE" WAS TRUE OF ONE CORPUS ONLY (#1108). `nso_za` carries 13
+ *     sentences and 16 instances, 13 of 13 a time of day, and most with the very marker the bullet says
+ *     could not be tabulated (`am`, `pm`, `mesong`, `nako ya selegae`). What that supports is not a word
+ *     but the PAUSE removal — see `DIGIT_COLON_RUN` above, which emits nothing and therefore does not need
+ *     the marker distribution the refusal was waiting on.
  *   · NO `ha` UNIT KEY, though `hektare` is attested ×5. Digit-adjacent `ha` is ×0 in the corpus, while `ha`
  *     is an extremely common word in the Sesotho that contaminates this wiki (`ha ho tla ho keteka`,
  *     `ha a bua le parishe`). A key with no true positive and a live false-positive population is a misfire
@@ -291,8 +296,28 @@ const NOT_VERSION = String.raw`(?<![\d.,])(?!802[.,]11[a-zA-Z](?![a-zA-Z\d]))`;
 
 /** Normalize one Sepedi input string — the shared symbol tier first, then this language's own rules. Steps
  *  are ORDER-DEPENDENT; each states its coupling, and the tier's position is argued in the header. */
+/**
+ * A COLON BETWEEN TWO DIGIT RUNS LOSES ITS PAUSE, and that is ALL it does (#1108).
+ *
+ * ⚠ IT EMITS NO WORD, so it makes no claim about what the figure is and needs no sourced hour noun —
+ * which nso does not have. `:` is `clausePunctuation`, so `ka 11:35 pm` read *kʼa lesometʼee **,**
+ * masometʰaro ɬano pʼm*, a phrase break inside one time expression.
+ * ⚠ UNGUARDED, AND THAT IS MEASURED RATHER THAN LAZY. The refusal below is right that the mined artifact
+ * retains no `N:NN` at all — so it has no counter-examples either. Over FLEURS `nso_za`: 13 distinct
+ * sentences, 16 instances, **13 of 13 a TIME OF DAY**, zero verse references, zero sports times, zero
+ * census brackets. With no population to tell apart, a marker guard would only cost the four that carry
+ * no marker (`Ka 11:20`, `ka morago ga 11:00`).
+ * ⚠ A COLON FOLLOWED BY A SPACE IS UNTOUCHED — there it is introducing something and the pause belongs.
+ */
+const DIGIT_COLON_RUN = /(?<![\d:])(\d{1,2})((?::\d{2})+)(?![\d])/gu;
+const COLON_G = /:/gu;
+
 export function normalizeSepedi(input: string): string {
     let s = SYMBOLS(input);
+
+    // 0) The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. First, because every numeric
+    //    step below reads a digit run and the colon was splitting one in half.
+    s = s.replace(DIGIT_COLON_RUN, (_m, head: string, rest: string) => head + rest.replace(COLON_G, " "));
 
     // 1) DOTTED CAPITAL RUNS → the bare letters, BEFORE anything reads an interior dot as a phrase break
     //    (multi-dot abbreviations before single-dot). The retained corpus writes `B.C.E.`, `C.E.`, `F.W.`,
