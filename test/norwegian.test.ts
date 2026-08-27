@@ -65,6 +65,23 @@ describe("Norwegian Bokmål canonical IPA", () => {
     test("text: words + clause punctuation", () => {
         expect(createNorwegian().text("Norsk er et språk.")).toBe("ˈnɔʂk ˈæːɾ ˈɛt ˈspɾoːk .");
     });
+
+    // ⚠ AN INTRA-WORD APOSTROPHE IS PART OF THE WORD. `LATIN_RUN` stopped at `'`, so each of the four types
+    // nb_no writes arrived as two runs, separately phonemized and separately stressed.
+    test("a medial apostrophe keeps the word whole", () => {
+        const nb = createNorwegian();
+        expect(nb.text("O'Shannessy")).toBe("ˈɔshɑnːəsːʏ"); //   was ˈuː ʃɑnəsːʏ — a stranded [uː]
+        expect(nb.text("l'Oyapock")).toBe("ˈluːʏɑpɔkː"); //      was ˈɛl ˈɔjɑpɔkː
+        expect(nb.text("President's")).toBe("ˈpɾeːsɪdənts"); //  was the word plus a bare [s]
+    });
+
+    // ⚠ …AND A TRAILING ONE IS NOT, which is why the guard is a LOOKAHEAD and not a class member: Norwegian
+    // writes the genitive of an s-final name with a trailing apostrophe, and a closing quote looks the same.
+    test("a trailing apostrophe is not part of the word", () => {
+        const nb = createNorwegian();
+        expect(nb.text("Anders' bok")).toBe("ˈɑnəʂ ˈbuːk");
+        expect(nb.text("Han sa 'nei'")).toBe("ˈhɑn ˈsɑː ˈnæɪ");
+    });
 });
 
 // the normalization layer. Every count below is measured over the FLEURS nb_no corpus (column 3),
@@ -131,6 +148,40 @@ describe("norwegian normalization", () => {
     // number, the ordinal rule saw a dash where it wanted a lowercase word. Attested in nb, da, de, cs.
     test("a range of ordinals", () => {
         expect(normalizeNorwegian("10.–11. århundre")).toBe("tiende til ellevte århundre");
+    });
+
+    // ⚠ `ca.` IS THE MOST FREQUENT DOTTED ABBREVIATION IN nb_no (21, against osv. 10 / kl. 10 / nr. 5) AND
+    // WAS THE ONE MISSING FROM THE TABLE. The word read fine; the DOT survived as clause punctuation, so
+    // `ca. én amerikansk cent` — a parity-golden line — carried a full stop in the middle of the phrase.
+    test("ca. is an abbreviation dot, not a sentence end", () => {
+        expect(normalizeNorwegian("ca. 220 mennesker")).toBe("cirka 220 mennesker");
+        expect(createNorwegian().text("ca. én cent")).toBe("ˈsɪɾkɑ ˈeːn ˈsɛnt"); // was ˈsɪɾkɑ . ˈeːn ˈsɛnt
+        // …and a word merely ENDING in "ca" before a real sentence end keeps its stop.
+        expect(normalizeNorwegian("Costa Rica. Deretter")).toBe("Costa Rica. Deretter");
+        // …and `jr.`, ×3 and every one a name suffix, which read as the bare onset cluster *jɾ* plus a stop.
+        expect(createNorwegian().text("Piquet jr. i Singapore")).toContain("ˈjʉːnɪʊɾ ˈiː");
+    });
+
+    // ⚠ THE ERA MARKER WAS READ AS MONEY. `f.Kr.` tokenized as `f` + `Kr`, and `kr` is the lexicon's
+    // currency abbreviation, so the corpus's `323 f.Kr. etter at…` read *ˈɛf . ˈkɾuːnəɾ .* — "eff kroner"
+    // plus two spurious clause breaks. 12 instances in nb_no, in four spellings.
+    test("the era marker expands, in every spelling the corpus writes", () => {
+        expect(normalizeNorwegian("323 f.Kr. etter")).toBe("323 før Kristus etter");
+        expect(normalizeNorwegian("1000 år f.kr")).toBe("1000 år før Kristus");
+        expect(normalizeNorwegian("5000 f.Kr!")).toBe("5000 før Kristus!"); // the corpus's exclamation survives
+        expect(normalizeNorwegian("400 e.kr til")).toBe("400 etter Kristus til");
+        expect(normalizeNorwegian("100 e.Kr.")).toBe("100 etter Kristus");
+        expect(createNorwegian().text("323 f.Kr.")).toBe("ˈtɾeːhʉndɾə ˈtjʉːə ˈtɾeː ˈføːɾ ˈkɾɪstʊs");
+        // ⚠ A TRAILING LETTER REFUSES THE MATCH, or `f. Kristian` would become "før Kristusistian".
+        expect(normalizeNorwegian("f.Kristian")).toBe("f.Kristian");
+    });
+
+    // ⚠ THE AMOUNT MAY NOT END IN A SPACE: `(\d[\d ]*)` swallowed the separator and the currency noun was
+    // written where it had been, so the corpus's own `mellom ¥2500 og` read *ˈyːənɔɡ* — "yenog", one token.
+    test("the currency noun does not fuse with the next word", () => {
+        expect(normalizeNorwegian("¥2500 og ¥130 000")).toBe("2500 yen og 130000 yen"); // step 1 de-grouped
+        expect(normalizeNorwegian("$5 og noe")).toBe("5 dollar og noe");
+        expect(createNorwegian().text("mellom ¥2500 og")).toBe("ˈmɛlɔm ˈtuː ˈtʉːsn ˈfɛmhʉndɾə ˈjɛn ˈoːɡ");
     });
 
     test("ordinary Norwegian text is untouched", () => {

@@ -141,6 +141,17 @@ public class LanguageBootstrapTests
     // ckb: the Latin unit alias, the degree scale, the preposed clause mark, and the detached izafe ⟨ی⟩.
     [InlineData("ckb", "5 km لە 25 °C، ٢٠٢٤ی ئەیلول.",
         "peːnd͡ʒ kiːloːmatɪɾ la biːstu peːnd͡ʒ pɪlaj saliːziː , duː hazaːɾu biːstu t͡ʃwaːɾ iː ʔajlul .")]
+    // Norwegian's four defining shapes. The complementary-length rule picks the vowel QUALITY as well as its
+    // length; the era marker and `ca.` are abbreviation dots that used to reach clausePunctuation (and `kr`
+    // used to reach the lexicon's CURRENCY reading); and a medial apostrophe keeps one word whole while the
+    // genitive's trailing one does not.
+    [InlineData("nb", "bok og takk", "ˈbuːk ˈoːɡ ˈtɑk")]
+    [InlineData("nb", "323 f.Kr.", "ˈtɾeːhʉndɾə ˈtjʉːə ˈtɾeː ˈføːɾ ˈkɾɪstʊs")]
+    [InlineData("nb", "ca. én cent", "ˈsɪɾkɑ ˈeːn ˈsɛnt")]
+    [InlineData("nb", "mellom ¥2500 og", "ˈmɛlɔm ˈtuː ˈtʉːsn ˈfɛmhʉndɾə ˈjɛn ˈoːɡ")]
+    [InlineData("nb", "O'Shannessy", "ˈɔshɑnːəsːʏ")]
+    [InlineData("nb", "Anders' bok", "ˈɑnəʂ ˈbuːk")]
+    [InlineData("nb", "133 m/s", "ˈhʊndɾə ˈtɾɛtɪ ˈtɾeː ˈmeːtəɾ ˈiː səˈkʊnə")]
     public void PortedEnginesAnswer(string code, string text, string expected) =>
         Assert.Equal(expected, Phonemizer.Phonemize(text, code));
 
@@ -153,6 +164,29 @@ public class LanguageBootstrapTests
         var rules = AfrikaansPhonemizer.PhonemizeWordRules(oov);
         var async = await Phonemizer.PhonemizeAsync(oov, "af");
         Assert.NotEqual(rules, async);
+    }
+
+    [Fact]
+    public async Task NorwegianAsyncUsesTheTagger()
+    {
+        // The tagger tier sits between the NST lexicon and the rules, and its tag alphabet embeds the stress
+        // mark — so on an OOV word the async reading must differ from the rule one, or the tier is not wired.
+        const string oov = "dreinsystemene"; // rules ˈdɾeːɪnsʏstəmənə → neural ˈdɾæɪnsʏˌsteːmənə
+        var rules = Languages.Norwegian.NorwegianPhonemizer.PhonemizeWordRules(oov);
+        var async = await Phonemizer.PhonemizeAsync(oov, "nb");
+        Assert.NotEqual(rules, async);
+    }
+
+    [Fact]
+    public void NorwegianLexiconIsLoadedThroughItsOwnNativiser()
+    {
+        // ⚠ #1068: `text()` folds a word to the declared inventory BEFORE the lookup, so 14 nb-lexicon keys
+        // are unreachable unless `loadTsvMap` aliases each to its nativised spelling. Both spellings must
+        // read the same, and the three value-CLASHES must resolve to the UNFOLDED row's value (`a`, not `á`).
+        Assert.Equal(Phonemizer.Phonemize("malmö", "nb"), Phonemizer.Phonemize("malmo", "nb"));
+        Assert.Equal("ˈɡøːɾɪŋ", Phonemizer.Phonemize("göring", "nb"));
+        Assert.Equal("sənˈjoːɾ", Phonemizer.Phonemize("señor", "nb"));
+        Assert.Equal("ˈɑː", Phonemizer.Phonemize("á", "nb")); // shadowed by `a`, which wins
     }
 
     [Fact]

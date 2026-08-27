@@ -65,6 +65,7 @@ public static class Bootstrap
             Malay.MalayPhonemizer.RegisterSelf();
             Maori.MaoriPhonemizer.RegisterSelf();
             Naija.NaijaPhonemizer.RegisterSelf();
+            Norwegian.NorwegianPhonemizer.RegisterSelf();
             Occitan.OccitanPhonemizer.RegisterSelf();
             Odia.OdiaPhonemizer.RegisterSelf();
             Oromo.OromoPhonemizer.RegisterSelf();

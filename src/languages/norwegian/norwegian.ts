@@ -9,7 +9,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { makeNativiser } from "../../core/hostWord.ts";
 import { renderNumber, spellDigits, westernNumberWords } from "../../core/numbers.ts";
 import { normalizeNorwegian } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -180,7 +180,22 @@ export const nat = makeNativiser(NATIVE_CLASS, "u");
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
 // every gate: no digit or raw mark survives and nothing VANISHES.
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…—])`, "gu");
+/**
+ * ⚠ …AND IT CARRIES A MEDIAL APOSTROPHE, behind a LOOKAHEAD rather than in the character class.
+ * `LATIN_RUN` stops at `'`, so a name or possessive carrying one arrived as TWO runs, each phonemized and
+ * stressed on its own: nb_no writes four such types (`O'Shannessy`, `O'Flynn`, `l'Oyapock`, `President's`)
+ * and every one lost a fragment to the front — *ˈuː ʃɑnəsɪ*, *ˈɛl ˈɔjɑpɔk*. Zero of them are in the parity
+ * golden and zero NST headwords are spelled this way, so the tokenizer is the only instrument that sees it.
+ *
+ * ⚠ THE LOOKAHEAD IS THE WHOLE POINT, and a plain class member is the wrong shape: Norwegian writes the
+ * genitive of an s-final name with a TRAILING apostrophe (`Anders'`), and a closing quote (`sa 'nei'`) ends
+ * a word the same way. Requiring a LETTER after the mark is what keeps both of those out of the token.
+ * U+2019 is admitted beside U+0027 — nb_no writes only the ASCII one, but the typographic form is the same
+ * elision and `core/clauses.ts` already lists it.
+ */
+const NB_LETTER = `(?!\\p{Nd})[\\p{Script=Latin}]`;
+const NB_WORD = `${NB_LETTER}(?:${NB_LETTER}|\\p{M}|['’](?=${NB_LETTER}))*`;
+const TOKEN = new RegExp(`(${NB_WORD})|(\\d+)|([.?!,;:…—])`, "gu");
 
 // Number words (en, hundre, tusen, …) are all in the lexicon, so they never reach the oovOverride tier — the sync
 // phonemizeWord is correct here and the neural path's tagged map (populated only from input tokens) never holds them.

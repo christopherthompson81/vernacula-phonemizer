@@ -11,6 +11,9 @@ public static class NeuralRegistry
         ["en"] = Languages.English.EnglishNeural.PhonemizeEnNeural, // BiLSTM OOV reader (else the sync n-gram OOV G2P)
         ["af"] = Languages.Afrikaans.AfrikaansNeural.PhonemizeAfNeural,
         ["bn"] = Languages.Bengali.BengaliNeural.PhonemizeBnNeural,
+        // per-grapheme BiLSTM reading the words the NST lexicon misses; its tag alphabet embeds the stress
+        // mark, which is the deep-orthography win the first-syllable rule heuristic cannot reach
+        ["nb"] = Languages.Norwegian.NorwegianNeural.PhonemizeNbNeural,
         ["fr"] = Languages.French.FrenchNeural.PhonemizeFrNeural,
         ["ur"] = t => RiderNeural.PhonemizeRiderNeural(t, "ur"),
         ["fa"] = Languages.Persian.PersianNeural.PhonemizeFaNeural,
