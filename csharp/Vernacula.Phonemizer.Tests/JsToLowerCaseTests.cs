@@ -86,3 +86,50 @@ public class JsToLowerCaseTests
         Assert.Equal("abc", Js.ToLowerCase("ABC"));         // and the ordinary string is untouched
     }
 }
+
+/**
+ * #1119 — the word paths must REACH `Js.ToLowerCase`.
+ *
+ * ⚠ #1116 REPAIRED THE HELPER AND THE SYMPTOM SURVIVED, because ~214 sites lowercase with a bare
+ * `ToLowerInvariant()` and never call it. The English foreign reader was the big one: a Latin run inside
+ * any non-Latin text is handed to it, and it lowercased directly — so `İ` leaked its capital into the
+ * phoneme stream of 87 of the 132 ported languages, 2,544 probe rows, long after the helper was correct.
+ *
+ * These pin the SHAPE at the fleet level: a language of each routing kind, on the one code point whose
+ * mapping is length-changing.
+ */
+public class LowercaseReachesTheWordPathTests
+{
+    [Theory]
+    // Routed to the ENGLISH reader — the path that carried 87 of the 87.
+    [InlineData("mn", "İ")]
+    [InlineData("ru", "İ")]
+    [InlineData("ja", "İ")]
+    [InlineData("ar", "İ")]
+    // …and the Latin-script engines that lowercase in their own g2p head.
+    [InlineData("sv", "İ")]
+    [InlineData("af", "İ")]
+    [InlineData("yo", "İ")]
+    [InlineData("umb", "İ")]
+    [InlineData("en", "İ")]
+    [InlineData("en-GB", "İ")]
+    public void ACapitalIWithDotAboveDoesNotLeakItsCapital(string code, string input)
+    {
+        var got = Phonemizer.Phonemize(input, code);
+        Assert.DoesNotContain("İ", got);
+        // …and it is not silently dropped either — the TS reads it as a vowel in every one of these.
+        Assert.NotEqual("", got.Trim());
+    }
+
+    /** The same for a run, which is what actually occurs — a Turkish name inside another language. */
+    [Theory]
+    [InlineData("mn")]
+    [InlineData("ru")]
+    [InlineData("sv")]
+    public void ANameCarryingItReadsWithoutLeaking(string code)
+    {
+        var got = Phonemizer.Phonemize("İstanbul", code);
+        Assert.DoesNotContain("İ", got);
+        Assert.DoesNotContain("I", got);
+    }
+}

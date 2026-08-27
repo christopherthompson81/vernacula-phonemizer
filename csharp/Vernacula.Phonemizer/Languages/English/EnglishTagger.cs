@@ -65,7 +65,7 @@ public static class EnglishTaggerFactory
 
         public async Task<string> Tag(string word)
         {
-            var chars = Js.CodePoints(word.ToLowerInvariant());
+            var chars = Js.CodePoints(Js.ToLowerCase(word));
             var T = chars.Count;
             if (T == 0) return "";
             var ids = new long[T];

@@ -149,7 +149,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
      */
     private static string PhonemizeMorpheme(string word, bool finalDevoice = true, bool emitStress = true)
     {
-        var w = FoldForeignLetters(word.Normalize(NormalizationForm.FormC).ToLowerInvariant());
+        var w = FoldForeignLetters(Js.ToLowerCase(word.Normalize(NormalizationForm.FormC)));
         var stressNucleus = StressedNucleus(w); // primary-stress nucleus (native first-syllable + loan-suffix overrides)
         var outSb = new StringBuilder();
         var i = 0;
@@ -239,7 +239,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
      *  lexicon-covered word is served by the exact dictionary reading rather than by the tagger. */
     public static bool AfrikaansLexiconHas(string word)
     {
-        var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
         return Lexicon().ContainsKey(w) || Rcrl().ContainsKey(w);
     }
 
@@ -249,7 +249,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
      */
     public static bool AfrikaansRuleReserved(string word)
     {
-        var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
         return w == "'n" || w == "’n" || Js.CodePoints(w).Count == 1;
     }
 
@@ -260,7 +260,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
     private static string WithStress(string ipa, string word)
     {
         if (ipa == "" || ipa.Contains('ˈ')) return ipa;
-        var target = StressedNucleus(FoldForeignLetters(word.Normalize(NormalizationForm.FormC).ToLowerInvariant()));
+        var target = StressedNucleus(FoldForeignLetters(Js.ToLowerCase(word.Normalize(NormalizationForm.FormC))));
         var seen = -1;
         for (var i = 0; i < ipa.Length; i += 1)
         {
@@ -275,7 +275,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
 
     public static string PhonemizeWord(string word, OovResolver? oovOverride = null)
     {
-        var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
         if (Lexicon().TryGetValue(w, out var pinned)) return WithStress(pinned, w);
         if (Rcrl().TryGetValue(w, out var dict)) return WithStress(dict, w);
         var oov = AfrikaansRuleReserved(w) ? null : oovOverride?.Invoke(w);
@@ -286,7 +286,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
     /** The RULE ENGINE ALONE — no proper-noun lexicon. */
     public static string PhonemizeWordRules(string word)
     {
-        var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
         if (w == "'n" || w == "’n") return "ə"; // the indefinite article ⟨'n⟩ = [ə]
         string? spelled = Js.CodePoints(w).Count == 1 && LETTER_NAME.TryGetValue(w, out var ln) ? ln : null;
         if (spelled is not null) return PhonemizeMorpheme(spelled);
