@@ -151,6 +151,7 @@ public static class Bootstrap
             AncientGreek.AncientGreekPhonemizer.RegisterSelf();
             Latin.LatinPhonemizer.RegisterSelf();
             Mongolian.MongolianPhonemizer.RegisterSelf();
+            Setswana.SetswanaPhonemizer.RegisterSelf();
         }
     }
 }
