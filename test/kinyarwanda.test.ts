@@ -91,6 +91,25 @@ describe("Kinyarwanda numbers", () => {
         // …but 10¹¹ still COMPOSES — the new ceiling must not have swallowed the normal path.
         expect(numberToWords(100000000000)).toBe("miriyari ijana");
     });
+
+    /**
+     * ⚠ THE FALLBACK READS THE TOKEN TEXT, NOT THE FLOAT'S RENDERING OF IT. Above 2^53 the `number` has
+     * already lost its low digits, so `String(n)` is a DIFFERENT quantity from what the writer typed —
+     * `9007199254740993` re-stringified as `…992` and `12345678901234567890` as `…4567000`, both read out
+     * digit-by-digit with total confidence. The digit-at-a-time path exists because the float cannot be
+     * trusted; re-consulting the float inside it defeats the whole guard. `phonemize` is what pins it,
+     * because the call site is where the token text lives.
+     */
+    test("⚠ an unsafe integer reads the DIGITS THE WRITER TYPED, not the float's rounding of them", () => {
+        // 2^53+1 and 2^53+2 differ in their LAST digit; the float collapses the first onto …992.
+        expect(numberToWords(9007199254740993, "9007199254740993").split(" ").at(-1)).toBe("gatatu");
+        expect(numberToWords(9007199254740994, "9007199254740994").split(" ").at(-1)).toBe("kane");
+        // …and the reading is different for the two, which the re-stringified form could not manage.
+        expect(phonemize("9007199254740993", "rw")).not.toBe(phonemize("9007199254740994", "rw"));
+        // A 20-digit run keeps all twenty digits rather than the float's 17 significant ones plus zeros.
+        expect(phonemize("12345678901234567890", "rw").split(" ")).toHaveLength(20);
+        expect(phonemize("12345678901234567890", "rw").split(" ").at(-2)).toBe("ikʲenda"); // …9|0, not 0|0
+    });
 });
 
 // ── TEXT NORMALIZATION (src/languages/kinyarwanda/normalize.ts) ────────────────────────────────────────────

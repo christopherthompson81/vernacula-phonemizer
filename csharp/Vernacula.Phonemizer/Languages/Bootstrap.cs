@@ -130,8 +130,12 @@ public static class Bootstrap
             Hebrew.HebrewPhonemizer.RegisterSelf();
             Kurmanji.KurmanjiPhonemizer.RegisterSelf();
             Serbian.SerbianPhonemizer.RegisterSelf();
+            Croatian.CroatianPhonemizer.RegisterSelf();
+            Bosnian.BosnianPhonemizer.RegisterSelf();
             Swedish.SwedishPhonemizer.RegisterSelf();
             Armenian.Armenian.RegisterSelf();
+            Haitian.HaitianPhonemizer.RegisterSelf();
+            Kinyarwanda.KinyarwandaPhonemizer.RegisterSelf();
         }
     }
 }

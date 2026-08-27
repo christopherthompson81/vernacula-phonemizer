@@ -15,8 +15,9 @@
  * ⚠ Every boundary here is an explicit lookaround, never `\b`, which is ASCII-defined and finds none against
  * the Croatian diacritics.
  */
+import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { normalizeSerbianInitialisms } from "../serbian/normalize.ts";
-import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
+import { slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { SYMBOLS } from "./croatian.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -112,7 +113,6 @@ function counted(n: number, forms: readonly [string, string, string]): string {
 }
 const SAT = ["sat", "sata", "sati"] as const; // 22 sata · 23 sata · 15 sati
 const MINUT = ["minut", "minuta", "minuta"] as const;
-const METAR = ["metar", "metra", "metara"] as const;
 const MILJA = ["milja", "milje", "milja"] as const;
 const STUPANJ = ["stupanj", "stupnja", "stupnjeva"] as const; // 1 stupanj · 2 stupnja · 5 stupnjeva
 
@@ -146,19 +146,25 @@ export function normalizeCroatian(input: string): string {
     //    elided).
     //    The `g.` (godine) is BETWEEN the year-ordinal and the era marker, so the year-ordinal claim
     //    looks past it.
-    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(?:g\.\s+)?(?=(?:n\.\s?e|p\.\s?n\.\s?e|pr\.\s?Kr\.)(?![\p{L}\p{M}]))/giu,
+    //    ⚠ LOWERCASE-ONLY (`gu`, not `giu`), AND THIS ARRIVED IN serbian/normalize.ts CITING *THIS*
+    //    CORPUS WITHOUT EVER BEING APPLIED HERE. `n.e.` is also two INITIALS with stops, and this block
+    //    runs BEFORE the dotted-capital-run rule that would otherwise claim them, so the case-insensitive
+    //    version read `N. E. Kovač je došao` as *nove ere Kovač* — a name replaced by a date. All six era
+    //    instances in FLEURS hr_hr are lowercase (`n. e.` ×4, `p.n.e.` ×2) and initials are capitals, so
+    //    nothing real is lost. `pr. Kr.` keeps its written capital in the pattern itself.
+    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(?:g\.\s+)?(?=(?:n\.\s?e|p\.\s?n\.\s?e|pr\.\s?Kr\.)(?![\p{L}\p{M}]))/gu,
         (whole, digits: string) => {
             const base = ordinalBase(Number(digits));
             return base === undefined ? whole : `${inflect(base, "f.gen")!} `;
         });
-    s = s.replace(/(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(?=[.!?]|$)/giu, "prije nove ere.");
-    s = s.replace(/(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(\s)/giu, "prije nove ere$1");
-    s = s.replace(/(?<![\p{L}\p{M}])n\.\s?e\.(?=[.!?]|$)/giu, "nove ere.");
-    s = s.replace(/(?<![\p{L}\p{M}])n\.\s?e\.(\s)/giu, "nove ere$1");
-    s = s.replace(/(?<![\p{L}\p{M}])pr\.\s?Kr\.(?=[.!?]|$)/giu, "prije Krista.");
-    s = s.replace(/(?<![\p{L}\p{M}])pr\.\s?Kr\.(\s)/giu, "prije Krista$1");
+    s = s.replace(/(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(?=[.!?]|$)/gu, "prije nove ere.");
+    s = s.replace(/(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(\s)/gu, "prije nove ere$1");
+    s = s.replace(/(?<![\p{L}\p{M}])n\.\s?e\.(?=[.!?]|$)/gu, "nove ere.");
+    s = s.replace(/(?<![\p{L}\p{M}])n\.\s?e\.(\s)/gu, "nove ere$1");
+    s = s.replace(/(?<![\p{L}\p{M}])pr\.\s?Kr\.(?=[.!?]|$)/gu, "prije Krista.");
+    s = s.replace(/(?<![\p{L}\p{M}])pr\.\s?Kr\.(\s)/gu, "prije Krista$1");
     // The `g.` in `400. g. n. e.` / `1000. g. pr. Kr.` is "godine" (elided); drop it after the claim.
-    s = s.replace(/(?<=\d)\s+g\.\s+(?=(?:n\.\s?e\.|pr\.\s?Kr\.))/giu, " ");
+    s = s.replace(/(?<=\d)\s+g\.\s+(?=(?:n\.\s?e\.|pr\.\s?Kr\.))/gu, " ");
 
     // 3) DOTTED ABBREVIATIONS. `itd.` → "i tako dalje". The dot is consumed before a following word.
     s = s.replace(/(?<![\p{L}\p{M}])itd\.(\s+)(?=[\p{L}\d(])/giu, "i tako dalje$1");
@@ -219,7 +225,13 @@ export function normalizeCroatian(input: string): string {
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih`, `15-og`). The suffix is the LAST LETTERS of the
     //    inflected ordinal. Runs before the range rule.
-    s = s.replace(/(?<![\d.,])(\d+)\s?-\s?(\p{Ll}{1,2})(?![^\p{L}\p{M}]|.)/gu,
+    //    ⚠ THE TRAILING GUARD WAS `(?![^\p{L}\p{M}]|.)`, WHICH IS "END OF INPUT", NOT "END OF WORD". The
+    //    `|.` arm rejects EVERY following character, so the whole rule only ever fired on an input that was
+    //    nothing but the numeral — the unit tests, in other words. In running text it never fired: the 50
+    //    corpus lines of this shape (`1480-ih, kada`, `tijekom 1990-ih bilo je`) read the CARDINAL plus a
+    //    stray *ih*, the accusative clitic "them". Serbian and Bosnian write the same rule with the shared
+    //    NOT_LETTER_AFTER and are unaffected; Croatian is the copy that lost it.
+    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, rawSuffix: string) =>
             ordinalForms(Number(digits)).find((f) => f.endsWith(rawSuffix.toLowerCase())) ?? whole);
 

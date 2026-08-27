@@ -6,7 +6,12 @@
 import { composeSlavicNumber } from "../serbian/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
-/** Non-negative integer (< 10⁹) → Bosnian words; larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number): string {
-    return composeSlavicNumber(n, MANIFEST.numbers);
+/** Non-negative integer (< 10⁹) → Bosnian words; larger / non-finite → digit-by-digit.
+ *  ⚠ `raw` IS THE TOKEN STRING AND THE CALLER MUST PASS IT (#1059), exactly as Serbian's own entry point does:
+ *  the digit-by-digit fallback cannot recover the digits from `n`, which is a double — above 2^53 it has
+ *  ROUNDED (`9007199254740993` read as *…dva*, its neighbour's reading) and above 1e21 `String(n)` is exponent
+ *  form (`"1e+21"`), whose `e` and `+` are table misses that leak into the IPA (`1e21` read *jedan e dva
+ *  jedan*). The threading landed in serbian/numbers.ts but NOT in the two standards that wrap it. */
+export function numberToWords(n: number, raw?: string): string {
+    return composeSlavicNumber(n, MANIFEST.numbers, raw);
 }

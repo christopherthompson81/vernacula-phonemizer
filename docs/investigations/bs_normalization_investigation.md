@@ -445,6 +445,67 @@ by CI rather than by reading output.
 
 ---
 
+## Run 8 — 2026-08-26 — the C# port, and four defects the parity gate structurally cannot see
+
+**Question.** Port `bs` to C# byte-identically, and — per `csharp/PORTING.md`'s bidirectional rule — read the
+TypeScript for defects rather than only chasing diffs. The gate proves the two engines AGREE, so a bug both
+reproduce passes it forever; everything below moved **0 of 200 golden rows**.
+
+**Commands.**
+
+    dotnet run --project csharp/tools/parity -- bs          # 200/200 on the FIRST run, before any fix
+    npx tsx tools/gen_parity_goldens.mts bs                 # after each fix: 0 rows moved, every time
+    # corpus-wide differential, cols 3+4 of the three bs_ba TSVs, deduped
+    cat …/bs_ba/{dev,test,train}.tsv | cut -f3,4 | tr '\t' '\n' | sort -u   # 3,952 lines
+    # both engines, both modes: TS `phonemize`/`phonemizeAsync` vs C# `Phonemize`/`PhonemizeAsync`
+
+**Raw findings.**
+
+1. **`¾` and `½` NEVER REACHED STEP 14.** `bs` was absent from `registry.ts`'s `VULGAR_FOLD_OPT_OUT`, and the
+   shared fold (landed 2026-08-04, twelve days before this file) rewrites `¾` → ` 3/4` before any engine runs.
+   bs has no `n/m` fraction rule, so the slash was dropped:
+
+       (29¾ inča sa 24½ inča)   →  …dˈeʋet TRIː t͡ʃˈetiri ˈiːnt͡ʃa sa …t͡ʃˈetiri JˈEdan DʋAː ˈiːnt͡ʃa
+       after the opt-out       →  …dˈeʋet I TRIː t͡ʃˈetʋrtine ˈiːnt͡ʃa sa …t͡ʃˈetiri I PO ˈiːnt͡ʃa
+
+   ⚠ **THE REASON IT SURVIVED SEVEN RUNS IS THE TEST HARNESS.** Every test in `test/bosnian.test.ts` calls
+   `createBosnian().text()` directly, which bypasses every pre-pass. The rule was green in its own suite and
+   dead in the product. The new tests go through `phonemize()`.
+   ⚠ The opt-out is a trade: the sixteen OTHER vulgar glyphs are now dropped rather than half-read. All ×0 in
+   this corpus; hr/ca/mk and six more already make the same trade.
+
+2. **#1059's `raw` never reached the wrapper.** `serbian/numbers.ts` threads `raw`; `bosnian/numbers.ts` did
+   not declare it. `9007199254740993` read as *…dʋaː* — its NEIGHBOUR's answer, the double having rounded —
+   and `1e21` as *jˈedan e dʋaː jˈedan*, four words for 22 digits. bs is off `ACCEPTED_LOSSY`. **hr still has
+   it** and its call site strips `.`/`,` first, so hr's `raw` must be the stripped string.
+
+3. **The era marker was the one word-keyed rule with a single script.** This file's own header states the
+   digraphia invariant and DOTTED_ALT/LICENSOR/the degree scale all hold it. `п.н.е. у пожару` → *p . n . e .*
+   Serbian ships both spellings already, so the fix is a transliteration and not a sourcing question.
+
+4. **Backlog item 6 is now closed for the three WORD connectives.** The coordinated pair is claimed as a unit
+   (step 9b), both endpoints in the WRITTEN licensor's slot:
+
+       10. i 11. stoljeća     →  dˈeset . i jedanˈaestoɡ …      →  dˈesetoɡ i jedanˈaestoɡ stˈoʎet͡ɕa
+       1. i 3. pukovniju      →  jˈedan . i trˈet͡ɕu …            →  pˈrʋu i trˈet͡ɕu pˈukoʋniju
+       u 2015. ili 2016. godini → …petnaestE ili …šesnaestOJ    →  …pˈetnaestoj ˈili …ʃˈesnaestoj ɡˈodini
+
+   ⚠ **THE YEAR HALF WAS A DIFFERENT DEFECT WITH THE SAME CAUSE, and Run 7 did not name it.** Step 11 claims a
+   year but only knows the ELIDED *godine*, so it always emits f.gen; where the written licensor governs
+   another slot the pair carried two cases for one construction. Run 7's own argument ("the elision governs
+   the pair") is what settles it. The COMMA form (`11.,12., i 13. vijeku`) is still open — item 6 stands for
+   that shape.
+
+**What it implies.** The gate is blind to all four, and so is the corpus differential for three of them
+(Cyrillic is ×0 in bs_ba, ≥2^53 digit runs are ×0, and the fractions are ×2 lines whose old reading was
+merely *wrong*, not absent). Off-golden probes — 296 lines, one per arm plus the neighbour each arm must
+decline — are what carried the weight, and the reading of their OUTPUT is what found the residuals now filed
+in `csharp/STATUS.md` (the decimal count disagreement between the local `/s` rule and the shared tier; space
+grouping; the round-thousand stranded pause; `km³`; U+2212 fusing a range).
+
+**Gate after.** TS 5,503 pass / 5 skipped; C# 1,198 pass; parity **111 languages, 21,896 rows, 0 differ,
+0 BLOCKED**. Corpus differential 3,952 lines × 2 modes and probes 296 × 2 modes, all byte-identical.
+
 ## Gates
 
 | gate | before | after |
@@ -485,10 +546,9 @@ by CI rather than by reading output.
 5. **`w`, `y`, `q`, `x` in foreign names** — `George W. Bush` loses the `W` entirely because those letters are
    in the tokenizer's Latin run but not in the Serbo-Croatian grapheme table. That is a `bosnian.ts`/g2p
    question, not a normalization one, and is out of this round's scope.
-6. **Coordinated ordinals sharing one licensor** — `10. i 11. stoljeća`, `11.,12., i 13. vijeku`,
-   `1. i 3. pukovniju`. The FIRST ordinal's licensor is two tokens to the right and the closed-list rule
-   cannot see it. 4 instances; a `N. (i|ili|do|,) M. <licensor>` arm would claim them and is not written
-   because the comma form (`11.,12.,`) needs a different shape again.
+6. ~~**Coordinated ordinals sharing one licensor**~~ — **CLOSED IN PART, Run 8.** Step 9b now claims
+   `N. (i|ili|do) M. <licensor>` as a unit, both endpoints in the written licensor's slot, both scripts. The
+   COMMA form (`11.,12., i 13. vijeku`) still needs a different shape and remains open.
 7. **`90 stepeni F.`** — Fahrenheit written as a bare letter after a SPELLED degree noun, with no `°`. ×1;
    claiming it needs a rule keyed on the noun rather than on the sign.
 8. **`AUD$`** — declared as a compound currency key, but `45 miliona AUD$` puts a MAGNITUDE between the number

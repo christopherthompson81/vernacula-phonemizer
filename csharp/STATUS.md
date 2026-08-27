@@ -16,11 +16,11 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 110 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 111 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67 — those languages have no wikipedia and no FLEURS, so their goldens are what exists).
-  **21,696 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **21,896 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn ca ceb cjy cmn cs de el en-GB en-IN en es-419 es fa ff fr-CA fr gan gu ha hak he hi hne hsn hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mai mg mi ml mr ms my nan ne nl nya oc om or pa pcm pl pnb ps pt-BR pt qu ro ru sd si skr sn so sr su sv sw syl ta te tg th tl tr ug uk umb ur uz vi wuu yo yue za zu.
+  Ported: acm acw af afb ajp am apc apd ar ary arz as ast awa ayl az bg bho bn bs ca ceb cjy cmn cs de el en en-GB en-IN es es-419 fa ff fr fr-CA gan gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko ln lo mad mai mg mi ml mr ms my nan ne nl nya oc om or pa pcm pl pnb ps pt pt-BR qu ro ru rw sd si skr sn so sr su sv sw syl ta te tg th tl tr ug uk umb ur uz vi wuu yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -407,6 +407,180 @@ measuring someone else's build until it noticed. Any brief that tells an agent t
 project must also tell it to use a uniquely-named subdirectory and to re-verify the `.csproj` target
 before trusting a number.
 
+### From the hr port (2026-08-26) — ⚠ FOUR DEFECTS, AND NOT ONE MOVED A GOLDEN ROW
+
+hr is a THIN module over the shared Serbian core (`PhonemizeWord`, `ForeignLetters`,
+`NormalizeSerbianInitialisms`, `ComposeSlavicNumber`) and was 200/200 on its FIRST parity run, before any of
+these were found. Every one came from READING, and every one is FIXED in both engines now — TS first, with
+tests, goldens regenerated (0 rows changed, four times over).
+
+- **⚠ A FIX DOES NOT PROPAGATE ALONG A SHARED CORE, AND THAT IS THE LESSON OF THIS PORT.** Three of the four
+  are a sibling's finding that never crossed the module boundary, and in two cases the sibling's own comment
+  CITES the Croatian corpus while leaving Croatian broken:
+    · **#1059's `raw` threading.** `serbian/numbers.ts` takes the parameter; hr's and bs's one-line
+      `numberToWords` wrappers DROPPED it and their call sites never passed a token, so both read
+      `1000000000000000000000` as *jedan e dva jedan* — "1 e + 2 1", the ⟨e⟩ voiced as a vowel. ⚠ hr's caller
+      also has a trap the others do not: it strips the thousands PERIODS and the decimal COMMA before
+      `Number()`, so `raw` must be the STRIPPED string. Both fixed; `hr`/`bs` removed from
+      `large-numeral-fidelity`'s ACCEPTED_LOSSY.
+    · **The era marker's `i` flag.** `n.e.` is also two capital INITIALS with stops, and the era block runs
+      BEFORE the dotted-capital-run rule, so `N. E. Kovač je došao` read *nove ere Kovač* — a name replaced by
+      a date. serbian/normalize.ts fixed exactly this, and its comment reads "all eight era instances across
+      the sr AND hr corpora are lowercase". hr kept `giu` anyway.
+    · **The hyphen-suffix ordinal was DEAD IN RUNNING TEXT.** Its trailing guard was `(?![^\p{L}\p{M}]|.)`,
+      whose `|.` arm rejects EVERY following character — "end of word" was silently "end of INPUT", so the
+      rule only ever fired on an input that was nothing but the numeral, i.e. on its unit tests. The 50 lines
+      of that shape in FLEURS hr_hr (`1480-ih, kada je…`, `tijekom 1990-ih bilo je`) read the CARDINAL plus a
+      stray *ih*, the accusative clitic "them". bosnian/normalize.ts NOTICED this and declined to copy it, in
+      a comment, without fixing the original.
+- **hr's own: the rate preposition was not per denominator.** `unitPer: "na"` is right for ⟨h⟩ only because
+  `sat` is syncretic in the accusative `na` governs; the feminine `sekunda` is not, so `1,5 km/s` and
+  `133 m/s` — both written in this corpus — read *kilometara NA SEKUNDA*. `core/normalizeSymbols.ts` already
+  takes a KEYED `unitPer` (added for Serbian's *u sekundi*), so the fix is data, not a forked rule.
+- Hygiene, no output change: hr's `METAR` count-noun table was declared and consulted by nothing (Serbian's
+  m/s rule is what reads it, and hr has none), and `makeSymbolNormalizer` was an unused import.
+- ⚠ **STILL OPEN, ALL THREE STANDARDS AGREE ON THEM, AND EACH NEEDS A DECISION RATHER THAN A REWRITE:**
+    · **`0,001 grama` reads *nula zarez jedan*** — a 100× error. The decimal comma becomes a word and the
+      fractional tail is then re-tokenized, so `Number("001")` is 1 and the leading zeros are gone. sr/hr/bs.
+    · **`1 000 000` reads *jedan nula nula*** — no space-grouping arm exists in any of the three (they group
+      on periods), so a space-grouped figure is three numbers. Cf. the uz finding.
+    · **`1,5 km` takes the genitive PLURAL where `2,5 km` takes the singular** — the shared tier's
+      `slavicCountForm` reads the integer part, but a Croatian decimal governs the genitive singular whatever
+      it is. The Ukrainian #920 shape, in a language that routes through the shared tier rather than around it.
+    · **`1000/2000` loses its slash** (fraction operands capped at 3 digits, the su finding), **`2000. godine`
+      keeps a spurious PAUSE** (`ordinalBase` declines a round thousand, documented in sr), **roman numerals
+      above V before a lowercase noun read as words** (`VI. svjetski` → *vi svjetski*), **`SAD-u` strands its
+      case suffix** after the nominative expansion, and **`1.234.567.890` degrades to digit-by-digit** for want
+      of a sourced *milijarda*.
+### From the bs port (2026-08-26) — four TS-side defects, and the golden moved ZERO rows for all four
+
+bs is the second Serbo-Croatian standard in the C# tree: `Languages/Bosnian/` is 4 files and ~430 lines,
+because `PhonemizeWord`, `ForeignLetters`, `ComposeSlavicNumber` and `NormalizeSerbianInitialisms` all come
+from `Languages/Serbian/` unchanged. Gate **110 → 111 languages, 21,696 → 21,896 rows, 0 differ, 0 BLOCKED**;
+200/200 on the first parity run, before any of the fixes below.
+
+⚠ **THE WIDENINGS ARE WHERE THE PORT EARNED ITS KEEP, AND THE GOLDEN SAW NONE OF IT.** All four defects were
+found by READING, all four are fixed in TypeScript first with tests, and `gen_parity_goldens.mts bs` moved
+**0 of 200 rows** on each — the gate proves the engines agree and every one of these was a bug both engines
+would have reproduced byte-for-byte forever. Corpus-wide differential: 3,952 FLEURS `bs_ba` lines (col 3+4)
+× sync and async, 0 differ. Off-golden probes: 296 hand-built lines, one per arm plus the adversarial
+neighbour each arm must decline, × both modes, 0 differ.
+
+- ⚠ **A SHARED PRE-PASS CAN KILL A LANGUAGE'S OWN RULE, AND NO UNIT TEST IN THE LANGUAGE'S FILE CAN SEE IT.**
+  `bs` was missing from `registry.ts`'s `VULGAR_FOLD_OPT_OUT`, so the shared fold rewrote `¾` to ` 3/4`
+  twelve days before the Bosnian port was written — and bs has no general `n/m` fraction rule, so the slash
+  was dropped and the corpus's parchment sentence read *dvadeset devet TRI ČETIRI inča*, "twenty-nine three
+  four". Step 14 of `bosnian/normalize.ts`, whose reading is *i tri četvrtine*, had never once run.
+  ⚠ **THE TEST FILE IS WHY IT SURVIVED**: every bs test built the engine with `createBosnian()` and called
+  `.text()` directly, which bypasses every pre-pass `getPhonemizer` wraps around it. A rule can be green in
+  its own suite and unreachable in the product. The new tests go through `phonemize()`.
+  ⚠ The opt-out is a TRADE, stated here rather than hidden: bs now reads the two attested glyphs (`¾` `½`,
+  the only ones in the corpus) with its own words, and DROPS the other sixteen, which the fold used to
+  half-read. hr, ca, mk and six more already make the same trade; inventing *i jedna trećina* for a glyph
+  with ×0 attestation is the Fula `tere` failure.
+- ⚠ **#1059's `raw` THREADING DID NOT PROPAGATE TO THE STANDARDS THAT WRAP THE SHARED COMPOSITOR.**
+  `serbian/numbers.ts` takes `raw` and `serbian.ts` passes it; `bosnian/numbers.ts` did not declare the
+  parameter at all, so bs read `9007199254740993` as *…dva* (its NEIGHBOUR's answer — the double had already
+  rounded) and `1e21` as *jedan e dva jedan*, four words for twenty-two digits. bs is removed from
+  `large-numeral-fidelity.test.ts`'s `ACCEPTED_LOSSY`, which is the list that may only shrink. ⚠ **`hr` HAS
+  THE SAME HOLE AND IS STILL ON THAT LIST** — its call site strips `.` and `,` before `Number()`, so its
+  `raw` must be the STRIPPED string, not the token.
+- ⚠ **THE ONE WORD-KEYED RULE IN A DIGRAPHIC LANGUAGE THAT HAD ONLY ONE SCRIPT.** `bosnian/normalize.ts`'s
+  header states the invariant ("its absence would make this file a no-op on Cyrillic prose") and DOTTED_ALT,
+  LICENSOR and the degree scale all hold it — the era marker did not. `п.н.е. у пожару` read as *p . n . e .*,
+  four letter names and four phrase breaks. Serbian already ships both spellings, so nothing was invented.
+- ⚠ **A COORDINATED ORDINAL PAIR IS ONE CONSTRUCTION AND WAS BEING READ AS TWO HALVES, ONE OF THEM WRONG.**
+  Step 9 established that a licensed span makes BOTH endpoints ordinal and cited the longhand sentences
+  (`u sezoni od 1995. do 1996. godine`, `u 2015. ili 2016. godini`) as its evidence — then claimed only the
+  DASH form. The longhand ones fell to steps 10/11, which see one numeral at a time:
+    · a NON-YEAR first conjunct is claimed by neither, so `10. i 11. stoljeća` read *deset . i jedanaestog
+      stoljeća* — the cardinal-plus-spurious-clause-break that the whole file exists to remove. ×3 distinct
+      corpus sentences, and the LICENSOR table cites two of them as its OWN evidence for `stoljeća` and
+      `pukovniju`;
+    · a YEAR first conjunct IS claimed, by step 11 — which only knows the ELIDED *godine* and so always
+      emits f.gen. `u 2015. ili 2016. godini` read *petnaestE … šesnaestOJ*, one construction with two cases
+      in it.
+  Step 9b now claims `N. (i|ili|do) N. LICENSOR` as a unit, both scripts. The connectives are the three the
+  corpus writes; an unlicensed follower and a round thousand are both refused.
+
+**Found and NOT fixed — filed, with the count that decided it:**
+
+- **A local rate rule and the shared tier disagree about a decimal count** — Ukrainian's #920 shape, in
+  sr/hr/bs alike. `intOf` TRUNCATES, so bs's local `m/s` rule reads `1,5 m/s` as *metAR* (nom.sg) where the
+  shared tier reads `1,5 km` as *kilometarA* (gen.pl, via `numValue`'s `int + 0.5`). ×0 decimals in the four
+  attested rate shapes (`133 m/s`, `200 milja/sat`, `300 m/h`, `600Mbit/s`), and closing it moves sr and hr
+  too, so it wants a Serbo-Croatian decision rather than a bs edit.
+- **Space-grouped thousands are not de-grouped**: `1 000 km` reads *jedan nula kilometara* — a lost
+  magnitude, and the tier's count form is right (`numValue` de-groups) while the tokenizer's number is not.
+  ×0 in bs_ba across all four space characters; Bosnian groups with periods (×47). Adding the arm on zero
+  attestation is the #955 invention trap.
+- **A round thousand ordinal leaves a stranded pause**: `2000. godine` → *dvije hiljade . godine*.
+  `ordinalBase` returns undefined by design (the fused *dvijehiljaditi* is a different word-formation), but
+  the untouched text keeps a `.` that IS clause punctuation. ×2 in the corpus, and closing it needs the
+  fused forms sourced.
+- **`km³` is dropped silently while `km²` reads** (ig's finding, same shape): bs declares no cubed word
+  because `³` is ×0 and the one cubic quantity is spelled out — but the MARK is then lost rather than left.
+- **U+2212 between digits fuses a range**: `1838−1917` → two years with nothing between them. The range
+  class is `[-–—]` and the minus class is `[-−–]`; ×0 U+2212 in bs_ba, so per #955 this is filed, not swept.
+- **A triple coordination claims only its last pair** (`1. i 3. i 5. pukovniju`), and **`GMT-00:43`** loses
+  its sign (the cy/ga finding). Both ×0.
+### From the rw port (2026-08-26) — 200/200 first run, one TS fix, two filed
+
+**rw (Kinyarwanda, ~12M)** — 4 files, ~470 C# lines: a greedy longest-match grapheme scan (the ⟨Cy⟩
+palatalisation series), the shared Rwanda-Rundi cardinal compositor, and a 610-line normalizer that owns the
+shared symbol-tier call from BOTH sides (de-grouping before it, the decimal spell-out after it). No FLEURS
+corpus and no espeak backend exist for rw, so widening (1) is the 443-line mined artifact rather than a
+transcript; the differential ran 849 lines (445 mined + 132 attest + 277 adversarial) plus 96 separator
+probes, sync AND async, **0 differ, 0 throws**. Coverage of the new code, measured not assumed: 580 probe
+lines carry a digit, 159 a decimal separator, 117 a unit key, 66 a span, 40 a percent, 33 a degree sign, 33
+an exponent, 30 a colon time, 26 a currency key, 16 a dotted capital run.
+
+Fixed in TypeScript first, with a test, then ported:
+
+- **rw's number call site re-stringified the double instead of passing the token text** — the #1059 shape,
+  and rw was on `large-numeral-fidelity`'s ACCEPTED_LOSSY list. `numberToWords(Number(m[2]))` dropped `raw`,
+  so the digit-at-a-time fallback — which exists *precisely because the float cannot be trusted* — then read
+  the float back out. `9007199254740993` read `…kʲenda kʲenda kabiɾi` (…992, the rounded value) and
+  `12345678901234567890` read its last three digits as *zeɾu zeɾu zeɾu* against a written `890`. A
+  confidently wrong quantity, not a drop, and the sibling engines that share this compositor's shape (shona,
+  chichewa) already passed `raw`. **0 golden rows move** — the rw golden's longest digit run is 5.
+  rw is now off ACCEPTED_LOSSY, which that test says may only shrink.
+
+Found, not fixed — both corpus-attested, both engines agreeing, and the second needs a FLEET decision:
+
+- **The `dogere` redundancy guard gives ONE CONSTRUCTION TWO ANSWERS.** `saidNear` reads the ±45-character
+  window of the string `String.replace` handed the callback — the PRE-replacement one — so a sibling match in
+  the SAME pass is invisible while one in a LATER pass is not. Measured on the corpus's own °C/(°F) glosses:
+  `−27.2 °C (−17.0 °F)` says the noun twice (both figures negative, both claimed by arm 4a) while
+  `−14.4 °C (6.1 °F)` says it once (the second figure falls to arm 4c, whose snapshot already carries the
+  insertion). Same construction, two readings, decided by which arm claimed the first figure. `25.3°C na
+  27.7°C` likewise emits `dogere selisiyusi` twice where the corpus's own spell-out
+  (`dogere 22° na 35° z'amajyepfo`) writes the noun ONCE for two signs. ⚠ NOT FIXED, because the obvious
+  blanket fix REGRESSES the coordinate arm: `2° 36′ 58″ S, 29° 44′ 34″ E` is 14 characters apart and the
+  corpus repeats the noun per AXIS on purpose (`dogere 22°… (S) na dogere 16°… (E)`). A correct fix has to
+  be per-arm — within-pass memory for the temperature arms, none for the coordinate arm — and it moves both
+  of the golden's two degree-bearing rows on n=1 and n=5 evidence. Needs the decision, not the diff.
+- **MAGNITUDE + NUMBER + CURRENCY is split down the middle, ×7 in the corpus.** rw writes the magnitude word
+  BEFORE its figure (`miliyari 290 Frw`, `miliyoni 158$`, `miliyoni 20 $`, `miliyoni 2 Frw`, `miliyoni $800`,
+  `miliyoni $440`, `miliyoni $247`) and `currencyPrefix` puts the currency phrase immediately before the
+  number, so `miliyari 290 Frw` → *miliyari amafaranga y'u Rwanda 290* — the magnitude noun and its count
+  separated by a four-word currency phrase. normalize.ts withholds `magnitudes` for a stated reason that is
+  about the TIER'S CAPABILITY rather than the desired reading: "`magAlt` matches NUMBER-then-magnitude, so
+  the hop can never fire". It cannot, and that is the defect — `core/normalizeSymbols.ts` has no
+  magnitude-BEFORE-number arm at all. A per-language patch would paper over one language; this is the
+  `roman`/`DC` shape, a fleet call on the shared tier. ⚠ And nya is the mirror case (NOUN+NUMBER+MAGNITUDE),
+  so the tier is already known to meet at least three orders.
+- Hygiene, no fix proposed: rw declines LETTER NAMES outright (no in-repo source, espeak ships no
+  Kinyarwanda), and step 1's dotted-capital rule therefore FUSES a person's spaced initials into a pseudo-word
+  — `P. W. Botha` → *pw botha*, `H. W. Bush` → *hw buʃ*, both corpus lines. The discriminator is clean (all 6
+  abbreviation instances are UNSPACED — `U.R.S.S.`, `R.R.A`, `P.S.`, `D.C.`, `A.L.A.R.M.` — and both initial
+  runs are SPACED), but with no letter-name table every available output is wrong, so the honest blocker is
+  the sourcing gap the file already records.
+- ⚠ **rn (Kirundi) CARRIES THE SAME NUMBER CALL-SITE DEFECT AND IS NOT FIXED HERE** — `kirundi.ts` also calls
+  `numberToWords(Number(m[2]))` and `kirundi/numbers.ts` also drops `raw` on the way to the shared
+  `composeRwandaRundi`. It is still on ACCEPTED_LOSSY. Reported rather than fixed, per trap 55: rn is a
+  separate bring-up and a sibling is a hypothesis, not a source.
+
 ### From the om/uz/sd/su/ig batch (2026-08-25) — read while porting, both engines agree on every one
 
 ⚠ THE PARITY GATE CANNOT SEE ANY OF THESE. It proves the two engines AGREE; a bug both reproduce
@@ -434,6 +608,46 @@ byte-for-byte passes it forever. Every entry below is a TS-side fix owing a test
   exactly this by design; the tutuq belgisi is never word-initial or word-final in Uzbek either.
 - Hygiene, no output change: ig's `consonants["ṅ"]` is stored precomposed but `phonemizeWord` NFDs first,
   so the row is unreachable; ig's and su's `foreign` constructor params are never read on any branch.
+
+### From the ht port (2026-08-26) — 200/200 first run; full log in `docs/ht_port_investigation.md`
+
+⚠ **THE INTRA-WORD MARK CLASS IS LIVE IN ht, AND IT IS THE TYPOGRAPHIC APOSTROPHE, NOT THE ASCII ONE.**
+Haitian writes `l'ap`, `n'ap`, `ki-sa`, `pa-t`, and the word arm already carried `"'-"` — measured over
+mined + attest + the 200 golden texts, 73+46 intra-word U+0027 and 229+35 intra-word hyphens all read as
+ONE token. **U+2019 did not**: 13 mined + 2 golden instances, every one an elision, and every one split at
+the mark — `l’Hôpital` → *l hopital* against `l'Hôpital` → *lhopital*, a stranded [l] in front of the
+noun. `core/clauses.ts`'s own `LATIN_RUN`/`FOREIGN_RUN` list U+2019 and ~20 sibling Latin engines do too;
+ht simply missed it. Fixed TS-first (`"'-"` → `"'’-"`, and the same in `NATIVE_CLASS`), **2 golden rows
+moved**, pinned in both suites as "the two spellings must read IDENTICALLY".
+⚠ The second half of the Swedish fix (#1073) was NOT needed and that was checked, not assumed: `scan` has
+no fall-through — an unnamed character is dropped, never passed into the IPA — so a leading or trailing
+quote still reads as nothing (`’moun` → *mun*).
+
+Found, not fixed:
+
+- **A decimal glued to a letter reads its separator as a CLAUSE BREAK — ×8 attested.** Step 10's trailing
+  `(?![\d\p{L}\p{M}])` is documented as keeping a dotted designation (`802.11a`) out; declining is not
+  neutral, because the surviving `.`/`,` is then CLAUSE PUNCTUATION. `17.09m.` → *disɛt . nɛf m .*,
+  `1.9pwen` → *ɛ̃ . nɛf pwɛ̃*, `442.7k` → *… kaɣãnde . sɛt k*, `802.11n` → *ɥit sã de . ɔ̃z n*. ⚠ **Two of
+  the eight are `normalize.ts`'s OWN attestations** — `1 a 1,5m` and `50cm a 1,80m`, quoted twice in the
+  file as the evidence for the `a` connective, read *ɛ̃ a ɛ̃ , sɛ̃k m*. 3 of the 12 corpus instances are
+  genuine quantities, 5 are designations/DOIs, 2 are already rescued by the unit tier — and the current
+  reading is wrong for ALL of them. NOT FIXED because the repair (read the separator as `vigil`) trades a
+  bogus full stop for a bogus *vigil* in the designation half; that is a corpus call, not a port call.
+  0 golden rows reach the shape.
+- **A NON-ASCENDING span drops its unit entirely.** `53-50 km` → *sɛ̃kãntwa sɛ̃kãt km* against `50-53 km`
+  → *… kilomɛt*. Step 5's `(?<!\d\s?[-–—]\s?)` on the single-operand arm is only ever REACHED when the
+  span arm declined (a successful span rewrites the dash away), so its whole effect is to delete the unit
+  in exactly that branch. ×0 attested — the `tl numberStressIdx` shape, live the moment one appears.
+- **The `-eyen` ordinal band strands a bare *jɛm*** — the before-picture step 12 exists to fix, surviving
+  wherever `ordinalTails` has no match: `20yèm` → *vɛ̃tjɛm* but `21yèm` → *vɛ̃tejɛ̃ jɛm*, and likewise 31,
+  41, 81, 101, 0 and every magnitude. Needs a sourced Haitian ordinal for the decade+`eyen` band; all 22
+  `ordinalTails` rows themselves ARE reached (checked by composing every band).
+- Shared shapes, already filed for other languages: `2 − 2` reads *de de* (step 4b claims the LEADING
+  U+2212 only, deliberately); `20 °Cx` → *vɛ̃ kks* and `(0) c°` → *zewo k* (the `lo` degree finding);
+  `ISBN`/`US`/`X` read as Haitian words because espeak ships no Haitian Creole letter names.
+- Hygiene, no output change: step 1's zero-width class was written with the four INVISIBLE characters, so
+  the line read as an empty class. Escaped in both engines (the #931 rule).
 
 ## ⚠ Things that will bite
 

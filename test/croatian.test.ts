@@ -177,4 +177,102 @@ describe("Croatian text normalization", () => {
         // ⚠ MOVED when the initialism pass landed: the run is now SPELLED OUT (see serbian/normalize.ts).
         expect(ph("UTC+1")).toBe("u te t͡se plus jˈe˩˥dan");
     });
+
+    /**
+     * ⚠ THE ERA MARKER IS LOWERCASE-ONLY, AND SERBIAN'S FIX FOR THIS CITED *THIS* CORPUS WITHOUT EVER BEING
+     * APPLIED HERE. `n.e.` is also two INITIALS with stops, and the era block runs BEFORE the
+     * dotted-capital-run rule that would otherwise claim them, so a case-insensitive era rule replaced a
+     * NAME with a date: `N. E. Kovač je došao` read *nove ere Kovač*. All six era instances in FLEURS hr_hr
+     * are lowercase; initials are capitals.
+     */
+    test("the era marker declines a pair of CAPITAL initials", () => {
+        expect(ph("N. E. Kovač je došao")).toBe("ne kˈo˩˥ʋat͡ʃ je dˈoʃao");
+        expect(ph("P. N. E. Horvat")).toBe("pne xˈo˩˥rʋat");
+        // …and every lowercase era form the corpus writes still reads.
+        expect(ph("n.e. i dalje")).toBe("nˈoʋe ˈere i dˈa˥˩ʎe");
+        expect(ph("p.n.e.")).toBe("prˈi˥˩je nˈoʋe ˈere .");
+        expect(ph("od 1500. p. n. e.")).toBe("od tˈisut͡ɕu pˈetstote prˈi˥˩je nˈoʋe ˈere .");
+        expect(ph("400. g. n. e.")).toBe("t͡ʃetˈiristote nˈoʋe ˈere .");
+        expect(ph("1000. g. pr. Kr.")).toBe("tisˈut͡ɕite prˈi˥˩je krˈista ."); // the capital is IN the pattern
+    });
+
+    /**
+     * ⚠ THE HYPHEN-SUFFIX ORDINAL ONLY EVER FIRED ON AN INPUT THAT WAS NOTHING BUT THE NUMERAL — which is
+     * to say, on unit tests. Its trailing guard was `(?![^\p{L}\p{M}]|.)`, and the `|.` arm rejects EVERY
+     * following character, so "end of word" was silently "end of input". In running text the rule was
+     * dead: the 50 lines of this shape in FLEURS hr_hr (`1480-ih, kada je…`, `tijekom 1990-ih bilo je`)
+     * read the CARDINAL and then a stray *ih* — the accusative clitic "them" — as a word of its own.
+     * Serbian and Bosnian write the same rule with the shared NOT_LETTER_AFTER; Croatian is the copy that
+     * lost it. ⚠ THE BARE-NUMERAL CASE IS THE ONE THAT KEPT PASSING, so it is not the regression pin: the
+     * pins below are all mid-sentence.
+     */
+    test("the hyphen-suffix ordinal fires MID-SENTENCE, not only at end of input", () => {
+        expect(ph("tijekom 1990-ih bilo je")).toBe("tijˈeː˥˩kom tˈisut͡ɕu dˈe˥˩ʋetsto deʋedˈe˩˥setix bˈilo je");
+        expect(normalizeCroatian("u 1970-ih godinama")).toBe("u tisuću devetsto sedamdesetih godinama");
+        expect(normalizeCroatian("15-og svibnja")).toBe("petnaestog svibnja");
+        expect(normalizeCroatian("1480-ih, kada")).toBe("tisuću četiristo osamdesetih, kada");
+        expect(normalizeCroatian("1970-ih")).toBe("tisuću devetsto sedamdesetih"); // the case that worked
+        // …and the widened guard does not over-claim: a suffix no ordinal form ends in is left alone, and
+        // a digit range still belongs to the range rule.
+        expect(normalizeCroatian("3-d model")).toBe("3-d model");
+        expect(normalizeCroatian("2-3 dana")).toBe("2 do 3 dana");
+    });
+
+    /**
+     * ⚠ THE RATE PREPOSITION IS PER DENOMINATOR. A single `unitPer: "na"` is right for ⟨h⟩ only because
+     * `sat` is syncretic in the accusative that `na` governs; the feminine `sekunda` is not, so `133 m/s`
+     * and `1,5 km/s` — both written in FLEURS hr_hr — read *kilometara NA SEKUNDA*, a nominative under an
+     * accusative preposition. BCS says *u sekundi*, which serbian/normalize.ts composes locally and
+     * Croatian now declares through the keyed `unitPer` the shared tier added for exactly this.
+     */
+    test("the /s rate takes ⟨u sekundi⟩ while /h keeps ⟨na sat⟩", () => {
+        expect(ph("133 m/s")).toBe("stoː˥˩ trˈiː˩˥deset triː˥˩ mˈetra u sekˈuː˩˥ndi");
+        expect(ph("5 km/s")).toBe("peː˥˩t kˈilometara u sekˈuː˩˥ndi");
+        expect(ph("70 km/h")).toBe("sedamdˈe˩˥set kˈilometara na saː˥˩t"); // the other denominator, unmoved
+        expect(ph("40 mi/h")).toBe("t͡ʃetrdˈe˩˥set mˈiː˥˩ʎa na saː˥˩t");
+    });
+
+    /**
+     * #1059, WHICH DID NOT PROPAGATE ALONG THE SHARED CORE. `serbian/numbers.ts` took the `raw` threading
+     * with sr, but Croatian's own `numberToWords` wrapper dropped the parameter and croatian.ts never
+     * passed a token string — so above 1e21 the fallback stringified the DOUBLE and
+     * `1000000000000000000000` read *jˈe˩˥dan e dʋaː˥˩ jˈe˩˥dan*, "1 e + 2 1", with the ⟨e⟩ voiced as a
+     * vowel and twenty-two digits gone.
+     *
+     * ⚠ AND THE STRING PASSED IS THE SEPARATOR-STRIPPED ONE, not the token match: Croatian groups thousands
+     * with PERIODS and writes the decimal with a COMMA, both inside the number token, and croatian.ts
+     * removes them before `Number()`. Passing the match would spell the separators out among the digits —
+     * a reading that sounds plausible and is silently wrong.
+     */
+    describe("Croatian large numerals (#1059)", () => {
+        test("a 22-digit run keeps its own digits", () => {
+            const a = phonemize("1000000000000000000001", "hr");
+            const b = phonemize("1000000000000000000009", "hr");
+            expect(a).not.toBe(b);
+            expect(a.split(" ").length).toBe(22);
+            expect(a.endsWith("jˈe˩˥dan")).toBe(true);
+            expect(b.endsWith("dˈe˥˩ʋet")).toBe(true);
+            expect(a).not.toMatch(/[e+]\s/u); // no exponent form leaking into the stream
+        });
+
+        // Above 2^53 the double has already rounded, so the digits must come from the token, not from `n`.
+        test("a 16-digit run past 2^53 reads its written digits", () => {
+            expect(phonemize("9007199254740993", "hr").endsWith("triː˥˩")).toBe(true);
+        });
+
+        // ⚠ THE STRIPPING TRAP: a dot-grouped run that overflows must read DIGITS, never its periods. Nine
+        // groups of three is 1e24, past the exponent cliff, and every one of those digits is a zero after
+        // the leading 1 — a period read as a digit would show up as an extra token.
+        test("a dot-grouped overflow reads exactly its digits, not its separators", () => {
+            const read = phonemize("1.000.000.000.000.000.000.000.000", "hr").trim();
+            expect(read.split(" ").length).toBe(25);
+            expect(new Set(read.split(" ").slice(1)).size).toBe(1); // 24 zeroes, all the same word
+        });
+
+        // …and the composed path below the cap is untouched, decimal comma and all.
+        test("the composed path is untouched", () => {
+            expect(phonemize("1.000.000", "hr").trim()).toBe("jˈe˩˥dan milˈi˩˥jun");
+            expect(phonemize("2,5", "hr").trim()).toBe("dʋaː˥˩ zˈarez peː˥˩t");
+        });
+    });
 });

@@ -59,8 +59,15 @@ export const SYMBOLS = makeSymbolNormalizer({
         mi: ["milja", "milje", "milja"],
         ghz: ["gigaherc", "gigaherca", "gigaherca"],
     },
-    unitPer: "na", // 70 km/h -> sedamdeset kilometara NA sat
-    rateDenominators: { h: "sat", s: "sekunda" },
+    // ⚠ THE PREPOSITION IS PER DENOMINATOR, AND ⟨s⟩ IS NOT THE ONE ⟨h⟩ TAKES. `na` governs the accusative,
+    // and `sat` is syncretic there (70 km/h → *kilometara na sat*, right), so a single `unitPer` looked
+    // correct until a feminine noun reached it: `1,5 km/s` and `133 m/s` — both in this corpus — read
+    // *kilometara NA SEKUNDA*, a nominative under an accusative preposition. The reading BCS actually gives
+    // the rate is *u sekundi*, which serbian/normalize.ts had to compose LOCALLY for want of a keyed
+    // `unitPer`; core/normalizeSymbols.ts now takes the record (it was added for that very case), so
+    // Croatian declares it instead of forking a rule.
+    unitPer: { h: "na", s: "u" }, // 70 km/h -> kilometara NA sat; 133 m/s -> metara U sekundi
+    rateDenominators: { h: "sat", s: "sekundi" },
     exponentWords: {
         squared: ["kvadratni", "kvadratna", "kvadratnih"],
         cubed: ["kubni", "kubna", "kubnih"],
@@ -77,8 +84,14 @@ class CroatianPhonemizer implements Phonemizer {
             // `foreignLetters` BEFORE `nat`: the fold is spelled in Gaj's Latin, so what reaches the
             // nativiser is a word the shared g2p has rules for. See `foreignLetters` in serbian.ts.
             if (m[1]) sink.emit(phonemizeWord(nat(foreignLetters(m[1])))); // shared Serbo-Croatian g2p
-            else if (m[2])
-                for (const wd of numberToWords(Number(m[2].replace(/\./gu, "").replace(/,/gu, ""))).split(" ")) sink.emit(phonemizeWord(wd)); // Croatian numbers
+            else if (m[2]) {
+                // ⚠ THE STRIPPED STRING IS BOTH THE VALUE AND THE `raw` DIGITS (#1059). Above 2^53 the double
+                // has rounded and above 1e21 `String(n)` is exponent form, so composeSlavicNumber's
+                // digit-by-digit fallback needs the digits themselves — but it must be the string with the
+                // thousands periods and the decimal comma ALREADY REMOVED, or it spells the separators out.
+                const digits = m[2].replace(/\./gu, "").replace(/,/gu, "");
+                for (const wd of numberToWords(Number(digits), digits).split(" ")) sink.emit(phonemizeWord(wd)); // Croatian numbers
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

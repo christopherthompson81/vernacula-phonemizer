@@ -527,6 +527,11 @@ public class ManifestMappingTests
             "provenance", "convention");
 
     [Fact]
+    public void KinyarwandaManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/kinyarwanda", "kinyarwanda.jsonc", Languages.Kinyarwanda.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
     public void KazakhManifestIsFullyMapped() =>
         AssertFullyMapped("languages/kazakh", "kazakh.jsonc", Languages.Kazakh.Manifest.MANIFEST,
             "language", "name", "script", "convention");
@@ -571,6 +576,18 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/kurmanji", "kurmanji.jsonc", Languages.Kurmanji.Manifest.MANIFEST,
             "language", "name", "script", "provenance", "convention");
 
+    /** ⚠ Croatian's `numbers` DESERIALIZES INTO SERBIAN'S TYPE — the shape is shared and only the words
+     *  differ, so this sweep is also what proves the reuse still covers every Croatian key. */
+    [Fact]
+    public void CroatianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/croatian", "croatian.jsonc", Languages.Croatian.Manifest.MANIFEST,
+            "language", "name", "script");
+
+    [Fact]
+    public void BosnianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/bosnian", "bosnian.jsonc", Languages.Bosnian.Manifest.MANIFEST,
+            "language", "name", "script");
+
     [Fact]
     public void SerbianManifestIsFullyMapped() =>
         AssertFullyMapped("languages/serbian", "serbian.jsonc", Languages.Serbian.Manifest.MANIFEST,
@@ -590,4 +607,20 @@ public class ManifestMappingTests
     public void ArmenianManifestIsFullyMapped() =>
         AssertFullyMapped("languages/armenian", "armenian.jsonc", Languages.Armenian.Manifest.MANIFEST,
             "language", "name", "script", "provenance");
+
+    // haitian.jsonc is read by TWO independent types, mirroring the TypeScript's module split: the engine's
+    // `HaitianDef` (which does not declare `numbers`, so numbers.ts can load the file without an import
+    // cycle) and `HaitianNumbersDef`. Each is checked against the whole file with the other's keys listed
+    // as metadata, so a key claimed by NEITHER still fails.
+    [Fact]
+    public void HaitianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/haitian", "haitian.jsonc", Languages.Haitian.Manifest.MANIFEST,
+            "language", "name", "script", "numbers");
+
+    [Fact]
+    public void HaitianNumbersManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/haitian", "haitian.jsonc",
+            new { numbers = Languages.Haitian.Numbers.N },
+            "language", "name", "script", "digraphs", "hiatusVowels", "graphemes", "clausePunctuation",
+            "ordinalTails");
 }

@@ -227,7 +227,7 @@ export function normalizeHaitian(input: string): string {
     //    corpus writes `lèt ​​​​,` and `Larisi ​​ak` with runs of U+200B — and `&nbsp;` must go BEFORE the
     //    ampersand rule at step 13, or it is read as "and" plus the letters n-b-s-p. This corpus has the
     //    entity in a SPACED form too (`[ ref. & nbsp; nesesè ]`), which is why the entity arm allows a gap.
-    s = s.replace(/&\s?nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍﻿]/gu, "");
+    s = s.replace(/&\s?nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[\u200b\u200c\u200d\ufeff]/gu, "");
 
     // 2) ERA MARKERS AND DOTTED ABBREVIATIONS, before anything can read an interior dot as a phrase break,
     //    and before the de-grouping at step 4 for the reason the Lingala layer gives: both look at dots.

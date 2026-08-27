@@ -43,6 +43,30 @@ describe("Haitian Creole canonical IPA — phonemic IPN g2p + the nasal-vowel ru
         expect(ht.text("Mwen pale kreyòl.").trim()).toBe("mwɛ̃ pale kɣejɔl .");
     });
 
+    // ⚠ THE ELISION IS ONE WORD WHICHEVER APOSTROPHE THE SOURCE TYPES, and the typographic one used to split
+    // it. The mined + attested artifacts carry 73 intra-word U+0027 and 13 intra-word U+2019, and two parity
+    // rows carry U+2019 (`d’Haïti`, `L’autoportrait`). Both characters are in the word arm now, and the
+    // reading must be IDENTICAL across the pair — a stranded [l] or [d] in front of the noun is what the
+    // split produced. The intra-word HYPHEN is pinned in the same test because it is the same class of
+    // mark and Haitian writes it inside words too (`ki-sa`, `pa-t`).
+    test("the elision is ONE token for BOTH apostrophes, and so is a hyphenated word", () => {
+        for (const [ascii, typographic] of [
+            ["Li l'ap ale", "Li l’ap ale"],
+            ["Nou n'ap ale", "Nou n’ap ale"],
+            ["Se sa m'ap di", "Se sa m’ap di"],
+            ["Mòn Lopital (Morne l'Hôpital)", "Mòn Lopital (Morne l’Hôpital)"],
+        ] as const) {
+            expect(ht.text(typographic)).toBe(ht.text(ascii));
+        }
+        expect(ht.text("Li l'ap ale").trim()).toBe("li lap ale"); // one word, not *li l ap ale
+        expect(ht.text("Mòn Lopital (Morne l’Hôpital)").trim()).toBe("mɔn lopital moɣne lhopital");
+        expect(ht.text("Se pa-t sa l'ap di").trim()).toBe("se pat sa lap di"); // ⟨ki-sa⟩/⟨pa-t⟩ stay whole
+        expect(ht.text("Nou n’ap ale nan ki-sa a").trim()).toBe("nu nap ale nã kisa a");
+        // A quote mark that is NOT an elision is still dropped rather than read, either way round.
+        expect(ht.text("’moun yo").trim()).toBe("mun jo");
+        expect(ht.text("moun’ yo").trim()).toBe("mun jo");
+    });
+
     // NUMBERS — the FRENCH VIGESIMAL RESIDUE is kept: 70 swasanndis (60+10), 80 katreven (4×20), 90 katrevendis
     // (4×20+10). The Belgian/Swiss decimal ⟨septante/octante/nonante⟩ forms are NOT Haitian. Source: LDC2017S03
     // "Haitian Creole LSP" §8.1–8.2 (citing Valdman et al. 2007). See haitian.jsonc.

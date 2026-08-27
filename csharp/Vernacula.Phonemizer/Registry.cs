@@ -164,7 +164,7 @@ public static class Registry
      * languages that DROP the fraction and must not pre-empt these.
      */
     private static readonly IReadOnlySet<string> VULGAR_FOLD_OPT_OUT =
-        new HashSet<string> { "az", "ca", "el", "ga", "hr", "kn", "mk", "te", "uz" };
+        new HashSet<string> { "az", "bs", "ca", "el", "ga", "hr", "kn", "mk", "te", "uz" };
 
     private static readonly Dictionary<string, ILanguage> Cache = new();
 

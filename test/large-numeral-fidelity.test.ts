@@ -39,14 +39,20 @@ const B = "1000000000000000000009";
  *     rounded tail: `String(1e21)` is `"1e+21"`, so `e` and `+` became `undefined` table lookups joined as
  *     empty strings, and Czech read BOTH probes as *jˈɛdɛn dvˈa jˈɛdɛn*. What remains below is one class
  *     only, and it is the one that needs evidence rather than a rewrite.
+ *   · ⚠ AND A FIX DOES NOT PROPAGATE ALONG A SHARED CORE. `hr` and `bs` compose through the SAME
+ *     `serbian/numbers.ts` that took the #1059 threading with `sr`, and both stayed broken for a year of
+ *     nothing: the parameter was threaded, their own `numberToWords` wrappers dropped it, and their call
+ *     sites never passed a token string. Both read `1000000000000000000000` as *jedan e dva jedan*. Fixed
+ *     while porting hr — ⚠ hr's caller must pass the SEPARATOR-STRIPPED string, not the match, because
+ *     Croatian's number token carries the thousands periods and the decimal comma.
  *   · NO FALLBACK AT ALL — tr returns "" above its range and zu composes right past it. Giving these a
  *     digit-at-a-time arm is a per-language behaviour ADDITION, not a mechanical repair, and wants the
  *     language's own evidence.
  * ⚠ A NEW LANGUAGE MUST NOT JOIN THIS LIST. It exists to be emptied.
  */
 const ACCEPTED_LOSSY = new Set(
-    ("ar arz apc apd acm afb ary ayl ajp acw pt pt-BR tr az vi ta gd ga cy ff si kk tg zu xh hr bs da " +
-        "mk lb fo sq la bar rw ki kam af rn grc").split(" "),
+    ("ar arz apc apd acm afb ary ayl ajp acw pt pt-BR tr az vi ta gd ga cy ff si kk tg zu xh da " +
+        "mk lb fo sq la bar ki kam af rn grc").split(" "),
 );
 
 const CODES = [

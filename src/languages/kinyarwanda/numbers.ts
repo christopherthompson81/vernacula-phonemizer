@@ -114,7 +114,16 @@ export function composeRwandaRundi(n: number, N: RwandaRundiNumbers, raw?: strin
     return r ? `${billion} ${N.and} ${below1e9(r)}` : billion;
 }
 
-/** Non-negative integer (< 10⁹) → Kinyarwanda words; larger / non-finite → digit-by-digit. */
-export function numberToWords(n: number): string {
-    return composeRwandaRundi(n, MANIFEST.numbers);
+/**
+ * Non-negative integer (< 10¹², the ceiling `miriyari` buys rw) → Kinyarwanda words; larger / non-finite →
+ * digit-by-digit.
+ *
+ * ⚠ `raw` IS THE TOKEN TEXT, AND THE FALLBACK IS WRONG WITHOUT IT. Above 2^53 the `number` has already lost
+ * its low digits, so re-stringifying it reads a DIFFERENT quantity: `9007199254740993` arrived as
+ * `…992` and `12345678901234567890` as `…567000`. The digit-at-a-time fallback exists precisely because the
+ * float cannot be trusted, so it must read the characters the writer typed, not the float's rendering of
+ * them. Every caller that has the token text passes it.
+ */
+export function numberToWords(n: number, raw?: string): string {
+    return composeRwandaRundi(n, MANIFEST.numbers, raw);
 }
