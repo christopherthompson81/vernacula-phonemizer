@@ -1605,23 +1605,31 @@ above-2⁵³ digit run and every ASCII-dotted abbreviation are ×0 in the corpus
 
 Luganda has no shared symbol tier (the measure noun PRECEDES its number, and the tier can only postpose), so
 all seven normalization steps are local. Parity **200/200 byte-identical on the first run**, 0 BLOCKED;
-corpus-wide differential over FLEURS `lg_ug` + the mined artifact + probes = **4,442 lines × sync AND async
-= 8,884 comparisons, 0 differ, 0 throws**, and 0 of 4,442 outputs carry a digit or an unread symbol.
+corpus-wide differential over FLEURS `lg_ug` + the mined artifact + probes = **4,488 lines × sync AND async
+= 8,976 comparisons, 0 differ, 0 throws, 0 PortPending**, and 0 of 4,488 outputs carry a digit or an unread
+symbol. (Re-run after rebasing onto #1134 — see `docs/lg_port_investigation.md` Run 5; the line count is not
+comparable to the first run's 4,442, whose hand probes were in a gitignored `.probe/` that did not survive.)
 
 ⚠ **THE GOLDEN REACHES FIVE OF THE SEVEN STEPS.** Step 1 (the English ordinal suffix) is ×0 in it, and
 step 3's SPACE and PERIOD arms are ×0 in it — the period arm, the one the TS itself calls "the risky one"
 because a period-grouped thousand is indistinguishable from a three-place decimal, is ×0 in FLEURS as well
 and rests on the mined artifact and the probes alone.
 
-Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (#1131, #1132):
+Three findings, all reproduced IDENTICALLY by both engines, so all three were FILED (#1131, #1132).
+⚠ **THE FIRST IS NOW FIXED** — #1131 landed in the TypeScript as PR #1134 while this port was in review, and
+this port implements the fixed behaviour (rebased; the grapheme row came free from the shared `data/` tree,
+the `NATIVE_CLASS` and prenasalisation-trigger halves were ported). Kept here as the finding that produced it:
 
-- **⟨ŋ⟩ does not "drop outright" — the shipped path folds it to ⟨n⟩ and speaks an alveolar geminate.**
+- **⟨ŋ⟩ did not "drop outright" — the shipped path folded it to ⟨n⟩ and spoke an alveolar geminate.**
   `luganda.ts`'s `NATIVE_CLASS` note is true of `phonemizeWord` and false of `text()`: a token outside the
   class goes through `makeNativiser`, whose `UNDECOMPOSABLE` table maps ŋ→n first. `ŋŋamba` reads *nːaːᵐba*
   where `ng'amba` reads *ŋaːᵐba*, and this language's own FLEURS line *"…mu ziseŋŋendo…"* reads
   *zisenːeːⁿdo*. 2 FLEURS lines and 4 mined lines carry a literal ⟨ŋ⟩; the golden carries 0. ⚠ AND THE
   REFEREE EVAL IMPORTS `phonemizeWord` DIRECTLY, so the 99.1% measures the path where the letter is dropped,
-  not the path where it is spoken as [n] — question 3, exactly.
+  not the path where it is spoken as [n] — question 3, exactly (filed as #1141).
+  ⚠ The fix also had to add ⟨ŋ⟩ to the PRENASALISATION trigger, which the finding did not anticipate: while
+  the letter folded to ⟨n⟩ it reached that rule, so ⟨ŋk⟩ read *ᵑk*, and the grapheme row alone took that away.
+  **A fix that adds an orthographic row must ask what the fold was silently doing for that letter first.**
 - **The ⟨ɡ⟩ (U+0261) entry in `prenasalisable` is a "defensive alias" that makes the reading worse, not
   better.** There is no ⟨ɡ⟩ grapheme row and the superscript choice tests the ASCII string `"kg"`, so
   `nɡa` → *ⁿa*: the alias fires the prenasal rule, picks the wrong place, and drops the consonant anyway.

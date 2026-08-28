@@ -37,6 +37,26 @@ public class LugandaTests
     [InlineData("era", "eɾa")]
     public void TheGreedyScan(string word, string want) => Assert.Equal(want, LgEngine.PhonemizeWord(word));
 
+    // The literal letter ⟨ŋ⟩ (#1131), which the golden cannot see — csharp/goldens/lg.tsv carries 0 of them.
+    // ⚠ ASSERTED THROUGH Phonemize, NOT PhonemizeWord: the TS defect lived in the gap between the two, where
+    // the nativiser folded ŋ→n before the g2p ran. Pinning only the g2p would pass while the product was wrong.
+    [Theory]
+    [InlineData("ŋŋamba", "ŋːaːᵐba")]      // == nng'amba
+    [InlineData("nng'amba", "ŋːaːᵐba")]
+    [InlineData("ŋabo", "ŋabo")]           // == ng'abo
+    [InlineData("ng'abo", "ŋabo")]
+    [InlineData("ziseŋŋendo", "ziseŋːeːⁿdo")] // the FLEURS lg_ug line
+    [InlineData("ŋka", "ᵑka")]             // ⟨ŋ⟩ prenasalises, as the ⟨n⟩ spelling does
+    [InlineData("nka", "ᵑka")]
+    [InlineData("ŋga", "ᵑɡa")]
+    [InlineData("nga", "ᵑɡa")]
+    [InlineData("Łódź", "lodz")]           // …and a genuinely foreign letter still folds
+    public void TheVelarNasalLetter(string word, string want) => Assert.Equal(want, Say(word));
+
+    // ⟨ŋ⟩ is NOT in `prenasalisable`, so ⟨ŋŋ⟩ falls through to the gemination rule rather than the trigger.
+    [Fact]
+    public void TheVelarNasalGeminates() => Assert.Equal("ŋː", LgEngine.PhonemizeWord("ŋŋ"));
+
     [Theory]
     // Units + the teens `na`/`n'` connective (elision before the vowel-initial emu).
     [InlineData(7, "musanvu")]

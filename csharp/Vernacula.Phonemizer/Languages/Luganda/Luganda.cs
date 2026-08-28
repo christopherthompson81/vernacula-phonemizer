@@ -55,9 +55,9 @@ public sealed class LugandaPhonemizer : ILanguage
                 continue;
             }
             var c = w[i];
-            // 2. PRENASALISATION: ⟨n m⟩ + an obstruent → a place-assimilated superscript nasal; the
+            // 2. PRENASALISATION: ⟨n m ŋ⟩ + an obstruent → a place-assimilated superscript nasal; the
             //    obstruent is then scanned normally, so its labialisation and gemination survive.
-            if ((c == 'n' || c == 'm') && PRENASAL.Contains(i + 1 < w.Length ? w[i + 1].ToString() : ""))
+            if ((c == 'n' || c == 'm' || c == 'ŋ') && PRENASAL.Contains(i + 1 < w.Length ? w[i + 1].ToString() : ""))
             {
                 var x = w[i + 1];
                 outp.Append("bpfv".Contains(x) ? "ᵐ"
@@ -94,11 +94,8 @@ public sealed class LugandaPhonemizer : ILanguage
     /**
      * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: TOKEN decides where the SCRIPT
      * boundary falls (routing); this class decides whether the g2p has rules for these letters.
-     * ⚠ ŋ IS DELIBERATELY ABSENT because the g2p has no rule for it — BUT THE TS COMMENT'S "drops it
-     * outright" IS TRUE ONLY OF `PhonemizeWord`. On this path the nativiser folds ŋ→n first, so `ŋŋamba`
-     * reads *nːaːᵐba* rather than losing the letter (#1131). Both engines do it; do not "fix" it here.
      */
-    private const string NATIVE_CLASS = "[a-z'’]";
+    private const string NATIVE_CLASS = "[a-zŋ'’]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "iu");
     private static readonly JsRe CURLY_APOSTROPHE = JsRegex.Compile("’", "gu");
 
