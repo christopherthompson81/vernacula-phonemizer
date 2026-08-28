@@ -1,4 +1,3 @@
-import { tr } from "./provenance.ts";
 /**
  * Shared MARKUP stripping — render HTML to the text it stands for, before any engine sees it.
  *
@@ -10,6 +9,7 @@ import { tr } from "./provenance.ts";
  * ⚠ ORDER: tags are stripped BEFORE entities are decoded. The other way round, `&lt;i&gt;` — an author writing
  * ABOUT a tag, which must stay literal — would decode to `<i>` and then be stripped as markup.
  */
+import { tr } from "./provenance.ts";
 
 /** The named entities that actually occur, plus the handful any text realistically carries. */
 const NAMED: Readonly<Record<string, string>> = {

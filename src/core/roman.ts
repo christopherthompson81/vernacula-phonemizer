@@ -1,4 +1,3 @@
-import { tr } from "./provenance.ts";
 /**
  * Shared ROMAN NUMERAL normalization — rewrite a Roman numeral to its DIGITS so the language's own
  * cardinal number compositor pronounces it. Language-independent by construction: the only thing
@@ -71,6 +70,7 @@ import { tr } from "./provenance.ts";
  * in both directions: an explicit collision stoplist, and for lowercased input only the shapes that
  * are essentially never words.
  */
+import { tr } from "./provenance.ts";
 
 /** Canonical Roman numeral form. Non-canonical spellings (IIII, XXXX, IC) are deliberately rejected —
  *  they are far more likely to be an acronym or typo than an intended numeral. */

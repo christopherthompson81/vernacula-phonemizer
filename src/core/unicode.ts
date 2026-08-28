@@ -1,4 +1,3 @@
-import { tr } from "./provenance.ts";
 /**
  * Notation-parsing PRIMITIVES for the native abugida path — pure Unicode/IPA facts about HOW to read
  * the string (which codepoints are vowels, modifiers, tie bars, digits; which block is a script). These
@@ -7,6 +6,7 @@ import { tr } from "./provenance.ts";
  * tokenizing. Regexes that match a SET are built from the string lists here at the use site, so the list
  * is the single source and the pattern is derived from it. One obvious mirror target for the C# port.
  */
+import { tr } from "./provenance.ts";
 
 /** Combining diacritics block U+0300–U+036F (̀-ͯ): attach to the preceding base (nasal ◌̃, dental ◌̪). */
 export const COMBINING_DIACRITICS = "̀-ͯ";
@@ -166,14 +166,22 @@ const NATIVE_DIGIT_BASES: readonly number[] = [
  * native digit. Rare in the corpora and left as-is, but it is the reason a `\d` in this file is not
  * automatically as safe as a `\d` in a normalizer.
  */
+/**
+ * One character's fold, exposed because a caller can hold a CHARACTER rather than the pipeline string —
+ * `fulaAdlam` folds an Adlam digit inside a per-word transliteration loop. Routing that through the
+ * provenance seam would hand `tr` a one-character string it is not tracking and drop the whole
+ * utterance's mapping, which is the `foldLatinDiacritics` lesson in miniature.
+ */
+export function foldDigitChar(ch: string): string {
+    const cp = ch.codePointAt(0)!;
+    if (cp < 0x80) return ch; // already ASCII
+    for (const base of NATIVE_DIGIT_BASES)
+        if (cp >= base && cp <= base + 9) return String(cp - base);
+    return ch; // a block we do not carry: leave it rather than guess
+}
+
 export function foldNativeDigits(s: string): string {
-    return tr(s, /\p{Nd}/gu, (ch) => {
-        const cp = ch.codePointAt(0)!;
-        if (cp < 0x80) return ch; // already ASCII
-        for (const base of NATIVE_DIGIT_BASES)
-            if (cp >= base && cp <= base + 9) return String(cp - base);
-        return ch; // a block we do not carry: leave it rather than guess
-    });
+    return tr(s, /\p{Nd}/gu, foldDigitChar);
 }
 
 /**
@@ -310,7 +318,10 @@ export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): stri
         // rule REFUSES and presence would fold are **76 in chv** \u2014 `\u0103\u0448\u0103` (warm), `\u00e7\u0115\u0440`, `\u00e7\u0115\u043d\u0115` (new),
         // `\u0432\u0438\u00e7\u00e7\u0115` (three), all short words where two Latin twins outvote one Cyrillic letter \u2014 against
         // **one** anywhere else (tt `k\u00fcbr\u04d9`, itself already broken). Without this, `\u00e7\u0115\u0440` stayed *s\u02c8\u025bp*.
-        w = tr(w, CHV_KEYS, (c: string) => CHUVASH_CONFUSABLE[c]!);
+        // ⚠ `.replace`, NOT `tr` — `w` is a MATCHED WORD, not the pipeline string. The outer `tr` above
+        // already reports this whole pass; handing the seam a substring it is not tracking reads as a missed
+        // step and poisons the mapping (measured: chv fell to 3/8 rows fully mapped).
+        w = w.replace(CHV_KEYS, (c) => CHUVASH_CONFUSABLE[c]!);
         cyr = 0; lat = 0;
         for (const ch of w) {
             if (/\p{Script=Cyrillic}/u.test(ch)) cyr++;
@@ -319,7 +330,7 @@ export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): stri
         if (lat === 0 || lat > cyr) return w; // Latin-majority word — leave it to the Latin fold
         if (lat === cyr && !hostIsCyrillic) return w; // an even split, and no host evidence to tip it
         CYR_KEYS.lastIndex = 0;
-        return tr(w, CYR_KEYS, (c) => CYRILLIC_CONFUSABLE[c]!);
+        return w.replace(CYR_KEYS, (c) => CYRILLIC_CONFUSABLE[c]!); // per-word, as above
     });
 }
 
