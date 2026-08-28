@@ -1228,7 +1228,18 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                             // *sikweja makiɽomita zisanu* (correct) and `5 km³` read *zisanu makiɽomita* —
                             // the wrong order AND the cube gone. The failure was doubled and only the
                             // second half was visible.
-                            return d.unitPrefix ? `${head}${exp} ${q}` : `${q} ${head}${exp}`;
+                            // ⚠ AND IT IS HANDED BACK AS THE SUPERSCRIPT, WHATEVER THE TEXT WROTE (#1145).
+                            // The argument above holds only for a character the reader cannot SAY. `²`/`³`
+                            // reach the tokenizer and are dropped, so they are visible to the leak gate and
+                            // silent in the phoneme stream — but the unit alternation also admits the ASCII
+                            // `2`/`3`, and a bare digit is claimed by the number path and SPOKEN. Re-emitting
+                            // it verbatim turned a missing WORD into an invented QUANTITY: `517 km3` read
+                            // *ibirometero GATATU amajana atanu…* — "kilometre three, five hundred and
+                            // seventeen" — in every language that declares one power and not the other (13
+                            // layers today). Normalising the spelling keeps both properties the note above
+                            // wants and removes the spoken digit. Missing word ≥ wrong word ≫ INVENTED NUMBER.
+                            const back = exp === "\u00b3" || exp === "3" ? "\u00b3" : "\u00b2";
+                            return d.unitPrefix ? `${head}${back} ${q}` : `${q} ${head}${back}`;
                         }
                         // Count forms, because in Romance the measure word is an ADJECTIVE and agrees:
                         // "un kilómetro cuadrado" vs "cincuenta kilómetros cuadrados".

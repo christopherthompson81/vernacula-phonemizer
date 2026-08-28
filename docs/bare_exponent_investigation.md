@@ -186,3 +186,53 @@ measured zero is recorded in the file rather than left to look like a repair.
 
 ⚠ **No golden row moves in either language**, so the parity gate is again blind to the whole change; the
 tests are the only witness.
+
+---
+
+# The undeclared-power fallback speaks an ASCII exponent (#1145)
+
+Same branch, one character further on. Surfaced while fixing rn's #1135, filed rather than patched from
+there because it is the TIER's and reaches every language that declares one power and not the other.
+
+## Run 1 — 2026-08-28 10:25 — what the fallback's own argument does and does not cover
+
+The branch's note is sound as far as it goes:
+
+> ⚠ NO MEASURE WORD DECLARED — emit the UNIT and hand the exponent back rather than abandoning the match.
+> Returning `whole` loses the QUANTITY too … Re-emitting the exponent keeps the unit's reading and leaves
+> `²` where the leak gate can see it, turning an invisible missing reading into a visible missing WORD.
+
+⚠ **IT HOLDS ONLY FOR A CHARACTER THE READER CANNOT SAY.** `²`/`³` reach the tokenizer and are dropped, so
+they are visible to the leak gate and silent in the phoneme stream — exactly as promised. But the unit
+alternation also admits the ASCII spelling (`(?<=[a-zA-Z])[23]`), and a bare digit is claimed by the NUMBER
+path and SPOKEN. So the fallback did the opposite of what it says on the ASCII half:
+
+    rn   517 km3   →  ibiɾometeɾo **ɡatatu** amad͡ʒana atanu na it͡ʃumi na indwi
+                      "kilometre THREE, five hundred and seventeen"
+    rn   517 km³   →  ibiɾometeɾo amad͡ʒana atanu na it͡ʃumi na indwi          ← what it should read
+
+A missing word is a lossy reading; an **invented quantity** is a false one, and the sentence still scans, so
+no leak gate fires and no referee names it.
+
+**Who is exposed.** 13 layers declare `squared` and not `cubed` today — abkhaz, bosnian, hakka, hiligaynon,
+khmer, kirundi, latgalian, minnan, santali, sesotho, wolof, wu, yoruba — and any future layer that declares
+one power and not the other joins them silently.
+
+**The fix.** Normalise the handed-back exponent to the SUPERSCRIPT however it was written. That keeps both
+properties the note argues for — visible to the gate, silent to the reader — and removes the spoken digit.
+Both branches of the return (the `unitPrefix` one and the default) get it, because #1060 already established
+that this fallback must honour `unitPrefix` like every sibling.
+
+## Run 2 — 2026-08-28 10:30 — the blast radius, and why the test carries it alone
+
+    tools/gen_parity_goldens.mts (ALL 169)   **0 rows moved**
+
+⚠ **NO GOLDEN ANYWHERE CARRIES THE SHAPE**, which is what "latent" means here and why the fix cannot be
+gated by the corpus. A unit written with an ASCII exponent, in a language that declares the OTHER power, is
+absent from all 169 golden files. The new core test in `test/normalize-multilang.test.ts` is the only thing
+that measures it, and it pins all four cells — declared/undeclared × superscript/ASCII — plus the
+`unitPrefix` branch, because that is where #1060's doubled failure lived.
+
+⚠ **AND A TS↔C# DIFFERENTIAL CANNOT GATE IT EITHER**, which is the recurring lesson of this pair of issues:
+both engines were wrong together, so a differential comparing them passes. The measurement that finds this
+class is reading the output against the PREVIOUS output.

@@ -248,6 +248,35 @@ describe("shared symbol normalizer (core)", () => {
         expect(n("$1")).toBe("1 dollar");
     });
 
+    // ⚠ AN UNDECLARED POWER IS HANDED BACK AS THE SUPERSCRIPT, WHATEVER THE TEXT WROTE (#1145). The tier's
+    // rule for a power a language has not declared is to emit the UNIT and re-emit the exponent, so the gap
+    // is a VISIBLE missing word rather than an invisible missing reading. That argument holds only for a
+    // character the reader cannot SAY: `²`/`³` are dropped by the g2p, but the unit alternation also admits
+    // the ASCII `2`/`3`, and a bare digit is claimed by the NUMBER path and spoken — so re-emitting it
+    // verbatim turned a missing word into an INVENTED QUANTITY. 13 layers declare one power and not the
+    // other, and no golden carries the shape, so this test is the only thing that measures it.
+    test("an undeclared power hands back the SUPERSCRIPT, never a spoken ASCII digit", () => {
+        const n = makeSymbolNormalizer({
+            units: { km: ["kilometre"] },
+            exponentWords: { squared: ["square"], position: "before" },
+        });
+        // the declared power is unaffected, in both spellings
+        expect(n("5 km²")).toBe("5 square kilometre");
+        expect(n("5 km2")).toBe("5 square kilometre");
+        // ⚠ THE UNDECLARED ONE KEEPS THE UNIT AND HANDS THE EXPONENT BACK — as a superscript either way, so
+        // the two spellings agree and neither contributes a digit the number path can speak.
+        expect(n("5 km³")).toBe("5 kilometre³");
+        expect(n("5 km3")).toBe("5 kilometre³");
+        // and the same for a `unitPrefix` language, which takes the other branch of the same return
+        const pre = makeSymbolNormalizer({
+            units: { km: ["kilometre"] },
+            unitPrefix: true,
+            exponentWords: { squared: ["square"], position: "after" },
+        });
+        expect(pre("5 km³")).toBe("kilometre³ 5");
+        expect(pre("5 km3")).toBe("kilometre³ 5");
+    });
+
     // ⚠ A COMPOUND CURRENCY KEY MUST MATCH ACROSS THE SPACE ITS OWN CORPUS WRITES (#1137). `US$` is declared
     // by 36 language layers, and Kirundi's corpus writes all three of its instances as `US $ 4,000` — which
     // the literal key missed, so the bare `$` claimed the amount and `US` reached the g2p as the WORD *us*.

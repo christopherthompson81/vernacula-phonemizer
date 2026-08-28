@@ -899,7 +899,14 @@ public static class NormalizeSymbols
                             // ⚠ AND IT HONOURS UnitPrefix like every sibling branch — this one returned
                             // number-first unconditionally, giving a partially-declaring UnitPrefix language
                             // two word orders from one rule (#1060).
-                            return d.UnitPrefix ? head + exp + " " + q : q + " " + head + exp;
+                            // ⚠ AND IT IS HANDED BACK AS THE SUPERSCRIPT, WHATEVER THE TEXT WROTE (#1145).
+                            // The argument above holds only for a character the reader cannot SAY: `²`/`³`
+                            // are dropped by the g2p, but the unit alternation also admits the ASCII `2`/`3`,
+                            // and a bare digit is claimed by the NUMBER path and SPOKEN — `517 km3` read
+                            // "kilometre THREE, five hundred and seventeen". Missing word ≥ wrong word ≫
+                            // INVENTED NUMBER.
+                            var back = exp == "³" || exp == "3" ? "³" : "²";
+                            return d.UnitPrefix ? head + back + " " + q : q + " " + head + back;
                         }
                         // Count forms, because in Romance the measure word is an ADJECTIVE and agrees.
                         var word = Pick(eForms, n, cf);

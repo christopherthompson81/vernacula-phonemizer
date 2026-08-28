@@ -1676,8 +1676,11 @@ Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (
   EVEN WHERE THE TEXT WROTE THE ASCII `3`: a raw digit is claimed by the tokenizer and SPOKEN, so the first
   cut of this fix read `(233/km3)` as *…kuri kirometero gatatu* — a quantity INVENTED inside a density
   figure, worse than either the missing word or the wrong one. Caught in review, not by the gate. 0 golden
-  rows moved, in either engine. ⚠ THE SHARED TIER STILL DOES THE OLD THING for `517 km3` — pre-existing,
-  fleet-wide, filed as #1145.
+  rows moved, in either engine. ⚠ THE SHARED TIER'S OWN BRANCH DID THE OLD THING for `517 km3` —
+  pre-existing and fleet-wide — **now fixed too (#1145 → PR #1151)**: an undeclared power is handed back as
+  the SUPERSCRIPT however it was written, so the ASCII spelling no longer contributes a digit the number
+  path can speak. 13 layers declare one power and not the other; **0 golden rows carry the shape**, so a
+  core test carries the whole measurement. See `docs/bare_exponent_investigation.md`.
 - ~~**Step 3's space-grouping arm eats an ASCII exponent digit.**~~ **FIXED (#1136 → PR #1147).** `km2 517`
   became `km2517` — exponent glued to the number (517 read as 2,517), space gone, and **`km` left in the
   phoneme stream raw**. ⚠ **THE GUARD THE ISSUE PROPOSED WOULD HAVE BROKEN A REAL NUMBER**: `R2 500` IS a
