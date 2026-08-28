@@ -455,3 +455,73 @@ Measured directly: **48 of 36,164 rows differ** (mi 18, vi 16, nan 7, hak 4, hmn
 on `main` and on this branch, so this change is byte-neutral; but the same rows MATCH when the probe runs
 those languages alone, so it is process-order dependent — cross-language state in the async path, not a
 TS↔C# divergence. Not touched here.
+
+## Run 13 — 2026-08-28 16:40 — the residual, taken apart
+
+**Question.** 94.7% mapped left 48,000 tokens unaccounted for. Run 11 called that "km and ja segment", which
+turned out to be about a fifth of it and a distraction from the rest.
+
+### The poison says WHERE it was caught, not WHAT happened
+
+The probe reports the frame that handed the seam an unrecognised string. That frame is downstream of the
+actual gap. Adding the FIRST DIFFERING INDEX between the tracked string and the one handed in names the
+transform instead:
+
+    326  normalizeSymbols.ts:1004   …"олтангазина Г. Н. ("  ->  …"олтангазина гэ эн ("
+     97  normalizeSymbols.ts:1027   …"een VS sent elk."     ->  …"een vee es sent elk."
+     42  hakka/normalize.ts:245     …"2012年 ngìn-khiéu"     ->  …"二零一二年 ngìn-khiéu"
+     31  hakka/normalize.ts:155     …"4,144.95 phìn-fông"   ->  …"4144.95 phìn-fông"
+
+Two shared passes, not 40 language-specific ones.
+
+### Three causes, in the order they paid
+
+| fix | sites | coverage |
+|---|---|---|
+| `core/initialisms.ts` onto the seam | 3 | 94.7% → **96.0%** |
+| `core/sinitic.ts` onto the seam | 9 | → **96.8%** |
+| multi-line chain heads (see below) | +45 net | → **97.2%** |
+| `renormalize`, and 33 sites onto it | 33 | → **98.4%** |
+
+### ⚠ The converter's own guard was refusing every multi-line chain
+
+`end != dot_i` was added in Run 11 to stop `` return `…`.replace(…) `` parsing its receiver as the keyword
+`return`. It also refused `s =\n    .replace(...)` — 11 chain heads, each gating a whole chain. Zhuang's is
+13 links and its entire punctuation fold sat behind it. Relaxed to "whitespace only may sit between".
+
+### ⚠ And re-running the converter silently undid four hand exclusions
+
+`foldLatinDiacritics`, `foldDigitsIn`, `foldCyrillicConfusables`' two inner folds — all deliberately OFF the
+seam, all re-converted by a second pass over the same file, because nothing in the source marks them. English
+went to **0% mapped** while the fleet total still read 95.6%, which is exactly the shape a fleet average
+hides. Now pinned by a test: no language may map zero tokens except the listed segmenters.
+
+### `renormalize` — the seam's second primitive
+
+A normalize is not a replace, and it was the largest hole left. 33 sites run one on the pipeline string;
+because it is length-CHANGING (`Mìng` precomposed is 4 code units, decomposed is 5) the mapping fell out of
+step at the FIRST character and every token in the utterance lost its span — **with no poison anywhere to
+say why**, because the desync happened before any `rewrite` ran. cdo mapped 6% and ee 29%; both are at 100%
+now.
+
+It works by chunking at canonical block boundaries, which is sound because normalization never reaches
+across a starter — and the result is **verified against the whole-string normalize**, so a chunking it gets
+wrong withholds the mapping rather than inventing one. Differential over 32,000 randomised cases across all
+four forms: 0 reading mismatches, 0 unsound mappings, 73 withheld (the Hangul jamo runs, by design).
+
+⚠ **`csharp/tools/regex-diff` caught the pattern before the port did.** `[\s\S]\p{M}*` under `/u` matches a
+whole code point in JS; .NET regexes are code-unit based, and the diff measured it splitting `𠀁 𫝀 😀` into
+six halves. The surrogate pair is spelt out explicitly so both engines read it the same.
+
+### Where it stands
+
+    TS  94.7% -> 98.4%        C#  93.4% -> 95.5%        SUBSTRING poison sites: 0 in both
+
+Remaining, in order:
+
+- **km 6,640 + ja 2,478 — the segmenters.** They insert ZWSP or spaces and rebuild the string outside any
+  regex. Neither `rewrite` nor `renormalize` fits; a segmentation pass has to PUSH its own mapping. This is
+  now the whole of the 0%-mapped set, and the test lists exactly these two.
+- **cmn 2,319, az 711, ltg 708, ki 386** — ordinary per-language gaps, each a named `desync` site.
+- **mai / awa / mag / syl are C#-only** and their normalizer seam counts already match the TS, so that gap is
+  upstream of the normalizer — still unchased.

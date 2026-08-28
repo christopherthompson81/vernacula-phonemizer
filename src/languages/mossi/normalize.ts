@@ -151,7 +151,7 @@
  *  The `(?<![\d.,])` / `(?![\d.,])` guards stop a match beginning or ending inside a longer run, which is
  *  the lookbehind-AND-lookahead pair trap 28 says a lookahead alone cannot replace. */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 // ⚠ THE TRAILING GUARD IS `(?!\d)`, NOT `(?![\d.,])`, AND THAT ONE CHARACTER IS TWO SEPARATE CASES. It
 // rejected every CLAUSE-FINAL grouped figure — `50 000.` came back untouched and read *pis nu zaːlem .*,
 // losing the thousand word at exactly a sentence end (playbook trap 58, reported by `review.ts`'s
@@ -264,7 +264,7 @@ export function normalizeMossi(input: string): string {
     //    that has precomposed equivalents for ⟨ã ẽ ĩ õ ũ⟩ and none for ⟨ɛ̃ ɩ̃ ʋ̃⟩, so one wiki paragraph
     //    carries both forms and they render identically. Trap 11 in a Latin script. The g2p NFCs
     //    downstream, so this costs nothing there.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, before anything that counts characters — a dump carries
     //    `&nbsp;` and numeric entities, and `&nbsp;` inside a grouped figure would otherwise hide the space

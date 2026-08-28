@@ -159,7 +159,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { MANIFEST, type LithuanianAgreement } from "./manifest.ts";
 import { agree, numberToWords } from "./numbers.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 const NRM = MANIFEST.normalization;
 const N = NRM.countedNouns;
@@ -327,7 +327,7 @@ export function normalizeLithuanian(input: string): string {
     // is downstream of this whole file, so a decomposed input would silently miss half these rules
     // (trap 11). ⚠ ROBUSTNESS, NOT A MEASURED DEFECT REPAIR: the retained text is entirely NFC already and
     // this line changes zero corpus readings. Said so rather than implying a fix (trap 22).
-    let t = input.normalize("NFC");
+    let t = renormalize(input, "NFC");
 
     // 0) THE MARKED CLOCK loses the separator's pause — see CLOCK_MARKED. First, because the ordinal and
     //    decimal rules below both read a dot and would spend `8.46`'s before this could see it.

@@ -1,6 +1,6 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { spacedBareExponent } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 /**
  * Hebrew / עברית (he) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -206,7 +206,7 @@ export function normalizeHebrew(input: string): string {
     // 1) NFC at the entry. Hebrew letters have composition exclusions (the precomposed U+FB2A–FB4F forms, and
     //    every pointed letter is decomposed by NFC), so a rule keyed on a literal would otherwise match a
     //    fraction of its instances — trap 11. The g2p NFCs again downstream, so this costs nothing.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 1b) ⚠ THE SOF PASUQ IS A CLAUSE MARK AND MUST NOT BE GLUED TO THE WORD. `׃` is declared in
     //     `clausePunctuation` (→ "."), but the word tokenizer admits it inside a word — it sits in the

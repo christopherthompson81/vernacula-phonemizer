@@ -19,6 +19,7 @@ import { createBengaliTagger, type BengaliTagger } from "./bengaliTagger.ts";
 import { getPhonemizer } from "../../registry.ts";
 import { BENGALI_WORD } from "../../core/unicode.ts";
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 const WORD = new RegExp(`[${BENGALI_WORD}]+`, "gu");
 let taggerP: Promise<BengaliTagger | undefined> | undefined;
@@ -40,7 +41,7 @@ export async function phonemizeBnNeural(text: string): Promise<string> {
     const lex = bengaliLexicon();
     return wordLevelNeuralPrepass(text, {
         word: WORD,
-        lexHas: (w) => lex.has(w.normalize("NFC")), // lexicon-covered words are served by the sync lexicon path
+        lexHas: (w) => lex.has(renormalize(w, "NFC")), // lexicon-covered words are served by the sync lexicon path
         tag: (w) => tagger.tag(w),
         // `withHost` — the engine is built here rather than by the registry, so nothing else pushes the host
         // and a foreign run would be dropped for want of one (core/foreign.ts). Sync, as that stack requires.

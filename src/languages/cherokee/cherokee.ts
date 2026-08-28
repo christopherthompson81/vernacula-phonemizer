@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeCherokee } from "./normalize.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 interface CherokeeDef {
     syllables: string[];
@@ -54,7 +55,7 @@ class CherokeePhonemizer implements Phonemizer {
         // ⚠ NORMALIZE BEFORE TOKENIZING, and after NFC — normalize.ts matches ASCII separators around
         // digits, so it must see the same string the tokenizer will. Its whole job is to spend marks that
         // `[.?!,;:…]` below would otherwise read as clause punctuation INSIDE a number.
-        return assembleClauses(normalizeCherokee(input.normalize("NFC")), TOKEN, (m, sink) => {
+        return assembleClauses(normalizeCherokee(renormalize(input, "NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

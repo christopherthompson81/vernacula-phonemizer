@@ -11,6 +11,7 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeNahuatl } from "./normalize.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 interface NahuatlDef {
     vowels: Record<string, string>;
@@ -75,7 +76,7 @@ class NahuatlPhonemizer implements Phonemizer {
     text(input: string): string {
         // ⚠ NORMALIZE FIRST, THEN NFC — normalize.ts's guards are written against precomposed macrons, and
         // its `\p{M}` classes are what tolerate the corpus's occasional decomposed input either way.
-        return assembleClauses(normalizeNahuatl(input.normalize("NFC")), TOKEN, (m, sink) => {
+        return assembleClauses(normalizeNahuatl(renormalize(input, "NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) for (const wd of numberToWords(Number(m[2]), m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

@@ -1,5 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 /**
  * Uyghur / ئۇيغۇرچە (ug) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -247,7 +247,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         // 1) NFC at the entry. Arabic-script text mixes precomposed and decomposed forms, so a rule keyed
         //    on a literal would otherwise match a fraction of its instances (trap 11). The engine NFCs
         //    again downstream, so this costs nothing.
-        let s = input.normalize("NFC");
+        let s = renormalize(input, "NFC");
 
         // 2) HTML ENTITIES, before anything can read one as letters. `&nbsp;` ×4 in the mined segments.
         s = rewrite(rewrite(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /﻿/gu, "");

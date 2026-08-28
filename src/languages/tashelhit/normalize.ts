@@ -131,7 +131,7 @@
  *   reading of it is correct.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /**
  * UNIT ABBREVIATION → the word to say, longest key first so `km²` is tried before `km`.
@@ -291,7 +291,7 @@ export function normalizeTashelhit(input: string): string {
     //    `Ḍ.T.`/`D.Ɛ.` and the unit word `amkkuẓ` are exactly trap 11 in a Latin script: the two encodings
     //    render identically and a decomposed one would match no rule here. `phonemize()` re-NFCs downstream
     //    (idempotent), so this costs nothing there.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS. A dump carries `&nbsp;` and numeric entities, and the artifact's
     //    `zero-width` cell is ×4 — the corpus writes `Taskflt n ​​trɣi` with two U+200B. A rendering hint is

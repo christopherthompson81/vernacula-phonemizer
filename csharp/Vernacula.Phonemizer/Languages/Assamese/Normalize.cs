@@ -3,6 +3,7 @@
  * pronounceable word into words the pipeline speaks.
  * Ported from src/languages/assamese/normalize.ts — see that file for the corpus evidence.
  */
+using System.Text;
 using Vernacula.Phonemizer.Core;
 using Vernacula.Phonemizer.Languages.Bengali;
 using static Vernacula.Phonemizer.Core.Rewriter;
@@ -78,7 +79,7 @@ public static class Normalize
 
         return input =>
         {
-            var s = input.Normalize(System.Text.NormalizationForm.FormC);
+            var s = Renormalize(input, NormalizationForm.FormC);
 
             s = Rewrite(s, DOTTED_LATIN, m => DOT_OR_SPACE.Replace(m.Value, ""));
             s = Rewrite(s, LONE_INITIAL, "$1");

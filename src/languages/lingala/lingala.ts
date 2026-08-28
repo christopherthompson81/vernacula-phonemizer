@@ -19,6 +19,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { normalizeLingala } from "./normalize.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 interface LingalaDef {
     consonants: Record<string, string>;
@@ -119,7 +120,7 @@ export function createLingala(): Phonemizer {
             // text→text, so everything it emits is then read by the ordinary word and number paths.
             // NFD so precomposed accented vowels (á í ǒ …) become base+combining and are captured by TOKEN's
             // combining-mark range (else the accent splits the word and the vowel is dropped).
-            return assembleClauses(normalizeLingala(input).normalize("NFD"), TOKEN, (m, sink) => {
+            return assembleClauses(renormalize(normalizeLingala(input), "NFD"), TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(m[1]));
                 else if (m[2]) {
                     const num = Number(m[2]);

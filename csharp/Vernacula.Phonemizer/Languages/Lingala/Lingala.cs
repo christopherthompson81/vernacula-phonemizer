@@ -4,6 +4,7 @@
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Lingala;
 
@@ -105,7 +106,7 @@ public sealed class LingalaPhonemizer : ILanguage
         // ⚠ ORDER: normalization runs FIRST, on NFC text — its literals (`bôngó`, `T.B.`) only exist as such
         // before the NFD below splits the accents off. Then NFD, so precomposed accented vowels become
         // base+combining and are captured by TOKEN's combining-mark range instead of splitting the word.
-        var normalized = Normalize.NormalizeLingala(input).Normalize(NormalizationForm.FormD);
+        var normalized = Renormalize(Normalize.NormalizeLingala(input), NormalizationForm.FormD);
         return Clauses.AssembleClauses(normalized, TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));

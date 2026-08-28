@@ -132,7 +132,7 @@
  *   This layer still emits DIGITS throughout, so nothing here is built on top of either.
  */
 import { MANIFEST } from "./manifest.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /** The CJK-ideograph blocks Sawndip draws on — the same set `sawndip.ts` recognises, as a class body.
  *  ⚠ KEEP IN STEP WITH `sawndip.ts`'s `isIdeograph` AND `zhuang.ts`'s TOKEN: the three are one set spelled
@@ -273,7 +273,7 @@ export function normalizeZhuang(input: string): string {
     // 0) NFC at the entry, so a literal here matches whichever normalization the corpus used. Zhuang's own
     //    letters are unaccented ASCII, but the dump carries precomposed and decomposed forms of the
     //    embedded names, and `’` (U+2019) is folded at step 2 into the syllable-boundary `'` the g2p reads.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 1) HTML ENTITIES, ZERO-WIDTH MARKS, AND THE FOREIGN-SCRIPT GLOSS — all before anything else looks at
     //    a bracket or a mark. The entity strip must precede the ampersand rule at step 9 or `&nbsp;` is
@@ -314,12 +314,12 @@ export function normalizeZhuang(input: string): string {
     //    range rule silently miss a third of its instances. Folding is safe because a bare `-` is silent.
     //    ⚠ NOT A BLANKET `NFKC` (trap 36): that would turn `²` into `2` and erase the exponent readings
     //    step 5 depends on, and this corpus writes `²` for both a unit power AND a romanization tone.
-    s = s
-        .replace(/[。｡]/gu, ".").replace(/[、，]/gu, ",").replace(/；/gu, ";").replace(/：/gu, ":")
-        .replace(/？/gu, "?").replace(/！/gu, "!").replace(/[‧·・]/gu, ",")
-        .replace(/’/gu, "'").replace(/[“”‘「」『』]/gu, " ")
-        .replace(/[—－～〜]/gu, "-").replace(/[（）《》〈〉【】\u3000]/gu, " ")  // ideographic space
-        .replace(/％/gu, "%").replace(/＆/gu, "&");
+    s = rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(s
+        , /[。｡]/gu, "."), /[、，]/gu, ","), /；/gu, ";"), /：/gu, ":")
+        , /？/gu, "?"), /！/gu, "!"), /[‧·・]/gu, ",")
+        , /’/gu, "'"), /[“”‘「」『』]/gu, " ")
+        , /[—－～〜]/gu, "-"), /[（）《》〈〉【】\u3000]/gu, " ")  // ideographic space
+        , /％/gu, "%"), /＆/gu, "&");
 
     // 2b) THE MINUS — U+2212 ONLY, PREPOSED, and BEFORE the era and range rules so a span cannot claim the
     //    sign's operand first. `lingzha` < Chinese 零下; see zhuang.jsonc for what is verified (`lingz` is

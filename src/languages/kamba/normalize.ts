@@ -119,7 +119,7 @@
  *   `kũthi` ×2     "kĩlomita 35 kũthi 40 kĩla ĩsaa"
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /** ⚠ NEVER `\b` — Kamba carries ⟨ĩ ũ⟩ and the ⟨ng'⟩ apostrophe, all of which `\b` treats as boundaries
  *  (trap 1/23). The apostrophe is a LETTER here and must stay inside a word. */
@@ -146,11 +146,7 @@ function foldTildeConfusables(s: string): string {
     if (!CONFUSABLE.test(s)) return s;
     return rewrite(s, /[\p{L}\p{M}'’ʼ]+/gu, (w) => {
         if (!CONFUSABLE.test(w)) return w;
-        const folded = w
-            .replace(/[îíì]/gu, "ĩ")
-            .replace(/[ûúù]/gu, "ũ")
-            .replace(/[ÎÍÌ]/gu, "Ĩ")
-            .replace(/[ÛÚÙ]/gu, "Ũ");
+        const folded = w.replace(/[îíì]/gu, "ĩ").replace(/[ûúù]/gu, "ũ").replace(/[ÎÍÌ]/gu, "Ĩ").replace(/[ÛÚÙ]/gu, "Ũ");
         return KAMBA_WORD.test(folded) ? folded : w;
     });
 }
@@ -211,7 +207,7 @@ export function normalizeKamba(input: string): string {
     // ⚠ NFC FIRST (trap 11). This corpus writes ⟨ĩ ũ⟩ precomposed throughout (U+0129 / U+0169; there is not
     //   one combining mark in its whole codepoint census), but a decomposed input would slip past both the
     //   confusable fold below and every literal in this file.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 1) THE CONFUSABLE TILDE VOWELS, BEFORE EVERYTHING — it changes which characters the tokenizer and every
     //    rule below can see at all, which is the same reason swahili.ts folds first. See the header: this is

@@ -5,6 +5,7 @@
  * Ported from src/languages/zhuang/normalize.ts — see that file for the corpus counts, the ORDER-DEPENDENCE
  * of every step, and the sourcing of (and refusals behind) every word emitted here.
  */
+using System.Text;
 using Vernacula.Phonemizer.Core;
 using static Vernacula.Phonemizer.Core.Rewriter;
 
@@ -117,11 +118,14 @@ public static class Normalize
         var open = group[..1];
         var close = group[^1..];
         var inner = group[1..^1];
-        inner = Rewrite(inner, GLOSS_LABEL, "");
-        inner = Rewrite(inner, HAN_RUN, " ");
-        inner = Rewrite(inner, DANGLING_MARK, " ");
-        inner = Rewrite(inner, LEADING_MARK, "");
-        inner = Rewrite(inner, MULTI_SPACE, " ");
+        // ⚠ `inner` IS A SLICE OF A MATCHED GROUP, not the pipeline string — off the seam, or the whole
+        // utterance's mapping goes with it. (`x = Rewrite(x, …)` is normally the shape that proves a site
+        // IS the pipeline; here the variable is a local built from the match, which is the exception.)
+        inner = JsRegex.Replace(inner, GLOSS_LABEL, "");
+        inner = JsRegex.Replace(inner, HAN_RUN, " ");
+        inner = JsRegex.Replace(inner, DANGLING_MARK, " ");
+        inner = JsRegex.Replace(inner, LEADING_MARK, "");
+        inner = JsRegex.Replace(inner, MULTI_SPACE, " ");
         inner = Js.Trim(inner);
         return HAS_LETTER_OR_NUMBER.IsMatch(inner) ? $"{open}{inner}{close}" : " ";
     }
@@ -133,7 +137,7 @@ public static class Normalize
     public static string NormalizeZhuang(string input)
     {
         // 0) NFC at the entry.
-        var s = input.Normalize(System.Text.NormalizationForm.FormC);
+        var s = Renormalize(input, NormalizationForm.FormC);
 
         // 1) HTML entities, zero-width marks, then the bracketed foreign-script gloss — the gloss pass must
         //    run BEFORE step 2, which folds away the full-width brackets it keys on.

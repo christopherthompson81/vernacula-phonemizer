@@ -8,6 +8,7 @@
  * with tl.wikipedia (~48k articles) as the sense-check for contested words, the same two-source method the
  * pcm and km normalizations used.
  */
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * HTML ENTITIES, before anything can voice them. The mined corpus carries 44 entities against 23 real
@@ -34,7 +35,7 @@ const RANGE = /(\d)\s*[–—]\s*(?=\d)|(\d)-(?=\d)/gu;
 
 /** Tagalog text → text, before tokenization. */
 export function normalizeTagalog(input: string): string {
-    return input
-        .replace(ENTITY, (_m, name: string) => ENTITY_CHAR[name] ?? " ")
-        .replace(RANGE, "$1$2 hanggang ");
+    return rewrite(rewrite(input
+        , ENTITY, (_m, name: string) => ENTITY_CHAR[name] ?? " ")
+        , RANGE, "$1$2 hanggang ");
 }

@@ -397,4 +397,35 @@ describe("the seam is a drop-in for `replace`, not a near-miss (#1150)", () => {
             }
         expect(mapped / tok).toBeGreaterThan(0.9);
     });
+
+    /**
+     * ⚠ A LANGUAGE AT EXACTLY ZERO IS A SEAM MISTAKE, NOT A GAP, and the fleet floor above cannot see it —
+     * English went to 0% while the total still read 95.6%. Zero mapped tokens across every row means the
+     * mapping is being DESTROYED rather than merely incomplete, which is what a substring on the seam does.
+     *
+     * The exceptions are the languages that SEGMENT: km and ja rebuild the string with inserted separators
+     * outside any regex, so nothing reports and nothing can. They are listed rather than tolerated, so
+     * adding one is a deliberate act.
+     */
+    test("no language maps zero tokens except the ones that rebuild the string", () => {
+        const SEGMENTERS = new Set(["km", "ja"]);
+        const zero: string[] = [];
+        for (const lang of GOLDEN_LANGS) {
+            if (SEGMENTERS.has(lang)) continue;
+            let tok = 0;
+            let mapped = 0;
+            for (const text of sample(lang, 6)) {
+                let t;
+                try {
+                    t = phonemizeTrace(text, lang);
+                } catch {
+                    continue;
+                }
+                tok += t.tokens.length;
+                mapped += t.tokens.filter((k) => k.inputSpan !== undefined).length;
+            }
+            if (tok > 0 && mapped === 0) zero.push(lang);
+        }
+        expect(zero).toEqual([]);
+    });
 });

@@ -94,7 +94,7 @@ const DOTTED: readonly (readonly [string, string])[] = [
 function foldLatinDiacritics(s: string): string {
     if (!/[^\p{ASCII}]/u.test(s)) return s;
     return rewrite(s, /\p{Script=Latin}/gu, (ch) => {
-        const base = ch.normalize("NFD").replace(/\p{Mn}+/gu, "");
+        const base = ch.normalize("NFD").replace(/\p{Mn}+/gu, ""); // ⚠ `ch` is ONE CHARACTER — off the seam
         return base === "" ? ch : base;
     });
 }

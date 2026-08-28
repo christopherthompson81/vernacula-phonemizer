@@ -225,7 +225,9 @@ export function normalizeKyrgyzInitialisms(text: string): string {
         acronymLetters: ACRONYM_LETTERS,
         isRecorded: () => false,
         isUnreadable: isUnreadableKyrgyz,
-    })(text);
+        // ⚠ OFF THE SEAM: this is called on a matched RUN from inside a callback below, not on the pipeline
+        // string, and a substring there drops the whole utterance's mapping.
+    }, false)(text);
 }
 
 // ---------------------------------------------------------------------------------------------------

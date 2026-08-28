@@ -87,7 +87,7 @@
 import { MANIFEST } from "./manifest.ts";
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /**
  * ⚠ THE UNIT NOUN COMES AFTER THE NUMBER in Haitian, like French and unlike Lingala — `45 kilomèt`,
@@ -222,7 +222,7 @@ export function normalizeHaitian(input: string): string {
     //    Haitian writes `è ò é à` and all four precompose, so a rule keyed on `kilomèt` or `sèt` would
     //    otherwise match only the composed half of its instances — trap 11, in a Latin script. The g2p
     //    NFCs again downstream, so this costs nothing.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 1) ZERO-WIDTH MARKS AND HTML ENTITIES, first. 333 zero-width characters in the Creole subset — the
     //    corpus writes `lèt ​​​​,` and `Larisi ​​ak` with runs of U+200B — and `&nbsp;` must go BEFORE the

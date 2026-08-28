@@ -114,7 +114,7 @@
  * engine's own number path speak them. Recorded so the measurement is re-runnable in one grep.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /** ⚠ THE UNIT NOUN COMES BEFORE THE NUMBER IN BAMBARA, which is why units are local and not the shared
  *  tier's — `normalizeSymbols` can only POSTPOSE (playbook §47 reason 2, the Oromo case). Measured over the
@@ -295,7 +295,7 @@ export function normalizeBambara(input: string): string {
     //    of `è ò ô é` — which do — and the era literal `K.Ɲ.` is keyed on one of the letters that does not,
     //    beside text that does. Trap 11 in a Latin script. The g2p lowercases and matches single characters
     //    downstream, so NFC costs nothing there.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, first — a dump carries `&nbsp;` and `&#…;` and both must go
     //    BEFORE the ampersand rule at step 12, or `&nbsp;` is read as the word "and" followed by the

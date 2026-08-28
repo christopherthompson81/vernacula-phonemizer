@@ -77,7 +77,7 @@ public static class Normalize
     /** The Hebrew text normalizer. */
     public static string NormalizeHebrew(string input)
     {
-        var s = input.Normalize(NormalizationForm.FormC);                                              // 1
+        var s = Renormalize(input, NormalizationForm.FormC);                                              // 1
         s = Rewrite(s, SOF_PASUQ, _ => " \u05C3 ");                                            // 1b
         s = Rewrite(s, BIDI, _ => "");                                                         // 2
         s = Rewrite(s, ENTITY, _ => " ");

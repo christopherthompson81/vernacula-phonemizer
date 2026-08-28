@@ -1,3 +1,4 @@
+import { rewrite } from "./provenance.ts";
 /**
  * Shared INITIALISM handling — decide what to do with an all-caps letter run before the tokenizer.
  *
@@ -121,7 +122,15 @@ const LONE_INITIAL = /(?<=^|\p{Lu}\p{L}*[ \u00a0])(\p{Lu})\.(?=[ \u00a0]+\p{Lu}\
  * pass MUST run AFTER the language's Roman-numeral rules, or it spells `Louis XIV` as EX-EYE-VEE. Likewise it
  * must run after abbreviation expansion, or French `MM.` becomes EM-EM.
  */
-export function makeInitialismNormalizer(d: InitialismData): (text: string) => string {
+/**
+ * ⚠ `onPipeline` IS THE SEAM'S RULE, MADE AN ARGUMENT. Almost every caller hands this the pipeline string, so
+ * it belongs on the seam — putting it there recovered 11,446 tokens across the Cyrillic and Latin fleets.
+ * But `ky` calls it on a MATCHED RUN from inside its own callback, and a substring on the seam drops the
+ * whole utterance's mapping. The distinction cannot be seen from in here, so the caller declares it.
+ */
+export function makeInitialismNormalizer(d: InitialismData, onPipeline = true): (text: string) => string {
+    const rw: (x: string, re: RegExp, rp: Parameters<typeof rewrite>[2]) => string =
+        onPipeline ? rewrite : (x, re, rp): string => x.replace(re, rp as string);
     // See `InitialismData.lower`. Every `.toLowerCase()` in this file used to be written out inline; they
     // are all the same decision and are all routed through here so a language cannot fix one and miss another.
     const lower = d.lower ?? ((s: string): string => s.toLowerCase());
@@ -133,9 +142,9 @@ export function makeInitialismNormalizer(d: InitialismData): (text: string) => s
     return (rawText: string): string => {
         // Initials are resolved BEFORE the all-caps rule, so `J. S.` is never seen as two separate
         // one-letter tokens, and after the caller's abbreviation pass for the usual reason.
-        const text = rawText
-            .replace(INITIAL_RUN, (run) => `${spellInitials(run)} `)
-            .replace(LONE_INITIAL, (_m, letter: string) => d.letterName(lower(letter)) ?? letter);
+        const text = rw(
+            rw(rawText, INITIAL_RUN, (run) => `${spellInitials(run)} `),
+            LONE_INITIAL, (_m, letter: string) => d.letterName(lower(letter)) ?? letter);
         return inner(text);
     };
 
@@ -156,7 +165,7 @@ export function makeInitialismNormalizer(d: InitialismData): (text: string) => s
         // to reach this pass and exposed it.
         // ⚠ Bounded by `LATIN_MARK`, not `\p{M}` — see that declaration for why a Hebrew point following
         // a Latin run is adjacent rather than attached.
-        return text.replace(RUN_OR_CODE, (tok) => {
+        return rw(text, RUN_OR_CODE, (tok) => {
             const low = lower(tok);
             const spelled = spellOut(low, d.letterName);
             if (tok.length < 2) return spelled ?? tok; // attached code: a letter, never a word

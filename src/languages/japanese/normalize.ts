@@ -125,9 +125,9 @@ const MEASURE: Readonly<Record<string, string>> = { "²": "平方", "³": "立�
 export function normalizeJapanese(input: string): string {
     // 0) WIDTH FOLDING first, so every rule below sees one representation. japanese.ts folds the digits
     //    too; doing it here as well makes this function correct standalone and the later fold a no-op.
-    let s = input
-        .replace(/[０-９]/gu, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0))
-        .replace(FULLWIDTH_LATIN, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0));
+    let s = rewrite(rewrite(input
+        , /[０-９]/gu, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0))
+        , FULLWIDTH_LATIN, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0));
 
     // 0a) DECLARED RUBY — an annotation that says it is one. The author has stated the reading, so it WINS
     //     and the base is dropped: `｜日本《にっぽん》` reads にっぽん, overriding the default にほん. That is

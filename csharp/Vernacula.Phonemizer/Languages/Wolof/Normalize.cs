@@ -13,6 +13,7 @@
  * refusals — the clock (33 of 33 are scripture references), initialisms, `=`, multiplication, the minus,
  * fractions, the era expansion, CFA and `€`. Nothing is re-derived here.
  */
+using System.Text;
 using Vernacula.Phonemizer.Core;
 using static Vernacula.Phonemizer.Core.Rewriter;
 
@@ -157,7 +158,7 @@ public static class Normalize
         // 1) NFC, THE SEMICOLON-LESS HTML ENTITIES, AND FORMAT CHARACTERS. ⚠ `&amp;` IS UNFOLDED FIRST, and
         //    the format-character strip is not cosmetic — a zero-width character inside a word splits it
         //    into two tokens.
-        s = s.Normalize(System.Text.NormalizationForm.FormC);
+        s = Renormalize(s, NormalizationForm.FormC);
         s = Rewrite(s, AMP_ENTITY, "&");
         s = Rewrite(s, NAMED_ENTITY, m =>
         {

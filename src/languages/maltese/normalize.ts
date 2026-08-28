@@ -404,11 +404,11 @@ const eraExpansion =
     (m: string, offset: number, full: string): string =>
         SENTENCE_AFTER.test(full.slice(offset + m.length)) ? `${word}.` : word;
 function eraMarkers(text: string): string {
-    return text
-        .replace(/(?<![\p{L}\p{M}])Q\s?\.\s?K\s?\./giu, eraExpansion(BCE))
-        .replace(/(?<![\p{L}\p{M}])W\s?\.\s?K\s?\./giu, eraExpansion(CE))
-        .replace(/(?<![\p{L}\p{M}])QK(?![\p{L}\p{M}])/giu, BCE)
-        .replace(/(?<![\p{L}\p{M}])WK(?![\p{L}\p{M}])/giu, CE);
+    return rewrite(rewrite(rewrite(rewrite(text
+        , /(?<![\p{L}\p{M}])Q\s?\.\s?K\s?\./giu, eraExpansion(BCE))
+        , /(?<![\p{L}\p{M}])W\s?\.\s?K\s?\./giu, eraExpansion(CE))
+        , /(?<![\p{L}\p{M}])QK(?![\p{L}\p{M}])/giu, BCE)
+        , /(?<![\p{L}\p{M}])WK(?![\p{L}\p{M}])/giu, CE);
 }
 
 /**

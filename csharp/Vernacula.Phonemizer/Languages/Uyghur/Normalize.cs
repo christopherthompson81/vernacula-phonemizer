@@ -121,7 +121,7 @@ public static class Normalize
         return input =>
         {
             // 1) NFC at the entry.
-            var s = input.Normalize(NormalizationForm.FormC);
+            var s = Renormalize(input, NormalizationForm.FormC);
 
             // 2) HTML ENTITIES, before anything can read one as letters.
             s = Rewrite(Rewrite(s, ENTITIES, " "), BOM, "");

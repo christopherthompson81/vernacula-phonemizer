@@ -12,6 +12,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeLatgalian } from "./normalize.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 interface LatgalianDef {
     digraphs: [string, string][];
@@ -112,7 +113,7 @@ class LatgalianPhonemizer implements Phonemizer {
     text(input: string): string {
         // ⚠ NORMALIZATION FIRST — normalize.ts rewrites figures, signs, units and the ordinal period into
         // Latgalian words BEFORE tokenization, so everything below sees plain words and digits.
-        return assembleClauses(normalizeLatgalian(input.normalize("NFC")), TOKEN, (m, sink) => {
+        return assembleClauses(normalizeLatgalian(renormalize(input, "NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2]), m[2]).split(" "))

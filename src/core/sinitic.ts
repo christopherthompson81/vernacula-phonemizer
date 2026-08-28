@@ -40,6 +40,7 @@
  * (wuu claims coordinates before degrees, nan claims a tilde range before its temperature, cjy declines
  * degrees outright because ⟨度⟩ is SILENT in its dict). A monolithic builder would have to hide that.
  */
+import { rewrite } from "./provenance.ts";
 
 /** 0–9 as Han numerals. The default; a language may pass its own (〇 vs 零 is a real corpus choice). */
 export const HAN_DIGITS: readonly string[] = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
@@ -60,7 +61,10 @@ export function spellHanDigits(s: string, digits: readonly string[] = HAN_DIGITS
  * and the corpus writes it. A looser pattern would mangle it.
  */
 export function degroupThousands(s: string): string {
-    return s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    // ⚠ THE INNER CALL IS ON THE MATCH, NOT THE PIPELINE STRING — a bare `m` is textually indistinguishable
+    // from a pipeline variable, which is how the mechanical conversion put it here. On the seam it hands
+    // `rewrite` a substring and drops the whole utterance's mapping (measured: cdo, 77 rows).
+    return rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 }
 
 /** Word data for the year rules. `rangeWord` omitted ⇒ the range arms are skipped, single years still spell. */
@@ -87,13 +91,13 @@ export function spellYears(s: string, d: YearRuleData = {}): string {
     let out = s;
     if (d.rangeWord !== undefined) {
         // ⚠ FIRST: only the RIGHT endpoint sees 年, so left alone this span gets two different readings.
-        out = out.replace(
+        out = rewrite(out, 
             new RegExp(`(?<![\\d.,])(\\d{4})\\s*[${dash}]\\s*(\\d{4})(?![\\d.,])(?=\\s*年)`, "gu"),
             (_m, a: string, b: string) => `${spell(a)}${d.rangeWord}${spell(b)}`,
         );
         // ⚠ SECOND, AND STILL BEFORE THE SINGLE-YEAR RULE: `1996年-2007年` spells both correctly either way,
         // but after the single rule the endpoints are Han and no digit pattern can reach the dash.
-        out = out.replace(
+        out = rewrite(out, 
             new RegExp(`(?<![\\d.,])(\\d{4})\\s*年\\s*[${dash}]\\s*(?=\\d{4}\\s*年)`, "gu"),
             (_m, a: string) => `${spell(a)}年${d.rangeWord}`,
         );
@@ -101,7 +105,7 @@ export function spellYears(s: string, d: YearRuleData = {}): string {
     // ⚠ THE 年 IS FOUND ACROSS WHITESPACE — `2009 年` is ordinary, and missing that silently defeated cmn.
     // ⚠ 3-DIGIT YEARS ARE NOT CLAIMED: most short `N年` forms are DURATIONS (`48年歷史`) and nothing in the
     // surface form separates them from a short year. That refusal is the fleet's, from the yue layer.
-    return out.replace(/(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)/gu, (_m, y: string) => spell(y));
+    return rewrite(out, /(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)/gu, (_m, y: string) => spell(y));
 }
 
 /**
@@ -119,7 +123,7 @@ export function spellYears(s: string, d: YearRuleData = {}): string {
  * Verified byte-identical over the cmn, yue, wuu, nan and cjy corpora.
  */
 export function reorderFraction(s: string, fractionWord: string): string {
-    return s.replace(
+    return rewrite(s, 
         /(?<![\d.,/\p{sc=Latn}])(\d{1,4})\/(\d{1,4})(?![\d/])/gu,
         (m, num: string, den: string) => (num.length === 4 && den.length === 4 ? m : `${den}${fractionWord}${num}`),
     );
@@ -150,7 +154,7 @@ export function reorderFraction(s: string, fractionWord: string): string {
  * helper, this decision is worth re-running against a corpus where the count is not 0.
  */
 export function readDecimals(s: string, decimalWord: string, digits: readonly string[] = HAN_DIGITS): string {
-    return s.replace(
+    return rewrite(s, 
         /(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)/gu,
         (_m, int: string, frac: string) => `${int}${decimalWord}${spellHanDigits(frac, digits)}`,
     );
@@ -188,8 +192,8 @@ export interface DegreeData {
 const DEG_NUM = "(\\d+(?:\\.\\d+)?)";
 export function readDegrees(s: string, d: DegreeData): string {
     let out = s;
-    if (d.celsius) out = out.replace(new RegExp(`${DEG_NUM}\\s*°\\s*C(?![\\p{sc=Latn}])`, "gui"), (_m, n: string) => d.celsius!(n));
-    if (d.fahrenheit) out = out.replace(new RegExp(`${DEG_NUM}\\s*°\\s*F(?![\\p{sc=Latn}])`, "gui"), (_m, n: string) => d.fahrenheit!(n));
-    if (d.bare) out = out.replace(new RegExp(`${DEG_NUM}\\s*°`, "gu"), (_m, n: string) => d.bare!(n));
+    if (d.celsius) out = rewrite(out, new RegExp(`${DEG_NUM}\\s*°\\s*C(?![\\p{sc=Latn}])`, "gui"), (_m, n: string) => d.celsius!(n));
+    if (d.fahrenheit) out = rewrite(out, new RegExp(`${DEG_NUM}\\s*°\\s*F(?![\\p{sc=Latn}])`, "gui"), (_m, n: string) => d.fahrenheit!(n));
+    if (d.bare) out = rewrite(out, new RegExp(`${DEG_NUM}\\s*°`, "gu"), (_m, n: string) => d.bare!(n));
     return out;
 }

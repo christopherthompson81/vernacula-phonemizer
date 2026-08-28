@@ -108,7 +108,7 @@ public static class Normalize
     /** Sylheti text → text the tokenizer can read. The step order and its couplings are stated in the TS. */
     public static string NormalizeSylheti(string input)
     {
-        var s = input.Normalize(NormalizationForm.FormC);
+        var s = Renormalize(input, NormalizationForm.FormC);
         s = Rewrite(s, ZERO_WIDTH, "");
         s = FoldStrayBengali(s);
         s = Rewrite(s, DOTTED_ABBREV, m => DOT_G.Replace(m.Value, ""));

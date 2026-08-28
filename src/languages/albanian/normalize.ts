@@ -304,13 +304,13 @@ function degrees(text: string): string {
  * SLOT-GAP class the fleet audit exists to find.
  */
 function signs(text: string): string {
-    return text
-        .replace(/(?<![\d\p{L}])\+\s?(?=\d)/gu, `${SIGN.plus} `)
-        .replace(/(?<![\d\p{L}])[−–-](?=\d)/gu, `${SIGN.minus} `)
-        .replace(/(?<![=!<>])(?<=[\d\p{L}\p{M})])\s*=\s*(?=[\d\p{L}(])(?![=<>])/gu, ` ${SIGN.equals} `)
-        .replace(/(?<![=!<>])(?<=[\d\p{L}])\s*<\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.lessThan} `)
-        .replace(/(?<![=!<>])(?<=[\d\p{L}])\s*>\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.greaterThan} `)
-        .replace(/(?<=\d)\s*÷\s*(?=\d)/gu, ` ${SIGN.dividedBy} `);
+    return rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(text
+        , /(?<![\d\p{L}])\+\s?(?=\d)/gu, `${SIGN.plus} `)
+        , /(?<![\d\p{L}])[−–-](?=\d)/gu, `${SIGN.minus} `)
+        , /(?<![=!<>])(?<=[\d\p{L}\p{M})])\s*=\s*(?=[\d\p{L}(])(?![=<>])/gu, ` ${SIGN.equals} `)
+        , /(?<![=!<>])(?<=[\d\p{L}])\s*<\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.lessThan} `)
+        , /(?<![=!<>])(?<=[\d\p{L}])\s*>\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.greaterThan} `)
+        , /(?<=\d)\s*÷\s*(?=\d)/gu, ` ${SIGN.dividedBy} `);
 }
 
 /**

@@ -10,6 +10,7 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 import { normalizeLuleSami } from "./normalize.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 interface LuleSamiDef {
     multigraphs: [string, string][];
@@ -53,7 +54,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class LuleSamiPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(normalizeLuleSami(input.normalize("NFC")), TOKEN, (m, sink) => {
+        return assembleClauses(normalizeLuleSami(renormalize(input, "NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string so the

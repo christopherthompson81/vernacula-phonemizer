@@ -237,7 +237,7 @@
  * by these.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 /** The bare-token pass for the kilometre — see the step that applies it. */
 const BARE_UNITS = makeBareUnitNormalizer([["km", "kis lus mev"]]);
 
@@ -272,7 +272,7 @@ export function normalizeHmong(input: string): string {
     //    unaccented ASCII so NFC is identity for Hmong's own letters, but the corpus's embedded foreign
     //    names arrive in both compositions. Zero-width ×4, every one paragraph-initial. The entity strip
     //    must precede step 10 or `&nbsp;` reads as "and" plus the letters n-b-s-p.
-    let s = input.normalize("NFC")
+    let s = renormalize(input, "NFC")
         .replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ")
         .replace(/[​‌‍⁠﻿]/gu, "");
 

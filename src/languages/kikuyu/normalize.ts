@@ -1,4 +1,4 @@
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 /**
  * Kikuyu / Gĩkũyũ (ki) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -215,7 +215,7 @@ export function normalizeKikuyu(input: string): string {
     //    ⚠ FORMAT CHARACTERS ARE STRIPPED IN THE SAME STEP, not because they are common — U+2060 WORD JOINER
     //    and U+FFFC are ×1 each here — but because a zero-width inside a word SPLITS it into two tokens, and
     //    that is the same class of silent damage the fold exists to undo. Robustness, stated as such.
-    s = s.normalize("NFC").replace(SUBSTITUTE_RX, (c) => SUBSTITUTE[c]!).replace(/[\p{Cf}￼]/gu, "");
+    s = renormalize(s, "NFC").replace(SUBSTITUTE_RX, (c) => SUBSTITUTE[c]!).replace(/[\p{Cf}￼]/gu, "");
 
     // 2) HTML ENTITIES, before anything looks for a number beside a sign or a unit. `&nbsp;` ×16 sits exactly
     //    in the gap a number-unit or number-sign adjacency needs (`kilomita 700². &nbsp;&nbsp;`), and
@@ -242,7 +242,9 @@ export function normalizeKikuyu(input: string): string {
     s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
     //    The space-grouped form, same shape. ×0 in this corpus; the arm is here because a wiki that writes
     //    `41,200` also writes `41 200`, and it cannot fire on anything else (three digits, no letters).
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    // ⚠ NAMED BY THE POISON TOOL AND STAYS ON THE SEAM, for the reason spelled out at the ordinal site below:
+    // the subject is `s` itself, so the gap is an earlier kikuyu step and reverting only moves the poison.
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // ⚠ `w` is the MATCH, not the pipeline string  // space, NBSP, NNBSP, thin space
 
     // 4) THE ENGLISH ORDINAL SUFFIX (`21st`, `20th`, `70th`, `4th`, `2nd`; 194 whole-corpus). Kikuyu writes
     //    its own ordinals as WORDS with a class-agreeing prefix — this corpus has *wa mbere*, *wa kerĩ*,
