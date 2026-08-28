@@ -113,7 +113,14 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'")})|(\\d+)|([.!?…,;:])`
  * THE G2P, and `test/native-inventory.test.ts` measures it character by character rather than
  * trusting it.
  */
-const NATIVE_CLASS = "[a-zċġħżèìùA-ZĊĠĦŻÈÌÙ']";
+/**
+ * ⚠ ⟨à ò⟩ JOIN ⟨è ì ù⟩ HERE FOR TRUTH, NOT FOR BEHAVIOUR (#1140). `maltese.jsonc` declares all five grave
+ * vowels and this class carried only three, so it under-claimed two letters the g2p has rules for. Measured
+ * before changing it: the graves read the SAME QUALITY as their plain counterparts (`kafà`/`kafa` → kafa,
+ * `kafò`/`kafo` → kafɔ), so the fold was reaching the right answer by the wrong route and this moves no
+ * output at all. Listed anyway, because the class is a claim about the g2p and the claim was false.
+ */
+const NATIVE_CLASS = "[a-zċġħżàèìòùA-ZĊĠĦŻÀÈÌÒÙ']";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class MaltesePhonemizer implements Phonemizer {

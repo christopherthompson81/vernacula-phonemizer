@@ -109,7 +109,10 @@ public sealed class AsturianPhonemizer : ILanguage
      * ⚠ ḷ Ḷ ARE DELIBERATELY ABSENT: the g2p has no rule for them, and drops them outright — listing them
      * here would promise a reading that does not exist.
      */
-    private const string NATIVE_CLASS = "[a-zñáéíóúüïḥA-ZÑÁÉÍÓÚÜÏḤ'·]";
+    // ⚠ ḷ Ḷ ARE CLAIMED (#1140). asturian.jsonc maps ⟨ḷḷ⟩ → t͡ʂ, the che vaqueira — a different phoneme from
+    // ⟨ll⟩ → ʎ. Excluded from the class, the letter was FOLDED (the under-dot stripped), so ⟨ḷḷ⟩ arrived as
+    // ⟨ll⟩ and the contrast was silently collapsed. See src/languages/asturian/asturian.ts for the evidence.
+    private const string NATIVE_CLASS = "[a-zñáéíóúüïḥḷA-ZÑÁÉÍÓÚÜÏḤḶ'·]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "u");
 
     public string Text(string input)

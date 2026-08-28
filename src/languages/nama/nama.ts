@@ -74,7 +74,18 @@ export function phonemizeWord(word: string): string {
  * token this class REJECTS carries a letter the language does not use — i.e. a foreign name, which `nat`
  * then folds to a base the g2p does have a rule for. See core/hostWord.ts.
  */
-const NATIVE_CLASS = "[a-zA-Zǀǁǂǃ]";
+/**
+ * ⚠ THE MACRON AND CIRCUMFLEX VOWELS ARE IN THE CLASS, and leaving them out cost this language BOTH of its
+ * diacritic contrasts (#1140). `nama.jsonc`'s own `letters` table declares them and says what they are:
+ * macron = LONG (ā → aː), circumflex = NASALIZED, annotated there as phonemic (ǂgâ, ǀî). But a token outside
+ * this class is FOLDED, and `core/hostWord.ts` strips combining marks — so ⟨ā⟩ and ⟨â⟩ both arrived as ⟨a⟩
+ * and both contrasts were erased before the g2p ran: `ǃkhās` read *ᵏǃʰas* not *ᵏǃʰaːs*, `ǂgâ` read *ᵏǂa* not
+ * *ᵏǂã*. Nothing looked broken, because a folded letter still produces a sound.
+ *
+ * ⚠ naq HAS NO GOLDEN AND NO CORPUS ARTIFACT in this repo, so no differential can witness this and the tests
+ * are the whole instrument. Both cases are listed because the nativiser flags here are "u", not "iu".
+ */
+const NATIVE_CLASS = "[a-zA-ZāēīōūâêîôûĀĒĪŌŪÂÊÎÔÛǀǁǂǃ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
