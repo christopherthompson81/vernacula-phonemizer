@@ -39,6 +39,14 @@ import { hostDepth } from "./foreign.ts";
 
 /** `prov[i]` = the `[start, end)` of the ORIGINAL input that character `i` of the current string came from. */
 let prov: [number, number][] | null = null;
+/**
+ * ⚠ THE STRING THE MAPPING DESCRIBES. Length alone cannot carry the guarantee: a step outside `tr` that is
+ * NET length-preserving passes a length check while having shifted every interior offset. Found in the C#
+ * port, where `Mandarin.SubstituteNumbers` rewrites a code-point list outside the seam — `115`→`一百一十五` is
+ * +2 and each `10`→`十` is −1 — so a stale identity mapping survived and reported `十` as coming from a SPACE.
+ * The same hole was here. Comparing content is O(n) and only on the traced path.
+ */
+let tracked: string | null = null;
 
 /**
  * ⚠ ONCE DESYNCED, STAY DESYNCED. `tr` rebuilds the array at the CURRENT string's length, so if a step the
@@ -50,6 +58,7 @@ let prov: [number, number][] | null = null;
  */
 function poison(): void {
     prov = null;
+    tracked = null;
 }
 
 /**
@@ -63,11 +72,13 @@ export function beginProvenance(input: string): void {
     // `TraceToken.span` are all UTF-16 offsets — one astral character (an emoji, an SMP letter) made the seed
     // array SHORT, and the desync then read as a valid mapping. Indexing has to match what it indexes.
     prov = Array.from({ length: input.length }, (_, i) => [i, i + 1] as [number, number]);
+    tracked = input;
 }
 
 export function endProvenance(): void {
     if (hostDepth() > 1) return;
     prov = null;
+    tracked = null;
 }
 
 /**
@@ -79,7 +90,7 @@ export function endProvenance(): void {
  * not know" and a silent wrong answer.
  */
 export function provenanceFor(normalized: string): [number, number][] | undefined {
-    if (prov === null || prov.length !== normalized.length) return undefined;
+    if (prov === null || tracked !== normalized) return undefined;
     return prov;
 }
 
@@ -182,7 +193,7 @@ export function tr(s: string, re: RegExp, rep: Replacer): string {
     // the length check over shifted values and reporting them as fact. Checking only the indices actually
     // read is not enough: the repro (`"abc"` → an untracked `b`→`BB`, then a tracked `c`→`C`) touches none
     // of the missing ones and still comes out confidently wrong.
-    if (p.length !== s.length) { poison(); return s.replace(re, rep as string); }
+    if (tracked !== s) { poison(); return s.replace(re, rep as string); }
 
     const global = re.flags.includes("g");
     const rx = new RegExp(re.source, global ? re.flags : re.flags + "g");
@@ -244,5 +255,6 @@ export function tr(s: string, re: RegExp, rep: Replacer): string {
     const joined = out.join("");
     if (next.length !== joined.length) { poison(); return joined; }
     prov = next;
+    tracked = joined;
     return joined;
 }

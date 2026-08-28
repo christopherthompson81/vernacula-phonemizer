@@ -318,3 +318,27 @@ describe("phonemizeTrace — normalizer provenance (#1150 stage 2)", () => {
             }
     });
 });
+
+describe("phonemizeTrace — length is not identity (#1150 stage 2)", () => {
+    /**
+     * ⚠ FOUND IN THE C# PORT AND PRESENT HERE TOO. A step outside the seam that is NET length-preserving
+     * passes a length check while having shifted every interior offset — `Mandarin.SubstituteNumbers`
+     * rewrites a code-point list outside it, and `115`→`一百一十五` (+2) with each `10`→`十` (−1) cancels out.
+     * A stale identity mapping then reported a token as coming from a SPACE, in range and so invisible to a
+     * bounds assertion. The mapping now tracks the STRING, not its length.
+     */
+    test("a net length-preserving step outside the seam yields absence, not a wrong span", () => {
+        const text = "115 10 10 中国";
+        const t = phonemizeTrace(text, "cmn");
+        expect(t.ipa).toBe(phonemize(text, "cmn"));
+        for (const k of t.tokens) expect(k.inputSpan, `${k.surface} must not be guessed`).toBeUndefined();
+    });
+
+    test("…and where the seam does see everything, the span is exact", () => {
+        const text = "Obugazi: 1 244.7 km²";
+        const t = phonemizeTrace(text, "lg");
+        const k = t.tokens.find((x) => x.surface === "kiromita");
+        expect(k?.inputSpan).toBeDefined();
+        expect(text.slice(...k!.inputSpan!)).toBe("1 244.7 km²");
+    });
+});

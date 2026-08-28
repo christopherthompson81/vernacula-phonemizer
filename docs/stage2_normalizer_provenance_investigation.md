@@ -225,3 +225,75 @@ vulgar-fraction fold BEFORE any normalizer, and none reports. A LENGTH-PRESERVIN
 That is the remaining 7.2%, and closing it means instrumenting ten fold functions in `core/unicode.ts` and
 `markup.ts`, each with its own shape. Left undone deliberately: it is a coverage limit, and with the entry
 check in place an unreported step now costs an ABSENT span rather than a wrong one.
+
+## Run 8 — the C# port, where the seam is better and the rule is the opposite
+
+⚠ **The port needed no change under `Languages/`.** The TS normalizers call `s.replace(re, rep)` — the STRING
+is the receiver — so there was no single place to instrument and 3,203 sites had to be rewritten. The C# calls
+`RE.Replace(s, rep)` — the JsRe is the receiver — so all 2,280 normalizer sites already funnel through two
+methods on one type. Instrumenting `JsRe.ReplaceAll` (and writing out the single-match path, which had been
+delegating to `Re.Replace(input, rep, 1)`) covers the fleet.
+
+### ⚠ And that breadth inverted the rule about a length mismatch
+
+The TS treats `p.length !== s.length` as a MISSED STEP and poisons, because `tr` is only ever called by a
+normalizer on the pipeline string. Doing the same in C# destroyed the mapping for most of the fleet, and the
+first offender named itself:
+
+    POISON entry: prov=22 input=8
+      Provenance.StartTrack -> JsRe.ReplaceAll -> Initialisms.MakeUnreadableTest
+      -> English.Normalize..cctor()
+
+A **static constructor** building a lookup table, through the same shared method. Here a mismatch usually
+means "a different string", not "a step went unseen", so it is IGNORED.
+
+⚠ **Ignoring is still safe, and the reason matters:** completeness is enforced at the END, not per call. The
+array is never REBUILT over a shifted string — it simply stops being updated — so a genuinely missed pipeline
+step leaves `For(normalized)` disagreeing on length and the mapping is withheld. What must never happen is
+the rebuild, which is exactly the TS defect Run 7 fixed. Same guarantee, opposite local rule, because the
+seams have different breadth.
+
+### Coverage, and an asymmetry worth recording
+
+    C#   99.4% of tokens carry an InputSpan (28,203 of 28,386)   0 out of range   2 languages partial
+    TS   92.8% (36,656 of 39,506)                                0 out of range
+
+⚠ **The C# is BETTER, and for a structural reason:** `JsRe.Replace` also carries the registry pre-passes
+(`stripMarkup`, the confusable and fullwidth folds, Roman numerals), which the TS rewrite deliberately did not
+touch — those are the TS's remaining 7.2%. `phonemizeTrace("<b>hi</b> there", "en")` maps nothing in TS and
+maps both tokens in C#. Closing the TS gap means either instrumenting those ten fold functions or moving the
+TS seam to match this one; the second is now the more attractive option and was not obvious before the port.
+
+Gates: parity 136 languages / 26,827 rows / 0 differ · goldens 0 rows changed · dotnet test 2,751 · TS 5,719.
+
+## Run 9 — review of the port: LENGTH IS NOT IDENTITY, in both engines
+
+Two defects, one root cause, and the TypeScript had the same hole.
+
+⚠ **A net length-preserving step outside the seam passed the completeness check.** `Mandarin.SubstituteNumbers`
+rewrites a code-point list rather than going through `JsRe.Replace`, and its edits cancel out — `115`→`一百一十五`
+is +2, each `10`→`十` is −1 — so a stale identity mapping survived and reported a token as coming from a SPACE:
+
+    input  115 10 10 中国        normalized  一百一十五 十 十 中国      (both length 12)
+      十  norm[6,7)  ->  src [6,7) = " "        should be [4,6) = "10"
+
+In range, and therefore invisible to a bounds assertion.
+
+⚠ **And a string that merely SHARED a length was adopted.** `Initialisms` runs
+`CLASS_BRACKETS.Replace("[aeiouy]", "")` inside a STATIC INITIALIZER — eight characters — so any pipeline
+string of length 8 took its six-entry result over the real mapping. Every language had its own poisoned
+length, once per process, on the first COLD trace. `phonemizeTrace("hi there", "en")` lost every span;
+the same call made second in the process was fine.
+
+**The fix is to track the STRING, not its length** — `tracked` beside `prov`, compared on entry, at commit and
+in `For()`. Applied to both engines, since the TS shared the defect. O(n) and only on the traced path.
+
+    TS   92.8% -> 88.9%      C#   99.4% -> 97.6%      out-of-range: 0 in both
+
+Those deltas were wrong spans passing a length-only check, exactly as in Run 7.
+
+⚠ **And neither existing test could see either defect** — the bounds test admits any in-range hull, and the
+containment test only runs where normalization is a NO-OP, i.e. precisely where the mapping cannot be wrong.
+The xunit suite additionally could never see the second one: it shares a process, so the static initializers
+were already warm by the time it ran. New tests in both engines cover the `cmn` numeral case and the
+length-8 collision, and the TS one was verified to FAIL against the pre-fix code.

@@ -14,6 +14,12 @@ public sealed class TraceToken
     public int Start { get; init; }
     public int End { get; init; }
     public string Surface { get; init; } = "";
+    /**
+     * [Start,End) into the CALLER's input, when normalizer provenance is complete for this engine (#1150
+     * stage 2). ⚠ NULL MEANS "NOT KNOWN", NEVER "IDENTICAL" — an unreported step desyncs the mapping and it
+     * is withheld rather than reported wrong.
+     */
+    public (int Start, int End)? InputSpan { get; set; }
     /** What the nativiser rewrote it to before the g2p saw it. Null when nothing was rewritten. */
     public string? Nativised { get; set; }
     /** What this token EMITTED — not necessarily a substring of the final reading; see TraceRewrite. */
@@ -57,11 +63,22 @@ public static class Trace
     public static void Start(string input)
     {
         recording = new Recording { Input = input };
+        Provenance.Seed(input);
     }
 
     public static TraceResult Stop()
     {
         var r = recording?.Result ?? new TraceResult();
+        // ⚠ RESOLVED AT STOP, not per token: a token is opened while the normalized string is still being
+        // tokenized, and the mapping is only complete once normalization has finished.
+        var p = Provenance.For(r.Normalized);
+        if (p is not null)
+            foreach (var t in r.Tokens)
+            {
+                var span = Provenance.InputSpan(p, t.Start, t.End);
+                if (span is not null) t.InputSpan = span;
+            }
+        Provenance.End();
         recording = null;
         return r;
     }
@@ -72,6 +89,10 @@ public static class Trace
         if (!Active || recording == null || recording.Result.Traced) return;
         recording.Result.Normalized = normalized;
         recording.Result.Traced = true;
+        // ⚠ FREEZE HERE. `JsRe.Replace` is the provenance seam, and engines also rewrite IPA through it
+        // (accent variants, post-assembly passes). Those act on a DIFFERENT string, so left running they
+        // would desync the mapping and destroy it. Normalization is finished by this point.
+        Provenance.Freeze();
         // Normalization is reported for every engine at once here: the caller's string and the string the
         // tokenizer sees are both known, and their difference IS the normalization.
         NoteRewrite("normalize", recording.Input, normalized);
