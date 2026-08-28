@@ -47,7 +47,7 @@ The readings there belong to the token already open. `beginToken` is now re-entr
 nests. **This was found by an assertion, not by reading**, which is the argument for having written the span
 invariant as a test rather than a comment.
 
-## Run 3 — where the trace does NOT reach, stated in the API
+## Run 3 — where the trace did NOT reach, and closing it
 
 Checked across every golden language rather than assumed:
 
@@ -76,11 +76,6 @@ whole-string pass AFTER the clause assembler. Spanish spirantizes across word bo
     (`Obugazi: 1 244.7 km²` → *Obugazi: kiromita eza kyebiriga 1244 7*, the unit's reading ahead of the figure
     it followed). Pretending otherwise would be worse than declining.
   * **Stage 3 (per-phoneme spans).**
-  * **The C# port.** ⚠ `Phonemize` is byte-identical either way, so the parity gate is unaffected — but the
-    seam instrumentation now exists in `clauses.ts` and not `Clauses.cs`, and a porter must not discover that
-    by surprise. Both C# sites carry a `PAIRED-FIX PENDING (#1150)` marker naming the issue, per PORTING.md's
-    own convention, to be DELETED when the port lands. The reasoning for TS-first is that stage 1 exists to
-    prove the API shape, and porting an unproven shape doubles the cost of changing it.
 
 ## Gates
 
@@ -88,3 +83,52 @@ whole-string pass AFTER the clause assembler. Spanish spirantizes across word bo
     parity fleet   136 languages, 26,827 rows, 0 differ
     TS suite       5,709 passed (10 new)   ·   dotnet test 2,719 passed
     tsc + package fence clean
+
+## Run 4 — the three directives from review
+
+### Every engine is traced now, not 178 of 185
+
+The four that bypass `assembleClauses` were the primary consumers, and an untraced engine is exactly the
+"absence that reads like a clean result" this API exists to expose. Two hook shapes, because one does not fit:
+
+  * **streaming** (`beginToken`/`endToken`) — `assembleClauses` and the code-point scanners;
+  * **direct** (`noteToken(span, surface, emitted)`) — for a pipeline that only knows a reading after
+    rendering the whole stream. `english.ts` runs a POS tagger across the utterance before resolving;
+    `french.ts` needs liaison to look one word ahead. Neither ever has a token "open" while its reading is
+    produced.
+
+⚠ Three engine-specific traps, each found by the span assertion rather than by reading:
+
+  * **burmese** passed no base offset to `emitUnclaimed`, so spans were relative to the GAP. Caught as
+    `my: span 1,3 is not "US"`.
+  * **mandarin** scans CODE POINTS. A code-point index is not a string offset once a supplementary character
+    appears, and Han has plenty — an offset table maps one to the other.
+  * **french** records at FLUSH, not at push: `accentFinal` MUTATES the group in place before it is joined, so
+    a reading captured at push is not the reading that ships.
+
+And a guard the failures taught: `beginToken` now requires that an engine has DECLARED itself, or one driving
+`clauseSink` without `enterEngine` produces tokens against an empty `normalized` — `traced: false` beside a
+populated token list. The coverage test is pinned at **zero untraced**, not at a list of known bypasses.
+
+### Rewrites are events, so `emitted` and `ipa` can differ with a stated cause
+
+`TraceToken.emitted` is what a token CONTRIBUTED; several engines then rewrite the ASSEMBLED string (527 of
+7,352 golden rows). Spanish spirantizes across word boundaries — `gato` emits *ɡˈato*, the sentence reads
+*ɣˈato*. Without an event the consumer sees a discrepancy with no cause attached, which is the same
+invisible-transformation problem one layer up.
+
+⚠ **Normalization is covered for all 180 engines at once, without touching any of them.** Each module calls
+its own `normalize*()` inline, so instrumenting them one at a time would be 180 edits and would still miss
+the registry's pre-passes. But the caller's string and the string the tokenizer sees are both known at
+`enterEngine`, and their difference IS the normalization — including the reordering that makes a span
+un-mappable back to the input. Naming the rewrite is stage 1's contribution to stage 2, not a substitute.
+
+### The C# port landed with it
+
+Dual maintenance from the start rather than a `PAIRED-FIX PENDING` marker. `Core/Trace.cs` mirrors the TS
+recorder ([ThreadStatic], like `Foreign`'s host stack), and the same four engines report explicitly.
+`Phonemizer.PhonemizeTrace` is the entry. Verified engine-by-engine against the TS output, not just compiled.
+
+    parity fleet   136 languages, 26,827 rows, 0 differ — Phonemize is untouched
+    goldens        0 rows changed
+    TS 5,713 passed   ·   dotnet test 2,739 passed (20 new)   ·   tsc + fence clean

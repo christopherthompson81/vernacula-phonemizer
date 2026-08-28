@@ -146,6 +146,13 @@ public sealed class MandarinPhonemizer : ILanguage
         // A code-point run scanner (Han / Latin / other), deliberately not a single regex: it drives the
         // clause sink directly instead of going through AssembleClauses, but reuses the same assembly.
         var (sink, finish) = Clauses.ClauseSink();
+        // ⚠ REPORTS ITS OWN SPANS (#1150): this scans CODE POINTS, so the recorder has no loop to derive them
+        // from, and a code-point index is not a string offset once a supplementary character appears (Han has
+        // plenty). `off` maps one to the other so a span indexes `Normalized` exactly.
+        var traceText = string.Concat(cp);
+        var off = new int[cp.Count + 1];
+        for (var k = 0; k < cp.Count; k++) off[k + 1] = off[k] + cp[k].Length;
+        Core.Trace.EnterEngine(traceText);
         var i = 0;
         while (i < cp.Count)
         {
@@ -154,14 +161,18 @@ public sealed class MandarinPhonemizer : ILanguage
             {
                 var j = i;
                 while (j < cp.Count && HAN.IsMatch(cp[j])) j++;
+                Core.Trace.BeginToken(off[i], off[j], string.Concat(cp.GetRange(i, j - i)));
                 sink.Emit(HanRun(cp.GetRange(i, j - i), exempt.GetRange(i, j - i)));
+                Core.Trace.EndToken();
                 i = j;
             }
             else if (LATIN.IsMatch(ch))
             {
                 var j = i;
                 while (j < cp.Count && LATIN_RUN.IsMatch(cp[j])) j++;
+                Core.Trace.BeginToken(off[i], off[j], string.Concat(cp.GetRange(i, j - i)));
                 sink.Emit(_foreign is not null ? _foreign(string.Concat(cp.GetRange(i, j - i))) : "");
+                Core.Trace.EndToken();
                 i = j;
             }
             else if (FOREIGN_CHAR.IsMatch(ch))
@@ -178,8 +189,10 @@ public sealed class MandarinPhonemizer : ILanguage
                         && FOREIGN_CHAR.IsMatch(next) && !HAN.IsMatch(next) && !LATIN.IsMatch(next)) { j += 2; continue; }
                     break;
                 }
+                Core.Trace.BeginToken(off[i], off[j], string.Concat(cp.GetRange(i, j - i)));
                 var routed = Foreign.ReadForeignRun(string.Concat(cp.GetRange(i, j - i)));
                 if (routed is not null && routed != "") sink.Emit(routed);
+                Core.Trace.EndToken();
                 i = j;
             }
             else

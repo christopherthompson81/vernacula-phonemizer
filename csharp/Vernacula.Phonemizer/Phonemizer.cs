@@ -8,6 +8,20 @@ using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer;
 
+/** The result of {@link Phonemizer.PhonemizeTrace}. */
+public sealed class PhonemeTrace
+{
+    /** Byte-identical to `Phonemize(text, lang)`. */
+    public string Ipa { get; init; } = "";
+    /** The text the tokenizer saw — normalization has already rewritten it. Token spans index THIS. */
+    public string Normalized { get; init; } = "";
+    /** ⚠ FALSE MEANS THIS ENGINE IS NOT TRACED, not that it had nothing to say. */
+    public bool Traced { get; init; }
+    public List<Core.TraceToken> Tokens { get; init; } = new();
+    /** Whole-string rewrites — why a token's `Emitted` may not be a substring of `Ipa`. */
+    public List<Core.TraceRewrite> Rewrites { get; init; } = new();
+}
+
 public static class Phonemizer
 {
     /**
@@ -50,6 +64,29 @@ public static class Phonemizer
      *  for real-world text. */
     public static string Phonemize(string text, string lang) =>
         Registry.GetPhonemizer(lang).Text(text);
+
+    /**
+     * `Phonemize`, plus what happened on the way — the additive trace of #1150 stage 1.
+     * Ported from src/index.ts `phonemizeTrace`; see src/core/trace.ts for the evidence and the design.
+     *
+     * ⚠ `Ipa` is byte-identical to `Phonemize(text, lang)`. Spans index `Normalized`, NOT `text`:
+     * normalization rewrites and can REORDER, so mapping back is not an offset problem (that is stage 2).
+     */
+    public static PhonemeTrace PhonemizeTrace(string text, string lang)
+    {
+        Core.Trace.Start(text);
+        try
+        {
+            var ipa = Phonemize(text, lang);
+            var r = Core.Trace.Stop();
+            return new PhonemeTrace { Ipa = ipa, Normalized = r.Normalized, Traced = r.Traced, Tokens = r.Tokens, Rewrites = r.Rewrites };
+        }
+        finally
+        {
+            // Already stopped on the success path; this clears ambient state when the engine THREW.
+            Core.Trace.Stop();
+        }
+    }
 
     /** Phonemize real-world text to canonical IPA — the UNIFIED best-output entry. Identical to `phonemize` for
      *  the bulk, but routes each language to its best available path (neuralRegistry.ts): the unpointed ABJADS

@@ -81,10 +81,6 @@ public static class HostWord
 
     /** Conditional fold for a nativising engine, judged PER CLUSTER and never per word: a word-level test
      *  fails on one foreign letter and then flattens the native ones too. */
-    // ⚠ PAIRED-FIX PENDING (#1150): the TypeScript counterpart reports each rewrite to a trace recorder, so the
-    // input-side fold that leaves no mark on the output — the step behind #1131, #1139 and #1140 — is visible
-    // through `phonemizeTrace`. TS-only while stage 1 proves the shape; the reading is identical either way.
-    // DELETE THIS COMMENT when the trace is ported.
     public static Func<string, string> MakeNativiser(string nativeClass, string flags = "u")
     {
         var inClass = JsRegex.Compile($"^(?:{nativeClass})+$", flags);
@@ -98,7 +94,11 @@ public static class HostWord
             var sb = new StringBuilder();
             foreach (System.Text.RegularExpressions.Match m in CLUSTER.Matches(w))
                 sb.Append(Known(m.Value) ? m.Value : FoldLatinToBase(m.Value));
-            return sb.ToString();
+            var outw = sb.ToString();
+            // ⚠ THE STEP THAT WAS INVISIBLE (#1150): this rewrite happens BEFORE the g2p sees the word and
+            // leaves no mark on the output, which is how #1131/#1139/#1140 all hid.
+            Trace.NoteNativised(w, outw);
+            return outw;
         };
     }
 }

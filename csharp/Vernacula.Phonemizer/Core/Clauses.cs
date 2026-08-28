@@ -37,6 +37,7 @@ public static class Clauses
         public void Emit(string ipa)
         {
             if (ipa == "") return;
+            Trace.NoteEmit(ipa);
             if (@out == "") @out = ipa;
             else if (pending != null)
             {
@@ -80,44 +81,52 @@ public static class Clauses
     private static readonly JsRe LatinOne = JsRegex.Compile(@"\p{Script=Latin}", "u");
 
     /** Emit the FOREIGN runs inside text the engine's own tokenizer did not claim. */
-    public static void EmitUnclaimed(string gap, ClauseSink sink)
+    public static void EmitUnclaimed(string gap, ClauseSink sink, int baseOffset = 0)
     {
         foreach (Match m in FOREIGN_RUN.Matches(gap))
         {
             var run = m.Value;
+            // ⚠ AN UNCLAIMED RUN IS STILL A TOKEN (#1150): its reading reaches the output, so leaving it out
+            // would attribute real IPA to no token. `baseOffset` is the gap's offset in the caller's string.
+            Trace.BeginToken(baseOffset + m.Index, baseOffset + m.Index + run.Length, run);
             var routed = Foreign.ReadForeignRun(run);
             if (routed != null)
             {
                 if (routed != "") sink.Emit(routed);
+                Trace.EndToken();
                 continue;
             }
-            if (!LatinOne.IsMatch(run)) continue;
+            if (!LatinOne.IsMatch(run)) { Trace.EndToken(); continue; }
             var foreign = Foreign.GetDefaultForeign();
             if (foreign != null) sink.Emit(foreign(run));
+            Trace.EndToken();
         }
     }
 
-    // ⚠ PAIRED-FIX PENDING (#1150): the TypeScript `assembleClauses` derives a per-token TRACE here — span,
-    // surface, the nativiser's rewrite, and the readings emitted — behind an additive `phonemizeTrace`. It is
-    // deliberately TS-only for now: stage 1 exists to prove the API shape, and porting an unproven shape
-    // doubles the cost of changing it. `Phonemize` is byte-identical either way, so the parity gate is
-    // unaffected. DELETE THIS COMMENT when the trace is ported; a stale marker is a fork that documents
-    // itself as fidelity.
     public static string AssembleClauses(
         string input,
         JsRe token,
         Action<Match, ClauseSink> handle)
     {
         var (sink, finish) = ClauseSink();
-        var cursor = 0;
-        foreach (Match m in JsRegex.MatchAll(token, input))
+        // The trace is derived here and nowhere else (#1150): `at`/`cursor` were already computed and
+        // discarded, and a token's span is that arithmetic kept.
+        Trace.EnterEngine(input);
+        try
         {
-            var at = m.Index; // TS `m.index ?? cursor` — a .NET Match always carries its index
-            if (at > cursor) EmitUnclaimed(input[cursor..at], sink);
-            handle(m, sink);
-            cursor = at + m.Value.Length;
+            var cursor = 0;
+            foreach (Match m in JsRegex.MatchAll(token, input))
+            {
+                var at = m.Index; // TS `m.index ?? cursor` — a .NET Match always carries its index
+                if (at > cursor) EmitUnclaimed(input[cursor..at], sink, cursor);
+                Trace.BeginToken(at, at + m.Value.Length, m.Value);
+                handle(m, sink);
+                Trace.EndToken();
+                cursor = at + m.Value.Length;
+            }
+            if (cursor < input.Length) EmitUnclaimed(input[cursor..], sink, cursor);
+            return finish();
         }
-        if (cursor < input.Length) EmitUnclaimed(input[cursor..], sink);
-        return finish();
+        finally { Trace.ExitEngine(); }
     }
 }

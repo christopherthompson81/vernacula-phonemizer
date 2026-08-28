@@ -47,6 +47,13 @@ public static class Foreign
     private static List<string>? hostsTls;
     private static List<string> hosts => hostsTls ??= new List<string>();
 
+    /**
+     * How deeply nested the current render is: 1 at the top-level call, ≥2 inside a delegated foreign run.
+     * ⚠ THE TRACE RECORDER GATES ON THIS (#1150) rather than counting delegations itself — the registry
+     * wrapper pushes a host for EVERY language, including the four that hand-roll their tokenizer loop.
+     */
+    public static int HostDepth() => hosts.Count;
+
     public static void PushHost(string lang)
     {
         hosts.Add(lang);
