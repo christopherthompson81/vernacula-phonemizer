@@ -5,6 +5,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Afrikaans;
 
@@ -46,12 +47,12 @@ public static class Normalize
 
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys
         .OrderByDescending(k => k.Length)
-        .Select(k => ESCAPE_KEY.Replace(k, "\\$&")));
+        .Select(k => JsRegex.Replace(k, ESCAPE_KEY, "\\$&")));
 
     private static readonly string BARE_ALT = string.Join("|", DOTTED_ABBREV.Keys
         .Where(k => k.Contains('.', StringComparison.Ordinal))
         .OrderByDescending(k => k.Length)
-        .Select(k => ESCAPE_KEY.Replace(k, "\\$&")));
+        .Select(k => JsRegex.Replace(k, ESCAPE_KEY, "\\$&")));
 
     private static SignWords SIGN => MANIFEST.SignWords; // afrikaans.jsonc — one word per math/sign symbol
     private static AfrikaansFractionWords FRAC => MANIFEST.FractionWords; // …and the two suppletive halves
@@ -147,30 +148,30 @@ public static class Normalize
     {
         var s = input;
 
-        s = AMP.Replace(s, " & ");
+        s = Rewrite(s, AMP, " & ");
 
-        s = ARTICLE_QUOTE.Replace(s, "'n");
-        s = ARTICLE_NACUTE.Replace(s, "'n");
+        s = Rewrite(s, ARTICLE_QUOTE, "'n");
+        s = Rewrite(s, ARTICLE_NACUTE, "'n");
 
         foreach (var (end, any, word) in MULTI_DOT_RES)
         {
-            s = end.Replace(s, $"{word}.");
-            s = any.Replace(s, word);
+            s = Rewrite(s, end, $"{word}.");
+            s = Rewrite(s, any, word);
         }
 
-        s = DOTTED_CAPS.Replace(s, m => DOT_OR_SPACE.Replace(m.Value, ""));
+        s = Rewrite(s, DOTTED_CAPS, m => DOT_OR_SPACE.Replace(m.Value, ""));
 
-        s = ABBREV_MID.Replace(s, m =>
+        s = Rewrite(s, ABBREV_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122). The pattern is built from this table's OWN keys but
             // carries `i`+`u`, so JS's fold widens it — `ſ`→`s`, and the Cyrillic `ᲀᲃᲅ` forms onto theirs —
             // and a near-miss MATCHES while its key is absent. The TS asserted non-null and spoke the word
             // "undefined"; this indexer THREW. Refuse the whole match.
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = ABBREV_END.Replace(s, m =>
+        s = Rewrite(s, ABBREV_END, m =>
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
-        s = ABBREV_BARE.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}");
+        s = Rewrite(s, ABBREV_BARE, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}");
 
-        s = ORDINAL.Replace(s, m => OrdinalWord(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        s = Rewrite(s, ORDINAL, m => OrdinalWord(Js.Number(m.Groups[1].Value)) ?? m.Value);
 
         static string Clock(string h, string min, string period) =>
             $"{Numbers.NumberToWords(Js.Number(h))}" +
@@ -179,24 +180,24 @@ public static class Normalize
             p is null ? "" : $" {(MANIFEST.ClockPeriods.TryGetValue(p.Trim().ToLowerInvariant(), out var v) ? v : p.Trim())}";
         // The trailing guard rejects a further `:` or `.` FOLLOWED BY A DIGIT — a sports time, not a clock.
         // A plain `.` may NOT be rejected outright: a clock at a sentence end is followed by one.
-        s = CLOCK_COLON.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
+        s = Rewrite(s, CLOCK_COLON, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
             Period(m.Groups[3].Success ? m.Groups[3].Value : null)));
-        s = CLOCK_DOT.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
+        s = Rewrite(s, CLOCK_DOT, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
             Period(m.Groups[3].Success ? m.Groups[3].Value : null)));
-        s = CLOCK_MILITARY.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value, ""));
-        s = CLOCK_BARE_VM.Replace(s, m =>
+        s = Rewrite(s, CLOCK_MILITARY, m => Clock(m.Groups[1].Value, m.Groups[2].Value, ""));
+        s = Rewrite(s, CLOCK_BARE_VM, m =>
             $"{Numbers.NumberToWords(Js.Number(m.Groups[1].Value))} {MANIFEST.ClockPeriods["vm"]}");
 
-        s = GROUPED.Replace(s, "");
+        s = Rewrite(s, GROUPED, "");
 
-        s = COMMA_DECIMAL.Replace(s, "$1.$2");
+        s = Rewrite(s, COMMA_DECIMAL, "$1.$2");
 
-        s = VERSION_DOT.Replace(s, "$1 punt $2");
-        s = FIGURE_DOT.Replace(s, "Figuur $1 punt $2");
+        s = Rewrite(s, VERSION_DOT, "$1 punt $2");
+        s = Rewrite(s, FIGURE_DOT, "Figuur $1 punt $2");
 
-        s = MBIT.Replace(s, "$1 megabit per sekonde");
+        s = Rewrite(s, MBIT, "$1 megabit per sekonde");
 
-        s = REGNAL.Replace(s, m =>
+        s = Rewrite(s, REGNAL, m =>
         {
             var d = m.Groups[1].Value;
             var roman = new Dictionary<string, double> { ["I"] = 1, ["II"] = 2, ["III"] = 3, ["IV"] = 4 };
@@ -205,14 +206,14 @@ public static class Normalize
             return ord is null ? m.Value : $"{ord} Wêreldoorlog";
         });
 
-        s = DEG_C.Replace(s, "$1 grade Celsius");
-        s = DEG_F.Replace(s, "$1 grade Fahrenheit");
-        s = DEG.Replace(s, "$1 grade");
+        s = Rewrite(s, DEG_C, "$1 grade Celsius");
+        s = Rewrite(s, DEG_F, "$1 grade Fahrenheit");
+        s = Rewrite(s, DEG, "$1 grade");
 
-        s = PLUS_MINUS.Replace(s, $" {SIGN.PlusMinus} ");
-        s = PLUS.Replace(s, $" {SIGN.Plus} ");
-        s = MINUS.Replace(s, $"{SIGN.Minus} $1");
-        s = AMP_LETTERS.Replace(s, m =>
+        s = Rewrite(s, PLUS_MINUS, $" {SIGN.PlusMinus} ");
+        s = Rewrite(s, PLUS, $" {SIGN.Plus} ");
+        s = Rewrite(s, MINUS, $"{SIGN.Minus} $1");
+        s = Rewrite(s, AMP_LETTERS, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -220,14 +221,14 @@ public static class Normalize
             var bn = LETTER_NAME.TryGetValue(b.ToLowerInvariant(), out var bv) ? bv : b;
             return $"{an} {SIGN.Ampersand} {bn}";
         });
-        s = AMP_SPACED.Replace(s, $" {SIGN.Ampersand} ");
-        s = EQUALS.Replace(s, $"$1 {SIGN.Equals} $2");
-        s = LESS_THAN.Replace(s, $"$1 {SIGN.LessThan} $2");
-        s = GREATER_THAN.Replace(s, $"$1 {SIGN.GreaterThan} $2");
-        s = TIMES.Replace(s, $"$1 {SIGN.Times} $2");
-        s = DIVIDED_BY.Replace(s, $"$1 {SIGN.DividedBy} $2");
+        s = Rewrite(s, AMP_SPACED, $" {SIGN.Ampersand} ");
+        s = Rewrite(s, EQUALS, $"$1 {SIGN.Equals} $2");
+        s = Rewrite(s, LESS_THAN, $"$1 {SIGN.LessThan} $2");
+        s = Rewrite(s, GREATER_THAN, $"$1 {SIGN.GreaterThan} $2");
+        s = Rewrite(s, TIMES, $"$1 {SIGN.Times} $2");
+        s = Rewrite(s, DIVIDED_BY, $"$1 {SIGN.DividedBy} $2");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
             if (den == 2) return num == 1 ? FRAC.OneHalf : $"{Numbers.NumberToWords(num)} {FRAC.Halves}";

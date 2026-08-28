@@ -4,6 +4,7 @@
  * Ported from src/languages/bulgarian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Bulgarian;
 
@@ -87,57 +88,57 @@ public static class Normalize
     {
         var t = input;
 
-        t = YEAR_G.Replace(t, "$1 година");
+        t = Rewrite(t, YEAR_G, "$1 година");
 
-        t = ERA_BC.Replace(t, "преди новата ера");
-        t = ERA_AD.Replace(t, "след новата ера");
+        t = Rewrite(t, ERA_BC, "преди новата ера");
+        t = Rewrite(t, ERA_AD, "след новата ера");
 
-        t = RATE_KM_H.Replace(t, "километра в час");
-        t = RATE_PER_HOUR.Replace(t, "$1 в час");
-        t = RATE_M_S.Replace(t, "метра в секунда");
-        t = RATE_KM_H_LAT.Replace(t, "километра в час");
-        t = RATE_M_S_LAT.Replace(t, "метра в секунда");
+        t = Rewrite(t, RATE_KM_H, "километра в час");
+        t = Rewrite(t, RATE_PER_HOUR, "$1 в час");
+        t = Rewrite(t, RATE_M_S, "метра в секунда");
+        t = Rewrite(t, RATE_KM_H_LAT, "километра в час");
+        t = Rewrite(t, RATE_M_S_LAT, "метра в секунда");
 
         string prev;
         do
         {
             prev = t;
-            t = SPACE_GROUP.Replace(t, "");
+            t = Rewrite(t, SPACE_GROUP, "");
         } while (t != prev);
 
-        t = DECIMAL.Replace(t, m =>
+        t = Rewrite(t, DECIMAL, m =>
             $"{m.Groups[1].Value} цяло и {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-        t = CLOCK.Replace(t, "$1 $2");
+        t = Rewrite(t, CLOCK, "$1 $2");
 
-        t = NUMERO.Replace(t, "номер ");
+        t = Rewrite(t, NUMERO, "номер ");
 
-        t = PERCENT.Replace(t, "$1 процента");
+        t = Rewrite(t, PERCENT, "$1 процента");
 
-        t = DEG_F_SIGN.Replace(DEG_C_SIGN.Replace(t, "°C"), "°F");
-        t = DEG_C.Replace(t, "$1 градуса по Целзий");
-        t = DEG_F.Replace(t, "$1 градуса по Фаренхайт");
-        t = DEG.Replace(t, "$1 градуса");
+        t = Rewrite(Rewrite(t, DEG_C_SIGN, "°C"), DEG_F_SIGN, "°F");
+        t = Rewrite(t, DEG_C, "$1 градуса по Целзий");
+        t = Rewrite(t, DEG_F, "$1 градуса по Фаренхайт");
+        t = Rewrite(t, DEG, "$1 градуса");
 
-        foreach (var (re, word) in SQUARED) t = re.Replace(t, word);
+        foreach (var (re, word) in SQUARED) t = Rewrite(t, re, word);
 
-        foreach (var (re, replacement) in UNIT_RES) t = re.Replace(t, replacement);
+        foreach (var (re, replacement) in UNIT_RES) t = Rewrite(t, re, replacement);
 
-        t = RANGE.Replace(t, "$1 до $2");
+        t = Rewrite(t, RANGE, "$1 до $2");
 
         foreach (var (before, after, word) in CURRENCY_RES)
         {
-            t = before.Replace(t, $"$1 {word}");
-            t = after.Replace(t, $"$1 {word}");
+            t = Rewrite(t, before, $"$1 {word}");
+            t = Rewrite(t, after, $"$1 {word}");
         }
 
-        t = SIGNED.Replace(t, m => $"{(m.Groups[1].Value == "+" ? "плюс" : "минус")} {m.Groups[2].Value}");
+        t = Rewrite(t, SIGNED, m => $"{(m.Groups[1].Value == "+" ? "плюс" : "минус")} {m.Groups[2].Value}");
 
-        t = PLUS_INFIX.Replace(t, "$1 плюс $2");
-        foreach (var (re, word) in RELATIONAL) t = re.Replace(t, word);
+        t = Rewrite(t, PLUS_INFIX, "$1 плюс $2");
+        foreach (var (re, word) in RELATIONAL) t = Rewrite(t, re, word);
 
-        t = AMP.Replace(t, " и ");
+        t = Rewrite(t, AMP, " и ");
 
-        return MULTI_SPACE.Replace(t, " ");
+        return Rewrite(t, MULTI_SPACE, " ");
     }
 }

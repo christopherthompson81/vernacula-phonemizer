@@ -61,7 +61,7 @@
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** ⚠ NEVER `\b` here even though Latin is ASCII-adjacent: the alphabet carries macrons and diaereses
  *  (`ā ē ī ō ū ȳ ë ï ö ü ÿ`), which `\b` treats as boundaries and would cut a word in half (trap 1/23). */
@@ -85,9 +85,9 @@ export function normalizeLatin(input: string): string {
     //    clause-final probe after I wrote `(?![\d.,])` and lost the whole grouping on `1 320 000,`. A
     //    guard carrying a bare `.` or `,` declines every clause-final figure; what it has to exclude is a
     //    separator that is CONTINUING the number (`.5`), which is `(?![.,]\d)`.
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
-        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rewrite(rest, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 2) THE ERA MARKER — Latin's own, and its own expansion. `a.C.n.` = *ante Christum natum*,
     //    `p.C.n.` = *post Christum natum*, written in this corpus as "anno 31 a.C.n.", "anno 15 a.C.n.",
@@ -102,7 +102,7 @@ export function normalizeLatin(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}p\\s?\\.\\s?C\\s?\\.${NOT_LETTER_AFTER}`, "gu"), "post Christum"],
     ];
     for (const [re, word] of multi)
-        s = tr(s, re, (m0: string, offset: number, full: string) => {
+        s = rewrite(s, re, (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
@@ -111,23 +111,23 @@ export function normalizeLatin(input: string): string {
     //    corpus: "Thesei, &c.", "cum Praenestinis; &c." It reached the g2p as a bare [k] plus a false
     //    full stop. ⚠ The spelled form is in the same artifact ("73, 73.0, 73.00, et caetera omnes eundem
     //    …"), which is what fixes the expansion rather than leaving it to a dictionary.
-    s = tr(s, new RegExp(`&\\s?c\\s?\\.`, "gu"), "et cetera");
+    s = rewrite(s, new RegExp(`&\\s?c\\s?\\.`, "gu"), "et cetera");
 
     // 4) DEGREES — and this corpus glosses both senses. THERMAL: "Mediocris temperatura est 10.6° C …
     //    quo 18.0 gradus Celsius, frigidissimus Ianuarius, quo 3.4° C", one paragraph writing the sign
     //    and the words for it. ANGULAR: "inter 36° et 43,5° gradus latitudinis septentrionalis".
     //    The scale letter is claimed first so it is not left to `core/foreign.ts` and the English letter
     //    name, which is what `°C` and `°F` were doing ([k] and [f] here, since Latin reads them natively).
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 gradus Celsius");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 gradus Fahrenheit");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 gradus Celsius");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 gradus Fahrenheit");
     //    ⚠ WITH A TRAILING SPACE, because the corpus writes the sign glued to a following word this rule
     //    does not claim (`43,5° gradus latitudinis`). The final space-collapse removes the doubling.
-    s = tr(s, /(\d)\s?°(?!\s*gradus)/gu, "$1 gradus ");
-    s = tr(s, /(\d)\s?°(?=\s*gradus)/gu, "$1 ");
+    s = rewrite(s, /(\d)\s?°(?!\s*gradus)/gu, "$1 gradus ");
+    s = rewrite(s, /(\d)\s?°(?=\s*gradus)/gu, "$1 ");
 
     // 5) SIGNS. The minus INVERTS and is read; the plus is lossless where it appears (inside the
     //    arithmetic identities of step 0's refusal) and is not.
-    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1minus $2");
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1minus $2");
 
     // 6) RANGES. The dash was dropped outright and the endpoints fused into one utterance — `1732-1735`
     //    read as two years with no break at all, `pp. 1-43` as one number. ⚠ THE DASH IS SPENT ON A PAUSE
@@ -138,15 +138,15 @@ export function normalizeLatin(input: string): string {
     //    hyphen-joined groups; a span has exactly two operands, so the rule refuses any figure that is
     //    already preceded by `digit-` — which is what leaves the identifier as a run of read numbers
     //    rather than a string of false pauses.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
     //    ⚠ AND THE GUARD NEEDS `(?!\d)` BEFORE IT, OR BACKTRACKING DEFEATS IT — trap 59's family. Written
     //    as `(\d+)(?!\s?-\s?\d)`, the engine simply gives back a digit: on `0-333-75088-8` it fails the
     //    lookahead with `333`, retries with `33`, finds a plain `3` after it, and emits `0, 333-75088-8`.
     //    Pinning the second operand's end with `(?!\d)` first removes the give-back entirely.
-    s = tr(s, /(?<![\d.,-])(\d+)\s?-\s?(\d+)(?!\d)(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(?<![\d.,-])(\d+)\s?-\s?(\d+)(?!\d)(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
     // producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }

@@ -4,6 +4,7 @@
  * Ported from src/languages/german/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.German;
 
@@ -90,8 +91,8 @@ public static class Normalize
      * to and they are dropped in silence.
      */
     public static string NormalizeGermanYears(string input) =>
-        YEAR_RE.Replace(
-            DECADE_RE.Replace(input, m => $"{YearWords(Js.Number(m.Groups[1].Value))}{m.Groups[2].Value}"),
+        Rewrite(
+            Rewrite(input, DECADE_RE, m => $"{YearWords(Js.Number(m.Groups[1].Value))}{m.Groups[2].Value}"), YEAR_RE,
             m => YearWords(Js.Number(m.Groups[1].Value)));
 
     private static readonly JsRe ERA_BC = JsRegex.Compile("\\bv\\.\\s?Chr\\.", "giu");
@@ -133,14 +134,14 @@ public static class Normalize
     {
         var s = input;
 
-        s = ERA_BC.Replace(s, "vor Christus");
-        s = ERA_AD.Replace(s, "nach Christus");
-        s = ZB.Replace(s, "zum Beispiel");
-        s = DH.Replace(s, "das heißt");
-        s = UA.Replace(s, "unter anderem");
-        s = UAE.Replace(s, "und Ähnliches");
+        s = Rewrite(s, ERA_BC, "vor Christus");
+        s = Rewrite(s, ERA_AD, "nach Christus");
+        s = Rewrite(s, ZB, "zum Beispiel");
+        s = Rewrite(s, DH, "das heißt");
+        s = Rewrite(s, UA, "unter anderem");
+        s = Rewrite(s, UAE, "und Ähnliches");
 
-        s = ORD.Replace(s, m =>
+        s = Rewrite(s, ORD, m =>
         {
             var prev = m.Groups[1].Success ? m.Groups[1].Value : null;
             var sp = m.Groups[2].Success ? m.Groups[2].Value : null;
@@ -156,7 +157,7 @@ public static class Normalize
             return $"{prev ?? ""}{sp ?? ""}{stem}{ending}";
         });
 
-        s = BARE_DAY_MONTH.Replace(s, m =>
+        s = Rewrite(s, BARE_DAY_MONTH, m =>
         {
             var prev = m.Groups[1].Success ? m.Groups[1].Value : null;
             var sp = m.Groups[2].Success ? m.Groups[2].Value : null;
@@ -168,10 +169,10 @@ public static class Normalize
             return $"{prev ?? ""}{sp ?? ""}{stem}{ending}{sp2}";
         });
 
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
+        s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
 
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             var h = Js.Number(m.Groups[1].Value);
             var min = Js.Number(m.Groups[2].Value);
@@ -179,23 +180,23 @@ public static class Normalize
             return min == 0 ? head : $"{head} {Numbers.NumberToWords(min)}";
         });
 
-        s = KMH.Replace(s, "$1 Kilometer pro Stunde");
-        s = MS.Replace(s, "$1 Meter pro Sekunde");
-        s = DEG_C.Replace(s, "$1 Grad Celsius");
-        s = DEG_F.Replace(s, "$1 Grad Fahrenheit");
-        s = DEG.Replace(s, "$1 Grad");
+        s = Rewrite(s, KMH, "$1 Kilometer pro Stunde");
+        s = Rewrite(s, MS, "$1 Meter pro Sekunde");
+        s = Rewrite(s, DEG_C, "$1 Grad Celsius");
+        s = Rewrite(s, DEG_F, "$1 Grad Fahrenheit");
+        s = Rewrite(s, DEG, "$1 Grad");
 
-        s = MINUS.Replace(s, "$1minus $2");
-        s = PLUS_MINUS.Replace(s, " plus minus ");
-        s = PLUS_ATTACHED.Replace(s, "$1 plus $2");
-        s = PLUS_LEADING.Replace(s, "$1plus $2");
+        s = Rewrite(s, MINUS, "$1minus $2");
+        s = Rewrite(s, PLUS_MINUS, " plus minus ");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 plus $2");
+        s = Rewrite(s, PLUS_LEADING, "$1plus $2");
 
-        s = EQUALS_RE.Replace(s, " gleich ");
-        s = LESS_THAN.Replace(s, " kleiner als ");
-        s = GREATER_THAN.Replace(s, " größer als ");
-        s = DIVIDE.Replace(s, " geteilt durch ");
+        s = Rewrite(s, EQUALS_RE, " gleich ");
+        s = Rewrite(s, LESS_THAN, " kleiner als ");
+        s = Rewrite(s, GREATER_THAN, " größer als ");
+        s = Rewrite(s, DIVIDE, " geteilt durch ");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             var num = Js.Number(m.Groups[1].Value);
             var den = Js.Number(m.Groups[2].Value);

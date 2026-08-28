@@ -20,7 +20,7 @@ import { MANIFEST as DEF } from "./manifest.ts";
 import { BENGALI_DIGITS } from "../../core/unicode.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const BN_DIGIT = Object.keys(BENGALI_DIGITS).join("");
 /** Either digit system. */
@@ -91,28 +91,28 @@ export function makeBengaliNormalizer(numbers: NumbersDef): (text: string) => st
 
         // 1) ABBREVIATIONS. ডঃ uses a VISARGA rather than a dot, which is not punctuation and so was read
         //    as a syllable; the dotted form left a phrase break instead.
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})[ঃ.]\\s*(?=[\\p{L}])`, "gu"),
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})[ঃ.]\\s*(?=[\\p{L}])`, "gu"),
             (_m, ab: string) => `${ABBREV[ab]!} `);
 
         // 2) ORDINAL SUFFIXES, attached or with an intervening space (both occur).
-        s = tr(s, new RegExp(`(?<![${D}.,])([${D}]+)\\s?(${ORDINAL_SUFFIX.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
+        s = rewrite(s, new RegExp(`(?<![${D}.,])([${D}]+)\\s?(${ORDINAL_SUFFIX.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) =>
                 ordinal(Number(toAscii(digits)), suffix) ?? whole);
 
         // 3) BENGALI UNIT ABBREVIATIONS, after a number. Longest first so কিমি/ঘন্টা beats কিমি.
-        s = tr(s, new RegExp(`([${D}])\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
+        s = rewrite(s, new RegExp(`([${D}])\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`);
 
         // 4) DEGREES, case-insensitively — the corpus lowercases, and a case-sensitive rule would leave the
         //    scale letter behind as a stray syllable.
-        s = tr(s, new RegExp(`([${D}])\\s?°\\s?C(?![\\p{L}])`, "giu"), "$1 ডিগ্রি সেলসিয়াস");
-        s = tr(s, new RegExp(`([${D}])\\s?°\\s?F(?![\\p{L}])`, "giu"), "$1 ডিগ্রি ফারেনহাইট");
-        s = tr(s, new RegExp(`([${D}])\\s?°`, "gu"), "$1 ডিগ্রি");
+        s = rewrite(s, new RegExp(`([${D}])\\s?°\\s?C(?![\\p{L}])`, "giu"), "$1 ডিগ্রি সেলসিয়াস");
+        s = rewrite(s, new RegExp(`([${D}])\\s?°\\s?F(?![\\p{L}])`, "giu"), "$1 ডিগ্রি ফারেনহাইট");
+        s = rewrite(s, new RegExp(`([${D}])\\s?°`, "gu"), "$1 ডিগ্রি");
 
         // 5) CLOCK. The colon was reaching the output RAW (padded, so it also produced a double space), and
         //    a :00 was read as শূন্য. Bengali says "দশটা ত্রিশ মিনিট"; at :00 the minutes drop out and a
         //    following টা is exactly right.
-        s = tr(s, new RegExp(`(?<![${D}:])([${D}]{1,2}):([${D}]{2})(?![${D}:])(\\s*টা)?`, "gu"),
+        s = rewrite(s, new RegExp(`(?<![${D}:])([${D}]{1,2}):([${D}]{2})(?![${D}:])(\\s*টা)?`, "gu"),
             (whole, h: string, min: string, ta?: string) => {
                 const hv = Number(toAscii(h)), mv = Number(toAscii(min));
                 if (hv > 23 || mv > 59) return whole;
@@ -122,9 +122,9 @@ export function makeBengaliNormalizer(numbers: NumbersDef): (text: string) => st
 
         // 6) SIGNS. Both directions occur in this corpus (-1 ×3, +3/+1 ×4), unlike Hindi where the only
         //    hyphen-before-digit was a spacecraft name, so both are claimed here.
-        s = tr(s, new RegExp(`(^|[\\s(])[-−–]([${D}])`, "gu"), "$1ঋণাত্মক $2");
-        s = tr(s, new RegExp(`(\\S)\\+\\s?([${D}])`, "gu"), "$1 যোগ $2");
-        s = tr(s, new RegExp(`(^|\\s)\\+\\s?([${D}])`, "gu"), "$1যোগ $2");
+        s = rewrite(s, new RegExp(`(^|[\\s(])[-−–]([${D}])`, "gu"), "$1ঋণাত্মক $2");
+        s = rewrite(s, new RegExp(`(\\S)\\+\\s?([${D}])`, "gu"), "$1 যোগ $2");
+        s = rewrite(s, new RegExp(`(^|\\s)\\+\\s?([${D}])`, "gu"), "$1যোগ $2");
 
         // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from bn_in:
         //
@@ -139,11 +139,11 @@ export function makeBengaliNormalizer(numbers: NumbersDef): (text: string) => st
         // an infix rule would read the comparison backwards. This normalizer serves as/bpy as well as bn.
         s = postposedSign(s, "<", "থেকে কম");
         s = postposedSign(s, ">", "থেকে বেশি");
-        s = tr(s, /\s?=\s?/gu, " সমান ");
-        s = tr(s, /\s?÷\s?/gu, " ভাগ ");
+        s = rewrite(s, /\s?=\s?/gu, " সমান ");
+        s = rewrite(s, /\s?÷\s?/gu, " ভাগ ");
 
         // 7) FRACTIONS. Bengali states them as "denominator ভাগের numerator", the spoken form; ½ is অর্ধেক.
-        s = tr(s, new RegExp(`(?<![${D}.,/])([${D}]{1,3})/([${D}]{1,3})(?![${D}/])`, "gu"),
+        s = rewrite(s, new RegExp(`(?<![${D}.,/])([${D}]{1,3})/([${D}]{1,3})(?![${D}/])`, "gu"),
             (m0, a: string, b: string) => {
                 const num = Number(toAscii(a)), den = Number(toAscii(b));
                 if (num === 1 && den === 2) return "অর্ধেক";

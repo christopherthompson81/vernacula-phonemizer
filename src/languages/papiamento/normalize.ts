@@ -1,5 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 /**
  * Papiamento (pap) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -58,14 +58,14 @@ export function normalizePapiamento(input: string): string {
     //    every decimal has one or two (`24,6%`, `27.3°C`).
     //    ⚠ THE WHOLE NUMBER AT ONCE, not one join per pass (trap 63); the trailing guard rejects a DIGIT
     //    and nothing else, or every clause-final figure is declined (trap 58).
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     //    …and what is left with one or two digits after a DOT is a decimal, folded onto the comma.
-    s = tr(s, /(?<!\d)(\d+)\.(\d{1,2})(?!\d)/gu, "$1,$2");
+    s = rewrite(s, /(?<!\d)(\d+)\.(\d{1,2})(?!\d)/gu, "$1,$2");
 
     // 2) THE ERA MARKER, in the Aruban spelling the corpus writes — "Hipocrates (460 a.C.–370 a.C.),
     //    Sorano de Efeso (98–138 d.C.) y Galeno (129–216 d.C.)". `antes` ×26, `despues` ×133,
@@ -75,22 +75,22 @@ export function normalizePapiamento(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}d\\s?\\.\\s?C\\s?\\.`, "gu"), "despues di Cristo"],
     ];
     for (const [re, word] of multi)
-        s = tr(s, re, (m0: string, offset: number, full: string) => {
+        s = rewrite(s, re, (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
 
     // 3) SIGNS, before the range rule spends the hyphen.
-    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1menos $2");
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1menos $2");
 
     // 4) DEGREES — both senses are here, as in Turkmen and Shan: the coordinates (`46° 37' W`,
     //    `10° nort di e ekuator i 84° wèst`, `longitut 180°`), an interior angle (`kada ángulo di e strea
     //    ta 36°`) and the temperatures (`entre 24 i 36°C`, `27.3°C`, `te 32°C`). `grado` ×41 /
     //    `gradonan` ×4, `Celsius` ×10.
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grado Celsius");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grado Fahrenheit");
-    s = tr(s, /(\d)\s?°\s?(\d+)\s?[′']/gu, "$1 grado $2 minüt ");
-    s = tr(s, /(\d)\s?°/gu, "$1 grado ");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grado Celsius");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grado Fahrenheit");
+    s = rewrite(s, /(\d)\s?°\s?(\d+)\s?[′']/gu, "$1 grado $2 minüt ");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 grado ");
 
     // 5) RANGES. The dash was dropped and the endpoints fused — `98–138 d.C.` read as one run, `129–216`
     //    likewise. ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A CONNECTIVE: Papiamento writes `entre X i
@@ -98,8 +98,8 @@ export function normalizePapiamento(input: string): string {
     //    the connective on a bare dash would double a word the writer already chose or not.
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), and a chain of three or more
     //    hyphen-joined groups is an identifier rather than a span.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

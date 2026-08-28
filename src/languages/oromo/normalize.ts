@@ -26,7 +26,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** The decimal point */
 const POINT = loadManifest<{ decimalWord: string }>(import.meta.url, "oromo.jsonc").decimalWord;
@@ -167,19 +167,19 @@ export function normalizeOromo(input: string): string {
     let s = input;
 
     // 1) AMPERSAND
-    s = tr(s, /&amp;/giu, " fi ");
-    s = tr(s, /&/gu, " fi ");
+    s = rewrite(s, /&amp;/giu, " fi ");
+    s = rewrite(s, /&/gu, " fi ");
 
     // 2) DIGIT DE-GROUPING — `783,562`, `24,000`, `US$11,000`, `2,243n` (×28). ⚠ DE-GROUPING RUNS FIRST: otherwise the grouping comma is read as clause punctuation, which is exactly
     //    what the corpus produced (`ᶑˈibːa tˈorba … sadˈiː , ᶑˈibːa ʃˈan …` — one number as two).
     //    THREE-digit blocks only; a 1–2 digit block after a comma is a decimal, and the corpus has none
     //    (`\d,\d{1,2}(?!\d)` → 0 instances), but the decimal rule in pass 2 still covers it.
-    s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?![\d]))/gu, "");
+    s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?![\d]))/gu, "");
 
     // 3) ERA MARKER — `D.K.D 5000` (×1). *dhaloota Kiristoos dura* ("before the birth of Christ") is the
     //    corpus's own spelled-out form, ×3. BEFORE the dotted-abbreviation step (era markers
     //    precede generic abbreviations), else the interior dots become phrase breaks.
-    s = tr(s, /(?<![\p{L}\p{M}])D\.?K\.?D\.?(?![\p{L}\p{M}])/gu, "dhaloota Kiristoos dura");
+    s = rewrite(s, /(?<![\p{L}\p{M}])D\.?K\.?D\.?(?![\p{L}\p{M}])/gu, "dhaloota Kiristoos dura");
 
     // 4) DOTTED ABBREVIATIONS. The corpus writes 8 of them beside ~40 SENTENCE-FINAL periods, so each
     //    shape is claimed BY NAME and nothing generic runs:
@@ -188,12 +188,12 @@ export function normalizeOromo(input: string): string {
     //      `kkf.` ×1 → kan kana fakkaatan  (corpus ×2, "and the like")
     //      `Dr.` `Jr.` ×4 `N. Wayne` — foreign name abbreviations with NO sourced Oromo expansion: drop
     //      only the DOT, which removes the spurious mid-sentence break and changes nothing else.
-    s = tr(s, /(?<![\p{L}\p{M}])fkn\.(?![\p{L}\p{M}])/giu, "fakkeenyaaf");
-    s = tr(s, /(?<![\p{L}\p{M}])kkf\.(?![\p{L}\p{M}])/giu, "kan kana fakkaatan");
-    s = tr(s, /(?<![\p{L}\p{M}])(Dr|Jr|Sr|Mr|Mrs|Prof)\.(?![\p{L}\p{M}])/gu, "$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}])fkn\.(?![\p{L}\p{M}])/giu, "fakkeenyaaf");
+    s = rewrite(s, /(?<![\p{L}\p{M}])kkf\.(?![\p{L}\p{M}])/giu, "kan kana fakkaatan");
+    s = rewrite(s, /(?<![\p{L}\p{M}])(Dr|Jr|Sr|Mr|Mrs|Prof)\.(?![\p{L}\p{M}])/gu, "$1");
     // A single capital INITIAL before a capitalized name (`N. Wayne Hale`). The lookbehind keeps a
     // sentence-final period safe: in `… hidhee ture. I`, the `e` before the period is a letter.
-    s = tr(s, /(?<![\p{L}\p{M}.])(\p{Lu})\.(?=\s+\p{Lu})/gu, "$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}.])(\p{Lu})\.(?=\s+\p{Lu})/gu, "$1");
 
     // 5) CLOCK, colon form (×8) — `11:00`, `07:19`, `8:46 a.m.`, `1:15 a.m tti`. Read as
     //    `H fi daqiiqaa M`: *daqiiqaa* ("minute") is corpus-attested before its number (`daqiiqaa 3 dura`)
@@ -203,7 +203,7 @@ export function normalizeOromo(input: string): string {
     //    NOT a clock: `qabxii 2:2` (a British degree classification, ×1) — the minutes must be TWO digits,
     //    which is what keeps that instance out. A third `.dd` field would be a sports time; none occur.
     //    a.m./p.m. → *ganama* / *galgala*, the corpus's own half-day words (`ganama keessaa 07:19`).
-    s = tr(s,
+    s = rewrite(s,
         /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)(?![\p{L}\p{M}]))?/gu,
         (m0, h: string, min: string, ap: string | undefined) => {
             const head = Number(min) === 0 ? String(Number(h)) : `${Number(h)} fi daqiiqaa ${Number(min)}`;
@@ -215,13 +215,13 @@ export function normalizeOromo(input: string): string {
     // 6) CLOCK, dot form before a TIMEZONE — `12.00 GMT`, `15.00 UTC` (×2). The dot is otherwise a
     //    decimal; the timezone after two-digit minutes is what marks it. BEFORE any decimal handling
     //    — times precede any rule that claims a bare number.
-    s = tr(s, /(?<![\d.,])(\d{1,2})\.([0-5]\d)(?![\d.])(?=\s*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,
+    s = rewrite(s, /(?<![\d.,])(\d{1,2})\.([0-5]\d)(?![\d.])(?=\s*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,
         (_m, h: string, min: string) =>
             Number(min) === 0 ? String(Number(h)) : `${Number(h)} fi daqiiqaa ${Number(min)}`);
 
     // 7) a.m./p.m. NOT attached to a clock — the corpus has none, but the marker is only ever readable as
     //    the half-day word, and leaving it spells `ˈa . m .` with two pauses.
-    s = tr(s, /(?<![\p{L}\p{M}])([Aa]\.[Mm]|[Pp]\.[Mm])\.?(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}])([Aa]\.[Mm]|[Pp]\.[Mm])\.?(?![\p{L}\p{M}])/gu,
         (m0) => (m0.toLowerCase().startsWith("p") ? "galgala" : "ganama"));
 
     // 8) VERSION DOT — `802.11n` (×1). A single letter glued after a dotted number is a designation, not
@@ -233,7 +233,7 @@ export function normalizeOromo(input: string): string {
     //    the corpus's detached enclitic (`2,207 n`), so rule 14b read the Wi-Fi standard's letter as a case
     //    suffix and said *tokkoon*. The tokenizer skips a hyphen (it matches only letters, digits and
     //    clause marks), so the reading is unchanged and the shape is no longer ambiguous.
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/gu,
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/gu,
         (_m, i: string, f: string) => `${i} ${POINT} ${[...f].join(" ")}-`);
 
     // 9) RANGES — 11 in the corpus, against 3 SCORES that must not be claimed. *hanga* ("up to") is
@@ -248,21 +248,21 @@ export function normalizeOromo(input: string): string {
     //     An ORDINAL range first of all — `jaarraa 10ffaa - 11ffaa` ("the 10th–11th century", ×1). The
     //     mined artifact's `ordinal-range` cell reports 0 for om and this instance is why that count is
     //     ⚠ not evidence of absence: without the rule the hyphen reads as a MINUS.
-    s = tr(s, /(?<![\d.,-])(\d+)ffaa\s*[-–]\s*(\d+)ffaa(?![\d.,-])/gu, "$1ffaa hanga $2ffaa");
-    s = tr(s, /(?<![\d.,-])(\d{4})\s?[-–]\s?(\d{2,4})(?![\d.,-])/gu, "$1 hanga $2");
-    s = tr(s, /(?<![\d.,-])(\d+)\s?[-–]\s?(\d+)(?![\d.,-])/gu,
+    s = rewrite(s, /(?<![\d.,-])(\d+)ffaa\s*[-–]\s*(\d+)ffaa(?![\d.,-])/gu, "$1ffaa hanga $2ffaa");
+    s = rewrite(s, /(?<![\d.,-])(\d{4})\s?[-–]\s?(\d{2,4})(?![\d.,-])/gu, "$1 hanga $2");
+    s = rewrite(s, /(?<![\d.,-])(\d+)\s?[-–]\s?(\d+)(?![\d.,-])/gu,
         (m0, a: string, b: string) => (Number(b) > Number(a) ? `${a} hanga ${b}` : m0));
 
     // 10) FRACTION — `inchii 1/5` (×1). Oromo puts the DENOMINATOR first with *keessaa* ("out of"),
     //     which the corpus writes ×106 in exactly that slot (`filannoof dhihaatan 17,000 keessaa`).
     //     Composed rather than tabulated on the one attested numerator, which is the Uzbek `3/4` defect
     //     : every numerator and denominator reads the same way here.
-    s = tr(s, /(?<![\d/.,])(\d{1,3})\/(\d{1,3})(?![\d/.,])/gu, "$2 keessaa $1");
+    s = rewrite(s, /(?<![\d/.,])(\d{1,3})\/(\d{1,3})(?![\d/.,])/gu, "$2 keessaa $1");
 
     // 11) DEGREES — `35°W` (×1), a longitude. *digirii* is corpus-attested
-    s = tr(s, /(\d+)\s?[°º]\s?([NSEW])(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(\d+)\s?[°º]\s?([NSEW])(?![\p{L}\p{M}])/gu,
         (_m, n: string, c: string) => `digirii ${n} ${COMPASS[c]!}`);
-    s = tr(s, /(\d+)\s?[°º]\s?[CF]?(?![\p{L}\p{M}])/gui, "digirii $1");
+    s = rewrite(s, /(\d+)\s?[°º]\s?[CF]?(?![\p{L}\p{M}])/gui, "digirii $1");
 
     // 12) UNITS — emitted BEFORE the number (fact 1), which is why they are not declared to the shared
     //     tier: it can only postpose them. The corpus writes the abbreviation on either side
@@ -281,13 +281,13 @@ export function normalizeOromo(input: string): string {
     //     reason and discovered the same way: by probing a `unitPrefix` language.
     //     ASCII `x` alongside `×`: `NxN` forms outnumber `×` roughly 85 to 20 across the corpora, and a bare
     //     `x` was reaching the phoneme stream as its own letter name.
-    s = tr(s, /(\d+)\s*(?:×|x)\s*(\d+)/gu, "$1 si’a $2");
+    s = rewrite(s, /(\d+)\s*(?:×|x)\s*(\d+)/gu, "$1 si’a $2");
 
     const units = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})\\s?/\\s?([hs])(?![\\p{L}\\p{M}])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})\\s?/\\s?([hs])(?![\\p{L}\\p{M}])`, "giu"),
         (_m, n: string, u: string, d: string) => `${PER[d.toLowerCase()]!} ${UNIT[u.toLowerCase()]!} ${n}`);
     //     (b) `sq mi` ×3 — *iskuweer* is the corpus's own transliteration (`iskuweer kiloometiiri`).
-    s = tr(s, /(?<![\p{L}\p{M}\d])(\d[\d.]*)\s?sq\s?mi(?![\p{L}\p{M}])/giu, "iskuweer maayilii $1");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d])(\d[\d.]*)\s?sq\s?mi(?![\p{L}\p{M}])/giu, "iskuweer maayilii $1");
     //     (b2) …and the SAME reading for `km²`, which is what the corpus's `iskuweer kiloometiiri 783,562`
     //         actually is: *iskuweer* leads, the unit noun follows, the number comes last. The shared tier
     //         now honours `unitPrefix` in its exponent branch, but Oromo's units are local precisely
@@ -296,12 +296,12 @@ export function normalizeOromo(input: string): string {
     //         superscript is an exponent (Hindi's wiki writes `km ²`) but a spaced ASCII `2` is the next
     //         NUMBER — `km 6,387` and `km 2-3` are both real forms in this corpus, so `km 2` must not
     //         become a square kilometre.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?:\\s?²|2)(?![\\p{L}\\p{M}\\d])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?:\\s?²|2)(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, n: string, u: string) => `iskuweer ${UNIT[u.toLowerCase()]!} ${n}`);
     //     (b3) …and CUBED, same shape as (b2). ⚠ THE SPELLING IS `kubiik`, NOT `kuubik` — probing the
     //         wrong vowel reports the word as absent and invites leaving `m³` unread. It appears in this
     //         language's own noun-first order: "iibame boba'aa kubiik metirii 120-160 of irraa qaba ture".
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?:\\s?³|3)(?![\\p{L}\\p{M}\\d])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?:\\s?³|3)(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, n: string, u: string) => `kubiik ${UNIT[u.toLowerCase()]!} ${n}`);
     //     (b4/b5) …and the SAME TWO POWERS IN THE UNIT-FIRST ORDER — `km² 100`, `m³ 12`. ⚠ THIS IS THE
     //         WORD ORDER THE WHOLE FILE EXISTS FOR (fact 1 in the header), and it was the one shape the
@@ -317,19 +317,19 @@ export function normalizeOromo(input: string): string {
     //         would otherwise claim the unit and orphan the power.
     //         The `(?:\s?²|2)` asymmetry is (b2)'s, unchanged and for its reason: a spaced ASCII `2` is
     //         the next NUMBER, so `km 2` stays six kilometres' neighbour and never becomes a square one.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(${units})(?:\\s?²|2)\\s?(?=\\d)`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(${units})(?:\\s?²|2)\\s?(?=\\d)`, "giu"),
         (_m, u: string) => `iskuweer ${UNIT[u.toLowerCase()]!} `);
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(${units})(?:\\s?³|3)\\s?(?=\\d)`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(${units})(?:\\s?³|3)\\s?(?=\\d)`, "giu"),
         (_m, u: string) => `kubiik ${UNIT[u.toLowerCase()]!} `);
     //     (c) the abbreviation BEFORE its number (`mm 5`, `km 6,387`) — and this must come BEFORE (d),
     //         which was found by the corpus's `mm 36 mm 24n` (a 36×24 mm negative): with (d) first, the
     //         SECOND `mm` was eaten as the postposed unit of `36`, and the first was left as the raw
     //         letters — i.e. read as the geminate [mː].
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(${units})\\s?(?=\\d)`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(${units})\\s?(?=\\d)`, "giu"),
         (_m, u: string) => `${UNIT[u.toLowerCase()]!} `);
     //     (d) the abbreviation AFTER its number (`35 mm`) — zero corpus instances in this order, but it
     //         is the adversarial neighbour of (c) and of the review's `1 km`/`5 km` probes.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?![\\p{L}\\p{M}’'ʼ])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?![\\p{L}\\p{M}’'ʼ])`, "giu"),
         (_m, n: string, u: string) => `${UNIT[u.toLowerCase()]!} ${n}`);
     //     (e) …and the abbreviation with NO NUMBER AT ALL — a caption, a header, or a figure whose numeral
     //         a bracket or an `&nbsp;` put out of reach of (c) and (d), which both require one. It reached
@@ -341,16 +341,16 @@ export function normalizeOromo(input: string): string {
     s = BARE_UNITS(s);
 
     // 13) MATH SIGNS.
-    s = tr(s, /(\d+)\s*<\s*(\d+)/gu, "$1 $2 caalaa xiqqaa");
-    s = tr(s, /(\d+)\s*>\s*(\d+)/gu, "$1 $2 caalaa guddaa");
+    s = rewrite(s, /(\d+)\s*<\s*(\d+)/gu, "$1 $2 caalaa xiqqaa");
+    s = rewrite(s, /(\d+)\s*>\s*(\d+)/gu, "$1 $2 caalaa guddaa");
     // (The multiplication signs — both `×` and ASCII `x` — are handled EARLIER, before the unit block; see
     //  the note there for why the ordering is forced.)
-    s = tr(s, /\s*=\s*/gu, " wal qixa ");
-    s = tr(s, /(?<![\p{L}\p{M}\d])\+\s?(?=\d)/gu, "ida’uu ");
+    s = rewrite(s, /\s*=\s*/gu, " wal qixa ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d])\+\s?(?=\d)/gu, "ida’uu ");
     //       The second lookbehind is variable-length and was added by the corpus diff: `10ffaa - 11ffaa`
     //       put a SPACE between the digits and the hyphen, so the plain "nothing precedes" guard let a
     //       range be read as a subtraction. A hyphen with a number anywhere before it is never a minus.
-    s = tr(s, /(?<![\p{L}\p{M}\d])(?<!\d\s{0,2})[-−]\s?(?=\d)/gu, "hir’isuu ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d])(?<!\d\s{0,2})[-−]\s?(?=\d)/gu, "hir’isuu ");
 
     return tidy(s);
 }
@@ -374,7 +374,7 @@ export function normalizeOromoNumerals(input: string): string {
     //     The apostrophe variants ’ ʼ ' all occur (`2010’tti`, `5’tti`) and are dropped: they are a
     //     hyphen-like separator here, not the glottal stop the g2p reads word-internally.
     //     A DECIMAL operand is handled too (`1.5tti` ×1) — it is why this runs before step 15.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+(?:\\.\\d+)?)[’'ʼ]?(ffaa[’'ʼ]?[a-z]{0,8}|${ENCLITIC})(?![\\p{L}\\p{M}\\d])`, "gu"),
         (m0, num: string, suf: string) => {
             const words = numeralWords(num).split(" ");
@@ -396,7 +396,7 @@ export function normalizeOromoNumerals(input: string): string {
     //      geminate [tːi], `f`/`n` alone a bare consonant. Detaching a bound postposition is a slip of the
     //      orthography, not a word boundary, so the space is not evidence of anything.
     //      ONE space, and no punctuation across it: a clause break really would end the numeral phrase.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+(?:\\.\\d+)?)[’'ʼ]? (${ENCLITIC_SPACED})(?![\\p{L}\\p{M}\\d])`, "gu"),
         (m0, num: string, suf: string) => {
             const words = numeralWords(num).split(" ");
@@ -410,7 +410,7 @@ export function normalizeOromoNumerals(input: string): string {
     //      front of it and the rule above cannot see it. Same regular morphology as every numeral above
     //      (vowel-final stem, short link) — the MORPHOLOGY is corpus-attested, this particular output form
     //      is not, which is the honest statement of what is claimed here.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(ganama|galgala) (${ENCLITIC_SPACED})(?![\\p{L}\\p{M}\\d])`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(ganama|galgala) (${ENCLITIC_SPACED})(?![\\p{L}\\p{M}\\d])`, "gu"),
         (_m, w: string, suf: string) => attachEnclitic(w, suf));
 
     // 15) DECIMAL POINT — 14 instances (`miliyoona 2.3`, `inchii 6.34`, `sa’aatii 1.5`). The fraction is
@@ -419,7 +419,7 @@ export function normalizeOromoNumerals(input: string): string {
     //     (both consume a dot that is not a decimal) and after step 14 (which claims a suffixed decimal).
     //     A comma-decimal has ZERO corpus instances — Oromo follows the English convention here — but is
     //     claimed too, so that a stray one cannot leak the comma as a clause pause.
-    s = tr(s, /(?<![\d.,])(\d+)[.,](\d+)(?!\d)/gu,
+    s = rewrite(s, /(?<![\d.,])(\d+)[.,](\d+)(?!\d)/gu,
         (_m, i: string, f: string) => `${i} ${POINT} ${[...f].join(" ")}`);
 
     return tidy(s);
@@ -428,5 +428,5 @@ export function normalizeOromoNumerals(input: string): string {
 /** A padded replacement doubles a space that was already there and can leave one at an edge; SLOT-GAP is
  *  a defect class, and this pass must not feed it. */
 function tidy(s: string): string {
-    return s.replace(/[^\S\n]{2,}/gu, " ").replace(/^[^\S\n]+|[^\S\n]+$/gu, "");
+    return rewrite(rewrite(s, /[^\S\n]{2,}/gu, " "), /^[^\S\n]+|[^\S\n]+$/gu, "");
 }

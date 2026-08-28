@@ -114,7 +114,7 @@
  * engine's own number path speak them. Recorded so the measurement is re-runnable in one grep.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** ⚠ THE UNIT NOUN COMES BEFORE THE NUMBER IN BAMBARA, which is why units are local and not the shared
  *  tier's — `normalizeSymbols` can only POSTPOSE (playbook §47 reason 2, the Oromo case). Measured over the
@@ -238,7 +238,7 @@ const ELISION = /(?<![\p{L}\p{M}])([bcdfghjklmnprstwyzɲŋ])['’ʼ]([aeɛiɔou]
 function expandDotted(s: string, body: string, word: string): string {
     const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");  // space, NBSP
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
-    return s.replace(atEnd, `${word}.`).replace(inline, word);
+    return rewrite(rewrite(s, atEnd, `${word}.`), inline, word);
 }
 
 /**
@@ -300,18 +300,18 @@ export function normalizeBambara(input: string): string {
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, first — a dump carries `&nbsp;` and `&#…;` and both must go
     //    BEFORE the ampersand rule at step 12, or `&nbsp;` is read as the word "and" followed by the
     //    letters n-b-s-p. The artifact's `zero-width` cell is ×2; a rendering hint is not speech.
-    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍⁠﻿]/gu, "");
+    s = rewrite(rewrite(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍⁠﻿]/gu, "");
 
     // 2b) HOMOGLYPHS FOR ɛ ɔ ɲ — see HOMOGLYPH. Immediately after NFC and the entity strip, and before ANY
     //     rule that inspects a letter: the ELISION rule at step 3 has ⟨ɛ ɔ⟩ in its vowel class and the unit
     //     and range rules read letter boundaries, so a word still carrying a Greek epsilon is invisible to
     //     all of them in the same way it is invisible to the tokenizer.
-    s = tr(s, HOMOGLYPH_RE, (c) => HOMOGLYPH[c]!);
+    s = rewrite(s, HOMOGLYPH_RE, (c) => HOMOGLYPH[c]!);
 
     // 3) THE ELISION APOSTROPHE — see ELISION. Placed here because it is orthographic rather than numeric
     //    and touches no character any later rule inspects, and BEFORE step 4 so that a name like `d'A.R.P.`
     //    cannot present the dotted rule with a stray consonant token. ×1218.
-    s = tr(s, ELISION, "$1$2");
+    s = rewrite(s, ELISION, "$1$2");
 
     // 4) ERA MARKER, then DOTTED INITIALISMS — before anything can read an interior dot as a phrase break,
     //    and before step 6, which is the other rule in this file that looks at dots. (In practice they
@@ -339,7 +339,7 @@ export function normalizeBambara(input: string): string {
     //    (the ones after the first are rejected by the lookbehind as well), so the line is untouched.
     //    ⚠ THE FINAL DOT SURVIVES WHEN THE SENTENCE ENDS. Same argument as `expandDotted`: `U.S.A. Awa
     //    katti` keeps its period, `A.R.P. bangera` does not.
-    s = tr(s, /(?<![\p{L}\p{M}.])((?:\p{L}\.){2,4})(?!\p{L}\.)(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}.])((?:\p{L}\.){2,4})(?!\p{L}\.)(?![\p{L}\p{M}])/gu,
         (whole: string, _g: string, off: number, all: string) => {
             const body = whole.replace(/\./gu, "");
             const rest = all.slice(off + whole.length);
@@ -351,7 +351,7 @@ export function normalizeBambara(input: string): string {
     //    kɔnɔntɔn ni biwolonwula ni segin, bisegin ni naani, …*) — a catalogue number spoken as
     //    arithmetic. ⚠ MUST PRECEDE THE RANGE RULE. RANGE's chain guard already rejects these, but claiming
     //    the identifier whole removes the question rather than resting it on one lookahead.
-    s = tr(s, /(?<![\p{L}\p{M}])(ISBN(?:[- ]1[03])?)\s*:?\s*(\d[\d– -]*[\dXx])/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}])(ISBN(?:[- ]1[03])?)\s*:?\s*(\d[\d– -]*[\dXx])/gu,
         (_m, tag: string, body: string) => `${tag} ${[...body.replace(/[– -]/gu, "")].join(" ")}`);
 
     // 6) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause
@@ -372,12 +372,12 @@ export function normalizeBambara(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma, which would split off the last
     //    group and speak it as zero.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => rewrite(w, /,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a list.
     //    Requiring every group to be exactly three digits does that: `san ba 2 fo 3` has no 3-digit group,
     //    and `tle 26 san 2008` is not `\d{1,3}( \d{3})+` because 2008 is four.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 7) UNITS, before decimals — the number-unit adjacency a unit rule matches on is destroyed the moment
     //    a decimal is rewritten into spaced digits (playbook step 4's standing coupling), and after
@@ -403,14 +403,14 @@ export function normalizeBambara(input: string): string {
     //    (`yaada 1–4 (mɛtɛrɛ 1–4)`).
     for (const [sym, word] of UNITS) {
         const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`, "giu"),
             (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${word} ${a} fo ${b}` : whole),
         );
         // ⚠ AND THE SINGLE-OPERAND ARM MUST REFUSE A SPAN'S SECOND HALF, which is the defect above stated
         // as a guard: a descending or chained span the arm just declined must reach RANGE whole, not with
         // its tail already rewritten.
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)(\\s+(?:${MAG}))?\\s?${key}`
                 + `(?![\\p{L}\\p{M}\\d²³/])`,
@@ -427,7 +427,7 @@ export function normalizeBambara(input: string): string {
     //    digits, since once step 9 has inserted `kɛmɛsarada` between them there is no pair left to match.
     //    After de-grouping, so a grouped endpoint is one token. See RANGE for the guards and for why
     //    non-ascending pairs are deliberately left alone.
-    s = tr(s, RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} fo ${b}` : whole));
+    s = rewrite(s, RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} fo ${b}` : whole));
 
     // 9) PERCENT — ×45, and the sourcing is the corpus glossing its own symbol, five separate sentences in
     //    four articles: `40% (binani kɛmɛsara)`, `90% (bikɔnɔtɔn kɛmɛ sarada)`, `40% (biinaani
@@ -455,7 +455,7 @@ export function normalizeBambara(input: string): string {
     //    token where the text has two. Trap 18/26 in a replacement rather than in a probe, and it applies to
     //    the redundant branch too, where the figure itself would otherwise fuse with the next word.
     const PCT_NAMED = new RegExp(`(?:kɛmɛ ?sarada?)(?:\\s+(?:${MAG}))?\\s*$`, "iu");
-    s = tr(s, /(\d+(?:[.,]\d+)?(?:\s\p{L}+)?)\s?%/gu, (whole: string, n: string, off: number, all: string) => {
+    s = rewrite(s, /(\d+(?:[.,]\d+)?(?:\s\p{L}+)?)\s?%/gu, (whole: string, n: string, off: number, all: string) => {
         const next = all[off + whole.length];
         const gap = next !== undefined && /[\p{L}\p{M}\p{Nd}]/u.test(next) ? " " : "";
         return PCT_NAMED.test(all.slice(0, off)) ? `${n}${gap}` : `${n} kɛmɛsarada${gap}`;
@@ -475,7 +475,7 @@ export function normalizeBambara(input: string): string {
     //     attested anywhere; declaring one would be invention of exactly the kind the Fula `tere` lesson
     //     forbids.
     const CUR_NAMED = new RegExp(`(?:dolar|dollars?|wari)(?:\\s+(?:${MAG}|wari))*\\s*$`, "iu");
-    s = tr(s, /(?<![\p{L}\p{M}])(US\s?)?\$\s?(\d)/giu,
+    s = rewrite(s, /(?<![\p{L}\p{M}])(US\s?)?\$\s?(\d)/giu,
         (_m: string, us: string | undefined, d: string, off: number, all: string) =>
             // ⚠ THE CODE KEEPS ITS BOUNDARY. `US$` writes the code hard against the sign, so re-emitting the
             // capture verbatim welded it to whatever followed — `US$ 1.25` read *usdolar kelẽ fila duuru*,
@@ -491,7 +491,7 @@ export function normalizeBambara(input: string): string {
     //     half, a dotted DATE (`2013.07.29`, which the mined artifact carries from a reference list) would
     //     have its first field claimed and its second left as a pause; without the letter half, a dotted
     //     designation (`802.11a`) would be. Both are the same one-character fix and both are cheap.
-    s = tr(s, /(?<![\d.,])(\d+)[.,](\d+)(?![\d.,\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
+    s = rewrite(s, /(?<![\d.,])(\d+)[.,](\d+)(?![\d.,\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
         `${int} ${[...frac].join(" ")}`);
 
     // 12) THE AMPERSAND — ×6, and every instance is a bibliographic or corporate "and" between two names
@@ -500,7 +500,7 @@ export function normalizeBambara(input: string): string {
     //     sourcing argument at all.
     //     ⚠ SPACED ON BOTH SIDES DELIBERATELY. `A&B` deletes to `AB`, which is ONE token instead of two —
     //     trap 18/26 — so the replacement must insert the boundary the sign was supplying.
-    s = tr(s, /\s?&\s?/gu, " ani ");
+    s = rewrite(s, /\s?&\s?/gu, " ani ");
 
     return s;
 }

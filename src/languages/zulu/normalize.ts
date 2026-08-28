@@ -26,7 +26,7 @@
  * [skǃ mˈiː]. That is why the degree, era and `sq mi` rules exist at all — the alternative is not silence.
  */
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Metric / imperial unit words, all the same `ama-` + borrowed-stem frame. */
 const UNIT_WORD: Record<string, string> = {
@@ -60,7 +60,7 @@ const BCE_WORD = "ngaphambi kukaKristu";
 function expandDotted(s: string, body: string, word: string): string {
     const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");  // space, NBSP
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
-    return s.replace(atEnd, `${word}.`).replace(inline, word);
+    return rewrite(rewrite(s, atEnd, `${word}.`), inline, word);
 }
 
 /** A clock's spoken body. ⚠ The hour NOUN is never added: a colon clock is already introduced by
@@ -128,7 +128,7 @@ function spellNguniInitialisms(s: string): string {
     // ⚠ `$` in the trailing guard: `US$`/`AUD$` are MULTI-CHARACTER CURRENCY KEYS owned by the ENGINE
     // tier (zulu.ts/xhosa.ts), not by this pass. Spelling `US` here strips the tier's key and the
     // amount loses its "amadola" — which is exactly what happened before this guard.
-    return s.replace(/(?<![\p{Lu}\p{M}\d])[A-Z]{2,6}(?![\p{L}\p{M}\d$])/gu, (run) =>
+    return rewrite(s, /(?<![\p{Lu}\p{M}\d])[A-Z]{2,6}(?![\p{L}\p{M}\d$])/gu, (run) =>
         WORD_ACRONYMS.has(run.toLowerCase()) ? run : [...run].map((c) => NGUNI_LETTER_NAME[c] ?? c).join(" "));
 }
 
@@ -137,27 +137,27 @@ export function normalizeZulu(input: string): string {
 
     // 1) HTML ENTITY, first — `amaB&amp;B` carries the escape verbatim. Folded to a bare `&` so step 2 has
     //    one shape to read.
-    s = tr(s, /&amp;/giu, "&");
+    s = rewrite(s, /&amp;/giu, "&");
 
     // 2) AMPERSAND → `kanye ne-` ("and the"), the form used before a hyphenated foreign token. The
     //    surrounding spaces are absorbed so the glued and spaced spellings both give `X kanye ne-Y`.
-    s = tr(s, /\s*&\s*/gu, " kanye ne-");
+    s = rewrite(s, /\s*&\s*/gu, " kanye ne-");
 
     // 3) ERA MARKERS, before the generic dotted-run rule below (else `B.C.` is flattened to `BC` first and
     //    the number guard has to carry it). Bare `BC` must follow a NUMBER, because two bare capitals are
     //    otherwise an ordinary initialism; `BCE` needs no such guard.
     s = expandDotted(s, "B\\.C\\.E", BCE_WORD);
     s = expandDotted(s, "B\\.C", BCE_WORD);
-    s = tr(s, /(?<![\p{L}\p{M}])BCE(?![\p{L}\p{M}])/gu, BCE_WORD);
-    s = tr(s, /(?<=\d[ \u00a0])BC(?![\p{L}\p{M}])/gu, BCE_WORD);  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])BCE(?![\p{L}\p{M}])/gu, BCE_WORD);
+    s = rewrite(s, /(?<=\d[ \u00a0])BC(?![\p{L}\p{M}])/gu, BCE_WORD);  // space, NBSP
 
     // 4) DOTTED CAPITAL RUNS and a LONE INITIAL — `U.S.` read [ˈuː . s .], two spurious phrase breaks inside
     //    one token. The interior dots are abbreviation dots, not clause marks, so they go; the letters stay
     //    as they were, since no letter-name reading is available for Zulu.
     //    The lone-initial arm (`uJoji W. Hlathi`) risks eating a sentence-final period before a new capital,
     //    which is why it requires a letter and a space immediately before the initial.
-    s = tr(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
-    s = tr(s, /(?<=\p{L}[ \u00a0])(\p{Lu})\.(?=[ \u00a0]+\p{Lu})/gu, "$1");  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<=\p{L}[ \u00a0])(\p{Lu})\.(?=[ \u00a0]+\p{Lu})/gu, "$1");  // space, NBSP
 
     // 5) THOUSANDS DE-GROUPING, before anything else numeric: the grouping comma reads as CLAUSE
     //    PUNCTUATION and the tail as a separate number — `1,000` came out *kunye , iqanda* ("one, egg").
@@ -169,24 +169,24 @@ export function normalizeZulu(input: string): string {
     //    futhi` and `nangu-2,207.` stay broken while `angu-17,500 ngehora` is fixed. `(?!\d)` is safe
     //    because the block size is EXACTLY three: a comma-decimal is 1–2 digits and can never match, and
     //    `1,000.5` de-groups and reaches the decimal rule intact instead of being skipped.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(,\d{3})+(?!\d)/gu, (whole) => whole.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(,\d{3})+(?!\d)/gu, (whole) => whole.replace(/,/gu, ""));
     //    SPACE GROUPING too (`ku- 100 000 abantu`) — read as two numbers, *ikhulu iqanda*. Blocks of EXACTLY
     //    three digits only, the same discipline the shared tier states for its own `NUM`: without it `30 9`
     //    would fuse two unrelated numbers.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})([ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (whole) => whole.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})([ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (whole) => rewrite(whole, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5b) SPORTS TIMES — `4:41.30`, racing paces. NOT clocks, and the clock rule below correctly refuses
     //     them (a third `.dd` field) — but refusing is not enough: the colon then survives as a CLAUSE PAUSE
     //     inside the pace and the decimal rule splits `.30` into "three zero". Read as three plain fields,
     //     the way a pace is said. BEFORE the clock rule, so the colon is gone before anything looks for a
     //     time.
-    s = tr(s, /(?<![\d:.,])(\d{1,2}):([0-5]\d)\.(\d{2})(?![\d.])/gu, "$1 $2 $3");
+    s = rewrite(s, /(?<![\d:.,])(\d{1,2}):([0-5]\d)\.(\d{2})(?![\d.])/gu, "$1 $2 $3");
 
     // 6) CLOCK, colon form. The colon reaches `clausePunctuation` and splits every time in two. `10: 08`
     //    puts a SPACE after the colon, so `:\s?` is required. NOT a sports time: a third `.dd` field is a
     //    pace, excluded by the trailing `(?![:.\d])`. BEFORE the decimal rules, which would otherwise claim
     //    the `11.60` tail of a sports time, and before the range rule.
-    s = tr(s,
+    s = rewrite(s,
         /(?<![\d:.,])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![:.\d])(?:[ \u00a0]*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)(?![\p{L}\p{M}]))?/gu,  // space, NBSP
         (_m, h: string, min: string, ap: string | undefined) => `${clockBody(h, min)}${halfDay(ap)}`);
 
@@ -194,14 +194,14 @@ export function normalizeZulu(input: string): string {
     //    (dot) and `(0230 UTC)` (bare four digits, marked by the leading zero). The separator is otherwise a
     //    decimal or a grouping mark; the timezone after two-digit minutes is what identifies a clock. AFTER
     //    the colon clock, BEFORE every decimal rule.
-    s = tr(s, /(?<![\d.,])(\d{1,2})[.,]([0-5]\d)(?=[ \u00a0]*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,  // space, NBSP
+    s = rewrite(s, /(?<![\d.,])(\d{1,2})[.,]([0-5]\d)(?=[ \u00a0]*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,  // space, NBSP
         (_m, h: string, min: string) => clockBody(h, min));
-    s = tr(s, /(?<![\d.,])(0\d)([0-5]\d)(?=[ \u00a0]*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,  // space, NBSP
+    s = rewrite(s, /(?<![\d.,])(0\d)([0-5]\d)(?=[ \u00a0]*(?:UTC|GMT)(?![\p{L}\p{M}]))/gu,  // space, NBSP
         (_m, h: string, min: string) => clockBody(h, min));
 
     // 8) a.m./p.m. NOT attached to a clock. The marker is only ever readable as the half-day word; leaving
     //    it spells [pʼ . m .], two pauses and a bare consonant.
-    s = tr(s, /(?<![\p{L}\p{M}])([Aa]\.[Mm]|[Pp]\.[Mm])\.?(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}])([Aa]\.[Mm]|[Pp]\.[Mm])\.?(?![\p{L}\p{M}])/gu,
         (m0) => halfDay(m0).trim());
 
     // 8c) THE PLUS AND ±, claimed HERE rather than with the other signs at step 14b — ⚠ THE ORDERING IS
@@ -220,8 +220,8 @@ export function normalizeZulu(input: string): string {
     //     ⚠ ± IS NOT FREE FOR zu's SISTER xh, which is otherwise nearly identical here: xh's minus word is
     //     `thabatha`, the VERB "subtract", so juxtaposing would read "plus subtract" — an operation where
     //     the sign marks a tolerance.
-    s = tr(s, /±/gu, " plas o mayinas ");
-    s = tr(s, /[ \u00a0]?\+[ \u00a0]?(?=\d)/gu, " plas ");  // space, NBSP
+    s = rewrite(s, /±/gu, " plas o mayinas ");
+    s = rewrite(s, /[ \u00a0]?\+[ \u00a0]?(?=\d)/gu, " plas ");  // space, NBSP
 
     // 9) DEGREES. `°` was dropped and the scale letter read as a CLICK: `+30°C` → [… kǀ], `35°W` → [… w].
     //    `amazinga` is the degree word and the concord `angu-` agrees with it — a class-6 noun THIS rule
@@ -240,14 +240,14 @@ export function normalizeZulu(input: string): string {
         /amazinga[^.!?;]*$/u.test(before);
     const deg = (whole: string, digits: string, tail: string, offset: number, full: string): string =>
         `${saidDegrees(full.slice(0, offset)) ? "" : "amazinga angu-"}${digits}${tail}`;
-    s = tr(s, /(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?C(?![\p{L}\p{M}])/gui,  // space, NBSP
+    s = rewrite(s, /(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?C(?![\p{L}\p{M}])/gui,  // space, NBSP
         (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
-    s = tr(s, /(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?F(?![\p{L}\p{M}])/gui,  // space, NBSP
+    s = rewrite(s, /(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?F(?![\p{L}\p{M}])/gui,  // space, NBSP
         (m0, d: string, off: number, full: string) => deg(m0, d, " Fahrenheit", off, full));
-    s = tr(s, /(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
+    s = rewrite(s, /(\d[\d.,]*)[ \u00a0]?[°º][ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
         (m0, d: string, c: string, off: number, full: string) =>
             deg(m0, d, ` ${COMPASS[c.toUpperCase()]!}`, off, full));
-    s = tr(s, /(\d[\d.,]*)[ \u00a0]?[°º]/gu,  // space, NBSP
+    s = rewrite(s, /(\d[\d.,]*)[ \u00a0]?[°º]/gu,  // space, NBSP
         (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
 
     // 10) RANGES → `kuya ku-` ("going to"). The `ku-` is class-17 locative and INVARIANT, which is exactly
@@ -266,8 +266,8 @@ export function normalizeZulu(input: string): string {
     //     ⚠ A DECIMAL range is joined in EITHER direction, unlike an integer one. The ascending-only guard
     //     exists to keep scores and seasons out, and neither is ever written with a decimal point — so a
     //     DESCENDING decimal span (`ezingu-4.2-3.9 edlule`, "4.2 to 3.9 million years ago") is genuine.
-    s = tr(s, /(?<![\d.,])(\d+\.\d+)[ \u00a0]*[-–—][ \u00a0]*(\d+\.\d+)(?![\d.,])/gu, "$1 kuya ku-$2");  // space, NBSP
-    s = tr(s, /(?<![\d.,])(\d[\d,]*\d|\d)[ \u00a0]*[-–—][ \u00a0]*(\d[\d,]*\d|\d)(?![\d.,])/gu, span);  // space, NBSP
+    s = rewrite(s, /(?<![\d.,])(\d+\.\d+)[ \u00a0]*[-–—][ \u00a0]*(\d+\.\d+)(?![\d.,])/gu, "$1 kuya ku-$2");  // space, NBSP
+    s = rewrite(s, /(?<![\d.,])(\d[\d,]*\d|\d)[ \u00a0]*[-–—][ \u00a0]*(\d[\d,]*\d|\d)(?![\d.,])/gu, span);  // space, NBSP
 
     // 11) RATE, LOCAL and not the shared tier's. Zulu's rate is a SINGLE agglutinated word — nga- + ihora →
     //     `ngehora` — while `makeSymbolNormalizer` emits a rate as four tokens (`num head per denominator`)
@@ -278,16 +278,16 @@ export function normalizeZulu(input: string): string {
     //     nothing for an unguarded match to break.
     //     BEFORE the decimal rules (the rate operands are all integers) and before the tier, which would
     //     otherwise claim `km` and strand `/h` as the letter H.
-    s = tr(s, /(?<!\d)(\d[\d.,]*)[ \u00a0]?(km|mi|m|mm|cm|kg)[ \u00a0]*\/[ \u00a0]*([hs])(?![\p{L}\p{M}])/giu,  // space, NBSP
+    s = rewrite(s, /(?<!\d)(\d[\d.,]*)[ \u00a0]?(km|mi|m|mm|cm|kg)[ \u00a0]*\/[ \u00a0]*([hs])(?![\p{L}\p{M}])/giu,  // space, NBSP
         (_m, n: string, u: string, d: string) => `${n} ${UNIT_WORD[u.toLowerCase()]!} ${PER[d.toLowerCase()]!}`);
-    s = tr(s, /(?<![\p{L}\p{M}])mph(?![\p{L}\p{M}])/giu, `${UNIT_WORD["mi"]!} ${PER["h"]!}`);
-    s = tr(s, /(?<![\p{L}\p{M}])kph(?![\p{L}\p{M}])/giu, `${UNIT_WORD["km"]!} ${PER["h"]!}`);
+    s = rewrite(s, /(?<![\p{L}\p{M}])mph(?![\p{L}\p{M}])/giu, `${UNIT_WORD["mi"]!} ${PER["h"]!}`);
+    s = rewrite(s, /(?<![\p{L}\p{M}])kph(?![\p{L}\p{M}])/giu, `${UNIT_WORD["km"]!} ${PER["h"]!}`);
 
     // 12) SQUARE MILES — `300,948 sq mi`, where `sq` read as [skǃ], a click. Postposed, matching the way the
     //     metric equivalent is written out (`amakhilomitha skwele angu-783,562`). A plain `km²` needs no
     //     rule here — the shared tier's `exponentWords` produces the same order — but a squared unit sitting
     //     on a DECIMAL does, and step 13 claims it.
-    s = tr(s, /(\d[\d.,]*)[ \u00a0]?sq[ \u00a0]?mi(?![\p{L}\p{M}])/giu, `$1 ${UNIT_WORD["mi"]!} skwele`);  // space, NBSP
+    s = rewrite(s, /(\d[\d.,]*)[ \u00a0]?sq[ \u00a0]?mi(?![\p{L}\p{M}])/giu, `$1 ${UNIT_WORD["mi"]!} skwele`);  // space, NBSP
 
     // 12b) `kma`, THE CORPUS'S OWN MISSPELLING OF km (`ongama-1600 kma kusuka`). ⚠ THE TABLE ENTRY ABOVE
     //      EXISTED WITHOUT A RULE THAT REACHED IT: every unit pattern in this file spells `km`, and the
@@ -297,29 +297,29 @@ export function normalizeZulu(input: string): string {
     //      A NUMBER IS REQUIRED, unlike `mph`/`kph`: those two are never Zulu words, while `kma` is a
     //      misspelling and an unguarded match would have nothing to distinguish it from one.
     //      BEFORE the decimal rules, so `1600.5 kma` still splits its decimal at step 13.
-    s = tr(s, /(?<!\d)(\d[\d.,]*)[ \u00a0]?kma(?![\p{L}\p{M}])/giu, `$1 ${UNIT_WORD["kma"]!}`);  // space, NBSP
+    s = rewrite(s, /(?<!\d)(\d[\d.,]*)[ \u00a0]?kma(?![\p{L}\p{M}])/giu, `$1 ${UNIT_WORD["kma"]!}`);  // space, NBSP
 
     // 13) DECIMALS. The currency and unit arms come first because this rewrite is the one that destroys
     //     number↔symbol adjacency, so it has to claim its own neighbours before the tier could.
     const dec = (i: string, f: string): string =>
         [i, ...f.replace(/0+$/u, "")].filter((t) => t !== "").join(" ");
-    s = tr(s, /(?<![\p{L}\p{M}])(?:US\$|AUD\$|\$|£)[ \u00a0]?(\d+)\.(\d+)(?!\.?\d)/gu,  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])(?:US\$|AUD\$|\$|£)[ \u00a0]?(\d+)\.(\d+)(?!\.?\d)/gu,  // space, NBSP
         (_m, i: string, f: string) => `${dec(i, f)} amadola`);
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)[ \u00a0]?(km|mi|mm|cm|kg|ft|m)([²2])?(?![\p{L}\p{M}'’])/giu,  // space, NBSP
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)[ \u00a0]?(km|mi|mm|cm|kg|ft|m)([²2])?(?![\p{L}\p{M}'’])/giu,  // space, NBSP
         (_m, i: string, f: string, u: string, exp: string | undefined) =>
             `${dec(i, f)} ${UNIT_WORD[u.toLowerCase()]!}${exp === undefined ? "" : " skwele"}`);
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?!\.?\d)/gu, (_m, i: string, f: string) => dec(i, f));
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?!\.?\d)/gu, (_m, i: string, f: string) => dec(i, f));
 
     // 13b) COMMA-DECIMAL — Zulu writes both separators. A comma before a THREE-digit group is thousands and
     //      was already de-grouped at step 5, so this claims only a 1–2 digit fraction and cannot swallow a
     //      grouping comma. Without it the comma leaks as a clause pause inside the number.
-    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => dec(i, f));
+    s = rewrite(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => dec(i, f));
 
     // 14) FRACTION — `1/5` read "one five" before. ⚠ NUMERATOR 1 ONLY, and deliberately: "three fifths" is
     //     *izingxenye ezintathu kwezinhlanu*, whose numerator carries a class-8 concord that would have to
     //     be applied to the digits. An unclaimed `3/5` keeps the bare juxtaposition it has today, which is
     //     not confidently wrong. AFTER the decimals, so a date-like `1.5/2` cannot reach here half-rewritten.
-    s = tr(s, /(?<![\d/.,])1[ \u00a0]?\/[ \u00a0]?(\d{1,2})(?![\d/.,])/gu, (m0, d: string) => {  // space, NBSP
+    s = rewrite(s, /(?<![\d/.,])1[ \u00a0]?\/[ \u00a0]?(\d{1,2})(?![\d/.,])/gu, (m0, d: string) => {  // space, NBSP
         const ord = ORDINAL_YE[Number(d)];
         return ord === undefined ? m0 : `ingxenye ${ord}`;
     });
@@ -336,24 +336,24 @@ export function normalizeZulu(input: string): string {
     //      ⚠ THE MINUS CARRIES A SECOND LOOKBEHIND rejecting a digit plus a space. Without it the rugby
     //      score `26 -00` reads *ukukhipha iqanda* ("subtract zero"); the range rule has already claimed
     //      the other `-\d` shape at step 10.
-    s = tr(s, /[ \u00a0]?×[ \u00a0]?/gu, " kuphindwe ngo-");  // space, NBSP
-    s = tr(s, /[ \u00a0]?=[ \u00a0]?/gu, " kulingana no-");  // space, NBSP
-    s = tr(s, /[ \u00a0]?<[ \u00a0]?/gu, " ngaphansi kuka-");  // space, NBSP
-    s = tr(s, /[ \u00a0]?>[ \u00a0]?/gu, " ngaphezu kuka-");  // space, NBSP
+    s = rewrite(s, /[ \u00a0]?×[ \u00a0]?/gu, " kuphindwe ngo-");  // space, NBSP
+    s = rewrite(s, /[ \u00a0]?=[ \u00a0]?/gu, " kulingana no-");  // space, NBSP
+    s = rewrite(s, /[ \u00a0]?<[ \u00a0]?/gu, " ngaphansi kuka-");  // space, NBSP
+    s = rewrite(s, /[ \u00a0]?>[ \u00a0]?/gu, " ngaphezu kuka-");  // space, NBSP
     // ⚠ THE PLUS IS NOT CLAIMED HERE — step 8c takes it, before the degree rule. An arm here would be
     // unreachable, so there is deliberately none. See step 8c.
-    s = tr(s, /(?<![\p{L}\p{Nd}])(?<![\p{L}\p{Nd}][ \u00a0])[-−](?=\d)/gu, "ukukhipha ");  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{Nd}])(?<![\p{L}\p{Nd}][ \u00a0])[-−](?=\d)/gu, "ukukhipha ");  // space, NBSP
 
     // 15) A SPACED DASH is a parenthetical break and was DROPPED ENTIRELY, taking the clause boundary with
     //     it (`ilunga - bona Umfanekiso`). LAST, so step 10 has already claimed every dash sitting between
     //     two numbers: the rugby score `26 -00` must keep its bare juxtaposition rather than gain a
     //     spurious pause.
-    s = tr(s, /(?<!\d)[ \u00a0]+[-–—]+[ \u00a0]+(?!\d)/gu, ", ");  // space, NBSP
+    s = rewrite(s, /(?<!\d)[ \u00a0]+[-–—]+[ \u00a0]+(?!\d)/gu, ", ");  // space, NBSP
     // `njl.` / `njll.` is *njalonjalo* ("et cetera") — corpus: `izinto zokuthutha, njll.`, previously
     // the cluster [ɲd͡ʒ̤l] plus a leaked break. Dot optional: FLEURS strips it.
-    s = tr(s, /(?<![\p{L}\p{M}])njll?\.?(?![\p{L}\p{M}])/giu, "njalonjalo");
+    s = rewrite(s, /(?<![\p{L}\p{M}])njll?\.?(?![\p{L}\p{M}])/giu, "njalonjalo");
     // `udkt.` is *udokotela* (Doctor) — corpus: `KwaZulu-Natal. udkt …`, previously [ˈuːd̤kʼtʼ].
-    s = tr(s, /(?<![\p{L}\p{M}])u?dkt\.?(?![\p{L}\p{M}])/giu, "udokotela");
+    s = rewrite(s, /(?<![\p{L}\p{M}])u?dkt\.?(?![\p{L}\p{M}])/giu, "udokotela");
 
     // INITIALISMS LAST. Every rule above owns capitals of its own — `US$`, `°C`, `B.C.`, `sq mi` — and
     // spelling them out first would take those away, which is exactly what happened when this ran early.

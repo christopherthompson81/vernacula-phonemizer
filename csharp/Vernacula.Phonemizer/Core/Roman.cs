@@ -4,6 +4,7 @@
  * Ported from src/core/roman.ts — see that file for the corpus evidence.
  */
 
+using static Vernacula.Phonemizer.Core.Rewriter;
 namespace Vernacula.Phonemizer.Core;
 
 public sealed class RomanPolicy
@@ -109,7 +110,7 @@ public static class Roman
         policy ??= new RomanPolicy();
         if (!RomanLetterRe.IsMatch(text)) return text;
         var hasLower = LowercaseRe.IsMatch(text);
-        return TOKEN.Replace(text, m =>
+        return Rewrite(text, TOKEN, m =>
         {
             var tok = m.Value;
             var offset = m.Index;

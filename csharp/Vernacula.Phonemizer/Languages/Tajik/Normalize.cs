@@ -4,6 +4,7 @@
  * Ported from src/languages/tajik/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Tajik;
 
@@ -121,59 +122,59 @@ public static class Normalize
     {
         var s = input;
 
-        s = JsRegex.Replace(JsRegex.Replace(s, SOFT_HYPHEN, _ => ""), NBSP_ENTITY, _ => " ");
+        s = Rewrite(Rewrite(s, SOFT_HYPHEN, _ => ""), NBSP_ENTITY, _ => " ");
 
-        s = GROUP_SPACE.Replace(s, "");
+        s = Rewrite(s, GROUP_SPACE, "");
 
-        s = JsRegex.Replace(s, SOLI, _ => "соли ");
-        s = JsRegex.Replace(s, DIGAR, _ => "дигар");
-        s = JsRegex.Replace(s, GHAYRA, _ => "ғайра");
-        s = JsRegex.Replace(s, MLRD_DOT, _ => "миллиард");
-        s = JsRegex.Replace(s, MLN_DOT, _ => "миллион");
-        s = JsRegex.Replace(s, HAZ_DOT, _ => "ҳазор");
-        s = JsRegex.Replace(s, MLRD, _ => "миллиард");
-        s = JsRegex.Replace(s, MLN, _ => "миллион");
-        s = JsRegex.Replace(s, HAZ, _ => "ҳазор");
+        s = Rewrite(s, SOLI, _ => "соли ");
+        s = Rewrite(s, DIGAR, _ => "дигар");
+        s = Rewrite(s, GHAYRA, _ => "ғайра");
+        s = Rewrite(s, MLRD_DOT, _ => "миллиард");
+        s = Rewrite(s, MLN_DOT, _ => "миллион");
+        s = Rewrite(s, HAZ_DOT, _ => "ҳазор");
+        s = Rewrite(s, MLRD, _ => "миллиард");
+        s = Rewrite(s, MLN, _ => "миллион");
+        s = Rewrite(s, HAZ, _ => "ҳазор");
 
-        s = JsRegex.Replace(s, DOTTED_DATE, m =>
+        s = Rewrite(s, DOTTED_DATE, m =>
         {
             double dv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             if (dv < 1 || dv > 31 || mv < 1 || mv > 12) return m.Value;
             return $"{Js.NumberToString(dv)} {MONTHS[(int)mv - 1]} соли {m.Groups[3].Value}";
         });
 
-        s = JsRegex.Replace(s, DIGIT_COLON, _ => " ");
+        s = Rewrite(s, DIGIT_COLON, _ => " ");
 
-        s = JsRegex.Replace(s, ORDINAL, m =>
+        s = Rewrite(s, ORDINAL, m =>
         {
             var ord = TajikOrdinal(Js.Number(m.Groups[1].Value));
             return ord is null ? m.Value : GlueSuffix(ord, m.Groups[3].Value);
         });
 
-        s = JsRegex.Replace(s, PERCENT_ENCLITIC, m => $"{m.Groups[1].Value} дарсад{m.Groups[2].Value}");
-        s = JsRegex.Replace(s, NUMBER_ENCLITIC, m =>
+        s = Rewrite(s, PERCENT_ENCLITIC, m => $"{m.Groups[1].Value} дарсад{m.Groups[2].Value}");
+        s = Rewrite(s, NUMBER_ENCLITIC, m =>
         {
             var w = TajikPhonemizer.NumberWords(Js.Number(m.Groups[1].Value));
             return w == "" ? m.Value : GlueSuffix(w, m.Groups[2].Value);
         });
 
-        s = JsRegex.Replace(s, RANGE, m => $"{m.Groups[1].Value} то {m.Groups[2].Value}");
+        s = Rewrite(s, RANGE, m => $"{m.Groups[1].Value} то {m.Groups[2].Value}");
 
-        s = JsRegex.Replace(s, SPACED_DASH, _ => " , ");
+        s = Rewrite(s, SPACED_DASH, _ => " , ");
 
-        s = JsRegex.Replace(s, DEG_CELSIUS,
+        s = Rewrite(s, DEG_CELSIUS,
             m => $"{m.Groups[1].Value} дараҷаи Селсий{(m.Groups[2].Success ? m.Groups[2].Value : "")}");
-        s = JsRegex.Replace(s, DEG_FAHRENHEIT, m => $"{m.Groups[1].Value} дараҷаи Фаренгейт");
-        s = JsRegex.Replace(s, DEG_COMPASS,
+        s = Rewrite(s, DEG_FAHRENHEIT, m => $"{m.Groups[1].Value} дараҷаи Фаренгейт");
+        s = Rewrite(s, DEG_COMPASS,
             m => $"{m.Groups[1].Value} дараҷаи {COMPASS[m.Groups[2].Value.ToUpperInvariant()]}");
-        s = JsRegex.Replace(s, DEG_BARE,
+        s = Rewrite(s, DEG_BARE,
             m => $"{m.Groups[1].Value} дараҷа{(m.Groups[2].Success ? m.Groups[2].Value : "")}");
 
-        s = JsRegex.Replace(s, DENSITY, m => $"{m.Groups[1].Value} дар километри мураббаъ");
+        s = Rewrite(s, DENSITY, m => $"{m.Groups[1].Value} дар километри мураббаъ");
 
         s = SYMBOLS(s);
 
-        s = JsRegex.Replace(s, FRACTION, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             double n = Js.Number(m.Groups[1].Value), d = Js.Number(m.Groups[2].Value);
             if (!(n >= 1 && n < d && d <= 10)) return m.Value;
@@ -181,10 +182,10 @@ public static class Normalize
             return den is null ? m.Value : $"{TajikPhonemizer.NumberWords(n)} {den}";
         });
 
-        s = JsRegex.Replace(s, DECIMAL_COMMA, _ => " ");
-        s = JsRegex.Replace(s, DECIMAL_DOT, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+        s = Rewrite(s, DECIMAL_COMMA, _ => " ");
+        s = Rewrite(s, DECIMAL_DOT, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
 
-        s = JsRegex.Replace(s, EQUALS, m => $"{m.Groups[1].Value} баробар аст ба {m.Groups[2].Value}");
+        s = Rewrite(s, EQUALS, m => $"{m.Groups[1].Value} баробар аст ба {m.Groups[2].Value}");
 
         return s;
     }

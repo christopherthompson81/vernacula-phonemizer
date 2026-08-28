@@ -4,6 +4,7 @@
  * Ported from src/languages/swahili/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Swahili;
 
@@ -16,7 +17,7 @@ public static class Normalize
     {
         var atEnd = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.(?=[ \u00a0]*(?:$|\\p{{Lu}}))", "gu");
         var inline = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.", "gu");
-        return JsRegex.Replace(JsRegex.Replace(s, atEnd, _ => $"{word}."), inline, _ => word);
+        return Rewrite(Rewrite(s, atEnd, _ => $"{word}."), inline, _ => word);
     }
 
     /** Era markers. */
@@ -44,7 +45,7 @@ public static class Normalize
     private static string FoldLatinDiacritics(string s)
     {
         if (!NON_ASCII.IsMatch(s)) return s;
-        return JsRegex.Replace(s, LATIN_CHAR, m =>
+        return Rewrite(s, LATIN_CHAR, m =>
         {
             var basec = JsRegex.Replace(m.Value.Normalize(System.Text.NormalizationForm.FormD), NONSPACING, _ => "");
             return basec == "" ? m.Value : basec;
@@ -79,38 +80,38 @@ public static class Normalize
 
         s = FoldLatinDiacritics(s);
 
-        s = JsRegex.Replace(s, ORDINAL_INDICATOR, _ => "°");
+        s = Rewrite(s, ORDINAL_INDICATOR, _ => "°");
 
-        s = JsRegex.Replace(s, DEGROUP, m => JsRegex.Replace(m.Value, COMMA_G, _ => ""));
+        s = Rewrite(s, DEGROUP, m => JsRegex.Replace(m.Value, COMMA_G, _ => ""));
 
-        s = JsRegex.Replace(s, PLUSMINUS, _ => " plas hasi ");
+        s = Rewrite(s, PLUSMINUS, _ => " plas hasi ");
         var whole5 = s;
-        s = JsRegex.Replace(s, MINUS, m => DIGIT_AT_END.IsMatch(whole5[..m.Index]) ? m.Value : "hasi ");
-        s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} plas ");
-        s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}plas ");
-        s = JsRegex.Replace(s, DEG_C, m => $"nyuzi joto {m.Groups[1].Value} Selsiasi");
-        s = JsRegex.Replace(s, DEG_F, m => $"nyuzi joto {m.Groups[2].Value} Fahrenheit");
-        s = JsRegex.Replace(s, DEG_BARE, m => $"nyuzi joto {m.Groups[2].Value}");
+        s = Rewrite(s, MINUS, m => DIGIT_AT_END.IsMatch(whole5[..m.Index]) ? m.Value : "hasi ");
+        s = Rewrite(s, PLUS_AFTER, m => $"{m.Groups[1].Value} plas ");
+        s = Rewrite(s, PLUS_START, m => $"{m.Groups[1].Value}plas ");
+        s = Rewrite(s, DEG_C, m => $"nyuzi joto {m.Groups[1].Value} Selsiasi");
+        s = Rewrite(s, DEG_F, m => $"nyuzi joto {m.Groups[2].Value} Fahrenheit");
+        s = Rewrite(s, DEG_BARE, m => $"nyuzi joto {m.Groups[2].Value}");
 
-        s = JsRegex.Replace(s, RANGE, m =>
+        s = Rewrite(s, RANGE, m =>
             Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[2].Value)
                 ? $"{m.Groups[1].Value} hadi {m.Groups[2].Value}"
                 : m.Value);
 
-        s = JsRegex.Replace(s, DECIMAL_RE, m =>
+        s = Rewrite(s, DECIMAL_RE, m =>
             $"{m.Groups[1].Value} nukta {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // ⚠ DOTTED before BARE, and multi-dot before single-dot: `B.C.E.` must be claimed before `BC`
         //   can bite into it.
         foreach (var (body, word) in DOTTED) s = ExpandDotted(s, body, word);
-        foreach (var (re, word) in BARE_ERA) s = JsRegex.Replace(s, re, _ => word);
+        foreach (var (re, word) in BARE_ERA) s = Rewrite(s, re, _ => word);
 
-        s = JsRegex.Replace(s, SPACED_DASH, _ => ", ");
+        s = Rewrite(s, SPACED_DASH, _ => ", ");
 
-        s = JsRegex.Replace(s, EQUALS, _ => " sawa na ");
-        s = JsRegex.Replace(s, LESS_THAN, _ => " chini ya ");
-        s = JsRegex.Replace(s, GREATER_THAN, _ => " zaidi ya ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " kugawanya kwa ");
+        s = Rewrite(s, EQUALS, _ => " sawa na ");
+        s = Rewrite(s, LESS_THAN, _ => " chini ya ");
+        s = Rewrite(s, GREATER_THAN, _ => " zaidi ya ");
+        s = Rewrite(s, DIVIDE, _ => " kugawanya kwa ");
 
         return s;
     }

@@ -6,6 +6,7 @@
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Hebrew;
 
@@ -77,37 +78,37 @@ public static class Normalize
     public static string NormalizeHebrew(string input)
     {
         var s = input.Normalize(NormalizationForm.FormC);                                              // 1
-        s = JsRegex.Replace(s, SOF_PASUQ, _ => " \u05C3 ");                                            // 1b
-        s = JsRegex.Replace(s, BIDI, _ => "");                                                         // 2
-        s = JsRegex.Replace(s, ENTITY, _ => " ");
-        s = JsRegex.Replace(s, GROUPED, m => JsRegex.Replace(m.Value, COMMA, _ => ""));                // 3
+        s = Rewrite(s, SOF_PASUQ, _ => " \u05C3 ");                                            // 1b
+        s = Rewrite(s, BIDI, _ => "");                                                         // 2
+        s = Rewrite(s, ENTITY, _ => " ");
+        s = Rewrite(s, GROUPED, m => JsRegex.Replace(m.Value, COMMA, _ => ""));                // 3
 
         foreach (var (body, expansion, head) in ABBREV)                                                // 4
         {
             var tail = expansion[head.Length..];
             var re = JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}({PRO_DASH}?){body}{Boundaries.NOT_LETTER_AFTER}", "gu");
-            s = JsRegex.Replace(s, re, m =>
+            s = Rewrite(s, re, m =>
             {
                 var pre = m.Groups[1].Value;
                 return (pre == "" ? expansion : (PROCLITIC.TryGetValue(pre, out var v) ? v : pre) + head + tail) + " ";
             });
         }
 
-        s = JsRegex.Replace(s, QUOTE_ARM, m => Vocalize(m.Groups[1].Value) + " \"");                    // 5
-        s = JsRegex.Replace(s, ACRONYM_ARM, m => m.Groups[1].Value + m.Groups[2].Value);
-        s = JsRegex.Replace(s, PROCLITIC_DASH, m => Vocalize(m.Groups[1].Value) + " ");                 // 6
-        s = JsRegex.Replace(s, PERCENT, m =>                                                            // 7
+        s = Rewrite(s, QUOTE_ARM, m => Vocalize(m.Groups[1].Value) + " \"");                    // 5
+        s = Rewrite(s, ACRONYM_ARM, m => m.Groups[1].Value + m.Groups[2].Value);
+        s = Rewrite(s, PROCLITIC_DASH, m => Vocalize(m.Groups[1].Value) + " ");                 // 6
+        s = Rewrite(s, PERCENT, m =>                                                            // 7
             m.Groups[1].Value + " " + (m.Groups[2].Success ? m.Groups[2].Value : "אָחוּז") + " ");
-        s = JsRegex.Replace(s, DOLLAR_PRE, m => m.Groups[1].Value + " דּוֹלָר ");                          // 8
-        s = JsRegex.Replace(s, DOLLAR_POST, m => m.Groups[1].Value + " דּוֹלָר ");
-        s = JsRegex.Replace(s, TRAILING_MINUS, m => "מִינוּס " + m.Groups[1].Value + m.Groups[2].Value);    // 9
-        s = JsRegex.Replace(s, DEGREE_SCALE, m => m.Groups[1].Value + " מַעֲלוֹת צֶלְזִיוּס ");                // 10
-        s = JsRegex.Replace(s, DEGREE_BARE, m => m.Groups[1].Value + " מַעֲלוֹת ");
-        s = JsRegex.Replace(s, KM3, m => m.Groups[1].Value + " קִילוֹמֶטֶר מְעֻקָּב ");                        // 11
-        s = JsRegex.Replace(s, KM2, m => m.Groups[1].Value + " קִילוֹמֶטֶר רָבוּעַ ");
-        s = JsRegex.Replace(s, SQUARE, m => m.Groups[1].Value + " בְּרִיבּוּעַ ");
+        s = Rewrite(s, DOLLAR_PRE, m => m.Groups[1].Value + " דּוֹלָר ");                          // 8
+        s = Rewrite(s, DOLLAR_POST, m => m.Groups[1].Value + " דּוֹלָר ");
+        s = Rewrite(s, TRAILING_MINUS, m => "מִינוּס " + m.Groups[1].Value + m.Groups[2].Value);    // 9
+        s = Rewrite(s, DEGREE_SCALE, m => m.Groups[1].Value + " מַעֲלוֹת צֶלְזִיוּס ");                // 10
+        s = Rewrite(s, DEGREE_BARE, m => m.Groups[1].Value + " מַעֲלוֹת ");
+        s = Rewrite(s, KM3, m => m.Groups[1].Value + " קִילוֹמֶטֶר מְעֻקָּב ");                        // 11
+        s = Rewrite(s, KM2, m => m.Groups[1].Value + " קִילוֹמֶטֶר רָבוּעַ ");
+        s = Rewrite(s, SQUARE, m => m.Groups[1].Value + " בְּרִיבּוּעַ ");
         s = NormalizeSymbols.SpacedBareExponent(s);
-        s = JsRegex.Replace(s, CLOCK_COLON, _ => " ");                                                  // 12
+        s = Rewrite(s, CLOCK_COLON, _ => " ");                                                  // 12
         return s;
     }
 }

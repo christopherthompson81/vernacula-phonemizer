@@ -5,6 +5,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.English;
 
@@ -252,47 +253,47 @@ public static class Normalize
     {
         var s = input;
 
-        s = TITLE_ABBREV.Replace(s, m =>
+        s = Rewrite(s, TITLE_ABBREV, m =>
         {
             var next = m.Groups[2].Value;
             if (!DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var f)) return m.Value;  // ⚠ reachable miss (#1122)
             return $"{f(next)} {next}";
         });
-        s = TITLE_ABBREV_END.Replace(s, m => m.Groups[1].Value.ToLowerInvariant() switch
+        s = Rewrite(s, TITLE_ABBREV_END, m => m.Groups[1].Value.ToLowerInvariant() switch
         {
             "st" => "street", "dr" => "drive", _ => "mount",
         });
-        s = SAINT_UNDOTTED.Replace(s, m =>
+        s = Rewrite(s, SAINT_UNDOTTED, m =>
         {
             var next = m.Groups[1].Value;
             return ABBREV_FUNCTION_NEXT.IsMatch(next) ? m.Value : $"saint {next}";
         });
 
-        s = PLAIN_MID.Replace(s, m =>
+        s = Rewrite(s, PLAIN_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
             // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
             PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = PLAIN_END.Replace(s, m =>
+        s = Rewrite(s, PLAIN_END, m =>
             PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
-        s = ET_AL_MID.Replace(s, "et al$1");
-        s = ET_AL_END.Replace(s, "et al.");
-        s = CIRCA.Replace(s, "circa ");
-        s = NUMBER_SIGN.Replace(s, "number ");
-        s = EG_MID.Replace(s, "for example$1");
-        s = EG_END.Replace(s, "for example.");
-        s = IE_MID.Replace(s, "that is$1");
-        s = IE_END.Replace(s, "that is.");
-        s = AM_PM.Replace(s, m => m.Groups[1].Value.ToLowerInvariant() == "a" ? "ay em" : "pee em");
-        s = DOTTED_INITIALS.Replace(s, m => DOTS.Replace(m.Value, "").ToUpperInvariant());
+        s = Rewrite(s, ET_AL_MID, "et al$1");
+        s = Rewrite(s, ET_AL_END, "et al.");
+        s = Rewrite(s, CIRCA, "circa ");
+        s = Rewrite(s, NUMBER_SIGN, "number ");
+        s = Rewrite(s, EG_MID, "for example$1");
+        s = Rewrite(s, EG_END, "for example.");
+        s = Rewrite(s, IE_MID, "that is$1");
+        s = Rewrite(s, IE_END, "that is.");
+        s = Rewrite(s, AM_PM, m => m.Groups[1].Value.ToLowerInvariant() == "a" ? "ay em" : "pee em");
+        s = Rewrite(s, DOTTED_INITIALS, m => DOTS.Replace(m.Value, "").ToUpperInvariant());
 
-        s = ERA.Replace(s, m => m.Value switch
+        s = Rewrite(s, ERA, m => m.Value switch
         {
             "BCE" => "bee see ee", "BC" => "bee see", "CE" => "see ee", "AD" => "ay dee", _ => m.Value,
         });
 
-        s = SPACE_GROUP.Replace(s, m => SPACE_GROUP_SEPS.Replace(m.Value, ""));
+        s = Rewrite(s, SPACE_GROUP, m => SPACE_GROUP_SEPS.Replace(m.Value, ""));
 
-        s = SCI_EXPONENT.Replace(s, m =>
+        s = Rewrite(s, SCI_EXPONENT, m =>
         {
             var ten = m.Groups[1].Value;
             var sup = m.Groups[2].Value;
@@ -303,31 +304,31 @@ public static class Normalize
             return $"{ten} to the power of {(neg ? $"negative {digits[1..]}" : digits)}";
         });
 
-        s = NEGATIVE.Replace(s, "$1negative $2");
-        s = PLUS_MINUS.Replace(s, "$1plus or minus $2");
+        s = Rewrite(s, NEGATIVE, "$1negative $2");
+        s = Rewrite(s, PLUS_MINUS, "$1plus or minus $2");
 
-        s = ISO_DATE.Replace(s, m =>
+        s = Rewrite(s, ISO_DATE, m =>
             IsoDate(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value), Js.Number(m.Groups[3].Value)) ?? m.Value);
-        s = US_DATE.Replace(s, m =>
+        s = Rewrite(s, US_DATE, m =>
             IsoDate(Js.Number(m.Groups[3].Value), Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);
 
-        s = MONEY_CENTS.Replace(s, m =>
+        s = Rewrite(s, MONEY_CENTS, m =>
         {
             var sym = m.Groups[1].Value;
             var intPart = m.Groups[2].Value;
             var cents = m.Groups[3].Value;
             var forms = CURRENCY[sym];
-            var unit = ONE_INT.IsMatch(COMMAS.Replace(intPart, "")) ? forms[0] : forms[1];
+            var unit = ONE_INT.IsMatch(Rewrite(intPart, COMMAS, "")) ? forms[0] : forms[1];
             return cents == "00" ? $"{intPart} {unit}" : $"{intPart} {unit} {Js.NumberToString(Js.Number(cents))}";
         });
 
-        s = PLUS_ATTACHED.Replace(s, "$1 plus $2");
-        s = PLUS_LEADING.Replace(s, "$1plus $2");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 plus $2");
+        s = Rewrite(s, PLUS_LEADING, "$1plus $2");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
             FractionWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);
 
-        s = CURRENCY_RE.Replace(s, m =>
+        s = Rewrite(s, CURRENCY_RE, m =>
         {
             var sym = m.Groups[1].Value;
             var num = m.Groups[2].Value;
@@ -335,13 +336,13 @@ public static class Normalize
             var abbrev = m.Groups[4].Success ? m.Groups[4].Value : null;
             var forms = CURRENCY[sym];
             var mag = spelled ?? (abbrev is null ? null : $" {MONEY_MAGNITUDE[abbrev]}");
-            var one = ONE_EXACT.IsMatch(COMMAS.Replace(num, ""));
+            var one = ONE_EXACT.IsMatch(JsRegex.Replace(num, COMMAS, ""));
             return $"{num}{mag ?? ""} {(one && mag is null ? forms[0] : forms[1])}";
         });
 
-        s = PERCENT.Replace(s, "$1 percent");
+        s = Rewrite(s, PERCENT, "$1 percent");
 
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             var h = m.Groups[1].Value;
             var mm = m.Groups[2].Value;
@@ -351,7 +352,7 @@ public static class Normalize
             return $"{h} {mm}{suffix}";
         });
 
-        s = MONTH_DAY.Replace(s, m =>
+        s = Rewrite(s, MONTH_DAY, m =>
         {
             var mon = m.Groups[1].Value;
             var d = m.Groups[2].Value;
@@ -363,22 +364,22 @@ public static class Normalize
             return $"{mon} {d}{suf}";
         });
 
-        s = YEAR_RANGE.Replace(s, m =>
+        s = Rewrite(s, YEAR_RANGE, m =>
         {
             double a = Js.Number(m.Groups[1].Value), b = Js.Number(m.Groups[3].Value);
             return b >= a ? $"{YearWords(a)}{m.Groups[2].Value}{YearWords(b)}" : m.Value;
         });
-        s = YEAR_CONTEXT.Replace(s, m =>
+        s = Rewrite(s, YEAR_CONTEXT, m =>
         {
             var ctx = m.Groups[1].Value;
             var det = m.Groups[2].Success ? m.Groups[2].Value : null;
             var y = Js.Number(m.Groups[3].Value);
             return det is not null && y >= 2010 ? m.Value : $"{ctx}{det ?? ""} {YearWords(y)}";
         });
-        s = YEAR_MONTH.Replace(s, m =>
+        s = Rewrite(s, YEAR_MONTH, m =>
             $"{m.Groups[1].Value}{m.Groups[2].Value} {YearWords(Js.Number(m.Groups[3].Value))}");
 
-        s = UNIT_RE.Replace(s, m =>
+        s = Rewrite(s, UNIT_RE, m =>
         {
             var num = m.Groups[1].Value;
             var mag = m.Groups[2].Success ? m.Groups[2].Value : null;
@@ -387,13 +388,13 @@ public static class Normalize
             var forms = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, u);
             if (forms is null) return m.Value; // unresolvable → leave the text alone
             var measure = exp == "²" || exp == "2" ? "square " : exp == "³" || exp == "3" ? "cubic " : "";
-            var one = mag is null && ONE_EXACT.IsMatch(COMMAS.Replace(num, ""));
+            var one = mag is null && ONE_EXACT.IsMatch(JsRegex.Replace(num, COMMAS, ""));
             return $"{num}{mag ?? ""} {measure}{(one ? forms[0] : forms[1])}";
         });
 
-        s = BARE_EXPONENT_GLUED.Replace(s, m => $"{m.Value} ");
+        s = Rewrite(s, BARE_EXPONENT_GLUED, m => $"{m.Value} ");
         var allE = s;
-        s = BARE_EXPONENT.Replace(s, m =>
+        s = Rewrite(s, BARE_EXPONENT, m =>
         {
             var bas = m.Groups[1].Value;
             // A lone ⁰ or ¹ is a degree sign or a prime, not a power — see LONE_MARK in Core/NormalizeSymbols.cs.
@@ -415,7 +416,7 @@ public static class Normalize
 
         if (HAS_LOWER.IsMatch(s))
         {
-            s = CAPS_ROMAN.Replace(s, m =>
+            s = Rewrite(s, CAPS_ROMAN, m =>
             {
                 var prev = m.Groups[1].Value;
                 var n = Roman.RomanToInt(m.Groups[2].Value);
@@ -434,7 +435,7 @@ public static class Normalize
             });
         }
 
-        s = LOWER_ROMAN.Replace(s, m =>
+        s = Rewrite(s, LOWER_ROMAN, m =>
         {
             var prev = m.Groups[1].Value;
             var n = ROMAN[m.Groups[2].Value.ToLowerInvariant()];
@@ -443,9 +444,9 @@ public static class Normalize
             return $"{prev} the {n}{suf}";
         });
 
-        s = AMP_ENTITY.Replace(s, " and ");
-        s = AMP.Replace(s, " and ");
-        s = TIMES_SIGN.Replace(s, m =>
+        s = Rewrite(s, AMP_ENTITY, " and ");
+        s = Rewrite(s, AMP, " and ");
+        s = Rewrite(s, TIMES_SIGN, m =>
         {
             var left = m.Groups[1].Value;
             var sign = m.Groups[2].Value;
@@ -454,10 +455,10 @@ public static class Normalize
             var unspacedAscii = sign == "x" && !HAS_SPACE.IsMatch(m.Value);
             return $"{left} {(hasUnit || unspacedAscii ? "by" : "times")} ";
         });
-        s = DIVIDE.Replace(s, "$1 divided by ");
-        s = EQUALS.Replace(s, "$1 equals $2");
-        s = LESS_THAN.Replace(s, "$1 less than ");
-        s = GREATER_THAN.Replace(s, "$1 greater than ");
+        s = Rewrite(s, DIVIDE, "$1 divided by ");
+        s = Rewrite(s, EQUALS, "$1 equals $2");
+        s = Rewrite(s, LESS_THAN, "$1 less than ");
+        s = Rewrite(s, GREATER_THAN, "$1 greater than ");
 
         return s;
     }

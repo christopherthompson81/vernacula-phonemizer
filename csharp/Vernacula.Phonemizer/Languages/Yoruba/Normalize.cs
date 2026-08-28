@@ -3,6 +3,7 @@
  * Ported from src/languages/yoruba/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Yoruba;
 
@@ -84,17 +85,17 @@ public static class Normalize
         var s = text;
         // The TS loops on `GROUPED.test`, resetting `lastIndex` each turn; a stateless IsMatch is the same loop
         // without the reset.
-        s = GROUPED.Replace(s, "");
-        s = RANGE.Replace(s, $"$1 {SYM.Range} ");
-        s = MINUS.Replace(s, $"{SYM.Negative} ");
+        s = Rewrite(s, GROUPED, "");
+        s = Rewrite(s, RANGE, $"$1 {SYM.Range} ");
+        s = Rewrite(s, MINUS, $"{SYM.Negative} ");
         {
             var subject = s;
-            s = PERCENT_PAREN.Replace(s, m =>
+            s = Rewrite(s, PERCENT_PAREN, m =>
                 SAID_AFTER.IsMatch(Fold(subject[Math.Max(0, m.Index - 60)..m.Index])) ? "" : m.Value);
         }
         {
             var subject = s;
-            s = PERCENT.Replace(s, m =>
+            s = Rewrite(s, PERCENT, m =>
             {
                 var num = m.Groups[1].Value;
                 var at = m.Index;
@@ -104,12 +105,12 @@ public static class Normalize
                     : $"{SYM.PercentBefore} {num} {SYM.PercentAfter}";
             });
         }
-        s = UNIT_SQUARED.Replace(s, m =>
+        s = Rewrite(s, UNIT_SQUARED, m =>
         {
             var u = m.Groups[1].Value;
             return $"{(UNIT_WORDS.TryGetValue(u, out var w) ? w : u)} {SYM.Squared}";
         });
-        s = SQ_PREFIX.Replace(s, m =>
+        s = Rewrite(s, SQ_PREFIX, m =>
         {
             var u = m.Groups[1].Value.ToLowerInvariant();
             var w = UNIT_WORDS.TryGetValue(u, out var a) ? a : SQ_UNITS.TryGetValue(u, out var b) ? b : m.Groups[1].Value;
@@ -118,18 +119,18 @@ public static class Normalize
         s = SYMBOLS(s);
         // ⚠ THE BARE METRE RUNS AFTER THE TIER, so every shape the tier can read (`10 km`, `56 km²`, `100 km/h`)
         // consumes its `m` there first — and before the decimal rule, which still needs `8.62` intact.
-        s = METRE.Replace(s, m => $"{m.Groups[1].Value} {METRE_WORD}");
-        s = SCALED_DEGREE.Replace(s, m =>
+        s = Rewrite(s, METRE, m => $"{m.Groups[1].Value} {METRE_WORD}");
+        s = Rewrite(s, SCALED_DEGREE, m =>
         {
             var letter = m.Groups[2].Value.ToUpperInvariant();
             var name = SYM.Scales.TryGetValue(letter, out var sc) ? sc : m.Groups[2].Value;
             return $"{SYM.Degree} {m.Groups[1].Value} {name}";
         });
-        s = TIMES.Replace(s, $"$1 {SYM.Times} ");
+        s = Rewrite(s, TIMES, $"$1 {SYM.Times} ");
         // ⚠ THE DECIMAL SEPARATOR LAST, AND THE ORDER IS LOAD-BEARING: run earlier it splits `8.3%` so the
         // percent circumfix wraps only one half, and turns `100.4°F` into two numbers before the scale is read.
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} {SYM.DecimalWord} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
-        return RUNS.Replace(s, " ");
+        return Rewrite(s, RUNS, " ");
     }
 }

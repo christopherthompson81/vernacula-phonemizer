@@ -6,6 +6,7 @@
 
 /** ⚠ NEVER `\b` — Asturian carries `á é í ó ú ñ ḷ ḥ`, which `\b` treats as boundaries (trap 1/23). */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Asturian;
 
@@ -60,27 +61,27 @@ public static class Normalize
     {
         var s = input;
 
-        s = SPACE_GROUP.Replace(s, m => m.Groups[1].Value + SPACE_SEPS.Replace(m.Groups[2].Value, ""));
-        s = DOT_GROUP.Replace(s, m => m.Groups[1].Value + DOTS.Replace(m.Groups[2].Value, ""));
-        s = DOT_DECIMAL.Replace(s, "$1,$2");
+        s = Rewrite(s, SPACE_GROUP, m => m.Groups[1].Value + SPACE_SEPS.Replace(m.Groups[2].Value, ""));
+        s = Rewrite(s, DOT_GROUP, m => m.Groups[1].Value + DOTS.Replace(m.Groups[2].Value, ""));
+        s = Rewrite(s, DOT_DECIMAL, "$1,$2");
 
         foreach (var (re, word) in MULTI)
         {
             var frozen = s;
-            s = re.Replace(s, m =>
+            s = Rewrite(s, re, m =>
             {
                 var rest = frozen[(m.Index + m.Value.Length)..];
                 return SENTENCE_TAIL.IsMatch(rest) ? $"{word}." : word;
             });
         }
 
-        s = ROMAN_DATE.Replace(s, m =>
+        s = Rewrite(s, ROMAN_DATE, m =>
         {
             if (!ROMAN_MONTH.TryGetValue(m.Groups[2].Value, out var mon)) return m.Value;
             return $"{m.Groups[1].Value} de {MONTHS[mon]} de {m.Groups[3].Value}";
         });
 
-        s = NUMERIC_DATE.Replace(s, m =>
+        s = Rewrite(s, NUMERIC_DATE, m =>
         {
             var mon = Js.Number(m.Groups[2].Value);
             return mon >= 1 && mon <= 12
@@ -88,18 +89,18 @@ public static class Normalize
                 : m.Value;
         });
 
-        s = CLOCK.Replace(s, "$1 $2");
+        s = Rewrite(s, CLOCK, "$1 $2");
 
-        s = DEG_SCALE.Replace(s, m =>
+        s = Rewrite(s, DEG_SCALE, m =>
             $"{m.Groups[1].Value} graos {(m.Groups[2].Value.ToUpperInvariant() == "C" ? "Celsius" : "Fahrenheit")}");
-        s = DEG_MIN.Replace(s, "$1 graos $2 minutos ");
-        s = DEG.Replace(s, "$1 graos ");
+        s = Rewrite(s, DEG_MIN, "$1 graos $2 minutos ");
+        s = Rewrite(s, DEG, "$1 graos ");
 
-        s = MINUS.Replace(s, "$1menos $2");
+        s = Rewrite(s, MINUS, "$1menos $2");
 
-        s = DASH_RANGE.Replace(s, "$1, ");
-        s = HYPHEN_RANGE.Replace(s, "$1, $2");
+        s = Rewrite(s, DASH_RANGE, "$1, ");
+        s = Rewrite(s, HYPHEN_RANGE, "$1, $2");
 
-        return MULTI_SPACE.Replace(s, " ");
+        return Rewrite(s, MULTI_SPACE, " ");
     }
 }

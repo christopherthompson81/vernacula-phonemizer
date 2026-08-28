@@ -5,6 +5,7 @@
 
 /** Ethiopic syllabary letters, EXCLUDING the punctuation and numeral sub-blocks (U+135F and up). */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Amharic;
 
@@ -75,20 +76,20 @@ public static class Normalize
         {
             var s = input;
 
-            s = DOUBLE_WORDSPACE.Replace(s, "።");
+            s = Rewrite(s, DOUBLE_WORDSPACE, "።");
 
-            s = TIME_SEP.Replace(s, "$1:$2");
+            s = Rewrite(s, TIME_SEP, "$1:$2");
 
-            s = MULTI_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-            s = INTERIOR_DOT.Replace(s, "");
+            s = Rewrite(s, MULTI_DOT, m => DOTS.Replace(m.Value, ""));
+            s = Rewrite(s, INTERIOR_DOT, "");
 
-            s = LONE_WORDSPACE.Replace(s, ",");
+            s = Rewrite(s, LONE_WORDSPACE, ",");
 
-            s = GROUPED.Replace(s, "$1");
-            s = GROUPED.Replace(s, "$1"); // second pass for 5,000,000
+            s = Rewrite(s, GROUPED, "$1");
+            s = Rewrite(s, GROUPED, "$1"); // second pass for 5,000,000
 
             //    sports splits are "4:41.30", where the clock must take 4:41 and leave .30 to step 10.
-            s = CLOCK.Replace(s, m =>
+            s = Rewrite(s, CLOCK, m =>
             {
                 var h = m.Groups[1].Value;
                 var mi = m.Groups[2].Value;
@@ -97,42 +98,42 @@ public static class Normalize
                 return frac is null ? $" {hm} " : $" {hm} {POINT} {EachDigit(frac)} ";
             });
 
-            s = CLOCK_DOT_TZ.Replace(s, m => $" {Words(m.Groups[1].Value)} ");
+            s = Rewrite(s, CLOCK_DOT_TZ, m => $" {Words(m.Groups[1].Value)} ");
 
             // RANGES are restricted to the ከ ("from") frame — ⚠ the restriction IS the rule, because most
             // hyphenated number pairs are scores or year spans and must NOT become "from…to".
-            s = RANGE.Replace(s, m => $"{FROM} {m.Groups[1].Value} {UNTIL} {m.Groups[2].Value}");
+            s = Rewrite(s, RANGE, m => $"{FROM} {m.Groups[1].Value} {UNTIL} {m.Groups[2].Value}");
 
             // Two LOCAL workarounds for the shared currency tier: a letter-code prefix ("US$14.7") blocks the
             // tier's own key, and its "the text already says it" prefix test misses Amharic plural morphology.
-            s = CODE_PREFIXED_SIGN.Replace(s, " ");
-            s = REDUNDANT_DOLLAR.Replace(s, m => $"{m.Groups[1].Value}{(m.Groups[2].Success ? m.Groups[2].Value : "")}");
+            s = Rewrite(s, CODE_PREFIXED_SIGN, " ");
+            s = Rewrite(s, REDUNDANT_DOLLAR, m => $"{m.Groups[1].Value}{(m.Groups[2].Success ? m.Groups[2].Value : "")}");
 
             s = symbols(s);
 
-            s = DECIMAL.Replace(s, m => $" {Words(m.Groups[1].Value)} {POINT} {EachDigit(m.Groups[2].Value)} ");
+            s = Rewrite(s, DECIMAL, m => $" {Words(m.Groups[1].Value)} {POINT} {EachDigit(m.Groups[2].Value)} ");
 
-            s = ORDINAL_RE.Replace(s, m =>
+            s = Rewrite(s, ORDINAL_RE, m =>
             {
                 var o = Ordinal(m.Groups[1].Value);
                 return o == "" ? m.Value : $" {o}{m.Groups[2].Value} ";
             });
 
-            s = SQUARE_KM.Replace(s, "ካሬ ኪሎ ሜትር");
+            s = Rewrite(s, SQUARE_KM, "ካሬ ኪሎ ሜትር");
 
-            s = KM.Replace(s, "ኪሎ ሜትር");
+            s = Rewrite(s, KM, "ኪሎ ሜትር");
 
-            s = DEGREE.Replace(s, " ዲግሪ ");
+            s = Rewrite(s, DEGREE, " ዲግሪ ");
 
-            s = PLUS_ATTACHED.Replace(s, "$1 ፕላስ ");
-            s = PLUS_LEADING.Replace(s, "$1ፕላስ ");
+            s = Rewrite(s, PLUS_ATTACHED, "$1 ፕላስ ");
+            s = Rewrite(s, PLUS_LEADING, "$1ፕላስ ");
 
-            s = LESS_THAN.Replace(s, "$1 ከ$2 ያነሰ");
-            s = GREATER_THAN.Replace(s, "$1 ከ$2 የበለጠ");
-            s = DIVIDE.Replace(s, "$1 በ$2 በመክፈል");
-            s = EQUALS.Replace(s, " እኩል ");
+            s = Rewrite(s, LESS_THAN, "$1 ከ$2 ያነሰ");
+            s = Rewrite(s, GREATER_THAN, "$1 ከ$2 የበለጠ");
+            s = Rewrite(s, DIVIDE, "$1 በ$2 በመክፈል");
+            s = Rewrite(s, EQUALS, " እኩል ");
 
-            return DOUBLE_SPACE.Replace(s, " ");
+            return Rewrite(s, DOUBLE_SPACE, " ");
         };
     }
 }

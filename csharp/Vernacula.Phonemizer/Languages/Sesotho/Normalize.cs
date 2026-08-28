@@ -14,6 +14,7 @@
  * bare exponent). Nothing is re-derived here.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Sesotho;
 
@@ -150,17 +151,17 @@ public static class Normalize
 
         // 1) HTML ENTITIES, before anything reads a `&` or a `#`. ⚠ `&#39;` IS AN ORTHOGRAPHIC CHARACTER in
         //    Sesotho — the apostrophe writes the syllabic nasal — so it is restored rather than dropped.
-        s = AMP_ENTITY.Replace(RB_ENTITY.Replace(LB_ENTITY.Replace(APOS_ENTITY.Replace(
-            NBSP_ENTITY.Replace(s, " "), "’"), "["), "]"), "&");
+        s = Rewrite(Rewrite(Rewrite(Rewrite(
+            Rewrite(s, NBSP_ENTITY, " "), APOS_ENTITY, "’"), LB_ENTITY, "["), RB_ENTITY, "]"), AMP_ENTITY, "&");
 
         // 2) THE BARE AMPERSAND → `le`. ⚠ This is why `Ampersand` is not declared on the shared tier: 8 of
         //    the corpus's 19 ampersands are `&nbsp;`, and the tier would emit "le nbsp" for every one.
-        s = BARE_AMP.Replace(s, $" {AND} ");
+        s = Rewrite(s, BARE_AMP, $" {AND} ");
 
         // 3) DOTTED CAPITAL RUNS → the bare letters. ⚠ THE FINAL DOT IS KEPT ONLY AT END OF INPUT, and the
         //    trade was measured: 1 lost sentence end against 2 spurious pauses avoided.
         var frozen = s;
-        s = DOTTED_CAPS.Replace(s, m =>
+        s = Rewrite(s, DOTTED_CAPS, m =>
         {
             var letters = DOT_OR_SPACE.Replace(m.Value, "");
             var rest = frozen[(m.Index + m.Value.Length)..];
@@ -169,51 +170,51 @@ public static class Normalize
         });
 
         // 3b) THE DOTTED DATE — spend the dots, and nothing else. ⚠ BEFORE step 4 and step 11.
-        s = DOTTED_DATE.Replace(s, "$1 $2 $3");
+        s = Rewrite(s, DOTTED_DATE, "$1 $2 $3");
 
         // 4) THOUSANDS DE-GROUPING, before every remaining numeric rule. ⚠ EXACTLY THREE DIGITS PER BLOCK,
         //    and the head must start 1–9.
-        s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => SPACE_SEPS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => SPACE_SEPS.Replace(m.Value, ""));
 
         // 5) A MAGNITUDE LETTER GLUED TO A CURRENCY AMOUNT → the magnitude WORD. ⚠ This step is what makes
         //    the one-letter metre key safe, and it must run after step 4 and before the tier.
-        s = CURRENCY_SCALE.Replace(s, m =>
+        s = Rewrite(s, CURRENCY_SCALE, m =>
             $"{m.Groups[1].Value}{m.Groups[2].Value} {(m.Groups[3].Value == "m" ? "dimilione" : "dibilione")}");
 
         // 6) A PERCENT SIGN WHOSE WORD IS ALREADY WRITTEN → drop the sign. This covers the three spellings
         //    the tier cannot know about (the Lesotho forms and the SA variant `diphesente`).
-        s = SAID_PERCENT.Replace(s, "$1$2");
+        s = Rewrite(s, SAID_PERCENT, "$1$2");
 
         // 6b) A DIGIT RUN GLUED TO THE END OF A WORD, immediately before a `%` → set it off with a space.
         //     ⚠ THIS EXISTS BECAUSE THE FIX CREATED IT, and it is narrowed to the `%` case on purpose.
-        s = GLUED_PERCENT.Replace(s, " ");
+        s = Rewrite(s, GLUED_PERCENT, " ");
 
         // 7) RANGES → `ho isa ho`, BEFORE the shared tier, and that ordering is load-bearing.
         //    ⚠ ASCENDING ONLY: the modal `N-N` shape in the artifact is a SEASON, which declines itself.
-        s = DASH_RANGE.Replace(s, m =>
+        s = Rewrite(s, DASH_RANGE, m =>
             Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[2].Value)
                 ? $"{m.Groups[1].Value} {SPAN} {m.Groups[2].Value}"
                 : m.Value);
 
         // 8) THE ENGLISH ORDINAL SUFFIX — always foreign orthography here; stripping it is the whole fix.
-        s = ENGLISH_ORDINAL.Replace(s, "$1");
+        s = Rewrite(s, ENGLISH_ORDINAL, "$1");
 
         // 9) THE SHARED SYMBOL TIER.
         s = SYMBOLS(s);
 
         // 10) THE CONCORD BETWEEN A MAGNITUDE AND ITS FIGURE, which the tier cannot emit. ⚠ ONLY AFTER A
         //     CONCORD THIS FILE JUST EMITTED, so a magnitude in ordinary prose is untouched.
-        s = MAG_CONCORD.Replace(s, "$1 tse ");
+        s = Rewrite(s, MAG_CONCORD, "$1 tse ");
 
         // 11) DECIMALS, LAST of the numeric rules. NO separator word is emitted; see the TS header.
         //     ⚠ THE DOT ARM REJECTS A FOLLOWING `.digit` (the D.M.Y date) and BOTH ARMS REJECT A LEADING
         //     COLON, which is what keeps this rule out of the sports times the header declines.
-        s = DECIMAL_DOT.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
-        s = DECIMAL_COMMA.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_DOT, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
 
         // A padded replacement doubles a space that was already there and can leave one at an edge.
-        return EDGE_SPACE.Replace(MULTI_SPACE.Replace(s, " "), "");
+        return Rewrite(Rewrite(s, MULTI_SPACE, " "), EDGE_SPACE, "");
     }
 }

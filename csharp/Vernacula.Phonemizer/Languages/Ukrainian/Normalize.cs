@@ -4,6 +4,7 @@
  * Ported from src/languages/ukrainian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Ukrainian;
 
@@ -219,26 +220,26 @@ public static class Normalize
     {
         var s = input;
 
-        s = DEGROUP_SPACE.Replace(s, "");
-        s = DEGROUP_COMMA.Replace(s, "");
-        s = SPACES.Replace(s, " ");
+        s = Rewrite(s, DEGROUP_SPACE, "");
+        s = Rewrite(s, DEGROUP_COMMA, "");
+        s = Rewrite(s, SPACES, " ");
 
         foreach (var (re, word) in MULTI_DOT)
         {
             var subject = s;
-            s = re.Replace(s, m =>
+            s = Rewrite(s, re, m =>
             {
                 var rest = subject[(m.Index + m.Length)..];
                 return SENTENCE_TAIL.IsMatch(rest) ? $"{word}." : word;
             });
         }
 
-        s = NUMERO.Replace(s, $"{DEF.NumberSign} ");
+        s = Rewrite(s, NUMERO, $"{DEF.NumberSign} ");
 
-        s = SQ_KM.Replace(s, "$1 км\u00b2");
-        s = SQ_MILES.Replace(s, $"$1 {SQUARE_GEN_PL} миль");
+        s = Rewrite(s, SQ_KM, "$1 км\u00b2");
+        s = Rewrite(s, SQ_MILES, $"$1 {SQUARE_GEN_PL} миль");
 
-        s = SUFFIXED.Replace(s, m =>
+        s = Rewrite(s, SUFFIXED, m =>
         {
             var whole = m.Value;
             var n = Js.Number(m.Groups[1].Value);
@@ -252,32 +253,32 @@ public static class Normalize
             return gen is not null && gen.EndsWith(suffix, StringComparison.Ordinal) ? gen : whole;
         });
 
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = ABBREV_COMMA.Replace(s, m => DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]);
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
+        s = Rewrite(s, ABBREV_COMMA, m => DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]);
+        s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
 
-        s = M_S.Replace(s, m =>
+        s = Rewrite(s, M_S, m =>
         {
             var n = m.Groups[1].Value;
             return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), METRE)} {UNIT_PER} {RATE["с"]}";
         });
-        s = METRE_RE.Replace(s, m =>
+        s = Rewrite(s, METRE_RE, m =>
         {
             var n = m.Groups[1].Value;
             return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), METRE)}";
         });
-        s = PER_HOUR.Replace(s, $" {UNIT_PER} {RATE["год"]}");
-        s = DEG_C.Replace(s, m =>
+        s = Rewrite(s, PER_HOUR, $" {UNIT_PER} {RATE["год"]}");
+        s = Rewrite(s, DEG_C, m =>
         {
             var n = m.Groups[1].Value;
             return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), DEGREE)} {DEF.TemperatureScales["C"]}";
         });
-        s = DEG_F.Replace(s, m =>
+        s = Rewrite(s, DEG_F, m =>
         {
             var n = m.Groups[1].Value;
             return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), DEGREE)} {DEF.TemperatureScales["F"]}";
         });
-        s = DEG.Replace(s, m =>
+        s = Rewrite(s, DEG, m =>
         {
             var n = m.Groups[1].Value;
             return $"{n} {Counted(Js.Number(Js.ReplaceFirst(n, ",", ".")), DEGREE)}";
@@ -285,7 +286,7 @@ public static class Normalize
 
         {
             var subject = s;
-            s = CLOCK.Replace(s, m =>
+            s = Rewrite(s, CLOCK, m =>
             {
                 var whole = m.Value;
                 double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
@@ -302,18 +303,18 @@ public static class Normalize
             });
         }
 
-        s = MINUS.Replace(s, $"$1{SIGN.Minus} $2");
-        s = PLUS_MINUS.Replace(s, $" {SIGN.PlusMinus} ");
-        s = PLUS.Replace(s, $"$1{SIGN.Plus} $2");
+        s = Rewrite(s, MINUS, $"$1{SIGN.Minus} $2");
+        s = Rewrite(s, PLUS_MINUS, $" {SIGN.PlusMinus} ");
+        s = Rewrite(s, PLUS, $"$1{SIGN.Plus} $2");
 
-        s = EQUALS.Replace(s, $" {SIGN.Equals} ");
-        s = LESS_THAN.Replace(s, $" {SIGN.LessThan} ");
-        s = GREATER_THAN.Replace(s, $" {SIGN.GreaterThan} ");
-        s = DIVIDE.Replace(s, $" {SIGN.DividedBy} ");
+        s = Rewrite(s, EQUALS, $" {SIGN.Equals} ");
+        s = Rewrite(s, LESS_THAN, $" {SIGN.LessThan} ");
+        s = Rewrite(s, GREATER_THAN, $" {SIGN.GreaterThan} ");
+        s = Rewrite(s, DIVIDE, $" {SIGN.DividedBy} ");
 
-        s = RANGE.Replace(s, $"$1 {DEF.RangeWord} ");
+        s = Rewrite(s, RANGE, $"$1 {DEF.RangeWord} ");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             var whole = m.Value;
             double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
@@ -324,7 +325,7 @@ public static class Normalize
             return $"{numWord} {fem}";
         });
 
-        s = DOT_DECIMAL.Replace(s, "$1,$2");
+        s = Rewrite(s, DOT_DECIMAL, "$1,$2");
 
         return s;
     }

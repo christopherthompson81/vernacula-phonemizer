@@ -4,6 +4,7 @@
  * Ported from src/languages/kurmanji/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Kurmanji;
 
@@ -47,7 +48,7 @@ public static class Normalize
         var words = KurmanjiNumbers.NumberToWords(n).Split(' ').ToList();
         var last = words[^1];
         words.RemoveAt(words.Count - 1);
-        var bare = LEAD_Y.Replace(written, ""); // the written glide is re-derived, never trusted
+        var bare = JsRegex.Replace(written, LEAD_Y, ""); // the written glide is re-derived, never trusted
         // JS `VOWEL.test(bare[0])` on an empty suffix would test the string "undefined" — never a vowel.
         var glide = VOWEL.IsMatch(last) && bare.Length > 0 && VOWEL.IsMatch(bare[0].ToString()) ? "y" : "";
         words.Add(last + glide + bare);
@@ -96,35 +97,35 @@ public static class Normalize
     {
         var s = input;
 
-        s = JsRegex.Replace(s, NBSP, _ => " ");
+        s = Rewrite(s, NBSP, _ => " ");
 
         var eraSrc = s;
-        s = JsRegex.Replace(s, ERA_DOTTED, m => EraHasYear(eraSrc, m.Index, m.Length) ? "berî zayînê" : m.Value);
+        s = Rewrite(s, ERA_DOTTED, m => EraHasYear(eraSrc, m.Index, m.Length) ? "berî zayînê" : m.Value);
         var eraSrc2 = s;
-        s = JsRegex.Replace(s, ERA_BARE, m => EraHasYear(eraSrc2, m.Index, m.Length) ? "berî zayînê" : m.Value);
+        s = Rewrite(s, ERA_BARE, m => EraHasYear(eraSrc2, m.Index, m.Length) ? "berî zayînê" : m.Value);
 
-        s = JsRegex.Replace(s, GROUP, m =>
+        s = Rewrite(s, GROUP, m =>
             m.Value.Replace(".", "", StringComparison.Ordinal).Replace(",", "", StringComparison.Ordinal));
 
-        s = JsRegex.Replace(s, JI_PERCENT, _ => "");
+        s = Rewrite(s, JI_PERCENT, _ => "");
 
-        s = JsRegex.Replace(s, URL_ESCAPE, _ => "");
+        s = Rewrite(s, URL_ESCAPE, _ => "");
         s = SYMBOLS(s);
 
-        s = JsRegex.Replace(s, DEG_C, m => $"{Neg(m.Groups[1].Value)}{m.Groups[2].Value} pile Selsiyus");
-        s = JsRegex.Replace(s, DEG_F, m => $"{Neg(m.Groups[1].Value)}{m.Groups[2].Value} pile");
-        s = JsRegex.Replace(s, DEG_BARE, m => $"{Neg(m.Groups[1].Value)}{m.Groups[2].Value} pile");
-        s = NEG_PILE.Replace(s, "negatîf $1");
-        s = NEG_START.Replace(s, "negatîf ");
+        s = Rewrite(s, DEG_C, m => $"{Neg(m.Groups[1].Value)}{m.Groups[2].Value} pile Selsiyus");
+        s = Rewrite(s, DEG_F, m => $"{Neg(m.Groups[1].Value)}{m.Groups[2].Value} pile");
+        s = Rewrite(s, DEG_BARE, m => $"{Neg(m.Groups[1].Value)}{m.Groups[2].Value} pile");
+        s = Rewrite(s, NEG_PILE, "negatîf $1");
+        s = Rewrite(s, NEG_START, "negatîf ");
 
         static string Spell(string whole, string frac) => $"{whole} {string.Join(" ", Js.CodePoints(frac))}";
-        s = JsRegex.Replace(s, DEC_COMMA, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
-        s = JsRegex.Replace(s, DEC_PERIOD, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DEC_COMMA, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DEC_PERIOD, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
 
-        s = JsRegex.Replace(s, DOTTED_ORDINAL, m =>
+        s = Rewrite(s, DOTTED_ORDINAL, m =>
             Js.Number(m.Groups[1].Value) <= 31 ? Suffixed(Js.Number(m.Groups[1].Value), "em") : m.Value);
 
-        s = JsRegex.Replace(s, BOUND_SUFFIX, m =>
+        s = Rewrite(s, BOUND_SUFFIX, m =>
         {
             var n = Js.Number(m.Groups[1].Value);
             return double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d

@@ -9,7 +9,7 @@
  * ⚠ ORDER: tags are stripped BEFORE entities are decoded. The other way round, `&lt;i&gt;` — an author writing
  * ABOUT a tag, which must stay literal — would decode to `<i>` and then be stripped as markup.
  */
-import { tr } from "./provenance.ts";
+import { rewrite } from "./provenance.ts";
 
 /** The named entities that actually occur, plus the handful any text realistically carries. */
 const NAMED: Readonly<Record<string, string>> = {
@@ -213,14 +213,14 @@ export function stripMarkup(text: string): string {
     // Then sup/sub, which must precede the general TAG pass — that pass deletes their brackets and leaves the
     // digits inline, which is exactly the flattening described above.
     // Braces only when a LaTeX command licensed it — see LATEX_CMD.
-    // ⚠ SEQUENTIAL `tr` RATHER THAN A CHAIN (#1150 stage 2): this runs BEFORE any engine's normalizer, so a
+    // ⚠ SEQUENTIAL `rewrite` RATHER THAN A CHAIN (#1150 stage 2): this runs BEFORE any engine's normalizer, so a
     // step it does not report desyncs the provenance mapping for the whole utterance and every token loses
     // its input span. A chained `.replace` reports only its head.
-    let s = HAS_LATEX.test(text) ? tr(tr(text, LATEX_CMD, " "), MATH_BRACE, " ") : text;
-    s = tr(s, WIKITABLE, " ");
-    s = tr(s, SUP_TAG, (_m, d: string) => [...d].map((c) => SUP_MAP[c] ?? c).join(""));
-    s = tr(s, TAG, "");
-    return tr(s, ENTITY, (whole, body: string) => {
+    let s = HAS_LATEX.test(text) ? rewrite(rewrite(text, LATEX_CMD, " "), MATH_BRACE, " ") : text;
+    s = rewrite(s, WIKITABLE, " ");
+    s = rewrite(s, SUP_TAG, (_m, d: string) => [...d].map((c) => SUP_MAP[c] ?? c).join(""));
+    s = rewrite(s, TAG, "");
+    return rewrite(s, ENTITY, (whole, body: string) => {
         if (body.startsWith("#")) {
             const cp =
                 body[1] === "x" || body[1] === "X"

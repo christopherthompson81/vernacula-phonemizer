@@ -58,7 +58,7 @@
 import { segment } from "./segment.ts";
 import { MANIFEST } from "./manifest.ts";
 import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Thai digit words, indexed by value. Single source: thai.ts's cardinal compositor imports this, and
  *  step 7 below spells a decimal's fractional digits one at a time from the same array. */
@@ -103,7 +103,7 @@ const ABBREV: readonly { from: string; to: string; unitOnly: boolean }[] = [
     { from: "ดร.", to: "ดอกเตอร์", unitOnly: false },
 ];
 
-const esc = (s: string): string => s.replace(/[.$*+?^{}()|[\]\\/]/gu, "\\$&");
+const esc = (s: string): string => rewrite(s, /[.$*+?^{}()|[\]\\/]/gu, "\\$&");
 
 /** `\b` is ASCII-defined and matches NOTHING against Thai script — the trap that bit six of the first
  *  thirteen languages. Every left-edge guard in this file is this explicit lookbehind instead. */
@@ -136,12 +136,12 @@ export function normalizeThai(input: string): string {
     // FIRST, so every numeric rule below sees one representation. ZERO occurrences in the th_th corpus
     // (checked before writing it) — kept because real Thai text does use them and the number path in
     // thai.ts only accepts ASCII, so an unfolded ๐-๙ would be dropped outright by the tokenizer.
-    s = tr(s, /[๐-๙]/gu, (c) => String(c.codePointAt(0)! - 0x0e50));
+    s = rewrite(s, /[๐-๙]/gu, (c) => String(c.codePointAt(0)! - 0x0e50));
 
     // ── 2. ฯลฯ (et cetera) ───────────────────────────────────────────────────────────────────────
     // BEFORE step 3, which is what turns the ๆ this expands to into a real repetition, and BEFORE
     // step 4, which deletes a bare ฯ. Read และอื่น ๆ. Corpus ×2. Was: "lˈaː˧".
-    s = tr(s, /ฯลฯ/gu, "และอื่น ๆ");
+    s = rewrite(s, /ฯลฯ/gu, "และอื่น ๆ");
 
     // ── 3. ๆ maiyamok = repeat the preceding WORD ─────────────────────────────────────────────────
     // AFTER step 2. The antecedent is a word, not "everything since the last space" — Thai writes no
@@ -152,7 +152,7 @@ export function normalizeThai(input: string): string {
     // The last segmented token is repeated WHOLE. A further "split a compound and repeat only its tail"
     // pass was measured and rejected: it recovers 22 (คนอื่น→อื่น, ช่วงแรก→แรก) but shatters 6 into
     // non-words (บ่อย→อย ×4, แปลก→ลก ×2). Repeating คนอื่น twice is verbose; repeating อย is wrong.
-    s = tr(s, /([ก-ๅ็-๎]*)\s*ๆ/gu, (_m, run: string) => {
+    s = rewrite(s, /([ก-ๅ็-๎]*)\s*ๆ/gu, (_m, run: string) => {
         if (run === "") return ""; // no Thai antecedent — drop the mark rather than invent one
         const seg = segment(run);
         return `${run} ${seg[seg.length - 1]!}`;
@@ -161,12 +161,12 @@ export function normalizeThai(input: string): string {
     // ── 4. ฯ paiyannoi (abbreviation mark) ────────────────────────────────────────────────────────
     // AFTER step 2. สหรัฐฯ (×10, "the US") is read exactly as สหรัฐ; the mark itself is silent. It sits
     // in the Thai block, so leaving it corrupts the host word's syllabification (see the header).
-    s = tr(s, /ฯ/gu, "");
+    s = rewrite(s, /ฯ/gu, "");
 
     // ── 5. de-group thousands ─────────────────────────────────────────────────────────────────────
     // FIRST among the numeric rules: otherwise the grouping comma is clause punctuation and the number
     // is read in two halves with a pause between them. Exactly-three-digit blocks only.
-    s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
+    s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
 
     // ── 6. clock ─────────────────────────────────────────────────────────────────────────────────
     // BEFORE step 7 (times before decimals — Thai writes the clock with a PERIOD, 09.30 น., so the
@@ -175,20 +175,20 @@ export function normalizeThai(input: string): string {
     // 3.50 เมตร are decimals, 09.30 น. is a time). น. = นาฬิกา, the formal register FLEURS is written in.
     // Range first, so the leading time of `22.00-23.00 น.` — which carries no น. of its own — is
     // recognised; ถึง is unambiguous there because the corpus instance is inside ระหว่าง ("between").
-    s = tr(s,
+    s = rewrite(s,
         /(\d{1,2})[.:](\d{2})\s*[-–—]\s*(\d{1,2})[.:](\d{2})\s*น\./gu,
         (_m, h1: string, m1: string, h2: string, m2: string) =>
             `${clock(h1, m1)} ถึง ${clock(h2, m2)}`,
     );
-    s = tr(s,
+    s = rewrite(s,
         /(\d{1,2})[.:](\d{2})\s*น\./gu,
         (_m, hh: string, mm: string) => clock(hh, mm),
     );
-    s = tr(s, /(\d{1,2})\s*น\./gu, (_m, hh: string) => `${Number(hh)} นาฬิกา`);
+    s = rewrite(s, /(\d{1,2})\s*น\./gu, (_m, hh: string) => `${Number(hh)} นาฬิกา`);
 
     // ── 7. decimals ──────────────────────────────────────────────────────────────────────────────
     // AFTER step 6. The point is จุด and the fractional digits are spelled ONE AT A TIME.
-    s = tr(s,
+    s = rewrite(s,
         /(\d)\.(\d+)/gu,
         (_m, last: string, frac: string) => `${last} จุด ${spellDigits(frac)}`,
     );
@@ -197,7 +197,7 @@ export function normalizeThai(input: string): string {
     // AFTER steps 5-7: the unit guard is "a digit immediately to the left", and de-grouping (3,850 →
     // 3850) is what makes that digit adjacent, while the clock and decimal rules have already removed
     // every period that is NOT an abbreviation dot. Applied longest-key-first (see ABBREV).
-    for (const { re, to } of ABBREV_RULES) s = tr(s, re, to);
+    for (const { re, to } of ABBREV_RULES) s = rewrite(s, re, to);
 
     // ── 8b. the plus sign → บวก, SOURCED FROM THE CORPUS'S OWN AUDIO ─────────────────────────────
     // The corpus's two instances are `ตามเวลาท้องถิ่น (UTC+1)`, and the sign was DROPPED outright:
@@ -228,7 +228,7 @@ export function normalizeThai(input: string): string {
     // insurance rather than a fix. `+30°C` has ZERO corpus instances here (unlike most of the fleet — th_th
     // does not carry the Montevideo sentence), so that arm covers arbitrary text rather than this corpus: a
     // dropped sign is inaudible, which is the one outcome that cannot be right.
-    s = tr(s, /\s*\+\s*(?=\d)/gu, " บวก ");
+    s = rewrite(s, /\s*\+\s*(?=\d)/gu, " บวก ");
 
     // ── 8b2. the MINUS and ±, and the sourcing doubt above is now resolved ──────────────────
     // The note above records that `attest.ts` on ลบ "returns the ADJECTIVE negative — การป้อนกลับทางลบ,
@@ -250,8 +250,8 @@ export function normalizeThai(input: string): string {
     // score `26 - 00` — but this range is spaced only BEFORE the sign, so that guard never fires. A digit
     // anywhere to the left of the sign is therefore rejected outright: a negative quantity does not follow a
     // number, a range does. Found by the diff, not by a probe — the one instance in 1,906 utterances.
-    s = tr(s, /±/gu, " บวก ลบ ");
-    s = tr(s, /(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
+    s = rewrite(s, /±/gu, " บวก ลบ ");
+    s = rewrite(s, /(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}ลบ `);
 
     // ── 8bb. the relational and division signs, ALL FOUR FROM THE CORPUS ───────────────────
@@ -273,10 +273,10 @@ export function normalizeThai(input: string): string {
     //
     // Spaces are inserted around the words even though Thai prose does not space: the corpus writes this
     // sentence with spaces around the numeral too, and the tokenizer needs the boundary.
-    s = tr(s, /\s?=\s?/gu, " เท่ากับ ");
-    s = tr(s, /\s?<\s?/gu, " น้อยกว่า ");
-    s = tr(s, /\s?>\s?/gu, " มากกว่า ");
-    s = tr(s, /\s?÷\s?/gu, " หารด้วย ");
+    s = rewrite(s, /\s?=\s?/gu, " เท่ากับ ");
+    s = rewrite(s, /\s?<\s?/gu, " น้อยกว่า ");
+    s = rewrite(s, /\s?>\s?/gu, " มากกว่า ");
+    s = rewrite(s, /\s?÷\s?/gu, " หารด้วย ");
 
     // ── 8c. the dimension × → คูณ, SOURCED FROM THE CORPUS'S OWN AUDIO ─────────────────────────────
     // The corpus's one instance is the manuscript sentence, `วัดขนาดได้ 29¾ นิ้ว × 24½ นิ้ว`, and the sign was
@@ -297,19 +297,19 @@ export function normalizeThai(input: string): string {
     // and th_th contains zero ASCII instances. Accepting a bare `x` here would be looser than vi's rule, which
     // is digit-FLANKED, because this one keys on the following digit alone (it has to: the left neighbour is the
     // unit word นิ้ว). Add it if a Thai instance ever appears; do not import it from another language's habits.
-    s = tr(s, /\s*[×]\s*(?=\d)/gu, " คูณ ");
+    s = rewrite(s, /\s*[×]\s*(?=\d)/gu, " คูณ ");
 
     // ── 9. degree sign ───────────────────────────────────────────────────────────────────────────
     // °C before a bare ° (else the C is left behind and routes to the English phonemizer as "sˈiː").
-    s = tr(s, /\s*°\s*C(?![A-Za-z])/gui, " องศาเซลเซียส");
-    s = tr(s, /\s*°/gu, " องศา");
+    s = rewrite(s, /\s*°\s*C(?![A-Za-z])/gui, " องศาเซลเซียส");
+    s = rewrite(s, /\s*°/gu, " องศา");
 
     // ── 10. all-caps Latin initialisms → Thai letter names ───────────────────────────────────────
     // LAST of the Latin-facing rules, and deliberately narrow: the run must be flanked by neither a
     // letter nor a digit, which excludes A1GP and H5N1 (where the caps are part of a mixed token) while
     // still catching XDR-TB as two initialisms. Roman numerals cannot collide here — th is not in
     // registry.ts's ROMAN_NATIVE, so `III` has already become `3` before text() runs.
-    s = tr(s, /(?<![A-Za-z0-9])[A-Z]{2,6}(?![A-Za-z0-9])/gu, (run) =>
+    s = rewrite(s, /(?<![A-Za-z0-9])[A-Z]{2,6}(?![A-Za-z0-9])/gu, (run) =>
         [...run].map((c) => MANIFEST.letterNames[c]!).join(" "),
     );
 

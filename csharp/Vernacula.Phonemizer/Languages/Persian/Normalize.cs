@@ -5,6 +5,7 @@
  * Ported from src/languages/persian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Persian;
 
@@ -117,39 +118,39 @@ public static class Normalize
         {
             var s = input;
 
-            s = JsRegex.Replace(s, EASTERN_DIGIT, m => FoldDigit(m.Value));
+            s = Rewrite(s, EASTERN_DIGIT, m => FoldDigit(m.Value));
 
             // Arabic symbol characters → ASCII, before de-grouping, decimals and percent so a natively-typed
             // ٫ / ٬ / ٪ is seen by them.
-            s = JsRegex.Replace(s, PCT_SIGN, _ => "%");
-            s = JsRegex.Replace(s, ARABIC_DECIMAL, _ => ".");
-            s = JsRegex.Replace(s, ARABIC_GROUP, _ => ",");
+            s = Rewrite(s, PCT_SIGN, _ => "%");
+            s = Rewrite(s, ARABIC_DECIMAL, _ => ".");
+            s = Rewrite(s, ARABIC_GROUP, _ => ",");
             // ⚠ The Arabic comma DOUBLES as the thousands separator (19،500). Only the digit-flanked,
             // exactly-3-digit case is folded — ⟨،⟩ as real punctuation is the commonest mark in Persian text.
-            s = ARABIC_COMMA_GROUP.Replace(s, ",");
+            s = Rewrite(s, ARABIC_COMMA_GROUP, ",");
 
             // De-grouping FIRST among the numeric rules: a grouping comma or period is otherwise read as clause
             // punctuation. The period form requires whole 3-digit blocks, which keeps it off genuine decimals.
-            s = JsRegex.Replace(s, GROUP_COMMA,
+            s = Rewrite(s, GROUP_COMMA,
                 m => m.Groups[1].Value + JsRegex.Replace(m.Groups[2].Value, COMMA, _ => ""));
-            s = JsRegex.Replace(s, GROUP_DOT,
+            s = Rewrite(s, GROUP_DOT,
                 m => m.Groups[1].Value + JsRegex.Replace(m.Groups[2].Value, DOT, _ => ""));
 
             // CLOCK before any rule that reads a bare number, so 11:30 is not claimed piecewise. No ساعت is
             // inserted (a clock is already introduced by one), and the text's own دقیقه is consumed rather than
             // duplicated. Lookarounds keep it off a longer digit run and off a comma-decimal sports time.
-            s = JsRegex.Replace(s, CLOCK, m => Clock(m.Value, m.Groups[1].Value, m.Groups[2].Value,
+            s = Rewrite(s, CLOCK, m => Clock(m.Value, m.Groups[1].Value, m.Groups[2].Value,
                 m.Groups[3].Success ? m.Groups[3].Value : null));
 
             // The dotted 24-hour clock, only when anchored by a following UTC — H.MM is decimal-shaped, so
             // nothing weaker may claim it, and it must be settled before the decimal rule below.
-            s = JsRegex.Replace(s, CLOCK_UTC, m => Clock(m.Value, m.Groups[1].Value, m.Groups[2].Value, null));
+            s = Rewrite(s, CLOCK_UTC, m => Clock(m.Value, m.Groups[1].Value, m.Groups[2].Value, null));
 
             // Units: AFTER de-grouping and BEFORE the decimal rule, which rewrites the dot as ممیز and would
             // leave FA_NUM's version guard with no dot to reject. ⚠ The exponent arm must precede the plain
             // one, or the plain rule eats the unit and strands the `²`.
             var faUnits = string.Join("|", FA_UNIT.Keys.OrderByDescending(k => k.Length));
-            s = JsRegex.Replace(s, JsRegex.Compile($"{FA_NUM}\\s?({faUnits})(?:\\s?([²³])|([23])(?![\\d\\p{{L}}]))", "giu"),
+            s = Rewrite(s, JsRegex.Compile($"{FA_NUM}\\s?({faUnits})(?:\\s?([²³])|([23])(?![\\d\\p{{L}}]))", "giu"),
                 m =>
                 {
                     var n = m.Groups[1].Value;
@@ -161,57 +162,57 @@ public static class Normalize
                 });
             // ⚠ The rate arm precedes the plain one, or the plain rule consumes the numerator and strands the
             // slash, leaving `120 km/h` to read the denominator as an English letter name.
-            s = JsRegex.Replace(s, JsRegex.Compile($"{FA_NUM}\\s?({faUnits})\\s?/\\s?([hs])(?![\\p{{L}}\\p{{M}}\\d])", "giu"),
+            s = Rewrite(s, JsRegex.Compile($"{FA_NUM}\\s?({faUnits})\\s?/\\s?([hs])(?![\\p{{L}}\\p{{M}}\\d])", "giu"),
                 m => $"{m.Groups[1].Value} {FA_UNIT[m.Groups[2].Value.ToLowerInvariant()]} بر {FA_PER[m.Groups[3].Value.ToLowerInvariant()]}");
-            s = JsRegex.Replace(s, JsRegex.Compile($"{FA_NUM}\\s?({faUnits})(?![\\p{{L}}\\p{{M}}\\d])", "giu"),
+            s = Rewrite(s, JsRegex.Compile($"{FA_NUM}\\s?({faUnits})(?![\\p{{L}}\\p{{M}}\\d])", "giu"),
                 m => $"{m.Groups[1].Value} {FA_UNIT[m.Groups[2].Value.ToLowerInvariant()]}");
 
             // Decimals AFTER de-grouping and both clock rules, each of which a decimal-shaped pattern would
             // otherwise mis-claim. The fractional part is spelled DIGIT BY DIGIT, not as an integer.
             var decimalWord = numbers.DecimalWord;
             if (decimalWord is not null)
-                s = JsRegex.Replace(s, DECIMAL_RE,
+                s = Rewrite(s, DECIMAL_RE,
                     m => $"{m.Groups[1].Value} {decimalWord} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-            s = JsRegex.Replace(s, PERCENT, m => $"{m.Groups[1].Value} درصد");
+            s = Rewrite(s, PERCENT, m => $"{m.Groups[1].Value} درصد");
 
             // ⚠ Unlike percent, currency MOVES its word ACROSS the numeral: the sign precedes the number in
             // logical order and the word follows it, so an in-place substitution would invert the two.
-            s = JsRegex.Replace(s, CURRENCY_RE, m => $"{m.Groups[2].Value} {CURRENCY[m.Groups[1].Value]}");
+            s = Rewrite(s, CURRENCY_RE, m => $"{m.Groups[2].Value} {CURRENCY[m.Groups[1].Value]}");
 
-            s = JsRegex.Replace(s, TIMES, _ => " ضربدر ");
+            s = Rewrite(s, TIMES, _ => " ضربدر ");
             // ⚠ TWO PLUS ARMS, because a displayed `+1` is stored as `1+` in logical order. The digit-first arm
             // moves the word across the numeral (and requires no digit after the sign, so arithmetic `5+3`
             // falls to the second arm); a single in-place arm would emit operand and operator inverted.
-            s = JsRegex.Replace(s, PLUS_AFTER, m => $"به اضافه {m.Groups[1].Value}");
-            s = JsRegex.Replace(s, PLUS_BEFORE, _ => " به اضافه ");
+            s = Rewrite(s, PLUS_AFTER, m => $"به اضافه {m.Groups[1].Value}");
+            s = Rewrite(s, PLUS_BEFORE, _ => " به اضافه ");
 
-            s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} درجه سانتی‌گراد");
-            s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} درجه فارنهایت");
-            s = JsRegex.Replace(s, DEG, m => $"{m.Groups[1].Value} درجه");
+            s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} درجه سانتی‌گراد");
+            s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} درجه فارنهایت");
+            s = Rewrite(s, DEG, m => $"{m.Groups[1].Value} درجه");
 
-            s = JsRegex.Replace(s, PLUSMINUS, _ => " مثبت و منفی ");
+            s = Rewrite(s, PLUSMINUS, _ => " مثبت و منفی ");
             // ⚠ THE RANGE GUARD: a digit anywhere to the LEFT rejects the match — a negative quantity does not
             // follow a number, a range does. (`whole` is the subject string, snapshotted because `s` is
             // reassigned by every step; it is the JS replacer's fourth argument.)
             var whole = s;
-            s = JsRegex.Replace(s, MINUS, m =>
+            s = Rewrite(s, MINUS, m =>
                 DIGIT_AT_END.IsMatch(whole[..m.Index]) ? m.Value : $"{m.Groups[1].Value}منفی ");
 
             // ⚠ Persian is SOV, so a comparative ends in است: the two inequality rules CONSUME both operands
             // and rebuild the clause. Equality and division are genuinely infix (برابر است با carries its
             // copula in the middle), so those two substitute between the operands.
-            s = JsRegex.Replace(s, LESS_THAN, m => $"{m.Groups[1].Value} کوچکتر از {m.Groups[2].Value} است");
-            s = JsRegex.Replace(s, GREATER_THAN, m => $"{m.Groups[1].Value} بزرگتر از {m.Groups[2].Value} است");
-            s = JsRegex.Replace(s, EQUALS, _ => " برابر است با ");
-            s = JsRegex.Replace(s, DIVIDE, _ => " تقسیم بر ");
+            s = Rewrite(s, LESS_THAN, m => $"{m.Groups[1].Value} کوچکتر از {m.Groups[2].Value} است");
+            s = Rewrite(s, GREATER_THAN, m => $"{m.Groups[1].Value} بزرگتر از {m.Groups[2].Value} است");
+            s = Rewrite(s, EQUALS, _ => " برابر است با ");
+            s = Rewrite(s, DIVIDE, _ => " تقسیم بر ");
 
-            s = JsRegex.Replace(s, AMPERSAND, _ => " اند ");
+            s = Rewrite(s, AMPERSAND, _ => " اند ");
 
             // ORDINALS LAST, after every numeric rule, so a decimal or a clock can never be re-read as one.
             // The one rule here that emits number WORDS, undiacritized, since the suffix must attach to the
             // final word. Only the ⟨ام⟩ spelling is matched: a bare ⟨م⟩ would reach into ordinary sequences.
-            s = JsRegex.Replace(s, ORDINAL, m =>
+            s = Rewrite(s, ORDINAL, m =>
             {
                 var n = Js.Number(m.Groups[1].Value);
                 if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d)) return m.Value;

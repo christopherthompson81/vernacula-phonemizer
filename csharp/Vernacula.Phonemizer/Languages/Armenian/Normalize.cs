@@ -5,6 +5,7 @@
  * sourcing, and the refusals (the bare-colon clock, the range joiner, the plus, the initialisms).
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Armenian;
 
@@ -202,9 +203,9 @@ public static class Normalize
         var s = input;
 
         // ── 1. DE-GROUPING — FIRST, or a grouping mark reads as clause punctuation.
-        s = GROUP_SPACE.Replace(s, m => m.Groups[1].Value + GROUP_SPACE_SEP.Replace(m.Groups[2].Value, ""));
-        s = GROUP_MULTI.Replace(s, m => m.Groups[1].Value + GROUP_MULTI_SEP.Replace(m.Groups[2].Value, ""));
-        s = GROUP_ONE.Replace(s, m =>
+        s = Rewrite(s, GROUP_SPACE, m => m.Groups[1].Value + GROUP_SPACE_SEP.Replace(m.Groups[2].Value, ""));
+        s = Rewrite(s, GROUP_MULTI, m => m.Groups[1].Value + GROUP_MULTI_SEP.Replace(m.Groups[2].Value, ""));
+        s = Rewrite(s, GROUP_ONE, m =>
         {
             var head = m.Groups[1].Value;
             // ⚠ `head == "0"` cannot fire — the pattern's head is `[1-9]\d{0,2}`. Carried verbatim from the
@@ -216,7 +217,7 @@ public static class Normalize
         });
 
         // ── 2. DOTTED D.M.YYYY DATES — before every other dot rule.
-        s = DOTTED_DATE.Replace(s, m =>
+        s = Rewrite(s, DOTTED_DATE, m =>
         {
             double day = Js.Number(m.Groups[1].Value), month = Js.Number(m.Groups[2].Value);
             if (day < 1 || day > 31 || month < 1 || month > 12) return m.Value;
@@ -224,30 +225,30 @@ public static class Normalize
         });
 
         // ── 3. ERA MARKERS — before the generic abbreviation step. Longest first: `մ.թ.ա.` before `մ.թ.`
-        s = ERA_BCE.Replace(s, "մեր թվարկությունից առաջ");
-        s = ERA_BC.Replace(s, "Քրիստոսից առաջ");
-        s = ERA_CE.Replace(s, "մեր թվարկության");
+        s = Rewrite(s, ERA_BCE, "մեր թվարկությունից առաջ");
+        s = Rewrite(s, ERA_BC, "Քրիստոսից առաջ");
+        s = Rewrite(s, ERA_CE, "մեր թվարկության");
 
         // ── 4. COORDINATE ABBREVIATION PAIRS — as PAIRS, never as single letters.
         foreach (var (lat, lon, full) in COORD_RULES)
         {
-            s = lat.Replace(s, $"{full} լայնություն");
-            s = lon.Replace(s, $"{full} երկայնություն");
+            s = Rewrite(s, lat, $"{full} լայնություն");
+            s = Rewrite(s, lon, $"{full} երկայնություն");
         }
 
         // ── 5. SINGLE-DOT ABBREVIATIONS and the MAGNITUDE abbreviations.
-        s = ABBR_YEARS_PL.Replace(s, "$1 թվականներ");
-        s = ABBR_YEAR.Replace(s, "$1 թվական");
-        s = ABBR_SQUARE.Replace(s, "քառակուսի");
-        s = ABBR_SAINT.Replace(s, "Սուրբ");
-        foreach (var (re, full) in MAGNITUDE_RULES) s = re.Replace(s, full);
+        s = Rewrite(s, ABBR_YEARS_PL, "$1 թվականներ");
+        s = Rewrite(s, ABBR_YEAR, "$1 թվական");
+        s = Rewrite(s, ABBR_SQUARE, "քառակուսի");
+        s = Rewrite(s, ABBR_SAINT, "Սուրբ");
+        foreach (var (re, full) in MAGNITUDE_RULES) s = Rewrite(s, re, full);
 
         // ── 6. ASCII EXPONENT ON A UNIT — folded to the superscript so ONE rule handles both.
-        s = ASCII_EXPONENT.Replace(s, m =>
+        s = Rewrite(s, ASCII_EXPONENT, m =>
             $"{m.Groups[1].Value}{m.Groups[2].Value}{(m.Groups[3].Value == "2" ? "²" : "³")}");
 
         // ── 7. A UNIT (optionally with its power) CARRYING A BOUND SUFFIX.
-        s = UNIT_SUFFIXED.Replace(s, m =>
+        s = Rewrite(s, UNIT_SUFFIXED, m =>
         {
             var noun = UNIT_WORD[m.Groups[2].Value];
             var power = m.Groups[3].Value;
@@ -256,21 +257,21 @@ public static class Normalize
         });
 
         // ── 7b. A UNIT AFTER A MEASURE WORD, and A UNIT AFTER A SLASH.
-        s = UNIT_AFTER_MEASURE.Replace(s, m => $"{m.Groups[1].Value}{UNIT_WORD[m.Groups[2].Value]}");
-        s = UNIT_AFTER_SLASH.Replace(s, m =>
+        s = Rewrite(s, UNIT_AFTER_MEASURE, m => $"{m.Groups[1].Value}{UNIT_WORD[m.Groups[2].Value]}");
+        s = Rewrite(s, UNIT_AFTER_SLASH, m =>
         {
             var power = m.Groups[3].Value;
             return $"{m.Groups[1].Value}{(power == "" ? "" : $"{EXPONENT_WORD[power]} ")}{UNIT_WORD[m.Groups[2].Value]}";
         });
 
         // ── 8. THE BOUND SUFFIX ON DIGITS — trap 14, this language's defining rule.
-        s = ORDINAL_RANGE.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_RANGE, m =>
         {
             var first = OrdinalWords(Js.Number(m.Groups[1].Value));
             var second = OrdinalWords(Js.Number(m.Groups[2].Value));
             return first == null || second == null ? m.Value : $"{first}, {second}";
         });
-        s = ORDINAL_SUFFIX.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_SUFFIX, m =>
         {
             var bare = SPACES.Replace(m.Groups[1].Value, "");
             if (!DIGITS_ONLY.IsMatch(bare)) return m.Value;
@@ -278,7 +279,7 @@ public static class Normalize
             var tail = m.Groups[2].Value;
             return ord == null ? m.Value : tail == "" ? ord : AttachSuffix(ord, tail);
         });
-        s = CASE_SUFFIX.Replace(s, m =>
+        s = Rewrite(s, CASE_SUFFIX, m =>
         {
             var bare = SPACES.Replace(m.Groups[1].Value, "");
             if (!DIGITS_ONLY.IsMatch(bare)) return m.Value;
@@ -287,21 +288,21 @@ public static class Normalize
         });
 
         // ── 9. RANGES — a PAUSE, not a joiner.
-        s = RANGE.Replace(s, "$1, $2");
+        s = Rewrite(s, RANGE, "$1, $2");
 
         // ── 10. PERCENT WITH A BOUND SUFFIX.
-        s = PERCENT_SUFFIXED.Replace(s, " տոկոս$1");
+        s = Rewrite(s, PERCENT_SUFFIXED, " տոկոս$1");
 
         // ── 11. DEGREES. ⚠ The scale letter may be CYRILLIC С (U+0421), which this corpus writes.
-        s = DEGREE_SUFFIXED.Replace(s, "$1 աստիճան$2");
-        s = DEGREE_CELSIUS.Replace(s, "$1 Ցելսիուսի աստիճան");
-        s = DEGREE_BARE.Replace(s, "$1 աստիճան");
+        s = Rewrite(s, DEGREE_SUFFIXED, "$1 աստիճան$2");
+        s = Rewrite(s, DEGREE_CELSIUS, "$1 Ցելսիուսի աստիճան");
+        s = Rewrite(s, DEGREE_BARE, "$1 աստիճան");
 
         // ── 12. MINUS — narrow, and the narrowness is the whole argument. AFTER step 11.
-        s = MINUS.Replace(s, "$1մինուս $2");
+        s = Rewrite(s, MINUS, "$1մինուս $2");
 
         // ── 13. DECIMALS — LAST among the number rules, because this step SPENDS the `.`/`,`.
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
         {
             var frac = m.Groups[2].Value;
             var zeros = LEADING_ZEROS.Match(frac).Value.Length;
@@ -311,7 +312,7 @@ public static class Normalize
         });
 
         // ── 14. FRACTIONS — numerator a cardinal, denominator an ORDINAL. The cap is the guard.
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             double n = Js.Number(m.Groups[1].Value), d = Js.Number(m.Groups[2].Value);
             if (d < 2 || d > 10 || n > d) return m.Value;

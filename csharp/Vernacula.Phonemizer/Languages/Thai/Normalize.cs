@@ -4,6 +4,7 @@
  * Ported from src/languages/thai/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Thai;
 
@@ -101,11 +102,11 @@ public static class Normalize
     {
         var s = input;
 
-        s = JsRegex.Replace(s, THAI_DIGIT, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0e50));
+        s = Rewrite(s, THAI_DIGIT, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0e50));
 
-        s = JsRegex.Replace(s, LA, _ => "และอื่น ๆ");
+        s = Rewrite(s, LA, _ => "และอื่น ๆ");
 
-        s = JsRegex.Replace(s, MAIYAMOK, m =>
+        s = Rewrite(s, MAIYAMOK, m =>
         {
             var run = m.Groups[1].Value;
             if (run == "") return ""; // no Thai antecedent — drop the mark rather than invent one
@@ -113,37 +114,37 @@ public static class Normalize
             return $"{run} {seg[^1]}";
         });
 
-        s = JsRegex.Replace(s, PAIYANNOI, _ => "");
+        s = Rewrite(s, PAIYANNOI, _ => "");
 
-        s = JsRegex.Replace(s, DEGROUP, _ => "");
+        s = Rewrite(s, DEGROUP, _ => "");
 
-        s = JsRegex.Replace(s, CLOCK_RANGE, m =>
+        s = Rewrite(s, CLOCK_RANGE, m =>
             $"{Clock(m.Groups[1].Value, m.Groups[2].Value)} ถึง {Clock(m.Groups[3].Value, m.Groups[4].Value)}");
-        s = JsRegex.Replace(s, CLOCK_ONE, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
-        s = JsRegex.Replace(s, CLOCK_HOUR, m => $"{Js.NumberToString(Js.Number(m.Groups[1].Value))} นาฬิกา");
+        s = Rewrite(s, CLOCK_ONE, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, CLOCK_HOUR, m => $"{Js.NumberToString(Js.Number(m.Groups[1].Value))} นาฬิกา");
 
-        s = JsRegex.Replace(s, DECIMAL_RE, m => $"{m.Groups[1].Value} จุด {SpellDigits(m.Groups[2].Value)}");
+        s = Rewrite(s, DECIMAL_RE, m => $"{m.Groups[1].Value} จุด {SpellDigits(m.Groups[2].Value)}");
 
-        foreach (var (re, to) in ABBREV_RULES) s = JsRegex.Replace(s, re, _ => to);
+        foreach (var (re, to) in ABBREV_RULES) s = Rewrite(s, re, _ => to);
 
-        s = JsRegex.Replace(s, PLUS, _ => " บวก ");
+        s = Rewrite(s, PLUS, _ => " บวก ");
 
-        s = JsRegex.Replace(s, PLUSMINUS, _ => " บวก ลบ ");
+        s = Rewrite(s, PLUSMINUS, _ => " บวก ลบ ");
         var whole = s;
-        s = JsRegex.Replace(s, MINUS, m =>
+        s = Rewrite(s, MINUS, m =>
             DIGIT_AT_END.IsMatch(whole[..m.Index]) ? m.Value : $"{m.Groups[1].Value}ลบ ");
 
-        s = JsRegex.Replace(s, EQUALS, _ => " เท่ากับ ");
-        s = JsRegex.Replace(s, LESS_THAN, _ => " น้อยกว่า ");
-        s = JsRegex.Replace(s, GREATER_THAN, _ => " มากกว่า ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " หารด้วย ");
+        s = Rewrite(s, EQUALS, _ => " เท่ากับ ");
+        s = Rewrite(s, LESS_THAN, _ => " น้อยกว่า ");
+        s = Rewrite(s, GREATER_THAN, _ => " มากกว่า ");
+        s = Rewrite(s, DIVIDE, _ => " หารด้วย ");
 
-        s = JsRegex.Replace(s, TIMES, _ => " คูณ ");
+        s = Rewrite(s, TIMES, _ => " คูณ ");
 
-        s = JsRegex.Replace(s, DEG_C, _ => " องศาเซลเซียส");
-        s = JsRegex.Replace(s, DEG_BARE, _ => " องศา");
+        s = Rewrite(s, DEG_C, _ => " องศาเซลเซียส");
+        s = Rewrite(s, DEG_BARE, _ => " องศา");
 
-        s = JsRegex.Replace(s, CAPS_RUN, m =>
+        s = Rewrite(s, CAPS_RUN, m =>
             string.Join(" ", Js.CodePoints(m.Value).Select(c => Manifest.MANIFEST.LetterNames[c])));
 
         return s;

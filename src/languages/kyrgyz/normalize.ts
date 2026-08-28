@@ -41,7 +41,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberWords } from "./kyrgyz.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ---------------------------------------------------------------------------------------------------
 // KYRGYZ SUFFIX MORPHOLOGY — the machinery trap 14 says every rule here needs
@@ -331,18 +331,18 @@ export function normalizeKyrgyz(input: string): string {
     //    in the engine's `[Ѐ-ӿ]` token class, so they TERMINATE A WORD and split it into two stressed halves.
     //    The `&nbsp;` entity goes with them: the artifact carries it as literal text, and the ampersand arm
     //    of the tier would otherwise read it as *жана nbsp*.
-    s = tr(tr(s, /[­​-‏﻿]/gu, ""), /&nbsp;?/gu, " ");
+    s = rewrite(rewrite(s, /[­​-‏﻿]/gu, ""), /&nbsp;?/gu, " ");
 
     // 1) SPACE-GROUPED THOUSANDS — `67 848 156`, `199 951 км²`, `1 729 742`, `23 000 сомдон`. The Russian
     //    convention and the one Kyrgyz uses; 34 occurrences in the hard tier and 7 in the sample. The
     //    engine's `\d+` splits on the space, so `1 000 000` read *bir nøl nøl* — "one zero zero".
     //    FIRST after the invisible fold, because a surviving grouping space is later seen as two operands.
-    for (let i = 0; i < 4; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?![\d]))/gu, "");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 4; i++) s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?![\d]))/gu, "");  // space, NBSP, NNBSP, thin space
 
     // 2) THE COMMA AS A THOUSANDS SEPARATOR, but ONLY when it groups more than once — `2,774,460`,
     //    `5,294,000`, `17,840,000`. Multi-group is unambiguous; a SINGLE `\d,\d{3}` is not, and is refused at
     //    the foot of this file with its 50/50 count. Above the decimal rule, which owns the same character.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3}){2,}(?![\d.,])/gu, (m0) => m0.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3}){2,}(?![\d.,])/gu, (m0) => rewrite(m0, /,/gu, ""));
 
     // 3) MULTI-DOT ABBREVIATIONS, before any single-dot handling, or the interior dot survives as a phrase
     //    break. All three are corroborated by the same corpus spelling the phrase out beside them:
@@ -354,18 +354,18 @@ export function normalizeKyrgyz(input: string): string {
     //    `[Бб]\.\s?[зэ]\.\s?ч\.` the rule missed `Б.З.Ч 276–194` (the Eratosthenes dates): the interior
     //    letters are CAPITALS there and there is no closing dot, so it fell through to the initialism pass
     //    and read *бе зе че*. The lowercase-only class was narrower than the orthography, again.
-    s = tr(s, /(?<![\p{L}\p{M}])б\.\s?[зэ]\.\s?ч\.?(?![\p{L}\p{M}])/giu, "биздин заманга чейин")
-        .replace(/(?<![\p{L}\p{M}])ж\.\s?б\./gu, "жана башка")
-        .replace(/(?<![\p{L}\p{M}])б\.\s?а\./gu, "башкача айтканда");
+    s = rewrite(rewrite(rewrite(s, /(?<![\p{L}\p{M}])б\.\s?[зэ]\.\s?ч\.?(?![\p{L}\p{M}])/giu, "биздин заманга чейин")
+        , /(?<![\p{L}\p{M}])ж\.\s?б\./gu, "жана башка")
+        , /(?<![\p{L}\p{M}])б\.\s?а\./gu, "башкача айтканда");
 
     // 4) MAGNITUDE ABBREVIATIONS after a number — `1,5 млн`, `$3,745 трлн`, `161.9 млн доллар`, `19,2 млрд`.
     //    млн ×20, млрд ×4, трлн ×1 in 456 segments. Every one is a vowel-less Cyrillic run, so it reached the
     //    g2p as the cluster [mln] / [mlrd] — audible garbage that no leak class can see (trap 56). The full
     //    words are what the same corpus writes: миллион ×9, миллиард, and «19,2 миллиард АКШ долларга» on the
     //    wiki. Claimed only AFTER a digit, which is where all 25 occurrences sit.
-    s = tr(s, /(?<=\d\s?)млрд\.?(?![\p{L}\p{M}])/gu, "миллиард")
-        .replace(/(?<=\d\s?)трлн\.?(?![\p{L}\p{M}])/gu, "триллион")
-        .replace(/(?<=\d\s?)млн\.?(?![\p{L}\p{M}])/gu, "миллион");
+    s = rewrite(rewrite(rewrite(s, /(?<=\d\s?)млрд\.?(?![\p{L}\p{M}])/gu, "миллиард")
+        , /(?<=\d\s?)трлн\.?(?![\p{L}\p{M}])/gu, "триллион")
+        , /(?<=\d\s?)млн\.?(?![\p{L}\p{M}])/gu, "миллион");
 
     // 5) THE HYPHENATED HEAD-NOUN ABBREVIATIONS, expanded so step 6 can ordinalise them like any other head.
     //    `1991-ж.` ×24, `1928–1933-жж.` ×3, `20-к.` ×12, `83-б.` ×2 in 456 segments — and each is a single
@@ -378,10 +378,10 @@ export function normalizeKyrgyz(input: string): string {
     //    ⚠ `ж.` IS AMBIGUOUS BETWEEN жыл / жылы / жылдын AND THE CHOICE IS PRICED: жылы is the adverbial
     //    "in the year N" that the abbreviation almost always abbreviates and outnumbers the bare noun 6:1.
     //    The residual cost is the genitive contexts (`1991-ж. жарлыгы менен`), which want жылдын.
-    s = tr(s, /(?<=\d)-жж\.?(?![\p{L}\p{M}])/gu, "-жылдары")
-        .replace(/(?<=\d)-ж\.?(?![\p{L}\p{M}])/gu, "-жылы")
-        .replace(/(?<=\d)-к\.?(?![\p{L}\p{M}])/gu, "-кылым")
-        .replace(/(?<=\d)-б\.?(?![\p{L}\p{M}])/gu, "-бет");
+    s = rewrite(rewrite(rewrite(rewrite(s, /(?<=\d)-жж\.?(?![\p{L}\p{M}])/gu, "-жылдары")
+        , /(?<=\d)-ж\.?(?![\p{L}\p{M}])/gu, "-жылы")
+        , /(?<=\d)-к\.?(?![\p{L}\p{M}])/gu, "-кылым")
+        , /(?<=\d)-б\.?(?![\p{L}\p{M}])/gu, "-бет");
 
     // 6) THE ORDINAL HYPHEN — the language's defining rule, 354 occurrences and 101 of 200 sample segments.
     //    `1991-жылы` → *бир миң тогуз жүз токсон биринчи жылы*, `19-кылымда` → *он тогузунчу кылымда*,
@@ -402,12 +402,12 @@ export function normalizeKyrgyz(input: string): string {
     //    read the left operand as a bare cardinal: `10-12-кылымдагы`, `1919-1921-жылдардагы`,
     //    `1880-90-жылдардан` — 6 occurrences. Kyrgyz marks both ends of an ordinal span.
     const ordinalHead = new RegExp(`(?<![\\d.,])(\\d{1,12})-(\\d{1,12})-(${CYR}+)`, "giu");
-    s = tr(s, ordinalHead, (m0, a: string, b: string, head: string) => {
+    s = rewrite(s, ordinalHead, (m0, a: string, b: string, head: string) => {
         if (suffixKind(head.toLowerCase()) !== undefined) return m0;
         const oa = kyrgyzOrdinal(Number(a)), ob = kyrgyzOrdinal(Number(b));
         return oa === undefined || ob === undefined ? m0 : `${oa} ${ob} ${head}`;
     });
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d{1,12})-(${CYR}+)`, "giu"), (m0, d: string, head: string) => {
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d{1,12})-(${CYR}+)`, "giu"), (m0, d: string, head: string) => {
         if (suffixKind(head.toLowerCase()) !== undefined) return m0;
         const ord = kyrgyzOrdinal(Number(d));
         return ord === undefined ? m0 : `${ord} ${head}`;
@@ -420,7 +420,7 @@ export function normalizeKyrgyz(input: string): string {
     //    `grep -c '[0-9]+ кылым'` over the raw corpus is **0**, so this shape has no native source at all and
     //    the rule has no possible false positive from written Kyrgyz.
     //    ⚠ THE SPACED YEAR IS NOT CLAIMED, on the same evidence read the other way — see the foot of the file.
-    s = tr(s, /(?<![\d.,])(\d{1,4})\s+(кылым[\p{Script=Cyrillic}]*)/giu, (m0, d: string, head: string) => {
+    s = rewrite(s, /(?<![\d.,])(\d{1,4})\s+(кылым[\p{Script=Cyrillic}]*)/giu, (m0, d: string, head: string) => {
         const ord = kyrgyzOrdinal(Number(d));
         return ord === undefined ? m0 : `${ord} ${head}`;
     });
@@ -435,7 +435,7 @@ export function normalizeKyrgyz(input: string): string {
     //    corpus instances where the written form disagrees with the words it will be spoken against.
     //    ⚠ THE DIGIT RUN IS ANCHORED AT BOTH ENDS (trap 52): a lookbehind alone does not reject a string, it
     //    only moves where the engine starts, so `802.11ге` would match `11ге` without the leading guard.
-    s = tr(s, new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d{1,12})-?(${SUFFIX_RE})${NOT_WORD}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d{1,12})-?(${SUFFIX_RE})${NOT_WORD}`, "gu"),
         (m0, d: string, tail: string) => {
             const kind = suffixKind(tail);
             const w = numberWords(Number(d));
@@ -449,7 +449,7 @@ export function normalizeKyrgyz(input: string): string {
     //    defect exactly. Reading the sign here and deriving the suffix on the emitted noun is trap 14's fix
     //    shape applied to a word this rule knows statically (пайыз: back-unrounded harmony, voiced coda з, so
     //    the dative is *пайызга* and never the written *пайызке*).
-    s = tr(s, new RegExp(`(\\d)\\s?%\\s?-?(${SUFFIX_RE})${NOT_WORD}`, "gu"),
+    s = rewrite(s, new RegExp(`(\\d)\\s?%\\s?-?(${SUFFIX_RE})${NOT_WORD}`, "gu"),
         (m0, d: string, tail: string) => {
             const kind = suffixKind(tail);
             return kind === undefined ? m0 : `${d} пайыз${suffix("пайыз", kind)}`;
@@ -479,8 +479,8 @@ export function normalizeKyrgyz(input: string): string {
     //     lifetime). ⚠ The em dash is in the alternation because this corpus writes the minus as one twice
     //     (`—5°Сден`, `—40°С`) — same character it uses for apposition, told apart by the same guard.
     const NO_SIGN_LEFT = `(?<![\\d°′'\u2032\\p{L}\\p{M}])`;
-    s = tr(s, new RegExp(`${NO_SIGN_LEFT}[-−–—]\\s?(\\d+(?:,\\d+)?)(?=\\s?[.…]{2,3}\\s?[-−–—]\\s?\\d+\\s?°)`, "gui"), "минус $1");
-    s = tr(s, new RegExp(`${NO_SIGN_LEFT}[-−–—]\\s?(\\d+(?:,\\d+)?)(?=\\s?°)`, "gui"), "минус $1");
+    s = rewrite(s, new RegExp(`${NO_SIGN_LEFT}[-−–—]\\s?(\\d+(?:,\\d+)?)(?=\\s?[.…]{2,3}\\s?[-−–—]\\s?\\d+\\s?°)`, "gui"), "минус $1");
+    s = rewrite(s, new RegExp(`${NO_SIGN_LEFT}[-−–—]\\s?(\\d+(?:,\\d+)?)(?=\\s?°)`, "gui"), "минус $1");
 
     // 9) DEGREES. `+4 °Cдан`, `−10 °Cга`, `-18°Сден`, `26°Сге`, `20-26°С`, `39°11′–43°16′`, `990оС`.
     //    44 degree signs in 456 segments, and 21 of them carry a bound case suffix — nearly half.
@@ -500,7 +500,7 @@ export function normalizeKyrgyz(input: string): string {
     //    which is lowercase Cyrillic only; under `i` it captures an UPPERCASE suffix, `suffixKind` then
     //    fails to recognise it and the `?? CASE.loc` fallback substitutes the wrong case in silence —
     //    `30 °C-ДАН` (ablative) read as the locative *градуста*.
-    s = tr(s, new RegExp(`(\\d)\\s?°\\s?[CСFcсf]${suffixArm}`, "gu"), (_m, d: string, tail: string | undefined) =>
+    s = rewrite(s, new RegExp(`(\\d)\\s?°\\s?[CСFcсf]${suffixArm}`, "gu"), (_m, d: string, tail: string | undefined) =>
         `${d} градус${tail === undefined ? "" : suffix("градус", suffixKind(tail) ?? CASE.loc)}`);
     //    A COORDINATE's arc-minute and arc-second, whose words come from the same градус article defining
     //    them: «1°=60'=3600", мында 1'— минут … 1" — секунда». Without this `39°11′` lost the degree and left
@@ -509,16 +509,16 @@ export function normalizeKyrgyz(input: string): string {
     //     the rule ATE THE SPACE after the prime whenever no arc-second followed, and `43°16′ жана` came out
     //     as *…он алты минутжана* — two words fused into one token. Found by reading the corpus diff, not by
     //     any probe: the reading was otherwise correct and no leak class can see two real words joined.
-    s = tr(s, /(\d)\s?°\s?(\d{1,2})\s?[′'](?:\s?(\d{1,2})\s?[″"])?/gu,
+    s = rewrite(s, /(\d)\s?°\s?(\d{1,2})\s?[′'](?:\s?(\d{1,2})\s?[″"])?/gu,
         (_m, d: string, mi: string, se: string | undefined) =>
             `${d} градус ${mi} минут${se === undefined ? "" : ` ${se} секунд`}`);
     //    ⚠ CYRILLIC ⟨о⟩ STANDING IN FOR THE DEGREE SIGN — `990оС`, `350оС`, `2607оС`, `1340оС`, `250оС`. Five
     //    occurrences, every one a melting/boiling point in a minerals article, i.e. a typographic
     //    substitution of the same shape as the `º` U+00BA the Hindi run found. Digits + о + С is not a Kyrgyz
     //    word shape, so the claim is unambiguous; unclaimed it read as *…нөл о эс*.
-    s = tr(s, /(\d)о\s?[CС](?![\p{L}\p{M}])/gu, "$1 градус");
+    s = rewrite(s, /(\d)о\s?[CС](?![\p{L}\p{M}])/gu, "$1 градус");
     //    Bare degree, LAST, so the scale, coordinate and mojibake arms all get first refusal.
-    s = tr(s, new RegExp(`(\\d)\\s?°${suffixArm}`, "gu"), (_m, d: string, tail: string | undefined) =>
+    s = rewrite(s, new RegExp(`(\\d)\\s?°${suffixArm}`, "gu"), (_m, d: string, tail: string | undefined) =>
         `${d} градус${tail === undefined ? "" : suffix("градус", suffixKind(tail) ?? CASE.loc)}`);
 
     // 10) THE COLON BETWEEN DIGITS IS NEVER A CLAUSE BREAK, AND NO CLOCK READING IS INVENTED. `12:30` read as
@@ -529,7 +529,7 @@ export function normalizeKyrgyz(input: string): string {
     //     A `саат`-guarded clock rule would fix at most three and the bare-colon rule ceb uses would claim all
     //     eighteen. The defect here is the PAUSE, and every one of those senses reads correctly as
     //     consecutive numbers, so the colon becomes a plain separator and nothing is invented.
-    s = tr(s, /(?<=\d):(?=\d)/gu, " ");
+    s = rewrite(s, /(?<=\d):(?=\d)/gu, " ");
 
     // 11) THE SHARED SYMBOL TIER — the number must still be adjacent to its sign and must still carry its
     //     decimal comma (`26,5 %`, `$3,745 трлн`), so this runs above step 13.
@@ -543,7 +543,7 @@ export function normalizeKyrgyz(input: string): string {
     //     match at `2`, the engine restarted at `8`, and `(?<![\d.,])` then rejected THAT because a comma
     //     precedes it, so `мден` stayed a bare token while the spaced `15 мге` beside it read correctly.
     //     Trap 52 from the other side: anchor the whole operand instead of one edge of the key.
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d[\\d.,]*\\d|\\d)\\s?(${unitKeys.join("|")})(${SUFFIX_RE})${NOT_WORD}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d[\\d.,]*\\d|\\d)\\s?(${unitKeys.join("|")})(${SUFFIX_RE})${NOT_WORD}`, "gu"),
         (m0, d: string, key: string, tail: string) => {
             const kind = suffixKind(tail);
             const word = UNIT_WORD[key];
@@ -569,7 +569,7 @@ export function normalizeKyrgyz(input: string): string {
     //     ⚠ THE SECOND OPERAND RUNS TO THE CLAUSE EDGE, not to the next space, because the word goes AFTER it:
     //     `= 100 тыйынга` is *жүз тыйынга барабар*, and a single-token capture produced *жүз барабар тыйынга*
     //     — the right word in the wrong place, which is the failure this rule was written to avoid.
-    s = tr(s, /([\d\p{Script=Cyrillic}])\s*=\s*([\d\p{Script=Cyrillic}][^=.,;:!?()]{0,40})/gu,
+    s = rewrite(s, /([\d\p{Script=Cyrillic}])\s*=\s*([\d\p{Script=Cyrillic}][^=.,;:!?()]{0,40})/gu,
         (_m, a: string, b: string) => `${a} ${b.trimEnd()} барабар`);
 
     // 11c) THE NUMERO SIGN — `Инв. № 222`, `№1057`, `№ 7`, `№ 222-инвертарынан`. 8 occurrences, every one a
@@ -578,7 +578,7 @@ export function normalizeKyrgyz(input: string): string {
     //     номер)», «Инвентардык номер»). ⚠ This is trap 36's stated exception: `№` looks foldable and NFKC
     //     gives the English `No`, which would put an English word into a Kyrgyz g2p — it needs a per-language
     //     WORD, and this is that word.
-    s = tr(s, /№\s?(?=\d)/gu, "номер ");
+    s = rewrite(s, /№\s?(?=\d)/gu, "номер ");
 
     // 12) FRACTIONS — `3/4` ×2, `2/3` ×2, `1/4` ×2, `9/10`. Kyrgyz builds these exactly as it builds a
     //     decimal: DENOMINATOR IN THE ABLATIVE, then the numerator — *төрттөн үч*, "three from four". The
@@ -588,7 +588,7 @@ export function normalizeKyrgyz(input: string): string {
     //     ⚠ GUARDED TO numerator < denominator ≤ 12, which accepts every real fraction in the corpus and
     //     rejects the three things that share its shape: `7/268` and `013/201` (catalogue numbers), `001/02`
     //     (a reference) and `4.1: 1900-1945` (a volume). `36/10` is also rejected, and is a ratio.
-    s = tr(s, /(?<![\p{L}\p{M}\d./,])(\d{1,2})\s?\/\s?(\d{1,2})(?![\d./,])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /(?<![\p{L}\p{M}\d./,])(\d{1,2})\s?\/\s?(\d{1,2})(?![\d./,])/gu, (m0, a: string, b: string) => {
         const n = Number(a), den = Number(b);
         if (!(n >= 1 && n < den && den <= 12)) return m0;
         const dw = numberWords(den), nw = numberWords(n);
@@ -610,7 +610,7 @@ export function normalizeKyrgyz(input: string): string {
     //     ⚠ ONE AND TWO FRACTIONAL DIGITS ONLY — 177 + 23 of the corpus's 208, i.e. 96%. Three digits is the
     //     ambiguous zone and is refused at the foot of this file.
     //     AFTER the tier, which needs `26,5 %` intact; AFTER degrees, which needs `+13,4 °C` intact.
-    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d.,])/gu, (m0, whole: string, frac: string) => {
+    s = rewrite(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d.,])/gu, (m0, whole: string, frac: string) => {
         const w = numberWords(Number(whole)), f = numberWords(Number(frac));
         const den = numberWords(frac.length === 1 ? 10 : 100);
         return w === undefined || f === undefined || den === undefined ? m0 : `${w} бүтүн ${glue(den, CASE.abl)} ${f}`;
@@ -625,7 +625,7 @@ export function normalizeKyrgyz(input: string): string {
     //     Guarded to a single unspaced dot between digits, so `01.04.1776` is rejected at both ends (trap 52:
     //     the trailing guard is what stops the engine restarting inside it and matching `04.1776`) and a
     //     sentence period is never eaten.
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.,])/gu, "$1 $2");
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.,])/gu, "$1 $2");
 
     // 15) INITIALISMS, LAST, so every abbreviation rule above has already spent its capitals.
     //     ⚠ AN INITIALISM WITH A BOUND CASE SUFFIX FIRST — `СССРдин` ×3, `СССРде` ×2, `АКШнын` ×2, `АКШда`
@@ -634,7 +634,7 @@ export function normalizeKyrgyz(input: string): string {
     //     run and the acronym reaches the g2p raw. Spelling the run and gluing the suffix to the LAST LETTER
     //     NAME keeps it one word: `СССРдин` → *эс эс эс эрдин*, where эр is front-unrounded so the genitive
     //     is -дин, which is also what the writer wrote.
-    s = tr(s, new RegExp(`${NOT_WORD_BEFORE}(\\p{Lu}{2,})(${SUFFIX_RE})${NOT_WORD}`, "gu"),
+    s = rewrite(s, new RegExp(`${NOT_WORD_BEFORE}(\\p{Lu}{2,})(${SUFFIX_RE})${NOT_WORD}`, "gu"),
         (m0, run: string, tail: string) => {
             const kind = suffixKind(tail);
             const spelled = normalizeKyrgyzInitialisms(run);

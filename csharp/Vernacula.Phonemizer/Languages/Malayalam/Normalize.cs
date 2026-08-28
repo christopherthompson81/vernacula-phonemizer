@@ -5,6 +5,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Malayalam;
 
@@ -87,18 +88,18 @@ public static class Normalize
     public static string NormalizeMalayalam(string input)
     {
         // 1) ZERO-WIDTH characters, FIRST — every later rule asserts letter/digit adjacency.
-        var s = JsRegex.Replace(input, ZWJ_CHILLU_RE, m => ZWJ_CHILLU[m.Groups[1].Value]);
-        s = JsRegex.Replace(s, ZERO_WIDTH, _ => "");
+        var s = Rewrite(input, ZWJ_CHILLU_RE, m => ZWJ_CHILLU[m.Groups[1].Value]);
+        s = Rewrite(s, ZERO_WIDTH, _ => "");
 
         // 2) MALAYALAM DIGITS ൦-൯ → ASCII, before every numeric rule.
         s = Unicode.FoldNativeDigits(s);
 
         // 3) DIGIT DE-GROUPING, before anything that reads punctuation.
-        s = JsRegex.Replace(s, GROUPING_COMMA, _ => "");
+        s = Rewrite(s, GROUPING_COMMA, _ => "");
 
         // 4) NUMERIC CLITICS, after de-grouping and before the symbol tier and the time rule.
         //    (a) ORDINALS first: -ാമത്തെ must not be claimed by a shorter ending.
-        s = JsRegex.Replace(s, ORDINAL_RE, m => Welded(m, n =>
+        s = Rewrite(s, ORDINAL_RE, m => Welded(m, n =>
         {
             var end = m.Groups[2].Value;
             // "ആം" is the standalone spelling of the ending "ാം"; "മത്തെ" of "ാമത്തെ".
@@ -106,10 +107,10 @@ public static class Normalize
             return NumbersMl.OrdinalToWords(n, ending);
         }));
         //    (b) PLURAL clitics before oblique ones: -കളിൽ ends in the oblique -ൽ.
-        s = JsRegex.Replace(s, PLURAL_RE, m =>
+        s = Rewrite(s, PLURAL_RE, m =>
             Welded(m, n => NumbersMl.CliticToWords(n, m.Groups[2].Value, NumbersMl.PluralStem)));
         //    (c) OBLIQUE case clitics.
-        s = JsRegex.Replace(s, OBLIQUE_RE, m => Welded(m, n =>
+        s = Rewrite(s, OBLIQUE_RE, m => Welded(m, n =>
         {
             var c = m.Groups[2].Value;
             return NumbersMl.CliticToWords(n, FOLD_CLITIC.TryGetValue(c, out var f) ? f : c, NumbersMl.ObliqueStem);
@@ -120,30 +121,30 @@ public static class Normalize
         s = SYMBOLS(s);
 
         // 6) TIMES BEFORE the decimal step, so a bare-number rule cannot restart inside 2:11.60.
-        s = JsRegex.Replace(s, OCLOCK, m => m.Groups[1].Value);
-        s = JsRegex.Replace(s, TIME_COLON, _ => " ");
+        s = Rewrite(s, OCLOCK, m => m.Groups[1].Value);
+        s = Rewrite(s, TIME_COLON, _ => " ");
 
         // 7) PERCENT ALREADY SPELLED OUT — the shared tier's duplicate guard is currency-only.
-        s = JsRegex.Replace(s, DOUBLE_PERCENT, _ => "ശതമാനം");
+        s = Rewrite(s, DOUBLE_PERCENT, _ => "ശതമാനം");
 
         // 8) DECIMALS, after units and times have taken their share.
-        s = JsRegex.Replace(s, DECIMAL_RE, m =>
+        s = Rewrite(s, DECIMAL_RE, m =>
             $"{m.Groups[1].Value} {NumbersMl.DECIMAL_WORD} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 9) SIGNS, then DEGREES last so a decimal temperature keeps its point.
-        s = JsRegex.Replace(s, PLUS_MINUS, _ => " പ്ലസ് മൈനസ് ");
+        s = Rewrite(s, PLUS_MINUS, _ => " പ്ലസ് മൈനസ് ");
         // ⚠ The JS replacer's `offset`/`whole` arguments are `m.Index` and the subject: the third guard
         // rejects a SPACED range or score by looking for a digit ANYWHERE to the left.
         var subject = s;
-        s = JsRegex.Replace(s, MINUS, m => DIGIT_LEFT.IsMatch(subject[..m.Index]) ? m.Value : "മൈനസ് ");
-        s = JsRegex.Replace(s, PLUS_AFTER, m => m.Groups[1].Value + " പ്ലസ് ");
-        s = JsRegex.Replace(s, PLUS_INITIAL, m => m.Groups[1].Value + "പ്ലസ് ");
+        s = Rewrite(s, MINUS, m => DIGIT_LEFT.IsMatch(subject[..m.Index]) ? m.Value : "മൈനസ് ");
+        s = Rewrite(s, PLUS_AFTER, m => m.Groups[1].Value + " പ്ലസ് ");
+        s = Rewrite(s, PLUS_INITIAL, m => m.Groups[1].Value + "പ്ലസ് ");
 
         s = PostposedSignPass.PostposedSign(s, "<", "എക്കാൾ കുറവ്");
         s = PostposedSignPass.PostposedSign(s, ">", "എക്കാൾ കൂടുതൽ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " ഹരണം ");
+        s = Rewrite(s, DIVIDE, _ => " ഹരണം ");
         s = PostposedSignPass.PostposedSign(s, "=", "ന് തുല്യം");
-        s = JsRegex.Replace(s, DEGREE, m => m.Groups[1].Value + " ഡിഗ്രി ");
+        s = Rewrite(s, DEGREE, m => m.Groups[1].Value + " ഡിഗ്രി ");
 
         return s;
     }

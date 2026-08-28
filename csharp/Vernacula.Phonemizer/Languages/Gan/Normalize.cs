@@ -4,6 +4,7 @@
  * Ported from src/languages/gan/normalize.ts — see that file for the corpus evidence and every refusal.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Gan;
 
@@ -47,17 +48,17 @@ public static class Normalize
     public static string NormalizeGan(string input)
     {
         var s = input;
-        s = ORD_O.Replace(ORD_A.Replace(s, _ => "a"), _ => "o");
+        s = Rewrite(Rewrite(s, ORD_A, _ => "a"), ORD_O, _ => "o");
         s = Sinitic.DegroupThousands(s);
         s = ProtectDurations(s);
         s = Sinitic.SpellYears(s, new YearRuleData { RangeWord = "到" });
         s = s.Replace(AGO, "年");
         s = Sinitic.ReorderFraction(s, "分之");
         s = SYMBOLS(s);
-        s = PER_MILLE.Replace(s, m => $"千分之{m.Groups[1].Value}");
+        s = Rewrite(s, PER_MILLE, m => $"千分之{m.Groups[1].Value}");
         s = Sinitic.ReadDecimals(s, "點");
-        s = NEGATIVE.Replace(s, m => $"{m.Groups[1].Value}負{m.Groups[2].Value}");
-        s = RANGE.Replace(s, m =>
+        s = Rewrite(s, NEGATIVE, m => $"{m.Groups[1].Value}負{m.Groups[2].Value}");
+        s = Rewrite(s, RANGE, m =>
         {
             var before = s[Math.Max(0, m.Index - 12)..m.Index];
             return LATIN_BEFORE.IsMatch(before) ? m.Value : $"{m.Groups[1].Value}到{m.Groups[2].Value}";
@@ -72,5 +73,5 @@ public static class Normalize
         "(\\d{4})年(\\s*(?:到|至|[-–~〜－])\\s*)(\\d{4})年(?=前)", "gu");
 
     private static string ProtectDurations(string s) =>
-        DURATION.Replace(s, m => $"{m.Groups[1].Value}{AGO}{m.Groups[2].Value}{m.Groups[3].Value}{AGO}");
+        Rewrite(s, DURATION, m => $"{m.Groups[1].Value}{AGO}{m.Groups[2].Value}{m.Groups[3].Value}{AGO}");
 }

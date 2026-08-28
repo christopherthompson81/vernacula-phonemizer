@@ -659,7 +659,7 @@ function degreeArms(src: string): Arms {
     // The `new RegExp(…)` alternative is ONE level paren-balanced: the pattern is a template string that
     // almost always contains a capture group (`(ꠍꠦ|ꠚꠣ)`), and `[^)]*` stops at that group's own paren, after
     // which the whole call fails to match and the arm vanishes instead of counting as unreadable.
-    for (const m of src.matchAll(/(?:\.replace\(|\btr\([A-Za-z_$][\w$]*,\s*)\s*(?:\/((?:\\.|\[[^\]]*\]|[^/\n])+)\/[a-z]*|new RegExp\((?:[^()]|\([^()]*\))*\))\s*,\s*([\s\S]{0,120}?)\)/gu)) {
+    for (const m of src.matchAll(/(?:\.replace\(|\brewrite\([A-Za-z_$][\w$]*,\s*)\s*(?:\/((?:\\.|\[[^\]]*\]|[^/\n])+)\/[a-z]*|new RegExp\((?:[^()]|\([^()]*\))*\))\s*,\s*([\s\S]{0,120}?)\)/gu)) {
         let pat = m[1];
         if (pat === undefined) {
             if (!/°/u.test(m[0])) continue;
@@ -1158,7 +1158,7 @@ function localUnitRule(langSrc: string): UnitDecl | undefined {
     const key = new RegExp(`(?<![\\p{L}\\p{M}])(?:${alt})(?![\\p{L}\\p{M}])`, "iu");
     const words: string[] = [];
     let unreadable = false;
-    for (const m of langSrc.matchAll(/(?:\.replace\(|\btr\([A-Za-z_$][\w$]*,\s*)\s*(?:\/((?:\\.|\[[^\]]*\]|[^/\n])+)\/[a-z]*|new RegExp\((?:[^()]|\([^()]*\))*\))\s*,\s*([\s\S]{0,120}?)\)/gu)) {
+    for (const m of langSrc.matchAll(/(?:\.replace\(|\brewrite\([A-Za-z_$][\w$]*,\s*)\s*(?:\/((?:\\.|\[[^\]]*\]|[^/\n])+)\/[a-z]*|new RegExp\((?:[^()]|\([^()]*\))*\))\s*,\s*([\s\S]{0,120}?)\)/gu)) {
         const pat = m[1] ?? /new RegExp\(\s*(["'`])((?:\\.|(?!\1)[^\\])*)\1/u.exec(m[0])?.[2];
         if (pat === undefined) continue;
         // ⚠ NO SEPARATE "AND A DIGIT" TEST. It was there to keep an unrelated `.replace` out, and it threw
@@ -1339,7 +1339,7 @@ function tierWords(c: Ctx): Row[] {
     // literal dollar) or inside a CHARACTER CLASS (`[$€]`). The other signs are not regex metacharacters and
     // need no such care.
     const emits = (sign: RegExp): boolean =>
-        [...c.langSrc.matchAll(/(?:\.replace\(|\btr\([A-Za-z_$][\w$]*,\s*)\s*(\/(?:\\.|\[[^\]]*\]|[^/\n])+\/[a-z]*)\s*,([^;]*)\)/gu)]
+        [...c.langSrc.matchAll(/(?:\.replace\(|\brewrite\([A-Za-z_$][\w$]*,\s*)\s*(\/(?:\\.|\[[^\]]*\]|[^/\n])+\/[a-z]*)\s*,([^;]*)\)/gu)]
             // The word may sit anywhere in the replacement, not against the quote: English writes
             // `.replace(/(\d)\s?%/gu, "$1 percent")`, so a `["'`]\p{L}{2,}` anchor missed it.
             // The replacement window is CAPPED: `([^;]*)` runs to the next semicolon, which in a chained

@@ -4,6 +4,7 @@
  * Ported from src/languages/kannada/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Kannada;
 
@@ -91,18 +92,18 @@ public static class Normalize
         // 1. Zero-width characters FIRST: every later rule asserts letter/digit adjacency, and an invisible
         // character defeats all of them. It also splits a word for the tokenizer, whose word class is the
         // Kannada block and excludes U+200C/U+200D.
-        var s = ZERO_WIDTH.Replace(input, "");
+        var s = Rewrite(input, ZERO_WIDTH, "");
 
         // 2. Kannada digits → ASCII, before every numeric rule below, so a native-digit numeral is eligible
         // for the same de-grouping, ordinal, percent and unit handling as an ASCII one.
         s = Unicode.FoldNativeDigits(s);
 
         // 3. De-group digits, before anything that reads punctuation, or the separator becomes a clause pause.
-        s = GROUPING.Replace(s, "");
+        s = Rewrite(s, GROUPING, "");
 
         // 4. Ordinals ನೇ / ನೆಯ, AFTER de-grouping — an ordinal can sit on a grouped numeral. The suffix fuses
         // onto the LAST cardinal word; emitted apart, ನೇ reaches the g2p as a stray stressed [nˈeː].
-        s = ORDINAL_RE.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_RE, m =>
         {
             var n = Js.Number(m.Groups[1].Value);
             if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n == 0) return m.Value;
@@ -112,28 +113,28 @@ public static class Normalize
 
         // 5. Era markers, BEFORE the dotted-abbreviation rules — ಕ್ರಿ.ಪೂ is a dotted pair by shape and would
         // otherwise survive as two letters with the era lost.
-        s = ERA_RE.Replace(s, m => ERA[m.Groups[1].Value]);
+        s = Rewrite(s, ERA_RE, m => ERA[m.Groups[1].Value]);
 
         // 6. Multi-dot abbreviations before single-dot ones, else the interior dot survives as a phrase break.
         // The unit is expanded only when nothing is welded onto it: gluing a case clitic to the expansion
         // would build a form Kannada does not have. `frozen` snapshots the subject, which `s` no longer is.
         var frozen = s;
-        s = KM_RE.Replace(s, m =>
+        s = Rewrite(s, KM_RE, m =>
             LETTER_START.IsMatch(frozen[(m.Index + m.Value.Length)..])
                 ? DOTTED.Replace(m.Value, "")
                 : "ಕಿಲೋಮೀಟರ್");
-        s = MM_RE.Replace(s, "ಮಿಮೀ");
-        s = INITIALISM_RE.Replace(s, m => DOTTED.Replace(m.Value, " ").Trim());
+        s = Rewrite(s, MM_RE, "ಮಿಮೀ");
+        s = Rewrite(s, INITIALISM_RE, m => DOTTED.Replace(m.Value, " ").Trim());
 
         // 7. Rate units, BEFORE the shared symbol tier can claim the numerator and strand the denominator.
         // Kannada's rate is a dative PREFIX, which is why `unitPer` is not declared on the shared tier.
         var frozen2 = s;
-        s = KM_RATE_RE.Replace(s, m =>
+        s = Rewrite(s, KM_RATE_RE, m =>
             $"{Dative(RATE_DENOM[m.Groups[2].Value], frozen2, m.Index)}{m.Groups[1].Value} ಕಿಲೋಮೀಟರ್");
         var frozen3 = s;
-        s = MI_RATE_RE.Replace(s, m => $"{Dative("ಗಂಟೆಗೆ", frozen3, m.Index)}{m.Groups[1].Value} ಮೈಲಿ");
+        s = Rewrite(s, MI_RATE_RE, m => $"{Dative("ಗಂಟೆಗೆ", frozen3, m.Index)}{m.Groups[1].Value} ಮೈಲಿ");
 
-        s = VULGAR_RE.Replace(s, m => $" {VULGAR[m.Groups[1].Value]}");
+        s = Rewrite(s, VULGAR_RE, m => $" {VULGAR[m.Groups[1].Value]}");
 
         // 9. The shared symbol tier: percent, currency, units, exponent. UNITS BEFORE DECIMALS — the tier
         // matches a unit only when a NUMBER is adjacent. After de-grouping and after the rate rule.
@@ -141,21 +142,21 @@ public static class Normalize
 
         // 10. Times BEFORE the decimal step: a bare-number rule must not claim `11:30`. `:00` minutes are
         // dropped rather than read, and every remaining digit-colon-digit becomes a space.
-        s = CLOCK_00.Replace(s, "$1");
-        s = CLOCK_COLON.Replace(s, " ");
+        s = Rewrite(s, CLOCK_00, "$1");
+        s = Rewrite(s, CLOCK_COLON, " ");
 
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} {Numbers.DECIMAL_WORD} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-        s = PLUS_ATTACHED.Replace(s, "$1 ಪ್ಲಸ್ ");
-        s = PLUS_LEADING.Replace(s, "$1ಪ್ಲಸ್ ");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 ಪ್ಲಸ್ ");
+        s = Rewrite(s, PLUS_LEADING, "$1ಪ್ಲಸ್ ");
 
-        s = DEGREE.Replace(s, "$1 ಡಿಗ್ರಿ ");
+        s = Rewrite(s, DEGREE, "$1 ಡಿಗ್ರಿ ");
 
         s = PostposedSignPass.PostposedSign(s, "<", "ಗಿಂತ ಕಡಿಮೆ");
         s = PostposedSignPass.PostposedSign(s, ">", "ಗಿಂತ ಹೆಚ್ಚು");
-        s = EQUALS.Replace(s, " ಸಮ ");
-        s = DIVIDE.Replace(s, " ಭಾಗಾಕಾರ ");
+        s = Rewrite(s, EQUALS, " ಸಮ ");
+        s = Rewrite(s, DIVIDE, " ಭಾಗಾಕಾರ ");
 
         return s;
     }

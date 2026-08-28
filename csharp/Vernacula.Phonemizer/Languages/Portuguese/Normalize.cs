@@ -4,6 +4,7 @@
  * Ported from src/languages/portuguese/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Portuguese;
 
@@ -70,7 +71,7 @@ public static class Normalize
 
     /** Feminine ordinal: every element of a compound inflects (trigésimo sétimo → trigésima sétima). */
     private static string FeminineOrdinal(string masc) =>
-        string.Join(" ", masc.Split(' ').Select(w => FINAL_O.Replace(w, "a")));
+        string.Join(" ", masc.Split(' ').Select(w => Rewrite(w, FINAL_O, "a")));
 
     /** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora). */
     private static string FeminineCardinal(double n) => FINAL_UM.Replace(Numbers.NumberToWords(n), DEF.FeminineOne);
@@ -124,68 +125,68 @@ public static class Normalize
     {
         var s = input;
 
-        s = GROUP_SPACE_RE.Replace(s, "");
-        s = GROUP_SPACE_RE.Replace(s, "");
-        s = THIN_SPACES.Replace(s, " ");
+        s = Rewrite(s, GROUP_SPACE_RE, "");
+        s = Rewrite(s, GROUP_SPACE_RE, "");
+        s = Rewrite(s, THIN_SPACES, " ");
 
         // Era markers run BEFORE the dotted-abbreviation rule, or the bare `a.` is claimed first.
-        s = ERA_BC.Replace(s, DEF.EraMarkers.BeforeChrist);
-        s = ERA_AD.Replace(s, DEF.EraMarkers.AfterChrist);
+        s = Rewrite(s, ERA_BC, DEF.EraMarkers.BeforeChrist);
+        s = Rewrite(s, ERA_AD, DEF.EraMarkers.AfterChrist);
 
-        s = NUMERO.Replace(s, $"{DEF.NumberSign} ");
+        s = Rewrite(s, NUMERO, $"{DEF.NumberSign} ");
 
-        s = ABBREV_MID.Replace(s, m =>
+        s = Rewrite(s, ABBREV_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122). The pattern is built from this table's OWN keys but
             // carries `i`+`u`, so JS's fold widens it — `ſ`→`s`, and the Cyrillic `ᲀᲃᲅ` forms onto theirs —
             // and a near-miss MATCHES while its key is absent. The TS asserted non-null and spoke the word
             // "undefined"; this indexer THREW. Refuse the whole match.
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = ABBREV_END.Replace(s, m =>
+        s = Rewrite(s, ABBREV_END, m =>
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
         // With no ordinal word in range the indicator is STRIPPED, not kept: returning the match unchanged
         // would leak a raw º into the phoneme string, which is the leak this rule exists to prevent.
-        s = ORDINAL_INDICATOR.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_INDICATOR, m =>
         {
             var digits = m.Groups[1].Value;
-            var n = Js.Number(GROUPING_DOT.Replace(digits, ""));
+            var n = Js.Number(Rewrite(digits, GROUPING_DOT, ""));
             var masc = double.IsInteger(n) && n >= 1 && n <= 1000 ? RomanOrdinals.PortugueseOrdinal((int)n) : null;
             if (masc is null) return digits;
             return FEMININE_MARK.IsMatch(m.Value) ? FeminineOrdinal(masc) : masc;
         });
 
-        s = REAIS.Replace(s, "$1 reais");
+        s = Rewrite(s, REAIS, "$1 reais");
 
         // US$/AUD$ fold to the bare sign rather than to a word so the shared currency tier keeps count
         // agreement (US$ 1 → dólar, not dólares). Only where a number follows: a lone $ is dropped instead.
-        s = DOLLAR_CODE.Replace(s, "$");
+        s = Rewrite(s, DOLLAR_CODE, "$");
 
         // Degrees before the unit tier, or the bare sign is left behind.
-        s = DEG_C.Replace(s, m => $"{m.Groups[1].Value} {DegreeWord(m.Groups[1].Value)} {DEGREE.Celsius}");
-        s = DEG_F.Replace(s, m => $"{m.Groups[1].Value} {DegreeWord(m.Groups[1].Value)} {DEGREE.Fahrenheit}");
-        s = DEG.Replace(s, m => $"{m.Groups[1].Value} {DegreeWord(m.Groups[1].Value)}");
+        s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} {DegreeWord(m.Groups[1].Value)} {DEGREE.Celsius}");
+        s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} {DegreeWord(m.Groups[1].Value)} {DEGREE.Fahrenheit}");
+        s = Rewrite(s, DEG, m => $"{m.Groups[1].Value} {DegreeWord(m.Groups[1].Value)}");
 
-        s = CLOCK_H.Replace(s, m => ClockWords(
+        s = Rewrite(s, CLOCK_H, m => ClockWords(
             Js.Number(m.Groups[1].Value),
             m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? Js.Number(m.Groups[2].Value) : null));
-        s = CLOCK_COLON.Replace(s, m => ClockWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
+        s = Rewrite(s, CLOCK_COLON, m => ClockWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
 
-        s = MINUS.Replace(s, $"$1{SIGN.Minus} $2");
+        s = Rewrite(s, MINUS, $"$1{SIGN.Minus} $2");
         // ± is a single character (U+00B1), not a `+`, so no `+` rule can ever match inside it.
-        s = PLUS_MINUS.Replace(s, $" {SIGN.PlusMinus} ");
-        s = PLUS_ATTACHED.Replace(s, $"$1 {SIGN.Plus} $2");
-        s = PLUS_LEADING.Replace(s, $"$1{SIGN.Plus} $2");
+        s = Rewrite(s, PLUS_MINUS, $" {SIGN.PlusMinus} ");
+        s = Rewrite(s, PLUS_ATTACHED, $"$1 {SIGN.Plus} $2");
+        s = Rewrite(s, PLUS_LEADING, $"$1{SIGN.Plus} $2");
 
-        s = EQUALS_RE.Replace(s, $" {SIGN.Equals} ");
-        s = LESS_THAN.Replace(s, $" {SIGN.LessThan} ");
-        s = GREATER_THAN.Replace(s, $" {SIGN.GreaterThan} ");
-        s = DIVIDE.Replace(s, $" {SIGN.DividedBy} ");
+        s = Rewrite(s, EQUALS_RE, $" {SIGN.Equals} ");
+        s = Rewrite(s, LESS_THAN, $" {SIGN.LessThan} ");
+        s = Rewrite(s, GREATER_THAN, $" {SIGN.GreaterThan} ");
+        s = Rewrite(s, DIVIDE, $" {SIGN.DividedBy} ");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
             FractionWords((int)Js.Number(m.Groups[1].Value), (int)Js.Number(m.Groups[2].Value)) ?? m.Value);
 
         if (brazilian)
-            s = FIRST_OF_MONTH.Replace(s, m => $"{DEF.Ordinals.Units[1]} de {m.Groups[1].Value}");
+            s = Rewrite(s, FIRST_OF_MONTH, m => $"{DEF.Ordinals.Units[1]} de {m.Groups[1].Value}");
 
         return s;
     }

@@ -5,6 +5,7 @@
  * Ported from src/languages/serbian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Serbian;
 
@@ -254,7 +255,7 @@ public static class Normalize
     /// a word table to drift. ⚠ SHARED BY sr, hr AND bs — the line it replaces existed three times, which
     /// is exactly how the era rule and the hyphen-suffix ordinal came to be fixed in one standard and left
     /// broken in the others (#1074).</para></summary>
-    public static string ReadDecimalComma(string s) => DECIMAL_FRAC.Replace(s, m =>
+    public static string ReadDecimalComma(string s) => Rewrite(s, DECIMAL_FRAC, m =>
     {
         var frac = m.Groups[1].Value;
         var zeros = 0;
@@ -274,22 +275,22 @@ public static class Normalize
         var s = input;
 
         // 0) DIGIT DE-GROUPING, FIRST. Two passes, because adjacent groups share a digit (`800.000`).
-        for (var i = 0; i < 2; i++) s = DEGROUP.Replace(s, "");
+        for (var i = 0; i < 2; i++) s = Rewrite(s, DEGROUP, "");
 
         // 1) MULTI-DOT ERA MARKER, before the abbreviation and `N.` ordinal rules.
-        s = ERA_YEAR.Replace(s, m =>
+        s = Rewrite(s, ERA_YEAR, m =>
         {
             var bas = OrdinalBase(Js.Number(m.Groups[1].Value));
             return bas is null ? m.Value : $"{Inflect(bas, "f.gen")} ";
         });
         foreach (var (dotted, bare, words) in ERA_RES)
         {
-            s = dotted.Replace(s, m => ReplaceEra(words, m.Groups[1].Value, m.Groups[2].Value));
-            s = bare.Replace(s, _ => words);
+            s = Rewrite(s, dotted, m => ReplaceEra(words, m.Groups[1].Value, m.Groups[2].Value));
+            s = Rewrite(s, bare, _ => words);
         }
 
         // 2) DOT-WRITTEN CLOCK — `12.00 сати`.
-        s = CLOCK_DOT.Replace(s, m =>
+        s = Rewrite(s, CLOCK_DOT, m =>
         {
             var h = m.Groups[1].Value;
             var min = Js.Number(m.Groups[2].Value);
@@ -297,36 +298,36 @@ public static class Normalize
         });
 
         // 3) DOTTED ABBREVIATIONS.
-        s = ABBREV_MID.Replace(s, m =>  // ⚠ reachable miss (#1122)
+        s = Rewrite(s, ABBREV_MID, m =>  // ⚠ reachable miss (#1122)
             DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = ABBREV_COMMA.Replace(s, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? w : m.Value);
-        s = ABBREV_END.Replace(s, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? $"{w}." : m.Value);
+        s = Rewrite(s, ABBREV_COMMA, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? w : m.Value);
+        s = Rewrite(s, ABBREV_END, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? $"{w}." : m.Value);
 
         // 3b) SIGNS. ⚠ `±` MUST PRECEDE THE `+` ARMS.
         var subject = s;
-        s = MINUS.Replace(s, m => DIGIT_LEFT.IsMatch(subject[..m.Index]) ? m.Value : "минус ");
-        s = PLUS_MINUS.Replace(s, " плус минус ");
-        s = PLUS_AFTER.Replace(s, "$1 плус ");
-        s = PLUS_START.Replace(s, "$1плус ");
+        s = Rewrite(s, MINUS, m => DIGIT_LEFT.IsMatch(subject[..m.Index]) ? m.Value : "минус ");
+        s = Rewrite(s, PLUS_MINUS, " плус минус ");
+        s = Rewrite(s, PLUS_AFTER, "$1 плус ");
+        s = Rewrite(s, PLUS_START, "$1плус ");
 
         // 3c) RELATIONAL AND DIVISION SIGNS.
-        s = EQUALS.Replace(s, " једнако ");
-        s = LESS_THAN.Replace(s, " мање од ");
-        s = GREATER_THAN.Replace(s, " веће од ");
-        s = DIVIDE.Replace(s, " подељено са ");
+        s = Rewrite(s, EQUALS, " једнако ");
+        s = Rewrite(s, LESS_THAN, " мање од ");
+        s = Rewrite(s, GREATER_THAN, " веће од ");
+        s = Rewrite(s, DIVIDE, " подељено са ");
 
         // 4) DEGREES, two arms — the scale-bearing one first, then the bare degree.
-        s = DEG_SCALE.Replace(s, m =>
+        s = Rewrite(s, DEG_SCALE, m =>
         {
             var n = m.Groups[1].Value;
             var scale = m.Groups[2].Success ? m.Groups[2].Value : m.Groups[3].Success ? m.Groups[3].Value : "";
             return $"{n} {Counted(Js.Number(n), STEPEN)} " + (FAHRENHEIT.IsMatch(scale) ? "Farenhajta" : "Celzijusa");
         });
         // ⚠ TRAILING SPACE — any letter this arm does not consume would otherwise glue onto the noun.
-        s = DEG_BARE.Replace(s, m => $"{m.Groups[1].Value} {Counted(Js.Number(m.Groups[1].Value), STEPEN)} ");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} {Counted(Js.Number(m.Groups[1].Value), STEPEN)} ");
 
         // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`). Before the range rule (6b).
-        s = SUFFIXED.Replace(s, m =>
+        s = Rewrite(s, SUFFIXED, m =>
         {
             var suffix = Lat(m.Groups[2].Value);
             return OrdinalForms(Js.Number(m.Groups[1].Value)).FirstOrDefault(f => f.EndsWith(suffix, StringComparison.Ordinal))
@@ -334,14 +335,14 @@ public static class Normalize
         });
 
         // 6) UNITS THE SHARED TIER CANNOT EXPRESS — the `/s` rate takes "u sekundi".
-        s = MBIT_S.Replace(s, m => $"{m.Groups[1].Value} {Counted(IntOf(m.Groups[1].Value), MEGABIT)} u sekundi");
-        s = M_S.Replace(s, m => $"{m.Groups[1].Value} {Counted(IntOf(m.Groups[1].Value), METAR)} u sekundi");
+        s = Rewrite(s, MBIT_S, m => $"{m.Groups[1].Value} {Counted(IntOf(m.Groups[1].Value), MEGABIT)} u sekundi");
+        s = Rewrite(s, M_S, m => $"{m.Groups[1].Value} {Counted(IntOf(m.Groups[1].Value), METAR)} u sekundi");
 
         // 6b) NUMERIC RANGES.
-        s = RANGE.Replace(s, "$1 do ");
+        s = Rewrite(s, RANGE, "$1 do ");
 
         // 7) THE `N.` ORDINAL — only before a LOWERCASE licensing word.
-        s = ORDINAL_N.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_N, m =>
         {
             var word = m.Groups[2].Value;
             if (!LICENSOR.TryGetValue(Lat(word), out var slot)) return m.Value;
@@ -351,7 +352,7 @@ public static class Normalize
         });
 
         // 8) CLOCK — a CARDINAL hour with the counted noun.
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             var head = $"{Numbers.NumberToWords(hv)} {Counted(hv, SAT)}";
@@ -366,8 +367,8 @@ public static class Normalize
         s = ReadDecimalComma(s);
 
         // 11) `×`/`x` between digits, and the leading `+`.
-        s = TIMES.Replace(s, " puta ");
-        s = PLUS_SIGN.Replace(s, "$1plus $2");
+        s = Rewrite(s, TIMES, " puta ");
+        s = Rewrite(s, PLUS_SIGN, "$1plus $2");
 
         // 12) INITIALISMS, LAST.
         return NormalizeSerbianInitialisms(s);
@@ -375,7 +376,7 @@ public static class Normalize
 
     /** Integer part of a Serbian-written number ("3,50" → 3), for the local count-agreement calls. */
     private static double IntOf(string n) =>
-        Math.Truncate(Js.Number(Js.ReplaceFirst(GROUP_DOT.Replace(n, ""), ",", ".")));
+        Math.Truncate(Js.Number(Js.ReplaceFirst(Rewrite(n, GROUP_DOT, ""), ",", ".")));
 
     /** The era-marker replacer (step 1). Keeps the final dot only when it was ALSO the sentence end. */
     private static string ReplaceEra(string words, string sp, string next)

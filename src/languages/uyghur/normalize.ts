@@ -1,5 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 /**
  * Uyghur / ئۇيغۇرچە (ug) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -250,7 +250,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         let s = input.normalize("NFC");
 
         // 2) HTML ENTITIES, before anything can read one as letters. `&nbsp;` ×4 in the mined segments.
-        s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /﻿/gu, "");
+        s = rewrite(rewrite(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /﻿/gu, "");
 
         // 3) ⚠ ARABIC PRESENTATION FORMS — 2,367 characters across 8 of the 429 mined segments, and those 8
         //    segments read as the EMPTY STRING today: the engine's TOKEN class is U+0620–U+06FF, so
@@ -275,7 +275,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    fold to the Urdu heh-goal ہ U+06C1, which the grapheme table does not carry and would
         //    therefore DROP — ×0 in the 429 mined segments and ×0 in the golden, so it is recorded here
         //    rather than keyed.
-        s = tr(s, /[ﭐ-﷿ﹰ-﻿]/gu, (c) => (c === "ﻩ" || c === "ﻪ" ? "ە" : c.normalize("NFKC")));  // BOM
+        s = rewrite(s, /[ﭐ-﷿ﹰ-﻿]/gu, (c) => (c === "ﻩ" || c === "ﻪ" ? "ە" : c.normalize("NFKC")));  // BOM
 
         // 4) ⚠ ه U+0647 → ھ U+06BE. The Arabic heh is NOT a letter of the Uyghur alphabet — Uyghur writes /h/
         //    as ھ (×1,099 here) and the vowel /ɛ/ as ە U+06D5 — but writers type it anyway (×40), and the
@@ -286,7 +286,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    ⚠ IT IS ALSO RIGHT FOR THE EMBEDDED FOREIGN TEXT the corpus carries: most of these 40 sit in a
         //    quoted Persian paragraph and an Arabic hadith, where ه is /h/ as well. The fold is a strict
         //    improvement in both, which is why it is unconditional.
-        s = tr(s, /ه/gu, "ھ");
+        s = rewrite(s, /ه/gu, "ھ");
 
         // 4b) ⚠ TWO MORE LETTERS OF THE SAME FAMILY, both found by `silentCharsIn` producing NOTHING.
         //    ک U+06A9 KEHEH ×5 — the Persian/Urdu shape of the kāf Uyghur writes ك U+0643 (×2,891 here).
@@ -309,7 +309,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    never writes them (the hamza is always the carrier ئ, ×0 counter-examples), so the value they
         //    would take is an ARABIC one this engine has no referee for — wikipron `uig_arab_broad` carries
         //    no headword with any of them. Same shape as ی above: measured, reported, not guessed.
-        s = tr(tr(s, /ک/gu, "ك"), /ڧ/gu, "ف");
+        s = rewrite(rewrite(s, /ک/gu, "ك"), /ڧ/gu, "ف");
 
         // 5) ERA MARKERS, digit-anchored, and ABOVE the ordinal rule at step 7 for two separate reasons.
         //    (a) The abbreviation's anchor is the YEAR'S DIGITS, and step 7 turns those into words — running
@@ -325,7 +325,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    `م.ك` are already unambiguous as pairs and the corpus writes both `م.ب 130` and `م. ب 1250`.
         for (const [body, word] of ERA) {
             const dot = body === "م" || body === "ھ" ? "\\s?\\." : "";
-            s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${body}${dot}${ERA_TAIL}(?=[${D}])`, "gu"), `${word} `);
+            s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}${body}${dot}${ERA_TAIL}(?=[${D}])`, "gu"), `${word} `);
         }
 
         // 6) DIGIT DE-GROUPING, before the ordinal so a grouped operand is one number, and before every
@@ -342,7 +342,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, not a clause mark, or a number
         //    followed by its own sentence comma would lose its last group and speak it as zero.
         for (const mark of ["،", ","]) {
-            s = tr(s,
+            s = rewrite(s,
                 new RegExp(`(?<![${D}.,،])[${D}]{1,3}(?:(?<!(?<![${D}])0)${mark}[${D}]{3})+(?![${D}]|${mark}[${D}])`, "gu"),
                 (w) => w.replace(new RegExp(mark, "gu"), ""),
             );
@@ -375,7 +375,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    an ordinal; and inside `70 -90-بەتلەر` (a page RANGE, ×3 for `بەت`) the second operand takes the
         //    ordinal. 4 of 390. The alternative — a closed noun list — is trap 8's table, correct exactly
         //    where I looked: the tail of that tally is 76 distinct nouns and 40 of them occur once.
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`${NOT_LETTER_BEFORE}([${D}]+)\\s*${DASH}\\s*(?=(?!${ERA_HEADS})[\\u0620-\\u06FF]{2,})`, "gu"),
             (whole: string, num: string) => {
                 const n = Number(toAscii(num));
@@ -432,7 +432,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
              * English fallback rather than being echoed byte-for-byte.
              */
             const tail = /^[A-Za-z]/u.test(sym) ? "A-Za-z" : "\\p{L}";
-            s = tr(s,
+            s = rewrite(s,
                 new RegExp(`(?<![\\p{L}\\p{M}${D}.,،])(${NUM}${MAG})\\s?${key}(?![${tail}\\p{M}${D}²])(ئ?)`, "gu"),
                 (_m, q: string, hamza: string) => `${q} ${word}${hamza === "" ? "" : ` ${hamza}`}`,
             );
@@ -440,7 +440,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    ⚠ AND THE UNIT NOUN IS OFTEN ALREADY SPELLED OUT WITH A BARE `²` HANGING OFF IT
         //    (`36.6 مىلىيون كىلومېتر² لىق`). No symbol key can reach that, because there is no symbol — the
         //    exponent has to be lifted onto the WORD, in the preposed position `كۋادرات` takes.
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`${NOT_LETTER_BEFORE}(كىلومېت[ىې]?ر|مېت[ىې]?ر|مىتىر)\\s?²`, "gu"),
             "كۋادرات $1",
         );
@@ -463,7 +463,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    name (`مىنۇس بەلگىسى`, "the minus sign") and, which is the one that matters, as a reading in
         //    front of a quantity: `يىللىق خاتالىق مىنۇس 0.9 دەقىقە` ("the annual error is minus 0.9
         //    minutes"). PREPOSED in every instance.
-        s = tr(s, new RegExp(`(^|[\\s(\\[])[-−–]\\s?(${NUM})(?=\\s?°\\s?[CF])`, "gui"), "$1مىنۇس $2");
+        s = rewrite(s, new RegExp(`(^|[\\s(\\[])[-−–]\\s?(${NUM})(?=\\s?°\\s?[CF])`, "gui"), "$1مىنۇس $2");
 
         // 10) DEGREES. `°C` BEFORE the bare `°`, or the scale letter is stranded and read as the ENGLISH
         //     letter name — which is what happens today: `11.3℃` → `ʔon bir . ʔyt͡ʃ sˈiː`. (`℃` itself is
@@ -479,8 +479,8 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //     confidently wrong English letter, which is the trade ps made for the same class.
         //     ⚠ AND THE ARC-MINUTE IS LEFT UNREAD. `113°53` is 113°53′; the minutes get no word, because
         //     none is attested. Same partial as ps's bare `°`, in the other half of the class.
-        s = tr(s, new RegExp(`(?<![${D}.,،])(${NUM})\\s?°\\s?[CF]${NOT_LETTER_AFTER}`, "gui"), "$1 گرادۇس");
-        s = tr(s, new RegExp(`(?<![${D}.,،])(${NUM})\\s?°`, "gu"), "$1 گرادۇس ");
+        s = rewrite(s, new RegExp(`(?<![${D}.,،])(${NUM})\\s?°\\s?[CF]${NOT_LETTER_AFTER}`, "gui"), "$1 گرادۇس");
+        s = rewrite(s, new RegExp(`(?<![${D}.,،])(${NUM})\\s?°`, "gu"), "$1 گرادۇس ");
 
         // 11) PERCENT — ×129 signs in 429 segments and every one of them is silent today.
         //     ⚠ BOTH ORDERS OF THE SIGN, AND BOTH EMIT THE POSTPOSED WORD. Uyghur writes it after the number
@@ -507,12 +507,12 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //     ×129 and `٪` U+066A is ×4 (`٪12.9نى ئىگىلەيدۇ`, `٪56.08نى`) — small, but they are exactly the
         //     instances the artifact scan still reported as `DROP percent` after the ASCII arm landed, which
         //     is what a differential gate is for. `﹪` U+FE6A and `％` U+FF05 are both ×0 and are not keyed.
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`(${NUM})\\s?[%٪]\\s?${NAMED}${PCT_TAIL}`, "gu"),
             (_m: string, n: string, named: string | undefined, suf: string | undefined) =>
                 named === undefined ? percent(n, suf) : `${n} ${named.trim()}${suf ?? ""} `,
         );
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`[%٪]\\s?(${NUM})\\s?${NAMED}${PCT_TAIL}`, "gu"),
             (_m: string, n: string, named: string | undefined, suf: string | undefined) =>
                 named === undefined ? percent(n, suf) : `${n} ${named.trim()}${suf ?? ""} `,
@@ -532,8 +532,8 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //     this corpus and rides along with it because it is the same sign, not a second currency.
         //     ⚠ `US$` BEFORE `$`, or the `US` is left to the Latin fallback as two English letter names.
         for (const [sign, word] of [["US\\$", "ئامېرىكا دوللىرى"], ["\\$", "دوللار"], ["[￥¥]", "يۈەن"], ["₺", "لىرا"]] as const) {
-            s = tr(s, new RegExp(`${sign}\\s?(${NUM})`, "gu"), `$1 ${word} `);
-            s = tr(s, new RegExp(`(${NUM})\\s?${sign}`, "gu"), `$1 ${word} `);
+            s = rewrite(s, new RegExp(`${sign}\\s?(${NUM})`, "gu"), `$1 ${word} `);
+            s = rewrite(s, new RegExp(`(${NUM})\\s?${sign}`, "gu"), `$1 ${word} `);
         }
 
         // 13) DECIMALS, LAST, because every rule above needs the number intact — and the separator is
@@ -552,7 +552,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //     step 8 has already claimed every unit, and what is left glued to a decimal is the corpus's
         //     ordinary typography — `414.69دەرھەم`, `72.647دىنار=بىر دوللار`, `1.575لېۋ` — 18 exchange-rate
         //     lines that a letter guard silently left with the pause still in them.
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`(?<![${D}.])([${D}]+)\\.([${D}]+)(?![${D}]|\\.[${D}])`, "gu"),
             "$1 $2",
         );

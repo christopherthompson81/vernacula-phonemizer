@@ -5,16 +5,16 @@
  * is the receipt. This is the itemisation — WHICH INPUT CHARACTERS produced a given normalized span — and it
  * is what turns a trace token's span (into `normalized`) into a span into the caller's own string.
  *
- * `tr(s, re, rep)` is a faithful drop-in for `s.replace(re, rep)` that also maintains that mapping, so
+ * `rewrite(s, re, rep)` is a faithful drop-in for `s.replace(re, rep)` that also maintains that mapping, so
  * adopting it in a normalizer is a textual substitution:
  *
- *     s = s.replace(RE, REP)   ->   s = tr(s, RE, REP)
+ *     s = s.replace(RE, REP)   ->   s = rewrite(s, RE, REP)
  *
  * ⚠ THE HOT PATH IS THE WHOLE DESIGN. There are ~3,200 of these sites across 168 normalizers plus the shared
- * tier, and `phonemize()` runs them on every utterance. When no trace is recording, `tr` calls
+ * tier, and `phonemize()` runs them on every utterance. When no trace is recording, `rewrite` calls
  * `String.replace` and returns — one boolean test, native semantics, nothing allocated. The provenance path
  * exists only while `phonemizeTrace` is running, which is also what keeps the fidelity risk off the shipped
- * reading entirely: untraced, `tr` IS `replace`.
+ * reading entirely: untraced, `rewrite` IS `replace`.
  *
  * ⚠ THE REGISTRY PRE-PASSES REPORT TOO, and getting there taught the seam's own rule. `stripMarkup`, the
  * confusable and fullwidth folds, Roman numerals and the vulgar-fraction fold run BEFORE any engine
@@ -22,7 +22,7 @@
  * `phonemizeTrace("<b>hi</b> there", "en")` map both tokens where it previously mapped neither.
  *
  * ⚠ BUT THE SEAM MUST STAY NARROW, and a blanket conversion proved it. `foldLatinDiacritics` lives in the
- * same file and looks identical, but it is called PER WORD from `resolveWord` — routing it through `tr`
+ * same file and looks identical, but it is called PER WORD from `resolveWord` — routing it through `rewrite`
  * poisoned the mapping on every utterance, because here a length mismatch legitimately means "a step went
  * unseen". Only functions that transform the PIPELINE STRING belong on this seam. (The C# port takes the
  * opposite rule for the opposite reason: its seam is `JsRe.Replace`, which the whole codebase uses, so a
@@ -36,10 +36,10 @@
  * `phonemizeTrace("<b>hi</b> there", "en")` maps none. 92.8% of tokens across the golden corpus carry a span;
  * the remaining 7.2% is overwhelmingly this.
  *
- * ⚠ INPUT-SIDE ONLY. `tr` maps a span back to the CALLER'S TEXT, so it belongs in a normalizer and nowhere
+ * ⚠ INPUT-SIDE ONLY. `rewrite` maps a span back to the CALLER'S TEXT, so it belongs in a normalizer and nowhere
  * else. Several engine files carry the same `s = s.replace(...)` shape over an IPA STRING — `english-gb.ts`
  * un-flaps a tapped coronal and maps offglides on the READING, not the input — and routing those through
- * `tr` would stamp input offsets across output characters and silently corrupt the mapping. The shape is
+ * `rewrite` would stamp input offsets across output characters and silently corrupt the mapping. The shape is
  * identical; the meaning is not. A post-assembly rewrite reports itself through `noteRewrite` instead.
  *
  * ⚠ AND SPAN GRANULARITY IS WHAT MAKES IT WORK. A replacement's provenance is the whole match's span, not a
@@ -52,7 +52,7 @@ import { hostDepth } from "./foreign.ts";
 /** `prov[i]` = the `[start, end)` of the ORIGINAL input that character `i` of the current string came from. */
 let prov: [number, number][] | null = null;
 /**
- * ⚠ THE STRING THE MAPPING DESCRIBES. Length alone cannot carry the guarantee: a step outside `tr` that is
+ * ⚠ THE STRING THE MAPPING DESCRIBES. Length alone cannot carry the guarantee: a step outside `rewrite` that is
  * NET length-preserving passes a length check while having shifted every interior offset. Found in the C#
  * port, where `Mandarin.SubstituteNumbers` rewrites a code-point list outside the seam — `115`→`一百一十五` is
  * +2 and each `10`→`十` is −1 — so a stale identity mapping survived and reported `十` as coming from a SPACE.
@@ -61,7 +61,7 @@ let prov: [number, number][] | null = null;
 let tracked: string | null = null;
 
 /**
- * ⚠ ONCE DESYNCED, STAY DESYNCED. `tr` rebuilds the array at the CURRENT string's length, so if a step the
+ * ⚠ ONCE DESYNCED, STAY DESYNCED. `rewrite` rebuilds the array at the CURRENT string's length, so if a step the
  * mapping did not see has already shifted the text, the next tracked step would re-synchronise the LENGTH
  * over shifted values — and `provenanceFor`'s length check, the module's whole safety net, would then pass
  * and report those values as fact. Measured before this guard: 1,478 of 112,640 tokens across 74 languages
@@ -74,9 +74,24 @@ function poison(): void {
 }
 
 /**
+ * A diagnostic sink for the poison, off by default and free when unset.
+ *
+ * ⚠ THE POISON IS THE ONLY THING THAT NAMES A NON-PIPELINE CALL SITE. Static shape cannot tell
+ * `s = rewrite(s, …)` on the pipeline string from the same line inside a per-word helper — that
+ * distinction is dynamic, and getting it wrong silently costs an utterance its whole mapping. Adopting the
+ * seam in a new language (or a new port) is therefore: convert broadly, run the corpus with a sink
+ * installed, and revert exactly the sites it names. Kept in the shipped module rather than a probe because
+ * the next port will need it as much as this one did.
+ */
+let poisonSink: ((expected: string, got: string) => void) | null = null;
+export function onPoison(fn: ((expected: string, got: string) => void) | null): void {
+    poisonSink = fn;
+}
+
+/**
  * Begin tracking, with `input` as the origin. Called by the trace recorder, never by a normalizer.
  * ⚠ A SECOND CALL AT DEPTH RESETS NOTHING: an embedded foreign run normalizes its own text through the same
- * `tr`, and letting it re-seed would replace the host's mapping with the run's.
+ * `rewrite`, and letting it re-seed would replace the host's mapping with the run's.
  */
 export function beginProvenance(input: string): void {
     if (hostDepth() > 1) return;
@@ -96,7 +111,7 @@ export function endProvenance(): void {
 /**
  * The mapping, or `undefined` when it cannot be trusted.
  *
- * ⚠ LENGTH IS THE COMPLETENESS CHECK. Any transformation that is not routed through `tr` still changes the
+ * ⚠ LENGTH IS THE COMPLETENESS CHECK. Any transformation that is not routed through `rewrite` still changes the
  * string but leaves the array behind, so the two fall out of step. Returning a mapping in that state would
  * hand a caller confident, wrong offsets — so it is withheld instead, which is the difference between "we do
  * not know" and a silent wrong answer.
@@ -194,8 +209,20 @@ function span(p: [number, number][], at: number, len: number): [number, number] 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Replacer = string | ((substring: string, ...args: any[]) => string);
 
+/**
+ * ⚠ A STRING PATTERN IS A LITERAL, FIRST MATCH ONLY — `String.replace`'s own rule, and the reason this
+ * overload exists rather than the 31 sites that use one being left off the seam. Escaping it into a
+ * non-global RegExp reproduces that rule exactly, so the shape stays one function with one implementation.
+ * ⚠ `$` IN THE REPLACEMENT STILL SUBSTITUTES. `"a".replace("a", "$&")` yields `"a"`, not `"$&"`, so the
+ * replacement must go through `expand` as it does for a regex — which routing it through `rewrite` does.
+ * ⚠ AND NO `u` FLAG: everything is escaped, so the reading is identical either way, while `u` would THROW
+ * on a lone surrogate in the pattern.
+ */
+const ESCAPE_PATTERN = /[.*+?^${}()|[\]\\]/gu;
+
 /** `s.replace(re, rep)`, carrying provenance when a trace is recording and nothing at all when it is not. */
-export function tr(s: string, re: RegExp, rep: Replacer): string {
+export function rewrite(s: string, re: RegExp | string, rep: Replacer): string {
+    if (typeof re === "string") return rewrite(s, new RegExp(re.replace(ESCAPE_PATTERN, "\\$&")), rep);
     // ⚠ THE UNTRACED PATH IS THE NATIVE CALL. Not "equivalent to" it — it IS it, so no reading can differ
     // because of this module, and the 3,200 sites cost one boolean test each.
     const p = prov;
@@ -205,12 +232,12 @@ export function tr(s: string, re: RegExp, rep: Replacer): string {
     // the length check over shifted values and reporting them as fact. Checking only the indices actually
     // read is not enough: the repro (`"abc"` → an untracked `b`→`BB`, then a tracked `c`→`C`) touches none
     // of the missing ones and still comes out confidently wrong.
-    if (tracked !== s) { poison(); return s.replace(re, rep as string); }
+    if (tracked !== s) { poisonSink?.(tracked ?? "", s); poison(); return s.replace(re, rep as string); }
 
     const global = re.flags.includes("g");
     const rx = new RegExp(re.source, global ? re.flags : re.flags + "g");
     // ⚠ `String.replace` RESETS `lastIndex` on a global regex; this path builds its own and would leave the
-    // caller's object untouched. khmer's de-grouping loop shares one `/g` regex between `tr` and `.test()`,
+    // caller's object untouched. khmer's de-grouping loop shares one `/g` regex between `rewrite` and `.test()`,
     // so a stale offset there could end the loop early — latent, but the guarantee is that no reading differs.
     re.lastIndex = 0;
     const out: string[] = [];

@@ -8,6 +8,7 @@
  */
 
 using System.Text;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Core;
 
@@ -145,17 +146,17 @@ public static class Markup
             !text.Contains('}')
         )
             return text;
-        var deLatex = HAS_LATEX.IsMatch(text) ? MATH_BRACE.Replace(LATEX_CMD.Replace(text, " "), " ") : text;
-        var s = WIKITABLE.Replace(deLatex, " ");
-        s = SUP_TAG.Replace(s, m =>
+        var deLatex = HAS_LATEX.IsMatch(text) ? Rewrite(Rewrite(text, LATEX_CMD, " "), MATH_BRACE, " ") : text;
+        var s = Rewrite(deLatex, WIKITABLE, " ");
+        s = Rewrite(s, SUP_TAG, m =>
         {
             var d = m.Groups[1].Value;
             var sb = new StringBuilder();
             foreach (var c in Js.CodePoints(d)) sb.Append(SUP_MAP.TryGetValue(c, out var sup) ? sup : c);
             return sb.ToString();
         });
-        s = TAG.Replace(s, "");
-        return ENTITY.Replace(s, m =>
+        s = Rewrite(s, TAG, "");
+        return Rewrite(s, ENTITY, m =>
         {
             var whole = m.Value;
             var body = m.Groups[1].Value;

@@ -80,7 +80,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, readDecimals, readDegrees, reorderFraction, spellYears } from "../../core/sinitic.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * ⚠ `unspacedScript`, because a sign in Han prose is flanked by Han and the tier's letter-boundary guard
@@ -152,7 +152,7 @@ export function normalizeHakka(input: string): string {
     // hyphen or space separates them, since those instances have `mî` there instead.
     // BEFORE step 6, which is the whole reason this runs: `spellYears` looks for 年, and until now there
     // was none to find.
-    s = tr(s, /(?<![\p{L}\d])(\d{1,4})[-\s]ngi[eè]n(?=[^\p{L}]|$)/gu, "$1年");
+    s = rewrite(s, /(?<![\p{L}\d])(\d{1,4})[-\s]ngi[eè]n(?=[^\p{L}]|$)/gu, "$1年");
 
     // ── 3. geographic coordinates ────────────────────────────────────────────────────────────────
     // ⚠ BEFORE EVERY OTHER ° RULE AND BEFORE THE RANGE RULE — the same ordering wuu earned. The corpus
@@ -162,16 +162,16 @@ export function normalizeHakka(input: string): string {
     // 至 gets wedged between a minute mark and a degree sign.
     // 度/分/秒 all speak (tʰu⁵³ — see the derived entry — / pun⁴⁴ / miau³¹). Digits stay digits so the
     // cardinal path reads them, which is also what strips a written leading zero.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(\\d+)\\s*°\\s*(\\d+)\\s*${MINUTE}\\s*(\\d+)\\s*${SECOND}`, "gu"),
         "$1度$2分$3秒",
     );
-    s = tr(s, new RegExp(`(\\d+)\\s*°\\s*(\\d+)\\s*${MINUTE}`, "gu"), "$1度$2分");
+    s = rewrite(s, new RegExp(`(\\d+)\\s*°\\s*(\\d+)\\s*${MINUTE}`, "gu"), "$1度$2分");
     // ⚠ AND THE DASH BETWEEN TWO COORDINATES, here rather than in step 7, because by now the endpoints end
     // in 分/秒 and no digit-to-digit rule can ever see them.
     // ⚠ ⟨度⟩ IS DELIBERATELY NOT IN THIS CLASS. wuu shipped it and it was a live defect — a genuine negative
     // (`温度-5度`) rewritten as a range. Both of this corpus's coordinate ranges have 分 before the dash.
-    s = tr(s, /([分秒])\s*[-–—－~～〜]\s*(?=\d)/gu, "$1至");
+    s = rewrite(s, /([分秒])\s*[-–—－~～〜]\s*(?=\d)/gu, "$1至");
 
     // ── 4. temperature, then the bare degree ─────────────────────────────────────────────────────
     // ⚠ SHARED — the trio and its order live in `core/sinitic.ts`: temperature first, or the bare rule eats
@@ -213,7 +213,7 @@ export function normalizeHakka(input: string): string {
     // in — it joins every polysyllable with one.
     // ⚠ AND ONLY THE SCALED FORM IS CLAIMED — no bare `-5度` arm. Every attested negative carries the scale
     // letter, so a bare arm would be a guard alternative with no instance behind it (playbook trap 9).
-    s = tr(s, /(?<![\d\p{L}])[-−](攝氏|華氏)/gu, "$1零下");
+    s = rewrite(s, /(?<![\d\p{L}])[-−](攝氏|華氏)/gu, "$1零下");
 
     // ── 6. years ─────────────────────────────────────────────────────────────────────────────────
     // ⚠ ALL THREE ARMS AND THEIR ORDER LIVE IN `core/sinitic.ts` — range, then both-endpoints, then single —
@@ -242,7 +242,7 @@ export function normalizeHakka(input: string): string {
     // to the dash and this can never match. The `‰` sign may sit on an endpoint, so it is captured and
     // RE-EMITTED (trap 10) — `30-34‰` must still reach step 10 as a per-mille on both halves.
     // Digits are LEFT as digits so the cardinal path reads them.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(
             `(?<![\\d.,:\\p{sc=Latn}])(\\d+(?:\\.\\d+)?)([%‰])?\\s*[-–—－~～〜]\\s*(\\d+(?:\\.\\d+)?)(?=\\s*${RANGE_UNIT})`,
             "gu",
@@ -274,7 +274,7 @@ export function normalizeHakka(input: string): string {
     // `30至34‰` the bare rule produces `30至千分之34` — "thirty to per-mille thirty-four", the scale word
     // wedged inside the span. Both of the corpus's per-mille instances are ranges, so this is the ONLY
     // shape the rule ever sees here; swallowing the optional `至N` puts the prefix where it belongs.
-    s = tr(s, /(?<![\d.,])(\d+(?:\.\d+)?(?:至\d+(?:\.\d+)?)?)\s*‰/gu, "千分之$1");
+    s = rewrite(s, /(?<![\d.,])(\d+(?:\.\d+)?(?:至\d+(?:\.\d+)?)?)\s*‰/gu, "千分之$1");
 
     // ── 11. decimals ─────────────────────────────────────────────────────────────────────────────
     // LAST of the number rules. `decimals: 1960` in the artifact, 1,253 over the dump, and every one was

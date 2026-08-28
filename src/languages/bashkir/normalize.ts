@@ -61,7 +61,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ---------------------------------------------------------------------------------------------------
 // ORDINALS — derived, not tabulated
@@ -174,9 +174,9 @@ export function normalizeBashkir(input: string): string {
     //    decimal tail, which this corpus writes — while a bare `(?![\d.,])` declines every clause-final
     //    figure (trap 58). The separator here is a SPACE, and a decimal never has one before its
     //    fraction, so `(?!\d)` is the whole guard.
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ABBREVIATIONS, before any single-dot rule. `б. э. т.` = *беҙҙең эраға тиклем* (BC) and
     //    `б. э.` = *беҙҙең эра*, both corpus-attested in the expanded form ("беҙҙең эраға тиклем 145—90
@@ -188,25 +188,25 @@ export function normalizeBashkir(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}һ\\.\\s?б\\.`, "giu"), "һәм башҡалар"],
     ];
     for (const [re, word] of multi)
-        s = tr(s, re, (m0, offset: number, full: string) => {
+        s = rewrite(s, re, (m0, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
 
     // 2) НОМЕР. The sign was dropped outright.
-    s = tr(s, /№\s?(?=\d)/gu, "номер ");
+    s = rewrite(s, /№\s?(?=\d)/gu, "номер ");
 
     // 3) THE YEAR ABBREVIATION `й.` — Bashkir's own, written after a figure (`1991 й.`); it was reaching
     //    the g2p as the bare glide [j]. ⚠ `г.` is NOT given a Bashkir reading: every one of its instances
     //    is inside a Russian-language passage, where it is Russian *года* (see the header).
-    s = tr(s, new RegExp(`(\\d)\\s?й\\.${NOT_LETTER_AFTER}`, "gu"), "$1 йыл");
+    s = rewrite(s, new RegExp(`(\\d)\\s?й\\.${NOT_LETTER_AFTER}`, "gu"), "$1 йыл");
 
     // 4) CLOCK, and the case suffix that may sit on it. The colon is clause punctuation in bashkir.ts, so
     //    `10:30` read as *ун , утыҙ* — a phrase break inside a time. ⚠ THE SUFFIX ATTACHES TO THE SPOKEN
     //    MINUTE, which is why the clock must be worded here rather than left as digits: `8:30-ҙа` is
     //    *һигеҙ утыҙҙа*, and gluing the written suffix to a DIGIT can never produce that (trap 14).
     //    Runs BEFORE the ordinal rule so a time is not first claimed as a numeral-plus-suffix.
-    s = tr(s, new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d)(?![\\d:.,])(?:\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER})?`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d)(?![\\d:.,])(?:\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER})?`, "gu"),
         (whole, h: string, min: string, sfx: string | undefined) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 24) return whole;
@@ -227,7 +227,7 @@ export function normalizeBashkir(input: string): string {
     //    The ordinal is tried FIRST and the `endsWith` guard is what makes the fallback safe — a suffix no
     //    ordinal produces falls through to the cardinal rather than inventing morphology.
     //    MUST run before the range rule (step 9), which would otherwise eat the hyphen.
-    s = tr(s, new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(${SFX}{1,5})${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(${SFX}{1,5})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, rawSuffix: string) => {
             const n = Number(digits);
             if (!Number.isSafeInteger(n)) return whole;
@@ -279,40 +279,40 @@ export function normalizeBashkir(input: string): string {
     //    writer's own choice implies; `Цельсий градусытан` is not a word. Honest lossiness, not an oversight.
     // ⚠ THE LOWERCASE SCALE LETTER GOES IN THE CLASS, NOT IN AN `i` FLAG — the suffix class beside it
     //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
-    s = tr(s, new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 градус$2");
-    s = tr(s, new RegExp(`(\\d)\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 градус$2");
+    s = rewrite(s, new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 градус$2");
+    s = rewrite(s, new RegExp(`(\\d)\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 градус$2");
     //    ⚠ AND THE CORPUS ALSO WRITES THE SIGN AFTER THE LETTER — `−41 С°`, `+35С°`, `0С° аҙағында`. That
     //    is a typo for `°С` and it is the only reason the degree class still reported after the rules above
     //    were in; claimed here on the same terms, letter first.
-    s = tr(s, new RegExp(`(\\d)\\s?[CСcс]\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 градус$2");
-    s = tr(s, /(\d)\s?[CС]\s?°(?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
-    s = tr(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
-    s = tr(s, /(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусы");
+    s = rewrite(s, new RegExp(`(\\d)\\s?[CСcс]\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 градус$2");
+    s = rewrite(s, /(\d)\s?[CС]\s?°(?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
+    s = rewrite(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
+    s = rewrite(s, /(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусы");
     //    ⚠ WITH A TRAILING SPACE, because the sign is written GLUED to letters this rule does not claim:
     //    `17—19 °Т` (degrees Turner, a dairy acidity unit) fused into *градуст*, one impossible word. The
     //    final space-collapse below removes the doubling in the ordinary case.
-    s = tr(s, /(\d)\s?°/gu, "$1 градус ");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 градус ");
 
     // 7) THE GRAM, claimed HERE rather than declared to the shared tier — see the header. `3,300 г` and
     //    `2,176 г` are grams; `1938 г.` and `1988 г.` are Russian years, and the DOT is the only thing that
     //    separates them. The tier's trailing guard (`(?![\p{L}\p{M}])`) does not reject a dot, so declaring
     //    the key would have read every Russian year in the corpus as a weight.
-    s = tr(s, /(\d+(?:,\d+)?)\s?г(?![\p{L}\p{M}.])/gu, "$1 грамм");
+    s = rewrite(s, /(\d+(?:,\d+)?)\s?г(?![\p{L}\p{M}.])/gu, "$1 грамм");
 
     // 8) SIGNS. This corpus's climate prose writes `+18 °C`, `+0,3 °C` and `−18 °C` — the true MINUS
     //    (U+2212) as well as the hyphen — and every one lost its sign.
-    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1минус $2");
+    s = rewrite(s, /(^|[\s(])[-−–](\d)/gu, "$1минус $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it.
-    s = tr(s, /±/gu, " плюс минус ");
-    s = tr(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
+    s = rewrite(s, /±/gu, " плюс минус ");
+    s = rewrite(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
     //    `=` is DIGIT-GATED: 16 of the corpus's 17 are LaTeX, a Russian-text typo, or a formula the dump
     //    extraction left raw. `тигеҙ` ×350 is the reading, sourced from the geometry article beside its own
     //    formula ("квадрат яғының яртыһына тигеҙ: r = t/2"). ⚠ In careful Bashkir it governs the DATIVE
     //    (*яртыһына тигеҙ*) and this layer emits bare numerals; the nominative reading is the colloquial
     //    one and is what a reader says for `5 = 5`. No `÷` rule is written at all — the corpus's single
     //    instance (`6,4÷6,7`) is a RANGE in the Russian convention, not a division.
-    s = tr(s, /(\d)\s?=\s?(?=\d)/gu, "$1 тигеҙ ");
-    s = tr(s, /(\d)\s?×\s?(?=\d)/gu, "$1 тапҡыр ");
+    s = rewrite(s, /(\d)\s?=\s?(?=\d)/gu, "$1 тигеҙ ");
+    s = rewrite(s, /(\d)\s?×\s?(?=\d)/gu, "$1 тапҡыр ");
 
     // 9) NUMERIC RANGES. The dash was dropped outright and the endpoints fused into one run of words —
     //    `300—600 мм` read as *өс йөҙ алты йөҙ*. ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A CONNECTIVE,
@@ -324,11 +324,11 @@ export function normalizeBashkir(input: string): string {
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58) — `Вегетация миҙгеле — 120—135 көн.`
     //    is how this corpus ends a sentence. Runs AFTER the ordinal and sign rules, which have already
     //    spent every hyphen that belongs to a suffix or opens a negative.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
 
     // A padded replacement (` плюс минус `) doubles a space that was already there. Harmless downstream
     // because assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be
     // the one producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }

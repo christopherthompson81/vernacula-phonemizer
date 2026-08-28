@@ -69,7 +69,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** ⚠ NEVER `\b` — Karakalpak Latin carries `á ó ú ı ń ǵ í`, which `\b` treats as boundaries (trap 1/23). */
 /**
@@ -116,7 +116,7 @@ export function normalizeKarakalpak(input: string): string {
     //    reads the sign and stops; the suffix is a separate token by then and reaches the g2p as a bare
     //    syllable. Both spellings occur, attached (`96%in`) and detached (`50% ten`), and the suffix set is
     //    the corpus's own: `ke`/`ki`, `ten`/`tan`/`den`/`dan`, `ti`/`tı`, `i`/`ı`/`in`/`ın`.
-    s = tr(s, /(\d)\s?%\s?(k[ei]|[td][ae]n|t[ıi]|[ıi]n?)(?![\p{L}\p{M}])/gu, "$1 procent$2");
+    s = rewrite(s, /(\d)\s?%\s?(k[ei]|[td][ae]n|t[ıi]|[ıi]n?)(?![\p{L}\p{M}])/gu, "$1 procent$2");
 
     // 2) ⚠ THE TWO-TOKEN SQUARE MEASURES AND THE COMPOUND ENERGY UNIT, BEFORE THE TIER — and the ordering
     //    is the whole point. `m.kv.` and `km kv` are square metres and square kilometres written without a
@@ -128,14 +128,14 @@ export function normalizeKarakalpak(input: string): string {
     //    DOT IS OPTIONAL in this corpus ("9,5 mln adam", "$205,539 mlrd (2018)" beside "21 mln. jılı",
     //    "23,3 mlrd. kvt/saat"), and `139,2 mln.ga` puts the unit straight after the dot. Expanded before
     //    the tier, that becomes "139,2 million ga" and the tier's magnitude arm can then reach `ga`.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}mln\\s?\\.\\s?`, "gu"), "million ");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}mlrd\\s?\\.\\s?`, "gu"), "milliard ");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}mln${NOT_LETTER_AFTER}`, "gu"), "million");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}mlrd${NOT_LETTER_AFTER}`, "gu"), "milliard");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}m\\s?\\.\\s?kv\\s?\\.`, "gu"), "kvadrat metr");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}km\\s?\\.?\\s?kv\\s?\\.`, "gu"), "kvadrat kilometr");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}km\\s+kv${NOT_LETTER_AFTER}`, "gu"), "kvadrat kilometr");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}kvt\\s?[/\\-]\\s?saat`, "gu"), "kilovatt saat");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}mln\\s?\\.\\s?`, "gu"), "million ");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}mlrd\\s?\\.\\s?`, "gu"), "milliard ");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}mln${NOT_LETTER_AFTER}`, "gu"), "million");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}mlrd${NOT_LETTER_AFTER}`, "gu"), "milliard");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}m\\s?\\.\\s?kv\\s?\\.`, "gu"), "kvadrat metr");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}km\\s?\\.?\\s?kv\\s?\\.`, "gu"), "kvadrat kilometr");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}km\\s+kv${NOT_LETTER_AFTER}`, "gu"), "kvadrat kilometr");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}kvt\\s?[/\\-]\\s?saat`, "gu"), "kilovatt saat");
 
     // 3) THE SHARED SYMBOL TIER, as the Punjabi and Saraiki layers order it: its own numeral pattern reads
     //    `19,605,052` and `1.65` as ONE token, and steps 3 and 4 split precisely those.
@@ -151,24 +151,24 @@ export function normalizeKarakalpak(input: string): string {
     //    what settles it; `19,605,052 akciyanı` and `$100,000 investiciyası` carry no magnitude and stay
     //    grouped.
     const MAG_NEXT = "(?!\\s?(?:mıń|million|milliard))";
-    s = tr(s, new RegExp(`(?<!\\d)(?<![\\d][.,])([1-9]\\d{0,2})((?:,\\d{3})+)(?!\\d)${MAG_NEXT}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<!\\d)(?<![\\d][.,])([1-9]\\d{0,2})((?:,\\d{3})+)(?!\\d)${MAG_NEXT}`, "gu"),
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     //    …and the SPACE, which this corpus also uses — "Maydanı 1 098 581 km²", "9 686 AQSh dolları",
     //    "1/299 792 458 sekund ishinde". Same idiom, same trap-63 whole-number match.
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) THE DECIMAL SEPARATORS, NEUTRALISED — see the header for why no word is spoken. What is left with
     //    a comma between digits is a decimal; what is left with a dot is a decimal ONLY IF THE RUN CARRIES
     //    EXACTLY ONE, which is the guard that keeps this off `198.51.100.0` and `26.02.1994`.
-    s = tr(s, /(\d),(?=\d)/gu, "$1 ");
-    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
+    s = rewrite(s, /(\d),(?=\d)/gu, "$1 ");
+    s = rewrite(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
 
     // 6) THE ERA MARKER. `b.e.sh.` is *biziń eramızǵa shekem* — "before our era" — and it was reaching the
     //    g2p as three letters with three false sentence breaks: "b . e . sh. 776-jılı". `biziń` ×22,
     //    `eramız` ×1 (thin, but it is the corpus's own phrase: "Biziń eramız basında"), `shekem` ×105.
     //    ⚠ THE FINAL DOT IS KEPT AT A SENTENCE END, or the pause is lost outright (trap 10).
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}b\\s?\\.\\s?e\\s?\\.\\s?sh\\s?\\.`, "giu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}b\\s?\\.\\s?e\\s?\\.\\s?sh\\s?\\.`, "giu"),
         (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? "biziń eramızǵa shekem." : "biziń eramızǵa shekem";
@@ -181,17 +181,17 @@ export function normalizeKarakalpak(input: string): string {
     //    adam/1 km kv", "8 m.kv. maydan", "12 m.kv. maydan".
     //    …the year abbreviation, which this corpus writes with a hyphen and a dot: "26.02.1994-j. №367/XII"
     //    is *1994-jıl*. `jıl` ×202.
-    s = tr(s, new RegExp(`(\\d)-j\\s?\\.`, "gu"), "$1 jıl");
+    s = rewrite(s, new RegExp(`(\\d)-j\\s?\\.`, "gu"), "$1 jıl");
     //    …and the HYPHEN-CUT abbreviation, which no dot rule can see: `t-rası` is *temperaturası*, in the
     //    chemistry articles ("Suyıqlanıw t-rası 323°, qaynaw t-rası 1403°").
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}t-r(ası|a)${NOT_LETTER_AFTER}`, "gu"), "temperatur$1");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}t-r(ası|a)${NOT_LETTER_AFTER}`, "gu"), "temperatur$1");
 
     // 8) THE CLOCK. The colon is clause punctuation in karakalpak.ts, so `saat 8:00 de` read as *saat segiz
     //    , nol de* — a phrase break inside a time. The writer supplies `saat` ("saat 8:00 de", "saat
     //    12:13:05 de"), so the figures are left as FIGURES and only the colon is spent.
     //    ⚠ THE HOUR BOUND IS WHAT DECLINES THE STANDARD NUMBER: this corpus cites `ISO/IEC 14882:2024` and
     //    `C++11 (14882:2011)`, where the digits before the colon are five long.
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?(?![\d:.,])/gu,
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?(?![\d:.,])/gu,
         (_m, h: string, mi: string, se?: string) => (se === undefined ? `${h} ${mi}` : `${h} ${mi} ${se}`));
 
     // 9) SIGNS. ⚠ THE PLUS IS CLAIMED AND THE DIGIT LOOKAHEAD IS THE WHOLE GUARD — see the header:
@@ -204,21 +204,21 @@ export function normalizeKarakalpak(input: string): string {
     //    and one this layer would have INTRODUCED rather than inherited (trap 56).
     //    `plyus` ×14, `minus` ×6, both attested in the arithmetic sense ("plyus yamasa minus funttaǵi 3
     //    pensqa", "50% plyus bir akciya", "(minus belgisi)" — the corpus naming the character).
-    s = tr(s, /(^|(?<!\d)[\s(])\+\s?(?=\d)/gu, "$1plyus ");
-    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(?=\d)/gu, "$1minus ");
+    s = rewrite(s, /(^|(?<!\d)[\s(])\+\s?(?=\d)/gu, "$1plyus ");
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(?=\d)/gu, "$1minus ");
     //    …the paired second sign, which sits directly against the first number: `+40+45`, `-32-38`.
-    s = tr(s, /(?<=\d)\+(?=\d{1,3}\s?(?:°|gradus))/gu, " plyus ");
-    s = tr(s, /(?<=\d)-(?=\d{1,2}\s?(?:°|gradus))/gu, " minus ");
+    s = rewrite(s, /(?<=\d)\+(?=\d{1,3}\s?(?:°|gradus))/gu, " plyus ");
+    s = rewrite(s, /(?<=\d)-(?=\d{1,2}\s?(?:°|gradus))/gu, " minus ");
 
     // 10) DEGREES. ⚠ THE SCALE LETTER MAY BE CYRILLIC (see the header) and the sign may be MISSING
     //    altogether (`8-12C`). `gradus` ×18 is bare in this corpus — no scale word is emitted.
     //    ⚠ AND THE CORPUS GLOSSES ITS OWN SIGN, so the word is NOT emitted twice: "Onı úy sharayatında
     //    +15+20°С gradus temperaturada saqlaǵan maqul" writes the sign and the word together, and without
     //    the lookahead it reads *gradus gradus*. Same shape as Turkmen's `+11° gradus`.
-    s = tr(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])(?!\s*gradus)/gui, "$1 gradus");
-    s = tr(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1");
-    s = tr(s, /(\d)\s?°(?!\s*gradus)/gu, "$1 gradus ");
-    s = tr(s, /(\d)\s?°/gu, "$1");
+    s = rewrite(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])(?!\s*gradus)/gui, "$1 gradus");
+    s = rewrite(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1");
+    s = rewrite(s, /(\d)\s?°(?!\s*gradus)/gu, "$1 gradus ");
+    s = rewrite(s, /(\d)\s?°/gu, "$1");
 
     // 11) RANGES. The dash was dropped and the endpoints fused — `500-600 mm`, `25-28°C`, `1858-1859
     //     jıllardaǵı`, `155-165 kún`, `178-380 santimetr`. ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A
@@ -227,11 +227,11 @@ export function normalizeKarakalpak(input: string): string {
     //     connective on a bare dash would double a word the writer already chose or not.
     //     ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), and an adjacent slash means a
     //     citation or an address rather than a span.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
     // producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }

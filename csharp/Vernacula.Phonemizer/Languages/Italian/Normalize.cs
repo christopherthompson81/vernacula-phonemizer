@@ -4,6 +4,7 @@
  * Ported from src/languages/italian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Italian;
 
@@ -89,7 +90,7 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
 
     private static readonly JsRe FINAL_O = JsRegex.Compile("o$", "u");
     /** Feminine ordinal: the final -o becomes -a (decimo → decima). */
-    private static string Feminine(string masc) => JsRegex.Replace(masc, FINAL_O, _ => "a");
+    private static string Feminine(string masc) => Rewrite(masc, FINAL_O, _ => "a");
 
     /** Fraction denominators with a suppletive name; the rest take the ordinal (1/5 = un quinto). Plural is the
      *  regular masculine -o → -i (tre quarti). */
@@ -103,7 +104,7 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
             ? sup
             : Ordinal(den);
         if (basew is null) return null;
-        return $"{(num == 1 ? DEF.ApocopatedOne : Js.NumberToString(num))} {(num > 1 ? JsRegex.Replace(basew, FINAL_O_TO_I, _ => "i") : basew)}";
+        return $"{(num == 1 ? DEF.ApocopatedOne : Js.NumberToString(num))} {(num > 1 ? Rewrite(basew, FINAL_O_TO_I, _ => "i") : basew)}";
     }
 
     /** The currency noun already spelled out right after the amount — see step 10. */
@@ -156,27 +157,27 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
         // 1) DIGIT DE-GROUPING — FIRST: `.` is clause punctuation, so `19.500` would read as two numbers
         //    with a pause. Applied twice so a two-separator number (5.000.000) collapses fully. Every later
         //    step — the clock, the ordinal, the unit tier — depends on seeing one unbroken digit run.
-        s = DEGROUP.Replace(s, "");
+        s = Rewrite(s, DEGROUP, "");
 
         // 2) ERA MARKERS, before the generic dotted-abbreviation rule (multi-dot before single-dot, or the
         //    interior dot of `a.C.` survives as a phrase break).
-        s = JsRegex.Replace(s, ERA_BC, _ => DEF.EraMarkers.BeforeChrist);
-        s = JsRegex.Replace(s, ERA_AD, _ => DEF.EraMarkers.AfterChrist);
+        s = Rewrite(s, ERA_BC, _ => DEF.EraMarkers.BeforeChrist);
+        s = Rewrite(s, ERA_AD, _ => DEF.EraMarkers.AfterChrist);
 
-        s = JsRegex.Replace(s, NUMERO, _ => $"{DEF.NumberSign} ");
+        s = Rewrite(s, NUMERO, _ => $"{DEF.NumberSign} ");
 
-        s = JsRegex.Replace(s, ABBREV_MID, m =>
+        s = Rewrite(s, ABBREV_MID, m =>
             $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = JsRegex.Replace(s, ABBREV_END, m =>
+        s = Rewrite(s, ABBREV_END, m =>
             $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
 
         // 5) DEGREE SIGN, in three senses, and they must be separated IN THIS ORDER because the ordinal rule
         //    in step 6 claims every remaining `\d°`. Temperature and coordinate are identified by the LETTER
         //    glued to the sign; the ordinal never has one. Also before the shared unit tier, which would
         //    otherwise leave the bare sign behind.
-        s = JsRegex.Replace(s, DEG_C, m => $"{Degrees(m.Groups[1].Value)} {DEG.Celsius}");
-        s = JsRegex.Replace(s, DEG_F, m => $"{Degrees(m.Groups[1].Value)} {DEG.Fahrenheit}");
-        s = JsRegex.Replace(s, DEG_COMPASS, m =>
+        s = Rewrite(s, DEG_C, m => $"{Degrees(m.Groups[1].Value)} {DEG.Celsius}");
+        s = Rewrite(s, DEG_F, m => $"{Degrees(m.Groups[1].Value)} {DEG.Fahrenheit}");
+        s = Rewrite(s, DEG_COMPASS, m =>
         {
             var dir = m.Groups[2].Success ? m.Groups[2].Value : m.Groups[3].Value;
             return $"{Degrees(m.Groups[1].Value)} {COMPASS[dir.ToLowerInvariant()]}";
@@ -184,7 +185,7 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
 
         // 6) ORDINAL INDICATORS `°`/`º`/`ª`. The temperature and coordinate senses were consumed in step 5,
         //    so what reaches here is the ordinal.
-        s = JsRegex.Replace(s, ORDINAL_IND, m =>
+        s = Rewrite(s, ORDINAL_IND, m =>
         {
             var masc = Ordinal(Js.Number(m.Groups[1].Value));
             if (masc is null) return m.Value;
@@ -193,30 +194,30 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
 
         // 7) CLOCK, before the unit tier so nothing claims the hour, and after de-grouping so the hour is a
         //    clean digit run. Minutes must be two digits, which keeps the grade `2:2` out of the rule.
-        s = JsRegex.Replace(s, CLOCK_COLON, m =>
+        s = Rewrite(s, CLOCK_COLON, m =>
             Js.Number(m.Groups[2].Value) == 0 ? m.Groups[1].Value : $"{m.Groups[1].Value} e {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, CLOCK_DOT, m =>
+        s = Rewrite(s, CLOCK_DOT, m =>
             $"{m.Groups[1].Value}{(Js.Number(m.Groups[3].Value) == 0 ? m.Groups[2].Value : $"{m.Groups[2].Value} e {m.Groups[3].Value}")}");
 
-        s = JsRegex.Replace(s, PLUSMINUS, _ => $" {SIGN.PlusMinus} ");
-        s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} {SIGN.Plus} {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}{SIGN.Plus} {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, MINUS, m => $"{m.Groups[1].Value}{SIGN.Minus} {m.Groups[2].Value}");
+        s = Rewrite(s, PLUSMINUS, _ => $" {SIGN.PlusMinus} ");
+        s = Rewrite(s, PLUS_AFTER, m => $"{m.Groups[1].Value} {SIGN.Plus} {m.Groups[2].Value}");
+        s = Rewrite(s, PLUS_START, m => $"{m.Groups[1].Value}{SIGN.Plus} {m.Groups[2].Value}");
+        s = Rewrite(s, MINUS, m => $"{m.Groups[1].Value}{SIGN.Minus} {m.Groups[2].Value}");
 
-        s = JsRegex.Replace(s, EQUALS, _ => $" {SIGN.Equals} ");
-        s = JsRegex.Replace(s, LESS_THAN, _ => $" {SIGN.LessThan} ");
-        s = JsRegex.Replace(s, GREATER_THAN, _ => $" {SIGN.GreaterThan} ");
-        s = JsRegex.Replace(s, DIVIDE, _ => $" {SIGN.DividedBy} ");
+        s = Rewrite(s, EQUALS, _ => $" {SIGN.Equals} ");
+        s = Rewrite(s, LESS_THAN, _ => $" {SIGN.LessThan} ");
+        s = Rewrite(s, GREATER_THAN, _ => $" {SIGN.GreaterThan} ");
+        s = Rewrite(s, DIVIDE, _ => $" {SIGN.DividedBy} ");
 
-        s = JsRegex.Replace(s, FRACTION, m =>
+        s = Rewrite(s, FRACTION, m =>
             FractionWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);
 
-        s = JsRegex.Replace(s, PLUS_JOINER, _ => $" {SIGN.Plus} ");
+        s = Rewrite(s, PLUS_JOINER, _ => $" {SIGN.Plus} ");
 
         // 10) CURRENCY WRITTEN BEFORE THE AMOUNT — claimed here because the shared tier's magnitude hop emits
         //     `5 milioni dollari` and Italian needs the partitive *di*. After step 1, so the amount is one run.
         var whole10 = s;
-        s = JsRegex.Replace(s, CURRENCY_PRE, m =>
+        s = Rewrite(s, CURRENCY_PRE, m =>
         {
             var sign = m.Groups[1].Value;
             var num = m.Groups[2].Value;
@@ -227,7 +228,7 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
             // by backtracking — the engine drops the magnitude and matches anyway.
             if (CURRENCY_WORD.IsMatch(after)) return $"{num}{mag ?? ""}";
             var forms = CURRENCY[sign];
-            var word = mag is not null || Js.Number(JsRegex.Replace(num, SEPARATORS, _ => "")) != 1 ? forms.Plural : forms.Singular;
+            var word = mag is not null || Js.Number(Rewrite(num, SEPARATORS, _ => "")) != 1 ? forms.Plural : forms.Singular;
             // ⚠ The noun must not FUSE with what follows: `$110m` welded into *dollˈarim*, one plausible-looking
             // word. The separator keeps *110 dollari* and leaves the `m` visible to RAW-LATIN.
             var tail = LEADING_LETTER.IsMatch(after) ? " " : "";
@@ -254,5 +255,5 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
      * looking at `5 km/s`. ItalianPhonemizer therefore calls this AFTER the symbol tier.
      */
     public static string NormalizeItalianDecimals(string input) =>
-        JsRegex.Replace(input, DECIMAL_COMMA, m => $"{m.Groups[1].Value} {DEF.DecimalWord} {m.Groups[2].Value}");
+        Rewrite(input, DECIMAL_COMMA, m => $"{m.Groups[1].Value} {DEF.DecimalWord} {m.Groups[2].Value}");
 }

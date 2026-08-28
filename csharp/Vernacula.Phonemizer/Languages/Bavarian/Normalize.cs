@@ -9,6 +9,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Bavarian;
 
@@ -153,15 +154,15 @@ public static class Normalize
         // 1) ⚠ FIRST, BECAUSE IT BLINDS EVERY GUARD BEHIND IT: the corpus writes `-13&nbsp;°C`, and no
         //    pattern expecting a space or nothing can match across six intervening letters. A SPACE, never a
         //    deletion — `67&nbsp;km` must stay two tokens.
-        s = NBSP.Replace(s, " ");
+        s = Rewrite(s, NBSP, " ");
 
         // 2) Multi-dot abbreviations, before the single-dot rule so no interior dot survives as a phrase
         //    break, and before the ordinal rule so `z. B.` cannot be mistaken for anything numeric.
-        foreach (var (re, word) in MULTI_DOT) s = re.Replace(s, word);
+        foreach (var (re, word) in MULTI_DOT) s = Rewrite(s, re, word);
 
         // 3) ORDINALS: licensed by the FOLLOWING word being a month or an ordinal noun, or by a PRECEDING
         //    licenser plus a capitalised noun. Unsourced values are returned untouched.
-        s = ORD_RE.Replace(s, m =>
+        s = Rewrite(s, ORD_RE, m =>
         {
             // ⚠ ONLY ONE PRECEDING WORD IS CAPTURED WHEN THE MATCH STARTS MID-SENTENCE, and it lands in the
             // FIRST optional group, not the second — the engine backtracks to leave group 3 empty. Shift.
@@ -189,43 +190,43 @@ public static class Normalize
         //    end. AFTER the ordinal rule, so `2005. ISBN` has already been declined rather than half-rewritten.
         //    ⚠ The continuation lookahead admits a CURRENCY SIGN, or `21,905 Mrd. €` falls through unexpanded
         //    and takes the `€` with it — the tier needs `Milliardn` as a magnitude to hop.
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}{m.Groups[2].Value}");
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}.");
+        s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}{m.Groups[2].Value}");
+        s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}.");
 
         // 5) CLOCK, colon form only (a dot form would collide with the thousands grouping at step 6).
         //    ⚠ THE RANGE IS CLAIMED FIRST: the TOKEN class admits `-` inside a word run, so the hyphen between
         //    two rewritten clocks fuses `fimf Uhr-nein Uhr` into one token.
-        s = CLOCK_RANGE.Replace(s, m =>
+        s = Rewrite(s, CLOCK_RANGE, m =>
             $"{ClockWords(m.Groups[1].Value, m.Groups[2].Value, "")} bis "
             + $"{ClockWords(m.Groups[3].Value, m.Groups[4].Value, Opt(m, 5) ?? " Uhr")}");
-        s = CLOCK_ONE.Replace(s, m => ClockWords(m.Groups[1].Value, m.Groups[2].Value, Opt(m, 3) ?? " Uhr"));
+        s = Rewrite(s, CLOCK_ONE, m => ClockWords(m.Groups[1].Value, m.Groups[2].Value, Opt(m, 3) ?? " Uhr"));
 
         // 6) Period-grouped thousands: the period is clausePunctuation, so an unhandled `30.528` is a sentence
         //    break inside a number. ⚠ AFTER the clock and BEFORE the tier, whose NOT_VERSION guard needs the
         //    dot of `8140.43P` — which is why the group size is pinned at exactly three digits.
-        s = GROUPING_DOT.Replace(s, "");
+        s = Rewrite(s, GROUPING_DOT, "");
         // 6b) ⚠ The space-grouped form matches the WHOLE RUN rather than one join per pass: this arm keeps its
         //     head anchor (what stops `12345 678` merging), so it cannot use step 6's zero-width form.
-        s = GROUPING_SPACE.Replace(s, m => m.Groups[1].Value + GROUP_SEP.Replace(m.Groups[2].Value, ""));
+        s = Rewrite(s, GROUPING_SPACE, m => m.Groups[1].Value + GROUP_SEP.Replace(m.Groups[2].Value, ""));
 
         // 7) DEGREES, before the unit rules so the scale letter is not left to the Latin fallback, and before
         //    the sign rule so the sign lookahead has a degree word to find.
-        s = DEG_F_SIGN.Replace(DEG_C_SIGN.Replace(s, "°C"), "°F");
-        s = DEG_C.Replace(s, "$1 Grad Celsius");
-        s = DEG_F.Replace(s, "$1 Grad Fahrenheit");
+        s = Rewrite(Rewrite(s, DEG_C_SIGN, "°C"), DEG_F_SIGN, "°F");
+        s = Rewrite(s, DEG_C, "$1 Grad Celsius");
+        s = Rewrite(s, DEG_F, "$1 Grad Fahrenheit");
         // ⚠ The compound hyphen is CONSUMED for the clock range's reason: `90 Grad-Winkl` fuses into one token.
-        s = DEG_COMPOUND.Replace(s, "$1 Grad ");
-        s = DEG_BARE.Replace(s, "$1 Grad");
+        s = Rewrite(s, DEG_COMPOUND, "$1 Grad ");
+        s = Rewrite(s, DEG_BARE, "$1 Grad");
 
         // 8) The signs, and only in the degree slot — see DEGREE_AHEAD.
-        s = SIGN_MINUS.Replace(s, "$1minus ");
-        s = SIGN_PLUS.Replace(s, "$1plus ");
+        s = Rewrite(s, SIGN_MINUS, "$1minus ");
+        s = Rewrite(s, SIGN_PLUS, "$1plus ");
         // ± is a single code point, so no `+` rule can ever match inside it.
-        s = PLUS_MINUS.Replace(s, " plus minus ");
+        s = Rewrite(s, PLUS_MINUS, " plus minus ");
 
         // 9) FRACTIONS, narrowly — the operands are capped at two digits and the denominator at the three
         //    sourced values, which is what keeps a year range and a model designation out.
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -237,7 +238,7 @@ public static class Normalize
 
         // 9b) NUMERIC RANGES. A range ASCENDS, which separates it from a standard's part number; the chain
         //     guards are what keep ISBNs out, which the ordering test alone would not (`3-86520` ascends).
-        s = RANGE.Replace(s, m =>
+        s = Rewrite(s, RANGE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;

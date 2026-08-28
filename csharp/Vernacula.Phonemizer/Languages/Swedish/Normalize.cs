@@ -4,6 +4,7 @@
  * Ported from src/languages/swedish/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Swedish;
 
@@ -135,7 +136,7 @@ public static class Normalize
     private static readonly JsRe ALL_CAPS_2PLUS = JsRegex.Compile("^\\p{Lu}{2,}$", "u");
 
     /** The Swedish colon as an INFLECTIONAL JOINT (`USA:s`, `TV:n`) — not a pause. */
-    private static string ResolveColonInflection(string text) => COLON_INFLECTION.Replace(text, m =>
+    private static string ResolveColonInflection(string text) => Rewrite(text, COLON_INFLECTION, m =>
     {
         string head = m.Groups[1].Value, suf = m.Groups[2].Value;
         var glued = $"{head}{suf}";
@@ -185,41 +186,41 @@ public static class Normalize
         string prev;
 
         // 1) space-grouped thousands, first — a space is a token boundary.
-        do { prev = t; t = SPACE_GROUP.Replace(t, ""); } while (t != prev);
+        do { prev = t; t = Rewrite(t, SPACE_GROUP, ""); } while (t != prev);
 
         // 2) English-style comma grouping, before anything reads the comma as a decimal point.
-        do { prev = t; t = COMMA_GROUP.Replace(t, ""); } while (t != prev);
+        do { prev = t; t = Rewrite(t, COMMA_GROUP, ""); } while (t != prev);
 
         // 3) sports / duration time `M:SS,hh` — before the clock rules, which would claim its tail.
-        t = SPORTS_TIME.Replace(t, "$1 $2,$3");
+        t = Rewrite(t, SPORTS_TIME, "$1 $2,$3");
 
         // 4) clock, period form (the form Swedish writes more often); the range form is claimed first.
-        t = CLOCK_DOT_RANGE.Replace(t, m =>
+        t = Rewrite(t, CLOCK_DOT_RANGE, m =>
         {
             string h1 = m.Groups[1].Value, m1 = m.Groups[2].Value, h2 = m.Groups[3].Value, m2 = m.Groups[4].Value;
             return IsClock(h1, m1) && IsClock(h2, m2)
                 ? $"{h1} {Minutes(m1)} till {h2} {Minutes(m2)}"
                 : m.Value;
         });
-        t = CLOCK_DOT.Replace(t, m =>
+        t = Rewrite(t, CLOCK_DOT, m =>
             IsClock(m.Groups[1].Value, m.Groups[2].Value)
                 ? $"{m.Groups[1].Value} {Minutes(m.Groups[2].Value)}"
                 : m.Value);
 
         // 5) clock, colon form.
-        t = CLOCK_COLON.Replace(t, m =>
+        t = Rewrite(t, CLOCK_COLON, m =>
             IsClock(m.Groups[1].Value, m.Groups[2].Value)
                 ? $"{m.Groups[1].Value} {Minutes(m.Groups[2].Value)}"
                 : m.Value);
 
         // 6) score `N:N` — after the clock, whose two minute digits this looser pattern would eat.
-        t = SCORE_COLON.Replace(t, "$1 $2");
+        t = Rewrite(t, SCORE_COLON, "$1 $2");
 
         // 7) dotted abbreviations; the dot is re-emitted where it is also the sentence period.
         foreach (var (re, word, keepFinal) in ABBREV)
         {
             var whole = t; // JS hands the callback the string being replaced, not the running result
-            t = re.Replace(t, m =>
+            t = Rewrite(t, re, m =>
             {
                 if (keepFinal is null || !m.Value.EndsWith(".", StringComparison.Ordinal)) return word;
                 var after = CLOSERS.Replace(whole[(m.Index + m.Length)..], "");
@@ -228,7 +229,7 @@ public static class Normalize
         }
 
         // 8) ordinal colon `N:a` / `N:e`, plus the `:s` genitive and the `:or` plural.
-        t = ORDINAL_COLON.Replace(t, m =>
+        t = Rewrite(t, ORDINAL_COLON, m =>
         {
             string num = m.Groups[1].Value, suf = m.Groups[2].Value;
             if (suf == "or") return $"{Numbers.NumberToWords(Js.Number(num), num)}or";
@@ -237,45 +238,45 @@ public static class Normalize
         });
 
         // 9) century / decade `NNNN-tal…`; the range form is claimed first.
-        t = CENTURY_RANGE.Replace(t, m =>
+        t = Rewrite(t, CENTURY_RANGE, m =>
         {
             string? first = HundredsYear(Js.Number(m.Groups[1].Value)), second = HundredsYear(Js.Number(m.Groups[2].Value));
             return first is not null && second is not null ? $"{first} till {second}{m.Groups[3].Value}" : m.Value;
         });
-        t = CENTURY.Replace(t, m =>
+        t = Rewrite(t, CENTURY, m =>
         {
             var word = HundredsYear(Js.Number(m.Groups[1].Value));
             return word is null ? m.Value : $"{word}{m.Groups[2].Value}";
         });
 
         // 10) ranges — before the year rule, which would leave no digits for this one to match.
-        t = RANGE.Replace(t, "$1 till $2");
+        t = Rewrite(t, RANGE, "$1 till $2");
 
         // 11) bare four-digit 1100–1999 → the hundreds reading, unless a tier-claimed unit follows.
-        t = BARE_YEAR.Replace(t, m => HundredsYear(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        t = Rewrite(t, BARE_YEAR, m => HundredsYear(Js.Number(m.Groups[1].Value)) ?? m.Value);
 
         // 12) degrees, before any rule that could claim the scale letter.
-        t = DEG_C_SIGN.Replace(t, "°C");
-        t = DEG_F_SIGN.Replace(t, "°F");
-        t = DEG_C.Replace(t, "$1 grader celsius");
-        t = DEG_F.Replace(t, "$1 grader fahrenheit");
-        t = DEG_V.Replace(t, "$1 grader väst");
-        t = DEG.Replace(t, "$1 grader");
+        t = Rewrite(t, DEG_C_SIGN, "°C");
+        t = Rewrite(t, DEG_F_SIGN, "°F");
+        t = Rewrite(t, DEG_C, "$1 grader celsius");
+        t = Rewrite(t, DEG_F, "$1 grader fahrenheit");
+        t = Rewrite(t, DEG_V, "$1 grader väst");
+        t = Rewrite(t, DEG, "$1 grader");
 
         // 13) `x` as multiplication.
-        t = TIMES_X.Replace(t, " gånger ");
+        t = Rewrite(t, TIMES_X, " gånger ");
 
         // 14) signed numbers — after the ranges, so a range's dash is already gone.
-        t = SIGN_PREFIX.Replace(t, m => $"{(m.Groups[1].Value == "+" ? "plus" : "minus")} {m.Groups[2].Value}");
-        t = PLUS_AFTER_LETTER.Replace(t, " plus ");
-        t = PLUS_BETWEEN.Replace(t, "$1 plus $2");
+        t = Rewrite(t, SIGN_PREFIX, m => $"{(m.Groups[1].Value == "+" ? "plus" : "minus")} {m.Groups[2].Value}");
+        t = Rewrite(t, PLUS_AFTER_LETTER, " plus ");
+        t = Rewrite(t, PLUS_BETWEEN, "$1 plus $2");
 
         // 15) relational and operator signs.
-        foreach (var (re, word) in RELATIONAL) t = re.Replace(t, word);
+        foreach (var (re, word) in RELATIONAL) t = Rewrite(t, re, word);
 
         // 16) ampersand.
-        t = AMPERSAND.Replace(t, " och ");
+        t = Rewrite(t, AMPERSAND, " och ");
 
-        return SPACE_RUN.Replace(t, " ");
+        return Rewrite(t, SPACE_RUN, " ");
     }
 }

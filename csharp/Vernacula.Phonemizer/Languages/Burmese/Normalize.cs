@@ -4,6 +4,7 @@
  * Ported from src/languages/burmese/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Burmese;
 
@@ -74,60 +75,60 @@ public static class Normalize
     {
         var t = input;
 
-        t = ZERO_WIDTH.Replace(t, "");
+        t = Rewrite(t, ZERO_WIDTH, "");
 
         // ⚠ ZERO-WIDTH, so every separator in the run is claimed in ONE pass. The consuming form ate the
         // trailing group, the scan resumed inside the remainder, and alternate commas survived into a
         // six-digit block the three-digit rule could never claim again — see test/thousands-degrouping.
-        t = JsRegex.Compile($"(?<={Digit()})(?<!(?<!{Digit()})0)[,\u066c](?={Digit(3)}(?!{Digit()}))", "gu").Replace(t, "");
+        t = Rewrite(t, JsRegex.Compile($"(?<={Digit()})(?<!(?<!{Digit()})0)[,\u066c](?={Digit(3)}(?!{Digit()}))", "gu"), "");
 
         foreach (var (nre, nword) in UNITS)
             foreach (var (dre, dword) in RATE_DENOMINATORS)
-                t = JsRegex.Compile(
+                t = Rewrite(t, JsRegex.Compile(
                         $"({Digit()}+(?:[.,]{Digit()}+)?(?:\\s*{DASH}\\s*{Digit()}+(?:[.,]{Digit()}+)?)?)"
                             + $"\\s*(?:{nre})\\s*/\\s*(?:{dre})(?![\\p{{L}}{D}])",
                         "giu")
-                    .Replace(t, $"တစ်{dword}လျှင် $1 {nword}");
+                    , $"တစ်{dword}လျှင် $1 {nword}");
 
-        t = JsRegex.Compile($"({Digit()}{{1,2}}):({Digit(2)})(?!{Digit()})", "gu").Replace(t, "$1 နာရီ $2 မိနစ်");
+        t = Rewrite(t, JsRegex.Compile($"({Digit()}{{1,2}}):({Digit(2)})(?!{Digit()})", "gu"), "$1 နာရီ $2 မိနစ်");
 
-        t = JsRegex.Compile($"({Digit()}+)\\.({Digit()}+)", "gu").Replace(t, m =>
+        t = Rewrite(t, JsRegex.Compile($"({Digit()}+)\\.({Digit()}+)", "gu"), m =>
             $"{m.Groups[1].Value} ဒသမ {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-        t = JsRegex.Compile($"({Digit()}+)\\s*[%\uff05]", "gu").Replace(t, "$1 ရာခိုင်နှုန်း");
+        t = Rewrite(t, JsRegex.Compile($"({Digit()}+)\\s*[%\uff05]", "gu"), "$1 ရာခိုင်နှုန်း");
 
-        t = DEG_F_SIGN.Replace(DEG_C_SIGN.Replace(t, "\u00b0C"), "\u00b0F");
-        t = JsRegex.Compile($"({Digit()})\\s*\u00b0\\s*C(?![\\p{{L}}])", "giu").Replace(t, "$1 ဒီဂရီ စင်တီဂရိတ်");
-        t = JsRegex.Compile($"({Digit()})\\s*\u00b0\\s*F(?![\\p{{L}}])", "giu").Replace(t, "$1 ဒီဂရီ ဖာရင်ဟိုက်");
-        t = JsRegex.Compile($"({Digit()})\\s*\u00b0", "gu").Replace(t, "$1 ဒီဂရီ");
+        t = Rewrite(Rewrite(t, DEG_C_SIGN, "\u00b0C"), DEG_F_SIGN, "\u00b0F");
+        t = Rewrite(t, JsRegex.Compile($"({Digit()})\\s*\u00b0\\s*C(?![\\p{{L}}])", "giu"), "$1 ဒီဂရီ စင်တီဂရိတ်");
+        t = Rewrite(t, JsRegex.Compile($"({Digit()})\\s*\u00b0\\s*F(?![\\p{{L}}])", "giu"), "$1 ဒီဂရီ ဖာရင်ဟိုက်");
+        t = Rewrite(t, JsRegex.Compile($"({Digit()})\\s*\u00b0", "gu"), "$1 ဒီဂရီ");
 
         foreach (var (sign, word) in CURRENCY)
-            t = JsRegex.Compile($"{ESCAPE.Replace(sign, "\\$&")}\\s*({Digit()}+)", "gu").Replace(t, $"$1 {word}");
+            t = Rewrite(t, JsRegex.Compile($"{ESCAPE.Replace(sign, "\\$&")}\\s*({Digit()}+)", "gu"), $"$1 {word}");
 
-        t = JsRegex.Compile($"(?<!{Digit()})({Digit()}+)\\s*/\\s*({Digit()}+)(?!{Digit()})", "gu")
-            .Replace(t, "$2 ပုံ $1 ပုံ");
+        t = Rewrite(t, JsRegex.Compile($"(?<!{Digit()})({Digit()}+)\\s*/\\s*({Digit()}+)(?!{Digit()})", "gu")
+            , "$2 ပုံ $1 ပုံ");
 
-        t = JsRegex.Compile(
+        t = Rewrite(t, JsRegex.Compile(
                 $"(?<!{DASH}\\s*)(?<![{D}])(?<![\u00d7xX]\\s{{0,2}})"
                     + $"({Digit()}+)\\s*{DASH}\\s*({Digit()}+)(?!{Digit()})(?!\\s*(?:{DASH}|အထိ|ထိ))",
                 "gu")
-            .Replace(t, "$1 မှ $2 အထိ");
+            , "$1 မှ $2 အထိ");
 
         foreach (var (sup, modifier) in EXP)
             foreach (var (re, word) in UNITS)
-                t = JsRegex.Compile($"({Digit()})\\s*(?:{re})\\s*{sup}", "gu").Replace(t, $"$1 {modifier}{word}");
+                t = Rewrite(t, JsRegex.Compile($"({Digit()})\\s*(?:{re})\\s*{sup}", "gu"), $"$1 {modifier}{word}");
 
         foreach (var (re, word) in UNITS)
-            t = JsRegex.Compile($"({Digit()})\\s*(?:{re})(?![\\p{{L}}])", "gu").Replace(t, $"$1 {word}");
+            t = Rewrite(t, JsRegex.Compile($"({Digit()})\\s*(?:{re})(?![\\p{{L}}])", "gu"), $"$1 {word}");
 
-        t = JsRegex.Compile($"({Digit()})\\s*\\+\\s*({Digit()})", "gu").Replace(t, "$1 အပေါင်း $2");
-        t = JsRegex.Compile($"(?<![{D}])\\+\\s*(?={Digit()})", "gu").Replace(t, "အပေါင်း ");
-        foreach (var (re, word) in RELATIONAL) t = re.Replace(t, word);
-        t = RUNS.Replace(t, " ");
+        t = Rewrite(t, JsRegex.Compile($"({Digit()})\\s*\\+\\s*({Digit()})", "gu"), "$1 အပေါင်း $2");
+        t = Rewrite(t, JsRegex.Compile($"(?<![{D}])\\+\\s*(?={Digit()})", "gu"), "အပေါင်း ");
+        foreach (var (re, word) in RELATIONAL) t = Rewrite(t, re, word);
+        t = Rewrite(t, RUNS, " ");
 
-        t = AMPERSAND.Replace(t, " နှင့် ");
+        t = Rewrite(t, AMPERSAND, " နှင့် ");
 
-        t = DOTTED_INITIALISM.Replace(t, m => DOTS.Replace(m.Value, ""));
+        t = Rewrite(t, DOTTED_INITIALISM, m => DOTS.Replace(m.Value, ""));
 
         return t;
     }

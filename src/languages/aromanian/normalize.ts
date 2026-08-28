@@ -56,7 +56,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** ⚠ NEVER `\b` — Aromanian carries `ã â ľ ț ş ș ñ` and the digraph apostrophes, which `\b` treats as
  *  boundaries (trap 1/23). */
@@ -86,7 +86,7 @@ export function normalizeAromanian(input: string): string {
     // 1) THE DOTTED DATE, FIRST — `23.12.1951`, `16.04.1959`, `18.11.1993` in the biography stubs. Three
     //    dot-joined runs, and the SECOND has two digits, so the decimal arm below would claim it and leave
     //    a stray sentence break. The dots become spaces; no date vocabulary is invented.
-    s = tr(s, /(?<![\d.])(\d{1,4})((?:\.\d{1,4}){2,})(?!\d)(?!\.\d)/gu,
+    s = rewrite(s, /(?<![\d.])(\d{1,4})((?:\.\d{1,4}){2,})(?!\d)(?!\.\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, " "));
 
     // 2) THE SEPARATORS — ⚠ THE SAME TEST ON BOTH MARKS, because each does both jobs (see the header).
@@ -94,22 +94,22 @@ export function normalizeAromanian(input: string): string {
     //    both directions, and one sentence carries a comma doing each.
     //    ⚠ THE WHOLE NUMBER AT ONCE, not one join per pass (trap 63), and the trailing guard rejects a
     //    DIGIT or a mark that continues the number — never a bare clause mark (trap 58).
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[.,]\d{3})+)(?!\d)(?![.,]\d)/gu,
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[.,]\d{3})+)(?!\d)(?![.,]\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""));
     //    …and the SPACE, which this corpus also uses (`216 061 bãn.`, `170 000 di mãrchi`, `21 000 000`).
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
-        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rewrite(rest, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    ⚠ AND WHAT IS LEFT WITH ONE OR TWO DIGITS IS A DECIMAL, spent rather than spoken: `virgulã` is ×0
     //    on this wiki and no other decimal-point candidate is attested, so the mark becomes a space. The
     //    defect being fixed is the false SENTENCE BREAK — `0.48%` read as *nulã . patrudzãts shi optu*.
-    s = tr(s, /(?<![\d.,])(\d+)[.,](\d{1,2})(?!\d)(?![.,]\d)/gu, "$1 $2");
+    s = rewrite(s, /(?<![\d.,])(\d+)[.,](\d{1,2})(?!\d)(?![.,]\d)/gu, "$1 $2");
 
     // 3) THE EN/EM DASH SPAN, BEFORE THE ERA STEP — and the ordering is the point. This corpus writes
     //    `287 n.Hr. –212 d.Hr.` and `356 n. Hr. – 323 d.Hr.`, where the character to the LEFT of the dash
     //    is the abbreviation's dot, not a digit. Run after step 4 the dash has become a letter's neighbour
     //    (`…Hristo –212`) and no digit-anchored rule can see it, so the span is dropped and two eras fuse
     //    into one run. Matching `[.\d]` on the left, while the dot is still there, is what claims it.
-    s = tr(s, /([.\d])\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /([.\d])\s?[–—]\s?(?=\d)/gu, "$1, ");
 
     // 3) THE ERA MARKERS, both spacings the corpus uses — `287 n.Hr. –212 d.Hr.`, `356 n. Hr. – 323 d.Hr.`,
     //    `17 d.Hr. - 69-71 d.Hr.`. They were reaching the g2p as bare letters with two false stops each.
@@ -121,7 +121,7 @@ export function normalizeAromanian(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}d\\s?\\.\\s?Hr\\s?\\.`, "gu"), "dupu Hristo"],
     ];
     for (const [re, word] of era)
-        s = tr(s, re, (m0: string, offset: number, full: string) => {
+        s = rewrite(s, re, (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
@@ -140,7 +140,7 @@ export function normalizeAromanian(input: string): string {
     //    where a BRACKET follows. Keeping the dot only when the clause actually ends is the same shape the
     //    era rule above uses, and it is right for the same reason (trap 10).
     for (const [ab, word] of abbrev)
-        s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${ab}\\s?\\.`, "gu"),
+        s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}${ab}\\s?\\.`, "gu"),
             (m0: string, offset: number, full: string) => {
                 const rest = full.slice(offset + m0.length);
                 return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
@@ -150,7 +150,7 @@ export function normalizeAromanian(input: string): string {
     //    requirement cannot bridge it. Aromanian writes both orders — `6650 km di la izvuri` (bare) and
     //    `largu 18 di km.di Tetova, 53 di km.di Scopia` (with the particle) — and only the first reaches
     //    the tier. Expanding the unit here leaves the particle exactly where the writer put it.
-    s = tr(s, new RegExp(`(\\d+\\s+di\\s+)km${NOT_LETTER_AFTER}`, "gu"), "$1kilometru");
+    s = rewrite(s, new RegExp(`(\\d+\\s+di\\s+)km${NOT_LETTER_AFTER}`, "gu"), "$1kilometru");
 
     // 6) THE SHARED SYMBOL TIER — `%` and the units. It must see the number still ADJACENT to its unit,
     //    which is why it runs after the separators (a grouped figure is one token by now) and before the
@@ -167,7 +167,7 @@ export function normalizeAromanian(input: string): string {
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), and an adjacent slash means a legal
     //    citation (`nr. 53/2013`, `nr.21/98`) rather than a span.
     //    (the en/em arm ran at step 3, while the era dots were still in place — see there.)
-    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

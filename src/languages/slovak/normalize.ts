@@ -52,7 +52,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { MANIFEST } from "./manifest.ts";
 import { SYMBOLS, skCountForm } from "./slovak.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * SLOVAK LETTER NAMES, for the initialism pass.
@@ -129,7 +129,7 @@ const MILA: readonly [string, string, string] = ["míľa", "míle", "míľ"];
  * such hour (`1:15` read *jeden … pätnásť*). Only the suffix changes, so a compound is handled by the same
  * replacement: dvadsaťjeden → dvadsaťjedna, dvadsaťdva → dvadsaťdve.
  */
-const feminine = (words: string): string => words.replace(/jeden$/u, "jedna").replace(/dva$/u, "dve");
+const feminine = (words: string): string => rewrite(rewrite(words, /jeden$/u, "jedna"), /dva$/u, "dve");
 
 // ---------------------------------------------------------------------------------------------------
 // ORDINALS
@@ -364,15 +364,15 @@ export function normalizeSlovak(input: string): string {
     //    (19 500 000). NBSP is folded to a plain space AFTERWARDS, never before — the corpus uses it both
     //    as the separator (`11 000 $`) and as an ordinary inter-word space (28 instances).
     for (let i = 0; i < 2; i++)
-        s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = tr(s, new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
+        s = rewrite(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = rewrite(s, new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
 
     // 1) MULTI-DOT ABBREVIATIONS (era markers, `n. m.`, `t. j.`), before the single-dot rule (⚠
     //    coupling) — otherwise the interior dots survive as breaks and the letters read as a bogus word
     //    ([n . ˈl̩ .]). Each expansion CONSUMES the final dot, so keepFinal puts back the sentence period
     //    where that dot was doing double duty (`356 pred n.l. Išlo …`).
     for (const [re, w] of MULTI_DOT)
-        s = tr(s, re, (m0: string, ...rest: unknown[]) => keepFinal(w, m0, rest));
+        s = rewrite(s, re, (m0: string, ...rest: unknown[]) => keepFinal(w, m0, rest));
 
     // 2) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break. Two shapes:
     //    followed by a word (`tzv. spamu`, `č. 11`), and followed by a mark or the clause end
@@ -381,11 +381,11 @@ export function normalizeSlovak(input: string): string {
     //    following comma already carries the pause, so appending a period there produced `a tak ďalej.,`
     //    — two marks where the sentence has one. Only an abbreviation at the very end of the utterance
     //    (or before closing brackets that end it) gets the period back.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED[ab.toLowerCase()]!}${sp}`);
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[»)”\\]]\\s*)*$)`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[»)”\\]]\\s*)*$)`, "giu"),
         (_m, ab: string) => `${DOTTED[ab.toLowerCase()]!}.`);
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?![\\p{L}\\p{M}])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?![\\p{L}\\p{M}])`, "giu"),
         (_m, ab: string) => DOTTED[ab.toLowerCase()]!);
     //    `St. Louis` ×1 — the DOT ONLY, with no expansion. There is no source for the word: the corpus's
     //    single `Saint` is the composer SAINT-SAËNS, a French surname, not this abbreviation's reading,
@@ -393,14 +393,14 @@ export function normalizeSlovak(input: string): string {
     //    separate defect from the word — it put a full phrase break in the middle of `do Six Flags v St.
     //    Louis v štáte Missouri` — and removing it needs no vocabulary at all. Claimed BY NAME,
     //    and only before a capitalised word, so a sentence-final `st.` cannot lose its pause.
-    s = tr(s, /(?<![\p{L}\p{M}.])(St)\.(?=\s+\p{Lu})/gu, "$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}.])(St)\.(?=\s+\p{Lu})/gu, "$1");
 
     // 3) CLOCK RANGE, before the single clock (⚠ order by who needs WORDS
     //    first). `medzi 22:00 - 23:00` governs the INSTRUMENTAL on BOTH clocks, and the second one's form
     //    does not exist until it has been read, so the pair is claimed here and the dash becomes the `a`
     //    the corpus's other instance writes ("medzi 06:30 a 07:30"). Without this step the dash would
     //    survive between two already-worded clocks and be dropped by the tokenizer.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(medzi\\s+)${CLOCK_BODY}\\s*(?:[-–—]|a)\\s*${CLOCK_BODY}${CLOCK_TAIL}`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(medzi\\s+)${CLOCK_BODY}\\s*(?:[-–—]|a)\\s*${CLOCK_BODY}${CLOCK_TAIL}`, "giu"),
         (m0, pre: string, h1: string, m1: string, h2: string, m2: string) =>
             `${pre}${clock(Number(h1), Number(m1), "f.instr")} a ${clock(Number(h2), Number(m2), "f.instr")}`);
 
@@ -410,7 +410,7 @@ export function normalizeSlovak(input: string): string {
     //    The GOVERNING PREPOSITION picks the case: o/do/po/od/pred/okolo → -ej, medzi → -ou (the
     //    step above), nothing → the neutral cardinal + counted *hodín*. A trailing `hod`/`h` is CONSUMED
     //    (`do 23:35 hod`): the hour noun is already in the reading and saying it twice is redundant.
-    s = tr(s, new RegExp(`(?<![\\d:.,])${CLOCK_BODY}${CLOCK_TAIL}(?:\\s+(?:hod|h)(?![\\p{L}\\p{M}]))?`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d:.,])${CLOCK_BODY}${CLOCK_TAIL}(?:\\s+(?:hod|h)(?![\\p{L}\\p{M}]))?`, "gu"),
         (m0: string, h: string, min: string, offset: number, whole: string) => {
             const before = whole.slice(0, offset);
             const governed = /(?<![\p{L}\p{M}])(?:o|do|po|od|pred|okolo)\s+$/iu.test(before);
@@ -420,7 +420,7 @@ export function normalizeSlovak(input: string): string {
     // 5) VERSION / FIGURE DOTS between digits — `802.11a`, `802.11b`, `802.11g`, `802.11n` (×5) broke the
     //    sentence at the interior dot. AFTER the clock (which owns `12.00`) and before the ordinal rules,
     //    so those never see a digit-dot-digit.
-    s = tr(s, /(\d)\.(?=\d)/gu, "$1 bodka ");
+    s = rewrite(s, /(\d)\.(?=\d)/gu, "$1 bodka ");
 
     // 6) NUMERIC RANGES. The dash between two numbers was DROPPED, fusing "1418" and "1450" into one
     //    uninterrupted run of words. Read as "do". Digits are required on BOTH sides so that `Il-76` and
@@ -431,7 +431,7 @@ export function normalizeSlovak(input: string): string {
     //    score, and "šesť do šesť" is not Slovak; a range whose endpoints coincide never is one, so the
     //    rule declines it rather than needing a score-vs-range judgement. 5 of the corpus's 6 dashed
     //    pairs are true ranges and are claimed; this is the sixth.
-    s = tr(s, /(?<![\d.,])(\d+)\s?[–—-]\s?(\d+)(?![\d.,])/gu,
+    s = rewrite(s, /(?<![\d.,])(\d+)\s?[–—-]\s?(\d+)(?![\d.,])/gu,
         (m0, a: string, b: string) => (a === b ? m0 : `${a} do ${b}`));
 
     // 7) LICENSED ORDINALS — the corpus's 66 claimable `N.`, inflected by the noun that follows. The LIST
@@ -439,7 +439,7 @@ export function normalizeSlovak(input: string): string {
     //    `medzi 10. a 11. storočím`; the optional word after `a` handles `19. a začiatku 20. storočia`,
     //    the corpus's one interpolated head. Every item in the list takes the head noun's case, which is
     //    what Slovak agreement requires and what a per-item rule could not produce.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(
             `(?<![\\p{L}\\p{M}\\d.,])((?:\\d{1,4}\\.,?\\s+(?:a\\s+(?:[\\p{Ll}\\p{M}]+\\s+)?)?)*)`
             + `(\\d{1,4})\\.\\s+(${LICENSOR_ALT})(?![\\p{L}\\p{M}])`,
@@ -474,7 +474,7 @@ export function normalizeSlovak(input: string): string {
     //    monarch range, so `Standard 802` and a page number cannot reach it. The lowercase-follower guard
     //    is shared with the general rule and is what keeps `stanice Fort Greely 9.` (an utterance end) out
     //    — that instance therefore keeps its sentence period and its cardinal reading, deliberately.
-    s = tr(s, /(?<![\p{L}\p{M}\d.,])(\d{1,4})\.(?=\s*[,\p{Ll}])/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d{1,4})\.(?=\s*[,\p{Ll}])/gu,
         (m0, digits: string, offset: number, whole: string) => {
             const n = Number(digits);
             const name = /(?<![\p{L}\p{M}])(\p{Lu}[\p{L}\p{M}]+)\s+$/u.exec(whole.slice(0, offset))?.[1];
@@ -488,19 +488,19 @@ export function normalizeSlovak(input: string): string {
     // 9) MÍĽ RATE — `40 míľ/h`. `míľ` is already the written Slovak genitive plural of *míľa*, so only the
     //    denominator needs reading, and the corpus spells the idiom out two sentences away: "rýchlosť 105
     //    míľ za hodinu (165 km/h)". The shared tier's `mi` key cannot match the spelled form.
-    s = tr(s, /(\d+)\s?míľ\s?\/\s?h(?![\p{L}\p{M}])/giu, (_m, n: string) => `${n} míľ za hodinu`);
+    s = rewrite(s, /(\d+)\s?míľ\s?\/\s?h(?![\p{L}\p{M}])/giu, (_m, n: string) => `${n} míľ za hodinu`);
     //    …and the bare abbreviation, which the corpus does not write but the neighbouring form implies.
-    s = tr(s, /(\d+)\s?mi\s?\/\s?h(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(\d+)\s?mi\s?\/\s?h(?![\p{L}\p{M}])/giu,
         (_m, n: string) => `${n} ${counted(Number(n), MILA)} za hodinu`);
 
     // 10) SIGNS that must be read BEFORE the shared tier, because they sit between the number and its
     //     unit or change what the number is. Degrees take the three-way agreement (30 → stupňov).
-    s = tr(s, /(\d+)\s?°\s?C(?![\p{L}\p{M}])/gui,
+    s = rewrite(s, /(\d+)\s?°\s?C(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n), STUPEN)} Celzia`);
-    s = tr(s, /(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui,
+    s = rewrite(s, /(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n), STUPEN)} Fahrenheita`);
-    s = tr(s, /(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), STUPEN)}`);
-    s = tr(s, /(?<=\d)\s?[x×]\s?(?=\d)/gu, " krát ");
+    s = rewrite(s, /(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), STUPEN)}`);
+    s = rewrite(s, /(?<=\d)\s?[x×]\s?(?=\d)/gu, " krát ");
     //     A leading `+`/`−` on a number. The corpus's one instance is `+30°C`; the minus is its
     //     counterpart, and a sign that is dropped turns a negative into a positive — the one outcome that
     //     cannot be right. U+2212 as well as the hyphen; the boundary keeps a hyphenated compound and a
@@ -509,9 +509,9 @@ export function normalizeSlovak(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = tr(s, /±/gu, " plus mínus ");
-    s = tr(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
-    s = tr(s, /(^|[\s(])[-−]\s?(?=\d)/gu, "$1mínus ");
+    s = rewrite(s, /±/gu, " plus mínus ");
+    s = rewrite(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
+    s = rewrite(s, /(^|[\s(])[-−]\s?(?=\d)/gu, "$1mínus ");
 
     // 11) THE SHARED SYMBOL TIER — %, currency, units, rates, exponents. It must see the number still
     //     ADJACENT to its unit and still carrying its decimal comma (`2,4 GHz`), so it runs here: after
@@ -520,17 +520,17 @@ export function normalizeSlovak(input: string): string {
 
     // 12) DECIMAL COMMA → the word. Slovak name for the comma, and the same choice Czech made
     //     for the same separator. Inserted as TEXT so the tokenizer phonemises it.
-    s = tr(s, /(?<=\d),(?=\d)/gu, " čiarka ");
+    s = rewrite(s, /(?<=\d),(?=\d)/gu, " čiarka ");
 
     // 13) FRACTIONS. Zero corpus instances — the only slash it writes is the SEASON `1995/96`, which the
     //     ≤3-digit numerator guard excludes — so the rule
     //     COMPOSES from the denominator noun and a feminine numerator (1/5 = jedna pätina, 3/4 = tri
     //     štvrtiny, 2/3 = dve tretiny) instead of tabulating the numerator that happens to be attested,
     //     which is exactly the defect Uzbek shipped. Denominators above 10 are left untouched.
-    s = tr(s, /(\d+)¾/gu, "$1 a tri štvrtiny");
-    s = tr(s, /(\d+)½/gu, "$1 a pol");
-    s = tr(s, /(\d+)¼/gu, "$1 a štvrtina");
-    s = tr(s, /(?<![\d/.,])(\d{1,3})\/(\d{1,2})(?![\d/.,])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /(\d+)¾/gu, "$1 a tri štvrtiny");
+    s = rewrite(s, /(\d+)½/gu, "$1 a pol");
+    s = rewrite(s, /(\d+)¼/gu, "$1 a štvrtina");
+    s = rewrite(s, /(?<![\d/.,])(\d{1,3})\/(\d{1,2})(?![\d/.,])/gu, (m0, a: string, b: string) => {
         const forms = DENOMINATOR[Number(b)];
         if (forms === undefined) return m0;
         return `${feminine(numberToWords(Number(a), a))} ${counted(Number(a), forms)}`;
@@ -539,11 +539,11 @@ export function normalizeSlovak(input: string): string {
     // 14) RELATIONAL SIGNS and the ampersand. None of the relational signs occurs in this corpus, but a
     //     phonemizer is handed arbitrary text and a dropped sign is inaudible — the one outcome that
     //     cannot be right.
-    s = tr(s, /\s*≈\s*/gu, " približne sa rovná ");
-    s = tr(s, /\s*=\s*/gu, " rovná sa ");
-    s = tr(s, /\s*<\s*/gu, " menší ako ");
-    s = tr(s, /\s*>\s*/gu, " väčší ako ");
-    s = tr(s, /\s*÷\s*/gu, " delené ");
+    s = rewrite(s, /\s*≈\s*/gu, " približne sa rovná ");
+    s = rewrite(s, /\s*=\s*/gu, " rovná sa ");
+    s = rewrite(s, /\s*<\s*/gu, " menší ako ");
+    s = rewrite(s, /\s*>\s*/gu, " väčší ako ");
+    s = rewrite(s, /\s*÷\s*/gu, " delené ");
     //     `&` → "a" (1 corpus instance, `B&B`, where it was dropped and left two unlinked letters).
     //     THE FLANKING LETTERS ARE SPELLED when both are lone capitals, which is what `B&B` is: joining
     //     them alone still left `B a B`, read [p ˈa p] — two bare devoiced stops, not the letter *bé*.
@@ -551,12 +551,12 @@ export function normalizeSlovak(input: string): string {
     //     on the ampersand, is what keeps it safe: a general "lone capital → letter name" rule is
     //     impossible in Slovak, where `v`, `a`, `i`, `s`, `k`, `o`, `u`, `z` are all real words (`V 16.
     //     storočí` opens with one).
-    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})\s*[&＆]\s*(\p{Lu})(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}])(\p{Lu})\s*[&＆]\s*(\p{Lu})(?![\p{L}\p{M}])/gu,
         (m0, a: string, b: string) => {
             const [x, y] = [LETTER_NAME[a.toLowerCase()], LETTER_NAME[b.toLowerCase()]];
             return x === undefined || y === undefined ? m0 : `${x} a ${y}`;
         });
-    s = tr(s, /\s*[&＆]\s*/gu, " a ");
+    s = rewrite(s, /\s*[&＆]\s*/gu, " a ");
 
     // 15) INITIALISMS, LAST. The seam's ordering constraint is that it must follow the Roman-numeral and
     //     regnal rules (step 8) and the abbreviation expansions (steps 1–2) — an all-caps run is what a

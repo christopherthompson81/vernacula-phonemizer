@@ -17,6 +17,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Kirundi;
 
@@ -259,10 +260,10 @@ public static class Normalize
         // ⚠ `full` IS THE PRE-REPLACE STRING, as JS's replace callback argument is — snapshot it, or the
         // closure would see `s` as reassigned by this very statement. (Same for every pass below.)
         var src1 = s;
-        s = DOTTED_RUN.Replace(s, m =>
+        s = Rewrite(s, DOTTED_RUN, m =>
         {
             var run = m.Value;
-            var letters = DOTS_AND_SPACES.Replace(run, "");
+            var letters = Rewrite(run, DOTS_AND_SPACES, "");
             var rest = Slice(src1, m.Index + run.Length, src1.Length);
             if (LEADING_LETTER.IsMatch(rest)) return $"{letters} ";
             if (!run.EndsWith(".", StringComparison.Ordinal)) return letters;
@@ -273,7 +274,7 @@ public static class Normalize
         //    spurious sentence breaks. ⚠ ONLY THE DOTS ARE SPENT: no month name is emitted, because the
         //    corpus glosses its own numeric date as three numbers. ⚠ BEFORE step 4, so a de-grouping arm
         //    can never see a date's `dd.mm` as the head of a grouped run.
-        s = DOTTED_DATE.Replace(s, "$1 $2 $3");
+        s = Rewrite(s, DOTTED_DATE, "$1 $2 $3");
 
         // 3) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — `km 1,965`, `km² 517`, `mm 1.000`. The shared
         //    tier matches ONLY number-then-unit, so these are structurally invisible to it. The output is
@@ -285,7 +286,7 @@ public static class Normalize
         //    onto the number and leaving `km` in the phoneme stream RAW.
         //    ⚠ THE OBVIOUS GUARD ("a head may not follow a letter") IS WRONG: `R2 500` IS a grouped
         //    thousand with a currency prefix. The discriminator is whether the letters are a UNIT KEY.
-        s = UNIT_BEFORE.Replace(s, m =>
+        s = Rewrite(s, UNIT_BEFORE, m =>
             ExponentPhrase(UNIT_MAP[Js.ToLowerCase(m.Groups[1].Value)], m.Groups[2]));
 
         // 4) THOUSANDS DE-GROUPING, before every remaining numeric rule AND before the tier.
@@ -296,9 +297,9 @@ public static class Normalize
         //    ⚠ NO `NOT_COORD` GUARD, and its absence is a MEASUREMENT: rn writes coordinates as
         //    degree-and-arcminute (`9°55'`), and `\d+[.,]\d{3}\s*°` is ×0 here. A guard with no instance is
         //    a misfire generator.
-        s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => GROUP_SPACES.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => GROUP_SPACES.Replace(m.Value, ""));
 
         // 5) SPANS. Both shapes are claimed HERE — before the tier, so a span's operands are still bare
         //    digits, and before step 8b so a verse reference has already been excluded by the guard rather
@@ -311,7 +312,7 @@ public static class Normalize
         //    ⚠ AND A TEMPERATURE SPAN TAKES `na`, NOT `gushika`: it is a different idiom, and using one for
         //    the other was the mistake the first draft made.
         var src5a = s;
-        s = DEGREE_SPAN_SIGNED.Replace(s, m =>
+        s = Rewrite(s, DEGREE_SPAN_SIGNED, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -320,7 +321,7 @@ public static class Normalize
             return $"{noun}{a} {DEGREE_AND} {b}";
         });
         //    The second shape: the corpus's own noun stands in front, so this arm emits none.
-        s = DEGREE_SPAN_NAMED.Replace(s, m =>
+        s = Rewrite(s, DEGREE_SPAN_NAMED, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -330,7 +331,7 @@ public static class Normalize
         //    5b) A `/` SPAN — an rn shape rw's corpus does not contain. AFTER step 4, so the operands are
         //    single runs.
         var src5b = s;
-        s = SLASH_SPAN.Replace(s, m =>
+        s = Rewrite(s, SLASH_SPAN, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -340,7 +341,7 @@ public static class Normalize
         //    5c) A HYPHEN OR DASH SPAN. 14 of 15 are YEAR or REIGN spans, which is why there is NO
         //    unit-hoisting arm here: rn has no measurement span at all.
         var src5c = s;
-        s = DASH_SPAN.Replace(s, m =>
+        s = Rewrite(s, DASH_SPAN, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -355,23 +356,23 @@ public static class Normalize
         //    6a) A SCALE TEMPERATURE. The `F` letter is CLAIMED so it cannot reach the phoneme stream raw,
         //    but NO Fahrenheit name is emitted — `farenheti` is 0/0 on rn.wikipedia.
         var src6a = s;
-        s = DEGREE_SCALE.Replace(s, m =>
+        s = Rewrite(s, DEGREE_SCALE, m =>
             DegreeBody(m.Groups[1].Value, m.Groups[2].Value, m.Index, m.Index + m.Length, src6a));
         //    6b) A COORDINATE — `9°55'`. ⚠ NO COMPASS TABLE: Kirundi SPELLS THE DIRECTION OUT as an
         //    ordinary word, and `[NSEW]` after a degree is ×0 in rn.
         var src6b = s;
-        s = DEGREE_COORD.Replace(s, m =>
+        s = Rewrite(s, DEGREE_COORD, m =>
             $"{DegreeBody(m.Groups[1].Value, m.Groups[2].Value, m.Index, m.Index + m.Length, src6b)} ");
         //    6c) A BARE DEGREE.
         var src6c = s;
-        s = DEGREE_BARE.Replace(s, m =>
+        s = Rewrite(s, DEGREE_BARE, m =>
             DegreeBody(m.Groups[1].Value, m.Groups[2].Value, m.Index, m.Index + m.Length, src6c));
 
         // 6d) A REDUNDANT PERCENT SIGN — the clause already SPELLS the word, so the reading must say it
         //     ONCE. ⚠ THE SIGN IS DROPPED AND THE WORDS ARE KEPT, the language-idiomatic position. BEFORE
         //     step 7, so the tier never sees a sign that has already been spoken.
         var src6d = s;
-        s = PERCENT_SIGN.Replace(s, m =>
+        s = Rewrite(s, PERCENT_SIGN, m =>
             PERCENT_WORD.IsMatch(Slice(src6d, m.Index - 45, m.Index + m.Length + 45)) ? m.Groups[1].Value : m.Value);
 
         // 7) THE SHARED SYMBOL TIER — percent, currency, units, exponent, ampersand. ⚠ BETWEEN steps 4 and
@@ -383,13 +384,13 @@ public static class Normalize
         //    The tier's rate path composes NUMERATOR + `/` + denominator and cannot see a denominator
         //    standing alone. ⚠ THE SINGULAR NOUN IS USED HERE, which is Kirundi noun class, not a typo.
         //    ⚠ AFTER THE TIER: run first, this would steal any real rate from the rate path.
-        s = DENOM_SLASH.Replace(s, m =>
+        s = Rewrite(s, DENOM_SLASH, m =>
             $" {PER} {ExponentPhrase(UNIT_SG[Js.ToLowerCase(m.Groups[1].Value)], m.Groups[2])}");
 
         // 8b) COLONS. rn has NO clock and NO race duration — all 6 instances are Bible verses plus one wiki
         //     signature — so there is nothing to compose and the only job is to stop `:` becoming a clause
         //     pause inside a single reference. ⚠ AFTER step 5a, whose guard already declined `12:22/24`.
-        s = COLON_PAIR.Replace(s, "$1 $2");
+        s = Rewrite(s, COLON_PAIR, "$1 $2");
 
         // 8c) A LONE `+`, `=`, `×` — and THE MINUS — are left unread, deliberately. See the TS header: rn's
         //     single negative number is a temperature whose sentence already says `munsi ya`, and no Kirundi
@@ -400,10 +401,10 @@ public static class Normalize
         //    needs the digit adjacent to its sign. NO separator word is emitted; `sources.ts` reports
         //    `[NONE] decimal-point` for rn. ⚠ THE TRAILING GUARD IS `(?!\d|[.,]\d)`: it keeps a decimal at a
         //    sentence END readable, which `(?![\d.,])` would have broken.
-        s = DECIMAL_DOT.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
-        s = DECIMAL_COMMA.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_DOT, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
 
         // ⚠ A padded replacement doubles a space that was already there and can leave one at an edge.
-        return EDGE_SPACES.Replace(RUN_OF_SPACES.Replace(s, " "), "");
+        return Rewrite(Rewrite(s, RUN_OF_SPACES, " "), EDGE_SPACES, "");
     }
 }

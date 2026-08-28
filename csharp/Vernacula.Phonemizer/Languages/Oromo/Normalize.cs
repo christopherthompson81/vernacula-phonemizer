@@ -5,6 +5,7 @@
  * for why the rules are split across TWO passes with the shared symbol tier running between them.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Oromo;
 
@@ -163,16 +164,16 @@ public static class Normalize
     {
         var s = input;
 
-        s = AMP_ENTITY.Replace(s, " fi ");
-        s = AMP.Replace(s, " fi ");
-        s = GROUPING.Replace(s, "");
-        s = ERA.Replace(s, "dhaloota Kiristoos dura");
-        s = FKN.Replace(s, "fakkeenyaaf");
-        s = KKF.Replace(s, "kan kana fakkaatan");
-        s = TITLE.Replace(s, "$1");
-        s = INITIAL.Replace(s, "$1");
+        s = Rewrite(s, AMP_ENTITY, " fi ");
+        s = Rewrite(s, AMP, " fi ");
+        s = Rewrite(s, GROUPING, "");
+        s = Rewrite(s, ERA, "dhaloota Kiristoos dura");
+        s = Rewrite(s, FKN, "fakkeenyaaf");
+        s = Rewrite(s, KKF, "kan kana fakkaatan");
+        s = Rewrite(s, TITLE, "$1");
+        s = Rewrite(s, INITIAL, "$1");
 
-        s = CLOCK_COLON.Replace(s, m =>
+        s = Rewrite(s, CLOCK_COLON, m =>
         {
             var h = m.Groups[1].Value;
             var min = m.Groups[2].Value;
@@ -184,7 +185,7 @@ public static class Normalize
             return $"{head}{half}";
         });
 
-        s = CLOCK_DOT.Replace(s, m =>
+        s = Rewrite(s, CLOCK_DOT, m =>
         {
             var h = m.Groups[1].Value;
             var min = m.Groups[2].Value;
@@ -193,47 +194,47 @@ public static class Normalize
                 : $"{Js.NumberToString(Js.Number(h))} fi daqiiqaa {Js.NumberToString(Js.Number(min))}";
         });
 
-        s = MERIDIEM.Replace(s, m =>
+        s = Rewrite(s, MERIDIEM, m =>
             Js.ToLowerCase(m.Value).StartsWith("p", StringComparison.Ordinal) ? "galgala" : "ganama");
 
-        s = VERSION_DOT.Replace(s, m =>
+        s = Rewrite(s, VERSION_DOT, m =>
             $"{m.Groups[1].Value} {POINT} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}-");
 
-        s = RANGE_ORD.Replace(s, "$1ffaa hanga $2ffaa");
-        s = RANGE_YEAR.Replace(s, "$1 hanga $2");
-        s = RANGE_NUM.Replace(s, m =>
+        s = Rewrite(s, RANGE_ORD, "$1ffaa hanga $2ffaa");
+        s = Rewrite(s, RANGE_YEAR, "$1 hanga $2");
+        s = Rewrite(s, RANGE_NUM, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
             return Js.Number(b) > Js.Number(a) ? $"{a} hanga {b}" : m.Value;
         });
 
-        s = FRACTION.Replace(s, "$2 keessaa $1");
+        s = Rewrite(s, FRACTION, "$2 keessaa $1");
 
-        s = DEGREE_COMPASS.Replace(s, m => $"digirii {m.Groups[1].Value} {COMPASS[m.Groups[2].Value]}");
-        s = DEGREE.Replace(s, "digirii $1");
+        s = Rewrite(s, DEGREE_COMPASS, m => $"digirii {m.Groups[1].Value} {COMPASS[m.Groups[2].Value]}");
+        s = Rewrite(s, DEGREE, "digirii $1");
 
         // ⚠ THE MULTIPLICATION SIGN RUNS BEFORE THE UNIT BLOCK — the unit rules MOVE the noun ahead of its
         // number, which would strand the sign's second operand. See the TS note for both failure shapes.
-        s = MULTIPLY.Replace(s, "$1 si’a $2");
+        s = Rewrite(s, MULTIPLY, "$1 si’a $2");
 
-        s = RATE.Replace(s, m =>
+        s = Rewrite(s, RATE, m =>
             $"{PER[Js.ToLowerCase(m.Groups[3].Value)]} {UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
-        s = SQ_MI.Replace(s, "iskuweer maayilii $1");
-        s = SQUARED.Replace(s, m => $"iskuweer {UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
-        s = CUBED.Replace(s, m => $"kubiik {UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
+        s = Rewrite(s, SQ_MI, "iskuweer maayilii $1");
+        s = Rewrite(s, SQUARED, m => $"iskuweer {UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
+        s = Rewrite(s, CUBED, m => $"kubiik {UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
         // ⚠ BEFORE UNIT_BEFORE, which would otherwise claim the abbreviation and orphan the power.
-        s = SQUARED_FIRST.Replace(s, m => $"iskuweer {UNIT[Js.ToLowerCase(m.Groups[1].Value)]} ");
-        s = CUBED_FIRST.Replace(s, m => $"kubiik {UNIT[Js.ToLowerCase(m.Groups[1].Value)]} ");
-        s = UNIT_BEFORE.Replace(s, m => $"{UNIT[Js.ToLowerCase(m.Groups[1].Value)]} ");
-        s = UNIT_AFTER.Replace(s, m => $"{UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
+        s = Rewrite(s, SQUARED_FIRST, m => $"iskuweer {UNIT[Js.ToLowerCase(m.Groups[1].Value)]} ");
+        s = Rewrite(s, CUBED_FIRST, m => $"kubiik {UNIT[Js.ToLowerCase(m.Groups[1].Value)]} ");
+        s = Rewrite(s, UNIT_BEFORE, m => $"{UNIT[Js.ToLowerCase(m.Groups[1].Value)]} ");
+        s = Rewrite(s, UNIT_AFTER, m => $"{UNIT[Js.ToLowerCase(m.Groups[2].Value)]} {m.Groups[1].Value}");
         s = BARE_UNITS(s);
 
-        s = LESS_THAN.Replace(s, "$1 $2 caalaa xiqqaa");
-        s = GREATER_THAN.Replace(s, "$1 $2 caalaa guddaa");
-        s = EQUALS.Replace(s, " wal qixa ");
-        s = PLUS.Replace(s, "ida’uu ");
-        s = MINUS.Replace(s, "hir’isuu ");
+        s = Rewrite(s, LESS_THAN, "$1 $2 caalaa xiqqaa");
+        s = Rewrite(s, GREATER_THAN, "$1 $2 caalaa guddaa");
+        s = Rewrite(s, EQUALS, " wal qixa ");
+        s = Rewrite(s, PLUS, "ida’uu ");
+        s = Rewrite(s, MINUS, "hir’isuu ");
 
         return Tidy(s);
     }
@@ -253,7 +254,7 @@ public static class Normalize
     {
         var s = input;
 
-        s = GLUED.Replace(s, m =>
+        s = Rewrite(s, GLUED, m =>
         {
             var words = NumeralWords(m.Groups[1].Value).Split(' ').ToList();
             var suf = m.Groups[2].Value;
@@ -270,7 +271,7 @@ public static class Normalize
             return string.Join(" ", words);
         });
 
-        s = SPACED.Replace(s, m =>
+        s = Rewrite(s, SPACED, m =>
         {
             var words = NumeralWords(m.Groups[1].Value).Split(' ').ToList();
             if (words.Count == 0) return m.Value;
@@ -280,9 +281,9 @@ public static class Normalize
             return string.Join(" ", words);
         });
 
-        s = HALFDAY_ENCLITIC.Replace(s, m => AttachEnclitic(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, HALFDAY_ENCLITIC, m => AttachEnclitic(m.Groups[1].Value, m.Groups[2].Value));
 
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} {POINT} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         return Tidy(s);
@@ -291,5 +292,5 @@ public static class Normalize
     private static readonly JsRe RUNS = JsRegex.Compile("[^\\S\\n]{2,}", "gu");
     private static readonly JsRe EDGES = JsRegex.Compile("^[^\\S\\n]+|[^\\S\\n]+$", "gu");
 
-    private static string Tidy(string s) => EDGES.Replace(RUNS.Replace(s, " "), "");
+    private static string Tidy(string s) => Rewrite(Rewrite(s, RUNS, " "), EDGES, "");
 }

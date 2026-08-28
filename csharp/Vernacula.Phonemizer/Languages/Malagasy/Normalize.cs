@@ -5,6 +5,7 @@
  * rule, every declined class, and the sourcing of each word in the symbol tier.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Malagasy;
 
@@ -73,37 +74,37 @@ public static class Normalize
 
         // 1) `&nbsp;` — French thin-space typography, and it must become a real space or every guard below
         //    sees a LETTER run where it expects a boundary.
-        s = NBSP_ENTITY.Replace(s, " ");
+        s = Rewrite(s, NBSP_ENTITY, " ");
 
         // 2) THOUSANDS GROUPED WITH A SPACE — the defect with no symptom.
-        s = SPACE_GROUPED.Replace(s, m => GROUP_SPACES.Replace(m.Value, ""));
+        s = Rewrite(s, SPACE_GROUPED, m => GROUP_SPACES.Replace(m.Value, ""));
 
         // 3) THOUSANDS GROUPED WITH A PERIOD — only at exactly three digits, and only when no `°` follows.
-        s = DOT_GROUPED.Replace(s, m => m.Value.Replace(".", "", StringComparison.Ordinal));
+        s = Rewrite(s, DOT_GROUPED, m => m.Value.Replace(".", "", StringComparison.Ordinal));
 
         // 4) DEGREES — `degre`, POSTPOSED. The scale letter is CONSUMED, case-insensitively.
-        s = DEGREE_SCALE.Replace(s, "$1 degre ");
+        s = Rewrite(s, DEGREE_SCALE, "$1 degre ");
         //    ⚠ `taonjato faha 17°` is an ORDINAL, not a degree; only the preceding `faha` separates them.
-        s = DEGREE_BARE.Replace(s, "$1 degre ");
+        s = Rewrite(s, DEGREE_BARE, "$1 degre ");
 
         // 5) PERCENT — the bound genitive is written on the SIGN and has to move onto the WORD.
-        s = PERCENT_GENITIVE.Replace(s, " isan-jaton'");
+        s = Rewrite(s, PERCENT_GENITIVE, " isan-jaton'");
         //    Steps 4 and 5 emit a padding space; where the source already had one, collapse the pair.
-        s = TRAILING_SPACES.Replace(RUN_OF_SPACES.Replace(s, " "), "");
+        s = Rewrite(Rewrite(s, RUN_OF_SPACES, " "), TRAILING_SPACES, "");
 
         // 5b) THE MALAGASY ABBREVIATIONS — BEFORE the tier, so nothing in the expansion collides with a unit
         //     key. ⚠ The guard excludes LETTERS, not word characters: the corpus fuses `snm` to a digit.
-        foreach (var (re, words) in ABBREVIATIONS) s = re.Replace(s, words);
+        foreach (var (re, words) in ABBREVIATIONS) s = Rewrite(s, re, words);
         //     ⚠ The separator is restored only where one is MISSING — a global tidy-up rewrote a corpus
         //     line whose spaced semicolon is pinned by a golden.
-        s = DIGIT_BEFORE_SY_NY.Replace(s, " ");
+        s = Rewrite(s, DIGIT_BEFORE_SY_NY, " ");
 
         // 6) THE SHARED TIER — ABOVE step 7, because a unit matches only with a NUMBER adjacent and the
         //    decimal rewrite destroys that adjacency.
         s = SYMBOLS(s);
 
         // 7) THE DECIMAL SEPARATOR — `faingo`, fed by BOTH marks; the fractional digits are said one at a time.
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} faingo {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 8) The minus, `=`/`×`, ranges and the clock are all DECLINED — see the TS for each count.

@@ -6,6 +6,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Uzbek;
 
@@ -143,32 +144,32 @@ public static class Normalize
 
         // 0) DIGIT DE-GROUPING, first. ONE pass: the separator is matched zero-width, so every
         //    separator in the run is claimed at once.
-        s = GROUPING.Replace(s, "");
-        s = SPACES.Replace(s, " ");
+        s = Rewrite(s, GROUPING, "");
+        s = Rewrite(s, SPACES, " ");
 
         // 1) ERA MARKERS, before the single-dot rules so the interior dots cannot survive as breaks.
-        s = ERA_BC_NUM.Replace(s, "miloddan avval");
-        s = ERA_BC.Replace(s, "miloddan avval");
-        s = ERA_AD.Replace(s, "milodiy");
+        s = Rewrite(s, ERA_BC_NUM, "miloddan avval");
+        s = Rewrite(s, ERA_BC, "miloddan avval");
+        s = Rewrite(s, ERA_AD, "milodiy");
 
         // 2) DOTTED ABBREVIATIONS.
-        s = HK_WORD.Replace(s, "hokazo");
-        s = HK_END.Replace(s, "hokazo.");
-        s = MLN_WORD.Replace(s, "million");
-        s = MLN_END.Replace(s, "million.");
+        s = Rewrite(s, HK_WORD, "hokazo");
+        s = Rewrite(s, HK_END, "hokazo.");
+        s = Rewrite(s, MLN_WORD, "million");
+        s = Rewrite(s, MLN_END, "million.");
 
         // 3) CLOCK, before the symbol tier can see the separator. Output stays DIGITS.
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
             Js.Number(m.Groups[2].Value) == 0 ? m.Groups[1].Value : $"{m.Groups[1].Value} {m.Groups[2].Value}");
 
         // 4) VERSION DOTS, before the ordinal rule.
-        s = VERSION_DOT.Replace(s, m =>
+        s = Rewrite(s, VERSION_DOT, m =>
             !m.Groups[3].Success
                 ? $"{m.Groups[1].Value} nuqta {m.Groups[2].Value}"
                 : $"{m.Groups[1].Value} nuqta {m.Groups[2].Value} {m.Groups[3].Value}");
 
         // 5) ORDINAL `N-word` — the defining rule (see the TS header).
-        s = ORDINAL_HYPHEN.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_HYPHEN, m =>
         {
             var d = m.Groups[1].Value;
             var w = m.Groups[2].Value;
@@ -180,7 +181,7 @@ public static class Normalize
         });
 
         // 6) REGNAL ORDINALS — guarded on the corpus's genitive, and ONLY that.
-        s = REGNAL.Replace(s, m =>
+        s = Rewrite(s, REGNAL, m =>
         {
             var n = Js.Number(m.Groups[2].Value);
             var ord = Numbers.OrdinalWords(n);
@@ -188,9 +189,9 @@ public static class Normalize
         });
 
         // 7) FRACTIONS.
-        s = THREE_QUARTERS.Replace(s, "$1 va uch chorak");
-        s = HALF.Replace(s, "$1 va yarim");
-        s = SLASH_FRACTION.Replace(s, m =>
+        s = Rewrite(s, THREE_QUARTERS, "$1 va uch chorak");
+        s = Rewrite(s, HALF, "$1 va yarim");
+        s = Rewrite(s, SLASH_FRACTION, m =>
         {
             var num = Js.Number(m.Groups[1].Value);
             var denom = Js.Number(m.Groups[2].Value);
@@ -201,39 +202,39 @@ public static class Normalize
         });
 
         // 8) DEGREE, before the sign rule can strand the +.
-        s = DEG_C.Replace(s, "$1 daraja");
-        s = DEG_F.Replace(s, "$1 daraja farengeyt");
-        s = DEG.Replace(s, "$1 daraja");
+        s = Rewrite(s, DEG_C, "$1 daraja");
+        s = Rewrite(s, DEG_F, "$1 daraja farengeyt");
+        s = Rewrite(s, DEG, "$1 daraja");
 
         // 9) SIGNS. ⚠ INFIX before POSTPOSED, and ± is a single character no `+` rule can reach.
-        s = PLUS_MINUS.Replace(s, " plyus minus ");
-        s = PLUS_INFIX.Replace(s, "$1 plyus $2");
-        s = PLUS_POST.Replace(s, "$1 plyus");
-        s = PLUS_PRE.Replace(s, "$1plyus $2");
-        s = MINUS.Replace(s, "minus ");
-        s = AMP_LETTERS.Replace(s, m =>
+        s = Rewrite(s, PLUS_MINUS, " plyus minus ");
+        s = Rewrite(s, PLUS_INFIX, "$1 plyus $2");
+        s = Rewrite(s, PLUS_POST, "$1 plyus");
+        s = Rewrite(s, PLUS_PRE, "$1plyus $2");
+        s = Rewrite(s, MINUS, "minus ");
+        s = Rewrite(s, AMP_LETTERS, m =>
             $"{LetterName(m.Groups[1].Value) ?? m.Groups[1].Value} va {LetterName(m.Groups[2].Value) ?? m.Groups[2].Value}");
-        s = AMP.Replace(s, " va ");
-        s = EQUALS.Replace(s, "$1 teng $2");
-        s = LESS_THAN.Replace(s, "$1 kichik $2");
-        s = GREATER_THAN.Replace(s, "$1 katta $2");
-        s = TIMES.Replace(s, "$1 karra $2");
-        s = DIVIDE.Replace(s, "$1 boʻlish $2");
+        s = Rewrite(s, AMP, " va ");
+        s = Rewrite(s, EQUALS, "$1 teng $2");
+        s = Rewrite(s, LESS_THAN, "$1 kichik $2");
+        s = Rewrite(s, GREATER_THAN, "$1 katta $2");
+        s = Rewrite(s, TIMES, "$1 karra $2");
+        s = Rewrite(s, DIVIDE, "$1 boʻlish $2");
 
         // 9b) PERCENT with a POSSESSIVE SUFFIX — the plain `N%` is left for the shared symbol tier.
-        s = PERCENT_POSS.Replace(s, "$1 foizi");
+        s = Rewrite(s, PERCENT_POSS, "$1 foizi");
 
         // 10) RATES, before the shared symbol tier: the corpus's own prose reads them PREFIXED.
-        s = KMH_RANGE.Replace(s, "soatiga $1 dan $2 kilometr");
-        s = MIL_RANGE.Replace(s, "soatiga $1 dan $2 mil");
-        s = KMH.Replace(s, m => $"soatiga {m.Groups[1].Value} kilometr{Suffix(m, 2)}");
-        s = MILH.Replace(s, m => $"soatiga {m.Groups[1].Value} mil{Suffix(m, 2)}");
-        s = MILYAH.Replace(s, m => $"soatiga {m.Groups[1].Value} milya{Suffix(m, 2)}");
-        s = MS.Replace(s, m => $"soniyasiga {m.Groups[1].Value} metr{Suffix(m, 2)}");
-        s = GHZ.Replace(s, "$1 gigagerts");
+        s = Rewrite(s, KMH_RANGE, "soatiga $1 dan $2 kilometr");
+        s = Rewrite(s, MIL_RANGE, "soatiga $1 dan $2 mil");
+        s = Rewrite(s, KMH, m => $"soatiga {m.Groups[1].Value} kilometr{Suffix(m, 2)}");
+        s = Rewrite(s, MILH, m => $"soatiga {m.Groups[1].Value} mil{Suffix(m, 2)}");
+        s = Rewrite(s, MILYAH, m => $"soatiga {m.Groups[1].Value} milya{Suffix(m, 2)}");
+        s = Rewrite(s, MS, m => $"soniyasiga {m.Groups[1].Value} metr{Suffix(m, 2)}");
+        s = Rewrite(s, GHZ, "$1 gigagerts");
 
         // 10b) LONE PERSONAL INITIALS the shared pass cannot claim ("T. rex", "N. Ueyn").
-        s = LONE_INITIAL.Replace(s, m => LetterName(m.Groups[1].Value) ?? m.Groups[1].Value);
+        s = Rewrite(s, LONE_INITIAL, m => LetterName(m.Groups[1].Value) ?? m.Groups[1].Value);
 
         // 11) INITIALISMS, LAST of the letter rules.
         s = NormalizeInitialisms(s);

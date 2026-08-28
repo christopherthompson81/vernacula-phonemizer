@@ -120,7 +120,7 @@
  * ×4,561 with a digit — trap 16, a seam that already works, left alone).
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Ilocano marks plurality with `dagiti` and by reduplication, not on a borrowed
@@ -285,7 +285,7 @@ export function normalizeIlocano(input: string): string {
     // ⚠ AND THE PERIOD-THOUSANDS FORM IS NOT HANDLED, because it does not exist here: every
     // `\d{1,3}\.\d{3}` in this corpus is a three-decimal DECIMAL (`0.625`, `0.443`, `6.271 a riwriw`).
     // Step 5's two-digit cap leaves them untouched rather than reading them as a decimal it cannot cap.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
 
     // ── 1b. THE MINUS — U+2212 ONLY, and the character's identity is the argument ────────────────────────
     // ⚠ OMITTING A MINUS INVERTS THE VALUE, which is why this is read on weaker evidence than this layer
@@ -305,7 +305,7 @@ export function normalizeIlocano(input: string): string {
     // leading-position lookbehind cannot see because it looks one character back and finds only the space.
     // ⚠ And a preceding LETTER already blocks `UTC−08:00`, the corpus's largest minus-shaped class.
     // Corpus instances claimed: `−4.6` and `−0.4` (stellar magnitudes), `(−224 °C)`, `−89 °C (−129 °F)`.
-    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, "negatibo ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, "negatibo ");
 
     // ── 2. CLOCK — BEFORE the tier and before the decimal rule ───────────────────────────────────────────
     // ⚠ THE GUARD IS THE RULE. `\d{1,2}:\d{2}` is ×205 in this corpus and only ~23 are clocks; see the
@@ -328,12 +328,12 @@ export function normalizeIlocano(input: string): string {
     const clock = (_m: string, h: string, min: string): string =>
         Number(min) === 0 ? `${Number(h)}` : `${Number(h)} ket ${Number(min)}`;
     const HOUR = String.raw`(?<![\d.:+\-−])([01]?\d|2[0-3]):([0-5]\d)(?!\d)`;
-    s = tr(s, new RegExp(`${HOUR}(?=\\s*(?:[ap]\\.?\\s?m\\.?(?![\\p{L}])|GMT|UTC))`, "giu"), clock);
-    s = tr(s,
+    s = rewrite(s, new RegExp(`${HOUR}(?=\\s*(?:[ap]\\.?\\s?m\\.?(?![\\p{L}])|GMT|UTC))`, "giu"), clock);
+    s = rewrite(s,
         new RegExp(`${HOUR}(?=\\s*(?:ti|iti)\\s+(?:agsapa|bigat|malem|rabii|sardam|aldaw))`, "giu"),
         clock,
     );
-    s = tr(s, new RegExp(`(?<=oras\\s+(?:a|ti|nga)\\s+)${HOUR}`, "giu"), clock);
+    s = rewrite(s, new RegExp(`(?<=oras\\s+(?:a|ti|nga)\\s+)${HOUR}`, "giu"), clock);
 
     // ── 3. THE SHARED TIER — percent, currency, units, the measure words, rates, `&` ─────────────────────
     // ⚠ AFTER DE-GROUPING, or `676,578 km²` is seen as `578 km²`. ⚠ BEFORE THE DECIMAL RULE — the
@@ -351,7 +351,7 @@ export function normalizeIlocano(input: string): string {
     // corpus's 4 `\dh` occurrences, i.e. perfect precision on the only evidence there is.
     // ⚠ EVERY WORD IS ATTESTED IN THE CORPUS: `oras` ×790 (×166 digit-adjacent), `minuto` ×45,
     // `segundo` ×83 (×28). So this reads the notation rather than merely silencing it.
-    s = tr(s,
+    s = rewrite(s,
         /(?<![\p{L}\p{M}\p{Nd}])(\d{1,2})\s?h\s?(\d{1,2})\s?m(?:\s?(\d{1,2}(?:\.\d+)?)\s?s)?(?![\p{L}\p{M}\p{Nd}])/gu,
         (_m, h: string, min: string, sec: string | undefined) =>
             `${h} oras ${min} minuto${sec === undefined ? "" : ` ${sec} segundo`}`,
@@ -360,7 +360,7 @@ export function normalizeIlocano(input: string): string {
     // ⚠ THE PER-SLOT UNIT MUST BE SPENT BEFORE THE TIER RUNS, not after: `6,632 tattao tunggal maysa a km²`
     // contains a number, and leaving the abbreviation for the tier to look at risks nothing today but
     // guarantees the two rules cannot disagree tomorrow. See PER_UNIT. ×133.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<=tunggal\\s(?:maysa\\s(?:a|nga)\\s)?)(${PER_UNIT_ALT})(?![\\p{L}\\p{M}²³])`, "gu"),
         (_m, u: string) => PER_UNIT[u]!,
     );
@@ -381,7 +381,7 @@ export function normalizeIlocano(input: string): string {
     // ⚠ THE OPERANDS ACCEPT A DECIMAL, WHICH IS WHY THIS RUNS ABOVE STEP 5, exactly as in hil:
     // `0.25–0.33 pulgada` and `6.4–8.4 mm` are real corpus ranges, and with the decimal rule first this
     // would claim `25–0` and emit a backwards span from inside a number.
-    s = tr(s,
+    s = rewrite(s,
         /(?<!\b(?:aginggana|agingga|inggana|manipud|manipud iti|manipud idi)\s(?:iti\s|ti\s)?)(?<![\d.,\p{L}-])(\d[\d,]*(?:\.\d+)?)\s?[-–]\s?(\d[\d,]*(?:\.\d+)?)(?![\d,-]|\.\d)/gu,
         "$1 aginggana iti $2",
     );
@@ -402,7 +402,7 @@ export function normalizeIlocano(input: string): string {
     // values that the digit-by-digit tail would read correctly anyway — but capping at two is what makes
     // the rule provably unable to eat a period-thousands group, and this corpus has none to eat.
     // ⚠ The fractional part is read DIGIT BY DIGIT, which is what a decimal is.
-    s = tr(s, /(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
+    s = rewrite(s, /(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
 
     // ── 6. DEGREES → `grado`, with the two scale names ───────────────────────────────────────────────────
     // ×954 digit-adjacent `°`, the third-largest class here and one the shared tier does not own. The sign
@@ -424,12 +424,12 @@ export function normalizeIlocano(input: string): string {
     // ⚠ THE ARC-MINUTE `'` IS LEFT UNREAD. It is ×138 beside a degree sign and no Ilocano word for it is
     // attested anywhere; see defects.ts. It survives as the manifest's glottal, which is a residual, not a
     // reading — recorded rather than guessed.
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grado Celsius");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grado Fahrenheit");
-    s = tr(s, /(\d)\s?°/gu, "$1 grado ");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grado Celsius");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grado Fahrenheit");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 grado ");
 
     // ── 7. DOTTED ABBREVIATIONS — closed list, see DOTTED_ABBREV ─────────────────────────────────────────
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}`);
 
     // ── 8. `c.` / `ca.` BEFORE A YEAR → `agarup a` ───────────────────────────────────────────────────────
@@ -443,7 +443,7 @@ export function normalizeIlocano(input: string): string {
     // ⚠ A FOLLOWING DIGIT IS REQUIRED, and that is what separates it from a personal INITIAL. This corpus
     // has 2,442 lone `X.` tokens in author lists (`Mathew, S. P. and C. R. Chitra`), so an unguarded `c\.`
     // would read every one of the `C.`s as "approximately".
-    s = tr(s, /(?<![\p{L}\p{M}.])c(?:a)?\.\s*(?=\d)/giu, "agarup a ");
+    s = rewrite(s, /(?<![\p{L}\p{M}.])c(?:a)?\.\s*(?=\d)/giu, "agarup a ");
 
     return s;
 }

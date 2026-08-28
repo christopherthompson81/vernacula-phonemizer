@@ -20,7 +20,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { portugueseOrdinal } from "./romanOrdinals.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const DEG = MANIFEST.degree;
 
@@ -34,7 +34,7 @@ const DEG = MANIFEST.degree;
  * ukrainian/normalize.ts, which hit it first.
  */
 function degreeWord(n: string): string {
-    return Number(n.replace(",", ".")) === 1 ? DEG.singular : DEG.plural;
+    return Number(rewrite(n, ",", ".")) === 1 ? DEG.singular : DEG.plural;
 }
 
 const GROUP_SPACE = "    ";  // NBSP, NNBSP, thin space
@@ -75,7 +75,7 @@ export function normalizePortugueseInitialisms(text: string): string {
 
 /** Feminine ordinal: every element of a compound inflects (trigésimo sétimo → trigésima sétima). */
 function feminineOrdinal(masc: string): string {
-    return masc.split(" ").map((w) => w.replace(/o$/u, "a")).join(" ");
+    return masc.split(" ").map((w) => rewrite(w, /o$/u, "a")).join(" ");
 }
 
 /** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora). */
@@ -103,21 +103,21 @@ export function normalizePortuguese(input: string, brazilian = false): string {
 
     // 0) DIGIT GROUPING with a space. The dot form (1.000) is already in the number tokenizer; the SI space
     //    form is not, and the number token cannot span a space.
-    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = rewrite(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first — `a.` is
     //    8 of the 19 dotted abbreviations in the corpus and every one is `a.C.`.
-    s = tr(s, /\ba\.\s?C\./giu, MANIFEST.eraMarkers.beforeChrist);
-    s = tr(s, /\bd\.\s?C\./giu, MANIFEST.eraMarkers.afterChrist);
+    s = rewrite(s, /\ba\.\s?C\./giu, MANIFEST.eraMarkers.beforeChrist);
+    s = rewrite(s, /\bd\.\s?C\./giu, MANIFEST.eraMarkers.afterChrist);
 
     // 2) NÚMERO, only before a digit: bare "no" is the contraction em+o and is everywhere.
-    s = tr(s, /\b(?:n\.º|nº|n°|no|núm\.)\s?(?=\d)/giu, `${MANIFEST.numberSign} `);
+    s = rewrite(s, /\b(?:n\.º|nº|n°|no|núm\.)\s?(?=\d)/giu, `${MANIFEST.numberSign} `);
 
     // 3) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
-    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -125,7 +125,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -155,8 +155,8 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    decision Xhosa's ordinal rule records for the English `-st/-nd/-th` suffixes.
     //    Every ordinal in this corpus is within range (`1º` ×5, `37º` ×3, `1.000º` ×3, `60º`, `11º`, `16º`,
     //    `7ª` ×3, `5ª` ×2), so this arm is for arbitrary text rather than for a corpus instance.
-    s = tr(s, /\b([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(?:º|ª)/gu, (whole, digits: string) => {
-        const n = Number(digits.replace(/\./gu, ""));
+    s = rewrite(s, /\b([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(?:º|ª)/gu, (whole, digits: string) => {
+        const n = Number(rewrite(digits, /\./gu, ""));
         const masc = portugueseOrdinal(n);
         if (masc === undefined) return digits;
         return /ª/u.test(whole) ? feminineOrdinal(masc) : masc;
@@ -164,7 +164,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
 
     // 5) CURRENCY. R$ is the Brazilian real and was read as a stray [ʁ] followed by "dólares" — the shared
     //    tier saw only the $ and had no entry for the R.
-    s = tr(s, /R\$\s?(\d[\d.,]*)/gu, `$1 ${MANIFEST.realWord}`);
+    s = rewrite(s, /R\$\s?(\d[\d.,]*)/gu, `$1 ${MANIFEST.realWord}`);
 
     // 5b) THE DOLLAR CODES → the bare sign, WHICH IS WHAT MAKES THE DECLARED KEY REACHABLE. `US$` was
     //     declared in portuguese.ts's currency table and the corpus's `DROP currency ×1` stood anyway, with a
@@ -198,36 +198,36 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //     claim and the tokenizer then drops, so `preços em US$` would go from spelling the letters to saying
     //     NOTHING. Neither reading is right — *dólares* is — but silence is strictly worse than the letters,
     //     so an unquantified code keeps its existing behaviour and only the useful case is folded.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(?:${MANIFEST.dollarCodes.join("|")})\\$(?=[ \u00a0]?\\d)`, "gu"), "$");  // space, NBSP
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(?:${MANIFEST.dollarCodes.join("|")})\\$(?=[ \u00a0]?\\d)`, "gu"), "$");  // space, NBSP
 
     // 6) DEGREES, before the unit tier so the bare sign is not left behind.
     // ⚠ THE GUARD IS `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following
     // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
     // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
     // orthography is what supplies the accented letter. 71 other engines already guard it this way.
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/giu,
         (_m, n: string) => `${n} ${degreeWord(n)} ${DEG.celsius}`);
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])/giu,
         (_m, n: string) => `${n} ${degreeWord(n)} ${DEG.fahrenheit}`);
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?°/gu, (_m, n: string) => `${n} ${degreeWord(n)}`);
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°/gu, (_m, n: string) => `${n} ${degreeWord(n)}`);
 
     // 7) CLOCK. Two forms occur and BOTH were broken: the `h` form (×28) dropped its marker entirely
     //    ("07h19" → "sete dezenove") and the colon form (×17) turned the colon into a PAUSE with a
     //    spurious "zero" at :00. `hora` is feminine, so 1 takes *uma*.
-    s = tr(s, /\b([01]?\d|2[0-3])\s?h\s?([0-5]\d)?(?![\p{L}\p{M}\d])/gu,
+    s = rewrite(s, /\b([01]?\d|2[0-3])\s?h\s?([0-5]\d)?(?![\p{L}\p{M}\d])/gu,
         (_m, h: string, min?: string) => clockWords(Number(h), min === undefined ? undefined : Number(min)));
-    s = tr(s, /\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+    s = rewrite(s, /\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
         (_m, h: string, min: string) => clockWords(Number(h), Number(min)));
 
     // 8) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
-    s = tr(s, /(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
+    s = rewrite(s, /(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = tr(s, /±/gu, ` ${SIGN.plusMinus} `);
-    s = tr(s, /(\S)\+\s?(\d)/gu, `$1 ${SIGN.plus} $2`);
-    s = tr(s, /(^|\s)\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
+    s = rewrite(s, /±/gu, ` ${SIGN.plusMinus} `);
+    s = rewrite(s, /(\S)\+\s?(\d)/gu, `$1 ${SIGN.plus} $2`);
+    s = rewrite(s, /(^|\s)\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
 
     // 8b) RELATIONAL AND DIVISION SIGNS. ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
     //     absent from pt_br; the vocabulary is ordinary comparative prose and is present:
@@ -250,20 +250,20 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //
     //     The copula is dropped because these strings are what the source calls the SIGNS themselves ("o sinal
     //     de menor que"), so the bare form is the sourced form — the same call `es` and `en` make.
-    s = tr(s, /\s?=\s?/gu, ` ${SIGN.equals} `);
-    s = tr(s, /\s?<\s?/gu, ` ${SIGN.lessThan} `);
-    s = tr(s, /\s?>\s?/gu, ` ${SIGN.greaterThan} `);
-    s = tr(s, /\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
+    s = rewrite(s, /\s?=\s?/gu, ` ${SIGN.equals} `);
+    s = rewrite(s, /\s?<\s?/gu, ` ${SIGN.lessThan} `);
+    s = rewrite(s, /\s?>\s?/gu, ` ${SIGN.greaterThan} `);
+    s = rewrite(s, /\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
 
     // 9) FRACTIONS, guarded against a date and a unit ratio by requiring digits on both sides.
-    s = tr(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) =>
+    s = rewrite(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
 
     // 10) DATES. The day is a plain cardinal, except the first of the month — and the varieties DIFFER, so
     //     this is dialect-gated like the Spanish equivalent: Brazil says *primeiro de julho*, Portugal
     //     normally *um de julho*. An EXPLICIT `1º` is honoured in both, because there the writer marked it.
     if (brazilian)
-        s = tr(s, new RegExp(`\\b1\\s+de\\s+(${MONTHS})\\b`, "giu"), (_m, mon: string) => `${MANIFEST.ordinals.units[1]!} de ${mon}`);
+        s = rewrite(s, new RegExp(`\\b1\\s+de\\s+(${MONTHS})\\b`, "giu"), (_m, mon: string) => `${MANIFEST.ordinals.units[1]!} de ${mon}`);
 
     return s;
 }

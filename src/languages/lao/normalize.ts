@@ -39,7 +39,7 @@
  * see). `decimals` is 1,150 in the dump and `grouped` 805.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Every word is attested IN ITS SLOT — and in an unspaced script that check is
@@ -117,16 +117,16 @@ export function normalizeLao(input: string): string {
     // 1) THE SOFT HYPHEN GOES AND THE ZERO WIDTH SPACE STAYS — see the file header. `&nbsp;` becomes a real
     //    space for the same reason it does everywhere: it is a LETTER run to every guard below, and this
     //    corpus writes `€180&nbsp;ລ້ານ` and `(5,&nbsp;2πk)`.
-    s = tr(tr(s, /&nbsp;/gu, " "), /[­‌﻿]/gu, "");
+    s = rewrite(rewrite(s, /&nbsp;/gu, " "), /[­‌﻿]/gu, "");
     //    …and one corpus spelling of the dollar code, which is written `Us$` once (`ແຕ Us$ 549ຂື້ນໄປ`).
     //    The tier's keys are literal, so the mixed case reached it as no key at all and the sign dropped.
-    s = tr(s, /(?<![\p{L}])Us\$/gu, "US$");
+    s = rewrite(s, /(?<![\p{L}])Us\$/gu, "US$");
 
     // 2) ERA MARKERS — before anything that reads a dot (playbook step 4), and the largest single class in
     //    the language. Each replacement re-emits a space so the expansion cannot glue itself to the year;
     //    the collapse below tidies the pair where the source already had one.
-    for (const [rx, word] of ERA) s = tr(s, rx, word);
-    s = tr(s, /  +/gu, " ");
+    for (const [rx, word] of ERA) s = rewrite(s, rx, word);
+    s = rewrite(s, /  +/gu, " ");
 
     // 3) THE SEPARATORS, BY GROUP SIZE — three digits after the mark is a THOUSANDS group whichever mark
     //    carries it (86 commas and 25 periods against 6 and 68 decimals; the table is in the header).
@@ -136,7 +136,7 @@ export function normalizeLao(input: string): string {
     // ⚠ AND A GROUP MAY NOT FOLLOW A LONE `0` — no convention groups from zero, so `0,001` joining to
     //    `0001` is a 1000× error rather than a reading of it.
     const group = /(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:([.,])\p{Nd}{3})+)(?![\p{Nd}.,])/gu;
-    s = tr(s, group, (m, _g, sep: string) => m.replaceAll(sep, ""));
+    s = rewrite(s, group, (m, _g, sep: string) => m.replaceAll(sep, ""));
 
     // 4) NEGATIVE NUMBERS — U+2212 anywhere, and the ASCII hyphen only where it opens a string or a bracket.
     //    Measured over the mined segments: **U+2212 is ×5 and all five are genuine** — `(−1, −2, −3, ...)`
@@ -157,8 +157,8 @@ export function normalizeLao(input: string): string {
     //    cannot discriminate here the way it does in Kurmanji, because two of the ranges are temperature
     //    spans (`30 - 33 c°`, `0 - 2 c°`) — those are excluded instead by the space AFTER the dash.
     //    `{` is excluded for the subscript markup `p^e_{-1}`.
-    s = tr(s, /−(?=\p{Nd})/gu, "ລົບ ");
-    s = tr(s, /(?<!\p{Nd}\s?)(?<![{_])-(?=\p{Nd})/gu, "ລົບ ");
+    s = rewrite(s, /−(?=\p{Nd})/gu, "ລົບ ");
+    s = rewrite(s, /(?<!\p{Nd}\s?)(?<![{_])-(?=\p{Nd})/gu, "ລົບ ");
 
     // 5) DEGREES — `ອົງສາ`, POSTPOSED, which is how the corpus writes it: `51 ອົງສາ 50 ລິບດາ`, `0 ອົງສາ`,
     //    `21 ອົງສາ 17 ລິບດາ`, `-180 ອົງສາ`. Every mined instance of the SIGN is a coordinate or a
@@ -170,8 +170,8 @@ export function normalizeLao(input: string): string {
     //    ⚠ No scale NAME is emitted: `ເຊວຊຽສ` and `ຟາເຣນໄຮ` are ×0 in both haystacks, and the corpus's own
     //    temperatures carry no scale word either. The letter is consumed rather than left to be read as an
     //    English letter name — `20 °C` was reading as *saːw **sˈiː***.
-    s = tr(s, /(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*(?:°\s*[CF]|[cf]\s*°)(?![\p{L}])/giu, "$1 ອົງສາ");
-    s = tr(s, /(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°/gu, "$1 ອົງສາ");
+    s = rewrite(s, /(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*(?:°\s*[CF]|[cf]\s*°)(?![\p{L}])/giu, "$1 ອົງສາ");
+    s = rewrite(s, /(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°/gu, "$1 ອົງສາ");
 
     // 5b) A PERCENT WORD ALREADY IN THE TEXT SPENDS THE SIGN — trap 12 applied to a word, and the only
     //     way to find it was to READ the reading. The corpus writes `ຜູ້ທີ່ຊະນະຈະໄດ້ເປີເຊັນ 10%` ("the
@@ -182,8 +182,8 @@ export function normalizeLao(input: string): string {
     //     (n===1 → first, else last), which would emit `ເປີເຊັນ` for every plural figure.
     //     ⚠ The word can sit on EITHER side of the figure, and the corpus's instance has it on the far
     //     side: `ເປີເຊັນ 10%` is word-number-sign, so a pattern matching word-then-sign misses it entirely.
-    s = tr(s, /(ເປີເຊັນ|ຮ້ອຍລະ)(\s*\p{Nd}[\p{Nd}.,]*)\s*%/gu, "$1$2");
-    s = tr(s, /(ເປີເຊັນ|ຮ້ອຍລະ)\s*%(?=\s?\p{Nd})/gu, "$1");
+    s = rewrite(s, /(ເປີເຊັນ|ຮ້ອຍລະ)(\s*\p{Nd}[\p{Nd}.,]*)\s*%/gu, "$1$2");
+    s = rewrite(s, /(ເປີເຊັນ|ຮ້ອຍລະ)\s*%(?=\s?\p{Nd})/gu, "$1");
 
     // 6) THE SHARED TIER — percent, currency, units and `&`. Runs ABOVE step 7, because the tier matches a
     //    unit only when a NUMBER is adjacent and the decimal rewrite destroys that adjacency (the
@@ -198,7 +198,7 @@ export function normalizeLao(input: string): string {
     //
     //    ⚠ The guard is "not part of a longer dotted run", which keeps a version string and a dotted date
     //    out from either end; the thousands case is already gone at step 3.
-    s = tr(s, /(?<![\p{Nd}.,])(\p{Nd}+)[.,](\p{Nd}+)(?![\p{Nd}.,])/gu,
+    s = rewrite(s, /(?<![\p{Nd}.,])(\p{Nd}+)[.,](\p{Nd}+)(?![\p{Nd}.,])/gu,
         (_m, whole: string, frac: string) => `${whole} ຈຸດ ${[...frac].join(" ")}`);
 
     // 8) FOUR CLASSES DECLINED, each with the count that justifies it:

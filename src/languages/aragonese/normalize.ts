@@ -1,5 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 /**
  * Aragonese (an) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -93,13 +93,13 @@ export function normalizeAragonese(input: string): string {
     //    otherwise, the COMMA always decimates, and the SPACE groups.
     //    ⚠ THE WHOLE NUMBER IS MATCHED AT ONCE, not one join per pass (trap 63), and the trailing guard
     //    rejects a DIGIT and nothing else, or every clause-final figure is declined (trap 58).
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
-        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rewrite(rest, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
     //    ⚠ AND WHAT IS LEFT CARRYING A DOT IS A DECIMAL, folded onto the comma the engine's number branch
     //    reads. Doing this before the grouping pass would turn every grouped figure into a decimal.
-    s = tr(s, /(?<!\d)(\d+)\.(\d+)(?!\d)/gu, "$1,$2");
+    s = rewrite(s, /(?<!\d)(\d+)\.(\d+)(?!\d)/gu, "$1,$2");
 
     // 2) THE ERA MARKER. `a. C.` is *antes de Cristo*, written with the spaces this corpus uses — "dende
     //    arredol d'o 12.500 a. C.", "dende o 3900 a. C.", "(490 a. C.?)", "(467 a. C.)". It was reaching
@@ -110,7 +110,7 @@ export function normalizeAragonese(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}d\\s?\\.\\s?C\\s?\\.`, "gu"), "dimpués de Cristo"],
     ];
     for (const [re, word] of multi)
-        s = tr(s, re, (m0: string, offset: number, full: string) => {
+        s = rewrite(s, re, (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
@@ -126,22 +126,22 @@ export function normalizeAragonese(input: string): string {
     //    ⚠ AND `hab.` LOSES ITS DOT RATHER THAN GAINING A WORD, because the shared tier reads `hab/km²` as
     //    a rate and cannot see through the abbreviation point — `413 hab./km²` and `43,5 hab/km²` are the
     //    same measurement written two ways, and this is what makes them one shape.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}n\\s?[º°]\\s?\\.?(?=\\s*\\d)`, "gu"), "numero ");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}lum\\s?\\.(?=\\s*\\d)`, "gu"), "lumero");
-    s = tr(s, /(\d)\s?hab\s?\.\s?(?=\/)/gu, "$1 hab");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}n\\s?[º°]\\s?\\.?(?=\\s*\\d)`, "gu"), "numero ");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}lum\\s?\\.(?=\\s*\\d)`, "gu"), "lumero");
+    s = rewrite(s, /(\d)\s?hab\s?\.\s?(?=\/)/gu, "$1 hab");
     //    ⚠ AND `m.a.` IS CLAIMED BECAUSE THE TIER WOULD OTHERWISE READ ITS `m` AS METRES. "En o Devoniano
     //    (fa ±415 - ±360 m.a.) se formó la penya calsinera" — *millons d'anyadas*, the geological unit,
     //    and the corpus writes the phrase out elsewhere ("1,5/1,8 millons d'anyadas d'antigüidat"). Left
     //    alone, `360 m.a.` composes as *trecientos sisanta metros* — a defect that produces a READING
     //    (trap 56), and one this layer would have INTRODUCED rather than inherited.
-    s = tr(s, new RegExp(`(\\d)\\s?m\\s?\\.\\s?a\\s?\\.`, "gu"), "$1 millons d'anyadas");
+    s = rewrite(s, new RegExp(`(\\d)\\s?m\\s?\\.\\s?a\\s?\\.`, "gu"), "$1 millons d'anyadas");
 
     // 4) THE CLOCK, and ⚠ THE GUARD IS THE RULE. The colon is clause punctuation in aragonese.ts, so
     //    `A las 17:07` read as *deθisjete , sjete* — a phrase break inside a time. But six of the eleven
     //    colon instances in this corpus are ATHLETICS TIMES (`3:40.96 min`, `28:39.11 min`) and one is a
     //    degrees:minutes:seconds coordinate, so what the rule must do is decline them: a trailing `.dd`
     //    or a second colon is what a stopwatch has and a clock has not. The figures are left as figures.
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
 
     // 5) SIGNS, before the range rule spends the hyphen. `-10º`, `-19°`, `-37,8 °C`, `−0,5 °C` — the
     //    climate prose, and the minus INVERTS rather than pausing. `menos` is the corpus's own word.
@@ -151,7 +151,7 @@ export function normalizeAragonese(input: string): string {
     //    national records as NEGATIVE times — a reading the status quo did not produce, so the layer would
     //    be introducing it (trap 56). A figure whose digits run into a colon is a time, not a signed
     //    quantity; `-10º` and `-218.3°C` carry no colon and are untouched.
-    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d(?!\d*:))/gu, "$1menos $2");
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d(?!\d*:))/gu, "$1menos $2");
 
     // 6) DEGREES. ⚠ BOTH CODEPOINTS, ONE ALLOW-LIST — see DEGREE_TAIL and the header. `grau` is the
     //    singular the corpus glosses ("O grau Celsius … representau como °C") and `graus` the plural it
@@ -159,15 +159,15 @@ export function normalizeAragonese(input: string): string {
     //    ⚠ `Graus` IS ALSO A TOWN IN ARAGON and outscores the measure word on the wiki — but unlike
     //    Occitan's `gras`/`graus` pair it is the SAME WORD PHONETICALLY, so the homograph costs nothing
     //    here. Worth stating because the identical-looking check went the other way one round ago.
-    s = tr(s, /(\d)\s?[°º]\s?([CF])(?![\p{L}\p{M}])/gui,
+    s = rewrite(s, /(\d)\s?[°º]\s?([CF])(?![\p{L}\p{M}])/gui,
         (_m, d: string, scale: string) => `${d} graus ${scale.toUpperCase() === "C" ? "Celsius" : "Fahrenheit"}`);
-    s = tr(s, /(\d)\s?[°º]\s?(\d+)\s?[′']/gu, "$1 graus $2 menutos ");
+    s = rewrite(s, /(\d)\s?[°º]\s?(\d+)\s?[′']/gu, "$1 graus $2 menutos ");
     //    …and the compass letter is spelled, because a bare `N` after a degree is unambiguous and the
     //    alternative is the letter name. `19° y 37°N`, `12° N`, `11°U y 12°E`, `60° de latitut sud`.
     const COMPASS: Readonly<Record<string, string>> = { N: "norte", S: "sud", E: "este", U: "ueste" };
-    s = tr(s, /(\d)\s?[°º]\s?([NSEU])(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(\d)\s?[°º]\s?([NSEU])(?![\p{L}\p{M}])/gu,
         (_m, d: string, c: string) => `${d} graus ${COMPASS[c]}`);
-    s = tr(s, new RegExp(`(\\d)\\s?[°º](?=${DEGREE_TAIL})`, "gu"), "$1 graus ");
+    s = rewrite(s, new RegExp(`(\\d)\\s?[°º](?=${DEGREE_TAIL})`, "gu"), "$1 graus ");
 
     // 7) RANGES. The dash was dropped and the endpoints fused — `1961-1990` read as one run, `28–37` as
     //    one number. ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A CONNECTIVE: Aragonese writes `entre X y
@@ -177,11 +177,11 @@ export function normalizeAragonese(input: string): string {
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), a chain of three or more
     //    hyphen-joined groups is an identifier rather than a span, and an adjacent SLASH means the pair is
     //    part of a citation (`Lei 10/2009`) rather than a range.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
     // producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }

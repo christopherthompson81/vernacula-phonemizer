@@ -6,6 +6,7 @@
  * and for the long list of readings deliberately refused (clock, minus, plus, fractions, compass, cubed).
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Shona;
 
@@ -89,20 +90,20 @@ public static class Normalize
 
         // 1) HTML entities, first — the entity sits exactly in the gap the tier's number-unit adjacency
         //    needs. `&amp;` is unfolded first so a doubly-escaped entity does not survive.
-        s = NBSP_ENTITY.Replace(AMP_ENTITY.Replace(s, "&"), " ");
+        s = Rewrite(Rewrite(s, AMP_ENTITY, "&"), NBSP_ENTITY, " ");
 
         // 2) A lowercase Shona proclitic glued to a currency sign, split off. LOWERCASE ONLY, which keeps
         //    `US$` / `AUD$` intact for their own compound keys.
-        s = PROCLITIC_DOLLAR.Replace(s, " $$");
+        s = Rewrite(s, PROCLITIC_DOLLAR, " $$");
 
         // 3) Dotted capital runs → the bare letters, before anything reads an interior dot as a break.
         // ⚠ `full` IS THE PRE-REPLACE STRING, as JS's replace callback argument is — snapshot it, or the
         // closure would see `s` as reassigned by this very statement.
         var src3 = s;
-        s = DOTTED_RUN.Replace(s, mm =>
+        s = Rewrite(s, DOTTED_RUN, mm =>
         {
             var run = mm.Value;
-            var letters = DOTS_AND_SPACES.Replace(run, "");
+            var letters = Rewrite(run, DOTS_AND_SPACES, "");
             var rest = Slice(src3, mm.Index + run.Length, src3.Length);
             if (LEADING_LETTER.IsMatch(rest)) return $"{letters} ";
             // ⚠ PUT BACK THE SPACE THE RUN SWALLOWED: the quantifier lets a space follow the LAST dot too.
@@ -111,15 +112,15 @@ public static class Normalize
         });
 
         // 4) Thousands de-grouping, before every remaining numeric rule. Exactly three digits per block.
-        s = GROUP_COMMA.Replace(s, mm => COMMAS.Replace(mm.Value, ""));
-        s = GROUP_SPACE.Replace(s, mm => GROUP_SPACES.Replace(mm.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, mm => COMMAS.Replace(mm.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, mm => GROUP_SPACES.Replace(mm.Value, ""));
 
         // 5) The English ordinal suffix, stripped — Shona writes its own ordinals as words.
-        s = ORDINAL_SUFFIX.Replace(s, "$1");
+        s = Rewrite(s, ORDINAL_SUFFIX, "$1");
 
         // 6) Ranges → `kusvika`, ASCENDING only. BEFORE THE TIER: Shona writes the unit after the SECOND
         //    operand, so once the tier has moved it no range rule can pair the two.
-        s = RANGE_RE.Replace(s, mm =>
+        s = Rewrite(s, RANGE_RE, mm =>
             Js.Number(mm.Groups[1].Value) < Js.Number(mm.Groups[2].Value)
                 ? $"{mm.Groups[1].Value} {RANGE} {mm.Groups[2].Value}"
                 : mm.Value);
@@ -134,7 +135,7 @@ public static class Normalize
 
         // 7) Bare `m` after a DECIMAL → *mamita*, the one metre reading the tier's `NOT_VERSION` guard
         //    structurally declines. The `²` arm recovers the exponent the same guard also cost.
-        s = DECIMAL_METRE.Replace(s, mm =>
+        s = Rewrite(s, DECIMAL_METRE, mm =>
         {
             var n = mm.Groups[1].Value;
             return mm.Groups[2].Success && mm.Groups[2].Value == "²" ? $"{SQUARED} mamita {n}" : $"mamita {n}";
@@ -143,20 +144,20 @@ public static class Normalize
         // 7b) A bare count of hours → *maawa N*. Claimed locally rather than as a `units` key: a units key
         //     is matchable as a DENOMINATOR too, and the tier cannot decline a clock. The colon in the
         //     lookbehind is what leaves `06:00hrs` raw and reported.
-        s = BARE_HOURS.Replace(s, "maawa $1");
+        s = Rewrite(s, BARE_HOURS, "maawa $1");
 
         // 8) Degrees. ⚠ THE LEFT GUARD IS `(?<![\d.,])`, NOT the siblings' letter-excluding one — Shona
         //    binds a proclitic to the front of a digit run (`ye32 ° C`, `ne180 °`).
         var src8a = s;
-        s = DEGREE_SCALE.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_SCALE, mm =>
             $"{DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src8a)} {SCALE[mm.Groups[2].Value.ToUpperInvariant()]}");
         var src8b = s;
-        s = DEGREE_BARE.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_BARE, mm =>
             DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src8b));
 
         // 9) Noun-class concord on a measure or currency noun's number (trap 14): the operand becomes WORDS
         //    inside the rule that knows which noun it follows. BEFORE step 10, so a decimal is left alone.
-        s = CONCORD.Replace(s, mm =>
+        s = Rewrite(s, CONCORD, mm =>
         {
             var n = Js.Number(mm.Groups[2].Value);
             if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n >= 1e6) return mm.Value;
@@ -166,12 +167,12 @@ public static class Normalize
         // 10) Decimals, LAST of the numeric rules — one word per mark. ⚠ THE TWO ARMS TAKE DIFFERENT TAILS:
         //     Shona has zero period-grouped thousands, so the period arm takes any tail, while the comma arm
         //     keeps the 1–2 cap because comma-grouped thousands here are real.
-        s = DECIMAL_DOT.Replace(s, mm => Spell(mm.Groups[1].Value, POINT_WORD, mm.Groups[2].Value));
-        s = DECIMAL_COMMA.Replace(s, mm => Spell(mm.Groups[1].Value, COMMA_WORD, mm.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_DOT, mm => Spell(mm.Groups[1].Value, POINT_WORD, mm.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, mm => Spell(mm.Groups[1].Value, COMMA_WORD, mm.Groups[2].Value));
 
         return Tidy(s);
     }
 
     /** A padded replacement doubles a space that was already there and can leave one at an edge. */
-    private static string Tidy(string s) => EDGE_SPACES.Replace(RUN_OF_SPACES.Replace(s, " "), "");
+    private static string Tidy(string s) => Rewrite(Rewrite(s, RUN_OF_SPACES, " "), EDGE_SPACES, "");
 }

@@ -17,7 +17,7 @@
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { BILLION, MILLION, numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -120,33 +120,33 @@ export function normalizeFula(input: string): string {
     let s = input;
 
     // 1) HTML ENTITIES — the corpus's one `&amp;` reads "e" (and). FIRST, before the ampersand rule.
-    s = tr(s, /&amp;/giu, " e ");
+    s = rewrite(s, /&amp;/giu, " e ");
 
     // 1b) CURRENCY PREFIXES — `AUD$45`, `uS$14.7` (the corpus's Australian/US dollar glued forms). The
     //     bare `$` is the tier's; the glued prefix names the country. AFTER &amp;, BEFORE the number rules.
-    s = tr(s, /(?<![\p{L}\p{M}])AUD\$?(?=\s?\d)/giu, "dollar Awstraliya ");
-    s = tr(s, /(?<![\p{L}\p{M}])(?:US|uS)\$?(?=\s?\d)/giu, "dollar Amerik ");
+    s = rewrite(s, /(?<![\p{L}\p{M}])AUD\$?(?=\s?\d)/giu, "dollar Awstraliya ");
+    s = rewrite(s, /(?<![\p{L}\p{M}])(?:US|uS)\$?(?=\s?\d)/giu, "dollar Amerik ");
 
     // 2) ERA MARKERS — `1000B.C.` (before Christ). The corpus's B.C. is attached to the year. Read the
     //    year, then "ɓawo jibineede Iisaa" (before the birth of Christ) — or the simpler Fula "ɓawo".
     //    The referee lacks an era word; "ɓawo" (before) is corpus-attested and unambiguous here.
-    s = tr(s, /(?<!\d)(\d[\d,]*)B\.?C\.?(?![\p{L}\p{M}])/giu, "$1 ɓawo");
+    s = rewrite(s, /(?<!\d)(\d[\d,]*)B\.?C\.?(?![\p{L}\p{M}])/giu, "$1 ɓawo");
 
     // 3) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `George W. Bush` — the W. suffix dot is a break.
-    s = tr(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
     //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
     //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
     //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
     //    Fula's own ⟨Ɓ Ɗ Ŋ Ƴ⟩. The minimal pair, measured before the fix:
     //        "A. Boyi"  → "A Boyi"
     //        "A. Ɓoyi"  → unchanged   ← the dot survives as a spurious clause break
-    s = tr(s, /(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
+    s = rewrite(s, /(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
 
     // 4) ORDINALS — the `Nst`/`Nnd`/`Nrd`/`Nth` English ordinal form (the corpus's dates/centuries).
     //    Read the Fula ordinal. BEFORE the clock rule so a digit run is not first claimed as a time.
-    s = tr(s, /(?<![\d.,])(\d[\d,]*)(st|nd|rd|th)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
-        const n = Number(d.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])(\d[\d,]*)(st|nd|rd|th)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
+        const n = Number(rewrite(d, /,/gu, ""));
         if (!Number.isFinite(n) || n < 1) return m0;
         const ord = ordinalWords(n);
         return ord === undefined ? m0 : ord;
@@ -163,13 +163,13 @@ export function normalizeFula(input: string): string {
     //    and read a RANGE where the text has a negative number: *one, up to two*. Same trailing-separator shape as
     //    the tokenizer bug closed in #1015. With the operand anchored on a digit, `\s*` can no longer
     //    straddle the comma and the rule declines, leaving the sign rule to claim `-2`.
-    s = tr(s, /(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])/gu, "$1 haa $2");
+    s = rewrite(s, /(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])/gu, "$1 haa $2");
 
     // 5b) GLUED CLOCK SUFFIX — `11:00nje` (the Fula locative -nje "at"; the corpus's only glued
     //     instance). The suffix is a separate word, not glued to the time; spaced out so the clock rule
     //     reads the time, then "nje" follows. ONLY the attested -nje (⚠ no unattested guard
     //     alternatives — -na/-ni/-nde never occur glued to a time in this corpus).
-    s = tr(s, /(?<![\d.,])(\d{1,2}):(\d{2})(nje)(?![\p{L}\p{M}])/giu, "$1:$2 $3");
+    s = rewrite(s, /(?<![\d.,])(\d{1,2}):(\d{2})(nje)(?![\p{L}\p{M}])/giu, "$1:$2 $3");
 
     // 6) CLOCK, in the COLON form. `1:15 a.m.` → goo e sappo e joyi a.m.; `9:30 fajiri` → … fajiri.
     //    The 24h `0230 UTC` is handled here too (a leading 0 makes it a 4-digit time). The a.m./p.m.
@@ -181,7 +181,7 @@ export function normalizeFula(input: string): string {
     //    tier did not exist when this rule was written, and it settles the question. NOT a sports
     //    time: a THIRD `\d.\d\d` field (4:41.30) means a pace. The trailing marker is captured WITHOUT
     //    eating the space before a following word (trap: a bare `\s*` glued "tati fajiri" → "tatifajiri").
-    s = tr(s, /(?<![\d:,])(\d{1,2}):(\d{2})(?![:.\d])(?:\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?))?/giu,
+    s = rewrite(s, /(?<![\d:,])(\d{1,2}):(\d{2})(?![:.\d])(?:\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?))?/giu,
         (m0, h: string, min: string, ap: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return m0;
@@ -193,7 +193,7 @@ export function normalizeFula(input: string): string {
 
     // 6b) CLOCK, in the DOT form before a timezone — `15.00 UTC`. The dot is otherwise a decimal;
     //     a timezone after the two-digit minutes marks a clock.
-    s = tr(s, /(?<![\d.,])(\d{1,2})\.(\d{2})\s*(UTC|GMT)/giu,
+    s = rewrite(s, /(?<![\d.,])(\d{1,2})\.(\d{2})\s*(UTC|GMT)/giu,
         (m0, h: string, min: string, tz: string) => {
             const hv = Number(h), mv = Number(min);
             const head = mv === 0 ? numberToWords(hv) : `${numberToWords(hv)} e ${numberToWords(mv)}`;
@@ -205,18 +205,18 @@ export function normalizeFula(input: string): string {
     //    the Fula word for a point/spot), the fraction digit-by-digit. GIGAHERTZ is claimed FIRST on the
     //    raw digits, because this rule converts the fraction to WORDS the Ghz rule can no longer see.
     //    AFTER the clock.
-    s = tr(s, /(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|mph|kph)(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|mph|kph)(?![\p{L}\p{M}])/giu,
         (m0, i: string, f: string, u: string) =>
             `${i} toɓɓere ${[...f].map((d) => numberToWords(Number(d))).join(" ")} ${({ km: "kilometre", m: "metre", kg: "kilogram", mm: "milimeta", cm: "santimeta", mph: "miles e wakkati gootel", kph: "kilometre e wakkati gootel" } as Record<string, string>)[u.toLowerCase()]!}`);
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${i} toɓɓere ${[...f].map((d) => numberToWords(Number(d))).join(" ")}`);
 
     // 7c) COMMA-DECIMALS — `12,5`. Fula follows English (comma = thousands, dot = decimal), so a
     //     comma-decimal is corpus-absent — but it must not LEAK the comma as a clause pause. A comma
     //     followed by a THREE-digit group is thousands (2,243) and stays for the TOKEN; this claims
     //     only 1-2 digit fractions.
-    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (m0, i: string, f: string) =>
+    s = rewrite(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (m0, i: string, f: string) =>
         `${i} toɓɓere ${[...f].map((d) => numberToWords(Number(d))).join(" ")}`);
 
     // 8) FRACTIONS. `1/5 inch` → *goo e joyi* (the corpus's one fraction, read as a ratio).
@@ -228,13 +228,13 @@ export function normalizeFula(input: string): string {
     //    phrase built two steps below, so `1¾` read as *one per hundred*. The ½ arm's `hecci` is ×0 in
     //    both corpora — unsourced as well as unreachable. Two authored readings, one wrong and one
     //    unsourced, standing in front of a correct upstream fold.
-    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) =>
+    s = rewrite(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) =>
         `${numberToWords(Number(a), a)} e ${numberToWords(Number(b), b)}`);
 
     // 9) DEGREES. `30°C` came out as the bare consonant [tʃ]. `digiri` is the degree word.
-    s = tr(s, /(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/giu, "$1 digiri Celsius");
-    s = tr(s, /(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/giu, "$1 digiri Fahrenheit");
-    s = tr(s, /(\d)\s?[°º](?![\p{L}\p{M}])/gu, "$1 digiri");
+    s = rewrite(s, /(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/giu, "$1 digiri Celsius");
+    s = rewrite(s, /(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/giu, "$1 digiri Fahrenheit");
+    s = rewrite(s, /(\d)\s?[°º](?![\p{L}\p{M}])/gu, "$1 digiri");
 
     // 10) RATES — `160km/h`, `133m/s`, `480 km/h`, `300mph`, `64kph`. The corpus's "miles per hour"
     //     is already text; the unit/unit forms need "e wakkati gootel" (in one hour). The corpus also
@@ -245,13 +245,13 @@ export function normalizeFula(input: string): string {
     //     `d === "h" ? "gootel" : "gootel"` — two identical branches, so `133m/s` (a real corpus line,
     //     `480 km/h (133m/s; 300mph)`, one wind speed glossed three ways) asserted *per hour*. `gootel`
     //     agrees with `wakkati`'s noun class and the form for `sahaawa` is unsourced; see fula.ts.
-    s = tr(s, /(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h)(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string) =>
             `${numberToWords(Number(n), n)} ${({ km: "kilometre", m: "metre", kg: "kilogram", mm: "milimeta", cm: "santimeta" } as Record<string, string>)[u.toLowerCase()]!} e wakkati gootel`);
-    s = tr(s, /(?<!\d)(\d+)\s?(mph|kph)(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(?<!\d)(\d+)\s?(mph|kph)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string) =>
             `${numberToWords(Number(n), n)} ${u.toLowerCase() === "mph" ? "miles e wakkati gootel" : "kilometre e wakkati gootel"}`);
-    s = tr(s, /(?<!\d)(\d+)o\s?(km\/h)(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(?<!\d)(\d+)o\s?(km\/h)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string) =>
             `${numberToWords(Number(n), n)} kilometre e wakkati gootel`);
 
@@ -264,7 +264,7 @@ export function normalizeFula(input: string): string {
     //     that sense: "ɗum fotan be …"). `%` reads *e teemedere* (in a hundred), composed from two attested
     //     pieces rather than asserted as one — see the header's SOURCING note. The percent rule also has to
     //     catch the WORD form, since by this point the dot rule has turned `3.5%` into words.
-    s = tr(s, /\+\s?(?=\d)/gu, " e gooto ");
+    s = rewrite(s, /\+\s?(?=\d)/gu, " e gooto ");
     // ⚠ U+2212 IS IN THE CLASS AND THE ASCII HYPHEN'S GUARDS ARE UNCHANGED. The MINUS SIGN is a distinct
     // code point whose only Unicode meaning is the arithmetic operator, and it is not on any keyboard —
     // whoever typed it meant a minus. It is not attested in this language's mined corpus, which is why an
@@ -272,16 +272,16 @@ export function normalizeFula(input: string): string {
     // dropping a sign INVERTS the value it belongs to. The hyphen is the ambiguous one and keeps every
     // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
     // still refused by the lookbehind.
-    s = tr(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "usta $1");
-    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "usta $1");
+    s = rewrite(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
         (_m, a: string, b: string, pl: string) =>
             `${LETTER_NAME[a.toLowerCase()] ?? a} e ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
-    s = tr(s, /\s&\s/gu, " e ");
-    s = tr(s, /(\d)\s*×\s*(\d)/gu, "$1 je $2");
-    s = tr(s, /(\S)\s*=\s*(\S)/gu, "$1 fota $2");
-    s = tr(s, /(\d)\s*<\s*(\d)/gu, "$1 famɗi $2");
-    s = tr(s, /(\d)\s*>\s*(\d)/gu, "$1 ɓuri $2");
-    s = tr(s, /(\d+(?: toɓɓere [\p{L}\p{M}]+)+|[\p{L}\p{M}]+ toɓɓere [\p{L}\p{M}]+|\d+)\s*%\s*(?![\p{L}\p{M}])/gu, "$1 e teemedere");
+    s = rewrite(s, /\s&\s/gu, " e ");
+    s = rewrite(s, /(\d)\s*×\s*(\d)/gu, "$1 je $2");
+    s = rewrite(s, /(\S)\s*=\s*(\S)/gu, "$1 fota $2");
+    s = rewrite(s, /(\d)\s*<\s*(\d)/gu, "$1 famɗi $2");
+    s = rewrite(s, /(\d)\s*>\s*(\d)/gu, "$1 ɓuri $2");
+    s = rewrite(s, /(\d+(?: toɓɓere [\p{L}\p{M}]+)+|[\p{L}\p{M}]+ toɓɓere [\p{L}\p{M}]+|\d+)\s*%\s*(?![\p{L}\p{M}])/gu, "$1 e teemedere");
 
     // 13) INITIALISMS, LAST of the letter rules: it must run after the era markers (else B.C. → *ba.
     //     ca.*) and after the dotted-capital rule.

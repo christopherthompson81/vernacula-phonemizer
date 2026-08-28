@@ -30,7 +30,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Cebuano marks plurality with the particle `mga`, not on the noun, and its Spanish
@@ -68,7 +68,7 @@ export function normalizeCebuano(input: string): string {
     // the TOKEN splits on `\d+`, so `1,100 km` read *usa , usa ka gatos km* — the value gone.
     // ⚠ EXACTLY THREE DIGITS PER GROUP: `14.7` and `2.5` are decimals and must survive. The trailing guard
     // rejects only a following DIGIT, so a group followed by the decimal point still de-groups (`14,700.5`).
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
 
     // ── 2. CLOCK — BEFORE the decimal rule, and before the tier ─────────────────────────────────────────
     // ×17, and the corpus writes the hour with `alas` ×11 (`mga alas 9:30 sa buntag`, `alas 07:19`). The
@@ -78,18 +78,18 @@ export function normalizeCebuano(input: string): string {
     // minutes drop out.
     const clock = (_m: string, h: string, min: string): string =>
         Number(min) === 0 ? `${Number(h)}` : `${Number(h)} ug ${Number(min)}`;
-    s = tr(s, /(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)/gu, clock);
+    s = rewrite(s, /(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)/gu, clock);
     // ⚠ AND THE PERIOD-SEPARATED CLOCK, which the corpus diff found and no probe would have: this corpus
     // writes `12.00 GMT` and `15.00 UTC` beside `9:30 sa buntag` and `8:46 sa buntag`. Without this the
     // decimal rule claimed them — `12.00 GMT` read *napulo ug duha punto nol nol*, a time spoken as a
     // measurement. ⚠ THE DISAMBIGUATION IS THE FOLLOWING MARKER, not the digits: `6.34 pulgada` is the same
     // shape and IS a decimal, so only a timezone or a part-of-day licenses the clock reading.
-    s = tr(s, /(?<![\d.:])([01]?\d|2[0-3])\.([0-5]\d)(?!\d)(?=\s*(?:GMT|UTC|[ap]\.?m\b|sa (?:buntag|hapon|gabii)))/giu, clock);
+    s = rewrite(s, /(?<![\d.:])([01]?\d|2[0-3])\.([0-5]\d)(?!\d)(?=\s*(?:GMT|UTC|[ap]\.?m\b|sa (?:buntag|hapon|gabii)))/giu, clock);
     // ⚠ AND THE MILITARY FORM, `0230 UTC` / `1200 GMT` — four digits and NO separator at all, which the
     // number path read as the cardinal *usa ka libo ug duha ka gatos*. ×2, both immediately before a
     // timezone, which is the only thing distinguishing them from an ordinary four-digit number (a YEAR is
     // the same shape). The timezone is required, not optional.
-    s = tr(s, /(?<![\d.:])([01]\d|2[0-3])([0-5]\d)(?!\d)(?=\s*(?:GMT|UTC))/gu, clock);
+    s = rewrite(s, /(?<![\d.:])([01]\d|2[0-3])([0-5]\d)(?!\d)(?=\s*(?:GMT|UTC))/gu, clock);
 
     // ── 3. THE SHARED TIER — percent, currency, units, rates, `&`, `×` ──────────────────────────────────
     // ⚠ BEFORE THE DECIMAL RULE ("units before decimals", the playbook's coupling): the tier matches a unit
@@ -108,7 +108,7 @@ export function normalizeCebuano(input: string): string {
     // they would say it. `punto` is the Spanish loan Cebuano uses for a point, and the alternative is 19
     // decimals read with a clause break.
     // ⚠ The fractional part is read DIGIT BY DIGIT, which is what a decimal is.
-    s = tr(s, /(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
+    s = rewrite(s, /(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
 
     // ── 5. RANGES → `ngadto sa` ────────────────────────────────────────────────────────────────────────
     // ×12. The hyphen was dropped, leaving two numbers abutting with no connective — and for a YEAR SPAN
@@ -117,7 +117,7 @@ export function normalizeCebuano(input: string): string {
     // ⚠ THE THREE GUARDS THE su AND so RUNS PAID FOR, carried rather than re-earned: do not double a
     // connective the text already wrote, do not claim a HYPHEN CHAIN (an identifier, not a span), and
     // require digits on BOTH sides — which is also what keeps this rule off `ika-20`, the ordinal prefix.
-    s = tr(s,
+    s = rewrite(s,
         /(?<!\b(?:ngadto sa|hangtod|hangtud|gikan sa)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d.,-])/gu,
         "$1 ngadto sa $2",
     );
@@ -130,7 +130,7 @@ export function normalizeCebuano(input: string): string {
     // ⚠ SO THE RULE IS KEYED ON A CLOSED LIST, never on the shape. The German lesson (trap 4) is that a bare
     // `N.` rule must not claim a sentence-final period, and this corpus proves the hazard is live rather
     // than theoretical. The dot is KEPT, so a genuine sentence end is unaffected either way.
-    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.`, "giu"),
+    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -143,7 +143,7 @@ export function normalizeCebuano(input: string): string {
     // ×1 in this corpus, so this is robustness for plausible input rather than a measured repair, and it is
     // labelled as such. `tunga` ("half") ×16 is the word for the one that has its own; everything else
     // composes with `kabahin` ("part"), the ordinary Cebuano fraction frame.
-    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (_m, a: string, b: string) =>
+    s = rewrite(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (_m, a: string, b: string) =>
         Number(a) === 1 && Number(b) === 2 ? "tunga" : `${a} kabahin sa ${b}`);
 
     // ── 8. SIGNS ───────────────────────────────────────────────────────────────────────────────────────
@@ -152,8 +152,8 @@ export function normalizeCebuano(input: string): string {
     // `grado`/`digri` (degrees) ×0, `minus` ×0. Inventing six readings from a 1,932-sentence corpus is
     // exactly what the Fula `tere` lesson forbids, so they stay unread and are declared in defects.ts.
     // `dugang` ("additional, more") ×32 is the one arithmetic word the corpus does carry.
-    s = tr(s, /(\S)\+\s?(\(?\s?[-−]?\d)/gu, "$1 dugang $2");
-    s = tr(s, /(^|\s)\+\s?(\(?\s?[-−]?\d)/gu, "$1dugang $2");
+    s = rewrite(s, /(\S)\+\s?(\(?\s?[-−]?\d)/gu, "$1 dugang $2");
+    s = rewrite(s, /(^|\s)\+\s?(\(?\s?[-−]?\d)/gu, "$1dugang $2");
 
     return s;
 }

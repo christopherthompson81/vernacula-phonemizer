@@ -8,6 +8,7 @@
  * genders, and `libri III` is a cardinal) and the arithmetic signs. Nothing is re-derived here.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Latin;
 
@@ -48,14 +49,14 @@ public static class Normalize
         var s = Unicode.FoldNativeDigits(input);
 
         // 1) DE-GROUPING — the WHOLE number at once, not one two-digit join per pass.
-        s = SPACE_GROUP.Replace(s, m => m.Groups[1].Value + SPACE_SEPS.Replace(m.Groups[2].Value, ""));
-        s = SPACE_SEPS.Replace(s, " ");
+        s = Rewrite(s, SPACE_GROUP, m => m.Groups[1].Value + SPACE_SEPS.Replace(m.Groups[2].Value, ""));
+        s = Rewrite(s, SPACE_SEPS, " ");
 
         // 2) THE ERA MARKER — `a.C.n.` / `p.C.n.` and the two-letter forms.
         foreach (var (re, word) in MULTI)
         {
             var frozen = s;
-            s = re.Replace(s, m =>
+            s = Rewrite(s, re, m =>
             {
                 var rest = frozen[(m.Index + m.Value.Length)..];
                 return SENTENCE_TAIL.IsMatch(rest) ? $"{word}." : word;
@@ -63,21 +64,21 @@ public static class Normalize
         }
 
         // 3) `&c.` — the ligature of *et* and *c(etera)*.
-        s = ET_CETERA.Replace(s, "et cetera");
+        s = Rewrite(s, ET_CETERA, "et cetera");
 
         // 4) DEGREES — the scale letter claimed first, then the bare sign.
-        s = DEG_C.Replace(s, "$1 gradus Celsius");
-        s = DEG_F.Replace(s, "$1 gradus Fahrenheit");
-        s = DEG.Replace(s, "$1 gradus ");
-        s = DEG_BEFORE_WORD.Replace(s, "$1 ");
+        s = Rewrite(s, DEG_C, "$1 gradus Celsius");
+        s = Rewrite(s, DEG_F, "$1 gradus Fahrenheit");
+        s = Rewrite(s, DEG, "$1 gradus ");
+        s = Rewrite(s, DEG_BEFORE_WORD, "$1 ");
 
         // 5) SIGNS — the minus inverts and is read; the plus is not.
-        s = MINUS.Replace(s, "$1minus $2");
+        s = Rewrite(s, MINUS, "$1minus $2");
 
         // 6) RANGES — the dash is spent on a PAUSE, and an ISBN is not a range.
-        s = DASH_RANGE.Replace(s, "$1, ");
-        s = HYPHEN_RANGE.Replace(s, "$1, $2");
+        s = Rewrite(s, DASH_RANGE, "$1, ");
+        s = Rewrite(s, HYPHEN_RANGE, "$1, $2");
 
-        return MULTI_SPACE.Replace(s, " ");
+        return Rewrite(s, MULTI_SPACE, " ");
     }
 }

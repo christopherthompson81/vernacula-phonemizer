@@ -22,6 +22,98 @@ using Vernacula.Phonemizer.Core;
 var goldens = Path.Combine(AppContext.BaseDirectory, "../../../../../goldens");
 if (!Directory.Exists(goldens)) goldens = "csharp/goldens";
 var only = args.Where(a => !a.StartsWith('-')).ToHashSet();
+
+/*
+ * `--provenance`: per-language #1150 stage-2 coverage, the C# mirror of .probe/stage2/bylang.mts.
+ *
+ * ⚠ A FLEET AVERAGE SAYS HOW MUCH IS MISSING AND NEVER WHERE. Ranking by tokens LOST is what turns
+ * "the mapping is 95% complete" into a named next fix, and it is also the only way to see the two
+ * engines diverge on one language while the totals agree.
+ */
+/*
+ * `--poison`: WHERE the mapping dies, by call site. The C# mirror of .probe/stage2/poison.mts.
+ *
+ * ⚠ THE SEAM'S RULE CANNOT BE CHECKED STATICALLY. `s = Rewrite(s, RE, rep)` inside a per-word helper is
+ * textually identical to the pipeline form; only running the corpus and asking who handed the seam an
+ * unrecognised string tells them apart. Needs a Debug build for line numbers.
+ */
+if (args.Contains("--poison"))
+{
+    var hits = new Dictionary<string, (int N, string Kind, string Sample)>(StringComparer.Ordinal);
+    Provenance.OnPoison((expected, got) =>
+    {
+        var frames = new System.Diagnostics.StackTrace(true).GetFrames()
+            .Select(fr => (File: fr.GetFileName(), Line: fr.GetFileLineNumber(), Method: fr.GetMethod()?.Name))
+            .Where(fr => fr.File is not null && !fr.File.Contains("Provenance.cs") && !fr.File.Contains("Rewriter.cs"))
+            .Take(3)
+            // ⚠ THE BARE FILE NAME IS USELESS HERE — every language has a `Normalize.cs`, so 114 distinct
+            // sites collapse onto one label. Keep enough of the path to name the language.
+            .Select(fr => $"{Rel(fr.File!)}:{fr.Line} {fr.Method}");
+        var key = string.Join("  <- ", frames);
+        var kind = (expected.Contains(got, StringComparison.Ordinal) && got.Length < expected.Length)
+            || got.Length * 3 < expected.Length ? "SUBSTRING" : "desync";
+        if (hits.TryGetValue(key, out var cur))
+            hits[key] = (cur.N + 1, cur.Kind == kind ? kind : "mixed", cur.Sample);
+        else
+            hits[key] = (1, kind, $"tracked={Truncate(expected)} s={Truncate(got)}");
+    });
+    static string Truncate(string x) => x.Length <= 40 ? x : x[..40];
+    static string Rel(string f)
+    {
+        var i = f.IndexOf("Vernacula.Phonemizer/", StringComparison.Ordinal);
+        return i < 0 ? Path.GetFileName(f) : f[(i + "Vernacula.Phonemizer/".Length)..];
+    }
+    foreach (var f in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(x => x, StringComparer.Ordinal))
+    {
+        var lang = Path.GetFileNameWithoutExtension(f);
+        if (only.Count > 0 && !only.Contains(lang)) continue;
+        foreach (var line in File.ReadLines(f))
+        {
+            var text = line.Split('\t')[0];
+            if (text.Length == 0) continue;
+            try { Phonemizer.PhonemizeTrace(text, lang); } catch { /* the reading is gated elsewhere */ }
+        }
+    }
+    Provenance.OnPoison(null);
+    var subs = hits.Where(h => h.Value.Kind != "desync").ToList();
+    Console.WriteLine($"distinct poison sites: {hits.Count}  (SUBSTRING {subs.Count}, desync {hits.Count - subs.Count})");
+    Console.WriteLine("\n=== SUBSTRING — revert these to JsRe.Replace ===");
+    foreach (var h in subs.OrderByDescending(x => x.Value.N)) Console.WriteLine($"{h.Value.N,6} {h.Value.Kind,-9} {h.Key}");
+    Console.WriteLine("\n=== desync — the subject IS the pipeline string; the gap is an earlier non-Replace step ===");
+    foreach (var h in hits.Where(x => x.Value.Kind == "desync").OrderByDescending(x => x.Value.N))
+        Console.WriteLine($"{h.Value.N,6}  {h.Key}\n        {h.Value.Sample}");
+    return 0;
+}
+
+if (args.Contains("--provenance"))
+{
+    var report = new List<(string Lang, int Tok, int Mapped, int FullRows, int Rows)>();
+    foreach (var f in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(x => x, StringComparer.Ordinal))
+    {
+        var lang = Path.GetFileNameWithoutExtension(f);
+        if (only.Count > 0 && !only.Contains(lang)) continue;
+        int tok = 0, mapped = 0, fullRows = 0, nRows = 0;
+        foreach (var line in File.ReadLines(f))
+        {
+            var text = line.Split('\t')[0];
+            if (text.Length == 0) continue;
+            PhonemeTrace t;
+            try { t = Phonemizer.PhonemizeTrace(text, lang); } catch { continue; }
+            nRows++;
+            var m = t.Tokens.Count(k => k.InputSpan is not null);
+            tok += t.Tokens.Count; mapped += m;
+            if (t.Tokens.Count > 0 && m == t.Tokens.Count) fullRows++;
+        }
+        if (tok > 0) report.Add((lang, tok, mapped, fullRows, nRows));
+    }
+    var tt = report.Sum(r => r.Tok);
+    var tm = report.Sum(r => r.Mapped);
+    Console.WriteLine($"{report.Count} languages · tokens {tm}/{tt} ({100.0 * tm / tt:F1}%)\n");
+    Console.WriteLine("lost   %mapped  rows   lang");
+    foreach (var r in report.Where(x => x.Mapped < x.Tok).OrderByDescending(x => x.Tok - x.Mapped))
+        Console.WriteLine($"{r.Tok - r.Mapped,5}  {100.0 * r.Mapped / r.Tok,5:F0}%  {r.FullRows,3}/{r.Rows,-3}  {r.Lang}");
+    return 0;
+}
 int langsOk = 0, langsBad = 0, langsBlocked = 0, rowsOk = 0, rowsBad = 0, rowsBlocked = 0;
 var blockedRows = new List<string>();
 var firstDiff = new List<string>();

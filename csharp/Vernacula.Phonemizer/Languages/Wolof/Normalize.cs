@@ -14,6 +14,7 @@
  * fractions, the era expansion, CFA and `€`. Nothing is re-derived here.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Wolof;
 
@@ -151,14 +152,14 @@ public static class Normalize
 
         // 0) A MARKED clock loses the colon's clause pause — see CLOCK_MARKED. First, so every numeric
         //    step below sees one digit run rather than two.
-        s = CLOCK_MARKED.Replace(s, "$1 $2");
+        s = Rewrite(s, CLOCK_MARKED, "$1 $2");
 
         // 1) NFC, THE SEMICOLON-LESS HTML ENTITIES, AND FORMAT CHARACTERS. ⚠ `&amp;` IS UNFOLDED FIRST, and
         //    the format-character strip is not cosmetic — a zero-width character inside a word splits it
         //    into two tokens.
         s = s.Normalize(System.Text.NormalizationForm.FormC);
-        s = AMP_ENTITY.Replace(s, "&");
-        s = NAMED_ENTITY.Replace(s, m =>
+        s = Rewrite(s, AMP_ENTITY, "&");
+        s = Rewrite(s, NAMED_ENTITY, m =>
         {
             // JS `e.slice(1).replace(";", "")` — a STRING replace, so only the FIRST `;` goes.
             var key = "&" + Js.ToLowerCase(ReplaceFirst(m.Value[1..], ";", ""));
@@ -168,23 +169,23 @@ public static class Normalize
             // word was spoken; this port reproduced that deliberately. Both now pass the run through.
             return ENTITY.TryGetValue(key, out var v) ? v : m.Value;
         });
-        s = FORMAT_CHARS.Replace(s, "");
+        s = Rewrite(s, FORMAT_CHARS, "");
 
         // 2) DEGREES → `aj`, BEFORE the tier and before de-grouping. The two-operand arm comes FIRST, or the
         //    bare arm claims `12°8` and strands the `8`. ⚠ The bare arm REFUSES A GLUED LETTER: with no
         //    scale name to emit there is no whole reading available, so `20 °C` is refused entire.
         var degFrozen = s;
-        s = DEGREE_TWO_OPERANDS.Replace(s, m =>
+        s = Rewrite(s, DEGREE_TWO_OPERANDS, m =>
             $"{Degree(m.Groups[1].Value, m.Index, m.Value.Length, degFrozen)} ");
         var bareFrozen = s;
-        s = DEGREE_BARE.Replace(s, m =>
+        s = Rewrite(s, DEGREE_BARE, m =>
             Degree(m.Groups[1].Value, m.Index, m.Value.Length, bareFrozen));
 
         // 3) THE DOTTED ERA AND HONORIFIC MARKERS — de-dotted, NOT expanded. ⚠ NO EXPANSION IS INVENTED: a
         //    definitional gloss is the wrong REGISTER for what a reader says. ⚠ EVERY ELEMENT MUST BE A
         //    SINGLE LETTER, which keeps this off ordinary prose and off a domain name.
         var eraFrozen = s;
-        s = DOTTED_ERA.Replace(s, m =>
+        s = Rewrite(s, DOTTED_ERA, m =>
         {
             var letters = string.Join(" ", Js.CodePoints(DOTS.Replace(m.Value, "")));
             var rest = eraFrozen[(m.Index + m.Value.Length)..];
@@ -198,14 +199,14 @@ public static class Normalize
 
         // 5) THOUSANDS DE-GROUPING. ⚠ EXACTLY THREE DIGITS PER BLOCK AND A HEAD STARTING 1–9 — the leading
         //    guard is what keeps the genuine 3-place decimals out, and step 9's third arm then claims them.
-        s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => SPACE_SEPS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => SPACE_SEPS.Replace(m.Value, ""));
 
         // 6) RANGES → `ba`. ⚠ THE `:` IS IN BOTH GUARDS, which is what keeps the rule off this corpus's
         //    dominant colon shape — SCRIPTURE. ⚠ ASCENDING ONLY, and not after a multiplication dot.
         var rangeFrozen = s;
-        s = DASH_RANGE.Replace(s, m =>
+        s = Rewrite(s, DASH_RANGE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -215,18 +216,18 @@ public static class Normalize
 
         // 7) THE ENGLISH ORDINAL SUFFIX — always foreign orthography here; Wolof writes its own as
         //    `-eel(u)`/`-eem`, which already reads.
-        s = ENGLISH_ORDINAL.Replace(s, "$1");
+        s = Rewrite(s, ENGLISH_ORDINAL, "$1");
 
         // 8) A LONE `+` IS LEFT UNREAD, deliberately — the sign does not occur in this corpus at all.
 
         // 9) DECIMALS, LAST of the numeric rules. NO SEPARATOR WORD IS EMITTED. ⚠ THE `:` IS IN THE LEADING
         //    GUARD AND `,` IN THE TRAILING ONE, or the scripture verse enumerations claim the rule.
-        s = DECIMAL_ZERO.Replace(s, m => Spell("0", m.Groups[1].Value));
-        s = DECIMAL_DOT.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
-        s = DECIMAL_COMMA.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_ZERO, m => Spell("0", m.Groups[1].Value));
+        s = Rewrite(s, DECIMAL_DOT, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
 
         // A padded replacement doubles a space that was already there and can leave one at an edge.
-        return EDGE_SPACE.Replace(MULTI_SPACE.Replace(s, " "), "");
+        return Rewrite(Rewrite(s, MULTI_SPACE, " "), EDGE_SPACE, "");
     }
 
     private static string Degree(string n, int off, int len, string full) =>

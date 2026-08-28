@@ -6,6 +6,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Kazakh;
 
@@ -204,20 +205,20 @@ public static class Normalize
         var s = input;
 
         // 0) SPACE-GROUPED THOUSANDS — de-group FIRST, before anything reads a pause.
-        for (var i = 0; i < 2; i++) s = GROUPED_THOUSANDS.Replace(s, "");
+        for (var i = 0; i < 2; i++) s = Rewrite(s, GROUPED_THOUSANDS, "");
 
         // 1) DOTTED ABBREVIATIONS and ERA MARKERS, before the single-dot rule.
-        foreach (var (re, with) in ERA_MARKERS) s = re.Replace(s, with);
+        foreach (var (re, with) in ERA_MARKERS) s = Rewrite(s, re, with);
 
         // 2) ORDINALS — `190-шы`, `1-ші`. Runs BEFORE the clock rule.
-        s = ORDINAL_SUFFIX.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_SUFFIX, m =>
         {
             var ord = OrdinalWord(Js.Number(m.Groups[1].Value));
             return ord ?? m.Value;
         });
 
         // 2b) `N-НОУН` — the ordinal writing with the noun spelled out. A ONE-LETTER tail is the date possessive.
-        s = N_NOUN.Replace(s, m =>
+        s = Rewrite(s, N_NOUN, m =>
         {
             var n = Js.Number(m.Groups[1].Value);
             var tail = m.Groups[2].Value;
@@ -229,10 +230,10 @@ public static class Normalize
         });
 
         // 2c) НӨМІР.
-        s = NUMERO.Replace(s, "нөмір ");
+        s = Rewrite(s, NUMERO, "нөмір ");
 
         // 3) CLOCK, in the COLON form.
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             if (hv > 23 || mv > 59) return m.Value;
@@ -241,14 +242,14 @@ public static class Normalize
         });
 
         // 3b) DOT-CLOCK before a timezone. ⚠ ZERO MINUTES ARE OMITTED, as in the `:`-clock arm.
-        s = DOT_CLOCK.Replace(s, m =>
+        s = Rewrite(s, DOT_CLOCK, m =>
         {
             var mv = Js.Number(m.Groups[2].Value);
             return $"{Orthographic(Js.Number(m.Groups[1].Value))}{(mv == 0 ? "" : $" {Orthographic(mv)}")} {m.Groups[3].Value}";
         });
 
         // 4) THE CASE SUFFIX. Runs AFTER the clock rule.
-        s = CASE_SUFFIX.Replace(s, m =>
+        s = Rewrite(s, CASE_SUFFIX, m =>
         {
             if (!CASE_BY_SUFFIX.TryGetValue(Js.ToLowerCase(m.Groups[2].Value), out var caseName)) return m.Value;
             var n = Js.Number(m.Groups[1].Value);
@@ -257,62 +258,62 @@ public static class Normalize
         });
 
         // 5) DEGREES. Runs BEFORE the case-suffix rule for the °C-тан form; the sign is claimed here.
-        s = DEG_C_PLUS.Replace(s, m =>
+        s = Rewrite(s, DEG_C_PLUS, m =>
             WithOptionalCase($"{m.Groups[1].Value}плюс {Orthographic(Js.Number(m.Groups[2].Value))} градус Цельсий", m.Groups[3]));
-        s = DEG_C_MINUS.Replace(s, m =>
+        s = Rewrite(s, DEG_C_MINUS, m =>
             WithOptionalCase($"{m.Groups[1].Value}минус {Orthographic(Js.Number(m.Groups[2].Value))} градус Цельсий", m.Groups[3]));
-        s = DEG_C.Replace(s, m =>
+        s = Rewrite(s, DEG_C, m =>
             WithOptionalCase($"{Orthographic(Js.Number(m.Groups[1].Value))} градус Цельсий", m.Groups[2]));
-        s = DEG_F.Replace(s, m =>
+        s = Rewrite(s, DEG_F, m =>
             WithOptionalCase($"{Orthographic(Js.Number(m.Groups[1].Value))} градус Фаренгейт", m.Groups[2]));
-        s = DEG_COMPASS.Replace(s, m =>
+        s = Rewrite(s, DEG_COMPASS, m =>
             $"{Orthographic(Js.Number(m.Groups[1].Value))} градус {COMPASS[m.Groups[2].Value.ToUpperInvariant()]}");
 
         // 5b) RATES — `83 км/сағ`, `160 км/сағ-қа`, `17 500 миля/сағат`.
-        s = RATE_KMH.Replace(s, m =>
+        s = Rewrite(s, RATE_KMH, m =>
         {
             var n = Js.Number(SPACES.Replace(m.Groups[1].Value, ""));
             return WithOptionalCase($"{Orthographic(n)} километр сағат", m.Groups[4]);
         });
-        s = RATE_MPH.Replace(s, m =>
+        s = Rewrite(s, RATE_MPH, m =>
         {
             var n = Js.Number(SPACES.Replace(m.Groups[1].Value, ""));
             return WithOptionalCase($"{Orthographic(n)} миля сағат", m.Groups[2]);
         });
 
         // 6) NUMERIC RANGES.
-        s = RANGE.Replace(s, "$1–$2");
+        s = Rewrite(s, RANGE, "$1–$2");
 
         // 7) THE SHARED SYMBOL TIER — %, units.
         s = KazakhPhonemizer.SYMBOLS(s);
 
         // 7z) FRACTIONS — the DENOMINATOR comes first, in the ABLATIVE (бестен бір).
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             string num = Orthographic(Js.Number(m.Groups[1].Value)), den = Orthographic(Js.Number(m.Groups[2].Value));
             return num == "" || den == "" ? m.Value : $"{WithCase(den, "abl")} {num}";
         });
 
         // 8) DECIMAL COMMA → the word.
-        s = DECIMAL_COMMA.Replace(s, " бүтін ");
+        s = Rewrite(s, DECIMAL_COMMA, " бүтін ");
 
         // 8b) DOT DECIMALS/VERSIONS. ⚠ THE SIGNED CASE IS CLAIMED FIRST.
-        s = SIGNED_DOT_DECIMAL.Replace(s, m =>
+        s = Rewrite(s, SIGNED_DOT_DECIMAL, m =>
             $"минус {Orthographic(Js.Number(m.Groups[1].Value))} нүкте {Orthographic(Js.Number(m.Groups[2].Value))}");
-        s = DOT_DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DOT_DECIMAL, m =>
             $"{Orthographic(Js.Number(m.Groups[1].Value))} нүкте {Orthographic(Js.Number(m.Groups[2].Value))}");
 
         // 9) SIGNS.
-        s = PLUS.Replace(s, "$1плюс $2");
-        s = DIVIDE.Replace(s, m =>
+        s = Rewrite(s, PLUS, "$1плюс $2");
+        s = Rewrite(s, DIVIDE, m =>
             $"{Orthographic(Js.Number(m.Groups[1].Value))} {WithCase(Orthographic(Js.Number(m.Groups[2].Value)), "dat")} бөлінеді");
-        s = PLUS_MINUS.Replace(s, " плюс минус ");
-        s = PLUS_AFTER_CAPS.Replace(s, " плюс $1");
-        s = MINUS.Replace(s, "минус $1");
-        s = TIMES.Replace(s, "$1 есе $2");
-        s = EQUALS.Replace(s, "$1 тең $2");
-        s = LESS.Replace(s, "$1 аз $2");
-        s = MORE.Replace(s, "$1 көп $2");
+        s = Rewrite(s, PLUS_MINUS, " плюс минус ");
+        s = Rewrite(s, PLUS_AFTER_CAPS, " плюс $1");
+        s = Rewrite(s, MINUS, "минус $1");
+        s = Rewrite(s, TIMES, "$1 есе $2");
+        s = Rewrite(s, EQUALS, "$1 тең $2");
+        s = Rewrite(s, LESS, "$1 аз $2");
+        s = Rewrite(s, MORE, "$1 көп $2");
 
         return s;
     }

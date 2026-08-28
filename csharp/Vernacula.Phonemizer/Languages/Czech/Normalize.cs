@@ -5,6 +5,7 @@
  * standing CASE limitation the ordinal rules trade against.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Czech;
 
@@ -235,27 +236,27 @@ public static class Normalize
 
         // 0) DIGIT DE-GROUPING, first — TWO passes, because the groups overlap on the shared digit.
         for (var i = 0; i < 2; i++)
-            s = DEGROUP.Replace(s, "");
-        s = JsRegex.Replace(s, GROUP_SPACE_ANY, _ => " ");
+            s = Rewrite(s, DEGROUP, "");
+        s = Rewrite(s, GROUP_SPACE_ANY, _ => " ");
 
         // 1) MULTI-DOT ABBREVIATIONS (the era markers), before the single-dot rule.
         foreach (var (re, w) in MULTI_DOT)
         {
             var whole = s;
-            s = JsRegex.Replace(s, re, m => KeepFinal(w, m.Value, m.Index, whole));
+            s = Rewrite(s, re, m => KeepFinal(w, m.Value, m.Index, whole));
         }
 
         // 2) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break.
-        s = JsRegex.Replace(s, DOTTED_MID, m =>
+        s = Rewrite(s, DOTTED_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
             // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
             DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = JsRegex.Replace(s, DOTTED_END, m =>
+        s = Rewrite(s, DOTTED_END, m =>
             DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
-        s = JsRegex.Replace(s, PAGE_S, m => $"{DOTTED["s"]}{m.Groups[1].Value}");
+        s = Rewrite(s, PAGE_S, m => $"{DOTTED["s"]}{m.Groups[1].Value}");
 
         // 3) CLOCK. ⚠ Before any rule that looks for a bare number.
-        s = JsRegex.Replace(s, CLOCK, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             var head = $"{Feminine(CzechNumbers.NumberToWords(hv))} {Counted(hv, HOUR)}";
@@ -263,7 +264,7 @@ public static class Normalize
         });
 
         // 4) DATE `N. N.`, before the version-dot rule, which would otherwise eat the interior dot.
-        s = JsRegex.Replace(s, DATE_NN, m =>
+        s = Rewrite(s, DATE_NN, m =>
         {
             double dv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             if (dv < 1 || dv > 31 || mv < 1 || mv > 12) return m.Value;
@@ -271,10 +272,10 @@ public static class Normalize
         });
 
         // 5) VERSION / FIGURE DOTS between digits, before the ordinal rules.
-        s = VERSION_DOT.Replace(s, "$1 tečka ");
+        s = Rewrite(s, VERSION_DOT, "$1 tečka ");
 
         // 6) ORDINAL RANGE — `10.–11.` read as "až" (through).
-        s = JsRegex.Replace(s, ORD_RANGE, m =>
+        s = Rewrite(s, ORD_RANGE, m =>
         {
             var oa = Ordinal(Js.Number(m.Groups[1].Value));
             var ob = Ordinal(Js.Number(m.Groups[2].Value));
@@ -284,7 +285,7 @@ public static class Normalize
 
         // 7) CENTURY — an immediately-preceding v/ve governs the LOCATIVE, every other preposition the GENITIVE.
         var whole7 = s;
-        s = JsRegex.Replace(s, CENTURY, m =>
+        s = Rewrite(s, CENTURY, m =>
         {
             var loc = CENTURY_V.IsMatch(whole7[..m.Index]);
             var c = loc ? "loc" : "gen";
@@ -294,28 +295,28 @@ public static class Normalize
         });
 
         // 8) DECADE — `N. + let/letech` governs the genitive/locative PLURAL.
-        s = JsRegex.Replace(s, DECADE, m =>
+        s = Rewrite(s, DECADE, m =>
             $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "plGen")} {m.Groups[2].Value}");
 
         // 9) DATE MONTHS — the month name is the case cue; červenci (after `k`) takes the dative.
-        s = JsRegex.Replace(s, DATE_MONTH, m =>
+        s = Rewrite(s, DATE_MONTH, m =>
             $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, MONTH_RULE[m.Groups[2].Value])} {m.Groups[2].Value}");
 
         // 10) PLACE — the compound first, then locative `místě` and neuter-accusative `místo`, then the one
         //     written-out hour ordinal (feminine locative, whose -é/-í ending neutNom already supplies).
-        s = JsRegex.Replace(s, PLACE_PAIR, m =>
+        s = Rewrite(s, PLACE_PAIR, m =>
             $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "loc")} a {InflectOrdinal(Ordinal(Js.Number(m.Groups[2].Value))!, "loc")} místě");
-        s = JsRegex.Replace(s, PLACE_LOC, m => $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "loc")} místě");
-        s = JsRegex.Replace(s, PLACE_ACC, m => $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "neutNom")} místo");
-        s = JsRegex.Replace(s, HOUR_ORD, m =>
+        s = Rewrite(s, PLACE_LOC, m => $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "loc")} místě");
+        s = Rewrite(s, PLACE_ACC, m => $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "neutNom")} místo");
+        s = Rewrite(s, HOUR_ORD, m =>
             $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "neutNom")} {m.Groups[2].Value}");
 
         // 11) GENERAL ORDINAL — a following LOWERCASE word or comma → ordinal; uppercase or clause end →
         //     an ordinary sentence period, left alone.
-        s = JsRegex.Replace(s, ORDINAL_DOT, m => Ordinal(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        s = Rewrite(s, ORDINAL_DOT, m => Ordinal(Js.Number(m.Groups[1].Value)) ?? m.Value);
 
         // 12) REGNAL ORDINALS — the digit after a capitalized NAME, guarded to ≤ 39 and a following break.
-        s = JsRegex.Replace(s, REGNAL, m =>
+        s = Rewrite(s, REGNAL, m =>
         {
             var n = Js.Number(m.Groups[1].Value);
             var o = Ordinal(n);
@@ -323,29 +324,29 @@ public static class Normalize
         });
 
         // 13) NUMERIC RANGES → "do". Digits on BOTH sides, so designations like `COVID-19` are untouched.
-        s = RANGE.Replace(s, "$1 do ");
+        s = Rewrite(s, RANGE, "$1 do ");
 
         // 14) RATE UNITS the shared tier cannot compose. AFTER the range rule.
-        s = JsRegex.Replace(s, MIL_H, m => $"{m.Groups[1].Value} mil za hodinu");
+        s = Rewrite(s, MIL_H, m => $"{m.Groups[1].Value} mil za hodinu");
 
         // 15) SIGNS. Degrees take the same three-way agreement.
-        s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} {Counted(Js.Number(m.Groups[1].Value), DEGREE)} Celsia");
-        s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} {Counted(Js.Number(m.Groups[1].Value), DEGREE)} Fahrenheita");
-        s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} {Counted(Js.Number(m.Groups[1].Value), DEGREE)}");
+        s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} {Counted(Js.Number(m.Groups[1].Value), DEGREE)} Celsia");
+        s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} {Counted(Js.Number(m.Groups[1].Value), DEGREE)} Fahrenheita");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} {Counted(Js.Number(m.Groups[1].Value), DEGREE)}");
         // ⚠ ± IS A SINGLE CHARACTER (U+00B1), not a `+`, so no `+` rule can ever match inside it.
-        s = JsRegex.Replace(s, PLUSMINUS, _ => " plus mínus ");
-        s = PLUS.Replace(s, "$1plus ");
-        s = TIMES.Replace(s, "$1 krát ");
-        s = MINUS.Replace(s, "$1mínus ");
+        s = Rewrite(s, PLUSMINUS, _ => " plus mínus ");
+        s = Rewrite(s, PLUS, "$1plus ");
+        s = Rewrite(s, TIMES, "$1 krát ");
+        s = Rewrite(s, MINUS, "$1mínus ");
 
-        s = JsRegex.Replace(s, EQUALS, _ => " rovná se ");
-        s = JsRegex.Replace(s, LESS_THAN, _ => " menší než ");
-        s = JsRegex.Replace(s, GREATER_THAN, _ => " větší než ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " děleno ");
-        s = JsRegex.Replace(s, AMPERSAND, _ => " a ");
+        s = Rewrite(s, EQUALS, _ => " rovná se ");
+        s = Rewrite(s, LESS_THAN, _ => " menší než ");
+        s = Rewrite(s, GREATER_THAN, _ => " větší než ");
+        s = Rewrite(s, DIVIDE, _ => " děleno ");
+        s = Rewrite(s, AMPERSAND, _ => " a ");
 
         // 16) FRACTIONS — feminine, agreeing with the elided *část*.
-        s = JsRegex.Replace(s, FRACTION, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             var den = Ordinal(Js.Number(m.Groups[2].Value));
             if (den is null || Js.Number(m.Groups[1].Value) != 1) return m.Value;
@@ -353,8 +354,8 @@ public static class Normalize
         });
 
         // 17) pH and Ghz — AFTER the version-dot rule, so "2.4Ghz" reads "dva tečka čtyři gigahertz".
-        s = JsRegex.Replace(s, PH, _ => "pé há");
-        s = JsRegex.Replace(s, GHZ, _ => "gigahertz");
+        s = Rewrite(s, PH, _ => "pé há");
+        s = Rewrite(s, GHZ, _ => "gigahertz");
 
         return s;
     }

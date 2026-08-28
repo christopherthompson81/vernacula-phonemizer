@@ -3,16 +3,17 @@ namespace Vernacula.Phonemizer.Core;
 /**
  * Normalizer provenance — #1150 stage 2. Ported from src/core/provenance.ts; see that file for the evidence.
  *
- * ⚠ THE SEAM IS BETTER HERE THAN IN THE TYPESCRIPT, and it is worth saying why rather than mirroring the TS
- * shape out of habit. The TS normalizers call `s.replace(re, rep)` — the STRING is the receiver — so there
- * was no single place to instrument and 3,203 call sites had to be rewritten. The C# port calls
- * `RE.Replace(s, rep)` — the JsRe is the receiver — so every one of the 2,280 normalizer sites already funnels
- * through two methods on one type. Nothing in Languages/ changes.
+ * ⚠ THE SEAM IS `Rewriter.Rewrite`, NOT `JsRe.Replace`, and the history matters because the earlier shape
+ * looked strictly better. Instrumenting `JsRe.Replace` needed no edits under Languages/ at all — every
+ * normalizer site already funnelled through it — where the TypeScript had to rewrite 3,203 call sites by
+ * hand. But breadth is not the same as precision: the method is also how a static constructor builds a
+ * lookup table and how an engine rewrites IPA, so the mapping could not tell "a step I did not see" from
+ * "a string that is not mine", and had to tolerate both. Two wrong-span defects came through that tolerance.
+ * The seam is now the narrow one the TS uses, and the two engines carry ONE mismatch rule.
  *
- * ⚠ AND THAT BREADTH IS EXACTLY WHY TRACKING MUST BE FROZEN. `JsRe.Replace` is not used only by normalizers:
- * engines rewrite IPA with it too (the accent variants, the post-assembly passes). Those operate on a
- * DIFFERENT string, so left running they would desync the mapping and destroy it. `Freeze()` is called when
- * the engine declares its normalized text, which is after normalization and before anything reads output.
+ * ⚠ TRACKING IS STILL FROZEN AT THE ENGINE BOUNDARY. Even a narrow seam cannot see the difference between a
+ * normalizer and a post-assembly pass that happens to call it; `Freeze()` is called when the engine declares
+ * its normalized text, which is after normalization and before anything reads output.
  */
 public static class Provenance
 {
@@ -121,32 +122,52 @@ public static class Provenance
         /// <summary>Adopt the accumulated mapping, or drop it if it does not describe `result`.</summary>
         public void Commit(string result)
         {
-            if (next.Count != result.Length) { prov = null; tracked = null; return; } // our accounting failed
+            if (next.Count != result.Length) { Poison(); return; } // our accounting failed
             prov = next.ToArray();
             tracked = result;
         }
     }
 
     /**
-     * Begin tracking one Replace, or return null.
+     * A diagnostic sink for the poison, off by default and free when unset. Mirrors the TypeScript's
+     * `onPoison`, and exists for the same reason: only the stack can tell a pipeline step that an earlier
+     * unconverted step already desynced from a call on a SUBSTRING that never belonged on the seam.
+     */
+    [ThreadStatic]
+    private static Action<string, string>? poisonSink;
+    public static void OnPoison(Action<string, string>? fn) => poisonSink = fn;
+
+    /**
+     * ⚠ ONCE DESYNCED, STAY DESYNCED. Rebuilding the array at the CURRENT string's length would
+     * re-synchronise the length check over shifted values, and `For`'s check — the whole safety net — would
+     * then pass and report them as fact.
+     */
+    private static void Poison()
+    {
+        prov = null;
+        tracked = null;
+    }
+
+    /**
+     * Begin tracking one rewrite of the pipeline string, or return null.
      *
-     * ⚠ A LENGTH MISMATCH MEANS "NOT THE TRACKED STRING", AND IS IGNORED — NOT POISONED, which is where this
-     * diverges from the TypeScript deliberately. There, `tr` is called only by normalizers on the pipeline
-     * string, so a mismatch can only mean a step went unseen. Here the seam is `JsRe.Replace`, which the whole
-     * codebase uses for incidental string work: the first offender found was `Initialisms.MakeUnreadableTest`
-     * running inside a STATIC CONSTRUCTOR to build a lookup table, on a string of length 8 while the pipeline
-     * held 22. Poisoning on those destroyed the mapping for most of the fleet.
-     *
-     * ⚠ AND IGNORING IS STILL SAFE, because completeness is enforced at the END rather than per call: the
-     * array is never REBUILT over a shifted string — it simply stops being updated — so if a real pipeline
-     * step goes unseen, `For(normalized)` finds the length disagreeing and withholds the mapping. What must
-     * never happen is a rebuild at the new length, which is exactly the TS defect.
+     * ⚠ A MISMATCH POISONS, matching the TypeScript exactly. It did not always: while provenance lived inside
+     * `JsRe.Replace`, an unrecognised string usually meant incidental work by some unrelated caller — the
+     * first offender was `Initialisms` building a lookup table in a STATIC CONSTRUCTOR, on a string of length
+     * 8 while the pipeline held 22 — so poisoning on those would have destroyed the mapping fleet-wide, and
+     * the rule had to be "ignore". Now that only `Rewriter.Rewrite` reaches here, an unrecognised string can
+     * only mean a pipeline step went unseen, which is precisely the thing the mapping must never paper over.
      */
     public static Track? StartTrack(string input)
     {
         var p = prov;
         if (p is null || frozen || Foreign.HostDepth() > 1) return null;
-        if (tracked != input) return null; // a different string, not a missed step
+        if (tracked != input)
+        {
+            poisonSink?.Invoke(tracked ?? "", input);
+            Poison();
+            return null;
+        }
         return new Track(p, input.Length);
     }
 }

@@ -4,6 +4,7 @@
  * Ported from src/languages/tagalog/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Tagalog;
 
@@ -22,9 +23,9 @@ public static class Normalize
     /** Tagalog text → text, before tokenization. */
     public static string NormalizeTagalog(string input)
     {
-        var s = ENTITY.Replace(input, m => ENTITY_CHAR.TryGetValue(m.Groups[1].Value, out var v) ? v : " ");
+        var s = Rewrite(input, ENTITY, m => ENTITY_CHAR.TryGetValue(m.Groups[1].Value, out var v) ? v : " ");
         // `$1$2`: the hyphen alternative leaves group 1 unmatched, which substitutes as the empty string in
         // both engines.
-        return RANGE.Replace(s, "$1$2 hanggang ");
+        return Rewrite(s, RANGE, "$1$2 hanggang ");
     }
 }

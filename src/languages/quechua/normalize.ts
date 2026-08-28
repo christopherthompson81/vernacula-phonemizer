@@ -198,7 +198,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Quechua marks plurality with `-kuna` on the noun and NOT after a numeral (the
@@ -287,9 +287,9 @@ export function normalizeQuechua(input: string): string {
     // ⚠ AND `802.11` IS SAFE BY CONSTRUCTION — two digits after the dot, so no arm can claim it. That is
     // load-bearing: the unit step's `NOT_VERSION` guard runs after this one and still needs its dot.
     const degroup = (sep: RegExp) => (w: string) => w.replace(sep, "");
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, degroup(/\./gu));
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, degroup(/,/gu));
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, degroup(/[ \u00a0\u202f\u2009]/gu));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, degroup(/\./gu));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, degroup(/,/gu));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, degroup(/[ \u00a0\u202f\u2009]/gu));  // space, NBSP, NNBSP, thin space
 
     // ── 3. THE SHARED TIER — units, exponents, rates, currency, `&` ─────────────────────────────────────
     // ⚠ AFTER de-grouping, or `1.007 km` is seen as `007 km` and the kilometre attaches to the wrong
@@ -319,7 +319,7 @@ export function normalizeQuechua(input: string): string {
     // ⚠ AND A REDUNDANCY GUARD, because this corpus's own sentences write BOTH the word and the sign
     // (playbook trap 12): five of the eight `°` instances sit inside `… isqun chunka k'atma (90° N)`.
     // Where the word is already there the sign is dropped and nothing is doubled.
-    s = tr(s, /(?<![\p{L}\p{M}])(\d+)\s?°(?![CF])/gui, (whole, n: string, at: number) => {
+    s = rewrite(s, /(?<![\p{L}\p{M}])(\d+)\s?°(?![CF])/gui, (whole, n: string, at: number) => {
         const near = s.slice(Math.max(0, at - 40), at + whole.length + 40);
         return near.includes("k'atma") ? n : `${n} k'atma`;
     });
@@ -343,7 +343,7 @@ export function normalizeQuechua(input: string): string {
     // and a clause comma (`…kachkan, 3824 mitru`) are untouched — both are spaced in every instance.
     // ⚠ AFTER the tier (step 3), so the number-unit adjacency and the version dot both still existed when
     // they were needed.
-    s = tr(s, /(\d)[.,](\d)/gu, "$1 $2");
+    s = rewrite(s, /(\d)[.,](\d)/gu, "$1 $2");
 
     return s;
 }

@@ -4,6 +4,7 @@
  * Ported from src/languages/spanish/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Spanish;
 
@@ -61,7 +62,7 @@ public static class Normalize
 
     /** Feminine ordinal: every element of a compound inflects (vigésimo primero → vigésima primera). */
     private static string FeminineOrdinal(string masc) =>
-        string.Join(" ", masc.Split(' ').Select(w => FINAL_O.Replace(w, "a")));
+        string.Join(" ", masc.Split(' ').Select(w => Rewrite(w, FINAL_O, "a")));
 
     private static readonly JsRe FINAL_UNO = JsRegex.Compile($"{Manifest.MANIFEST.Numbers.Ones[1]}$", "u");
 
@@ -122,62 +123,62 @@ public static class Normalize
         var americas = options?.Americas ?? false;
         var s = input;
 
-        s = SPACE_GROUP_RE.Replace(s, "");
-        s = SPACE_GROUP_RE.Replace(s, "");
-        s = SPACES.Replace(s, " ");
+        s = Rewrite(s, SPACE_GROUP_RE, "");
+        s = Rewrite(s, SPACE_GROUP_RE, "");
+        s = Rewrite(s, SPACES, " ");
 
-        s = DOT_DECIMAL.Replace(s, "$1,$2");
+        s = Rewrite(s, DOT_DECIMAL, "$1,$2");
 
         // ⚠ ERA MARKERS before the generic abbreviation rule, or the bare `a.` is claimed first; then
         //   `EE. UU.`, before the generic rule too, or it splits into two abbreviations and two pauses.
-        s = ERA_BC.Replace(s, DEF.EraMarkers.BeforeChrist);
-        s = ERA_AD.Replace(s, DEF.EraMarkers.AfterChrist);
+        s = Rewrite(s, ERA_BC, DEF.EraMarkers.BeforeChrist);
+        s = Rewrite(s, ERA_AD, DEF.EraMarkers.AfterChrist);
 
-        s = EEUU_UPPER.Replace(s, DEF.UnitedStates);
-        s = EEUU_LOWER.Replace(s, DEF.UnitedStates);
+        s = Rewrite(s, EEUU_UPPER, DEF.UnitedStates);
+        s = Rewrite(s, EEUU_LOWER, DEF.UnitedStates);
 
         // ⚠ COMPOSED FROM `LetterNames`, not held as two more literals: the reading IS ⟨a⟩/⟨p⟩ followed by ⟨m⟩,
         // said as letter names, so a change to either name must reach here.
-        s = AM_PM.Replace(s, m =>
+        s = Rewrite(s, AM_PM, m =>
             $"{DEF.LetterNames[m.Groups[1].Value.ToLowerInvariant()]} {DEF.LetterNames["m"]}");
 
-        s = NUMERO_SIGN.Replace(s, $"{DEF.NumberSign} ");
+        s = Rewrite(s, NUMERO_SIGN, $"{DEF.NumberSign} ");
 
-        s = ABBREV_MID.Replace(s, m =>
+        s = Rewrite(s, ABBREV_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122). The pattern is built from this table's OWN keys but
             // carries `i`+`u`, so JS's fold widens it — `ſ`→`s`, and the Cyrillic `ᲀᲃᲅ` forms onto theirs —
             // and a near-miss MATCHES while its key is absent. The TS asserted non-null and spoke the word
             // "undefined"; this indexer THREW. Refuse the whole match.
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = ABBREV_END.Replace(s, m =>
+        s = Rewrite(s, ABBREV_END, m =>
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
-        s = ORDINAL_IND.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_IND, m =>
         {
             var n = Js.Number(DIGITS_IN.Match(m.Value).Value);
             var masc = double.IsInteger(n) && n >= 1 && n <= 1000 ? RomanOrdinals.SpanishOrdinal((int)n) : null;
             if (masc is null) return m.Value;
             if (HAS_FEM.IsMatch(m.Value)) return FeminineOrdinal(masc);
-            if (HAS_ER.IsMatch(m.Value)) return FINAL_O.Replace(masc, ""); // apocopated: primer, tercer
+            if (HAS_ER.IsMatch(m.Value)) return Rewrite(masc, FINAL_O, ""); // apocopated: primer, tercer
             return masc;
         });
 
-        s = PLUS_MINUS.Replace(s, $" {SIGN.PlusMinus} ");
-        s = PLUS_ATTACHED.Replace(s, $"$1 {SIGN.Plus} $2");
-        s = PLUS_LEADING.Replace(s, $"$1{SIGN.Plus} $2");
-        s = MINUS.Replace(s, $"$1{SIGN.Minus} $2");
+        s = Rewrite(s, PLUS_MINUS, $" {SIGN.PlusMinus} ");
+        s = Rewrite(s, PLUS_ATTACHED, $"$1 {SIGN.Plus} $2");
+        s = Rewrite(s, PLUS_LEADING, $"$1{SIGN.Plus} $2");
+        s = Rewrite(s, MINUS, $"$1{SIGN.Minus} $2");
 
-        s = EQUALS.Replace(s, $" {SIGN.Equals} ");
-        s = LESS_THAN.Replace(s, $" {SIGN.LessThan} ");
-        s = GREATER_THAN.Replace(s, $" {SIGN.GreaterThan} ");
-        s = DIVIDE.Replace(s, $" {SIGN.DividedBy} ");
+        s = Rewrite(s, EQUALS, $" {SIGN.Equals} ");
+        s = Rewrite(s, LESS_THAN, $" {SIGN.LessThan} ");
+        s = Rewrite(s, GREATER_THAN, $" {SIGN.GreaterThan} ");
+        s = Rewrite(s, DIVIDE, $" {SIGN.DividedBy} ");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
             FractionWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);
 
-        s = CLOCK.Replace(s, m => TimeWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
+        s = Rewrite(s, CLOCK, m => TimeWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
 
-        s = FIRST_OF_MONTH.Replace(s, m =>
+        s = Rewrite(s, FIRST_OF_MONTH, m =>
             americas ? $"{DEF.Ordinals.Units[1]} de {m.Groups[1].Value}" : ONE_INDICATOR.Replace(m.Value, DEF.Numbers.Ones[1]));
 
         return s;

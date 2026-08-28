@@ -48,7 +48,7 @@
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * Suppletive ordinals 1-4 and 9. Nepali's ordinal has ONE form (no gender/number agreement written on it,
@@ -123,7 +123,7 @@ const MAGNITUDE_ALT = "मिलियन|बिलियन|ट्रिलि�
 
 // Only `$` is a regex metacharacter among the four signs; escaping the others is an *invalid escape* in
 // `u` mode rather than a harmless belt-and-braces, which is why the class is built this way.
-const CUR_ALT = Object.keys(CURRENCY).map((c) => c.replace(/[$]/gu, "\\$&")).join("|");
+const CUR_ALT = Object.keys(CURRENCY).map((c) => rewrite(c, /[$]/gu, "\\$&")).join("|");
 const NOUN_ALT = [...new Set(Object.values(CURRENCY))].join("|");
 const MAG_TAIL = `(\\s*(?:${MAGNITUDE_ALT})(?![\\p{L}\\p{M}]))?`;
 /**
@@ -205,19 +205,19 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    two tokens with two stresses, where गर्यो is [ɡˈʌɾjo]. 104 instances and by count the
         //    single largest defect in this corpus after the numbers. Stripping is orthographically
         //    lossless — the ZWJ only requests the eyelash-ra glyph.
-        s = tr(s, /[‌‍]/gu, "");
+        s = rewrite(s, /[‌‍]/gu, "");
 
         // 2) DEVANAGARI DIGITS → ASCII. Before every rule that follows, all of which are ASCII-defined.
         //    Only 19 characters in this corpus (the Marathi lead does not carry), but two of the eight
         //    tokens are ordinals — "१९ औं", "२० औं" — which step 6 could not otherwise see. The engine's
         //    own number() already folds these, so doing it here is loss-free.
-        s = tr(s, /[०-९]/gu, (d) => String(d.charCodeAt(0) - 0x0966));
+        s = rewrite(s, /[०-९]/gu, (d) => String(d.charCodeAt(0) - 0x0966));
 
         // 3) VISARGA written as ASCII ':', BEFORE the clock rules in step 7 — they compete for the same
         //    character. Word-INTERNAL is unambiguous (प्राय:जसो; a list colon is always followed by a
         //    space or end of string). Word-FINAL needs the closed list, per the note at VISARGA_WORD_ALT.
-        s = tr(s, /(?<=[ऀ-ॣॲ-ॿ]):(?=[ऀ-ॣॲ-ॿ])/gu, "ः");
-        s = tr(s,
+        s = rewrite(s, /(?<=[ऀ-ॣॲ-ॿ]):(?=[ऀ-ॣॲ-ॿ])/gu, "ः");
+        s = rewrite(s,
             new RegExp(`(?<![\\p{L}\\p{M}])(${VISARGA_WORD_ALT}):(?![\\p{L}\\p{M}])`, "gu"),
             "$1ः",
         );
@@ -227,15 +227,15 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    [kˈi . mˈi . kˈo], two spurious pauses and two truncated words. यु.एस. and डब्ल्यु. are
         //    Devanagari transliterations of U.S. and W.; their letter names are already the right
         //    reading, so only the dots are removed.
-        s = tr(s, /(?<![\p{L}\p{M}])कि\.\s?मी\.?/gu, "किलोमिटर");
-        s = tr(s, /(?<![\p{L}\p{M}])यु\.\s?एस\.?/gu, "यु एस");
-        s = tr(s, /(?<![\p{L}\p{M}])(डब्ल्यु|डब्ल्यू)\.(?=\s)/gu, "$1");
+        s = rewrite(s, /(?<![\p{L}\p{M}])कि\.\s?मी\.?/gu, "किलोमिटर");
+        s = rewrite(s, /(?<![\p{L}\p{M}])यु\.\s?एस\.?/gu, "यु एस");
+        s = rewrite(s, /(?<![\p{L}\p{M}])(डब्ल्यु|डब्ल्यू)\.(?=\s)/gu, "$1");
 
         // 5) ABBREVIATIONS. डा. is the only Devanagari one in this corpus (×4, always with the dot);
         //    डाक्टर is the corpus's own spelling of the expansion (×1). The dot is consumed so it cannot
         //    become a phrase break, and the rule requires a following word so a sentence-final डा. — of
         //    which there are none, checked — could not swallow a real sentence boundary.
-        s = tr(s, /(?<![\p{L}\p{M}])डा\.(\s+)(?=[\p{L}])/gu, "डाक्टर$1");
+        s = rewrite(s, /(?<![\p{L}\p{M}])डा\.(\s+)(?=[\p{L}])/gu, "डाक्टर$1");
 
         // 6) ORDINALS. Before the clock in step 7 only incidentally (they cannot collide), but AFTER the
         //    digit fold in step 2, which is what lets "१९ औं" match at all.
@@ -254,10 +254,10 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    the numeral is left as written and the suffix reads on its own as [ˈʌũ], which is the stray
         //    stressed syllable this whole rule exists to remove. Both are ×0 in the corpus: every `6 औँ` hit
         //    is the tail of `16 औँ`.
-        s = tr(s,
+        s = rewrite(s,
             /(?<![\d.,:])([1-9]\d{0,2}(?:,\d{3})+|\d+)\s?(औं|औँ)(?![\p{L}\p{M}])/gu,
             (whole, digits: string, suffix: string) => {
-                const n = Number(digits.replace(/,/gu, ""));
+                const n = Number(rewrite(digits, /,/gu, ""));
                 return Number.isSafeInteger(n) ? ordinal(n, suffix) ?? whole : whole;
             },
         );
@@ -268,12 +268,12 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //        (its `(?![\d:])` permits a following dot) and produced "चार बजकर एकचालीस मिनट . तीस" —
         //        a bogus clock, two Hindi words, and a spurious phrase break. Dropping the colon leaves
         //        two plain numbers, the honest reading, which nothing downstream can re-claim.
-        s = tr(s, /(?<![\d.,:])(\d{1,2}):(\d{2}\.\d{1,2})(?![\d:])/gu, "$1 $2");
+        s = rewrite(s, /(?<![\d.,:])(\d{1,2}):(\d{2}\.\d{1,2})(?![\d:])/gu, "$1 $2");
         //    7b) A time RANGE h:mm-h:mm, before the clock proper so both endpoints survive as times and
         //        before the numeric range rule in step 11, whose `(?<![\d.,:])` guard would in any case
         //        refuse it. One instance ("10:00-11:00 राती"); without this the hyphen was dropped
         //        silently and the two clocks were simply juxtaposed.
-        s = tr(s,
+        s = rewrite(s,
             /(?<![\d.,:])((?:[01]?\d|2[0-3]):[0-5]\d)\s?[-–—]\s?((?:[01]?\d|2[0-3]):[0-5]\d)(?![\d:.])/gu,
             "$1 देखि $2",
         );
@@ -283,7 +283,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //        At :00 बजे is exactly right and is supplied when absent — but NOT when the next word is
         //        another बज- form, or "11:00 बजेपछि" would become "एघार बजे बजेपछि" — ⚠ the duplicate-word
         //        trap that bites any language whose clock noun can also begin the following word.
-        s = tr(s,
+        s = rewrite(s,
             /(?<![\d:.])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.])(\s*बजे(?![\p{L}\p{M}]))?/gu,
             (m, h: string, min: string, baje: string | undefined, offset: number, whole: string) => {
                 const body = clock(Number(h), Number(min));
@@ -326,11 +326,11 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //
         //    SOURCED: ne.wikipedia NAMES THE SIGN — "घटाउ (जुन माइनस चिन्ह ⟨−⟩द्वारा सङ्केत गरिन्छ)": subtraction,
         //    denoted by the MINUS SIGN ⟨−⟩. The same article pairs it with प्लस, so ± is those two juxtaposed.
-        s = tr(s, /±/gu, " प्लस माइनस ");
-        s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        s = rewrite(s, /±/gu, " प्लस माइनस ");
+        s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
             /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "माइनस ");
-        s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 प्लस ");
-        s = tr(s, /(^|\s)\+\s?(?=\d)/gu, "$1प्लस ");
+        s = rewrite(s, /(\S)\+\s?(?=\d)/gu, "$1 प्लस ");
+        s = rewrite(s, /(^|\s)\+\s?(?=\d)/gu, "$1प्लस ");
 
         // THE RELATIONAL AND DIVISION SIGNS, all four attested in running Nepali text:
         //   `बराबर`    "यस आकार अनुपातको बराबर" — EQUAL TO this aspect ratio
@@ -342,16 +342,16 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         // division read infix.
         s = postposedSign(s, "<", "भन्दा कम");
         s = postposedSign(s, ">", "भन्दा बढी");
-        s = tr(s, /\s?=\s?/gu, " बराबर ");
-        s = tr(s, /\s?÷\s?/gu, " विभाजन ");
+        s = rewrite(s, /\s?=\s?/gu, " बराबर ");
+        s = rewrite(s, /\s?÷\s?/gu, " विभाजन ");
 
-        s = tr(s, /(\d)\s?°\s?C(?![A-Za-z])/gui, "$1 डिग्री सेल्सियस ");
-        s = tr(s, /(\d)\s?°\s?F(?![A-Za-z])/gui, "$1 डिग्री फरेनहाइट ");
-        s = tr(s, /(\d)\s?°\s?N(?![A-Za-z])/gu, "$1 डिग्री उत्तर ");
-        s = tr(s, /(\d)\s?°\s?S(?![A-Za-z])/gu, "$1 डिग्री दक्षिण ");
-        s = tr(s, /(\d)\s?°\s?E(?![A-Za-z])/gu, "$1 डिग्री पूर्व ");
-        s = tr(s, /(\d)\s?°\s?W(?![A-Za-z])/gu, "$1 डिग्री पश्चिम ");
-        s = tr(s, /(\d)\s?°/gu, "$1 डिग्री ");
+        s = rewrite(s, /(\d)\s?°\s?C(?![A-Za-z])/gui, "$1 डिग्री सेल्सियस ");
+        s = rewrite(s, /(\d)\s?°\s?F(?![A-Za-z])/gui, "$1 डिग्री फरेनहाइट ");
+        s = rewrite(s, /(\d)\s?°\s?N(?![A-Za-z])/gu, "$1 डिग्री उत्तर ");
+        s = rewrite(s, /(\d)\s?°\s?S(?![A-Za-z])/gu, "$1 डिग्री दक्षिण ");
+        s = rewrite(s, /(\d)\s?°\s?E(?![A-Za-z])/gu, "$1 डिग्री पूर्व ");
+        s = rewrite(s, /(\d)\s?°\s?W(?![A-Za-z])/gu, "$1 डिग्री पश्चिम ");
+        s = rewrite(s, /(\d)\s?°/gu, "$1 डिग्री ");
 
         // 9) CURRENCY, owned locally rather than through the shared tier for two measured reasons.
         //    (a) THE TIER CANNOT SEE A LETTER-CODE PREFIX. Its currency pattern is guarded with
@@ -366,9 +366,9 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    emit the noun after the number, which is the Nepali reading either way.
         const money = (n: string, mag: string | undefined, sign: string, noun: string | undefined) =>
             `${n}${mag ?? ""}${noun ?? ` ${CURRENCY[sign]!}`}`;
-        s = tr(s, CUR_BEFORE, (_m, sign: string, n: string, mag?: string, noun?: string) =>
+        s = rewrite(s, CUR_BEFORE, (_m, sign: string, n: string, mag?: string, noun?: string) =>
             money(n, mag, sign, noun));
-        s = tr(s, CUR_AFTER, (_m, n: string, mag: string | undefined, sign: string, noun?: string) =>
+        s = rewrite(s, CUR_AFTER, (_m, n: string, mag: string | undefined, sign: string, noun?: string) =>
             money(n, mag, sign, noun));
 
         // 10) UNITS. After the clock (step 7) so nothing looking for a bare number can claim a time, and
@@ -392,11 +392,11 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //          exponent is stranded with no digit adjacency, and the volume reads as a length), while the
         //          Latin `5 km³` reads *घन किलोमिटर* through the tier. ×0 in ne_np FLEURS, ×0 in
         //          tools/corpus/mined/ne.jsonc and ×0 in the parity golden — an inert asymmetry today.
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`(\\d)\\s?(${UNIT_ALT})(?:\\s?²|2)(?![\\p{L}\\p{M}\\d])`, "gu"),
             (_m, d: string, u: string) => `${d} वर्ग ${UNIT_WORD[u]!}`,
         );
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`,
         );
@@ -404,7 +404,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //          ×2 and the solidus form ×3. The SPACE after the solidus is not optional to allow:
         //          the corpus writes "165 किमी/ घण्टा" exactly so. Both sides are closed lists; see the
         //          note at RATE_NUM for why मिटर is a numerator but never a denominator.
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}])(${RATE_NUM})\\s*/\\s*(${RATE_DEN})(?![\\p{L}\\p{M}])`,
                 "gu",
@@ -424,7 +424,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //     THE TRAILING GUARD ALSO REFUSES AN EXISTING देखि. "सन् 1995-1996 देखि" already carries the
         //     postposition and would otherwise read "…छयानब्बे देखि देखि" — the same duplicate-word trap
         //     as step 7c.
-        s = tr(s,
+        s = rewrite(s,
             /(?<![\d.,:])(\d+(?:\.\d+)?)\s?[-–—]\s?(\d+(?:\.\d+)?)(?![\d.,:])(?!\s*देखि(?![\p{L}\p{M}]))/gu,
             (m, a: string, b: string) => (Number(b) > Number(a) ? `${a} देखि ${b}` : m),
         );
@@ -434,7 +434,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //     rather than replaced by a guess: an unsourced substitute is worse than an inherited word.
         //     It has to be restated here because supplying this normalizer stops Hindi's from running,
         //     and without the rule "1/5" would read as two unrelated numbers.
-        s = tr(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+        s = rewrite(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
             const nw = cardinalText(Number(a)), dw = cardinalText(Number(b));
             return nw === "" || dw === "" ? m0 : `${nw} बटा ${dw}`;
         });
@@ -446,8 +446,8 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //     Step 8's `+` rule handles exactly this shape with a `(\S)` capture and a re-emitted space; this
         //     one does not. ×0 in the corpus — its single tilde is space-preceded (`लागि ~500 कंगोको`) — so
         //     the fix is unmotivated by evidence and would be a behaviour change on a hypothetical.
-        s = tr(s, /~\s?(?=\d)/gu, "लगभग ");
-        s = tr(s, / {2,}/gu, " ");
+        s = rewrite(s, /~\s?(?=\d)/gu, "लगभग ");
+        s = rewrite(s, / {2,}/gu, " ");
 
         return s;
     };

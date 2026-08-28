@@ -22,7 +22,7 @@ import { postposedSign } from "../../core/postposedSign.ts";
 import { MANIFEST } from "./manifest.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The SHARED symbol tier, with Odia's data. Odia count nouns do not inflect after a numeral
@@ -71,7 +71,7 @@ const UNIT_WORD: Readonly<Record<string, string>> = {
 };
 const UNIT_ALT = Object.keys(UNIT_WORD)
     .sort((a, b) => b.length - a.length)
-    .map((k) => k.replace(/\./gu, "\\."))
+    .map((k) => rewrite(k, /\./gu, "\\."))
     .join("|");
 
 /** Measure nouns that may stand either side of a rate slash. A CLOSED LIST on both sides, because only
@@ -111,21 +111,21 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    why no bare-syllable key is declared at all. Longest first (see UNIT_ALT). The trailing
         //    guard stops ମିମି biting into a longer word. Before step 4 so `160କିମି/ଘଣ୍ଟା` has a
         //    recognisable measure noun on the left of its slash by the time that rule runs.
-        s = tr(s, new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
+        s = rewrite(s, new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`);
 
         // 3) LATIN DOTTED INITIALISMS — a.m., p.m., U.S., A.D. Every interior dot was surviving as a
         //    PHRASE BREAK ("07:19 a.m. ରେ" → two of them). The dots are stripped rather than expanded:
         //    the letters then reach the Latin/foreign path as one run, which is what they are.
         //    Two or more single letters, so `802.11a` (a digit on the left) cannot match.
-        s = tr(s, /(?<![\p{L}\p{M}\d])([A-Za-z](?:\.[A-Za-z])+)\.?(?![\p{L}\p{M}])/gu,
+        s = rewrite(s, /(?<![\p{L}\p{M}\d])([A-Za-z](?:\.[A-Za-z])+)\.?(?![\p{L}\p{M}])/gu,
             (_m, run: string) => run.replace(/\./gu, ""));
 
         // 4) RATE SLASH between two Odia measure nouns → ପ୍ରତି. Runs after step 2 so the abbreviated
         //    left-hand side has already become a full noun. Closed lists on BOTH sides: nine of the
         //    fourteen Odia-to-Odia slashes in this corpus are ଏବଂ/କିମ୍ବା and the like, and a blanket
         //    rule would read "and per or".
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`(?<![\\p{L}\\p{M}])(${RATE_NUM.join("|")})\\s?/\\s?(${RATE_DEN.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, a: string, b: string) => `${a} ପ୍ରତି ${b}`);
 
@@ -137,14 +137,14 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    REQUIRED, which keeps a list separator ("1990, 1991" — a space follows) out of the match.
         //    Indian grouping is unattested in THIS corpus (0 instances) and is carried anyway: it costs
         //    one line and Indic sources write it.
-        s = tr(s, /(?<![\d,])(\d{1,2}(?:,\d{2})+,\d{3})(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
-        s = tr(s, /(?<![\d,])([1-9]\d{0,2}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+        s = rewrite(s, /(?<![\d,])(\d{1,2}(?:,\d{2})+,\d{3})(?![\d,])/gu, (m) => rewrite(m, /,/gu, ""));
+        s = rewrite(s, /(?<![\d,])([1-9]\d{0,2}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
         // 6) ODIA DOT-ABBREVIATION LEFTOVERS whose expansion is not sourceable — କି.ଗ୍ରା. after a number
         //    is handled in step 2; this catches the standalone-with-trailing-dot shape so the final dot
         //    cannot survive as a break. Kept separate from step 2 so the "expand" and "merely de-dot"
         //    cases stay visibly different.
-        s = tr(s, /(?<![\p{L}\p{M}])କି\.ଗ୍ରା\.?/gu, "କିଗ୍ରା");
+        s = rewrite(s, /(?<![\p{L}\p{M}])କି\.ଗ୍ରା\.?/gu, "କିଗ୍ରା");
 
         // 7) DECIMALS — after de-grouping (a grouped numeral may carry a decimal tail) and before the
         //    clock, so a stray dot cannot survive into a time match. The dot is NEUTRALISED, not spoken:
@@ -153,7 +153,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    → [ˈekɔ . d̪ˈui]). Dropping a sign beats speaking a word we cannot source.
         //    This also neutralises 802.11n, which was being read as a sentence boundary inside a standard's
         //    name; "802 11n" is not the right register but it is not a false full stop either.
-        s = tr(s, /(\d)\.(?=\d)/gu, "$1 ");
+        s = rewrite(s, /(\d)\.(?=\d)/gu, "$1 ");
 
         // 8) TIMES, before the ordinal rule so a bare-number rule cannot claim 11:30 first. The colon was
         //    becoming a COMMA PAUSE ("ten, zero"). Odia reads the clock as bare juxtaposition plus ଟା,
@@ -164,7 +164,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    3:2), which is not a time and does not match. The `(?<![\d:])` guard keeps the sports splits
         //    "4: 41.30" and "2: 11.60" out too — those write a SPACE after the colon, which `:([0-5]\d)`
         //    already rejects — ⚠ a clock rule that permits a following dot will claim a sports time.
-        s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+        s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
             (_m, h: string, min: string) => (Number(min) === 0 ? h : `${h} ${min}`));
 
         // 9) ORDINAL SUFFIXES. Written attached to the numeral (18ଶ, 1000ତମ) but tokenized apart from it,
@@ -180,15 +180,15 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    THE TRAILING BOUNDARY IS LOAD-BEARING. Without it the single-letter ଶ matches the START of an
         //    ordinary word; in particular "18ଶହ ଶତାବ୍ଦୀ" (×2) is ଶହ, the HUNDRED word, and must be left
         //    alone to read "eighteen hundred". `\b` cannot express this — see the header.
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`(?<![\\d.,])(\\d+)\\s?(${ORDINAL_SUFFIXES.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) => ordinal(Number(digits), suffix) ?? whole);
 
         // 10) ABBREVIATIONS. The DOT IS REQUIRED, and so is the visarga: ଡଃ / ଡାଃ are unambiguous, but a
         //     dot-optional rule would also fire on ordinary word-final ଡା. ଡାକ୍ତର is the corpus's own
         //     spelling (×7, plus the kaikki referee). ନଂ. → ନମ୍ବର, likewise corpus-attested (×6).
-        s = tr(s, /(?<![\p{L}\p{M}])(?:ଡଃ|ଡାଃ)\.(\s*)(?=[\p{L}])/gu, (_m, sp: string) => `ଡାକ୍ତର${sp || " "}`);
-        s = tr(s, /(?<![\p{L}\p{M}])ନଂ\.(\s*)(?=[\d\p{L}])/gu, (_m, sp: string) => `ନମ୍ବର${sp || " "}`);
+        s = rewrite(s, /(?<![\p{L}\p{M}])(?:ଡଃ|ଡାଃ)\.(\s*)(?=[\p{L}])/gu, (_m, sp: string) => `ଡାକ୍ତର${sp || " "}`);
+        s = rewrite(s, /(?<![\p{L}\p{M}])ନଂ\.(\s*)(?=[\d\p{L}])/gu, (_m, sp: string) => `ନମ୍ବର${sp || " "}`);
 
         // 11) LATIN `I` USED AS A DANDA. Twenty-three of them, every one sentence-final after Odia text
         //     ("…ହୋଇଛି I", "…ପାଇଥିଲେI") — a keyboard artifact for ।, and the single worst defect by
@@ -197,12 +197,12 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //     LATIN letters and digits, not against Odia ones, because the artifact is frequently glued
         //     to the preceding Odia word with no space. Zero non-danda standalone `I` in this corpus.
         //     Last, so no earlier rule (step 3's initialisms in particular) can be starved of it.
-        s = tr(s, /(?<![A-Za-z\d])I(?![A-Za-z\d])/gu, "।");
+        s = rewrite(s, /(?<![A-Za-z\d])I(?![A-Za-z\d])/gu, "।");
 
         // 12) DEGREES. The bare sign was dropped outright. ଡିଗ୍ରୀ is the corpus's own spelling (×3,
         //     including "90(F)-ଡିଗ୍ରୀ" where the text writes the word itself). The corpus's single ° is
         //     the longitude "35°W", for which "35 ଡିଗ୍ରୀ W" is the right reading.
-        s = tr(s, /(\d)\s?°/gu, "$1 ଡିଗ୍ରୀ");
+        s = rewrite(s, /(\d)\s?°/gu, "$1 ଡିଗ୍ରୀ");
 
         // 13) THE UTC OFFSET'S PLUS. The corpus's `ପ୍ରାୟ 11:00 (UTC+1)ରେ` dropped the sign, and unlike every
         //     other language in this batch THE AUDIO COULD NOT SUPPLY THE WORD — so this rule ships on
@@ -236,10 +236,10 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //
         //    Three guards: a digit immediately after the sign, a letter or digit immediately before, and a digit
         //    ANYWHERE to the left (the spaced range/score, which the fleet's usual guard misses).
-        s = tr(s, /±/gu, " ପ୍ଲସ୍ ଋଣାତ୍ମକ ");
-        s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        s = rewrite(s, /±/gu, " ପ୍ଲସ୍ ଋଣାତ୍ମକ ");
+        s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
             /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "ଋଣାତ୍ମକ ");
-        s = tr(s, /\+(?=\d)/gu, " ପ୍ଲସ୍ ");
+        s = rewrite(s, /\+(?=\d)/gu, " ପ୍ଲସ୍ ");
 
         // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from or_in:
         //
@@ -255,8 +255,8 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         // use core/postposedSign.ts; an infix rule would read the comparison backwards.
         s = postposedSign(s, "<", "ଠାରୁ କମ");
         s = postposedSign(s, ">", "ଠାରୁ ଅଧିକ");
-        s = tr(s, /\s?=\s?/gu, " ସମାନ ");
-        s = tr(s, /\s?÷\s?/gu, " ଭାଗ ");
+        s = rewrite(s, /\s?=\s?/gu, " ସମାନ ");
+        s = rewrite(s, /\s?÷\s?/gu, " ଭାଗ ");
 
         return s;
     };

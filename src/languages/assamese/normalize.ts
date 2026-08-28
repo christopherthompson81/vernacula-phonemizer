@@ -20,7 +20,7 @@ import { BENGALI_DIGITS } from "../../core/unicode.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { BengaliDef } from "../bengali/bengali.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const BN_DIGIT = Object.keys(BENGALI_DIGITS).join("");
 /** Either digit system. */
@@ -64,12 +64,12 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         //    dot survives as a phrase break. Also `George W. Bush` — the W. suffix dot is a break. A dotted
         //    Bengali run (ইউ.এছ.অ.চি, USOC) is the same shape and loses its dots so the letters read as one
         //    run (the spaces keep them distinct aksharas).
-        s = tr(s, /(?<![\p{L}\p{M}])[A-Za-z]\.(?:[ \u00a0]?[A-Za-z]\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
+        s = rewrite(s, /(?<![\p{L}\p{M}])[A-Za-z]\.(?:[ \u00a0]?[A-Za-z]\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
         // A LONE capital + dot is an initial (`George W. Bush`, the corpus's only instance). Keying on any
         // capital before the dot also stripped the SENTENCE period after an acronym — `NASA. Bush` and
         // `the U.S. The next` lost their pause — so the initial must be a single letter.
-        s = tr(s, /(?<![\p{L}\p{M}])([A-Z])\.(?=\s+[A-Z])/gu, "$1");
-        s = tr(s, /(?<![\p{L}\p{M}])[\p{Script=Bengali}\p{M}]+\.(?:[ \u00a0]?[\p{Script=Bengali}\p{M}]+\.)+/gu, (m0) => m0.replace(/\./gu, " ").replace(/\s+/gu, " "));  // space, NBSP
+        s = rewrite(s, /(?<![\p{L}\p{M}])([A-Z])\.(?=\s+[A-Z])/gu, "$1");
+        s = rewrite(s, /(?<![\p{L}\p{M}])[\p{Script=Bengali}\p{M}]+\.(?:[ \u00a0]?[\p{Script=Bengali}\p{M}]+\.)+/gu, (m0) => rewrite(rewrite(m0, /\./gu, " "), /\s+/gu, " "));  // space, NBSP
 
         // 2) THE `Nশ` CLASSICAL ORDINALS (11–20) and `1শ` = একশ. The শ suffix is the ordinal for a
         //    two-digit 11–20 (century ordinals — the corpus's dominant use), but `1শ` is "one hundred".
@@ -77,23 +77,23 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         //    the tokenizer as a bare syllable.
         //    The guard `(?!ত)` keeps the WORD শত ("hundred") out: the corpus writes `৯০শত` (nine thousand),
         //    and without it a `11শত` would read as the ordinal একাদশ with a stray ত.
-        s = tr(s, new RegExp(`(?<![${D}])([${D}]{2})(শ)(?![${D}ত])`, "gu"), (m0, d: string) => {
+        s = rewrite(s, new RegExp(`(?<![${D}])([${D}]{2})(শ)(?![${D}ত])`, "gu"), (m0, d: string) => {
             const n = Number(toAscii(d));
             return ORDINAL_11_20[n] ?? (n === 10 ? "দশম" : m0);
         });
-        s = tr(s, new RegExp(`(?<![${D}])([${D}])শ(?![${D}])`, "gu"), (m0, d: string) =>
+        s = rewrite(s, new RegExp(`(?<![${D}])([${D}])শ(?![${D}])`, "gu"), (m0, d: string) =>
             Number(toAscii(d)) === 1 ? "একশ" : m0);
 
         // 3) THE `নং` NUMBER MARKER — "number N" (190 নং স্থান → position number 190). Not an ordinal; the
         //    marker reads নম্বৰ (number), like the Latin "no.".
-        s = tr(s, new RegExp(`(?<![${D}])([${D}]+)\\s?নং(?![\\p{L}\\p{M}])`, "gu"),
+        s = rewrite(s, new RegExp(`(?<![${D}])([${D}]+)\\s?নং(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string) => `${cardinal(Number(toAscii(d)))} নম্বৰ`);
 
         // 4) COMMA-GROUPED ORDINALS — `1,000তম`. The Bengali normalize's ordinal rule keys on a plain digit
         //    run, and the grouping comma detaches the suffix. De-group the comma when an ordinal suffix
         //    follows, so the suffix stays attached. Two passes for overlapping groups (1,234,567তম).
         for (let i = 0; i < 2; i++)
-            s = tr(s, new RegExp(`([${D}]),([${D}]{3})(?=(?:তম|শে|ই|ম|য়|র্থ|ষ্ঠ|লা|রা|ঠা))`, "gu"), "$1$2");
+            s = rewrite(s, new RegExp(`([${D}]),([${D}]{3})(?=(?:তম|শে|ই|ম|য়|র্থ|ষ্ঠ|লা|রা|ঠা))`, "gu"), "$1$2");
 
         // 5) VERSION DOTS — `802.11এন`, `802.11a/b/g`. The tokenizer reads `802.11` as a DECIMAL
         //    (দশমিক); a dot-decimal followed by the Wi-Fi VERSION SUFFIX (ASCII a/b/g/n, or the Assamese
@@ -103,7 +103,7 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         //    BOUNDED TO THAT SHAPE: three or more integer digits (802) plus a SINGLE trailing letter. A
         //    looser `\d+.\d+[a-z]` reads a decimal glued to its unit as a version — `6.5km` came out
         //    *6 বিন্দু 5 kilometre*. All four corpus instances (802.11a/b/g/n, ৮০২.১১a) fit the bound.
-        s = tr(s, new RegExp(`(?<![${D},.:])([${D}]{3,})\\.([${D}]+)(?=(?:[a-zA-Z](?![a-zA-Z])|এন))`, "gu"),
+        s = rewrite(s, new RegExp(`(?<![${D},.:])([${D}]{3,})\\.([${D}]+)(?=(?:[a-zA-Z](?![a-zA-Z])|এন))`, "gu"),
             "$1 বিন্দু $2");
 
         // 6) CURRENCY CODES — `AUD$৪৫` and `US$30`. The bare `$` is handled by the Bengali symbol tier;
@@ -116,20 +116,20 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         //    where it fell produced for `AUD$৪৫ মিলিয়ন`.
         const num = `[${D}]+(?:[.,][${D}]+)*`;
         const CODE: Readonly<Record<string, string>> = { US: "আমেৰিকান", AUD: "অস্ট্রেলিয়ান" };
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(US|AUD)\\$[ ]?(${num})(\\s+${MAGNITUDE})?`, "gu"),
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(US|AUD)\\$[ ]?(${num})(\\s+${MAGNITUDE})?`, "gu"),
             (_m, code: string, n: string, mag?: string) => `${n}${mag ?? ""} ${CODE[code]} ডলাৰ`);
         // A BARE `$` whose sentence ALREADY spells the currency out: `$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ` and
         // `$2.3 বিলিয়ন ডলাৰৰ` both had the Bengali tier insert a SECOND ডলাৰ, so the reading was
         // *14.7 dollar billion American dollar*. Here the sign is redundant — drop it and keep the words.
-        s = tr(s, new RegExp(`\\$[ ]?(${num})(\\s+${MAGNITUDE})?(?=\\s+(?:আমেৰিকান\\s+)?ডলা[ৰর])`, "gu"), "$1$2");
+        s = rewrite(s, new RegExp(`\\$[ ]?(${num})(\\s+${MAGNITUDE})?(?=\\s+(?:আমেৰিকান\\s+)?ডলা[ৰর])`, "gu"), "$1$2");
         // …and where no noun follows, the magnitude still has to precede it: `$45 মিলিয়ন` → 45 মিলিয়ন ডলাৰ.
-        s = tr(s, new RegExp(`\\$[ ]?(${num})(\\s+${MAGNITUDE})`, "gu"), "$1$2 ডলাৰ");
+        s = rewrite(s, new RegExp(`\\$[ ]?(${num})(\\s+${MAGNITUDE})`, "gu"), "$1$2 ডলাৰ");
 
         // 7) `&` → en (আৰু). The corpus's `B&B য়ে` dropped the ampersand; `&` reads আৰু (and). The tight
         //    `X&Y` form (B&B) is kept as letters + আৰু so the foreign path letter-names the sides.
-        s = tr(s, /\s&\s/gu, " আৰু ");
-        s = tr(s, /(?<![A-Za-z])&(?![A-Za-z])/gu, " আৰু ");
-        s = tr(s, /([A-Za-z])&([A-Za-z])/gu, "$1 আৰু $2");
+        s = rewrite(s, /\s&\s/gu, " আৰু ");
+        s = rewrite(s, /(?<![A-Za-z])&(?![A-Za-z])/gu, " আৰু ");
+        s = rewrite(s, /([A-Za-z])&([A-Za-z])/gu, "$1 আৰু $2");
 
         // 8) REGNAL `II` — `II বিশ্ব যুদ্ধ` (World War II). The shared Roman pass converts II → 2 before
         //    the engine; the digit before বিশ্ব যুদ্ধ reads as an ORDINAL (দ্বিতীয়), matching the
@@ -139,7 +139,7 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         //     deleted "World War" outright: the corpus's one instance, `II বিশ্ব যুদ্ধৰ`, read *ditijɔɹ* —
         //     "of the second", with the thing itself gone. The case suffix (ৰ) is outside the match and
         //     re-attaches to the noun, which is where it belongs.
-        s = tr(s, new RegExp(`([${D}]{1,2})\\s+বিশ্ব যুদ্ধ`, "gu"), (m0, d: string) => {
+        s = rewrite(s, new RegExp(`([${D}]{1,2})\\s+বিশ্ব যুদ্ধ`, "gu"), (m0, d: string) => {
             const n = Number(toAscii(d));
             if (n < 1 || n > 20) return m0;
             const ord = n <= 10
@@ -151,10 +151,10 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         // 9) SIGNS the Bengali normalize does not own. It handles `-` (ঋণাত্মক) and `+` (যোগ); `=`, `<`,
         //    `>`, `×` do not occur in as_in but are read for completeness: সমান (equal), তকৈ সৰু (less),
         //    তকৈ ডাঙৰ (greater), গুণ (times). AFTER the regnal rule (which uses digits too).
-        s = tr(s, /(\S)\s*=\s*(\S)/gu, "$1 সমান $2");
-        s = tr(s, /(\d)\s*<\s*(\d)/gu, "$1 তকৈ সৰু $2");
-        s = tr(s, /(\d)\s*>\s*(\d)/gu, "$1 তকৈ ডাঙৰ $2");
-        s = tr(s, /(\d)\s*×\s*(\d)/gu, "$1 গুণ $2");
+        s = rewrite(s, /(\S)\s*=\s*(\S)/gu, "$1 সমান $2");
+        s = rewrite(s, /(\d)\s*<\s*(\d)/gu, "$1 তকৈ সৰু $2");
+        s = rewrite(s, /(\d)\s*>\s*(\d)/gu, "$1 তকৈ ডাঙৰ $2");
+        s = rewrite(s, /(\d)\s*×\s*(\d)/gu, "$1 গুণ $2");
 
         return s;
     };

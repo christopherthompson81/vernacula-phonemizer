@@ -76,7 +76,7 @@
  *     same duplicated sentence (*plaat bu nekk 5 euro*). One sentence is a lead, not a finding.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier.
@@ -299,7 +299,7 @@ export function normalizeWolof(input: string): string {
 
     // 0) A MARKED clock loses the colon's clause pause — see CLOCK_MARKED. First, so every numeric step
     //    below sees one digit run rather than two.
-    s = tr(s, CLOCK_MARKED, "$1 $2");
+    s = rewrite(s, CLOCK_MARKED, "$1 $2");
 
     // 1) NFC, THE SEMICOLON-LESS HTML ENTITIES, AND FORMAT CHARACTERS — before anything looks for a number,
     //    a sign or an ampersand. `&sup2` ×3 is the load-bearing one: it sits in the EXPONENT slot
@@ -336,9 +336,9 @@ export function normalizeWolof(input: string): string {
     //    by a lowercase word. The trade is stated instead of being hidden behind a word list.
     const degree = (n: string, off: number, len: number, full: string): string =>
         saidAfter(full, off + len, DEGREE) ? n : `${n} ${DEGREE}`;
-    s = tr(s, /(?<![\p{L}\p{M}])(\d+)[ \u00a0]?°[ \u00a0]?(?=\d)/gu,  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])(\d+)[ \u00a0]?°[ \u00a0]?(?=\d)/gu,  // space, NBSP
         (w, n: string, off: number, full: string) => `${degree(n, off, w.length, full)} `);
-    s = tr(s, /(?<![\p{L}\p{M}])(\d+)[ \u00a0]?[°º](?![\d\p{L}\p{M}])/gu,  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])(\d+)[ \u00a0]?[°º](?![\d\p{L}\p{M}])/gu,  // space, NBSP
         (w, n: string, off: number, full: string) => degree(n, off, w.length, full));
 
     // 3) THE DOTTED ERA AND HONORIFIC MARKERS — de-dotted, NOT expanded. ~46 in the retained text:
@@ -353,7 +353,7 @@ export function normalizeWolof(input: string): string {
     //    domain name: in `wo.wikipedia` the `o` is preceded by `w`, so the lookbehind rejects it.
     //    ⚠ THE FINAL DOT IS KEPT WHEN THE SENTENCE VISIBLY ENDS, or `…atum 1967 g.` loses its sentence
     //    break — the same three-way test nya's dotted-capital rule uses, told apart by what follows.
-    s = tr(s, /(?<![\p{L}\p{M}.])[a-z](?:\.[a-zA-Z]){1,3}\.?(?![\p{L}\p{M}])/gu, (run, off: number, full: string) => {
+    s = rewrite(s, /(?<![\p{L}\p{M}.])[a-z](?:\.[a-zA-Z]){1,3}\.?(?![\p{L}\p{M}])/gu, (run, off: number, full: string) => {
         const letters = [...run.replace(/\./gu, "")].join(" ");
         const rest = full.slice(off + run.length);
         return rest === "" || /^[ \u00a0]*$/u.test(rest) || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;  // space, NBSP
@@ -377,9 +377,9 @@ export function normalizeWolof(input: string): string {
     //    groupings — 6 against 2, and both readings of `1,602` were wrong before (it was a clause pause).
     //    ⚠ THE SPACE ARM'S TRAILING GUARD IS `(?![\d])` ONLY. `1,602 189 2` — the same constant written with
     //    spaced digit groups — is rejected by the LEADING guard instead, because `602` is preceded by a comma.
-    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => rewrite(w, /,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => rewrite(w, /\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 6) RANGES → `ba`. 21 ascending digit-flanked spans in the retained text once verse references are
     //    excluded: `1906-2001`, `1960-1980`, `1500-1888`, `1884-1885`, `1740 -1786`, `1265 - 1321`, `10-20`.
@@ -412,7 +412,7 @@ export function normalizeWolof(input: string): string {
     //    clause-final dot was already admitted (`15-20.` → *15 ba 20 .*) and adding `\.\d` here would be a
     //    second, unrelated change smuggled into a comma fix.
     //    Same shape as the clause-final period two paragraphs up, and the same trap (58) one step further on.
-    s = tr(s, /(?<![-:\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-:\d\p{L}\p{M}]|,\d)/gu,  // space, NBSP
+    s = rewrite(s, /(?<![-:\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-:\d\p{L}\p{M}]|,\d)/gu,  // space, NBSP
         (whole, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b) && !/[·∙×][ \u00a0]*$/u.test(full.slice(Math.max(0, off - 3), off))  // space, NBSP
                 ? `${a} ${SPAN} ${b}`
@@ -423,7 +423,7 @@ export function normalizeWolof(input: string): string {
     //    orthography — it occurs inside the English and Portuguese passages this wiki carries — and it was
     //    reaching the phoneme stream as a bare [tʰ]. Stripping it is the whole fix; no Wolof ordinal
     //    morphology is invented, because the language already writes its own out. Case-insensitive (trap 7).
-    s = tr(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+    s = rewrite(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 8) A LONE `+` IS LEFT UNREAD, deliberately. `sources.ts` reports the sign does not occur in this
     //    corpus at all, and the playbook's fleet-wide finding is that the UTC-offset plus is the one
@@ -442,11 +442,11 @@ export function normalizeWolof(input: string): string {
     //    length — the constructive half of step 5's leading-digit guard, and what claims `0.449` and `0,511`.
     //    ⚠ THE `:` IS IN THE LEADING GUARD AND `,` IN THE TRAILING ONE, or the scripture lists claim the
     //    rule: `Jëf 2:9; 19:10,22,26,27` and `1Ko 15:22,45` are verse enumerations, not decimals.
-    s = tr(s, /(?<![\d.,:])0[.,](\d+)(?![\d.,])/gu, (_m, f: string) => spell("0", f));
-    s = tr(s, /(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d.,])/gu, (_m, i: string, f: string) => spell(i, f));
-    s = tr(s, /(?<![\d.,:])(\d+),(\d{1,2})(?![\d.,])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = rewrite(s, /(?<![\d.,:])0[.,](\d+)(?![\d.,])/gu, (_m, f: string) => spell("0", f));
+    s = rewrite(s, /(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d.,])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = rewrite(s, /(?<![\d.,:])(\d+),(\d{1,2})(?![\d.,])/gu, (_m, i: string, f: string) => spell(i, f));
 
     // ⚠ A padded replacement (` ak `, `${n} aj`) doubles a space that was already there and can leave one at
     // an edge. SLOT-GAP is a corpus-diff defect class; this pass must not feed it.
-    return s.replace(/[^\S\n]{2,}/gu, " ").replace(/^[^\S\n]+|[^\S\n]+$/gu, "");
+    return rewrite(rewrite(s, /[^\S\n]{2,}/gu, " "), /^[^\S\n]+|[^\S\n]+$/gu, "");
 }

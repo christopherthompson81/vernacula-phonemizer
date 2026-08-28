@@ -5,6 +5,7 @@ using System.Globalization;
  * Ported from src/languages/gujarati/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Gujarati;
 
@@ -113,25 +114,25 @@ public static class Normalize
         {
             var s = input;
 
-            s = JsRegex.Replace(s, GU_DIGIT, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0ae6));
+            s = Rewrite(s, GU_DIGIT, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0ae6));
 
-            s = JsRegex.Replace(s, VISARGA_RE, m => $"{m.Groups[1].Value}ઃ");
+            s = Rewrite(s, VISARGA_RE, m => $"{m.Groups[1].Value}ઃ");
 
-            s = JsRegex.Replace(s, ERA_RE, _ => "ઈસવીસન");
+            s = Rewrite(s, ERA_RE, _ => "ઈસવીસન");
 
-            s = JsRegex.Replace(s, DOTTED_RE, m => DOTTED[m.Groups[1].Value]);
+            s = Rewrite(s, DOTTED_RE, m => DOTTED[m.Groups[1].Value]);
 
-            s = JsRegex.Replace(s, INITIALISM_RE, m => $"{string.Join(" ", m.Value[..^1].Split('.'))} ");
+            s = Rewrite(s, INITIALISM_RE, m => $"{string.Join(" ", m.Value[..^1].Split('.'))} ");
 
-            s = JsRegex.Replace(s, DOCTOR, m => $"ડૉક્ટર{m.Groups[1].Value}");
+            s = Rewrite(s, DOCTOR, m => $"ડૉક્ટર{m.Groups[1].Value}");
 
-            s = JsRegex.Replace(s, CLOCK_DOT, m => $"{m.Groups[1].Value}:{m.Groups[2].Value}");
+            s = Rewrite(s, CLOCK_DOT, m => $"{m.Groups[1].Value}:{m.Groups[2].Value}");
             //    7b) SPORTS times mm:ss.hh are NOT clocks; dropping the colon leaves two plain numbers,
             //        which is the honest reading and which nothing downstream can re-claim.
-            s = JsRegex.Replace(s, SPORTS_TIME, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
-            s = JsRegex.Replace(s, HMS, m => $"{m.Groups[1].Value} {m.Groups[2].Value} {m.Groups[3].Value}");
+            s = Rewrite(s, SPORTS_TIME, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+            s = Rewrite(s, HMS, m => $"{m.Groups[1].Value} {m.Groups[2].Value} {m.Groups[3].Value}");
             var whole7 = s;
-            s = JsRegex.Replace(s, CLOCK_RE, m =>
+            s = Rewrite(s, CLOCK_RE, m =>
             {
                 var h = m.Groups[1].Value;
                 var min = m.Groups[2].Value;
@@ -141,29 +142,29 @@ public static class Normalize
                 return CLOCK_WORD_AFTER.IsMatch(rest) ? h : $"{h} વાગ્યે";
             });
 
-            s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} પ્લસ ");
-            s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}પ્લસ ");
+            s = Rewrite(s, PLUS_AFTER, m => $"{m.Groups[1].Value} પ્લસ ");
+            s = Rewrite(s, PLUS_START, m => $"{m.Groups[1].Value}પ્લસ ");
 
-            s = JsRegex.Replace(s, PLUSMINUS, _ => " પ્લસ માઈનસ ");
+            s = Rewrite(s, PLUSMINUS, _ => " પ્લસ માઈનસ ");
             s = PostposedSignPass.PostposedSign(s, "<", "કરતાં ઓછું");
             s = PostposedSignPass.PostposedSign(s, ">", "કરતાં વધુ");
             s = PostposedSignPass.PostposedSign(s, "÷", "દ્વારા વિભાજીત");
-            s = JsRegex.Replace(s, EQUALS, _ => " બરાબર ");
+            s = Rewrite(s, EQUALS, _ => " બરાબર ");
 
-            s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} ડિગ્રી સેલ્સિયસ");
-            s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} ડિગ્રી ફેરનહીટ");
-            s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} ડિગ્રી");
+            s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} ડિગ્રી સેલ્સિયસ");
+            s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} ડિગ્રી ફેરનહીટ");
+            s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} ડિગ્રી");
 
-            s = JsRegex.Replace(s, TILDE, _ => "આશરે ");
+            s = Rewrite(s, TILDE, _ => "આશરે ");
 
             // RANGES N-M → "N થી M". ⚠ THE ASCENDING GUARD IS THE RULE: a descending or equal pair is a
             // sports result, where "from…to" would be flatly wrong.
-            s = JsRegex.Replace(s, RANGE, m =>
+            s = Rewrite(s, RANGE, m =>
                 Js.Number(m.Groups[2].Value) > Js.Number(m.Groups[1].Value)
                     ? $"{m.Groups[1].Value} થી {m.Groups[2].Value}"
                     : m.Value);
 
-            s = JsRegex.Replace(s, FRACTION, m =>
+            s = Rewrite(s, FRACTION, m =>
             {
                 double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
                 if (num >= den) return m.Value;
@@ -173,7 +174,7 @@ public static class Normalize
                 return nw == "" || dw == "" ? m.Value : $"{nw} ભાગ્યા {dw}";
             });
 
-            s = JsRegex.Replace(s, ORD_SUPPLETIVE, m =>
+            s = Rewrite(s, ORD_SUPPLETIVE, m =>
             {
                 var n = (int)Js.Number(m.Groups[1].Value);
                 var cons = m.Groups[2].Value;
@@ -182,9 +183,9 @@ public static class Normalize
                 if (n == 4 && cons == "થ" && vowel == "ી") return m.Value;
                 return IRREGULAR[n.ToString(CultureInfo.InvariantCulture)][FORM[vowel]];
             });
-            s = JsRegex.Replace(s, ORD_REGULAR_SUPPL, m =>
+            s = Rewrite(s, ORD_REGULAR_SUPPL, m =>
                 IRREGULAR[((int)Js.Number(m.Groups[1].Value)).ToString(CultureInfo.InvariantCulture)][FORM[m.Groups[2].Value]]);
-            s = JsRegex.Replace(s, JOIN_RE, m =>
+            s = Rewrite(s, JOIN_RE, m =>
             {
                 var digits = m.Groups[1].Value;
                 var ord = m.Groups[2].Success ? m.Groups[2].Value : null;
@@ -192,7 +193,7 @@ public static class Normalize
                 return Glue(digits, ord ?? post!) ?? m.Value;
             });
 
-            return JsRegex.Replace(s, DOUBLE_SPACE, _ => " ");
+            return Rewrite(s, DOUBLE_SPACE, _ => " ");
         };
     }
 }

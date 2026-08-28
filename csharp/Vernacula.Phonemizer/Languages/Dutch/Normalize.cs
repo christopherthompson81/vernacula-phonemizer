@@ -4,6 +4,7 @@
  * Ported from src/languages/dutch/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Dutch;
 
@@ -133,25 +134,25 @@ public static class Normalize
     {
         var s = input;
 
-        s = DOLLAR_CODE.Replace(s, "$$");
+        s = Rewrite(s, DOLLAR_CODE, "$$");
 
         foreach (var (final, any, word) in MULTI_DOT_RE)
         {
-            s = final.Replace(s, $"{word}.");
-            s = any.Replace(s, word);
+            s = Rewrite(s, final, $"{word}.");
+            s = Rewrite(s, any, word);
         }
 
-        s = DOTTED_CAPS.Replace(s, m => DOT_OR_SPACE.Replace(m.Value, ""));
+        s = Rewrite(s, DOTTED_CAPS, m => DOT_OR_SPACE.Replace(m.Value, ""));
 
-        s = ABBREV_MID.Replace(s, m =>
+        s = Rewrite(s, ABBREV_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys
             // but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w)
                 ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = ABBREV_END.Replace(s, m =>
+        s = Rewrite(s, ABBREV_END, m =>
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
-        s = ORDINAL.Replace(s, m => OrdinalWord(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        s = Rewrite(s, ORDINAL, m => OrdinalWord(Js.Number(m.Groups[1].Value)) ?? m.Value);
 
         // The colon form's `(?![:\d])` / `(?<![\d:])` guards are load-bearing: a three-part `4:41:30` is a
         // SPORTS TIME, and without them the rule claims `4:41` and restarts inside the rest.
@@ -162,33 +163,33 @@ public static class Normalize
         }
         // JS hands an unmatched optional group as `undefined`, which the `??` above turns into " uur"; .NET
         // hands an EMPTY string, so the group's Success is what decides here.
-        s = CLOCK_COLON.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
+        s = Rewrite(s, CLOCK_COLON, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
             m.Groups[3].Success ? m.Groups[3].Value : null));
-        s = CLOCK_DOT.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
+        s = Rewrite(s, CLOCK_DOT, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
             m.Groups[3].Success ? m.Groups[3].Value : null));
 
-        s = DEG_C.Replace(s, "$1 graden Celsius");
-        s = DEG_F.Replace(s, "$1 graden Fahrenheit");
-        s = DEG_COMPASS.Replace(s, m => $"{m.Groups[1].Value} graden {COMPASS[m.Groups[2].Value]}");
-        s = DEG.Replace(s, "$1 graden");
+        s = Rewrite(s, DEG_C, "$1 graden Celsius");
+        s = Rewrite(s, DEG_F, "$1 graden Fahrenheit");
+        s = Rewrite(s, DEG_COMPASS, m => $"{m.Groups[1].Value} graden {COMPASS[m.Groups[2].Value]}");
+        s = Rewrite(s, DEG, "$1 graden");
 
-        s = PLUS.Replace(s, " plus ");
+        s = Rewrite(s, PLUS, " plus ");
 
-        s = PLUS_MINUS.Replace(s, " plus min ");
+        s = Rewrite(s, PLUS_MINUS, " plus min ");
 
-        s = EQUALS.Replace(s, " is gelijk aan ");
-        s = LESS_THAN.Replace(s, " kleiner dan ");
-        s = GREATER_THAN.Replace(s, " groter dan ");
-        s = DIVIDE.Replace(s, " gedeeld door ");
+        s = Rewrite(s, EQUALS, " is gelijk aan ");
+        s = Rewrite(s, LESS_THAN, " kleiner dan ");
+        s = Rewrite(s, GREATER_THAN, " groter dan ");
+        s = Rewrite(s, DIVIDE, " gedeeld door ");
 
-        s = AMP_LETTERS.Replace(s, m =>
+        s = Rewrite(s, AMP_LETTERS, m =>
         {
             string? x = SpellCaps(m.Groups[1].Value), y = SpellCaps(m.Groups[2].Value);
             return x is not null && y is not null ? $"{x} en {y}" : m.Value;
         });
-        s = AMP_SPACED.Replace(s, " en ");
+        s = Rewrite(s, AMP_SPACED, " en ");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
             if (den == 2) return num == 1 ? "een half" : $"{Numbers.NumberToWords(num)} halve";

@@ -5,6 +5,7 @@
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Quechua;
 
@@ -47,12 +48,12 @@ public static class Normalize
         // ⚠ THE MISS BRANCH IS REACHABLE AND FALLS BACK TO THE MATCH (#1122): the pattern's `iu` flags fold
         // U+017F LONG S onto `s`, so `&ſup2;` matches while its key does not exist. The TS asserted non-null
         // and spoke the word "undefined"; this indexer THREW `KeyNotFoundException` for the whole caller.
-        s = ENTITIES.Replace(s, m => ENTITY.TryGetValue(m.Value.ToLowerInvariant(), out var v) ? v : m.Value);
-        s = FORMAT_CHAR.Replace(s, "");
+        s = Rewrite(s, ENTITIES, m => ENTITY.TryGetValue(m.Value.ToLowerInvariant(), out var v) ? v : m.Value);
+        s = Rewrite(s, FORMAT_CHAR, "");
 
-        s = GROUP_DOT.Replace(s, m => DOT.Replace(m.Value, ""));
-        s = GROUP_COMMA.Replace(s, m => COMMA.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => SPACE_SEP.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOT.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMA.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => SPACE_SEP.Replace(m.Value, ""));
 
         // ⚠ ORDER: the tier runs AFTER de-grouping and BEFORE the decimal step — its version guard works by
         // seeing the dot that the decimal step below spends.
@@ -61,7 +62,7 @@ public static class Normalize
         // ⚠ THE NEIGHBOURHOOD IS READ OFF THE PRE-REPLACEMENT STRING, as in the TS: the JS replacer closes
         // over `s` before the assignment lands, so every window is cut from the same text.
         var before = s;
-        s = DEGREE.Replace(s, m =>
+        s = Rewrite(s, DEGREE, m =>
         {
             var n = m.Groups[1].Value;
             var at = m.Index;
@@ -69,7 +70,7 @@ public static class Normalize
             return near.Contains("k'atma", StringComparison.Ordinal) ? n : $"{n} k'atma";
         });
 
-        s = DECIMAL_SEP.Replace(s, "$1 $2");
+        s = Rewrite(s, DECIMAL_SEP, "$1 $2");
 
         return s;
     }

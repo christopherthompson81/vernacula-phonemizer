@@ -4,6 +4,7 @@
  * Ported from src/languages/marathi/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Marathi;
 
@@ -120,7 +121,7 @@ public static class Normalize
         {
             if (w == numbers.Magnitudes.Hundred) return "शंभरा"; // शे is the combining form; the ordinal is शंभरावा
             if (w == "नऊ") return "नव"; // 9 → नववा, the one unit with a stem change
-            if (ENDS_EES.IsMatch(w)) return JsRegex.Replace(w, ENDS_EES, _ => "िसा");
+            if (ENDS_EES.IsMatch(w)) return Rewrite(w, ENDS_EES, _ => "िसा");
             if (UNITS.Contains(w) || TEENS.Contains(w)) return w;
             return DEV_CONSONANT_FINAL.IsMatch(w) ? $"{w}ा" : w;
         }
@@ -146,26 +147,26 @@ public static class Normalize
         {
             var s = input;
 
-            s = JsRegex.Replace(s, AE_DIGRAPH, _ => "ऍ");
-            s = JsRegex.Replace(s, AO_DIGRAPH, _ => "ऑ");
-            s = JsRegex.Replace(s, ZW_JOINERS, _ => "");
+            s = Rewrite(s, AE_DIGRAPH, _ => "ऍ");
+            s = Rewrite(s, AO_DIGRAPH, _ => "ऑ");
+            s = Rewrite(s, ZW_JOINERS, _ => "");
 
-            s = JsRegex.Replace(s, DEV_DIGIT, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0966));
+            s = Rewrite(s, DEV_DIGIT, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0966));
 
-            s = JsRegex.Replace(s, VISARGA_CLOCK, m => $"{m.Groups[1].Value}:{m.Groups[2].Value}");
-            s = JsRegex.Replace(s, COLON_INTERNAL, _ => "ः");
-            s = JsRegex.Replace(s, TAH_COLON, m => $"{m.Groups[1].Value}ः");
+            s = Rewrite(s, VISARGA_CLOCK, m => $"{m.Groups[1].Value}:{m.Groups[2].Value}");
+            s = Rewrite(s, COLON_INTERNAL, _ => "ः");
+            s = Rewrite(s, TAH_COLON, m => $"{m.Groups[1].Value}ः");
 
-            s = JsRegex.Replace(s, ERA_BCE_FULL, _ => D.EraMarkers.Bc);
-            s = JsRegex.Replace(s, ERA_BCE_SHORT, _ => D.EraMarkers.Bc);
-            s = JsRegex.Replace(s, ERA_CE, _ => D.EraMarkers.Ad);
+            s = Rewrite(s, ERA_BCE_FULL, _ => D.EraMarkers.Bc);
+            s = Rewrite(s, ERA_BCE_SHORT, _ => D.EraMarkers.Bc);
+            s = Rewrite(s, ERA_CE, _ => D.EraMarkers.Ad);
 
-            s = JsRegex.Replace(s, DOCTOR, m => $"{D.Abbreviations["डॉ"]}{m.Groups[1].Value}");
+            s = Rewrite(s, DOCTOR, m => $"{D.Abbreviations["डॉ"]}{m.Groups[1].Value}");
 
-            s = JsRegex.Replace(s, ORDINAL, m =>
+            s = Rewrite(s, ORDINAL, m =>
                 Ordinal(Js.Number(m.Groups[1].Value), SUFFIX_FORM[m.Groups[2].Value], m.Groups[2].Value) ?? m.Value);
 
-            s = JsRegex.Replace(s, NUM_BEFORE_VA, m =>
+            s = Rewrite(s, NUM_BEFORE_VA, m =>
             {
                 var n = Js.Number(m.Groups[1].Value);
                 if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d)) return m.Value;
@@ -178,12 +179,12 @@ public static class Normalize
             // Sports times (mm:ss.hh) FIRST, and the guard between the two time rules is the point: these are
             // not clocks, but the inherited Hindi clock rule claims them. Dropping the colon leaves two plain
             // numbers, which nothing downstream can re-claim.
-            s = JsRegex.Replace(s, SPORTS_TIME, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+            s = Rewrite(s, SPORTS_TIME, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
             // The clock proper; its `(?![\d:.])` is what refuses 7a's leftovers. `whole7b` stands in for the JS
             // replacer's fifth argument (the subject string) and must be snapshotted, since `s` is reassigned
             // by every step.
             var whole7b = s;
-            s = JsRegex.Replace(s, CLOCK_COLON, m =>
+            s = Rewrite(s, CLOCK_COLON, m =>
             {
                 var h = m.Groups[1].Value;
                 var min = m.Groups[2].Value;
@@ -193,37 +194,37 @@ public static class Normalize
                 var rest = whole7b[(m.Index + m.Length)..];
                 return !string.IsNullOrEmpty(vaajta) || !VAAJ_NEXT.IsMatch(rest) ? $"{body} {D.Clock.Oclock}" : body;
             });
-            s = JsRegex.Replace(s, CLOCK_DOT_TZ, m => Clock(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
+            s = Rewrite(s, CLOCK_DOT_TZ, m => Clock(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
 
-            s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.Celsius}");
-            s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.Fahrenheit}");
-            s = JsRegex.Replace(s, DEG_N, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.North}");
-            s = JsRegex.Replace(s, DEG_S, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.South}");
-            s = JsRegex.Replace(s, DEG_E, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.East}");
-            s = JsRegex.Replace(s, DEG_W, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.West}");
-            s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} {D.Degree.Word}");
+            s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.Celsius}");
+            s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.Fahrenheit}");
+            s = Rewrite(s, DEG_N, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.North}");
+            s = Rewrite(s, DEG_S, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.South}");
+            s = Rewrite(s, DEG_E, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.East}");
+            s = Rewrite(s, DEG_W, m => $"{m.Groups[1].Value} {D.Degree.Word} {D.Degree.West}");
+            s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} {D.Degree.Word}");
 
-            s = JsRegex.Replace(s, PERCENT, m =>
+            s = Rewrite(s, PERCENT, m =>
             {
                 var n = m.Groups[1].Value;
                 return $"{n} {(Js.Number(JsRegex.Replace(n, COMMA_G, _ => "")) == 1 ? PERCENT_W.Singular : PERCENT_W.Plural)}";
             });
 
-            s = JsRegex.Replace(s, CURRENCY_RE, m =>
+            s = Rewrite(s, CURRENCY_RE, m =>
                 $"{m.Groups[2].Value}{(m.Groups[3].Success ? m.Groups[3].Value : "")} {CURRENCY[m.Groups[1].Value]}");
 
-            s = JsRegex.Replace(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
+            s = Rewrite(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
 
             // Ranges N-M → "N ते M", but ONLY when ascending: a descending or equal pair is a sports result,
             // where "ते" would be wrong and the silent hyphen the engine already produces is correct.
-            s = JsRegex.Replace(s, RANGE, m =>
+            s = Rewrite(s, RANGE, m =>
             {
                 var a = m.Groups[1].Value;
                 var b = m.Groups[2].Value;
                 return Js.Number(b) > Js.Number(a) ? $"{a} {D.RangeWord} {b}" : m.Value;
             });
 
-            s = JsRegex.Replace(s, FRACTION, m =>
+            s = Rewrite(s, FRACTION, m =>
             {
                 double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
                 if (num == 1 && den == 2) return D.Fractions.Half;
@@ -234,18 +235,18 @@ public static class Normalize
                 return nw == "" || dw == "" ? m.Value : $"{nw} {D.Fractions.DividedBy} {dw}";
             });
 
-            s = JsRegex.Replace(s, BARE_HUNDRED, _ => D.BareHundred);
+            s = Rewrite(s, BARE_HUNDRED, _ => D.BareHundred);
 
-            s = JsRegex.Replace(s, PLUS, _ => $" {D.SymbolWords.Plus} ");
-            s = JsRegex.Replace(s, MINUS_SIGN, _ => $" {D.SymbolWords.Minus} ");
-            s = JsRegex.Replace(s, TILDE, _ => $" {D.SymbolWords.Approximately} ");
+            s = Rewrite(s, PLUS, _ => $" {D.SymbolWords.Plus} ");
+            s = Rewrite(s, MINUS_SIGN, _ => $" {D.SymbolWords.Minus} ");
+            s = Rewrite(s, TILDE, _ => $" {D.SymbolWords.Approximately} ");
 
-            s = JsRegex.Replace(s, PLUSMINUS, _ => $" {D.SymbolWords.PlusMinus} ");
+            s = Rewrite(s, PLUSMINUS, _ => $" {D.SymbolWords.PlusMinus} ");
             s = PostposedSignPass.PostposedSign(s, "<", D.SymbolWords.LessThan);
             s = PostposedSignPass.PostposedSign(s, ">", D.SymbolWords.GreaterThan);
             s = PostposedSignPass.PostposedSign(s, "÷", D.SymbolWords.Divide);
-            s = JsRegex.Replace(s, EQUALS, _ => $" {D.SymbolWords.Equals} ");
-            s = JsRegex.Replace(s, DOUBLE_SPACE, _ => " ");
+            s = Rewrite(s, EQUALS, _ => $" {D.SymbolWords.Equals} ");
+            s = Rewrite(s, DOUBLE_SPACE, _ => " ");
 
             return s;
         };

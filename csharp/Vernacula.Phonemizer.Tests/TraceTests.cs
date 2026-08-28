@@ -110,10 +110,11 @@ public class TraceTests
         Assert.Equal(Phonemizer.Phonemize("ŋŋamba", "lg"), t.Ipa);
     }
     /**
-     * #1150 stage 2 — normalizer provenance. ⚠ The seam differs from the TypeScript deliberately: TS
-     * normalizers call `s.replace(...)` (the STRING is the receiver) so 3,203 sites were rewritten, while
-     * the port calls `RE.Replace(s, ...)` so instrumenting `JsRe.Replace` covers every site with no change
-     * under Languages/.
+     * #1150 stage 2 — normalizer provenance. ⚠ The seam is `Rewriter.Rewrite`, spelled and ordered exactly
+     * as the TypeScript's `rewrite(s, re, rep)`. It was once `JsRe.Replace`, which needed no edits under
+     * Languages/ at all — but that method is also how a static constructor builds a lookup table and how an
+     * engine rewrites IPA, so the mapping could not tell "a step I did not see" from "a string that is not
+     * mine" and had to tolerate both. Two wrong-span defects came through that tolerance.
      */
     [Fact]
     public void ATokenNamesTheInputCharactersThatProducedIt()

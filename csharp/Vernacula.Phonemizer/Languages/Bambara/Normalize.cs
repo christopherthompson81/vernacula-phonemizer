@@ -10,6 +10,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Bambara;
 
@@ -50,7 +51,7 @@ public static class Normalize
     {
         var atEnd = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.(?=[ \\u00a0]*(?:$|\\p{{Lu}}))", "gu");
         var inline = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.", "gu");
-        return inline.Replace(atEnd.Replace(s, $"{word}."), word);
+        return Rewrite(Rewrite(s, atEnd, $"{word}."), inline, word);
     }
 
     /** Homoglyphs for Bambara's non-ASCII letters — none of ⟨ɛ ɔ ɲ⟩ is on a French AZERTY keyboard, so the
@@ -108,16 +109,16 @@ public static class Normalize
 
         // 2) Entities and zero-width marks, BEFORE the ampersand rule at step 12, or `&nbsp;` is read as
         //    "and" followed by the letters n-b-s-p.
-        s = ZERO_WIDTH.Replace(ENTITIES.Replace(s, " "), "");
+        s = Rewrite(Rewrite(s, ENTITIES, " "), ZERO_WIDTH, "");
 
         // 2b) ⚠ HOMOGLYPHS BEFORE ANY RULE THAT INSPECTS A LETTER: the elision rule has ⟨ɛ ɔ⟩ in its vowel
         //     class and the unit and range rules read letter boundaries, so a word still carrying a Greek
         //     epsilon is invisible to all of them in the way it is invisible to the tokenizer.
-        s = HOMOGLYPH_RE.Replace(s, m => HOMOGLYPH[m.Value]);
+        s = Rewrite(s, HOMOGLYPH_RE, m => HOMOGLYPH[m.Value]);
 
         // 3) The elision apostrophe. Before step 4, so a name like `d'A.R.P.` cannot present the dotted rule
         //    with a stray consonant token.
-        s = ELISION.Replace(s, "$1$2");
+        s = Rewrite(s, ELISION, "$1$2");
 
         // 4) Era marker, then dotted initialisms — before anything can read an interior dot as a phrase
         //    break, and before step 6, the other rule here that looks at dots.
@@ -128,7 +129,7 @@ public static class Normalize
         //    ⚠ CAPPED AT FOUR GROUPS WITH A LOOKAHEAD THAT REFUSES A LONGER RUN: the corpus has one 27-group
         //    line (the alphabet, `A.B.C.…Z.`), and `{2,4}` alone would eat four letters and leave 23 dots.
         var all4 = s;
-        s = INITIALISM.Replace(s, m =>
+        s = Rewrite(s, INITIALISM, m =>
         {
             var body = DOTS.Replace(m.Value, "");
             var rest = all4[(m.Index + m.Length)..];
@@ -138,7 +139,7 @@ public static class Normalize
         // 5) ISBN, before every numeric rule — an identifier is read DIGIT BY DIGIT, not as a quantity.
         //    ⚠ MUST PRECEDE THE RANGE RULE: its chain guard already rejects these, but claiming the
         //    identifier whole removes the question rather than resting it on one lookahead.
-        s = ISBN.Replace(s, m =>
+        s = Rewrite(s, ISBN, m =>
             $"{m.Groups[1].Value} {string.Join(" ", Js.CodePoints(ISBN_SEP.Replace(m.Groups[2].Value, "")))}");
 
         // 6) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause
@@ -146,9 +147,9 @@ public static class Normalize
         //    discriminator, because both marks are also this corpus's decimal separators.
         //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK: a plain
         //    `(?![\d.,])` refuses to de-group a number followed by its own sentence comma.
-        s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => SPACES.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => SPACES.Replace(m.Value, ""));
 
         // 7) UNITS, before decimals — the number-unit adjacency is destroyed the moment a decimal is
         //    rewritten into spaced digits — and after de-grouping so `103 000 km2` is already one token.
@@ -158,11 +159,11 @@ public static class Normalize
         //    which would already have spent the dash.
         foreach (var (sym, word) in UNITS)
         {
-            var key = LIT.Replace(sym, m => "\\" + m.Value);
-            s = JsRegex.Compile(
+            var key = JsRegex.Replace(sym, LIT, m => "\\" + m.Value);
+            s = Rewrite(s, JsRegex.Compile(
                     $"(?<![\\d.,:\\p{{L}}\\p{{M}}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d²³/])",
                     "giu")
-                .Replace(s, m =>
+                , m =>
                 {
                     var a = m.Groups[1].Value;
                     var b = m.Groups[2].Value;
@@ -170,11 +171,11 @@ public static class Normalize
                 });
             // ⚠ AND THE SINGLE-OPERAND ARM MUST REFUSE A SPAN'S SECOND HALF: a descending or chained span the
             // arm above just declined must reach RANGE whole, not with its tail already rewritten.
-            s = JsRegex.Compile(
+            s = Rewrite(s, JsRegex.Compile(
                     $"(?<![\\p{{L}}\\p{{M}}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)(\\s+(?:{MAG}))?\\s?{key}"
                     + "(?![\\p{L}\\p{M}\\d²³/])",
                     "giu")
-                .Replace(s, m =>
+                , m =>
                     $"{word} {m.Groups[1].Value}{(m.Groups[2].Success ? m.Groups[2].Value : "")}");
         }
         // …and the ones with NO numeral at all. Last, so the counted arms keep every match they can make.
@@ -182,7 +183,7 @@ public static class Normalize
 
         // 8) RANGES, before percent — a range OF percents must be claimed while both operands are still bare
         //    digits. Non-ascending pairs are deliberately left as the bare juxtaposition they already were.
-        s = RANGE.Replace(s, m =>
+        s = Rewrite(s, RANGE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -194,7 +195,7 @@ public static class Normalize
         //    REPLACEMENT HAS TO SUPPLY ONE: the corpus writes the percentage hard against the following word
         //    (`10%ye`), and re-emitting the word alone welded it to that letter.
         var all9 = s;
-        s = PERCENT.Replace(s, m =>
+        s = Rewrite(s, PERCENT, m =>
         {
             var n = m.Groups[1].Value;
             var end = m.Index + m.Length;
@@ -208,7 +209,7 @@ public static class Normalize
         //     is attested. ⚠ `US$` IS THE SAME CURRENCY NAMED TWICE, so only the sign is consumed — and the
         //     code KEEPS ITS BOUNDARY, since `US$` writes it hard against the sign.
         var all10 = s;
-        s = CURRENCY.Replace(s, m =>
+        s = Rewrite(s, CURRENCY, m =>
         {
             var us = m.Groups[1].Success ? m.Groups[1].Value : null;
             var d = m.Groups[2].Value;
@@ -219,12 +220,12 @@ public static class Normalize
         //     fractional digits are spaced apart so the number path speaks them one at a time.
         //     ⚠ THE TRAILING GUARD EXCLUDES A FURTHER SEPARATOR as well as a letter, or a dotted DATE has its
         //     first field claimed and its second left as a pause.
-        s = DECIMAL_.Replace(s, m =>
+        s = Rewrite(s, DECIMAL_, m =>
             $"{m.Groups[1].Value} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 12) THE AMPERSAND. ⚠ SPACED ON BOTH SIDES DELIBERATELY: `A&B` deletes to `AB`, ONE token instead of
         //     two, so the replacement must insert the boundary the sign was supplying.
-        s = AMPERSAND.Replace(s, " ani ");
+        s = Rewrite(s, AMPERSAND, " ani ");
 
         return s;
     }

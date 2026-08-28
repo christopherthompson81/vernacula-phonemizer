@@ -61,7 +61,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ---------------------------------------------------------------------------------------------------
 // ORDINALS — derived, not tabulated
@@ -234,9 +234,9 @@ export function normalizeTatar(input: string): string {
     //    decimal tail, which this corpus writes — while a bare `(?![\d.,])` declines every clause-final
     //    figure (trap 58). The separator here is a SPACE, and a decimal never has one before its
     //    fraction, so `(?!\d)` is the whole guard.
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ABBREVIATIONS, before any single-dot rule.
     //    ⚠ THE ERA MARKERS ARE SOURCED BY THE CORPUS'S OWN GLOSS, in one sentence that gives all four
@@ -259,13 +259,13 @@ export function normalizeTatar(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}млн\\s?\\.`, "giu"), "миллион"],
     ];
     for (const [re, word] of multi)
-        s = tr(s, re, (m0, offset: number, full: string) => {
+        s = rewrite(s, re, (m0, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
 
     // 2) НОМЕР. The sign was dropped outright (`№ 5. С. 49-52`).
-    s = tr(s, /№\s?(?=\d)/gu, "номер ");
+    s = rewrite(s, /№\s?(?=\d)/gu, "номер ");
 
     // 3) CLOCK, and the case suffix that may sit on it. The colon is clause punctuation in tatar.ts, so
     //    `22:30` read as *егерме ике , утыз* — a phrase break inside a time. ⚠ THE SUFFIX ATTACHES TO THE
@@ -276,14 +276,14 @@ export function normalizeTatar(input: string): string {
     //    Both are claimed; a two-field rule alone would have left the seconds as a stranded number.
     //    Runs BEFORE the ordinal rule so a time is not first claimed as a numeral-plus-suffix.
     const timeSuffix = `(?:\\s?-\\s?|)(${SFX}{1,5})${NOT_LETTER_AFTER}`;
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d):([0-5]\\d)(?![\\d:.,])(?:${timeSuffix})?`, "gu"),
         (whole, h: string, mi: string, sec: string, sfx: string | undefined) => {
             const words = [cardinal(Number(h)), cardinal(Number(mi)), cardinal(Number(sec))].join(" ");
             return sfx === undefined ? words : attachToWords(whole, words, sfx);
         },
     );
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-4]):\\s?([0-5]\\d)(?![\\d:.,])(?:${timeSuffix})?`, "gu"),
         (whole, h: string, mi: string, sfx: string | undefined) => {
             const mv = Number(mi);
@@ -296,19 +296,19 @@ export function normalizeTatar(input: string): string {
     //    ⚠ HYPHENATED AND GLUED TAKE THE FULL CLOSED SET, because the boundary is unambiguous there:
     //    `3-нче`, `2009-нчы`, `19-ынчы`, `2000-гә`, `2005нченең`.
     //    MUST run before the range rule (step 7), which would otherwise eat the hyphen.
-    s = tr(s, new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(${SFX}{1,6})${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(${SFX}{1,6})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, sfx: string) => attach(whole, digits, sfx));
-    s = tr(s, new RegExp(`(?<![\\d.,/])(\\d+)(${SFX}{1,6})${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,/])(\\d+)(${SFX}{1,6})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, sfx: string) => attach(whole, digits, sfx));
 
     // 5) SIGNS. `−2.88-гә` uses the true MINUS (U+2212); the corpus's own arithmetic uses `=` and `×`.
     //    Runs before the range rule, which would otherwise read the minus as a span's dash.
-    s = tr(s, /(^|(?<!\d)[\s(])[-−–](\d)/gu, "$1минус $2");
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–](\d)/gu, "$1минус $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it.
-    s = tr(s, /±/gu, " плюс минус ");
-    s = tr(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
-    s = tr(s, /(\d)\s?=\s?(?=\d)/gu, "$1 тигез ");
-    s = tr(s, /(\d)\s?×\s?(?=\d)/gu, "$1 тапкыр ");
+    s = rewrite(s, /±/gu, " плюс минус ");
+    s = rewrite(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
+    s = rewrite(s, /(\d)\s?=\s?(?=\d)/gu, "$1 тигез ");
+    s = rewrite(s, /(\d)\s?×\s?(?=\d)/gu, "$1 тапкыр ");
 
     // 6) DEGREES — and in this corpus that means COORDINATES. `66°30'`, `81°49'`, `77°43'`, `46°22′`,
     //    `19°38'` are latitude and longitude readings, and `90°`, `0°`, `360°` are an angle, a meridian
@@ -318,12 +318,12 @@ export function normalizeTatar(input: string): string {
     //    The suffix must be glued to *минут*, not left standing as its own word: an isolated *ында* is a
     //    bound morpheme read aloud as a word, which is the trap-56 shape — a defect that produces a
     //    reading. `\s?` before it, because the corpus writes both `41°11'ында` and `81°49' ында`.
-    s = tr(s, new RegExp(`(\\d)\\s?°\\s?(\\d+)\\s?[′']\\s?(${SFX}{1,5})${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`(\\d)\\s?°\\s?(\\d+)\\s?[′']\\s?(${SFX}{1,5})${NOT_LETTER_AFTER}`, "gu"),
         (whole, deg: string, min: string, sfx: string) => {
             const glued = attachToWords(whole, `${deg} градус ${min} минут`, sfx);
             return glued === whole ? `${deg} градус ${min} минут ${sfx}` : `${glued} `;
         });
-    s = tr(s, /(\d)\s?°\s?(\d+)\s?[′']/gu, "$1 градус $2 минут ");
+    s = rewrite(s, /(\d)\s?°\s?(\d+)\s?[′']/gu, "$1 градус $2 минут ");
     //    ⚠ THE CELSIUS BRANCH IS INSURANCE, NOT EVIDENCE, AND ITS WORD IS ATTESTED IN THE WRONG SENSE.
     //    Zero of this corpus's degrees are temperatures, and all 28 token hits for `Цельсий` are the
     //    SURNAME — "Магнус Николай Цельсий (Magnus Nicolai Celsius; 1621—1679) — швед математик", and his
@@ -332,16 +332,16 @@ export function normalizeTatar(input: string): string {
     //    a stated assumption. It ships because it is letter-gated and cannot misfire on anything this
     //    corpus contains, and because without it a `°C` loses the sign AND reads the ⟨C⟩ as the ENGLISH
     //    letter name via core/foreign.ts. The assumption is written down rather than left to look measured.
-    s = tr(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
-    s = tr(s, /(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусы");
+    s = rewrite(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
+    s = rewrite(s, /(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусы");
     //    WITH A TRAILING SPACE, because the sign is written glued to letters this rule does not claim;
     //    the final space-collapse removes the doubling in the ordinary case.
-    s = tr(s, /(\d)\s?°/gu, "$1 градус ");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 градус ");
 
     // 7) THE SPACED ORDINAL, and ⚠ ONLY THE ORDINAL. `1 нче президенты`, `1917 нче елда`, `1930 нчы
     //    елга`, `1914 – 1917 нче елларда`. Runs AFTER the range rule below would have wanted to, so it is
     //    ordered before it and the range rule is given the leftovers — see step 8.
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\s(${ORD_SUFFIX})${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)\\s(${ORD_SUFFIX})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, sfx: string) => attach(whole, digits, sfx));
 
     // 8) NUMERIC RANGES. The dash was dropped outright and the endpoints fused into one run of words —
@@ -353,13 +353,13 @@ export function normalizeTatar(input: string): string {
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58) — `№ 6. С. 34-37.` is how this
     //    corpus ends a citation. Runs AFTER the suffix and sign rules, which have already spent every
     //    hyphen that belongs to a suffix or opens a negative.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
 
     // A padded replacement (` плюс минус `) doubles a space that was already there. Harmless downstream
     // because assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be
     // the one producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }
 
 /**

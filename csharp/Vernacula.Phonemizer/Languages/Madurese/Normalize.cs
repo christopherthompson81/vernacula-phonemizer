@@ -6,6 +6,7 @@
  * four classes deliberately left unread.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Madurese;
 
@@ -113,50 +114,50 @@ public static class Normalize
         var s = input;
 
         // ── 1. THE CLOCK — FIRST, before any rule that reads a dot ──
-        s = CLOCK_HOUR_WORD.Replace(s, m =>
+        s = Rewrite(s, CLOCK_HOUR_WORD, m =>
             $"{m.Groups[1].Value}{m.Groups[2].Value}{Js.NumberToString(Js.Number(m.Groups[3].Value))}");
-        s = CLOCK_MARKED.Replace(s, m => Js.NumberToString(Js.Number(m.Groups[1].Value)));
-        s = CLOCK_BARE_COLON.Replace(s, m => Js.NumberToString(Js.Number(m.Groups[1].Value)));
+        s = Rewrite(s, CLOCK_MARKED, m => Js.NumberToString(Js.Number(m.Groups[1].Value)));
+        s = Rewrite(s, CLOCK_BARE_COLON, m => Js.NumberToString(Js.Number(m.Groups[1].Value)));
 
         // ── 2. DE-GROUP THOUSANDS ──
-        s = GROUPED_PERIOD.Replace(s, m => m.Value.Replace(".", "", StringComparison.Ordinal));
-        s = GROUPED_COMMA.Replace(s, m => m.Value.Replace(",", "", StringComparison.Ordinal));
+        s = Rewrite(s, GROUPED_PERIOD, m => m.Value.Replace(".", "", StringComparison.Ordinal));
+        s = Rewrite(s, GROUPED_COMMA, m => m.Value.Replace(",", "", StringComparison.Ordinal));
 
         // ── 3. THE COORDINATE RANGE'S DASH — before the degree rules destroy the adjacency ──
-        s = COORD_DASH.Replace(s, "$1 sampè' ");
+        s = Rewrite(s, COORD_DASH, "$1 sampè' ");
 
         // ── 4. DEGREES — the scale letters, then the bare sign ──
-        s = DEG_C.Replace(s, "$1 derajat celcius");
-        s = DEG_F.Replace(s, "$1 derajat fahrenheit");
-        s = DEG.Replace(s, "$1 derajat ");
+        s = Rewrite(s, DEG_C, "$1 derajat celcius");
+        s = Rewrite(s, DEG_F, "$1 derajat fahrenheit");
+        s = Rewrite(s, DEG, "$1 derajat ");
 
         // ── 5. `±` IS "ABOUT", NOT A TOLERANCE ──
-        s = PLUS_MINUS.Replace(s, "korang lebbi ");
-        s = PLUS_MINUS_DOUBLED.Replace(s, "$1");
+        s = Rewrite(s, PLUS_MINUS, "korang lebbi ");
+        s = Rewrite(s, PLUS_MINUS_DOUBLED, "$1");
 
         // ── 6. ERA MARKERS — SM before M, always ──
-        s = ERA_SM.Replace(s, "$1 sabellunna Masèhi");
-        s = ERA_M.Replace(s, "$1 Masèhi");
+        s = Rewrite(s, ERA_SM, "$1 sabellunna Masèhi");
+        s = Rewrite(s, ERA_M, "$1 Masèhi");
 
         // ── 7. THE TWO RATE SHAPES THE SHARED TIER CANNOT REACH — before the tier ──
-        s = SLASH_RATE.Replace(s, m =>
+        s = Rewrite(s, SLASH_RATE, m =>
             $" per {UNIT_WORD[m.Groups[1].Value.ToLowerInvariant()]}{ExpWord(m.Groups[2])}");
-        s = PER_RATE.Replace(s, m =>
+        s = Rewrite(s, PER_RATE, m =>
             $"per {UNIT_WORD[m.Groups[1].Value.ToLowerInvariant()]}{ExpWord(m.Groups[2])}");
 
         // ── 8. THE SHARED TIER — after de-grouping and the degree rules, before the decimal rule ──
         s = SYMBOLS(s);
 
         // ── 8b. `dpl`, bound to the metre word the tier has just supplied ──
-        s = DPL.Replace(s, "$1 è attas tasè'");
+        s = Rewrite(s, DPL, "$1 è attas tasè'");
 
         // ── 9. RANGES → `sampè'` — last of the rules that own a dash ──
-        s = RANGE.Replace(s, "$1 sampè' $2");
+        s = Rewrite(s, RANGE, "$1 sampè' $2");
 
         // ── 10. DECIMALS → `koma` — last, because every rule above needs its separator intact ──
-        s = DECIMAL_COMMA.Replace(s, m => Decimal(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, m => Decimal(m.Groups[1].Value, m.Groups[2].Value));
         var full = s;
-        s = DECIMAL_PERIOD.Replace(s, m =>
+        s = Rewrite(s, DECIMAL_PERIOD, m =>
             HOUR_TAIL.IsMatch(full[..m.Index]) ? m.Value : Decimal(m.Groups[1].Value, m.Groups[2].Value));
 
         return s;

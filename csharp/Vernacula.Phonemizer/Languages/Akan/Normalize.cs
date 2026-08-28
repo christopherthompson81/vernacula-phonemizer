@@ -9,6 +9,7 @@
  * `PhonemizeWord("cedi")` falls through to `LatinPhone` as *[kedi]*).
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Akan;
 
@@ -114,53 +115,53 @@ public static class Normalize
         var s = input.Normalize(System.Text.NormalizationForm.FormC);
 
         // 1) HTML ENTITIES AND ZERO-WIDTH MARKS, first.
-        s = ENTITIES.Replace(s, _ => " ");
-        s = ZERO_WIDTH.Replace(s, _ => "");
-        s = PIPE_AFTER_DIGIT.Replace(s, _ => " ");
+        s = Rewrite(s, ENTITIES, _ => " ");
+        s = Rewrite(s, ZERO_WIDTH, _ => "");
+        s = Rewrite(s, PIPE_AFTER_DIGIT, _ => " ");
 
         // 1b) HOMOGLYPHS FOR ⟨ɛ ɔ⟩ — before ANY rule that reads an Akan letter.
-        s = HOMOGLYPH_RE.Replace(s, m => HOMOGLYPH[m.Value]);
+        s = Rewrite(s, HOMOGLYPH_RE, m => HOMOGLYPH[m.Value]);
 
         // 2) THE ELISION APOSTROPHE — the largest class in the language, ×4,930 tw + ×2,664 fat.
-        s = ELISION.Replace(s, m => m.Groups[1].Value + m.Groups[2].Value);
+        s = Rewrite(s, ELISION, m => m.Groups[1].Value + m.Groups[2].Value);
 
         // 3) DIGIT DE-GROUPING, before every other numeric rule.
-        s = GROUP_COMMA.Replace(s, m => COMMA_ALL.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOT_ALL.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => SPACE_ALL.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMA_ALL.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOT_ALL.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => SPACE_ALL.Replace(m.Value, ""));
 
         // 4) UNITS, BEFORE DECIMALS — the number-unit adjacency dies the moment a decimal becomes words.
         //    ⚠ The squared arm runs first for every key, then the plain arm for every key: a `km²` must not
         //    be claimed by the plain `km` rule and left with a stranded exponent.
         for (var i = 0; i < UNITS.Length; i++)
-            s = UNIT_SQUARED[i].Replace(s, m => $"{m.Groups[1].Value} {UNITS[i].Word} {SQUARED}");
+            s = Rewrite(s, UNIT_SQUARED[i], m => $"{m.Groups[1].Value} {UNITS[i].Word} {SQUARED}");
         for (var i = 0; i < UNITS.Length; i++)
-            s = UNIT_PLAIN[i].Replace(s, m => $"{m.Groups[1].Value} {UNITS[i].Word}");
+            s = Rewrite(s, UNIT_PLAIN[i], m => $"{m.Groups[1].Value} {UNITS[i].Word}");
         s = BARE_UNITS(s);
 
         // 5) PERCENT, before the range rule and before decimals. The word is PREPOSED.
         var pctSrc = s;
-        s = PERCENT_RANGE.Replace(pctSrc, m =>
+        s = Rewrite(pctSrc, PERCENT_RANGE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
-            if (Js.Number(COMMA_ALL.Replace(a, "")) >= Js.Number(COMMA_ALL.Replace(b, ""))) return m.Value;
+            if (Js.Number(Rewrite(a, COMMA_ALL, "")) >= Js.Number(Rewrite(b, COMMA_ALL, ""))) return m.Value;
             var word = AlreadyPercented(pctSrc[..m.Index]) ? "" : $"{PERCENT} ";
             return $"{word}{a} {TO} {b}";
         });
         var pctSrc2 = s;
-        s = PERCENT_ONE.Replace(pctSrc2, m =>
+        s = Rewrite(pctSrc2, PERCENT_ONE, m =>
             AlreadyPercented(pctSrc2[..m.Index]) ? m.Groups[1].Value : $"{PERCENT} {m.Groups[1].Value}");
 
         // 6) CURRENCY, also PREPOSED, and before decimals for the same reason. Longest key first.
         for (var i = 0; i < CURRENCY.Length; i++)
-            s = CURRENCY_RE[i].Replace(s, m => $"{CURRENCY[i].Word} {m.Groups[1].Value}");
+            s = Rewrite(s, CURRENCY_RE[i], m => $"{CURRENCY[i].Word} {m.Groups[1].Value}");
 
         // 7) DOTTED ABBREVIATIONS — the INTERIOR dots only (×940 tw + 222 fat).
-        s = INTERIOR_DOT.Replace(s, _ => "");
+        s = Rewrite(s, INTERIOR_DOT, _ => "");
 
         // 8) RANGES — ×1,125 bare pairs in tw and ×264 in fat, read today as two juxtaposed cardinals.
-        s = RANGE.Replace(s, m =>
+        s = Rewrite(s, RANGE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -168,14 +169,14 @@ public static class Normalize
         });
 
         // 9) THE DECIMAL POINT, after every rule that needed to see a dot (steps 3, 4 and 7).
-        s = DECIMAL_DOT.Replace(s, m => $"{m.Groups[1].Value} {POINT} {Fraction(m.Groups[2].Value)}");
-        s = DECIMAL_COMMA.Replace(s, m => $"{m.Groups[1].Value} {POINT} {Fraction(m.Groups[2].Value)}");
+        s = Rewrite(s, DECIMAL_DOT, m => $"{m.Groups[1].Value} {POINT} {Fraction(m.Groups[2].Value)}");
+        s = Rewrite(s, DECIMAL_COMMA, m => $"{m.Groups[1].Value} {POINT} {Fraction(m.Groups[2].Value)}");
 
         // 10) THE ENGLISH ORDINAL SUFFIX — ×528 tw + 254 fat, all inside English text these wikis carry.
-        s = ENGLISH_ORDINAL.Replace(s, _ => "");
+        s = Rewrite(s, ENGLISH_ORDINAL, _ => "");
 
         // 11) THE AMPERSAND — ×230 tw + 91 fat, silent today.
-        s = AMPERSAND.Replace(s, _ => " ne ");
+        s = Rewrite(s, AMPERSAND, _ => " ne ");
 
         return s;
     }

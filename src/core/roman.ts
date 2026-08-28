@@ -70,7 +70,7 @@
  * in both directions: an explicit collision stoplist, and for lowercased input only the shapes that
  * are essentially never words.
  */
-import { tr } from "./provenance.ts";
+import { rewrite } from "./provenance.ts";
 
 /** Canonical Roman numeral form. Non-canonical spellings (IIII, XXXX, IC) are deliberately rejected —
  *  they are far more likely to be an acronym or typo than an intended numeral. */
@@ -204,7 +204,7 @@ export function normalizeRomans(text: string, policy: RomanPolicy = {}): string 
     // short-circuits every text with no Latin at all, which is the bulk of the engines this pass exists for.
     if (!/[ivxlcdmIVXLCDM]/u.test(text)) return text;
     const hasLower = /\p{Ll}/u.test(text);
-    return tr(text, TOKEN, (tok, offset: number) => {
+    return rewrite(text, TOKEN, (tok, offset: number) => {
         const lower = tok.toLowerCase();
         if (policy.exclude?.has(lower)) return tok; // this language's own homograph — never a numeral
         // GLUED TO DIGITS ⇒ not a numeral but part of an alphanumeric code: the C of `39C`, the B of

@@ -20,7 +20,7 @@
 import { MANIFEST } from "./manifest.ts";
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -77,14 +77,14 @@ const DOTTED_ABBREV = MANIFEST.dottedAbbreviations; // afrikaans.jsonc
 // The keys contain DOTS (m.p.u), so each must be regex-escaped before joining the alternation.
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV)
     .sort((a, b) => b.length - a.length)
-    .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"))
+    .map((k) => rewrite(k, /[.*+?^${}()|[\]\\]/gu, "\\$&"))
     .join("|");
 // Only the DOTTED keys may appear WITHOUT their trailing dot (`m.p.u` before a space/paren/end). A plain
 // word like `dr` is NEVER matched bare — it is the start of "Dromaeosauridae" and would misfire.
 const BARE_ALT = Object.keys(DOTTED_ABBREV)
     .filter((k) => k.includes("."))
     .sort((a, b) => b.length - a.length)
-    .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"))
+    .map((k) => rewrite(k, /[.*+?^${}()|[\]\\]/gu, "\\$&"))
     .join("|");
 
 const SIGN = MANIFEST.signWords; // afrikaans.jsonc — one word per math/sign symbol
@@ -123,7 +123,7 @@ export function normalizeAfrikaans(input: string): string {
 
     // 0) DECODE THE HTML AMPERSAND FIRST. `&amp;` appears verbatim in the corpus (B&amp;B, Qatar Airways
     //    &amp;) — an HTML-escaped `&` that is otherwise just a letter run "amp" and dropped with its neighbours.
-    s = tr(s, /&amp;/giu, " & ");
+    s = rewrite(s, /&amp;/giu, " & ");
 
     // 0b) THE INDEFINITE ARTICLE, in every spelling the corpus uses. `'n` is [ə], and `phonemizeWord`
     //    recognises exactly two spellings of it: U+0027 `'n` and U+2019 `’n`. The corpus writes it
@@ -132,27 +132,27 @@ export function normalizeAfrikaans(input: string): string {
     //    instances, and `ń` read as *en* [ɛn]. Fold them all onto the canonical `'n` here; the article is
     //    the one thing this layer must not get wrong. A word boundary after the `n` is required, so an
     //    opening quote on an n-word (`‘nuwe’`) is untouched.
-    s = tr(s, /(?<![\p{L}\p{M}])[‘’ʼ`´]n(?![\p{L}\p{M}])/gu, "'n");
-    s = tr(s, /(?<![\p{L}\p{M}])ń(?![\p{L}\p{M}])/gu, "'n");
+    s = rewrite(s, /(?<![\p{L}\p{M}])[‘’ʼ`´]n(?![\p{L}\p{M}])/gu, "'n");
+    s = rewrite(s, /(?<![\p{L}\p{M}])ń(?![\p{L}\p{M}])/gu, "'n");
 
     // 1) ERA MARKERS and MULTI-DOT ABBREVIATIONS. FIRST, before the single-dot rule — otherwise the
     //    single-dot rule consumes `v.`/`d.` and leaves `C.`/`i.` behind as an interior phrase break.
     //    Also before the dotted-capital rule, so `V.C.` is not offered to it.
     for (const [body, word] of MULTI_DOT) {
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=\\s*$)`, "giu"), `${word}.`);
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}`, "giu"), word);
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=\\s*$)`, "giu"), `${word}.`);
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}`, "giu"), word);
     }
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS. `V.S.`
     //    was *f . s .* — two unpronounceable stops and two spurious phrase breaks. Also `Wêreld Oorlog II`
     //    (the regnal rule below needs the digit, and the roman pass has already converted II → 2).
-    s = tr(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
 
     // 3) SINGLE-DOT ABBREVIATIONS. Three branches. The dotted forms come FIRST: mid-sentence the dot is
     //    CONSUMED so it cannot become a phrase break, and at a phrase end it is kept (there it really is the
     //    sentence end). The `m.p.u` form may also appear WITHOUT a trailing dot (before a space, paren or
     //    end) — the bare key covers it last, so a dotted instance is never stripped of its sentence pause.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -160,7 +160,7 @@ export function normalizeAfrikaans(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -168,7 +168,7 @@ export function normalizeAfrikaans(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}.`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${BARE_ALT})(?=\\s*(?:[\\p{L}\\d(]|[,.;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${BARE_ALT})(?=\\s*(?:[\\p{L}\\d(]|[,.;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -183,7 +183,7 @@ export function normalizeAfrikaans(input: string): string {
     //    BEFORE the clock rule so a digit run is not first claimed as a time. CASE-INSENSITIVE: the suffix
     //    is orthography, not a lowercase convention, and a capitalized head (`11De`, a heading or a
     //    title-cased date) would otherwise read as the cardinal with the suffix stranded as a word.
-    s = tr(s, /(?<![\d,.])(\d{1,4})(?:ste[n]?|de[n]?|e)(?![\p{L}\p{M}])/giu, (m0, d: string) =>
+    s = rewrite(s, /(?<![\d,.])(\d{1,4})(?:ste[n]?|de[n]?|e)(?![\p{L}\p{M}])/giu, (m0, d: string) =>
         ordinalWord(Number(d)) ?? m0);
 
     // 5) CLOCK, in both written forms, BEFORE the number tokenizer sees the separator. The undotted
@@ -204,28 +204,28 @@ export function normalizeAfrikaans(input: string): string {
     // corpus has three (`4:41.30`, `2:11:60`, `1:09:02`). Guarding on `:` alone let `4:41.30` through: the
     // clock claimed `4:41` and stranded `.30` as a phrase break plus a bare number. A plain `.` may NOT be
     // rejected outright — a clock at a sentence end (`begin om 11:20.`) is followed by one.
-    s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![:.]?\d)(\s*(?:vm|nm))?/giu,
+    s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![:.]?\d)(\s*(?:vm|nm))?/giu,
         (_m, h: string, min: string, p?: string) => clock(h, min, period(p)));
     // THE DOT FORM IS CONTEXT-BOUND, and must be. In this corpus the dot is the DECIMAL POINT, so
     // `H.MM` and `N.NN` are the same string: the corpus's one dot-clock is `15.00 GUT` and its decimals
     // include `6.34 duim`, `3.50-meter`, `1.50`, `2.30`. An unguarded hour/minute range check read every
     // one of them as a time — `6.34 duim` became *ses vier en dertig duim*. So the dot form is claimed
     // ONLY with a timezone or an AM/PM marker after it, which is the only evidence the corpus offers.
-    s = tr(s, /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:-])(?=\s*(?:GUT|UTC|SAST|GMT|vm|nm))(\s*(?:vm|nm))?/giu,
+    s = rewrite(s, /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:-])(?=\s*(?:GUT|UTC|SAST|GMT|vm|nm))(\s*(?:vm|nm))?/giu,
         (_m, h: string, min: string, p?: string) => clock(h, min, period(p)));
-    s = tr(s, /(?<![\d:])([01]?\d|2[0-3])([0-5]\d)(?=\s*(?:UTC|GUT))/gu,
+    s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3])([0-5]\d)(?=\s*(?:UTC|GUT))/gu,
         (_m, h: string, min: string) => clock(h, min, ""));
     // An HOUR + AM/PM without a separator (`5vm`, `10:00vm`'s tail) is a clock too. `vm` ONLY: the corpus's
     // separator-less instances are both `vm`, and admitting `nm` here reads the nanometre `10nm` as *tien
     // namiddag*. A spaced or dotted `n.m.`/`nm` still reaches the forms above.
-    s = tr(s, /(?<![\d:])([01]?\d|2[0-3])(vm)(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3])(vm)(?![\p{L}\p{M}])/giu,
         (_m, h: string) => `${numberToWords(Number(h))} ${MANIFEST.clockPeriods["vm"]}`);
 
     // 6) COMMA-GROUPED THOUSANDS. The comma is the ENGLISH grouping separator here (17,500, 100,000) — NOT
     //    a decimal. It is consumed before the symbol tier so the tier sees a plain digit run, and before the
     //    ordinal rule's lookbehind could misfire. Two passes, because the groups overlap on the shared digit.
     for (let i = 0; i < 2; i++)
-        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
+        s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
 
     // 6b) A COMMA DECIMAL, folded onto the dot form. STANDARD Afrikaans marks the decimal with a COMMA
     //     (South Africa's official convention, as in Dutch); this corpus is the exception, not the rule,
@@ -235,7 +235,7 @@ export function normalizeAfrikaans(input: string): string {
     //     had no corpus instance and read as a CLAUSE PAUSE inside the number: *twaalf , vyf*. Folding to
     //     `12.5` here means the TOKEN, the "komma" reading and the symbol tier's adjacency all apply
     //     unchanged. A clause comma is written with a following SPACE ("In 1990, 5 mense") and is untouched.
-    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,.])/gu, "$1.$2");
+    s = rewrite(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,.])/gu, "$1.$2");
 
     // 7) VERSION DOTS, NOT the decimal. The dot IS the decimal point in this corpus (12.8, 2.3) and the
     //    TOKEN swallows `\d+\.\d+` to emit "komma" between the parts — the shared symbol tier needs the raw
@@ -243,13 +243,13 @@ export function normalizeAfrikaans(input: string): string {
     //    NOTHING ELSE: the rule is bounded to those two shapes — three or more integer digits plus a
     //    single trailing letter, or the explicit figure reference. Claiming any `\d+\.\d+[a-z]` read a
     //    decimal glued to its unit as a version, so `12.5km` came out *twaalf punt vyf kilometer*.
-    s = tr(s, /(?<![\d.,])(\d{3,})\.(\d+)(?=[a-z](?![a-z]))/giu, "$1 punt $2");
-    s = tr(s, /Figuur (\d+)\.(\d+)/giu, "Figuur $1 punt $2");
+    s = rewrite(s, /(?<![\d.,])(\d{3,})\.(\d+)(?=[a-z](?![a-z]))/giu, "$1 punt $2");
+    s = rewrite(s, /Figuur (\d+)\.(\d+)/giu, "Figuur $1 punt $2");
 
     // 8) RATES and UNITS the shared tier cannot compose. `m.p.u` (myl per uur = mph) was already expanded by
     //    step 3; `600Mbit/s` (megabits per sekonde) is a compound unit the tier's one-letter keys cannot
     //    express. The `km/h`/`km/u`/`m/s` forms go to the shared tier.
-    s = tr(s, /(\d+)\s*Mbit\/s(?![\p{L}\p{M}])/giu, "$1 megabit per sekonde");
+    s = rewrite(s, /(\d+)\s*Mbit\/s(?![\p{L}\p{M}])/giu, "$1 megabit per sekonde");
 
     // 9) REGNAL ORDINALS. `Wêreld Oorlog II` → the shared Roman pass already emitted `Wêreld Oorlog 2`; the
     //    digit reads as an ORDINAL (*tweede Wêreldoorlog*), matching how Afrikaans actually names the wars.
@@ -259,7 +259,7 @@ export function normalizeAfrikaans(input: string): string {
     //    (`Wêreldoorlog II`), and the shared roman pass only converts the two-letter `II` — so a matcher
     //    for "two words + digit" covered 2 of the 5 instances and left `Wêreldoorlog II` a cardinal and
     //    both `… Oorlog I` reading as the stray letter *i*. Take the Roman numeral here as well.
-    s = tr(s, /W[êe]reld ?[Oo]orlog (\d+|I{1,3}V?|IV)(?![\p{L}\p{M}])/gu, (m0: string, d: string) => {
+    s = rewrite(s, /W[êe]reld ?[Oo]orlog (\d+|I{1,3}V?|IV)(?![\p{L}\p{M}])/gu, (m0: string, d: string) => {
         const roman: Record<string, number> = { I: 1, II: 2, III: 3, IV: 4 };
         const n = /^\d+$/u.test(d) ? Number(d) : roman[d];
         const ord = n === undefined ? undefined : ordinalWord(n);
@@ -269,9 +269,9 @@ export function normalizeAfrikaans(input: string): string {
     // 10) DEGREES. `+30°C` came out as the bare consonant *s*; `90 ° F-hitte` dropped the sign and left a
     //     lone F. The scale letters are expanded only DIRECTLY after a degree sign, where they cannot be
     //     anything else. AFTER the rates so no `°` rule sees a speed, and after the clock.
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grade Celsius");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grade Fahrenheit");
-    s = tr(s, /(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 grade");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grade Celsius");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grade Fahrenheit");
+    s = rewrite(s, /(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 grade");
 
     // 11) SIGNS. `+30°C`, `UTC+1` — the plus was dropped outright. `&` → *en* (Afrikaans "en" = and); the
     //     tight `X&Y` form (`B&B`) is spelled with LETTER NAMES, because the shared initialism pass cannot
@@ -283,8 +283,8 @@ export function normalizeAfrikaans(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, and ⚠ both are SIGN names rather than
     //    OPERATION names, which is what ± needs: it marks a TOLERANCE, not an addition.
-    s = tr(s, /±/gu, ` ${SIGN.plusMinus} `);
-    s = tr(s, /\+\s?(?=\d)/gu, ` ${SIGN.plus} `);
+    s = rewrite(s, /±/gu, ` ${SIGN.plusMinus} `);
+    s = rewrite(s, /\+\s?(?=\d)/gu, ` ${SIGN.plus} `);
     // ⚠ U+2212 IS IN THE CLASS AND THE ASCII HYPHEN'S GUARDS ARE UNCHANGED. The MINUS SIGN is a distinct
     // code point whose only Unicode meaning is the arithmetic operator, and it is not on any keyboard —
     // whoever typed it meant a minus. It is not attested in this language's mined corpus, which is why an
@@ -292,20 +292,20 @@ export function normalizeAfrikaans(input: string): string {
     // dropping a sign INVERTS the value it belongs to. The hyphen is the ambiguous one and keeps every
     // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
     // still refused by the lookbehind.
-    s = tr(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, `${SIGN.minus} $1`);
-    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) =>
+    s = rewrite(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, `${SIGN.minus} $1`);
+    s = rewrite(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) =>
         `${LETTER_NAME[a.toLowerCase()] ?? a} ${SIGN.ampersand} ${LETTER_NAME[b.toLowerCase()] ?? b}`);
-    s = tr(s, /\s&\s/gu, ` ${SIGN.ampersand} `);
-    s = tr(s, /(\S)\s*=\s*(\S)/gu, `$1 ${SIGN.equals} $2`);
-    s = tr(s, /(\d)\s*<\s*(\d)/gu, `$1 ${SIGN.lessThan} $2`);
-    s = tr(s, /(\d)\s*>\s*(\d)/gu, `$1 ${SIGN.greaterThan} $2`);
-    s = tr(s, /(\d)\s*×\s*(\d)/gu, `$1 ${SIGN.times} $2`);
-    s = tr(s, /(\d)\s*÷\s*(\d)/gu, `$1 ${SIGN.dividedBy} $2`);
+    s = rewrite(s, /\s&\s/gu, ` ${SIGN.ampersand} `);
+    s = rewrite(s, /(\S)\s*=\s*(\S)/gu, `$1 ${SIGN.equals} $2`);
+    s = rewrite(s, /(\d)\s*<\s*(\d)/gu, `$1 ${SIGN.lessThan} $2`);
+    s = rewrite(s, /(\d)\s*>\s*(\d)/gu, `$1 ${SIGN.greaterThan} $2`);
+    s = rewrite(s, /(\d)\s*×\s*(\d)/gu, `$1 ${SIGN.times} $2`);
+    s = rewrite(s, /(\d)\s*÷\s*(\d)/gu, `$1 ${SIGN.dividedBy} $2`);
 
     // 12) FRACTIONS (×1: `1/5 duim`). Afrikaans builds these on the ordinal, as Dutch does: 1/5 → *een vyfde*,
     //     3/4 → *drie vierde*, and 1/2 is the suppletive *een half*. The trailing guard keeps a date or a
     //     ratio chain (`1/5/2020`) out. LAST, so no earlier rule has to work around a slash.
-    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return num === 1 ? FRAC.oneHalf : `${numberToWords(num)} ${FRAC.halves}`;
         const ord = ordinalWord(den);

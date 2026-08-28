@@ -39,7 +39,7 @@
  * markers ×6 (BCE ×4, BC ×1, A.D. ×1), n.k. ×2, degrees ×1, currency signs ×0.
  */
 import { MANIFEST as DEF } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Ascending pairs are SPANS, non-ascending ones are scores or seasons. Measured, not assumed: of the 18
  *  `N-N` shapes in the corpus, all 13 ascending ones are genuine spans (1469-1539, 1000-1300, 10-15,
@@ -61,7 +61,7 @@ const RANGE = /(?<![\d.,\p{L}])(\d+)\s?[-–]\s?(\d+)(?![\d.,\p{L}])/gu;
 function expandDotted(s: string, body: string, word: string): string {
     const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");  // space, NBSP
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
-    return s.replace(atEnd, `${word}.`).replace(inline, word);
+    return rewrite(rewrite(s, atEnd, `${word}.`), inline, word);
 }
 
 /** Era markers. `Baada ya Kristo` is attested in the corpus itself ("1000-1300 Baada ya Kristo"); its
@@ -93,7 +93,7 @@ const DOTTED: readonly (readonly [string, string])[] = [
  *  embedded non-Latin run is untouched. */
 function foldLatinDiacritics(s: string): string {
     if (!/[^\p{ASCII}]/u.test(s)) return s;
-    return s.replace(/\p{Script=Latin}/gu, (ch) => {
+    return rewrite(s, /\p{Script=Latin}/gu, (ch) => {
         const base = ch.normalize("NFD").replace(/\p{Mn}+/gu, "");
         return base === "" ? ch : base;
     });
@@ -111,7 +111,7 @@ export function normalizeSwahili(input: string): string {
     // 2) U+00BA MASCULINE ORDINAL → U+00B0 DEGREE. The corpus's one temperature is written `+30ºC` with
     //    the ordinal indicator, which is neither punctuation nor a letter, so it survived TOKEN untouched
     //    and was EMITTED RAW into the phoneme stream ("thelathini º k"). Must precede step 5.
-    s = tr(s, /º/gu, "°");
+    s = rewrite(s, /º/gu, "°");
 
     // 3) THOUSANDS DE-GROUPING, before anything else numeric: ⚠ the grouping
     //    comma is otherwise read as clause punctuation and the tail as a separate number — `1,000` came
@@ -122,7 +122,7 @@ export function normalizeSwahili(input: string): string {
     //    de-group a number followed by its own sentence comma or period, so `24,000, na wengine` reads
     //    *ishirini na nne , SIFURI ,* — the group splits off and `000` is spoken as zero. The mark is only a
     //    separator when a DIGIT follows it: `(?![\d]|,\d)`.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
 
     // 4) CURRENCY is the SHARED tier's now (`currencyPrefix` in swahili.ts). Safe to move because
     //    swahili.ts runs SYMBOLS *before* this pass, so the tier still sees the sign adjacent to its
@@ -161,19 +161,19 @@ export function normalizeSwahili(input: string): string {
     //    sign position needs.
     //
     //    ± is then this language's own two words juxtaposed, both lifted from rules in this file.
-    s = tr(s, /±/gu, " plas hasi ");
-    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+    s = rewrite(s, /±/gu, " plas hasi ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "hasi ");
-    s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 plas ");
-    s = tr(s, /(^|\s)\+\s?(?=\d)/gu, "$1plas ");
-    s = tr(s, /(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])/gui, "nyuzi joto $1 Selsiasi");
-    s = tr(s, /([+-]?)(\d[\d.,]*)\s?°\s?F(?![\p{L}\p{M}])/gui, "nyuzi joto $2 Fahrenheit");
-    s = tr(s, /([+-]?)(\d[\d.,]*)\s?°/gu, "nyuzi joto $2");
+    s = rewrite(s, /(\S)\+\s?(?=\d)/gu, "$1 plas ");
+    s = rewrite(s, /(^|\s)\+\s?(?=\d)/gu, "$1plas ");
+    s = rewrite(s, /(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])/gui, "nyuzi joto $1 Selsiasi");
+    s = rewrite(s, /([+-]?)(\d[\d.,]*)\s?°\s?F(?![\p{L}\p{M}])/gui, "nyuzi joto $2 Fahrenheit");
+    s = rewrite(s, /([+-]?)(\d[\d.,]*)\s?°/gu, "nyuzi joto $2");
 
     // 6) RANGES → `hadi` ("until/up to"), which the corpus itself uses for spans written in words
     //    ("asilimia 3 hadi 5 ya watoto", "futi 328 hadi …", "hadi kilomita 480"). Ascending only; see
     //    RANGE above for why. After de-grouping, so a grouped endpoint is already one token.
-    s = tr(s, RANGE, (whole, a: string, b: string) =>
+    s = rewrite(s, RANGE, (whole, a: string, b: string) =>
         Number(a) < Number(b) ? `${a} hadi ${b}` : whole);
 
     // 7) DECIMALS. The dot was reaching `clausePunctuation` and becoming a SENTENCE BREAK in the middle of
@@ -183,19 +183,19 @@ export function normalizeSwahili(input: string): string {
     //    path speaks them one at a time. ×28.
     //    The trailing letter guard is what keeps the 802.11a/b/g/n Wi-Fi designations (×5) out — with it,
     //    none of them match at all. Must come after steps 4–6, all of which need the number intact.
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d\p{L}])/gu, (_m, int: string, frac: string) =>
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d\p{L}])/gu, (_m, int: string, frac: string) =>
         `${int} nukta ${[...frac].join(" ")}`);
 
     // 8) DOTTED abbreviations before BARE ones (⚠ multi-dot before single-dot, era
     //    markers before generic abbreviations) — `B.C.E.` must be claimed before `BC` can bite into it.
     for (const [body, word] of DOTTED) s = expandDotted(s, body, word);
-    for (const [re, word] of BARE_ERA) s = tr(s, re, word);
+    for (const [re, word] of BARE_ERA) s = rewrite(s, re, word);
 
     // 9) A SPACED DASH is a parenthetical break and was being dropped entirely, so 22 clause boundaries
     //    carried no pause at all ("kwa usahihi - pia jaribu", "ni Mungu mmoja - Dini ya Kiyahudi").
     //    LAST, so that step 6 has already claimed every dash that sits between two numbers — a sports
     //    score like "26 - 00" must keep its bare juxtaposition rather than gain a spurious pause.
-    s = tr(s, /(?<![\d])\s+[-–—]+\s+(?![\d])/gu, ", ");
+    s = rewrite(s, /(?<![\d])\s+[-–—]+\s+(?![\d])/gu, ", ");
 
     // THE RELATIONAL AND DIVISION SIGNS. Swahili is SVO, so all four read infix.
     //
@@ -215,10 +215,10 @@ export function normalizeSwahili(input: string): string {
     // ⚠ `chini ya`'s two WIKI hits are the wrong sense ("Chini ya Elimu kwa wote" — UNDER the programme), so
     // here the corpus is the better source and the register tier the weaker one — the reverse of the usual
     // order in this issue, and a reminder that the tiers rank haystacks, not individual findings.
-    s = tr(s, /\s?=\s?/gu, " sawa na ");
-    s = tr(s, /\s?<\s?/gu, " chini ya ");
-    s = tr(s, /\s?>\s?/gu, " zaidi ya ");
-    s = tr(s, /\s?÷\s?/gu, " kugawanya kwa ");
+    s = rewrite(s, /\s?=\s?/gu, " sawa na ");
+    s = rewrite(s, /\s?<\s?/gu, " chini ya ");
+    s = rewrite(s, /\s?>\s?/gu, " zaidi ya ");
+    s = rewrite(s, /\s?÷\s?/gu, " kugawanya kwa ");
 
     return s;
 }

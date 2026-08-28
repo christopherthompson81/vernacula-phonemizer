@@ -4,6 +4,7 @@
  * Ported from src/languages/japanese/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Japanese;
 
@@ -16,7 +17,7 @@ public static class Normalize
      *  segmentText's hiragana-specific は→わ particle heuristic cannot corrupt an internal は — はち would
      *  otherwise surface as わち. Same reason japanese.ts folds readCounter's output. */
     private static string ToKatakana(string s) =>
-        HIRAGANA_RANGE.Replace(s, c => char.ConvertFromUtf32(Js.CodePointAt0(c.Value) + 0x60));
+        Rewrite(s, HIRAGANA_RANGE, c => char.ConvertFromUtf32(Js.CodePointAt0(c.Value) + 0x60));
 
     /** Digit → its katakana name, for the places Japanese reads digits ONE AT A TIME rather than composing a
      *  cardinal: the fractional part of a decimal (6.34 is ろくてん*さんよん*, never ろくてんさんじゅうよん).
@@ -107,11 +108,11 @@ public static class Normalize
      *  lets the existing engine do the pronouncing. */
     public static string NormalizeJapanese(string input)
     {
-        var s = FULLWIDTH_LATIN.Replace(
-            FULLWIDTH_DIGIT.Replace(input, d => char.ConvertFromUtf32(Js.CodePointAt0(d.Value) - 0xfee0)),
+        var s = Rewrite(
+            Rewrite(input, FULLWIDTH_DIGIT, d => char.ConvertFromUtf32(Js.CodePointAt0(d.Value) - 0xfee0)), FULLWIDTH_LATIN,
             d => char.ConvertFromUtf32(Js.CodePointAt0(d.Value) - 0xfee0));
 
-        s = DECLARED_RUBY.Replace(s, m =>
+        s = Rewrite(s, DECLARED_RUBY, m =>
         {
             var r1 = m.Groups[2].Success ? m.Groups[2].Value : null;
             var r2 = m.Groups[4].Success ? m.Groups[4].Value : null;
@@ -122,7 +123,7 @@ public static class Normalize
         // The guard is EQUALITY WITH THE COMPUTED READING: a parenthesised kana run is not always furigana
         // (a gloss, an alternate reading, a katakana loan), so only an annotation saying exactly what the
         // engine would already say may be dropped — anything else is kept and read as ordinary text.
-        s = PARENTHESISED_RUBY.Replace(s, m =>
+        s = Rewrite(s, PARENTHESISED_RUBY, m =>
         {
             var baseW = m.Groups[1].Value;
             var ruby = m.Groups[2].Success ? m.Groups[2].Value : m.Groups[3].Success ? m.Groups[3].Value : "";
@@ -132,17 +133,17 @@ public static class Normalize
         for (var prev = ""; prev != s;)
         {
             prev = s;
-            s = GROUPED_THOUSANDS.Replace(s, "");
+            s = Rewrite(s, GROUPED_THOUSANDS, "");
         }
 
         // 分の must be rewritten BEFORE the counter fusion in Japanese.cs can read 分 as the MINUTES counter
         // (3分の1 → *さんぷんのいち). Katakana ブンノ is out of the fusion's reach. Only BETWEEN TWO DIGITS: most
         // 分の in running text is 自分の / 部分の, where the reading is already ぶん and a rewrite corrupts it.
-        s = BUNNO.Replace(s, "$1ブンノ");
+        s = Rewrite(s, BUNNO, "$1ブンノ");
 
-        s = SLASH_FRACTION.Replace(s, "$2ブンノ$1");
+        s = Rewrite(s, SLASH_FRACTION, "$2ブンノ$1");
 
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             var h = Js.Number(m.Groups[1].Value);
             var min = Js.Number(m.Groups[2].Value);
@@ -151,38 +152,38 @@ public static class Normalize
                 : $"{Js.NumberToString(h)}時{Js.NumberToString(min)}分";
         });
 
-        s = DECIMAL_RE.Replace(s, m =>
+        s = Rewrite(s, DECIMAL_RE, m =>
             $"{m.Groups[1].Value}点{string.Concat(m.Groups[2].Value.Select(d => DIGIT_KANA[d - '0']))}");
 
-        s = RANGE.Replace(s, "から");
+        s = Rewrite(s, RANGE, "から");
 
         // ⚠ The trailing guard rejects a LATIN letter, not any letter: Japanese is unspaced, so what follows a
         // temperature is normally kana — and kana is `\p{L}`, so a `\p{L}` guard would reject the ordinary case
         // (`20℃を`). Only a Latin letter can form the `°Cm` run-on the guard exists to stop.
-        s = CELSIUS.Replace(s, "$1度");
-        s = FAHRENHEIT.Replace(s, "華氏$1度");
-        s = DEGREE.Replace(s, "$1度");
+        s = Rewrite(s, CELSIUS, "$1度");
+        s = Rewrite(s, FAHRENHEIT, "華氏$1度");
+        s = Rewrite(s, DEGREE, "$1度");
 
-        s = MINUS.Replace(s, "$1マイナス$2");
-        s = PLUS_MINUS.Replace(s, " プラスマイナス ");
-        s = PLUS_LEADING.Replace(s, "$1プラス$2");
-        s = PLUS_ATTACHED.Replace(s, "$1プラス$2");
+        s = Rewrite(s, MINUS, "$1マイナス$2");
+        s = Rewrite(s, PLUS_MINUS, " プラスマイナス ");
+        s = Rewrite(s, PLUS_LEADING, "$1プラス$2");
+        s = Rewrite(s, PLUS_ATTACHED, "$1プラス$2");
 
         // ⚠ The inequalities are POSTPOSED in Japanese (`A < B` is 「AはBより小さい」), so these two rules consume
         // BOTH operands and rebuild the clause. Substituting より小さい infix the way the European languages do
         // would invert the comparison. They therefore fire only between two digits; elsewhere the sign is
         // dropped as before.
-        s = LESS_THAN.Replace(s, "$1は$2より小さい");
-        s = GREATER_THAN.Replace(s, "$1は$2より大きい");
-        s = EQUALS_RE.Replace(s, "イコール");
-        s = DIVIDE.Replace(s, "わる");
+        s = Rewrite(s, LESS_THAN, "$1は$2より小さい");
+        s = Rewrite(s, GREATER_THAN, "$1は$2より大きい");
+        s = Rewrite(s, EQUALS_RE, "イコール");
+        s = Rewrite(s, DIVIDE, "わる");
 
-        s = TIMES.Replace(s, "$1かける");
+        s = Rewrite(s, TIMES, "$1かける");
 
         // Latin initialisms LAST, so the rules above still see the ASCII they key on. The boundary lookarounds
         // are ALL of Latin, not `[A-Za-z]`: an ASCII-only guard does not see the accented letter of `São`, and
         // the isolated capital `S` was spelled out as a letter name.
-        s = INITIALISM.Replace(s, m => Spell(m.Value));
+        s = Rewrite(s, INITIALISM, m => Spell(m.Value));
         foreach (var (k, v) in WORD_ACRONYM)
             if (HAS_LOWER.IsMatch(k))
                 s = s.Replace(k, v, StringComparison.Ordinal);
@@ -191,7 +192,7 @@ public static class Normalize
     }
 
     private static string ToHiragana(string s) =>
-        KATAKANA_RANGE.Replace(s, c => char.ConvertFromUtf32(Js.CodePointAt0(c.Value) - 0x60));
+        Rewrite(s, KATAKANA_RANGE, c => char.ConvertFromUtf32(Js.CodePointAt0(c.Value) - 0x60));
 
     /** The five vowel phonemes, longest-first so ɯᵝ and the mid-lowered e̞/o̞ are matched whole. */
     private static readonly IReadOnlyList<string> VOWEL_IPA =

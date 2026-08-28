@@ -5,6 +5,7 @@
  * and the three measured disambiguations.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Norwegian;
 
@@ -118,41 +119,41 @@ public static class Normalize
         do
         {
             prev = t;
-            t = SPACE_GROUP.Replace(t, _ => "");
+            t = Rewrite(t, SPACE_GROUP, _ => "");
         } while (t != prev);
 
         // 2) ENGLISH-STYLE COMMA GROUPING — before the decimal rule.
         do
         {
             prev = t;
-            t = COMMA_GROUP.Replace(t, _ => "");
+            t = Rewrite(t, COMMA_GROUP, _ => "");
         } while (t != prev);
 
         // 3) DECIMAL COMMA; the fractional part is spoken digit by digit.
-        t = DECIMAL_COMMA.Replace(t, m =>
+        t = Rewrite(t, DECIMAL_COMMA, m =>
             $"{m.Groups[1].Value} komma {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 4) CLOCK, COLON FORM ONLY.
-        t = CLOCK.Replace(t, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
+        t = Rewrite(t, CLOCK, m => $"{m.Groups[1].Value} {m.Groups[2].Value}");
 
         // 5) ABBREVIATIONS, dot consumed.
-        foreach (var (re, word) in ABBREV) t = re.Replace(t, _ => word);
+        foreach (var (re, word) in ABBREV) t = Rewrite(t, re, _ => word);
 
         // 6) PERCENT.
-        t = PERCENT.Replace(t, m => $"{m.Groups[1].Value} prosent");
+        t = Rewrite(t, PERCENT, m => $"{m.Groups[1].Value} prosent");
 
         // 7) DEGREES, BEFORE the unit rules.
-        t = DEG_C_SIGN.Replace(t, _ => "°C");
-        t = DEG_F_SIGN.Replace(t, _ => "°F");
-        t = DEG_C.Replace(t, m => $"{m.Groups[1].Value} grader celsius");
-        t = DEG_F.Replace(t, m => $"{m.Groups[1].Value} grader fahrenheit");
-        t = DEG_BARE.Replace(t, m => $"{m.Groups[1].Value} grader");
+        t = Rewrite(t, DEG_C_SIGN, _ => "°C");
+        t = Rewrite(t, DEG_F_SIGN, _ => "°F");
+        t = Rewrite(t, DEG_C, m => $"{m.Groups[1].Value} grader celsius");
+        t = Rewrite(t, DEG_F, m => $"{m.Groups[1].Value} grader fahrenheit");
+        t = Rewrite(t, DEG_BARE, m => $"{m.Groups[1].Value} grader");
 
         // 8) SQUARED / CUBED UNITS.
-        foreach (var (re, word) in SQUARED) t = re.Replace(t, _ => word);
+        foreach (var (re, word) in SQUARED) t = Rewrite(t, re, _ => word);
 
         // 9) NUMERIC DATES `D.M.YYYY`, before the ordinal-dot rule.
-        t = NUMERIC_DATE.Replace(t, m =>
+        t = Rewrite(t, NUMERIC_DATE, m =>
         {
             var day = ORDINALS.TryGetValue(Js.NumberToString(Js.Number(m.Groups[1].Value)), out var d) ? d : null;
             var moIdx = Js.Number(m.Groups[2].Value);
@@ -165,7 +166,7 @@ public static class Normalize
         });
 
         // 10) ORDINAL RANGES, before the ordinal-dot and cardinal-range rules.
-        t = ORDINAL_RANGE.Replace(t, m =>
+        t = Rewrite(t, ORDINAL_RANGE, m =>
         {
             var first = ORDINALS.TryGetValue(Js.NumberToString(Js.Number(m.Groups[1].Value)), out var a) ? a : null;
             var second = ORDINALS.TryGetValue(Js.NumberToString(Js.Number(m.Groups[2].Value)), out var b) ? b : null;
@@ -174,27 +175,27 @@ public static class Normalize
 
         // 11) ORDINAL DOT — the largest defect in the language.
         // ⚠ The key is the RAW digits, not `String(Number(n))` as in steps 9/10 — so `03.` declines.
-        t = ORDINAL_DOT.Replace(t, m =>
+        t = Rewrite(t, ORDINAL_DOT, m =>
             ORDINALS.TryGetValue(m.Groups[1].Value, out var o) ? o : m.Value);
 
         // 12) RANGES.
-        t = RANGE.Replace(t, m => $"{m.Groups[1].Value} til {m.Groups[2].Value}");
+        t = Rewrite(t, RANGE, m => $"{m.Groups[1].Value} til {m.Groups[2].Value}");
 
         // 13) CURRENCY — the sign precedes the amount, the word follows it.
         for (var i = 0; i < CURRENCY.Length; i++)
         {
             var word = CURRENCY[i].Word;
-            t = CURRENCY_RE[i].Replace(t, m => $"{m.Groups[1].Value} {word}");
+            t = Rewrite(t, CURRENCY_RE[i], m => $"{m.Groups[1].Value} {word}");
         }
 
         // 14) SIGNED NUMBERS.
-        t = SIGNED.Replace(t, m =>
+        t = Rewrite(t, SIGNED, m =>
             $"{(m.Groups[1].Value == "+" ? "pluss" : "minus")} {m.Groups[2].Value}");
 
         // 15) ARITHMETIC AND RELATIONAL SIGNS.
-        t = INFIX_PLUS.Replace(t, m => $"{m.Groups[1].Value} pluss {m.Groups[2].Value}");
-        foreach (var (re, word) in RELATIONAL) t = re.Replace(t, _ => word);
-        t = SPACE_RUN.Replace(t, _ => " ");
+        t = Rewrite(t, INFIX_PLUS, m => $"{m.Groups[1].Value} pluss {m.Groups[2].Value}");
+        foreach (var (re, word) in RELATIONAL) t = Rewrite(t, re, _ => word);
+        t = Rewrite(t, SPACE_RUN, _ => " ");
 
         // THE SHARED TIER LAST.
         return SYMBOLS(t);

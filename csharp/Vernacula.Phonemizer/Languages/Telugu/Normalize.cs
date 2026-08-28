@@ -4,6 +4,7 @@
  * Ported from src/languages/telugu/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Telugu;
 
@@ -96,12 +97,12 @@ public static class Normalize
     /** The Telugu normalizer. */
     public static string NormalizeTelugu(string input)
     {
-        var s = JsRegex.Replace(input, ZERO_WIDTH, _ => "");
+        var s = Rewrite(input, ZERO_WIDTH, _ => "");
 
         // ⚠ `full[off - 1]` / `full[off + 1]` READ SINGLE UTF-16 UNITS in the TS, not code points, and the
         //    neighbours here are BMP Telugu so the two coincide. Mirrored rather than corrected.
         var full2 = s;
-        s = JsRegex.Replace(s, SUNNA_HOMOGLYPH, m =>
+        s = Rewrite(s, SUNNA_HOMOGLYPH, m =>
         {
             var off = m.Index;
             var prev = off - 1 >= 0 ? full2[off - 1].ToString() : null;
@@ -113,7 +114,7 @@ public static class Normalize
 
         s = Unicode.FoldNativeDigits(s);
 
-        s = JsRegex.Replace(s, ORDINAL_RE, m =>
+        s = Rewrite(s, ORDINAL_RE, m =>
         {
             var n = Js.Number(m.Groups[1].Value);
             if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n == 0) return m.Value;
@@ -121,19 +122,19 @@ public static class Normalize
             return w == "" ? m.Value : w;
         });
 
-        s = JsRegex.Replace(s, YEAR_RE, m => TeluguNumbersComposer.YearToWords(Js.Number(m.Groups[1].Value)));
+        s = Rewrite(s, YEAR_RE, m => TeluguNumbersComposer.YearToWords(Js.Number(m.Groups[1].Value)));
 
-        s = JsRegex.Replace(s, DEGROUP, _ => "");
+        s = Rewrite(s, DEGROUP, _ => "");
 
-        s = JsRegex.Replace(s, ERA_RE, m => ERA[m.Groups[1].Value]);
-        s = JsRegex.Replace(s, UDA_RE, _ => "ఉదాహరణకు ");
+        s = Rewrite(s, ERA_RE, m => ERA[m.Groups[1].Value]);
+        s = Rewrite(s, UDA_RE, _ => "ఉదాహరణకు ");
 
-        s = JsRegex.Replace(s, KM_RE, _ => "కిలోమీటర్లు");
-        s = JsRegex.Replace(s, MI_RE, _ => "మైళ్లు");
-        s = JsRegex.Replace(s, INITIALISM_RE, m => JsRegex.Replace(m.Value, DOT_RUN, _ => " ").Trim());
+        s = Rewrite(s, KM_RE, _ => "కిలోమీటర్లు");
+        s = Rewrite(s, MI_RE, _ => "మైళ్లు");
+        s = Rewrite(s, INITIALISM_RE, m => JsRegex.Replace(m.Value, DOT_RUN, _ => " ").Trim());
 
         var full8 = s;
-        s = JsRegex.Replace(s, RATE_ASCII, m =>
+        s = Rewrite(s, RATE_ASCII, m =>
         {
             var num = RATE_NUM.GetValueOrDefault(m.Groups[2].Value.ToLowerInvariant());
             var d = RATE_DENOM.GetValueOrDefault(m.Groups[3].Value.ToLowerInvariant());
@@ -141,35 +142,35 @@ public static class Normalize
             return $"{Dative(d, full8, m.Index)}{m.Groups[1].Value} {num}";
         });
         var full8b = s;
-        s = JsRegex.Replace(s, RATE_TE, m =>
+        s = Rewrite(s, RATE_TE, m =>
             $"{Dative("గంటకు", full8b, m.Index)}{m.Groups[1].Value} కిలోమీటర్లు");
 
-        s = JsRegex.Replace(s, HALF, _ => ".5");
-        s = JsRegex.Replace(s, THREE_QUARTERS, _ => ".75");
+        s = Rewrite(s, HALF, _ => ".5");
+        s = Rewrite(s, THREE_QUARTERS, _ => ".75");
 
         s = SYMBOLS(s);
 
-        s = JsRegex.Replace(s, CLOCK_ZERO, m => m.Groups[1].Value);
-        s = JsRegex.Replace(s, CLOCK_COLON, _ => " ");
+        s = Rewrite(s, CLOCK_ZERO, m => m.Groups[1].Value);
+        s = Rewrite(s, CLOCK_COLON, _ => " ");
 
-        s = JsRegex.Replace(s, DECIMAL_RE, m =>
+        s = Rewrite(s, DECIMAL_RE, m =>
             $"{m.Groups[1].Value} పాయింట్ {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-        s = JsRegex.Replace(s, PLUSMINUS, _ => " ప్లస్ మైనస్ ");
+        s = Rewrite(s, PLUSMINUS, _ => " ప్లస్ మైనస్ ");
         var full12 = s;
-        s = JsRegex.Replace(s, MINUS, m =>
+        s = Rewrite(s, MINUS, m =>
             DIGIT_AT_END.IsMatch(full12[..m.Index]) ? m.Value : "మైనస్ ");
-        s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} ప్లస్ ");
-        s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}ప్లస్ ");
+        s = Rewrite(s, PLUS_AFTER, m => $"{m.Groups[1].Value} ప్లస్ ");
+        s = Rewrite(s, PLUS_START, m => $"{m.Groups[1].Value}ప్లస్ ");
 
         s = PostposedSignPass.PostposedSign(s, "<", "కంటే తక్కువ");
         s = PostposedSignPass.PostposedSign(s, ">", "కంటే ఎక్కువ");
-        s = JsRegex.Replace(s, EQUALS, _ => " సమానం ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " భాగించడం ");
+        s = Rewrite(s, EQUALS, _ => " సమానం ");
+        s = Rewrite(s, DIVIDE, _ => " భాగించడం ");
 
-        s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} డిగ్రీల సెల్సియస్");
-        s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} డిగ్రీల ఫారెన్‌హీట్");
-        s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} డిగ్రీలు");
+        s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} డిగ్రీల సెల్సియస్");
+        s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} డిగ్రీల ఫారెన్‌హీట్");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} డిగ్రీలు");
 
         return s;
     }

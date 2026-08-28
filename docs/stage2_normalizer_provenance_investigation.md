@@ -328,3 +328,86 @@ different string (ignore).
 
 The residual TS gap is now the languages whose normalizers do something other than `replace`, not the
 pre-passes.
+
+## Run 11 — 2026-08-28 15:20 — one seam, one name, one rule
+
+**Question.** The two engines had converged on the same *guarantee* and diverged on everything else: TS
+called `tr(s, re, rep)` at 3,203 hand-rewritten sites, C# maintained provenance inside `JsRe.Replace` where
+nothing under `Languages/` had to change, and the two took opposite rules for a mismatch. Could they be made
+to read the same, and would that close the residual blindness on either side?
+
+### The instrument came from the user, not from me
+
+I had been reading source shapes to guess which TS sites were still unconverted. The better instrument:
+
+> "search for JsRe instances in the .cs files and if the count is off from the TS one, something's probably
+> outstanding."
+
+The port is line-for-line, so the counts should be too. Run at the time:
+
+    ported dirs: C#-minus-TS seam gap = 351,  raw TS .replace still present = 384
+    unported dirs: 53, carrying 208 raw TS .replace
+
+The gap tracked the raw count almost exactly — arithmetic, not archaeology. That is now
+`tools/seam-parity.mts`.
+
+### The rename, and what it forced
+
+`rewrite` / `Rewrite`, chosen over `respell` (most sites are not spelling) and `subst` (says nothing about
+the pipeline). The C# seam moved OFF `JsRe.Replace` onto `Rewriter.Rewrite`, which is the part that is not
+cosmetic: while provenance lived inside the regex wrapper, every caller of a JS regex was a participant — a
+static constructor building a lookup table, an engine rewriting IPA — so a string the mapping did not
+recognise had to be IGNORED. With a narrow seam it can only mean a step went unseen, so **both engines now
+poison**, and the deliberate divergence is deleted.
+
+    TS   s = rewrite(s, KM2, " square kilometres");
+    C#   s = Rewrite(s, KM2, " square kilometres");
+
+### ⚠ Only the poison names a non-pipeline site — the parser cannot
+
+Converted broadly (TS 429 new sites, C# 2,583 + 22 pre-pass), then let `onPoison` / `Provenance.OnPoison`
+decide. Broad conversion alone measured **80.7%**, DOWN from 92.1%: substring calls on the seam destroy the
+whole utterance's mapping. Reverting the sites the probe named recovered it and then some.
+
+    TS   92.1%  ->  80.7% (broad)  ->  94.7% (converged)
+    C#   97.6%* ->  86.7% (narrow) ->  93.4% (converged)
+
+`*` not comparable: the old C# number counted mappings the tolerant rule allowed through, some of them
+wrong. 93.4% is the first honest C# figure.
+
+### Three defects, and each one cost a measurable amount
+
+1. **`.replaceAll` is not `replace`.** `rewrite`'s string-pattern form is FIRST MATCH ONLY, so
+   `m.replaceAll(".", "")` de-grouped `1.234.567` to `1234.567`. **13 tests across 8 languages.** Excluded
+   `.replaceAll` from the seam entirely — which also matches the C#, whose `string.Replace` sites were never
+   on it, and keeps the two counts equal.
+2. **My CI green was `tail`'s exit code.** `npm run ci 2>&1 | tail -30` reports the pipeline's last command.
+   Two "green" runs were nothing of the kind, and the second of them was the basis for merging #1156.
+3. **`x = Rewrite(x, …)` is never a substring call.** The revert loop lacked that guard and took Sinhala's
+   `StripJoiners` off the seam: **si fell from 100% to 17%**. A poison at a self-assigning site means an
+   earlier step went unseen; reverting there only moves the poison one line down.
+
+### ⚠ The fleet number is the wrong instrument, and the user said so
+
+> "Can't you do per-language coverage tests to narrow down what needs work rather than wholesale reverting
+> and redoing?"
+
+Correct, and two revert rounds were wasted before adopting it. `.probe/stage2/bylang.mts` and
+`parity --provenance` rank by tokens LOST, which turns "95% complete" into a named next fix:
+
+    lost   %mapped  lang        lost   %mapped  lang
+    6640      0%    km          4145     40%    mai   (C# only — TS is at 100%)
+    5445      6%    cdo         3322     56%    awa   (C# only)
+    4856     29%    ee          2533     61%    mag   (C# only)
+    2478      0%    ja
+
+### What is left, named rather than averaged
+
+- **km and ja map nothing in either engine.** Not a `replace` gap at all: both SEGMENT — inserting ZWSP or
+  spaces between words — and rebuild the string outside any regex. `km` 155 chars in, 185 out. A
+  segmentation pass needs to *push* provenance, which is a different API from `rewrite`. Same shape for
+  `cdo` and `ee`.
+- **mai / awa / mag / syl / fa are C#-only losses**, and their normalizer seam counts match the TS exactly —
+  so the gap is upstream of the normalizer, in a shared tier or pre-pass. Named, not chased.
+- **207 raw replaces remain off the seam in each engine — the same number on both sides**, which is the
+  result the count instrument was built to produce.

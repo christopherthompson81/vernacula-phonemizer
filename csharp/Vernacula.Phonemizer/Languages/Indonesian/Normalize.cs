@@ -5,6 +5,7 @@
  * Ported from src/languages/indonesian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Indonesian;
 
@@ -70,55 +71,55 @@ public static class Normalize
         // The clock runs FIRST, before anything can treat the dot as grouping. Both lookarounds are needed:
         // the trailing one keeps a race time (`2:11.60`) out, the leading one stops the scan restarting inside
         // one and claiming `09.02` out of `1:09.02`.
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             var h = Js.Number(m.Groups[1].Value);
             var mv = Js.Number(m.Groups[2].Value);
             return mv == 0 ? $"{Js.NumberToString(h)}" : $"{Js.NumberToString(h)} lewat {Js.NumberToString(mv)}";
         });
 
-        s = DOLLAR_CODE.Replace(s, "$");
+        s = Rewrite(s, DOLLAR_CODE, "$");
 
-        s = RUPIAH.Replace(s, "$1 rupiah");
+        s = Rewrite(s, RUPIAH, "$1 rupiah");
 
-        s = NOMOR.Replace(s, "nomor ");
+        s = Rewrite(s, NOMOR, "nomor ");
 
-        s = ABBREV_MID.Replace(s, m =>
+        s = Rewrite(s, ABBREV_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122). The pattern is built from this table's OWN keys but
             // carries `i`+`u`, so JS's fold widens it — `ſ`→`s`, and the Cyrillic `ᲀᲃᲅ` forms onto theirs —
             // and a near-miss MATCHES while its key is absent. The TS asserted non-null and spoke the word
             // "undefined"; this indexer THREW. Refuse the whole match.
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = ABBREV_END.Replace(s, m =>
+        s = Rewrite(s, ABBREV_END, m =>
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
         // Slash units, before the shared symbol tier claims the bare `km`.
-        s = SLASH_UNIT.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
+        s = Rewrite(s, SLASH_UNIT, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
 
         // The three named senses of `°` before the bare arm, or the bare arm strands the scale/compass letter.
-        s = DEG_C.Replace(s, "$1 derajat Celsius");
-        s = DEG_F.Replace(s, "$1 derajat Fahrenheit");
-        s = DEG_COORD.Replace(s, m =>
+        s = Rewrite(s, DEG_C, "$1 derajat Celsius");
+        s = Rewrite(s, DEG_F, "$1 derajat Fahrenheit");
+        s = Rewrite(s, DEG_COORD, m =>
             // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122). The pattern carries `i` AND `u`, so
             // JS folds U+017F LONG S onto `s` and `12°ſ` MATCHES `[NSEW]` — while `ſ` is no COMPASS key. The
             // TS asserted non-null and spoke the word "undefined"; the C# indexer THREW.
             COMPASS.TryGetValue(m.Groups[2].Value.ToLowerInvariant(), out var dir)
                 ? $"{m.Groups[1].Value} derajat {dir}"
                 : m.Value);
-        s = DEG.Replace(s, "$1 derajat");
+        s = Rewrite(s, DEG, "$1 derajat");
 
-        s = MINUS.Replace(s, "$1minus $2");
+        s = Rewrite(s, MINUS, "$1minus $2");
         // ± is a SINGLE character (U+00B1), not a `+`, so no `+` rule can ever match inside it.
-        s = PLUS_MINUS.Replace(s, " plus minus ");
-        s = PLUS_ATTACHED.Replace(s, "$1 plus $2");
-        s = PLUS_LEADING.Replace(s, "$1plus $2");
+        s = Rewrite(s, PLUS_MINUS, " plus minus ");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 plus $2");
+        s = Rewrite(s, PLUS_LEADING, "$1plus $2");
 
-        s = EQUALS_RE.Replace(s, " sama dengan ");
-        s = LESS_THAN.Replace(s, " lebih kecil dari ");
-        s = GREATER_THAN.Replace(s, " lebih besar dari ");
-        s = DIVIDE.Replace(s, " dibagi ");
+        s = Rewrite(s, EQUALS_RE, " sama dengan ");
+        s = Rewrite(s, LESS_THAN, " lebih kecil dari ");
+        s = Rewrite(s, GREATER_THAN, " lebih besar dari ");
+        s = Rewrite(s, DIVIDE, " dibagi ");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
             Js.Number(m.Groups[1].Value) == 1 && Js.Number(m.Groups[2].Value) == 2
                 ? "setengah"
                 : $"{m.Groups[1].Value} per {m.Groups[2].Value}");

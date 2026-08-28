@@ -102,7 +102,7 @@ import { westernNumberWords } from "../../core/numbers.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { ArmenianDef } from "./armenian.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const NUMBERS = loadManifest<ArmenianDef>(import.meta.url, "armenian.jsonc").numbers;
 
@@ -262,20 +262,20 @@ export function normalizeArmenian(input: string): string {
     //       and 1–2 digits after the separator is always a decimal (72 instances: 35,6 · 10.7 · 76.5%).
 
     // 1a. SPACE-grouped (36 hard / 5 sample): `29 743`, `36 260 130`, `1 500 000`, `250 000-ը`.
-    s = tr(s,
+    s = rewrite(s,
         /(?<!\d)(?<!\d[.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""),  // space, NBSP, NNBSP, thin space
     );
     // 1b. TWO OR MORE `.`/`,` groups — grouping with no ambiguity left to resolve.
-    s = tr(s,
+    s = rewrite(s,
         /(?<!\d)(?<!\d[.,])([1-9]\d{0,2})((?:([.,])\d{3}){2,})(?!\d)(?![.,]\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""),
+        (_m, head: string, rest: string) => head + rewrite(rest, /[.,]/gu, ""),
     );
     // 1c. ONE `.`/`,` group. Grouping unless (b) or (c) fires. ⚠ A DOTTED DATE cannot reach this rule:
     //     `30.08.1918` and `8.11.1953` have TWO-digit groups, and the `[.,]`-excluding lookarounds on both
     //     edges stop the engine restarting inside the number (trap 52 — a lookbehind rejects a POSITION).
     const magAlt = MAGNITUDE_WORDS.join("|");
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<!\\d)(?<!\\d[.,])([1-9]\\d{0,2})[.,](\\d{3})(?!\\d)(?![.,]\\d)(\\s*(?:${magAlt})${NOT_LETTER_AFTER}|\\s*[×x%])?`, "gu"),
         (m, head: string, group: string, trailer: string | undefined) =>
             head === "0" || trailer !== undefined ? m : `${head}${group}`,
@@ -291,7 +291,7 @@ export function normalizeArmenian(input: string): string {
     //       (a version, a dotted thousands survivor) cannot match; and the case ending is deliberately NOT
     //       added, because which case the day takes depends on the sentence and the corpus writes several
     //       (`9-ին`, `1-ից`, `27-ի`).
-    s = tr(s, /(?<!\d)(?<!\d[.,])(\d{1,2})\.(\d{1,2})\.(\d{4})(?!\d)(?![.,]\d)/gu, (m, d: string, mo: string, y: string) => {
+    s = rewrite(s, /(?<!\d)(?<!\d[.,])(\d{1,2})\.(\d{1,2})\.(\d{4})(?!\d)(?![.,]\d)/gu, (m, d: string, mo: string, y: string) => {
         const day = Number(d), month = Number(mo);
         if (day < 1 || day > 31 || month < 1 || month > 12) return m;
         return `${y} թվականի ${MONTH_GENITIVE[month - 1]!} ${day}`;
@@ -303,9 +303,9 @@ export function normalizeArmenian(input: string): string {
     //       `Մ.թ.ա.-ն հապավվում է «Մեր թվարկությունից առաջ»` — hy.wikipedia, defining it.
     //       Longest first: `մ.թ.ա.` before `մ.թ.`
     const DOT = "[.\\u2024]";
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}[Մմ]${DOT}\\s?թ${DOT}\\s?ա${DOT}?`, "gu"), "մեր թվարկությունից առաջ");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}[Քք]${DOT}\\s?ա${DOT}?`, "gu"), "Քրիստոսից առաջ");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}[Մմ]${DOT}\\s?թ${DOT}`, "gu"), "մեր թվարկության");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}[Մմ]${DOT}\\s?թ${DOT}\\s?ա${DOT}?`, "gu"), "մեր թվարկությունից առաջ");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}[Քք]${DOT}\\s?ա${DOT}?`, "gu"), "Քրիստոսից առաջ");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}[Մմ]${DOT}\\s?թ${DOT}`, "gu"), "մեր թվարկության");
 
     // ── 4. COORDINATE ABBREVIATION PAIRS — as PAIRS, never as single letters. `հս․ լ․` is north latitude
     //       and `արլ․ ե․` east longitude (7 instances), but a bare `լ.`/`ե.` is indistinguishable from a
@@ -316,8 +316,8 @@ export function normalizeArmenian(input: string): string {
     for (const [abbr, full] of [
         ["հս", "հյուսիսային"], ["հվ", "հարավային"], ["արլ", "արևելյան"], ["արմ", "արևմտյան"],
     ] as const) {
-        s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${abbr}${DOT}\\s?լ${DOT}`, "gu"), `${full} լայնություն`);
-        s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${abbr}${DOT}\\s?ե${DOT}`, "gu"), `${full} երկայնություն`);
+        s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}${abbr}${DOT}\\s?լ${DOT}`, "gu"), `${full} լայնություն`);
+        s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}${abbr}${DOT}\\s?ե${DOT}`, "gu"), `${full} երկայնություն`);
     }
 
     // ── 5. SINGLE-DOT ABBREVIATIONS and the MAGNITUDE abbreviations. After step 3 (multi-dot first, or an
@@ -326,21 +326,21 @@ export function normalizeArmenian(input: string): string {
     //       abbreviation of it by hy.wikipedia's own քառակուսի կիլոմետր article; `Սբ.` = Սուրբ.
     //       ⚠ `թ`/`թթ` REQUIRE A PRECEDING NUMERAL-OR-SUFFIX. Every corpus instance has one (`2005 թ.`,
     //       `1990-ական թթ.`), and `թ` alone is an ordinary Armenian letter.
-    s = tr(s, new RegExp(`(\\d|${ARM_LOWER})\\s?թթ${DOT}`, "gu"), "$1 թվականներ");
-    s = tr(s, new RegExp(`(\\d|${ARM_LOWER})\\s?թ${DOT}`, "gu"), "$1 թվական");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}քառ${DOT}`, "gu"), "քառակուսի");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}Սբ${DOT}`, "gu"), "Սուրբ");
+    s = rewrite(s, new RegExp(`(\\d|${ARM_LOWER})\\s?թթ${DOT}`, "gu"), "$1 թվականներ");
+    s = rewrite(s, new RegExp(`(\\d|${ARM_LOWER})\\s?թ${DOT}`, "gu"), "$1 թվական");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}քառ${DOT}`, "gu"), "քառակուսի");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}Սբ${DOT}`, "gu"), "Սուրբ");
     //       The magnitude abbreviations reach the IPA as consonant clusters otherwise ([mlɾd] + schwa), and
     //       the shared tier's currency hop can only match a SPELLED magnitude. Longest first.
     for (const [abbr, full] of MAGNITUDE_ABBREV)
-        s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${abbr}${NOT_LETTER_AFTER}`, "gu"), full);
+        s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}${abbr}${NOT_LETTER_AFTER}`, "gu"), full);
 
     // ── 6. ASCII EXPONENT ON A UNIT — `41.8կմ2`, `16.8կմ2-ը`, `0.53կմ/կմ2`. hy writes the power with a
     //       plain `2`/`3` as often as with `²`/`³` in this corpus (4 instances against 29). Folded to the
     //       superscript so ONE rule handles both; left alone it is trap 53's shape exactly — the tier
     //       re-emits the digit and `41.8կմ2` reads "…kilometres TWO", a quantity invented out of a power.
     //       Runs before steps 7–7b so the unit rules sees a single shape.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`([\\d/\\s])(${UNIT_KEYS.join("|")})([23])(?![\\d])${NOT_LETTER_AFTER}`, "gu"),
         (_m, lead: string, unit: string, p: string) => `${lead}${unit}${p === "2" ? "²" : "³"}`,
     );
@@ -351,7 +351,7 @@ export function normalizeArmenian(input: string): string {
     //       (կիլոմետր+ից → կիլոմետրից, մետր+ի → մետրի; every unit word here is consonant-final).
     //       ⚠ BEFORE step 8, or the digit-suffix rule below would not see a unit at all — and before the
     //       tier, for the reason trap 39 gives: a guard's evidence has a lifetime.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(\\d\\s?)(${UNIT_KEYS.join("|")})([²³]?)[-\\u2010\\u2011\\u2013\\u2014](${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
         (_m, lead: string, unit: string, power: string, suffix: string) => {
             const noun = UNIT_WORD[unit]!;
@@ -372,11 +372,11 @@ export function normalizeArmenian(input: string): string {
     //        ⚠ AND A UNIT AFTER A MEASURE WORD, for the same reason and one this pass CREATES: step 5
     //        expands `քառ. կմ` to `քառակուսի կմ`, at which point the unit is no longer digit-adjacent and
     //        the tier declines it — the fix has to close the leak it just made visible.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`((?:քառակուսի|խորանարդ)\\s)(${UNIT_KEYS.join("|")})(?![\\d])${NOT_LETTER_AFTER}`, "gu"),
         (_m, lead: string, unit: string) => `${lead}${UNIT_WORD[unit]!}`,
     );
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(/\\s?)(${UNIT_KEYS.join("|")})([²³]?)(?![\\d])${NOT_LETTER_AFTER}`, "gu"),
         (_m, lead: string, unit: string, power: string) =>
             `${lead}${power === "" ? "" : `${EXPONENT_WORD[power]!} `}${UNIT_WORD[unit]!}`,
@@ -399,23 +399,23 @@ export function normalizeArmenian(input: string): string {
     // 7a. `19-20-րդ դարերի`, `6-5-րդ դարերի` — a RANGE whose ordinal suffix is written once, at the end.
     //     Claimed before the single ordinal so the first operand is not left as a bare cardinal with a
     //     dangling hyphen.
-    s = tr(s, /(?<!\d)(?<!\d[.,])(\d{1,4})[-–](\d{1,4})-րդ(?![\p{L}\p{M}])/gu, (m, a: string, b: string) => {
+    s = rewrite(s, /(?<!\d)(?<!\d[.,])(\d{1,4})[-–](\d{1,4})-րդ(?![\p{L}\p{M}])/gu, (m, a: string, b: string) => {
         const first = ordinalWords(Number(a));
         const second = ordinalWords(Number(b));
         return first === undefined || second === undefined ? m : `${first}, ${second}`;
     });
     // 7b. ORDINAL.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<!\\d)(?<!\\d[.,])(\\d[\\d ]*\\d|\\d)[-\\u2010\\u2011\\u2013\\u2014]րդ(${ARM_LOWER}*)${NOT_LETTER_AFTER}`, "gu"),
         (m, digits: string, tail: string) => {
-            const bare = digits.replace(/ /gu, "");
+            const bare = rewrite(digits, / /gu, "");
             if (!DIGITS_ONLY.test(bare)) return m;
             const ord = ordinalWords(Number(bare));
             return ord === undefined ? m : tail === "" ? ord : attachSuffix(ord, tail);
         },
     );
     // 7c. DECADE and every other bound suffix, in one rule — they differ only in the suffix string.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<!\\d)(?<!\\d[.,])(\\d[\\d ]*\\d|\\d)[-\\u2010\\u2011\\u2013\\u2014](${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
         (m, digits: string, suffix: string) => {
             const bare = digits.replace(/ /gu, "");
@@ -431,13 +431,13 @@ export function normalizeArmenian(input: string): string {
     //       bibliographic `1480-1630. - 1. - Cambridge` out, and what stops the engine restarting INSIDE a
     //       dotted date (`30.08.1918-1.1919`) — trap 52: a lookbehind rejects a starting POSITION, not a
     //       string, so the operand itself has to be anchored on both sides.
-    s = tr(s, /(?<!\d)(?<!\d[.,])(?<![-‐‑–—])(\d+(?:[.,]\d+)?)\s?[-‐‑–—]\s?(\d+(?:[.,]\d+)?)(?!\d)(?![.,]\d)(?![-‐‑–—])/gu, "$1, $2");
+    s = rewrite(s, /(?<!\d)(?<!\d[.,])(?<![-‐‑–—])(\d+(?:[.,]\d+)?)\s?[-‐‑–—]\s?(\d+(?:[.,]\d+)?)(?!\d)(?![.,]\d)(?![-‐‑–—])/gu, "$1, $2");
 
     // ── 10. PERCENT WITH A BOUND SUFFIX — `76.5%-ը`, `20%-ով`, `36,7 %-ը`, `70 %–ը`, `0.21% -ով`. The
     //       shared tier stops at the sign and would leave the suffix to be read as a bare vowel (`20%-ով`
     //       → *kʰəsɑn ov*), so the suffixed form is claimed here and the plain `5 %` is left to the tier.
     //       `տոկոս` is consonant-final, so the suffix glues: տոկոսը, տոկոսով, տոկոսի, տոկոսից.
-    s = tr(s, new RegExp(`\\s?%\\s?[-\\u2013\\u2014]\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), " տոկոս$1");
+    s = rewrite(s, new RegExp(`\\s?%\\s?[-\\u2013\\u2014]\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), " տոկոս$1");
 
     // ── 11. DEGREES. `°C` is a temperature and a bare `°` is a coordinate or an unscaled temperature; both
     //        occur here (13 and 10). ⚠ THE SCALE LETTER MAY BE CYRILLIC — this corpus writes `+15.2°С` and
@@ -445,12 +445,12 @@ export function normalizeArmenian(input: string): string {
     //        reaching the IPA as the ENGLISH letter name (`20 °C` → *kʰəsɑn sˈiː*).
     //        `°F` is ×0 here and is deliberately left untouched rather than given an unsourced scale name.
     //        A bound suffix on the degree is handled first (`35,6°-ից`), same reason as step 9.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(\\d)\\s?°\\s?[CСc]?\\s?[-\\u2013](${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
         "$1 աստիճան$2",
     );
-    s = tr(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Ցելսիուսի աստիճան");
-    s = tr(s, /(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 աստիճան");
+    s = rewrite(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Ցելսիուսի աստիճան");
+    s = rewrite(s, /(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 աստիճան");
 
     // ── 12. MINUS — narrow, and the narrowness is the whole argument (trap 24). Every minus-shaped
     //        instance in the retained corpus was read: 4 true negatives (`-4.9 %`, `-0,018 %`, `-20 °C`,
@@ -459,7 +459,7 @@ export function normalizeArmenian(input: string): string {
     //        from this corpus rather than borrowed: when the left context is exhausted, the right one
     //        decides. Runs AFTER step 11, so the degree is already a WORD to look for.
     //        `մինուս`: hy.wikipedia ×28/2, in the article defining the + and − signs.
-    s = tr(s,
+    s = rewrite(s,
         /(^|[\s(«՝])[-−–]\s?(\d[\d ]*(?:[.,]\d+)?)(?=\s?(?:%|աստիճան|Ցելսիուսի))/gmu,
         "$1մինուս $2",
     );
@@ -482,7 +482,7 @@ export function normalizeArmenian(input: string): string {
     //        tier matches on (the playbook's "units before decimals" coupling) and `0,012 կգ` would lose
     //        its kilogram. The alternative reading, a denominator ordinal (*…հազարերորդ*), is composable
     //        from the attested series but costs exactly that adjacency, so it is not taken.
-    s = tr(s, /(?<!\d)(?<!\d[.,])(\d+)[.,](\d+)(?!\d)(?![.,]\d)/gu, (_m, int: string, frac: string) => {
+    s = rewrite(s, /(?<!\d)(?<!\d[.,])(\d+)[.,](\d+)(?!\d)(?![.,]\d)/gu, (_m, int: string, frac: string) => {
         const zeros = /^0*/u.exec(frac)![0].length;
         const rest = frac.slice(zeros);
         const spelledZeros = Array.from({ length: zeros }, () => NUMBERS.units[0]!).join(" ");
@@ -498,7 +498,7 @@ export function normalizeArmenian(input: string): string {
     //        sides and no second slash admits the three and refuses all ten — including `3/14`, which a
     //        looser cap would have read as "երեք տասնչորսերորդ".
     //        Runs after step 13 so a decimal numerator has already become words and cannot match.
-    s = tr(s, /(?<!\d)(?<!\d[.,])(?<!\/)(\d{1,2})\/(\d{1,2})(?!\d)(?![.,]\d)(?!\/)/gu, (m, nRaw: string, dRaw: string) => {
+    s = rewrite(s, /(?<!\d)(?<!\d[.,])(?<!\/)(\d{1,2})\/(\d{1,2})(?!\d)(?![.,]\d)(?!\/)/gu, (m, nRaw: string, dRaw: string) => {
         const n = Number(nRaw), d = Number(dRaw);
         if (d < 2 || d > 10 || n > d) return m;
         const num = cardinalWords(n), den = ordinalWords(d);

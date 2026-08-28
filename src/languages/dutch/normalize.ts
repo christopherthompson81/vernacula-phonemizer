@@ -16,7 +16,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -122,7 +122,7 @@ export function normalizeDutch(input: string): string {
     //    defect it exists to prevent: the code spelled out and THE CURRENCY WORD GONE (*ˈy ˈɛs vˈeːrtin
     //    kˈɔmaː zˈeːvən mˈɪljɑrt*, no *dollar*). The escape is deliberate — a literal NBSP is invisible in a
     //    source file and folds to a plain space under an editor, which is how the duplicate arose.
-    s = tr(s, /(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");  // space, NBSP
 
     // 1) ERA MARKERS and the MULTI-DOT abbreviations. FIRST, before the single-dot rule — otherwise the
     //    single-dot rule consumes `v.` / `e.` and leaves `Chr.` / `d.` behind as an interior phrase break.
@@ -132,8 +132,8 @@ export function normalizeDutch(input: string): string {
     //    it really is the sentence period ("…dateren uit 5000 v.Chr." must keep its pause), and consumed
     //    otherwise ("rond 10.000 v.Chr. was neergestreken" must not gain one).
     for (const [body, word] of MULTI_DOT) {
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=\\s*$)`, "giu"), `${word}.`);
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "giu"), word);
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=\\s*$)`, "giu"), `${word}.`);
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "giu"), word);
     }
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the shared initialism pass (run later, from the
@@ -145,12 +145,12 @@ export function normalizeDutch(input: string): string {
     //    The pattern deliberately ENDS on a dot rather than allowing a trailing separator, so the space
     //    after the run survives — an earlier `(?:\p{Lu}\.\s?){2,}` swallowed it and glued "V.S. met" into
     //    the single token *VSmet*, which the initialism pass then could not see as a caps run at all.
-    s = tr(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
 
     // 3) SINGLE-DOT ABBREVIATIONS. As in German, two branches: mid-sentence the dot is CONSUMED so it
     //    cannot become a phrase break; at a phrase end it is kept, because there it really is the sentence
     //    end (`…, etc.` ×3 of the 5).
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -158,7 +158,7 @@ export function normalizeDutch(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -172,7 +172,7 @@ export function normalizeDutch(input: string): string {
     //    accepted and the word is recomputed from the number, so a spelling like `15de` (where standard
     //    Dutch is *vijftiende*) still comes out right. Was *achttien ee* / *vijftien de* / *zestig stee*.
     //    BEFORE the number tokenizer, and before step 5 so a digit run is not first claimed as a clock.
-    s = tr(s, /(?<![\d,.])(\d{1,4})(?:ste[n]?|de[n]?|e)(?![\p{L}\p{M}])/gu, (m0, d: string) =>
+    s = rewrite(s, /(?<![\d,.])(\d{1,4})(?:ste[n]?|de[n]?|e)(?![\p{L}\p{M}])/gu, (m0, d: string) =>
         ordinalWord(Number(d)) ?? m0);
 
     // 5) CLOCK, in both written forms, BEFORE the number tokenizer sees the separator.
@@ -188,9 +188,9 @@ export function normalizeDutch(input: string): string {
         const head = `${numberToWords(Number(h), h)}${uur ?? " uur"}`;
         return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min), min)}`;
     };
-    s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![:\d])(\s*uur)?/gu,
+    s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![:\d])(\s*uur)?/gu,
         (_m, h: string, min: string, uur?: string) => clock(h, min, uur));
-    s = tr(s, /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:])(\s*uur)?/gu,
+    s = rewrite(s, /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:])(\s*uur)?/gu,
         (_m, h: string, min: string, uur?: string) => clock(h, min, uur));
 
     // 6-7) SQUARED UNITS and RATES are composed by the shared symbol tier — see `unitPer`,
@@ -202,24 +202,24 @@ export function normalizeDutch(input: string): string {
     //    The compass letters are expanded only DIRECTLY after a degree sign, where they cannot be anything
     //    else. AFTER the 6-7 tier composition so `m/s` is already gone, and after the clock (step 5) so no
     //    `°` rule sees a time.
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 graden Celsius");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 graden Fahrenheit");
-    s = tr(s, /(\d)\s?°\s?([NOZW])(?![\p{L}\p{M}])/gu, (_m, d: string, c: string) =>
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 graden Celsius");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 graden Fahrenheit");
+    s = rewrite(s, /(\d)\s?°\s?([NOZW])(?![\p{L}\p{M}])/gu, (_m, d: string, c: string) =>
         `${d} graden ${({ N: "noord", O: "oost", Z: "zuid", W: "west" } as Record<string, string>)[c]!}`);
-    s = tr(s, /(\d)\s?°/gu, "$1 graden");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 graden");
 
     // 9) SIGNS. `+` ×2 (`UTC+1`, `+30°C`) — both were dropped entirely. No true minus sign occurs in
     //    nl_nl: every `-\d` there is a score or a range (`6-6`, `22:00-23:00`), which Dutch reads as the
     //    two bare numbers, so NO minus rule is written — inventing one would have turned 14 scores into
     //    negatives. AFTER step 8, so `+30°C` has already become `+30 graden Celsius`.
-    s = tr(s, /\+\s?(?=\d)/gu, " plus ");
+    s = rewrite(s, /\+\s?(?=\d)/gu, " plus ");
 
     // 9b) ± AND THE RELATIONAL AND DIVISION SIGNS. ± is this language's own two words juxtaposed, and
     //     the `plus` half is lifted from the rule directly above; `min` is not otherwise in this file precisely
     //     because this language has no true minus sign (see the note above), so ⚠ `min` is the one word here
     //     that comes from the REGISTER rather than from another rule in this file. It is the standard Dutch
     //     reading of the sign.
-    s = tr(s, /±/gu, " plus min ");
+    s = rewrite(s, /±/gu, " plus min ");
 
     //     ⚠ THE ONLY LANGUAGE IN THIS BATCH WHERE TIER 2 SETTLED THE READING ON ITS OWN. Counted in nl_nl:
     //
@@ -235,24 +235,24 @@ export function normalizeDutch(input: string): string {
     //
     //     The copula is kept for the equality only, because that is the attested string and Dutch says it that
     //     way; the comparatives read as the sign names, which is how the register uses them.
-    s = tr(s, /\s?=\s?/gu, " is gelijk aan ");
-    s = tr(s, /\s?<\s?/gu, " kleiner dan ");
-    s = tr(s, /\s?>\s?/gu, " groter dan ");
-    s = tr(s, /\s?÷\s?/gu, " gedeeld door ");
+    s = rewrite(s, /\s?=\s?/gu, " is gelijk aan ");
+    s = rewrite(s, /\s?<\s?/gu, " kleiner dan ");
+    s = rewrite(s, /\s?>\s?/gu, " groter dan ");
+    s = rewrite(s, /\s?÷\s?/gu, " gedeeld door ");
 
     // 10) AMPERSAND → *en*, which is simply how Dutch reads it (×4, all silently dropped before). The
     //     tight `X&Y` form (`P&R`, `B&B`) is spelled with LETTER NAMES, because the shared initialism pass
     //     claims runs of two or more capitals and so cannot see a single letter either side of the `&`.
-    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (m0, a: string, b: string) => {
         const x = spellCaps(a), y = spellCaps(b);
         return x !== undefined && y !== undefined ? `${x} en ${y}` : m0;
     });
-    s = tr(s, /\s&\s/gu, " en ");
+    s = rewrite(s, /\s&\s/gu, " en ");
 
     // 11) FRACTIONS (×1: `1/5 inch`). Dutch builds these on the ordinal: 1/5 → *een vijfde*, 3/4 → *drie
     //     vierde*, and 1/2 is the suppletive *een half*. The trailing guard keeps a date or a ratio chain
     //     (`1/5/2020`) out. LAST, so no earlier rule has to work around a slash.
-    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return num === 1 ? "een half" : `${numberToWords(num)} halve`;
         const ord = ordinalWord(den);

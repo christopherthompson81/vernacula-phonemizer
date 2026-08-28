@@ -22,7 +22,7 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { lastKhmerWord } from "./segment.ts";
 import { havePerceptron, segmentRun } from "./khmerPerceptron.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * THE SHARED SYMBOL TIER, not local regexes. ⚠ Before declaring a class out of scope, check whether the seam
@@ -152,7 +152,7 @@ export function normalizeKhmer(text: string): string {
     // `lastKhmerWord` remains the fallback for when the perceptron's weight table is absent.
     //
     // An empty antecedent drops the mark rather than inventing a word, matching Thai's ๆ rule.
-    s = tr(s, new RegExp(`([${KH}]+)${SEP}ៗ`, "gu"), (_m, run: string) =>
+    s = rewrite(s, new RegExp(`([${KH}]+)${SEP}ៗ`, "gu"), (_m, run: string) =>
         run === "" ? "" : `${run} ${lastWord(run)}`,
     );
 
@@ -162,13 +162,13 @@ export function normalizeKhmer(text: string): string {
     // million. Exactly-three-digit blocks only, so a genuine list `៣,៤,៥` is untouched. 2,788 in the corpus.
     // Applied repeatedly because the lookbehind cannot span a group it has already consumed.
     const degroup = new RegExp(`(?<=[${D}])(?<!(?<![${D}\\.,])0),(?=[${D}]{3}(?![${D}]))`, "gu");
-    for (let i = 0; i < 4 && degroup.test(s); i++) s = tr(s, degroup, "");
+    for (let i = 0; i < 4 && degroup.test(s); i++) s = rewrite(s, degroup, "");
     // ⚠ AND THE SPACE-GROUPED FORM, which this rule missed and `review.ts` surfaced: it printed `5 000` reading
     // as "pram soun" — "five zero". Khmer groups with a space or a ZWSP as well as a comma, 567 times in the
     // corpus (`៣០ ០០០`, `១១៨ ១៨៣`), and the artifact's own exponent example is `១៨១ ០៣៥ គម²`, which without this
     // is two numbers and a stranded unit. Same three-digit-block guard, so a genuine list of numbers survives.
     const degroupSpace = new RegExp(`(?<=[${D}])(?<!(?<![${D}\\.,])0)[ \u00a0\u202f\u2009\u200b](?=[${D}]{3}(?![${D}]))`, "gu");  // space, NBSP, NNBSP, thin space, ZWSP
-    for (let i = 0; i < 4 && degroupSpace.test(s); i++) s = tr(s, degroupSpace, "");
+    for (let i = 0; i < 4 && degroupSpace.test(s); i++) s = rewrite(s, degroupSpace, "");
 
     // ── 3. decimal point ─────────────────────────────────────────────────────────────────────────────
     // AFTER de-grouping, which would otherwise see `៣.៥` as a group boundary. The point becomes a SPACE, not
@@ -176,18 +176,18 @@ export function normalizeKhmer(text: string): string {
     // the digits are read individually and the only fix available is removing the clause pause that currently
     // splits the number in half. Requires a digit on both sides, so an abbreviation dot (គ.ស) and a
     // sentence-final period are untouched. 4,018 in the corpus.
-    s = tr(s, new RegExp(`(?<=[${D}])\\.(?=[${D}])`, "gu"), " ");
+    s = rewrite(s, new RegExp(`(?<=[${D}])\\.(?=[${D}])`, "gu"), " ");
     // ⚠ THE COMMA IS ALSO A DECIMAL SEPARATOR HERE, which `review.ts` caught: it printed `12,5` reading as
     // "ɗɑp piː , pram" — twelve, pause, five. Khmer writes both forms (`៦,០%`, `០,៣៥`, `៥,៧`), and de-grouping
     // above has already consumed every comma that introduces a three-digit block, so whatever survives to this
     // point is a decimal rather than a group boundary. That ordering is the entire discrimination.
-    s = tr(s, new RegExp(`(?<=[${D}]),(?=[${D}])`, "gu"), " ");
+    s = rewrite(s, new RegExp(`(?<=[${D}]),(?=[${D}])`, "gu"), " ");
 
     // ── 4. ranges ────────────────────────────────────────────────────────────────────────────────────
     // BEFORE the arithmetic rule, because both compete for a hyphen. In this corpus a dash between two numbers
     // is overwhelmingly a range — 4,014 ranges against 399 signed numbers — so the range reading wins, and a
     // signed number is left to the deeper number path rather than guessed at here.
-    s = tr(s, new RegExp(`(?<=[${D}])${SEP}[–—-]${SEP}(?=[${D}])`, "gu"), " ដល់ ");
+    s = rewrite(s, new RegExp(`(?<=[${D}])${SEP}[–—-]${SEP}(?=[${D}])`, "gu"), " ដល់ ");
 
     // ── 5. equals ────────────────────────────────────────────────────────────────────────────────────
     // ⚠ THIS CLASS WAS REFUSED IN THE FIRST VERSION OF THIS FILE, on an assumption rather than a check —
@@ -203,7 +203,7 @@ export function normalizeKhmer(text: string): string {
     // Widening to the probe's shape would fire on the code and the query strings, getting it wrong nearly as
     // often as right. The arithmetic reading is
     // the only one the evidence supports.
-    s = tr(s, new RegExp(`(?<=[${D}])${SEP}=${SEP}(?=[${D}])`, "gu"), " ស្មើ ");
+    s = rewrite(s, new RegExp(`(?<=[${D}])${SEP}=${SEP}(?=[${D}])`, "gu"), " ស្មើ ");
     /**
      * ⚠ AND A SPACED `=` BETWEEN ANY TWO OPERANDS, which this file refused for two rounds. The refusal was that
      * the letter-flanked shape is "glosses and code, getting it wrong nearly as often as right" — true of the
@@ -225,7 +225,7 @@ export function normalizeKhmer(text: string): string {
      * 6% of the sites, all of them markup rather than language — and `allOccurrencesInMarkup` in defects.ts now
      * keeps the scan from reporting that class of line as a language defect.
      */
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![=!<>])(?<=[${D}\\p{L}\\p{M}²³)]) = (?=[${D}\\p{L}\\p{M}(])(?![=<>])`, "gu"),
         " ស្មើ ",
     );
@@ -234,7 +234,7 @@ export function normalizeKhmer(text: string): string {
     // ⚠ THE PLUS RULE EXISTED AND I DELETED IT while restructuring for the shared tier — the tier carries
     // `multiply` but has no plus, so migrating silently dropped a class with 74 digit-flanked instances. Caught
     // by `review.ts` reporting `plus` among the DROPPED sign classes. បូក is corpus-attested (3,338).
-    s = tr(s, new RegExp(`(?<=[${D}])${SEP}\\+${SEP}(?=[${D}])`, "gu"), " បូក ");
+    s = rewrite(s, new RegExp(`(?<=[${D}])${SEP}\\+${SEP}(?=[${D}])`, "gu"), " បូក ");
     /**
      * ⚠ AND A SPACED `+` BETWEEN ANY TWO OPERANDS, not only between digits — 274 sites this file used to leave
      * silent. They were counted once as "leading" pluses and refused as undecidable, on the grounds that "142 of
@@ -256,7 +256,7 @@ export function normalizeKhmer(text: string): string {
     // mixed shape unread — `cos\alpha_1 + isin\alpha_1` has a digit before the sign and a letter after, so
     // neither this rule nor the digit-flanked one above could see it, and the artifact scan reported four
     // math-sign drops that were all of that shape.
-    s = tr(s, new RegExp(`(?<=[${D}\\p{L}\\p{M}²³)]) \\+ (?=[${D}\\p{L}\\p{M}(])`, "gu"), " បូក ");
+    s = rewrite(s, new RegExp(`(?<=[${D}\\p{L}\\p{M}²³)]) \\+ (?=[${D}\\p{L}\\p{M}(])`, "gu"), " បូក ");
     /**
      * ⚠ A LEADING `+` ON A BARE NUMBER READS វិជ្ជមាន ("positive value"), and this one is NOT corpus-sourced —
      * it is the weaker tier and is marked as such. `វិជ្ជមាន` is attested 419 times as a WORD, but the SIGN never
@@ -275,25 +275,25 @@ export function normalizeKhmer(text: string): string {
     // threshold) read *haːsəp pʰiəkrɔːj ʋɨcceəmiən muəj* — "fifty percent POSITIVE one" — because a percent sign
     // is neither a letter nor a digit, so the sign looked like it began a fresh number. An unspaced plus after an
     // operand is left silent rather than mis-read: that is the LaTeX-risk shape.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}${D}%‰\\\\)])\\+${SEP}(?=[${D}])`, "gu"), "វិជ្ជមាន ");
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}${D}%‰\\\\)])\\+${SEP}(?=[${D}])`, "gu"), "វិជ្ជមាន ");
     // ⚠ AND THE TIMEZONE OFFSET, which is the one unspaced shape worth reading: `UTC+7`, `GMT+9`, `JST (UTC+09:00)`
     // — 11 sites, every one a real offset after an uppercase initialism, no misfires available. A reader says
     // "UTC plus seven", so the sign carries meaning here where an unspaced `+` inside LaTeX does not.
-    s = tr(s, new RegExp(`(?<=[A-Z]{2,4})\\+(?=[${D}])`, "gu"), " បូក ");
+    s = rewrite(s, new RegExp(`(?<=[A-Z]{2,4})\\+(?=[${D}])`, "gu"), " បូក ");
     // ± is always a scientific tolerance here, never a sign pair, so it reads as the two words juxtaposed.
-    s = tr(s, new RegExp(`(?<=[${D}])${SEP}±${SEP}(?=[${D}])`, "gu"), " បូក ឬ ដក ");
+    s = rewrite(s, new RegExp(`(?<=[${D}])${SEP}±${SEP}(?=[${D}])`, "gu"), " បូក ឬ ដក ");
     // AND THE LEADING FORM, which is what `review.ts`'s `±5` probe tests. Measured before adding rather than
     // after: stripping whitespace properly, exactly 4 sites in the corpus have a ± with no number before it, and
     // all 4 are genuine — the latitude bands `±20°`, `±60°`, `± 50°` and the tolerance `± 0.1 ឆ្នាំ`. No misfires
     // available, so this is safe in a way the leading PLUS is not (see ACCEPTED_SIGN_SILENCE in defects.ts).
-    s = tr(s, new RegExp(`(?<![${D}])±${SEP}(?=[${D}])`, "gu"), "បូក ឬ ដក ");
+    s = rewrite(s, new RegExp(`(?<![${D}])±${SEP}(?=[${D}])`, "gu"), "បូក ឬ ដក ");
 
     // ── 6. minus ─────────────────────────────────────────────────────────────────────────────────────
     // AFTER step 4, which has already claimed every dash BETWEEN two numbers — so what reaches here is
     // a dash with no number before it, which is the negative/subtract reading. ដក is attested 3,808 times with
     // `២៨ ដក៥` written out. The ordering is the whole guard: this corpus has 4,014 ranges against 399 signed
     // numbers, so a digit-flanked dash belongs to the range and only a leading one is a minus.
-    s = tr(s, new RegExp(`(?<![${D}${KH}])[-−–](?=[${D}])`, "gu"), "ដក ");
+    s = rewrite(s, new RegExp(`(?<![${D}${KH}])[-−–](?=[${D}])`, "gu"), "ដក ");
 
     // ── 6b. divide, less-than, greater-than — ROBUSTNESS, not repair ─────────────────────────────────
     // ⚠ THESE SIGNS DO NOT OCCUR DIGIT-FLANKED IN THIS CORPUS: `÷` 0, `<` 0, `>` 2. Khmer writes the WORD
@@ -304,14 +304,14 @@ export function normalizeKhmer(text: string): string {
     // they cannot misfire — the risk is a guard
     // that fires on something else, and with zero instances there is nothing here to fire on. This is the
     // "pure robustness rather than a repair" case, and it closes the same class for arbitrary input.
-    s = tr(s, new RegExp(`(?<=[${D}])${SEP}÷${SEP}(?=[${D}])`, "gu"), " ចែក ");
-    s = tr(s, new RegExp(`(?<=[${D}])${SEP}<${SEP}(?=[${D}])`, "gu"), " តិចជាង ");
-    s = tr(s, new RegExp(`(?<=[${D}])${SEP}>${SEP}(?=[${D}])`, "gu"), " ច្រើនជាង ");
+    s = rewrite(s, new RegExp(`(?<=[${D}])${SEP}÷${SEP}(?=[${D}])`, "gu"), " ចែក ");
+    s = rewrite(s, new RegExp(`(?<=[${D}])${SEP}<${SEP}(?=[${D}])`, "gu"), " តិចជាង ");
+    s = rewrite(s, new RegExp(`(?<=[${D}])${SEP}>${SEP}(?=[${D}])`, "gu"), " ច្រើនជាង ");
 
     // ── 7. fractions ─────────────────────────────────────────────────────────────────────────────────
     // The frame is NUM ភាគ NUM, which the corpus writes out 74 times as `៥ភាគ៦` — the language's own
     // construction rather than a calque. 326 in the corpus.
-    s = tr(s, new RegExp(`(?<=[${D}])${SEP}/${SEP}(?=[${D}])`, "gu"), " ភាគ ");
+    s = rewrite(s, new RegExp(`(?<=[${D}])${SEP}/${SEP}(?=[${D}])`, "gu"), " ភាគ ");
 
     // ── 8. the shared symbol tier ────────────────────────────────────────────────────────────────────
     // LAST, because it works on numbers and units that the rules above have finished shaping: de-grouping has

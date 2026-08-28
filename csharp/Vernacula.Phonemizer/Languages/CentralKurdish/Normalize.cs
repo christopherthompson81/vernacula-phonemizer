@@ -5,6 +5,7 @@
  * every ordering constraint between the rules (they are forced, not tidy).
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.CentralKurdish;
 
@@ -91,7 +92,7 @@ public static class Normalize
         CURRENCY.Select(c => JsRegex.Compile($"{Esc(c.Key)}\\s*(\\d+)", "gu")).ToArray();
     private static readonly JsRe[] CURRENCY_AFTER =
         CURRENCY.Select(c => JsRegex.Compile($"(\\d+)\\s*{Esc(c.Key)}", "gu")).ToArray();
-    private static string Esc(string sign) => ESCAPE.Replace(sign, "\\$&");
+    private static string Esc(string sign) => JsRegex.Replace(sign, ESCAPE, "\\$&");
     private static readonly JsRe SIGNED_PLUS = JsRegex.Compile("(?<![\\d])(\\+)(\\d+)", "gu");
     private static readonly JsRe SIGNED_MINUS = JsRegex.Compile("(?<![\\d\\p{L}\\p{M}])([-−])(\\d+)", "gu");
     private static readonly JsRe PLUS_INFIX = JsRegex.Compile("(\\d)\\s*\\+\\s*(\\d)", "gu");
@@ -101,7 +102,7 @@ public static class Normalize
     public static string NormalizeCentralKurdish(string input)
     {
         // 0) THE ARABIC LETTERFORMS, before anything reads a word.
-        input = LETTERFORM_RE.Replace(input, m => LETTERFORM[m.Value]);
+        input = Rewrite(input, LETTERFORM_RE, m => LETTERFORM[m.Value]);
 
         // 1) FOLD THE NATIVE DIGITS FIRST — every rule below counts digits.
         var t = Core.Unicode.FoldNativeDigits(input);
@@ -111,67 +112,67 @@ public static class Normalize
         do
         {
             prev = t;
-            t = GROUPED.Replace(t, "");
+            t = Rewrite(t, GROUPED, "");
         } while (t != prev);
 
         // 2b) LATIN UNIT ALIASES AND THEIR POWERS — exponent arm first, then rates, then the plain arm.
-        t = UNIT_EXP.Replace(t, m =>
+        t = Rewrite(t, UNIT_EXP, m =>
         {
             var sup = m.Groups[3].Success ? m.Groups[3].Value : m.Groups[4].Value;
             return $"{m.Groups[1].Value} {CKB_UNIT[m.Groups[2].Value.ToLowerInvariant()]} "
                 + (sup == "³" || sup == "3" ? "سێجا" : "دووجا");
         });
-        t = RATE_LATIN.Replace(t, m =>
+        t = Rewrite(t, RATE_LATIN, m =>
             $"{m.Groups[1].Value} {CKB_UNIT[m.Groups[2].Value.ToLowerInvariant()]} لە {CKB_PER[m.Groups[3].Value.ToLowerInvariant()]}");
-        t = RATE_NATIVE.Replace(t, m =>
+        t = Rewrite(t, RATE_NATIVE, m =>
             $"{m.Groups[1].Value} {CKB_NUMER[m.Groups[2].Value]} لە {CKB_PER[m.Groups[3].Value]}");
-        t = UNIT_PLAIN.Replace(t, m =>
+        t = Rewrite(t, UNIT_PLAIN, m =>
             $"{m.Groups[1].Value} {CKB_UNIT[m.Groups[2].Value.ToLowerInvariant()]}");
 
         // 3) DECIMAL POINT — the fractional part is spoken digit by digit.
-        t = DECIMAL.Replace(t, m =>
+        t = Rewrite(t, DECIMAL, m =>
             $"{m.Groups[1].Value} خاڵ {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 4) CLOCK, COLON FORM.
-        t = COLON_CLOCK.Replace(t, "$1 $2");
+        t = Rewrite(t, COLON_CLOCK, "$1 $2");
 
         // 5) PERCENT — PREPOSED, and both placements of the sign are claimed.
-        t = PERCENT_AFTER.Replace(t, "لە سەدا $1");
-        t = PERCENT_BEFORE.Replace(t, "لە سەدا $1");
+        t = Rewrite(t, PERCENT_AFTER, "لە سەدا $1");
+        t = Rewrite(t, PERCENT_BEFORE, "لە سەدا $1");
 
         // 6) DEGREES.
-        t = DEG_F_SIGN.Replace(DEG_C_SIGN.Replace(t, "°C"), "°F");
-        t = DEG_C.Replace(t, "$1 پلەی سەلیزی");
-        t = DEG_F.Replace(t, "$1 پلەی فەهرەنهایت");
-        t = DEG.Replace(t, "$1 پلە");
+        t = Rewrite(Rewrite(t, DEG_C_SIGN, "°C"), DEG_F_SIGN, "°F");
+        t = Rewrite(t, DEG_C, "$1 پلەی سەلیزی");
+        t = Rewrite(t, DEG_F, "$1 پلەی فەهرەنهایت");
+        t = Rewrite(t, DEG, "$1 پلە");
 
         // 6b) UNIT ABBREVIATIONS — a numeral MUST precede; that guard is the whole safety of this rule.
-        t = ABBR_KM.Replace(t, "$1 کیلۆمەتر");
-        t = ABBR_CM.Replace(t, "$1 سانتیمەتر");
+        t = Rewrite(t, ABBR_KM, "$1 کیلۆمەتر");
+        t = Rewrite(t, ABBR_CM, "$1 سانتیمەتر");
 
         // 7) RANGES.
-        t = RANGE.Replace(t, "$1 بۆ $2");
+        t = Rewrite(t, RANGE, "$1 بۆ $2");
 
         // 8) CURRENCY, both placements.
         for (var i = 0; i < CURRENCY.Count; i++)
         {
-            t = CURRENCY_BEFORE[i].Replace(t, $"$1 {CURRENCY[i].Value}");
-            t = CURRENCY_AFTER[i].Replace(t, $"$1 {CURRENCY[i].Value}");
+            t = Rewrite(t, CURRENCY_BEFORE[i], $"$1 {CURRENCY[i].Value}");
+            t = Rewrite(t, CURRENCY_AFTER[i], $"$1 {CURRENCY[i].Value}");
         }
 
         // 9) SIGNED NUMBERS — ⟨+⟩ admits a LETTER before it (the timezone `UTC+1`); ⟨-⟩ does NOT, because
         //    every letter-adjacent hyphen in this corpus is a designation. See the TS for the count.
-        t = SIGNED_PLUS.Replace(t, m => $" کۆ {m.Groups[2].Value}");
-        t = SIGNED_MINUS.Replace(t, m => $" کەم {m.Groups[2].Value}");
+        t = Rewrite(t, SIGNED_PLUS, m => $" کۆ {m.Groups[2].Value}");
+        t = Rewrite(t, SIGNED_MINUS, m => $" کەم {m.Groups[2].Value}");
 
         // 10) ARITHMETIC AND RELATIONAL SIGNS.
-        t = PLUS_INFIX.Replace(t, "$1 کۆ $2");
-        foreach (var (re, word) in RELATIONAL) t = re.Replace(t, word);
+        t = Rewrite(t, PLUS_INFIX, "$1 کۆ $2");
+        foreach (var (re, word) in RELATIONAL) t = Rewrite(t, re, word);
 
         // 11) AMPERSAND → و ("and").
-        t = AMPERSAND.Replace(t, " و ");
+        t = Rewrite(t, AMPERSAND, " و ");
 
         // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
-        return SPACE_RUN.Replace(t, " ");
+        return Rewrite(t, SPACE_RUN, " ");
     }
 }

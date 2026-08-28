@@ -5,6 +5,7 @@
  * which of Hindi's inherited choices are wrong for Nepali and which are deliberately kept.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Nepali;
 
@@ -128,19 +129,19 @@ public static class Normalize
         {
             var s = input;
 
-            s = ZW_JOINERS.Replace(s, "");
-            s = DEV_DIGIT.Replace(s, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0966));
+            s = Rewrite(s, ZW_JOINERS, "");
+            s = Rewrite(s, DEV_DIGIT, m => Js.NumberToString(Js.CodePointAt0(m.Value) - 0x0966));
 
-            s = COLON_INTERNAL.Replace(s, "ः");
-            s = VISARGA_WORD.Replace(s, "$1ः");
+            s = Rewrite(s, COLON_INTERNAL, "ः");
+            s = Rewrite(s, VISARGA_WORD, "$1ः");
 
-            s = ABBR_KM.Replace(s, "किलोमिटर");
-            s = ABBR_US.Replace(s, "यु एस");
-            s = ABBR_W.Replace(s, "$1");
+            s = Rewrite(s, ABBR_KM, "किलोमिटर");
+            s = Rewrite(s, ABBR_US, "यु एस");
+            s = Rewrite(s, ABBR_W, "$1");
 
-            s = DOCTOR.Replace(s, m => $"डाक्टर{m.Groups[1].Value}");
+            s = Rewrite(s, DOCTOR, m => $"डाक्टर{m.Groups[1].Value}");
 
-            s = ORDINAL.Replace(s, m =>
+            s = Rewrite(s, ORDINAL, m =>
             {
                 var n = Js.Number(COMMA_G.Replace(m.Groups[1].Value, ""));
                 return double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d
@@ -148,12 +149,12 @@ public static class Normalize
                     : m.Value;
             });
 
-            s = SPORTS_TIME.Replace(s, "$1 $2");
-            s = TIME_RANGE.Replace(s, "$1 देखि $2");
+            s = Rewrite(s, SPORTS_TIME, "$1 $2");
+            s = Rewrite(s, TIME_RANGE, "$1 देखि $2");
             // `whole7c` stands in for the JS replacer's fifth argument (the subject string); it must be
             // snapshotted, since `s` is reassigned by every step.
             var whole7c = s;
-            s = CLOCK_COLON.Replace(s, m =>
+            s = Rewrite(s, CLOCK_COLON, m =>
             {
                 var body = Clock(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value));
                 if (Js.Number(m.Groups[2].Value) != 0) return body;
@@ -162,40 +163,40 @@ public static class Normalize
                 return baje != "" || !BAJ_NEXT.IsMatch(rest) ? $"{body} बजे" : body;
             });
 
-            s = PLUSMINUS.Replace(s, " प्लस माइनस ");
+            s = Rewrite(s, PLUSMINUS, " प्लस माइनस ");
             // The third guard: a digit ANYWHERE to the left rejects a SPACED range or score, which the
             // adjacency lookbehind alone misses.
             var wholeMinus = s;
-            s = MINUS.Replace(s, m => DIGIT_LEFT.IsMatch(wholeMinus[..m.Index]) ? m.Value : "माइनस ");
-            s = PLUS_AFTER_NONSPACE.Replace(s, "$1 प्लस ");
-            s = PLUS_AT_BOUNDARY.Replace(s, "$1प्लस ");
+            s = Rewrite(s, MINUS, m => DIGIT_LEFT.IsMatch(wholeMinus[..m.Index]) ? m.Value : "माइनस ");
+            s = Rewrite(s, PLUS_AFTER_NONSPACE, "$1 प्लस ");
+            s = Rewrite(s, PLUS_AT_BOUNDARY, "$1प्लस ");
 
             s = PostposedSignPass.PostposedSign(s, "<", "भन्दा कम");
             s = PostposedSignPass.PostposedSign(s, ">", "भन्दा बढी");
-            s = EQUALS.Replace(s, " बराबर ");
-            s = DIVIDE.Replace(s, " विभाजन ");
+            s = Rewrite(s, EQUALS, " बराबर ");
+            s = Rewrite(s, DIVIDE, " विभाजन ");
 
-            s = DEG_C.Replace(s, "$1 डिग्री सेल्सियस ");
-            s = DEG_F.Replace(s, "$1 डिग्री फरेनहाइट ");
-            s = DEG_N.Replace(s, "$1 डिग्री उत्तर ");
-            s = DEG_S.Replace(s, "$1 डिग्री दक्षिण ");
-            s = DEG_E.Replace(s, "$1 डिग्री पूर्व ");
-            s = DEG_W.Replace(s, "$1 डिग्री पश्चिम ");
-            s = DEG_BARE.Replace(s, "$1 डिग्री ");
+            s = Rewrite(s, DEG_C, "$1 डिग्री सेल्सियस ");
+            s = Rewrite(s, DEG_F, "$1 डिग्री फरेनहाइट ");
+            s = Rewrite(s, DEG_N, "$1 डिग्री उत्तर ");
+            s = Rewrite(s, DEG_S, "$1 डिग्री दक्षिण ");
+            s = Rewrite(s, DEG_E, "$1 डिग्री पूर्व ");
+            s = Rewrite(s, DEG_W, "$1 डिग्री पश्चिम ");
+            s = Rewrite(s, DEG_BARE, "$1 डिग्री ");
 
             string Money(string n, string mag, string sign, string? noun) =>
                 $"{n}{mag}{noun ?? $" {CURRENCY[sign]}"}";
-            s = CUR_BEFORE.Replace(s, m => Money(m.Groups[2].Value,
+            s = Rewrite(s, CUR_BEFORE, m => Money(m.Groups[2].Value,
                 m.Groups[3].Success ? m.Groups[3].Value : "", m.Groups[1].Value,
                 m.Groups[4].Success ? m.Groups[4].Value : null));
-            s = CUR_AFTER.Replace(s, m => Money(m.Groups[1].Value,
+            s = Rewrite(s, CUR_AFTER, m => Money(m.Groups[1].Value,
                 m.Groups[2].Success ? m.Groups[2].Value : "", m.Groups[3].Value,
                 m.Groups[4].Success ? m.Groups[4].Value : null));
 
             // THE SQUARED FORM FIRST, or the plain rule consumes the abbreviation and strands the `²`.
-            s = UNIT_SQUARED.Replace(s, m => $"{m.Groups[1].Value} वर्ग {UNIT_WORD[m.Groups[2].Value]}");
-            s = UNIT_RE.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
-            s = RATE.Replace(s, m =>
+            s = Rewrite(s, UNIT_SQUARED, m => $"{m.Groups[1].Value} वर्ग {UNIT_WORD[m.Groups[2].Value]}");
+            s = Rewrite(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
+            s = Rewrite(s, RATE, m =>
             {
                 var num = m.Groups[1].Value;
                 var den = m.Groups[2].Value;
@@ -206,22 +207,22 @@ public static class Normalize
 
             // Ranges fire only when ASCENDING: every descending or equal pair in this corpus is a sports
             // result, where "देखि" would be wrong.
-            s = RANGE.Replace(s, m =>
+            s = Rewrite(s, RANGE, m =>
             {
                 var a = m.Groups[1].Value;
                 var b = m.Groups[2].Value;
                 return Js.Number(b) > Js.Number(a) ? $"{a} देखि {b}" : m.Value;
             });
 
-            s = FRACTION.Replace(s, m =>
+            s = Rewrite(s, FRACTION, m =>
             {
                 var nw = CardinalText(Js.Number(m.Groups[1].Value));
                 var dw = CardinalText(Js.Number(m.Groups[2].Value));
                 return nw == "" || dw == "" ? m.Value : $"{nw} बटा {dw}";
             });
 
-            s = TILDE.Replace(s, "लगभग ");
-            s = DOUBLE_SPACE.Replace(s, " ");
+            s = Rewrite(s, TILDE, "लगभग ");
+            s = Rewrite(s, DOUBLE_SPACE, " ");
 
             return s;
         };

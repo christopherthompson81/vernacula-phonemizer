@@ -4,6 +4,7 @@
  * Ported from src/languages/lingala/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Lingala;
 
@@ -48,7 +49,7 @@ public static class Normalize
     {
         var atEnd = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.(?=[ \u00a0]*(?:$|\\p{{Lu}}))", "gu");
         var inline = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.", "gu");
-        return inline.Replace(atEnd.Replace(s, $"{word}."), word);
+        return Rewrite(Rewrite(s, atEnd, $"{word}."), inline, word);
     }
 
     private static readonly JsRe ENTITIES = JsRegex.Compile("&nbsp;|&#(?:x[0-9a-f]+|\\d+);", "giu");
@@ -103,13 +104,13 @@ public static class Normalize
     public static string NormalizeLingala(string input)
     {
         // 0) The marked clock loses the colon's pause — see CLOCK_MARKED.
-        input = CLOCK_MARKED.Replace(input, "$1 $2");
+        input = Rewrite(input, CLOCK_MARKED, "$1 $2");
         // NFC at the entry so the literals in this file match whichever normalization the text arrived in;
         // the engine NFDs again downstream.
         var s = input.Normalize(System.Text.NormalizationForm.FormC);
 
         // ⚠ Entities first, before the ampersand rule at the bottom, or `&nbsp;` reads as "and n-b-s-p".
-        s = ZERO_WIDTH.Replace(ENTITIES.Replace(s, " "), "");
+        s = Rewrite(Rewrite(s, ENTITIES, " "), ZERO_WIDTH, "");
 
         // ⚠ Dotted abbreviations before the de-grouping arms below: both look at dots, and de-grouping first
         // would leave nothing recognisable.
@@ -117,50 +118,50 @@ public static class Normalize
 
         // ⚠ ISBN before every numeric rule, RANGE included: its inner hyphen pairs are exactly the ascending
         // shape RANGE looks for. Read digit by digit — an identifier is not a quantity.
-        s = ISBN.Replace(s, m =>
+        s = Rewrite(s, ISBN, m =>
             $"{m.Groups[1].Value} {string.Join(" ", Js.CodePoints(ISBN_SEPS.Replace(m.Groups[2].Value, "")))}");
 
         // ⚠ Digit de-grouping before every other numeric rule, or the grouping mark reads as clause
         // punctuation and the tail as its own number. Exactly three digits per group is the discriminator
         // against the decimal separator.
-        s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => SPACES.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => SPACES.Replace(m.Value, ""));
 
         // ⚠ Units before decimals — the number-unit adjacency is destroyed the moment a decimal is rewritten
         // into spaced digits — and after de-grouping, so `1 800 km` is already one token. The rewrite
         // REORDERS: Lingala puts the unit noun in front of the figure.
         foreach (var (sym, word) in UNITS)
         {
-            var key = ESCAPE.Replace(sym, "\\$&");
-            s = JsRegex.Compile(
+            var key = JsRegex.Replace(sym, ESCAPE, "\\$&");
+            s = Rewrite(s, JsRegex.Compile(
                     $"(?<![\\d.,:\\p{{L}}\\p{{M}}-])(\\d+)\\s?[-\u2013\u2014]\\s?(\\d+)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d²³/])",
                     "gu")
-                .Replace(s, m =>
+                , m =>
                 {
                     string a = m.Groups[1].Value, b = m.Groups[2].Value;
                     return Js.Number(a) < Js.Number(b) ? $"{word} {a} kino {b}" : m.Value;
                 });
-            s = JsRegex.Compile(
+            s = Rewrite(s, JsRegex.Compile(
                     $"(?<![\\p{{L}}\\p{{M}}\\d.,])(?<!\\d\\s?[-\u2013\u2014]\\s?)(\\d+(?:[.,]\\d+)?)\\s?{key}(?![\\p{{L}}\\p{{M}}\\d²³/])",
                     "gu")
                 // ⚠ The single-operand arm must refuse a span's second half (`(?<!\d\s?[-–—]\s?)`), so a
                 // span it declined reaches RANGE whole rather than with its tail already rewritten.
-                .Replace(s, $"{word} $1");
+                , $"{word} $1");
         }
         s = BARE_UNITS(s);
 
-        s = DEGREE_C.Replace(s, "Celsius $1");
+        s = Rewrite(s, DEGREE_C, "Celsius $1");
 
         // ⚠ Ranges before percent: `2-3%` is a range OF percents, and once the percent words are inserted
         // there is no digit pair left to match.
-        s = PCT_RANGE.Replace(s, m =>
+        s = Rewrite(s, PCT_RANGE, m =>
         {
             string a = m.Groups[1].Value, b = m.Groups[2].Value;
             return Js.Number(Js.ReplaceFirst(a, ",", ".")) < Js.Number(Js.ReplaceFirst(b, ",", "."))
                 ? $"{a}% kino {b}%" : m.Value;
         });
-        s = RANGE.Replace(s, m =>
+        s = Rewrite(s, RANGE, m =>
         {
             string a = m.Groups[1].Value, gap = m.Groups[2].Value, b = m.Groups[3].Value;
             if (Js.Number(a) >= Js.Number(b)) return m.Value;
@@ -168,37 +169,37 @@ public static class Normalize
             return $"{a} kino {b}";
         });
 
-        s = PERCENT.Replace(s, "$1 likolo ya mokama");
+        s = Rewrite(s, PERCENT, "$1 likolo ya mokama");
 
-        s = US_DOLLAR.Replace(s, "dolare $1");
+        s = Rewrite(s, US_DOLLAR, "dolare $1");
         {
             var subject = s;
-            s = DOLLAR_BEFORE.Replace(s, m =>
+            s = Rewrite(s, DOLLAR_BEFORE, m =>
                 NAMED.IsMatch(subject[..m.Index]) ? m.Groups[1].Value : $"dolare {m.Groups[1].Value}");
         }
         {
             var subject = s;
-            s = DOLLAR_AFTER.Replace(s, m =>
+            s = Rewrite(s, DOLLAR_AFTER, m =>
                 NAMED.IsMatch(subject[..m.Index]) ? m.Groups[1].Value : $"dolare {m.Groups[1].Value}");
         }
 
         // ⚠ Decimals last of the numeric rules, after everything that needs the number intact. The separator
         // becomes NOTHING and the fractional digits are spaced apart, so they are read one at a time.
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             string a = m.Groups[1].Value, b = m.Groups[2].Value;
             return Js.Number(a) < Js.Number(b) && Js.Number(b) <= 10 ? $"{a} ya {b}" : m.Value;
         });
-        s = HALF.Replace(QUARTER.Replace(s, " mǒkó ya mínei "), " mǒkó ya míbalé ");
+        s = Rewrite(Rewrite(s, QUARTER, " mǒkó ya mínei "), HALF, " mǒkó ya míbalé ");
 
-        s = ORD_FIRST.Replace(s, $"ya {FIRST_ORDINAL}");
-        s = ORD_EME.Replace(s, "ya $1");
-        s = ORD_E.Replace(s, "ya $1");
+        s = Rewrite(s, ORD_FIRST, $"ya {FIRST_ORDINAL}");
+        s = Rewrite(s, ORD_EME, "ya $1");
+        s = Rewrite(s, ORD_E, "ya $1");
 
-        s = AMPERSAND.Replace(s, " mpé ");
+        s = Rewrite(s, AMPERSAND, " mpé ");
 
         return s;
     }

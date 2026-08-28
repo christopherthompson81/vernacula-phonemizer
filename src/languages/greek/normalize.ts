@@ -30,7 +30,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ── data ────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -114,7 +114,7 @@ function minuteWords(m: number): string {
 const DOTTED: Readonly<Record<string, string>> = MANIFEST.abbreviations;
 const DOTTED_ALT = Object.keys(DOTTED)
     .sort((a, b) => b.length - a.length)
-    .map((s) => s.replace(/\./gu, "\\."))
+    .map((s) => rewrite(s, /\./gu, "\\."))
     .join("|");
 
 // ── the shared symbol tier ──────────────────────────────────────────────────────────────────────────
@@ -216,7 +216,7 @@ export function normalizeGreek(input: string): string {
     //    run and never reach the clause-mark alternation. Folded to U+00B7 MIDDLE DOT, which is what the
     //    corpus actually types (all 10 instances) and what greek.jsonc maps. Cheaper and safer than
     //    widening the letter class, which is shared with every other Greek rule.
-    s = tr(s, /\u0387/gu, "\u00b7");
+    s = rewrite(s, /\u0387/gu, "\u00b7");
 
     // 1) LATIN↔GREEK HOMOGLYPHS. FIRST, because every rule after this one assumes that a Latin run is
     //    genuinely foreign text, and these are not — they are Greek words with a lookalike Latin letter
@@ -225,20 +225,20 @@ export function normalizeGreek(input: string): string {
     //    splitting each of these into a Greek fragment plus an English letter name.
     //    Only fires where the Latin letter TOUCHES Greek script, so the token is already broken and a
     //    false positive is not reachable; the bare article is handled separately below.
-    s = tr(s,
+    s = rewrite(s,
         /(?<=\p{Script=Greek})[A-Za-z]+|[A-Za-z]+(?=\p{Script=Greek})/gu,
         (run) => [...run].map((c) => HOMOGLYPH[c] ?? c).join(""),
     );
     //    A standalone lowercase Latin `o` is the article ο. Every letter the corpus genuinely DISCUSSES
     //    as a letter is a different one (c, g, r, n, v, V, H, O, A), so this claims nothing real.
-    s = tr(s, /(?<![\p{L}\p{M}\d'’-])o(?![\p{L}\p{M}\d'’-])/gu, "ο");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d'’-])o(?![\p{L}\p{M}\d'’-])/gu, "ο");
     //    The SENTENCE-INITIAL capitals are the same defect one case up: `H` and `O` are the only Latin
     //    letters that are also whole Greek articles (Η, Ο), and the corpus has three — «H γεωργία»,
     //    «H Μεγάλη», «O Κάρολος». Restricted to sentence-initial position and a following Greek word,
     //    which is exactly what separates them from the genuine letter mentions: every one of those is
     //    mid-sentence and preceded by its own Greek article («το H στο pH», «το «O» ώστε»). Without this
     //    the initialism rule of step 14 would read the article as «έιτς».
-    s = tr(s, /(^|[.!;·…»]\s+)([HO])(?=\s+\p{Script=Greek})/gu,
+    s = rewrite(s, /(^|[.!;·…»]\s+)([HO])(?=\s+\p{Script=Greek})/gu,
         (_m, lead: string, ch: string) => lead + HOMOGLYPH[ch]!);
 
     // 2) GREEK ALPHABETIC NUMERALS. Before every other rule that reads Greek capitals. The corpus writes
@@ -248,7 +248,7 @@ export function normalizeGreek(input: string): string {
     //    exactly that («τον Β΄ Παγκόσμιο Πόλεμο», «τον Λουδοβίκο ΙΣΤ΄»); the sixth is a queen's regnal
     //    number and wants -η. Gender is not recoverable from the two tokens around the numeral, so the
     //    majority reading is taken rather than guessed at per-instance.
-    s = tr(s, /(?<![\p{L}\p{M}])([Α-ΩϚ]{1,4})[΄ʹʹ](?![\p{L}\p{M}])/gu, (whole, run: string) => {
+    s = rewrite(s, /(?<![\p{L}\p{M}])([Α-ΩϚ]{1,4})[΄ʹʹ](?![\p{L}\p{M}])/gu, (whole, run: string) => {
         const v = greekNumeralValue(run);
         if (v === undefined) return whole;
         return ordinal(v, "ο") ?? whole;
@@ -263,30 +263,30 @@ export function normalizeGreek(input: string): string {
     //    π.Χ., οι Ασσύριοι` would otherwise emit «προ Χριστού.,» — a full stop AND a comma, two clause
     //    marks where the text has one. That is the same double-gap the padded-clausePunctuation bug made
     //    in three earlier languages.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})(\\s*[,;:!?)\\]»·]|\\s+\\p{Ll}|)`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})(\\s*[,;:!?)\\]»·]|\\s+\\p{Ll}|)`, "gu"),
         (_m, ab: string, after: string) => `${DOTTED[ab]!}${after === "" ? "." : after}`);
 
     // 4) SINGLE-DOT ABBREVIATION `βλ.` → βλέπε. After step 3 so it cannot bite into a multi-dot form.
-    s = tr(s, /(?<![\p{L}\p{M}])βλ\.(?=\s+\p{Ll})/gu, "βλέπε");
+    s = rewrite(s, /(?<![\p{L}\p{M}])βλ\.(?=\s+\p{Ll})/gu, "βλέπε");
 
     // 5) RATES, kept LOCAL because Greek takes an agreeing definite article, not an invariant "per" —
     //    see the SYMBOLS comment. BEFORE the shared tier: the tier would otherwise claim `240 km` and
     //    strand `/h`, which then read as the English letter H.
     //    The corpus writes the slash spaced in two of the five (`165 χλμ / ώρα`, `83 χλμ/ ώρα`).
-    s = tr(s, /(\d)\s?(?:km|χλμ)\s?\/\s?(?:h|ώρα)(?![\p{L}\p{M}])/giu, "$1 χιλιόμετρα την ώρα");
-    s = tr(s, /(\d)\s?(?:mi|μίλια)\s?\/\s?(?:h|ώρα)(?![\p{L}\p{M}])/giu, "$1 μίλια την ώρα");
-    s = tr(s, /(\d)\s?mph(?![\p{L}\p{M}])/giu, "$1 μίλια την ώρα");
-    s = tr(s, /(\d)\s?m\s?\/\s?s(?![\p{L}\p{M}])/gu, "$1 μέτρα το δευτερόλεπτο");
+    s = rewrite(s, /(\d)\s?(?:km|χλμ)\s?\/\s?(?:h|ώρα)(?![\p{L}\p{M}])/giu, "$1 χιλιόμετρα την ώρα");
+    s = rewrite(s, /(\d)\s?(?:mi|μίλια)\s?\/\s?(?:h|ώρα)(?![\p{L}\p{M}])/giu, "$1 μίλια την ώρα");
+    s = rewrite(s, /(\d)\s?mph(?![\p{L}\p{M}])/giu, "$1 μίλια την ώρα");
+    s = rewrite(s, /(\d)\s?m\s?\/\s?s(?![\p{L}\p{M}])/gu, "$1 μέτρα το δευτερόλεπτο");
 
     // 6) χλμ, after the rate rule has taken `χλμ / ώρα`. The dot is consumed only mid-sentence, for the
     //    same reason as step 3 — `70 χλμ. στην` must not keep a break, a sentence-final one must.
-    s = tr(s, /(?<![\p{L}\p{M}])χλμ\.(?=\s+\p{Ll})/gu, "χιλιόμετρα");
-    s = tr(s, /(?<![\p{L}\p{M}])χλμ(?![\p{L}\p{M}.])/gu, "χιλιόμετρα");
+    s = rewrite(s, /(?<![\p{L}\p{M}])χλμ\.(?=\s+\p{Ll})/gu, "χιλιόμετρα");
+    s = rewrite(s, /(?<![\p{L}\p{M}])χλμ(?![\p{L}\p{M}.])/gu, "χιλιόμετρα");
 
     // 7) DIGIT DE-GROUPING. FIRST among the number rules: Greek groups thousands with a PERIOD, so
     //    `1.000` was read as «ένα» + a phrase break + «μηδέν». Run twice for `5.000.000`. Only a block of
     //    EXACTLY three digits is grouping — `4:41.30` (a sports time) and `802,11` are left intact.
-    for (let k = 0; k < 2; k++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+    for (let k = 0; k < 2; k++) s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
 
     // 8) ORDINAL NOTATION. The Greek ending is the CASE and GENDER, not an ordinal marker: `15ο` is
     //    δέκατο πέμπτο, `9ης` ένατης, `18ου` δέκατου όγδοου — and BOTH members of a compound inflect, so
@@ -294,7 +294,7 @@ export function normalizeGreek(input: string): string {
     //    grouped number reaches it as digits. Bounded by explicit lookarounds (`\b` finds nothing here),
     //    and the trailing one is what stops `53χρονης` — the corpus's one digit+Greek non-ordinal — from
     //    being claimed.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d{1,3})(${ORD_ALT})(?![\\p{L}\\p{M}])`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d{1,3})(${ORD_ALT})(?![\\p{L}\\p{M}])`, "gu"),
         (whole, digits: string, written: string) => ordinal(Number(digits), written) ?? whole);
 
     // 9) CLOCK. The colon was a clause mark, so `11:00` read as «έντεκα , μηδέν». Hours are FEMININE
@@ -303,7 +303,7 @@ export function normalizeGreek(input: string): string {
     //    GUARDED against a SPORTS time — the corpus has three (`4:41.30`, `2:11.60`, `1:09.02`), which are
     //    minutes and decimal seconds, not clock times. A dot-or-comma plus a digit after the minutes is
     //    the marker; the same trap claimed a Russian and an Indonesian time before it was written down.
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?![.,]\d)/gu, (_m, h: string, mi: string) => {
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?![.,]\d)/gu, (_m, h: string, mi: string) => {
         const hv = Number(h);
         const mv = Number(mi);
         return mv === 0 ? HOUR_FEM[hv]! : `${HOUR_FEM[hv]} και ${minuteWords(mv)}`;
@@ -311,9 +311,9 @@ export function normalizeGreek(input: string): string {
 
     // 10) DEGREES. `°C` was reading as the English letter C. Nominative plural is used; the case Greek
     //     would actually give it depends on the governing preposition and is not recoverable here.
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 βαθμοί Κελσίου");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 βαθμοί Φαρενάιτ");
-    s = tr(s, /(\d)\s?°/gu, "$1 βαθμοί");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 βαθμοί Κελσίου");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 βαθμοί Φαρενάιτ");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 βαθμοί");
 
     // 11) SIGNS and VULGAR FRACTIONS. `(UTC +1)`; and `29¾ επί 24½ ίντσες`, where the elided noun is
     //     feminine (ίντσα) — «είκοσι εννιά και τρία τέταρτα».
@@ -321,11 +321,11 @@ export function normalizeGreek(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = tr(s, /±/gu, " συν μείον ");
-    s = tr(s, /(?<![\p{L}\p{M}\d])\+\s?(?=\d)/gu, "συν ");
-    s = tr(s, /(\d)\s?½/gu, "$1 και μισή");
-    s = tr(s, /(\d)\s?¼/gu, "$1 και ένα τέταρτο");
-    s = tr(s, /(\d)\s?¾/gu, "$1 και τρία τέταρτα");
+    s = rewrite(s, /±/gu, " συν μείον ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d])\+\s?(?=\d)/gu, "συν ");
+    s = rewrite(s, /(\d)\s?½/gu, "$1 και μισή");
+    s = rewrite(s, /(\d)\s?¼/gu, "$1 και ένα τέταρτο");
+    s = rewrite(s, /(\d)\s?¾/gu, "$1 και τρία τέταρτα");
 
     // 11b) RELATIONAL AND DIVISION SIGNS. ⚠ SOURCED ENTIRELY AT TIER 4 — the corpus has nothing to give
     //      here, and says so in the two ways this issue has learned to distinguish:
@@ -345,10 +345,10 @@ export function normalizeGreek(input: string): string {
     //      `ίσον` is emitted bare, and here that is not a policy choice but the attested form: the source reads
     //      `9 + 4 ίσον 1` with no copula, and separately calls the sign "ένα ίσον". `διά` likewise sits directly
     //      between its operands.
-    s = tr(s, /\s?=\s?/gu, " ίσον ");
-    s = tr(s, /\s?<\s?/gu, " μικρότερο από ");
-    s = tr(s, /\s?>\s?/gu, " μεγαλύτερο από ");
-    s = tr(s, /\s?÷\s?/gu, " διά ");
+    s = rewrite(s, /\s?=\s?/gu, " ίσον ");
+    s = rewrite(s, /\s?<\s?/gu, " μικρότερο από ");
+    s = rewrite(s, /\s?>\s?/gu, " μεγαλύτερο από ");
+    s = rewrite(s, /\s?÷\s?/gu, " διά ");
 
     // 11c) THE PARENTHETICAL DASH → A PAUSE. This was reported for a whole sweep as a `signed-number` DROP,
     //      and the classification was wrong: it is not a minus, not a designation, and not ambiguous. Greek
@@ -373,7 +373,7 @@ export function normalizeGreek(input: string): string {
     //      either side — the "en dash as a joiner" convention. A pause there would be wrong,
     //      so the rule requires adjacent whitespace and the compound is left alone. 20/20 against 1/1.
     //      The `(?<=\S)` guard keeps a sentence-initial dash from producing a leading comma (a SLOT-GAP).
-    s = tr(s, /(?<=\S)(?:\s+[–—]\s*|[–—]\s+)/gu, ", ");
+    s = rewrite(s, /(?<=\S)(?:\s+[–—]\s*|[–—]\s+)/gu, ", ");
 
     // 11d) THE MINUS → μείον, and this one is ROBUSTNESS, not a measured repair — said plainly because the
     //      file's other sign rules are corpus-attested and this one cannot be. el_gr contains ZERO true
@@ -388,7 +388,7 @@ export function normalizeGreek(input: string): string {
     //      digit plus at most an ordinal suffix, an abbreviating dot and one space, which is what rejects
     //      `35-40`, `(1469-1539)`, `7:00-8:00` and the spaced `26 - 00`.
     //      The en/em dashes are gone by step 11c, so this only ever sees ASCII `-` and U+2212.
-    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}[\p{L}\p{M}]{0,2}[.,]?[ \t]?)[-−](?=\p{Nd})/gu, "μείον ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}[\p{L}\p{M}]{0,2}[.,]?[ \t]?)[-−](?=\p{Nd})/gu, "μείον ");
 
     // 12) SHARED SYMBOL TIER: %, currency, plain units, squared/cubed. AFTER the rate and degree rules,
     //     which need the raw `km/h` and `°C`, and BEFORE the decimal rewrite of step 13 — the tier only
@@ -398,7 +398,7 @@ export function normalizeGreek(input: string): string {
     // 13) DECIMAL COMMA. Greek's decimal mark is the comma and the tokenizer read it as a clause break:
     //     `2,3` was «δύο , τρία». Read as «κόμμα». AFTER step 12 (see above) and after step 7, so a
     //     grouping period can never reach here.
-    s = tr(s, /(\d),(?=\d)/gu, "$1 κόμμα ");
+    s = rewrite(s, /(\d),(?=\d)/gu, "$1 κόμμα ");
 
     // 14) LATIN INITIALISMS → Greek letter names. LAST of all, so every rule above still sees the ASCII
     //     it matches on — the unit, rate and degree rules are keyed on lowercase letters that an
@@ -408,11 +408,11 @@ export function normalizeGreek(input: string): string {
     //     HYPHEN is deliberately NOT a boundary: `COVID-19`, `XDR-TB` and `Super-G` each carry a real
     //     initialism on one side of it. An apostrophe IS one, or the `s` of `People's` reads as a letter.
     for (const [k, v] of Object.entries(MIXED_CASE_INITIALISM))
-        s = tr(s, new RegExp(`(?<![\\p{Script=Latin}\\d])${k}(?![\\p{Script=Latin}\\d])`, "gu"), v);
-    s = tr(s, /(?<![\p{Script=Latin}\d'’])[A-Z]{2,}(?![\p{Script=Latin}\d'’])/gu, spellLatin);
+        s = rewrite(s, new RegExp(`(?<![\\p{Script=Latin}\\d])${k}(?![\\p{Script=Latin}\\d])`, "gu"), v);
+    s = rewrite(s, /(?<![\p{Script=Latin}\d'’])[A-Z]{2,}(?![\p{Script=Latin}\d'’])/gu, spellLatin);
     //     Single letters, same boundaries: the corpus's 9 remaining ones are genuine letter mentions
     //     («το c και το g», «το H στο pH», «μοιάζει με V») or an initial (`A(H5N1)`).
-    s = tr(s, /(?<![\p{Script=Latin}\d'’&])[A-Za-z](?![\p{Script=Latin}\d'’&])/gu, spellLatin);
+    s = rewrite(s, /(?<![\p{Script=Latin}\d'’&])[A-Za-z](?![\p{Script=Latin}\d'’&])/gu, spellLatin);
 
     return s;
 }

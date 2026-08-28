@@ -5,6 +5,7 @@
  * Ported from src/languages/javanese/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Javanese;
 
@@ -87,47 +88,47 @@ public static class Normalize
 
         // 1. The clock, FIRST — before every dot rule, since a clock's dot is neither a grouper nor a decimal
         // and only the context says so. Only whole hours (`.00`) are claimed.
-        s = JsRegex.Replace(s, CLOCK_RANGE, m =>
+        s = Rewrite(s, CLOCK_RANGE, m =>
             $"{Js.NumberToString(Js.Number(m.Groups[1].Value))} nganti {Js.NumberToString(Js.Number(m.Groups[3].Value))}");
-        s = JsRegex.Replace(s, CLOCK_HOUR, m => Js.NumberToString(Js.Number(m.Groups[1].Value)));
+        s = Rewrite(s, CLOCK_HOUR, m => Js.NumberToString(Js.Number(m.Groups[1].Value)));
 
-        s = JsRegex.Replace(s, RP_DOT, _ => "Rp");
+        s = Rewrite(s, RP_DOT, _ => "Rp");
 
         // 2. De-group thousands — AFTER the clock, BEFORE every decimal rule. Both separators group in this
         // language. Exactly-3-digit groups are what keeps this off clocks, decimals and DOIs; the dot arm
         // must allow a following comma (`1.485,36`) and the comma arm a following dot (`32,548.20`).
-        s = JsRegex.Replace(s, GROUP_DOT, m => JsRegex.Replace(m.Value, DOT_G, _ => ""));
-        s = JsRegex.Replace(s, GROUP_COMMA, m => JsRegex.Replace(m.Value, COMMA_G, _ => ""));
+        s = Rewrite(s, GROUP_DOT, m => JsRegex.Replace(m.Value, DOT_G, _ => ""));
+        s = Rewrite(s, GROUP_COMMA, m => JsRegex.Replace(m.Value, COMMA_G, _ => ""));
 
         // 3. Decimals, AFTER de-grouping, so only the fractional tail is left. The fraction is read digit by
         // digit. `.00` and a `jam` context are excluded outright — those are the clock shapes step 1 leaves.
         string Decimal(string i, string f) => $"{i} koma {string.Join(" ", Js.CodePoints(f))}";
-        s = JsRegex.Replace(s, DECIMAL_COMMA, m => Decimal(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, m => Decimal(m.Groups[1].Value, m.Groups[2].Value));
         var full3 = s;
-        s = JsRegex.Replace(s, DECIMAL_DOT, m =>
+        s = Rewrite(s, DECIMAL_DOT, m =>
             m.Groups[2].Value == "00" || JAM_BEFORE.IsMatch(full3[..m.Index])
                 ? m.Value
                 : Decimal(m.Groups[1].Value, m.Groups[2].Value));
 
         // 4. The three fractions, BY LITERAL rather than by pattern: a general `a/b` rule would claim DOIs
         // and year pairs. The vulgar characters arrive already folded to `1/2` etc.
-        s = JsRegex.Replace(s, HALF, _ => "setengah");
-        s = JsRegex.Replace(s, THIRD, _ => "sapratelon");
-        s = JsRegex.Replace(s, QUARTER, _ => "saprapat");
+        s = Rewrite(s, HALF, _ => "setengah");
+        s = Rewrite(s, THIRD, _ => "sapratelon");
+        s = Rewrite(s, QUARTER, _ => "saprapat");
 
         // 4b. Ranges whose endpoints are not bare digits, BEFORE the symbol tier and the degree rules — both
         // destroy the digit-dash-digit adjacency step 7 needs. The percent sign is captured and put back.
-        s = JsRegex.Replace(s, PCT_RANGE, m => $"{m.Groups[1].Value}% nganti ");
-        s = JsRegex.Replace(s, COORD_RANGE, m => $"{m.Groups[1].Value} nganti ");
+        s = Rewrite(s, PCT_RANGE, m => $"{m.Groups[1].Value}% nganti ");
+        s = Rewrite(s, COORD_RANGE, m => $"{m.Groups[1].Value} nganti ");
 
         // 5. °C BEFORE the bare ° — otherwise the bare rule eats the sign and strands a lone ⟨C⟩.
-        s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} drajat celsius");
+        s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} drajat celsius");
         // The trailing space is load-bearing: a coordinate glues its compass letters onto the sign (`6°LU`).
-        s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} drajat ");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} drajat ");
 
-        s = JsRegex.Replace(s, APPROX, _ => "kurang luwih ");
+        s = Rewrite(s, APPROX, _ => "kurang luwih ");
 
-        s = JsRegex.Replace(s, DENSITY, m => $"{m.Groups[1].Value} jiwa per kilomèter persegi");
+        s = Rewrite(s, DENSITY, m => $"{m.Groups[1].Value} jiwa per kilomèter persegi");
 
         // 6. The shared symbol tier — AFTER de-grouping (it needs the number contiguous), AFTER the decimal
         // rule (a still-comma'd decimal presents two numbers to it), and AFTER the degree rules (its `units`
@@ -138,7 +139,7 @@ public static class Normalize
         // what reaches here is a bare numeric range. Both `doi` guards are needed — one for a citation that
         // FOLLOWS the range, one for the identifier the range sits INSIDE.
         var full7 = s;
-        s = JsRegex.Replace(s, RANGE, m =>
+        s = Rewrite(s, RANGE, m =>
             DOI_BEFORE.IsMatch(full7[Math.Max(0, m.Index - 40)..m.Index])
                 ? m.Value
                 : $"{m.Groups[1].Value} nganti {m.Groups[2].Value}");

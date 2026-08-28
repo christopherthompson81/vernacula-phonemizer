@@ -8,6 +8,7 @@
  * rule, and the clock runs before the ranges.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Malay;
 
@@ -151,48 +152,48 @@ public static class Normalize
     {
         var s = input;
 
-        s = AMPERSAND.Replace(s, " dan ");
+        s = Rewrite(s, AMPERSAND, " dan ");
 
-        s = COMMA_THOUSANDS.Replace(s, m => COMMA_G.Replace(m.Value, ""));
+        s = Rewrite(s, COMMA_THOUSANDS, m => COMMA_G.Replace(m.Value, ""));
 
-        s = CURRENCY_CODE_PREFIX.Replace(s, "$1 $");
+        s = Rewrite(s, CURRENCY_CODE_PREFIX, "$1 $");
         // The magnitude word has to be got out from between the number and its currency, and the SIGN cannot
         // simply be moved: the shared tier keys the currency word on adjacency to the digits, so a moved sign
         // is dropped and the currency vanishes. It is consumed here and re-emitted as the tier's own word.
-        s = CURRENCY_REDUNDANT.Replace(s, "");
-        s = CURRENCY_MAGNITUDE.Replace(s, m =>
+        s = Rewrite(s, CURRENCY_REDUNDANT, "");
+        s = Rewrite(s, CURRENCY_MAGNITUDE, m =>
             $"{m.Groups[2].Value}{m.Groups[3].Value} {CURRENCY_WORD[m.Groups[1].Value]}");
-        s = CURRENCY_DECIMAL.Replace(s, "$2 $1");
+        s = Rewrite(s, CURRENCY_DECIMAL, "$2 $1");
 
-        s = PERCENT_REDUNDANT.Replace(s, "$1");
-        s = PERCENT.Replace(s, "$1 peratus");
+        s = Rewrite(s, PERCENT_REDUNDANT, "$1");
+        s = Rewrite(s, PERCENT, "$1 peratus");
 
-        s = ERA_SM.Replace(s, "$1$2sebelum Masihi");
+        s = Rewrite(s, ERA_SM, "$1$2sebelum Masihi");
 
-        s = DOTTED_CAPS_MID.Replace(s, m => DOT_G.Replace(m.Groups[1].Value, ""));
-        s = DOTTED_CAPS_END.Replace(s, m => $"{DOT_G.Replace(m.Groups[1].Value, "")}.");
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
-        s = NOMBOR.Replace(s, "nombor ");
+        s = Rewrite(s, DOTTED_CAPS_MID, m => DOT_G.Replace(m.Groups[1].Value, ""));
+        s = Rewrite(s, DOTTED_CAPS_END, m => $"{DOT_G.Replace(m.Groups[1].Value, "")}.");
+        s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
+        s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = Rewrite(s, NOMBOR, "nombor ");
 
         // Rates before the shared tier can claim the bare `km`, and before the decimal rule below.
-        s = RATE_RE.Replace(s, m => $"{m.Groups[1].Value} {RATE_WORD[m.Groups[2].Value]}");
+        s = Rewrite(s, RATE_RE, m => $"{m.Groups[1].Value} {RATE_WORD[m.Groups[2].Value]}");
 
         // Exponent, cube and frequency units, all BEFORE the decimal rule: a glued unit (`19,500km²`,
         // `2.4Ghz`) looks exactly like the version-dot guard's "a letter follows the fraction digits".
-        s = KM2_GLUED.Replace(s, " kilometer persegi"); // glued: `19,500km²`
-        s = KM2_BARE.Replace(s, "kilometer persegi");
-        s = M2.Replace(s, "$1meter persegi");
-        s = CUBE_GLUED.Replace(s, m => $" {CUBED[m.Groups[1].Value.ToLowerInvariant()]} padu");
-        s = CUBE_BARE.Replace(s, m => $"{CUBED[m.Groups[1].Value.ToLowerInvariant()]} padu");
-        s = M3.Replace(s, "$1meter padu");
+        s = Rewrite(s, KM2_GLUED, " kilometer persegi"); // glued: `19,500km²`
+        s = Rewrite(s, KM2_BARE, "kilometer persegi");
+        s = Rewrite(s, M2, "$1meter persegi");
+        s = Rewrite(s, CUBE_GLUED, m => $" {CUBED[m.Groups[1].Value.ToLowerInvariant()]} padu");
+        s = Rewrite(s, CUBE_BARE, m => $"{CUBED[m.Groups[1].Value.ToLowerInvariant()]} padu");
+        s = Rewrite(s, M3, "$1meter padu");
 
-        s = FREQ.Replace(s, m => $"{m.Groups[1].Value} {FREQ_WORD[m.Groups[2].Value.ToLowerInvariant()]}");
+        s = Rewrite(s, FREQ, m => $"{m.Groups[1].Value} {FREQ_WORD[m.Groups[2].Value.ToLowerInvariant()]}");
 
-        s = DEG_C.Replace(s, "$1 darjah Celsius");
-        s = DEG_F.Replace(s, "$1 darjah Fahrenheit");
-        s = DEG_COMPASS.Replace(s, m => $"{m.Groups[1].Value} darjah {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
-        s = DEG.Replace(s, "$1 darjah");
+        s = Rewrite(s, DEG_C, "$1 darjah Celsius");
+        s = Rewrite(s, DEG_F, "$1 darjah Fahrenheit");
+        s = Rewrite(s, DEG_COMPASS, m => $"{m.Groups[1].Value} darjah {COMPASS[m.Groups[2].Value.ToLowerInvariant()]}");
+        s = Rewrite(s, DEG, "$1 darjah");
 
         // A clock is only claimed when a marker says so — `pukul`/`jam` before, or a meridiem/zone/part-of-day
         // word after — because Malay's dot is the DECIMAL point, so digit count cannot separate the two the way
@@ -209,42 +210,42 @@ public static class Normalize
         for (var pass = 0; pass < 4; pass++)
         {
             var before = s;
-            s = CLOCK_MERIDIEM.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value));
-            s = CLOCK_MARKED_BEFORE.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value, null));
-            s = CLOCK_MARKED_AFTER.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value, null));
+            s = Rewrite(s, CLOCK_MERIDIEM, m => Clock(m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value));
+            s = Rewrite(s, CLOCK_MARKED_BEFORE, m => Clock(m.Groups[1].Value, m.Groups[2].Value, null));
+            s = Rewrite(s, CLOCK_MARKED_AFTER, m => Clock(m.Groups[1].Value, m.Groups[2].Value, null));
             if (s == before) break;
         }
 
-        s = BARE_HOUR_MERIDIEM.Replace(s, m =>
+        s = Rewrite(s, BARE_HOUR_MERIDIEM, m =>
             $"{m.Groups[1].Value} {MeridiemWord(Js.Number(m.Groups[1].Value), m.Groups[2].Value)}");
-        s = PG.Replace(s, "pagi");
+        s = Rewrite(s, PG, "pagi");
 
         // A colon pair that survived the clock rules is not a clock (score, aspect ratio, degree class): no
         // single Malay word fits all three senses, so the MARK is dropped and both operands kept. A sports time
         // must be claimed HERE, or the inherited Indonesian clock rule takes it once the decimal rule below has
         // rewritten the hundredths that were protecting it. `H:00` is exempted first: it is a clock regardless.
-        s = COLON_ZERO.Replace(s, "$1");
-        s = COLON_PAIR.Replace(s, "$1 $2");
+        s = Rewrite(s, COLON_ZERO, "$1");
+        s = Rewrite(s, COLON_PAIR, "$1 $2");
 
-        s = TIMES.Replace(s, "$1 kali ");
-        s = LESS_THAN.Replace(s, "$1 kurang daripada ");
-        s = GREATER_THAN.Replace(s, "$1 lebih daripada ");
-        s = EQUALS_RE.Replace(s, "$1 sama dengan ");
+        s = Rewrite(s, TIMES, "$1 kali ");
+        s = Rewrite(s, LESS_THAN, "$1 kurang daripada ");
+        s = Rewrite(s, GREATER_THAN, "$1 lebih daripada ");
+        s = Rewrite(s, EQUALS_RE, "$1 sama dengan ");
 
         // Ranges fire ONLY for a pair a measure/period noun follows, or a pair of four-digit years — which is
         // what keeps them off sports scores. The year arm's trailing guard is `(?!\d)` and NOT `(?![\d.,])`, so
         // a year range ending on a clause comma still joins.
-        s = RANGE_MEASURE.Replace(s, "$1 hingga $2");
-        s = RANGE_YEARS.Replace(s, "$1 hingga $2");
+        s = Rewrite(s, RANGE_MEASURE, "$1 hingga $2");
+        s = Rewrite(s, RANGE_YEARS, "$1 hingga $2");
 
         // A version dot is `titik`, not `perpuluhan`: `802.11` is not a quantity. Its trailing letter is
         // re-emitted behind a HYPHEN, which the tokenizer drops — that breaks the number-adjacency the shared
         // unit tier matches on, so `802.11g` cannot read as *sebelas GRAM*.
-        s = VERSION_DOT.Replace(s, "$1 titik $2-$3");
+        s = Rewrite(s, VERSION_DOT, "$1 titik $2-$3");
         // Decimals LAST, once every glued-unit rule has run. The fraction is read DIGIT BY DIGIT. A fraction of
         // exactly `000` behind at most three digits is excluded: that is Indonesian-convention thousands
         // grouping leaking through translation, and the inherited tokenizer already reads it correctly.
-        s = DECIMAL_RE.Replace(s, m =>
+        s = Rewrite(s, DECIMAL_RE, m =>
         {
             var intPart = m.Groups[1].Value;
             var frac = m.Groups[2].Value;

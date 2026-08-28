@@ -26,7 +26,7 @@
  *   · DE-GROUPING before the decimal rule, or `30,000` is read as a fraction.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Relational and operator signs, read in every position — a dropped sign is inaudible. */
 const RELATIONAL: [RegExp, string][] = [
@@ -62,7 +62,7 @@ const LETTERFORM_RE = new RegExp(`[${Object.keys(LETTERFORM).join("")}]`, "gu");
 export function normalizeCentralKurdish(input: string): string {
     // 0) THE ARABIC LETTERFORMS, before anything reads a word — a rule keyed on a Sorani spelling would
     //    otherwise miss every instance typed the Arabic way.
-    input = tr(input, LETTERFORM_RE, (c) => LETTERFORM[c]!);
+    input = rewrite(input, LETTERFORM_RE, (c) => LETTERFORM[c]!);
 
     // 1) FOLD THE NATIVE DIGITS FIRST — see the header. Without this every rule below is blind to the
     //    majority of the text's digits, and the engine reads them as an empty string.
@@ -74,7 +74,7 @@ export function normalizeCentralKurdish(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)[,،](?=\d{3}(?!\d))/gu, "");
+        t = rewrite(t, /(?<=\d)(?<!(?<![\d\.,])0)[,،](?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 2b) LATIN UNIT ALIASES AND THEIR POWERS. No new vocabulary — a second KEY onto the words step 6b
@@ -94,7 +94,7 @@ export function normalizeCentralKurdish(input: string): string {
     //     A DOTTED DESIGNATION IS NOT A QUANTITY (`802.11m`) — `NOT_VERSION` from the shared tier, guarding
     //     the WHOLE number, because a lookbehind on the adjacent digit would also reject `12.8 کم` above.
     const CKB_NUM = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))(\\d[\\d.,]*)";
-    t = tr(t, new RegExp(`${CKB_NUM}\\s*(${ckbUnits})(?:\\s?([²³])|([23])(?![\\d\\p{L}]))`, "giu"),
+    t = rewrite(t, new RegExp(`${CKB_NUM}\\s*(${ckbUnits})(?:\\s?([²³])|([23])(?![\\d\\p{L}]))`, "giu"),
         (_m, n: string, u: string, sup: string | undefined, ascii: string | undefined) =>
             `${n} ${CKB_UNIT[u.toLowerCase()]!} ${(sup ?? ascii) === "³" || (sup ?? ascii) === "3" ? "سێجا" : "دووجا"}`);
     //     ⚠ RATES BEFORE THE PLAIN ARM, or that arm consumes the numerator and strands the slash, leaving
@@ -105,7 +105,7 @@ export function normalizeCentralKurdish(input: string): string {
         h: "کاتژمێر", s: "چرکە", "کاتژمێر": "کاتژمێر", "چرکە": "چرکە",
     };
     const ckbPer = Object.keys(CKB_PER).sort((a, b) => b.length - a.length).join("|");
-    t = tr(t, new RegExp(`${CKB_NUM}\\s*(${ckbUnits})\\s*/\\s*(${ckbPer})(?![\\p{L}\\p{M}\\d])`, "giu"),
+    t = rewrite(t, new RegExp(`${CKB_NUM}\\s*(${ckbUnits})\\s*/\\s*(${ckbPer})(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, n: string, u: string, d: string) =>
             `${n} ${CKB_UNIT[u.toLowerCase()]!} لە ${CKB_PER[d.toLowerCase()]!}`);
     //     …and the PERSO-ARABIC numerator, which the corpus writes as `کم/کاتژمێر` and `مەتر/چرکە`.
@@ -117,34 +117,34 @@ export function normalizeCentralKurdish(input: string): string {
         "کم": "کیلۆمەتر", "کیلۆمەتر": "کیلۆمەتر", "مەتر": "مەتر", "سم": "سانتیمەتر",
     };
     const ckbNumer = Object.keys(CKB_NUMER).sort((a, b) => b.length - a.length).join("|");
-    t = tr(t, new RegExp(`(\\d[\\d.,]*)\\s*(${ckbNumer})\\s*/\\s*(${ckbPer})(?![\\p{L}\\p{M}\\d])`, "gu"),
+    t = rewrite(t, new RegExp(`(\\d[\\d.,]*)\\s*(${ckbNumer})\\s*/\\s*(${ckbPer})(?![\\p{L}\\p{M}\\d])`, "gu"),
         (_m, n: string, u: string, d: string) => `${n} ${CKB_NUMER[u]!} لە ${CKB_PER[d]!}`);
-    t = tr(t, new RegExp(`${CKB_NUM}\\s*(${ckbUnits})(?![\\p{L}\\p{M}\\d])`, "giu"),
+    t = rewrite(t, new RegExp(`${CKB_NUM}\\s*(${ckbUnits})(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, n: string, u: string) => `${n} ${CKB_UNIT[u.toLowerCase()]!}`);
 
     // 3) DECIMAL POINT (47) — again the English convention. The period is clause punctuation, so `2.4`
     //    read as "two" + a SENTENCE BREAK + "four". Fractional part spoken digit by digit.
-    t = tr(t, /(\d+)\.(\d+)/gu, (_m, whole: string, frac: string) =>
+    t = rewrite(t, /(\d+)\.(\d+)/gu, (_m, whole: string, frac: string) =>
         `${whole} خاڵ ${[...frac].join(" ")}`);
 
     // 4) CLOCK, COLON FORM (25). The colon was reaching clausePunctuation as a COMMA PAUSE, so `11:00`
     //    read as "یانزە , سفر".
-    t = tr(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
+    t = rewrite(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
 
     // 5) PERCENT (5) → `لە سەدا` ("out of a hundred"), the construction the corpus writes out (11).
     //    Kurdish PREPOSES it, unlike every other language in this sequence: `لە سەدا ٢٥`, not `٢٥ لە سەدا`.
     //    BOTH PLACEMENTS of the sign are claimed. The corpus writes `٨٨%` five times and `%٨٨` once —
     //    the sign-first form is the Arabic-script convention and a rule anchored only on the digit-first
     //    shape leaves it silent. The READING is preposed either way.
-    t = tr(t, /(\d+)\s*%/gu, "لە سەدا $1");
-    t = tr(t, /%\s*(\d+)/gu, "لە سەدا $1");
+    t = rewrite(t, /(\d+)\s*%/gu, "لە سەدا $1");
+    t = rewrite(t, /%\s*(\d+)/gu, "لە سەدا $1");
 
     // 6) DEGREES. `پلە` is the word (90 in the corpus); the scale letter would otherwise reach the Latin
     //    fallback and be read as an English letter name.
-    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
-    t = tr(t, /(\d)\s*°\s*C(?!\p{L})/giu, "$1 پلەی سەلیزی");
-    t = tr(t, /(\d)\s*°\s*F(?!\p{L})/giu, "$1 پلەی فەهرەنهایت");
-    t = tr(t, /(\d)\s*°/gu, "$1 پلە");
+    t = rewrite(rewrite(t, /℃/gu, "°C"), /℉/gu, "°F");
+    t = rewrite(t, /(\d)\s*°\s*C(?!\p{L})/giu, "$1 پلەی سەلیزی");
+    t = rewrite(t, /(\d)\s*°\s*F(?!\p{L})/giu, "$1 پلەی فەهرەنهایت");
+    t = rewrite(t, /(\d)\s*°/gu, "$1 پلە");
 
     // 6b) UNIT ABBREVIATIONS. `19500 کم` read the abbreviation as raw letters — the `ˈʊkm` shape found
     //     fleet-wide — and the corpus writes them 32 times, EVERY ONE after a numeral:
@@ -164,16 +164,16 @@ export function normalizeCentralKurdish(input: string): string {
     //     after the unit ("کم دووجا"), so expanding the abbreviation leaves "کیلۆمەتر دووجا" intact.
     //     `م` and `کگ` are NOT declared — `م` is a one-letter key in a script where it is a very common
     //     letter, and `کگ` occurs zero times.
-    t = tr(t, /(\d)\s*کم(?![\p{L}\p{M}])/gu, "$1 کیلۆمەتر");
-    t = tr(t, /(\d)\s*سم(?![\p{L}\p{M}])/gu, "$1 سانتیمەتر");
+    t = rewrite(t, /(\d)\s*کم(?![\p{L}\p{M}])/gu, "$1 کیلۆمەتر");
+    t = rewrite(t, /(\d)\s*سم(?![\p{L}\p{M}])/gu, "$1 سانتیمەتر");
     // 7) RANGES (34). Spoken `بۆ` ("to"), which is an ordinary word in the corpus (2057).
-    t = tr(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 بۆ $2");
+    t = rewrite(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 بۆ $2");
 
     // 8) CURRENCY, both placements — the corpus writes none, but a phonemizer is handed arbitrary text.
     for (const [sign, word] of Object.entries(CURRENCY)) {
         const esc = sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        t = tr(t, new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
-        t = tr(t, new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
     }
 
     // 9) SIGNED NUMBERS — a sign PREFIXED to a number, `UTC+1`. The boundary must admit a LETTER before
@@ -188,17 +188,17 @@ export function normalizeCentralKurdish(input: string): string {
     //    keeps the wider one. (An unsigned `کۆڤید-19` then reads as its two parts, which is what it is.)
     //    The replacement carries a LEADING space: the sign sits directly against the abbreviation
     //    (`UTC+1`), so without it the word fuses on as `UTCکۆ`. The trailing collapse tidies the double.
-    t = tr(t, /(?<![\d])(\+)(\d+)/gu, (_m, _sign: string, n: string) => ` کۆ ${n}`);
-    t = tr(t, /(?<![\d\p{L}\p{M}])([-−])(\d+)/gu, (_m, _sign: string, n: string) => ` کەم ${n}`);
+    t = rewrite(t, /(?<![\d])(\+)(\d+)/gu, (_m, _sign: string, n: string) => ` کۆ ${n}`);
+    t = rewrite(t, /(?<![\d\p{L}\p{M}])([-−])(\d+)/gu, (_m, _sign: string, n: string) => ` کەم ${n}`);
 
     // 10) ARITHMETIC AND RELATIONAL SIGNS — infix between digits is where arithmetic lives; the relational
     //    signs are read in every position, because a dropped sign is inaudible.
-    t = tr(t, /(\d)\s*\+\s*(\d)/gu, "$1 کۆ $2");
-    for (const [re, word] of RELATIONAL) t = tr(t, re, word);
+    t = rewrite(t, /(\d)\s*\+\s*(\d)/gu, "$1 کۆ $2");
+    for (const [re, word] of RELATIONAL) t = rewrite(t, re, word);
 
     // 11) AMPERSAND → و ("and"), which is the commonest word in the corpus (32,622).
-    t = tr(t, /\s*[&＆]\s*/gu, " و ");
+    t = rewrite(t, /\s*[&＆]\s*/gu, " و ");
 
     // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
-    return t.replace(/[ \t]{2,}/gu, " ");
+    return rewrite(t, /[ \t]{2,}/gu, " ");
 }

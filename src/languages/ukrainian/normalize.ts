@@ -42,7 +42,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { MANIFEST as DEF } from "./manifest.ts";
 import { eastSlavicNumberWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** The cardinal, as words — the same composer the engine's number path uses, so an ordinal's head reads
  *  exactly as a bare numeral would (`1970` → *тисяча дев'ятсот*). */
@@ -220,7 +220,7 @@ const MULTI_DOT: readonly (readonly [RegExp, string])[] = DEF.multiDotAbbrev.map
     let src = "(?<![\\p{L}\\p{M}])";
     parts.forEach((part, i) => {
         if (i > 0) src += parts[i - 1]!.endsWith(".") ? "\\s?" : "\\s+";
-        src += part.replace(/\./gu, "\\.");
+        src += rewrite(part, /\./gu, "\\.");
     });
     return [new RegExp(src, "giu"), reading] as const;
 });
@@ -238,9 +238,9 @@ export function normalizeUkrainian(input: string): string {
     //    (3,980 миль)` = 6387 km / 3980 mi — the conversion checks out), and requiring EXACTLY three
     //    digits keeps every comma DECIMAL in the corpus (1,5 · 2,4 · 6,34 · 12,8 · 14,7 — all 1–2 places)
     //    out of this rule. Zero three-decimal-place numbers occur.
-    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
-    s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
-    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 2; i++) s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
+    s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule (step 5) so `н. е.` and `т. п.` are claimed
     //    whole — their interior dots were becoming phrase breaks. Both spacings occur (`н. е.` and `н.е.`).
@@ -249,23 +249,23 @@ export function normalizeUkrainian(input: string): string {
     //    regression the corpus diff caught on the first pass, and the check the German run named:
     //    zero sentence-final pauses may be lost.
     for (const [re, word] of MULTI_DOT)
-        s = tr(s, re, (_m, offset: number, full: string) => {
+        s = rewrite(s, re, (_m, offset: number, full: string) => {
             const rest = full.slice(offset + _m.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
 
     // 2) НОМЕР. The sign was dropped outright (×3, including the unspaced `№11`).
-    s = tr(s, /№\s?(?=\d)/gu, `${DEF.numberSign} `);
+    s = rewrite(s, /№\s?(?=\d)/gu, `${DEF.numberSign} `);
 
     // 3) `кв.` = квадратний, an AGREEING adjective — so it needs the count, which is why it runs before the
     //    de-grouping's output is consumed by anything else and before the shared unit tier. `кв. км` folds
     //    to the `км²` the shared exponent seam already understands; `кв. миль` cannot, because миль is a
     //    spelled-out word rather than a unit abbreviation, so it is composed here.
-    s = tr(s, /(\d)\s?кв\.\s?км(?![\p{L}\p{M}])/gu, "$1 км²");
+    s = rewrite(s, /(\d)\s?кв\.\s?км(?![\p{L}\p{M}])/gu, "$1 км²");
     //    `кв. миль` takes the GENITIVE PLURAL adjective outright rather than a count form: the noun is
     //    written миль (gen.pl) in all three corpus instances, so the adjective must agree with what the
     //    text actually says, not with what the numeral would otherwise govern (9 174 квадратних миль).
-    s = tr(s, /(\d)\s?кв\.\s?миль(?![\p{L}\p{M}])/gu, `$1 ${SQUARE_GEN_PL} миль`);
+    s = rewrite(s, /(\d)\s?кв\.\s?миль(?![\p{L}\p{M}])/gu, `$1 ${SQUARE_GEN_PL} миль`);
 
     // 4) NUMERAL + WRITTEN SUFFIX. The suffix is the last letters of the FULL word, not an appendable
     //    ordinal marker, and the word may be an ordinal (`1970-х` = сімдесятих) or an oblique CARDINAL
@@ -281,7 +281,7 @@ export function normalizeUkrainian(input: string): string {
     //        what makes the paradigm safe to guess with — `400-от` falls through the ordinal forms (none
     //        ends in -от) onto *чотирьохсот*, which does.
     //    MUST run before the range rule (step 9), which would otherwise eat the hyphen.
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?([а-яіїєґ]{1,3})${NOT_LETTER}`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?([а-яіїєґ]{1,3})${NOT_LETTER}`, "giu"),
         (whole, digits: string, rawSuffix: string) => {
             const n = Number(digits);
             const suffix = rawSuffix.toLowerCase();
@@ -296,7 +296,7 @@ export function normalizeUkrainian(input: string): string {
 
     // 5) DOTTED ABBREVIATIONS. The dot is consumed before a following word or a comma, so it cannot become
     //    a phrase break; at a real sentence end it is kept. Runs AFTER step 1 so `н. е.` is already gone.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -304,9 +304,9 @@ export function normalizeUkrainian(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
         (_m, ab: string) => DOTTED_ABBREV[ab.toLowerCase()]!);
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -323,21 +323,21 @@ export function normalizeUkrainian(input: string): string {
     //    · `м/с` follows from the same exclusion: with м out of `units`, the rate cannot compose there.
     //    · `миль/год` has a SPELLED-OUT numerator, which the tier (abbreviation keys only) cannot match.
     //    Units run BEFORE the clock and before the decimal fold, because both destroy number adjacency.
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?м\/с(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?м\/с(?![\p{L}\p{M}])/gu,
         (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), METRE)} ${UNIT_PER} ${RATE["с"]!}`);
-    s = tr(s, new RegExp(`(\\d+(?:[.,]\\d+)?)\\s?м(?![\\p{L}\\p{M}'’ʼ²³/])`, "gu"),
+    s = rewrite(s, new RegExp(`(\\d+(?:[.,]\\d+)?)\\s?м(?![\\p{L}\\p{M}'’ʼ²³/])`, "gu"),
         (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), METRE)}`);
     //      The 3-letter lookbehind is what keeps this off `км/год`, which the shared tier composes itself.
-    s = tr(s, /(?<=[\p{L}\p{M}]{3})\s?\/\s?год(?![\p{L}\p{M}])/gu, ` ${UNIT_PER} ${RATE["год"]!}`);
+    s = rewrite(s, /(?<=[\p{L}\p{M}]{3})\s?\/\s?год(?![\p{L}\p{M}])/gu, ` ${UNIT_PER} ${RATE["год"]!}`);
     //      ⚠ THE SCALE RULES READ THE WHOLE NUMBER, not its last digit. `(\d)` was invisible while the word
     //      was a hard-coded gen.pl (`+30°C` → *плюс 30 градусів Цельсія*, right by luck) and wrong the
     //      moment the count is read off it — and with no agreement applied at all, `1 °C` was
     //      *один градусів Цельсія* regardless of the capture.
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?°\s?[CСc](?![\p{L}\p{M}])/gui,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°\s?[CСc](?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)} ${DEF.temperatureScales["C"]!}`);
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?°\s?[FФf](?![\p{L}\p{M}])/gui,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°\s?[FФf](?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)} ${DEF.temperatureScales["F"]!}`);
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)}`);
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n.replace(",", ".")), DEGREE)}`);
 
     // 7) CLOCK. The colon is clause punctuation in ukrainian.jsonc, so `20:30` read as *двадцять ,
     //    тридцять*. Ukrainian says the hour as a FEMININE ORDINAL agreeing with the elided *година*, in
@@ -345,7 +345,7 @@ export function normalizeUkrainian(input: string): string {
     //    The preceding word is read off the text rather than captured, so the lookbehind stays simple.
     //    Two-digit minutes are REQUIRED, which is what keeps the corpus's scores and ratios (`5:3`, `3:2`,
     //    `26 - 00`) out of this rule.
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu,
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu,
         (whole: string, h: string, min: string, offset: number, full: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv === 0) return whole; // *нульова година* is not said; leave it
@@ -358,13 +358,13 @@ export function normalizeUkrainian(input: string): string {
         });
 
     // 8) SIGNS. `+30°C` lost its sign entirely (the ° rule above has already made it `+30 градусів …`).
-    s = tr(s, /(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
+    s = rewrite(s, /(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = tr(s, /±/gu, ` ${SIGN.plusMinus} `);
-    s = tr(s, /(^|[\s(])\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
+    s = rewrite(s, /±/gu, ` ${SIGN.plusMinus} `);
+    s = rewrite(s, /(^|[\s(])\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
 
     // 8b) RELATIONAL AND DIVISION SIGNS. uk.wikipedia's division article reads the whole expression
     //     aloud, both signs, operands in place, and — the part that matters for a case language — with the
@@ -389,10 +389,10 @@ export function normalizeUkrainian(input: string): string {
     //     nor evidence against it. `розділене на` is chosen because the gloss above puts it in the exact slot
     //     between two numerals, not because the alternative is wrong. (Italian's `sorella minore di` IS a
     //     different construction — an age adjective plus a partitive — and that distinction is real.)
-    s = tr(s, /\s?=\s?/gu, ` ${SIGN.equals} `);
-    s = tr(s, /\s?<\s?/gu, ` ${SIGN.lessThan} `);
-    s = tr(s, /\s?>\s?/gu, ` ${SIGN.greaterThan} `);
-    s = tr(s, /\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
+    s = rewrite(s, /\s?=\s?/gu, ` ${SIGN.equals} `);
+    s = rewrite(s, /\s?<\s?/gu, ` ${SIGN.lessThan} `);
+    s = rewrite(s, /\s?>\s?/gu, ` ${SIGN.greaterThan} `);
+    s = rewrite(s, /\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
 
     // 9) NUMERIC RANGES. The dash between two numbers was dropped outright, fusing the endpoints
     //    (`1418-1450` became one run of words). Digits are required on BOTH sides so that `COVID-19`,
@@ -400,13 +400,13 @@ export function normalizeUkrainian(input: string): string {
     //    KNOWN false positives, counted rather than assumed: 3 of the 19 dashes are SCORES (`6-6`, `7–2`,
     //    `26 - 00`) where "до" is the wrong connective — but the endpoints were fusing there too, so no
     //    reading is lost, only a wrong-ish connective gained.
-    s = tr(s, /(\d)\s?[–—-]\s?(?=\d)/gu, `$1 ${DEF.rangeWord} `);
+    s = rewrite(s, /(\d)\s?[–—-]\s?(?=\d)/gu, `$1 ${DEF.rangeWord} `);
 
     // 10) FRACTIONS — feminine, agreeing with the elided *частина*: 1/5 is *одна п'ята*.
     //     ⚠ THE FEMININE 1 AND 2 ARE `numbers.feminine`, the pair the magnitude compositor already uses for
     //     the feminine тисяча (одна тисяча, дві тисячі) — and the masculine forms they replace are
     //     `numbers.units[1]` and `[2]`. This rule held its own copies of all four.
-    s = tr(s, /(?<![\d\p{L}])(\d{1,3})\/(\d{1,3})(?![\d/\p{L}])/gu, (whole, a: string, b: string) => {
+    s = rewrite(s, /(?<![\d\p{L}])(\d{1,3})\/(\d{1,3})(?![\d/\p{L}])/gu, (whole, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         const fem = ordinalForms(den)[FEM_NOM];
         if (fem === undefined) return whole;
@@ -419,7 +419,7 @@ export function normalizeUkrainian(input: string): string {
     // 11) DOT DECIMALS → the comma form the engine's number token reads. Narrow ON PURPOSE (see header):
     //     only a 1–2-digit integer with a single fractional digit, which claims the two genuine decimals
     //     (`2.3 мільярда`, `6.5`) and rejects the version string `802.11n` and the dot-time `15.00`.
-    s = tr(s, /(?<![\d.])(\d{1,2})\.(\d)(?![\d.])/gu, "$1,$2");
+    s = rewrite(s, /(?<![\d.])(\d{1,2})\.(\d)(?![\d.])/gu, "$1,$2");
 
     return s;
 }

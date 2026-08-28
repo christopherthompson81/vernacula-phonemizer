@@ -15,6 +15,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Mongolian;
 
@@ -178,28 +179,28 @@ public static class Normalize
         var s = input;
 
         // 1. Personal initials, before the dot rule and before the caps run.
-        s = INITIALS.Replace(s, m => string.Join(" ", CAPS.Matches(m.Groups[1].Value)
+        s = Rewrite(s, INITIALS, m => string.Join(" ", CAPS.Matches(m.Groups[1].Value)
             .Select(c => LETTER_NAME.GetValueOrDefault(Js.ToLowerCase(c.Value), c.Value))) + " ");
 
         // 2. An abbreviation dot between two lowercase letters is not a clause end.
-        s = ABBREV_DOT.Replace(s, " ");
+        s = Rewrite(s, ABBREV_DOT, " ");
 
         // 3. De-grouping.
-        s = GROUP_SPACE.Replace(GROUP_COMMA.Replace(s, ""), "$1$2");
+        s = Rewrite(Rewrite(s, GROUP_COMMA, ""), GROUP_SPACE, "$1$2");
 
         // 3b. The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. Here rather than later
         //     because every numeric step below reads a digit run, and the colon was splitting one in half.
-        s = DIGIT_COLON_RUN.Replace(s, m => m.Groups[1].Value + COLON_G.Replace(m.Groups[2].Value, " "));
+        s = Rewrite(s, DIGIT_COLON_RUN, m => m.Groups[1].Value + COLON_G.Replace(m.Groups[2].Value, " "));
 
         // 4. Ordinals.
-        s = ORDINAL.Replace(s, m =>
+        s = Rewrite(s, ORDINAL, m =>
         {
             var words = OrdinalWords(Js.Number(m.Groups[1].Value));
             return words is null ? m.Value : $"{words}{m.Groups[2].Value}";
         });
 
         // 5. Percent — the suffixed arms first, or the bare arm consumes the sign and strands the suffix.
-        s = PERCENT.Replace(PERCENT_NI.Replace(PERCENT_SUFFIX.Replace(s, "$1 хув$2"), "$1 хувь нь"), "$1 хувь");
+        s = Rewrite(Rewrite(Rewrite(s, PERCENT_SUFFIX, "$1 хув$2"), PERCENT_NI, "$1 хувь нь"), PERCENT, "$1 хувь");
 
         // 6. Currency. The sign is DROPPED where the word is already said within the window; a MAGNITUDE word
         //    takes the currency name to the far side of it, or refuses the match when it is itself case-marked.
@@ -210,24 +211,24 @@ public static class Normalize
             return $"{num}{mag} {CURRENCY_WORD[sign]}";
         }
         var beforeFrozen = s;
-        s = CURRENCY_BEFORE.Replace(s, m =>
+        s = Rewrite(s, CURRENCY_BEFORE, m =>
             Currency(beforeFrozen, m, m.Groups[2].Value, m.Groups[1].Value, m.Groups[3].Value));
         var afterFrozen = s;
-        s = CURRENCY_AFTER.Replace(s, m =>
+        s = Rewrite(s, CURRENCY_AFTER, m =>
             Currency(afterFrozen, m, m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value));
 
         // 7. Degrees, scale arm first so the bare arm cannot re-claim what it declined. The `°F` refusal is
         //    CASE-FOLDED, because the class that reaches it is.
-        s = DEGREE_SCALE.Replace(s, m =>
+        s = Rewrite(s, DEGREE_SCALE, m =>
             m.Groups[2].Value.ToUpperInvariant() == "F" ? m.Value : $"{m.Groups[1].Value} хэм");
-        s = DEGREE_BARE.Replace(s, "$1 хэм");
+        s = Rewrite(s, DEGREE_BARE, "$1 хэм");
 
         // 8. Minus. After step 7, so the degree arm can key on the emitted `хэм` as well as on `градус`.
-        s = MINUS_TRUE.Replace(MINUS_DEGREE.Replace(s, "хасах $1"), "хасах ");
+        s = Rewrite(Rewrite(s, MINUS_DEGREE, "хасах $1"), MINUS_TRUE, "хасах ");
 
         // 9. Units and exponents, with the measure word preposed onto the unit noun. A glued case suffix is
         //    ACCEPTED here and refused by the percent arm — the fallback readings are what is asymmetric.
-        s = UNIT.Replace(s, m =>
+        s = Rewrite(s, UNIT, m =>
         {
             var num = m.Groups[1].Value;
             var unit = UNIT_WORD[m.Groups[2].Value];
@@ -240,7 +241,7 @@ public static class Normalize
         });
 
         // 10. The decimal point.
-        s = DECIMAL_COMMA.Replace(DECIMAL_DOT.Replace(s, "$1 цэг $2"), "$1 цэг $2");
+        s = Rewrite(Rewrite(s, DECIMAL_DOT, "$1 цэг $2"), DECIMAL_COMMA, "$1 цэг $2");
 
         // 11. The shared initialism seam.
         return SpellInitialisms(s);

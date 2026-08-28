@@ -20,7 +20,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Regular, NBSP and narrow-NBSP — all three occur as thousands separators. */
 const GROUP_SPACE = " \\u00a0\\u202f\\u2009";
@@ -210,8 +210,8 @@ export function normalizeCzech(input: string): string {
     //    unit/percent tier to see it, so czech.ts's TOKEN swallows it and emits "čárka" (the Czech name of
     //    the decimal comma) between the parts.
     for (let i = 0; i < 2; i++)
-        s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = tr(s, new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
+        s = rewrite(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = rewrite(s, new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
 
     // 1) MULTI-DOT ABBREVIATIONS (the era markers), before the single-dot rule —
     //    otherwise the interior dots survive as breaks and the letters read as a bogus word.
@@ -219,12 +219,12 @@ export function normalizeCzech(input: string): string {
     //    period it has to be put back — "…do roku 1000 př. n. l." ends the utterance, and eating the dot
     //    lost its sentence-final pause. `keepFinal` is applied to every dot-consuming rule below.
     for (const [re, w] of MULTI_DOT)
-        s = tr(s, re, (m0: string, ...rest: unknown[]) => keepFinal(w, m0, rest));
+        s = rewrite(s, re, (m0: string, ...rest: unknown[]) => keepFinal(w, m0, rest));
 
     // 2) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break. Two shapes:
     //    followed by a word, and followed by another mark or end of clause (`apod.` at the end of a
     //    list), where the sentence period is kept.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -232,7 +232,7 @@ export function normalizeCzech(input: string): string {
             const w = DOTTED[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -241,7 +241,7 @@ export function normalizeCzech(input: string): string {
             return w === undefined ? m0 : `${w}.`;
         });
     //    `s.` (strana), DIGIT-GUARDED — see DOTTED_ALT above for why it cannot ride the shared rule.
-    s = tr(s, /(?<![\p{L}\p{M}.])s\.(\s+)(?=\d)/giu, (m0, sp: string) => {
+    s = rewrite(s, /(?<![\p{L}\p{M}.])s\.(\s+)(?=\d)/giu, (m0, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
             // key is absent. The `!` here made `String.replace` stringify `undefined`.
@@ -260,7 +260,7 @@ export function normalizeCzech(input: string): string {
     //    unit twice (*osm hodin … hodin*) is worse than the alternative. The governing preposition
     //    ("v 8:46", "ve 12:00") is left as its own word; inflecting the cardinal to agree is beyond what a
     //    number can tell us (case limitation in the header).
-    s = tr(s, /([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)(?:\s+(?:h|hodin)(?![\p{L}\p{M}]))?/gu,
+    s = rewrite(s, /([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)(?:\s+(?:h|hodin)(?![\p{L}\p{M}]))?/gu,
         (m0, h: string, min: string) => {
             const hv = Number(h), mv = Number(min);
             const head = `${feminine(numberToWords(hv))} ${counted(hv, HOUR)}`;
@@ -271,7 +271,7 @@ export function normalizeCzech(input: string): string {
     //    čtvrtého osmého"). Before the version-dot rule, which would otherwise eat the interior dot of
     //    "5. 9." (a space separates date parts; version dots never do). Validated on day/month ranges so a
     //    bare "N. N." cannot be claimed spuriously.
-    s = tr(s, /(?<![\p{L}\p{M}\d])(\d{1,2})\.\s+(\d{1,2})\.(?=\s*(?:do\b|\d{4}|[.,\p{Ll}]|$))/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d])(\d{1,2})\.\s+(\d{1,2})\.(?=\s*(?:do\b|\d{4}|[.,\p{Ll}]|$))/gu,
         (m0, d: string, mo: string) => {
             const dv = Number(d), mv = Number(mo);
             if (dv < 1 || dv > 31 || mv < 1 || mv > 12) return m0;
@@ -281,11 +281,11 @@ export function normalizeCzech(input: string): string {
     // 5) VERSION / FIGURE DOTS between digits — `802.11n` ×3, `2.4Ghz`/`5.0Ghz` and the figure `1.1` were
     //    breaking the sentence at the interior dot. Before the ordinal rules so they never see a
     //    digit-dot-digit.
-    s = tr(s, /(\d)\.(?=\d)/gu, "$1 tečka ");
+    s = rewrite(s, /(\d)\.(?=\d)/gu, "$1 tečka ");
 
     // 6) ORDINAL RANGE — `10.–11.` in "mezi 10.–11. a 14. stoletím" read as two cardinals plus a break.
     //    Read as "až" (through). Digits on BOTH sides carry the dots; the en dash is the corpus form.
-    s = tr(s, /(?<![\p{L}\p{M}\d.])(\d+)\.\s*[–—-]\s*(\d+)\.(?![\d])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.])(\d+)\.\s*[–—-]\s*(\d+)\.(?![\d])/gu, (m0, a: string, b: string) => {
         const oa = ordinal(Number(a)), ob = ordinal(Number(b));
         if (oa === undefined || ob === undefined) return m0;
         return `${oa} až ${ob}`;
@@ -297,38 +297,38 @@ export function normalizeCzech(input: string): string {
     //    století → do patnáctého století). The list shape covers the corpus's "11., 12. a 13. století".
     //    `stoletím` (instrumental, "mezi 10.–11. a 14. stoletím") is deliberately NOT matched — its number
     //    context is the general ordinal's business, which keeps that sentence's endings consistent.
-    s = tr(s, /((?:\d+\.\s*)(?:,\s*\d+\.\s*)*(?:\s+a\s+\d+\.\s*)?)století(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /((?:\d+\.\s*)(?:,\s*\d+\.\s*)*(?:\s+a\s+\d+\.\s*)?)století(?![\p{L}\p{M}])/gu,
         (m0: string, list: string, offset: number, whole: string) => {
             const loc = /(?:v|ve)\s+$/iu.test(whole.slice(0, offset));
             const c: OrdCase = loc ? "loc" : "gen";
-            return `${list.replace(/(\d+)\./gu, (_m, n: string) => inflectOrdinal(ordinal(Number(n))!, c))}století`;
+            return `${rewrite(list, /(\d+)\./gu, (_m, n: string) => inflectOrdinal(ordinal(Number(n))!, c))}století`;
         });
 
     // 8) DECADE — `N. + let/letech` (60. let, 70. let, 20./30./50./80. letech) governs the
     //    genitive/locative PLURAL (v 60. letech → v šedesátých letech). Before the general ordinal so
     //    the number is claimed here with the agreeing ending.
-    s = tr(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+(let|letech)(?!\p{L})/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+(let|letech)(?!\p{L})/gu,
         (_m, n: string, head: string) => `${inflectOrdinal(ordinal(Number(n))!, "plGen")} ${head}`);
 
     // 9) DATE MONTHS — `N. + month genitive` (21. července, 24. září, 17. září 2007 …). The month name is
     //    the case cue; červenci (after `k`) takes the dative. Before the general ordinal for the same
     //    reason as step 8.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d.,])(\\d+)\\.\\s+(${MONTH_ALT})(?!\\p{L})`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d.,])(\\d+)\\.\\s+(${MONTH_ALT})(?!\\p{L})`, "gu"),
         (_m, n: string, month: string) => `${inflectOrdinal(ordinal(Number(n))!, MONTH_RULE[month]!)} ${month}`);
 
     // 10) PLACE — `na 5. a 6. místě` (compound first), `na 13. místě` (locative) and `na 190. místo`
     //     (neuter accusative: na + acc). The `místo` form is the "place" sense in the corpus, not the
     //     homographic preposition.
-    s = tr(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+a\s+(\d+)\.\s+místě/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+a\s+(\d+)\.\s+místě/gu,
         (_m, a: string, b: string) =>
             `${inflectOrdinal(ordinal(Number(a))!, "loc")} a ${inflectOrdinal(ordinal(Number(b))!, "loc")} místě`);
-    s = tr(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místě(?!\p{L})/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místě(?!\p{L})/gu,
         (_m, n: string) => `${inflectOrdinal(ordinal(Number(n))!, "loc")} místě`);
-    s = tr(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místo(?!\p{L})/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místo(?!\p{L})/gu,
         (_m, n: string) => `${inflectOrdinal(ordinal(Number(n))!, "neutNom")} místo`);
     //    The one written-out hour ordinal, `po 11. hodině` → po jedenácté hodině (locative, feminine —
     //    the same -é/-í ending as the neuter, so neutNom supplies it).
-    s = tr(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+(hodin\p{L}*)(?!\p{L})/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+(hodin\p{L}*)(?!\p{L})/gu,
         (_m, n: string, head: string) => `${inflectOrdinal(ordinal(Number(n))!, "neutNom")} ${head}`);
 
     // 11) GENERAL ORDINAL — derived by tabulating what surrounds `N.` in this corpus, NOT ported from
@@ -336,7 +336,7 @@ export function normalizeCzech(input: string): string {
     //     word (or a comma) → ordinal, in the masculine nominative except where a step above claimed the
     //     agreeing form; followed by an UPPERCASE word or end of clause → sentence period (the corpus's
     //     "…lat 21. Cuddeback"-shaped traps do not occur, but the guard is what makes the rule safe).
-    s = tr(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.(?=\s*[,\p{Ll}])/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.(?=\s*[,\p{Ll}])/gu,
         (m0, digits: string) => ordinal(Number(digits)) ?? m0);
 
     // 12) REGNAL ORDINALS. All three corpus Romans (Lealofi III, Alžběty II., Ludvík XVI.) are regnal
@@ -345,7 +345,7 @@ export function normalizeCzech(input: string): string {
     //     read as an ordinal (Lealofi 3 → Lealofi třetí). Guarded two ways: the number must be ≤ 39 (the
     //     practical monarch/pope range, which keeps "Standard 802.11n" and "O 250 let" untouched) and
     //     followed by a break, never another digit/letter.
-    s = tr(s, /(?<=\p{Lu}\p{Ll}+\p{M}*[ \u00a0])(\d{1,2})\.?(?=[\s.,;:!?]|$)/gu, (m0, d: string) => {  // space, NBSP
+    s = rewrite(s, /(?<=\p{Lu}\p{Ll}+\p{M}*[ \u00a0])(\d{1,2})\.?(?=[\s.,;:!?]|$)/gu, (m0, d: string) => {  // space, NBSP
         const n = Number(d);
         const o = ordinal(n);
         return o === undefined || n > 39 ? m0 : o;
@@ -355,46 +355,46 @@ export function normalizeCzech(input: string): string {
     //     "1450" into one uninterrupted run of number words. Read as "do" — the ordinary Czech reading of
     //     a range dash. Digits are required on BOTH sides so that "Ił-76"-shaped designations and
     //     "COVID-19" are not touched.
-    s = tr(s, /(\d)\s?[–—-]\s?(?=\d)/gu, "$1 do ");
+    s = rewrite(s, /(\d)\s?[–—-]\s?(?=\d)/gu, "$1 do ");
 
     // 14) RATE UNITS the shared tier cannot compose (the numerator is not one of its units): `mil/h`
     //     (miles per hour), where `mil` is already the written Czech genitive plural of míle. `km/h` and
     //     `m/s` are composed by the shared tier in czech.ts. AFTER the range rule, so "35–40 mil/h" reads
     //     as "35 do 40 mil za hodinu".
-    s = tr(s, /(\d+)\s?mil\s?\/\s?h(?![\p{L}\p{M}])/giu, (_m, n: string) => `${n} mil za hodinu`);
+    s = rewrite(s, /(\d+)\s?mil\s?\/\s?h(?![\p{L}\p{M}])/giu, (_m, n: string) => `${n} mil za hodinu`);
 
     // 15) SIGNS. Degrees take the same three-way agreement. `×` between numbers reads as "krát"
     //     (6 × 6 cm = šest krát šest centimetrů), `+` before a number as "plus".
-    s = tr(s, /(\d+)\s?°\s?C(?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Celsia`);
-    s = tr(s, /(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Fahrenheita`);
-    s = tr(s, /(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
+    s = rewrite(s, /(\d+)\s?°\s?C(?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Celsia`);
+    s = rewrite(s, /(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Fahrenheita`);
+    s = rewrite(s, /(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = tr(s, /±/gu, " plus mínus ");
-    s = tr(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
-    s = tr(s, /(\d)\s*×\s*(?=\d)/gu, "$1 krát ");
+    s = rewrite(s, /±/gu, " plus mínus ");
+    s = rewrite(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
+    s = rewrite(s, /(\d)\s*×\s*(?=\d)/gu, "$1 krát ");
     // MINUS, the counterpart of the `plus` rule above and missing from it. A sign before a number was
     // dropped outright, so `-5 stupňů` read as "pět stupňů" — five degrees, not minus five. Same boundary
     // as the plus rule so a hyphenated compound is untouched; U+2212 as well as the hyphen.
-    s = tr(s, /(^|[\s(])[-−]\s?(?=\d)/gu, "$1mínus ");
+    s = rewrite(s, /(^|[\s(])[-−]\s?(?=\d)/gu, "$1mínus ");
 
     // RELATIONAL SIGNS. None occurs in this corpus, but a phonemizer is handed arbitrary text and a
     // dropped sign is inaudible — the one outcome that cannot be right. All the words read
     // correctly through the g2p: rovná se [rˈovnaː sˈɛ], mínus [mˈiːnus], plus [plˈus].
-    s = tr(s, /\s*[=≈]\s*/gu, " rovná se ");
-    s = tr(s, /\s*<\s*/gu, " menší než ");
-    s = tr(s, /\s*>\s*/gu, " větší než ");
-    s = tr(s, /\s*÷\s*/gu, " děleno ");
+    s = rewrite(s, /\s*[=≈]\s*/gu, " rovná se ");
+    s = rewrite(s, /\s*<\s*/gu, " menší než ");
+    s = rewrite(s, /\s*>\s*/gu, " větší než ");
+    s = rewrite(s, /\s*÷\s*/gu, " děleno ");
 
     // AMPERSAND → `a` (2 in the corpus, and `a` is its commonest word at 2155). It was dropped, so
     // `B&B` read as two bare letters with nothing between them.
-    s = tr(s, /\s*[&＆]\s*/gu, " a ");
+    s = rewrite(s, /\s*[&＆]\s*/gu, " a ");
 
     // 16) FRACTIONS — feminine, agreeing with the elided *část*: 1/5 is "jedna pětina". Digits on both
     //     sides only, so the corpus's " / " in "i / nebo"-shaped phrases is untouched.
-    s = tr(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
         const den = ordinal(Number(b));
         if (den === undefined || Number(a) !== 1) return m0;
         return `jedna ${inflectOrdinal(den, "fem")}`;
@@ -403,8 +403,8 @@ export function normalizeCzech(input: string): string {
     // 17) pH and Ghz — the corpus's lowercase tech tokens that would otherwise read as consonant
     //     clusters ([px] for pH, [ks x] for Ghz). `pH` letter-spells (pé há), `Ghz` is the word
     //     gigahertz. AFTER the version-dot rule, so "2.4Ghz" reads "dva tečka čtyři gigahertz".
-    s = tr(s, /(?<![\p{L}\p{M}])pH(?![\p{L}\p{M}])/gu, "pé há");
-    s = tr(s, /(?<![\p{L}\p{M}])Ghz(?![\p{L}\p{M}])/giu, "gigahertz");
+    s = rewrite(s, /(?<![\p{L}\p{M}])pH(?![\p{L}\p{M}])/gu, "pé há");
+    s = rewrite(s, /(?<![\p{L}\p{M}])Ghz(?![\p{L}\p{M}])/giu, "gigahertz");
 
     return s;
 }

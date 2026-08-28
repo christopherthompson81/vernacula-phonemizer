@@ -4,6 +4,7 @@
  * Ported from src/languages/russian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Russian;
 
@@ -54,7 +55,7 @@ public static class Normalize
         var words = bas.Split(' ').ToList();
         var last = words[^1];
         var soft = last.EndsWith("ий", StringComparison.Ordinal); // третий is the only soft stem in the 1–19 table
-        var stem = ORD_STEM.Replace(last, "");
+        var stem = Rewrite(last, ORD_STEM, "");
         // JS `forms[0] || last.slice(stem.length)` — the empty hard ending is FALSY in JS, so it falls back
         // to whatever the lemma already carries (the "й" row, where the base form IS the nominative).
         words[^1] = stem + (soft ? forms[1] : forms[0].Length > 0 ? forms[0] : last[stem.Length..]);
@@ -150,13 +151,13 @@ public static class Normalize
     {
         var s = input;
 
-        s = GROUP_1.Replace(s, "");
-        s = GROUP_1.Replace(s, "");
-        s = SPACES.Replace(s, " ");
+        s = Rewrite(s, GROUP_1, "");
+        s = Rewrite(s, GROUP_1, "");
+        s = Rewrite(s, SPACES, " ");
 
         foreach (var (re, words) in MULTI_DOT)
         {
-            s = re.Replace(s, m =>
+            s = Rewrite(s, re, m =>
             {
                 var sp = m.Groups[1].Value;
                 var next = m.Groups[2].Value;
@@ -167,52 +168,52 @@ public static class Normalize
             });
         }
 
-        s = NUMERO.Replace(s, "номер ");
+        s = Rewrite(s, NUMERO, "номер ");
 
-        s = ORDINAL_NOTATION.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_NOTATION, m =>
         {
             var bas = OrdinalBase(Js.Number(m.Groups[1].Value));
             if (bas is null) return m.Value;
             return InflectOrdinal(bas, m.Groups[2].Value.ToLowerInvariant()) ?? m.Value;
         });
 
-        s = YEAR_G.Replace(s, "$1 $2 году");
+        s = Rewrite(s, YEAR_G, "$1 $2 году");
 
-        s = ABBREV_MID.Replace(s, m =>
+        s = Rewrite(s, ABBREV_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122). The pattern is built from this table's OWN keys but
             // carries `i`+`u`, so JS's fold widens it — `ſ`→`s`, and the Cyrillic `ᲀᲃᲅ` forms onto theirs —
             // and a near-miss MATCHES while its key is absent. The TS asserted non-null and spoke the word
             // "undefined"; this indexer THREW. Refuse the whole match.
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = ABBREV_END.Replace(s, m =>
+        s = Rewrite(s, ABBREV_END, m =>
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
-        s = KM_H.Replace(s, "$1 километров в час");
-        s = M_S.Replace(s, "$1 метров в секунду");
+        s = Rewrite(s, KM_H, "$1 километров в час");
+        s = Rewrite(s, M_S, "$1 метров в секунду");
         // ⚠ THE LOWERCASE SCALE LETTERS ARE IN THE CHARACTER CLASS, NOT AN `i` FLAG — under `i` the class
         // folds and would also reject uppercase, quietly narrowing what the rule claims.
-        s = DEG_C.Replace(s, "$1 градусов Цельсия");
-        s = DEG_F.Replace(s, "$1 градусов Фаренгейта");
-        s = DEG.Replace(s, "$1 градусов");
+        s = Rewrite(s, DEG_C, "$1 градусов Цельсия");
+        s = Rewrite(s, DEG_F, "$1 градусов Фаренгейта");
+        s = Rewrite(s, DEG, "$1 градусов");
 
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             var head = $"{Numbers.NumberToWords(hv)} {Counted(hv, HOUR)}";
             return mv == 0 ? head : $"{head} {Numbers.NumberToWords(mv)} {Counted(mv, MINUTE)}";
         });
 
-        s = MINUS.Replace(s, "$1минус $2");
-        s = PLUS_MINUS.Replace(s, " плюс минус ");
-        s = PLUS_ATTACHED.Replace(s, "$1 плюс $2");
-        s = PLUS_LEADING.Replace(s, "$1плюс $2");
+        s = Rewrite(s, MINUS, "$1минус $2");
+        s = Rewrite(s, PLUS_MINUS, " плюс минус ");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 плюс $2");
+        s = Rewrite(s, PLUS_LEADING, "$1плюс $2");
 
-        s = EQUALS.Replace(s, " равно ");
-        s = LESS_THAN.Replace(s, " меньше чем ");
-        s = GREATER_THAN.Replace(s, " больше чем ");
-        s = DIVIDE.Replace(s, " разделить на ");
+        s = Rewrite(s, EQUALS, " равно ");
+        s = Rewrite(s, LESS_THAN, " меньше чем ");
+        s = Rewrite(s, GREATER_THAN, " больше чем ");
+        s = Rewrite(s, DIVIDE, " разделить на ");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
             if (num == 1 && den == 2) return "одна вторая";

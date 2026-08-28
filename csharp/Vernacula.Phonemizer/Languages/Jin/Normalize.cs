@@ -4,6 +4,7 @@
  * Ported from src/languages/jin/normalize.ts — see that file for the corpus evidence and every refusal.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Jin;
 
@@ -36,12 +37,12 @@ public static class Normalize
     public static string NormalizeJin(string input)
     {
         var s = input;
-        s = GROUPED.Replace(s, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUPED, m => COMMAS.Replace(m.Value, ""));
         s = Sinitic.SpellYears(s, new YearRuleData { RangeWord = "到" });
         s = Sinitic.ReorderFraction(s, "分之");
         s = SYMBOLS(s);
         s = Sinitic.ReadDecimals(s, "點");
-        s = RANGE.Replace(s, m =>
+        s = Rewrite(s, RANGE, m =>
         {
             var before = s[Math.Max(0, m.Index - 12)..m.Index];
             return LATIN_BEFORE.IsMatch(before) ? m.Value : $"{m.Groups[1].Value}到{m.Groups[2].Value}";

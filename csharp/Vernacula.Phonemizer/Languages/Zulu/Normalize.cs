@@ -5,6 +5,7 @@
  * click-letter argument behind the degree/era/`sq mi` rules, and the corpus evidence for every step.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Zulu;
 
@@ -41,7 +42,7 @@ public static class Normalize
     {
         var atEnd = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.(?=[  ]*(?:$|\\p{{Lu}}))", "gu");
         var inline = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){body}\\.", "gu");
-        return inline.Replace(atEnd.Replace(s, _ => $"{word}."), _ => word);
+        return Rewrite(Rewrite(s, atEnd, _ => $"{word}."), inline, _ => word);
     }
 
     /** A clock's spoken body. `:00` reads as the bare hour, never *iqanda* (zero). */
@@ -83,7 +84,7 @@ public static class Normalize
     private static string SpellNguniInitialisms(string s)
     {
         if (!LOWERCASE.IsMatch(s) && WHITESPACE.IsMatch(s.Trim())) return s;
-        return ALLCAPS_RUN.Replace(s, m =>
+        return Rewrite(s, ALLCAPS_RUN, m =>
         {
             var run = m.Value;
             return WORD_ACRONYMS.Contains(Js.ToLowerCase(run))
@@ -151,7 +152,7 @@ public static class Normalize
     private static string Dec(string i, string f)
     {
         var parts = new List<string> { i };
-        parts.AddRange(Js.CodePoints(TRAILING_ZEROS.Replace(f, "")));
+        parts.AddRange(Js.CodePoints(JsRegex.Replace(f, TRAILING_ZEROS, "")));
         return string.Join(" ", parts.Where(t => t != ""));
     }
 
@@ -164,104 +165,104 @@ public static class Normalize
         var s = input;
 
         // 1) HTML ENTITY, first.
-        s = AMP_ENTITY.Replace(s, "&");
+        s = Rewrite(s, AMP_ENTITY, "&");
 
         // 2) AMPERSAND → `kanye ne-`.
-        s = AMPERSAND.Replace(s, " kanye ne-");
+        s = Rewrite(s, AMPERSAND, " kanye ne-");
 
         // 3) ERA MARKERS, before the generic dotted-run rule below.
         s = ExpandDotted(s, "B\\.C\\.E", BCE_WORD);
         s = ExpandDotted(s, "B\\.C", BCE_WORD);
-        s = BCE_BARE.Replace(s, _ => BCE_WORD);
-        s = BC_AFTER_NUM.Replace(s, _ => BCE_WORD);
+        s = Rewrite(s, BCE_BARE, _ => BCE_WORD);
+        s = Rewrite(s, BC_AFTER_NUM, _ => BCE_WORD);
 
         // 4) DOTTED CAPITAL RUNS and a LONE INITIAL.
-        s = DOTTED_CAPS.Replace(s, m => DOTS_AND_SPACE.Replace(m.Value, ""));
-        s = LONE_INITIAL.Replace(s, "$1");
+        s = Rewrite(s, DOTTED_CAPS, m => DOTS_AND_SPACE.Replace(m.Value, ""));
+        s = Rewrite(s, LONE_INITIAL, "$1");
 
         // 5) THOUSANDS DE-GROUPING, before anything else numeric.
-        s = DEGROUP_COMMA.Replace(s, m => COMMA_G.Replace(m.Value, ""));
-        s = DEGROUP_SPACE.Replace(s, m => GROUP_SPACES.Replace(m.Value, ""));
+        s = Rewrite(s, DEGROUP_COMMA, m => COMMA_G.Replace(m.Value, ""));
+        s = Rewrite(s, DEGROUP_SPACE, m => GROUP_SPACES.Replace(m.Value, ""));
 
         // 5b) SPORTS TIMES, before the clock rule.
-        s = SPORTS_TIME.Replace(s, "$1 $2 $3");
+        s = Rewrite(s, SPORTS_TIME, "$1 $2 $3");
 
         // 6) CLOCK, colon form.
-        s = CLOCK_COLON.Replace(s, m =>
+        s = Rewrite(s, CLOCK_COLON, m =>
             $"{ClockBody(m.Groups[1].Value, m.Groups[2].Value)}{HalfDay(m.Groups[3].Success ? m.Groups[3].Value : null)}");
 
         // 7) CLOCK before a TIMEZONE, comma/dot and bare-four-digit spellings.
-        s = CLOCK_TZ.Replace(s, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value));
-        s = CLOCK_TZ_BARE.Replace(s, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, CLOCK_TZ, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, CLOCK_TZ_BARE, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value));
 
         // 8) a.m./p.m. NOT attached to a clock.
-        s = LOOSE_MERIDIEM.Replace(s, m => HalfDay(m.Value).Trim());
+        s = Rewrite(s, LOOSE_MERIDIEM, m => HalfDay(m.Value).Trim());
 
         // 8c) THE PLUS AND ±, before the degree rule — see the TS on why this ordering is load-bearing.
-        s = PLUSMINUS.Replace(s, " plas o mayinas ");
-        s = PLUS.Replace(s, " plas ");
+        s = Rewrite(s, PLUSMINUS, " plas o mayinas ");
+        s = Rewrite(s, PLUS, " plas ");
 
         // 9) DEGREES.
         string Deg(string digits, string tail, int offset, string full) =>
             $"{(SAID_DEGREES.IsMatch(full[..offset]) ? "" : "amazinga angu-")}{digits}{tail}";
         var full9 = s;
-        s = DEG_C.Replace(s, m => Deg(m.Groups[1].Value, "", m.Index, full9));
+        s = Rewrite(s, DEG_C, m => Deg(m.Groups[1].Value, "", m.Index, full9));
         var full9F = s;
-        s = DEG_F.Replace(s, m => Deg(m.Groups[1].Value, " Fahrenheit", m.Index, full9F));
+        s = Rewrite(s, DEG_F, m => Deg(m.Groups[1].Value, " Fahrenheit", m.Index, full9F));
         var full9C = s;
-        s = DEG_COMPASS.Replace(s, m =>
+        s = Rewrite(s, DEG_COMPASS, m =>
             Deg(m.Groups[1].Value, $" {COMPASS[m.Groups[2].Value.ToUpperInvariant()]}", m.Index, full9C));
         var full9B = s;
-        s = DEG_BARE.Replace(s, m => Deg(m.Groups[1].Value, "", m.Index, full9B));
+        s = Rewrite(s, DEG_BARE, m => Deg(m.Groups[1].Value, "", m.Index, full9B));
 
         // 10) RANGES → `kuya ku-`. Decimal ranges FIRST — see the TS.
-        s = RANGE_DECIMAL.Replace(s, "$1 kuya ku-$2");
-        s = RANGE_INT.Replace(s, m =>
+        s = Rewrite(s, RANGE_DECIMAL, "$1 kuya ku-$2");
+        s = Rewrite(s, RANGE_INT, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
-            return Js.Number(COMMA_G.Replace(a, "")) < Js.Number(COMMA_G.Replace(b, ""))
+            return Js.Number(JsRegex.Replace(a, COMMA_G, "")) < Js.Number(JsRegex.Replace(b, COMMA_G, ""))
                 ? $"{a} kuya ku-{b}" : m.Value;
         });
 
         // 11) RATE, LOCAL and not the shared tier's — Zulu's rate is a SINGLE agglutinated word.
-        s = RATE.Replace(s, m =>
+        s = Rewrite(s, RATE, m =>
             $"{m.Groups[1].Value} {UNIT_WORD[Js.ToLowerCase(m.Groups[2].Value)]} {PER[Js.ToLowerCase(m.Groups[3].Value)]}");
-        s = MPH.Replace(s, $"{UNIT_WORD["mi"]} {PER["h"]}");
-        s = KPH.Replace(s, $"{UNIT_WORD["km"]} {PER["h"]}");
+        s = Rewrite(s, MPH, $"{UNIT_WORD["mi"]} {PER["h"]}");
+        s = Rewrite(s, KPH, $"{UNIT_WORD["km"]} {PER["h"]}");
 
         // 12) SQUARE MILES.
-        s = SQ_MI.Replace(s, $"$1 {UNIT_WORD["mi"]} skwele");
+        s = Rewrite(s, SQ_MI, $"$1 {UNIT_WORD["mi"]} skwele");
 
         // 12b) `kma`, the corpus's own misspelling of km — the UNIT_WORD entry no pattern used to reach.
-        s = KMA.Replace(s, $"$1 {UNIT_WORD["kma"]}");
+        s = Rewrite(s, KMA, $"$1 {UNIT_WORD["kma"]}");
 
         // 13) DECIMALS — the currency and unit arms first.
-        s = DEC_CURRENCY.Replace(s, m => $"{Dec(m.Groups[1].Value, m.Groups[2].Value)} amadola");
-        s = DEC_UNIT.Replace(s, m =>
+        s = Rewrite(s, DEC_CURRENCY, m => $"{Dec(m.Groups[1].Value, m.Groups[2].Value)} amadola");
+        s = Rewrite(s, DEC_UNIT, m =>
             $"{Dec(m.Groups[1].Value, m.Groups[2].Value)} {UNIT_WORD[Js.ToLowerCase(m.Groups[3].Value)]}"
             + (m.Groups[4].Success ? " skwele" : ""));
-        s = DEC_PLAIN.Replace(s, m => Dec(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DEC_PLAIN, m => Dec(m.Groups[1].Value, m.Groups[2].Value));
 
         // 13b) COMMA-DECIMAL.
-        s = DEC_COMMA.Replace(s, m => Dec(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DEC_COMMA, m => Dec(m.Groups[1].Value, m.Groups[2].Value));
 
         // 14) FRACTION — numerator 1 only.
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
             ORDINAL_YE.TryGetValue(Js.NumberToString(Js.Number(m.Groups[1].Value)), out var ord)
                 ? $"ingxenye {ord}" : m.Value);
 
         // 14b) MATH SIGNS. The plus is NOT claimed here — step 8c takes it.
-        s = TIMES.Replace(s, " kuphindwe ngo-");
-        s = EQUALS.Replace(s, " kulingana no-");
-        s = LESS.Replace(s, " ngaphansi kuka-");
-        s = GREATER.Replace(s, " ngaphezu kuka-");
-        s = MINUS.Replace(s, "ukukhipha ");
+        s = Rewrite(s, TIMES, " kuphindwe ngo-");
+        s = Rewrite(s, EQUALS, " kulingana no-");
+        s = Rewrite(s, LESS, " ngaphansi kuka-");
+        s = Rewrite(s, GREATER, " ngaphezu kuka-");
+        s = Rewrite(s, MINUS, "ukukhipha ");
 
         // 15) A SPACED DASH is a parenthetical break, LAST.
-        s = SPACED_DASH.Replace(s, ", ");
-        s = ETC.Replace(s, "njalonjalo");
-        s = DOCTOR.Replace(s, "udokotela");
+        s = Rewrite(s, SPACED_DASH, ", ");
+        s = Rewrite(s, ETC, "njalonjalo");
+        s = Rewrite(s, DOCTOR, "udokotela");
 
         // INITIALISMS LAST — every rule above owns capitals of its own.
         s = SpellNguniInitialisms(s);

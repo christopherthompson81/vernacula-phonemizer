@@ -5,6 +5,7 @@
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Greek;
 
@@ -68,7 +69,7 @@ public static class Normalize
     private static readonly JsRe DOT_ESCAPE = JsRegex.Compile("\\.", "gu");
     private static readonly string DOTTED_ALT = string.Join("|", DOTTED.Keys
         .OrderByDescending(k => k.Length)
-        .Select(k => DOT_ESCAPE.Replace(k, "\\.")));
+        .Select(k => JsRegex.Replace(k, DOT_ESCAPE, "\\.")));
 
     /** symbol normalization — Greek. */
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
@@ -190,77 +191,77 @@ public static class Normalize
     {
         var s = input;
 
-        s = ANO_TELEIA.Replace(s, "·");
+        s = Rewrite(s, ANO_TELEIA, "·");
 
-        s = LATIN_TOUCHING_GREEK.Replace(s, m =>
+        s = Rewrite(s, LATIN_TOUCHING_GREEK, m =>
             string.Concat(Js.CodePoints(m.Value).Select(c => HOMOGLYPH.TryGetValue(c, out var g) ? g : c)));
-        s = BARE_O.Replace(s, "ο");
-        s = SENTENCE_INITIAL_HO.Replace(s, m => m.Groups[1].Value + HOMOGLYPH[m.Groups[2].Value]);
+        s = Rewrite(s, BARE_O, "ο");
+        s = Rewrite(s, SENTENCE_INITIAL_HO, m => m.Groups[1].Value + HOMOGLYPH[m.Groups[2].Value]);
 
-        s = GREEK_NUMERAL_RE.Replace(s, m =>
+        s = Rewrite(s, GREEK_NUMERAL_RE, m =>
         {
             var v = GreekNumeralValue(m.Groups[1].Value);
             if (v is null) return m.Value;
             return Ordinal(v.Value, "ο") ?? m.Value;
         });
 
-        s = DOTTED_RE.Replace(s, m =>
+        s = Rewrite(s, DOTTED_RE, m =>
         {
             var after = m.Groups[2].Value;
             return $"{DOTTED[m.Groups[1].Value]}{(after == "" ? "." : after)}";
         });
 
-        s = VLEPE.Replace(s, "βλέπε");
+        s = Rewrite(s, VLEPE, "βλέπε");
 
-        s = RATE_KM_H.Replace(s, "$1 χιλιόμετρα την ώρα");
-        s = RATE_MI_H.Replace(s, "$1 μίλια την ώρα");
-        s = RATE_MPH.Replace(s, "$1 μίλια την ώρα");
-        s = RATE_M_S.Replace(s, "$1 μέτρα το δευτερόλεπτο");
+        s = Rewrite(s, RATE_KM_H, "$1 χιλιόμετρα την ώρα");
+        s = Rewrite(s, RATE_MI_H, "$1 μίλια την ώρα");
+        s = Rewrite(s, RATE_MPH, "$1 μίλια την ώρα");
+        s = Rewrite(s, RATE_M_S, "$1 μέτρα το δευτερόλεπτο");
 
-        s = XLM_DOT.Replace(s, "χιλιόμετρα");
-        s = XLM.Replace(s, "χιλιόμετρα");
+        s = Rewrite(s, XLM_DOT, "χιλιόμετρα");
+        s = Rewrite(s, XLM, "χιλιόμετρα");
 
         // DIGIT DE-GROUPING, first among the number rules: Greek groups thousands with a PERIOD. Run twice
         // for `5.000.000`. ⚠ Only a block of EXACTLY three digits is grouping, so a sports time is intact.
-        s = DEGROUP.Replace(s, "");
+        s = Rewrite(s, DEGROUP, "");
 
-        s = ORDINAL_RE.Replace(s, m => Ordinal(Js.Number(m.Groups[1].Value), m.Groups[2].Value) ?? m.Value);
+        s = Rewrite(s, ORDINAL_RE, m => Ordinal(Js.Number(m.Groups[1].Value), m.Groups[2].Value) ?? m.Value);
 
         // CLOCK. Hours are FEMININE (they count ώρες), minutes neuter; a whole hour drops the minutes.
         // ⚠ Guarded against a sports time, which is minutes plus decimal seconds in the same shape.
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             var hv = Js.Number(m.Groups[1].Value);
             var mv = Js.Number(m.Groups[2].Value);
             return mv == 0 ? HOUR_FEM[(int)hv] : $"{HOUR_FEM[(int)hv]} και {MinuteWords(mv)}";
         });
 
-        s = DEG_C.Replace(s, "$1 βαθμοί Κελσίου");
-        s = DEG_F.Replace(s, "$1 βαθμοί Φαρενάιτ");
-        s = DEG.Replace(s, "$1 βαθμοί");
+        s = Rewrite(s, DEG_C, "$1 βαθμοί Κελσίου");
+        s = Rewrite(s, DEG_F, "$1 βαθμοί Φαρενάιτ");
+        s = Rewrite(s, DEG, "$1 βαθμοί");
 
-        s = PLUS_MINUS.Replace(s, " συν μείον ");
-        s = PLUS.Replace(s, "συν ");
-        s = HALF.Replace(s, "$1 και μισή");
-        s = QUARTER.Replace(s, "$1 και ένα τέταρτο");
-        s = THREE_QUARTERS.Replace(s, "$1 και τρία τέταρτα");
+        s = Rewrite(s, PLUS_MINUS, " συν μείον ");
+        s = Rewrite(s, PLUS, "συν ");
+        s = Rewrite(s, HALF, "$1 και μισή");
+        s = Rewrite(s, QUARTER, "$1 και ένα τέταρτο");
+        s = Rewrite(s, THREE_QUARTERS, "$1 και τρία τέταρτα");
 
-        s = EQUALS.Replace(s, " ίσον ");
-        s = LESS_THAN.Replace(s, " μικρότερο από ");
-        s = GREATER_THAN.Replace(s, " μεγαλύτερο από ");
-        s = DIVIDE.Replace(s, " διά ");
+        s = Rewrite(s, EQUALS, " ίσον ");
+        s = Rewrite(s, LESS_THAN, " μικρότερο από ");
+        s = Rewrite(s, GREATER_THAN, " μεγαλύτερο από ");
+        s = Rewrite(s, DIVIDE, " διά ");
 
-        s = PARENTHETICAL_DASH.Replace(s, ", ");
+        s = Rewrite(s, PARENTHETICAL_DASH, ", ");
 
-        s = MINUS.Replace(s, "μείον ");
+        s = Rewrite(s, MINUS, "μείον ");
 
         s = SYMBOLS(s);
 
-        s = DECIMAL_COMMA.Replace(s, "$1 κόμμα ");
+        s = Rewrite(s, DECIMAL_COMMA, "$1 κόμμα ");
 
-        foreach (var (re, v) in MIXED_CASE_RES) s = re.Replace(s, v);
-        s = CAPS_RUN.Replace(s, m => SpellLatin(m.Value));
-        s = SINGLE_LATIN.Replace(s, m => SpellLatin(m.Value));
+        foreach (var (re, v) in MIXED_CASE_RES) s = Rewrite(s, re, v);
+        s = Rewrite(s, CAPS_RUN, m => SpellLatin(m.Value));
+        s = Rewrite(s, SINGLE_LATIN, m => SpellLatin(m.Value));
 
         return s;
     }

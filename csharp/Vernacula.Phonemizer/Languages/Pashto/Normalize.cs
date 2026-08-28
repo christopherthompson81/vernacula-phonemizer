@@ -5,6 +5,7 @@
  */
 
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Pashto;
 
@@ -145,7 +146,7 @@ public static class Normalize
         {
             var s = input.Normalize(System.Text.NormalizationForm.FormC);
 
-            s = BOM.Replace(ENTITIES.Replace(s, " "), "");
+            s = Rewrite(Rewrite(s, ENTITIES, " "), BOM, "");
 
             // ORDINALS BEFORE THE ERA RULE: `مه`/`مې` are longer than the era's bare `م` and are the same
             // letter (see ORD_SUFFIX). This rule emits WORDS where every other rule emits digits, because a
@@ -153,7 +154,7 @@ public static class Normalize
             foreach (var suffix in ORD_SUFFIX)
             {
                 var cutoff = suffix == "م" ? 100d : double.PositiveInfinity; // the bare-`م` era/ordinal split, see ORD_SUFFIX
-                s = JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}([{D}]+)\\s?{suffix}{Boundaries.NOT_LETTER_AFTER}", "gu").Replace(s, m =>
+                s = Rewrite(s, JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}([{D}]+)\\s?{suffix}{Boundaries.NOT_LETTER_AFTER}", "gu"), m =>
                 {
                     var n = Js.Number(ToAscii(m.Groups[1].Value));
                     if (!IsSafeInteger(n) || n < 1 || n >= cutoff) return m.Value;
@@ -165,37 +166,37 @@ public static class Normalize
             // ERA MARKERS, after the ordinals and BEFORE de-grouping — a marker can sit against the year's
             // last digit, and the de-grouping patterns match on digit runs. `ق.م` is digit-anchored on
             // purpose: unanchored it mostly matches `قم` inside ordinary words.
-            s = QM_ERA.Replace(s, "$1 له ميلاد څخه مخکې");
+            s = Rewrite(s, QM_ERA, "$1 له ميلاد څخه مخکې");
             // ⚠ THE TRAILING GUARD REJECTS A ZWNJ AS WELL AS A LETTER. U+200C is category `Cf`, so
             // `(?![\p{L}\p{M}])` alone treats it as a word END — and Pashto joins abbreviations with it, so
             // `م‌ز` would pass the guard and the bare-`م` arm would fire on a BC date.
             foreach (var (eraBody, word) in ERA)
-                s = JsRegex.Compile($"([{D}])\\s?{eraBody}(?![\\p{{L}}\\p{{M}}‌])", "gu").Replace(s, $"$1 {word}");
+                s = Rewrite(s, JsRegex.Compile($"([{D}])\\s?{eraBody}(?![\\p{{L}}\\p{{M}}‌])", "gu"), $"$1 {word}");
 
             // DE-GROUPING. The dot form is de-grouped ONLY in its unambiguous multi-group shape; a single
             // `D{1,3}.D{3}` is far more often a decimal here. There is deliberately no space arm.
-            s = GROUP_AR_COMMA.Replace(s, m => AR_COMMAS.Replace(m.Value, ""));
-            s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-            s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
+            s = Rewrite(s, GROUP_AR_COMMA, m => AR_COMMAS.Replace(m.Value, ""));
+            s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+            s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
 
             // UNITS before decimals (the adjacency dies the moment a decimal becomes words) and after
             // de-grouping (so a grouped operand is already one token).
             foreach (var (sym, word) in UNITS)
             {
-                var key = ESCAPE.Replace(sym, "\\$&");
-                s = JsRegex.Compile(
+                var key = JsRegex.Replace(sym, ESCAPE, "\\$&");
+                s = Rewrite(s, JsRegex.Compile(
                         $"(?<![\\p{{L}}\\p{{M}}{D}.,،])([{D}]+(?:[.,،][{D}]+)?)\\s?{key}(?![\\p{{L}}\\p{{M}}{D}])",
                         "gu")
-                    .Replace(s, $"$1 {word}");
+                    , $"$1 {word}");
             }
 
             // A bare exponent's digits, AFTER the unit rule above and never before it — `km²` is the unit's.
             s = NormalizeSymbols.SpacedBareExponent(s);
 
-            s = DEG_C.Replace(s, "$1 سانتيګراد");
-            s = DEG_SIGN.Replace(s, "$1 سانتيګراد");
+            s = Rewrite(s, DEG_C, "$1 سانتيګراد");
+            s = Rewrite(s, DEG_SIGN, "$1 سانتيګراد");
 
-            s = CLOCK.Replace(s, m =>
+            s = Rewrite(s, CLOCK, m =>
             {
                 string h = m.Groups[1].Value, min = m.Groups[2].Value;
                 var mm = Js.Number(ToAscii(min));
@@ -207,7 +208,7 @@ public static class Normalize
             // operands are still bare digits. Non-ascending pairs are left alone (birth–death, scores).
             // The trailing guard rejects the two commas but NOT the dot: a trailing dot is a sentence end far
             // more often than a fractional part, and the decimal step runs later, so `۹۰-۹۵.۵` still works out.
-            s = RANGE.Replace(s, m =>
+            s = Rewrite(s, RANGE, m =>
             {
                 string a = m.Groups[1].Value, b = m.Groups[2].Value;
                 double x = Js.Number(ToAscii(a)), y = Js.Number(ToAscii(b));
@@ -223,8 +224,8 @@ public static class Normalize
                 var named = m.Groups[2].Success ? m.Groups[2].Value.Trim() : "سلنه";
                 return $"{m.Groups[1].Value} {named}";
             }
-            s = PCT_AFTER.Replace(s, Pct);
-            s = PCT_BEFORE.Replace(s, Pct);
+            s = Rewrite(s, PCT_AFTER, Pct);
+            s = Rewrite(s, PCT_BEFORE, Pct);
 
             static string Money(string n, string mag, int off, string all, int len)
             {
@@ -233,26 +234,26 @@ public static class Normalize
             }
             {
                 var subject = s;
-                s = DOLLAR_BEFORE.Replace(s, m =>
+                s = Rewrite(s, DOLLAR_BEFORE, m =>
                     Money(m.Groups[1].Value, m.Groups[2].Success ? m.Groups[2].Value : "", m.Index, subject, m.Length));
             }
             {
                 var subject = s;
-                s = DOLLAR_AFTER.Replace(s, m =>
+                s = Rewrite(s, DOLLAR_AFTER, m =>
                     Money(m.Groups[1].Value, m.Groups[2].Success ? m.Groups[2].Value : "", m.Index, subject, m.Length));
             }
 
-            s = MINUS.Replace(s, "$1منفي $2");
+            s = Rewrite(s, MINUS, "$1منفي $2");
 
             // DECIMALS LAST of the number rules, so every earlier rule sees the number intact. The fractional
             // digits are spoken ONE AT A TIME, which is why they are spaced apart here.
             // The trailing `(?!\.[digit])` guard is what keeps an IP address out: without it `192.168` matches
             // and the rest of the address trails behind. Written as `\.[D]`, not a bare `.`, so a decimal that
             // ends a sentence is still read.
-            s = DECIMAL.Replace(s, m =>
+            s = Rewrite(s, DECIMAL, m =>
                 $"{m.Groups[1].Value} اعشاريه {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-            s = FRACTION.Replace(s, m =>
+            s = Rewrite(s, FRACTION, m =>
             {
                 string a = m.Groups[1].Value, b = m.Groups[2].Value;
                 double x = Js.Number(ToAscii(a)), y = Js.Number(ToAscii(b));

@@ -6,6 +6,7 @@
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Uyghur;
 
@@ -123,37 +124,37 @@ public static class Normalize
             var s = input.Normalize(NormalizationForm.FormC);
 
             // 2) HTML ENTITIES, before anything can read one as letters.
-            s = BOM.Replace(ENTITIES.Replace(s, " "), "");
+            s = Rewrite(Rewrite(s, ENTITIES, " "), BOM, "");
 
             // 3) ARABIC PRESENTATION FORMS — NFKC PER CHARACTER over a curated range, never over the whole
             //    string. The plain isolated/final heh forms are Uyghur's VOWEL ە, which NFKC gets wrong.
-            s = PRESENTATION.Replace(s, m =>
+            s = Rewrite(s, PRESENTATION, m =>
                 m.Value == "ﻩ" || m.Value == "ﻪ" ? "ە" : m.Value.Normalize(NormalizationForm.FormKC));
 
             // 4) ه U+0647 → ھ U+06BE, and 4b) the two other foreign-keyboard letters.
-            s = HEH.Replace(s, "ھ");
-            s = QAF_DOT.Replace(KEHEH.Replace(s, "ك"), "ف");
+            s = Rewrite(s, HEH, "ھ");
+            s = Rewrite(Rewrite(s, KEHEH, "ك"), QAF_DOT, "ف");
 
             // 5) ERA MARKERS, digit-anchored, and ABOVE the ordinal rule.
             foreach (var (body, word) in ERA)
             {
                 var dot = body == "م" || body == "ھ" ? "\\s?\\." : "";
-                s = JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}{body}{dot}{ERA_TAIL}(?=[{D}])", "gu")
-                    .Replace(s, $"{word} ");
+                s = Rewrite(s, JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}{body}{dot}{ERA_TAIL}(?=[{D}])", "gu")
+                    , $"{word} ");
             }
 
             // 6) DIGIT DE-GROUPING, before the ordinal so a grouped operand is one number.
             foreach (var mark in new[] { "،", "," })
             {
                 var strip = JsRegex.Compile(mark, "gu");
-                s = JsRegex.Compile(
+                s = Rewrite(s, JsRegex.Compile(
                         $"(?<![{D}.,،])[{D}]{{1,3}}(?:(?<!(?<![{D}])0){mark}[{D}]{{3}})+(?![{D}]|{mark}[{D}])", "gu")
-                    .Replace(s, m => strip.Replace(m.Value, ""));
+                    , m => strip.Replace(m.Value, ""));
             }
 
             // 7) THE HYPHENATED ORDINAL — this language's defining rule, and the one rule here that emits
             //    WORDS rather than digits: the suffix attaches to the last word of the spoken numeral.
-            s = ORDINAL.Replace(s, m =>
+            s = Rewrite(s, ORDINAL, m =>
             {
                 var n = Js.Number(ToAscii(m.Groups[1].Value));
                 if (!UyghurPhonemizer.IsSafeInteger(n) || n < 1) return m.Value;
@@ -164,14 +165,14 @@ public static class Normalize
             // 8) UNITS, before decimals and after de-grouping.
             foreach (var (sym, word) in UNITS)
             {
-                var key = ESCAPE.Replace(sym, "\\$&");
+                var key = JsRegex.Replace(sym, ESCAPE, "\\$&");
                 // The right guard is relaxed to Latin-only for a Latin key, so a bound case suffix glued to
                 // `kg`/`km` does not make the whole match decline; ⟨ئ⟩ is the word boundary that keeps a
                 // glued NEXT WORD out of the unit.
                 var tail = JsRegex.Compile("^[A-Za-z]", "u").IsMatch(sym) ? "A-Za-z" : "\\p{L}";
-                s = JsRegex.Compile(
+                s = Rewrite(s, JsRegex.Compile(
                         $"(?<![\\p{{L}}\\p{{M}}{D}.,،])({NUM}{MAG})\\s?{key}(?![{tail}\\p{{M}}{D}²])(ئ?)", "gu")
-                    .Replace(s, m =>
+                    , m =>
                     {
                         var hamza = m.Groups[2].Value;
                         return $"{m.Groups[1].Value} {word}{(hamza == "" ? "" : $" {hamza}")}";
@@ -179,15 +180,15 @@ public static class Normalize
             }
             // …and the unit noun already spelled out with a bare `²` hanging off it, which no symbol key
             // can reach: the exponent is lifted onto the WORD, in the preposed position كۋادرات takes.
-            s = SPELLED_EXPONENT.Replace(s, "كۋادرات $1");
+            s = Rewrite(s, SPELLED_EXPONENT, "كۋادرات $1");
 
             // 9) THE MINUS, read only where a TEMPERATURE follows — the right context is what separates it
             //    from a range dash. Above step 10, which spends the `°C` this guard reads.
-            s = MINUS.Replace(s, "$1مىنۇس $2");
+            s = Rewrite(s, MINUS, "$1مىنۇس $2");
 
             // 10) DEGREES. `°C` before the bare `°`, or the scale letter is read as the ENGLISH letter name.
-            s = DEG_SCALE.Replace(s, "$1 گرادۇس");
-            s = DEG_BARE.Replace(s, "$1 گرادۇس ");
+            s = Rewrite(s, DEG_SCALE, "$1 گرادۇس");
+            s = Rewrite(s, DEG_BARE, "$1 گرادۇس ");
 
             // 11) PERCENT — both sign orders, both signs, and the suffix re-derived onto the word.
             string Pct(System.Text.RegularExpressions.Match m)
@@ -198,19 +199,19 @@ public static class Normalize
                     ? Percent(m.Groups[1].Value, suf)
                     : $"{m.Groups[1].Value} {Js.Trim(named)}{suf ?? ""} ";
             }
-            s = PCT_AFTER.Replace(s, Pct);
-            s = PCT_BEFORE.Replace(s, Pct);
+            s = Rewrite(s, PCT_AFTER, Pct);
+            s = Rewrite(s, PCT_BEFORE, Pct);
 
             // 12) CURRENCY. `US$` before `$`, or the `US` is left to the Latin fallback as letter names.
             foreach (var (sign, word) in CURRENCY)
             {
-                s = JsRegex.Compile($"{sign}\\s?({NUM})", "gu").Replace(s, $"$1 {word} ");
-                s = JsRegex.Compile($"({NUM})\\s?{sign}", "gu").Replace(s, $"$1 {word} ");
+                s = Rewrite(s, JsRegex.Compile($"{sign}\\s?({NUM})", "gu"), $"$1 {word} ");
+                s = Rewrite(s, JsRegex.Compile($"({NUM})\\s?{sign}", "gu"), $"$1 {word} ");
             }
 
             // 13) DECIMALS, LAST, because every rule above needs the number intact — and the separator is
             //     replaced by a SPACE rather than by a word (no decimal-point word is attested).
-            s = DECIMAL.Replace(s, "$1 $2");
+            s = Rewrite(s, DECIMAL, "$1 $2");
 
             return s;
         };

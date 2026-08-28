@@ -5,6 +5,7 @@
  * steps are ORDER-DEPENDENT, and for the separator-convention analysis the de-grouping arms rest on.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Sundanese;
 
@@ -126,22 +127,22 @@ public static class Normalize
         var s = input;
 
         // 0. LaTeX math delimiters — before ANY rule reads `$` as money.
-        s = LATEX_MATH.Replace(s, "$1");
+        s = Rewrite(s, LATEX_MATH, "$1");
 
         // 1. De-group thousands — FIRST, and by GROUP SIZE, which is the whole disambiguation.
-        s = GROUP_DOT.Replace(s, m => m.Value.Replace(".", "", StringComparison.Ordinal));
-        s = GROUP_COMMA.Replace(s, m => m.Value.Replace(",", "", StringComparison.Ordinal));
-        s = GROUP_SPACE.Replace(s, m => GROUP_SPACE_CHARS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => m.Value.Replace(".", "", StringComparison.Ordinal));
+        s = Rewrite(s, GROUP_COMMA, m => m.Value.Replace(",", "", StringComparison.Ordinal));
+        s = Rewrite(s, GROUP_SPACE, m => GROUP_SPACE_CHARS.Replace(m.Value, ""));
 
         // 2. Clock — BEFORE the decimal rule, which would otherwise claim `7.30`.
-        s = CLOCK_WORD.Replace(s, m =>
+        s = Rewrite(s, CLOCK_WORD, m =>
         {
             var w = m.Groups[1].Value;
             var h = Js.NumberToString(Js.Number(m.Groups[2].Value));
             var min = Js.Number(m.Groups[3].Value);
             return min == 0 ? $"{w} {h}" : $"{w} {h} liwat {Js.NumberToString(min)}";
         });
-        s = CLOCK_BARE.Replace(s, m =>
+        s = Rewrite(s, CLOCK_BARE, m =>
         {
             var h = Js.NumberToString(Js.Number(m.Groups[1].Value));
             var min = Js.Number(m.Groups[2].Value);
@@ -149,7 +150,7 @@ public static class Normalize
         });
 
         // 3. Unit after the word `per` (and the slash rate whose numerator is a word) — BEFORE the tier.
-        s = SLASH_UNIT.Replace(s, m =>
+        s = Rewrite(s, SLASH_UNIT, m =>
         {
             var u = m.Groups[1].Value;
             var exp0 = m.Groups[2].Success ? m.Groups[2].Value : "";
@@ -157,7 +158,7 @@ public static class Normalize
             var word = UNIT_WORD.TryGetValue(Js.ToLowerCase(u), out var uw) ? uw : u;
             return $" per {word}{(EXP_WORD.TryGetValue(exp, out var ew) ? ew : "")}";
         });
-        s = PER_UNIT.Replace(s, m =>
+        s = Rewrite(s, PER_UNIT, m =>
         {
             var exp0 = m.Groups[2].Success ? m.Groups[2].Value : "";
             var exp = EXP_ASCII.TryGetValue(exp0, out var sup) ? sup : exp0;
@@ -168,47 +169,47 @@ public static class Normalize
         s = SYMBOLS(s);
 
         // 5. Decimals → `koma`, read digit-by-digit after the separator.
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} koma {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 6. Era markers — SM before M, always.
-        s = ERA_SM.Replace(s, "$1 saméméh Maséhi");
-        s = ERA_M.Replace(s, "$1 Maséhi");
+        s = Rewrite(s, ERA_SM, "$1 saméméh Maséhi");
+        s = Rewrite(s, ERA_M, "$1 Maséhi");
 
         // 7. Ranges → `nepi ka`.
-        s = RANGE.Replace(s, "$1 nepi ka $2");
+        s = Rewrite(s, RANGE, "$1 nepi ka $2");
 
         // 8. Fractions.
-        s = YEAR_SPAN.Replace(s, m => Js.Number(m.Groups[2].Value) == Js.Number(m.Groups[1].Value) + 1
+        s = Rewrite(s, YEAR_SPAN, m => Js.Number(m.Groups[2].Value) == Js.Number(m.Groups[1].Value) + 1
             ? $"{m.Groups[1].Value} nepi ka {m.Groups[2].Value}"
             : m.Value);
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
             Js.Number(m.Groups[1].Value) == 1 && Js.Number(m.Groups[2].Value) == 2
                 ? "satengah"
                 : $"{m.Groups[1].Value} per {m.Groups[2].Value}");
 
         // 9. Degrees — scale letters, then compass, then the bare sign.
-        s = DEG_C.Replace(s, "$1 darajat Celsius");
-        s = DEG_F.Replace(s, "$1 darajat Fahrenheit");
-        s = DEG_COMPASS.Replace(s, m =>
+        s = Rewrite(s, DEG_C, "$1 darajat Celsius");
+        s = Rewrite(s, DEG_F, "$1 darajat Fahrenheit");
+        s = Rewrite(s, DEG_COMPASS, m =>
             // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122). The pattern carries `i` AND `u`, so
             // JS folds U+017F LONG S onto `s` and `12°ſ` MATCHES `[NSEW]` — while `ſ` is no COMPASS key. The
             // TS asserted non-null and spoke the word "undefined"; the C# indexer THREW.
             COMPASS.TryGetValue(Js.ToLowerCase(m.Groups[2].Value), out var dir)
                 ? $"{m.Groups[1].Value} darajat {dir}"
                 : m.Value);
-        s = DEG_BARE_GLUED.Replace(s, "$1 darajat ");
-        s = DEG_BARE.Replace(s, "$1 darajat");
+        s = Rewrite(s, DEG_BARE_GLUED, "$1 darajat ");
+        s = Rewrite(s, DEG_BARE, "$1 darajat");
 
         // 10. Signs. ⚠ MINUS AFTER PLUS — the order is forced by the bracketed operand.
-        s = PLUS_MINUS.Replace(s, " tambah kurang ");
-        s = PLUS_AFTER.Replace(s, "$1 tambah $2");
-        s = PLUS_LEAD.Replace(s, "$1tambah $2");
-        s = MINUS.Replace(s, "$1kurang $2");
-        s = EQUALS.Replace(s, " sarua jeung ");
-        s = LESS_THAN.Replace(s, " leuwih leutik ti ");
-        s = GREATER_THAN.Replace(s, " leuwih gedé ti ");
-        s = DIVIDE.Replace(s, " dibagi ");
+        s = Rewrite(s, PLUS_MINUS, " tambah kurang ");
+        s = Rewrite(s, PLUS_AFTER, "$1 tambah $2");
+        s = Rewrite(s, PLUS_LEAD, "$1tambah $2");
+        s = Rewrite(s, MINUS, "$1kurang $2");
+        s = Rewrite(s, EQUALS, " sarua jeung ");
+        s = Rewrite(s, LESS_THAN, " leuwih leutik ti ");
+        s = Rewrite(s, GREATER_THAN, " leuwih gedé ti ");
+        s = Rewrite(s, DIVIDE, " dibagi ");
 
         return s;
     }
