@@ -142,6 +142,32 @@ describe("phonemizeTrace — the step that was invisible", () => {
     });
 });
 
+describe("phonemizeTrace — rewrites, the transformations no token can own", () => {
+    test("a post-assembly pass is an event, so `emitted` and `ipa` can differ with a stated cause", () => {
+        // Spanish spirantizes ACROSS word boundaries, after the clause string is assembled.
+        const t = phonemizeTrace("el gato negro", "es");
+        expect(t.tokens.find((k) => k.surface === "gato")?.emitted).toEqual(["ɡˈato"]);
+        expect(t.ipa).toContain("ɣˈato"); // …and the sentence says something else
+        const r = t.rewrites.find((x) => x.stage === "spirantize-across-words");
+        expect(r, "the discrepancy must carry its cause").toBeDefined();
+        expect(r?.before).toContain("ɡˈato");
+        expect(r?.after).toContain("ɣˈato");
+    });
+
+    test("normalization is reported for every engine, including when it REORDERS", () => {
+        const t = phonemizeTrace("Obugazi: 1 244.7 km²", "lg");
+        const n = t.rewrites.find((x) => x.stage === "normalize");
+        expect(n?.before).toBe("Obugazi: 1 244.7 km²");
+        expect(n?.after).toBe(t.normalized);
+        // the unit's reading precedes the figure it followed — why a span cannot be mapped back (stage 2)
+        expect(n?.after.indexOf("kiromita")).toBeLessThan(n!.after.indexOf("1244"));
+    });
+
+    test("a stage that changed nothing emits no event — the list is what MOVED", () => {
+        expect(phonemizeTrace("the cat", "en").rewrites).toEqual([]);
+    });
+});
+
 describe("phonemizeTrace — the recorder is ambient, so prove it cannot leak", () => {
     test("a throwing call leaves no state for the next one", () => {
         expect(() => phonemizeTrace("x", "definitely-not-a-language")).toThrow();

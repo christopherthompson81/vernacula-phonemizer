@@ -4,7 +4,7 @@
  *   phonemize("भारत", "hi") → "bʱaːɾət̪"
  *   phonemize("I read a book", "en") → "aᶦ ɹˈɛd ə bˈʊk"
  */
-import { startTrace, stopTrace, type TraceToken } from "./core/trace.ts";
+import { startTrace, stopTrace, type TraceRewrite, type TraceToken } from "./core/trace.ts";
 import { getPhonemizer } from "./registry.ts";
 import { getNeuralPhonemizer } from "./neuralRegistry.ts";
 import { prewarmForeignEnglish } from "./languages/english/englishNeural.ts";
@@ -21,7 +21,7 @@ const MIXED_LATIN = (text: string): boolean =>
     /\p{Script=Latin}/u.test(text) && /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}\p{Script=Arabic}\p{Script=Cyrillic}\p{Script=Devanagari}\p{Script=Tamil}\p{Script=Ethiopic}\p{Script=Hebrew}\p{Script=Bengali}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Gujarati}\p{Script=Gurmukhi}\p{Script=Sinhala}\p{Script=Khmer}\p{Script=Lao}\p{Script=Myanmar}\p{Script=Georgian}\p{Script=Armenian}\p{Script=Greek}\p{Script=Tibetan}\p{Script=Oriya}\p{Script=Thaana}\p{Script=Syriac}\p{Script=Cherokee}]/u.test(text);
 
 export { getPhonemizer, type Phonemizer } from "./registry.ts";
-export type { TraceToken } from "./core/trace.ts";
+export type { TraceRewrite, TraceToken } from "./core/trace.ts";
 
 /** Phonemize `text` in language `lang` to canonical IPA (SYNCHRONOUS). Throws for an unregistered language.
  *  This is the simple path: a complete rule/lexicon engine for every language. Two caveats it does NOT cover —
@@ -47,6 +47,12 @@ export interface PhonemeTrace {
      */
     traced: boolean;
     tokens: TraceToken[];
+    /**
+     * Whole-string rewrites, in the order they ran. ⚠ THIS IS WHY `TraceToken.emitted` MAY NOT BE A SUBSTRING
+     * OF `ipa`: a token reports what it contributed, and a rewrite here may then have changed it. Spanish
+     * spirantizes across word boundaries; Assamese collapses a doubled aspirate. Empty when nothing moved.
+     */
+    rewrites: TraceRewrite[];
 }
 
 /**
@@ -69,11 +75,11 @@ export interface PhonemeTrace {
  * moved a golden row, and all of which had to be found by a human reading a comment.
  */
 export function phonemizeTrace(text: string, lang: string): PhonemeTrace {
-    startTrace();
+    startTrace(text);
     try {
         const ipa = phonemize(text, lang);
-        const { normalized, tokens, traced } = stopTrace();
-        return { ipa, normalized, traced, tokens };
+        const { normalized, tokens, rewrites, traced } = stopTrace();
+        return { ipa, normalized, traced, tokens, rewrites };
     } finally {
         // `stopTrace` already ran on the success path; this clears the recorder when the engine THREW, so a
         // failed call cannot leave ambient state for the next one.

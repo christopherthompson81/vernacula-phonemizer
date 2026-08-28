@@ -44,9 +44,28 @@ export interface TraceToken {
     emitted: string[];
 }
 
+/**
+ * A whole-string rewrite applied to an already-assembled reading, or to the input before tokenizing.
+ *
+ * ⚠ WHY THE TOKEN RECORD IS NOT ENOUGH. `TraceToken.emitted` is what a token CONTRIBUTED; several engines
+ * then rewrite the assembled string, so the contribution is not a substring of the output. Spanish
+ * spirantizes ACROSS word boundaries — `gato` emits *ɡˈato* and the sentence reads *ɣˈato* — and Assamese
+ * collapses `dʱdʱ` → `dʱː`. Without an event for it, a consumer diffing tokens against the output sees a
+ * discrepancy with no cause attached, which is the same "invisible transformation" problem one layer up.
+ */
+export interface TraceRewrite {
+    /** What ran — `"spirantize-across-words"`, `"normalize"`, … */
+    stage: string;
+    before: string;
+    after: string;
+}
+
 interface Recording {
+    /** What the caller passed in, before the registry pre-passes and the engine's own normalizer. */
+    input: string;
     normalized: string;
     tokens: TraceToken[];
+    rewrites: TraceRewrite[];
     current: TraceToken | null;
     /** Did the TOP-LEVEL engine reach the traced seam? See `PhonemeTrace.traced`. */
     traced: boolean;
@@ -67,14 +86,28 @@ let recording: Recording | null = null;
  */
 const active = (): boolean => recording !== null && hostDepth() <= 1;
 
-export function startTrace(): void {
-    recording = { normalized: "", tokens: [], current: null, traced: false, tokenDepth: 0 };
+export function startTrace(input: string): void {
+    recording = { input, normalized: "", tokens: [], rewrites: [], current: null, traced: false, tokenDepth: 0 };
 }
 
-export function stopTrace(): { normalized: string; tokens: TraceToken[]; traced: boolean } {
-    const r = recording ?? { normalized: "", tokens: [], traced: false };
+export function stopTrace(): {
+    normalized: string;
+    tokens: TraceToken[];
+    rewrites: TraceRewrite[];
+    traced: boolean;
+} {
+    const r = recording ?? { input: "", normalized: "", tokens: [], rewrites: [], traced: false };
     recording = null;
-    return { normalized: r.normalized, tokens: r.tokens, traced: r.traced };
+    return { normalized: r.normalized, tokens: r.tokens, rewrites: r.rewrites, traced: r.traced };
+}
+
+/**
+ * Record a whole-string rewrite. A no-op when nothing changed, so a stage that did not fire costs nothing and
+ * leaves no noise — the events present are exactly the ones that moved the string.
+ */
+export function noteRewrite(stage: string, before: string, after: string): void {
+    if (!active() || recording === null || before === after) return;
+    recording.rewrites.push({ stage, before, after });
 }
 
 /** Enter a seam engine. The FIRST one at the top level owns the recording. */
@@ -82,6 +115,13 @@ export function enterEngine(normalized: string): void {
     if (!active() || recording === null || recording.traced) return;
     recording.normalized = normalized;
     recording.traced = true;
+    // ⚠ NORMALIZATION IS REPORTED FOR EVERY ENGINE AT ONCE, HERE. Each of the 180 modules calls its own
+    // `normalize*()` inline, so instrumenting them one by one would be 180 edits and would still miss the
+    // registry's own pre-passes (markup stripping, digit folds, Roman numerals). The caller's string and the
+    // string the tokenizer sees are both known at this point, and their difference IS the normalization —
+    // including the reordering that makes a span un-mappable back to the input (Luganda's measure noun moves
+    // ahead of its number). That is stage 2's problem; naming the rewrite is stage 1's contribution to it.
+    noteRewrite("normalize", recording.input, normalized);
 }
 export function exitEngine(): void {
     /* nothing to unwind: `foreignDepth` is what scopes a nested engine, not a counter here */
