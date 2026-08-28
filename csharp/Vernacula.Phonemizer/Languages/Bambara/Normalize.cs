@@ -105,7 +105,7 @@ public static class Normalize
     {
         // 1) NFC at the entry, so a literal in this file matches whichever normalization the corpus used —
         //    the era literal `K.Ɲ.` sits beside text full of `è ò ô é`, which do decompose.
-        var s = input.Normalize(NormalizationForm.FormC);
+        var s = Renormalize(input, NormalizationForm.FormC);
 
         // 2) Entities and zero-width marks, BEFORE the ampersand rule at step 12, or `&nbsp;` is read as
         //    "and" followed by the letters n-b-s-p.

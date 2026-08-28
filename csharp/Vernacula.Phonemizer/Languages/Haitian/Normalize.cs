@@ -171,7 +171,7 @@ public static class Normalize
     public static string NormalizeHaitian(string input)
     {
         // 0) NFC at the entry, so a literal in this file matches whichever normalization the corpus used.
-        var s = input.Normalize(NormalizationForm.FormC);
+        var s = Renormalize(input, NormalizationForm.FormC);
 
         // 1) ZERO-WIDTH MARKS AND HTML ENTITIES, first — `&nbsp;` before the ampersand rule at step 13.
         s = Rewrite(Rewrite(s, ENTITIES, " "), ZERO_WIDTH, "");

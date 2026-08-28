@@ -1,4 +1,3 @@
-import { rewrite } from "../../core/provenance.ts";
 /**
  * Sylheti / ꠍꠤꠟꠐꠤ ꠘꠣꠉꠞꠤ (syl) text normalization — the pre-tokenizer pass that rewrites everything which is
  * not already a pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
@@ -67,6 +66,7 @@ import { rewrite } from "../../core/provenance.ts";
  *    corpus writes instead is NATIVE dotted abbreviations (ꠝꠤ.ꠉ꠆ꠞꠣ., ꠍꠦ.ꠝꠤ., ꠝꠦ.ꠐꠘ, ꠇꠤ.ꠇ꠆ꠎꠣꠟꠧꠞꠤ), and
  *    step 4 stops those from being read as phrase breaks without inventing a unit vocabulary.
  */
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /** Syloti Nagri LETTERS and signs — U+A800–A827 plus U+A82C (alternate hasanta). */
 const SYL = "\\u{A800}-\\u{A827}\\u{A82C}";
@@ -207,7 +207,7 @@ export function normalizeSylheti(input: string): string {
     // 1. NFC FIRST. Bengali-Assamese has composition exclusions (য়/ড়/ঢ় exist precomposed AND as base +
     //    nukta) and step 2 matches Bengali literals, so without this the fold would catch about half its
     //    instances and the failure would be invisible — the two forms render identically.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 2. Zero-width formatting characters. 17 in the artifact, and they are not cosmetic: `ꠖꠇ꠆‌ꠈꠤꠘ`
     //    carries a ZWNJ mid-word, which splits one Syloti token into two. BEFORE step 3, whose guard asks

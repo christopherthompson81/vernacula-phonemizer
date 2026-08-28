@@ -131,7 +131,7 @@
  *   nothing distinguishes the two without a paragraph-level detector built on one attested instance.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /**
  * PERCENT, and it is POSTPOSED — `le alafa me`, literally "in a hundred". Both of ee.wikipedia's instances
@@ -228,7 +228,7 @@ export function normalizeEwe(input: string): string {
     // 0) NFC at the entry, so a literal in this file matches whichever normalization the wiki used. Ewe's
     //    ⟨ɖ ƒ ʋ ɣ ŋ ɔ ɛ⟩ do not precompose, but its NASAL vowels do (ã ẽ ĩ õ ũ) and a dump carries both
     //    forms — trap 11 in a Latin script.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 1) THE HOMOGLYPH FOLD, FIRST, because every later rule and the tokenizer itself are downstream of it.
     //    See the header for the census, the counts and why each of these four and none of the lookalikes.

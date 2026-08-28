@@ -105,6 +105,9 @@ const LATIN_ATOMIC: Record<string, string> = {
  */
 export function foldLatinDiacritics(s: string): string {
     const stripped = s.normalize("NFD").replace(/\p{M}+/gu, "");
+    // ⚠ OFF THE SEAM: called PER WORD from `resolveWord`, not on the pipeline string. On the seam it takes
+    // English to 0% mapped. Re-running the mechanical converter over this file will re-convert it — that is
+    // how it came back once already.
     return stripped.replace(/[øæœßłđðþħıŋ]/gu, (c) => LATIN_ATOMIC[c] ?? c);
 }
 
@@ -186,7 +189,7 @@ export function foldDigitChar(ch: string): string {
  * the seam dropped the utterance's mapping on 52 of its golden rows.
  */
 export function foldDigitsIn(s: string): string {
-    return s.replace(/\p{Nd}/gu, foldDigitChar);
+    return s.replace(/\p{Nd}/gu, foldDigitChar); // ⚠ the whole point of this function is to stay OFF the seam
 }
 
 export function foldNativeDigits(s: string): string {

@@ -76,7 +76,7 @@
  *     same duplicated sentence (*plaat bu nekk 5 euro*). One sentence is a lead, not a finding.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier.
@@ -310,7 +310,7 @@ export function normalizeWolof(input: string): string {
     //    ⚠ THE FORMAT-CHARACTER STRIP IS NOT COSMETIC: the artifact's `zero-width` cell is ×5, and a
     //    zero-width character INSIDE a word splits it into two tokens — silent damage of the same class as a
     //    dropped letter.
-    s = s.normalize("NFC")
+    s = renormalize(s, "NFC")
         .replace(/&amp;/giu, "&")
         .replace(/&(?:sup2|sup3|nbsp|alpha);?/giu, (e) => ENTITY[`&${e.slice(1).replace(";", "").toLowerCase()}`] ?? e)
         .replace(/\p{Cf}/gu, "");

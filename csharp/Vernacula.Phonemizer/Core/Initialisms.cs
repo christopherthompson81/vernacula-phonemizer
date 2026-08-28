@@ -3,6 +3,8 @@
  * Ported from src/core/initialisms.ts — see that file for the corpus evidence.
  */
 
+using System.Text.RegularExpressions;
+using static Vernacula.Phonemizer.Core.Rewriter;
 namespace Vernacula.Phonemizer.Core;
 
 public sealed class InitialismData
@@ -67,16 +69,27 @@ public static class Initialisms
     private static readonly JsRe JS_TRIM = JsRegex.Compile("^\\s+|\\s+$", "gu");
 
     /** Build the text→text initialism pass. */
-    public static Func<string, string> MakeInitialismNormalizer(InitialismData d)
+    /**
+     * ⚠ `onPipeline` IS THE SEAM'S RULE, MADE AN ARGUMENT — carried over from the TypeScript so the port stays
+     * a transliteration. Almost every caller hands this the pipeline string, so it belongs on the seam; `ky`
+     * calls it on a MATCHED RUN from inside its own callback, and a substring on the seam drops the whole
+     * utterance's mapping. The distinction cannot be seen from in here, so the caller declares it.
+     * (`ky` is not ported yet; the parameter exists so that port is a copy rather than a rediscovery.)
+     */
+    public static Func<string, string> MakeInitialismNormalizer(InitialismData d, bool onPipeline = true)
     {
+        string Rw(string x, JsRe re, MatchEvaluator ev) => onPipeline ? Rewrite(x, re, ev) : JsRegex.Replace(x, re, ev);
         var lower = d.Lower ?? (s => s.ToLowerInvariant());
         string SpellInitials(string run) =>
             string.Join(" ", UPPER.Matches(run).Select(m => d.LetterName(lower(m.Value)) ?? m.Value));
 
         string Inner(string text)
         {
-            if (!LOWER_TEST.IsMatch(text) && SPACE_TEST.IsMatch(JS_TRIM.Replace(text, ""))) return text;
-            return RUN_OR_CODE.Replace(text, m =>
+            // ⚠ THE RESULT IS DISCARDED — it only feeds a test, and `text` is what gets returned. On the seam
+            // this would commit the mapping to a string the pipeline never carries, desyncing everything
+            // after it. A `Rewrite` whose output is thrown away is always wrong.
+            if (!LOWER_TEST.IsMatch(text) && SPACE_TEST.IsMatch(JsRegex.Replace(text, JS_TRIM, ""))) return text;
+            return Rw(text, RUN_OR_CODE, m =>
             {
                 var tok = m.Value;
                 var low = lower(tok);
@@ -91,8 +104,8 @@ public static class Initialisms
 
         return rawText =>
         {
-            var text = LONE_INITIAL.Replace(
-                INITIAL_RUN.Replace(rawText, m => SpellInitials(m.Value) + " "),
+            var text = Rw(
+                Rw(rawText, INITIAL_RUN, m => SpellInitials(m.Value) + " "), LONE_INITIAL,
                 m =>
                 {
                     var letter = m.Groups[1].Value;

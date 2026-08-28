@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Vernacula.Phonemizer.Core;
@@ -37,4 +38,51 @@ public static class Rewriter
     /// <summary>JS `s.replace(re, callback)` on the PIPELINE STRING, carrying provenance.</summary>
     public static string Rewrite(string s, JsRe re, MatchEvaluator evaluator) =>
         re.Replace(s, evaluator, Provenance.StartTrack(s));
+
+    /**
+     * A canonical block: a Hangul jamo run, a surrogate pair with its marks, or one code unit with its marks.
+     *
+     * ⚠ NORMALIZATION DOES NOT REACH ACROSS A STARTER, which is what makes a chunked normalize equal to a
+     * whole-string one — but only if the chunking is right, and Hangul is the exception that proves it (L, V
+     * and T jamo are all starters and NFC composes them together). The surrogate pair is spelt out because
+     * .NET regexes are code-unit based; `csharp/tools/regex-diff` measured the `[\s\S]` form splitting
+     * `𠀁 𫝀 😀` into six halves where Node saw three characters.
+     */
+    private static readonly JsRe CANONICAL_BLOCK = JsRegex.Compile(
+        "[\\u1100-\\u11FF\\uA960-\\uA97F\\uD7B0-\\uD7FF]+|[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]\\p{M}*|[\\s\\S]\\p{M}*", "gu");
+
+    /**
+     * `s.Normalize(form)` on the PIPELINE STRING, carrying provenance — the seam's second primitive, and the
+     * mirror of the TypeScript's `renormalize`.
+     *
+     * ⚠ A NORMALIZE IS NOT A REPLACE, and it was the largest hole left after the seam itself. Because it is
+     * length-CHANGING (`Mìng` precomposed is 4 code units, decomposed is 5) the mapping fell out of step at
+     * the FIRST character and every token in the utterance lost its span — with no poison anywhere to say
+     * why, because the desync happened before any `Rewrite` ran. Measured in the TypeScript: cdo mapped 6%
+     * of its tokens and ee 29%, and both reached 100% once this existed.
+     */
+    public static string Renormalize(string s, NormalizationForm form)
+    {
+        var whole = s.Normalize(form);
+        // ⚠ THE UNTRACED TEST COMES FIRST, and the order is the point. `whole == s` is an O(n) comparison, so
+        // putting it ahead would charge every shipped utterance for a check only the traced path can act on.
+        // `StartTrack` returns null on the first field read when nothing is recording.
+        var track = Provenance.StartTrack(s);
+        // ⚠ A NO-OP NEEDS NO MAPPING WORK AT ALL, and it is the common case — the mapping already describes `s`.
+        if (track is null || whole == s) return whole;
+        var at = 0;
+        var rebuilt = new StringBuilder(whole.Length);
+        foreach (Match m in CANONICAL_BLOCK.Matches(s))
+        {
+            var piece = m.Value.Normalize(form);
+            rebuilt.Append(piece);
+            track.Stamp(at, m.Value.Length, piece.Length);
+            at += m.Value.Length;
+        }
+        // ⚠ VERIFIED, NOT ASSUMED. If the blocks do not reassemble into what `Normalize` actually produced,
+        // the chunking was wrong for this text and the mapping would be a confident lie.
+        if (at != s.Length || rebuilt.ToString() != whole) { Provenance.PoisonExternally(s, whole); return whole; }
+        track.Commit(whole);
+        return whole;
+    }
 }

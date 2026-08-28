@@ -160,6 +160,13 @@ public static class Provenance
      * the rule had to be "ignore". Now that only `Rewriter.Rewrite` reaches here, an unrecognised string can
      * only mean a pipeline step went unseen, which is precisely the thing the mapping must never paper over.
      */
+    /// <summary>Drop the mapping, for a rebuild that could not verify its own accounting.</summary>
+    internal static void PoisonExternally(string expected, string got)
+    {
+        poisonSink?.Invoke(expected, got);
+        Poison();
+    }
+
     public static Track? StartTrack(string input)
     {
         var p = prov;

@@ -220,6 +220,65 @@ type Replacer = string | ((substring: string, ...args: any[]) => string);
  */
 const ESCAPE_PATTERN = /[.*+?^${}()|[\]\\]/gu;
 
+/**
+ * A canonical block: a Hangul jamo run, or one code point with its combining marks.
+ *
+ * ⚠ NORMALIZATION DOES NOT REACH ACROSS A STARTER, which is what makes a chunked normalize equal to a
+ * whole-string one — but only if the chunking is right, and Hangul is the exception that proves it (L, V and
+ * T jamo are all starters and NFC composes them together). The jamo alternative is first for that reason,
+ * and the result is VERIFIED against the whole-string normalize regardless, so a chunking this misses
+ * withholds the mapping instead of inventing one.
+ *
+ * ⚠ THE SURROGATE PAIR IS SPELT OUT because the port cannot rely on `/u`. In JS `[\s\S]` under `/u` matches a
+ * whole code point; .NET regexes are code-unit based, so `csharp/tools/regex-diff` measured this pattern
+ * splitting `𠀁 𫝀 😀` into six halves. An explicit pair alternative reads identically in both engines.
+ */
+const CANONICAL_BLOCK = /[\u1100-\u11FF\uA960-\uA97F\uD7B0-\uD7FF]+|[\uD800-\uDBFF][\uDC00-\uDFFF]\p{M}*|[\s\S]\p{M}*/gu;
+
+/**
+ * `s.normalize(form)` on the PIPELINE STRING, carrying provenance — the seam's second primitive.
+ *
+ * ⚠ A NORMALIZE IS NOT A REPLACE, and until this existed it was the largest single hole left. 24 normalizers
+ * run one on the pipeline string; because it is length-CHANGING (`Mìng` precomposed is 4 code units, decomposed
+ * is 5) the mapping fell out of step at the very first character and every token in the utterance lost its
+ * span. Measured: cdo mapped 6% of its tokens and ee 29%, with no poison anywhere to say why — the desync
+ * happened before any `rewrite` ran.
+ */
+export function renormalize(s: string, form: "NFC" | "NFD" | "NFKC" | "NFKD"): string {
+    const whole = s.normalize(form);
+    // ⚠ THE UNTRACED TEST COMES FIRST, and the order is the point. `whole === s` is an O(n) comparison, so
+    // putting it ahead of the `prov` read would charge every shipped utterance for a check only the traced
+    // path can act on — the same mistake this module's string-pattern form made and had corrected.
+    const p = prov;
+    if (p === null || hostDepth() > 1) return whole;
+    // ⚠ A NO-OP NEEDS NO MAPPING WORK AT ALL, and it is the common case — the mapping already describes `s`.
+    if (whole === s) return whole;
+    if (tracked !== s) { poisonSink?.(tracked ?? "", s); poison(); return whole; }
+    CANONICAL_BLOCK.lastIndex = 0;
+    const blocks = s.match(CANONICAL_BLOCK) ?? [];
+    const next: [number, number][] = [];
+    let at = 0;
+    for (const b of blocks) {
+        const sp = span(p, at, b.length);
+        for (let i = 0; i < b.normalize(form).length; i++) next.push(sp);
+        at += b.length;
+    }
+    // ⚠ VERIFIED, NOT ASSUMED. If the blocks do not reassemble into what `normalize` actually produced, the
+    // chunking was wrong for this text and the mapping would be a confident lie.
+    // ⚠ TWO INDEPENDENT NETS, as the C# has. The block reassembly below is the specific check; the length is
+    // the general one, and `rewrite` has carried it since the start. The C# gets the second for free because
+    // `Track.Commit` refuses a mapping whose count disagrees with the result — measured by sabotaging the
+    // reassembly check in both engines: the C# tests still passed, the TypeScript's did not.
+    if (next.length !== whole.length || at !== s.length || blocks.map((b) => b.normalize(form)).join("") !== whole) {
+        poisonSink?.(s, whole);
+        poison();
+        return whole;
+    }
+    prov = next;
+    tracked = whole;
+    return whole;
+}
+
 /** `s.replace(re, rep)`, carrying provenance when a trace is recording and nothing at all when it is not. */
 export function rewrite(s: string, re: RegExp | string, rep: Replacer): string {
     // ⚠ THE UNTRACED PATH IS THE NATIVE CALL. Not "equivalent to" it — it IS it, so no reading can differ

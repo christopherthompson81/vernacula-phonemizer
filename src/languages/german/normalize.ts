@@ -115,9 +115,9 @@ function yearWords(y: number): string {
 }
 
 export function normalizeGermanYears(input: string): string {
-    return input
-        .replace(DECADE_RE, (_m, y: string, suf: string) => `${yearWords(Number(y))}${suf}`)
-        .replace(YEAR_RE, (_m, y: string) => yearWords(Number(y)));
+    return rewrite(rewrite(input
+        , DECADE_RE, (_m, y: string, suf: string) => `${yearWords(Number(y))}${suf}`)
+        , YEAR_RE, (_m, y: string) => yearWords(Number(y)));
 }
 
 export function normalizeGerman(input: string): string {

@@ -4,6 +4,7 @@
  * Ported from src/languages/pashto/normalize.ts — see that file for the corpus evidence.
  */
 
+using System.Text;
 using Vernacula.Phonemizer.Core;
 using static Vernacula.Phonemizer.Core.Rewriter;
 
@@ -144,7 +145,7 @@ public static class Normalize
     {
         return input =>
         {
-            var s = input.Normalize(System.Text.NormalizationForm.FormC);
+            var s = Renormalize(input, NormalizationForm.FormC);
 
             s = Rewrite(Rewrite(s, ENTITIES, " "), BOM, "");
 

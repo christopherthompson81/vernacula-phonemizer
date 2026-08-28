@@ -4,6 +4,7 @@
  */
 
 using System.Text;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Core;
 
@@ -47,8 +48,8 @@ public static class Sinitic
      */
     public static string DegroupThousands(string s)
     {
-        return JsRegex.Compile(@"(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])", "gu")
-            .Replace(s, m => JsRegex.Compile(",", "gu").Replace(m.Value, ""));
+        return Rewrite(s, JsRegex.Compile(@"(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])", "gu")
+            , m => JsRegex.Compile(",", "gu").Replace(m.Value, ""));
     }
 
     /** THE YEAR TRIO, IN THE ONLY ORDER THAT WORKS — and the order is the point. */
@@ -61,19 +62,19 @@ public static class Sinitic
         var outp = s;
         if (d.RangeWord != null)
         {
-            outp = JsRegex.Compile($"(?<![\\d.,])(\\d{{4}})\\s*[{dash}]\\s*(\\d{{4}})(?![\\d.,])(?=\\s*年)", "gu")
-                .Replace(outp, m => $"{Spell(m.Groups[1].Value)}{d.RangeWord}{Spell(m.Groups[2].Value)}");
-            outp = JsRegex.Compile($"(?<![\\d.,])(\\d{{4}})\\s*年\\s*[{dash}]\\s*(?=\\d{{4}}\\s*年)", "gu")
-                .Replace(outp, m => $"{Spell(m.Groups[1].Value)}年{d.RangeWord}");
+            outp = Rewrite(outp, JsRegex.Compile($"(?<![\\d.,])(\\d{{4}})\\s*[{dash}]\\s*(\\d{{4}})(?![\\d.,])(?=\\s*年)", "gu")
+                , m => $"{Spell(m.Groups[1].Value)}{d.RangeWord}{Spell(m.Groups[2].Value)}");
+            outp = Rewrite(outp, JsRegex.Compile($"(?<![\\d.,])(\\d{{4}})\\s*年\\s*[{dash}]\\s*(?=\\d{{4}}\\s*年)", "gu")
+                , m => $"{Spell(m.Groups[1].Value)}年{d.RangeWord}");
         }
-        return JsRegex.Compile(@"(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)", "gu")
-            .Replace(outp, m => Spell(m.Groups[1].Value));
+        return Rewrite(outp, JsRegex.Compile(@"(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)", "gu")
+            , m => Spell(m.Groups[1].Value));
     }
 
     /** THE FRACTION, IN THE CHINESE ORDER — `a/b` is `b分之a`, "of b parts, a". */
     public static string ReorderFraction(string s, string fractionWord)
     {
-        return JsRegex.Compile(@"(?<![\d.,/\p{sc=Latn}])(\d{1,4})\/(\d{1,4})(?![\d/])", "gu").Replace(s, m =>
+        return Rewrite(s, JsRegex.Compile(@"(?<![\d.,/\p{sc=Latn}])(\d{1,4})\/(\d{1,4})(?![\d/])", "gu"), m =>
         {
             var num = m.Groups[1].Value;
             var den = m.Groups[2].Value;
@@ -88,7 +89,7 @@ public static class Sinitic
     public static string ReadDecimals(string s, string decimalWord, IReadOnlyList<string>? digits = null)
     {
         digits ??= HAN_DIGITS;
-        return JsRegex.Compile(@"(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)", "gu").Replace(s,
+        return Rewrite(s, JsRegex.Compile(@"(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)", "gu"),
             m => $"{m.Groups[1].Value}{decimalWord}{SpellHanDigits(m.Groups[2].Value, digits)}");
     }
 
@@ -100,9 +101,9 @@ public static class Sinitic
     public static string ReadDegrees(string s, DegreeData d)
     {
         var outp = s;
-        if (d.Celsius != null) outp = JsRegex.Compile($"{DEG_NUM}\\s*°\\s*C(?![\\p{{sc=Latn}}])", "gui").Replace(outp, m => d.Celsius(m.Groups[1].Value));
-        if (d.Fahrenheit != null) outp = JsRegex.Compile($"{DEG_NUM}\\s*°\\s*F(?![\\p{{sc=Latn}}])", "gui").Replace(outp, m => d.Fahrenheit(m.Groups[1].Value));
-        if (d.Bare != null) outp = JsRegex.Compile($"{DEG_NUM}\\s*°", "gu").Replace(outp, m => d.Bare(m.Groups[1].Value));
+        if (d.Celsius != null) outp = Rewrite(outp, JsRegex.Compile($"{DEG_NUM}\\s*°\\s*C(?![\\p{{sc=Latn}}])", "gui"), m => d.Celsius(m.Groups[1].Value));
+        if (d.Fahrenheit != null) outp = Rewrite(outp, JsRegex.Compile($"{DEG_NUM}\\s*°\\s*F(?![\\p{{sc=Latn}}])", "gui"), m => d.Fahrenheit(m.Groups[1].Value));
+        if (d.Bare != null) outp = Rewrite(outp, JsRegex.Compile($"{DEG_NUM}\\s*°", "gu"), m => d.Bare(m.Groups[1].Value));
         return outp;
     }
 }

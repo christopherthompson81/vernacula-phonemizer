@@ -8,6 +8,7 @@
  * outsider would compose ×2; the cedi is `sidi`, not `cedi`, because ⟨c⟩ is not an Akan letter and
  * `PhonemizeWord("cedi")` falls through to `LatinPhone` as *[kedi]*).
  */
+using System.Text;
 using Vernacula.Phonemizer.Core;
 using static Vernacula.Phonemizer.Core.Rewriter;
 
@@ -112,7 +113,7 @@ public static class Normalize
     public static string NormalizeAkan(string input)
     {
         // 0) NFC at the entry, so a literal here matches whichever normalization the corpus used.
-        var s = input.Normalize(System.Text.NormalizationForm.FormC);
+        var s = Renormalize(input, NormalizationForm.FormC);
 
         // 1) HTML ENTITIES AND ZERO-WIDTH MARKS, first.
         s = Rewrite(s, ENTITIES, _ => " ");

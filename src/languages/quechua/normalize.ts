@@ -198,7 +198,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Quechua marks plurality with `-kuna` on the noun and NOT after a numeral (the
@@ -263,7 +263,7 @@ export function normalizeQuechua(input: string): string {
     // silent damage of the same class as a dropped letter.
     // ⚠ NFC first, so a decomposed letter is one code point before any literal below is matched; the g2p
     // NFCs again downstream and the fold is idempotent, so this costs nothing.
-    s = s.normalize("NFC").replace(/&amp;/giu, "&")
+    s = renormalize(s, "NFC").replace(/&amp;/giu, "&")
         .replace(/&(?:nbsp|bull|sup2|sup3);/giu, (e) => ENTITY[e.toLowerCase()] ?? e)
         .replace(/\p{Cf}/gu, "");
 

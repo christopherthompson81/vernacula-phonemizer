@@ -13,6 +13,7 @@ import { latinPhone } from "../../core/latinPhones.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeGeorgian } from "./normalize.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -64,7 +65,7 @@ class GeorgianPhonemizer implements Phonemizer {
         // cannot read into Georgian words: the case suffix glued to a figure, the ordinal circumfix, the
         // clock, %, °C, the unit abbreviations, the era markers, currency and the signs. NFC first, because
         // that pass matches Mkhedruli literals and the g2p NFCs anyway.
-        return assembleClauses(normalizeGeorgian(input.normalize("NFC")), TOKEN, (m, sink) => {
+        return assembleClauses(normalizeGeorgian(renormalize(input, "NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2]), m[2]).split(" "))

@@ -142,7 +142,7 @@
  *  agree with the ENGINE's number token, which is `\d+` after the registry's native-digit fold. */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 const D = "0-9۰-۹٠-٩";
 /** "not inside a word", the trap-1/23 form: `\p{M}` beside `\p{L}`, and never `\b`. */
 /** The Arabic-script letter range this language actually uses, INCLUDING the Arabic Supplement — ݔ U+0754
@@ -308,7 +308,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         // 1) NFC at the entry. Arabic-script text mixes precomposed and decomposed forms, so a rule keyed
         //    on a literal would otherwise match a fraction of its instances (trap 11). The engine NFCs
         //    again downstream, so this costs nothing.
-        let s = input.normalize("NFC");
+        let s = renormalize(input, "NFC");
 
         // 2) HTML entities and the zero-width characters that are NOT orthography, before anything can
         //    read one as a letter or split a word on one.

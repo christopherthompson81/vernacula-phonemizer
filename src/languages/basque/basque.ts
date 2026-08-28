@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { normalizeBasque } from "./normalize.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 interface BasqueNumbers {
     ones: string[];
@@ -119,7 +120,7 @@ class BasquePhonemizer implements Phonemizer {
         // NORMALIZATION FIRST — see normalize.ts. The shared symbol tier is declared THERE rather than here,
         // because this language's decimal comma and its glued case endings both have to be sequenced around
         // it: the tier needs the figure intact, and both of those rules consume it.
-        return assembleClauses(normalizeBasque(input.normalize("NFC")), TOKEN, (m, sink) => {
+        return assembleClauses(normalizeBasque(renormalize(input, "NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) sink.emit(number(m[2])); // Basque vigesimal cardinals
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

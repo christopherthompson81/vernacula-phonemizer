@@ -17,6 +17,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 import { normalizeTashelhit } from "./normalize.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 interface TashelhitDef {
     graphemes: Record<string, string>; // Berber Latin alphabet → IPA
@@ -80,7 +81,7 @@ class TashelhitPhonemizer implements Phonemizer {
         // TEXT NORMALIZATION runs FIRST, before tokenization — see normalize.ts. It NFCs at its own entry
         // (its era and unit literals carry dot-below emphatics), and NFC is idempotent, so the fold below
         // still guarantees the tokenizer's class sees a composed string whatever the layer emitted.
-        const nfc = normalizeTashelhit(input).normalize("NFC");
+        const nfc = renormalize(normalizeTashelhit(input), "NFC");
 
         return assembleClauses(nfc, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemize(nat(m[1])));

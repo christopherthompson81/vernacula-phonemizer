@@ -3,6 +3,7 @@
  * already a pronounceable word into words the existing pipeline speaks.
  * Ported from src/languages/lingala/normalize.ts — see that file for the corpus evidence.
  */
+using System.Text;
 using Vernacula.Phonemizer.Core;
 using static Vernacula.Phonemizer.Core.Rewriter;
 
@@ -107,7 +108,7 @@ public static class Normalize
         input = Rewrite(input, CLOCK_MARKED, "$1 $2");
         // NFC at the entry so the literals in this file match whichever normalization the text arrived in;
         // the engine NFDs again downstream.
-        var s = input.Normalize(System.Text.NormalizationForm.FormC);
+        var s = Renormalize(input, NormalizationForm.FormC);
 
         // ⚠ Entities first, before the ampersand rule at the bottom, or `&nbsp;` reads as "and n-b-s-p".
         s = Rewrite(Rewrite(s, ENTITIES, " "), ZERO_WIDTH, "");

@@ -20,6 +20,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { normalizeMinDong } from "./normalize.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 interface MinDongDef {
     initials: Record<string, string>;
@@ -201,7 +202,7 @@ class MinDongPhonemizer implements Phonemizer {
         // leave those insertions in NFC inside an otherwise-NFD string and the tokenizer's combining-mark
         // class would truncate them — the same precomposed-⟨ṳ⟩ hazard the test below pins. Folding last
         // means a word this layer inserts is tokenized exactly like one the corpus wrote.
-        const nfd = normalizeMinDong(input).normalize("NFD");
+        const nfd = renormalize(normalizeMinDong(input), "NFD");
         return assembleClauses(nfd, tok, (m, sink) => {
             if (m[1]) sink.emit(bucToIpa(m[1]));
             else if (m[2]) sink.emit(bucToIpa(numberToBucWords(Number(m[2]), m[2]).join("-")));

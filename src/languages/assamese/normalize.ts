@@ -20,7 +20,7 @@ import { BENGALI_DIGITS } from "../../core/unicode.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { BengaliDef } from "../bengali/bengali.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 const BN_DIGIT = Object.keys(BENGALI_DIGITS).join("");
 /** Either digit system. */
@@ -58,7 +58,7 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         // reading *14.7 dollar billion American dollar*. NFC is the right fold because these letters are
         // Unicode composition EXCLUSIONS, so it yields the decomposed form the literals here use, and it is
         // what the Bengali g2p already applies downstream (both forms give byte-identical IPA).
-        let s = input.normalize("NFC");
+        let s = renormalize(input, "NFC");
 
         // 1) DOTTED LATIN RUNS → a bare run, before anything else. `U.S.` was *jˈuː . ˈɛs .* — the interior
         //    dot survives as a phrase break. Also `George W. Bush` — the W. suffix dot is a break. A dotted

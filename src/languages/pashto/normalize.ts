@@ -1,6 +1,6 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { spacedBareExponent } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 /**
  * Pashto / پښتو (ps) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -219,7 +219,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         // 0) NFC at the entry. Arabic-script text mixes precomposed and decomposed forms and carries
         //    presentation-form variants, so a rule keyed on a literal would otherwise match a fraction of
         //    its instances (trap 11). The engine NFCs again downstream, so this costs nothing.
-        let s = input.normalize("NFC");
+        let s = renormalize(input, "NFC");
 
         // 1) HTML ENTITIES, before anything can read one as letters.
         //    ⚠ THE ZERO-WIDTH NON-JOINER IS DELIBERATELY LEFT ALONE. It occurs ×22,590 and it is not

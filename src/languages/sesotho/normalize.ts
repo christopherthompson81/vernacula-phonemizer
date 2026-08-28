@@ -251,12 +251,12 @@ export function normalizeSesotho(input: string): string {
     //    `Ntat&#39;a` and `&#39;Matsaba`, and `&#x5B;`/`&#x5D;` around a citation-needed marker.
     //    ⚠ `&#39;` IS AN ORTHOGRAPHIC CHARACTER IN SESOTHO, not decoration: the apostrophe writes the
     //    syllabic nasal (*'m'a*, *'Matsaba*), so it is restored rather than dropped.
-    s = s
-        .replace(/&nbsp;/giu, " ")
-        .replace(/&#0*39;|&#x0*27;|&apos;/giu, "’")
-        .replace(/&#x0*5B;/giu, "[")
-        .replace(/&#x0*5D;/giu, "]")
-        .replace(/&amp;/giu, "&");
+    s = rewrite(rewrite(rewrite(rewrite(rewrite(s
+        , /&nbsp;/giu, " ")
+        , /&#0*39;|&#x0*27;|&apos;/giu, "’")
+        , /&#x0*5B;/giu, "[")
+        , /&#x0*5D;/giu, "]")
+        , /&amp;/giu, "&");
 
     // 2) THE BARE AMPERSAND → `le`, the manifest's own conjunction, which the number path already uses for
     //    *leshome le metso e mmedi*.

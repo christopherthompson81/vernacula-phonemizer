@@ -80,7 +80,7 @@
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /** The ONE number word this layer emits — the suppletive first ordinal, for the French `1er`/`1ère` shape in
  *  step 12. ⚠ READ FROM THE MANIFEST RATHER THAN SPELLED HERE: the step's own comment already said the word
@@ -231,7 +231,7 @@ export function normalizeLingala(input: string): string {
     //    Lingala writes `é á ó ô ǒ` (which precompose) beside `ɛ́ ɔ́` (which cannot), so its text is
     //    inherently mixed-normalization and a rule keyed on `bôngó` would otherwise match about half its
     //    instances — trap 11, in a Latin script. The engine NFDs again downstream, so this costs nothing.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 1) HTML ENTITIES AND ZERO-WIDTH MARKS, first — a dump carries `&nbsp;` and `&#xFEFF;` (×21 zero-width
     //    in the corpus) and both must go BEFORE the ampersand rule at step 13, or `&nbsp;` is read as the

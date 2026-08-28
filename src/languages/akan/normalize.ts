@@ -107,7 +107,7 @@
  *   committed golden to swap one for the other.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /** ⚠ TWI-SOURCED, and the Fante form differs. `akyiri pɔ` is the decimal point ×1,137 in tw and ×1 in fat;
  *  Fante writes `ekyir pɔw` ("nyaa ɔha nkyekyɛmu esia na n'ekyir pɔw eduowɔtwe"). Every instance sits
@@ -310,7 +310,7 @@ export function normalizeAkan(input: string): string {
     //    Akan writes ⟨ɛ ɔ⟩, which do not precompose, beside ordinary Latin — but a wiki dump also carries
     //    decomposed ⟨ɛ́⟩-style sequences from imported text, and the g2p NFCs downstream anyway, so this
     //    costs nothing and closes trap 11 in a Latin script.
-    let s = input.normalize("NFC");
+    let s = renormalize(input, "NFC");
 
     // 1) HTML ENTITIES AND ZERO-WIDTH MARKS, first — a dump carries `&nbsp;` and `&#xFEFF;` (the
     //    `zero-width` cell holds 258 instances) and both must go BEFORE the ampersand rule at step 10, or

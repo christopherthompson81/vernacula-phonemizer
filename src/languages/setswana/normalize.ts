@@ -199,12 +199,12 @@ export function normalizeSetswanaPre(input: string): string {
     //    ⚠ AND THE FOLD IS LOAD-BEARING FOR THE UNIT PATH, not just for the ampersand: `1,400&nbsp;km²`,
     //    `$52&nbsp;million`, `31&nbsp;°C` and `R1&nbsp;billion` all put the entity between the number and
     //    the thing that has to be adjacent to it.
-    s = s
-        .replace(/&nbsp;/giu, " ")
-        .replace(/&#x20;/giu, " ")
-        .replace(/&#x5B;/giu, "[")
-        .replace(/&#x5D;/giu, "]")
-        .replace(/&amp;/giu, "&");
+    s = rewrite(rewrite(rewrite(rewrite(rewrite(s
+        , /&nbsp;/giu, " ")
+        , /&#x20;/giu, " ")
+        , /&#x5B;/giu, "[")
+        , /&#x5D;/giu, "]")
+        , /&amp;/giu, "&");
 
     // 2) A MAGNITUDE SUFFIX GLUED TO A CURRENCY AMOUNT → the magnitude word, BEFORE the tier claims the
     //    number. `bn`/`m`/`M` after a currency sign is a scale, never a unit; the corpus writes ten of them.

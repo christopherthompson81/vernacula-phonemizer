@@ -5,6 +5,8 @@
  * parity gate is 136 languages × 26,827 rows across two engines, and a second output shape that could drift
  * from the first would be a fork wearing a feature's clothes.
  */
+using System.Text;
+using Vernacula.Phonemizer.Core;
 using Vernacula.Phonemizer;
 using Xunit;
 
@@ -217,4 +219,52 @@ public class TraceTests
         }
     }
 
+    /**
+     * #1150 — `Renormalize`, the seam's second primitive. A normalize is not a replace, and being
+     * length-CHANGING it desynced the mapping at the FIRST character with no poison anywhere to say why.
+     *
+     * ⚠ ITS CORRECTNESS RESTS ON ONE CLAIM: normalization never reaches across a starter, so normalizing
+     * canonical blocks separately equals normalizing the whole string. The claim is VERIFIED at runtime
+     * rather than trusted, and these two cases pin both sides of that — the ordinary case reports, and the
+     * one documented exception withholds instead of guessing.
+     */
+    [Theory]
+    [InlineData("M\u00ecng-ng\u1e73\u0304", NormalizationForm.FormD)]
+    [InlineData("caf\u00e9 na\u00efve", NormalizationForm.FormD)]
+    [InlineData("cafe\u0301 nai\u0308ve", NormalizationForm.FormC)]
+    public void RenormalizeReadsExactlyAsStringNormalize(string src, NormalizationForm form)
+    {
+        Provenance.Seed(src);
+        try
+        {
+            var got = Rewriter.Renormalize(src, form);
+            Assert.Equal(src.Normalize(form), got);
+            var p = Provenance.For(got);
+            Assert.NotNull(p);
+            for (var i = 0; i < got.Length; i++)
+            {
+                var sp = Provenance.InputSpan(p!, i, i + 1);
+                Assert.NotNull(sp);                                  // absent or inside the input,
+                Assert.InRange(sp!.Value.Start, 0, src.Length);      // never a span the caller cannot index
+                Assert.InRange(sp.Value.End, sp.Value.Start, src.Length);
+            }
+        }
+        finally { Provenance.End(); }
+    }
+
+    [Fact]
+    public void ACompositionThatReachesAcrossAStarterIsWithheldNotGuessed()
+    {
+        // `가` (U+AC00, a precomposed LV syllable) plus a trailing T jamo composes into `각` under NFC, and
+        // that composition crosses a starter — the one thing the block chunking assumes cannot happen.
+        const string src = "\uAC00\u11A8";
+        Provenance.Seed(src);
+        try
+        {
+            var got = Rewriter.Renormalize(src, NormalizationForm.FormC);
+            Assert.Equal("\uAC01", got);              // the reading is never in doubt
+            Assert.Null(Provenance.For(got));         // and the mapping says "not known"
+        }
+        finally { Provenance.End(); }
+    }
 }
