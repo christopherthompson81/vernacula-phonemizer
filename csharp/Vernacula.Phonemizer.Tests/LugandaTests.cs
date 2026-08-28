@@ -57,6 +57,25 @@ public class LugandaTests
     [Fact]
     public void TheVelarNasalGeminates() => Assert.Equal("ŋː", LgEngine.PhonemizeWord("ŋŋ"));
 
+    // #1132/1 — U+0261 was a "defensive alias" in prenasalisable that corrupted every syllable it touched.
+    // Both halves of #1132 are DATA-side (luganda.jsonc, the shared tree), so the C# needed no code change;
+    // these pin that it picked the change up.
+    [Theory]
+    [InlineData("n\u0261a", "na")]     // ⟨n⟩ keeps its reading; the ɡ is simply unread (was ⁿa)
+    [InlineData("an\u0261", "an")]     // …and no spurious vowel length (was aːⁿ)
+    [InlineData("m\u0261a", "ma")]
+    [InlineData("nga", "ᵑɡa")]         // ⚠ the ASCII spelling, the one Luganda is written in, is untouched
+    [InlineData("buganda", "buɡaːⁿda")]
+    public void TheScriptGDegradesQuietly(string word, string want) => Assert.Equal(want, Say(word));
+
+    // #1132/2 — the twelve unreachable prenasal digraph rows are deleted; the CODE rule is the single source.
+    [Theory]
+    [InlineData("mb", "ᵐb")] [InlineData("mp", "ᵐp")] [InlineData("mf", "ᵐf")] [InlineData("mv", "ᵐv")]
+    [InlineData("nf", "ᵐf")] [InlineData("nv", "ᵐv")] [InlineData("nd", "ⁿd")] [InlineData("nt", "ⁿt")]
+    [InlineData("nc", "ⁿc")] [InlineData("nj", "ⁿɟ")] [InlineData("nk", "ᵑk")] [InlineData("ng", "ᵑɡ")]
+    public void TheCodeRuleHoldsTheTwelveMappings(string digraph, string ipa) =>
+        Assert.Equal($"aː{ipa}a", LgEngine.PhonemizeWord($"a{digraph}a"));
+
     [Theory]
     // Units + the teens `na`/`n'` connective (elision before the vowel-initial emu).
     [InlineData(7, "musanvu")]

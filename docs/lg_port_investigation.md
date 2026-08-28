@@ -225,3 +225,79 @@ a statement about the *unchanged* engine; it is the 44 probes and the 11 new xun
 ⟨ŋ⟩, and the golden covers it not at all. That is the same structural blindness #1131 was filed about, and
 regenerating the golden does not remove it — `gen_parity_goldens.mts lg` still produces 0 rows carrying the
 letter, because FLEURS lg_ug simply does not write it often.
+
+## Run 6 — 2026-08-28 — #1132: the ⟨ɡ⟩ alias and the twelve dead rows
+
+**Question.** #1132 leaves finding 1 with two coherent resolutions — make the U+0261 "defensive alias" work
+(add a `"ɡ": "ɡ"` row and widen the ASCII `"kg"` place test), or delete it. Which does the evidence support?
+
+### The alias has no input for which it helps
+
+Both reproduce first:
+
+    "nɡa" (U+0261)  → ⁿa       ⟨n⟩'s own reading gone, place wrong, ɡ dropped anyway
+    "nga" (ASCII)   → ᵑɡa      correct
+    dead rows       → 12       (the issue's count is right; ⟨ny⟩ and ⟨n'⟩ are reachable via SPECIAL,
+                                not OTHER_DIGRAPHS, so a naive filter says 14)
+
+Then measured EXHAUSTIVELY rather than argued: every 3-letter frame over the language's alphabet plus
+U+0261, scanned twice — manifest as shipped, and with the alias removed.
+
+    1,951 frames containing U+0261
+      1,798 identical with and without the alias
+        153 DIFFER — and 0 of the 153 favour the alias
+
+Every one of the 153 has the same shape, and it is worse than the issue described:
+
+    anɡ    alias → aːⁿ      no-alias → an
+
+The alias does not merely pick the wrong place. It (a) replaces the nasal's own full segment with a
+superscript, (b) picks the wrong place, (c) drops the ɡ regardless, and (d) **spuriously lengthens the
+preceding vowel**, because the superscript it emits triggers the vowel-lengthening post-step. That fourth
+effect is not in the issue text. **A defence with no input for which it helps is not a defence.**
+
+### Why DELETE rather than wire it up
+
+Neither resolution is distinguishable by corpus impact — U+0261 is ×0 in FLEURS `lg_ug`, ×0 in
+`tools/corpus/mined/lg.jsonc`, ×0 in `tools/corpus/attest/lg.jsonc`, ×0 in the golden's input column
+(re-counted here, matching the finding). So the tie-break has to be a principle, and two were available:
+
+- Fleet convention: **there is none.** `grep "defensive alias"` returns exactly one hit in the repo — this
+  one. Where U+0261 does occur fleet-wide it is inside an embedded IPA gloss in Wikipedia-derived text
+  (`csharp/goldens/hil.tsv`: *"…sa lokal bilang [bɛˈniɡnɔʔ aˈkino]…"*), not as a language's orthography.
+- Internal consistency: **Luganda's g2p drops every unknown letter** — it has no `latinPhone` fallback, so
+  ⟨ɛ⟩, ⟨ð⟩, ⟨ø⟩ and the rest are all simply unread. Singling out U+0261 for rescue would be the one-off; a
+  general "an unread letter still denotes a sound" policy is a different and much larger change.
+
+⚠ **The honest residual: deletion does not make U+0261 READ, it makes it fail predictably instead of
+corruptly.** `Buɡanda` (U+0261) now reads *buaːⁿda* — a whole consonant missing — where the ASCII spelling
+reads *buɡaːⁿda*. That is the same degradation every other out-of-inventory letter gets here, which is the
+point, but it is not a correct reading. If evidence ever turns up of Luganda text actually written with
+U+0261, the other resolution in #1132 is still the right one and this entry is where to start.
+
+### Finding 2 — the twelve rows are deleted, not annotated
+
+`OTHER_DIGRAPHS` filters length-2 keys to `k[1] === "w"` or vowel+vowel, so ⟨mb mp mf mv nf nv nd nt nc nj
+nk ng⟩ were unreachable BY CONSTRUCTION, while the block comment above them claimed the scanner tried them.
+Deleted rather than re-commented, because the mapping they held is already stated once in
+`convention.prenasal` and computed once in the code rule — PORTING.md's own argument that a second copy is
+not a second witness but a copy that drifts. A test now pins that the code rule still produces all twelve
+byte-identically, which is the property the rows were silently standing in for.
+
+### Both halves are DATA-side, so the C# needed no code change
+
+Both edits are in `data/languages/luganda/luganda.jsonc`, which PORTING.md says is owned by no engine.
+Verified rather than assumed: no hardcoded digraph lookup exists in `Luganda.cs`, and the C# picked both
+changes up through the shared tree.
+
+    golden lg      0 rows changed (regenerated)
+    parity lg      200/200, 0 BLOCKED
+    parity fleet   135 languages, 26,627 rows, 0 differ
+    differential   4,496 lines × sync AND async = 8,992 comparisons, 0 differ, 0 throws, 0 PortPending
+    leak sweep     0 of 4,496 C# outputs carry a digit or an unread symbol
+    TS suite       5,683 passed        dotnet test  2,609 passed
+
+⚠ Same limit as Run 5, and worse here: **U+0261 is ×0 in the corpus**, so 8 of the 8,992 comparisons are the
+probes I added for it and the rest say nothing about this change. The 17 new xunit cases and the 2 new
+vitest cases are the whole instrument. The 0-differ number is a statement that the change moved nothing it
+should not have — not evidence that it moved what it should.
