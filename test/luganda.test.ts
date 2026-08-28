@@ -49,6 +49,42 @@ describe("Luganda canonical IPA — greedy g2p + gemination + prenasal lengtheni
     // it reached the prenasalisation rule, so ⟨ŋk⟩ read ᵑk; giving the letter its own row took that away and
     // split it into two segments, re-opening the one-phoneme-two-readings gap #1131 closes — in a position the
     // mined corpus (which carries only ⟨ŋŋ⟩) cannot witness. ⟨ŋ⟩ is therefore a prenasalisation trigger too.
+    // #1132/1 — U+0261 LATIN SMALL LETTER SCRIPT G was listed in `prenasalisable` as a "defensive alias"
+    // beside ASCII ⟨g⟩. There is no ⟨ɡ⟩ grapheme row and the place test is the ASCII string "kg", so the alias
+    // fired the rule, picked the wrong place, dropped the consonant anyway AND spuriously lengthened the
+    // vowel. Measured exhaustively over the 1,951 three-letter frames containing U+0261: 153 differed, none in
+    // the alias's favour. Removed — the character now degrades the way every other unknown letter does.
+    // U+0261 SCRIPT G now reads exactly as ASCII ⟨g⟩ does, and it takes two changes to get there: deleting the
+    // "defensive alias" from `prenasalisable` (which corrupted the syllable — `anɡ` → *aːⁿ*), and the `ɡ → g`
+    // row added to core/hostWord.ts's UNDECOMPOSABLE table, which is what makes the letter READ rather than
+    // merely fail quietly. Pinned as an EQUIVALENCE against the ASCII spelling, so neither half can regress
+    // without this failing.
+    test("U+0261 ⟨ɡ⟩ reads exactly as ASCII ⟨g⟩ does", () => {
+        const G = "\u0261";
+        for (const [script, ascii] of [
+            [`n${G}a`, "nga"], [`an${G}`, "ang"], [`m${G}a`, "mga"],
+            [`lu${G}anda`, "luganda"], [`Bu${G}anda`, "Buganda"], [`${G}a`, "ga"],
+        ] as const)
+            expect(phonemize(script, "lg"), `${script} vs ${ascii}`).toBe(phonemize(ascii, "lg"));
+        expect(phonemize(`n${G}a`, "lg")).toBe("ᵑɡa"); // was *ⁿa* with the alias, *na* with it merely deleted
+        expect(phonemize(`an${G}`, "lg")).toBe("aːᵑɡ"); // was *aːⁿ* — the alias's spurious length, no consonant
+        expect(phonemize(`lu${G}anda`, "lg")).toBe("luɡaːⁿda");
+    });
+
+    // #1132/2 — the twelve prenasal digraph rows in the grapheme table were unreachable by construction
+    // (OTHER_DIGRAPHS admits only ⟨Cw⟩ and vowel+vowel) and are deleted. The CODE rule is the single source,
+    // so this pins that it still produces all twelve readings the deleted rows duplicated.
+    test("the prenasalisation CODE rule produces all twelve mappings the deleted table rows held", () => {
+        for (const [digraph, ipa] of [
+            ["mb", "ᵐb"], ["mp", "ᵐp"], ["mf", "ᵐf"], ["mv", "ᵐv"], ["nf", "ᵐf"], ["nv", "ᵐv"],
+            ["nd", "ⁿd"], ["nt", "ⁿt"], ["nc", "ⁿc"], ["nj", "ⁿɟ"], ["nk", "ᵑk"], ["ng", "ᵑɡ"],
+        ] as const)
+            expect(phonemizeWord(`a${digraph}a`), `⟨${digraph}⟩`).toBe(`aː${ipa}a`);
+        // …and the reason the rows had to go rather than be wired in: the code rule consumes ONLY the nasal,
+        // which is what keeps a following ⟨w⟩ reachable.
+        expect(phonemizeWord("ndwadde")).toBe("ⁿdʷadːe");
+    });
+
     test("⟨ŋ⟩ before an obstruent prenasalises, exactly as the ⟨n⟩ spelling does", () => {
         expect(phonemize("ŋka", "lg")).toBe(phonemize("nka", "lg"));
         expect(phonemize("ŋka", "lg")).toBe("ᵑka");

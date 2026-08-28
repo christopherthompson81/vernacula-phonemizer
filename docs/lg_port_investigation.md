@@ -225,3 +225,139 @@ a statement about the *unchanged* engine; it is the 44 probes and the 11 new xun
 ⟨ŋ⟩, and the golden covers it not at all. That is the same structural blindness #1131 was filed about, and
 regenerating the golden does not remove it — `gen_parity_goldens.mts lg` still produces 0 rows carrying the
 letter, because FLEURS lg_ug simply does not write it often.
+
+## Run 6 — 2026-08-28 — #1132: the ⟨ɡ⟩ alias and the twelve dead rows
+
+**Question.** #1132 leaves finding 1 with two coherent resolutions — make the U+0261 "defensive alias" work
+(add a `"ɡ": "ɡ"` row and widen the ASCII `"kg"` place test), or delete it. Which does the evidence support?
+
+### The alias has no input for which it helps
+
+Both reproduce first:
+
+    "nɡa" (U+0261)  → ⁿa       ⟨n⟩'s own reading gone, place wrong, ɡ dropped anyway
+    "nga" (ASCII)   → ᵑɡa      correct
+    dead rows       → 12       (the issue's count is right; ⟨ny⟩ and ⟨n'⟩ are reachable via SPECIAL,
+                                not OTHER_DIGRAPHS, so a naive filter says 14)
+
+Then measured EXHAUSTIVELY rather than argued: every 3-letter frame over the language's alphabet plus
+U+0261, scanned twice — manifest as shipped, and with the alias removed.
+
+    1,951 frames containing U+0261
+      1,798 identical with and without the alias
+        153 DIFFER — and 0 of the 153 favour the alias
+
+Every one of the 153 has the same shape, and it is worse than the issue described:
+
+    anɡ    alias → aːⁿ      no-alias → an
+
+The alias does not merely pick the wrong place. It (a) replaces the nasal's own full segment with a
+superscript, (b) picks the wrong place, (c) drops the ɡ regardless, and (d) **spuriously lengthens the
+preceding vowel**, because the superscript it emits triggers the vowel-lengthening post-step. That fourth
+effect is not in the issue text. **A defence with no input for which it helps is not a defence.**
+
+### Why DELETE rather than wire it up
+
+Neither resolution is distinguishable by corpus impact — U+0261 is ×0 in FLEURS `lg_ug`, ×0 in
+`tools/corpus/mined/lg.jsonc`, ×0 in `tools/corpus/attest/lg.jsonc`, ×0 in the golden's input column
+(re-counted here, matching the finding). So the tie-break has to be a principle, and two were available:
+
+- Fleet convention: **there is none.** `grep "defensive alias"` returns exactly one hit in the repo — this
+  one. Where U+0261 does occur fleet-wide it is inside an embedded IPA gloss in Wikipedia-derived text
+  (`csharp/goldens/hil.tsv`: *"…sa lokal bilang [bɛˈniɡnɔʔ aˈkino]…"*), not as a language's orthography.
+- Internal consistency: **Luganda's g2p drops every unknown letter** — it has no `latinPhone` fallback, so
+  ⟨ɛ⟩, ⟨ð⟩, ⟨ø⟩ and the rest are all simply unread. Singling out U+0261 for rescue would be the one-off; a
+  general "an unread letter still denotes a sound" policy is a different and much larger change.
+
+⚠ **The honest residual: deletion does not make U+0261 READ, it makes it fail predictably instead of
+corruptly.** `Buɡanda` (U+0261) now reads *buaːⁿda* — a whole consonant missing — where the ASCII spelling
+reads *buɡaːⁿda*. That is the same degradation every other out-of-inventory letter gets here, which is the
+point, but it is not a correct reading. If evidence ever turns up of Luganda text actually written with
+U+0261, the other resolution in #1132 is still the right one and this entry is where to start.
+
+### Finding 2 — the twelve rows are deleted, not annotated
+
+`OTHER_DIGRAPHS` filters length-2 keys to `k[1] === "w"` or vowel+vowel, so ⟨mb mp mf mv nf nv nd nt nc nj
+nk ng⟩ were unreachable BY CONSTRUCTION, while the block comment above them claimed the scanner tried them.
+Deleted rather than re-commented, because the mapping they held is already stated once in
+`convention.prenasal` and computed once in the code rule — PORTING.md's own argument that a second copy is
+not a second witness but a copy that drifts. A test now pins that the code rule still produces all twelve
+byte-identically, which is the property the rows were silently standing in for.
+
+### Both halves are DATA-side, so the C# needed no code change
+
+Both edits are in `data/languages/luganda/luganda.jsonc`, which PORTING.md says is owned by no engine.
+Verified rather than assumed: no hardcoded digraph lookup exists in `Luganda.cs`, and the C# picked both
+changes up through the shared tree.
+
+    goldens        1 row changed FLEET-WIDE (hil), from the UNDECOMPOSABLE row; lg itself 0
+    parity lg      200/200, 0 BLOCKED
+    parity fleet   136 languages, 26,827 rows, 0 differ — re-closed over the regenerated goldens
+    differential   4,496 lines × sync AND async = 8,992 comparisons, 0 differ, 0 throws, 0 PortPending
+    leak sweep     0 of 4,496 C# outputs carry a digit or an unread symbol
+    TS suite       5,683 passed        dotnet test  2,695 passed
+    (rebased onto the rn port landing on main mid-review; the fleet numbers include Kirundi, and the
+     UNDECOMPOSABLE row was re-checked against its new golden — rn does not move.)
+
+⚠ Same limit as Run 5, and worse here: **U+0261 is ×0 in the corpus**, so 8 of the 8,992 comparisons are the
+probes I added for it and the rest say nothing about this change. The 17 new xunit cases and the 2 new
+vitest cases are the whole instrument. The 0-differ number is a statement that the change moved nothing it
+should not have — not evidence that it moved what it should.
+
+### Review addendum — the third resolution I did not weigh, now TAKEN (#1144)
+
+Review on PR #1142 pointed out that the two resolutions #1132 offered are both LOCAL, and the fleet already
+has the mechanism for exactly this class of character: `core/hostWord.ts`'s `UNDECOMPOSABLE` table, which
+maps the letters NFD cannot decompose onto a base the g2ps do have rules for (ŋ→n, ɛ→e, ɔ→o, ə→e, ɓ→b…).
+**It has no `ɡ → g` row.** I actually printed `foldLatinToBase("ɡ") === "ɡ"` in the very first probe of this
+run and did not follow it up — the no-op fold was on screen and I read past it.
+
+The consequence is not local at all:
+
+    phonemize("ɡato",    "es")  → ˈato       vs  gato    → ɡˈato
+    phonemize("ɡut",     "de")  → uːt        vs  gut     → ɡuːt
+    phonemize("luɡanda", "lg")  → luaːⁿda    vs  luganda → luɡaːⁿda
+
+A whole consonant deleted, in three unrelated languages. And the input is not exotic: U+0261 is the IPA
+voiced velar stop, Wikipedia-derived text is full of inline pronunciation glosses, 11 corpus artifacts carry
+it, and `csharp/goldens/hil.tsv` already ships a row whose INPUT contains one.
+
+**Taken in this PR** rather than filed — a `ɡ: "g", Ɡ: "G"` row in `UNDECOMPOSABLE`, in both engines. It was
+first filed as #1144 and then fixed inline instead, on the direction that this work was proliferating issues
+rather than closing them.
+
+⚠ **Checked BEFORE adding the row, because a fold that fires where a g2p had a rule is #1140's defect in
+reverse:** across every language declaring a `NATIVE_CLASS`, U+0261 is **never** an orthographic input key in
+any grapheme/consonant/letters/digraphs table. So the fold cannot take a reading away from a g2p that had
+one. (The 20-odd manifests that carry U+0261 as a key are keyed on the IPA side, which the input fold never
+touches.)
+
+Blast radius, measured rather than assumed: **1 golden row in the fleet**, `csharp/goldens/hil.tsv`, and the
+change is a dropped consonant restored inside an IPA gloss:
+
+    nˈino  →  nˈiɡno        ("…sa lokal bilang [bɛˈniɡnɔʔ aˈkino]…")
+
+⚠ **This does not change #1132's verdict, it sharpens it.** Deleting the alias was still right, and the two
+changes COMPOSE: with the fold in place U+0261 becomes ASCII ⟨g⟩ before the g2p sees it, so no ⟨ɡ⟩ entry in
+`prenasalisable` is wanted at all. Wiring the alias up — the resolution I rejected — would have been actively
+in the fold's way. Deleting the alias alone would have left the letter unread; the fold alone would have left
+a corrupting alias in the table.
+
+⚠ The two tests that pinned `nɡa → na` were REWRITTEN, not deleted, exactly as their annotations said: they
+now assert U+0261 reads *identically to the ASCII spelling* in both engines, so neither half can regress
+silently. `nɡa` → *ᵑɡa*, `anɡ` → *aːᵑɡ*, `nɡwadde` → *ᵑɡʷadːe* (prenasal + labialisation both preserved).
+
+### Four smaller review findings, all fixed in the PR
+
+  * `manifest.ts` and `Manifest.cs` still described the grapheme table as holding "prenasalised units" and the
+    scan as trying "the Cw + prenasal digraphs" — **stale comments of exactly the class #1132 removes**, left
+    behind by my own deletion. Fixed in both engines, along with two `⟨n m⟩` prenasal docstrings that #1131
+    had already made `⟨n m ŋ⟩`.
+  * The new jsonc comment claimed the deleted mapping "is stated once, in `convention.prenasal`" — but that
+    string listed TEN pairs, not twelve: ⟨mf⟩ and ⟨mv⟩ were absent, so two of the twelve were left stated
+    NOWHERE. The guarantee was false as written. Fixed by completing the string.
+  * "the 1,951 three-letter frames" was not reproducible without naming the alphabet it ranged over (a
+    reviewer re-running it over the manifest's own 27 single-letter keys got 2,269 frames / 165 differing —
+    same conclusion, different number). The alphabet is now named: ASCII a–z with ⟨g⟩ replaced by U+0261,
+    26³ − 25³ = 1,951.
+  * `csharp/STATUS.md` still listed both #1132 items as open findings, so an auditor would have re-filed them.

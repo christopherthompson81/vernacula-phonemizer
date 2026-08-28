@@ -66,6 +66,14 @@ const UNDECOMPOSABLE: Readonly<Record<string, string>> = {
     ɛ: "e", Ɛ: "E", ɔ: "o", Ɔ: "O", ə: "e", Ə: "E", ɓ: "b", Ɓ: "B", ɗ: "d", Ɗ: "D",
     ƙ: "k", Ƙ: "K", ƴ: "y", Ƴ: "Y", ı: "i", ʉ: "u", ɨ: "i", ƀ: "b", ŧ: "t", ſ: "s",
     ƒ: "f", Ƒ: "F", // f with hook — /f/ in the African orthographies that use it (and the florin sign)
+    // ⚠ SCRIPT G (U+0261 / U+A7AC) IS A TYPOGRAPHIC VARIANT OF ⟨g⟩, NOT A LETTER OF ANYONE'S ORTHOGRAPHY, and
+    // without this row it survived the fold unchanged, reached a g2p with no rule for it and was DROPPED —
+    // a whole consonant deleted: `ɡato` read *ˈato* in es, `ɡut` *uːt* in de, `luɡanda` *luaːⁿda* in lg.
+    // The input is not exotic: U+0261 is the IPA voiced velar stop, and Wikipedia-derived corpus text is full
+    // of inline pronunciation glosses — 11 mined/attest artifacts carry it and `csharp/goldens/hil.tsv` ships
+    // a row whose INPUT contains one. Verified before adding: U+0261 is never an orthographic input key in any
+    // language declaring a NATIVE_CLASS, so folding it cannot take a reading away from a g2p that had one.
+    ɡ: "g", Ɡ: "G",
 };
 const UNDECOMPOSABLE_RE = new RegExp(`[${Object.keys(UNDECOMPOSABLE).join("")}]`, "gu");
 

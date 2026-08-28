@@ -57,6 +57,26 @@ public class LugandaTests
     [Fact]
     public void TheVelarNasalGeminates() => Assert.Equal("ŋː", LgEngine.PhonemizeWord("ŋŋ"));
 
+    // U+0261 SCRIPT G reads exactly as ASCII ⟨g⟩ does. Two changes get there: the "defensive alias" deleted
+    // from prenasalisable (data-side, shared tree), and the ɡ→g row in Core/HostWord's UNDECOMPOSABLE table,
+    // which is what makes the letter READ rather than merely fail quietly.
+    [Theory]
+    [InlineData("n\u0261a", "ᵑɡa")]        // was ⁿa with the alias, na with it merely deleted
+    [InlineData("an\u0261", "aːᵑɡ")]       // was aːⁿ — the alias's spurious length, and no consonant
+    [InlineData("m\u0261a", "ᵑɡa")]
+    [InlineData("lu\u0261anda", "luɡaːⁿda")]
+    [InlineData("nga", "ᵑɡa")]             // the ASCII spelling, unchanged
+    [InlineData("buganda", "buɡaːⁿda")]
+    public void TheScriptGReadsAsAsciiG(string word, string want) => Assert.Equal(want, Say(word));
+
+    // #1132/2 — the twelve unreachable prenasal digraph rows are deleted; the CODE rule is the single source.
+    [Theory]
+    [InlineData("mb", "ᵐb")] [InlineData("mp", "ᵐp")] [InlineData("mf", "ᵐf")] [InlineData("mv", "ᵐv")]
+    [InlineData("nf", "ᵐf")] [InlineData("nv", "ᵐv")] [InlineData("nd", "ⁿd")] [InlineData("nt", "ⁿt")]
+    [InlineData("nc", "ⁿc")] [InlineData("nj", "ⁿɟ")] [InlineData("nk", "ᵑk")] [InlineData("ng", "ᵑɡ")]
+    public void TheCodeRuleHoldsTheTwelveMappings(string digraph, string ipa) =>
+        Assert.Equal($"aː{ipa}a", LgEngine.PhonemizeWord($"a{digraph}a"));
+
     [Theory]
     // Units + the teens `na`/`n'` connective (elision before the vowel-initial emu).
     [InlineData(7, "musanvu")]
