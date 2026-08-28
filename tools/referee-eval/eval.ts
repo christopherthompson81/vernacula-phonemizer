@@ -8,6 +8,7 @@
  * Usage:  npx tsx tools/referee-eval/eval.ts <zu|si|kk> [--examples N]
  */
 import { existsSync, readFileSync } from "node:fs";
+import { phonemizeAsync } from "../../src/index.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -253,7 +254,14 @@ const ckb = async (w: string): Promise<string> => {
     return (await tagger.tag(w)) || ckbRules(w);
 };
 
-const PHON: Record<string, (w: string) => string | Promise<string>> = {
+/**
+ * ⚠ WHICH PATH THIS TABLE HOLDS IS THE WHOLE OF #1141. Most entries are `phonemizeWord` — the bare g2p — while
+ * the product is `phonemize(text, lang)`, which runs normalization, tokenization and the NATIVISER first. Where
+ * the two disagree the published referee percentage does not describe the product, and the divergence is
+ * invisible from inside either path (#1131 was found this way, not by the referee). EXPORTED so the delta
+ * between the two can be measured rather than assumed.
+ */
+export const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ar,
     // RULE-ONLY (lexicon:false): the shipped path adds an Egyptian short-vowel lexicon MINED FROM kaikki, which
     // shares the Wiktionary tradition with the wikipron-arz referee → evaluating it would be circular.
@@ -439,6 +447,73 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     yue,
     zu,
 };
+/**
+ * WHICH PATH EACH `PHON` ENTRY MEASURES — DERIVED FROM THIS FILE'S OWN IMPORTS, never hand-kept, for the reason
+ * `tools/registry-map.ts` gives about the registry: a hand-maintained list silently rots while the thing it
+ * describes moves.
+ *
+ * ⚠ THIS IS #1141, AND THE ANSWER IS NOT "POINT IT ALL AT `phonemize`". Measured across 170 refereed languages
+ * (35,057 sampled rows): the scored path and the shipped path disagree on 6.67% of rows in 53 languages. But
+ * the disagreement decomposes, and most of it is CORRECT:
+ *   · ~19.6% prosody — `text()` places stress the bare g2p does not (`antoine` → ɑ̃twan vs ɑ̃twˈan);
+ *   · ~8.9% routing — the referee list is written in a script the product re-homes. `cmn`'s list is PINYIN, so
+ *     `phonemize(pinyin, "cmn")` hands the Latin run to ENGLISH and reads `a` as *ˈə*. The comparison is
+ *     meaningless there, not the engine wrong;
+ *   · ~1.1% normalization firing on citation-form artifacts (`69'er` → *nioɡtʁes ɛɐ*);
+ *   · the rest is dominated by SEVENTEEN languages that deliberately score `phonemizeWordRules` — the rules-only
+ *     engine — because the lexicon/neural path was built from the same source as the referee. norwegian.ts,
+ *     danish.ts, afrikaans.ts and bengali.ts all say so in prose: "NON-CIRCULAR (not the lexicon)". Repointing
+ *     those at `phonemize` would score a lexicon against the corpus it was mined from — worse, not better.
+ * So the defect is NOT the path choice. It is that the number never SAID which path it describes, and that no
+ * path exercises the product-only transformations, which is how #1131 hid: `makeNativiser` runs in `text()`
+ * only, so a nativiser defect was invisible to the referee no matter how good the referee was.
+ */
+export type ScoredPath = "rules" | "word" | "engine-text";
+/**
+ * ⚠ HAND-KEPT, AND ONLY BECAUSE IT HAS TO BE. Most entries are derivable from the import symbol below, but
+ * three are hand-written WRAPPERS with no symbol to key on — `arz` is `ar(w, "egyptian", {lexicon:false})`.
+ * A derived list cannot rot; this one can, so `test/referee-eval.test.ts` cross-checks every entry against
+ * the RULE-ONLY / NON-CIRCULAR prose this file already writes beside each such import.
+ */
+const PATH_OVERRIDE: Record<string, ScoredPath> = {
+    arz: "rules", // RULE-ONLY (lexicon:false) — see the note at its PHON entry
+    ps: "rules", // PS_HONEST — psCore over a referee-filtered harakat restore; see the note at the import
+};
+export const PATH_OF: Record<string, ScoredPath> = (() => {
+    const src = readFileSync(fileURLToPath(import.meta.url), "utf8");
+    const key = (alias: string): string | undefined => {
+        // an alias only labels a language if it IS the table's entry for one. `en-GB` is keyed with a hyphen
+        // its identifier cannot carry, and a reserved word takes a trailing underscore (`as_` → `as`), so try
+        // both spellings, case-insensitively.
+        if (alias in PHON) return alias;
+        const bare = alias.replace(/_$/u, "").toLowerCase();
+        return Object.keys(PHON).find((k) => k.replace(/-/gu, "").toLowerCase() === bare);
+    };
+    const out: Record<string, ScoredPath> = {};
+    // ⚠ BOTH LEXICON-FREE SYMBOLS. `phonemizeWordRules` is the common one; `ur` and `ps` expose their
+    // lexicon-free skeleton as `phonemizeWordCore`, and keying only on the first labelled them "word" —
+    // asserting the wrong engine on the very field whose job is to stop that.
+    // ⚠ MATCHED ANYWHERE IN THE IMPORT, not just after `import {`: `ckb` pulls three symbols from one
+    // statement. And ⚠ ONLY IF THE ALIAS IS ITSELF A PHON ENTRY — `ckbRules` is not, which is load-bearing:
+    // `ckb`'s entry is a COMPOSITE (bizroke lexicon → ONNX tagger → rules fallback), not a rules measurement.
+    for (const m of src.matchAll(/phonemizeWord(?:Rules|Core) as ([A-Za-z_$][\w$]*)/gu)) {
+        const k = key(m[1]!);
+        if (k !== undefined) out[k] = "rules";
+    }
+    for (const m of src.matchAll(/^const (\w+) = \(w: string\)[^\n]*\.text\(w\)/gmu)) {
+        const k = key(m[1]!);
+        if (k !== undefined) out[k] = "engine-text";
+    }
+    Object.assign(out, PATH_OVERRIDE);
+    // ⚠ FAIL LOUDLY, NOT CLOSED. This reads its own source and matches TYPE ANNOTATIONS; under any transform
+    // that strips them (a compiled dist, a bundled tools build) every match fails, and an empty map would
+    // silently report every language as the bare word g2p — a wrong answer that looks like a right one.
+    if (Object.keys(out).length === 0)
+        throw new Error("referee-eval: PATH_OF derived nothing — eval.ts source not readable as written");
+    return out;
+})();
+export const pathOf = (lang: string): ScoredPath => PATH_OF[lang] ?? "word";
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 /**
@@ -540,6 +615,16 @@ export function makeFold(
 export interface RefereeResult {
     source: string;
     role: "primary" | "secondary";
+    /** WHICH PATH the numbers below describe — see PATH_OF. Reported so a score is never ambiguous again. */
+    path: ScoredPath;
+    /**
+     * How far the SHIPPED reading is from the one scored, over a deterministic stride sample. Not a quality
+     * metric and not a defect count: a large delta usually means the referee list is not product-shaped (see
+     * PATH_OF's note on `cmn`'s pinyin list) or that the scored path is deliberately the rules engine. It is
+     * the number that was missing when #1131 hid inside it — the eval runs no `normalize` and no
+     * `makeNativiser`, so anything living there is invisible until this line is non-zero and someone looks.
+     */
+    product: { differ: number; compared: number };
     total: number;
     raw: number;
     folded: number;
@@ -592,6 +677,10 @@ export async function evaluate(
     sampleCap = 0, // >0 → evaluate only a deterministic stride sample of this many rows (the floor test uses it to
     // stay fast on huge referees run through slow phonemizers, e.g. en-GB's 76k words × the neural English G2P; the
     // CLI leaves it 0 = full). A uniform stride keeps the folded% a faithful estimate of the whole.
+    // ⚠ LAST, and defaulting off. It was briefly inserted before `sampleCap`, which silently reinterpreted
+    // `evaluate(lang, true, 3000)` in the floor test as withDelta=3000 and sampleCap=0 — a signature change
+    // that type-checks and quietly measures something else.
+    withDelta = false, // compute the product-path delta — CLI only; see RefereeResult.product
 ): Promise<RefereeResult[]> {
     const cfg = CONFIG[lang],
         phon = PHON[lang];
@@ -612,6 +701,10 @@ export async function evaluate(
         }
         let raw = 0,
             folded = 0;
+        let pDiffer = 0,
+            pCompared = 0,
+            pSeen = 0;
+        const pStride = withDelta ? Math.max(1, Math.ceil(pairs.length / 300)) : 0;
         let freqNum = 0,
             freqDen = 0,
             freqCovered = 0;
@@ -637,6 +730,19 @@ export async function evaluate(
                 // has four readings, and the referee licenses each one.
                 .flatMap((ri) => (cfg.parenOptional && /[()]/u.test(ri) ? expandOptional(ri) : [ri]));
             const rawOurs = await phon(w);
+            // ⚠ THE PRODUCT-PATH DELTA (#1141) — folded in HERE so it reuses the reading just computed. Doing
+            // it in a second pass re-invoked the engine for every sampled row, which for `ar` (ONNX
+            // diacritizer), `ckb` (bizroke tagger) and `en` (beam search) meant doubling the model calls.
+            if (withDelta && pStride > 0 && pSeen++ % pStride === 0) {
+                try {
+                    const shipped = (await phonemizeAsync(w, lang)).trim();
+                    pCompared++;
+                    if (rawOurs.trim() !== shipped) pDiffer++;
+                } catch {
+                    // a word the shipped path refuses is NOT counted as compared: including it in the
+                    // denominator would let "0 differ" be printed off zero successful comparisons.
+                }
+            }
             // Under segmentJoin the reference is space-stripped; strip OUR word-separator spaces too (a segmented
             // phonemizer, e.g. Burmese/Thai, joins subwords with a space) so the raw metric compares like with like.
             const ours = cfg.segmentJoin ? rawOurs.replace(/\s+/g, "") : rawOurs;
@@ -668,6 +774,8 @@ export async function evaluate(
         out.push({
             source: ref.source,
             role: ref.role,
+            path: pathOf(lang),
+            product: { differ: pDiffer, compared: pCompared },
             total: pairs.length,
             raw,
             folded,
@@ -689,7 +797,7 @@ async function main(): Promise<void> {
     }
     const exIdx = process.argv.indexOf("--examples");
     const nEx = exIdx >= 0 ? Number(process.argv[exIdx + 1] ?? 25) : 12;
-    for (const r of await evaluate(lang)) {
+    for (const r of await evaluate(lang, false, 0, true)) {
         console.log(
             `\n=== ${lang} vs ${r.source} [${r.role}] (${r.total} words) ===`,
         );
@@ -705,6 +813,23 @@ async function main(): Promise<void> {
         if (r.freqWeighted !== undefined)
             console.log(
                 `frequency-weighted:${(100 * r.freqWeighted).toFixed(1)}%  — token-weighted real-text quality (${r.freqCovered} referee words have a frequency; unbiased by a dictionary-shaped referee)`,
+            );
+        console.log(
+            `scored path:    ${r.path}${
+                r.path === "rules"
+                    ? "  — the rules-only engine, DELIBERATELY: the lexicon/neural path shares a source with the referee"
+                    : r.path === "engine-text"
+                      ? "  — this engine's OWN text(), NOT the registry-wrapped phonemize(): no romanPass/foldPass/withHost, and for en not the neural OOV path"
+                      : "  — the bare word g2p"
+            }`,
+        );
+        if (r.product.compared > 0)
+            console.log(
+                `product delta:  ${r.product.differ}/${r.product.compared} compared rows read differently by phonemize() — ${
+                    r.product.differ === 0
+                        ? "identical here, which is NOT evidence the product-only steps ran: normalize and makeNativiser are simply no-ops on most citation forms, and that silence is where #1131 hid"
+                        : "NOT a defect count — see PATH_OF for the four ordinary causes (prosody, routing, normalization, a deliberately rules-only path) before treating any of it as a bug"
+                }`,
             );
         console.log(
             `residual divergence classes (top ${nEx}, count × folded-form; investigate, don't auto-fix):`,
