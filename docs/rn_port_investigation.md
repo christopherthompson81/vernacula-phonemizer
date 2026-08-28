@@ -177,3 +177,30 @@ it currently gives the wrong answer twice.
     findings                3, all reproduced identically by both engines → FILED (#1135, #1136, #1137)
     ⚠ NO FLEURS             widening (1) is unavailable for rn; the probes carry it, and the golden
                             reaches only four of the nine normalizer steps
+
+## Run 5 — 2026-08-28 07:55 — rebase onto lg + #1134, and the recount
+
+**Question.** #1133 (the lg port) and #1134 (the TS-side fix for lg's ⟨ŋ⟩ finding) both landed while rn was
+in review. rn was branched from the same `main` as lg, not stacked on it, so what does the rebase move?
+
+    git rebase origin/main       3 conflicts, all BOOKKEEPING
+
+The conflicts were exactly the three files two independent ports must both touch, and none of them is code
+that runs: `Bootstrap.cs` (adjacent registration lines — keep both), `ManifestMappingTests.cs` (adjacent
+`[Fact]` blocks — keep both), and `STATUS.md` (the shared counters and the `Ported:` list — union, and the
+lg section kept verbatim as its author rewrote it in Run 5 of that doc).
+
+⚠ **AND THE BASE HAD MOVED UNDER THE FIRST MEASUREMENT, WHICH IS THE REASON TO RE-RUN RATHER THAN TO
+RE-STATE.** #1134 touches `src/languages/luganda/`, `data/languages/luganda/` and `test/` only — no shared
+core — so rn's readings should be untouched. "Should be" is not a measurement, so the whole gate was run
+again on the rebased branch rather than carried over:
+
+    parity rn        200/200 byte-identical, 0 BLOCKED
+    parity fleet     136 languages, 26,827 rows, 0 differ      (135 / 26,627 before lg landed)
+    dotnet test      2,677 passed, 0 failed                     (2,566 before, + lg's cases)
+    differential     4,316 comparisons, 0 differ, 0 throws
+    ⚠ byte-diff of the C# output against the PRE-REBASE run: **0 of 2,158 lines changed**
+
+So the expectation held, and it is now measured rather than assumed. The counters in this doc's Runs 2–3 are
+left at the figures that were true when those runs happened; the current-state numbers are the ones above
+and in `csharp/STATUS.md`.
