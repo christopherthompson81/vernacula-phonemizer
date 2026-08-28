@@ -65,3 +65,34 @@ describe("Nama (Khoekhoe) canonical IPA", () => {
         expect(naq.text("0").trim()).toBe("nul");
     });
 });
+
+// #1140 — BOTH of Nama's diacritic contrasts were being erased before the g2p ran. `nama.jsonc`'s `letters`
+// table declares macron = LONG and circumflex = NASALIZED (annotated there as phonemic), but the accented
+// vowels were outside NATIVE_CLASS, so `makeNativiser` stripped the marks and ⟨ā⟩/⟨â⟩ both arrived as ⟨a⟩.
+// ⚠ naq HAS NO GOLDEN AND NO CORPUS ARTIFACT, so these tests are the entire instrument for this language.
+describe("Nama diacritics — macron is length, circumflex is nasalization (#1140)", () => {
+    const say = (w: string): string => getPhonemizer("naq").text(w).trim();
+
+    test("the macron vowels are LONG, not their bare counterparts", () => {
+        expect(say("hā")).toBe("haː");
+        expect(say("ha")).toBe("ha");
+        expect(say("hā")).not.toBe(say("ha"));
+        expect(say("ǃkhās")).toBe("ᵏǃʰaːs"); // the jsonc's own worked example
+        expect(say("hā")).toBe(say("haa")); // …and length agrees with the doubled-vowel spelling
+    });
+
+    test("the circumflex vowels are NASALIZED, not their bare counterparts", () => {
+        expect(say("hâ")).toBe("hã");
+        expect(say("hâ")).not.toBe(say("ha"));
+        expect(say("ǂgâ")).toBe("ᵏǂã"); // the jsonc's own phonemic examples
+        expect(say("ǀî")).toBe("ᵑ̊ǀˀĩ");
+    });
+
+    test("all ten accented vowels survive the nativiser rather than folding to their base", () => {
+        for (const [acc, bare] of [
+            ["ā", "a"], ["ē", "e"], ["ī", "i"], ["ō", "o"], ["ū", "u"],
+            ["â", "a"], ["ê", "e"], ["î", "i"], ["ô", "o"], ["û", "u"],
+        ] as const)
+            expect(say(`h${acc}`), `⟨${acc}⟩ folded to ⟨${bare}⟩`).not.toBe(say(`h${bare}`));
+    });
+});

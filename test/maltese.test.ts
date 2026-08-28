@@ -458,3 +458,21 @@ describe("the clock guard covers the timezone marker too (#1102)", () => {
         expect(normalizeMaltese("88.08 biljun")).toBe("88 punt 08 biljun"); // the note's own counter-example
     });
 });
+
+// #1140 — ⟨à ò⟩ were declared in `maltese.jsonc` but missing from NATIVE_CLASS, which under-claimed two
+// letters the g2p has rules for. ⚠ THIS MOVES NO OUTPUT, and that was measured before the class was changed:
+// the grave vowels read the SAME QUALITY as their plain counterparts, so the fold was reaching the right
+// answer by the wrong route. Pinned so the equality is a stated property rather than a coincidence.
+describe("Maltese grave vowels — claimed by the class, same quality as their plain counterparts (#1140)", () => {
+    test("⟨à ò⟩ read as ⟨a o⟩ do, on the shipped path", () => {
+        expect(phonemize("kafà", "mt")).toBe(phonemize("kafa", "mt"));
+        expect(phonemize("kafò", "mt")).toBe(phonemize("kafo", "mt"));
+        expect(phonemize("kafà", "mt")).toBe("kafa");
+        expect(phonemize("kafò", "mt")).toBe("kafɔ");
+    });
+
+    test("the productive ⟨-tà⟩ nominalizer, which is why the letter is in the table at all", () => {
+        expect(phonemize("attività", "mt")).toBe("attɪvɪta");
+        expect(phonemize("università", "mt")).toBe("unɪvɛrsɪta");
+    });
+});

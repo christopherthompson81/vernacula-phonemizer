@@ -125,12 +125,18 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'\u00b7")})|(\\d+(?:,\\d+)?
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
  * is no longer also deciding where the script boundary falls.
  *
- * ⚠ ḷ Ḷ ARE DELIBERATELY ABSENT: the g2p has no rule for them, and drops them outright —
- * listing them here would promise a reading that does not exist. NATIVE_CLASS is a claim ABOUT
- * THE G2P, and `test/native-inventory.test.ts` measures it character by character rather than
- * trusting it.
+ * ⚠ ḷ Ḷ ARE HERE, AND THE NOTE THAT USED TO SIT HERE SAID THE OPPOSITE — that the g2p had no rule for them
+ * and "drops them outright", so listing them would promise a reading that does not exist. Both halves were
+ * false (#1140). The g2p HAS a rule: `asturian.jsonc` maps the digraph ⟨ḷḷ⟩ → t͡ʂ, the *che vaqueira* of
+ * western Asturian, which is a DIFFERENT PHONEME from ⟨ll⟩ → ʎ. And the letter was never dropped — a token
+ * this class rejects is FOLDED, and `core/hostWord.ts` strips the under-dot, so ⟨ḷḷ⟩ arrived as ⟨ll⟩ and the
+ * contrast was silently collapsed: `Ḷḷena` read *ʎena*, `vaḷḷes` *baʎes*, `Munieḷḷos` *munjeʎos*. Six words in
+ * this language's own mined corpus carried it; the golden carries none, which is why 200 rows could not see it.
+ *
+ * NATIVE_CLASS is a claim ABOUT THE G2P, and `test/native-inventory.test.ts` measures it both ways now — the
+ * OVER-claim (a listed letter the g2p drops) and, since #1140, the UNDER-claim this comment was.
  */
-const NATIVE_CLASS = "[a-zñáéíóúüïḥA-ZÑÁÉÍÓÚÜÏḤ'·]";
+const NATIVE_CLASS = "[a-zñáéíóúüïḥḷA-ZÑÁÉÍÓÚÜÏḤḶ'·]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class AsturianPhonemizer implements Phonemizer {

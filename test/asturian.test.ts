@@ -132,3 +132,30 @@ describe("Asturian text normalization", () => {
         expect(ast.text("88°23' S")).toBe("ot͡ʃenta i ot͡ʃo ɡɾaos bentitɾes minutos s");
     });
 });
+
+// #1140 — the che vaqueira. `asturian.jsonc` maps ⟨ḷḷ⟩ → t͡ʂ, a DIFFERENT phoneme from ⟨ll⟩ → ʎ, but ḷ was left
+// out of NATIVE_CLASS, so `makeNativiser` stripped the under-dot and ⟨ḷḷ⟩ arrived as ⟨ll⟩. The contrast was
+// silently collapsed — and the module's own comment claimed the letter was "dropped outright", which it never was.
+// ⚠ ASSERTED THROUGH `phonemize`, the shipped path: `phonemizeWord` never saw the fold, so a word-level test
+// passed while the product was wrong. The golden carries 0 of these; six words of the mined corpus carry them.
+describe("Asturian ⟨ḷḷ⟩ — the che vaqueira is not ⟨ll⟩ (#1140)", () => {
+    test("⟨ḷḷ⟩ → t͡ʂ, and ⟨ll⟩ → ʎ stays what it was", () => {
+        expect(phonemize("ḷḷobu", "ast")).toBe("t͡ʂobu");
+        expect(phonemize("llobu", "ast")).toBe("ʎobu");
+        expect(phonemize("ḷḷobu", "ast")).not.toBe(phonemize("llobu", "ast"));
+    });
+
+    test("the six words of this language's own mined corpus that carry it", () => {
+        for (const [w, want] of [
+            ["Ḷḷena", "t͡ʂena"], ["ḷḷendáu", "t͡ʂendau"], ["ḷḷindes", "t͡ʂindes"],
+            ["Munieḷḷos", "munjet͡ʂos"], ["vaḷḷes", "bat͡ʂes"], ["Viḷḷapedre", "bit͡ʂapedɾe"],
+        ] as const)
+            expect(phonemize(w, "ast"), w).toBe(want);
+    });
+
+    test("a lone ⟨ḷ⟩ still reads, so admitting the letter is not an over-claim", () => {
+        expect(phonemize("ḷobu", "ast")).toBe("lobu");
+        // …and a genuinely foreign letter still folds
+        expect(phonemize("Łódź", "ast")).toBe("lodθ");
+    });
+});
