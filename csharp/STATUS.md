@@ -1678,7 +1678,7 @@ Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (
   figure, worse than either the missing word or the wrong one. Caught in review, not by the gate. 0 golden
   rows moved, in either engine. ⚠ THE SHARED TIER STILL DOES THE OLD THING for `517 km3` — pre-existing,
   fleet-wide, filed as #1145.
-- ~~**Step 3's space-grouping arm eats an ASCII exponent digit.**~~ **FIXED (#1136 → PR #1146).** `km2 517`
+- ~~**Step 3's space-grouping arm eats an ASCII exponent digit.**~~ **FIXED (#1136 → PR #1147).** `km2 517`
   became `km2517` — exponent glued to the number (517 read as 2,517), space gone, and **`km` left in the
   phoneme stream raw**. ⚠ **THE GUARD THE ISSUE PROPOSED WOULD HAVE BROKEN A REAL NUMBER**: `R2 500` IS a
   grouped thousand with a currency prefix, and "a head may not follow a letter" splits it into *two* — the
