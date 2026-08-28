@@ -38,9 +38,15 @@ export function phonemizeWord(word: string): string {
         const sp = SPECIAL.find((k) => w.startsWith(k, i));
         if (sp) { out += G[sp] ?? "ⁿ"; i += sp.length; continue; }
         const c = w[i]!;
-        // 2. PRENASALISATION: ⟨n m⟩ + an obstruent → a place-assimilated superscript nasal; the obstruent is then
+        // 2. PRENASALISATION: ⟨n m ŋ⟩ + an obstruent → a place-assimilated superscript nasal; the obstruent is then
         //    scanned normally, so its labialisation (⟨dw⟩→dʷ) and gemination survive (ndw → ⁿdʷ).
-        if ((c === "n" || c === "m") && PRENASAL.has(w[i + 1] ?? "")) {
+        //    ⚠ ⟨ŋ⟩ TRIGGERS THIS TOO, and that is CONSERVATION, not a new rule (#1131). Before ⟨ŋ⟩ had a grapheme
+        //    row it fell outside NATIVE_CLASS and the nativiser folded it to ⟨n⟩, so ⟨ŋk⟩ reached this rule as
+        //    ⟨nk⟩ and read ᵑk. Giving the letter a row would have taken that away — ⟨ŋk⟩ would split into two
+        //    segments while ⟨nk⟩ stayed ᵑk, re-opening the SAME one-phoneme-two-readings split this fix closes,
+        //    displaced to the pre-obstruent slot. ⟨ŋ⟩ is not in `prenasalisable`, so ⟨ŋŋ⟩ still falls through to
+        //    the gemination rule below.
+        if ((c === "n" || c === "m" || c === "ŋ") && PRENASAL.has(w[i + 1] ?? "")) {
             const x = w[i + 1]!;
             out += "bpfv".includes(x) ? "ᵐ" : "kg".includes(x) ? "ᵑ" : "ⁿ";
             i += 1;

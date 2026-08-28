@@ -21,7 +21,7 @@
 
     "convention": {
         "vowels": "5 vowels a e i o u; DOUBLING = LENGTH (aa→aː, ee→eː, ii→iː, oo→oː, uu→uː)",
-        "prenasal": "⟨mb mp nf nv nd nt nc nj nk ng⟩ → ᵐb ᵐp ᵐf ᵐv ⁿd ⁿt ⁿc ⁿɟ ᵑk ᵑɡ (single onset units)",
+        "prenasal": "⟨mb mp nf nv nd nt nc nj nk ng⟩ → ᵐb ᵐp ᵐf ᵐv ⁿd ⁿt ⁿc ⁿɟ ᵑk ᵑɡ (single onset units); ⟨ŋ⟩ triggers it too (⟨ŋk⟩ → ᵑk, as ⟨nk⟩ does)",
         "velarNasal": "⟨ng'⟩ → ŋ (distinct from ⟨ng⟩ → ᵑɡ); ⟨nng'⟩ → ŋː; the literal letter ⟨ŋ⟩ → ŋ, ⟨ŋŋ⟩ → ŋː; ⟨ny⟩ → ɲ, ⟨nny⟩ → ɲː",
         "gemination": "a doubled consonant is a GEMINATE Cː (bbiri→bːiri, kitto→citːo) — handled in code",
         "labialisation": "⟨Cw⟩ → Cʷ (bw→bʷ, gw→ɡʷ, …)",

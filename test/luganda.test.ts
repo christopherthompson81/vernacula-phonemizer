@@ -45,6 +45,20 @@ describe("Luganda canonical IPA — greedy g2p + gemination + prenasal lengtheni
         expect(phonemize("Łódź", "lg")).toBe("lodz");
     });
 
+    // ⚠ THE PRE-OBSTRUENT SLOT, which the grapheme row alone would have REGRESSED. While ⟨ŋ⟩ was folded to ⟨n⟩
+    // it reached the prenasalisation rule, so ⟨ŋk⟩ read ᵑk; giving the letter its own row took that away and
+    // split it into two segments, re-opening the one-phoneme-two-readings gap #1131 closes — in a position the
+    // mined corpus (which carries only ⟨ŋŋ⟩) cannot witness. ⟨ŋ⟩ is therefore a prenasalisation trigger too.
+    test("⟨ŋ⟩ before an obstruent prenasalises, exactly as the ⟨n⟩ spelling does", () => {
+        expect(phonemize("ŋka", "lg")).toBe(phonemize("nka", "lg"));
+        expect(phonemize("ŋka", "lg")).toBe("ᵑka");
+        expect(phonemize("ŋga", "lg")).toBe(phonemize("nga", "lg"));
+        expect(phonemize("ŋga", "lg")).toBe("ᵑɡa");
+        // …and the trigger must NOT swallow the geminate: ⟨ŋ⟩ is not prenasalisable, so ⟨ŋŋ⟩ stays ŋː
+        expect(phonemizeWord("ŋŋ")).toBe("ŋː");
+        expect(phonemize("ŋkuŋŋaana", "lg")).toBe(phonemize("nkuŋŋaana", "lg"));
+    });
+
     test("GEMINATION (doubled → Cː) and prenasal + LABIALISATION (⟨ndw⟩ → ⁿdʷ)", () => {
         expect(phonemizeWord("bbiri")).toBe("bːiɾi"); // "two" — ⟨bb⟩ → bː; ⟨r⟩ → ɾ
         expect(phonemizeWord("kitto")).toBe("kitːo"); // ⟨tt⟩ → tː

@@ -111,3 +111,73 @@ Tests added to test/luganda.test.ts (incl. 60 = nkaaga and the two attested hund
 `socket hang up` (never retrievable this session); salanguages.com + sesotho.web.za `ECONNREFUSED`; Quizlet 403;
 the Peace Corps *Sepedi* PDF 403. WebFetch's summariser also silently truncated the Omniglot tables on the first
 pass — asking for an explicit "N = form" list per numeral was what finally got verbatim rows out of it.
+
+## Run 5 — 2026-08-28 — ⟨ŋ⟩: the fold, not the drop (#1131, PR #1134)
+
+**Question.** #1131 claims the `NATIVE_CLASS` comment ("the g2p has no rule for it, and drops it outright") is
+true of `phonemizeWord` and false of `text()`. Does it reproduce, and what does the shipped path actually say?
+
+Command: `npx tsx -e 'phonemizeWord(w) / phonemize(w,"lg")'` over a ⟨ŋ⟩ word list.
+
+```
+ŋŋamba       phonemizeWord aːᵐba     phonemize nːaːᵐba
+ng'amba      phonemizeWord ŋaːᵐba    phonemize ŋaːᵐba
+ziseŋŋendo   phonemizeWord ziseeːⁿdo phonemize zisenːeːⁿdo
+```
+
+Reproduces exactly. The letter is not dropped on the shipped path, it is REPLACED — `makeNativiser` →
+`core/hostWord.ts` `UNDECOMPOSABLE` maps ŋ → n — so one phoneme got two readings depending on whether the writer
+spelled it ⟨ŋ⟩ or ⟨ng'⟩. **Implication:** the fix is a grapheme row PLUS the class, not either alone; the row
+without the class is dead code, because the fold runs first.
+
+**Corpus counts (the reason no golden can see this).** `csharp/goldens/lg.tsv` column 1 carries ZERO literal ⟨ŋ⟩
+(the ŋ present in column 2 is IPA output from ⟨ng'⟩). `tools/corpus/mined/lg.jsonc` carries 4; FLEURS lg_ug 2.
+So the regenerated golden moved **0 rows** — confirmed by rerunning `gen_parity_goldens.mts lg` — and the pinned
+test is the entire instrument. Measured before/after on a `main` worktree rather than inferred:
+
+| word | before | after |
+|---|---|---|
+| `eŋŋanda` | `enːaːⁿda` | `eŋːaːⁿda` |
+| `enkuŋŋaana` | `eːᵑkunːaːna` | `eːᵑkuŋːaːna` |
+| `nkuŋŋaana` | `ᵑkunːaːna` | `ᵑkuŋːaːna` |
+| `okukuŋŋaanya` | `okukunːaːɲa` | `okukuŋːaːɲa` |
+| `ziseŋŋendo` | `zisenːeːⁿdo` | `ziseŋːeːⁿdo` |
+
+All four mined words are real velar-nasal vocabulary that was reading alveolar.
+
+### The regression the fix itself introduced — caught in review, not by any gate
+
+Giving ⟨ŋ⟩ a grapheme row **took away** a reading it used to get for free. While the letter was folded to ⟨n⟩ it
+reached the prenasalisation rule, so ⟨ŋk⟩ read `ᵑk`. With a row of its own it stopped triggering that rule:
+
+```
+ŋka  ŋka   vs  nka  ᵑka        <- after the row, BEFORE the trigger fix
+ŋga  ŋɡa   vs  nga  ᵑɡa
+```
+
+That is the *same* one-phoneme-two-readings defect #1131 is about, displaced to the pre-obstruent slot — and
+invisible to every instrument here, because the mined corpus carries only ⟨ŋŋ⟩ and no ⟨ŋ⟩+obstruent. **Negative
+result worth keeping: a fix that adds an orthographic row must ask what the fold was silently doing for that
+letter beforehand.** Resolved by adding ⟨ŋ⟩ to the prenasalisation trigger — conservation of the shipped reading,
+not a new linguistic claim. ⟨ŋ⟩ is deliberately NOT added to `prenasalisable`, so ⟨ŋŋ⟩ still falls to gemination.
+
+### Fleet-wide: how general is the under-claim?
+
+`native-inventory.test.ts` measures only the OVER-claim (a listed letter the g2p drops). The under-claim — a
+letter the g2p HAS a rule for, sitting outside the class, folded before it arrives — is silent, because a folded
+letter still makes sound. Measured across every engine declaring a `NATIVE_CLASS`:
+
+- naive "language mentions the character anywhere": **295** — useless, dominated by the character appearing as an
+  IPA *output* value.
+- restricted to characters used as *input keys* (jsonc object keys, `c === "x"` comparisons): **29**, in 18
+  languages.
+- probing 15 of those for the symptom: all 15 fold. **But folding is CORRECT for most** — ⟨ɛ⟩ genuinely is not
+  Welsh orthography, and `mto`'s ð turned out to be the *output* of a lenition rule (`ada` → `aða`).
+
+So the probe cannot self-adjudicate: separating "wrongly folded" from "correctly folded" needs per-language
+judgement about whether the key is orthographic input or an IPA-side table key. **Confirmed genuine: `ak`.**
+`src/languages/akan/akan.ts:114` has `if (c === "ŋ") { out.push("ŋ"); … }` with a comment saying the literal ⟨ŋ⟩
+is a deliberate kaikki-sourced passthrough, while `akan.ts:193` `NATIVE_CLASS = "[A-Za-zɛɔƐƆ̃]"` excludes it —
+so `phonemize("ŋa","ak")` → `na`, byte-identical to `phonemize("na","ak")`, and that rule is dead on the shipped
+path. Filed separately; `ak` IS ported to C# with a golden, so it needs the full TS→golden→C# cycle rather than a
+ride-along on this PR.
