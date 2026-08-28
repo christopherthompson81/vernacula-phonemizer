@@ -753,10 +753,35 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // Currency keys are an ALTERNATION, not a character class: a class holds only single characters, which
     // would exclude letter-code currencies (`zł`, `PLN`, `USD`). Longest first so a two-letter code is not
     // shadowed by a one-letter one, and letter-bounded on both sides so a bare code cannot match inside a word.
+    /**
+     * ⚠ A COMPOUND KEY'S LETTERS MAY BE SEPARATED FROM ITS SIGN BY A SPACE, and until this was written the
+     * key could not match the shape it was declared for. `US$` is declared by 36 language layers; Kirundi's
+     * corpus writes all three of its instances as `US $ 4,000`, with the space — which the literal key
+     * missed, so the bare `$` key claimed the amount and `US` was left to reach the g2p as the WORD *us*.
+     * That is half of the very defect the compound key exists to fix, and the language layer that declared
+     * it recorded the defect as closed (#1137).
+     * ⚠ ONLY AT THE LETTER→SIGN SEAM, and only in that direction: the optional separator is inserted where a
+     * run of letters is followed by a run of non-letters, so `US$`/`AUD$`/`CN¥` gain it and an all-letter
+     * code (`PLN`, `zł`, `Frw`) is untouched — there is no seam inside a word, and admitting one would let
+     * a key match across a space that separates two real tokens.
+     * ⚠ AND THE LETTER RUN MUST BE AT LEAST TWO LONG, WHICH IS NOT TIDINESS — a ONE-letter code is short
+     * enough to be a WORD. Afrikaans declares `U$`, and ⟨U⟩ is its capitalised polite second-person pronoun:
+     * widening that key ate the pronoun and re-read a plain dollar sum as a US one, `U $50 skenking` →
+     * *fˈəiftəχ **fˈiə ˈɛs** dˈɔlər skˈɛŋkəŋ*, "fifty VS-dollar donation" with the "you" gone. `{2,}` keeps
+     * every compound key declared today (`US$ AS$ AUD$ CN¥ HK$ NZ$ VS$`) and excludes exactly that one.
+     * ⚠ AND THE ARMS STILL REQUIRE A NUMBER, so a bare `US $` in prose cannot match: `curBefore`/`curAfter`
+     * bind the key to an adjacent figure, which is what keeps this from claiming the letters of any sentence
+     * that happens to end before a dollar sign.
+     */
+    const escapeKey = (k: string): string => k.replace(/[$.*+?^${}()|[\]\\]/gu, "\\$&");
+    const curKey = (k: string): string => {
+        const seam = /^(\p{L}{2,})(\P{L}+)$/u.exec(k);
+        return seam ? `${escapeKey(seam[1]!)}${OPT_SEP}${escapeKey(seam[2]!)}` : escapeKey(k);
+    };
     const curKeys = d.currency
         ? Object.keys(d.currency)
               .sort((a, b) => b.length - a.length)
-              .map((s) => s.replace(/[$.*+?^${}()|[\]\\]/gu, "\\$&"))
+              .map(curKey)
               .join("|")
         : "";
     // ⚠ THE BOUNDARY GUARDS ASSUME SPACES BETWEEN WORDS, and Chinese and Japanese have none — so the ordinary
@@ -1015,7 +1040,11 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // inserted before the magnitude while the written one stayed put. Reported by the Nepali run,
         // whose corpus writes `$1000 डलर`.
         const money = (num: string, mag: string | undefined, sym: string, rest: string, magFirst = false): string => {
-            const forms = d.currency![sym]!;
+            // ⚠ THE MATCHED TEXT IS NOT ALWAYS THE DECLARED KEY. A compound key may match with a separator
+            // at its letter→sign seam (`US $` for the key `US$` — see `curKey`), so the table is consulted
+            // with the literal first and with the seam closed second. Indexing on the literal alone threw
+            // on the very shape the seam was opened for.
+            const forms = d.currency![sym] ?? d.currency![sym.replace(/[\s\u200b\u200c]+/gu, "")]!;  // ZWSP, ZWNJ
             const already = saidAfter(forms);
             // ⚠ `magFirst` KEEPS THE MAGNITUDE AGAINST ITS NUMBER for a `magnitudePrecedes` language. Without
             // it the postposed-currency branch below would emit `290 miliyari CUR` — the right adjacency but

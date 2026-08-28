@@ -522,6 +522,8 @@ public static class NormalizeSymbols
          * which already means "this language's word boundaries are not spaces".
          */
         var OPT_SEP = d.UnspacedScript ? "[\\s\u200b\u200c]?" : "\\s?";
+        // The separators a compound key's seam may carry, for closing it again on lookup. Mirrors OPT_SEP.
+        var SEAM_SEPS = JsRegex.Compile("[\\s\\u200b\\u200c]+", "gu");  // ZWSP, ZWNJ
         //
         // ⚠ LONGEST FIRST: a shorter magnitude is often a prefix of a longer inflected one, and in declaration
         // order the short form matches first and strands the suffix. ⚠ `\s*`, NOT `\s+` — Chinese and Japanese
@@ -552,8 +554,25 @@ public static class NormalizeSymbols
         // Currency keys are an ALTERNATION, not a character class: a class holds only single characters, which
         // would exclude letter-code currencies (`zł`, `PLN`, `USD`). Longest first so a two-letter code is not
         // shadowed by a one-letter one, and letter-bounded on both sides so a bare code cannot match inside a word.
+        // ⚠ A COMPOUND KEY'S LETTERS MAY BE SEPARATED FROM ITS SIGN BY A SPACE, and the literal key could not
+        // match the shape it was declared for: `US$` is declared by 36 language layers, and Kirundi's corpus
+        // writes all three of its instances as `US $ 4,000` — so the bare `$` claimed the amount and `US`
+        // reached the g2p as the WORD *us* (#1137).
+        // ⚠ ONLY AT THE LETTER→SIGN SEAM: the optional separator goes where a run of letters is followed by a
+        // run of non-letters, so `US$`/`AUD$`/`CN¥` gain it and an all-letter code (`PLN`, `zł`) does not —
+        // there is no seam inside a word, and admitting one would let a key match across a real token gap.
+        // ⚠ THE LETTER RUN MUST BE AT LEAST TWO LONG: a ONE-letter code is short enough to be a WORD.
+        // Afrikaans declares `U$`, and ⟨U⟩ is its capitalised polite second-person pronoun — widening that
+        // key ate the pronoun and re-read a plain dollar sum as a US one. `{2,}` keeps every compound key
+        // declared today (`US$ AS$ AUD$ CN¥ HK$ NZ$ VS$`) and excludes exactly that one.
+        var seam = JsRegex.Compile("^(\\p{L}{2,})(\\P{L}+)$", "u");
+        string CurKey(string k)
+        {
+            var m = seam.Match(k);
+            return m.Success ? EscCur(m.Groups[1].Value) + OPT_SEP + EscCur(m.Groups[2].Value) : EscCur(k);
+        }
         var curKeys = d.Currency is not null
-            ? string.Join("|", d.Currency.Keys.OrderByDescending(s => s.Length).Select(EscCur))
+            ? string.Join("|", d.Currency.Keys.OrderByDescending(s => s.Length).Select(CurKey))
             : "";
         // ⚠ THE BOUNDARY GUARDS ASSUME SPACES BETWEEN WORDS, and Chinese and Japanese have none, so the ordinary
         // case is the one they reject. `UnspacedScript` narrows the guard from "any letter" to "a letter that
@@ -700,7 +719,12 @@ public static class NormalizeSymbols
             // spells the currency noun, emitting the word again doubles it.
             string Money(string num, string? mag, string sym, string rest, bool magFirst = false)
             {
-                var forms = d.Currency![sym];
+                // ⚠ THE MATCHED TEXT IS NOT ALWAYS THE DECLARED KEY — a compound key may match with a
+                // separator at its letter→sign seam (`US $` for the key `US$`), so the table is consulted
+                // with the literal first and with the seam closed second.
+                var forms = d.Currency!.TryGetValue(sym, out var litForms)
+                    ? litForms
+                    : d.Currency![SEAM_SEPS.Replace(sym, "")];
                 var already = SaidAfter(forms);
                 // ⚠ `magFirst` KEEPS THE MAGNITUDE AGAINST ITS NUMBER for a MagnitudePrecedes language. The
                 // POSTPOSED branch below would otherwise emit `290 miliyari CUR` — right adjacency, wrong

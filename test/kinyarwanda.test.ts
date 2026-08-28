@@ -143,7 +143,12 @@ describe("Kinyarwanda text normalization", () => {
 
     test("currency — PREFIXED, and the ISO codes are keys too", () => {
         expect(N("$1,000")).toBe("amadolari 1000");
-        expect(N("US $ 115,600,000")).toBe("US amadolari 115600000");
+        // ⚠ AND THIS LINE PINNED THE DEFECT AS THE ANSWER TOO (#1137). The compound key `US$` was matched as
+        // a LITERAL, so the spaced form the corpus writes never reached it: the bare `$` claimed the amount
+        // and `US` was left to reach the g2p as the WORD *us*. The assertion froze that. A compound key now
+        // admits the tier's optional separator at its letter→sign seam.
+        expect(N("US $ 115,600,000")).toBe("amadolari 115600000");
+        expect(N("US$115,600,000")).toBe("amadolari 115600000");   // the unspaced form, unchanged
         expect(N("Rwf120,250")).toBe("amafaranga y'u Rwanda 120250");
         // ⚠ THIS LINE USED TO PIN THE DEFECT AS THE ANSWER. `miliyari amafaranga y'u Rwanda 290` is the
         // currency noun landing BETWEEN the magnitude and the count it belongs to — "billion francs

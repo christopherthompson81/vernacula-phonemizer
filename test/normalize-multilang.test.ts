@@ -247,6 +247,39 @@ describe("shared symbol normalizer (core)", () => {
         expect(n("$5 million")).toBe("5 million dollars");
         expect(n("$1")).toBe("1 dollar");
     });
+
+    // ⚠ A COMPOUND CURRENCY KEY MUST MATCH ACROSS THE SPACE ITS OWN CORPUS WRITES (#1137). `US$` is declared
+    // by 36 language layers, and Kirundi's corpus writes all three of its instances as `US $ 4,000` — which
+    // the literal key missed, so the bare `$` claimed the amount and `US` reached the g2p as the WORD *us*.
+    // That is half of the defect the compound key exists to fix, and the layer that declared it had recorded
+    // the defect as closed.
+    test("a compound currency key matches with a separator at its letter→sign seam", () => {
+        const n = makeSymbolNormalizer({
+            currency: { "US$": ["US dollars"], $: ["dollars"] },
+            currencyPrefix: true,
+        });
+        // the shape the key was declared for, and the shape the corpus actually writes. ⚠ The operand is
+        // UNGROUPED here on purpose: the tier does not de-group (each language's own layer does, before
+        // calling it), so a grouped figure would make this test about grouping rather than about the seam.
+        expect(n("US$4000")).toBe("US dollars 4000");
+        expect(n("US $ 4000")).toBe("US dollars 4000");
+        expect(n("US $4000")).toBe("US dollars 4000");
+        // the bare key is untouched, and still loses to the longer one
+        expect(n("$4000")).toBe("dollars 4000");
+        // ⚠ ONLY AT THE LETTER→SIGN SEAM: an all-letter code has no seam, so a space cannot be admitted
+        // inside it — otherwise a key would match across the gap between two real tokens.
+        const code = makeSymbolNormalizer({ currency: { USD: ["dollars"] }, currencyPrefix: true });
+        expect(code("USD 400")).toBe("dollars 400");
+        expect(code("US D 400")).toBe("US D 400");
+        // ⚠ AND THE ARMS STILL REQUIRE A NUMBER, so a bare mention in prose cannot match
+        expect(n("the US $ sign")).toBe("the US $ sign");
+        // ⚠ A ONE-LETTER CODE IS SHORT ENOUGH TO BE A WORD, so it does NOT gain the seam. Afrikaans declares
+        // `U$` and ⟨U⟩ is its capitalised polite second-person pronoun: widening that key ate the pronoun and
+        // re-read a plain dollar sum as a US one.
+        const one = makeSymbolNormalizer({ currency: { U$: ["VS-dollar"], $: ["dollar"] }, currencyPrefix: true });
+        expect(one("U$50")).toBe("VS-dollar 50");   // the unspaced key still works
+        expect(one("U $50")).toBe("U dollar 50");   // the pronoun survives, and the sum is a plain dollar
+    });
 });
 
 describe("language-level symbol normalization", () => {
