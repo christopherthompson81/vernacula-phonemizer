@@ -84,7 +84,7 @@ counts small enough that the probes are doing the real work.
 ## Run 3 — 2026-08-28 07:32 — the whole-fleet gate
 
 `dotnet run --project csharp/tools/parity` → **135 languages byte-identical, 26,627 rows ok, 0 differ, 0
-BLOCKED**; `dotnet test` → **2,561 passed, 0 failed** (78 new `KirundiTests` cases + the
+BLOCKED**; `dotnet test` → **2,566 passed, 0 failed** (84 new `KirundiTests` cases + the
 `KirundiManifestIsFullyMapped` structural check).
 
 ## Run 4 — 2026-08-28 07:34 — reading for correctness
@@ -135,7 +135,8 @@ space-grouped-thousands arm matches `2 517` inside `km2 517` — head `2`, block
 The exponent digit is glued onto the number, the figure is read as 2,517 instead of 517, and `km` reaches
 the phoneme stream RAW — which is the very leak step 4 exists to close. Same for `km3 517`. Also ×0 in the
 corpus (all four corpus instances write the superscript), so latent; the fix is a letter-boundary guard on
-the grouping head, and it belongs in the TS with a test.
+the grouping head, and it belongs in the TS with a test. ⚠ AND IT GENERALISES PAST UNITS — the lookbehind
+admits any preceding LETTER, so `R2 500` → `R2500` too.
 
 ### FINDING 3 (#1137) — the `US$` compound key cannot match any of the three shapes it was declared for
 
@@ -171,7 +172,7 @@ it currently gives the wrong answer twice.
     parity rn               200/200 byte-identical, 0 BLOCKED — first run
     parity fleet            135 languages, 26,627 rows, 0 differ
     differential            4,316 comparisons (sync + async), 0 differ, 0 throws
-    dotnet test             2,561 passed, 0 failed
+    dotnet test             2,566 passed, 0 failed
     leak sweep              0 of 2,158 outputs carry a digit or an unread symbol
     findings                3, all reproduced identically by both engines → FILED (#1135, #1136, #1137)
     ⚠ NO FLEURS             widening (1) is unavailable for rn; the probes carry it, and the golden

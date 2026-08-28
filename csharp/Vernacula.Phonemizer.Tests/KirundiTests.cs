@@ -98,6 +98,20 @@ public class KirundiTests
     [InlineData("Km 1,965", "ibirometero 1965")]
     // ⚠ THE SPACE IS MANDATORY: the unspaced shape means something else entirely.
     [InlineData("km2 ni ikimenyetso", "km2 ni ikimenyetso")]
+    // ⚠ PINNED AS THEY SHIP, NOT AS THE FILE'S PROSE READS — both are filed, both are ×0 in the corpus, and
+    // a TS fix must meet a failing assertion here rather than change rn silently.
+    // #1135: the alternation admits `³` but the callback maps EVERY exponent to the square word, so a cube
+    // is ANNOUNCED as a square — while the tier, which honours the same file's "no cube word is declared",
+    // leaves `517 km³` as `ibirometero³ 517`. One construct, three readings.
+    [InlineData("km³ 517", "ibirometero kwadarato 517")]
+    [InlineData("(233/km³)", "(233 kuri kirometero kwadarato)")]
+    [InlineData("517 km³", "ibirometero³ 517")]
+    // #1136: step 3's space-grouping arm runs FIRST and its lookbehind is satisfied by a preceding LETTER,
+    // so it claims `2 517` inside `km2 517` — the figure becomes 2,517 and `km` leaks raw, the exact leak
+    // step 4's mandatory space exists to close. ⚠ IT GENERALISES PAST UNITS: any letter+digit before a
+    // three-digit block, `R2 500` included.
+    [InlineData("km2 517", "km2517")]
+    [InlineData("R2 500", "R2500")]
     // A UNIT AS A BARE DENOMINATOR takes the class-7 SINGULAR, where a quantity takes the class-8 plural.
     [InlineData("(233/km²)", "(233 kuri kirometero kwadarato)")]
     [InlineData("3372 hab/km²", "3372 hab kuri kirometero kwadarato")]

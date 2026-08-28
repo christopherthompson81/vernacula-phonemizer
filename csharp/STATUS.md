@@ -1664,7 +1664,8 @@ Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (
 - **Step 3's space-grouping arm eats an ASCII exponent digit.** Step 4's comment anticipates `km2` and makes
   its space mandatory, but step 3 runs FIRST and matches `2 517` inside `km2 517` (the lookbehind is
   satisfied by the preceding `m`): → `km2517`, the figure reads as 2,517 instead of 517 and **`km` reaches
-  the phoneme stream raw** — the very leak step 4 exists to close. ×0 in corpus — latent.
+  the phoneme stream raw** — the very leak step 4 exists to close. ⚠ It generalises past units (`R2 500` →
+  `R2500`). ×0 in corpus — latent.
 - **The `US$` compound key cannot match any of the three shapes it was declared for**, and this one is
   **LIVE**. It claims `US$4,000` but not `US $ 4,000`, which is how all three corpus instances are written,
   so `US` still reaches the g2p as the word *us* — the second half of the defect the TS header's own table
