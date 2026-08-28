@@ -49,6 +49,17 @@ export function setScriptReader(f: ScriptReader): void {
  */
 const hosts: string[] = [];
 
+/**
+ * How deeply nested the current render is: 1 at the top-level call, ≥2 inside a delegated foreign run.
+ * ⚠ THE TRACE RECORDER GATES ON THIS (#1150) rather than counting delegations itself, because this stack is
+ * pushed by the registry wrapper for EVERY language — including the four that hand-roll their tokenizer loop
+ * and never reach `assembleClauses`. Counting delegations missed exactly those, and a nested engine under an
+ * untraced host then claimed the recording.
+ */
+export function hostDepth(): number {
+    return hosts.length;
+}
+
 export function pushHost(lang: string): void {
     hosts.push(lang);
 }

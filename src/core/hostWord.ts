@@ -18,6 +18,7 @@
  * structurally to identify by source pattern — `test/latin-tokenizers.test.ts` is the measurement.
  */
 import type { ScriptName } from "./scripts.ts";
+import { noteNativised } from "./trace.ts";
 
 /**
  * Word arm for an engine writing in `scripts`, as a STRING (engines assemble `TOKEN` by template from word,
@@ -86,8 +87,6 @@ export const foldLatinToBase = (w: string): string =>
         .replace(UNDECOMPOSABLE_RE, (c) => UNDECOMPOSABLE[c] ?? c);
 
 /** One base character with any combining marks that belong to it — the unit a fold decision is made about. */
-import { noteNativised } from "./trace.ts";
-
 const CLUSTER = /\P{M}\p{M}*/gu;
 
 /**

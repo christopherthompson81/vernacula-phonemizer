@@ -15,10 +15,17 @@
  * `beginToken()` and `endToken()` nothing else can run. It is not safe to make `text()` async without
  * revisiting this.
  *
- * ⚠ AND IT MUST SURVIVE RECURSION, because `emitUnclaimed` hands an embedded foreign run to ANOTHER language's
- * engine, which runs its own `assembleClauses`. Only the outermost call records; `depth` is what keeps an
- * inner engine from stealing the outer engine's tokens or clearing its state.
+ * ⚠ AND IT MUST SURVIVE RECURSION — which is the part the first cut got wrong three ways. `emitUnclaimed`
+ * hands an embedded run to ANOTHER language's engine. The boundary that matters is therefore THE DELEGATING
+ * CALL, not "which engine is running": gating on engine depth let a nested engine close the outer engine's
+ * token (a Greek run in Russian lost its reading entirely), let the two engines that drive `clauseSink`
+ * without `assembleClauses` double-record into the outer token (`中国` in Russian emitted twice), and let a
+ * nested engine CLAIM THE RECORDING when the host was one of the untraced hand-rolled engines
+ * (`phonemizeTrace("hello Владимир world", "en")` reported `traced: true` with `normalized: "Владимир"`).
+ * So `foreignDepth` brackets the delegating calls in `emitUnclaimed`, and every recorder is inert inside one.
  */
+
+import { hostDepth } from "./foreign.ts";
 
 /** One token as the tokenizer matched it, with what happened to it on the way to IPA. */
 export interface TraceToken {
@@ -41,79 +48,79 @@ interface Recording {
     normalized: string;
     tokens: TraceToken[];
     current: TraceToken | null;
-    /** Did any engine actually reach the traced seam? See `PhonemeTrace.traced`. */
+    /** Did the TOP-LEVEL engine reach the traced seam? See `PhonemeTrace.traced`. */
     traced: boolean;
+    /** Nesting of `beginToken`, so a re-entrant call nests rather than opening a second token. */
+    tokenDepth: number;
 }
 
 let recording: Recording | null = null;
-let depth = 0;
 
-/** Is a trace being recorded at the outermost engine? */
-export const tracing = (): boolean => recording !== null && depth === 1;
+/**
+ * Recording, and at the TOP-LEVEL render. Every recorder below is gated on this.
+ *
+ * ⚠ THE NESTING SIGNAL IS THE REGISTRY'S OWN HOST STACK, not a counter kept here. `getPhonemizer`'s wrapper
+ * pushes a host for EVERY language, including the four that hand-roll their tokenizer loop and never reach
+ * `assembleClauses` — so counting delegations at the seam missed exactly those, and a nested engine under an
+ * untraced host claimed the recording (`phonemizeTrace("hello Владимир world", "en")` reported `traced: true`
+ * with `normalized: "Владимир"`). Asking how deep the render is cannot miss a caller that does not report.
+ */
+const active = (): boolean => recording !== null && hostDepth() <= 1;
 
-/** Start a recording. Returns the collected tokens; `stop()` must run even if the engine throws. */
 export function startTrace(): void {
-    recording = { normalized: "", tokens: [], current: null, traced: false };
-    depth = 0;
-    tokenDepth = 0;
+    recording = { normalized: "", tokens: [], current: null, traced: false, tokenDepth: 0 };
 }
 
 export function stopTrace(): { normalized: string; tokens: TraceToken[]; traced: boolean } {
     const r = recording ?? { normalized: "", tokens: [], traced: false };
     recording = null;
-    depth = 0;
-    tokenDepth = 0;
     return { normalized: r.normalized, tokens: r.tokens, traced: r.traced };
 }
 
-/** Enter an engine. Only the first one recorded is the one whose tokens are kept. */
+/** Enter a seam engine. The FIRST one at the top level owns the recording. */
 export function enterEngine(normalized: string): void {
-    if (recording === null) return;
-    depth++;
-    if (depth === 1) {
-        recording.normalized = normalized;
-        recording.traced = true;
-    }
+    if (!active() || recording === null || recording.traced) return;
+    recording.normalized = normalized;
+    recording.traced = true;
 }
-
 export function exitEngine(): void {
-    if (recording === null) return;
-    depth--;
+    /* nothing to unwind: `foreignDepth` is what scopes a nested engine, not a counter here */
 }
-
-let tokenDepth = 0;
 
 /**
- * Open a token. A no-op inside a nested (foreign-run) engine, whose tokens belong to that engine, not this.
+ * Open a token.
  *
- * ⚠ AND RE-ENTRANT, because `emitUnclaimed` is called from TWO places with different meanings. From
+ * ⚠ RE-ENTRANT, because `emitUnclaimed` is called from TWO places with different meanings. From
  * `assembleClauses`'s gap loop it introduces a token of its own (an embedded `Windows` in Russian text). But
  * `hmong.ts` calls it from INSIDE its handler, for a run its own tokenizer already claimed — there the
  * readings belong to the token already open, and its spans are relative to a different string entirely. The
  * outermost `beginToken` wins; an inner one only nests.
  */
 export function beginToken(span: [number, number], surface: string): void {
-    if (!tracing() || recording === null) return;
-    tokenDepth++;
-    if (tokenDepth > 1) return; // already inside a token — its emits are that token's
+    if (!active() || recording === null) return;
+    recording.tokenDepth++;
+    if (recording.tokenDepth > 1) return;
     recording.current = { span, surface, emitted: [] };
     recording.tokens.push(recording.current);
 }
 
 export function endToken(): void {
-    if (recording === null) return;
-    if (tokenDepth > 0) tokenDepth--;
-    if (tokenDepth === 0) recording.current = null;
+    // ⚠ GATED THE SAME WAY `beginToken` IS. Ungated, a nested engine's `endToken` calls decremented the OUTER
+    // engine's depth against increments that never happened, closing its token early and dropping the
+    // readings that followed.
+    if (!active() || recording === null) return;
+    if (recording.tokenDepth > 0) recording.tokenDepth--;
+    if (recording.tokenDepth === 0) recording.current = null;
 }
 
 /** Record what the nativiser did to the token currently open. */
 export function noteNativised(from: string, to: string): void {
-    if (!tracing() || recording?.current == null || from === to) return;
+    if (!active() || recording?.current == null || from === to) return;
     recording.current.nativised = to;
 }
 
 /** Record one emitted reading against the token currently open. */
 export function noteEmit(ipa: string): void {
-    if (!tracing() || recording?.current == null || ipa === "") return;
+    if (!active() || recording?.current == null || ipa === "") return;
     recording.current.emitted.push(ipa);
 }
