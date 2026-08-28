@@ -1678,11 +1678,15 @@ Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (
   figure, worse than either the missing word or the wrong one. Caught in review, not by the gate. 0 golden
   rows moved, in either engine. ⚠ THE SHARED TIER STILL DOES THE OLD THING for `517 km3` — pre-existing,
   fleet-wide, filed as #1145.
-- **Step 3's space-grouping arm eats an ASCII exponent digit.** Step 4's comment anticipates `km2` and makes
-  its space mandatory, but step 3 runs FIRST and matches `2 517` inside `km2 517` (the lookbehind is
-  satisfied by the preceding `m`): → `km2517`, the figure reads as 2,517 instead of 517 and **`km` reaches
-  the phoneme stream raw** — the very leak step 4 exists to close. ⚠ It generalises past units (`R2 500` →
-  `R2500`). ×0 in corpus — latent.
+- ~~**Step 3's space-grouping arm eats an ASCII exponent digit.**~~ **FIXED (#1136 → PR #1146).** `km2 517`
+  became `km2517` — exponent glued to the number (517 read as 2,517), space gone, and **`km` left in the
+  phoneme stream raw**. ⚠ **THE GUARD THE ISSUE PROPOSED WOULD HAVE BROKEN A REAL NUMBER**: `R2 500` IS a
+  grouped thousand with a currency prefix, and "a head may not follow a letter" splits it into *two* — the
+  discriminator is whether the letters are a UNIT KEY. So the fix is an ORDER, not a guard: the
+  unit-before-number rule now runs BEFORE de-grouping (the two steps swap and are renumbered). The old
+  order's stated reason did not survive reading — the rule's lookahead needs the operand only to START with
+  a digit, so it never needed de-grouping. Exactly 2 rows moved over the 2,169-line set, 0 golden rows, and
+  the second is a bonus: **#1135's cube handling was unreachable for the ASCII spelling** until this landed.
 - **The `US$` compound key cannot match any of the three shapes it was declared for**, and this one is
   **LIVE**. It claims `US$4,000` but not `US $ 4,000`, which is how all three corpus instances are written,
   so `US` still reaches the g2p as the word *us* — the second half of the defect the TS header's own table

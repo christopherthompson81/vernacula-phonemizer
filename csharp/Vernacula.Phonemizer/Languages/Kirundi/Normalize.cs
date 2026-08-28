@@ -26,7 +26,7 @@ public static class Normalize
      *  the three can never drift apart. */
     private static readonly string AND = Manifest.MANIFEST.Numbers.And;
 
-    /** THE MEASURE NOUNS, one table shared by the tier (step 7, number-then-unit) and by step 4
+    /** THE MEASURE NOUNS, one table shared by the tier (step 7, number-then-unit) and by step 3
      *  (unit-then-number, which the tier cannot see). Both PRECEDE their figure.
      *  ⚠ INSERTION-ORDERED, like JS `Object.keys`: the PRE/DENOM alternations are built by a STABLE
      *  length-descending sort over this order.
@@ -97,7 +97,7 @@ public static class Normalize
             ["$"] = new[] { DOLLAR },
         },
         CurrencyPrefix = true,
-        // Derived from the ONE table above, so the tier and step 4 can never name different words for one key.
+        // Derived from the ONE table above, so the tier and step 3 can never name different words for one key.
         Units = UNIT.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)new[] { kv.Value }, StringComparer.Ordinal),
         UnitPrefix = true,
         // ⚠ NO CUBE WORD IS DECLARED — `m³`/`km³` are ×0 in rn and no Kirundi cube word is attested.
@@ -233,9 +233,9 @@ public static class Normalize
     private static string DegreeBody(string sign, string n, int off, int end, string full) =>
         $"{(SaidNear(full, off, end, DEGREE) ? "" : $"{DEGREE} ")}{sign}{SpellDec(n)}";
 
-    /** The exponent modifier for a unit noun, shared by step 4 and step 8 so the two orders cannot drift.
+    /** The exponent modifier for a unit noun, shared by step 3 and step 8 so the two orders cannot drift.
      *  ⚠ ONLY THE SQUARE IS DECLARED, so a CUBE keeps the unit's reading and HANDS THE EXPONENT BACK — the
-     *  shared tier's own convention for an undeclared power, which step 4 exists to converge with. Giving a
+     *  shared tier's own convention for an undeclared power, which step 3 exists to converge with. Giving a
      *  cube the SQUARE's word is the option ruled out: a missing word is lossy, a wrong one is false (#1135).
      *  ⚠ AND IT IS HANDED BACK AS THE SUPERSCRIPT EVEN WHERE THE TEXT WROTE THE ASCII `3`: that digit is
      *  claimed by the tokenizer and SPOKEN (`(233/km3)` → *…kuri kirometero gatatu*), inventing a quantity,
@@ -268,27 +268,34 @@ public static class Normalize
 
         // 2) A DOTTED NUMERIC DATE — `d.m.yyyy`, ten of them in the biography frame, each emitting TWO
         //    spurious sentence breaks. ⚠ ONLY THE DOTS ARE SPENT: no month name is emitted, because the
-        //    corpus glosses its own numeric date as three numbers. ⚠ BEFORE step 3, so a de-grouping arm
+        //    corpus glosses its own numeric date as three numbers. ⚠ BEFORE step 4, so a de-grouping arm
         //    can never see a date's `dd.mm` as the head of a grouped run.
         s = DOTTED_DATE.Replace(s, "$1 $2 $3");
 
-        // 3) THOUSANDS DE-GROUPING, before every remaining numeric rule AND before the tier.
+        // 3) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — `km 1,965`, `km² 517`, `mm 1.000`. The shared
+        //    tier matches ONLY number-then-unit, so these are structurally invisible to it. The output is
+        //    the SAME SHAPE the tier's `unitPrefix` produces, from the same table, so the two orders
+        //    converge on one reading.
+        //    ⚠ BEFORE THE DE-GROUPING STEP, AND THAT ORDER IS A REPAIR (#1136). Running second cost the
+        //    whole match: de-grouping's SPACE arm claims a head digit preceded by a LETTER, so `km2 517` —
+        //    the ASCII spelling of `km² 517` — matched as `2 517` and became `km2517`, gluing the exponent
+        //    onto the number and leaving `km` in the phoneme stream RAW.
+        //    ⚠ THE OBVIOUS GUARD ("a head may not follow a letter") IS WRONG: `R2 500` IS a grouped
+        //    thousand with a currency prefix. The discriminator is whether the letters are a UNIT KEY.
+        s = UNIT_BEFORE.Replace(s, m =>
+            ExponentPhrase(UNIT_MAP[Js.ToLowerCase(m.Groups[1].Value)], m.Groups[2]));
+
+        // 4) THOUSANDS DE-GROUPING, before every remaining numeric rule AND before the tier.
         //    ⚠ KIRUNDI WRITES THREE CONVENTIONS AT ONCE — the francophone `12.100.000`, the space form and
         //    the Anglo `1,964.54` — so all three arms are load-bearing, where rw's space arm was near-idle.
         //    ⚠ THE HEAD MUST START 1–9: a grouped number never opens with a leading zero.
+        //    ⚠ AND A HEAD MAY STILL FOLLOW A LETTER, DELIBERATELY — see step 3.
         //    ⚠ NO `NOT_COORD` GUARD, and its absence is a MEASUREMENT: rn writes coordinates as
         //    degree-and-arcminute (`9°55'`), and `\d+[.,]\d{3}\s*°` is ×0 here. A guard with no instance is
         //    a misfire generator.
         s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
         s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
         s = GROUP_SPACE.Replace(s, m => GROUP_SPACES.Replace(m.Value, ""));
-
-        // 4) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — `km 1,965`, `km² 517`, `mm 1.000`. The shared
-        //    tier matches ONLY number-then-unit, so these are structurally invisible to it. The output is
-        //    the SAME SHAPE the tier's `unitPrefix` produces, from the same table, so the two orders
-        //    converge on one reading. ⚠ AFTER step 3, so a grouped operand is already one digit run.
-        s = UNIT_BEFORE.Replace(s, m =>
-            ExponentPhrase(UNIT_MAP[Js.ToLowerCase(m.Groups[1].Value)], m.Groups[2]));
 
         // 5) SPANS. Both shapes are claimed HERE — before the tier, so a span's operands are still bare
         //    digits, and before step 8b so a verse reference has already been excluded by the guard rather
@@ -317,7 +324,7 @@ public static class Normalize
             return Js.Number(a) < Js.Number(b) ? $"{a} {DEGREE_AND} {b}" : m.Value;
         });
 
-        //    5b) A `/` SPAN — an rn shape rw's corpus does not contain. AFTER step 3, so the operands are
+        //    5b) A `/` SPAN — an rn shape rw's corpus does not contain. AFTER step 4, so the operands are
         //    single runs.
         var src5b = s;
         s = SLASH_SPAN.Replace(s, m =>

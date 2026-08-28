@@ -115,13 +115,19 @@ public class KirundiTests
     [InlineData("3372 hab/km3", "3372 hab kuri kirometero³")]
     // ⚠ THE SQUARE IS UNAFFECTED — it HAS a word, and all three paths still emit it.
     [InlineData("517 km²", "ibirometero kwadarato 517")]
-    // ⚠ #1136 IS STILL OPEN and pinned as it SHIPS, so a fix meets a failing assertion here.
-    // #1136: step 3's space-grouping arm runs FIRST and its lookbehind is satisfied by a preceding LETTER,
-    // so it claims `2 517` inside `km2 517` — the figure becomes 2,517 and `km` leaks raw, the exact leak
-    // step 4's mandatory space exists to close. ⚠ IT GENERALISES PAST UNITS: any letter+digit before a
-    // three-digit block, `R2 500` included.
-    [InlineData("km2 517", "km2517")]
+    // ⚠ #1136 IS FIXED — the unit rule now runs BEFORE de-grouping, so a unit's ASCII exponent is never
+    // seen as a thousands head. It used to become `km2517`: the exponent glued to the number (517 read as
+    // 2,517) and `km` left in the phoneme stream raw.
+    [InlineData("km2 517", "ibirometero kwadarato 517")]
+    [InlineData("km2 517 000", "ibirometero kwadarato 517000")]
+    [InlineData("mm2 500", "milimetero kwadarato 500")]
+    [InlineData("km3 517", "ibirometero³ 517")]   // and the cube now reaches #1135's handling
+    // ⚠ THE OBVIOUS GUARD WOULD HAVE BROKEN THIS: `R2 500` IS a grouped thousand with a currency prefix,
+    // so "a head may not follow a letter" would have split 2,500 into two numbers. The discriminator is
+    // whether the letters are a UNIT KEY, not whether there are letters.
     [InlineData("R2 500", "R2500")]
+    // the spaced forms the unit rule was written for are untouched by the reorder
+    [InlineData("km 1 965", "ibirometero 1965")]
     // A UNIT AS A BARE DENOMINATOR takes the class-7 SINGULAR, where a quantity takes the class-8 plural.
     [InlineData("(233/km²)", "(233 kuri kirometero kwadarato)")]
     [InlineData("3372 hab/km²", "3372 hab kuri kirometero kwadarato")]

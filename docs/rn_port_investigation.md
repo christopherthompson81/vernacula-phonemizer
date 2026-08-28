@@ -310,3 +310,63 @@ language, so it is filed rather than patched from here.
     dotnet test                           2,681 passed, 0 failed
     differential                          4,328 comparisons, 0 differ, 0 throws
     gen_parity_goldens.mts rn             0 rows moved
+
+## Run 8 — 2026-08-28 09:15 — #1136, and the guard the issue proposed would have broken a real number
+
+**The defect.** De-grouping's SPACE arm claims a head digit preceded by a LETTER, so `km2 517` — the ASCII
+spelling of `km² 517`, which this corpus writes four times with the superscript — matched as `2 517`:
+
+    km2 517  →  km2517  →  *km ibihumbi bibiɾi na amad͡ʒana atanu na it͡ʃumi na indwi*
+
+Three failures at once: the exponent glued onto the number (517 read as **2,517**), the space deleted, and
+`km` left in the phoneme stream RAW — the leak the unit rule exists to close, reached because that rule ran
+second and never saw the token.
+
+**⚠ THE FIX THE ISSUE PROPOSED IS WRONG, and the counter-example is a shape this language writes.** The
+issue said: *"a letter boundary on the grouping head — the head should not be allowed to start immediately
+after an ASCII letter."* Measured before implementing:
+
+    R2 500  →  R2500      ✓ CORRECT TODAY — a grouped thousand with a currency prefix, 2,500
+
+A letter-boundary guard rejects that head and leaves `R2 500`, which the tokenizer then reads as **two
+numbers**, *kabiri … amajana atanu* — "two, five hundred". The guard would have traded a latent defect for a
+live one. **The discriminator is not the letter, it is whether the letters are a UNIT KEY** — which is
+exactly what the unit rule already knows.
+
+**So the fix is an ORDER, not a guard: the unit-before-number rule now runs BEFORE de-grouping** (steps 3
+and 4 swap, and are renumbered so the file still reads in execution order). The unit becomes a WORD before
+de-grouping ever looks, so no later arm can see a letter-adjacent head that is really an exponent.
+
+⚠ **THE OLD ORDER'S STATED REASON DOES NOT SURVIVE READING.** It was *"AFTER step 3, so a grouped operand
+(`km 1,965`) is already one digit run"* — but the rule's lookahead is `(?=[  ]\d)`, which needs the
+operand only to START with a digit. It never needed the de-grouping, and the four spaced corpus forms
+(`km 1,965`, `km 1 965`, `mm 1.000`, `km² 517`) are byte-identical either way. Verified, not assumed.
+
+**What moved, over the whole 2,169-line differential set: exactly two rows.**
+
+    km2 517   km ibihumbi bibiɾi na amad͡ʒana atanu…  →  ibiɾometeɾo kwadaɾato amad͡ʒana atanu…
+    km3 517   km ibihumbi bitatu na amad͡ʒana atanu…  →  ibiɾometeɾo amad͡ʒana atanu…
+
+Nothing else — not one line of the mined corpus, the golden text or the 1,601-word referee list. And the
+second row is a bonus: **#1135's cube handling was unreachable for the ASCII spelling** because this defect
+ate the token first, which that PR recorded as a known gap. Fixing the order closes it.
+
+⚠ **CASE IS COVERED FOR FREE** — the unit rule carries the `i` flag, so `Km2 517` and `KM2 517` read
+correctly, where a hand-written lookbehind guard in the de-grouping arm would have needed the case variants
+spelled out (that arm has no `i` flag).
+
+⚠ **WHAT IS STILL NOT FIXED, SAID RATHER THAN IMPLIED.** `km2,517` and `km2.517` — the ASCII exponent with
+NO space — remain `km2517`. The unit rule's space is mandatory (`km2` unspaced is `km²`, and an optional
+space would let the rule read the `2` as the unit's number — trap 28), so it declines them and the comma and
+period arms still claim the head. Both shapes are ×0 in the corpus and neither is a plausible way to write a
+squared kilometre; recorded so the next reader does not think they were missed.
+
+**Gates** — TS first, then the goldens, then C#:
+
+    npx vitest run test/kirundi.test.ts   27 passed (1 new test)
+    npm test                              288 files, 5,680 passed, 5 skipped
+    npx tsc --noEmit                      clean
+    gen_parity_goldens.mts rn             **0 rows moved**
+    dotnet test                           2,703 passed, 0 failed
+    parity fleet                          136 languages, 26,827 rows, 0 differ
+    differential                          4,354 comparisons (8 new probes), 0 differ, 0 throws
