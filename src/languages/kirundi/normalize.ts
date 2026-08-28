@@ -194,6 +194,14 @@ const SQUARED = "kwadarato";
 /**
  * The exponent modifier for a unit noun, shared by step 4 and step 8 so the two orders cannot drift.
  *
+ * ⚠ A CUBE IS HANDED BACK AS THE SUPERSCRIPT ³ EVEN WHERE THE TEXT WROTE THE ASCII `3`, AND THAT ONE
+ * CHARACTER IS THE WHOLE POINT OF THIS FUNCTION. Re-emitting the ASCII digit is not a silent leak the way a
+ * superscript is — `3` is a DIGIT, so the tokenizer claims it and the number path SPEAKS it: `(233/km3)`
+ * read *…kuri kirometero GATATU*, "per kilometre three", inventing a quantity inside a density figure. The
+ * superscript reaches the same tokenizer and is dropped, so it stays visible to the leak gate (the tier's
+ * stated reason for handing an exponent back at all) while saying nothing. Missing word ≥ wrong word ≫
+ * INVENTED NUMBER, and normalising the spelling is what keeps the third off the table.
+ *
  * ⚠ ONLY THE SQUARE IS DECLARED. No Kirundi CUBE word is attested — `m³` and `km³` are ×0 in this corpus and
  * the header records that as the trap 51 floor — so a cube keeps the UNIT'S reading and HANDS THE EXPONENT
  * BACK rather than being given the square's word.
@@ -209,7 +217,7 @@ const SQUARED = "kwadarato";
  * second (trap 53 — half a reading is not a reading).
  */
 const exponentPhrase = (noun: string, exp: string | undefined): string =>
-    exp === undefined ? noun : exp === "³" || exp === "3" ? `${noun}${exp}` : `${noun} ${SQUARED}`;
+    exp === undefined ? noun : exp === "³" || exp === "3" ? `${noun}³` : `${noun} ${SQUARED}`;
 
 /**
  * DEGREE VOCABULARY.

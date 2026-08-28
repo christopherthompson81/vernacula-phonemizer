@@ -1665,14 +1665,19 @@ rather than folded into a headline number.
 
 Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (#1135, #1136, #1137):
 
-- ~~**A CUBE READS AS A SQUARE in two of rn's three exponent paths.**~~ **FIXED (#1135 → #1139).** Steps 4
+- ~~**A CUBE READS AS A SQUARE in two of rn's three exponent paths.**~~ **FIXED (#1135 → PR #1143).** Steps 4
   and 8 both carried `³` in the pattern and mapped every exponent to `SQUARED`, so `km³ 517` announced a
   SQUARE while `517 km³` (the tier) did not — one construct, three readings. Both arms now go through one
   `exponentPhrase` helper that keeps the unit's reading and HANDS THE EXPONENT BACK for an undeclared power,
   which is **the shared tier's own convention** (`normalizeSymbols.ts`: *"emit the UNIT and hand the exponent
   back rather than abandoning the match … Returning `whole` loses the QUANTITY too"*) and the shape step 4
   exists to converge with. ⚠ NOT the nso refusal the issue first proposed — the tier argues against it, and
-  step 4's own docstring says its job is to match the tier. 0 golden rows moved, in either engine.
+  step 4's own docstring says its job is to match the tier. ⚠ AND THE CUBE IS HANDED BACK AS THE SUPERSCRIPT
+  EVEN WHERE THE TEXT WROTE THE ASCII `3`: a raw digit is claimed by the tokenizer and SPOKEN, so the first
+  cut of this fix read `(233/km3)` as *…kuri kirometero gatatu* — a quantity INVENTED inside a density
+  figure, worse than either the missing word or the wrong one. Caught in review, not by the gate. 0 golden
+  rows moved, in either engine. ⚠ THE SHARED TIER STILL DOES THE OLD THING for `517 km3` — pre-existing,
+  fleet-wide, filed as #1145.
 - **Step 3's space-grouping arm eats an ASCII exponent digit.** Step 4's comment anticipates `km2` and makes
   its space mandatory, but step 3 runs FIRST and matches `2 517` inside `km2 517` (the lookbehind is
   satisfied by the preceding `m`): → `km2517`, the figure reads as 2,517 instead of 517 and **`km` reaches

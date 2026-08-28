@@ -121,6 +121,15 @@ describe("Kirundi text normalization", () => {
         // ⚠ THE ASCII SPELLING `km3 517` NEVER REACHES THIS ARM — step 3's space-grouping rule eats the `3`
         // first (`km3 517` → `km2517`-shaped), which is a separate, filed defect (#1136). Asserted there, not
         // here, so this test measures one rule.
+        // ⚠ BUT STEP 8's ARM HAS NO SUCH BLOCKER, AND ITS ASCII FORM IS EXACTLY WHY THE CUBE IS HANDED BACK
+        // AS A SUPERSCRIPT: a raw `3` is a DIGIT, so the tokenizer claims it and the number path SPEAKS it.
+        // Re-emitting it read `(233/km3)` as *…kuri kirometero GATATU* — "per kilometre three", a quantity
+        // invented inside a density figure, which is worse than either the missing word or the wrong one.
+        expect(normalizeKirundi("(233/km3)")).toBe("(233 kuri kirometero³)");
+        expect(normalizeKirundi("3372 hab/km3")).toBe("3372 hab kuri kirometero³");
+        // ⚠ THE ASSERTION IS ON WHAT FOLLOWS THE UNIT, not on the whole string: 233 is *…na ɡatatu* itself,
+        // so a bare "does not contain three" would pass for the wrong reason.
+        expect(phonemize("(233/km3)", "rn").trim().endsWith("kiɾometeɾo")).toBe(true);
         // step 8, the bare denominator — the same arm, the same defect
         expect(normalizeKirundi("(233/km³)")).toBe("(233 kuri kirometero³)");
         // the shared tier, number-then-unit — unchanged, and it is what the other two now agree with

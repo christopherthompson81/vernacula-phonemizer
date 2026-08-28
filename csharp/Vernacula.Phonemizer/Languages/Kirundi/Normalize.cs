@@ -237,10 +237,12 @@ public static class Normalize
      *  ⚠ ONLY THE SQUARE IS DECLARED, so a CUBE keeps the unit's reading and HANDS THE EXPONENT BACK — the
      *  shared tier's own convention for an undeclared power, which step 4 exists to converge with. Giving a
      *  cube the SQUARE's word is the option ruled out: a missing word is lossy, a wrong one is false (#1135).
-     *  See the TS for the measurement behind "no Kirundi cube word is attested". */
+     *  ⚠ AND IT IS HANDED BACK AS THE SUPERSCRIPT EVEN WHERE THE TEXT WROTE THE ASCII `3`: that digit is
+     *  claimed by the tokenizer and SPOKEN (`(233/km3)` → *…kuri kirometero gatatu*), inventing a quantity,
+     *  while the superscript is dropped and stays visible to the leak gate. See the TS for the measurement. */
     private static string ExponentPhrase(string noun, Group exp) =>
         !exp.Success ? noun
-        : exp.Value == "³" || exp.Value == "3" ? $"{noun}{exp.Value}"
+        : exp.Value == "³" || exp.Value == "3" ? $"{noun}³"
         : $"{noun} {SQUARED}";
 
     /** Normalize one Kirundi input string. Steps are ORDER-DEPENDENT; the TS states each coupling. */

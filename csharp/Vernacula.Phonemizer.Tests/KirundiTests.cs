@@ -107,6 +107,12 @@ public class KirundiTests
     [InlineData("(233/km³)", "(233 kuri kirometero³)")]
     [InlineData("517 km³", "ibirometero³ 517")]
     [InlineData("mm³ 1000", "milimetero³ 1000")]
+    // ⚠ THE CUBE IS HANDED BACK AS A SUPERSCRIPT EVEN WHERE THE TEXT WROTE THE ASCII `3`. Step 8's arm has
+    // no #1136 blocker, and a raw `3` is a DIGIT — the tokenizer claims it and the number path SPEAKS it, so
+    // re-emitting it read `(233/km3)` as *…kuri kirometero GATATU*, a quantity invented inside a density
+    // figure. Missing word ≥ wrong word ≫ INVENTED NUMBER.
+    [InlineData("(233/km3)", "(233 kuri kirometero³)")]
+    [InlineData("3372 hab/km3", "3372 hab kuri kirometero³")]
     // ⚠ THE SQUARE IS UNAFFECTED — it HAS a word, and all three paths still emit it.
     [InlineData("517 km²", "ibirometero kwadarato 517")]
     // ⚠ #1136 IS STILL OPEN and pinned as it SHIPS, so a fix meets a failing assertion here.
