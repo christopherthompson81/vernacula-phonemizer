@@ -100,4 +100,24 @@ public class AkanTests
         // Every arm of the unit step needs a numeral, so a caption or table header went to the phoneme sink
         // as raw ASCII — invisible to every leak gate in a Latin-script language.
         Assert.Contains("kilomita", AkanNormalize.NormalizeAkan("bare km here"), StringComparison.Ordinal);
+    // The literal letter ⟨ŋ⟩ (#1139) — the g2p's deliberate rule for it was unreachable because NATIVE_CLASS
+    // excluded the letter, so the nativiser folded ŋ→n first. ⟨ŋ⟩ is ×0 in the golden, so these are the
+    // instrument. Asserted through Phonemize, not PhonemizeWord: the defect lived in the gap between them.
+    [Theory]
+    [InlineData("ŋa", "ŋa")]           // was na
+    [InlineData("aŋa", "aŋa")]
+    [InlineData("dwoŋ", "d͡ʑʷoŋ")]     // word-final; was d͡ʑʷon
+    [InlineData("Ŋa", "ŋa")]           // the class carries both cases (flags are "u", not "iu")
+    [InlineData("ŋw", "ŋw")]           // ⚠ literal: ⟨ŋ⟩ enters none of the ⟨nw ng ny⟩ digraphs
+    [InlineData("ŋg", "ŋɡ")]
+    [InlineData("ŋy", "ŋj")]
+    [InlineData("Ŋgozi", "ŋɡozi")]     // ⚠ the typed ⟨g⟩ survives
+    [InlineData("ŋp", "ŋp")]           // and never assimilates — ⟨np⟩ is mp, but explicit ŋ states its place
+    [InlineData("np", "mp")]
+    [InlineData("nw", "ŋʷ")]           // ⚠ the standard spellings are untouched
+    [InlineData("ng", "ŋ")]
+    [InlineData("ny", "ɲ")]
+    public void TheLiteralVelarNasal(string word, string want) =>
+        Assert.Equal(want, Phonemizer.Phonemize(word, "ak").Trim());
+
 }

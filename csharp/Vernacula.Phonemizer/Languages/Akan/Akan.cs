@@ -192,7 +192,11 @@ public static class AkanPhonemizer
      * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter
      * the language does not use, i.e. a foreign name.
      */
-    private const string NATIVE_CLASS = "[A-Za-zɛɔƐƆ̃]";
+    // ⚠ ⟨ŋ Ŋ⟩ ARE NOT STANDARD AKAN SPELLING and are in the class deliberately (#1139): the g2p below has a
+    // rule for the literal letter, and without them the nativiser folded ŋ→n and that rule was dead. ⟨ŋ⟩ is
+    // read LITERALLY — it enters none of the ⟨nw ng ny⟩ digraphs and does not assimilate. See
+    // src/languages/akan/akan.ts for why conserving those digraph readings was tried and rejected.
+    private const string NATIVE_CLASS = "[A-Za-zɛɔƐƆ̃ŋŊ]";
 
     /** ⚠ EXPORTED FOR the reachability guard, which asserts every lexicon key survives its own fold. */
     public static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "u");

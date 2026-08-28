@@ -12,6 +12,17 @@
     "provenance": "Authored from the standard Akan (Twi-Fante) orthography + Dolphyne (1988) 'The Akan (Twi-Fante) Language: Its Sound Systems and Tonal Structure'. Validated against the kaikki Akan human readings.",
 
     // Consonant DIGRAPHS (longest-match first) → IPA. Palatal series + labialised series + ⟨ng⟩.
+    // ⚠ THERE IS DELIBERATELY NO ⟨ŋw⟩ / ⟨ŋg⟩ / ⟨ŋy⟩ ROW (#1139). All three ⟨n⟩-initial digraphs exist because
+    // ⟨n⟩ is ORTHOGRAPHICALLY AMBIGUOUS — in ⟨nw ng ny⟩ the ⟨n⟩ is not /n/ at all, the pair is one unit. A
+    // writer who instead writes the literal ⟨ŋ⟩ has ALREADY DISAMBIGUATED, so the letter is read literally and
+    // does not enter these pairs: ⟨ŋw⟩ → ŋw, ⟨ŋg⟩ → ŋɡ, ⟨ŋy⟩ → ŋj.
+    // ⚠ CONSERVING THEM WAS TRIED FIRST AND WAS WRONG, which is worth recording. While ⟨ŋ⟩ sat outside
+    // NATIVE_CLASS the nativiser folded it to ⟨n⟩, so ⟨ŋw⟩ reached the ⟨nw⟩ row and read ŋʷ and ⟨ŋg⟩ reached
+    // ⟨ng⟩ and read ŋ; adding rows to keep those readings looked like the #1131 conservation lesson. But it
+    // makes the engine CONTRADICT ITSELF: ⟨ŋg⟩ → ŋ DELETES the ⟨g⟩ the writer typed (⟨Ŋgozi⟩ → *ŋozi*), which
+    // akan.ts refuses to do for any other letter, and the same rule applied to ⟨ŋy⟩ → ɲ would turn an
+    // explicitly VELAR nasal into a PALATAL one. A rule that has to skip the case that disproves it is not a
+    // rule. The standard ⟨nw ng ny⟩ rows are untouched and still carry the orthography.
     "digraphs": {
         "ky": "t͡ɕ", "gy": "d͡ʑ", "hy": "ɕ", "ny": "ɲ",
         "tw": "t͡ɕʷ", "dw": "d͡ʑʷ", "kw": "kʷ", "gw": "ɡʷ", "hw": "ɕʷ", "nw": "ŋʷ",

@@ -73,6 +73,42 @@ describe("Akan (Twi) canonical IPA", () => {
     test("full text via the registry", () => {
         expect(getPhonemizer("ak").text("Akwaaba, wo ho te sɛn?")).toBeTruthy();
     });
+
+    // The LITERAL letter ⟨ŋ⟩ (#1139). The g2p has a deliberate rule for it (`if (c === "ŋ")`, kaikki-sourced)
+    // that NATIVE_CLASS made unreachable: the nativiser's UNDECOMPOSABLE table maps ŋ → n, so `ŋa` read *na*,
+    // byte-identical to `na`, and the rule was dead on the shipped path.
+    // ⚠ ASSERTED THROUGH `phonemize`, NOT `phonemizeWord` — the whole defect lived in the gap between them,
+    // and a phonemizeWord-only test passed while the product was wrong. ⟨ŋ⟩ is ×0 in the golden, the mined
+    // and attest artifacts and the tone lexicon, so this test is the only instrument.
+    test("the literal letter ⟨ŋ⟩ reaches the g2p instead of being folded to ⟨n⟩", () => {
+        const say = (w: string): string => getPhonemizer("ak").text(w).trim();
+        expect(say("ŋa")).toBe("ŋa"); // was *na* — the fold, not the rule
+        expect(say("ŋa")).not.toBe(say("na"));
+        expect(say("aŋa")).toBe("aŋa");
+        expect(say("dwoŋ")).toBe("d͡ʑʷoŋ"); // word-final; was *d͡ʑʷon*
+        expect(say("Ŋa")).toBe("ŋa"); // the class carries both cases (its flags are "u", not "iu")
+    });
+
+    // ⚠ ⟨ŋ⟩ IS READ LITERALLY — it enters none of the ⟨n⟩-digraphs and does not assimilate (#1139). While the
+    // letter was folded to ⟨n⟩ it REACHED the digraph table (⟨ŋw⟩→ŋʷ via ⟨nw⟩, ⟨ŋg⟩→ŋ via ⟨ng⟩, ⟨ŋy⟩→ɲ via
+    // ⟨ny⟩), and rows conserving the first two were tried first. That was wrong: those digraphs exist because
+    // ⟨n⟩ is AMBIGUOUS, and a writer who types ⟨ŋ⟩ has already disambiguated. Conserving contradicts itself —
+    // ⟨ŋg⟩→ŋ deletes the typed ⟨g⟩, and the same move on ⟨ŋy⟩→ɲ would make an explicit VELAR nasal PALATAL.
+    test("⟨ŋ⟩ is literal — no digraph, no assimilation; the ⟨n⟩ spellings keep the orthography", () => {
+        const say = (w: string): string => getPhonemizer("ak").text(w).trim();
+        // the letter never joins a digraph…
+        expect(say("ŋw")).toBe("ŋw");
+        expect(say("ŋg")).toBe("ŋɡ");
+        expect(say("ŋy")).toBe("ŋj");
+        expect(say("Ŋgozi")).toBe("ŋɡozi"); // ⚠ the typed ⟨g⟩ SURVIVES; conserving read this *ŋozi*
+        // …and never assimilates: ⟨n⟩ is underspecified and takes the following place, ⟨ŋ⟩ states its own.
+        expect(say("np")).toBe("mp");
+        expect(say("ŋp")).toBe("ŋp");
+        // ⚠ THE STANDARD SPELLINGS ARE UNTOUCHED — this is what the orthography actually uses.
+        expect(say("nw")).toBe("ŋʷ");
+        expect(say("ng")).toBe("ŋ");
+        expect(say("ny")).toBe("ɲ");
+    });
 });
 
 // TEXT NORMALIZATION (src/languages/akan/normalize.ts). ⚠ ak.wikipedia is LOCKED, so the evidence is
