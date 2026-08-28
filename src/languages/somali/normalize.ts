@@ -205,7 +205,7 @@ export function normalizeSomali(input: string): string {
     //       connective already declared as `unitPer` above, and the corpus writes it out in exactly this
     //       frame one clause later — *"1,200 qof halkii km2"*. ⚠ FIRST of the four, because every rule
     //       below rewrites the very text this one's lookahead is reading.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(String.raw`(?<=[\d\p{L}])\s*/\s*(?=(?:sq |cu )?(?:${UNIT_KEYS})(?:[²³23])?(?![\p{L}\p{M}\d]))`, "gu"),
         " halkii ",
     );
@@ -238,7 +238,7 @@ export function normalizeSomali(input: string): string {
     //       here does not weaken the tier's case-SENSITIVE unit keys (the note above `M`, step 2): what
     //       makes `2407M` ambiguous is a bare magnitude letter after a digit, and an `M` preceded by
     //       `sq `/`cu ` is the English measure frame and nothing else.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(String.raw`(?<![\p{L}\p{M}])(sq|cu)\s+(${UNIT_KEYS})(?![\p{L}\p{M}\d])`, "giu"),
         (_m, mod: string, u: string) =>
             `${UNIT[u.toLowerCase() as keyof typeof UNIT]} ${mod.toLowerCase() === "sq" ? EXPONENT[2] : EXPONENT[3]}`,
@@ -258,7 +258,7 @@ export function normalizeSomali(input: string): string {
     //       3b-ii the rate frames land here too (*"26,800 halkii km2"*).
     //       ⚠ ONLY THE VOWEL-LESS MULTI-LETTER KEYS, via `isBareUnitKey`: a bare `m` or `ha` is ordinary
     //       Somali, and that is the same test the shared pass applies for the same reason.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(String.raw`(?<![\p{L}\p{M}\p{Nd}'’ʼ-])(${BARE_KEYS})([²³23])(?![\p{L}\p{M}\d])`, "gu"),
         (_m, u: string, e: string) => `${UNIT[u as keyof typeof UNIT]} ${EXPONENT[e as keyof typeof EXPONENT]}`,
     );
@@ -336,7 +336,7 @@ export function normalizeSomali(input: string): string {
     // percentages both run in either direction — so unlike its sn/ee/nya siblings it has nothing that
     // declines a truncated endpoint, and the comma is doing that work by accident. Trading 5 real gains for 2
     // confidently wrong readings replacing silent ones is the wrong trade; the `.` arm above is clean at 4/4.
-    s = tr(s, 
+    s = tr(s,
         /(?<!\b(?:ilaa|dhaxaysay|inta)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d,-])/gu,
         "$1 ilaa $2",
     );

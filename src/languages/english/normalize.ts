@@ -423,7 +423,7 @@ export function normalizeEnglish(input: string): string {
     //        version guard; it was here.
     //      · the UNIT step below would otherwise claim the `m` as a metre, since it runs later and `m` is a
     //        declared unit key. Consuming it here is what makes `he ran 100m` and `$1.5m` differ.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`([$£€¥])\\s?(\\d[\\d,]*(?:\\.\\d+)?)(?:(\\s+(?:million|billion|trillion|thousand))|(${
             // ⚠ THE BOUNDARY GUARD SITS INSIDE THE ABBREVIATION ARM, NOT AFTER THE WHOLE GROUP. Placed
             // outside, it applies even when no magnitude matched — and then `$2.5tn` cannot satisfy it, so
@@ -485,7 +485,7 @@ export function normalizeEnglish(input: string): string {
     //    ⚠ It does NOT fully escape the sign rule at step 0f: that arm needs the dash to follow a space or
     //    an open paren, which `1998-1999` and `1998 - 1999` avoid but `1998 -1999` does not — that spacing
     //    still reads as a negative, exactly as it does on main. Not introduced here, and not fixed here.
-    s = tr(s, 
+    s = tr(s,
         /(?<!\b(?:pp|p|pages?|nos?|no|rooms?|chapters?|verses?|lines?|sections?|parts?|models?|items?|figs?|figures?|tables?|suites?|apt|ext)\.?\s)\b(1[1-9]\d\d|20\d\d)(\s*[-–—]\s*)(1[1-9]\d\d|20\d\d)\b(?![.,]?\d)(?!\s*(?:percent|kilometers?|meters?|km|kg|miles?|feet|ft|dollars?|usd|euros?))/gi,
         //    ⚠ AND A DATE RANGE ASCENDS. This catches what no cue list can: `call 1800-1234` is a phone
         //    number, not a reign, and it read as "18 hundred-12 34". Requiring b >= a rules out phone
@@ -502,7 +502,7 @@ export function normalizeEnglish(input: string): string {
     //    words in the investigate queue, and the recognizer plainly returns *nineteen ninety-eight*. Only
     //    the three bare determiners are allowed through: an adjective slot would let "in a 2011 people
     //    survey" past, which is the reading the context gate exists to prevent.
-    s = tr(s, 
+    s = tr(s,
         /\b(in|of|since|from|until|till|by|before|after|around|circa|year|late|early|mid)(\s+(?:the|a|an))?\s+(1[1-9]\d\d|20\d\d)\b(?![.,]?\d)(?!\s*(?:percent|kilometers?|meters?))/gi,
         (_m, ctx: string, det: string | undefined, y: string) =>
             // ⚠ THE DETERMINER ARM IS PRE-2010 ONLY, and the split is measured, not stylistic. Reaching
@@ -512,7 +512,7 @@ export function normalizeEnglish(input: string): string {
             // hundred ninety-eight". A year in the ORIGINAL tight contexts is untouched either way.
             det && Number(y) >= 2010 ? _m : `${ctx}${det ?? ""} ${yearWords(Number(y))}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`\\b(${MONTH_ALT})((?:\\s+\\d{1,2}(?:st|nd|rd|th))?,?)\\s+(1[1-9]\\d\\d|20\\d\\d)\\b(?![.,]?\\d)`, "gi"),
         (_m, mon: string, day: string, y: string) => `${mon}${day} ${yearWords(Number(y))}`,
     );

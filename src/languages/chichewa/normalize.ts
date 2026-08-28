@@ -139,7 +139,7 @@ export function normalizeChichewa(input: string): string {
     //    `&nbsp;`, a non-breaking-space entity that is not a conjunction at all, and the tier would emit
     //    "ndi nbsp" for every one. The entity table has to be consulted BEFORE the sign is read, and only
     //    a local step can sequence that.
-    s = tr(s, /&nbsp;/giu, " ").replace(/&amp;/giu, "&");
+    s = tr(tr(s, /&nbsp;/giu, " "), /&amp;/giu, "&");
     //    ⚠ SPACED ON BOTH SIDES, always: `T&T` is two initialisms and gluing the word in fuses them into
     //    one token — the merge defect of trap 18.
     s = tr(s, /&/gu, ` ${AND} `);
@@ -180,7 +180,7 @@ export function normalizeChichewa(input: string): string {
     //    text already said *mmawa* and deleting it would lose a word the writer typed.
     //    ⚠ BEFORE step 4 and step 10: de-grouping and the decimal rule must not see a colon operand, and
     //    `:` is `clausePunctuation`, so every one of these was reading as a comma pause mid-number.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `(?<![\\d:.,])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])` +  // NBSP
                 `(?:[ \u00a0]*(?:([AaPp])\\.?[Mm]\\.?|(${TZ})(?![\\p{L}\\p{M}])|(${DAYPART})(?![\\p{L}\\p{M}])))`,  // space, NBSP

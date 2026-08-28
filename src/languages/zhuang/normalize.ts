@@ -290,7 +290,7 @@ export function normalizeZhuang(input: string): string {
     //    Meanwhile `sawndip.ts`'s dictionary resolves 31.7% of those glyphs, so the status quo is not
     //    silence — it is a Chinese gloss emitting unrelated Zhuang syllables (`(Sawgun: 崇左市)` → *poː*).
     //    A parenthetical spelling gloss is not spoken in any case: the word it glosses was just said.
-    s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍﻿]/gu, "");
+    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍﻿]/gu, "");
     s = tr(s, BRACKET, stripGloss);
 
     // 2) CJK PUNCTUATION → ASCII. THE SINGLE BIGGEST DEFECT IN THE LANGUAGE, and it is pure data: the
@@ -401,7 +401,7 @@ export function normalizeZhuang(input: string): string {
     const NOT_VERSION = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
     for (const [sym, word] of UNITS) {
         const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        s = tr(s, 
+        s = tr(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])${NOT_VERSION}(\\d+(?:\\.\\d+)?)(\\s(?:fanh|ik))?\\s?${key}(?![\\p{L}\\p{M}\\d²³])`,
                 "gu",
@@ -437,7 +437,7 @@ export function normalizeZhuang(input: string): string {
     //    reachable by RANGE at all — a `%` stands between the digits and the dash — and once this rule has
     //    inserted a phrase between the operands there is no pair left to match. ×1 (`bingh dai beijlwd
     //    youq 0.5％－5.0％`), and the shape cannot be arithmetic, so it needs no ascending test beyond it.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,])(\d+(?:\.\d+)?)\s?%\s?-\s?(\d+(?:\.\d+)?)\s?%/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `bak faenh cih ${a} daengz bak faenh cih ${b}` : whole),
     );

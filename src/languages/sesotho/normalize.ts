@@ -322,7 +322,7 @@ export function normalizeSesotho(input: string): string {
     //        "$2.5-billion (£1.98-bilione)"
     //    so `m` → *dimilione* and `bn` → *dibilione*, in the SA spelling `numbers.ts` already emits.
     //    MUST run after step 4 (a grouped amount is one digit run by now) and before the tier.
-    s = tr(s, 
+    s = tr(s,
         /((?:US[ \u00a0]?)?[$£€R])([ \u00a0]?\d[\d.,]*)(m|bn)(?![\p{L}\p{M}\d])/gu,  // space, NBSP
         (_w, sym: string, num: string, mag: string) => `${sym}${num} ${mag === "m" ? "dimilione" : "dibilione"}`,
     );
@@ -334,7 +334,7 @@ export function normalizeSesotho(input: string): string {
     //        "li ka balloa ho liporesente tse 25% libakeng tsa litoropong"      (Lesotho)
     //        "e ikarabella ho diperesente tse 1.5% ka hara naha"                (SA — tier handles this one)
     //    Without this, the Lesotho sentence would read *liporesente tse diperesente tse 25*.
-    s = tr(s, 
+    s = tr(s,
         /((?<![\p{L}\p{M}])[dl]i(?:peresente|poresente|phesente)[ \u00a0]+(?:tse[ \u00a0]+)?)(\d[\d.,]*)[ \u00a0]?%/giu,  // space, NBSP
         "$1$2",
     );

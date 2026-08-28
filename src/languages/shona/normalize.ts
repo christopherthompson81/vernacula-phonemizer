@@ -206,7 +206,7 @@ export function normalizeShonaPre(input: string): string {
     //    ⚠ NO AMPERSAND WORD IS SPENT. See the header: the bare sign occurs only in this wiki's English
     //    dictionary glosses, so folding the entities IS the whole defect. `&amp;` is unfolded first so a
     //    doubly-escaped entity does not survive as the word "amp" plus a semicolon.
-    s = tr(s, /&amp;/giu, "&").replace(/&nbsp;/giu, " ");
+    s = tr(tr(s, /&amp;/giu, "&"), /&nbsp;/giu, " ");
 
     // 2) A SHONA PROCLITIC GLUED TO A CURRENCY SIGN, split off — and this exists because the tier's currency
     //    key is letter-bounded on the LEFT so that `US$30` is not split at the `$`. Shona's associative

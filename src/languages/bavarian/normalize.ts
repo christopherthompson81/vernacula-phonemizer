@@ -341,7 +341,7 @@ export function normalizeBavarian(input: string): string {
     //    not just the modifier (trap 37). ℃/℉ are folded first — one code point meaning what `°C` means.
     //    ⚠ The arc-minute and arc-second of a coordinate are LEFT UNREAD. `47°16′15″` has no sourced Bavarian
     //    word for ′/″ anywhere probed, and reading the degree while dropping the minute is the honest state.
-    s = tr(s, /℃/gu, "°C").replace(/℉/gu, "°F");
+    s = tr(tr(s, /℃/gu, "°C"), /℉/gu, "°F");
     s = tr(s, /(\p{Nd})\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 Grad Celsius");
     s = tr(s, /(\p{Nd})\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 Grad Fahrenheit");
     //    ⚠ THE COMPOUND HYPHEN IS CONSUMED, and reading the output is what caught this too. `90°-Winkl` is a

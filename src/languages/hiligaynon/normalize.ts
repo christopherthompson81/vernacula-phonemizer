@@ -183,7 +183,7 @@ export function normalizeHiligaynon(input: string): string {
     // this emits. Reading it right needs a sourced Spanish 1–12 set for hil, which neither the corpus (×1
     // clock, and it writes the digit) nor Kaufmann's headword list supplies as a paradigm. One instance,
     // recorded rather than guessed; what this rule does fix is the false pause and the phantom "sero".
-    s = tr(s, 
+    s = tr(s,
         /(?<=(?:a?las)[- ])(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)(?!\d)/giu,
         (_m, h: string, min: string) => (Number(min) === 0 ? `${Number(h)}` : `${Number(h)} kag ${Number(min)}`),
     );
@@ -209,7 +209,7 @@ export function normalizeHiligaynon(input: string): string {
     // connective the text already wrote, do not claim a HYPHEN CHAIN (an identifier, not a span), and
     // require digits on BOTH sides — which is also what keeps this rule off `ika-19`, where the hyphen has
     // a LETTER on its left.
-    s = tr(s, 
+    s = tr(s,
         /(?<!\b(?:hasta|asta|tubtob|tubtub|halin sa|halin)\s)(?<![\d.,\p{L}-])(\d[\d,]*(?:\.\d+)?)\s?[-–]\s?(\d[\d,]*(?:\.\d+)?)(?![\d,-]|\.\d)/gu,
         "$1 hasta $2",
     );

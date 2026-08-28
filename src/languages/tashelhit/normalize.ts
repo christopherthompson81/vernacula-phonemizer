@@ -297,7 +297,7 @@ export function normalizeTashelhit(input: string): string {
     //    `zero-width` cell is ×4 — the corpus writes `Taskflt n ​​trɣi` with two U+200B. A rendering hint is
     //    not speech, and a zero-width space between a figure and its unit would break every adjacency the
     //    steps below match on.
-    s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍⁠﻿]/gu, "");
+    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍⁠﻿]/gu, "");
 
     // 3) ERA MARKERS, then DOTTED RUNS — before anything can read an interior dot as a phrase break, and
     //    before step 6, the other rule in this file that inspects dots (trap 39: a guard's evidence has a
@@ -386,7 +386,7 @@ export function normalizeTashelhit(input: string): string {
     //    discriminator is the RIGHT context, which is trap 24's move: a coordinate degree is followed by its
     //    ARC-MINUTE, and a bearing by a direction word. Both are rejected; the temperature instances have
     //    neither. Zero counter-examples on this corpus in either direction.
-    s = tr(s, 
+    s = tr(s,
         /(\d)\s?°(?!\s*\d+\s*[′'’])(?!\s*(?:Ouest|Est|Nord|Sud|agafa|anẓul|iffus|ataram|agmuḍ)(?![\p{L}\p{M}]))/gu,
         "$1 n tskflt",
     );

@@ -131,7 +131,7 @@ export function normalizeYoruba(text: string): string {
     //     ⚠ ONLY BEFORE A DECLARED UNIT, so `sq ft`-style phrases whose unit this file cannot read keep
     //     their `sq` rather than half the phrase being spoken. Emitted as unit-then-modifier, the position
     //     `exponentWords` already declares for this language.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{L}\p{M}])sq\.?\s*(km|ha|mi|ft)(?![\p{L}\p{M}\d])/giu,
         // ⚠ A LEADING SPACE, because the corpus writes `705.78sq` GLUED and the replacement would otherwise
         // fuse the noun onto the numeral (`8kìlómítà`) for the tokenizer to swallow whole. The trailing
@@ -146,7 +146,7 @@ export function normalizeYoruba(text: string): string {
     s = tr(s, METRE, (_m, num: string) => `${num} ${METRE_WORD}`);
     // 5. ⚠ ANOTHER CIRCUMFIX: `ìwọ̀n` before the number, the scale name after. The scale names are borrowed
     //    unchanged. Must run BEFORE the decimal rule so `100.4°F` is still one number when the scale is claimed.
-    s = tr(s, 
+    s = tr(s,
         SCALED_DEGREE,
         (_m, num: string, letter: string) => `${SYM.degree} ${num} ${SYM.scales[letter.toUpperCase()] ?? letter}`,
     );

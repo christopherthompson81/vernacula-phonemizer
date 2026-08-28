@@ -72,7 +72,7 @@ export function normalizeArabic(input: string): string {
     let s = foldLetterforms(input);
 
     // 1) ARABIC SYMBOL CHARACTERS → their ASCII equivalents, so every shared rule downstream applies.
-    s = tr(s, /٪/gu, "%").replace(/٫/gu, ".").replace(/٬/gu, ",");
+    s = tr(tr(tr(s, /٪/gu, "%"), /٫/gu, "."), /٬/gu, ",");
 
     // 2) UNIT ABBREVIATIONS after a number. Longest first so كم/س beats كم.
     s = tr(s, new RegExp(`([${DIGIT}])\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),

@@ -196,7 +196,7 @@ function prepose(t: string, word: string, opts: { gap: number; lead?: string; ta
     //    ⚠ THE WINDOW STOPS AT A CLAUSE BOUNDARY. `[^digit]` alone would let a shad or a newline inside it,
     //    so a `ཨ་སྒོར` in the PREVIOUS sentence could suppress this sentence's currency word — a silent drop
     //    where the gap is widest. All six of the corpus's `ཨ་སྒོར … $` windows sit inside one clause.
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`(${w}${WORD_END}[^${D}།༎\\n]{0,${opts.gap}})${lead}(${NUM})${tail}`, "gu"),
         "$1$2",
     );
@@ -233,7 +233,7 @@ export function normalizeTibetan(input: string): string {
     //    registry covers only fullwidth digits and letters, so these are this layer's job.
     //    ℃/℉ are folded by the registry already; repeated here, idempotently, so the pass is correct when a
     //    test calls it directly.
-    t = tr(t, /[％﹪٪]/gu, "%").replace(/℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(tr(t, /[％﹪٪]/gu, "%"), /℃/gu, "°C"), /℉/gu, "°F");
 
     // 2b) THE SPACE AROUND A NUMERAL, ONCE HERE AND AGAIN AT STEP 12 — and it must be both.
     //     Here, because a rule that PREPOSES a word puts a letter where the digit used to be, so a space that
@@ -309,7 +309,7 @@ export function normalizeTibetan(input: string): string {
     //     ཆུ་ཚོད (hour) and སྐར་མ (minute) are both in the kaikki referee's word list, and the minute sense of
     //     སྐར་མ is read on the wiki — `པིན་ཆེན་ཆུ་ཚོད་ཀྱིས་སྐར་མ་བཅོ་ལྔ་རེའི་མཚམས་སུ`, Big Ben chiming every
     //     fifteen minutes (its other hits are སྐར་མ "star", trap 37).
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`(?<![${D}:])([${D}]{1,2}):([${D}]{2})(?![${D}:])`, "gu"),
         `${TSHEG}ཆུ་ཚོད་$1་སྐར་མ་$2`,
     );
@@ -328,7 +328,7 @@ export function normalizeTibetan(input: string): string {
     //     exponent sign is a hyphen; a `*`/`×`/`x` before the left operand is the discriminator, and the
     //     operand is anchored at BOTH edges because a lookbehind alone only moves where the engine starts
     //     (playbook trap 52 — this is the shape that read `802.11m` as "802.11 metres" in three languages).
-    t = tr(t, 
+    t = tr(t,
         new RegExp(
             `(?<![*×xX]\\s{0,2})(?<!${DASH}\\s{0,2})(?<![${D}.,])`
                 + `([${D}]+)\\s*${DASH}\\s*([${D}]+)(?![${D}.,])(?!\\s*${DASH})`,

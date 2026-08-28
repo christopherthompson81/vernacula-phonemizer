@@ -172,7 +172,7 @@ export function normalizeGerman(input: string): string {
     //     and the reader still says the ordinal — the OmniVoice audit heard *vierundzwanzigSTEN september*
     //     where we read the cardinal *vierundzwanzig*. Safe without the dot precisely because a month name
     //     follows: a number in that position is a day, never a quantity. Same <= 31 guard, same endings.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?:(\\p{L}+)(\\s+))?(\\d{1,2})(\\s+)(?=(?:${MONTHS})(?![\\p{L}\\p{M}]))`, "giu"),
         (whole, prev: string | undefined, sp: string | undefined, digits: string, sp2: string) => {
             const stem = ordinalStem(Number(digits));

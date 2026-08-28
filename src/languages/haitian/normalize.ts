@@ -228,7 +228,7 @@ export function normalizeHaitian(input: string): string {
     //    corpus writes `lèt ​​​​,` and `Larisi ​​ak` with runs of U+200B — and `&nbsp;` must go BEFORE the
     //    ampersand rule at step 13, or it is read as "and" plus the letters n-b-s-p. This corpus has the
     //    entity in a SPACED form too (`[ ref. & nbsp; nesesè ]`), which is why the entity arm allows a gap.
-    s = tr(s, /&\s?nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[\u200b\u200c\u200d\ufeff]/gu, "");
+    s = tr(tr(s, /&\s?nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[\u200b\u200c\u200d\ufeff]/gu, "");
 
     // 2) ERA MARKERS AND DOTTED ABBREVIATIONS, before anything can read an interior dot as a phrase break,
     //    and before the de-grouping at step 4 for the reason the Lingala layer gives: both look at dots.
@@ -318,7 +318,7 @@ export function normalizeHaitian(input: string): string {
     //    number, unit noun, connective, denominator — `120 kilomèt pa èdtan`, the corpus's own sentence.
     for (const [sym, word] of UNITS) {
         if (/[²³23]$/u.test(sym)) continue; // a rate never carries an exponent on its NUMERATOR here
-        s = tr(s, 
+        s = tr(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(\\d+(?:[.,]\\d+)?)\\s?${sym}\\s?/\\s?(h|èdtan)(?![\\p{L}\\p{M}\\d])`,
                 "gu",
@@ -335,18 +335,18 @@ export function normalizeHaitian(input: string): string {
         // arm below matches on: `Ak yon sifas tè 30 milyon km2`, `8.6 milyon km²`. Claimed first, because
         // the single-operand arm cannot see past the word and would leave the unit raw (this is the shared
         // tier's `magAltU` hop, done locally for the same reason the rest of this step is local).
-        s = tr(s, 
+        s = tr(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(\\d+(?:[.,]\\d+)?)\\s?(milyon|milya|mil)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`,
                 "gu",
             ),
             `$1 $2 ${word}`,
         );
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),
             (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${a} a ${b} ${word}` : whole),
         );
-        s = tr(s, 
+        s = tr(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`,
                 "gu",
@@ -400,7 +400,7 @@ export function normalizeHaitian(input: string): string {
     //    guards and for why non-ascending pairs are left alone.
     //    ⚠ A PERCENT-TO-PERCENT SPAN NEEDS ITS OWN ARM: RANGE wants the dash to follow the DIGITS, and in
     //    `10%-15%` a `%` stands between them. It costs no new word — the connective is the same `a`.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?%\s?[-–—]\s?(\d+(?:[.,]\d+)?)\s?%/gu,
         (whole, a: string, b: string) =>
             Number(a.replace(",", ".")) < Number(b.replace(",", ".")) ? `${a}% a ${b}%` : whole,

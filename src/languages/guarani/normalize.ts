@@ -299,7 +299,7 @@ export function normalizeGuarani(input: string): string {
     // ⚠ CAPPED AT SIX DIGITS so a long identifier cannot be worded, and anchored on BOTH edges of the digit
     // run rather than only before the key — trap 52: a lookbehind rejects a POSITION, and the engine simply
     // starts one digit later (`1932ha` would otherwise match as `932ha`).
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,])(\d{1,6})ha(?![\p{L}\p{M}]|\s*\d)/gu,
         (_m, n: string) => `${numberToWords(Number(n), n)}${ORDINAL_SUFFIX}`,
     );
@@ -386,7 +386,7 @@ export function normalizeGuarani(input: string): string {
     // i.e. pedagogical rather than naturally-occurring, so a non-zero time is REFUSED WHOLE rather than half
     // (trap 53's `ak` model) and reads exactly as it did before.
     // ⚠ AND IT MUST NOT DOUBLE A NOUN THE TEXT ALREADY WROTE (trap 12): `15:30 aravo` already carries it.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,:])([01]?\d|2[0-3]):00(?![\d.,:])(?!\s*aravo(?![\p{L}\p{M}]))/gu,
         (_m, h: string) => `${Number(h)} aravo`,
     );

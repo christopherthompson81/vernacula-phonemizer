@@ -203,7 +203,7 @@ export function normalizeSundanese(input: string): string {
     // construction (`jam 10 liwat 10`). Shipped on that plus the sister-language pattern (Indonesian `lewat`,
     // the same construction), and the thinness is stated rather than hidden — if it is wrong, it is wrong on
     // 78 instances, and the alternative was leaving a clause pause in the middle of every clock.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.:])\b(jam|tabuh|pukul)\s?([01]?\d|2[0-3])[.:]([0-5]\d)\b(?!\.?\d)/giu,
         (_m, w: string, h: string, min: string) =>
             Number(min) === 0 ? `${w} ${Number(h)}` : `${w} ${Number(h)} liwat ${Number(min)}`,
@@ -291,7 +291,7 @@ export function normalizeSundanese(input: string): string {
     // writes the DECIMAL COMMA (`40,9 °C` ×many, and step 12 reads it), so a following comma is what declines
     // a decimal right operand. Measured: dropping it as well gains 4 more segments, every one a clause comma
     // after a year span, and admits `N-N,N` into a comma-decimal corpus for it.
-    s = tr(s, 
+    s = tr(s,
         /(?<!\b(?:nepi ka|tepi ka|dugi ka|ti|antara)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d,-])/gu,
         "$1 nepi ka $2",
     );

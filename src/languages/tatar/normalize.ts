@@ -276,14 +276,14 @@ export function normalizeTatar(input: string): string {
     //    Both are claimed; a two-field rule alone would have left the seconds as a stranded number.
     //    Runs BEFORE the ordinal rule so a time is not first claimed as a numeral-plus-suffix.
     const timeSuffix = `(?:\\s?-\\s?|)(${SFX}{1,5})${NOT_LETTER_AFTER}`;
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d):([0-5]\\d)(?![\\d:.,])(?:${timeSuffix})?`, "gu"),
         (whole, h: string, mi: string, sec: string, sfx: string | undefined) => {
             const words = [cardinal(Number(h)), cardinal(Number(mi)), cardinal(Number(sec))].join(" ");
             return sfx === undefined ? words : attachToWords(whole, words, sfx);
         },
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-4]):\\s?([0-5]\\d)(?![\\d:.,])(?:${timeSuffix})?`, "gu"),
         (whole, h: string, mi: string, sfx: string | undefined) => {
             const mv = Number(mi);

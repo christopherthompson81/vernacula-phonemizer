@@ -294,7 +294,7 @@ export function normalizeKorean(input: string): string {
     //    The month irregulars are the one place where the Sino series itself changes shape — 6월 is
     //    유월 and 10월 is 시월, never 육월 / 십월 — so they are spelled here rather than composed
     //    (×4 and ×7 in the corpus). 16월 does not exist, but the lookbehind keeps 16 out of it anyway.
-    s = tr(s, /(?<!\d)6월/gu, "유월").replace(/(?<!\d)10월/gu, "시월");
+    s = tr(tr(s, /(?<!\d)6월/gu, "유월"), /(?<!\d)10월/gu, "시월");
     s = tr(s, /(\d+)(?=[가-힣])/gu, (m, num: string) => {
         const w = numberToWords(Number(num));
         return w === "" ? m : w; // out of safe-integer range: leave the digits for the number path

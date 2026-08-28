@@ -160,7 +160,7 @@ export function normalizeMalayalam(input: string): string {
     s = tr(s, /ശതമാനം(\s+ശതമാനം)+/gu, "ശതമാനം");
 
     // 8) DECIMALS (×25), after units and times have taken their share.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} ${DECIMAL_WORD} ${[...frac].join(" ")}`,
     );

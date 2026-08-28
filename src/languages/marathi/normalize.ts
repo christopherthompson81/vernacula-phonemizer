@@ -141,7 +141,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //    words, आपल् + या → [ˈaːpəl jˈaː]. 66 instances. Stripping it is orthographically lossless.
         //    अ‍ॅ / अॅ is the Marathi spelling of the loan vowel /æ/ and is folded to ऍ (candra e), which
         //    the manifest already maps to ɛː; left as अ + ॅ it read as two vowels [ə ɛː].
-        s = tr(s, /अ[‌‍]?ॅ/gu, "ऍ").replace(/अ[‌‍]?ॉ/gu, "ऑ");  // ZWNJ, ZWJ
+        s = tr(tr(s, /अ[‌‍]?ॅ/gu, "ऍ"), /अ[‌‍]?ॉ/gu, "ऑ");  // ZWNJ, ZWJ
         s = tr(s, /[‌‍]/gu, "");  // ZWNJ, ZWJ
 
         // 2) DEVANAGARI DIGITS → ASCII. Second, and before EVERY rule that follows, because all of them
@@ -160,7 +160,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //    3b) ASCII ':' written where a visarga was meant. Word-INTERNAL is unambiguous (स्वत:चे —
         //        a list colon is always followed by a space). Word-FINAL needs the closed adverb list.
         s = tr(s, /(?<=[ऀ-ॣॲ-ॿ]):(?=[ऀ-ॣॲ-ॿ])/gu, "ः");
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\p{L}\\p{M}])(${TAH_ADVERB_ALT}):(?![\\p{L}\\p{M}])`, "gu"),
             "$1ः",
         );
@@ -189,7 +189,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //    characters of वाजता, वाजल्यानंतर, वाजण्याच्या, वादळे, वाईल्ड and (via वे) वेळा, वेगवेगळ्या —
         //    13 live corruptions in this corpus, e.g. "8:30 वाजता" → [ˈaːʈʰ , t̪iːsʋˈaːd͡zt̪aː]. A
         //    leading `(?<![\d.,])` likewise keeps the rule off the minute field of a clock time.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\d.,])(\\d+)\\s?(${SUFFIX_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) =>
                 ordinal(Number(digits), SUFFIX_FORM[suffix]!, suffix) ?? whole,
@@ -225,7 +225,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //        its sense; at :00 the postposition is exactly right and is supplied when absent — but
         //        NOT when the next word is another वाज- form ("11:00 वाजल्यानंतर" must not become
         //        "अकरा वाजता वाजल्यानंतर").
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d:.])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.])(\s*वाजता(?![\p{L}\p{M}]))?/gu,
             (m, h: string, min: string, vaajta: string | undefined, offset: number, whole: string) => {
                 const body = clock(Number(h), Number(min));
@@ -237,7 +237,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //    7c) The same clock written with a DOT, which only occurs beside a timezone marker in this
         //        corpus ("१२.०० GMT वाजता", "(15.00 यूटीसी)"). No वाजता is added — the sentence already
         //        carries one after the timezone, and adding a second read as "बारा वाजता GMT वाजता".
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:])(?=\s*(?:GMT|UTC|यूटीसी|जीएमटी))/gu,
             (_m, h: string, min: string) => clock(Number(h), Number(min)),
         );
@@ -264,7 +264,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         // 10) CURRENCY, likewise before the shared tier (which would give यूरो / पाउंड for € / £). The
         //     sign is always PRE-posed in this corpus and the noun always follows the number, with any
         //     magnitude word hopping along: "$२.३ बिलियन" → "२.३ बिलियन डॉलर".
-        s = tr(s, 
+        s = tr(s,
             new RegExp(
                 `([$€¥£₹])\\s?(\\d+(?:[.,]\\d+)*)(\\s*(?:${MAGNITUDE_ALT})(?![\\p{L}\\p{M}]))?`,
                 "gu",
@@ -279,7 +279,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     matches a unit only when a NUMBER is adjacent and these keys are Devanagari, so this stays
         //     local. `(?![\p{L}\p{M}])` after the key is what keeps मी (metre) out of मीटर, मिनिटे and
         //     the pronoun मी — the same over-counting trap any short unit key has in an abugida.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`,
         );
@@ -292,7 +292,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     १०००-१३००, 100-200 मैल, 1469-1539 …) is ascending. So the rule fires only when b > a:
         //     11 gained, 0 broken, 2 real ranges deliberately missed (१९९५-९६, an abbreviated year span,
         //     and 4.2-3.9, a descending "million years ago" span).
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,])(\d+(?:\.\d+)?)\s?[-–—]\s?(\d+(?:\.\d+)?)(?![\d.,])/gu,
             (m, a: string, b: string) => (Number(b) > Number(a) ? `${a} ${def.rangeWord} ${b}` : m),
         );

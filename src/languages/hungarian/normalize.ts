@@ -213,11 +213,11 @@ export function normalizeHungarian(input: string): string {
     //    sentence period (`…, stb.`).
     //    A DIGIT counts as a continuation as well as a letter: `kb. 20 km-re` and `kb. 1000 körül` are the
     //    commonest shape of all, and a `(?=\p{L})` lookahead alone left them as the cluster [ɡb] + a pause.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`,
     );
@@ -257,7 +257,7 @@ export function normalizeHungarian(input: string): string {
     // 4) UNIT ABBREVIATION + HYPHEN SUFFIX, BEFORE the shared symbol tier (step 6). The tier would
     //    otherwise claim `20 km-re` and leave `-re` stranded behind the substituted word, where the
     //    tokenizer drops the hyphen and *re* becomes its own stressed word.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(${UNIT_ALT})([²³23])?-([${LOWER}]+)`, "giu"),
         (whole, u: string, exp: string | undefined, suf: string) => {
             const head = SUFFIXABLE_UNIT[u.toLowerCase()];
@@ -268,7 +268,7 @@ export function normalizeHungarian(input: string): string {
     );
     //    The single-letter `m` needs a preceding NUMBER to be a unit at all (`2m-es`); bare `m-` is far
     //    likelier to be an initial or a typo than a metre.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(\\d)\\s?m([²³23])?-([${LOWER}]+)`, "gu"),
         (_m, d: string, exp: string | undefined, suf: string) => {
             const pre = exp === undefined ? "" : exp === "³" || exp === "3" ? "köb" : "négyzet";
@@ -289,7 +289,7 @@ export function normalizeHungarian(input: string): string {
     // 7) DEGREES and SIGNS. `°` was dropped outright and a trailing C was read as Hungarian ⟨c⟩ → [t͡s].
     //    The suffixed form (`35°-tól`, a longitude) is claimed FIRST, for the reason step 4 exists: the
     //    plain rule would emit *fok* and leave `-tól` to become its own stressed word.
-    s = tr(s, 
+    s = tr(s,
         // ⚠ THE LOWERCASE SCALE LETTERS GO IN THE CLASS, NOT IN AN `i` FLAG. `LOWER` is the Hungarian
         //    lowercase alphabet and the suffix is genuinely lowercase-only, so `i` would fix the scale
         //    letter and silently widen the suffix capture. Leaving this arm case-sensitive while the plain
@@ -356,7 +356,7 @@ export function normalizeHungarian(input: string): string {
         const doubled = dg !== undefined ? `${stem.slice(0, -dg.length)}${dg[0]!}${dg}` : stem + stem.slice(-1);
         return `${head}${doubled}${v}l`;
     };
-    s = tr(s, 
+    s = tr(s,
         /(\d+)\s?÷\s?(\d+)/gu,
         (_m, a: string, b: string) => `${numberToWords(Number(a), a)} ${huInstrumental(numberToWords(Number(b), b))} osztva`,
     );
@@ -375,7 +375,7 @@ export function normalizeHungarian(input: string): string {
     s = tr(s, new RegExp(`(?<![\\d.,])(\\d{1,4})\\.(\\s+)(?=${MONTH})`, "giu"), "$1$2");
     // 9b) MONTH + DAY: the bare date nominative — `augusztus 24. és` is *augusztus huszonnegyedike és*.
     //     ×2. Licensed by a following lowercase word so a date ending a sentence keeps its period.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(${MONTH}\\p{L}*\\s+)(\\d{1,2})\\.(?=\\s+[${LOWER}])`, "giu"),
         (whole, pre: string, d: string) => {
             const w = dateNominative(Number(d));
@@ -385,7 +385,7 @@ export function normalizeHungarian(input: string): string {
     // 9c) THE GENERAL ORDINAL. The left lookbehind refuses a numeral that is itself preceded by a digit or
     //     a dot (`1.1. ábra`, `802.11a`); the lookahead refuses a digit, an uppercase continuation and the
     //     end of input. The period is CONSUMED — removing the spurious phrase break is half the fix.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d.,])(\\d{1,4})\\.(?=\\s+[${LOWER}]|,)`, "gu"),
         (whole, d: string) => ordinalWords(Number(d)) ?? whole,
     );
@@ -417,7 +417,7 @@ export function normalizeHungarian(input: string): string {
     // 10a) DATES take the ORDINAL stem: `szeptember 17-én` is *tizenhetedikén*, not *tizenhétén*. Gated on
     //      a preceding month name — all 32 date-suffixed numerals in the corpus have one, and the gate is
     //      what keeps an ordinary superessive on a cardinal out of the ordinal path.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<=${MONTH}\\p{L}*\\s)(\\d{1,2})-([${LOWER}]+)(?![\\p{L}\\p{M}])`, "giu"),
         (whole, d: string, suf: string) => {
             if (!DATE_SUFFIX.test(suf)) return whole;
@@ -429,7 +429,7 @@ export function normalizeHungarian(input: string): string {
     );
     // 10b) Everything else concatenates onto the cardinal, which is correct because the orthography
     //      already wrote the harmonically-chosen form (`1848-ban`, `1970-es`, `36-an`, `1945-ig`).
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+)-([${LOWER}]+)(?![\\p{L}\\p{M}])`, "gu"),
         (whole, d: string, suf: string) => {
             const n = Number(d);
@@ -446,7 +446,7 @@ export function normalizeHungarian(input: string): string {
     //      letter name (*gé pé eshez*), so it is glued here rather than left for the tokenizer to drop
     //      the hyphen and emit it as its own stressed word. The word-vs-letters decision mirrors the
     //      shared pass's: spell only what could not be read as a word at all.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(\\p{Lu}{2,})-([${LOWER}]+)`, "gu"),
         (whole, acr: string, suf: string) => {
             const lexical = ACRONYM_WORD[acr];

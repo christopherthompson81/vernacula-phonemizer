@@ -125,7 +125,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    left-hand side has already become a full noun. Closed lists on BOTH sides: nine of the
         //    fourteen Odia-to-Odia slashes in this corpus are ଏବଂ/କିମ୍ବା and the like, and a blanket
         //    rule would read "and per or".
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\p{L}\\p{M}])(${RATE_NUM.join("|")})\\s?/\\s?(${RATE_DEN.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, a: string, b: string) => `${a} ପ୍ରତି ${b}`);
 
@@ -180,7 +180,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    THE TRAILING BOUNDARY IS LOAD-BEARING. Without it the single-letter ଶ matches the START of an
         //    ordinary word; in particular "18ଶହ ଶତାବ୍ଦୀ" (×2) is ଶହ, the HUNDRED word, and must be left
         //    alone to read "eighteen hundred". `\b` cannot express this — see the header.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\d.,])(\\d+)\\s?(${ORDINAL_SUFFIXES.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) => ordinal(Number(digits), suffix) ?? whole);
 

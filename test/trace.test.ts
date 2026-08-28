@@ -259,9 +259,50 @@ describe("phonemizeTrace — normalizer provenance (#1150 stage 2)", () => {
      * wrong. That is the difference between an unknown and a confident wrong offset, and it is the same
      * discipline `traced: false` uses for an engine that reports no tokens at all.
      */
-    test("an input span is either right or absent — never a guess", () => {
+    /**
+     * ⚠ THIS TEST USED TO CHECK ONLY BOUNDS, AND SO COULD NOT FAIL. Review found 1,478 tokens across 74
+     * languages naming input characters that did not contain their own surface (`paid` → `" Smi"`), and every
+     * one satisfied `0 <= start <= end <= length`.
+     *
+     * ⚠ AND THE OBVIOUS REPLACEMENT IS UNSOUND. "the surface must occur inside the mapped span" produces
+     * FALSE failures, because normalization GENERATES tokens: `an`'s `habitants` maps to `210,59 hab/km²`
+     * and `hil`'s `sang` to `sg`, both correct. A generated token can also coincide with text elsewhere in
+     * the input, so surface matching cannot distinguish a good mapping from a drifted one.
+     *
+     * What IS sound: where normalization changed nothing, the mapping must be the identity. That is the case
+     * offset drift breaks first — the failure above was drift by the length of some untracked edit — and it
+     * covers most of the corpus, since most rows normalize to themselves. The rewriting cases are carried by
+     * the two explicit tests above, which name their expected source text outright.
+     */
+    test("where normalization changed nothing, a token's source CONTAINS it", () => {
+        const bad: string[] = [];
+        let checked = 0;
         for (const lang of GOLDEN_LANGS)
-            for (const text of sample(lang, 3)) {
+            for (const text of sample(lang, 4)) {
+                let t: ReturnType<typeof phonemizeTrace>;
+                try {
+                    t = phonemizeTrace(text, lang);
+                } catch {
+                    continue;
+                }
+                if (t.normalized !== text) continue; // normalization moved things: not this test's case
+                for (const k of t.tokens) {
+                    if (k.inputSpan === undefined) continue;
+                    checked++;
+                    // ⚠ CONTAINMENT, NOT EQUALITY. A rule may match a wider region and re-emit it unchanged —
+                    // `bar` matches `4.` and writes `4.` back — so both characters legitimately derive from
+                    // the whole match and the span is WIDER than the token. What drift breaks is containment.
+                    if (k.inputSpan[0] > k.span[0] || k.inputSpan[1] < k.span[1])
+                        bad.push(`${lang}: ${JSON.stringify(k.surface)} span ${k.span} but inputSpan ${k.inputSpan}`);
+                }
+            }
+        expect(bad.slice(0, 8), "the input was unchanged, so a token's source must contain it").toEqual([]);
+        expect(checked, "no identity rows were reached — the probe measured nothing").toBeGreaterThan(500);
+    });
+
+    test("an input span always lies inside the caller's own string", () => {
+        for (const lang of GOLDEN_LANGS)
+            for (const text of sample(lang, 2)) {
                 let t: ReturnType<typeof phonemizeTrace>;
                 try {
                     t = phonemizeTrace(text, lang);
@@ -270,8 +311,8 @@ describe("phonemizeTrace — normalizer provenance (#1150 stage 2)", () => {
                 }
                 for (const k of t.tokens) {
                     if (k.inputSpan === undefined) continue;
-                    expect(k.inputSpan[0], `${lang} span start`).toBeGreaterThanOrEqual(0);
-                    expect(k.inputSpan[1], `${lang} span end past input`).toBeLessThanOrEqual(text.length);
+                    expect(k.inputSpan[0]).toBeGreaterThanOrEqual(0);
+                    expect(k.inputSpan[1]).toBeLessThanOrEqual(text.length);
                     expect(k.inputSpan[0]).toBeLessThanOrEqual(k.inputSpan[1]);
                 }
             }

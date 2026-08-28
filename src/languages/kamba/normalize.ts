@@ -243,7 +243,7 @@ export function normalizeKamba(input: string): string {
     //    needs a digit adjacent to the mark and this shape puts the magnitude between them, so the sign
     //    would simply be dropped. ×1, and the reading it produces is the corpus's own order for the same
     //    quantity elsewhere ("mambilioni ma Ndola sya US").
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`${NOT_BEFORE}(?:US|AUD)?\\$\\s?(?=(?:milioni|mbilioni|ngili)${NOT_AFTER})`, "gu"),
         "ndola ",
     );

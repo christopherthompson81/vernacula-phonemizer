@@ -162,7 +162,7 @@ export function normalizeHakka(input: string): string {
     // 至 gets wedged between a minute mark and a degree sign.
     // 度/分/秒 all speak (tʰu⁵³ — see the derived entry — / pun⁴⁴ / miau³¹). Digits stay digits so the
     // cardinal path reads them, which is also what strips a written leading zero.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(\\d+)\\s*°\\s*(\\d+)\\s*${MINUTE}\\s*(\\d+)\\s*${SECOND}`, "gu"),
         "$1度$2分$3秒",
     );
@@ -242,7 +242,7 @@ export function normalizeHakka(input: string): string {
     // to the dash and this can never match. The `‰` sign may sit on an endpoint, so it is captured and
     // RE-EMITTED (trap 10) — `30-34‰` must still reach step 10 as a per-mille on both halves.
     // Digits are LEFT as digits so the cardinal path reads them.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `(?<![\\d.,:\\p{sc=Latn}])(\\d+(?:\\.\\d+)?)([%‰])?\\s*[-–—－~～〜]\\s*(\\d+(?:\\.\\d+)?)(?=\\s*${RANGE_UNIT})`,
             "gu",

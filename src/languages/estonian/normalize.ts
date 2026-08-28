@@ -711,7 +711,7 @@ export function normalizeEstonian(input: string): string {
     //    are read and only the connective is dropped — which is fi's shipped answer for the same shape, and
     //    it is exactly what the dash already did.
     const ordCase = (word: string): string | undefined => caseOf(word);
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`(?<![\\d.,:\\p{L}\\p{M}])(\\d{1,4})\\.\\s+(ja|või)\\s+(\\d{1,4})\\.(?=\\s+(${HEAD_WORD}))`, "gu"),
         (m, a: string, conj: string, b: string, head: string) => {
             const e = ordCase(head);
@@ -720,7 +720,7 @@ export function normalizeEstonian(input: string): string {
             return x !== undefined && y !== undefined ? `${x} ${conj} ${y}` : m;
         },
     );
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`(?<![\\d.,:\\p{L}\\p{M}])(\\d{1,4})\\.\\s*[–—-]\\s*(\\d{1,4})\\.(?=\\s+(${HEAD_WORD}))`, "gu"),
         (m, a: string, b: string, head: string) => {
             const e = ordCase(head);
@@ -741,7 +741,7 @@ export function normalizeEstonian(input: string): string {
     //    match: `Diogenes Laertios 5.1.10.` is rejected at `5` (the next dot is followed by a digit) and at
     //    `1`/`10` (preceded by a dot) — trap 52, where a lookbehind rejects a POSITION and the engine simply
     //    starts later, so the operand is anchored on BOTH edges rather than only the left.
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`(?<![\\d.,:\\p{L}\\p{M}])(\\d{1,4})\\.(?=\\s+(${HEAD_WORD}))`, "gu"),
         (m, n: string, head: string) => {
             const e = ordCase(head);
@@ -801,7 +801,7 @@ export function normalizeEstonian(input: string): string {
     //    IN TIME, so declining it is a real cost — three spans keep their silent dash. It is taken knowingly:
     //    the alternative is to read the era marker's position, and step 2 has already spent it.
     const NUM = String.raw`\d+`;
-    t = tr(t, 
+    t = tr(t,
         new RegExp(
             String.raw`(?<![-+−–—/\d.,:\p{L}\p{M}])(${NUM})[ ]?[-–—][ ]?(${NUM})(?![-+−/\d:\p{L}\p{M}]|,\d)`,
             "gu",

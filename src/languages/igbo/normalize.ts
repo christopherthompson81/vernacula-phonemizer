@@ -296,7 +296,7 @@ export function normalizeIgbo(text: string): string {
     //    that `igbo.ts` reads tone only when written.
     //
     //    The FRACTION stays digit-by-digit after the word: `3.14159` is "three point one four one five nine".
-    s = tr(s, 
+    s = tr(s,
         DECIMAL,
         (_m, whole: string, frac: string) => `${whole} ${MANIFEST.numbers.decimalWord} ${[...frac].join(" ")}`,
     );

@@ -126,7 +126,7 @@ export function makeTigrinyaNormalizer(
 
         // 1. ፡፡ → ። . TWO U+1361 ETHIOPIC WORDSPACE is the typewriter substitute for ። (ኣርባዕተ ነጥቢ), and
         //    `::` is its ASCII substitute (`ይረጋገጽ:: "ብርግጽ …"`). ×1 each. FIRST, so step 5 sees only lone ፡.
-        s = tr(s, /፡፡/gu, "።").replace(/::/gu, "።");
+        s = tr(tr(s, /፡፡/gu, "።"), /::/gu, "።");
 
         // 2. THE CLOCK, and it is claimed ONLY on the ETHIOPIC separator. ×1: `ሰዓት 10፡00 ቅድሚ ቐትሪ`.
         //    ⚠ THE NARROWNESS IS THE RULE, and it is where Amharic's step 6 does not survive re-measurement.

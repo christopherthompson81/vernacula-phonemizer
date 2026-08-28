@@ -195,7 +195,7 @@ export function normalizeMacedonian(input: string): string {
     //    The trailing "часот"/"ч" (the hour) is kept/expanded — "ч" is the abbreviation for "часот". A
     //    comma after the minutes marks a sports time, not a clock. The range rule ran first, so
     //    `22:00-23:00` is already "22:00 до 23:00". `am`/`pm` after a time → "претпладне"/"попладне".
-    s = tr(s, 
+    s = tr(s,
         /([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)(\s*ч(?!\p{L})\.?)?/gu,
         (_m: string, h: string, min: string, ...rest: unknown[]) => {
             // The optional `ч` group participates only for "23:35 ч"; otherwise the args shift so the
@@ -214,7 +214,7 @@ export function normalizeMacedonian(input: string): string {
     // 7) THE ORDINAL SUFFIX, the largest class in this file. `(\d+)[- ]?` + the written suffix (the last letters of the
     //    spoken ordinal). The `-те` suffix is ambiguous between a count ("the N") and a decade: a 4-digit
     //    number followed by "години" is a decade, otherwise it is "the N".
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `(?<![\\p{L}\\p{M}\\d])(\\d+)\\s*-?\\s*(тите|тиот|миот|виот|риот|тина|ите|от|ти|ви|ми|ри|та|ма|те)(?!\\p{L})`,
             "gu",
@@ -262,7 +262,7 @@ export function normalizeMacedonian(input: string): string {
     // 9) DATES — `N <month>` → ordinal + month (на 6 октомври → на шести октомври), including a date range
     //    `24 август - 5 септември` and the Germanic-dot form `4. јули 1776`. The day must be 1–31.
     const monthAlt = [...MONTHS].join("|");
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(\\d{1,2})\\s+(${monthAlt})\\s*[-–—]\\s*(\\d{1,2})\\s+(${monthAlt})(?![\\p{L}\\p{M}])`, "giu"),
         (_m: string, a: string, ma: string, b: string, mb: string) => {
             const oa = mkOrdinal(Number(a)), ob = mkOrdinal(Number(b));
@@ -270,7 +270,7 @@ export function normalizeMacedonian(input: string): string {
             return `${oa} ${ma} до ${ob} ${mb}`;
         },
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(\\d{1,2})(?:\\.)?\\s+(${monthAlt})(?![\\p{L}\\p{M}])`, "giu"),
         (_m: string, d: string, month: string) => {
             const dv = Number(d);

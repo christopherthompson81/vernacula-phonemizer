@@ -175,12 +175,12 @@ export function normalizeThai(input: string): string {
     // 3.50 เมตร are decimals, 09.30 น. is a time). น. = นาฬิกา, the formal register FLEURS is written in.
     // Range first, so the leading time of `22.00-23.00 น.` — which carries no น. of its own — is
     // recognised; ถึง is unambiguous there because the corpus instance is inside ระหว่าง ("between").
-    s = tr(s, 
+    s = tr(s,
         /(\d{1,2})[.:](\d{2})\s*[-–—]\s*(\d{1,2})[.:](\d{2})\s*น\./gu,
         (_m, h1: string, m1: string, h2: string, m2: string) =>
             `${clock(h1, m1)} ถึง ${clock(h2, m2)}`,
     );
-    s = tr(s, 
+    s = tr(s,
         /(\d{1,2})[.:](\d{2})\s*น\./gu,
         (_m, hh: string, mm: string) => clock(hh, mm),
     );
@@ -188,7 +188,7 @@ export function normalizeThai(input: string): string {
 
     // ── 7. decimals ──────────────────────────────────────────────────────────────────────────────
     // AFTER step 6. The point is จุด and the fractional digits are spelled ONE AT A TIME.
-    s = tr(s, 
+    s = tr(s,
         /(\d)\.(\d+)/gu,
         (_m, last: string, frac: string) => `${last} จุด ${spellDigits(frac)}`,
     );

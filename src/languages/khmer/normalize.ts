@@ -225,7 +225,7 @@ export function normalizeKhmer(text: string): string {
      * 6% of the sites, all of them markup rather than language — and `allOccurrencesInMarkup` in defects.ts now
      * keeps the scan from reporting that class of line as a language defect.
      */
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![=!<>])(?<=[${D}\\p{L}\\p{M}²³)]) = (?=[${D}\\p{L}\\p{M}(])(?![=<>])`, "gu"),
         " ស្មើ ",
     );

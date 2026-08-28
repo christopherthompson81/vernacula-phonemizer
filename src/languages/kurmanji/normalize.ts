@@ -246,7 +246,7 @@ export function normalizeKurmanji(input: string): string {
     //    degree word ONCE, after the second number, so a lookahead tight enough to be safe reached only
     //    that one — the first `-24` read as a bare positive, i.e. the sign silently inverted on half the
     //    phrase. The window now allows one intervening `û -N`.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{L}\p{Nd}])[-−](\p{Nd}+(?:[.,]\p{Nd}+)?)(?=(?:\s*û\s*[-−]?\p{Nd}+(?:[.,]\p{Nd}+)?)?[^.,\p{Nd}]{0,4}\s?pile)/giu,
         "negatîf $1",
     );
@@ -311,7 +311,7 @@ export function normalizeKurmanji(input: string): string {
     //    `3. Rêbaza`, `17. Gulan`, `19. Heya` are ordinals before a capital; `1. rêbaza`, `2. rêbaza` are
     //    ordinals before a lowercase; and the sentence ends are followed by capitals too. Only the number's
     //    MAGNITUDE separates them, which is why it was tabulated rather than guessed.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{Nd}.,\-–—])(\p{Nd}{1,2})\.(?=\s+\p{L})/gu,
         (whole, digits: string) => (Number(digits) <= 31 ? suffixed(Number(digits), "em") : whole),
     );
@@ -324,7 +324,7 @@ export function normalizeKurmanji(input: string): string {
     //    ⚠ The digit run must not begin inside a word (`C3a`, `C3b` are complement proteins) and the number
     //    is bounded, because `numberToWords` is a compositor and a 12-digit run is not a numeral anybody
     //    speaks — the corpus's longest genuine one is `2456293` (a Julian day).
-    s = tr(s, 
+    s = tr(s,
         new RegExp(String.raw`(?<![\p{L}\p{Nd}.,])(\p{Nd}{1,9})(${SUFFIX_ALT})(?![\p{L}\p{Nd}])`, "gu"),
         (whole, digits: string, suf: string) => {
             const n = Number(digits);

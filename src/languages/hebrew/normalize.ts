@@ -255,7 +255,7 @@ export function normalizeHebrew(input: string): string {
     //    straight onto the expansion's head word: `לְ` + `סֶנְטִימֶטֶר` → *lesentimeter*.
     for (const [body, expansion, head] of ABBREV) {
         const tail = expansion.slice(head.length);
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`${NOT_LETTER_BEFORE}(${PRO_DASH}?)${body}${NOT_LETTER_AFTER}`, "gu"),
             (_m: string, pre: string) => `${pre === "" ? expansion : (PROCLITIC[pre] ?? pre) + head + tail} `,
         );
@@ -293,11 +293,11 @@ export function normalizeHebrew(input: string): string {
     //    word the pipeline speaks; `צהל` is a skeleton it does — the neural nakdan vocalizes it, and the
     //    sync path stops emitting a spurious word boundary. The acronyms that are NOT read as a word are
     //    the eight at step 4, which is why step 4 runs first.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`${NOT_LETTER_BEFORE}(${PRO_QUOTE}{1,2})${GERSHAYIM}(?=[א-ת]{2,})`, "gu"),
         (_m: string, run: string) => `${vocalize(run)} "`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`${NOT_LETTER_BEFORE}([א-ת]{1,6})${GERSHAYIM}([א-ת]{1,8})${NOT_LETTER_AFTER}`, "gu"),
         "$1$2",
     );
@@ -317,7 +317,7 @@ export function normalizeHebrew(input: string): string {
     //    Each letter is vocalized separately (`וְ כְּ`) rather than fused, because the fused forms are exactly
     //    the u-/va- morphophonology `hebrew.jsonc` records as unmodelled. Zero non-proclitic letters occur
     //    in this position in the corpus, so the class is closed by measurement rather than by assumption.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`${NOT_LETTER_BEFORE}(${PRO_DASH}{1,2})${DASH}(?=[0-9A-Za-z])`, "gu"),
         (_m: string, run: string) => `${vocalize(run)} `,
     );
@@ -330,7 +330,7 @@ export function normalizeHebrew(input: string): string {
     //    ×0; the corpus's other four hits are the construct אחוזי־, `אחוזי ההצלחה`, a different slot.)
     //    ⚠ AND THE WORD MAY ALREADY BE THERE (trap 12) — `20 אחוז` ×3 carries no sign at all, so the two
     //    forms cannot collide, but the guard is written anyway because it costs one alternation.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(${NUM})\\s?%\\s?(אחוז\\S*)?`, "gu"),
         (_m: string, n: string, named: string | undefined) => `${n} ${named ?? "אָחוּז"} `,
     );
@@ -370,7 +370,7 @@ export function normalizeHebrew(input: string): string {
     //    he.wikipedia and every quoted instance is in front of its quantity: `מינוס 80 צלזיוס`,
     //    `מינוס 273.15 מעלות צלזיוס`, `מינוס 38 מעלות`, `מינוס 4 מעלות צלזיוס`, `מינוס 14.2 מעלות`. It is
     //    ×0 in the mined corpus, which is the ordinary shape for a SIGN's word (a writer types the glyph).
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![0-9.,])(${NUM})(\\s?°\\s?[CF])\\s?[-−–]`, "gui"),
         "מִינוּס $1$2",
     );

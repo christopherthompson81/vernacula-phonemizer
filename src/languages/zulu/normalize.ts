@@ -186,7 +186,7 @@ export function normalizeZulu(input: string): string {
     //    puts a SPACE after the colon, so `:\s?` is required. NOT a sports time: a third `.dd` field is a
     //    pace, excluded by the trailing `(?![:.\d])`. BEFORE the decimal rules, which would otherwise claim
     //    the `11.60` tail of a sports time, and before the range rule.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d:.,])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![:.\d])(?:[ \u00a0]*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)(?![\p{L}\p{M}]))?/gu,  // space, NBSP
         (_m, h: string, min: string, ap: string | undefined) => `${clockBody(h, min)}${halfDay(ap)}`);
 

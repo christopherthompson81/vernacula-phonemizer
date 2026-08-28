@@ -174,3 +174,54 @@ The mechanical part is proven — 3,203 sites, 27,286 rows, zero output change. 
 239 rows silently desynced, which is precisely the failure mode this project keeps finding: an instrument
 that looks clean and measures nothing. The order that follows from the evidence is: cover the three shapes in
 the shared components first, add the nesting guard, measure the cost, and only then rewrite the 168.
+
+## Run 7 — review, and the defect that made the feature worse than useless
+
+⚠ **The `?? [0, 0]` fallback laundered a desync into a confident wrong mapping.** `provenanceFor` withholds
+the mapping when its length disagrees with the string — but `tr` rebuilt the array at the CURRENT length,
+filling gaps with `[0,0]`, so the very next tracked step re-synchronised the LENGTH over shifted values and
+the check then passed. Repro:
+
+    beginProvenance("abc"); s = "abc".replace(/b/u,"BB");   // provenanceFor -> undefined   (right)
+    s = tr(s, /c/gu, "C");                                  // provenanceFor -> [[0,1],[1,2],[2,3],[3,3]]
+
+End to end, `phonemizeTrace("<b>Dr.</b> Smith paid $1,250.", "en")` reported `paid` → `" Smi"` and `1,250` →
+`"h paid"`. Corpus-wide: **1,478 of 112,640 tokens across 74 of 185 languages** named input characters that
+did not contain their own surface. The header claimed that was impossible.
+
+**The fix is to check at ENTRY, not per index.** Checking only the indices actually read is not enough — the
+repro touches none of the missing ones. `tr` now requires `p.length === s.length` before it will track, and
+drops the mapping permanently otherwise. Coverage fell from a claimed 97.0% to a true **92.8%**; the 4.2%
+difference was the wrong answers.
+
+⚠ **And the test could not have caught it.** It asserted `0 <= start <= end <= length`, which all 1,478 wrong
+spans satisfy. The replacement asserts CONTAINMENT where normalization changed nothing — and the obvious
+alternative ("the surface must appear inside the mapped span") is UNSOUND, because normalization GENERATES
+tokens: `an`'s `habitants` maps to `210,59 hab/km²` and `hil`'s `sang` to `sg`, both correct.
+
+### Four more
+
+  * **Code points vs code units.** `beginProvenance` seeded with `[...input]` (code points) while every other
+    offset in the trace is a UTF-16 index, so one astral character made the array short — and per the defect
+    above, the next step hid it. The replacement loop had the mirror bug. Both now index code units.
+  * **`re.lastIndex`.** `String.replace` resets it on a global regex; the traced path built its own and left
+    the caller's untouched. `khmer`'s de-grouping loop shares one `/g` regex between `tr` and `.test()`.
+  * **A second source scanner went blind.** `tools/normalization/review.ts`'s `replaceCalls` matched only
+    `.replace(`, dropping from 3,743 sites to 614 — an 84% loss, after which its blindness probe reported
+    clean because it saw nothing. Restored to 3,825.
+  * **Chained tails.** `tr(x, A, B).replace(C, D)` left the tail untracked; 63 sites in 45 files rewritten to
+    `tr(tr(x, A, B), C, D)`. ⚠ Measured afterwards: coverage did NOT move, so these were not the binding
+    constraint — the registry pre-passes are.
+
+### The ceiling, stated precisely
+
+`getPhonemizer`'s wrapper runs `stripMarkup`, the confusable/fullwidth folds, Roman numerals and the
+vulgar-fraction fold BEFORE any normalizer, and none reports. A LENGTH-PRESERVING pre-pass is harmless
+(`foldNativeDigits`: `１`→`1`, one for one) and a LENGTH-CHANGING one desyncs:
+
+    phonemizeTrace("Dr. Smith paid １２５０", "en")   every token mapped
+    phonemizeTrace("<b>hi</b> there", "en")         none mapped
+
+That is the remaining 7.2%, and closing it means instrumenting ten fold functions in `core/unicode.ts` and
+`markup.ts`, each with its own shape. Left undone deliberately: it is a coverage limit, and with the entry
+check in place an unreported step now costs an ABSENT span rather than a wrong one.

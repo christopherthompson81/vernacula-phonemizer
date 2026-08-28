@@ -262,12 +262,12 @@ export function normalizeArmenian(input: string): string {
     //       and 1–2 digits after the separator is always a decimal (72 instances: 35,6 · 10.7 · 76.5%).
 
     // 1a. SPACE-grouped (36 hard / 5 sample): `29 743`, `36 260 130`, `1 500 000`, `250 000-ը`.
-    s = tr(s, 
+    s = tr(s,
         /(?<!\d)(?<!\d[.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""),  // space, NBSP, NNBSP, thin space
     );
     // 1b. TWO OR MORE `.`/`,` groups — grouping with no ambiguity left to resolve.
-    s = tr(s, 
+    s = tr(s,
         /(?<!\d)(?<!\d[.,])([1-9]\d{0,2})((?:([.,])\d{3}){2,})(?!\d)(?![.,]\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""),
     );
@@ -275,7 +275,7 @@ export function normalizeArmenian(input: string): string {
     //     `30.08.1918` and `8.11.1953` have TWO-digit groups, and the `[.,]`-excluding lookarounds on both
     //     edges stop the engine restarting inside the number (trap 52 — a lookbehind rejects a POSITION).
     const magAlt = MAGNITUDE_WORDS.join("|");
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<!\\d)(?<!\\d[.,])([1-9]\\d{0,2})[.,](\\d{3})(?!\\d)(?![.,]\\d)(\\s*(?:${magAlt})${NOT_LETTER_AFTER}|\\s*[×x%])?`, "gu"),
         (m, head: string, group: string, trailer: string | undefined) =>
             head === "0" || trailer !== undefined ? m : `${head}${group}`,
@@ -340,7 +340,7 @@ export function normalizeArmenian(input: string): string {
     //       superscript so ONE rule handles both; left alone it is trap 53's shape exactly — the tier
     //       re-emits the digit and `41.8կմ2` reads "…kilometres TWO", a quantity invented out of a power.
     //       Runs before steps 7–7b so the unit rules sees a single shape.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`([\\d/\\s])(${UNIT_KEYS.join("|")})([23])(?![\\d])${NOT_LETTER_AFTER}`, "gu"),
         (_m, lead: string, unit: string, p: string) => `${lead}${unit}${p === "2" ? "²" : "³"}`,
     );
@@ -351,7 +351,7 @@ export function normalizeArmenian(input: string): string {
     //       (կիլոմետր+ից → կիլոմետրից, մետր+ի → մետրի; every unit word here is consonant-final).
     //       ⚠ BEFORE step 8, or the digit-suffix rule below would not see a unit at all — and before the
     //       tier, for the reason trap 39 gives: a guard's evidence has a lifetime.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(\\d\\s?)(${UNIT_KEYS.join("|")})([²³]?)[-\\u2010\\u2011\\u2013\\u2014](${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
         (_m, lead: string, unit: string, power: string, suffix: string) => {
             const noun = UNIT_WORD[unit]!;
@@ -372,11 +372,11 @@ export function normalizeArmenian(input: string): string {
     //        ⚠ AND A UNIT AFTER A MEASURE WORD, for the same reason and one this pass CREATES: step 5
     //        expands `քառ. կմ` to `քառակուսի կմ`, at which point the unit is no longer digit-adjacent and
     //        the tier declines it — the fix has to close the leak it just made visible.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`((?:քառակուսի|խորանարդ)\\s)(${UNIT_KEYS.join("|")})(?![\\d])${NOT_LETTER_AFTER}`, "gu"),
         (_m, lead: string, unit: string) => `${lead}${UNIT_WORD[unit]!}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(/\\s?)(${UNIT_KEYS.join("|")})([²³]?)(?![\\d])${NOT_LETTER_AFTER}`, "gu"),
         (_m, lead: string, unit: string, power: string) =>
             `${lead}${power === "" ? "" : `${EXPONENT_WORD[power]!} `}${UNIT_WORD[unit]!}`,
@@ -405,7 +405,7 @@ export function normalizeArmenian(input: string): string {
         return first === undefined || second === undefined ? m : `${first}, ${second}`;
     });
     // 7b. ORDINAL.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<!\\d)(?<!\\d[.,])(\\d[\\d ]*\\d|\\d)[-\\u2010\\u2011\\u2013\\u2014]րդ(${ARM_LOWER}*)${NOT_LETTER_AFTER}`, "gu"),
         (m, digits: string, tail: string) => {
             const bare = digits.replace(/ /gu, "");
@@ -415,7 +415,7 @@ export function normalizeArmenian(input: string): string {
         },
     );
     // 7c. DECADE and every other bound suffix, in one rule — they differ only in the suffix string.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<!\\d)(?<!\\d[.,])(\\d[\\d ]*\\d|\\d)[-\\u2010\\u2011\\u2013\\u2014](${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
         (m, digits: string, suffix: string) => {
             const bare = digits.replace(/ /gu, "");
@@ -445,7 +445,7 @@ export function normalizeArmenian(input: string): string {
     //        reaching the IPA as the ENGLISH letter name (`20 °C` → *kʰəsɑn sˈiː*).
     //        `°F` is ×0 here and is deliberately left untouched rather than given an unsourced scale name.
     //        A bound suffix on the degree is handled first (`35,6°-ից`), same reason as step 9.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(\\d)\\s?°\\s?[CСc]?\\s?[-\\u2013](${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
         "$1 աստիճան$2",
     );
@@ -459,7 +459,7 @@ export function normalizeArmenian(input: string): string {
     //        from this corpus rather than borrowed: when the left context is exhausted, the right one
     //        decides. Runs AFTER step 11, so the degree is already a WORD to look for.
     //        `մինուս`: hy.wikipedia ×28/2, in the article defining the + and − signs.
-    s = tr(s, 
+    s = tr(s,
         /(^|[\s(«՝])[-−–]\s?(\d[\d ]*(?:[.,]\d+)?)(?=\s?(?:%|աստիճան|Ցելսիուսի))/gmu,
         "$1մինուս $2",
     );

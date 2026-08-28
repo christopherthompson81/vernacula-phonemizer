@@ -236,7 +236,7 @@ export function normalizeEwe(input: string): string {
     //    base letter with an orphaned mark the scan drops. `TOKEN` admits U+0342 (it is inside the
     //    ̀-ͯ range), so the word never broke on it — the mark simply reached `phonemizeWord` and was
     //    dropped as unmapped, which is why this one is silent where ⟨Ð⟩ is loud.
-    s = tr(s, /[ÐĐ]/gu, "Ɖ").replace(/Ƞ/gu, "Ŋ").replace(/͂/gu, "̃").normalize("NFC");
+    s = tr(tr(tr(s, /[ÐĐ]/gu, "Ɖ"), /Ƞ/gu, "Ŋ"), /͂/gu, "̃").normalize("NFC");
 
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, before the ampersand rule at step 11 — else `&nbsp;` is read as
     //    the word "and" followed by the letters n-b-s-p. This wiki writes 9 of its 16 ampersands as entities
@@ -244,7 +244,7 @@ export function normalizeEwe(input: string): string {
     //    ⚠ AND THE ENTITY SITS IN EXACTLY THE GAP THE UNIT AND MAGNITUDE RULES NEED: `million&nbsp;925`,
     //    `miliɔn 1.4&nbsp;`, `GH¢&nbsp;1`. Folding it to a space is what lets step 6 reach across it.
     //    U+200B is ×20 in the retained text (`zero-width` cell 48) and is a rendering hint, not speech.
-    s = tr(s, /&nbsp;?/giu, " ").replace(/&ndash;/giu, "–").replace(/&#(?:x[0-9a-f]+|\d+);/giu, " ")
+    s = tr(tr(tr(s, /&nbsp;?/giu, " "), /&ndash;/giu, "–"), /&#(?:x[0-9a-f]+|\d+);/giu, " ")
         .replace(/[​‌‍﻿]/gu, "");
 
     // 3) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause

@@ -316,7 +316,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    judgement about Balochi. `[ؠ-ۿݐ-ݿ‌]` contains U+200C, so a ZWNJ keeps its word whole and
         //    `phonemizeArabic` then strips it; U+200D is absent from that class, so its 3 instances SPLIT
         //    a word into two tokens and each half goes to the g2p alone. Same for the BOM.
-        s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[‍﻿​]/gu, "");
+        s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[‍﻿​]/gu, "");
 
         // 3) ⚠ ARABIC PRESENTATION FORMS — ×110 across 5 of the 383 segments, and those segments read as
         //    the EMPTY STRING today: the engine's token class stops at U+06FF (and now U+077F), so
@@ -386,7 +386,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, not a clause mark, or a number
         //    followed by its own sentence comma would lose its last group and speak it as zero.
         for (const mark of ["،", ",", "٬"]) {
-            s = tr(s, 
+            s = tr(s,
                 new RegExp(`(?<![${D}.,،٬])[${D}]{1,3}(?:(?<!(?<![${D}])0)${mark}[${D}]{3})+(?![${D}]|${mark}[${D}])`, "gu"),
                 (w) => w.split(mark).join(""),
             );
@@ -452,7 +452,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //     untouched, exact case, and never beside a numeral, a rate slash or an exponent.
         s = BARE_UNITS(s);
         for (const [abbr, word] of UNITS) {
-            s = tr(s, 
+            s = tr(s,
                 new RegExp(`(?<![${D}.,٫])([${D}]+(?:[.٫][${D}]+)?)[ \u00a0\u202f\u2009]?${abbr}(?![\\p{L}\\p{M}‌²³/])`, "giu"),  // space, NBSP, NNBSP, thin space
                 `$1 ${word}`,
             );
@@ -470,7 +470,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    numbers with no pause — byte-identical to what this rule would produce. Stated rather than
         //    coded, so nobody adds it to the punctuation table by symmetry and turns 2 quantities into 2
         //    spurious pauses.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![${D}.])([${D}]+)\\.([${D}]+)(?![${D}]|\\.[${D}])`, "gu"),
             "$1 $2",
         );

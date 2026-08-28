@@ -97,7 +97,7 @@ export function normalizeSindhi(input: string): string {
 
     // 6) DEGREES (5), BEFORE the unit rules — the scale letter would otherwise reach the Latin fallback
     //    and be read as an English letter name.
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, /(\d)\s*°\s*C(?!\p{L})/giu, "$1 ڊگري سينٽي گريڊ");
     t = tr(t, /(\d)\s*°\s*F(?!\p{L})/giu, "$1 ڊگري فارينهائيٽ");
     t = tr(t, /(\d)\s*°/gu, "$1 ڊگري");

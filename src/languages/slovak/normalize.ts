@@ -439,7 +439,7 @@ export function normalizeSlovak(input: string): string {
     //    `medzi 10. a 11. storočím`; the optional word after `a` handles `19. a začiatku 20. storočia`,
     //    the corpus's one interpolated head. Every item in the list takes the head noun's case, which is
     //    what Slovak agreement requires and what a per-item rule could not produce.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `(?<![\\p{L}\\p{M}\\d.,])((?:\\d{1,4}\\.,?\\s+(?:a\\s+(?:[\\p{Ll}\\p{M}]+\\s+)?)?)*)`
             + `(\\d{1,4})\\.\\s+(${LICENSOR_ALT})(?![\\p{L}\\p{M}])`,

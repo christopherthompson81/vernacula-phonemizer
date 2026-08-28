@@ -143,7 +143,7 @@ export function normalizeBulgarian(input: string): string {
     t = tr(t, /(\d+)\s*%/gu, "$1 процента");
 
     // 8) DEGREES, BEFORE the unit rules — the C of `20 °C` is otherwise read as the English letter name.
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, /(\d)\s*°\s*C(?!\p{L})/giu, "$1 градуса по Целзий");
     t = tr(t, /(\d)\s*°\s*F(?!\p{L})/giu, "$1 градуса по Фаренхайт");
     t = tr(t, /(\d)\s*°/gu, "$1 градуса");

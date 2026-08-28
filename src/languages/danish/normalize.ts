@@ -143,7 +143,7 @@ export function normalizeDanish(input: string): string {
 
     // 6) DEGREES (3), BEFORE the unit rules — the C of `20 °C` was falling through to the English letter
     //    name [seːˀ]. Case-insensitive on the scale letter; the bare sign is read too.
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, /(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grader celsius");
     t = tr(t, /(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grader fahrenheit");
     //    ⚠ THE NOUN MUST NOT FUSE WITH WHAT FOLLOWS — the same repair step 12 carries for the currency arm,

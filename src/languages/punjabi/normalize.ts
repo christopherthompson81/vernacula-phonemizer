@@ -153,7 +153,7 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    ordinary word and glues it to the numeral. `\b` cannot express it: `\b` is ASCII-defined and
         //    finds nothing at all against Gurmukhi, so every boundary in this file is an explicit
         //    lookaround — `\b` is ASCII-defined and matches nothing against this script.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\d.,])(\\d+)\\s?(${ORDINAL_SUFFIXES.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) => ordinal(Number(digits), suffix) ?? whole);
 

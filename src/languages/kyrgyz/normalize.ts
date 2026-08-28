@@ -331,7 +331,7 @@ export function normalizeKyrgyz(input: string): string {
     //    in the engine's `[Ѐ-ӿ]` token class, so they TERMINATE A WORD and split it into two stressed halves.
     //    The `&nbsp;` entity goes with them: the artifact carries it as literal text, and the ampersand arm
     //    of the tier would otherwise read it as *жана nbsp*.
-    s = tr(s, /[­​-‏﻿]/gu, "").replace(/&nbsp;?/gu, " ");
+    s = tr(tr(s, /[­​-‏﻿]/gu, ""), /&nbsp;?/gu, " ");
 
     // 1) SPACE-GROUPED THOUSANDS — `67 848 156`, `199 951 км²`, `1 729 742`, `23 000 сомдон`. The Russian
     //    convention and the one Kyrgyz uses; 34 occurrences in the hard tier and 7 in the sample. The

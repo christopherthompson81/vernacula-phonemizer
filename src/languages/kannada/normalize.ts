@@ -128,7 +128,7 @@ export function normalizeKannada(input: string): string {
     //    (15ನೇ → ಹದಿನೈದನೇ); emitted apart, ನೇ reached the g2p as a stray stressed [nˈeː]. The suffix
     //    is written both welded (16ನೇ) and spaced (15 ನೇ) in this corpus, hence the optional space, and
     //    may carry the nominaliser ದು (60ನೆಯದು), which rides along on the fused form.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d.,])(\\d+)\\s*-?\\s*(ನೇ|ನೆಯ)(ದು)?${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, suffix: string, du: string | undefined) => {
             const n = Number(digits);
@@ -144,7 +144,7 @@ export function normalizeKannada(input: string): string {
     //    are mid-sentence (ಕ್ರಿ.ಪೂ. 356, ಕ್ರಿ.ಪೂ.5000, ಕ್ರಿ.ಶ. 1000–1300). A Kannada case clitic may be
     //    welded straight onto the abbreviation (ಕ್ರಿ.ಪೂದಲ್ಲಿ, ಕ್ರಿ.ಪೂವರೆಗೂ); it is left attached, which
     //    is grammatical on the expansion too — ಕ್ರಿಸ್ತ ಪೂರ್ವದಲ್ಲಿ, ಕ್ರಿಸ್ತ ಪೂರ್ವವರೆಗೂ.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`${NOT_LETTER_BEFORE}ಕ್ರಿ\\s*\\.\\s*(ಪೂ|ಶ)(?:\\s*\\.(?=\\s*[\\p{L}\\d]))?`, "gu"),
         (_m, k: string) => ERA[k]!,
     );
@@ -170,7 +170,7 @@ export function normalizeKannada(input: string): string {
     //    denominator. Kannada's rate is a dative PREFIX, attested verbatim in this corpus
     //    ("ಗಂಟೆಗೆ 83 ಕಿಮೀ", "ಸೆಕೆಂಡಿಗೆ 1.5 ಕಿಮಿ"), which is why `unitPer` is not declared on the shared
     //    tier. Step 6 has already folded ಕಿ.ಮೀ/ಕಿಮೀ to ಕಿಲೋಮೀಟರ್, so this matches the expanded word.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(\\d[\\d.]*)\\s?ಕಿಲೋಮೀಟರ್\\s*\\/\\s*(ಗಂ|ಸೆ)\\.?${NOT_LETTER_AFTER}`, "gu"),
         (_m, n: string, den: string, off: number, full: string) =>
             `${dative(RATE_DENOM[den]!, full, off)}${n} ಕಿಲೋಮೀಟರ್`,
@@ -199,7 +199,7 @@ export function normalizeKannada(input: string): string {
     s = tr(s, /(?<=\d):\s?(?=\d)/gu, " ");
 
     // 11) DECIMALS
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} ${DECIMAL_WORD} ${[...frac].join(" ")}`,
     );

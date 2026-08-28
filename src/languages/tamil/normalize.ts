@@ -191,7 +191,7 @@ export function normalizeTamil(input: string): string {
     // 5) RATE units, before the shared unit tier (step 6) claims the numerator and strands the `/x`.
     //    Prefix + dative, which is the Tamil idiom and is attested verbatim in this corpus
     //    ("மணிக்கு 64 கி.மீ", "வினாடிக்கு 1.5 கிலோமீட்டர்"). mph is the same shape spelled as one token.
-    s = tr(s, 
+    s = tr(s,
         // The closing boundary is `(?![A-Za-z])`, NOT the general letter class: the corpus writes
         // "160km/hக்கு" with a Tamil case clitic welded to the denominator, and a `\p{L}` guard rejected
         // it — after which the shared tier claimed "160km" and left "/h" stranded as the letter H.
@@ -214,7 +214,7 @@ export function normalizeTamil(input: string): string {
     // 7) TIMES BEFORE the decimal and sign steps: a bare-number rule must not claim 11:30, and 15.00 UTC
     //    is a clock, not a decimal.
     //    (a) the dotted clock, which only appears with an explicit zone (15.00 UTC, 12.00 GMT ×2).
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.:])([01]?\d|2[0-3])\.([0-5]\d)(?=\s*(?:UTC|GMT))/gu,
         (_m, h: string, min: string) => (Number(min) === 0 ? h : `${h} ${min}`),
     );
@@ -229,7 +229,7 @@ export function normalizeTamil(input: string): string {
 
     // 8) DECIMALS, after units and times have taken their share. Tamil reads the fractional part digit by
     //    digit after புள்ளி ("point"), so they are separated — 3.50 → மூன்று புள்ளி ஐந்து பூஜ்ஜியம்.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} புள்ளி ${[...frac].join(" ")}`,
     );
@@ -253,7 +253,7 @@ export function normalizeTamil(input: string): string {
 
     // 10) FRACTIONS. Only after the rate rule, which also owns `/`. Tamil lexicalises ½/¼/¾; anything
     //     else takes the "N-இல் M பங்கு" frame (1/5 → ஐந்தில் ஒரு பங்கு).
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d./])(\d{1,3})\/(\d{1,3})(?![\d/])/gu,
         (whole, a: string, b: string) => {
             const lex = FRACTION_WORD[`${a}/${b}`];

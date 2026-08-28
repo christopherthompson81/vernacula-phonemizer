@@ -165,7 +165,7 @@ export function normalizeXhosa(input: string): string {
 
     // 1) HTML ENTITY, then the bare ampersand → `kunye` ("and"). The entity must go first or `&amp;` becomes
     //    "kunye amp ;".
-    s = tr(s, /&amp;/giu, "&").replace(/&/gu, " kunye ");
+    s = tr(tr(s, /&amp;/giu, "&"), /&/gu, " kunye ");
 
     // 2) DOTTED CAPITAL RUNS → the bare letters, BEFORE anything else reads an interior dot as a phrase
     //    break (multi-dot abbreviations before single-dot).
@@ -237,7 +237,7 @@ export function normalizeXhosa(input: string): string {
     //    ⚠ A COMMA IS A DECIMAL SEPARATOR ONLY WITH A 1–2 DIGIT TAIL, the same discipline step 15 uses:
     //    without it these two rules eat a grouped thousand that step 4 declined.
     const decimal = (sep: string, frac: string): boolean => sep === "." || frac.length <= 2;
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(US\\$|AUD\\$|[$£¥])[ \u00a0]?(\\d+)([.,])(\\d+)((?:[ \u00a0](?:${MAG_ALT}))?)`, "gu"),  // space, NBSP
         (whole, sym: string, int: string, sep: string, frac: string, mag: string) =>
             decimal(sep, frac)

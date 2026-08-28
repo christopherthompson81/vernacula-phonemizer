@@ -1,4 +1,3 @@
-import { tr } from "./provenance.ts";
 /**
  * Shared SYMBOL normalization — the language-independent machinery for rewriting %, currency
  * signs, and unit abbreviations into that language's words, BEFORE its tokenizer. The per-language part
@@ -11,6 +10,7 @@ import { tr } from "./provenance.ts";
  * times, years and romans, which are NOT shared — their rules are language-specific by nature). The
  * contract everywhere: emit plain words and digits the language's EXISTING pipeline already speaks.
  */
+import { tr } from "./provenance.ts";
 
 /** Word forms for one countable noun. Index 0 = singular; further indices per the language's
  *  `countForm`. A language with no agreement uses a 1-element array. */
@@ -1001,7 +1001,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // two initialisms (`B&B`) must become three tokens, and any later rule that reads a token boundary
         // needs the split to have happened already.
         if (d.ampersand !== undefined)
-            text = tr(text, /&amp;/giu, "&").replace(/[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
+            text = tr(tr(text, /&amp;/giu, "&"), /[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
         let s = text;
         const isUnitKey = (k: string): boolean =>
             d.units?.[k] !== undefined ||
@@ -1078,7 +1078,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         };
         // BEFORE curBefore/curAfter — see the arms' docstring.
         if (magFirstAfter)
-            s = tr(s, 
+            s = tr(s,
                 magFirstAfter,
                 // ⚠ ` ${mag}` — the leading space is what `magAlt`'s capture carries, and the prefix
                 // template below is written against that shape. Passing the bare word would fuse it to the
@@ -1087,19 +1087,19 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     money(num, ` ${mag}`, sym, full.slice(offset + m.length), true),
             );
         if (magFirstBefore)
-            s = tr(s, 
+            s = tr(s,
                 magFirstBefore,
                 (m: string, mag: string, sym: string, num: string, offset: number, full: string) =>
                     money(num, ` ${mag}`, sym, full.slice(offset + m.length), true),
             );
         if (curBefore)
-            s = tr(s, 
+            s = tr(s,
                 curBefore,
                 (m: string, sym: string, num: string, mag: string | undefined, offset: number, full: string) =>
                     money(num, mag, sym, full.slice(offset + m.length)),
             );
         if (curAfter)
-            s = tr(s, 
+            s = tr(s,
                 curAfter,
                 (m: string, num: string, mag: string | undefined, sym: string, offset: number, full: string) =>
                     money(num, mag, sym, full.slice(offset + m.length)),
@@ -1132,7 +1132,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         if (d.multiply !== undefined) {
             const mul = d.multiply;
             const by = mul.by ?? mul.times;
-            s = tr(s, 
+            s = tr(s,
                 /(\p{Nd})\s*(×|x)\s*(?=\p{Nd})/gu,
                 (whole, left: string, sign: string, off: number, full: string) => {
                     // A UNIT after the right operand makes it a measurement; an UNSPACED ascii `x` is the
@@ -1147,7 +1147,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         }
 
         if (unitRe)
-            s = tr(s, 
+            s = tr(s,
                 unitRe,
                 (whole, num: string, mag: string | undefined, u: string, numExp?: string, denom?: string,
                  denomExp?: string, exp?: string) => {

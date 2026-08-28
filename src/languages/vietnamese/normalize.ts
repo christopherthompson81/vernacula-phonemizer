@@ -86,7 +86,7 @@ export function normalizeVietnamese(input: string): string {
     // ⚠ The right guard is `(?![\d:])(?!,\d)`, NOT `(?![\d,:])`: a comma followed by a DIGIT is the
     // sports-time hundredths that 3b owns, but a comma followed by anything else is an ordinary sentence
     // comma, and the blunter guard silently skips "Vào lúc 11:20, cảnh sát …".
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?!,\\d)(\\s+giờ${NOT_LETTER_AFTER})?`, "gu"),
         (_m, hh: string, mm: string) => clock(hh, mm),
     );

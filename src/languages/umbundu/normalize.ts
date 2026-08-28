@@ -134,7 +134,7 @@ export function normalizeUmbundu(input: string): string {
     //    it is a SPELLING repair and every later step's word boundary (`(?![\p{L}\p{M}])`) would otherwise
     //    treat the stray letter as a boundary too. Both cases, though only the lowercase occurs (×10);
     //    ⟨Ĩ⟩ U+0128 occurs ×2 already correctly spelled, so the capital row is symmetry, not a measured fix.
-    s = tr(s, /ῖ/gu, "ĩ").replace(/Ῑ/gu, "Ĩ");
+    s = tr(tr(s, /ῖ/gu, "ĩ"), /Ῑ/gu, "Ĩ");
 
     // 2) THE SHARED SYMBOL TIER, ordered as the Karakalpak and Punjabi layers order it: its own numeral
     //    pattern reads `3.850` and `163,52` as ONE token, and steps 3 and 4 split precisely those. It also

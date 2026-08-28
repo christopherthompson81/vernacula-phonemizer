@@ -168,7 +168,7 @@ export function normalizeTajik(input: string): string {
     //    (2.9%) — the same shape as the Balochi run's deleted letter, one character class over.
     //    `&nbsp;` goes with it: the artifact carries the ENTITY as literal text (`+22,2&nbsp;°C`), and the
     //    ampersand tier at step 9 would otherwise read it as the word "ва" plus *nbsp*.
-    s = tr(s, /\u00ad/gu, "").replace(/&nbsp;?/gu, " ");
+    s = tr(tr(s, /\u00ad/gu, ""), /&nbsp;?/gu, " ");
 
     // 1) SPACE-GROUPED THOUSANDS — `70 000`, `5 781 203`, `135 620 км²`, `877 802 песо`. The Russian
     //    convention, and the engine's `\d+` splits on the space: `70 000 нафар` read *ҳафтод сифр нафар*

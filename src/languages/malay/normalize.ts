@@ -259,7 +259,7 @@ export function normalizeMalay(input: string): string {
     //     the dot is gone and pass 2 claims the coordinated second clock. Bounded, and idempotent after.
     for (let pass = 0; pass < 4; pass++) {
         const before = s;
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\d.:])${clockBody}\\s?(${MERIDIEM})(?![\\p{L}\\p{M}])(?!\\s*(?:pagi|petang|malam|tengah))`, "gu"),
             (_m, h: string, min: string, mark: string) => clock(h, min, mark));
         s = tr(s, new RegExp(`${CLOCK_BEFORE}(?<![\\d.:])${clockBody}`, "gu"),

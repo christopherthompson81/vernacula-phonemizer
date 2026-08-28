@@ -103,7 +103,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         // 2) ARABIC SYMBOL CHARACTERS → ASCII. Must precede de-grouping/decimals (3, 6) so a natively-typed ٫/٬
         //    is seen by them, and precede percent (7) — a percentage written with the Arabic ٪ U+066A is in no
         //    tier's pattern and vanishes outright.
-        s = tr(s, /٪/gu, "%").replace(/٫/gu, ".").replace(/٬/gu, ",");
+        s = tr(tr(tr(s, /٪/gu, "%"), /٫/gu, "."), /٬/gu, ",");
         //    ⚠ THE ARABIC COMMA DOUBLES AS THE THOUSANDS SEPARATOR in Persian (19،500). Between digits it is a
         //    grouping mark, not punctuation; left alone it is a clause break, so "19،500 کیلومتر" reads as
         //    "nineteen … five hundred". ONLY the digit-flanked, exactly-3-digit-block case is folded — ⟨،⟩ as real

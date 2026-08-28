@@ -71,7 +71,7 @@ export function makeUrduNormalizer(numbers: NumbersDef): (text: string) => strin
 
         // 1) ARABIC SYMBOL CHARACTERS → ASCII, so the shared symbol tier (ASCII-keyed) applies. ٪ occurs
         //    once in this corpus and was dropped outright, exactly as in Arabic.
-        s = tr(s, /٪/gu, "%").replace(/٫/gu, ".").replace(/٬/gu, ",");
+        s = tr(tr(tr(s, /٪/gu, "%"), /٫/gu, "."), /٬/gu, ",");
         //    The ARABIC COMMA is also used as a THOUSANDS SEPARATOR here (11،000). Between digits it is a
         //    grouping mark, not punctuation — left alone it was a clause break, so "11،000" read as
         //    "eleven … zero". Only the digit-flanked case is folded; ، as real punctuation is untouched.

@@ -329,7 +329,7 @@ export function normalizeIlocano(input: string): string {
         Number(min) === 0 ? `${Number(h)}` : `${Number(h)} ket ${Number(min)}`;
     const HOUR = String.raw`(?<![\d.:+\-−])([01]?\d|2[0-3]):([0-5]\d)(?!\d)`;
     s = tr(s, new RegExp(`${HOUR}(?=\\s*(?:[ap]\\.?\\s?m\\.?(?![\\p{L}])|GMT|UTC))`, "giu"), clock);
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`${HOUR}(?=\\s*(?:ti|iti)\\s+(?:agsapa|bigat|malem|rabii|sardam|aldaw))`, "giu"),
         clock,
     );
@@ -351,7 +351,7 @@ export function normalizeIlocano(input: string): string {
     // corpus's 4 `\dh` occurrences, i.e. perfect precision on the only evidence there is.
     // ⚠ EVERY WORD IS ATTESTED IN THE CORPUS: `oras` ×790 (×166 digit-adjacent), `minuto` ×45,
     // `segundo` ×83 (×28). So this reads the notation rather than merely silencing it.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{L}\p{M}\p{Nd}])(\d{1,2})\s?h\s?(\d{1,2})\s?m(?:\s?(\d{1,2}(?:\.\d+)?)\s?s)?(?![\p{L}\p{M}\p{Nd}])/gu,
         (_m, h: string, min: string, sec: string | undefined) =>
             `${h} oras ${min} minuto${sec === undefined ? "" : ` ${sec} segundo`}`,
@@ -360,7 +360,7 @@ export function normalizeIlocano(input: string): string {
     // ⚠ THE PER-SLOT UNIT MUST BE SPENT BEFORE THE TIER RUNS, not after: `6,632 tattao tunggal maysa a km²`
     // contains a number, and leaving the abbreviation for the tier to look at risks nothing today but
     // guarantees the two rules cannot disagree tomorrow. See PER_UNIT. ×133.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<=tunggal\\s(?:maysa\\s(?:a|nga)\\s)?)(${PER_UNIT_ALT})(?![\\p{L}\\p{M}²³])`, "gu"),
         (_m, u: string) => PER_UNIT[u]!,
     );
@@ -381,7 +381,7 @@ export function normalizeIlocano(input: string): string {
     // ⚠ THE OPERANDS ACCEPT A DECIMAL, WHICH IS WHY THIS RUNS ABOVE STEP 5, exactly as in hil:
     // `0.25–0.33 pulgada` and `6.4–8.4 mm` are real corpus ranges, and with the decimal rule first this
     // would claim `25–0` and emit a backwards span from inside a number.
-    s = tr(s, 
+    s = tr(s,
         /(?<!\b(?:aginggana|agingga|inggana|manipud|manipud iti|manipud idi)\s(?:iti\s|ti\s)?)(?<![\d.,\p{L}-])(\d[\d,]*(?:\.\d+)?)\s?[-–]\s?(\d[\d,]*(?:\.\d+)?)(?![\d,-]|\.\d)/gu,
         "$1 aginggana iti $2",
     );

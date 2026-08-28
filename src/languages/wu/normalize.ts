@@ -128,7 +128,7 @@ export function normalizeWu(
     // left to the range rule, `29°08ˊ-29°13ˊ` gets a 到 wedged between a minute mark and a degree sign.
     // 度/分/秒 are each their own dict entry (du6 / fen1 / miau6). Digits stay digits so the cardinal path
     // reads them, which is also what strips a written leading zero (09分 → 九分).
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(\\d+)\\s*°\\s*(\\d+)\\s*${MINUTE}\\s*(\\d+)\\s*${SECOND}`, "gu"),
         "$1度$2分$3秒",
     );
@@ -174,18 +174,18 @@ export function normalizeWu(
     // and is a QUANTITY range, not years — reading it 一四零零到一五零零万元 would be confidently wrong. That
     // instance is why this guard exists; step 6 claims it instead.
     const NOT_QUANTITY = "(?!\\s*[万萬亿億元块塊人米吨噸])";
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d.,])(\\d{4})\\s*[-–—－~～〜]\\s*(\\d{4})(?![\\d.,])${NOT_QUANTITY}`, "gu"),
         (_m, a: string, b: string) => `${spellDigits(a)}到${spellDigits(b)}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d.,])(\\d{4})\\s*([至到])\\s*(\\d{4})(?![\\d.,])(?=\\s*年)`, "gu"),
         (_m, a: string, conn: string, b: string) => `${spellDigits(a)}${conn}${spellDigits(b)}`,
     );
     // ⚠ AND THE FORM WHERE 年 IS WRITTEN ON BOTH ENDPOINTS — `1969年～1976年`, which the two rules above cannot
     // see because the 年 sits BETWEEN the number and the dash. Left to step 5 alone both years get their
     // digit reading and the connective silently vanishes, which reads as one date abutting another.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,])(\d{4})\s*年\s*[-–—－~～〜]\s*(\d{4})(?=\s*年)/gu,
         (_m, a: string, b: string) => `${spellDigits(a)}年到${spellDigits(b)}`,
     );
@@ -214,7 +214,7 @@ export function normalizeWu(
     // dash so a `\d+\s*-` pattern never reaches it. Captured and RE-EMITTED (playbook trap 10: a rule that
     // consumes a character must put it back), which is what lets step 9 read both halves: 百分之7到百分之10.
     const RANGE_UNIT = "(?:%|‰|°|摄氏度|度|月|日|号|號|年|岁|歲|世纪|世紀|公里|千米|米|毫米|公斤|吨|噸|万|萬|亿|億|元|人|个|個)";
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `(?<![\\d.,\\p{sc=Latn}])(\\d+(?:\\.\\d+)?)([%‰])?\\s*[-–—－~～〜]\\s*(\\d+(?:\\.\\d+)?)(?=\\s*${RANGE_UNIT})`,
             "gu",
@@ -243,7 +243,7 @@ export function normalizeWu(
     // arrives as `70人 ²` and the unit is gone before this layer runs. A `[/\\]` class here would be dead
     // code that reads as coverage. The residue is one `MARKUP exponent` line in the artifact scan.
     // AFTER the fraction rule, whose digit-only right side can never match `km²`.
-    s = tr(s, 
+    s = tr(s,
         /(\d+(?:\.\d+)?)\s*(人?)\s*\/\s*km\s*(?:²|2)(?![\p{sc=Latn}\d])/giu,
         (_m, n: string, ren: string) => `每平方公里${n}${ren}`,
     );
@@ -279,7 +279,7 @@ export function normalizeWu(
     // before this layer existed. Claiming it would need a 时/分/秒 reading, and the corpus's five instances
     // split between elapsed times (2:08:44, a marathon → 小时) and UTC timestamps (17:47:23 → 时), which one
     // rule cannot serve.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.:])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int}点${spellDigits(frac)}`,
     );
@@ -349,7 +349,7 @@ export function normalizeWu(
     // math/chemistry single letter in it is Latin-flanked and untouched. Han on one side, nothing
     // alphanumeric on the other.
     if (letterNames !== undefined)
-        s = tr(s, 
+        s = tr(s,
             /(?<=\p{Script=Han})([A-Z])(?![\p{sc=Latn}\d])|(?<![\p{sc=Latn}\d])([A-Z])(?=\p{Script=Han})/gu,
             (m, a: string | undefined, b: string | undefined) => {
                 const L = a ?? b!;
@@ -357,7 +357,7 @@ export function normalizeWu(
             },
         );
     if (letterNames !== undefined)
-        s = tr(s, 
+        s = tr(s,
             /(?<![\p{sc=Latn}\d])[A-Z]{2,3}(?![\p{sc=Latn}\d])/gu,
             (run) =>
                 /^[IVX]{2,3}$/u.test(run)

@@ -116,7 +116,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //    compete for the same character. GUJARATI_WORD ("઀-૥૰-૿") already covers U+0A83 ઃ, so the
         //    folded form is a single token; unfolded, પુન:સ્થાપિત was split into two words by a comma
         //    pause, [pˈun , st̪ʰˈapit̪].
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\p{L}\\p{M}])(${VISARGA_WORD}):`, "gu"),
             "$1ઃ",
         );
@@ -156,7 +156,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //    7a) The clock written with a DOT rather than a colon, which happens beside વાગ્યે / કલાકે
         //        ("સવારે ૮.૪૬ વાગ્યે", "રાત્રે ૧૦.૦૦-૧૧:૦૦"). Folded to a colon so 7d claims it; left
         //        alone it would be read by the decimal path added in this change as "આઠ દશાંશ ચાર છ".
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,])(?=\s?[-–]\s?\d{1,2}[:.]\d{2}|\s*(?:વાગ|કલાક))/gu,
             "$1:$2",
         );
@@ -183,7 +183,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //        વાગ્યે is NOT supplied when the sentence already carries a clock word or a timezone
         //        after the time — "12:00 GMT વાગ્યે" and "11:00 (યુ. ટી. સી.+1) કલાકે" would otherwise
         //        each have said it twice.
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,:])([01]?\d|2[0-3]):\s?([0-5]\d)(?![\d.:])/gu,
             (m, h: string, min: string, offset: number, whole: string) => {
                 if (Number(min) !== 0) return `${h} ${min}`;
@@ -260,7 +260,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //     13 gained, 0 broken, 2 real ranges deliberately missed (1995-96, an abbreviated year span,
         //     and 4.2-3.9, a descending "million years ago" span). થી as the range connective is the
         //     corpus's own ("2 થી 3 મિલિયન", "10થી 15 લોકો", "100થી 250 મીટર" — 737 થી in all).
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,])(\d+(?:\.\d+)?)\s?[-–—]\s?(\d+(?:\.\d+)?)(?![\d.,])/gu,
             (m, a: string, b: string) => (Number(b) > Number(a) ? `${a} થી ${b}` : m),
         );
@@ -290,7 +290,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //          ordinal is not the cardinal. 4+થ is excluded: થી is also the ablative postposition and
         //          `4થી` would be ambiguous between "fourth" and "from four"; the corpus has no instance,
         //          so it is left to 13b (→ ચારથી) rather than resolved by guessing.
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,])(\d)(લ|જ|થ|ઠ્ઠ)(ો|ી|ું|ા|ે)(?![\p{L}\p{M}])/gu,
             (m, d: string, cons: string, vowel: string) => {
                 const n = Number(d);
@@ -302,7 +302,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //     13b) The suppletive numbers written with the REGULAR -મ- suffix (1મી, 6ઠ્ઠ- aside). Not
         //          attested here — included because it is reachable and "એકમી" would be plainly wrong —
         //          and kept off the postposition path by requiring a bare vowel, never માં.
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,])([12346])\s?મ(ો|ી|ું|ા|ે)(?![\p{L}\p{M}])/gu,
             (_m, d: string, vowel: string) => IRREGULAR[Number(d)]![FORM[vowel]!],
         );
@@ -320,7 +320,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //          `SIGN NUM`, so spelling out the digits of "US$11,000થી" here would have destroyed the
         //          adjacency and dropped the currency word entirely. Left alone, the tier rewrites it to
         //          "11,000 ડોલરથી", which is the right Gujarati and needs no join.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(
                 `(?<![\\d.,$€£¥₹])(\\d+(?:,\\d+)*)(?:\\s?(મ[ોીાે]|મું)|(${POSTPOSITION}))(?![\\p{L}\\p{M}])`,
                 "gu",

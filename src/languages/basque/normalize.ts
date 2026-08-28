@@ -270,12 +270,12 @@ export function normalizeBasque(input: string): string {
     //    the denominator word already ends in the same `-ko` genitive, which is why the doubling reads as a
     //    stutter rather than as an obvious leak. Matched BEFORE the bare-unit arm so `km/h-ko` cannot be
     //    claimed as `km` plus stray text.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${unitAlt})/(${denomAlt})-(${CASE_ENDINGS.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
         (_m, unit: string, denom: string, ending: string) =>
             `${UNITS[unit]![0]!} ${RATE_DENOMINATORS[denom]!.replace(/ko$/u, "")}${ending === "ko" || ending === "koa" ? ending : `ko${ending}`}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${unitAlt})(?:(²|³)-?|-)(${CASE_ENDINGS.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
         (_m, unit: string, exp: string | undefined, ending: string) => {
             const noun = UNITS[unit]![0]!;
@@ -347,7 +347,7 @@ export function normalizeBasque(input: string): string {
     //    with the ending stranded — the very defect this step exists for, in its other written form. ×3 in
     //    the retained text (`995-ko`, `26-en`, `18-n`), and one of them is the header's own `2.18.19-26-en`.
     const endingAlt = CASE_ENDINGS.join("|");
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+)(?:,(\\d+))?(-?)(${endingAlt})(?![\\p{L}\\p{M}])`, "gu"),
         (whole, digits: string, frac: string | undefined, hyphen: string, ending: string) => {
             const n = Number(digits);

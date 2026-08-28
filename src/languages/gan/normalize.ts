@@ -184,7 +184,7 @@ export function normalizeGan(input: string): string {
     // ordinals are 第N, `º` is ×0 in the corpus and `ª` is ×1, the transliteration above. `core/unicode.ts`
     // folds neither, and widening the shared fold list is a fleet change with its own measurement, so the
     // repair stays in the one language that has been measured to need it.
-    s = tr(s, /ª/gu, "a").replace(/º/gu, "o");
+    s = tr(tr(s, /ª/gu, "a"), /º/gu, "o");
 
     // ── 1. de-group thousands ────────────────────────────────────────────────────────────────────
     // ⚠ FIRST, and it is the most destructive thing this engine does to a number: the tokenizer splits on
@@ -273,7 +273,7 @@ export function normalizeGan(input: string): string {
     // between the identifier and the digits. That is not theoretical here: `ranges 58` in this corpus is
     // dominated by ISBNs (`ISBN 1-55849-175-9`, `ISBN 7-5060-1052-6`, `ISBN 978-0-393-924…`), where the
     // adjacent-dash rejection does most of the work and the Latin-run check finishes it.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,/\-\p{sc=Latn}])(\d+)\s*[-–~〜－]\s*(\d+)(?![\d.,/\-\p{sc=Latn}])/gu,
         (m, a: string, b: string, off: number, full: string) =>
             /\p{sc=Latn}[\s\p{sc=Latn}]*$/u.test(full.slice(Math.max(0, off - 12), off)) ? m : `${a}到${b}`,

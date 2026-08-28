@@ -455,7 +455,7 @@ export function normalizeKirundi(input: string): string {
     //    would let this rule read that `2` as the unit's NUMBER. Trap 28's family; all 4 corpus instances are
     //    spaced. Case-insensitive because the corpus writes `Km`/`KM` alongside `km` (trap 7).
     const PRE_UNIT = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0\u202f\u2009]\\d)`, "giu"),  // space, NBSP, NNBSP, thin space
         (_m, key: string, exp?: string) => exponentPhrase(UNIT[key.toLowerCase()]!, exp),
     );
@@ -667,7 +667,7 @@ export function normalizeKirundi(input: string): string {
     //    URL PATH SEGMENT as a unit, and the numeral guard that protects the other positions does not exist in
     //    denominator position (trap 46 through a third door). rn declares no one-letter key anyway.
     const DENOM_UNIT = Object.keys(UNIT_SG).sort((a, b) => b.length - a.length).join("|");
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`/[ \u00a0]?(${DENOM_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "giu"),  // space, NBSP
         (_w, key: string, exp?: string) => ` ${PER} ${exponentPhrase(UNIT_SG[key.toLowerCase()]!, exp)}`,
     );

@@ -437,7 +437,7 @@ export function normalizeLithuanian(input: string): string {
     //    missed it — which is why `komandai` was on the list at all: it was doing the ANCHORING rather than
     //    the identifying. Widening the reach is what let the over-broad word come off it.
     const SCORE = new RegExp(`${NOT_LETTER_BEFORE}(?:rezultat|pergal|pralaimėj|lygus)`, "iu");
-    t = tr(t, 
+    t = tr(t,
         new RegExp(
             `(?<![\\d.,:/\\p{L}\\p{M}–—-])(\\d+(?:,\\d+)?)${SP}*[–—-]${SP}*(\\d+(?:,\\d+)?)` +
                 `(?!\\d|[.,]\\d|:|[–—-])`,
@@ -518,7 +518,7 @@ export function normalizeLithuanian(input: string): string {
     //    ⚠ THE DOT AFTER `proc` IS OPTIONAL AND THE WORD BOUNDARY IS WHAT IDENTIFIES IT. Requiring the dot
     //    lost the percent entirely on `21,2 proc;` and left `proc` to be read as a word. `procentai`,
     //    `procesas` and `procesorius` — all frequent in this corpus — are excluded by `NOT_LETTER_AFTER`, not by the dot.
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`${NUM}${SP}*proc${NOT_LETTER_AFTER}\\.?`, "gu"),
         (_m, num: string) => quantity(num, N.percent),
     );
@@ -529,11 +529,11 @@ export function normalizeLithuanian(input: string): string {
     //    /t͡s/, so today `17 °C` comes out *septyniolika t͡s* — a plausible Lithuanian phoneme with no basis,
     //    which is trap 56 rather than a visible leak, and no DROP class can see it. 31 instances.
     //    ℃ (U+2103) is folded to `°C` at the registry's dispatch point, above this layer (trap 36).
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`${NUM}${SP}*°${SP}*C${NOT_LETTER_AFTER}`, "gui"),
         (_m, num: string) => `${quantity(num, N.degree)} ${W.celsius}`,
     );
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`${NUM}${SP}*°${SP}*F${NOT_LETTER_AFTER}`, "gui"),
         (_m, num: string) => `${quantity(num, N.degree)} ${W.fahrenheit}`,
     );
@@ -572,7 +572,7 @@ export function normalizeLithuanian(input: string): string {
     ];
     for (const [key, forms, squarable] of UNITS) {
         if (squarable) {
-            t = tr(t, 
+            t = tr(t,
                 new RegExp(`(?<![/\\p{L}])${NUM}${MAG_MID}${SP}*${key}${SP}*[²2]${NOT_LETTER_AFTER}`, "gu"),
                 (_m, num: string, mag: string | undefined) => {
                     const forced = mag !== undefined || num.includes(",");
@@ -591,7 +591,7 @@ export function normalizeLithuanian(input: string): string {
         // only for the ONE-LETTER `m` key below, where it is the year/metre discriminator; for a
         // two-letter key it rejects real readings and buys nothing. A guard is only free when it rejects
         // something (the same mistake the Luganda review had to undo, at the other end of its file).
-        t = tr(t, 
+        t = tr(t,
             new RegExp(`(?<![/\\p{L}])${NUM}${MAG_MID}${SP}*${key}${NOT_LETTER_AFTER}(?!/)`, "gu"),
             (_m, num: string, mag: string | undefined) =>
                 mag === undefined
@@ -626,7 +626,7 @@ export function normalizeLithuanian(input: string): string {
         //    ⚠ A MAGNITUDE MAY STAND HERE TOO — `20 tūkst. t durpių` is the shape, and without `MAG_MID`
         //    the two-letter keys above claimed it and these three did not, which is a difference with no
         //    reason behind it. After a magnitude the unit is the genitive plural, as everywhere else.
-        t = tr(t, 
+        t = tr(t,
             new RegExp(`(?<![/\\p{L}])${NUM}${MAG_MID}${SP}${key}${NOT_LETTER_AFTER}(?![/.]${extra})`, "gu"),
             (_m, num: string, mag: string | undefined) =>
                 mag === undefined
@@ -671,13 +671,13 @@ export function normalizeLithuanian(input: string): string {
             return `${numWords}${magPart} ${noun} `;
         };
         // Sign BEFORE the figure. `US$` / `JAV $` keep their letters; only the sign is claimed.
-        t = tr(t, 
+        t = tr(t,
             new RegExp(`${sign}${SP}*${NUM}(${SP}*(?:(?:mlrd|mln|tūkst)\\.?|${MAG_SPELLED})${NOT_LETTER_AFTER})?`, "gu"),
             (m, num: string, mag: string | undefined, off: number, whole: string) =>
                 money(num, mag, nextWords(whole.slice(off + m.length), 2)),
         );
         // Sign AFTER the figure.
-        t = tr(t, 
+        t = tr(t,
             new RegExp(`${NUM}(${SP}*(?:(?:mlrd|mln|tūkst)\\.?|${MAG_SPELLED})${NOT_LETTER_AFTER})?${SP}*${sign}${NOT_LETTER_AFTER}`, "gu"),
             (m, num: string, mag: string | undefined, off: number, whole: string) =>
                 money(num, mag, nextWords(whole.slice(off + m.length), 2)),
@@ -692,7 +692,7 @@ export function normalizeLithuanian(input: string): string {
     //    with nothing after it. So the concord is `agree()` normally and the genitive when a lowercase noun
     //    follows — which also gets "2,048 mln. keleivių" and "9 986 mlrd. JAV dolerių" right.
     for (const [re, forms] of MAGS) {
-        t = tr(t, 
+        t = tr(t,
             // ⚠ THE KEY NEEDS A WORD BOUNDARY AFTER IT, WHICH IT DID NOT HAVE. `tūkst` is five characters
             // inside *tūkstantmetis* and inside the spelled-out *tūkstančių* itself, so `2 tūkstantmetis`
             // was consumed as `2 tūkst` + a leftover `antmetis` (*du tūkstančių ANTMETIS*) and the corpus's
@@ -744,7 +744,7 @@ export function normalizeLithuanian(input: string): string {
     //     admitting the capitalised variant, which trap 7 normally demands, would read a person's initial
     //     as *metais*. The initialism pass claims those instead. Probed: `2000 M.` is left alone.
     const MONTHS = NRM.monthsGen.join("|");
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`${NUM}${SP}*m\\.(${SP}*(?:${MONTHS})${NOT_LETTER_AFTER})?`, "gu"),
         (_m, num: string, month: string | undefined) => {
             const small = !num.includes(",") && num.length <= 2;
@@ -761,7 +761,7 @@ export function normalizeLithuanian(input: string): string {
     //     ⚠ WHAT THIS DOES NOT FIX, SAID PLAINLY: the day of a date is an ORDINAL in the ACCUSATIVE
     //     (*septintą dieną*), and the ordinal series is the one the header records as measured and refused.
     //     The gender is now right and the case and the ordinal are still wrong; this is the closable half.
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`${NUM}${SP}*d\\.`, "gu"),
         (_m, num: string) => `${feminise(bare(num))} ${W.day} `,
     );
@@ -836,7 +836,7 @@ export function normalizeLithuanian(input: string): string {
     //         language's decimal separator; de-grouping it would turn 3.628 billion into 3,628 billion, a
     //         silent 1000× error (trap 56's `tg` class). 7 misreads is the correct price for not risking
     //         that, and it is stated rather than hidden.
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`(?<![\\d.,])(\\d+),(\\d+)(?![\\d.,])`, "gu"),
         (_m, a: string, b: string) => `${a} ${W.decimalPoint} ${b.split("").join(" ")}`,
     );
@@ -845,7 +845,7 @@ export function normalizeLithuanian(input: string): string {
     //     runs the two names together with no separation at all (traps 18/26, the merge defect). Spaced on
     //     both sides, always. ×4, all inside bibliographic citations, and `ir` is the language's ordinary
     //     conjunction. `&amp;` is decoded above this layer but is folded here for a raw-text caller.
-    t = tr(t, /&amp;/gu, "&").replace(/\s*&\s*/gu, ` ${W.and} `);
+    t = tr(tr(t, /&amp;/gu, "&"), /\s*&\s*/gu, ` ${W.and} `);
 
     // The insertions above pad with spaces so a word never fuses with its neighbour; collapse the runs.
     return t.replace(/[ \t]{2,}/gu, " ");

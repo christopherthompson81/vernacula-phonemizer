@@ -225,7 +225,7 @@ export function normalizeGreek(input: string): string {
     //    splitting each of these into a Greek fragment plus an English letter name.
     //    Only fires where the Latin letter TOUCHES Greek script, so the token is already broken and a
     //    false positive is not reachable; the bare article is handled separately below.
-    s = tr(s, 
+    s = tr(s,
         /(?<=\p{Script=Greek})[A-Za-z]+|[A-Za-z]+(?=\p{Script=Greek})/gu,
         (run) => [...run].map((c) => HOMOGLYPH[c] ?? c).join(""),
     );

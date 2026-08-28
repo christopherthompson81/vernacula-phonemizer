@@ -16,6 +16,14 @@
  * exists only while `phonemizeTrace` is running, which is also what keeps the fidelity risk off the shipped
  * reading entirely: untraced, `tr` IS `replace`.
  *
+ * ⚠ THE COVERAGE CEILING IS THE REGISTRY PRE-PASSES, and it is precise: `getPhonemizer`'s wrapper runs
+ * `stripMarkup`, the confusable and fullwidth folds, Roman numerals and the vulgar-fraction fold BEFORE any
+ * engine normalizer, and none of them reports. A LENGTH-PRESERVING one is harmless (`foldNativeDigits` maps
+ * ｜１｜→｜1｜ one for one, and the mapping survives); a LENGTH-CHANGING one desyncs and the mapping is then
+ * withheld. Measured: `phonemizeTrace("Dr. Smith paid １２５０", "en")` maps every token, and
+ * `phonemizeTrace("<b>hi</b> there", "en")` maps none. 92.8% of tokens across the golden corpus carry a span;
+ * the remaining 7.2% is overwhelmingly this.
+ *
  * ⚠ INPUT-SIDE ONLY. `tr` maps a span back to the CALLER'S TEXT, so it belongs in a normalizer and nowhere
  * else. Several engine files carry the same `s = s.replace(...)` shape over an IPA STRING — `english-gb.ts`
  * un-flaps a tapped coronal and maps offglides on the READING, not the input — and routing those through
@@ -33,13 +41,28 @@ import { hostDepth } from "./foreign.ts";
 let prov: [number, number][] | null = null;
 
 /**
+ * ⚠ ONCE DESYNCED, STAY DESYNCED. `tr` rebuilds the array at the CURRENT string's length, so if a step the
+ * mapping did not see has already shifted the text, the next tracked step would re-synchronise the LENGTH
+ * over shifted values — and `provenanceFor`'s length check, the module's whole safety net, would then pass
+ * and report those values as fact. Measured before this guard: 1,478 of 112,640 tokens across 74 languages
+ * named input characters that did not contain their own surface (`paid` → `" Smi"`). Dropping the mapping on
+ * the first sign of a gap is what makes "absent" mean not-known instead of not-noticed.
+ */
+function poison(): void {
+    prov = null;
+}
+
+/**
  * Begin tracking, with `input` as the origin. Called by the trace recorder, never by a normalizer.
  * ⚠ A SECOND CALL AT DEPTH RESETS NOTHING: an embedded foreign run normalizes its own text through the same
  * `tr`, and letting it re-seed would replace the host's mapping with the run's.
  */
 export function beginProvenance(input: string): void {
     if (hostDepth() > 1) return;
-    prov = [...input].map((_, i) => [i, i + 1] as [number, number]);
+    // ⚠ CODE UNITS, NOT CODE POINTS. `[...input]` iterates code points, while `s[i]`, `span()` and
+    // `TraceToken.span` are all UTF-16 offsets — one astral character (an emoji, an SMP letter) made the seed
+    // array SHORT, and the desync then read as a valid mapping. Indexing has to match what it indexes.
+    prov = Array.from({ length: input.length }, (_, i) => [i, i + 1] as [number, number]);
 }
 
 export function endProvenance(): void {
@@ -154,9 +177,19 @@ export function tr(s: string, re: RegExp, rep: Replacer): string {
     // because of this module, and the 3,200 sites cost one boolean test each.
     const p = prov;
     if (p === null || hostDepth() > 1) return s.replace(re, rep as string);
+    // ⚠ THE MAPPING MUST ALREADY DESCRIBE THE STRING IT IS HANDED. If a step this module did not see has
+    // shifted the text, `p` is stale — and continuing would rebuild it at the NEW length, re-synchronising
+    // the length check over shifted values and reporting them as fact. Checking only the indices actually
+    // read is not enough: the repro (`"abc"` → an untracked `b`→`BB`, then a tracked `c`→`C`) touches none
+    // of the missing ones and still comes out confidently wrong.
+    if (p.length !== s.length) { poison(); return s.replace(re, rep as string); }
 
     const global = re.flags.includes("g");
     const rx = new RegExp(re.source, global ? re.flags : re.flags + "g");
+    // ⚠ `String.replace` RESETS `lastIndex` on a global regex; this path builds its own and would leave the
+    // caller's object untouched. khmer's de-grouping loop shares one `/g` regex between `tr` and `.test()`,
+    // so a stale offset there could end the loop early — latent, but the guarantee is that no reading differs.
+    re.lastIndex = 0;
     const out: string[] = [];
     const next: [number, number][] = [];
     let cursor = 0;
@@ -166,8 +199,10 @@ export function tr(s: string, re: RegExp, rep: Replacer): string {
         seen++;
         const at = m.index ?? 0;
         for (let i = cursor; i < at; i++) {
+            const q = p[i];
+            if (q === undefined) { poison(); return s.replace(re, rep as string); }
             out.push(s[i]!);
-            next.push(p[i] ?? [0, 0]);
+            next.push(q);
         }
         // ⚠ DO NOT RE-RUN THE REGEX ON THE ISOLATED MATCH. A pattern with a lookahead cannot match `m[0]`
         // alone, so the replacement silently does not apply — `Jr.` stayed `Jr.` on 2 of 200 English rows.
@@ -184,21 +219,30 @@ export function tr(s: string, re: RegExp, rep: Replacer): string {
                   )
                 : expand(rep, m, at, s);
         const sp = span(p, at, m[0].length);
-        for (const ch of piece) {
-            out.push(ch);
+        // ⚠ CODE UNITS AGAIN: `for (const ch of piece)` yields code POINTS, so an astral character in a
+        // replacement pushed one entry where the string grew by two.
+        for (let i = 0; i < piece.length; i++) {
+            out.push(piece[i]!);
             next.push(sp);
         }
         cursor = at + m[0].length;
         if (m[0].length === 0 && cursor < s.length) {
+            const q = p[cursor];
+            if (q === undefined) { poison(); return s.replace(re, rep as string); }
             out.push(s[cursor]!);
-            next.push(p[cursor] ?? [0, 0]);
+            next.push(q);
             cursor++;
         }
     }
     for (let i = cursor; i < s.length; i++) {
+        const q = p[i];
+        if (q === undefined) { poison(); return s.replace(re, rep as string); }
         out.push(s[i]!);
-        next.push(p[i] ?? [0, 0]);
+        next.push(q);
     }
+    // ⚠ AND THE ARRAY MUST MATCH THE STRING IT DESCRIBES, or the length check is measuring nothing.
+    const joined = out.join("");
+    if (next.length !== joined.length) { poison(); return joined; }
     prov = next;
-    return out.join("");
+    return joined;
 }

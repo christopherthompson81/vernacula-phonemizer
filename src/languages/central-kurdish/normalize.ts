@@ -141,7 +141,7 @@ export function normalizeCentralKurdish(input: string): string {
 
     // 6) DEGREES. `پلە` is the word (90 in the corpus); the scale letter would otherwise reach the Latin
     //    fallback and be read as an English letter name.
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, /(\d)\s*°\s*C(?!\p{L})/giu, "$1 پلەی سەلیزی");
     t = tr(t, /(\d)\s*°\s*F(?!\p{L})/giu, "$1 پلەی فەهرەنهایت");
     t = tr(t, /(\d)\s*°/gu, "$1 پلە");

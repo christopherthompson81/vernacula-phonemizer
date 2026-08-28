@@ -250,7 +250,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         let s = input.normalize("NFC");
 
         // 2) HTML ENTITIES, before anything can read one as letters. `&nbsp;` ×4 in the mined segments.
-        s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/﻿/gu, "");
+        s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /﻿/gu, "");
 
         // 3) ⚠ ARABIC PRESENTATION FORMS — 2,367 characters across 8 of the 429 mined segments, and those 8
         //    segments read as the EMPTY STRING today: the engine's TOKEN class is U+0620–U+06FF, so
@@ -309,7 +309,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    never writes them (the hamza is always the carrier ئ, ×0 counter-examples), so the value they
         //    would take is an ARABIC one this engine has no referee for — wikipron `uig_arab_broad` carries
         //    no headword with any of them. Same shape as ی above: measured, reported, not guessed.
-        s = tr(s, /ک/gu, "ك").replace(/ڧ/gu, "ف");
+        s = tr(tr(s, /ک/gu, "ك"), /ڧ/gu, "ف");
 
         // 5) ERA MARKERS, digit-anchored, and ABOVE the ordinal rule at step 7 for two separate reasons.
         //    (a) The abbreviation's anchor is the YEAR'S DIGITS, and step 7 turns those into words — running
@@ -342,7 +342,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, not a clause mark, or a number
         //    followed by its own sentence comma would lose its last group and speak it as zero.
         for (const mark of ["،", ","]) {
-            s = tr(s, 
+            s = tr(s,
                 new RegExp(`(?<![${D}.,،])[${D}]{1,3}(?:(?<!(?<![${D}])0)${mark}[${D}]{3})+(?![${D}]|${mark}[${D}])`, "gu"),
                 (w) => w.replace(new RegExp(mark, "gu"), ""),
             );
@@ -375,7 +375,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    an ordinal; and inside `70 -90-بەتلەر` (a page RANGE, ×3 for `بەت`) the second operand takes the
         //    ordinal. 4 of 390. The alternative — a closed noun list — is trap 8's table, correct exactly
         //    where I looked: the tail of that tally is 76 distinct nouns and 40 of them occur once.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`${NOT_LETTER_BEFORE}([${D}]+)\\s*${DASH}\\s*(?=(?!${ERA_HEADS})[\\u0620-\\u06FF]{2,})`, "gu"),
             (whole: string, num: string) => {
                 const n = Number(toAscii(num));
@@ -432,7 +432,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
              * English fallback rather than being echoed byte-for-byte.
              */
             const tail = /^[A-Za-z]/u.test(sym) ? "A-Za-z" : "\\p{L}";
-            s = tr(s, 
+            s = tr(s,
                 new RegExp(`(?<![\\p{L}\\p{M}${D}.,،])(${NUM}${MAG})\\s?${key}(?![${tail}\\p{M}${D}²])(ئ?)`, "gu"),
                 (_m, q: string, hamza: string) => `${q} ${word}${hamza === "" ? "" : ` ${hamza}`}`,
             );
@@ -440,7 +440,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    ⚠ AND THE UNIT NOUN IS OFTEN ALREADY SPELLED OUT WITH A BARE `²` HANGING OFF IT
         //    (`36.6 مىلىيون كىلومېتر² لىق`). No symbol key can reach that, because there is no symbol — the
         //    exponent has to be lifted onto the WORD, in the preposed position `كۋادرات` takes.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`${NOT_LETTER_BEFORE}(كىلومېت[ىې]?ر|مېت[ىې]?ر|مىتىر)\\s?²`, "gu"),
             "كۋادرات $1",
         );
@@ -507,12 +507,12 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //     ×129 and `٪` U+066A is ×4 (`٪12.9نى ئىگىلەيدۇ`, `٪56.08نى`) — small, but they are exactly the
         //     instances the artifact scan still reported as `DROP percent` after the ASCII arm landed, which
         //     is what a differential gate is for. `﹪` U+FE6A and `％` U+FF05 are both ×0 and are not keyed.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(${NUM})\\s?[%٪]\\s?${NAMED}${PCT_TAIL}`, "gu"),
             (_m: string, n: string, named: string | undefined, suf: string | undefined) =>
                 named === undefined ? percent(n, suf) : `${n} ${named.trim()}${suf ?? ""} `,
         );
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`[%٪]\\s?(${NUM})\\s?${NAMED}${PCT_TAIL}`, "gu"),
             (_m: string, n: string, named: string | undefined, suf: string | undefined) =>
                 named === undefined ? percent(n, suf) : `${n} ${named.trim()}${suf ?? ""} `,
@@ -552,7 +552,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //     step 8 has already claimed every unit, and what is left glued to a decimal is the corpus's
         //     ordinary typography — `414.69دەرھەم`, `72.647دىنار=بىر دوللار`, `1.575لېۋ` — 18 exchange-rate
         //     lines that a letter guard silently left with the pause still in them.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![${D}.])([${D}]+)\\.([${D}]+)(?![${D}]|\\.[${D}])`, "gu"),
             "$1 $2",
         );

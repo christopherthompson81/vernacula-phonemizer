@@ -279,7 +279,7 @@ export function normalizeSinhala(input: string): string {
     //    half. Korean's 시속 rule is prefixed for the same reason and the tier's own notes record it.
     const RATE_OPERAND = "(?:((?<![\\p{Nd}.,\\-–—])\\p{Nd}[\\p{Nd}.,]*(?:\\s?[-–—]\\s?\\p{Nd}[\\p{Nd}.,]*)?)\\s*)?";
     for (const [unit, word] of [["km\\s?\\/\\s?h", "පැයට කිලෝමීටර්"], ["m\\s?\\/\\s?s", "තත්පරයට මීටර්"]] as const)
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`${RATE_OPERAND}(?<![\\p{L}\\p{M}\\p{Nd}])${unit}(?![\\p{L}\\p{M}])`, "gu"),
             (_m, n: string | undefined) => (n ? `${word} ${n}` : word),
         );

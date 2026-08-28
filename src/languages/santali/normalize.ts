@@ -380,7 +380,7 @@ export function normalizeSantali(input: string): string {
     // followed by a space and a name, so the guard now says exactly that. The LEFT operand's own
     // `(?<![:.]\d{0,4})` is untouched and still refuses the `᱑᱐:᱓᱐ - ᱑᱑` case it was written for.
     const RANGE_DASH = `[-–—${PHAARKAA}]`;
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![-+×÷=<>]\\s?)(?<![:.]${D}{0,4})(?<!${D})(${D}+(?:\\.${D}+)?)\\s?${RANGE_DASH}\\s?(${D}+(?:\\.${D}+)?)(?!\\s?[-+×÷=<>])(?!${D})(?!:${D})`, "gu"),
         "$1 ᱠᱷᱚᱱ $2");
 

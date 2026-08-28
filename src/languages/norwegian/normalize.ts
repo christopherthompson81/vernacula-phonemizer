@@ -184,7 +184,7 @@ export function normalizeNorwegian(input: string): string {
 
     // 7) DEGREES (2), BEFORE the unit rules — the C of `20 °C` was falling through to the English letter
     //    name [seː]. Case-insensitive on the scale letter; the bare sign is read too.
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, /(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grader celsius");
     t = tr(t, /(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grader fahrenheit");
     t = tr(t, /(\d)\s*°/gu, "$1 grader");

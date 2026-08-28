@@ -211,7 +211,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    ⚠ ANCHORED ON THE CURRENCY SIGN, which is the whole guard: `915 m` and `4 × 400 m` are metres and
     //    must not be touched, and they have no sign in front. Case is honoured (`M` and `m` both scale here)
     //    because after a sign neither can be anything else.
-    s = tr(s, 
+    s = tr(s,
         /((?:US[ \u00a0]?\$|\$|£|P|R)[ \u00a0]?\d[\d \u00a0.,]*)(bn|M|m)(?![\p{L}\p{M}\d])/gu,  // space, NBSP
         (_w, amount: string, suf: string) => `${amount} ${MAGNITUDE_SUFFIX[suf]!}`,
     );
@@ -224,7 +224,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    word, a road number is a bare 1–3 digit integer. Both true instances pass, the road declines.
     //    ⚠ THE NUMBER CLASS ENDS IN A DIGIT (trap 14's Welsh lesson) — without that, `R268.26bn, mme` would
     //    swallow the clause comma the moment the rule stopped re-emitting its operand verbatim.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `(?<![\\p{L}\\p{M}\\d])R[ \u00a0]?(\\d[\\d \u00a0.,]*\\d|\\d)(?![\\p{L}\\p{M}])([ \u00a0]*(?:${MAGNITUDE_WORD})(?![\\p{L}\\p{M}]))?`,  // space, NBSP
             "gu",
@@ -243,7 +243,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    ⚠ THE MINUS ARM IS CLAIMED ONLY HERE — see BELOW_ZERO. The left guard rejects a DIGIT as well as a
     //    letter so a range's second operand cannot be read as a negative; rejected there, the engine simply
     //    starts later and matches the bare number (trap 52), which is the safe outcome rather than a miss.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui,  // space, NBSP
         (_w, sign: string, n: string, sc: string) =>
             sign === ""
@@ -286,7 +286,7 @@ export function normalizeSetswanaPost(input: string): string {
     //    `:` is `clausePunctuation`, so every one of these was reading as a comma pause mid-number.
     //    ⚠ THE a.m./p.m. DOTS ARE CONSUMED IN THE SAME MATCH — afterwards nothing can associate them with
     //    the time they belong to, and each was one more sentence break mid-clause.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `(?<![\\d:.,])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])` +  // NBSP
                 `(?:[ \u00a0]*(?:([AaPp])\\.?[Mm]\\.?|(${TZ})(?![\\p{L}\\p{M}])|(${DAYPART})(?![\\p{L}\\p{M}])))`,  // space, NBSP
@@ -383,7 +383,7 @@ export function normalizeSetswanaPost(input: string): string {
     //     concord every entry in that table ends with (and the currency ones too, `didolara di le`), so the
     //     shape is the tier's contract rather than a guess at its vocabulary.
     //     ⚠ ASCENDING ONLY, the same test step 8 applies, so a descending pair stays the juxtaposition it is.
-    s = tr(s, 
+    s = tr(s,
         /(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?((?:\p{L}+[ \u00a0])?\p{L}+[ \u00a0]di[ \u00a0]le[ \u00a0])(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
         (whole, a: string, noun: string, b: string) =>
             (Number(a) < Number(b) ? `${noun}${a} ${RANGE} ${b}` : whole));

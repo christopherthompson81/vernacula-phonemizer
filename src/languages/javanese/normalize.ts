@@ -128,11 +128,11 @@ export function normalizeJavanese(input: string): string {
     // ⚠ ⟨pukul⟩ IS NOT GUARDED, DELIBERATELY: it is the Indonesian formal clock word and scores ZERO in this
     // corpus, where all 10 clock instances use ⟨jam⟩. Adding it would be a guard with no attested instance
     // (trap 9) — so `pukul 13.30` still reads as a decimal, and that is recorded rather than papered over.
-    s = tr(s, 
+    s = tr(s,
         /(\d{1,2})\.00\s*([-–])\s*(\d{1,2})\.00(?!\d)/gu,
         (_m, a: string, _d: string, b: string) => `${Number(a)} nganti ${Number(b)}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<=jam\\s)(\\d{1,2})\\.00(?!\\d)`, "gu"),
         (_m, h: string) => String(Number(h)),
     );
@@ -180,7 +180,7 @@ export function normalizeJavanese(input: string): string {
     // decimal followed by a stray pause. Refusing only when ANOTHER DOT-PLUS-DIGIT follows is what lets a
     // decimal at the end of a sentence through (`Ana 3.5.` is still a decimal); the `version-dot` cell is
     // 103 corpus-wide against 15,961 decimals, so the guard has to be this narrow.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d,])(?!\.\d)/gu,
         (m, i: string, f: string, off: number, full: string) =>
             f === "00" || /(?<![\p{L}\p{M}])jam\s*$/u.test(full.slice(0, off)) ? m : decimal(i, f),
@@ -235,7 +235,7 @@ export function normalizeJavanese(input: string): string {
     // `475 jiwa/km²`, `1.868 jiwa/km²` — the shared tier cannot compose this one because the NUMERATOR is a
     // Javanese noun (⟨jiwa⟩, "souls") rather than a unit symbol, so its rate path never engages and the
     // whole `/km²` was dropped. ⟨per⟩ is the corpus's own rate word (`mèter kubik per detik`, `per kapita`).
-    s = tr(s, 
+    s = tr(s,
         /(\d[\d.,]*)\s*jiwa\s*\/\s*km\s*(?:²|2)(?![\p{L}\d])/gu,
         "$1 jiwa per kilomèter persegi",
     );
@@ -267,7 +267,7 @@ export function normalizeJavanese(input: string): string {
     // ⚠ THE COMMA STAYS IN THE CLASS on the same reasoning, though it is worth recording that in THIS layer
     // neither separator is reachable as a DECIMAL at all — steps 3 and 4 own both marks and run first, so
     // the guard's live job here is the identifier, not the number.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,/-])(\d+)\s*[-–]\s*(\d+)(?![\d,/-]|\.\d)(?!\s*doi)/giu,
         (m, a: string, b: string, off: number, full: string) =>
             /doi:?\s*\S*$/iu.test(full.slice(Math.max(0, off - 40), off)) ? m : `${a} nganti ${b}`,

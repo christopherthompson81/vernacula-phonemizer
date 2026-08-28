@@ -115,7 +115,7 @@ export function normalizeJin(input: string): string {
     // ⚠ AND NOT AFTER A LATIN RUN AT ALL, which a one-character lookbehind cannot express: `ISO 8859-1` put
     // a SPACE between the identifier and the digits, so the guard saw the space and read the designation as
     // "8859 到 1". Checked over the preceding characters instead.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,/\-\p{sc=Latn}])(\d+)\s*[-–~〜]\s*(\d+)(?![\d.,/\-\p{sc=Latn}])/gu,
         (m, a: string, b: string, off: number, full: string) =>
             /\p{sc=Latn}[\s\p{sc=Latn}]*$/u.test(full.slice(Math.max(0, off - 12), off)) ? m : `${a}到${b}`,

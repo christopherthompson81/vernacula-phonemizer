@@ -228,11 +228,11 @@ export function normalizeMadurese(input: string): string {
     // `Rp 16,09 milyad` in the same article. Every markerless `H.MM` in this corpus is a decimal.
     // ⚠ THE RANGE ARM RUNS FIRST — `kol 17.30 – 21.00 WIB` needs the second endpoint claimed by its own
     // trailing marker, and step 8's range rule can only see the dash once both endpoints are bare numbers.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(${HOUR_WORD})(\\s*)(\\d{1,2})[.:]00(?![\\d.:])`, "giu"),
         (_m, w: string, sp: string, h: string) => `${w}${sp}${Number(h)}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d.:,])(\\d{1,2})[.:]00(?![\\d.:])(?=\\s*${CLOCK_MARK}(?!${L}))`, "gu"),
         (_m, h: string) => String(Number(h)),
     );
@@ -301,7 +301,7 @@ export function normalizeMadurese(input: string): string {
     // ⚠ WHICH IS ALSO WHY THE GUARD EXISTS. Substituting blind DOUBLES a connective the text already wrote,
     // in two of the four instances (`korang lebbi ±…` and `ra-kèra ±…`). The lookbehind is spelled out
     // because these are words, not a character class.
-    s = tr(s, 
+    s = tr(s,
         /(?<!(?:korang lebbi|ra-kèra|sakètar|kèra-kèra)\s?)(?<![\p{L}\p{M}])±\s*(?=\d)/gu,
         "korang lebbi ",
     );
@@ -338,12 +338,12 @@ export function normalizeMadurese(input: string): string {
     // `atoran/kabiyasaan`, `axle/gardan`, `dhisa/kelurahan`), and a general word/word rule would read
     // every one of them as a rate.
     const rateUnit = "(km|cm|mm|kg|ha|m)";
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<=${L})\\s?/\\s?${rateUnit}(²|³|2|3)?(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, u: string, exp: string | undefined) =>
             ` per ${UNIT_WORD[u.toLowerCase()]!}${EXP_WORD[exp ?? ""] ?? ""}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}])per\\s+${rateUnit}(²|³|2|3)?(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, u: string, exp: string | undefined) =>
             `per ${UNIT_WORD[u.toLowerCase()]!}${EXP_WORD[exp ?? ""] ?? ""}`,
@@ -409,7 +409,7 @@ export function normalizeMadurese(input: string): string {
     //   2. NO LEADING LETTER, DIGIT, SEPARATOR OR HYPHEN — which is what excludes an identifier chain
     //      (ISBN ×8 in the artifact) and a designation (`Ḍ3-Akuntansi`).
     //   3. NOTHING BUT WHITESPACE MAY FOLLOW A TRAILING SEPARATOR OR HYPHEN, for the same chain reason.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,\p{L}\p{M}/-])(\d+(?:[.,]\d+)?)\s?[-–—]\s?(\d+(?:[.,]\d+)?)(?![\d\p{L}\p{M}/-]|[.,]\d)/gu,
         "$1 sampè' $2",
     );
@@ -462,7 +462,7 @@ export function normalizeMadurese(input: string): string {
     //     leaves behind is a clock with REAL MINUTES, and this rule read `kol 17.30` as *kol 17 koma 3 0* —
     //     a decimal inside a time. The corpus's `pokol 18.56` is the same shape. Found by probing the
     //     leftovers of step 1's deliberate refusal, not by the corpus, whose other clocks are whole hours.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)/gu,
         (m, i: string, f: string, off: number, full: string) =>
             new RegExp(`(?<![\\p{L}\\p{M}])${HOUR_WORD}\\s*$`, "iu").test(full.slice(0, off))

@@ -326,7 +326,7 @@ export function normalizeSwedish(input: string): string {
     //    cannot, and gated on a legal hour/minute so an English-style `1.75` cannot. The RANGE form is
     //    claimed first: after the single-clock rewrite there are no dots left for a range rule to see, and
     //    `Mellan 22.00–23.00 MDT` is followed by a capital, so step 13's lowercase guard would decline it.
-    t = tr(t, 
+    t = tr(t,
         /(?<![\d:,])(?<!\.\d)(\d{1,2})\.(\d{2})\s*[-–—]\s*(\d{1,2})\.(\d{2})(?!\d)/gu,
         (m, h1: string, m1: string, h2: string, m2: string) =>
             isClock(h1, m1) && isClock(h2, m2)
@@ -385,7 +385,7 @@ export function normalizeSwedish(input: string): string {
     //    The RANGE form is claimed first (`1100-1200-talet` ×1): its left endpoint has no `-tal` of its
     //    own, so the single rule would strand it and step 13 would decline it (the right operand is
     //    followed by a hyphen, not a lowercase noun).
-    t = tr(t, 
+    t = tr(t,
         /(?<![\d.,:])(\d{3,4})-(\d{3,4})-(tal\p{L}*)/gu,
         (m, a: string, b: string, tail: string) => {
             const first = hundredsYear(Number(a)), second = hundredsYear(Number(b));
@@ -416,7 +416,7 @@ export function normalizeSwedish(input: string): string {
     //     `(1644-1912) styrkor` came out as two hundreds-years with NO connective, because by the time the
     //     range rule ran its operands were words and there were no digits left to match. Everything that
     //     needs to see a bare digit run has to precede step 11.
-    t = tr(t, 
+    t = tr(t,
         /(?<![-–—\d])(\d[\d,]*\d|\d)\s*[-–—]\s*(\d[\d,]*\d|\d)(?![\d\-–—.,])/gu,
         "$1 till $2",
     );
@@ -464,7 +464,7 @@ export function normalizeSwedish(input: string): string {
     //     a bare [k], the sign and the degree both silently gone, and `35°V` as *trettiofem* plus a bare
     //     [v]. `°V` is a LONGITUDE (väst), not a temperature scale; it is the corpus's only compass
     //     instance, and N / S / Ö are deliberately not added (0 instances each — see the PR).
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, /(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 grader celsius");
     t = tr(t, /(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 grader fahrenheit");
     t = tr(t, /(\d)\s*°\s*V(?![\p{L}\p{M}])/gu, "$1 grader väst");

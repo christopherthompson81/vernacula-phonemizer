@@ -79,7 +79,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // FIRST, so exactly one representation reaches every rule below. ⚠ The ％ arm is now REDUNDANT — the shared
     // tier reads all three percent signs itself (see the header) — but `／` → `/` is not: step 6's fraction rule
     // matches an ASCII slash, and CJK text writes the full-width one.
-    s = tr(s, /％/gu, "%").replace(/／/gu, "/");
+    s = tr(tr(s, /％/gu, "%"), /／/gu, "/");
 
     // ── 1b. the plus sign ───────────────────────────────────────────────────────────────────────
     // 加 reads kaː˥. Spaced on both sides for the same reason the ampersand cell is: an adjacent initialism
@@ -126,7 +126,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // 至-joined pair of 4-digit numbers is otherwise a quantity range; the written connective is kept rather
     // than replaced. Without this arm the left endpoint stays a cardinal while step 4 gives the right one the
     // digit reading — the same split, one form later.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,])(\d{4})\s*([-–—])\s*(\d{4})(?![\d]|[.,]\d)|(?<![\d.,])(\d{4})\s*([至到])\s*(\d{4})(?![\d.,])(?=\s*年)/gu,
         (_m, a1: string, _d: string, b1: string, a2: string, conn: string, b2: string) =>
             a1 !== undefined
@@ -147,7 +147,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // (10:00 → 十點). Digits are LEFT as digits so the engine's own cardinal composition reads them — which is
     // also what strips a written leading zero (06:30 → 6點30分 → 六點三十分). a.m./p.m. become the 上午/下午
     // PREFIX and are consumed here, which also keeps their stray letters off the English path.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d:])(\d{1,2}):([0-5]\d)(?![\d:])(?:\s*([ap])\s*\.?\s*m\s*\.?(?![\p{L}\p{M}]))?/giu,
         (_m, h: string, mm: string, ap: string | undefined) => {
             const pre = ap === undefined ? "" : ap.toLowerCase() === "a" ? "上午" : "下午";
@@ -176,7 +176,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // AFTER the clock (step 5) and year (step 4) rules, so no period they own is still in play, and after
     // step 7. ⚠ The separator is 點 and the FRACTIONAL part is read DIGIT BY DIGIT — 6.34 is 六點三四, never
     // 六點三十四 — so it is written out as Han here while the integer part stays a digit for the cardinal path.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int}點${spellDigits(frac)}`,
     );
@@ -186,7 +186,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // (1200 間 must not become 120兩間). Cantonese counts with 兩 loeng5 before a classifier, not 二.
     // ⚠ 月 and 日 are deliberately NOT in the manifest's inventory — "2 月" is February, which is 二月.
     if (measureWords !== "")
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\d.,])2(?=\\s*[${measureWords}])`, "gu"),
             "兩",
         );

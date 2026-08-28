@@ -236,7 +236,7 @@ export function normalizeLingala(input: string): string {
     // 1) HTML ENTITIES AND ZERO-WIDTH MARKS, first — a dump carries `&nbsp;` and `&#xFEFF;` (×21 zero-width
     //    in the corpus) and both must go BEFORE the ampersand rule at step 13, or `&nbsp;` is read as the
     //    word "and" followed by the letters n-b-s-p. `&#xFEFF;` is a rendering hint, not speech.
-    s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍﻿]/gu, "");
+    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍﻿]/gu, "");
 
     // 2) ERA MARKERS AND DOTTED ABBREVIATIONS, before anything can read an interior dot as a phrase break.
     //    ⚠ This must also precede step 4: `L.T.B.` and the grouping-dot rule are both looking at dots, and
@@ -308,7 +308,7 @@ export function normalizeLingala(input: string): string {
     //    and it must run HERE rather than after step 7, because step 7 would already have spent the dash.
     for (const [sym, word] of UNITS) {
         const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),
             (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${word} ${a} kino ${b}` : whole),
         );
@@ -316,7 +316,7 @@ export function normalizeLingala(input: string): string {
         // a guard: a descending or chained span the arm just declined must reach RANGE whole, not with its
         // tail already rewritten. `(?<!\d\s?[-–—]\s?)` is narrower than putting the dash in the main
         // lookbehind, which would also have blocked a genuine negative measurement.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`,
                 "gu",
@@ -350,7 +350,7 @@ export function normalizeLingala(input: string): string {
     //    `%…-…%` shape cannot be arithmetic — a difference of two percentages is not written this way — so
     //    the arm needs no ascending-vs-descending judgement beyond the one it shares with RANGE, and it
     //    costs NO NEW WORD: `kino` is the same connective, and each operand keeps its `%` for step 8.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?%\s?[-–—]\s?(\d+(?:[.,]\d+)?)\s?%/gu,
         (whole, a: string, b: string) =>
             Number(a.replace(",", ".")) < Number(b.replace(",", ".")) ? `${a}% kino ${b}%` : whole,
@@ -422,7 +422,7 @@ export function normalizeLingala(input: string): string {
     s = tr(s, /(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) =>
         Number(a) < Number(b) && Number(b) <= 10 ? `${a} ya ${b}` : whole);
     // ¼ and ½ occur once each; both are the same idiom with the numerator spelled out.
-    s = tr(s, /¼/gu, " mǒkó ya mínei ").replace(/½/gu, " mǒkó ya míbalé ");
+    s = tr(tr(s, /¼/gu, " mǒkó ya mínei "), /½/gu, " mǒkó ya míbalé ");
 
     // 12) ORDINAL SUFFIXES. `16ème` was reaching the phoneme stream with its French suffix as raw letters
     //     (`zómi na motóbá e˩me˩`). ⚠ ALL 235 INSTANCES ARE INSIDE FRENCH TEXT — "du 16ème au 18ème

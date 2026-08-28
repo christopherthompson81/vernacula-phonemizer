@@ -283,7 +283,7 @@ export function normalizeHmong(input: string): string {
     //    The curly quotes (×4 each) are quotation marks around a metalinguistic label (`'Ch.'`) and are
     //    dropped, as ASCII `"` already is. ⚠ RPA HAS NO SYLLABLE-BOUNDARY APOSTROPHE — unlike Zhuang, where
     //    `’` had to be FOLDED rather than dropped or the syllables fused — so dropping is correct here.
-    s = tr(s, /[—－−]/gu, "-").replace(/[‘’“”]/gu, " ");
+    s = tr(tr(s, /[—－−]/gu, "-"), /[‘’“”]/gu, " ");
 
     // 3) THE ASCII EXPONENT, folded onto the real one, BEFORE de-grouping can split the operand. This is the
     //    one exponent repair available without a unit word, and it is a real defect and not tidying:
@@ -298,7 +298,7 @@ export function normalizeHmong(input: string): string {
     //    `146.270.033` was three numbers separated by two FULL STOPS and `23,822,747` three separated by two
     //    comma pauses. See GROUP_COMMA/GROUP_DOT above for why BOTH marks get a grouping arm and why the
     //    discriminator is the tail's length.
-    s = tr(s, GROUP_COMMA, (w) => w.replace(/,/gu, "")).replace(GROUP_DOT, (w) => w.replace(/\./gu, ""));
+    s = tr(tr(s, GROUP_COMMA, (w) => w.replace(/,/gu, "")), GROUP_DOT, (w) => w.replace(/\./gu, ""));
 
     // 5) THE KILOMETRE → `kis lus mev`, IN PLACE. Sourced in the header, including why this file's first run
     //    refused it and what changed. The symbol is postposed in every attestation, so nothing moves: the
@@ -349,7 +349,7 @@ export function normalizeHmong(input: string): string {
     //    the lookbehind on the letter `S`, so the optional arm cannot be skipped where it is present.
     //    ⚠ AFTER STEP 4 (`46,330` must already be one token) and BEFORE STEP 11 (the operand keeps its
     //    decimal tail).
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{L}\p{M}\d])(?:US\s?)?\$\s?(\d+(?:[.,]\d+)?)(\s(?:lab|vam|roob)(?![\p{L}\p{M}]))?/gu,
         (_m, n: string, mag: string | undefined) => `${n}${mag ?? ""} duas`,
     );

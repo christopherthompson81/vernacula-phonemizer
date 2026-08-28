@@ -174,7 +174,7 @@ export function spellInitialisms(input: string): string {
     );
     // A LONE uppercase letter, only where it touches Han — `X光`, `A股`, `T恤` are letter-read, while a bare
     // single letter in Latin context is a math variable or a chemical symbol (`f(x)`, `m = 2`).
-    s = tr(s, 
+    s = tr(s,
         /(?<=\p{Script=Han})([A-Z])(?![\p{sc=Latn}\d])|(?<![\p{sc=Latn}\d])([A-Z])(?=\p{Script=Han})/gu,
         (m, a: string | undefined, b: string | undefined) => {
             const L = a ?? b!;

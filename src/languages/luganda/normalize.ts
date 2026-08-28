@@ -347,7 +347,7 @@ export function normalizeLuganda(input: string): string {
     //    decimal comma too (`7,2`, `5,3` in the artifact), so a trailing `,` can be the start of the right
     //    operand's fractional part. The dot is the character with no defence; the comma has two.
     const GROUPED = String.raw`[1-9]\d{0,2}(?:,\d{3})+|\d+`;
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             String.raw`(?<![-+−–—/\d.,\p{L}\p{M}])(${GROUPED})[ \u00a0]?[-–—][ \u00a0]?(${GROUPED})`  // space, NBSP
             + String.raw`(?![-+−/\d,\p{L}\p{M}])`,
@@ -456,7 +456,7 @@ export function normalizeLuganda(input: string): string {
     //    `mm` ×1 and `kg` ×1 are each glossed by their own word in the sentence that contains them, which is
     //    where those two readings come from.
     for (const [key, noun] of [["cm", CENTIMETRE], ["mm", MILLIMETRE], ["kg", KILOGRAM]] as const)
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+(?:\\.\\d+)?)[ \\u00a0]?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),  // space, NBSP
             (w, n: string, off: number, all: string) =>
                 saidNear(all, off, off + w.length, ...spellings(noun)) ? n : `${noun} ${n}`);

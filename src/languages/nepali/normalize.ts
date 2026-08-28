@@ -217,7 +217,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    character. Word-INTERNAL is unambiguous (प्राय:जसो; a list colon is always followed by a
         //    space or end of string). Word-FINAL needs the closed list, per the note at VISARGA_WORD_ALT.
         s = tr(s, /(?<=[ऀ-ॣॲ-ॿ]):(?=[ऀ-ॣॲ-ॿ])/gu, "ः");
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\p{L}\\p{M}])(${VISARGA_WORD_ALT}):(?![\\p{L}\\p{M}])`, "gu"),
             "$1ः",
         );
@@ -254,7 +254,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    the numeral is left as written and the suffix reads on its own as [ˈʌũ], which is the stray
         //    stressed syllable this whole rule exists to remove. Both are ×0 in the corpus: every `6 औँ` hit
         //    is the tail of `16 औँ`.
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,:])([1-9]\d{0,2}(?:,\d{3})+|\d+)\s?(औं|औँ)(?![\p{L}\p{M}])/gu,
             (whole, digits: string, suffix: string) => {
                 const n = Number(digits.replace(/,/gu, ""));
@@ -273,7 +273,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //        before the numeric range rule in step 11, whose `(?<![\d.,:])` guard would in any case
         //        refuse it. One instance ("10:00-11:00 राती"); without this the hyphen was dropped
         //        silently and the two clocks were simply juxtaposed.
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,:])((?:[01]?\d|2[0-3]):[0-5]\d)\s?[-–—]\s?((?:[01]?\d|2[0-3]):[0-5]\d)(?![\d:.])/gu,
             "$1 देखि $2",
         );
@@ -283,7 +283,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //        At :00 बजे is exactly right and is supplied when absent — but NOT when the next word is
         //        another बज- form, or "11:00 बजेपछि" would become "एघार बजे बजेपछि" — ⚠ the duplicate-word
         //        trap that bites any language whose clock noun can also begin the following word.
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d:.])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.])(\s*बजे(?![\p{L}\p{M}]))?/gu,
             (m, h: string, min: string, baje: string | undefined, offset: number, whole: string) => {
                 const body = clock(Number(h), Number(min));
@@ -392,11 +392,11 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //          exponent is stranded with no digit adjacency, and the volume reads as a length), while the
         //          Latin `5 km³` reads *घन किलोमिटर* through the tier. ×0 in ne_np FLEURS, ×0 in
         //          tools/corpus/mined/ne.jsonc and ×0 in the parity golden — an inert asymmetry today.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(\\d)\\s?(${UNIT_ALT})(?:\\s?²|2)(?![\\p{L}\\p{M}\\d])`, "gu"),
             (_m, d: string, u: string) => `${d} वर्ग ${UNIT_WORD[u]!}`,
         );
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`,
         );
@@ -404,7 +404,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //          ×2 and the solidus form ×3. The SPACE after the solidus is not optional to allow:
         //          the corpus writes "165 किमी/ घण्टा" exactly so. Both sides are closed lists; see the
         //          note at RATE_NUM for why मिटर is a numerator but never a denominator.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}])(${RATE_NUM})\\s*/\\s*(${RATE_DEN})(?![\\p{L}\\p{M}])`,
                 "gu",
@@ -424,7 +424,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //     THE TRAILING GUARD ALSO REFUSES AN EXISTING देखि. "सन् 1995-1996 देखि" already carries the
         //     postposition and would otherwise read "…छयानब्बे देखि देखि" — the same duplicate-word trap
         //     as step 7c.
-        s = tr(s, 
+        s = tr(s,
             /(?<![\d.,:])(\d+(?:\.\d+)?)\s?[-–—]\s?(\d+(?:\.\d+)?)(?![\d.,:])(?!\s*देखि(?![\p{L}\p{M}]))/gu,
             (m, a: string, b: string) => (Number(b) > Number(a) ? `${a} देखि ${b}` : m),
         );

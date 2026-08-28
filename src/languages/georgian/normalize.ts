@@ -451,7 +451,7 @@ export function normalizeGeorgian(input: string): string {
     //    ⚠ THE FOLLOWING `საათ…` IS CONSUMED AND ITS CASE MOVED TO THE LAST COMPONENT (trap 12: say it once,
     //    in the position the language puts it; trap 10: put back what you consume — the CASE is what carried
     //    meaning, and it is re-emitted). `15:00 საათზე` → *თხუთმეტი საათზე*, which is exactly the Georgian.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d:.,])(\\d{1,2}):([0-5]\\d)(?::([0-5]\\d))?(?![\\d:])` +
             `(?:\\s*-?(${WRITTEN_ALT})${NOT_LETTER_AFTER})?` +
             `(?:\\s+(საათ(?:${WRITTEN_ALT})?)${NOT_LETTER_AFTER})?`, "gu"),

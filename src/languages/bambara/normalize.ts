@@ -300,7 +300,7 @@ export function normalizeBambara(input: string): string {
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, first — a dump carries `&nbsp;` and `&#…;` and both must go
     //    BEFORE the ampersand rule at step 12, or `&nbsp;` is read as the word "and" followed by the
     //    letters n-b-s-p. The artifact's `zero-width` cell is ×2; a rendering hint is not speech.
-    s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍⁠﻿]/gu, "");
+    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍⁠﻿]/gu, "");
 
     // 2b) HOMOGLYPHS FOR ɛ ɔ ɲ — see HOMOGLYPH. Immediately after NFC and the entity strip, and before ANY
     //     rule that inspects a letter: the ELISION rule at step 3 has ⟨ɛ ɔ⟩ in its vowel class and the unit
@@ -403,14 +403,14 @@ export function normalizeBambara(input: string): string {
     //    (`yaada 1–4 (mɛtɛrɛ 1–4)`).
     for (const [sym, word] of UNITS) {
         const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        s = tr(s, 
+        s = tr(s,
             new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`, "giu"),
             (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${word} ${a} fo ${b}` : whole),
         );
         // ⚠ AND THE SINGLE-OPERAND ARM MUST REFUSE A SPAN'S SECOND HALF, which is the defect above stated
         // as a guard: a descending or chained span the arm just declined must reach RANGE whole, not with
         // its tail already rewritten.
-        s = tr(s, 
+        s = tr(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)(\\s+(?:${MAG}))?\\s?${key}`
                 + `(?![\\p{L}\\p{M}\\d²³/])`,

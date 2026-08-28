@@ -147,7 +147,7 @@ export function normalizeXiang(input: string): string {
     // all — which a one-character lookbehind cannot express, because `ISO 8859-1` puts a SPACE between the
     // identifier and the digits and the guard would read the designation as "8859 到 1". cjy paid for that
     // one; it is copied here rather than re-earned.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,/\-\p{sc=Latn}])(\d+)\s*[-–~〜－]\s*(\d+)(?![\d.,/\-\p{sc=Latn}])/gu,
         (m, a: string, b: string, off: number, full: string) =>
             /\p{sc=Latn}[\s\p{sc=Latn}]*$/u.test(full.slice(Math.max(0, off - 12), off)) ? m : `${a}到${b}`,

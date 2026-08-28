@@ -300,7 +300,7 @@ export function normalizeItalian(input: string): string {
     //     Italian needs the partitive *di* between a magnitude and the currency noun ("5 milioni DI
     //     dollari"). Claiming the sign here leaves the tier nothing to do. Only ordering requirement: after
     //     the de-grouping in step 1, so the amount is one digit run.
-    s = tr(s, 
+    s = tr(s,
         /([€$£¥])\s?(\d[\d.,]*)(\s+(?:miliardi|miliardo|milioni|milione|mila))?/gu,
         (m0, sign: string, num: string, mag: string | undefined, offset: number, whole: string) => {
             // The currency NOUN may already be written out beside the sign ("$5 milioni di dollari" is a

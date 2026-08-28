@@ -222,7 +222,7 @@ export function normalizeKikuyu(input: string): string {
     //    `&quot;` ×2 would otherwise reach the g2p as the word "quot".
     //    ⚠ NO AMPERSAND WORD IS SPENT — see the header; the bare sign occurs only in English names.
     //    `&amp;` is unfolded first so a doubly-escaped entity does not survive as "amp" plus a semicolon.
-    s = tr(s, /&amp;/giu, "&").replace(/&nbsp;/giu, " ").replace(/&quot;/giu, '"');
+    s = tr(tr(tr(s, /&amp;/giu, "&"), /&nbsp;/giu, " "), /&quot;/giu, '"');
 
     // 3) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping comma reads as a CLAUSE
     //    PAUSE, so `1,312` came out *ĩmwe , magana matatũ ikũmi na igĩrĩ* — two numbers and a pause where the

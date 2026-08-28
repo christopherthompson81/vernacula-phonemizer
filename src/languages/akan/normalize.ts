@@ -316,7 +316,7 @@ export function normalizeAkan(input: string): string {
     //    `zero-width` cell holds 258 instances) and both must go BEFORE the ampersand rule at step 10, or
     //    `&nbsp;` is read as the word "and" followed by the letters n-b-s-p. `&#xFEFF;` is a rendering
     //    hint, not speech.
-    s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍﻿]/gu, "");
+    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍﻿]/gu, "");
     //    ⚠ AND A WIKITEXT TABLE PIPE BETWEEN A FIGURE AND ITS UNIT, for the same reason `&nbsp;` is here:
     //    it is not speech, it is already silent, and it sits in exactly the gap step 4's number-unit
     //    adjacency needs. `asaase bɛyɛ 973.78|km² so` is the artifact's ONE instance (`|` occurs once in

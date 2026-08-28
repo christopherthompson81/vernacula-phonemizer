@@ -413,11 +413,11 @@ export function normalizeSepedi(input: string): string {
     //    ⚠ THE NOUN PRECEDES ITS FIGURE and the magnitude stays with the number, matching both the attested
     //    order (`diranta tše dimilione tše 100`) and what the tier does for `$` two steps earlier.
     const MAG = "dimilione|milione|dibilione|bilione|dipilione|pilione";
-    s = tr(s, 
+    s = tr(s,
         new RegExp(String.raw`(?<![\p{L}\p{M}\d])R[ \u00a0]?(\d+\.\d+|\d{4,})([ \u00a0](?:${MAG}))?(?![\p{L}\p{M}\d])`, "giu"),  // space, NBSP
         (_w, num: string, mag: string | undefined) => `${RAND}${mag ?? ""} ${num}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(String.raw`(?<![\p{L}\p{M}\d])R[ \u00a0]?(\d+)([ \u00a0](?:${MAG}))(?![\p{L}\p{M}\d])`, "giu"),  // space, NBSP
         (_w, num: string, mag: string) => `${RAND}${mag} ${num}`,
     );
@@ -440,7 +440,7 @@ export function normalizeSepedi(input: string): string {
     //    Case-insensitive on the key, because the corpus writes `Km`/`KM` beside `km` (trap 7); the exponent
     //    branch's ASCII `2`/`3` needs the preceding character to be a LETTER so `km 2` (a kilometre, then
     //    two) is not read as an area while `km ²` is.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `${NOT_VERSION}(\\d+(?:[ \u00a0\u202f\u2009]\\d{3}(?!\\d)|[.,]\\d+)*)(?![\\d.,])[ \u00a0\u202f\u2009]?(${UNIT_ALT})` +  // NBSP, NNBSP, thin space
                 `(?:[ \u00a0\u202f\u2009]?/[ \u00a0\u202f\u2009]?(${DENOM_ALT})|[ \u00a0\u202f\u2009]?(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?` +  // NBSP, NNBSP, thin space

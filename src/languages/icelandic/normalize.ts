@@ -153,7 +153,7 @@ export function normalizeIcelandic(input: string): string {
 
     // 4) PERCENT (2) and DEGREES. Postposed.
     t = tr(t, /(\d+)\s*%/gu, "$1 prósent");
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, /(\d)\s*°\s*C(?!\p{L})/giu, "$1 gráður á Celsíus");
     t = tr(t, /(\d)\s*°\s*F(?!\p{L})/giu, "$1 gráður á Fahrenheit");
     t = tr(t, /(\d)\s*°/gu, "$1 gráður");

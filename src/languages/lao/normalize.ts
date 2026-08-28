@@ -117,7 +117,7 @@ export function normalizeLao(input: string): string {
     // 1) THE SOFT HYPHEN GOES AND THE ZERO WIDTH SPACE STAYS — see the file header. `&nbsp;` becomes a real
     //    space for the same reason it does everywhere: it is a LETTER run to every guard below, and this
     //    corpus writes `€180&nbsp;ລ້ານ` and `(5,&nbsp;2πk)`.
-    s = tr(s, /&nbsp;/gu, " ").replace(/[­‌﻿]/gu, "");
+    s = tr(tr(s, /&nbsp;/gu, " "), /[­‌﻿]/gu, "");
     //    …and one corpus spelling of the dollar code, which is written `Us$` once (`ແຕ Us$ 549ຂື້ນໄປ`).
     //    The tier's keys are literal, so the mixed case reached it as no key at all and the sign dropped.
     s = tr(s, /(?<![\p{L}])Us\$/gu, "US$");

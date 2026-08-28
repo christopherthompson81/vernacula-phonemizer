@@ -718,7 +718,7 @@ export function normalizeMongolian(input: string): string {
     s = tr(s, ABBREV_DOT, " ");
 
     // 3. De-grouping.
-    s = tr(s, GROUP_COMMA, "").replace(GROUP_SPACE, "$1$2");
+    s = tr(tr(s, GROUP_COMMA, ""), GROUP_SPACE, "$1$2");
 
     // 3b. The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. Here rather than later because
     //     every numeric step below reads a digit run, and the colon was splitting one in half.
@@ -731,7 +731,7 @@ export function normalizeMongolian(input: string): string {
     });
 
     // 5. Percent — the suffixed arms first, or the bare arm consumes the sign and strands the suffix.
-    s = tr(s, PERCENT_SUFFIX, "$1 хув$2").replace(PERCENT_NI, "$1 хувь нь").replace(PERCENT, "$1 хувь");
+    s = tr(tr(tr(s, PERCENT_SUFFIX, "$1 хув$2"), PERCENT_NI, "$1 хувь нь"), PERCENT, "$1 хувь");
 
     // 6. Currency. The sign is DROPPED, not read, where the word is already said within the window (trap 12);
     //    a MAGNITUDE word after the figure takes the currency name to the far side of it, or refuses the
@@ -756,7 +756,7 @@ export function normalizeMongolian(input: string): string {
     s = tr(s, DEGREE_BARE, "$1 хэм");
 
     // 8. Minus. After step 7, so the degree arm can key on the emitted `хэм` as well as on `градус`.
-    s = tr(s, MINUS_DEGREE, "хасах $1").replace(MINUS_TRUE, "хасах ");
+    s = tr(tr(s, MINUS_DEGREE, "хасах $1"), MINUS_TRUE, "хасах ");
 
     // 9. Units and exponents, with the measure word preposed onto the unit noun. A glued case suffix is
     //    ACCEPTED rather than refused (the percent arm's opposite call, and the reason is at the step):
@@ -770,7 +770,7 @@ export function normalizeMongolian(input: string): string {
     });
 
     // 10. The decimal point.
-    s = tr(s, DECIMAL_DOT, "$1 цэг $2").replace(DECIMAL_COMMA, "$1 цэг $2");
+    s = tr(tr(s, DECIMAL_DOT, "$1 цэг $2"), DECIMAL_COMMA, "$1 цэг $2");
 
     // 11. The shared initialism seam.
     return spellInitialisms(s);

@@ -269,7 +269,7 @@ export function normalizeMossi(input: string): string {
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, before anything that counts characters — a dump carries
     //    `&nbsp;` and numeric entities, and `&nbsp;` inside a grouped figure would otherwise hide the space
     //    that step 3 matches on. The artifact's `zero-width` cell is ×2; a rendering hint is not speech.
-    s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍⁠﻿]/gu, "");
+    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍⁠﻿]/gu, "");
 
     // 3) DIGIT DE-GROUPING — FIRST among the number rules, and the playbook's own ordering rule says why: a
     //    grouping comma or period is otherwise read as CLAUSE PUNCTUATION, which is precisely the defect

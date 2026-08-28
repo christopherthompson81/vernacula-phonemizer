@@ -108,7 +108,7 @@ export function normalizeBurmese(input: string): string {
     //     figure arrives whole.
     for (const [nre, nword] of UNITS)
         for (const [dre, dword] of RATE_DENOMINATORS)
-            t = tr(t, 
+            t = tr(t,
                 new RegExp(
                     `(${d()}+(?:[.,]${d()}+)?(?:\\s*[-‐-―−]\\s*${d()}+(?:[.,]${d()}+)?)?)`
                         + `\\s*(?:${nre.source})\\s*/\\s*(?:${dre.source})(?![\\p{L}${D}])`,
@@ -134,7 +134,7 @@ export function normalizeBurmese(input: string): string {
     // 6) DEGREES, BEFORE the Latin fallback can read the scale letter as an English letter name.
     //    Case-insensitive on the letter; the bare sign is read too (negative result 2 in the header).
     //    ⚠ ℃/℉ are SINGLE characters and never decompose, so they are folded first.
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, new RegExp(`(${d()})\\s*°\\s*C(?![\\p{L}])`, "giu"), "$1 ဒီဂရီ စင်တီဂရိတ်");
     t = tr(t, new RegExp(`(${d()})\\s*°\\s*F(?![\\p{L}])`, "giu"), "$1 ဒီဂရီ ဖာရင်ဟိုက်");
     t = tr(t, new RegExp(`(${d()})\\s*°`, "gu"), "$1 ဒီဂရီ");
@@ -173,7 +173,7 @@ export function normalizeBurmese(input: string): string {
     //    ⚠ The negative exponent itself is still SILENT, and deliberately — negative result 1 in the header
     //    holds, Burmese writes a real negative as the word အနုတ်. What this guard buys is the kilogram.
     const DASH = "[-‐-―−]";
-    t = tr(t, 
+    t = tr(t,
         new RegExp(
             // ⚠ `(?<![${D}])` IS PART OF THE SAME FIX AND NOT A TIDY-UP. Without it the guard slides: rejected
             // at the `1` of `×10`, the engine simply retries one character along and matches `0 −27`, so the

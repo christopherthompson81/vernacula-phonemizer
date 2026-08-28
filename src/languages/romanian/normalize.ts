@@ -134,7 +134,7 @@ export function normalizeRomanian(input: string): string {
     t = tr(t, /(\d+)\s*%/gu, "$1 la sută");
 
     // 6) DEGREES (3), BEFORE the unit rules — the C of `20 °C` was read as Romanian [k].
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, /(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grade Celsius");
     t = tr(t, /(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grade Fahrenheit");
     t = tr(t, /(\d)\s*°/gu, "$1 grade");

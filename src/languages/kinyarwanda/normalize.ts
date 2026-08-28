@@ -449,7 +449,7 @@ export function normalizeKinyarwanda(input: string): string {
     //    year — and the corpus's only prefixed one-letter instances are `m` ×8 and `g` ×1. `m` earns it; `g`
     //    at ×1 does not pay for the exposure.
     const PRE_UNIT = Object.keys(UNIT).filter((k) => k.length > 1 || k === "m").sort((a, b) => b.length - a.length).join("|");
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0]\\d)`, "giu"),  // space, NBSP
         (_m, key: string, exp?: string) => {
             const noun = UNIT[key.toLowerCase()]!;
@@ -537,7 +537,7 @@ export function normalizeKinyarwanda(input: string): string {
     //    two-field time here is preceded by `saa`, and `saa` is re-emitted rather than consumed (trap 10).
     //    ⚠ `:00` EMITS THE HOUR ALONE. The alternative is the manifest's zero word, and "saa 10 zeru zeru" is
     //    not a reading of ten o'clock in any language.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${HOUR_MARKER})[ \u00a0]+([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])`, "giu"),  // space, NBSP
         (_w, mark: string, h: string, m: string) =>
             Number(m) === 0 ? `${mark} ${Number(h)}` : `${mark} ${Number(h)} ${AND} ${MINUTES} ${Number(m)}`,
@@ -592,7 +592,7 @@ export function normalizeKinyarwanda(input: string): string {
     s = tr(s, /(?<![\d.,])(\d+)[ \u00a0]?%[ \u00a0]?[-–—][ \u00a0]?(\d+)[ \u00a0]?%/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} kugeza kuri ${b}%` : whole));
     const RANGE_UNIT = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![-\\d.,\\p{L}\\p{M}])(\\d+)[ \u00a0]?[-–—][ \u00a0]?(\\d+)[ \u00a0]?(${RANGE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "gu"),  // space, NBSP
         (whole, a: string, b: string, key: string, exp?: string) => {
             if (Number(a) >= Number(b)) return whole;
@@ -633,7 +633,7 @@ export function normalizeKinyarwanda(input: string): string {
     //    the two instances this arm exists for are both `km`. Trap 46's one-letter hazard through a third
     //    door: the numeral guard that makes `m` safe everywhere else does not exist in denominator position.
     const DENOM_UNIT = Object.keys(UNIT).filter((k) => k.length > 1).sort((a, b) => b.length - a.length).join("|");
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`/[ \u00a0]?(${DENOM_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "giu"),  // space, NBSP
         (_w, key: string, exp?: string) => {
             const mod = exp === undefined ? "" : ` ${exp === "²" || exp === "2" ? SQUARED : CUBED}`;
@@ -646,7 +646,7 @@ export function normalizeKinyarwanda(input: string): string {
     //    when an EXPONENT is present: `km²` is never anything but a unit, whereas a bare `km` behind no
     //    numeral is exactly the unguarded shape trap 46 is about. 1 instance, and it closes the last
     //    `DROP exponent` shape the artifact carries that is not a lost superscript.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${DENOM_UNIT}|m)(²|³)(?![\\p{L}\\p{M}\\d'’])`, "giu"),
         (_w, key: string, exp: string) => `${UNIT[key.toLowerCase()]!} ${exp === "²" ? SQUARED : CUBED}`,
     );

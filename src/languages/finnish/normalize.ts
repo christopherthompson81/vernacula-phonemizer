@@ -404,7 +404,7 @@ export function normalizeFinnish(input: string): string {
     //    keeps a version string or a figure number out: `H.264` has one dot, and nothing in this corpus
     //    writes `d.d.d` with a field above 31/12. The YEAR stays as DIGITS so the cardinal compositor
     //    reads it (trap 20 — and here the engine's own rules do the right thing with it).
-    t = tr(t, 
+    t = tr(t,
         /(?<![\d.,:])(\d{1,2})\.(\d{1,2})\.(\d{4})(?!\d)/gu,
         (m, d: string, mo: string, y: string) =>
             isDay(Number(d)) && isMonth(Number(mo)) && ordinal(Number(d)) !== undefined
@@ -441,21 +441,21 @@ export function normalizeFinnish(input: string): string {
     //    so the marker licenses both operands — which means it has to run BEFORE the single arm, or that
     //    arm has already rewritten `6.30` and the lookbehind no longer sees a digit to anchor on. Written
     //    the other way round first, and it silently claimed nothing.
-    t = tr(t, 
+    t = tr(t,
         /(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(\s+ja\s+)(\d{1,2})[.:](\d{2})(?![\d.,])/giu,
         (m, h1: string, m1: string, sep: string, h2: string, m2: string) => {
             const a = clockBody(h1, m1), b = clockBody(h2, m2);
             return a !== undefined && b !== undefined ? `${a}${sep}${b}` : m;
         },
     );
-    t = tr(t, 
+    t = tr(t,
         /(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(?![\d.,])/giu,
         (m, h: string, mm: string) => clockBody(h, mm) ?? m,
     );
     //    4b) THE PARENTHETICAL TIMEZONE GLOSS. `(2.30 UTC)`, `(15.00 koordinoitua yleisaikaa)` — keyed on
     //    the ZONE NAME rather than on the bracket, because a bracket alone licenses nothing. `koordinoitua`
     //    is the corpus's own spelling-out of UTC and is what the second instance carries.
-    t = tr(t, 
+    t = tr(t,
         /(?<=\()(\d{1,2})[.:](\d{2})(?=\s+(?:UTC|GMT|EET|EEST|koordinoitua)(?![\p{L}\p{M}]))/giu,
         (m, h: string, mm: string) => clockBody(h, mm) ?? m,
     );
@@ -470,14 +470,14 @@ export function normalizeFinnish(input: string): string {
     //    by a month or a lowercase word, so the single rule would strand it and read it as a cardinal.
     //    Only the connective is refused (see the header); both ordinals are still read.
     const ordTail = `(?=\\s+(?:${MONTH_LOOKAHEAD}|\\p{Ll}))`;
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`(?<![\\d.,:\\p{L}])(\\d{1,3})\\.\\s*[–—-]\\s*(\\d{1,3})\\.${ordTail}`, "gu"),
         (m, a: string, b: string) => {
             const x = ordinal(Number(a)), y = ordinal(Number(b));
             return x !== undefined && y !== undefined ? `${x} ${y}` : m;
         },
     );
-    t = tr(t, 
+    t = tr(t,
         new RegExp(`(?<![\\d.,:\\p{L}])(\\d{1,3})\\.${ordTail}`, "gu"),
         (m, n: string) => ordinal(Number(n)) ?? m,
     );
@@ -547,7 +547,7 @@ export function normalizeFinnish(input: string): string {
     //     `71° 8′ N`), where the direction letter is also unread. Reading the ring without the tick
     //     improves the degree and leaves that pre-existing gap exactly as it was rather than half-closing
     //     it (trap 53: refuse the whole match, never half of it).
-    t = tr(t, /℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
     t = tr(t, /(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 astetta");
     t = tr(t, /(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 astetta fahrenheitia");
     t = tr(t, /(\d)\s*°/gu, "$1 astetta");
@@ -593,12 +593,12 @@ export function normalizeFinnish(input: string): string {
     //           (`plusmiinus-tilasto`, `plusmiinus-sarakkeen näyttäessä nollaa`), a column name rather
     //           than a reading of the sign. Trap 37 / the Fula lesson, with a healthy count on the wrong
     //           slot; ± is ×0 in this corpus, so there is nothing pressing the question either.
-    t = tr(t, /=/gu, " yhtä suuri kuin ").replace(/</gu, " pienempi kuin ").replace(/>/gu, " suurempi kuin ");
+    t = tr(tr(tr(t, /=/gu, " yhtä suuri kuin "), /</gu, " pienempi kuin "), />/gu, " suurempi kuin ");
 
     // 12) THE AMPERSAND (67) — dropped outright today, so `Robinson & Cook` ran the two names together
     //     with no separation at all. Spaced on both sides, always, or `B&B` fuses into one token (the
     //     merge defect of traps 18/26). `ja` is the language's conjunction, ×717 in the corpus.
-    t = tr(t, /&amp;/gu, "&").replace(/\s*[&＆]\s*/gu, " ja ");
+    t = tr(tr(t, /&amp;/gu, "&"), /\s*[&＆]\s*/gu, " ja ");
 
     // The insertions above pad with spaces so a word never fuses with its neighbours; collapse the runs.
     return t.replace(/[ \t]{2,}/gu, " ");

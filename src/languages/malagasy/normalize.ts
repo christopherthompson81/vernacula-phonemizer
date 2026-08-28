@@ -235,7 +235,7 @@ export function normalizeMalagasy(input: string): string {
     s = tr(s, /%\s*n['’]/gu, " isan-jaton'");
     //    Steps 4 and 5 emit a trailing/leading space so an expansion cannot glue itself to what follows
     //    (`4°40'` was becoming `4 degre40'`); where the source already had one, collapse the pair.
-    s = tr(s, / {2,}/gu, " ").replace(/ +$/u, "");
+    s = tr(tr(s, / {2,}/gu, " "), / +$/u, "");
 
     // 5b) THE MALAGASY ABBREVIATIONS — `sns` → *sy ny sisa*, `snm` → *sy ny manaraka*. See the table above
     //     for the wiki's own gloss of the first and the citation-slot argument for the second.

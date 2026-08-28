@@ -137,7 +137,7 @@ export function normalizeTelugu(input: string): string {
     //    and any numeric rule below would otherwise be free to read it as a zero. Guarded on BOTH sides
     //    against a real Telugu digit run, and required to touch a Telugu letter or mark, so a genuine
     //    ౧౦ or a standalone ౦ is untouched. See the file header for why all 144 here are typos.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![౦-౯])౦(?![౦-౯])`, "gu"),
         (m, off: number, full: string) => {
             const near = new RegExp(`[${TE_LETTER}]`, "u");
@@ -161,7 +161,7 @@ export function normalizeTelugu(input: string): string {
     //    this corpus itself writes); emitted apart, వ reached the g2p as a stray stressed [ʋˈa].
     //    All 28 digit-adjacent వ are ordinals — checked by tabulating what follows, which is
     //    శతాబ్దం / సంవత్సరం / స్థానం every time. `వది` (60వది) is the same suffix plus the nominaliser.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d.,])(\\d+)\\s*-?\\s*వ(ది)?${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, di: string | undefined) => {
             const n = Number(digits);
@@ -211,7 +211,7 @@ export function normalizeTelugu(input: string): string {
     //    letter H. Prefix + dative, the Telugu idiom, attested verbatim in this corpus (గంటకు 105 మైళ్ల).
     //    The trailing guard is `(?![A-Za-z])`, not the general letter class, because the corpus writes
     //    160km/hకు with a Telugu clitic welded to the denominator.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{L}\d])(\d[\d.]*)\s?(km|mi|ft|m)\s?\/\s?(h|s)(?![A-Za-z])/giu,
         (whole, n: string, u: string, den: string, off: number, full: string) => {
             const num = RATE_NUM[u.toLowerCase()], d = RATE_DENOM[den.toLowerCase()];
@@ -222,7 +222,7 @@ export function normalizeTelugu(input: string): string {
     //    The Telugu-script rate, whose numerator step 7 has already folded to a word (83కి.మీ/గం. →
     //    83కిలోమీటర్లు/గం.). Same dative guard: "గాలులు గంటకు 83కి.మీ/గం." already says గంటకు and must
     //    not say it twice, while "(165 కి.మీ./గం)" stands alone in its parenthesis and needs it.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(\\d[\\d.]*)\\s?కిలోమీటర్లు\\s*\\/\\s*గం\\.?${NOT_LETTER_AFTER}`, "gu"),
         (_m, n: string, off: number, full: string) => `${dative("గంటకు", full, off)}${n} కిలోమీటర్లు`,
     );
@@ -231,7 +231,7 @@ export function normalizeTelugu(input: string): string {
     //    rather than being silently dropped, which is what happened before: 24½ came out ఇరవై నాలుగు.
     //    Rewriting to 24.5 avoids inventing the fused Telugu form (ఇరవై నాలుగున్నర) — the reading
     //    "ఇరవై నాలుగు పాయింట్ ఐదు" is sourced from the same audio as the rest of step 11. ×2.
-    s = tr(s, /(?<=\d)\s?½/gu, ".5").replace(/(?<=\d)\s?¾/gu, ".75");
+    s = tr(tr(s, /(?<=\d)\s?½/gu, ".5"), /(?<=\d)\s?¾/gu, ".75");
 
     // 10) The SHARED symbol tier: percent, currency, units, exponents. UNITS BEFORE DECIMALS (step 11) —
     //     the tier matches a unit only when a NUMBER is adjacent, and rewriting 12.8 km to
@@ -255,7 +255,7 @@ export function normalizeTelugu(input: string): string {
     //     802.11 → "ఎనిమిది వందల రెండు పాయింట్ ఒకటి ఒకటి", 2.4 → "రెండు పాయింట్ నాలుగు",
     //     5.0 → "ఐదు పాయింట్ సున్నా", 6.5 → "ఆరు పాయింట్ ఐదు". The borrowed పాయింట్, not the Sanskritic
     //     దశాంశం, and the fractional digits one at a time.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} పాయింట్ ${[...frac].join(" ")}`,
     );

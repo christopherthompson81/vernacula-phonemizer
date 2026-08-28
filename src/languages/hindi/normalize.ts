@@ -126,7 +126,7 @@ export function makeHindiNormalizer(
         //       · THE CONSONANT MUST BE THAT NUMBER'S OWN, so `2था` cannot match on 4's consonant.
         //       · the trailing letter-boundary, so `2राज्य` ("2 states") is not claimed as `2रा` + ज्य.
         if (Object.keys(SUPPLETIVE_CONS).length > 0)
-            s = tr(s, 
+            s = tr(s,
                 new RegExp(`(?<![\\d.,])(\\d)(${alt([...new Set(Object.values(SUPPLETIVE_CONS))])})`
                     + `(${alt(Object.keys(VOWEL_FORM))})(?![\\p{L}\\p{M}])`, "gu"),
                 (whole, d: string, cons: string, vowel: string) => {
@@ -275,7 +275,7 @@ export function makeHindiNormalizer(
         //     percentage and is not a sign, and that IS a decimal. It is excluded because a digit precedes the
         //     dash (`३१,३८१ -`), the same shape `defects.ts`'s minus guard now excludes fleet-wide. Verified on
         //     both: `-२.८८ परिमाण` reads ऋण and `-९८.५३%` stays silent.
-        s = tr(s, 
+        s = tr(s,
             /(?<![\p{L}\p{M}\p{Nd}-])(?<!\p{Nd}[\p{L}\p{M}]{0,2}[.,]?[ \t]?)[-−–](\d+[.,]\d+)(?![\d.,])/gu,
             "ऋण $1",
         );

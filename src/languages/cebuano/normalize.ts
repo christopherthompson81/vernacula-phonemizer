@@ -117,7 +117,7 @@ export function normalizeCebuano(input: string): string {
     // ⚠ THE THREE GUARDS THE su AND so RUNS PAID FOR, carried rather than re-earned: do not double a
     // connective the text already wrote, do not claim a HYPHEN CHAIN (an identifier, not a span), and
     // require digits on BOTH sides — which is also what keeps this rule off `ika-20`, the ordinal prefix.
-    s = tr(s, 
+    s = tr(s,
         /(?<!\b(?:ngadto sa|hangtod|hangtud|gikan sa)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d.,-])/gu,
         "$1 ngadto sa $2",
     );

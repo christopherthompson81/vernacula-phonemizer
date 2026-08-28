@@ -578,7 +578,7 @@ export function normalizeBosnian(input: string): string {
     //     Both endpoints take the slot the WRITTEN licensor governs, which is step 9's rule stated for a
     //     word connective instead of a dash. The three connectives are the three the corpus writes (`i`
     //     ×2 sentences, `do` ×2, `ili` ×1); both scripts, as everywhere else in this file.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d.,])(\\d{1,4})\\.\\s+(${CONNECTIVE_ALT})\\s+(\\d{1,4})\\.\\s+(\\p{Ll}[\\p{L}\\p{M}]*)`, "gu"),
         (whole, from: string, conn: string, to: string, word: string) => {
             const slot = LICENSOR[lat(word)];

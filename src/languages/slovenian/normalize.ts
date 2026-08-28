@@ -682,15 +682,15 @@ export function normalizeSlovenian(input: string): string {
     //    before closing brackets that end it — `restavracije itd.`), where the sentence period is put back,
     //    and anything else (`idr., ki se` — a following comma already carries the pause, so appending a
     //    period there would give `in drugo.,`).
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"»])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED[ab.toLowerCase()]!}${sp}`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[»)”\\]]\\s*)*$)`, "giu"),
         (_m, ab: string) => `${DOTTED[ab.toLowerCase()]!}.`,
     );
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?![\\p{L}\\p{M}])`, "giu"),
         (_m, ab: string) => DOTTED[ab.toLowerCase()]!,
     );
@@ -699,7 +699,7 @@ export function normalizeSlovenian(input: string): string {
     //    ⚠ NO `i` FLAG — `\p{Lu}` UNDER `/i` MATCHES A LOWERCASE LETTER, so the capital guard this rule is
     //    built on did not exist and `Vzel ga. je` read *Vzel gospa je*. The abbreviation's own case is
     //    spelled out in the class instead; `Dr.`/`dr.`/`Ga.`/`ga.`/`G.`/`g.` are the attested spellings.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{L}\p{M}.])([Dd]r|[Gg]a|[Gg])\.(\s+)(?=\p{Lu})/gu,
         (_m, ab: string, sp: string) => `${HONORIFIC[ab.toLowerCase()]!}${sp}`,
     );
@@ -717,7 +717,7 @@ export function normalizeSlovenian(input: string): string {
     //    number. Both `.` and `:` are clause punctuation in slovenian.jsonc, so every
     //    clock in the corpus was split by a phrase break. A trailing `ure`/`uri`/`uro`/`ura` is CONSUMED
     //    (`okoli 9.30 ure`, ×1): the hour noun is already in the reading and saying it twice is redundant.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\d.,])${CLOCK_BODY}${CLOCK_TAIL}(?:\\s+(?:ure|uri|uro|ura)(?![\\p{L}\\p{M}]))?`, "gu"),
         (_m: string, h: string, min: string, offset: number, whole: string) => {
             const gov = CLOCK_GOV.exec(whole.slice(0, offset))?.[1]?.toLowerCase();
@@ -735,7 +735,7 @@ export function normalizeSlovenian(input: string): string {
     //    The ZONE LABEL is the whole licence. A bare 4-digit run is a year far more often than a time, and
     //    this corpus writes 116 of them; requiring UTC/GMT/CET/CEST after is what separates the one instance
     //    from all of those. Hours ≤ 23 and minutes ≤ 59, as in CLOCK_BODY.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `(?<![\\d.,:])([01]\\d|2[0-3])([0-5]\\d)(?![\\d.,:])(?=\\s*\\)?\\s*(?:po\\s+)?(?:UTC|GMT|CET|CEST)(?![\\p{L}\\p{M}]))`,
             "gu",
@@ -762,7 +762,7 @@ export function normalizeSlovenian(input: string): string {
     //     The trailing guard rejects a further digit, a colon and a `.dd`/`,dd` decimal but NOT a bare
     //     period: that is the SENTENCE end, and rejecting it silently refused `je torej 3:2.`
     const ascends = (a: string, b: string): boolean => Number(b) > Number(a);
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,:–—-])(\d{1,2})([:–—-])(\d{1,2})(?![\d:])(?!\.\d)(?!,\d)/gu,
         (m0, a: string, mark: string, b: string, offset: number, whole: string) => {
             if (mark !== ":" && ascends(a, b)) return m0; // a real range — step 5b owns it
@@ -801,7 +801,7 @@ export function normalizeSlovenian(input: string): string {
     //     *oseminsedemdeseti let*, `poglavar je govoril 2 uri` → *drugi uri*. All four titles take a bare
     //     quantity like that in ordinary Slovene, so the false positive is not exotic. The titles' own
     //     case is spelled into the class now and the flag is gone.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{L}\p{M}])([Kk]ralj[\p{L}\p{M}]*|[Cc]esar[\p{L}\p{M}]*|[Pp]apež[\p{L}\p{M}]*|[Pp]oglavar[\p{L}\p{M}]*)(\s+(?:\p{Lu}[\p{L}\p{M}]*\s+){1,3})(\d{1,2})(\.?)(?![\p{L}\p{M}\d,])/gu,
         (m0, title: string, names: string, digits: string, dot: string, ...rest: unknown[]) => {
             const t = title.toLowerCase();
@@ -838,7 +838,7 @@ export function normalizeSlovenian(input: string): string {
     //     what a per-item rule could not produce. The optional interpolated lowercase word handles
     //     `10. italijanske vojske` — an adjective between the ordinal and its head — and is re-emitted
     //     verbatim — ⚠ a rule that CONSUMES a word must put it back.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(
             `(?<![\\p{L}\\p{M}\\d.,])((?:\\d{1,4}\\.,?\\s+(?:in\\s+)?)*)` +
                 `(\\d{1,4})\\.\\s+((?:[\\p{Ll}\\p{M}]+\\s+)?)(${LICENSOR_ALT})(?![\\p{L}\\p{M}])`,
@@ -866,7 +866,7 @@ export function normalizeSlovenian(input: string): string {
     //     lowercase followers step 6b's closed list does not know (`60. v sezoni`, `1. dne v mesecu`).
     //     The case comes from the follower's ENDING where that is unambiguous, else the masculine
     //     nominative; see slotFromEnding for why `-e`/`-em`/`-a`/`-u` are deliberately excluded.
-    s = tr(s, 
+    s = tr(s,
         /(?<![\p{L}\p{M}\d.,])(\d{1,4})\.(?=\s*[,]|\s+[\p{Ll}\p{M}])/gu,
         (m0, digits: string, offset: number, whole: string) => {
             const word = /^\s+([\p{Ll}\p{M}]+)/u.exec(whole.slice(offset + m0.length))?.[1];
@@ -906,11 +906,11 @@ export function normalizeSlovenian(input: string): string {
     //     `0,5 °C` → *stopinje* — while `1,5 km` through the tier reads the gen.sg *kilometra*. The
     //     Ukrainian #920 shape: when a language keeps a unit out of the shared tier, the agreement it
     //     declared there is the specification the local rule owes.
-    s = tr(s, 
+    s = tr(s,
         /(\d+(?:,\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(numOf(n), STOPINJA())} Celzija`,
     );
-    s = tr(s, 
+    s = tr(s,
         /(\d+(?:,\d+)?)\s?°\s?F(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(numOf(n), STOPINJA())} Fahrenheita`,
     );
@@ -1031,7 +1031,7 @@ export function normalizeSlovenian(input: string): string {
         if (Number(a) === 1 && Number(b) === 2) return "pol";
         return `${feminineNumeral(Number(a))} ${counted(Number(a), forms)}`;
     };
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d.,\/])(\d+)\s+(\d{1,3})\/(\d{1,2})(?![\d.,\/])/gu,
         (m0, int: string, a: string, b: string) => {
             const f = frac(a, b, "");

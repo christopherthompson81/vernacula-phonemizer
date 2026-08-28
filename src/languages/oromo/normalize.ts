@@ -203,7 +203,7 @@ export function normalizeOromo(input: string): string {
     //    NOT a clock: `qabxii 2:2` (a British degree classification, ×1) — the minutes must be TWO digits,
     //    which is what keeps that instance out. A third `.dd` field would be a sports time; none occur.
     //    a.m./p.m. → *ganama* / *galgala*, the corpus's own half-day words (`ganama keessaa 07:19`).
-    s = tr(s, 
+    s = tr(s,
         /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)(?![\p{L}\p{M}]))?/gu,
         (m0, h: string, min: string, ap: string | undefined) => {
             const head = Number(min) === 0 ? String(Number(h)) : `${Number(h)} fi daqiiqaa ${Number(min)}`;
@@ -374,7 +374,7 @@ export function normalizeOromoNumerals(input: string): string {
     //     The apostrophe variants ’ ʼ ' all occur (`2010’tti`, `5’tti`) and are dropped: they are a
     //     hyphen-like separator here, not the glottal stop the g2p reads word-internally.
     //     A DECIMAL operand is handled too (`1.5tti` ×1) — it is why this runs before step 15.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+(?:\\.\\d+)?)[’'ʼ]?(ffaa[’'ʼ]?[a-z]{0,8}|${ENCLITIC})(?![\\p{L}\\p{M}\\d])`, "gu"),
         (m0, num: string, suf: string) => {
             const words = numeralWords(num).split(" ");
@@ -396,7 +396,7 @@ export function normalizeOromoNumerals(input: string): string {
     //      geminate [tːi], `f`/`n` alone a bare consonant. Detaching a bound postposition is a slip of the
     //      orthography, not a word boundary, so the space is not evidence of anything.
     //      ONE space, and no punctuation across it: a clause break really would end the numeral phrase.
-    s = tr(s, 
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+(?:\\.\\d+)?)[’'ʼ]? (${ENCLITIC_SPACED})(?![\\p{L}\\p{M}\\d])`, "gu"),
         (m0, num: string, suf: string) => {
             const words = numeralWords(num).split(" ");
