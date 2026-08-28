@@ -186,3 +186,87 @@ measured zero is recorded in the file rather than left to look like a repair.
 
 ⚠ **No golden row moves in either language**, so the parity gate is again blind to the whole change; the
 tests are the only witness.
+
+---
+
+# The undeclared-power fallback speaks an ASCII exponent (#1145)
+
+Same branch, one character further on. Surfaced while fixing rn's #1135, filed rather than patched from
+there because it is the TIER's and reaches every language that declares one power and not the other.
+
+## Run 1 — 2026-08-28 10:25 — what the fallback's own argument does and does not cover
+
+The branch's note is sound as far as it goes:
+
+> ⚠ NO MEASURE WORD DECLARED — emit the UNIT and hand the exponent back rather than abandoning the match.
+> Returning `whole` loses the QUANTITY too … Re-emitting the exponent keeps the unit's reading and leaves
+> `²` where the leak gate can see it, turning an invisible missing reading into a visible missing WORD.
+
+⚠ **IT HOLDS ONLY FOR A CHARACTER THE READER CANNOT SAY.** `²`/`³` reach the tokenizer and are dropped, so
+they are visible to the leak gate and silent in the phoneme stream — exactly as promised. But the unit
+alternation also admits the ASCII spelling (`(?<=[a-zA-Z])[23]`), and a bare digit is claimed by the NUMBER
+path and SPOKEN. So the fallback did the opposite of what it says on the ASCII half:
+
+    rn   517 km3   →  ibiɾometeɾo **ɡatatu** amad͡ʒana atanu na it͡ʃumi na indwi
+                      "kilometre THREE, five hundred and seventeen"
+    rn   517 km³   →  ibiɾometeɾo amad͡ʒana atanu na it͡ʃumi na indwi          ← what it should read
+
+A missing word is a lossy reading; an **invented quantity** is a false one, and the sentence still scans, so
+no leak gate fires and no referee names it.
+
+**Who is exposed — 22 layers, and the first count of 13 was WRONG.** The scan that produced it read only
+`src/languages/<x>/normalize.ts`, and a good many layers declare the tier in `<x>.ts` instead. Re-run over
+every `.ts` in each language directory, plus the manifest-indirected declarations under `data/`:
+
+    19 in code       abkhaz bosnian chichewa hakka hiligaynon khmer kirundi latgalian minnan santali
+                     sesotho setswana shona tigrinya wolof wu xhosa yoruba zulu
+     3 via manifest  cantonese cebuano indonesian
+    ── 22, and any future layer declaring one power and not the other joins them silently.
+
+⚠ **CHICHEWA IS THE OMISSION THAT MATTERS**, because it is the language named in the #1060 note in the very
+comment block this fix touches — the squared-only `unitPrefix` case that established the branch must honour
+word order. A miscount that drops the worked example is a miscount that would have misled the next reader
+about exactly the case the comment is about.
+
+**The fix, and it lands at TWO sites rather than one.** Normalise the handed-back exponent to the
+SUPERSCRIPT however it was written. That keeps both
+properties the note argues for — visible to the gate, silent to the reader — and removes the spoken digit.
+Both branches of the return (the `unitPrefix` one and the default) get it, because #1060 already established
+that this fallback must honour `unitPrefix` like every sibling.
+
+## Run 2 — 2026-08-28 10:30 — the blast radius, and why the test carries it alone
+
+    tools/gen_parity_goldens.mts (ALL 169)   **0 rows moved**
+
+⚠ **NO GOLDEN ANYWHERE CARRIES THE SHAPE**, which is what "latent" means here and why the fix cannot be
+gated by the corpus. A unit written with an ASCII exponent, in a language that declares the OTHER power, is
+absent from all 169 golden files. The new core test in `test/normalize-multilang.test.ts` is the only thing
+that measures it, and it pins all four cells — declared/undeclared × superscript/ASCII — plus the
+`unitPrefix` branch, because that is where #1060's doubled failure lived.
+
+⚠ **AND A TS↔C# DIFFERENTIAL CANNOT GATE IT EITHER**, which is the recurring lesson of this pair of issues:
+both engines were wrong together, so a differential comparing them passes. The measurement that finds this
+class is reading the output against the PREVIOUS output.
+
+## Run 3 — 2026-08-28 10:50 — the rate branch had the SAME defect, and a worse one beside it
+
+Review caught that the first cut fixed one of the two places that hand an exponent back. `withPower`, which
+serves both sides of a RATE, takes its own `sup` from the numerator group — and that group admits the ASCII
+spelling exactly like the one the fix touched. Two defects, one function:
+
+    9 m3/s   undeclared power   →  9 metre**3** per second     the raw digit, SPOKEN by the number path
+    9 m3/s   both powers declared →  9 **square** metre per second   an ASCII CUBE read as a SQUARE
+
+The second is the worse of the two and was not in the issue at all: `withPower` classified with
+`sup === "³"` alone, where the sibling branch uses `exp === "³" || exp === "3"`. In a squared-only language
+that turns the fallback's honest gap into a confidently wrong reading — *square* where the text wrote a
+cube — and nothing in the pipeline can see it, because a wrong WORD leaks no symbol.
+
+⚠ **THE TWO BRANCHES DIVERGED BECAUSE EACH CLASSIFIED THE POWER FOR ITSELF**, and the first cut of this fix
+repeated the pattern: it computed `back` with a second ternary over `exp` two lines below the `power` that
+already meant the same thing. Both engines now classify ONCE and derive the character from `power`, so a
+future edit cannot move one and not the other. That is the review's own nit, and it is the mechanism behind
+finding 2, so it is worth more than tidiness.
+
+    9 m3/s · 9 m³/s   undeclared  →  9 metre³ per second        both spellings agree
+    9 m3/s · 9 m³/s   declared    →  9 cubic metre per second   both spellings agree

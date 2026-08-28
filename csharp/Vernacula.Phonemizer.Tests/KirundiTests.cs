@@ -106,6 +106,10 @@ public class KirundiTests
     [InlineData("km³ 517", "ibirometero³ 517")]
     [InlineData("(233/km³)", "(233 kuri kirometero³)")]
     [InlineData("517 km³", "ibirometero³ 517")]
+    // ⚠ #1145 — the tier hands an undeclared power back as the SUPERSCRIPT however it was written, so the
+    // ASCII spelling no longer contributes a digit the number path can SPEAK (`517 km3` read "kilometre
+    // THREE, five hundred and seventeen"). No golden anywhere carries the shape; this is the measurement.
+    [InlineData("517 km3", "ibirometero³ 517")]
     [InlineData("mm³ 1000", "milimetero³ 1000")]
     // ⚠ THE CUBE IS HANDED BACK AS A SUPERSCRIPT EVEN WHERE THE TEXT WROTE THE ASCII `3`. Step 8's arm has
     // no #1136 blocker, and a raw `3` is a DIGIT — the tokenizer claims it and the number path SPEAKS it, so
