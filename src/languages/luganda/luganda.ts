@@ -3,8 +3,8 @@
  * The principal language of Uganda (~11M incl. L2). A greedy longest-match scan over the
  * grapheme table (manifest.ts) with two code rules: CONSONANT GEMINATION — a doubled consonant is a geminate
  * [Cː] (bbiri→bːiri) — and VOWEL LENGTHENING before a prenasalised consonant (Buganda→buɡaːnda). Signatures:
- * 5 vowels with DOUBLING = LENGTH; prenasalised consonants as single units (mb→ᵐb, nd→ⁿd, ng→ᵑɡ); ⟨ng'⟩→ŋ vs
- * ⟨ng⟩→ᵑɡ; ⟨ny⟩→ɲ; labialisation ⟨Cw⟩→Cʷ; the palatal STOPS ⟨c⟩=c, ⟨j⟩=ɟ; ⟨r⟩=ɾ. Tone (3-way H/L/falling) is
+ * 5 vowels with DOUBLING = LENGTH; prenasalised consonants as single units (mb→ᵐb, nd→ⁿd, ng→ᵑɡ); ⟨ng'⟩ and
+ * the literal letter ⟨ŋ⟩ both → ŋ, vs ⟨ng⟩→ᵑɡ; ⟨ny⟩→ɲ; labialisation ⟨Cw⟩→Cʷ; the palatal STOPS ⟨c⟩=c, ⟨j⟩=ɟ; ⟨r⟩=ɾ. Tone (3-way H/L/falling) is
  * lexical + unwritten → DEFERRED. Cardinal numbers: numbers.ts (citation/counting series + the mu/na
  * connectives).
  */
@@ -68,11 +68,20 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|(\\d+)|([.!?…,;:
  * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
  * core/hostWord.ts.
  *
- * ⚠ ŋ IS DELIBERATELY ABSENT: the g2p has no rule for it, and drops it outright — listing it here
- * would promise a reading that does not exist. NATIVE_CLASS is a claim ABOUT THE G2P, and
- * `test/native-inventory.test.ts` measures it character by character rather than trusting it.
+ * ⚠ ⟨ŋ⟩ IS IN THE CLASS, and the note that used to sit here said the opposite — that the g2p had no rule
+ * for the letter and "drops it outright", so listing it would promise a reading that does not exist. That was
+ * true of `phonemizeWord` and FALSE of `text()`, the path users reach (#1131). A letter this class REJECTS is not
+ * dropped, it is FOLDED: `makeNativiser` sends it through `core/hostWord.ts`'s UNDECOMPOSABLE table, which maps
+ * ŋ → n. So the shipped reading of `ziseŋŋendo` was *zisenːeːⁿdo*, an ALVEOLAR geminate standing where the
+ * orthography wrote the one segment this language's sources call contrastive — the same phoneme read two ways
+ * depending on which of ⟨ŋ⟩ and ⟨ng'⟩ the writer chose. A grapheme row (luganda.jsonc) fixes the reading; the
+ * class then has to admit the letter, or the fold still reaches it first.
+ *
+ * NATIVE_CLASS is a claim ABOUT THE G2P, and `test/native-inventory.test.ts` measures it character by character
+ * rather than trusting it — but it measures only the OVER-claim (a listed letter the g2p drops). The under-claim
+ * is silent, because a folded letter still produces sound.
  */
-const NATIVE_CLASS = "[a-z'’]";
+const NATIVE_CLASS = "[a-zŋ'’]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class LugandaPhonemizer implements Phonemizer {

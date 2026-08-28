@@ -5,6 +5,10 @@
 //   • 5 vowels a e i o u; DOUBLING = LENGTH (aa→aː …). Length is phonemic (bana 'four' vs baana 'children').
 //   • PRENASALISED consonants as single onset units (mb→ᵐb, nd→ⁿd, ng→ᵑɡ, nj→ⁿɟ, nc→ⁿc, nk→ᵑk, mp→ᵐp, nf→ᵐf,
 //     nv→ᵐv); ⟨ng'⟩→ŋ (velar nasal, distinct from ⟨ng⟩→ᵑɡ), ⟨ny⟩→ɲ; LABIALISATION ⟨Cw⟩→Cʷ.
+//   • ⟨ŋ⟩ IS A ROW OF ITS OWN (#1131). ⟨ng'⟩ is the commoner spelling of the velar nasal, but the literal
+//     letter occurs in this language's own corpus (FLEURS lg_ug + tools/corpus/mined/lg.jsonc), and without
+//     a row the nativiser's UNDECOMPOSABLE fold sent it to ⟨n⟩ — so `ziseŋŋendo` spoke an ALVEOLAR geminate
+//     nː where the orthography wrote the velar. The two spellings now read the same phoneme.
 //   • ⟨c⟩=c, ⟨j⟩=ɟ (voiceless/voiced palatal STOPS, Wikipedia — [tʃ]/[dʒ] are allophones before front vowels;
 //     folded c~tʃ, ɟ~dʒ vs the epitran referee). ⟨l⟩=l, ⟨r⟩=ɾ (allophones the orthography already writes).
 // TONE (3-way H/L/falling) is LEXICAL + UNWRITTEN → DEFERRED (not emitted). REFEREE = epitran lug-Latn only, which
@@ -18,7 +22,7 @@
     "convention": {
         "vowels": "5 vowels a e i o u; DOUBLING = LENGTH (aa→aː, ee→eː, ii→iː, oo→oː, uu→uː)",
         "prenasal": "⟨mb mp nf nv nd nt nc nj nk ng⟩ → ᵐb ᵐp ᵐf ᵐv ⁿd ⁿt ⁿc ⁿɟ ᵑk ᵑɡ (single onset units)",
-        "velarNasal": "⟨ng'⟩ → ŋ (distinct from ⟨ng⟩ → ᵑɡ); ⟨nng'⟩ → ŋː; ⟨ny⟩ → ɲ, ⟨nny⟩ → ɲː",
+        "velarNasal": "⟨ng'⟩ → ŋ (distinct from ⟨ng⟩ → ᵑɡ); ⟨nng'⟩ → ŋː; the literal letter ⟨ŋ⟩ → ŋ, ⟨ŋŋ⟩ → ŋː; ⟨ny⟩ → ɲ, ⟨nny⟩ → ɲː",
         "gemination": "a doubled consonant is a GEMINATE Cː (bbiri→bːiri, kitto→citːo) — handled in code",
         "labialisation": "⟨Cw⟩ → Cʷ (bw→bʷ, gw→ɡʷ, …)",
         "palatalStops": "⟨c⟩=c, ⟨j⟩=ɟ (palatal STOPS, not affricates — Wikipedia); ⟨l⟩=l, ⟨r⟩=ɾ",
@@ -37,7 +41,7 @@
         "aa": "aː", "ee": "eː", "ii": "iː", "oo": "oː", "uu": "uː",
         "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
         "b": "b", "c": "c", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "ɟ", "k": "k",
-        "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "ɾ", "s": "s", "t": "t",
+        "l": "l", "m": "m", "n": "n", "ŋ": "ŋ", "p": "p", "q": "k", "r": "ɾ", "s": "s", "t": "t",
         "v": "v", "w": "w", "x": "ks", "y": "j", "z": "z"
     },
 

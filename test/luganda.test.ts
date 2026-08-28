@@ -24,6 +24,27 @@ describe("Luganda canonical IPA — greedy g2p + gemination + prenasal lengtheni
         expect(phonemizeWord("nnyo")).toBe("ɲːo"); // ⟨nny⟩ → ɲː
     });
 
+    // The LITERAL letter ⟨ŋ⟩, which the corpus writes beside the commoner ⟨ng'⟩ (#1131). It has no golden row —
+    // `csharp/goldens/lg.tsv` carries 0 — so this test is the only thing pinning it. ⚠ ASSERTED THROUGH
+    // `phonemize`, NOT ONLY `phonemizeWord`: the defect lived in the gap between them. Without a grapheme row
+    // the letter fell outside NATIVE_CLASS, `makeNativiser` folded it through UNDECOMPOSABLE (ŋ → n), and the
+    // shipped path spoke an ALVEOLAR geminate — `ziseŋŋendo`, a real FLEURS lg_ug line, read *zisenːeːⁿdo*
+    // while `phonemizeWord` dropped the letter and read *ziseeːⁿdo*. Neither is the velar the writer wrote.
+    test("the literal letter ⟨ŋ⟩ reads as ⟨ng'⟩ does — on BOTH paths, not just phonemizeWord", () => {
+        expect(phonemizeWord("ŋ")).toBe("ŋ");
+        expect(phonemizeWord("ŋŋ")).toBe("ŋː"); // the gemination rule reaches it, as ⟨nng'⟩ → ŋː does
+        // the two spellings of one phoneme, agreeing
+        expect(phonemize("ŋŋamba", "lg")).toBe(phonemize("nng'amba", "lg"));
+        expect(phonemize("ŋŋamba", "lg")).toBe("ŋːaːᵐba");
+        expect(phonemize("ŋabo", "lg")).toBe(phonemize("ng'abo", "lg"));
+        // the FLEURS lg_ug line, spoken velar
+        expect(phonemize("ziseŋŋendo", "lg")).toBe("ziseŋːeːⁿdo");
+        // and the two paths agree, which is the invariant the fold broke
+        for (const w of ["ŋŋamba", "ziseŋŋendo", "ŋabo"]) expect(phonemize(w, "lg")).toBe(phonemizeWord(w));
+        // ⟨ŋ⟩ joining NATIVE_CLASS must NOT stop a genuinely foreign letter from folding
+        expect(phonemize("Łódź", "lg")).toBe("lodz");
+    });
+
     test("GEMINATION (doubled → Cː) and prenasal + LABIALISATION (⟨ndw⟩ → ⁿdʷ)", () => {
         expect(phonemizeWord("bbiri")).toBe("bːiɾi"); // "two" — ⟨bb⟩ → bː; ⟨r⟩ → ɾ
         expect(phonemizeWord("kitto")).toBe("kitːo"); // ⟨tt⟩ → tː
