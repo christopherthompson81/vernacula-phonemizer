@@ -12,10 +12,15 @@
     "provenance": "Authored from the standard Akan (Twi-Fante) orthography + Dolphyne (1988) 'The Akan (Twi-Fante) Language: Its Sound Systems and Tonal Structure'. Validated against the kaikki Akan human readings.",
 
     // Consonant DIGRAPHS (longest-match first) → IPA. Palatal series + labialised series + ⟨ng⟩.
+    // ⚠ THE ⟨ŋw⟩ AND ⟨ŋg⟩ ROWS ARE CONSERVATION, NOT NEW ORTHOGRAPHY (#1139). The standard spellings are
+    // ⟨nw⟩ and ⟨ng⟩ and are untouched. But while the literal letter ⟨ŋ⟩ sat outside NATIVE_CLASS the nativiser
+    // folded it to ⟨n⟩, so ⟨ŋw⟩ REACHED the ⟨nw⟩ row and read ŋʷ, and ⟨ŋg⟩ reached ⟨ng⟩ and read ŋ. Admitting
+    // the letter to the class would have taken both away — ⟨ŋw⟩ splitting into ŋ + w, losing the signature
+    // labialisation. These two rows keep every ⟨ŋ⟩ spelling reading what its ⟨n⟩ counterpart reads.
     "digraphs": {
         "ky": "t͡ɕ", "gy": "d͡ʑ", "hy": "ɕ", "ny": "ɲ",
         "tw": "t͡ɕʷ", "dw": "d͡ʑʷ", "kw": "kʷ", "gw": "ɡʷ", "hw": "ɕʷ", "nw": "ŋʷ",
-        "ng": "ŋ"
+        "ng": "ŋ", "ŋw": "ŋʷ", "ŋg": "ŋ"
     },
     // Single consonant letters → IPA.
     "consonants": {

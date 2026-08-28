@@ -189,8 +189,23 @@ function numberWords(n: number): string {
  * This language's OWN inventory — the TOKEN class as it stood before the widening below, lifted verbatim, so
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name.
+ *
+ * ⚠ ⟨ŋ Ŋ⟩ ARE HERE THOUGH THEY ARE NOT STANDARD AKAN SPELLING, and the reason is that the g2p above has a
+ * DELIBERATE rule for the letter (`if (c === "ŋ")`, sourced from kaikki) which this class made unreachable:
+ * a token carrying ⟨ŋ⟩ went through `makeNativiser`, whose UNDECOMPOSABLE table maps ŋ → n, so `ŋa` read
+ * *na* — byte-identical to `na` — and the rule was dead on the shipped path (#1139). NATIVE_CLASS is a claim
+ * ABOUT THE G2P, and the g2p has a rule, so the class has to admit the letter or the rule has to go.
+ *
+ * ⚠ AND THE FOLD WAS DOING A SECOND JOB SILENTLY, which is why two digraph rows moved with this (#1139, and
+ * the same trap as #1131): folded to ⟨n⟩, the letter REACHED the ⟨nw⟩ and ⟨ng⟩ digraphs, so ⟨ŋw⟩ read ŋʷ and
+ * ⟨ŋg⟩ read ŋ. Admitting the letter would have split ⟨ŋw⟩ into ŋ + w and lost the signature labialisation.
+ * `akan.jsonc` now carries ⟨ŋw⟩ and ⟨ŋg⟩ rows so every ⟨ŋ⟩ spelling still reads what its ⟨n⟩ one does.
+ *
+ * ⚠ ONE DIVERGENCE IS DELIBERATE: ⟨n⟩ is the UNDERSPECIFIED nasal and assimilates to a following consonant's
+ * place (⟨np⟩ → mp), while ⟨ŋ⟩ states velar place explicitly, so it does NOT assimilate (⟨ŋp⟩ → ŋp). An
+ * explicit letter overriding the writer would be the bug, not the feature.
  */
-const NATIVE_CLASS = "[A-Za-zɛɔƐƆ̃]";
+const NATIVE_CLASS = "[A-Za-zɛɔƐƆ̃ŋŊ]";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See

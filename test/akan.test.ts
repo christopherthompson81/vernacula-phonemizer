@@ -73,6 +73,36 @@ describe("Akan (Twi) canonical IPA", () => {
     test("full text via the registry", () => {
         expect(getPhonemizer("ak").text("Akwaaba, wo ho te sɛn?")).toBeTruthy();
     });
+
+    // The LITERAL letter ⟨ŋ⟩ (#1139). The g2p has a deliberate rule for it (`if (c === "ŋ")`, kaikki-sourced)
+    // that NATIVE_CLASS made unreachable: the nativiser's UNDECOMPOSABLE table maps ŋ → n, so `ŋa` read *na*,
+    // byte-identical to `na`, and the rule was dead on the shipped path.
+    // ⚠ ASSERTED THROUGH `phonemize`, NOT `phonemizeWord` — the whole defect lived in the gap between them,
+    // and a phonemizeWord-only test passed while the product was wrong. ⟨ŋ⟩ is ×0 in the golden, the mined
+    // and attest artifacts and the tone lexicon, so this test is the only instrument.
+    test("the literal letter ⟨ŋ⟩ reaches the g2p instead of being folded to ⟨n⟩", () => {
+        const say = (w: string): string => getPhonemizer("ak").text(w).trim();
+        expect(say("ŋa")).toBe("ŋa"); // was *na* — the fold, not the rule
+        expect(say("ŋa")).not.toBe(say("na"));
+        expect(say("aŋa")).toBe("aŋa");
+        expect(say("dwoŋ")).toBe("d͡ʑʷoŋ"); // word-final; was *d͡ʑʷon*
+        expect(say("Ŋa")).toBe("ŋa"); // the class carries both cases (its flags are "u", not "iu")
+    });
+
+    // ⚠ WHAT THE FOLD WAS SUPPLYING SILENTLY, conserved on purpose (#1139; the trap #1131 set). Folded to ⟨n⟩,
+    // the letter REACHED the ⟨nw⟩ and ⟨ng⟩ digraphs — so admitting it to the class would have split ⟨ŋw⟩ into
+    // ŋ + w and lost the signature labialisation. Two jsonc rows keep those readings.
+    test("⟨ŋ⟩ spellings read what their ⟨n⟩ counterparts read — except where ⟨n⟩ merely assimilates", () => {
+        const say = (w: string): string => getPhonemizer("ak").text(w).trim();
+        expect(say("ŋwa")).toBe(say("nwa")); // ŋʷa — the labialisation survives
+        expect(say("ŋwa")).toBe("ŋʷa");
+        expect(say("ŋgu")).toBe(say("ngu")); // ŋu
+        expect(say("ŋk")).toBe(say("nk")); // ŋk — ⟨n⟩ assimilates TO velar here, so the two agree anyway
+        // …and the ONE deliberate divergence: ⟨n⟩ is the underspecified nasal and takes the following
+        // consonant's place, while ⟨ŋ⟩ states velar explicitly and must not be overridden.
+        expect(say("np")).toBe("mp");
+        expect(say("ŋp")).toBe("ŋp");
+    });
 });
 
 // TEXT NORMALIZATION (src/languages/akan/normalize.ts). ⚠ ak.wikipedia is LOCKED, so the evidence is

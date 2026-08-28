@@ -192,7 +192,7 @@ public static class AkanPhonemizer
      * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter
      * the language does not use, i.e. a foreign name.
      */
-    private const string NATIVE_CLASS = "[A-Za-zɛɔƐƆ̃]";
+    private const string NATIVE_CLASS = "[A-Za-zɛɔƐƆ̃ŋŊ]";
 
     /** ⚠ EXPORTED FOR the reachability guard, which asserts every lexicon key survives its own fold. */
     public static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "u");
