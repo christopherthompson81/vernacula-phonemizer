@@ -177,4 +177,43 @@ public class TraceTests
         Assert.True(checkedCount > 0, "no token carried an input span — the probe measured nothing");
     }
 
+    /**
+     * ⚠ THE TWO DEFECTS THE OTHER PROVENANCE TESTS COULD NOT SEE, both from "length is not identity".
+     *
+     * (a) `Mandarin.SubstituteNumbers` rewrites a code-point list OUTSIDE the `JsRe.Replace` seam and is NET
+     * length-preserving (`115`→`一百一十五` is +2, each `10`→`十` is −1), so a stale identity mapping passed a
+     * length check and reported `十` as coming from a SPACE. In-range and therefore invisible to a bounds
+     * assertion, and absent from the containment test because that only runs where normalization is a no-op.
+     *
+     * (b) `Initialisms` runs `CLASS_BRACKETS.Replace("[aeiouy]", "")` inside a STATIC INITIALIZER — eight
+     * characters — and any pipeline string of length 8 adopted its six-entry result. Every language had its
+     * own poisoned length, once per process, on the first COLD trace; xunit shares a process, so by the time
+     * the other tests ran the initializers were already warm and the defect had evaporated.
+     *
+     * Both are now caught by tracking the STRING, not its length.
+     */
+    [Fact]
+    public void ANetLengthPreservingStepOutsideTheSeamYieldsAbsenceNotAWrongSpan()
+    {
+        var t = Phonemizer.PhonemizeTrace("115 10 10 中国", "cmn");
+        Assert.Equal(t.Ipa, Phonemizer.Phonemize("115 10 10 中国", "cmn"));
+        // the mapping cannot be trusted here, so it must not be offered at all
+        Assert.All(t.Tokens, k => Assert.Null(k.InputSpan));
+    }
+
+    [Theory]
+    [InlineData("hi there")]   // exactly the length of Initialisms' "[aeiouy]"
+    [InlineData("the cats")]
+    public void APipelineStringThatMerelySHARESALengthIsNotAdopted(string text)
+    {
+        var t = Phonemizer.PhonemizeTrace(text, "en");
+        Assert.Equal(text, t.Normalized); // the premise: normalization is a no-op here
+        Assert.NotEmpty(t.Tokens);
+        foreach (var k in t.Tokens)
+        {
+            Assert.NotNull(k.InputSpan);
+            Assert.Equal(k.Surface, text[k.InputSpan!.Value.Start..k.InputSpan.Value.End]);
+        }
+    }
+
 }

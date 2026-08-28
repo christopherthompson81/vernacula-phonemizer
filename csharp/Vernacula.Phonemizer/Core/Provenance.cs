@@ -19,6 +19,17 @@ public static class Provenance
     /// <summary>prov[i] = [Start,End) of the ORIGINAL input that character i of the current string came from.</summary>
     [ThreadStatic]
     private static (int Start, int End)[]? prov;
+    /**
+     * ⚠ THE STRING THE MAPPING DESCRIBES — length alone cannot carry the guarantee, and two separate defects
+     * proved it. (a) `Mandarin.SubstituteNumbers` rewrites a code-point list OUTSIDE the seam and is NET
+     * length-preserving (`115`→`一百一十五` is +2, each `10`→`十` is −1), so a stale identity mapping passed a
+     * length check and reported `十` as coming from a SPACE. (b) `Initialisms` runs
+     * `CLASS_BRACKETS.Replace("[aeiouy]", "")` inside a static initializer — 8 characters — and any pipeline
+     * string of length 8 adopted its 6-entry result. Every language had its own poisoned length, once per
+     * process, on the first cold trace. Comparing content costs O(n) on the traced path only.
+     */
+    [ThreadStatic]
+    private static string? tracked;
     [ThreadStatic]
     private static bool frozen;
 
@@ -30,6 +41,7 @@ public static class Provenance
         // and one astral character made the array short.
         prov = new (int, int)[input.Length];
         for (var i = 0; i < input.Length; i++) prov[i] = (i, i + 1);
+        tracked = input;
         frozen = false;
     }
 
@@ -40,6 +52,7 @@ public static class Provenance
     {
         if (Foreign.HostDepth() > 1) return;
         prov = null;
+        tracked = null;
         frozen = false;
     }
 
@@ -49,7 +62,7 @@ public static class Provenance
      * the array falls out of step and is WITHHELD rather than reported wrong.
      */
     public static (int Start, int End)[]? For(string normalized) =>
-        prov is not null && prov.Length == normalized.Length ? prov : null;
+        prov is not null && tracked == normalized ? prov : null;
 
     /// <summary>The [Start,End) in the input that produced [from,to) of the normalized string.</summary>
     public static (int Start, int End)? InputSpan((int Start, int End)[] p, int from, int to)
@@ -108,8 +121,9 @@ public static class Provenance
         /// <summary>Adopt the accumulated mapping, or drop it if it does not describe `result`.</summary>
         public void Commit(string result)
         {
-            if (next.Count != result.Length) { prov = null; return; } // our own accounting failed: drop it
+            if (next.Count != result.Length) { prov = null; tracked = null; return; } // our accounting failed
             prov = next.ToArray();
+            tracked = result;
         }
     }
 
@@ -132,7 +146,7 @@ public static class Provenance
     {
         var p = prov;
         if (p is null || frozen || Foreign.HostDepth() > 1) return null;
-        if (p.Length != input.Length) return null; // a different string, not a missed step
+        if (tracked != input) return null; // a different string, not a missed step
         return new Track(p, input.Length);
     }
 }
