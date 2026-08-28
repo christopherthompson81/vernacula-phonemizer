@@ -253,7 +253,7 @@ describe("shared symbol normalizer (core)", () => {
     // is a VISIBLE missing word rather than an invisible missing reading. That argument holds only for a
     // character the reader cannot SAY: `²`/`³` are dropped by the g2p, but the unit alternation also admits
     // the ASCII `2`/`3`, and a bare digit is claimed by the NUMBER path and spoken — so re-emitting it
-    // verbatim turned a missing word into an INVENTED QUANTITY. 13 layers declare one power and not the
+    // verbatim turned a missing word into an INVENTED QUANTITY. 22 layers declare one power and not the
     // other, and no golden carries the shape, so this test is the only thing that measures it.
     test("an undeclared power hands back the SUPERSCRIPT, never a spoken ASCII digit", () => {
         const n = makeSymbolNormalizer({
@@ -275,6 +275,22 @@ describe("shared symbol normalizer (core)", () => {
         });
         expect(pre("5 km³")).toBe("kilometre³ 5");
         expect(pre("5 km3")).toBe("kilometre³ 5");
+        // ⚠ AND THE RATE BRANCH IS THE SECOND SITE THAT HANDS AN EXPONENT BACK — it took its power from its
+        // OWN ternary and so disagreed with the branch above about what an ASCII `3` is. Undeclared: the raw
+        // digit was re-emitted and SPOKEN. Declared: an ASCII cube was read as a SQUARE, which is worse than
+        // the gap the fallback exists to leave, and invisible because a wrong WORD leaks no symbol.
+        const rate = makeSymbolNormalizer({
+            units: { m: ["metre"] }, rateDenominators: { s: "second" }, unitPer: "per",
+        });
+        expect(rate("9 m3/s")).toBe("9 metre³ per second");
+        expect(rate("9 m³/s")).toBe("9 metre³ per second");
+        const rateBoth = makeSymbolNormalizer({
+            units: { m: ["metre"] }, rateDenominators: { s: "second" }, unitPer: "per",
+            exponentWords: { squared: ["square"], cubed: ["cubic"], position: "before" },
+        });
+        expect(rateBoth("9 m3/s")).toBe("9 cubic metre per second");
+        expect(rateBoth("9 m³/s")).toBe("9 cubic metre per second");
+        expect(rateBoth("9 m2/s")).toBe("9 square metre per second");
     });
 
     // ⚠ A COMPOUND CURRENCY KEY MUST MATCH ACROSS THE SPACE ITS OWN CORPUS WRITES (#1137). `US$` is declared

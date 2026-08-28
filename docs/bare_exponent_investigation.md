@@ -214,11 +214,22 @@ path and SPOKEN. So the fallback did the opposite of what it says on the ASCII h
 A missing word is a lossy reading; an **invented quantity** is a false one, and the sentence still scans, so
 no leak gate fires and no referee names it.
 
-**Who is exposed.** 13 layers declare `squared` and not `cubed` today — abkhaz, bosnian, hakka, hiligaynon,
-khmer, kirundi, latgalian, minnan, santali, sesotho, wolof, wu, yoruba — and any future layer that declares
-one power and not the other joins them silently.
+**Who is exposed — 22 layers, and the first count of 13 was WRONG.** The scan that produced it read only
+`src/languages/<x>/normalize.ts`, and a good many layers declare the tier in `<x>.ts` instead. Re-run over
+every `.ts` in each language directory, plus the manifest-indirected declarations under `data/`:
 
-**The fix.** Normalise the handed-back exponent to the SUPERSCRIPT however it was written. That keeps both
+    19 in code       abkhaz bosnian chichewa hakka hiligaynon khmer kirundi latgalian minnan santali
+                     sesotho setswana shona tigrinya wolof wu xhosa yoruba zulu
+     3 via manifest  cantonese cebuano indonesian
+    ── 22, and any future layer declaring one power and not the other joins them silently.
+
+⚠ **CHICHEWA IS THE OMISSION THAT MATTERS**, because it is the language named in the #1060 note in the very
+comment block this fix touches — the squared-only `unitPrefix` case that established the branch must honour
+word order. A miscount that drops the worked example is a miscount that would have misled the next reader
+about exactly the case the comment is about.
+
+**The fix, and it lands at TWO sites rather than one.** Normalise the handed-back exponent to the
+SUPERSCRIPT however it was written. That keeps both
 properties the note argues for — visible to the gate, silent to the reader — and removes the spoken digit.
 Both branches of the return (the `unitPrefix` one and the default) get it, because #1060 already established
 that this fallback must honour `unitPrefix` like every sibling.
@@ -236,3 +247,26 @@ that measures it, and it pins all four cells — declared/undeclared × superscr
 ⚠ **AND A TS↔C# DIFFERENTIAL CANNOT GATE IT EITHER**, which is the recurring lesson of this pair of issues:
 both engines were wrong together, so a differential comparing them passes. The measurement that finds this
 class is reading the output against the PREVIOUS output.
+
+## Run 3 — 2026-08-28 10:50 — the rate branch had the SAME defect, and a worse one beside it
+
+Review caught that the first cut fixed one of the two places that hand an exponent back. `withPower`, which
+serves both sides of a RATE, takes its own `sup` from the numerator group — and that group admits the ASCII
+spelling exactly like the one the fix touched. Two defects, one function:
+
+    9 m3/s   undeclared power   →  9 metre**3** per second     the raw digit, SPOKEN by the number path
+    9 m3/s   both powers declared →  9 **square** metre per second   an ASCII CUBE read as a SQUARE
+
+The second is the worse of the two and was not in the issue at all: `withPower` classified with
+`sup === "³"` alone, where the sibling branch uses `exp === "³" || exp === "3"`. In a squared-only language
+that turns the fallback's honest gap into a confidently wrong reading — *square* where the text wrote a
+cube — and nothing in the pipeline can see it, because a wrong WORD leaks no symbol.
+
+⚠ **THE TWO BRANCHES DIVERGED BECAUSE EACH CLASSIFIED THE POWER FOR ITSELF**, and the first cut of this fix
+repeated the pattern: it computed `back` with a second ternary over `exp` two lines below the `power` that
+already meant the same thing. Both engines now classify ONCE and derive the character from `power`, so a
+future edit cannot move one and not the other. That is the review's own nit, and it is the mechanism behind
+finding 2, so it is worth more than tidiness.
+
+    9 m3/s · 9 m³/s   undeclared  →  9 metre³ per second        both spellings agree
+    9 m3/s · 9 m³/s   declared    →  9 cubic metre per second   both spellings agree

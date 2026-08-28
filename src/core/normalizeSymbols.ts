@@ -1189,9 +1189,16 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                          *  never abandons the match. The SINGULAR form is used on both sides \u2014 inside a
                          *  rate neither noun is what the quantity counts. */
                         const withPower = (noun: string, sup: string): string => {
-                            const power = sup === "\u00b3" ? "cubed" : "squared";
+                            // ⚠ THE ASCII SPELLING COUNTS ON BOTH HALVES OF THIS (#1145). The unit regex
+                            // admits `m3` as well as `m³`, so classifying on the superscript alone read an
+                            // ASCII CUBE as a SQUARE — `9 m3/s` gave *9 square metre per second* where the
+                            // superscript gave *cubic* — and re-emitting the raw digit on the miss handed
+                            // the NUMBER path a `3` to speak. Both are the same defect as the sibling branch
+                            // below, in the same function; they diverged because each classified the power
+                            // for itself. Classify ONCE and derive the character from that.
+                            const power = sup === "\u00b3" || sup === "3" ? "cubed" : "squared";
                             const eForms = d.exponentWords?.[power];
-                            if (eForms === undefined) return `${noun}${sup}`;
+                            if (eForms === undefined) return `${noun}${power === "cubed" ? "\u00b3" : "\u00b2"}`;
                             const ew = eForms[0]!;
                             const eDeclared = d.exponentWords?.position;
                             const ePos = (typeof eDeclared === "string" ? eDeclared : eDeclared?.[power]) ?? "after";
@@ -1235,10 +1242,12 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                             // `2`/`3`, and a bare digit is claimed by the number path and SPOKEN. Re-emitting
                             // it verbatim turned a missing WORD into an invented QUANTITY: `517 km3` read
                             // *ibirometero GATATU amajana atanu…* — "kilometre three, five hundred and
-                            // seventeen" — in every language that declares one power and not the other (13
+                            // seventeen" — in every language that declares one power and not the other (22
                             // layers today). Normalising the spelling keeps both properties the note above
                             // wants and removes the spoken digit. Missing word ≥ wrong word ≫ INVENTED NUMBER.
-                            const back = exp === "\u00b3" || exp === "3" ? "\u00b3" : "\u00b2";
+                            // ⚠ DERIVED FROM `power`, NOT RE-CLASSIFIED. A second ternary over `exp` is how
+                            // the rate branch above came to disagree with this one about what an ASCII `3` is.
+                            const back = power === "cubed" ? "\u00b3" : "\u00b2";
                             return d.unitPrefix ? `${head}${back} ${q}` : `${q} ${head}${back}`;
                         }
                         // Count forms, because in Romance the measure word is an ADJECTIVE and agrees:

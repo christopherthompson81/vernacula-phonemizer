@@ -853,9 +853,13 @@ public static class NormalizeSymbols
                      */
                     string WithPower(string noun, string sup)
                     {
-                        var power = sup == "\u00b3" ? "cubed" : "squared";
+                        // ⚠ THE ASCII SPELLING COUNTS ON BOTH HALVES OF THIS (#1145). The unit regex admits
+                        // `m3` as well as `m³`, so classifying on the superscript alone read an ASCII CUBE as
+                        // a SQUARE, and re-emitting the raw digit on the miss handed the NUMBER path a `3` to
+                        // speak. Classify ONCE and derive the character from that.
+                        var power = sup == "³" || sup == "3" ? "cubed" : "squared";
                         var eForms = d.ExponentWords?[power];
-                        if (eForms is null) return noun + sup;
+                        if (eForms is null) return noun + (power == "cubed" ? "³" : "²");
                         var ew = eForms[0];
                         var ePos = d.ExponentWords?.Position?.For(power) ?? "after";
                         return ePos == "compound" ? ew + noun
@@ -905,7 +909,9 @@ public static class NormalizeSymbols
                             // and a bare digit is claimed by the NUMBER path and SPOKEN — `517 km3` read
                             // "kilometre THREE, five hundred and seventeen". Missing word ≥ wrong word ≫
                             // INVENTED NUMBER.
-                            var back = exp == "³" || exp == "3" ? "³" : "²";
+                            // ⚠ DERIVED FROM `power`, NOT RE-CLASSIFIED — a second ternary over `exp` is how
+                            // the rate branch above came to disagree with this one about an ASCII `3`.
+                            var back = power == "cubed" ? "³" : "²";
                             return d.UnitPrefix ? head + back + " " + q : q + " " + head + back;
                         }
                         // Count forms, because in Romance the measure word is an ADJECTIVE and agrees.
