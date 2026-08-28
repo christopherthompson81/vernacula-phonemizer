@@ -297,3 +297,34 @@ containment test only runs where normalization is a NO-OP, i.e. precisely where 
 The xunit suite additionally could never see the second one: it shares a process, so the static initializers
 were already warm by the time it ran. New tests in both engines cover the `cmn` numeral case and the
 length-8 collision, and the TS one was verified to FAIL against the pre-fix code.
+
+## Run 10 — the TS pre-passes, and why the seam must stay narrow
+
+The C# port's coverage lead came from `JsRe.Replace` also carrying the registry pre-passes. PR #1155 first
+claimed closing the TS gap might mean "moving the TS seam to match"; measured, that was backwards — the ten
+fold functions carry **19 `.replace` sites between them**, while moving the seam would mean introducing a
+JsRe-style wrapper across a codebase that uses native `String.replace` everywhere.
+
+Converting those 19 (plus `roman.ts`'s one, which runs outside `foldPass`) lifted TS coverage
+**88.9% → 92.1%**, and made the case that previously mapped nothing map everything:
+
+    phonemizeTrace("<b>hi</b> there", "en")     before: neither token     after: both
+
+### ⚠ And a blanket conversion broke English, which is the lesson
+
+`foldLatinDiacritics` lives in the same file, has the identical `return s.replace(...)` shape, and is
+**called per word from `resolveWord`**. Routing it through `tr` poisoned the mapping on every utterance:
+
+    POISON: tracked="doctor Smith paid 1,250 dollars."  s="doctor"
+      at foldLatinDiacritics (unicode.ts:108) <- resolveWord <- EnglishPhonemizer.text
+
+Only functions that transform the PIPELINE STRING belong on this seam. That is the same "input-side only"
+boundary the engine files taught in Run 6, reappearing inside `core/` where the shapes are indistinguishable
+by grep — and it is why the two engines take OPPOSITE rules for a length mismatch: the TS seam is narrow, so
+a mismatch means a step went unseen (poison); the C# seam is the shared `JsRe.Replace`, so a mismatch means a
+different string (ignore).
+
+    TS  92.1%   ·   C#  97.6%   ·   out-of-range 0 in both
+
+The residual TS gap is now the languages whose normalizers do something other than `replace`, not the
+pre-passes.

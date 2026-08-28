@@ -12,7 +12,7 @@
  * dropped. The extra loan letters (va x gb z kp sh) transliterate to their Boko equivalents — identical to how the
  * Latin engine already treats them, so the two scripts stay consistent.
  */
-import { foldNativeDigits } from "../../core/unicode.ts";
+import { foldDigitChar } from "../../core/unicode.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // The Adlam tables (fula.jsonc `adlam`): letter → Boko/Latin, and the combining marks. The TRANSLITERATION
@@ -48,11 +48,11 @@ export function adlamToLatin(word: string): string {
         if (ch === GEMINATION) { out += lastBase; continue; }
         if (ch === HAMZA) { out += "q"; lastBase = "q"; continue; }
         if (DROP.has(ch)) continue;
-        // ⚠ THE DIGIT TEST MUST STAY NARROW. foldNativeDigits folds EVERY script's digits and returns a
+        // ⚠ THE DIGIT TEST MUST STAY NARROW. foldDigitChar folds EVERY script's digits and returns a
         // non-digit unchanged, so calling it unguarded would (a) make `lat` never undefined, killing the
         // pass-through below, and (b) set lastBase — the gemination target — from a character that is not
         // an Adlam letter at all. Guarding on the Adlam digit range keeps the undefined signal intact.
-        const lat = ADLAM[ch] ?? (ADLAM_DIGIT.test(ch) ? foldNativeDigits(ch) : undefined);
+        const lat = ADLAM[ch] ?? (ADLAM_DIGIT.test(ch) ? foldDigitChar(ch) : undefined);
         if (lat !== undefined) { out += lat; lastBase = lat; } else out += raw; // pass unknown through
     }
     return out;
