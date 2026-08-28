@@ -21,7 +21,7 @@
 
     "convention": {
         "vowels": "5 vowels a e i o u; DOUBLING = LENGTH (aa→aː, ee→eː, ii→iː, oo→oː, uu→uː)",
-        "prenasal": "⟨mb mp nf nv nd nt nc nj nk ng⟩ → ᵐb ᵐp ᵐf ᵐv ⁿd ⁿt ⁿc ⁿɟ ᵑk ᵑɡ (single onset units); ⟨ŋ⟩ triggers it too (⟨ŋk⟩ → ᵑk, as ⟨nk⟩ does)",
+        "prenasal": "⟨mb mp mf mv nf nv nd nt nc nj nk ng⟩ → ᵐb ᵐp ᵐf ᵐv ᵐf ᵐv ⁿd ⁿt ⁿc ⁿɟ ᵑk ᵑɡ (single onset units) — all TWELVE, since this string is now the only place the mapping is written; ⟨ŋ⟩ triggers it too (⟨ŋk⟩ → ᵑk, as ⟨nk⟩ does)",
         "velarNasal": "⟨ng'⟩ → ŋ (distinct from ⟨ng⟩ → ᵑɡ); ⟨nng'⟩ → ŋː; the literal letter ⟨ŋ⟩ → ŋ, ⟨ŋŋ⟩ → ŋː; ⟨ny⟩ → ɲ, ⟨nny⟩ → ɲː",
         "gemination": "a doubled consonant is a GEMINATE Cː (bbiri→bːiri, kitto→citːo) — handled in code",
         "labialisation": "⟨Cw⟩ → Cʷ (bw→bʷ, gw→ɡʷ, …)",
@@ -59,8 +59,15 @@
     // every reading it touched WORSE, never better: there is no ⟨ɡ⟩ grapheme row and luganda.ts's place test
     // is the ASCII string "kg", so the alias fired the rule, picked the wrong place, dropped the consonant
     // anyway AND spuriously lengthened the vowel — ⟨anɡ⟩ read *aːⁿ* where without it it reads *an*. Measured
-    // exhaustively over the 1,951 three-letter frames containing U+0261: 153 differ, 0 of them in the alias's
-    // favour. A defence with no input for which it helps is not a defence.
+    // exhaustively over every three-letter frame containing U+0261 drawn from ASCII a-z with ⟨g⟩ replaced by
+    // U+0261 (26³ − 25³ = 1,951 frames): 153 differ, 0 of them in the alias's favour. A defence with no input
+    // for which it helps is not a defence.
+    // ⚠ DELETING THE ALIAS IS ONLY HALF. On its own it made U+0261 fail predictably rather than corruptly —
+    // `luɡanda` → *luaːⁿda*, a consonant still deleted. The other half is a `ɡ → g` row in core/hostWord.ts's
+    // UNDECOMPOSABLE table, added with this change: script g is a typographic variant of ⟨g⟩, not a letter of
+    // anyone's orthography, and the fold is what makes it READ. `luɡanda` now reads *luɡaːⁿda*, and the same
+    // row repairs the whole fleet (`ɡato` read *ˈato* in es). With the fold in place no ⟨ɡ⟩ entry in
+    // `prenasalisable` is wanted at all — wiring the alias up would have been in the fold's way.
     "prenasalisable": ["b", "p", "f", "v", "t", "d", "c", "j", "k", "g"],
 
     "clausePunctuation": {

@@ -43,7 +43,7 @@ public sealed class LugandaManifest
     public IReadOnlyDictionary<string, string> Graphemes { get; init; } = new Dictionary<string, string>();
     /** The five vowel letters — a doubled one is length, not the geminate a doubled consonant makes. */
     public IReadOnlyList<string> VowelLetters { get; init; } = Array.Empty<string>();
-    /** The obstruent letters a preceding ⟨n m⟩ prenasalises into one onset unit. */
+    /** The obstruent letters a preceding ⟨n m ŋ⟩ prenasalises into one onset unit. */
     public IReadOnlyList<string> Prenasalisable { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public LugandaNumbers Numbers { get; init; } = new();
@@ -54,8 +54,8 @@ public static class Manifest
     public static readonly LugandaManifest MANIFEST =
         LoadManifest.Load<LugandaManifest>("languages/luganda", "luganda.jsonc");
 
-    // Length DESC so the greedy scan tries nng'/nny/ng'/ny, the Cw + prenasal digraphs and the vowel-length
-    // digraphs before singles.
+    // Length DESC so the greedy scan tries nng'/nny/ng'/ny, then the Cw and vowel-length digraphs, before
+    // singles. No prenasal digraph is among them — the code rule owns that mapping.
     // ⚠ STABLE, like JS `Array.prototype.sort`: same-length keys keep the manifest's declaration order.
     public static readonly IReadOnlyList<string> GRAPHEME_KEYS =
         MANIFEST.Graphemes.Keys.OrderByDescending(k => k.Length).ToList();

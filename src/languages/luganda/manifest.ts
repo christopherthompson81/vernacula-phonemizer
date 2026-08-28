@@ -1,7 +1,8 @@
 /**
  * Loads the Luganda data manifest (luganda.jsonc) once at module init and exposes it typed. Holds the
- * context-free hand-authored DATA: the orthography→IPA grapheme table (prenasalised units, vowel-length digraphs,
- * ⟨ng'⟩, labialisation) + clause punctuation. The gemination + vowel-lengthening ALGORITHM stays in code.
+ * context-free hand-authored DATA: the orthography→IPA grapheme table (⟨ng'⟩, the vowel-length digraphs,
+ * labialisation) + clause punctuation. The gemination, PRENASALISATION and vowel-lengthening ALGORITHMS stay
+ * in code — the table holds no prenasal digraph row, see the jsonc's grapheme block (#1132).
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 
@@ -12,7 +13,7 @@ export interface LugandaManifest {
     graphemes: Record<string, string>;
     /** The five vowel letters — a doubled one is length, not the geminate a doubled consonant makes. */
     vowelLetters: readonly string[];
-    /** The obstruent letters a preceding ⟨n m⟩ prenasalises into one onset unit. */
+    /** The obstruent letters a preceding ⟨n m ŋ⟩ prenasalises into one onset unit. */
     prenasalisable: readonly string[];
     clausePunctuation: Record<string, string>;
     numbers: LugandaNumbers;
@@ -61,6 +62,6 @@ export interface LugandaNumbers {
 /** The consolidated hand-authored Luganda data tables (see luganda.jsonc). */
 export const MANIFEST = loadManifest<LugandaManifest>(import.meta.url, "luganda.jsonc");
 
-// Grapheme keys sorted LENGTH DESC so the greedy scan tries nng'/nny/ng'/ny, the Cw + prenasalised digraphs, and
-// the vowel-length digraphs before singles.
+// Grapheme keys sorted LENGTH DESC so the greedy scan tries nng'/nny/ng'/ny, then the ⟨Cw⟩ and vowel-length
+// digraphs, before singles. ⚠ NO PRENASAL DIGRAPH IS AMONG THEM — the code rule owns that mapping (#1132).
 export const GRAPHEME_KEYS = Object.keys(MANIFEST.graphemes).sort((a, b) => b.length - a.length);

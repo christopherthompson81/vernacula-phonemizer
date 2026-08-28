@@ -54,15 +54,21 @@ describe("Luganda canonical IPA — greedy g2p + gemination + prenasal lengtheni
     // fired the rule, picked the wrong place, dropped the consonant anyway AND spuriously lengthened the
     // vowel. Measured exhaustively over the 1,951 three-letter frames containing U+0261: 153 differed, none in
     // the alias's favour. Removed — the character now degrades the way every other unknown letter does.
-    test("U+0261 ⟨ɡ⟩ degrades like any unknown letter — it does not corrupt the syllable around it", () => {
+    // U+0261 SCRIPT G now reads exactly as ASCII ⟨g⟩ does, and it takes two changes to get there: deleting the
+    // "defensive alias" from `prenasalisable` (which corrupted the syllable — `anɡ` → *aːⁿ*), and the `ɡ → g`
+    // row added to core/hostWord.ts's UNDECOMPOSABLE table, which is what makes the letter READ rather than
+    // merely fail quietly. Pinned as an EQUIVALENCE against the ASCII spelling, so neither half can regress
+    // without this failing.
+    test("U+0261 ⟨ɡ⟩ reads exactly as ASCII ⟨g⟩ does", () => {
         const G = "\u0261";
-        expect(phonemize(`n${G}a`, "lg")).toBe("na"); // ⟨n⟩ keeps its own reading; the ɡ is simply unread
-        expect(phonemize(`n${G}a`, "lg")).not.toBe("ⁿa"); // the shape the alias produced
-        expect(phonemize(`an${G}`, "lg")).toBe("an"); // …and no spurious vowel length (was *aːⁿ*)
-        expect(phonemize(`m${G}a`, "lg")).toBe("ma");
-        // ⚠ the ASCII spelling — the one Luganda is actually written in — is untouched
-        expect(phonemize("nga", "lg")).toBe("ᵑɡa");
-        expect(phonemize("buganda", "lg")).toBe("buɡaːⁿda");
+        for (const [script, ascii] of [
+            [`n${G}a`, "nga"], [`an${G}`, "ang"], [`m${G}a`, "mga"],
+            [`lu${G}anda`, "luganda"], [`Bu${G}anda`, "Buganda"], [`${G}a`, "ga"],
+        ] as const)
+            expect(phonemize(script, "lg"), `${script} vs ${ascii}`).toBe(phonemize(ascii, "lg"));
+        expect(phonemize(`n${G}a`, "lg")).toBe("ᵑɡa"); // was *ⁿa* with the alias, *na* with it merely deleted
+        expect(phonemize(`an${G}`, "lg")).toBe("aːᵑɡ"); // was *aːⁿ* — the alias's spurious length, no consonant
+        expect(phonemize(`lu${G}anda`, "lg")).toBe("luɡaːⁿda");
     });
 
     // #1132/2 — the twelve prenasal digraph rows in the grapheme table were unreachable by construction

@@ -56,6 +56,7 @@ public static class HostWord
         ["ɛ"] = "e", ["Ɛ"] = "E", ["ɔ"] = "o", ["Ɔ"] = "O", ["ə"] = "e", ["Ə"] = "E", ["ɓ"] = "b", ["Ɓ"] = "B", ["ɗ"] = "d", ["Ɗ"] = "D",
         ["ƙ"] = "k", ["Ƙ"] = "K", ["ƴ"] = "y", ["Ƴ"] = "Y", ["ı"] = "i", ["ʉ"] = "u", ["ɨ"] = "i", ["ƀ"] = "b", ["ŧ"] = "t", ["ſ"] = "s",
         ["ƒ"] = "f", ["Ƒ"] = "F", // f with hook — /f/ in the African orthographies that use it (and the florin sign)
+        ["ɡ"] = "g", ["Ɡ"] = "G", // script g — a typographic variant of ⟨g⟩; see the TS for the evidence
     };
 
     private static readonly JsRe UNDECOMPOSABLE_RE =

@@ -57,16 +57,17 @@ public class LugandaTests
     [Fact]
     public void TheVelarNasalGeminates() => Assert.Equal("ŋː", LgEngine.PhonemizeWord("ŋŋ"));
 
-    // #1132/1 — U+0261 was a "defensive alias" in prenasalisable that corrupted every syllable it touched.
-    // Both halves of #1132 are DATA-side (luganda.jsonc, the shared tree), so the C# needed no code change;
-    // these pin that it picked the change up.
+    // U+0261 SCRIPT G reads exactly as ASCII ⟨g⟩ does. Two changes get there: the "defensive alias" deleted
+    // from prenasalisable (data-side, shared tree), and the ɡ→g row in Core/HostWord's UNDECOMPOSABLE table,
+    // which is what makes the letter READ rather than merely fail quietly.
     [Theory]
-    [InlineData("n\u0261a", "na")]     // ⟨n⟩ keeps its reading; the ɡ is simply unread (was ⁿa)
-    [InlineData("an\u0261", "an")]     // …and no spurious vowel length (was aːⁿ)
-    [InlineData("m\u0261a", "ma")]
-    [InlineData("nga", "ᵑɡa")]         // ⚠ the ASCII spelling, the one Luganda is written in, is untouched
+    [InlineData("n\u0261a", "ᵑɡa")]        // was ⁿa with the alias, na with it merely deleted
+    [InlineData("an\u0261", "aːᵑɡ")]       // was aːⁿ — the alias's spurious length, and no consonant
+    [InlineData("m\u0261a", "ᵑɡa")]
+    [InlineData("lu\u0261anda", "luɡaːⁿda")]
+    [InlineData("nga", "ᵑɡa")]             // the ASCII spelling, unchanged
     [InlineData("buganda", "buɡaːⁿda")]
-    public void TheScriptGDegradesQuietly(string word, string want) => Assert.Equal(want, Say(word));
+    public void TheScriptGReadsAsAsciiG(string word, string want) => Assert.Equal(want, Say(word));
 
     // #1132/2 — the twelve unreachable prenasal digraph rows are deleted; the CODE rule is the single source.
     [Theory]

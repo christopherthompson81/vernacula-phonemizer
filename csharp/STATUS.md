@@ -1616,7 +1616,9 @@ because a period-grouped thousand is indistinguishable from a three-place decima
 and rests on the mined artifact and the probes alone.
 
 Three findings, all reproduced IDENTICALLY by both engines, so all three were FILED (#1131, #1132).
-⚠ **THE FIRST IS NOW FIXED** — #1131 landed in the TypeScript as PR #1134 while this port was in review, and
+⚠ **ALL THREE ARE NOW FIXED** — #1132's two data-side items landed in PR #1142 (the U+0261 alias deleted, and
+the twelve unreachable prenasal rows deleted; both in the shared `data/` tree, so the C# needed no change).
+⚠ **THE FIRST WAS FIXED FIRST** — #1131 landed in the TypeScript as PR #1134 while this port was in review, and
 this port implements the fixed behaviour (rebased; the grapheme row came free from the shared `data/` tree,
 the `NATIVE_CLASS` and prenasalisation-trigger halves were ported). Kept here as the finding that produced it:
 
@@ -1630,14 +1632,22 @@ the `NATIVE_CLASS` and prenasalisation-trigger halves were ported). Kept here as
   ⚠ The fix also had to add ⟨ŋ⟩ to the PRENASALISATION trigger, which the finding did not anticipate: while
   the letter folded to ⟨n⟩ it reached that rule, so ⟨ŋk⟩ read *ᵑk*, and the grapheme row alone took that away.
   **A fix that adds an orthographic row must ask what the fold was silently doing for that letter first.**
-- **The ⟨ɡ⟩ (U+0261) entry in `prenasalisable` is a "defensive alias" that makes the reading worse, not
-  better.** There is no ⟨ɡ⟩ grapheme row and the superscript choice tests the ASCII string `"kg"`, so
-  `nɡa` → *ⁿa*: the alias fires the prenasal rule, picks the wrong place, and drops the consonant anyway.
-  Without it the same input reads *na*. ×0 in every corpus measured — latent, not live.
-- **The twelve prenasal digraph rows in the grapheme table are unreachable** (question 2). `OTHER_DIGRAPHS`
-  filters length-2 keys to `k[1] === "w"` or vowel+vowel, deliberately and with a comment saying so, but the
-  jsonc's own block comment claims the scanner tries "…+ Cw + prenasal + vowel digraphs → singles". Verified
-  row by row that the code rule reproduces all twelve byte-identically, so **no behaviour is at stake**.
+- **The ⟨ɡ⟩ (U+0261) entry in `prenasalisable` was a "defensive alias" that made the reading worse, not
+  better** (FIXED in #1142 — deleted). There is no ⟨ɡ⟩ grapheme row and the superscript choice tests the ASCII
+  string `"kg"`, so `nɡa` → *ⁿa*: the alias fired the prenasal rule, picked the wrong place, dropped the
+  consonant anyway and spuriously lengthened the vowel (`anɡ` → *aːⁿ*). Without it the same input reads *na*.
+  ×0 in every corpus measured — latent, not live. Measured exhaustively over the 1,951 three-letter frames
+  containing U+0261: 153 differ, **0 in the alias's favour**.
+  ⚠ Deletion alone would make the letter fail predictably, not correctly (`luɡanda` → *luaːⁿda*), so the same
+  PR added the general repair: a `ɡ → g` row in `Core/HostWord`'s UNDECOMPOSABLE table. Script g is a
+  typographic variant of ⟨g⟩, never an orthographic input key in any NATIVE_CLASS language (verified), and the
+  row fixes the fleet — `ɡato` read *ˈato* in es, `ɡut` *uːt* in de. Moves one golden row (hil).
+- **The twelve prenasal digraph rows in the grapheme table were unreachable** (question 2; FIXED in #1142 —
+  deleted). `OTHER_DIGRAPHS` filters length-2 keys to `k[1] === "w"` or vowel+vowel, deliberately and with a
+  comment saying so, while the jsonc's own block comment claimed the scanner tried "…+ Cw + prenasal + vowel
+  digraphs → singles". Verified row by row that the code rule reproduces all twelve byte-identically, so **no
+  behaviour was at stake** — the rows were deleted rather than re-commented, since `convention.prenasal` states
+  the mapping and the code rule computes it, and a test now pins all twelve.
 ### From the rn port (2026-08-28) — 200/200 first run; full log in `docs/rn_port_investigation.md`
 
 Kirundi shares Kinyarwanda's numeral COMPOSITOR and nothing else: `Kirundi/Numbers.cs` is a wrapper around
