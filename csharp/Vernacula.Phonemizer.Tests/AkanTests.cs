@@ -108,10 +108,15 @@ public class AkanTests
     [InlineData("aŋa", "aŋa")]
     [InlineData("dwoŋ", "d͡ʑʷoŋ")]     // word-final; was d͡ʑʷon
     [InlineData("Ŋa", "ŋa")]           // the class carries both cases (flags are "u", not "iu")
-    [InlineData("ŋwa", "ŋʷa")]         // ⚠ conserved: folded to ⟨n⟩ this reached the ⟨nw⟩ digraph
-    [InlineData("ŋgu", "ŋu")]          // ⚠ conserved: reached the ⟨ng⟩ digraph
-    [InlineData("ŋp", "ŋp")]           // deliberate divergence — ⟨np⟩ is mp, but explicit ŋ states its place
+    [InlineData("ŋw", "ŋw")]           // ⚠ literal: ⟨ŋ⟩ enters none of the ⟨nw ng ny⟩ digraphs
+    [InlineData("ŋg", "ŋɡ")]
+    [InlineData("ŋy", "ŋj")]
+    [InlineData("Ŋgozi", "ŋɡozi")]     // ⚠ the typed ⟨g⟩ survives
+    [InlineData("ŋp", "ŋp")]           // and never assimilates — ⟨np⟩ is mp, but explicit ŋ states its place
     [InlineData("np", "mp")]
+    [InlineData("nw", "ŋʷ")]           // ⚠ the standard spellings are untouched
+    [InlineData("ng", "ŋ")]
+    [InlineData("ny", "ɲ")]
     public void TheLiteralVelarNasal(string word, string want) =>
         Assert.Equal(want, Phonemizer.Phonemize(word, "ak").Trim());
 

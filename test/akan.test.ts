@@ -89,19 +89,25 @@ describe("Akan (Twi) canonical IPA", () => {
         expect(say("Ŋa")).toBe("ŋa"); // the class carries both cases (its flags are "u", not "iu")
     });
 
-    // ⚠ WHAT THE FOLD WAS SUPPLYING SILENTLY, conserved on purpose (#1139; the trap #1131 set). Folded to ⟨n⟩,
-    // the letter REACHED the ⟨nw⟩ and ⟨ng⟩ digraphs — so admitting it to the class would have split ⟨ŋw⟩ into
-    // ŋ + w and lost the signature labialisation. Two jsonc rows keep those readings.
-    test("⟨ŋ⟩ spellings read what their ⟨n⟩ counterparts read — except where ⟨n⟩ merely assimilates", () => {
+    // ⚠ ⟨ŋ⟩ IS READ LITERALLY — it enters none of the ⟨n⟩-digraphs and does not assimilate (#1139). While the
+    // letter was folded to ⟨n⟩ it REACHED the digraph table (⟨ŋw⟩→ŋʷ via ⟨nw⟩, ⟨ŋg⟩→ŋ via ⟨ng⟩, ⟨ŋy⟩→ɲ via
+    // ⟨ny⟩), and rows conserving the first two were tried first. That was wrong: those digraphs exist because
+    // ⟨n⟩ is AMBIGUOUS, and a writer who types ⟨ŋ⟩ has already disambiguated. Conserving contradicts itself —
+    // ⟨ŋg⟩→ŋ deletes the typed ⟨g⟩, and the same move on ⟨ŋy⟩→ɲ would make an explicit VELAR nasal PALATAL.
+    test("⟨ŋ⟩ is literal — no digraph, no assimilation; the ⟨n⟩ spellings keep the orthography", () => {
         const say = (w: string): string => getPhonemizer("ak").text(w).trim();
-        expect(say("ŋwa")).toBe(say("nwa")); // ŋʷa — the labialisation survives
-        expect(say("ŋwa")).toBe("ŋʷa");
-        expect(say("ŋgu")).toBe(say("ngu")); // ŋu
-        expect(say("ŋk")).toBe(say("nk")); // ŋk — ⟨n⟩ assimilates TO velar here, so the two agree anyway
-        // …and the ONE deliberate divergence: ⟨n⟩ is the underspecified nasal and takes the following
-        // consonant's place, while ⟨ŋ⟩ states velar explicitly and must not be overridden.
+        // the letter never joins a digraph…
+        expect(say("ŋw")).toBe("ŋw");
+        expect(say("ŋg")).toBe("ŋɡ");
+        expect(say("ŋy")).toBe("ŋj");
+        expect(say("Ŋgozi")).toBe("ŋɡozi"); // ⚠ the typed ⟨g⟩ SURVIVES; conserving read this *ŋozi*
+        // …and never assimilates: ⟨n⟩ is underspecified and takes the following place, ⟨ŋ⟩ states its own.
         expect(say("np")).toBe("mp");
         expect(say("ŋp")).toBe("ŋp");
+        // ⚠ THE STANDARD SPELLINGS ARE UNTOUCHED — this is what the orthography actually uses.
+        expect(say("nw")).toBe("ŋʷ");
+        expect(say("ng")).toBe("ŋ");
+        expect(say("ny")).toBe("ɲ");
     });
 });
 

@@ -40,19 +40,42 @@ order to preserve a spelling convention the writer had already declined to use. 
 
 ### ⚠ But the fold was doing a SECOND job silently — the #1131 trap, again
 
-This is the part the issue did not anticipate, and it is the reason this is not a one-character change.
-Folded to ⟨n⟩, the letter **reached the digraph table**:
+This is the part the issue did not anticipate. Folded to ⟨n⟩, the letter **reached the digraph table**:
 
     ŋwa  → (nwa) → ŋʷa      the ⟨nw⟩ row — the signature Akan labialisation
     ŋgu  → (ngu) → ŋu       the ⟨ng⟩ row
+    ŋy   → (ny)  → ɲ        the ⟨ny⟩ row
 
-Admitting ⟨ŋ⟩ to the class takes both away: ⟨ŋw⟩ splits into ŋ + w and the labialisation is simply lost.
-Conserved with two rows in `akan.jsonc` (`"ŋw": "ŋʷ"`, `"ŋg": "ŋ"`), so every ⟨ŋ⟩ spelling reads what its
-⟨n⟩ counterpart reads. The standard ⟨nw⟩/⟨ng⟩ rows are untouched.
+### ⚠ And CONSERVING those readings was wrong — a dead end worth keeping
 
-**One divergence is deliberate and is the point of the fix:** ⟨n⟩ is the UNDERSPECIFIED nasal and takes a
-following consonant's place (⟨np⟩ → *mp*), while ⟨ŋ⟩ states velar place explicitly and must not be
-overridden (⟨ŋp⟩ → *ŋp*). An explicit letter being reassigned by an assimilation rule would be the bug.
+My first pass added `"ŋw": "ŋʷ"` and `"ŋg": "ŋ"` rows, reasoning straight from #1131: *giving a letter its
+own rule must not silently take away what the fold was supplying.* Review caught that the conservation was
+incomplete — ⟨ny⟩ is the **third** ⟨n⟩-initial digraph and ⟨ŋy⟩ had regressed from `ɲ` to `ŋj`, contradicting
+an invariant the diff asserted in three places.
+
+The fix was not to add the third row. It was to notice that **the rule had to skip the case that disproves
+it**:
+
+  * `"ŋy": "ɲ"` would turn an explicitly **velar** nasal into a **palatal** one. Actively wrong.
+  * `"ŋg": "ŋ"` **deletes the ⟨g⟩ the writer typed** — `⟨Ŋgozi⟩` read *ŋozi*. `akan.ts`'s own `latinPhone`
+    fallback exists precisely to refuse that ("a letter this g2p has no rule for still denotes a sound, and
+    dropping it deletes content the writer typed"), and the ⟨ŋp⟩ divergence is justified by the same
+    principle. The diff was arguing both sides at once and only one can hold.
+
+**The principle that does hold:** the three ⟨n⟩-digraphs exist because ⟨n⟩ is orthographically AMBIGUOUS —
+in ⟨nw ng ny⟩ the ⟨n⟩ is not /n/ at all, the pair is one unit. A writer who types the literal ⟨ŋ⟩ has
+**already disambiguated**, so the letter is read literally and enters none of them. Both conserving rows were
+removed; ⟨ŋw⟩ → ŋw, ⟨ŋg⟩ → ŋɡ, ⟨ŋy⟩ → ŋj, and `⟨Ŋgozi⟩` → *ŋɡozi* with the /ɡ/ intact. The standard
+⟨nw ng ny⟩ rows are untouched and still carry the orthography.
+
+**The same principle covers the assimilation case,** which is why there is now one rule rather than a rule
+plus an exception: ⟨n⟩ is the UNDERSPECIFIED nasal and takes a following consonant's place (⟨np⟩ → *mp*),
+while ⟨ŋ⟩ states velar place explicitly (⟨ŋp⟩ → *ŋp*). **An explicit letter is never overridden and never
+deleted** — that one sentence generates every row above.
+
+⚠ Worth naming the failure mode for next time: I applied #1131's conservation lesson as a *rule* instead of
+as a *question*. "What was the fold supplying?" is the question; "therefore conserve it" is not the answer.
+Here the fold was supplying readings that were only ever right for the ambiguous spelling.
 
 Final table:
 
@@ -62,10 +85,13 @@ Final table:
 | `aŋa` | `ana` | **`aŋa`** | |
 | `dwoŋ` | `d͡ʑʷon` | **`d͡ʑʷoŋ`** | word-final |
 | `Ŋa` | — | **`ŋa`** | the class flags are `"u"`, so both cases are listed |
-| `ŋwa` | `ŋʷa` | `ŋʷa` | conserved |
-| `ŋgu` | `ŋu` | `ŋu` | conserved |
+| `ŋw` | `ŋʷ` | **`ŋw`** | literal — no digraph |
+| `ŋg` | `ŋ` | **`ŋɡ`** | literal — the typed ⟨g⟩ survives |
+| `ŋy` | `ɲ` | **`ŋj`** | literal — a velar is not made palatal |
+| `Ŋgozi` | `ŋozi` | **`ŋɡozi`** | the case that decided it |
 | `ŋk` | `ŋk` | `ŋk` | agreed before and after |
-| `ŋp` | `mp` | **`ŋp`** | deliberate — explicit place is not reassigned |
+| `ŋp` | `mp` | **`ŋp`** | explicit place is not reassigned |
+| `nw` / `ng` / `ny` | `ŋʷ` / `ŋ` / `ɲ` | unchanged | the standard spellings carry the orthography |
 
 ## Gates
 
