@@ -81,6 +81,10 @@ public static class HostWord
 
     /** Conditional fold for a nativising engine, judged PER CLUSTER and never per word: a word-level test
      *  fails on one foreign letter and then flattens the native ones too. */
+    // ⚠ PAIRED-FIX PENDING (#1150): the TypeScript counterpart reports each rewrite to a trace recorder, so the
+    // input-side fold that leaves no mark on the output — the step behind #1131, #1139 and #1140 — is visible
+    // through `phonemizeTrace`. TS-only while stage 1 proves the shape; the reading is identical either way.
+    // DELETE THIS COMMENT when the trace is ported.
     public static Func<string, string> MakeNativiser(string nativeClass, string flags = "u")
     {
         var inClass = JsRegex.Compile($"^(?:{nativeClass})+$", flags);

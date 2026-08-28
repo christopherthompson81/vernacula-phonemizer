@@ -97,6 +97,12 @@ public static class Clauses
         }
     }
 
+    // ⚠ PAIRED-FIX PENDING (#1150): the TypeScript `assembleClauses` derives a per-token TRACE here — span,
+    // surface, the nativiser's rewrite, and the readings emitted — behind an additive `phonemizeTrace`. It is
+    // deliberately TS-only for now: stage 1 exists to prove the API shape, and porting an unproven shape
+    // doubles the cost of changing it. `Phonemize` is byte-identical either way, so the parity gate is
+    // unaffected. DELETE THIS COMMENT when the trace is ported; a stale marker is a fork that documents
+    // itself as fidelity.
     public static string AssembleClauses(
         string input,
         JsRe token,

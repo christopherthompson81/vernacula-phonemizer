@@ -86,6 +86,8 @@ export const foldLatinToBase = (w: string): string =>
         .replace(UNDECOMPOSABLE_RE, (c) => UNDECOMPOSABLE[c] ?? c);
 
 /** One base character with any combining marks that belong to it — the unit a fold decision is made about. */
+import { noteNativised } from "./trace.ts";
+
 const CLUSTER = /\P{M}\p{M}*/gu;
 
 /**
@@ -107,6 +109,11 @@ export function makeNativiser(nativeClass: string, flags = "u"): (w: string) => 
     const known = (s: string): boolean => inClass.test(s.normalize("NFC"));
     return (w: string): string => {
         if (known(w)) return w;
-        return (w.match(CLUSTER) ?? []).map((c) => (known(c) ? c : foldLatinToBase(c))).join("");
+        const out = (w.match(CLUSTER) ?? []).map((c) => (known(c) ? c : foldLatinToBase(c))).join("");
+        // ⚠ THE STEP THAT WAS INVISIBLE (#1150). This rewrite happens BEFORE the g2p sees the word and leaves
+        // no mark on the output, which is how #1131/#1139/#1140 all hid. `noteNativised` is a no-op unless a
+        // trace is running.
+        noteNativised(w, out);
+        return out;
     };
 }
