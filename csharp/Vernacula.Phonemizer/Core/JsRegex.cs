@@ -102,24 +102,58 @@ public sealed class JsRe
             throw new ArgumentException("JsRe.Replace: \"$0\" is a literal in JS but group 0 in .NET - rewrite the call site");
         return Global
             ? ReplaceAll(input, m => m.Result(replacement))
-            : Re.Replace(input, replacement, 1);
+            : ReplaceFirst(input, m => m.Result(replacement));
     }
 
     /// <summary>JS `String.prototype.replace(re, callback)`: all matches when g, else first only.</summary>
     public string Replace(string input, MatchEvaluator evaluator) =>
-        Global ? ReplaceAll(input, evaluator) : Re.Replace(input, evaluator, 1);
+        Global ? ReplaceAll(input, evaluator) : ReplaceFirst(input, evaluator);
+
+    /**
+     * The FIRST match only, written out rather than delegating to `Re.Replace(input, rep, 1)` so #1150's
+     * provenance can be maintained here too. The match located is the one .NET's own single replace would
+     * use, so the reading is unchanged.
+     */
+    private string ReplaceFirst(string input, MatchEvaluator evaluator)
+    {
+        var m = Re.Match(input);
+        if (!m.Success) return input;
+        var track = Provenance.StartTrack(input);
+        var piece = evaluator(m);
+        var result = string.Concat(input.AsSpan(0, m.Index), piece, input.AsSpan(m.Index + m.Length));
+        if (track is not null)
+        {
+            track.Copy(0, m.Index);
+            track.Stamp(m.Index, m.Length, piece.Length);
+            track.Copy(m.Index + m.Length, input.Length - m.Index - m.Length);
+            track.Commit(result);
+        }
+        return result;
+    }
 
     /// <summary>Global replace driven by the same JS advance rules as <see cref="Matches"/>.</summary>
     private string ReplaceAll(string input, MatchEvaluator evaluator)
     {
+        // ⚠ THE ONE PLACE #1150's PROVENANCE IS MAINTAINED. Every normalizer site in the port funnels through
+        // here, so nothing under Languages/ changes; `track` is null unless a trace is recording, so the
+        // shipped path costs one null check.
+        var track = Provenance.StartTrack(input);
         var sb = new StringBuilder(input.Length);
         var copied = 0;
         foreach (var m in Matches(input))
         {
-            sb.Append(input, copied, m.Index - copied).Append(evaluator(m));
+            sb.Append(input, copied, m.Index - copied);
+            track?.Copy(copied, m.Index - copied);
+            var piece = evaluator(m);
+            sb.Append(piece);
+            track?.Stamp(m.Index, m.Length, piece.Length);
             copied = m.Index + m.Length;
         }
-        return sb.Append(input, copied, input.Length - copied).ToString();
+        sb.Append(input, copied, input.Length - copied);
+        track?.Copy(copied, input.Length - copied);
+        var result = sb.ToString();
+        track?.Commit(result);
+        return result;
     }
 }
 

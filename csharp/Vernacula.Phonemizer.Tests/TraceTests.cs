@@ -109,4 +109,72 @@ public class TraceTests
         Assert.Single(t.Tokens);
         Assert.Equal(Phonemizer.Phonemize("ŋŋamba", "lg"), t.Ipa);
     }
+    /**
+     * #1150 stage 2 — normalizer provenance. ⚠ The seam differs from the TypeScript deliberately: TS
+     * normalizers call `s.replace(...)` (the STRING is the receiver) so 3,203 sites were rewritten, while
+     * the port calls `RE.Replace(s, ...)` so instrumenting `JsRe.Replace` covers every site with no change
+     * under Languages/.
+     */
+    [Fact]
+    public void ATokenNamesTheInputCharactersThatProducedIt()
+    {
+        const string text = "Obugazi: 1 244.7 km² ne 15%.";
+        var t = Phonemizer.PhonemizeTrace(text, "lg");
+        string? Src(string surface)
+        {
+            var k = t.Tokens.FirstOrDefault(x => x.Surface == surface);
+            return k?.InputSpan is null ? null : text[k.InputSpan.Value.Start..k.InputSpan.Value.End];
+        }
+        // the unit's reading-words and the figure all trace to the one source span they came from
+        Assert.Equal("1 244.7 km²", Src("kiromita"));
+        Assert.Equal("1 244.7 km²", Src("1244"));
+        Assert.Equal("15%", Src("kikumi"));
+        Assert.Equal("Obugazi", Src("Obugazi")); // untouched text maps to itself
+    }
+
+    /**
+     * ⚠ ABSENCE MEANS "NOT KNOWN", NEVER "IDENTICAL". A step that does not report still changes the string,
+     * so the mapping desyncs and is WITHHELD rather than reported wrong — the difference between an unknown
+     * and a confident wrong offset. In the TS this defect shipped and named 1,478 tokens wrongly before the
+     * entry check was added.
+     */
+    [Theory]
+    [InlineData("Obugazi: 1 244.7 km² ne 15%.", "lg")]
+    [InlineData("Dr. Smith paid $1,250.", "en")]
+    [InlineData("<b>hi</b> there", "en")]
+    [InlineData("Это Windows компьютер", "ru")]
+    [InlineData("el gato negro", "es")]
+    [InlineData("中国 hello 世界", "cmn")]
+    public void AnInputSpanIsEitherInsideTheCallersStringOrAbsent(string text, string lang)
+    {
+        var t = Phonemizer.PhonemizeTrace(text, lang);
+        foreach (var k in t.Tokens)
+        {
+            if (k.InputSpan is null) continue;
+            Assert.InRange(k.InputSpan.Value.Start, 0, text.Length);
+            Assert.InRange(k.InputSpan.Value.End, k.InputSpan.Value.Start, text.Length);
+        }
+    }
+
+    /// <summary>Where normalization changed nothing, a token's source must CONTAIN it (a rule may match wider).</summary>
+    [Theory]
+    [InlineData("the cat sat on the mat", "en")]
+    [InlineData("el gato negro", "es")]
+    [InlineData("Obugazi ne Kampala", "lg")]
+    [InlineData("Это компьютер", "ru")]
+    public void WhereNormalizationChangedNothingTheSourceContainsTheToken(string text, string lang)
+    {
+        var t = Phonemizer.PhonemizeTrace(text, lang);
+        Assert.Equal(text, t.Normalized); // the premise of this test
+        var checkedCount = 0;
+        foreach (var k in t.Tokens)
+        {
+            if (k.InputSpan is null) continue;
+            checkedCount++;
+            Assert.True(k.InputSpan.Value.Start <= k.Start && k.InputSpan.Value.End >= k.End,
+                $"{lang}: {k.Surface} span [{k.Start},{k.End}) but inputSpan [{k.InputSpan.Value.Start},{k.InputSpan.Value.End})");
+        }
+        Assert.True(checkedCount > 0, "no token carried an input span — the probe measured nothing");
+    }
+
 }

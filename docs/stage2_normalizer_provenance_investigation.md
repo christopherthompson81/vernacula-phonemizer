@@ -225,3 +225,43 @@ vulgar-fraction fold BEFORE any normalizer, and none reports. A LENGTH-PRESERVIN
 That is the remaining 7.2%, and closing it means instrumenting ten fold functions in `core/unicode.ts` and
 `markup.ts`, each with its own shape. Left undone deliberately: it is a coverage limit, and with the entry
 check in place an unreported step now costs an ABSENT span rather than a wrong one.
+
+## Run 8 — the C# port, where the seam is better and the rule is the opposite
+
+⚠ **The port needed no change under `Languages/`.** The TS normalizers call `s.replace(re, rep)` — the STRING
+is the receiver — so there was no single place to instrument and 3,203 sites had to be rewritten. The C# calls
+`RE.Replace(s, rep)` — the JsRe is the receiver — so all 2,280 normalizer sites already funnel through two
+methods on one type. Instrumenting `JsRe.ReplaceAll` (and writing out the single-match path, which had been
+delegating to `Re.Replace(input, rep, 1)`) covers the fleet.
+
+### ⚠ And that breadth inverted the rule about a length mismatch
+
+The TS treats `p.length !== s.length` as a MISSED STEP and poisons, because `tr` is only ever called by a
+normalizer on the pipeline string. Doing the same in C# destroyed the mapping for most of the fleet, and the
+first offender named itself:
+
+    POISON entry: prov=22 input=8
+      Provenance.StartTrack -> JsRe.ReplaceAll -> Initialisms.MakeUnreadableTest
+      -> English.Normalize..cctor()
+
+A **static constructor** building a lookup table, through the same shared method. Here a mismatch usually
+means "a different string", not "a step went unseen", so it is IGNORED.
+
+⚠ **Ignoring is still safe, and the reason matters:** completeness is enforced at the END, not per call. The
+array is never REBUILT over a shifted string — it simply stops being updated — so a genuinely missed pipeline
+step leaves `For(normalized)` disagreeing on length and the mapping is withheld. What must never happen is
+the rebuild, which is exactly the TS defect Run 7 fixed. Same guarantee, opposite local rule, because the
+seams have different breadth.
+
+### Coverage, and an asymmetry worth recording
+
+    C#   99.4% of tokens carry an InputSpan (28,203 of 28,386)   0 out of range   2 languages partial
+    TS   92.8% (36,656 of 39,506)                                0 out of range
+
+⚠ **The C# is BETTER, and for a structural reason:** `JsRe.Replace` also carries the registry pre-passes
+(`stripMarkup`, the confusable and fullwidth folds, Roman numerals), which the TS rewrite deliberately did not
+touch — those are the TS's remaining 7.2%. `phonemizeTrace("<b>hi</b> there", "en")` maps nothing in TS and
+maps both tokens in C#. Closing the TS gap means either instrumenting those ten fold functions or moving the
+TS seam to match this one; the second is now the more attractive option and was not obvious before the port.
+
+Gates: parity 136 languages / 26,827 rows / 0 differ · goldens 0 rows changed · dotnet test 2,751 · TS 5,719.
