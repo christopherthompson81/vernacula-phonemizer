@@ -355,6 +355,26 @@ ate the token first, which that PR recorded as a known gap. Fixing the order clo
 correctly, where a hand-written lookbehind guard in the de-grouping arm would have needed the case variants
 spelled out (that arm has no `i` flag).
 
+⚠ **AND THE FIRST CUT OF THIS FIX WAS NARROWER THAN THE ARM IT GUARDS — the same defect one axis over.**
+Review caught it. The unit rule's lookahead carried `[space, NBSP]` while de-grouping's space arm carries
+`[space, NBSP, NNBSP, thin space]`, so a NNBSP or a thin space between the unit and its figure made the unit
+rule DECLINE and let de-grouping claim the exponent after all:
+
+    km2<NNBSP>517  →  km2517       ← verbatim the failure this ordering exists to prevent
+    mm3<NNBSP>517  →  mm3517       ← and #1135's cube handling unreachable again
+
+Two classes that must agree, character for character, and the reorder is only as wide as the narrower one.
+The lookahead now carries all four. ⚠ THE ASSERTIONS FOR THIS ARE ON THE READING, not the intermediate text:
+the separator itself survives normalization (it is whitespace, and `tidy` only collapses RUNS), so what has
+to be equal is what is SPOKEN.
+
+⚠ **THE MULTI-GROUP CASE IS AMBIGUOUS, AND THE TEST NOW SAYS SO INSTEAD OF PRESENTING ONE ANSWER.**
+`km2 517 000` → `ibirometero kwadarato 517000` reads km² + 517,000; the competing reading is `km` + a
+misplaced space inside 2,517,000. Glued `km2` is the ordinary ASCII spelling of `km²` while the alternative
+needs the writer to have DROPPED the space after `km`, so the exponent reading is the likelier one — but it
+does change the quantity, which is this file's own worst class, so it is recorded rather than assumed. The
+old behaviour was not the safe side either: `km2517000` leaked `km` AND read 2,517,000. ×0 in the corpus.
+
 ⚠ **WHAT IS STILL NOT FIXED, SAID RATHER THAN IMPLIED.** `km2,517` and `km2.517` — the ASCII exponent with
 NO space — remain `km2517`. The unit rule's space is mandatory (`km2` unspaced is `km²`, and an optional
 space would let the rule read the `2` as the unit's number — trap 28), so it declines them and the comma and
@@ -367,6 +387,6 @@ squared kilometre; recorded so the next reader does not think they were missed.
     npm test                              288 files, 5,680 passed, 5 skipped
     npx tsc --noEmit                      clean
     gen_parity_goldens.mts rn             **0 rows moved**
-    dotnet test                           2,703 passed, 0 failed
+    dotnet test                           2,704 passed, 0 failed
     parity fleet                          136 languages, 26,827 rows, 0 differ
-    differential                          4,354 comparisons (8 new probes), 0 differ, 0 throws
+    differential                          4,364 comparisons (13 new probes), 0 differ, 0 throws

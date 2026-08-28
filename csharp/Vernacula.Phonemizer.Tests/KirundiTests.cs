@@ -119,7 +119,13 @@ public class KirundiTests
     // seen as a thousands head. It used to become `km2517`: the exponent glued to the number (517 read as
     // 2,517) and `km` left in the phoneme stream raw.
     [InlineData("km2 517", "ibirometero kwadarato 517")]
+    // ⚠ THE MULTI-GROUP CASE IS AMBIGUOUS AND THIS IS THE SIDE WE TAKE: km² + 517,000, against `km` + a
+    // misplaced space in 2,517,000. Glued `km2` is the ordinary ASCII spelling of `km²`, so this is the
+    // likelier reading — but it changes the quantity, so it is recorded rather than assumed. ×0 in corpus.
     [InlineData("km2 517 000", "ibirometero kwadarato 517000")]
+    // ⚠ ALL FOUR SEPARATORS — this lookahead must match de-grouping's space arm character for character.
+    // The separator itself survives normalization (it is whitespace), so the NNBSP/thin-space forms are
+    // asserted on the READING instead, in AllFourSeparatorsReadAlike below.
     [InlineData("mm2 500", "milimetero kwadarato 500")]
     [InlineData("km3 517", "ibirometero³ 517")]   // and the cube now reaches #1135's handling
     // ⚠ THE OBVIOUS GUARD WOULD HAVE BROKEN THIS: `R2 500` IS a grouped thousand with a currency prefix,
@@ -205,6 +211,19 @@ public class KirundiTests
     // cannot be the wrong word.
     [InlineData("R & D", "R na D")]
     public void TheCurrencyColonsAndDecimals(string input, string want) => Assert.Equal(want, Norm(input));
+
+    [Fact]
+    public void AllFourSeparatorsReadAlike()
+    {
+        // ⚠ #1136 ONE AXIS OVER: the unit rule's lookahead carried space+NBSP while de-grouping's space arm
+        // carries space, NBSP, NNBSP and thin space — so a NNBSP made THIS rule decline and de-grouping
+        // claimed the exponent anyway. Two classes that must agree, character for character.
+        foreach (var sep in new[] { "\u00a0", "\u202f", "\u2009" })
+        {
+            Assert.Equal(Say("km2 517"), Say($"km2{sep}517"));
+            Assert.Equal(Say("mm3 517"), Say($"mm3{sep}517"));
+        }
+    }
 
     [Theory]
     // End to end through the phonemizer.

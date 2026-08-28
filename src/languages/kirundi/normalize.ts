@@ -208,7 +208,7 @@ const SQUARED = "kwadarato";
  * ⚠ THAT IS THE SHARED TIER'S OWN CONVENTION FOR AN UNDECLARED POWER, quoted from `core/normalizeSymbols.ts`:
  * *"emit the UNIT and hand the exponent back rather than abandoning the match. Returning `whole` loses the
  * QUANTITY too, not just its power … Re-emitting the exponent keeps the unit's reading and leaves `²` where
- * the leak gate can see it, turning an invisible missing reading into a visible missing WORD."* Step 4 exists
+ * the leak gate can see it, turning an invisible missing reading into a visible missing WORD."* Step 3 exists
  * to produce the SAME SHAPE the tier produces, so it must fail the same way too — before this, `km³ 517`
  * announced a SQUARE while `517 km³` (the tier) did not, and one construct read three different ways
  * depending only on where the number sat.
@@ -442,6 +442,12 @@ export function normalizeKirundi(input: string): string {
     //    shape that refutes it is a currency prefix: `R2 500` IS a grouped thousand (2,500), and rejecting a
     //    letter-adjacent head would split it into two numbers. The discriminator is not the letter, it is
     //    whether the letters are a UNIT KEY — which is exactly what this rule already knows.
+    //    ⚠ THE SEPARATOR CLASS HERE MUST MATCH THE DE-GROUPING ARM'S, CHARACTER FOR CHARACTER, and it
+    //    did not: this lookahead carried space+NBSP while de-grouping's space arm carries space, NBSP,
+    //    NNBSP and thin space — so a NNBSP or a thin space between the unit and its figure made THIS
+    //    rule decline and let de-grouping claim the exponent after all, `km2<NNBSP>517` → `km2517`,
+    //    verbatim the failure this ordering exists to prevent. Two classes that must agree, and the
+    //    same defect one axis over (#1136).
     //    ⚠ THE KEY IS BOUNDED ON BOTH SIDES and the SPACE IS MANDATORY: `(?<![\p{L}\p{M}\d])` stops `km`
     //    matching inside a word, and `(?=[ \u00a0]\d)` is what identifies the abbreviation at all. The unspaced
     //    shape means something else entirely — `km2` is `km²` with an ASCII exponent — and an optional space
@@ -449,7 +455,7 @@ export function normalizeKirundi(input: string): string {
     //    spaced. Case-insensitive because the corpus writes `Km`/`KM` alongside `km` (trap 7).
     const PRE_UNIT = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
     s = s.replace(
-        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0]\\d)`, "giu"),  // space, NBSP
+        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0\u202f\u2009]\\d)`, "giu"),  // space, NBSP, NNBSP, thin space
         (_m, key: string, exp?: string) => exponentPhrase(UNIT[key.toLowerCase()]!, exp),
     );
 

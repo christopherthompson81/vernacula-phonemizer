@@ -149,8 +149,23 @@ describe("Kirundi text normalization", () => {
     // phoneme stream RAW. The unit rule now runs first, so the unit is a WORD before de-grouping looks.
     test("a unit's ASCII exponent is not a thousands head — but a currency prefix's digit still is", () => {
         expect(normalizeKirundi("km2 517")).toBe("ibirometero kwadarato 517");
-        expect(normalizeKirundi("km2 517 000")).toBe("ibirometero kwadarato 517000");
         expect(normalizeKirundi("mm2 500")).toBe("milimetero kwadarato 500");
+        // ⚠ ALL FOUR SEPARATORS, because de-grouping's space arm takes all four: with this lookahead at
+        // space+NBSP only, a NNBSP or thin space made THIS rule decline and de-grouping claimed the
+        // exponent anyway — the same defect one axis over.
+        // ⚠ ASSERTED ON THE READING, not the intermediate text: the separator itself survives normalization
+        // (it is whitespace, and `tidy` only collapses RUNS), so what has to be equal is what is spoken.
+        for (const sep of ["\u00a0", "\u202f", "\u2009"]) {
+            expect(phonemize(`km2${sep}517`, "rn")).toBe(phonemize("km2 517", "rn"));
+            expect(phonemize(`mm3${sep}517`, "rn")).toBe(phonemize("mm3 517", "rn"));
+        }
+        // ⚠ THE MULTI-GROUP CASE IS AMBIGUOUS AND THIS IS THE SIDE WE TAKE, not a case with one answer.
+        // `km2 517 000` reads as km² + 517,000; the competing reading is `km` + a misplaced space in
+        // 2,517,000. Glued `km2` is the ordinary ASCII spelling of `km²` while the alternative needs the
+        // writer to have DROPPED the space after `km`, so the exponent reading is the likelier one — but it
+        // does change the quantity, so it is recorded here rather than presented as unambiguous. ×0 in the
+        // corpus, and the old behaviour (`km2517000`) was not better: it leaked `km` AND read 2,517,000.
+        expect(normalizeKirundi("km2 517 000")).toBe("ibirometero kwadarato 517000");
         // and the cube reaches #1135's handling now that step 3 sees the token at all
         expect(normalizeKirundi("km3 517")).toBe("ibirometero³ 517");
         // ⚠ THE OBVIOUS GUARD WOULD HAVE BROKEN THIS: `R2 500` IS a grouped thousand with a currency

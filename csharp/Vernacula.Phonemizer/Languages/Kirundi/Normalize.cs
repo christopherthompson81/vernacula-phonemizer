@@ -141,9 +141,12 @@ public static class Normalize
     private static readonly JsRe GROUP_SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
 
     /** ⚠ THE SPACE IS MANDATORY: the unspaced shape means something else entirely — `km2` is `km²` with an
-     *  ASCII exponent — and an optional space would let this rule read that `2` as the unit's NUMBER. */
+     *  ASCII exponent — and an optional space would let this rule read that `2` as the unit's NUMBER.
+     *  ⚠ AND THE SEPARATOR CLASS MUST MATCH THE DE-GROUPING ARM'S, CHARACTER FOR CHARACTER: it carried
+     *  space+NBSP while that arm carries space, NBSP, NNBSP and thin space, so a NNBSP between the unit and
+     *  its figure made this rule decline and let de-grouping claim the exponent anyway (#1136). */
     private static readonly JsRe UNIT_BEFORE = JsRegex.Compile(
-        $"(?<![\\p{{L}}\\p{{M}}\\d])({PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{{L}}]))?(?=[ \\u00a0]\\d)", "giu");  // space, NBSP
+        $"(?<![\\p{{L}}\\p{{M}}\\d])({PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{{L}}]))?(?=[ \\u00a0\\u202f\\u2009]\\d)", "giu");  // space, NBSP, NNBSP, thin space
 
     private static readonly JsRe FOUR_DIGITS = JsRegex.Compile("^\\d{4}$", "u");
     /** ⚠ THE SUPPRESSION LOOK-BACK MUST END IN OPTIONAL SPACE: `\S{0,10}$` can only reach the figure when
@@ -371,7 +374,7 @@ public static class Normalize
         s = PERCENT_SIGN.Replace(s, m =>
             PERCENT_WORD.IsMatch(Slice(src6d, m.Index - 45, m.Index + m.Length + 45)) ? m.Groups[1].Value : m.Value);
 
-        // 7) THE SHARED SYMBOL TIER — percent, currency, units, exponent, ampersand. ⚠ BETWEEN steps 3 and
+        // 7) THE SHARED SYMBOL TIER — percent, currency, units, exponent, ampersand. ⚠ BETWEEN steps 4 and
         //    9 BY NECESSITY, and both directions are load-bearing. That is the whole reason this file owns
         //    the call.
         s = SYMBOLS(s);

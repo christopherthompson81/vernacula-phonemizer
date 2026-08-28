@@ -1687,6 +1687,9 @@ Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (
   order's stated reason did not survive reading — the rule's lookahead needs the operand only to START with
   a digit, so it never needed de-grouping. Exactly 2 rows moved over the 2,169-line set, 0 golden rows, and
   the second is a bonus: **#1135's cube handling was unreachable for the ASCII spelling** until this landed.
+  ⚠ **AND THE FIRST CUT WAS NARROWER THAN THE ARM IT GUARDS** — the unit rule's lookahead carried space+NBSP
+  while de-grouping's space arm carries space, NBSP, NNBSP and thin space, so `km2<NNBSP>517` reproduced the
+  defect exactly. Two classes that must agree character for character; caught in review, not by the gate.
 - **The `US$` compound key cannot match any of the three shapes it was declared for**, and this one is
   **LIVE**. It claims `US$4,000` but not `US $ 4,000`, which is how all three corpus instances are written,
   so `US` still reaches the g2p as the word *us* — the second half of the defect the TS header's own table
