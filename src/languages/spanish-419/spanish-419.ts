@@ -18,6 +18,7 @@ import {
     createSpanish,
     phonemizeWord as phonemizeWordEs,
 } from "../spanish/spanish.ts";
+import { noteRewrite } from "../../core/trace.ts";
 
 /** Castilian IPA → Latin-American: seseo (θ→s) + yeísmo (ʎ→ʝ). Context-free, no information lost. */
 export function toLatinAmerican(castilian: string): string {
@@ -32,5 +33,14 @@ export function phonemizeWord(word: string): string {
 /** Build the Latin-American Spanish phonemizer (Castilian engine + the seseo/yeísmo mergers). */
 export function createSpanish419(): Phonemizer {
     const e = createSpanish(true); // Latin-American usage in the normalization layer (el primero de enero)
-    return { text: (input: string): string => toLatinAmerican(e.text(input)) };
+    // ⚠ AN ACCENT VARIANT IS A WHOLE-STRING DELTA over the base engine's output, so a trace token records
+    // the CASTILIAN reading and the utterance ships the American one. Reported (#1150).
+    return {
+        text: (input: string): string => {
+            const pre = e.text(input);
+            const out = toLatinAmerican(pre);
+            noteRewrite("accent:es-419", pre, out);
+            return out;
+        },
+    };
 }

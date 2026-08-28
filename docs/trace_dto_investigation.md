@@ -132,3 +132,43 @@ recorder ([ThreadStatic], like `Foreign`'s host stack), and the same four engine
     parity fleet   136 languages, 26,827 rows, 0 differ — Phonemize is untouched
     goldens        0 rows changed
     TS 5,713 passed   ·   dotnet test 2,739 passed (20 new)   ·   tsc + fence clean
+
+## Run 5 — "doesn't that mean the post-assembly passes also need to push an event?"
+
+Yes. And the number I had reported was both stale and wrong, in opposite directions.
+
+**Stale**, because 527/7,352 predated hooking the hand-rolled engines: those languages counted as unaccounted
+only because they produced NO tokens. Re-measured with all 185 traced it rose to **1,205 (16.4%)**.
+
+⚠ **And then most of THAT was a bug in the checker, not the engine.** An `emitted` entry can itself be
+multi-word — a numeral expansion is emitted as ONE string — and I was comparing token entries against
+space-split output words. Comparing joined strings instead:
+
+    1,205 (16.4%)  →  180 (2.45%), 7 languages
+
+The remaining 180 were seven genuine post-assembly passes, each now reporting:
+
+| language | pass | what it does |
+|---|---|---|
+| `ca`, `gl` | `spirantize-across-words` | `bˈin` → `βˈin` |
+| `as` | `collapse-geminates` | `pɹɔttekɔtote` → `pɹɔtːekɔtote` |
+| `awa` | `awadhi-flap` | `bˈəɖaː` → `bˈəɽaː` |
+| `ne` | `nepali-inherent-vowel` | `sʈjanpʰˈoɾɖə` → `sʈjanpʰˈoɾɖʌ` |
+| `fr-CA` | `accent:fr-CA` | `a` → `ɑ` |
+| `es-419` | `accent:es-419` | `infoɾmaθjˈon` → `infoɾmasjˈon` |
+
+⚠ **The two accent variants are the interesting ones.** They are whole-string deltas over the BASE engine's
+output, so a trace token records the Castilian reading while the utterance ships the American one. Nothing
+about that is visible from the token record alone — the same shape as the nativiser, one layer along.
+
+    unaccounted: 0 of 7,352 rows, 0 languages   (TS)      0 of 816 sampled rows   (C#)
+
+### The durable part is the invariant, not the seven fixes
+
+Hand-hunting post-passes does not scale and would miss the next one. **`tokens + declared rewrites must
+account for the output` is now a test**, pinned at zero, verified to FAIL when a single `noteRewrite` call is
+removed (`ca:` rows appear immediately). A post-assembly pass added without an event is now a failing test
+rather than a silent discrepancy — which is #1131's lesson applied to the trace itself.
+
+Gates: parity 136 languages / 26,827 rows / 0 differ · goldens 0 rows changed · TS 5,714 passed ·
+dotnet test 2,739 passed · tsc + fence clean.

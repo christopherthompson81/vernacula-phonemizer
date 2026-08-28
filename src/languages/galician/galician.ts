@@ -12,6 +12,7 @@ import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeGalician } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
+import { noteRewrite } from "../../core/trace.ts";
 
 const NASALS = new Set(MANIFEST.nasals);
 const STOP_TO_FRIC = MANIFEST.spirantize;
@@ -66,6 +67,14 @@ function spirantize(segs: Seg[]): void {
 const CROSS_WORD_STOP = /([^\s])(\s+)([bdɡ])/gu;
 
 function spirantizeAcrossWords(ipa: string): string {
+    // ⚠ REPORTED TO THE TRACE (#1150): runs on the ASSEMBLED string, so a token's `emitted` reading is not
+    // what ships. Without the event the discrepancy has no cause attached.
+    const out = spirantizeAcrossWordsCore(ipa);
+    noteRewrite("spirantize-across-words", ipa, out);
+    return out;
+}
+
+function spirantizeAcrossWordsCore(ipa: string): string {
     return ipa.replace(CROSS_WORD_STOP, (m, prev: string, gap: string, stop: string) => {
         if (NASALS.has(prev)) return m;                   // nasal + stop stays occlusive
         if (stop === "d" && prev === "l") return m;       // homorganic: only /d/ after /l/

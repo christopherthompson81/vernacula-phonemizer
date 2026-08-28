@@ -15,6 +15,7 @@ import {
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { normalizeAssamese } from "./normalize.ts";
+import { noteRewrite } from "../../core/trace.ts";
 
 // Assamese-specific geminate → length: the Bengali engine collapses only its own phoneme set (t͡ʃ, d̪, ʃ, …); the
 // Assamese consonants that result from deaffrication + the alveolar merger (t tʰ d dʱ s z x) need their own pass.
@@ -31,7 +32,14 @@ function wrap(base: ReturnType<typeof makeNativeBengali>): ReturnType<typeof mak
         word: (w) => collapseGeminates(base.word(w)),
         wordRules: (w) => collapseGeminates(base.wordRules(w)),
         number: (d) => collapseGeminates(base.number(d)),
-        text: (i) => collapseGeminates(base.text(i)),
+        // ⚠ text() ONLY is a whole-string post-pass, so it is reported (#1150); the word-level entries are
+        // not assembled output and have no trace token to be inconsistent with.
+        text: (i) => {
+            const pre = base.text(i);
+            const out = collapseGeminates(pre);
+            noteRewrite("collapse-geminates", pre, out);
+            return out;
+        },
     };
 }
 

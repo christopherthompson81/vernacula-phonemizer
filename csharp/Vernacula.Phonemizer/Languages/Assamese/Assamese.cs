@@ -22,7 +22,8 @@ public static class Assamese
         Word = (w, _) => CollapseGeminates(b.Word(w, null)),
         WordRules = w => CollapseGeminates(b.WordRules(w)),
         Number = (d, _) => CollapseGeminates(b.Number(d, null)),
-        Text = (i, _) => CollapseGeminates(b.Text(i, null)),
+        // ⚠ Text() only: a whole-string post-pass, reported to the trace (#1150).
+        Text = (i, _) => { var pre = b.Text(i, null); var o = CollapseGeminates(pre); Core.Trace.NoteRewrite("collapse-geminates", pre, o); return o; },
     };
 
     /**

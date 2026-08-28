@@ -27,7 +27,15 @@ public static class Spanish419
 
     private sealed class Es419Language(ILanguage inner) : ILanguage
     {
-        public string Text(string input) => ToLatinAmerican(inner.Text(input));
+        // ⚠ AN ACCENT VARIANT IS A WHOLE-STRING DELTA over the base engine's output, so a trace token records
+        // the CASTILIAN reading and the utterance ships the American one. Reported (#1150).
+        public string Text(string input)
+        {
+            var pre = inner.Text(input);
+            var o = ToLatinAmerican(pre);
+            Core.Trace.NoteRewrite("accent:es-419", pre, o);
+            return o;
+        }
     }
 
     /**

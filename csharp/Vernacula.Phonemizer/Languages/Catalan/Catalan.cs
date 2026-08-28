@@ -37,7 +37,15 @@ public sealed class CatalanPhonemizer : ILanguage
     private static readonly JsRe CROSS_WORD_STOP = JsRegex.Compile("([^\\s])(\\s+)([bdɡ])(?=([^\\s]?))", "gu");
     private static readonly JsRe LETTERISH = JsRegex.Compile("[\\p{L}\\p{M}ˈˌ]", "u");
 
-    private static string SpirantizeAcrossWords(string ipa) => CROSS_WORD_STOP.Replace(ipa, m =>
+    // ⚠ Reported to the trace (#1150): runs on the ASSEMBLED string, so a token's Emitted is not what ships.
+    private static string SpirantizeAcrossWords(string ipa)
+    {
+        var traced = SpirantizeAcrossWordsCore(ipa);
+        Core.Trace.NoteRewrite("spirantize-across-words", ipa, traced);
+        return traced;
+    }
+
+    private static string SpirantizeAcrossWordsCore(string ipa) => CROSS_WORD_STOP.Replace(ipa, m =>
     {
         var prev = m.Groups[1].Value;
         var gap = m.Groups[2].Value;

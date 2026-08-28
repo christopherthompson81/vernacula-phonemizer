@@ -26,7 +26,8 @@ public static class AwadhiPhonemizer
             Word = w => Awadhify(b.Word(w)),
             WordRules = w => Awadhify(b.WordRules(w)),
             Number = d => Awadhify(b.Number(d)),
-            Text = i => Awadhify(b.Text(i)),
+            // ⚠ Text() only: a whole-string post-pass, reported to the trace (#1150).
+            Text = i => { var pre = b.Text(i); var o = Awadhify(pre); Core.Trace.NoteRewrite("awadhi-flap", pre, o); return o; },
         };
     }
 

@@ -55,7 +55,14 @@ public static class FrenchCa
 
     private sealed class FrCaLanguage(ILanguage inner) : ILanguage
     {
-        public string Text(string input) => ToQuebecois(inner.Text(input));
+        // ⚠ AN ACCENT VARIANT IS A WHOLE-STRING DELTA over the base engine's output (#1150).
+        public string Text(string input)
+        {
+            var pre = inner.Text(input);
+            var o = ToQuebecois(pre);
+            Core.Trace.NoteRewrite("accent:fr-CA", pre, o);
+            return o;
+        }
     }
 
     /** Build the Québécois-French phonemizer (France engine + the Québécois delta on the output). */

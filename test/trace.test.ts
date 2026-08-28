@@ -163,6 +163,41 @@ describe("phonemizeTrace — rewrites, the transformations no token can own", ()
         expect(n?.after.indexOf("kiromita")).toBeLessThan(n!.after.indexOf("1244"));
     });
 
+    /**
+     * ⚠ THE ACCOUNTING INVARIANT, and the reason the rewrite list has to be complete rather than illustrative.
+     *
+     * Every reading in the output must be attributable: either a token emitted it, or a DECLARED rewrite
+     * changed it. Measured across the golden corpus this started at 180 unaccounted rows in 7 languages —
+     * spirantization in `ca`/`gl`, geminate collapse in `as`, the Awadhi flap, Nepali's inherent vowel, and
+     * the two ACCENT VARIANTS (`fr-CA`, `es-419`), which are whole-string deltas over the base engine's
+     * output so a token records the Castilian reading while the utterance ships the American one.
+     *
+     * Pinning it at zero is what stops the next post-assembly pass from being added invisibly — which is the
+     * same defect class as #1131, one layer along: a transformation with no mark on the record.
+     */
+    test("tokens + declared rewrites ACCOUNT for the output, with nothing left over", () => {
+        const dropPauses = (x: string): string =>
+            x.split(" ").filter((w) => w !== "" && !/^[.,!?;:…]+$/u.test(w)).join(" ");
+        const bad: string[] = [];
+        for (const lang of GOLDEN_LANGS)
+            for (const text of sample(lang, 6)) {
+                let t: ReturnType<typeof phonemizeTrace>;
+                try {
+                    t = phonemizeTrace(text, lang);
+                } catch {
+                    continue;
+                }
+                // ⚠ JOINED, not compared word-by-word: one `emitted` entry can itself be multi-word (a
+                // numeral expansion emitted as a single string). Comparing per word reported 16% of rows as
+                // unaccounted and every one of them was this measurement bug.
+                const fromTokens = dropPauses(t.tokens.flatMap((k) => k.emitted).join(" "));
+                const output = t.rewrites.filter((r) => r.stage !== "normalize");
+                const target = dropPauses(output.length > 0 ? output[0]!.before : t.ipa);
+                if (fromTokens !== target) bad.push(`${lang}: ${text.slice(0, 30)}`);
+            }
+        expect(bad.slice(0, 6), "a reading reached the output that no token or rewrite accounts for").toEqual([]);
+    });
+
     test("a stage that changed nothing emits no event — the list is what MOVED", () => {
         expect(phonemizeTrace("the cat", "en").rewrites).toEqual([]);
     });
