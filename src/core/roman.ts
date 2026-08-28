@@ -1,3 +1,4 @@
+import { tr } from "./provenance.ts";
 /**
  * Shared ROMAN NUMERAL normalization — rewrite a Roman numeral to its DIGITS so the language's own
  * cardinal number compositor pronounces it. Language-independent by construction: the only thing
@@ -203,7 +204,7 @@ export function normalizeRomans(text: string, policy: RomanPolicy = {}): string 
     // short-circuits every text with no Latin at all, which is the bulk of the engines this pass exists for.
     if (!/[ivxlcdmIVXLCDM]/u.test(text)) return text;
     const hasLower = /\p{Ll}/u.test(text);
-    return text.replace(TOKEN, (tok, offset: number) => {
+    return tr(text, TOKEN, (tok, offset: number) => {
         const lower = tok.toLowerCase();
         if (policy.exclude?.has(lower)) return tok; // this language's own homograph — never a numeral
         // GLUED TO DIGITS ⇒ not a numeral but part of an alphanumeric code: the C of `39C`, the B of

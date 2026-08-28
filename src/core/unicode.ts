@@ -1,3 +1,4 @@
+import { tr } from "./provenance.ts";
 /**
  * Notation-parsing PRIMITIVES for the native abugida path — pure Unicode/IPA facts about HOW to read
  * the string (which codepoints are vowels, modifiers, tie bars, digits; which block is a script). These
@@ -166,7 +167,7 @@ const NATIVE_DIGIT_BASES: readonly number[] = [
  * automatically as safe as a `\d` in a normalizer.
  */
 export function foldNativeDigits(s: string): string {
-    return s.replace(/\p{Nd}/gu, (ch) => {
+    return tr(s, /\p{Nd}/gu, (ch) => {
         const cp = ch.codePointAt(0)!;
         if (cp < 0x80) return ch; // already ASCII
         for (const base of NATIVE_DIGIT_BASES)
@@ -236,7 +237,7 @@ export function foldLatinConfusables(s: string): string {
     CONFUSABLE_RE.lastIndex = 0;
     if (!CONFUSABLE_RE.test(s)) return s;
     CONFUSABLE_RE.lastIndex = 0;
-    return s.replace(CONFUSABLE_RE, (c) => LATIN_CONFUSABLE[c]!);
+    return tr(s, CONFUSABLE_RE, (c) => LATIN_CONFUSABLE[c]!);
 }
 
 /**
@@ -295,7 +296,7 @@ const WORDISH = /[\p{L}\p{M}\p{Nd}]+/gu;
  */
 export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): string {
     if (!/\p{Script=Cyrillic}/u.test(s)) return s;
-    return s.replace(WORDISH, (w) => {
+    return tr(s, WORDISH, (w) => {
         let cyr = 0, lat = 0;
         for (const ch of w) {
             if (/\p{Script=Cyrillic}/u.test(ch)) cyr++;
@@ -309,7 +310,7 @@ export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): stri
         // rule REFUSES and presence would fold are **76 in chv** \u2014 `\u0103\u0448\u0103` (warm), `\u00e7\u0115\u0440`, `\u00e7\u0115\u043d\u0115` (new),
         // `\u0432\u0438\u00e7\u00e7\u0115` (three), all short words where two Latin twins outvote one Cyrillic letter \u2014 against
         // **one** anywhere else (tt `k\u00fcbr\u04d9`, itself already broken). Without this, `\u00e7\u0115\u0440` stayed *s\u02c8\u025bp*.
-        w = w.replace(CHV_KEYS, (c) => CHUVASH_CONFUSABLE[c]!);
+        w = tr(w, CHV_KEYS, (c: string) => CHUVASH_CONFUSABLE[c]!);
         cyr = 0; lat = 0;
         for (const ch of w) {
             if (/\p{Script=Cyrillic}/u.test(ch)) cyr++;
@@ -318,7 +319,7 @@ export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): stri
         if (lat === 0 || lat > cyr) return w; // Latin-majority word — leave it to the Latin fold
         if (lat === cyr && !hostIsCyrillic) return w; // an even split, and no host evidence to tip it
         CYR_KEYS.lastIndex = 0;
-        return w.replace(CYR_KEYS, (c) => CYRILLIC_CONFUSABLE[c]!);
+        return tr(w, CYR_KEYS, (c) => CYRILLIC_CONFUSABLE[c]!);
     });
 }
 
@@ -360,7 +361,7 @@ const ANY_STRESS_MARK = new RegExp(`[${STRESS_MARKS}]`, "u");
 
 export function foldCyrillicStressMarks(s: string): string {
     if (!ANY_STRESS_MARK.test(s)) return s;
-    return s.replace(CYRILLIC_STRESS, (_m, base: string, marks: string) => {
+    return tr(s, CYRILLIC_STRESS, (_m, base: string, marks: string) => {
         const composed = (base + marks).normalize("NFC");
         return [...composed].length === 1 ? composed : base;
     });
@@ -525,7 +526,7 @@ const CARET_RE = /(?<=[\p{L}\p{Nd}])\^\{?([+-]?\d+)\}?/gu;
 
 export function foldCaretExponents(s: string): string {
     if (!s.includes("^")) return s;
-    return s.replace(CARET_RE, (_m, exp: string) => [...exp].map((c) => CARET_SUP[c] ?? c).join(""));
+    return tr(s, CARET_RE, (_m, exp: string) => [...exp].map((c) => CARET_SUP[c] ?? c).join(""));
 }
 
 /**
@@ -593,12 +594,12 @@ const VULGAR_RE = new RegExp(`[${Object.keys(VULGAR).join("")}]`, "gu");
 export function foldVulgarFractions(s: string): string {
     if (!VULGAR_RE.test(s)) return s;
     VULGAR_RE.lastIndex = 0;
-    return s.replace(VULGAR_RE, (c, off: number, full: string) =>
+    return tr(s, VULGAR_RE, (c, off: number, full: string) =>
         (/\d/u.test(full[off - 1] ?? "") ? " " : "") + VULGAR[c]!);
 }
 
 export function foldSquaredDegrees(s: string): string {
-    return s.replace(/℃/gu, "\u00b0C").replace(/℉/gu, "\u00b0F");
+    return tr(tr(s, /℃/gu, "\u00b0C"), /℉/gu, "\u00b0F");
 }
 
 /**
@@ -619,5 +620,5 @@ export function foldFullwidthLatin(s: string): string {
     FULLWIDTH.lastIndex = 0;
     if (!FULLWIDTH.test(s)) return s;
     FULLWIDTH.lastIndex = 0;
-    return s.replace(FULLWIDTH, (c) => String.fromCodePoint(c.codePointAt(0)! - 0xFEE0));
+    return tr(s, FULLWIDTH, (c) => String.fromCodePoint(c.codePointAt(0)! - 0xFEE0));
 }

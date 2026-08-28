@@ -16,7 +16,19 @@
  * exists only while `phonemizeTrace` is running, which is also what keeps the fidelity risk off the shipped
  * reading entirely: untraced, `tr` IS `replace`.
  *
- * ⚠ THE COVERAGE CEILING IS THE REGISTRY PRE-PASSES, and it is precise: `getPhonemizer`'s wrapper runs
+ * ⚠ THE REGISTRY PRE-PASSES REPORT TOO, and getting there taught the seam's own rule. `stripMarkup`, the
+ * confusable and fullwidth folds, Roman numerals and the vulgar-fraction fold run BEFORE any engine
+ * normalizer; instrumenting their nineteen `.replace` sites lifted coverage and made
+ * `phonemizeTrace("<b>hi</b> there", "en")` map both tokens where it previously mapped neither.
+ *
+ * ⚠ BUT THE SEAM MUST STAY NARROW, and a blanket conversion proved it. `foldLatinDiacritics` lives in the
+ * same file and looks identical, but it is called PER WORD from `resolveWord` — routing it through `tr`
+ * poisoned the mapping on every utterance, because here a length mismatch legitimately means "a step went
+ * unseen". Only functions that transform the PIPELINE STRING belong on this seam. (The C# port takes the
+ * opposite rule for the opposite reason: its seam is `JsRe.Replace`, which the whole codebase uses, so a
+ * mismatch there means "a different string" and is ignored.)
+ *
+ * ⚠ THE OLD CEILING, kept because the reasoning still applies to anything not yet reporting: `getPhonemizer`'s wrapper runs
  * `stripMarkup`, the confusable and fullwidth folds, Roman numerals and the vulgar-fraction fold BEFORE any
  * engine normalizer, and none of them reports. A LENGTH-PRESERVING one is harmless (`foldNativeDigits` maps
  * ｜１｜→｜1｜ one for one, and the mapping survives); a LENGTH-CHANGING one desyncs and the mapping is then

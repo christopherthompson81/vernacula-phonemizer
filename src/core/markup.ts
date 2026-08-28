@@ -1,3 +1,4 @@
+import { tr } from "./provenance.ts";
 /**
  * Shared MARKUP stripping — render HTML to the text it stands for, before any engine sees it.
  *
@@ -212,21 +213,23 @@ export function stripMarkup(text: string): string {
     // Then sup/sub, which must precede the general TAG pass — that pass deletes their brackets and leaves the
     // digits inline, which is exactly the flattening described above.
     // Braces only when a LaTeX command licensed it — see LATEX_CMD.
-    const deLatex = HAS_LATEX.test(text) ? text.replace(LATEX_CMD, " ").replace(MATH_BRACE, " ") : text;
-    return deLatex
-        .replace(WIKITABLE, " ")
-        .replace(SUP_TAG, (_m, d: string) => [...d].map((c) => SUP_MAP[c] ?? c).join(""))
-        .replace(TAG, "")
-        .replace(ENTITY, (whole, body: string) => {
-            if (body.startsWith("#")) {
-                const cp =
-                    body[1] === "x" || body[1] === "X"
-                        ? Number.parseInt(body.slice(2), 16)
-                        : Number.parseInt(body.slice(1), 10);
-                // An out-of-range or unparseable reference is left as written rather than replaced with a
-                // replacement character, so nothing is silently invented.
-                return Number.isFinite(cp) && cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : whole;
-            }
-            return NAMED[body.toLowerCase()] ?? whole; // an unknown entity stays literal
-        });
+    // ⚠ SEQUENTIAL `tr` RATHER THAN A CHAIN (#1150 stage 2): this runs BEFORE any engine's normalizer, so a
+    // step it does not report desyncs the provenance mapping for the whole utterance and every token loses
+    // its input span. A chained `.replace` reports only its head.
+    let s = HAS_LATEX.test(text) ? tr(tr(text, LATEX_CMD, " "), MATH_BRACE, " ") : text;
+    s = tr(s, WIKITABLE, " ");
+    s = tr(s, SUP_TAG, (_m, d: string) => [...d].map((c) => SUP_MAP[c] ?? c).join(""));
+    s = tr(s, TAG, "");
+    return tr(s, ENTITY, (whole, body: string) => {
+        if (body.startsWith("#")) {
+            const cp =
+                body[1] === "x" || body[1] === "X"
+                    ? Number.parseInt(body.slice(2), 16)
+                    : Number.parseInt(body.slice(1), 10);
+            // An out-of-range or unparseable reference is left as written rather than replaced with a
+            // replacement character, so nothing is silently invented.
+            return Number.isFinite(cp) && cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : whole;
+        }
+        return NAMED[body.toLowerCase()] ?? whole; // an unknown entity stays literal
+    });
 }
