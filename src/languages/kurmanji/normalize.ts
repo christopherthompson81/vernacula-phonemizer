@@ -39,6 +39,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Every word is attested IN ITS SLOT, and three of the six candidates probed had to
@@ -127,7 +128,7 @@ export function normalizeKurmanji(input: string): string {
     // 1) HTML ENTITIES — the dump carries `&nbsp;` between a number and its unit (`8.196&nbsp;km²`,
     //    `-24,0&nbsp;°C`, `1000&nbsp;mm`), which is a LETTER run to every guard below and blocks both the
     //    unit tier and the degree rule. ×20 in the mined segments.
-    s = s.replace(/&nbsp;/gu, " ");
+    s = tr(s, /&nbsp;/gu, " ");
 
     // 2) ERA MARKERS — before generic abbreviations (playbook step 4). `b.z.` ×13 in the mined segments and
     //    364 in the dump, written lowercase with dots (`484 b.z.`, `b.z. 550`, `558 b.z.- 530 b.z.`) and
@@ -145,9 +146,9 @@ export function normalizeKurmanji(input: string): string {
     //    Goldberg`) still match, because the preceding-token test cannot tell a date from a byline. ×0 here.
     const ERA_HAS_YEAR = (all: string, at: number, len: number): boolean =>
         /\d[\p{L}'’]*\s?$/u.test(all.slice(Math.max(0, at - 12), at)) || /^\s?\d/u.test(all.slice(at + len, at + len + 3));
-    s = s.replace(/(?<![\p{L}])b\s?\.\s?z\s?\.?(?![\p{L}])/giu,
+    s = tr(s, /(?<![\p{L}])b\s?\.\s?z\s?\.?(?![\p{L}])/giu,
         (m, at: number, all: string) => (ERA_HAS_YEAR(all, at, m.length) ? "berî zayînê" : m));
-    s = s.replace(/(?<![\p{L}])BZ(?![\p{L}])/gu,
+    s = tr(s, /(?<![\p{L}])BZ(?![\p{L}])/gu,
         (m, at: number, all: string) => (ERA_HAS_YEAR(all, at, m.length) ? "berî zayînê" : m));
 
     // 3) THE SEPARATORS, BY GROUP SIZE — the only thing that tells them apart in a corpus that carries both
@@ -172,14 +173,14 @@ export function normalizeKurmanji(input: string): string {
     //    number and a value 1000× off. This rule's own rule ("three digits after the mark is a thousands
     //    group, WHICHEVER mark it is") already decided both marks; only the removal disagreed.
     const group = /(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:[.,]\p{Nd}{3})+)(?![\p{Nd}]|[.,]\p{Nd})/gu;
-    s = s.replace(group, (m) => m.replaceAll(".", "").replaceAll(",", ""));
+    s = tr(s, group, (m) => m.replaceAll(".", "").replaceAll(",", ""));
 
     // 4) PERCENT — `ji sedî` is a PHRASE whose first word the corpus already writes before the sign, and
     //    dropping the duplicate is the trap-12 move applied to a word rather than a symbol. The corpus
     //    writes `ji %71 çiya, ji %10 deşt, ji %3 zozan, ji %16 jî plato` — eight of them in one paragraph —
     //    and without this the reading is *ji ji sedî 71*. The sign also appears on the right (`37,0%`,
     //    `95%´ê`) and spaced (`% 38,2`); `percentPrefix` normalises all three to one order.
-    s = s.replace(/(?<![\p{L}])ji\s+(?=%\s?\p{Nd})/giu, "");
+    s = tr(s, /(?<![\p{L}])ji\s+(?=%\s?\p{Nd})/giu, "");
 
     // 5) THE SHARED TIER — percent, currency, units, the squared/cubed modifier and `&`. Runs ABOVE step 7 because
     //    the tier matches a unit only when a NUMBER is adjacent and the decimal rewrite destroys that
@@ -188,7 +189,7 @@ export function normalizeKurmanji(input: string): string {
     //    are `$` + four hex digits (`$002f$002f…$0026sm$003dfalse`, ×17), and the tier read `$002f` as a
     //    dollar amount — *002 dolar f*, confidently wrong where the old behaviour was merely silent. The
     //    `$` there introduces a percent-style escape, not a price, so it is spent here.
-    s = s.replace(/\$(?=00[0-9a-fA-F]{2})/gu, "");
+    s = tr(s, /\$(?=00[0-9a-fA-F]{2})/gu, "");
     s = SYMBOLS(s);
 
     // 6) DEGREES, AND THE NEGATIVE SIGN RIDES WITH THEM — because in this corpus the two are the same rule.
@@ -224,9 +225,9 @@ export function normalizeKurmanji(input: string): string {
     // article title is *"Pileya Celsius an jî selsiyus … / ºC"*. No Fahrenheit spelling is attested beyond
     // the same article's `Farinhayt`, which is a transliteration inside a comparison, so `°F` gets the
     // degree word and no scale.
-    s = s.replace(new RegExp(TEMP + "C(?![\\p{L}])", "giu"),
+    s = tr(s, new RegExp(TEMP + "C(?![\\p{L}])", "giu"),
         (_m, sg: string, n: string) => `${neg(sg)}${n} pile Selsiyus`);
-    s = s.replace(new RegExp(TEMP + "F(?![\\p{L}])", "giu"),
+    s = tr(s, new RegExp(TEMP + "F(?![\\p{L}])", "giu"),
         (_m, sg: string, n: string) => `${neg(sg)}${n} pile`);
     // A bare degree — every mined instance is a coordinate, where the direction word (`bakûr`, `rojhilat`)
     // is already spelled out beside it, so only the sign needs a reading.
@@ -237,7 +238,7 @@ export function normalizeKurmanji(input: string): string {
     // it is aimed at, and here the miss was worse than the gap. ⚠ The refusal is ONE letter only, not any
     // letter: the corpus's `carna 40° germ dibe` ("becomes 40 degrees hot") is a degree followed by a WORD
     // and must still read, so only an unhandled SCALE letter (`°K`, `°R`) is left visible.
-    s = s.replace(new RegExp(String.raw`([-−]?)(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°(?!\s*\p{L}(?!\p{L}))`, "gu"),
+    s = tr(s, new RegExp(String.raw`([-−]?)(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°(?!\s*\p{L}(?!\p{L}))`, "gu"),
         (_m, sg: string, n: string) => `${neg(sg)}${n} pile`);
     // …and a negative that has already lost its `°` to the two rules above, or that leads a `pile` phrase
     // the corpus wrote out itself (`heta -24 û -30 pileyan`).
@@ -245,7 +246,7 @@ export function normalizeKurmanji(input: string): string {
     //    degree word ONCE, after the second number, so a lookahead tight enough to be safe reached only
     //    that one — the first `-24` read as a bare positive, i.e. the sign silently inverted on half the
     //    phrase. The window now allows one intervening `û -N`.
-    s = s.replace(
+    s = tr(s,
         /(?<![\p{L}\p{Nd}])[-−](\p{Nd}+(?:[.,]\p{Nd}+)?)(?=(?:\s*û\s*[-−]?\p{Nd}+(?:[.,]\p{Nd}+)?)?[^.,\p{Nd}]{0,4}\s?pile)/giu,
         "negatîf $1",
     );
@@ -257,7 +258,7 @@ export function normalizeKurmanji(input: string): string {
     //    SIGN — the one code point that can only mean the operator — was the single spelling this language
     //    refused. The trigger is unchanged in each: string-start here, a degree figure above, a `pile` phrase
     //    before that. Widening the character class does not widen any claim.
-    s = s.replace(/^[-−](?=\p{Nd})/u, "negatîf ");
+    s = tr(s, /^[-−](?=\p{Nd})/u, "negatîf ");
 
     // 7) THE DECIMAL SEPARATOR IS REMOVED AND NOT REPLACED, and this is a sourced REFUSAL rather than an
     //    oversight. **No Kurmanji decimal-separator word is attested anywhere this repo can reach**, and it
@@ -282,8 +283,8 @@ export function normalizeKurmanji(input: string): string {
     //    follows it, so `37,0` kept the break this rule removes. What the guard is for is the longer run
     //    (`1,000.5`, `27.10-6.11.2003`), which needs the mark refused only when a DIGIT follows it.
     const spell = (whole: string, frac: string): string => `${whole} ${[...frac].join(" ")}`;
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}+),(\p{Nd}{1,2})(?![\p{Nd}]|[.,]\p{Nd})/gu, (_m, w: string, f: string) => spell(w, f));
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}+)\.(\p{Nd})(?![\p{Nd}]|[.,]\p{Nd})/gu, (_m, w: string, f: string) => spell(w, f));
+    s = tr(s, /(?<![\p{Nd}.,])(\p{Nd}+),(\p{Nd}{1,2})(?![\p{Nd}]|[.,]\p{Nd})/gu, (_m, w: string, f: string) => spell(w, f));
+    s = tr(s, /(?<![\p{Nd}.,])(\p{Nd}+)\.(\p{Nd})(?![\p{Nd}]|[.,]\p{Nd})/gu, (_m, w: string, f: string) => spell(w, f));
 
     // 8) THE DOTTED ORDINAL — `1. rêbaza kevin … 2. rêbaza Êzidiyan … 3. Rêbaza Botanê`, the German-style
     //    `N.`. `ordinal-latin` is 1,484 in the dump and the period was a CLAUSE PAUSE in every one, so a
@@ -310,7 +311,7 @@ export function normalizeKurmanji(input: string): string {
     //    `3. Rêbaza`, `17. Gulan`, `19. Heya` are ordinals before a capital; `1. rêbaza`, `2. rêbaza` are
     //    ordinals before a lowercase; and the sentence ends are followed by capitals too. Only the number's
     //    MAGNITUDE separates them, which is why it was tabulated rather than guessed.
-    s = s.replace(
+    s = tr(s,
         /(?<![\p{Nd}.,\-–—])(\p{Nd}{1,2})\.(?=\s+\p{L})/gu,
         (whole, digits: string) => (Number(digits) <= 31 ? suffixed(Number(digits), "em") : whole),
     );
@@ -323,7 +324,7 @@ export function normalizeKurmanji(input: string): string {
     //    ⚠ The digit run must not begin inside a word (`C3a`, `C3b` are complement proteins) and the number
     //    is bounded, because `numberToWords` is a compositor and a 12-digit run is not a numeral anybody
     //    speaks — the corpus's longest genuine one is `2456293` (a Julian day).
-    s = s.replace(
+    s = tr(s,
         new RegExp(String.raw`(?<![\p{L}\p{Nd}.,])(\p{Nd}{1,9})(${SUFFIX_ALT})(?![\p{L}\p{Nd}])`, "gu"),
         (whole, digits: string, suf: string) => {
             const n = Number(digits);

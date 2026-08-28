@@ -27,6 +27,7 @@
 import { MANIFEST } from "./manifest.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * Irregular ordinals, from the manifest. ⚠ INDEXED BY NUMBER IN CODE BUT BY STRING IN JSON — JSON keys
@@ -109,13 +110,13 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //    generalise to Gujarati. The fold is kept anyway because it costs nothing (the engine's own
         //    number() already folds them, so this is loss-free) and because both instances happen to be
         //    exactly the forms steps 7 and 8 exist for: "રાત્રે ૧૦.૦૦-૧૧:૦૦" and "સવારે ૮.૪૬ વાગ્યે".
-        s = s.replace(/[૦-૯]/gu, (d) => String(d.charCodeAt(0) - 0x0ae6));
+        s = tr(s, /[૦-૯]/gu, (d) => String(d.charCodeAt(0) - 0x0ae6));
 
         // 2) ASCII ':' written where a VISARGA ઃ was meant. Before the clock rules in step 7, which
         //    compete for the same character. GUJARATI_WORD ("઀-૥૰-૿") already covers U+0A83 ઃ, so the
         //    folded form is a single token; unfolded, પુન:સ્થાપિત was split into two words by a comma
         //    pause, [pˈun , st̪ʰˈapit̪].
-        s = s.replace(
+        s = tr(s,
             new RegExp(`(?<![\\p{L}\\p{M}])(${VISARGA_WORD}):`, "gu"),
             "$1ઃ",
         );
@@ -126,11 +127,11 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //    ordinary word and needs no rewriting, so only the abbreviation itself is claimed — which is
         //    also what makes the bare "ઈ.સ. 1000-1300" case fall out for free. The expansion ઈસવીસન is
         //    the corpus's own spelling ("ઈસવીસન પૂર્વે 21 જુલાઈ, 356ના રોજ").
-        s = s.replace(/(?<![\p{L}\p{M}])[ઇઈ]\.\s?સ\./gu, "ઈસવીસન");
+        s = tr(s, /(?<![\p{L}\p{M}])[ઇઈ]\.\s?સ\./gu, "ઈસવીસન");
 
         // 4) DOTTED ABBREVIATIONS that are not initialisms (કિ.મી., દા.ત., ફે.), before step 5 for the
         //    same reason. Longest key first.
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})`, "gu"), (_m, k: string) =>
+        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})`, "gu"), (_m, k: string) =>
             DOTTED[k]!);
 
         // 5) GUJARATI DOTTED INITIALISMS — યુ.એસ. ×7, યુ.એન., એફ.ટી.એ., એ.એફ.સી.એફ.ટી.એ. Each interior
@@ -144,18 +145,18 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //    pattern matches 18 times and every one of the 18 is a real abbreviation — zero false
         //    positives. The cost of the strictness is the one instance written with spaces,
         //    "(યુ. ટી. સી.+1)", which is left alone.
-        s = s.replace(/(?:[઀-૿]{1,2}\.){2,}/gu, (m) =>
+        s = tr(s, /(?:[઀-૿]{1,2}\.){2,}/gu, (m) =>
             `${m.slice(0, -1).split(".").join(" ")} `);
 
         // 6) SINGLE-DOT ABBREVIATIONS. ડો./ડૉ. ×6, always written with the dot, which is consumed so it
         //    cannot become a phrase break. ડૉક્ટર is the corpus's own spelling.
-        s = s.replace(/(?<![\p{L}\p{M}])ડ[ોૉ]\.(\s+)(?=[\p{L}])/gu, "ડૉક્ટર$1");
+        s = tr(s, /(?<![\p{L}\p{M}])ડ[ોૉ]\.(\s+)(?=[\p{L}])/gu, "ડૉક્ટર$1");
 
         // 7) TIMES. Four rules, and the guards between them are the point.
         //    7a) The clock written with a DOT rather than a colon, which happens beside વાગ્યે / કલાકે
         //        ("સવારે ૮.૪૬ વાગ્યે", "રાત્રે ૧૦.૦૦-૧૧:૦૦"). Folded to a colon so 7d claims it; left
         //        alone it would be read by the decimal path added in this change as "આઠ દશાંશ ચાર છ".
-        s = s.replace(
+        s = tr(s,
             /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,])(?=\s?[-–]\s?\d{1,2}[:.]\d{2}|\s*(?:વાગ|કલાક))/gu,
             "$1:$2",
         );
@@ -164,10 +165,10 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //        (its `(?![\d:])` permits a following dot) and produced [t͡ʃˈaɾ ˈekt̪alis . t̪ɾˈis] — a
         //        bogus clock plus a spurious phrase break. Dropping the colon leaves two plain numbers,
         //        which is the honest reading and which nothing downstream can re-claim.
-        s = s.replace(/(?<![\d.,:])(\d{1,2}):(\d{2}\.\d{1,2})(?![\d:])/gu, "$1 $2");
+        s = tr(s, /(?<![\d.,:])(\d{1,2}):(\d{2}\.\d{1,2})(?![\d:])/gu, "$1 $2");
         //    7c) h:mm:ss, which occurs once as "(શુક્રવારે 09: 19: 00 જીએમટી)". Before 7d so that 7d's
         //        `(?![\s\d.:])` cannot claim its first two fields.
-        s = s.replace(/(?<![\d.,:])(\d{1,2}):\s?([0-5]\d):\s?([0-5]\d)(?![\d.,:])/gu, "$1 $2 $3");
+        s = tr(s, /(?<![\d.,:])(\d{1,2}):\s?([0-5]\d):\s?([0-5]\d)(?![\d.,:])/gu, "$1 $2 $3");
         //    7d) The clock proper. A space after the colon is permitted — the corpus writes "1: 15",
         //        "07: 19".
         //
@@ -182,7 +183,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //        વાગ્યે is NOT supplied when the sentence already carries a clock word or a timezone
         //        after the time — "12:00 GMT વાગ્યે" and "11:00 (યુ. ટી. સી.+1) કલાકે" would otherwise
         //        each have said it twice.
-        s = s.replace(
+        s = tr(s,
             /(?<![\d.,:])([01]?\d|2[0-3]):\s?([0-5]\d)(?![\d.:])/gu,
             (m, h: string, min: string, offset: number, whole: string) => {
                 if (Number(min) !== 0) return `${h} ${min}`;
@@ -207,8 +208,8 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         // and like ta and mi. So the reading habit genuinely splits across the fleet; it is not a universal.
         // પ્લસ reads plˈəs, matching the decode, so no new lexical data was needed.
         // BEFORE the degree rule — the ordering coupling zu's `[+]?` taught.
-        s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 પ્લસ ");
-        s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1પ્લસ ");
+        s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 પ્લસ ");
+        s = tr(s, /(^|\s)\+\s?(?=\d)/gu, "$1પ્લસ ");
 
         // 8b) THE RELATIONAL AND DIVISION SIGNS, and ±. Sourced from gu_in throughout — gu.wikipedia is
         //     thin here (`બરાબર`, `ભાગ્યા`, `વત્તા` are all ×0 in its arithmetic articles), so tier 2 is the
@@ -231,19 +232,19 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //    `તાપમાન±5` read *t̪apmanˈəpləs*, one token, with the stress of neither. The shared symbol tier's
         //    `ampersand` note records the same hazard for the same reason. Every other language that reads ± in this
         //    fleet uses the spaced form; these three did not, and gu/mr got it by copying hi.
-        s = s.replace(/±/gu, " પ્લસ માઈનસ ");
+        s = tr(s, /±/gu, " પ્લસ માઈનસ ");
         s = postposedSign(s, "<", "કરતાં ઓછું");
         s = postposedSign(s, ">", "કરતાં વધુ");
         s = postposedSign(s, "÷", "દ્વારા વિભાજીત");
-        s = s.replace(/\s?=\s?/gu, " બરાબર ");
+        s = tr(s, /\s?=\s?/gu, " બરાબર ");
 
-        s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી સેલ્સિયસ");
-        s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી ફેરનહીટ");
-        s = s.replace(/(\d)\s?°/gu, "$1 ડિગ્રી");
+        s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી સેલ્સિયસ");
+        s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી ફેરનહીટ");
+        s = tr(s, /(\d)\s?°/gu, "$1 ડિગ્રી");
 
         // 9) TILDE. આશરે ("approximately") is the corpus's own word, ×5. Before step 13, which would
         //    otherwise leave the sign stranded against a spelled-out number.
-        s = s.replace(/~\s?(?=\d)/gu, "આશરે ");
+        s = tr(s, /~\s?(?=\d)/gu, "આશરે ");
 
         // 10) (no step 10 — units, percent and currency are DATA, in gujarati.ts's symbol tier, which the
         //     engine runs AFTER this pass. That ordering is why step 13 must not eat a currency-adjacent
@@ -259,7 +260,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //     13 gained, 0 broken, 2 real ranges deliberately missed (1995-96, an abbreviated year span,
         //     and 4.2-3.9, a descending "million years ago" span). થી as the range connective is the
         //     corpus's own ("2 થી 3 મિલિયન", "10થી 15 લોકો", "100થી 250 મીટર" — 737 થી in all).
-        s = s.replace(
+        s = tr(s,
             /(?<![\d.,])(\d+(?:\.\d+)?)\s?[-–—]\s?(\d+(?:\.\d+)?)(?![\d.,])/gu,
             (m, a: string, b: string) => (Number(b) > Number(a) ? `${a} થી ${b}` : m),
         );
@@ -270,7 +271,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //     it they would have become "બસો ત્રાણું ભાગ્યા ચાર". અડધો is corpus-attested; ભાગ્યા is the
         //     ordinary spoken division form (and replaces Hindi's inherited બટા-equivalent, which would
         //     have been emitted in Devanagari and so dropped outright).
-        s = s.replace(/(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+        s = tr(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
             const num = Number(a), den = Number(b);
             if (num >= den) return m0;
             if (num === 1 && den === 2) return "અડધો";
@@ -289,7 +290,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //          ordinal is not the cardinal. 4+થ is excluded: થી is also the ablative postposition and
         //          `4થી` would be ambiguous between "fourth" and "from four"; the corpus has no instance,
         //          so it is left to 13b (→ ચારથી) rather than resolved by guessing.
-        s = s.replace(
+        s = tr(s,
             /(?<![\d.,])(\d)(લ|જ|થ|ઠ્ઠ)(ો|ી|ું|ા|ે)(?![\p{L}\p{M}])/gu,
             (m, d: string, cons: string, vowel: string) => {
                 const n = Number(d);
@@ -301,7 +302,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //     13b) The suppletive numbers written with the REGULAR -મ- suffix (1મી, 6ઠ્ઠ- aside). Not
         //          attested here — included because it is reachable and "એકમી" would be plainly wrong —
         //          and kept off the postposition path by requiring a bare vowel, never માં.
-        s = s.replace(
+        s = tr(s,
             /(?<![\d.,])([12346])\s?મ(ો|ી|ું|ા|ે)(?![\p{L}\p{M}])/gu,
             (_m, d: string, vowel: string) => IRREGULAR[Number(d)]![FORM[vowel]!],
         );
@@ -319,7 +320,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //          `SIGN NUM`, so spelling out the digits of "US$11,000થી" here would have destroyed the
         //          adjacency and dropped the currency word entirely. Left alone, the tier rewrites it to
         //          "11,000 ડોલરથી", which is the right Gujarati and needs no join.
-        s = s.replace(
+        s = tr(s,
             new RegExp(
                 `(?<![\\d.,$€£¥₹])(\\d+(?:,\\d+)*)(?:\\s?(મ[ોીાે]|મું)|(${POSTPOSITION}))(?![\\p{L}\\p{M}])`,
                 "gu",

@@ -72,6 +72,7 @@
  *   · NO SPORTS-TIME READING (20 of the artifact's 39 colon shapes). See the clock step.
  */
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** The manifest's own conjunction — the number joiner (*lesome LE bongwe*), reused for the clock's
  *  hour/minute link and, at the tier's `ampersand`, for `&`. Read from the manifest so they cannot drift. */
@@ -210,7 +211,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    ⚠ ANCHORED ON THE CURRENCY SIGN, which is the whole guard: `915 m` and `4 × 400 m` are metres and
     //    must not be touched, and they have no sign in front. Case is honoured (`M` and `m` both scale here)
     //    because after a sign neither can be anything else.
-    s = s.replace(
+    s = tr(s,
         /((?:US[ \u00a0]?\$|\$|£|P|R)[ \u00a0]?\d[\d \u00a0.,]*)(bn|M|m)(?![\p{L}\p{M}\d])/gu,  // space, NBSP
         (_w, amount: string, suf: string) => `${amount} ${MAGNITUDE_SUFFIX[suf]!}`,
     );
@@ -223,7 +224,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    word, a road number is a bare 1–3 digit integer. Both true instances pass, the road declines.
     //    ⚠ THE NUMBER CLASS ENDS IN A DIGIT (trap 14's Welsh lesson) — without that, `R268.26bn, mme` would
     //    swallow the clause comma the moment the rule stopped re-emitting its operand verbatim.
-    s = s.replace(
+    s = tr(s,
         new RegExp(
             `(?<![\\p{L}\\p{M}\\d])R[ \u00a0]?(\\d[\\d \u00a0.,]*\\d|\\d)(?![\\p{L}\\p{M}])([ \u00a0]*(?:${MAGNITUDE_WORD})(?![\\p{L}\\p{M}]))?`,  // space, NBSP
             "gu",
@@ -242,7 +243,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    ⚠ THE MINUS ARM IS CLAIMED ONLY HERE — see BELOW_ZERO. The left guard rejects a DIGIT as well as a
     //    letter so a range's second operand cannot be read as a negative; rejected there, the engine simply
     //    starts later and matches the bare number (trap 52), which is the safe outcome rather than a miss.
-    s = s.replace(
+    s = tr(s,
         /(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui,  // space, NBSP
         (_w, sign: string, n: string, sc: string) =>
             sign === ""
@@ -252,7 +253,7 @@ export function normalizeSetswanaPre(input: string): string {
     //    A BARE degree — a coordinate (`21° 57' 0"`, `(26°)`) or the open end of a temperature span
     //    (`17° go ya go 31 °C`). `º` (U+00BA) is accepted beside `°` because it stands in for it in
     //    imported text, which the playbook records for hi and it.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, `${DEGREE} di le $1`);  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, `${DEGREE} di le $1`);  // space, NBSP
 
     return s;
 }
@@ -285,7 +286,7 @@ export function normalizeSetswanaPost(input: string): string {
     //    `:` is `clausePunctuation`, so every one of these was reading as a comma pause mid-number.
     //    ⚠ THE a.m./p.m. DOTS ARE CONSUMED IN THE SAME MATCH — afterwards nothing can associate them with
     //    the time they belong to, and each was one more sentence break mid-clause.
-    s = s.replace(
+    s = tr(s,
         new RegExp(
             `(?<![\\d:.,])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])` +  // NBSP
                 `(?:[ \u00a0]*(?:([AaPp])\\.?[Mm]\\.?|(${TZ})(?![\\p{L}\\p{M}])|(${DAYPART})(?![\\p{L}\\p{M}])))`,  // space, NBSP
@@ -314,16 +315,16 @@ export function normalizeSetswanaPost(input: string): string {
     //    ⚠ THE TRAILING GUARD IS `(?![\d]|[.,]\d)`, NOT `(?![\d.,])`: with the wider form a grouped number
     //    followed by a CLAUSE comma or a sentence period declines to de-group, and the leftover separator is
     //    then read as a decimal by step 10.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 7) THE ENGLISH ORDINAL SUFFIX (`20th`, `3rd`, `2nd`). Setswana writes its own ordinals as words —
     //    *wa ntlha*, *ya bobedi*, *la bo 18 la dingwaga* — so a Latin suffix on a digit is always foreign
     //    orthography, and it was reaching the phoneme stream as a bare [tʰ]. Stripping it is the whole fix;
     //    no ordinal morphology is invented, because Setswana's is already written out wherever the language
     //    means it. Case-insensitive (trap 7).
-    s = s.replace(/(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+    s = tr(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 8) RANGES → `go ya go`. 2,042 in the whole corpus; the dash was dropped outright, so `15–49` read as
     //    two bare cardinals.
@@ -364,7 +365,7 @@ export function normalizeSetswanaPost(input: string): string {
     //    `/` is not in the lookbehind) are still declined.
     //    ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA as well as the comma group,
     //    so `5–13,7` must not be claimed with its fraction left behind.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
+    s = tr(s, /(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     // 8b) A SPAN WHOSE UNIT SITS AFTER THE SECOND OPERAND — the two losses step 8 records (#1104).
@@ -382,7 +383,7 @@ export function normalizeSetswanaPost(input: string): string {
     //     concord every entry in that table ends with (and the currency ones too, `didolara di le`), so the
     //     shape is the tier's contract rather than a guess at its vocabulary.
     //     ⚠ ASCENDING ONLY, the same test step 8 applies, so a descending pair stays the juxtaposition it is.
-    s = s.replace(
+    s = tr(s,
         /(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?((?:\p{L}+[ \u00a0])?\p{L}+[ \u00a0]di[ \u00a0]le[ \u00a0])(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
         (whole, a: string, noun: string, b: string) =>
             (Number(a) < Number(b) ? `${noun}${a} ${RANGE} ${b}` : whole));
@@ -396,13 +397,13 @@ export function normalizeSetswanaPost(input: string): string {
     //    ⚠ BOTH SEPARATORS, both restricted to a 1–2 digit tail — the same discipline step 6 uses from the
     //    other side. Without the tail limit these two arms would swallow any grouped thousand step 6
     //    declined (a date comma with a four-digit tail is excluded by both).
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
-    s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, f));
     //    ⚠ AND A THIRD ARM FOR THE LEADING-ZERO LONG TAIL, which the other two and step 6 all decline by
     //    design and which therefore fell through to `clausePunctuation` as a SENTENCE BREAK: the corpus's
     //    `0.001 mm` and `0.00004 in` (the micrometre article) read *lefela . bongwe*. A head of exactly `0`
     //    can never be a grouped thousand, so the 3-digit tail that step 6 reserves for grouping is safe here.
-    s = s.replace(/(?<![\d.,])(0)[.,](\d{3,})(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = tr(s, /(?<![\d.,])(0)[.,](\d{3,})(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
 
     // ⚠ A padded replacement (` le `, ` go ya go `) doubles a space that was already there and can leave one
     // at an edge. SLOT-GAP is a corpus-diff defect class; this pass must not feed it.

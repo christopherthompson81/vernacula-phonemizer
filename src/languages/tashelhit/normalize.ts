@@ -131,6 +131,7 @@
  *   reading of it is correct.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * UNIT ABBREVIATION → the word to say, longest key first so `km²` is tried before `km`.
@@ -296,7 +297,7 @@ export function normalizeTashelhit(input: string): string {
     //    `zero-width` cell is ×4 — the corpus writes `Taskflt n ​​trɣi` with two U+200B. A rendering hint is
     //    not speech, and a zero-width space between a figure and its unit would break every adjacency the
     //    steps below match on.
-    s = s.replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍⁠﻿]/gu, "");
+    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍⁠﻿]/gu, "");
 
     // 3) ERA MARKERS, then DOTTED RUNS — before anything can read an interior dot as a phrase break, and
     //    before step 6, the other rule in this file that inspects dots (trap 39: a guard's evidence has a
@@ -310,7 +311,7 @@ export function normalizeTashelhit(input: string): string {
     //    pass, so what reaches here is only the dotless form (trap 15's shape: the same abbreviation written
     //    two ways, and looking for one of them finds half the instances).
     for (const [body, word] of ERA)
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${body}(?![\\p{L}\\p{M}.])`, "gu"), word);
+        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}(?![\\p{L}\\p{M}.])`, "gu"), word);
 
     //    THE GENERIC DOTTED RUN ONLY REMOVES THE DOTS. `H. E. Butler` (×5, in the English bibliographies this
     //    wiki carries) and `a.l.` were each producing one spurious CLAUSE BREAK per interior dot. Reading the
@@ -318,7 +319,7 @@ export function normalizeTashelhit(input: string): string {
     //    exists for shi), so this fixes the pause and leaves the letters exactly where they were.
     //    ⚠ CAPPED AT FOUR GROUPS WITH A LOOKAHEAD THAT REFUSES A LONGER RUN, and ⚠ THE FINAL DOT SURVIVES
     //    WHEN THE SENTENCE ENDS — both taken from the bm layer, same arguments.
-    s = s.replace(/(?<![\p{L}\p{M}.])((?:\p{L}\.){2,4})(?!\p{L}\.)(?![\p{L}\p{M}])/gu,
+    s = tr(s, /(?<![\p{L}\p{M}.])((?:\p{L}\.){2,4})(?!\p{L}\.)(?![\p{L}\p{M}])/gu,
         (whole: string, _g: string, off: number, all: string) => {
             const body = whole.replace(/\./gu, "");
             const rest = all.slice(off + whole.length);
@@ -348,16 +349,16 @@ export function normalizeTashelhit(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    would refuse to de-group a number followed by its own sentence comma and speak the last group as
     //    a separate figure.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)(?!\s?%)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)(?!\s?%)/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    ⚠ U+066C ARABIC THOUSANDS SEPARATOR, ×2 — `¥ 106٬710٬325`. Moroccan text mixes the digit sets and the
     //    engine's tokenizer already accepts ٠-٩, so the separator has to be de-grouped on the same terms.
-    s = s.replace(/(?<![\d٬])([\d٠-٩]{1,3})((?:٬[\d٠-٩]{3})+)(?![\d٠-٩]|٬[\d٠-٩])/gu, (w) => w.replace(/٬/gu, ""));
+    s = tr(s, /(?<![\d٬])([\d٠-٩]{1,3})((?:٬[\d٠-٩]{3})+)(?![\d٠-٩]|٬[\d٠-٩])/gu, (w) => w.replace(/٬/gu, ""));
     //    The SPACE form (×19: `1 351 m`, `gr 16 500 d 30 000`, `5 262 km`, `∼26 100 a.l.`) additionally has
     //    to reject a bare adjacency that is really two numbers. Requiring every group to be EXACTLY three
     //    digits does that: `wiss 11 d 57 n tusdadt` has no 3-digit group and `21 mars 2020` is not
     //    `\d{1,3}( \d{3})+` because 2020 is four digits with no separator before it.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) UNITS AND DEGREES, before decimals — the number-unit adjacency these match on is destroyed the
     //    moment a decimal is rewritten into spaced digits (playbook step 4's standing coupling), and after
@@ -377,15 +378,15 @@ export function normalizeTashelhit(input: string): string {
     //      `Fahrinhayt` is ×0 and `°F` does not occur, so there is no Fahrenheit arm.
     //    ⚠ TRAP 12: WHERE THE SCALE WORD IS ALREADY WRITTEN the sign must not add a second one — `°Silsyus`
     //    emits only the degree noun and leaves the author's word in place.
-    s = s.replace(/°(?=[Ss]ils)/gu, " taskflt n ");
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 taskflt n Silsyus");
+    s = tr(s, /°(?=[Ss]ils)/gu, " taskflt n ");
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 taskflt n Silsyus");
     //    ⚠ AND THE BARE `°` IS CLAIMED ONLY WHERE IT IS A TEMPERATURE. Of the 18 digit-adjacent degree signs,
     //    ~11 are temperatures (`19° d 23° ɣ uzal`, `28°`, `40°C`) and ~5 are COORDINATES
     //    (`31° 57′ 51″ N`, `34°51'15 anẓul`, `51°27'52" agmuḍ`, `37°21' agafa`) plus `7° Ouest`. The
     //    discriminator is the RIGHT context, which is trap 24's move: a coordinate degree is followed by its
     //    ARC-MINUTE, and a bearing by a direction word. Both are rejected; the temperature instances have
     //    neither. Zero counter-examples on this corpus in either direction.
-    s = s.replace(
+    s = tr(s,
         /(\d)\s?°(?!\s*\d+\s*[′'’])(?!\s*(?:Ouest|Est|Nord|Sud|agafa|anẓul|iffus|ataram|agmuḍ)(?![\p{L}\p{M}]))/gu,
         "$1 n tskflt",
     );
@@ -424,7 +425,7 @@ export function normalizeTashelhit(input: string): string {
     //    step 4 carries, and the corpus diff is what caught it missing here. A plain `(?![\d.,])` refused the
     //    π article's `(π≈3,14, π≈22/7)`, because the decimal is followed by the sentence's own COMMA, so that
     //    instance kept its spurious pause while the identical `3,14` earlier in the same paragraph was fixed.
-    s = s.replace(/(?<![\d.,])(\d+)[.,](\d+)(?![\d]|[.,]\d)/gu, (_m, int: string, frac: string) =>
+    s = tr(s, /(?<![\d.,])(\d+)[.,](\d+)(?![\d]|[.,]\d)/gu, (_m, int: string, frac: string) =>
         `${int} ${[...frac].join(" ")}`);
 
     // 7) THE CURRENCY ARM IS NOW STEP 5's, not its own. It moved into `SYMBOLS` with everything else — see

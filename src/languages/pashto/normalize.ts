@@ -1,5 +1,6 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { spacedBareExponent } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 /**
  * Pashto / پښتو (ps) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -225,7 +226,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    debris in this script: it marks a morpheme seam inside a word (`سون‌توکو`). The engine's TOKEN
         //    class already excludes U+200C, so it is ALREADY a token boundary and the reading is correct;
         //    deleting it would FUSE two words into one, which is the trap-18/26 failure in reverse.
-        s = s.replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[﻿]/gu, "");
+        s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[﻿]/gu, "");
 
         // 2) ORDINALS — before the era rule, because `مه`/`مې` are longer than the era's bare `م` and the
         //    two are the same letter (see ORD_SUFFIX for the tabulation that separates them).
@@ -236,7 +237,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    convert the operand to words inside the rule and apply the morphology there.
         for (const suffix of ORD_SUFFIX) {
             const cutoff = suffix === "م" ? 100 : Infinity; // the bare-`م` era/ordinal split, see ORD_SUFFIX
-            s = s.replace(
+            s = tr(s,
                 new RegExp(`${NOT_LETTER_BEFORE}([${D}]+)\\s?${suffix}${NOT_LETTER_AFTER}`, "gu"),
                 (whole: string, num: string) => {
                     const n = Number(toAscii(num));
@@ -255,7 +256,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    `د ۳۰۵ ق م نه واخلې تر ۱۸۰ ق م پورې`). This is the playbook's own Urdu قم/قمری example
         //    reproduced in another language, which is why the count was read before it was used (trap 2).
         //    The expansion is the corpus's dominant phrase: `له ميلاد څخه مخکې` ×526.
-        s = s.replace(
+        s = tr(s,
             new RegExp(`([${D}])\\s*ق\\s*\\.?\\s*م\\s*\\.?${NOT_LETTER_AFTER}`, "gu"),
             "$1 له ميلاد څخه مخکې",
         );
@@ -265,7 +266,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    plus an orphaned consonant. A guard meaning "not inside a word" has to know what this script
         //    uses to stay inside one.
         for (const [body, word] of ERA) {
-            s = s.replace(new RegExp(`([${D}])\\s?${body}(?![\\p{L}\\p{M}‌])`, "gu"), `$1 ${word}`);  // ZWNJ
+            s = tr(s, new RegExp(`([${D}])\\s?${body}(?![\\p{L}\\p{M}‌])`, "gu"), `$1 ${word}`);  // ZWNJ
         }
 
         // 4) DIGIT DE-GROUPING. A grouping mark is otherwise read as CLAUSE PUNCTUATION and the tail as a
@@ -286,12 +287,12 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //
         //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK, or a number
         //    followed by its own sentence comma would have its last group split off and spoken as zero.
-        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0)،[${D}]{3})+)(?![${D}]|،[${D}])`, "gu"),
+        s = tr(s, new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0)،[${D}]{3})+)(?![${D}]|،[${D}])`, "gu"),
             (w) => w.replace(/،/gu, ""));
-        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0),[${D}]{3})+)(?![${D}]|,[${D}])`, "gu"),
+        s = tr(s, new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0),[${D}]{3})+)(?![${D}]|,[${D}])`, "gu"),
             (w) => w.replace(/,/gu, ""));
         //    The DOT form only in its multi-group shape (×35), where a decimal reading is impossible.
-        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0)\\.[${D}]{3}){2,})(?![${D}]|\\.[${D}])`, "gu"),
+        s = tr(s, new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0)\\.[${D}]{3}){2,})(?![${D}]|\\.[${D}])`, "gu"),
             (w) => w.replace(/\./gu, ""));
         //    ⚠ THERE IS NO SPACE ARM, AND THAT IS A MEASUREMENT RATHER THAN AN OMISSION. `D{1,3}( D{3})+`
         //    matches 115 times and NOT ONE of them is a Western-style space grouping. They are phone
@@ -310,7 +311,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    reason. See UNITS for the sourcing and for why one-letter keys are excluded.
         for (const [sym, word] of UNITS) {
             const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-            s = s.replace(
+            s = tr(s,
                 new RegExp(`(?<![\\p{L}\\p{M}${D}.,،])([${D}]+(?:[.,،][${D}]+)?)\\s?${key}(?![\\p{L}\\p{M}${D}])`, "gu"),
                 `$1 ${word}`,
             );
@@ -334,11 +335,11 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    (`3°22'30"W`, `40°N`, `45°17.460′N`) and there is no attested Pashto reading for the degree of
         //    arc or for the primes. Reading the scale but not the bare sign is a PARTIAL fix, and the
         //    alternative it replaces was `°C` → a bare English letter name [siː].
-        s = s.replace(
+        s = tr(s,
             new RegExp(`(?<![${D}.,،])([${D}]+(?:[.,،][${D}]+)?)\\s?°\\s?[CcسS]${NOT_LETTER_AFTER}`, "gu"),
             "$1 سانتيګراد",
         );
-        s = s.replace(new RegExp(`(?<![${D}.,،])([${D}]+(?:[.,،][${D}]+)?)\\s?℃`, "gu"), "$1 سانتيګراد");
+        s = tr(s, new RegExp(`(?<![${D}.,،])([${D}]+(?:[.,،][${D}]+)?)\\s?℃`, "gu"), "$1 سانتيګراد");
 
         // 7) THE CLOCK, before the range rule — a colon must not be left for a rule looking at bare numbers,
         //    and `sources.ts` had no clock tier at all. The idiom is the corpus's, written out in full:
@@ -354,7 +355,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    instances** — and without this the rule emits its own `بجې` in front of the corpus's, so the
         //    hour noun is said TWICE. Swallowing it puts the reading back into the one idiom the comment
         //    above cites. This was invisible to the mined artifact, which carries the shape zero times.
-        s = s.replace(
+        s = tr(s,
             new RegExp(`(?<![${D}:.])([${D}]{1,2}):([${D}]{2})(?![${D}:.])(\\s*(?:بجو|بجې|بجه))?`, "gu"),
             (whole: string, h: string, m: string, already?: string) => {
                 const mm = Number(toAscii(m));
@@ -390,7 +391,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    one: `۹۰-۹۵.۵` is claimed as `۹۰ تر ۹۵` and `۹۵.۵` still reaches the decimal rule whole. The two
         //    commas are kept because each is ALSO a grouping separator here (step 4) — evidence this rule reads
         //    — and because the dot is the one character with nothing left to defend it.
-        s = s.replace(
+        s = tr(s,
             new RegExp(
                 `(?<![${D}.,،:\\p{L}\\p{M}-])([${D}]+)\\s?[-–—]\\s?([${D}]+)(?![${D}\\p{L}\\p{M}-]|[,،][${D}])`,
                 "gu",
@@ -411,12 +412,12 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //     ⚠ AND THE WORD MAY ALREADY BE THERE — `N٪ سلنه` ×77, the corpus writing both the sign and its
         //     reading (trap 12). The correct reading says it ONCE, so the sign is dropped and the word kept;
         //     without the guard `۹۹% سلنه وگړي` came back as `۹۹ سلنه سلنه`.
-        s = s.replace(new RegExp(`([${D}]+(?:[.,،][${D}]+)?)\\s?[٪%](\\s*سلنه)?`, "gu"),
+        s = tr(s, new RegExp(`([${D}]+(?:[.,،][${D}]+)?)\\s?[٪%](\\s*سلنه)?`, "gu"),
             // ⚠ RE-SPACED even when the word was already there: the corpus writes `۱۰%سلنه` with the sign
             // between them and no space, so re-emitting the capture verbatim gave `۱۰سلنه` — one token
             // where there were two (trap 26). Dropping a sign must not also drop a boundary.
             (_m: string, n: string, named: string | undefined) => `${n} ${named?.trim() ?? "سلنه"}`);
-        s = s.replace(new RegExp(`[٪%]\\s?([${D}]+(?:[.,،][${D}]+)?)(\\s*سلنه)?`, "gu"),
+        s = tr(s, new RegExp(`[٪%]\\s?([${D}]+(?:[.,،][${D}]+)?)(\\s*سلنه)?`, "gu"),
             // ⚠ RE-SPACED even when the word was already there: the corpus writes `۱۰%سلنه` with the sign
             // between them and no space, so re-emitting the capture verbatim gave `۱۰سلنه` — one token
             // where there were two (trap 26). Dropping a sign must not also drop a boundary.
@@ -444,10 +445,10 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
             // which is trap 26 in a rule that was otherwise correct.
             return named ? `${n}${mag ?? ""} ` : `${n}${mag ?? ""} ډالر `;
         };
-        s = s.replace(new RegExp(`\\$\\s?([${D}]+(?:[.,،][${D}]+)?)${MAG}`, "gu"),
+        s = tr(s, new RegExp(`\\$\\s?([${D}]+(?:[.,،][${D}]+)?)${MAG}`, "gu"),
             (whole: string, n: string, mag: string | undefined, off: number, all: string) =>
                 money(n, mag, off, all, whole.length));
-        s = s.replace(new RegExp(`([${D}]+(?:[.,،][${D}]+)?)\\s?\\$${MAG}`, "gu"),
+        s = tr(s, new RegExp(`([${D}]+(?:[.,،][${D}]+)?)\\s?\\$${MAG}`, "gu"),
             (whole: string, n: string, mag: string | undefined, off: number, all: string) =>
                 money(n, mag, off, all, whole.length));
 
@@ -464,7 +465,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //     whose operands are full dates, so the range rule cannot claim it and the minus rule read a
         //     death year as "minus 1979". The corpus writes its true negatives glued — `-7 °C`, `-18 °C`,
         //     `−26.3 °C` — so requiring adjacency keeps every one of them and drops the dashes.
-        s = s.replace(new RegExp(`(^|[\\s(（\\[])[-−–]([${D}])`, "gu"), "$1منفي $2");
+        s = tr(s, new RegExp(`(^|[\\s(（\\[])[-−–]([${D}])`, "gu"), "$1منفي $2");
 
         // 12) DECIMALS, after every rule that needs the number intact. ⚠ THE POINT WORD IS `اعشاريه`, AND
         //     THIS IS THE TIER `sources.ts` REPORTED AS `[NONE]`. ⚠ That report was wrong for the reason
@@ -489,7 +490,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //     existing lookbehind then blocks every later pair from starting mid-chain — so the whole
         //     address survives. Written as `\.[D]` rather than a bare `.` in the class deliberately: a
         //     decimal that ENDS a sentence (`۷۸.۸.`) is followed by a dot too, and must still be read.
-        s = s.replace(
+        s = tr(s,
             new RegExp(`(?<![${D}.,،٫])([${D}]+)[.,،٫]([${D}]+)(?![${D}\\p{L}\\p{M}]|[.,،٫][${D}])`, "gu"),
             (_m: string, int: string, frac: string) => `${int} اعشاريه ${[...frac].join(" ")}`,
         );
@@ -506,7 +507,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //     them; a third `/digit` field rejects the dates before the cap has to.
         //     ⚠ AND THE NOUN MAY ALREADY BE THERE (trap 12): the corpus writes `۱/۳برخه` with the word
         //     glued straight onto the figure, so emitting it unconditionally would say `برخه` twice.
-        s = s.replace(
+        s = tr(s,
             new RegExp(`(?<![${D}\\p{L}\\p{M}/])([${D}]{1,3})/([${D}]{1,3})(?![${D}/])(\\s*برخ[ېه])?`, "gu"),
             (whole: string, a: string, b: string, noun: string | undefined) => {
                 const x = Number(toAscii(a)), y = Number(toAscii(b));

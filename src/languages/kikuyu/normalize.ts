@@ -1,3 +1,4 @@
+import { tr } from "../../core/provenance.ts";
 /**
  * Kikuyu / Gĩkũyũ (ki) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -221,7 +222,7 @@ export function normalizeKikuyu(input: string): string {
     //    `&quot;` ×2 would otherwise reach the g2p as the word "quot".
     //    ⚠ NO AMPERSAND WORD IS SPENT — see the header; the bare sign occurs only in English names.
     //    `&amp;` is unfolded first so a doubly-escaped entity does not survive as "amp" plus a semicolon.
-    s = s.replace(/&amp;/giu, "&").replace(/&nbsp;/giu, " ").replace(/&quot;/giu, '"');
+    s = tr(tr(tr(s, /&amp;/giu, "&"), /&nbsp;/giu, " "), /&quot;/giu, '"');
 
     // 3) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping comma reads as a CLAUSE
     //    PAUSE, so `1,312` came out *ĩmwe , magana matatũ ikũmi na igĩrĩ* — two numbers and a pause where the
@@ -238,10 +239,10 @@ export function normalizeKikuyu(input: string): string {
     //    guard here left `3,066.3 ft` — a real elevation gloss in this corpus — UNDE-GROUPED, so it read as
     //    *ithatũ , mĩrongo ĩtandatũ na ithathatũ . ithatũ*: one number, one pause and one sentence break.
     //    Caught by this file's own test rather than by a probe, which is the point of pinning the branch.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
     //    The space-grouped form, same shape. ×0 in this corpus; the arm is here because a wiki that writes
     //    `41,200` also writes `41 200`, and it cannot fire on anything else (three digits, no letters).
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 4) THE ENGLISH ORDINAL SUFFIX (`21st`, `20th`, `70th`, `4th`, `2nd`; 194 whole-corpus). Kikuyu writes
     //    its own ordinals as WORDS with a class-agreeing prefix — this corpus has *wa mbere*, *wa kerĩ*,
@@ -251,7 +252,7 @@ export function normalizeKikuyu(input: string): string {
     //    language means it. Case-insensitive (trap 7: `21St` and `11De` are ordinary in titles).
     //    ⚠ AFTER de-grouping, so a grouped ordinal is already one digit run; BEFORE the range rule, whose
     //    right guard excludes a trailing letter and would otherwise decline `1990th-2000th`.
-    s = s.replace(/(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+    s = tr(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 5) RANGES → `nginya`. AFTER step 3 (a grouped endpoint must already be one digit run) and BEFORE the
     //    unit and percent rules, so neither operand has been rewritten into words by the time this pairs
@@ -277,7 +278,7 @@ export function normalizeKikuyu(input: string): string {
     //    `clause-final` check). What the decimal exclusion needs is a CONTINUATION of the number, which is
     //    what a following digit tests; `30.9-72.5` is still declined and so is a grouped `1-1,000`.
     //    ⚠ AND A TRAILING LETTER IS EXCLUDED, which is what leaves `1960/1961` and `13-14million` alone.
-    s = s.replace(/(?<![-+−–—\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-+−\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
+    s = tr(s, /(?<![-+−–—\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-+−\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     // 6) PERCENT → `N harĩ igana`, the one POSTPOSED reading in this layer (see the declaration for the two
@@ -288,7 +289,7 @@ export function normalizeKikuyu(input: string): string {
     //    digit, and the number takes its own dot so `%` after a grouped figure still finds one operand.
     //    ⚠ FOUR OF THE ARTIFACT'S `%` ARE CSS (`font-size:90%`), a mining residue named in the header. They
     //    are indistinguishable from a percentage without a markup rule and are left to read as one.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0]?%/gu, `$1 ${PERCENT}`);  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0]?%/gu, `$1 ${PERCENT}`);  // space, NBSP
 
     // 7) THE DOLLAR SIGN → `dolari N`, the noun BEFORE its amount (this language's order — see the header).
     //    `$2.7 million`, `$ 5.6 million`, `US$486,840`, and the GDP-per-capita legend `>$60,000 $50,000 -
@@ -298,8 +299,8 @@ export function normalizeKikuyu(input: string): string {
     //    ⚠ THE TRAP-12 GUARD IS ON BOTH SIDES. The corpus writes `dolari milioni 4.35` and `mirioni 3.75 cia
     //    dollar` in monetary sentences, so a `$` beside an already-named currency must not say it twice.
     const NAMED = /dolari|dolar|dollars?|ciringi/iu;
-    s = s.replace(/(?<![\p{L}\p{M}])US[ \u00a0]?\$[ \u00a0]?(?=\d)/giu, `${DOLLAR} `);  // space, NBSP
-    s = s.replace(/\$[ \u00a0]?(?=\d)/gu, (w, off: number, all: string) =>  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])US[ \u00a0]?\$[ \u00a0]?(?=\d)/giu, `${DOLLAR} `);  // space, NBSP
+    s = tr(s, /\$[ \u00a0]?(?=\d)/gu, (w, off: number, all: string) =>  // space, NBSP
         saidNear(all, off, off + w.length, "dolari") || NAMED.test(all.slice(Math.max(0, off - 45), off))
             ? "" : `${DOLLAR} `);
 
@@ -334,13 +335,13 @@ export function normalizeKikuyu(input: string): string {
     //    attested for Kikuyu — `unitPer` is one invariant string and this language has no candidate for it.
     //    AFTER the ranges (step 5) and BEFORE the decimals (step 9), which is what leaves `934.6` intact to
     //    be this rule's operand.
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0\u202f\u2009]?km(?![\p{L}\p{M}\d²³/])/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0\u202f\u2009]?km(?![\p{L}\p{M}\d²³/])/gu,  // space, NBSP, NNBSP, thin space
         (w, n: string, off: number, all: string) =>
             saidNear(all, off, off + w.length, KILOMETRE) ? n : `${KILOMETRE} ${n}`);
     const metre = (w: string, n: string, off: number, all: string): string =>
         saidNear(all, off, off + w.length, METRE) ? n : `${METRE} ${n}`;
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+\.\d+)[ \u00a0]m(?![\p{L}\p{M}\d²³/])/gu, metre);  // space, NBSP
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+)[ \u00a0]?m(?![\p{L}\p{M}\d²³/])/gu, metre);  // space, NBSP
+    s = tr(s, /(?<![\d.,\p{L}\p{M}])(\d+\.\d+)[ \u00a0]m(?![\p{L}\p{M}\d²³/])/gu, metre);  // space, NBSP
+    s = tr(s, /(?<![\d.,\p{L}\p{M}])(\d+)[ \u00a0]?m(?![\p{L}\p{M}\d²³/])/gu, metre);  // space, NBSP
 
     // 9) DECIMALS, LAST of the numeric rules — steps 5 to 8 all need their number intact. The separator was
     //    reaching `clausePunctuation` and becoming a SENTENCE BREAK inside a number: `934.6 m` read
@@ -365,7 +366,7 @@ export function normalizeKikuyu(input: string): string {
     //    one out. It also leaves the Korean news datelines `2013.07.27` alone, which are not Kikuyu at all.
     //    ⚠ AND A TRAILING LETTER IS EXCLUDED, keeping a dotted designation (`802.11a`) out — ×0 here, the
     //    same robustness argument as step 8's version guard.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.,\p{L}\p{M}])/gu,
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.,\p{L}\p{M}])/gu,
         (_m, int: string, frac: string) => `${int} ${[...frac].join(" ")}`);
 
     return tidy(s);

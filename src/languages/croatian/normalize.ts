@@ -21,6 +21,7 @@ import { slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { SYMBOLS } from "./croatian.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 const N = MANIFEST.numbers;
 
@@ -130,15 +131,15 @@ export function normalizeCroatian(input: string): string {
     let s = input;
 
     // 0) ZERO-WIDTH — the corpus has U+200B ×5.
-    s = s.replace(/[\u200B\u200C\u200D\uFEFF]/gu, "");
+    s = tr(s, /[\u200B\u200C\u200D\uFEFF]/gu, "");
 
     // 1) DIGIT DE-GROUPING, FIRST — Croatian groups thousands with a PERIOD, and until it is removed the
     //    period is read as clause punctuation. EXACTLY three digits, no space (keeps `802.11` and the
     //    `N.` ordinals out). The comma-decimal and the en-dash range are handled separately.
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     // The EN-DASH RANGE between two dotted numbers (`1000. – 1300. n. e.`) must be claimed before the
     //    era-ordinal rule (step 2) consumes the second dotted number.
-    s = s.replace(/(\d{1,4})\.\s*[-–—]\s*(\d{1,4})\.(?=\s*(?:n\.\s?e\.|p\.\s?n\.\s?e\.))/gu, "$1 do $2");
+    s = tr(s, /(\d{1,4})\.\s*[-–—]\s*(\d{1,4})\.(?=\s*(?:n\.\s?e\.|p\.\s?n\.\s?e\.))/gu, "$1 do $2");
 
     // 2) MULTI-DOT ERA MARKER — `n. e.` (nove ere), `p.n.e.` (prije nove ere), `g. n. e.`, `g. pr. Kr.`
     //    (godine prije Krista), and the `400. g. n. e.` form. BEFORE the dotted-abbreviation and N.
@@ -152,33 +153,33 @@ export function normalizeCroatian(input: string): string {
     //    version read `N. E. Kovač je došao` as *nove ere Kovač* — a name replaced by a date. All six era
     //    instances in FLEURS hr_hr are lowercase (`n. e.` ×4, `p.n.e.` ×2) and initials are capitals, so
     //    nothing real is lost. `pr. Kr.` keeps its written capital in the pattern itself.
-    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(?:g\.\s+)?(?=(?:n\.\s?e|p\.\s?n\.\s?e|pr\.\s?Kr\.)(?![\p{L}\p{M}]))/gu,
+    s = tr(s, /(?<![\d.,])(\d{1,4})\.\s+(?:g\.\s+)?(?=(?:n\.\s?e|p\.\s?n\.\s?e|pr\.\s?Kr\.)(?![\p{L}\p{M}]))/gu,
         (whole, digits: string) => {
             const base = ordinalBase(Number(digits));
             return base === undefined ? whole : `${inflect(base, "f.gen")!} `;
         });
-    s = s.replace(/(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(?=[.!?]|$)/gu, "prije nove ere.");
-    s = s.replace(/(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(\s)/gu, "prije nove ere$1");
-    s = s.replace(/(?<![\p{L}\p{M}])n\.\s?e\.(?=[.!?]|$)/gu, "nove ere.");
-    s = s.replace(/(?<![\p{L}\p{M}])n\.\s?e\.(\s)/gu, "nove ere$1");
-    s = s.replace(/(?<![\p{L}\p{M}])pr\.\s?Kr\.(?=[.!?]|$)/gu, "prije Krista.");
-    s = s.replace(/(?<![\p{L}\p{M}])pr\.\s?Kr\.(\s)/gu, "prije Krista$1");
+    s = tr(s, /(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(?=[.!?]|$)/gu, "prije nove ere.");
+    s = tr(s, /(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(\s)/gu, "prije nove ere$1");
+    s = tr(s, /(?<![\p{L}\p{M}])n\.\s?e\.(?=[.!?]|$)/gu, "nove ere.");
+    s = tr(s, /(?<![\p{L}\p{M}])n\.\s?e\.(\s)/gu, "nove ere$1");
+    s = tr(s, /(?<![\p{L}\p{M}])pr\.\s?Kr\.(?=[.!?]|$)/gu, "prije Krista.");
+    s = tr(s, /(?<![\p{L}\p{M}])pr\.\s?Kr\.(\s)/gu, "prije Krista$1");
     // The `g.` in `400. g. n. e.` / `1000. g. pr. Kr.` is "godine" (elided); drop it after the claim.
-    s = s.replace(/(?<=\d)\s+g\.\s+(?=(?:n\.\s?e\.|pr\.\s?Kr\.))/gu, " ");
+    s = tr(s, /(?<=\d)\s+g\.\s+(?=(?:n\.\s?e\.|pr\.\s?Kr\.))/gu, " ");
 
     // 3) DOTTED ABBREVIATIONS. `itd.` → "i tako dalje". The dot is consumed before a following word.
-    s = s.replace(/(?<![\p{L}\p{M}])itd\.(\s+)(?=[\p{L}\d(])/giu, "i tako dalje$1");
-    s = s.replace(/(?<![\p{L}\p{M}])itd\.(?=\s*[,;:])/giu, "i tako dalje");
-    s = s.replace(/(?<![\p{L}\p{M}])itd\.(?=\s*(?:[.!?”"»)\]])|$)/giu, "i tako dalje.");
+    s = tr(s, /(?<![\p{L}\p{M}])itd\.(\s+)(?=[\p{L}\d(])/giu, "i tako dalje$1");
+    s = tr(s, /(?<![\p{L}\p{M}])itd\.(?=\s*[,;:])/giu, "i tako dalje");
+    s = tr(s, /(?<![\p{L}\p{M}])itd\.(?=\s*(?:[.!?”"»)\]])|$)/giu, "i tako dalje.");
 
     // 4) DOTTED CAPITAL RUNS — `George W. Bush`. The W. suffix dot is a break. The single-initial form
     //    (W. Bush) needs the lone-initial rule too.
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
-    s = s.replace(/(?<=\p{Lu}\p{L}*\s)(\p{Lu})\.(?=\s+\p{Lu}\p{Ll})/gu, "$1");
+    s = tr(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
+    s = tr(s, /(?<=\p{Lu}\p{L}*\s)(\p{Lu})\.(?=\s+\p{Lu}\p{Ll})/gu, "$1");
     // `Dr.` → "doktor"; `SAD` (USA) → the expansion.
-    s = s.replace(/(?<![\p{L}\p{M}])Dr\.(\s+)(?=[\p{L}\d])/giu, "Doktor$1");
-    s = s.replace(/(?<![\p{L}\p{M}])Dr\.(?=\s*(?:[.,;:!?»)]|$))/giu, "Doktor.");
-    s = s.replace(/(?<![-\p{L}\p{M}])SAD(?=-)/gu, "Sjedinjene Američke Države");
+    s = tr(s, /(?<![\p{L}\p{M}])Dr\.(\s+)(?=[\p{L}\d])/giu, "Doktor$1");
+    s = tr(s, /(?<![\p{L}\p{M}])Dr\.(?=\s*(?:[.,;:!?»)]|$))/giu, "Doktor.");
+    s = tr(s, /(?<![-\p{L}\p{M}])SAD(?=-)/gu, "Sjedinjene Američke Države");
 
     // 4b) PRENOMINAL ROMAN ORDINALS — `I. svjetskog rata`, `II. svjetskom ratu`, `I. i II. reda`
     //     (World War I/II, first/second order). The shared roman pass skips single-letter I (below its
@@ -186,7 +187,7 @@ export function normalizeCroatian(input: string): string {
     //     lowercase noun. The registry's roman→digit conversion also cannot see the dotted form here,
     //     so the ordinal is claimed directly, inflected for the slot the following word governs.
     const ROMAN_ORD: Readonly<Record<string, string>> = { I: "prvi", II: "drugi", III: "treći", IV: "četvrti", V: "peti" };
-    s = s.replace(/(?<![\p{L}\p{M}])([IVXL]+)\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
+    s = tr(s, /(?<![\p{L}\p{M}])([IVXL]+)\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
         (whole, rom: string, word: string) => {
             const base = ROMAN_ORD[rom.toUpperCase()];
             if (base === undefined) return whole;
@@ -198,7 +199,7 @@ export function normalizeCroatian(input: string): string {
         });
 
     // 5) DEGREES. `90 °F`, `+30°C`, `35° W` (a LONGITUDE — the bare-degree rule must not claim it).
-    s = s.replace(/(\d+)\s?°\s?([CFcf])(?![\p{L}\p{M}])/gui, (_m, n: string, u: string) =>
+    s = tr(s, /(\d+)\s?°\s?([CFcf])(?![\p{L}\p{M}])/gui, (_m, n: string, u: string) =>
         `${n} ${/[Ff]/u.test(u) ? "stupnjeva Farenhajta" : "stupnjeva Celzija"}`);
     // ⚠ ATTACHMENT IS REQUIRED OF LOWERCASE ⟨s⟩ AND ONLY OF IT. `S` is *južno* and `s` is the preposition "with",
     //   so spaced off the degree the bearing arm was deleting a common word and inventing a bearing:
@@ -206,7 +207,7 @@ export function normalizeCroatian(input: string): string {
     //   Croatian sentence uses alone, so `35° w` — the form this corpus actually writes — still reads.
     //   ⚠ AND THE GUARD IS CASE-SENSITIVE: only the LOWERCASE letter is the word. A spaced uppercase `35° S`
     //   is an ordinary way to write a latitude and must keep reading as *južno*.
-    s = s.replace(/(\d+)\s?°(?:\s?([NEWSnew])|([s]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
+    s = tr(s, /(\d+)\s?°(?:\s?([NEWSnew])|([s]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
         `${n} stupnjeva ${({ N: "sjeverno", S: "južno", E: "istočno", W: "zapadno" } as Record<string, string>)[(spaced ?? tight)!.toUpperCase()]!}`);
 
     // 5b) THE BARE DEGREE. ⚠ ADDED BECAUSE THE ARM ABOVE STOPPED CLAIMING EVERYTHING. While the compass
@@ -220,7 +221,7 @@ export function normalizeCroatian(input: string): string {
     //     this arm does not consume — `300°K` — would otherwise land inside the word, and the stress
     //     lookup then runs on `stupnjevak`, misses the dictionary and loses the pitch accent. Consuming a
     //     letter class cannot cover this: the class is finite and the alphabet is not.
-    s = s.replace(/(\d+)\s?°(?:\s?[QXYqxy](?![\p{L}\p{M}]))?/gu,
+    s = tr(s, /(\d+)\s?°(?:\s?[QXYqxy](?![\p{L}\p{M}]))?/gu,
         (_m, n: string) => `${n} ${counted(intOf(n), STUPANJ)} `);
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih`, `15-og`). The suffix is the LAST LETTERS of the
@@ -231,12 +232,12 @@ export function normalizeCroatian(input: string): string {
     //    corpus lines of this shape (`1480-ih, kada`, `tijekom 1990-ih bilo je`) read the CARDINAL plus a
     //    stray *ih*, the accusative clitic "them". Serbian and Bosnian write the same rule with the shared
     //    NOT_LETTER_AFTER and are unaffected; Croatian is the copy that lost it.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, rawSuffix: string) =>
             ordinalForms(Number(digits)).find((f) => f.endsWith(rawSuffix.toLowerCase())) ?? whole);
 
     // 7) THE `N.` ORDINAL — claimed when a licensing word from the closed list follows, LOWERCASE.
-    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
+    s = tr(s, /(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
         (whole, digits: string, word: string) => {
             const slot = LICENSOR[word];
             if (slot === undefined) return whole;
@@ -260,7 +261,7 @@ export function normalizeCroatian(input: string): string {
     //     A SENTENCE END is a capital or the end of the utterance — NOT merely "no letter follows".
     //     Closing punctuation counts as neither: the corpus writes the year range `(1644. - 1912.)`, where
     //     both periods are ordinal markers and the text runs on after the bracket.
-    s = s.replace(/(?<![\d.,\-])(1\d{3}|20\d{2}|2100)\.(?!\d)/gu, (whole, digits: string, at: number, all: string) => {
+    s = tr(s, /(?<![\d.,\-])(1\d{3}|20\d{2}|2100)\.(?!\d)/gu, (whole, digits: string, at: number, all: string) => {
         const base = ordinalBase(Number(digits));
         if (base === undefined) return whole;
         const year = inflect(base, "f.gen");
@@ -275,7 +276,7 @@ export function normalizeCroatian(input: string): string {
     //    time: a THIRD `\d.\d\d` field (4:41.30) means a pace. The optional `h` is consumed WITHOUT
     //    eating the space before a following word (the clock-glue trap): a bare `\s*` glued "22:00 i
     //    23:00" → "satai" and "12:00 GMT" → "satiGMT".
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*h)?/giu,
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*h)?/giu,
         (_m, h: string, min: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return _m;
@@ -284,12 +285,12 @@ export function normalizeCroatian(input: string): string {
         });
 
     // 9) NUMERIC RANGES — `10 – 60`, `2-3`, `120-160`. Croatian "do" (to).
-    s = s.replace(/(\d)\s?[-–—]\s?(?=\d)/gu, "$1 do ");
+    s = tr(s, /(\d)\s?[-–—]\s?(?=\d)/gu, "$1 do ");
 
     // 9b) MILJA RATE — the corpus writes "milja/h" and "milja/sat" (miles per hour). "milja" is already
     //     the Croatian word; only the /sat or /h denominator needs reading. The tier's `mi` key does not
     //     match the spelled "milja", so the rate is composed here.
-    s = s.replace(/(\d+(?:,\d+)?)\s?milja\s*\/\s*(?:sat|h)(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(\d+(?:,\d+)?)\s?milja\s*\/\s*(?:sat|h)(?![\p{L}\p{M}])/giu,
         (_m, n: string) => `${n} ${counted(intOf(n), MILJA)} na sat`);
 
     // 10) THE SHARED SYMBOL TIER — %, units, rates. The number must be ADJACENT to its unit and still
@@ -303,9 +304,9 @@ export function normalizeCroatian(input: string): string {
 
     // 12) FRACTIONS. `29¾ sa 24½ inča`, `1/5 inča`. The vulgar fractions read "i tri četvrtine"/"i pola";
     //     the ratio reads "jedan peti" (one fifth).
-    s = s.replace(/(\d+)¾/gu, "$1 i tri četvrtine");
-    s = s.replace(/(\d+)½/gu, "$1 i pol");
-    s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+    s = tr(s, /(\d+)¾/gu, "$1 i tri četvrtine");
+    s = tr(s, /(\d+)½/gu, "$1 i pol");
+    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const ord = ordinalBase(Number(b));
         return ord === undefined ? m0 : `${numberToWords(Number(a))} ${ord}`;
     });
@@ -314,27 +315,27 @@ export function normalizeCroatian(input: string): string {
     //     reads "minus" (the corpus's `–` en-dashes are punctuation, and the minus rule requires a
     //     hyphen/U+2212 directly before a digit with no en-dash — measured like Serbian). `=` →
     //     "jednako", `<` → "manje od", `>` → "veće od".
-    s = s.replace(/(?<!\p{L}\p{M})(\p{Lu})&(\p{Lu})(?![^\p{L}\p{M}])/gu, "$1 i $2");
-    s = s.replace(/\s&\s/gu, " i ");
-    s = s.replace(/(?<=\d)\s?[x×]\s?(?=\d)/gu, " puta ");
+    s = tr(s, /(?<!\p{L}\p{M})(\p{Lu})&(\p{Lu})(?![^\p{L}\p{M}])/gu, "$1 i $2");
+    s = tr(s, /\s&\s/gu, " i ");
+    s = tr(s, /(?<=\d)\s?[x×]\s?(?=\d)/gu, " puta ");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " plus minus ");
-    s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1plus $2");
-    s = s.replace(/(?<=[A-Z])\+(\d)/gu, " plus $1");
-    s = s.replace(/(?<![\p{L}\p{Nd}])[−-](\d+)(?!\s*[-–—\d])/gu, "minus $1");
-    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 jednako $2");
-    s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 manje od $2");
-    s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 veće od $2");
+    s = tr(s, /±/gu, " plus minus ");
+    s = tr(s, /(^|[\s(])\+\s?(\d)/gu, "$1plus $2");
+    s = tr(s, /(?<=[A-Z])\+(\d)/gu, " plus $1");
+    s = tr(s, /(?<![\p{L}\p{Nd}])[−-](\d+)(?!\s*[-–—\d])/gu, "minus $1");
+    s = tr(s, /(\S)\s*=\s*(\S)/gu, "$1 jednako $2");
+    s = tr(s, /(\d)\s*<\s*(\d)/gu, "$1 manje od $2");
+    s = tr(s, /(\d)\s*>\s*(\d)/gu, "$1 veće od $2");
     // 13b) THE DIVISION SIGN, the one sign this file still dropped — `6 ÷ 3` read as two bare numbers.
     //      ⚠ THE SOURCE READS THE SIGN ITSELF, which is as direct as this issue's tier 4 gets: hr.wikipedia's
     //      Dijeljenje article writes "a podijeljeno s b jednako c: a ÷ b = c" — the ÷ glyph, its reading, and
     //      the very equals word this file already emits, in one sentence. Corroboration in both directions.
     //      FLEURS's parallel aspect-ratio sentence, which performs a division aloud in 57 of its 67 languages,
     //      independently gives the same verb here ("omjer … dijeli se s dvanaest").
-    s = s.replace(/(\S)\s*÷\s*(\S)/gu, "$1 podijeljeno s $2");
+    s = tr(s, /(\S)\s*÷\s*(\S)/gu, "$1 podijeljeno s $2");
 
     // ⚠ INITIALISMS, LAST, AND SHARED WITH SERBIAN. hr/bs run serbian.ts's g2p, so they must run its
     //   letter-name table too or the same `DVD` → *dʋd* cluster survives here — which it did: the pass was

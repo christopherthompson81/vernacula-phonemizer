@@ -123,6 +123,7 @@
  */
 import { makeSymbolNormalizer, type CountForms } from "../../core/normalizeSymbols.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * ⚠ NEVER `\b` — Latgalian carries `ā ē ī ō ū y č š ž ģ ķ ļ ņ`, which `\b` treats as boundaries
@@ -314,9 +315,9 @@ export function normalizeLatgalian(input: string): string {
         const rest = full.slice(offset + m0.length);
         return /^\s*["»)']?\s*$/u.test(rest) || /^\s+\p{Lu}/u.test(rest) ? `${word}.` : word;
     };
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}u\\.c\\.`, "gu"),
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}u\\.c\\.`, "gu"),
         (m0, off: number, full: string) => others(m0, off, full, "i cyti"));
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}ct\\.`, "gu"),
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}ct\\.`, "gu"),
         (m0, off: number, full: string) => others(m0, off, full, "cyti"));
 
     // 3) THE ORDINAL PERIOD — above the range step (see `ordinalPeriod`'s first arm) and above everything
@@ -330,27 +331,27 @@ export function normalizeLatgalian(input: string): string {
     //    ⚠ AND THE TRAILING GUARD REJECTS A DIGIT AND NOTHING ELSE (playbook trap 58) — `(?![\d.,])` would
     //    decline `700 000.` at the end of a sentence and lose the whole grouping.
     //    The SPACE first: `83 871 km²`, `9 223 766 dzeivuotuojim`, `700 000 daļderu`, `11 858 puslopys`.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    …then the COMMA, by the three-digit test: `1,500 solu`, `548,000 cylvāku`, `3,555 km2`,
     //    `450,295 km²`, `2,300 km²`. The `(?!\d)` after the run is what leaves `0,702804` and `55,883333`
     //    alone — a fourth digit after the group means the comma was a decimal all along.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
     // 5) THE MAGNITUDE ABBREVIATIONS, before the tier so its magnitude hop can see them: `Ledzīvotāju
     //    Austrejas - 8,9 mil.`, `runoj vydyskai … 400 mln. ļaužu`. Both read as bare syllables today.
     //    ⚠ A PRECEDING DIGIT IS REQUIRED, because `mil` and `mln` unguarded are a fragment of any word.
-    s = s.replace(/(?<=\d)(\s*)(?:mln|mil)\s?\./gu, (_m, gap: string) => `${gap || " "}milijoni`);
+    s = tr(s, /(?<=\d)(\s*)(?:mln|mil)\s?\./gu, (_m, gap: string) => `${gap || " "}milijoni`);
 
     // 6) THE PRODUCT SIGN — digits on BOTH sides, which is the whole guard (see the header: the corpus's
     //    other asterisk is the biographical birth mark, `* ap 310—305 g. p. Kr.`).
-    s = s.replace(/(?<=\d)\s?\*\s?(?=\d)/gu, " reiz ");
+    s = tr(s, /(?<=\d)\s?\*\s?(?=\d)/gu, " reiz ");
 
     // 7) THE APPROXIMATION SIGN — `apmāram 15% (~16 tyukstūšys)`. `apmāram` is 27 tok / 20 arts and the
     //    corpus uses it directly before a figure in the same sentence as the sign ("apmāram 15%", "apmāram
     //    0,702804 latu", "apmāram 200 milijonim").
-    s = s.replace(/[~≈]\s*(?=[\d])/gu, "apmāram ");
+    s = tr(s, /[~≈]\s*(?=[\d])/gu, "apmāram ");
 
     // 8) THE SHARED SYMBOL TIER — percent, currency, units, the squared exponent, magnitudes, `&`, `×`.
     //    Ordered as the Hawaiian and Karakalpak layers order it: its own numeral pattern reads `12,8` as
@@ -377,7 +378,7 @@ export function normalizeLatgalian(input: string): string {
     //     shapes here.
     //     ⚠ AND THE TRAILING GUARD REJECTS A DIGIT AND NOTHING ELSE (playbook trap 58): `(?![\d.,])` would
     //     decline `beja 3,5.` at the end of a sentence and put the pause back inside the number.
-    s = s.replace(/(?<![\d.,])(\d+),(\d+)(?!\d)/gu, (_m, head: string, frac: string) => {
+    s = tr(s, /(?<![\d.,])(\d+),(\d+)(?!\d)/gu, (_m, head: string, frac: string) => {
         const zeros = /^0*/u.exec(frac)![0];
         const rest = frac.slice(zeros.length);
         return [head, ...zeros, ...(rest === "" ? [] : [rest])].join(" ");
@@ -385,7 +386,7 @@ export function normalizeLatgalian(input: string): string {
     //     …then the DOT, and ONLY IF THE RUN CARRIES EXACTLY ONE. That guard is what declines the five
     //     dotted DATES this corpus writes — `07.02.1922`, `1858.07.01`, `1922.12.16`, `17.12.1932`,
     //     `18.02.2004` — which have two dots each and must not be read as decimals.
-    s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
+    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
 
     // 11) RANGES. The dash was dropped outright and the endpoints fused — `650—700 mm`, `54—57% dīnys`,
     //     `33-40%`, `1966-1970`, `30—50 m`, `0,6-0,8 cm`. ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A
@@ -396,8 +397,8 @@ export function normalizeLatgalian(input: string): string {
     //     ⚠ RUNS AFTER THE DECIMAL STEP, so `0,6-0,8 cm` is already `0 6-0 8 cm` and the hyphen still sits
     //     between two digits — the endpoints are split either way, and running it earlier would have let
     //     the ASCII arm's `(?<![\d.,])` guard reject the decimal second endpoint outright.
-    s = s.replace(/(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = s.replace(/(?<![\d.,\-/])(\d+)\s?-\s?(\d+)(?![\d/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(?<![\d.,\-/])(\d+)\s?-\s?(\d+)(?![\d/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

@@ -237,6 +237,7 @@
  * by these.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 /** The bare-token pass for the kilometre — see the step that applies it. */
 const BARE_UNITS = makeBareUnitNormalizer([["km", "kis lus mev"]]);
 
@@ -282,7 +283,7 @@ export function normalizeHmong(input: string): string {
     //    The curly quotes (×4 each) are quotation marks around a metalinguistic label (`'Ch.'`) and are
     //    dropped, as ASCII `"` already is. ⚠ RPA HAS NO SYLLABLE-BOUNDARY APOSTROPHE — unlike Zhuang, where
     //    `’` had to be FOLDED rather than dropped or the syllables fused — so dropping is correct here.
-    s = s.replace(/[—－−]/gu, "-").replace(/[‘’“”]/gu, " ");
+    s = tr(tr(s, /[—－−]/gu, "-"), /[‘’“”]/gu, " ");
 
     // 3) THE ASCII EXPONENT, folded onto the real one, BEFORE de-grouping can split the operand. This is the
     //    one exponent repair available without a unit word, and it is a real defect and not tidying:
@@ -290,14 +291,14 @@ export function normalizeHmong(input: string): string {
     //    the `za` `810km2` finding reproduced. After this fold both spellings read identically (the `²` is
     //    dropped either way, see the header). ⚠ BOTH LOOKAROUNDS, per the tone-letter rule: without the
     //    trailing one this would bite the `km` out of a longer RPA word.
-    s = s.replace(/(?<![\p{L}\p{M}])km2(?![\p{L}\p{M}\d])/gu, "km²");
+    s = tr(s, /(?<![\p{L}\p{M}])km2(?![\p{L}\p{M}\d])/gu, "km²");
 
     // 4) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause
     //    punctuation and the tail as a separate number, which is the layer's single largest defect:
     //    `146.270.033` was three numbers separated by two FULL STOPS and `23,822,747` three separated by two
     //    comma pauses. See GROUP_COMMA/GROUP_DOT above for why BOTH marks get a grouping arm and why the
     //    discriminator is the tail's length.
-    s = s.replace(GROUP_COMMA, (w) => w.replace(/,/gu, "")).replace(GROUP_DOT, (w) => w.replace(/\./gu, ""));
+    s = tr(tr(s, GROUP_COMMA, (w) => w.replace(/,/gu, "")), GROUP_DOT, (w) => w.replace(/\./gu, ""));
 
     // 5) THE KILOMETRE → `kis lus mev`, IN PLACE. Sourced in the header, including why this file's first run
     //    refused it and what changed. The symbol is postposed in every attestation, so nothing moves: the
@@ -318,7 +319,7 @@ export function normalizeHmong(input: string): string {
     //    ⚠ ORDER-INSENSITIVE WITH RESPECT TO STEP 11 by construction, and checked: if the decimal rule ran
     //    first, `9,85 lab km²` would already be `9 8 5 lab km²` and the lookbehind still matches on the `5`.
     //    It is placed here rather than at the end only so it sits with the other vocabulary rules.
-    s = s.replace(/(?<=\d\s?|\d\s(?:lab|vam|roob)\s)km²?(?![\p{L}\p{M}\d²³/])/gu, "kis lus mev");
+    s = tr(s, /(?<=\d\s?|\d\s(?:lab|vam|roob)\s)km²?(?![\p{L}\p{M}\d²³/])/gu, "kis lus mev");
     //    …and a bare `km` with no figure, which the lookbehind above cannot reach. Shared guards
     //    (core/normalizeSymbols.ts): multi-letter vowel-free keys ONLY, which is what keeps this away from
     //    the RPA tone-letter hazard — no one-letter key can ever qualify.
@@ -332,7 +333,7 @@ export function normalizeHmong(input: string): string {
     //    the sign on the RIGHT END ONLY, so claiming the percent first leaves `5-10 feem pua`, which step 9
     //    still matches as an ascending pair and reads *tsib mus rau kaum feem pua* — five to ten percent.
     //    Claiming the range first would strand the sign after a connective.
-    s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?%/gu, "$1 feem pua");
+    s = tr(s, /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?%/gu, "$1 feem pua");
 
     // 7) CURRENCY → `duas`, POSTPOSED, with the magnitude word kept BETWEEN the number and the noun. `$10
     //    lab` is "ten million dollars", so the reading has to be `10 lab duas` and not `10 duas lab`; the
@@ -348,7 +349,7 @@ export function normalizeHmong(input: string): string {
     //    the lookbehind on the letter `S`, so the optional arm cannot be skipped where it is present.
     //    ⚠ AFTER STEP 4 (`46,330` must already be one token) and BEFORE STEP 11 (the operand keeps its
     //    decimal tail).
-    s = s.replace(
+    s = tr(s,
         /(?<![\p{L}\p{M}\d])(?:US\s?)?\$\s?(\d+(?:[.,]\d+)?)(\s(?:lab|vam|roob)(?![\p{L}\p{M}]))?/gu,
         (_m, n: string, mag: string | undefined) => `${n}${mag ?? ""} duas`,
     );
@@ -362,13 +363,13 @@ export function normalizeHmong(input: string): string {
     //    CONTENTFUL where a scale name beside `° C` is redundant with nothing — dropping it would be a real
     //    loss, so that instance is deliberately left alone (its `N` still reaches the IPA raw, ×1).
     //    ⚠ BEFORE STEP 11, so the operand still carries its decimal tail (`+45,4 ° C`, `116,6 ° C`).
-    s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?[CF](?![\p{L}\p{M}])/gui, "$1");
+    s = tr(s, /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?[CF](?![\p{L}\p{M}])/gui, "$1");
 
     // 9) RANGES → `mus rau`, the connective the corpus itself writes between two numerals (header). AFTER
     //    step 6 so a percent span is already carrying its word, and AFTER step 4 so a grouped endpoint is one
     //    token. See RANGE above for why this is glued-only and for the 53 spaced dashes and 124 hyphenated
     //    proper nouns that forced it. ASCENDING only.
-    s = s.replace(RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} mus rau ${b}` : whole));
+    s = tr(s, RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} mus rau ${b}` : whole));
 
     // 10) THE AMPERSAND → `thiab`. ⚠ ×0 IN THE CORPUS — this is ROBUSTNESS FOR PLAUSIBLE INPUT, not a
     //    measured repair, and the comment says so rather than letting the rule look earned (trap 22's
@@ -376,7 +377,7 @@ export function normalizeHmong(input: string): string {
     //    the ampersand has one reading everywhere it occurs.
     //    ⚠ SPACED ON BOTH SIDES DELIBERATELY. `A&B` deletes to `AB`, which is ONE token instead of two —
     //    traps 18/26 — so the replacement must insert the boundary the sign was supplying.
-    s = s.replace(/\s?&\s?/gu, " thiab ");
+    s = tr(s, /\s?&\s?/gu, " thiab ");
 
     // 11) DECIMALS, LAST, after every rule that needs the number intact. BOTH marks, and a tail of one or two
     //     digits only — the other half of the tail-length discriminator documented above. The separator
@@ -390,7 +391,7 @@ export function normalizeHmong(input: string): string {
     //     file — which matters, because trap 39 says a guard that needs a character cannot live downstream of
     //     the rule that spends it, and this file spends the dot at exactly this step.
     //     ⚠ THE LEADING GUARD keeps the rule from restarting inside a number it has already rewritten.
-    s = s.replace(/(?<![\d.,])(\d+)[.,](\d{1,2})(?![\d\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
+    s = tr(s, /(?<![\d.,])(\d+)[.,](\d{1,2})(?![\d\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
         `${int} ${[...frac].join(" ")}`);
 
     return s;

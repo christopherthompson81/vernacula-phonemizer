@@ -39,6 +39,7 @@ import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalToWords, yearToWords, isCenturyYear } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Telugu letter+mark boundary. Never `\b`. */
 /** Telugu letters and marks, EXCLUDING the digit block ౦-౯ (U+0C66-0C6F) — used by the ౦ fold. */
@@ -136,7 +137,7 @@ export function normalizeTelugu(input: string): string {
     //    and any numeric rule below would otherwise be free to read it as a zero. Guarded on BOTH sides
     //    against a real Telugu digit run, and required to touch a Telugu letter or mark, so a genuine
     //    ౧౦ or a standalone ౦ is untouched. See the file header for why all 144 here are typos.
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![౦-౯])౦(?![౦-౯])`, "gu"),
         (m, off: number, full: string) => {
             const near = new RegExp(`[${TE_LETTER}]`, "u");
@@ -160,7 +161,7 @@ export function normalizeTelugu(input: string): string {
     //    this corpus itself writes); emitted apart, వ reached the g2p as a stray stressed [ʋˈa].
     //    All 28 digit-adjacent వ are ordinals — checked by tabulating what follows, which is
     //    శతాబ్దం / సంవత్సరం / స్థానం every time. `వది` (60వది) is the same suffix plus the nominaliser.
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![\\d.,])(\\d+)\\s*-?\\s*వ(ది)?${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, di: string | undefined) => {
             const n = Number(digits);
@@ -183,34 +184,34 @@ export function normalizeTelugu(input: string): string {
     //    *ʋˈejːi t̪ˈomːid̪i ʋˈãn̪d̪ala…* ("one thousand nine hundred ninety-five") — the right number in the
     //    wrong register, which no leak class can see. Telugu's decimal is the DOT, so `.` must still be
     //    rejected before a digit; the comma is a grouping mark here and step 5 de-groups it just below.
-    s = s.replace(/(?<![\d.,])(1[1-9]\d{2})(?![\d]|\.\d)/gu, (_m, y: string) => yearToWords(Number(y)));
+    s = tr(s, /(?<![\d.,])(1[1-9]\d{2})(?![\d]|\.\d)/gu, (_m, y: string) => yearToWords(Number(y)));
 
     // 5) DIGIT DE-GROUPING, before anything that reads punctuation. A grouping comma is otherwise clause
     //    punctuation: 17,000 was reading as "పదిహేడు <pause> సున్నా" — the pause plus a single zero,
     //    because the trailing 000 collapsed to one numeral. Western 3-digit blocks are the only grouping
     //    in this corpus (no Indian 2-then-3 form occurs).
-    s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
+    s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
 
     // 6) ERA markers BEFORE the initialism rule (step 7) — క్రీ.శ is a dotted pair by shape and would
     //    otherwise survive as two letters with the era lost. Also ఉదా. (= e.g., ×2), whose single dot
     //    was a mid-sentence phrase break.
-    s = s.replace(ERA_RE, (_m, k: string) => ERA[k]!);
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}ఉదా\\s*\\.\\s*(?=[\\p{L}])`, "gu"), "ఉదాహరణకు ");
+    s = tr(s, ERA_RE, (_m, k: string) => ERA[k]!);
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}ఉదా\\s*\\.\\s*(?=[\\p{L}])`, "gu"), "ఉదాహరణకు ");
 
     // 7) MULTI-DOT ABBREVIATIONS before single-dot ones, else the interior dot survives as a phrase
     //    break: కి.మీ was reading as [kˈi . mˈiː], two clauses, and యూ.ఎస్. as three. The Telugu unit
     //    abbreviations go first because కి/మీ are not letter names and the initialism rule cannot see
     //    them. Both run before the rate rule below, which needs కి.మీ already folded to a word.
-    s = s.replace(KM_RE, "కిలోమీటర్లు");
-    s = s.replace(MI_RE, "మైళ్లు");
-    s = s.replace(INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());
+    s = tr(s, KM_RE, "కిలోమీటర్లు");
+    s = tr(s, MI_RE, "మైళ్లు");
+    s = tr(s, INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());
 
     // 8) RATE units, before the shared unit tier (step 9) claims the numerator and strands the `/x` —
     //    which is what happened: 160km/h read as [ˈʊkm ˈeᶦt͡ʃ], the denominator surviving as the English
     //    letter H. Prefix + dative, the Telugu idiom, attested verbatim in this corpus (గంటకు 105 మైళ్ల).
     //    The trailing guard is `(?![A-Za-z])`, not the general letter class, because the corpus writes
     //    160km/hకు with a Telugu clitic welded to the denominator.
-    s = s.replace(
+    s = tr(s,
         /(?<![\p{L}\d])(\d[\d.]*)\s?(km|mi|ft|m)\s?\/\s?(h|s)(?![A-Za-z])/giu,
         (whole, n: string, u: string, den: string, off: number, full: string) => {
             const num = RATE_NUM[u.toLowerCase()], d = RATE_DENOM[den.toLowerCase()];
@@ -221,7 +222,7 @@ export function normalizeTelugu(input: string): string {
     //    The Telugu-script rate, whose numerator step 7 has already folded to a word (83కి.మీ/గం. →
     //    83కిలోమీటర్లు/గం.). Same dative guard: "గాలులు గంటకు 83కి.మీ/గం." already says గంటకు and must
     //    not say it twice, while "(165 కి.మీ./గం)" stands alone in its parenthesis and needs it.
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(\\d[\\d.]*)\\s?కిలోమీటర్లు\\s*\\/\\s*గం\\.?${NOT_LETTER_AFTER}`, "gu"),
         (_m, n: string, off: number, full: string) => `${dative("గంటకు", full, off)}${n} కిలోమీటర్లు`,
     );
@@ -230,7 +231,7 @@ export function normalizeTelugu(input: string): string {
     //    rather than being silently dropped, which is what happened before: 24½ came out ఇరవై నాలుగు.
     //    Rewriting to 24.5 avoids inventing the fused Telugu form (ఇరవై నాలుగున్నర) — the reading
     //    "ఇరవై నాలుగు పాయింట్ ఐదు" is sourced from the same audio as the rest of step 11. ×2.
-    s = s.replace(/(?<=\d)\s?½/gu, ".5").replace(/(?<=\d)\s?¾/gu, ".75");
+    s = tr(tr(s, /(?<=\d)\s?½/gu, ".5"), /(?<=\d)\s?¾/gu, ".75");
 
     // 10) The SHARED symbol tier: percent, currency, units, exponents. UNITS BEFORE DECIMALS (step 11) —
     //     the tier matches a unit only when a NUMBER is adjacent, and rewriting 12.8 km to
@@ -246,15 +247,15 @@ export function normalizeTelugu(input: string): string {
     //     NO గంటలు is added. Both readers of "రాత్రి 11:35 గంటల సమయంలో" in the audio said the hour and
     //     the minutes as bare numerals — the noun is already in the text in 13 of the 15 instances, so
     //     adding one would duplicate it (the Arabic الساعة shape again).
-    s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):\s?00(?![\d:.])/gu, "$1");
-    s = s.replace(/(?<=\d):\s?(?=\d)/gu, " ");
+    s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):\s?00(?![\d:.])/gu, "$1");
+    s = tr(s, /(?<=\d):\s?(?=\d)/gu, " ");
 
     // 12) DECIMALS, after units and times have taken their share. The separator word and the digit-wise
     //     reading of the fraction are BOTH audio-arbitrated (te_in/test, two independent recordings):
     //     802.11 → "ఎనిమిది వందల రెండు పాయింట్ ఒకటి ఒకటి", 2.4 → "రెండు పాయింట్ నాలుగు",
     //     5.0 → "ఐదు పాయింట్ సున్నా", 6.5 → "ఆరు పాయింట్ ఐదు". The borrowed పాయింట్, not the Sanskritic
     //     దశాంశం, and the fractional digits one at a time.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} పాయింట్ ${[...frac].join(" ")}`,
     );
@@ -290,11 +291,11 @@ export function normalizeTelugu(input: string): string {
     //
     //    Three guards: a digit immediately after the sign, a letter or digit immediately before, and a digit
     //    ANYWHERE to the left — the last for the SPACED range or score the fleet's usual guard misses.
-    s = s.replace(/±/gu, " ప్లస్ మైనస్ ");
-    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+    s = tr(s, /±/gu, " ప్లస్ మైనస్ ");
+    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "మైనస్ ");
-    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 ప్లస్ ");
-    s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ప్లస్ ");
+    s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 ప్లస్ ");
+    s = tr(s, /(^|\s)\+\s?(?=\d)/gu, "$1ప్లస్ ");
 
     // 13) DEGREES, after the decimal step so a temperature like 1.5°C keeps its point. ×2.
     // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from te_in:
@@ -312,12 +313,12 @@ export function normalizeTelugu(input: string): string {
     // The comparatives are POSTPOSITIONAL (కంటే follows the standard), so they use core/postposedSign.ts.
     s = postposedSign(s, "<", "కంటే తక్కువ");
     s = postposedSign(s, ">", "కంటే ఎక్కువ");
-    s = s.replace(/\s?=\s?/gu, " సమానం ");
-    s = s.replace(/\s?÷\s?/gu, " భాగించడం ");
+    s = tr(s, /\s?=\s?/gu, " సమానం ");
+    s = tr(s, /\s?÷\s?/gu, " భాగించడం ");
 
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 డిగ్రీల సెల్సియస్");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 డిగ్రీల ఫారెన్‌హీట్");  // ZWNJ
-    s = s.replace(/(\d)\s?°/gu, "$1 డిగ్రీలు");
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}])/giu, "$1 డిగ్రీల సెల్సియస్");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}])/giu, "$1 డిగ్రీల ఫారెన్‌హీట్");  // ZWNJ
+    s = tr(s, /(\d)\s?°/gu, "$1 డిగ్రీలు");
 
     return s;
 }

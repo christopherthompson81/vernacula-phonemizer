@@ -142,6 +142,7 @@
  *  agree with the ENGINE's number token, which is `\d+` after the registry's native-digit fold. */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
+import { tr } from "../../core/provenance.ts";
 const D = "0-9۰-۹٠-٩";
 /** "not inside a word", the trap-1/23 form: `\p{M}` beside `\p{L}`, and never `\b`. */
 /** The Arabic-script letter range this language actually uses, INCLUDING the Arabic Supplement — ݔ U+0754
@@ -315,7 +316,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    judgement about Balochi. `[ؠ-ۿݐ-ݿ‌]` contains U+200C, so a ZWNJ keeps its word whole and
         //    `phonemizeArabic` then strips it; U+200D is absent from that class, so its 3 instances SPLIT
         //    a word into two tokens and each half goes to the g2p alone. Same for the BOM.
-        s = s.replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[‍﻿​]/gu, "");
+        s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[‍﻿​]/gu, "");
 
         // 3) ⚠ ARABIC PRESENTATION FORMS — ×110 across 5 of the 383 segments, and those segments read as
         //    the EMPTY STRING today: the engine's token class stops at U+06FF (and now U+077F), so
@@ -333,7 +334,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    ⚠ RUNS ABOVE STEP 5, because one of the four Hijri abbreviations is itself written in
         //    presentation forms (`ماں ﺳﺎﻝ 1373ﻫـ .ﻕ. وتی وانگ`) — a guard's evidence has a lifetime
         //    (trap 39), and here the evidence does not exist until this step has created it.
-        s = s.replace(/[ﭐ-﷿ﹰ-﻿]/gu, (c) => c.normalize("NFKC"));  // BOM
+        s = tr(s, /[ﭐ-﷿ﹰ-﻿]/gu, (c) => c.normalize("NFKC"));  // BOM
 
         // 4) ⚠ THE ORTHOGRAPHIC VARIANT FOLD — THIS LANGUAGE'S DEFINING RULE, and by a wide margin. Every
         //    other rule in this file touches at most a handful of instances; this one touches 1,443
@@ -350,7 +351,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //      d. otherwise only the EXACT-value folds are applied, leaving ݔ and ۏ in place for the
         //         manifest to read as eː and oː rather than guessing them into ی and و.
         //    Step (d) is what stops this being a blanket transliteration: an OOV ē stays an ē.
-        s = s.replace(WORD, (w) => {
+        s = tr(s, WORD, (w) => {
             if (knownWord(w)) return w;
             const bare = w.replace(HARAKAT, "");
             if (knownWord(bare)) return bare;
@@ -385,7 +386,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, not a clause mark, or a number
         //    followed by its own sentence comma would lose its last group and speak it as zero.
         for (const mark of ["،", ",", "٬"]) {
-            s = s.replace(
+            s = tr(s,
                 new RegExp(`(?<![${D}.,،٬])[${D}]{1,3}(?:(?<!(?<![${D}])0)${mark}[${D}]{3})+(?![${D}]|${mark}[${D}])`, "gu"),
                 (w) => w.split(mark).join(""),
             );
@@ -401,8 +402,8 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    neither arm is a prefix of the other and neither bare letter is claimed alone — a lone `ھ` or
         //    `م` next to a digit is far too common in Balochi to key on.
         for (const [body, word] of ERA) {
-            s = s.replace(new RegExp(`(?<=[${D}])[ـ\\s]*${body}${ERA_SEP}\\.?`, "gu"), ` ${word}`);  // tatweel
-            s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${body}${ERA_SEP}\\.?\\s*(?=[${D}])`, "gu"), `${word} `);
+            s = tr(s, new RegExp(`(?<=[${D}])[ـ\\s]*${body}${ERA_SEP}\\.?`, "gu"), ` ${word}`);  // tatweel
+            s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${body}${ERA_SEP}\\.?\\s*(?=[${D}])`, "gu"), `${word} `);
         }
 
         // 7) SI LENGTH UNITS — the Latin abbreviation after a number, rewritten to the Balochi word. See
@@ -451,7 +452,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //     untouched, exact case, and never beside a numeral, a rate slash or an exponent.
         s = BARE_UNITS(s);
         for (const [abbr, word] of UNITS) {
-            s = s.replace(
+            s = tr(s,
                 new RegExp(`(?<![${D}.,٫])([${D}]+(?:[.٫][${D}]+)?)[ \u00a0\u202f\u2009]?${abbr}(?![\\p{L}\\p{M}‌²³/])`, "giu"),  // space, NBSP, NNBSP, thin space
                 `$1 ${word}`,
             );
@@ -469,7 +470,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    numbers with no pause — byte-identical to what this rule would produce. Stated rather than
         //    coded, so nobody adds it to the punctuation table by symmetry and turns 2 quantities into 2
         //    spurious pauses.
-        s = s.replace(
+        s = tr(s,
             new RegExp(`(?<![${D}.])([${D}]+)\\.([${D}]+)(?![${D}]|\\.[${D}])`, "gu"),
             "$1 $2",
         );

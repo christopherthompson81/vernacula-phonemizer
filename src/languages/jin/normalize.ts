@@ -48,6 +48,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, readDecimals, reorderFraction, spellYears } from "../../core/sinitic.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * ⚠ `unspacedScript`, because a sign in Han prose is flanked by Han and the tier's letter-boundary guard
@@ -76,7 +77,7 @@ export function normalizeJin(input: string): string {
     // ⚠ FIRST, and this is the most destructive defect the engine has on numbers: the tokenizer splits
     // `\d+`, so a grouping comma is read as a clause pause AND the value is destroyed — `1,000` came out
     // *iəʔ˨ , liŋ˩˩*, "one … zero". Exactly-3-digit groups, which cannot touch a decimal.
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
     // ── 2. years ─────────────────────────────────────────────────────────────────────────────────
     // ⚠ ALL THREE ARMS AND THEIR ORDER LIVE IN `core/sinitic.ts` — range, then both-endpoints, then single.
@@ -114,7 +115,7 @@ export function normalizeJin(input: string): string {
     // ⚠ AND NOT AFTER A LATIN RUN AT ALL, which a one-character lookbehind cannot express: `ISO 8859-1` put
     // a SPACE between the identifier and the digits, so the guard saw the space and read the designation as
     // "8859 到 1". Checked over the preceding characters instead.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,/\-\p{sc=Latn}])(\d+)\s*[-–~〜]\s*(\d+)(?![\d.,/\-\p{sc=Latn}])/gu,
         (m, a: string, b: string, off: number, full: string) =>
             /\p{sc=Latn}[\s\p{sc=Latn}]*$/u.test(full.slice(Math.max(0, off - 12), off)) ? m : `${a}到${b}`,

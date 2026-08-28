@@ -32,6 +32,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberWords } from "./tajik.ts";
+import { tr } from "../../core/provenance.ts";
 
 // ---------------------------------------------------------------------------------------------------
 // ORDINALS — the Persian side of the language, and its highest-traffic native pattern
@@ -167,14 +168,14 @@ export function normalizeTajik(input: string): string {
     //    (2.9%) — the same shape as the Balochi run's deleted letter, one character class over.
     //    `&nbsp;` goes with it: the artifact carries the ENTITY as literal text (`+22,2&nbsp;°C`), and the
     //    ampersand tier at step 9 would otherwise read it as the word "ва" plus *nbsp*.
-    s = s.replace(/\u00ad/gu, "").replace(/&nbsp;?/gu, " ");
+    s = tr(tr(s, /\u00ad/gu, ""), /&nbsp;?/gu, " ");
 
     // 1) SPACE-GROUPED THOUSANDS — `70 000`, `5 781 203`, `135 620 км²`, `877 802 песо`. The Russian
     //    convention, and the engine's `\d+` splits on the space: `70 000 нафар` read *ҳафтод сифр нафар*
     //    ("seventy zero"). 42 occurrences in 24 of 456 segments; 7,348 articles wiki-wide.
     //    FIRST after the invisible-character fold, because a grouping space that survives is later read as
     //    two operands by the range rule and as two numbers by the tier.
-    for (let i = 0; i < 3; i++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?![\d]))/gu, "");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 3; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?![\d]))/gu, "");  // space, NBSP, NNBSP, thin space
 
     // 2) DOTTED ABBREVIATIONS — the three that are TAJIK. Before any single-dot handling, so the interior
     //    dot cannot survive as a phrase break.
@@ -182,17 +183,17 @@ export function normalizeTajik(input: string): string {
     //    «С.1924 нахустин амбулатория ва соли 1925 якумин беморхона». Claimed ONLY before a 4-digit year —
     //    that guard is what keeps it off `Солодов А. А., Петриков С. С.`, the Russian initials that make up
     //    most of the 23 capital `С.` in the artifact. 9 occurrences in 3 segments.
-    s = s.replace(/(?<![\p{L}\p{M}])[Сс]\.\s?(?=\d{3,4}(?![\d]))/gu, "соли ");
+    s = tr(s, /(?<![\p{L}\p{M}])[Сс]\.\s?(?=\d{3,4}(?![\d]))/gu, "соли ");
     //    `ва диг.` = ва дигар ("and others"), 8/8 artifact instances in that exact collocation.
-    s = s.replace(/(?<![\p{L}\p{M}])диг\./gu, "дигар");
+    s = tr(s, /(?<![\p{L}\p{M}])диг\./gu, "дигар");
     //    `ва ғ.` = ва ғайра ("etc."), 5/5 instances after `ва`; ғайра ×246 in 18 articles.
-    s = s.replace(/(?<![\p{L}\p{M}])ғ\.(?=\s|$|\))/gu, "ғайра");
+    s = tr(s, /(?<![\p{L}\p{M}])ғ\.(?=\s|$|\))/gu, "ғайра");
     //    млн / млрд / ҳаз — the Russian-style magnitude abbreviations, spoken as the full international
     //    words the same corpus spells out beside them (миллион ×20, миллиард ×12, ҳазор ×45 in the
     //    artifact). Claimed only AFTER a number, which is where all 50 artifact occurrences sit, and the
     //    trailing abbreviation dot is spent only when a lowercase word or a digit follows — at the end of a
     //    sentence it is the sentence's own period and must stay (`45,4 млн. нафар` vs `— 6458 км.`).
-    s = s.replace(/(?<=\d\s?)млрд\.(?=\s+[\p{Ll}\d])/gu, "миллиард")
+    s = tr(s, /(?<=\d\s?)млрд\.(?=\s+[\p{Ll}\d])/gu, "миллиард")
         .replace(/(?<=\d\s?)млн\.(?=\s+[\p{Ll}\d])/gu, "миллион")
         .replace(/(?<=\d\s?)ҳаз\.(?=\s+[\p{Ll}\d])/gu, "ҳазор")
         .replace(/(?<=\d\s?)млрд(?![\p{L}\p{M}])/gu, "миллиард")
@@ -207,7 +208,7 @@ export function normalizeTajik(input: string): string {
     //    rule off `10.02.22` and `10.02.08`, the Russian dissertation-speciality codes in the artifact's
     //    bibliography lines, which have the identical shape and are not dates.
     //    BEFORE the range rule, so `05.01.1952—08.09.2001` is two dates and not a numeric range.
-    s = s.replace(/(?<![\d.,])(\d{1,2})\.(\d{1,2})\.(\d{4})(?![\d.])/gu,
+    s = tr(s, /(?<![\d.,])(\d{1,2})\.(\d{1,2})\.(\d{4})(?![\d.])/gu,
         (m0, d: string, mo: string, y: string) => {
             const dv = Number(d), mv = Number(mo);
             if (dv < 1 || dv > 31 || mv < 1 || mv > 12) return m0;
@@ -220,7 +221,7 @@ export function normalizeTajik(input: string): string {
     //    swim time, `01:11:45` a video length). Nothing here needs to know WHICH: the defect is the pause,
     //    and the fields read correctly as consecutive numbers in every one of those senses. So the colon
     //    becomes a plain separator and no reading is invented for the notation.
-    s = s.replace(/(?<=\d):(?=\d)/gu, " ");
+    s = tr(s, /(?<=\d):(?=\d)/gu, " ");
 
     // 5) ORDINALS — `1-ум`, `2-юм`, `10-уми`, `129-умро`, `18-ум`. Tajik's own native pattern and the
     //    densest one this layer has after the decimal: 3,675 articles for `\d-ум`, 793 for `\d-юм`, 1,660
@@ -228,7 +229,7 @@ export function normalizeTajik(input: string): string {
     //    the ending standing as its own stressed word.
     //    BEFORE the range rule, or `1-ум` looks like the start of a hyphen range; BEFORE the generic
     //    enclitic rule, so a tail that IS an ordinal ending is claimed as one.
-    s = s.replace(/(?<![\d.,])(\d+)-(ум|юм)([\p{L}\p{M}]*)/gu, (m0, d: string, _e: string, tail: string) => {
+    s = tr(s, /(?<![\d.,])(\d+)-(ум|юм)([\p{L}\p{M}]*)/gu, (m0, d: string, _e: string, tail: string) => {
         const ord = tajikOrdinal(Number(d));
         return ord === undefined ? m0 : glueSuffix(ord, tail);
     });
@@ -238,10 +239,10 @@ export function normalizeTajik(input: string): string {
     //    `-и` stranded as its own token. Reading the sign here and gluing the enclitic to the emitted word
     //    is trap 14's fix shape — wordify the operand, then apply the agreement. 10 occurrences in 6 mined
     //    segments; 220 + 97 articles for `%-и` / `%-ро`.
-    s = s.replace(new RegExp(`(\\d[\\d,]*)\\s?%-(${SUFFIX})(?![\\p{L}\\p{M}])`, "gu"),
+    s = tr(s, new RegExp(`(\\d[\\d,]*)\\s?%-(${SUFFIX})(?![\\p{L}\\p{M}])`, "gu"),
         (_m, n: string, sfx: string) => `${n} дарсад${sfx}`);
     //    The bare numeral form. The digits become words HERE so the enclitic has a word to attach to.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)-(${SUFFIX})(?![\\p{L}\\p{M}])`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)-(${SUFFIX})(?![\\p{L}\\p{M}])`, "gu"),
         (m0, d: string, sfx: string) => {
             const w = numberWords(Number(d));
             return w === "" ? m0 : glueSuffix(w, sfx);
@@ -257,7 +258,7 @@ export function normalizeTajik(input: string): string {
     //    the corpus is a DESIGNATION whose hyphen follows a letter — `COVID-19`, `Варзоб-1`, `Sirius-4`,
     //    `ABS-1`, `CASA-1000`, `1-Май` — and none of them can match. AFTER the ordinal and date rules, both
     //    of which own a hyphen or a dash of their own.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)\s?[-–—]\s?(\d)/gu, "$1 то $2");
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+)\s?[-–—]\s?(\d)/gu, "$1 то $2");
 
     // 8) THE SPACED DASH IS A PAUSE, and it was being deleted outright. Tajik uses ` — ` as the copula
     //    (`Тоҷикистон — кишварест…`) and for apposition; it is the single most frequent punctuation mark in
@@ -265,7 +266,7 @@ export function normalizeTajik(input: string): string {
     //    not one of them produced a break, because `—` is in neither the token class nor
     //    `clausePunctuation`. Rewritten to a comma, which the manifest already maps to a comma-length pause.
     //    AFTER step 7, so a numeric range has already taken its dash.
-    s = s.replace(/\s+[–—]\s+/gu, " , ");
+    s = tr(s, /\s+[–—]\s+/gu, " , ");
 
     // 9a) DEGREES. `38° арзи шимолӣ` (a latitude), `14,1°С-ро`, `+22,2 °C`, `–26°С`, `75.0°E`. 634 corpus
     //     occurrences, 45 in 16 mined segments, all dropped.
@@ -278,16 +279,16 @@ export function normalizeTajik(input: string): string {
     //     articles by `/[0-9] дараҷа/`.
     // ⚠ THE LOWERCASE SCALE LETTER GOES IN THE CLASS, NOT IN AN `i` FLAG — the suffix class beside it
     //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСcс](?:-(${SUFFIX}))?(?![\\p{L}\\p{M}])`, "gu"),
+    s = tr(s, new RegExp(`(\\d)\\s?°\\s?[CСcс](?:-(${SUFFIX}))?(?![\\p{L}\\p{M}])`, "gu"),
         (_m, d: string, sfx: string) => `${d} дараҷаи Селсий${sfx ?? ""}`);
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 дараҷаи Фаренгейт");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 дараҷаи Фаренгейт");
     //     A COORDINATE's direction letter is Latin and the language's own words are Tajik; the corpus writes
     //     the spelled form beside the sign (`38° арзи шимолӣ`, `68° тули шарқӣ`), which is where these come
     //     from. Without it `75.0°E` lost the degree AND glued a raw `E` into the reading.
-    s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/gu, (_m, d: string, c: string) =>
+    s = tr(s, /(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/gu, (_m, d: string, c: string) =>
         `${d} дараҷаи ${({ N: "шимолӣ", S: "ҷанубӣ", E: "шарқӣ", W: "ғарбӣ" } as Record<string, string>)[c.toUpperCase()]!}`);
     //     Bare degree, last, so the scale and direction arms get first refusal.
-    s = s.replace(new RegExp(`(\\d)\\s?°(?:-(${SUFFIX}))?`, "gu"),
+    s = tr(s, new RegExp(`(\\d)\\s?°(?:-(${SUFFIX}))?`, "gu"),
         (_m, d: string, sfx: string) => `${d} дараҷа${sfx ?? ""}`);
 
     // 9b) THE DENSITY RATE `нафар/км²` — 10 articles, and neither operand is a unit the tier can hold
@@ -298,7 +299,7 @@ export function normalizeTajik(input: string): string {
     //     the artifact showed, the rule was written for it, and the scan then reported the SAME defect once
     //     more on `5914,4 тан/км²` — the identical construction with the other word for "person". A cell can
     //     hide behind itself; this one had two spellings of one noun.
-    s = s.replace(/(?<![\p{L}\p{M}])([Ѐ-ӿ]{2,})\s?\/\s?км(²|2)(?![\p{L}\p{M}\d])/gu, "$1 дар километри мураббаъ");
+    s = tr(s, /(?<![\p{L}\p{M}])([Ѐ-ӿ]{2,})\s?\/\s?км(²|2)(?![\p{L}\p{M}\d])/gu, "$1 дар километри мураббаъ");
 
     // 9c) THE SHARED SYMBOL TIER — %, currency, units, rates. The number must still be ADJACENT to its sign
     //     and must still carry its decimal comma (`26,5 %`), so this runs before step 10 spends the comma.
@@ -312,7 +313,7 @@ export function normalizeTajik(input: string): string {
     //     instances, against 5 real fractions. Both are claimed by numerator < denominator ≤ 10, which
     //     accepts every fraction and rejects every address, and also rejects `12/256 GB`, `9/195-106` and
     //     the half-life subscript in `К 14С(Т1/2` (a letter precedes it).
-    s = s.replace(/(?<![\p{L}\p{M}\d./])(\d{1,2})\s?\/\s?(\d{1,2})(?![\d./])/gu, (m0, a: string, b: string) => {
+    s = tr(s, /(?<![\p{L}\p{M}\d./])(\d{1,2})\s?\/\s?(\d{1,2})(?![\d./])/gu, (m0, a: string, b: string) => {
         const n = Number(a), d = Number(b);
         if (!(n >= 1 && n < d && d <= 10)) return m0;
         const den = tajikOrdinal(d);
@@ -326,15 +327,15 @@ export function normalizeTajik(input: string): string {
     //     word — merely missing, never confidently wrong.
     //     The dot form goes the same way: the corpus writes both (`1.8 - 4.5кг`, `9.85Mb`, `75.0°E`).
     //     Guarded to an unspaced dot between digits, so a sentence period is never eaten.
-    s = s.replace(/(?<=\d),(?=\d)/gu, " ");
-    s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
+    s = tr(s, /(?<=\d),(?=\d)/gu, " ");
+    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
 
     // 12) EQUALS — `1 доллар = 100 сент`, `372 ҳиҷрии қамарӣ = 982 милодӣ`. `баробар аст ба` is the corpus's
     //     own phrasing of the relation («Як километри мураббаъ баробар аст ба:», «масоҳаташон ба 11 146 км²
     //     баробар аст»). 15 occurrences in 10 segments. ⚠ Guarded to a Cyrillic or digit operand on BOTH
     //     sides, which is what excludes the artifact's timeline-markup line `ScaleMinor = gridcolor:lightgrey`
     //     — Latin on both sides, and not a statement about quantities at all.
-    s = s.replace(/([\dЀ-ӿ])\s*=\s*([\dЀ-ӿ])/gu, "$1 баробар аст ба $2");
+    s = tr(s, /([\dЀ-ӿ])\s*=\s*([\dЀ-ӿ])/gu, "$1 баробар аст ба $2");
 
     return s;
 }

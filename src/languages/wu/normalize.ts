@@ -56,6 +56,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, HAN_DIGITS, spellHanDigits, readDegrees, reorderFraction } from "../../core/sinitic.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** 0–9 as Han numerals — RE-EXPORTED FROM `core/sinitic.ts`, not declared here. wu.ts imports it FROM HERE
  *  so its cardinal composition and this file's digit-string reading cannot drift apart; the re-export keeps
@@ -127,11 +128,11 @@ export function normalizeWu(
     // left to the range rule, `29°08ˊ-29°13ˊ` gets a 到 wedged between a minute mark and a degree sign.
     // 度/分/秒 are each their own dict entry (du6 / fen1 / miau6). Digits stay digits so the cardinal path
     // reads them, which is also what strips a written leading zero (09分 → 九分).
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(\\d+)\\s*°\\s*(\\d+)\\s*${MINUTE}\\s*(\\d+)\\s*${SECOND}`, "gu"),
         "$1度$2分$3秒",
     );
-    s = s.replace(new RegExp(`(\\d+)\\s*°\\s*(\\d+)\\s*${MINUTE}`, "gu"), "$1度$2分");
+    s = tr(s, new RegExp(`(\\d+)\\s*°\\s*(\\d+)\\s*${MINUTE}`, "gu"), "$1度$2分");
     // ⚠ AND THE DASH BETWEEN TWO COORDINATES, here rather than in step 6, because by now the endpoints end in
     // 分/秒/度 and no digit-to-digit rule can ever see them: `东经121°48´-121°57ˊ` became 一二一度四八分 …
     // 一二一度五七分 with the range silently gone (4 of the corpus's DROP-minus instances, all of them this
@@ -141,7 +142,7 @@ export function normalizeWu(
     // of the corpus's coordinate ranges have 分 before the dash (`121°48´-121°57ˊ`, `29°08ˊ-29°13ˊ`) and
     // none has a bare 度, so the narrower class keeps every attested case and drops the misfire. A range
     // between two whole-degree coordinates would need its own evidence before being claimed.
-    s = s.replace(/([分秒])\s*[-–—－~～〜]\s*(?=\d)/gu, "$1到");
+    s = tr(s, /([分秒])\s*[-–—－~～〜]\s*(?=\d)/gu, "$1到");
 
     // ── 3. temperature scales ────────────────────────────────────────────────────────────────────
     // ⚠ AFTER coordinates (step 2) and BEFORE the bare-degree rule below, which would otherwise consume the
@@ -173,18 +174,18 @@ export function normalizeWu(
     // and is a QUANTITY range, not years — reading it 一四零零到一五零零万元 would be confidently wrong. That
     // instance is why this guard exists; step 6 claims it instead.
     const NOT_QUANTITY = "(?!\\s*[万萬亿億元块塊人米吨噸])";
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![\\d.,])(\\d{4})\\s*[-–—－~～〜]\\s*(\\d{4})(?![\\d.,])${NOT_QUANTITY}`, "gu"),
         (_m, a: string, b: string) => `${spellDigits(a)}到${spellDigits(b)}`,
     );
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![\\d.,])(\\d{4})\\s*([至到])\\s*(\\d{4})(?![\\d.,])(?=\\s*年)`, "gu"),
         (_m, a: string, conn: string, b: string) => `${spellDigits(a)}${conn}${spellDigits(b)}`,
     );
     // ⚠ AND THE FORM WHERE 年 IS WRITTEN ON BOTH ENDPOINTS — `1969年～1976年`, which the two rules above cannot
     // see because the 年 sits BETWEEN the number and the dash. Left to step 5 alone both years get their
     // digit reading and the connective silently vanishes, which reads as one date abutting another.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,])(\d{4})\s*年\s*[-–—－~～〜]\s*(\d{4})(?=\s*年)/gu,
         (_m, a: string, b: string) => `${spellDigits(a)}年到${spellDigits(b)}`,
     );
@@ -195,7 +196,7 @@ export function normalizeWu(
     // 2009年 is 二零零九年, not the cardinal 二千零九年, and 1990年代 is 一九九零年代.
     // ⚠ THE 年 MUST BE FOUND ACROSS WHITESPACE: Han corpora routinely write "2009 年", and that exact detail
     // silently defeated the same rule in Mandarin.
-    s = s.replace(/(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)/gu, (_m, y: string) => spellDigits(y));
+    s = tr(s, /(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)/gu, (_m, y: string) => spellDigits(y));
 
     // ── 6. quantity ranges, RIGHT-CONTEXT GUARDED ────────────────────────────────────────────────
     // AFTER the year rules, which have already claimed the year shapes. `ranges: 1001` corpus-wide.
@@ -213,7 +214,7 @@ export function normalizeWu(
     // dash so a `\d+\s*-` pattern never reaches it. Captured and RE-EMITTED (playbook trap 10: a rule that
     // consumes a character must put it back), which is what lets step 9 read both halves: 百分之7到百分之10.
     const RANGE_UNIT = "(?:%|‰|°|摄氏度|度|月|日|号|號|年|岁|歲|世纪|世紀|公里|千米|米|毫米|公斤|吨|噸|万|萬|亿|億|元|人|个|個)";
-    s = s.replace(
+    s = tr(s,
         new RegExp(
             `(?<![\\d.,\\p{sc=Latn}])(\\d+(?:\\.\\d+)?)([%‰])?\\s*[-–—－~～〜]\\s*(\\d+(?:\\.\\d+)?)(?=\\s*${RANGE_UNIT})`,
             "gu",
@@ -242,7 +243,7 @@ export function normalizeWu(
     // arrives as `70人 ²` and the unit is gone before this layer runs. A `[/\\]` class here would be dead
     // code that reads as coverage. The residue is one `MARKUP exponent` line in the artifact scan.
     // AFTER the fraction rule, whose digit-only right side can never match `km²`.
-    s = s.replace(
+    s = tr(s,
         /(\d+(?:\.\d+)?)\s*(人?)\s*\/\s*km\s*(?:²|2)(?![\p{sc=Latn}\d])/giu,
         (_m, n: string, ren: string) => `每平方公里${n}${ren}`,
     );
@@ -258,7 +259,7 @@ export function normalizeWu(
     // is 千分之, and the corpus DEFINES it: “像1‰，即代表千分之一” and “82‰，即代表千分之82”. That is about as
     // direct a sourcing as a symbol reading ever gets. Prefixed, like 百分之.
     // AFTER the tier so `31到32‰` still has its digits adjacent to the sign.
-    s = s.replace(/(?<![\d.,])(\d+(?:\.\d+)?)\s*‰/gu, "千分之$1");
+    s = tr(s, /(?<![\d.,])(\d+(?:\.\d+)?)\s*‰/gu, "千分之$1");
 
     // ── 11. decimals ─────────────────────────────────────────────────────────────────────────────
     // AFTER the year (step 5), coordinate (step 2) and percent (step 9) rules, so no period or digit run they
@@ -278,7 +279,7 @@ export function normalizeWu(
     // before this layer existed. Claiming it would need a 时/分/秒 reading, and the corpus's five instances
     // split between elapsed times (2:08:44, a marathon → 小时) and UTC timestamps (17:47:23 → 时), which one
     // rule cannot serve.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.:])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int}点${spellDigits(frac)}`,
     );
@@ -290,7 +291,7 @@ export function normalizeWu(
     // ⚠ 月 and 日 are deliberately NOT in the manifest's inventory — "2 月" is February, which is 二月.
     // ⚠ AND NOT AFTER 第, which the Cantonese rule does not guard: 第2个 is an ORDINAL, 第二个, never *第两个.
     if (measureWords !== "")
-        s = s.replace(new RegExp(`(?<![\\d.,第])2(?=\\s*[${measureWords}])`, "gu"), "两");
+        s = tr(s, new RegExp(`(?<![\\d.,第])2(?=\\s*[${measureWords}])`, "gu"), "两");
 
     // ── 13. the iteration mark ───────────────────────────────────────────────────────────────────
     // 々 repeats the preceding character, and the corpus carries it inside Japanese names quoted in Wu prose
@@ -299,7 +300,7 @@ export function normalizeWu(
     // nothing since the doubled character was already in the dict by definition.
     // LAST, because it is the one rule whose input is a Han character rather than a digit or a sign, so
     // nothing above can consume it and nothing below depends on it.
-    s = s.replace(/(\p{Script=Han})々/gu, "$1$1");
+    s = tr(s, /(\p{Script=Han})々/gu, "$1$1");
 
     // ── 14. Latin initialisms → their letter names, spelled in Han ───────────────────────────────
     // ⚠ WHY THIS IS NOT LEFT ON THE ENGLISH PHONEMIZER, which is what cmn and yue do. `中国GDP总量` read
@@ -348,7 +349,7 @@ export function normalizeWu(
     // math/chemistry single letter in it is Latin-flanked and untouched. Han on one side, nothing
     // alphanumeric on the other.
     if (letterNames !== undefined)
-        s = s.replace(
+        s = tr(s,
             /(?<=\p{Script=Han})([A-Z])(?![\p{sc=Latn}\d])|(?<![\p{sc=Latn}\d])([A-Z])(?=\p{Script=Han})/gu,
             (m, a: string | undefined, b: string | undefined) => {
                 const L = a ?? b!;
@@ -356,7 +357,7 @@ export function normalizeWu(
             },
         );
     if (letterNames !== undefined)
-        s = s.replace(
+        s = tr(s,
             /(?<![\p{sc=Latn}\d])[A-Z]{2,3}(?![\p{sc=Latn}\d])/gu,
             (run) =>
                 /^[IVX]{2,3}$/u.test(run)

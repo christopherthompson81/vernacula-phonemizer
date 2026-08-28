@@ -66,6 +66,7 @@
  * ×20 with a digit, ×2,168 spelled out. Only the bound `-ng` variant needs a rule; see step 7.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Hiligaynon marks plurality with the particle `mga` and not on the noun, so each
@@ -165,7 +166,7 @@ export function normalizeHiligaynon(input: string): string {
     // 17.865 ka pumuluyo`, in an article about a GERMAN town, i.e. the source's own imported convention —
     // against 1,643 period-decimals. Claiming it would need a rule that cannot tell the two apart. Step 5's
     // two-digit cap means this one instance falls through untouched rather than being read as a decimal.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
 
     // ── 2. CLOCK — BEFORE the tier and before the decimal rule ───────────────────────────────────────────
     // ×1: `halin Sabado sa alas-5:00 sang aga tubtob sa Domingo`. The colon is clause punctuation, so it
@@ -182,7 +183,7 @@ export function normalizeHiligaynon(input: string): string {
     // this emits. Reading it right needs a sourced Spanish 1–12 set for hil, which neither the corpus (×1
     // clock, and it writes the digit) nor Kaufmann's headword list supplies as a paradigm. One instance,
     // recorded rather than guessed; what this rule does fix is the false pause and the phantom "sero".
-    s = s.replace(
+    s = tr(s,
         /(?<=(?:a?las)[- ])(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)(?!\d)/giu,
         (_m, h: string, min: string) => (Number(min) === 0 ? `${Number(h)}` : `${Number(h)} kag ${Number(min)}`),
     );
@@ -208,7 +209,7 @@ export function normalizeHiligaynon(input: string): string {
     // connective the text already wrote, do not claim a HYPHEN CHAIN (an identifier, not a span), and
     // require digits on BOTH sides — which is also what keeps this rule off `ika-19`, where the hyphen has
     // a LETTER on its left.
-    s = s.replace(
+    s = tr(s,
         /(?<!\b(?:hasta|asta|tubtob|tubtub|halin sa|halin)\s)(?<![\d.,\p{L}-])(\d[\d,]*(?:\.\d+)?)\s?[-–]\s?(\d[\d,]*(?:\.\d+)?)(?![\d,-]|\.\d)/gu,
         "$1 hasta $2",
     );
@@ -226,10 +227,10 @@ export function normalizeHiligaynon(input: string): string {
     // two-digit fractional parts and exactly ONE three-digit — which is the German-town period-THOUSANDS
     // instance from step 1. So the cap admits every real decimal and refuses the one number that is not one.
     // ⚠ The fractional part is read DIGIT BY DIGIT, which is what a decimal is.
-    s = s.replace(/(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
+    s = tr(s, /(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
 
     // ── 6. DOTTED ABBREVIATIONS — closed list, see DOTTED_ABBREV ─────────────────────────────────────────
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.`, "giu"), (m0, ab: string) => {
+    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.`, "giu"), (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
             // key is absent. The `!` here made `String.replace` stringify `undefined`.
@@ -244,7 +245,7 @@ export function normalizeHiligaynon(input: string): string {
     // *ʔika lima ŋ*. Detached into the language's own linker `nga` it reads *ʔika lima nga*, which is what
     // `ika-lima nga` (×2,168 spelled out) already reads as. The bare `ika-N` form needs nothing (see the
     // header): it is ×20 and already correct.
-    s = s.replace(/(?<![\p{L}\p{M}])(ika-\d+)ng(?![\p{L}\p{M}])/giu, "$1 nga");
+    s = tr(s, /(?<![\p{L}\p{M}])(ika-\d+)ng(?![\p{L}\p{M}])/giu, "$1 nga");
 
     // ── 8. `sg` → `sang` — THE CORPUS'S OWN SHORTHAND FOR THE GENITIVE PARTICLE ───────────────────────────
     // ×6, and it is this artifact's ENTIRE raw-ASCII-Latin leak: `sg` has no vowel, so it can never be a
@@ -269,7 +270,7 @@ export function normalizeHiligaynon(input: string): string {
     // case is where the collisions live: `zh-sg` (a MediaWiki language-conversion variant tag — it is a real
     // raw-Latin hit in ANOTHER language's artifact in this same batch, wuu's), a `.sg` domain, and an `sg:`
     // interwiki prefix. Matching the shape case-insensitively would claim all three.
-    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}.:/-])sg(?![\p{L}\p{M}\p{Nd}.:/-])/gu, "sang");
+    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}.:/-])sg(?![\p{L}\p{M}\p{Nd}.:/-])/gu, "sang");
 
     return s;
 }

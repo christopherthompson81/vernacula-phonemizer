@@ -45,6 +45,7 @@
  * disambiguation page for `1+1` names the arithmetic reading 一加一. Availability is not correctness.
  */
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * Western fraction notation → the Chinese order, still in digits: `a/b` → `b分之a`. Guarded against dates
@@ -130,17 +131,17 @@ function spellLetters(run: string): string {
 export function normalizeMandarin(input: string): string {
     let s = input;
     // 1) FRACTION — the reordering the western notation needs.
-    s = s.replace(FRACTION, (_m, num: string, den: string) => `${den}分之${num}`);
+    s = tr(s, FRACTION, (_m, num: string, den: string) => `${den}分之${num}`);
     // 2) NEGATIVES, temperature before the general case so 零下 wins where it applies.
-    s = s.replace(BELOW_ZERO, "零下$1");
-    s = s.replace(NEGATIVE, "负");
+    s = tr(s, BELOW_ZERO, "零下$1");
+    s = tr(s, NEGATIVE, "负");
     // 3) The remaining signs.
-    for (const [re, word] of SIGNS) s = s.replace(re, word);
+    for (const [re, word] of SIGNS) s = tr(s, re, word);
     // 3b) The ampersand, Latin-internal arm first so the general arm cannot claim it.
-    s = s.replace(AMP_LATIN, " and ");
-    s = s.replace(AMP_ELSEWHERE, "和");
+    s = tr(s, AMP_LATIN, " and ");
+    s = tr(s, AMP_ELSEWHERE, "和");
     // 4) A bare exponent, after the signs so nothing above can strand it.
-    s = s.replace(BARE_EXPONENT, (_m, e: string) => `的${POWER[e]!}`);
+    s = tr(s, BARE_EXPONENT, (_m, e: string) => `的${POWER[e]!}`);
     return s;
 }
 
@@ -173,7 +174,7 @@ export function spellInitialisms(input: string): string {
     );
     // A LONE uppercase letter, only where it touches Han — `X光`, `A股`, `T恤` are letter-read, while a bare
     // single letter in Latin context is a math variable or a chemical symbol (`f(x)`, `m = 2`).
-    s = s.replace(
+    s = tr(s,
         /(?<=\p{Script=Han})([A-Z])(?![\p{sc=Latn}\d])|(?<![\p{sc=Latn}\d])([A-Z])(?=\p{Script=Han})/gu,
         (m, a: string | undefined, b: string | undefined) => {
             const L = a ?? b!;

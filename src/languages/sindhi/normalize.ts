@@ -1,3 +1,4 @@
+import { tr } from "../../core/provenance.ts";
 /**
  * Sindhi (sd) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the Sindhi g2p
  * cannot already read into Sindhi words the existing pipeline speaks. Pure text→text, no IPA. Runs inside
@@ -70,7 +71,7 @@ export function normalizeSindhi(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = t.replace(/(?<=\d)(?<!(?<![\d\.,])0)[,،](?=\d{3}(?!\d))/gu, "");
+        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)[,،](?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 2) THE PERIOD CLOCK, but ONLY when a timezone marks it. `HH.MM` occurs 18 times and is mostly
@@ -78,36 +79,36 @@ export function normalizeSindhi(input: string): string {
     //    are clocks, and both are followed by GMT/UTC. So the timezone is the evidence, not the shape —
     //    claiming `HH.MM` outright would turn six measurements into times. Must run BEFORE the decimal
     //    rule, which would otherwise read `12.00 GMT` as "twelve point zero zero".
-    t = t.replace(/(\d{1,2})\.(\d{2})(?=\s*(?:GMT|UTC|وڳي|بجي))/gu, "$1 ڪلاڪ $2 منٽ");
+    t = tr(t, /(\d{1,2})\.(\d{2})(?=\s*(?:GMT|UTC|وڳي|بجي))/gu, "$1 ڪلاڪ $2 منٽ");
 
     // 3) DECIMAL POINT (56). The period is clause punctuation too, so `2.4` read as "two" + a SENTENCE
     //    BREAK + "four". `پوائنٽ` is a borrowing of "point" and is what the corpus writes (39).
-    t = t.replace(/(\d+)\.(\d+)/gu, (_m, whole: string, frac: string) =>
+    t = tr(t, /(\d+)\.(\d+)/gu, (_m, whole: string, frac: string) =>
         `${whole} پوائنٽ ${[...frac].join(" ")}`);
 
     // 4) CLOCK, COLON FORM (43). The colon was reaching clausePunctuation as a pause, so `11:00` split
     //    into two unrelated numerals.
-    t = t.replace(/(\d{1,2}):(\d{2})(?!\d)/gu, "$1 ڪلاڪ $2 منٽ");
+    t = tr(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 ڪلاڪ $2 منٽ");
 
     // 5) PERCENT (11) → سيڪڙو, attested 41 times. Both placements of the sign are claimed: the
     //    Arabic-script convention puts it before the number, as Central Kurdish does.
-    t = t.replace(/(\d+)\s*%/gu, "$1 سيڪڙو");
-    t = t.replace(/%\s*(\d+)/gu, "$1 سيڪڙو");
+    t = tr(t, /(\d+)\s*%/gu, "$1 سيڪڙو");
+    t = tr(t, /%\s*(\d+)/gu, "$1 سيڪڙو");
 
     // 6) DEGREES (5), BEFORE the unit rules — the scale letter would otherwise reach the Latin fallback
     //    and be read as an English letter name.
-    t = t.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
-    t = t.replace(/(\d)\s*°\s*C(?!\p{L})/giu, "$1 ڊگري سينٽي گريڊ");
-    t = t.replace(/(\d)\s*°\s*F(?!\p{L})/giu, "$1 ڊگري فارينهائيٽ");
-    t = t.replace(/(\d)\s*°/gu, "$1 ڊگري");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
+    t = tr(t, /(\d)\s*°\s*C(?!\p{L})/giu, "$1 ڊگري سينٽي گريڊ");
+    t = tr(t, /(\d)\s*°\s*F(?!\p{L})/giu, "$1 ڊگري فارينهائيٽ");
+    t = tr(t, /(\d)\s*°/gu, "$1 ڊگري");
 
     // 7) SQUARED UNITS, before the plain unit rule or the `km` is consumed and the exponent stranded.
-    t = t.replace(/(?<!\p{L})km\s*[²2](?!\d)/giu, "مربع ڪلوميٽر");
-    t = t.replace(/(?<!\p{L})m\s*[²2](?!\d)/giu, "مربع ميٽر");
+    t = tr(t, /(?<!\p{L})km\s*[²2](?!\d)/giu, "مربع ڪلوميٽر");
+    t = tr(t, /(?<!\p{L})m\s*[²2](?!\d)/giu, "مربع ميٽر");
     //    …and CUBED, the same shape and the same word order. `ڪيوبڪ ميٽر` is the corpus's own: "لونو ۾
     //    120–160 ڪيوبڪ ميٽر تيل هو" — the loan, preceding the noun exactly as مربع does.
-    t = t.replace(/(?<!\p{L})km\s*[³3](?!\d)/giu, "ڪيوبڪ ڪلوميٽر");
-    t = t.replace(/(?<!\p{L})m\s*[³3](?!\d)/giu, "ڪيوبڪ ميٽر");
+    t = tr(t, /(?<!\p{L})km\s*[³3](?!\d)/giu, "ڪيوبڪ ڪلوميٽر");
+    t = tr(t, /(?<!\p{L})m\s*[³3](?!\d)/giu, "ڪيوبڪ ميٽر");
 
     // 8) LATIN UNIT ABBREVIATIONS after a number. The trailing guard is `(?!\p{L})`, never `\b`: `\b` is
     //    defined on ASCII word characters and finds no boundary against Perso-Arabic script, so the rule
@@ -116,8 +117,8 @@ export function normalizeSindhi(input: string): string {
     // denominator to read as an English letter name (`120 km/h` → …ڪلوميٽر [ˈeᶦt͡ʃ], `133 m/s` → [ˈɛm ˈɛs]).
     // Every word is the corpus's own, spelled out in its rate sentence: "480 ڪلو ميٽر في ڪلاڪ (133 ميٽر في
     // سيڪنڊ؛ 300 ميل في ڪلاڪ)" — `في` is "per", `ڪلاڪ` the hour, `سيڪنڊ` the second.
-    t = t.replace(/(?<!\p{L})km\s*\/\s*h(?![\p{L}\p{M}])/giu, "ڪلوميٽر في ڪلاڪ");
-    t = t.replace(/(?<!\p{L})m\s*\/\s*s(?![\p{L}\p{M}])/giu, "ميٽر في سيڪنڊ");
+    t = tr(t, /(?<!\p{L})km\s*\/\s*h(?![\p{L}\p{M}])/giu, "ڪلوميٽر في ڪلاڪ");
+    t = tr(t, /(?<!\p{L})m\s*\/\s*s(?![\p{L}\p{M}])/giu, "ميٽر في سيڪنڊ");
     // ⚠ `re.flags`, NOT A HARD-CODED "gu" — the table declares `/km/giu` and the composed regex was
     // throwing the `i` away, so an UPPERCASE abbreviation fell through to the initialism reading:
     // `12 KM پري` read *ɓˈaːɾəhənə kʰˈeᶦ ˈɛm pˈəɾeː* ("twelve kay em door") while `15 km پري` read the
@@ -125,23 +126,23 @@ export function normalizeSindhi(input: string): string {
     // is why `480 KM/H` was never affected. Reading the flags off the declaration is what makes the
     // declaration mean something.
     for (const [re, word] of UNITS)
-        t = t.replace(new RegExp(`(\\d)\\s*(?:${re.source})(?!\\p{L})`, re.flags), `$1 ${word}`);
+        t = tr(t, new RegExp(`(\\d)\\s*(?:${re.source})(?!\\p{L})`, re.flags), `$1 ${word}`);
 
     // 9) RANGES (48). Sindhi uses a CIRCUMFIX — کان … تائين, "from … until" — not a single connective
     //    word like the European languages' `til` / `până la` / `до`. Both halves are attested (1446 and
     //    384), and the full `N کان N تائين` shape occurs in the corpus.
-    t = t.replace(/(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 کان $2 تائين");
+    t = tr(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 کان $2 تائين");
 
     // 10) CURRENCY, both placements.
     for (const [sign, word] of Object.entries(CURRENCY)) {
         const esc = sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        t = t.replace(new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
-        t = t.replace(new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
+        t = tr(t, new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
+        t = tr(t, new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
     }
 
     // 11) SIGNED NUMBERS — a sign PREFIXED to a number. The boundary admits a LETTER before the sign, as
     //     in Kurdish, because a timezone offset is written directly against its abbreviation (`UTC+1`).
-    t = t.replace(/(?<!\d)([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
+    t = tr(t, /(?<!\d)([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
         ` ${sign === "+" ? "جمع" : "منفي"} ${n}`);
 
     // 12) ARITHMETIC AND RELATIONAL SIGNS — infix between digits is where arithmetic lives; the
@@ -150,12 +151,12 @@ export function normalizeSindhi(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    t = t.replace(/±/gu, " جمع منفي ");
-    t = t.replace(/(\d)\s*\+\s*(\d)/gu, "$1 جمع $2");
-    for (const [re, word] of RELATIONAL) t = t.replace(re, word);
+    t = tr(t, /±/gu, " جمع منفي ");
+    t = tr(t, /(\d)\s*\+\s*(\d)/gu, "$1 جمع $2");
+    for (const [re, word] of RELATIONAL) t = tr(t, re, word);
 
     // 13) AMPERSAND → ۽, the Sindhi "and" and the corpus's second-commonest word (2731).
-    t = t.replace(/\s*[&＆]\s*/gu, " ۽ ");
+    t = tr(t, /\s*[&＆]\s*/gu, " ۽ ");
 
     // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
     return t.replace(/[ \t]{2,}/gu, " ");

@@ -1,3 +1,4 @@
+import { tr } from "../../core/provenance.ts";
 /**
  * Tibetan (bo) text normalization — the pre-tokenizer pass that rewrites everything the Tibetan g2p cannot
  * already read into Tibetan-script words the pipeline speaks. Pure text→text, no IPA. Runs inside
@@ -195,7 +196,7 @@ function prepose(t: string, word: string, opts: { gap: number; lead?: string; ta
     //    ⚠ THE WINDOW STOPS AT A CLAUSE BOUNDARY. `[^digit]` alone would let a shad or a newline inside it,
     //    so a `ཨ་སྒོར` in the PREVIOUS sentence could suppress this sentence's currency word — a silent drop
     //    where the gap is widest. All six of the corpus's `ཨ་སྒོར … $` windows sit inside one clause.
-    t = t.replace(
+    t = tr(t,
         new RegExp(`(${w}${WORD_END}[^${D}།༎\\n]{0,${opts.gap}})${lead}(${NUM})${tail}`, "gu"),
         "$1$2",
     );
@@ -224,7 +225,7 @@ export function normalizeTibetan(input: string): string {
     //    (`རྒྱལ་​དབང་​ལྔ་​པའི་`, 99 in one paragraph), and U+200B is outside tibetan.ts's word class — so the
     //    token breaks at each ZWSP and every syllable is read as word-INITIAL. Lhasa tone is contrastive only
     //    on syllable 1, so that is not cosmetic: it hands each syllable a tone the word does not have.
-    t = t.replace(/[­​-‏⁠﻿]/gu, "");  // soft hyphen, ZWSP, RLM, word joiner, BOM
+    t = tr(t, /[­​-‏⁠﻿]/gu, "");  // soft hyphen, ZWSP, RLM, word joiner, BOM
 
     // 2) COMPATIBILITY FORMS OF THE SIGNS THIS LAYER READS. ⚠ Only these — never blanket NFKC, which would
     //    turn `²` into a plain `2` and erase the exponent readings below (playbook trap 36). The corpus writes
@@ -232,7 +233,7 @@ export function normalizeTibetan(input: string): string {
     //    registry covers only fullwidth digits and letters, so these are this layer's job.
     //    ℃/℉ are folded by the registry already; repeated here, idempotently, so the pass is correct when a
     //    test calls it directly.
-    t = t.replace(/[％﹪٪]/gu, "%").replace(/℃/gu, "°C").replace(/℉/gu, "°F");
+    t = tr(tr(tr(t, /[％﹪٪]/gu, "%"), /℃/gu, "°C"), /℉/gu, "°F");
 
     // 2b) THE SPACE AROUND A NUMERAL, ONCE HERE AND AGAIN AT STEP 12 — and it must be both.
     //     Here, because a rule that PREPOSES a word puts a letter where the digit used to be, so a space that
@@ -249,7 +250,7 @@ export function normalizeTibetan(input: string): string {
     //    (`༤༧་༠༠༠`, ×3) against 87 periods that are decimal, and it is exactly the same character in both
     //    roles — so de-grouping those would merge two numbers and INVENT a quantity wherever it guessed wrong.
     //    A comma before exactly three digits is unambiguous here; the others are left as they are.
-    t = t.replace(new RegExp(`(?<=[${D}])(?<!(?<![${D}\\.,])0),(?=[${D}]{3}(?![${D}]))`, "gu"), "");
+    t = tr(t, new RegExp(`(?<=[${D}])(?<!(?<![${D}\\.,])0),(?=[${D}]{3}(?![${D}]))`, "gu"), "");
 
     // 4) RATES — `118-149km/h`. ⚠ HERE, ahead of the unit, span and clock rules, because this rule MOVES the
     //    operand and every one of those needs it intact to match; once relocated it is read by those same
@@ -308,7 +309,7 @@ export function normalizeTibetan(input: string): string {
     //     ཆུ་ཚོད (hour) and སྐར་མ (minute) are both in the kaikki referee's word list, and the minute sense of
     //     སྐར་མ is read on the wiki — `པིན་ཆེན་ཆུ་ཚོད་ཀྱིས་སྐར་མ་བཅོ་ལྔ་རེའི་མཚམས་སུ`, Big Ben chiming every
     //     fifteen minutes (its other hits are སྐར་མ "star", trap 37).
-    t = t.replace(
+    t = tr(t,
         new RegExp(`(?<![${D}:])([${D}]{1,2}):([${D}]{2})(?![${D}:])`, "gu"),
         `${TSHEG}ཆུ་ཚོད་$1་སྐར་མ་$2`,
     );
@@ -327,7 +328,7 @@ export function normalizeTibetan(input: string): string {
     //     exponent sign is a hyphen; a `*`/`×`/`x` before the left operand is the discriminator, and the
     //     operand is anchored at BOTH edges because a lookbehind alone only moves where the engine starts
     //     (playbook trap 52 — this is the shape that read `802.11m` as "802.11 metres" in three languages).
-    t = t.replace(
+    t = tr(t,
         new RegExp(
             `(?<![*×xX]\\s{0,2})(?<!${DASH}\\s{0,2})(?<![${D}.,])`
                 + `([${D}]+)\\s*${DASH}\\s*([${D}]+)(?![${D}.,])(?!\\s*${DASH})`,

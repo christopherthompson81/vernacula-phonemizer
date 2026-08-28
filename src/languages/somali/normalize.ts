@@ -61,6 +61,7 @@
  *                      Igbo `ndị` → `nd`, and the detector's documented false-positive population.
  */
 import { isBareUnitKey, makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * THE UNIT TABLE, named once so the tier and the four local rules in step 3b cannot disagree about which
@@ -126,8 +127,8 @@ export function normalizeSomali(input: string): string {
     // clauses. ⚠ EXACTLY THREE DIGITS PER GROUP, REPEATED, is the disambiguation — `0.53` (two) and `2.5`
     // (one) are decimals and must survive untouched. The trailing guard rejects only a following DIGIT, so a
     // group followed by the decimal separator (`1,234.56`, ×49) still de-groups.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
 
     // ── 2. THE GLUED CALENDAR LETTERS — BEFORE the tier, which would otherwise strand the `M` ──────────
     // ⚠ ORDER IS LOAD-BEARING HERE AND THE PROBE FOUND IT: with this after the shared tier, `$2M` had its
@@ -136,7 +137,7 @@ export function normalizeSomali(input: string): string {
     // ⚠ THE GLUED CALENDAR LETTERS, ×567 + ×25, and they are the largest era class in the language — bigger
     // than every spaced marker combined. A Hijri year is written `728H`, `1332H`, and (×305) as a TWO-DIGIT
     // early-Islamic year, `sanadkii 18H`, `bishii Safar 12H`. All of them read as a stray letter h.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)H(?![\p{L}\p{M}])/gu, "$1 Hijri");
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+)H(?![\p{L}\p{M}])/gu, "$1 Hijri");
     // ⚠ `M` IS SPLIT BY DIGIT COUNT AND THAT SPLIT IS LOAD-BEARING: three or four digits is the MIILAADI year
     // (`1999M`, `766M`, ×25), one or two is MILLION (`$2M`, `8M oo higtar`, `1M oo ay beeraty`, ×21). Reading
     // the short form as an era would date a sum of money to the year 2; reading the long form as a magnitude
@@ -148,7 +149,7 @@ export function normalizeSomali(input: string): string {
     // exactly those two — measured, not guessed. (The tier cannot rescue the metres case: its unit keys are
     // case-SENSITIVE, so `2407m` reads as mitir but `2407M` does not.)
     // The SHORT form needs no such gate: one or two digits before `M` is the million idiom (`$2M`, `8M`).
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)M(?![\p{L}\p{M}])/gu, (whole, n: string, off: number, src: string) => {
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+)M(?![\p{L}\p{M}])/gu, (whole, n: string, off: number, src: string) => {
         if (n.length < 3) return `${n} milyan`;
         // ⚠ `Hijri`, not `\d+H` — the H arm above has ALREADY run and rewritten `150H/766M` to
         // `150 Hijri/766M`, so a check for the raw form silently fails on exactly the calendar-pair frame
@@ -183,7 +184,7 @@ export function normalizeSomali(input: string): string {
     //   the time was not read at all, the opposite of the documented "reads the TIME, leaves the meridiem
     //   visible". The alternation lets a meridiem satisfy the boundary; the meridiem itself is still left
     //   for the reader, unsourced, exactly as the header says.
-    s = s.replace(/(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)(?!:\d)(?!\.?\d)(?:(?=\s?[AaPp]\.?[Mm]\.?)|\b)/gu,
+    s = tr(s, /(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)(?!:\d)(?!\.?\d)(?:(?=\s?[AaPp]\.?[Mm]\.?)|\b)/gu,
         (_m, h: string, min: string) => (Number(min) === 0 ? `${Number(h)}` : `${Number(h)} iyo ${Number(min)}`));
 
     // ── 3b. THE ENGLISH SPELLINGS OF THINGS SOMALI ALREADY WRITES ITS OWN WAY ──────────────────────────
@@ -197,14 +198,14 @@ export function normalizeSomali(input: string): string {
     //       the same clause, about the same kind of thing. `-aad` is this corpus's ordinal suffix ×1,436
     //       (header), and the engine already reads `1aad` as *kow aad* with no rule at all — so the
     //       rewrite hands the result to a path that is known to work rather than inventing a reading.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1aad");
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1aad");
 
     // 3b-ii. THE BARE RATE — `26,800/km 2`, `69,000/sq mi`, `610 deggane/sq mi`. A slash with a unit after
     //       it and NO unit before it, so the tier's rate branch has nothing to key on. `halkii` is the same
     //       connective already declared as `unitPer` above, and the corpus writes it out in exactly this
     //       frame one clause later — *"1,200 qof halkii km2"*. ⚠ FIRST of the four, because every rule
     //       below rewrites the very text this one's lookahead is reading.
-    s = s.replace(
+    s = tr(s,
         new RegExp(String.raw`(?<=[\d\p{L}])\s*/\s*(?=(?:sq |cu )?(?:${UNIT_KEYS})(?:[²³23])?(?![\p{L}\p{M}\d]))`, "gu"),
         " halkii ",
     );
@@ -214,7 +215,7 @@ export function normalizeSomali(input: string): string {
     //       kilometre correctly and then a stray "two" — so the utterance gained a number the source never
     //       said. Joined only against a DECLARED unit and only when no digit follows, so a range or a
     //       citation cannot be swallowed.
-    s = s.replace(new RegExp(String.raw`(?<![\p{L}\p{M}])(${UNIT_KEYS})\s+([23])(?![\d\p{L}\p{M}])`, "gu"), "$1$2");
+    s = tr(s, new RegExp(String.raw`(?<![\p{L}\p{M}])(${UNIT_KEYS})\s+([23])(?![\d\p{L}\p{M}])`, "gu"), "$1$2");
 
     // 3b-iv. `sq` AND `cu` — the ENGLISH measure words, ×7 and ×1, and every one of them is an imperial
     //       parenthetical beside a metric figure the sentence has already given in Somali: *"1,104,300
@@ -237,7 +238,7 @@ export function normalizeSomali(input: string): string {
     //       here does not weaken the tier's case-SENSITIVE unit keys (the note above `M`, step 2): what
     //       makes `2407M` ambiguous is a bare magnitude letter after a digit, and an `M` preceded by
     //       `sq `/`cu ` is the English measure frame and nothing else.
-    s = s.replace(
+    s = tr(s,
         new RegExp(String.raw`(?<![\p{L}\p{M}])(sq|cu)\s+(${UNIT_KEYS})(?![\p{L}\p{M}\d])`, "giu"),
         (_m, mod: string, u: string) =>
             `${UNIT[u.toLowerCase() as keyof typeof UNIT]} ${mod.toLowerCase() === "sq" ? EXPONENT[2] : EXPONENT[3]}`,
@@ -246,7 +247,7 @@ export function normalizeSomali(input: string): string {
     // 3b-v. `mph` ×1 — spelled as the rate it abbreviates, so the tier reads it with words this file has
     //       ALREADY sourced (`mi` → mayl, `h` → saacad, `unitPer` → halkii). Nothing new is claimed about
     //       Somali; what is claimed is what `mph` stands for.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d)\s*mph(?![\p{L}\p{M}])/gu, "$1 mi/h");
+    s = tr(s, /(?<![\p{L}\p{M}])(\d)\s*mph(?![\p{L}\p{M}])/gu, "$1 mi/h");
 
     // 3b-vi. A BARE UNIT CARRYING AN EXPONENT — what 3b-ii and 3b-iii leave behind, and what the SHARED
     //       bare-unit pass refuses on purpose: `makeBareUnitNormalizer` declines before a `²` because
@@ -257,7 +258,7 @@ export function normalizeSomali(input: string): string {
     //       3b-ii the rate frames land here too (*"26,800 halkii km2"*).
     //       ⚠ ONLY THE VOWEL-LESS MULTI-LETTER KEYS, via `isBareUnitKey`: a bare `m` or `ha` is ordinary
     //       Somali, and that is the same test the shared pass applies for the same reason.
-    s = s.replace(
+    s = tr(s,
         new RegExp(String.raw`(?<![\p{L}\p{M}\p{Nd}'’ʼ-])(${BARE_KEYS})([²³23])(?![\p{L}\p{M}\d])`, "gu"),
         (_m, u: string, e: string) => `${UNIT[u as keyof typeof UNIT]} ${EXPONENT[e as keyof typeof EXPONENT]}`,
     );
@@ -266,7 +267,7 @@ export function normalizeSomali(input: string): string {
     //       a numeral to BOUND MORPHOLOGY (`2010-kii` ×3,023, header), so the hyphen itself proves nothing;
     //       what separates this from that class is that the thing after it is a DECLARED UNIT KEY, which
     //       is not a Somali suffix. Restoring the space hands it to the tier's ordinary digit-adjacent path.
-    s = s.replace(new RegExp(String.raw`(\d)-(?=(?:${UNIT_KEYS})(?:[²³23])?(?![\p{L}\p{M}\d]))`, "gu"), "$1 ");
+    s = tr(s, new RegExp(String.raw`(\d)-(?=(?:${UNIT_KEYS})(?:[²³23])?(?![\p{L}\p{M}\d]))`, "gu"), "$1 ");
 
     // ── 4. THE SHARED TIER — percent, currency, units, rates, exponents, `&`, `×` ───────────────────────
     // ⚠ BEFORE THE DECIMAL RULE ("units before decimals", the playbook's own coupling): the tier matches a
@@ -293,7 +294,7 @@ export function normalizeSomali(input: string): string {
     // break where the point was.
     // ⚠ The fractional part is read DIGIT BY DIGIT, which is what a decimal is; the integer part keeps the
     // engine's ordinary cardinal composition.
-    s = s.replace(/(\d)[.,](\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} dhibic ${[...b].join(" ")}`);
+    s = tr(s, /(\d)[.,](\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} dhibic ${[...b].join(" ")}`);
 
     // ── 6. ERA MARKERS ─────────────────────────────────────────────────────────────────────────────────
     // ⚠ `C.H.` IS SOMALI'S OWN AND THE CORPUS GLOSSES IT: `1391 ilaa 1271 C.H (Ciise Hortiis)` — "before
@@ -302,16 +303,16 @@ export function normalizeSomali(input: string): string {
     // /ʕ/ — `BC` was *bʕ*. `Miilaadi` ×47 is the corpus's word for the Christian era, `Hijri` ×61 for the
     // Islamic one.
     // ⚠ LONGEST FIRST, and BCE before BC or the `E` is stranded.
-    s = s.replace(/(\d)\s*C\.?\s?H\.?(?![\p{L}\p{M}])/gu, "$1 Ciise Hortiis");
+    s = tr(s, /(\d)\s*C\.?\s?H\.?(?![\p{L}\p{M}])/gu, "$1 Ciise Hortiis");
     // ⚠ AND ITS COUNTERPART `C.D` ×213 — "Ciise Dabadiis", after Christ — which the first draft missed
     // entirely because the probe list was built from `C.H.` and never asked what the OTHER direction was.
     // Glossed in the corpus the same way (`Ciise Dabadiis` ×2) and written both spaced and glued
     // (`70 C.D. Rooma`, `900 – 1870 CD`). ⚠ THE LEADING DIGIT IS WHAT KEEPS IT OFF `CD-yada iyo Internetka`
     // — compact discs, in the same corpus.
-    s = s.replace(/(\d)\s*C\.?\s?D\.?(?![\p{L}\p{M}])/gu, "$1 Ciise Dabadiis");
-    s = s.replace(/(\d)\s*(?:BCE|BC)(?![\p{L}\p{M}])/gu, "$1 Ciise Hortiis");
-    s = s.replace(/(\d)\s*(?:CE|AD)(?![\p{L}\p{M}])/gu, "$1 Miilaadi");
-    s = s.replace(/(\d)\s*AH(?![\p{L}\p{M}])/gu, "$1 Hijri");
+    s = tr(s, /(\d)\s*C\.?\s?D\.?(?![\p{L}\p{M}])/gu, "$1 Ciise Dabadiis");
+    s = tr(s, /(\d)\s*(?:BCE|BC)(?![\p{L}\p{M}])/gu, "$1 Ciise Hortiis");
+    s = tr(s, /(\d)\s*(?:CE|AD)(?![\p{L}\p{M}])/gu, "$1 Miilaadi");
+    s = tr(s, /(\d)\s*AH(?![\p{L}\p{M}])/gu, "$1 Hijri");
     // ── 7. RANGES → `ilaa` ("up to") ───────────────────────────────────────────────────────────────────
     // ×2,690, and `ilaa` is one of the commonest words in the language (×11,059) in exactly this sense
     // (`1391 ilaa 1271`, `27 ilaa 39 boqolkiiba`). The hyphen was dropped, leaving two numbers abutting.
@@ -335,7 +336,7 @@ export function normalizeSomali(input: string): string {
     // percentages both run in either direction — so unlike its sn/ee/nya siblings it has nothing that
     // declines a truncated endpoint, and the comma is doing that work by accident. Trading 5 real gains for 2
     // confidently wrong readings replacing silent ones is the wrong trade; the `.` arm above is clean at 4/4.
-    s = s.replace(
+    s = tr(s,
         /(?<!\b(?:ilaa|dhaxaysay|inta)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d,-])/gu,
         "$1 ilaa $2",
     );
@@ -344,7 +345,7 @@ export function normalizeSomali(input: string): string {
     // ×235. `1/2` read as *kow laba* — the slash dropped, two bare numbers. `nus` ("half") ×149 and `rubuc`
     // ("quarter") ×74 are the corpus's own words for the two that have one; everything else composes with
     // `meelood` ("parts"), the ordinary Somali fraction frame.
-    s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (_m, a: string, b: string) => {
+    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (_m, a: string, b: string) => {
         const [n, d] = [Number(a), Number(b)];
         if (n === 1 && d === 2) return "nus";
         if (n === 1 && d === 4) return "rubuc";
@@ -358,9 +359,9 @@ export function normalizeSomali(input: string): string {
     // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
     // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
     // orthography is what supplies the accented letter. 71 other engines already guard it this way.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 darajo Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 darajo Fahrenheit");
-    s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 darajo Celsius");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 darajo Fahrenheit");
+    s = tr(s, /(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
         (m, d: string, dir: string) => {
             // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122). The pattern carries `i` AND `u`, so
             // JS folds U+017F LONG S onto `s` and `12°ſ` MATCHES `[NSEW]` — while `ſ` is not a COMPASS key.
@@ -369,22 +370,22 @@ export function normalizeSomali(input: string): string {
             const word = COMPASS[dir.toLowerCase()];
             return word === undefined ? m : `${d} darajo ${word}`;
         });
-    s = s.replace(/(\d)\s?°/gu, "$1 darajo");
+    s = tr(s, /(\d)\s?°/gu, "$1 darajo");
 
     // ── 10. SIGNS ───────────────────────────────────────────────────────────────────────────────────────
     // Sourced from the filtered corpus: `ka badan` ×2,109 ("more than"), `ka yar` ×561 ("less than"),
     // `ku dar` ×439 ("add"), `laga jaray` ×17 ("subtracted"), `u dhiganta` ×214 ("equivalent to").
     // ⚠ PLUS BEFORE MINUS, the coupling the Sundanese run found: run the other way, the minus arm claims the
     // bracketed operand of `5 + (−3)` and the `+` is dropped, silently turning a sum into a difference.
-    s = s.replace(/(\S)\+\s?(\(?\s?[-−]?\d)/gu, "$1 ku dar $2");
-    s = s.replace(/(^|\s)\+\s?(\(?\s?[-−]?\d)/gu, "$1ku dar $2");
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1laga jaray $2");
+    s = tr(s, /(\S)\+\s?(\(?\s?[-−]?\d)/gu, "$1 ku dar $2");
+    s = tr(s, /(^|\s)\+\s?(\(?\s?[-−]?\d)/gu, "$1ku dar $2");
+    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1laga jaray $2");
     // ⚠ `±` IS ONE CHARACTER (U+00B1) and no `+` rule can match inside it — ×22, and it needs its own arm.
-    s = s.replace(/±/gu, " ku dar ama laga jaray ");
-    s = s.replace(/\s?=\s?/gu, " u dhiganta ");
-    s = s.replace(/\s?<\s?/gu, " ka yar ");
-    s = s.replace(/\s?>\s?/gu, " ka badan ");
-    s = s.replace(/\s?÷\s?/gu, " loo qeybiyay ");
+    s = tr(s, /±/gu, " ku dar ama laga jaray ");
+    s = tr(s, /\s?=\s?/gu, " u dhiganta ");
+    s = tr(s, /\s?<\s?/gu, " ka yar ");
+    s = tr(s, /\s?>\s?/gu, " ka badan ");
+    s = tr(s, /\s?÷\s?/gu, " loo qeybiyay ");
 
     return s;
 }

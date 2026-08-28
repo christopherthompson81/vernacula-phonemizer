@@ -25,6 +25,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { MANIFEST } from "./manifest.ts";
 import { COUNTED, SYMBOLS, slCountForm } from "./slovenian.ts";
 import { numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 const N = MANIFEST.numbers;
 
@@ -661,35 +662,35 @@ export function normalizeSlovenian(input: string): string {
     //    (17), which is the Croatian convention and the opposite of Slovak's. EXACTLY three digits and no
     //    space, which is what keeps this rule off the clock (`23.35`, two digits), off `802.11` and off
     //    every `N.` ordinal. Two passes, because groups overlap on the shared digit (`5.000.000`).
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     //    …and the SPACE-grouped form, which the corpus does not use (0 instances of `\d[ ]\d{3}`) but which
     //    Slovene orthography also permits, and which read as two separate numbers: `5 000` → *pet nič*.
     //    Reported by the review tool's ordinary-text probe, not by the corpus — ⚠ zero corpus
     //    instances is not evidence of correctness. Exactly three digits, so `100 in 200 m` cannot fuse.
     //    NBSP is folded to a plain space AFTERWARDS, never before: this corpus uses it 22 times and always
     //    as an ORDINARY inter-word space (`Umrl je v torek`), never as a separator.
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
-    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ERA MARKERS, before the single-dot rule (⚠ coupling) — otherwise the interior
     //    dots survive as breaks. Each expansion CONSUMES the final dot, so keepFinal puts back the sentence
     //    period where that dot was doing double duty.
-    for (const [re, w] of MULTI_DOT) s = s.replace(re, (m0: string, ...rest: unknown[]) => keepFinal(w, m0, rest));
+    for (const [re, w] of MULTI_DOT) s = tr(s, re, (m0: string, ...rest: unknown[]) => keepFinal(w, m0, rest));
 
     // 2) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break. Three shapes in
     //    this order: followed by a word (`npr. vizo`, `št. 11`), at the very end of the utterance (or
     //    before closing brackets that end it — `restavracije itd.`), where the sentence period is put back,
     //    and anything else (`idr., ki se` — a following comma already carries the pause, so appending a
     //    period there would give `in drugo.,`).
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"»])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED[ab.toLowerCase()]!}${sp}`,
     );
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[»)”\\]]\\s*)*$)`, "giu"),
         (_m, ab: string) => `${DOTTED[ab.toLowerCase()]!}.`,
     );
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?![\\p{L}\\p{M}])`, "giu"),
         (_m, ab: string) => DOTTED[ab.toLowerCase()]!,
     );
@@ -698,7 +699,7 @@ export function normalizeSlovenian(input: string): string {
     //    ⚠ NO `i` FLAG — `\p{Lu}` UNDER `/i` MATCHES A LOWERCASE LETTER, so the capital guard this rule is
     //    built on did not exist and `Vzel ga. je` read *Vzel gospa je*. The abbreviation's own case is
     //    spelled out in the class instead; `Dr.`/`dr.`/`Ga.`/`ga.`/`G.`/`g.` are the attested spellings.
-    s = s.replace(
+    s = tr(s,
         /(?<![\p{L}\p{M}.])([Dd]r|[Gg]a|[Gg])\.(\s+)(?=\p{Lu})/gu,
         (_m, ab: string, sp: string) => `${HONORIFIC[ab.toLowerCase()]!}${sp}`,
     );
@@ -707,16 +708,16 @@ export function normalizeSlovenian(input: string): string {
     //    sprva` ×1 (mid-sentence), `(James et al., 1995)` ×1. There is no source for any of the three
     //    words: the corpus's only `Saint` is the composer Saint-Saëns, and `Inc.`/`al.` are not Slovene.
     //    Claimed BY NAME and only where the dot cannot be a sentence period.
-    s = s.replace(/(?<![\p{L}\p{M}.])(St)\.(?=\s+\p{Lu})/gu, "$1");
-    s = s.replace(/(?<![\p{L}\p{M}.])(Inc)\.(?=\s+\p{Ll})/gu, "$1");
-    s = s.replace(/(?<=(?:et|Et)\s)(al)\.(?![\p{L}\p{M}])/gu, "$1");
+    s = tr(s, /(?<![\p{L}\p{M}.])(St)\.(?=\s+\p{Lu})/gu, "$1");
+    s = tr(s, /(?<![\p{L}\p{M}.])(Inc)\.(?=\s+\p{Ll})/gu, "$1");
+    s = tr(s, /(?<=(?:et|Et)\s)(al)\.(?![\p{L}\p{M}])/gu, "$1");
 
     // 3) CLOCK. Before the version-dot rule, which would otherwise eat the interior dot of the PERIOD form
     //    (`ob 12.00 po GMT`, 13 of the corpus's 16 clocks), and before any rule that looks for a bare
     //    number. Both `.` and `:` are clause punctuation in slovenian.jsonc, so every
     //    clock in the corpus was split by a phrase break. A trailing `ure`/`uri`/`uro`/`ura` is CONSUMED
     //    (`okoli 9.30 ure`, ×1): the hour noun is already in the reading and saying it twice is redundant.
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![\\d.,])${CLOCK_BODY}${CLOCK_TAIL}(?:\\s+(?:ure|uri|uro|ura)(?![\\p{L}\\p{M}]))?`, "gu"),
         (_m: string, h: string, min: string, offset: number, whole: string) => {
             const gov = CLOCK_GOV.exec(whole.slice(0, offset))?.[1]?.toLowerCase();
@@ -734,7 +735,7 @@ export function normalizeSlovenian(input: string): string {
     //    The ZONE LABEL is the whole licence. A bare 4-digit run is a year far more often than a time, and
     //    this corpus writes 116 of them; requiring UTC/GMT/CET/CEST after is what separates the one instance
     //    from all of those. Hours ≤ 23 and minutes ≤ 59, as in CLOCK_BODY.
-    s = s.replace(
+    s = tr(s,
         new RegExp(
             `(?<![\\d.,:])([01]\\d|2[0-3])([0-5]\\d)(?![\\d.,:])(?=\\s*\\)?\\s*(?:po\\s+)?(?:UTC|GMT|CET|CEST)(?![\\p{L}\\p{M}]))`,
             "gu",
@@ -748,7 +749,7 @@ export function normalizeSlovenian(input: string): string {
     // 4) VERSION / FIGURE DOTS between digits — `802.11a`, `802.11b`, `802.11g`, `802.11n` ×3 and
     //    `Sliko 1.1.` ×1 all broke the sentence at the interior dot. AFTER the clock (which owns `12.00`)
     //    and BEFORE the ordinal rules, so those never see a digit-dot-digit.
-    s = s.replace(/(\d)\.(?=\d)/gu, "$1 pika ");
+    s = tr(s, /(\d)\.(?=\d)/gu, "$1 pika ");
 
     // 5a) SCORES AND RATIOS, before the range rule. The discriminator is DIRECTION: a range runs upward, a
     //     score need not, and the corpus writes the joiner as "proti". The clock rule above has already
@@ -761,7 +762,7 @@ export function normalizeSlovenian(input: string): string {
     //     The trailing guard rejects a further digit, a colon and a `.dd`/`,dd` decimal but NOT a bare
     //     period: that is the SENTENCE end, and rejecting it silently refused `je torej 3:2.`
     const ascends = (a: string, b: string): boolean => Number(b) > Number(a);
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,:–—-])(\d{1,2})([:–—-])(\d{1,2})(?![\d:])(?!\.\d)(?!,\d)/gu,
         (m0, a: string, mark: string, b: string, offset: number, whole: string) => {
             if (mark !== ":" && ascends(a, b)) return m0; // a real range — step 5b owns it
@@ -777,7 +778,7 @@ export function normalizeSlovenian(input: string): string {
     //    `2-3 km` keeps its unit adjacency on the second operand.
     //    Non-ascending short pairs are already gone, claimed as scores by 5a. A SEASON is not a range either:
     //    `od leta 1995-96` abbreviates the second year and reads as the bare pair, not "do".
-    s = s.replace(/(?<![\d.,])(\d+(?:,\d+)*)\s?[–—-]\s?(\d+(?:,\d+)*)(?![\d.,])/gu, (m0, a: string, b: string) =>
+    s = tr(s, /(?<![\d.,])(\d+(?:,\d+)*)\s?[–—-]\s?(\d+(?:,\d+)*)(?![\d.,])/gu, (m0, a: string, b: string) =>
         a.length === 4 && b.length <= 2 ? m0 : `${a} do ${b}`,
     );
 
@@ -800,7 +801,7 @@ export function normalizeSlovenian(input: string): string {
     //     *oseminsedemdeseti let*, `poglavar je govoril 2 uri` → *drugi uri*. All four titles take a bare
     //     quantity like that in ordinary Slovene, so the false positive is not exotic. The titles' own
     //     case is spelled into the class now and the flag is gone.
-    s = s.replace(
+    s = tr(s,
         /(?<![\p{L}\p{M}])([Kk]ralj[\p{L}\p{M}]*|[Cc]esar[\p{L}\p{M}]*|[Pp]apež[\p{L}\p{M}]*|[Pp]oglavar[\p{L}\p{M}]*)(\s+(?:\p{Lu}[\p{L}\p{M}]*\s+){1,3})(\d{1,2})(\.?)(?![\p{L}\p{M}\d,])/gu,
         (m0, title: string, names: string, digits: string, dot: string, ...rest: unknown[]) => {
             const t = title.toLowerCase();
@@ -837,7 +838,7 @@ export function normalizeSlovenian(input: string): string {
     //     what a per-item rule could not produce. The optional interpolated lowercase word handles
     //     `10. italijanske vojske` — an adjective between the ordinal and its head — and is re-emitted
     //     verbatim — ⚠ a rule that CONSUMES a word must put it back.
-    s = s.replace(
+    s = tr(s,
         new RegExp(
             `(?<![\\p{L}\\p{M}\\d.,])((?:\\d{1,4}\\.,?\\s+(?:in\\s+)?)*)` +
                 `(\\d{1,4})\\.\\s+((?:[\\p{Ll}\\p{M}]+\\s+)?)(${LICENSOR_ALT})(?![\\p{L}\\p{M}])`,
@@ -865,7 +866,7 @@ export function normalizeSlovenian(input: string): string {
     //     lowercase followers step 6b's closed list does not know (`60. v sezoni`, `1. dne v mesecu`).
     //     The case comes from the follower's ENDING where that is unambiguous, else the masculine
     //     nominative; see slotFromEnding for why `-e`/`-em`/`-a`/`-u` are deliberately excluded.
-    s = s.replace(
+    s = tr(s,
         /(?<![\p{L}\p{M}\d.,])(\d{1,4})\.(?=\s*[,]|\s+[\p{Ll}\p{M}])/gu,
         (m0, digits: string, offset: number, whole: string) => {
             const word = /^\s+([\p{Ll}\p{M}]+)/u.exec(whole.slice(offset + m0.length))?.[1];
@@ -881,7 +882,7 @@ export function normalizeSlovenian(input: string): string {
     //    Guarded on the last word ending in a CONSONANT, so `ena`/`dva`/`tri`/`štiri` — whose -ih forms
     //    are irregular (*dveh*, not *dvaih*) and which the corpus never writes this way — are declined
     //    rather than guessed.
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d{1,4})\s?-\s?ih(?![\p{L}\p{M}])/gu, (m0, digits: string) => {
+    s = tr(s, /(?<![\d.,\p{L}\p{M}])(\d{1,4})\s?-\s?ih(?![\p{L}\p{M}])/gu, (m0, digits: string) => {
         const words = numberToWords(Number(digits), digits);
         return /[aeiou]$/u.test(words) ? m0 : `${words}ih`;
     });
@@ -890,7 +891,7 @@ export function normalizeSlovenian(input: string): string {
     //    matches a unit only when a NUMBER is adjacent, and the hyphen broke that adjacency, so both units
     //    reached the sink as raw letters. Folded to a space. The unit must be followed by a non-letter, so
     //    `35-milimetrski` (a real compound adjective, ×1) is untouched.
-    s = s.replace(/(\d)-(?=(?:km|mm|cm|kg|m)(?![\p{L}\p{M}]))/gu, "$1 ");
+    s = tr(s, /(\d)-(?=(?:km|mm|cm|kg|m)(?![\p{L}\p{M}]))/gu, "$1 ");
 
     // 9) DEGREES ×2, before the shared tier (the sign sits between the number and the scale letter) and
     //    before the `+` rule. `stopinj` is corpus-attested (`s temperaturami nad 90 stopinj`) and takes the
@@ -905,33 +906,33 @@ export function normalizeSlovenian(input: string): string {
     //     `0,5 °C` → *stopinje* — while `1,5 km` through the tier reads the gen.sg *kilometra*. The
     //     Ukrainian #920 shape: when a language keeps a unit out of the shared tier, the agreement it
     //     declared there is the specification the local rule owes.
-    s = s.replace(
+    s = tr(s,
         /(\d+(?:,\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(numOf(n), STOPINJA())} Celzija`,
     );
-    s = s.replace(
+    s = tr(s,
         /(\d+(?:,\d+)?)\s?°\s?F(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(numOf(n), STOPINJA())} Fahrenheita`,
     );
-    s = s.replace(/(\d+(?:,\d+)?)\s?°/gu, (_m, n: string) => `${n} ${counted(numOf(n), STOPINJA())}`);
+    s = tr(s, /(\d+(?:,\d+)?)\s?°/gu, (_m, n: string) => `${n} ${counted(numOf(n), STOPINJA())}`);
 
     // 10) `x`/`×` between digits → *krat* ×2 (`36 x 24 mm`, `avtomobila 4 x 4`), where the ASCII letter was
     //     read as [ks]. The corpus writes the word itself in the very sentence the sign appears in
     //     (`meri 29 3/4 palca krat 24 1/2 palca`). Both the sign and the letter, because the corpus writes
     //     only the letter.
-    s = s.replace(/(?<=\d)\s?[x×]\s?(?=\d)/gu, " krat ");
+    s = tr(s, /(?<=\d)\s?[x×]\s?(?=\d)/gu, " krat ");
 
     // 11) A LEADING `+`/`−` on a number. The corpus's one instance is `presežejo +30 °C`; the minus is its
     //     counterpart, and a dropped sign turns a negative into a positive — the one outcome that cannot be
     //     right.
-    s = s.replace(/±/gu, " plus minus ");
-    s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
-    s = s.replace(/(^|[\s(])[-−]\s?(?=\d)/gu, "$1minus ");
+    s = tr(s, /±/gu, " plus minus ");
+    s = tr(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
+    s = tr(s, /(^|[\s(])[-−]\s?(?=\d)/gu, "$1minus ");
     //     …and a `+` glued to a TIMEZONE CODE, `(UTC+1)` ×1 — the corpus's only other sign, and the one the
     //     artifact scan reported as `DROP math-sign`. Gated on an upper-case letter before the sign, so it
     //     cannot claim a hyphenated compound; it runs before step 20 spells the code out, which is why the
     //     reading is *u te ce plus ena* and not a dropped offset.
-    s = s.replace(/(?<=\p{Lu})\+(?=\d)/gu, " plus ");
+    s = tr(s, /(?<=\p{Lu})\+(?=\d)/gu, " plus ");
 
     // 11z) NUMERAL-INITIAL COMPOUNDS (`21-letni`, `24-urne`, `8-krat`, `100-metrska`, `35-milimetrski`) —
     //      36 corpus instances. Slovene writes these as ONE word once the numeral is spelled out
@@ -948,7 +949,7 @@ export function normalizeSlovenian(input: string): string {
     //      `5-ih`) by the ordinal/case rules, both BEFORE this point, so what is left is the compound case.
     //      The ≥4-letter guard is the belt: every attested compound suffix is 4+ (krat, urne, letni,
     //      metrska, stopinjski, milimetrski) and every ending and unit is ≤3 (ih, ega, im, km, mm).
-    s = s.replace(/(?<![\d.,-])(\d+)-(\p{Ll}{4,})/gu, (m0, n: string, tail: string) => {
+    s = tr(s, /(?<![\d.,-])(\d+)-(\p{Ll}{4,})/gu, (m0, n: string, tail: string) => {
         const v = Number(n);
         if (!Number.isSafeInteger(v)) return m0;
         const words = numberToWords(v);
@@ -964,7 +965,7 @@ export function normalizeSlovenian(input: string): string {
     //     keys cannot match a spelled-out noun. NOT a general `/` reading: the corpus's other three slashes
     //     are `100 jardov/metrov` ×2 and `Džakarju/Bumthangu`, where the slash means "or" and *poševnica*
     //     would be worse than the silence.
-    s = s.replace(/(?<![\p{L}\p{M}])milj\s?\/\s?(?:uro|h)(?![\p{L}\p{M}])/giu, "milj na uro");
+    s = tr(s, /(?<![\p{L}\p{M}])milj\s?\/\s?(?:uro|h)(?![\p{L}\p{M}])/giu, "milj na uro");
 
     // 13) PERCENT AND UNITS WHOSE NUMERAL NEEDS A GENDER — nothing here; see step 15. The digits are left
     //     as digits through step 14 precisely so the tier can still see the number–unit adjacency.
@@ -989,15 +990,15 @@ export function normalizeSlovenian(input: string): string {
     for (const c of Object.values(COUNTED)) {
         const [sg, dual, paucal] = c.forms;
         if (c.g === "m") {
-            s = s.replace(new RegExp(`(?<![\\d.,])1 (?=${esc(sg!)}(?![\\p{L}\\p{M}]))`, "gu"), "en ");
+            s = tr(s, new RegExp(`(?<![\\d.,])1 (?=${esc(sg!)}(?![\\p{L}\\p{M}]))`, "gu"), "en ");
             //     …but NOT the SECOND OPERAND OF A RANGE. `prekriva 2–3 km ledu` became `2 do 3 km` at
             //     step 5b, and the count phrase there is headed by the whole range, which the verb puts in
             //     the accusative (*prekriva dva do tri kilometre*) — so the nominative *trije* is the one
             //     form that is certainly wrong. 1 corpus instance; the case-neutral *tri* is left alone.
-            s = s.replace(new RegExp(`(?<![\\d.,])(?<!do )3 (?=${esc(paucal!)}(?![\\p{L}\\p{M}]))`, "gu"), "trije ");
-            s = s.replace(new RegExp(`(?<![\\d.,])(?<!do )4 (?=${esc(paucal!)}(?![\\p{L}\\p{M}]))`, "gu"), "štirje ");
+            s = tr(s, new RegExp(`(?<![\\d.,])(?<!do )3 (?=${esc(paucal!)}(?![\\p{L}\\p{M}]))`, "gu"), "trije ");
+            s = tr(s, new RegExp(`(?<![\\d.,])(?<!do )4 (?=${esc(paucal!)}(?![\\p{L}\\p{M}]))`, "gu"), "štirje ");
         } else {
-            s = s.replace(new RegExp(`(?<![\\d.,])2 (?=${esc(dual!)}(?![\\p{L}\\p{M}]))`, "gu"), "dve ");
+            s = tr(s, new RegExp(`(?<![\\d.,])2 (?=${esc(dual!)}(?![\\p{L}\\p{M}]))`, "gu"), "dve ");
         }
     }
 
@@ -1009,7 +1010,7 @@ export function normalizeSlovenian(input: string): string {
     //     IDENTICALLY to `1,5 km`, a distinct-numbers violation on top of the magnitude error. The zeros
     //     are emitted as DIGITS rather than as *nič*, because the number arm already reads a bare `0` as
     //     this language's zero word; `1,50` is untouched, its whole-number reading being correct.
-    s = s.replace(/(?<=\d),(\d+)/gu, (_m, frac: string) => {
+    s = tr(s, /(?<=\d),(\d+)/gu, (_m, frac: string) => {
         const zeros = /^0*/u.exec(frac)![0].length;
         return zeros === 0 ? ` ${N.decimalWord} ${frac}` : ` ${N.decimalWord} ${"0 ".repeat(zeros)}${frac.slice(zeros)}`;
     });
@@ -1030,25 +1031,25 @@ export function normalizeSlovenian(input: string): string {
         if (Number(a) === 1 && Number(b) === 2) return "pol";
         return `${feminineNumeral(Number(a))} ${counted(Number(a), forms)}`;
     };
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,\/])(\d+)\s+(\d{1,3})\/(\d{1,2})(?![\d.,\/])/gu,
         (m0, int: string, a: string, b: string) => {
             const f = frac(a, b, "");
             return f === "" ? m0 : `${int} in ${f}`;
         },
     );
-    s = s.replace(/(?<![\d.,\/])(\d{1,3})\/(\d{1,2})(?![\d.,\/])/gu, (m0, a: string, b: string) => frac(a, b, m0));
+    s = tr(s, /(?<![\d.,\/])(\d{1,3})\/(\d{1,2})(?![\d.,\/])/gu, (m0, a: string, b: string) => frac(a, b, m0));
     //     The precomposed vulgar fractions. Zero corpus instances in sl_si — Croatian's translation of the
     //     same FLEURS sentence writes `29¾ sa 24½ inča` where Slovenian writes `29 3/4` — so this is the
     //     adversarial neighbour, kept because the characters would otherwise be dropped silently.
-    s = s.replace(/(\d+)¾/gu, "$1 in tri četrtine");
-    s = s.replace(/(\d+)½/gu, "$1 in pol");
-    s = s.replace(/(\d+)¼/gu, "$1 in ena četrtina");
+    s = tr(s, /(\d+)¾/gu, "$1 in tri četrtine");
+    s = tr(s, /(\d+)½/gu, "$1 in pol");
+    s = tr(s, /(\d+)¼/gu, "$1 in ena četrtina");
 
     // 18) RELATIONAL SIGNS and the AMPERSAND.
-    s = s.replace(/\s*=\s*/gu, " enako ");
-    s = s.replace(/(\d)\s*<\s*(?=\d)/gu, "$1 je manjše od ");
-    s = s.replace(/(\d)\s*>\s*(?=\d)/gu, "$1 je večje od ");
+    s = tr(s, /\s*=\s*/gu, " enako ");
+    s = tr(s, /(\d)\s*<\s*(?=\d)/gu, "$1 je manjše od ");
+    s = tr(s, /(\d)\s*>\s*(?=\d)/gu, "$1 je večje od ");
     //     `&` → *in*. THE FLANKING LETTERS ARE SPELLED when both are lone capitals, which is what
     //     `B&B` is: joining them alone still left `B in B`, read [p in p] — two bare devoiced stops, not
     //     the letter *be*. Step 20 cannot rescue them, because its all-caps run requires two ADJACENT
@@ -1056,7 +1057,7 @@ export function normalizeSlovenian(input: string): string {
     //     name" rule is impossible in Slovene, where `V`, `A`, `S`, `Z`, `K`, `O`, `I` are all real words
     //     (`V 16. stoletju` opens with one, and `V` alone accounts for 118 of the 132 all-caps matches a
     //     naive Roman-numeral grep finds).
-    s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})\s*[&＆]\s*(\p{Lu})(?![\p{L}\p{M}])/gu, (m0, a: string, b: string) => {
+    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})\s*[&＆]\s*(\p{Lu})(?![\p{L}\p{M}])/gu, (m0, a: string, b: string) => {
         const [x, y] = [LETTER_NAME[a.toLowerCase()], LETTER_NAME[b.toLowerCase()]];
         return x === undefined || y === undefined ? m0 : `${x} in ${y}`;
     });
@@ -1065,12 +1066,12 @@ export function normalizeSlovenian(input: string): string {
     // s sedem, s sto; z ena, z dva, z osem, z devet, z deset, z dvajset. A fixed `z` would misvoice half the
     // numerals, which is a wrong word rather than an accent.
     const SL_VOICELESS = /^[ptksšcčfh]/u;
-    s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) => {
+    s = tr(s, /(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) => {
         const y = numberToWords(Number(b), b);
         return `${numberToWords(Number(a), a)} deljeno ${SL_VOICELESS.test(y) ? "s" : "z"} ${y}`;
     });
 
-    s = s.replace(/\s*[&＆]\s*/gu, " in ");
+    s = tr(s, /\s*[&＆]\s*/gu, " in ");
 
     // 19) A LONE LETTER GLUED TO A DIGIT RUN → its LETTER NAME. Eight instances: the Wi-Fi standards
     //     `802.11a/b/g/n` (×6, whose letter step 4 leaves stranded on the digits), `Il-76s` (the aircraft
@@ -1079,7 +1080,7 @@ export function normalizeSlovenian(input: string): string {
     //     `802.11g`, so declaring it would have read the Wi-Fi standard's letter as *gram* — the
     //     third hazard, measured rather than assumed. Runs BEFORE the initialism pass, whose all-caps rule
     //     needs two letters and so cannot claim any of these.
-    s = s.replace(/(?<=\d)(\p{L})(?![\p{L}\p{M}])/gu, (m0, l: string) => {
+    s = tr(s, /(?<=\d)(\p{L})(?![\p{L}\p{M}])/gu, (m0, l: string) => {
         const name = LETTER_NAME[l.toLowerCase()];
         return name === undefined ? m0 : ` ${name}`;
     });

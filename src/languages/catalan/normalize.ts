@@ -16,6 +16,7 @@
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -127,23 +128,23 @@ export function normalizeCatalan(input: string): string {
     // 1) ERA MARKERS and MULTI-DOT ABBREVIATIONS. FIRST, before the single-dot rule — otherwise the
     //    single-dot rule consumes `d.`/`a.` and leaves `C` behind. `dC`/`aC` are undotted in the corpus.
     for (const [body, word] of MULTI_DOT) {
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${body}(?![\\p{L}\\p{M}])`, "giu"), word);
+        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}(?![\\p{L}\\p{M}])`, "giu"), word);
     }
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `George W. Bush` — the W. suffix dot is a break.
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
     //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
     //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
     //    Catalan's own ⟨À È É Í Ò Ó Ú Ü Ç⟩. The minimal pair, measured before the fix:
     //        "J. Puig"     → "J Puig"
     //        "J. Àlvarez" → unchanged   ← the dot survives as a spurious clause break
-    s = s.replace(/(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
+    s = tr(s, /(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
 
     // 3) SINGLE-DOT ABBREVIATIONS. Two branches: mid-sentence the dot is CONSUMED so it cannot become a
     //    phrase break; at a phrase end it is kept.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(dr|etc)\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(dr|etc)\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -151,7 +152,7 @@ export function normalizeCatalan(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(dr|etc)\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(dr|etc)\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -166,7 +167,7 @@ export function normalizeCatalan(input: string): string {
     //    does not write (11r, 5t) — ⚠ a guard alternative with no attested instance is a misfire
     //    generator. Was *set è* / *set a* / *cent noranta a* / *quatre t*. BEFORE the clock rule so a digit
     //    run is not first claimed as a time.
-    s = s.replace(/(?<![\d.,])(\d+)(è|a|r|n|ns|t)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
+    s = tr(s, /(?<![\d.,])(\d+)(è|a|r|n|ns|t)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
         const n = Number(d);
         const fem = sfx.toLowerCase() === "a";
         const ord = ordinalWords(n, fem);
@@ -191,7 +192,7 @@ export function normalizeCatalan(input: string): string {
     //     Narrowed to the DECADE shapes — a four-digit year or a bare tens (`1920s`, `90s`). Stripping the
     //     `s` from ANY number took the unit off a genuine `45s` (forty-five SECONDS), which the tier reads
     //     correctly once the plural marker is not in the way.
-    s = s.replace(/(?<![\d.,])((?:1\d|20)\d{2}|\d0)s(?![\p{L}\p{M}])/giu, "$1");
+    s = tr(s, /(?<![\d.,])((?:1\d|20)\d{2}|\d0)s(?![\p{L}\p{M}])/giu, "$1");
 
     // 5) CLOCK, in the COLON form. The comma DECIMAL and the DOT version are handled elsewhere; the colon
     //    is clause punctuation and must be claimed here. `11:35 PM` → onze trenta-cinc PM; `06:30` → sis
@@ -200,7 +201,7 @@ export function normalizeCatalan(input: string): string {
     //    `(?![:.\d])` after the minutes is what declines it, and the colon then falls through to the
     //    tokenizer as ordinary clause punctuation (a pause), which is the reading a pace wants anyway.
     //    (This sentence used to stop at "— the"; the guard it describes was always in the pattern.)
-    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])\s*(h)?\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)?/giu,
+    s = tr(s, /(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])\s*(h)?\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)?/giu,
         (m0, h: string, min: string, hh: string, ap: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return m0;
@@ -214,13 +215,13 @@ export function normalizeCatalan(input: string): string {
     //    digits (1.400 = mil quatre-cents); a 1-2 digit fraction is a DECIMAL the English-influenced corpus
     //    writes with a dot. Read "punt" (point). AFTER the clock (8:30 has a two-digit minute and no letter
     //    after, but the clock rule has already claimed it).
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.])/giu, "$1 punt $2");
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.])/giu, "$1 punt $2");
 
     // 7) FRACTIONS. ¾/½ after a whole read "i tres quarts"/"i mig"; a unit fraction reads the denominator
     //    + "è" (ordinal): 1/5 → *un cinquè*. The vulgar-fraction glyphs were being dropped outright.
-    s = s.replace(/(\d+)¾/gu, "$1 i tres quarts");
-    s = s.replace(/(\d+)½/gu, "$1 i mig");
-    s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+    s = tr(s, /(\d+)¾/gu, "$1 i tres quarts");
+    s = tr(s, /(\d+)½/gu, "$1 i mig");
+    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return num === 1 ? "mig" : `${numberToWords(num)} mitjos`;
         // 3 and 4 have their own NOUNS (un terç, tres quarts) rather than the ordinal, and every
@@ -234,17 +235,17 @@ export function normalizeCatalan(input: string): string {
 
     // 8) DEGREES. `30 °C` came out as the bare consonant [k]; `35 ºO` (longitude west) used the ORDINAL
     //    º (U+00BA) which the ° rule missed. `grau` is the degree word (plural graus).
-    s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/giu, "$1 graus Celsius");
-    s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/giu, "$1 graus Fahrenheit");
+    s = tr(s, /(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/giu, "$1 graus Celsius");
+    s = tr(s, /(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/giu, "$1 graus Fahrenheit");
     //    The class must carry S as well as N/O/E — the map has "sud" but the class did not, so `35 ºS`
     //    left the º raw (a RAWMARK) and read the S as a letter.
-    s = s.replace(/(\d)\s?[°º]\s?([NSOE])(?![\p{L}\p{M}])/giu, (_m, d: string, c: string) =>
+    s = tr(s, /(\d)\s?[°º]\s?([NSOE])(?![\p{L}\p{M}])/giu, (_m, d: string, c: string) =>
         `${d} graus ${({ N: "nord", S: "sud", E: "est", O: "oest" } as Record<string, string>)[c.toUpperCase()]!}`);
-    s = s.replace(/(\d)\s?[°º](?![\p{L}\p{M}])/gu, "$1 graus");
+    s = tr(s, /(\d)\s?[°º](?![\p{L}\p{M}])/gu, "$1 graus");
 
     // 9) GIGAHERTZ — the corpus's `2.4 Ghz`, `5.0 Ghz`. The version-dot rule has already split the number
     //    ("2.4" → "2 punt 4"); the Ghz unit reads gigahercis. AFTER the version rule, BEFORE the tier.
-    s = s.replace(/(\d+(?: punt \d+)?)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahercis");
+    s = tr(s, /(\d+(?: punt \d+)?)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahercis");
 
     // 10) SIGNS. `UTC +1` — the plus was dropped. `&` → *i* (and), with a trailing plural `s` on the LAST
     //     letter name (`B&Bs` → be i bes — the corpus's only ampersand is the plural). A TRUE minus (`-5`)
@@ -254,8 +255,8 @@ export function normalizeCatalan(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, and ⚠ both are SIGN names rather than
     //    OPERATION names, which is what ± needs: it marks a TOLERANCE, not an addition.
-    s = s.replace(/±/gu, " més menys ");
-    s = s.replace(/\+\s?(?=\d)/gu, " més ");
+    s = tr(s, /±/gu, " més menys ");
+    s = tr(s, /\+\s?(?=\d)/gu, " més ");
     // ⚠ U+2212 IS IN THE CLASS AND THE ASCII HYPHEN'S GUARDS ARE UNCHANGED. The MINUS SIGN is a distinct
     // code point whose only Unicode meaning is the arithmetic operator, and it is not on any keyboard —
     // whoever typed it meant a minus. It is not attested in this language's mined corpus, which is why an
@@ -263,21 +264,21 @@ export function normalizeCatalan(input: string): string {
     // dropping a sign INVERTS the value it belongs to. The hyphen is the ambiguous one and keeps every
     // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
     // still refused by the lookbehind.
-    s = s.replace(/(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "menys $1");
-    s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
+    s = tr(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "menys $1");
+    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
         (_m, a: string, b: string, pl: string) =>
             `${LETTER_NAME[a.toLowerCase()] ?? a} i ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
-    s = s.replace(/\s&\s/gu, " i ");
-    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 és igual a $2");
+    s = tr(s, /\s&\s/gu, " i ");
+    s = tr(s, /(\S)\s*=\s*(\S)/gu, "$1 és igual a $2");
     // THE DIVISION SIGN, the one sign this file still dropped. ca.wikipedia's arithmetic prose uses the
     // participle in the slot — "21 = 16+4+1 +1 dividit per 8" — and FLEURS's parallel aspect-ratio sentence,
     // which performs a division aloud in 57 of its 67 languages, has the Catalan translator writing the gerund
     // of the same verb ("dividint per dotze"). Both are attested; the participle is the neutral sign reading,
     // since the gerund is inflected for its clause rather than for the notation.
-    s = s.replace(/(\S)\s*÷\s*(\S)/gu, "$1 dividit per $2");
-    s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 és menor que $2");
-    s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 és major que $2");
-    s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 per $2");
+    s = tr(s, /(\S)\s*÷\s*(\S)/gu, "$1 dividit per $2");
+    s = tr(s, /(\d)\s*<\s*(\d)/gu, "$1 és menor que $2");
+    s = tr(s, /(\d)\s*>\s*(\d)/gu, "$1 és major que $2");
+    s = tr(s, /(\d)\s*×\s*(\d)/gu, "$1 per $2");
 
     // 11) INITIALISMS, LAST of the letter rules: it must run after the era markers (else dC → *de ce*)
     //     and after the dotted-capital rule.

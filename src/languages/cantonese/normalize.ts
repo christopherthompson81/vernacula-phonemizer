@@ -35,6 +35,7 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
 import { degroupThousands, HAN_DIGITS, spellHanDigits, readDegrees, reorderFraction } from "../../core/sinitic.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** 0–9 as Han numerals — RE-EXPORTED FROM `core/sinitic.ts`, not declared here.
  *  ⚠ There were THREE identical copies of this table (yue, wuu, core) until the extraction, which is the
@@ -78,20 +79,20 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // FIRST, so exactly one representation reaches every rule below. ⚠ The ％ arm is now REDUNDANT — the shared
     // tier reads all three percent signs itself (see the header) — but `／` → `/` is not: step 6's fraction rule
     // matches an ASCII slash, and CJK text writes the full-width one.
-    s = s.replace(/％/gu, "%").replace(/／/gu, "/");
+    s = tr(tr(s, /％/gu, "%"), /／/gu, "/");
 
     // ── 1b. the plus sign ───────────────────────────────────────────────────────────────────────
     // 加 reads kaː˥. Spaced on both sides for the same reason the ampersand cell is: an adjacent initialism
     // (「UTC 加一」) would otherwise fuse into one token.
     // ⚠ BEFORE THE DEGREE RULES, or the degree pattern consumes the sign's operand and this can no longer match.
-    s = s.replace(/\s*\+\s*(?=\d)/gu, " 加 ");
+    s = tr(s, /\s*\+\s*(?=\d)/gu, " 加 ");
 
     // ── 1c. relational and division signs ───────────────────────────────────────────────────────
     // Spaced on both sides for the reason the 加 rule gives: an adjacent initialism would otherwise fuse.
-    s = s.replace(/\s*=\s*/gu, " 等於 ");
-    s = s.replace(/\s*<\s*/gu, " 小於 ");
-    s = s.replace(/\s*>\s*/gu, " 大於 ");
-    s = s.replace(/\s*÷\s*/gu, " 除以 ");
+    s = tr(s, /\s*=\s*/gu, " 等於 ");
+    s = tr(s, /\s*<\s*/gu, " 小於 ");
+    s = tr(s, /\s*>\s*/gu, " 大於 ");
+    s = tr(s, /\s*÷\s*/gu, " 除以 ");
 
     // ── 1d. degrees ─────────────────────────────────────────────────────────────────────────────
     // `20℃` read as "二十 C" — the sign DROPPED and the scale letter spelled out by the Latin fallback, which
@@ -109,7 +110,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // and `\s*` in wu/nan, so `20  °C` lost its unit in Cantonese and nowhere else, reading the scale
     // letter as an English letter name. One character, four near-copies, no test able to see it.
     s = readDegrees(s, { celsius: (n) => `攝氏${n}度`, fahrenheit: (n) => `華氏${n}度` });
-    s = s.replace(/(\d+)\s*°/gu, "$1度");
+    s = tr(s, /(\d+)\s*°/gu, "$1度");
 
     // ── 2. de-group thousands separators ─────────────────────────────────────────────────────────
     // ⚠ BEFORE EVERYTHING ELSE. A grouping comma is otherwise read as clause punctuation, and worse: the
@@ -125,7 +126,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // 至-joined pair of 4-digit numbers is otherwise a quantity range; the written connective is kept rather
     // than replaced. Without this arm the left endpoint stays a cardinal while step 4 gives the right one the
     // digit reading — the same split, one form later.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,])(\d{4})\s*([-–—])\s*(\d{4})(?![\d]|[.,]\d)|(?<![\d.,])(\d{4})\s*([至到])\s*(\d{4})(?![\d.,])(?=\s*年)/gu,
         (_m, a1: string, _d: string, b1: string, a2: string, conn: string, b2: string) =>
             a1 !== undefined
@@ -138,7 +139,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // read DIGIT BY DIGIT — 2009 年 is 二零零九年, not the cardinal 二千零九年.
     // ⚠ THE 年 MUST BE FOUND ACROSS WHITESPACE: Han corpora routinely write "2009 年" with a space, and that
     // exact detail silently defeated the same rule in Mandarin.
-    s = s.replace(/(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)/gu, (_m, y: string) => spellDigits(y));
+    s = tr(s, /(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)/gu, (_m, y: string) => spellDigits(y));
 
     // ── 5. clock times ───────────────────────────────────────────────────────────────────────────
     // BEFORE the decimal rule and before the shared symbol tier: a bare-number rule must not claim either half
@@ -146,7 +147,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // (10:00 → 十點). Digits are LEFT as digits so the engine's own cardinal composition reads them — which is
     // also what strips a written leading zero (06:30 → 6點30分 → 六點三十分). a.m./p.m. become the 上午/下午
     // PREFIX and are consumed here, which also keeps their stray letters off the English path.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d:])(\d{1,2}):([0-5]\d)(?![\d:])(?:\s*([ap])\s*\.?\s*m\s*\.?(?![\p{L}\p{M}]))?/giu,
         (_m, h: string, mm: string, ap: string | undefined) => {
             const pre = ap === undefined ? "" : ap.toLowerCase() === "a" ? "上午" : "下午";
@@ -175,7 +176,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // AFTER the clock (step 5) and year (step 4) rules, so no period they own is still in play, and after
     // step 7. ⚠ The separator is 點 and the FRACTIONAL part is read DIGIT BY DIGIT — 6.34 is 六點三四, never
     // 六點三十四 — so it is written out as Han here while the integer part stays a digit for the cardinal path.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int}點${spellDigits(frac)}`,
     );
@@ -185,7 +186,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // (1200 間 must not become 120兩間). Cantonese counts with 兩 loeng5 before a classifier, not 二.
     // ⚠ 月 and 日 are deliberately NOT in the manifest's inventory — "2 月" is February, which is 二月.
     if (measureWords !== "")
-        s = s.replace(
+        s = tr(s,
             new RegExp(`(?<![\\d.,])2(?=\\s*[${measureWords}])`, "gu"),
             "兩",
         );

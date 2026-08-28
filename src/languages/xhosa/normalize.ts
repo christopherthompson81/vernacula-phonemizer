@@ -27,6 +27,7 @@
  */
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** The manifest's own connective series (`nanye` … `nethoba`): units 1–9 already have their na- form. */
 const NA = MANIFEST.numbers.na;
@@ -164,7 +165,7 @@ export function normalizeXhosa(input: string): string {
 
     // 1) HTML ENTITY, then the bare ampersand → `kunye` ("and"). The entity must go first or `&amp;` becomes
     //    "kunye amp ;".
-    s = s.replace(/&amp;/giu, "&").replace(/&/gu, " kunye ");
+    s = tr(tr(s, /&amp;/giu, "&"), /&/gu, " kunye ");
 
     // 2) DOTTED CAPITAL RUNS → the bare letters, BEFORE anything else reads an interior dot as a phrase
     //    break (multi-dot abbreviations before single-dot).
@@ -172,20 +173,20 @@ export function normalizeXhosa(input: string): string {
     //    sentence break. Three cases, disambiguated by what follows: a letter with NO space is a glued word
     //    (`U.S.Geological` → "US Geological"); a space then a capital, or end of input, is a sentence end
     //    (keep the dot); anything else is mid-sentence (drop it).
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.){2,}/gu, (run, off: number, full: string) => {
+    s = tr(s, /(?<![\p{L}\p{M}])(?:\p{Lu}\.){2,}/gu, (run, off: number, full: string) => {
         const letters = run.replace(/\./gu, "");
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `; // glued next word
         return rest === "" || /^[ \u00a0]+\p{Lu}/u.test(rest) ? `${letters}.` : letters;  // space, NBSP
     });
     //    `U.S House` — one dot, so the run above cannot claim it.
-    s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})\.(\p{Lu})(?![\p{L}\p{M}])/gu, "$1$2");
+    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})\.(\p{Lu})(?![\p{L}\p{M}])/gu, "$1$2");
     //    A personal initial glued to the name, where the dot was reading as a full stop.
     //    ⚠ THE LOOKBEHIND EXCLUDES ONLY AN UPPERCASE LETTER, not any letter: Xhosa glues its subject prefix
     //    on the front (`uN.Wayne`), so the `(?<![\p{L}\p{M}])` guard core/initialisms.ts uses declines it.
     //    The dangerous shape — a sentence ending in a lone capital before a new one — is still excluded,
     //    because the lookahead requires the next capital to be GLUED to the dot with no space.
-    s = s.replace(/(?<![\p{Lu}\p{M}])(\p{Lu})\.(?=\p{Lu}\p{Ll})/gu, "$1 ");
+    s = tr(s, /(?<![\p{Lu}\p{M}])(\p{Lu})\.(?=\p{Lu}\p{Ll})/gu, "$1 ");
 
     // 3) ABBREVIATIONS. `Mnu.` → `Mnumzana`, requiring a following capitalised name so the token cannot be
     //    claimed inside anything else. `Jr.` has no Xhosa reading to give it, so only its DOT is removed, and
@@ -198,11 +199,11 @@ export function normalizeXhosa(input: string): string {
     //    and sentence-initial `UMnu.` — so simply dropping `i` would stop the third expanding. Both letters
     //    of the concord are therefore written out. Cost, counted: 5 corpus lines change and all five are
     //    FLEURS' all-lowercase column 4 (`umnu reid`), which is a transcript artifact, not Xhosa text.
-    s = s.replace(/(?<![\p{L}\p{M}])([uU]?)Mnu\.?(?=[ \u00a0]\p{Lu})/gu, "$1Mnumzana");  // space, NBSP
-    s = s.replace(/(?<![\p{L}\p{M}])Jr\.(?=[ \u00a0]\p{Ll})/gu, "Jr");  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])([uU]?)Mnu\.?(?=[ \u00a0]\p{Lu})/gu, "$1Mnumzana");  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])Jr\.(?=[ \u00a0]\p{Ll})/gu, "Jr");  // space, NBSP
     // `njl.` / `njll.` is *njalonjalo* ("et cetera") — corpus: `izinto zokuthutha, njll.`, previously
     // the cluster [ɲd͡ʒ̤l] plus a leaked break. Dot optional: FLEURS strips it.
-    s = s.replace(/(?<![\p{L}\p{M}])njll?\.?(?![\p{L}\p{M}])/giu, "njalonjalo");
+    s = tr(s, /(?<![\p{L}\p{M}])njll?\.?(?![\p{L}\p{M}])/giu, "njalonjalo");
 
     // 4) THOUSANDS DE-GROUPING, before anything else numeric: the grouping comma reads as clause punctuation
     //    and the tail as a separate number, so `11,000` ends in *iqanda* ("egg"). Exactly three digits per
@@ -212,10 +213,10 @@ export function normalizeXhosa(input: string): string {
     //    followed by a CLAUSE comma or a sentence period declines to de-group, and the leftover comma is then
     //    read as a decimal separator by step 6 — `¥130,000,` comes out "one hundred and thirty zero zero zero
     //    yen". The guard only needs to stop a PARTIAL grouped match (`1,234` inside `1,234,5`), i.e. `,\d`.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
     //    SPACE grouping. The shared tier's `NUM` understands it but the TOKEN does not, so `6 500` reads
     //    "six five hundred". Blocks of exactly three digits, or "30 9" would fuse two unrelated numbers.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d])/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d])/gu,  // space, NBSP, NNBSP, thin space
         (whole) => whole.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) THE CURRENCY SIGN, PRISED OFF ITS CONCORD PREFIX. ⚠ The shared tier is letter-bounded on the left,
@@ -227,8 +228,8 @@ export function normalizeXhosa(input: string): string {
     //    ⚠ THE SPLIT MUST RUN BEFORE THE JOIN. The other way round the join is silently undone: the split's
     //    lookbehind is any letter, so it fires again on the `S` of a freshly joined `US$` and re-inserts the
     //    space, leaving `i-US $14.7` for the tier to match as a bare `$`.
-    s = s.replace(/(?<=[\p{L}\p{M}])(?=(?:US|AUD)?[$£¥€][ \u00a0]?\d)/gu, " ");  // space, NBSP
-    s = s.replace(/(?<![\p{L}\p{M}])(US|AUD)[ \u00a0]+(?=[$£¥€][ \u00a0]?\d)/gu, "$1");  // space, NBSP
+    s = tr(s, /(?<=[\p{L}\p{M}])(?=(?:US|AUD)?[$£¥€][ \u00a0]?\d)/gu, " ");  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(US|AUD)[ \u00a0]+(?=[$£¥€][ \u00a0]?\d)/gu, "$1");  // space, NBSP
 
     // 6) A DECIMAL CARRYING A CURRENCY SIGN OR A UNIT must claim it here. Step 15 turns `14.7` into `14 7`,
     //    which destroys the number adjacency the shared tier matches on, so `US$ 14.7 yezigidi` would read
@@ -236,13 +237,13 @@ export function normalizeXhosa(input: string): string {
     //    ⚠ A COMMA IS A DECIMAL SEPARATOR ONLY WITH A 1–2 DIGIT TAIL, the same discipline step 15 uses:
     //    without it these two rules eat a grouped thousand that step 4 declined.
     const decimal = (sep: string, frac: string): boolean => sep === "." || frac.length <= 2;
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(US\\$|AUD\\$|[$£¥])[ \u00a0]?(\\d+)([.,])(\\d+)((?:[ \u00a0](?:${MAG_ALT}))?)`, "gu"),  // space, NBSP
         (whole, sym: string, int: string, sep: string, frac: string, mag: string) =>
             decimal(sep, frac)
                 ? `${spell(int, frac)}${mag} ${CUR_WORD[sym] ?? ""}`.replace(/[ \u00a0]+$/u, "")  // space, NBSP
                 : whole);
-    s = s.replace(/(?<![\d.,])(\d+)([.,])(\d+)[ \u00a0]?(km|mm|cm|kg|mi|m)(?![\p{L}\p{M}'’ʼ])/gu,  // space, NBSP
+    s = tr(s, /(?<![\d.,])(\d+)([.,])(\d+)[ \u00a0]?(km|mm|cm|kg|mi|m)(?![\p{L}\p{M}'’ʼ])/gu,  // space, NBSP
         (whole, int: string, sep: string, frac: string, u: string) =>
             decimal(sep, frac) ? `${spell(int, frac)} ${UNIT_WORD[u]!}` : whole);
 
@@ -251,7 +252,7 @@ export function normalizeXhosa(input: string): string {
     //    would then spell both sides out with the hyphen dropped and no joiner at all.
     //    NOT ascending-gated: a decimal pair is never a score, and the attested span counts backwards in time
     //    (4.2 to 3.9 million years ago).
-    s = s.replace(/(?<![\d.,])(\d+\.\d+)[ \u00a0]?[-–][ \u00a0]?(\d+\.\d+)(?![\d.])/gu, "$1 ukuya ku $2");  // space, NBSP
+    s = tr(s, /(?<![\d.,])(\d+\.\d+)[ \u00a0]?[-–][ \u00a0]?(\d+\.\d+)(?![\d.])/gu, "$1 ukuya ku $2");  // space, NBSP
 
     // 8) THE CLOCK, colon form — the one rule that must produce WORDS (see the header). A clock is sometimes
     //    written with a SPACE after the colon (`10: 00`), hence `[ \u00a0]?`.
@@ -264,7 +265,7 @@ export function normalizeXhosa(input: string): string {
     //    `9:30 amaXhosa` matched ` Am` and read *…namashumi amathathu kusasa*+`aXhosa` — a word destroyed and
     //    a spurious "in the morning" emitted. ×0 attested; the neighbour is ordinary Xhosa, and the pseudo-word
     //    it leaves is invisible to every leak and DROP class.
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![:.\d])(?:[ \u00a0]*([AaPp])\.?[Mm]\.?(?![\p{L}\p{M}]))?/gu,  // space, NBSP
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![:.\d])(?:[ \u00a0]*([AaPp])\.?[Mm]\.?(?![\p{L}\p{M}]))?/gu,  // space, NBSP
         (whole, h: string, m: string, ap: string | undefined) => {
             const hv = Number(h), mv = Number(m);
             if (hv > 23 || mv > 59) return whole;
@@ -275,7 +276,7 @@ export function normalizeXhosa(input: string): string {
     // 9) THE CLOCK, DOT form before a timezone — `12.00 GMT`. The dot is otherwise a decimal; a two-digit
     //    minute field plus a timezone name is what marks it as a time. BEFORE step 15, which would otherwise
     //    read `15.00` as *ishumi nanhlanu iqanda iqanda*.
-    s = s.replace(/(?<![\d.,])(\d{1,2})\.([0-5]\d)(?![.\d])[ \u00a0]*(UTC|GMT)/gu,  // space, NBSP
+    s = tr(s, /(?<![\d.,])(\d{1,2})\.([0-5]\d)(?![.\d])[ \u00a0]*(UTC|GMT)/gu,  // space, NBSP
         (whole, h: string, m: string, tz: string) => {
             const hv = Number(h);
             return hv > 23 ? whole : `${clockWords(hv, Number(m))} ${tz}`;
@@ -288,24 +289,24 @@ export function normalizeXhosa(input: string): string {
     //     `2:2 isidanga seklasi`, i.e. every surviving instance in the corpus is a numeric relation and none
     //     is punctuation. Nothing is invented — the operands were already read as bare numbers; only the
     //     false pause goes. AFTER both clock rules, which have first claim on a colon.
-    s = s.replace(/(\d)[ \u00a0]?:[ \u00a0]?(?=\d)/gu, "$1 ");  // space, NBSP
+    s = tr(s, /(\d)[ \u00a0]?:[ \u00a0]?(?=\d)/gu, "$1 ");  // space, NBSP
 
     // 10) RANGES → `ukuya ku` ("going to"). ⚠ ASCENDING ONLY: a non-ascending `N-N` is a score (`5-3`,
     //     `26 - 00`) or a season (`1995-96`), which read as a bare juxtaposition and must keep it.
     //     Both operands stay DIGITS, so a following unit is still adjacent for step 11 and for the tier
     //     (`56-64 km/h`). AFTER de-grouping, so a grouped endpoint is already one run of digits.
-    s = s.replace(/(?<![\d.,])(\d+)[ \u00a0]?[-–][ \u00a0]?(\d+)(?![\d.,])/gu,  // space, NBSP
+    s = tr(s, /(?<![\d.,])(\d+)[ \u00a0]?[-–][ \u00a0]?(\d+)(?![\d.,])/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ukuya ku ${b}` : whole));
 
     // 11) RATES, resolved locally rather than through the tier's `unitPer` — see `PER`. Covers the glued,
     //     spaced and spaced-slash spellings (`160km/h`, `480 km/h`, `83 km / h`) plus `mph` and `kph`.
     //     Numbers stay DIGITS. BEFORE step 15, which would break the adjacency.
-    s = s.replace(/(?<![\d.,])(\d+)[ \u00a0]?(km|mi|m)[ \u00a0]*\/[ \u00a0]*(h|u|s)(?![\p{L}\p{M}])/giu,  // space, NBSP
+    s = tr(s, /(?<![\d.,])(\d+)[ \u00a0]?(km|mi|m)[ \u00a0]*\/[ \u00a0]*(h|u|s)(?![\p{L}\p{M}])/giu,  // space, NBSP
         (whole, n: string, u: string, d: string) => {
             const head = UNIT_WORD[u.toLowerCase()], per = PER[d.toLowerCase()];
             return head === undefined || per === undefined ? whole : `${n} ${head} ${per}`;
         });
-    s = s.replace(/(?<![\d.,])(\d+)[ \u00a0]?(mph|kph)(?![\p{L}\p{M}])/giu,  // space, NBSP
+    s = tr(s, /(?<![\d.,])(\d+)[ \u00a0]?(mph|kph)(?![\p{L}\p{M}])/giu,  // space, NBSP
         (_m, n: string, u: string) =>
             `${n} ${u.toLowerCase() === "kph" ? UNIT_WORD["km"]! : UNIT_WORD["mi"]!} ${PER["h"]!}`);
 
@@ -322,22 +323,22 @@ export function normalizeXhosa(input: string): string {
     //     minus. Unguarded, `kwi-30°C` — an ordinary Xhosa spelling — reads *kwi thabatha amaqondo 30*, "in
     //     minus thirty degrees".
     //     BEFORE step 13, which needs the digits intact.
-    s = s.replace(/(?<![\p{L}\p{M}\d])([+-])?(\d+)[ \u00a0]?°[ \u00a0]?[CF](?![\p{L}\p{M}])/gui,  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}\d])([+-])?(\d+)[ \u00a0]?°[ \u00a0]?[CF](?![\p{L}\p{M}])/gui,  // space, NBSP
         (_m, sign: string | undefined, n: string, off: number, full: string) => {
             const body = saidBefore(full, off, "maqondo") ? n : `amaqondo ${n}`;
             if (sign === "+") return `plas ${body}`;
             return sign === "-" ? `thabatha ${body}` : body;
         });
-    s = s.replace(/(\d+)[ \u00a0]?°[ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu, (_m, n: string, c: string, off: number, full: string) =>  // space, NBSP
+    s = tr(s, /(\d+)[ \u00a0]?°[ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu, (_m, n: string, c: string, off: number, full: string) =>  // space, NBSP
         `${saidBefore(full, off, "maqondo") ? n : `amaqondo ${n}`} ${COMPASS[c]!}`);
-    s = s.replace(/(\d+)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, (_m, n: string, off: number, full: string) =>  // space, NBSP
+    s = tr(s, /(\d+)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, (_m, n: string, off: number, full: string) =>  // space, NBSP
         saidBefore(full, off, "maqondo") ? n : `amaqondo ${n}`);
 
     // 13) THE ENGLISH ORDINAL SUFFIX (`15th`, `17th-century`). Such a form already carries its Xhosa concord
     //     in the text — *ngesenturi ye 16th* — so the Latin suffix is redundant orthography, and it was
     //     reaching the phoneme stream as a bare [tʰ]. Stripping it is the whole fix; no ordinal morphology is
     //     invented, because Xhosa's is written and is written here. Case-insensitive.
-    s = s.replace(/(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+    s = tr(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 14) RELATIONAL AND ARITHMETIC SIGNS. A dropped sign is INAUDIBLE — the one outcome that cannot be
     //     right — so these are read even where the corpus has no instance. AFTER step 10, so no range dash
@@ -349,27 +350,27 @@ export function normalizeXhosa(input: string): string {
     //     · `-` is read only where it cannot be a compound hyphen or a stray dash: nothing alphanumeric
     //       before it, AND not a space that itself follows a word. `ebhudla kangange -40 mph` renders "winds
     //       blowing at 40 mph", so reading that hyphen as *thabatha* would be confidently wrong.
-    s = s.replace(/[ \u00a0]*[=≈][ \u00a0]*/gu, " lilingana ne ");  // space, NBSP
-    s = s.replace(/[ \u00a0]*<[ \u00a0]*/gu, " ngaphantsi kuna ");  // space, NBSP
-    s = s.replace(/[ \u00a0]*>[ \u00a0]*/gu, " ngaphezulu kuna ");  // space, NBSP
-    s = s.replace(/(\d)[ \u00a0]*×[ \u00a0]*(?=\d)/gu, "$1 phindaphinda ");  // space, NBSP
-    s = s.replace(/[ \u00a0]*÷[ \u00a0]*/gu, " yahlula ");  // space, NBSP
+    s = tr(s, /[ \u00a0]*[=≈][ \u00a0]*/gu, " lilingana ne ");  // space, NBSP
+    s = tr(s, /[ \u00a0]*<[ \u00a0]*/gu, " ngaphantsi kuna ");  // space, NBSP
+    s = tr(s, /[ \u00a0]*>[ \u00a0]*/gu, " ngaphezulu kuna ");  // space, NBSP
+    s = tr(s, /(\d)[ \u00a0]*×[ \u00a0]*(?=\d)/gu, "$1 phindaphinda ");  // space, NBSP
+    s = tr(s, /[ \u00a0]*÷[ \u00a0]*/gu, " yahlula ");  // space, NBSP
     //     ⚠ `+` BETWEEN OPERANDS IS `plas`, NOT `dibanisa`. `dibanisa` is the dictionary's ADDITION OPERATOR
     //     and a correct gloss of the symbol; it is not what a reader says in `UTC+1`, which takes the English
     //     loan. Spelled `plas` and not `plus` because this orthography is phonemic and the attested vowel is
     //     [a] — `plus` would read pʼlˈuːs. The conventional isiXhosa spelling of the loan is unsourced; this
     //     one is chosen to reproduce the phones.
-    s = s.replace(/(?<=[\p{L}\d])\+(?=\d)/gu, " plas ");
-    s = s.replace(/(?<![\p{L}\p{M}\d])\+[ \u00a0]?(?=\d)/gu, "plas ");  // space, NBSP
-    s = s.replace(/(?<![\p{L}\p{M}\d])(?<![\p{L}\p{M}][ \u00a0])[-−](?=\d)/gu, "thabatha ");  // space, NBSP
+    s = tr(s, /(?<=[\p{L}\d])\+(?=\d)/gu, " plas ");
+    s = tr(s, /(?<![\p{L}\p{M}\d])\+[ \u00a0]?(?=\d)/gu, "plas ");  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}\d])(?<![\p{L}\p{M}][ \u00a0])[-−](?=\d)/gu, "thabatha ");  // space, NBSP
 
     // 15) DECIMALS, LAST of the numeric rules — steps 6 to 12 all need the number intact. The dot was
     //     reaching `clausePunctuation` and becoming a SENTENCE BREAK inside a number. NO separator word is
     //     emitted; see the header.
     //     The comma arm is restricted to a 1–2 digit tail so a date comma (`Novemba 26,2008`) cannot be
     //     swallowed.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d])/gu, (_m, int: string, frac: string) => spell(int, frac));
-    s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, int: string, frac: string) => spell(int, frac));
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d])/gu, (_m, int: string, frac: string) => spell(int, frac));
+    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, int: string, frac: string) => spell(int, frac));
 
     // INITIALISMS LAST. Every rule above owns capitals of its own — `US$`, `°C`, `B.C.`, `sq mi` — and
     // spelling them out first would take those away, which is exactly what happened when this ran early.

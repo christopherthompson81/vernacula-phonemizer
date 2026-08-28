@@ -56,6 +56,7 @@
  *     them is attested anywhere.
  */
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** The manifest's own conjunction — the number joiner (*khumi NDI chimodzi*), reused for `&` and for the
  *  clock's hour/minute link. Read from the manifest so the two can never drift apart. */
@@ -138,10 +139,10 @@ export function normalizeChichewa(input: string): string {
     //    `&nbsp;`, a non-breaking-space entity that is not a conjunction at all, and the tier would emit
     //    "ndi nbsp" for every one. The entity table has to be consulted BEFORE the sign is read, and only
     //    a local step can sequence that.
-    s = s.replace(/&nbsp;/giu, " ").replace(/&amp;/giu, "&");
+    s = tr(tr(s, /&nbsp;/giu, " "), /&amp;/giu, "&");
     //    ⚠ SPACED ON BOTH SIDES, always: `T&T` is two initialisms and gluing the word in fuses them into
     //    one token — the merge defect of trap 18.
-    s = s.replace(/&/gu, ` ${AND} `);
+    s = tr(s, /&/gu, ` ${AND} `);
 
     // 2) DOTTED CAPITAL RUNS → the bare letters, BEFORE anything reads an interior dot as a phrase break
     //    (multi-dot abbreviations before single-dot). 25 runs in the corpus (`U.S.`, `B.C.E`, `F.F.`,
@@ -153,7 +154,7 @@ export function normalizeChichewa(input: string): string {
     //    ⚠ THE OPTIONAL TRAILING CAPITAL is what makes `B.C.E` — the corpus's commonest era spelling, and
     //    dotless on its last letter — come out `BCE` rather than `BC E`. It is bounded by `(?![\p{L}])`,
     //    so it cannot reach into the next word: `U.S. Census` keeps its `Census` intact.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {  // space, NBSP
         const letters = run.replace(/[. \u00a0]/gu, "");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
@@ -179,7 +180,7 @@ export function normalizeChichewa(input: string): string {
     //    text already said *mmawa* and deleting it would lose a word the writer typed.
     //    ⚠ BEFORE step 4 and step 10: de-grouping and the decimal rule must not see a colon operand, and
     //    `:` is `clausePunctuation`, so every one of these was reading as a comma pause mid-number.
-    s = s.replace(
+    s = tr(s,
         new RegExp(
             `(?<![\\d:.,])([01]?\\d|2[0-3]):[ \u00a0]?([0-5]\\d)(?![:.\\d])` +  // NBSP
                 `(?:[ \u00a0]*(?:([AaPp])\\.?[Mm]\\.?|(${TZ})(?![\\p{L}\\p{M}])|(${DAYPART})(?![\\p{L}\\p{M}])))`,  // space, NBSP
@@ -208,9 +209,9 @@ export function normalizeChichewa(input: string): string {
     //    ⚠ THE TRAILING GUARD IS `(?![\d]|[.,][\d])`, NOT `(?![\d.,])`: with the wider form a grouped number
     //    followed by a CLAUSE comma or a sentence period declines to de-group, and the leftover separator
     //    is then read as a decimal by step 10. It only needs to stop a PARTIAL match inside a longer run.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) DEGREES. `40 °C (104.0 °F)`, `25 ° S`, and a bare `30 °`. The sign was dropped outright and the
     //    scale letter reached the g2p as a phoneme — `C` as [k] and `F` as [f], because Chichewa has no
@@ -226,25 +227,25 @@ export function normalizeChichewa(input: string): string {
     //    BEFORE step 10, which needs `104.0` intact to be recognised as the Fahrenheit reading's operand.
     const degreeBody = (n: string, off: number, end: number, full: string): string =>
         saidNear(full, off, end, DEGREE) ? n : `${DEGREE} ${n}`;
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?[CF](?![\p{L}\p{M}])/gui,  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?[CF](?![\p{L}\p{M}])/gui,  // space, NBSP
         (w, n: string, off: number, full: string) => degreeBody(n, off, off + w.length, full));
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?°[ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
         (w, n: string, c: string, off: number, full: string) =>
             `${degreeBody(n, off, off + w.length, full)} ${COMPASS[c]!}`);
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu,  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu,  // space, NBSP
         (w, n: string, off: number, full: string) => degreeBody(n, off, off + w.length, full));
 
     // 6) BARE `m` → *mamita*, the key the shared tier cannot hold — see METRE above for the 6-against-3
     //    measurement. AFTER step 4 (so `10,000 m` is one digit run by now) and BEFORE step 10.
     //    Prefix position, matching every other measure noun in the language (*mamita 1,708*).
-    s = s.replace(/(?<![\d.,])(\d+)[ \u00a0]?m(?![\p{L}\p{M}'’ʼ0-9])/gu, `${METRE} $1`);  // space, NBSP
+    s = tr(s, /(?<![\d.,])(\d+)[ \u00a0]?m(?![\p{L}\p{M}'’ʼ0-9])/gu, `${METRE} $1`);  // space, NBSP
 
     // 7) THE ENGLISH ORDINAL SUFFIX (`20th century`, `3rd`, `2nd`). Chichewa writes its own ordinals as
     //    WORDS — *wachiwiri*, *lachisanu*, *zaka za zana la 16* — so a Latin suffix here is always foreign
     //    orthography sitting on a digit, and it was reaching the phoneme stream as a bare [tʰ]. Stripping
     //    it is the whole fix; no ordinal morphology is invented, because Chichewa's is already written out
     //    wherever the language means it. Case-insensitive (trap 7).
-    s = s.replace(/(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+    s = tr(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 8) RANGES → `mpaka` ("until/up to"), the corpus's own span joiner: 31 digit-flanked instances
     //    (*masiku 10 mpaka 12*, *17 mpaka 25.5 g*, *kuyambira 1994 mpaka 2004*, *52% mpaka 48%*). Nothing
@@ -273,7 +274,7 @@ export function normalizeChichewa(input: string): string {
     //    `30-40,000`; and the ASCENDING-ONLY test above is what declines the truncated second endpoints a
     //    comma would otherwise be guarding by accident (`2018-19,`, `2015–16,`, `2009-10,`, `2-0,`).
     //    +3 segments, all genuine spans, no regression.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}])/gu,  // space, NBSP
+    s = tr(s, /(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}])/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} mpaka ${b}` : whole));
 
     // 9) A LONE `+` BETWEEN OPERANDS IS LEFT UNREAD, deliberately — `(UTC + 7)`, `(GMT+1)`, 2 instances.
@@ -288,8 +289,8 @@ export function normalizeChichewa(input: string): string {
     //     ⚠ BOTH SEPARATORS, both restricted to a 1–2 digit tail — the same discipline step 4 uses from the
     //     other side. Without the tail limit these two arms would swallow any grouped thousand step 4
     //     declined (a date comma, `Novembala 26,2008`, has a four-digit tail and is excluded by both).
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
-    s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, f));
 
     // ⚠ A padded replacement (` ndi `, `letters `) doubles a space that was already there and can leave one
     // at an edge. SLOT-GAP is a corpus-diff defect class; this pass must not feed it.

@@ -146,6 +146,7 @@
 
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -374,7 +375,7 @@ export function normalizeFinnish(input: string): string {
     //    `4 096 × 2 304` stays two numbers around its multiplication sign).
     do {
         prev = t;
-        t = t.replace(/(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     } while (t !== prev);
 
     // 2) DOTTED ABBREVIATIONS (630) — multi-dot before single-dot (playbook step 4), era markers before
@@ -389,7 +390,7 @@ export function normalizeFinnish(input: string): string {
     //    The `keepFinal` arm re-emits the period when the abbreviation ends a sentence, which is the only
     //    place in this file a period is consumed at all: `noin 2100 eaa. Urissa asui…` keeps its break.
     for (const [re, word, keepFinal] of ABBREV)
-        t = t.replace(re, (m: string, ...rest: unknown[]) => {
+        t = tr(t, re, (m: string, ...rest: unknown[]) => {
             if (!keepFinal || !m.endsWith(".")) return word;
             const at = rest[rest.length - 2] as number;
             const whole = rest[rest.length - 1] as string;
@@ -403,14 +404,14 @@ export function normalizeFinnish(input: string): string {
     //    keeps a version string or a figure number out: `H.264` has one dot, and nothing in this corpus
     //    writes `d.d.d` with a field above 31/12. The YEAR stays as DIGITS so the cardinal compositor
     //    reads it (trap 20 — and here the engine's own rules do the right thing with it).
-    t = t.replace(
+    t = tr(t,
         /(?<![\d.,:])(\d{1,2})\.(\d{1,2})\.(\d{4})(?!\d)/gu,
         (m, d: string, mo: string, y: string) =>
             isDay(Number(d)) && isMonth(Number(mo)) && ordinal(Number(d)) !== undefined
                 ? `${ordinal(Number(d))!} ${MONTHS[Number(mo)]!} ${y}`
                 : m,
     );
-    t = t.replace(/(?<![\d.,:])(\d{1,2})\.(\d{1,2})\.(?!\d)/gu, (m, d: string, mo: string) =>
+    t = tr(t, /(?<![\d.,:])(\d{1,2})\.(\d{1,2})\.(?!\d)/gu, (m, d: string, mo: string) =>
         isDay(Number(d)) && isMonth(Number(mo)) && ordinal(Number(d)) !== undefined
             ? `${ordinal(Number(d))!} ${MONTHS[Number(mo)]!}`
             : m);
@@ -440,21 +441,21 @@ export function normalizeFinnish(input: string): string {
     //    so the marker licenses both operands — which means it has to run BEFORE the single arm, or that
     //    arm has already rewritten `6.30` and the lookbehind no longer sees a digit to anchor on. Written
     //    the other way round first, and it silently claimed nothing.
-    t = t.replace(
+    t = tr(t,
         /(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(\s+ja\s+)(\d{1,2})[.:](\d{2})(?![\d.,])/giu,
         (m, h1: string, m1: string, sep: string, h2: string, m2: string) => {
             const a = clockBody(h1, m1), b = clockBody(h2, m2);
             return a !== undefined && b !== undefined ? `${a}${sep}${b}` : m;
         },
     );
-    t = t.replace(
+    t = tr(t,
         /(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(?![\d.,])/giu,
         (m, h: string, mm: string) => clockBody(h, mm) ?? m,
     );
     //    4b) THE PARENTHETICAL TIMEZONE GLOSS. `(2.30 UTC)`, `(15.00 koordinoitua yleisaikaa)` — keyed on
     //    the ZONE NAME rather than on the bracket, because a bracket alone licenses nothing. `koordinoitua`
     //    is the corpus's own spelling-out of UTC and is what the second instance carries.
-    t = t.replace(
+    t = tr(t,
         /(?<=\()(\d{1,2})[.:](\d{2})(?=\s+(?:UTC|GMT|EET|EEST|koordinoitua)(?![\p{L}\p{M}]))/giu,
         (m, h: string, mm: string) => clockBody(h, mm) ?? m,
     );
@@ -469,14 +470,14 @@ export function normalizeFinnish(input: string): string {
     //    by a month or a lowercase word, so the single rule would strand it and read it as a cardinal.
     //    Only the connective is refused (see the header); both ordinals are still read.
     const ordTail = `(?=\\s+(?:${MONTH_LOOKAHEAD}|\\p{Ll}))`;
-    t = t.replace(
+    t = tr(t,
         new RegExp(`(?<![\\d.,:\\p{L}])(\\d{1,3})\\.\\s*[–—-]\\s*(\\d{1,3})\\.${ordTail}`, "gu"),
         (m, a: string, b: string) => {
             const x = ordinal(Number(a)), y = ordinal(Number(b));
             return x !== undefined && y !== undefined ? `${x} ${y}` : m;
         },
     );
-    t = t.replace(
+    t = tr(t,
         new RegExp(`(?<![\\d.,:\\p{L}])(\\d{1,3})\\.${ordTail}`, "gu"),
         (m, n: string) => ordinal(Number(n)) ?? m,
     );
@@ -486,7 +487,7 @@ export function normalizeFinnish(input: string): string {
     //    purpose: `9:nnen`, `11:nneksi`, `1:sten`, `30:nneksi` are oblique and Finnish puts the case
     //    marker INSIDE the compound (`yhdenneksitoista`), which no in-repo source carries — see the
     //    header. Those fall through to step 6.
-    t = t.replace(/(?<![\d.,:])(\d{1,3}):s(?![\p{L}\p{M}])/gu, (m, n: string) => ordinal(Number(n)) ?? m);
+    t = tr(t, /(?<![\d.,:])(\d{1,3}):s(?![\p{L}\p{M}])/gu, (m, n: string) => ordinal(Number(n)) ?? m);
 
     // 7) THE REMAINING COLON SUFFIXES — the PRICED REFUSAL (header). The colon is a morpheme joint and
     //    `clausePunctuation` reads it as a clause pause, so `172001:stä` came out with a sentence break
@@ -505,11 +506,11 @@ export function normalizeFinnish(input: string): string {
     //    ⚠ INITIALISMS ARE NOT TOUCHED HERE. `resolveColonInflection` below owns those, because there the
     //    suffix has to be glued to the last LETTER NAME (`CIA:n` → *see ii aan*), which does not exist
     //    until the letters have been spelled.
-    t = t.replace(/(?<=\d)\s*:(?=[a-zåäö])/gu, "");
+    t = tr(t, /(?<=\d)\s*:(?=[a-zåäö])/gu, "");
     // ⚠ `[a-zåäö]` is the Finnish case suffix and is lowercase-only; `i` folds it, so the lowercase
     //    scale letters go in the lookbehind's class instead of into the flags.
-    t = t.replace(/(?<=[%²³]|°[CFcf])\s*:[a-zåäö]+(?![\p{L}\p{M}])/gu, "");
-    t = t.replace(/(?<=\d\s?(?:kg|km|cm|mm|m))\s*:[a-zåäö]+(?![\p{L}\p{M}])/gu, "");
+    t = tr(t, /(?<=[%²³]|°[CFcf])\s*:[a-zåäö]+(?![\p{L}\p{M}])/gu, "");
+    t = tr(t, /(?<=\d\s?(?:kg|km|cm|mm|m))\s*:[a-zåäö]+(?![\p{L}\p{M}])/gu, "");
 
     // 8) THE APOSTROPHE GENITIVE (4 in the retained text; the `quote-letter` cell is 87). Finnish joins a
     //    case ending to a foreign name with an apostrophe — `Perrault’n`, `Renault'lla`, `Illinois’n` —
@@ -518,7 +519,7 @@ export function normalizeFinnish(input: string): string {
     //    boundary — `raa'asti`, `vaa'an` — where gluing would create a spurious long vowel. Every corpus
     //    instance of the genitive joint follows a consonant and every hiatus mark sits between two
     //    identical vowels, so the guard is exact on this corpus and errs toward doing nothing.
-    t = t.replace(/(?<=[bcdfghjklmnpqrstvwxz])['’](?=[a-zåäö]{1,4}(?![\p{L}\p{M}]))/giu, "");
+    t = tr(t, /(?<=[bcdfghjklmnpqrstvwxz])['’](?=[a-zåäö]{1,4}(?![\p{L}\p{M}]))/giu, "");
 
     // 9) THE DECIMAL COMMA (430; 152 in the retained text) — the second-largest defect. `clausePunctuation`
     //    maps `,` to a pause, so `50,7 %` read *viisikymmentä [PAUSE] seitsemän*: a sentence break inside
@@ -534,7 +535,7 @@ export function normalizeFinnish(input: string): string {
     //    composed *sataneljäkymmentäyksi*.
     //
     //    AFTER steps 2–5, every one of which needs to see an unbroken digit run, and BEFORE the tier.
-    t = t.replace(/(\d),(\d+)(?!\d)/gu, (_m, int: string, frac: string) =>
+    t = tr(t, /(\d),(\d+)(?!\d)/gu, (_m, int: string, frac: string) =>
         `${int} ${DECIMAL_WORD} ${[...frac].join(" ")}`);
 
     // 10) DEGREES (17), BEFORE any rule that could claim the scale letter — `−34,3 °C` read the sign and
@@ -546,10 +547,10 @@ export function normalizeFinnish(input: string): string {
     //     `71° 8′ N`), where the direction letter is also unread. Reading the ring without the tick
     //     improves the degree and leaves that pre-existing gap exactly as it was rather than half-closing
     //     it (trap 53: refuse the whole match, never half of it).
-    t = t.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
-    t = t.replace(/(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 astetta");
-    t = t.replace(/(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 astetta fahrenheitia");
-    t = t.replace(/(\d)\s*°/gu, "$1 astetta");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
+    t = tr(t, /(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 astetta");
+    t = tr(t, /(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 astetta fahrenheitia");
+    t = tr(t, /(\d)\s*°/gu, "$1 astetta");
 
     // 11) THE MINUS AND PLUS SIGNS. The FLEET SHAPE, and the width is a MEASUREMENT rather than a habit
     //     (trap 24, run in the direction that BREAKS a refusal). A first draft required a following
@@ -570,9 +571,9 @@ export function normalizeFinnish(input: string): string {
     //     plus is read because Finnish weather register says it aloud (*plus kolmekymmentäkolme*) and
     //     because `UTC+1` is contentful, not because the minus needed it.
     //     The third arm is the INFIX plus — `paikkamääräänsä (156+27)`, a seat gain, ×1.
-    t = t.replace(/(?<![\p{L}\p{M}\d])[-−–](?=\d)/gu, "miinus ");
-    t = t.replace(/(?<![\p{L}\p{M}\d])\+(?=\d)/gu, "plus ");
-    t = t.replace(/(?<=\d)\s*\+\s*(?=\d)/gu, " plus ");
+    t = tr(t, /(?<![\p{L}\p{M}\d])[-−–](?=\d)/gu, "miinus ");
+    t = tr(t, /(?<![\p{L}\p{M}\d])\+(?=\d)/gu, "plus ");
+    t = tr(t, /(?<=\d)\s*\+\s*(?=\d)/gu, " plus ");
 
     // 11b) THE RELATIONAL SIGNS — ×0 in this corpus, read anyway, because a DROPPED sign is inaudible and
     //     inaudible is the one outcome that cannot be right for arbitrary input. None can misfire: none
@@ -592,12 +593,12 @@ export function normalizeFinnish(input: string): string {
     //           (`plusmiinus-tilasto`, `plusmiinus-sarakkeen näyttäessä nollaa`), a column name rather
     //           than a reading of the sign. Trap 37 / the Fula lesson, with a healthy count on the wrong
     //           slot; ± is ×0 in this corpus, so there is nothing pressing the question either.
-    t = t.replace(/=/gu, " yhtä suuri kuin ").replace(/</gu, " pienempi kuin ").replace(/>/gu, " suurempi kuin ");
+    t = tr(tr(tr(t, /=/gu, " yhtä suuri kuin "), /</gu, " pienempi kuin "), />/gu, " suurempi kuin ");
 
     // 12) THE AMPERSAND (67) — dropped outright today, so `Robinson & Cook` ran the two names together
     //     with no separation at all. Spaced on both sides, always, or `B&B` fuses into one token (the
     //     merge defect of traps 18/26). `ja` is the language's conjunction, ×717 in the corpus.
-    t = t.replace(/&amp;/gu, "&").replace(/\s*[&＆]\s*/gu, " ja ");
+    t = tr(tr(t, /&amp;/gu, "&"), /\s*[&＆]\s*/gu, " ja ");
 
     // The insertions above pad with spaces so a word never fuses with its neighbours; collapse the runs.
     return t.replace(/[ \t]{2,}/gu, " ");

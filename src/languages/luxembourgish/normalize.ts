@@ -30,6 +30,7 @@
  * sandhi is `applyEifelerRegel()` in numbers.ts, the same function the numeral connector uses.
  */
 import { applyEifelerRegel, numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** All twelve. ⚠ `Mee` is capitalised on purpose — lowercase *mee* is the conjunction "but". */
 const MONTHS = "Januar|Februar|Mäerz|Abrëll|Mee|Juni|Juli|August|September|Oktober|November|Dezember";
@@ -168,8 +169,8 @@ export function normalizeLuxembourgish(input: string): string {
     //    `1.000`/`2.500`/`130.000`/`7.000` each contain a `\d{1,2}\.\d{2}` prefix that would otherwise be
     //    claimed as a time — which is exactly this language's period ambiguity, resolved by requiring
     //    EXACTLY THREE digits after the dot for grouping and TWO for a clock.
-    s = s.replace(GROUP_DOT, (m) => m.replace(/\./gu, ""));
-    s = s.replace(GROUP_SPACE, (m) => m.replace(SPACE_ANY, ""));
+    s = tr(s, GROUP_DOT, (m) => m.replace(/\./gu, ""));
+    s = tr(s, GROUP_SPACE, (m) => m.replace(SPACE_ANY, ""));
 
     // 2) ERA markers, before the single-dot rule so their interior dot is not left behind as a phrase
     //    break (`v. Chr.`, `n. Chr.`). Three branches: the dot is consumed
@@ -177,22 +178,22 @@ export function normalizeLuxembourgish(input: string): string {
     //    and kept only when the abbreviation itself ends the utterance. One corpus instance writes
     //    `v. Chr` with no trailing dot at all, which the first branch also takes.
     for (const [ab, word] of [["v", "vir"], ["n", "no"]] as const) {
-        s = s.replace(ERA_MID(ab), `${word} Christus`);
-        s = s.replace(ERA_BEFORE_MARK(ab), `${word} Christus`);
-        s = s.replace(ERA_END(ab), `${word} Christus.`);
+        s = tr(s, ERA_MID(ab), `${word} Christus`);
+        s = tr(s, ERA_BEFORE_MARK(ab), `${word} Christus`);
+        s = tr(s, ERA_END(ab), `${word} Christus.`);
     }
 
     // 3) MULTI-DOT abbreviations (`z. B.`, `d. h.`), still before the single-dot rule.
-    s = s.replace(MULTIDOT_ZB, "zum Beispill");
-    s = s.replace(MULTIDOT_DH, "dat heescht");
+    s = tr(s, MULTIDOT_ZB, "zum Beispill");
+    s = tr(s, MULTIDOT_DH, "dat heescht");
 
     // 4) SINGLE-DOT abbreviations (×19). The dot is consumed when the sentence continues, so it cannot
     //    become a phrase break, and kept at a phrase end where it really is the sentence break — the
     //    German shape — with one extra branch, because `asw., déi` and `asw.).` would otherwise keep the
     //    abbreviation dot AND its real terminator, i.e. two pauses where the text has one.
-    s = s.replace(ABBREV_MID, (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
-    s = s.replace(ABBREV_BEFORE_MARK, (_m, ab: string) => DOTTED_ABBREV[ab.toLowerCase()]!);
-    s = s.replace(ABBREV_END, (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+    s = tr(s, ABBREV_MID, (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+    s = tr(s, ABBREV_BEFORE_MARK, (_m, ab: string) => DOTTED_ABBREV[ab.toLowerCase()]!);
+    s = tr(s, ABBREV_END, (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
 
     // 5) ORDINALS — the largest class in this file, and unclaimed they read as a cardinal plus a
     //    spurious PAUSE. Three licensing conditions (see the file header):
@@ -206,7 +207,7 @@ export function normalizeLuxembourgish(input: string): string {
     //    Before punctuation (a list comma) the ⟨n⟩ is kept, because there is a pause and no sandhi.
     //    MUST FOLLOW step 1 (`Säin 1 000. Timber` is only an ordinal once the group separator is gone)
     //    and MUST PRECEDE every rule that reads a period.
-    s = s.replace(ORD, (whole, prev: string | undefined, psp: string | undefined, digits: string,
+    s = tr(s, ORD, (whole, prev: string | undefined, psp: string | undefined, digits: string,
         offset: number, full: string) => {
         const rest = full.slice(offset + whole.length);
         const next = ORD_NEXT.exec(rest)?.[1];
@@ -228,7 +229,7 @@ export function normalizeLuxembourgish(input: string): string {
     //    or one of them restarts inside the time. The field-separating period is dropped (it is neither a
     //    decimal point nor a pause) and the comma is read as the decimal it is; no unwritten "Minutten"
     //    is invented.
-    s = s.replace(SPORTS_TIME, (_m, mm: string, ss: string, hh: string) =>
+    s = tr(s, SPORTS_TIME, (_m, mm: string, ss: string, hh: string) =>
         `${mm} ${ss} Komma ${perDigit(hh)}`);
 
     // 7) CLOCK, written with a PERIOD. Licensed by a following `Auer`/zone label or a preceding
@@ -237,7 +238,7 @@ export function normalizeLuxembourgish(input: string): string {
     //    consumed ZONE label is put back after an inserted `Auer` (`15.00 UTC` → *fofzéng Auer UTC*).
     //    ⚠ `Auer` is FEMININE, so hour 1 is *eng Auer*, never *eent Auer* — a digit
     //    could never agree, so the hour is words-ified in exactly that case (`um 1.15 Auer`, corpus ×1).
-    s = s.replace(CLOCK, (whole, prev: string | undefined, psp: string | undefined, h: string,
+    s = tr(s, CLOCK, (whole, prev: string | undefined, psp: string | undefined, h: string,
         min: string, msp: string | undefined, marker: string | undefined) => {
         if (marker === undefined && !(prev !== undefined && CLOCK_PREP.test(prev))) return whole;
         const hour = Number(h) === 1 ? "eng" : h;
@@ -251,14 +252,14 @@ export function normalizeLuxembourgish(input: string): string {
     //    version letter. THE FRACTION IS LIMITED TO ONE DIGIT on purpose: in this language a two-digit
     //    fraction after a period is the CLOCK shape (the decimal separator is the comma), so an
     //    unlicensed `20.30` is left alone rather than confidently read as *zwanzeg Komma dräi null*.
-    s = s.replace(DOT_DECIMAL, (_m, int: string, frac: string) => `${int} Komma ${perDigit(frac)}`);
+    s = tr(s, DOT_DECIMAL, (_m, int: string, frac: string) => `${int} Komma ${perDigit(frac)}`);
 
     // 9) COMMA DECIMAL — the language's own decimal separator. Unclaimed it reads as a PHRASE BREAK
     //    (`1,5 Kilometer` → *eent , fënnef …*). Digits on both sides, so a clause comma is safe.
     //    The fraction is read digit by digit (7,74 → *Komma siwen véier*), and both operands stay DIGITS
     //    so the shared tier can still see a following unit — units are resolved BEFORE decimals, and
     //    the lb unit nouns are invariant, so the integer/decimal count never changes the word either).
-    s = s.replace(COMMA_DECIMAL, (_m, int: string, frac: string) => `${int} Komma ${perDigit(frac)}`);
+    s = tr(s, COMMA_DECIMAL, (_m, int: string, frac: string) => `${int} Komma ${perDigit(frac)}`);
 
     // 10) RANGES (`1894 – 1895`, `2 – 3 km`), an en dash between nbsp. ⚠ Digits are required on BOTH
     //     sides: the same dash is far more often the PARENTHETICAL dash, which must not be touched.
@@ -267,7 +268,7 @@ export function normalizeLuxembourgish(input: string): string {
     //     operand is words-ified when and only when it needs to be. The right operand stays digits, which
     //     is what keeps the number↔unit adjacency alive for `2 – 3 km`. The operand class is anchored to
     //     end in a digit so it cannot swallow a clause comma.
-    s = s.replace(RANGE, (_m, left: string) => {
+    s = tr(s, RANGE, (_m, left: string) => {
         const words = /^\d+$/u.test(left) ? numberToWords(Number(left)) : "";
         // ⚠ Only an unstressed final ⟨-en⟩ is the rule's target — *siwen* → *siwe*, *Milliounen* →
         // *Millioune*. A bare final-⟨n⟩ test is wrong: 1 000 000 is *eng Millioun*, whose ⟨n⟩ is part of
@@ -278,40 +279,40 @@ export function normalizeLuxembourgish(input: string): string {
     // 11) MILES PER HOUR, which the shared unit tier must NOT own: ⚠ declaring `meile` as a unit rewrites
     //     an already-correct spelled-out `(31 Meile)` into `Meilen`, because the language applies the
     //     Eifeler Regel to that noun itself. Claiming only the RATE leaves the spelled-out noun alone.
-    s = s.replace(MPH, "$1 Meilen an der Stonn");
+    s = tr(s, MPH, "$1 Meilen an der Stonn");
 
     // 12) DEGREES, which the tier cannot express. The COMPASS letter (`35 °W`) is deliberately left raw —
     //     *Grad West* is unsourced — but the ° itself is still spoken rather than silently dropped.
-    s = s.replace(DEG_C, "$1 Grad Celsius");
-    s = s.replace(DEG_F, "$1 Grad Fahrenheit");
-    s = s.replace(DEG_BARE, "$1 Grad ");
+    s = tr(s, DEG_C, "$1 Grad Celsius");
+    s = tr(s, DEG_F, "$1 Grad Fahrenheit");
+    s = tr(s, DEG_BARE, "$1 Grad ");
 
     // 13) SIGNS. ⚠ A BARE `-N` IS ALMOST NEVER A NEGATIVE NUMBER in this language — it is a compound
     //     hyphen (`Typ-1-Diabetes`, `COVID-19`, `II-76`, `36-x-24-mm`). The minus rule therefore keeps the
     //     German guard, requiring a space or an opening paren before the sign, which admits none of those.
     //     Ranges (step 10) are gone by now, so the en dash cannot reach here either.
-    s = s.replace(MINUS, "$1minus $2");
+    s = tr(s, MINUS, "$1minus $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " plus minus ");
-    s = s.replace(PLUS_AFTER_WORD, "$1 plus $2");
-    s = s.replace(PLUS_INITIAL, "$1plus $2");
+    s = tr(s, /±/gu, " plus minus ");
+    s = tr(s, PLUS_AFTER_WORD, "$1 plus $2");
+    s = tr(s, PLUS_INITIAL, "$1plus $2");
 
     // RELATIONAL AND ARITHMETIC SIGNS, and the AMPERSAND.
-    s = s.replace(/[ \u00a0]*[=≈][ \u00a0]*/gu, " ass gläich ");  // space, NBSP
-    s = s.replace(/[ \u00a0]*<[ \u00a0]*/gu, " méi kleng ewéi ");  // space, NBSP
-    s = s.replace(/[ \u00a0]*>[ \u00a0]*/gu, " méi grouss ewéi ");  // space, NBSP
-    s = s.replace(/(\d)[ \u00a0]*×[ \u00a0]*(?=\d)/gu, "$1 mol ");  // space, NBSP
-    s = s.replace(/[ \u00a0]*÷[ \u00a0]*/gu, " dividéiert duerch ");  // space, NBSP
-    s = s.replace(/[ \u00a0]*[&＆][ \u00a0]*/gu, " an ");  // space, NBSP
+    s = tr(s, /[ \u00a0]*[=≈][ \u00a0]*/gu, " ass gläich ");  // space, NBSP
+    s = tr(s, /[ \u00a0]*<[ \u00a0]*/gu, " méi kleng ewéi ");  // space, NBSP
+    s = tr(s, /[ \u00a0]*>[ \u00a0]*/gu, " méi grouss ewéi ");  // space, NBSP
+    s = tr(s, /(\d)[ \u00a0]*×[ \u00a0]*(?=\d)/gu, "$1 mol ");  // space, NBSP
+    s = tr(s, /[ \u00a0]*÷[ \u00a0]*/gu, " dividéiert duerch ");  // space, NBSP
+    s = tr(s, /[ \u00a0]*[&＆][ \u00a0]*/gu, " an ");  // space, NBSP
 
     // 14) FRACTIONS (`1/5` → *ee Fënneftel*). ⚠ Denominator 2 is the ADJECTIVE `hallef`, not a noun;
     //     everything else composes as ordinal stem + `el` (see fractionNoun). The numerator 1 is
     //     `een`, itself subject to the Eifeler Regel — the corpus writes `een Drëttel` (⟨d⟩ keeps the n)
     //     and the rule therefore gives `ee Fënneftel` (⟨f⟩ does not).
-    s = s.replace(FRACTION, (m0, a: string, b: string) => {
+    s = tr(s, FRACTION, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return `${num === 1 ? oneBefore("hallef") : numberToWords(num)} hallef`;
         const noun = fractionNoun(den);

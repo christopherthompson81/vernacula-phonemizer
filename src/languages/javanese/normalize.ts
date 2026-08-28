@@ -47,6 +47,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Not-a-letter, on both sides. `\b` cannot be used — see the header. */
 const L = "[\\p{L}\\p{M}]";
@@ -127,11 +128,11 @@ export function normalizeJavanese(input: string): string {
     // ⚠ ⟨pukul⟩ IS NOT GUARDED, DELIBERATELY: it is the Indonesian formal clock word and scores ZERO in this
     // corpus, where all 10 clock instances use ⟨jam⟩. Adding it would be a guard with no attested instance
     // (trap 9) — so `pukul 13.30` still reads as a decimal, and that is recorded rather than papered over.
-    s = s.replace(
+    s = tr(s,
         /(\d{1,2})\.00\s*([-–])\s*(\d{1,2})\.00(?!\d)/gu,
         (_m, a: string, _d: string, b: string) => `${Number(a)} nganti ${Number(b)}`,
     );
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<=jam\\s)(\\d{1,2})\\.00(?!\\d)`, "gu"),
         (_m, h: string) => String(Number(h)),
     );
@@ -140,7 +141,7 @@ export function normalizeJavanese(input: string): string {
     // The corpus writes both `Rp` and `Rp.`, and the tier's key is the letters — so the dotted form reached
     // it as `Rp` + a sentence period and read *rp . limang èwu*, the letters bare and a spurious pause.
     // ⚠ ONLY WHEN AN AMOUNT FOLLOWS, so the corpus's bare `1$ = Rp.` (a gloss, no number) keeps its period.
-    s = s.replace(/(?<![\p{L}\p{M}])Rp\.(?=\s*\d)/gu, "Rp");
+    s = tr(s, /(?<![\p{L}\p{M}])Rp\.(?=\s*\d)/gu, "Rp");
 
     // ── 2. de-group thousands ────────────────────────────────────────────────────────────────────
     // ⚠ AFTER the clock and BEFORE every decimal rule. Both separators are attested as GROUPERS in this
@@ -156,8 +157,8 @@ export function normalizeJavanese(input: string): string {
     // that is BOTH grouped and decimal — `± 1.485,36 km²` — and with `(?![\d,])` the group refused to match
     // at all, leaving BOTH separators as clause pauses. It still refuses a following DOT, which is what
     // keeps the two conventions apart.
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d.])/gu, (m) => m.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d.])/gu, (m) => m.replace(/\./gu, ""));
+    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
     // ── 3. decimals ──────────────────────────────────────────────────────────────────────────────
     // AFTER de-grouping, so what is left of a mixed number is only its fractional tail.
@@ -170,7 +171,7 @@ export function normalizeJavanese(input: string): string {
     // decimal `.00` says nothing anyway. Without this, a bare `03.00` outside a `jam` context would read
     // "telu koma nol".
     const decimal = (int: string, frac: string): string => `${int} koma ${[...frac].join(" ")}`;
-    s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => decimal(i, f));
+    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => decimal(i, f));
     // ⚠ AND A `jam` CONTEXT IS EXCLUDED OUTRIGHT, not just `.00`. Step 1 claims the whole hours it can
     // identify; what it leaves behind is a clock with REAL MINUTES, and this rule read `jam 08.45` as
     // *jam 08 koma 4 5* — a decimal inside a time. Found by a test, not by the corpus, whose clocks all
@@ -179,7 +180,7 @@ export function normalizeJavanese(input: string): string {
     // decimal followed by a stray pause. Refusing only when ANOTHER DOT-PLUS-DIGIT follows is what lets a
     // decimal at the end of a sentence through (`Ana 3.5.` is still a decimal); the `version-dot` cell is
     // 103 corpus-wide against 15,961 decimals, so the guard has to be this narrow.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d,])(?!\.\d)/gu,
         (m, i: string, f: string, off: number, full: string) =>
             f === "00" || /(?<![\p{L}\p{M}])jam\s*$/u.test(full.slice(0, off)) ? m : decimal(i, f),
@@ -195,9 +196,9 @@ export function normalizeJavanese(input: string): string {
     // ⚠ The vulgar characters arrive already folded — `foldVulgarFractions` in the registry turns `½` into
     // `1/2` before any engine sees it — so these literals catch both spellings at once. That fold is why
     // `½ kilogram` read *sˈid͡ʒi lˈoro kilˈɔɡram*, "one two kilogram".
-    s = s.replace(new RegExp(`(?<!${L}|[\\d/])1/2(?!${L}|[\\d/])`, "gu"), "setengah");
-    s = s.replace(new RegExp(`(?<!${L}|[\\d/])1/3(?!${L}|[\\d/])`, "gu"), "sapratelon");
-    s = s.replace(new RegExp(`(?<!${L}|[\\d/])1/4(?!${L}|[\\d/])`, "gu"), "saprapat");
+    s = tr(s, new RegExp(`(?<!${L}|[\\d/])1/2(?!${L}|[\\d/])`, "gu"), "setengah");
+    s = tr(s, new RegExp(`(?<!${L}|[\\d/])1/3(?!${L}|[\\d/])`, "gu"), "sapratelon");
+    s = tr(s, new RegExp(`(?<!${L}|[\\d/])1/4(?!${L}|[\\d/])`, "gu"), "saprapat");
 
     // ── 4b. the two ranges whose endpoints are not bare digits ───────────────────────────────────
     // ⚠ BEFORE the symbol tier and the degree rules, because both destroy the adjacency step 7 needs.
@@ -207,8 +208,8 @@ export function normalizeJavanese(input: string): string {
     //   · A COORDINATE RANGE (`110°30'-110°45'`, `7°32'17"-7°49'32"`, `109° 08’-109° 10’`): the left
     //     endpoint ends in a minute or second mark, not a digit — the same shape that hid the coordinate
     //     ranges in Wu. 10 of the artifact's dropped minus signs are these two classes.
-    s = s.replace(/(\d+)\s*%\s*[-–]\s*(?=\d)/gu, "$1% nganti ");
-    s = s.replace(/(['’"”′″°])\s*[-–]\s*(?=\d)/gu, "$1 nganti ");
+    s = tr(s, /(\d+)\s*%\s*[-–]\s*(?=\d)/gu, "$1% nganti ");
+    s = tr(s, /(['’"”′″°])\s*[-–]\s*(?=\d)/gu, "$1 nganti ");
 
     // ── 5. temperature, then the bare degree ─────────────────────────────────────────────────────
     // ⚠ °C BEFORE the bare ° — otherwise the bare rule eats the sign and leaves a lone ⟨C⟩, which is exactly
@@ -217,24 +218,24 @@ export function normalizeJavanese(input: string): string {
     // `nganti 33 drajat Celcius`, `sautara 29 drajat celcius`. ℃ arrives already folded to `°C`.
     // ⚠ The bare arm covers the COORDINATE, which is what most of `degrees: 456` is: `6°LU-11°LS`,
     // `95°BT-141°BT`. The compass letters are left for the Latin path; only the sign is read.
-    s = s.replace(/(\d+)\s*°\s*C(?![\p{L}])/gui, "$1 drajat celsius");
+    s = tr(s, /(\d+)\s*°\s*C(?![\p{L}])/gui, "$1 drajat celsius");
     // ⚠ THE TRAILING SPACE IS LOAD-BEARING. Without it `6°LU` became `6 drajatLU` — one token, read
     // *d̪rad͡ʒˈat̪lu* — because a coordinate glues its compass letters straight onto the sign. The
     // duplicate-space case is harmless (the clause sink trims; the corpus diff reports SLOT-GAP 0).
-    s = s.replace(/(\d+)\s*°\s*/gu, "$1 drajat ");
+    s = tr(s, /(\d+)\s*°\s*/gu, "$1 drajat ");
 
     // ── 5b. the approximation marker ─────────────────────────────────────────────────────────────
     // ⚠ ± IN THIS CORPUS IS NOT A TOLERANCE, IT IS "ABOUT" — `± 1.485,36 km²`, `+/- 327.866 (2003)`, four
     // instances, every one a rounded population or area. Javanese writes that sense out as ⟨kurang luwih⟩,
     // which the corpus uses 17 times in exactly this slot (`kurang luwih 1/3`, `kurang luwih saprapat saka
     // gunggung`). Both spellings of the sign are claimed, since the corpus writes both.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:±|\+\/-)\s*(?=\d)/gu, "kurang luwih ");
+    s = tr(s, /(?<![\p{L}\p{M}])(?:±|\+\/-)\s*(?=\d)/gu, "kurang luwih ");
 
     // ── 5c. population density ───────────────────────────────────────────────────────────────────
     // `475 jiwa/km²`, `1.868 jiwa/km²` — the shared tier cannot compose this one because the NUMERATOR is a
     // Javanese noun (⟨jiwa⟩, "souls") rather than a unit symbol, so its rate path never engages and the
     // whole `/km²` was dropped. ⟨per⟩ is the corpus's own rate word (`mèter kubik per detik`, `per kapita`).
-    s = s.replace(
+    s = tr(s,
         /(\d[\d.,]*)\s*jiwa\s*\/\s*km\s*(?:²|2)(?![\p{L}\d])/gu,
         "$1 jiwa per kilomèter persegi",
     );
@@ -266,7 +267,7 @@ export function normalizeJavanese(input: string): string {
     // ⚠ THE COMMA STAYS IN THE CLASS on the same reasoning, though it is worth recording that in THIS layer
     // neither separator is reachable as a DECIMAL at all — steps 3 and 4 own both marks and run first, so
     // the guard's live job here is the identifier, not the number.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,/-])(\d+)\s*[-–]\s*(\d+)(?![\d,/-]|\.\d)(?!\s*doi)/giu,
         (m, a: string, b: string, off: number, full: string) =>
             /doi:?\s*\S*$/iu.test(full.slice(Math.max(0, off - 40), off)) ? m : `${a} nganti ${b}`,

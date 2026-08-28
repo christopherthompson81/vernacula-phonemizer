@@ -28,6 +28,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { spanishOrdinal } from "./romanOrdinals.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Space characters used as digit-group separators: regular, NBSP, narrow NBSP, thin. */
 const GROUP_SPACE = "    ";
@@ -121,9 +122,9 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     // 0) DIGIT GROUPING with a space. Spanish groups thousands with a period (17.000), which the number
     //    tokenizer already reads, but the SI space form also occurs (15× in the corpus) and the number
     //    token cannot span a space, so "5 000 años" read as "cinco cero años".
-    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 0b) ⚠ THE DOT ALSO DECIMATES, AND THE THREE-DIGIT TEST TELLS THE TWO APART. Spanish groups thousands
     //     with a period and the number token reads that (`17.000` → diecisiete mil), but BOTH corpora carry
@@ -139,34 +140,34 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     //     where they disagree the corpus decides, which is why this is a three-digit test and not a swap.
     //     ⚠ AND A FOLLOWING LETTER BLOCKS IT — `802.11n`, `2.4Ghz`, `5.0Ghz` are a standard number and two
     //     clock speeds; a preceding colon blocks the sports times (`4:41.30`, `2:11.60`).
-    s = s.replace(/(?<![\d.,:])(?<!:\d\d)(\d+)\.(\d{1,2})(?![\d.,\p{L}])/gu, "$1,$2");
+    s = tr(s, /(?<![\d.,:])(?<!:\d\d)(\d+)\.(\d{1,2})(?![\d.,\p{L}])/gu, "$1,$2");
 
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first. Usually
     //    written with a space in the corpus ("356 a. C.", 9 of 11 occurrences).
-    s = s.replace(/\ba\.\s?de\s?C\.|\ba\.\s?C\./giu, MANIFEST.eraMarkers.beforeChrist);
-    s = s.replace(/\bd\.\s?de\s?C\.|\bd\.\s?C\./giu, MANIFEST.eraMarkers.afterChrist);
+    s = tr(s, /\ba\.\s?de\s?C\.|\ba\.\s?C\./giu, MANIFEST.eraMarkers.beforeChrist);
+    s = tr(s, /\bd\.\s?de\s?C\.|\bd\.\s?C\./giu, MANIFEST.eraMarkers.afterChrist);
 
     // 2) EE. UU. — the most frequent abbreviation in the corpus, and it expands to WORDS. Claimed before
     //    the generic rule, which would otherwise see two separate abbreviations and leave two pauses.
-    s = s.replace(/\bEE\.\s?UU\.?/gu, MANIFEST.unitedStates);
-    s = s.replace(/\bee\.\s?uu\.?/gu, MANIFEST.unitedStates);
+    s = tr(s, /\bEE\.\s?UU\.?/gu, MANIFEST.unitedStates);
+    s = tr(s, /\bee\.\s?uu\.?/gu, MANIFEST.unitedStates);
 
     // 2b) a. m. / p. m. — read as the LETTER NAMES in Spanish ([a ˈeme], [pe ˈeme]), not expanded to the
     //     Latin. Handled here rather than in the generic table because the interior dots would otherwise
     //     survive as two phrase breaks ("a las 10:08 p. m." kept both).
     //     ⚠ COMPOSED FROM `letterNames`, not held as two more literals: the reading IS ⟨a⟩/⟨p⟩ followed by
     //     ⟨m⟩, said as letter names, so a change to either name must reach here.
-    s = s.replace(/\b([ap])\.\s?m\./giu, (_m, ap: string) =>
+    s = tr(s, /\b([ap])\.\s?m\./giu, (_m, ap: string) =>
         `${MANIFEST.letterNames[ap.toLowerCase()]!} ${MANIFEST.letterNames["m"]!}`);
 
     // 3) NÚMERO. `no.` only counts before a digit — bare "no" is one of the commonest Spanish words.
     //    Spanish writes it several ways, and `n.º` — n + period + the ORDINAL INDICATOR — is the form that
     //    actually occurs in the corpus. A single-character class missed it and left a bare º in the output.
-    s = s.replace(/\b(?:n\.º|nº|n°|n\.|no\.)\s?(?=\d)/giu, `${MANIFEST.numberSign} `);
+    s = tr(s, /\b(?:n\.º|nº|n°|n\.|no\.)\s?(?=\d)/giu, `${MANIFEST.numberSign} `);
 
     // 4) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues, so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -174,7 +175,7 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -189,7 +190,7 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     //    ° (U+00B0 DEGREE SIGN) is deliberately NOT an ordinal indicator, and no space is allowed before
     //    the indicator either: "20 °C" and "35°" are temperatures, and treating ° as ordinal read them as
     //    "vigésimo k" and "trigésimo quinto". Only º (U+00BA) and ª (U+00AA) are ordinal indicators.
-    s = s.replace(/\b(\d+)\.?(?:er\b|º|ª)/gu, (whole) => {
+    s = tr(s, /\b(\d+)\.?(?:er\b|º|ª)/gu, (whole) => {
         const n = Number(/\d+/.exec(whole)![0]);
         const masc = spanishOrdinal(n);
         if (masc === undefined) return whole;
@@ -203,10 +204,10 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, ` ${SIGN.plusMinus} `);
-    s = s.replace(/(\S)\+\s?(\d)/gu, `$1 ${SIGN.plus} $2`);
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
+    s = tr(s, /±/gu, ` ${SIGN.plusMinus} `);
+    s = tr(s, /(\S)\+\s?(\d)/gu, `$1 ${SIGN.plus} $2`);
+    s = tr(s, /(^|\s)\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
+    s = tr(s, /(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
 
     // 6b) RELATIONAL AND DIVISION SIGNS. ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
     //     genuinely absent from the corpus — every `<` in the fleet is an HTML tag `stripMarkup` removes — but
@@ -232,22 +233,22 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     //
     //     The copula is dropped (`igual a`, not `es igual a`) because the sign occurs in running text where the
     //     verb is already present or absent for its own reasons — the same call `en` makes with `equals`.
-    s = s.replace(/\s?=\s?/gu, ` ${SIGN.equals} `);
-    s = s.replace(/\s?<\s?/gu, ` ${SIGN.lessThan} `);
-    s = s.replace(/\s?>\s?/gu, ` ${SIGN.greaterThan} `);
-    s = s.replace(/\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
+    s = tr(s, /\s?=\s?/gu, ` ${SIGN.equals} `);
+    s = tr(s, /\s?<\s?/gu, ` ${SIGN.lessThan} `);
+    s = tr(s, /\s?>\s?/gu, ` ${SIGN.greaterThan} `);
+    s = tr(s, /\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
 
     // 7) FRACTIONS, guarded against a date and a unit ratio by requiring digits both sides.
-    s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) =>
+    s = tr(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
 
     // 8) TIMES. The colon was becoming a PHRASE BREAK — "a las 11:00" read as "a las once , cero" with a
     //    pause and a spurious "cero". `hora` is feminine, so 1 takes *una* (a la una, not a la uno).
-    s = s.replace(/\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+    s = tr(s, /\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
         (_m, h: string, min: string) => timeWords(Number(h), Number(min)));
 
     // 9) DATES. The day is a cardinal, except the first of the month in American usage (see the option).
-    s = s.replace(new RegExp(`\\b1\\.?º?\\s+de\\s+(${MONTHS})\\b`, "giu"),
+    s = tr(s, new RegExp(`\\b1\\.?º?\\s+de\\s+(${MONTHS})\\b`, "giu"),
         (m0, mon: string) =>
             (americas
                 ? `${MANIFEST.ordinals.units[1]!} de ${mon}`

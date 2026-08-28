@@ -44,6 +44,7 @@
  * `decimals` is 12,231 in the dump and `grouped` 6,913.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Every word is corpus- or wiki-attested IN ITS SLOT (playbook 5e); the sourcing
@@ -175,7 +176,7 @@ export function normalizeSinhala(input: string): string {
     //    (`ක්‍රි.ව.1940 දී පමණ`, ×1). Without it the expansion came out `ක්‍රිස්තු වර්ෂ1940`; the tokenizer
     //    would still split letters from digits, but the text is what the next rules match on and a rule
     //    that leaves its output unspaced is one edit away from a real bug (trap 10's neighbourhood).
-    for (const [rx, word] of DOTTED_ABBREV) s = s.replace(rx, word);
+    for (const [rx, word] of DOTTED_ABBREV) s = tr(s, rx, word);
 
     // 3) SINHALA-LETTER INITIALS — `එෆ්.ආර්.ප්‍රනාන්දු`, `ජේ.ආර්.ජයවර්ධන`, `ටී.ආර්.එන්.සී`, `බී.එම්.ඩබ්ලිව්`.
     //    Each initial is already a pronounceable Sinhala syllable; the only defect is the dot becoming a
@@ -186,22 +187,22 @@ export function normalizeSinhala(input: string): string {
     //    segments `(?:[඀-෿]{1,7}\.){2,}` matches **20 times with zero false positives** — the 10 era
     //    markers (already spent at step 2), `සෙ.මී.`, and eight genuine initial runs. Requiring TWO dots is
     //    what excludes the missing-space sentence period, which never has a second dot before the space.
-    s = s.replace(/(?<![඀-෿.])(?:[඀-෿]{1,7}\.){2,}/gu, (m) => m.replaceAll(".", " ").trimEnd() + " ");
+    s = tr(s, /(?<![඀-෿.])(?:[඀-෿]{1,7}\.){2,}/gu, (m) => m.replaceAll(".", " ").trimEnd() + " ");
     //    Steps 2 and 3 both emit a trailing space so an expansion cannot glue itself to what follows; where
     //    the source already had one, collapse the pair.
-    s = s.replace(/  +/gu, " ");
+    s = tr(s, /  +/gu, " ");
 
     // 4) THOUSANDS SEPARATOR — before anything that reads a dot or a digit run, or the comma is clause
     //    punctuation: `1,001,450` read *ˈekə , ˈekə , hˈat̪ərə sˈijəjə pˈanəhə*. `grouped` ×6,913 in the dump.
     //    Only 3-digit groups, so a genuine clause comma between numbers (`ලකුණු 156ක්, තරග 90කදී`) is safe.
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:(?<!(?<!\p{Nd})0),\p{Nd}{3})+)(?![\p{Nd}])/gu, (m) => m.replaceAll(",", ""));
+    s = tr(s, /(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:(?<!(?<!\p{Nd})0),\p{Nd}{3})+)(?![\p{Nd}])/gu, (m) => m.replaceAll(",", ""));
 
     //    A TRUNCATED DECIMAL — `ස්කන්ධයෙන් .9% ක්` writes `0.9%` without its zero, and the leading dot then
     //    survived the percent rule and became a sentence break (*…ස්කන්ධයෙන් . සියයට 9…*). Restoring the zero
     //    is the whole fix. ⚠ THE SPACE GUARD IS THE ENTIRE RULE: the other twelve dot-before-digit hits in
     //    the mined segments are the corpus's missing-space-after-a-full-stop (`ඇත.2011`, `තිබේ.1930`,
     //    `ය.1958`) plus the abbreviation `අවු.18` — all GLUED to a letter, all correctly left as pauses.
-    s = s.replace(/(?<=[\s(\[])\.(?=\p{Nd})/gu, "0.");
+    s = tr(s, /(?<=[\s(\[])\.(?=\p{Nd})/gu, "0.");
 
     // 5) DEGREES — before units and before the decimal rule, because `20.5 °C` needs both of those still
     //    intact. `සෙල්සියස් අංශක 38 (ෆැරන්හයිට් අංශක 100.4)` is si.wikipedia's own frame, four times over in
@@ -218,16 +219,16 @@ export function normalizeSinhala(input: string): string {
     const NUM = "(\\p{Nd}+(?:\\.\\p{Nd}+)?)";
     const DEG = "\\s*[°º\\u2070]\\s*";
     const neg = (sg: string): string => (sg ? "ඍණ " : "");
-    s = s.replace(new RegExp(SIGN + NUM + DEG + "C(?![\\p{L}\\p{M}])", "giu"),
+    s = tr(s, new RegExp(SIGN + NUM + DEG + "C(?![\\p{L}\\p{M}])", "giu"),
         (_m, sg: string, n: string) => `සෙල්සියස් අංශක ${neg(sg)}${n}`);
-    s = s.replace(new RegExp(SIGN + NUM + DEG + "F(?![\\p{L}\\p{M}])", "giu"),
+    s = tr(s, new RegExp(SIGN + NUM + DEG + "F(?![\\p{L}\\p{M}])", "giu"),
         (_m, sg: string, n: string) => `ෆැරන්හයිට් අංශක ${neg(sg)}${n}`);
     // Coordinates. The direction words are the ordinary corpus ones — `උතුරු අක්ෂාංශ 29°-39°`,
     // `නැගෙනහිර දේශාංශ 60°-75°` — so nothing is invented, only moved to the letter's position.
     const COMPASS: Record<string, string> = { N: "උතුරු", S: "දකුණු", E: "නැගෙනහිර", W: "බටහිර" };
-    s = s.replace(new RegExp(NUM + DEG + "([NSEW])(?![\\p{L}\\p{M}])", "gu"),
+    s = tr(s, new RegExp(NUM + DEG + "([NSEW])(?![\\p{L}\\p{M}])", "gu"),
         (_m, n: string, d: string) => `අංශක ${n} ${COMPASS[d]}`);
-    s = s.replace(new RegExp(SIGN + NUM + "\\s*[°º\\u2070]", "gu"),
+    s = tr(s, new RegExp(SIGN + NUM + "\\s*[°º\\u2070]", "gu"),
         (_m, sg: string, n: string) => `අංශක ${neg(sg)}${n}`);
     // KELVIN, and it takes NO degree word — the scale is the noun. `කෙල්වින්` ×37 whole-word on the wiki,
     // in the right sense (*කෙල්වින් යනු උෂ්නත්වය මිනුමකි*, "Kelvin is a temperature measure", and
@@ -236,7 +237,7 @@ export function normalizeSinhala(input: string): string {
     // instances are — `90.20 K (−182.95 °C…)` and `54.36 K (−218.79 °C…)`, 2/2 kelvin — and what excludes
     // the glued `5K` designation the corpus does not contain but arbitrary input will. A following DOT
     // is excluded too, so an initial (`1990 K.M. Silva`) cannot be read as a temperature.
-    s = s.replace(new RegExp(NUM + " K(?![\\p{L}\\p{M}.])", "gu"), "කෙල්වින් $1");
+    s = tr(s, new RegExp(NUM + " K(?![\\p{L}\\p{M}.])", "gu"), "කෙල්වින් $1");
 
     // 6) NEGATIVE NUMBERS — and the discriminator is the CHARACTER, measured rather than guessed. U+2212 is
     //    ×5 in the mined segments and **all five are genuine negatives** (`−1 °C`, `−182.95`, `−297.31`,
@@ -257,8 +258,8 @@ export function normalizeSinhala(input: string): string {
     //    (`වයස 0 -5`, `සමරසේකර -12 වැනි`, `-1967`, `-1918`, `අඩි 200 -250ක්`). Restricted to a sign that
     //    OPENS the string or a bracket, it has zero corpus counter-examples — the corpus never writes
     //    `(-5`, only `( -1967` — and a bare `-5` handed to the engine as input still reads.
-    s = s.replace(/(^|[(\[])[-–−](?=\p{Nd})/gu, "$1ඍණ ");
-    s = s.replace(/(?<=[\s(\[])−(?=\p{Nd})/gu, "ඍණ ");
+    s = tr(s, /(^|[(\[])[-–−](?=\p{Nd})/gu, "$1ඍණ ");
+    s = tr(s, /(?<=[\s(\[])−(?=\p{Nd})/gu, "ඍණ ");
 
     // 7) RATES — LOCAL, because Sinhala's denominator takes a DATIVE suffix and LEADS the phrase, which the
     //    tier's one-invariant-string `unitPer` cannot express (trap 47, case 1). si.wikipedia writes it
@@ -278,7 +279,7 @@ export function normalizeSinhala(input: string): string {
     //    half. Korean's 시속 rule is prefixed for the same reason and the tier's own notes record it.
     const RATE_OPERAND = "(?:((?<![\\p{Nd}.,\\-–—])\\p{Nd}[\\p{Nd}.,]*(?:\\s?[-–—]\\s?\\p{Nd}[\\p{Nd}.,]*)?)\\s*)?";
     for (const [unit, word] of [["km\\s?\\/\\s?h", "පැයට කිලෝමීටර්"], ["m\\s?\\/\\s?s", "තත්පරයට මීටර්"]] as const)
-        s = s.replace(
+        s = tr(s,
             new RegExp(`${RATE_OPERAND}(?<![\\p{L}\\p{M}\\p{Nd}])${unit}(?![\\p{L}\\p{M}])`, "gu"),
             (_m, n: string | undefined) => (n ? `${word} ${n}` : word),
         );
@@ -294,7 +295,7 @@ export function normalizeSinhala(input: string): string {
     //    own magnitude hop: `ඇමෙරිකානු ඩොලර් මිලියන 100`. ×1 in the mined segments.
     //    ⚠ The residue is stated rather than chased: the same sentence writes `SDR69.5m`, where the code is
     //    not a sign, so that one still reads as metres. One instance, inside an English citation fragment.
-    s = s.replace(/((?:US\$|[$€£₨])\s?\p{Nd}[\p{Nd}.,]*)m(?![\p{L}\p{M}])/gu, "$1 මිලියන");
+    s = tr(s, /((?:US\$|[$€£₨])\s?\p{Nd}[\p{Nd}.,]*)m(?![\p{L}\p{M}])/gu, "$1 මිලියන");
     //    ⚠ AND THE OTHER SIDE OF THE SAME GUARD HAS TO BE PAID FOR LOCALLY. `NOT_VERSION` refuses a
     //    one-letter key glued to a dotted number, which is what stops `US$100m` and `SDR69.5m` — and it also
     //    refuses the EIGHT genuine metre readings this corpus writes that way: `2.5m දිගින්`, `1.397m හා
@@ -302,7 +303,7 @@ export function normalizeSinhala(input: string): string {
     //    survive the tier, so the glued form is claimed here instead, with the discriminator the corpus
     //    itself supplies: a LATIN LETTER before the number means it is a code, not a measurement
     //    (`SDR69.5m`). Exactly one dot, so a version string cannot enter from either end.
-    s = s.replace(/(?<![\p{L}\p{Nd}.,])(\p{Nd}+\.\p{Nd}+)m(?![\p{L}\p{M}])/gu, "මීටර් $1");
+    s = tr(s, /(?<![\p{L}\p{Nd}.,])(\p{Nd}+\.\p{Nd}+)m(?![\p{L}\p{M}])/gu, "මීටර් $1");
     s = SYMBOLS(s);
 
     // 9) THE DECIMAL POINT — `දශම`, attested definitionally on si.wikipedia (*"…හෝ දශම තිතකින් ඇරඹී…"*,
@@ -313,7 +314,7 @@ export function normalizeSinhala(input: string): string {
     //    ⚠ THE GUARD IS "EXACTLY ONE DOT", and it is what keeps a dotted DATE and a version string out:
     //    `(2007.04.25)` ×1 and `1.613.5291.0` ×1 both fail it from either end, so neither is read as a
     //    decimal and neither loses a digit. `decimals` is 12,231 in the dump — the largest repair here.
-    s = s.replace(/(?<![\p{Nd}.])(\p{Nd}+)\.(\p{Nd}+)(?![\p{Nd}.])/gu,
+    s = tr(s, /(?<![\p{Nd}.])(\p{Nd}+)\.(\p{Nd}+)(?![\p{Nd}.])/gu,
         (_m, whole: string, frac: string) => `${whole} දශම ${[...frac].join(" ")}`);
 
     // 10) THE COLON IS LEFT AS A PAUSE, DELIBERATELY, and this is a measured refusal rather than an

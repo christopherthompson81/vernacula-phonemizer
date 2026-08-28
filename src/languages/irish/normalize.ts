@@ -19,6 +19,7 @@
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords as irishNumber } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -165,45 +166,45 @@ export function normalizeIrish(input: string): string {
 
     // 0) ZERO-WIDTH — the corpus has U+200B ZERO WIDTH SPACE ×18. Invisible, but they split tokens.
     //    Remove them outright (they are not text).
-    s = s.replace(/[\u200B\u200C\u200D\uFEFF]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
+    s = tr(s, /[\u200B\u200C\u200D\uFEFF]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
 
     // 1) ERA MARKERS and MULTI-DOT ABBREVIATIONS — `A.D.` (tar éis Chríost), `R.C.` (roimh Chríost),
     //    the undotted `AD`, and the Irish `N.A.`/`S.A.` (Náisiúin Aontaithe / Stáit Aontaithe). FIRST,
     //    before the dotted-capital rule: otherwise the interior dot becomes a break.
-    s = s.replace(/(?<![\p{L}\p{M}])A\.D\.(?![\p{L}\p{M}])/giu, "tar éis Chríost");
-    s = s.replace(/(?<![\p{L}\p{M}])R\.C\.(?![\p{L}\p{M}])/giu, "roimh Chríost");
-    s = s.replace(/(?<![\p{L}\p{M}])AD(?=\s*\d+)/giu, "tar éis Chríost");
-    s = s.replace(/(?<![\p{L}\p{M}])\d[\d,]*\s+AD(?![\p{L}\p{M}])/giu, (m0) => m0.replace(/AD/giu, "tar éis Chríost"));
-    s = s.replace(/(?<![\p{L}\p{M}])BC(?=\s*\d+)/giu, "roimh Chríost");
-    s = s.replace(/(?<![\p{L}\p{M}])\d[\d,]*\s+BC(?![\p{L}\p{M}])/giu, (m0) => m0.replace(/BC/giu, "roimh Chríost"));
-    s = s.replace(/(?<![\p{L}\p{M}])N\.A\.(?![\p{L}\p{M}])/giu, "Náisiúin Aontaithe");
-    s = s.replace(/(?<![\p{L}\p{M}])S\.A\.(?![\p{L}\p{M}])/giu, "Stáit Aontaithe");
+    s = tr(s, /(?<![\p{L}\p{M}])A\.D\.(?![\p{L}\p{M}])/giu, "tar éis Chríost");
+    s = tr(s, /(?<![\p{L}\p{M}])R\.C\.(?![\p{L}\p{M}])/giu, "roimh Chríost");
+    s = tr(s, /(?<![\p{L}\p{M}])AD(?=\s*\d+)/giu, "tar éis Chríost");
+    s = tr(s, /(?<![\p{L}\p{M}])\d[\d,]*\s+AD(?![\p{L}\p{M}])/giu, (m0) => m0.replace(/AD/giu, "tar éis Chríost"));
+    s = tr(s, /(?<![\p{L}\p{M}])BC(?=\s*\d+)/giu, "roimh Chríost");
+    s = tr(s, /(?<![\p{L}\p{M}])\d[\d,]*\s+BC(?![\p{L}\p{M}])/giu, (m0) => m0.replace(/BC/giu, "roimh Chríost"));
+    s = tr(s, /(?<![\p{L}\p{M}])N\.A\.(?![\p{L}\p{M}])/giu, "Náisiúin Aontaithe");
+    s = tr(s, /(?<![\p{L}\p{M}])S\.A\.(?![\p{L}\p{M}])/giu, "Stáit Aontaithe");
     // `srl.` is *agus araile* ("et cetera") — corpus: `iompar ar thalamh, srl.`, previously the
     // cluster [sˠɾˠl̪ˠ] plus a leaked phrase break. The dot is optional because FLEURS strips it.
-    s = s.replace(/(?<![\p{L}\p{M}])srl\.?(?![\p{L}\p{M}])/giu, "agus araile");
+    s = tr(s, /(?<![\p{L}\p{M}])srl\.?(?![\p{L}\p{M}])/giu, "agus araile");
 
     // 1b) CURRENCY PREFIXES — `US$14.7`, `US$11,000`, `US$30`. The corpus's glued US$ names the
     //     currency (dollar); the bare `$` is the tier's. The `$` is REQUIRED so `US` alone (without a
     //     sign) does not expand — that keeps the with-`$` and without-`$` readings different, which is
     //     how the scan's DROP test sees the contribution. AFTER the era markers, BEFORE the number rules.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|uS)\$(?=\s?\d)/giu, "dollar na Stát Aontaithe ");
+    s = tr(s, /(?<![\p{L}\p{M}])(?:US|uS)\$(?=\s?\d)/giu, "dollar na Stát Aontaithe ");
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `George W. Bush` — the W. suffix dot is a break.
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
     //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
     //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
     //    Irish's own fada'd ⟨Á É Í Ó Ú⟩ — and ⟨Ó⟩ is the surname particle. The minimal pair, measured before the fix:
     //        "S. Mac Gearailt" → "S Mac Gearailt"
     //        "S. Ó Riain" → unchanged   ← the dot survives as a spurious clause break
-    s = s.replace(/(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
+    s = tr(s, /(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
 
     // 3) SINGLE-DOT ABBREVIATIONS. `Dr.` → "dochtúir", `etc.` → "srl", `Mrs.` → "bean Uí".
-    s = s.replace(/(?<![\p{L}\p{M}])Dr\.(\s+)(?=[\p{L}\d])/giu, "Dochtúir$1");
-    s = s.replace(/(?<![\p{L}\p{M}])Dr\.(?=\s*(?:[.,;:!?»)]|$))/giu, "Dochtúir.");
-    s = s.replace(/(?<![\p{L}\p{M}])etc\.(\s+)(?=[\p{L}\d])/giu, "srl$1");
-    s = s.replace(/(?<![\p{L}\p{M}])etc\.(?=\s*(?:[.,;:!?»)]|$))/giu, "srl.");
+    s = tr(s, /(?<![\p{L}\p{M}])Dr\.(\s+)(?=[\p{L}\d])/giu, "Dochtúir$1");
+    s = tr(s, /(?<![\p{L}\p{M}])Dr\.(?=\s*(?:[.,;:!?»)]|$))/giu, "Dochtúir.");
+    s = tr(s, /(?<![\p{L}\p{M}])etc\.(\s+)(?=[\p{L}\d])/giu, "srl$1");
+    s = tr(s, /(?<![\p{L}\p{M}])etc\.(?=\s*(?:[.,;:!?»)]|$))/giu, "srl.");
 
     // 4) ORDINALS — the `Nú` form (the corpus's own ordinal digits). The suffix is the Irish ordinal
     //    ending; the READING is the ordinal word (an chéad, an dara, an tríú …). The digit run may
@@ -212,7 +213,7 @@ export function normalizeIrish(input: string): string {
     //    the PRECEDING word is inspected: a vowel-initial ordinal takes the t- prefix after a bare "an"
     //    (an t-ochtú, an t-aonú), which is the one piece of the article's morphology that belongs to us
     //    rather than to the corpus text.
-    s = s.replace(/(\ban )?(?<![\d.,])(\d[\d,]*)ú(?![\p{L}\p{M}])([ \u00a0]+([\p{L}\p{M}]+))?/giu,  // space, NBSP
+    s = tr(s, /(\ban )?(?<![\d.,])(\d[\d,]*)ú(?![\p{L}\p{M}])([ \u00a0]+([\p{L}\p{M}]+))?/giu,  // space, NBSP
         (m0, art: string | undefined, d: string, spaced: string | undefined, noun: string | undefined) => {
             const n = Number(d.replace(/,/gu, ""));
             if (!Number.isFinite(n) || n < 1) return m0;
@@ -236,7 +237,7 @@ export function normalizeIrish(input: string): string {
     //     ⚠ Gated on a preceding LETTER and a following DIGIT. A hyphen between two letter runs is
     //     load-bearing elsewhere in the fleet (Estonian glues a case ending across it, `SKP-st` →
     //     *ess kaa peest*; Mongolian likewise), which is why this is not a shared rule.
-    s = s.replace(/(?<=\p{L})[-–](?=\d)/gu, " ");
+    s = tr(s, /(?<=\p{L})[-–](?=\d)/gu, " ");
 
     // 5) RANGES and SCORES — `10-60 nóiméad`, `6-6`, `4.2-3.9 milliún`, `AD 1000-1300`. Irish reads
     //    these with "go dtí" (to) or the range just as two numbers. The corpus's prose uses "idir X
@@ -246,14 +247,14 @@ export function normalizeIrish(input: string): string {
     //    and read a RANGE where the text has a negative number: *a haon, go dtí a dó*. Same trailing-separator shape as
     //    the tokenizer bug closed in #1015. With the operand anchored on a digit, `\s*` can no longer
     //    straddle the comma and the rule declines, leaving the sign rule to claim `-2`.
-    s = s.replace(/(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])/gu, "$1 go dtí $2");
+    s = tr(s, /(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])/gu, "$1 go dtí $2");
 
     // 6) CLOCK, in the COLON form. `11:35 i.n.` → aon déag tríocha a cúig iarnóin; `8:30 p.m.` →
     //    ocht tríocha p.m. The i.n./r.n./p.m./a.m. marker (WITH the dots) expands to the Irish
     //    time-of-day (iarnóin = afternoon/p.m., réamhnóin = morning/a.m.). NOT a sports time: a THIRD
     //    `\d.\d\d` field (4:41.30) means a pace. The marker is captured WITHOUT eating the space before
     //    it (the clock-glue trap).
-    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*(i\.?n\.?|r\.?n\.?|[Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?))?/giu,
+    s = tr(s, /(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*(i\.?n\.?|r\.?n\.?|[Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?))?/giu,
         (m0, h: string, min: string, ap: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return m0;
@@ -268,30 +269,30 @@ export function normalizeIrish(input: string): string {
     // 7) VERSION DOTS and DOT DECIMALS — `1.5 million`, `4.2-3.9`, `12.8 km`, `802.11n`, `2.4Ghz`. The
     //    dot is a DECIMAL (the corpus follows English; thousands use COMMAS). Read "pointe" (point),
     //    the fraction digit-by-digit. GIGAHERTZ is claimed FIRST on the raw digits. AFTER the clock.
-    s = s.replace(/(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
+    s = tr(s, /(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
     // A VERSION LETTER after the fraction (802.11n) is a separate letter, not glued to the last digit —
     // emit it spaced so it reads as the letter name n (the corpus's 802.11n/a/b/g).
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/giu,
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/giu,
         (m0, i: string, f: string) =>
             `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")} `);
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|msu|km\/u)(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|msu|km\/u)(?![\p{L}\p{M}])/giu,
         (m0, i: string, f: string, u: string) =>
             `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")} ${({ km: "ciliméadar", m: "méadar", kg: "cileagram", mm: "milliméadar", cm: "ceintiméadar", msu: "míle san uair", "km/u": "ciliméadar san uair" } as Record<string, string>)[u.toLowerCase()]!}`);
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")}`);
 
     // 7c) COMMA-DECIMALS — `12,5`. Irish follows English (comma = thousands, dot = decimal), so a
     //     comma-decimal is corpus-absent — but it must not LEAK the comma as a clause pause. A comma
     //     followed by a THREE-digit group is thousands (2,243) and stays for the TOKEN; this claims
     //     only 1-2 digit fractions.
-    s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (m0, i: string, f: string) =>
+    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (m0, i: string, f: string) =>
         `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")}`);
 
     // 8) FRACTIONS. `29¾ orlach` → *fiche a naoi agus trí cheathrú orlach*; `1/5 orlach` → *aonú
     //    cúigiú*? No — the corpus's `1/5 orlach` is "one fifth of an inch" → *cúigiú orlach*.
-    s = s.replace(/(\d+)¾/gu, "$1 agus trí cheathrú");
-    s = s.replace(/(\d+)½/gu, "$1 agus leath");
-    s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+    s = tr(s, /(\d+)¾/gu, "$1 agus trí cheathrú");
+    s = tr(s, /(\d+)½/gu, "$1 agus leath");
+    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const ord = ordinalWords(Number(b));
         if (ord === undefined) return m0;
         // THE ARTICLE BELONGS HERE, not in the ordinal table. A `Nú` digit is preceded by the corpus's own
@@ -305,20 +306,20 @@ export function normalizeIrish(input: string): string {
 
     // 9) DEGREES. `30°C` came out as the bare consonant [k]; `35°W` is a LONGITUDE. `céim` is the
     //    degree word. The compass letters N/S/E/W read their Irish words.
-    s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/giu, "$1 céim Celsius");
-    s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/giu, "$1 céim Fahrenheit");
-    s = s.replace(/(\d)\s?[°º]\s?([NSEW])(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/giu, "$1 céim Celsius");
+    s = tr(s, /(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/giu, "$1 céim Fahrenheit");
+    s = tr(s, /(\d)\s?[°º]\s?([NSEW])(?![\p{L}\p{M}])/giu,
         (_m, d: string, c: string) =>
             `${d} céim ${({ N: "ó thuaidh", S: "ó dheas", E: "soir", W: "siar" } as Record<string, string>)[c.toUpperCase()]!}`);
-    s = s.replace(/(\d)\s?[°º](?![\p{L}\p{M}])/gu, "$1 céim");
+    s = tr(s, /(\d)\s?[°º](?![\p{L}\p{M}])/gu, "$1 céim");
 
     // 10) RATES — `70km/h`, `160km/u`, `35-40 msu`. The corpus's own prose "míle san uair" is text;
     //     the msu (míle san uair = mph) and km/u (ciliméadar san uair) forms need the words. AFTER the
     //     version-dot rule (12.8km has been claimed), BEFORE the tier.
-    s = s.replace(/(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h|u)(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h|u)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string, d: string) =>
             `${irishNumber(Number(n))} ${({ km: "ciliméadar", m: "méadar", kg: "cileagram", mm: "milliméadar", cm: "ceintiméadar" } as Record<string, string>)[u.toLowerCase()]!} san uair`);
-    s = s.replace(/(?<!\d)(\d+)\s?msu(?![\p{L}\p{M}])/giu, (m0, n: string) =>
+    s = tr(s, /(?<!\d)(\d+)\s?msu(?![\p{L}\p{M}])/giu, (m0, n: string) =>
         `${irishNumber(Number(n))} míle san uair`);
 
     // 11) SIGNS. `+30°C` — the plus was dropped. `&` → *agus* (and). A TRUE minus (`-5`) reads "lúide";
@@ -329,8 +330,8 @@ export function normalizeIrish(input: string): string {
     //     this corpus's ×490-TOKEN word for "or", so the whole reading is built from vocabulary already here.
     //     `en` is the other language that needs the conjunction ("plus or minus"), and for the same reason:
     //     where the two halves are not sign NAMES, something has to mark them as alternatives.
-    s = s.replace(/±/gu, " móide nó lúide ");
-    s = s.replace(/\+\s?(?=\d)/gu, " móide ");
+    s = tr(s, /±/gu, " móide nó lúide ");
+    s = tr(s, /\+\s?(?=\d)/gu, " móide ");
     // ⚠ U+2212 IS IN THE CLASS AND THE ASCII HYPHEN'S GUARDS ARE UNCHANGED. The MINUS SIGN is a distinct
     // code point whose only Unicode meaning is the arithmetic operator, and it is not on any keyboard —
     // whoever typed it meant a minus. It is not attested in this language's mined corpus, which is why an
@@ -338,29 +339,29 @@ export function normalizeIrish(input: string): string {
     // dropping a sign INVERTS the value it belongs to. The hyphen is the ambiguous one and keeps every
     // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
     // still refused by the lookbehind.
-    s = s.replace(/(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "lúide $1");
-    s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
+    s = tr(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "lúide $1");
+    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
         (_m, a: string, b: string, pl: string) =>
             `${LETTER_NAME[a.toLowerCase()] ?? a} agus ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
-    s = s.replace(/\s&\s/gu, " agus ");
+    s = tr(s, /\s&\s/gu, " agus ");
     // The corpus's `B&Banna` (B&B + the -anna plural): the & between two caps with a following vowel run.
-    s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(\p{Ll}+)(?![\p{L}\p{M}])/gu,
+    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(\p{Ll}+)(?![\p{L}\p{M}])/gu,
         (_m, a: string, b: string, tail: string) =>
             `${LETTER_NAME[a.toLowerCase()] ?? a} agus ${LETTER_NAME[b.toLowerCase()] ?? b}${tail}`);
-    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 ionann is $2");
+    s = tr(s, /(\S)\s*=\s*(\S)/gu, "$1 ionann is $2");
     // THE DIVISION SIGN, the one sign this file still dropped. Sourced from FLEURS's parallel
     // aspect-ratio sentence, which performs a division aloud in 57 of its 67 languages — the Irish translator
     // wrote "roinnt ar a dó dhéag" ("divided by twelve"), i.e. a recording of a human reading the operation
     // with a numeral operand. ga.wikipedia corroborates the same form (x1); the participle `roinnte ar` is x0,
     // so the attested shape is the one shipped rather than the tidier-looking one.
-    s = s.replace(/(\S)\s*÷\s*(\S)/gu, "$1 roinnt ar $2");
-    s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 níos lú ná $2");
-    s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 níos mó ná $2");
-    s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 faoi $2");
+    s = tr(s, /(\S)\s*÷\s*(\S)/gu, "$1 roinnt ar $2");
+    s = tr(s, /(\d)\s*<\s*(\d)/gu, "$1 níos lú ná $2");
+    s = tr(s, /(\d)\s*>\s*(\d)/gu, "$1 níos mó ná $2");
+    s = tr(s, /(\d)\s*×\s*(\d)/gu, "$1 faoi $2");
     // A PERCENT after a DECIMAL — `3.5%`. The dot rule has converted the number to words by now, so the
     // tier's digit-adjacent % would miss it; claim the word-form percent here (the Fula decimal-percent
     // leak). The bare-digit `%` is the tier's.
-    s = s.replace(/([\p{L}\p{M}\d]+ pointe [\p{L}\p{M} ]+?)\s*%\s*(?![\p{L}\p{M}])/gu, "$1 faoin gcéad");
+    s = tr(s, /([\p{L}\p{M}\d]+ pointe [\p{L}\p{M} ]+?)\s*%\s*(?![\p{L}\p{M}])/gu, "$1 faoin gcéad");
 
     // 12) INITIALISMS, LAST of the letter rules: it must run after the era markers (else A.D. → *a.
     //     dé.*) and after the dotted-capital rule.

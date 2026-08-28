@@ -24,6 +24,7 @@
 import { MANIFEST } from "./manifest.ts";
 
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * THE SHARED SYMBOL TIER, adopted for UNITS AND RATES only.
@@ -122,29 +123,29 @@ export function normalizeDanish(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = t.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 2) DECIMAL COMMA (35). The comma is clause punctuation too, so `12,5` read as "tolv , fem" — a
     //    PAUSE inside a number. Fractional part spoken digit by digit. No English-grouping guard is
     //    needed here, unlike Norwegian; see difference 3 in the header.
-    t = t.replace(/(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
+    t = tr(t, /(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
         `${whole} komma ${[...frac].join(" ")}`);
 
     // 3) CLOCK, COLON FORM ONLY (33). The period form is a Wi-Fi standard — see the header.
-    t = t.replace(/(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
+    t = tr(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
 
     // 4) ABBREVIATIONS (84), dot consumed. After the clock so `kl. 14:30` keeps its time.
-    for (const [re, word] of ABBREV) t = t.replace(re, word);
+    for (const [re, word] of ABBREV) t = tr(t, re, word);
 
     // 5) PERCENT. Postposed, and the sign was dropped outright.
-    t = t.replace(/(\d+)\s*%/gu, "$1 procent");
+    t = tr(t, /(\d+)\s*%/gu, "$1 procent");
 
     // 6) DEGREES (3), BEFORE the unit rules — the C of `20 °C` was falling through to the English letter
     //    name [seːˀ]. Case-insensitive on the scale letter; the bare sign is read too.
-    t = t.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
-    t = t.replace(/(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grader celsius");
-    t = t.replace(/(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grader fahrenheit");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
+    t = tr(t, /(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grader celsius");
+    t = tr(t, /(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grader fahrenheit");
     //    ⚠ THE NOUN MUST NOT FUSE WITH WHAT FOLLOWS — the same repair step 12 carries for the currency arm,
     //    and the corpus needs it here too. The scale-letter arms above decline a letter RUN on purpose
     //    (`25°Cölner` is not Celsius), and the bare arm then left `grader` abutting it: the compass bearing
@@ -152,16 +153,16 @@ export function normalizeDanish(input: string): string {
     //    OOV pseudo-word *ɡʁˈaðeʁv*, where the space gives *ˈɡʁɑːðɐ ˈveːˀ* (the lexicon's noun plus the
     //    letter name). A plausible Danish-looking word no leak class can see (trap 56). The trailing space
     //    is emitted only when a letter actually follows; `tidy` collapses the run.
-    t = t.replace(/(\d)\s*°(?=[\p{L}\p{M}])/gu, "$1 grader ");
-    t = t.replace(/(\d)\s*°/gu, "$1 grader");
+    t = tr(t, /(\d)\s*°(?=[\p{L}\p{M}])/gu, "$1 grader ");
+    t = tr(t, /(\d)\s*°/gu, "$1 grader");
 
     // 7) SQUARED / CUBED UNITS (3). The exponent was dropped, losing the area.
-    for (const [re, word] of SQUARED) t = t.replace(re, word);
+    for (const [re, word] of SQUARED) t = tr(t, re, word);
 
     // 8) ORDINAL RANGES — `10.-11. århundrede`, a range whose ENDS are ordinals. BEFORE the ordinal-dot
     //    rule and before the cardinal range rule, neither of which claims it; the corpus has one, and it
     //    is the same construction found in nb, de and cs.
-    t = t.replace(/(?<!\d)(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, a: string, b: string) => {
+    t = tr(t, /(?<!\d)(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, a: string, b: string) => {
         const first = ORDINALS[String(Number(a))], second = ORDINALS[String(Number(b))];
         return first !== undefined && second !== undefined ? `${first} til ${second}` : m;
     });
@@ -170,17 +171,17 @@ export function normalizeDanish(input: string): string {
     //    (followed by `og`) and declines the second (followed by a proper noun), which produced the
     //    inconsistent "første og 3.". A coordinator between two dotted numbers makes both ordinals
     //    regardless of what follows, so the pair is claimed together.
-    t = t.replace(/(?<!\d)(\d{1,2})\.\s+(og|eller)\s+(\d{1,2})\./gu, (m, a: string, conj: string, b: string) => {
+    t = tr(t, /(?<!\d)(\d{1,2})\.\s+(og|eller)\s+(\d{1,2})\./gu, (m, a: string, conj: string, b: string) => {
         const first = ORDINALS[a], second = ORDINALS[b];
         return first !== undefined && second !== undefined ? `${first} ${conj} ${second}` : m;
     });
 
     // 10) ORDINAL DOT (112) — the largest defect. `3. maj` read as "tre" + a SENTENCE BREAK + "maj". The
     //    following-lowercase guard separates it from a sentence ending in a year (8 such).
-    t = t.replace(/(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, n: string) => ORDINALS[n] ?? m);
+    t = tr(t, /(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, n: string) => ORDINALS[n] ?? m);
 
     // 11) RANGES (16). A dash between numerals is spoken `til`.
-    t = t.replace(/(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
+    t = tr(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
 
     // 12) CURRENCY, in BOTH positions — Danish postposes the sign 8 times against 2 preposed. The digit
     //     group is `\d+` and not `\d[\d ]*`: the looser class ate the SPACE after the amount, so
@@ -188,7 +189,7 @@ export function normalizeDanish(input: string): string {
     //     A CURRENCY CODE can carry the sign instead of a digit — `US$` (7), `AUD$` (1) — so the sign
     //     follows LETTERS and neither digit-anchored pattern fires. The code itself is left for the
     //     initialism pass to spell out; only the sign becomes a word.
-    t = t.replace(/\b([A-Z]{2,3})\s*\$/gu, "$1 dollar");
+    t = tr(t, /\b([A-Z]{2,3})\s*\$/gu, "$1 dollar");
     for (const [sign, word] of Object.entries(CURRENCY)) {
         const esc = sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
         // ⚠ THE NOUN MUST NOT FUSE WITH WHAT FOLLOWS, the same repair `core/normalizeSymbols.ts` carries for
@@ -198,26 +199,26 @@ export function normalizeDanish(input: string): string {
         // leaves the `m` visible to RAW-LATIN; refusing the match would drop the sign as well. Emitted only
         // when a letter actually follows, so nothing else gains a stray space (`tidy` would collapse it, but
         // the postposed arm has no such hazard and is left exactly as it was).
-        t = t.replace(new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
-        t = t.replace(new RegExp(`${esc}\\s*(\\d+)(?=[\\p{L}\\p{M}])`, "gu"), `$1 ${word} `);
-        t = t.replace(new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
+        t = tr(t, new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
+        t = tr(t, new RegExp(`${esc}\\s*(\\d+)(?=[\\p{L}\\p{M}])`, "gu"), `$1 ${word} `);
+        t = tr(t, new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
     }
 
     // 13) SIGNED NUMBERS — a sign PREFIXED to a number (`+30 °C`, `-5 grader`). Needs a boundary before
     //     it so a hyphenated compound is untouched, and runs after ranges so a range's dash is gone.
-    t = t.replace(/(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
+    t = tr(t, /(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
         `${sign === "+" ? "plus" : "minus"} ${n}`);
 
     // 14) ARITHMETIC AND RELATIONAL SIGNS — infix between digits is where arithmetic lives; the
     //     relational signs are read in every position, because a dropped sign is inaudible.
-    t = t.replace(/(\d)\s*\+\s*(\d)/gu, "$1 plus $2");
-    for (const [re, word] of RELATIONAL) t = t.replace(re, word);
+    t = tr(t, /(\d)\s*\+\s*(\d)/gu, "$1 plus $2");
+    for (const [re, word] of RELATIONAL) t = tr(t, re, word);
 
     // 15) AMPERSAND → og. It was dropped outright, so `A&B` read as two unrelated letters.
-    t = t.replace(/\s*[&＆]\s*/gu, " og ");
+    t = tr(t, /\s*[&＆]\s*/gu, " og ");
 
     // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
-    t = t.replace(/[ \t]{2,}/gu, " ");
+    t = tr(t, /[ \t]{2,}/gu, " ");
 
     // 16) THE SHARED TIER LAST, so every local rule above has already claimed its own text — the squared
     //     compounds in particular, which the tier has no word for in this language.

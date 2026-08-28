@@ -190,6 +190,7 @@
 import { MANIFEST } from "./manifest.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 const N = MANIFEST.numbers;
 
@@ -384,17 +385,17 @@ export function normalizeGeorgian(input: string): string {
     // 0) FOLD THE MASCULINE ORDINAL INDICATOR onto the degree sign. `41,5º განედსა და 41,5º გრძედზე` —
     //    U+00BA standing in for U+00B0 in a coordinate, the same substitution hi found (trap 25). This is
     //    the artifact scan's one `LEAK RAWMARK`. A FOLD of one character, never NFKC (trap 36).
-    s = s.replace(/º/gu, "°");
+    s = tr(s, /º/gu, "°");
 
     // 1) DE-GROUP, FIRST OF ALL. The engine's TOKEN is `\d+`, so a space- or comma-grouped thousand splits
     //    into separate numbers and the grouping comma reads as a CLAUSE PAUSE — `5 000` came out
     //    *χutʰi nuli*, "five zero". This must precede every rule that reads a number or a pause.
     //    Space grouping ×45 in the artifact (`5 000`, `83 500`, `1 900 000`), run twice for two groups.
     // ⚠ AND A GROUPING SPACE MAY NOT FOLLOW A LONE `0`, the guard the COMMA arm below already states.
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d])0)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d])0)[ \u00a0\u202f\u2009](\d{3})(?!\d)/gu, "$1");  // space, NBSP, NNBSP, thin space
     //    Comma grouping ×7, all English-style imports; `,`+1–2 digits (×105) is the decimal and is NOT
     //    touched. A leading `0,` is excluded — that is where a genuine 3-place Georgian decimal would be.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d.,])/gu, (_m, head: string, rest: string) =>
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d.,])/gu, (_m, head: string, rest: string) =>
         head + rest.replace(/,/gu, ""));
 
     // 2) SIGNS — AND THEY RUN HERE, ABOVE EVERYTHING THAT SPENDS A DEGREE SIGN OR A UNIT (trap 39).
@@ -411,9 +412,9 @@ export function normalizeGeorgian(input: string): string {
     //     An opening bracket cannot be the value-introducing dash that generates the false positives
     //     (`მაქსიმუმი – 760 მმ`, `მაჩვენებელს - 400 კუბურ სანტიმეტრს`), which is what separates the two.
     //     Omitting a plus is lossless; omitting a minus INVERTS — so the arms are not symmetrical.
-    s = s.replace(/−/gu, " მინუს ");
-    s = s.replace(/\((-)(?=\s?\d)/gu, "( მინუს ");
-    s = s.replace(/(^|[\s(])[-–](?=\s?\d[\d.,]*\s?°)/gu, "$1მინუს ");
+    s = tr(s, /−/gu, " მინუს ");
+    s = tr(s, /\((-)(?=\s?\d)/gu, "( მინუს ");
+    s = tr(s, /(^|[\s(])[-–](?=\s?\d[\d.,]*\s?°)/gu, "$1მინუს ");
     //     ⚠ AND A SECOND, WIDER ARM, MEASURED THE SAME WAY: a sign GLUED to its figure (no space between
     //     them) after a space, a bracket or the string start. 14 artifact instances, **12 true and 2 false**,
     //     and the two false ones are `(1627 –1628)` / `(2014 –2017)` — year ranges whose dash happens to be
@@ -422,11 +423,11 @@ export function normalizeGeorgian(input: string): string {
     //     guard could see it, and a bare `-5`, which is what makes the class readable rather than
     //     shape-specific. The corpus's remaining false-positive class — a value-introducing dash
     //     (`მაქსიმუმი – 760 მმ`, `მაჩვენებელს - 400 კუბურ სანტიმეტრს`) — is SPACED after the sign, every time.
-    s = s.replace(/(^|[\s(])(?<!\d\s)[-–](?=\d)/gu, "$1მინუს ");
+    s = tr(s, /(^|[\s(])(?<!\d\s)[-–](?=\d)/gu, "$1მინუს ");
     //     THE PLUS. ×8: five are `+24,4 °C` (a temperature) and three `(63+33 წევრი)` (a seat SUM) — and the
     //     attesting sentence covers the second exactly, *"„ორს პლუს ორი უდრის ხუთს“ (2 + 2 = 5)"*.
-    s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1პლუს ");
-    s = s.replace(/(?<=\d)\s?\+\s?(?=\d)/gu, " პლუს ");
+    s = tr(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1პლუს ");
+    s = tr(s, /(?<=\d)\s?\+\s?(?=\d)/gu, " პლუს ");
     //     `=`, from the same sentence, and the frame is confirmed on its own: *"1 ტონა უდრის 1.000
     //     კილოგრამს"*, *"1 კმ² უდრის:"*. ⚠ THE RIGHT SIDE IS THE DISCRIMINATOR, not the left. Requiring a
     //     digit on the RIGHT admits the corpus's `1900/400 = 4`, `−500/400 = −2` and `დღე = 365.2425 დღე`,
@@ -434,9 +435,9 @@ export function normalizeGeorgian(input: string): string {
     //     bibliographic TITLE equivalences `Lingua Latina = ლათინური ენა`, `… = Invia est in medicina …`,
     //     which have no digit after the sign. Left context is a digit or a Georgian letter, so the sign is
     //     not claimed out of a Latin run.
-    s = s.replace(/(?<=[\d\p{Script=Georgian}])\s*=\s*(?=(?:მინუს\s+)?\d)/gu, " უდრის ");
+    s = tr(s, /(?<=[\d\p{Script=Georgian}])\s*=\s*(?=(?:მინუს\s+)?\d)/gu, " უდრის ");
     //     `№`, preposed. One instance (`ქუჩა № 37`), and the sign was dropped outright.
-    s = s.replace(/№\s?(?=\d)/gu, "ნომერი ");
+    s = tr(s, /№\s?(?=\d)/gu, "ნომერი ");
 
 
     // 3) THE CLOCK, BEFORE anything that reads a bare number or a pause — `15:00` read *tʰχutʰmɛtʼi , nuli*,
@@ -450,7 +451,7 @@ export function normalizeGeorgian(input: string): string {
     //    ⚠ THE FOLLOWING `საათ…` IS CONSUMED AND ITS CASE MOVED TO THE LAST COMPONENT (trap 12: say it once,
     //    in the position the language puts it; trap 10: put back what you consume — the CASE is what carried
     //    meaning, and it is re-emitted). `15:00 საათზე` → *თხუთმეტი საათზე*, which is exactly the Georgian.
-    s = s.replace(
+    s = tr(s,
         new RegExp(`(?<![\\d:.,])(\\d{1,2}):([0-5]\\d)(?::([0-5]\\d))?(?![\\d:])` +
             `(?:\\s*-?(${WRITTEN_ALT})${NOT_LETTER_AFTER})?` +
             `(?:\\s+(საათ(?:${WRITTEN_ALT})?)${NOT_LETTER_AFTER})?`, "gu"),
@@ -472,23 +473,23 @@ export function normalizeGeorgian(input: string): string {
         });
     //    3b) THE TIMEZONE ARM. `04:35 UTC`, `01:46:40 UTC`, `06:39:42 UTC` — the zone name is the context,
     //        and it stays as written (the shared foreign-run pass reads it).
-    s = s.replace(/(?<![\d:.,])(\d{1,2}):([0-5]\d)(?![\d:])(?=\s*(?:UTC|GMT))/gu,
+    s = tr(s, /(?<![\d:.,])(\d{1,2}):([0-5]\d)(?![\d:])(?=\s*(?:UTC|GMT))/gu,
         (m0, h: string, mi: string) => (Number(h) > 23 ? m0
             : `${numberToWords(Number(h), h)} საათი და ${numberToWords(Number(mi), mi)} წუთი`));
 
     // 4) ORDINALS. Both halves of the circumfix, and the CENTURY.
     //    4a) `მე-N` — the prefix half, ×7. Guarded on the left so the 1sg pronoun მე cannot start a match
     //        from inside a word.
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}მე-(\\d{1,4})(?![\\d.,])`, "gu"), (m0, d: string) =>
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}მე-(\\d{1,4})(?![\\d.,])`, "gu"), (m0, d: string) =>
         ordinalWord(Number(d)) ?? m0);
     //    4b) `N-ე` — the suffix half, ×6 (`179-ე`, `25-ე`, `41-ე`).
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d{1,4})-ე${NOT_LETTER_AFTER}`, "gu"), (m0, d: string) =>
+    s = tr(s, new RegExp(`(?<![\\d.,])(\\d{1,4})-ე${NOT_LETTER_AFTER}`, "gu"), (m0, d: string) =>
         ordinalWord(Number(d)) ?? m0);
     //    4b′) `1-ლი` — the ONE ordinal is suppletive (პირველი) and so is its abbreviation: Georgian writes
     //        the last SYLLABLE, `-ლი`, where every other ordinal writes `-ე`. ×0 in this corpus and shipped
     //        anyway, because it is the adversarial neighbour of the rule above (trap 8) and the shape is not
     //        derivable from it — `1-ე` would be a different (and wrong) word.
-    s = s.replace(new RegExp(`(?<![\\d.,])1-ლი${NOT_LETTER_AFTER}`, "gu"), "პირველი");
+    s = tr(s, new RegExp(`(?<![\\d.,])1-ლი${NOT_LETTER_AFTER}`, "gu"), "პირველი");
     //    4b″) A SINGLE-LETTER ROMAN CENTURY, WHICH THE SHARED PASS DELIBERATELY DOES NOT CONVERT.
     //        `core/roman.ts` returns any one-letter token unchanged — "single letters are never worth the
     //        risk (I, V, X, C, D, M, L)", its own comment — which is right for the fleet and leaves ⟨V⟩ ×4
@@ -499,7 +500,7 @@ export function normalizeGeorgian(input: string): string {
     //        in the artifact; the other 53 are multi-letter and are digits by the time this file runs).
     //        Restricted to I/V/X: L/C/D/M before a century noun is not a real century, and ⟨C⟩ in
     //        particular is the Celsius letter ×75 in this corpus.
-    s = s.replace(/(?<![\p{L}\p{M}])([IVX])(?![\p{L}\p{M}])(\s+)(?=საუკუნ|ათასწლეულ)/gu,
+    s = tr(s, /(?<![\p{L}\p{M}])([IVX])(?![\p{L}\p{M}])(\s+)(?=საუკუნ|ათასწლეულ)/gu,
         (m0, r: string, sp: string) => {
             const n = { I: 1, V: 5, X: 10 }[r];
             const ord = n === undefined ? undefined : ordinalWord(n);
@@ -513,7 +514,7 @@ export function normalizeGeorgian(input: string): string {
     //        პირველი მახასიათებელია"*, *"მეთვრამეტე საუკუნეში"*; and it writes the digit form the same way
     //        once, `20-ე საუკუნე`. Capped at 21 so an ordinary count (`2 საუკუნის განმავლობაში`) is out of
     //        range only where it plausibly is one — the artifact has no such counter-example.
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d{1,2})(?=\s+(?:საუკუნ|ათასწლეულ))/gu, (m0, d: string) => {
+    s = tr(s, /(?<![\d.,\p{L}\p{M}])(\d{1,2})(?=\s+(?:საუკუნ|ათასწლეულ))/gu, (m0, d: string) => {
         const n = Number(d);
         return n >= 1 && n <= 21 ? ordinalWord(n) ?? m0 : m0;
     });
@@ -523,27 +524,27 @@ export function normalizeGeorgian(input: string): string {
     //    noun. ⚠ ⟨C⟩ was reaching the IPA as the ENGLISH letter *sˈiː*, so this is a wrong reading being
     //    replaced, not merely a silence (trap 56).
     const DEG = `(?:\\s*-?(${WRITTEN_ALT})${NOT_LETTER_AFTER})?`;
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°\\s?C${DEG}`, "gui"), (_m, d: string, sfx: string | undefined) =>
+    s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s?°\\s?C${DEG}`, "gui"), (_m, d: string, sfx: string | undefined) =>
         attach(`${figureToWords(d)} გრადუსი ცელსიუსი`, sfx));
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°\\s?F${DEG}`, "gui"), (_m, d: string, sfx: string | undefined) =>
+    s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s?°\\s?F${DEG}`, "gui"), (_m, d: string, sfx: string | undefined) =>
         attach(`${figureToWords(d)} გრადუსი ფარენჰაიტი`, sfx));
     //    A BARE degree — the coordinate/declination form (`41,5° განედსა`, `მინუს 7.2°`), ×3 after step 0.
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°${DEG}`, "gu"), (_m, d: string, sfx: string | undefined) =>
+    s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s?°${DEG}`, "gu"), (_m, d: string, sfx: string | undefined) =>
         attach(`${figureToWords(d)} გრადუსი`, sfx));
 
     // 6) PERCENT AND PER MILLE, postposed, with the ending attaching to the WORD — 100 artifact instances
     //    and five of them carry one (`82%-ით`, `98 %-მა`, `4 %-ს`, `54 %-ის`). Reading the ending as its own
     //    token gave *…itʰ*, a bound morpheme standing alone. Both signs were DROPPED outright before this.
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?%${DEG}`, "gu"), (_m, d: string, sfx: string | undefined) =>
+    s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s?%${DEG}`, "gu"), (_m, d: string, sfx: string | undefined) =>
         attach(`${figureToWords(d)} პროცენტი`, sfx));
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?‰${DEG}`, "gu"), (_m, d: string, sfx: string | undefined) =>
+    s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s?‰${DEG}`, "gu"), (_m, d: string, sfx: string | undefined) =>
         attach(`${figureToWords(d)} პრომილე`, sfx));
     //    A `%` WITH NO FIGURE BESIDE IT is still the word, and it is the artifact's last surviving percent
     //    drop: `ერთობლივი ეროვნული პროდუქტი: სტრუქტურა (%)` — a table header naming the unit. One instance,
     //    and it is the only bare `%` in the corpus, so the arm cannot misfire on anything counted.
     //    No lookbehind is needed or wanted: the digit-adjacent arm above has already consumed every `%` that
     //    has a figure, so whatever is left here is bare by construction.
-    s = s.replace(new RegExp(`%${DEG}`, "gu"), (_m, sfx: string | undefined) => attach("პროცენტი", sfx));
+    s = tr(s, new RegExp(`%${DEG}`, "gu"), (_m, sfx: string | undefined) => attach("პროცენტი", sfx));
 
     // 7) UNITS. Ordered longest-key-first, and the COMPOSED forms before the bare ones — `კვ. კმ` must not
     //    be read as ⟨კვ⟩ plus ⟨კმ⟩, and `კმ²` must not be read as ⟨კმ⟩ with the exponent dropped (which is
@@ -555,7 +556,7 @@ export function normalizeGeorgian(input: string): string {
     //    does that (`1 კმ²-ზე` → *ერთი კვადრატულ კილომეტრზე*).
     //
     //    7a) `კვ. კმ` / `კვ კმ` — the spelled-out square, ×3 (`69 700 კვ. კმ-ს`, `1 კვ კმ-ზე`, `2919 კვ.კმ-ს`).
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?კვ\\.?\\s?(${UNIT_ALT})${DEG}`, "gu"),
+    s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s?კვ\\.?\\s?(${UNIT_ALT})${DEG}`, "gu"),
         (_m, d: string, u: string, sfx: string | undefined) =>
             attach(`${figureToWords(d)} კვადრატული ${UNIT_WORD.get(u)}`, sfx));
     //    7b) THE RATE, and it must run BEFORE the exponent — `კაცი/კმ²`'s denominator is itself an exponent,
@@ -566,10 +567,10 @@ export function normalizeGeorgian(input: string): string {
     //        *"მშპ საათში მუშაობისათვის"* gives the speed form.
     //        ⚠ `კვტ/სთ` IS NOT A RATE — a kilowatt-HOUR is a product, not "kilowatts per hour" — so it gets
     //        its own compound key, tried first (trap 44: a slashed key outranks the rate path).
-    s = s.replace(/(?<![\p{L}\p{M}])კვტ\s?\/\s?სთ(?![\p{L}\p{M}])/gu, "კილოვატ საათი");
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${UNIT_ALT})\\s?\\/\\s?(${UNIT_ALT})${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, /(?<![\p{L}\p{M}])კვტ\s?\/\s?სთ(?![\p{L}\p{M}])/gu, "კილოვატ საათი");
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${UNIT_ALT})\\s?\\/\\s?(${UNIT_ALT})${NOT_LETTER_AFTER}`, "gu"),
         (_m, a: string, b: string) => `${UNIT_WORD.get(a)} ${attach(UNIT_WORD.get(b)!, b === "სთ" ? "ში" : "ზე")}`);
-    s = s.replace(new RegExp(`(${GEO}+)\\s?\\/\\s?(${UNIT_ALT})([²³])?${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`(${GEO}+)\\s?\\/\\s?(${UNIT_ALT})([²³])?${NOT_LETTER_AFTER}`, "gu"),
         (_m, head: string, u: string, ex: string | undefined) => {
             const noun = ex === undefined ? UNIT_WORD.get(u)! : `${ex === "²" ? "კვადრატული" : "კუბური"} ${UNIT_WORD.get(u)}`;
             return `${head} ${attach(noun, "ზე")}`;
@@ -581,21 +582,21 @@ export function normalizeGeorgian(input: string): string {
     //        by reading the corpus diff and by nothing else (trap 10: re-emit what you consume).
     const exponentNoun = (u: string, ex: string): string =>
         `${ex === "²" ? "კვადრატული" : "კუბური"} ${UNIT_WORD.get(u)}`;
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?${NOT_LETTER_BEFORE}(${UNIT_ALT})([²³])${DEG}`, "gu"),
+    s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s?${NOT_LETTER_BEFORE}(${UNIT_ALT})([²³])${DEG}`, "gu"),
         (_m, d: string, u: string, ex: string, sfx: string | undefined) =>
             attach(`${figureToWords(d)} ${exponentNoun(u, ex)}`, sfx));
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${UNIT_ALT})([²³])${DEG}`, "gu"),
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${UNIT_ALT})([²³])${DEG}`, "gu"),
         (_m, u: string, ex: string, sfx: string | undefined) => attach(exponentNoun(u, ex), sfx));
     //    7d) THE PLAIN UNIT. 102 artifact instances, ⟨მმ⟩ ×36 and ⟨კმ⟩ ×26 the bulk of them. Before this,
     //        every one reached the IPA as a raw consonant cluster (/kʼm/, /sm/) — pronounceable garbage,
     //        which no leak class sees (trap 56).
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?${NOT_LETTER_BEFORE}(${UNIT_ALT})${DEG}${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s?${NOT_LETTER_BEFORE}(${UNIT_ALT})${DEG}${NOT_LETTER_AFTER}`, "gu"),
         (_m, d: string, u: string, sfx: string | undefined) => attach(`${figureToWords(d)} ${UNIT_WORD.get(u)}`, sfx));
     //    7e) THE MAGNITUDE ABBREVIATIONS, with their own dot consumed — `$316 მლრდ.` read *mlɾtʰ* plus a
     //        false clause pause. The dot belongs to the abbreviation; when a sentence also ends there
     //        Georgian writes only that one dot and this loses the pause (`($24 მლრდ.).` keeps its outer one).
     for (const [abbr, word] of SCALES)
-        s = s.replace(new RegExp(`(?<=\\d)\\s?${NOT_LETTER_BEFORE}${abbr}\\.?${DEG}${NOT_LETTER_AFTER}`, "gu"),
+        s = tr(s, new RegExp(`(?<=\\d)\\s?${NOT_LETTER_BEFORE}${abbr}\\.?${DEG}${NOT_LETTER_AFTER}`, "gu"),
             (_m, sfx: string | undefined) => ` ${attach(word, sfx)}`);
 
     // 8) CURRENCY, postposed after the magnitude in the NOMINATIVE — which is the frame the attesting
@@ -607,7 +608,7 @@ export function normalizeGeorgian(input: string): string {
     for (const [sign, word] of Object.entries(CURRENCY)) {
         const S = sign.replace(/[$]/gu, "\\$");
         const stem = word.replace(/[ია]$/u, ""); // დოლარი → დოლარ, ევრო → ევრო: matches any inflected form
-        s = s.replace(new RegExp(`${S}\\s?(\\d[\\d.,]*)((?:\\s+(?:${MAG_WORD})${GEO}*)?)` +
+        s = tr(s, new RegExp(`${S}\\s?(\\d[\\d.,]*)((?:\\s+(?:${MAG_WORD})${GEO}*)?)` +
             `(?:\\s*-?(${WRITTEN_ALT})${NOT_LETTER_AFTER})?`, "gu"),
             (m0: string, d: string, mag: string, sfx: string | undefined, offset: number, whole: string) => {
                 const head = `${figureToWords(d)}${mag}`;
@@ -620,7 +621,7 @@ export function normalizeGeorgian(input: string): string {
                 return attach(`${head} ${word}`, sfx);
             });
         //    …and the POSTPOSED sign, `860 $.` — one instance, and the only shape where the figure leads.
-        s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s${S}(?!\\d)`, "gu"), (_m, d: string) => `${figureToWords(d)} ${word}`);
+        s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s${S}(?!\\d)`, "gu"), (_m, d: string) => `${figureToWords(d)} ${word}`);
     }
 
     // 9) ERA MARKERS AND DOTTED ABBREVIATIONS. Multi-dot before single-dot, and each in two arms — before a
@@ -641,8 +642,8 @@ export function normalizeGeorgian(input: string): string {
         // ⚠ `\s*`, NOT `\s+`, AND THE SPACE IS RE-EMITTED. The corpus writes `549/546-დაახლ.ძვ.წ. 480` with
         // no space after the abbreviation's dot, and a `\s+` arm matched neither that nor the punctuation
         // arm — so `დაახლ.` survived as the cluster /daaχl/ plus a false pause, which is the defect.
-        s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${pat}\\s*(?=[\\p{L}\\d])`, "gu"), `${expansion} `);
-        s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}${pat}(?=\\s*(?:[.,;:!?»)\\]]|$))`, "gu"), `${expansion}.`);
+        s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${pat}\\s*(?=[\\p{L}\\d])`, "gu"), `${expansion} `);
+        s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${pat}(?=\\s*(?:[.,;:!?»)\\]]|$))`, "gu"), `${expansion}.`);
     }
 
     // 10) FRACTIONS. `1/3-ს`, `1/3-ზე` — the slash was dropped and the digits read in order (*ერთი სამი*).
@@ -663,7 +664,7 @@ export function normalizeGeorgian(input: string): string {
     //    ⚠ AND IT CLAIMS ITS OWN ENDING. Both corpus instances carry one (`1/3-ს`, `1/3-ზე`); leaving it to
     //    step 10 is not an option, because by then the operand is WORDS and step 10 only matches digits —
     //    the ending would survive as the free token *s*, which is the defect, not the fix.
-    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d{1,3})\\s?\\/\\s?(\\d{1,3})(?![\\d.,/])(?!\\s*(?:${MONTHS}))${DEG}`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,/])(\\d{1,3})\\s?\\/\\s?(\\d{1,3})(?![\\d.,/])(?!\\s*(?:${MONTHS}))${DEG}`, "gu"),
         (m0, a: string, b: string, sfx: string | undefined) => {
             const num = Number(a), den = Number(b);
             if (num < 1 || den < 2 || den > 100 || num >= den) return m0;
@@ -683,7 +684,7 @@ export function normalizeGeorgian(input: string): string {
     //     ⚠ THE OPERAND MUST BEGIN AND END IN A DIGIT and may not be letter-preceded — otherwise `ლბ1-ის`
     //     (a fossil's catalogue number) and `S60-ზე` would be read as quantities, and a trailing separator
     //     would be swallowed (trap 14's Welsh hazard).
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(?<![\\d.,])(\\d[\\d.,]*\\d|\\d)-(${WRITTEN_ALT})${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(?<![\\d.,])(\\d[\\d.,]*\\d|\\d)-(${WRITTEN_ALT})${NOT_LETTER_AFTER}`, "gu"),
         (m0, d: string, sfx: string) => {
             const words = figureToWords(d);
             return words === "" ? m0 : attach(words, sfx);
@@ -693,7 +694,7 @@ export function normalizeGeorgian(input: string): string {
     //          numeral appears as its bare stem (თორმეტწლიანი). Restricted to an `-იან-` derivative, which
     //          is what keeps it off `549/546-დაახლ.ძვ.წ. 480` — four artifact hyphens that look like a
     //          suffix and are a RANGE DASH in front of an abbreviation (trap 2: read the instances).
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(?<![\\d.,])(\\d+)-(${GEO}{2,}იან[ია]?)${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(?<![\\d.,])(\\d+)-(${GEO}{2,}იან[ია]?)${NOT_LETTER_AFTER}`, "gu"),
         (m0, d: string, tail: string) => {
             const words = numberToWords(Number(d));
             return words === "" ? m0 : `${stemOf(words)}${tail}`;
@@ -704,7 +705,7 @@ export function normalizeGeorgian(input: string): string {
     //     `4.52-ია`. ⚠ NO WORD IS EMITTED: see the header — the reading is unsourceable and the two
     //     candidates fail on sense. What is removed is the CLAUSE PAUSE, which is wrong under every
     //     candidate reading, and nothing is put in its place.
-    s = s.replace(/(?<=\d)[.,](?=\d)/gu, " ");
+    s = tr(s, /(?<=\d)[.,](?=\d)/gu, " ");
 
     return s;
 }

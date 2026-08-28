@@ -80,6 +80,7 @@
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** The ONE number word this layer emits — the suppletive first ordinal, for the French `1er`/`1ère` shape in
  *  step 12. ⚠ READ FROM THE MANIFEST RATHER THAN SPELLED HERE: the step's own comment already said the word
@@ -225,7 +226,7 @@ const CLOCK_MARKED =
 export function normalizeLingala(input: string): string {
     // 0) THE MARKED CLOCK loses the colon's pause — see CLOCK_MARKED. First, so every numeric step below
     //    sees one digit run rather than two.
-    input = input.replace(CLOCK_MARKED, "$1 $2");
+    input = tr(input, CLOCK_MARKED, "$1 $2");
     // 0) NFC at the entry, so a literal in this file matches whichever normalization the corpus used.
     //    Lingala writes `é á ó ô ǒ` (which precompose) beside `ɛ́ ɔ́` (which cannot), so its text is
     //    inherently mixed-normalization and a rule keyed on `bôngó` would otherwise match about half its
@@ -235,7 +236,7 @@ export function normalizeLingala(input: string): string {
     // 1) HTML ENTITIES AND ZERO-WIDTH MARKS, first — a dump carries `&nbsp;` and `&#xFEFF;` (×21 zero-width
     //    in the corpus) and both must go BEFORE the ampersand rule at step 13, or `&nbsp;` is read as the
     //    word "and" followed by the letters n-b-s-p. `&#xFEFF;` is a rendering hint, not speech.
-    s = s.replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍﻿]/gu, "");
+    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍﻿]/gu, "");
 
     // 2) ERA MARKERS AND DOTTED ABBREVIATIONS, before anything can read an interior dot as a phrase break.
     //    ⚠ This must also precede step 4: `L.T.B.` and the grouping-dot rule are both looking at dots, and
@@ -253,7 +254,7 @@ export function normalizeLingala(input: string): string {
     //    ⚠ MUST PRECEDE THE RANGE RULE AS WELL AS DE-GROUPING. RANGE already rejects a hyphen CHAIN, but
     //    `ISBN 2-84586-494-9`'s inner pairs are exactly the shape it looks for, and one fewer group would
     //    hand it a bare ascending pair. Claiming the identifier whole removes the question.
-    s = s.replace(/(?<![\p{L}\p{M}])(ISBN(?:[- ]1[03])?)\s*:?\s*([\d][\d– -]*[\dXx])/gu,
+    s = tr(s, /(?<![\p{L}\p{M}])(ISBN(?:[- ]1[03])?)\s*:?\s*([\d][\d– -]*[\dXx])/gu,
         (_m, tag: string, body: string) => `${tag} ${[...body.replace(/[– -]/gu, "")].join(" ")}`);
 
     // 4) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause
@@ -274,12 +275,12 @@ export function normalizeLingala(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma, so `24,000, na wengine` would
     //    split off `000` and speak it as zero.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a list.
     //    Requiring every group to be exactly three digits does that: `mibu 1600 kino 1850` has no 3-digit
     //    group, and `sanza 9 1946` is not `\d{1,3}( \d{3})+` because 1946 is four.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) UNITS, before decimals — the number-unit adjacency a unit rule matches on is destroyed the moment
     //    a decimal is rewritten into spaced digits (playbook step 4's standing coupling), and after
@@ -307,7 +308,7 @@ export function normalizeLingala(input: string): string {
     //    and it must run HERE rather than after step 7, because step 7 would already have spent the dash.
     for (const [sym, word] of UNITS) {
         const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        s = s.replace(
+        s = tr(s,
             new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),
             (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${word} ${a} kino ${b}` : whole),
         );
@@ -315,7 +316,7 @@ export function normalizeLingala(input: string): string {
         // a guard: a descending or chained span the arm just declined must reach RANGE whole, not with its
         // tail already rewritten. `(?<!\d\s?[-–—]\s?)` is narrower than putting the dash in the main
         // lookbehind, which would also have blocked a genuine negative measurement.
-        s = s.replace(
+        s = tr(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`,
                 "gu",
@@ -336,7 +337,7 @@ export function normalizeLingala(input: string): string {
     //    ⚠ SAME DECIMAL-TAIL COUPLING AS STEP 5, and the corpus proves it: `-273,15 °C` matched on `15 °C`
     //    alone and read *… kámá míbalé na túku sambo na mísáto , CELSIUS zómi na mítáno* — the number cut
     //    in two at the comma, which is precisely the defect this layer exists to remove.
-    s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, "Celsius $1");
+    s = tr(s, /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, "Celsius $1");
 
     // 7) RANGES, before percent — `20%-40%` and `2-3% ya batu` are ranges OF percents, so the range must be
     //    claimed while both operands are still bare digits; once step 8 has inserted `likolo ya mokama`
@@ -349,12 +350,12 @@ export function normalizeLingala(input: string): string {
     //    `%…-…%` shape cannot be arithmetic — a difference of two percentages is not written this way — so
     //    the arm needs no ascending-vs-descending judgement beyond the one it shares with RANGE, and it
     //    costs NO NEW WORD: `kino` is the same connective, and each operand keeps its `%` for step 8.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?%\s?[-–—]\s?(\d+(?:[.,]\d+)?)\s?%/gu,
         (whole, a: string, b: string) =>
             Number(a.replace(",", ".")) < Number(b.replace(",", ".")) ? `${a}% kino ${b}%` : whole,
     );
-    s = s.replace(RANGE, (whole, a: string, gap: string, b: string) => {
+    s = tr(s, RANGE, (whole, a: string, gap: string, b: string) => {
         if (Number(a) >= Number(b)) return whole;
         if (gap !== "" && a.length < 2 && b.length < 2) return whole; // the spaced-score arm, see RANGE
         return `${a} kino ${b}`;
@@ -374,7 +375,7 @@ export function normalizeLingala(input: string): string {
     //    ⚠ ONE SENTENCE IS ONE SENTENCE. It is also the whole of the in-language evidence, and the
     //    alternative is 274 silent instances, so it ships — with the limit written down so the next reader
     //    re-checks it rather than inheriting it.
-    s = s.replace(/(\d+)\s?%/gu, "$1 likolo ya mokama");
+    s = tr(s, /(\d+)\s?%/gu, "$1 likolo ya mokama");
 
     // 9) CURRENCY. `dolare` ×16, sense-checked (`dolare ya Amerika`, `dolare milio 1,8`, `dolare 1 500`),
     //    and unit-first like every other measure noun — the corpus writes `badollar 45$` and
@@ -389,10 +390,10 @@ export function normalizeLingala(input: string): string {
     //    other side. The corpus writes `kongwa na badollar 45$ tii na badollar 10$`, so a rule that always
     //    emits the word says it twice; the guard checks for a currency noun immediately to the left.
     const NAMED = /(?:dolare|dolar|badollar|dollars?|falánga|falanga)\s*$/iu;
-    s = s.replace(/(?<![\p{L}\p{M}])US\s?\$\s?(\d)/giu, "dolare $1");
-    s = s.replace(/\$\s?(\d[\d ,.]*)/gu, (whole, n: string, off: number, all: string) =>
+    s = tr(s, /(?<![\p{L}\p{M}])US\s?\$\s?(\d)/giu, "dolare $1");
+    s = tr(s, /\$\s?(\d[\d ,.]*)/gu, (whole, n: string, off: number, all: string) =>
         NAMED.test(all.slice(0, off)) ? n : `dolare ${n}`);
-    s = s.replace(/(\d[\d ,.]*?)\s?\$/gu, (whole, n: string, off: number, all: string) =>
+    s = tr(s, /(\d[\d ,.]*?)\s?\$/gu, (whole, n: string, off: number, all: string) =>
         NAMED.test(all.slice(0, off)) ? n : `dolare ${n}`);
 
     // 10) DECIMALS, after every rule that needs the number intact. The separator becomes NOTHING and the
@@ -402,7 +403,7 @@ export function normalizeLingala(input: string): string {
     //    libungutúlu*.
     //    ⚠ THE TRAILING LETTER GUARD keeps a dotted designation (`802.11a`) out — zero in this corpus, and
     //    the same robustness argument as step 5.
-    s = s.replace(/(?<![\d.,])(\d+)[.,](\d+)(?![\d\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
+    s = tr(s, /(?<![\d.,])(\d+)[.,](\d+)(?![\d\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
         `${int} ${[...frac].join(" ")}`);
 
     // 11) FRACTIONS → the ordinal-denominator idiom, which is the language's own and needs no new word:
@@ -418,10 +419,10 @@ export function normalizeLingala(input: string): string {
     //     `/digit` field additionally rejects the dates before the cap has to.
     //     ⚠ AND THE CAP IS A RANGE, NOT A TABLE (trap 8): the rule COMPOSES from the ordinal idiom, so
     //     `3/4` and `1/2` read correctly although the corpus writes neither in ASCII.
-    s = s.replace(/(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) =>
+    s = tr(s, /(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) =>
         Number(a) < Number(b) && Number(b) <= 10 ? `${a} ya ${b}` : whole);
     // ¼ and ½ occur once each; both are the same idiom with the numerator spelled out.
-    s = s.replace(/¼/gu, " mǒkó ya mínei ").replace(/½/gu, " mǒkó ya míbalé ");
+    s = tr(tr(s, /¼/gu, " mǒkó ya mínei "), /½/gu, " mǒkó ya míbalé ");
 
     // 12) ORDINAL SUFFIXES. `16ème` was reaching the phoneme stream with its French suffix as raw letters
     //     (`zómi na motóbá e˩me˩`). ⚠ ALL 235 INSTANCES ARE INSIDE FRENCH TEXT — "du 16ème au 18ème
@@ -436,16 +437,16 @@ export function normalizeLingala(input: string): string {
     //     zero are ordinals, and the spaced arm was deleting that "and" — `em ya 1533 com a invasão`. Trap 9
     //     with the evidence pointing the other way: the alternative is not merely unattested, it is attested
     //     WRONG. Tight `2e`/`16e` (×184, all French ordinals) is what the rule is for and is unaffected.
-    s = s.replace(/(?<![\d\p{L}\p{M}])1\s?(?:er|ère|re)(?![\p{L}\p{M}])/gu, `ya ${FIRST_ORDINAL}`);
-    s = s.replace(/(?<![\d\p{L}\p{M}])(\d+)\s?(?:ème|nd)(?![\p{L}\p{M}])/gu, "ya $1");
-    s = s.replace(/(?<![\d\p{L}\p{M}])(\d+)e(?![\p{L}\p{M}])/gu, "ya $1");
+    s = tr(s, /(?<![\d\p{L}\p{M}])1\s?(?:er|ère|re)(?![\p{L}\p{M}])/gu, `ya ${FIRST_ORDINAL}`);
+    s = tr(s, /(?<![\d\p{L}\p{M}])(\d+)\s?(?:ème|nd)(?![\p{L}\p{M}])/gu, "ya $1");
+    s = tr(s, /(?<![\d\p{L}\p{M}])(\d+)e(?![\p{L}\p{M}])/gu, "ya $1");
 
     // 13) THE AMPERSAND — ×254, and every instance read is a bibliographic "and" between two names
     //     ("De Moor & JP Jacquemin", "M. Vences & F. Glaw", "Bd 1&2"). `mpé` is the language's ordinary
     //     conjunction, attested throughout, so this needs no sourcing argument at all.
     //     ⚠ SPACED ON BOTH SIDES DELIBERATELY. `A&B` deletes to `AB`, which is ONE token instead of two —
     //     trap 18/26 — so the replacement must insert the boundary the sign was supplying.
-    s = s.replace(/\s?&\s?/gu, " mpé ");
+    s = tr(s, /\s?&\s?/gu, " mpé ");
 
     return s;
 }

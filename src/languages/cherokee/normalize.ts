@@ -1,3 +1,4 @@
+import { tr } from "../../core/provenance.ts";
 /**
  * Cherokee (chr) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -191,7 +192,7 @@ export function normalizeCherokee(input: string): string {
     //    fallback returns nothing for it, and the two years fuse. Folded to the real dash here so step 4 can
     //    claim it; running before step 4 is the whole point of its position. This is dump/markup residue,
     //    not a Cherokee orthographic convention, and is deliberately narrow — only the two dash entities.
-    s = s.replace(/&(ndash|mdash);/gu, (_m, which: string) => (which === "ndash" ? "\u2013" : "\u2014"));
+    s = tr(s, /&(ndash|mdash);/gu, (_m, which: string) => (which === "ndash" ? "\u2013" : "\u2014"));
 
     // 2) DE-GROUPING THE COMMA — the round's largest defect. The three-digit test is the WHOLE guard,
     //    because every `\d,\d{3}` in this corpus is a thousands group and there is no decimal comma to
@@ -208,7 +209,7 @@ export function normalizeCherokee(input: string): string {
     //    ⚠ AND THE DATE COMMA IS DECLINED BY THE SAME THREE-DIGIT TEST, not by a separate rule:
     //    `ᏀᎾ ᎦᎶᏂ 28, 1838,` is `\d{1,2}, \d{4}` — a space after the comma and four digits after it, so
     //    neither `,\d{3}` nor the no-digit-follows guard can be satisfied. ×8 dates, all safe.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
     // 3) THE DECIMAL DOT, NEUTRALISED. ⚠ NO DECIMAL WORD IS SOURCEABLE (header), so the mark is spent rather
@@ -222,7 +223,7 @@ export function normalizeCherokee(input: string): string {
     //    and it costs nothing measured: 0 further utterances change with or without it.
     //    ⚠ AND IT DECLINES THE ABBREVIATING DOT BY REQUIRING A DIGIT ON THE LEFT: `pt.1` in the Smithsonian
     //    citation, `D.C.`, `Ꭴ..` and the sentence period of `ᎭᏫᎾᏗᏢ 1907.` are all untouched.
-    s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
+    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
 
     // 4) THE SPAN DASH, SPENT ON A PAUSE. Digit-flanked `–`/`—` is the birth–death parenthetical of a
     //    biography or a percent span, without exception in this corpus (header): `(1923–2008)`,
@@ -235,14 +236,14 @@ export function normalizeCherokee(input: string): string {
     //    and NARROWING to the two dashes is what makes it safe.
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58) — the lookahead is `(?=\d)` and the
     //    rule re-emits nothing beyond its own separator, so `(1961–1989),` keeps its clause comma.
-    s = s.replace(/(\d)\s?[\u2013\u2014]\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(\d)\s?[\u2013\u2014]\s?(?=\d)/gu, "$1, ");
 
     //    …and the SPACED dash between words, which is the same mark doing the same job outside a number and
     //    which also vanished: `ᎢᎾᎨ ᎡᏯ ᏒᎩ — Allium canadense`, `ᎩᎦᎨ ᎤᏆᎫᏫᏂᏗᏧ (…) – Polystichum
     //    acrostichoides` (the species glosses), `"ᏣᎳᎩ" (ᏣᎳᎩ) – ᎪᎯ ᎾᎯᏳᎢ` and `TONMO.COM – The Octopus News
     //    Magazine Online`. A dash with a space on BOTH sides is never a word-internal joiner in any of the
     //    three scripts this text mixes, which is what makes the shape safe where the bare hyphen is not.
-    s = s.replace(/[^\S\n][\u2013\u2014][^\S\n]/gu, ", ");
+    s = tr(s, /[^\S\n][\u2013\u2014][^\S\n]/gu, ", ");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

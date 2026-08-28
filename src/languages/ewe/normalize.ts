@@ -131,6 +131,7 @@
  *   nothing distinguishes the two without a paragraph-level detector built on one attested instance.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * PERCENT, and it is POSTPOSED — `le alafa me`, literally "in a hundred". Both of ee.wikipedia's instances
@@ -235,7 +236,7 @@ export function normalizeEwe(input: string): string {
     //    base letter with an orphaned mark the scan drops. `TOKEN` admits U+0342 (it is inside the
     //    ̀-ͯ range), so the word never broke on it — the mark simply reached `phonemizeWord` and was
     //    dropped as unmapped, which is why this one is silent where ⟨Ð⟩ is loud.
-    s = s.replace(/[ÐĐ]/gu, "Ɖ").replace(/Ƞ/gu, "Ŋ").replace(/͂/gu, "̃").normalize("NFC");
+    s = tr(tr(tr(s, /[ÐĐ]/gu, "Ɖ"), /Ƞ/gu, "Ŋ"), /͂/gu, "̃").normalize("NFC");
 
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, before the ampersand rule at step 11 — else `&nbsp;` is read as
     //    the word "and" followed by the letters n-b-s-p. This wiki writes 9 of its 16 ampersands as entities
@@ -243,7 +244,7 @@ export function normalizeEwe(input: string): string {
     //    ⚠ AND THE ENTITY SITS IN EXACTLY THE GAP THE UNIT AND MAGNITUDE RULES NEED: `million&nbsp;925`,
     //    `miliɔn 1.4&nbsp;`, `GH¢&nbsp;1`. Folding it to a space is what lets step 6 reach across it.
     //    U+200B is ×20 in the retained text (`zero-width` cell 48) and is a rendering hint, not speech.
-    s = s.replace(/&nbsp;?/giu, " ").replace(/&ndash;/giu, "–").replace(/&#(?:x[0-9a-f]+|\d+);/giu, " ")
+    s = tr(tr(tr(s, /&nbsp;?/giu, " "), /&ndash;/giu, "–"), /&#(?:x[0-9a-f]+|\d+);/giu, " ")
         .replace(/[​‌‍﻿]/gu, "");
 
     // 3) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause
@@ -255,11 +256,11 @@ export function normalizeEwe(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma, so `24,000, na …` would split off
     //    `000` and speak it as zero (the ln finding).
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
     //    The SPACE form is ×1 in the retained text (`10 955 000`, Greece's population). Requiring every group
     //    to be exactly three digits is what stops it claiming two adjacent numbers — `ƒe 1961 – 25` has no
     //    three-digit group and `Ɔktoba 22 lia le ƒe 1899` is four digits.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 4) UNITS, BEFORE DECIMALS — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten (the playbook's standing coupling), and after de-grouping so `1,904,569 km2`
@@ -276,10 +277,10 @@ export function normalizeEwe(input: string): string {
     //      must READ), so the anchor here is robustness rather than a measured repair.
     //    ⚠ `NOT_MAGNITUDE` keeps the table off `$400mm`. See its definition.
     for (const [sym, word] of UNITS) {
-        s = s.replace(new RegExp(`${NOT_MAGNITUDE}(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?:²|2)(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `${word} $1`);
+        s = tr(s, new RegExp(`${NOT_MAGNITUDE}(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?:²|2)(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `${word} $1`);
     }
     for (const [sym, word] of UNITS) {
-        s = s.replace(new RegExp(`${NOT_MAGNITUDE}(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `${word} $1`);
+        s = tr(s, new RegExp(`${NOT_MAGNITUDE}(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `${word} $1`);
     }
     //    …and the ones with no numeral at all. Last, so the counted arms keep every match they can make.
     s = BARE_UNITS(s);
@@ -288,17 +289,17 @@ export function normalizeEwe(input: string): string {
     //    would have split the operands. `25–33%` and `10–15%` are both in the corpus.
     //    ⚠ THE WORD IS POSTPOSED (see PERCENT), so on a span it lands after the SECOND operand.
     //    ⚠ ASCENDING AND CHAIN-GUARDED, the same tests step 8 uses — see there for why.
-    s = s.replace(new RegExp(`(?<![\\d.,:\\-–—])(${NUM})\\s?%?\\s?[-–—]\\s?(${NUM})\\s?%`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,:\\-–—])(${NUM})\\s?%?\\s?[-–—]\\s?(${NUM})\\s?%`, "gu"),
         (whole: string, a: string, b: string) =>
             (Number(a.replace(/,/gu, "")) < Number(b.replace(/,/gu, "")) ? `${a} ${TO} ${b} ${PERCENT}` : whole));
-    s = s.replace(new RegExp(`(?<![\\d.,])(${NUM})\\s?%`, "gu"), `$1 ${PERCENT}`);
+    s = tr(s, new RegExp(`(?<![\\d.,])(${NUM})\\s?%`, "gu"), `$1 ${PERCENT}`);
 
     // 6) CURRENCY, PREPOSED, and before decimals for the same reason percent is. Longest key first (see
     //    CURRENCY), so `GH¢` is claimed before the bare `¢`.
     //    ⚠ THE FIGURE IS REQUIRED. A bare sign with no amount does not occur in this corpus, so a stray one
     //    is left exactly as silent as it was rather than emitting a currency noun out of nowhere.
     for (const [sym, word] of CURRENCY) {
-        s = s.replace(new RegExp(`${NLB}${sym}\\s?(${NUM})`, "gu"), `${word} $1`);
+        s = tr(s, new RegExp(`${NLB}${sym}\\s?(${NUM})`, "gu"), `${word} $1`);
     }
 
     // 7) DOTTED ABBREVIATIONS — the INTERIOR dots only (`dotted` ×356). `H.W.`, `B.C.`, `E.P.`, `J.N.D.`,
@@ -313,7 +314,7 @@ export function normalizeEwe(input: string): string {
     //    ASCII-defined even under the `u` flag, so `[^\W\d_]` does not contain ⟨Ŋ⟩ — and Ewe's own era
     //    marker is `D.M.Ŋ.`, whose SECOND dot the ASCII class therefore left in place (`dm . ŋ .`). Measured
     //    on the real string before and after.
-    s = s.replace(/(?<=\p{L})\.(?=\p{L}\.)/gu, "");
+    s = tr(s, /(?<=\p{L})\.(?=\p{L}\.)/gu, "");
 
     // 8) RANGES — `ranges` ×459, read today as two juxtaposed cardinals with no connective. `va ɖo` is the
     //    infix (see TO). Three guards, each measured over the retained text's 54 hyphen pairs:
@@ -341,7 +342,7 @@ export function normalizeEwe(input: string): string {
     //    the two guards above are what decline the shapes a comma would otherwise be catching by accident —
     //    the tennis scores `7–6, 4–6, 7–6, 2–6, 6–2` are rejected as non-ascending or as both-single-digit,
     //    and the scripture spans `Mateo 21:1-11,` by the leading `:`. +1 segment (`le May 10-11, …`).
-    s = s.replace(new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d\\p{L}\\p{M}\\-–—])`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d\\p{L}\\p{M}\\-–—])`, "gu"),
         (whole: string, a: string, b: string) =>
             (Number(a) < Number(b) && (a.length > 1 || b.length > 1) ? `${a} ${TO} ${b}` : whole));
 
@@ -351,14 +352,14 @@ export function normalizeEwe(input: string): string {
     //    them one at a time — see the header for why there is no point word to insert. What this fixes is the
     //    spurious CLAUSE BREAK and the mis-read tail, not the missing word.
     //    ⚠ THE TRAILING LETTER GUARD keeps a dotted designation out; ×0 in this corpus, robustness only.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
         `${int} ${[...frac].join(" ")}`);
 
     // 10) THE ENGLISH ORDINAL SUFFIX — `3rd edition`, inside the English citation furniture this wiki
     //     carries; the letters reach the IPA as a fragment today. DROPPED rather than translated, because
     //     Ewe's own ordinal POSTPOSES `lia` to the figure (`ƒe alafa 19 lia`) and the cardinal that remains
     //     is what the sentence already reads.
-    s = s.replace(/(?<=\d)(?:st|nd|rd|th)(?![\p{L}\p{M}])/gu, "");
+    s = tr(s, /(?<=\d)(?:st|nd|rd|th)(?![\p{L}\p{M}])/gu, "");
 
     // 11) THE AMPERSAND — silent today, and every surviving instance after step 2 is inside an English or
     //     French name (`Duncker & Humblot`, `Prempeh & Co`, `St. Vincent & the Grenadines`, `Foris
@@ -366,7 +367,7 @@ export function normalizeEwe(input: string): string {
     //     corpus it saturates (×357 tokens in the retained text).
     //     ⚠ SPACES ON BOTH SIDES, because deleting the sign merges its operands and `A&B` would become one
     //     initialism where the text has two (traps 18/26).
-    s = s.replace(/\s?&\s?/gu, " kple ");
+    s = tr(s, /\s?&\s?/gu, " kple ");
 
     return s;
 }

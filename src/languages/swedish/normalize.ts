@@ -67,6 +67,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -295,7 +296,7 @@ export function normalizeSwedish(input: string): string {
     //    `1400-talet` get the SAME hundreds reading — the inconsistency to avoid.
     do {
         prev = t;
-        t = t.replace(/(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     } while (t !== prev);
 
     // 2) ENGLISH-STYLE COMMA GROUPING (9) — before anything reads the comma as a decimal point, which is
@@ -308,7 +309,7 @@ export function normalizeSwedish(input: string): string {
     //    åtta*.
     do {
         prev = t;
-        t = t.replace(/(?<=\d)(?<!(?<![\d\.,])0)[,](?=\d{3}(?!\d))/gu, "");
+        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)[,](?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 3) SPORTS / DURATION TIME `M:SS,hh` (3) — `4:41,30`, `2:11,60`, `1:09.02`. NOT a clock: a third
@@ -317,7 +318,7 @@ export function normalizeSwedish(input: string): string {
     //    English decimal point becomes the Swedish comma, so TOKEN reads the seconds as one decimal
     //    numeral. FIRST of the three time rules: `1:09.02` contains `09.02`, which step 4 would otherwise
     //    claim as a clock (the Russian and Indonesian defects, from the other direction).
-    t = t.replace(/(?<![\d:,])(\d{1,2}):(\d{2})[.,](\d{1,2})(?!\d)/gu, "$1 $2,$3");
+    t = tr(t, /(?<![\d:,])(\d{1,2}):(\d{2})[.,](\d{1,2})(?!\d)/gu, "$1 $2,$3");
 
     // 4) CLOCK, PERIOD FORM `HH.MM` (12) — the form Swedish writes MORE often (see the header). TOKEN's
     //    `\d+(?:[.,]\d+)?` claimed it as a DECIMAL, so `kl. 20.30` read *tjugo komma tre noll*. Anchored
@@ -325,33 +326,33 @@ export function normalizeSwedish(input: string): string {
     //    cannot, and gated on a legal hour/minute so an English-style `1.75` cannot. The RANGE form is
     //    claimed first: after the single-clock rewrite there are no dots left for a range rule to see, and
     //    `Mellan 22.00–23.00 MDT` is followed by a capital, so step 13's lowercase guard would decline it.
-    t = t.replace(
+    t = tr(t,
         /(?<![\d:,])(?<!\.\d)(\d{1,2})\.(\d{2})\s*[-–—]\s*(\d{1,2})\.(\d{2})(?!\d)/gu,
         (m, h1: string, m1: string, h2: string, m2: string) =>
             isClock(h1, m1) && isClock(h2, m2)
                 ? `${h1} ${minutes(m1)} till ${h2} ${minutes(m2)}`
                 : m,
     );
-    t = t.replace(/(?<![\d:,])(?<!\.\d)(\d{1,2})\.(\d{2})(?![\d.])/gu, (m, h: string, mm: string) =>
+    t = tr(t, /(?<![\d:,])(?<!\.\d)(\d{1,2})\.(\d{2})(?![\d.])/gu, (m, h: string, mm: string) =>
         isClock(h, mm) ? `${h} ${minutes(mm)}` : m);
 
     // 5) CLOCK, COLON FORM `HH:MM` (7). The colon is `,` in clausePunctuation, so `klockan 12:00` read
     //    *klockan tolv , noll* — a pause inside the time. Two digits of minutes is what separates it from
     //    the score in step 6 and from the `N:a` ordinal in step 8.
-    t = t.replace(/(?<![\d:,])(\d{1,2}):(\d{2})(?![\d.,])/gu, (m, h: string, mm: string) =>
+    t = tr(t, /(?<![\d:,])(\d{1,2}):(\d{2})(?![\d.,])/gu, (m, h: string, mm: string) =>
         isClock(h, mm) ? `${h} ${minutes(mm)}` : m);
 
     // 6) SCORE `N:N` (2) — `betyget 2:2`, `vara 3:2.`. AFTER the clock, which has two minute digits and
     //    would otherwise be eaten by this looser pattern. Only the pause is wrong; two bare cardinals
     //    (*tre två*) is how a Swedish score is read, so the colon is simply removed.
-    t = t.replace(/(?<![\d:.,])(\d{1,2}):(\d{1,2})(?![\d\p{L}])/gu, "$1 $2");
+    t = tr(t, /(?<![\d:.,])(\d{1,2}):(\d{1,2})(?![\d\p{L}])/gu, "$1 $2");
 
     // 7) DOTTED ABBREVIATIONS (29), multi-dot before single-dot — else the interior dot survives as a
     //    phrase break. AFTER the clock rules so `kl. 20.30` and `kl.12.00` still have their times intact
     //    (the `kl.` pattern eats the following space, which is what makes the no-space variant work), and
     //    BEFORE the initialism pass, or `f.Kr.` is spelled EFF-KÅ-ERR.
     for (const [re, word, keepFinal] of ABBREV)
-        t = t.replace(re, (m: string, ...rest: unknown[]) => {
+        t = tr(t, re, (m: string, ...rest: unknown[]) => {
             if (keepFinal === undefined || !m.endsWith(".")) return word;
             const at = rest[rest.length - 2] as number;
             const whole = rest[rest.length - 1] as string;
@@ -369,7 +370,7 @@ export function normalizeSwedish(input: string): string {
     //    The suffix letter carries no information Swedish does not already have — `:a` appears on första /
     //    andra because those END in -a — so the table decides, not the written suffix. An unclaimable
     //    number (>100) keeps its digits and its colon rather than getting a guessed ending.
-    t = t.replace(/(?<![\d:.,])(\d{1,3}):(a|e|s|or)(?![\p{L}\p{M}])/gu, (m, n: string, suf: string) => {
+    t = tr(t, /(?<![\d:.,])(\d{1,3}):(a|e|s|or)(?![\p{L}\p{M}])/gu, (m, n: string, suf: string) => {
         if (suf === "or") return `${numberToWords(Number(n), n)}or`;
         const ord = ordinal(Number(n));
         return ord === undefined ? m : suf === "s" ? `${ord}s` : ord;
@@ -384,14 +385,14 @@ export function normalizeSwedish(input: string): string {
     //    The RANGE form is claimed first (`1100-1200-talet` ×1): its left endpoint has no `-tal` of its
     //    own, so the single rule would strand it and step 13 would decline it (the right operand is
     //    followed by a hyphen, not a lowercase noun).
-    t = t.replace(
+    t = tr(t,
         /(?<![\d.,:])(\d{3,4})-(\d{3,4})-(tal\p{L}*)/gu,
         (m, a: string, b: string, tail: string) => {
             const first = hundredsYear(Number(a)), second = hundredsYear(Number(b));
             return first !== undefined && second !== undefined ? `${first} till ${second}${tail}` : m;
         },
     );
-    t = t.replace(/(?<![\d.,:])(\d{3,4})-(tal\p{L}*)/gu, (m, y: string, tail: string) => {
+    t = tr(t, /(?<![\d.,:])(\d{3,4})-(tal\p{L}*)/gu, (m, y: string, tail: string) => {
         const word = hundredsYear(Number(y));
         return word === undefined ? m : `${word}${tail}`;
     });
@@ -415,7 +416,7 @@ export function normalizeSwedish(input: string): string {
     //     `(1644-1912) styrkor` came out as two hundreds-years with NO connective, because by the time the
     //     range rule ran its operands were words and there were no digits left to match. Everything that
     //     needs to see a bare digit run has to precede step 11.
-    t = t.replace(
+    t = tr(t,
         /(?<![-–—\d])(\d[\d,]*\d|\d)\s*[-–—]\s*(\d[\d,]*\d|\d)(?![\d\-–—.,])/gu,
         "$1 till $2",
     );
@@ -456,41 +457,41 @@ export function normalizeSwedish(input: string): string {
     //     CASE-INSENSITIVELY and the others are not: the corpus writes `GHz` / `Mbit` cased and `km` / `m`
     //     lowercase, and widening the whole group to `/i` would newly decline `1500 M` — a behaviour change
     //     with no evidence behind it — so only the two cased keys carry classes.
-    t = t.replace(/(?<![\d.,:\p{L}])(1[1-9]\d\d)(?![\d,:])(?!\.\d)(?!\p{L})(?!\s*(?:%|[$€£°²³]|(?:km|cm|mm|kg|[Gg][Hh][Zz]|[Mm][Bb][Ii][Tt]|m)(?![\p{L}\p{M}])))/gu, (m, y: string) =>
+    t = tr(t, /(?<![\d.,:\p{L}])(1[1-9]\d\d)(?![\d,:])(?!\.\d)(?!\p{L})(?!\s*(?:%|[$€£°²³]|(?:km|cm|mm|kg|[Gg][Hh][Zz]|[Mm][Bb][Ii][Tt]|m)(?![\p{L}\p{M}])))/gu, (m, y: string) =>
         hundredsYear(Number(y)) ?? m);
 
     // 12) DEGREES (2), BEFORE any rule that could claim the scale letter — `+30°C` read as *trettio* plus
     //     a bare [k], the sign and the degree both silently gone, and `35°V` as *trettiofem* plus a bare
     //     [v]. `°V` is a LONGITUDE (väst), not a temperature scale; it is the corpus's only compass
     //     instance, and N / S / Ö are deliberately not added (0 instances each — see the PR).
-    t = t.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
-    t = t.replace(/(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 grader celsius");
-    t = t.replace(/(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 grader fahrenheit");
-    t = t.replace(/(\d)\s*°\s*V(?![\p{L}\p{M}])/gu, "$1 grader väst");
-    t = t.replace(/(\d)\s*°/gu, "$1 grader");
+    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
+    t = tr(t, /(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 grader celsius");
+    t = tr(t, /(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 grader fahrenheit");
+    t = tr(t, /(\d)\s*°\s*V(?![\p{L}\p{M}])/gu, "$1 grader väst");
+    t = tr(t, /(\d)\s*°/gu, "$1 grader");
 
     // 13) `x` AS MULTIPLICATION (1) — `75,6 cm x 62,2` read the letter as [ks]. Requires spaces on both
     //     sides and a digit after, so a hyphenated or word-internal x is untouched; lowercase only, so a
     //     capital `X` in a name is not claimed. `×` itself is handled with the other signs in step 15.
-    t = t.replace(/(?<=[\d\p{L}])\s+x\s+(?=\d)/gu, " gånger ");
+    t = tr(t, /(?<=[\d\p{L}])\s+x\s+(?=\d)/gu, " gånger ");
 
     // 14) SIGNED NUMBERS (2). `+30°C` — a plus PREFIXED to a number, dropped outright; and `UTC+1`, where
     //     the sign sits between a LETTER and a digit so the boundary-guarded prefix pattern cannot see it.
     //     Two positions, two patterns, both attested. AFTER the ranges so a range's dash is already gone.
-    t = t.replace(/(?<![\p{L}\p{M}\d])([-−+])(\d)/gu, (_m, sign: string, d: string) =>
+    t = tr(t, /(?<![\p{L}\p{M}\d])([-−+])(\d)/gu, (_m, sign: string, d: string) =>
         `${sign === "+" ? "plus" : "minus"} ${d}`);
-    t = t.replace(/(?<=[\p{L}\p{M}])\+(?=\d)/gu, " plus ");
-    t = t.replace(/(\d)\s*\+\s*(\d)/gu, "$1 plus $2");
+    t = tr(t, /(?<=[\p{L}\p{M}])\+(?=\d)/gu, " plus ");
+    t = tr(t, /(\d)\s*\+\s*(\d)/gu, "$1 plus $2");
 
     // 15) RELATIONAL AND OPERATOR SIGNS — none occurs here; read anyway, because a dropped sign is
     //     inaudible. See RELATIONAL.
-    for (const [re, word] of RELATIONAL) t = t.replace(re, word);
+    for (const [re, word] of RELATIONAL) t = tr(t, re, word);
 
     // 16) AMPERSAND (2) — `bed & breakfasts`, `College of Arts & Sciences`. Dropped outright today, so the
     //     two sides ran together with no separation at all. Both instances sit inside an English phrase;
     //     `och` is still strictly better than silence, the same argument nb and da
     //     made for the same shape.
-    t = t.replace(/\s*[&＆]\s*/gu, " och ");
+    t = tr(t, /\s*[&＆]\s*/gu, " och ");
 
     // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
     return t.replace(/[ \t]{2,}/gu, " ");

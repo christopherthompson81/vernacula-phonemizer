@@ -69,6 +69,7 @@
  *   `www`, `mg` one URL, `www.assemblee-nationale.mg`, in a citation.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Every word is attested IN ITS SLOT (playbook 5e).
@@ -188,7 +189,7 @@ export function normalizeMalagasy(input: string): string {
     //    dump's `ampersand` 30,267 is very largely this. It is French typography — the thin space before
     //    `%` and inside numbers (`45&nbsp;%n' ny vahoaka`, `6&nbsp;% ny PIB`) — and it must become a real
     //    space or every guard below sees a LETTER run where it expects a boundary. Trap 2, in a cell name.
-    s = s.replace(/&nbsp;/gu, " ");
+    s = tr(s, /&nbsp;/gu, " ");
 
     // 2) THOUSANDS GROUPED WITH A SPACE — the defect with no symptom (see the file header). `\d{1,3}` plus
     //    the digit lookbehind is what keeps a YEAR out: in `1947 250` the first run is four digits, so the
@@ -196,7 +197,7 @@ export function normalizeMalagasy(input: string): string {
     //    ⚠ The trailing guard rejects a following DIGIT only, not a following mark, because the French
     //    convention combines both in one number: `299 792,458 km/s` (the speed of light) is space-grouped
     //    AND comma-decimal, and a `(?![\p{Nd}.,])` guard left its integer part as two separate numbers.
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:(?<!(?<!\p{Nd})0)[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:(?<!(?<!\p{Nd})0)[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 3) THOUSANDS GROUPED WITH A PERIOD — only at exactly three digits, and only when no `°` follows.
     //    ⚠ THE DEGREE IS THE DISCRIMINATOR, and it is the corpus's own: every period-decimal that is not a
@@ -204,7 +205,7 @@ export function normalizeMalagasy(input: string): string {
     //    `44.872°`), while the thousands are populations and money (`25.000fmg`, `30.000 eo ho eo`,
     //    `isam-ponina dia 5.196`). 3 of 3 thousands right, 4 of 5 decimals right; the miss is `~1.666 km`,
     //    a miles-to-kilometres factor, ×1.
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:(?<!(?<!\p{Nd})0)\.\p{Nd}{3})+)(?![\p{Nd}.,°])/gu, (m) => m.replaceAll(".", ""));
+    s = tr(s, /(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:(?<!(?<!\p{Nd})0)\.\p{Nd}{3})+)(?![\p{Nd}.,°])/gu, (m) => m.replaceAll(".", ""));
 
     // 4) DEGREES — `degre`, POSTPOSED, which is how the corpus writes it (`4.27471 degre`, `3.10228 degre`).
     //    `degrees` is 23,806 in the dump but that is overwhelmingly the commune coordinate stubs; the human
@@ -215,12 +216,12 @@ export function normalizeMalagasy(input: string): string {
     //    ⚠ CASE-INSENSITIVE, which is trap 7 and cost the Kurmanji pass the same bug: with a case-sensitive
     //    `[CF]` the scale letter in `35°c` was not consumed and reached the IPA as a bare letter. The
     //    corpus writes it uppercase, so nothing here would have caught it — the probe did.
-    s = s.replace(/(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°\s*[CF](?![\p{L}])/giu, "$1 degre ");
+    s = tr(s, /(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°\s*[CF](?![\p{L}])/giu, "$1 degre ");
     //    ⚠ ONE GUARD, AND THE CORPUS SUPPLIES IT: `taonjato faha 17°` is "the 17TH century", not seventeen
     //    degrees — ⟨faha-⟩ is the Malagasy ordinal prefix, and the writer has used `°` the way French uses
     //    a raised ordinal marker. It is U+00B0, the real degree sign, so no character test separates them;
     //    the preceding `faha` does. ×1 of the 51 degree signs in the mined segments.
-    s = s.replace(/(?<!faha\s{0,3}\p{Nd}{0,4})(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°/gu, "$1 degre ");
+    s = tr(s, /(?<!faha\s{0,3}\p{Nd}{0,4})(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°/gu, "$1 degre ");
 
     // 5) PERCENT — `isan-jato`, POSTPOSED, corpus-attested five times in exactly that position
     //    (`Mitombo roa isan-jato isan-taona`, `ny 15 isan-jato ny vola`, `53,41 isanjato`,
@@ -231,10 +232,10 @@ export function normalizeMalagasy(input: string): string {
     //    and `90%n'ny solosaina`; the reading has to be `isan-jaton'`, which is exactly what the corpus
     //    itself writes when it spells the word out: `Ny 81 isan-jaton'ny mponina`. `%n'` ×7 and `%n'ny` ×2
     //    against 8 with nothing following and ~40 with an ordinary space and word.
-    s = s.replace(/%\s*n['’]/gu, " isan-jaton'");
+    s = tr(s, /%\s*n['’]/gu, " isan-jaton'");
     //    Steps 4 and 5 emit a trailing/leading space so an expansion cannot glue itself to what follows
     //    (`4°40'` was becoming `4 degre40'`); where the source already had one, collapse the pair.
-    s = s.replace(/ {2,}/gu, " ").replace(/ +$/u, "");
+    s = tr(tr(s, / {2,}/gu, " "), / +$/u, "");
 
     // 5b) THE MALAGASY ABBREVIATIONS — `sns` → *sy ny sisa*, `snm` → *sy ny manaraka*. See the table above
     //     for the wiki's own gloss of the first and the citation-slot argument for the second.
@@ -253,8 +254,8 @@ export function normalizeMalagasy(input: string): string {
     //     unconditional `/ +([,.;])/ → "$1"` tidy-up here rewrote `taonjato faha 17° ; dia`, whose spaced
     //     semicolon is the corpus's own and is pinned by a golden test. The lookbehind does the same job
     //     with no reach outside the match.
-    for (const [re, words] of ABBREVIATIONS) s = s.replace(re, words);
-    s = s.replace(/(?<=\p{Nd})(?=sy ny )/gu, " ");
+    for (const [re, words] of ABBREVIATIONS) s = tr(s, re, words);
+    s = tr(s, /(?<=\p{Nd})(?=sy ny )/gu, " ");
 
     // 6) THE SHARED TIER — percent, currency, units, the squared modifier and `&`. Runs ABOVE step 7,
     //    because the tier matches a unit only when a NUMBER is adjacent and the decimal rewrite destroys
@@ -271,7 +272,7 @@ export function normalizeMalagasy(input: string): string {
     //    ⚠ BOTH MARKS FEED IT, because this corpus writes decimals with both — the comma throughout human
     //    text and the period in the bot coordinate stubs. Steps 2–3 have already taken the thousands
     //    groups, so what reaches here is a decimal point whichever character carries it.
-    s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}+)[.,](\p{Nd}+)(?![\p{Nd}.,])/gu,
+    s = tr(s, /(?<![\p{Nd}.,])(\p{Nd}+)[.,](\p{Nd}+)(?![\p{Nd}.,])/gu,
         (_m, whole: string, frac: string) => `${whole} faingo ${[...frac].join(" ")}`);
 
     // 8) FOUR CLASSES DECLINED, each with the count that justifies it:

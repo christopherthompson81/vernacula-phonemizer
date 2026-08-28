@@ -73,6 +73,7 @@
 import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Guaraní marks number on the noun only optionally (`-kuéra`) and never after a
@@ -194,20 +195,20 @@ export function normalizeGuarani(input: string): string {
     // See the header. ×303 retained. This must precede every rule below that inspects word boundaries, and
     // it must live here rather than in `phonemizeWord`, because for U+02BC the tokenizer has already split
     // the word by the time `phonemizeWord` is called (trap 39: a guard's evidence has a lifetime).
-    s = s.replace(PUSO, "'");
+    s = tr(s, PUSO, "'");
 
     // ── 2. ZERO-WIDTH SPACE — the other character that splits a word ────────────────────────────────────
     // U+200B ×11 retained, `zero-width` ×84 whole-corpus, all inside words (`Chíle​pe`, `Rio de Janeiro​pe`,
     // `ñe'ẽ​me`) where it is a line-break hint the dump preserved. It is script COMMON, so the TOKEN class
     // rejects it and the word reads as two: `a​b` → *ˈa b*. Deleted, not spaced — the two halves are one
     // Guaraní word plus its bound postposition.
-    s = s.replace(/[​‌‍﻿]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
+    s = tr(s, /[​‌‍﻿]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
 
     // ── 3. `º`/`ª` STANDING IN FOR THE DEGREE SIGN — before step 4 deletes the leftovers ────────────────
     // The masculine/feminine ordinal indicators are used for `°` throughout this corpus: `21º C`, `0º C`,
     // `39º C`, `1 ºC`, `22 ºC` and even the feminine `40ª C`. The playbook has met this exact substitution
     // twice (trap 25's `२८°२१´` / `º`, the Italian `dell'11º`). Folded to `°` so step 5 sees ONE shape.
-    s = s.replace(/(\d\s*)[ºª](\s*[CF](?![\p{L}\p{M}]))/gu, "$1°$2");
+    s = tr(s, /(\d\s*)[ºª](\s*[CF](?![\p{L}\p{M}]))/gu, "$1°$2");
 
     // ── 4. THE MARKS THAT READ AS PHONEMES OR AS NOTHING — a declared refusal, not a reading ────────────
     // ⚠ THE EMPTY-STRING DEFECT. `º` U+00BA is `\p{Script=Latin}`, so the tokenizer matches it as a whole
@@ -229,8 +230,8 @@ export function normalizeGuarani(input: string): string {
     // key and no reading in this language at all — so once step 3 has taken the temperature ones, ANY
     // survivor can only read as the empty string, whatever precedes it. A digit lookbehind looked tighter
     // and silently missed the corpus's own `15.º` (a dot between) and `Nº`.
-    s = s.replace(/[ºª]/gu, "");
-    s = s.replace(/(?<=\d)\s*['´′″“”]+(?![\p{L}\p{M}\d])/gu, "");
+    s = tr(s, /[ºª]/gu, "");
+    s = tr(s, /(?<=\d)\s*['´′″“”]+(?![\p{L}\p{M}\d])/gu, "");
 
     // ── 5. TEMPERATURE — the SCALE name only, and the degree word is deliberately withheld ──────────────
     // ×22 retained, ×48 whole-corpus for the `degrees` cell. `39°C` read as *ᵐbohapɨˈpa poɾuˈⁿdɨ K* — the
@@ -252,8 +253,8 @@ export function normalizeGuarani(input: string): string {
     // stray [k]. Half-declaring here cannot invent a quantity the way ig's `790 km2` did (trap 53), because
     // there is no numeral left over to misread. If a later run sources the degree word, this rule takes it
     // in one edit; the counts above are the re-check.
-    s = s.replace(/(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 Celsius");
-    s = s.replace(/(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 Fahrenheit");
+    s = tr(s, /(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 Celsius");
+    s = tr(s, /(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 Fahrenheit");
 
     // ── 6. DE-GROUP THOUSANDS — the single biggest defect this layer repairs ────────────────────────────
     // `grouped` ×1,350 whole-corpus, and this corpus writes the separator THREE ways at once, which is the
@@ -272,12 +273,12 @@ export function normalizeGuarani(input: string): string {
     // de-groups — which this corpus needs: `755.838,7 km²`, `8 514 876,6 km²`.
     // ⚠ IT RUNS BEFORE EVERYTHING NUMERIC (the playbook's first ordering coupling) and, critically, before
     // the tier at step 8 — otherwise `1.098.581 km²` reaches the unit path as `581 km²`.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
     // ⚠ U+00A0 IS IN THE CLASS BESIDE THE ASCII SPACE, AND IT IS NOT REDUNDANT. `stripMarkup` decodes
     // the `&nbsp;` ENTITY to a plain space, so this corpus's own `21&nbsp;696` arrives here already spaced
     // — but a dump carrying the raw character reaches this rule as U+00A0, and a class written from the
     // decoded form alone would silently miss exactly the shape this corpus writes most. Caught by a test.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (m) => m.replace(/[\s\u00a0\u202f\u2009]/gu, ""));  // NBSP, NNBSP, thin space
 
     // ── 7. THE ORDINAL SUFFIX `-ha` GLUED TO DIGITS — trap 14, and Guaraní's own ordinal ────────────────
@@ -298,7 +299,7 @@ export function normalizeGuarani(input: string): string {
     // ⚠ CAPPED AT SIX DIGITS so a long identifier cannot be worded, and anchored on BOTH edges of the digit
     // run rather than only before the key — trap 52: a lookbehind rejects a POSITION, and the engine simply
     // starts one digit later (`1932ha` would otherwise match as `932ha`).
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,])(\d{1,6})ha(?![\p{L}\p{M}]|\s*\d)/gu,
         (_m, n: string) => `${numberToWords(Number(n), n)}${ORDINAL_SUFFIX}`,
     );
@@ -334,8 +335,8 @@ export function normalizeGuarani(input: string): string {
     // introduces no word and removes a false sentence boundary from every period-decimal in the corpus.
     // ⚠ ONE OR TWO FRACTIONAL DIGITS, which is what is left after step 6 has claimed every three-digit group;
     // the `0.` head that step 6 refuses is admitted here, which is where `0.572` belongs.
-    s = s.replace(/(?<![\d.,])(0)\.(\d{3})(?![\d.,])/gu, "$1,$2");
-    s = s.replace(/(?<=\d)\.(?=\d{1,2}(?![\d.]))/gu, ",");
+    s = tr(s, /(?<![\d.,])(0)\.(\d{3})(?![\d.,])/gu, "$1,$2");
+    s = tr(s, /(?<=\d)\.(?=\d{1,2}(?![\d.]))/gu, ",");
 
     // ── 10. YEAR SPANS — `guive … peve`, the corpus's own frame ─────────────────────────────────────────
     // `ranges` ×525 whole-corpus. The dash was simply dropped, leaving two numbers abutting with no
@@ -367,7 +368,7 @@ export function normalizeGuarani(input: string): string {
     // grounds and still refuses — so the corpus diff is 0 and the branch is pinned as a test instead.
     // The `[.,]\d` half is what keeps `12-14.000` refused, which is the one shape here that needs it: the
     // decimal comma of step 9 is native to Guaraní and a right operand continuing into one is not a span.
-    s = s.replace(/(?<![\d.,–—-])(\d{4})\s?[-–—]\s?(\d{4})(?![\d–—-]|[.,]\d)/gu, "$1 guive $2 peve");
+    s = tr(s, /(?<![\d.,–—-])(\d{4})\s?[-–—]\s?(\d{4})(?![\d–—-]|[.,]\d)/gu, "$1 guive $2 peve");
 
     // ── 11. THE CLOCK — ON THE HOUR ONLY, and the narrowness is the measurement ─────────────────────────
     // ⚠ THE CELL COUNT IS A TRAP AND THIS IS TRAP 55'S `ilo` CASE. The `clock` cell reports ×158
@@ -385,7 +386,7 @@ export function normalizeGuarani(input: string): string {
     // i.e. pedagogical rather than naturally-occurring, so a non-zero time is REFUSED WHOLE rather than half
     // (trap 53's `ak` model) and reads exactly as it did before.
     // ⚠ AND IT MUST NOT DOUBLE A NOUN THE TEXT ALREADY WROTE (trap 12): `15:30 aravo` already carries it.
-    s = s.replace(
+    s = tr(s,
         /(?<![\d.,:])([01]?\d|2[0-3]):00(?![\d.,:])(?!\s*aravo(?![\p{L}\p{M}]))/gu,
         (_m, h: string) => `${Number(h)} aravo`,
     );

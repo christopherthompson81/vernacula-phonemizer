@@ -1,5 +1,6 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * Yoruba text normalization — the symbols a reader voices, rewritten to words before the tokenizer sees them.
@@ -98,9 +99,9 @@ export function normalizeYoruba(text: string): string {
     let s = text;
     // 1. De-group thousands FIRST: a grouping comma left in place makes one number into two with a clause pause
     //    (`2,500` → *méjì , ẹgbẹ̀rún márùn-ún*). Exactly three following digits so a decimal comma survives.
-    s = s.replace(GROUPED, "");
+    s = tr(s, GROUPED, "");
     // 2. ⚠ A DIGIT-FLANKED DASH IS A RANGE, NOT A MINUS — `sí` ("to") is what occurs between digits.
-    s = s.replace(RANGE, `$1 ${SYM.range} `);
+    s = tr(s, RANGE, `$1 ${SYM.range} `);
     // 2b. THE MINUS — U+2212 ONLY, and a LEADING one. ⚠ THE RANGE ABOVE IS WHY: this language's
     //     digit-flanked dash is a range 7,537 times over, so the sign is claimed only where a dash cannot
     //     be one. `alòdì` is sourced in `yoruba.jsonc` against yo.wikipedia's own `-1.44, -1` gloss.
@@ -110,19 +111,19 @@ export function normalizeYoruba(text: string): string {
     //     (`ìwọ̀n otútù àròpín ti −47.6 °C`, `−38 °C`, `−39.8 °C`, `−65 °C`) that read as POSITIVE until now.
     //     ⚠ `(?<!\p{Nd}\s)` REFUSES THE SPACE-SEPARATED EXPONENT — this corpus writes one
     //     (`1.98739x10 −21 s`), and a one-character lookbehind sees only the space before it.
-    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, `${SYM.negative} `);
+    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, `${SYM.negative} `);
     // 3. ⚠ YORUBA'S PERCENT IS A CIRCUMFIX: a word BEFORE the number and a phrase AFTER it. A parenthesised
     //    percentage restating one already spelled out is dropped rather than read twice.
-    s = s.replace(/\(\s*(\d+(?:\.\d+)?)\s*%\s*\)/gu, (m, num: string, at: number, whole: string) =>
+    s = tr(s, /\(\s*(\d+(?:\.\d+)?)\s*%\s*\)/gu, (m, num: string, at: number, whole: string) =>
         SAID_AFTER.test(fold(whole.slice(Math.max(0, at - 60), at))) ? "" : m,
     );
-    s = s.replace(PERCENT, (_m, num: string, at: number, whole: string) =>
+    s = tr(s, PERCENT, (_m, num: string, at: number, whole: string) =>
         SAID_AFTER.test(fold(whole.slice(at, at + 40))) || SAID_BEFORE.test(fold(whole.slice(Math.max(0, at - 20), at)))
             ? num
             : `${SYM.percentBefore} ${num} ${SYM.percentAfter}`,
     );
     // 4. Squared units, then the shared symbol tier.
-    s = s.replace(UNIT_SQUARED, (_m, u: string) => `${UNIT_WORDS[u] ?? u} ${SYM.squared}`);
+    s = tr(s, UNIT_SQUARED, (_m, u: string) => `${UNIT_WORDS[u] ?? u} ${SYM.squared}`);
     // 4a. ⚠ THE ENGLISH MEASURE WORD `sq`, WHICH COSTS TWO READINGS RATHER THAN ONE — the `so` finding
     //     exactly. `ìwọ̀n ilẹ̀ tó tó 705.78sq km 2` is Ibarapa East's area, and the `sq` stands BETWEEN the
     //     number and the unit, so the tier's digit-adjacent unit path declines as well: the `km` leaks raw
@@ -130,7 +131,7 @@ export function normalizeYoruba(text: string): string {
     //     ⚠ ONLY BEFORE A DECLARED UNIT, so `sq ft`-style phrases whose unit this file cannot read keep
     //     their `sq` rather than half the phrase being spoken. Emitted as unit-then-modifier, the position
     //     `exponentWords` already declares for this language.
-    s = s.replace(
+    s = tr(s,
         /(?<![\p{L}\p{M}])sq\.?\s*(km|ha|mi|ft)(?![\p{L}\p{M}\d])/giu,
         // ⚠ A LEADING SPACE, because the corpus writes `705.78sq` GLUED and the replacement would otherwise
         // fuse the noun onto the numeral (`8kìlómítà`) for the tokenizer to swallow whole. The trailing
@@ -142,10 +143,10 @@ export function normalizeYoruba(text: string): string {
     //     that keep `m` out of `units`. After the tier so every shape the tier CAN read gets first refusal —
     //     `10 km`, `56 km²`, `100 km/h` all consume their `m` there and never reach this pattern — and before
     //     rule 7, which still needs `8.62` intact to be this reading's operand.
-    s = s.replace(METRE, (_m, num: string) => `${num} ${METRE_WORD}`);
+    s = tr(s, METRE, (_m, num: string) => `${num} ${METRE_WORD}`);
     // 5. ⚠ ANOTHER CIRCUMFIX: `ìwọ̀n` before the number, the scale name after. The scale names are borrowed
     //    unchanged. Must run BEFORE the decimal rule so `100.4°F` is still one number when the scale is claimed.
-    s = s.replace(
+    s = tr(s,
         SCALED_DEGREE,
         (_m, num: string, letter: string) => `${SYM.degree} ${num} ${SYM.scales[letter.toUpperCase()] ?? letter}`,
     );
@@ -153,9 +154,9 @@ export function normalizeYoruba(text: string): string {
     //    limit: it is attested between SPELLED-OUT numerals, not between digits, so this composes a symbol
     //    reading from an attested piece. Preferred to silence because every digit-flanked × here is a relay leg,
     //    dimension or resolution, where dropping the sign runs two numbers together.
-    s = s.replace(TIMES, `$1 ${SYM.times} `);
+    s = tr(s, TIMES, `$1 ${SYM.times} `);
     // 7. ⚠ THE DECIMAL SEPARATOR LAST, AND THE ORDER IS LOAD-BEARING. Before rule 3 it splits `8.3%` and the
     //    percent circumfix wraps only one half; before rule 5 it turns `100.4°F` into `100 àti dásímà 4°F`.
-    s = s.replace(DECIMAL, (_m, whole: string, frac: string) => `${whole} ${SYM.decimalWord} ${[...frac].join(" ")}`);
+    s = tr(s, DECIMAL, (_m, whole: string, frac: string) => `${whole} ${SYM.decimalWord} ${[...frac].join(" ")}`);
     return s.replace(/[ \t]{2,}/gu, " ");
 }

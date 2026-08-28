@@ -127,6 +127,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * THE UNIT TABLE, with the gloss each word was sourced by. See the UNIT section of the header for every
@@ -225,7 +226,7 @@ export function normalizeIgbo(text: string): string {
     //    between them (`1,500` → *otu , naɾɪ ise*, "one, five hundred").
     //    ⚠ EXACTLY THREE FOLLOWING DIGITS, so a decimal comma cannot be eaten. Applied repeatedly for numbers
     //    with several groups (1,234,567).
-    s = s.replace(GROUPED, "");
+    s = tr(s, GROUPED, "");
 
     // 1b. THE ENGLISH ORDINAL TAIL — `8th` → `nke 8`, which the number path then reads as *nke asatọ*.
     //
@@ -259,12 +260,12 @@ export function normalizeIgbo(text: string): string {
     //     ordinal in a line already being read as Igbo throughout.
     //
     //     ⚠ AFTER rule 1, so a grouped `1,000th` is one number by the time this sees it.
-    s = s.replace(ORDINAL_TAIL, "nke $1");
+    s = tr(s, ORDINAL_TAIL, "nke $1");
 
     // 2. ⚠ A DIGIT-FLANKED DASH IN IGBO IS A RANGE, NOT A MINUS — overwhelmingly year-year (`1967-1970`) or
     //    page-page (`peeji 90-120`). A minus rule here would read every date range as arithmetic, which is why
     //    nl, mr, ta and yue all record their minus as an ACCEPTED silence. `ruo` is "to, until".
-    s = s.replace(RANGE, "$1 ruo ");
+    s = tr(s, RANGE, "$1 ruo ");
 
     // 2b. ⚠ A LETTER FUSED TO A QUANTITY, SEPARATED — because `unitPrefix` MOVES THE UNIT NOUN LEFTWARD and a
     //     missing space in the source then swallows it. The artifact's *"mpaghara ala198 km2"* (no space, and
@@ -278,7 +279,7 @@ export function normalizeIgbo(text: string): string {
     //     designations and every alphanumeric name in the corpus.
     //
     //     ⚠ BEFORE the tier, and after the range rule so `ala198-200 km` is already two numbers.
-    s = s.replace(FUSED_QUANTITY, "$1 ");
+    s = tr(s, FUSED_QUANTITY, "$1 ");
 
     // 3. The shared symbol tier.
     s = SYMBOLS(s);
@@ -295,7 +296,7 @@ export function normalizeIgbo(text: string): string {
     //    that `igbo.ts` reads tone only when written.
     //
     //    The FRACTION stays digit-by-digit after the word: `3.14159` is "three point one four one five nine".
-    s = s.replace(
+    s = tr(s,
         DECIMAL,
         (_m, whole: string, frac: string) => `${whole} ${MANIFEST.numbers.decimalWord} ${[...frac].join(" ")}`,
     );

@@ -119,6 +119,7 @@
  *   `kũthi` ×2     "kĩlomita 35 kũthi 40 kĩla ĩsaa"
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** ⚠ NEVER `\b` — Kamba carries ⟨ĩ ũ⟩ and the ⟨ng'⟩ apostrophe, all of which `\b` treats as boundaries
  *  (trap 1/23). The apostrophe is a LETTER here and must stay inside a word. */
@@ -223,26 +224,26 @@ export function normalizeKamba(input: string): string {
     //    rewritten to `mi²` — trap 54's single forbidden move, because an INVENTED superscript reaches the
     //    phoneme sink as a RAWMARK wherever the tier's digit-adjacency then declines. `sikwea sya kilomita`
     //    is the corpus's own order and concord.
-    s = s.replace(new RegExp(`${NOT_BEFORE}(\\d[\\d,.]*)\\s?sq\\s?mi${NOT_AFTER}`, "gu"), "sikwea sya maili $1");
+    s = tr(s, new RegExp(`${NOT_BEFORE}(\\d[\\d,.]*)\\s?sq\\s?mi${NOT_AFTER}`, "gu"), "sikwea sya maili $1");
 
     // 3) `mph`, ×1 — "480 km/h (133 m/s; 300 mph)". Composed here rather than as a `units` key because
     //    `unitPrefix` would move a three-word reading wholesale in front of its number ("maili kwa isaa
     //    300"), where the corpus writes the noun first and the rate phrase last: "maili 105 kwa isaa".
     //    Before the tier, or its `mi` key would have to be kept off `mph` by a second guard.
-    s = s.replace(new RegExp(`${NOT_BEFORE}(\\d[\\d,.]*)\\s?mph${NOT_AFTER}`, "gu"), "maili $1 kwa isaa");
+    s = tr(s, new RegExp(`${NOT_BEFORE}(\\d[\\d,.]*)\\s?mph${NOT_AFTER}`, "gu"), "maili $1 kwa isaa");
 
     // 4) THE CURRENCY NOUN THE WRITER ALREADY WROTE — "mathangu ma mbesa meu ma Canada ma **ndola $5** na
     //    **ndola $100**". ⚠ CONSUMED HERE AND PUT BACK BY THE TIER (trap 10): the tier has an "already said
     //    it" suppression for PERCENT and none for currency, so left alone this reads *ndola ndola itanɔ*.
     //    Deleting the writer's word and letting `currencyPrefix` re-emit it in the same slot is the one move
     //    that keeps the reading at exactly one noun.
-    s = s.replace(new RegExp(`${NOT_BEFORE}[Nn]dola\\s+((?:US|AUD)?\\$)\\s?(?=\\d)`, "gu"), "$1");
+    s = tr(s, new RegExp(`${NOT_BEFORE}[Nn]dola\\s+((?:US|AUD)?\\$)\\s?(?=\\d)`, "gu"), "$1");
 
     // 5) THE SIGN BEFORE A MAGNITUDE WORD — "kwa kũnengane **AUD$ milioni 45** sya kwongeleela". The tier
     //    needs a digit adjacent to the mark and this shape puts the magnitude between them, so the sign
     //    would simply be dropped. ×1, and the reading it produces is the corpus's own order for the same
     //    quantity elsewhere ("mambilioni ma Ndola sya US").
-    s = s.replace(
+    s = tr(s,
         new RegExp(`${NOT_BEFORE}(?:US|AUD)?\\$\\s?(?=(?:milioni|mbilioni|ngili)${NOT_AFTER})`, "gu"),
         "ndola ",
     );
@@ -261,9 +262,9 @@ export function normalizeKamba(input: string): string {
     //    ⚠ THE WHOLE NUMBER AT ONCE (trap 63) — `5,000,000` is three groups and a per-pass join reads it as
     //    two numbers. ⚠ AND THE TRAILING GUARD REJECTS A DIGIT AND NOTHING ELSE (trap 58): `(?![\d.,])`
     //    would decline every clause-final figure, and this corpus ends a clause on a figure 152 times.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     // 8) RANGES → `kũthi`, ABOVE THE DECIMAL STEP and that ordering is a defect this layer would otherwise
@@ -291,7 +292,7 @@ export function normalizeKamba(input: string): string {
     //      · the SPACING BACKREFERENCE rejects `2 -76`, because a span is spaced symmetrically or not at all
     //        (`2-3`, `120-160`, `26 - 00`) and never on one side only.
     //    Neither guard costs a single corpus range.
-    s = s.replace(/(?<![\d.,\-\/:])(\d+)([^\S\n]?)-\2(\d+)(?![\d\/:\p{L}\p{M}])(?!\s?-\s?\d)/gu,
+    s = tr(s, /(?<![\d.,\-\/:])(\d+)([^\S\n]?)-\2(\d+)(?![\d\/:\p{L}\p{M}])(?!\s?-\s?\d)/gu,
         (whole: string, a: string, _sp: string, b: string) =>
             Number(a) < Number(b) ? `${a} kũthi ${b}` : whole);
 
@@ -311,7 +312,7 @@ export function normalizeKamba(input: string): string {
     //    ⚠ AND IT IS ALSO THE CLOCK RULE FOR THE DOTTED NOTATION — `saa 12.00 GMT`, `(15.00 UTC)`,
     //    `saa 9.30 sya kwakya`, `saa 11.00 kũvĩka` — which comes out identical to what step 11 does to
     //    `saa 11:00`. The writer supplies `saa`, so only the mark is spent.
-    s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?!\d)(?!\.\d)/gu, "$1 $2");
+    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?!\d)(?!\.\d)/gu, "$1 $2");
 
     // 10) DEGREES. One instance, `uvyuvu wa ndikilii +30°C`, and ⚠ THE WRITER HAS ALREADY SAID IT (trap 12) —
     //     `ndikilii` stands immediately before the sign, so emitting the word again gives *ndikilii ndikilii*.
@@ -324,7 +325,7 @@ export function normalizeKamba(input: string): string {
     //     slot (`˚` U+02DA in Hawaiian, `º` U+00BA in Swahili, a Cyrillic ⟨С⟩ in Karakalpak); this corpus's
     //     whole non-ASCII census is 21 characters and contains U+00B0 once and no relative of it. The
     //     confusable this round DID find is in the vowels instead (step 1).
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°\\s?[CF]?${NOT_AFTER}`, "gui"),
+    s = tr(s, new RegExp(`(\\d[\\d.,]*)\\s?°\\s?[CF]?${NOT_AFTER}`, "gui"),
         (_m: string, num: string, offset: number, full: string) =>
             /ndikilii\s*[+\-−]?\s*$/iu.test(full.slice(0, offset)) ? num : `ndikilii ${num}`);
 
@@ -335,14 +336,14 @@ export function normalizeKamba(input: string): string {
     //     the header: the ratio `3:2`, the degree class `2:2`, and the three ski times `4:41.30`, `2:41.60`,
     //     `1:09.02`, whose trailing `.` the right-hand guard rejects. `10:00-11:000` reads its first half and
     //     declines the typo'd second, which is the right answer for a figure that is not a time of day.
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
 
     // 12) A SPACED DASH is a parenthetical break and was being dropped entirely, so 20 clause boundaries
     //     carried no pause at all ("Kukuia angi - Ndukaatate muvuko waku ueke uwona", "wendo wa kusoma -
     //     kivindi kiu kyanengie syana vinya"). LAST, so step 8 has already claimed every dash between two
     //     numbers — the score "26 - 00" must keep its bare juxtaposition rather than gain a spurious pause.
     //     ⚠ THE DOUBLED FORM OCCURS TOO ("kulisa iima na kutulila -- indi yendaa"), ×1.
-    s = s.replace(/(?<!\d)[^\S\n]+-{1,2}[^\S\n]+(?!\d)/gu, ", ");
+    s = tr(s, /(?<!\d)[^\S\n]+-{1,2}[^\S\n]+(?!\d)/gu, ", ");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

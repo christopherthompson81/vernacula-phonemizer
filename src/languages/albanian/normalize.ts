@@ -27,6 +27,7 @@
  * `15.4 për qind` (postposed, ×22 / 6 arts) and `-20 gradë Celsius`, `10 gradë Celsius` (×17 / 6 arts).
  */
 import { makeSymbolNormalizer, type CountForms } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * ⚠ ALBANIAN AGREEMENT IS THE PLAIN ONE: singular after exactly 1, plural otherwise. Stated rather than
@@ -342,13 +343,13 @@ export function normalizeAlbanian(input: string): string {
      */
     let s = input.replace(ASCII_EXPONENT, (_m, p: string) => `km${p === "2" ? "\u00B2" : "\u00B3"}`); // 0
 
-    s = s.replace(GROUP_SEPARATED, (_w, head: string, groups: string) => head + groups.replace(/[.,\u00a0\u202f\u2009 ]/gu, "")); // 1  // NBSP, NNBSP, thin space
-    s = s.replace(RANGE, `$1 deri $2`); // 3 — before a dash can be claimed as a minus
-    s = s.replace(PER_MILLE, `$1 për mijë`); // 2b — before the tier, which has no per-mille arm
+    s = tr(s, GROUP_SEPARATED, (_w, head: string, groups: string) => head + groups.replace(/[.,\u00a0\u202f\u2009 ]/gu, "")); // 1  // NBSP, NNBSP, thin space
+    s = tr(s, RANGE, `$1 deri $2`); // 3 — before a dash can be claimed as a minus
+    s = tr(s, PER_MILLE, `$1 për mijë`); // 2b — before the tier, which has no per-mille arm
     s = SYMBOLS(s); // 2 — percent, currency, units, rates, exponents; needs the figure intact
     s = degrees(s); // 4
     s = signs(s); // 5
-    s = s.replace(DECIMAL, (_w, head: string, frac: string) => {
+    s = tr(s, DECIMAL, (_w, head: string, frac: string) => {
         const zeros = /^0*/u.exec(frac)![0];
         const rest = frac.slice(zeros.length);
         return `${head} ${DECIMAL_WORD} ${[...zeros].map(() => "zero").concat(rest === "" ? [] : [rest]).join(" ")}`;

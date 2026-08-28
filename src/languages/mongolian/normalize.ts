@@ -146,6 +146,7 @@ import { numberToWords } from "./numbers.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Mongolian Cyrillic letters, upper and lower. Used as the "inside a word" guard everywhere below —
  *  `\b` is ASCII-defined and finds NO boundary against Cyrillic, which is how `core/initialisms.ts` was once
@@ -710,27 +711,27 @@ export function normalizeMongolian(input: string): string {
     let s = input;
 
     // 1. Personal initials, before the dot rule and before the caps run — `Ц.Элбэгдорж` → `цэ Элбэгдорж`.
-    s = s.replace(INITIALS, (_m, run: string) =>
+    s = tr(s, INITIALS, (_m, run: string) =>
         [...run.matchAll(/[А-ЯӨҮЁ]/gu)].map((c) => LETTER_NAME[c[0]!.toLowerCase()] ?? c[0]!).join(" ") + " ");
 
     // 2. An abbreviation dot between two lowercase letters is not a clause end.
-    s = s.replace(ABBREV_DOT, " ");
+    s = tr(s, ABBREV_DOT, " ");
 
     // 3. De-grouping.
-    s = s.replace(GROUP_COMMA, "").replace(GROUP_SPACE, "$1$2");
+    s = tr(tr(s, GROUP_COMMA, ""), GROUP_SPACE, "$1$2");
 
     // 3b. The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. Here rather than later because
     //     every numeric step below reads a digit run, and the colon was splitting one in half.
-    s = s.replace(DIGIT_COLON_RUN, (_m, head: string, rest: string) => head + rest.replace(COLON_G, " "));
+    s = tr(s, DIGIT_COLON_RUN, (_m, head: string, rest: string) => head + rest.replace(COLON_G, " "));
 
     // 4. Ordinals. Above the percent and unit steps only because nothing else spends a hyphen before a ⟨р⟩.
-    s = s.replace(ORDINAL, (m, digits: string, tail: string) => {
+    s = tr(s, ORDINAL, (m, digits: string, tail: string) => {
         const words = ordinalWords(Number(digits));
         return words === undefined ? m : `${words}${tail}`;
     });
 
     // 5. Percent — the suffixed arms first, or the bare arm consumes the sign and strands the suffix.
-    s = s.replace(PERCENT_SUFFIX, "$1 хув$2").replace(PERCENT_NI, "$1 хувь нь").replace(PERCENT, "$1 хувь");
+    s = tr(tr(tr(s, PERCENT_SUFFIX, "$1 хув$2"), PERCENT_NI, "$1 хувь нь"), PERCENT, "$1 хувь");
 
     // 6. Currency. The sign is DROPPED, not read, where the word is already said within the window (trap 12);
     //    a MAGNITUDE word after the figure takes the currency name to the far side of it, or refuses the
@@ -740,9 +741,9 @@ export function normalizeMongolian(input: string): string {
         if (SAID_CURRENCY.test(currencyWindow(whole, off))) return num + mag; // trap 12 — say it once, in the word
         return `${num}${mag} ${CURRENCY_WORD[sign]!}`;
     };
-    s = s.replace(CURRENCY_BEFORE, (m, sign: string, num: string, mag: string, off: number, whole: string) =>
+    s = tr(s, CURRENCY_BEFORE, (m, sign: string, num: string, mag: string, off: number, whole: string) =>
         currency(m, num, sign, mag, off, whole));
-    s = s.replace(CURRENCY_AFTER, (m, num: string, sign: string, mag: string, off: number, whole: string) =>
+    s = tr(s, CURRENCY_AFTER, (m, num: string, sign: string, mag: string, off: number, whole: string) =>
         currency(m, num, sign, mag, off, whole));
 
     // 7. Degrees, scale arm first so the bare arm cannot re-claim what it declined. `°F` is refused WHOLE —
@@ -750,18 +751,18 @@ export function normalizeMongolian(input: string): string {
     //    The refusal is CASE-FOLDED, because the class that reaches it is: `f` is in `DEGREE_SCALE` as
     //    robustness, so a case-sensitive `=== "F"` let `5°f` through to a confident CELSIUS reading (`5 хэм`)
     //    while `5°F` was correctly refused — a guard admitting exactly what it was written to reject.
-    s = s.replace(DEGREE_SCALE, (m, digit: string, scale: string) =>
+    s = tr(s, DEGREE_SCALE, (m, digit: string, scale: string) =>
         (scale.toUpperCase() === "F" ? m : `${digit} хэм`));
-    s = s.replace(DEGREE_BARE, "$1 хэм");
+    s = tr(s, DEGREE_BARE, "$1 хэм");
 
     // 8. Minus. After step 7, so the degree arm can key on the emitted `хэм` as well as on `градус`.
-    s = s.replace(MINUS_DEGREE, "хасах $1").replace(MINUS_TRUE, "хасах ");
+    s = tr(tr(s, MINUS_DEGREE, "хасах $1"), MINUS_TRUE, "хасах ");
 
     // 9. Units and exponents, with the measure word preposed onto the unit noun. A glued case suffix is
     //    ACCEPTED rather than refused (the percent arm's opposite call, and the reason is at the step):
     //    it glues onto a ⟨р⟩-final unit noun with no morphology (`265 км-т` → *265 километрт*, the ordinal
     //    step's mechanism), and stays where it was on any other, which is no worse than before.
-    s = s.replace(UNIT, (_m, num: string, key: string, exp: string | undefined, suffix: string | undefined) => {
+    s = tr(s, UNIT, (_m, num: string, key: string, exp: string | undefined, suffix: string | undefined) => {
         const unit = UNIT_WORD[key]!;
         const measure = exp === undefined ? unit : `${EXPONENT_WORD[exp]!} ${unit}`;
         if (suffix === undefined) return `${num} ${measure}`;
@@ -769,7 +770,7 @@ export function normalizeMongolian(input: string): string {
     });
 
     // 10. The decimal point.
-    s = s.replace(DECIMAL_DOT, "$1 цэг $2").replace(DECIMAL_COMMA, "$1 цэг $2");
+    s = tr(tr(s, DECIMAL_DOT, "$1 цэг $2"), DECIMAL_COMMA, "$1 цэг $2");
 
     // 11. The shared initialism seam.
     return spellInitialisms(s);

@@ -1,3 +1,4 @@
+import { tr } from "../../core/provenance.ts";
 /**
  * Luo / Dholuo (luo) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -154,7 +155,7 @@ export function normalizeLuo(input: string): string {
     //    Septemba 17,2007` write the American date with no space; both are declined by `\d{3}`, which is
     //    the same test that identifies the grouping, so no extra guard is needed — recorded because the
     //    shape is invisible until you look for it.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
     // 2) THE DOTTED DESIGNATION, BEFORE THE DECIMAL RULE — trap 39, a guard's evidence has a lifetime: the
@@ -165,7 +166,7 @@ export function normalizeLuo(input: string): string {
     //    decimal glued to a unit and their letter run is three, so the lookahead declines them and step 4
     //    reads them as decimals. The dot is spent SILENTLY here — no word and no pause — because a
     //    designation is not a quantity and *802 nukta 1 1 a* would be a reading, not a repair.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?=\p{L}(?![\p{L}\p{M}]))/gu, "$1 $2");
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?=\p{L}(?![\p{L}\p{M}]))/gu, "$1 $2");
 
     // 3) CURRENCY. ⚠ CLAIMED ONLY WHERE THE WRITER HAS NOT ALREADY SAID THE WORD — see the header for the
     //    three tier configurations that all say *dola* twice. Every `$` in this corpus is a permissible
@@ -175,7 +176,7 @@ export function normalizeLuo(input: string): string {
     //    `dola bilion $2.3` is *dollars · billion · 2.3*, so `mar tara £27` must become
     //    `mar paund tara 27` and not `mar tara paund 27`. `tara` is the million here, ×23.
     //    Runs above step 4 because it needs the figure still adjacent to the sign.
-    s = s.replace(new RegExp(`${NOT_BEFORE}(${MAGNITUDE}\\s+)?([$£])\\s?(?=\\d)`, "giu"),
+    s = tr(s, new RegExp(`${NOT_BEFORE}(${MAGNITUDE}\\s+)?([$£])\\s?(?=\\d)`, "giu"),
         (whole: string, mag: string | undefined, sign: string, offset: number, full: string) => {
             const before = full.slice(Math.max(0, offset - 30), offset);
             if (ALREADY_NAMED.test(before)) return mag ?? "";
@@ -187,7 +188,7 @@ export function normalizeLuo(input: string): string {
     //    it (its operands are colon-flanked), and if the clock step ran first the colons would be gone and
     //    the range rule would then read `00-11` as a span. One instance, written as its own arm rather
     //    than by loosening a guard (trap 9).
-    s = s.replace(/(?<![\d:.,])(\d{1,2}:\d{2})\s?-\s?(\d{1,2}:\d{2})(?![\d:.,])/gu, "$1 nyaka $2");
+    s = tr(s, /(?<![\d:.,])(\d{1,2}:\d{2})\s?-\s?(\d{1,2}:\d{2})(?![\d:.,])/gu, "$1 nyaka $2");
 
     // 5) RANGES → `nyaka`, ABOVE THE DECIMAL STEP. ×17 hyphen-flanked figures, and the engine was fusing
     //    both endpoints with no boundary at all: `(1644-1912)` read *…gang'wen elfu achiel gi mia ochiko…*,
@@ -212,7 +213,7 @@ export function normalizeLuo(input: string): string {
     //    language outside `ROMAN_NATIVE`, so by the time this rule sees it the string is `2-76s` and it
     //    read as *ariyo NYAKA piero abiriyo gauchiel s*. All 17 genuine ranges in this corpus are followed
     //    by a space, a comma, a bracket or a full stop — **not one by a letter** — so the guard is free.
-    s = s.replace(/(?<![\d.,:\-\/])(\d+(?:\.\d+)?)\s?-\s?(\d+(?:\.\d+)?)(?![\d\/\p{L}\p{M}])(?!\s?-\s?\d)/gu,
+    s = tr(s, /(?<![\d.,:\-\/])(\d+(?:\.\d+)?)\s?-\s?(\d+(?:\.\d+)?)(?![\d\/\p{L}\p{M}])(?!\s?-\s?\d)/gu,
         (whole: string, a: string, b: string) =>
             b.replace(/\D/gu, "").length < a.replace(/\D/gu, "").length ? whole : `${a} nyaka ${b}`);
 
@@ -221,8 +222,8 @@ export function normalizeLuo(input: string): string {
     //    (UTC+1)`, `(15.00 UTC)`. ⚠ `saa 1.5 kowuok Vancouver` is a decimal number of hours after the SAME
     //    noun and is refused by the two-digit fraction. The dot is spent, not spoken, exactly as the colon
     //    is at step 7 — `saa 11.00` becomes `saa 11 00`.
-    s = s.replace(/(?<=(?:saa|Saa)\s)(?<![\d.,:])(\d{1,2})\.(\d{2})(?![\d.,:])/gu, "$1 $2");
-    s = s.replace(/(?<![\d.,:])(\d{1,2})\.(\d{2})(?![\d.,:])(?=\s?(?:UTC|GMT))/gu, "$1 $2");
+    s = tr(s, /(?<=(?:saa|Saa)\s)(?<![\d.,:])(\d{1,2})\.(\d{2})(?![\d.,:])/gu, "$1 $2");
+    s = tr(s, /(?<![\d.,:])(\d{1,2})\.(\d{2})(?![\d.,:])(?=\s?(?:UTC|GMT))/gu, "$1 $2");
 
     // 7) THE CLOCK. The colon is `clausePunctuation` in luo.jsonc, so `e saa 9:30 okinyi` read as
     //    *e saa ochiko , piero adek okinyi* — a phrase break inside a time. ELEVEN of the corpus's
@@ -235,7 +236,7 @@ export function normalizeLuo(input: string): string {
     //    clas mar ariyo)` — a lower-second-class DEGREE, not a time — fails `[0-5]\d`; and both sports
     //    times, `e saa 4:41.30,2:11.60 minutes` and `gi dakika 1:09.02 mos`, fail the trailing guard on
     //    their `.`, at every starting position the engine retries from (trap 52).
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
 
     // 8) DECIMALS → `nukta`. ×21, and the dot was reaching `clausePunctuation` and becoming a SENTENCE
     //    BREAK in the middle of a number: `kilomita 12.8 kata mail 8` read *kilomita apar gariyo . aboro*.
@@ -249,7 +250,7 @@ export function normalizeLuo(input: string): string {
     //    `(?!\d)(?!\.\d)` — which still refuses the second dot of an IP address or a three-dot date
     //    (neither occurs here) and costs nothing.
     //    `nukta` is corpus-sourced ×1 and the corpus glosses its own notation with it — see the header.
-    s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?!\d)(?!\.\d)/gu,
+    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?!\d)(?!\.\d)/gu,
         (_m, int: string, frac: string) => `${int} nukta ${[...frac].join(" ")}`);
 
     // 9) THE SPACED DASH IS A PARENTHETICAL BREAK AND WAS BEING DROPPED ENTIRELY — 19 clause boundaries
@@ -267,7 +268,7 @@ export function normalizeLuo(input: string): string {
     //    1 wrong one created. The obvious guard — decline when both sides are capitalised — was tested and
     //    rejected, because it also declines `Ting'o ne ji ma moko - Kik iwe bagni lal e wang'i`, a genuine
     //    clause dash whose right side is a capital. One for one, so the simple rule stands.
-    s = s.replace(/\s+[-–—]+\s+/gu, ", ");
+    s = tr(s, /\s+[-–—]+\s+/gu, ", ");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

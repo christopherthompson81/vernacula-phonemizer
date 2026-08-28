@@ -56,6 +56,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** The cardinal as words, in the series the slot calls for. */
 const cardinal = (n: number, attr = false): string => numberToWords(n, attr).join(" ");
@@ -160,21 +161,21 @@ export function normalizeChuvash(input: string): string {
     //    decimal tail, which this corpus writes — while a bare `(?![\d.,])` declines every clause-final
     //    figure (trap 58). The separator here is a SPACE, and a decimal never has one before its
     //    fraction, so `(?!\d)` is the whole guard.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    ⚠ AND THE SPACE GROUPS THE FRACTION TOO, SI-style — `1 мм²=0,000 001 м²`, the square-millimetre
     //    article. That is 0.000001, and the integer-side rule cannot reach it: its leading guard rejects a
     //    group sitting behind a decimal separator, correctly, because that is how `1.234 567` is kept from
     //    being read as grouping. The fractional side needs its own pass, anchored on the separator.
-    s = s.replace(/([.,]\d{3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /([.,]\d{3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) THE MAGNITUDE ABBREVIATIONS, before any single-dot rule — `1,3 млн. çын`, `143,8 млн. çын`,
     //    `$4,2 млрд`, `$1,915 трлн`. The dot is optional because the corpus writes both.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])млрд\\.?${NOT_LETTER_AFTER}`, "giu"), "миллиард");
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])трлн\\.?${NOT_LETTER_AFTER}`, "giu"), "триллион");
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])млн\\.?${NOT_LETTER_AFTER}`, "giu"), "миллион");
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])млрд\\.?${NOT_LETTER_AFTER}`, "giu"), "миллиард");
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])трлн\\.?${NOT_LETTER_AFTER}`, "giu"), "триллион");
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])млн\\.?${NOT_LETTER_AFTER}`, "giu"), "миллион");
 
     // 1b) THE ERA MARKER AND THE YEAR ABBREVIATION, which the corpus supplies together:
     //     "Вӑтам патшалӑх — Авалхи Египет кун-ҫулӗнчи **п. эрч.** 2040 тата 1783 …" gives the
@@ -185,12 +186,12 @@ export function normalizeChuvash(input: string): string {
     //     extraction mangled (`530 п. эраччен. ҫ.`), so the pattern is written for exactly the form that
     //     was seen and no spacing variant is invented (trap 9).
     //     `ҫ.` / `ҫҫ.` after a figure are ҫул / ҫулсем — "пирӗн эраччен 530 ҫ.", "Афинара 550—530 ҫҫ.".
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])п\\.\\s?эрч\\.`, "giu"), "пирӗн эраччен");
-    s = s.replace(new RegExp(`(\\d)\\s?ҫҫ\\.`, "gu"), "$1 ҫулсем");
-    s = s.replace(new RegExp(`(\\d)\\s?ҫ\\.`, "gu"), "$1 ҫул");
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])п\\.\\s?эрч\\.`, "giu"), "пирӗн эраччен");
+    s = tr(s, new RegExp(`(\\d)\\s?ҫҫ\\.`, "gu"), "$1 ҫулсем");
+    s = tr(s, new RegExp(`(\\d)\\s?ҫ\\.`, "gu"), "$1 ҫул");
 
     // 2) НОМЕР. The sign was dropped outright (`№ 4. – С. 61-63`).
-    s = s.replace(/№\s?(?=\d)/gu, "номер ");
+    s = tr(s, /№\s?(?=\d)/gu, "номер ");
 
     // 3) CLOCK. The colon is clause punctuation in chuvash.ts, so `10:25:34` read as *вуннӑ , ҫирӗм пиллӗк
     //    , вӑтӑр тӑваттӑ* — two phrase breaks inside a timestamp. ⚠ EVERY ONE OF THIS CORPUS'S CLOCKS HAS
@@ -200,10 +201,10 @@ export function normalizeChuvash(input: string): string {
     //    ⚠ AND THE SECONDS FIELD REACHES 60, because one of the three is the LEAP SECOND itself:
     //    "1972, 23:59:60 UTC — пĕрремĕш хут тĕкел çул çеккунтине кĕртнĕ". A `[0-5]\d` seconds field is
     //    right for every clock in the world except the one this corpus was written to describe.
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d):([0-5]\d|60)(?![\d:.,])/gu,
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d):([0-5]\d|60)(?![\d:.,])/gu,
         (_m, h: string, mi: string, sec: string) =>
             `${cardinal(Number(h))} ${cardinal(Number(mi))} ${cardinal(Number(sec))}`);
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-4]):\s?([0-5]\d)(?![\d:.,])/gu, (_m, h: string, mi: string) => {
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-4]):\s?([0-5]\d)(?![\d:.,])/gu, (_m, h: string, mi: string) => {
         const mv = Number(mi);
         return mv === 0 ? cardinal(Number(h)) : `${cardinal(Number(h))} ${cardinal(mv)}`;
     });
@@ -215,7 +216,7 @@ export function normalizeChuvash(input: string): string {
     //    addresses) and `№ 5 / 2002` (a citation). Requiring numerator < denominator ≤ 12 AND the noun
     //    takes all three real ones and refuses all six others — and the `пай` requirement is not a guess,
     //    it is the shape every attested instance has. A bare `4/5` is left alone for want of evidence.
-    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d{1,2})\\s?/\\s?(\\d{1,2})(?=\\s(?:пай|пая|пайĕ|пайӗ)${WORD}*)`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,/])(\\d{1,2})\\s?/\\s?(\\d{1,2})(?=\\s(?:пай|пая|пайĕ|пайӗ)${WORD}*)`, "gu"),
         (whole, num: string, den: string) => {
             const nv = Number(num), dv = Number(den);
             if (!(nv >= 1 && nv < dv && dv <= 12)) return whole;
@@ -227,7 +228,7 @@ export function normalizeChuvash(input: string): string {
     //    `1-5-мӗш класӗсенче`, `1 - 19-мĕшĕсенче`. Three hyphens in one token, two of which open a range
     //    and one of which introduces the suffix; nothing downstream can tell them apart once either rule
     //    has spent a hyphen. The suffix is written ONCE, on the second endpoint, and belongs to both.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,8})${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,8})${NOT_LETTER_AFTER}`, "gu"),
         (whole, a: string, b: string, sfx: string) => {
             const first = attachOrdinal(whole, a, sfx);
             const second = attachOrdinal(whole, b, sfx);
@@ -241,15 +242,15 @@ export function normalizeChuvash(input: string): string {
     //    (the writer types the ordinal and declines that), so an open alternation would have nothing to
     //    gain and every space-separated noun to lose.
     //    MUST run before the range rule (step 9), which would otherwise eat the hyphen.
-    s = s.replace(new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,6})${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,6})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, sfx: string) => attachOrdinal(whole, digits, sfx.replace(/ĕ/gu, "ӗ")));
 
     // 7) SIGNS. This corpus's climate prose writes the true MINUS (U+2212) as well as the hyphen, on both
     //    sides of the scale: `−19 °C`, `-13°С`, `+19 °C`, `+ 37°С` (spaced), `+20°с`.
-    s = s.replace(/(^|(?<!\d)[\s(])[-−–](\d)/gu, "$1минус $2");
+    s = tr(s, /(^|(?<!\d)[\s(])[-−–](\d)/gu, "$1минус $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it.
-    s = s.replace(/±/gu, " плюс минус ");
-    s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
+    s = tr(s, /±/gu, " плюс минус ");
+    s = tr(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
 
     // 8) DEGREES — and here they are TEMPERATURES, all 33 of them. ⚠ THE SCALE LETTER IS WRITTEN THREE
     //    WAYS: Latin ⟨C⟩ (`−19 °C`), Cyrillic ⟨С⟩ (`-42 °С`) and lowercase Cyrillic ⟨с⟩ (`+20°с`). They
@@ -257,11 +258,11 @@ export function normalizeChuvash(input: string): string {
     //    the Latin one falls to core/foreign.ts and is read as the ENGLISH letter name.
     //    ⚠ THE SCALE NAME FOLLOWS THE NOUN — *Цельси градусӗ*, the possessive compound, which is the same
     //    order Bashkir's corpus glosses and the opposite of the Russian *градус Цельсия*.
-    s = s.replace(/(\d)\s?°\s?[CСс](?![\p{L}\p{M}])/gui, "$1 Цельси градусӗ");
-    s = s.replace(/(\d)\s?°\s?[FФф](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусӗ");
+    s = tr(s, /(\d)\s?°\s?[CСс](?![\p{L}\p{M}])/gui, "$1 Цельси градусӗ");
+    s = tr(s, /(\d)\s?°\s?[FФф](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусӗ");
     //    WITH A TRAILING SPACE, because the sign is written glued to letters this rule does not claim;
     //    the final space-collapse removes the doubling in the ordinary case.
-    s = s.replace(/(\d)\s?°/gu, "$1 градус ");
+    s = tr(s, /(\d)\s?°/gu, "$1 градус ");
 
     // 9) NUMERIC RANGES. The dash was dropped outright and the endpoints fused into one run of words —
     //    `1608—1609` read as one twelve-word number, `530-570 мм` as *пилӗҫ ҫӗр вӑтӑр…*. ⚠ THE DASH IS
@@ -271,8 +272,8 @@ export function normalizeChuvash(input: string): string {
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58) — `– С. 61-63.` is how this corpus
     //    ends a citation. Runs AFTER the ordinal and sign rules, which have already spent every hyphen
     //    that belongs to a suffix or opens a negative.
-    s = s.replace(/(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = s.replace(/(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
 
     // A padded replacement (` плюс минус `) doubles a space that was already there. Harmless downstream
     // because assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be

@@ -1,3 +1,4 @@
+import { tr } from "../../core/provenance.ts";
 /**
  * Scottish Gaelic (gd) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -116,15 +117,15 @@ export function normalizeScottishGaelic(input: string): string {
     //    `−224.2`) untouched for step 5 — all of them one or two places.
     //    Two passes each, because adjacent groups share the digit the first consumes.
     for (let i = 0; i < 3; i++) {
-        s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
-        s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
+        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     }
     //    The SI space form, for completeness — it does not occur in the retained text.
-    for (let i = 0; i < 2; i++) s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
 
     // 1) DOTTED ABBREVIATIONS. The dot is consumed before a following word so it cannot become a phrase
     //    break; at a real sentence end it is kept.
-    s = s.replace(new RegExp(`${NOT_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
+    s = tr(s, new RegExp(`${NOT_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -132,7 +133,7 @@ export function normalizeScottishGaelic(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = s.replace(new RegExp(`${NOT_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = tr(s, new RegExp(`${NOT_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -142,13 +143,13 @@ export function normalizeScottishGaelic(input: string): string {
         });
 
     // 2) ÀIREAMH. `no.` / `àir.` before a digit — the sign was dropped and the dot became a phrase break.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:no|àir)\.\s?(?=\d)/giu, "àireamh ");
-    s = s.replace(/№\s?(?=\d)/gu, "àireamh ");
+    s = tr(s, /(?<![\p{L}\p{M}])(?:no|àir)\.\s?(?=\d)/giu, "àireamh ");
+    s = tr(s, /№\s?(?=\d)/gu, "àireamh ");
 
     // 3) THE DECADE. `1990s`, `1960s` — without this the trailing `s` is read as a bare consonant, and the
     //    shared tier's one-letter `s` would otherwise be a candidate for it. Gaelic names a decade by its
     //    figure, so the plural marker is simply dropped.
-    s = s.replace(/(?<![\d.,])((?:1\d|20)\d0)s(?![\p{L}\p{M}])/gu, "$1");
+    s = tr(s, /(?<![\d.,])((?:1\d|20)\d0)s(?![\p{L}\p{M}])/gu, "$1");
 
     // 4) THE ORDINAL, AND ITS CIRCUMFIX. Written `19mh`, `18mh`, `12na`, `11mh`, `6mh`, `1d`, `3s` — the
     //    suffix is the TAIL OF THE FULL WORD (chiad → d, dàrna → na, treas → s, còigeamh → mh), so the
@@ -165,7 +166,7 @@ export function normalizeScottishGaelic(input: string): string {
     //    ⚠ THE SUFFIX MUST BE GLUED (or hyphen-attached), never merely adjacent. Allowing a space made
     //    `3 s` — a duration in seconds — match the ordinal `treas`, because *treas* does end in ⟨s⟩. The
     //    corpus writes every one of these glued (`19mh`, `12na`, `3s`, `1d`), so nothing is lost.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d{1,2})-?(mh|na|s|d)(?:(\\s+)(${WORD}))?${NOT_LETTER}`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\d.,])(\\d{1,2})-?(mh|na|s|d)(?:(\\s+)(${WORD}))?${NOT_LETTER}`, "giu"),
         (whole, digits: string, rawSfx: string, gap: string | undefined, noun: string | undefined) => {
             const n = Number(digits);
             const head = n >= 1 && n <= 20 ? ORD_1_20[n] : undefined;
@@ -189,7 +190,7 @@ export function normalizeScottishGaelic(input: string): string {
     //    numeral form (playbook trap 20's constructive half — emitting digits is the right default, as
     //    long as you check what the downstream numeral rules do to them, and a single digit has no
     //    lenition or particle context to get wrong).
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.\p{L}])/gu,
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.\p{L}])/gu,
         (_m, int: string, frac: string) => `${int} puing ${[...frac].join(" ")}`);
 
     // 6) SIGNS. The corpus writes the true MINUS (U+2212) in `−224.2 °C` and `49 K (−224.2 °C)`.
@@ -201,7 +202,7 @@ export function normalizeScottishGaelic(input: string): string {
     //    they are written with a plain hyphen; the shapes that must NOT be claimed are a year span with a
     //    stray space (`1805 -1869`) and the glued scores and ISO dates, so the guard is a preceding space
     //    or paren that is not itself preceded by a digit.
-    s = s.replace(/(^|(?<!\d)[\s(])[-−–](\d)/gu, "$1minus $2");
+    s = tr(s, /(^|(?<!\d)[\s(])[-−–](\d)/gu, "$1minus $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
