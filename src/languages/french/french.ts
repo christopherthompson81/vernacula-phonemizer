@@ -7,6 +7,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { readForeignRun } from "../../core/foreign.ts";
 import { FOREIGN_RUN } from "../../core/clauses.ts";
+import { enterEngine, noteToken } from "../../core/trace.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -200,13 +201,16 @@ class FrenchPhonemizer implements Phonemizer {
         // must see the all-caps runs the numeral pass declined → SYMBOLS (%, currency, units) last, since
         // the time rule upstream has already claimed the hour marker.
         input = SYMBOLS(normalizeFrenchInitialisms(normalizeFrenchNumerals(normalizeFrench(input, isWord)), isWord));
+        enterEngine(input);
         // Flatten to a sequence of word strings / pause marks (numbers expand to their spelled words), so liaison
         // can look one word ahead across the whole stream (incl. spelled numbers: "2 ans" → deux → dø zˈɑ̃).
         // An `ipa` item is a run in a script French does not own, ALREADY resolved by whichever engine
         // owns that script (core/scripts.ts). It carries phonemes, not text, because there is no French
         // pronunciation of Владимир to look up — and critically it must stay OUT of the liaison
         // machinery, which is why it is a third variant rather than a `word` holding IPA.
-        type Item = { word: string } | { pause: string } | { ipa: string };
+        // `src` is carried for the #1150 trace only — nothing in the reading path reads it.
+        type Src = { span: [number, number]; surface: string };
+        type Item = ({ word: string } | { pause: string } | { ipa: string }) & { src?: Src };
         const items: Item[] = [];
         // GAPS between tokens carry embedded foreign text. French's word class is Latin-1 only, so a
         // Greek or Cyrillic run matched nothing and was dropped outright. French cannot use
@@ -218,34 +222,38 @@ class FrenchPhonemizer implements Phonemizer {
             if (upto > gapCursor)
                 for (const g of input.slice(gapCursor, upto).matchAll(FOREIGN_RUN)) {
                     const ipa = readForeignRun(g[0]);
-                    if (ipa !== undefined && ipa !== "") items.push({ ipa });
+                    const at = gapCursor + (g.index ?? 0);
+                    if (ipa !== undefined && ipa !== "")
+                        items.push({ ipa, src: { span: [at, at + g[0].length], surface: g[0] } });
                 }
             gapCursor = upto;
         };
         for (const m of input.matchAll(TOKEN)) {
             claimGap(m.index ?? gapCursor);
-            gapCursor = (m.index ?? gapCursor) + m[0].length;
-            if (m[1]) items.push({ word: m[1] });
+            const tokAt = m.index ?? gapCursor;
+            gapCursor = tokAt + m[0].length;
+            const src: Src = { span: [tokAt, gapCursor], surface: m[0] };
+            if (m[1]) items.push({ word: m[1], src });
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);
                 for (const w of numberToWords(Number(intPart), intPart).split(" "))
-                    items.push({ word: w });
+                    items.push({ word: w, src });
                 if (frac !== undefined) {
                     // Decimal: "virgule" + the fractional part. French reads that part as a NUMBER
                     // (1,75 → un virgule soixante-quinze), not digit by digit, so long as doing so is
                     // unambiguous. A LEADING ZERO makes it ambiguous — reading "05" as a number would
                     // say 1,5 for 1,05 — and past three digits the number reading stops being useful,
                     // so both of those fall back to digit-by-digit.
-                    items.push({ word: MANIFEST.numbers.decimalSeparator });
+                    items.push({ word: MANIFEST.numbers.decimalSeparator, src });
                     const asNumber = frac.length <= 3 && !frac.startsWith("0");
                     const parts = asNumber
                         ? numberToWords(Number(frac), frac).split(" ")
                         : [...frac].flatMap((d) => numberToWords(Number(d)).split(" "));
-                    for (const w of parts) items.push({ word: w });
+                    for (const w of parts) items.push({ word: w, src });
                 }
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
-                if (mk) items.push({ pause: mk });
+                if (mk) items.push({ pause: mk, src });
             }
         }
         claimGap(input.length);
@@ -253,11 +261,25 @@ class FrenchPhonemizer implements Phonemizer {
         let group: string[] = []; // IPA tokens of the current rhythmic group (until a pause)
         let out = "";
         let carry = ""; // liaison consonant to prepend to the next word (its new onset)
+        // ⚠ RECORDED AT FLUSH, NOT AT PUSH (#1150). `accentFinal` MUTATES the group in place before it is
+        // joined, so a reading captured when the word was pushed is not the reading that ships. `groupSrc`
+        // tracks which source token produced each slot so the trace reports the post-mutation value.
+        let groupSrc: (Src | undefined)[] = [];
+        const traced = new Map<string, { span: [number, number]; surface: string; emitted: string[] }>();
         const flush = (pause: string | null): void => {
             if (group.length) {
                 accentFinal(group);
+                for (let gi = 0; gi < group.length; gi++) {
+                    const sc = groupSrc[gi];
+                    if (sc === undefined) continue;
+                    const key = `${sc.span[0]}:${sc.span[1]}`;
+                    const b = traced.get(key);
+                    if (b) b.emitted.push(group[gi]!);
+                    else traced.set(key, { span: sc.span, surface: sc.surface, emitted: [group[gi]!] });
+                }
                 out += (out ? " " : "") + group.join(" ");
                 group = [];
+                groupSrc = [];
             }
             if (pause) out += ` ${pause}`;
         };
@@ -275,6 +297,7 @@ class FrenchPhonemizer implements Phonemizer {
                 // PREVIOUS word from setting a carry onto this item, so nothing is lost by clearing here.
                 carry = "";
                 group.push(it.ipa);
+                groupSrc.push(it.src);
                 continue;
             }
             // Heteronym first: it is the only reading that depends on context, so it must pre-empt the
@@ -297,9 +320,13 @@ class FrenchPhonemizer implements Phonemizer {
                 carry = liaisonOnto(it.word, next.word);
                 if (carry) ipa = stripLatent(ipa, carry); // avoid doubling a citation-realised final consonant
             }
-            if (ipa) group.push(ipa);
+            if (ipa) {
+                group.push(ipa);
+                groupSrc.push(it.src);
+            }
         }
         flush(null);
+        for (const t of traced.values()) noteToken(t.span, t.surface, t.emitted);
         return out;
     }
 }

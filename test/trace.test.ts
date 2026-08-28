@@ -42,14 +42,16 @@ describe("phonemizeTrace — a second view, never a second reading", () => {
     });
 
     /**
-     * ⚠ AN UNTRACED ENGINE MUST NOT LOOK LIKE A CLEAN ONE. The trace is derived at `assembleClauses`, and four
-     * engines hand-roll their own tokenizer loop instead (english's two-phase tagger, french's liaison
-     * lookahead, mandarin's code-point scan, burmese's), so they emit no tokens at all. `traced: false` says
-     * so. Pinned as an exact set: if a new engine stops routing through the seam, an empty token list would
-     * otherwise be indistinguishable from a correct trace — which is the very defect this API exists to
-     * expose (#1131, #1140).
+     * ⚠ AN UNTRACED ENGINE MUST NOT LOOK LIKE A CLEAN ONE — an empty token list is indistinguishable from a
+     * correct trace, which is the very defect this API exists to expose (#1131, #1140). The trace is DERIVED
+     * at `assembleClauses`, which four engines bypass with a hand-rolled loop (english's two-phase tagger,
+     * french's liaison lookahead, mandarin's code-point scan, burmese's); those four now report to the trace
+     * EXPLICITLY, through `enterEngine` + `noteToken`, so every language is covered.
+     *
+     * Pinned at zero rather than at a list: a new engine that neither routes through the seam nor reports
+     * fails here instead of silently returning nothing.
      */
-    test("the untraced engines are exactly the known bypasses", () => {
+    test("every engine is traced — none silently returns an empty trace", () => {
         const untraced = GOLDEN_LANGS.filter((lang) => {
             for (const text of sample(lang, 4)) {
                 try {
@@ -60,7 +62,7 @@ describe("phonemizeTrace — a second view, never a second reading", () => {
             }
             return true;
         });
-        expect(untraced.sort()).toEqual(["cmn", "en", "en-GB", "en-IN", "fr", "fr-CA", "my"]);
+        expect(untraced).toEqual([]);
     });
 
     test("spans are ordered, non-overlapping, and index the normalized text", () => {
@@ -103,6 +105,22 @@ describe("phonemizeTrace — the step that was invisible", () => {
         expect(t.tokens).toHaveLength(1);
         expect(t.tokens[0]?.emitted.length).toBeGreaterThan(3); // lukumi mu bikumi bibiri mu …
         expect(t.tokens[0]?.emitted.join(" ")).toBe(t.ipa);
+    });
+
+    test("the hand-rolled engines report explicitly — tokens, spans and all", () => {
+        for (const [text, lang, want] of [
+            ["the cat sat", "en", ["the", "cat", "sat"]],
+            ["le chat noir", "fr", ["le", "chat", "noir"]],
+            ["中国 hello 世界", "cmn", ["中国", "hello", "世界"]],
+        ] as const) {
+            const t = phonemizeTrace(text, lang);
+            expect(t.traced, lang).toBe(true);
+            expect(t.tokens.map((k) => k.surface), lang).toEqual(want);
+            for (const k of t.tokens) expect(t.normalized.slice(k.span[0], k.span[1])).toBe(k.surface);
+        }
+        // english expands a numeral into many readings against ONE source span
+        const n = phonemizeTrace("I have 1244 cats.", "en").tokens.find((k) => k.surface === "1244");
+        expect(n?.emitted.length).toBeGreaterThan(3);
     });
 
     test("an embedded foreign run is a token, not an unattributed reading", () => {

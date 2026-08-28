@@ -97,7 +97,10 @@ export function exitEngine(): void {
  * outermost `beginToken` wins; an inner one only nests.
  */
 export function beginToken(span: [number, number], surface: string): void {
-    if (!active() || recording === null) return;
+    // ⚠ AND ONLY ONCE AN ENGINE HAS DECLARED ITSELF. `emitUnclaimed` opens tokens, and an engine that drives
+    // `clauseSink` without calling `enterEngine` would otherwise emit tokens against an empty `normalized`,
+    // with spans indexing a string the caller never sees — `traced: false` alongside a populated token list.
+    if (!active() || recording === null || !recording.traced) return;
     recording.tokenDepth++;
     if (recording.tokenDepth > 1) return;
     recording.current = { span, surface, emitted: [] };
@@ -117,6 +120,21 @@ export function endToken(): void {
 export function noteNativised(from: string, to: string): void {
     if (!active() || recording?.current == null || from === to) return;
     recording.current.nativised = to;
+}
+
+/**
+ * Record a COMPLETE token in one call — the hook for a pipeline that cannot bracket its emits.
+ *
+ * ⚠ `english.ts` and `french.ts` are two-phase: they collect tokens, run a POS tagger / liaison lookahead over
+ * the whole stream, and only then render. There is no point in that shape where a token is "open" while its
+ * reading is produced, so the streaming `beginToken`/`endToken` pair does not fit. They call this instead,
+ * after rendering, when span, surface and readings are all known.
+ */
+export function noteToken(span: [number, number], surface: string, emitted: string[], nativised?: string): void {
+    if (!active() || recording === null || !recording.traced) return;
+    const t: TraceToken = { span, surface, emitted: emitted.filter((x) => x !== "") };
+    if (nativised !== undefined && nativised !== surface) t.nativised = nativised;
+    recording.tokens.push(t);
 }
 
 /** Record one emitted reading against the token currently open. */
