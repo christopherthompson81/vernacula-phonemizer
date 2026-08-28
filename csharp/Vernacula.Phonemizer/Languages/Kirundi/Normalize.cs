@@ -15,6 +15,7 @@
  *
  * Ported from src/languages/kirundi/normalize.ts.
  */
+using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.Kirundi;
@@ -232,6 +233,16 @@ public static class Normalize
     private static string DegreeBody(string sign, string n, int off, int end, string full) =>
         $"{(SaidNear(full, off, end, DEGREE) ? "" : $"{DEGREE} ")}{sign}{SpellDec(n)}";
 
+    /** The exponent modifier for a unit noun, shared by step 4 and step 8 so the two orders cannot drift.
+     *  ⚠ ONLY THE SQUARE IS DECLARED, so a CUBE keeps the unit's reading and HANDS THE EXPONENT BACK — the
+     *  shared tier's own convention for an undeclared power, which step 4 exists to converge with. Giving a
+     *  cube the SQUARE's word is the option ruled out: a missing word is lossy, a wrong one is false (#1135).
+     *  See the TS for the measurement behind "no Kirundi cube word is attested". */
+    private static string ExponentPhrase(string noun, Group exp) =>
+        !exp.Success ? noun
+        : exp.Value == "³" || exp.Value == "3" ? $"{noun}{exp.Value}"
+        : $"{noun} {SQUARED}";
+
     /** Normalize one Kirundi input string. Steps are ORDER-DEPENDENT; the TS states each coupling. */
     public static string NormalizeKirundi(string input)
     {
@@ -275,10 +286,7 @@ public static class Normalize
         //    the SAME SHAPE the tier's `unitPrefix` produces, from the same table, so the two orders
         //    converge on one reading. ⚠ AFTER step 3, so a grouped operand is already one digit run.
         s = UNIT_BEFORE.Replace(s, m =>
-        {
-            var noun = UNIT_MAP[Js.ToLowerCase(m.Groups[1].Value)];
-            return !m.Groups[2].Success ? noun : $"{noun} {SQUARED}";
-        });
+            ExponentPhrase(UNIT_MAP[Js.ToLowerCase(m.Groups[1].Value)], m.Groups[2]));
 
         // 5) SPANS. Both shapes are claimed HERE — before the tier, so a span's operands are still bare
         //    digits, and before step 8b so a verse reference has already been excluded by the guard rather
@@ -364,10 +372,7 @@ public static class Normalize
         //    standing alone. ⚠ THE SINGULAR NOUN IS USED HERE, which is Kirundi noun class, not a typo.
         //    ⚠ AFTER THE TIER: run first, this would steal any real rate from the rate path.
         s = DENOM_SLASH.Replace(s, m =>
-        {
-            var noun = UNIT_SG[Js.ToLowerCase(m.Groups[1].Value)];
-            return $" {PER} {(!m.Groups[2].Success ? noun : $"{noun} {SQUARED}")}";
-        });
+            $" {PER} {ExponentPhrase(UNIT_SG[Js.ToLowerCase(m.Groups[1].Value)], m.Groups[2])}");
 
         // 8b) COLONS. rn has NO clock and NO race duration — all 6 instances are Bible verses plus one wiki
         //     signature — so there is nothing to compose and the only job is to stop `:` becoming a clause

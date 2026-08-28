@@ -192,6 +192,26 @@ const UNIT_SG: Readonly<Record<string, string>> = {
 const SQUARED = "kwadarato";
 
 /**
+ * The exponent modifier for a unit noun, shared by step 4 and step 8 so the two orders cannot drift.
+ *
+ * ⚠ ONLY THE SQUARE IS DECLARED. No Kirundi CUBE word is attested — `m³` and `km³` are ×0 in this corpus and
+ * the header records that as the trap 51 floor — so a cube keeps the UNIT'S reading and HANDS THE EXPONENT
+ * BACK rather than being given the square's word.
+ * ⚠ THAT IS THE SHARED TIER'S OWN CONVENTION FOR AN UNDECLARED POWER, quoted from `core/normalizeSymbols.ts`:
+ * *"emit the UNIT and hand the exponent back rather than abandoning the match. Returning `whole` loses the
+ * QUANTITY too, not just its power … Re-emitting the exponent keeps the unit's reading and leaves `²` where
+ * the leak gate can see it, turning an invisible missing reading into a visible missing WORD."* Step 4 exists
+ * to produce the SAME SHAPE the tier produces, so it must fail the same way too — before this, `km³ 517`
+ * announced a SQUARE while `517 km³` (the tier) did not, and one construct read three different ways
+ * depending only on where the number sat.
+ * ⚠ EMITTING `kwadarato` FOR A CUBE IS THE OPTION RULED OUT, not merely the one not taken: a missing word is
+ * a LOSSY reading and a wrong word is a FALSE one, and stating a square where the text wrote a cube is the
+ * second (trap 53 — half a reading is not a reading).
+ */
+const exponentPhrase = (noun: string, exp: string | undefined): string =>
+    exp === undefined ? noun : exp === "³" || exp === "3" ? `${noun}${exp}` : `${noun} ${SQUARED}`;
+
+/**
  * DEGREE VOCABULARY.
  * · `dogere` — corpus ×2 beside the sign itself (`ni ukuvuga nka dogere 22/25 ku mutaga`, `ubushuhe ntarengwa
  *   buri hagati ya dogere 29`); rn.wikipedia 9 hits / 4 articles — `dogere 20`, `(dogere 25)`, `(dogere 18)`,
@@ -452,10 +472,7 @@ export function normalizeKirundi(input: string): string {
     const PRE_UNIT = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
     s = s.replace(
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0]\\d)`, "giu"),  // space, NBSP
-        (_m, key: string, exp?: string) => {
-            const noun = UNIT[key.toLowerCase()]!;
-            return exp === undefined ? noun : `${noun} ${SQUARED}`;
-        },
+        (_m, key: string, exp?: string) => exponentPhrase(UNIT[key.toLowerCase()]!, exp),
     );
 
     // 5) SPANS. Two shapes, and BOTH are claimed here — before the tier, so a span's operands are still bare
@@ -622,10 +639,7 @@ export function normalizeKirundi(input: string): string {
     const DENOM_UNIT = Object.keys(UNIT_SG).sort((a, b) => b.length - a.length).join("|");
     s = s.replace(
         new RegExp(`/[ \u00a0]?(${DENOM_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?![\\p{L}\\p{M}\\d'’])`, "giu"),  // space, NBSP
-        (_w, key: string, exp?: string) => {
-            const noun = UNIT_SG[key.toLowerCase()]!;
-            return ` ${PER} ${exp === undefined ? noun : `${noun} ${SQUARED}`}`;
-        },
+        (_w, key: string, exp?: string) => ` ${PER} ${exponentPhrase(UNIT_SG[key.toLowerCase()]!, exp)}`,
     );
 
     // 8b) COLONS. rn has NO clock and NO race duration — see the header for the measurement — so there is
