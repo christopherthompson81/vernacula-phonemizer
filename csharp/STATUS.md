@@ -1690,10 +1690,17 @@ Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (
   ⚠ **AND THE FIRST CUT WAS NARROWER THAN THE ARM IT GUARDS** — the unit rule's lookahead carried space+NBSP
   while de-grouping's space arm carries space, NBSP, NNBSP and thin space, so `km2<NNBSP>517` reproduced the
   defect exactly. Two classes that must agree character for character; caught in review, not by the gate.
-- **The `US$` compound key cannot match any of the three shapes it was declared for**, and this one is
-  **LIVE**. It claims `US$4,000` but not `US $ 4,000`, which is how all three corpus instances are written,
-  so `US` still reaches the g2p as the word *us* — the second half of the defect the TS header's own table
-  lists as broken. Pinned as it SHIPS in `KirundiTests` rather than as the header believes it reads.
+- ~~**The `US$` compound key cannot match any of the three shapes it was declared for.**~~ **FIXED
+  (#1137 → PR #1149), AND IN THE TIER RATHER THAN IN rn.** `US$` is declared by **36 language layers** and
+  the matching lives in `core/normalizeSymbols.ts`, so declaring `"US $"` in rn's own table would have put a
+  workaround where the bug is not and left 35 layers with the gap. A compound key now admits the tier's
+  optional separator **at its letter→sign seam** — `US$`/`AUD$`/`CN¥` gain it, all-letter codes (`PLN`,
+  `zł`) do not, because a code with no seam must not match across a real token gap. ⚠ Regenerating ALL 169
+  goldens moved **two rows**: rn loses its stray *us*, and **ilo** gains the fuller noun its own table
+  declares (*doliar ti Estados Unidos*) — ilo's header records this class at ×98, so the spaced form was
+  live there too and unmeasured. ⚠ AND **rw's OWN TEST PINNED THE LEAK AS THE ANSWER** (`US $ 115,600,000`
+  → *`US` amadolari …*), so a third language had it live; only the unit test saw it, rw's golden carrying no
+  such row.
 
 Recorded, not filed: `kirundi.jsonc`'s `convention.affricates` still reads `⟨j⟩→ʒ`, Kinyarwanda's value,
 contradicting the same file's header, its own grapheme table and the shipped reading (`jana` → *d͡ʒana*) —

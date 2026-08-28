@@ -193,12 +193,15 @@ public class KirundiTests
 
     [Theory]
     // The currency noun PRECEDES its amount; ⟨l⟩ is not a Kirundi letter, so it is `amadorari`.
-    // ⚠ THE `US$` COMPOUND KEY DOES NOT CLAIM THE SPACED FORM, AND ALL THREE CORPUS INSTANCES ARE SPACED —
-    // so `US` still reaches the g2p as the word *us*. Pinned as it SHIPS, not as the TS header believes it
-    // reads; filed as #1137, because both engines do this identically. See docs/rn_port_investigation.md.
-    [InlineData("US $ 4,000", "US amadorari 4000")]
-    [InlineData("US $ 7.34", "US amadorari 7 3 4")]
-    [InlineData("US$4,000", "amadorari 4000")]   // the unspaced form the key WAS written for — ×0 in rn
+    // ⚠ #1137 IS FIXED IN THE TIER: a compound currency key now admits the optional separator at its
+    // letter→sign seam, so `US $ 4,000` — how all three corpus instances are written — is claimed by `US$`
+    // instead of leaving `US` to reach the g2p as the word *us*.
+    [InlineData("US $ 4,000", "amadorari 4000")]
+    [InlineData("US $ 7.34", "amadorari 7 3 4")]
+    [InlineData("US$4,000", "amadorari 4000")]   // the unspaced form the key was written for — ×0 in rn
+    [InlineData("US $4,000", "amadorari 4000")]
+    // ⚠ THE ARMS STILL REQUIRE A NUMBER, so a bare mention in prose cannot match.
+    [InlineData("the US $ sign", "the US $ sign")]
     [InlineData("27 664 $", "amadorari 27664")]
     // COLONS: rn has NO clock — all six instances are Bible verses — so the colon is spent on a space and
     // nothing is invented.
