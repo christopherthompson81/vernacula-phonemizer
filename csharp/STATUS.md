@@ -1,4 +1,4 @@
-# C# port — state as of 2026-08-27
+# C# port — state as of 2026-08-28
 
 Resume here. Read `PORTING.md` first; it is the contract and it has been amended five times — most recently to REVERSE the "keep comment text" rule.
 
@@ -16,12 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 134 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 135 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
   so their goldens are what exists).
-  **26,427 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **26,627 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fi fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nso nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wo wuu xh yo yue za zu.
+  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fi fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la lg ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nso nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wo wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -1600,3 +1600,33 @@ lines read differently sync vs async in BOTH engines — all embedded Latin reac
 neural tier of its own. ⚠ **Coverage of the probe-only arms, stated rather than assumed**: currency signs other
 than ₹, space-grouped thousands, caret exponents, U+2212, ± ÷ × < >, `℃`/`℉`, a true fraction, a `:00` clock, an
 above-2⁵³ digit run and every ASCII-dotted abbreviation are ×0 in the corpus and rest entirely on the probes.
+
+### From the lg port (2026-08-28) — 200/200 first run; full log in `docs/lg_port_investigation.md`
+
+Luganda has no shared symbol tier (the measure noun PRECEDES its number, and the tier can only postpose), so
+all seven normalization steps are local. Parity **200/200 byte-identical on the first run**, 0 BLOCKED;
+corpus-wide differential over FLEURS `lg_ug` + the mined artifact + probes = **4,442 lines × sync AND async
+= 8,884 comparisons, 0 differ, 0 throws**, and 0 of 4,442 outputs carry a digit or an unread symbol.
+
+⚠ **THE GOLDEN REACHES FIVE OF THE SEVEN STEPS.** Step 1 (the English ordinal suffix) is ×0 in it, and
+step 3's SPACE and PERIOD arms are ×0 in it — the period arm, the one the TS itself calls "the risky one"
+because a period-grouped thousand is indistinguishable from a three-place decimal, is ×0 in FLEURS as well
+and rests on the mined artifact and the probes alone.
+
+Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (#1131, #1132):
+
+- **⟨ŋ⟩ does not "drop outright" — the shipped path folds it to ⟨n⟩ and speaks an alveolar geminate.**
+  `luganda.ts`'s `NATIVE_CLASS` note is true of `phonemizeWord` and false of `text()`: a token outside the
+  class goes through `makeNativiser`, whose `UNDECOMPOSABLE` table maps ŋ→n first. `ŋŋamba` reads *nːaːᵐba*
+  where `ng'amba` reads *ŋaːᵐba*, and this language's own FLEURS line *"…mu ziseŋŋendo…"* reads
+  *zisenːeːⁿdo*. 2 FLEURS lines and 4 mined lines carry a literal ⟨ŋ⟩; the golden carries 0. ⚠ AND THE
+  REFEREE EVAL IMPORTS `phonemizeWord` DIRECTLY, so the 99.1% measures the path where the letter is dropped,
+  not the path where it is spoken as [n] — question 3, exactly.
+- **The ⟨ɡ⟩ (U+0261) entry in `prenasalisable` is a "defensive alias" that makes the reading worse, not
+  better.** There is no ⟨ɡ⟩ grapheme row and the superscript choice tests the ASCII string `"kg"`, so
+  `nɡa` → *ⁿa*: the alias fires the prenasal rule, picks the wrong place, and drops the consonant anyway.
+  Without it the same input reads *na*. ×0 in every corpus measured — latent, not live.
+- **The twelve prenasal digraph rows in the grapheme table are unreachable** (question 2). `OTHER_DIGRAPHS`
+  filters length-2 keys to `k[1] === "w"` or vowel+vowel, deliberately and with a comment saying so, but the
+  jsonc's own block comment claims the scanner tries "…+ Cw + prenasal + vowel digraphs → singles". Verified
+  row by row that the code rule reproduces all twelve byte-identically, so **no behaviour is at stake**.
