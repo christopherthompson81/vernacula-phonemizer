@@ -105,10 +105,6 @@ public sealed class AsturianPhonemizer : ILanguage
     private static readonly JsRe TOKEN = JsRegex.Compile(
         $"({HostWord.HostWordRun(new[] { "Latin" }, "'·")})|(\\d+(?:,\\d+)?)|([.!?…,;:])", "gu");
 
-    /**
-     * ⚠ ḷ Ḷ ARE DELIBERATELY ABSENT: the g2p has no rule for them, and drops them outright — listing them
-     * here would promise a reading that does not exist.
-     */
     // ⚠ ḷ Ḷ ARE CLAIMED (#1140). asturian.jsonc maps ⟨ḷḷ⟩ → t͡ʂ, the che vaqueira — a different phoneme from
     // ⟨ll⟩ → ʎ. Excluded from the class, the letter was FOLDED (the under-dot stripped), so ⟨ḷḷ⟩ arrived as
     // ⟨ll⟩ and the contrast was silently collapsed. See src/languages/asturian/asturian.ts for the evidence.

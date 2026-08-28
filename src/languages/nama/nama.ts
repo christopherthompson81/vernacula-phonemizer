@@ -84,6 +84,14 @@ export function phonemizeWord(word: string): string {
  *
  * ⚠ naq HAS NO GOLDEN AND NO CORPUS ARTIFACT in this repo, so no differential can witness this and the tests
  * are the whole instrument. Both cases are listed because the nativiser flags here are "u", not "iu".
+ *
+ * ⚠ THE COST, STATED RATHER THAN DISCOVERED: ⟨â ê î ô û⟩ is EXACTLY the Afrikaans circumflex set, and
+ * Afrikaans is the dominant contact language where this engine is used. Judging those clusters native means
+ * an otherwise-ASCII Afrikaans word is no longer folded — `môre` reads *mõre* rather than *more*, `brûe`
+ * *brũe*, `sê` *sẽ* — i.e. a borrowed word acquires a phonemic nasal vowel it does not have. That is the
+ * ordinary nativiser trade (this class decides the INVENTORY, not the routing) and it is worth paying: the
+ * alternative erased ⟨ǂgâ⟩ and ⟨ǀî⟩, contrasts the manifest calls phonemic, on every native word. But with no
+ * corpus for this language, nothing here witnesses EITHER direction, so the trade is recorded, not measured.
  */
 const NATIVE_CLASS = "[a-zA-ZāēīōūâêîôûĀĒĪŌŪÂÊÎÔÛǀǁǂǃ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

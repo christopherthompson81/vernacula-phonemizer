@@ -108,14 +108,10 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'")})|(\\d+)|([.!?…,;:])`
  * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
  * core/hostWord.ts.
  *
- * ⚠ à ò À Ò ARE DELIBERATELY ABSENT: the g2p has no rule for them, and drops them outright —
- * listing them here would promise a reading that does not exist. NATIVE_CLASS is a claim ABOUT
- * THE G2P, and `test/native-inventory.test.ts` measures it character by character rather than
- * trusting it.
- */
-/**
- * ⚠ ⟨à ò⟩ JOIN ⟨è ì ù⟩ HERE FOR TRUTH, NOT FOR BEHAVIOUR (#1140). `maltese.jsonc` declares all five grave
- * vowels and this class carried only three, so it under-claimed two letters the g2p has rules for. Measured
+ * ⚠ ⟨à ò⟩ JOIN ⟨è ì ù⟩ HERE FOR TRUTH, NOT FOR BEHAVIOUR (#1140). The note that used to sit here said the
+ * opposite — that they were "deliberately absent" because the g2p "drops them outright" — and both halves
+ * were false. `maltese.jsonc` declares all five grave vowels and this class carried only three, so it
+ * under-claimed two letters the g2p has rules for. Measured
  * before changing it: the graves read the SAME QUALITY as their plain counterparts (`kafà`/`kafa` → kafa,
  * `kafò`/`kafo` → kafɔ), so the fold was reaching the right answer by the wrong route and this moves no
  * output at all. Listed anyway, because the class is a claim about the g2p and the claim was false.

@@ -132,16 +132,31 @@ describe("a declared native inventory matches what the g2p can read", () => {
             .filter((c) => /\p{L}/u.test(c) && foldLatinToBase(c) !== c && /^[A-Za-z]+$/u.test(foldLatinToBase(c)));
         const TABLES = ["graphemes", "consonants", "vowels", "letters", "digraphs", "trigraphs"];
         const under: string[] = [];
+        let measured = 0;
         for (const [dir] of dirCodes()) {
             let cls: string | null = null;
+            let flags = "u";
             for (const f of readdirSync(`src/languages/${dir}`).filter((x) => x.endsWith(".ts"))) {
-                const m = readFileSync(`src/languages/${dir}/${f}`, "utf8").match(
-                    /^const NATIVE_CLASS = "\[([^"]*)\]";$/mu,
-                );
-                if (m !== null) { cls = m[1]!; break; }
+                const src = readFileSync(`src/languages/${dir}/${f}`, "utf8");
+                // ⚠ NOT `^const NATIVE_CLASS = "\[…\]";$`. `minnan.ts` declares its class as a five-line `+`
+                // concatenation, so an anchored one-line pattern SKIPS it — silently, which is the failure
+                // mode this whole file exists to catch. Take everything up to the `;` and join the literals.
+                const decl = src.match(/^const NATIVE_CLASS =([\s\S]*?);$/mu);
+                if (decl === null) continue;
+                const body = [...decl[1]!.matchAll(/"((?:[^"\\]|\\.)*)"/gu)].map((q) => q[1]!).join("");
+                const inner = body.match(/^\[([\s\S]*)\]$/u);
+                if (inner === null) continue;
+                cls = inner[1]!;
+                flags = src.match(/makeNativiser\(NATIVE_CLASS, "([a-z]*)"\)/u)?.[1] ?? "u";
+                break;
             }
             if (cls === null) continue;
-            const claimed = new Set(expand(cls));
+            measured++;
+            // ⚠ THE CLASS'S OWN FLAGS DECIDE WHAT IT CLAIMS. 41 engines pass "iu", where a lowercase-only
+            // class matches uppercase too — so a case-sensitive membership test would report `Á` unclaimed in
+            // Spanish and tell the author to add a letter that is already there.
+            const fold = (ch: string): string => (flags.includes("i") ? ch.toLowerCase() : ch);
+            const claimed = new Set(expand(cls).map(fold));
             const dd = `data/languages/${dir}`;
             if (!existsSync(dd)) continue;
             for (const g of readdirSync(dd).filter((x) => x.endsWith(".jsonc"))) {
@@ -156,13 +171,18 @@ describe("a declared native inventory matches what the g2p can read", () => {
                     if (t === null || typeof t !== "object") continue;
                     for (const key of Object.keys(t as object))
                         for (const ch of key)
-                            if (REWRITTEN.includes(ch) && !claimed.has(ch))
+                            if (REWRITTEN.includes(ch) && !claimed.has(fold(ch)))
                                 under.push(`${dir} keys on ${ch} (${g}:${field}) but NATIVE_CLASS folds it to ${foldLatinToBase(ch)}`);
                 }
             }
         }
         expect([...new Set(under)], "a letter the g2p has a rule for, folded away before it arrives — add it to NATIVE_CLASS")
             .toEqual([]);
+        // ⚠ A FLOOR, so the probe cannot pass by measuring nothing. Everything above is a scan that SKIPS what
+        // it cannot parse; without this, one change to how the class is declared turns the whole test green
+        // and silent — which is the exact shape of the defect it was written to catch.
+        expect(measured, "engines actually measured — a drop here means the scan stopped parsing declarations")
+            .toBeGreaterThanOrEqual(80);
     });
 
     test("an out-of-inventory letter is FOLDED, never dropped", () => {

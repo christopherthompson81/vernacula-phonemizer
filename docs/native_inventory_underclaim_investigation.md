@@ -107,3 +107,31 @@ without a class update — that is the recurrence guard #1140 asked for. It does
 file's header documents separately (43 engines claim `a-z` while their g2p drops part of it), and it cannot
 see a rule that lives in CODE rather than a declared table, because keying on code comparisons is exactly
 what made the instrument 100% false-positive.
+
+## Run 4 — review findings, fixed inline
+
+Five findings on PR #1148. ⚠ **Two of them were this PR's own defect class, in my own diff:** the stale
+`⚠ … ARE DELIBERATELY ABSENT: the g2p has no rule for them, and drops them outright` block was left in place
+and merely *prefixed* with the new note, in `maltese.ts` and — one line apart, on the very constant the change
+is about — in `Asturian.cs`. The `ast`, `lg` and `ak` bugs were all caused by a human trusting exactly that
+sentence, and a C# Maltese port does not exist yet, so the stale half was a standing instruction to undo the
+fix. Both blocks deleted rather than appended to.
+
+Three on the instrument itself:
+
+  * **The scan skipped what it could not parse, with no signal.** `^const NATIVE_CLASS = "\[…\]";$` is
+    anchored to a one-line literal, and `minnan.ts` declares its class as a five-line `+` concatenation — so
+    `nan` was silently unmeasured while the sibling leak test in the same file, using a looser matcher,
+    included it. Now joins the string literals up to the `;`. **88 engines are measured, 0 unparsed**, and a
+    floor assertion (`>= 80`) means the probe can no longer pass by measuring nothing — which is precisely the
+    failure shape it was written to catch.
+  * **Membership was case-sensitive; the class's own flags decide.** 41 engines pass `"iu"`, where a
+    lowercase-only class claims uppercase too, so `Á` IS claimed in Spanish at runtime while a case-sensitive
+    set says otherwise. Latent — no jsonc keys on an uppercase accented letter today — but it would have
+    reported a false under-claim and told the author to add a letter that was already there. The test now
+    reads the flags and folds accordingly.
+  * **The Afrikaans collision in `naq`.** ⟨â ê î ô û⟩ is exactly the Afrikaans circumflex set, and Afrikaans
+    is the dominant contact language in the region. Judging those native means `môre` reads *mõre*, `brûe`
+    *brũe*, `sê` *sẽ* — a borrowed word acquiring a phonemic nasal it does not have. Worth paying, since the
+    alternative erased ⟨ǂgâ⟩/⟨ǀî⟩ on every NATIVE word; but with no corpus for naq, nothing witnesses either
+    direction, so it is now stated in the module note rather than left to be discovered.
