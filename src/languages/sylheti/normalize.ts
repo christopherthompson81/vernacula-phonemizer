@@ -1,4 +1,3 @@
-import { renormalize, rewrite } from "../../core/provenance.ts";
 /**
  * Sylheti / ꠍꠤꠟꠐꠤ ꠘꠣꠉꠞꠤ (syl) text normalization — the pre-tokenizer pass that rewrites everything which is
  * not already a pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
@@ -67,6 +66,7 @@ import { renormalize, rewrite } from "../../core/provenance.ts";
  *    corpus writes instead is NATIVE dotted abbreviations (ꠝꠤ.ꠉ꠆ꠞꠣ., ꠍꠦ.ꠝꠤ., ꠝꠦ.ꠐꠘ, ꠇꠤ.ꠇ꠆ꠎꠣꠟꠧꠞꠤ), and
  *    step 4 stops those from being read as phrase breaks without inventing a unit vocabulary.
  */
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /** Syloti Nagri LETTERS and signs — U+A800–A827 plus U+A82C (alternate hasanta). */
 const SYL = "\\u{A800}-\\u{A827}\\u{A82C}";

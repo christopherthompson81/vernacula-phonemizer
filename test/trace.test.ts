@@ -9,7 +9,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import { phonemize, phonemizeTrace } from "../src/index.ts";
-import { beginProvenance, endProvenance, rewrite } from "../src/core/provenance.ts";
+import { beginProvenance, endProvenance, inputSpan, provenanceFor, renormalize, rewrite } from "../src/core/provenance.ts";
 
 /** A deterministic stride sample of each golden's input column. */
 function sample(lang: string, n: number): string[] {
@@ -396,6 +396,75 @@ describe("the seam is a drop-in for `replace`, not a near-miss (#1150)", () => {
                 mapped += t.tokens.filter((k) => k.inputSpan !== undefined).length;
             }
         expect(mapped / tok).toBeGreaterThan(0.9);
+    });
+
+    /**
+     * ⚠ A NORMALIZE IS NOT A REPLACE, and this primitive is the seam's answer to that. Its correctness rests
+     * on one claim — that normalization never reaches across a starter, so normalizing canonical blocks
+     * separately equals normalizing the whole string — and on the VERIFICATION that backs the claim up.
+     * Randomised over all four forms, with Hangul jamo (which NFC composes ACROSS starters, the one
+     * exception) and astral characters in the alphabet.
+     */
+    test("renormalize reads exactly as String.normalize, and never reports an unsound mapping", () => {
+        const ALPHA = [..."aeìñõẹ́̀̃각가한🙂ṳ̄ĕ̤", "Mìng", "ngṳ̄", "\u1100\u1161\u11A8"];
+        let seed = 20260828;
+        const rnd = (): number => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+        const pick = (n: number): string => Array.from({ length: n }, () => ALPHA[Math.floor(rnd() * ALPHA.length)]!).join("");
+        const badRead: string[] = [];
+        const unsound: string[] = [];
+        let reported = 0;
+        let withheld = 0;
+        try {
+            for (const form of ["NFC", "NFD", "NFKC", "NFKD"] as const)
+                for (let i = 0; i < 3000; i++) {
+                    const src = pick(1 + Math.floor(rnd() * 6));
+                    beginProvenance(src);
+                    const got = renormalize(src, form);
+                    if (got !== src.normalize(form)) badRead.push(`${JSON.stringify(src)} ${form}`);
+                    const p = provenanceFor(got);
+                    if (p === undefined) withheld++;
+                    else {
+                        reported++;
+                        for (let k = 0; k < got.length; k++) {
+                            const sp = inputSpan(p, k, k + 1);
+                            // ⚠ ABSENT OR INSIDE THE INPUT — never a span the caller cannot index.
+                            if (sp === undefined || sp[0] < 0 || sp[1] > src.length || sp[0] > sp[1]) {
+                                unsound.push(`${JSON.stringify(src)} ${form} @${k}`);
+                                break;
+                            }
+                        }
+                    }
+                    endProvenance();
+                }
+        } finally {
+            endProvenance();
+        }
+        expect(badRead.slice(0, 3)).toEqual([]);
+        expect(unsound.slice(0, 3)).toEqual([]);
+        // ⚠ IT MUST ACTUALLY REPORT. A version that withheld everything would satisfy both checks above and
+        // be useless.
+        expect(reported).toBeGreaterThan(1000);
+        expect(withheld).toBeGreaterThanOrEqual(0);
+    });
+
+    /**
+     * ⚠ THE DOCUMENTED EXCEPTION, PINNED — not left to a random alphabet to stumble into. `가` (U+AC00, a
+     * precomposed LV syllable) followed by a trailing T jamo composes into `각` under NFC, and that
+     * composition reaches ACROSS a starter, which is the one thing the block chunking assumes cannot happen.
+     * The reading must still be exact and the mapping must be WITHHELD, because a mapping built from blocks
+     * that do not reassemble would be a confident lie.
+     */
+    test("a composition that reaches across a starter is withheld, not guessed", () => {
+        const src = "\uAC00\u11A8"; // 가 + trailing kiyeok
+        try {
+            beginProvenance(src);
+            const got = renormalize(src, "NFC");
+            expect(got).toBe(src.normalize("NFC")); // 각 — the reading is never in doubt
+            expect(got).toBe("\uAC01");
+            expect(provenanceFor(got)).toBeUndefined(); // and the mapping says "not known"
+        } finally {
+            endProvenance();
+        }
     });
 
     /**

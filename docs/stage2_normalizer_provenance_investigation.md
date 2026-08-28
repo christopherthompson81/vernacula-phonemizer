@@ -525,3 +525,27 @@ Remaining, in order:
 - **cmn 2,319, az 711, ltg 708, ki 386** — ordinary per-language gaps, each a named `desync` site.
 - **mai / awa / mag / syl are C#-only** and their normalizer seam counts already match the TS, so that gap is
   upstream of the normalizer — still unchased.
+
+### Reviewing Run 13
+
+**Four findings, all fixed in place.**
+
+1. **The import demoted the module docstring again** — `initialisms.ts` plus three normalizers. Third time
+   this exact mechanical slip has landed; the converter inserts at line 0 when a file has no `import` yet.
+2. **A second docstring stacked on `makeInitialismNormalizer`**, so only the new one attached and the
+   original's ordering constraints (after Roman numerals, after abbreviation expansion) stopped documenting
+   the function. Merged.
+3. **`renormalize` charged the shipped path for a traced-path check.** `if (whole === s || p === null …)`
+   runs an O(n) string comparison on every utterance before the cheap `prov` read. The same ordering
+   mistake the previous review found in `rewrite`'s string form; fixed in both engines.
+4. **⚠ `renormalize` had ONE net where every other path has two, and sabotage is what showed it.** Removing
+   the block-reassembly check in both engines: the C# tests still passed, the TypeScript's failed. The C#
+   is saved by `Track.Commit`, which refuses a mapping whose entry count disagrees with the result — the TS
+   `renormalize` assigned `prov` directly and had no equivalent. Added, so both engines carry a specific
+   check and a general one.
+
+The primitive shipped without a test; it has three now, and the one that matters is the **documented
+exception** rather than a random alphabet. `가` (U+AC00) plus a trailing T jamo composes into `각` under NFC —
+a composition that reaches ACROSS a starter, the one thing the block chunking assumes cannot happen. The
+reading must still be exact and the mapping must be WITHHELD. Pinning that beats asserting `withheld > 0`
+over randomised input, which passed or failed depending on the seed.

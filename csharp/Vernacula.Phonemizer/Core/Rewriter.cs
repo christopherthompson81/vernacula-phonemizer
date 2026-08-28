@@ -64,10 +64,12 @@ public static class Rewriter
     public static string Renormalize(string s, NormalizationForm form)
     {
         var whole = s.Normalize(form);
-        // ⚠ A NO-OP NEEDS NO MAPPING WORK AT ALL, and it is the common case.
-        if (whole == s) return whole;
-        var track = Provenance.StartTrackForRebuild(s);
-        if (track is null) return whole;
+        // ⚠ THE UNTRACED TEST COMES FIRST, and the order is the point. `whole == s` is an O(n) comparison, so
+        // putting it ahead would charge every shipped utterance for a check only the traced path can act on.
+        // `StartTrack` returns null on the first field read when nothing is recording.
+        var track = Provenance.StartTrack(s);
+        // ⚠ A NO-OP NEEDS NO MAPPING WORK AT ALL, and it is the common case — the mapping already describes `s`.
+        if (track is null || whole == s) return whole;
         var at = 0;
         var rebuilt = new StringBuilder(whole.Length);
         foreach (Match m in CANONICAL_BLOCK.Matches(s))

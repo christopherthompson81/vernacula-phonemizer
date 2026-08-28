@@ -246,9 +246,13 @@ const CANONICAL_BLOCK = /[\u1100-\u11FF\uA960-\uA97F\uD7B0-\uD7FF]+|[\uD800-\uDB
  */
 export function renormalize(s: string, form: "NFC" | "NFD" | "NFKC" | "NFKD"): string {
     const whole = s.normalize(form);
+    // ⚠ THE UNTRACED TEST COMES FIRST, and the order is the point. `whole === s` is an O(n) comparison, so
+    // putting it ahead of the `prov` read would charge every shipped utterance for a check only the traced
+    // path can act on — the same mistake this module's string-pattern form made and had corrected.
     const p = prov;
+    if (p === null || hostDepth() > 1) return whole;
     // ⚠ A NO-OP NEEDS NO MAPPING WORK AT ALL, and it is the common case — the mapping already describes `s`.
-    if (whole === s || p === null || hostDepth() > 1) return whole;
+    if (whole === s) return whole;
     if (tracked !== s) { poisonSink?.(tracked ?? "", s); poison(); return whole; }
     CANONICAL_BLOCK.lastIndex = 0;
     const blocks = s.match(CANONICAL_BLOCK) ?? [];
@@ -261,7 +265,11 @@ export function renormalize(s: string, form: "NFC" | "NFD" | "NFKC" | "NFKD"): s
     }
     // ⚠ VERIFIED, NOT ASSUMED. If the blocks do not reassemble into what `normalize` actually produced, the
     // chunking was wrong for this text and the mapping would be a confident lie.
-    if (at !== s.length || blocks.map((b) => b.normalize(form)).join("") !== whole) {
+    // ⚠ TWO INDEPENDENT NETS, as the C# has. The block reassembly below is the specific check; the length is
+    // the general one, and `rewrite` has carried it since the start. The C# gets the second for free because
+    // `Track.Commit` refuses a mapping whose count disagrees with the result — measured by sabotaging the
+    // reassembly check in both engines: the C# tests still passed, the TypeScript's did not.
+    if (next.length !== whole.length || at !== s.length || blocks.map((b) => b.normalize(form)).join("") !== whole) {
         poisonSink?.(s, whole);
         poison();
         return whole;

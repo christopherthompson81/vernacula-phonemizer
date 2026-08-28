@@ -1,4 +1,3 @@
-import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { renormalize, rewrite } from "../../core/provenance.ts";
 /**
  * Uyghur / ئۇيغۇرچە (ug) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
@@ -98,6 +97,7 @@ import { renormalize, rewrite } from "../../core/provenance.ts";
  *   so keying on it would be uz's regnal misfire generator (trap 9). This needs `ROMAN_POLICIES`, which is a
  *   shared-file change and therefore the reviewer's call, not a side effect of one language's rules.
  */
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /** ASCII + Extended Arabic-Indic + Arabic-Indic. Written out because `\p{Nd}` would also admit Devanagari
  *  and friends, and because the ENGINE's own number token is `\d+` — the two must agree or a rule can emit
  *  a digit the tokenizer will not read. See the header for why the eastern arms are near-dead here. */

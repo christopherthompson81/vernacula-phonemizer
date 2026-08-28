@@ -160,14 +160,8 @@ public static class Provenance
      * the rule had to be "ignore". Now that only `Rewriter.Rewrite` reaches here, an unrecognised string can
      * only mean a pipeline step went unseen, which is precisely the thing the mapping must never paper over.
      */
-    /**
-     * A track for a rebuild that is NOT a regex replace — `Rewriter.Renormalize` stamps blocks rather than
-     * matches. Same guards as <see cref="StartTrack"/>; separate only so the intent reads at the call site.
-     */
-    public static Track? StartTrackForRebuild(string input) => StartTrack(input);
-
-    /// <summary>Drop the mapping from outside, when a rebuild could not verify its own accounting.</summary>
-    public static void PoisonExternally(string expected, string got)
+    /// <summary>Drop the mapping, for a rebuild that could not verify its own accounting.</summary>
+    internal static void PoisonExternally(string expected, string got)
     {
         poisonSink?.Invoke(expected, got);
         Poison();

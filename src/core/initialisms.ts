@@ -1,4 +1,3 @@
-import { rewrite } from "./provenance.ts";
 /**
  * Shared INITIALISM handling — decide what to do with an all-caps letter run before the tokenizer.
  *
@@ -28,6 +27,7 @@ import { rewrite } from "./provenance.ts";
  * (ROV, NYC, SUV) needs a data entry, where a threshold would guess — and guess wrong about as often (it
  * reads USAF as a word), for a two-word difference on the referee.
  */
+import { rewrite } from "./provenance.ts";
 
 export interface InitialismData {
     /** Letter → the orthographic form to emit for its NAME. English can emit most letters unchanged,
@@ -121,12 +121,11 @@ const LONE_INITIAL = /(?<=^|\p{Lu}\p{L}*[ \u00a0])(\p{Lu})\.(?=[ \u00a0]+\p{Lu}\
  * ⚠ ORDERING CONSTRAINT FOR THE CALLER, and it bites: Roman numerals are all-caps letter runs too, so this
  * pass MUST run AFTER the language's Roman-numeral rules, or it spells `Louis XIV` as EX-EYE-VEE. Likewise it
  * must run after abbreviation expansion, or French `MM.` becomes EM-EM.
- */
-/**
- * ⚠ `onPipeline` IS THE SEAM'S RULE, MADE AN ARGUMENT. Almost every caller hands this the pipeline string, so
- * it belongs on the seam — putting it there recovered 11,446 tokens across the Cyrillic and Latin fleets.
- * But `ky` calls it on a MATCHED RUN from inside its own callback, and a substring on the seam drops the
- * whole utterance's mapping. The distinction cannot be seen from in here, so the caller declares it.
+ *
+ * ⚠ `onPipeline` IS THE SEAM'S RULE (#1150), MADE AN ARGUMENT. Almost every caller hands this the pipeline
+ * string, so it belongs on the seam — putting it there recovered 11,446 tokens across the Cyrillic and Latin
+ * fleets. But `ky` calls it on a MATCHED RUN from inside its own callback, and a substring on the seam drops
+ * the whole utterance's mapping. The distinction cannot be seen from in here, so the caller declares it.
  */
 export function makeInitialismNormalizer(d: InitialismData, onPipeline = true): (text: string) => string {
     const rw: (x: string, re: RegExp, rp: Parameters<typeof rewrite>[2]) => string =

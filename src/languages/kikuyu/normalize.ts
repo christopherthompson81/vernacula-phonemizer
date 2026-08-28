@@ -1,4 +1,3 @@
-import { renormalize, rewrite } from "../../core/provenance.ts";
 /**
  * Kikuyu / Gĩkũyũ (ki) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -128,6 +127,7 @@ import { renormalize, rewrite } from "../../core/provenance.ts";
  *     `LEAK RAW-LATIN mw ×3` and of 4 of the artifact's `%` instances (`font-size:90%`). `filter-markup.py`
  *     owns that; a normalizer that strips CSS would be fixing the wrong file.
  */
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /**
  * The RANGE joiner, and the best-attested word in this layer. `nginya` ("until, up to") is written as a bare
