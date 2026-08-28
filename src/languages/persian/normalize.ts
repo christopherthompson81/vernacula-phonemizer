@@ -31,7 +31,7 @@
  */
 import type { NumbersDef } from "../../core/numbers.ts";
 import { persianNumberWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Persian-Indic digits ۰-۹ (U+06F0-U+06F9) — Persian's own block, NOT the Arabic-Indic ٠-٩ (U+0660) that
  *  Arabic uses. Both are folded, since either can be typed on a Persian keyboard layout. */
@@ -98,25 +98,25 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
 
         // 1) DIGIT FOLD, first: every rule below, the engine's TOKEN and the shared symbol tier are all written
         //    against ASCII digits.
-        s = tr(s, EASTERN_DIGIT, foldDigit);
+        s = rewrite(s, EASTERN_DIGIT, foldDigit);
 
         // 2) ARABIC SYMBOL CHARACTERS → ASCII. Must precede de-grouping/decimals (3, 6) so a natively-typed ٫/٬
         //    is seen by them, and precede percent (7) — a percentage written with the Arabic ٪ U+066A is in no
         //    tier's pattern and vanishes outright.
-        s = tr(tr(tr(s, /٪/gu, "%"), /٫/gu, "."), /٬/gu, ",");
+        s = rewrite(rewrite(rewrite(s, /٪/gu, "%"), /٫/gu, "."), /٬/gu, ",");
         //    ⚠ THE ARABIC COMMA DOUBLES AS THE THOUSANDS SEPARATOR in Persian (19،500). Between digits it is a
         //    grouping mark, not punctuation; left alone it is a clause break, so "19،500 کیلومتر" reads as
         //    "nineteen … five hundred". ONLY the digit-flanked, exactly-3-digit-block case is folded — ⟨،⟩ as real
         //    punctuation is by far the commonest mark in Persian text and must stay untouched.
-        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)،(?=\d{3}(?!\d))/gu, ",");
+        s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)،(?=\d{3}(?!\d))/gu, ",");
 
         // 3) DIGIT DE-GROUPING. FIRST among the numeric rules: a grouping comma or period is otherwise read as
         //    clause punctuation — "1,000" → [ˈiːk , sˈefɾ] "one, zero".
         //    Both separators occur. The period form requires whole 3-digit blocks, which is what keeps it off
         //    genuine decimals ("3.50 متر") and off the "15.00 UTC" clock of step 5.
-        s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d,])/gu,
+        s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d,])/gu,
             (_m, a: string, rest: string) => a + rest.replace(/,/gu, ""));
-        s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d.])/gu,
+        s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d.])/gu,
             (_m, a: string, rest: string) => a + rest.replace(/\./gu, ""));
 
         // 4) CLOCK. BEFORE any rule that reads a bare number, so 11:30 is not claimed piecewise. The colon is a
@@ -127,14 +127,14 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    text already wrote one ("در ساعت 07:19 دقیقه صبح").
         //    Hour and minute are emitted as DIGITS, so the engine's own number path spells them (header).
         //    Lookarounds keep it off a longer digit run and off a comma-decimal sports time (2:11,60).
-        s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?![.,]\d)(\s*دقیقه)?/gu, clock);
+        s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?![.,]\d)(\s*دقیقه)?/gu, clock);
 
         // 5) THE DOTTED 24-HOUR CLOCK, but ONLY when anchored by a following UTC — H.MM is decimal-shaped, so
         //    nothing weaker may claim it. Must be settled BEFORE step 6, which would otherwise read it as
         //    "fifteen point zero zero".
         //    ⚠ Two capture groups only, so `clock` is called explicitly — passing it directly would bind
         //    String.replace's OFFSET argument to the written-دقیقه parameter.
-        s = tr(s, /(?<![\d.,])([01]?\d|2[0-3])\.([0-5]\d)(?=\s*UTC(?![A-Za-z]))/gu,
+        s = rewrite(s, /(?<![\d.,])([01]?\d|2[0-3])\.([0-5]\d)(?=\s*UTC(?![A-Za-z]))/gu,
             (m: string, h: string, min: string) => clock(m, h, min));
 
         // 5b) UNIT ABBREVIATIONS AND THEIR POWERS. Persian spells its units out, but a phonemizer is handed
@@ -158,17 +158,17 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //     digit — a lookbehind for "digit after a dot" would also reject a real `12.8 کم`. What separates
         //     them is the SPACE: a version glues its letter to the digits.
         const FA_NUM = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))(\\d[\\d.,]*)";
-        s = tr(s, new RegExp(`${FA_NUM}\\s?(${faUnits})(?:\\s?([²³])|([23])(?![\\d\\p{L}]))`, "giu"),
+        s = rewrite(s, new RegExp(`${FA_NUM}\\s?(${faUnits})(?:\\s?([²³])|([23])(?![\\d\\p{L}]))`, "giu"),
             (_m, n: string, u: string, sup: string | undefined, ascii: string | undefined) =>
                 `${n} ${FA_UNIT[u.toLowerCase()]!} ${(sup ?? ascii) === "³" || (sup ?? ascii) === "3" ? "مکعب" : "مربع"}`);
         //     RATES FIRST of the two arms, or the plain one consumes the numerator and strands the slash — which
         //     leaves `120 km/h` reading the denominator as the ENGLISH LETTER NAME [ˈeᶦt͡ʃ] and `133 m/s` as [ˈɛs].
         //     `بر` is "per", `ساعت` the hour, `ثانیه` the second.
         const FA_PER: Readonly<Record<string, string>> = { h: "ساعت", s: "ثانیه" };
-        s = tr(s, new RegExp(`${FA_NUM}\\s?(${faUnits})\\s?/\\s?([hs])(?![\\p{L}\\p{M}\\d])`, "giu"),
+        s = rewrite(s, new RegExp(`${FA_NUM}\\s?(${faUnits})\\s?/\\s?([hs])(?![\\p{L}\\p{M}\\d])`, "giu"),
             (_m, n: string, u: string, d: string) =>
                 `${n} ${FA_UNIT[u.toLowerCase()]!} بر ${FA_PER[d.toLowerCase()]!}`);
-        s = tr(s, new RegExp(`${FA_NUM}\\s?(${faUnits})(?![\\p{L}\\p{M}\\d])`, "giu"),
+        s = rewrite(s, new RegExp(`${FA_NUM}\\s?(${faUnits})(?![\\p{L}\\p{M}\\d])`, "giu"),
             (_m, n: string, u: string) => `${n} ${FA_UNIT[u.toLowerCase()]!}`);
 
         // 6) DECIMALS. AFTER de-grouping (3) and after both clock rules (4, 5), each of which would otherwise be
@@ -178,7 +178,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    here rather than handed to the number path as the integer 34.
         const decimalWord = (numbers as { decimalWord?: string }).decimalWord;
         if (decimalWord !== undefined)
-            s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.,])/gu,
+            s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.,])/gu,
                 (_m, int: string, frac: string) => `${int} ${decimalWord} ${[...frac].join(" ")}`);
 
         // 7) PERCENT. AFTER the digit fold (1) and the ٪→% fold (2). Persian writes the word AFTER the number —
@@ -186,7 +186,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    so an unhandled percentage is silently DELETED: "80% از درآمد" read as a bare [hʃatˈaːd]. Done here
         //    rather than through the shared symbol tier because Persian has no count agreement for it to select,
         //    and the tier's percent pattern is ASCII-`%`-only anyway.
-        s = tr(s, new RegExp(`(\\d)\\s?%${NOT_WORD}`, "gu"), `$1 درصد`);
+        s = rewrite(s, new RegExp(`(\\d)\\s?%${NOT_WORD}`, "gu"), `$1 درصد`);
 
         // 7b) CURRENCY. `$5` read as bare [pˈand͡ʒ] — the sign is in no group of the engine's TOKEN, so it was
         //     DELETED exactly as the percent signs were, and a dropped sign is worse than a wrong word because
@@ -195,7 +195,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //     agreement, and the tier's currency guard is letter-bounded on both sides, which an RTL script with
         //     no space between sign and numeral would fight. ⚠ Unlike percent, this rule moves the word ACROSS
         //     the numeral — the sign precedes it in logical order, the word follows it.
-        s = tr(s, new RegExp(`([$€£¥])\\s?(\\d[\\d.,]*)`, "gu"),
+        s = rewrite(s, new RegExp(`([$€£¥])\\s?(\\d[\\d.,]*)`, "gu"),
             (_m, sign: string, num: string) => `${num} ${CURRENCY[sign]!}`);
 
         // 7c) THE PLUS → به اضافه. Its noun اضافه is specifically ADDITION, where the near-synonym علاوه doubles
@@ -210,28 +210,28 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //     numbers with the relation gone, and `6x6` read the `x` as the English LETTER NAME. `NxN` outnumbers
         //     `×` by roughly four to one, so the ASCII form is the one that matters. Digit-bounded on both sides
         //     so the `x` cannot claim a letter.
-        s = tr(s, /(?<=[\d\u06f0-\u06f9])\s?(?:×|x)\s?(?=[\d\u06f0-\u06f9])/gu, " ضربدر ");
-        s = tr(s, /(\d[\d.,]*)\s?\+(?!\s?\d)/gu, "به اضافه $1");
-        s = tr(s, /\+\s?(?=\d)/gu, " به اضافه ");
+        s = rewrite(s, /(?<=[\d\u06f0-\u06f9])\s?(?:×|x)\s?(?=[\d\u06f0-\u06f9])/gu, " ضربدر ");
+        s = rewrite(s, /(\d[\d.,]*)\s?\+(?!\s?\d)/gu, "به اضافه $1");
+        s = rewrite(s, /\+\s?(?=\d)/gu, " به اضافه ");
 
         // 7c0) THE DEGREE SIGN. Persian spells its units out, so no abbreviation table was needed and `°` fell
         //      through with them: `20 °C` read *bist si* — the sign dropped and the C spoken as an English letter
         //      name. Persian puts the unit AFTER the number, so unlike Korean's 섭씨 this rule reorders nothing
         //      and cannot strand a sign to its left.
-        s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 درجه سانتی‌گراد");  // ZWNJ
-        s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 درجه فارنهایت");
-        s = tr(s, /(\d)\s?°/gu, "$1 درجه");
+        s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 درجه سانتی‌گراد");  // ZWNJ
+        s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 درجه فارنهایت");
+        s = rewrite(s, /(\d)\s?°/gu, "$1 درجه");
 
         // 7c1) THE MINUS AND ±, both dropped before, so `-5 °C` read as five degrees above zero.
         //      ⚠ PERSIAN SPLITS THE SIGN FROM THE OPERATION, as ko and vi do: منفی is the NEGATIVE sign while
         //      به اضافه / منها are the operators, and the plus rule above already uses the operator form. A sign
         //      directly before a digit is the negative-quantity case, so it takes منفی. ± pairs the two SIGN
         //      names, conjoined.
-        s = tr(s, /±/gu, " مثبت و منفی ");
+        s = rewrite(s, /±/gu, " مثبت و منفی ");
         //      ⚠ THE RANGE GUARD. Rejecting a sign with a space AFTER it catches a score like `26 - 00` but
         //      misses a range spaced only BEFORE the sign, which then reads as a subtraction. A digit anywhere to
         //      the left rejects the match: a negative quantity does not follow a number, a range does.
-        s = tr(s, /(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
+        s = rewrite(s, /(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
             /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}منفی `);
 
         // 7c2) RELATIONAL AND DIVISION SIGNS.
@@ -240,10 +240,10 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //      operands — those two rules therefore CONSUME both operands, as in ja/ko/tr. The equality is
         //      genuinely infix, because برابر است با carries its copula in the MIDDLE ("is equal with"), so it
         //      substitutes between the operands like any European rule. Same for تقسیم بر.
-        s = tr(s, /(\d+)\s?<\s?(\d+)/gu, "$1 کوچکتر از $2 است");
-        s = tr(s, /(\d+)\s?>\s?(\d+)/gu, "$1 بزرگتر از $2 است");
-        s = tr(s, /\s?=\s?/gu, " برابر است با ");
-        s = tr(s, /\s?÷\s?/gu, " تقسیم بر ");
+        s = rewrite(s, /(\d+)\s?<\s?(\d+)/gu, "$1 کوچکتر از $2 است");
+        s = rewrite(s, /(\d+)\s?>\s?(\d+)/gu, "$1 بزرگتر از $2 است");
+        s = rewrite(s, /\s?=\s?/gu, " برابر است با ");
+        s = rewrite(s, /\s?÷\s?/gu, " تقسیم بر ");
 
         // 7d) THE AMPERSAND → اند, AND IT IS THE ENGLISH WORD ON PURPOSE. `B&B` is an English term carried whole
         //     into Persian, and readers carry its conjunction with it rather than substituting Persian's own `و`
@@ -251,7 +251,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //     native `และ`, uk native `та`, and ja borrows `アンド`.
         //     Renderable with no invented phonology: /a/, /n/ and /d/ are all ordinary Persian.
         //     Spaced on both sides because the neighbours are initialisms — joining them would make one token.
-        s = tr(s, /&/gu, " اند ");
+        s = rewrite(s, /&/gu, " اند ");
 
         // 8) ORDINALS. Persian writes the ordinal as the numeral plus ـم/ـام (قرن 16ام "the 16th century",
         //    sometimes across a ZWNJ: ⟨1000‌ام⟩). The suffix was tokenized apart and spoken as its own word
@@ -262,7 +262,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    restoration layer that supplies every other short vowel in Persian text.
         //    ⚠ Only the ⟨ام⟩ spelling is matched. A bare ⟨م⟩ suffix is also legal Persian, but matching it would
         //    let the rule reach into ordinary digit+word sequences.
-        s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\u200C?ام${NOT_WORD}`, "gu"),  // ZWNJ
+        s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)\\u200C?ام${NOT_WORD}`, "gu"),  // ZWNJ
             (whole, digits: string) => {
                 const n = Number(digits);
                 if (!Number.isSafeInteger(n)) return whole;

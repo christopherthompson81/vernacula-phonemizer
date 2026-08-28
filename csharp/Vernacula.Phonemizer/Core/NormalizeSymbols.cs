@@ -6,6 +6,7 @@
  */
 
 using System.Text;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Core;
 
@@ -290,7 +291,7 @@ public static class NormalizeSymbols
     public static string SpacedBareExponent(string s)
     {
         var all = s;
-        return BARE_EXPONENT.Replace(s, m =>
+        return Rewrite(s, BARE_EXPONENT, m =>
         {
             var whole = m.Value;
             var sup = m.Groups[2].Value;
@@ -386,7 +387,7 @@ public static class NormalizeSymbols
      */
     private static double NumValue(string num)
     {
-        var cleaned = NUM_SPACE.Replace(num, "");
+        var cleaned = JsRegex.Replace(num, NUM_SPACE, "");
         var m = NUM_SHAPE.Match(cleaned);
         if (!m.Success) return double.NaN;
         var integer = double.Parse(NUM_SEPS.Replace(m.Groups[1].Value, ""), System.Globalization.CultureInfo.InvariantCulture);
@@ -482,7 +483,7 @@ public static class NormalizeSymbols
             "(?<![\\p{L}\\p{M}\\p{Nd}'’ʼ/-])(?<!\\p{Nd}\\s)(" + string.Join("|", keys) + ")"
                 + "(?![\\p{L}\\p{M}\\p{Nd}'’ʼ/²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))",
             "gu");
-        return text => re.Replace(text, m => map[m.Groups[1].Value]);
+        return text => Rewrite(text, re, m => map[m.Groups[1].Value]);
     }
 
     /** `t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")` */
@@ -490,8 +491,8 @@ public static class NormalizeSymbols
     /** The currency-key escape, which also lists `$` first — kept as its own pattern so the ports diff. */
     private static readonly JsRe ESC_CUR_RE = JsRegex.Compile("[$.*+?^${}()|[\\]\\\\]", "gu");
 
-    private static string Esc(string t) => ESC_RE.Replace(t, "\\$&");
-    private static string EscCur(string t) => ESC_CUR_RE.Replace(t, "\\$&");
+    private static string Esc(string t) => JsRegex.Replace(t, ESC_RE, "\\$&");
+    private static string EscCur(string t) => JsRegex.Replace(t, ESC_CUR_RE, "\\$&");
 
     private static readonly JsRe AMP_ENTITY = JsRegex.Compile("&amp;", "giu");
     private static readonly JsRe AMP_SIGN = JsRegex.Compile("[ \\t]*[&\uff06][ \\t]*", "gu");
@@ -698,7 +699,7 @@ public static class NormalizeSymbols
             // THE AMPERSAND FIRST, and spaced. Before every other rule because a `&` between two initialisms must
             // become three tokens, and any later rule that reads a token boundary needs the split already done.
             if (d.Ampersand is not null)
-                text = AMP_SIGN.Replace(AMP_ENTITY.Replace(text, "&"), " " + d.Ampersand + " ");
+                text = Rewrite(Rewrite(text, AMP_ENTITY, "&"), AMP_SIGN, " " + d.Ampersand + " ");
             var s = text;
 
             bool IsUnitKey(string k) =>
@@ -709,7 +710,7 @@ public static class NormalizeSymbols
 
             // A square or cube standing BEFORE a unit noun is the UNIT's power — dropped here, first, because
             // the unit path rewrites the key into a word and the mark breaks the number↔unit adjacency.
-            s = UNIT_POWER_BEFORE.Replace(s, m =>
+            s = Rewrite(s, UNIT_POWER_BEFORE, m =>
                 IsUnitKey(m.Groups[1].Value) ? UNIT_POWER_MARK.Replace(m.Value, "") : m.Value);
 
             string Join(string? mag) =>
@@ -752,21 +753,21 @@ public static class NormalizeSymbols
                 var full = s;
                 // ⚠ " " + mag — the leading space is what magAlt's capture carries, and the prefix template
                 // in Money is written against that shape. The template itself is UNTOUCHED.
-                s = magFirstAfter.Replace(full, m => Money(
+                s = Rewrite(full, magFirstAfter, m => Money(
                     m.Groups[2].Value, " " + m.Groups[1].Value, m.Groups[3].Value,
                     full[(m.Index + m.Length)..], true));
             }
             if (magFirstBefore is not null)
             {
                 var full = s;
-                s = magFirstBefore.Replace(full, m => Money(
+                s = Rewrite(full, magFirstBefore, m => Money(
                     m.Groups[3].Value, " " + m.Groups[1].Value, m.Groups[2].Value,
                     full[(m.Index + m.Length)..], true));
             }
             if (curBefore is not null)
             {
                 var full = s;
-                s = curBefore.Replace(full, m => Money(
+                s = Rewrite(full, curBefore, m => Money(
                     m.Groups[2].Value,
                     m.Groups[3].Success ? m.Groups[3].Value : null,
                     m.Groups[1].Value,
@@ -775,7 +776,7 @@ public static class NormalizeSymbols
             if (curAfter is not null)
             {
                 var full = s;
-                s = curAfter.Replace(full, m => Money(
+                s = Rewrite(full, curAfter, m => Money(
                     m.Groups[1].Value,
                     m.Groups[2].Success ? m.Groups[2].Value : null,
                     m.Groups[3].Value,
@@ -796,9 +797,9 @@ public static class NormalizeSymbols
                     return PCT_AFTER.IsMatch(after) ? num : num + " " + w;
                 }
                 var pre = s;
-                s = pctPreRe.Replace(pre, m => Pct(m.Groups[1].Value, m.Index, pre, m.Length));
+                s = Rewrite(pre, pctPreRe, m => Pct(m.Groups[1].Value, m.Index, pre, m.Length));
                 var post = s;
-                s = pctRe.Replace(post, m => Pct(m.Groups[1].Value, m.Index, post, m.Length));
+                s = Rewrite(post, pctRe, m => Pct(m.Groups[1].Value, m.Index, post, m.Length));
             }
             // THE MULTIPLICATION SIGN, both `×` and ASCII `x` — BEFORE the unit path, and ⚠ THAT ORDERING IS
             // LOAD-BEARING. Placed after it, a `UnitPrefix` language breaks: its unit path MOVES the noun ahead of
@@ -809,7 +810,7 @@ public static class NormalizeSymbols
                 var mul = d.Multiply;
                 var by = mul.By ?? mul.Times;
                 var full = s;
-                s = MUL_RE.Replace(full, m =>
+                s = Rewrite(full, MUL_RE, m =>
                 {
                     var whole = m.Value;
                     var left = m.Groups[1].Value;
@@ -825,7 +826,7 @@ public static class NormalizeSymbols
             }
 
             if (unitRe is not null)
-                s = unitRe.Replace(s, m =>
+                s = Rewrite(s, unitRe, m =>
                 {
                     var whole = m.Value;
                     var num = m.Groups[1].Value;
@@ -942,9 +943,9 @@ public static class NormalizeSymbols
             if (d.BareExponent is not null)
             {
                 var be = d.BareExponent;
-                s = BARE_EXPONENT_GLUED.Replace(s, m => $"{m.Value} ");
+                s = Rewrite(s, BARE_EXPONENT_GLUED, m => $"{m.Value} ");
                 var allD = s;
-                s = BARE_EXPONENT.Replace(s, m =>
+                s = Rewrite(s, BARE_EXPONENT, m =>
                 {
                     var whole = m.Value;
                     var baseText = m.Groups[1].Value;
@@ -968,7 +969,7 @@ public static class NormalizeSymbols
                     if (tpl is null) return SpacedDigits(baseText, digitStr, allD, end) ?? whole;
                     if (neg && be.Negative is null) return SpacedDigits(baseText, digitStr, allD, end) ?? whole;
                     var exponent = neg ? be.Negative + " " + mag : mag;
-                    return TPL_E.Replace(TPL_N.Replace(tpl, baseText), exponent);
+                    return JsRegex.Replace(JsRegex.Replace(tpl, TPL_N, baseText), TPL_E, exponent);
                 });
             }
             else

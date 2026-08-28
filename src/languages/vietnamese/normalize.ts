@@ -1,6 +1,6 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 /**
  * Vietnamese (vi) text normalization — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable Vietnamese syllable into Vietnamese words the pipeline speaks. Pure text→text; no IPA.
@@ -61,8 +61,8 @@ export function normalizeVietnamese(input: string): string {
     // ── 1. HTML superscript markup ───────────────────────────────────────────────────────────────
     // FIRST, before anything else looks at units or numbers. Left alone, the tag letters of `km<sup>2</sup>`
     // tokenize as the syllable "sup" and are SPOKEN, twice per occurrence.
-    s = tr(s, /<sup>\s*2\s*<\/sup>/giu, "²");
-    s = tr(s, /<[^>]*>/gu, "");
+    s = rewrite(s, /<sup>\s*2\s*<\/sup>/giu, "²");
+    s = rewrite(s, /<[^>]*>/gu, "");
 
     // ── 2. squared units ─────────────────────────────────────────────────────────────────────────
     // Composed by the shared tier (`exponentWords` in vietnamese.ts), which appends the word and keeps the
@@ -72,12 +72,12 @@ export function normalizeVietnamese(input: string): string {
     // 3a. A clock–clock pair is always a span, so it is joined before the ambiguity of step 7 arises — and it
     // must happen HERE, because after 3c the operands are no longer bare digits ("10 giờ – 11 giờ") and the
     // generic range rule can no longer see them.
-    s = tr(s, /((?<!\d)\d{1,2}:[0-5]\d)\s*[-–—]\s*(\d{1,2}:[0-5]\d(?!\d))/gu, "$1 đến $2");
+    s = rewrite(s, /((?<!\d)\d{1,2}:[0-5]\d)\s*[-–—]\s*(\d{1,2}:[0-5]\d(?!\d))/gu, "$1 đến $2");
     // 3b. ⚠ SPORTS TIMES `M:SS,hh` (4:41,30 — minutes:seconds:hundredths) BEFORE the clock rule: the shape is
     // a legal clock, and the clock rule would claim the first half and leave `,30` to be read as a clause
     // pause. A trailing "phút" is CONSUMED for the same reason the clock consumes "giờ" — the text writes
     // "2:11,60 phút", and re-emitting it gives "…giây 60 phút".
-    s = tr(s, new RegExp(`(?<!\\d)(\\d{1,2}):([0-5]\\d),(\\d{1,2})(?!\\d)(\\s+phút${NOT_LETTER_AFTER})?`, "gu"),
+    s = rewrite(s, new RegExp(`(?<!\\d)(\\d{1,2}):([0-5]\\d),(\\d{1,2})(?!\\d)(\\s+phút${NOT_LETTER_AFTER})?`, "gu"),
         (_m, mi: string, se: string, hu: string) => `${Number(mi)} phút ${Number(se)} giây ${Number(hu)}`);
     // 3c. Clocks. ⚠ EXACTLY TWO MINUTE DIGITS IN 00–59, which is what excludes a RATIO — `3:2` (aspect) and
     // `2:2` (a UK degree class) are the same shape as a bare `\d:\d`.
@@ -86,7 +86,7 @@ export function normalizeVietnamese(input: string): string {
     // ⚠ The right guard is `(?![\d:])(?!,\d)`, NOT `(?![\d,:])`: a comma followed by a DIGIT is the
     // sports-time hundredths that 3b owns, but a comma followed by anything else is an ordinary sentence
     // comma, and the blunter guard silently skips "Vào lúc 11:20, cảnh sát …".
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?!,\\d)(\\s+giờ${NOT_LETTER_AFTER})?`, "gu"),
         (_m, hh: string, mm: string) => clock(hh, mm),
     );
@@ -95,16 +95,16 @@ export function normalizeVietnamese(input: string): string {
     // BEFORE the symbol tier. The target forms are the ones Vietnamese prose writes out — `km/giờ`,
     // `dặm/giờ`. `/` is dropped by the tokenizer without a pause, so `165 km/giờ` reads "…ki lô mét giờ".
     // The digit guard keeps this off ordinary word slashes (và/hoặc, đi/đến).
-    s = tr(s, new RegExp(`(?<=\\d\\s?)km/h${NOT_LETTER_AFTER}`, "giu"), "km/giờ");
-    s = tr(s, new RegExp(`(?<=\\d\\s?)kph${NOT_LETTER_AFTER}`, "giu"), "km/giờ");
-    s = tr(s, new RegExp(`(?<=\\d\\s?)mph${NOT_LETTER_AFTER}`, "giu"), "dặm/giờ");
+    s = rewrite(s, new RegExp(`(?<=\\d\\s?)km/h${NOT_LETTER_AFTER}`, "giu"), "km/giờ");
+    s = rewrite(s, new RegExp(`(?<=\\d\\s?)kph${NOT_LETTER_AFTER}`, "giu"), "km/giờ");
+    s = rewrite(s, new RegExp(`(?<=\\d\\s?)mph${NOT_LETTER_AFTER}`, "giu"), "dặm/giờ");
 
     // ── 5. degree sign ───────────────────────────────────────────────────────────────────────────
     // °C before a bare ° — otherwise the C is stranded and routes to the English phonemizer as "sˈiː".
     // "xê" and "ép" are the Vietnamese letter names (same table as step 12).
-    s = tr(s, /\s*°\s*C(?![\p{L}\p{M}])/gui, " độ xê");
-    s = tr(s, /\s*°\s*F(?![\p{L}\p{M}])/gui, " độ ép");
-    s = tr(s, /\s*°/gu, " độ");
+    s = rewrite(s, /\s*°\s*C(?![\p{L}\p{M}])/gui, " độ xê");
+    s = rewrite(s, /\s*°\s*F(?![\p{L}\p{M}])/gui, " độ ép");
+    s = rewrite(s, /\s*°/gu, " độ");
 
     // ── 6. de-group thousands ────────────────────────────────────────────────────────────────────
     // FIRST of the number rules: a grouping separator is otherwise read as clause punctuation. ⚠ EXACTLY
@@ -114,11 +114,11 @@ export function normalizeVietnamese(input: string): string {
     // ⚠ THE GUARD IS `(?!\d)`, NOT `(?![\d.,])`. The stricter form looks safer and skips a grouped numeral
     // followed by ordinary sentence punctuation, so `¥130.000,` comes out "130 chấm 000". Dot and comma
     // grouping are separate rules so that a mixed numeral (1.234,5) can de-group and then reach step 8.
-    s = tr(s, /(?<!\d)(?<!\d[.,])[1-9]\d{0,2}(?:\.\d{3})+(?!\d)/gu, (n) => n.replace(/\./gu, ""));
+    s = rewrite(s, /(?<!\d)(?<!\d[.,])[1-9]\d{0,2}(?:\.\d{3})+(?!\d)/gu, (n) => n.replace(/\./gu, ""));
     // ⚠ Comma grouping is formally ambiguous under the Vietnamese convention (`7,000` is 7.0 or 7000). It is
     // claimed anyway because a currency context settles the attested case and the alternative reading
     // ("bảy , không") is wrong either way.
-    s = tr(s, /(?<!\d)(?<!\d[.,])[1-9]\d{0,2}(?:,\d{3})+(?!\d)/gu, (n) => n.replace(/,/gu, ""));
+    s = rewrite(s, /(?<!\d)(?<!\d[.,])[1-9]\d{0,2}(?:,\d{3})+(?!\d)/gu, (n) => rewrite(n, /,/gu, ""));
 
     // ── 7. dash ranges → "đến" ───────────────────────────────────────────────────────────────────
     // AFTER de-grouping (so 1.000-1.300 parses) and BEFORE the decimal rules — step 8 would otherwise turn
@@ -128,30 +128,30 @@ export function normalizeVietnamese(input: string): string {
     // every score is non-ascending while a span almost always ascends, so "second operand strictly greater"
     // separates them. The known miss is a span that runs BACKWARDS because it counts years AGO
     // (`4,2-3,9 triệu năm trước`); it keeps the status quo, a dropped dash rather than a wrong word.
-    s = tr(s, /(?<![\d.,])(\d[\d.,]*)\s*[-–—]\s*(\d[\d.,]*)(?![\d.,])/gu,
+    s = rewrite(s, /(?<![\d.,])(\d[\d.,]*)\s*[-–—]\s*(\d[\d.,]*)(?![\d.,])/gu,
         (m, a: string, b: string) => (numVal(b) > numVal(a) ? `${a} đến ${b}` : m));
 
     // ── 8. decimal comma → "phẩy" ────────────────────────────────────────────────────────────────
     // AFTER step 6, which has already consumed every comma that was a thousands separator, and after step 7.
     // `phẩy` is the name of the mark itself, which is how Vietnamese reads a decimal (14,7 = "mười bốn phẩy
     // bảy"). The fractional part is left as a digit run for the cardinal compositor.
-    s = tr(s, /(?<=\d),(?=\d)/gu, " phẩy ");
+    s = rewrite(s, /(?<=\d),(?=\d)/gu, " phẩy ");
 
     // ── 9. decimal / dotted numerals → "chấm" ────────────────────────────────────────────────────
     // AFTER step 6, so everything reaching here is a NON-grouping dot between digits: 802.11a/b/g/n, 2.4 Ghz,
     // Hình 1.1. `chấm` ("dot") is right for the identifier-shaped ones and is the ordinary colloquial reading
     // for a genuine decimal too — and it removes the spurious SENTENCE BREAK all of them produced.
-    s = tr(s, /(?<=\d)\.(?=\d)/gu, " chấm ");
+    s = rewrite(s, /(?<=\d)\.(?=\d)/gu, " chấm ");
 
     // ── 10. fractions → "phần" ───────────────────────────────────────────────────────────────────
     // Digits on BOTH sides and no adjacent digit, so this cannot touch word slashes (và/hoặc, đi/đến) or the
     // unit slashes rewritten at step 4. Vietnamese writes no d/m/y dates — it writes "ngày 21 tháng 7 năm
     // 356", already words — so there is nothing for this to collide with.
-    s = tr(s, /(?<![\d/])(\d{1,2})\/(\d{1,2})(?![\d/])/gu, "$1 phần $2");
+    s = rewrite(s, /(?<![\d/])(\d{1,2})\/(\d{1,2})(?![\d/])/gu, "$1 phần $2");
 
     // ── 11. multiplication `x` between numbers → "nhân" ──────────────────────────────────────────
     // Digit-flanked only; a bare `x` elsewhere is left alone.
-    s = tr(s, /(?<=\d)\s*[x×]\s*(?=\d)/giu, " nhân ");
+    s = rewrite(s, /(?<=\d)\s*[x×]\s*(?=\d)/giu, " nhân ");
 
     // ── 11b. the plus sign → "cộng" ──────────────────────────────────────────────────────────────
     // ⚠ A READER WHO OMITS THE SIGN IS NOT LICENCE TO DELETE IT. Recordings show the cross-linguistic
@@ -162,19 +162,19 @@ export function normalizeVietnamese(input: string): string {
     //
     // After step 11 so `x`/`×` has already been claimed, and before the initialism pass so `UTC` is still the
     // ASCII the first arm matches on.
-    s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 cộng ");
-    s = tr(s, /(^|\s)\+\s?(?=\d)/gu, "$1cộng ");
+    s = rewrite(s, /(\S)\+\s?(?=\d)/gu, "$1 cộng ");
+    s = rewrite(s, /(^|\s)\+\s?(?=\d)/gu, "$1cộng ");
 
     // ── 11b2. the minus and ± ────────────────────────────────────────────────────────────────────
     // ⚠ VIETNAMESE SPLITS THE SIGN FROM THE OPERATION, as Korean does. `dấu trừ` is the MINUS SIGN and `trừ`
     // the subtraction verb, while a NEGATIVE quantity is read `âm`. The rule below matches a sign directly
     // before a digit — the negative-quantity case — so it emits `âm`. Without it, `-5 °C` reads *năm độ*,
     // five degrees above zero.
-    s = tr(s, /±/gu, " cộng trừ ");
+    s = rewrite(s, /±/gu, " cộng trừ ");
     // ⚠ THE RANGE GUARD. Rejecting a sign with a space AFTER it catches a score like `26 - 00` but misses a
     // range spaced only BEFORE the sign, which then reads as a subtraction. A digit anywhere to the left
     // rejects the match: a negative quantity does not follow a number, a range does.
-    s = tr(s, /(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
+    s = rewrite(s, /(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}âm `);
 
     // ── 11c. the relational and division signs ───────────────────────────────────────────────────
@@ -187,28 +187,28 @@ export function normalizeVietnamese(input: string): string {
     // while proving nothing about the reading.
     // ⚠ THE ESCAPE IS TO PROBE THE SLOT, NOT THE WORD: search for the SIGN'S NAME (`dấu bằng`) and for the
     // reading WITH ITS OPERANDS — "1 + 1 = 2 («một cộng một bằng hai»)" — rather than for the bare word.
-    s = tr(s, /\s?=\s?/gu, " bằng ");
-    s = tr(s, /\s?<\s?/gu, " nhỏ hơn ");
-    s = tr(s, /\s?>\s?/gu, " lớn hơn ");
-    s = tr(s, /\s?÷\s?/gu, " chia cho ");
+    s = rewrite(s, /\s?=\s?/gu, " bằng ");
+    s = rewrite(s, /\s?<\s?/gu, " nhỏ hơn ");
+    s = rewrite(s, /\s?>\s?/gu, " lớn hơn ");
+    s = rewrite(s, /\s?÷\s?/gu, " chia cho ");
 
     // THE AMPERSAND. A Latin-script printing ligature, and Vietnamese is written in Latin script, so it reads
-    // with the language's own conjunction rather than as a loan — the same call `tr` (ve) and `nl` (en) make,
+    // with the language's own conjunction rather than as a loan — the same call `rewrite` (ve) and `nl` (en) make,
     // as against `ko` (앤드) and `ja` (アンド), where the symbol only ever arrives inside a Latin run.
-    s = tr(s, /\s?&\s?/gu, " và ");
+    s = rewrite(s, /\s?&\s?/gu, " và ");
 
     // ── 12. Vietnamese abbreviations, then foreign initialisms ───────────────────────────────────
     // ⚠ ERA MARKERS BEFORE GENERIC INITIALISMS, and it is load-bearing: TCN and SCN are all-caps runs, so 12b
     // would otherwise spell "trước Công nguyên" as "tê xê en nờ".
     for (const [from, to] of VI_ABBREV)
-        s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${from}${NOT_LETTER_AFTER}`, "gu"), to);
+        s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}${from}${NOT_LETTER_AFTER}`, "gu"), to);
     // 12b. All-caps runs → Vietnamese letter names. Gated on the text containing lowercase: an all-caps
     // DOCUMENT carries no initialism signal and spelling every word would be absurd (core/initialisms.ts
     // makes the same exemption). Flanked by neither letter nor digit, which excludes A1GP and JAS 39C where
     // the caps are part of a mixed alphanumeric token. Roman numerals cannot collide: vi is not in
     // registry.ts's ROMAN_NATIVE, so `XVI` has already become `16` before text() runs.
     if (/\p{Ll}/u.test(s) || !/\s/u.test(s.trim()))
-        s = tr(s, /(?<![\p{L}\p{M}\d])[A-Z]{2,6}(?![\p{L}\p{M}\d])/gu, (run) =>
+        s = rewrite(s, /(?<![\p{L}\p{M}\d])[A-Z]{2,6}(?![\p{L}\p{M}\d])/gu, (run) =>
             [...run].map((c) => MANIFEST.letterNames[c] ?? c).join(" "));
 
     return s;

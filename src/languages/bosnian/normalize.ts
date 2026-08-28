@@ -59,7 +59,7 @@ import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const N = MANIFEST.numbers;
 
@@ -356,7 +356,7 @@ export function normalizeBosnian(input: string): string {
     //    trista osamdeset sedam*. Two passes, because adjacent groups share a digit (`10.000`). EXACTLY
     //    three digits and no space, and every exclusion that guard buys is LIVE in this corpus:
     //    `802.11a/b/g/n` (a Wi-Fi standard, ×2), `12.00 GMT` (step 8's note) and all 222 `N.` ordinals.
-    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+    for (let i = 0; i < 2; i++) s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
 
     // 1) THE ERA MARKER, before the dotted-abbreviation rule (step 2) and the `N.` ordinal rule (step 9) —
     //    its interior dots would otherwise become phrase breaks and its `e.` would look like a licensor.
@@ -378,10 +378,10 @@ export function normalizeBosnian(input: string): string {
     //    is the defect this file mostly exists for, arriving through the script it does not measure.
     //    Serbian's own era rule already ships both spellings; nothing here is invented, only transliterated.
     for (const marker of ["p\\.\\s?n\\.\\s?e", "п\\.\\s?н\\.\\s?е"]) {
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${marker}\\.(\\s*)(\\S?)`, "giu"), replaceEra("prije nove ere"));
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${marker}\\.(\\s*)(\\S?)`, "giu"), replaceEra("prije nove ere"));
         //    THE FINAL DOT IS SOMETIMES ABSENT (`p.n.e,`), so a second pass claims the dotless form. Guarded
         //    against a following letter so it cannot bite into a real word.
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${marker}(?![\\p{L}\\p{M}.])`, "giu"), "prije nove ere");
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${marker}(?![\\p{L}\\p{M}.])`, "giu"), "prije nove ere");
     }
 
     // 2) DOTTED ABBREVIATIONS, three arms. The dot is consumed before a following word so it cannot become
@@ -396,20 +396,20 @@ export function normalizeBosnian(input: string): string {
     //    pattern matches UPPERCASE too, so a `(?=\p{Ll})` guard here would be a no-op — the same trap
     //    Serbian's era rule documents from the other direction. The `i` flag itself is needed so a
     //    sentence-initial `Itd.` still matches its lowercase key.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
         (_m, ab: string, sp: string, off: number, all: string) => {
             const next = all.slice(off + _m.length, off + _m.length + 1);
             const w0 = DOTTED[lat(ab)];   // ⚠ reachable miss (#1122)
             if (w0 === undefined) return _m;
             return `${w0}${/\p{Lu}/u.test(next) ? "." : ""}${sp}`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*[,;:])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*[,;:])`, "giu"),
         (m0, ab: string) => DOTTED[lat(ab)] ?? m0);
     //    ⚠ A CLOSING BRACKET OR QUOTE IS NOT A PAUSE — bosnian.jsonc maps only `.!?…,;:` — so the dot must
     //    be KEPT before one, not consumed the way it is before a comma. This arm EARNS ITSELF here: the
     //    corpus has `… uređivanje priča, pripovijedanje priča itd.)`, where grouping `)` with the comma
     //    would silently lose the sentence-final pause.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*(?:[.!?”"»)\\]]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*(?:[.!?”"»)\\]]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -426,9 +426,9 @@ export function normalizeBosnian(input: string): string {
     //    `Dr.` proper is ×4 (`Dr. Damadian`, `Dr. Lee`, `Dr. Moll`, `Dr. Tony Moll`) and is claimed; the
     //    lowercase *et al.* is left alone.
     //    ⚠ THE DOTTED CAPITAL RUN (`A. B.`) THAT CROATIAN ALSO CARRIES IS ×0 HERE and is not ported.
-    s = tr(s, /(?<=\p{Lu}\p{L}*\s)(\p{Lu})\.(?=\s+\p{Lu}\p{Ll})/gu, "$1");
-    s = tr(s, /(?<![\p{L}\p{M}])Dr\.(\s+)(?=[\p{L}\d])/gu, "doktor$1");
-    s = tr(s, /(?<![\p{L}\p{M}])Dr\.(?=\s*(?:[.,;:!?»)]|$))/gu, "doktor.");
+    s = rewrite(s, /(?<=\p{Lu}\p{L}*\s)(\p{Lu})\.(?=\s+\p{Lu}\p{Ll})/gu, "$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}])Dr\.(\s+)(?=[\p{L}\d])/gu, "doktor$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}])Dr\.(?=\s*(?:[.,;:!?»)]|$))/gu, "doktor.");
 
     // 4) `SAD-a` — the GENITIVE of the USA, ×10, and it is trap 56 rather than a leak: the tokenizer splits
     //    on the hyphen and the g2p reads `SAD` as the ordinary Bosnian ADVERB *sad* ("now"), so `trupe
@@ -438,12 +438,12 @@ export function normalizeBosnian(input: string): string {
     //    principle step 5 uses for `1970-ih`. Bare `SAD` (×5–6) is left alone because its instances are
     //    locative, accusative and a bare apposition and one expansion cannot serve three cases — Serbian's
     //    `Св.` refusal, which is why Croatian's nominative `SAD(?=-)` rule is NOT what ships here.
-    s = tr(s, /(?<![-\p{L}\p{M}])SAD-a(?![\p{L}\p{M}])/gu, "Sjedinjenih Američkih Država");
+    s = rewrite(s, /(?<![-\p{L}\p{M}])SAD-a(?![\p{L}\p{M}])/gu, "Sjedinjenih Američkih Država");
 
     // 5) DEGREES, three arms, and the middle one is the round's an→ast moment.
     //    5a) `°C` / `°F` supplies both the degree noun and the scale name; the count agrees with the
     //        numeral (30 → gen.pl stepeni). Corpus: `temperature iznad + 30 °C su uobičajene`.
-    s = tr(s, /(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])/gui, (_m, n: string, unit: string) =>
+    s = rewrite(s, /(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])/gui, (_m, n: string, unit: string) =>
         `${n} ${counted(Number(n), STEPEN)} ${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}`);
     //    5b) ⚠ THE COMPASS LETTERS ARE `S J I Z`, NOT `N S E W`. Croatian allow-lists `[NSEWnsew]` and that
     //        matches NOTHING in Bosnian: the corpus's one bare degree is `tek treći veliki uragan
@@ -459,7 +459,7 @@ export function normalizeBosnian(input: string): string {
     //        `35° S` is an ordinary latitude. J Z N E W are letters no Bosnian sentence uses alone at all.
     //        ⚠ N AND E ARE READ, NOT DROPPED. The imported English-convention bearings are unambiguous in
     //        either system and their words are already in this table, so reading them beats deleting them.
-    s = tr(s, /(\d+)\s?°(?:\s?([JZNEWSIjznew])|([si]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
+    s = rewrite(s, /(\d+)\s?°(?:\s?([JZNEWSIjznew])|([si]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
         `${n} ${counted(Number(n), STEPEN)} ${({ S: "sjeverno", J: "južno", I: "istočno", Z: "zapadno", N: "sjeverno", E: "istočno", W: "zapadno" } as Record<string, string>)[(spaced ?? tight)!.toUpperCase()]!}`);
     //    5c) THE BARE DEGREE emits the degree noun only. Safe unguarded because 5a/5b have already
     //        consumed the scale and bearing forms.
@@ -473,7 +473,7 @@ export function normalizeBosnian(input: string): string {
     //        ⚠ AND THE REPLACEMENT ENDS IN A SPACE, which is what actually stops the gluing. Consuming a
     //        letter class cannot: the class is finite and the alphabet is not, so `300°K` would still
     //        land inside the noun and send the stress lookup to a word that does not exist.
-    s = tr(s, /(\d+)\s?°(?:\s?[XYQxyq](?![\p{L}\p{M}]))?/gu,
+    s = rewrite(s, /(\d+)\s?°(?:\s?[XYQxyq](?![\p{L}\p{M}]))?/gu,
         (_m, n: string) => `${n} ${counted(Number(n), STEPEN)} `);
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih` ×13, all decades). As in Russian, the written suffix is
@@ -487,7 +487,7 @@ export function normalizeBosnian(input: string): string {
     //    C#, so all three standards now share the guard. The corpus writes `krajem 1970-ih;` and
     //    `1850-ih i predstavlja`, so the plain not-a-letter guard is the one that claims them. The 2-letter cap also excludes
     //    COMPOUND ADJECTIVES (`24-časovnom`), which need a combining stem this file does not model.
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, rawSuffix: string) => {
             const suffix = lat(rawSuffix);
             return ordinalForms(Number(digits)).find((f) => f.endsWith(suffix)) ?? whole;
@@ -497,13 +497,13 @@ export function normalizeBosnian(input: string): string {
     //    number-to-unit adjacency. The `/s` rate takes "u sekundi", not `unitPer`'s "na" + accusative, and
     //    one `unitPer` cannot carry both — the corpus writes the second-based rate out longhand in exactly
     //    those words: `udarila u površinu Mjeseca brzinom od 1,5 kilometara U SEKUNDI`.
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?Mbit\s?\/\s?s(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?Mbit\s?\/\s?s(?![\p{L}\p{M}])/gu,
         (_m, n: string) => `${n} ${counted(intOf(n), MEGABIT)} u sekundi`);
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?m\s?\/\s?s(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?m\s?\/\s?s(?![\p{L}\p{M}])/gu,
         (_m, n: string) => `${n} ${counted(intOf(n), METAR)} u sekundi`);
     // 7b) THE SPELLED-OUT MILE RATE — `vjetrovi brzine (često 100-200 milja/sat)`. `milja` is already the
     //     Bosnian word, so the tier's `mi` key cannot match it and only the denominator needs reading.
-    s = tr(s, /(\d+(?:,\d+)?)\s?milja\s*\/\s*(?:sat|h)(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(\d+(?:,\d+)?)\s?milja\s*\/\s*(?:sat|h)(?![\p{L}\p{M}])/giu,
         (_m, n: string) => `${n} ${counted(intOf(n), MILJA)} na sat`);
 
     // 7c) A SPAN BETWEEN TWO CLOCKS, and it has to be claimed HERE rather than by the general range rule
@@ -512,7 +512,7 @@ export function normalizeBosnian(input: string): string {
     //     outright and the span reads as two consecutive times with nothing between them. Measured ×1:
     //     `Između 10:00 - 11:00 sati uveče prema MDT vremenskoj zoni`, which read *između deset sati
     //     jedanaest sati*. Claiming it before the clock rule is the whole fix.
-    s = tr(s, /(\d{1,2}:\d{2})\s?[-–—]\s?(?=\d{1,2}:\d{2})/gu, "$1 do ");
+    s = rewrite(s, /(\d{1,2}:\d{2})\s?[-–—]\s?(?=\d{1,2}:\d{2})/gu, "$1 do ");
 
     // 8) THE CLOCK, IN THE COLON FORM. The colon is clause punctuation in bosnian.jsonc, so `06:30` read as
     //    *šest , trideset*. Bosnian says a CARDINAL hour with the counted noun — `u 11 sati`.
@@ -528,7 +528,7 @@ export function normalizeBosnian(input: string): string {
     //    `ostvarila ugodnu pobjedu od 26:00 protiv petoplasirane Zambije` (26 is not an hour), plus the
     //    utterance-final `rezultat bio 6:6.` (one-digit minute).
     //    RUNS BEFORE the range rule (step 9), which would otherwise eat `Između 10:00 - 11:00 sati`.
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])(\s*(?:sati|sata|časova|sahati|sahata))?/giu,
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])(\s*(?:sati|sata|časova|sahati|sahata))?/giu,
         (_m, h: string, min: string, _noun: string | undefined) => {
             const hv = Number(h), mv = Number(min);
             const head = `${numberToWords(hv)} ${counted(hv, SAT)}`;
@@ -554,7 +554,7 @@ export function normalizeBosnian(input: string): string {
     //    rather than only in a probe: the general range rule ran first, so step 11 saw a bare `1450.` and
     //    produced CARDINAL-then-ORDINAL — *hiljadu četiristo osamnaest do hiljadu četiristo pedesete*.
     //    Neither "both cardinal" nor "both ordinal", and no counter sees a mixed reading (trap 56).
-    s = tr(s, /(?<![\d.,])(1\d{3}|20\d{2}|2100)\s?[-–—]\s?(1\d{3}|20\d{2}|2100)\.(?=\s+\p{Ll})/gu,
+    s = rewrite(s, /(?<![\d.,])(1\d{3}|20\d{2}|2100)\s?[-–—]\s?(1\d{3}|20\d{2}|2100)\.(?=\s+\p{Ll})/gu,
         (whole, from: string, to: string) => {
             const a = ordinalBase(Number(from)), b = ordinalBase(Number(to));
             if (a === undefined || b === undefined) return whole; // round thousands — see ordinalBase
@@ -578,7 +578,7 @@ export function normalizeBosnian(input: string): string {
     //     Both endpoints take the slot the WRITTEN licensor governs, which is step 9's rule stated for a
     //     word connective instead of a dash. The three connectives are the three the corpus writes (`i`
     //     ×2 sentences, `do` ×2, `ili` ×1); both scripts, as everywhere else in this file.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\d.,])(\\d{1,4})\\.\\s+(${CONNECTIVE_ALT})\\s+(\\d{1,4})\\.\\s+(\\p{Ll}[\\p{L}\\p{M}]*)`, "gu"),
         (whole, from: string, conn: string, to: string, word: string) => {
             const slot = LICENSOR[lat(word)];
@@ -594,7 +594,7 @@ export function normalizeBosnian(input: string): string {
     //     so requiring lowercase excludes genuine sentence ends by construction.
     //     Runs AFTER step 0 (de-grouping) so `10.000` is already whole, and AFTER step 1 so `p.n.e.` is
     //     gone and its `e.` cannot be mistaken for a licensor.
-    s = tr(s, /(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
+    s = rewrite(s, /(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
         (whole, digits: string, word: string) => {
             const slot = LICENSOR[lat(word)];
             if (slot === undefined) return whole;
@@ -623,7 +623,7 @@ export function normalizeBosnian(input: string): string {
     //     lookahead class. The class was `[\d.,\-]`, which is right for `COVID-19.` and blind to
     //     `1990–1995.`; the en dash and the em dash join the same corpus's range shapes (`7–2`, `1469–1539`,
     //     `AD 1000–1300`) and had to join this guard with them.
-    s = tr(s, /(?<![\d.,\-–—])(1\d{3}|20\d{2}|2100)\.(?!\d)/gu, (whole, digits: string, at: number, all: string) => {
+    s = rewrite(s, /(?<![\d.,\-–—])(1\d{3}|20\d{2}|2100)\.(?!\d)/gu, (whole, digits: string, at: number, all: string) => {
         const base = ordinalBase(Number(digits));
         if (base === undefined) return whole;
         const year = inflect(base, "f.gen");
@@ -648,7 +648,7 @@ export function normalizeBosnian(input: string): string {
     //      than widened on nothing.
     //      Known false positives: SCORES (`7–2`, `5-3`) where *do* is the wrong connective — but the
     //      endpoints were fusing there too, so no reading is lost, only a wrong-ish connective gained.
-    s = tr(s, /(\d)\s?[-–—]\s?(?=\d)/gu, "$1 do ");
+    s = rewrite(s, /(\d)\s?[-–—]\s?(?=\d)/gu, "$1 do ");
 
     // 12) THE SHARED SYMBOL TIER — %, currency, units, rates, `&`, `×`/`x`, the exponent. It must see the
     //     number still ADJACENT to its unit and still carrying its decimal comma (`3,50 m`, `2,4 GHz`), so
@@ -666,13 +666,13 @@ export function normalizeBosnian(input: string): string {
     //     document measured a whole number of inches.
     //     ⚠ `i po`, NOT CROATIAN'S `i pol`. The half word is the one place bs and hr genuinely part company
     //     in this file's vocabulary, and `po` is the bs/sr form.
-    s = tr(s, /(\d+)¾/gu, "$1 i tri četvrtine");
-    s = tr(s, /(\d+)½/gu, "$1 i po");
+    s = rewrite(s, /(\d+)¾/gu, "$1 i tri četvrtine");
+    s = rewrite(s, /(\d+)½/gu, "$1 i po");
 
     // 15) THE SIGNS THAT REMAIN. `+` is ×2 and BOTH are positive rather than arithmetic — `temperature
     //     iznad + 30 °C su uobičajene` (spaced) and `po lokalnom vremenu (UTC+1)` (after capitals).
-    s = tr(s, /(^|[\s(])\+\s?(\d)/gu, "$1plus $2");
-    s = tr(s, /(?<=\p{Lu})\+(?=\d)/gu, " plus ");
+    s = rewrite(s, /(^|[\s(])\+\s?(\d)/gu, "$1plus $2");
+    s = rewrite(s, /(?<=\p{Lu})\+(?=\d)/gu, " plus ");
     //     THE MINUS, with Serbian's three guards, each of which rejects a real shape:
     //       · a digit IMMEDIATELY AFTER the sign — rejects the spaced `- 36 mm širine` form
     //       · a letter or digit IMMEDIATELY BEFORE — rejects `Il-76`, `COVID-19`, `SAD-a`, `120-160`
@@ -684,7 +684,7 @@ export function normalizeBosnian(input: string): string {
     //     dropped MINUS INVERTS its operand, so a class with no instances to argue from is claimed rather
     //     than silenced. It is Serbian's residual risk (`word -1`) bought for nothing, on a corpus that
     //     contains neither the risk nor the reward.
-    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+    s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "minus ");
 
     // ⚠ INITIALISMS, LAST, AND SHARED WITH SERBIAN. hr/bs run serbian.ts's g2p, so they must run its
@@ -696,7 +696,7 @@ export function normalizeBosnian(input: string): string {
 
 /** Integer part of a Bosnian-written number ("3,50" → 3), for the local count-agreement calls. */
 function intOf(n: string): number {
-    return Math.trunc(Number(n.replace(/\./gu, "").replace(",", ".")));
+    return Math.trunc(Number(rewrite(rewrite(n, /\./gu, ""), ",", ".")));
 }
 
 /**

@@ -14,6 +14,7 @@
  */
 using System.Collections.Concurrent;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Luganda;
 
@@ -70,7 +71,7 @@ public static class Normalize
     private static bool SaidNear(string full, int offset, int end, params string[] words)
     {
         var alt = string.Join("|", words.Select(w =>
-            NEEDLE_SPACE.Replace(NEEDLE_ESCAPE.Replace(w, "\\$&"), "\\s+")));
+            JsRegex.Replace(JsRegex.Replace(w, NEEDLE_ESCAPE, "\\$&"), NEEDLE_SPACE, "\\s+")));
         var re = NeedleCache.GetOrAdd(alt, a =>
             JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])(?:{a})(?![\\p{{L}}\\p{{M}}])", "iu"));
         var from = Math.Max(0, offset - 45);
@@ -155,7 +156,7 @@ public static class Normalize
     {
         // 0) THE MARKED CLOCK loses the separator's pause. First, because the numeric steps below read a
         //    digit run and the separator was splitting one in half.
-        input = CLOCK_MARKED.Replace(input, m => m.Groups[1].Success
+        input = Rewrite(input, CLOCK_MARKED, m => m.Groups[1].Success
             ? $"{m.Groups[1].Value} {m.Groups[2].Value}"
             : $"{m.Groups[3].Value} {m.Groups[4].Value}");
         var s = input;
@@ -168,19 +169,19 @@ public static class Normalize
         //    fix, because Luganda's own ordinals are already spelled out as words wherever it means them.
         //    ⚠ FIRST, because the range rule's right guard excludes a trailing letter and would otherwise
         //    decline `1990th-2000th`.
-        s = ENGLISH_ORDINAL.Replace(s, "$1");
+        s = Rewrite(s, ENGLISH_ORDINAL, "$1");
 
         // 2) RANGES → `okutuuka mu` for a year pair, `okutuuka ku` otherwise.
         //    ⚠ THIS RUNS ABOVE THE DE-GROUPING STEP AND MATCHES A GROUPED OPERAND ITSELF — the writer's
         //    grouping is exactly the evidence that tells a YEAR from a QUANTITY, and de-grouping first
         //    destroys it. ⚠ ASCENDING ONLY: a football score, an abbreviated second year and a birth–death
         //    line whose second operand is a DAY are all non-ascending.
-        s = DASH_RANGE.Replace(s, m =>
+        s = Rewrite(s, DASH_RANGE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
-            var na = Js.Number(COMMAS.Replace(a, ""));
-            var nb = Js.Number(COMMAS.Replace(b, ""));
+            var na = Js.Number(JsRegex.Replace(a, COMMAS, ""));
+            var nb = Js.Number(JsRegex.Replace(b, COMMAS, ""));
             if (na >= nb) return m.Value;
             var year = !a.Contains(',', StringComparison.Ordinal) && !b.Contains(',', StringComparison.Ordinal)
                 && a.Length == 4 && b.Length == 4 && na >= 1000;
@@ -191,15 +192,15 @@ public static class Normalize
         //    PAUSE. ⚠ THIS WIKI WRITES ALL THREE CONVENTIONS, so each arm is measured separately. ⚠ THE
         //    PERIOD ARM IS THE RISKY ONE and the 1–9 head is the guard doing the work — it is what keeps the
         //    corpus's `0.628` out of a rule that would otherwise read it as six hundred and twenty-eight.
-        s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => SPACE_SEPS.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => SPACE_SEPS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
 
         // 4) PERCENT → `N ku kikumi`, the one POSTPOSED reading here. ⚠ THE NEEDLE IS THE COLLOCATION, NOT
         //    `kikumi` ALONE: that word is this engine's own cardinal for 100, so a bare needle suppressed the
         //    reading whenever a hundred was spelled out anywhere in the window.
         var pctFrozen = s;
-        s = PERCENT_RE.Replace(s, m =>
+        s = Rewrite(s, PERCENT_RE, m =>
         {
             var n = m.Groups[1].Value;
             return SaidNear(pctFrozen, m.Index, m.Index + m.Length, PERCENT, "ku buli kikumi") ? n : $"{n} {PERCENT}";
@@ -210,14 +211,14 @@ public static class Normalize
         //    GUARD IS THE MAJORITY CASE: this wiki names the currency in Luganda and THEN writes the sign,
         //    so the correct reading drops the sign.
         var usdFrozen = s;
-        s = US_DOLLAR_SIGN.Replace(s, m => NamedDollarNear(usdFrozen, m.Index, m.Length) ? "" : $"{DOLLAR} ");
+        s = Rewrite(s, US_DOLLAR_SIGN, m => NamedDollarNear(usdFrozen, m.Index, m.Length) ? "" : $"{DOLLAR} ");
         var dollarFrozen = s;
-        s = DOLLAR_SIGN.Replace(s, m => NamedDollarNear(dollarFrozen, m.Index, m.Length) ? "" : $"{DOLLAR} ");
+        s = Rewrite(s, DOLLAR_SIGN, m => NamedDollarNear(dollarFrozen, m.Index, m.Length) ? "" : $"{DOLLAR} ");
         var euroFrozen = s;
-        s = EURO_SIGN.Replace(s, m =>
+        s = Rewrite(s, EURO_SIGN, m =>
             SaidNear(euroFrozen, m.Index, m.Index + m.Length, EURO) ? "" : $"{EURO} ");
         var poundFrozen = s;
-        s = POUND_SIGN.Replace(s, m =>
+        s = Rewrite(s, POUND_SIGN, m =>
             SaidNear(poundFrozen, m.Index, m.Index + m.Length, POUND) ? "" : $"{POUND} ");
 
         // 6) UNITS — the measure noun FIRST. AFTER the ranges and BEFORE the decimals, which is what leaves
@@ -225,7 +226,7 @@ public static class Normalize
         //    bare `km` arm can see it. ⚠ THE ASCII `km2` IS THE WORSE OF THE TWO SPELLINGS: it is not a
         //    visible leak, it is a NUMBER, so `580,367 km2` read *"…musanvu km bbiri"*.
         var km2Frozen = s;
-        s = KM_SQUARED.Replace(s, m =>
+        s = Rewrite(s, KM_SQUARED, m =>
         {
             var n = m.Groups[1].Value;
             return SaidNear(km2Frozen, m.Index, m.Index + m.Length, Spellings(KILOMETRE)) ? n
@@ -235,7 +236,7 @@ public static class Normalize
         //    in the retained text. The `/` in the right guard keeps `299,792 km/s` out — there is no rate
         //    idiom for this language.
         var kmFrozen = s;
-        s = KM_BARE.Replace(s, m =>
+        s = Rewrite(s, KM_BARE, m =>
         {
             var n = m.Groups[1].Value;
             return SaidNear(kmFrozen, m.Index, m.Index + m.Length, Spellings(KILOMETRE)) ? n : $"{KILOMETRE} {n}";
@@ -244,14 +245,14 @@ public static class Normalize
         {
             var frozen = s;
             var needles = Spellings(noun);
-            s = re.Replace(s, m =>
+            s = Rewrite(s, re, m =>
             {
                 var n = m.Groups[1].Value;
                 return SaidNear(frozen, m.Index, m.Index + m.Length, needles) ? n : $"{noun} {n}";
             });
         }
         var metreFrozen = s;
-        s = METRE_RE.Replace(s, m =>
+        s = Rewrite(s, METRE_RE, m =>
         {
             var n = m.Groups[1].Value;
             return SaidNear(metreFrozen, m.Index, m.Index + m.Length, Spellings(METRE)) ? n : $"{METRE} {n}";
@@ -262,7 +263,7 @@ public static class Normalize
         //    TRAILING DOT GUARD IS `\.\d`, NOT A BARE `\.`: this corpus's commonest decimal ends a sentence,
         //    and a bare guard read the SENTENCE PERIOD as the start of a second dot run.
         //    ⚠ THERE IS NO COMMA ARM — this corpus's `\d+,\d{1,2}` is the maths article's DIGIT LISTS.
-        s = DECIMAL_DOT.Replace(s, m =>
+        s = Rewrite(s, DECIMAL_DOT, m =>
             $"{m.Groups[1].Value} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         return Tidy(s);
@@ -278,5 +279,5 @@ public static class Normalize
     }
 
     /** ⚠ A padded replacement doubles a space that was already there and can leave one at an edge. */
-    private static string Tidy(string s) => EDGE_SPACE.Replace(MULTI_SPACE.Replace(s, " "), "");
+    private static string Tidy(string s) => Rewrite(Rewrite(s, MULTI_SPACE, " "), EDGE_SPACE, "");
 }

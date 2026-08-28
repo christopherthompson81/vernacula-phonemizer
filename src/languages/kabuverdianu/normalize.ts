@@ -103,7 +103,7 @@
 import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** ⚠ NEVER `\b` — Kabuverdianu carries `á é í ó ú â ê ô à è ò` and the ALUPEC apostrophe, which `\b` treats
  *  as boundaries (trap 1/23). Written as an explicit lookaround and reused, so the hazard is stated once. */
@@ -185,10 +185,10 @@ export function normalizeKabuverdianu(input: string): string {
     //    numbers the way a looser one would.
     const degroup = (mark: string) =>
         new RegExp(`(?<!\\d)(?<![\\d][.,])([1-9]\\d{0,2})((?:${mark}\\d{3})+)(?!\\d)`, "gu");
-    s = tr(s, degroup("[ \\u00a0\\u202f\\u2009]"), (_m, head: string, rest: string) =>  // space, NBSP, NNBSP, thin space
-        head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = tr(s, degroup("\\."), (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
-    s = tr(s, degroup(","), (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
+    s = rewrite(s, degroup("[ \\u00a0\\u202f\\u2009]"), (_m, head: string, rest: string) =>  // space, NBSP, NNBSP, thin space
+        head + rewrite(rest, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, degroup("\\."), (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
+    s = rewrite(s, degroup(","), (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
     // 3) WHAT IS LEFT BETWEEN TWO DIGITS IS SPENT ON A SPACE, NOT SPOKEN. ⚠ NO DECIMAL WORD IS SOURCEABLE:
     //    `vírgula` is ×0 and `pontu` ×11 is a point of view, a sports point, or the full stop of a sentence
@@ -199,7 +199,7 @@ export function normalizeKabuverdianu(input: string): string {
     //    way and neither reading gains or loses a word — the mark becomes a space in both, so the
     //    decimal-vs-designation distinction cannot change the output. It DOES matter one step earlier, which
     //    is why the tier is at step 1.
-    s = tr(s, /(?<!\d)(\d+)[.,](\d+)(?!\d)/gu, "$1 $2");
+    s = rewrite(s, /(?<!\d)(\d+)[.,](\d+)(?!\d)/gu, "$1 $2");
 
     // 4) THE ERA MARKER, before any generic dotted-abbreviation handling. The corpus writes it four ways —
     //    `323 a.C.`, `1000 A.C.`, `400 D.C.`, `sékulu III a.C.` — ×11 in all. Composed from attested pieces
@@ -213,7 +213,7 @@ export function normalizeKabuverdianu(input: string): string {
         [new RegExp(`(?<![\\p{L}\\p{M}.])[dD]\\s?\\.\\s?[cC]\\s?\\.`, "gu"), "dipôs di Kristu"],
     ];
     for (const [re, word] of ERA)
-        s = tr(s, re, (m0: string, offset: number, full: string) => {
+        s = rewrite(s, re, (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)'”]?\s*$/u.test(rest) ? `${word}.` : word;
         });
@@ -222,7 +222,7 @@ export function normalizeKabuverdianu(input: string): string {
     //    "riatoris Númeru 1 y 2 di se sentral di Shika fitxadu". Trap 36 records that № must NOT be folded
     //    to a Latin `No`, because that substitutes an English word for a dropped sign; it needs the
     //    language's own word, and kea has one. Guarded on a FOLLOWING DIGIT so a bare `Nº` cannot match.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}N\\s?[º°]\\s?(?=\\d)`, "gu"), "númeru ");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}N\\s?[º°]\\s?(?=\\d)`, "gu"), "númeru ");
 
     // 6) THE ORDINAL INDICATOR — before the degree step, which would otherwise claim it.
     //    ⚠ THIS IS THE ROUND'S CONFUSABLE, AND IT POINTS THE OPPOSITE WAY FROM THE LAST THREE. Aragonese
@@ -240,7 +240,7 @@ export function normalizeKabuverdianu(input: string): string {
     //        `7ª maior ilha` and `5ª lugar`, and `sétima` and `kinta` are ×0. Two instances, refused.
     //    A FOLLOWING LETTER is required, which is what separates `1º dia` / `3º rijimentus` / `10º
     //    Izérsitu` / `7ª maior` from the clause-final `tenperatura na 90º.` that step 7 reads as a degree.
-    s = tr(s, /(?<![\d.,])(\d{1,2})\s?º(?=\s?[\p{L}])/gu,
+    s = rewrite(s, /(?<![\d.,])(\d{1,2})\s?º(?=\s?[\p{L}])/gu,
         (m0: string, n: string) => (Number(n) >= 1 && Number(n) <= 10 ? ORDINAL[Number(n)]! : m0));
 
     // 7) DEGREES. `grau` ×4, and the two instances that license it are the two senses this step needs —
@@ -258,8 +258,8 @@ export function normalizeKabuverdianu(input: string): string {
     //    tenpurada` and `1.000º selu` alone. ⚠ AND THE GUARD MUST LOOK PAST A SPACE: written `(?![\p{L}])`
     //    it passes on `37º país`, whose next character is a SPACE, and the step-6 refusal is then undone
     //    one line later — "trinta seti GRAU país". Measured on all three refused instances before and after.
-    s = tr(s, /(\d)\s?°/gu, "$1 grau ");
-    s = tr(s, /(\d)\s?º(?!\s?[\p{L}\p{M}])/gu, "$1 grau ");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 grau ");
+    s = rewrite(s, /(\d)\s?º(?!\s?[\p{L}\p{M}])/gu, "$1 grau ");
 
     // 8) THE CLOCK — and this is the sharpest DIVERGENCE from Papiamento, which has no clock rule at all
     //    because its one digit-colon is the Curaçao flag's stripe ratio. **20 colons here and 17 are
@@ -276,7 +276,7 @@ export function normalizeKabuverdianu(input: string): string {
     //    `**11:20**, pulísia pidi manifestantis`, which opens an utterance and is the very first clock in
     //    the corpus. What has to be excluded is a THIRD field continuing the time, and `(?![.,]\d)` is what
     //    tests that while letting a clause mark through.
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?![.,]\d)/gu, "$1 $2");
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?![.,]\d)/gu, "$1 $2");
 
     // 9) FRACTIONS. Two sources, ONE SHAPE, because of an upstream fold.
     //    · the corpus's own slashed instance — `Padron debe ser sufisientimenti prufundu, 5 mm (1/5
@@ -295,7 +295,7 @@ export function normalizeKabuverdianu(input: string): string {
     //    ⚠ AND THE RULE IS DIGIT-GATED ON BOTH SIDES, because 23 of the corpus's 24 slashes are between
     //    WORDS (`y/ô`, `di/pa`, `bilheti di ida/volta`, `Jakar/Bumthang`, `agu/árias`) or inside a rate the
     //    tier has already read.
-    s = tr(s, /(?<![\d.,\/])(\d{1,2})\s?\/\s?([2-5])(?![\d\/])/gu,
+    s = rewrite(s, /(?<![\d.,\/])(\d{1,2})\s?\/\s?([2-5])(?![\d\/])/gu,
         (_m, n: string, d: string) => `${n} ${DENOMINATOR[d]}`);
 
     // 10) RANGES. Before this step the dash was dropped and the endpoints FUSED with no pause at all —
@@ -312,8 +312,8 @@ export function normalizeKabuverdianu(input: string): string {
     //     ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58) — `dipôs (10-60 minotu).` is
     //     clause-final — and a chain of three or more hyphen-joined groups is an identifier, not a span.
     //     All 14 single-hyphen instances are ranges or scores; there is no negative number in this corpus.
-    s = tr(s, /(\d)\s?--\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(\d)\s?--\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

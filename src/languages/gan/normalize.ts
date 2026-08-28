@@ -119,7 +119,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, readDecimals, reorderFraction, spellYears } from "../../core/sinitic.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * ⚠ `unspacedScript`, because a sign in Gan prose is normally flanked by Han and the tier's letter-boundary
@@ -184,7 +184,7 @@ export function normalizeGan(input: string): string {
     // ordinals are 第N, `º` is ×0 in the corpus and `ª` is ×1, the transliteration above. `core/unicode.ts`
     // folds neither, and widening the shared fold list is a fleet change with its own measurement, so the
     // repair stays in the one language that has been measured to need it.
-    s = tr(tr(s, /ª/gu, "a"), /º/gu, "o");
+    s = rewrite(rewrite(s, /ª/gu, "a"), /º/gu, "o");
 
     // ── 1. de-group thousands ────────────────────────────────────────────────────────────────────
     // ⚠ FIRST, and it is the most destructive thing this engine does to a number: the tokenizer splits on
@@ -239,7 +239,7 @@ export function normalizeGan(input: string): string {
     // ⚠ The shared tier has no per-mille slot, so this is LOCAL by architecture, not by idiom (trap 47.4).
     // ⚠ BEFORE the decimal rule, for the same adjacency reason step 4 gives: `9.8‰` must still be a
     // contiguous digit run when this matches, and step 5 then turns it into 千分之9點八.
-    s = tr(s, /(?<![\d.,])(\d+(?:\.\d+)?)\s*‰/gu, (_m, n: string) => `千分之${n}`);
+    s = rewrite(s, /(?<![\d.,])(\d+(?:\.\d+)?)\s*‰/gu, (_m, n: string) => `千分之${n}`);
 
     // ── 5. decimals ─────────────────────────────────────────────────────────────────────────────
     // LAST of the number rules, for the adjacency reason in step 4. ×207, currently reading the point as a
@@ -262,7 +262,7 @@ export function normalizeGan(input: string): string {
     // `6-10號綫`. Requiring the sign to OPEN a string, a bracket or a list item excludes all of them.
     // ⚠ `到-2.0` IS THEREFORE NOT CLAIMED — one real negative given up to keep the guard provably clean.
     // ⚠ AFTER the decimal rule, so `-4.6` is already `-4點六` and the sign is still the character it needs.
-    s = tr(s, /(^|[\s(（、,，])[-−](\d)/gu, (_m, pre: string, d: string) => `${pre}負${d}`);
+    s = rewrite(s, /(^|[\s(（、,，])[-−](\d)/gu, (_m, pre: string, d: string) => `${pre}負${d}`);
 
     // ── 7. ranges ───────────────────────────────────────────────────────────────────────────────
     // LAST, so every rule that owns a dash has already consumed it. ⟨到⟩ is the corpus's own numeric
@@ -273,7 +273,7 @@ export function normalizeGan(input: string): string {
     // between the identifier and the digits. That is not theoretical here: `ranges 58` in this corpus is
     // dominated by ISBNs (`ISBN 1-55849-175-9`, `ISBN 7-5060-1052-6`, `ISBN 978-0-393-924…`), where the
     // adjacent-dash rejection does most of the work and the Latin-run check finishes it.
-    s = tr(s,
+    s = rewrite(s,
         /(?<![\d.,/\-\p{sc=Latn}])(\d+)\s*[-–~〜－]\s*(\d+)(?![\d.,/\-\p{sc=Latn}])/gu,
         (m, a: string, b: string, off: number, full: string) =>
             /\p{sc=Latn}[\s\p{sc=Latn}]*$/u.test(full.slice(Math.max(0, off - 12), off)) ? m : `${a}到${b}`,
@@ -303,5 +303,5 @@ export function normalizeGan(input: string): string {
  */
 const AGO = "";
 function protectDurations(s: string): string {
-    return s.replace(/(\d{4})年(\s*(?:到|至|[-–~〜－])\s*)(\d{4})年(?=前)/gu, (_m, a: string, mid: string, b: string) => `${a}${AGO}${mid}${b}${AGO}`);
+    return rewrite(s, /(\d{4})年(\s*(?:到|至|[-–~〜－])\s*)(\d{4})年(?=前)/gu, (_m, a: string, mid: string, b: string) => `${a}${AGO}${mid}${b}${AGO}`);
 }

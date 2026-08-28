@@ -12,6 +12,7 @@
  * `normalize.ts`, so it alone was mis-reported; the fix is to be conventional rather than to teach the tool
  * a second pattern it would then have to keep matching.
  */
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * ABBREVIATIONS. ⟨Dr⟩ nativised as a WORD → *dɾaiv* ("drive"), the same wrong-word class the ordinals were.
@@ -86,7 +87,7 @@ const MINUS = /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu;
 
 /** Naija text → text, before tokenization. */
 export function normalizeNaija(input: string): string {
-    return input.replace(ABBREV_RE, (_m, w: string) => ABBREV[w]!)
-        .replace(MAGNITUDE_ABBREV, " billion")
-        .replace(MINUS, "minus ");
+    return rewrite(rewrite(rewrite(input, ABBREV_RE, (_m, w: string) => ABBREV[w]!)
+        , MAGNITUDE_ABBREV, " billion")
+        , MINUS, "minus ");
 }

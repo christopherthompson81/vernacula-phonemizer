@@ -10,7 +10,7 @@
  * times, years and romans, which are NOT shared — their rules are language-specific by nature). The
  * contract everywhere: emit plain words and digits the language's EXISTING pipeline already speaks.
  */
-import { tr } from "./provenance.ts";
+import { rewrite } from "./provenance.ts";
 
 /** Word forms for one countable noun. Index 0 = singular; further indices per the language's
  *  `countForm`. A language with no agreement uses a 1-element array. */
@@ -599,7 +599,7 @@ export function makeBareUnitNormalizer(
             `(?![\\p{L}\\p{M}\\p{Nd}'’ʼ/²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))`,
         "gu",
     );
-    return (text: string): string => tr(text, re, (_whole: string, u: string) => map.get(u)!);
+    return (text: string): string => rewrite(text, re, (_whole: string, u: string) => map.get(u)!);
 }
 
 /**
@@ -655,7 +655,7 @@ export interface SignWords {
  * check its own before wiring this in.
  */
 export function spacedBareExponent(s: string): string {
-    return tr(s, BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
+    return rewrite(s, BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
         // ⚠ A LONE ⁰ OR ¹ IS A DEGREE SIGN OR A PRIME — see `LONE_MARK`.
         if (LONE_MARK.test(sup)) return whole;
         // ⚠ …AND A RUN OF ONLY ¹ AFTER AN UNSPACED COORDINATE CHAIN IS THE SECONDS PRIME — see `PRIME_CHAIN`.
@@ -1001,7 +1001,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // two initialisms (`B&B`) must become three tokens, and any later rule that reads a token boundary
         // needs the split to have happened already.
         if (d.ampersand !== undefined)
-            text = tr(tr(text, /&amp;/giu, "&"), /[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
+            text = rewrite(rewrite(text, /&amp;/giu, "&"), /[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
         let s = text;
         const isUnitKey = (k: string): boolean =>
             d.units?.[k] !== undefined ||
@@ -1024,7 +1024,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // text writes a kilometre to the sixth — so `10⁶ km` is the NUMBER's magnitude and keeps its digits.
         // A letter base is `km²` itself, which belongs to the unit path above and to the language's own
         // normalize.ts after it (Kirundi's step 8 reads exactly that shape).
-        s = tr(s, UNIT_POWER_BEFORE, (whole: string, unit: string) =>
+        s = rewrite(s, UNIT_POWER_BEFORE, (whole: string, unit: string) =>
             // `0,5 ² км` would otherwise be left holding two spaces, its adjacency still broken, so the
             // separator goes with the mark — space, NBSP, NNBSP, thin space.
             isUnitKey(unit) ? whole.replace(/[ \u00a0\u202f\u2009]?[²³]/u, "") : whole);
@@ -1078,7 +1078,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         };
         // BEFORE curBefore/curAfter — see the arms' docstring.
         if (magFirstAfter)
-            s = tr(s,
+            s = rewrite(s,
                 magFirstAfter,
                 // ⚠ ` ${mag}` — the leading space is what `magAlt`'s capture carries, and the prefix
                 // template below is written against that shape. Passing the bare word would fuse it to the
@@ -1087,19 +1087,19 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     money(num, ` ${mag}`, sym, full.slice(offset + m.length), true),
             );
         if (magFirstBefore)
-            s = tr(s,
+            s = rewrite(s,
                 magFirstBefore,
                 (m: string, mag: string, sym: string, num: string, offset: number, full: string) =>
                     money(num, ` ${mag}`, sym, full.slice(offset + m.length), true),
             );
         if (curBefore)
-            s = tr(s,
+            s = rewrite(s,
                 curBefore,
                 (m: string, sym: string, num: string, mag: string | undefined, offset: number, full: string) =>
                     money(num, mag, sym, full.slice(offset + m.length)),
             );
         if (curAfter)
-            s = tr(s,
+            s = rewrite(s,
                 curAfter,
                 (m: string, num: string, mag: string | undefined, sym: string, offset: number, full: string) =>
                     money(num, mag, sym, full.slice(offset + m.length)),
@@ -1119,8 +1119,8 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 if (d.percentPrefix) return PCT_BEFORE.test(before) ? num : `${w} ${num}`;
                 return PCT_AFTER.test(after) ? num : `${num} ${w}`;
             };
-            s = tr(s, pctPreRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
-            s = tr(s, pctRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
+            s = rewrite(s, pctPreRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
+            s = rewrite(s, pctRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
         }
         // THE MULTIPLICATION SIGN, both `×` and ASCII `x` — BEFORE the unit path, and that ordering is load-bearing.
         // Placed after it, a `unitPrefix` language broke: Swahili's unit path MOVES the noun ahead of its number,
@@ -1132,7 +1132,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         if (d.multiply !== undefined) {
             const mul = d.multiply;
             const by = mul.by ?? mul.times;
-            s = tr(s,
+            s = rewrite(s,
                 /(\p{Nd})\s*(×|x)\s*(?=\p{Nd})/gu,
                 (whole, left: string, sign: string, off: number, full: string) => {
                     // A UNIT after the right operand makes it a measurement; an UNSPACED ascii `x` is the
@@ -1147,7 +1147,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         }
 
         if (unitRe)
-            s = tr(s,
+            s = rewrite(s,
                 unitRe,
                 (whole, num: string, mag: string | undefined, u: string, numExp?: string, denom?: string,
                  denomExp?: string, exp?: string) => {
@@ -1291,8 +1291,8 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             // German — one token where there were two, in every language that declares `bareExponent`.
             // Invisible to every gate: nothing is dropped and no raw mark survives, so it is a WRONG-WORD
             // defect, the class the leak gates cannot reach.
-            s = tr(s, BARE_EXPONENT_GLUED, (m0: string) => `${m0} `);
-            s = tr(s, BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
+            s = rewrite(s, BARE_EXPONENT_GLUED, (m0: string) => `${m0} `);
+            s = rewrite(s, BARE_EXPONENT, (whole, base: string, sup: string, at: number, all: string) => {
                 if (LONE_MARK.test(sup)) return whole;
                 // ⚠ THE SAME TWO REFUSALS AS THE FALLBACK, AND THIS IS THE SITE #1045 IS ACTUALLY ABOUT.
                 // Both shapes occur only in languages that do NOT declare `bareExponent` today — so the

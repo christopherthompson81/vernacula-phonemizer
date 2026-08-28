@@ -97,7 +97,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** The manifest's own conjunction — the number joiner (*leshome LE metso e mmedi*), reused for `&`. Read
  *  from the manifest so the two can never drift apart. */
@@ -266,7 +266,7 @@ export function normalizeSesotho(input: string): string {
     //    BEFORE the sign is read, and only a local step can sequence that (the Chichewa finding).
     //    ⚠ SPACED ON BOTH SIDES, always: `M&G` is two initialisms and gluing the word in fuses them into
     //    one token — the merge defect of trap 18.
-    s = tr(s, /[ \t]*&[ \t]*/gu, ` ${AND} `);
+    s = rewrite(s, /[ \t]*&[ \t]*/gu, ` ${AND} `);
 
     // 3) DOTTED CAPITAL RUNS → the bare letters, BEFORE anything reads an interior dot as a phrase break
     //    (multi-dot abbreviations before single-dot). The artifact's `abbrev` cell is 1581 and the runs it
@@ -280,7 +280,7 @@ export function normalizeSesotho(input: string): string {
     //        `U.D. Oliveirense`       a club name             — likewise
     //    1 against 2, so the dot goes. Reinstating it (`(?:[ \u00a0](?=\p{Lu}\.))?`, so the space is consumed only
     //    between two capital-dot pairs) flips the score to 2 wrong / 1 right; it was tried and reverted.
-    s = tr(s, /(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {  // space, NBSP
         const letters = run.replace(/[. \u00a0]/gu, "");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
@@ -296,7 +296,7 @@ export function normalizeSesotho(input: string): string {
     //     already read as a sequence of numbers. This makes the dotted form read the same way.
     //     ⚠ BEFORE step 4 AND step 11, both of which would otherwise claim `28.11` — the decimal arm's
     //     trailing guard is written to reject it too, belt and braces.
-    s = tr(s, /(?<![\d.,])(\d{1,2})\.(\d{1,2})\.(\d{4})(?![\d.,])/gu, "$1 $2 $3");
+    s = rewrite(s, /(?<![\d.,])(\d{1,2})\.(\d{1,2})\.(\d{4})(?![\d.,])/gu, "$1 $2 $3");
 
     // 4) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping COMMA reads as a clause
     //    pause and a grouping PERIOD as a full stop, so `1,395 m` came out *nngwe , makgolo a mararo …*
@@ -308,9 +308,9 @@ export function normalizeSesotho(input: string): string {
     //    ⚠ THE TRAILING GUARD IS `(?![\d]|[.,]\d)`, NOT `(?![\d.,])`: with the wider form a grouped number
     //    followed by a CLAUSE comma or a sentence period declines to de-group, and the leftover separator
     //    is then read as a decimal by step 11.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) A MAGNITUDE LETTER GLUED TO A CURRENCY AMOUNT → the magnitude WORD, and this step is what makes
     //    the one-letter metre key safe. The artifact writes `R2.3m`, `£1.2m`, `R22.8m`, `$2.5bn`,
@@ -322,7 +322,7 @@ export function normalizeSesotho(input: string): string {
     //        "$2.5-billion (£1.98-bilione)"
     //    so `m` → *dimilione* and `bn` → *dibilione*, in the SA spelling `numbers.ts` already emits.
     //    MUST run after step 4 (a grouped amount is one digit run by now) and before the tier.
-    s = tr(s,
+    s = rewrite(s,
         /((?:US[ \u00a0]?)?[$£€R])([ \u00a0]?\d[\d.,]*)(m|bn)(?![\p{L}\p{M}\d])/gu,  // space, NBSP
         (_w, sym: string, num: string, mag: string) => `${sym}${num} ${mag === "m" ? "dimilione" : "dibilione"}`,
     );
@@ -334,7 +334,7 @@ export function normalizeSesotho(input: string): string {
     //        "li ka balloa ho liporesente tse 25% libakeng tsa litoropong"      (Lesotho)
     //        "e ikarabella ho diperesente tse 1.5% ka hara naha"                (SA — tier handles this one)
     //    Without this, the Lesotho sentence would read *liporesente tse diperesente tse 25*.
-    s = tr(s,
+    s = rewrite(s,
         /((?<![\p{L}\p{M}])[dl]i(?:peresente|poresente|phesente)[ \u00a0]+(?:tse[ \u00a0]+)?)(\d[\d.,]*)[ \u00a0]?%/giu,  // space, NBSP
         "$1$2",
     );
@@ -348,7 +348,7 @@ export function normalizeSesotho(input: string): string {
     //     ⚠ NARROWED TO THE `%` CASE ON PURPOSE. Letter+digit in this corpus is otherwise a DESIGNATION —
     //     `U20`, `T20`, `y2`, `x5`, and reference glue `h50`, `g48` — and splitting those would break the
     //     one shape (`km2`) whose adjacency the exponent branch depends on.
-    s = tr(s, /(?<=[\p{L}\p{M}])(?=\d[\d.,]*[ \u00a0]?%)/gu, " ");  // space, NBSP
+    s = rewrite(s, /(?<=[\p{L}\p{M}])(?=\d[\d.,]*[ \u00a0]?%)/gu, " ");  // space, NBSP
 
     // 7) RANGES → `ho isa ho`, BEFORE the shared tier and that ordering is load-bearing: `unitPrefix` moves
     //    the measure noun in FRONT of its number, so a range claimed after the tier would read
@@ -371,7 +371,7 @@ export function normalizeSesotho(input: string): string {
     //    guard that declines it. `\.\d` still does; a bare removal would have read the DOI as a span.
     //    ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA as well as the comma group,
     //    so `5–13,7` must not be claimed with its fraction left behind.
-    s = tr(s, /(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
+    s = rewrite(s, /(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${SPAN} ${b}` : whole));
 
     // 8) THE ENGLISH ORDINAL SUFFIX (`60th`, `1st`, `18th`). Sesotho writes its own ordinals as WORDS with a
@@ -379,7 +379,7 @@ export function normalizeSesotho(input: string): string {
     //    always foreign orthography, and it was reaching the phoneme stream as a bare [tʰ]. Stripping it is
     //    the whole fix; no ordinal morphology is invented, because Sesotho's is already written out wherever
     //    the language means it. Case-insensitive (trap 7).
-    s = tr(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+    s = rewrite(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 9) THE SHARED SYMBOL TIER — percent, currency, units, the rate and the squared exponent. See SYMBOLS.
     s = SYMBOLS(s);
@@ -393,7 +393,7 @@ export function normalizeSesotho(input: string): string {
     //     digit (trap 14) — `tse` is the invariant class 8/10 concord of the magnitude noun, which is
     //     `dimilione`/`dibilione` whatever number follows.
     //     ⚠ ONLY AFTER A CONCORD THIS FILE JUST EMITTED, so a magnitude in ordinary prose is untouched.
-    s = tr(s, new RegExp(`(tse[ \u00a0]+(?:${MAG_ALT}))[ \u00a0]+(?=\\d)`, "gu"), "$1 tse ");  // space, NBSP
+    s = rewrite(s, new RegExp(`(tse[ \u00a0]+(?:${MAG_ALT}))[ \u00a0]+(?=\\d)`, "gu"), "$1 tse ");  // space, NBSP
 
     // 11) DECIMALS, LAST of the numeric rules — steps 5 to 10 all need their number intact, and the tier
     //     needs the digit adjacent to its sign (`37,99 km²` must still be one operand when the unit is
@@ -411,10 +411,10 @@ export function normalizeSesotho(input: string): string {
     //     header declines. `ka nako ya 1:56.72` has a `:` before the `56`, which is not a digit or a
     //     separator, so the plain lookbehind admitted it and the layer read *1:56 7 2* — claiming HALF of a
     //     shape it had just declined to claim at all. Refuse the whole match, never half of it (trap 53).
-    s = tr(s, /(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d]|\.\d)/gu, (_m, i: string, f: string) => spell(i, f));
-    s = tr(s, /(?<![\d.,:])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = rewrite(s, /(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d]|\.\d)/gu, (_m, i: string, f: string) => spell(i, f));
+    s = rewrite(s, /(?<![\d.,:])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, f));
 
     // ⚠ A padded replacement (` le `, ` tse `) doubles a space that was already there and can leave one at
     // an edge. SLOT-GAP is a corpus-diff defect class; this pass must not feed it.
-    return s.replace(/[^\S\n]{2,}/gu, " ").replace(/^[^\S\n]+|[^\S\n]+$/gu, "");
+    return rewrite(rewrite(s, /[^\S\n]{2,}/gu, " "), /^[^\S\n]+|[^\S\n]+$/gu, "");
 }

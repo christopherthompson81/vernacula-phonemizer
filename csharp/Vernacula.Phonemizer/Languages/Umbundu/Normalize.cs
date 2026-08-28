@@ -4,6 +4,7 @@
  * Ported from src/languages/umbundu/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Umbundu;
 
@@ -33,22 +34,22 @@ public static class Normalize
     {
         var s = input;
 
-        s = IOTA_UPPER.Replace(IOTA_LOWER.Replace(s, "ĩ"), "Ĩ");
+        s = Rewrite(Rewrite(s, IOTA_LOWER, "ĩ"), IOTA_UPPER, "Ĩ");
 
         s = SYMBOLS(s);
 
-        s = DOT_GROUP.Replace(s, m => m.Groups[1].Value + DOTS.Replace(m.Groups[2].Value, ""));
+        s = Rewrite(s, DOT_GROUP, m => m.Groups[1].Value + DOTS.Replace(m.Groups[2].Value, ""));
 
-        s = DECIMAL_COMMA.Replace(s, "$1 ");
+        s = Rewrite(s, DECIMAL_COMMA, "$1 ");
 
-        s = CLOCK.Replace(s, "$1 $2");
+        s = Rewrite(s, CLOCK, "$1 $2");
 
-        s = HOUR_H.Replace(s, "$1 $2");
+        s = Rewrite(s, HOUR_H, "$1 $2");
 
-        s = SPACED_DASH.Replace(s, ", ");
+        s = Rewrite(s, SPACED_DASH, ", ");
 
-        s = TIGHT_RANGE.Replace(s, "$1, $2");
+        s = Rewrite(s, TIGHT_RANGE, "$1, $2");
 
-        return MULTI_SPACE.Replace(s, " ");
+        return Rewrite(s, MULTI_SPACE, " ");
     }
 }

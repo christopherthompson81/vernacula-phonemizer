@@ -4,6 +4,7 @@
  * Ported from src/languages/urdu/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Urdu;
 
@@ -79,21 +80,21 @@ public static class Normalize
 
         return input =>
         {
-            var s = ARABIC_DIGIT.Replace(input, m => FoldDigit(m.Value));
+            var s = Rewrite(input, ARABIC_DIGIT, m => FoldDigit(m.Value));
 
-            s = AR_THOUSANDS.Replace(AR_DECIMAL.Replace(AR_PERCENT.Replace(s, "%"), "."), ",");
-            s = AR_COMMA_GROUP.Replace(s, ",");
+            s = Rewrite(Rewrite(Rewrite(s, AR_PERCENT, "%"), AR_DECIMAL, "."), AR_THOUSANDS, ",");
+            s = Rewrite(s, AR_COMMA_GROUP, ",");
 
-            s = ORDINAL_RE.Replace(s, m =>
+            s = Rewrite(s, ORDINAL_RE, m =>
                 Ordinal(Js.Number(m.Groups[1].Value), SUFFIX_FORM[m.Groups[2].Value], m.Groups[2].Value) ?? m.Value);
 
-            s = UNIT_RE.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
+            s = Rewrite(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
 
-            s = DEG_C.Replace(s, "$1 ڈگری سینٹی گریڈ");
-            s = DEG_F.Replace(s, "$1 ڈگری فارن ہائیٹ");
-            s = DEG.Replace(s, "$1 ڈگری");
+            s = Rewrite(s, DEG_C, "$1 ڈگری سینٹی گریڈ");
+            s = Rewrite(s, DEG_F, "$1 ڈگری فارن ہائیٹ");
+            s = Rewrite(s, DEG, "$1 ڈگری");
 
-            s = CLOCK.Replace(s, m =>
+            s = Rewrite(s, CLOCK, m =>
             {
                 var hv = Js.Number(m.Groups[1].Value);
                 var mv = Js.Number(m.Groups[2].Value);
@@ -104,16 +105,16 @@ public static class Normalize
                 return $"{hw} بج کر {string.Join(" ", Cardinal(mv))} منٹ";
             });
 
-            s = MINUS.Replace(s, "$1منفی $2");
-            s = PLUS_ATTACHED.Replace(s, "$1 جمع $2");
-            s = PLUS_LEADING.Replace(s, "$1جمع $2");
+            s = Rewrite(s, MINUS, "$1منفی $2");
+            s = Rewrite(s, PLUS_ATTACHED, "$1 جمع $2");
+            s = Rewrite(s, PLUS_LEADING, "$1جمع $2");
 
             s = PostposedSignPass.PostposedSign(s, "<", "سے کم");
             s = PostposedSignPass.PostposedSign(s, ">", "سے زیادہ");
-            s = EQUALS_RE.Replace(s, " برابر ");
-            s = DIVIDE.Replace(s, " تقسیم ");
+            s = Rewrite(s, EQUALS_RE, " برابر ");
+            s = Rewrite(s, DIVIDE, " تقسیم ");
 
-            s = FRACTION.Replace(s, m =>
+            s = Rewrite(s, FRACTION, m =>
             {
                 var num = Js.Number(m.Groups[1].Value);
                 var den = Js.Number(m.Groups[2].Value);

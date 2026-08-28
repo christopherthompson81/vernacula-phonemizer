@@ -5,6 +5,7 @@
  * attestation, and for the keys it deliberately refuses.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Igbo;
 
@@ -60,23 +61,23 @@ public static class Normalize
         var s = text;
 
         // 1. De-group thousands FIRST, repeatedly, so `1,234,567` becomes one number.
-        s = GROUPED.Replace(s, "");
+        s = Rewrite(s, GROUPED, "");
 
         // 1b. `8th` → `nke 8` — the ordinal marker is a corpus word and the DIGITS go to the compositor.
-        s = ORDINAL_TAIL.Replace(s, "nke $1");
+        s = Rewrite(s, ORDINAL_TAIL, "nke $1");
 
         // 2. A digit-flanked dash in Igbo is a RANGE, not a minus. `ruo` is "to, until".
-        s = RANGE.Replace(s, "$1 ruo ");
+        s = Rewrite(s, RANGE, "$1 ruo ");
 
         // 2b. ⚠ BEFORE the tier, which MOVES the unit noun leftward onto whatever precedes the digits.
-        s = FUSED_QUANTITY.Replace(s, "$1 ");
+        s = Rewrite(s, FUSED_QUANTITY, "$1 ");
 
         // 3. The shared symbol tier.
         s = SYMBOLS(s);
 
         // 4. ⚠ The decimal separator LAST: run before the tier it splits `8.3%` and the percent word lands
         //    between the halves. The fraction stays digit-by-digit after the word.
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} {Manifest.MANIFEST.Numbers.DecimalWord} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         return s;

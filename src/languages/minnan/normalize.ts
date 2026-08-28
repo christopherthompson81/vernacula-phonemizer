@@ -107,7 +107,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, readDecimals, readDegrees } from "../../core/sinitic.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 
 /**
@@ -189,7 +189,7 @@ export function normalizeMinNan(input: string): string {
     // ⚠ THE GUARD IS THE ⟨o⟩ VOWEL IN BOTH SPELLINGS, precomposed and decomposed. Counted over the
     // corpus, 145 of the 146 dots follow one (`ō· ×61, ó· ×37, ò· ×16, o· ×16, ô· ×13, O· ×2`); the one
     // that does not follows a hyphen and is not this vowel, so it is left alone rather than rewritten.
-    s = tr(s, /([oOòóôōǒÒÓÔŌǑ]\p{M}*)[·‧]/gu, "$1͘");
+    s = rewrite(s, /([oOòóôōǒÒÓÔŌǑ]\p{M}*)[·‧]/gu, "$1͘");
 
     // ── 1. de-group thousands ────────────────────────────────────────────────────────────────────
     // ⚠ FIRST, and this language's number format is unambiguous, unlike Javanese's: the corpus is
@@ -208,7 +208,7 @@ export function normalizeMinNan(input: string): string {
     // ⚠ THE LEFT ENDPOINT MAY CARRY ITS UNIT — `25℃~30℃` puts the mark after the SIGN, not after a digit,
     // so a `(\d)` pattern never reaches it and the range vanished while both halves still read. Captured and
     // RE-EMITTED (playbook trap 10) so step 3 still sees `25°C` intact and gives it its Liap-sī reading.
-    s = tr(s, /(\d)((?:\s*°\s*C|℃|\s*°|%)?)\s*[–~〜]\s*(?=\d)/gui, "$1$2 到 ");
+    s = rewrite(s, /(\d)((?:\s*°\s*C|℃|\s*°|%)?)\s*[–~〜]\s*(?=\d)/gui, "$1$2 到 ");
 
     // ── 2b. THE MINUS, AND THIS CORPUS GLOSSES ITS OWN SIGN ──────────────────────────────────────
     // ⚠ THE SENTENCE CARRYING THE SIGN NAMES IT. `(2000 kg) × (−10 m/s) = 20000 kg⋅m/s, hū-hō tāi-piáu
@@ -238,8 +238,8 @@ export function normalizeMinNan(input: string): string {
     // only the space. `9.10938356(11)×10 −31 kg` is 10⁻³¹, not "ten minus thirty-one"; the base is two
     // characters away. Seven languages in this fleet's corpora write an exponent exactly that way.
     const NAN_UNIT_AHEAD = "(?=\\p{Nd}[\\d.,]*\\s*(?:°|%|\\p{sc=Latn}))";
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\p{Nd}])(?<!\\p{Nd}\\s)\u2212${NAN_UNIT_AHEAD}`, "gu"), "負");
-    s = tr(s, /(^|[(（,，])\s?\u2212(?=\p{Nd})/gmu, "$1負");
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\p{Nd}])(?<!\\p{Nd}\\s)\u2212${NAN_UNIT_AHEAD}`, "gu"), "負");
+    s = rewrite(s, /(^|[(（,，])\s?\u2212(?=\p{Nd})/gmu, "$1負");
 
     // ── 3. coordinates, then the temperature, then the bare degree ───────────────────────────────
     // ⚠ COORDINATES FIRST: `tang-keng 118°04'04"`, `pak-hūi 24°26'46"`, `118°24′`, `25°10′` — the minute
@@ -247,8 +247,8 @@ export function normalizeMinNan(input: string): string {
     // ⚠ ONLY THE DEGREE IS READ. ⟨tō͘⟩ is corpus-attested (`lâm-hūi 65-tō͘`), but no arc-minute or
     // arc-second word is — ⟨hun⟩ occurs ×4 and never in this sense, ⟨biáu⟩ only as a time unit in `km/biáu`
     // — so the marks are dropped rather than read with a guessed word, and the digits still speak.
-    s = tr(s, /(\d+)\s*°\s*(\d+)\s*[′']\s*(\d+)\s*[″"]/gu, "$1度 $2 $3");
-    s = tr(s, /(\d+)\s*°\s*(\d+)\s*[′']/gu, "$1度 $2");
+    s = rewrite(s, /(\d+)\s*°\s*(\d+)\s*[′']\s*(\d+)\s*[″"]/gu, "$1度 $2 $3");
+    s = rewrite(s, /(\d+)\s*°\s*(\d+)\s*[′']/gu, "$1度 $2");
     // ⚠ CELSIUS IS PREPOSED, and the corpus DEFINES it: `siat-tēng-chòe Liap-sī 0 tō͘ (0 °C)` and
     // `Liap-sī 100 tō͘ (100 °C)`. So the reading wraps around the numeral — the scale name before it, the
     // degree word after — which no `units` entry can express, hence the local rule. ⟨攝氏⟩ is a dict WORD

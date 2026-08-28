@@ -87,7 +87,7 @@
 import { MANIFEST } from "./manifest.ts";
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * ⚠ THE UNIT NOUN COMES AFTER THE NUMBER in Haitian, like French and unlike Lingala — `45 kilomèt`,
@@ -213,7 +213,7 @@ function ordinalWord(n: number): string | undefined {
 function expandDotted(s: string, body: string, word: string): string {
     const atEnd = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.(?=[ \u00a0]*(?:$|\\p{Lu}))`, "gu");  // space, NBSP
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
-    return s.replace(atEnd, `${word}.`).replace(inline, word);
+    return rewrite(rewrite(s, atEnd, `${word}.`), inline, word);
 }
 
 /** Haitian Creole text normalization: symbols, numbers and ordinals → words the g2p already speaks. */
@@ -228,7 +228,7 @@ export function normalizeHaitian(input: string): string {
     //    corpus writes `lèt ​​​​,` and `Larisi ​​ak` with runs of U+200B — and `&nbsp;` must go BEFORE the
     //    ampersand rule at step 13, or it is read as "and" plus the letters n-b-s-p. This corpus has the
     //    entity in a SPACED form too (`[ ref. & nbsp; nesesè ]`), which is why the entity arm allows a gap.
-    s = tr(tr(s, /&\s?nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[\u200b\u200c\u200d\ufeff]/gu, "");
+    s = rewrite(rewrite(s, /&\s?nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[\u200b\u200c\u200d\ufeff]/gu, "");
 
     // 2) ERA MARKERS AND DOTTED ABBREVIATIONS, before anything can read an interior dot as a phrase break,
     //    and before the de-grouping at step 4 for the reason the Lingala layer gives: both look at dots.
@@ -246,7 +246,7 @@ export function normalizeHaitian(input: string): string {
     //    `1976, p. 157-177` broke into two sentences. `paj` is the ordinary Creole word and the corpus uses
     //    it in this exact slot (`242 paj`, `20 paj`). Guarded on a following digit so an initial (`A. p.`)
     //    is untouched.
-    s = tr(s, /(?<![\p{L}\p{M}])pp?\.\s?(?=\d)/gu, "paj ");
+    s = rewrite(s, /(?<![\p{L}\p{M}])pp?\.\s?(?=\d)/gu, "paj ");
 
     // 3) ISBN, before every numeric rule — an identifier is read DIGIT BY DIGIT, not as a quantity. ×70 in
     //    Creole text, ×593 in the dump, and it is the one place a raw digit reaches the IPA: a 13-digit run
@@ -254,7 +254,7 @@ export function normalizeHaitian(input: string): string {
     //    otherwise read as four separate cardinals — a catalogue number spoken as arithmetic.
     //    ⚠ MUST PRECEDE THE RANGE RULE. `ISBN 1-58432-005-2`'s inner pairs are exactly the shape RANGE looks
     //    for; claiming the identifier whole removes the question.
-    s = tr(s, /(?<![\p{L}\p{M}])(ISBN(?:[- ]1[03])?)#?\s*:?\s*([\d][\d– -]*[\dXx])/gu,
+    s = rewrite(s, /(?<![\p{L}\p{M}])(ISBN(?:[- ]1[03])?)#?\s*:?\s*([\d][\d– -]*[\dXx])/gu,
         (_m, tag: string, body: string) => `${tag} ${[...body.replace(/[– -]/gu, "")].join(" ")}`);
 
     // 4) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause
@@ -274,12 +274,12 @@ export function normalizeHaitian(input: string): string {
     //    corpus's clearest instance. That is the trap-28 shape — say both numbers, 3,861 against a handful.
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => rewrite(w, /\./gu, ""));
     //    The SPACE form must additionally reject a bare adjacency that is really two numbers in a list;
     //    requiring every group to be exactly three digits does that (`ant 1854 ak 1889` has no 3-digit
     //    group). The corpus uses both U+0020 and U+00A0 here.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]|[ \u00a0\u202f\u2009]\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]|[ \u00a0\u202f\u2009]\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));
 
     // 4b) THE MINUS — U+2212 ONLY. ⚠ THIS REVERSES THIS FILE'S OWN EARLIER REFUSAL (see the header), and
     //    the reversal is about WHICH CHARACTER is claimed, not about new evidence for the word.
@@ -294,7 +294,7 @@ export function normalizeHaitian(input: string): string {
     //    read rather than dropped because omitting a minus INVERTS the value, and `mwens ven degre` is at
     //    worst an odd register for a reading that is otherwise the wrong temperature by forty degrees.
     //    Corpus instance claimed: `−20°C`. The 6 temperatures written with a hyphen stay silent.
-    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, "mwens ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, "mwens ");
 
     // 5) UNITS, before decimals — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten (the playbook's standing coupling), and after de-grouping so `1 250 257,6 km²`
@@ -318,7 +318,7 @@ export function normalizeHaitian(input: string): string {
     //    number, unit noun, connective, denominator — `120 kilomèt pa èdtan`, the corpus's own sentence.
     for (const [sym, word] of UNITS) {
         if (/[²³23]$/u.test(sym)) continue; // a rate never carries an exponent on its NUMERATOR here
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(\\d+(?:[.,]\\d+)?)\\s?${sym}\\s?/\\s?(h|èdtan)(?![\\p{L}\\p{M}\\d])`,
                 "gu",
@@ -335,18 +335,18 @@ export function normalizeHaitian(input: string): string {
         // arm below matches on: `Ak yon sifas tè 30 milyon km2`, `8.6 milyon km²`. Claimed first, because
         // the single-operand arm cannot see past the word and would leave the unit raw (this is the shared
         // tier's `magAltU` hop, done locally for the same reason the rest of this step is local).
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(\\d+(?:[.,]\\d+)?)\\s?(milyon|milya|mil)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`,
                 "gu",
             ),
             `$1 $2 ${word}`,
         );
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),
             (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${a} a ${b} ${word}` : whole),
         );
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d²³/])`,
                 "gu",
@@ -357,7 +357,7 @@ export function normalizeHaitian(input: string): string {
     // …and the ones with NO numeral at all — see BARE_UNITS. Last, so the counted arms above keep every
     // match they can make and only what they could not reach is left for this.
     s = BARE_UNITS(s);
-    for (const [re, word] of BARE_EXPONENT_UNITS) s = tr(s, re, word);
+    for (const [re, word] of BARE_EXPONENT_UNITS) s = rewrite(s, re, word);
 
     // 6) THE DEGREE SIGN, WHICH DOES FIVE DIFFERENT JOBS ON THIS WIKI — and only two of them are a degree.
     //    Measured over the 276 `°` in Creole text (the Lingala layer records the same hazard with four jobs;
@@ -373,14 +373,14 @@ export function normalizeHaitian(input: string): string {
     //    no new vocabulary: `nimewo` ×381 is the ordinary Creole word and the corpus uses it in exactly this
     //    slot (`li te rive nan nimewo 117 sou Billboard 200 la ak nimewo 50`). Reading `n°1` as a degree —
     //    Lingala's stated worry — is avoided by reading it correctly instead.
-    s = tr(s, /(?<![\p{L}\p{M}])[Nn]\s?°\s?(?=\d)/gu, "nimewo ");
+    s = rewrite(s, /(?<![\p{L}\p{M}])[Nn]\s?°\s?(?=\d)/gu, "nimewo ");
     //    ⚠ THE SCALE ARM NEXT, and `degre Sèlsiyis` is the layer's best-sourced phrase: the corpus GLOSSES
     //    the symbol with it — `yon tanperati mwayèn 25 °C (25 degre Sèlsiyis)` — and writes the collocation
     //    ×16 more (`ki pi piti pase 10 degre Sèlsiyis`, `ant 9 degre Sèlsiyis ak 12 degre Sèlsiyis`).
     //    ⚠ `°F` IS NOT CLAIMED: its scale name is written `Farenheit` ×1 and `Farennayt` ×1, two spellings
     //    with one instance each, which is not a source. 6 instances, left as they were.
     //    ⚠ SAME DECIMAL-TAIL COUPLING AS STEP 5 — `-272.5 ° C` must match whole or the number is cut in two.
-    s = tr(s, /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 degre Sèlsiyis");
+    s = rewrite(s, /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 degre Sèlsiyis");
     //    ⚠ AND ONLY THEN THE BARE `°`, as `degre` — attested in exactly this measure slot (`kiltive ant 60
     //    degre latitid nò ak 40 degre latitid sid`, `40 a 50 degre Farenheit`). ⚠ Bare `degre` ×180 is
     //    mostly the abstract "degree/extent" (`yon gwo degre nan pouvwa politik`), so it is the COLLOCATION
@@ -391,7 +391,7 @@ export function normalizeHaitian(input: string): string {
     //    minutes is a partial fix, and the alternative was silence on all 139 angles and coordinates.
     //    ⚠ AND IT RE-SPACES WHEN A DIGIT FOLLOWS, because a coordinate glues the arc-minutes straight onto
     //    the sign (`52°21′`): without that, `degre` and `21` would fuse into one unreadable token.
-    s = tr(s, /(?<=\d)\s?°(?![\p{L}\p{M}])/gu, (m: string, off: number, all: string) =>
+    s = rewrite(s, /(?<=\d)\s?°(?![\p{L}\p{M}])/gu, (m: string, off: number, all: string) =>
         /^\s?\d/u.test(all.slice(off + m.length)) ? " degre " : " degre");
 
     // 7) RANGES, before percent — `70-80%` and `20-25%` are ranges OF percents (this corpus's own sentence:
@@ -400,12 +400,12 @@ export function normalizeHaitian(input: string): string {
     //    guards and for why non-ascending pairs are left alone.
     //    ⚠ A PERCENT-TO-PERCENT SPAN NEEDS ITS OWN ARM: RANGE wants the dash to follow the DIGITS, and in
     //    `10%-15%` a `%` stands between them. It costs no new word — the connective is the same `a`.
-    s = tr(s,
+    s = rewrite(s,
         /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?%\s?[-–—]\s?(\d+(?:[.,]\d+)?)\s?%/gu,
         (whole, a: string, b: string) =>
-            Number(a.replace(",", ".")) < Number(b.replace(",", ".")) ? `${a}% a ${b}%` : whole,
+            Number(rewrite(a, ",", ".")) < Number(rewrite(b, ",", ".")) ? `${a}% a ${b}%` : whole,
     );
-    s = tr(s, RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} a ${b}` : whole));
+    s = rewrite(s, RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} a ${b}` : whole));
 
     // 8) PERCENT → `pousan`, POSTPOSED. ×1,449 in Creole text, the layer's largest class by a wide margin,
     //    and the best-attested word in it: `pousan` ×82 in exactly this position — `Plis pase 90 pousan nan
@@ -413,7 +413,7 @@ export function normalizeHaitian(input: string): string {
     //    kabòn`, `li mande yo envesti ant 10 pousan ak 15 pousan nan salè yo`.
     //    ⚠ `pousantaj` ×138 IS A DIFFERENT WORD, not an inflection of this one — it is the noun
     //    "percentage" (`youn nan pi gwo pousantaj inegalite nan mond lan`) and never the reading of `N%`.
-    s = tr(s, /(\d)\s?%/gu, "$1 pousan");
+    s = rewrite(s, /(\d)\s?%/gu, "$1 pousan");
 
     // 9) CURRENCY. `dola` ×493, sense-checked (`90 milyon dola nan 1838`, `$19,97 milya dola`, `40 milya
     //    dola`), and POSTPOSED as the corpus writes it.
@@ -441,8 +441,8 @@ export function normalizeHaitian(input: string): string {
     //    *630 mil dolalions* — a word cut in half. Caught on the re-probe of the fix above.
     const MAG = "(?:milliards?|millions?|milyon|milya|mil)";
     const NAMED = new RegExp(`^[\\s)\\]]*(?:${MAG}\\s+)?(?:dola|dolar|dollars?)(?![\\p{L}\\p{M}])`, "iu");
-    s = tr(s, /(?<![\p{L}\p{M}])(US)\s?\$\s?(?=\d)/giu, "$1 ");
-    s = tr(s, new RegExp(`\\$\\s?(\\d(?:[\\d \u00a0,.]*\\d)?)(\\s?${MAG})?`, "giu"),  // NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])(US)\s?\$\s?(?=\d)/giu, "$1 ");
+    s = rewrite(s, new RegExp(`\\$\\s?(\\d(?:[\\d \u00a0,.]*\\d)?)(\\s?${MAG})?`, "giu"),  // NBSP
         (whole: string, n: string, mag: string | undefined, off: number, all: string) => {
             const quantity = `${n}${mag ?? ""}`;
             return NAMED.test(all.slice(off + whole.length)) ? quantity : `${quantity} dola`;
@@ -473,7 +473,7 @@ export function normalizeHaitian(input: string): string {
     //     false clause boundary re-prosodies the whole utterance. And the shape is ×0 in this corpus — it
     //     was always a hypothesis, while the six are attested.
     //     The chain guard is kept on the RIGHT as well, so `1.2.3` still declines from either direction.
-    s = tr(s, /(?<![\d.,])(\d+)[.,](\d+)(?![\d]|[.,]\d)/gu, (_m, int: string, frac: string) =>
+    s = rewrite(s, /(?<![\d.,])(\d+)[.,](\d+)(?![\d]|[.,]\d)/gu, (_m, int: string, frac: string) =>
         frac.length <= 2 && !frac.startsWith("0") ? `${int} vigil ${frac}` : `${int} vigil ${[...frac].join(" ")}`);
 
     // 11) FRACTIONS → the ordinal-denominator idiom, which is the language's own: `prèske yon senkyèm se
@@ -487,7 +487,7 @@ export function normalizeHaitian(input: string): string {
     //     denominator ≤ 10 admits the real ones and none of the others.
     //     ⚠ AND THE CAP IS A RANGE, NOT A TABLE (trap 8): the rule composes through `ordinalWord`, so `3/4`
     //     reads correctly although the corpus writes it only in words.
-    s = tr(s, /(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) => {
+    s = rewrite(s, /(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) => {
         const den = ordinalWord(Number(b));
         if (den === undefined || !(Number(a) < Number(b) && Number(b) <= 10)) return whole;
         return Number(a) === 1 ? `yon ${den}` : `${a} ${den}`;
@@ -502,7 +502,7 @@ export function normalizeHaitian(input: string): string {
     //     ⚠ THE RULE DECLINES RATHER THAN GUESSES when `ordinalWord` has no attested tail — see its comment.
     //     ⚠ AND IT MUST NOT EAT A FOLLOWING WORD. The suffix may be spaced (`329 èm jou`), so the arm allows
     //     one optional space, and the trailing guard rejects a letter so `4emisyon` cannot match.
-    s = tr(s, /(?<![\d\p{L}\p{M}])(\d+)\s?(?:yèm|ème|èm|em)(?![\p{L}\p{M}])/gu, (whole, n: string) =>
+    s = rewrite(s, /(?<![\d\p{L}\p{M}])(\d+)\s?(?:yèm|ème|èm|em)(?![\p{L}\p{M}])/gu, (whole, n: string) =>
         ordinalWord(Number(n)) ?? whole);
 
     // 13) THE AMPERSAND → `ak`, the ordinary Creole conjunction, which needs no sourcing argument. ×339 in
@@ -510,7 +510,7 @@ export function normalizeHaitian(input: string): string {
     //     Smith (1995)`, `Kool & the Gang`, `Funk & Wagnalls`, `Young & Rubicam`.
     //     ⚠ SPACED ON BOTH SIDES DELIBERATELY: `A&B` deletes to `AB`, which is ONE token instead of two
     //     (traps 18 and 26), so the replacement must insert the boundary the sign was supplying.
-    s = tr(s, /\s?&\s?/gu, " ak ");
+    s = rewrite(s, /\s?&\s?/gu, " ak ");
 
     return s;
 }

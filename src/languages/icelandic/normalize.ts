@@ -35,7 +35,7 @@
  *   · THE ORDINAL RULE AFTER de-grouping and after the decimal rule, both of which own a period too.
  */
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * Ordinals 1–31 in the three weak endings. `masc` is the masculine NOMINATIVE (`-i`); `common` covers
@@ -132,7 +132,7 @@ export function normalizeIcelandic(input: string): string {
     //    numeric rule below could claim one — but the ordering is stated rather than relied on, because the
     //    period is contested by three separate rules in this file and an abbreviation that survives into any
     //    of them arrives as a clause break plus a vowelless ASCII run.
-    for (const [re, word] of ABBREV) t = tr(t, re, word);
+    for (const [re, word] of ABBREV) t = rewrite(t, re, word);
 
     // 1) PERIOD-GROUPED THOUSANDS (22), FIRST — before the ordinal rule, which would otherwise claim the
     //    `1.` of `1.234`. The period is clause punctuation, so the numeral read as "one" + a SENTENCE
@@ -140,34 +140,34 @@ export function normalizeIcelandic(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+        t = rewrite(t, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 2) DECIMAL COMMA (8). The comma is clause punctuation too, so `12,5` read as a PAUSE inside a
     //    number. Fractional part spoken digit by digit.
-    t = tr(t, /(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
+    t = rewrite(t, /(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
         `${whole} komma ${[...frac].join(" ")}`);
 
     // 3) CLOCK, COLON FORM ONLY (10). The period form is a decimal here — see the header.
-    t = tr(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
+    t = rewrite(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
 
     // 4) PERCENT (2) and DEGREES. Postposed.
-    t = tr(t, /(\d+)\s*%/gu, "$1 prósent");
-    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
-    t = tr(t, /(\d)\s*°\s*C(?!\p{L})/giu, "$1 gráður á Celsíus");
-    t = tr(t, /(\d)\s*°\s*F(?!\p{L})/giu, "$1 gráður á Fahrenheit");
-    t = tr(t, /(\d)\s*°/gu, "$1 gráður");
+    t = rewrite(t, /(\d+)\s*%/gu, "$1 prósent");
+    t = rewrite(rewrite(t, /℃/gu, "°C"), /℉/gu, "°F");
+    t = rewrite(t, /(\d)\s*°\s*C(?!\p{L})/giu, "$1 gráður á Celsíus");
+    t = rewrite(t, /(\d)\s*°\s*F(?!\p{L})/giu, "$1 gráður á Fahrenheit");
+    t = rewrite(t, /(\d)\s*°/gu, "$1 gráður");
 
     // 5) SQUARED UNITS (2), before the plain unit rule or the `km` is consumed and the exponent stranded.
-    t = tr(t, /(?<!\p{L})km\s*[²2](?!\d)/giu, "ferkílómetrar");
-    t = tr(t, /(?<!\p{L})m\s*[²2](?!\d)/giu, "fermetrar");
+    t = rewrite(t, /(?<!\p{L})km\s*[²2](?!\d)/giu, "ferkílómetrar");
+    t = rewrite(t, /(?<!\p{L})m\s*[²2](?!\d)/giu, "fermetrar");
     //    …and CUBED, the same shape. `rúmmetra` is the corpus's own word: "Luno var með 120–160 rúmmetra af
     //    eldsneyti um borð". Icelandic fuses the measure word on like `fer-`, so this is a prefix and not a
     //    separate word — `ferkílómetrar` above is the pattern. The nominative plural is emitted to match the
     //    rest of this file's unit table; the corpus's `rúmmetra` is that noun in the accusative, which the
     //    numeral governs and which no rule here inflects for (a standing limitation of the whole table).
-    t = tr(t, /(?<!\p{L})km\s*[³3](?!\d)/giu, "rúmkílómetrar");
-    t = tr(t, /(?<!\p{L})m\s*[³3](?!\d)/giu, "rúmmetrar");
+    t = rewrite(t, /(?<!\p{L})km\s*[³3](?!\d)/giu, "rúmkílómetrar");
+    t = rewrite(t, /(?<!\p{L})m\s*[³3](?!\d)/giu, "rúmmetrar");
 
     // 6) LATIN UNIT ABBREVIATIONS after a number (57).
     // 6a) RATES, BEFORE the plain unit loop — that loop's guard is `(?!\p{L})`, which a slash satisfies, so it
@@ -176,15 +176,15 @@ export function normalizeIcelandic(input: string): string {
     //     ("17.500 mílna hraða á klukkustund"); the abbreviation it writes is `km/klst.`, Icelandic
     //     *klukkustund*, not `km/h`, and both are claimed because foreign-sourced text hands over the latter.
     //     NO SECOND: `á sekúndu` and `sekúndu` are both ×0 here, so `m/s` is left alone rather than invented.
-    t = tr(t, /(?<!\p{L})km\s*\/\s*(?:klst\.?|h)(?![\p{L}])/giu, "kílómetrar á klukkustund");
+    t = rewrite(t, /(?<!\p{L})km\s*\/\s*(?:klst\.?|h)(?![\p{L}])/giu, "kílómetrar á klukkustund");
     for (const [re, word] of UNITS)
-        t = tr(t, new RegExp(`(\\d)\\s*(?:${re.source})(?!\\p{L})`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`(\\d)\\s*(?:${re.source})(?!\\p{L})`, "gu"), `$1 ${word}`);
 
     // 7) ORDINAL DOT (46) — the largest defect. `3. maí` read as "þrír" + a SENTENCE BREAK + "maí".
     //    THE FORM IS SELECTED BY WHAT FOLLOWS, which is the Icelandic-specific part: a month name takes
     //    the masculine nominative `-i`, the oblique forms of `öld` take `-u`, and everything else takes
     //    `-a` — see the declension table in the header for why `-a` is the default rather than `-i`.
-    t = tr(t, /(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})\s+(\p{Ll}+)/gu, (m, n: string, next: string) => {
+    t = rewrite(t, /(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})\s+(\p{Ll}+)/gu, (m, n: string, next: string) => {
         const forms = ORDINALS[n];
         if (forms === undefined) return m;
         const word = MONTHS.test(next) ? forms.masc : FEM_OBLIQUE.test(next) ? forms.femOblique : forms.common;
@@ -192,27 +192,27 @@ export function normalizeIcelandic(input: string): string {
     });
 
     // 8) RANGES (12). Spoken `til`.
-    t = tr(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
+    t = rewrite(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
 
     // 9) CURRENCY, both placements.
     for (const [sign, word] of Object.entries(CURRENCY)) {
         const esc = sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        t = tr(t, new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
-        t = tr(t, new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
     }
 
     // 10) SIGNED NUMBERS — a sign PREFIXED to a number, after ranges so a range's dash is already gone.
-    t = tr(t, /(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
+    t = rewrite(t, /(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
         `${sign === "+" ? "plús" : "mínus"} ${n}`);
 
     // 11) ARITHMETIC AND RELATIONAL SIGNS — infix between digits is where arithmetic lives; the
     //     relational signs are read in every position.
-    t = tr(t, /(\d)\s*\+\s*(\d)/gu, "$1 plús $2");
-    for (const [re, word] of RELATIONAL) t = tr(t, re, word);
+    t = rewrite(t, /(\d)\s*\+\s*(\d)/gu, "$1 plús $2");
+    for (const [re, word] of RELATIONAL) t = rewrite(t, re, word);
 
     // 12) AMPERSAND → og.
-    t = tr(t, /\s*[&＆]\s*/gu, " og ");
+    t = rewrite(t, /\s*[&＆]\s*/gu, " og ");
 
     // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
-    return t.replace(/[ \t]{2,}/gu, " ");
+    return rewrite(t, /[ \t]{2,}/gu, " ");
 }

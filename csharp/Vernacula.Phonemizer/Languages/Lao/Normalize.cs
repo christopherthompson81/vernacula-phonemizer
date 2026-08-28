@@ -5,6 +5,7 @@
  * characters, the era markers, the group-size separator split, and the four declined classes).
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Lao;
 
@@ -83,36 +84,36 @@ public static class Normalize
         var s = input;
 
         // 1) THE SOFT HYPHEN GOES AND THE ZERO WIDTH SPACE STAYS — see the TS header.
-        s = INVISIBLE.Replace(NBSP.Replace(s, " "), "");
-        s = US_DOLLAR.Replace(s, "US$$");
+        s = Rewrite(Rewrite(s, NBSP, " "), INVISIBLE, "");
+        s = Rewrite(s, US_DOLLAR, "US$$");
 
         // 2) ERA MARKERS — before anything that reads a dot, and the largest single class in the language.
-        foreach (var (rx, word) in ERA) s = rx.Replace(s, word);
-        s = DOUBLE_SPACE.Replace(s, " ");
+        foreach (var (rx, word) in ERA) s = Rewrite(s, rx, word);
+        s = Rewrite(s, DOUBLE_SPACE, " ");
 
         // 3) THE SEPARATORS, BY GROUP SIZE — three digits after the mark is a THOUSANDS group whichever
         //    mark carries it.
-        s = JsRegex.Replace(s, GROUP, m => m.Value.Replace(m.Groups[2].Value, "", StringComparison.Ordinal));
+        s = Rewrite(s, GROUP, m => m.Value.Replace(m.Groups[2].Value, "", StringComparison.Ordinal));
 
         // 4) NEGATIVE NUMBERS — U+2212 anywhere, the ASCII hyphen only where it does not follow a number.
-        s = MINUS_SIGN.Replace(s, "ລົບ ");
-        s = MINUS_ASCII.Replace(s, "ລົບ ");
+        s = Rewrite(s, MINUS_SIGN, "ລົບ ");
+        s = Rewrite(s, MINUS_ASCII, "ລົບ ");
 
         // 5) DEGREES — `ອົງສາ`, POSTPOSED. Lao writes the scale letter FIRST (`30 - 33 c°`), so both orders
         //    are claimed and the letter is consumed rather than read as an English letter name.
-        s = DEGREE_SCALE.Replace(s, "$1 ອົງສາ");
-        s = DEGREE_BARE.Replace(s, "$1 ອົງສາ");
+        s = Rewrite(s, DEGREE_SCALE, "$1 ອົງສາ");
+        s = Rewrite(s, DEGREE_BARE, "$1 ອົງສາ");
 
         // 5b) A PERCENT WORD ALREADY IN THE TEXT SPENDS THE SIGN — on either side of the figure.
-        s = PERCENT_WORD_NUM.Replace(s, "$1$2");
-        s = PERCENT_WORD_SIGN.Replace(s, "$1");
+        s = Rewrite(s, PERCENT_WORD_NUM, "$1$2");
+        s = Rewrite(s, PERCENT_WORD_SIGN, "$1");
 
         // 6) THE SHARED TIER — above step 7, because the tier matches a unit only when a NUMBER is adjacent
         //    and the decimal rewrite destroys that adjacency.
         s = SYMBOLS(s);
 
         // 7) THE DECIMAL POINT — `ຈຸດ`, fractional digits emitted ONE AT A TIME, as they are said.
-        s = JsRegex.Replace(s, DECIMAL,
+        s = Rewrite(s, DECIMAL,
             m => m.Groups[1].Value + " ຈຸດ " + string.Join(" ", Js.CodePoints(m.Groups[2].Value)));
 
         return s;

@@ -4,6 +4,7 @@
  * Ported from src/languages/cebuano/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Cebuano;
 
@@ -58,31 +59,31 @@ public static class Normalize
     {
         var s = input;
 
-        s = GROUPED.Replace(s, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUPED, m => COMMAS.Replace(m.Value, ""));
 
-        s = CLOCK_COLON.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
-        s = CLOCK_DOT.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
-        s = CLOCK_MILITARY.Replace(s, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, CLOCK_COLON, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, CLOCK_DOT, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, CLOCK_MILITARY, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
 
         s = SYMBOLS(s);
 
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} punto {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-        s = RANGE.Replace(s, "$1 ngadto sa $2");
+        s = Rewrite(s, RANGE, "$1 ngadto sa $2");
 
-        s = ABBREV.Replace(s, m =>
+        s = Rewrite(s, ABBREV, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
             // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
             Js.Number(m.Groups[1].Value) == 1 && Js.Number(m.Groups[2].Value) == 2
                 ? "tunga"
                 : $"{m.Groups[1].Value} kabahin sa {m.Groups[2].Value}");
 
-        s = PLUS_ATTACHED.Replace(s, "$1 dugang $2");
-        s = PLUS_LEADING.Replace(s, "$1dugang $2");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 dugang $2");
+        s = Rewrite(s, PLUS_LEADING, "$1dugang $2");
 
         return s;
     }

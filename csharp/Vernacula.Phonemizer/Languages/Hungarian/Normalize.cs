@@ -4,6 +4,7 @@
  * Ported from src/languages/hungarian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Hungarian;
 
@@ -34,7 +35,7 @@ public static class Normalize
         ["dzs"] = "z", ["sz"] = "s", ["zs"] = "z", ["cs"] = "c", ["gy"] = "g", ["ny"] = "n",
         ["ty"] = "t", ["ly"] = "j", ["dz"] = "z",
     };
-    private static string Fold(string w) => DIGRAPH.Replace(w, m => DIGRAPH_FOLD[m.Value]);
+    private static string Fold(string w) => JsRegex.Replace(w, DIGRAPH, m => DIGRAPH_FOLD[m.Value]);
 
     /** Hungarian phonotactics, for the OOV rule in core/initialisms.ts. Native Hungarian words admit NO
      *  initial cluster; the onsets listed are the ones loanwords brought in. Applied to the digraph-folded
@@ -212,31 +213,31 @@ public static class Normalize
     {
         var s = input;
 
-        s = TIMES.Replace(s, m =>
+        s = Rewrite(s, TIMES, m =>
         {
             var w = Numbers.MultiplicativeWords(Js.Number(m.Groups[1].Value));
             return w is null ? m.Value : $"{w} ";
         });
 
-        foreach (var (re, word) in ERA) s = re.Replace(s, word);
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        foreach (var (re, word) in ERA) s = Rewrite(s, re, word);
+        s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
+        s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
 
         // 2) DIGIT DE-GROUPING, FIRST among the number rules — before the ordinal detector in step 9, which
         //    would otherwise read `100.` as an ordinal. Looped three times: `5.000.000` has two separators.
         for (var i = 0; i < 3; i++)
         {
-            s = GROUP_DOT_SPACE.Replace(s, "");
-            s = GROUP_DOT_THEN_SPACE.Replace(s, ""); // the `400. 000` shape
-            s = GROUP_COMMA.Replace(s, "");
+            s = Rewrite(s, GROUP_DOT_SPACE, "");
+            s = Rewrite(s, GROUP_DOT_THEN_SPACE, ""); // the `400. 000` shape
+            s = Rewrite(s, GROUP_COMMA, "");
         }
 
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
             Js.Number(m.Groups[2].Value) == 0 ? m.Groups[1].Value : $"{m.Groups[1].Value} {m.Groups[2].Value}");
 
         // 4) UNIT ABBREVIATION + HYPHEN SUFFIX, BEFORE the shared symbol tier (step 6). The tier would
         //    otherwise claim `20 km-re` and leave `-re` stranded behind the substituted word.
-        s = UNIT_SUFFIX.Replace(s, m =>
+        s = Rewrite(s, UNIT_SUFFIX, m =>
         {
             var u = m.Groups[1].Value;
             var exp = m.Groups[2].Success ? m.Groups[2].Value : null;
@@ -245,7 +246,7 @@ public static class Normalize
             var pre = exp is null ? "" : exp == "\u00b3" || exp == "3" ? "köb" : "négyzet";
             return $"{pre}{head}{suf}";
         });
-        s = METRE_SUFFIX.Replace(s, m =>
+        s = Rewrite(s, METRE_SUFFIX, m =>
         {
             var exp = m.Groups[2].Success ? m.Groups[2].Value : null;
             var pre = exp is null ? "" : exp == "\u00b3" || exp == "3" ? "köb" : "négyzet";
@@ -253,7 +254,7 @@ public static class Normalize
         });
 
         // 5) PERCENT + HYPHEN SUFFIX, before the tier, for the reason step 4 gives.
-        s = PCT_SUFFIX.Replace(s, "$1 százalék$2");
+        s = Rewrite(s, PCT_SUFFIX, "$1 százalék$2");
 
         // 6) SHARED SYMBOL TIER — %, units, rates, exponents. BEFORE the decimal rewrite in step 8: the tier
         //    matches a unit only when a NUMBER is adjacent, and `3,5` → *három egész öt* destroys that.
@@ -263,55 +264,55 @@ public static class Normalize
         // ⚠ The lowercase scale letters go in the CLASS, not in an `i` flag: `LOWER` is the Hungarian
         //    lowercase alphabet and the suffix is genuinely lowercase-only, so `i` would silently widen the
         //    suffix capture.
-        s = DEG_SUFFIX.Replace(s, m =>
+        s = Rewrite(s, DEG_SUFFIX, m =>
         {
             var scale = m.Groups[2].Success ? m.Groups[2].Value : null;
             var pre = scale?.ToUpperInvariant() == "C" ? "Celsius-"
                 : scale?.ToUpperInvariant() == "F" ? "Fahrenheit-" : "";
             return $"{m.Groups[1].Value} {pre}fok{m.Groups[3].Value}";
         });
-        s = DEG_C.Replace(s, "$1 Celsius-fok");
-        s = DEG_F.Replace(s, "$1 Fahrenheit-fok");
-        s = DEG.Replace(s, "$1 fok");
+        s = Rewrite(s, DEG_C, "$1 Celsius-fok");
+        s = Rewrite(s, DEG_F, "$1 Fahrenheit-fok");
+        s = Rewrite(s, DEG, "$1 fok");
         // ⚠ Every `-<digit>` in Hungarian text of this kind is a RANGE or a score, not a negative, so the
         // minus is restricted to positions a range cannot occupy.
         {
             var subject = s;
-            s = MINUS.Replace(s, m => DIGIT_BEFORE.IsMatch(subject[..m.Index]) ? m.Value : "mínusz ");
+            s = Rewrite(s, MINUS, m => DIGIT_BEFORE.IsMatch(subject[..m.Index]) ? m.Value : "mínusz ");
         }
-        s = PLUS_MINUS.Replace(s, " plusz mínusz ");
-        s = PLUS_ATTACHED.Replace(s, "$1 plusz $2"); // UTC+1
-        s = PLUS_LEADING.Replace(s, "$1plusz $2"); // "a + 30°C"
+        s = Rewrite(s, PLUS_MINUS, " plusz mínusz ");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 plusz $2"); // UTC+1
+        s = Rewrite(s, PLUS_LEADING, "$1plusz $2"); // "a + 30°C"
 
-        s = EQUALS.Replace(s, " egyenlő ");
-        s = LESS_THAN.Replace(s, " kisebb mint ");
-        s = GREATER_THAN.Replace(s, " nagyobb mint ");
-        s = DIVIDE.Replace(s, m =>
+        s = Rewrite(s, EQUALS, " egyenlő ");
+        s = Rewrite(s, LESS_THAN, " kisebb mint ");
+        s = Rewrite(s, GREATER_THAN, " nagyobb mint ");
+        s = Rewrite(s, DIVIDE, m =>
             $"{Numbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} " +
             $"{HuInstrumental(Numbers.NumberToWords(Js.Number(m.Groups[2].Value), m.Groups[2].Value))} osztva");
 
-        s = DECIMAL.Replace(s, "$1 egész ");
+        s = Rewrite(s, DECIMAL, "$1 egész ");
 
         // 9) ORDINALS.
         // 9a) YEAR + MONTH: the year is a plain CARDINAL and its period is silent. Must precede 9c, which
         //     would otherwise claim the same period as an ordinal marker.
-        s = YEAR_MONTH.Replace(s, "$1$2");
-        s = MONTH_DAY.Replace(s, m =>
+        s = Rewrite(s, YEAR_MONTH, "$1$2");
+        s = Rewrite(s, MONTH_DAY, m =>
         {
             var w = DateNominative(Js.Number(m.Groups[2].Value));
             return w is null ? m.Value : $"{m.Groups[1].Value}{w}";
         });
         // 9c) The general ordinal. The period is CONSUMED — removing the spurious phrase break is half the fix.
-        s = ORDINAL_DOT.Replace(s, m => Numbers.OrdinalWords(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        s = Rewrite(s, ORDINAL_DOT, m => Numbers.OrdinalWords(Js.Number(m.Groups[1].Value)) ?? m.Value);
         // 9d) The period after a Roman-numeral ORDINAL WORD, which the shared roman pass has already
         //     produced by the time this runs. Not extended to a capitalised follower on purpose: that shape
         //     is indistinguishable from a sentence that merely ENDS in an ordinal.
-        s = ORDINAL_PERIOD.Replace(s, "");
+        s = Rewrite(s, ORDINAL_PERIOD, "");
 
         // 10) NUMERAL + HYPHEN SUFFIX → WORDS. LAST of the number rules, because it is the only one that
         //     leaves digits behind: steps 3–9 all need the digits still present to match on.
         // 10a) Dates take the ORDINAL stem, gated on a preceding month name.
-        s = DATE_HYPHEN.Replace(s, m =>
+        s = Rewrite(s, DATE_HYPHEN, m =>
         {
             var suf = m.Groups[2].Value;
             if (!DATE_SUFFIX.IsMatch(suf)) return m.Value;
@@ -321,7 +322,7 @@ public static class Normalize
             // Day 1's stem is *elsej-*, so the written `j` of `1-jén` is already in the stem.
             return stem + (d == 1 ? (suf.StartsWith("j", StringComparison.Ordinal) ? suf[1..] : suf) : suf);
         });
-        s = NUM_HYPHEN.Replace(s, m =>
+        s = Rewrite(s, NUM_HYPHEN, m =>
         {
             var n = Js.Number(m.Groups[1].Value);
             if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d)) return m.Value;
@@ -332,7 +333,7 @@ public static class Normalize
         // 11) ACRONYMS, LAST of the letter rules: after step 1, else `Kr`/`ld` are spelled out.
         // 11a) Acronym + hyphen suffix — the suffix belongs to the LAST letter name (*gé pé eshez*), so it is
         //      glued here rather than left for the tokenizer to drop the hyphen.
-        s = ACRONYM_HYPHEN.Replace(s, m =>
+        s = Rewrite(s, ACRONYM_HYPHEN, m =>
         {
             var acr = m.Groups[1].Value;
             var suf = m.Groups[2].Value;
@@ -343,7 +344,7 @@ public static class Normalize
         });
         // 11b) The lexical overrides, before the shared pass can spell them out letter by letter.
         foreach (var (acr, word) in ACRONYM_WORD)
-            s = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){acr}(?![\\p{{L}}\\p{{M}}])", "gu").Replace(s, word);
+            s = Rewrite(s, JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){acr}(?![\\p{{L}}\\p{{M}}])", "gu"), word);
         s = NormalizeInitialisms(s);
 
         return s;

@@ -26,7 +26,7 @@ import { postposedSign } from "../../core/postposedSign.ts";
 import { MANIFEST } from "./manifest.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The SHARED symbol tier, with Punjabi's data. Punjabi count nouns do not inflect after a numeral
@@ -68,7 +68,7 @@ const UNIT_WORD: Readonly<Record<string, string>> = {
 };
 const UNIT_ALT = Object.keys(UNIT_WORD)
     .sort((a, b) => b.length - a.length)
-    .map((k) => k.replace(/\./gu, "\\."))
+    .map((k) => rewrite(k, /\./gu, "\\."))
     .join("|");
 
 /** Build the Punjabi normalizer. Takes the numbers definition so the ordinal rule composes its cardinal
@@ -111,7 +111,7 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //      all. It is kept because the ARABIC-SEMICOLON arm below is not general and cannot be: the
         //      shared decoder's pattern ends at an ASCII `;`, and `&nbsp؛` is a fact about this dump.
         //    An entity NOT in this list still falls through to the shared decoder unchanged.
-        let s = input.replace(/&(nbsp|lrm|rlm|zwnj|zwj|amp|ndash|mdash)[;؛]/giu,
+        let s = rewrite(input, /&(nbsp|lrm|rlm|zwnj|zwj|amp|ndash|mdash)[;؛]/giu,
             (_m, name: string) => (name.toLowerCase() === "amp" ? "&" : name.toLowerCase() === "ndash" ? "–"
                 : name.toLowerCase() === "mdash" ? "—" : name.toLowerCase() === "nbsp" ? " " : ""));
 
@@ -127,15 +127,15 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    with no separators, so the trailing "000" became its own number, 0.
         //    Both groupings: Indian 2-2-3 (1,00,000) and Western 3-3 (5,000,000). A final 3-digit group is
         //    REQUIRED, which is what keeps a list separator ("1990, 1991" — a space) out of the match.
-        s = tr(s, /(?<![\d,])(\d{1,2}(?:,\d{2})+,\d{3})(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
-        s = tr(s, /(?<![\d,])([1-9]\d{0,2}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+        s = rewrite(s, /(?<![\d,])(\d{1,2}(?:,\d{2})+,\d{3})(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+        s = rewrite(s, /(?<![\d,])([1-9]\d{0,2}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
         // 3) DECIMALS — after de-grouping (a grouped numeral may carry a decimal tail) and before the clock,
         //    so a stray dot cannot survive into a time match. The dot is NEUTRALISED, not spoken: there is
         //    no sourceable Gurmukhi spelling of the decimal-point word in this repo (see the header), and
         //    the defect being fixed is the SENTENCE BREAK the dot was producing mid-number
         //    ("2.3 ਅਰਬ ਡਾਲਰ" → [d̪ˈoː . …]). Dropping a sign beats speaking a word we cannot source.
-        s = tr(s, /(\d)\.(?=\d)/gu, "$1 ");
+        s = rewrite(s, /(\d)\.(?=\d)/gu, "$1 ");
 
         // 4) TIMES, before the unit and ordinal rules so a bare-number rule cannot claim 11:30 first.
         //    The colon was becoming a COMMA PAUSE ("eleven, twenty"). Punjabi reads the clock as bare
@@ -144,7 +144,7 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    and the corpus's own bare form ("ਲਗਭਗ 10 ਵਜੇ", "ਸਵੇਰੇ 5 ਵਜੇ") is then exactly what is left.
         //    The two-digit minute guard is load-bearing: the corpus also writes the ratio "3:2" and the
         //    degree classification "2:2", neither of which is a time and neither of which matches.
-        s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+        s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
             (_m, h: string, min: string) => (Number(min) === 0 ? h : `${h} ${min}`));
 
         // 5) ORDINAL SUFFIXES. Written attached to the numeral (15ਵੀਂ) but tokenized apart from it, so the
@@ -153,20 +153,20 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    ordinary word and glues it to the numeral. `\b` cannot express it: `\b` is ASCII-defined and
         //    finds nothing at all against Gurmukhi, so every boundary in this file is an explicit
         //    lookaround — `\b` is ASCII-defined and matches nothing against this script.
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(`(?<![\\d.,])(\\d+)\\s?(${ORDINAL_SUFFIXES.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) => ordinal(Number(digits), suffix) ?? whole);
 
         // 6) GURMUKHI UNIT ABBREVIATIONS, only after a number — which is what keeps ਸੈਮੀ ਆਧੁਨਿਕ and
         //    ਫ਼ੋਟੋਗ੍ਰਾਫ਼ੀ out (none of those is preceded by a digit), and why neither key is declared at all.
         //    Longest first (see UNIT_ALT). The trailing guard stops ਮੀ. biting into a longer word.
-        s = tr(s, new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
+        s = rewrite(s, new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`);
 
         // 7) ERA MARKER, before the ਡਾ. abbreviation rule so the generic single-dot rule cannot claim the
         //    bare ਈ. first. Both dots were surviving as phrase breaks ("1000 ਈ.ਪੂ. ਵਿੱਚ" → [ˈiː . pˈuː .]).
         //    ਈਸਾ ਪੂਰਵ is the corpus's own spelling of the expansion ("323 ਈਸਾ ਪੂਰਵ", "ਤੀਜੀ ਸਦੀ ਈਸਾ ਪੂਰਵ").
-        s = tr(s, /(?<![\p{L}\p{M}])ਈ\.\s?ਪੂ\.?/gu, "ਈਸਾ ਪੂਰਵ");
+        s = rewrite(s, /(?<![\p{L}\p{M}])ਈ\.\s?ਪੂ\.?/gu, "ਈਸਾ ਪੂਰਵ");
 
         //    ⚠ AND THE SHAHMUKHI HALF HAS AN ERA MARKER TOO, WRITTEN AS A BARE HAMZA. `1238 ء وچ` is
         //    "in 1238 CE": ⟨ء⟩ after a year abbreviates عیسوی, exactly as ⟨ਈ.ਪੂ.⟩ abbreviates ਈਸਾ ਪੂਰਵ above.
@@ -178,16 +178,16 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    ⚠ A PRECEDING DIGIT IS REQUIRED, and that is what keeps the rule off the ordinary word-final hamza
         //    of an Arabic loan (علماء, اشیاء, فضاء), which is correctly SILENT in a language with no /ʔ/ — see
         //    the ʔ-removal in punjabi.ts. Attached (`2016ء`) and spaced (`1238 ء`) are both attested.
-        s = tr(s, /(\d)\s?ء(?![\p{L}\p{M}])/gu, "$1 عیسوی");
+        s = rewrite(s, /(\d)\s?ء(?![\p{L}\p{M}])/gu, "$1 عیسوی");
 
         // 8) ABBREVIATION. The DOT IS REQUIRED here, unlike Hindi's डॉ — ਡਾ is a live word-medial sequence
         //    (ਸਾਡਾ, ਵੱਡਾ, ਕੈਨੇਡਾ), and the leading lookaround alone would not save a dot-optional rule from
         //    a word-FINAL ਡਾ. The dot is consumed so it cannot become a phrase break.
-        s = tr(s, /(?<![\p{L}\p{M}])ਡਾ\.(\s+)(?=[\p{L}])/gu, (_m, sp: string) => `ਡਾਕਟਰ${sp}`);
+        s = rewrite(s, /(?<![\p{L}\p{M}])ਡਾ\.(\s+)(?=[\p{L}])/gu, (_m, sp: string) => `ਡਾਕਟਰ${sp}`);
 
         // 9) DEGREES. The bare sign was dropped outright. °C is left to emit ਡਿਗਰੀ + the Latin C: the
         //    Punjabi word for the scale is attested nowhere in this repo (see the header).
-        s = tr(s, /(\d)\s?°/gu, "$1 ਡਿਗਰੀ");
+        s = rewrite(s, /(\d)\s?°/gu, "$1 ਡਿਗਰੀ");
 
         // THE ADDITIVE SIGNS. pa_in gives nothing usable — ਜਮਾਂ is ×0, ਪਲੱਸ appears only inside the brand
         // name ਮੈਟਰੋਪਲੱਸ, and ਜੋੜ is ×1 token against ×33 SUBSTRING (ਜੋੜੇ, "couples"). pa.wikipedia's arithmetic
@@ -205,10 +205,10 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         // ⚠ THE MINUS TAKES THE RANGE GUARD th NEEDED. The fleet convention rejects a sign with a space AFTER it,
         // which misses a range spaced only BEFORE the sign (`1000 -1300` read as a subtraction in th_th). A digit
         // anywhere to the left rejects the match: a negative quantity does not follow a number, a range does.
-        s = tr(s, /±/gu, " ਜਮ੍ਹਾਂ ਘਟਾਓ ");
-        s = tr(s, /(\d)\s?\+\s?(?=\d)/gu, "$1 ਜਮ੍ਹਾਂ ");
-        s = tr(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1ਜਮ੍ਹਾਂ ");
-        s = tr(s, /(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
+        s = rewrite(s, /±/gu, " ਜਮ੍ਹਾਂ ਘਟਾਓ ");
+        s = rewrite(s, /(\d)\s?\+\s?(?=\d)/gu, "$1 ਜਮ੍ਹਾਂ ");
+        s = rewrite(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1ਜਮ੍ਹਾਂ ");
+        s = rewrite(s, /(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
             /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}ਘਟਾਓ `);
 
         // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from pa_in:
@@ -227,8 +227,8 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         // the division slot here. The count is not the evidence; the parallel sentence is.
         s = postposedSign(s, "<", "ਤੋਂ ਘੱਟ");
         s = postposedSign(s, ">", "ਤੋਂ ਵੱਧ");
-        s = tr(s, /\s?=\s?/gu, " ਬਰਾਬਰ ");
-        s = tr(s, /\s?÷\s?/gu, " ਭਾਗ ");
+        s = rewrite(s, /\s?=\s?/gu, " ਬਰਾਬਰ ");
+        s = rewrite(s, /\s?÷\s?/gu, " ਭਾਗ ");
 
         return s;
     };

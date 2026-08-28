@@ -4,6 +4,7 @@
  * Ported from src/languages/punjabi/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Punjabi;
 
@@ -47,7 +48,7 @@ public static class Normalize
     };
     private static readonly JsRe DOT_ESC = JsRegex.Compile("\\.", "gu");
     private static readonly string UNIT_ALT = string.Join("|",
-        UNIT_WORD.Keys.OrderByDescending(k => k.Length).Select(k => DOT_ESC.Replace(k, "\\.")));
+        UNIT_WORD.Keys.OrderByDescending(k => k.Length).Select(k => JsRegex.Replace(k, DOT_ESC, "\\.")));
 
     private static readonly JsRe ENTITY = JsRegex.Compile("&(nbsp|lrm|rlm|zwnj|zwj|amp|ndash|mdash)[;؛]", "giu");
     private static readonly JsRe GROUP_INDIAN = JsRegex.Compile("(?<![\\d,])(\\d{1,2}(?:,\\d{2})+,\\d{3})(?![\\d,])", "gu");
@@ -91,7 +92,7 @@ public static class Normalize
             //    reads every ⟨&⟩ and would voice the entity NAME as a word. The arm that cannot be made
             //    general is the ARABIC SEMICOLON ⟨؛⟩ terminator: the shared pattern ends at an ASCII `;`.
             //    An entity not in this list still falls through to the shared decoder unchanged.
-            var s = ENTITY.Replace(input, m =>
+            var s = Rewrite(input, ENTITY, m =>
             {
                 var name = m.Groups[1].Value.ToLowerInvariant();
                 return name == "amp" ? "&" : name == "ndash" ? "–" : name == "mdash" ? "—" : name == "nbsp" ? " " : "";
@@ -106,57 +107,57 @@ public static class Normalize
             //    otherwise claimed as a phrase break AND truncates the numeral, since the tokenizer's number
             //    class has no separators. Both groupings: Indian 2-2-3 and Western 3-3. A final 3-digit group
             //    is REQUIRED, which is what keeps a list separator ("1990, 1991") out of the match.
-            s = GROUP_INDIAN.Replace(s, m => COMMA_G.Replace(m.Value, ""));
-            s = GROUP_WESTERN.Replace(s, m => COMMA_G.Replace(m.Value, ""));
+            s = Rewrite(s, GROUP_INDIAN, m => COMMA_G.Replace(m.Value, ""));
+            s = Rewrite(s, GROUP_WESTERN, m => COMMA_G.Replace(m.Value, ""));
 
             // 3) DECIMALS — after de-grouping (a grouped numeral may carry a decimal tail) and before the
             //    clock, so a stray dot cannot survive into a time match. The dot is NEUTRALISED, not spoken:
             //    the defect being fixed is the SENTENCE BREAK it produced mid-number.
-            s = DECIMAL_DOT.Replace(s, "$1 ");
+            s = Rewrite(s, DECIMAL_DOT, "$1 ");
 
             // 4) TIMES, before the unit and ordinal rules so a bare-number rule cannot claim 11:30 first. The
             //    colon becomes a space; at :00 the minutes DROP OUT, or "10:00 ਵਜੇ" reads "ten zero". The
             //    two-digit minute guard is load-bearing — it is what keeps the ratio "3:2" from matching.
-            s = CLOCK.Replace(s, m =>
+            s = Rewrite(s, CLOCK, m =>
                 Js.Number(m.Groups[2].Value) == 0 ? m.Groups[1].Value : $"{m.Groups[1].Value} {m.Groups[2].Value}");
 
             // 5) ORDINAL SUFFIXES, written attached to the numeral but tokenized apart from it. THE TRAILING
             //    BOUNDARY IS LOAD-BEARING: without it the suffix matches the START of an ordinary word and
             //    glues it to the numeral. It is an explicit lookaround because `\b` is ASCII-defined in both
             //    runtimes and finds no boundary at all against Gurmukhi.
-            s = ORDINAL_RE.Replace(s, m =>
+            s = Rewrite(s, ORDINAL_RE, m =>
                 Ordinal(Js.Number(m.Groups[1].Value), m.Groups[2].Value) ?? m.Value);
 
-            s = UNIT_RE.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
+            s = Rewrite(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
 
             // 7) ERA MARKERS, BEFORE the ਡਾ. abbreviation rule below — otherwise the generic single-dot rule
             //    claims the bare ਈ. first and strands the ਪੂ.
-            s = ERA_GURMUKHI.Replace(s, "ਈਸਾ ਪੂਰਵ");
+            s = Rewrite(s, ERA_GURMUKHI, "ਈਸਾ ਪੂਰਵ");
             //    The Shahmukhi half writes its era marker as a bare hamza after the year. ⚠ THE PRECEDING
             //    DIGIT IS REQUIRED: it is what keeps the rule off the ordinary word-final hamza of an Arabic
             //    loan, which is correctly silent in a language with no /ʔ/.
-            s = ERA_HAMZA.Replace(s, "$1 عیسوی");
+            s = Rewrite(s, ERA_HAMZA, "$1 عیسوی");
 
             // 8) ABBREVIATION. The DOT IS REQUIRED: ਡਾ is a live word-medial sequence, so a dot-optional rule
             //    would fire inside ordinary words. The dot is consumed so it cannot become a phrase break.
-            s = DOCTOR.Replace(s, m => $"ਡਾਕਟਰ{m.Groups[1].Value}");
+            s = Rewrite(s, DOCTOR, m => $"ਡਾਕਟਰ{m.Groups[1].Value}");
 
-            s = DEGREE.Replace(s, "$1 ਡਿਗਰੀ");
+            s = Rewrite(s, DEGREE, "$1 ਡਿਗਰੀ");
 
-            s = PLUS_MINUS.Replace(s, " ਜਮ੍ਹਾਂ ਘਟਾਓ ");
-            s = PLUS_INFIX.Replace(s, "$1 ਜਮ੍ਹਾਂ ");
-            s = PLUS_LEADING.Replace(s, "$1ਜਮ੍ਹਾਂ ");
+            s = Rewrite(s, PLUS_MINUS, " ਜਮ੍ਹਾਂ ਘਟਾਓ ");
+            s = Rewrite(s, PLUS_INFIX, "$1 ਜਮ੍ਹਾਂ ");
+            s = Rewrite(s, PLUS_LEADING, "$1ਜਮ੍ਹਾਂ ");
             // ⚠ THE MINUS TAKES A RANGE GUARD. A digit anywhere to the LEFT rejects the match: a negative
             // quantity does not follow a number, but a range does (`1000 -1300`).
-            s = MINUS_RE.Replace(s, m =>
+            s = Rewrite(s, MINUS_RE, m =>
                 DIGIT_BEFORE.IsMatch(s[..m.Index]) ? m.Value : $"{m.Groups[1].Value}ਘਟਾਓ ");
 
             // ⚠ THE COMPARATIVES ARE POSTPOSITIONAL (ਤੋਂ follows the standard), hence the postposed-sign pass;
             // an infix rule would read the comparison backwards.
             s = PostposedSignPass.PostposedSign(s, "<", "ਤੋਂ ਘੱਟ");
             s = PostposedSignPass.PostposedSign(s, ">", "ਤੋਂ ਵੱਧ");
-            s = EQUALS_RE.Replace(s, " ਬਰਾਬਰ ");
-            s = DIVIDE.Replace(s, " ਭਾਗ ");
+            s = Rewrite(s, EQUALS_RE, " ਬਰਾਬਰ ");
+            s = Rewrite(s, DIVIDE, " ਭਾਗ ");
 
             return s;
         };

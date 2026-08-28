@@ -34,7 +34,7 @@
  *   · km² BEFORE the plain unit rule, or the `km` is consumed first and the exponent left stranded.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Unit abbreviations → Romanian words, all probed through the g2p. Longest first so `km` is not matched
  *  as `m` with a stray k left over. */
@@ -112,36 +112,36 @@ export function normalizeRomanian(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+        t = rewrite(t, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 2) SPACE-GROUPED THOUSANDS (12). A space is a token boundary, so the numeral arrived as two.
     do {
         prev = t;
-        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+        t = rewrite(t, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     } while (t !== prev);
 
     // 3) DECIMAL COMMA (35). The comma is clause punctuation too, so `12,5` read as "doisprezece , cinci"
     //    — a PAUSE inside a number. Fractional part spoken digit by digit.
-    t = tr(t, /(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
+    t = rewrite(t, /(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
         `${whole} virgulă ${[...frac].join(" ")}`);
 
     // 4) CLOCK, COLON FORM ONLY (47). The colon was reaching clausePunctuation as a COMMA PAUSE, so
     //    `22:00` read as "douăzeci și doi , zero". The period form is a Wi-Fi standard — see the header.
-    t = tr(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
+    t = rewrite(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
 
     // 5) PERCENT (22) → `la sută`, the majority reading — see the header.
-    t = tr(t, /(\d+)\s*%/gu, "$1 la sută");
+    t = rewrite(t, /(\d+)\s*%/gu, "$1 la sută");
 
     // 6) DEGREES (3), BEFORE the unit rules — the C of `20 °C` was read as Romanian [k].
-    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
-    t = tr(t, /(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grade Celsius");
-    t = tr(t, /(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grade Fahrenheit");
-    t = tr(t, /(\d)\s*°/gu, "$1 grade");
+    t = rewrite(rewrite(t, /℃/gu, "°C"), /℉/gu, "°F");
+    t = rewrite(t, /(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grade Celsius");
+    t = rewrite(t, /(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grade Fahrenheit");
+    t = rewrite(t, /(\d)\s*°/gu, "$1 grade");
 
     // 7) SQUARED / CUBED UNITS (3), BEFORE the plain unit rule — otherwise `km` is consumed first and the
     //    exponent is left stranded. `km²` was reaching the output as the bare letters "km".
-    for (const [re, word] of SQUARED) t = tr(t, re, word);
+    for (const [re, word] of SQUARED) t = rewrite(t, re, word);
 
     // 8) RATES (13) — `160 km/h`, `160 km/oră`. BEFORE the plain unit rule, or the `km` is consumed and
     //    a bare `/h` is left with nothing to attach to. The slash reached the tokenizer raw and was
@@ -149,40 +149,40 @@ export function normalizeRomanian(input: string): string {
     //    ⚠ The trailing boundary is `(?!\p{L})`, NOT `\b`. `\b` is defined on ASCII word characters, so
     //    after the `ă` of `oră` — which is not one — it finds no boundary and the rule silently did not
     //    fire. Romanian's own alphabet (ă â î ș ț) walks straight into it.
-    t = tr(t, /km\s*\/\s*(?:h|or[ăa])(?!\p{L})/giu, "kilometri pe oră");
-    t = tr(t, /(?<!\p{L})m\s*\/\s*s(?!\p{L})/giu, "metri pe secundă");
+    t = rewrite(t, /km\s*\/\s*(?:h|or[ăa])(?!\p{L})/giu, "kilometri pe oră");
+    t = rewrite(t, /(?<!\p{L})m\s*\/\s*s(?!\p{L})/giu, "metri pe secundă");
 
     // 9) LATIN UNIT ABBREVIATIONS after a number (45).
     for (const [re, word] of UNITS)
-        t = tr(t, new RegExp(`(\\d)\\s*(?:${re.source.replace(/\\b/gu, "")})(?![\\p{L}\\d²³/])`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`(\\d)\\s*(?:${re.source.replace(/\\b/gu, "")})(?![\\p{L}\\d²³/])`, "gu"), `$1 ${word}`);
     //    …and the same abbreviations with NO number — see BARE_UNITS. After the loop, so every reading the
     //    counted rule can make is already made and only what it could not reach is left for this.
     t = BARE_UNITS(t);
 
     // 10) RANGES (38). Spoken `până la`, which the corpus writes out — `25 până la 30`.
-    t = tr(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 până la $2");
+    t = rewrite(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 până la $2");
 
     // 11) CURRENCY, both placements.
     for (const [sign, word] of Object.entries(CURRENCY)) {
         if (!/^[^\p{L}]/u.test(sign)) continue; // `lei` is a word already, not a sign
         const esc = sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        t = tr(t, new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
-        t = tr(t, new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
     }
 
     // 12) SIGNED NUMBERS — a sign PREFIXED to a number. Boundary before it so a hyphenated compound is
     //     untouched, and after ranges so a range's dash is already gone.
-    t = tr(t, /(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
+    t = rewrite(t, /(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
         `${sign === "+" ? "plus" : "minus"} ${n}`);
 
     // 13) ARITHMETIC AND RELATIONAL SIGNS — infix between digits is where arithmetic lives; the
     //     relational signs are read in every position.
-    t = tr(t, /(\d)\s*\+\s*(\d)/gu, "$1 plus $2");
-    for (const [re, word] of RELATIONAL) t = tr(t, re, word);
+    t = rewrite(t, /(\d)\s*\+\s*(\d)/gu, "$1 plus $2");
+    for (const [re, word] of RELATIONAL) t = rewrite(t, re, word);
 
     // 14) AMPERSAND → și.
-    t = tr(t, /\s*[&＆]\s*/gu, " și ");
+    t = rewrite(t, /\s*[&＆]\s*/gu, " și ");
 
     // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
-    return t.replace(/[ \t]{2,}/gu, " ");
+    return rewrite(t, /[ \t]{2,}/gu, " ");
 }

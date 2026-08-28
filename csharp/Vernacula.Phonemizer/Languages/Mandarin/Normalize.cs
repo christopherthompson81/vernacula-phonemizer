@@ -4,6 +4,7 @@
  * Ported from src/languages/mandarin/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Mandarin;
 
@@ -68,16 +69,16 @@ public static class Normalize
     public static string NormalizeMandarin(string input)
     {
         var s = input;
-        s = FRACTION.Replace(s, m => $"{m.Groups[2].Value}分之{m.Groups[1].Value}");
+        s = Rewrite(s, FRACTION, m => $"{m.Groups[2].Value}分之{m.Groups[1].Value}");
         // Temperature before the general negative, so 零下 wins where it applies.
-        s = BELOW_ZERO.Replace(s, "零下$1");
-        s = NEGATIVE.Replace(s, "负");
-        foreach (var (re, word) in SIGNS) s = re.Replace(s, word);
+        s = Rewrite(s, BELOW_ZERO, "零下$1");
+        s = Rewrite(s, NEGATIVE, "负");
+        foreach (var (re, word) in SIGNS) s = Rewrite(s, re, word);
         // Latin-internal ampersand first, or the general arm claims it.
-        s = AMP_LATIN.Replace(s, " and ");
-        s = AMP_ELSEWHERE.Replace(s, "和");
+        s = Rewrite(s, AMP_LATIN, " and ");
+        s = Rewrite(s, AMP_ELSEWHERE, "和");
         // After the signs, or one of them strands the exponent.
-        s = BARE_EXPONENT.Replace(s, m => $"的{POWER[m.Groups[1].Value]}");
+        s = Rewrite(s, BARE_EXPONENT, m => $"的{POWER[m.Groups[1].Value]}");
         return s;
     }
 
@@ -93,8 +94,8 @@ public static class Normalize
      */
     public static string SpellInitialisms(string input)
     {
-        var s = CAPS_RUN.Replace(input, m => ROMAN.IsMatch(m.Value) ? m.Value : SpellLetters(m.Value));
-        s = LONE_UPPER.Replace(s, m =>
+        var s = Rewrite(input, CAPS_RUN, m => ROMAN.IsMatch(m.Value) ? m.Value : SpellLetters(m.Value));
+        s = Rewrite(s, LONE_UPPER, m =>
         {
             var L = m.Groups[1].Success && m.Groups[1].Value.Length > 0 ? m.Groups[1].Value : m.Groups[2].Value;
             return Manifest.MANIFEST.LetterNames.TryGetValue(L, out var name) ? $" {name} " : m.Value;

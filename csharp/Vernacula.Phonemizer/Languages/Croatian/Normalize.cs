@@ -6,6 +6,7 @@
  */
 using Vernacula.Phonemizer.Core;
 using SR = Vernacula.Phonemizer.Languages.Serbian;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Croatian;
 
@@ -115,7 +116,7 @@ public static class Normalize
 
     /** Integer part of a Croatian-written number ("2,4" → 2), for the local count-agreement calls. */
     private static double IntOf(string n) =>
-        Math.Truncate(Js.Number(Js.ReplaceFirst(INT_OF_DOT.Replace(n, ""), ",", ".")));
+        Math.Truncate(Js.Number(Js.ReplaceFirst(Rewrite(n, INT_OF_DOT, ""), ",", ".")));
 
     // -----------------------------------------------------------------------------------------------
     // THE RULES
@@ -194,41 +195,41 @@ public static class Normalize
         var s = input;
 
         // 0) ZERO-WIDTH.
-        s = ZERO_WIDTH.Replace(s, "");
+        s = Rewrite(s, ZERO_WIDTH, "");
 
         // 1) DIGIT DE-GROUPING, FIRST. Two passes, because adjacent groups share a digit.
-        for (var i = 0; i < 2; i++) s = DEGROUP.Replace(s, "");
-        s = ENDASH_ERA_RANGE.Replace(s, "$1 do $2");
+        for (var i = 0; i < 2; i++) s = Rewrite(s, DEGROUP, "");
+        s = Rewrite(s, ENDASH_ERA_RANGE, "$1 do $2");
 
         // 2) MULTI-DOT ERA MARKER, before the abbreviation and `N.` ordinal rules. ⚠ THE ERA PATTERNS ARE
         //    LOWERCASE-ONLY — `n.e.` is also two INITIALS with stops and this block runs first; see the TS.
-        s = ERA_YEAR.Replace(s, m =>
+        s = Rewrite(s, ERA_YEAR, m =>
         {
             var bas = OrdinalBase(Js.Number(m.Groups[1].Value));
             return bas is null ? m.Value : $"{Inflect(bas, "f.gen")} ";
         });
-        s = PNE_END.Replace(s, "prije nove ere.");
-        s = PNE_SP.Replace(s, "prije nove ere$1");
-        s = NE_END.Replace(s, "nove ere.");
-        s = NE_SP.Replace(s, "nove ere$1");
-        s = PRKR_END.Replace(s, "prije Krista.");
-        s = PRKR_SP.Replace(s, "prije Krista$1");
-        s = ERA_G_DROP.Replace(s, " ");
+        s = Rewrite(s, PNE_END, "prije nove ere.");
+        s = Rewrite(s, PNE_SP, "prije nove ere$1");
+        s = Rewrite(s, NE_END, "nove ere.");
+        s = Rewrite(s, NE_SP, "nove ere$1");
+        s = Rewrite(s, PRKR_END, "prije Krista.");
+        s = Rewrite(s, PRKR_SP, "prije Krista$1");
+        s = Rewrite(s, ERA_G_DROP, " ");
 
         // 3) DOTTED ABBREVIATIONS.
-        s = ITD_MID.Replace(s, "i tako dalje$1");
-        s = ITD_COMMA.Replace(s, "i tako dalje");
-        s = ITD_END.Replace(s, "i tako dalje.");
+        s = Rewrite(s, ITD_MID, "i tako dalje$1");
+        s = Rewrite(s, ITD_COMMA, "i tako dalje");
+        s = Rewrite(s, ITD_END, "i tako dalje.");
 
         // 4) DOTTED CAPITAL RUNS, then the lone initial, then Dr. / SAD.
-        s = INITIAL_RUN.Replace(s, m => DOT_OR_SPACE.Replace(m.Value, ""));
-        s = LONE_INITIAL.Replace(s, "$1");
-        s = DR_MID.Replace(s, "Doktor$1");
-        s = DR_END.Replace(s, "Doktor.");
-        s = SAD_SUFFIXED.Replace(s, "Sjedinjene Američke Države");
+        s = Rewrite(s, INITIAL_RUN, m => DOT_OR_SPACE.Replace(m.Value, ""));
+        s = Rewrite(s, LONE_INITIAL, "$1");
+        s = Rewrite(s, DR_MID, "Doktor$1");
+        s = Rewrite(s, DR_END, "Doktor.");
+        s = Rewrite(s, SAD_SUFFIXED, "Sjedinjene Američke Države");
 
         // 4b) PRENOMINAL ROMAN ORDINALS.
-        s = ROMAN_PRENOMINAL.Replace(s, m =>
+        s = Rewrite(s, ROMAN_PRENOMINAL, m =>
         {
             if (!ROMAN_ORD.TryGetValue(m.Groups[1].Value.ToUpperInvariant(), out var bas)) return m.Value;
             var word = m.Groups[2].Value;
@@ -241,9 +242,9 @@ public static class Normalize
         });
 
         // 5) DEGREES — the scale, then the compass bearing.
-        s = DEG_SCALE.Replace(s, m =>
+        s = Rewrite(s, DEG_SCALE, m =>
             $"{m.Groups[1].Value} {(FAHRENHEIT.IsMatch(m.Groups[2].Value) ? "stupnjeva Farenhajta" : "stupnjeva Celzija")}");
-        s = DEG_BEARING.Replace(s, m =>
+        s = Rewrite(s, DEG_BEARING, m =>
         {
             var letter = m.Groups[2].Success ? m.Groups[2].Value : m.Groups[3].Value;
             return $"{m.Groups[1].Value} stupnjeva {BEARING[letter.ToUpperInvariant()]}";
@@ -251,16 +252,16 @@ public static class Normalize
 
         // 5b) THE BARE DEGREE. ⚠ THE TRAILING SPACE IS LOAD-BEARING — any letter this arm does not consume
         //     would otherwise glue onto the noun and send the stress lookup to a word that does not exist.
-        s = DEG_BARE.Replace(s, m => $"{m.Groups[1].Value} {Counted(IntOf(m.Groups[1].Value), STUPANJ)} ");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} {Counted(IntOf(m.Groups[1].Value), STUPANJ)} ");
 
         // 6) NUMERAL + HYPHEN + CASE SUFFIX. Before the range rule.
-        s = SUFFIXED.Replace(s, m =>
+        s = Rewrite(s, SUFFIXED, m =>
             OrdinalForms(Js.Number(m.Groups[1].Value))
                 .FirstOrDefault(f => f.EndsWith(Js.ToLowerCase(m.Groups[2].Value), StringComparison.Ordinal))
             ?? m.Value);
 
         // 7) THE `N.` ORDINAL — only before a LOWERCASE licensing word.
-        s = ORDINAL_N.Replace(s, m =>
+        s = Rewrite(s, ORDINAL_N, m =>
         {
             var word = m.Groups[2].Value;
             if (!LICENSOR.TryGetValue(word, out var slot)) return m.Value;
@@ -270,7 +271,7 @@ public static class Normalize
 
         // 7b) A YEAR WITH `godine` ELIDED. The period survives only where it is ALSO a sentence end.
         var yearSubject = s;
-        s = ELIDED_YEAR.Replace(s, m =>
+        s = Rewrite(s, ELIDED_YEAR, m =>
         {
             var bas = OrdinalBase(Js.Number(m.Groups[1].Value));
             if (bas is null) return m.Value;
@@ -282,7 +283,7 @@ public static class Normalize
         });
 
         // 8) CLOCK, colon form, with the Croatian `h` (sat) suffix.
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             if (hv > 23 || mv > 59) return m.Value;
@@ -291,10 +292,10 @@ public static class Normalize
         });
 
         // 9) NUMERIC RANGES.
-        s = RANGE.Replace(s, "$1 do ");
+        s = Rewrite(s, RANGE, "$1 do ");
 
         // 9b) MILJA RATE — the tier's `mi` key does not match the spelled "milja".
-        s = MILJA_RATE.Replace(s, m => $"{m.Groups[1].Value} {Counted(IntOf(m.Groups[1].Value), MILJA)} na sat");
+        s = Rewrite(s, MILJA_RATE, m => $"{m.Groups[1].Value} {Counted(IntOf(m.Groups[1].Value), MILJA)} na sat");
 
         // 10) THE SHARED SYMBOL TIER — the number must still be adjacent to its unit and still carry its
         //     decimal comma, so it runs before step 11.
@@ -306,26 +307,26 @@ public static class Normalize
         s = Serbian.Normalize.ReadDecimalComma(s);
 
         // 12) FRACTIONS.
-        s = THREE_QUARTERS.Replace(s, "$1 i tri četvrtine");
-        s = HALF.Replace(s, "$1 i pol");
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, THREE_QUARTERS, "$1 i tri četvrtine");
+        s = Rewrite(s, HALF, "$1 i pol");
+        s = Rewrite(s, FRACTION, m =>
         {
             var ord = OrdinalBase(Js.Number(m.Groups[2].Value));
             return ord is null ? m.Value : $"{Numbers.NumberToWords(Js.Number(m.Groups[1].Value))} {ord}";
         });
 
         // 13) SIGNS. ⚠ `±` IS ONE CHARACTER (U+00B1), so no `+` rule can ever match inside it.
-        s = AMP_INITIALS.Replace(s, "$1 i $2");
-        s = AMP_SPACED.Replace(s, " i ");
-        s = TIMES.Replace(s, " puta ");
-        s = PLUS_MINUS.Replace(s, " plus minus ");
-        s = PLUS_START.Replace(s, "$1plus $2");
-        s = PLUS_AFTER_CAP.Replace(s, " plus $1");
-        s = MINUS.Replace(s, "minus $1");
-        s = EQUALS.Replace(s, "$1 jednako $2");
-        s = LESS_THAN.Replace(s, "$1 manje od $2");
-        s = GREATER_THAN.Replace(s, "$1 veće od $2");
-        s = DIVIDE.Replace(s, "$1 podijeljeno s $2");
+        s = Rewrite(s, AMP_INITIALS, "$1 i $2");
+        s = Rewrite(s, AMP_SPACED, " i ");
+        s = Rewrite(s, TIMES, " puta ");
+        s = Rewrite(s, PLUS_MINUS, " plus minus ");
+        s = Rewrite(s, PLUS_START, "$1plus $2");
+        s = Rewrite(s, PLUS_AFTER_CAP, " plus $1");
+        s = Rewrite(s, MINUS, "minus $1");
+        s = Rewrite(s, EQUALS, "$1 jednako $2");
+        s = Rewrite(s, LESS_THAN, "$1 manje od $2");
+        s = Rewrite(s, GREATER_THAN, "$1 veće od $2");
+        s = Rewrite(s, DIVIDE, "$1 podijeljeno s $2");
 
         // ⚠ INITIALISMS, LAST, AND SHARED WITH SERBIAN — one table, three engines.
         return SR.Normalize.NormalizeSerbianInitialisms(s);

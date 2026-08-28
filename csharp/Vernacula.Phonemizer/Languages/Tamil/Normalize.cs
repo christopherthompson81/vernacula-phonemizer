@@ -4,6 +4,7 @@
  * Ported from src/languages/tamil/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Tamil;
 
@@ -124,31 +125,31 @@ public static class Normalize
     /** The Tamil normalizer. */
     public static string NormalizeTamil(string input)
     {
-        var s = JsRegex.Replace(input, ZERO_WIDTH, _ => "");
+        var s = Rewrite(input, ZERO_WIDTH, _ => "");
 
         s = Unicode.FoldNativeDigits(s);
 
-        s = JsRegex.Replace(s, DEGROUP, _ => "");
+        s = Rewrite(s, DEGROUP, _ => "");
 
-        s = JsRegex.Replace(s, ERA_RE, m => ERA[m.Groups[1].Value]);
-        s = JsRegex.Replace(s, EGA_RE, _ => "எடுத்துக்காட்டாக");
+        s = Rewrite(s, ERA_RE, m => ERA[m.Groups[1].Value]);
+        s = Rewrite(s, EGA_RE, _ => "எடுத்துக்காட்டாக");
 
-        s = JsRegex.Replace(s, TAMIL_UNIT_DOT_RE, m =>
+        s = Rewrite(s, TAMIL_UNIT_DOT_RE, m =>
         {
             string a = m.Groups[1].Value, b = m.Groups[2].Value;
             return TAMIL_UNIT.GetValueOrDefault($"{a}{b}") ?? TAMIL_UNIT.GetValueOrDefault($"{a}மீ") ?? $"{a}{b}";
         });
-        s = JsRegex.Replace(s, TAMIL_UNIT_SPACED_RE, m =>
+        s = Rewrite(s, TAMIL_UNIT_SPACED_RE, m =>
         {
             string a = m.Groups[1].Value, b = m.Groups[2].Value;
             return TAMIL_UNIT.GetValueOrDefault($"{a}{b}") ?? TAMIL_UNIT.GetValueOrDefault($"{a}மீ") ?? $"{a} {b}";
         });
-        s = JsRegex.Replace(s, TAMIL_UNIT_RE, m => TAMIL_UNIT[m.Groups[1].Value]);
-        s = JsRegex.Replace(s, INITIALISM_RE, m => JsRegex.Replace(m.Value, DOT_RUN, _ => " ").Trim());
-        s = JsRegex.Replace(s, THIRU_RE, _ => "திரு ");
+        s = Rewrite(s, TAMIL_UNIT_RE, m => TAMIL_UNIT[m.Groups[1].Value]);
+        s = Rewrite(s, INITIALISM_RE, m => JsRegex.Replace(m.Value, DOT_RUN, _ => " ").Trim());
+        s = Rewrite(s, THIRU_RE, _ => "திரு ");
 
         var full5 = s;
-        s = JsRegex.Replace(s, RATE_ASCII, m =>
+        s = Rewrite(s, RATE_ASCII, m =>
         {
             var num = RATE_NUM.GetValueOrDefault(m.Groups[2].Value.ToLowerInvariant());
             var d = RATE_DENOM.GetValueOrDefault(m.Groups[3].Value.ToLowerInvariant());
@@ -156,32 +157,32 @@ public static class Normalize
             return $"{Dative(d, full5, m.Index)}{m.Groups[1].Value} {num}";
         });
         var full5b = s;
-        s = JsRegex.Replace(s, RATE_MPH, m => $"{Dative("மணிக்கு", full5b, m.Index)}{m.Groups[1].Value} மைல்");
+        s = Rewrite(s, RATE_MPH, m => $"{Dative("மணிக்கு", full5b, m.Index)}{m.Groups[1].Value} மைல்");
 
         s = SYMBOLS(s);
 
-        s = JsRegex.Replace(s, CLOCK_DOT_TZ, m =>
+        s = Rewrite(s, CLOCK_DOT_TZ, m =>
             Js.Number(m.Groups[2].Value) == 0 ? m.Groups[1].Value : $"{m.Groups[1].Value} {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, CLOCK_ZERO, m => m.Groups[1].Value);
-        s = JsRegex.Replace(s, CLOCK_COLON, _ => " ");
+        s = Rewrite(s, CLOCK_ZERO, m => m.Groups[1].Value);
+        s = Rewrite(s, CLOCK_COLON, _ => " ");
 
-        s = JsRegex.Replace(s, DECIMAL_RE, m =>
+        s = Rewrite(s, DECIMAL_RE, m =>
             $"{m.Groups[1].Value} புள்ளி {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-        s = JsRegex.Replace(s, PLUSMINUS, _ => " கூட்டல் கழித்தல் ");
-        s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} பிளஸ் {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}பிளஸ் {m.Groups[2].Value}");
+        s = Rewrite(s, PLUSMINUS, _ => " கூட்டல் கழித்தல் ");
+        s = Rewrite(s, PLUS_AFTER, m => $"{m.Groups[1].Value} பிளஸ் {m.Groups[2].Value}");
+        s = Rewrite(s, PLUS_START, m => $"{m.Groups[1].Value}பிளஸ் {m.Groups[2].Value}");
 
         s = PostposedSignPass.PostposedSign(s, "<", "ஐ விட குறைவாக");
         s = PostposedSignPass.PostposedSign(s, ">", "ஐ விட அதிகமாக");
-        s = JsRegex.Replace(s, EQUALS, _ => " சமம் ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " வகுத்தல் ");
+        s = Rewrite(s, EQUALS, _ => " சமம் ");
+        s = Rewrite(s, DIVIDE, _ => " வகுத்தல் ");
 
-        s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} டிகிரி செல்சியஸ்");
-        s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} டிகிரி பாரன்ஹீட்");
-        s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} டிகிரி");
+        s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} டிகிரி செல்சியஸ்");
+        s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} டிகிரி பாரன்ஹீட்");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} டிகிரி");
 
-        s = JsRegex.Replace(s, FRACTION_RE, m =>
+        s = Rewrite(s, FRACTION_RE, m =>
         {
             string a = m.Groups[1].Value, b = m.Groups[2].Value;
             var lex = FRACTION_WORD.GetValueOrDefault($"{a}/{b}");
@@ -194,10 +195,10 @@ public static class Normalize
             return $"{string.Join(" ", dw)} {(Js.Number(a) == 1 ? "ஒரு" : Cardinal(Js.Number(a)))} பங்கு";
         });
 
-        s = JsRegex.Replace(s, ORDINAL_RE, m =>
+        s = Rewrite(s, ORDINAL_RE, m =>
             Ordinal(Js.Number(m.Groups[1].Value), m.Groups[2].Value) ?? m.Value);
 
-        s = JsRegex.Replace(s, LOCATIVE, m => $"{m.Groups[1].Value} இல்");
+        s = Rewrite(s, LOCATIVE, m => $"{m.Groups[1].Value} இல்");
 
         return s;
     }

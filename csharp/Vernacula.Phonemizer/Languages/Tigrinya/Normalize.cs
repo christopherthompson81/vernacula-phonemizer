@@ -4,6 +4,7 @@
  * ordering argument between the steps, and every refusal with its count.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Tigrinya;
 
@@ -75,49 +76,49 @@ public static class Normalize
         {
             var s = input;
 
-            s = DOUBLE_WORDSPACE.Replace(s, "።");
-            s = DOUBLE_COLON.Replace(s, "።");
+            s = Rewrite(s, DOUBLE_WORDSPACE, "።");
+            s = Rewrite(s, DOUBLE_COLON, "።");
 
-            s = CLOCK.Replace(s, m =>
+            s = Rewrite(s, CLOCK, m =>
             {
                 var h = m.Groups[1].Value;
                 var mi = m.Groups[2].Value;
                 return Js.Number(mi) == 0 ? $" {Words(h)} " : $" {Words(h)} {Words(mi)} ";
             });
 
-            s = ERA_BCE.Replace(s, " ቅድሚ ልደተ ክርስቶስ ");
-            s = ERA_CE.Replace(s, " ድሕሪ ልደተ ክርስቶስ ");
+            s = Rewrite(s, ERA_BCE, " ቅድሚ ልደተ ክርስቶስ ");
+            s = Rewrite(s, ERA_CE, " ድሕሪ ልደተ ክርስቶስ ");
 
-            s = MULTI_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-            s = INTERIOR_DOT.Replace(s, "");
+            s = Rewrite(s, MULTI_DOT, m => DOTS.Replace(m.Value, ""));
+            s = Rewrite(s, INTERIOR_DOT, "");
 
-            s = LONE_WORDSPACE.Replace(s, ",");
+            s = Rewrite(s, LONE_WORDSPACE, ",");
 
-            s = PERIOD_TOKEN.Replace(s, m => PERIOD_GROUP.Replace(m.Value, "$1"));
-            s = COMMA_GROUP.Replace(s, "$1");
-            s = COMMA_GROUP.Replace(s, "$1"); // second pass for 5,000,000
+            s = Rewrite(s, PERIOD_TOKEN, m => PERIOD_GROUP.Replace(m.Value, "$1"));
+            s = Rewrite(s, COMMA_GROUP, "$1");
+            s = Rewrite(s, COMMA_GROUP, "$1"); // second pass for 5,000,000
 
-            s = RANGE.Replace(s, m => $"{FROM} {m.Groups[1].Value} {UNTIL} {m.Groups[2].Value}");
+            s = Rewrite(s, RANGE, m => $"{FROM} {m.Groups[1].Value} {UNTIL} {m.Groups[2].Value}");
 
-            s = SQUARE_KM.Replace(s, "ትርብዒት ኪሎ ሜተር");
-            s = KM.Replace(s, "ኪሎ ሜተር");
+            s = Rewrite(s, SQUARE_KM, "ትርብዒት ኪሎ ሜተር");
+            s = Rewrite(s, KM, "ኪሎ ሜተር");
 
             s = symbols(s);
 
-            s = DECIMAL.Replace(s, m => $" {Words(m.Groups[1].Value)} {POINT} {EachDigit(m.Groups[2].Value)} ");
+            s = Rewrite(s, DECIMAL, m => $" {Words(m.Groups[1].Value)} {POINT} {EachDigit(m.Groups[2].Value)} ");
 
-            s = ORDINAL_RE.Replace(s, m => Ordinalize(m.Value, Js.Number(m.Groups[1].Value), m.Groups[2].Value));
-            s = ORDINAL_GEEZ.Replace(s, m =>
+            s = Rewrite(s, ORDINAL_RE, m => Ordinalize(m.Value, Js.Number(m.Groups[1].Value), m.Groups[2].Value));
+            s = Rewrite(s, ORDINAL_GEEZ, m =>
                 Ordinalize(m.Value, GEEZ_DIGIT.TryGetValue(m.Groups[1].Value, out var v) ? v : 0, m.Groups[2].Value));
 
-            s = GEEZ_NUMERAL.Replace(s, m =>
+            s = Rewrite(s, GEEZ_NUMERAL, m =>
                 " " + string.Join(" ", Js.CodePoints(m.Value)
                     .Select(c => GEEZ_DIGIT.TryGetValue(c, out var v) ? numberToText(v) : "")
                     .Where(w => w.Length > 0)) + " ");
 
-            s = DEGREE.Replace(s, " ዲግሪ ");
+            s = Rewrite(s, DEGREE, " ዲግሪ ");
 
-            return DOUBLE_SPACE.Replace(s, " ");  // space, NBSP
+            return Rewrite(s, DOUBLE_SPACE, " ");  // space, NBSP
         };
     }
 }

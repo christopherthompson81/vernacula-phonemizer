@@ -7,6 +7,7 @@
  * script, so every boundary is an explicit `(?<![\p{L}\p{M}])` / `(?![\p{L}\p{M}])` lookaround.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Odia;
 
@@ -39,7 +40,7 @@ public static class Normalize
     private static readonly JsRe DOT_ESCAPE = JsRegex.Compile("\\.", "gu");
     private static readonly string UNIT_ALT = string.Join("|", UNIT_WORD.Keys
         .OrderByDescending(k => k.Length)
-        .Select(k => DOT_ESCAPE.Replace(k, "\\.")));
+        .Select(k => JsRegex.Replace(k, DOT_ESCAPE, "\\.")));
 
     /** Measure nouns that may stand either side of a rate slash. A CLOSED LIST on both sides, because only
      *  five of the corpus's fourteen Odia-to-Odia slashes are rates. */
@@ -98,54 +99,54 @@ public static class Normalize
 
             // Unit abbreviations before the rate slash below, so its left-hand side is a full measure noun
             // by the time that rule runs (`160କିମି/ଘଣ୍ଟା`).
-            s = UNIT_RE.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
+            s = Rewrite(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
 
-            s = LATIN_INITIALISM.Replace(s, m => DOT_ESCAPE.Replace(m.Groups[1].Value, ""));
+            s = Rewrite(s, LATIN_INITIALISM, m => DOT_ESCAPE.Replace(m.Groups[1].Value, ""));
 
-            s = RATE_SLASH.Replace(s, m => $"{m.Groups[1].Value} ପ୍ରତି {m.Groups[2].Value}");
+            s = Rewrite(s, RATE_SLASH, m => $"{m.Groups[1].Value} ପ୍ରତି {m.Groups[2].Value}");
 
             // De-grouping before anything else that reads punctuation, or `7,000` reads as "seven, zero".
             // Both groupings: Indian 2-2-3 and Western 3-3.
-            s = GROUP_INDIC.Replace(s, m => COMMAS.Replace(m.Value, ""));
-            s = GROUP_WESTERN.Replace(s, m => COMMAS.Replace(m.Value, ""));
+            s = Rewrite(s, GROUP_INDIC, m => COMMAS.Replace(m.Value, ""));
+            s = Rewrite(s, GROUP_WESTERN, m => COMMAS.Replace(m.Value, ""));
 
-            s = KG_STANDALONE.Replace(s, "କିଗ୍ରା");
+            s = Rewrite(s, KG_STANDALONE, "କିଗ୍ରା");
 
             // Decimals after de-grouping and before the clock. The dot is NEUTRALISED, not spoken: the defect
             // is the SENTENCE BREAK it produced mid-number.
-            s = DECIMAL_DOT.Replace(s, "$1 ");
+            s = Rewrite(s, DECIMAL_DOT, "$1 ");
 
             // The clock before the ordinal rule, and the colon becomes a space (it was reading as a pause).
-            s = CLOCK.Replace(s, m =>
+            s = Rewrite(s, CLOCK, m =>
                 Js.Number(m.Groups[2].Value) == 0 ? m.Groups[1].Value : $"{m.Groups[1].Value} {m.Groups[2].Value}");
 
             // ⚠ THE TRAILING BOUNDARY IS LOAD-BEARING: in `18ଶହ ଶତାବ୍ଦୀ` the ଶହ is the HUNDRED word, not the
             // ordinal suffix ଶ, and must be left alone.
-            s = ORDINAL_RE.Replace(s, m =>
+            s = Rewrite(s, ORDINAL_RE, m =>
                 Ordinal(Js.Number(m.Groups[1].Value), m.Groups[2].Value) ?? m.Value);
 
             // The DOT IS REQUIRED here, and so is the visarga: a dot-optional rule would also fire on an
             // ordinary word-final ଡା.
-            s = DOCTOR.Replace(s, m => $"ଡାକ୍ତର{(m.Groups[1].Value.Length > 0 ? m.Groups[1].Value : " ")}");
-            s = NUMBER_ABBR.Replace(s, m => $"ନମ୍ବର{(m.Groups[1].Value.Length > 0 ? m.Groups[1].Value : " ")}");
+            s = Rewrite(s, DOCTOR, m => $"ଡାକ୍ତର{(m.Groups[1].Value.Length > 0 ? m.Groups[1].Value : " ")}");
+            s = Rewrite(s, NUMBER_ABBR, m => $"ନମ୍ବର{(m.Groups[1].Value.Length > 0 ? m.Groups[1].Value : " ")}");
 
             // A Latin `I` standing alone is a keyboard artifact for the danda ।, not the English pronoun; the
             // guard is against other LATIN letters and digits only, since it is often glued to an Odia word.
-            s = LATIN_DANDA.Replace(s, "।");
+            s = Rewrite(s, LATIN_DANDA, "।");
 
-            s = DEGREE.Replace(s, "$1 ଡିଗ୍ରୀ");
+            s = Rewrite(s, DEGREE, "$1 ଡିଗ୍ରୀ");
 
-            s = PLUS_MINUS.Replace(s, " ପ୍ଲସ୍ ଋଣାତ୍ମକ ");
+            s = Rewrite(s, PLUS_MINUS, " ପ୍ଲସ୍ ଋଣାତ୍ମକ ");
             var frozen = s;
-            s = LEADING_MINUS.Replace(s, m => DIGIT_BEFORE.IsMatch(frozen[..m.Index]) ? m.Value : "ଋଣାତ୍ମକ ");
-            s = PLUS.Replace(s, " ପ୍ଲସ୍ ");
+            s = Rewrite(s, LEADING_MINUS, m => DIGIT_BEFORE.IsMatch(frozen[..m.Index]) ? m.Value : "ଋଣାତ୍ମକ ");
+            s = Rewrite(s, PLUS, " ପ୍ଲସ୍ ");
 
             // ⚠ THE COMPARATIVES ARE POSTPOSED (ଠାରୁ follows the standard and fuses to it), hence the shared
             // postposed-sign pass; rewriting them as an infix rule reads the comparison backwards.
             s = PostposedSignPass.PostposedSign(s, "<", "ଠାରୁ କମ");
             s = PostposedSignPass.PostposedSign(s, ">", "ଠାରୁ ଅଧିକ");
-            s = EQUALS.Replace(s, " ସମାନ ");
-            s = DIVIDE.Replace(s, " ଭାଗ ");
+            s = Rewrite(s, EQUALS, " ସମାନ ");
+            s = Rewrite(s, DIVIDE, " ଭାଗ ");
 
             return s;
         };

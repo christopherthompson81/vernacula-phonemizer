@@ -5,6 +5,7 @@
  * every word, the refusals (the ASCII hyphen above all) and the step ordering.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.MinNan;
 
@@ -55,17 +56,17 @@ public static class Normalize
     {
         var s = input;
 
-        s = OO_MIDDLE_DOT.Replace(s, "$1͘");
+        s = Rewrite(s, OO_MIDDLE_DOT, "$1͘");
 
         s = Sinitic.DegroupThousands(s);
 
-        s = RANGE.Replace(s, "$1$2 到 ");
+        s = Rewrite(s, RANGE, "$1$2 到 ");
 
-        s = MINUS_UNIT.Replace(s, "負");
-        s = MINUS_LEAD.Replace(s, "$1負");
+        s = Rewrite(s, MINUS_UNIT, "負");
+        s = Rewrite(s, MINUS_LEAD, "$1負");
 
-        s = COORD_DMS.Replace(s, "$1度 $2 $3");
-        s = COORD_DM.Replace(s, "$1度 $2");
+        s = Rewrite(s, COORD_DMS, "$1度 $2 $3");
+        s = Rewrite(s, COORD_DM, "$1度 $2");
 
         s = Sinitic.ReadDegrees(s, new DegreeData
         {

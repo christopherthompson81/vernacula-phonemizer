@@ -132,7 +132,7 @@
  *   This layer still emits DIGITS throughout, so nothing here is built on top of either.
  */
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** The CJK-ideograph blocks Sawndip draws on — the same set `sawndip.ts` recognises, as a class body.
  *  ⚠ KEEP IN STEP WITH `sawndip.ts`'s `isIdeograph` AND `zhuang.ts`'s TOKEN: the three are one set spelled
@@ -290,8 +290,8 @@ export function normalizeZhuang(input: string): string {
     //    Meanwhile `sawndip.ts`'s dictionary resolves 31.7% of those glyphs, so the status quo is not
     //    silence — it is a Chinese gloss emitting unrelated Zhuang syllables (`(Sawgun: 崇左市)` → *poː*).
     //    A parenthetical spelling gloss is not spoken in any case: the word it glosses was just said.
-    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍﻿]/gu, "");
-    s = tr(s, BRACKET, stripGloss);
+    s = rewrite(rewrite(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍﻿]/gu, "");
+    s = rewrite(s, BRACKET, stripGloss);
 
     // 2) CJK PUNCTUATION → ASCII. THE SINGLE BIGGEST DEFECT IN THE LANGUAGE, and it is pure data: the
     //    engine's `clausePunctuation` and its `TOKEN` both know only `[.!?…,;:]`, while Zhuang wiki prose
@@ -330,7 +330,7 @@ export function normalizeZhuang(input: string): string {
     //    Haijdai dwg -418m … gemj daengz -420m`, which is exactly the population that WOULD be worth
     //    claiming and exactly the character that cannot be told from a span. U+2212 can only be the operator.
     //    ⚠ `(?<!\p{Nd}\s)` refuses the space-separated negative exponent, the fleet-wide guard.
-    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, `${MANIFEST.minus} `);
+    s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, `${MANIFEST.minus} `);
 
     // 3) ERA MARKERS, before de-grouping and before the range rule. `BC` ×10, written both glued and
     //    spaced and on BOTH sides of a span (`259BC-210BC`, `273 BC daengz 232BC`, `551 BC – 479 BC`,
@@ -349,9 +349,9 @@ export function normalizeZhuang(input: string): string {
     //    sentence, so swallowing the trailing period would delete the pause — the Swahili/Lingala
     //    `expandDotted` hazard, avoided here by simply not matching that dot.
     const BCE = "\\s?B\\.?C(?![\\p{L}\\p{M}])";
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+)${BCE}\\s?[-–—]\\s?(\\d+)${BCE}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+)${BCE}\\s?[-–—]\\s?(\\d+)${BCE}`, "gu"),
         "gunghyenz gonq $1 daengz gunghyenz gonq $2");
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+)${BCE}`, "gu"), "gunghyenz gonq $1");
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+)${BCE}`, "gu"), "gunghyenz gonq $1");
 
     // 4) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause
     //    punctuation and the tail as a separate number (`1,130.81` → *ʔiːt , ʔiːt paːk θaːm ɕiːp . …*).
@@ -366,11 +366,11 @@ export function normalizeZhuang(input: string): string {
     //
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
     //    The SPACE form (×3: `357 021 bingzfueng`, `8 200 fanh`, `52 fanh 6 500 cih`) additionally has to
     //    reject a bare adjacency that is really two numbers in a list. Requiring every group to be exactly
     //    three digits does that: `2008 nienz 7-11 nyied` has no 3-digit group to join.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) UNITS, before decimals — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten into spaced digits (the playbook's standing "units before decimals"
@@ -401,7 +401,7 @@ export function normalizeZhuang(input: string): string {
     const NOT_VERSION = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
     for (const [sym, word] of UNITS) {
         const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-        s = tr(s,
+        s = rewrite(s,
             new RegExp(
                 `(?<![\\p{L}\\p{M}\\d.,])${NOT_VERSION}(\\d+(?:\\.\\d+)?)(\\s(?:fanh|ik))?\\s?${key}(?![\\p{L}\\p{M}\\d²³])`,
                 "gu",
@@ -418,7 +418,7 @@ export function normalizeZhuang(input: string): string {
     //    real onset. `ACCEPTED_SIGN_SILENCE.za.degrees` records the refusal so the gate stays honest.
     //    ⚠ AFTER STEP 5, because `°C` is not a unit key and the unit rule's trailing guard would otherwise
     //    have to know about it; and the bare `°` is left alone — it has no instances here beyond these.
-    s = tr(s, /(?<![\d.,])(\d+(?:\.\d+)?)\s?(?:°\s?[CF]|[℃℉])(?![\p{L}\p{M}])/gui, "$1");
+    s = rewrite(s, /(?<![\d.,])(\d+(?:\.\d+)?)\s?(?:°\s?[CF]|[℃℉])(?![\p{L}\p{M}])/gui, "$1");
 
     // 7) PERCENT — ×68, the layer's highest-traffic symbol rule and its THINNEST SOURCING, stated here
     //    rather than buried. The corpus never spells `%` out. What it does spell out is the FRACTION
@@ -437,18 +437,18 @@ export function normalizeZhuang(input: string): string {
     //    reachable by RANGE at all — a `%` stands between the digits and the dash — and once this rule has
     //    inserted a phrase between the operands there is no pair left to match. ×1 (`bingh dai beijlwd
     //    youq 0.5％－5.0％`), and the shape cannot be arithmetic, so it needs no ascending test beyond it.
-    s = tr(s,
+    s = rewrite(s,
         /(?<![\d.,])(\d+(?:\.\d+)?)\s?%\s?-\s?(\d+(?:\.\d+)?)\s?%/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `bak faenh cih ${a} daengz bak faenh cih ${b}` : whole),
     );
-    s = tr(s, /(?<![\d.,])(\d+(?:\.\d+)?)\s?%/gu, "bak faenh cih $1");
+    s = rewrite(s, /(?<![\d.,])(\d+(?:\.\d+)?)\s?%/gu, "bak faenh cih $1");
 
     // 8) RANGES. AFTER percent, because a percent span is claimed there and its operands are no longer
     //    bare digits; after de-grouping, so a grouped endpoint is one token; after step 3, so a `BC` span
     //    is already words. See RANGE and DATE_RANGE for the guards and for why non-ascending pairs are
     //    left alone. The connective `daengz` is the corpus's own, written between two numerals ×6.
-    s = tr(s, DATE_RANGE, " daengz ");
-    s = tr(s, RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} daengz ${b}` : whole));
+    s = rewrite(s, DATE_RANGE, " daengz ");
+    s = rewrite(s, RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} daengz ${b}` : whole));
 
     // 9) FRACTIONS → the attested `faenh cih` idiom, WITH THE OPERANDS SWAPPED: Zhuang states the
     //    denominator first (`sam faenh cih it` = one third), so `5/6` is `6 faenh cih 5`.
@@ -459,7 +459,7 @@ export function normalizeZhuang(input: string): string {
     //    ⚠ IT EMITS DIGITS and lets the engine's own number path speak them (trap 20 checked: the only
     //    numeral rule za has is the plain cardinal compositor, which has no context-sensitive branch a
     //    re-emitted digit could trip).
-    s = tr(s, /(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) =>
+    s = rewrite(s, /(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) =>
         Number(a) < Number(b) && Number(b) <= 100 ? `${b} faenh cih ${a}` : whole);
 
     // 10) DECIMALS, after every rule that needs the number intact. The separator becomes NOTHING and the
@@ -469,7 +469,7 @@ export function normalizeZhuang(input: string): string {
     //     ⚠ THE TRAILING LETTER GUARD keeps a dotted designation out (zero in this corpus; the same
     //     robustness argument as step 5), and the leading one keeps the rule from restarting inside a
     //     number it has already rewritten.
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
         `${int} ${[...frac].join(" ")}`);
 
     // 11) THE AMPERSAND — ×3 in the Zhuang subset and ×62 in the artifact (whose instances are mostly the
@@ -478,7 +478,7 @@ export function normalizeZhuang(input: string): string {
     //     ordinary conjunction, ×1636, so this needs no sourcing argument at all.
     //     ⚠ SPACED ON BOTH SIDES DELIBERATELY. `A&B` deletes to `AB`, which is ONE token instead of two —
     //     traps 18/26 — so the replacement must insert the boundary the sign was supplying.
-    s = tr(s, /\s?&\s?/gu, " caeuq ");
+    s = rewrite(s, /\s?&\s?/gu, " caeuq ");
 
     return s;
 }

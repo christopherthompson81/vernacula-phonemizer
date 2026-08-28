@@ -5,6 +5,7 @@
  * (no bareExponent: 23 of 24 superscript runs here are romanization TONE NUMBERS; no degree, ×, =, currency).
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Xiang;
 
@@ -41,7 +42,7 @@ public static class Normalize
     {
         var s = input;
         s = Sinitic.DegroupThousands(s);
-        s = AGO_MARK.Replace(s, m => $"{m.Groups[1].Value}{AGO}");
+        s = Rewrite(s, AGO_MARK, m => $"{m.Groups[1].Value}{AGO}");
         s = Sinitic.SpellYears(s, new YearRuleData { RangeWord = "到" });
         s = s.Replace(AGO, "年", StringComparison.Ordinal);
         s = Sinitic.ReorderFraction(s, "分之");
@@ -49,7 +50,7 @@ public static class Normalize
         s = Sinitic.ReadDecimals(s, "點");
         // ⚠ `full` is the pre-replace string, matching the TS callback's 4th argument.
         var full = s;
-        s = RANGE.Replace(s, m =>
+        s = Rewrite(s, RANGE, m =>
         {
             var before = full[Math.Max(0, m.Index - 12)..m.Index];
             return LATIN_BEFORE.IsMatch(before) ? m.Value : $"{m.Groups[1].Value}到{m.Groups[2].Value}";

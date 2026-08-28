@@ -20,7 +20,7 @@ import { slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { russianOrdinal } from "./romanOrdinals.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const GROUP_SPACE = "    ";  // NBSP, NNBSP, thin space
 
@@ -69,7 +69,7 @@ function inflectOrdinal(base: string, written: string): string | undefined {
     const words = base.split(" ");
     const last = words[words.length - 1]!;
     const soft = last.endsWith("ий"); // третий is the only soft stem in the 1–19 table
-    const stem = last.replace(/(ый|ой|ий)$/u, "");
+    const stem = rewrite(last, /(ый|ой|ий)$/u, "");
     words[words.length - 1] = stem + (soft ? forms[1] : forms[0] || last.slice(stem.length));
     return words.join(" ");
 }
@@ -120,9 +120,9 @@ export function normalizeRussian(input: string): string {
 
     // 0) DIGIT GROUPING with a space — the Russian convention, and the number token cannot span a space, so
     //    "5 000 лет" read as "пять ноль лет".
-    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = rewrite(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-letter rule so `н. э.` and `т. е.` are claimed whole —
     //    their interior dots were becoming phrase breaks.
@@ -147,7 +147,7 @@ export function normalizeRussian(input: string): string {
     //    lookahead written that way fired on "Затем" and ate the boundary anyway. The abbreviation itself
     //    still needs `i` (both `н. э.` and `Н. Э.` occur), so the two cannot share one pattern.
     for (const [pat, words] of MULTI_DOT) {
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${pat}\\.(\\s*)(\\S?)`, "giu"),
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${pat}\\.(\\s*)(\\S?)`, "giu"),
             (_m: string, sp: string, next: string) => {
                 if (next === "") return `${words}.`; // end of input ⇒ it was the sentence end
                 if (/[,;:!?)»]/u.test(next)) return `${words}${sp}${next}`; // the mark carries the break
@@ -157,10 +157,10 @@ export function normalizeRussian(input: string): string {
     }
 
     // 2) НОМЕР. The sign was dropped outright.
-    s = tr(s, /№\s?(?=\d)/gu, "номер ");
+    s = rewrite(s, /№\s?(?=\d)/gu, "номер ");
 
     // 3) ORDINAL NOTATION. The suffix is the CASE ending, not an appendable marker (see the file header).
-    s = tr(s, new RegExp(`\\b(\\d+)\\s?-\\s?(${CASE_ALT})(?![а-яё])`, "giu"),
+    s = rewrite(s, new RegExp(`\\b(\\d+)\\s?-\\s?(${CASE_ALT})(?![а-яё])`, "giu"),
         (whole, digits: string, written: string) => {
             const base = ordinalBase(Number(digits));
             if (base === undefined) return whole;
@@ -170,10 +170,10 @@ export function normalizeRussian(input: string): string {
     // 3b) `г.` after a year is года, EXCEPT after the preposition в, which governs the prepositional
     //     году ("в 2007 г." = в 2007 году). All three corpus instances are year contexts — none is the
     //     city sense of г., which would need a different expansion and does not occur here.
-    s = tr(s, /(?<![\p{L}\p{M}])(в|во)\s+(\d+)\s*г\./giu, "$1 $2 году");
+    s = rewrite(s, /(?<![\p{L}\p{M}])(в|во)\s+(\d+)\s*г\./giu, "$1 $2 году");
 
     // 4) DOTTED ABBREVIATIONS. The dot is consumed so it cannot become a phrase break.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -181,7 +181,7 @@ export function normalizeRussian(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -191,35 +191,35 @@ export function normalizeRussian(input: string): string {
         });
 
     // 5) UNITS the shared tier cannot express: the Cyrillic slash unit and the degree signs.
-    s = tr(s, /(\d)\s?км\/ч(?![а-яё])/giu, "$1 километров в час");
-    s = tr(s, /(\d)\s?м\/с(?![а-яё])/giu, "$1 метров в секунду");
+    s = rewrite(s, /(\d)\s?км\/ч(?![а-яё])/giu, "$1 километров в час");
+    s = rewrite(s, /(\d)\s?м\/с(?![а-яё])/giu, "$1 метров в секунду");
     // ⚠ THE LOWERCASE SCALE LETTERS GO IN THE CLASS, NOT IN AN `i` FLAG. `[а-яё]` is the guard against a
     //    SPELLED-OUT scale name (`30 °Cельсия` — the ⟨C⟩ is the word's first letter, not the symbol), and
     //    under `i` that property folds to reject uppercase Cyrillic too, quietly narrowing what the rule
     //    will claim. The class carries both cases of both alphabets instead.
-    s = tr(s, /(\d)\s?°\s?[CСcс](?![а-яё])/gu, "$1 градусов Цельсия");
-    s = tr(s, /(\d)\s?°\s?[FФfф](?![а-яё])/gu, "$1 градусов Фаренгейта");
-    s = tr(s, /(\d)\s?°/gu, "$1 градусов");
+    s = rewrite(s, /(\d)\s?°\s?[CСcс](?![а-яё])/gu, "$1 градусов Цельсия");
+    s = rewrite(s, /(\d)\s?°\s?[FФfф](?![а-яё])/gu, "$1 градусов Фаренгейта");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 градусов");
 
     // 6) CLOCK. The colon was a clause mark, so "11:00" read as "одиннадцать , ноль". час and минута take
     //    Slavic count agreement (1 час / 2 часа / 5 часов).
     //    Guarded against a SPORTS time: "2:11,60 минуты" is 2 minutes 11.60 seconds, not two o'clock, and
     //    the corpus contains one. A comma-plus-digit after the minutes marks decimal seconds.
-    s = tr(s, /\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)/gu, (_m, h: string, min: string) => {
+    s = rewrite(s, /\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)/gu, (_m, h: string, min: string) => {
         const hv = Number(h), mv = Number(min);
         const head = `${numberToWords(hv)} ${counted(hv, HOUR)}`;
         return mv === 0 ? head : `${head} ${numberToWords(mv)} ${counted(mv, MINUTE)}`;
     });
 
     // 7) SIGNS.
-    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1минус $2");
+    s = rewrite(s, /(^|[\s(])[-−–](\d)/gu, "$1минус $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = tr(s, /±/gu, " плюс минус ");
-    s = tr(s, /(\S)\+\s?(\d)/gu, "$1 плюс $2");
-    s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1плюс $2");
+    s = rewrite(s, /±/gu, " плюс минус ");
+    s = rewrite(s, /(\S)\+\s?(\d)/gu, "$1 плюс $2");
+    s = rewrite(s, /(^|\s)\+\s?(\d)/gu, "$1плюс $2");
 
     // 7b) RELATIONAL AND DIVISION SIGNS. ⚠ THE SOURCE HERE IS A PRONUNCIATION GLOSS, which is the strongest
     //     shape this kind of evidence takes: the arithmetic articles do not merely use these words, they
@@ -243,13 +243,13 @@ export function normalizeRussian(input: string): string {
     //     "в четыре раза больше чем у 35-миллиметрового негатива"), so it is both grammatical and tier-2
     //     attested. `разделить на` governs the accusative, which for these numerals is identical to the
     //     nominative, so the division rule needs no such repair.
-    s = tr(s, /\s?=\s?/gu, " равно ");
-    s = tr(s, /\s?<\s?/gu, " меньше чем ");
-    s = tr(s, /\s?>\s?/gu, " больше чем ");
-    s = tr(s, /\s?÷\s?/gu, " разделить на ");
+    s = rewrite(s, /\s?=\s?/gu, " равно ");
+    s = rewrite(s, /\s?<\s?/gu, " меньше чем ");
+    s = rewrite(s, /\s?>\s?/gu, " больше чем ");
+    s = rewrite(s, /\s?÷\s?/gu, " разделить на ");
 
     // 8) FRACTIONS — feminine, agreeing with the elided *часть*: 1/5 is «одна пятая».
-    s = tr(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (num === 1 && den === 2) return "одна вторая";
         const base = ordinalBase(den);

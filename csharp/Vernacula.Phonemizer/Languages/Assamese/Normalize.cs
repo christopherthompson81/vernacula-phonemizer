@@ -5,6 +5,7 @@
  */
 using Vernacula.Phonemizer.Core;
 using Vernacula.Phonemizer.Languages.Bengali;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Assamese;
 
@@ -79,35 +80,35 @@ public static class Normalize
         {
             var s = input.Normalize(System.Text.NormalizationForm.FormC);
 
-            s = DOTTED_LATIN.Replace(s, m => DOT_OR_SPACE.Replace(m.Value, ""));
-            s = LONE_INITIAL.Replace(s, "$1");
-            s = DOTTED_BENGALI.Replace(s, m => SPACE_RUN.Replace(DOT_G.Replace(m.Value, " "), " "));
+            s = Rewrite(s, DOTTED_LATIN, m => DOT_OR_SPACE.Replace(m.Value, ""));
+            s = Rewrite(s, LONE_INITIAL, "$1");
+            s = Rewrite(s, DOTTED_BENGALI, m => SPACE_RUN.Replace(DOT_G.Replace(m.Value, " "), " "));
 
-            s = SHA_TWO_DIGIT.Replace(s, m =>
+            s = Rewrite(s, SHA_TWO_DIGIT, m =>
             {
                 var n = (int)Js.Number(ToAscii(m.Groups[1].Value));
                 return ORDINAL_11_20.TryGetValue(n, out var ord) ? ord : n == 10 ? "দশম" : m.Value;
             });
-            s = SHA_ONE_DIGIT.Replace(s, m =>
+            s = Rewrite(s, SHA_ONE_DIGIT, m =>
                 Js.Number(ToAscii(m.Groups[1].Value)) == 1 ? "একশ" : m.Value);
 
-            s = NANG.Replace(s, m => $"{Cardinal(Js.Number(ToAscii(m.Groups[1].Value)))} নম্বৰ");
+            s = Rewrite(s, NANG, m => $"{Cardinal(Js.Number(ToAscii(m.Groups[1].Value)))} নম্বৰ");
 
             for (var i = 0; i < 2; i++)
-                s = GROUPED_ORDINAL.Replace(s, "$1$2");
+                s = Rewrite(s, GROUPED_ORDINAL, "$1$2");
 
-            s = VERSION_DOT.Replace(s, "$1 বিন্দু $2");
+            s = Rewrite(s, VERSION_DOT, "$1 বিন্দু $2");
 
-            s = CURRENCY_CODE.Replace(s, m =>
+            s = Rewrite(s, CURRENCY_CODE, m =>
                 $"{m.Groups[2].Value}{(m.Groups[3].Success ? m.Groups[3].Value : "")} {CODE[m.Groups[1].Value]} ডলাৰ");
-            s = BARE_DOLLAR_REDUNDANT.Replace(s, "$1$2");
-            s = BARE_DOLLAR_MAGNITUDE.Replace(s, "$1$2 ডলাৰ");
+            s = Rewrite(s, BARE_DOLLAR_REDUNDANT, "$1$2");
+            s = Rewrite(s, BARE_DOLLAR_MAGNITUDE, "$1$2 ডলাৰ");
 
-            s = AMP_SPACED.Replace(s, " আৰু ");
-            s = AMP_BARE.Replace(s, " আৰু ");
-            s = AMP_TIGHT.Replace(s, "$1 আৰু $2");
+            s = Rewrite(s, AMP_SPACED, " আৰু ");
+            s = Rewrite(s, AMP_BARE, " আৰু ");
+            s = Rewrite(s, AMP_TIGHT, "$1 আৰু $2");
 
-            s = REGNAL_WW.Replace(s, m =>
+            s = Rewrite(s, REGNAL_WW, m =>
             {
                 var n = (int)Js.Number(ToAscii(m.Groups[1].Value));
                 if (n < 1 || n > 20) return m.Value;
@@ -115,10 +116,10 @@ public static class Normalize
                 return $"{ord} বিশ্ব যুদ্ধ";
             });
 
-            s = EQUALS_RE.Replace(s, "$1 সমান $2");
-            s = LESS_THAN.Replace(s, "$1 তকৈ সৰু $2");
-            s = GREATER_THAN.Replace(s, "$1 তকৈ ডাঙৰ $2");
-            s = TIMES.Replace(s, "$1 গুণ $2");
+            s = Rewrite(s, EQUALS_RE, "$1 সমান $2");
+            s = Rewrite(s, LESS_THAN, "$1 তকৈ সৰু $2");
+            s = Rewrite(s, GREATER_THAN, "$1 তকৈ ডাঙৰ $2");
+            s = Rewrite(s, TIMES, "$1 গুণ $2");
 
             return s;
         };

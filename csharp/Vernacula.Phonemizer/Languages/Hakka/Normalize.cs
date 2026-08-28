@@ -4,6 +4,7 @@
  * Ported from src/languages/hakka/normalize.ts — see that file for the corpus evidence and every refusal.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Hakka;
 
@@ -61,17 +62,17 @@ public static class Normalize
     {
         var s = input;
         s = Sinitic.DegroupThousands(s);
-        s = YEAR_MORPHEME.Replace(s, "$1年");
-        s = COORD_DMS.Replace(s, "$1度$2分$3秒");
-        s = COORD_DM.Replace(s, "$1度$2分");
-        s = COORD_RANGE.Replace(s, "$1至");
+        s = Rewrite(s, YEAR_MORPHEME, "$1年");
+        s = Rewrite(s, COORD_DMS, "$1度$2分$3秒");
+        s = Rewrite(s, COORD_DM, "$1度$2分");
+        s = Rewrite(s, COORD_RANGE, "$1至");
         s = Sinitic.ReadDegrees(s, DEGREES);
-        s = NEGATIVE_TEMP.Replace(s, "$1零下");
+        s = Rewrite(s, NEGATIVE_TEMP, "$1零下");
         s = Sinitic.SpellYears(s, new YearRuleData { RangeWord = "至" });
-        s = RANGE.Replace(s, m => $"{m.Groups[1].Value}{(m.Groups[2].Success ? m.Groups[2].Value : "")}至{m.Groups[3].Value}");
+        s = Rewrite(s, RANGE, m => $"{m.Groups[1].Value}{(m.Groups[2].Success ? m.Groups[2].Value : "")}至{m.Groups[3].Value}");
         s = Sinitic.ReorderFraction(s, "分之");
         s = SYMBOLS(s);
-        s = PERMILLE.Replace(s, "千分之$1");
+        s = Rewrite(s, PERMILLE, "千分之$1");
         s = Sinitic.ReadDecimals(s, "點");
         return s;
     }

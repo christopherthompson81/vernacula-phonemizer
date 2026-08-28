@@ -8,6 +8,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Kinyarwanda;
 
@@ -211,10 +212,10 @@ public static class Normalize
         // ⚠ `full` IS THE PRE-REPLACE STRING, as JS's replace callback argument is — snapshot it, or the
         // closure would see `s` as reassigned by this very statement. (Same for every pass below.)
         var src1 = s;
-        s = DOTTED_RUN.Replace(s, mm =>
+        s = Rewrite(s, DOTTED_RUN, mm =>
         {
             var run = mm.Value;
-            var letters = DOTS_AND_SPACES.Replace(run, "");
+            var letters = JsRegex.Replace(run, DOTS_AND_SPACES, "");
             var rest = Slice(src1, mm.Index + run.Length, src1.Length);
             if (LEADING_LETTER.IsMatch(rest)) return $"{letters} ";
             if (!run.EndsWith(".", StringComparison.Ordinal)) return letters;
@@ -223,23 +224,23 @@ public static class Normalize
 
         // 2) THOUSANDS DE-GROUPING, before every remaining numeric rule AND before the tier — a grouped
         //    `1.300m` must reach the tier de-grouped or `NOT_VERSION` refuses the metre.
-        s = GROUP_COMMA.Replace(s, mm => COMMAS.Replace(mm.Value, ""));
-        s = GROUP_DOT.Replace(s, mm => DOTS.Replace(mm.Value, ""));
-        s = GROUP_SPACE.Replace(s, mm => GROUP_SPACES.Replace(mm.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, mm => COMMAS.Replace(mm.Value, ""));
+        s = Rewrite(s, GROUP_DOT, mm => DOTS.Replace(mm.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, mm => GROUP_SPACES.Replace(mm.Value, ""));
 
         // 3) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — structurally invisible to the shared tier.
-        s = UNIT_BEFORE.Replace(s, mm =>
+        s = Rewrite(s, UNIT_BEFORE, mm =>
             $"{UNIT_MAP[Js.ToLowerCase(mm.Groups[1].Value)]}{Exponent(mm.Groups[2])}");
 
         // 4) DEGREES — four arms plus the coordinate one, ordered longest-first so `°C` is not claimed by
         //    the bare arm. BEFORE step 10, which would otherwise break the number↔sign adjacency.
         //    4a) A NEGATIVE TEMPERATURE — the only slot with an attested reading for the sign.
         var src4a = s;
-        s = DEGREE_NEG.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_NEG, mm =>
             $"{DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src4a, Scale(mm.Groups[2]))} {BELOW_ZERO}");
         //    4b) A RANGE OF DEGREES — claimed HERE and not by step 7, because the noun heads the whole span.
         var src4b = s;
-        s = DEGREE_RANGE.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_RANGE, mm =>
         {
             var a = mm.Groups[1].Value;
             var b = mm.Groups[2].Value;
@@ -249,15 +250,15 @@ public static class Normalize
         });
         //    4c) A SCALE TEMPERATURE.
         var src4c = s;
-        s = DEGREE_SCALE.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_SCALE, mm =>
             DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src4c, Scale(mm.Groups[2])));
         //    4d) A COORDINATE — the compass letter is a DIRECTION, not a scale.
         var src4d = s;
-        s = DEGREE_COMPASS.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_COMPASS, mm =>
             $"{DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src4d, "")} {mm.Groups[2].Value}{COMPASS[mm.Groups[3].Value]}");
         //    4e) A BARE DEGREE.
         var src4e = s;
-        s = DEGREE_BARE.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_BARE, mm =>
             DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src4e, ""));
         // ⚠ THE MARKS COME OFF HERE — AFTER 4e, the LAST arm. A step earlier and 4e would read a `dogere`
         // this file inserted as one the WRITER wrote, and suppress a noun it should emit. Unconditional and
@@ -268,7 +269,7 @@ public static class Normalize
 
         // 6) COLON TIMES. The colon is clausePunctuation, so every one of these emitted comma PAUSES
         //    inside a single quantity. ⚠ THE MARKER IS WHAT IDENTIFIES A CLOCK, not the shape.
-        s = CLOCK.Replace(s, mm =>
+        s = Rewrite(s, CLOCK, mm =>
         {
             var mark = mm.Groups[1].Value;
             var h = Js.NumberToString(Js.Number(mm.Groups[2].Value));
@@ -276,23 +277,23 @@ public static class Normalize
             return mv == 0 ? $"{mark} {h}" : $"{mark} {h} {AND} {MINUTES} {Js.NumberToString(mv)}";
         });
         //    A THREE-FIELD run WITH a timezone is a timestamp: the colons simply stop being clauses.
-        s = TIMESTAMP.Replace(s, "$1 $2 $3");
+        s = Rewrite(s, TIMESTAMP, "$1 $2 $3");
         //    A THREE-FIELD run WITHOUT one is a RACE DURATION.
-        s = DURATION.Replace(s, mm =>
+        s = Rewrite(s, DURATION, mm =>
             $"{HOURS} {Js.NumberToString(Js.Number(mm.Groups[1].Value))} {MINUTES} " +
             $"{Js.NumberToString(Js.Number(mm.Groups[2].Value))} {SECONDS} {Js.NumberToString(Js.Number(mm.Groups[3].Value))}");
         //    ANY REMAINING `N:NN` keeps its digits but loses the spurious pause.
-        s = COLON_PAIR.Replace(s, "$1 $2");
+        s = Rewrite(s, COLON_PAIR, "$1 $2");
 
         // 7) RANGES → `kugeza kuri`, ASCENDING ONLY. A PERCENT SPAN is claimed first and keeps ONE sign.
-        s = PERCENT_SPAN.Replace(s, mm =>
+        s = Rewrite(s, PERCENT_SPAN, mm =>
         {
             var a = mm.Groups[1].Value;
             var b = mm.Groups[2].Value;
             return Js.Number(a) < Js.Number(b) ? $"{a} kugeza kuri {b}%" : mm.Value;
         });
         //    FIRST ARM: a span whose second operand carries the UNIT — the noun is HOISTED to the front.
-        s = SPAN_WITH_UNIT.Replace(s, mm =>
+        s = Rewrite(s, SPAN_WITH_UNIT, mm =>
         {
             var a = mm.Groups[1].Value;
             var b = mm.Groups[2].Value;
@@ -300,7 +301,7 @@ public static class Normalize
             return $"{UNIT_MAP[mm.Groups[3].Value]}{Exponent(mm.Groups[4])} {a} kugeza kuri {b}";
         });
         //    SECOND ARM: the bare span.
-        s = SPAN_BARE.Replace(s, mm =>
+        s = Rewrite(s, SPAN_BARE, mm =>
         {
             var a = mm.Groups[1].Value;
             var b = mm.Groups[2].Value;
@@ -313,18 +314,18 @@ public static class Normalize
         // 9) A UNIT USED AS A BARE DENOMINATOR, with no numeral of its own. AFTER the tier, so a surviving
         //    `/unit` is one that had no numerator. MULTI-LETTER KEYS ONLY — a one-letter key here would
         //    read a URL path segment as a unit.
-        s = DENOM_SLASH.Replace(s, mm =>
+        s = Rewrite(s, DENOM_SLASH, mm =>
             $" kuri {UNIT_MAP[Js.ToLowerCase(mm.Groups[1].Value)]}{Exponent(mm.Groups[2])}");
         //    AND THE SAME GAP WITHOUT THE SLASH — claimed ONLY when an EXPONENT is present.
-        s = BARE_EXPONENT_UNIT.Replace(s, mm =>
+        s = Rewrite(s, BARE_EXPONENT_UNIT, mm =>
             $"{UNIT_MAP[Js.ToLowerCase(mm.Groups[1].Value)]} {(mm.Groups[2].Value == "²" ? SQUARED : CUBED)}");
 
         // 9b) A lone `+`, `=` or `×` is left unread, deliberately — see the TS header.
 
         // 10) DECIMALS, LAST of the numeric rules — and the rule that spends the dot `NOT_VERSION` needs.
-        s = DECIMAL_DOT.Replace(s, mm => Spell(mm.Groups[1].Value, mm.Groups[2].Value));
-        s = DECIMAL_COMMA.Replace(s, mm => Spell(mm.Groups[1].Value, mm.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_DOT, mm => Spell(mm.Groups[1].Value, mm.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, mm => Spell(mm.Groups[1].Value, mm.Groups[2].Value));
 
-        return EDGE_SPACES.Replace(RUN_OF_SPACES.Replace(s, " "), "");
+        return Rewrite(Rewrite(s, RUN_OF_SPACES, " "), EDGE_SPACES, "");
     }
 }

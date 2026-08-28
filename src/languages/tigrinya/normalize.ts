@@ -41,7 +41,7 @@
  *     form above ten and it already reads correctly with no rule at all.
  */
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Ethiopic syllabary letters, EXCLUDING the punctuation (U+1360+) and numeral (U+1369+) sub-blocks. */
 const FID = "[\\u1200-\\u135A]";
@@ -126,7 +126,7 @@ export function makeTigrinyaNormalizer(
 
         // 1. ፡፡ → ። . TWO U+1361 ETHIOPIC WORDSPACE is the typewriter substitute for ። (ኣርባዕተ ነጥቢ), and
         //    `::` is its ASCII substitute (`ይረጋገጽ:: "ብርግጽ …"`). ×1 each. FIRST, so step 5 sees only lone ፡.
-        s = tr(tr(s, /፡፡/gu, "።"), /::/gu, "።");
+        s = rewrite(rewrite(s, /፡፡/gu, "።"), /::/gu, "።");
 
         // 2. THE CLOCK, and it is claimed ONLY on the ETHIOPIC separator. ×1: `ሰዓት 10፡00 ቅድሚ ቐትሪ`.
         //    ⚠ THE NARROWNESS IS THE RULE, and it is where Amharic's step 6 does not survive re-measurement.
@@ -137,7 +137,7 @@ export function makeTigrinyaNormalizer(
         //    ⚠ ONLY THE SEPARATOR IS RESOLVED — no ሰዓት/ደቒቕ is inserted, because the text already supplies
         //    the frame (`ሰዓት 10፡00`) and adding the word would double it. `፡00` is the whole hour and reads
         //    as the bare hour, not as "…zero".
-        s = tr(s, /(?<!\d)(\d{1,2})፡([0-5]\d)(?!\d)/gu, (_m, h: string, mi: string) =>
+        s = rewrite(s, /(?<!\d)(\d{1,2})፡([0-5]\d)(?!\d)/gu, (_m, h: string, mi: string) =>
             Number(mi) === 0 ? ` ${words(h)} ` : ` ${words(h)} ${words(mi)} `);
 
         // 3. ERA MARKERS, BEFORE the generic abbreviation pass in step 4 — which would otherwise strip the
@@ -147,8 +147,8 @@ export function makeTigrinyaNormalizer(
         //    out IN FULL 12× in this corpus (`ካብ ከባቢ 9600 ቅድሚ ልደተ ክርስቶስ`) and ×28 on the wiki, and
         //    `ድሕሪ ልደተ ክርስቶስ` ×3 on the wiki in exactly this slot (`4ይ ክፍለ ዘመን ድሕሪ ልደተ ክርስቶስ`).
         //    Trailing dot optional; `ቅ.ል.` and `ቅ.ል.ክ` are both written.
-        s = tr(s, /(?<![ሀ-ፚ])ቅ\.ል\.(?:ክ\.?)?/gu, " ቅድሚ ልደተ ክርስቶስ ");
-        s = tr(s, /(?<![ሀ-ፚ])ድ\.(?:ል|ክ)\.(?:ክ\.?)?/gu, " ድሕሪ ልደተ ክርስቶስ ");
+        s = rewrite(s, /(?<![ሀ-ፚ])ቅ\.ል\.(?:ክ\.?)?/gu, " ቅድሚ ልደተ ክርስቶስ ");
+        s = rewrite(s, /(?<![ሀ-ፚ])ድ\.(?:ል|ክ)\.(?:ክ\.?)?/gu, " ድሕሪ ልደተ ክርስቶስ ");
 
         // 4. DOTTED ABBREVIATIONS. ti writes unit abbreviations and initialisms with ASCII dots between
         //    Ethiopic letters (ኪ.ሜ ×15, ሜ. ×11, ኪ.ግ, ዓ.ም ×19, ዓ.ም.ፈ ×5). 71 interior dots in 323 lines,
@@ -157,10 +157,10 @@ export function makeTigrinyaNormalizer(
         //    MULTI-DOT FIRST (trap: the interior dot of a 3-part form survives a single-dot rule), and the
         //    multi-dot form also loses its TRAILING dot. ⚠ Safe only because ti terminates sentences with ።
         //    rather than an ASCII dot, so no sentence-final pause is at risk.
-        s = tr(s, new RegExp(`(?:${FID}{1,5}\\.){2,}${FID}{0,5}\\.?`, "gu"), (m) => m.replace(/\./gu, ""));
+        s = rewrite(s, new RegExp(`(?:${FID}{1,5}\\.){2,}${FID}{0,5}\\.?`, "gu"), (m) => m.replace(/\./gu, ""));
         //    Then the single INTERIOR dot, bounded by a fidel on BOTH sides, so it cannot touch 1.5,
         //    802.11a, or a genuine trailing period after a word.
-        s = tr(s, new RegExp(`(?<=${FID})\\.(?=${FID})`, "gu"), "");
+        s = rewrite(s, new RegExp(`(?<=${FID})\\.(?=${FID})`, "gu"), "");
         //    ⚠ A TRAILING dot on a single-dot abbreviation (`ሜ.`, `ኪ.ሜ.`) is deliberately LEFT: that shape
         //    is indistinguishable from a word plus a sentence period.
 
@@ -174,7 +174,7 @@ export function makeTigrinyaNormalizer(
         //    (`ገጀረት፡ሰምበል፡ሰኒታ`) and a clause break, so they want a comma too.
         //    Mapped to ASCII ',', which `clausePunctuation` already carries, so TOKEN needs no change.
         //    AFTER steps 1 and 2, which took the sentence terminator and the clock.
-        s = tr(s, /፡-?/gu, ",");
+        s = rewrite(s, /፡-?/gu, ",");
 
         // 6. DIGIT DE-GROUPING, before anything reads the separator as clause punctuation.
         //
@@ -195,11 +195,11 @@ export function makeTigrinyaNormalizer(
         //    `451,170.7` are untouched because the fraction is not exactly three digits.
         //    RESIDUAL RISK, stated: a genuine 3-decimal-place figure written without any comma group would
         //    be de-grouped. The artifact contains none, and 4-against-1 is the whole argument.
-        s = tr(s, /(?<![\d,.])[\d.]+(?![\d,.])/gu, (n) => n.replace(/(\d)(?<!(?<![\d])0)\.(?=\d{3}(?!\d))/gu, "$1"));
+        s = rewrite(s, /(?<![\d,.])[\d.]+(?![\d,.])/gu, (n) => n.replace(/(\d)(?<!(?<![\d])0)\.(?=\d{3}(?!\d))/gu, "$1"));
         //    Then the comma, ×66. `1,600` read as `ħadə , ʃɨdʃtə miʔti` — "one, six hundred", a phrase break
         //    inside a number.
-        s = tr(s, /(\d)(?<!(?<![\d])0),(?=\d{3}(?!\d))/gu, "$1");
-        s = tr(s, /(\d)(?<!(?<![\d])0),(?=\d{3}(?!\d))/gu, "$1"); // second pass for 5,000,000
+        s = rewrite(s, /(\d)(?<!(?<![\d])0),(?=\d{3}(?!\d))/gu, "$1");
+        s = rewrite(s, /(\d)(?<!(?<![\d])0),(?=\d{3}(?!\d))/gu, "$1"); // second pass for 5,000,000
 
         // 7. RANGES, restricted to the ካብ ("from") frame — `ካብ 51-70 ኪ.ሜ` → `ካብ 51 ክሳብ 70 ኪ.ሜ`. ×5, and
         //    the frame is not invented: the corpus writes `ካብ N ክሳብ M` out in full 15 times.
@@ -208,7 +208,7 @@ export function makeTigrinyaNormalizer(
         //    (`6-1`, `2 – 1`) or designations (`COVID-19`, `ICD-10`, `G-20`, `ሚግ-21`) — none of which may
         //    become "from…to". They are left as two adjacent numbers, which is what they already were:
         //    TOKEN drops the hyphen and emits no pause.
-        s = tr(s, /(?<![\p{L}\p{M}])ካብ\s?(\d[\d.]*)\s?[-–—]\s?(\d[\d.]*)/gu,
+        s = rewrite(s, /(?<![\p{L}\p{M}])ካብ\s?(\d[\d.]*)\s?[-–—]\s?(\d[\d.]*)/gu,
             (_m, a: string, b: string) => `${FROM} ${a} ${UNTIL} ${b}`);
 
         // 8. SQUARED AREA, ⚠ BEFORE the plain ኪሜ expansion in step 8b, which would otherwise strand the
@@ -216,13 +216,13 @@ export function makeTigrinyaNormalizer(
         //    ⚠ ትርብዒት PRECEDES the unit and is TIGRINYA'S OWN WORD, not Amharic's ካሬ or ስኩዌር: ×7 in this
         //    corpus and ×11 on the wiki, always in front — `916,445 ትርብዒት ኪ.ሜ`, `172,300 ትርብዒት ማይል`,
         //    `ልዕሊ 8.5 ሚልዮን ትርብዒት ኪ.ሜ.`. ካሬ appears ×1, an Amharic borrowing, and is the loser here.
-        s = tr(s, /(?<![ሀ-ፚ])ኪሜ\s?[²2](?![\d\p{L}])/gu, "ትርብዒት ኪሎ ሜተር");
+        s = rewrite(s, /(?<![ሀ-ፚ])ኪሜ\s?[²2](?![\d\p{L}])/gu, "ትርብዒት ኪሎ ሜተር");
 
         // 8b. ኪ.ሜ / ኪሜ → ኪሎ ሜተር. ×15. Trap 38: the word was already there — this corpus writes it out in
         //     full ×6 (`ኪሎሜተር` ×3, `ኪሎ ሜተር` ×3), so the expansion is the spoken form and not the letter-run
         //     "kime" the fidel g2p produces. ⚠ Unconditional rather than routed through the shared unit
         //     tier, because it also occurs with no adjacent number (`ኪ.ሜ ንታሕቲ`).
-        s = tr(s, /(?<![ሀ-ፚ])ኪሜ(?![ሀ-ፚ])/gu, "ኪሎ ሜተር");
+        s = rewrite(s, /(?<![ሀ-ፚ])ኪሜ(?![ሀ-ፚ])/gu, "ኪሎ ሜተር");
 
         // 9. SHARED SYMBOL TIER (%, $, €, £) runs HERE, in the middle: after de-grouping and the clock (so
         //    `$17 ሚልዮን` and `10፡00` are already settled) but BEFORE decimals, because the tier's own NUM
@@ -252,7 +252,7 @@ export function makeTigrinyaNormalizer(
         //     ⚠ The RUN of the two marks is deliberately shared: `1,741.980` is the artifact's one number
         //     carrying both, and step 6 spends its comma as a group first, so only one mark ever survives to
         //     here. A spaced pair (`ኣብ 2010, 2011`) cannot match — the fraction must be digit-adjacent.
-        s = tr(s, /(?<![\d.])(\d+)[.,](\d+)(?![\d.])/gu,
+        s = rewrite(s, /(?<![\d.])(\d+)[.,](\d+)(?![\d.])/gu,
             (_m, i: string, f: string) => ` ${words(i)} ${POINT} ${eachDigit(f)} `);
 
         // 11. ORDINALS — `Nይ`, ti's own abbreviated form, ×22 and EVERY ONE 1–10. Before this, `6ይ` read as
@@ -275,9 +275,9 @@ export function makeTigrinyaNormalizer(
             const o = ORDINAL[value];
             return o === undefined ? m : ` ${o}${tail} `;
         };
-        s = tr(s, /(?<![\d.])(\d+)\s*ይ([ቲትን]?)(?![ሀ-ፚ])/gu,
+        s = rewrite(s, /(?<![\d.])(\d+)\s*ይ([ቲትን]?)(?![ሀ-ፚ])/gu,
             (m, d: string, tail: string) => ordinalize(m, Number(d), tail));
-        s = tr(s, /(?<![፩-፼])([፩-፼])ይ([ቲትን]?)(?![ሀ-ፚ])/gu,
+        s = rewrite(s, /(?<![፩-፼])([፩-፼])ይ([ቲትን]?)(?![ሀ-ፚ])/gu,
             (m, c: string, tail: string) => ordinalize(m, GEEZ_DIGIT[c] ?? 0, tail));
 
         // 12. ETHIOPIC NUMERALS → the value word of each character. 20 instances, ALL of which read as the
@@ -286,7 +286,7 @@ export function makeTigrinyaNormalizer(
         //     ⚠ AFTER step 11, so `፮ይ` ("6th grade") keeps its ይ as an ordinary letter rather than being
         //     claimed by the Arabic-digit ordinal rule — and after step 4, whose fidel-bounded dot guard
         //     must not see numeral characters as letters (`፩፶፬()ሜ.`).
-        s = tr(s, /[፩-፼]+/gu, (m) =>
+        s = rewrite(s, /[፩-፼]+/gu, (m) =>
             ` ${[...m].map((c) => { const v = GEEZ_DIGIT[c]; return v === undefined ? "" : numberToText(v); })
                 .filter(Boolean).join(" ")} `);
 
@@ -303,8 +303,8 @@ export function makeTigrinyaNormalizer(
         //     `፭°C`. Left as it is rather than dropped: which of the two readings is better is a fleet
         //     question about unreadable Latin residue, not a ti one, and inventing ሴልሲየስ is the refusal
         //     above. Recorded so the next reader measures it instead of trusting the old claim.
-        s = tr(s, /°/gu, " ዲግሪ ");
+        s = rewrite(s, /°/gu, " ዲግሪ ");
 
-        return s.replace(/[ \u00a0]{2,}/gu, " ");  // space, NBSP
+        return rewrite(s, /[ \u00a0]{2,}/gu, " ");  // space, NBSP
     };
 }

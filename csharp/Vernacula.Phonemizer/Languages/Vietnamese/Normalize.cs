@@ -4,6 +4,7 @@
  * Ported from src/languages/vietnamese/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Vietnamese;
 
@@ -76,62 +77,62 @@ public static class Normalize
     {
         var s = input;
 
-        s = JsRegex.Replace(s, SUP2, _ => "²");
-        s = JsRegex.Replace(s, ANY_TAG, _ => "");
+        s = Rewrite(s, SUP2, _ => "²");
+        s = Rewrite(s, ANY_TAG, _ => "");
 
         // ⚠ ORDER: clock RANGES, then sports times, then clocks. A clock-clock pair must be joined before the
         // clock rule rewrites its operands into words, and `M:SS,hh` (4:41,30) must be claimed before the clock
         // rule, whose pattern the shape also matches.
-        s = JsRegex.Replace(s, CLOCK_RANGE, m => $"{m.Groups[1].Value} đến {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, SPORTS_TIME, m =>
+        s = Rewrite(s, CLOCK_RANGE, m => $"{m.Groups[1].Value} đến {m.Groups[2].Value}");
+        s = Rewrite(s, SPORTS_TIME, m =>
             $"{Js.NumberToString(Js.Number(m.Groups[1].Value))} phút {Js.NumberToString(Js.Number(m.Groups[2].Value))} giây {Js.NumberToString(Js.Number(m.Groups[3].Value))}");
-        s = JsRegex.Replace(s, CLOCK_RE, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, CLOCK_RE, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
 
-        s = JsRegex.Replace(s, KMH, _ => "km/giờ");
-        s = JsRegex.Replace(s, KPH, _ => "km/giờ");
-        s = JsRegex.Replace(s, MPH, _ => "dặm/giờ");
+        s = Rewrite(s, KMH, _ => "km/giờ");
+        s = Rewrite(s, KPH, _ => "km/giờ");
+        s = Rewrite(s, MPH, _ => "dặm/giờ");
 
-        s = JsRegex.Replace(s, DEG_C, _ => " độ xê");
-        s = JsRegex.Replace(s, DEG_F, _ => " độ ép");
-        s = JsRegex.Replace(s, DEG_BARE, _ => " độ");
+        s = Rewrite(s, DEG_C, _ => " độ xê");
+        s = Rewrite(s, DEG_F, _ => " độ ép");
+        s = Rewrite(s, DEG_BARE, _ => " độ");
 
-        s = JsRegex.Replace(s, GROUP_DOT, m => JsRegex.Replace(m.Value, DOT_G, _ => ""));
-        s = JsRegex.Replace(s, GROUP_COMMA, m => JsRegex.Replace(m.Value, COMMA_G, _ => ""));
+        s = Rewrite(s, GROUP_DOT, m => JsRegex.Replace(m.Value, DOT_G, _ => ""));
+        s = Rewrite(s, GROUP_COMMA, m => JsRegex.Replace(m.Value, COMMA_G, _ => ""));
 
         // ⚠ The ascending test is the span/score discriminator, and this rule sits AFTER de-grouping and BEFORE
         // the decimal rules — otherwise `4,2-3,9` has already become two numbers by the time it is read.
-        s = JsRegex.Replace(s, RANGE, m =>
+        s = Rewrite(s, RANGE, m =>
             NumVal(m.Groups[2].Value) > NumVal(m.Groups[1].Value)
                 ? $"{m.Groups[1].Value} đến {m.Groups[2].Value}"
                 : m.Value);
 
-        s = JsRegex.Replace(s, DECIMAL_COMMA, _ => " phẩy ");
+        s = Rewrite(s, DECIMAL_COMMA, _ => " phẩy ");
 
-        s = JsRegex.Replace(s, DOTTED_NUM, _ => " chấm ");
+        s = Rewrite(s, DOTTED_NUM, _ => " chấm ");
 
-        s = JsRegex.Replace(s, FRACTION, m => $"{m.Groups[1].Value} phần {m.Groups[2].Value}");
+        s = Rewrite(s, FRACTION, m => $"{m.Groups[1].Value} phần {m.Groups[2].Value}");
 
-        s = JsRegex.Replace(s, TIMES, _ => " nhân ");
+        s = Rewrite(s, TIMES, _ => " nhân ");
 
-        s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} cộng ");
-        s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}cộng ");
+        s = Rewrite(s, PLUS_AFTER, m => $"{m.Groups[1].Value} cộng ");
+        s = Rewrite(s, PLUS_START, m => $"{m.Groups[1].Value}cộng ");
 
-        s = JsRegex.Replace(s, PLUSMINUS, _ => " cộng trừ ");
+        s = Rewrite(s, PLUSMINUS, _ => " cộng trừ ");
         var whole = s;
-        s = JsRegex.Replace(s, MINUS, m =>
+        s = Rewrite(s, MINUS, m =>
             DIGIT_AT_END.IsMatch(whole[..m.Index]) ? m.Value : $"{m.Groups[1].Value}âm ");
 
-        s = JsRegex.Replace(s, EQUALS, _ => " bằng ");
-        s = JsRegex.Replace(s, LESS_THAN, _ => " nhỏ hơn ");
-        s = JsRegex.Replace(s, GREATER_THAN, _ => " lớn hơn ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " chia cho ");
+        s = Rewrite(s, EQUALS, _ => " bằng ");
+        s = Rewrite(s, LESS_THAN, _ => " nhỏ hơn ");
+        s = Rewrite(s, GREATER_THAN, _ => " lớn hơn ");
+        s = Rewrite(s, DIVIDE, _ => " chia cho ");
 
-        s = JsRegex.Replace(s, AMPERSAND, _ => " và ");
+        s = Rewrite(s, AMPERSAND, _ => " và ");
 
         foreach (var (from, to) in VI_ABBREV)
-            s = JsRegex.Replace(s, JsRegex.Compile($"{NLB}{from}{NL}", "gu"), _ => to);
+            s = Rewrite(s, JsRegex.Compile($"{NLB}{from}{NL}", "gu"), _ => to);
         if (HAS_LOWER.IsMatch(s) || !HAS_SPACE.IsMatch(s.Trim()))
-            s = JsRegex.Replace(s, CAPS_RUN, m =>
+            s = Rewrite(s, CAPS_RUN, m =>
                 string.Join(" ", Js.CodePoints(m.Value).Select(c => Manifest.MANIFEST.LetterNames.GetValueOrDefault(c) ?? c)));
 
         return s;

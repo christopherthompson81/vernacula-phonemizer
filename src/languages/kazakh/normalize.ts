@@ -17,7 +17,7 @@
  */
 import { ROMAN_POLICY } from "./romanOrdinals.ts";
 import { SYMBOLS } from "./kazakh.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ---------------------------------------------------------------------------------------------------
 // ORDINALS
@@ -176,22 +176,22 @@ export function normalizeKazakh(input: string): string {
 
     // 0) SPACE-GROUPED THOUSANDS — the corpus writes 17 000, 5 000 000 (space, not comma/period). The
     //    TOKEN `\d+` splits these on the space. De-group FIRST, before anything reads a pause.
-    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 2; i++) s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
 
     // 1) DOTTED ABBREVIATIONS and ERA MARKERS — `б.д.д.` (біздің дәуірге дейін = before our era, BC),
     //    `т.б.` (тағы басқа = etc), `т.с.с.` (тағы сол сияқты = and the like). BEFORE the single-dot
     //    rule. The dot is consumed before a following word.
-    s = tr(s, /(?<![\p{L}\p{M}])б\.\s?д\.\s?д\.(\s+)(?=[\p{L}\d])/giu, "біздің дәуірге дейін$1");
-    s = tr(s, /(?<![\p{L}\p{M}])б\.\s?д\.\s?д\.(?=\s*(?:[.,;:!?»)]|$))/giu, "біздің дәуірге дейін.");
-    s = tr(s, /(?<![\p{L}\p{M}])т\.\s?б\.(\s+)(?=[\p{L}\d])/giu, "тағы басқа$1");
-    s = tr(s, /(?<![\p{L}\p{M}])т\.\s?б\.(?=\s*(?:[.,;:!?»)]|$))/giu, "тағы басқа.");
-    s = tr(s, /(?<![\p{L}\p{M}])т\.\s?с\.\s?с\.(\s+)(?=[\p{L}\d])/giu, "тағы сол сияқты$1");
-    s = tr(s, /(?<![\p{L}\p{M}])т\.\s?с\.\s?с\.(?=\s*(?:[.,;:!?»)]|$))/giu, "тағы сол сияқты.");
+    s = rewrite(s, /(?<![\p{L}\p{M}])б\.\s?д\.\s?д\.(\s+)(?=[\p{L}\d])/giu, "біздің дәуірге дейін$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}])б\.\s?д\.\s?д\.(?=\s*(?:[.,;:!?»)]|$))/giu, "біздің дәуірге дейін.");
+    s = rewrite(s, /(?<![\p{L}\p{M}])т\.\s?б\.(\s+)(?=[\p{L}\d])/giu, "тағы басқа$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}])т\.\s?б\.(?=\s*(?:[.,;:!?»)]|$))/giu, "тағы басқа.");
+    s = rewrite(s, /(?<![\p{L}\p{M}])т\.\s?с\.\s?с\.(\s+)(?=[\p{L}\d])/giu, "тағы сол сияқты$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}])т\.\s?с\.\s?с\.(?=\s*(?:[.,;:!?»)]|$))/giu, "тағы сол сияқты.");
 
     // 2) ORDINALS — `190-шы`, `60-шы`, `19-шы`, `1-ші`. The -шы/-ші/-ншы/-нші suffix is the ordinal
     //    ending; the READING is the ordinal word (жүз тоқсаныншы, алпысыншы). Runs BEFORE the clock
     //    rule so a digit run is not first claimed as a time.
-    s = tr(s, /(?<![\d.,])(\d+)(?:-)?(ші|шы|нші|ншы)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
+    s = rewrite(s, /(?<![\d.,])(\d+)(?:-)?(ші|шы|нші|ншы)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
         const n = Number(d);
         const ord = ordinalWord(n);
         return ord === undefined ? m0 : ord;
@@ -206,7 +206,7 @@ export function normalizeKazakh(input: string): string {
     //     bare case-suffix rule, so a tail that IS an ending has already been claimed.
     //     A ONE-LETTER tail is the date possessive (`15-і` = the 15th), which attaches to the number
     //     instead of standing as a noun.
-    s = tr(s, /(?<![\d.,])(\d+)-([а-яәғқңөұүһі]+)(?![\p{L}\p{M}])/giu, (m0, d: string, tail: string) => {
+    s = rewrite(s, /(?<![\d.,])(\d+)-([а-яәғқңөұүһі]+)(?![\p{L}\p{M}])/giu, (m0, d: string, tail: string) => {
         const n = Number(d);
         if (CASE_BY_SUFFIX[tail.toLowerCase()] !== undefined) return m0; // an ending, not a noun
         const ord = ordinalWord(n);
@@ -224,13 +224,13 @@ export function normalizeKazakh(input: string): string {
     //     suits a different construction and is not what a preposed sign wants. Emitted preposed, the shape ru
     //     and uk already use for this character. ⚠ ONE INSTANCE OF EACH: this is a lead acted on because the
     //     alternative is a silently dropped sign, not a strongly attested reading.
-    s = tr(s, /№\s?(?=\d)/gu, "нөмір ");
+    s = rewrite(s, /№\s?(?=\d)/gu, "нөмір ");
 
     // 3) CLOCK, in the COLON form. `08:46` → сегіз қырық алты; `13:15` → он үш он бес. The corpus's
     //    `10: 00` (space after colon) is handled. Runs BEFORE the case-suffix rule so a case-suffixed
     //    clock (`11:00-ден`, `9:30-да`) is read as a time first and the suffix attaches to its last
     //    word. NOT a sports time: a THIRD `\d.\d\d` field means a pace.
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):\s*([0-5]\d)(?![:.\d])(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан|ның|нің|да|де|та|те|мен|бен|пен)?/giu,
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):\s*([0-5]\d)(?![:.\d])(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан|ның|нің|да|де|та|те|мен|бен|пен)?/giu,
         (_m, h: string, min: string, sfx: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return _m;
@@ -248,7 +248,7 @@ export function normalizeKazakh(input: string): string {
     //     (`mv === 0 ? hour : hour minute`). It used to fall out of `orthographic(0)` returning the
     //     EMPTY STRING, so `15.00 UTC` read *он бес UTC* by accident; with zero now rendering as a word
     //     the omission has to be stated, or the clock reads *он бес нөл* — "fifteen zero".
-    s = tr(s, /(?<![\d.,])(\d{1,2})\.(\d{2})\s*(UTC|GMT)/giu, (_m, h: string, min: string, tz: string) => {
+    s = rewrite(s, /(?<![\d.,])(\d{1,2})\.(\d{2})\s*(UTC|GMT)/giu, (_m, h: string, min: string, tz: string) => {
         const mv = Number(min);
         return `${orthographic(Number(h))}${mv === 0 ? "" : ` ${orthographic(mv)}`} ${tz}`;
     });
@@ -258,7 +258,7 @@ export function normalizeKazakh(input: string): string {
     //    the last word with harmony. ⚠ AGREEMENT CANNOT BE APPLIED TO DIGITS, so
     //    the operand is wordified FIRST. Runs AFTER the clock rule so a clock + suffix reads the time
     //    then the suffix (11:00-ден → он бірден).
-    s = tr(s, /(?<![\d.,])(\d+)(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан|ның|нің|да|де|та|те|мен|бен|пен)(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(?<![\d.,])(\d+)(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан|ның|нің|да|де|та|те|мен|бен|пен)(?![\p{L}\p{M}])/giu,
         (m0, d: string, sfx: string) => {
             const caseName = CASE_BY_SUFFIX[sfx.toLowerCase()];
             if (caseName === undefined) return m0;
@@ -273,7 +273,7 @@ export function normalizeKazakh(input: string): string {
     //    LONGITUDE). `градус` is the degree word. The ablative -тан attaches to it. Runs BEFORE the
     //    case-suffix rule so the °C-тан suffix is not claimed as a bare number suffix. The leading
     //    `+` is claimed here (the plus rule at the end runs after the degree consumed the number).
-    s = tr(s, /(^|[\s(])\+\s?(\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?/giu,
+    s = rewrite(s, /(^|[\s(])\+\s?(\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?/giu,
         (_m, lead: string, n: string, sfx: string) => {
             const base = `${lead}плюс ${orthographic(Number(n))} градус Цельсий`;
             if (sfx !== undefined && sfx !== "") {
@@ -284,7 +284,7 @@ export function normalizeKazakh(input: string): string {
         });
     // ⚠ U+2212 HERE TOO — the degree arm runs BEFORE the general sign rule and consumes the number, so a
     // class fixed only at the end would leave `−30 °C` reading as a bare thirty. Same reasoning as there.
-    s = tr(s, /(^|[\s(])[-−](\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?/giu,
+    s = rewrite(s, /(^|[\s(])[-−](\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?/giu,
         (_m, lead: string, n: string, sfx: string) => {
             const base = `${lead}минус ${orthographic(Number(n))} градус Цельсий`;
             if (sfx !== undefined && sfx !== "") {
@@ -293,7 +293,7 @@ export function normalizeKazakh(input: string): string {
             }
             return base;
         });
-    s = tr(s, /(\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
         (_m, n: string, sfx: string) => {
             const base = `${orthographic(Number(n))} градус Цельсий`;
             if (sfx !== undefined && sfx !== "") {
@@ -302,7 +302,7 @@ export function normalizeKazakh(input: string): string {
             }
             return base;
         });
-    s = tr(s, /(\d+)\s?°\s?F\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(\d+)\s?°\s?F\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
         (_m, n: string, sfx: string) => {
             const base = `${orthographic(Number(n))} градус Фаренгейт`;
             if (sfx !== undefined && sfx !== "") {
@@ -311,16 +311,16 @@ export function normalizeKazakh(input: string): string {
             }
             return base;
         });
-    s = tr(s, /(\d+)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu, (_m, n: string, c: string) =>
+    s = rewrite(s, /(\d+)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu, (_m, n: string, c: string) =>
         `${orthographic(Number(n))} градус ${({ N: "солтүстік", S: "оңтүстік", E: "шығыс", W: "батыс" } as Record<string, string>)[c.toUpperCase()]!}`);
 
     // 5b) RATES — `83 км/сағ` (km/h), `17 500 миля/сағат` (mph), and the case-suffixed `160 км/сағ-қа`
     //    (the dative -қа attaches to the last word). The tier's `км` unit matches but `/сағ` has no
     //    rateDenominator; compose locally. AFTER the case suffix rule (which claims -қа), BEFORE the
     //    tier. The suffix on a rate is claimed here too (сағатқа = "to the hour").
-    s = tr(s, /(\d[\d ]*)\s?(км)\s*\/\s*(сағ|сағат)(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(\d[\d ]*)\s?(км)\s*\/\s*(сағ|сағат)(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
         (_m, d: string, u: string, denom: string, sfx: string) => {
-            const n = Number(d.replace(/ /gu, ""));
+            const n = Number(rewrite(d, / /gu, ""));
             // ⚠ The ternary this replaced had two identical branches. Here that is CORRECT rather than a
             // bug — the alternation is `(сағ|сағат)`, an abbreviation and its full form, and both read
             // *сағат*. Stated plainly so it does not read as an unfinished branch. (Fula had the same
@@ -332,9 +332,9 @@ export function normalizeKazakh(input: string): string {
             }
             return base;
         });
-    s = tr(s, /(\d[\d ]*)\s?миля\s*\/\s*сағат(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
+    s = rewrite(s, /(\d[\d ]*)\s?миля\s*\/\s*сағат(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
         (_m, d: string, sfx: string) => {
-            const n = Number(d.replace(/ /gu, ""));
+            const n = Number(rewrite(d, / /gu, ""));
             const base = `${orthographic(n)} миля сағат`;
             if (sfx !== undefined && sfx !== "") {
                 const caseName = CASE_BY_SUFFIX[sfx.toLowerCase()];
@@ -346,7 +346,7 @@ export function normalizeKazakh(input: string): string {
     // 6) NUMERIC RANGES — `1977-1981`, `1418 – 1450`, `10-11`, `35-40`. Kazakh "ден" (to/from) or just
     //    two numbers. The corpus's `2005-жылы` (a year + -жылы) is NOT a range (the hyphen is part of
     //    the year form). A leading minus stays a sign.
-    s = tr(s, /(?<![\d.,])(\d[\d ]*)\s*[-–—]\s*(\d[\d ]*)(?![\d.-])/gu, "$1–$2");
+    s = rewrite(s, /(?<![\d.,])(\d[\d ]*)\s*[-–—]\s*(\d[\d ]*)(?![\d.-])/gu, "$1–$2");
 
     // 7) THE SHARED SYMBOL TIER — %, units. The number must be ADJACENT to its unit and still carry its
     //    decimal comma (2,3), so it runs before step 8 folds the comma into a word.
@@ -372,14 +372,14 @@ export function normalizeKazakh(input: string): string {
     //     оннан бір, жүзден бір.
     //
     //     Digits on both sides only, and AFTER the km/сағ rate rules above so a unit slash is already consumed.
-    s = tr(s, /(?<![\d.,])(\d{1,3})\s?\/\s?(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /(?<![\d.,])(\d{1,3})\s?\/\s?(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
         const num = orthographic(Number(a)), den = orthographic(Number(b));
         return num === "" || den === "" ? m0 : `${withCase(den, "abl")} ${num}`;
     });
 
     // 8) DECIMAL COMMA → the word. Kazakh reads the decimal comma as "бүтін" (whole) with the fraction
     //    as a separate number.
-    s = tr(s, /(?<=\d),(?=\d)/gu, " бүтін ");
+    s = rewrite(s, /(?<=\d),(?=\d)/gu, " бүтін ");
 
     // 8b) DOT DECIMALS/VERSIONS — `1.1 суретті` (Figure 1.1, the corpus's only dot-decimal; Kazakh
     //     writes decimals with commas, so a dot is a version/figure number). Read "нүкте" (point).
@@ -389,13 +389,13 @@ export function normalizeKazakh(input: string): string {
     //     the separator and leaves the digits for the sign rule to find.
     //     The `(?<![\p{L}\p{Nd}])` guard is step 9's own, and it is what keeps a RANGE out: in
     //     `1.5-2.5` the character before the dash is a digit, so the sign arm declines.
-    s = tr(s, /(?<![\p{L}\p{Nd}])[-−](\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
+    s = rewrite(s, /(?<![\p{L}\p{Nd}])[-−](\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `минус ${orthographic(Number(i))} нүкте ${orthographic(Number(f))}`);
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${orthographic(Number(i))} нүкте ${orthographic(Number(f))}`);
 
     // 9) SIGNS. `+` → "плюс" (the corpus's `+ 30`, `UTC + 1`). A TRUE minus (`-5`) reads "минус".
-    s = tr(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
+    s = rewrite(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
     // THE DIVISION SIGN. ⚠ THE DIVISOR TAKES THE DATIVE, exactly as in az, and kk.wikipedia attests the
     //    construction on NUMERIC operands directly:
     //
@@ -412,15 +412,15 @@ export function normalizeKazakh(input: string): string {
     //    call and nothing about Kazakh morphology is re-derived. Verified across бір…мың: бірге, екіге, үшке,
     //    төртке, беске, алтыға, жетіге, сегізге, тоғызға, онға, жиырмаға, отызға, қырыққа, елуге, алпысқа,
     //    жетпіске, сексенге, тоқсанға, жүзге, мыңға.
-    s = tr(s, /(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) =>
+    s = rewrite(s, /(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) =>
         `${orthographic(Number(a))} ${withCase(orthographic(Number(b)), "dat")} бөлінеді`);
 
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, and ⚠ both are SIGN names rather than
     //    OPERATION names, which is what ± needs: it marks a TOLERANCE, not an addition.
-    s = tr(s, /±/gu, " плюс минус ");
-    s = tr(s, /(?<=[A-Z])\s?\+\s?(\d)/gu, " плюс $1");
+    s = rewrite(s, /±/gu, " плюс минус ");
+    s = rewrite(s, /(?<=[A-Z])\s?\+\s?(\d)/gu, " плюс $1");
     // ⚠ U+2212 IS IN THE CLASS AND THE ASCII HYPHEN'S GUARDS ARE UNCHANGED. The MINUS SIGN is a distinct
     // code point whose only Unicode meaning is the arithmetic operator, and it is not on any keyboard —
     // whoever typed it meant a minus. It is not attested in this language's mined corpus, which is why an
@@ -428,11 +428,11 @@ export function normalizeKazakh(input: string): string {
     // dropping a sign INVERTS the value it belongs to. The hyphen is the ambiguous one and keeps every
     // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
     // still refused by the lookbehind.
-    s = tr(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "минус $1");
-    s = tr(s, /(\d)\s*×\s*(\d)/gu, "$1 есе $2");
-    s = tr(s, /(\S)\s*=\s*(\S)/gu, "$1 тең $2");
-    s = tr(s, /(\d)\s*<\s*(\d)/gu, "$1 аз $2");
-    s = tr(s, /(\d)\s*>\s*(\d)/gu, "$1 көп $2");
+    s = rewrite(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "минус $1");
+    s = rewrite(s, /(\d)\s*×\s*(\d)/gu, "$1 есе $2");
+    s = rewrite(s, /(\S)\s*=\s*(\S)/gu, "$1 тең $2");
+    s = rewrite(s, /(\d)\s*<\s*(\d)/gu, "$1 аз $2");
+    s = rewrite(s, /(\d)\s*>\s*(\d)/gu, "$1 көп $2");
 
     return s;
 }

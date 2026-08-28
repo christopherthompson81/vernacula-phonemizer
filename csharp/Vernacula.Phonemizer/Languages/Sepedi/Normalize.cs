@@ -19,6 +19,7 @@
  * `ha` key. Nothing is re-derived here.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Sepedi;
 
@@ -193,14 +194,14 @@ public static class Normalize
 
         // 0) The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. First, because every numeric
         //    step below reads a digit run and the colon was splitting one in half.
-        s = DIGIT_COLON_RUN.Replace(s, m => m.Groups[1].Value + COLON_G.Replace(m.Groups[2].Value, " "));
+        s = Rewrite(s, DIGIT_COLON_RUN, m => m.Groups[1].Value + COLON_G.Replace(m.Groups[2].Value, " "));
 
         // 1) DOTTED CAPITAL RUNS → the bare letters. ⚠ THE LETTERS ARE JOINED WITH A HYPHEN, NOT GLUED, and
         //    in this language that is not cosmetic: glued, `T.L.` meets the g2p's DIGRAPH table and reads as
         //    the lateral affricate, `P.H.` as the aspirate — trap 56 in miniature. ⚠ A DOT IS ONLY EVER
         //    KEPT, NEVER ADDED.
         var frozen = s;
-        s = DOTTED_CAPS.Replace(s, m =>
+        s = Rewrite(s, DOTTED_CAPS, m =>
         {
             var letters = string.Join("-", Js.CodePoints(DOT_OR_SPACE.Replace(m.Value, "")));
             var rest = frozen[(m.Index + m.Value.Length)..];
@@ -212,23 +213,23 @@ public static class Normalize
         // 2) THOUSANDS DE-GROUPING. ⚠ Sepedi's wiki writes ALL THREE conventions at once and the
         //    discriminator is the BLOCK LENGTH, never the character. ⚠ AT MOST FOUR GROUPS — a measured cap,
         //    because the base-16 article tabulates 43- and 60-digit space-grouped powers of two.
-        s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => SPACE_SEPS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => SPACE_SEPS.Replace(m.Value, ""));
 
         // 3) THE ENGLISH ORDINAL SUFFIX — foreign orthography on a digit; stripping it is the whole fix.
-        s = ENGLISH_ORDINAL.Replace(s, "$1");
+        s = Rewrite(s, ENGLISH_ORDINAL, "$1");
 
         // 4) THE RAND SIGN — LOCAL, because `R` is also South Africa's ROUTE prefix. ⚠ THE DISCRIMINATOR IS
         //    WHAT THE FIGURE CARRIES: all nine currency instances have a magnitude word, a decimal point or a
         //    grouping separator, and neither road number has any of the three.
-        s = RAND_DECIMAL_OR_LONG.Replace(s, m =>
+        s = Rewrite(s, RAND_DECIMAL_OR_LONG, m =>
             $"{RAND}{(m.Groups[2].Success ? m.Groups[2].Value : "")} {m.Groups[1].Value}");
-        s = RAND_MAGNITUDE.Replace(s, m => $"{RAND}{m.Groups[2].Value} {m.Groups[1].Value}");
+        s = Rewrite(s, RAND_MAGNITUDE, m => $"{RAND}{m.Groups[2].Value} {m.Groups[1].Value}");
 
         // 5) UNITS — noun first, concord, then the figure. ⚠ AN UNSAYABLE POWER, AND A RATE WITH AN
         //    UNDECLARED DENOMINATOR, REFUSE THE WHOLE MATCH: half a reading is not a reading.
-        s = UNIT_RE.Replace(s, m =>
+        s = Rewrite(s, UNIT_RE, m =>
         {
             var num = m.Groups[1].Value;
             var k = m.Groups[2].Value.ToLowerInvariant();
@@ -261,19 +262,19 @@ public static class Normalize
         //    left unsaid), the scale name is SUPPRESSED when the clause already carries it, and both `°`
         //    and the MASCULINE ORDINAL INDICATOR `º` are in the class.
         var degFrozen = s;
-        s = DEGREE_C.Replace(s, m =>
+        s = Rewrite(s, DEGREE_C, m =>
         {
             var n = m.Groups[1].Value;
             return SaidNear(degFrozen, m.Index, m.Index + m.Value.Length, CELSIUS) ? n : $"{n} {CELSIUS}";
         });
-        s = DEGREE_F.Replace(s, "$1");
-        s = DEGREE_COMPASS.Replace(s, m => $"{m.Groups[1].Value} {COMPASS[m.Groups[2].Value]}");
-        s = DEGREE_BARE.Replace(s, "$1");
+        s = Rewrite(s, DEGREE_F, "$1");
+        s = Rewrite(s, DEGREE_COMPASS, m => $"{m.Groups[1].Value} {COMPASS[m.Groups[2].Value]}");
+        s = Rewrite(s, DEGREE_BARE, "$1");
 
         // 8) RANGES → `go ya go`. ⚠ THE ONE NUMERIC GUARD IS A DIGIT-LENGTH GAP OF TWO OR MORE, which is what
         //    separates a span from a standard's part number and from an abbreviated year span. ⚠ AND THE
         //    HYPHEN GUARD REACHES ACROSS A SPACE, or the wiki's spaced year-index chains read as spans.
-        s = DASH_RANGE.Replace(s, m =>
+        s = Rewrite(s, DASH_RANGE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -282,10 +283,10 @@ public static class Normalize
 
         // 9) DECIMALS, LAST of the numeric rules. NO separator word is emitted; see the TS header for the
         //    `khutlo` register finding. ⚠ THE COMMA ARM'S `(?![\d,])` IS WHAT DECLINES A LIST.
-        s = DECIMAL_DOT.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
-        s = DECIMAL_COMMA.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_DOT, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
 
         // A padded replacement doubles a space that was already there and can leave one at an edge.
-        return EDGE_SPACE.Replace(MULTI_SPACE.Replace(s, " "), "");
+        return Rewrite(Rewrite(s, MULTI_SPACE, " "), EDGE_SPACE, "");
     }
 }

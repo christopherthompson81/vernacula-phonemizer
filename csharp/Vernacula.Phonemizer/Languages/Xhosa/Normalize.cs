@@ -6,6 +6,7 @@
  * corpus evidence and step ordering each rule states.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Xhosa;
 
@@ -110,7 +111,7 @@ public static class Normalize
     private static string SpellNguniInitialisms(string s)
     {
         if (!LOWERCASE.IsMatch(s) && WHITESPACE.IsMatch(Js.Trim(s))) return s;
-        return ALLCAPS_RUN.Replace(s, m =>
+        return Rewrite(s, ALLCAPS_RUN, m =>
         {
             var run = m.Value;
             return WORD_ACRONYMS.Contains(Js.ToLowerCase(run))
@@ -182,35 +183,35 @@ public static class Normalize
         var s = input;
 
         // 1) HTML ENTITY, then the bare ampersand → `kunye`.
-        s = AMPERSAND.Replace(AMP_ENTITY.Replace(s, "&"), " kunye ");
+        s = Rewrite(Rewrite(s, AMP_ENTITY, "&"), AMPERSAND, " kunye ");
 
         // 2) DOTTED CAPITAL RUNS → the bare letters, keeping the final dot where the sentence visibly ends.
         var full2 = s;
-        s = DOTTED_CAPS.Replace(s, m =>
+        s = Rewrite(s, DOTTED_CAPS, m =>
         {
             var letters = DOTS.Replace(m.Value, "");
             var rest = full2[(m.Index + m.Length)..];
             if (LEADS_LETTER.IsMatch(rest)) return $"{letters} "; // glued next word
             return rest == "" || LEADS_SPACE_CAP.IsMatch(rest) ? $"{letters}." : letters;
         });
-        s = CAPS_ONE_DOT.Replace(s, "$1$2");
-        s = GLUED_INITIAL.Replace(s, "$1 ");
+        s = Rewrite(s, CAPS_ONE_DOT, "$1$2");
+        s = Rewrite(s, GLUED_INITIAL, "$1 ");
 
         // 3) ABBREVIATIONS.
-        s = HONORIFIC.Replace(s, "$1Mnumzana");
-        s = JUNIOR.Replace(s, "Jr");
-        s = ETC.Replace(s, "njalonjalo");
+        s = Rewrite(s, HONORIFIC, "$1Mnumzana");
+        s = Rewrite(s, JUNIOR, "Jr");
+        s = Rewrite(s, ETC, "njalonjalo");
 
         // 4) THOUSANDS DE-GROUPING, before anything else numeric.
-        s = DEGROUP_COMMA.Replace(s, m => COMMA_G.Replace(m.Value, ""));
-        s = DEGROUP_SPACE.Replace(s, m => GROUP_SPACES.Replace(m.Value, ""));
+        s = Rewrite(s, DEGROUP_COMMA, m => COMMA_G.Replace(m.Value, ""));
+        s = Rewrite(s, DEGROUP_SPACE, m => GROUP_SPACES.Replace(m.Value, ""));
 
         // 5) THE CURRENCY SIGN, PRISED OFF ITS CONCORD PREFIX. ⚠ THE SPLIT MUST RUN BEFORE THE JOIN.
-        s = CUR_SPLIT.Replace(s, " ");
-        s = CUR_JOIN.Replace(s, "$1");
+        s = Rewrite(s, CUR_SPLIT, " ");
+        s = Rewrite(s, CUR_JOIN, "$1");
 
         // 6) A DECIMAL CARRYING A CURRENCY SIGN OR A UNIT must claim it here.
-        s = DEC_CURRENCY.Replace(s, m =>
+        s = Rewrite(s, DEC_CURRENCY, m =>
         {
             var sym = m.Groups[1].Value;
             var frac = m.Groups[4].Value;
@@ -218,16 +219,16 @@ public static class Normalize
             var cur = CUR_WORD.TryGetValue(sym, out var c) ? c : "";
             return TRAILING_SPACE.Replace($"{Spell(m.Groups[2].Value, frac)}{m.Groups[5].Value} {cur}", "");
         });
-        s = DEC_UNIT.Replace(s, m =>
+        s = Rewrite(s, DEC_UNIT, m =>
             Decimal(m.Groups[2].Value, m.Groups[3].Value)
                 ? $"{Spell(m.Groups[1].Value, m.Groups[3].Value)} {UNIT_WORD[m.Groups[4].Value]}"
                 : m.Value);
 
         // 7) A DECIMAL RANGE, before the plain range rule and before step 15.
-        s = RANGE_DECIMAL.Replace(s, "$1 ukuya ku $2");
+        s = Rewrite(s, RANGE_DECIMAL, "$1 ukuya ku $2");
 
         // 8) THE CLOCK, colon form — the one rule that must produce WORDS.
-        s = CLOCK_COLON.Replace(s, m =>
+        s = Rewrite(s, CLOCK_COLON, m =>
         {
             var hv = Js.Number(m.Groups[1].Value);
             var mv = Js.Number(m.Groups[2].Value);
@@ -238,33 +239,33 @@ public static class Normalize
         });
 
         // 9) THE CLOCK, DOT form before a timezone — `12.00 GMT`.
-        s = CLOCK_TZ.Replace(s, m =>
+        s = Rewrite(s, CLOCK_TZ, m =>
         {
             var hv = Js.Number(m.Groups[1].Value);
             return hv > 23 ? m.Value : $"{ClockWords(hv, Js.Number(m.Groups[2].Value))} {m.Groups[3].Value}";
         });
 
         // 9b) A COLON LEFT BETWEEN TWO DIGITS IS NOT A CLAUSE BREAK. AFTER both clock rules.
-        s = NUMERIC_COLON.Replace(s, "$1 ");
+        s = Rewrite(s, NUMERIC_COLON, "$1 ");
 
         // 10) RANGES → `ukuya ku`. ⚠ ASCENDING ONLY: a non-ascending `N-N` is a score or a season.
-        s = RANGE_INT.Replace(s, m =>
+        s = Rewrite(s, RANGE_INT, m =>
             Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[2].Value)
                 ? $"{m.Groups[1].Value} ukuya ku {m.Groups[2].Value}" : m.Value);
 
         // 11) RATES, resolved locally rather than through the tier's `unitPer`.
-        s = RATE.Replace(s, m =>
+        s = Rewrite(s, RATE, m =>
         {
             var hasHead = UNIT_WORD.TryGetValue(Js.ToLowerCase(m.Groups[2].Value), out var head);
             var hasPer = PER.TryGetValue(Js.ToLowerCase(m.Groups[3].Value), out var per);
             return !hasHead || !hasPer ? m.Value : $"{m.Groups[1].Value} {head} {per}";
         });
-        s = MPH.Replace(s, m =>
+        s = Rewrite(s, MPH, m =>
             $"{m.Groups[1].Value} {(Js.ToLowerCase(m.Groups[2].Value) == "kph" ? UNIT_WORD["km"] : UNIT_WORD["mi"])} {PER["h"]}");
 
         // 12) DEGREES — a temperature, a longitude, and the bare sign.
         var full12 = s;
-        s = DEG_SCALE.Replace(s, m =>
+        s = Rewrite(s, DEG_SCALE, m =>
         {
             var sign = m.Groups[1].Success ? m.Groups[1].Value : null;
             var body = SaidBefore(full12, m.Index, "maqondo") ? m.Groups[2].Value : $"amaqondo {m.Groups[2].Value}";
@@ -272,32 +273,32 @@ public static class Normalize
             return sign == "-" ? $"thabatha {body}" : body;
         });
         var full12b = s;
-        s = DEG_COMPASS.Replace(s, m =>
+        s = Rewrite(s, DEG_COMPASS, m =>
             $"{(SaidBefore(full12b, m.Index, "maqondo") ? m.Groups[1].Value : $"amaqondo {m.Groups[1].Value}")} {COMPASS[m.Groups[2].Value]}");
         var full12c = s;
-        s = DEG_BARE.Replace(s, m =>
+        s = Rewrite(s, DEG_BARE, m =>
             SaidBefore(full12c, m.Index, "maqondo") ? m.Groups[1].Value : $"amaqondo {m.Groups[1].Value}");
 
         // 13) THE ENGLISH ORDINAL SUFFIX — redundant orthography beside the written Xhosa concord.
-        s = ENG_ORDINAL.Replace(s, "$1");
+        s = Rewrite(s, ENG_ORDINAL, "$1");
 
         // 14) RELATIONAL AND ARITHMETIC SIGNS. A dropped sign is INAUDIBLE.
-        s = EQUALS.Replace(s, " lilingana ne ");
-        s = LESS.Replace(s, " ngaphantsi kuna ");
-        s = GREATER.Replace(s, " ngaphezulu kuna ");
-        s = TIMES.Replace(s, "$1 phindaphinda ");
-        s = DIVIDE.Replace(s, " yahlula ");
-        s = PLUS_INFIX.Replace(s, " plas ");
-        s = PLUS_LEAD.Replace(s, "plas ");
-        s = MINUS.Replace(s, "thabatha ");
+        s = Rewrite(s, EQUALS, " lilingana ne ");
+        s = Rewrite(s, LESS, " ngaphantsi kuna ");
+        s = Rewrite(s, GREATER, " ngaphezulu kuna ");
+        s = Rewrite(s, TIMES, "$1 phindaphinda ");
+        s = Rewrite(s, DIVIDE, " yahlula ");
+        s = Rewrite(s, PLUS_INFIX, " plas ");
+        s = Rewrite(s, PLUS_LEAD, "plas ");
+        s = Rewrite(s, MINUS, "thabatha ");
 
         // 15) DECIMALS, LAST of the numeric rules.
-        s = DEC_DOT.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
-        s = DEC_COMMA.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DEC_DOT, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DEC_COMMA, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
 
         // INITIALISMS LAST — every rule above owns capitals of its own.
         s = SpellNguniInitialisms(s);
 
-        return EDGE_SPACES.Replace(RUN_OF_SPACES.Replace(s, " "), "");
+        return Rewrite(Rewrite(s, RUN_OF_SPACES, " "), EDGE_SPACES, "");
     }
 }

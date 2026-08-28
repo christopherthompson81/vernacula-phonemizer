@@ -4,6 +4,7 @@
  * Ported from src/languages/somali/normalize.ts — see that file for the corpus evidence behind every arm.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Somali;
 
@@ -111,13 +112,13 @@ public static class Normalize
         var s = input;
 
         // 1. De-group thousands — EXACTLY THREE DIGITS PER GROUP, so `0.53` and `2.5` survive as decimals.
-        s = GROUP_COMMA.Replace(s, m => COMMA.Replace(m.Value, ""));
-        s = GROUP_PERIOD.Replace(s, m => PERIOD.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMA.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_PERIOD, m => PERIOD.Replace(m.Value, ""));
 
         // 2. The glued calendar letters — BEFORE the tier, which would otherwise strand the `M`.
-        s = GLUED_H.Replace(s, "$1 Hijri");
+        s = Rewrite(s, GLUED_H, "$1 Hijri");
         var src = s; // the JS callback's 4th argument: the string as it stands BEFORE this replace
-        s = GLUED_M.Replace(src, m =>
+        s = Rewrite(src, GLUED_M, m =>
         {
             var n = m.Groups[1].Value;
             if (n.Length < 3) return $"{n} milyan";
@@ -126,7 +127,7 @@ public static class Normalize
         });
 
         // 3. Clock — BEFORE the decimal rule, which would otherwise claim `2:00` and `8:15`.
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             var h = Js.NumberToString(Js.Number(m.Groups[1].Value));
             var min = Js.Number(m.Groups[2].Value);
@@ -134,46 +135,46 @@ public static class Normalize
         });
 
         // 3b-i. The English ordinal tail → the corpus's own bound `-aad`.
-        s = ORDINAL_TAIL.Replace(s, "$1aad");
+        s = Rewrite(s, ORDINAL_TAIL, "$1aad");
         // 3b-ii. The bare rate — ⚠ FIRST of the four, because every rule below rewrites the text its
         //        lookahead is reading.
-        s = BARE_RATE.Replace(s, " halkii ");
+        s = Rewrite(s, BARE_RATE, " halkii ");
         // 3b-iii. The exponent written with a space (`91 km 2`) — a MIS-READING, not a leak.
-        s = SPACED_EXPONENT.Replace(s, "$1$2");
+        s = Rewrite(s, SPACED_EXPONENT, "$1$2");
         // 3b-iv. `sq`/`cu` → the measure WORDS, and only before a DECLARED unit. ⚠ BOTH captures are folded:
         //        this is the only arm in step 3b with the `i` flag, and an unfolded unit key missed the table.
-        s = SQ_CU.Replace(s, m =>
+        s = Rewrite(s, SQ_CU, m =>
         {
             var mod = m.Groups[1].Value;
             var u = m.Groups[2].Value;
             return $"{UNIT[u.ToLowerInvariant()]} {(mod.ToLowerInvariant() == "sq" ? EXPONENT["2"] : EXPONENT["3"])}";
         });
         // 3b-v. `mph` spelled as the rate it abbreviates.
-        s = MPH.Replace(s, "$1 mi/h");
+        s = Rewrite(s, MPH, "$1 mi/h");
         // 3b-vi. A bare unit carrying an exponent — Somali has both measure words, so nothing is stranded.
-        s = BARE_UNIT_EXPONENT.Replace(s, m => $"{UNIT[m.Groups[1].Value]} {EXPONENT[m.Groups[2].Value]}");
+        s = Rewrite(s, BARE_UNIT_EXPONENT, m => $"{UNIT[m.Groups[1].Value]} {EXPONENT[m.Groups[2].Value]}");
         // 3b-vii. The hyphen-attached unit (`750-km`) — a declared unit key is not a Somali suffix.
-        s = HYPHEN_UNIT.Replace(s, "$1 ");
+        s = Rewrite(s, HYPHEN_UNIT, "$1 ");
 
         // 4. The shared tier — BEFORE the decimal rule, AFTER de-grouping.
         s = SYMBOLS(s);
 
         // 5. Decimals → `dhibic`, fractional part digit by digit.
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} dhibic {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 6. Era markers. ⚠ LONGEST FIRST, and BCE before BC or the `E` is stranded.
-        s = ERA_CH.Replace(s, "$1 Ciise Hortiis");
-        s = ERA_CD.Replace(s, "$1 Ciise Dabadiis");
-        s = ERA_BC.Replace(s, "$1 Ciise Hortiis");
-        s = ERA_CE.Replace(s, "$1 Miilaadi");
-        s = ERA_AH.Replace(s, "$1 Hijri");
+        s = Rewrite(s, ERA_CH, "$1 Ciise Hortiis");
+        s = Rewrite(s, ERA_CD, "$1 Ciise Dabadiis");
+        s = Rewrite(s, ERA_BC, "$1 Ciise Hortiis");
+        s = Rewrite(s, ERA_CE, "$1 Miilaadi");
+        s = Rewrite(s, ERA_AH, "$1 Hijri");
 
         // 7. Ranges → `ilaa`.
-        s = RANGE.Replace(s, "$1 ilaa $2");
+        s = Rewrite(s, RANGE, "$1 ilaa $2");
 
         // 8. Fractions.
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             double n = Js.Number(m.Groups[1].Value), d = Js.Number(m.Groups[2].Value);
             if (n == 1 && d == 2) return "nus";
@@ -182,26 +183,26 @@ public static class Normalize
         });
 
         // 9. Degrees.
-        s = DEG_C.Replace(s, "$1 darajo Celsius");
-        s = DEG_F.Replace(s, "$1 darajo Fahrenheit");
-        s = DEG_COMPASS.Replace(s, m =>
+        s = Rewrite(s, DEG_C, "$1 darajo Celsius");
+        s = Rewrite(s, DEG_F, "$1 darajo Fahrenheit");
+        s = Rewrite(s, DEG_COMPASS, m =>
             // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122). The pattern carries `i` AND `u`, so
             // JS folds U+017F LONG S onto `s` and `12°ſ` MATCHES `[NSEW]` — while `ſ` is no COMPASS key. The
             // TS asserted non-null and spoke the word "undefined"; the C# indexer THREW.
             COMPASS.TryGetValue(m.Groups[2].Value.ToLowerInvariant(), out var dir)
                 ? $"{m.Groups[1].Value} darajo {dir}"
                 : m.Value);
-        s = DEG_BARE.Replace(s, "$1 darajo");
+        s = Rewrite(s, DEG_BARE, "$1 darajo");
 
         // 10. Signs. ⚠ PLUS BEFORE MINUS, or the minus arm claims the bracketed operand of `5 + (−3)`.
-        s = PLUS_AFTER.Replace(s, "$1 ku dar $2");
-        s = PLUS_LEADING.Replace(s, "$1ku dar $2");
-        s = MINUS.Replace(s, "$1laga jaray $2");
-        s = PLUS_MINUS.Replace(s, " ku dar ama laga jaray ");
-        s = EQUALS.Replace(s, " u dhiganta ");
-        s = LESS_THAN.Replace(s, " ka yar ");
-        s = GREATER_THAN.Replace(s, " ka badan ");
-        s = DIVIDE.Replace(s, " loo qeybiyay ");
+        s = Rewrite(s, PLUS_AFTER, "$1 ku dar $2");
+        s = Rewrite(s, PLUS_LEADING, "$1ku dar $2");
+        s = Rewrite(s, MINUS, "$1laga jaray $2");
+        s = Rewrite(s, PLUS_MINUS, " ku dar ama laga jaray ");
+        s = Rewrite(s, EQUALS, " u dhiganta ");
+        s = Rewrite(s, LESS_THAN, " ka yar ");
+        s = Rewrite(s, GREATER_THAN, " ka badan ");
+        s = Rewrite(s, DIVIDE, " loo qeybiyay ");
 
         return s;
     }

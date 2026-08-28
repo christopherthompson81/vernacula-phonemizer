@@ -108,6 +108,28 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
   rows, almost all of them through the ENGLISH foreign reader — which lowercases the run before reading it,
   so a Turkish name inside any of 87 languages leaked its capital raw.
 
+## ⚠ The provenance seam — `Rewrite`, and only for the pipeline string
+- A normalizer's regex replace goes through **`Rewrite(s, RE, rep)`** (`using static
+  Vernacula.Phonemizer.Core.Rewriter;`), which is spelled and ordered to match the TypeScript's
+  `rewrite(s, re, rep)` **exactly**. Porting a normalizer is then a transliteration, and
+  `npx tsx tools/seam-parity.mts` compares the two counts per language.
+- ⚠ **Calling it ASSERTS that `s` is the pipeline string** — the text the trace's `normalized` will be,
+  whose offsets map back to the caller's input. A replace on anything else — a matched word, one
+  character, a lookup key built in a static constructor — stays on `JsRegex.Replace`, which does not
+  touch the mapping. `string.Replace` and `.replaceAll` are never on the seam either: they replace ALL
+  occurrences, and the seam's string-pattern form is first-match-only like JS's.
+- ⚠ **That distinction is DYNAMIC, and no reading of the source settles it.** `s = Rewrite(s, RE, rep)`
+  inside a per-word helper is textually identical to the pipeline form. Adopting the seam in a new
+  language is: convert broadly, run `dotnet run --project csharp/tools/parity -- --poison`, and revert
+  exactly the sites it names as SUBSTRING. Two guards learned the hard way — `x = Rewrite(x, …)` is
+  never a substring call (reverting one took Sinhala from 100% to 17%), and a site whose subject really
+  is the pipeline string means the gap is UPSTREAM, so reverting only moves the poison one line down.
+- Measure with `dotnet run --project csharp/tools/parity -- --provenance`, which ranks languages by
+  tokens LOST. The fleet average says how much is missing and never where.
+- The TypeScript has the same pair — `tools/provenance-poison.mts` and `tools/provenance-coverage.mts` —
+  and comparing the two engines' per-language rows is how a gap that belongs to only ONE of them shows
+  up at all (`mai`/`awa`/`mag` read ~40-60% in C# while the TS has them at 100%).
+
 ## Ordering & numbers
 - `Array.prototype.sort` default is LEXICOGRAPHIC (string) — port as `OrdinalIgnoreCase`-free
   `string.CompareOrdinal`, not the .NET culture default. `sort((a,b)=>a-b)` → numeric.

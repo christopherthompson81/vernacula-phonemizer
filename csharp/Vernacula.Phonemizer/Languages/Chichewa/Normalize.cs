@@ -6,6 +6,7 @@
  * arm, and for the list of rules deliberately not written.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Chichewa;
 
@@ -89,24 +90,24 @@ public static class Normalize
 
         // 1) HTML entities, then the bare ampersand → `ndi`. The entity table is consulted BEFORE the sign
         //    is read, which is the whole reason `ampersand` is not on the shared tier.
-        s = AMP_ENTITY.Replace(NBSP_ENTITY.Replace(s, " "), "&");
-        s = AMPERSAND.Replace(s, $" {AND} ");
+        s = Rewrite(Rewrite(s, NBSP_ENTITY, " "), AMP_ENTITY, "&");
+        s = Rewrite(s, AMPERSAND, $" {AND} ");
 
         // 2) Dotted capital runs → the bare letters, before anything reads an interior dot as a break.
         // ⚠ `full` IS THE PRE-REPLACE STRING, as JS's replace callback argument is — snapshot it, or the
         // closure would see `s` as reassigned by this very statement.
         var src2 = s;
-        s = DOTTED_RUN.Replace(s, mm =>
+        s = Rewrite(s, DOTTED_RUN, mm =>
         {
             var run = mm.Value;
-            var letters = DOTS_AND_SPACES.Replace(run, "");
+            var letters = JsRegex.Replace(run, DOTS_AND_SPACES, "");
             var rest = Slice(src2, mm.Index + run.Length, src2.Length);
             if (LEADING_LETTER.IsMatch(rest)) return $"{letters} ";
             return rest == "" || LEADING_SPACE_CAP.IsMatch(rest) ? $"{letters}." : letters;
         });
 
         // 3) The clock — a right-hand MARKER is what identifies it, not the shape. Before steps 4 and 10.
-        s = CLOCK.Replace(s, mm =>
+        s = Rewrite(s, CLOCK, mm =>
         {
             var whole = mm.Value;
             var hv = Js.Number(mm.Groups[1].Value);
@@ -120,30 +121,30 @@ public static class Normalize
         });
 
         // 4) Thousands de-grouping, before every remaining numeric rule. Exactly three digits per block.
-        s = GROUP_COMMA.Replace(s, mm => COMMAS.Replace(mm.Value, ""));
-        s = GROUP_DOT.Replace(s, mm => DOTS.Replace(mm.Value, ""));
-        s = GROUP_SPACE.Replace(s, mm => GROUP_SPACES.Replace(mm.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, mm => COMMAS.Replace(mm.Value, ""));
+        s = Rewrite(s, GROUP_DOT, mm => DOTS.Replace(mm.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, mm => GROUP_SPACES.Replace(mm.Value, ""));
 
         // 5) Degrees. The scale letter is claimed so it cannot reach the phoneme stream raw; no scale name
         //    is invented. Before step 10, which would otherwise take the `104.0` apart.
         var src5a = s;
-        s = DEGREE_SCALE.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_SCALE, mm =>
             DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src5a));
         var src5b = s;
-        s = DEGREE_COMPASS.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_COMPASS, mm =>
             $"{DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src5b)} {COMPASS[mm.Groups[2].Value]}");
         var src5c = s;
-        s = DEGREE_BARE.Replace(s, mm =>
+        s = Rewrite(s, DEGREE_BARE, mm =>
             DegreeBody(mm.Groups[1].Value, mm.Index, mm.Index + mm.Length, src5c));
 
         // 6) Bare `m` → *mamita*, with the apostrophe-aware guard the shared tier cannot express.
-        s = METRES.Replace(s, $"{METRE} $1");
+        s = Rewrite(s, METRES, $"{METRE} $1");
 
         // 7) The English ordinal suffix, stripped — Chichewa writes its own ordinals as words.
-        s = ORDINAL_SUFFIX.Replace(s, "$1");
+        s = Rewrite(s, ORDINAL_SUFFIX, "$1");
 
         // 8) Ranges → `mpaka`. ASCENDING only.
-        s = RANGE.Replace(s, mm =>
+        s = Rewrite(s, RANGE, mm =>
             Js.Number(mm.Groups[1].Value) < Js.Number(mm.Groups[2].Value)
                 ? $"{mm.Groups[1].Value} mpaka {mm.Groups[2].Value}"
                 : mm.Value);
@@ -151,9 +152,9 @@ public static class Normalize
         // 9) A lone `+` between operands is left unread, deliberately — see the TS header.
 
         // 10) Decimals, LAST of the numeric rules. No separator word is emitted.
-        s = DECIMAL_DOT.Replace(s, mm => Spell(mm.Groups[1].Value, mm.Groups[2].Value));
-        s = DECIMAL_COMMA.Replace(s, mm => Spell(mm.Groups[1].Value, mm.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_DOT, mm => Spell(mm.Groups[1].Value, mm.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, mm => Spell(mm.Groups[1].Value, mm.Groups[2].Value));
 
-        return EDGE_SPACES.Replace(RUN_OF_SPACES.Replace(s, " "), "");
+        return Rewrite(Rewrite(s, RUN_OF_SPACES, " "), EDGE_SPACES, "");
     }
 }

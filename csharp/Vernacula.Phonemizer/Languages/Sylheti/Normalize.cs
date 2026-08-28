@@ -7,6 +7,7 @@
 using System.Globalization;
 using System.Text;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Sylheti;
 
@@ -78,11 +79,11 @@ public static class Normalize
 
     /** Fold the Bengali-Assamese characters of a MIXED token into Syloti Nagri. The "a Syloti neighbour in
      *  the same run" guard is the whole rule — see the TS. */
-    private static string FoldStrayBengali(string s) => MIXED_RUN.Replace(s, m =>
+    private static string FoldStrayBengali(string s) => Rewrite(s, MIXED_RUN, m =>
     {
         var run = m.Value;
         if (!(HAS_SYL.IsMatch(run) && HAS_BN.IsMatch(run))) return run;
-        var carrier = YA_NUKTA.Replace(run, mm => INDEPENDENT.TryGetValue(mm.Groups[1].Value, out var v) ? v : "");
+        var carrier = JsRegex.Replace(run, YA_NUKTA, mm => INDEPENDENT.TryGetValue(mm.Groups[1].Value, out var v) ? v : "");
         return string.Concat(Js.CodePoints(carrier).Select(c => BN_TO_SYL.TryGetValue(c, out var t) ? t : c));
     });
 
@@ -108,32 +109,32 @@ public static class Normalize
     public static string NormalizeSylheti(string input)
     {
         var s = input.Normalize(NormalizationForm.FormC);
-        s = ZERO_WIDTH.Replace(s, "");
+        s = Rewrite(s, ZERO_WIDTH, "");
         s = FoldStrayBengali(s);
-        s = DOTTED_ABBREV.Replace(s, m => DOT_G.Replace(m.Value, ""));
+        s = Rewrite(s, DOTTED_ABBREV, m => DOT_G.Replace(m.Value, ""));
         for (var prev = ""; prev != s;)
         {
             prev = s;
-            s = GROUP_COMMA.Replace(s, "$1");
+            s = Rewrite(s, GROUP_COMMA, "$1");
         }
-        s = RANGE.Replace(s, m =>
+        s = Rewrite(s, RANGE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
             return NumValue(b) > NumValue(a) ? $"{a} {RANGE_WORD} {b}" : m.Value;
         });
-        s = DEGREE_NATIVE.Replace(s, m =>
+        s = Rewrite(s, DEGREE_NATIVE, m =>
             $"{m.Groups[1].Value} {DEGREE_WORD} {SCALE[m.Groups[2].Value.ToUpperInvariant()]}");
-        s = DEGREE_LATIN.Replace(s, m =>
+        s = Rewrite(s, DEGREE_LATIN, m =>
             $"{m.Groups[1].Value} {DEGREE_WORD} {(m.Groups[2].Value.ToUpperInvariant() == "C" ? SCALE["ꠍꠦ"] : SCALE["ꠚꠣ"])}");
-        s = DEGREE_BARE.Replace(s, $"$1 {DEGREE_WORD}");
-        s = DECIMAL.Replace(s, $"$1 {DECIMAL_WORD} ");
-        s = PERCENT_NUM.Replace(s, $"$1 {PERCENT_WORD}");
-        s = PERCENT_BARE.Replace(s, $" {PERCENT_WORD} ");
-        s = TAKA_NUM.Replace(s, $"$1 {CURRENCY_WORD}");
-        s = TAKA_NUM_REDUNDANT.Replace(s, "$1");
-        s = TAKA_BARE.Replace(s, $" {CURRENCY_WORD} ");
-        s = TAKA_DROP.Replace(s, "");
+        s = Rewrite(s, DEGREE_BARE, $"$1 {DEGREE_WORD}");
+        s = Rewrite(s, DECIMAL, $"$1 {DECIMAL_WORD} ");
+        s = Rewrite(s, PERCENT_NUM, $"$1 {PERCENT_WORD}");
+        s = Rewrite(s, PERCENT_BARE, $" {PERCENT_WORD} ");
+        s = Rewrite(s, TAKA_NUM, $"$1 {CURRENCY_WORD}");
+        s = Rewrite(s, TAKA_NUM_REDUNDANT, "$1");
+        s = Rewrite(s, TAKA_BARE, $" {CURRENCY_WORD} ");
+        s = Rewrite(s, TAKA_DROP, "");
         return s;
     }
 }

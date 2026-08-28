@@ -70,6 +70,7 @@
  */
 
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The PERCENT reading, and the best-attested word in this layer.
@@ -336,7 +337,7 @@ const countForm = (n: number): number => (n === 1 || (n >= 11 && n % 1 === 0) ? 
  * copied rather than paraphrased, since `numValue` is not exported. Whoever changes one must change both.
  */
 function numeralValue(num: string): number {
-    const cleaned = num.replace(/[ \u00a0]/gu, ""); // thin/regular space grouping, as `numValue` does  // space, NBSP
+    const cleaned = rewrite(num, /[ \u00a0]/gu, ""); // thin/regular space grouping, as `numValue` does  // space, NBSP
     // Grouping separators come in 3-digit blocks; a trailing 1–2 digit block after . or , is a decimal.
     const m = /^(\d+(?:[.,]\d{3})*)(?:[.,](\d+))?$/.exec(cleaned);
     if (!m) return Number.NaN;
@@ -360,7 +361,7 @@ function numeralValue(num: string): number {
  * consumes the digit the second match would have started on.
  */
 function degroup(text: string): string {
-    return text.replace(/(?<=\p{Nd})(?<!(?<![\p{Nd}\.,])0)[,](?=\p{Nd}{3}(?!\p{Nd}))/gu, "");
+    return rewrite(text, /(?<=\p{Nd})(?<!(?<![\p{Nd}\.,])0)[,](?=\p{Nd}{3}(?!\p{Nd}))/gu, "");
 }
 
 /**
@@ -440,7 +441,7 @@ function eraMarkers(text: string): string {
  * space misplaced before the apostrophe. No Maltese article ends in an apostrophe, so it cannot let one in.
  */
 function minusSign(text: string): string {
-    return text.replace(
+    return rewrite(text, 
         /(^|[\s(‘’'"“])[-−–](\p{Nd}[\p{Nd}.,]*)(?=\s?[°%])/gu,
         `$1${MINUS} $2`,
     );
@@ -466,7 +467,7 @@ function minusSign(text: string): string {
  * emit the PLURAL *gradi* where 21.8 takes the singular *grad*. Same coupling as step 3's, one step along.
  */
 function degrees(text: string): string {
-    return text.replace(
+    return rewrite(text, 
         /(\p{Nd}[\p{Nd}.,]*)\s?°\s?([CF])(?![\p{L}\p{M}])/gui,
         (_m, num: string, scale: string) => {
             const n = numeralValue(num);
@@ -537,7 +538,7 @@ const RATE_RE = new RegExp(
     "gu",
 );
 function rates(text: string): string {
-    return text.replace(RATE_RE, (_m, num: string, unit: string, denom: string) => {
+    return rewrite(text, RATE_RE, (_m, num: string, unit: string, denom: string) => {
         const forms = UNITS[unit]!;
         const n = numeralValue(num);
         const noun = Number.isNaN(n) ? forms[forms.length - 1]! : (forms[countForm(n)] ?? forms[0]!);
@@ -577,7 +578,7 @@ const IL_UNIT_RE = new RegExp(
     "gu",
 );
 function ilLinkedUnit(text: string): string {
-    return text.replace(IL_UNIT_RE, (_m, num: string, unit: string) => {
+    return rewrite(text, IL_UNIT_RE, (_m, num: string, unit: string) => {
         const forms = UNITS[unit]!;
         const n = numeralValue(num);
         const noun = Number.isNaN(n) ? forms[0]! : (forms[countForm(n)] ?? forms[0]!);
@@ -599,7 +600,7 @@ function ilLinkedUnit(text: string): string {
  * the wiki 227 / 20.
  */
 function euroSpelling(text: string): string {
-    return text.replace(/(€\s?\p{Nd}[\p{Nd}.,]*(?:\s\p{L}+)?\s)euro(?![\p{L}\p{M}])/giu, "$1ewro");
+    return rewrite(text, /(€\s?\p{Nd}[\p{Nd}.,]*(?:\s\p{L}+)?\s)euro(?![\p{L}\p{M}])/giu, "$1ewro");
 }
 
 /**
@@ -697,11 +698,11 @@ function clockPhrase(h: number, mi: number): string {
 }
 
 function clock(text: string): string {
-    const s = text.replace(
+    const s = rewrite(text, 
         /(?<![\d.,:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
         (_m, h: string, mi: string) => clockPhrase(Number(h), Number(mi)),
     );
-    return s.replace(
+    return rewrite(s, 
         /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d:])/gu,
         (m: string, h: string, mi: string, offset: number, full: string) =>
             CLOCK_TAIL.test(full.slice(offset + m.length)) ? clockPhrase(Number(h), Number(mi)) : m,
@@ -709,7 +710,7 @@ function clock(text: string): string {
 }
 
 function decimalPoint(text: string): string {
-    return text.replace(
+    return rewrite(text, 
         /(\p{Nd})\.(\p{Nd}+)/gu,
         (_m, a: string, b: string) => `${a} ${DECIMAL_POINT} ${b}`,
     );

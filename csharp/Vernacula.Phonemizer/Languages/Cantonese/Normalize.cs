@@ -4,6 +4,7 @@
  * Ported from src/languages/cantonese/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Cantonese;
 
@@ -50,33 +51,33 @@ public static class Normalize
     {
         var s = input;
 
-        s = JsRegex.Replace(s, FULLWIDTH_PCT, _ => "%");
-        s = JsRegex.Replace(s, FULLWIDTH_SLASH, _ => "/");
+        s = Rewrite(s, FULLWIDTH_PCT, _ => "%");
+        s = Rewrite(s, FULLWIDTH_SLASH, _ => "/");
 
-        s = JsRegex.Replace(s, PLUS, _ => " 加 ");
+        s = Rewrite(s, PLUS, _ => " 加 ");
 
-        s = JsRegex.Replace(s, EQUALS, _ => " 等於 ");
-        s = JsRegex.Replace(s, LESS_THAN, _ => " 小於 ");
-        s = JsRegex.Replace(s, GREATER_THAN, _ => " 大於 ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " 除以 ");
+        s = Rewrite(s, EQUALS, _ => " 等於 ");
+        s = Rewrite(s, LESS_THAN, _ => " 小於 ");
+        s = Rewrite(s, GREATER_THAN, _ => " 大於 ");
+        s = Rewrite(s, DIVIDE, _ => " 除以 ");
 
         s = Sinitic.ReadDegrees(s, new DegreeData
         {
             Celsius = n => $"攝氏{n}度",
             Fahrenheit = n => $"華氏{n}度",
         });
-        s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value}度");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value}度");
 
         s = Sinitic.DegroupThousands(s);
 
-        s = JsRegex.Replace(s, YEAR_RANGE, m =>
+        s = Rewrite(s, YEAR_RANGE, m =>
             m.Groups[1].Success
                 ? $"{SpellDigits(m.Groups[1].Value)}至{SpellDigits(m.Groups[3].Value)}"
                 : $"{SpellDigits(m.Groups[4].Value)}{m.Groups[5].Value}{SpellDigits(m.Groups[6].Value)}");
 
-        s = JsRegex.Replace(s, YEAR_BEFORE_NIAN, m => SpellDigits(m.Groups[1].Value));
+        s = Rewrite(s, YEAR_BEFORE_NIAN, m => SpellDigits(m.Groups[1].Value));
 
-        s = JsRegex.Replace(s, CLOCK, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             var ap = m.Groups[3].Success ? m.Groups[3].Value : null;
             var pre = ap is null ? "" : ap.ToLowerInvariant() == "a" ? "上午" : "下午";
@@ -89,10 +90,10 @@ public static class Normalize
 
         s = SYMBOLS(s);
 
-        s = JsRegex.Replace(s, DECIMAL_RE, m => $"{m.Groups[1].Value}點{SpellDigits(m.Groups[2].Value)}");
+        s = Rewrite(s, DECIMAL_RE, m => $"{m.Groups[1].Value}點{SpellDigits(m.Groups[2].Value)}");
 
         if (measureWords != "")
-            s = JsRegex.Replace(s, JsRegex.Compile($"(?<![\\d.,])2(?=\\s*[{measureWords}])", "gu"), _ => "兩");
+            s = Rewrite(s, JsRegex.Compile($"(?<![\\d.,])2(?=\\s*[{measureWords}])", "gu"), _ => "兩");
 
         return s;
     }

@@ -59,7 +59,7 @@ import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const N = MANIFEST.numbers;
 
@@ -268,7 +268,7 @@ export function normalizeSerbian(input: string): string {
     //    period reads as clause punctuation and the number splits in two (`1.300` → *jedan . trista*).
     //    Two passes, because adjacent groups share a digit (`800.000`). EXACTLY three digits and no space,
     //    which keeps `802.11` (a Wi-Fi standard), `12.00 сати` (step 2) and every sentence-final `N.` out.
-    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+    for (let i = 0; i < 2; i++) s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
 
     // 1) MULTI-DOT ERA MARKER, before the single-dot abbreviation rule (step 3) and before the `N.` ordinal
     //    rule (step 7) — `1000. п. н. е.` contains both, and its interior dots become phrase breaks.
@@ -300,7 +300,7 @@ export function normalizeSerbian(input: string): string {
     //    marker. Requiring a year would have dropped a real instance to catch a hypothetical one.
     //    ⚠ The classes hold BOTH scripts' letters (Cyrillic ⟨п н е⟩ and Latin ⟨p n e⟩ are distinct code
     //    points that look alike); dropping the `i` flag is what makes them lowercase-only, not script-only.
-    s = tr(s, /(?<![\d.,])(\d{1,4})\.\s+(?=(?:[пp]\.\s?)?[нn]\.\s?[еe](?![\p{L}\p{M}]))/gu,
+    s = rewrite(s, /(?<![\d.,])(\d{1,4})\.\s+(?=(?:[пp]\.\s?)?[нn]\.\s?[еe](?![\p{L}\p{M}]))/gu,
         (whole, digits: string) => {
             const base = ordinalBase(Number(digits));
             return base === undefined ? whole : `${inflect(base, "f.gen")!} `;
@@ -309,21 +309,21 @@ export function normalizeSerbian(input: string): string {
         ["н\\.\\s?е", "nove ere"], ["n\\.\\s?e", "nove ere"]] as const) {
         //    ⚠ `gu`, NOT `giu` — see the lowercase guard above. Case-insensitive, this loop expanded a
         //    person's INITIALS: `N. E. Kovač` → *nove ere. Kovač*.
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${pat}\\.(\\s*)(\\S?)`, "gu"), replaceEra(words));
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${pat}\\.(\\s*)(\\S?)`, "gu"), replaceEra(words));
         //    THE FINAL DOT IS SOMETIMES ABSENT (`п.н.е,`), so a second pass claims the dotless form. Guarded
         //    against a following letter so it cannot bite into a real word.
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${pat}(?![\\p{L}\\p{M}.])`, "gu"), words);
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${pat}(?![\\p{L}\\p{M}.])`, "gu"), words);
     }
 
     // 2) DOT-WRITTEN CLOCK — `12.00 сати`. Claimed only when the hour noun is already WRITTEN, which is what
     //    separates it from a decimal; the trailing noun is left in place and the dot pair dropped. Must run
     //    after step 0 (which would otherwise not touch it — 2 digits, not 3) and before step 8.
-    s = tr(s, /(?<![\d.,])(\d{1,2})\.(\d{2})(?=\s*(?:сати|часова|sati|časova))/gu,
+    s = rewrite(s, /(?<![\d.,])(\d{1,2})\.(\d{2})(?=\s*(?:сати|часова|sati|časova))/gu,
         (_m, h: string, min: string) => (Number(min) === 0 ? h : `${h} i ${Number(min)}`));
 
     // 3) DOTTED ABBREVIATIONS. The dot is consumed before a following word so it cannot become a phrase
     //    break; at a real sentence end it is kept.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -331,12 +331,12 @@ export function normalizeSerbian(input: string): string {
             const w = DOTTED[lat(ab)];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*[,;:])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*[,;:])`, "giu"),
         (_m, ab: string) => DOTTED[lat(ab)]!);
     //    ⚠ A CLOSING BRACKET OR QUOTE IS NOT A PAUSE — serbian.jsonc maps only `.!?…,;:` — so the dot must be
     //    KEPT before one, not consumed the way it is before a comma. Grouping `)` with the comma silently
     //    loses the sentence-final pause on `…, итд.)`.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*(?:[.!?”"»)\\]]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*(?:[.!?”"»)\\]]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -355,19 +355,19 @@ export function normalizeSerbian(input: string): string {
     //    ⚠ WHAT NONE OF THEM CAN REJECT is a spaced DESIGNATION: `word -1` has the same shape as a genuine
     //    `was -5`. Serbian accepts that residual risk; mr and nl decline the rule outright over it (see
     //    ACCEPTED_SIGN_SILENCE in defects.ts).
-    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+    s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "минус ");
-    s = tr(s, /±/gu, " плус минус ");
-    s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 плус ");
-    s = tr(s, /(^|\s)\+\s?(?=\d)/gu, "$1плус ");
+    s = rewrite(s, /±/gu, " плус минус ");
+    s = rewrite(s, /(\S)\+\s?(?=\d)/gu, "$1 плус ");
+    s = rewrite(s, /(^|\s)\+\s?(?=\d)/gu, "$1плус ");
 
     // 3c) RELATIONAL AND DIVISION SIGNS. All four are ADJ + од constructions read in written order.
     //     ⚠ `једнако` IS ALSO A COMMON ADVERB ("equally"), which has no arithmetic reading — the arithmetic
     //     sense has to be sourced from a mathematical register, not from running prose.
-    s = tr(s, /\s?=\s?/gu, " једнако ");
-    s = tr(s, /\s?<\s?/gu, " мање од ");
-    s = tr(s, /\s?>\s?/gu, " веће од ");
-    s = tr(s, /\s?÷\s?/gu, " подељено са ");
+    s = rewrite(s, /\s?=\s?/gu, " једнако ");
+    s = rewrite(s, /\s?<\s?/gu, " мање од ");
+    s = rewrite(s, /\s?>\s?/gu, " веће од ");
+    s = rewrite(s, /\s?÷\s?/gu, " подељено са ");
 
     // 4) DEGREES, two arms. The first claims `°C` / `°F` and supplies both the degree noun and the scale
     //    name. A WRITTEN degree noun is CONSUMED when present (`32 °C степена`), or the word is emitted
@@ -377,7 +377,7 @@ export function normalizeSerbian(input: string): string {
     //    degree is the preposition "with", so `35° с падавинама` would read as Celsius and delete the
     //    word. Attachment separates them: `35°С` is the scale, `35° с` is the preposition. Latin ⟨c⟩ has
     //    no such collision and the corpus writes it spaced (`32 °c`), so that arm keeps its `\s?`.
-    s = tr(s, /(\d+)\s?°(?:\s?([CFcf])|([СЦФсцф]))(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gui,
+    s = rewrite(s, /(\d+)\s?°(?:\s?([CFcf])|([СЦФсцф]))(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gui,
         (_m, n: string, lat: string | undefined, cyr: string | undefined, _written: string | undefined) =>
             `${n} ${counted(Number(n), STEPEN)} `
             + (/[FfФф]/u.test(lat ?? cyr ?? "") ? "Farenhajta" : "Celzijusa"));
@@ -414,7 +414,7 @@ export function normalizeSerbian(input: string): string {
     //    `35° W` still reads. Latin ⟨I⟩ (istok) belongs in the list too; leaving it out let `35°I` glue.
     //    ⚠ CASE-SENSITIVE: only the LOWERCASE letter is the function word, so a spaced uppercase bearing
     //    (`35° S`, `35° И`) still reads. Only `s i с и` need the attachment.
-    s = tr(s, /(\d+)\s?°(?:(?:\s?[NEWJZSIXYQnewjzxyqЈЗСИјз]|[siси])(?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
+    s = rewrite(s, /(\d+)\s?°(?:(?:\s?[NEWJZSIXYQnewjzxyqЈЗСИјз]|[siси])(?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
         //    ⚠ TRAILING SPACE — any letter this arm does not consume would otherwise glue onto the noun
         //    (`300°K` → *stepenik*), and the stress lookup then runs on a word that does not exist. A
         //    letter class cannot cover that: the class is finite and the alphabet is not.
@@ -428,7 +428,7 @@ export function normalizeSerbian(input: string): string {
     //    at 2 letters and may not be followed by a letter, which excludes COMPOUND ADJECTIVES
     //    (`24-часовном`, `11-годишња`): those need the combining stem (dvadesetčetvoro-, jedanaesto-), a
     //    different word-formation, and are left as the cardinal plus the word.
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{Ll}{1,2})${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, rawSuffix: string) => {
             const suffix = lat(rawSuffix);
             return ordinalForms(Number(digits)).find((f) => f.endsWith(suffix)) ?? whole;
@@ -437,9 +437,9 @@ export function normalizeSerbian(input: string): string {
     // 6) UNITS THE SHARED TIER CANNOT EXPRESS, before the tier itself and before every rule that destroys
     //    number-to-unit adjacency (the decimal fold, step 10). The `/s` rate takes "u sekundi", not
     //    `unitPer`'s "na" + accusative, and one `unitPer` cannot carry both.
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?Mbit\s?\/\s?s(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?Mbit\s?\/\s?s(?![\p{L}\p{M}])/gu,
         (_m, n: string) => `${n} ${counted(intOf(n), MEGABIT)} u sekundi`);
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?m\s?\/\s?s(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?m\s?\/\s?s(?![\p{L}\p{M}])/gu,
         (_m, n: string) => `${n} ${counted(intOf(n), METAR)} u sekundi`);
 
     // 6b) NUMERIC RANGES — the dash was dropped outright, fusing the endpoints into one run of words. Digits
@@ -447,7 +447,7 @@ export function normalizeSerbian(input: string): string {
     //     and BEFORE step 7, so `1000-1300. године` still has a digit on the right when this fires.
     //     Known false positives: SCORES and seasons (`6-6`, `1995-96`) where "do" is the wrong connective —
     //     but the endpoints were fusing there too, so no reading is lost, only a wrong-ish connective gained.
-    s = tr(s, /(\d)\s?[-–—]\s?(?=\d)/gu, "$1 do ");
+    s = rewrite(s, /(\d)\s?[-–—]\s?(?=\d)/gu, "$1 do ");
 
     // 7) THE `N.` ORDINAL — the rule this file exists for (see the header). Claimed ONLY when a licensing
     //    word from the closed list follows, and only when that word is LOWERCASE. The case guard is what
@@ -456,7 +456,7 @@ export function normalizeSerbian(input: string): string {
     //    by construction. Nothing outside the list is touched at all.
     //    Runs AFTER step 0 (de-grouping) so `1.300` is already whole, and AFTER step 1 so `п. н. е.` is gone
     //    and cannot be mistaken for a licensor.
-    s = tr(s, /(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
+    s = rewrite(s, /(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
         (whole, digits: string, word: string) => {
             const slot = LICENSOR[lat(word)];
             if (slot === undefined) return whole;
@@ -469,7 +469,7 @@ export function normalizeSerbian(input: string): string {
     //    Serbian says a CARDINAL hour with the counted noun — `u 11 sati` — unlike Ukrainian's feminine
     //    ordinal. TWO-DIGIT minutes are required, which keeps scores (`5:3`, `26 : 0`) out. Runs before the
     //    decimal fold (step 10).
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu, (_m, h: string, min: string) => {
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu, (_m, h: string, min: string) => {
         const hv = Number(h), mv = Number(min);
         const head = `${numberToWords(hv)} ${counted(hv, SAT)}`;
         return mv === 0 ? head : `${head} i ${numberToWords(mv)} ${counted(mv, MINUT)}`;
@@ -489,8 +489,8 @@ export function normalizeSerbian(input: string): string {
     //     ⚠ NO LEADING-MINUS RULE HERE. Reading a leading `–`/`−` before a number as a minus, the way ru and
     //     uk do, misreads the PUNCTUATION dash: `…изгледа низак – 6000 од укупно…` becomes *…nizak MINUS šest
     //     hiljada…*. Confidently wrong, which is worse than the dropped dash it replaces.
-    s = tr(s, /(?<=\d)\s?[x×]\s?(?=\d)/gu, " puta ");
-    s = tr(s, /(^|[\s(])\+\s?(\d)/gu, "$1plus $2");
+    s = rewrite(s, /(?<=\d)\s?[x×]\s?(?=\d)/gu, " puta ");
+    s = rewrite(s, /(^|[\s(])\+\s?(\d)/gu, "$1plus $2");
 
     // 12) INITIALISMS, LAST — after every numeric rule, so a spelled-out letter run can no longer be
     //     mistaken for one of their operands. See the header for the audio attestation.
@@ -499,7 +499,7 @@ export function normalizeSerbian(input: string): string {
 
 /** Integer part of a Serbian-written number ("3,50" → 3), for the local count-agreement calls. */
 function intOf(n: string): number {
-    return Math.trunc(Number(n.replace(/\./gu, "").replace(",", ".")));
+    return Math.trunc(Number(rewrite(rewrite(n, /\./gu, ""), ",", ".")));
 }
 
 /**
@@ -520,7 +520,7 @@ function intOf(n: string): number {
  * one standard and left broken in the others (#1074). A rule identical in all three belongs to the core.
  */
 export function readDecimalComma(s: string): string {
-    return s.replace(/(?<=\d),(\d+)/gu, (_m, frac: string) => {
+    return rewrite(s, /(?<=\d),(\d+)/gu, (_m, frac: string) => {
         const zeros = /^0*/u.exec(frac)![0].length;
         return zeros === 0 ? ` zarez ${frac}` : ` zarez ${"0 ".repeat(zeros)}${frac.slice(zeros)}`;
     });

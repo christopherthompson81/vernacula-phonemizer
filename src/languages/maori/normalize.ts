@@ -1,6 +1,6 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST as DEF } from "./manifest.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * Māori (mi) text normalization — the pre-tokenizer pass, pure text→text. Runs inside maori.ts's `text()`.
@@ -71,36 +71,36 @@ const SYMBOLS = makeSymbolNormalizer({
 export function normalizeMaori(input: string): string {
     // The entity must go before the bare sign, or `&amp;` becomes "me amp ;". Spaced both sides so `B&B` stays
     // two initialisms rather than fusing into one token.
-    let s = input.replace(/&amp;/giu, "&").replace(/&/gu, " me ");
+    let s = rewrite(rewrite(input, /&amp;/giu, "&"), /&/gu, " me ");
     // Māori has no /l/ or /s/, so `plus` and `minus` are unsayable natively; they reach the English reader by the
     // engine's routing path (`isNativeWord` walks the word as the g2p does, and both fail at the `l`). Guarded
     // against a spaced range, which would otherwise read as a sign.
-    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+    s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "minus ",
     );
     // `tāpiri` is the arithmetic verb (append / sum), so it reads the OPERATOR only — as a polarity sign it would
     // say "thirty degrees APPEND". Digits on BOTH sides keep a UTC offset or signed temperature away from it.
-    s = tr(s, /(\d)\s?\+\s?(?=\d)/gu, "$1 tāpiri ");
+    s = rewrite(s, /(\d)\s?\+\s?(?=\d)/gu, "$1 tāpiri ");
 
     // ⚠ ORDER IS LOAD-BEARING: the operator arm above must claim `3 + 4` first, or the leading-sign arm below
     // matches its space and reads *toru plus whā*. Two sign arms are needed — `(\S)\+` for a glued `UTC+1`, the
     // boundary arm for `+5` / `+30°C`.
-    s = tr(s, /±/gu, " plus minus ");
-    s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 plus ");
-    s = tr(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
+    s = rewrite(s, /±/gu, " plus minus ");
+    s = rewrite(s, /(\S)\+\s?(?=\d)/gu, "$1 plus ");
+    s = rewrite(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
 
     // Relational and division signs have native words, so unlike the loans above they stay on the native branch.
     // ⚠ All four are INFIX despite Māori being VSO: each construction puts its preposition before the second
     // operand (`A < B` → "A iti iho i B"), so the operands keep written order and need no reordering.
-    s = tr(s, /\s?=\s?/gu, " rite ki ");
-    s = tr(s, /\s?<\s?/gu, " iti iho i ");
-    s = tr(s, /\s?>\s?/gu, " nui ake i ");
-    s = tr(s, /\s?÷\s?/gu, " whakawehe ki ");
+    s = rewrite(s, /\s?=\s?/gu, " rite ki ");
+    s = rewrite(s, /\s?<\s?/gu, " iti iho i ");
+    s = rewrite(s, /\s?>\s?/gu, " nui ake i ");
+    s = rewrite(s, /\s?÷\s?/gu, " whakawehe ki ");
 
     // ⚠ `putu` (degree) and `pūtu` (boots) differ only by vowel length — the macron is the whole distinction.
     // °F is not declared: no Māori form for Fahrenheit, and this file does not invent one (cf. `mm` above).
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 putu Herehiūhu");
-    s = tr(s, /(\d)\s?°/gu, "$1 putu");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 putu Herehiūhu");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 putu");
 
     // Everything else this language needs is declared data, not a local rule.
     return SYMBOLS(s);

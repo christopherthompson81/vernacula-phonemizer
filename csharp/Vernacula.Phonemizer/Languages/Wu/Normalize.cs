@@ -4,6 +4,7 @@
  * Ported from src/languages/wu/normalize.ts — see that file for the corpus evidence and the step ordering.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Wu;
 
@@ -77,10 +78,10 @@ public static class Normalize
 
         s = Sinitic.DegroupThousands(s);
 
-        s = JsRegex.Replace(s, COORD_DMS,
+        s = Rewrite(s, COORD_DMS,
             m => $"{m.Groups[1].Value}度{m.Groups[2].Value}分{m.Groups[3].Value}秒");
-        s = JsRegex.Replace(s, COORD_DM, m => $"{m.Groups[1].Value}度{m.Groups[2].Value}分");
-        s = JsRegex.Replace(s, COORD_RANGE, m => $"{m.Groups[1].Value}到");
+        s = Rewrite(s, COORD_DM, m => $"{m.Groups[1].Value}度{m.Groups[2].Value}分");
+        s = Rewrite(s, COORD_RANGE, m => $"{m.Groups[1].Value}到");
 
         s = Sinitic.ReadDegrees(s, new DegreeData
         {
@@ -89,42 +90,42 @@ public static class Normalize
             Bare = n => $"{n}度",
         });
 
-        s = JsRegex.Replace(s, YEAR_RANGE_DASH,
+        s = Rewrite(s, YEAR_RANGE_DASH,
             m => $"{SpellDigits(m.Groups[1].Value)}到{SpellDigits(m.Groups[2].Value)}");
-        s = JsRegex.Replace(s, YEAR_RANGE_WORD,
+        s = Rewrite(s, YEAR_RANGE_WORD,
             m => $"{SpellDigits(m.Groups[1].Value)}{m.Groups[2].Value}{SpellDigits(m.Groups[3].Value)}");
-        s = JsRegex.Replace(s, YEAR_RANGE_BOTH_NIAN,
+        s = Rewrite(s, YEAR_RANGE_BOTH_NIAN,
             m => $"{SpellDigits(m.Groups[1].Value)}年到{SpellDigits(m.Groups[2].Value)}");
 
-        s = JsRegex.Replace(s, YEAR_BEFORE_NIAN, m => SpellDigits(m.Groups[1].Value));
+        s = Rewrite(s, YEAR_BEFORE_NIAN, m => SpellDigits(m.Groups[1].Value));
 
-        s = JsRegex.Replace(s, QUANTITY_RANGE,
+        s = Rewrite(s, QUANTITY_RANGE,
             m => $"{m.Groups[1].Value}{(m.Groups[2].Success ? m.Groups[2].Value : "")}到{m.Groups[3].Value}");
 
         s = Sinitic.ReorderFraction(s, "分之");
 
-        s = JsRegex.Replace(s, DENSITY, m => $"每平方公里{m.Groups[1].Value}{m.Groups[2].Value}");
+        s = Rewrite(s, DENSITY, m => $"每平方公里{m.Groups[1].Value}{m.Groups[2].Value}");
 
         s = SYMBOLS(s);
 
-        s = JsRegex.Replace(s, PERMILLE, m => $"千分之{m.Groups[1].Value}");
+        s = Rewrite(s, PERMILLE, m => $"千分之{m.Groups[1].Value}");
 
-        s = JsRegex.Replace(s, DECIMAL_RE,
+        s = Rewrite(s, DECIMAL_RE,
             m => $"{m.Groups[1].Value}点{SpellDigits(m.Groups[2].Value)}");
 
         if (measureWords != "")
-            s = JsRegex.Replace(s, JsRegex.Compile($"(?<![\\d.,第])2(?=\\s*[{measureWords}])", "gu"), _ => "两");
+            s = Rewrite(s, JsRegex.Compile($"(?<![\\d.,第])2(?=\\s*[{measureWords}])", "gu"), _ => "两");
 
-        s = JsRegex.Replace(s, ITERATION, m => m.Groups[1].Value + m.Groups[1].Value);
+        s = Rewrite(s, ITERATION, m => m.Groups[1].Value + m.Groups[1].Value);
 
         if (letterNames is not null)
         {
-            s = JsRegex.Replace(s, LETTER_SOLO, m =>
+            s = Rewrite(s, LETTER_SOLO, m =>
             {
                 var l = m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value;
                 return letterNames.TryGetValue(l, out var han) ? $" {han} " : m.Value;
             });
-            s = JsRegex.Replace(s, LETTER_RUN, m =>
+            s = Rewrite(s, LETTER_RUN, m =>
                 ROMAN_RUN.IsMatch(m.Value)
                     ? m.Value
                     : " " + string.Join(" ", Js.CodePoints(m.Value)

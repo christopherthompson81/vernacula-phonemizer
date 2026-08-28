@@ -4,6 +4,7 @@
  * Ported from src/languages/french/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.French;
 
@@ -121,20 +122,20 @@ public static class Normalize
     {
         var s = input;
 
-        s = GROUP_SPACE_RE.Replace(s, "");
-        s = GROUP_SPACE_RE.Replace(s, ""); // millions: 1 234 567
-        s = NBSP_RUN.Replace(s, " ");
+        s = Rewrite(s, GROUP_SPACE_RE, "");
+        s = Rewrite(s, GROUP_SPACE_RE, ""); // millions: 1 234 567
+        s = Rewrite(s, NBSP_RUN, " ");
 
-        s = ERA_BC.Replace(s, "avant Jésus-Christ");
-        s = ERA_AD.Replace(s, "après Jésus-Christ");
+        s = Rewrite(s, ERA_BC, "avant Jésus-Christ");
+        s = Rewrite(s, ERA_AD, "après Jésus-Christ");
 
-        s = DEGREE_SPACED.Replace(s, "$1°");
+        s = Rewrite(s, DEGREE_SPACED, "$1°");
 
-        s = NUMERO.Replace(s, "numéro ");
+        s = Rewrite(s, NUMERO, "numéro ");
 
         // DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues, so it cannot become a phrase
         // break; at a phrase end it stays, because there it really is the sentence end.
-        s = ABBREV_MID.Replace(s, m =>
+        s = Rewrite(s, ABBREV_MID, m =>
         {
             var ab = m.Groups[1].Value;
             var sp = m.Groups[2].Value;
@@ -142,32 +143,32 @@ public static class Normalize
             if (DOT_ONLY.Contains(key)) return $"{ab}{sp}";
             return DOTTED_ABBREV.TryGetValue(key, out var w) ? $"{w}{sp}" : m.Value;  // ⚠ reachable miss (#1122)
         });
-        s = ABBREV_END.Replace(s, m =>
+        s = Rewrite(s, ABBREV_END, m =>
         {
             var ab = m.Groups[1].Value;
             if (DOT_ONLY.Contains(ab.ToLowerInvariant())) return m.Value;
             return DOTTED_ABBREV.TryGetValue(ab.ToLowerInvariant(), out var w) ? $"{w}." : m.Value;
         });
 
-        s = UNDOTTED.Replace(s, m =>
+        s = Rewrite(s, UNDOTTED, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
             // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
             UNDOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
 
-        s = NAME_INITIAL.Replace(s, m =>
+        s = Rewrite(s, NAME_INITIAL, m =>
         {
             var name = Manifest.MANIFEST.LetterNames.GetValueOrDefault(m.Groups[1].Value.ToLowerInvariant());
             return name is null ? m.Value : $"{name}{m.Groups[2].Value}";
         });
 
-        s = MONEY_POST.Replace(s, m =>
+        s = Rewrite(s, MONEY_POST, m =>
         {
             var (intPart, cents, sym) = (m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value);
             var forms = CURRENCY_WORDS[sym];
             var unit = intPart == "1" ? forms[0] : forms[1];
             return cents == "00" ? $"{intPart} {unit}" : $"{intPart} {unit} {Js.NumberToString(Js.Number(cents))}";
         });
-        s = MONEY_PRE.Replace(s, m =>
+        s = Rewrite(s, MONEY_PRE, m =>
         {
             var (sym, intPart, cents) = (m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value);
             var forms = CURRENCY_WORDS[sym];
@@ -175,26 +176,26 @@ public static class Normalize
             return cents == "00" ? $"{intPart} {unit}" : $"{intPart} {unit} {Js.NumberToString(Js.Number(cents))}";
         });
 
-        s = PLUS_MINUS.Replace(s, " plus moins ");
-        s = PLUS_ATTACHED.Replace(s, "$1 plus $2");
-        s = PLUS_LEADING.Replace(s, "$1plus $2");
+        s = Rewrite(s, PLUS_MINUS, " plus moins ");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 plus $2");
+        s = Rewrite(s, PLUS_LEADING, "$1plus $2");
 
-        s = MINUS.Replace(s, "$1moins $2");
+        s = Rewrite(s, MINUS, "$1moins $2");
 
-        s = EQUALS_RE.Replace(s, " est égal à ");
-        s = LESS_THAN.Replace(s, " est inférieur à ");
-        s = GREATER_THAN.Replace(s, " est supérieur à ");
-        s = DIVIDE.Replace(s, " divisé par ");
+        s = Rewrite(s, EQUALS_RE, " est égal à ");
+        s = Rewrite(s, LESS_THAN, " est inférieur à ");
+        s = Rewrite(s, GREATER_THAN, " est supérieur à ");
+        s = Rewrite(s, DIVIDE, " divisé par ");
 
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
             FractionWords((int)Js.Number(m.Groups[1].Value), (int)Js.Number(m.Groups[2].Value)) ?? m.Value);
 
-        s = CLOCK_H.Replace(s, m => TimeWords(
+        s = Rewrite(s, CLOCK_H, m => TimeWords(
             Js.Number(m.Groups[1].Value),
             m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? Js.Number(m.Groups[2].Value) : null));
-        s = CLOCK_COLON.Replace(s, m => TimeWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
+        s = Rewrite(s, CLOCK_COLON, m => TimeWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
 
-        s = NUMERIC_DATE.Replace(s, m =>
+        s = Rewrite(s, NUMERIC_DATE, m =>
         {
             var (d, mo, y) = (m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value);
             var monthIdx = (int)Js.Number(mo) - 1;
@@ -202,7 +203,7 @@ public static class Normalize
             if (monthIdx < 0 || monthIdx >= months.Length || Js.Number(d) < 1 || Js.Number(d) > 31) return m.Value;
             return $"{(Js.Number(d) == 1 ? Ordinals.Ordinal(1) : d)} {months[monthIdx]} {y}";
         });
-        s = FIRST_OF_MONTH.Replace(s, m => $"{Ordinals.Ordinal(1)} {m.Groups[1].Value}");
+        s = Rewrite(s, FIRST_OF_MONTH, m => $"{Ordinals.Ordinal(1)} {m.Groups[1].Value}");
 
         return s;
     }

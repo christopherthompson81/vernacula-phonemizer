@@ -7,6 +7,7 @@
  * behind every word and every refusal. Nothing is re-derived here.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Tibetan;
 
@@ -30,7 +31,7 @@ public static class Normalize
 
     private static readonly JsRe LIT = JsRegex.Compile(@"[.*+?^${}()|[\]\\]", "gu");
     /** Escape a literal for embedding in a pattern — the JS `lit()` helper. */
-    private static string Lit(string s) => LIT.Replace(s, m => "\\" + m.Value);
+    private static string Lit(string s) => JsRegex.Replace(s, LIT, m => "\\" + m.Value);
 
     /**
      * Put `word` in front of a numeral that carries `lead`/`tail`, UNLESS the text already wrote the word
@@ -45,16 +46,16 @@ public static class Normalize
     private static string Prepose(string t, string word, int gap, string lead = "", string tail = "")
     {
         var w = Lit(word);
-        t = JsRegex.Compile($"({w}{WORD_END}[^{D}།༎\\n]{{0,{gap}}}){lead}({NUM}){tail}", "gu")
-            .Replace(t, m => m.Groups[1].Value + m.Groups[2].Value);
-        return JsRegex.Compile($"(?<![{D}.,]){lead}({NUM}){tail}", "gu")
-            .Replace(t, m => $"{TSHEG}{word}་{m.Groups[1].Value}");
+        t = Rewrite(t, JsRegex.Compile($"({w}{WORD_END}[^{D}།༎\\n]{{0,{gap}}}){lead}({NUM}){tail}", "gu")
+            , m => m.Groups[1].Value + m.Groups[2].Value);
+        return Rewrite(t, JsRegex.Compile($"(?<![{D}.,]){lead}({NUM}){tail}", "gu")
+            , m => $"{TSHEG}{word}་{m.Groups[1].Value}");
     }
 
     private static readonly JsRe TIB_DIGIT = JsRegex.Compile("[༠-༩]", "gu");
     /** The numeric value of a run that may be written in Tibetan digits. */
     private static double Value(string run) =>
-        Js.Number(TIB_DIGIT.Replace(run, m => ((char.ConvertToUtf32(m.Value, 0) - 0x0F20)).ToString(
+        Js.Number(JsRegex.Replace(run, TIB_DIGIT, m => ((char.ConvertToUtf32(m.Value, 0) - 0x0F20)).ToString(
             System.Globalization.CultureInfo.InvariantCulture)));
 
     private static readonly JsRe SQUEEZE_A = JsRegex.Compile($"([{D}])[ \\t]+(?=[{TIB}])", "gu");
@@ -62,7 +63,7 @@ public static class Normalize
     /** ⚠ RUN TWICE — once before the rules and once after, and it must be both: the rules themselves leave
      *  a numeral newly adjacent to a Tibetan word. */
     private static string SqueezeNumeralSpace(string t) =>
-        SQUEEZE_B.Replace(SQUEEZE_A.Replace(t, m => m.Groups[1].Value), m => m.Groups[1].Value);
+        Rewrite(Rewrite(t, SQUEEZE_A, m => m.Groups[1].Value), SQUEEZE_B, m => m.Groups[1].Value);
 
     // soft hyphen, ZWSP, RLM, word joiner, BOM
     private static readonly JsRe ZERO_WIDTH = JsRegex.Compile("[­​-‏⁠﻿]", "gu");
@@ -83,12 +84,12 @@ public static class Normalize
         var t = input;
 
         // 1) ZERO-WIDTH MARKS, first. ⚠ This corpus writes ZWSP after EVERY TSHEG in places.
-        t = ZERO_WIDTH.Replace(t, _ => "");
+        t = Rewrite(t, ZERO_WIDTH, _ => "");
 
         // 2) COMPATIBILITY FORMS OF THE SIGNS THIS LAYER READS. ⚠ Only these — never blanket NFKC.
-        t = PCT_COMPAT.Replace(t, _ => "%");
-        t = DEG_C.Replace(t, _ => "°C");
-        t = DEG_F.Replace(t, _ => "°F");
+        t = Rewrite(t, PCT_COMPAT, _ => "%");
+        t = Rewrite(t, DEG_C, _ => "°C");
+        t = Rewrite(t, DEG_F, _ => "°F");
 
         // 2b) THE SPACE AROUND A NUMERAL, once here and again at step 12 — and it must be both.
         t = SqueezeNumeralSpace(t);
@@ -96,7 +97,7 @@ public static class Normalize
         // 3) COMMA-GROUPED THOUSANDS, BEFORE the comma can be read as a clause pause and cut a numeral in
         //    half. ⚠ Never after a lone `0` — no convention groups from zero, and joining would be a 1000×
         //    error rather than a reading of one.
-        t = GROUP_COMMA.Replace(t, _ => "");
+        t = Rewrite(t, GROUP_COMMA, _ => "");
 
         // 4) RATES — `118-149km/h`. ⚠ HERE, ahead of the unit, span and clock rules, because this rule MOVES
         //    the numeral and a later rule would no longer find it adjacent to what it needs.
@@ -123,11 +124,11 @@ public static class Normalize
 
         // 10) CLOCK. ⚠ THE CHAIN GUARD IS THE WHOLE RULE — of the six colon shapes in the retained text,
         //     three are not clocks, and a chained colon is what tells them apart.
-        t = CLOCK.Replace(t, m => $"{TSHEG}ཆུ་ཚོད་{m.Groups[1].Value}་སྐར་མ་{m.Groups[2].Value}");
+        t = Rewrite(t, CLOCK, m => $"{TSHEG}ཆུ་ཚོད་{m.Groups[1].Value}་སྐར་མ་{m.Groups[2].Value}");
 
         // 11) SPANS → the corpus's own `X ནས Y བར` circumfix. ⚠ Only when the second operand is LARGER; a
         //     non-ascending pair is a score, a date or a subtraction, not a span.
-        t = SPAN.Replace(t, m =>
+        t = Rewrite(t, SPAN, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;

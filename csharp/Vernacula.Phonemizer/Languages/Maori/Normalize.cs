@@ -3,6 +3,7 @@
  * Ported from src/languages/maori/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Maori;
 
@@ -40,31 +41,31 @@ public static class Normalize
     {
         // ⚠ ORDER: the entity must go before the bare sign, or `&amp;` becomes "me amp ;". Spaced on both
         // sides so `B&B` stays two initialisms rather than fusing into one token.
-        var s = AMP.Replace(AMP_ENTITY.Replace(input, "&"), " me ");
+        var s = Rewrite(Rewrite(input, AMP_ENTITY, "&"), AMP, " me ");
         // `plus`/`minus` are English loans: Māori has no /l/ or /s/, so the engine's routing sends them to
         // the English reader. Guarded against a spaced range, which would otherwise read as a sign.
         var before = s;
-        s = LEADING_MINUS.Replace(s, m => DIGIT_BEFORE.IsMatch(before[..m.Index]) ? m.Value : "minus ");
+        s = Rewrite(s, LEADING_MINUS, m => DIGIT_BEFORE.IsMatch(before[..m.Index]) ? m.Value : "minus ");
         // `tāpiri` is the arithmetic verb, so it reads the OPERATOR only — as a polarity sign it would say
         // "thirty degrees APPEND". Digits on BOTH sides keep a UTC offset or signed temperature away from it.
-        s = PLUS_OPERATOR.Replace(s, "$1 tāpiri ");
+        s = Rewrite(s, PLUS_OPERATOR, "$1 tāpiri ");
 
         // ⚠ ORDER IS LOAD-BEARING: the operator arm above must claim `3 + 4` first, or the leading-sign arms
         // here match its space and read *toru plus whā*.
-        s = PLUS_MINUS.Replace(s, " plus minus ");
-        s = PLUS_ATTACHED.Replace(s, "$1 plus ");
-        s = PLUS_LEADING.Replace(s, "$1plus ");
+        s = Rewrite(s, PLUS_MINUS, " plus minus ");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 plus ");
+        s = Rewrite(s, PLUS_LEADING, "$1plus ");
 
         // ⚠ All four are INFIX despite Māori being VSO: each construction puts its preposition before the
         // second operand (`A < B` → "A iti iho i B"), so the operands keep written order.
-        s = EQUALS.Replace(s, " rite ki ");
-        s = LESS_THAN.Replace(s, " iti iho i ");
-        s = GREATER_THAN.Replace(s, " nui ake i ");
-        s = DIVIDE.Replace(s, " whakawehe ki ");
+        s = Rewrite(s, EQUALS, " rite ki ");
+        s = Rewrite(s, LESS_THAN, " iti iho i ");
+        s = Rewrite(s, GREATER_THAN, " nui ake i ");
+        s = Rewrite(s, DIVIDE, " whakawehe ki ");
 
         // ⚠ `putu` (degree) and `pūtu` (boots) differ only by vowel length — the macron is the distinction.
-        s = DEG_C.Replace(s, "$1 putu Herehiūhu");
-        s = DEG.Replace(s, "$1 putu");
+        s = Rewrite(s, DEG_C, "$1 putu Herehiūhu");
+        s = Rewrite(s, DEG, "$1 putu");
 
         return SYMBOLS(s);
     }

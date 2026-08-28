@@ -37,7 +37,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { multiplicativeWords, numberToWords, ordinalWords, stemForSuffix } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const LOWER = "a-záéíóöőúüű";
 
@@ -198,26 +198,26 @@ export function normalizeHungarian(input: string): string {
     // 1) DOTTED ABBREVIATIONS, multi-dot before single-dot so an interior dot cannot be claimed by the
     //    shorter pattern first (`et al.` before `al.`). The dot is consumed with the abbreviation, since
     //    leaving it makes a phrase break inside the expansion.
-    s = tr(s, /(?<![\d.,\-])(?<!\d[ .,])(\d{1,6})\s?[x×]\s?(?=\d)/gu, (m0, n: string) => {
+    s = rewrite(s, /(?<![\d.,\-])(?<!\d[ .,])(\d{1,6})\s?[x×]\s?(?=\d)/gu, (m0, n: string) => {
         const w = multiplicativeWords(Number(n));
         return w === undefined ? m0 : `${w} `;
     });
 
-    s = tr(s, /(?<![\p{L}\p{M}])Kr\.\s?e\./giu, "Krisztus előtt"); // ×3
-    s = tr(s, /(?<![\p{L}\p{M}])Kr\.\s?u\./giu, "Krisztus után"); // ×1
-    s = tr(s, /(?<![\p{L}\p{M}])i\.\s?sz\./giu, "időszámításunk szerint"); // ×2
-    s = tr(s, /(?<![\p{L}\p{M}])i\.\s?e\./giu, "időszámításunk előtt"); // 0 in corpus; the pair of i.sz.
-    s = tr(s, /(?<![\p{L}\p{M}])d\.\s?e\./giu, "délelőtt"); // ×1
-    s = tr(s, /(?<![\p{L}\p{M}])d\.\s?u\./giu, "délután"); // 0 in corpus; the pair of d.e.
+    s = rewrite(s, /(?<![\p{L}\p{M}])Kr\.\s?e\./giu, "Krisztus előtt"); // ×3
+    s = rewrite(s, /(?<![\p{L}\p{M}])Kr\.\s?u\./giu, "Krisztus után"); // ×1
+    s = rewrite(s, /(?<![\p{L}\p{M}])i\.\s?sz\./giu, "időszámításunk szerint"); // ×2
+    s = rewrite(s, /(?<![\p{L}\p{M}])i\.\s?e\./giu, "időszámításunk előtt"); // 0 in corpus; the pair of i.sz.
+    s = rewrite(s, /(?<![\p{L}\p{M}])d\.\s?e\./giu, "délelőtt"); // ×1
+    s = rewrite(s, /(?<![\p{L}\p{M}])d\.\s?u\./giu, "délután"); // 0 in corpus; the pair of d.e.
     //    The dot is consumed when the sentence continues, and kept at a phrase end where it really is the
     //    sentence period (`…, stb.`).
     //    A DIGIT counts as a continuation as well as a letter: `kb. 20 km-re` and `kb. 1000 körül` are the
     //    commonest shape of all, and a `(?=\p{L})` lookahead alone left them as the cluster [ɡb] + a pause.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`,
     );
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`,
     );
@@ -239,9 +239,9 @@ export function normalizeHungarian(input: string): string {
         // split off, `000` spoken as zero, AND a spurious full stop. Hungarian marks the decimal with a
         // comma, so the mark is only a separator when a digit follows: `(?![\d]|,\d)`. Same defect the zu
         // and xh runs found in swahili/normalize.ts, which is where this guard shape came from.
-        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[.\u00a0\u202f\u2009 ](?=\d{3}(?![\d]|,\d))/gu, "");  // NBSP, NNBSP, thin space
-        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)\.[ \u00a0\u202f\u2009](?=\d{3}(?![\d]|,\d))/gu, ""); // the corpus's one `400. 000`  // space, NBSP, NNBSP, thin space
-        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?![\d]|,\d))/gu, "");
+        s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)[.\u00a0\u202f\u2009 ](?=\d{3}(?![\d]|,\d))/gu, "");  // NBSP, NNBSP, thin space
+        s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)\.[ \u00a0\u202f\u2009](?=\d{3}(?![\d]|,\d))/gu, ""); // the corpus's one `400. 000`  // space, NBSP, NNBSP, thin space
+        s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?![\d]|,\d))/gu, "");
     }
 
     // 3) CLOCK, before any rule can read the separator: the colon is clause punctuation and became a
@@ -250,14 +250,14 @@ export function normalizeHungarian(input: string): string {
     //    *tizenegy nulla nulla*. Output stays DIGITS so the number path expands them, and so step 10's
     //    suffix rule can still attach (`11:35-re` → `11 35-re` → *harmincötre*).
     //    Two-digit minutes are REQUIRED, which is what keeps the score `3:2-re` out of this rule.
-    s = tr(s, /(?<![\d.,:])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![\d:])/gu, (_m, h: string, min: string) =>  // space, NBSP
+    s = rewrite(s, /(?<![\d.,:])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![\d:])/gu, (_m, h: string, min: string) =>  // space, NBSP
         Number(min) === 0 ? h : `${h} ${min}`,
     );
 
     // 4) UNIT ABBREVIATION + HYPHEN SUFFIX, BEFORE the shared symbol tier (step 6). The tier would
     //    otherwise claim `20 km-re` and leave `-re` stranded behind the substituted word, where the
     //    tokenizer drops the hyphen and *re* becomes its own stressed word.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(${UNIT_ALT})([²³23])?-([${LOWER}]+)`, "giu"),
         (whole, u: string, exp: string | undefined, suf: string) => {
             const head = SUFFIXABLE_UNIT[u.toLowerCase()];
@@ -268,7 +268,7 @@ export function normalizeHungarian(input: string): string {
     );
     //    The single-letter `m` needs a preceding NUMBER to be a unit at all (`2m-es`); bare `m-` is far
     //    likelier to be an initial or a typo than a metre.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(\\d)\\s?m([²³23])?-([${LOWER}]+)`, "gu"),
         (_m, d: string, exp: string | undefined, suf: string) => {
             const pre = exp === undefined ? "" : exp === "³" || exp === "3" ? "köb" : "négyzet";
@@ -279,7 +279,7 @@ export function normalizeHungarian(input: string): string {
     // 5) PERCENT + HYPHEN SUFFIX. Every one of the corpus's 8 percent signs carries a suffix (`29%-a`,
     //    `93%-ával`, `8%-kal`), so this must run before the shared tier in step 6 — the tier emits the
     //    bare noun and would strand the suffix exactly as step 4's units would.
-    s = tr(s, new RegExp(`(\\d)\\s?[%٪％]-([${LOWER}]+)`, "gu"), "$1 százalék$2");
+    s = rewrite(s, new RegExp(`(\\d)\\s?[%٪％]-([${LOWER}]+)`, "gu"), "$1 százalék$2");
 
     // 6) SHARED SYMBOL TIER — %, units, rates (`km/h`), exponents (`km²`). Runs BEFORE the decimal
     //    rewrite in step 8: the tier matches a unit only when a NUMBER is adjacent, and turning `3,5` into
@@ -289,7 +289,7 @@ export function normalizeHungarian(input: string): string {
     // 7) DEGREES and SIGNS. `°` was dropped outright and a trailing C was read as Hungarian ⟨c⟩ → [t͡s].
     //    The suffixed form (`35°-tól`, a longitude) is claimed FIRST, for the reason step 4 exists: the
     //    plain rule would emit *fok* and leave `-tól` to become its own stressed word.
-    s = tr(s,
+    s = rewrite(s,
         // ⚠ THE LOWERCASE SCALE LETTERS GO IN THE CLASS, NOT IN AN `i` FLAG. `LOWER` is the Hungarian
         //    lowercase alphabet and the suffix is genuinely lowercase-only, so `i` would fix the scale
         //    letter and silently widen the suffix capture. Leaving this arm case-sensitive while the plain
@@ -299,13 +299,13 @@ export function normalizeHungarian(input: string): string {
         (_m, d: string, scale: string | undefined, suf: string) =>
             `${d} ${scale?.toUpperCase() === "C" ? "Celsius-" : scale?.toUpperCase() === "F" ? "Fahrenheit-" : ""}fok${suf}`,
     );
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 Celsius-fok");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 Fahrenheit-fok");
-    s = tr(s, /(\d)\s?°/gu, "$1 fok");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 Celsius-fok");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 Fahrenheit-fok");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 fok");
     // THE MINUS. ⚠ EVERY `-<digit>` in Hungarian text of this kind is a RANGE or a score, not a negative, so
     // a bare leading-dash rule would read date ranges as arithmetic. Restricted to positions a range cannot
     // occupy.
-    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+    s = rewrite(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "mínusz ",
     );
     // ⚠ ± TAKES TWO SIGN NAMES, so it is only expressible once BOTH the plus and the minus rules exist —
@@ -316,18 +316,18 @@ export function normalizeHungarian(input: string): string {
     //    pluszjel (+) és a mínuszjel (−), melyek a matematikában a pozitív és a negatív fogalmát" — the two
     //    SIGNS are the plus sign and the minus sign, expressing positive and negative. Exactly the sense ±
     //    needs, and the reason this pair is a tolerance marker rather than two operations.
-    s = tr(s, /±/gu, " plusz mínusz ");
-    s = tr(s, /(\S)\+\s?(\d)/gu, "$1 plusz $2"); // UTC+1
-    s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1plusz $2"); // "a + 30°C"
+    s = rewrite(s, /±/gu, " plusz mínusz ");
+    s = rewrite(s, /(\S)\+\s?(\d)/gu, "$1 plusz $2"); // UTC+1
+    s = rewrite(s, /(^|\s)\+\s?(\d)/gu, "$1plusz $2"); // "a + 30°C"
 
     // THE RELATIONAL SIGNS. All three read INFIX and all three are attested, `egyenlő` ×12 token / 8
     // articles in the arithmetic register with the sense in view ("nagyobb vagy egyenlő", "két egyenlő részre
     // osztja") and `nagyobb mint` in both corpus (×3 phrase) and wiki. `kisebb mint` has ×0 phrase hits in
     // either, while `kisebb` ×24 and `mint` ×259 are both common in hu_hu — the construction is ADJ + mint and
     // its sibling proves it, exactly as `größer als` needed for German.
-    s = tr(s, /\s?=\s?/gu, " egyenlő ");
-    s = tr(s, /\s?<\s?/gu, " kisebb mint ");
-    s = tr(s, /\s?>\s?/gu, " nagyobb mint ");
+    s = rewrite(s, /\s?=\s?/gu, " egyenlő ");
+    s = rewrite(s, /\s?<\s?/gu, " kisebb mint ");
+    s = rewrite(s, /\s?>\s?/gu, " nagyobb mint ");
     // THE DIVISION SIGN. `osztva` governs the INSTRUMENTAL on its operand, so the divisor must carry
     // `-val`/`-vel` with assimilation — the suffix doubles the final consonant (`ottel`, `hattal`). Spelled
     // from the number words rather than substituted, because the allomorph depends on the operand vowels.
@@ -356,7 +356,7 @@ export function normalizeHungarian(input: string): string {
         const doubled = dg !== undefined ? `${stem.slice(0, -dg.length)}${dg[0]!}${dg}` : stem + stem.slice(-1);
         return `${head}${doubled}${v}l`;
     };
-    s = tr(s,
+    s = rewrite(s,
         /(\d+)\s?÷\s?(\d+)/gu,
         (_m, a: string, b: string) => `${numberToWords(Number(a), a)} ${huInstrumental(numberToWords(Number(b), b))} osztva`,
     );
@@ -365,17 +365,17 @@ export function normalizeHungarian(input: string): string {
     //    *egész* between the parts (*három egész öt*). The digits are LEFT AS DIGITS so the existing
     //    number path pronounces them — this layer has no reason to duplicate the compositor here.
     //    After step 2, any comma still sitting between digits is a decimal mark.
-    s = tr(s, /(\d),(?=\d)/gu, "$1 egész ");
+    s = rewrite(s, /(\d),(?=\d)/gu, "$1 egész ");
 
     // 9) ORDINALS. All three sub-rules license on "whitespace + a LOWERCASE letter" (or a comma); see the
     //    file header for the 80-instance tabulation and the zero-sentence-final-pauses-lost check.
     // 9a) YEAR + MONTH: the year is a plain CARDINAL and the period is silent — `1759. szeptember` is
     //     *ezerhétszázötvenkilenc szeptember*, NOT *ezerhétszázötvenkilencedik*. This must precede 9c,
     //     which would otherwise claim the same period as an ordinal marker. ×19.
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d{1,4})\\.(\\s+)(?=${MONTH})`, "giu"), "$1$2");
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d{1,4})\\.(\\s+)(?=${MONTH})`, "giu"), "$1$2");
     // 9b) MONTH + DAY: the bare date nominative — `augusztus 24. és` is *augusztus huszonnegyedike és*.
     //     ×2. Licensed by a following lowercase word so a date ending a sentence keeps its period.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(${MONTH}\\p{L}*\\s+)(\\d{1,2})\\.(?=\\s+[${LOWER}])`, "giu"),
         (whole, pre: string, d: string) => {
             const w = dateNominative(Number(d));
@@ -385,7 +385,7 @@ export function normalizeHungarian(input: string): string {
     // 9c) THE GENERAL ORDINAL. The left lookbehind refuses a numeral that is itself preceded by a digit or
     //     a dot (`1.1. ábra`, `802.11a`); the lookahead refuses a digit, an uppercase continuation and the
     //     end of input. The period is CONSUMED — removing the spurious phrase break is half the fix.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\d.,])(\\d{1,4})\\.(?=\\s+[${LOWER}]|,)`, "gu"),
         (whole, d: string) => ordinalWords(Number(d)) ?? whole,
     );
@@ -395,7 +395,7 @@ export function normalizeHungarian(input: string): string {
     //     romanOrdinals.ts records as needing "a Hungarian-side pre-pass that swallows the ordinal
     //     period". This is that pre-pass. Every Hungarian ordinal ends in `-dik` except *első*, and the
     //     same lowercase-continuation licence applies, so a sentence-final ordinal keeps its period.
-    s = tr(s, new RegExp(`(?<=dik|első)\\.(?=\\s+[${LOWER}])`, "gu"), "");
+    s = rewrite(s, new RegExp(`(?<=dik|első)\\.(?=\\s+[${LOWER}])`, "gu"), "");
     //     NOT extended to a CAPITALISED follower, though the regnal shape wants it: `II. Erzsébet`
     //     becomes *második. Erzsébet* and that period survives as a phrase break. Tried, and reverted.
     //     The guard would have to distinguish a regnal ordinal from a sentence that merely ENDS in an
@@ -417,19 +417,19 @@ export function normalizeHungarian(input: string): string {
     // 10a) DATES take the ORDINAL stem: `szeptember 17-én` is *tizenhetedikén*, not *tizenhétén*. Gated on
     //      a preceding month name — all 32 date-suffixed numerals in the corpus have one, and the gate is
     //      what keeps an ordinary superessive on a cardinal out of the ordinal path.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<=${MONTH}\\p{L}*\\s)(\\d{1,2})-([${LOWER}]+)(?![\\p{L}\\p{M}])`, "giu"),
         (whole, d: string, suf: string) => {
             if (!DATE_SUFFIX.test(suf)) return whole;
             const stem = dateStem(Number(d));
             if (stem === undefined) return whole;
             // day 1's stem is *elsej-*, so the written `j` of `1-jén` is already in the stem.
-            return stem + (Number(d) === 1 ? suf.replace(/^j/u, "") : suf);
+            return stem + (Number(d) === 1 ? rewrite(suf, /^j/u, "") : suf);
         },
     );
     // 10b) Everything else concatenates onto the cardinal, which is correct because the orthography
     //      already wrote the harmonically-chosen form (`1848-ban`, `1970-es`, `36-an`, `1945-ig`).
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+)-([${LOWER}]+)(?![\\p{L}\\p{M}])`, "gu"),
         (whole, d: string, suf: string) => {
             const n = Number(d);
@@ -446,7 +446,7 @@ export function normalizeHungarian(input: string): string {
     //      letter name (*gé pé eshez*), so it is glued here rather than left for the tokenizer to drop
     //      the hyphen and emit it as its own stressed word. The word-vs-letters decision mirrors the
     //      shared pass's: spell only what could not be read as a word at all.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\p{L}\\p{M}])(\\p{Lu}{2,})-([${LOWER}]+)`, "gu"),
         (whole, acr: string, suf: string) => {
             const lexical = ACRONYM_WORD[acr];
@@ -458,7 +458,7 @@ export function normalizeHungarian(input: string): string {
     );
     // 11b) The lexical overrides, before the shared pass can spell them out letter by letter.
     for (const [acr, word] of Object.entries(ACRONYM_WORD))
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${acr}(?![\\p{L}\\p{M}])`, "gu"), word);
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${acr}(?![\\p{L}\\p{M}])`, "gu"), word);
     s = normalizeInitialisms(s);
 
     return s;

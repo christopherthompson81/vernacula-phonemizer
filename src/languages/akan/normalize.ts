@@ -107,7 +107,7 @@
  *   committed golden to swap one for the other.
  */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** ⚠ TWI-SOURCED, and the Fante form differs. `akyiri pɔ` is the decimal point ×1,137 in tw and ×1 in fat;
  *  Fante writes `ekyir pɔw` ("nyaa ɔha nkyekyɛmu esia na n'ekyir pɔw eduowɔtwe"). Every instance sits
@@ -316,7 +316,7 @@ export function normalizeAkan(input: string): string {
     //    `zero-width` cell holds 258 instances) and both must go BEFORE the ampersand rule at step 10, or
     //    `&nbsp;` is read as the word "and" followed by the letters n-b-s-p. `&#xFEFF;` is a rendering
     //    hint, not speech.
-    s = tr(tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍﻿]/gu, "");
+    s = rewrite(rewrite(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "), /[​‌‍﻿]/gu, "");
     //    ⚠ AND A WIKITEXT TABLE PIPE BETWEEN A FIGURE AND ITS UNIT, for the same reason `&nbsp;` is here:
     //    it is not speech, it is already silent, and it sits in exactly the gap step 4's number-unit
     //    adjacency needs. `asaase bɛyɛ 973.78|km² so` is the artifact's ONE instance (`|` occurs once in
@@ -324,14 +324,14 @@ export function normalizeAkan(input: string): string {
     //    it to a space cannot change any reading — the sink drops the character today — it can only let a
     //    rule reach across it. ⚠ NARROW ON PURPOSE: digit on the left, letter on the right. A bare `|` is
     //    left alone, so nothing that might be a genuine table column separator is touched.
-    s = tr(s, /(?<=\d)\|(?=\p{L})/gu, " ");
+    s = rewrite(s, /(?<=\d)\|(?=\p{L})/gu, " ");
 
     // 1b) HOMOGLYPHS FOR ⟨ɛ ɔ⟩ — see HOMOGLYPH. Immediately after NFC and the entity strip, and before ANY
     //     rule that inspects a letter: step 2's elision rule carries ⟨ɛ ɔ⟩ in its vowel class, step 5's
     //     `PERCENT_WRITTEN` is spelled with them, and the unit and range guards read letter boundaries — so
     //     a word still carrying a Greek epsilon or a Hebrew kaf is invisible to all of them in exactly the
     //     way it is invisible to the tokenizer.
-    s = tr(s, HOMOGLYPH_RE, (c) => HOMOGLYPH[c]!);
+    s = rewrite(s, HOMOGLYPH_RE, (c) => HOMOGLYPH[c]!);
 
     // 2) THE ELISION APOSTROPHE — the largest class in the language, ×4,930 tw + ×2,664 fat.
     //    `n'` (3sg possessive *ne*), `w'` (2sg *wo*) and `m'` (1sg *me*) are CLITICS whose vowel elides
@@ -346,7 +346,7 @@ export function normalizeAkan(input: string): string {
     //    `People's`, `Master's` and every `'s` are out regardless). Measured: the 4,930 tw matches of this
     //    pattern are the single-letter clitics, and the 690+163+126 English possessives are not among
     //    them.
-    s = tr(s, new RegExp(`${NLB}([nwmNWM])['’ʼ]([aeɛioɔuAEIƐOƆU])`, "gu"), "$1$2");
+    s = rewrite(s, new RegExp(`${NLB}([nwmNWM])['’ʼ]([aeɛioɔuAEIƐOƆU])`, "gu"), "$1$2");
 
     // 3) DIGIT DE-GROUPING, before every other numeric rule — a grouping mark is otherwise read as clause
     //    punctuation and the tail as a separate number (`16,083` → *du nsia , adwɔwɔt͡ɕʷɪ mmiɛnsa*). Three
@@ -365,12 +365,12 @@ export function normalizeAkan(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma, so `24,000, na …` would split
     //    off `000` and speak it as zero (the ln finding, reproduced here).
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3}){2,})(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3}){2,})(?![\d]|\.\d)/gu, (w) => rewrite(w, /\./gu, ""));
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a row.
     //    Requiring every group to be exactly three digits does that: `afe 1961 – 25` has no 3-digit group,
     //    and `bosome 9 1946` is not `\d{1,3}( \d{3})+` because 1946 is four digits.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 4) UNITS, BEFORE DECIMALS — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten into a word plus spaced digits (the playbook's standing coupling), and after
@@ -401,10 +401,10 @@ export function normalizeAkan(input: string): string {
     //      own lookahead still refuses a `3`/`³` (`km2` yes, `km23` no, `km3` no — there is no cube word).
     //      See SQUARED for the citation and for why this is where ak's raw-Latin leak lived.
     for (const [sym, word] of UNITS) {
-        s = tr(s, new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?:²|2)(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `$1 ${word} ${SQUARED}`);
+        s = rewrite(s, new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?:²|2)(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `$1 ${word} ${SQUARED}`);
     }
     for (const [sym, word] of UNITS) {
-        s = tr(s, new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `$1 ${word}`);
+        s = rewrite(s, new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `$1 ${word}`);
     }
     // …and the ones with no numeral at all — see BARE_UNITS. Last, so the counted arm above keeps every
     // match it can make and only what it could not reach is left for this.
@@ -419,13 +419,13 @@ export function normalizeAkan(input: string): string {
     //    ⚠ AND THE SPAN IS ALSO WRITTEN WITH THE SIGN ON BOTH ENDS (`40%-50%`, ×2 tw). The optional first
     //    `%` is what stops that shape falling to the single-operand arm, which would emit the word twice
     //    with a bare hyphen stranded between the two halves.
-    s = tr(s, new RegExp(`(?<![\\d.,:\\-–—])(${NUM})\\s?%?\\s?[-–—]\\s?(${NUM})\\s?%`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,:\\-–—])(${NUM})\\s?%?\\s?[-–—]\\s?(${NUM})\\s?%`, "gu"),
         (whole: string, a: string, b: string, at: number, str: string) => {
-            if (Number(a.replace(/,/gu, "")) >= Number(b.replace(/,/gu, ""))) return whole;
+            if (Number(rewrite(a, /,/gu, "")) >= Number(rewrite(b, /,/gu, ""))) return whole;
             const word = alreadyPercented(str.slice(0, at)) ? "" : `${PERCENT} `;
             return `${word}${a} ${TO} ${b}`;
         });
-    s = tr(s, new RegExp(`(?<![\\d.,])(${NUM})\\s?%`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(${NUM})\\s?%`, "gu"),
         (_m: string, a: string, at: number, str: string) => (alreadyPercented(str.slice(0, at)) ? a : `${PERCENT} ${a}`));
 
     // 6) CURRENCY, also PREPOSED, and before decimals for the same reason. Longest key first (see
@@ -434,7 +434,7 @@ export function normalizeAkan(input: string): string {
     //    the corpus writes; a bare `$` with no figure after it does not occur in either wiki, so the rule
     //    requires a figure and a stray sign is left exactly as silent as it was.
     for (const [sym, word] of CURRENCY) {
-        s = tr(s, new RegExp(`${NLB}${sym}\\s?(${NUM})`, "gu"), `${word} $1`);
+        s = rewrite(s, new RegExp(`${NLB}${sym}\\s?(${NUM})`, "gu"), `${word} $1`);
     }
 
     // 7) DOTTED ABBREVIATIONS — the INTERIOR dots only (×940 tw + 222 fat). `U.S.A.` reads as three
@@ -454,7 +454,7 @@ export function normalizeAkan(input: string): string {
     //    correct, but `Ɔ.K.` and `Ɛ.Ɔ.A.` came back UNCHANGED and `D.M.Ŋ.` came back HALF-APPLIED as
     //    `DM.Ŋ.` — a rule that quietly stops working at the language's own alphabet. `\p{M}` rides along
     //    on both sides so a marked letter is still a letter (trap 23). The ee run hit the identical bug.
-    s = tr(s, /(?<=[\p{L}\p{M}])\.(?=\p{L}\p{M}*\.)/gu, "");
+    s = rewrite(s, /(?<=[\p{L}\p{M}])\.(?=\p{L}\p{M}*\.)/gu, "");
 
     // 8) RANGES — ×1,125 bare pairs in tw and ×264 in fat, read today as two juxtaposed cardinals with no
     //    connective at all. `kosi` is the infix (see TO). ⚠ ASCENDING PAIRS ONLY, AND CHAIN-GUARDED:
@@ -482,18 +482,18 @@ export function normalizeAkan(input: string): string {
     //    ⚠ THIS CORPUS GAINS NOTHING FROM IT, and that is stated rather than hidden: its one clause-final
     //    span is `1964-1967, Belfast` — a COMMA — so the artifact diff is 0/237 and the repair is pinned as a
     //    branch in `test/akan.test.ts` instead of counted as corpus movement.
-    s = tr(s, new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d\\p{L}\\p{M}\\-–—]|,\\d)`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d\\p{L}\\p{M}\\-–—]|,\\d)`, "gu"),
         (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${TO} ${b}` : whole));
 
     // 9) THE DECIMAL POINT, after every rule that needed to see a dot (steps 3, 4 and 7) and after every
     //    rule that had to claim the whole figure (5, 6). `1.8` reads as a SENTENCE BREAK today. The word
     //    and the fractional-part convention are both the corpus's own — see POINT and `fraction`.
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\.(\\d+)(?![\\d.])`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)\\.(\\d+)(?![\\d.])`, "gu"),
         (_m: string, head: string, tail: string) => `${head} ${POINT} ${fraction(tail)}`);
     //    The COMMA decimal is ×39 tw + 13 fat — a minority spelling, but the same defect (a PAUSE where a
     //    point belongs) and the same reading. It runs after the comma de-grouping above, which has already
     //    claimed every 3-digit group, so what reaches here is a 1–2 digit tail.
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+),(\\d{1,2})(?![\\d.,])`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+),(\\d{1,2})(?![\\d.,])`, "gu"),
         (_m: string, head: string, tail: string) => `${head} ${POINT} ${fraction(tail)}`);
 
     // 10) THE ENGLISH ORDINAL SUFFIX — ×528 tw + 254 fat, all of it inside English text these wikis carry
@@ -503,7 +503,7 @@ export function normalizeAkan(input: string): string {
     //     ×4,904 tw, `ɔtɔ do` ×1,742 fat), so there is no prefixable ordinal word to substitute and
     //     preposing the clause before `Republic` would be ungrammatical. Dropping leaves the CARDINAL,
     //     which is what the corpus's own glosses of these very dates read.
-    s = tr(s, /(?<=\d)(?:st|nd|rd|th)(?![\p{L}\p{M}])/gu, "");
+    s = rewrite(s, /(?<=\d)(?:st|nd|rd|th)(?![\p{L}\p{M}])/gu, "");
 
     // 11) THE AMPERSAND — ×230 tw + 91 fat, silent today, and every instance read is inside an English
     //     organisation name (`Trade & Industry`, `Michael & Susan Dell Foundation`, `GCE O & A level`).
@@ -511,7 +511,7 @@ export function normalizeAkan(input: string): string {
     //     ⚠ SPACES ON BOTH SIDES OF THE REPLACEMENT, because deleting the sign merges its operands and
     //     `A&B` would otherwise become one initialism where the text has two (trap 18/26 — the reason the
     //     differential probe substitutes a space rather than deleting).
-    s = tr(s, /\s?&\s?/gu, " ne ");
+    s = rewrite(s, /\s?&\s?/gu, " ne ");
 
     return s;
 }

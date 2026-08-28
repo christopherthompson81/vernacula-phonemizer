@@ -36,7 +36,7 @@ export interface TraceToken {
      * `[start, end)` into the CALLER's input, when normalizer provenance is complete for this engine (#1150
      * stage 2).
      * ⚠ ABSENT MEANS "NOT KNOWN", NEVER "IDENTICAL". A normalizer step that does not route through
-     * `provenance.tr` still changes the string, so the mapping falls out of step and is withheld rather than
+     * `provenance.rewrite` still changes the string, so the mapping falls out of step and is withheld rather than
      * reported wrong — the difference between an unknown and a confident wrong offset.
      */
     inputSpan?: [number, number];

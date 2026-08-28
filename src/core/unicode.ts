@@ -6,7 +6,7 @@
  * tokenizing. Regexes that match a SET are built from the string lists here at the use site, so the list
  * is the single source and the pattern is derived from it. One obvious mirror target for the C# port.
  */
-import { tr } from "./provenance.ts";
+import { rewrite } from "./provenance.ts";
 
 /** Combining diacritics block U+0300–U+036F (̀-ͯ): attach to the preceding base (nasal ◌̃, dental ◌̪). */
 export const COMBINING_DIACRITICS = "̀-ͯ";
@@ -169,7 +169,7 @@ const NATIVE_DIGIT_BASES: readonly number[] = [
 /**
  * One character's fold, exposed because a caller can hold a CHARACTER rather than the pipeline string —
  * `fulaAdlam` folds an Adlam digit inside a per-word transliteration loop. Routing that through the
- * provenance seam would hand `tr` a one-character string it is not tracking and drop the whole
+ * provenance seam would hand `rewrite` a one-character string it is not tracking and drop the whole
  * utterance's mapping, which is the `foldLatinDiacritics` lesson in miniature.
  */
 export function foldDigitChar(ch: string): string {
@@ -180,8 +180,17 @@ export function foldDigitChar(ch: string): string {
     return ch; // a block we do not carry: leave it rather than guess
 }
 
+/**
+ * Every digit in `s`, WITHOUT touching the provenance mapping — for a caller holding a substring rather
+ * than the pipeline string. `fula` folds a captured group inside its tokenizer loop; routing that through
+ * the seam dropped the utterance's mapping on 52 of its golden rows.
+ */
+export function foldDigitsIn(s: string): string {
+    return s.replace(/\p{Nd}/gu, foldDigitChar);
+}
+
 export function foldNativeDigits(s: string): string {
-    return tr(s, /\p{Nd}/gu, foldDigitChar);
+    return rewrite(s, /\p{Nd}/gu, foldDigitChar);
 }
 
 /**
@@ -245,7 +254,7 @@ export function foldLatinConfusables(s: string): string {
     CONFUSABLE_RE.lastIndex = 0;
     if (!CONFUSABLE_RE.test(s)) return s;
     CONFUSABLE_RE.lastIndex = 0;
-    return tr(s, CONFUSABLE_RE, (c) => LATIN_CONFUSABLE[c]!);
+    return rewrite(s, CONFUSABLE_RE, (c) => LATIN_CONFUSABLE[c]!);
 }
 
 /**
@@ -304,7 +313,7 @@ const WORDISH = /[\p{L}\p{M}\p{Nd}]+/gu;
  */
 export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): string {
     if (!/\p{Script=Cyrillic}/u.test(s)) return s;
-    return tr(s, WORDISH, (w) => {
+    return rewrite(s, WORDISH, (w) => {
         let cyr = 0, lat = 0;
         for (const ch of w) {
             if (/\p{Script=Cyrillic}/u.test(ch)) cyr++;
@@ -318,7 +327,7 @@ export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): stri
         // rule REFUSES and presence would fold are **76 in chv** \u2014 `\u0103\u0448\u0103` (warm), `\u00e7\u0115\u0440`, `\u00e7\u0115\u043d\u0115` (new),
         // `\u0432\u0438\u00e7\u00e7\u0115` (three), all short words where two Latin twins outvote one Cyrillic letter \u2014 against
         // **one** anywhere else (tt `k\u00fcbr\u04d9`, itself already broken). Without this, `\u00e7\u0115\u0440` stayed *s\u02c8\u025bp*.
-        // ⚠ `.replace`, NOT `tr` — `w` is a MATCHED WORD, not the pipeline string. The outer `tr` above
+        // ⚠ `.replace`, NOT `rewrite` — `w` is a MATCHED WORD, not the pipeline string. The outer `rewrite` above
         // already reports this whole pass; handing the seam a substring it is not tracking reads as a missed
         // step and poisons the mapping (measured: chv fell to 3/8 rows fully mapped).
         w = w.replace(CHV_KEYS, (c) => CHUVASH_CONFUSABLE[c]!);
@@ -372,7 +381,7 @@ const ANY_STRESS_MARK = new RegExp(`[${STRESS_MARKS}]`, "u");
 
 export function foldCyrillicStressMarks(s: string): string {
     if (!ANY_STRESS_MARK.test(s)) return s;
-    return tr(s, CYRILLIC_STRESS, (_m, base: string, marks: string) => {
+    return rewrite(s, CYRILLIC_STRESS, (_m, base: string, marks: string) => {
         const composed = (base + marks).normalize("NFC");
         return [...composed].length === 1 ? composed : base;
     });
@@ -537,7 +546,7 @@ const CARET_RE = /(?<=[\p{L}\p{Nd}])\^\{?([+-]?\d+)\}?/gu;
 
 export function foldCaretExponents(s: string): string {
     if (!s.includes("^")) return s;
-    return tr(s, CARET_RE, (_m, exp: string) => [...exp].map((c) => CARET_SUP[c] ?? c).join(""));
+    return rewrite(s, CARET_RE, (_m, exp: string) => [...exp].map((c) => CARET_SUP[c] ?? c).join(""));
 }
 
 /**
@@ -605,12 +614,12 @@ const VULGAR_RE = new RegExp(`[${Object.keys(VULGAR).join("")}]`, "gu");
 export function foldVulgarFractions(s: string): string {
     if (!VULGAR_RE.test(s)) return s;
     VULGAR_RE.lastIndex = 0;
-    return tr(s, VULGAR_RE, (c, off: number, full: string) =>
+    return rewrite(s, VULGAR_RE, (c, off: number, full: string) =>
         (/\d/u.test(full[off - 1] ?? "") ? " " : "") + VULGAR[c]!);
 }
 
 export function foldSquaredDegrees(s: string): string {
-    return tr(tr(s, /℃/gu, "\u00b0C"), /℉/gu, "\u00b0F");
+    return rewrite(rewrite(s, /℃/gu, "\u00b0C"), /℉/gu, "\u00b0F");
 }
 
 /**
@@ -631,5 +640,5 @@ export function foldFullwidthLatin(s: string): string {
     FULLWIDTH.lastIndex = 0;
     if (!FULLWIDTH.test(s)) return s;
     FULLWIDTH.lastIndex = 0;
-    return tr(s, FULLWIDTH, (c) => String.fromCodePoint(c.codePointAt(0)! - 0xFEE0));
+    return rewrite(s, FULLWIDTH, (c) => String.fromCodePoint(c.codePointAt(0)! - 0xFEE0));
 }

@@ -1,5 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 /**
  * Faroese (fo) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -54,20 +54,20 @@ export function normalizeFaroese(input: string): string {
     // 1) THE TIME, first, because `23.59.60` is the only shape with TWO dots and the grouping rule would
     //    otherwise take its first pair. One instance and it is the leap second — "Eitt eyka sekund,
     //    23.59.60, verður lagt at enda árið" — so the fields are separated and left as figures.
-    s = tr(s, /(?<![\d.,])([01]?\d|2[0-4])\.([0-5]\d)\.([0-5]\d|60)(?![\d.,])/gu, "$1 $2 $3");
+    s = rewrite(s, /(?<![\d.,])([01]?\d|2[0-4])\.([0-5]\d)\.([0-5]\d|60)(?![\d.,])/gu, "$1 $2 $3");
 
     // 2) THE THOUSANDS GROUP — exactly three digits after the dot, and the no-break space this corpus
     //    also uses (`7 737 fólkini`, `48 219`, `12 000–10 000 f. Kr.`). ⚠ THE WHOLE NUMBER AT ONCE, not
     //    one join per pass (trap 63); the trailing guard rejects a DIGIT and nothing else (trap 58).
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     // 3) THE DECIMAL DOT — what is left with fewer than three digits after it, which in this corpus is
     //    always a dollar figure (`3.00 kr frímerki`, `4.19$ pr. km²`). Folded onto the comma the engine's
     //    number branch reads, so one branch covers both conventions.
-    s = tr(s, /(?<!\d)(\d+)\.(\d{1,2})(?!\d)/gu, "$1,$2");
+    s = rewrite(s, /(?<!\d)(\d+)\.(\d{1,2})(?!\d)/gu, "$1,$2");
 
     // 4) THE ABBREVIATIONS, before the ordinal rule spends any remaining dot. Every expansion is the
     //    corpus's own: `n.br.`/`v.l.` are glossed in full three articles away ("62° norðurbreidd, 7°
@@ -86,7 +86,7 @@ export function normalizeFaroese(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}uml\\s?\\.`, "gu"), "umleið"],
     ];
     for (const [re, word] of abbrev)
-        s = tr(s, re, (m0: string, offset: number, full: string) => {
+        s = rewrite(s, re, (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
@@ -97,23 +97,23 @@ export function normalizeFaroese(input: string): string {
     //    that is unambiguously right; the ordinal itself needs a paradigm this corpus does not supply.
     //    ⚠ THE GUARD IS A FOLLOWING LOWERCASE WORD. An uppercase one begins a new sentence, which is the
     //    dot's fifth job and the one that must survive untouched.
-    s = tr(s, /(?<![\d.,])(\d{1,4})\.(\s+)(?=\p{Ll})/gu, "$1$2");
+    s = rewrite(s, /(?<![\d.,])(\d{1,4})\.(\s+)(?=\p{Ll})/gu, "$1$2");
     //    …and the same before a NO-BREAK space, which this corpus writes inside a date (`31.&nbsp;des.`).
     //    ⚠ THE SEPARATOR HERE MUST BE THE NO-BREAK SPACE AND NOTHING ELSE. Written with an ordinary space
     //    and a bare `\p{L}` lookahead, this rule ate the SENTENCE-FINAL dot in `Tað var 1998. Síðan kom`
     //    — the fifth job of the full stop, and the one that must survive untouched (trap 58's family).
     //    The test caught it; the corpus diff could not, because a lost pause is not a lost reading.
-    s = tr(s, /(?<![\d.,])(\d{1,4})\.(\u00a0)(?=\p{L})/gu, "$1$2");  // NBSP
+    s = rewrite(s, /(?<![\d.,])(\d{1,4})\.(\u00a0)(?=\p{L})/gu, "$1$2");  // NBSP
 
     // 6) DEGREES. `stig` ×64 / `stigum` ×59 is the Faroese degree; `Celsius` ×23. The corpus's angular
     //    instances are coordinates (`62° norðurbreidd`, `57°71° … n.br.`, `47° and 50° N`) and its
     //    thermal ones carry the scale letter (`11 °C (52 °F)`, `56,7 °C (134 °F)`).
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 stig Celsius");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 stig Fahrenheit");
-    s = tr(s, /(\d)\s?°/gu, "$1 stig ");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 stig Celsius");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 stig Fahrenheit");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 stig ");
 
     // 7) SIGNS, before the range rule spends the hyphen.
-    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1minus $2");
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1minus $2");
 
     // 8) RANGES. The dash was dropped and the endpoints fused — `1269–1308` read as one run. ⚠ THE DASH
     //    IS SPENT ON A PAUSE RATHER THAN A CONNECTIVE: Faroese writes `frá X til Y` and the corpus does
@@ -121,8 +121,8 @@ export function normalizeFaroese(input: string): string {
     //    dash would double a word the writer already chose or not.
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), and a chain of three or more
     //    hyphen-joined groups is an identifier rather than a span.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

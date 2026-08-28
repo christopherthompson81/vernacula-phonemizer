@@ -62,7 +62,7 @@
  * `tools/corpus/attest/haw.jsonc`.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** ⚠ NEVER `\b` — Hawaiian carries the ʻokina and the macrons `ā ē ī ō ū`, which `\b` treats as
  *  boundaries (trap 1/23). The ʻokina is U+02BB, a LETTER, and must stay inside a word. */
@@ -108,37 +108,37 @@ export function normalizeHawaiian(input: string): string {
     //    the dot groups exactly once, inside a quoted German figure (see the header).
     //    ⚠ THE WHOLE NUMBER AT ONCE (trap 63), and the trailing guard rejects a DIGIT and nothing else
     //    (trap 58).
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     // 3) THE DECIMAL DOT, NEUTRALISED. ⚠ NO DECIMAL WORD IS SOURCEABLE — `koena` ×18 is "the remainder of"
     //    in every example — so the mark is spent rather than spoken; the defect being fixed is the false
     //    sentence break it produces mid-quantity. ⚠ THE `(?<![\d.])…(?![\d.])` GUARD IS WHAT DECLINES AN
     //    IP ADDRESS: `18.55.6.215` is four dot-joined groups and a decimal has exactly one dot.
-    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
+    s = rewrite(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
 
     // 4) THE COORDINATE, which this corpus glosses for itself — "28°25′ʻĀ, 178°20′K (ʻiwakāluakūmāwalu
     //    kēkelē ʻiwakāluakūmālima minuke … ʻākau … komohana …)". ⚠ ONLY THE TWO COMPASS LETTERS THE
     //    ARTIFACT ACTUALLY SHOWS ARE CLAIMED: `ʻĀ` = ʻākau (north) and `K` = komohana (west). `H` would be
     //    ambiguous between *hema* (south) and *hikina* (east), and guessing it is exactly the kind of
     //    fourth arm this corpus gives no evidence for.
-    s = tr(s, /(\d)\s?[°˚]\s?(\d+)\s?[′']\s?ʻĀ(?![\p{L}\p{M}ʻ])/gu, "$1 kēkelē $2 minuke ʻākau");
-    s = tr(s, /(\d)\s?[°˚]\s?(\d+)\s?[′']\s?K(?![\p{L}\p{M}ʻ])/gu, "$1 kēkelē $2 minuke komohana");
-    s = tr(s, /(\d)\s?[°˚]\s?(\d+)\s?[′']/gu, "$1 kēkelē $2 minuke ");
+    s = rewrite(s, /(\d)\s?[°˚]\s?(\d+)\s?[′']\s?ʻĀ(?![\p{L}\p{M}ʻ])/gu, "$1 kēkelē $2 minuke ʻākau");
+    s = rewrite(s, /(\d)\s?[°˚]\s?(\d+)\s?[′']\s?K(?![\p{L}\p{M}ʻ])/gu, "$1 kēkelē $2 minuke komohana");
+    s = rewrite(s, /(\d)\s?[°˚]\s?(\d+)\s?[′']/gu, "$1 kēkelē $2 minuke ");
 
     // 5) DEGREES. ⚠ BOTH SIGNS — `°` U+00B0 and `˚` U+02DA (see the header) — and the scale letter is left
     //    to the shared cardinal path, because no Hawaiian Celsius/Fahrenheit name is attested on this wiki.
     //    `kēkelē` ×37 is the word, sourced from the coordinate gloss above.
-    s = tr(s, /(\d)\s?[°˚]/gu, "$1 kēkelē ");
+    s = rewrite(s, /(\d)\s?[°˚]/gu, "$1 kēkelē ");
 
     // 6) THE CLOCK. ⚠ THE CODEPOINT IS THE WHOLE GUARD: the artifact's only colon between digits is a
     //    SCRIPTURE REFERENCE written with U+02D0 (`ʻOihana Kahuna 8ː10-12`, `Pukaʻana 30ː29`), while the
     //    clocks are ASCII (`ka hola 12:18`, `mai ka hola 12:00 awakea a ka hola 5:00 ahiahi`). A rule keyed
     //    on `:` reads every clock and never touches a verse. The writer supplies `hola`, so the figures are
     //    left as figures and only the colon is spent.
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
 
     // 7) RANGES. The dash was dropped and the endpoints fused — `9–13 °C`, `22–25 °C`, `48–55 °F`,
     //    `70–75 pākēneka`, `15–20 °C`. ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A CONNECTIVE: Hawaiian
@@ -147,11 +147,11 @@ export function normalizeHawaiian(input: string): string {
     //    chose or not.
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), and an adjacent slash means a rating
     //    (`8.6/10`) rather than a span.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
     // producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }

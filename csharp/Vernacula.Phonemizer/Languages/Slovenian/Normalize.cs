@@ -6,6 +6,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Slovenian;
 
@@ -402,52 +403,52 @@ public static class Normalize
         var s = input;
 
         // 0) DIGIT DE-GROUPING, FIRST. Two passes, because groups overlap on the shared digit.
-        for (var i = 0; i < 2; i++) s = DEGROUP_DOT.Replace(s, _ => "");
-        for (var i = 0; i < 2; i++) s = DEGROUP_SPACE.Replace(s, _ => "");
-        s = FOLD_SPACES.Replace(s, _ => " ");
+        for (var i = 0; i < 2; i++) s = Rewrite(s, DEGROUP_DOT, _ => "");
+        for (var i = 0; i < 2; i++) s = Rewrite(s, DEGROUP_SPACE, _ => "");
+        s = Rewrite(s, FOLD_SPACES, _ => " ");
 
         // 1) MULTI-DOT ERA MARKERS, before the single-dot rule.
         foreach (var (re, w) in MULTI_DOT)
         {
             // `whole` is the string THIS replace was handed — the JS callback's last argument.
             var whole = s;
-            s = re.Replace(s, m => KeepFinal(w, m.Value, m.Index, whole));
+            s = Rewrite(s, re, m => KeepFinal(w, m.Value, m.Index, whole));
         }
 
         // 2) SINGLE-DOT ABBREVIATIONS.
-        s = DOTTED_MID.Replace(s, m =>
+        s = Rewrite(s, DOTTED_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
             // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
             DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = DOTTED_END.Replace(s, m =>
+        s = Rewrite(s, DOTTED_END, m =>
             DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
-        s = DOTTED_ANY.Replace(s, m =>
+        s = Rewrite(s, DOTTED_ANY, m =>
             DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
-        s = HONORIFIC_RE.Replace(s, m =>
+        s = Rewrite(s, HONORIFIC_RE, m =>
             HONORIFIC.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
-        s = ST_RE.Replace(s, m => m.Groups[1].Value);
-        s = INC_RE.Replace(s, m => m.Groups[1].Value);
-        s = AL_RE.Replace(s, m => m.Groups[1].Value);
+        s = Rewrite(s, ST_RE, m => m.Groups[1].Value);
+        s = Rewrite(s, INC_RE, m => m.Groups[1].Value);
+        s = Rewrite(s, AL_RE, m => m.Groups[1].Value);
 
         // 3) CLOCK, before the version-dot rule.
         {
             var whole = s;
-            s = CLOCK_RE.Replace(s, m =>
+            s = Rewrite(s, CLOCK_RE, m =>
                 Clock(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value), GovSlot(whole, m.Index)));
         }
         {
             var whole = s;
-            s = MILITARY_RE.Replace(s, m =>
+            s = Rewrite(s, MILITARY_RE, m =>
                 Clock(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value), GovSlot(whole, m.Index)));
         }
 
         // 4) VERSION / FIGURE DOTS between digits.
-        s = VERSION_DOT.Replace(s, m => $"{m.Groups[1].Value} pika ");
+        s = Rewrite(s, VERSION_DOT, m => $"{m.Groups[1].Value} pika ");
 
         // 5a) SCORES AND RATIOS, before the range rule.
         {
             var whole = s;
-            s = SCORE_RE.Replace(s, m =>
+            s = Rewrite(s, SCORE_RE, m =>
             {
                 var a = m.Groups[1].Value;
                 var mark = m.Groups[2].Value;
@@ -459,7 +460,7 @@ public static class Normalize
         }
 
         // 5b) NUMERIC RANGES, read as "do".
-        s = RANGE_RE.Replace(s, m =>
+        s = Rewrite(s, RANGE_RE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -469,7 +470,7 @@ public static class Normalize
         // 6a) REGNAL ORDINALS.
         {
             var whole = s;
-            s = REGNAL_RE.Replace(s, m =>
+            s = Rewrite(s, REGNAL_RE, m =>
             {
                 var title = m.Groups[1].Value;
                 var names = m.Groups[2].Value;
@@ -492,7 +493,7 @@ public static class Normalize
         }
 
         // 6b) LICENSED ORDINALS.
-        s = LICENSED_RE.Replace(s, m =>
+        s = Rewrite(s, LICENSED_RE, m =>
         {
             var list = m.Groups[1].Value;
             var digits = m.Groups[2].Value;
@@ -501,7 +502,7 @@ public static class Normalize
             var slot = LICENSOR[head];
             var tail = OrdinalWords(Js.Number(digits), slot);
             if (tail is null) return m.Value;
-            var pre = LIST_ITEM.Replace(list, w =>
+            var pre = JsRegex.Replace(list, LIST_ITEM, w =>
                 $"{OrdinalWords(Js.Number(w.Groups[1].Value), slot) ?? w.Value}{w.Groups[2].Value}");
             return $"{pre}{tail} {mid}{head}";
         });
@@ -509,7 +510,7 @@ public static class Normalize
         // 6c) GENERAL ORDINAL.
         {
             var whole = s;
-            s = GENERAL_ORD.Replace(s, m =>
+            s = Rewrite(s, GENERAL_ORD, m =>
             {
                 var fw = FOLLOWER_WORD.Match(whole[(m.Index + m.Length)..]);
                 var word = fw.Success ? fw.Groups[1].Value : null;
@@ -519,7 +520,7 @@ public static class Normalize
         }
 
         // 7) NUMERAL + HYPHEN + `-ih`.
-        s = SUFFIX_IH.Replace(s, m =>
+        s = Rewrite(s, SUFFIX_IH, m =>
         {
             var digits = m.Groups[1].Value;
             var words = Numbers.NumberToWords(Js.Number(digits), digits);
@@ -527,24 +528,24 @@ public static class Normalize
         });
 
         // 8) HYPHEN BEFORE A UNIT ABBREVIATION.
-        s = HYPHEN_UNIT.Replace(s, m => $"{m.Groups[1].Value} ");
+        s = Rewrite(s, HYPHEN_UNIT, m => $"{m.Groups[1].Value} ");
 
         // 9) DEGREES, before the shared tier and before the `+` rule.
-        s = DEG_C.Replace(s, m => $"{m.Groups[1].Value} {CountedForm(NumOf(m.Groups[1].Value), STOPINJA())} Celzija");
-        s = DEG_F.Replace(s, m => $"{m.Groups[1].Value} {CountedForm(NumOf(m.Groups[1].Value), STOPINJA())} Fahrenheita");
-        s = DEG_BARE.Replace(s, m => $"{m.Groups[1].Value} {CountedForm(NumOf(m.Groups[1].Value), STOPINJA())}");
+        s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} {CountedForm(NumOf(m.Groups[1].Value), STOPINJA())} Celzija");
+        s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} {CountedForm(NumOf(m.Groups[1].Value), STOPINJA())} Fahrenheita");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} {CountedForm(NumOf(m.Groups[1].Value), STOPINJA())}");
 
         // 10) `x`/`×` between digits → *krat*.
-        s = TIMES_RE.Replace(s, _ => " krat ");
+        s = Rewrite(s, TIMES_RE, _ => " krat ");
 
         // 11) A LEADING `+`/`−` on a number.
-        s = PLUSMINUS.Replace(s, _ => " plus minus ");
-        s = LEAD_PLUS.Replace(s, m => $"{m.Groups[1].Value}plus ");
-        s = LEAD_MINUS.Replace(s, m => $"{m.Groups[1].Value}minus ");
-        s = TZ_PLUS.Replace(s, _ => " plus ");
+        s = Rewrite(s, PLUSMINUS, _ => " plus minus ");
+        s = Rewrite(s, LEAD_PLUS, m => $"{m.Groups[1].Value}plus ");
+        s = Rewrite(s, LEAD_MINUS, m => $"{m.Groups[1].Value}minus ");
+        s = Rewrite(s, TZ_PLUS, _ => " plus ");
 
         // 11z) NUMERAL-INITIAL COMPOUNDS.
-        s = NUM_COMPOUND.Replace(s, m =>
+        s = Rewrite(s, NUM_COMPOUND, m =>
         {
             var n = m.Groups[1].Value;
             var tail = m.Groups[2].Value;
@@ -556,7 +557,7 @@ public static class Normalize
         });
 
         // 12) THE SPELLED-OUT MILE RATE.
-        s = MILJ_RATE.Replace(s, _ => "milj na uro");
+        s = Rewrite(s, MILJ_RATE, _ => "milj na uro");
 
         // 14) THE SHARED SYMBOL TIER — %, currency, units, rates, exponents.
         s = SlovenianPhonemizer.SYMBOLS(s);
@@ -569,18 +570,18 @@ public static class Normalize
             var paucal = c.Forms[2];
             if (c.G == "m")
             {
-                s = JsRegex.Compile($"(?<![\\d.,])1 (?={Esc(sg)}(?![\\p{{L}}\\p{{M}}]))", "gu").Replace(s, _ => "en ");
-                s = JsRegex.Compile($"(?<![\\d.,])(?<!do )3 (?={Esc(paucal)}(?![\\p{{L}}\\p{{M}}]))", "gu").Replace(s, _ => "trije ");
-                s = JsRegex.Compile($"(?<![\\d.,])(?<!do )4 (?={Esc(paucal)}(?![\\p{{L}}\\p{{M}}]))", "gu").Replace(s, _ => "štirje ");
+                s = Rewrite(s, JsRegex.Compile($"(?<![\\d.,])1 (?={Esc(sg)}(?![\\p{{L}}\\p{{M}}]))", "gu"), _ => "en ");
+                s = Rewrite(s, JsRegex.Compile($"(?<![\\d.,])(?<!do )3 (?={Esc(paucal)}(?![\\p{{L}}\\p{{M}}]))", "gu"), _ => "trije ");
+                s = Rewrite(s, JsRegex.Compile($"(?<![\\d.,])(?<!do )4 (?={Esc(paucal)}(?![\\p{{L}}\\p{{M}}]))", "gu"), _ => "štirje ");
             }
             else
             {
-                s = JsRegex.Compile($"(?<![\\d.,])2 (?={Esc(dual)}(?![\\p{{L}}\\p{{M}}]))", "gu").Replace(s, _ => "dve ");
+                s = Rewrite(s, JsRegex.Compile($"(?<![\\d.,])2 (?={Esc(dual)}(?![\\p{{L}}\\p{{M}}]))", "gu"), _ => "dve ");
             }
         }
 
         // 16) DECIMAL COMMA — AND THE FRACTIONAL PART'S LEADING ZEROS SURVIVE IT.
-        s = DECIMAL_COMMA.Replace(s, m =>
+        s = Rewrite(s, DECIMAL_COMMA, m =>
         {
             var frac = m.Groups[1].Value;
             var zeros = LEADING_ZEROS.Match(frac).Length;
@@ -590,27 +591,27 @@ public static class Normalize
         });
 
         // 17) FRACTIONS — the mixed form first, because `29 3/4` is one quantity.
-        s = MIXED_FRAC.Replace(s, m =>
+        s = Rewrite(s, MIXED_FRAC, m =>
         {
             var f = Frac(m.Groups[2].Value, m.Groups[3].Value, "");
             return f == "" ? m.Value : $"{m.Groups[1].Value} in {f}";
         });
-        s = BARE_FRAC.Replace(s, m => Frac(m.Groups[1].Value, m.Groups[2].Value, m.Value));
-        s = VULGAR_34.Replace(s, m => $"{m.Groups[1].Value} in tri četrtine");
-        s = VULGAR_12.Replace(s, m => $"{m.Groups[1].Value} in pol");
-        s = VULGAR_14.Replace(s, m => $"{m.Groups[1].Value} in ena četrtina");
+        s = Rewrite(s, BARE_FRAC, m => Frac(m.Groups[1].Value, m.Groups[2].Value, m.Value));
+        s = Rewrite(s, VULGAR_34, m => $"{m.Groups[1].Value} in tri četrtine");
+        s = Rewrite(s, VULGAR_12, m => $"{m.Groups[1].Value} in pol");
+        s = Rewrite(s, VULGAR_14, m => $"{m.Groups[1].Value} in ena četrtina");
 
         // 18) RELATIONAL SIGNS and the AMPERSAND.
-        s = EQUALS_RE.Replace(s, _ => " enako ");
-        s = LESS_RE.Replace(s, m => $"{m.Groups[1].Value} je manjše od ");
-        s = MORE_RE.Replace(s, m => $"{m.Groups[1].Value} je večje od ");
-        s = AMPERSAND_LETTERS.Replace(s, m =>
+        s = Rewrite(s, EQUALS_RE, _ => " enako ");
+        s = Rewrite(s, LESS_RE, m => $"{m.Groups[1].Value} je manjše od ");
+        s = Rewrite(s, MORE_RE, m => $"{m.Groups[1].Value} je večje od ");
+        s = Rewrite(s, AMPERSAND_LETTERS, m =>
         {
             var x = LetterName(m.Groups[1].Value.ToLowerInvariant());
             var y = LetterName(m.Groups[2].Value.ToLowerInvariant());
             return x is null || y is null ? m.Value : $"{x} in {y}";
         });
-        s = DIVIDE_RE.Replace(s, m =>
+        s = Rewrite(s, DIVIDE_RE, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -618,10 +619,10 @@ public static class Normalize
             return $"{Numbers.NumberToWords(Js.Number(a), a)} deljeno {(SL_VOICELESS.IsMatch(y) ? "s" : "z")} {y}";
         });
 
-        s = AMPERSAND_RE.Replace(s, _ => " in ");
+        s = Rewrite(s, AMPERSAND_RE, _ => " in ");
 
         // 19) A LONE LETTER GLUED TO A DIGIT RUN → its LETTER NAME.
-        s = GLUED_LETTER.Replace(s, m =>
+        s = Rewrite(s, GLUED_LETTER, m =>
         {
             var name = LetterName(m.Groups[1].Value.ToLowerInvariant());
             return name is null ? m.Value : " " + name;
@@ -644,5 +645,5 @@ public static class Normalize
     private static double NumOf(string n) => Js.Number(Js.ReplaceFirst(n, ",", "."));
 
     /** Escape a literal for embedding in a RegExp source. */
-    private static string Esc(string t) => ESC_RE.Replace(t, m => "\\" + m.Value);
+    private static string Esc(string t) => JsRegex.Replace(t, ESC_RE, m => "\\" + m.Value);
 }

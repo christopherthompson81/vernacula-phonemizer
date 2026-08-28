@@ -96,29 +96,43 @@ public sealed class JsRe
     /// <summary>JS `String.prototype.replace(re, replacement)`: all matches when the regex is g,
     /// otherwise the FIRST match only. .NET substitution syntax ($1, ${name}, $&amp;) matches JS's for
     /// the forms this codebase uses; JS's literal "$0" (no group-0 substitution in JS) is refused.</summary>
-    public string Replace(string input, string replacement)
-    {
-        if (replacement.Contains("$0"))
-            throw new ArgumentException("JsRe.Replace: \"$0\" is a literal in JS but group 0 in .NET - rewrite the call site");
-        return Global
-            ? ReplaceAll(input, m => m.Result(replacement))
-            : ReplaceFirst(input, m => m.Result(replacement));
-    }
+    public string Replace(string input, string replacement) =>
+        Replace(input, Evaluator(replacement), null);
 
     /// <summary>JS `String.prototype.replace(re, callback)`: all matches when g, else first only.</summary>
     public string Replace(string input, MatchEvaluator evaluator) =>
-        Global ? ReplaceAll(input, evaluator) : ReplaceFirst(input, evaluator);
+        Replace(input, evaluator, null);
+
+    /// <summary>The string replacement as an evaluator, with JS's `$0` rule enforced.</summary>
+    internal static MatchEvaluator Evaluator(string replacement)
+    {
+        if (replacement.Contains("$0"))
+            throw new ArgumentException("JsRe.Replace: \"$0\" is a literal in JS but group 0 in .NET - rewrite the call site");
+        return m => m.Result(replacement);
+    }
+
+    /**
+     * The replace itself, optionally maintaining #1150's provenance mapping.
+     *
+     * ⚠ THE TRACK IS PASSED IN, NOT OPENED HERE, and that is the whole point of the seam. It used to be
+     * opened inside this method, which made EVERY caller of a JS regex a provenance participant — including
+     * a static constructor building a lookup table and an engine rewriting IPA. Those operate on a different
+     * string, so the mapping had to tolerate a mismatch, and tolerance is what let two wrong-span defects
+     * through. `Rewriter.Rewrite` now declares the pipeline string explicitly; everything else gets `null`
+     * and cannot touch the mapping at all.
+     */
+    internal string Replace(string input, MatchEvaluator evaluator, Provenance.Track? track) =>
+        Global ? ReplaceAll(input, evaluator, track) : ReplaceFirst(input, evaluator, track);
 
     /**
      * The FIRST match only, written out rather than delegating to `Re.Replace(input, rep, 1)` so #1150's
      * provenance can be maintained here too. The match located is the one .NET's own single replace would
      * use, so the reading is unchanged.
      */
-    private string ReplaceFirst(string input, MatchEvaluator evaluator)
+    private string ReplaceFirst(string input, MatchEvaluator evaluator, Provenance.Track? track)
     {
         var m = Re.Match(input);
         if (!m.Success) return input;
-        var track = Provenance.StartTrack(input);
         var piece = evaluator(m);
         var result = string.Concat(input.AsSpan(0, m.Index), piece, input.AsSpan(m.Index + m.Length));
         if (track is not null)
@@ -132,12 +146,8 @@ public sealed class JsRe
     }
 
     /// <summary>Global replace driven by the same JS advance rules as <see cref="Matches"/>.</summary>
-    private string ReplaceAll(string input, MatchEvaluator evaluator)
+    private string ReplaceAll(string input, MatchEvaluator evaluator, Provenance.Track? track)
     {
-        // ⚠ THE ONE PLACE #1150's PROVENANCE IS MAINTAINED. Every normalizer site in the port funnels through
-        // here, so nothing under Languages/ changes; `track` is null unless a trace is recording, so the
-        // shipped path costs one null check.
-        var track = Provenance.StartTrack(input);
         var sb = new StringBuilder(input.Length);
         var copied = 0;
         foreach (var m in Matches(input))
@@ -181,6 +191,10 @@ public static class JsRegex
     /// <summary>JS replace-with-callback, honouring g vs non-g.</summary>
     public static string Replace(string input, JsRe re, MatchEvaluator evaluator) =>
         re.Replace(input, evaluator);
+
+    /// <summary>JS replace-with-string, honouring g vs non-g.</summary>
+    public static string Replace(string input, JsRe re, string replacement) =>
+        re.Replace(input, replacement);
 
     /// <summary>Sticky (y) helper: match anchored EXACTLY at <paramref name="index"/> or fail
     /// (the JsRe must have been compiled with the y flag -- Compile prepends \G for it).</summary>

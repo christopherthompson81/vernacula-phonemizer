@@ -187,7 +187,7 @@
  *    here: `normalizeRomans` is the registry's shared pass and this file cannot see it.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Ol Chiki LETTERS and signs — U+1C5A–U+1C7D, exactly the class `santali.ts`'s `TOKEN` claims. */
 const OL = "\\u1C5A-\\u1C7D";
@@ -232,11 +232,11 @@ export function normalizeSantali(input: string): string {
     // ZWNJ/ZWJ/ZWSP and the bidi marks are outside `TOKEN`'s word class, so each one ENDS THE WORD and is
     // dropped: `ᱦᱚ‌ᱲ` reads *hɔ ɽ* instead of *hɔɽ*. 23 occurrences (ZWNJ ×15, ZWJ ×7, ZWSP ×1). Ol Chiki
     // is an alphabet with no ligature or half-form for these to control, so they carry nothing.
-    s = tr(s, new RegExp(`(?<=${O})[​‌‍‎‏‬](?=${O})`, "gu"), "");  // ZWSP, ZWNJ, ZWJ, LRM, RLM, PDF
+    s = rewrite(s, new RegExp(`(?<=${O})[​‌‍‎‏‬](?=${O})`, "gu"), "");  // ZWSP, ZWNJ, ZWJ, LRM, RLM, PDF
     // `&nbsp;` survives the dump into the artifact and sits BETWEEN A NUMBER AND ITS UNIT
     // (`83,883&nbsp;km²`). Repaired to a space FIRST, because step 10's tier matches a unit only when a
     // number is adjacent, and an unrepaired entity destroys exactly that adjacency (trap 54, `so`'s shape).
-    s = tr(s, /&nbsp;/gu, " ");
+    s = rewrite(s, /&nbsp;/gu, " ");
 
     // ── 2. ⟨ᱻ RELAA⟩ AFTER A CONSONANT IS A KEYBOARD SLIP FOR ⟨ᱼ PHAARKAA⟩ ────────────────────────────
     // U+1C7B and U+1C7C are adjacent code points, both hyphen-shaped, both in the modifier-letter
@@ -256,7 +256,7 @@ export function normalizeSantali(input: string): string {
     // consonant, and rewrote a legitimate length mark into a PHAARKAA that then vanished — the sources are
     // explicit that relaa is written AFTER the găhlă ṭuḍăg and combines with a NASAL vowel as readily as an
     // oral one, so the two vowel-modifying signs are TRANSPARENT here. U+1C78–1C7A is exactly ᱸ ᱹ ᱺ.
-    s = tr(s, new RegExp(`(?<=${O})(?<!${VOWEL}[\\u1C78-\\u1C7A]?)${RELAA}`, "gu"), PHAARKAA);
+    s = rewrite(s, new RegExp(`(?<=${O})(?<!${VOWEL}[\\u1C78-\\u1C7A]?)${RELAA}`, "gu"), PHAARKAA);
 
     // ── 2b. AN ORPHAN SIGN IS A PUNCTUATION MARK SOMEBODY TYPED WITH THE WRONG KEY ────────────────────
     // ⚠ THE COMPANION FINDING TO STEP 2, AND THE SAME CLASS: a sign that is not attached to a letter is not
@@ -274,8 +274,8 @@ export function normalizeSantali(input: string): string {
     // ⚠ A SINGLE orphan ⟨ᱹ⟩ is deliberately NOT claimed — `(ᱥᱤᱹᱰᱞᱤᱭᱩ ᱹᱣᱤᱭᱩ ᱹᱟᱨ)` (CWUR spelled out in Ol
     // Chiki) writes it as an initialism dot glued to the NEXT segment, where it is already harmless: the
     // sign is dropped and `ᱣᱤᱭᱩ` reads. Claiming it would put a pause inside an acronym — step 7's mistake.
-    s = tr(s, new RegExp(`(?<!${O})${MU_GAHLA}`, "gu"), ":");
-    s = tr(s, new RegExp(`(?<!${O})${GAAHLAA}{2,}`, "gu"), "…");
+    s = rewrite(s, new RegExp(`(?<!${O})${MU_GAHLA}`, "gu"), ":");
+    s = rewrite(s, new RegExp(`(?<!${O})${GAAHLAA}{2,}`, "gu"), "…");
 
     // ── 3. DIGIT-FLANKED ⟨ᱹ GAAHLAA⟩ IS A DECIMAL SEPARATOR ───────────────────────────────────────────
     // The corpus writes decimals TWO ways: `᱒᱒.᱓᱓` ×84 and `᱓᱐ᱹ᱑%` ×16 — the GAAHLAA sign standing in for
@@ -284,7 +284,7 @@ export function normalizeSantali(input: string): string {
     // Folded onto the `.` behaviour rather than given a word: see the header's decimal refusal.
     // ⚠ BEFORE step 4, and disjoint from it by construction — this is digit-flanked, step 4 is
     // letter-flanked — but ordered first so the digit rules are all above the letter rules (playbook §4).
-    s = tr(s, new RegExp(`(?<=${D})${GAAHLAA}(?=${D})`, "gu"), ".");
+    s = rewrite(s, new RegExp(`(?<=${D})${GAAHLAA}(?=${D})`, "gu"), ".");
 
     // ── 4. DE-GROUP ───────────────────────────────────────────────────────────────────────────────────
     // ⚠ FIRST AMONG THE NUMBER RULES: a grouping comma is otherwise read as clause punctuation, and
@@ -294,7 +294,7 @@ export function normalizeSantali(input: string): string {
     // 3-only guard would have left the language's own lakh/crore grouping half-degrouped.
     // ⚠ AND A GROUPING COMMA MAY NOT FOLLOW A LONE `0` — no convention groups from zero, so `0,001`
     // joining to `0001` is a 1000× error, not a reading.
-    s = tr(s, new RegExp(`(?<=${D})(?<!(?<!${D})0)(?:,(?=${D}{2,3}(?!${D})))`, "gu"), "");
+    s = rewrite(s, new RegExp(`(?<=${D})(?<!(?<!${D})0)(?:,(?=${D}{2,3}(?!${D})))`, "gu"), "");
 
     // ── 5. THE NATIVE DOTTED UNIT ABBREVIATIONS `ᱠ.ᱢ.` AND `ᱢ.` ───────────────────────────────────────
     // The corpus abbreviates its units in OL CHIKI letters with dots — `᱑᱐᱕ ᱠ.ᱢ.` ×4, `᱘00 ᱢ.` ×4 — which
@@ -303,8 +303,8 @@ export function normalizeSantali(input: string): string {
     // the string, so the digit run must both begin where the match begins and be a real numeral. And the
     // one-letter `ᱢ.` key needs the left guard or it claims the LAST LETTER of `ᱮᱢ.` (M.A.) and `ᱮᱢ.ᱤ.` —
     // trap 28's family, arriving in Ol Chiki.
-    s = tr(s, new RegExp(`(?<!${D})(${D}+(?:\\.${D}+)?)\\s*(?<!${O})ᱠ\\.ᱢ\\.?(?!${O})`, "gu"), "$1 ᱠᱤᱞᱚᱢᱤᱴᱚᱨ");
-    s = tr(s, new RegExp(`(?<!${D})(${D}+(?:\\.${D}+)?)\\s*(?<!${O})ᱢ\\.(?!${O})`, "gu"), "$1 ᱢᱤᱴᱚᱨ");
+    s = rewrite(s, new RegExp(`(?<!${D})(${D}+(?:\\.${D}+)?)\\s*(?<!${O})ᱠ\\.ᱢ\\.?(?!${O})`, "gu"), "$1 ᱠᱤᱞᱚᱢᱤᱴᱚᱨ");
+    s = rewrite(s, new RegExp(`(?<!${D})(${D}+(?:\\.${D}+)?)\\s*(?<!${O})ᱢ\\.(?!${O})`, "gu"), "$1 ᱢᱤᱴᱚᱨ");
 
     // ── 5b. `sq mi` — THE IMPERIAL GLOSS THIS CORPUS PUTS AFTER EVERY METRIC AREA ──────────────────────
     // ⚠ THE SECOND-BIGGEST LATIN SHAPE IN THE CORPUS, AND IT READ AS GARBAGE IN ENGLISH TOO. `sq mi` ×20 —
@@ -321,7 +321,7 @@ export function normalizeSantali(input: string): string {
     // ⚠ BARE `mi` IS NOT DECLARED AS A UNIT KEY (trap 46/28). Only the two-token `sq mi` shape is claimed —
     // the one that was counted — because a bare two-letter `mi` would fire on far more than a unit.
     // ⚠ ABOVE the symbol tier so the `sq`/`mi` pair never reaches it as two unrelated fragments.
-    s = tr(s, new RegExp(`(?<=${D})\\s*sq\\s*mi(?![\\p{sc=Latn}])`, "gu"), " ᱵᱚᱨᱜᱚ ᱢᱟᱭᱤᱞ");
+    s = rewrite(s, new RegExp(`(?<=${D})\\s*sq\\s*mi(?![\\p{sc=Latn}])`, "gu"), " ᱵᱚᱨᱜᱚ ᱢᱟᱭᱤᱞ");
 
     // ── 6. THE ASCII HYPHEN AS ⟨ᱼ PHAARKAA⟩, NARROWLY ─────────────────────────────────────────────────
     // See the header's finding 2. Only the FINITE-VERB ENCLITIC is claimed — the shape that carries 70 of
@@ -329,7 +329,7 @@ export function normalizeSantali(input: string): string {
     // the attested PHAARKAA suffix set `ᱼᱟ ᱼᱟᱜ ᱼᱟᱭ ᱼᱮ`. The ~29 genuine compound hyphens are left alone.
     // ⚠ Above step 8, because that step reads hyphens too: this one is LETTER-flanked and that one is
     // DIGIT-flanked, so they are disjoint, but the order is fixed so the disjointness is checkable.
-    s = tr(s, new RegExp(`(?<=${O})-(ᱟᱜ?|ᱟᱭ|ᱮ)(?![${OL}])`, "gu"), `${PHAARKAA}$1`);
+    s = rewrite(s, new RegExp(`(?<=${O})-(ᱟᱜ?|ᱟᱭ|ᱮ)(?![${OL}])`, "gu"), `${PHAARKAA}$1`);
 
     // ── 7. THE ASCII PERIOD AS ⟨ᱹ GAAHLAA⟩, AND THE DOTTED INITIALISM ─────────────────────────────────
     // The layer's largest rule; the evidence is finding 1 in the header. Two arms, and the discriminator
@@ -350,10 +350,10 @@ export function normalizeSantali(input: string): string {
     // `ᱤ.` in ISSF and `ᱭᱩ.`/`ᱴᱤ.` in UTC are vowel-preceded and are read by arm (a) — but `santali.jsonc`'s
     // `gahla` table maps `i→i` and `u→u`, so the substitution is phonologically a NO-OP and its only
     // effect is the one wanted anyway, the spurious break going away.
-    s = tr(s, new RegExp(`(?<=${A})\\.(?=${O})`, "gu"), GAAHLAA);
-    s = tr(s, new RegExp(`(?<=${O}${O}${A})\\.(?![${OL}.])`, "gu"), GAAHLAA);
-    s = tr(s, new RegExp(`(?<=${O})\\.(?=\\s*${O})`, "gu"), " ");
-    s = tr(s, new RegExp(`(?<=${O})\\.(?!\\s*[${OL}])(?=\\s|$|[),])`, "gu"), " ");
+    s = rewrite(s, new RegExp(`(?<=${A})\\.(?=${O})`, "gu"), GAAHLAA);
+    s = rewrite(s, new RegExp(`(?<=${O}${O}${A})\\.(?![${OL}.])`, "gu"), GAAHLAA);
+    s = rewrite(s, new RegExp(`(?<=${O})\\.(?=\\s*${O})`, "gu"), " ");
+    s = rewrite(s, new RegExp(`(?<=${O})\\.(?!\\s*[${OL}])(?=\\s|$|[),])`, "gu"), " ");
 
     // ── 8. RANGES — THE ATTESTED INFIX `ᱠᱷᱚᱱ` ─────────────────────────────────────────────────────────
     // `᱑᱙᱔᱕-᱑᱙᱔᱖`, `᱒-᱓ ᱜᱤᱫᱽᱨᱟᱹ`, `᱔-᱕ ᱢᱤᱴᱚᱨ`, `᱒᱐᱑᱒-᱑᱓`, and the ⟨ᱼ PHAARKAA⟩-as-dash form
@@ -380,7 +380,7 @@ export function normalizeSantali(input: string): string {
     // followed by a space and a name, so the guard now says exactly that. The LEFT operand's own
     // `(?<![:.]\d{0,4})` is untouched and still refuses the `᱑᱐:᱓᱐ - ᱑᱑` case it was written for.
     const RANGE_DASH = `[-–—${PHAARKAA}]`;
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![-+×÷=<>]\\s?)(?<![:.]${D}{0,4})(?<!${D})(${D}+(?:\\.${D}+)?)\\s?${RANGE_DASH}\\s?(${D}+(?:\\.${D}+)?)(?!\\s?[-+×÷=<>])(?!${D})(?!:${D})`, "gu"),
         "$1 ᱠᱷᱚᱱ $2");
 
@@ -392,7 +392,7 @@ export function normalizeSantali(input: string): string {
     // ⚠ `°F` ×2 AND THE COORDINATE `°N/E/S/W` ×6 ARE DELIBERATELY NOT CLAIMED — no Fahrenheit word and no
     // sourced direction words, and half a reading is worse than none (trap 53). The whole match is refused,
     // so those keep exactly the reading they had; the sign stays visible to the leak gates.
-    s = tr(s, new RegExp(`(${D})\\s*°\\s*C(?![\\p{sc=Latn}])`, "gui"), "$1 ᱰᱤᱜᱨᱤ ᱥᱮᱞᱥᱤᱭᱚᱥ");
+    s = rewrite(s, new RegExp(`(${D})\\s*°\\s*C(?![\\p{sc=Latn}])`, "gui"), "$1 ᱰᱤᱜᱨᱤ ᱥᱮᱞᱥᱤᱭᱚᱥ");
     // ── 9b. THE BARE `°`, WHERE THE NOUN AFTER IT IS ALREADY SANTALI ──────────────────────────────────
     // ⚠ FOUND BY THE SCAN AFTER 9 LANDED, WHICH IS THE NORMAL ORDER — a cell can hide behind itself.
     // The corpus's DOMINANT temperature and coordinate shape is not `°C` at all; it is a bare `°` with the
@@ -407,7 +407,7 @@ export function normalizeSantali(input: string): string {
     // and reading only the `°` would leave `N` to the English fallback as *ˈɛn*), and before a digit or an
     // arc-minute/second mark (`77°12.5′E` is a DMS coordinate needing minute and second words this layer
     // does not have). Half a reading is worse than none.
-    s = tr(s, new RegExp(`(${D})\\s*°(?![\\p{sc=Latn}${D}′″'"])`, "gu"), "$1 ᱰᱤᱜᱨᱤ");
+    s = rewrite(s, new RegExp(`(${D})\\s*°(?![\\p{sc=Latn}${D}′″'"])`, "gu"), "$1 ᱰᱤᱜᱨᱤ");
 
     // ── 10. THE SHARED SYMBOL TIER — %, CURRENCY, UNITS, ² ─────────────────────────────────────────────
     // Trap 47's test is "can the tier SAY it?", and for Santali it can: percent, currency and units are all

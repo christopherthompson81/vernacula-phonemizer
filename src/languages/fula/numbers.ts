@@ -111,4 +111,4 @@ export function numberToWords(n: number, raw?: string): string {
  * NATIVE_DIGIT_BASES, and this file had a third copy of the same arithmetic (fulaAdlam.ts had a fourth,
  * as a lookup table).
  */
-export { foldNativeDigits as foldAdlamDigits } from "../../core/unicode.ts";
+export { foldDigitsIn as foldAdlamDigits } from "../../core/unicode.ts";

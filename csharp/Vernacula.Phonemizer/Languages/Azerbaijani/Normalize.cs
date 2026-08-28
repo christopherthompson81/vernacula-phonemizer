@@ -5,6 +5,7 @@
  * per-step coupling notes.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Azerbaijani;
 
@@ -184,28 +185,28 @@ public static class Normalize
         // 1) ERA MARKERS and MULTI-DOT ABBREVIATIONS.
         foreach (var (end, bare, word) in MULTI_DOT_RE)
         {
-            s = end.Replace(s, $"{word}.");
-            s = bare.Replace(s, word);
+            s = Rewrite(s, end, $"{word}.");
+            s = Rewrite(s, bare, word);
         }
 
         // 2) DOTTED CAPITAL RUNS → a bare all-caps run.
-        s = JsRegex.Replace(s, DOTTED_CAPS, m0 => DOTS_AND_SPACE.Replace(m0.Value, ""));
-        s = INITIAL_DOT.Replace(s, "");
+        s = Rewrite(s, DOTTED_CAPS, m0 => DOTS_AND_SPACE.Replace(m0.Value, ""));
+        s = Rewrite(s, INITIAL_DOT, "");
 
         // 3) SINGLE-DOT ABBREVIATIONS.
-        s = JsRegex.Replace(s, ABBREV_MID, m =>
+        s = Rewrite(s, ABBREV_MID, m =>
             $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}{m.Groups[2].Value}");
-        s = JsRegex.Replace(s, ABBREV_END, m =>
+        s = Rewrite(s, ABBREV_END, m =>
             $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}.");
 
         // 4) ORDINALS — the `N-ci` form. BEFORE the clock rule.
-        s = JsRegex.Replace(s, ORDINAL_NCI, m => OrdinalWords(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        s = Rewrite(s, ORDINAL_NCI, m => OrdinalWords(Js.Number(m.Groups[1].Value)) ?? m.Value);
 
         // 5) SPACE-GROUPED THOUSANDS. Two passes, because the groups overlap on the shared digit.
-        for (var i = 0; i < 2; i++) s = GROUPING.Replace(s, "");
+        for (var i = 0; i < 2; i++) s = Rewrite(s, GROUPING, "");
 
         // 6) CLOCK, in the COLON form, with the case suffix glued to the last spoken word.
-        s = JsRegex.Replace(s, CLOCK, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             if (hv > 23 || mv > 59) return m.Value;
@@ -217,19 +218,19 @@ public static class Normalize
         });
 
         // 7) VERSION DOTS. AFTER the clock.
-        s = VERSION_DOT.Replace(s, "$1 nöqtə $2");
-        s = VERSION_DOT_UNIT.Replace(s, "$1 nöqtə $2$3");
+        s = Rewrite(s, VERSION_DOT, "$1 nöqtə $2");
+        s = Rewrite(s, VERSION_DOT_UNIT, "$1 nöqtə $2$3");
 
         // 8) RATES — prefixed, as the corpus's own prose reads them.
-        s = RATE_KM.Replace(s, "saatda $1 kilometr");
-        s = RATE_MIL.Replace(s, "saatda $1 mil");
-        s = RATE_MS.Replace(s, "saniyədə $1 metr");
-        s = RATE_YARD.Replace(s, "metrdə $1 yard");
-        s = RATE_MBIT.Replace(s, "saniyədə $1 meqabit");
-        s = GHZ.Replace(s, "$1 giqahers");
+        s = Rewrite(s, RATE_KM, "saatda $1 kilometr");
+        s = Rewrite(s, RATE_MIL, "saatda $1 mil");
+        s = Rewrite(s, RATE_MS, "saniyədə $1 metr");
+        s = Rewrite(s, RATE_YARD, "metrdə $1 yard");
+        s = Rewrite(s, RATE_MBIT, "saniyədə $1 meqabit");
+        s = Rewrite(s, GHZ, "$1 giqahers");
 
         // 9) PERCENT with a POSSESSIVE SUFFIX.
-        s = JsRegex.Replace(s, PERCENT_SUFFIXED, m =>
+        s = Rewrite(s, PERCENT_SUFFIXED, m =>
         {
             var sfx = m.Groups[2].Value;
             var link = N_INITIAL.IsMatch(sfx) ? HarmoniseSuffix("faiz", "i") : "";
@@ -237,29 +238,29 @@ public static class Normalize
         });
 
         // 10) DEGREES.
-        s = DEG_C.Replace(s, "$1 dərəcə selsi");
-        s = DEG_F.Replace(s, "$1 dərəcə farenheyt");
-        s = DEG_BARE.Replace(s, "$1 dərəcə");
+        s = Rewrite(s, DEG_C, "$1 dərəcə selsi");
+        s = Rewrite(s, DEG_F, "$1 dərəcə farenheyt");
+        s = Rewrite(s, DEG_BARE, "$1 dərəcə");
 
         // 11) SIGNS.
-        s = PLUS.Replace(s, " üstəgəl ");
-        s = MINUS.Replace(s, "mənfi $1");
-        s = JsRegex.Replace(s, AMP_LETTERS, m =>
+        s = Rewrite(s, PLUS, " üstəgəl ");
+        s = Rewrite(s, MINUS, "mənfi $1");
+        s = Rewrite(s, AMP_LETTERS, m =>
         {
             var a = LETTER_NAME.GetValueOrDefault(G2p.AzLower(m.Groups[1].Value)) ?? m.Groups[1].Value;
             var b = LETTER_NAME.GetValueOrDefault(G2p.AzLower(m.Groups[2].Value)) ?? m.Groups[2].Value;
             return $"{a} və {b}";
         });
-        s = AMP_SPACED.Replace(s, " və ");
-        s = EQUALS.Replace(s, "$1 bərabərdir $2");
-        s = LESS.Replace(s, "$1 kiçikdir $2");
-        s = GREATER.Replace(s, "$1 böyükdür $2");
-        s = TIMES.Replace(s, "$1 vur $2");
+        s = Rewrite(s, AMP_SPACED, " və ");
+        s = Rewrite(s, EQUALS, "$1 bərabərdir $2");
+        s = Rewrite(s, LESS, "$1 kiçikdir $2");
+        s = Rewrite(s, GREATER, "$1 böyükdür $2");
+        s = Rewrite(s, TIMES, "$1 vur $2");
 
         // 12) FRACTIONS. LAST, so no earlier rule has to work around a slash.
-        s = HALF.Replace(s, "$1 yarım");
-        s = THREE_QUARTERS.Replace(s, "$1 dörddə üç");
-        s = JsRegex.Replace(s, DIVIDE, m =>
+        s = Rewrite(s, HALF, "$1 yarım");
+        s = Rewrite(s, THREE_QUARTERS, "$1 dörddə üç");
+        s = Rewrite(s, DIVIDE, m =>
         {
             string x = AzerbaijaniNumbers.NumberToWords(Js.Number(m.Groups[1].Value)),
                    y = AzerbaijaniNumbers.NumberToWords(Js.Number(m.Groups[2].Value));
@@ -268,8 +269,8 @@ public static class Normalize
             return $"{x} {head}{stem}{HarmoniseSuffix(stem, "ə")} bölünür";
         });
 
-        s = QUARTER.Replace(s, "$1 dörddə bir");
-        s = JsRegex.Replace(s, SLASH_FRACTION, m =>
+        s = Rewrite(s, QUARTER, "$1 dörddə bir");
+        s = Rewrite(s, SLASH_FRACTION, m =>
         {
             double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
             if (den == 2) return num == 1 ? "yarım" : $"{AzerbaijaniNumbers.NumberToWords(num)} yarım";
@@ -278,7 +279,7 @@ public static class Normalize
         });
 
         // 13) REGNAL `II` — the shared Roman pass has already made it a digit.
-        s = JsRegex.Replace(s, REGNAL_WW, m =>
+        s = Rewrite(s, REGNAL_WW, m =>
         {
             var ord = OrdinalWords(Js.Number(m.Groups[1].Value));
             return ord is null ? m.Value : $"{ord} Dünya Müharibəsi";

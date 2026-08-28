@@ -1,5 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 /**
  * Occitan (oc) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -55,26 +55,26 @@ export function normalizeOccitan(input: string): string {
     // 1) SEPARATORS. The SPACE groups and BOTH marks decimate — see the header. ⚠ THE WHOLE NUMBER IS
     //    MATCHED AT ONCE, not one join per pass (trap 63), and the trailing guard rejects a DIGIT and
     //    nothing else, or every clause-final figure is declined (trap 58).
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    ⚠ AND THE DOT DECIMAL FOLDS ONTO THE COMMA, unconditionally — unlike Asturian, no dot in this
     //    corpus ever groups, so the three-digit test that language needs would be wrong here.
-    s = tr(s, /(?<!\d)(\d+)\.(\d+)(?!\d)/gu, "$1,$2");
+    s = rewrite(s, /(?<!\d)(\d+)\.(\d+)(?!\d)/gu, "$1,$2");
 
     // 2) THE ERA MARKER, in both spellings. ⚠ IT IS NOT A LEAK, WHICH IS WHY NO GATE SAW IT: Occitan's
     //    TOKEN treats a letter run as a word, so `abC` reached the g2p as the syllable [abk]. `Crist`
     //    ×98, `abans` ×53, `après` ×72 on oc.wikipedia.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}a[bv]\\.?\\s?C\\.?${NOT_LETTER_AFTER}`, "gu"), "abans Crist");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}ap\\.?\\s?C\\.?${NOT_LETTER_AFTER}`, "gu"), "après Crist");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}a[bv]\\.?\\s?C\\.?${NOT_LETTER_AFTER}`, "gu"), "abans Crist");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}ap\\.?\\s?C\\.?${NOT_LETTER_AFTER}`, "gu"), "après Crist");
 
     // 3) THE CLOCK. The colon is clause punctuation in occitan.ts, so `12:30 h` read as *dotze , trenta*.
     //    The Aranese radio listings are where this class lives — "de 8h enquiara 9h e er aute de 12h a
     //    12:30 h deth meddia", "un butlletin de 20 menutes de 15:35 enquiara 16 h" — and the writer
     //    supplies the `h`, so the figures are left as figures and only the colon is spent.
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
 
     // 4) SIGNS, before the range rule spends the hyphen. The corpus's climate prose writes `-20,4°C`.
-    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1mens $2");
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1mens $2");
 
     // 5) DEGREES. ⚠ WITH A LOOKBEHIND FOR THE BIBLIOGRAPHIC FORMAT — `2 in-12°` is DUODECIMO, a book
     //    size, and reading it as twelve degrees is a defect that produces a READING (trap 56). Everything
@@ -84,10 +84,10 @@ export function normalizeOccitan(input: string): string {
     //    version still read *dotze graus*. `(?<!in-\d{0,3})` is variable-length, which V8 allows.
     //    `graus` ×17 is the attested plural; `grau` is its transparent singular. ⚠ `gras` ×156 scores far
     //    higher and is NOT used: it is the homograph meaning "fat", the Fula `tere` shape.
-    s = tr(s, /(?<!in-\d{0,3})(\d)\s?°\s?([CF])(?![\p{L}\p{M}])/gui,
+    s = rewrite(s, /(?<!in-\d{0,3})(\d)\s?°\s?([CF])(?![\p{L}\p{M}])/gui,
         (_m, d: string, scale: string) => `${d} graus ${scale.toUpperCase() === "C" ? "Celsius" : "Fahrenheit"}`);
-    s = tr(s, /(?<!in-\d{0,3})(\d)\s?°\s?(\d+)\s?[′']/gu, "$1 graus $2 minutas ");
-    s = tr(s, /(?<!in-\d{0,3})(\d)\s?°/gu, "$1 graus ");
+    s = rewrite(s, /(?<!in-\d{0,3})(\d)\s?°\s?(\d+)\s?[′']/gu, "$1 graus $2 minutas ");
+    s = rewrite(s, /(?<!in-\d{0,3})(\d)\s?°/gu, "$1 graus ");
 
     // 6) RANGES. The dash was dropped and the endpoints fused — `1909-2006` read as one run, `18-20` as
     //    "dèts e uèch vint". ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A CONNECTIVE: Occitan writes
@@ -96,11 +96,11 @@ export function normalizeOccitan(input: string): string {
     //    already chose or not.
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), and a chain of three or more
     //    hyphen-joined groups is an identifier rather than a span.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
     // producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }

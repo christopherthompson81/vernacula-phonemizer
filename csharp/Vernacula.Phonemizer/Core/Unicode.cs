@@ -6,6 +6,7 @@
  */
 using System.Globalization;
 using System.Text;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Core;
 
@@ -89,8 +90,12 @@ public static class Unicode
      */
     public static string FoldLatinDiacritics(string s)
     {
+        // ⚠ OFF THE SEAM, and the TypeScript learned this the hard way: `foldLatinDiacritics` is called PER
+        // WORD from `resolveWord`, not on the pipeline string, so routing it through `Rewrite` poisons the
+        // mapping on every utterance. It also strips marks with a plain `Replace` first, which the seam
+        // would not see anyway.
         var stripped = MarksRun.Replace(s.Normalize(NormalizationForm.FormD), "");
-        return LatinAtomicRe.Replace(stripped, m =>
+        return JsRegex.Replace(stripped, LatinAtomicRe, m =>
             LATIN_ATOMIC.TryGetValue(m.Value, out var v) ? v : m.Value);
     }
 
@@ -211,7 +216,7 @@ public static class Unicode
     public static string FoldLatinConfusables(string s)
     {
         if (!CONFUSABLE_RE.IsMatch(s)) return s;
-        return CONFUSABLE_RE.Replace(s, m => LATIN_CONFUSABLE[m.Groups[1].Value]);
+        return Rewrite(s, CONFUSABLE_RE, m => LATIN_CONFUSABLE[m.Groups[1].Value]);
     }
 
     /**
@@ -264,7 +269,7 @@ public static class Unicode
     public static string FoldCyrillicConfusables(string s, bool hostIsCyrillic = false)
     {
         if (!CyrillicOne.IsMatch(s)) return s;
-        return WORDISH.Replace(s, m =>
+        return Rewrite(s, WORDISH, m =>
         {
             var w = m.Value;
             var cyr = 0;
@@ -279,7 +284,8 @@ public static class Unicode
             // look-alike is a REAL LETTER OF THE LATIN ALPHABET, so a word carrying several may genuinely be a Latin
             // word and the majority test is what protects it. ă ĕ ç ü standing beside a Cyrillic letter cannot be —
             // and they are short words, where two Latin twins outvote one Cyrillic letter.
-            w = CHV_KEYS.Replace(w, c => CHUVASH_CONFUSABLE[c.Value]);
+            // ⚠ `w` is a MATCHED WORD, not the pipeline string — the outer Rewrite already reports this pass.
+            w = JsRegex.Replace(w, CHV_KEYS, c => CHUVASH_CONFUSABLE[c.Value]);
             cyr = 0;
             lat = 0;
             foreach (var ch in Js.CodePoints(w))
@@ -289,7 +295,7 @@ public static class Unicode
             }
             if (lat == 0 || lat > cyr) return w; // Latin-majority word — leave it to the Latin fold
             if (lat == cyr && !hostIsCyrillic) return w; // an even split, and no host evidence to tip it
-            return CYR_KEYS.Replace(w, c => CYRILLIC_CONFUSABLE[c.Value]);
+            return JsRegex.Replace(w, CYR_KEYS, c => CYRILLIC_CONFUSABLE[c.Value]); // per-word, as above
         });
     }
 
@@ -322,7 +328,7 @@ public static class Unicode
     public static string FoldCyrillicStressMarks(string s)
     {
         if (!ANY_STRESS_MARK.IsMatch(s)) return s;
-        return CYRILLIC_STRESS.Replace(s, m =>
+        return Rewrite(s, CYRILLIC_STRESS, m =>
         {
             var baseCh = m.Groups[1].Value;
             var marks = m.Groups[2].Value;
@@ -387,7 +393,7 @@ public static class Unicode
         // is a clause mark or silent here, whereas leaving it alone leaves a `€` that `\p{Sc}` reads as a
         // PHANTOM CURRENCY. ⚠ U+FFFD IS A FINGERPRINT, NOT NOISE: of the E2 80 xx third bytes only a handful are
         // unmapped in CP1252, and among those the closing double quote is overwhelmingly the commonest.
-        s = ThreeByte.Replace(s, m =>
+        s = Rewrite(s, ThreeByte, m =>
         {
             var b2 = SourceByte(m.Value[1]);
             var b3 = SourceByte(m.Value[2]);
@@ -399,8 +405,8 @@ public static class Unicode
         // third characters are punctuation, but that is only true of some: `“` is `E2 80 9C`, whose third byte
         // 0x9C maps to `œ` — A LETTER — so the opening-quote arm matched `â€` and stranded the `œ`. Ordering
         // after the full decode removes the whole class of interception.
-        s = LossyCloseQuote.Replace(s, "”");
-        s = LossyOpenQuote.Replace(s, "“");
+        s = Rewrite(s, LossyCloseQuote, "”");
+        s = Rewrite(s, LossyOpenQuote, "“");
         // TWO-BYTE, as the GENERAL formula rather than one arm per lead byte: for C2 it returns b2 unchanged and
         // for C3 it returns b2 + 0x40, and extending to C4/C5 reaches Latin Extended-A. Bounded there by
         // measurement — the next range up never occurs.
@@ -415,7 +421,7 @@ public static class Unicode
         // ⚠ KNOWN RESIDUE: a trailing byte that CP1252 maps OUT of U+0080–U+00BF is not matched, because this arm
         // decodes the character directly instead of going through `SourceByte()` the way the three-byte arm does.
         // Widening the trailing class to reach it would pull in en-dashes and curly quotes.
-        return TwoByte.Replace(s, m =>
+        return Rewrite(s, TwoByte, m =>
             Js.FromCodePoint(((m.Groups[1].Value[0] & 0x1f) << 6) | (m.Groups[2].Value[0] & 0x3f)));
     }
 
@@ -436,7 +442,7 @@ public static class Unicode
     public static string FoldCaretExponents(string s)
     {
         if (!s.Contains('^')) return s;
-        return CARET_RE.Replace(s, m =>
+        return Rewrite(s, CARET_RE, m =>
             string.Concat(Js.CodePoints(m.Groups[1].Value)
                 .Select(c => CARET_SUP.TryGetValue(c, out var v) ? v : c)));
     }
@@ -480,7 +486,7 @@ public static class Unicode
     public static string FoldVulgarFractions(string s)
     {
         if (!VULGAR_RE.IsMatch(s)) return s;
-        return VULGAR_RE.Replace(s, m =>
+        return Rewrite(s, VULGAR_RE, m =>
             (AsciiDigit.IsMatch(m.Index > 0 ? s[m.Index - 1].ToString() : "") ? " " : "") + VULGAR[m.Value]);
     }
 
@@ -488,7 +494,7 @@ public static class Unicode
     private static readonly JsRe Fahrenheit = JsRegex.Compile("℉", "gu");
 
     public static string FoldSquaredDegrees(string s) =>
-        Fahrenheit.Replace(Celsius.Replace(s, "°C"), "°F");
+        Rewrite(Rewrite(s, Celsius, "°C"), Fahrenheit, "°F");
 
     /**
      * FULLWIDTH LATIN LETTERS AND DIGITS → their ASCII twins (Ｇ→G, ７→7). They are `Script=Latin` letters with
@@ -502,6 +508,6 @@ public static class Unicode
     public static string FoldFullwidthLatin(string s)
     {
         if (!FULLWIDTH.IsMatch(s)) return s;
-        return FULLWIDTH.Replace(s, m => ((char)(m.Value[0] - 0xFEE0)).ToString());
+        return Rewrite(s, FULLWIDTH, m => ((char)(m.Value[0] - 0xFEE0)).ToString());
     }
 }

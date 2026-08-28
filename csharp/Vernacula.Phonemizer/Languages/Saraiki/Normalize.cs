@@ -4,6 +4,7 @@
  * Ported from src/languages/saraiki/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Saraiki;
 
@@ -45,31 +46,31 @@ public static class Normalize
 
         // 0) Zero-width joiners between a figure and its sign — narrow on purpose (ZWNJ is meaningful
         //    orthography inside a word).
-        s = ZW_BEFORE_SIGN.Replace(s, "");
+        s = Rewrite(s, ZW_BEFORE_SIGN, "");
 
         // 1) THE SHARED SYMBOL TIER FIRST: its numeral pattern reads `2,500`/`2.3` as ONE token, and steps 2
         //    and 5 split precisely those.
         s = SYMBOLS(s);
 
         // 2) DE-GROUPING, on BOTH commas, by the three-digit test.
-        s = GROUPED.Replace(s, m => m.Groups[1].Value + GROUP_MARK.Replace(m.Groups[2].Value, ""));
+        s = Rewrite(s, GROUPED, m => m.Groups[1].Value + GROUP_MARK.Replace(m.Groups[2].Value, ""));
 
         // 3) DEGREES.
-        s = DEG_C.Replace(s, "$1 ڈگری سینٹی گریڈ");
-        s = DEG_F.Replace(s, "$1 ڈگری فارن ہائیٹ");
-        s = DEG.Replace(s, "$1 ڈگری ");
+        s = Rewrite(s, DEG_C, "$1 ڈگری سینٹی گریڈ");
+        s = Rewrite(s, DEG_F, "$1 ڈگری فارن ہائیٹ");
+        s = Rewrite(s, DEG, "$1 ڈگری ");
 
         // 4) THE MINUS SIGN, before the range rule spends the hyphen.
-        s = MINUS.Replace(s, "$1منفی $2");
+        s = Rewrite(s, MINUS, "$1منفی $2");
 
         // 5) RANGES — the ء year marker may sit between the figure and the dash.
-        s = RANGE_DASH.Replace(s, "$1, ");
-        s = RANGE_HYPHEN.Replace(s, "$1, $2");
+        s = Rewrite(s, RANGE_DASH, "$1, ");
+        s = Rewrite(s, RANGE_HYPHEN, "$1, $2");
 
         // 6) DECIMALS, LAST — this step SPLITS the numeral and every rule above wants it whole.
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} اعشاریہ {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-        return SPACE_RUN.Replace(s, " ");
+        return Rewrite(s, SPACE_RUN, " ");
     }
 }

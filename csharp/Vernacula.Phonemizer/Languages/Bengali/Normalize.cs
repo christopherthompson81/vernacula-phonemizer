@@ -5,6 +5,7 @@ using System.Globalization;
  * Ported from src/languages/bengali/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Bengali;
 
@@ -91,18 +92,18 @@ public static class Normalize
         {
             var s = string.Concat(Js.CodePoints(input).Select(c => Unicode.BENGALI_DIGITS.GetValueOrDefault(c, c)));
 
-            s = ABBREV_RE.Replace(s, m => $"{ABBREV[m.Groups[1].Value]} ");
+            s = Rewrite(s, ABBREV_RE, m => $"{ABBREV[m.Groups[1].Value]} ");
 
-            s = ORDINAL_RE.Replace(s, m =>
+            s = Rewrite(s, ORDINAL_RE, m =>
                 Ordinal(Js.Number(ToAscii(m.Groups[1].Value)), m.Groups[2].Value) ?? m.Value);
 
-            s = UNIT_RE.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
+            s = Rewrite(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
 
-            s = DEG_C.Replace(s, "$1 ডিগ্রি সেলসিয়াস");
-            s = DEG_F.Replace(s, "$1 ডিগ্রি ফারেনহাইট");
-            s = DEG.Replace(s, "$1 ডিগ্রি");
+            s = Rewrite(s, DEG_C, "$1 ডিগ্রি সেলসিয়াস");
+            s = Rewrite(s, DEG_F, "$1 ডিগ্রি ফারেনহাইট");
+            s = Rewrite(s, DEG, "$1 ডিগ্রি");
 
-            s = CLOCK.Replace(s, m =>
+            s = Rewrite(s, CLOCK, m =>
             {
                 var hv = Js.Number(ToAscii(m.Groups[1].Value));
                 var mv = Js.Number(ToAscii(m.Groups[2].Value));
@@ -112,16 +113,16 @@ public static class Normalize
                 return $"{Cardinal(hv)}টা {Cardinal(mv)} মিনিট";
             });
 
-            s = MINUS.Replace(s, "$1ঋণাত্মক $2");
-            s = PLUS_ATTACHED.Replace(s, "$1 যোগ $2");
-            s = PLUS_LEADING.Replace(s, "$1যোগ $2");
+            s = Rewrite(s, MINUS, "$1ঋণাত্মক $2");
+            s = Rewrite(s, PLUS_ATTACHED, "$1 যোগ $2");
+            s = Rewrite(s, PLUS_LEADING, "$1যোগ $2");
 
             s = PostposedSignPass.PostposedSign(s, "<", "থেকে কম");
             s = PostposedSignPass.PostposedSign(s, ">", "থেকে বেশি");
-            s = EQUALS_RE.Replace(s, " সমান ");
-            s = DIVIDE.Replace(s, " ভাগ ");
+            s = Rewrite(s, EQUALS_RE, " সমান ");
+            s = Rewrite(s, DIVIDE, " ভাগ ");
 
-            s = FRACTION.Replace(s, m =>
+            s = Rewrite(s, FRACTION, m =>
             {
                 var num = Js.Number(ToAscii(m.Groups[1].Value));
                 var den = Js.Number(ToAscii(m.Groups[2].Value));

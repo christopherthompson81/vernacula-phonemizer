@@ -4,6 +4,7 @@
  * Ported from src/languages/romanian/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Romanian;
 
@@ -97,59 +98,59 @@ public static class Normalize
         do
         {
             prev = t;
-            t = GROUP_DOT.Replace(t, "");
+            t = Rewrite(t, GROUP_DOT, "");
         } while (t != prev);
 
         do
         {
             prev = t;
-            t = GROUP_SPACE.Replace(t, "");
+            t = Rewrite(t, GROUP_SPACE, "");
         } while (t != prev);
 
-        t = DECIMAL_COMMA.Replace(t, m =>
+        t = Rewrite(t, DECIMAL_COMMA, m =>
             $"{m.Groups[1].Value} virgulă {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
-        t = CLOCK.Replace(t, "$1 $2");
+        t = Rewrite(t, CLOCK, "$1 $2");
 
-        t = PERCENT.Replace(t, "$1 la sută");
+        t = Rewrite(t, PERCENT, "$1 la sută");
 
         // ⚠ DEGREES BEFORE the unit rules — the ⟨C⟩ of `20 °C` is otherwise read as Romanian [k].
-        t = DEG_F_SIGN.Replace(DEG_C_SIGN.Replace(t, "\u00b0C"), "\u00b0F");
-        t = DEG_C.Replace(t, "$1 grade Celsius");
-        t = DEG_F.Replace(t, "$1 grade Fahrenheit");
-        t = DEG.Replace(t, "$1 grade");
+        t = Rewrite(Rewrite(t, DEG_C_SIGN, "\u00b0C"), DEG_F_SIGN, "\u00b0F");
+        t = Rewrite(t, DEG_C, "$1 grade Celsius");
+        t = Rewrite(t, DEG_F, "$1 grade Fahrenheit");
+        t = Rewrite(t, DEG, "$1 grade");
 
         // ⚠ SQUARED/CUBED BEFORE the plain unit rule, or `km` is consumed first and the exponent stranded.
-        foreach (var (re, word) in SQUARED) t = re.Replace(t, word);
+        foreach (var (re, word) in SQUARED) t = Rewrite(t, re, word);
 
         // ⚠ RATES BEFORE the plain unit rule too, or `km` is consumed and a bare `/h` is left dangling.
         // ⚠ The trailing boundary is `(?!\p{L})`, NOT `\b` — do not "simplify" it: after the ⟨ă⟩ of `oră`
         // the JS `\b` this port reproduces finds no boundary and the rule silently does not fire.
-        t = KM_H.Replace(t, "kilometri pe oră");
-        t = M_S.Replace(t, "metri pe secundă");
+        t = Rewrite(t, KM_H, "kilometri pe oră");
+        t = Rewrite(t, M_S, "metri pe secundă");
 
-        foreach (var (re, word) in COUNTED_UNITS) t = re.Replace(t, $"$1 {word}");
+        foreach (var (re, word) in COUNTED_UNITS) t = Rewrite(t, re, $"$1 {word}");
         // The bare-unit pass runs AFTER the counted loop, so only what the counted rule could not reach
         // is left for it.
         t = BARE_UNITS(t);
 
-        t = RANGE.Replace(t, "$1 până la $2");
+        t = Rewrite(t, RANGE, "$1 până la $2");
 
         foreach (var (sign, word) in CURRENCY)
         {
             if (!NON_LETTER_FIRST.IsMatch(sign)) continue; // `lei` is a word already, not a sign
-            var esc = ESCAPE.Replace(sign, "\\$&");
-            t = JsRegex.Compile($"{esc}\\s*(\\d+)", "gu").Replace(t, $"$1 {word}");
-            t = JsRegex.Compile($"(\\d+)\\s*{esc}", "gu").Replace(t, $"$1 {word}");
+            var esc = JsRegex.Replace(sign, ESCAPE, "\\$&");
+            t = Rewrite(t, JsRegex.Compile($"{esc}\\s*(\\d+)", "gu"), $"$1 {word}");
+            t = Rewrite(t, JsRegex.Compile($"(\\d+)\\s*{esc}", "gu"), $"$1 {word}");
         }
 
-        t = SIGNED.Replace(t, m => $"{(m.Groups[1].Value == "+" ? "plus" : "minus")} {m.Groups[2].Value}");
+        t = Rewrite(t, SIGNED, m => $"{(m.Groups[1].Value == "+" ? "plus" : "minus")} {m.Groups[2].Value}");
 
-        t = INFIX_PLUS.Replace(t, "$1 plus $2");
-        foreach (var (re, word) in RELATIONAL) t = re.Replace(t, word);
+        t = Rewrite(t, INFIX_PLUS, "$1 plus $2");
+        foreach (var (re, word) in RELATIONAL) t = Rewrite(t, re, word);
 
-        t = AMPERSAND.Replace(t, " și ");
+        t = Rewrite(t, AMPERSAND, " și ");
 
-        return RUNS.Replace(t, " ");
+        return Rewrite(t, RUNS, " ");
     }
 }

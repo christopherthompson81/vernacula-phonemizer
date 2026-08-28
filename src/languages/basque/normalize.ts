@@ -77,7 +77,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { cardinalWords } from "./basque.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The PERCENT reading, and the best-sourced word in this layer — the wiki states it DEFINITIONALLY, and
@@ -213,7 +213,7 @@ export function normalizeBasque(input: string): string {
     //    ⚠ SAFE HERE BECAUSE BASQUE DOES NOT WRITE ORDINALS THIS WAY: its ordinal is `1.`/`1go`, not `1º`, and
     //    every instance in this corpus is angular or a scale — `58ºI`, `56ºH` (coordinates), `30º`, `7000ºK`.
     //    Folding changes the CHARACTER, not the reading: a bare `°` is still refused (step 2).
-    s = tr(s, /\u00BA/gu, "\u00B0");
+    s = rewrite(s, /\u00BA/gu, "\u00B0");
 
     // 1) THOUSANDS DE-GROUPING, first, because every later rule needs the figure to be one digit run and the
     //    grouping mark here is the PERIOD — so left alone it is read as a sentence break INSIDE a number:
@@ -226,11 +226,11 @@ export function normalizeBasque(input: string): string {
     //    ⚠ THE TRAILING GUARD IS `(?!\d)` AND NOT `(?![\d.,])` — playbook trap 58. A clause mark after a
     //    grouped figure is not a continuation of the number, and excluding it declines every figure that ends
     //    a sentence. The de-grouping arms of six other layers had to learn this one character at a time.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, (w) => w.replace(/\./gu, ""));
     //    ⚠ AND THE SPACE-GROUPED FORM, ×5 — `40 091 km-koa`, `12 756 km-koa`, `12 730 km-koa`. A wiki that
     //    writes `44.579.000` also writes `40 091`, and both are in this corpus. Three digits per block and a
     //    1–9 head, so an adjacent PAIR of numbers cannot fuse.
-    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 2) THE DEGREE SIGN WITH A SCALE LETTER — `56,7 ° C`, `26 °C`. Both readings come from one attestation
     //    (see SCALES), so neither is inferred from the other.
@@ -243,7 +243,7 @@ export function normalizeBasque(input: string): string {
     //    without its scale would put a temperature word on a latitude.
     //    BEFORE the tier, so the scale letter cannot be mistaken for a unit key, and before step 6 so the
     //    operand is still one figure.
-    s = tr(s, /(\d)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui, (_m, d: string, k: string) => `${d} ${DEGREE} ${SCALES[k.toUpperCase()]!}`);  // space, NBSP
+    s = rewrite(s, /(\d)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui, (_m, d: string, k: string) => `${d} ${DEGREE} ${SCALES[k.toUpperCase()]!}`);  // space, NBSP
 
     // 3) THE CASE ENDING GLUED TO THE **UNIT**, before the tier, because the tier's trailing guard refuses a
     //    letter after a unit key and therefore declined the whole match — leaving a raw `km` in the IPA. This
@@ -270,12 +270,12 @@ export function normalizeBasque(input: string): string {
     //    the denominator word already ends in the same `-ko` genitive, which is why the doubling reads as a
     //    stutter rather than as an obvious leak. Matched BEFORE the bare-unit arm so `km/h-ko` cannot be
     //    claimed as `km` plus stray text.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${unitAlt})/(${denomAlt})-(${CASE_ENDINGS.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
         (_m, unit: string, denom: string, ending: string) =>
             `${UNITS[unit]![0]!} ${RATE_DENOMINATORS[denom]!.replace(/ko$/u, "")}${ending === "ko" || ending === "koa" ? ending : `ko${ending}`}`,
     );
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${unitAlt})(?:(²|³)-?|-)(${CASE_ENDINGS.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
         (_m, unit: string, exp: string | undefined, ending: string) => {
             const noun = UNITS[unit]![0]!;
@@ -323,7 +323,7 @@ export function normalizeBasque(input: string): string {
     //    would have refused `baxuena -89.2 ° C` too, which is the very case this rule exists for.
     //    What actually separates them is the writer's own spacing: all four genuine negatives in this corpus
     //    are written TIGHT (`-89.2`, `−94,7`, `(-66`, `-2,8`), and every dash used as punctuation is spaced.
-    s = tr(s, /(?<![\d.]\s{0,3})(?<![\p{L}\p{M}.,])[−-](?=\d)/gu, "minus ");
+    s = rewrite(s, /(?<![\d.]\s{0,3})(?<![\p{L}\p{M}.,])[−-](?=\d)/gu, "minus ");
 
     // 5) THE CASE ENDING GLUED TO A FIGURE — the largest class in this corpus at ×296, and the one that
     //    produced a stranded consonant cluster: `1980an` read *mila bederatziehun eta laurogei AN*, with the
@@ -347,7 +347,7 @@ export function normalizeBasque(input: string): string {
     //    with the ending stranded — the very defect this step exists for, in its other written form. ×3 in
     //    the retained text (`995-ko`, `26-en`, `18-n`), and one of them is the header's own `2.18.19-26-en`.
     const endingAlt = CASE_ENDINGS.join("|");
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+)(?:,(\\d+))?(-?)(${endingAlt})(?![\\p{L}\\p{M}])`, "gu"),
         (whole, digits: string, frac: string | undefined, hyphen: string, ending: string) => {
             const n = Number(digits);
@@ -375,7 +375,7 @@ export function normalizeBasque(input: string): string {
     //    ⚠ THE GUARDS EXCLUDE A MULTI-COMMA RUN on both sides, which leaves a comma-separated LIST alone, and
     //    a trailing letter, which leaves an ending-carrying figure to step 4. A following clause mark is NOT
     //    excluded (trap 58) — `93,55.` at a sentence end is still a decimal.
-    s = tr(s, /(?<![\d,])(\d+),(\d+)(?![\d,\p{L}\p{M}])/gu,
+    s = rewrite(s, /(?<![\d,])(\d+),(\d+)(?![\d,\p{L}\p{M}])/gu,
         (_m, a: string, b: string) => `${a} ${DECIMAL_WORD} ${fractionDigits(b)}`);
 
     return tidy(s);
@@ -418,5 +418,5 @@ function glueFraction(head: string, frac: string, ending: string): string | unde
 /** ⚠ A padded replacement doubles a space that was already there and can leave one at an edge. SLOT-GAP is a
  *  corpus-diff defect class; this pass may not feed it. */
 function tidy(s: string): string {
-    return s.replace(/[^\S\n]{2,}/gu, " ").replace(/^[^\S\n]+|[^\S\n]+$/gu, "");
+    return rewrite(rewrite(s, /[^\S\n]{2,}/gu, " "), /^[^\S\n]+|[^\S\n]+$/gu, "");
 }

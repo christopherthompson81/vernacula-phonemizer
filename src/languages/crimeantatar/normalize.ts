@@ -62,7 +62,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** ⚠ NEVER `\b` — Crimean Tatar carries `â ç ğ ı ñ ö ş ü`, which `\b` treats as boundaries (trap 1/23). */
 /**
@@ -99,20 +99,20 @@ export function normalizeCrimeanTatar(input: string): string {
     // 1) THE PERCENT SIGN AND ITS CASE SUFFIX, TOGETHER AND BEFORE THE TIER. Turkic agglutination lands on
     //    the symbol through a hyphen here — "dünya okean yüzüniñ 0,7%-ine kele" — and the tier reads the
     //    sign and stops, leaving `ine` to reach the g2p as a bare syllable (it reads *ine* today).
-    s = tr(s, /(\d)\s?%\s?-?\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 faiz$2");
+    s = rewrite(s, /(\d)\s?%\s?-?\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 faiz$2");
 
     // 2) ⚠ THE AUTHOR'S OWN SQUARE MEASURE, BEFORE THE TIER. When the corpus writes `kvadrat` itself the
     //    unit abbreviation is no longer adjacent to its number — "5 kvadrat km qaplağan", "10 biñ kvadrat
     //    km-ge yaqın" — and the tier's number-adjacency requirement cannot bridge the word the writer
     //    supplied. The exponent word is already there, so only the unit needs expanding.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}kvadrat(\\s+)km${NOT_LETTER_AFTER}`, "gu"), "kvadrat$1kilometr");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}kvadrat(\\s+)km${NOT_LETTER_AFTER}`, "gu"), "kvadrat$1kilometr");
     //    …and the RUSSIAN MAGNITUDE ABBREVIATIONS, which belong here for the same reason and carry an
     //    optional dot: "106,2 mln. km² meydanlıqqa", "$167,8 mlrd UMV bar edi". Expanded before the tier,
     //    `106,2 million km²` composes as a magnitude + unit + exponent in one match.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}mln\\s?\\.\\s?`, "gu"), "million ");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}mlrd\\s?\\.\\s?`, "gu"), "milliard ");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}mln${NOT_LETTER_AFTER}`, "gu"), "million");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}mlrd${NOT_LETTER_AFTER}`, "gu"), "milliard");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}mln\\s?\\.\\s?`, "gu"), "million ");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}mlrd\\s?\\.\\s?`, "gu"), "milliard ");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}mln${NOT_LETTER_AFTER}`, "gu"), "million");
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}mlrd${NOT_LETTER_AFTER}`, "gu"), "milliard");
 
     // 3) THE SHARED SYMBOL TIER, as the Punjabi/Saraiki/Karakalpak layers order it: its own numeral pattern
     //    reads `38.765` and `1,5` as ONE token, and steps 3 and 4 split precisely those.
@@ -124,23 +124,23 @@ export function normalizeCrimeanTatar(input: string): string {
     //    `+24,6°C`, `1,5 million`, `5.9%`). The three-digit test decides all three marks.
     //    ⚠ THE WHOLE NUMBER AT ONCE (trap 63), and the trailing guard rejects a DIGIT and nothing else
     //    (trap 58).
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
+        (_m, head: string, rest: string) => head + rewrite(rest, /,/gu, ""));
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     // 5) THE DECIMAL SEPARATORS, NEUTRALISED. ⚠ NO DECIMAL WORD IS SOURCEABLE — `nokta` and `ülüş` are both
     //    ABSENT from this wiki — so the mark is spent rather than spoken, which is the Punjabi choice and
     //    the defect actually being fixed: `+24,6°C` reads as a phrase break mid-quantity today.
-    s = tr(s, /(\d)[.,](?=\d)/gu, "$1 ");
+    s = rewrite(s, /(\d)[.,](?=\d)/gu, "$1 ");
 
     // 6) THE ERA MARKER. `m.e.` is *milâttan evel* and the corpus writes it out two paragraphs away —
     //    "Zemaneviy Alupka topraqlarında insannıñ yerleşmeleri **milâttan evel** VIII biñyıllıqta peyda
     //    oldı", "**milâttan evel** III asırda meydanğa kelgen" — beside `m.e. 753 senesi` abbreviated.
     //    ⚠ THE FINAL DOT IS KEPT AT A SENTENCE END, or the pause is lost outright (trap 10).
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}m\\s?\\.\\s?e\\s?\\.`, "gu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}m\\s?\\.\\s?e\\s?\\.`, "gu"),
         (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? "milâttan evel." : "milâttan evel";
@@ -163,7 +163,7 @@ export function normalizeCrimeanTatar(input: string): string {
         ["ğ\\s?\\.\\s?b\\s?\\.", "ğarbiy", "boyluq"],
     ];
     for (const [pat, adj, noun] of coords)
-        s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${pat}(\\s*)(${noun}\\p{L}*)?`, "gu"),
+        s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}${pat}(\\s*)(${noun}\\p{L}*)?`, "gu"),
             (_m, gap: string, head?: string) => (head === undefined ? `${adj} ${noun}${gap}` : `${adj}${gap}${head}`));
 
     // 8) RANGES — ⚠ AND THEY RUN BEFORE THE SIGNS, WHICH INVERTS THE FLEET ORDER. See the header: this
@@ -174,13 +174,13 @@ export function normalizeCrimeanTatar(input: string): string {
     //    imposing the connective on a bare dash would double a word the writer already chose or not.
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), and an adjacent slash means a
     //    citation (`m.e. 754/753 seneleri`) rather than a span.
-    s = tr(s, /(\d)\s?[–—]\s?(?=[+-]?\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=[+-]?\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // 9) THE MINUS. ⚠ ONLY THE MINUS — see the header: no plus word survives the sourcing check, and a
     //    plus does not invert its operand, so the silence costs nothing. `(?<!\d)` is what leaves the
     //    ranges above alone; by this point they have already been spent anyway.
-    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1minus $2");
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1minus $2");
 
     // 10) DEGREES. ⚠ THE SCALE LETTER MAY BE CYRILLIC (U+0421) and it MAY CARRY A CASE SUFFIX through a
     //    hyphen — "suv arareti +23 °C-den +26 °C-ge qadar deñişe", "minus 16°С-ge yaqın". The suffix
@@ -188,10 +188,10 @@ export function normalizeCrimeanTatar(input: string): string {
     // ⚠ THE LOWERCASE SCALE LETTER IS IN THE CLASS, NOT IN AN `i` FLAG. `\p{Ll}` below is the case SUFFIX
     //    and it is genuinely lowercase-only; under `i` that property folds and matches uppercase too, so
     //    the flag would silently widen the suffix capture while fixing the scale letter.
-    s = tr(s, /(\d)\s?°\s?[CСcс]\s?-\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 derece$2");
-    s = tr(s, /(\d)\s?°\s?[CСcс](?![\p{L}\p{M}])/gu, "$1 derece");
-    s = tr(s, /(\d)\s?°\s?-\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 derece$2");
-    s = tr(s, /(\d)\s?°/gu, "$1 derece ");
+    s = rewrite(s, /(\d)\s?°\s?[CСcс]\s?-\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 derece$2");
+    s = rewrite(s, /(\d)\s?°\s?[CСcс](?![\p{L}\p{M}])/gu, "$1 derece");
+    s = rewrite(s, /(\d)\s?°\s?-\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 derece$2");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 derece ");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

@@ -12,6 +12,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Finnish;
 
@@ -231,7 +232,7 @@ public static class Normalize
         do
         {
             prev = t;
-            t = SPACE_GROUP.Replace(t, "");
+            t = Rewrite(t, SPACE_GROUP, "");
         } while (t != prev);
 
         // 2) DOTTED ABBREVIATIONS — multi-dot before single-dot, era markers before the generic ones, and
@@ -240,7 +241,7 @@ public static class Normalize
         foreach (var (re, word, keepFinal) in ABBREV)
         {
             var frozen = t;
-            t = re.Replace(t, m =>
+            t = Rewrite(t, re, m =>
             {
                 if (!keepFinal || !m.Value.EndsWith(".", StringComparison.Ordinal)) return word;
                 var after = CLOSERS.Replace(frozen[(m.Index + m.Value.Length)..], "");
@@ -250,7 +251,7 @@ public static class Normalize
 
         // 3) DOTTED DATES, BEFORE the ordinal rule — otherwise its month/lowercase lookahead never fires and
         //    the three fields read as three cardinals separated by two clause pauses.
-        t = DOTTED_DATE_Y.Replace(t, m =>
+        t = Rewrite(t, DOTTED_DATE_Y, m =>
         {
             var d = Js.Number(m.Groups[1].Value);
             var mo = Js.Number(m.Groups[2].Value);
@@ -258,7 +259,7 @@ public static class Normalize
                 ? $"{ord} {MONTHS[(int)mo]} {m.Groups[3].Value}"
                 : m.Value;
         });
-        t = DOTTED_DATE.Replace(t, m =>
+        t = Rewrite(t, DOTTED_DATE, m =>
         {
             var d = Js.Number(m.Groups[1].Value);
             var mo = Js.Number(m.Groups[2].Value);
@@ -273,73 +274,73 @@ public static class Normalize
         // 4a) THE RANGE FIRST, AND THE ORDER IS THE WHOLE OF IT. `kello 6.30 ja 7.30` is matched as ONE span
         //     so the marker licenses both operands — which means it must run BEFORE the single arm, or that
         //     arm has already rewritten `6.30` and the lookbehind no longer sees a digit to anchor on.
-        t = CLOCK_RANGE.Replace(t, m =>
+        t = Rewrite(t, CLOCK_RANGE, m =>
         {
             var a = ClockBody(m.Groups[1].Value, m.Groups[2].Value);
             var b = ClockBody(m.Groups[4].Value, m.Groups[5].Value);
             return a is not null && b is not null ? $"{a}{m.Groups[3].Value}{b}" : m.Value;
         });
-        t = CLOCK.Replace(t, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value) ?? m.Value);
+        t = Rewrite(t, CLOCK, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value) ?? m.Value);
         // 4b) THE PARENTHETICAL TIMEZONE GLOSS — keyed on the ZONE NAME rather than on the bracket, because
         //     a bracket alone licenses nothing. ⚠ `Noin 11.29` IS DELIBERATELY LEFT: `noin` is a general
         //     quantity hedge, not a time word, and one instance is not a marker.
-        t = CLOCK_PAREN.Replace(t, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value) ?? m.Value);
+        t = Rewrite(t, CLOCK_PAREN, m => ClockBody(m.Groups[1].Value, m.Groups[2].Value) ?? m.Value);
 
         // 5) THE BARE `N.` ORDINAL — the largest rule in the file. THE ORDINAL RANGE IS CLAIMED FIRST, or its
         //    LEFT operand is stranded and read as a cardinal; only the connective is refused.
-        t = ORDINAL_RANGE.Replace(t, m =>
+        t = Rewrite(t, ORDINAL_RANGE, m =>
         {
             var x = Ordinal(Js.Number(m.Groups[1].Value));
             var y = Ordinal(Js.Number(m.Groups[2].Value));
             return x is not null && y is not null ? $"{x} {y}" : m.Value;
         });
-        t = ORDINAL_BARE.Replace(t, m => Ordinal(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        t = Rewrite(t, ORDINAL_BARE, m => Ordinal(Js.Number(m.Groups[1].Value)) ?? m.Value);
 
         // 6) THE ORDINAL COLON SUFFIX `N:s` — the written `s` IS the nominative ending, so there is nothing
         //    to inflect. Restricted to `:s` on purpose; the oblique forms fall through to step 7.
-        t = ORDINAL_COLON.Replace(t, m => Ordinal(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        t = Rewrite(t, ORDINAL_COLON, m => Ordinal(Js.Number(m.Groups[1].Value)) ?? m.Value);
 
         // 7) THE REMAINING COLON SUFFIXES — the PRICED REFUSAL. The colon is a morpheme joint and
         //    `clausePunctuation` reads it as a clause pause. ⚠ THE TWO ARMS DIFFER: after DIGITS the suffix
         //    survives as its own token, but after a SYMBOL a trailing letter makes the tier DECLINE the whole
         //    match, so the symbol arm drops the suffix with the colon.
-        t = COLON_AFTER_DIGIT.Replace(t, "");
-        t = COLON_AFTER_SYMBOL.Replace(t, "");
-        t = COLON_AFTER_UNIT.Replace(t, "");
+        t = Rewrite(t, COLON_AFTER_DIGIT, "");
+        t = Rewrite(t, COLON_AFTER_SYMBOL, "");
+        t = Rewrite(t, COLON_AFTER_UNIT, "");
 
         // 8) THE APOSTROPHE GENITIVE. ⚠ GUARDED ON A CONSONANT BEFORE IT, because Finnish uses the SAME mark
         //    for its own vowel-hiatus boundary (`raa'asti`), where gluing would create a spurious long vowel.
-        t = APOSTROPHE_GENITIVE.Replace(t, "");
+        t = Rewrite(t, APOSTROPHE_GENITIVE, "");
 
         // 9) THE DECIMAL COMMA — the second-largest defect. ⚠ THE FRACTION KEEPS ITS DIGITS AND SO DOES THE
         //    INTEGER: the rule inserts ONE word, which is what preserves the number–unit adjacency the shared
         //    tier matches on.
-        t = DECIMAL_COMMA.Replace(t, m =>
+        t = Rewrite(t, DECIMAL_COMMA, m =>
             $"{m.Groups[1].Value} {DECIMAL_WORD} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 10) DEGREES, BEFORE any rule that could claim the scale letter. ⚠ THE ARC-MINUTE `′` IS LEFT ALONE
         //     — reading the ring without the tick improves the degree and leaves that gap as it was.
-        t = DEG_F_SIGN.Replace(DEG_C_SIGN.Replace(t, "°C"), "°F");
-        t = DEGREE_C.Replace(t, "$1 astetta");
-        t = DEGREE_F.Replace(t, "$1 astetta fahrenheitia");
-        t = DEGREE_BARE.Replace(t, "$1 astetta");
+        t = Rewrite(Rewrite(t, DEG_C_SIGN, "°C"), DEG_F_SIGN, "°F");
+        t = Rewrite(t, DEGREE_C, "$1 astetta");
+        t = Rewrite(t, DEGREE_F, "$1 astetta fahrenheitia");
+        t = Rewrite(t, DEGREE_BARE, "$1 astetta");
 
         // 11) THE MINUS AND PLUS SIGNS — the fleet shape, and the width is a MEASUREMENT: the plain form
         //     scores 3 true / 0 false for the minus and 1/0 for the plus over the retained text.
-        t = MINUS.Replace(t, "miinus ");
-        t = PLUS.Replace(t, "plus ");
-        t = PLUS_INFIX.Replace(t, " plus ");
+        t = Rewrite(t, MINUS, "miinus ");
+        t = Rewrite(t, PLUS, "plus ");
+        t = Rewrite(t, PLUS_INFIX, " plus ");
 
         // 11b) THE RELATIONAL SIGNS — ×0 in this corpus, read anyway, because a DROPPED sign is inaudible.
         //      Both words come from the fi.wikipedia article that NAMES THE SIGN BESIDE THE WORD.
         //      ⚠ `÷` and `±` are REFUSED, and both refusals are findings — see the TS.
-        t = GREATER.Replace(LESS.Replace(EQUALS.Replace(t, " yhtä suuri kuin "), " pienempi kuin "), " suurempi kuin ");
+        t = Rewrite(Rewrite(Rewrite(t, EQUALS, " yhtä suuri kuin "), LESS, " pienempi kuin "), GREATER, " suurempi kuin ");
 
         // 12) THE AMPERSAND — spaced on both sides, always, or `B&B` fuses into one token.
-        t = AMPERSAND.Replace(AMP_ENTITY.Replace(t, "&"), " ja ");
+        t = Rewrite(Rewrite(t, AMP_ENTITY, "&"), AMPERSAND, " ja ");
 
         // The insertions above pad with spaces so a word never fuses with its neighbours; collapse the runs.
-        return MULTI_SPACE.Replace(t, " ");
+        return Rewrite(t, MULTI_SPACE, " ");
     }
 
     /**
@@ -372,7 +373,7 @@ public static class Normalize
      * the honest reading.
      */
     private static string ResolveColonInflection(string text) =>
-        COLON_HEAD.Replace(text, m =>
+        Rewrite(text, COLON_HEAD, m =>
         {
             var head = m.Groups[1].Value;
             var suf = m.Groups[2].Value;

@@ -32,7 +32,7 @@
 import { makeSymbolNormalizer, type CountForms } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { HEAD_NOUN, ordinalWords } from "./ordinals.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * Latvian AGREEMENT for a counted noun: SINGULAR after a count ending in ...1 but NOT ...11 — *21 procents*,
@@ -294,7 +294,7 @@ function abbreviations(text: string): string {
 const ORDINAL_RANGE = /(?<![\d.,\p{L}])(\d{1,4})\.\s*[-–—]\s*(\d{1,4})\.(\s+)(\p{Ll}[\p{L}\p{M}]*)/gu;
 
 function ordinalRange(text: string): string {
-    return text.replace(ORDINAL_RANGE, (whole, a: string, b: string, gap: string, next: string) => {
+    return rewrite(text, ORDINAL_RANGE, (whole, a: string, b: string, gap: string, next: string) => {
         const c = HEAD_NOUN[next.toLowerCase()];
         const first = c === undefined ? undefined : ordinalWords(Number(a), c);
         const second = c === undefined ? undefined : ordinalWords(Number(b), c);
@@ -354,7 +354,7 @@ function ordinalRange(text: string): string {
  * is an ordinary sentence boundary. Neither may be touched.
  */
 function ordinalPeriod(text: string): string {
-    return text.replace(/(?<![\d.,])(\d{1,4})\.(\s+)(\p{Ll}[\p{L}\p{M}]*)/gu, (whole, fig: string, gap: string, next: string) => {
+    return rewrite(text, /(?<![\d.,])(\d{1,4})\.(\s+)(\p{Ll}[\p{L}\p{M}]*)/gu, (whole, fig: string, gap: string, next: string) => {
         const c = HEAD_NOUN[next.toLowerCase()];
         if (c === undefined) return `${fig}${gap}${next}`; // period dropped, figure left cardinal — see above
         const words = ordinalWords(Number(fig), c);
@@ -426,7 +426,7 @@ const RANGE = /(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?!\d
 const DEGREE_SIGN = /(\d+(?:,\d+)?)\s*°(?:\s*([CF])(?![\p{L}\p{M}]))?/gui;
 
 function degrees(text: string): string {
-    return text.replace(DEGREE_SIGN, (whole: string, fig: string, scale: string | undefined, offset: number, full: string) => {
+    return rewrite(text, DEGREE_SIGN, (whole: string, fig: string, scale: string | undefined, offset: number, full: string) => {
         const forms = scale ? SCALE[scale.toUpperCase()]! : DEGREE;
         /**
          * ⚠ A FIGURE WITH A FRACTION TAKES THE PLURAL, whatever its integer part. `21,5` ends in ...1 by
@@ -498,7 +498,7 @@ function signs(text: string): string {
  * zeros are emitted as words and only the remainder is read as a number.
  */
 function decimalComma(text: string): string {
-    return text.replace(/(?<![\d,.])(\d+),(\d+)(?![\d,.])/gu, (whole, head: string, frac: string) => {
+    return rewrite(text, /(?<![\d,.])(\d+),(\d+)(?![\d,.])/gu, (whole, head: string, frac: string) => {
         if (head.length > 15 || frac.length > 15) return whole;
         const zeros = /^0*/u.exec(frac)![0];
         const rest = frac.slice(zeros.length);
@@ -511,11 +511,11 @@ function decimalComma(text: string): string {
 /** The Latvian normalization pre-pass. See the numbered steps above; the order is load-bearing. */
 export function normalizeLatvian(input: string): string {
     let s = input;
-    s = tr(s, GROUP_SPACE, ""); // 1. de-group 29 660 → 29660, before anything reads a number
+    s = rewrite(s, GROUP_SPACE, ""); // 1. de-group 29 660 → 29660, before anything reads a number
     s = abbreviations(s); // 2. dotted abbreviations, whose periods are the same periods as step 4's
     s = ordinalRange(s); // 3. N.–M. + noun, before either half can be claimed separately
     s = ordinalPeriod(s); // 4. the ordinal period, before any step consumes a dot
-    s = tr(s, RANGE, `$1 līdz $2`); // 5. ranges, before a dash can be read as a minus
+    s = rewrite(s, RANGE, `$1 līdz $2`); // 5. ranges, before a dash can be read as a minus
     s = SYMBOLS(s); // 6. percent, currency, units, rates, exponents
     s = degrees(s); // 7. ° and the scale names
     s = signs(s); // 8. the remaining signs

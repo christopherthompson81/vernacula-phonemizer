@@ -5,6 +5,7 @@
  * and in particular for why Danish is NOT Norwegian (the period is a thousands separator here).
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Danish;
 
@@ -119,36 +120,36 @@ public static class Normalize
         do
         {
             prev = t;
-            t = GROUPED_THOUSANDS.Replace(t, "");
+            t = Rewrite(t, GROUPED_THOUSANDS, "");
         } while (t != prev);
 
         // 2) DECIMAL COMMA. Fractional part spoken digit by digit.
-        t = DECIMAL_COMMA.Replace(t, m =>
+        t = Rewrite(t, DECIMAL_COMMA, m =>
             $"{m.Groups[1].Value} komma {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 3) CLOCK, COLON FORM ONLY.
-        t = CLOCK.Replace(t, "$1 $2");
+        t = Rewrite(t, CLOCK, "$1 $2");
 
         // 4) ABBREVIATIONS, dot consumed.
-        foreach (var (re, word) in ABBREV) t = re.Replace(t, word);
+        foreach (var (re, word) in ABBREV) t = Rewrite(t, re, word);
 
         // 5) PERCENT.
-        t = PERCENT.Replace(t, "$1 procent");
+        t = Rewrite(t, PERCENT, "$1 procent");
 
         // 6) DEGREES, BEFORE the unit rules.
-        t = DEG_F_SIGN.Replace(DEG_C_SIGN.Replace(t, "°C"), "°F");
-        t = DEG_C.Replace(t, "$1 grader celsius");
-        t = DEG_F.Replace(t, "$1 grader fahrenheit");
+        t = Rewrite(Rewrite(t, DEG_C_SIGN, "°C"), DEG_F_SIGN, "°F");
+        t = Rewrite(t, DEG_C, "$1 grader celsius");
+        t = Rewrite(t, DEG_F, "$1 grader fahrenheit");
         // ⚠ The trailing space keeps the noun off the following letter run (`35°V` → *ɡʁˈaðeʁv*); emitted
         // only when a letter actually follows, and the space-run tidy below collapses it.
-        t = DEG_GLUED.Replace(t, "$1 grader ");
-        t = DEG_BARE.Replace(t, "$1 grader");
+        t = Rewrite(t, DEG_GLUED, "$1 grader ");
+        t = Rewrite(t, DEG_BARE, "$1 grader");
 
         // 7) SQUARED / CUBED UNITS.
-        foreach (var (re, word) in SQUARED) t = re.Replace(t, word);
+        foreach (var (re, word) in SQUARED) t = Rewrite(t, re, word);
 
         // 8) ORDINAL RANGES — before the ordinal-dot rule and before the cardinal range rule.
-        t = ORDINAL_RANGE.Replace(t, m =>
+        t = Rewrite(t, ORDINAL_RANGE, m =>
         {
             var first = Lookup(ORDINALS, Js.NumberToString(Js.Number(m.Groups[1].Value)));
             var second = Lookup(ORDINALS, Js.NumberToString(Js.Number(m.Groups[2].Value)));
@@ -156,7 +157,7 @@ public static class Normalize
         });
 
         // 9) COORDINATED ORDINALS — a coordinator between two dotted numbers makes both ordinals.
-        t = ORDINAL_PAIR.Replace(t, m =>
+        t = Rewrite(t, ORDINAL_PAIR, m =>
         {
             var first = Lookup(ORDINALS, m.Groups[1].Value);
             var second = Lookup(ORDINALS, m.Groups[3].Value);
@@ -166,33 +167,33 @@ public static class Normalize
         });
 
         // 10) ORDINAL DOT — the following-lowercase guard separates it from a sentence ending in a year.
-        t = ORDINAL_DOT.Replace(t, m => Lookup(ORDINALS, m.Groups[1].Value) ?? m.Value);
+        t = Rewrite(t, ORDINAL_DOT, m => Lookup(ORDINALS, m.Groups[1].Value) ?? m.Value);
 
         // 11) RANGES.
-        t = RANGE.Replace(t, "$1 til $2");
+        t = Rewrite(t, RANGE, "$1 til $2");
 
         // 12) CURRENCY, in BOTH positions.
-        t = CURRENCY_CODE.Replace(t, "$1 dollar");
+        t = Rewrite(t, CURRENCY_CODE, "$1 dollar");
         foreach (var arms in CURRENCY_ARMS)
         {
-            t = arms.Postposed.Replace(t, $"$1 {arms.Word}");
+            t = Rewrite(t, arms.Postposed, $"$1 {arms.Word}");
             // ⚠ The trailing space keeps the noun from fusing with an abbreviated magnitude glued to the
             // number (`$110m` → *dˈolaʁm*); emitted only when a letter actually follows.
-            t = arms.PreposedGlued.Replace(t, $"$1 {arms.Word} ");
-            t = arms.Preposed.Replace(t, $"$1 {arms.Word}");
+            t = Rewrite(t, arms.PreposedGlued, $"$1 {arms.Word} ");
+            t = Rewrite(t, arms.Preposed, $"$1 {arms.Word}");
         }
 
         // 13) SIGNED NUMBERS.
-        t = SIGNED.Replace(t, m => $"{(m.Groups[1].Value == "+" ? "plus" : "minus")} {m.Groups[2].Value}");
+        t = Rewrite(t, SIGNED, m => $"{(m.Groups[1].Value == "+" ? "plus" : "minus")} {m.Groups[2].Value}");
 
         // 14) ARITHMETIC AND RELATIONAL SIGNS.
-        t = INFIX_PLUS.Replace(t, "$1 plus $2");
-        foreach (var (re, word) in RELATIONAL) t = re.Replace(t, word);
+        t = Rewrite(t, INFIX_PLUS, "$1 plus $2");
+        foreach (var (re, word) in RELATIONAL) t = Rewrite(t, re, word);
 
         // 15) AMPERSAND → og.
-        t = AMPERSAND.Replace(t, " og ");
+        t = Rewrite(t, AMPERSAND, " og ");
 
-        t = SPACE_RUN.Replace(t, " ");
+        t = Rewrite(t, SPACE_RUN, " ");
 
         // 16) THE SHARED TIER LAST.
         return SYMBOLS(t);

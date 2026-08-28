@@ -4,6 +4,7 @@
  * Ported from src/languages/catalan/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Catalan;
 
@@ -49,7 +50,7 @@ public static class Normalize
         }
         stem = stem.EndsWith("ó", StringComparison.Ordinal) ? $"{stem[..^1]}on"
             : stem == "cents" ? "cent"
-            : STEM_FINAL_AE.Replace(stem, "");
+            : Rewrite(stem, STEM_FINAL_AE, "");
         words[^1] = fem ? $"{stem}ena" : $"{stem}è";
         return string.Join(" ", words);
     }
@@ -154,18 +155,18 @@ public static class Normalize
         var s = input;
 
         // 1) ERA MARKERS and MULTI-DOT ABBREVIATIONS, before the single-dot rule.
-        foreach (var (re, word) in MULTI_DOT) s = re.Replace(s, word);
+        foreach (var (re, word) in MULTI_DOT) s = Rewrite(s, re, word);
 
         // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
-        s = DOTTED_CAPS.Replace(s, m => DOTS_AND_SPACE.Replace(m.Value, ""));
-        s = CAP_DOT_CAP.Replace(s, "");
+        s = Rewrite(s, DOTTED_CAPS, m => DOTS_AND_SPACE.Replace(m.Value, ""));
+        s = Rewrite(s, CAP_DOT_CAP, "");
 
         // 3) SINGLE-DOT ABBREVIATIONS.
-        s = ABBREV_MID.Replace(s, m => $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}{m.Groups[2].Value}");
-        s = ABBREV_END.Replace(s, m => $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}.");
+        s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}{m.Groups[2].Value}");
+        s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[Js.ToLowerCase(m.Groups[1].Value)]}.");
 
         // 4) ORDINALS — the `Nè`/`Na`/`Nr`/`Nn`/`Nt`/`Nns` form.
-        s = ORDINAL.Replace(s, m0 =>
+        s = Rewrite(s, ORDINAL, m0 =>
         {
             var n = Js.Number(m0.Groups[1].Value);
             var sfx = m0.Groups[2].Value;
@@ -178,15 +179,15 @@ public static class Normalize
             if (mm == "n" && last != "segon") return m0.Value;
             if (mm == "ns" && last != "segon") return m0.Value;
             if (mm == "t" && last != "quart") return m0.Value;
-            if (mm == "ns") return TRAILING_SEGON.Replace(ord, "segons");
+            if (mm == "ns") return Rewrite(ord, TRAILING_SEGON, "segons");
             return ord;
         });
 
         // 4b) DECADES — `1920s`, `90s`. Drop the plural marker; the number itself is the decade.
-        s = DECADE.Replace(s, "$1");
+        s = Rewrite(s, DECADE, "$1");
 
         // 5) CLOCK, in the COLON form.
-        s = CLOCK.Replace(s, m0 =>
+        s = Rewrite(s, CLOCK, m0 =>
         {
             double hv = Js.Number(m0.Groups[1].Value), mv = Js.Number(m0.Groups[2].Value);
             if (hv > 23 || mv > 59) return m0.Value;
@@ -197,50 +198,50 @@ public static class Normalize
         });
 
         // 6) VERSION DOTS and DOT DECIMALS.
-        s = VERSION_DOT.Replace(s, "$1 punt $2");
+        s = Rewrite(s, VERSION_DOT, "$1 punt $2");
 
         // 7) FRACTIONS.
-        s = FRAC_THREE_QUARTERS.Replace(s, "$1 i tres quarts");
-        s = FRAC_HALF.Replace(s, "$1 i mig");
-        s = FRACTION.Replace(s, m0 =>
+        s = Rewrite(s, FRAC_THREE_QUARTERS, "$1 i tres quarts");
+        s = Rewrite(s, FRAC_HALF, "$1 i mig");
+        s = Rewrite(s, FRACTION, m0 =>
         {
             double num = Js.Number(m0.Groups[1].Value), den = Js.Number(m0.Groups[2].Value);
             if (den == 2) return num == 1 ? "mig" : $"{Numbers.NumberToWords(num)} mitjos";
             var noun = den == 3 ? "terç" : den == 4 ? "quart" : OrdinalWords(den, false);
             if (noun is null) return m0.Value;
-            var plural = den == 3 ? "terços" : den == 4 ? "quarts" : ORD_E_END.Replace(noun, "ens");
+            var plural = den == 3 ? "terços" : den == 4 ? "quarts" : Rewrite(noun, ORD_E_END, "ens");
             return $"{Numbers.NumberToWords(num)} {(num == 1 ? noun : plural)}";
         });
 
         // 8) DEGREES.
-        s = DEG_C.Replace(s, "$1 graus Celsius");
-        s = DEG_F.Replace(s, "$1 graus Fahrenheit");
-        s = DEG_COMPASS.Replace(s, m => $"{m.Groups[1].Value} graus {COMPASS[m.Groups[2].Value.ToUpperInvariant()]}");
-        s = DEG_BARE.Replace(s, "$1 graus");
+        s = Rewrite(s, DEG_C, "$1 graus Celsius");
+        s = Rewrite(s, DEG_F, "$1 graus Fahrenheit");
+        s = Rewrite(s, DEG_COMPASS, m => $"{m.Groups[1].Value} graus {COMPASS[m.Groups[2].Value.ToUpperInvariant()]}");
+        s = Rewrite(s, DEG_BARE, "$1 graus");
 
         // 9) GIGAHERTZ — AFTER the version rule, BEFORE the tier.
-        s = GHZ.Replace(s, "$1 gigahercis");
+        s = Rewrite(s, GHZ, "$1 gigahercis");
 
         // 10) SIGNS.
-        s = PLUS_MINUS.Replace(s, " més menys ");
-        s = PLUS.Replace(s, " més ");
-        s = MINUS.Replace(s, "menys $1");
-        s = AMPERSAND_INITIALS.Replace(s, m =>
+        s = Rewrite(s, PLUS_MINUS, " més menys ");
+        s = Rewrite(s, PLUS, " més ");
+        s = Rewrite(s, MINUS, "menys $1");
+        s = Rewrite(s, AMPERSAND_INITIALS, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
             return $"{LETTER_NAME.GetValueOrDefault(Js.ToLowerCase(a)) ?? a} i {LETTER_NAME.GetValueOrDefault(Js.ToLowerCase(b)) ?? b}{m.Groups[3].Value}";
         });
-        s = AMPERSAND_SPACED.Replace(s, " i ");
-        s = EQUALS.Replace(s, "$1 és igual a $2");
-        s = DIVIDE.Replace(s, "$1 dividit per $2");
-        s = LESS_THAN.Replace(s, "$1 és menor que $2");
-        s = GREATER_THAN.Replace(s, "$1 és major que $2");
-        s = TIMES.Replace(s, "$1 per $2");
+        s = Rewrite(s, AMPERSAND_SPACED, " i ");
+        s = Rewrite(s, EQUALS, "$1 és igual a $2");
+        s = Rewrite(s, DIVIDE, "$1 dividit per $2");
+        s = Rewrite(s, LESS_THAN, "$1 és menor que $2");
+        s = Rewrite(s, GREATER_THAN, "$1 és major que $2");
+        s = Rewrite(s, TIMES, "$1 per $2");
 
         // 11) INITIALISMS, LAST of the letter rules.
         s = NormalizeInitialisms(s);
 
-        return MULTI_SPACE.Replace(s, " ");
+        return Rewrite(s, MULTI_SPACE, " ");
     }
 }

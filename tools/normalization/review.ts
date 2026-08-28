@@ -199,13 +199,13 @@ function skipLiteral(code: string, at: number): number {
 export interface ReplaceCall { readonly pattern: string; readonly replacement: string }
 export function replaceCalls(code: string): ReplaceCall[] {
     const out: ReplaceCall[] = [];
-    // ⚠ `tr(x, …)` IS A REPLACE CALL. #1150 stage 2 rewrote ~3,200 normalizer sites from `s = s.replace(re,
-    // rep)` to `s = tr(s, re, rep)`; keying only on `.replace(` dropped this scanner from 3,743 call sites to
+    // ⚠ `rewrite(x, …)` IS A REPLACE CALL. #1150 stage 2 rewrote ~3,200 normalizer sites from `s = s.replace(re,
+    // rep)` to `s = rewrite(s, re, rep)`; keying only on `.replace(` dropped this scanner from 3,743 call sites to
     // 614 — an 84% loss — after which `localDeclarations` found almost no percent/currency declarations and
     // the blindness probe reported clean because it could see nothing. The open paren is the same in both
     // forms; only the argument that follows differs, and that is skipped below.
-    for (const m of code.matchAll(/(?:\.replace(?:All)?\s*\(|\btr\s*\(\s*[A-Za-z_$][\w$]*\s*,\s*)/gu)) {
-        const open = m.index! + (m[0].startsWith("tr") ? m[0].indexOf("(") : m[0].length - 1);
+    for (const m of code.matchAll(/(?:\.replace(?:All)?\s*\(|\brewrite\s*\(\s*[A-Za-z_$][\w$]*\s*,\s*)/gu)) {
+        const open = m.index! + (m[0].startsWith("rewrite") ? m[0].indexOf("(") : m[0].length - 1);
         let depth = 0, i = open, comma = -1;
         for (; i < code.length; i++) {
             const c = code[i]!;

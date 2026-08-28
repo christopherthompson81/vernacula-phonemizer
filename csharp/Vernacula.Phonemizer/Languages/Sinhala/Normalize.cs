@@ -6,6 +6,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Sinhala;
 
@@ -43,7 +44,7 @@ public static class Normalize
     private static readonly JsRe ZERO_WIDTH = JsRegex.Compile("[​-‍⁠﻿­]", "gu");
 
     /** Zero-width joiners and the HTML no-break space; run FIRST and again LAST. */
-    private static string StripJoiners(string s) => ZERO_WIDTH.Replace(NBSP.Replace(s, " "), "");
+    private static string StripJoiners(string s) => Rewrite(Rewrite(s, NBSP, " "), ZERO_WIDTH, "");
 
     private const string B = "(?<![඀-෿])";
     private const string E = "(?![඀-෿])";
@@ -122,38 +123,38 @@ public static class Normalize
         s = StripJoiners(s);
 
         // 2) Dotted abbreviations, closed list — era markers first.
-        foreach (var (rx, word) in DOTTED_ABBREV) s = rx.Replace(s, word);
+        foreach (var (rx, word) in DOTTED_ABBREV) s = Rewrite(s, rx, word);
 
         // 3) Sinhala-letter initials: the dot becomes a SPACE, not nothing.
-        s = INITIALS.Replace(s, m => TrimEnd(m.Value.Replace(".", " ", StringComparison.Ordinal)) + " ");
-        s = DOUBLE_SPACE.Replace(s, " ");
+        s = Rewrite(s, INITIALS, m => TrimEnd(m.Value.Replace(".", " ", StringComparison.Ordinal)) + " ");
+        s = Rewrite(s, DOUBLE_SPACE, " ");
 
         // 4) Thousands separator, then the truncated decimal (`.9%` → `0.9%`).
-        s = GROUPED.Replace(s, m => m.Value.Replace(",", "", StringComparison.Ordinal));
-        s = TRUNCATED_DECIMAL.Replace(s, "0.");
+        s = Rewrite(s, GROUPED, m => m.Value.Replace(",", "", StringComparison.Ordinal));
+        s = Rewrite(s, TRUNCATED_DECIMAL, "0.");
 
         // 5) Degrees — above the minus rule, which would otherwise attach the sign to the scale.
-        s = CELSIUS.Replace(s, m => $"සෙල්සියස් අංශක {Neg(m.Groups[1].Value)}{m.Groups[2].Value}");
-        s = FAHRENHEIT.Replace(s, m => $"ෆැරන්හයිට් අංශක {Neg(m.Groups[1].Value)}{m.Groups[2].Value}");
-        s = COMPASS_RE.Replace(s, m => $"අංශක {m.Groups[1].Value} {COMPASS[m.Groups[2].Value]}");
-        s = BARE_DEGREE.Replace(s, m => $"අංශක {Neg(m.Groups[1].Value)}{m.Groups[2].Value}");
-        s = KELVIN.Replace(s, "කෙල්වින් $1");
+        s = Rewrite(s, CELSIUS, m => $"සෙල්සියස් අංශක {Neg(m.Groups[1].Value)}{m.Groups[2].Value}");
+        s = Rewrite(s, FAHRENHEIT, m => $"ෆැරන්හයිට් අංශක {Neg(m.Groups[1].Value)}{m.Groups[2].Value}");
+        s = Rewrite(s, COMPASS_RE, m => $"අංශක {m.Groups[1].Value} {COMPASS[m.Groups[2].Value]}");
+        s = Rewrite(s, BARE_DEGREE, m => $"අංශක {Neg(m.Groups[1].Value)}{m.Groups[2].Value}");
+        s = Rewrite(s, KELVIN, "කෙල්වින් $1");
 
         // 6) Negative numbers — only U+2212, plus a string/bracket-initial ASCII sign.
-        s = ASCII_MINUS.Replace(s, "$1ඍණ ");
-        s = UNICODE_MINUS.Replace(s, "ඍණ ");
+        s = Rewrite(s, ASCII_MINUS, "$1ඍණ ");
+        s = Rewrite(s, UNICODE_MINUS, "ඍණ ");
 
         // 7) Rates — local, because the denominator takes a dative suffix and LEADS the phrase.
         foreach (var (rx, word) in RATES)
-            s = rx.Replace(s, m => m.Groups[1].Success ? $"{word} {m.Groups[1].Value}" : word);
+            s = Rewrite(s, rx, m => m.Groups[1].Success ? $"{word} {m.Groups[1].Value}" : word);
 
         // 8) The shared tier, with the two locally-spent `m` guards above it.
-        s = CURRENCY_MILLION_SUFFIX.Replace(s, "$1 මිලියන");
-        s = GLUED_METRES.Replace(s, "මීටර් $1");
+        s = Rewrite(s, CURRENCY_MILLION_SUFFIX, "$1 මිලියන");
+        s = Rewrite(s, GLUED_METRES, "මීටර් $1");
         s = SYMBOLS(s);
 
         // 9) The decimal point; the fractional digits are emitted one at a time.
-        s = DECIMAL_POINT.Replace(s, m =>
+        s = Rewrite(s, DECIMAL_POINT, m =>
             $"{m.Groups[1].Value} දශම {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // 12) Re-strip — the words emitted above carry their ordinary joiners.

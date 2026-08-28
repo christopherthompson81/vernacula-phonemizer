@@ -59,7 +59,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { MANIFEST } from "./manifest.ts";
 import { trLower } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const VOWEL = /[aeıioöuü]/u;
 
@@ -158,16 +158,16 @@ export function normalizeTurkish(input: string): string {
     //    phrase break, and before the initialism pass (step 7) which would otherwise spell MÖ as *me ö*.
     //    MÖ/MS are only claimed before a NUMBER: `MS` alone is multiple sclerosis in 2 of its 3 corpus
     //    occurrences ("MS olmaya", "MS; beyin …"), and only "MS 400" is the era.
-    s = tr(s, /(?<![\p{L}\p{M}])M\.\s?Ö\./gu, "milattan önce");
-    s = tr(s, /(?<![\p{L}\p{M}])M\.\s?S\./gu, "milattan sonra");
-    s = tr(s, /(?<![\p{L}\p{M}])MÖ(?=\s+\d)/gu, "milattan önce");
-    s = tr(s, /(?<![\p{L}\p{M}])MS(?=\s+\d)/gu, "milattan sonra");
+    s = rewrite(s, /(?<![\p{L}\p{M}])M\.\s?Ö\./gu, "milattan önce");
+    s = rewrite(s, /(?<![\p{L}\p{M}])M\.\s?S\./gu, "milattan sonra");
+    s = rewrite(s, /(?<![\p{L}\p{M}])MÖ(?=\s+\d)/gu, "milattan önce");
+    s = rewrite(s, /(?<![\p{L}\p{M}])MS(?=\s+\d)/gu, "milattan sonra");
 
     // 2) DOTTED ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a phrase
     //    break; at a phrase end it stays, because there it really is the sentence end. Boundaries are
     //    explicit lookarounds, never `\b` — `\b` is ASCII-defined and finds no boundary against ı/ö/ü/ş/ç/ğ.
-    s = tr(s, /(?<![\p{L}\p{M}])No\.['’]lu(?![\p{L}\p{M}])/gu, "numaralı"); // 11 No.'lu → 11 numaralı
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = rewrite(s, /(?<![\p{L}\p{M}])No\.['’]lu(?![\p{L}\p{M}])/gu, "numaralı"); // 11 No.'lu → 11 numaralı
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -175,7 +175,7 @@ export function normalizeTurkish(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -191,19 +191,19 @@ export function normalizeTurkish(input: string): string {
     //    The dot form declines when an apostrophe follows (`11.00'dan` ×1): collapsing it to `11'dan` would
     //    glue a suffix chosen for *sıfır sıfır* onto *bir*, breaking vowel harmony.
     const clock = (_m: string, h: string, min: string): string => (Number(min) === 0 ? h : `${h} ${min}`);
-    s = tr(s, /(?<![\d.,:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu, clock);
-    s = tr(s, /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d'’])/gu, clock);
+    s = rewrite(s, /(?<![\d.,:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu, clock);
+    s = rewrite(s, /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d'’])/gu, clock);
 
     // 4) COMPOUND `/` UNITS, before the shared symbol tier (see the function header). Turkish states the
     //    rate first — "saatte 83 kilometre" — so this reorders rather than substituting in place. It
     //    declines when the unit itself carries a suffix (`km/saate` ×1), where the reorder would strand it.
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?km\s?\/\s?(?:saat|sa|s)(?![\p{L}\p{M}])/gu, "saatte $1 kilometre");
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?mil\s?\/\s?(?:saat|sa|s)(?![\p{L}\p{M}])/gu, "saatte $1 mil");
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?m\s?\/\s?s(?![\p{L}\p{M}])/gu, "saniyede $1 metre");
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?km\s?\/\s?(?:saat|sa|s)(?![\p{L}\p{M}])/gu, "saatte $1 kilometre");
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?mil\s?\/\s?(?:saat|sa|s)(?![\p{L}\p{M}])/gu, "saatte $1 mil");
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?m\s?\/\s?s(?![\p{L}\p{M}])/gu, "saniyede $1 metre");
 
     // 5) DEGREE. `°` was dropped outright and a trailing C was read as Turkish c → d͡ʒ.
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 derece");
-    s = tr(s, /(\d)\s?°/gu, "$1 derece");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 derece");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 derece");
 
     // 6) SIGNS. `UTC+1` ×1 — the sign vanished entirely.
     // ⚠ ± AND THE MINUS ARE HERE ON THE STRENGTH OF THE SAME SOURCE AS THE RELATIONAL RULES BELOW:
@@ -212,10 +212,10 @@ export function normalizeTurkish(input: string): string {
     //    two juxtaposed, at no further sourcing cost.
     //    ⚠ ± NEEDS ITS OWN RULE: it is a single character (U+00B1), not a `+`, so no `+` rule can match
     //    inside it and the sign would otherwise be dropped in silence.
-    s = tr(s, /±/gu, " artı eksi ");
-    s = tr(s, /(\S)\+\s?(\d)/gu, "$1 artı $2");
-    s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1artı $2");
-    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1eksi $2");
+    s = rewrite(s, /±/gu, " artı eksi ");
+    s = rewrite(s, /(\S)\+\s?(\d)/gu, "$1 artı $2");
+    s = rewrite(s, /(^|\s)\+\s?(\d)/gu, "$1artı $2");
+    s = rewrite(s, /(^|[\s(])[-−–](\d)/gu, "$1eksi $2");
 
     // 6b) RELATIONAL AND DIVISION SIGNS. ⚠ TURKISH IS THE FIRST LANGUAGE WHERE THE READING REQUIRES CASE
     //     MORPHOLOGY ON AN OPERAND, and the source states every reading in full. tr.wikipedia's arithmetic
@@ -256,22 +256,22 @@ export function normalizeTurkish(input: string): string {
     const trWord = (t: string): string => numberToWords(Number(t)) || t;
     const OPERAND = String.raw`\d+`;
     const postposed = (sign: string, inflect: (w: string) => string, verb: string): void => {
-        s = tr(s, new RegExp(`(${OPERAND})\\s?${sign}\\s?(${OPERAND})`, "gu"),
+        s = rewrite(s, new RegExp(`(${OPERAND})\\s?${sign}\\s?(${OPERAND})`, "gu"),
             (_m, a: string, b: string) => `${trWord(a)} ${inflect(trWord(b))} ${verb}`);
     };
     postposed("<", ablative, "küçüktür");
     postposed(">", ablative, "büyüktür");
-    s = tr(s, /\s?=\s?/gu, " eşittir ");
-    s = tr(s, /\s?÷\s?/gu, " bölü ");
+    s = rewrite(s, /\s?=\s?/gu, " eşittir ");
+    s = rewrite(s, /\s?÷\s?/gu, " bölü ");
 
     //     THE AMPERSAND, dropped before, is a Latin-script printing ligature rather than an arithmetic sign —
     //     but Turkish IS a Latin-script language, so unlike `ko`/`ja` (where the symbol arrives inside a Latin
     //     run and takes a LOAN reading, 앤드 / アンド) the natural reading here is the language's own conjunction.
     //     `nl` already reads `&` as its native `en` on the same grounds.
-    s = tr(s, /\s?&\s?/gu, " ve ");
+    s = rewrite(s, /\s?&\s?/gu, " ve ");
 
     // 7) INITIALISMS, LAST of the letter rules: it must run after step 1 (else MÖ → *me ö*) and after step 2
-    //    (else an abbreviation's letters are spelled). Roman numerals need no sequencing here — `tr` is not
+    //    (else an abbreviation's letters are spelled). Roman numerals need no sequencing here — `rewrite` is not
     //    in registry.ts's ROMAN_NATIVE, so `II. Dünya Savaşı` has already become `2. Dünya Savaşı` before
     //    text() is called, and the ordinal rule then reads it correctly.
     s = normalizeInitialisms(s);

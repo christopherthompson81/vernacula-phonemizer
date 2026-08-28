@@ -5,6 +5,7 @@ using System.Globalization;
  * Ported from src/languages/hindi/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Hindi;
 
@@ -107,20 +108,20 @@ public static class Normalize
             // 1) ERA MARKERS, before the abbreviation rule in step 3 so the bare ई. is not claimed first.
             // ⚠ `\b` NEVER MATCHES BEFORE A DEVANAGARI LETTER — every boundary in this file is an explicit
             //    lookaround, and swapping one back to `\b` silently disables the guard.
-            s = ERA_ISP.Replace(s, "ईसा पूर्व");
-            s = ERA_IP.Replace(s, "ईसा पूर्व");
+            s = Rewrite(s, ERA_ISP, "ईसा पूर्व");
+            s = Rewrite(s, ERA_IP, "ईसा पूर्व");
 
             // 2) ORDINAL SUFFIXES. THE TRAILING BOUNDARY IS LOAD-BEARING: without it the suffix matches the
             //    START of an ordinary word and `10 वापस` glues into one token.
             if (ordinalRe is not null)
-                s = ordinalRe.Replace(s, m =>
+                s = Rewrite(s, ordinalRe, m =>
                     Ordinal(Js.Number(m.Groups[1].Value), suffixForm[m.Groups[2].Value], m.Groups[2].Value) ?? m.Value);
 
             // 2b) THE SUPPLETIVE SPELLINGS — `1ला`, `2रा`, `4था`, `6ठा`. See the TS module: GLUED only
             //     (`था`/`थी` are the past copula), the consonant must be that NUMBER's own, and the
             //     trailing boundary keeps `2राज्य` out.
             if (suppletiveRe is not null)
-                s = suppletiveRe.Replace(s, m =>
+                s = Rewrite(s, suppletiveRe, m =>
                 {
                     var d = m.Groups[1].Value;
                     if (!suppletive.TryGetValue(d, out var c) || c != m.Groups[2].Value) return m.Value;
@@ -128,22 +129,22 @@ public static class Normalize
                         && f < forms.Length ? forms[f] : m.Value;
                 });
 
-            s = ABBREV_RE.Replace(s, m => $"{ABBREV[m.Groups[1].Value]}{m.Groups[2].Value}");
+            s = Rewrite(s, ABBREV_RE, m => $"{ABBREV[m.Groups[1].Value]}{m.Groups[2].Value}");
 
             // 4) DEVANAGARI UNIT ABBREVIATIONS, after a number. Longest first, so किमी/घंटा beats किमी.
-            s = UNIT_RE.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
+            s = Rewrite(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
 
             // 5) DEGREES. 5a) COORDINATES FIRST, because the degree rules below would eat the ° and strand
             //    the minutes mark. The minutes mark is claimed ONLY after a degree — a bare `'` is an apostrophe.
-            s = COORD.Replace(s, m =>
+            s = Rewrite(s, COORD, m =>
                 $"{m.Groups[1].Value} डिग्री {m.Groups[2].Value} मिनट{(m.Groups[3].Success && m.Groups[3].Value.Length > 0 ? $" {m.Groups[3].Value} सेकंड" : "")}");
-            s = DEG_C_SIGN.Replace(s, "$1 डिग्री सेल्सियस");
-            s = DEG_F_SIGN.Replace(s, "$1 डिग्री फ़ारेनहाइट");
-            s = DEG_C.Replace(s, "$1 डिग्री सेल्सियस");
-            s = DEG_F.Replace(s, "$1 डिग्री फ़ारेनहाइट");
-            s = DEG.Replace(s, "$1 डिग्री");
+            s = Rewrite(s, DEG_C_SIGN, "$1 डिग्री सेल्सियस");
+            s = Rewrite(s, DEG_F_SIGN, "$1 डिग्री फ़ारेनहाइट");
+            s = Rewrite(s, DEG_C, "$1 डिग्री सेल्सियस");
+            s = Rewrite(s, DEG_F, "$1 डिग्री फ़ारेनहाइट");
+            s = Rewrite(s, DEG, "$1 डिग्री");
 
-            s = CLOCK.Replace(s, m =>
+            s = Rewrite(s, CLOCK, m =>
             {
                 var hw = string.Join(" ", Cardinal(Js.Number(m.Groups[1].Value)));
                 if (Js.Number(m.Groups[2].Value) == 0)
@@ -151,27 +152,27 @@ public static class Normalize
                 return $"{hw} बजकर {string.Join(" ", Cardinal(Js.Number(m.Groups[2].Value)))} मिनट";
             });
 
-            s = PLUS_ATTACHED.Replace(s, "$1 प्लस $2");
-            s = PLUS_LEADING.Replace(s, "$1प्लस $2");
+            s = Rewrite(s, PLUS_ATTACHED, "$1 प्लस $2");
+            s = Rewrite(s, PLUS_LEADING, "$1प्लस $2");
 
-            s = MINUS_BRACKET.Replace(s, "$1ऋण $2");
-            s = MINUS_DEGREE.Replace(s, "ऋण $1");
-            s = MINUS_DECIMAL.Replace(s, "ऋण $1");
+            s = Rewrite(s, MINUS_BRACKET, "$1ऋण $2");
+            s = Rewrite(s, MINUS_DEGREE, "ऋण $1");
+            s = Rewrite(s, MINUS_DECIMAL, "ऋण $1");
 
             s = PostposedSignPass.PostposedSign(s, "<", "से कम");
             s = PostposedSignPass.PostposedSign(s, ">", "से अधिक");
-            s = EQUALS.Replace(s, " बराबर ");
+            s = Rewrite(s, EQUALS, " बराबर ");
             // `/` is NOT routed here — step 8 already reads it as the fraction बटा.
-            s = TIMES.Replace(s, " गुणा ");
-            s = DIVIDE.Replace(s, " भाग ");
+            s = Rewrite(s, TIMES, " गुणा ");
+            s = Rewrite(s, DIVIDE, " भाग ");
             // ⚠ Spaced on BOTH sides, or the reading fuses onto the preceding word (`तापमान±5`).
-            s = PLUS_MINUS.Replace(s, " धन ऋण ");
+            s = Rewrite(s, PLUS_MINUS, " धन ऋण ");
             // The ampersand splits by context: between LATIN letters it stays inside the run delegated to
             // English (`AT&T`); elsewhere it is और. The Latin arm must therefore run first.
-            s = AMP_LATIN.Replace(s, " and ");
-            s = AMP.Replace(s, " और ");
+            s = Rewrite(s, AMP_LATIN, " and ");
+            s = Rewrite(s, AMP, " और ");
 
-            s = FRACTION.Replace(s, m =>
+            s = Rewrite(s, FRACTION, m =>
             {
                 double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
                 if (num == 1 && den == 2) return "आधा";

@@ -46,7 +46,7 @@ import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { eastSlavicNumberWords, type EastSlavicNumbers } from "../ukrainian/numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const DEF = loadManifest<{ numbers: EastSlavicNumbers }>(import.meta.url, "belarusian.jsonc");
 
@@ -280,8 +280,8 @@ export function normalizeBelarusian(input: string): string {
     //    whole. ⚠ THIS IS THE LARGEST WRONG-MAGNITUDE DEFECT IN THE LANGUAGE, not a tidy-up: `3 000 000`
     //    read as *тры нуль нуль*. Two passes, because adjacent groups share the digit the first consumes
     //    (`5 000 000`); `X 000` is 7 of the corpus's 21 grouped figures.
-    for (let i = 0; i < 2; i++) s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
-    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    for (let i = 0; i < 2; i++) s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule (step 4) so their interior dots do not first
     //    become phrase breaks. `н.э.` ×17 glued and `н. э.` ×2 spaced — both spellings occur. The FINAL dot
@@ -294,13 +294,13 @@ export function normalizeBelarusian(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}т\\.\\s?зв\\.`, "giu"), "так званы"],
     ];
     for (const [re, word] of multi)
-        s = tr(s, re, (m0, offset: number, full: string) => {
+        s = rewrite(s, re, (m0, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
 
     // 2) НУМАР. The sign was dropped outright. `нумар` ×39 — "Міжнародны стандартны кніжны нумар (ISBN)".
-    s = tr(s, /№\s?(?=\d)/gu, "нумар ");
+    s = rewrite(s, /№\s?(?=\d)/gu, "нумар ");
 
     // 3) THE YEAR ABBREVIATION, digit-anchored — `1990 г.`, `438 г. н.э.`, `2014-2016 г.` The bare letter
     //    was reaching the g2p as [x]. ⚠ ANCHORED ON THE FIGURE because `г.` alone is three different words:
@@ -310,9 +310,9 @@ export function normalizeBelarusian(input: string): string {
     //    The genitive *года* is what a figure governs (`1990 года`), and the final dot is dropped because
     //    it is not a sentence end — step 1's clause-final test does not apply, since a year is followed by
     //    more sentence in every corpus instance.
-    s = tr(s, /(\d)\s?(?:км\s?\/\s?(?:гадз|год|г)|км\/ч)(?![\p{L}\p{M}])/giu, "$1 кіламетраў на гадзіну");
-    s = tr(s, new RegExp(`(\\d)\\s?г\\.${NOT_LETTER}`, "gu"), "$1 года");
-    s = tr(s, new RegExp(`(\\d)\\s?гг\\.${NOT_LETTER}`, "gu"), "$1 гадоў");
+    s = rewrite(s, /(\d)\s?(?:км\s?\/\s?(?:гадз|год|г)|км\/ч)(?![\p{L}\p{M}])/giu, "$1 кіламетраў на гадзіну");
+    s = rewrite(s, new RegExp(`(\\d)\\s?г\\.${NOT_LETTER}`, "gu"), "$1 года");
+    s = rewrite(s, new RegExp(`(\\d)\\s?гг\\.${NOT_LETTER}`, "gu"), "$1 гадоў");
 
     // 3b) THE MAGNITUDE ABBREVIATIONS `млн` / `млрд` / `трлн`, which reached the g2p as the raw consonant
     //     clusters [mɫn] and [mɫrd]. `млрд` is ×16 after a digit in the retained text and `дол.` ×7 beside
@@ -321,16 +321,16 @@ export function normalizeBelarusian(input: string): string {
     //     an unexpanded abbreviation is not one. Expanded here, with the count agreement the numeral
     //     governs, so the tier still sees a magnitude between the figure and any unit that follows.
     for (const [abbr, forms] of MAGNITUDE_ABBREV)
-        s = tr(s, new RegExp(`(\\d+(?:[.,]\\d+)?)\\s?${abbr}\\.?${NOT_LETTER}`, "gu"),
+        s = rewrite(s, new RegExp(`(\\d+(?:[.,]\\d+)?)\\s?${abbr}\\.?${NOT_LETTER}`, "gu"),
             (_m, n: string) => `${n} ${magnitudeForm(n, forms)}`);
 
     // 4) DOTTED ABBREVIATIONS. The dot is consumed before a following word or a comma so it cannot become a
     //    phrase break; at a real sentence end it is kept.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
         (_m, ab: string) => DOTTED_ABBREV[ab.toLowerCase()]!);
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
 
     // 5) NUMERAL + WRITTEN SUFFIX — the ordinal notation, ×23 in the retained text and `ordinal-latin`
@@ -344,7 +344,7 @@ export function normalizeBelarusian(input: string): string {
     //    The suffix is capped at 3 letters and must not be followed by another letter, which keeps the rule
     //    off compound adjectives (`28-гадовы`); those keep their current cardinal-plus-word reading.
     //    MUST run before the range rule (step 12), which would otherwise eat the hyphen.
-    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?([а-яёіў]{1,3})${NOT_LETTER}`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?([а-яёіў]{1,3})${NOT_LETTER}`, "giu"),
         (whole, digits: string, rawSuffix: string) => {
             const n = Number(digits);
             const suffix = rawSuffix.toLowerCase();
@@ -362,9 +362,9 @@ export function normalizeBelarusian(input: string): string {
     //      clause-final `100—200 м.` and the possessive-apostrophe hazard; the guard below is explicit.
     //    · `г` and `с` are NOT units in this language's text — see the header. Nothing declares them.
     //    Units run BEFORE the clock and the decimal fold, because both destroy number adjacency.
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?м\/с(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?м\/с(?![\p{L}\p{M}])/gu,
         (_m, n: string) => `${n} ${counted(Math.trunc(Number(n.replace(",", "."))), METRE)} на секунду`);
-    s = tr(s, new RegExp(`(\\d+(?:[.,]\\d+)?)\\s?м(?![\\p{L}\\p{M}'’ʼ²³/])`, "gu"),
+    s = rewrite(s, new RegExp(`(\\d+(?:[.,]\\d+)?)\\s?м(?![\\p{L}\\p{M}'’ʼ²³/])`, "gu"),
         (_m, n: string) => `${n} ${counted(Math.trunc(Number(n.replace(",", "."))), METRE)}`);
 
     // 7) DEGREES, before the sign rules so a negative temperature still finds its `°`, and before the unit
@@ -373,17 +373,17 @@ export function normalizeBelarusian(input: string): string {
     //    carry both ⟨C⟩ and ⟨С⟩, which are different characters that render identically.
     //    `градусаў Цэльсія` ×31/×50, in the exact slot: "тэмпература 25 градусаў Цэльсія", "−182.5
     //    градусаў Цэльсія"; and the Цэльсія article names the sign ("за 100° — тэмпература кіпення").
-    s = tr(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 градусаў Цэльсія");
-    s = tr(s, /(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 градусаў Фарэнгейта");
-    s = tr(s, /(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
+    s = rewrite(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 градусаў Цэльсія");
+    s = rewrite(s, /(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 градусаў Фарэнгейта");
+    s = rewrite(s, /(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
 
     // 8) CLOCK. The colon is clause punctuation in belarusian.jsonc, so `23:59` read as *дваццаць тры ,
     //    пяцьдзесят дзевяць*. Belarusian says the hour as a cardinal followed by the minutes; a `:00`
     //    minute is not read as *нуль*. Two-digit minutes are REQUIRED, which keeps the corpus's scores and
     //    bibliographic ratios out of the rule. A third field means a timestamp, not a clock: the colons are
     //    spent on spaces and nothing is invented (the playbook's `sports-time` reading).
-    s = tr(s, /(?<![\d:])(\d{1,2}):([0-5]\d):([0-5]\d)(?![:\d])/gu, "$1 $2 $3");
-    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu,
+    s = rewrite(s, /(?<![\d:])(\d{1,2}):([0-5]\d):([0-5]\d)(?![:\d])/gu, "$1 $2 $3");
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu,
         (whole, h: string, min: string) => {
             const hv = Number(h), mv = Number(min);
             const head = cardinal(hv);
@@ -393,23 +393,23 @@ export function normalizeBelarusian(input: string): string {
 
     // 9) SIGNS. `+57.7 °C` lost its sign entirely; `−16 °C` likewise. The corpus writes the true MINUS
     //    (U+2212) and the en-dash as well as the hyphen.
-    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1мінус $2");
+    s = rewrite(s, /(^|[\s(])[-−–](\d)/gu, "$1мінус $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs its
     //    own rule or the sign is dropped in silence; ×4 in the retained text, every one a tolerance
     //    (`(0,28±0,04)`, `(4,004±0,040) кг`). The reading is this language's own two sign words.
-    s = tr(s, /±/gu, " плюс-мінус ");
-    s = tr(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
+    s = rewrite(s, /±/gu, " плюс-мінус ");
+    s = rewrite(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
 
     // 10) RELATIONAL AND DIVISION SIGNS — see the header for the one sentence that sources all four.
     //     ⚠ `=` REQUIRES A DIGIT ON ONE SIDE, and that guard is the whole rule: 7 of the corpus's 9 are
     //     BIBLIOGRAPHIC TITLE SEPARATORS (`Запісы = Zapisy`, `Беларусіка = Albaruthenica`) where "ёсць"
     //     would assert an equation about a translation — the Lithuanian lesson. The two real ones are
     //     `1 аўстр. дол. = 0,71 дол. ЗША` and `фунт стэрлінгаў = 100 пенсаў`, and both have the digit.
-    s = tr(s, /(\d)\s?=\s?/gu, "$1 ёсць ");
-    s = tr(s, /\s?=\s?(?=\d)/gu, " ёсць ");
-    s = tr(s, /(\d)\s?<\s?(?=\d)/gu, "$1 менш за ");
-    s = tr(s, /(\d)\s?>\s?(?=\d)/gu, "$1 больш за ");
-    s = tr(s, /(\d)\s?÷\s?(?=\d)/gu, "$1 падзяліць на ");
+    s = rewrite(s, /(\d)\s?=\s?/gu, "$1 ёсць ");
+    s = rewrite(s, /\s?=\s?(?=\d)/gu, " ёсць ");
+    s = rewrite(s, /(\d)\s?<\s?(?=\d)/gu, "$1 менш за ");
+    s = rewrite(s, /(\d)\s?>\s?(?=\d)/gu, "$1 больш за ");
+    s = rewrite(s, /(\d)\s?÷\s?(?=\d)/gu, "$1 падзяліць на ");
 
     // 11) FRACTIONS — feminine, agreeing with the elided *частка*: 1/5 is *адна пятая*.
     //     ⚠ BOUNDED AT A DENOMINATOR OF TEN, AND THE BOUND IS THE EVIDENCE. Every `\d+/\d+` in this corpus
@@ -418,7 +418,7 @@ export function normalizeBelarusian(input: string): string {
     //     still claiming the ordinary shape if it occurs, which is the honest position: a rule with no
     //     attested instance is a misfire generator (trap 9), and a rule that reads a death year as a
     //     fraction is a defect that produces a READING (trap 56).
-    s = tr(s, /(?<![\d\p{L}/.,])(\d{1,2})\/(\d{1,2})(?![\d/\p{L}.,])/gu, (whole, a: string, b: string) => {
+    s = rewrite(s, /(?<![\d\p{L}/.,])(\d{1,2})\/(\d{1,2})(?![\d/\p{L}.,])/gu, (whole, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den < 2 || den > 10 || num < 1 || num >= den) return whole;
         // ⚠ THE DENOMINATOR AGREES WITH THE NUMERATOR, not merely with the elided noun. Belarusian says
@@ -440,7 +440,7 @@ export function normalizeBelarusian(input: string): string {
     //     corpus ends a sentence. Attested spans: `10—20 мм ападкаў`, `300—350 км`, `3—6 км`, `1-3
     //     працоўных дзён`, `7-14 дзён`. The football scores (`5—2`, `9-4`) are a counted minority and were
     //     fusing their endpoints anyway, so no reading is lost there — only a wrong-ish connective gained.
-    s = tr(s, /(\d)\s?[–—-]\s?(?=\d)/gu, "$1 да ");
+    s = rewrite(s, /(\d)\s?[–—-]\s?(?=\d)/gu, "$1 да ");
 
     // 13) DOT DECIMALS → the comma form the engine's number token reads. ⚠ WIDER THAN UKRAINIAN'S ON
     //     PURPOSE, and the difference is measured rather than inherited: uk folded only a 1–2-digit integer
@@ -448,10 +448,10 @@ export function normalizeBelarusian(input: string): string {
     //     decimals — `+57.7 °C`, `$7.2 мільярда`, `$68.7 мільярдаў`, `(74.2 %)`, `12.7x99mm`. The known
     //     misfires are a train model (`81-717.5М`) and a mobile standard (`«2.5G»`), both of which carry a
     //     LETTER immediately after the fraction, which the guard therefore rejects.
-    s = tr(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.\p{L}])/gu, "$1,$2");
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.\p{L}])/gu, "$1,$2");
 
     // A padded replacement (` плюс-мінус `, ` ёсць `) doubles a space that was already there. Harmless
     // downstream because assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass
     // should not be the one producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }

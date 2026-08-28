@@ -4,6 +4,7 @@
  * Ported from src/languages/hausa/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Hausa;
 
@@ -113,27 +114,27 @@ public static class Normalize
         var s = input;
 
         // 1) HTML ENTITIES, FIRST — before the ampersand rule in step 11.
-        s = JsRegex.Replace(s, AMP_ENTITY, _ => " da ");
+        s = Rewrite(s, AMP_ENTITY, _ => " da ");
 
-        s = JsRegex.Replace(s, BC_BEFORE_KAFIN, _ => "");
-        s = JsRegex.Replace(s, BCE, _ => "kafin haihuwar Yesu");
+        s = Rewrite(s, BC_BEFORE_KAFIN, _ => "");
+        s = Rewrite(s, BCE, _ => "kafin haihuwar Yesu");
 
-        s = JsRegex.Replace(s, DOTTED_CAPS, m => JsRegex.Replace(m.Value, DOT_OR_SPACE, _ => ""));
+        s = Rewrite(s, DOTTED_CAPS, m => JsRegex.Replace(m.Value, DOT_OR_SPACE, _ => ""));
         // ⚠ `\p{Lu}`, NOT `[A-Z]` — the ASCII form leaves the dot after Hausa's own hooked capitals
         //    ⟨Ɓ Ɗ Ƙ⟩ standing as a spurious clause break.
-        s = JsRegex.Replace(s, INITIAL_DOT, _ => "");
-        s = JsRegex.Replace(s, VERSUS, _ => " da ");
+        s = Rewrite(s, INITIAL_DOT, _ => "");
+        s = Rewrite(s, VERSUS, _ => " da ");
 
-        s = JsRegex.Replace(s, US_DOLLAR, _ => "dala ");
+        s = Rewrite(s, US_DOLLAR, _ => "dala ");
 
         // 4) RANGES and SCORES. The DECIMAL range must come FIRST: the plain-range lookbehind `(?<![\d.,])`
         //    blocks a digit that follows a dot, so `4.2-3.9` would never match and the hyphen would vanish.
-        s = JsRegex.Replace(s, RANGE_DECIMAL, m => $"{m.Groups[1].Value} zuwa {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, RANGE_PLAIN, m => $"{m.Groups[1].Value} zuwa {m.Groups[2].Value}");
+        s = Rewrite(s, RANGE_DECIMAL, m => $"{m.Groups[1].Value} zuwa {m.Groups[2].Value}");
+        s = Rewrite(s, RANGE_PLAIN, m => $"{m.Groups[1].Value} zuwa {m.Groups[2].Value}");
 
         // 5) CLOCK, COLON form. NOT a sports time: a THIRD `\d.\d\d` field (4:41.30) means a pace. The
         //    marker is captured WITHOUT eating the space before it (the clock-glue trap).
-        s = JsRegex.Replace(s, CLOCK_COLON, m =>
+        s = Rewrite(s, CLOCK_COLON, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             if (hv > 23 || mv > 59) return m.Value;
@@ -146,7 +147,7 @@ public static class Normalize
             return $"{head}{suffix}";
         });
 
-        s = JsRegex.Replace(s, CLOCK_DOT_TZ, m =>
+        s = Rewrite(s, CLOCK_DOT_TZ, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             var head = mv == 0
@@ -157,64 +158,64 @@ public static class Normalize
 
         // 7) VERSION DOTS and DOT DECIMALS — Hausa follows English here (comma = thousands, dot = decimal).
         //    AFTER the clock steps, which have already claimed the clock-shaped dots.
-        s = JsRegex.Replace(s, GHZ, m => $"{m.Groups[1].Value} gigahertz");
+        s = Rewrite(s, GHZ, m => $"{m.Groups[1].Value} gigahertz");
         // Longest-first alternation: km/h and m/s must win over the bare km/m.
-        s = JsRegex.Replace(s, DECIMAL_UNIT, m =>
+        s = Rewrite(s, DECIMAL_UNIT, m =>
             $"{m.Groups[1].Value} maki {SpellFraction(m.Groups[2].Value)} {UNIT_NOUN[m.Groups[3].Value.ToLowerInvariant()]}");
-        s = JsRegex.Replace(s, DECIMAL_VERSION, m =>
+        s = Rewrite(s, DECIMAL_VERSION, m =>
             $"{m.Groups[1].Value} maki {SpellFraction(m.Groups[2].Value)} ");
-        s = JsRegex.Replace(s, DECIMAL_PLAIN, m =>
+        s = Rewrite(s, DECIMAL_PLAIN, m =>
             $"{m.Groups[1].Value} maki {SpellFraction(m.Groups[2].Value)}");
 
-        s = JsRegex.Replace(s, DECIMAL_COMMA, m =>
+        s = Rewrite(s, DECIMAL_COMMA, m =>
             $"{m.Groups[1].Value} maki {SpellFraction(m.Groups[2].Value)}");
 
-        s = JsRegex.Replace(s, FRACTION, m =>
+        s = Rewrite(s, FRACTION, m =>
             $"{HausaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} bisa {HausaNumbers.NumberToWords(Js.Number(m.Groups[2].Value))}");
 
-        s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} digiri Celsius");
-        s = JsRegex.Replace(s, DEG_F, m => $"{m.Groups[1].Value} digiri Fahrenheit");
-        s = JsRegex.Replace(s, DEG_COMPASS, m =>
+        s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} digiri Celsius");
+        s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} digiri Fahrenheit");
+        s = Rewrite(s, DEG_COMPASS, m =>
             $"{m.Groups[1].Value} digiri {COMPASS[m.Groups[2].Value.ToUpperInvariant()]}");
-        s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} digiri");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} digiri");
 
         // 10) RATES. AFTER the version-dot rule (`12.8km` has been claimed by now), BEFORE the shared tier.
-        s = JsRegex.Replace(s, RATE_SLASH, m =>
+        s = Rewrite(s, RATE_SLASH, m =>
         {
             var d = m.Groups[3].Value.ToLowerInvariant();
             return $"{HausaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} {RATE_NOUN[m.Groups[2].Value.ToLowerInvariant()]} a {(d == "h" || d == "u" ? "awa" : "daƙiƙa")}";
         });
-        s = JsRegex.Replace(s, RATE_WORD, m =>
+        s = Rewrite(s, RATE_WORD, m =>
             $"{HausaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} {(m.Groups[2].Value.ToLowerInvariant() == "kph" ? "kilomita" : "mil")} a awa");
-        s = JsRegex.Replace(s, RATE_MBIT, m =>
+        s = Rewrite(s, RATE_MBIT, m =>
             $"{HausaNumbers.NumberToWords(Js.Number(m.Groups[1].Value))} megabit a daƙiƙa");
 
         // 10b) THE UNIT SYMBOL BEFORE ITS NUMERAL — `km 2-3` is HAUSA'S OWN ORDER, not a typo, so only the
         //     symbol is spelled out and the number is left where it stands. AFTER the range step, which has
         //     already turned `2-3` into `2 zuwa 3`; run before it and the lookahead would have to admit the
         //     hyphen and would then also match a compound designation.
-        s = JsRegex.Replace(s, UNIT_BEFORE_NUM, m => UNIT_BEFORE[m.Groups[1].Value]);
+        s = Rewrite(s, UNIT_BEFORE_NUM, m => UNIT_BEFORE[m.Groups[1].Value]);
 
-        s = JsRegex.Replace(s, PLUS, _ => " ƙari ");
-        s = JsRegex.Replace(s, MINUS, m => $"rashin {m.Groups[1].Value}");
-        s = JsRegex.Replace(s, AMP_INITIALS, m =>
+        s = Rewrite(s, PLUS, _ => " ƙari ");
+        s = Rewrite(s, MINUS, m => $"rashin {m.Groups[1].Value}");
+        s = Rewrite(s, AMP_INITIALS, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
             return $"{Manifest.MANIFEST.LetterNames.GetValueOrDefault(a.ToLowerInvariant()) ?? a} da {Manifest.MANIFEST.LetterNames.GetValueOrDefault(b.ToLowerInvariant()) ?? b}{m.Groups[3].Value}";
         });
-        s = JsRegex.Replace(s, AMP_SPACED, _ => " da ");
-        s = JsRegex.Replace(s, EQUALS, m => $"{m.Groups[1].Value} daidai {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, LESS_THAN, m => $"{m.Groups[1].Value} kasa da {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, GREATER_THAN, m => $"{m.Groups[1].Value} fiye da {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, TIMES, m => $"{m.Groups[1].Value} sau {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, DECIMAL_PERCENT, m => $"kashi {m.Groups[1].Value}");
+        s = Rewrite(s, AMP_SPACED, _ => " da ");
+        s = Rewrite(s, EQUALS, m => $"{m.Groups[1].Value} daidai {m.Groups[2].Value}");
+        s = Rewrite(s, LESS_THAN, m => $"{m.Groups[1].Value} kasa da {m.Groups[2].Value}");
+        s = Rewrite(s, GREATER_THAN, m => $"{m.Groups[1].Value} fiye da {m.Groups[2].Value}");
+        s = Rewrite(s, TIMES, m => $"{m.Groups[1].Value} sau {m.Groups[2].Value}");
+        s = Rewrite(s, DECIMAL_PERCENT, m => $"kashi {m.Groups[1].Value}");
 
         // 12) INITIALISMS, LAST of the letter rules: after the era markers (else `B.C.` → *ba. ca.*) and
         //     after the dotted-capital rule.
         s = NormalizeInitialisms(s);
 
         // The padded replacements above (` ƙari `, ` da `) can double a space or leave one at an edge.
-        return JsRegex.Replace(JsRegex.Replace(s, SPACE_RUN, _ => " "), EDGE_SPACE, _ => "");
+        return Rewrite(Rewrite(s, SPACE_RUN, _ => " "), EDGE_SPACE, _ => "");
     }
 }

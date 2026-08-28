@@ -36,7 +36,7 @@
  */
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const NATIVE = MANIFEST.numbers.native;
 
@@ -134,7 +134,7 @@ export function normalizeKorean(input: string): string {
     let s = input;
     for (let prev = ""; prev !== s; ) {
         prev = s;
-        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
+        s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
     }
 
     // 2) SPEED UNITS, before rule 5 splits a range. Korean puts 시속 / 초속 ("per hour" / "per second")
@@ -150,7 +150,7 @@ export function normalizeKorean(input: string): string {
     //    stops any of these three from starting in the middle of a number.
     const SPAN = "\\d[\\d.]*(?:\\s?[-–—~〜～]\\s?\\d[\\d.]*)?";
     const speed = (unit: string, prefix: string, word: string): void => {
-        s = tr(s, new RegExp(`(?<![\\d.])(?:${prefix}\\s?)?(${SPAN})\\s?(?:${unit})(?![A-Za-z\\d])`, "gu"),
+        s = rewrite(s, new RegExp(`(?<![\\d.])(?:${prefix}\\s?)?(${SPAN})\\s?(?:${unit})(?![A-Za-z\\d])`, "gu"),
             `${prefix} $1${word}`);
     };
     speed("mph", "시속", "마일");
@@ -163,7 +163,7 @@ export function normalizeKorean(input: string): string {
     //    A trailing 2 is the corpus's mm2, an ASCII-typed square; 제곱 is the word it is already using
     //    elsewhere in the same corpus (제곱미터, 제곱 마일), so the exponent is consumed here rather
     //    than left stranded after the unit is claimed.
-    s = tr(s, new RegExp(`(?<=\\d)\\s?(${UNIT_ALT})([²³2-3])?(?![A-Za-z\\d])`, "gu"),
+    s = rewrite(s, new RegExp(`(?<=\\d)\\s?(${UNIT_ALT})([²³2-3])?(?![A-Za-z\\d])`, "gu"),
         (_m, unit: string, exp?: string) =>
             `${exp === undefined ? "" : exp === "³" || exp === "3" ? "세제곱" : "제곱"}${UNIT_HANGUL[unit]!}`);
 
@@ -181,9 +181,9 @@ export function normalizeKorean(input: string): string {
     // its particles, so a temperature is normally followed by one — and `(?![\p{L}])` rejected exactly that:
     // `20℃` read 섭씨 20도 while `20℃에` read "20도씨에", losing 섭씨 and spelling the C as 씨 through rule 9.
     // The corpus's own instance is `32℃에 달하는` (×3), so the ordinary case was the broken one.
-    s = tr(s, /([-−–±]?)(\d+)\s?°\s?C(?![\p{sc=Latn}\p{M}])/gui, "섭씨 $1$2도");
-    s = tr(s, /([-−–±]?)(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui, "화씨 $1$2도");
-    s = tr(s, /(\d)\s?°/gu, "$1도");
+    s = rewrite(s, /([-−–±]?)(\d+)\s?°\s?C(?![\p{sc=Latn}\p{M}])/gui, "섭씨 $1$2도");
+    s = rewrite(s, /([-−–±]?)(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui, "화씨 $1$2도");
+    s = rewrite(s, /(\d)\s?°/gu, "$1도");
 
     //     ⚠ AND `+`, `−`, `±` WERE DROPPED OUTRIGHT TOO — pre-existing, and found while checking this rule's
     //     output on `3 + 4 = 7`. Korean had no rule for any additive sign, so `3 + 4` read 삼 사, two bare
@@ -198,12 +198,12 @@ export function normalizeKorean(input: string): string {
     //     below uses 더하기 while the negative rule uses 마이너스, and ± — which is a sign and not an operation —
     //     juxtaposes the loan pair. ⚠ ± NEEDS ITS OWN RULE: it is a single character (U+00B1), not a `+`,
     //     so no `+` rule can match inside it and the sign would otherwise be dropped in silence.
-    s = tr(s, /±/gu, " 플러스 마이너스 ");
-    s = tr(s, /(\d)\s?\+\s?(?=\d)/gu, "$1 더하기 ");
+    s = rewrite(s, /±/gu, " 플러스 마이너스 ");
+    s = rewrite(s, /(\d)\s?\+\s?(?=\d)/gu, "$1 더하기 ");
     //     The LEADING plus is the sign, not the operation, so it takes 플러스 (`+5` → 플러스 5) — the same
     //     operator/sign split as the pair above.
-    s = tr(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1플러스 ");
-    s = tr(s, /(^|[\s(])[-−–](?=\d)/gu, "$1마이너스 ");
+    s = rewrite(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1플러스 ");
+    s = rewrite(s, /(^|[\s(])[-−–](?=\d)/gu, "$1마이너스 ");
 
     // 4b) RELATIONAL AND DIVISION SIGNS. ko.wikipedia's arithmetic articles read the notation out beside
     //     the notation, which is the article class this issue's tier 4 looks for:
@@ -242,32 +242,32 @@ export function normalizeKorean(input: string): string {
     };
     const kTopic = (w: string): string => `${w}${kClosed(w) ? "은" : "는"}`;
     const relational = (sign: string, tail: (y: string) => string): void => {
-        s = tr(s, new RegExp(`(${OPERAND})\\s?${sign}\\s?(${OPERAND})`, "gu"),
+        s = rewrite(s, new RegExp(`(${OPERAND})\\s?${sign}\\s?(${OPERAND})`, "gu"),
             (_m, a: string, b: string) => `${kTopic(kWord(a))} ${tail(kWord(b))}`);
     };
     relational("=", (y) => `${y}${kClosed(y) ? "과" : "와"} 같다`);
     relational("<", (y) => `${y}보다 작다`);
     relational(">", (y) => `${y}보다 크다`);
-    s = tr(s, /\s?÷\s?/gu, " 나누기 ");
+    s = rewrite(s, /\s?÷\s?/gu, " 나누기 ");
 
     //     THE AMPERSAND, which was dropped outright, is not an arithmetic sign and is not Korean: it is a
     //     Latin-script printing ligature, and in Korean text it occurs only inside a Latin run — R&B, P&R.
     //     So its reading is a LOAN and not native vocabulary, which is why it is 앤드 rather than the native
     //     conjunction 및. `ja` already ships exactly this (`&` → アンド), so the fleet has the precedent and the
     //     register question is settled by it.
-    s = tr(s, /\s?&\s?/gu, " 앤드 ");
+    s = rewrite(s, /\s?&\s?/gu, " 앤드 ");
 
 
     // 5) RANGES (×12 for these three marks). The mark is in no table, so it was dropped outright and
     //    1894~1895 read as two bare years. 에서 is the standard reading of 물결표 between two numbers.
     //    After rule 2 (see there) and after rule 1, so a grouped endpoint is already one number.
-    s = tr(s, /(?<=\d)\s?[~〜～–—]\s?(?=\d)/gu, "에서 ");
+    s = rewrite(s, /(?<=\d)\s?[~〜～–—]\s?(?=\d)/gu, "에서 ");
 
     // 6) DECIMALS (×10). The point is clause punctuation too, so 1.5 broke into "일 . 오" — a sentence
     //    boundary inside a number. Korean says 점 and then the fractional digits INDIVIDUALLY (7.75 is
     //    칠 점 칠오, never 칠 점 칠십오, which is what the number path produced), and the whole thing is
     //    emitted as Hangul so rule 8 leaves it alone.
-    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, (_m, int: string, frac: string) =>
+    s = rewrite(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, (_m, int: string, frac: string) =>
         `${numberToWords(Number(int))}점${[...frac].map((d) => MANIFEST.numbers.ones[Number(d)]!).join("")}`);
 
     // 7) NATIVE-SERIES COUNTERS, before rule 8 claims the digits for the Sino series. Gated at 99
@@ -276,7 +276,7 @@ export function normalizeKorean(input: string): string {
     //    rule 8 — 맞춤법 spaces a counter, but the numeral and its counter are one phonological word and
     //    the sandhi runs across the boundary: 열 시 is [jʌɭɕ͈i] (열씨) and 다섯 개 is [tasʌt̚k͈ɛ]
     //    (다섣깨), neither of which the engine can produce from two separately phonemized tokens.
-    s = tr(s, NATIVE_COUNTER, (m, num: string, counter: string) => {
+    s = rewrite(s, NATIVE_COUNTER, (m, num: string, counter: string) => {
         const n = Number(num);
         return n >= 1 && n <= 99 ? `${nativeNumeral(n)}${counter}` : m;
     });
@@ -294,8 +294,8 @@ export function normalizeKorean(input: string): string {
     //    The month irregulars are the one place where the Sino series itself changes shape — 6월 is
     //    유월 and 10월 is 시월, never 육월 / 십월 — so they are spelled here rather than composed
     //    (×4 and ×7 in the corpus). 16월 does not exist, but the lookbehind keeps 16 out of it anyway.
-    s = tr(tr(s, /(?<!\d)6월/gu, "유월"), /(?<!\d)10월/gu, "시월");
-    s = tr(s, /(\d+)(?=[가-힣])/gu, (m, num: string) => {
+    s = rewrite(rewrite(s, /(?<!\d)6월/gu, "유월"), /(?<!\d)10월/gu, "시월");
+    s = rewrite(s, /(\d+)(?=[가-힣])/gu, (m, num: string) => {
         const w = numberToWords(Number(num));
         return w === "" ? m : w; // out of safe-integer range: leave the digits for the number path
     });
@@ -308,5 +308,5 @@ export function normalizeKorean(input: string): string {
     //    ⚠ THE BOUNDARY IS ALL OF LATIN, not `[A-Za-z]`. An ASCII-only lookaround does not see an accented
     //    letter as a letter, so the `S` of `São` passed the isolated-capital test and was spelled out as a
     //    LETTER NAME with the rest of the name left behind: `São` → *esu / ˈʌɔː*.
-    return s.replace(/(?<![\p{Script=Latin}\p{M}])[A-Z][A-Z-]*[A-Z](?![\p{Script=Latin}\p{M}])|(?<![\p{Script=Latin}\p{M}])[A-Z](?![\p{Script=Latin}\p{M}])/gu, spell);
+    return rewrite(s, /(?<![\p{Script=Latin}\p{M}])[A-Z][A-Z-]*[A-Z](?![\p{Script=Latin}\p{M}])|(?<![\p{Script=Latin}\p{M}])[A-Z](?![\p{Script=Latin}\p{M}])/gu, spell);
 }

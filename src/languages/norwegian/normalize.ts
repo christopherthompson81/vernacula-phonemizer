@@ -42,7 +42,7 @@
 import { MANIFEST } from "./manifest.ts";
 
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * THE SHARED SYMBOL TIER, adopted for UNITS AND RATES only.
@@ -157,47 +157,47 @@ export function normalizeNorwegian(input: string): string {
     let prev: string;
     do {
         prev = t;
-        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+        t = rewrite(t, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     } while (t !== prev);
 
     // 2) ENGLISH-STYLE COMMA GROUPING (5) — before the decimal rule, which would otherwise read 23,764 as
     //    "tjuetre komma sju seks fire". Exactly three digits and no more; see disambiguation 2 in the header.
     do {
         prev = t;
-        t = tr(t, /(?<=\d)(?<!(?<![\d\.,])0)[,](?=\d{3}(?!\d))/gu, "");
+        t = rewrite(t, /(?<=\d)(?<!(?<![\d\.,])0)[,](?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
     // 3) DECIMAL COMMA (34). The comma is clause punctuation, so `12,5` read as "tolv , fem" — a PAUSE
     //    inside a number. The fractional part is spoken digit by digit.
-    t = tr(t, /(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
+    t = rewrite(t, /(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
         `${whole} komma ${[...frac].join(" ")}`);
 
     // 4) CLOCK, COLON FORM ONLY (45). The colon is not in clausePunctuation, so it vanished and `14:30`
     //    read as two unrelated numerals. The period form is left alone — disambiguation 1 in the header.
-    t = tr(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
+    t = rewrite(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
 
     // 5) ABBREVIATIONS, dot consumed. After the clock so `kl. 14:30` still has its time intact.
-    for (const [re, word] of ABBREV) t = tr(t, re, word);
+    for (const [re, word] of ABBREV) t = rewrite(t, re, word);
 
     // 6) PERCENT (15). Norwegian postposes the word, and the sign was dropped outright.
-    t = tr(t, /(\d+)\s*%/gu, "$1 prosent");
+    t = rewrite(t, /(\d+)\s*%/gu, "$1 prosent");
 
     // 7) DEGREES (2), BEFORE the unit rules — the C of `20 °C` was falling through to the English letter
     //    name [seː]. Case-insensitive on the scale letter; the bare sign is read too.
-    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
-    t = tr(t, /(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grader celsius");
-    t = tr(t, /(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grader fahrenheit");
-    t = tr(t, /(\d)\s*°/gu, "$1 grader");
+    t = rewrite(rewrite(t, /℃/gu, "°C"), /℉/gu, "°F");
+    t = rewrite(t, /(\d)\s*°\s*C(?![\p{L}])/giu, "$1 grader celsius");
+    t = rewrite(t, /(\d)\s*°\s*F(?![\p{L}])/giu, "$1 grader fahrenheit");
+    t = rewrite(t, /(\d)\s*°/gu, "$1 grader");
 
     // 8) SQUARED / CUBED UNITS (8). The exponent was dropped outright, so `23 764 km²` lost its area.
-    for (const [re, word] of SQUARED) t = tr(t, re, word);
+    for (const [re, word] of SQUARED) t = rewrite(t, re, word);
 
     // 9) NUMERIC DATES `D.M.YYYY` (7 distinct: 05.09.2021, 10.06.1940, 17.09.1939, 24.08.2021). Read as
     //    ordinal day + month NAME + year, which is how the date is spoken — the digits alone gave
     //    "tjuefire . åtte . to tusen tjueen", three numerals separated by two sentence breaks. This must
     //    run BEFORE the ordinal-dot rule below, which would otherwise claim the day and leave `.08.2021`
     //    stranded, and it is the reason the period form was excluded from the clock rule in step 4.
-    t = tr(t, /(?<!\d)(\d{1,2})\.(\d{1,2})\.(\d{4})(?!\d)/gu, (m, d: string, mo: string, y: string) => {
+    t = rewrite(t, /(?<!\d)(\d{1,2})\.(\d{1,2})\.(\d{4})(?!\d)/gu, (m, d: string, mo: string, y: string) => {
         const day = ORDINALS[String(Number(d))], month = MONTHS[Number(mo)];
         return day !== undefined && month !== undefined ? `${day} ${month} ${y}` : m;
     });
@@ -209,7 +209,7 @@ export function normalizeNorwegian(input: string): string {
     //     "ti . ellevte" — a bare cardinal, a sentence break, then an ordinal.
     //     Not a Norwegian quirk: attested in every ordinal-dot orthography checked (nb 2, da 2, de 1,
     //     cs 1), which is why it also became a cell in the miner.
-    t = tr(t, /(?<!\d)(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, a: string, b: string) => {
+    t = rewrite(t, /(?<!\d)(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, a: string, b: string) => {
         const first = ORDINALS[String(Number(a))], second = ORDINALS[String(Number(b))];
         return first !== undefined && second !== undefined ? `${first} til ${second}` : m;
     });
@@ -217,11 +217,11 @@ export function normalizeNorwegian(input: string): string {
     // 11) ORDINAL DOT (134) — the largest defect in the language. `3. mai` read as "tre" + a SENTENCE
     //    BREAK + "mai". The following-lowercase guard is what separates it from a sentence ending in a
     //    year; see disambiguation 3 in the header.
-    t = tr(t, /(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, n: string) => ORDINALS[n] ?? m);
+    t = rewrite(t, /(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, n: string) => ORDINALS[n] ?? m);
 
     // 12) RANGES (40). A dash between numerals is spoken `til`. After the clock and the ordinal rules so
     //     it cannot claim their separators.
-    t = tr(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
+    t = rewrite(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
 
     // 13) CURRENCY. The sign PRECEDES the amount in writing and the word FOLLOWS it in speech, as in
     //     English. All five words are in the NST lexicon (kroner, dollar, euro, pund, yen); the corpus
@@ -235,7 +235,7 @@ export function normalizeNorwegian(input: string): string {
     //     word, with the wrong vowel too); the `¥130 000,` beside it was right only because a COMMA followed.
     //     All four signs had it. The amount now has to end in a digit.
     for (const [sign, word] of Object.entries(CURRENCY))
-        t = tr(t, new RegExp(`${sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\s*(\\d(?:[\\d ]*\\d)?)`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`${sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\s*(\\d(?:[\\d ]*\\d)?)`, "gu"), `$1 ${word}`);
 
     // 14) SIGNED NUMBERS. A bare `+` before a number is a POSITIVE sign and was dropped outright —
     //     `+30°C` read as plain "tretti grader" and `UTC +1` lost the offset entirely. Measured, the plus
@@ -244,7 +244,7 @@ export function normalizeNorwegian(input: string): string {
     //     ⚠ Runs AFTER ranges, so a range's dash is already gone, and requires a boundary before the sign
     //     so a hyphenated compound is untouched. Norwegian does write a bare negative temperature, and
     //     `minus` is in the lexicon.
-    t = tr(t, /(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
+    t = rewrite(t, /(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
         `${sign === "+" ? "pluss" : "minus"} ${n}`);
 
     // 15) ARITHMETIC AND RELATIONAL SIGNS — infix between digits, which is simply where arithmetic lives
@@ -273,10 +273,10 @@ export function normalizeNorwegian(input: string): string {
         [/×/gu, " ganger "],
         [/÷/gu, " delt på "],
     ];
-    t = tr(t, /(\d)\s*\+\s*(\d)/gu, "$1 pluss $2");
-    for (const [re, word] of RELATIONAL) t = tr(t, re, word);
+    t = rewrite(t, /(\d)\s*\+\s*(\d)/gu, "$1 pluss $2");
+    for (const [re, word] of RELATIONAL) t = rewrite(t, re, word);
     // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
-    t = tr(t, /[ \t]{2,}/gu, " ");
+    t = rewrite(t, /[ \t]{2,}/gu, " ");
 
     // THE SHARED TIER LAST, so every local rule above has already claimed its own text — the squared
     // compounds in particular, which the tier has no word for in this language.

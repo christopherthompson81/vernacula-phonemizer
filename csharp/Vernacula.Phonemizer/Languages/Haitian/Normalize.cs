@@ -6,6 +6,7 @@
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Haitian;
 
@@ -120,7 +121,7 @@ public static class Normalize
         var sym = u.Key;
         // ⚠ THE EXPONENT MAY BE SET OFF BY A SPACE (`605 km ²`), so a key whose last character is the power
         // admits one optional gap before it.
-        var key = EXP_KEY_TAIL.Replace(ESC_RE.Replace(sym, "\\$&"), "\\s?$1");
+        var key = JsRegex.Replace(JsRegex.Replace(sym, ESC_RE, "\\$&"), EXP_KEY_TAIL, "\\s?$1");
         var rate = EXPONENT_TAIL.IsMatch(sym)
             ? null // a rate never carries an exponent on its NUMERATOR here
             : JsRegex.Compile(
@@ -173,74 +174,74 @@ public static class Normalize
         var s = input.Normalize(NormalizationForm.FormC);
 
         // 1) ZERO-WIDTH MARKS AND HTML ENTITIES, first — `&nbsp;` before the ampersand rule at step 13.
-        s = ZERO_WIDTH.Replace(ENTITIES.Replace(s, " "), "");
+        s = Rewrite(Rewrite(s, ENTITIES, " "), ZERO_WIDTH, "");
 
         // 2) ERA MARKERS AND DOTTED ABBREVIATIONS, before anything can read an interior dot as a break.
-        foreach (var d in ERA) s = d.Inline.Replace(d.AtEnd.Replace(s, $"{d.Word}."), d.Word);
+        foreach (var d in ERA) s = Rewrite(Rewrite(s, d.AtEnd, $"{d.Word}."), d.Inline, d.Word);
         //    `p.` / `pp.` before a page number → `paj`.
-        s = PAGE.Replace(s, "paj ");
+        s = Rewrite(s, PAGE, "paj ");
 
         // 3) ISBN, before every numeric rule — an identifier is read DIGIT BY DIGIT, not as a quantity.
-        s = ISBN.Replace(s, m =>
+        s = Rewrite(s, ISBN, m =>
             $"{m.Groups[1].Value} {string.Join(" ", Js.CodePoints(ISBN_SEPS.Replace(m.Groups[2].Value, "")))}");
 
         // 4) DIGIT DE-GROUPING, before every other numeric rule.
-        s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => GROUP_SPACES.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => GROUP_SPACES.Replace(m.Value, ""));
 
         // 4b) THE MINUS — U+2212 ONLY. See normalize.ts for why the ASCII hyphen is still refused.
-        s = MINUS.Replace(s, "mwens ");
+        s = Rewrite(s, MINUS, "mwens ");
 
         // 5) UNITS, before decimals; the RATE first, before any arm that takes a unit on its own.
         foreach (var u in UNIT_ARMS)
-            if (u.Rate is not null) s = u.Rate.Replace(s, $"$1 {u.Word} pa èdtan");
+            if (u.Rate is not null) s = Rewrite(s, u.Rate, $"$1 {u.Word} pa èdtan");
         foreach (var u in UNIT_ARMS)
         {
-            s = u.Magnitude.Replace(s, $"$1 $2 {u.Word}");
-            s = u.Span.Replace(s, m =>
+            s = Rewrite(s, u.Magnitude, $"$1 $2 {u.Word}");
+            s = Rewrite(s, u.Span, m =>
                 Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[2].Value)
                     ? $"{m.Groups[1].Value} a {m.Groups[2].Value} {u.Word}"
                     : m.Value);
-            s = u.Single.Replace(s, $"$1 {u.Word}");
+            s = Rewrite(s, u.Single, $"$1 {u.Word}");
         }
         //    …and the ones with NO numeral at all. Last, so the counted arms keep every match they can make.
         s = BARE_UNITS(s);
-        foreach (var (re, word) in BARE_EXPONENT_UNITS) s = re.Replace(s, word);
+        foreach (var (re, word) in BARE_EXPONENT_UNITS) s = Rewrite(s, re, word);
 
         // 6) THE DEGREE SIGN, which does five different jobs on this wiki. The NUMERO arm runs first.
-        s = NUMERO.Replace(s, "nimewo ");
-        s = CELSIUS.Replace(s, "$1 degre Sèlsiyis");
+        s = Rewrite(s, NUMERO, "nimewo ");
+        s = Rewrite(s, CELSIUS, "$1 degre Sèlsiyis");
         //    ⚠ AND IT RE-SPACES WHEN A DIGIT FOLLOWS, or `degre` and the arc-minutes fuse into one token.
         var beforeDegree = s;
-        s = BARE_DEGREE.Replace(s, m =>
+        s = Rewrite(s, BARE_DEGREE, m =>
             DIGIT_AFTER.IsMatch(beforeDegree[(m.Index + m.Length)..]) ? " degre " : " degre");
 
         // 7) RANGES, before percent — `70-80%` is a range OF percents, so the pair must be claimed while
         //    both operands are still bare digits.
-        s = PCT_SPAN.Replace(s, m =>
+        s = Rewrite(s, PCT_SPAN, m =>
             Js.Number(Js.ReplaceFirst(m.Groups[1].Value, ",", ".")) < Js.Number(Js.ReplaceFirst(m.Groups[2].Value, ",", "."))
                 ? $"{m.Groups[1].Value}% a {m.Groups[2].Value}%"
                 : m.Value);
-        s = RANGE.Replace(s, m =>
+        s = Rewrite(s, RANGE, m =>
             Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[2].Value)
                 ? $"{m.Groups[1].Value} a {m.Groups[2].Value}"
                 : m.Value);
 
         // 8) PERCENT → `pousan`, POSTPOSED.
-        s = PERCENT.Replace(s, "$1 pousan");
+        s = Rewrite(s, PERCENT, "$1 pousan");
 
         // 9) CURRENCY. `dola`, POSTPOSED, with the redundancy guard looking RIGHT.
-        s = US_DOLLAR.Replace(s, "$1 ");
+        s = Rewrite(s, US_DOLLAR, "$1 ");
         var beforeDollar = s;
-        s = DOLLAR.Replace(s, m =>
+        s = Rewrite(s, DOLLAR, m =>
         {
             var quantity = m.Groups[1].Value + (m.Groups[2].Success ? m.Groups[2].Value : "");
             return NAMED.IsMatch(beforeDollar[(m.Index + m.Length)..]) ? quantity : $"{quantity} dola";
         });
 
         // 10) DECIMALS, after every rule that needs the number intact. The separator becomes `vigil`.
-        s = DECIMAL.Replace(s, m =>
+        s = Rewrite(s, DECIMAL, m =>
         {
             string @int = m.Groups[1].Value, frac = m.Groups[2].Value;
             return frac.Length <= 2 && !frac.StartsWith("0", StringComparison.Ordinal)
@@ -249,7 +250,7 @@ public static class Normalize
         });
 
         // 11) FRACTIONS → the ordinal-denominator idiom. The denominator is capped at ten.
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
         {
             string a = m.Groups[1].Value, b = m.Groups[2].Value;
             var den = OrdinalWord(Js.Number(b));
@@ -258,10 +259,10 @@ public static class Normalize
         });
 
         // 12) ORDINALS — this language's own suffix; the rule DECLINES rather than guesses.
-        s = ORDINAL.Replace(s, m => OrdinalWord(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        s = Rewrite(s, ORDINAL, m => OrdinalWord(Js.Number(m.Groups[1].Value)) ?? m.Value);
 
         // 13) THE AMPERSAND → `ak`. ⚠ SPACED ON BOTH SIDES DELIBERATELY: `A&B` would otherwise be ONE token.
-        s = AMPERSAND.Replace(s, " ak ");
+        s = Rewrite(s, AMPERSAND, " ak ");
 
         return s;
     }

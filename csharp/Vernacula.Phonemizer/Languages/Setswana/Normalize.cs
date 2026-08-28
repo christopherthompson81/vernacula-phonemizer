@@ -14,6 +14,7 @@
  * the arithmetic signs, letter names, `ml`/`ft`, fractions, sports times). Nothing is re-derived here.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Setswana;
 
@@ -78,16 +79,16 @@ public static class Normalize
         // 1) HTML ENTITIES, FIRST OF EVERYTHING — 21 of the artifact's 32 ampersands are `&nbsp;`, and the
         //    entity sits BETWEEN the number and its unit or sign, so the fold is load-bearing for the unit
         //    path and not only for the ampersand.
-        s = AMP_ENTITY.Replace(RB_ENTITY.Replace(LB_ENTITY.Replace(SP_ENTITY.Replace(
-            NBSP_ENTITY.Replace(s, " "), " "), "["), "]"), "&");
+        s = Rewrite(Rewrite(Rewrite(Rewrite(
+            Rewrite(s, NBSP_ENTITY, " "), SP_ENTITY, " "), LB_ENTITY, "["), RB_ENTITY, "]"), AMP_ENTITY, "&");
 
         // 2) A MAGNITUDE SUFFIX GLUED TO A CURRENCY AMOUNT → the magnitude word, before the tier claims the
         //    number. ⚠ ANCHORED ON THE CURRENCY SIGN, which is the whole guard: `915 m` is metres.
-        s = CURRENCY_SCALE.Replace(s, m =>
+        s = Rewrite(s, CURRENCY_SCALE, m =>
             $"{m.Groups[1].Value} {MAGNITUDE_SUFFIX[m.Groups[2].Value]}");
 
         // 3) THE RAND, LOCALLY — the tier cannot express the guard this sign needs.
-        s = RAND.Replace(s, m =>
+        s = Rewrite(s, RAND, m =>
         {
             var n = m.Groups[1].Value;
             var mag = m.Groups[2].Success ? m.Groups[2].Value : null;
@@ -98,7 +99,7 @@ public static class Normalize
 
         // 4) DEGREES, before the tier and before every numeric rule in pass two. ⚠ THE MINUS ARM IS CLAIMED
         //    ONLY HERE, on a scale-marked degree — never on a bare number.
-        s = DEGREE_SCALE.Replace(s, m =>
+        s = Rewrite(s, DEGREE_SCALE, m =>
         {
             var sign = m.Groups[1].Value;
             var n = m.Groups[2].Value;
@@ -108,7 +109,7 @@ public static class Normalize
                 : $"{DEGREE} tsa {sc} tse di {BELOW_ZERO} di le {n}";
         });
         //    A BARE degree — a coordinate, or the open end of a temperature span.
-        s = DEGREE_BARE.Replace(s, $"{DEGREE} di le $1");
+        s = Rewrite(s, DEGREE_BARE, $"{DEGREE} di le $1");
 
         return s;
     }
@@ -158,7 +159,7 @@ public static class Normalize
 
         // 5) THE CLOCK — and the MARKER identifies it, not the shape: all 13 true clocks in the artifact
         //    carry a right-hand marker and not one of the 20 sports times does.
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             var hv = Js.Number(m.Groups[1].Value);
             var mv = Js.Number(m.Groups[2].Value);
@@ -175,35 +176,35 @@ public static class Normalize
 
         // 6) THOUSANDS DE-GROUPING, before every remaining numeric rule. ⚠ EXACTLY THREE DIGITS PER BLOCK,
         //    and the head must start 1–9 — that guard is what separates period-grouping from period-decimal.
-        s = GROUP_COMMA.Replace(s, m => COMMAS.Replace(m.Value, ""));
-        s = GROUP_DOT.Replace(s, m => DOTS.Replace(m.Value, ""));
-        s = GROUP_SPACE.Replace(s, m => SPACE_SEPS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_COMMA, m => COMMAS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_DOT, m => DOTS.Replace(m.Value, ""));
+        s = Rewrite(s, GROUP_SPACE, m => SPACE_SEPS.Replace(m.Value, ""));
 
         // 7) THE ENGLISH ORDINAL SUFFIX — always foreign orthography here, and it was reaching the phoneme
         //    stream as a bare [tʰ]. Stripping it is the whole fix.
-        s = ENGLISH_ORDINAL.Replace(s, "$1");
+        s = Rewrite(s, ENGLISH_ORDINAL, "$1");
 
         // 8) RANGES → `go ya go`. ⚠ ASCENDING ONLY: the non-ascending pairs are football scores and SEASONS.
-        s = DASH_RANGE.Replace(s, m =>
+        s = Rewrite(s, DASH_RANGE, m =>
             Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[2].Value)
                 ? $"{m.Groups[1].Value} {RANGE} {m.Groups[2].Value}"
                 : m.Value);
 
         // 8b) …and the same span with the tier's measure-noun phrase between the operands.
-        s = DASH_RANGE_UNIT.Replace(s, m =>
+        s = Rewrite(s, DASH_RANGE_UNIT, m =>
             Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[3].Value)
                 ? $"{m.Groups[2].Value}{m.Groups[1].Value} {RANGE} {m.Groups[3].Value}"
                 : m.Value);
 
         // 9) DECIMALS, LAST of the numeric rules — steps 5 to 8 all need their number intact, and the tier's
         //    `NOT_VERSION` guard needs the dot to still be there when it looks.
-        s = DECIMAL_DOT.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
-        s = DECIMAL_COMMA.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_DOT, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_COMMA, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
         //    ⚠ AND A THIRD ARM FOR THE LEADING-ZERO LONG TAIL, which the other two and step 6 all decline by
         //    design and which therefore fell through to `clausePunctuation` as a SENTENCE BREAK.
-        s = DECIMAL_ZERO_LONG.Replace(s, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
+        s = Rewrite(s, DECIMAL_ZERO_LONG, m => Spell(m.Groups[1].Value, m.Groups[2].Value));
 
         // A padded replacement doubles a space that was already there and can leave one at an edge.
-        return EDGE_SPACE.Replace(MULTI_SPACE.Replace(s, " "), "");
+        return Rewrite(Rewrite(s, MULTI_SPACE, " "), EDGE_SPACE, "");
     }
 }

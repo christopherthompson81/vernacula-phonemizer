@@ -47,7 +47,7 @@ import { westernNumberWords } from "../../core/numbers.ts";
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { ArmenianDef } from "../armenian/armenian.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 const NUMBERS = loadManifest<ArmenianDef>(import.meta.url, "westarmenian.jsonc").numbers;
 
@@ -141,15 +141,15 @@ export function normalizeWestArmenian(input: string): string {
     //    decimal tail, which this corpus writes — while a bare `(?![\d.,])` declines every clause-final
     //    figure (trap 58). The separator here is a SPACE, and a decimal never has one before its
     //    fraction, so `(?!\d)` is the whole guard.
-    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
-    s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?![\d,]))/gu, "");
-    s = tr(s, /(\d),\s?(\d+)/gu, "$1.$2");
+    s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?![\d,]))/gu, "");
+    s = rewrite(s, /(\d),\s?(\d+)/gu, "$1.$2");
 
     // 2) MAGNITUDE ABBREVIATIONS, before any single-dot rule — they reach the IPA as clusters otherwise.
     for (const [abbrev, word] of MAGNITUDE_ABBREV)
-        s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}${abbrev}\\.?${NOT_LETTER_AFTER}`, "giu"), word);
+        s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}${abbrev}\\.?${NOT_LETTER_AFTER}`, "giu"), word);
 
     // 3) THE ERA MARKERS. Both abbreviations occur in this corpus and the wiki glosses each by the other
     //    in one parenthesis — "714 Քրիստոսէ առաջ (Մեր թուարկութենէն Առաջ)" — so neither expansion is
@@ -162,14 +162,14 @@ export function normalizeWestArmenian(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}մ\\s?\\.\\s?թ\\s?\\.`, "giu"), "մեր թուարկութեամբ"],
     ];
     for (const [re, word] of multi)
-        s = tr(s, re, (m0: string, offset: number, full: string) => {
+        s = rewrite(s, re, (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
 
     // 4) THE ASTRONOMICAL UNIT, `ա.մ.` / `ա. մ.` — and the corpus glosses it itself: "5.23 աստղագիտական
     //    միաւոր (ա.մ.) է". It was reaching the g2p as two bare letters with two false clause pauses.
-    s = tr(s, new RegExp(`(\\d[^\\s]*)\\s?ա\\s?\\.\\s?մ\\s?\\.`, "gu"), "$1 աստղագիտական միաւոր");
+    s = rewrite(s, new RegExp(`(\\d[^\\s]*)\\s?ա\\s?\\.\\s?մ\\s?\\.`, "gu"), "$1 աստղագիտական միաւոր");
 
     // 5) THE BOUND SUFFIX ON A FIGURE — this language's defining form, exactly as in Eastern, and 174
     //    instances in the retained text. `2019-ին`, `2029-ի`, `1884-ին`, `70-ի`, `120-անկիւնիի`.
@@ -178,7 +178,7 @@ export function normalizeWestArmenian(input: string): string {
     //    ⚠ ORDER: the ORDINAL first (its suffix is a different morpheme), then the DECADE, then the rest.
 
     // 5a. ORDINAL RANGE — `19-20-րդ դարերի`, `2-1 հազ`: the suffix is written once, at the end.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,4})\\s?-\\s?(\\d{1,4})\\s?-\\s?(ր|եր|րոր)դ${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,4})\\s?-\\s?(\\d{1,4})\\s?-\\s?(ր|եր|րոր)դ${NOT_LETTER_AFTER}`, "gu"),
         (whole, a: string, b: string) => {
             const first = ordinalWords(Number(a)), second = ordinalWords(Number(b));
             return first === undefined || second === undefined ? whole : `${first}, ${second}`;
@@ -187,7 +187,7 @@ export function normalizeWestArmenian(input: string): string {
     // 5b. ORDINAL. The corpus writes `-րդ` (`2-րդ`, `8-րդ`, `4-րդ`, `5-րդ`) and once the fuller `-րորդ`
     //     (`3-րորդ`); the spelled word is the same either way, so the alternation covers both without
     //     the reading depending on which the writer typed.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,4})\\s?-\\s?(?:ր|եր|րոր)դ(${ARM_LOWER}*)${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,4})\\s?-\\s?(?:ր|եր|րոր)դ(${ARM_LOWER}*)${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, tail: string) => {
             const ord = ordinalWords(Number(digits));
             return ord === undefined ? whole : `${ord}${tail}`;
@@ -198,7 +198,7 @@ export function normalizeWestArmenian(input: string): string {
     // 5d. EVERY OTHER BOUND SUFFIX, in one rule. ⚠ The alternation is CLOSED to Armenian lowercase and
     //     requires the hyphen, which is what keeps `1915-1923` (a range) and `13-11-2020` (a date) out:
     //     both have a DIGIT after the hyphen, and this rule needs a letter.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(\\d+)\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(\\d+)\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, suffix: string) => {
             const cardinal = cardinalWords(Number(digits));
             return cardinal === undefined ? whole : attachSuffix(cardinal, suffix);
@@ -211,22 +211,22 @@ export function normalizeWestArmenian(input: string): string {
     //    ⚠ AND THE CASE SUFFIX SITS ON THE SIGN — `3800±200°C-ին`, `104 °F-ը`, `40°-ին`, `13.2 °C-էն`.
     // ⚠ THE LOWERCASE SCALE LETTER GOES IN THE CLASS, NOT IN AN `i` FLAG — the suffix class beside it
     //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
-    s = tr(s, new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), "$1 սելսիուս աստիճան$2");
-    s = tr(s, new RegExp(`(\\d)\\s?°\\s?[Ff]\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), "$1 ֆարենհայթ աստիճան$2");
+    s = rewrite(s, new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), "$1 սելսիուս աստիճան$2");
+    s = rewrite(s, new RegExp(`(\\d)\\s?°\\s?[Ff]\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), "$1 ֆարենհայթ աստիճան$2");
     // ⚠ NO SCALE LETTER IN THIS ARM, so a case-insensitive flag fixes nothing and only folds ARM_LOWER
     //    into matching uppercase Armenian: `20 °-Ը` would match where it must not.
-    s = tr(s, new RegExp(`(\\d)\\s?°\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), "$1 աստիճան$2");
-    s = tr(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 սելսիուս աստիճան");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 ֆարենհայթ աստիճան");
-    s = tr(s, /(\d)\s?°/gu, "$1 աստիճան ");
+    s = rewrite(s, new RegExp(`(\\d)\\s?°\\s?-\\s?(${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"), "$1 աստիճան$2");
+    s = rewrite(s, /(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 սելսիուս աստիճան");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 ֆարենհայթ աստիճան");
+    s = rewrite(s, /(\d)\s?°/gu, "$1 աստիճան ");
 
     // 7) SIGNS. ⚠ `±` GETS A PAUSE, not a word: `3800±200°C-ին` is a tolerance and no Western reading of
     //    the sign is attested, while dropping it ran the two figures together into one numeral.
-    s = tr(s, /\s?±\s?/gu, ", ");
+    s = rewrite(s, /\s?±\s?/gu, ", ");
     //    ⚠ AND `÷` IS A RANGE HERE, NOT A DIVISION — `0.96÷1.41 ԱՄ հեռաւորութեան`, the Russian-tradition
     //    span notation, which is the same finding ba recorded for its single instance.
-    s = tr(s, /(\d)\s?÷\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1մինուս $2");
+    s = rewrite(s, /(\d)\s?÷\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1մինուս $2");
 
     // 7b) DECIMALS — LAST among the number rules, because this step SPENDS the `.` that step 1 needed to
     //     make its grouping decision (trap 39: a guard's evidence has a lifetime). `ամբողջ` ×37 is the
@@ -241,7 +241,7 @@ export function normalizeWestArmenian(input: string): string {
     //     numeral ten times too big and invisible to DIGIT, RAWMARK, DROP and the referee alike. This
     //     corpus has it (`0.037%`, `0,08 աստիճան/օր`), so each leading zero is spelled with the engine's
     //     own units[0] and the rest stays digits.
-    s = tr(s, /(?<!\d)(?<!\d[.,])(\d+)[.,](\d+)(?!\d)(?![.,]\d)/gu, (_m, int: string, frac: string) => {
+    s = rewrite(s, /(?<!\d)(?<!\d[.,])(\d+)[.,](\d+)(?!\d)(?![.,]\d)/gu, (_m, int: string, frac: string) => {
         const zeros = /^0*/u.exec(frac)![0].length;
         const rest = frac.slice(zeros);
         const spelledZeros = Array.from({ length: zeros }, () => NUMBERS.units[0]!).join(" ");
@@ -259,7 +259,7 @@ export function normalizeWestArmenian(input: string): string {
     //     ⚠ THE COPULA IS DROPPED, deliberately: careful Armenian writes «հաւասար է» with the verb after
     //     the second operand, and the tier's slot is BETWEEN them. The bare adjective is what a reader
     //     says aloud for `100 = 47`, and half a two-part reading placed wrongly is worse than the word.
-    s = tr(s, /(\d)\s?=\s?(?=\d)/gu, "$1 հաւասար ");
+    s = rewrite(s, /(\d)\s?=\s?(?=\d)/gu, "$1 հաւասար ");
 
     // 8) NUMERIC RANGES. The dash was dropped outright and the endpoints fused into one utterance —
     //    `1915-1923` read as two years with no break at all. ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A
@@ -267,11 +267,11 @@ export function normalizeWestArmenian(input: string): string {
     //    the WRITER chose to write it, and imposing it on 13,235 bare dashes over-claims.
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58). Runs AFTER the suffix and sign
     //    rules, which have already spent every hyphen belonging to a suffix or opening a negative.
-    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = tr(s, /(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
     // producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }

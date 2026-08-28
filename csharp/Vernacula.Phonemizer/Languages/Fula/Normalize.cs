@@ -5,6 +5,7 @@
  * word, and for the couplings each step states.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Fula;
 
@@ -170,21 +171,21 @@ public static class Normalize
         var s = input;
 
         // 1) HTML ENTITIES — FIRST, before the ampersand rule.
-        s = AMP_ENTITY.Replace(s, " e ");
+        s = Rewrite(s, AMP_ENTITY, " e ");
 
         // 1b) CURRENCY PREFIXES — AFTER &amp;, BEFORE the number rules.
-        s = AUD.Replace(s, "dollar Awstraliya ");
-        s = USD.Replace(s, "dollar Amerik ");
+        s = Rewrite(s, AUD, "dollar Awstraliya ");
+        s = Rewrite(s, USD, "dollar Amerik ");
 
         // 2) ERA MARKERS — `1000B.C.`.
-        s = ERA.Replace(s, "$1 ɓawo");
+        s = Rewrite(s, ERA, "$1 ɓawo");
 
         // 3) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
-        s = DOTTED_CAPS.Replace(s, m0 => DOTTED_CAPS_STRIP.Replace(m0.Value, ""));
-        s = SUFFIX_DOT.Replace(s, "");
+        s = Rewrite(s, DOTTED_CAPS, m0 => DOTTED_CAPS_STRIP.Replace(m0.Value, ""));
+        s = Rewrite(s, SUFFIX_DOT, "");
 
         // 4) ORDINALS — the English `Nst`/`Nnd`/`Nrd`/`Nth` form. BEFORE the clock rule.
-        s = ORDINAL.Replace(s, m =>
+        s = Rewrite(s, ORDINAL, m =>
         {
             var n = Js.Number(GROUPING_COMMA.Replace(m.Groups[1].Value, ""));
             if (double.IsNaN(n) || double.IsInfinity(n) || n < 1) return m.Value;
@@ -192,13 +193,13 @@ public static class Normalize
         });
 
         // 5) RANGES and SCORES — read with `haa` (up to). A leading minus stays a sign (handled later).
-        s = RANGE.Replace(s, "$1 haa $2");
+        s = Rewrite(s, RANGE, "$1 haa $2");
 
         // 5b) GLUED CLOCK SUFFIX — `11:00nje`.
-        s = CLOCK_SUFFIX.Replace(s, "$1:$2 $3");
+        s = Rewrite(s, CLOCK_SUFFIX, "$1:$2 $3");
 
         // 6) CLOCK, in the COLON form.
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             if (hv > 23 || mv > 59) return m.Value;
@@ -212,7 +213,7 @@ public static class Normalize
         });
 
         // 6b) CLOCK, in the DOT form before a timezone — `15.00 UTC`.
-        s = CLOCK_DOT_TZ.Replace(s, m =>
+        s = Rewrite(s, CLOCK_DOT_TZ, m =>
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             var head = mv == 0
@@ -222,52 +223,52 @@ public static class Normalize
         });
 
         // 7) VERSION DOTS and DOT DECIMALS. GIGAHERTZ is claimed FIRST on the raw digits. AFTER the clock.
-        s = GIGAHERTZ.Replace(s, "$1 gigahertz");
-        s = DECIMAL_UNIT.Replace(s, m =>
+        s = Rewrite(s, GIGAHERTZ, "$1 gigahertz");
+        s = Rewrite(s, DECIMAL_UNIT, m =>
             $"{m.Groups[1].Value} toɓɓere {SpellDigits(m.Groups[2].Value)} " +
             DECIMAL_UNIT_WORDS[m.Groups[3].Value.ToLowerInvariant()]);
-        s = DECIMAL_DOT.Replace(s, m => $"{m.Groups[1].Value} toɓɓere {SpellDigits(m.Groups[2].Value)}");
+        s = Rewrite(s, DECIMAL_DOT, m => $"{m.Groups[1].Value} toɓɓere {SpellDigits(m.Groups[2].Value)}");
 
         // 7c) COMMA-DECIMALS — `12,5`; a comma before a THREE-digit group is thousands and stays.
-        s = DECIMAL_COMMA.Replace(s, m => $"{m.Groups[1].Value} toɓɓere {SpellDigits(m.Groups[2].Value)}");
+        s = Rewrite(s, DECIMAL_COMMA, m => $"{m.Groups[1].Value} toɓɓere {SpellDigits(m.Groups[2].Value)}");
 
         // 8) FRACTIONS.
-        s = FRACTION.Replace(s, m =>
+        s = Rewrite(s, FRACTION, m =>
             $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} e {FulaNumbers.NumberToWords(Js.Number(m.Groups[2].Value), m.Groups[2].Value)}");
 
         // 9) DEGREES.
-        s = DEGREE_C.Replace(s, "$1 digiri Celsius");
-        s = DEGREE_F.Replace(s, "$1 digiri Fahrenheit");
-        s = DEGREE.Replace(s, "$1 digiri");
+        s = Rewrite(s, DEGREE_C, "$1 digiri Celsius");
+        s = Rewrite(s, DEGREE_F, "$1 digiri Fahrenheit");
+        s = Rewrite(s, DEGREE, "$1 digiri");
 
         // 10) RATES. AFTER the version-dot rule, BEFORE the tier.
-        s = RATE.Replace(s, m =>
+        s = Rewrite(s, RATE, m =>
             $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} " +
             $"{RATE_UNIT_WORDS[m.Groups[2].Value.ToLowerInvariant()]} e wakkati gootel");
-        s = RATE_WORD.Replace(s, m =>
+        s = Rewrite(s, RATE_WORD, m =>
             $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} " +
             (m.Groups[2].Value.ToLowerInvariant() == "mph" ? "miles e wakkati gootel" : "kilometre e wakkati gootel"));
-        s = RATE_TYPO.Replace(s, m =>
+        s = Rewrite(s, RATE_TYPO, m =>
             $"{FulaNumbers.NumberToWords(Js.Number(m.Groups[1].Value), m.Groups[1].Value)} kilometre e wakkati gootel");
 
         // 11) GIGAHERTZ — handled in step 7 on the raw digits (before the fraction becomes words).
 
         // 12) SIGNS.
-        s = PLUS.Replace(s, " e gooto ");
-        s = MINUS.Replace(s, "usta $1");
-        s = AMP_CAPS.Replace(s, m =>
+        s = Rewrite(s, PLUS, " e gooto ");
+        s = Rewrite(s, MINUS, "usta $1");
+        s = Rewrite(s, AMP_CAPS, m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
             return $"{LETTER_NAME.GetValueOrDefault(a.ToLowerInvariant()) ?? a} e " +
                    $"{LETTER_NAME.GetValueOrDefault(b.ToLowerInvariant()) ?? b}{m.Groups[3].Value}";
         });
-        s = AMP_SPACED.Replace(s, " e ");
-        s = TIMES.Replace(s, "$1 je $2");
-        s = EQUALS.Replace(s, "$1 fota $2");
-        s = LESS.Replace(s, "$1 famɗi $2");
-        s = GREATER.Replace(s, "$1 ɓuri $2");
-        s = PERCENT.Replace(s, "$1 e teemedere");
+        s = Rewrite(s, AMP_SPACED, " e ");
+        s = Rewrite(s, TIMES, "$1 je $2");
+        s = Rewrite(s, EQUALS, "$1 fota $2");
+        s = Rewrite(s, LESS, "$1 famɗi $2");
+        s = Rewrite(s, GREATER, "$1 ɓuri $2");
+        s = Rewrite(s, PERCENT, "$1 e teemedere");
 
         // 13) INITIALISMS, LAST of the letter rules.
         s = NormalizeInitialisms(s);

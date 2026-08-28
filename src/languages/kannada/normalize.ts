@@ -38,7 +38,7 @@ import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalToWords, ordinalStem, DECIMAL_WORD } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Kannada letter+mark boundary. Never `\b`. */
 /**
@@ -108,7 +108,7 @@ export function normalizeKannada(input: string): string {
     //    out [pˈaːjĩɳʈ ɡˈaɭĩn̪d̪a], two primary stresses where the word has one. Every one of the 1,067
     //    instances sits immediately after a virama ್ (checked by printing the neighbours), so deleting
     //    the joiner leaves the identical akshara sequence and no phoneme changes.
-    let s = input.replace(/[​‌‍﻿]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
+    let s = rewrite(input, /[​‌‍﻿]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
 
     // 2) KANNADA DIGITS ೦-೯ → ASCII (×1). Before every numeric rule below, so that a native-digit
     //    numeral is eligible for the same de-grouping, ordinal, percent and unit handling as an ASCII
@@ -120,7 +120,7 @@ export function normalizeKannada(input: string): string {
     //    clause punctuation: 1,000 was reading as "ಒಂದು <pause> ಸೊನ್ನೆ" — a pause plus a single zero,
     //    because the trailing 000 collapsed to one numeral. ×42, all Western 3-digit blocks (no Indian
     //    2-then-3 grouping occurs in this corpus).
-    s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
+    s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
 
     // 4) ORDINALS ನೇ / ನೆಯ (×39), AFTER de-grouping — unlike Telugu, this corpus does write an ordinal
     //    on a grouped numeral ("ಅವರ 1,000 ನೇ ಅಂಚೆ ಚೀಟಿ"), which the `(?<![\d.,])` guard would reject
@@ -128,7 +128,7 @@ export function normalizeKannada(input: string): string {
     //    (15ನೇ → ಹದಿನೈದನೇ); emitted apart, ನೇ reached the g2p as a stray stressed [nˈeː]. The suffix
     //    is written both welded (16ನೇ) and spaced (15 ನೇ) in this corpus, hence the optional space, and
     //    may carry the nominaliser ದು (60ನೆಯದು), which rides along on the fused form.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(?<![\\d.,])(\\d+)\\s*-?\\s*(ನೇ|ನೆಯ)(ದು)?${NOT_LETTER_AFTER}`, "gu"),
         (whole, digits: string, suffix: string, du: string | undefined) => {
             const n = Number(digits);
@@ -144,7 +144,7 @@ export function normalizeKannada(input: string): string {
     //    are mid-sentence (ಕ್ರಿ.ಪೂ. 356, ಕ್ರಿ.ಪೂ.5000, ಕ್ರಿ.ಶ. 1000–1300). A Kannada case clitic may be
     //    welded straight onto the abbreviation (ಕ್ರಿ.ಪೂದಲ್ಲಿ, ಕ್ರಿ.ಪೂವರೆಗೂ); it is left attached, which
     //    is grammatical on the expansion too — ಕ್ರಿಸ್ತ ಪೂರ್ವದಲ್ಲಿ, ಕ್ರಿಸ್ತ ಪೂರ್ವವರೆಗೂ.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`${NOT_LETTER_BEFORE}ಕ್ರಿ\\s*\\.\\s*(ಪೂ|ಶ)(?:\\s*\\.(?=\\s*[\\p{L}\\d]))?`, "gu"),
         (_m, k: string) => ERA[k]!,
     );
@@ -159,27 +159,27 @@ export function normalizeKannada(input: string): string {
     //    the clitic to the expansion would produce ಕಿಲೋಮೀಟರ್ಯಲ್ಲಿ, a form Kannada does not build that
     //    way, so those keep the abbreviation and only lose the dot. Losing the dot is the whole defect;
     //    the expansion is a bonus that is only taken where it is safe.
-    s = tr(s, KM_RE, (m, off: number, full: string) =>
+    s = rewrite(s, KM_RE, (m, off: number, full: string) =>
         new RegExp(`^[\\p{L}\\p{M}]`, "u").test(full.slice(off + m.length))
-            ? m.replace(/\s*\.\s*/gu, "")
+            ? rewrite(m, /\s*\.\s*/gu, "")
             : "ಕಿಲೋಮೀಟರ್");
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}ಮಿ\\s*\\.\\s*ಮೀ`, "gu"), "ಮಿಮೀ");
-    s = tr(s, INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}ಮಿ\\s*\\.\\s*ಮೀ`, "gu"), "ಮಿಮೀ");
+    s = rewrite(s, INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());
 
     // 7) RATE units, BEFORE the shared symbol tier (step 9) can claim the numerator and strand the
     //    denominator. Kannada's rate is a dative PREFIX, attested verbatim in this corpus
     //    ("ಗಂಟೆಗೆ 83 ಕಿಮೀ", "ಸೆಕೆಂಡಿಗೆ 1.5 ಕಿಮಿ"), which is why `unitPer` is not declared on the shared
     //    tier. Step 6 has already folded ಕಿ.ಮೀ/ಕಿಮೀ to ಕಿಲೋಮೀಟರ್, so this matches the expanded word.
-    s = tr(s,
+    s = rewrite(s,
         new RegExp(`(\\d[\\d.]*)\\s?ಕಿಲೋಮೀಟರ್\\s*\\/\\s*(ಗಂ|ಸೆ)\\.?${NOT_LETTER_AFTER}`, "gu"),
         (_m, n: string, den: string, off: number, full: string) =>
             `${dative(RATE_DENOM[den]!, full, off)}${n} ಕಿಲೋಮೀಟರ್`,
     );
-    s = tr(s, MI_RATE_RE, (_m, n: string, off: number, full: string) =>
+    s = rewrite(s, MI_RATE_RE, (_m, n: string, off: number, full: string) =>
         `${dative("ಗಂಟೆಗೆ", full, off)}${n} ಮೈಲಿ`);
 
     // 8) VULGAR FRACTIONS
-    s = tr(s, /(?<=\d)\s?([¼½¾])/gu, (_m, f: string) => ` ${VULGAR[f]!}`);
+    s = rewrite(s, /(?<=\d)\s?([¼½¾])/gu, (_m, f: string) => ` ${VULGAR[f]!}`);
 
     // 9) The SHARED symbol tier: percent, currency, units, exponent. UNITS BEFORE DECIMALS (step 11) —
     //    the tier matches a unit only when a NUMBER is adjacent, and rewriting 3.5 to "3 ದಶಾಂಶ 5" first
@@ -195,26 +195,26 @@ export function normalizeKannada(input: string): string {
     //         engine (kannada.jsonc maps it to ","), so it was inserting a pause inside 9:30 and 07:19.
     //     NO ಗಂಟೆ is added. The noun is already in the text where it belongs ("ಸ್ಥಳೀಯ ಸಮಯ 11:00"), and
     //     adding one would duplicate it — the same call Tamil and Telugu made on the same evidence.
-    s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):\s?00(?![\d:.])/gu, "$1");
-    s = tr(s, /(?<=\d):\s?(?=\d)/gu, " ");
+    s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3]):\s?00(?![\d:.])/gu, "$1");
+    s = rewrite(s, /(?<=\d):\s?(?=\d)/gu, " ");
 
     // 11) DECIMALS
-    s = tr(s,
+    s = rewrite(s,
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} ${DECIMAL_WORD} ${[...frac].join(" ")}`,
     );
 
     // 12) DEGREES
-    s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 ಪ್ಲಸ್ ");
-    s = tr(s, /(^|\s)\+\s?(?=\d)/gu, "$1ಪ್ಲಸ್ ");
+    s = rewrite(s, /(\S)\+\s?(?=\d)/gu, "$1 ಪ್ಲಸ್ ");
+    s = rewrite(s, /(^|\s)\+\s?(?=\d)/gu, "$1ಪ್ಲಸ್ ");
 
-    s = tr(s, /(\d)\s?°\s?/gu, "$1 ಡಿಗ್ರಿ ");
+    s = rewrite(s, /(\d)\s?°\s?/gu, "$1 ಡಿಗ್ರಿ ");
 
     // THE RELATIONAL AND DIVISION SIGNS
     s = postposedSign(s, "<", "ಗಿಂತ ಕಡಿಮೆ");
     s = postposedSign(s, ">", "ಗಿಂತ ಹೆಚ್ಚು");
-    s = tr(s, /\s?=\s?/gu, " ಸಮ ");
-    s = tr(s, /\s?÷\s?/gu, " ಭಾಗಾಕಾರ ");
+    s = rewrite(s, /\s?=\s?/gu, " ಸಮ ");
+    s = rewrite(s, /\s?÷\s?/gu, " ಭಾಗಾಕಾರ ");
 
     return s;
 }

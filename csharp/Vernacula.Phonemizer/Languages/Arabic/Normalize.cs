@@ -6,6 +6,7 @@
 
 /** Arabic-Indic digits, both the standard and the extended (Persian/Urdu) ranges. */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Arabic;
 
@@ -38,7 +39,7 @@ public static class Normalize
 
     /** PERSO-ARABIC LETTERFORM VARIANTS → the Arabic codepoint for the same letter. */
     public static string FoldLetterforms(string input) =>
-        KEHEH.Replace(FARSI_YEH.Replace(input, "ي"), "ك");
+        Rewrite(Rewrite(input, FARSI_YEH, "ي"), KEHEH, "ك");
 
     private static readonly JsRe AR_PERCENT = JsRegex.Compile("٪", "gu");
     private static readonly JsRe AR_DECIMAL = JsRegex.Compile("٫", "gu");
@@ -65,15 +66,15 @@ public static class Normalize
     {
         var s = FoldLetterforms(input);
 
-        s = AR_THOUSANDS.Replace(AR_DECIMAL.Replace(AR_PERCENT.Replace(s, "%"), "."), ",");
+        s = Rewrite(Rewrite(Rewrite(s, AR_PERCENT, "%"), AR_DECIMAL, "."), AR_THOUSANDS, ",");
 
-        s = UNIT_RE.Replace(s, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
+        s = Rewrite(s, UNIT_RE, m => $"{m.Groups[1].Value} {UNIT_WORD[m.Groups[2].Value]}");
 
-        s = DEG_C.Replace(s, "$1 دَرَجَة مِئَوِيَّة");
-        s = DEG_F.Replace(s, "$1 دَرَجَة فَهْرَنْهَايْت");
-        s = DEG_BARE.Replace(s, "$1 دَرَجَة");
+        s = Rewrite(s, DEG_C, "$1 دَرَجَة مِئَوِيَّة");
+        s = Rewrite(s, DEG_F, "$1 دَرَجَة فَهْرَنْهَايْت");
+        s = Rewrite(s, DEG_BARE, "$1 دَرَجَة");
 
-        s = CLOCK.Replace(s, m =>
+        s = Rewrite(s, CLOCK, m =>
         {
             var hv = Js.Number(string.Concat(Js.CodePoints(m.Groups[2].Value).Select(FoldDigit)));
             var mv = Js.Number(string.Concat(Js.CodePoints(m.Groups[3].Value).Select(FoldDigit)));
@@ -84,20 +85,20 @@ public static class Normalize
                 : $"{head}{Js.NumberToString(hv)} وَ {Js.NumberToString(mv)} دَقِيقَة";
         });
 
-        s = MINUS.Replace(s, "$1نَاقِص $2");
-        s = PLUS_MINUS.Replace(s, " زَائِد نَاقِص ");
-        s = PLUS_ATTACHED.Replace(s, "$1 زَائِد $2");
-        s = PLUS_LEADING.Replace(s, "$1زَائِد $2");
+        s = Rewrite(s, MINUS, "$1نَاقِص $2");
+        s = Rewrite(s, PLUS_MINUS, " زَائِد نَاقِص ");
+        s = Rewrite(s, PLUS_ATTACHED, "$1 زَائِد $2");
+        s = Rewrite(s, PLUS_LEADING, "$1زَائِد $2");
 
-        s = EQUALS_RE.Replace(s, " يُسَاوِي ");
-        s = LESS_THAN.Replace(s, " أَصْغَر مِن ");
-        s = GREATER_THAN.Replace(s, " أَكْبَر مِن ");
-        s = DIVIDE.Replace(s, " مَقْسُوم عَلَى ");
+        s = Rewrite(s, EQUALS_RE, " يُسَاوِي ");
+        s = Rewrite(s, LESS_THAN, " أَصْغَر مِن ");
+        s = Rewrite(s, GREATER_THAN, " أَكْبَر مِن ");
+        s = Rewrite(s, DIVIDE, " مَقْسُوم عَلَى ");
 
-        s = DIMENSION.Replace(s, " في ");
+        s = Rewrite(s, DIMENSION, " في ");
 
-        s = FRACTION.Replace(s, m => $"{m.Groups[1].Value} عَلَى {m.Groups[2].Value}");
+        s = Rewrite(s, FRACTION, m => $"{m.Groups[1].Value} عَلَى {m.Groups[2].Value}");
 
-        return ARABIC_DIGIT.Replace(s, m => FoldDigit(m.Value));
+        return Rewrite(s, ARABIC_DIGIT, m => FoldDigit(m.Value));
     }
 }

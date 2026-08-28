@@ -5,6 +5,7 @@
  * for why each refused class stays refused.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Khmer;
 
@@ -100,7 +101,7 @@ public static class Normalize
         var s = text;
 
         // 1. ៗ (លេខទោ) = repeat the preceding WORD. FIRST, because it is the only rule that reads a Khmer run.
-        s = REPEAT.Replace(s, m =>
+        s = Rewrite(s, REPEAT, m =>
         {
             var run = m.Groups[1].Value;
             return run == "" ? "" : $"{run} {LastWord(run)}";
@@ -108,38 +109,38 @@ public static class Normalize
 
         // 2. de-group thousands (comma, then the space-grouped forms). Applied repeatedly because the
         // lookbehind cannot span a group it has already consumed.
-        for (var i = 0; i < 4 && DEGROUP.IsMatch(s); i++) s = DEGROUP.Replace(s, "");
-        for (var i = 0; i < 4 && DEGROUP_SPACE.IsMatch(s); i++) s = DEGROUP_SPACE.Replace(s, "");
+        for (var i = 0; i < 4 && DEGROUP.IsMatch(s); i++) s = Rewrite(s, DEGROUP, "");
+        for (var i = 0; i < 4 && DEGROUP_SPACE.IsMatch(s); i++) s = Rewrite(s, DEGROUP_SPACE, "");
 
         // 3. decimal point / comma → a space, AFTER de-grouping (which is the entire discrimination).
-        s = DECIMAL_POINT.Replace(s, " ");
-        s = DECIMAL_COMMA.Replace(s, " ");
+        s = Rewrite(s, DECIMAL_POINT, " ");
+        s = Rewrite(s, DECIMAL_COMMA, " ");
 
         // 4. ranges, BEFORE the arithmetic rule — both compete for a hyphen and the range wins 4,014:399.
-        s = RANGE.Replace(s, " ដល់ ");
+        s = Rewrite(s, RANGE, " ដល់ ");
 
         // 5. equals — digit-flanked, then the SPACED operand-flanked shape.
-        s = EQUALS_DIGITS.Replace(s, " ស្មើ ");
-        s = EQUALS_SPACED.Replace(s, " ស្មើ ");
+        s = Rewrite(s, EQUALS_DIGITS, " ស្មើ ");
+        s = Rewrite(s, EQUALS_SPACED, " ស្មើ ");
 
         // 5b. plus, and plus-minus.
-        s = PLUS_DIGITS.Replace(s, " បូក ");
-        s = PLUS_SPACED.Replace(s, " បូក ");
-        s = PLUS_LEADING.Replace(s, "វិជ្ជមាន ");
-        s = PLUS_TZ.Replace(s, " បូក ");
-        s = PLUSMINUS.Replace(s, " បូក ឬ ដក ");
-        s = PLUSMINUS_LEADING.Replace(s, "បូក ឬ ដក ");
+        s = Rewrite(s, PLUS_DIGITS, " បូក ");
+        s = Rewrite(s, PLUS_SPACED, " បូក ");
+        s = Rewrite(s, PLUS_LEADING, "វិជ្ជមាន ");
+        s = Rewrite(s, PLUS_TZ, " បូក ");
+        s = Rewrite(s, PLUSMINUS, " បូក ឬ ដក ");
+        s = Rewrite(s, PLUSMINUS_LEADING, "បូក ឬ ដក ");
 
         // 6. minus — AFTER step 4, which has claimed every dash BETWEEN two numbers.
-        s = MINUS.Replace(s, "ដក ");
+        s = Rewrite(s, MINUS, "ដក ");
 
         // 6b. divide, less-than, greater-than — robustness; zero digit-flanked instances in this corpus.
-        s = DIVIDE.Replace(s, " ចែក ");
-        s = LESS.Replace(s, " តិចជាង ");
-        s = GREATER.Replace(s, " ច្រើនជាង ");
+        s = Rewrite(s, DIVIDE, " ចែក ");
+        s = Rewrite(s, LESS, " តិចជាង ");
+        s = Rewrite(s, GREATER, " ច្រើនជាង ");
 
         // 7. fractions — NUM ភាគ NUM, the language's own construction.
-        s = FRACTION.Replace(s, " ភាគ ");
+        s = Rewrite(s, FRACTION, " ភាគ ");
 
         // 8. the shared symbol tier, LAST: it works on numbers the rules above have finished shaping.
         s = SYMBOLS(s);

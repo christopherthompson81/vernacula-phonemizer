@@ -27,7 +27,7 @@
  * `15.4 për qind` (postposed, ×22 / 6 arts) and `-20 gradë Celsius`, `10 gradë Celsius` (×17 / 6 arts).
  */
 import { makeSymbolNormalizer, type CountForms } from "../../core/normalizeSymbols.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * ⚠ ALBANIAN AGREEMENT IS THE PLAIN ONE: singular after exactly 1, plural otherwise. Stated rather than
@@ -271,7 +271,7 @@ const RANGE = /(?<![\d.,\p{L}-])(\d+(?:[.,]\d+)?)\s*[-–—]\s*(\d+(?:[.,]\d+)?
 const DEGREE_SIGN = /(\d+(?:[.,]\d+)?)\s*°(?:\s*([CF])(?![\p{L}\p{M}]))?/gui;
 
 function degrees(text: string): string {
-    return text.replace(DEGREE_SIGN, (whole: string, fig: string, scale: string | undefined, offset: number, full: string) => {
+    return rewrite(text, DEGREE_SIGN, (whole: string, fig: string, scale: string | undefined, offset: number, full: string) => {
         const rest = full.slice(offset + whole.length);
         const named = scale !== undefined ? SCALE[scale.toUpperCase()]! : undefined;
         // the writer may have spelled the scale out already — `+7° Celsius`
@@ -341,15 +341,15 @@ export function normalizeAlbanian(input: string): string {
      * trailing `(?![\d.,])` refuses `30.04` because a period follows it. The shape survives untouched, which
      * is exactly what the discarded machinery was for. ×1 in the artifact; pinned in test/albanian.test.ts.
      */
-    let s = input.replace(ASCII_EXPONENT, (_m, p: string) => `km${p === "2" ? "\u00B2" : "\u00B3"}`); // 0
+    let s = rewrite(input, ASCII_EXPONENT, (_m, p: string) => `km${p === "2" ? "\u00B2" : "\u00B3"}`); // 0
 
-    s = tr(s, GROUP_SEPARATED, (_w, head: string, groups: string) => head + groups.replace(/[.,\u00a0\u202f\u2009 ]/gu, "")); // 1  // NBSP, NNBSP, thin space
-    s = tr(s, RANGE, `$1 deri $2`); // 3 — before a dash can be claimed as a minus
-    s = tr(s, PER_MILLE, `$1 për mijë`); // 2b — before the tier, which has no per-mille arm
+    s = rewrite(s, GROUP_SEPARATED, (_w, head: string, groups: string) => head + groups.replace(/[.,\u00a0\u202f\u2009 ]/gu, "")); // 1  // NBSP, NNBSP, thin space
+    s = rewrite(s, RANGE, `$1 deri $2`); // 3 — before a dash can be claimed as a minus
+    s = rewrite(s, PER_MILLE, `$1 për mijë`); // 2b — before the tier, which has no per-mille arm
     s = SYMBOLS(s); // 2 — percent, currency, units, rates, exponents; needs the figure intact
     s = degrees(s); // 4
     s = signs(s); // 5
-    s = tr(s, DECIMAL, (_w, head: string, frac: string) => {
+    s = rewrite(s, DECIMAL, (_w, head: string, frac: string) => {
         const zeros = /^0*/u.exec(frac)![0];
         const rest = frac.slice(zeros.length);
         return `${head} ${DECIMAL_WORD} ${[...zeros].map(() => "zero").concat(rest === "" ? [] : [rest]).join(" ")}`;

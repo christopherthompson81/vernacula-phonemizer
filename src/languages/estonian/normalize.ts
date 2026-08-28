@@ -236,7 +236,7 @@
  */
 
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // NUMERAL MORPHOLOGY — the genitive cardinal and the ordinal, which is what every date and year rule needs
@@ -656,7 +656,7 @@ const CLOCK_MARKED = /(?<=\bkell[ao]?\s)([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,
 export function normalizeEstonian(input: string): string {
     // 0) THE MARKED CLOCK loses the separator's pause — see CLOCK_MARKED. First, because the ordinal and
     //    decimal rules below both read a dot and would spend `8.46`'s before this could see it.
-    input = tr(input, CLOCK_MARKED, "$1 $2");
+    input = rewrite(input, CLOCK_MARKED, "$1 $2");
     let t = input;
 
     // 1) SPACE-GROUPED THOUSANDS (31,010 whole-corpus; 48 in the retained text), FIRST — a space is a token
@@ -679,18 +679,18 @@ export function normalizeEstonian(input: string): string {
     //    `\d,\d{3}` in the retained text is a genuine three-place DECIMAL — `120,758 miljardit USA dollarit`
     //    is 120.758 billion — against two English-convention groupings quoted from a poker-tournament report
     //    (`€2,400`, `R$5,000`). A comma arm would corrupt the real decimals to fix two foreign figures.
-    t = tr(t, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (_m, head: string, rest: string) =>  // space, NBSP, NNBSP, thin space
+    t = rewrite(t, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (_m, head: string, rest: string) =>  // space, NBSP, NNBSP, thin space
         `${head}${rest.replace(/[ \u00a0\u202f\u2009]/gu, "")}`);  // space, NBSP, NNBSP, thin space
 
     // 2) ERA MARKERS (1,319 whole-corpus; 25 in the retained text), before the abbreviations for the usual
     //    reason and — critically — before the shared unit tier, so `632 m.a.j.` cannot read as 632 metres.
     //    See the ERA declaration for that coupling and for both espeak citations.
-    for (const [re, phrase] of ERA) t = tr(t, re, phrase);
+    for (const [re, phrase] of ERA) t = rewrite(t, re, phrase);
 
     // 3) DOTLESS ABBREVIATIONS (202,955 whole-corpus; 24 retained). AFTER the era markers and BEFORE the
     //    initialism pass, which runs on this function's output — otherwise nothing here is at risk from it,
     //    since every abbreviation is lowercase, but the ordering is the fleet's and is kept.
-    for (const [re, word] of ABBREV) t = tr(t, re, word);
+    for (const [re, word] of ABBREV) t = rewrite(t, re, word);
 
     // 4) THE ORDINAL COORDINATION AND THE ORDINAL RANGE, BEFORE the single `N.` rule (step 5) and before the
     //    general range rule (step 7). Both exist because their LEFT operand is not followed by a head noun,
@@ -711,7 +711,7 @@ export function normalizeEstonian(input: string): string {
     //    are read and only the connective is dropped — which is fi's shipped answer for the same shape, and
     //    it is exactly what the dash already did.
     const ordCase = (word: string): string | undefined => caseOf(word);
-    t = tr(t,
+    t = rewrite(t,
         new RegExp(`(?<![\\d.,:\\p{L}\\p{M}])(\\d{1,4})\\.\\s+(ja|või)\\s+(\\d{1,4})\\.(?=\\s+(${HEAD_WORD}))`, "gu"),
         (m, a: string, conj: string, b: string, head: string) => {
             const e = ordCase(head);
@@ -720,7 +720,7 @@ export function normalizeEstonian(input: string): string {
             return x !== undefined && y !== undefined ? `${x} ${conj} ${y}` : m;
         },
     );
-    t = tr(t,
+    t = rewrite(t,
         new RegExp(`(?<![\\d.,:\\p{L}\\p{M}])(\\d{1,4})\\.\\s*[–—-]\\s*(\\d{1,4})\\.(?=\\s+(${HEAD_WORD}))`, "gu"),
         (m, a: string, b: string, head: string) => {
             const e = ordCase(head);
@@ -741,7 +741,7 @@ export function normalizeEstonian(input: string): string {
     //    match: `Diogenes Laertios 5.1.10.` is rejected at `5` (the next dot is followed by a digit) and at
     //    `1`/`10` (preceded by a dot) — trap 52, where a lookbehind rejects a POSITION and the engine simply
     //    starts later, so the operand is anchored on BOTH edges rather than only the left.
-    t = tr(t,
+    t = rewrite(t,
         new RegExp(`(?<![\\d.,:\\p{L}\\p{M}])(\\d{1,4})\\.(?=\\s+(${HEAD_WORD}))`, "gu"),
         (m, n: string, head: string) => {
             const e = ordCase(head);
@@ -769,7 +769,7 @@ export function normalizeEstonian(input: string): string {
     //    which the shared tier can no longer match, so the `$` would vanish ENTIRELY. Trading a raw suffix
     //    token for a silently dropped currency is a worse reading, so those three are declined whole
     //    (trap 53) and keep exactly the output they had.
-    t = tr(t, /(?<![\d.,\p{Sc}])(\d{1,4})-(le|ni)(?![\p{L}\p{M}])/gu, (m, n: string, suf: string) => {
+    t = rewrite(t, /(?<![\d.,\p{Sc}])(\d{1,4})-(le|ni)(?![\p{L}\p{M}])/gu, (m, n: string, suf: string) => {
         const v = Number(n);
         return v >= 1 && v <= 9999 ? `${genCardinal(v)}${suf}` : m;
     });
@@ -801,7 +801,7 @@ export function normalizeEstonian(input: string): string {
     //    IN TIME, so declining it is a real cost — three spans keep their silent dash. It is taken knowingly:
     //    the alternative is to read the era marker's position, and step 2 has already spent it.
     const NUM = String.raw`\d+`;
-    t = tr(t,
+    t = rewrite(t,
         new RegExp(
             String.raw`(?<![-+−–—/\d.,:\p{L}\p{M}])(${NUM})[ ]?[-–—][ ]?(${NUM})(?![-+−/\d:\p{L}\p{M}]|,\d)`,
             "gu",
@@ -812,7 +812,7 @@ export function normalizeEstonian(input: string): string {
     //    The ELLIPSIS span (7): `−10...0 °C`, `3000...4000 m`, `200...250 mm`, `40...50 mm`. Three ASCII dots
     //    between digits are not three clause breaks — `clausePunctuation` maps each `.` to a sentence end, so
     //    `3000...4000` came out as two numbers with THREE pauses between them. Same joiner, same evidence.
-    t = tr(t, /(?<![\d.,])(\d+)\s*\.\.\.\s*(\d+)(?![\d.,])/gu, `$1 ${RANGE_JOINER} $2`);
+    t = rewrite(t, /(?<![\d.,])(\d+)\s*\.\.\.\s*(\d+)(?![\d.,])/gu, `$1 ${RANGE_JOINER} $2`);
 
     // 8) THE DECIMAL COMMA (91,561 whole-corpus; 91 retained) — the second-largest defect. `clausePunctuation`
     //    maps `,` to a pause, so `74,2%` read *seitsekümmend neli [PAUSE] kaks*: a sentence break inside one
@@ -828,7 +828,7 @@ export function normalizeEstonian(input: string): string {
     //    figures quoted from English (`$0.20`, `3.3million`) and exactly ONE real decimal, `63.27%`, in a list
     //    whose other five members are written with commas. A dot arm would put a *koma* into twenty-two
     //    citations to fix one figure the same sentence spells correctly five times over.
-    t = tr(t, /(?<![\d.,])(\d+),(\d+)(?![\d,])/gu, (_m, int: string, frac: string) =>
+    t = rewrite(t, /(?<![\d.,])(\d+),(\d+)(?![\d,])/gu, (_m, int: string, frac: string) =>
         `${int} ${DECIMAL_WORD} ${[...frac].join(" ")}`);
 
     // 9) DEGREES (3,973 whole-corpus; 33 retained), AFTER the ranges and the decimals so the operand is
@@ -852,8 +852,8 @@ export function normalizeEstonian(input: string): string {
     //    `saidNear` for the three ways the equivalent Luganda guard was wrong before review.
     const degree = (w: string, n: string, off: number, all: string): string =>
         saidNear(all, off, off + w.length, "kraad") ? n : `${n} ${DEGREE_WORD}`;
-    t = tr(t, /(\d)\s*°\s*[CF](?![\p{L}\p{M}])/gui, degree);
-    t = tr(t, /(\d)\s*°(?!\s*\d+\s*['’′])/gu, degree);
+    t = rewrite(t, /(\d)\s*°\s*[CF](?![\p{L}\p{M}])/gui, degree);
+    t = rewrite(t, /(\d)\s*°(?!\s*\d+\s*['’′])/gu, degree);
 
     // 10) THE MINUS SIGN (18,727 `signed-number` whole-corpus; 8 in the retained text), AFTER the range rule
     //     so a span's dash has already been spent and cannot be read as a sign.
@@ -865,7 +865,7 @@ export function normalizeEstonian(input: string): string {
     //     span this file declined (`18–13,7`, `1920.–1940.`) cannot have its leftover dash re-read as a
     //     negative. Zero false positives over the retained text.
     //     `miinus` is attested ×43/18 and the first hit glosses itself — *"Miinus Seitse (ka -7)"*.
-    t = tr(t, /(?<![\p{L}\p{M}\d.,–—-])[-−–](?=\d)/gu, "miinus ");
+    t = rewrite(t, /(?<![\p{L}\p{M}\d.,–—-])[-−–](?=\d)/gu, "miinus ");
 
     // 10b) THE PLUS SIGN (7), argued SEPARATELY and never on the minus's citation (the hi mistake). Read,
     //     because all seven instances take it: `+26 °C` (the Estonian weather register says *pluss*), the
@@ -879,12 +879,12 @@ export function normalizeEstonian(input: string): string {
     //     `$50 pre-flopist + 3x$30` (the leading arm's digit is one space away). None of the three can be
     //     read by a rule that insists on a digit, and all three are ordinary additions. `+` is not an
     //     Estonian letter, so no widening here can bite a word.
-    t = tr(t, /(?<![\p{L}\p{M}\d])\+\s?(?=\d)/gu, "pluss ");
-    t = tr(t, /(?<=[\p{L}\p{M}\d)\p{Sc}])\s*\+\s*(?=[\p{L}\p{M}\d(\p{Sc}])/gu, " pluss ");
+    t = rewrite(t, /(?<![\p{L}\p{M}\d])\+\s?(?=\d)/gu, "pluss ");
+    t = rewrite(t, /(?<=[\p{L}\p{M}\d)\p{Sc}])\s*\+\s*(?=[\p{L}\p{M}\d(\p{Sc}])/gu, " pluss ");
 
     // The insertions above pad with spaces so a word never fuses with its neighbours; collapse the runs, and
     // do not leave one at an edge (SLOT-GAP is a corpus-diff defect class and this pass may not feed it).
-    return t.replace(/[^\S\n]{2,}/gu, " ").replace(/^[^\S\n]+|[^\S\n]+$/gu, "");
+    return rewrite(rewrite(t, /[^\S\n]{2,}/gu, " "), /^[^\S\n]+|[^\S\n]+$/gu, "");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1005,7 +1005,7 @@ export function normalizeEstonianInitialisms(text: string): string {
  * the OOV rule, and gluing a suffix onto a word the tokenizer will read anyway buys nothing.
  */
 function resolveHyphenInflection(text: string): string {
-    return text.replace(
+    return rewrite(text, 
         /(?<![\p{L}\p{M}])(\p{Lu}{2,})-([a-zõäöüšž]{1,3})(?![\p{L}\p{M}])/gu,
         (m, head: string, suf: string) => {
             const lower = head.toLowerCase();

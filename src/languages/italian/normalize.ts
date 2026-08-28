@@ -29,7 +29,7 @@ import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { romanToInt } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
 import { ROMAN_POLICY } from "./romanOrdinals.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Word boundaries as explicit lookarounds. `\b` is ASCII-defined and matches INSIDE `città`/`perché` at
  *  the accent, which is precisely how the French rule came to fire in the middle of `siècle`. */
@@ -90,7 +90,7 @@ const DEG = MANIFEST.degree;
  * was invisible while the noun was a hard-coded plural and wrong the moment a count is read off it.
  */
 function degrees(n: string): string {
-    return Number(n.replace(",", ".")) === 1
+    return Number(rewrite(n, ",", ".")) === 1
         ? `${MANIFEST.apocopatedOne} ${DEG.singular}`
         : `${n} ${DEG.plural}`;
 }
@@ -113,7 +113,7 @@ export function normalizeItalianInitialisms(text: string): string {
 const ordinal = (n: number): string | undefined => ROMAN_POLICY.ordinal(n);
 
 /** Feminine ordinal: the final -o becomes -a (decimo → decima). */
-const feminine = (masc: string): string => masc.replace(/o$/u, "a");
+const feminine = (masc: string): string => rewrite(masc, /o$/u, "a");
 
 /** Fraction denominators with a suppletive name; the rest take the ordinal (1/5 = un quinto). Plural is the
  *  regular masculine -o → -i (tre quarti). */
@@ -145,24 +145,24 @@ export function normalizeItalian(input: string): string {
     //    "diciannove [PAUSE] cinquecento". Applied twice so a two-separator number (5.000.000) collapses
     //    fully; the `(?!\d)` tail keeps it to real 3-digit blocks. Every later step then sees one unbroken
     //    digit run — the clock, the ordinal and the unit tier all depend on that.
-    s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
-    s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+    s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
+    s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
 
     // 2) ERA MARKERS, before the generic dotted-abbreviation rule (multi-dot before single-dot: otherwise
     //    the interior dot of `a.C.` survives as a phrase break). Both spacings occur in the wild; the
     //    corpus writes them closed (a.C. ×7, d.C. ×3).
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}a\\.\\s?C\\.`, "gu"), MANIFEST.eraMarkers.beforeChrist);
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}d\\.\\s?C\\.`, "gu"), MANIFEST.eraMarkers.afterChrist);
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}a\\.\\s?C\\.`, "gu"), MANIFEST.eraMarkers.beforeChrist);
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}d\\.\\s?C\\.`, "gu"), MANIFEST.eraMarkers.afterChrist);
 
     // 3) NUMERO — only before a digit. Both corpus occurrences are `n. 1` / `n. 11`; a bare `n.` at the end
     //    of a sentence is an ordinary word's last letter far more often than it is an abbreviation.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(?:n\\.º|n\\.|nr\\.|nº)\\s?(?=\\d)`, "giu"), `${MANIFEST.numberSign} `);
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(?:n\\.º|n\\.|nr\\.|nº)\\s?(?=\\d)`, "giu"), `${MANIFEST.numberSign} `);
 
     // 4) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues, so it cannot become a
     //    phrase break; at a phrase end it is kept, because there it really is the sentence end. What
     //    follows may be a DIGIT as well as a letter — `art. 5` and `pag. 12` are the normal shapes for
     //    half this table, and a letter-only lookahead left both unexpanded with the dot still a pause.
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\p{N}])`, "giu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\p{N}])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -170,7 +170,7 @@ export function normalizeItalian(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -183,8 +183,8 @@ export function normalizeItalian(input: string): string {
     //    below claims every remaining `\d°`. Temperature (`30°C`, `90 °F`) and coordinate (`35°W`) are
     //    identified by the LETTER glued to the sign; the ordinal never has one (`1° gennaio` has a space).
     //    This also has to run before the shared unit tier, which would otherwise leave the bare sign behind.
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, (_m, n: string) => `${degrees(n)} ${DEG.celsius}`);
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])/gui, (_m, n: string) => `${degrees(n)} ${DEG.fahrenheit}`);
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, (_m, n: string) => `${degrees(n)} ${DEG.celsius}`);
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])/gui, (_m, n: string) => `${degrees(n)} ${DEG.fahrenheit}`);
     //    ⚠ THE COMPASS ARM IS CASE-INSENSITIVE **AND** REQUIRES THE LETTER GLUED, and the two changes are
     //    one fix. It was case-SENSITIVE while the C and F arms above were not, so `35°w` fell through to the
     //    ordinal rule and read *trentacinquesimo w* — thirty-FIFTH double-u. The corpus writes `35°W`
@@ -200,7 +200,7 @@ export function normalizeItalian(input: string): string {
     //    Two branches, so nothing that worked before is lost: GLUED in either case (`35°W`, `35°w`), or
     //    SPACED but only UPPERCASE (`35° W`) — an uppercase ⟨E⟩ after a space is not the conjunction, a
     //    lowercase one is, and that asymmetry is the whole reason this arm needs branches at all.
-    s = tr(s, /(\d+(?:[.,]\d+)?)\s?°(?:([nsewNSEW])|\s+([NSEW]))(?![\p{L}\p{M}])/gu,
+    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°(?:([nsewNSEW])|\s+([NSEW]))(?![\p{L}\p{M}])/gu,
         (_m, d: string, glued: string | undefined, spaced: string | undefined) =>
             `${degrees(d)} ${COMPASS[(glued ?? spaced)!.toLowerCase()]!}`);
 
@@ -210,7 +210,7 @@ export function normalizeItalian(input: string): string {
     //    (`il 1° gennaio`, `il suo 60° gol`, ×8) — this is where Italian parts company with es/pt, which
     //    exclude `°` because in those corpora it is only ever a temperature. The temperature and
     //    coordinate senses were already consumed in step 5, so what reaches here is the ordinal.
-    s = tr(s, /(\d+)\.?(?:º|ª|°)/gu, (whole, digits: string) => {
+    s = rewrite(s, /(\d+)\.?(?:º|ª|°)/gu, (whole, digits: string) => {
         const masc = ordinal(Number(digits));
         if (masc === undefined) return whole;
         return /ª/u.test(whole) ? feminine(masc) : masc;
@@ -222,13 +222,13 @@ export function normalizeItalian(input: string): string {
     //    so the existing cardinal compositor still does the pronouncing. Minutes must be two digits, which
     //    is what keeps the grade `2:2` ("classe di voto 2:2", the one non-clock colon-digit in the corpus)
     //    out of this rule.
-    s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+    s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
         (_m, h: string, min: string) => (Number(min) === 0 ? h : `${h} e ${min}`));
     //    Italian also writes the clock with a PERIOD (`alle 12.00 GMT`, ×1 here). Unlike the colon, a period
     //    between two short digit runs is NOT self-identifying — `802.11a` in this same corpus offers
     //    `02.11`, and an English-style decimal would offer `6.34` — so this form is claimed only after an
     //    explicit hour preposition. That cue is what carries the rule, not the digit shape.
-    s = tr(s, /((?:all[e'’]|alle ore|ore|dalle|verso le|le)\s?)([01]?\d|2[0-3])\.([0-5]\d)(?![\d.])/giu,
+    s = rewrite(s, /((?:all[e'’]|alle ore|ore|dalle|verso le|le)\s?)([01]?\d|2[0-3])\.([0-5]\d)(?![\d.])/giu,
         (_m, cue: string, h: string, min: string) => `${cue}${Number(min) === 0 ? h : `${h} e ${min}`}`);
 
     // 8) SIGNS. `+` occurs once (`UTC+1`); `-` does not occur in this corpus, but a dropped minus is silent
@@ -238,10 +238,10 @@ export function normalizeItalian(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    immediately below.
-    s = tr(s, /±/gu, ` ${SIGN.plusMinus} `);
-    s = tr(s, /(\S)\+\s?(\d)/gu, `$1 ${SIGN.plus} $2`);
-    s = tr(s, /(^|\s)\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
-    s = tr(s, /(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
+    s = rewrite(s, /±/gu, ` ${SIGN.plusMinus} `);
+    s = rewrite(s, /(\S)\+\s?(\d)/gu, `$1 ${SIGN.plus} $2`);
+    s = rewrite(s, /(^|\s)\+\s?(\d)/gu, `$1${SIGN.plus} $2`);
+    s = rewrite(s, /(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
 
     // 8b) RELATIONAL AND DIVISION SIGNS. ⚠ TIER 2 LOOKED SUFFICIENT AND WAS THE WRONG SENSE TWICE —
     //     this language is the clearest case in the issue for why the examples get read rather than the counts.
@@ -267,14 +267,14 @@ export function normalizeItalian(input: string): string {
     //     Italian admits — the adjective needs its verb — so the bare form de/es/en use has nothing to drop to
     //     here. `diviso per` is a participle and stands without one. `lb` (`ass gläich`) and `nb` (`er lik`)
     //     already ship the copular shape, so both are in the fleet.
-    s = tr(s, /\s?=\s?/gu, ` ${SIGN.equals} `);
-    s = tr(s, /\s?<\s?/gu, ` ${SIGN.lessThan} `);
-    s = tr(s, /\s?>\s?/gu, ` ${SIGN.greaterThan} `);
-    s = tr(s, /\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
+    s = rewrite(s, /\s?=\s?/gu, ` ${SIGN.equals} `);
+    s = rewrite(s, /\s?<\s?/gu, ` ${SIGN.lessThan} `);
+    s = rewrite(s, /\s?>\s?/gu, ` ${SIGN.greaterThan} `);
+    s = rewrite(s, /\s?÷\s?/gu, ` ${SIGN.dividedBy} `);
 
     // 9) FRACTIONS, guarded against a date and a unit ratio by requiring digits on both sides and nothing
     //    numeric after.
-    s = tr(s, /(?<!\d)(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) =>
+    s = rewrite(s, /(?<!\d)(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
 
     // 9b) THE PLUS AS A WORD-JOINER — a shape the whole signed-number sweep never met. Every other `+` resolved
@@ -292,7 +292,7 @@ export function normalizeItalian(input: string): string {
     //     UTC offset has a digit on at least one side and is left for a later rule to claim. Spaced on output
     //     because the inputs are closed up (`volo+hotel` is one token to the tokenizer, and *volopiùhotel* is
     //     not a word).
-    s = tr(s, /(?<=[\p{L}\p{M}])\+(?=[\p{L}\p{M}])/gu, ` ${SIGN.plus} `);
+    s = rewrite(s, /(?<=[\p{L}\p{M}])\+(?=[\p{L}\p{M}])/gu, ` ${SIGN.plus} `);
 
     // 10) CURRENCY WRITTEN BEFORE THE AMOUNT. The corpus only ever postposes the sign ("banconote da 5 $",
     //     "2.500 ¥"), which the shared symbol tier handles correctly, so this rule exists for the preposed
@@ -300,7 +300,7 @@ export function normalizeItalian(input: string): string {
     //     Italian needs the partitive *di* between a magnitude and the currency noun ("5 milioni DI
     //     dollari"). Claiming the sign here leaves the tier nothing to do. Only ordering requirement: after
     //     the de-grouping in step 1, so the amount is one digit run.
-    s = tr(s,
+    s = rewrite(s,
         /([€$£¥])\s?(\d[\d.,]*)(\s+(?:miliardi|miliardo|milioni|milione|mila))?/gu,
         (m0, sign: string, num: string, mag: string | undefined, offset: number, whole: string) => {
             // The currency NOUN may already be written out beside the sign ("$5 milioni di dollari" is a
@@ -309,7 +309,7 @@ export function normalizeItalian(input: string): string {
             // simply drops the magnitude and matches anyway, which is worse than either outcome.
             if (CURRENCY_WORD.test(whole.slice(offset + m0.length))) return `${num}${mag ?? ""}`;
             const forms = CURRENCY[sign]!;
-            const word = mag !== undefined || Number(num.replace(/[.,]/gu, "")) !== 1 ? forms[1]! : forms[0]!;
+            const word = mag !== undefined || Number(rewrite(num, /[.,]/gu, "")) !== 1 ? forms[1]! : forms[0]!;
             // ⚠ THE NOUN MUST NOT FUSE WITH WHAT FOLLOWS, the same repair `core/normalizeSymbols.ts` carries
             // for the shared arm. The match ends at the digits (or the magnitude), so an ABBREVIATED
             // magnitude glued to the number left the noun abutting it and the tokenizer read one word:
@@ -346,5 +346,5 @@ export const CURRENCY: Readonly<Record<string, readonly [string, string]>> = {
  * (`nel 1990, 1995`), which always carries the space a decimal never does.
  */
 export function normalizeItalianDecimals(input: string): string {
-    return input.replace(/(\d),(\d)/gu, `$1 ${MANIFEST.decimalWord} $2`);
+    return rewrite(input, /(\d),(\d)/gu, `$1 ${MANIFEST.decimalWord} $2`);
 }

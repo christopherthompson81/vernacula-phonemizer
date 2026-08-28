@@ -4,6 +4,7 @@
  * Ported from src/languages/turkish/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Turkish;
 
@@ -117,33 +118,33 @@ public static class Normalize
     {
         var s = input;
 
-        s = JsRegex.Replace(s, ERA_MO_DOTTED, _ => "milattan önce");
-        s = JsRegex.Replace(s, ERA_MS_DOTTED, _ => "milattan sonra");
-        s = JsRegex.Replace(s, ERA_MO, _ => "milattan önce");
-        s = JsRegex.Replace(s, ERA_MS, _ => "milattan sonra");
+        s = Rewrite(s, ERA_MO_DOTTED, _ => "milattan önce");
+        s = Rewrite(s, ERA_MS_DOTTED, _ => "milattan sonra");
+        s = Rewrite(s, ERA_MO, _ => "milattan önce");
+        s = Rewrite(s, ERA_MS, _ => "milattan sonra");
 
-        s = JsRegex.Replace(s, NO_LU, _ => "numaralı"); // 11 No.'lu → 11 numaralı
-        s = JsRegex.Replace(s, ABBREV_MID, m =>
+        s = Rewrite(s, NO_LU, _ => "numaralı"); // 11 No.'lu → 11 numaralı
+        s = Rewrite(s, ABBREV_MID, m =>
             $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = JsRegex.Replace(s, ABBREV_END, m =>
+        s = Rewrite(s, ABBREV_END, m =>
             $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
 
         System.Text.RegularExpressions.MatchEvaluator Clock = m =>
             Js.Number(m.Groups[2].Value) == 0 ? m.Groups[1].Value : $"{m.Groups[1].Value} {m.Groups[2].Value}";
-        s = JsRegex.Replace(s, CLOCK_COLON, Clock);
-        s = JsRegex.Replace(s, CLOCK_DOT, Clock);
+        s = Rewrite(s, CLOCK_COLON, Clock);
+        s = Rewrite(s, CLOCK_DOT, Clock);
 
-        s = JsRegex.Replace(s, RATE_KM, m => $"saatte {m.Groups[1].Value} kilometre");
-        s = JsRegex.Replace(s, RATE_MIL, m => $"saatte {m.Groups[1].Value} mil");
-        s = JsRegex.Replace(s, RATE_MS, m => $"saniyede {m.Groups[1].Value} metre");
+        s = Rewrite(s, RATE_KM, m => $"saatte {m.Groups[1].Value} kilometre");
+        s = Rewrite(s, RATE_MIL, m => $"saatte {m.Groups[1].Value} mil");
+        s = Rewrite(s, RATE_MS, m => $"saniyede {m.Groups[1].Value} metre");
 
-        s = JsRegex.Replace(s, DEG_C, m => $"{m.Groups[1].Value} derece");
-        s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value} derece");
+        s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} derece");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} derece");
 
-        s = JsRegex.Replace(s, PLUSMINUS, _ => " artı eksi ");
-        s = JsRegex.Replace(s, PLUS_AFTER, m => $"{m.Groups[1].Value} artı {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, PLUS_START, m => $"{m.Groups[1].Value}artı {m.Groups[2].Value}");
-        s = JsRegex.Replace(s, MINUS, m => $"{m.Groups[1].Value}eksi {m.Groups[2].Value}");
+        s = Rewrite(s, PLUSMINUS, _ => " artı eksi ");
+        s = Rewrite(s, PLUS_AFTER, m => $"{m.Groups[1].Value} artı {m.Groups[2].Value}");
+        s = Rewrite(s, PLUS_START, m => $"{m.Groups[1].Value}artı {m.Groups[2].Value}");
+        s = Rewrite(s, MINUS, m => $"{m.Groups[1].Value}eksi {m.Groups[2].Value}");
 
         static string LowVowel(string stem)
         {
@@ -165,15 +166,15 @@ public static class Normalize
         }
         void Postposed(string sign, Func<string, string> inflect, string verb)
         {
-            s = JsRegex.Replace(s, JsRegex.Compile($"({OPERAND})\\s?{sign}\\s?({OPERAND})", "gu"),
+            s = Rewrite(s, JsRegex.Compile($"({OPERAND})\\s?{sign}\\s?({OPERAND})", "gu"),
                 m => $"{TrWord(m.Groups[1].Value)} {inflect(TrWord(m.Groups[2].Value))} {verb}");
         }
         Postposed("<", Ablative, "küçüktür");
         Postposed(">", Ablative, "büyüktür");
-        s = JsRegex.Replace(s, EQUALS, _ => " eşittir ");
-        s = JsRegex.Replace(s, DIVIDE, _ => " bölü ");
+        s = Rewrite(s, EQUALS, _ => " eşittir ");
+        s = Rewrite(s, DIVIDE, _ => " bölü ");
 
-        s = JsRegex.Replace(s, AMPERSAND, _ => " ve ");
+        s = Rewrite(s, AMPERSAND, _ => " ve ");
 
         s = NormalizeInitialisms(s);
 

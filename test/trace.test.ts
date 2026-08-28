@@ -9,6 +9,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import { phonemize, phonemizeTrace } from "../src/index.ts";
+import { beginProvenance, endProvenance, rewrite } from "../src/core/provenance.ts";
 
 /** A deterministic stride sample of each golden's input column. */
 function sample(lang: string, n: number): string[] {
@@ -340,5 +341,60 @@ describe("phonemizeTrace — length is not identity (#1150 stage 2)", () => {
         const k = t.tokens.find((x) => x.surface === "kiromita");
         expect(k?.inputSpan).toBeDefined();
         expect(text.slice(...k!.inputSpan!)).toBe("1 244.7 km²");
+    });
+});
+
+describe("the seam is a drop-in for `replace`, not a near-miss (#1150)", () => {
+    /**
+     * ⚠ A STRING PATTERN REPLACES THE FIRST MATCH ONLY, and getting that wrong is not a subtle failure.
+     * Converting `.replaceAll(".", "")` onto the seam de-grouped `1.234.567` into `1234.567` and broke 13
+     * tests across 8 languages, because `replaceAll` and `replace` differ in exactly this way. `.replaceAll`
+     * is therefore off the seam entirely; this pins the half that is on it.
+     */
+    test("a string pattern behaves as String.replace does, over randomised input", () => {
+        const ALPHA = [..."ab.$&*+?^(){}[]|\\/ 🙂é", "aa", "$1", "$&", "$`", "$'"];
+        let seed = 20260828;
+        const rnd = (): number => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+        const pick = (n: number): string => Array.from({ length: n }, () => ALPHA[Math.floor(rnd() * ALPHA.length)]!).join("");
+        // ⚠ IT MUST RUN UNDER A LIVE TRACE. Untraced, `rewrite` hands the pattern straight to `String.replace`
+        // and the overload under test is never reached — the first version of this test passed happily with
+        // the seam deliberately sabotaged to a GLOBAL regex, because it only ever exercised the native call.
+        const bad: string[] = [];
+        try {
+            for (let i = 0; i < 4000; i++) {
+                const s = pick(1 + Math.floor(rnd() * 8));
+                const pat = pick(1 + Math.floor(rnd() * 3));
+                const rep = rnd() < 0.5 ? pick(1 + Math.floor(rnd() * 3)) : (m: string): string => `<${m}>`;
+                const want = s.replace(pat, rep as string);
+                beginProvenance(s);
+                const got = rewrite(s, pat, rep);
+                if (want !== got) bad.push(`${JSON.stringify(s)} / ${JSON.stringify(pat)}: want ${JSON.stringify(want)} got ${JSON.stringify(got)}`);
+            }
+        } finally {
+            endProvenance();
+        }
+        expect(bad.slice(0, 4)).toEqual([]);
+    });
+
+    /**
+     * ⚠ ABSENT MUST STAY THE ONLY OTHER ANSWER. A floor, not a target: it exists so a future change that
+     * quietly takes sites off the seam — or puts a SUBSTRING on it, which destroys a whole utterance's
+     * mapping — shows up as a test rather than as a number nobody re-measured. Measured 94.7% when written.
+     */
+    test("provenance coverage does not silently regress", () => {
+        let tok = 0;
+        let mapped = 0;
+        for (const lang of GOLDEN_LANGS)
+            for (const text of sample(lang, 6)) {
+                let t;
+                try {
+                    t = phonemizeTrace(text, lang);
+                } catch {
+                    continue;
+                }
+                tok += t.tokens.length;
+                mapped += t.tokens.filter((k) => k.inputSpan !== undefined).length;
+            }
+        expect(mapped / tok).toBeGreaterThan(0.9);
     });
 });

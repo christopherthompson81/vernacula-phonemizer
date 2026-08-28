@@ -20,7 +20,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { azLower } from "./g2p.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -185,24 +185,24 @@ export function normalizeAzerbaijani(input: string): string {
     //    Measured before the fix: 0 of the 3,838 FLEURS az lines and 0 of the 200 golden rows end on an era
     //    marker, so nothing observable moved — the branch was dead, not wrong-but-load-bearing.
     for (const [body, word] of MULTI_DOT) {
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}(?=\\s*$)`, "giu"), `${word}.`);
-        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}`, "giu"), word);
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}(?=\\s*$)`, "giu"), `${word}.`);
+        s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}`, "giu"), word);
     }
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `Corc V. Buş` — the W.-style initial dot is a break.
-    s = tr(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
     //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
     //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
     //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
     //    Azerbaijani's own ⟨Ə Ç Ğ İ Ö Ş Ü⟩ — ⟨Ə⟩ above all. The minimal pair, measured before the fix:
     //        "M. Bayramov" → "M Bayramov"
     //        "M. Əliyev" → unchanged   ← the dot survives as a spurious clause break
-    s = tr(s, /(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
+    s = rewrite(s, /(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
 
     // 3) SINGLE-DOT ABBREVIATIONS. Two branches: mid-sentence the dot is CONSUMED so it cannot become a
     //    phrase break; at a phrase end it is kept. `Şək.` (şəkil, figure) is the corpus's abbreviation.
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(dr|prof|şək)\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(dr|prof|şək)\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -210,7 +210,7 @@ export function normalizeAzerbaijani(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(dr|prof|şək)\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(dr|prof|şək)\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -222,13 +222,13 @@ export function normalizeAzerbaijani(input: string): string {
     // 4) ORDINALS — the `N-ci` form. The written suffix (ci/cı/cu/cü) implies the harmony class; the spoken
     //    suffix is the cardinal's last word with -ıncı/-inci/-uncu/-üncü. Was *səkkiz d͡ʒi* / *yüz doxsan
     //    d͡ʒı* / *iyirmi dörd d͡ʒü*. BEFORE the clock rule so a digit run is not first claimed as a time.
-    s = tr(s, /(?<![\d.,])(\d+)-(cı|ci|cu|cü)(?![\p{L}\p{M}])/giu, (m0, d: string) =>
+    s = rewrite(s, /(?<![\d.,])(\d+)-(cı|ci|cu|cü)(?![\p{L}\p{M}])/giu, (m0, d: string) =>
         ordinalWords(Number(d)) ?? m0);
 
     // 5) SPACE-GROUPED THOUSANDS. Azerbaijani groups thousands with a SPACE (400 000, 30 000). Two passes,
     //    because the groups overlap on the shared digit. AFTER the ordinal (no `N-ci` has a space).
     for (let i = 0; i < 2; i++)
-        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+        s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
 
     // 6) CLOCK, in the COLON form. The comma DECIMAL and the DOT version are handled elsewhere; the colon
     //    is clause punctuation and must be claimed here. `12:00 GMT` → saat on iki GMT; `21:20` → iyirmi
@@ -245,7 +245,7 @@ export function normalizeAzerbaijani(input: string): string {
     //    dot-separated variant of the same shape (`4:41.30`, which Afrikaans shipped) would otherwise have
     //    its head claimed as a clock and its tail stranded as a phrase break. A bare `.` must still pass —
     //    a clause can end on a clock.
-    s = tr(s, /(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|\.\d)(?:-([a-zəçğıiöşü]{1,5}))?/giu,
+    s = rewrite(s, /(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|\.\d)(?:-([a-zəçğıiöşü]{1,5}))?/giu,
         (m0, h: string, min: string, sfx?: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return m0;
@@ -261,24 +261,24 @@ export function normalizeAzerbaijani(input: string): string {
     //    grouping the corpus never writes with a dot.
     // The lookbehind also rejects a preceding COLON, so the dot inside a colon-separated sports time
     // (`4:41.30`) is not read as a version point once the clock rule has correctly declined it.
-    s = tr(s, /(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d])(?=\s*(?:[a-zA-Zçğəıiöşüx]|[)»]|$))/giu, "$1 nöqtə $2");
+    s = rewrite(s, /(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d])(?=\s*(?:[a-zA-Zçğəıiöşüx]|[)»]|$))/giu, "$1 nöqtə $2");
     // The fraction is capped at TWO digits and the space is preserved. Unbounded, this rule claimed the
     // period-THOUSANDS the engine reads as one number (`1.234 nəfər` → *1 nöqtə 234nəfər*, the space eaten
     // too) — the very grouping the TOKEN's `\d+\.\d{3}` group exists to read.
-    s = tr(s, /(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d])(\s?)(?=[a-zA-Zçğəıiöşüx]|GHz?)/giu, "$1 nöqtə $2$3");
+    s = rewrite(s, /(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d])(\s?)(?=[a-zA-Zçğəıiöşüx]|GHz?)/giu, "$1 nöqtə $2$3");
 
     // 8) RATES — the corpus's own prose reads them PREFIXED ("saatda 40 mil", "saniyədə 1,5 km"), exactly
     //    as Turkish. The shared tier only emits "N kilometr saatda"-shaped, so the `/unit` forms are
     //    claimed here BEFORE the tier: km/saat & km/h → "saatda N kilometr", m/s → "saniyədə N metr",
     //    mil/saat → "saatda N mil". The slash is consumed so neither the unit nor the denominator strands.
-    s = tr(s, /(\d+(?:,\d+)?)\s?km\s?\/\s?(?:saat|h|s)(?![\p{L}\p{M}])/giu, "saatda $1 kilometr");
-    s = tr(s, /(\d+(?:,\d+)?)\s?mil\s?\/\s?(?:saat|h|s)(?![\p{L}\p{M}])/giu, "saatda $1 mil");
-    s = tr(s, /(\d+(?:,\d+)?)\s?m\s?\/\s?s(?![\p{L}\p{M}])/giu, "saniyədə $1 metr");
-    s = tr(s, /(\d+(?:,\d+)?)\s?yard\s?\/\s?m(?![\p{L}\p{M}])/giu, "metrdə $1 yard");
-    s = tr(s, /(\d+(?:,\d+)?)\s?Mbit\s?\/\s?s(?![\p{L}\p{M}])/giu, "saniyədə $1 meqabit");
+    s = rewrite(s, /(\d+(?:,\d+)?)\s?km\s?\/\s?(?:saat|h|s)(?![\p{L}\p{M}])/giu, "saatda $1 kilometr");
+    s = rewrite(s, /(\d+(?:,\d+)?)\s?mil\s?\/\s?(?:saat|h|s)(?![\p{L}\p{M}])/giu, "saatda $1 mil");
+    s = rewrite(s, /(\d+(?:,\d+)?)\s?m\s?\/\s?s(?![\p{L}\p{M}])/giu, "saniyədə $1 metr");
+    s = rewrite(s, /(\d+(?:,\d+)?)\s?yard\s?\/\s?m(?![\p{L}\p{M}])/giu, "metrdə $1 yard");
+    s = rewrite(s, /(\d+(?:,\d+)?)\s?Mbit\s?\/\s?s(?![\p{L}\p{M}])/giu, "saniyədə $1 meqabit");
     // Gigahertz as the corpus writes it — `2.4Ghz`, `5.0 Ghz`, and `802.11n` (its speed). Azerbaijani for
     // GHz is giqahers.
-    s = tr(s, /(\d+(?:,\d+)?)\s?Ghz?\b(?![\p{L}\p{M}])/giu, "$1 giqahers");
+    s = rewrite(s, /(\d+(?:,\d+)?)\s?Ghz?\b(?![\p{L}\p{M}])/giu, "$1 giqahers");
 
     // 9) PERCENT with a POSSESSIVE SUFFIX — `30%-i`, `3%-ni`, `88%-ni` ("its 30%"). The corpus's faiz
     //    noun takes the suffix directly (faizi, faizini). The shared tier's `N%` → "N faiz" cannot see
@@ -289,20 +289,20 @@ export function normalizeAzerbaijani(input: string): string {
     //     (*faiz dən*). Two of the corpus's twelve percent instances. An n-INITIAL suffix also needs the
     //     linking vowel that its written form assumes — `88%-ni` is *faizini*, never *faizni*, which is a
     //     cluster the language does not allow (three more instances).
-    s = tr(s, /(\d+)\s?%-?([a-zəçğıiöşün]{1,5})(?![\p{L}\p{M}])/gu, (_m, d: string, sfx: string) => {
+    s = rewrite(s, /(\d+)\s?%-?([a-zəçğıiöşün]{1,5})(?![\p{L}\p{M}])/gu, (_m, d: string, sfx: string) => {
         const link = /^n/u.test(sfx) ? harmoniseSuffix("faiz", "i") : "";
         return `${d} faiz${link}${harmoniseSuffix(`faiz${link}`, sfx)}`;
     });
 
     // 10) DEGREES. `+30°C` came out as the bare consonant [dʒ]; `35°` dropped the sign. The scale letters are
     //     expanded only DIRECTLY after a degree sign. `dərəcə` is the corpus's own word ("90 dərəcə farenheyt").
-    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 dərəcə selsi");
-    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 dərəcə farenheyt");
-    s = tr(s, /(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 dərəcə");
+    s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 dərəcə selsi");
+    s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 dərəcə farenheyt");
+    s = rewrite(s, /(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 dərəcə");
 
     // 11) SIGNS. `+30°C` — the plus was dropped. `&` → *və* (and). A TRUE minus (`-5`) reads "mənfi"; the
     //     corpus's `-\d` are all ranges/scores (1-3, 10-60, 6-6, 25-30) and stay as two bare numbers.
-    s = tr(s, /\+\s?(?=\d)/gu, " üstəgəl ");
+    s = rewrite(s, /\+\s?(?=\d)/gu, " üstəgəl ");
     // ⚠ U+2212 IS IN THE CLASS AND THE ASCII HYPHEN'S GUARDS ARE UNCHANGED. The MINUS SIGN is a distinct
     // code point whose only Unicode meaning is the arithmetic operator, and it is not on any keyboard —
     // whoever typed it meant a minus. It is not attested in this language's mined corpus, which is why an
@@ -310,28 +310,28 @@ export function normalizeAzerbaijani(input: string): string {
     // dropping a sign INVERTS the value it belongs to. The hyphen is the ambiguous one and keeps every
     // guard it had: leading position only, so a range (`1838−1917`) and a negative exponent (`10−19`) are
     // still refused by the lookbehind.
-    s = tr(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "mənfi $1");
+    s = rewrite(s, /(?<![\p{L}\p{Nd}])[-−](\d+)(?!\s*[-\d])/gu, "mənfi $1");
     // ⚠ `azLower`, NOT `toLowerCase`, for the reason `normalizeInitialisms` states above — and this call
     // was the one site in the file that still had the plain fold. JS lowercase maps the DOTLESS capital
     // `I` to dotted `i`, which the letter-name table answers with *i*, so `I&O` read *i və o* where
     // Azerbaijani says *ı və o* — the same defect the initialism pass was fixed for, in the arm nobody
     // re-checked. `İ` folds to `i` + U+0307, which the table cannot key on at all, so it fell through to
     // the bare capital and only reached *i* by way of the tokenizer's own İ→i normalization.
-    s = tr(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) =>
+    s = rewrite(s, /(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) =>
         `${LETTER_NAME[azLower(a)] ?? a} və ${LETTER_NAME[azLower(b)] ?? b}`);
-    s = tr(s, /\s&\s/gu, " və ");
-    s = tr(s, /(\S)\s*=\s*(\S)/gu, "$1 bərabərdir $2");
-    s = tr(s, /(\d)\s*<\s*(\d)/gu, "$1 kiçikdir $2");
-    s = tr(s, /(\d)\s*>\s*(\d)/gu, "$1 böyükdür $2");
-    s = tr(s, /(\d)\s*×\s*(\d)/gu, "$1 vur $2");
+    s = rewrite(s, /\s&\s/gu, " və ");
+    s = rewrite(s, /(\S)\s*=\s*(\S)/gu, "$1 bərabərdir $2");
+    s = rewrite(s, /(\d)\s*<\s*(\d)/gu, "$1 kiçikdir $2");
+    s = rewrite(s, /(\d)\s*>\s*(\d)/gu, "$1 böyükdür $2");
+    s = rewrite(s, /(\d)\s*×\s*(\d)/gu, "$1 vur $2");
 
     // 12) FRACTIONS (×3: 24½, 29¾, 1/5, 1/3). Azerbaijani builds these on the ordinal: 1/5 → *beşdə bir*
     //     (locative of the denominator + numerator), ½ → yarım, ¾ → üçdə dörd. LAST, so no earlier rule
     //     has to work around a slash.
-    s = tr(s, /(\d+)½/gu, "$1 yarım");
+    s = rewrite(s, /(\d+)½/gu, "$1 yarım");
     // ¾ is THREE QUARTERS — denominator-locative + numerator, the same shape the slash rule below builds:
     // *dörddə üç*. "üçdə dörd" is 4/3, and the corpus's one instance (`29¾ düym`) read it that way.
-    s = tr(s, /(\d+)¾/gu, "$1 dörddə üç");
+    s = rewrite(s, /(\d+)¾/gu, "$1 dörddə üç");
     // THE DIVISION SIGN. ⚠ THE SECOND OPERAND TAKES THE DATIVE, so this is not a substitution: az.wikipedia
     //    has `bölünür` ×11 / 7 articles ("is divided") and Azerbaijani states the operation as
     //    "altı üçə bölünür" — six is divided BY three — with -a/-ə on the divisor and the verb last. The
@@ -345,14 +345,14 @@ export function normalizeAzerbaijani(input: string): string {
     //    LOW harmony picks -a after a back vowel and -ə after a front one, and the y-buffer handles iki/altı/
     //    yeddi/iyirmi/əlli. Verified across bir…min: birə, ikiyə, üçə, dördə, beşə, altıya, yeddiyə, səkkizə,
     //    doqquza, ona, iyirmiyə, otuza, qırxa, əlliyə, altmışa, yetmişə, səksənə, doxsana, yüzə, minə.
-    s = tr(s, /(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) => {
+    s = rewrite(s, /(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) => {
         const x = numberToWords(Number(a)), y = numberToWords(Number(b));
         const cut = y.lastIndexOf(" ") + 1, head = y.slice(0, cut), stem = y.slice(cut);
         return `${x} ${head}${stem}${harmoniseSuffix(stem, "ə")} bölünür`;
     });
 
-    s = tr(s, /(\d+)¼/gu, "$1 dörddə bir");
-    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+    s = rewrite(s, /(\d+)¼/gu, "$1 dörddə bir");
+    s = rewrite(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return num === 1 ? "yarım" : `${numberToWords(num)} yarım`;
         const dw = numberToWords(den);
@@ -363,7 +363,7 @@ export function normalizeAzerbaijani(input: string): string {
     // 13) REGNAL `II` — `II Dünya Müharibəsi` (World War II). The shared Roman pass converts II → 2 before
     //     the engine; the digit before Dünya Müharibəsi reads as an ORDINAL (İkinci), matching the corpus's
     //     own "İkinci Dünya Müharibəsində".
-    s = tr(s, /(\d{1,2})\s+Dünya Müharibəsi/gu, (m0, d: string) => {
+    s = rewrite(s, /(\d{1,2})\s+Dünya Müharibəsi/gu, (m0, d: string) => {
         const ord = ordinalWords(Number(d));
         return ord === undefined ? m0 : `${ord} Dünya Müharibəsi`;
     });

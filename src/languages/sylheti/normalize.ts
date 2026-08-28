@@ -1,4 +1,4 @@
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 /**
  * Sylheti / ꠍꠤꠟꠐꠤ ꠘꠣꠉꠞꠤ (syl) text normalization — the pre-tokenizer pass that rewrites everything which is
  * not already a pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
@@ -195,7 +195,7 @@ const SCALE: Readonly<Record<string, string>> = { "ꠍꠦ": "ꠍꠦꠟꠍꠤꠀ�
  * "quoted in another script" case.
  */
 function foldStrayBengali(s: string): string {
-    return s.replace(MIXED_RUN, (run) =>
+    return rewrite(s, MIXED_RUN, (run) =>
         HAS_SYL.test(run) && HAS_BN.test(run)
             ? [...run.replace(YA_NUKTA, (_m, v: string) => INDEPENDENT[v] ?? "")]
                 .map((c) => BN_TO_SYL[c] ?? c).join("")
@@ -213,7 +213,7 @@ export function normalizeSylheti(input: string): string {
     //    carries a ZWNJ mid-word, which splits one Syloti token into two. BEFORE step 3, whose guard asks
     //    whether a Bengali character has a Syloti neighbour — a zero-width character between them is not a
     //    boundary and must not read as one.
-    s = tr(s, ZERO_WIDTH, "");
+    s = rewrite(s, ZERO_WIDTH, "");
 
     // 3. Stray Bengali-Assamese characters inside a Syloti word (see `foldStrayBengali`). BEFORE every
     //    rule below, because a Bengali digit sign or nukta sitting inside an operand would otherwise make
@@ -232,7 +232,7 @@ export function normalizeSylheti(input: string): string {
     //    to sit before a ⁕. A rule claiming any trailing dot after a short Syloti run would have deleted
     //    those three pauses. Single-dot abbreviations (ꠒꠣ. "Dr.", ꠝꠦ., ꠞ.) therefore keep their spurious
     //    pause: separating them from a sentence end needs evidence this corpus does not carry.
-    s = tr(s, new RegExp(`(?:${S}+\\.)+${S}+\\.?`, "gu"), (m) => m.replace(/\./gu, ""));
+    s = rewrite(s, new RegExp(`(?:${S}+\\.)+${S}+\\.?`, "gu"), (m) => m.replace(/\./gu, ""));
 
     // 5. DE-GROUPING FIRST among the number rules — a grouping comma is otherwise read as clause
     //    punctuation, and `১,০০,০০০` read as `ex , ʃunːo , ʃunːo`: two pauses and the quantity destroyed.
@@ -242,7 +242,7 @@ export function normalizeSylheti(input: string): string {
     //    supplies the lakh/crore grouping from the VALUE, never from the writing.
     for (let prev = ""; prev !== s; ) {
         prev = s;
-        s = tr(s, /(\p{Nd})(?<!(?<!\p{Nd})0),(?=\p{Nd}{2,3}(?!\p{Nd}))/gu, "$1");
+        s = rewrite(s, /(\p{Nd})(?<!(?<!\p{Nd})0),(?=\p{Nd}{2,3}(?!\p{Nd}))/gu, "$1");
     }
 
     // 6. RANGES, and this step is pinned between two others. AFTER de-grouping, or `১৯,৬০০-২০,০০০` matches
@@ -256,7 +256,7 @@ export function normalizeSylheti(input: string): string {
     //    (`১৫ ꠅꠇ꠆ꠐꠧꠛꠞ ১৯২৬ – ২৫ ꠎꠥꠘ ১৯৮৪`). 16/16 kept, 5/5 rejected, on one property of the numbers
     //    themselves. A score read as "three to three" would be confidently wrong, which is the reading
     //    this guard exists to refuse.
-    s = tr(s, new RegExp(`(?<![\\p{Nd}.,])(${NUM})\\s*[-–—]\\s*(${NUM})(?![\\p{Nd}.,])`, "gu"),
+    s = rewrite(s, new RegExp(`(?<![\\p{Nd}.,])(${NUM})\\s*[-–—]\\s*(${NUM})(?![\\p{Nd}.,])`, "gu"),
         (m, a: string, b: string) => (numValue(b) > numValue(a) ? `${a} ${RANGE_WORD} ${b}` : m));
 
     // 7. DEGREES, before the decimal rule for the shared tier's "units before decimals" reason — the scale
@@ -269,18 +269,18 @@ export function normalizeSylheti(input: string): string {
     //    (Rankine), so `°C` is ×0 here. It costs nothing — the two scale words are already sourced — and
     //    it also catches the ℃/℉ that `registry.ts` folds to `°C`/`°F` before any engine sees them, which
     //    52 languages were losing whole. Zero corpus instances is not evidence of correctness.
-    s = tr(s, new RegExp(`(\\p{Nd})\\s*°\\s*(ꠍꠦ|ꠚꠣ)\\.?(?!${S})`, "gu"),
+    s = rewrite(s, new RegExp(`(\\p{Nd})\\s*°\\s*(ꠍꠦ|ꠚꠣ)\\.?(?!${S})`, "gu"),
         (_m, n: string, sc: string) => `${n} ${DEGREE_WORD} ${SCALE[sc.toUpperCase()]}`);
-    s = tr(s, /(\p{Nd})\s*°\s*([CF])(?![\p{L}\p{M}])/gui,
+    s = rewrite(s, /(\p{Nd})\s*°\s*([CF])(?![\p{L}\p{M}])/gui,
         (_m, n: string, sc: string) => `${n} ${DEGREE_WORD} ${sc.toUpperCase() === "C" ? SCALE["ꠍꠦ"] : SCALE["ꠚꠣ"]}`);
-    s = tr(s, /(\p{Nd})\s*°/gu, `$1 ${DEGREE_WORD}`);
+    s = rewrite(s, /(\p{Nd})\s*°/gu, `$1 ${DEGREE_WORD}`);
 
     // 8. DECIMAL POINT. ⚠ THE GUARD REJECTS A DOI/URL, which is the only other digit.digit shape here:
     //    `10.1177/0261927X03261223` and `10.1016/j.langsci.2018.06.010` are citation residue, and a
     //    fractional part followed by another dot or a slash is never a decimal, and NEITHER IS ONE THAT
     //    ALREADY HAS A DOT BEFORE IT — the lookahead alone let `…2018.06.010` through on its LAST dot,
     //    because nothing follows `010`. Both directions are needed, exactly as `NOT_VERSION` needs both.
-    s = tr(s, /(?<!\.\p{Nd}*)(\p{Nd})\.(?=\p{Nd})(?!\p{Nd}*[./])/gu, `$1 ${DECIMAL_WORD} `);
+    s = rewrite(s, /(?<!\.\p{Nd}*)(\p{Nd})\.(?=\p{Nd})(?!\p{Nd}*[./])/gu, `$1 ${DECIMAL_WORD} `);
 
     // 9. PERCENT — postposed, which is the position its one attested collocation writes (`4 ꠡꠔꠣꠋꠡ`).
     //    ⚠ THE SECOND ARM IS FOR A `%` WITH NO OPERAND, and it is not a widening for an unattested shape:
@@ -288,20 +288,20 @@ export function normalizeSylheti(input: string): string {
     //    through the wikitext. The number is lost either way; the WORD is not, and a `%` is a percent
     //    whether or not its quantity survived. Two instances, both in that sentence, and it was the last
     //    `DROP percent` the artifact scan had left.
-    s = tr(s, /(\p{Nd})\s*%/gu, `$1 ${PERCENT_WORD}`);
-    s = tr(s, /%/gu, ` ${PERCENT_WORD} `);
+    s = rewrite(s, /(\p{Nd})\s*%/gu, `$1 ${PERCENT_WORD}`);
+    s = rewrite(s, /%/gu, ` ${PERCENT_WORD} `);
 
     // 10. TAKA. ⚠ THE SIGN IS DROPPED WHERE THE WORD IS ALREADY THERE (trap 12: a redundant symbol is a
     //     permissible drop, and the language-idiomatic position is the one to keep). The corpus's own
     //     sentence is the case — `ꠅꠁꠟꠦ ৳১ ꠨ ৳২ ꠀꠞ ৳৫ ꠐꠦꠈꠣꠞ ꠘꠧꠐ` states the currency once for three
     //     amounts, so the first two get the word and the third keeps the one already written. Numeral
     //     BEFORE the word, per `৩০ ꠔꠘꠦ 600 ꠐꠦꠈꠣ`.
-    s = tr(s, /৳\s*(\p{Nd}+)(?![^\p{Nd}]{0,3}ꠐꠦꠈꠣ)/gu, `$1 ${CURRENCY_WORD}`);
-    s = tr(s, /৳\s*(\p{Nd}+)/gu, "$1");
+    s = rewrite(s, /৳\s*(\p{Nd}+)(?![^\p{Nd}]{0,3}ꠐꠦꠈꠣ)/gu, `$1 ${CURRENCY_WORD}`);
+    s = rewrite(s, /৳\s*(\p{Nd}+)/gu, "$1");
     //     A BARE ৳ with no amount is the article's own gloss of the symbol (`ꠝꠥꠖ꠆ꠞꠣ ꠙ꠆ꠞꠔꠤꠇ ꠪ ৳`,
     //     "currency symbol: ৳") — naming the sign, so the word IS the reading there.
-    s = tr(s, /৳(?![^\p{Nd}]{0,3}ꠐꠦꠈꠣ)/gu, ` ${CURRENCY_WORD} `);
-    s = tr(s, /৳/gu, "");
+    s = rewrite(s, /৳(?![^\p{Nd}]{0,3}ꠐꠦꠈꠣ)/gu, ` ${CURRENCY_WORD} `);
+    s = rewrite(s, /৳/gu, "");
 
     return s;
 }

@@ -5,6 +5,7 @@
  * ⟨Dr⟩ alternation is case-SENSITIVE and the minus is U+2212 only.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Naija;
 
@@ -22,9 +23,9 @@ public static class Normalize
 
     /** Naija text → text, before tokenization. */
     public static string NormalizeNaija(string input) =>
-        MINUS.Replace(
-            MAGNITUDE_ABBREV.Replace(
-                ABBREV_RE.Replace(input, m => ABBREV[m.Groups[1].Value]),
-                " billion"),
+        Rewrite(
+            Rewrite(
+                Rewrite(input, ABBREV_RE, m => ABBREV[m.Groups[1].Value]), MAGNITUDE_ABBREV,
+                " billion"), MINUS,
             "minus ");
 }

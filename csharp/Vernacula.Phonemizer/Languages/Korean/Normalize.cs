@@ -4,6 +4,7 @@
  * Ported from src/languages/korean/normalize.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Korean;
 
@@ -114,7 +115,7 @@ public static class Normalize
         for (var prev = ""; prev != s;)
         {
             prev = s;
-            s = GROUP_COMMA.Replace(s, "");
+            s = Rewrite(s, GROUP_COMMA, "");
         }
 
         // 2) SPEED UNITS, before the range rule splits a range: 시속 / 초속 precede the number, so the whole
@@ -124,7 +125,7 @@ public static class Normalize
         //    directly onto the abbreviation (83km/h의) and a letter-class guard would reject exactly those.
         void Speed(string unit, string prefix, string word)
         {
-            s = JsRegex.Replace(s, JsRegex.Compile($"(?<![\\d.])(?:{prefix}\\s?)?({SPAN})\\s?(?:{unit})(?![A-Za-z\\d])", "gu"),
+            s = Rewrite(s, JsRegex.Compile($"(?<![\\d.])(?:{prefix}\\s?)?({SPAN})\\s?(?:{unit})(?![A-Za-z\\d])", "gu"),
                 m => $"{prefix} {m.Groups[1].Value}{word}");
         }
         Speed("mph", "시속", "마일");
@@ -133,7 +134,7 @@ public static class Normalize
 
         // 3) UNITS, while a digit is still adjacent and the number is still plain ASCII. Any space is
         //    CONSUMED, joining the unit to the number so rule 8 spells them as one sandhi domain.
-        s = JsRegex.Replace(s, UNIT_RE, m =>
+        s = Rewrite(s, UNIT_RE, m =>
         {
             var unit = m.Groups[1].Value;
             var exp = m.Groups[2].Success ? m.Groups[2].Value : null;
@@ -145,18 +146,18 @@ public static class Normalize
         //    carried with it; without that, `-5 °C` becomes `-섭씨 5도` and the minus is stranded.
         //    The trailing guard must reject a LATIN letter, not any letter: a temperature is normally
         //    followed by a Korean particle (32℃에), which a \p{L} guard would refuse.
-        s = JsRegex.Replace(s, DEG_C, m => $"섭씨 {m.Groups[1].Value}{m.Groups[2].Value}도");
-        s = JsRegex.Replace(s, DEG_F, m => $"화씨 {m.Groups[1].Value}{m.Groups[2].Value}도");
-        s = JsRegex.Replace(s, DEG_BARE, m => $"{m.Groups[1].Value}도");
+        s = Rewrite(s, DEG_C, m => $"섭씨 {m.Groups[1].Value}{m.Groups[2].Value}도");
+        s = Rewrite(s, DEG_F, m => $"화씨 {m.Groups[1].Value}{m.Groups[2].Value}도");
+        s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value}도");
 
         // The additive signs run AFTER the relational rules, which match digits on both sides: `3 + 4 = 7`
         // must have its `= 7` consumed first. ⚠ The two registers are NOT interchangeable — 더하기/빼기 are
         // the OPERATORS, 플러스/마이너스 the SIGNS — so the infix rule and the leading-sign rule differ on
         // purpose. ± is a single character (U+00B1), not a `+`, so no `+` rule can match inside it.
-        s = JsRegex.Replace(s, PLUSMINUS, _ => " 플러스 마이너스 ");
-        s = JsRegex.Replace(s, PLUS_INFIX, m => $"{m.Groups[1].Value} 더하기 ");
-        s = JsRegex.Replace(s, PLUS_LEAD, m => $"{m.Groups[1].Value}플러스 ");
-        s = JsRegex.Replace(s, MINUS_LEAD, m => $"{m.Groups[1].Value}마이너스 ");
+        s = Rewrite(s, PLUSMINUS, _ => " 플러스 마이너스 ");
+        s = Rewrite(s, PLUS_INFIX, m => $"{m.Groups[1].Value} 더하기 ");
+        s = Rewrite(s, PLUS_LEAD, m => $"{m.Groups[1].Value}플러스 ");
+        s = Rewrite(s, MINUS_LEAD, m => $"{m.Groups[1].Value}마이너스 ");
 
         // 4b) RELATIONAL AND DIVISION SIGNS. Korean is verb-final, so only ÷ is infix; =, < and > are
         //     POSTPOSED and therefore consume BOTH operands. ⚠ The particles 는/은 and 와/과 are allomorphic
@@ -184,30 +185,30 @@ public static class Normalize
         static string KTopic(string w) => $"{w}{(KClosed(w) ? "은" : "는")}";
         void Relational(string sign, Func<string, string> tail)
         {
-            s = JsRegex.Replace(s, JsRegex.Compile($"({OPERAND})\\s?{sign}\\s?({OPERAND})", "gu"),
+            s = Rewrite(s, JsRegex.Compile($"({OPERAND})\\s?{sign}\\s?({OPERAND})", "gu"),
                 m => $"{KTopic(KWord(m.Groups[1].Value))} {tail(KWord(m.Groups[2].Value))}");
         }
         Relational("=", y => $"{y}{(KClosed(y) ? "과" : "와")} 같다");
         Relational("<", y => $"{y}보다 작다");
         Relational(">", y => $"{y}보다 크다");
-        s = JsRegex.Replace(s, DIVIDE, _ => " 나누기 ");
+        s = Rewrite(s, DIVIDE, _ => " 나누기 ");
 
-        s = JsRegex.Replace(s, AMPERSAND, _ => " 앤드 ");
+        s = Rewrite(s, AMPERSAND, _ => " 앤드 ");
 
         // 5) RANGES, after rules 1 and 2 so a grouped endpoint is already one number and a speed range is
         //    already claimed whole.
-        s = JsRegex.Replace(s, RANGE_MARK, _ => "에서 ");
+        s = Rewrite(s, RANGE_MARK, _ => "에서 ");
 
         // 6) DECIMALS. The point is clause punctuation too, so 1.5 would break into "일 . 오". The fractional
         //    digits are read INDIVIDUALLY (7.75 → 칠 점 칠오), and the result is Hangul so rule 8 skips it.
-        s = JsRegex.Replace(s, DECIMAL_RE, m =>
+        s = Rewrite(s, DECIMAL_RE, m =>
             $"{KoreanNumbers.NumberToWords(Js.Number(m.Groups[1].Value))}점" +
             string.Concat(Js.CodePoints(m.Groups[2].Value).Select(d => Manifest.MANIFEST.Numbers.Ones[(int)Js.Number(d)])));
 
         // 7) NATIVE-SERIES COUNTERS, BEFORE rule 8 claims the digits for the Sino series. Gated at 99, since
         //    ≥100 is Sino for every counter. Joined, because numeral + counter is one phonological word and
         //    the sandhi runs across the boundary (열 시 → [jʌɭɕ͈i]).
-        s = JsRegex.Replace(s, NATIVE_COUNTER, m =>
+        s = Rewrite(s, NATIVE_COUNTER, m =>
         {
             var n = Js.Number(m.Groups[1].Value);
             return n >= 1 && n <= 99 ? $"{NativeNumeral(n)}{m.Groups[2].Value}" : m.Value;
@@ -216,9 +217,9 @@ public static class Normalize
         // 8) A DIGIT RUN DIRECTLY FOLLOWED BY HANGUL → Sino-Korean words, JOINED, so the cross-syllable
         //    sandhi at the number–counter boundary lands inside one token. Only an ADJACENT Hangul character
         //    triggers it. The month irregulars are spelled rather than composed: 6월 is 유월, 10월 is 시월.
-        s = JsRegex.Replace(s, JUNE, _ => "유월");
-        s = JsRegex.Replace(s, OCTOBER, _ => "시월");
-        s = JsRegex.Replace(s, DIGITS_BEFORE_HANGUL, m =>
+        s = Rewrite(s, JUNE, _ => "유월");
+        s = Rewrite(s, OCTOBER, _ => "시월");
+        s = Rewrite(s, DIGITS_BEFORE_HANGUL, m =>
         {
             var w = KoreanNumbers.NumberToWords(Js.Number(m.Groups[1].Value));
             return w == "" ? m.Value : w; // out of safe-integer range: leave the digits for the number path
@@ -228,6 +229,6 @@ public static class Normalize
         //    Bounded by explicit letter lookarounds, never \b, which would also fire between a letter and a
         //    Hangul syllable. ⚠ The boundary is ALL of Latin, not [A-Za-z]: an ASCII-only lookaround does not
         //    see an accented letter, so the S of `São` passed the isolated-capital test and was spelled out.
-        return JsRegex.Replace(s, INITIALISM, m => Spell(m.Value));
+        return Rewrite(s, INITIALISM, m => Spell(m.Value));
     }
 }

@@ -1,4 +1,4 @@
-import { tr } from "../../core/provenance.ts";
+import { rewrite } from "../../core/provenance.ts";
 /**
  * Burmese (my) text normalization — the pre-tokenizer pass that rewrites everything the Burmese g2p cannot
  * already read into Burmese-script words the pipeline speaks. Pure text→text, no IPA. Runs inside
@@ -96,11 +96,11 @@ export function normalizeBurmese(input: string): string {
 
     // 1) ZERO-WIDTH marks. ⚠ Burmese uses ZWSP as a line-break hint INSIDE words, so it lands in the middle
     //    of a token and splits it for the segmenter. Removed outright.
-    t = tr(t, /[​-‍⁠﻿]/gu, "");  // ZWSP, ZWJ, word joiner, BOM
+    t = rewrite(t, /[​-‍⁠﻿]/gu, "");  // ZWSP, ZWJ, word joiner, BOM
 
     // 2) COMMA-GROUPED THOUSANDS, FIRST — before the comma can be read as a clause pause and cut the numeral
     //    in half. Applied repeatedly for numbers with several groups (၁,၂၃၄,၅၆၇).
-    t = tr(t, new RegExp(`(?<=${d()})(?<!(?<!${d()})0)[,٬](?=${d(3)}(?!${d()}))`, "gu"), "");
+    t = rewrite(t, new RegExp(`(?<=${d()})(?<!(?<!${d()})0)[,٬](?=${d(3)}(?!${d()}))`, "gu"), "");
 
     // 2b) RATES — `၃၀ mg/kg`, the drug-dose shape. ⚠ HERE, before the clock, the decimal and the range rules,
     //     because this rule MOVES the numeral and every one of those three needs it intact to match; see
@@ -108,7 +108,7 @@ export function normalizeBurmese(input: string): string {
     //     figure arrives whole.
     for (const [nre, nword] of UNITS)
         for (const [dre, dword] of RATE_DENOMINATORS)
-            t = tr(t,
+            t = rewrite(t,
                 new RegExp(
                     `(${d()}+(?:[.,]${d()}+)?(?:\\s*[-‐-―−]\\s*${d()}+(?:[.,]${d()}+)?)?)`
                         + `\\s*(?:${nre.source})\\s*/\\s*(?:${dre.source})(?![\\p{L}${D}])`,
@@ -119,25 +119,25 @@ export function normalizeBurmese(input: string): string {
 
     // 3) CLOCK, before any rule that reads a bare number and before the decimal rule. The colon reaches the
     //    output as nothing at all, so `၁၄:၃၀` reads as two unrelated numerals.
-    t = tr(t, new RegExp(`(${d()}{1,2}):(${d(2)})(?!${d()})`, "gu"), "$1 နာရီ $2 မိနစ်");
+    t = rewrite(t, new RegExp(`(${d()}{1,2}):(${d(2)})(?!${d()})`, "gu"), "$1 နာရီ $2 မိနစ်");
 
     // 4) DECIMALS, after de-grouping so a grouped numeral keeps its tail, and after the clock so a time is
     //    never read as a decimal. The point reaches clausePunctuation and becomes a SENTENCE BREAK, so `၈၆.၄`
     //    reads as "၈၆", a full stop, then "၄". ⚠ The fractional part is spoken DIGIT BY DIGIT, so each digit
     //    is spaced out for the tokenizer to take one at a time.
-    t = tr(t, new RegExp(`(${d()}+)\\.(${d()}+)`, "gu"), (_m, whole: string, frac: string) =>
+    t = rewrite(t, new RegExp(`(${d()}+)\\.(${d()}+)`, "gu"), (_m, whole: string, frac: string) =>
         `${whole} ဒသမ ${[...frac].join(" ")}`);
 
     // 5) PERCENT. Postposed — see the header.
-    t = tr(t, new RegExp(`(${d()}+)\\s*[%％]`, "gu"), "$1 ရာခိုင်နှုန်း");
+    t = rewrite(t, new RegExp(`(${d()}+)\\s*[%％]`, "gu"), "$1 ရာခိုင်နှုန်း");
 
     // 6) DEGREES, BEFORE the Latin fallback can read the scale letter as an English letter name.
     //    Case-insensitive on the letter; the bare sign is read too (negative result 2 in the header).
     //    ⚠ ℃/℉ are SINGLE characters and never decompose, so they are folded first.
-    t = tr(tr(t, /℃/gu, "°C"), /℉/gu, "°F");
-    t = tr(t, new RegExp(`(${d()})\\s*°\\s*C(?![\\p{L}])`, "giu"), "$1 ဒီဂရီ စင်တီဂရိတ်");
-    t = tr(t, new RegExp(`(${d()})\\s*°\\s*F(?![\\p{L}])`, "giu"), "$1 ဒီဂရီ ဖာရင်ဟိုက်");
-    t = tr(t, new RegExp(`(${d()})\\s*°`, "gu"), "$1 ဒီဂရီ");
+    t = rewrite(rewrite(t, /℃/gu, "°C"), /℉/gu, "°F");
+    t = rewrite(t, new RegExp(`(${d()})\\s*°\\s*C(?![\\p{L}])`, "giu"), "$1 ဒီဂရီ စင်တီဂရိတ်");
+    t = rewrite(t, new RegExp(`(${d()})\\s*°\\s*F(?![\\p{L}])`, "giu"), "$1 ဒီဂရီ ဖာရင်ဟိုက်");
+    t = rewrite(t, new RegExp(`(${d()})\\s*°`, "gu"), "$1 ဒီဂရီ");
 
     // 7) CURRENCY. The sign PRECEDES the amount in writing and the word FOLLOWS it in speech, the same
     //    inversion English has.
@@ -145,11 +145,11 @@ export function normalizeBurmese(input: string): string {
     //    syntax character, so a blanket `\\${sign}` produces the invalid pattern `\€` and the engine throws
     //    on every input — including plain words, since the rule is built before it is used.
     for (const [sign, word] of Object.entries(CURRENCY))
-        t = tr(t, new RegExp(`${sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\s*(${d()}+)`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`${sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\s*(${d()}+)`, "gu"), `$1 ${word}`);
 
     // 8) FRACTIONS — DENOMINATOR FIRST, which is the whole point (see the header). Guarded on both sides
     //    being bare digit runs so a date written with slashes is not caught.
-    t = tr(t, new RegExp(`(?<!${d()})(${d()}+)\\s*/\\s*(${d()}+)(?!${d()})`, "gu"), "$2 ပုံ $1 ပုံ");
+    t = rewrite(t, new RegExp(`(?<!${d()})(${d()}+)\\s*/\\s*(${d()}+)(?!${d()})`, "gu"), "$2 ပုံ $1 ပုံ");
 
     // 9) RANGES. A dash between two numerals is spoken `မှ … အထိ`. Runs AFTER the clock and the decimal so it
     //    cannot claim their separators, and it deliberately does NOT treat a leading dash as a negative —
@@ -173,7 +173,7 @@ export function normalizeBurmese(input: string): string {
     //    ⚠ The negative exponent itself is still SILENT, and deliberately — negative result 1 in the header
     //    holds, Burmese writes a real negative as the word အနုတ်. What this guard buys is the kilogram.
     const DASH = "[-‐-―−]";
-    t = tr(t,
+    t = rewrite(t,
         new RegExp(
             // ⚠ `(?<![${D}])` IS PART OF THE SAME FIX AND NOT A TIDY-UP. Without it the guard slides: rejected
             // at the `1` of `×10`, the engine simply retries one character along and matches `0 −27`, so the
@@ -193,12 +193,12 @@ export function normalizeBurmese(input: string): string {
     const EXP: [string, string][] = [["²", "စတုရန်း"], ["³", "ကုဗ"]];
     for (const [sup, modifier] of EXP)
         for (const [re, word] of UNITS)
-            t = tr(t, new RegExp(`(${d()})\\s*(?:${re.source})\\s*${sup}`, "gu"), `$1 ${modifier}${word}`);
+            t = rewrite(t, new RegExp(`(${d()})\\s*(?:${re.source})\\s*${sup}`, "gu"), `$1 ${modifier}${word}`);
 
     // 11) LATIN UNIT ABBREVIATIONS after a number. Only when a digit precedes, so ordinary embedded English
     //     is left to the Latin fallback.
     for (const [re, word] of UNITS)
-        t = tr(t, new RegExp(`(${d()})\\s*(?:${re.source})(?![\\p{L}])`, "gu"), `$1 ${word}`);
+        t = rewrite(t, new RegExp(`(${d()})\\s*(?:${re.source})(?![\\p{L}])`, "gu"), `$1 ${word}`);
 
     // 12) RELATIONAL AND ARITHMETIC SIGNS.
     //     ⚠ `=` IS READ EVEN IN A GLOSS (`gêeo = Earth`, `မိုင်း = ကြီးမား`). Left unread the sign is DROPPED,
@@ -217,7 +217,7 @@ export function normalizeBurmese(input: string): string {
         [/×|(?<=\p{Nd})[ \t]?x[ \t]?(?=\p{Nd})/gu, " မြှောက် "],
         [/÷/gu, " စား "],
     ];
-    t = tr(t, new RegExp(`(${d()})\\s*\\+\\s*(${d()})`, "gu"), "$1 အပေါင်း $2");
+    t = rewrite(t, new RegExp(`(${d()})\\s*\\+\\s*(${d()})`, "gu"), "$1 အပေါင်း $2");
     //     ⚠ A LEADING `+` WITH A DIGIT AFTER IT IS ALSO A WORD, which a both-sides guard is too tight to
     //     reach: `အာဆီယံ +၃` is ASEAN **Plus Three**, where the plus is part of the organisation's NAME, and
     //     `(+2/3)` is a positivity marker. A digit AFTER the sign is the discriminator, and it separates these
@@ -227,18 +227,18 @@ export function normalizeBurmese(input: string): string {
     //     That one has its own reading and it is NOT အပေါင်း — Burmese glosses the symbol as နှင့် ("and") in
     //     exactly that frame. Left unimplemented rather than guessed at, because a rule narrow enough to catch
     //     the bracket-gloss shape would be fitted to one article rather than to the language.
-    t = tr(t, new RegExp(`(?<![${D}])\\+\\s*(?=${d()})`, "gu"), "အပေါင်း ");
-    for (const [re, word] of RELATIONAL) t = tr(t, re, word);
-    t = tr(t, /[ \t]{2,}/gu, " ");
+    t = rewrite(t, new RegExp(`(?<![${D}])\\+\\s*(?=${d()})`, "gu"), "အပေါင်း ");
+    for (const [re, word] of RELATIONAL) t = rewrite(t, re, word);
+    t = rewrite(t, /[ \t]{2,}/gu, " ");
 
     // 13) AMPERSAND → နှင့် ("and"), the ordinary conjunction. Dropped outright, `A&B` reads as two unrelated
     //     letters.
-    t = tr(t, /\s*[&＆]\s*/gu, " နှင့် ");
+    t = rewrite(t, /\s*[&＆]\s*/gu, " နှင့် ");
 
     // 14) DOTTED INITIALISMS (`U.S.`). The periods are abbreviation dots, not sentence ends, and each becomes
     //     a clause pause — `U.S.` reads as "yu . es .", two spurious breaks in the middle of a phrase. The
     //     letters themselves are left to the Latin fallback; only the dots are consumed.
-    t = tr(t, /(?<![\p{L}\p{M}])(?:\p{L}\.){2,}/gu, (run) => run.replace(/\./gu, ""));
+    t = rewrite(t, /(?<![\p{L}\p{M}])(?:\p{L}\.){2,}/gu, (run) => run.replace(/\./gu, ""));
 
     return t;
 }
