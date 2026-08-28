@@ -12,7 +12,6 @@
  * magnitude letter, the ampersand, the arithmetic signs, the MINUS (a red gate, not an accepted silence)
  * and fractions. Nothing is re-derived here.
  */
-using System.Text;
 using System.Collections.Concurrent;
 using Vernacula.Phonemizer.Core;
 
@@ -134,14 +133,12 @@ public static class Normalize
     private static readonly JsRe METRE_RE = JsRegex.Compile(
         "(?<![\\d.,\\p{L}\\p{M}])(\\d+)[ \\u00a0]m(?![\\p{L}\\p{M}\\d²³/])", "gu");  // space, NBSP
 
-    /** `cm`/`mm`/`kg` — one pattern per key, built the way the TS builds them. ⚠ INSERTION-ORDERED: the TS
-     *  iterates the pairs in this order and each replace sees the previous one's output. */
-    private static readonly (string Key, string Noun, JsRe Re)[] UNIT_KEYS =
-    [
-        ("cm", CENTIMETRE, MakeUnitRe("cm")),
-        ("mm", MILLIMETRE, MakeUnitRe("mm")),
-        ("kg", KILOGRAM, MakeUnitRe("kg")),
-    ];
+    /** `cm`/`mm`/`kg` — one pattern per key, built from the key so the two can never disagree.
+     *  ⚠ INSERTION-ORDERED: the TS iterates the pairs in this order and each replace sees the previous
+     *  one's output. */
+    private static readonly (string Noun, JsRe Re)[] UNIT_KEYS =
+        [.. new[] { ("cm", CENTIMETRE), ("mm", MILLIMETRE), ("kg", KILOGRAM) }
+            .Select(p => (p.Item2, MakeUnitRe(p.Item1)))];
 
     private static JsRe MakeUnitRe(string key) => JsRegex.Compile(
         $"(?<![\\d.,\\p{{L}}\\p{{M}}])(\\d+(?:\\.\\d+)?)[ \\u00a0]?{key}(?![\\p{{L}}\\p{{M}}\\d²³/])", "gu");  // space, NBSP
@@ -243,7 +240,7 @@ public static class Normalize
             var n = m.Groups[1].Value;
             return SaidNear(kmFrozen, m.Index, m.Index + m.Length, Spellings(KILOMETRE)) ? n : $"{KILOMETRE} {n}";
         });
-        foreach (var (_, noun, re) in UNIT_KEYS)
+        foreach (var (noun, re) in UNIT_KEYS)
         {
             var frozen = s;
             var needles = Spellings(noun);

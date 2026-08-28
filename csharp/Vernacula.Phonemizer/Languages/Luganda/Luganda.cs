@@ -94,8 +94,9 @@ public sealed class LugandaPhonemizer : ILanguage
     /**
      * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: TOKEN decides where the SCRIPT
      * boundary falls (routing); this class decides whether the g2p has rules for these letters.
-     * ⚠ ŋ IS DELIBERATELY ABSENT: the g2p has no rule for it and drops it outright, so listing it here would
-     * promise a reading that does not exist.
+     * ⚠ ŋ IS DELIBERATELY ABSENT because the g2p has no rule for it — BUT THE TS COMMENT'S "drops it
+     * outright" IS TRUE ONLY OF `PhonemizeWord`. On this path the nativiser folds ŋ→n first, so `ŋŋamba`
+     * reads *nːaːᵐba* rather than losing the letter (#1131). Both engines do it; do not "fix" it here.
      */
     private const string NATIVE_CLASS = "[a-z'’]";
     private static readonly Func<string, string> Nat = HostWord.MakeNativiser(NATIVE_CLASS, "iu");
