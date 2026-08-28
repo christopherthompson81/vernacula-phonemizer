@@ -16,12 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 135 of 193 registry codes**, all **200/200** except where a golden is thinner
+- **Languages: 136 of 193 registry codes**, all **200/200** except where a golden is thinner
   (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
   so their goldens are what exists).
-  **26,627 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+  **26,827 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fi fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la lg ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nso nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wo wuu xh yo yue za zu.
+  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fi fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la lg ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nso nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt rn ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wo wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -1638,3 +1638,39 @@ the `NATIVE_CLASS` and prenasalisation-trigger halves were ported). Kept here as
   filters length-2 keys to `k[1] === "w"` or vowel+vowel, deliberately and with a comment saying so, but the
   jsonc's own block comment claims the scanner tries "…+ Cw + prenasal + vowel digraphs → singles". Verified
   row by row that the code rule reproduces all twelve byte-identically, so **no behaviour is at stake**.
+### From the rn port (2026-08-28) — 200/200 first run; full log in `docs/rn_port_investigation.md`
+
+Kirundi shares Kinyarwanda's numeral COMPOSITOR and nothing else: `Kirundi/Numbers.cs` is a wrapper around
+`Kinyarwanda.Numbers.ComposeRwandaRundi` with rn's own table, and every normalizer rule was taken from rn's
+own corpus rather than from the sibling — the TS header lists seven that diverge, the load-bearing one being
+SQUARED, where rw's `kare` is the Kirundi ADVERB "early" in all 20 of its rn.wikipedia hits.
+
+⚠ **rn HAS NO FLEURS CORPUS**, so PORTING.md's corpus-wide differential does not exist for this language and
+the probes carry it. Differential over the mined artifact + the golden + the referee wordlist + 176 hand
+probes = **2,158 lines × sync AND async = 4,316 comparisons, 0 differ, 0 throws**; 0 of 2,158 outputs carry
+a digit or an unread symbol. ⚠ **THE GOLDEN REACHES ONLY FOUR OF THE NINE STEPS** (1, 2, 4, 5c and 6d are
+×0 in it, as is space grouping), and ⚠ **the 1,601-line referee list is a WORDLIST carrying one digit in
+total** — it exercises the g2p broadly and the normalizer not at all, which is why it is counted separately
+rather than folded into a headline number.
+
+Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (#1135, #1136, #1137):
+
+- **A CUBE READS AS A SQUARE in two of rn's three exponent paths.** `normalize.ts` states "NO CUBE WORD IS
+  DECLARED … the trap 51 floor", and the shared tier honours it — but steps 4 and 8 both carry `³` in the
+  pattern and map every exponent to `SQUARED`. `km³ 517` → *ibirometero kwadarato 517* and `(233/km³)` →
+  *kuri kirometero kwadarato*, while `517 km³` (the tier) refuses to name it. A dropped exponent is lossy; a
+  cube ANNOUNCED as a square is false. The sibling layers refuse it explicitly (nso returns the whole
+  match), so this is rn's own gap, not a fleet convention. ×0 in corpus — latent.
+- **Step 3's space-grouping arm eats an ASCII exponent digit.** Step 4's comment anticipates `km2` and makes
+  its space mandatory, but step 3 runs FIRST and matches `2 517` inside `km2 517` (the lookbehind is
+  satisfied by the preceding `m`): → `km2517`, the figure reads as 2,517 instead of 517 and **`km` reaches
+  the phoneme stream raw** — the very leak step 4 exists to close. ⚠ It generalises past units (`R2 500` →
+  `R2500`). ×0 in corpus — latent.
+- **The `US$` compound key cannot match any of the three shapes it was declared for**, and this one is
+  **LIVE**. It claims `US$4,000` but not `US $ 4,000`, which is how all three corpus instances are written,
+  so `US` still reaches the g2p as the word *us* — the second half of the defect the TS header's own table
+  lists as broken. Pinned as it SHIPS in `KirundiTests` rather than as the header believes it reads.
+
+Recorded, not filed: `kirundi.jsonc`'s `convention.affricates` still reads `⟨j⟩→ʒ`, Kinyarwanda's value,
+contradicting the same file's header, its own grapheme table and the shipped reading (`jana` → *d͡ʒana*) —
+on the single fact that distinguishes rn from rw. `convention` is metadata neither engine reads.
