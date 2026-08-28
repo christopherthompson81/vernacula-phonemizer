@@ -1,9 +1,9 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 
-import { describe, expect, it } from "vitest";
-import { evaluate } from "../tools/referee-eval/eval.ts";
+import { describe, expect, it, test } from "vitest";
+import { evaluate, PATH_OF, PHON, pathOf } from "../tools/referee-eval/eval.ts";
 import { CONFIG } from "../tools/referee-eval/config.ts";
 
 /**
@@ -267,3 +267,31 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
         }
     });
 });
+
+// #1141 — the reported `scored path` must agree with the prose this file's sibling writes beside each entry.
+// ⚠ THIS EXISTS BECAUSE `PATH_OVERRIDE` IS HAND-KEPT. Two entries (`arz`, `ps`) are hand-written wrappers with
+// no import symbol to derive from, so the map cannot be fully derived — and a hand-kept list rots. Deriving
+// the EXPECTATION from eval.ts's own RULE-ONLY / NON-CIRCULAR markers means the prose and the label cannot
+// drift apart silently: keying only on `phonemizeWordRules` had already mislabelled `ur` and `ps` as the bare
+// word g2p, which is the exact ambiguity the field was added to remove.
+describe("referee-eval scored-path labels", () => {
+    test("every entry the file calls RULE-ONLY / NON-CIRCULAR is labelled `rules`", () => {
+        const src = readFileSync("tools/referee-eval/eval.ts", "utf8");
+        const named = new Set<string>();
+        for (const m of src.matchAll(/(?:RULE-ONLY|NON-CIRCULAR)[^\n]*?\bfor ([A-Za-z-]+)/gu)) named.add(m[1]!);
+        for (const m of src.matchAll(/RULE-ONLY: [^\n]*/gu)) void m; // unnamed markers carry no language
+        expect(named.size, "no RULE-ONLY markers found — the prose convention moved").toBeGreaterThan(5);
+        const wrong = [...named]
+            .filter((l) => l in PHON)
+            .filter((l) => pathOf(l) !== "rules")
+            .map((l) => `${l} is called RULE-ONLY but reports "${pathOf(l)}"`);
+        expect(wrong).toEqual([]);
+    });
+
+    test("the derivation produced labels at all — it reads its own source and can fail closed", () => {
+        expect(Object.keys(PATH_OF).length).toBeGreaterThan(10);
+        // a composite entry must NOT be labelled rules-only: ckb is lexicon -> ONNX tagger -> rules fallback
+        expect(pathOf("ckb")).toBe("word");
+    });
+});
+

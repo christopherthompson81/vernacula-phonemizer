@@ -84,10 +84,48 @@ disagreed:
    which engine produced it, and a non-zero delta is visible at the moment someone reads the score.
 3. `PHON` exported, with the whole finding above written at its declaration.
 
-⚠ **The delta is CLI-only** (`sampleCap === 0`). Charging the floor test for it took `referee-eval.test.ts`
-from **54s to 121s** across its 171 cases — which is how a diagnostic becomes something people switch off. The
-gate does not consult it; a human reading a report does.
+⚠ **The delta is CLI-only** — an explicit `withDelta` parameter, defaulting off. Charging the floor test for
+it took `referee-eval.test.ts` from **54s to 121s** across its cases — which is how a diagnostic becomes
+something people switch off. With it truly off the gate now runs in **30.7s**, below the 54s baseline.
 
 ⚠ **This did not need #1150.** The stream DTO would give exact attribution of *why* two paths differ, and the
 four-way decomposition above was reached with cheap heuristics instead. Filing the delta as evidence for
 #1150 is right; blocking #1141 on it would not have been.
+
+## Run 4 — review findings, fixed inline
+
+Eight, and four of them said the labelling — the entire point of the change — was wrong.
+
+  * ⚠ **THREE ENTRIES WERE LABELLED WITH THE WRONG ENGINE.** Keying only on the symbol `phonemizeWordRules`
+    missed `ur` and `ps` (they expose their lexicon-free skeleton as `phonemizeWordCore`) and `arz` (a
+    hand-written `ar(w, "egyptian", {lexicon:false})` wrapper with no symbol at all). All three are called
+    RULE-ONLY / NON-CIRCULAR in this file's own prose, and all three reported "the bare word g2p" — asserting
+    the wrong engine on the very field added to stop that. Now derives from BOTH lexicon-free symbols, with a
+    small hand-kept `PATH_OVERRIDE` for the two wrappers.
+  * ⚠ **AND A HAND-KEPT MAP ROTS, so it is now guarded by the file's own prose.** A new test extracts every
+    language named in a `RULE-ONLY … for <lang>` / `NON-CIRCULAR for <lang>` marker and asserts it is labelled
+    `rules`. That test fails on the pre-fix code, which is the only reason to trust it.
+  * ⚠ **`text` was a lie for `en`/`hi`.** Those entries call `createEnglish().text(w)` directly, bypassing the
+    registry wrapper (`romanPass`/`foldPass`/`withHost`) and, for `en`, the neural OOV path. Measured:
+    `PHON.en("blorptastic")` → *blˈɝpteᶦstˌɪ* vs `phonemizeAsync` → *blɔːɹptˈæstɪk*. The report said "the
+    shipped path" and then printed a large delta AGAINST the shipped path. Renamed `engine-text`, described as
+    what it is.
+  * ⚠ **THE TWO DELTA MESSAGES WERE SEMANTICALLY SWAPPED.** `differ === 0` printed "the scored path and the
+    shipped path agree here" — reassurance emitted at exactly the point where nothing about the nativiser was
+    exercised — while `differ > 0` claimed the product-only steps were "unmeasured" when they had just visibly
+    fired. Both rewritten: zero now says it is *not* evidence the steps ran, non-zero points at the four
+    ordinary causes before anyone calls it a bug.
+  * **`catch { continue }` inflated the denominator.** A row the shipped path refuses stayed in `sampled` but
+    never in `differ`, so a language that mostly throws could print `0/300 … agree here` off zero successful
+    comparisons. Now counts `compared`, not sampled.
+  * **The claim "CLI runs only" was false.** The floor test calls `evaluate(lang, true)` with the default
+    `sampleCap = 0`, so `nb`/`af`/`ur` were paying for it inside the gate. Replaced the inference with an
+    explicit `withDelta` parameter — ⚠ placed LAST, because inserting it before `sampleCap` silently
+    reinterpreted `evaluate(lang, true, 3000)` as `withDelta=3000, sampleCap=0`: a signature change that
+    type-checks and quietly measures something else.
+  * **The delta re-invoked the engine.** It called `phon(w)` a second time for every sampled row, doubling
+    model calls for `ar` (ONNX), `ckb` (tagger) and `en` (beam search). Folded into the main loop, reusing the
+    reading already computed.
+  * **`PATH_OF` failed closed.** It reads its own source and matches TYPE ANNOTATIONS, so under any transform
+    that strips them the map would silently become `{}` and every language would report "the bare word g2p" —
+    a wrong answer that looks like a right one. It now throws at module load instead.
