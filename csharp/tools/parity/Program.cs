@@ -24,14 +24,7 @@ if (!Directory.Exists(goldens)) goldens = "csharp/goldens";
 var only = args.Where(a => !a.StartsWith('-')).ToHashSet();
 
 /*
- * `--provenance`: per-language #1150 stage-2 coverage, the C# mirror of .probe/stage2/bylang.mts.
- *
- * ⚠ A FLEET AVERAGE SAYS HOW MUCH IS MISSING AND NEVER WHERE. Ranking by tokens LOST is what turns
- * "the mapping is 95% complete" into a named next fix, and it is also the only way to see the two
- * engines diverge on one language while the totals agree.
- */
-/*
- * `--poison`: WHERE the mapping dies, by call site. The C# mirror of .probe/stage2/poison.mts.
+ * `--poison`: WHERE the mapping dies, by call site. The C# mirror of `tools/provenance-poison.mts`.
  *
  * ⚠ THE SEAM'S RULE CANNOT BE CHECKED STATICALLY. `s = Rewrite(s, RE, rep)` inside a per-word helper is
  * textually identical to the pipeline form; only running the corpus and asking who handed the seam an
@@ -85,6 +78,14 @@ if (args.Contains("--poison"))
     return 0;
 }
 
+/*
+ * `--provenance`: per-language #1150 stage-2 coverage, the C# mirror of `tools/provenance-coverage.mts`.
+ *
+ * ⚠ A FLEET AVERAGE SAYS HOW MUCH IS MISSING AND NEVER WHERE. Ranking by tokens LOST is what turns
+ * "the mapping is 95% complete" into a named next fix, and it is also the only way to see the two
+ * engines diverge on one language while the totals agree — `mai`, `awa` and `mag` read ~40-60% here
+ * while the TypeScript has them at 100%.
+ */
 if (args.Contains("--provenance"))
 {
     var report = new List<(string Lang, int Tok, int Mapped, int FullRows, int Rows)>();

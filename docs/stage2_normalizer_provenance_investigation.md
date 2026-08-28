@@ -365,8 +365,8 @@ poison**, and the deliberate divergence is deleted.
 
 ### ⚠ Only the poison names a non-pipeline site — the parser cannot
 
-Converted broadly (TS 429 new sites, C# 2,583 + 22 pre-pass), then let `onPoison` / `Provenance.OnPoison`
-decide. Broad conversion alone measured **80.7%**, DOWN from 92.1%: substring calls on the seam destroy the
+Converted broadly (TS 429 new sites, C# 2,583 + 22 pre-pass), then let `tools/provenance-poison.mts` /
+`parity --poison` decide. Broad conversion alone measured **80.7%**, DOWN from 92.1%: substring calls on the seam destroy the
 whole utterance's mapping. Reverting the sites the probe named recovered it and then some.
 
     TS   92.1%  ->  80.7% (broad)  ->  94.7% (converged)
@@ -392,7 +392,7 @@ wrong. 93.4% is the first honest C# figure.
 > "Can't you do per-language coverage tests to narrow down what needs work rather than wholesale reverting
 > and redoing?"
 
-Correct, and two revert rounds were wasted before adopting it. `.probe/stage2/bylang.mts` and
+Correct, and two revert rounds were wasted before adopting it. `tools/provenance-coverage.mts` and
 `parity --provenance` rank by tokens LOST, which turns "95% complete" into a named next fix:
 
     lost   %mapped  lang        lost   %mapped  lang
@@ -411,3 +411,47 @@ Correct, and two revert rounds were wasted before adopting it. `.probe/stage2/by
   so the gap is upstream of the normalizer, in a shared tier or pre-pass. Named, not chased.
 - **207 raw replaces remain off the seam in each engine — the same number on both sides**, which is the
   result the count instrument was built to produce.
+
+## Run 12 — 2026-08-28 15:45 — reviewing Run 11
+
+**Four findings, all fixed in place.**
+
+### 1. The string-pattern form compiled a regex on the SHIPPED path
+
+`rewrite`'s whole premise is that untraced it *is* `String.replace` — "one boolean test, native semantics,
+nothing allocated". The string overload was resolved BEFORE that test, so the 31 sites passing a literal did
+an escape pass and a `new RegExp` on every utterance. The test now comes first and the string form is
+reached only while tracing.
+
+### 2. An accounting failure inside the seam was the one silent way to lose the mapping
+
+`if (next.length !== joined.length) { poison(); … }` means *this module's* bookkeeping failed — a worse
+fault than a missed pipeline step, and the only path that dropped the mapping without telling the sink.
+Reported now, in both engines.
+
+### 3. ⚠ The new drop-in test was VACUOUS, and proving it took deliberate sabotage
+
+Written first as a plain differential against `String.replace`, it passed with the seam sabotaged to a
+GLOBAL regex — the exact `.replaceAll` mistake that cost 13 tests. Untraced, `rewrite` hands the pattern
+straight to `String.replace`, so the overload under test was never reached. Running it under
+`beginProvenance` makes it fail on the sabotage, which is the only evidence that it tests anything.
+
+    sabotaged, untraced:  1 passed
+    sabotaged, traced:    × want "a.<]>$1]{[" got "a.<]>$1<]>{["
+
+The coverage floor added beside it is verified the same way: it is set at 90%, and the broad-conversion
+state measured 80.7%.
+
+### 4. The C# shipped its instruments and the TypeScript did not
+
+`parity --poison` and `--provenance` are in the repo; `bylang.mts` and `poison.mts` were under `.probe/`,
+which is **gitignored** — so PORTING.md and Run 11 both pointed at files no one else would have. Promoted to
+`tools/provenance-coverage.mts` and `tools/provenance-poison.mts`.
+
+### ⚠ Unrelated, pre-existing, and worth its own look
+
+Nothing in the repo compares the TYPESCRIPT to the stored goldens — the parity gate compares the C# to them.
+Measured directly: **48 of 36,164 rows differ** (mi 18, vi 16, nan 7, hak 4, hmn 1, si 1, syl 1). Identical
+on `main` and on this branch, so this change is byte-neutral; but the same rows MATCH when the probe runs
+those languages alone, so it is process-order dependent — cross-language state in the async path, not a
+TS↔C# divergence. Not touched here.

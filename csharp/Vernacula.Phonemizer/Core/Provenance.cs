@@ -122,7 +122,9 @@ public static class Provenance
         /// <summary>Adopt the accumulated mapping, or drop it if it does not describe `result`.</summary>
         public void Commit(string result)
         {
-            if (next.Count != result.Length) { Poison(); return; } // our accounting failed
+        // ⚠ REPORTED TOO — this branch means the accounting in `Track` failed, a worse fault than a missed
+        // pipeline step, and it was the only way to lose the mapping without saying so.
+        if (next.Count != result.Length) { poisonSink?.Invoke(tracked ?? "", result); Poison(); return; }
             prov = next.ToArray();
             tracked = result;
         }

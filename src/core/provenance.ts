@@ -10,7 +10,7 @@
  *
  *     s = s.replace(RE, REP)   ->   s = rewrite(s, RE, REP)
  *
- * ⚠ THE HOT PATH IS THE WHOLE DESIGN. There are ~3,200 of these sites across 168 normalizers plus the shared
+ * ⚠ THE HOT PATH IS THE WHOLE DESIGN. There are ~3,300 of these sites across 168 normalizers plus the shared
  * tier, and `phonemize()` runs them on every utterance. When no trace is recording, `rewrite` calls
  * `String.replace` and returns — one boolean test, native semantics, nothing allocated. The provenance path
  * exists only while `phonemizeTrace` is running, which is also what keeps the fidelity risk off the shipped
@@ -222,11 +222,14 @@ const ESCAPE_PATTERN = /[.*+?^${}()|[\]\\]/gu;
 
 /** `s.replace(re, rep)`, carrying provenance when a trace is recording and nothing at all when it is not. */
 export function rewrite(s: string, re: RegExp | string, rep: Replacer): string {
-    if (typeof re === "string") return rewrite(s, new RegExp(re.replace(ESCAPE_PATTERN, "\\$&")), rep);
     // ⚠ THE UNTRACED PATH IS THE NATIVE CALL. Not "equivalent to" it — it IS it, so no reading can differ
-    // because of this module, and the 3,200 sites cost one boolean test each.
+    // because of this module, and the 3,300 sites cost one boolean test each.
+    // ⚠ AND THE STRING-PATTERN FORM MUST TAKE IT FIRST. Escaping the literal and compiling a RegExp is how
+    // the traced path reproduces `replace`'s first-match rule, but doing it before this test put an escape
+    // pass and a regex construction on the SHIPPED path of every site that passes a literal.
     const p = prov;
-    if (p === null || hostDepth() > 1) return s.replace(re, rep as string);
+    if (p === null || hostDepth() > 1) return s.replace(re as RegExp, rep as string);
+    if (typeof re === "string") return rewrite(s, new RegExp(re.replace(ESCAPE_PATTERN, "\\$&")), rep);
     // ⚠ THE MAPPING MUST ALREADY DESCRIBE THE STRING IT IS HANDED. If a step this module did not see has
     // shifted the text, `p` is stale — and continuing would rebuild it at the NEW length, re-synchronising
     // the length check over shifted values and reporting them as fact. Checking only the indices actually
@@ -292,7 +295,9 @@ export function rewrite(s: string, re: RegExp | string, rep: Replacer): string {
     }
     // ⚠ AND THE ARRAY MUST MATCH THE STRING IT DESCRIBES, or the length check is measuring nothing.
     const joined = out.join("");
-    if (next.length !== joined.length) { poison(); return joined; }
+    // ⚠ REPORTED TOO. This branch means the accounting in THIS function failed, which is a worse fault
+    // than a missed pipeline step and was the only way to lose the mapping without saying so.
+    if (next.length !== joined.length) { poisonSink?.(s, joined); poison(); return joined; }
     prov = next;
     tracked = joined;
     return joined;

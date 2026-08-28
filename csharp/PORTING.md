@@ -126,6 +126,9 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
   is the pipeline string means the gap is UPSTREAM, so reverting only moves the poison one line down.
 - Measure with `dotnet run --project csharp/tools/parity -- --provenance`, which ranks languages by
   tokens LOST. The fleet average says how much is missing and never where.
+- The TypeScript has the same pair — `tools/provenance-poison.mts` and `tools/provenance-coverage.mts` —
+  and comparing the two engines' per-language rows is how a gap that belongs to only ONE of them shows
+  up at all (`mai`/`awa`/`mag` read ~40-60% in C# while the TS has them at 100%).
 
 ## Ordering & numbers
 - `Array.prototype.sort` default is LEXICOGRAPHIC (string) — port as `OrdinalIgnoreCase`-free

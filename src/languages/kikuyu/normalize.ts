@@ -252,6 +252,11 @@ export function normalizeKikuyu(input: string): string {
     //    language means it. Case-insensitive (trap 7: `21St` and `11De` are ordinary in titles).
     //    ⚠ AFTER de-grouping, so a grouped ordinal is already one digit run; BEFORE the range rule, whose
     //    right guard excludes a trailing letter and would otherwise decline `1990th-2000th`.
+    // ⚠ STAYS ON THE SEAM despite `tools/provenance-poison.mts` naming it. The classifier calls a poison a
+    // SUBSTRING when the string it was handed is much shorter than the one tracked, and here it is neither:
+    // the subject is `s` itself, and the poison means an EARLIER kikuyu step went unseen. Reverting a
+    // self-assigning site only moves the poison one line down — measured, and it is how Sinhala's
+    // `StripJoiners` once took that language from 100% to 17%.
     s = rewrite(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 5) RANGES → `nginya`. AFTER step 3 (a grouped endpoint must already be one digit run) and BEFORE the
