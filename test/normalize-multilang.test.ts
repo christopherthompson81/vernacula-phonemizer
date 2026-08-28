@@ -273,6 +273,12 @@ describe("shared symbol normalizer (core)", () => {
         expect(code("US D 400")).toBe("US D 400");
         // ⚠ AND THE ARMS STILL REQUIRE A NUMBER, so a bare mention in prose cannot match
         expect(n("the US $ sign")).toBe("the US $ sign");
+        // ⚠ A ONE-LETTER CODE IS SHORT ENOUGH TO BE A WORD, so it does NOT gain the seam. Afrikaans declares
+        // `U$` and ⟨U⟩ is its capitalised polite second-person pronoun: widening that key ate the pronoun and
+        // re-read a plain dollar sum as a US one.
+        const one = makeSymbolNormalizer({ currency: { U$: ["VS-dollar"], $: ["dollar"] }, currencyPrefix: true });
+        expect(one("U$50")).toBe("VS-dollar 50");   // the unspaced key still works
+        expect(one("U $50")).toBe("U dollar 50");   // the pronoun survives, and the sum is a plain dollar
     });
 });
 

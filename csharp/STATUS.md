@@ -1700,7 +1700,9 @@ Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (
   declares (*doliar ti Estados Unidos*) — ilo's header records this class at ×98, so the spaced form was
   live there too and unmeasured. ⚠ AND **rw's OWN TEST PINNED THE LEAK AS THE ANSWER** (`US $ 115,600,000`
   → *`US` amadolari …*), so a third language had it live; only the unit test saw it, rw's golden carrying no
-  such row.
+  such row. ⚠ **THE FIRST CUT OF THE SEAM ATE AN AFRIKAANS PRONOUN** — no minimum on the letter run meant it
+  also widened the ONE-letter `U$` af declares, and ⟨U⟩ is af's polite second-person pronoun, so `U $50` lost
+  the word AND became a US dollar. `{2,}` excludes exactly that key. Caught in review, not by the gate.
 
 Recorded, not filed: `kirundi.jsonc`'s `convention.affricates` still reads `⟨j⟩→ʒ`, Kinyarwanda's value,
 contradicting the same file's header, its own grapheme table and the shipped reading (`jana` → *d͡ʒana*) —

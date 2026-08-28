@@ -764,13 +764,18 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
      * run of letters is followed by a run of non-letters, so `US$`/`AUD$`/`CN¥` gain it and an all-letter
      * code (`PLN`, `zł`, `Frw`) is untouched — there is no seam inside a word, and admitting one would let
      * a key match across a space that separates two real tokens.
+     * ⚠ AND THE LETTER RUN MUST BE AT LEAST TWO LONG, WHICH IS NOT TIDINESS — a ONE-letter code is short
+     * enough to be a WORD. Afrikaans declares `U$`, and ⟨U⟩ is its capitalised polite second-person pronoun:
+     * widening that key ate the pronoun and re-read a plain dollar sum as a US one, `U $50 skenking` →
+     * *fˈəiftəχ **fˈiə ˈɛs** dˈɔlər skˈɛŋkəŋ*, "fifty VS-dollar donation" with the "you" gone. `{2,}` keeps
+     * every compound key declared today (`US$ AS$ AUD$ CN¥ HK$ NZ$ VS$`) and excludes exactly that one.
      * ⚠ AND THE ARMS STILL REQUIRE A NUMBER, so a bare `US $` in prose cannot match: `curBefore`/`curAfter`
      * bind the key to an adjacent figure, which is what keeps this from claiming the letters of any sentence
      * that happens to end before a dollar sign.
      */
     const escapeKey = (k: string): string => k.replace(/[$.*+?^${}()|[\]\\]/gu, "\\$&");
     const curKey = (k: string): string => {
-        const seam = /^(\p{L}+)(\P{L}+)$/u.exec(k);
+        const seam = /^(\p{L}{2,})(\P{L}+)$/u.exec(k);
         return seam ? `${escapeKey(seam[1]!)}${OPT_SEP}${escapeKey(seam[2]!)}` : escapeKey(k);
     };
     const curKeys = d.currency

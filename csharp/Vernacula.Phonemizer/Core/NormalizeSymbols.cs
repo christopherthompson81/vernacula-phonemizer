@@ -561,7 +561,11 @@ public static class NormalizeSymbols
         // ⚠ ONLY AT THE LETTER→SIGN SEAM: the optional separator goes where a run of letters is followed by a
         // run of non-letters, so `US$`/`AUD$`/`CN¥` gain it and an all-letter code (`PLN`, `zł`) does not —
         // there is no seam inside a word, and admitting one would let a key match across a real token gap.
-        var seam = JsRegex.Compile("^(\\p{L}+)(\\P{L}+)$", "u");
+        // ⚠ THE LETTER RUN MUST BE AT LEAST TWO LONG: a ONE-letter code is short enough to be a WORD.
+        // Afrikaans declares `U$`, and ⟨U⟩ is its capitalised polite second-person pronoun — widening that
+        // key ate the pronoun and re-read a plain dollar sum as a US one. `{2,}` keeps every compound key
+        // declared today (`US$ AS$ AUD$ CN¥ HK$ NZ$ VS$`) and excludes exactly that one.
+        var seam = JsRegex.Compile("^(\\p{L}{2,})(\\P{L}+)$", "u");
         string CurKey(string k)
         {
             var m = seam.Match(k);

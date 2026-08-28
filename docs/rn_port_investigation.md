@@ -441,13 +441,34 @@ LINE USED TO PIN THE DEFECT AS THE ANSWER"* about a different assertion, so the 
 `US$` and had the same live defect; its golden happens to carry no such row, so only the unit test saw it.
 Corrected with the note, not deleted.
 
+⚠ **AND THE FIRST CUT OF THE SEAM ATE AN AFRIKAANS PRONOUN.** Review caught it. The seam was
+`^(\p{L}+)(\P{L}+)$` — no minimum on the letter run — so it also widened the ONE-letter code `U$` that
+Afrikaans declares, and ⟨U⟩ is that language's capitalised polite second-person pronoun:
+
+    U $50 skenking is ontvang    before  ˈyː fˈəiftəχ dˈɔlər skˈɛŋkəŋ …      "you fifty dollar donation"
+                                 cut 1   fˈəiftəχ **fˈiə ˈɛs** dˈɔlər …      the pronoun GONE, and a plain
+                                                                             dollar sum re-read as a US one
+
+Two harms at once: a word deleted and a currency changed. `{2,}` on the letter run keeps every compound key
+declared today (`US$ AS$ AUD$ CN¥ HK$ NZ$ VS$`) and excludes exactly the one that is also a word. ⚠ THE
+HEADER'S SAFETY ARGUMENT HAD REASONED ONLY ABOUT `US`/`AUD`/`CN` — it never considered a letter run short
+enough to be a word, which is the whole hazard class.
+
+⚠ **A SECOND, NARROWER TRADE-OFF, RECORDED RATHER THAN FIXED.** Where `US` is a standalone country mention
+AND a number follows, the mention is now consumed: `In the US $4,000 was raised` (tl) loses its *ʔˈus*.
+Unspaced `US$4,000` is unambiguously a currency prefix; the spaced form is not. It is per-layer: the ~20
+layers whose `US$` form names the country (rn `amadorari`, ilo *doliar ti Estados Unidos*, rw, sq, om, su,
+mad, st, km, nan, yo …) read correctly, and the ~10 whose form does not (tl, pcm, ig, sn, tn, nso, wo, haw,
+mi, gu, kea) drop the mention. Left as it is: the currency reading is the commoner shape by far, and the
+alternative is to refuse the spaced form entirely, which is the defect this fix exists to close.
+
 **Gates:**
 
-    npx vitest run test/normalize-multilang.test.ts   85 passed (1 new core test)
+    npx vitest run test/normalize-multilang.test.ts   85 passed (2 new core tests)
     npm test                                          288 files, 5,683 passed, 5 skipped
     npx tsc --noEmit                                  clean
     gen_parity_goldens.mts (ALL)                      2 rows moved, in 2 files, both correct
     parity fleet                                      136 languages, 26,827 rows, 0 differ
-    dotnet test                                       2,717 passed, 0 failed
+    dotnet test                                       2,719 passed, 0 failed
     rn differential                                   4,372 comparisons, 0 differ, 0 throws
     tools/extract_regexes.mts                         re-extracted (the seam pattern is new)
