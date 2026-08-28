@@ -89,6 +89,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Not-a-letter, on both sides. `\b` cannot be used — see the header. */
 const L = "[\\p{L}\\p{M}]";
@@ -227,11 +228,11 @@ export function normalizeMadurese(input: string): string {
     // `Rp 16,09 milyad` in the same article. Every markerless `H.MM` in this corpus is a decimal.
     // ⚠ THE RANGE ARM RUNS FIRST — `kol 17.30 – 21.00 WIB` needs the second endpoint claimed by its own
     // trailing marker, and step 8's range rule can only see the dash once both endpoints are bare numbers.
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`(?<![\\p{L}\\p{M}])(${HOUR_WORD})(\\s*)(\\d{1,2})[.:]00(?![\\d.:])`, "giu"),
         (_m, w: string, sp: string, h: string) => `${w}${sp}${Number(h)}`,
     );
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`(?<![\\d.:,])(\\d{1,2})[.:]00(?![\\d.:])(?=\\s*${CLOCK_MARK}(?!${L}))`, "gu"),
         (_m, h: string) => String(Number(h)),
     );
@@ -242,7 +243,7 @@ export function normalizeMadurese(input: string): string {
     // otherwise `clausePunctuation`, so `2:00` read *duwɤ , nɔla* — a phrase break inside a time. The hour
     // is capped at 23 and the minutes at `00`, which is what keeps a SPORTS TIME or a score out (the
     // `sports-time` cell is ×1 corpus-wide and is a Chinese-language Olympics line).
-    s = s.replace(/(?<![\d.:,])([01]?\d|2[0-3]):00(?![\d.:])/gu, (_m, h: string) => String(Number(h)));
+    s = tr(s, /(?<![\d.:,])([01]?\d|2[0-3]):00(?![\d.:])/gu, (_m, h: string) => String(Number(h)));
 
     // ── 2. DE-GROUP THOUSANDS — the single most destructive defect this layer repairs ──────────────
     // ⚠ AFTER the clock (whose `14.00` is 2 digits and safe either way) and BEFORE every other number rule.
@@ -255,8 +256,8 @@ export function normalizeMadurese(input: string): string {
     // refusing the period is what keeps the two conventions apart and leaves the corpus's malformed
     // `87.017.41 km²` alone rather than half-reading it.
     // ⚠ THE COMMA ARM CARRIES `(?!0,)`, WHICH IS A MEASURED GUARD AND NOT A STYLE CHOICE: see the header.
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d.])/gu, (m) => m.replaceAll(".", ""));
-    s = s.replace(/(?<![\d.,])(?!0,)[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replaceAll(",", ""));
+    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d.])/gu, (m) => m.replaceAll(".", ""));
+    s = tr(s, /(?<![\d.,])(?!0,)[1-9]\d{0,2}(?:,\d{3})+(?![\d,])/gu, (m) => m.replaceAll(",", ""));
 
     // ── 3. THE COORDINATE RANGE'S DASH ────────────────────────────────────────────────────────────
     // ⚠ BEFORE the degree rules, which destroy the adjacency this needs, and before step 8, which cannot
@@ -273,7 +274,7 @@ export function normalizeMadurese(input: string): string {
     // after the first version of this rule went in — the count went 10 → 5 and the leftovers named the bug.
     // ⟨sampè'⟩ ×14 is the corpus's own span connective and it is used with coordinate endpoints in exactly
     // this construction: `111º05′ sampè' 112º13′ Bujur Tèmor bân 7º20′ sampè' 7º59′ Lintang Lao'`.
-    s = s.replace(/(?<=\d)(['’′″"”º°]+)\s*[-–—]\s*(?=\d)/gu, "$1 sampè' ");
+    s = tr(s, /(?<=\d)(['’′″"”º°]+)\s*[-–—]\s*(?=\d)/gu, "$1 sampè' ");
 
     // ── 4. DEGREES — the scale letters, then the bare sign ────────────────────────────────────────
     // ⚠ °C BEFORE THE BARE °, or the bare rule eats the sign and leaves a lone ⟨C⟩ — which is exactly what
@@ -288,9 +289,9 @@ export function normalizeMadurese(input: string): string {
     // ⚠ THE TRAILING SPACE ON THE BARE ARM IS LOAD-BEARING: a coordinate glues its compass word straight
     // onto the sign, so without it `6°LU` becomes one unreadable token. The clause sink trims the
     // duplicate-space case.
-    s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/gui, "$1 derajat celcius");
-    s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/gui, "$1 derajat fahrenheit");
-    s = s.replace(/(\d)\s?[°º]\s?/gu, "$1 derajat ");
+    s = tr(s, /(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/gui, "$1 derajat celcius");
+    s = tr(s, /(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/gui, "$1 derajat fahrenheit");
+    s = tr(s, /(\d)\s?[°º]\s?/gu, "$1 derajat ");
 
     // ── 5. `±` IS "ABOUT", NOT A TOLERANCE — and the corpus glosses it itself ──────────────────────
     // All four instances are a rounded area or a rounded height: `±1.752,21 km²`, `otabâ ±3.78%`,
@@ -300,13 +301,13 @@ export function normalizeMadurese(input: string): string {
     // ⚠ WHICH IS ALSO WHY THE GUARD EXISTS. Substituting blind DOUBLES a connective the text already wrote,
     // in two of the four instances (`korang lebbi ±…` and `ra-kèra ±…`). The lookbehind is spelled out
     // because these are words, not a character class.
-    s = s.replace(
+    s = tr(s, 
         /(?<!(?:korang lebbi|ra-kèra|sakètar|kèra-kèra)\s?)(?<![\p{L}\p{M}])±\s*(?=\d)/gu,
         "korang lebbi ",
     );
     // …and where the text DID write it, the sign is redundant and simply comes out (playbook trap 12: say
     // it once, in the position the language puts it).
-    s = s.replace(/((?:korang lebbi|ra-kèra|sakètar|kèra-kèra)\s?)±\s*(?=\d)/gu, "$1");
+    s = tr(s, /((?:korang lebbi|ra-kèra|sakètar|kèra-kèra)\s?)±\s*(?=\d)/gu, "$1");
 
     // ── 6. ERA MARKERS — SM before M, always ──────────────────────────────────────────────────────
     // ⚠ `M` MATCHES INSIDE `SM` and would leave a stranded S. `940 M`, `950 M`, `1037 M`, `875 M.` and
@@ -321,8 +322,8 @@ export function normalizeMadurese(input: string): string {
     // ⚠ A FOLLOWING PERIOD IS ALLOWED, unlike the Sundanese rule, because `875 M.` is a sentence-final era
     // marker here and excluding the period would miss it. A Roman `M` cannot reach this rule: `mad` is not
     // in `ROMAN_NATIVE`, so `core/roman.ts` has already turned any Roman numeral into digits.
-    s = s.replace(/(?<![\p{L}\p{M}\d])(\d+)\s?SM(?![\p{L}\p{M}\d])/gu, "$1 sabellunna Masèhi");
-    s = s.replace(/(?<![\p{L}\p{M}\d])(\d+)\s?M(?![\p{L}\p{M}\d])/gu, "$1 Masèhi");
+    s = tr(s, /(?<![\p{L}\p{M}\d])(\d+)\s?SM(?![\p{L}\p{M}\d])/gu, "$1 sabellunna Masèhi");
+    s = tr(s, /(?<![\p{L}\p{M}\d])(\d+)\s?M(?![\p{L}\p{M}\d])/gu, "$1 Masèhi");
 
     // ── 7. THE TWO RATE SHAPES THE SHARED TIER CANNOT REACH ───────────────────────────────────────
     // ⚠ BEFORE the tier. The tier matches a unit only when a NUMBER is adjacent, and in both of these the
@@ -337,12 +338,12 @@ export function normalizeMadurese(input: string): string {
     // `atoran/kabiyasaan`, `axle/gardan`, `dhisa/kelurahan`), and a general word/word rule would read
     // every one of them as a rate.
     const rateUnit = "(km|cm|mm|kg|ha|m)";
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`(?<=${L})\\s?/\\s?${rateUnit}(²|³|2|3)?(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, u: string, exp: string | undefined) =>
             ` per ${UNIT_WORD[u.toLowerCase()]!}${EXP_WORD[exp ?? ""] ?? ""}`,
     );
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`(?<![\\p{L}\\p{M}])per\\s+${rateUnit}(²|³|2|3)?(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, u: string, exp: string | undefined) =>
             `per ${UNIT_WORD[u.toLowerCase()]!}${EXP_WORD[exp ?? ""] ?? ""}`,
@@ -387,7 +388,7 @@ export function normalizeMadurese(input: string): string {
     // The leading side changes nothing the corpus reaches — `kilomèter dpl` is declined by BOTH spellings,
     // since the metre word has to be a token of its own — but a digit-adjacent `40mèter dpl` now fires,
     // which is the same unspaced shape this corpus writes for `40m`.
-    s = s.replace(/(?<![\p{L}\p{M}])(m[èe]t[èe]r)\s+dpl(?![\p{L}\p{M}\d])/giu, "$1 è attas tasè'");
+    s = tr(s, /(?<![\p{L}\p{M}])(m[èe]t[èe]r)\s+dpl(?![\p{L}\p{M}\d])/giu, "$1 è attas tasè'");
 
     // ── 9. RANGES → `sampè'` ──────────────────────────────────────────────────────────────────────
     // ⚠ LAST OF THE RULES THAT OWN A DASH. Every earlier rule has already taken the dashes it owns — the
@@ -408,7 +409,7 @@ export function normalizeMadurese(input: string): string {
     //   2. NO LEADING LETTER, DIGIT, SEPARATOR OR HYPHEN — which is what excludes an identifier chain
     //      (ISBN ×8 in the artifact) and a designation (`Ḍ3-Akuntansi`).
     //   3. NOTHING BUT WHITESPACE MAY FOLLOW A TRAILING SEPARATOR OR HYPHEN, for the same chain reason.
-    s = s.replace(
+    s = tr(s, 
         /(?<![\d.,\p{L}\p{M}/-])(\d+(?:[.,]\d+)?)\s?[-–—]\s?(\d+(?:[.,]\d+)?)(?![\d\p{L}\p{M}/-]|[.,]\d)/gu,
         "$1 sampè' $2",
     );
@@ -452,7 +453,7 @@ export function normalizeMadurese(input: string): string {
     // engine's own cardinal path speaks each one.
     const KOMA = MANIFEST.numbers.decimalWord;
     const decimal = (int: string, frac: string): string => `${int} ${KOMA} ${[...frac].join(" ")}`;
-    s = s.replace(/(?<![\d.,])(\d+),(\d{1,3})(?![\d,])/gu, (_m, i: string, f: string) => decimal(i, f));
+    s = tr(s, /(?<![\d.,])(\d+),(\d{1,3})(?![\d,])/gu, (_m, i: string, f: string) => decimal(i, f));
     // ⚠ THE PERIOD ARM CARRIES TWO EXTRA GUARDS THE COMMA ARM DOES NOT NEED.
     //   · `(?!\.\d)` KEEPS A VERSION/SECTION TRIPLE OUT. The corpus writes `2.4.1` and `No 01/0/SKB/2004`;
     //     without it `2.4.1` read *duwâ koma empa' . settong*, a decimal plus a stray pause. Refusing only
@@ -461,7 +462,7 @@ export function normalizeMadurese(input: string): string {
     //     leaves behind is a clock with REAL MINUTES, and this rule read `kol 17.30` as *kol 17 koma 3 0* —
     //     a decimal inside a time. The corpus's `pokol 18.56` is the same shape. Found by probing the
     //     leftovers of step 1's deliberate refusal, not by the corpus, whose other clocks are whole hours.
-    s = s.replace(
+    s = tr(s, 
         /(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)/gu,
         (m, i: string, f: string, off: number, full: string) =>
             new RegExp(`(?<![\\p{L}\\p{M}])${HOUR_WORD}\\s*$`, "iu").test(full.slice(0, off))

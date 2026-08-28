@@ -114,6 +114,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * The shared SYMBOL tier. THREE declarations, no more — see the header for what each rests on and what was
@@ -133,7 +134,7 @@ export function normalizeUmbundu(input: string): string {
     //    it is a SPELLING repair and every later step's word boundary (`(?![\p{L}\p{M}])`) would otherwise
     //    treat the stray letter as a boundary too. Both cases, though only the lowercase occurs (×10);
     //    ⟨Ĩ⟩ U+0128 occurs ×2 already correctly spelled, so the capital row is symmetry, not a measured fix.
-    s = s.replace(/ῖ/gu, "ĩ").replace(/Ῑ/gu, "Ĩ");
+    s = tr(s, /ῖ/gu, "ĩ").replace(/Ῑ/gu, "Ĩ");
 
     // 2) THE SHARED SYMBOL TIER, ordered as the Karakalpak and Punjabi layers order it: its own numeral
     //    pattern reads `3.850` and `163,52` as ONE token, and steps 3 and 4 split precisely those. It also
@@ -152,7 +153,7 @@ export function normalizeUmbundu(input: string): string {
     //    clause-final figure, and this corpus ends sentences on one (`… lyomanu.`, `… cikale 55.000.`).
     //    ⚠ AND THE EXACT `\d{3}` IS WHAT DECLINES THE VERSION AND THE SECTION NUMBER: `802.11n` and
     //    `ociluvyavya 1.1` have two digits and one, so neither shape can be reached from here.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     // 4) THE DECIMAL COMMA, NEUTRALISED RATHER THAN SPOKEN. There is no decimal word: `sources.ts` reports
@@ -162,7 +163,7 @@ export function normalizeUmbundu(input: string): string {
     //    cannot supply (the Punjabi and Karakalpak choice, for the same reason).
     //    All twelve instances are decimals: `14,7` `1,5` `2,3` `38,48` `3,7` `2,8` `2,2` `163,52` `790,19`
     //    `3,50` `1,5`. Not one comma groups.
-    s = s.replace(/(\d),(?=\d)/gu, "$1 ");
+    s = tr(s, /(\d),(?=\d)/gu, "$1 ");
 
     // 5) THE CLOCK. The colon is clause punctuation in `umbundu.ts`, so `Eci kwapita 11:00, omanu` read as
     //    *ekwi la mosi , zelo , omanu* — a phrase break inside a time. 11 clocks: `1:15 lyomẽle`, `11:00`,
@@ -174,14 +175,14 @@ export function normalizeUmbundu(input: string): string {
     //    (`4:41.30`, `2:11.60`, `1:09.02` — a downhill result, minutes and seconds, not a clock). A guard
     //    carrying a bare `.` would additionally decline every clause-final clock, and `Ombunje yafetika ko
     //    10:00.`-shaped sentence ends are exactly what this corpus writes.
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!\.\d)/gu, "$1 $2");
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!\.\d)/gu, "$1 $2");
 
     // 6) THE PORTUGUESE HOUR NOTATION. `20h30` and `15h00 UTC` — the `h` reached the g2p as a bare letter
     //    inside the figure (*akwi avali h akwi atatu*). Same treatment as the colon and for the same reason:
     //    no hour word is placed, because the corpus's own hour phrase is a clitic (`k’akukutu`) whose
     //    placement in this frame is unattested. ⚠ AFTER the clock step, so `21:19` cannot reach it, and
     //    bounded left and right so a word-internal ⟨h⟩ is untouchable.
-    s = s.replace(/(?<![\p{L}\p{M}\d])([01]?\d|2[0-3])h([0-5]\d)(?![\p{L}\p{M}\d])/gu, "$1 $2");
+    s = tr(s, /(?<![\p{L}\p{M}\d])([01]?\d|2[0-3])h([0-5]\d)(?![\p{L}\p{M}\d])/gu, "$1 $2");
 
     // 7) THE SPACED DASH IS A CLAUSE DASH — and this is the round's Karakalpak finding in a different mark.
     //    12 instances of `–` and 2 of a spaced `-`, and 11 of the 12 set off an apposition in running prose;
@@ -191,7 +192,7 @@ export function normalizeUmbundu(input: string): string {
     //    is in scope).
     //    ⚠ SPACING, NOT SHAPE, IS THE DISCRIMINATOR: every real range in this corpus is written TIGHT
     //    (step 8), so requiring the spaces on both sides is what keeps this rule off them.
-    s = s.replace(/ [-–] (?=\S)/gu, ", ");
+    s = tr(s, / [-–] (?=\S)/gu, ", ");
 
     // 8) RANGES, TIGHT HYPHEN ONLY. The dash was dropped and the endpoints fused: `2-3 km` read *vali tatu
     //    km*, two numerals with nothing between them. ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A
@@ -207,7 +208,7 @@ export function normalizeUmbundu(input: string): string {
     //    POSITION, so the operand is anchored at BOTH ends).
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58) — `Nadal apitĩla la Kanadiyanu yeyi
     //    7-2.` is clause-final — and an adjacent slash means a citation or a rate rather than a span.
-    s = s.replace(/(?<![\p{L}\p{M}\d.,\-\/])(\d+)-(\d+)(?![\d\/])/gu, "$1, $2");
+    s = tr(s, /(?<![\p{L}\p{M}\d.,\-\/])(\d+)-(\d+)(?![\d\/])/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

@@ -109,6 +109,7 @@
  *     be a no-op. A sourcing gap, not a seam gap.
  */
 import { numberToWords, withClass6Concord } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * The range joiner, and the best-attested word in this layer. `kusvika` ("to arrive at, until") is written
@@ -205,7 +206,7 @@ export function normalizeShonaPre(input: string): string {
     //    ⚠ NO AMPERSAND WORD IS SPENT. See the header: the bare sign occurs only in this wiki's English
     //    dictionary glosses, so folding the entities IS the whole defect. `&amp;` is unfolded first so a
     //    doubly-escaped entity does not survive as the word "amp" plus a semicolon.
-    s = s.replace(/&amp;/giu, "&").replace(/&nbsp;/giu, " ");
+    s = tr(s, /&amp;/giu, "&").replace(/&nbsp;/giu, " ");
 
     // 2) A SHONA PROCLITIC GLUED TO A CURRENCY SIGN, split off — and this exists because the tier's currency
     //    key is letter-bounded on the LEFT so that `US$30` is not split at the `$`. Shona's associative
@@ -213,7 +214,7 @@ export function normalizeShonaPre(input: string): string {
     //    without this the sign is refused and dropped.
     //    ⚠ LOWERCASE ONLY, which is what keeps `US$` / `AUD$` intact for their own compound keys: a Shona
     //    proclitic is lowercase mid-sentence and an ISO currency code is not.
-    s = s.replace(/(?<=\p{Ll})\$(?=\d)/gu, " $");
+    s = tr(s, /(?<=\p{Ll})\$(?=\d)/gu, " $");
 
     // 3) DOTTED CAPITAL RUNS → the bare letters, BEFORE anything reads an interior dot as a phrase break
     //    (the playbook's "multi-dot abbreviations before single-dot"). `3000 B.C.`, `1000 C.E.`, `U.S.`,
@@ -221,7 +222,7 @@ export function normalizeShonaPre(input: string): string {
     //    ⚠ THE FINAL DOT IS KEPT WHEN THE SENTENCE VISIBLY ENDS, or a real break is lost. Three cases, told
     //    apart by what follows: a letter with no space is a glued word, a space then a capital (or the end
     //    of input) is a sentence end, anything else is mid-sentence.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {  // space, NBSP
         const letters = run.replace(/[. \u00a0]/gu, "");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
@@ -250,15 +251,15 @@ export function normalizeShonaPre(input: string): string {
     //    ⚠ THE TRAILING GUARD IS `(?!\d|[.,]\d)`, NOT `(?![\d.,])`: the wider form declines to de-group a
     //    grouped number that is followed by a clause comma or a sentence period, and step 9 would then read
     //    the leftover separator as a decimal.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) THE ENGLISH ORDINAL SUFFIX (`19th Century`, ×1 here). Shona writes its own ordinals as WORDS with a
     //    `chi-`/`re-` prefix — this corpus has *mwaka wechizana 19*, *zana ramakore rechi20*, *kechiviri*,
     //    *zuva repiri* — so a Latin suffix on a digit is always foreign orthography, and it was reaching the
     //    phoneme stream as a bare [tʰ]. Stripping it is the whole fix; no ordinal morphology is invented,
     //    because Shona's is already spelled out wherever the language means it. Case-insensitive (trap 7).
-    s = s.replace(/(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+    s = tr(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 6) RANGES → `kusvika`. BEFORE THE TIER, and that ordering is the reason this pass exists at all: Shona
     //    writes the unit after the SECOND operand (`20-50 cm`, `110-120km/hr`, `0-100 km/hr`, `2-5 cm`), and
@@ -288,7 +289,7 @@ export function normalizeShonaPre(input: string): string {
     //    would otherwise be guarding by accident. +2 segments, both `March 20-21, ...`, no regression.
     //    ⚠ A DECIMAL RIGHT OPERAND IS STILL DECLINED, by the LEFT guard rather than this one: in `2.1-3.4m`
     //    the only candidate pair is `1-3`, and its `1` is preceded by a `.`.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}])/gu,  // space, NBSP
+    s = tr(s, /(?<![-\d.,\p{L}\p{M}])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-\d\p{L}\p{M}])/gu,  // space, NBSP
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     return tidy(s);
@@ -315,7 +316,7 @@ export function normalizeShonaPost(input: string): string {
     //    Shona has none (see the header).
     //    ⚠ AFTER the tier (which gets first refusal on every shape it can do) and BEFORE step 10, which is
     //    what still leaves the decimal intact for this pattern to see.
-    s = s.replace(/(?<![\d.,])(\d+[.,]\d+)[ \u00a0]?m([²³])?(?![\p{L}\p{M}'’ʼ\d])/gu,  // space, NBSP
+    s = tr(s, /(?<![\d.,])(\d+[.,]\d+)[ \u00a0]?m([²³])?(?![\p{L}\p{M}'’ʼ\d])/gu,  // space, NBSP
         (_w, n: string, exp: string | undefined) => (exp === "²" ? `${SQUARED} mamita ${n}` : `mamita ${n}`));
 
     // ⚠ AND MINUTES ARE NOT GIVEN THE SAME ARM, ON A COUNT NOW TAKEN OVER BOTH HAYSTACKS. `min` has the
@@ -348,7 +349,7 @@ export function normalizeShonaPost(input: string): string {
     //    ⚠ AND NO SPACE IS ALLOWED BEFORE `hr` ON THE RATE SIDE by construction: this arm needs a DIGIT
     //    immediately before (bar one space), and `km/hr` has a slash there, so the rate path is untouched.
     //    AFTER the tier, like step 7, and BEFORE step 9 so the concord pass agrees the numeral.
-    s = s.replace(/(?<![\d.,:\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?hrs?(?![\p{L}\p{M}\d])/gu, "maawa $1");  // space, NBSP
+    s = tr(s, /(?<![\d.,:\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?hrs?(?![\p{L}\p{M}\d])/gu, "maawa $1");  // space, NBSP
 
     // 8) DEGREES. `32 ° C / 90 ° F`, `17°51′50″S`, a bare `ne180 °`, and the mojibake-ish bare `o` this wiki
     //    writes for the sign in a dozen places (`0 o C`, `66.5 o N`, `+23.5 o`). The sign was dropped outright
@@ -366,10 +367,10 @@ export function normalizeShonaPost(input: string): string {
     const degreeBody = (n: string, off: number, end: number, full: string): string =>
         saidNear(full, off, end, DEGREE) ? n : `${DEGREE} ${n}`;
     const DEG = "(?:[ \u00a0]?°|[ \u00a0]o)";  // space, NBSP
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}[ \u00a0]?([CF])(?![\\p{L}\\p{M}])`, "gui"),  // space, NBSP
+    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}[ \u00a0]?([CF])(?![\\p{L}\\p{M}])`, "gui"),  // space, NBSP
         (w, n: string, c: string, off: number, full: string) =>
             `${degreeBody(n, off, off + w.length, full)} ${SCALE[c.toUpperCase()]!}`);
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}(?![\\p{L}\\p{M}])`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}(?![\\p{L}\\p{M}])`, "gu"),
         (w, n: string, off: number, full: string) => degreeBody(n, off, off + w.length, full));
 
     // 9) NOUN-CLASS CONCORD ON A MEASURE OR CURRENCY NOUN'S NUMBER — playbook trap 14, and the fix shape the
@@ -391,7 +392,7 @@ export function normalizeShonaPost(input: string): string {
     //    SEPARATOR-then-digit, so on a two-digit integer part the engine backtracks `\d+` one digit short and
     //    the truncated run passes the guard: `madhora 25.5` came out `madhora <2>5.5` — the wrong quantity,
     //    with the tail left as loose digits. `madhora 2.5` hid it, because a one-digit run cannot backtrack.
-    s = s.replace(new RegExp(`((?:${MA_NOUNS})[ \u00a0])(\\d+)(?![.,]?\\d)`, "gu"),  // space, NBSP
+    s = tr(s, new RegExp(`((?:${MA_NOUNS})[ \u00a0])(\\d+)(?![.,]?\\d)`, "gu"),  // space, NBSP
         (whole, noun: string, digits: string) => {
             const n = Number(digits);
             if (!Number.isSafeInteger(n) || n >= 1e6) return whole;
@@ -421,8 +422,8 @@ export function normalizeShonaPost(input: string): string {
     //     π at `3.14159`. Capped, every one of those emitted a SENTENCE BREAK in the middle of a number.
     //     14 against 0, so the period arm takes any tail. The COMMA arm keeps the 1–2 cap, because Shona's
     //     comma-grouped thousands ARE real (20 of them) and a longer tail there is one of those or a date.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.,])/gu, (_m, i: string, f: string) => spell(i, POINT_WORD, f));
-    s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, COMMA_WORD, f));
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.,])/gu, (_m, i: string, f: string) => spell(i, POINT_WORD, f));
+    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, COMMA_WORD, f));
 
     return tidy(s);
 }

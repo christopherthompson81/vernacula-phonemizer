@@ -22,6 +22,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 const MONTHS = MANIFEST.months.join("|");
 /** Nouns that follow an ordinal numeral. `Jahrunderts` is the corpus's own misspelling, kept so the rule
@@ -128,19 +129,19 @@ export function normalizeGerman(input: string): string {
     // *f . kʁ* — a consonant cluster plus two phrase breaks. Same wall as the ordinal rule below and the
     // English st./dr. work: lowercased input is real input. `v. chr.` has no lowercase homograph to catch
     // by mistake.
-    s = s.replace(/\bv\.\s?Chr\./giu, "vor Christus");
-    s = s.replace(/\bn\.\s?Chr\./giu, "nach Christus");
-    s = s.replace(/\bz\.\s?B\./gu, "zum Beispiel");
-    s = s.replace(/\bd\.\s?h\./gu, "das heißt");
-    s = s.replace(/\bu\.\s?a\./gu, "unter anderem");
-    s = s.replace(/\bu\.\s?Ä\./gu, "und Ähnliches");
+    s = tr(s, /\bv\.\s?Chr\./giu, "vor Christus");
+    s = tr(s, /\bn\.\s?Chr\./giu, "nach Christus");
+    s = tr(s, /\bz\.\s?B\./gu, "zum Beispiel");
+    s = tr(s, /\bd\.\s?h\./gu, "das heißt");
+    s = tr(s, /\bu\.\s?a\./gu, "unter anderem");
+    s = tr(s, /\bu\.\s?Ä\./gu, "und Ähnliches");
 
     // 2) ORDINALS. See the file header for how the detector and the two endings were derived. One rule,
     //    two licensing conditions: the FOLLOWING word is a month or Jahrhundert (which alone covers ~100 of
     //    the 109 in the corpus), or the PRECEDING word is a date/ordinal-licensing article and a
     //    capitalised noun follows. A sentence-final "N." satisfies neither.
     const ORD = new RegExp(`(?:(\\p{L}+)(\\s+))?(\\d{1,4})\\.(?=\\s+(\\p{L}+))`, "gu");
-    s = s.replace(ORD, (whole, prev: string | undefined, sp: string | undefined, digits: string, next: string) => {
+    s = tr(s, ORD, (whole, prev: string | undefined, sp: string | undefined, digits: string, next: string) => {
         // ⚠ CASE-INSENSITIVE on the noun condition, because LOWERCASED INPUT IS REAL INPUT: FLEURS ships its
         // German transcripts lowercased, so `am 16. februar` matched nothing and read as a cardinal plus a
         // leaked phrase break (*zˈɛçt͡sen . fˈeːbʁuaːɐ̯*) while `am 16. Februar` was already correct. 103
@@ -171,7 +172,7 @@ export function normalizeGerman(input: string): string {
     //     and the reader still says the ordinal — the OmniVoice audit heard *vierundzwanzigSTEN september*
     //     where we read the cardinal *vierundzwanzig*. Safe without the dot precisely because a month name
     //     follows: a number in that position is a day, never a quantity. Same <= 31 guard, same endings.
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`(?:(\\p{L}+)(\\s+))?(\\d{1,2})(\\s+)(?=(?:${MONTHS})(?![\\p{L}\\p{M}]))`, "giu"),
         (whole, prev: string | undefined, sp: string | undefined, digits: string, sp2: string) => {
             const stem = ordinalStem(Number(digits));
@@ -188,7 +189,7 @@ export function normalizeGerman(input: string): string {
     //    sentence start stays ambiguous and is left to the table, as before.
     //    The lookahead admits a DIGIT as well as a letter: `S. 42` and `Nr. 5` are the ordinary forms and
     //    neither matched before, so both leaked a raw letter plus a spurious pause.
-    s = s.replace(new RegExp(`(?<!\\p{Lu}\\.[ \u00a0])\\b(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),  // space, NBSP
+    s = tr(s, new RegExp(`(?<!\\p{Lu}\\.[ \u00a0])\\b(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),  // space, NBSP
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -196,7 +197,7 @@ export function normalizeGerman(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -214,15 +215,15 @@ export function normalizeGerman(input: string): string {
     //    " Uhr", and the literal one survived — *acht Uhr dreissig uhr*. That is 24 of 24 clock rows in
     //    the corpus, i.e. the rule was case-correct and corpus-wrong. The word is re-emitted rather than
     //    echoed back, so a lowercase or shouted `UHR` still yields the one properly-cased noun.
-    s = s.replace(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\b(?!\.?\d)(\s*Uhr)?/giu,
+    s = tr(s, /\b([01]?\d|2[0-3])[:.]([0-5]\d)\b(?!\.?\d)(\s*Uhr)?/giu,
         (_m, h: string, min: string) => {
             const head = `${numberToWords(Number(h), h)} Uhr`;
             return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min), min)}`;
         });
 
     // 5) UNITS the shared tier cannot express, and the degree signs.
-    s = s.replace(/(\d)\s?km\/h\b/gu, "$1 Kilometer pro Stunde");
-    s = s.replace(/(\d)\s?m\/s\b/gu, "$1 Meter pro Sekunde");
+    s = tr(s, /(\d)\s?km\/h\b/gu, "$1 Kilometer pro Stunde");
+    s = tr(s, /(\d)\s?m\/s\b/gu, "$1 Meter pro Sekunde");
     // ⚠ THE SCALE LETTER MUST BE MATCHED CASE-INSENSITIVELY. Case-folded text writes `32 °c`, and an
     //    uppercase-only rule drops it through to the bare-`°` arm below, leaving the `c` as a loose
     //    letter for the g2p (`c` → /k/ context-free): *zweiunddreissig Grad k*. Fleet-wide invariant,
@@ -231,19 +232,19 @@ export function normalizeGerman(input: string): string {
     // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
     // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
     // orthography is what supplies the accented letter. 71 other engines already guard it this way.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 Grad Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 Grad Fahrenheit");
-    s = s.replace(/(\d)\s?°/gu, "$1 Grad");
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 Grad Celsius");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 Grad Fahrenheit");
+    s = tr(s, /(\d)\s?°/gu, "$1 Grad");
 
     // 6) SIGNS.
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1minus $2");
+    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1minus $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " plus minus ");
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
+    s = tr(s, /±/gu, " plus minus ");
+    s = tr(s, /(\S)\+\s?(\d)/gu, "$1 plus $2");
+    s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
     // 6b) RELATIONAL AND DIVISION SIGNS. ⚠ THE SIGNS ARE UNATTESTED AND THE WORDS ARE NOT, and that
     //     distinction is the whole sourcing story. Searching de_de for `=`/`<`/`>`/`÷` finds nothing usable — every
@@ -270,13 +271,13 @@ export function normalizeGerman(input: string): string {
     //     German math register puts the copula in (`ist gleich`, `ist kleiner als`), but the sign appears in
     //     running text where the verb is already present or absent for its own reasons, so the bare form is what
     //     the rule emits — the same choice `en` makes with `equals` rather than `is equal to`.
-    s = s.replace(/\s?=\s?/gu, " gleich ");
-    s = s.replace(/\s?<\s?/gu, " kleiner als ");
-    s = s.replace(/\s?>\s?/gu, " größer als ");
-    s = s.replace(/\s?÷\s?/gu, " geteilt durch ");
+    s = tr(s, /\s?=\s?/gu, " gleich ");
+    s = tr(s, /\s?<\s?/gu, " kleiner als ");
+    s = tr(s, /\s?>\s?/gu, " größer als ");
+    s = tr(s, /\s?÷\s?/gu, " geteilt durch ");
 
     // 7) FRACTIONS. ½ is "ein halb"; the rest are the ordinal stem plus -el (ein Fünftel).
-    s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) => {
+    s = tr(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return num === 1 ? "ein halb" : `${numberToWords(num)} halbe`;
         const stem = ordinalStem(den);

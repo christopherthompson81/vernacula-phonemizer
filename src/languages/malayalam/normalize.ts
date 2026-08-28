@@ -35,6 +35,7 @@ import {
     ordinalToWords,
     pluralStem,
 } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Malayalam letter+mark boundary. Never `\b`. */
 /**
@@ -87,7 +88,7 @@ export function normalizeMalayalam(input: string): string {
     //    invisible in their own source. Same defect class as the Burmese U+0001 join separator (#931).
     let s = input.replace(/([ണനരലളക])്\u200d/gu, (_m, base: string) => ZWJ_CHILLU[base]!);
     //    (b) everything else zero-width is a rendering hint with no phonetic content.
-    s = s.replace(/[\u200b\u200c\u200d\ufeff]/gu, "");
+    s = tr(s, /[\u200b\u200c\u200d\ufeff]/gu, "");
 
     // 2) MALAYALAM DIGITS ൦-൯ → ASCII. Zero occurrences here (see the header); folded before every
     //    numeric rule anyway so a native-digit numeral would be eligible for the same de-grouping,
@@ -99,7 +100,7 @@ export function normalizeMalayalam(input: string): string {
     //    clause punctuation: 1,234 was reading as ഒന്ന് <pause> ഇരുന്നൂറ്റി മുപ്പത്തിനാല് — a phrase
     //    break inside a number, and the leading digit spoken as a separate numeral. All 36 are Western
     //    3-digit blocks; no Indian 2-then-3 grouping occurs here.
-    s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
+    s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?:,\d|[^\d]|$))/gu, "");
 
     // 4) NUMERIC CLITICS (×133 hyphenated + ~40 spaced), AFTER de-grouping — this corpus writes a
     //    clitic on a grouped numeral ("1,000-മത്തെ" shape) which a `(?<![\d,])` guard would reject
@@ -114,7 +115,7 @@ export function normalizeMalayalam(input: string): string {
         new RegExp(`(?<![\\d.,])(\\d+)\\s*[-–]?\\s*(${longestFirst(list)})${NOT_LETTER_AFTER}`, "gu");
     //    (a) ORDINALS first: -ാമത്തെ must not be claimed by a shorter ending, and ordinal endings are
     //        not a subset of the oblique ones, so the two lists cannot be merged.
-    s = s.replace(clitic(ORDINAL_ENDINGS), (whole, digits: string, end: string) => {
+    s = tr(s, clitic(ORDINAL_ENDINGS), (whole, digits: string, end: string) => {
         const n = Number(digits);
         if (!Number.isSafeInteger(n) || n === 0) return whole;
         // "ആം" is the standalone spelling of the ending "ാം"; "മത്തെ" of "ാമത്തെ".
@@ -124,14 +125,14 @@ export function normalizeMalayalam(input: string): string {
     });
     //    (b) PLURAL clitics before oblique ones: -കളിൽ ends in the oblique -ൽ and would otherwise be
     //        split, leaving a stranded കളി. The plural stem takes -ു, not -ി (ഇരുപതുകളിൽ, attested).
-    s = s.replace(clitic(PLURAL_CLITICS), (whole, digits: string, c: string) => {
+    s = tr(s, clitic(PLURAL_CLITICS), (whole, digits: string, c: string) => {
         const n = Number(digits);
         if (!Number.isSafeInteger(n) || n === 0) return whole;
         const w = cliticToWords(n, c, pluralStem);
         return w === "" ? whole : w;
     });
     //    (c) OBLIQUE case clitics.
-    s = s.replace(clitic(OBLIQUE_CLITICS), (whole, digits: string, c: string) => {
+    s = tr(s, clitic(OBLIQUE_CLITICS), (whole, digits: string, c: string) => {
         const n = Number(digits);
         if (!Number.isSafeInteger(n) || n === 0) return whole;
         const w = cliticToWords(n, FOLD_CLITIC[c] ?? c, obliqueStem);
@@ -150,16 +151,16 @@ export function normalizeMalayalam(input: string): string {
     //    (b) every remaining digit-colon-digit becomes a SPACE: ⚠ `:` is clause punctuation in this engine
     //        (malayalam.jsonc maps it to ","), so left alone it inserts a pause INSIDE 8:30.
     //    NO മണി is added — the noun is already in the text where it belongs ("11:00 ന് കഴിഞ്ഞപ്പോൾ").
-    s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):\s?00(?![\d:.])/gu, "$1");
-    s = s.replace(/(?<=\d):\s?(?=\d)/gu, " ");
+    s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):\s?00(?![\d:.])/gu, "$1");
+    s = tr(s, /(?<=\d):\s?(?=\d)/gu, " ");
 
     // 7) PERCENT ALREADY SPELLED OUT ("93% ശതമാനം"). ⚠ The shared tier's duplicate guard is CURRENCY-ONLY,
     //    so step 5 turns this into "93 ശതമാനം ശതമാനം". Collapsed here rather than in core, because
     //    generalising that guard to percent is a shared-code change.
-    s = s.replace(/ശതമാനം(\s+ശതമാനം)+/gu, "ശതമാനം");
+    s = tr(s, /ശതമാനം(\s+ശതമാനം)+/gu, "ശതമാനം");
 
     // 8) DECIMALS (×25), after units and times have taken their share.
-    s = s.replace(
+    s = tr(s, 
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} ${DECIMAL_WORD} ${[...frac].join(" ")}`,
     );
@@ -184,11 +185,11 @@ export function normalizeMalayalam(input: string): string {
     //    "പ്ലസ്-മൈനസ് ചിഹ്നം, ±, ഒന്നിലധികം അർത്ഥങ്ങളുള്ള ഒരു ഗണിത…" (the plus-minus sign, ±, a mathematical
     //    symbol with several meanings). A citation that names the WORD against the GLYPH is the strongest
     //    form this kind of sourcing takes. ± is then the two words juxtaposed, both already in this file.
-    s = s.replace(/±/gu, " പ്ലസ് മൈനസ് ");
-    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+    s = tr(s, /±/gu, " പ്ലസ് മൈനസ് ");
+    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "മൈനസ് ");
-    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 പ്ലസ് ");
-    s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1പ്ലസ് ");
+    s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 പ്ലസ് ");
+    s = tr(s, /(^|\s)\+\s?(?=\d)/gu, "$1പ്ലസ് ");
 
     // THE DIVISION AND COMPARISON SIGNS.
     //
@@ -218,7 +219,7 @@ export function normalizeMalayalam(input: string): string {
     // unchanged; the tokenizer merely sees a boundary Malayalam would not write.
     s = postposedSign(s, "<", "എക്കാൾ കുറവ്");
     s = postposedSign(s, ">", "എക്കാൾ കൂടുതൽ");
-    s = s.replace(/\s?÷\s?/gu, " ഹരണം ");
+    s = tr(s, /\s?÷\s?/gu, " ഹരണം ");
 
     // THE EQUALITY. ⚠ SEARCHING ONLY INSIDE MATHS ARTICLES HIDES THE EQUALITY WORD, because those articles
     // WRITE the notation rather than read it aloud. The word turns up immediately in ordinary prose:
@@ -235,7 +236,7 @@ export function normalizeMalayalam(input: string): string {
     // (`പിണ്ഡത്തിന് തുല്യം`), so `A = B` is "A B-ന് തുല്യം". The dative is emitted unfused, as above.
     s = postposedSign(s, "=", "ന് തുല്യം");
 
-    s = s.replace(/(\d)\s?°\s?/gu, "$1 ഡിഗ്രി ");
+    s = tr(s, /(\d)\s?°\s?/gu, "$1 ഡിഗ്രി ");
 
     return s;
 }

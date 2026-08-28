@@ -42,6 +42,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
 import { ordinal } from "./romanOrdinals.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Regular, NBSP and narrow-NBSP — all three occur as thousands separators in the corpus. */
 const GROUP_SPACE = " \u00a0\u202f\u2009";
@@ -199,8 +200,8 @@ export function normalizePolish(input: string): string {
     //    stay adjacent to the number for the shared unit/percent tier to see it, so polish.ts's TOKEN
     //    swallows it and emits "przecinek" (the Polish name of the decimal comma) between the parts.
     for (let i = 0; i < 2; i++)
-        s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
+        s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = tr(s, new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule — otherwise the interior
     //    dot of p.n.e. / m.in. survives as a phrase break. p.n.e. is also an ERA marker and so has to
@@ -210,25 +211,25 @@ export function normalizePolish(input: string): string {
     //    its sentence-final pause. `keepFinal` is applied to every dot-consuming rule below for that
     //    reason; it was found by auditing the corpus diff for utterances whose trailing mark disappeared.
     for (const [re, w] of MULTI_DOT)
-        s = s.replace(re, (m0: string, ...rest: unknown[]) => keepFinal(w, m0, rest));
+        s = tr(s, re, (m0: string, ...rest: unknown[]) => keepFinal(w, m0, rest));
 
     // 2) COMPOUND UNITS containing a dot or a slash. Before the generic `godz.` rule (which would eat the
     //    dot of `km/godz.`) and before the shared symbol tier (which matches single tokens only).
-    s = s.replace(/(\d+)\s?km\s?\/\s?(?:h|godz\.?)(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(\d+)\s?km\s?\/\s?(?:h|godz\.?)(?![\p{L}\p{M}])/giu,
         (m0, n: string, ...rest: unknown[]) =>
             keepFinal(`${n} ${counted(Number(n), KMH)} na godzinę`, m0, rest));
-    s = s.replace(/(?<![\p{L}\p{M}])km\s?\/\s?(?:h|godz\.?)(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(?<![\p{L}\p{M}])km\s?\/\s?(?:h|godz\.?)(?![\p{L}\p{M}])/giu,
         (m0, ...rest: unknown[]) => keepFinal("kilometrów na godzinę", m0, rest));
-    s = s.replace(/(\d+)\s?mph(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(\d+)\s?mph(?![\p{L}\p{M}])/giu,
         (_m, n: string) => `${n} ${counted(Number(n), MILE)} na godzinę`);
     // SQUARED units are composed by the shared tier now (exponentWords in polish.ts). The RATE forms above
     // stay local: "na godzinę" is a preposition plus an ACCUSATIVE, the corpus writes a bare numberless
     // `km/h`, and `km/godz.` needs keepFinal so its dot cannot swallow a sentence period.
-    s = s.replace(/(\d+)\s?Mb\s?\/\s?s(?![\p{L}\p{M}])/gu, "$1 megabitów na sekundę");
+    s = tr(s, /(\d+)\s?Mb\s?\/\s?s(?![\p{L}\p{M}])/gu, "$1 megabitów na sekundę");
 
     // 3) `godz.` → godzina, in the case the preceding preposition governs. All 8 corpus instances are
     //    clock contexts ("o godz. 12:00", "przed godz. 23:35"); none is the "hours elapsed" sense.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(?:(${PREP_ALT})\\s+)?godz\\.`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(?:(${PREP_ALT})\\s+)?godz\\.`, "giu"),
         (_m, prep?: string) => `${prep ? prep + " " : ""}${clockCase(prep).noun}`);
 
     // 4) `r.` and `w.` after a number. Both corpus senses are oblique (w/z/na + rok → roku, w + wiek →
@@ -238,18 +239,18 @@ export function normalizePolish(input: string): string {
     //    pass cannot supply it, because its context test only sees the adjacent WORD and "w" is also the
     //    preposition — adding it to romanOrdinals' CONTEXT would fire on every "XX w Polsce". So the
     //    ordinal is applied here, after the roman has already become digits.
-    s = s.replace(/(\d+)(\s+)r\./gu,
+    s = tr(s, /(\d+)(\s+)r\./gu,
         (m0, n: string, sp: string, ...rest: unknown[]) => keepFinal(`${n}${sp}roku`, m0, rest));
-    s = s.replace(/(\d+)(\s+)w\./gu, (m0, n: string, sp: string, ...rest: unknown[]) =>
+    s = tr(s, /(\d+)(\s+)w\./gu, (m0, n: string, sp: string, ...rest: unknown[]) =>
         keepFinal(`${ordinal(Number(n)) ?? n}${sp}wieku`, m0, rest));
-    s = s.replace(/(\d)\s?s\.\s?(?=\d)/gu, "$1 strona ");
+    s = tr(s, /(\d)\s?s\.\s?(?=\d)/gu, "$1 strona ");
     //    `nr` carries no dot in Polish, so it never reached the dotted rule and read as the cluster [nr].
-    s = s.replace(/(?<![\p{L}\p{M}])nr\.?(?=\s+[\d\p{Lu}])/gu, "numer");
+    s = tr(s, /(?<![\p{L}\p{M}])nr\.?(?=\s+[\d\p{Lu}])/gu, "numer");
 
     // 5) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break. Two shapes:
     //    followed by a word, and followed by another mark or end of clause (`itp.` at the end of a list),
     //    where the sentence period is kept.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -257,7 +258,7 @@ export function normalizePolish(input: string): string {
             const w = DOTTED[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -268,7 +269,7 @@ export function normalizePolish(input: string): string {
 
     // 6) VERSION / FIGURE DOTS between digits — `802.11n` ×4 and `rysunek 1.1.` ×1 were breaking the
     //    sentence at the interior dot. Before step 7 so the ordinal rule never sees a digit-dot-digit.
-    s = s.replace(/(\d)\.(?=\d)/gu, "$1 kropka ");
+    s = tr(s, /(\d)\.(?=\d)/gu, "$1 kropka ");
 
     // 7) ORDINAL NOTATION `N.` — derived by tabulating what surrounds it in this corpus, NOT ported from
     //    German's or Turkish's rule. 36 instances of `\d+\.`; 17 are sentence-final, 5 are version dots
@@ -282,14 +283,14 @@ export function normalizePolish(input: string): string {
     //    govern the genitive/locative plural (*w latach dwudziestych*) and `lata` the nominative plural
     //    (*na lata pięćdziesiąte*). Both are regular adjectival endings, so they are applied; every other
     //    context gets the masculine nominative, per the file header.
-    s = s.replace(/(?<![\p{L}\p{M}\d.,])(lat|lata|latach)(\s+)(\d+)\.(?=\s*[,\p{Ll}])/gu,
+    s = tr(s, /(?<![\p{L}\p{M}\d.,])(lat|lata|latach)(\s+)(\d+)\.(?=\s*[,\p{Ll}])/gu,
         (m0, head: string, sp: string, digits: string) => {
             const n = Number(digits);
             const masc = ordinal(n);
             if (masc === undefined || n % 10 !== 0) return m0;
             return `${head}${sp}${inflectOrdinal(masc, head.toLowerCase() === "lata" ? "plNom" : "plGen")}`;
         });
-    s = s.replace(/(?<![\p{L}\p{M}\d.,])(\d+)\.(?=\s*[,\p{Ll}])/gu,
+    s = tr(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.(?=\s*[,\p{Ll}])/gu,
         (m0, digits: string) => ordinal(Number(digits)) ?? m0);
 
     // 8) CLOCK. ⚠ Before any rule that looks for a bare number: `11:30` must not be
@@ -303,7 +304,7 @@ export function normalizePolish(input: string): string {
     //    The governing preposition is looked up from the text BEFORE the match rather than with an
     //    optional lookbehind group: V8 lets `(?:(?<=…))?` match empty and never populates the capture.
     const CLOCK_PREP = new RegExp(`(?:^|[\\s(])(${PREP_ALT})\\s+(?:godzin\\p{L}*\\s+)?$`, "iu");
-    s = s.replace(/([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)/gu,
+    s = tr(s, /([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)/gu,
         (m0, h: string, min: string, offset: number, whole: string) => {
             const masc = HOUR_ORD(Number(h));
             if (masc === undefined) return m0;
@@ -316,14 +317,14 @@ export function normalizePolish(input: string): string {
     //    "1450" into one uninterrupted run of number words (16 instances). Read as "do" — the ordinary
     //    Polish reading of a range dash. Digits are required on BOTH sides so that "Ił-76", "COVID-19"
     //    and "100-dolarowych" are not touched.
-    s = s.replace(/(\d)\s?[–—-]\s?(?=\d)/gu, "$1 do ");
+    s = tr(s, /(\d)\s?[–—-]\s?(?=\d)/gu, "$1 do ");
 
     // 10) SIGNS. Degrees take the same three-way agreement; the corpus instance is "+30°C".
-    s = s.replace(/(\d+)\s?°\s?C(?![\p{L}\p{M}])/gui,
+    s = tr(s, /(\d+)\s?°\s?C(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Celsjusza`);
-    s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui,
+    s = tr(s, /(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Fahrenheita`);
-    s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
+    s = tr(s, /(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
     // THE MINUS. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
     //    (1000–1300), a SCORE (1977-1981), a DESIGNATION (ił-76) or a clock range. The rule is written anyway on
     //    the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
@@ -341,14 +342,14 @@ export function normalizePolish(input: string): string {
     //    `was -5`, which is exactly why mr and nl decline the rule outright (see ACCEPTED_SIGN_SILENCE in
     //    defects.ts). This corpus has no such instance, so the rule is safe HERE — a fact about this corpus,
     //    not about the guard.
-    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "minus ");
     // ⚠ ± TAKES TWO SIGN NAMES, so it is only expressible once BOTH the plus and the minus rules exist —
     //    both halves are taken from the rules in this file. ⚠ It needs its OWN rule: ± is a single character
     //    (U+00B1), not a `+`, so no `+` rule can match inside it and the sign would otherwise be dropped in
     //    silence.
-    s = s.replace(/±/gu, " plus minus ");
-    s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
+    s = tr(s, /±/gu, " plus minus ");
+    s = tr(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
 
     // 10b) THE RELATIONAL AND DIVISION SIGNS.
 
@@ -376,14 +377,14 @@ export function normalizePolish(input: string): string {
     //      `podzielić przez` is the infinitive, which is how the division is dictated in Polish ("sześć
     //      podzielić przez trzy") and is what the wiki attests (×2, plus `dzielone przez` ×1); the participle
     //      `podzielone` is ×0 token / ×0 substring in the corpus, so the attested form is the one shipped.
-    s = s.replace(/\s?=\s?/gu, " równa się ");
-    s = s.replace(/\s?<\s?/gu, " mniejsze niż ");
-    s = s.replace(/\s?>\s?/gu, " większe niż ");
-    s = s.replace(/\s?÷\s?/gu, " podzielić przez ");
+    s = tr(s, /\s?=\s?/gu, " równa się ");
+    s = tr(s, /\s?<\s?/gu, " mniejsze niż ");
+    s = tr(s, /\s?>\s?/gu, " większe niż ");
+    s = tr(s, /\s?÷\s?/gu, " podzielić przez ");
 
     // 11) FRACTIONS — feminine, agreeing with the elided *część*: 1/5 is "jedna piąta". Digits on both
     //     sides only, so the corpus's " / " in "lokalizacji i / lub płeć" is untouched.
-    s = s.replace(/(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
+    s = tr(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
         const den = ordinal(Number(b));
         if (den === undefined || Number(a) !== 1) return m0;
         return `jedna ${inflectOrdinal(den, "fem")}`;

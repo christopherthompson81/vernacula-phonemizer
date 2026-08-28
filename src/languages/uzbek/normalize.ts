@@ -47,6 +47,7 @@
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords, ordinalWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** A word character. UPPERCASE included: the hyphen-ordinal writing is orthographic, not case-bound, and a
  *  capitalized head is ordinary in dates and titles (`1-Mart`, `16-Noyabr`, `1.1-Rasmga`) — with a
@@ -99,35 +100,35 @@ export function normalizeUzbek(input: string): string {
     //    that splits the number. Two passes, because the groups overlap on the shared digit (783 562 948).
     //    A space is only grouping when the block is exactly three digits ("800 000" but not "3000 mil").
     for (let i = 0; i < 2; i++)
-        s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
-    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
+    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) ERA MARKERS, before the single-dot rules so the interior dots cannot survive as breaks. `m.a.` =
     //    miloddan avval (BC, ×4), `m.` = milodiy (AD, ×1). Each is claimed only before a number or another
     //    era-adjacent token; a bare `m.` in a name context is left alone.
-    s = s.replace(/(?<![\p{L}\p{M}])m\.a\.(?=\s*(?:\d|milodiy|avval))/giu, "miloddan avval");
-    s = s.replace(/(?<![\p{L}\p{M}])m\.a\.(?![\p{L}\p{M}])/giu, "miloddan avval");
-    s = s.replace(/(?<![\p{L}\p{M}])m\.(?=\s*\d)/giu, "milodiy");
+    s = tr(s, /(?<![\p{L}\p{M}])m\.a\.(?=\s*(?:\d|milodiy|avval))/giu, "miloddan avval");
+    s = tr(s, /(?<![\p{L}\p{M}])m\.a\.(?![\p{L}\p{M}])/giu, "miloddan avval");
+    s = tr(s, /(?<![\p{L}\p{M}])m\.(?=\s*\d)/giu, "milodiy");
 
     // 2) DOTTED ABBREVIATIONS. `h.k.` = hokazo (etc., ×1), `mln.` = million (×1). The dot is consumed
     //    when the sentence continues; at a phrase end it stays. Boundaries are explicit lookarounds.
     //    "va h.k.)" already carries the va, so the expansion is the bare noun — see the corpus instance.
-    s = s.replace(/(?<![\p{L}\p{M}])h\.k\.(?=\s+\p{L})/giu, "hokazo");
-    s = s.replace(/(?<![\p{L}\p{M}])h\.k\.(?=\s*(?:[.,;:!?»)]|$))/giu, "hokazo.");
-    s = s.replace(/(?<![\p{L}\p{M}])mln\.(?=\s+\p{L})/giu, "million");
-    s = s.replace(/(?<![\p{L}\p{M}])mln\.(?=\s*(?:[.,;:!?»)]|$))/giu, "million.");
+    s = tr(s, /(?<![\p{L}\p{M}])h\.k\.(?=\s+\p{L})/giu, "hokazo");
+    s = tr(s, /(?<![\p{L}\p{M}])h\.k\.(?=\s*(?:[.,;:!?»)]|$))/giu, "hokazo.");
+    s = tr(s, /(?<![\p{L}\p{M}])mln\.(?=\s+\p{L})/giu, "million");
+    s = tr(s, /(?<![\p{L}\p{M}])mln\.(?=\s*(?:[.,;:!?»)]|$))/giu, "million.");
 
     // 3) CLOCK, before the symbol tier can see the separator. `10:00` → the hour alone (`:00` drops the
     //    minutes, as Uzbek says "soat oʻn"); `11:35` → "11 35" (hour space minute). Output stays DIGITS so
     //    the number path expands them. The corpus's "(TO)" timezone marker is left for the initialism pass.
-    s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu, (_m: string, h: string, min: string) =>
+    s = tr(s, /(?<![\d.,:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu, (_m: string, h: string, min: string) =>
         Number(min) === 0 ? h : `${h} ${min}`);
 
     // 4) VERSION DOTS, before the ordinal rule: `802.11n`, `1.1-rasmga`. The dot is neither a thousands
     //    separator (Uzbek groups with spaces) nor a decimal (comma), so `\d.\d` is a version number. Read
     //    "nuqta" (point). A following hyphen-word (a figure reference, `1.1-rasmga`) is consumed here so
     //    the ordinal rule cannot claim the trailing digit.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\.(\\d+)(?:-(${WORD}+))?(?!${WORD})`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\.(\\d+)(?:-(${WORD}+))?(?!${WORD})`, "gu"),
         (_m: string, a: string, b: string, w?: string) => (w === undefined ? `${a} nuqta ${b}` : `${a} nuqta ${b} ${w}`));
 
     // 5) ORDINAL `N-word` — the defining rule (see the header). Every digit-hyphen-word reads the number
@@ -135,7 +136,7 @@ export function normalizeUzbek(input: string): string {
     //    sevens — a sport name, read *yetti regbi*) and `2005-moliviy` (a fiscal-year compound, read
     //    cardinal). The regex is letter-bounded so `802.11n` (no hyphen) and `Super-G` (no digit) are
     //    untouched.
-    s = s.replace(new RegExp(`${DIGITS}-(${WORD}+)(?!${WORD})`, "gu"),
+    s = tr(s, new RegExp(`${DIGITS}-(${WORD}+)(?!${WORD})`, "gu"),
         (_m: string, d: string, w: string): string => {
             if (w.toLowerCase().startsWith("regbi") || w.toLowerCase().startsWith("moliviy"))
                 return `${numberToWords(Number(d.replace(",", ".")))} ${w}`;
@@ -151,7 +152,7 @@ export function normalizeUzbek(input: string): string {
     //    "Capitalized N." as regnal — "Sahifa 12." became *Sahifa oʻn ikkinchi* — and bought nothing, since
     //    no corpus instance takes that shape. The rule declines on scores and percents ("Gingrich 32 foiz",
     //    "Betten 2,3 milliard", "Oxirgi 3 oy"), and the comma-guard keeps "Izmir 3,7 million" cardinal.
-    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=[ \u00a0](?:ning|hukmron))/gu,  // space, NBSP
+    s = tr(s, /(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=[ \u00a0](?:ning|hukmron))/gu,  // space, NBSP
         (_m: string, name: string, d: string): string => {
             const n = Number(d);
             const ord = ordinalWords(n);
@@ -163,11 +164,11 @@ export function normalizeUzbek(input: string): string {
     //    rather than a table (1/5 → beshdan bir, 3/4 → toʻrtdan uch — a numerator-1-only table read `3/4`
     //    as the bare cardinals *uch toʻrt*). 1/2 and 1/4 keep their idioms (yarim, chorak). The
     //    vulgar-fraction glyphs are not in any clause-punctuation map, so they were being dropped outright.
-    s = s.replace(/(\d+)¾/gu, "$1 va uch chorak");
-    s = s.replace(/(\d+)½/gu, "$1 va yarim");
+    s = tr(s, /(\d+)¾/gu, "$1 va uch chorak");
+    s = tr(s, /(\d+)½/gu, "$1 va yarim");
     // The slash guards exclude a DATE (16/11/1978) and a further slash on either side, which a bare
     // digit-boundary guard let through — `1/5/2020` would have read *beshdan bir/2020*.
-    s = s.replace(/(?<![\d.,/])(\d{1,2})\/(\d{1,2})(?![\d.,/])/gu, (_m: string, a: string, b: string) => {
+    s = tr(s, /(?<![\d.,/])(\d{1,2})\/(\d{1,2})(?![\d.,/])/gu, (_m: string, a: string, b: string) => {
         const num = Number(a),
             denom = Number(b);
         if (denom < 2 || num < 1 || num >= denom) return _m; // an improper/degenerate ratio is not a fraction
@@ -178,10 +179,10 @@ export function normalizeUzbek(input: string): string {
 
     // 8) DEGREE, before the sign rule can strand the +. `30°C` → "30 daraja" (the corpus's own word for
     //    temperature; "daraja" ×57). The C is dropped as Uzbek says "oʻttiz daraja", not "Selsiy".
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 daraja");
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 daraja");
     // Fahrenheit is NAMED, since "daraja" alone would assert the corpus's Celsius default.
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 daraja farengeyt");
-    s = s.replace(/(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 daraja");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 daraja farengeyt");
+    s = tr(s, /(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 daraja");
 
     // 9) SIGNS. The corpus's `+30°C`, `(UTC+1)` and `B&B`; the sign classes from the review checklist are
     //    all probed. Uzbek: + = plyus, - = minus, & = va, = = teng, < = kichik, > = katta, × = karra.
@@ -192,26 +193,26 @@ export function normalizeUzbek(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " plyus minus ");
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plyus $2");    // UTC+1 → UTC plyus 1
-    s = s.replace(/(\d)\s?\+/gu, "$1 plyus");           // postposed + (30+)
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plyus $2");   // +30 → plyus 30
-    s = s.replace(/(?<![\p{L}\p{Nd}])[-−](?=\d)/gu, "minus ");
-    s = s.replace(/([A-Za-z])&([A-Za-z])/g,
+    s = tr(s, /±/gu, " plyus minus ");
+    s = tr(s, /(\S)\+\s?(\d)/gu, "$1 plyus $2");    // UTC+1 → UTC plyus 1
+    s = tr(s, /(\d)\s?\+/gu, "$1 plyus");           // postposed + (30+)
+    s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1plyus $2");   // +30 → plyus 30
+    s = tr(s, /(?<![\p{L}\p{Nd}])[-−](?=\d)/gu, "minus ");
+    s = tr(s, /([A-Za-z])&([A-Za-z])/g,
         (_m: string, a: string, b: string) => `${LETTER_NAME[a.toLowerCase()] ?? a} va ${LETTER_NAME[b.toLowerCase()] ?? b}`);
-    s = s.replace(/&/gu, " va ");
-    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 teng $2");   // x = y → x teng y
-    s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 kichik $2");
-    s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 katta $2");
-    s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 karra $2");
-    s = s.replace(/(\d)\s*÷\s*(\d)/gu, "$1 boʻlish $2");
+    s = tr(s, /&/gu, " va ");
+    s = tr(s, /(\S)\s*=\s*(\S)/gu, "$1 teng $2");   // x = y → x teng y
+    s = tr(s, /(\d)\s*<\s*(\d)/gu, "$1 kichik $2");
+    s = tr(s, /(\d)\s*>\s*(\d)/gu, "$1 katta $2");
+    s = tr(s, /(\d)\s*×\s*(\d)/gu, "$1 karra $2");
+    s = tr(s, /(\d)\s*÷\s*(\d)/gu, "$1 boʻlish $2");
 
     // 9b) PERCENT with a POSSESSIVE SUFFIX — `93%i ulangan` = "its 93% are connected" → *toʻqson uch foizi
     //     ulangan*. The plain `N%` is left for the shared symbol tier (→ foiz); only the suffixed form is
     //     claimed here because the tier's regex cannot see past the trailing letter.
     // ⚠ `(?![\p{L}\p{M}])`, NOT `\b`. JS defines `\b` on ASCII `\w`, so the modifier letters Uzbek writes
     //    constantly — the ʻ of oʻ/gʻ — counted as a boundary and let the rule fire into them. See #949.
-    s = s.replace(/(\d+)%i(?![\p{L}\p{M}])/gu, "$1 foizi");
+    s = tr(s, /(\d+)%i(?![\p{L}\p{M}])/gu, "$1 foizi");
 
     // 10) RATES, before the shared symbol tier: the corpus's own prose reads them PREFIXED ("soatiga 240
     //     kilometr", "soniyasiga 1,5 km") and the tier only emits "N kilometr soatiga"-shaped. km/s in the
@@ -221,27 +222,27 @@ export function normalizeUzbek(input: string): string {
     //     km/s ga" → … kilometrga), and a RANGE reads "dan …" (35–40 mil/s → soatiga 35 dan 40 mil). The
     //     slash is consumed here so neither the unit nor the denominator is stranded.
     const rateSuffix = "(?:\\s?(ga|gacha|dan|da))?";
-    s = s.replace(new RegExp(`(\\d+(?:,\\d+)?)[–-](\\d+(?:,\\d+)?)\\s?km\\s?\\/\\s?(?:soat|s|h)(?![\\p{L}\\p{M}])`, "giu"),
+    s = tr(s, new RegExp(`(\\d+(?:,\\d+)?)[–-](\\d+(?:,\\d+)?)\\s?km\\s?\\/\\s?(?:soat|s|h)(?![\\p{L}\\p{M}])`, "giu"),
         "soatiga $1 dan $2 kilometr");
-    s = s.replace(new RegExp(`(\\d+(?:,\\d+)?)[–-](\\d+(?:,\\d+)?)\\s?mil\\s?\\/\\s?(?:soat|s|h)(?![\\p{L}\\p{M}])`, "giu"),
+    s = tr(s, new RegExp(`(\\d+(?:,\\d+)?)[–-](\\d+(?:,\\d+)?)\\s?mil\\s?\\/\\s?(?:soat|s|h)(?![\\p{L}\\p{M}])`, "giu"),
         "soatiga $1 dan $2 mil");
-    s = s.replace(new RegExp(`(\\d+(?:,\\d+)?)\\s?km\\s?\\/\\s?(?:soat|s|h)${rateSuffix}(?![\\p{L}\\p{M}])`, "giu"),
+    s = tr(s, new RegExp(`(\\d+(?:,\\d+)?)\\s?km\\s?\\/\\s?(?:soat|s|h)${rateSuffix}(?![\\p{L}\\p{M}])`, "giu"),
         (_m: string, n: string, sfx: string) => `soatiga ${n} kilometr${sfx ?? ""}`);
-    s = s.replace(new RegExp(`(\\d+(?:,\\d+)?)\\s?mil\\s?\\/\\s?(?:soat|s|h)${rateSuffix}(?![\\p{L}\\p{M}])`, "giu"),
+    s = tr(s, new RegExp(`(\\d+(?:,\\d+)?)\\s?mil\\s?\\/\\s?(?:soat|s|h)${rateSuffix}(?![\\p{L}\\p{M}])`, "giu"),
         (_m: string, n: string, sfx: string) => `soatiga ${n} mil${sfx ?? ""}`);
-    s = s.replace(new RegExp(`(\\d+(?:,\\d+)?)\\s?milya\\s?\\/\\s?soat${rateSuffix}(?![\\p{L}\\p{M}])`, "giu"),
+    s = tr(s, new RegExp(`(\\d+(?:,\\d+)?)\\s?milya\\s?\\/\\s?soat${rateSuffix}(?![\\p{L}\\p{M}])`, "giu"),
         (_m: string, n: string, sfx: string) => `soatiga ${n} milya${sfx ?? ""}`);
-    s = s.replace(new RegExp(`(\\d+(?:,\\d+)?)\\s?m\\s?\\/\\s?s${rateSuffix}(?![\\p{L}\\p{M}])`, "giu"),
+    s = tr(s, new RegExp(`(\\d+(?:,\\d+)?)\\s?m\\s?\\/\\s?s${rateSuffix}(?![\\p{L}\\p{M}])`, "giu"),
         (_m: string, n: string, sfx: string) => `soniyasiga ${n} metr${sfx ?? ""}`);
     // Gigahertz as the corpus writes it — `2,4 Gs va 5,0 Gs` (802.11n). Uzbek for GHz is gigagerts.
-    s = s.replace(/(\d+(?:,\d+)?)\s?Gs\b(?![\p{L}\p{M}])/giu, "$1 gigagerts");
+    s = tr(s, /(\d+(?:,\d+)?)\s?Gs\b(?![\p{L}\p{M}])/giu, "$1 gigagerts");
 
     // 10b) LONE PERSONAL INITIALS the shared pass cannot claim. The shared LONE_INITIAL fires only for a
     //     capital BETWEEN two capitalized words ("Jorj V. Bush"); "T. rex" and "N. Ueyn" are a capital +
     //     period before a LOWERCASE word, so the letter reached the g2p as a bare consonant plus a break.
     //     Claimed only when a LETTER follows the dot (a name or a word); "S. 42" — a period before a digit
     //     — stays a page reference. The shared pass still handles "D. K. Arya" (two initials) itself.
-    s = s.replace(/(?<![\p{L}\p{M}])([A-Z])\.(?=[ \u00a0]+[A-Za-z])/gu, (_m: string, l: string) =>  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])([A-Z])\.(?=[ \u00a0]+[A-Za-z])/gu, (_m: string, l: string) =>  // space, NBSP
         LETTER_NAME[l.toLowerCase()] ?? l);
 
     // 11) INITIALISMS, LAST of the letter rules: it must run after the era markers (else m.a. → *em a*)

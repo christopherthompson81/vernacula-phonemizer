@@ -29,6 +29,7 @@
 import { MANIFEST } from "./manifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -199,12 +200,12 @@ export function normalizeBavarian(input: string): string {
     //    Trap 49's shape (an injected sequence makes downstream guards misfire) arriving as markup rather than
     //    as mojibake, and trap 27's (a guard that assumes a space).
     //    A SPACE, never deletion: `67&nbsp;km` must stay two tokens (trap 26 — substitute, do not delete).
-    s = s.replace(/&nbsp;|&#160;| /gu, " ");
+    s = tr(s, /&nbsp;|&#160;| /gu, " ");
 
     // 2) MULTI-DOT ABBREVIATIONS, before the single-dot rule so no interior dot survives as a phrase break,
     //    and before the ordinal rule so `z. B.` can never be mistaken for anything numeric. `z. B.` ×13 read
     //    as the two letters plus two sentence breaks: *t͡s . b̥ .*
-    for (const [re, word] of MULTI_DOT) s = s.replace(re, word);
+    for (const [re, word] of MULTI_DOT) s = tr(s, re, word);
 
     // 3) ORDINALS — the largest LANGUAGE defect (71 `N.` in the Bavarian subset; `ordinal-latin` 17,226
     //    unfiltered), and playbook trap 4 in its original German form: a numeral plus a bare period that a
@@ -241,7 +242,7 @@ export function normalizeBavarian(input: string): string {
     const WEAK_N = new Set(["am", "om", "im", "vom", "zum", "beim", "ins", "seitm", "seit", "ausm", "aus", "bis", "nach", "noch", "vo", "von", "dem", "den"]);
     const GOVERNS_WEAK = new Set(["vo", "von", "in", "bei", "mid", "mit", "zu", "af", "auf", "an", "aus", "noch", "nach", "seit"]);
     const ORD_RE = new RegExp(`(?:(\\p{L}+)(\\s+))?(?:(\\p{L}+)(\\s+))?(?<!\\p{Nd})(\\d{1,4})\\.(?=\\s+(\\p{L}+))`, "gu");
-    s = s.replace(ORD_RE, (whole, pre2: string | undefined, sp2: string | undefined,
+    s = tr(s, ORD_RE, (whole, pre2: string | undefined, sp2: string | undefined,
         prev: string | undefined, sp: string | undefined, digits: string, next: string) => {
         // Only ONE preceding word was captured when the match starts mid-sentence with a single word; shift.
         let p1 = prev, s1 = sp, p2 = pre2, s2 = sp2;
@@ -262,7 +263,7 @@ export function normalizeBavarian(input: string): string {
     //    ⚠ THE CONTINUATION LOOKAHEAD ADMITS A CURRENCY SIGN as well as a letter or digit, because the corpus's
     //    one `Mrd.` is `21,905 Mrd. €` — a letters-or-digits lookahead matched neither arm, so the abbreviation
     //    fell through unexpanded AND took the `€` with it (the tier needs `Milliardn` as a magnitude to hop).
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\p{Nd}\\p{Sc}])`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\p{Nd}\\p{Sc}])`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -270,7 +271,7 @@ export function normalizeBavarian(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -307,10 +308,10 @@ export function normalizeBavarian(input: string): string {
     //    (`hostWordRun(["Latin"], "'-")`), so `Uhr-nein` FUSED into one token and read *uɐ̯nɑɛ̯n*. The joiner is
     //    the corpus's own `bis`, which it writes in exactly this slot — "freitags vo 5 bis 2 Uhr", "18 bis 20",
     //    "0 bis –4 Grad Celsius", "−1 bis −2 °C", "10 bis 20 Prozent".
-    s = s.replace(new RegExp(`${CLOCK}\\s*[-–—]\\s*${CLOCK}(\\s*Uhr)?`, "gu"),
+    s = tr(s, new RegExp(`${CLOCK}\\s*[-–—]\\s*${CLOCK}(\\s*Uhr)?`, "gu"),
         (_m, h1: string, m1: string, h2: string, m2: string, uhr?: string) =>
             `${clockWords(h1, m1, "")} bis ${clockWords(h2, m2, uhr ?? " Uhr")}`);
-    s = s.replace(new RegExp(`${CLOCK}(\\s*Uhr)?`, "gu"),
+    s = tr(s, new RegExp(`${CLOCK}(\\s*Uhr)?`, "gu"),
         (_m, h: string, min: string, uhr?: string) => clockWords(h, min, uhr ?? " Uhr"));
 
     // 6) PERIOD-GROUPED THOUSANDS (56), before anything reads a bare number. The period is
@@ -320,7 +321,7 @@ export function normalizeBavarian(input: string): string {
     //    ⚠ AFTER the clock (a dot form would have been eaten) and BEFORE the tier, whose `NOT_VERSION` guard
     //    needs the dot of `8140.43P` to still be there — traps 39 and 46. `.43` is two digits, so this rule
     //    cannot touch it, which is the whole reason the group size is pinned at exactly three.
-    s = s.replace(/(?<=\p{Nd})(?<!(?<![\p{Nd}\.,])0)\.(?=\p{Nd}{3}(?!\p{Nd}))/gu, "");
+    s = tr(s, /(?<=\p{Nd})(?<!(?<![\p{Nd}\.,])0)\.(?=\p{Nd}{3}(?!\p{Nd}))/gu, "");
     // 6b) SPACE-GROUPED THOUSANDS (2: `549 000 €` and `43 000 €`, both in one municipality's finance
     //     paragraph). Small, but the reading is *fimfhundadneinafiazg **nul*** — the group read as a separate
     //     numeral. Same three-digit discipline as the dot form, which is what stops it claiming two numbers
@@ -328,7 +329,7 @@ export function normalizeBavarian(input: string): string {
     //     ⚠ THE WHOLE RUN AT ONCE, not one join per pass — see step 6. This arm keeps its HEAD ANCHOR
     //     (`(?<!\p{Nd})` + at most three leading digits), which is what stops `12345 678` merging, so it
     //     cannot use the zero-width form step 6 does and matches the run instead.
-    s = s.replace(/(?<!\p{Nd})([1-9]\p{Nd}{0,2})((?:[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<!\p{Nd})([1-9]\p{Nd}{0,2})((?:[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 7) DEGREES, before the unit rules so the scale letter is not left to the Latin fallback, and before
@@ -340,17 +341,17 @@ export function normalizeBavarian(input: string): string {
     //    not just the modifier (trap 37). ℃/℉ are folded first — one code point meaning what `°C` means.
     //    ⚠ The arc-minute and arc-second of a coordinate are LEFT UNREAD. `47°16′15″` has no sourced Bavarian
     //    word for ′/″ anywhere probed, and reading the degree while dropping the minute is the honest state.
-    s = s.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
-    s = s.replace(/(\p{Nd})\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 Grad Celsius");
-    s = s.replace(/(\p{Nd})\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 Grad Fahrenheit");
+    s = tr(s, /℃/gu, "°C").replace(/℉/gu, "°F");
+    s = tr(s, /(\p{Nd})\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 Grad Celsius");
+    s = tr(s, /(\p{Nd})\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 Grad Fahrenheit");
     //    ⚠ THE COMPOUND HYPHEN IS CONSUMED, and reading the output is what caught this too. `90°-Winkl` is a
     //    German-style compound ("a 90-degree angle"), and this engine's TOKEN admits `-` inside a word run, so
     //    emitting `90 Grad-Winkl` FUSED the two into one token: *ɡ̥rɑd̥ʋiŋɡ̥l*, where before the rule existed
     //    they were two clean words. Same cause as the clock range above, and the same class of hazard trap 14
     //    names — a rule that turns digits into WORDS changes what the tokenizer does with the punctuation next
     //    to them. 2 instances (`90°-Winkl`, `90°-Drehung`).
-    s = s.replace(/(\p{Nd})\s*°\s*[-–—](?=\p{L})/gu, "$1 Grad ");
-    s = s.replace(/(\p{Nd})\s*°/gu, "$1 Grad");
+    s = tr(s, /(\p{Nd})\s*°\s*[-–—](?=\p{L})/gu, "$1 Grad ");
+    s = tr(s, /(\p{Nd})\s*°/gu, "$1 Grad");
 
     // 8) THE SIGNS, AND ONLY IN THE DEGREE SLOT — the narrow arm, arrived at the way trap 24 says to arrive
     //    at one: by tabulating the counter-examples first. Of 32 sign+digit shapes in the Bavarian subset:
@@ -380,12 +381,12 @@ export function normalizeBavarian(input: string): string {
     const JOINER = "(?:bis|beziehungsweise|beziahungsweis)";
     const NUM = "\\p{Nd}[\\p{Nd},.]*";
     const DEGREE_AHEAD = `(?=\\s*${NUM}(?:\\s+${JOINER}\\s+[-−–+]?\\s*${NUM})?\\s+Grad)`;
-    s = s.replace(new RegExp(`(^|[\\s(])[-−–]${DEGREE_AHEAD}`, "gu"), "$1minus ");
-    s = s.replace(new RegExp(`(^|[\\s(])\\+${DEGREE_AHEAD}`, "gu"), "$1plus ");
+    s = tr(s, new RegExp(`(^|[\\s(])[-−–]${DEGREE_AHEAD}`, "gu"), "$1minus ");
+    s = tr(s, new RegExp(`(^|[\\s(])\\+${DEGREE_AHEAD}`, "gu"), "$1plus ");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1) and no `+` rule can ever match inside it; unread it is dropped in
     //    silence. Zero instances in this corpus — robustness for plausible input, not a measured repair, and
     //    both words come from the rules above rather than from anywhere new.
-    s = s.replace(/±/gu, " plus minus ");
+    s = tr(s, /±/gu, " plus minus ");
 
     // 9) FRACTIONS, NARROWLY. The Bavarian subset has **one** real fraction — `des hod 2/3 da
     //    Soizproduktion entsprochn` — against two shapes a German-style `\d{1,3}/\d{1,3}` rule would have
@@ -404,7 +405,7 @@ export function normalizeBavarian(input: string): string {
     //    (*ein* halb, never *eins* halb); it is only visible in a fraction because nothing else puts a bare 1
     //    in front of a noun.
     const DENOM: Readonly<Record<number, string>> = { 2: "hoib", 3: "Driddl", 4: "Viadl" };
-    s = s.replace(/(?<!\p{Nd})(\p{Nd}{1,2})\/(\p{Nd})(?!\p{Nd})/gu, (m0, a: string, b: string) => {
+    s = tr(s, /(?<!\p{Nd})(\p{Nd}{1,2})\/(\p{Nd})(?!\p{Nd})/gu, (m0, a: string, b: string) => {
         const noun = DENOM[Number(b)];
         if (noun === undefined) return m0;
         return `${Number(a) === 1 ? "a" : numberToWords(Number(a))} ${noun}`;
@@ -427,7 +428,7 @@ export function normalizeBavarian(input: string): string {
     //     sit in a corpus whose largest hyphen population is German-language ISBNs.
     //     ⚠ Runs AFTER the ordinal rule, so `10.–23.` (an ordinal range) has already been seen and declined by
     //     both — the dot after the first operand stops this pattern too.
-    s = s.replace(/(?<![-–—\p{Nd}])(\p{Nd}{1,4})\s?[-–—]\s?(\p{Nd}{1,4})(?![-–—\p{Nd}])/gu,
+    s = tr(s, /(?<![-–—\p{Nd}])(\p{Nd}{1,4})\s?[-–—]\s?(\p{Nd}{1,4})(?![-–—\p{Nd}])/gu,
         (m0, a: string, b: string) => (Number(b) > Number(a) ? `${a} bis ${b}` : m0));
 
     // 10) THE SHARED SYMBOL TIER, LAST — percent, currency, units, the exponent and the rate. It matches on

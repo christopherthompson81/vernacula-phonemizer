@@ -27,6 +27,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { MANIFEST as FR_MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { ordinal } from "./ordinals.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Space characters used as digit-group separators in French typography: regular, NBSP, narrow NBSP,
  *  thin space. The FLEURS transcripts use NBSP (`5 000`, `9 h 30`, `n° 11`). */
@@ -124,14 +125,14 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //    number class does not span a space, so "5 000 ans" read as "cinq zéro ans" — two numbers, and
     //    the thousand lost. Degroup to one digit run, but ONLY for exact 3-digit blocks, or "30 9" would
     //    fuse two unrelated numbers.
-    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), ""); // millions: 1 234 567
+    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), ""); // millions: 1 234 567
     //    Remaining non-breaking spaces become ordinary ones so every later pattern can use \s.
-    s = s.replace(/[\u00a0\u202f\u2009]/gu, " ");
+    s = tr(s, /[\u00a0\u202f\u2009]/gu, " ");
 
     // 1) ERA MARKERS, before the generic `av.` → avenue: every "av." in the corpus is this.
-    s = s.replace(/\bav(?:ant)?\.?\s*j\.?\s*-?\s*c\.?/giu, "avant Jésus-Christ");
-    s = s.replace(/\bapr(?:ès)?\.?\s*j\.?\s*-?\s*c\.?/giu, "après Jésus-Christ");
+    s = tr(s, /\bav(?:ant)?\.?\s*j\.?\s*-?\s*c\.?/giu, "avant Jésus-Christ");
+    s = tr(s, /\bapr(?:ès)?\.?\s*j\.?\s*-?\s*c\.?/giu, "après Jésus-Christ");
 
     // 1b) THE DEGREE SIGN, SPACED. French typography puts a space before `°C`, and the corpus writes
     //     `une chaleur de 32 ° C` — with blanks on BOTH sides of the sign. The tier reads the degree through
@@ -139,22 +140,22 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //     the whole `° C` was DROPPED: the sentence read "trente-deux" with no unit at all. Closed up here
     //     rather than by loosening the tier's key, because a key is a spelling and this is whitespace.
     //     Only between a DIGIT and the scale letter, so an ordinary `°` (bearings, `n°`) is untouched.
-    s = s.replace(/(\d)\s*°\s*(?=[CF](?![\p{L}\p{M}]))/gui, "$1°");
+    s = tr(s, /(\d)\s*°\s*(?=[CF](?![\p{L}\p{M}]))/gui, "$1°");
 
     // 2) NUMÉRO: n° / nº before a number.
-    s = s.replace(/\bn[°º]\s*(?=\d)/giu, "numéro ");
+    s = tr(s, /\bn[°º]\s*(?=\d)/giu, "numéro ");
 
     // 3) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues (a following word), so it
     //    cannot become a phrase break — the defect behind the reported English "St. James" pause. At a
     //    phrase end the dot stays, because there it really is the sentence end.
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (_m, ab: string, sp: string) => {
             const key = ab.toLowerCase();
             if (DOT_ONLY.has(key)) return `${ab}${sp}`;
             const w0 = DOTTED_ABBREV[key];   // ⚠ reachable miss (#1122)
             return w0 === undefined ? _m : `${w0}${sp}`;
         });
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             if (DOT_ONLY.has(ab.toLowerCase())) return m0;
             const w0 = DOTTED_ABBREV[ab.toLowerCase()];
@@ -162,12 +163,12 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
         });
 
     // 3b) UNDOTTED abbreviations, which is how French normally writes them (le Dr Martin).
-    s = s.replace(/\b(dr|pr)\b\.?(?=\s+\p{L})/giu,
+    s = tr(s, /\b(dr|pr)\b\.?(?=\s+\p{L})/giu,
         (m0, ab: string) => UNDOTTED_ABBREV[ab.toLowerCase()] ?? m0);
 
     // 4) NAME INITIALS: a single letter + dot before a word is an initial, read as the LETTER NAME
     //    ("n. wayne hale" → "enne wayne hale"). Runs after step 3 so the honorifics (m., p.) win.
-    s = s.replace(/\b([a-zà-ÿ])\.(\s+)(?=[\p{L}])/giu,
+    s = tr(s, /\b([a-zà-ÿ])\.(\s+)(?=[\p{L}])/giu,
         (m0, ltr: string, sp: string) => {
             const name = FR_MANIFEST.letterNames[ltr.toLowerCase()];
             return name === undefined ? m0 : `${name}${sp}`;
@@ -176,12 +177,12 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     // 4b) MONEY with centimes: "deux euros cinquante", not "deux virgule cinquante euro" — a decimal
     //     reading of a price is wrong in a way listeners notice. Runs before SYMBOLS, which owns the
     //     plain currency case. The symbol normally follows the amount in French; both orders are matched.
-    s = s.replace(/(\d+),(\d{2})\s?([€$£¥])/gu, (_m, int: string, cents: string, sym: string) => {
+    s = tr(s, /(\d+),(\d{2})\s?([€$£¥])/gu, (_m, int: string, cents: string, sym: string) => {
         const [sg, pl] = CURRENCY_WORDS[sym]!;
         const unit = int === "1" ? sg : pl;
         return cents === "00" ? `${int} ${unit}` : `${int} ${unit} ${Number(cents)}`;
     });
-    s = s.replace(/([€$£¥])\s?(\d+),(\d{2})/gu, (_m, sym: string, int: string, cents: string) => {
+    s = tr(s, /([€$£¥])\s?(\d+),(\d{2})/gu, (_m, sym: string, int: string, cents: string) => {
         const [sg, pl] = CURRENCY_WORDS[sym]!;
         const unit = int === "1" ? sg : pl;
         return cents === "00" ? `${int} ${unit}` : `${int} ${unit} ${Number(cents)}`;
@@ -196,13 +197,13 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " plus moins ");
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
+    s = tr(s, /±/gu, " plus moins ");
+    s = tr(s, /(\S)\+\s?(\d)/gu, "$1 plus $2");
+    s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
     // 5) NEGATIVES: a minus sign before a number is spoken. Requires a boundary before it so a hyphenated
     //    range or a score ("2-1", "1918-1939") is not turned into a subtraction.
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1moins $2");
+    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1moins $2");
 
     // 5b) RELATIONAL AND DIVISION SIGNS. ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN — the notation is
     //     absent from fr_fr (every `<` in the fleet is an HTML tag) while the vocabulary is ordinary prose.
@@ -237,20 +238,20 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //     bare form those languages use has no French equivalent to drop to. `lb` (`ass gläich`) and `nb`
     //     (`er lik`) already ship the copular form, so the fleet has both shapes and this picks the one the
     //     language admits. `divisé par` is a participle and needs no verb ("3 564 divisé par 17").
-    s = s.replace(/\s?=\s?/gu, " est égal à ");
-    s = s.replace(/\s?<\s?/gu, " est inférieur à ");
-    s = s.replace(/\s?>\s?/gu, " est supérieur à ");
-    s = s.replace(/\s?÷\s?/gu, " divisé par ");
+    s = tr(s, /\s?=\s?/gu, " est égal à ");
+    s = tr(s, /\s?<\s?/gu, " est inférieur à ");
+    s = tr(s, /\s?>\s?/gu, " est supérieur à ");
+    s = tr(s, /\s?÷\s?/gu, " divisé par ");
 
     // 6) FRACTIONS. Guarded against a date (14/07/1789) and against a unit ratio (km/h) by requiring
     //    digits on both sides and nothing numeric after.
-    s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*\/?\d)/gu, (m0, a: string, b: string) =>
+    s = tr(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*\/?\d)/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
 
     // 7) TIMES. The `h` form is the French standard (11 h 20, 20h30) and is what the corpus uses; the
     //    colon form also occurs. Both were losing the hour marker completely — "11 h 20" read as "onze
     //    vingt", and "4:41" turned the colon into a pause mark.
-    s = s.replace(/\b([01]?\d|2[0-3])\s*[hH]\s*([0-5]\d)?(?![\p{L}\p{M}\d])/gu,
+    s = tr(s, /\b([01]?\d|2[0-3])\s*[hH]\s*([0-5]\d)?(?![\p{L}\p{M}\d])/gu,
         (_m, h: string, min?: string) => timeWords(Number(h), min === undefined ? undefined : Number(min)));
     //    ⚠ A FRACTIONAL PART MEANS IT IS NOT A TIME OF DAY, and the guard must reject it. `4:41.20` is a
     //    race time — minutes, seconds, hundredths — and without this the clock rule claimed it and asserted
@@ -260,18 +261,18 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //    a proper duration reading needs its own per-language sourcing, and inventing one would score well
     //    while staying wrong — see the trap documented in tools/corpus/numeral_register.mts. German uses
     //    the same `(?!\.?\d)` shape; a clock at the end of a sentence (`à 4:41.`) still matches.
-    s = s.replace(/\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!\.\d)/gu,
+    s = tr(s, /\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!\.\d)/gu,
         (_m, h: string, min: string) => timeWords(Number(h), Number(min)));
 
     // 8) DATES. A numeric date is day-first in French. Then a bare day 1 before a month name becomes the
     //    ordinal (1 janvier → premier janvier); every other day is a plain cardinal and already correct.
-    s = s.replace(new RegExp(`\\b(\\d{1,2})[/.](\\d{1,2})[/.](\\d{4})\\b`, "gu"),
+    s = tr(s, new RegExp(`\\b(\\d{1,2})[/.](\\d{1,2})[/.](\\d{4})\\b`, "gu"),
         (m0, d: string, mo: string, y: string) => {
             const month = MONTHS.split("|")[Number(mo) - 1];
             if (month === undefined || Number(d) < 1 || Number(d) > 31) return m0;
             return `${Number(d) === 1 ? ordinal(1) : d} ${month} ${y}`;
         });
-    s = s.replace(new RegExp(`\\b1\\s+(${MONTHS})\\b`, "giu"), (_m, mon: string) => `${ordinal(1)} ${mon}`);
+    s = tr(s, new RegExp(`\\b1\\s+(${MONTHS})\\b`, "giu"), (_m, mon: string) => `${ordinal(1)} ${mon}`);
 
     return s;
 }

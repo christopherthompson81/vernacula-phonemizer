@@ -48,6 +48,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { mkOrdinal, numberToText } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 const MANIFEST = loadManifest<{ acronymLetters: string[] }>(import.meta.url, "macedonian.jsonc");
 
@@ -151,39 +152,39 @@ export function normalizeMacedonian(input: string): string {
     //    comma stays: it is BOTH the decimal separator (6,5) and a thousands separator in the
     //    English-influenced spots (1,400) — the TOKEN distinguishes them by the block length, like Czech.
     for (let i = 0; i < 2; i++)
-        s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)\\.(?=\\d{3}(?!\\d))`, "gu"), "");
+        s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)\\.(?=\\d{3}(?!\\d))`, "gu"), "");
     for (let i = 0; i < 2; i++)
-        s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+        s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
 
     // 1) ERA MARKERS (multi-dot) BEFORE the single-dot year rule, so the interior dots never reach
     //    clausePunctuation as breaks: `356 г. п.н.е.` → "356 година пред нашата ера".
-    s = s.replace(/пр\.\s*н\.\s*е\./giu, "пред нашата ера");
-    s = s.replace(/п\.\s*н\.\s*е\./giu, "пред нашата ера");
-    s = s.replace(/(?<![\p{L}\p{M}])н\.\s*е\./giu, "од нашата ера");
+    s = tr(s, /пр\.\s*н\.\s*е\./giu, "пред нашата ера");
+    s = tr(s, /п\.\s*н\.\s*е\./giu, "пред нашата ера");
+    s = tr(s, /(?<![\p{L}\p{M}])н\.\s*е\./giu, "од нашата ера");
 
     // 2) YEAR ABBREVIATION `N г.` / `N год.` → "N година" (a specific year) or "N години" (a count/age —
     //    the corpus's one small instance "25 г., и Заха" is an age). The dot is consumed; where it was
     //    also the sentence period, put it back.
-    s = s.replace(/(\d+)\s*год\./gu, (m0, n: string) => `${n} ${Number(n) >= 100 ? "година" : "години"}`);
-    s = s.replace(/(\d+)\s*г\./gu, (m0, n: string) => `${n} ${Number(n) >= 100 ? "година" : "години"}`);
+    s = tr(s, /(\d+)\s*год\./gu, (m0, n: string) => `${n} ${Number(n) >= 100 ? "година" : "години"}`);
+    s = tr(s, /(\d+)\s*г\./gu, (m0, n: string) => `${n} ${Number(n) >= 100 ? "година" : "години"}`);
 
     // 3) SINGLE-DOT / HYPHEN ABBREVIATIONS. "итн." (etc.), "т.е." (that is), "Г-дин" (Mr.), "Д-р" (Dr.).
     //    Hyphenated, so they do not collide with the year rule's `N г.`.
-    s = s.replace(/(?<![\p{L}\p{M}])итн\.(?=\s|$|[,.;:!?»"')])/giu, "и така натаму");
-    s = s.replace(/(?<![\p{L}\p{M}])т\.е\./giu, "то ест");
-    s = s.replace(/[Гг]-дин(?![\p{L}\p{M}])/gu, "господин");
-    s = s.replace(/[Дд]-р(?![\p{L}\p{M}])/gu, "доктор");
+    s = tr(s, /(?<![\p{L}\p{M}])итн\.(?=\s|$|[,.;:!?»"')])/giu, "и така натаму");
+    s = tr(s, /(?<![\p{L}\p{M}])т\.е\./giu, "то ест");
+    s = tr(s, /[Гг]-дин(?![\p{L}\p{M}])/gu, "господин");
+    s = tr(s, /[Дд]-р(?![\p{L}\p{M}])/gu, "доктор");
 
     // 4) VERSION / FIGURE DOTS between digits — `802.11n` (×4), `Слика 1.1`, `14.7 милијарди`,
     //    `12.00 GMT` — were breaking the sentence at the interior dot. A period followed by a SPACE or a
     //    non-digit is not this (the date/century rules own those). Read as "точка" (point).
-    s = s.replace(/(\d)\.(\d+)(?!\d)/gu, "$1 точка $2");
+    s = tr(s, /(\d)\.(\d+)(?!\d)/gu, "$1 точка $2");
 
     // 5) NUMERIC RANGES, BEFORE the clock — `10-60`, `6-6`, `5-3`, `1894-1895`, `1995-96`, `35-40`,
     //    `100-200`, and the clock range `22:00-23:00` → "22:00 до 23:00" so the times are claimed whole.
     //    Read "до". The LEFT side must be ≥2 digits (or both single) so an alphanumeric designation like
     //    `II-76` (→ "2-76" after the shared Roman pass) is not read as a range.
-    s = s.replace(/(\d+)\s*[-–—]\s*(\d+)(?!\d)/gu, (_m, a: string, b: string) => {
+    s = tr(s, /(\d+)\s*[-–—]\s*(\d+)(?!\d)/gu, (_m, a: string, b: string) => {
         if (a.length === 1 && b.length > 1) return _m; // "2-76" — a designation, not a range
         return `${a} до ${b}`;
     });
@@ -194,7 +195,7 @@ export function normalizeMacedonian(input: string): string {
     //    The trailing "часот"/"ч" (the hour) is kept/expanded — "ч" is the abbreviation for "часот". A
     //    comma after the minutes marks a sports time, not a clock. The range rule ran first, so
     //    `22:00-23:00` is already "22:00 до 23:00". `am`/`pm` after a time → "претпладне"/"попладне".
-    s = s.replace(
+    s = tr(s, 
         /([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)(\s*ч(?!\p{L})\.?)?/gu,
         (_m: string, h: string, min: string, ...rest: unknown[]) => {
             // The optional `ч` group participates only for "23:35 ч"; otherwise the args shift so the
@@ -207,13 +208,13 @@ export function normalizeMacedonian(input: string): string {
     );
     // 6b) `am`/`pm` after a time → претпладне/попладне. Standalone words (the clock already consumed the
     //     digits), matched on word boundaries so "Сами" is untouched.
-    s = s.replace(/\bam\b/giu, "претпладне");
-    s = s.replace(/\bpm\b/giu, "попладне");
+    s = tr(s, /\bam\b/giu, "претпладне");
+    s = tr(s, /\bpm\b/giu, "попладне");
 
     // 7) THE ORDINAL SUFFIX, the largest class in this file. `(\d+)[- ]?` + the written suffix (the last letters of the
     //    spoken ordinal). The `-те` suffix is ambiguous between a count ("the N") and a decade: a 4-digit
     //    number followed by "години" is a decade, otherwise it is "the N".
-    s = s.replace(
+    s = tr(s, 
         new RegExp(
             `(?<![\\p{L}\\p{M}\\d])(\\d+)\\s*-?\\s*(тите|тиот|миот|виот|риот|тина|ите|от|ти|ви|ми|ри|та|ма|те)(?!\\p{L})`,
             "gu",
@@ -245,15 +246,15 @@ export function normalizeMacedonian(input: string): string {
     // 8) CENTURY — `N век` → ordinal + век (10 век → десетти век), including the compound list
     //    `10 и 11 век`. Also the one Germanic remnant `8. век` (with a dot). The suffix forms (17-ти век,
     //    18-тиот век) are already claimed by step 7.
-    s = s.replace(/(\d+)\s+и\s+(\d+)\s*век(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) => {
+    s = tr(s, /(\d+)\s+и\s+(\d+)\s*век(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) => {
         const oa = mkOrdinal(Number(a)), ob = mkOrdinal(Number(b));
         return oa !== undefined && ob !== undefined ? `${oa} и ${ob} век` : _m;
     });
-    s = s.replace(/(\d+)\s*век(?![\p{L}\p{M}])/gu, (m0, n: string) => {
+    s = tr(s, /(\d+)\s*век(?![\p{L}\p{M}])/gu, (m0, n: string) => {
         const o = mkOrdinal(Number(n));
         return o === undefined ? m0 : `${o} век`;
     });
-    s = s.replace(/(\d+)\.\s*век(?![\p{L}\p{M}])/gu, (m0, n: string) => {
+    s = tr(s, /(\d+)\.\s*век(?![\p{L}\p{M}])/gu, (m0, n: string) => {
         const o = mkOrdinal(Number(n));
         return o === undefined ? m0 : `${o} век`;
     });
@@ -261,7 +262,7 @@ export function normalizeMacedonian(input: string): string {
     // 9) DATES — `N <month>` → ordinal + month (на 6 октомври → на шести октомври), including a date range
     //    `24 август - 5 септември` and the Germanic-dot form `4. јули 1776`. The day must be 1–31.
     const monthAlt = [...MONTHS].join("|");
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`(\\d{1,2})\\s+(${monthAlt})\\s*[-–—]\\s*(\\d{1,2})\\s+(${monthAlt})(?![\\p{L}\\p{M}])`, "giu"),
         (_m: string, a: string, ma: string, b: string, mb: string) => {
             const oa = mkOrdinal(Number(a)), ob = mkOrdinal(Number(b));
@@ -269,7 +270,7 @@ export function normalizeMacedonian(input: string): string {
             return `${oa} ${ma} до ${ob} ${mb}`;
         },
     );
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`(\\d{1,2})(?:\\.)?\\s+(${monthAlt})(?![\\p{L}\\p{M}])`, "giu"),
         (_m: string, d: string, month: string) => {
             const dv = Number(d);
@@ -289,7 +290,7 @@ export function normalizeMacedonian(input: string): string {
     //     roman, and "Формула 1" is Formula ONE, a cardinal), must be followed by PUNCTUATION or end
     //     (all three regnal instances are "III."/"II."/"XVI,"; "Цели 20 проценти" and "Имаше 2 гола" are
     //     counts), and must not open a comma-grouped thousands run ("Од 1,400 луѓе").
-    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=\.?[.,;:!?]|$)/gu, (_m: string, name: string, d: string) => {  // space, NBSP
+    s = tr(s, /(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=\.?[.,;:!?]|$)/gu, (_m: string, name: string, d: string) => {  // space, NBSP
         const n = Number(d);
         const o = mkOrdinal(n);
         if (o === undefined || n < 2 || n > 39) return _m;
@@ -300,51 +301,51 @@ export function normalizeMacedonian(input: string): string {
     //     abbreviation), the Latin `mph`/`kph`, `Mbit/s` (megabits per second). The Cyrillic squared units
     //     `мм2`/`км2` are also local: the tier's exponent lookbehind `(?<=[a-zA-Z])` is ASCII-only and the
     //     corpus writes `3136 мм2`.
-    s = s.replace(/(\d+)\s*милји\s*\/\s*час(?![\p{L}\p{M}])/giu, "$1 милји на час");
-    s = s.replace(/(\d+)\s*mph(?![\p{L}\p{M}])/giu, "$1 милји на час");
-    s = s.replace(/(\d+)\s*kph(?![\p{L}\p{M}])/giu, "$1 километри на час");
-    s = s.replace(/(\d+)\s*Mbit\/s(?![\p{L}\p{M}])/giu, "$1 мегабити на секунда");
-    s = s.replace(/(\d+)\s*мм\s*[²2](?!\d)/gu, "$1 квадратни милиметри");
-    s = s.replace(/(\d+)\s*км\s*[²2](?!\d)/gu, "$1 квадратни километри");
+    s = tr(s, /(\d+)\s*милји\s*\/\s*час(?![\p{L}\p{M}])/giu, "$1 милји на час");
+    s = tr(s, /(\d+)\s*mph(?![\p{L}\p{M}])/giu, "$1 милји на час");
+    s = tr(s, /(\d+)\s*kph(?![\p{L}\p{M}])/giu, "$1 километри на час");
+    s = tr(s, /(\d+)\s*Mbit\/s(?![\p{L}\p{M}])/giu, "$1 мегабити на секунда");
+    s = tr(s, /(\d+)\s*мм\s*[²2](?!\d)/gu, "$1 квадратни милиметри");
+    s = tr(s, /(\d+)\s*км\s*[²2](?!\d)/gu, "$1 квадратни километри");
 
     // 12) DEGREES — `90°F`, `35° W`, and a bare `N°`. The corpus's own spelled-out form is
     //     "30 степени целзиусови", so °C/°F use the "по" construction; `° W`/`° E` are coordinates.
-    s = s.replace(/(\d+)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 степени по Целзиус");
-    s = s.replace(/(\d+)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 степени по Фаренхајт");
-    s = s.replace(/(\d+)\s*°\s*W(?![\p{L}\p{M}])/gu, "$1 степени запад");
-    s = s.replace(/(\d+)\s*°\s*E(?![\p{L}\p{M}])/gu, "$1 степени исток");
-    s = s.replace(/(\d+)\s*°/gu, "$1 степени");
+    s = tr(s, /(\d+)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 степени по Целзиус");
+    s = tr(s, /(\d+)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 степени по Фаренхајт");
+    s = tr(s, /(\d+)\s*°\s*W(?![\p{L}\p{M}])/gu, "$1 степени запад");
+    s = tr(s, /(\d+)\s*°\s*E(?![\p{L}\p{M}])/gu, "$1 степени исток");
+    s = tr(s, /(\d+)\s*°/gu, "$1 степени");
 
     // 13) SIGNS. `+30` (the corpus's "над +30 степени") reads "плус". Minus, ×, ÷, =, <, > and the
     //     ampersand are the handoff's sign classes — none occurs in the corpus but a dropped sign is
     //     inaudible, so each is read.
-    s = s.replace(/(^|[\s(])[-−]\s?(?=\d)/gu, "$1минус ");
+    s = tr(s, /(^|[\s(])[-−]\s?(?=\d)/gu, "$1минус ");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " плус минус ");
-    s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1плус ");
-    s = s.replace(/(\d)\s*×\s*(?=\d)/gu, "$1 пати ");
-    s = s.replace(/\s*÷\s*/gu, " поделено со ");
-    s = s.replace(/\s*=\s*/gu, " еднакво на ");
-    s = s.replace(/\s*<\s*/gu, " помало од ");
-    s = s.replace(/\s*>\s*/gu, " поголемо од ");
-    s = s.replace(/\s*[&＆]\s*/gu, " и ");
+    s = tr(s, /±/gu, " плус минус ");
+    s = tr(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1плус ");
+    s = tr(s, /(\d)\s*×\s*(?=\d)/gu, "$1 пати ");
+    s = tr(s, /\s*÷\s*/gu, " поделено со ");
+    s = tr(s, /\s*=\s*/gu, " еднакво на ");
+    s = tr(s, /\s*<\s*/gu, " помало од ");
+    s = tr(s, /\s*>\s*/gu, " поголемо од ");
+    s = tr(s, /\s*[&＆]\s*/gu, " и ");
 
     // 14) pH → "пе ха" (letter names) and `Ghz` → "гигахерци" — the corpus's lowercase-tech tokens that
     //     would otherwise read as consonant clusters or Latin foreign.
-    s = s.replace(/(?<![\p{L}\p{M}])pH(?![\p{L}\p{M}])/gu, "пе ха");
-    s = s.replace(/(?<![\p{L}\p{M}])Ghz(?![\p{L}\p{M}])/giu, "гигахерци");
+    s = tr(s, /(?<![\p{L}\p{M}])pH(?![\p{L}\p{M}])/gu, "пе ха");
+    s = tr(s, /(?<![\p{L}\p{M}])Ghz(?![\p{L}\p{M}])/giu, "гигахерци");
 
     // 14b) FRACTIONS — the corpus's "29¾ инчи на 24½ инчи" and "5 мм (1/5 инчи)". ¾/½ after a whole read
     //     "и три четвртини" / "и половина"; a unit fraction reads "една петтина"-shaped (numeral-ordinand
     //     stem + -тина). The vulgar-fraction glyphs are not in any clause-punctuation map, so they were
     //     being dropped outright.
-    s = s.replace(/(\d+)¾/gu, "$1 и три четвртини");
-    s = s.replace(/(\d+)½/gu, "$1 и половина");
-    s = s.replace(/(\d+)¼/gu, "$1 и четвртина");
-    s = s.replace(/(?<![\d.,])(\d{1,2})\/(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => {
+    s = tr(s, /(\d+)¾/gu, "$1 и три четвртини");
+    s = tr(s, /(\d+)½/gu, "$1 и половина");
+    s = tr(s, /(\d+)¼/gu, "$1 и четвртина");
+    s = tr(s, /(?<![\d.,])(\d{1,2})\/(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => {
         const denom = Number(b);
         const suffix = denom === 2 ? "половина" : denom === 3 ? "третина" : denom === 4 ? "четвртина"
             : denom === 5 ? "петтина" : denom === 6 ? "шестина" : undefined;
@@ -356,8 +357,8 @@ export function normalizeMacedonian(input: string): string {
     //     sits between capitalized words; this one follows a comma in "НАСА, Н. Вејн"). And a lone Latin
     //     capital standing as a LETTER between words — `буквата V` (the letter vee) reads "ве" not the
     //     English [viː]; `H во pH` (after pH → "пе ха") reads "ха".
-    s = s.replace(/(?<=,\s)([А-ШЃЅЈЉЊЌЏ])\.(?=\s+[А-Ш]\p{Ll})/gu, (_m, l: string) => LETTER_NAME[l.toLowerCase()] ?? l);
-    s = s.replace(/(?<![\p{L}\p{M}])([A-Z])(?![\p{L}\p{M}])/gu, (_m, l: string) => LETTER_NAME[l.toLowerCase()] ?? l);
+    s = tr(s, /(?<=,\s)([А-ШЃЅЈЉЊЌЏ])\.(?=\s+[А-Ш]\p{Ll})/gu, (_m, l: string) => LETTER_NAME[l.toLowerCase()] ?? l);
+    s = tr(s, /(?<![\p{L}\p{M}])([A-Z])(?![\p{L}\p{M}])/gu, (_m, l: string) => LETTER_NAME[l.toLowerCase()] ?? l);
 
     return s;
 }

@@ -180,6 +180,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, readDecimals, readDegrees, reorderFraction } from "../../core/sinitic.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * ⚠ NO `unspacedScript` — see the header. This is the ONE Sinitic layer that must leave the tier's
@@ -258,7 +259,7 @@ export function normalizeMinDong(input: string): string {
     // ⚠ THE WORDS ARE THE CORPUS'S AND THE WIKI'S, and the wiki corrects the corpus — see the header:
     // ⟨hŭng⟩ 分 for `′`, ⟨miēu⟩ 秒 for `″`, from `25 dô 16 hŭng gáu 25 dô 44 hŭng`.
     // Covers every coordinate the corpus writes: `118°08'`, `25° 47′`, `22° 11′ 47″`, `26°23'`, `119°7'`.
-    s = s.replace(
+    s = tr(s, 
         /(\d+)\s*°\s*(\d+)\s*['′](?:\s*(\d+(?:\.\d+)?)\s*["″])?/gu,
         (_m, d: string, min: string, sec: string | undefined) =>
             `${d} dô ${min} hŭng${sec === undefined ? "" : ` ${sec} miēu`}`,
@@ -281,7 +282,7 @@ export function normalizeMinDong(input: string): string {
     // `(3%-4%)`, `(1%-2%)`) and the rule is one line — trap 17, count it before deferring.
     // ⚠ IT EMITS THE PERCENT WORD ONCE, IN FRONT, which is the Sinitic order (百分之94到98) and is what the
     // tier could never produce from two separate signs.
-    s = s.replace(
+    s = tr(s, 
         /(?<![\d.,:/-])(\d+(?:\.\d+)?)\s*%?\s*[-–—~～〜]\s*(\d+(?:\.\d+)?)\s*%/gu,
         (_m, a: string, b: string) => `báh-hŭng-cĭ ${a} gáu ${b}`,
     );
@@ -351,7 +352,7 @@ export function normalizeMinDong(input: string): string {
     // every one of them, and step 7 has already spent every decimal point. What remains beside a digit at
     // this step is punctuation. The LEFT guard keeps both, because a match must still not BEGIN inside a
     // number, and `:` / `/` / the dash chain — the Bible-verse, DOI and ISBN rejections above — are untouched.
-    s = s.replace(
+    s = tr(s, 
         /(?<![\d.,:/\-–—])(\d+)\s*[-–—~～〜]\s*(\d+)(?![\d:/\-–—])/gu,
         (m, a: string, b: string, off: number, full: string) =>
             /(?:^|[^\p{L}\p{M}])[A-Z]{2,}[\s.]*$/u.test(full.slice(Math.max(0, off - 12), off)) ? m : `${a} gáu ${b}`,

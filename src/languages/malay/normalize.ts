@@ -1,4 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
+import { tr } from "../../core/provenance.ts";
 /**
  * Standard Malay (zsm) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -98,18 +99,18 @@ export function normalizeMalay(input: string): string {
     // 1) AMPERSAND, including the HTML entity the corpus actually writes (`Seni &amp; Sains`, `Qatar
     //    Airways &amp; Turkish Airlines`, `B&B`). The sign was DROPPED outright — the leak classes are blind
     //    to a symbol that vanishes, so this is a silent content loss. Malay `dan` ×874.
-    s = s.replace(/\s*(?:&amp;|&(?!\w+;))\s*/gu, " dan ");
+    s = tr(s, /\s*(?:&amp;|&(?!\w+;))\s*/gu, " dan ");
 
     // 2) COMMA THOUSANDS — first, before any other rule can read the grouping comma as clause punctuation
     //    or (worse) as Indonesian's decimal comma. The leading `(?<!\d)` anchor matters: without it
     //    `1990,300` would match at `990,300`. Exactly three digits per group, so a decimal comma cannot be
     //    caught by accident (this corpus writes none, but Indonesian's convention leaks in translation).
-    s = s.replace(/(?<!\d)([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replace(/,/gu, ""));
+    s = tr(s, /(?<!\d)([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replace(/,/gu, ""));
 
     // 3) `US$30` — the shared symbol tier is keyed on a sign at a token boundary, so a `$` glued behind
     //    letters was swallowed and the amount lost its currency word entirely (`uɛs tiga puluh`). One space
     //    is the whole fix; `US` is written, so it stays written (a REDUNDANT symbol is a permissible drop: say each thing once).
-    s = s.replace(new RegExp(`(${NOT_LETTER_BEFORE}(?:US|AS|HK|NZ|CAD?))\\$(?=\\d)`, "gu"), "$1 $");
+    s = tr(s, new RegExp(`(${NOT_LETTER_BEFORE}(?:US|AS|HK|NZ|CAD?))\\$(?=\\d)`, "gu"), "$1 $");
     //    …and A MAGNITUDE WORD AFTER THE AMOUNT has to be got out from between the number and its currency.
     //    The tier keys the currency word on the sign's ADJACENCY TO THE DIGITS, so it lands inside the
     //    quantity: `$2.3 bilion` read *dua perpuluhan tiga DOLAR bilion* and `$45 juta` *empat puluh lima
@@ -126,13 +127,13 @@ export function normalizeMalay(input: string): string {
     const MAGNITUDE = "ribu|juta|bilion|billion|trilion";
     const CURRENCY_WORD: Readonly<Record<string, string>> = { $: "dolar", "€": "euro", "£": "pound", "¥": "yen" };
     const AMOUNT = `\\d[\\d.]*(?:\\s+(?:${MAGNITUDE}))?`;
-    s = s.replace(new RegExp(`[$€£¥]\\s?(?=${AMOUNT}\\s+(?:AUD|USD|MYR|SGD|EUR|GBP|JPY|NZD|CAD|HKD)${NOT_LETTER_AFTER})`, "gu"), "");
-    s = s.replace(new RegExp(`([$€£¥])\\s?(\\d[\\d.]*)(\\s+(?:${MAGNITUDE}))${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`[$€£¥]\\s?(?=${AMOUNT}\\s+(?:AUD|USD|MYR|SGD|EUR|GBP|JPY|NZD|CAD|HKD)${NOT_LETTER_AFTER})`, "gu"), "");
+    s = tr(s, new RegExp(`([$€£¥])\\s?(\\d[\\d.]*)(\\s+(?:${MAGNITUDE}))${NOT_LETTER_AFTER}`, "gu"),
         (_m, sign: string, amt: string, mag: string) => `${amt}${mag} ${CURRENCY_WORD[sign]!}`);
     //    A bare DECIMAL amount still has to move, for the same reason at a smaller scale: without it step 15
     //    splits the number and the tier only sees the integer part, so `$1.50` read *satu DOLAR perpuluhan
     //    lima nol*. An integer amount is left alone — the tier already reads `$1000` as *seribu dolar*.
-    s = s.replace(/([$€£¥])\s?(\d+\.\d+)/gu, "$2 $1");
+    s = tr(s, /([$€£¥])\s?(\d+\.\d+)/gu, "$2 $1");
 
     // 4) PERCENT. Malay says `peratus` (×15 in this corpus, spelled out after the number); Indonesian's tier
     //    says `persen`, which ms_my never writes (×0). Claimed here so the inherited tier never sees a `%`.
@@ -145,25 +146,25 @@ export function normalizeMalay(input: string): string {
     //    one, not to add more pre-emption here.
     //    Trap 12 first: where a sentence writes both the sign and the word, the sign is DELETED — leaving it
     //    for the inherited tier would say it twice, and in the wrong dialect (`lapan puluh persen peratus`).
-    s = s.replace(/(\d)\s?%(?=\s*peratus)/gu, "$1");
-    s = s.replace(/(\d)\s?%/gu, "$1 peratus");
+    s = tr(s, /(\d)\s?%(?=\s*peratus)/gu, "$1");
+    s = tr(s, /(\d)\s?%/gu, "$1 peratus");
 
     // 5) ERA MARKER, before the generic abbreviation step. `323 SM`, `5000 SM`:
     //    the letters were spelled `ɛsɛm`. The corpus spells the expansion itself ×3 (`abad ke-10 sebelum
     //    Masihi`), which is where the wording comes from. A preceding number is required, so an `SM` that
     //    is some other initialism cannot be claimed.
-    s = s.replace(new RegExp(`(\\d)(\\s*)SM${NOT_LETTER_AFTER}`, "gu"), "$1$2sebelum Masihi");
+    s = tr(s, new RegExp(`(\\d)(\\s*)SM${NOT_LETTER_AFTER}`, "gu"), "$1$2sebelum Masihi");
 
     // 6) DOTTED FORMS, multi-dot before single-dot so no interior dot survives as a phrase break.
     //    6a) `A.S.` ×8 (Amerika Syarikat) read as `ˈa . s .` — two spurious pauses mid-sentence. Collapsing
     //        the dots hands the letter run to the existing initialism path. Two branches, because at a
     //        clause end the last dot really is the sentence end and must stay a pause.
-    s = s.replace(/(?<![\p{L}\p{M}.])((?:[A-Z]\.){2,})(?=\s+\p{L})/gu, (_m, ab: string) => ab.replace(/\./gu, ""));
-    s = s.replace(/(?<![\p{L}\p{M}.])((?:[A-Z]\.){2,})(?=\s*(?:[,;:!?)]|$))/gu,
+    s = tr(s, /(?<![\p{L}\p{M}.])((?:[A-Z]\.){2,})(?=\s+\p{L})/gu, (_m, ab: string) => ab.replace(/\./gu, ""));
+    s = tr(s, /(?<![\p{L}\p{M}.])((?:[A-Z]\.){2,})(?=\s*(?:[,;:!?)]|$))/gu,
         (_m, ab: string) => `${ab.replace(/\./gu, "")}.`);
     //    6b) The three abbreviations whose MALAY wording differs from Indonesian's table. Same two-branch
     //        shape: the dot is consumed mid-sentence, kept at a clause end.
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -171,7 +172,7 @@ export function normalizeMalay(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -181,20 +182,20 @@ export function normalizeMalay(input: string): string {
         });
     //    6c) `No.` before a DIGIT (`angkasawan No. 11`) — a letter-lookahead rule cannot claim it, and the
     //        inherited layer has its own digit branch that would otherwise win with Indonesian's `nomor`.
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}no\\.\\s?(?=\\d)`, "giu"), "nombor ");
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}no\\.\\s?(?=\\d)`, "giu"), "nombor ");
 
     // 7) RATES, before the shared tier claims the bare `km` and before step 15 could read the slash unit's
     //    letters as a version suffix. `160km/j` read with Indonesian's `per jam`; `batu/jam` lost its slash.
-    s = s.replace(new RegExp(`(\\d)\\s?(${RATE_ALT})${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`(\\d)\\s?(${RATE_ALT})${NOT_LETTER_AFTER}`, "gu"),
         (_m, d: string, u: string) => `${d} ${RATE_WORD[u]!}`);
 
     // 8) EXPONENT. `3,850 km²` and `19,500km²` read as `ʔm` — the unit was not claimed (no adjacent digit
     //    after de-grouping in `juta km2`) and the `²` was dropped. Both the superscript and the ASCII form,
     //    because a rule matching only `²` leaves the ASCII form to be read as a NUMBER. The bare `m²` arm
     //    requires a preceding digit so `M2` cannot match.
-    s = s.replace(new RegExp(`(?<=\\d)km[²2]${NOT_LETTER_AFTER}`, "gu"), " kilometer persegi"); // glued: `19,500km²`
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}km[²2]${NOT_LETTER_AFTER}`, "gu"), "kilometer persegi");
-    s = s.replace(/(\d\s?)m²/gu, "$1meter persegi");
+    s = tr(s, new RegExp(`(?<=\\d)km[²2]${NOT_LETTER_AFTER}`, "gu"), " kilometer persegi"); // glued: `19,500km²`
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}km[²2]${NOT_LETTER_AFTER}`, "gu"), "kilometer persegi");
+    s = tr(s, /(\d\s?)m²/gu, "$1meter persegi");
     //     CUBED, and this is a REAL Malay/Indonesian divergence rather than a shared word — which is the whole
     //     reason this file exists. Malay says `padu`, Indonesian `kubik`, and in ms_my:
     //       meter padu ×2  "Luno membawa 120–160 meter padu bahan bakar di atas kapal"
@@ -215,22 +216,22 @@ export function normalizeMalay(input: string): string {
     };
     const cubeAlt = Object.keys(CUBED).sort((a, b) => b.length - a.length).join("|");
     const cube = (_m: string, u: string): string => ` ${CUBED[u.toLowerCase()]!} padu`;
-    s = s.replace(new RegExp(`(?<=\\d)\\s?(${cubeAlt})[³3]${NOT_LETTER_AFTER}`, "gu"), cube);
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(${cubeAlt})[³3]${NOT_LETTER_AFTER}`, "gu"), (m, u: string) => cube(m, u).trimStart());
-    s = s.replace(/(\d\s?)m³/gu, "$1meter padu");
+    s = tr(s, new RegExp(`(?<=\\d)\\s?(${cubeAlt})[³3]${NOT_LETTER_AFTER}`, "gu"), cube);
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(${cubeAlt})[³3]${NOT_LETTER_AFTER}`, "gu"), (m, u: string) => cube(m, u).trimStart());
+    s = tr(s, /(\d\s?)m³/gu, "$1meter padu");
 
     // 9) FREQUENCY, before the decimal rule: `2.4Ghz` is a decimal GLUED to its unit, and step 15's
     //    version-dot guard is exactly "a letter follows the fraction", so the unit has to be words first.
-    s = s.replace(new RegExp(`(\\d)\\s?(GHz|Ghz|gHz|ghz|MHz|Mhz|mhz|kHz|khz|Hz)${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`(\\d)\\s?(GHz|Ghz|gHz|ghz|MHz|Mhz|mhz|kHz|khz|Hz)${NOT_LETTER_AFTER}`, "gu"),
         (_m, d: string, u: string) => `${d} ${FREQ_WORD[u.toLowerCase()]!}`);
 
     // 10) DEGREES. Malay `darjah` (×3, incl. the angular `beberapa darjah di utara khatulistiwa`), not
     //     Indonesian's `derajat`. The compass arm fixes `35°W` → `dərˈad͡ʒatw`, a glued non-word.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 darjah Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 darjah Fahrenheit");
-    s = s.replace(/(\d)\s?°\s?([NSEWnsew])(?![\p{L}\p{M}])/gu,
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 darjah Celsius");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 darjah Fahrenheit");
+    s = tr(s, /(\d)\s?°\s?([NSEWnsew])(?![\p{L}\p{M}])/gu,
         (_m, d: string, c: string) => `${d} darjah ${COMPASS[c.toLowerCase()]!}`);
-    s = s.replace(/(\d)\s?°/gu, "$1 darjah");
+    s = tr(s, /(\d)\s?°/gu, "$1 darjah");
 
     // 11) CLOCK, before the decimal rule (a dot clock must not become a decimal, and `3.50 m` must not
     //     become a clock — both were happening) and before the range rule (an endpoint may be a clock).
@@ -258,12 +259,12 @@ export function normalizeMalay(input: string): string {
     //     the dot is gone and pass 2 claims the coordinated second clock. Bounded, and idempotent after.
     for (let pass = 0; pass < 4; pass++) {
         const before = s;
-        s = s.replace(
+        s = tr(s, 
             new RegExp(`(?<![\\d.:])${clockBody}\\s?(${MERIDIEM})(?![\\p{L}\\p{M}])(?!\\s*(?:pagi|petang|malam|tengah))`, "gu"),
             (_m, h: string, min: string, mark: string) => clock(h, min, mark));
-        s = s.replace(new RegExp(`${CLOCK_BEFORE}(?<![\\d.:])${clockBody}`, "gu"),
+        s = tr(s, new RegExp(`${CLOCK_BEFORE}(?<![\\d.:])${clockBody}`, "gu"),
             (_m, h: string, min: string) => clock(h, min));
-        s = s.replace(new RegExp(`(?<![\\d.:])${clockBody}${CLOCK_AFTER}`, "gu"),
+        s = tr(s, new RegExp(`(?<![\\d.:])${clockBody}${CLOCK_AFTER}`, "gu"),
             (_m, h: string, min: string) => clock(h, min));
         if (s === before) break;
     }
@@ -271,11 +272,11 @@ export function normalizeMalay(input: string): string {
     // 12) A BARE hour with a meridiem (`8 p.m.`) — zero corpus instances, but it is the adversarial
     //     neighbour of the clock above and read `p . m .` before. ⚠ Zero corpus instances is not evidence of correctness — it is
     //     absence of evidence, and the adversarial neighbour of a rule that DOES fire needs covering.
-    s = s.replace(new RegExp(`(?<![\\d.:])(\\d{1,2})\\s?(${MERIDIEM})(?![\\p{L}\\p{M}])(?!\\s*(?:pagi|petang|malam|tengah))`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d.:])(\\d{1,2})\\s?(${MERIDIEM})(?![\\p{L}\\p{M}])(?!\\s*(?:pagi|petang|malam|tengah))`, "gu"),
         (_m, h: string, mark: string) => `${h} ${meridiemWord(Number(h), mark)}`);
     //     …and `pg`, the corpus's abbreviation for `pagi`, which read as the bare letters `pɡ`. Only after a
     //     number in the same clause, so an unrelated `pg` cannot be claimed.
-    s = s.replace(new RegExp(`(?<=\\d[^.!?]{0,20})${NOT_LETTER_BEFORE}pg\\.?${NOT_LETTER_AFTER}`, "gu"), "pagi");
+    s = tr(s, new RegExp(`(?<=\\d[^.!?]{0,20})${NOT_LETTER_BEFORE}pg\\.?${NOT_LETTER_AFTER}`, "gu"), "pagi");
 
     // 13) A COLON PAIR THAT SURVIVED step 11 is not a clock: the corpus's three are a rugby score (21:20),
     //     an aspect ratio (3:2) and a UK degree class (2:2). They read with a spurious clause pause, and
@@ -290,8 +291,8 @@ export function normalizeMalay(input: string): string {
     //     One exception, on the COLON only (a colon is never a decimal point, so no `$1.00` can be caught):
     //     an unmarked `H:00` is a clock whatever else it might be, and juxtaposing its zero minutes said
     //     *dua puluh satu NOL*. The hour alone is the same reading the marked rule gives.
-    s = s.replace(/(?<![\d.:])([01]?\d|2[0-3]):00(?![\d.:])/gu, "$1");
-    s = s.replace(/(?<![\d.:])(\d{1,4}):(\d{1,4})(?!\d)/gu, "$1 $2");
+    s = tr(s, /(?<![\d.:])([01]?\d|2[0-3]):00(?![\d.:])/gu, "$1");
+    s = tr(s, /(?<![\d.:])(\d{1,4}):(\d{1,4})(?!\d)/gu, "$1 $2");
 
     // 13b) ARITHMETIC AND COMPARISON SIGNS, dropped silently by the shared tier (in Indonesian too). ⚠ Zero
     //      instances in this corpus, which is not evidence of correctness — and the corpus does
@@ -299,10 +300,10 @@ export function normalizeMalay(input: string): string {
     //      `negatif 56 kali 56 mm`, and writes `sama dengan` ×11, `kurang daripada` ×3, `lebih daripada`
     //      ×11. `<`/`>`/`×` are claimed ONLY between digits, because this corpus's text still carries HTML
     //      tags (`<i>`, `<sup>`) and a bare `<` rule would eat them.
-    s = s.replace(/(\d)\s*×\s*(?=\d)/gu, "$1 kali ");
-    s = s.replace(/(\d)\s*<\s*(?=\d)/gu, "$1 kurang daripada ");
-    s = s.replace(/(\d)\s*>\s*(?=\d)/gu, "$1 lebih daripada ");
-    s = s.replace(/(\S)\s*=\s*(?=\S)/gu, "$1 sama dengan ");
+    s = tr(s, /(\d)\s*×\s*(?=\d)/gu, "$1 kali ");
+    s = tr(s, /(\d)\s*<\s*(?=\d)/gu, "$1 kurang daripada ");
+    s = tr(s, /(\d)\s*>\s*(?=\d)/gu, "$1 lebih daripada ");
+    s = tr(s, /(\S)\s*=\s*(?=\S)/gu, "$1 sama dengan ");
 
     // 14) RANGES with `hingga` (×23 in this corpus, as the infix between two quantities). The hyphen was
     //     silently dropped, so `10-60 minit` read *sepuluh enam puluh minit*. Fires ONLY for a pair that a
@@ -310,10 +311,10 @@ export function normalizeMalay(input: string): string {
     //     four sports scores (5-3, 6-6, 7-2, 26 - 00), none of which has either. Operands are re-emitted
     //     verbatim and the class ends in a digit, so a following clause comma cannot be eaten.
     const num = "\\d+(?:\\.\\d+)?";
-    s = s.replace(new RegExp(`(?<![\\d.])(${num})\\s?[-–]\\s?(${num})(?=\\s*(?:${RANGE_NOUN})${NOT_LETTER_AFTER})`, "gu"), "$1 hingga $2");
+    s = tr(s, new RegExp(`(?<![\\d.])(${num})\\s?[-–]\\s?(${num})(?=\\s*(?:${RANGE_NOUN})${NOT_LETTER_AFTER})`, "gu"), "$1 hingga $2");
     //     The year arm's trailing guard is `(?!\d)` and NOT `(?![\d.,])`: `sejak 1995-1996, apabila` ends on
     //     a clause comma, and excluding it left the corpus's commonest year range unjoined.
-    s = s.replace(/(?<!\d)([12]\d{3})\s?[-–]\s?([12]\d{3})(?!\d)/gu, "$1 hingga $2");
+    s = tr(s, /(?<!\d)([12]\d{3})\s?[-–]\s?([12]\d{3})(?!\d)/gu, "$1 hingga $2");
 
     // 15) DECIMALS, LAST — every rule that consumes a glued unit has run, so a letter still stuck to the
     //     fraction now means a VERSION (`802.11a/b/g/n`), not a unit. Malay reads the point as
@@ -331,8 +332,8 @@ export function normalizeMalay(input: string): string {
     //     describes. `11-g` reads the bare letter, which is what the standard's name is.
     //     THE VERSION DOT IS `titik`, NOT `perpuluhan`: `802.11` is not a quantity, so the dot is the
     //     PUNCTUATION MARK rather than a decimal separator, and Malay names the two separately.
-    s = s.replace(/(?<![\d.])(\d+)\.(\d+)([a-z])(?![\p{L}\p{M}])/gu, "$1 titik $2-$3");
-    s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?![\d])/gu, (whole, int: string, frac: string) =>
+    s = tr(s, /(?<![\d.])(\d+)\.(\d+)([a-z])(?![\p{L}\p{M}])/gu, "$1 titik $2-$3");
+    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?![\d])/gu, (whole, int: string, frac: string) =>
         int.length <= 3 && frac === "000" ? whole : `${int} perpuluhan ${[...frac].join(" ")}`);
 
     return s;

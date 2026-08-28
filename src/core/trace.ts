@@ -26,11 +26,20 @@
  */
 
 import { hostDepth } from "./foreign.ts";
+import { beginProvenance, endProvenance, inputSpan, provenanceFor } from "./provenance.ts";
 
 /** One token as the tokenizer matched it, with what happened to it on the way to IPA. */
 export interface TraceToken {
     /** `[start, end)` into the trace's `normalized` text — NOT into the caller's original input. */
     span: [number, number];
+    /**
+     * `[start, end)` into the CALLER's input, when normalizer provenance is complete for this engine (#1150
+     * stage 2).
+     * ⚠ ABSENT MEANS "NOT KNOWN", NEVER "IDENTICAL". A normalizer step that does not route through
+     * `provenance.tr` still changes the string, so the mapping falls out of step and is withheld rather than
+     * reported wrong — the difference between an unknown and a confident wrong offset.
+     */
+    inputSpan?: [number, number];
     /** The token exactly as the tokenizer matched it. */
     surface: string;
     /** What `makeNativiser` rewrote it to before the g2p saw it. Absent when nothing was rewritten. */
@@ -88,6 +97,7 @@ const active = (): boolean => recording !== null && hostDepth() <= 1;
 
 export function startTrace(input: string): void {
     recording = { input, normalized: "", tokens: [], rewrites: [], current: null, traced: false, tokenDepth: 0 };
+    beginProvenance(input);
 }
 
 export function stopTrace(): {
@@ -97,6 +107,15 @@ export function stopTrace(): {
     traced: boolean;
 } {
     const r = recording ?? { input: "", normalized: "", tokens: [], rewrites: [], traced: false };
+    // ⚠ RESOLVED AT STOP, not per token: a token is opened while the normalized string is still being
+    // tokenized, and the provenance array is only complete once normalization has finished.
+    const p = provenanceFor(r.normalized);
+    if (p !== undefined)
+        for (const t of r.tokens) {
+            const is = inputSpan(p, t.span[0], t.span[1]);
+            if (is !== undefined) t.inputSpan = is;
+        }
+    endProvenance();
     recording = null;
     return { normalized: r.normalized, tokens: r.tokens, rewrites: r.rewrites, traced: r.traced };
 }

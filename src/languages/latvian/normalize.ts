@@ -32,6 +32,7 @@
 import { makeSymbolNormalizer, type CountForms } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { HEAD_NOUN, ordinalWords } from "./ordinals.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * Latvian AGREEMENT for a counted noun: SINGULAR after a count ending in ...1 but NOT ...11 — *21 procents*,
@@ -510,11 +511,11 @@ function decimalComma(text: string): string {
 /** The Latvian normalization pre-pass. See the numbered steps above; the order is load-bearing. */
 export function normalizeLatvian(input: string): string {
     let s = input;
-    s = s.replace(GROUP_SPACE, ""); // 1. de-group 29 660 → 29660, before anything reads a number
+    s = tr(s, GROUP_SPACE, ""); // 1. de-group 29 660 → 29660, before anything reads a number
     s = abbreviations(s); // 2. dotted abbreviations, whose periods are the same periods as step 4's
     s = ordinalRange(s); // 3. N.–M. + noun, before either half can be claimed separately
     s = ordinalPeriod(s); // 4. the ordinal period, before any step consumes a dot
-    s = s.replace(RANGE, `$1 līdz $2`); // 5. ranges, before a dash can be read as a minus
+    s = tr(s, RANGE, `$1 līdz $2`); // 5. ranges, before a dash can be read as a minus
     s = SYMBOLS(s); // 6. percent, currency, units, rates, exponents
     s = degrees(s); // 7. ° and the scale names
     s = signs(s); // 8. the remaining signs

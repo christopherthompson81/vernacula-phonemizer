@@ -17,6 +17,7 @@
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Arabic-Indic digits, both ranges, folded to ASCII so one representation reaches every rule. */
 const ARABIC_DIGIT = /[٠-٩۰-۹]/gu;
@@ -70,29 +71,29 @@ export function makeUrduNormalizer(numbers: NumbersDef): (text: string) => strin
 
         // 1) ARABIC SYMBOL CHARACTERS → ASCII, so the shared symbol tier (ASCII-keyed) applies. ٪ occurs
         //    once in this corpus and was dropped outright, exactly as in Arabic.
-        s = s.replace(/٪/gu, "%").replace(/٫/gu, ".").replace(/٬/gu, ",");
+        s = tr(s, /٪/gu, "%").replace(/٫/gu, ".").replace(/٬/gu, ",");
         //    The ARABIC COMMA is also used as a THOUSANDS SEPARATOR here (11،000). Between digits it is a
         //    grouping mark, not punctuation — left alone it was a clause break, so "11،000" read as
         //    "eleven … zero". Only the digit-flanked case is folded; ، as real punctuation is untouched.
-        s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0)،(?=\d{3}(?!\d))/gu, ",");
+        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0)،(?=\d{3}(?!\d))/gu, ",");
 
         // 2) ORDINAL SUFFIXES, attached or spaced.
-        s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?(${Object.keys(SUFFIX_FORM).join("|")})(?![\\p{L}\\p{M}])`, "gu"),
+        s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?(${Object.keys(SUFFIX_FORM).join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) =>
                 ordinal(Number(digits), SUFFIX_FORM[suffix]!, suffix) ?? whole);
 
         // 3) SPACED / ABBREVIATED UNITS. Longest first.
-        s = s.replace(new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
+        s = tr(s, new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`);
 
         // 4) DEGREES. Case-insensitive on the scale letter, and the bare sign too.
-        s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 ڈگری سینٹی گریڈ");
-        s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 ڈگری فارن ہائیٹ");
-        s = s.replace(/(\d)\s?°/gu, "$1 ڈگری");
+        s = tr(s, /(\d)\s?°\s?C(?![\p{L}])/giu, "$1 ڈگری سینٹی گریڈ");
+        s = tr(s, /(\d)\s?°\s?F(?![\p{L}])/giu, "$1 ڈگری فارن ہائیٹ");
+        s = tr(s, /(\d)\s?°/gu, "$1 ڈگری");
 
         // 5) CLOCK. The colon reached the output RAW (and padded, so also a double space), and :00 read as
         //    صفر. Urdu says "گیارہ بج کر بیس منٹ"; at :00 the minutes drop and a following بجے is right.
-        s = s.replace(/(?<![\d:])([01]?\d|2[0-3])\s?:\s?([0-5]\d)(?![\d:])(?!,\d)(\s*بجے)?/gu,
+        s = tr(s, /(?<![\d:])([01]?\d|2[0-3])\s?:\s?([0-5]\d)(?![\d:])(?!,\d)(\s*بجے)?/gu,
             (whole, h: string, min: string, baje?: string) => {
                 const hv = Number(h), mv = Number(min);
                 const hw = cardinal(hv).join(" ");
@@ -102,9 +103,9 @@ export function makeUrduNormalizer(numbers: NumbersDef): (text: string) => strin
             });
 
         // 6) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
-        s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1منفی $2");
-        s = s.replace(/(\S)\+\s?(\d)/gu, "$1 جمع $2");
-        s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1جمع $2");
+        s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1منفی $2");
+        s = tr(s, /(\S)\+\s?(\d)/gu, "$1 جمع $2");
+        s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1جمع $2");
 
         // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from ur_pk — no Wikipedia needed, which
         // makes Urdu one of the few languages in this issue where tier 2 settled all four readings:
@@ -122,11 +123,11 @@ export function makeUrduNormalizer(numbers: NumbersDef): (text: string) => strin
         // separately attested and only the script differs for these words.
         s = postposedSign(s, "<", "سے کم");
         s = postposedSign(s, ">", "سے زیادہ");
-        s = s.replace(/\s?=\s?/gu, " برابر ");
-        s = s.replace(/\s?÷\s?/gu, " تقسیم ");
+        s = tr(s, /\s?=\s?/gu, " برابر ");
+        s = tr(s, /\s?÷\s?/gu, " تقسیم ");
 
         // 7) FRACTIONS, as "denominator بٹا numerator" — the ordinary spoken form; ½ is آدھا.
-        s = s.replace(/(?<![\d.,/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+        s = tr(s, /(?<![\d.,/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
             const num = Number(a), den = Number(b);
             if (num === 1 && den === 2) return "آدھا";
             const nw = cardinal(num).join(" "), dw = cardinal(den).join(" ");

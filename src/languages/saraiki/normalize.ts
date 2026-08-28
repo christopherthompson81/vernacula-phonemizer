@@ -61,6 +61,7 @@
  * `tools/corpus/attest/skr.jsonc`.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * The shared SYMBOL tier. ⚠ THE PERCENT ARM IS THE WHOLE REASON THIS TIER IS DECLARED, and it is a trap-16
@@ -104,7 +105,7 @@ export function normalizeSaraiki(input: string): string {
     //    percent sign, so the tier — which allows a space and nothing else there — never saw a percentage
     //    at all. ⚠ THE RULE IS NARROW ON PURPOSE: ZWNJ is meaningful Perso-Arabic orthography INSIDE a
     //    word, and only a joiner sitting between a DIGIT and a SIGN can be certain to carry no meaning.
-    s = s.replace(/(?<=\d)[\u200c\u200d]+(?=[%\u066a\u00b0\u066b])/gu, "");  // ZWNJ, ZWJ
+    s = tr(s, /(?<=\d)[\u200c\u200d]+(?=[%\u066a\u00b0\u066b])/gu, "");  // ZWNJ, ZWJ
 
     // 1) THE SHARED SYMBOL TIER FIRST, exactly as the Punjabi sibling does it and for the same reason: the
     //    tier's own numeral pattern reads `2,500` and `2.3` as ONE token, and steps 2 and 5 below split
@@ -116,7 +117,7 @@ export function normalizeSaraiki(input: string): string {
     //    THREE DIGITS AFTER THE MARK decides everything.
     //    ⚠ THE WHOLE NUMBER IS MATCHED AT ONCE, not one join per pass (trap 63), and the trailing guard
     //    rejects a DIGIT and nothing else, or every clause-final figure is declined (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,،])([1-9]\d{0,2})((?:[,،]\s?\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,،])([1-9]\d{0,2})((?:[,،]\s?\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/[,،\s]/gu, ""));
 
     // 3) DEGREES. `ڈگری` ×55 is the corpus's own word in exactly this slot ("28 ڈگری سینٹی گریڈ توں 42
@@ -125,9 +126,9 @@ export function normalizeSaraiki(input: string): string {
     //    ⚠ AND THE BARE BRANCH IS DELIBERATELY LEFT TO RUN INTO A FOLLOWING WORD: `44.7° سینٹی گریڈ`
     //    becomes "44.7 ڈگری سینٹی گریڈ", which is what the corpus writes elsewhere, and `60° درجہ دار قوس`
     //    becomes "60 ڈگری درجہ دار قوس" — *a sixty-degree graded arc*, which is what it means.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 ڈگری سینٹی گریڈ");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 ڈگری فارن ہائیٹ");
-    s = s.replace(/(\d)\s?°/gu, "$1 ڈگری ");
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 ڈگری سینٹی گریڈ");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 ڈگری فارن ہائیٹ");
+    s = tr(s, /(\d)\s?°/gu, "$1 ڈگری ");
 
     // 4) THE MINUS SIGN, before the range rule spends the hyphen. ⚠ THE WORD IS SOURCED FROM THE RETAINED
     //    CORPUS RATHER THAN THE WIKI BATCH, which is the round's sharpest sourcing result: `منفی` ×36 on
@@ -136,7 +137,7 @@ export function normalizeSaraiki(input: string): string {
     //    the same elevation written once with the word and once with the sign.
     //    ⚠ THE `(?<!\d)` GUARD IS LOAD-BEARING: this corpus writes NEGATIVE EXPONENTS inline as
     //    `10−50 cm4 s photon−1`, and a rule reaching those would read a cross-section as a subtraction.
-    s = s.replace(/(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1منفی $2");
+    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1منفی $2");
 
     // 5) RANGES. The dash was dropped and the endpoints fused — `1682–1744`, `1704–1749`, `1850–1950`,
     //    `39-45`, `1961-62`, `1950ء–1986ء`. ⚠ THE YEAR MARKER MAY SIT BETWEEN THE FIGURE AND THE DASH,
@@ -144,15 +145,15 @@ export function normalizeSaraiki(input: string): string {
     //    anchored on `\d` alone misses every dated span in the language.
     //    ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A CONNECTIVE, and ⚠ nothing may be required after the
     //    second number (trap 58); an adjacent slash means a citation (`213-276/828-889`), not a span.
-    s = s.replace(/([\dء])\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = s.replace(/(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = tr(s, /([\dء])\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // 6) DECIMALS, LAST — because this step SPLITS the numeral, and every rule above wants it whole.
     //    ⚠ `اعشاریہ` ×18 and five of its six wiki examples are the decimal SYSTEM rather than the point;
     //    the sixth is the slot and glosses itself ("ہک اعشاریہ ترئے ارب یعنی ہک ارب تریہہ کروڑ"). The
     //    fractional part is read DIGIT BY DIGIT, which is what a reader does and what keeps `52.66` from
     //    becoming *fifty-two point sixty-six*.
-    s = s.replace(/(\d)\.(\d+)(?!\d)/gu,
+    s = tr(s, /(\d)\.(\d+)(?!\d)/gu,
         (_m, head: string, frac: string) => `${head} اعشاریہ ${[...frac].join(" ")}`);
 
     // A padded replacement doubles a space that was already there. Harmless downstream because

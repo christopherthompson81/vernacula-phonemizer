@@ -26,6 +26,7 @@ import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalStem } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Tamil letter+mark boundary. Never `\b`. */
 /**
@@ -167,30 +168,30 @@ export function normalizeTamil(input: string): string {
     //    "ஐந்து <pause> பூஜ்ஜியம் <pause> பூஜ்ஜியம்". BOTH grouping systems occur: Western 3-digit blocks
     //    (100,000) and Indian 2-then-3 (7,83,562), so the block is 2 OR 3 digits. Requiring ≥2 digits
     //    after the comma is what keeps a genuine list ("11, 12 வது" — always spaced) out of the rule.
-    s = s.replace(/(?<=\d)(?<!(?<![\d])0),(?=\d{2,3}(?:,\d|[^\d]|$))/gu, "");
+    s = tr(s, /(?<=\d)(?<!(?<![\d])0),(?=\d{2,3}(?:,\d|[^\d]|$))/gu, "");
 
     // 3) ERA markers, BEFORE the initialism rule (step 4) — கி.மு. is a letter pair by shape and would
     //    otherwise be spelled out as [kɪ mʊ] with the era lost.
-    s = s.replace(ERA_RE, (_m, k: string) => ERA[k]!);
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}எ\\s*\\.\\s*கா\\s*\\.?${NOT_LETTER_AFTER}`, "gu"), "எடுத்துக்காட்டாக");
+    s = tr(s, ERA_RE, (_m, k: string) => ERA[k]!);
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}எ\\s*\\.\\s*கா\\s*\\.?${NOT_LETTER_AFTER}`, "gu"), "எடுத்துக்காட்டாக");
 
     // 4) MULTI-DOT ABBREVIATIONS before single-dot ones, else the interior dot survives as a phrase break:
     //    எம்.ஆர்.ஐ was reading as [ˈem . ˈaːr . ˈaᶦ], three clauses. Dotted Tamil unit abbreviations
     //    (கி.மீ ×6, மி.மி ×2) are folded to their full word here too, before the letter-name rule, since
     //    கி/மீ are not letter names and would otherwise keep their dot.
-    s = s.replace(TAMIL_UNIT_DOT_RE, (_m, a: string, b: string) =>
+    s = tr(s, TAMIL_UNIT_DOT_RE, (_m, a: string, b: string) =>
         TAMIL_UNIT[`${a}${b}`] ?? TAMIL_UNIT[`${a}மீ`] ?? `${a}${b}`);
-    s = s.replace(TAMIL_UNIT_SPACED_RE, (_m, a: string, b: string) =>
+    s = tr(s, TAMIL_UNIT_SPACED_RE, (_m, a: string, b: string) =>
         TAMIL_UNIT[`${a}${b}`] ?? TAMIL_UNIT[`${a}மீ`] ?? `${a} ${b}`);
-    s = s.replace(TAMIL_UNIT_RE, (_m, u: string) => TAMIL_UNIT[u]!);
-    s = s.replace(INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());
+    s = tr(s, TAMIL_UNIT_RE, (_m, u: string) => TAMIL_UNIT[u]!);
+    s = tr(s, INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());
     //    திரு. (Mr.) — a single-dot abbreviation, ×3; its dot was a phrase break mid-sentence.
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}திரு\\s*\\.\\s*(?=[\\p{L}])`, "gu"), "திரு ");
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}திரு\\s*\\.\\s*(?=[\\p{L}])`, "gu"), "திரு ");
 
     // 5) RATE units, before the shared unit tier (step 6) claims the numerator and strands the `/x`.
     //    Prefix + dative, which is the Tamil idiom and is attested verbatim in this corpus
     //    ("மணிக்கு 64 கி.மீ", "வினாடிக்கு 1.5 கிலோமீட்டர்"). mph is the same shape spelled as one token.
-    s = s.replace(
+    s = tr(s, 
         // The closing boundary is `(?![A-Za-z])`, NOT the general letter class: the corpus writes
         // "160km/hக்கு" with a Tamil case clitic welded to the denominator, and a `\p{L}` guard rejected
         // it — after which the shared tier claimed "160km" and left "/h" stranded as the letter H.
@@ -201,7 +202,7 @@ export function normalizeTamil(input: string): string {
             return `${dative(d, full, off)}${n} ${num}`;
         },
     );
-    s = s.replace(new RegExp(`(\\d[\\d.]*)\\s?mph${NOT_LETTER_AFTER}`, "giu"),
+    s = tr(s, new RegExp(`(\\d[\\d.]*)\\s?mph${NOT_LETTER_AFTER}`, "giu"),
         (_m, n: string, off: number, full: string) => `${dative("மணிக்கு", full, off)}${n} மைல்`);
 
     // 6) The SHARED symbol tier: percent, currency, units, exponents. UNITS BEFORE DECIMALS (step 8) —
@@ -213,46 +214,46 @@ export function normalizeTamil(input: string): string {
     // 7) TIMES BEFORE the decimal and sign steps: a bare-number rule must not claim 11:30, and 15.00 UTC
     //    is a clock, not a decimal.
     //    (a) the dotted clock, which only appears with an explicit zone (15.00 UTC, 12.00 GMT ×2).
-    s = s.replace(
+    s = tr(s, 
         /(?<![\d.:])([01]?\d|2[0-3])\.([0-5]\d)(?=\s*(?:UTC|GMT))/gu,
         (_m, h: string, min: string) => (Number(min) === 0 ? h : `${h} ${min}`),
     );
     //    (b) :00 minutes are DROPPED, not read: "11:00 மணிக்கு" is பதினொன்று மணிக்கு, and reading the
     //    zeros gave "பதினொன்று பூஜ்ஜியம் பூஜ்ஜியம் மணிக்கு".
-    s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):00(?![\d:.])/gu, "$1");
+    s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):00(?![\d:.])/gu, "$1");
     //    (c) every remaining digit-colon-digit becomes a SPACE. The colon is clause punctuation in this
     //    engine, so it was inserting a pause inside 10:08, 06:30 and the sports times 4:41.30 / 2:11.60 /
     //    1:09.02. A fuller "H மணி M நிமிடம்" rendering was REJECTED after reading the corpus: 13 of the 15
     //    wall-clock instances already carry மணிக்கு/மணியளவில் in the text, so it would duplicate the noun.
-    s = s.replace(/(?<=\d):(?=\d)/gu, " ");
+    s = tr(s, /(?<=\d):(?=\d)/gu, " ");
 
     // 8) DECIMALS, after units and times have taken their share. Tamil reads the fractional part digit by
     //    digit after புள்ளி ("point"), so they are separated — 3.50 → மூன்று புள்ளி ஐந்து பூஜ்ஜியம்.
-    s = s.replace(
+    s = tr(s, 
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} புள்ளி ${[...frac].join(" ")}`,
     );
 
     // 8b) PLUS — SOURCED FROM THE CORPUS'S OWN AUDIO
-    s = s.replace(/±/gu, " கூட்டல் கழித்தல் ");
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 பிளஸ் $2");
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1பிளஸ் $2");
+    s = tr(s, /±/gu, " கூட்டல் கழித்தல் ");
+    s = tr(s, /(\S)\+\s?(\d)/gu, "$1 பிளஸ் $2");
+    s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1பிளஸ் $2");
 
     // 8c) THE RELATIONAL AND DIVISION SIGNS
     s = postposedSign(s, "<", "ஐ விட குறைவாக");
     s = postposedSign(s, ">", "ஐ விட அதிகமாக");
-    s = s.replace(/\s?=\s?/gu, " சமம் ");
-    s = s.replace(/\s?÷\s?/gu, " வகுத்தல் ");
+    s = tr(s, /\s?=\s?/gu, " சமம் ");
+    s = tr(s, /\s?÷\s?/gu, " வகுத்தல் ");
 
     // 9) DEGREES. One bare `35 ° W` plus the spelled-out டிகிரி elsewhere; the scale letter is matched
     //    case-insensitively because the corpus writes both C and c.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 டிகிரி செல்சியஸ்");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 டிகிரி பாரன்ஹீட்");
-    s = s.replace(/(\d)\s?°/gu, "$1 டிகிரி");
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}])/giu, "$1 டிகிரி செல்சியஸ்");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}])/giu, "$1 டிகிரி பாரன்ஹீட்");
+    s = tr(s, /(\d)\s?°/gu, "$1 டிகிரி");
 
     // 10) FRACTIONS. Only after the rate rule, which also owns `/`. Tamil lexicalises ½/¼/¾; anything
     //     else takes the "N-இல் M பங்கு" frame (1/5 → ஐந்தில் ஒரு பங்கு).
-    s = s.replace(
+    s = tr(s, 
         /(?<![\d./])(\d{1,3})\/(\d{1,3})(?![\d/])/gu,
         (whole, a: string, b: string) => {
             const lex = FRACTION_WORD[`${a}/${b}`];
@@ -270,14 +271,14 @@ export function normalizeTamil(input: string): string {
     //     cardinal word (2019-ஆம் → இரண்டாயிரத்து பத்தொன்பதாம்); emitted apart, ஆம் reached the g2p as a
     //     stray [aːm]. All 105 digit-adjacent ஆம்/ம்/வது in the corpus are ordinals — checked by
     //     tabulating what follows, which is ஆண்டு / நூற்றாண்டு / தேதி / பிரிவு every time.
-    s = s.replace(ORDINAL_RE, (whole, digits: string, suffix: string) =>
+    s = tr(s, ORDINAL_RE, (whole, digits: string, suffix: string) =>
         ordinal(Number(digits), suffix) ?? whole);
 
     // 12) The LOCATIVE clitic written as bare ல் (×14, "1444-ல்"). Alone it is a single consonant and
     //     reached the output as [l]; இல் is the full form of the same case marker and is what the corpus
     //     writes in the other 28 instances. Attaching the case to the numeral's oblique properly
     //     (ஆயிரத்து நானூற்று நாற்பத்து நான்கில்) is left undone — see the header of the commit.
-    s = s.replace(/(\d)\s*-?\s*ல்(?![\p{L}\p{M}])/gu, "$1 இல்");
+    s = tr(s, /(\d)\s*-?\s*ல்(?![\p{L}\p{M}])/gu, "$1 இல்");
 
     return s;
 }

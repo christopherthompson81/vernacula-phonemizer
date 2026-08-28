@@ -31,6 +31,7 @@
  */
 import { MANIFEST } from "./manifest.ts";
 import { applyReadings } from "./kanji.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Hiragana → katakana. Counter and digit readings are injected as KATAKANA throughout this engine so
  *  segmentText's hiragana-specific は→わ particle heuristic cannot corrupt an internal は — はち would
@@ -131,7 +132,7 @@ export function normalizeJapanese(input: string): string {
     // 0a) DECLARED RUBY — an annotation that says it is one. The author has stated the reading, so it WINS
     //     and the base is dropped: `｜日本《にっぽん》` reads にっぽん, overriding the default にほん. That is
     //     the entire reason for writing it, and it is the one case where the annotation is authoritative.
-    s = s.replace(DECLARED_RUBY, (_m, b1?: string, r1?: string, _b2?: string, r2?: string) =>
+    s = tr(s, DECLARED_RUBY, (_m, b1?: string, r1?: string, _b2?: string, r2?: string) =>
         (r1 ?? r2 ?? b1) as string);
 
     // 0b) PARENTHESISED RUBY — a CONVENTION, not a declaration, so it needs a guard. Unclaimed, the
@@ -146,7 +147,7 @@ export function normalizeJapanese(input: string): string {
     //     engine would already say is dropped, which is lossless by construction.
     //     ⚠ AND THAT IS WHY THIS CANNOT USE 0a's RULE: here the ruby is not authoritative, so a mismatch means
     //     "keep both", not "the author is overriding".
-    s = s.replace(PARENTHESISED_RUBY, (whole, base: string, r1?: string, r2?: string) => {
+    s = tr(s, PARENTHESISED_RUBY, (whole, base: string, r1?: string, r2?: string) => {
         const ruby = r1 ?? r2 ?? "";
         return toHiragana(ruby) === applyReadings(base) ? base : whole;
     });
@@ -158,7 +159,7 @@ export function normalizeJapanese(input: string): string {
     //    and "2:2" style pairs are left alone. Looped, so 1,000,000 collapses across both separators.
     for (let prev = ""; prev !== s; ) {
         prev = s;
-        s = s.replace(/(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
+        s = tr(s, /(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))/gu, "");
     }
 
     // 2) UNITS, while a digit is still adjacent to them and the number is still plain ASCII — see
@@ -172,29 +173,29 @@ export function normalizeJapanese(input: string): string {
     //    corpus only 5 are fractions. Twelve are 自分の ("one's own"), which the rule corrupted into
     //    自ブンノ; one is 7時30分の間, where 分 really is the minutes counter and ふん is right; the rest
     //    are 部分の / 必要な分の, where the reading was already ぶん and no rewrite was needed.
-    s = s.replace(/(\d)分の(?=\d)/gu, "$1ブンノ");
+    s = tr(s, /(\d)分の(?=\d)/gu, "$1ブンノ");
 
     // 4) SLASH FRACTIONS → the same 分の shape, denominator first (1/2 → 2ブンノ1). Guarded on both sides
     //    so a date or a path is not claimed; ×2 in the corpus, and previously the slash was dropped
     //    outright, leaving "1 2".
-    s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, "$2ブンノ$1");
+    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, "$2ブンノ$1");
 
     // 5) CLOCK. Two digits of minutes is the guard that matters: the corpus's other colons are a ratio
     //    (3:2) and a UK degree class (2:2), and neither has them. Both real instances are :00, which drops
     //    the minutes entirely — 11:00 is じゅういちじ, not じゅういちじれいふん.
-    s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+    s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
         (_m, h: string, min: string) => Number(min) === 0 ? `${Number(h)}時` : `${Number(h)}時${Number(min)}分`);
 
     // 6) DECIMALS (×16). The point was clause punctuation too, so "1.5" broke into "いち . ご". Japanese
     //    says 点 and then the fractional digits INDIVIDUALLY, so those are emitted as katakana digit names
     //    while the integer part stays digits for the cardinal compositor: 6.34 → 6点サンヨン.
-    s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
+    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int}点${[...frac].map((d) => DIGIT_KANA[Number(d)]!).join("")}`);
 
     // 7) RANGES (×37). 〜 and its full-width and ASCII twins are read から between the two endpoints
     //    (2～3回, 1894年～1895年). The mark itself is in no table, so it was silently dropped and the range
     //    read as two bare numbers.
-    s = s.replace(/(?<=[\d\p{Script=Han}\p{sc=Katakana}])[〜～~](?=\d)/gu, "から");
+    s = tr(s, /(?<=[\d\p{Script=Han}\p{sc=Katakana}])[〜～~](?=\d)/gu, "から");
 
     // 8) DEGREES. ℃ is a single character and never decomposed, so the shared symbol tier could not see
     //    it. Japanese says the bare 度 for Celsius — 30℃ is さんじゅうど — and marks Fahrenheit explicitly,
@@ -204,19 +205,19 @@ export function normalizeJapanese(input: string): string {
     // `20℃` read 20度 while `20℃を` read "20度 シー を", the scale letter spelled out because this arm failed
     // and the bare `°` rule below claimed the sign alone. The guard exists to stop `°Cm`-style run-ons, which
     // only a Latin letter can form. Same reasoning as the tier's `unspacedScript`, in a local rule.
-    s = s.replace(/(\d)\s?(?:℃|°\s?C)(?![\p{sc=Latn}])/gui, "$1度");
-    s = s.replace(/(\d)\s?(?:℉|°\s?F)(?![\p{sc=Latn}])/gui, "華氏$1度");
-    s = s.replace(/(\d)\s?°/gu, "$1度");
+    s = tr(s, /(\d)\s?(?:℃|°\s?C)(?![\p{sc=Latn}])/gui, "$1度");
+    s = tr(s, /(\d)\s?(?:℉|°\s?F)(?![\p{sc=Latn}])/gui, "華氏$1度");
+    s = tr(s, /(\d)\s?°/gu, "$1度");
 
     // 9) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
-    s = s.replace(/(^|[\s(（])[-−–](\d)/gu, "$1マイナス$2");
+    s = tr(s, /(^|[\s(（])[-−–](\d)/gu, "$1マイナス$2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " プラスマイナス ");
-    s = s.replace(/(^|[\s(（])\+\s?(\d)/gu, "$1プラス$2");
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1プラス$2");
+    s = tr(s, /±/gu, " プラスマイナス ");
+    s = tr(s, /(^|[\s(（])\+\s?(\d)/gu, "$1プラス$2");
+    s = tr(s, /(\S)\+\s?(\d)/gu, "$1プラス$2");
 
     // 9aa) RELATIONAL AND DIVISION SIGNS. ja.wikipedia states two of these outright, which is as direct
     //      as a sourcing tier gets — an article whose subject IS the sign, saying how it is read:
@@ -234,10 +235,10 @@ export function normalizeJapanese(input: string): string {
     //      digits the sign stays dropped, exactly as before — a rule that is correct on the cases it claims
     //      beats a total rule that lies about the rest. 小なり / 大なり, the sign NAMES and infix-safe, were
     //      probed as the alternative and are ×0 / ×0 on ja.wikipedia, so they are not the register's reading.
-    s = s.replace(/(\d)\s?<\s?(\d)/gu, "$1は$2より小さい");
-    s = s.replace(/(\d)\s?>\s?(\d)/gu, "$1は$2より大きい");
-    s = s.replace(/\s?=\s?/gu, "イコール");
-    s = s.replace(/\s?÷\s?/gu, "わる");
+    s = tr(s, /(\d)\s?<\s?(\d)/gu, "$1は$2より小さい");
+    s = tr(s, /(\d)\s?>\s?(\d)/gu, "$1は$2より大きい");
+    s = tr(s, /\s?=\s?/gu, "イコール");
+    s = tr(s, /\s?÷\s?/gu, "わる");
 
     // 9b) THE DIMENSION `×` → かける, SOURCED FROM THE CORPUS'S OWN AUDIO. The corpus's one instance is the
     //     film-camera sentence, which writes it twice: `6×6 cm、より正確には56×56 mm`. Both are MEASUREMENTS,
@@ -256,7 +257,7 @@ export function normalizeJapanese(input: string): string {
     //     Digit-flanked, which is safe for ja: the language is unspaced, so a dimension `×` sits directly
     //     between the numerals. (⚠ That is NOT portable — ar's `29¾ بوصة × 24½ بوصة` has a unit word on the
     //     left, so Arabic keys on the following digit alone.)
-    s = s.replace(/(\d)\s*×\s*(?=\d)/gu, "$1かける");
+    s = tr(s, /(\d)\s*×\s*(?=\d)/gu, "$1かける");
 
     // 10) LATIN INITIALISMS → katakana, LAST, so the rules above still see the ASCII they match on (the
     //     unit and degree rules are keyed on lowercase letters or symbols, untouched by an all-caps rule).
@@ -265,7 +266,7 @@ export function normalizeJapanese(input: string): string {
     //    ⚠ THE BOUNDARY IS ALL OF LATIN, not `[A-Za-z]`. An ASCII-only lookaround does not see an accented
     //    letter as a letter, so the `S` of `São` passed the isolated-capital test and was spelled out as a
     //    LETTER NAME with the rest of the name left behind: `São` → *esu / ˈʌɔː*.
-    s = s.replace(/(?<![\p{Script=Latin}\p{M}])[A-Z][A-Z-]*[A-Z](?![\p{Script=Latin}\p{M}])|(?<![\p{Script=Latin}\p{M}])[A-Z](?![\p{Script=Latin}\p{M}])/gu, spell);
+    s = tr(s, /(?<![\p{Script=Latin}\p{M}])[A-Z][A-Z-]*[A-Z](?![\p{Script=Latin}\p{M}])|(?<![\p{Script=Latin}\p{M}])[A-Z](?![\p{Script=Latin}\p{M}])/gu, spell);
     //     `pH` and the other listed mixed-case initialisms, which the all-caps rule cannot reach.
     for (const [k, v] of Object.entries(WORD_ACRONYM))
         if (/[a-z]/u.test(k)) s = s.replaceAll(k, v);

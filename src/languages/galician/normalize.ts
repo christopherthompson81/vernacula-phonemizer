@@ -47,6 +47,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // DATA
@@ -173,33 +174,33 @@ export function normalizeGalician(input: string): string {
     //    tokenizer and is deliberately left alone here; the space form is not, and a number token cannot
     //    span a space. Twice, because `299 792 458` has two group boundaries and the first match consumes
     //    the space the second would need.
-    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
-    s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " "); // the leftover no-break spaces are ordinary ones
+    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = tr(s, new RegExp(`(?<=\\d)(?<!(?<![\\d\\.,])0)[${GROUP_SPACE}](?=\\d{3}(?!\\d))`, "gu"), "");
+    s = tr(s, new RegExp(`[${GROUP_SPACE}]`, "gu"), " "); // the leftover no-break spaces are ordinary ones
 
     // 1) ERA MARKERS, before the abbreviation rule so the bare `a.`/`d.` is not claimed first, and before the
     //    dotted-capital rule so `a. C.` is not folded into an initialism. `a. e. c.` comes first because
     //    `a. C.`'s pattern would otherwise claim nothing of it but its own tail would be left dangling.
     //    ⚠ `a.C.`/`d.C.` are matched CASE-SENSITIVELY (no `i` flag) — a lowercase `d.c.` does not occur and
     //    the letter `C` is what distinguishes the era marker from an initial; `a. e. c.` is written lowercase.
-    for (const [re, word] of ERA) s = s.replace(re, word);
+    for (const [re, word] of ERA) s = tr(s, re, word);
 
     // 2) NÚMERO, only before a digit. `nº`/`n.º`/`Nº` ×3 in the retained text. The bare `no` is the
     //    contraction en+o and is everywhere in Galician, so it is deliberately NOT an alternative here —
     //    which is where pt's rule differs, and pt's `no` alternative would misfire on every Galician clause.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:n\.º|nº|n°|núm\.)\s?(?=\d)/giu, "número ");
+    s = tr(s, /(?<![\p{L}\p{M}])(?:n\.º|nº|n°|núm\.)\s?(?=\d)/giu, "número ");
 
     // 3) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass (step 14) reads them as LETTERS.
     //    ⚠ `\p{Lu}`, never `[A-Z]` — Galician's own ⟨Á É Í Ó Ú Ñ⟩ are capitals outside ASCII (trap 1/7).
-    s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     //    A single initial before a surname: the dot is a break, not a full stop.
-    s = s.replace(/(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
+    s = tr(s, /(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
 
     // 4) SINGLE-DOT ABBREVIATIONS. Two branches: mid-sentence the dot is CONSUMED so it cannot become a
     //    phrase break; at a phrase end it is kept, because there it really is the sentence end.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
 
     // 5) ORDINAL INDICATORS — º (U+00BA) and ª (U+00AA), which were reaching the phoneme string as nothing
@@ -216,7 +217,7 @@ export function normalizeGalician(input: string): string {
     //    cardinal stands — it loses the ordinality, which is honest lossiness, and it invents no
     //    morphology; reading those as *graos* was declined because three instances cannot license inventing
     //    a temperature on a genuine `o 1000º aniversario`. Recorded in the investigation doc, run 3.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(º|ª)(?![\p{L}\p{M}])/gu,
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(º|ª)(?![\p{L}\p{M}])/gu,
         (_m, digits: string, ind: string) => {
             const n = Number(digits.replace(/\./gu, ""));
             const masc = n <= ORDINAL_INDICATOR_MAX ? galicianOrdinal(n) : undefined;
@@ -239,25 +240,25 @@ export function normalizeGalician(input: string): string {
     //    reads *oitocentos dous coma once …* and the shared tier's `NOT_VERSION` guard has no dot left to
     //    see by the time it runs. The `version-dot` cell is 396 corpus-wide against `decimals` at 77,321,
     //    and the decimal is the reading that is currently WRONG rather than merely odd.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.])/gu, `$1 ${DECIMAL_WORD} $2`);
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.])/gu, `$1 ${DECIMAL_WORD} $2`);
 
     // 7) CURRENCY CODES → the bare sign, WHICH IS WHAT MAKES THE TIER'S DECLARED KEY REACHABLE. The
     //    initialism pass (step 11) runs after this file and would split `US$` into letter names, after which
     //    the tier's guard — the one that stops a key biting into a word — correctly refuses the `$` and the
     //    sign vanishes. `US$` ×6 in the retained text. Only where a NUMBER follows: a bare `US$` folded to a
     //    lone `$` would be dropped by the tokenizer, and silence is worse than the letters (pt's finding).
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD|CAD)\$(?=[ \u00a0]?\d)/gu, "$");  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(?:US|AUD|CAD)\$(?=[ \u00a0]?\d)/gu, "$");  // space, NBSP
     //    R$ is the Brazilian real; the tier has no entry for the R and read it as a stray [ʁ].
-    s = s.replace(/(?<![\p{L}\p{M}])R\$\s?(\d[\d.,]*)/gu, "$1 reais");
+    s = tr(s, /(?<![\p{L}\p{M}])R\$\s?(\d[\d.,]*)/gu, "$1 reais");
 
     // 8) DEGREES, BEFORE the unit tier so the bare sign is not left behind and before the sign rules so a
     //    negative temperature still finds its `°`. `graos` is sourced from the corpus's own gloss of the
     //    same figure: "un ángulo de 104,45 graos entre si" is the artifact's `104,45°` sentence written out.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 graos Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 graos Fahrenheit");
-    s = s.replace(/(\d)\s?°\s?([NSEO])(?![\p{L}\p{M}])/gu, (_m, d: string, c: string) =>
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 graos Celsius");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 graos Fahrenheit");
+    s = tr(s, /(\d)\s?°\s?([NSEO])(?![\p{L}\p{M}])/gu, (_m, d: string, c: string) =>
         `${d} graos ${({ N: "norte", S: "sur", E: "leste", O: "oeste" } as Record<string, string>)[c]!}`);
-    s = s.replace(/(\d)\s?°/gu, "$1 graos");
+    s = tr(s, /(\d)\s?°/gu, "$1 graos");
 
     // 9) CLOCK, and the THREE-FIELD TIMESTAMP that is not one. This corpus's colon numerals are dominated by
     //    launch timestamps — `11:12:01`, `07:00:01`, `00:36:59`, and `69:08:20 horas`, which is an elapsed
@@ -265,22 +266,22 @@ export function normalizeGalician(input: string): string {
     //    ⚠ THE THREE-FIELD FORM IS CLAIMED FIRST, or the two-field rule takes its head and strands the rest.
     //    Nothing is invented for it: the colons are spent on spaces, the playbook's `sports-time` reading
     //    (Kirundi's call), because this corpus never spells such a timestamp out.
-    s = s.replace(/(?<![\d:])(\d{1,2}):([0-5]\d):([0-5]\d)(?![:\d])/gu, "$1 $2 $3");
+    s = tr(s, /(?<![\d:])(\d{1,2}):([0-5]\d):([0-5]\d)(?![:\d])/gu, "$1 $2 $3");
     //    The real clock. `ás 11:35` → *ás once e trinta e cinco*; a `:00` minute is not read as *cero*.
-    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])/gu,
+    s = tr(s, /(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])/gu,
         (_m, h: string, min: string) => clockWords(Number(h), Number(min)));
 
     // 10) SIGNS.
     //    ⚠ ± IS A SINGLE CHARACTER (U+00B1), so no `+` rule can ever match inside it — it needs its own rule
     //    or the sign is dropped in silence. gl.wikipedia NAMES it: "O sinal máis-menos (±) é un símbolo
     //    matemático", so the reading is the language's own compound rather than two juxtaposed sign words.
-    s = s.replace(/±/gu, " máis menos ");
+    s = tr(s, /±/gu, " máis menos ");
     //    THE MINUS IS REAL IN THIS CORPUS, unlike Burmese's: `−5°C`, `−22°C`, `-1 °C`, `-2 °C`, `-1000`
     //    (a year), `(–287 a. C.)` — 7 genuine negatives, mostly temperatures. The `(?!\d*-)` excludes the
     //    footnote marker `os mesmos -243- no 1646`; `en 1929. -39.` is a residual misfire at one instance.
-    s = s.replace(/(^|[\s(])[-−–](\d+(?:[.,]\d+)?)(?!\d*[-–])/gu, "$1menos $2");
-    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 máis ");
-    s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1máis ");
+    s = tr(s, /(^|[\s(])[-−–](\d+(?:[.,]\d+)?)(?!\d*[-–])/gu, "$1menos $2");
+    s = tr(s, /(\S)\+\s?(?=\d)/gu, "$1 máis ");
+    s = tr(s, /(^|\s)\+\s?(?=\d)/gu, "$1máis ");
     //    RELATIONAL AND DIVISION SIGNS — ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN, and read the examples.
     //    gl.wikipedia's own articles name every one of these: "O signo igual (=) é un símbolo matemático
     //    empregado para indicar a igualdade"; "o signo > significa maior que (3 > 0) e < significa menor que
@@ -290,10 +291,10 @@ export function normalizeGalician(input: string): string {
     //    while dropping the sign: this corpus writes `n=1 no baleiro e n>1 na materia`, where the operand is
     //    the refractive index. A LETTER on either side is licensed by that instance and by nothing else —
     //    the `->` of an etymology ("ars -> arte") still has no letter to its left and stays untouched.
-    s = s.replace(/\s?=\s?/gu, " igual a ");
-    s = s.replace(/(?<=[\p{L}\p{Nd}])\s?<\s?(?=[\p{L}\p{Nd}])/gu, " menor que ");
-    s = s.replace(/(?<=[\p{L}\p{Nd}])\s?>\s?(?=[\p{L}\p{Nd}])/gu, " maior que ");
-    s = s.replace(/\s?÷\s?/gu, " dividido por ");
+    s = tr(s, /\s?=\s?/gu, " igual a ");
+    s = tr(s, /(?<=[\p{L}\p{Nd}])\s?<\s?(?=[\p{L}\p{Nd}])/gu, " menor que ");
+    s = tr(s, /(?<=[\p{L}\p{Nd}])\s?>\s?(?=[\p{L}\p{Nd}])/gu, " maior que ");
+    s = tr(s, /\s?÷\s?/gu, " dividido por ");
 
     // 11) FRACTIONS. Galician names 2 and 3 with NOUNS (*medio*, *terzo*) and everything from 4 up with the
     //     ordinal, pluralised above one — reading the bare ordinal gives *un terceiro* for 1/3.
@@ -309,7 +310,7 @@ export function normalizeGalician(input: string): string {
     //     so the replacement landed glued to the next token — *mediomV²*, one eight-letter word, which also
     //     put the base past the shared tier's three-letter bare-exponent limit and took the `²` down with
     //     it. That second failure showed up as a `DROP exponent` in the corpus diff and in nothing else.
-    s = s.replace(/(?<![\d/.,])(\d{1,2})\/(\d{1,2})(?![\d/.,])(\p{L})?/gu,
+    s = tr(s, /(?<![\d/.,])(\d{1,2})\/(\d{1,2})(?![\d/.,])(\p{L})?/gu,
         (m0, a: string, b: string, tail: string | undefined) => {
             const num = Number(a), den = Number(b);
             if (den < 2 || den > 12 || num < 1 || num > den) return m0;
@@ -327,7 +328,7 @@ export function normalizeGalician(input: string): string {
     //     boundary makes the rule decline at a full stop, and `de 1924–1999.` is exactly how this corpus
     //     ends a sentence. The guard is only that the right operand does not continue into another dash.
     //     AFTER the minus rule, which has already spent every dash that opens a negative.
-    s = s.replace(/(?<=\d)\s?[-–—]\s?(?=\d)/gu, " a ");
+    s = tr(s, /(?<=\d)\s?[-–—]\s?(?=\d)/gu, " a ");
 
     // 13) THE ÍDEM SIGN 〃, which this corpus does not merely contain but DEFINES: "O signo de ídem (〃) é un
     //     símbolo tipográfico que indica a repetición da palabra ou elemento que está na liña superior."
@@ -335,7 +336,7 @@ export function normalizeGalician(input: string): string {
     //     strongest kind of source this repo has. Its other use here is a price list — "Dous quilos de
     //     pementos … 2,70€ / Cinco 〃 〃 〃 … 6,75€" — where reading the repeated item is beyond this layer
     //     and the sign's own name is what a reader would say for it. Unhandled it was a silent drop ×3.
-    s = s.replace(/〃/gu, " ídem ");
+    s = tr(s, /〃/gu, " ídem ");
 
     // 14) INITIALISMS, LAST of the letter rules: after the era markers (else `dC` → *de ce*), after the
     //     dotted-capital fold that feeds it, and after the currency-code fold that must see `US$` intact.

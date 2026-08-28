@@ -20,6 +20,7 @@
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** Devanagari consonant letters (base + nukta block) — used to test whether a cardinal ends in a bare
  *  consonant, which is what conditions the ordinal's linking -आ- (साठ → साठावा). */
@@ -140,8 +141,8 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //    words, आपल् + या → [ˈaːpəl jˈaː]. 66 instances. Stripping it is orthographically lossless.
         //    अ‍ॅ / अॅ is the Marathi spelling of the loan vowel /æ/ and is folded to ऍ (candra e), which
         //    the manifest already maps to ɛː; left as अ + ॅ it read as two vowels [ə ɛː].
-        s = s.replace(/अ[‌‍]?ॅ/gu, "ऍ").replace(/अ[‌‍]?ॉ/gu, "ऑ");  // ZWNJ, ZWJ
-        s = s.replace(/[‌‍]/gu, "");  // ZWNJ, ZWJ
+        s = tr(s, /अ[‌‍]?ॅ/gu, "ऍ").replace(/अ[‌‍]?ॉ/gu, "ऑ");  // ZWNJ, ZWJ
+        s = tr(s, /[‌‍]/gu, "");  // ZWNJ, ZWJ
 
         // 2) DEVANAGARI DIGITS → ASCII. Second, and before EVERY rule that follows, because all of them
         //    — and the shared symbol tier, whose NUM is `\d+(?:[ ]\d{3}|[.,]\d+)*` — are ASCII-defined.
@@ -150,16 +151,16 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //    the tokenizer simply never emitted it), `३५°` dropped its degree sign, `१५व्या` kept its
         //    stray suffix syllable and `१/२` read as "एक दोन". The engine's own number() already folds
         //    these digits to ASCII, so doing it here is loss-free.
-        s = s.replace(/[०-९]/gu, (d) => String(d.charCodeAt(0) - 0x0966));
+        s = tr(s, /[०-९]/gu, (d) => String(d.charCodeAt(0) - 0x0966));
 
         // 3) The two colon/visarga confusions, both before the clock rule in step 7 (they compete for
         //    the same characters).
         //    3a) ः (visarga) written where a clock colon was meant: ११ः०० वाजता ×1, १ः२ ×1, १ः० ×1.
-        s = s.replace(/(\d)ः(\d)/gu, "$1:$2");
+        s = tr(s, /(\d)ः(\d)/gu, "$1:$2");
         //    3b) ASCII ':' written where a visarga was meant. Word-INTERNAL is unambiguous (स्वत:चे —
         //        a list colon is always followed by a space). Word-FINAL needs the closed adverb list.
-        s = s.replace(/(?<=[ऀ-ॣॲ-ॿ]):(?=[ऀ-ॣॲ-ॿ])/gu, "ः");
-        s = s.replace(
+        s = tr(s, /(?<=[ऀ-ॣॲ-ॿ]):(?=[ऀ-ॣॲ-ॿ])/gu, "ः");
+        s = tr(s, 
             new RegExp(`(?<![\\p{L}\\p{M}])(${TAH_ADVERB_ALT}):(?![\\p{L}\\p{M}])`, "gu"),
             "$1ः",
         );
@@ -173,13 +174,13 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //    ईसा पूर्व; once Marathi supplied its own normalizer through the engine's override the Hindi
         //    rule no longer ran and the dots reached the output as two spurious pauses. Claimed here now,
         //    with Marathi's own wording rather than Hindi's.
-        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?स\.?\s?प[ूु]\.?/gu, ERA.bc);
-        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?प[ूु]\.?/gu, ERA.bc);
-        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?स\./gu, ERA.ad);
+        s = tr(s, /(?<![\p{L}\p{M}])[इई]\.?\s?स\.?\s?प[ूु]\.?/gu, ERA.bc);
+        s = tr(s, /(?<![\p{L}\p{M}])[इई]\.?\s?प[ूु]\.?/gu, ERA.bc);
+        s = tr(s, /(?<![\p{L}\p{M}])[इई]\.?\s?स\./gu, ERA.ad);
 
         // 5) ABBREVIATIONS. डॉ. is the only one in this corpus (×6, always with the dot). The dot is
         //    consumed so it cannot become a phrase break.
-        s = s.replace(/(?<![\p{L}\p{M}])डॉ\.?(\s+)(?=[\p{L}])/gu, `${def.abbreviations["डॉ"]}$1`);
+        s = tr(s, /(?<![\p{L}\p{M}])डॉ\.?(\s+)(?=[\p{L}])/gu, `${def.abbreviations["डॉ"]}$1`);
 
         // 6) ORDINALS. Before the numeral-spelling rule in step 6b, which exists only to mop up what
         //    this step legitimately leaves behind.
@@ -188,7 +189,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //    characters of वाजता, वाजल्यानंतर, वाजण्याच्या, वादळे, वाईल्ड and (via वे) वेळा, वेगवेगळ्या —
         //    13 live corruptions in this corpus, e.g. "8:30 वाजता" → [ˈaːʈʰ , t̪iːsʋˈaːd͡zt̪aː]. A
         //    leading `(?<![\d.,])` likewise keeps the rule off the minute field of a clock time.
-        s = s.replace(
+        s = tr(s, 
             new RegExp(`(?<![\\d.,])(\\d+)\\s?(${SUFFIX_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) =>
                 ordinal(Number(digits), SUFFIX_FORM[suffix]!, suffix) ?? whole,
@@ -200,7 +201,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     वी / वे at the start of the following word (7 वेळा → "सातवाळा"-shaped glue). Removing the
         //     digit removes the match. The output is correct Marathi either way — "सात वेळा", "पाच
         //     वाजता", "चार वेगवेगळ्या" — so the cost is nil; only the MOTIVE is external.
-        s = s.replace(/(?<![\d.,:])(\d+)(\s*)(?=व[ाीे])/gu, (whole, d: string, sp: string) => {
+        s = tr(s, /(?<![\d.,:])(\d+)(\s*)(?=व[ाीे])/gu, (whole, d: string, sp: string) => {
             const n = Number(d);
             if (!Number.isSafeInteger(n)) return whole;
             const words = cardinal(n);
@@ -218,13 +219,13 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //        (the trailing guard is `(?![\d:])`, NOT `(?![\d.,:])` — the corpus writes these in a
         //        comma-separated list, "4:41.30, 2:11.60", and excluding a following comma made the rule
         //        miss the first of the two.)
-        s = s.replace(/(?<![\d.,:])(\d{1,2}):(\d{2}\.\d{1,2})(?![\d:])/gu, "$1 $2");
+        s = tr(s, /(?<![\d.,:])(\d{1,2}):(\d{2}\.\d{1,2})(?![\d:])/gu, "$1 $2");
         //    7b) The clock proper. `(?![\d:.])` is what refuses 7a's leftovers and any h:mm:ss. A
         //        following वाजता is CONSUMED when the minutes are spoken, because वाजून already carries
         //        its sense; at :00 the postposition is exactly right and is supplied when absent — but
         //        NOT when the next word is another वाज- form ("11:00 वाजल्यानंतर" must not become
         //        "अकरा वाजता वाजल्यानंतर").
-        s = s.replace(
+        s = tr(s, 
             /(?<![\d:.])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.])(\s*वाजता(?![\p{L}\p{M}]))?/gu,
             (m, h: string, min: string, vaajta: string | undefined, offset: number, whole: string) => {
                 const body = clock(Number(h), Number(min));
@@ -236,7 +237,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //    7c) The same clock written with a DOT, which only occurs beside a timezone marker in this
         //        corpus ("१२.०० GMT वाजता", "(15.00 यूटीसी)"). No वाजता is added — the sentence already
         //        carries one after the timezone, and adding a second read as "बारा वाजता GMT वाजता".
-        s = s.replace(
+        s = tr(s, 
             /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:])(?=\s*(?:GMT|UTC|यूटीसी|जीएमटी))/gu,
             (_m, h: string, min: string) => clock(Number(h), Number(min)),
         );
@@ -244,26 +245,26 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         // 8) DEGREES, before the signs in step 14 so the ° still has its digit adjacent ("+30°से."). अंश
         //    is the Marathi word (corpus-attested in "90(फ)- अंश तापमानात"), not Hindi's डिग्री. से. is
         //    the corpus's abbreviation for सेल्सिअस and its dot must be eaten, or it becomes a break.
-        s = s.replace(/(\d)\s?°\s?(?:C|से\.?)(?![\p{L}\p{M}])/giu, `$1 ${DEG.word} ${DEG.celsius}`);
-        s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, `$1 ${DEG.word} ${DEG.fahrenheit}`);
-        s = s.replace(/(\d)\s?°\s?N(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.north}`);
-        s = s.replace(/(\d)\s?°\s?S(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.south}`);
-        s = s.replace(/(\d)\s?°\s?E(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.east}`);
-        s = s.replace(/(\d)\s?°\s?W(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.west}`);
-        s = s.replace(/(\d)\s?°/gu, `$1 ${DEG.word}`);
+        s = tr(s, /(\d)\s?°\s?(?:C|से\.?)(?![\p{L}\p{M}])/giu, `$1 ${DEG.word} ${DEG.celsius}`);
+        s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, `$1 ${DEG.word} ${DEG.fahrenheit}`);
+        s = tr(s, /(\d)\s?°\s?N(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.north}`);
+        s = tr(s, /(\d)\s?°\s?S(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.south}`);
+        s = tr(s, /(\d)\s?°\s?E(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.east}`);
+        s = tr(s, /(\d)\s?°\s?W(?![\p{L}\p{M}])/gu, `$1 ${DEG.word} ${DEG.west}`);
+        s = tr(s, /(\d)\s?°/gu, `$1 ${DEG.word}`);
 
         // 9) PERCENT. Must precede the shared symbol tier, which is Hindi's and says प्रतिशत: the
         //    corpus's own word, nine times over, is टक्के. (The ASCII-digit half of the corpus was
         //    getting प्रतिशत while the Devanagari-digit half fell through to the manifest's टक्के — the
         //    same document read two different languages depending on which digits it used.) टक्का is
         //    the singular.
-        s = s.replace(/(\d+(?:[.,]\d+)*)\s?[%٪％]/gu, (_m, n: string) =>
+        s = tr(s, /(\d+(?:[.,]\d+)*)\s?[%٪％]/gu, (_m, n: string) =>
             `${n} ${Number(n.replace(/,/g, "")) === 1 ? PERCENT.singular : PERCENT.plural}`);
 
         // 10) CURRENCY, likewise before the shared tier (which would give यूरो / पाउंड for € / £). The
         //     sign is always PRE-posed in this corpus and the noun always follows the number, with any
         //     magnitude word hopping along: "$२.३ बिलियन" → "२.३ बिलियन डॉलर".
-        s = s.replace(
+        s = tr(s, 
             new RegExp(
                 `([$€¥£₹])\\s?(\\d+(?:[.,]\\d+)*)(\\s*(?:${MAGNITUDE_ALT})(?![\\p{L}\\p{M}]))?`,
                 "gu",
@@ -278,7 +279,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     matches a unit only when a NUMBER is adjacent and these keys are Devanagari, so this stays
         //     local. `(?![\p{L}\p{M}])` after the key is what keeps मी (metre) out of मीटर, मिनिटे and
         //     the pronoun मी — the same over-counting trap any short unit key has in an abugida.
-        s = s.replace(
+        s = tr(s, 
             new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`,
         );
@@ -291,7 +292,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     १०००-१३००, 100-200 मैल, 1469-1539 …) is ascending. So the rule fires only when b > a:
         //     11 gained, 0 broken, 2 real ranges deliberately missed (१९९५-९६, an abbreviated year span,
         //     and 4.2-3.9, a descending "million years ago" span).
-        s = s.replace(
+        s = tr(s, 
             /(?<![\d.,])(\d+(?:\.\d+)?)\s?[-–—]\s?(\d+(?:\.\d+)?)(?![\d.,])/gu,
             (m, a: string, b: string) => (Number(b) > Number(a) ? `${a} ${def.rangeWord} ${b}` : m),
         );
@@ -299,7 +300,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         // 13) FRACTIONS. अर्धा / पाव / पाऊण are suppletive; anything else is the ordinary spoken
         //     division form "n भागिले m" (Marathi's equivalent of Hindi बटा, which the inherited pass
         //     would otherwise emit into Marathi output). Corpus: १/२, ३/४, 1/5 — all in measurements.
-        s = s.replace(/(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+        s = tr(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
             const num = Number(a), den = Number(b);
             if (num === 1 && den === 2) return FRAC.half;
             if (num === 1 && den === 4) return FRAC.quarter;
@@ -314,7 +315,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     digits, and is guarded against the dash on both sides so "100-200 मैल" and "100-मीटर"
         //     keep theirs. `(?!\s*[A-Za-z])` was added after the corpus diff caught this rule producing
         //     `शंभरm` from the swim event "100m आणि 200m" — the guard leaves any digits+Latin pair alone.
-        s = s.replace(/(?<![\d,.\-–—])100(?![\d,.\-–—])(?!\s*[A-Za-z])/gu, def.bareHundred);
+        s = tr(s, /(?<![\d,.\-–—])100(?![\d,.\-–—])(?!\s*[A-Za-z])/gu, def.bareHundred);
 
         // 15) SIGNS. ⚠ THE ASCII HYPHEN IS STILL REFUSED, AND THE REFUSAL IS ABOUT THE TRIGGER RATHER THAN
         //     THE WORD: Devanagari compounds are written with a hyphen (आस-पास), and a hyphen before a
@@ -331,7 +332,7 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     ⚠ ZERO CORPUS OCCURRENCES, STATED PLAINLY. U+2212 appears 0 times in the mined artifact and
         //     0 times in the 200-row golden, so nothing measures this rule — it fills a gap rather than
         //     fixing an observed defect, and the sabotage count for `minus` is 0 against any corpus probe.
-        s = s.replace(/\+\s?(?=\d)/gu, ` ${SIGN.plus} `);
+        s = tr(s, /\+\s?(?=\d)/gu, ` ${SIGN.plus} `);
         //     ⚠ LEADING POSITION ONLY, and the left guard is the correction rather than the rule. A first
         //     version fired on any U+2212 before a digit, which read `१८३८−१९१७` as "1838 minus 1917".
         //     Reading the 279 U+2212 instances across the mined corpora rather than counting them: 223 are
@@ -340,8 +341,8 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         //     left is exactly the case that must NOT be claimed — the same shape as this file's own
         //     refusal of the ASCII hyphen, for the same reason. `५−३` goes back to silence, which is the
         //     right answer when the alternative is a confident misreading.
-        s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])−\s?(?=\d)/gu, ` ${SIGN.minus} `);  // U+2212 MINUS SIGN
-        s = s.replace(/~\s?(?=\d)/gu, ` ${SIGN.approximately} `);
+        s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])−\s?(?=\d)/gu, ` ${SIGN.minus} `);  // U+2212 MINUS SIGN
+        s = tr(s, /~\s?(?=\d)/gu, ` ${SIGN.approximately} `);
 
         // 15b) THE RELATIONAL AND DIVISION SIGNS, and ±. ⚠ All sourced from running text rather than from
         //      Marathi's own arithmetic articles, which write the notation instead of reading it — `बरोबर`,
@@ -368,12 +369,12 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the
         //    preceding word: `तापमान±5` reads *t̪ˈaːpmaːnəəd̪ʱɪk*, one token, with the stress of neither.
         //    The shared symbol tier's `ampersand` note records the same hazard for the same reason.
-        s = s.replace(/±/gu, ` ${SIGN.plusMinus} `);
+        s = tr(s, /±/gu, ` ${SIGN.plusMinus} `);
         s = postposedSign(s, "<", SIGN.lessThan);
         s = postposedSign(s, ">", SIGN.greaterThan);
         s = postposedSign(s, "÷", SIGN.divide);
-        s = s.replace(/\s?=\s?/gu, ` ${SIGN.equals} `);
-        s = s.replace(/ {2,}/gu, " ");
+        s = tr(s, /\s?=\s?/gu, ` ${SIGN.equals} `);
+        s = tr(s, / {2,}/gu, " ");
 
         return s;
     };

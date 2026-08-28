@@ -1,4 +1,5 @@
 import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
+import { tr } from "../../core/provenance.ts";
 /**
  * Classical Nahuatl (nci) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -136,13 +137,13 @@ export function normalizeNahuatl(input: string): string {
     //    modern-Nahuatl articles ("uan ​​eli nopa ompa ueyi tlanemakaketl", "uan ​​moneki kipixtos").
     //    Invisible, so it can only ever be noise; U+FEFF is stripped with it. ⚠ ZWJ/ZWNJ are NOT touched —
     //    they are contrastive in several scripts and this rule has no business generalising.
-    s = s.replace(/[​﻿]/gu, "");  // ZWSP, BOM
+    s = tr(s, /[​﻿]/gu, "");  // ZWSP, BOM
 
     // 2) THE `&nbsp;` ENTITY, ×10 AND LITERAL. The dump extractor left it in text, so `45.9&nbsp;km`
     //    reaches the g2p as the word *nbsp* AND hides the `km` from step 8 (`133&nbsp;km`, `12&nbsp;km`,
     //    `57&nbsp;km`, `25&nbsp;°C`, `0&nbsp;°C`, `100&nbsp;°C`, `-120&nbsp;°C`). ⚠ Replaced by a SPACE,
     //    not deleted — it IS a space, and deleting it fuses the figure to its unit (trap 10).
-    s = s.replace(/&nbsp;/gu, " ");
+    s = tr(s, /&nbsp;/gu, " ");
 
     // 3) DE-GROUPING THE SPACE, BY THE THREE-DIGIT TEST — and this is the highest-value rule in the layer,
     //    because a space-grouped figure currently reads as two numerals with the zero stopgap between them:
@@ -152,7 +153,7 @@ export function normalizeNahuatl(input: string): string {
     //    so a figure at a clause end (`… (480 000) xihuitl`) is not declined by its own bracket.
     //    ⚠ AND THE HEAD GUARD IS WHAT DECLINES A SPACE-GROUPED DECIMAL TAIL: `1,602 176 487(40)` in the
     //    Spanish physics infobox has a comma two characters back, so no start position qualifies.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 4) DE-GROUPING THE COMMA, same test — `384,400 km`, `3,746 km`, `37,932,330 km²`,
@@ -160,7 +161,7 @@ export function normalizeNahuatl(input: string): string {
     //    ⚠ THE SCRIPTURE CITATIONS ARE DECLINED BY THE TEST ITSELF and need no guard of their own: a
     //    chapter,verse reference has ONE or TWO digits after the comma (`Mt 20,29-34`, `Mc 10,46-52`,
     //    `Lc 3, 23-38`), never three. See the header for the five Spanish decimals this does misread.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
     // 5) THE DECIMAL DOT, NEUTRALISED. ⚠ NO DECIMAL WORD IS SOURCEABLE — `punto` ×0 and `coma` ×0 on
@@ -169,21 +170,21 @@ export function normalizeNahuatl(input: string): string {
     //    ("oːmpoːwalli ommaːkʷiːlli . tʃikʷnaːwi"). The Punjabi and Karakalpak choice, for the same reason.
     //    ⚠ THE `(?<![\d.])…(?![\d.])` GUARD keeps this off a dotted run of three or more groups; this
     //    corpus has none, but an IP address or a `d.m.Y` date is one dump away and the guard costs nothing.
-    s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
+    s = tr(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, "$1 $2");
 
     // 6) THE CLOCK, GATED ON ARITY AND ON THE MARKER WORD — see the header. The three-part form is a clock
     //    in all four of its instances and no verse reference has three parts, so `h:m:s` is claimed
     //    outright; the two-part form is claimed ONLY before `hrs`, which is what separates `4:00 hrs.` and
     //    `12:14 hrs` from fourteen Gospel citations written with the identical ASCII colon.
     //    The writer supplies the context word, so the figures stay FIGURES and only the colon is spent.
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)(?![\d:.,])/gu, "$1 $2 $3");
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)(?![\d:.,])/gu, "$1 $2 $3");
     //    …and `hrs` is expanded with it, or it reaches the g2p as *ɾs* — nahuatl.ts correctly silences a
     //    word-initial ⟨h⟩, which is right for the language and wrong for this abbreviation. `horas` ×4 on
     //    nah.wikipedia, of which two are the real countable hour ("se billón horas", "500 horas tlen
     //    contenido") and two are a Spanish poetry title and a gloss; `hora` ×3 is two NOVEL TITLES ("La
     //    mala hora", "La hora de todos") and one true hour ("azo ya ipan matlactli hora"). Thin, read, and
     //    in the right slot. ⚠ THE TRAILING DOT IS NOT CONSUMED (trap 10) — `4:00 hrs.` ends a sentence.
-    s = s.replace(new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:.,])(\\s?)hrs${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:.,])(\\s?)hrs${NOT_LETTER_AFTER}`, "gu"),
         "$1 $2$3horas");
 
     // 7) DEGREES. ⚠ `°` U+00B0 ONLY — `º` U+00BA is the Spanish ordinal in this corpus (see the header) and
@@ -198,8 +199,8 @@ export function normalizeNahuatl(input: string): string {
     //    ⚠ THE SCALE LETTER CLASS IS `C` ALONE, because `°F` is ×0 here — every degree in this corpus is
     //    Celsius (`17 °C`, `0 °C`, `100 °C`, `-1° C`, `-120 °C`) and an unattested `F` arm is a misfire
     //    generator for nothing (trap 9).
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grados");
-    s = s.replace(/(\d)\s?°/gu, "$1 grados ");
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grados");
+    s = tr(s, /(\d)\s?°/gu, "$1 grados ");
 
     // 8) THE TWO UNITS, WITH THE SPACE REQUIRED — the reason this layer declares no shared tier; see the
     //    header. Every genuine metre in the corpus has the space and every false one does not, and `km`
@@ -210,7 +211,7 @@ export function normalizeNahuatl(input: string): string {
     //    ⚠ AND `²³` ARE IN IT so `km²` and `km³` keep their power visible to the leak gates rather than
     //    losing it silently to a unit with no measure word behind it.
     for (const [abbr, word] of UNITS) {
-        s = s.replace(new RegExp(`(\\d)\\s+${abbr}(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `$1 ${word}`);
+        s = tr(s, new RegExp(`(\\d)\\s+${abbr}(?![\\p{L}\\p{M}\\d²³/])`, "gu"), `$1 ${word}`);
     }
 
     // 9) RANGES. ⚠ THE HYPHEN BETWEEN DIGITS IS MOSTLY A CITATION HERE, and the fleet-standard guards are
@@ -225,8 +226,8 @@ export function normalizeNahuatl(input: string): string {
     //     ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), and an adjacent slash means a
     //     regnal alternative (`1494-1524/1525`) rather than a span.
     //     ⚠ AND `UTC-5` IS DECLINED BY THE HEAD GUARD needing a DIGIT before the dash — the `C` is a letter.
-    s = s.replace(/(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = s.replace(/(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

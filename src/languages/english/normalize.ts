@@ -16,6 +16,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { resolveUnitSymbol } from "../../core/normalizeSymbols.ts";
 import { COLLISIONS as ROMAN_COLLISIONS, romanToInt } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
+import { tr } from "../../core/provenance.ts";
 
 // ── Roman numerals ──────────────────────────────────────────────────────────────────────────────────
 // A closed, conservative set (2–20, minus vi and xi). Lowercased text cannot tell "VI" from "vi", and vi
@@ -255,17 +256,17 @@ export function normalizeEnglish(input: string): string {
     //    undotted saint pattern ("st petersburg"). An undotted "st" before a function word stays as-is: the
     //    dict's street reading is correct there ("main st in dublin"). A dotted abbreviation at phrase end
     //    is the trailing use (street/drive), keeping the punctuation that follows it.
-    s = s.replace(/\b(st|dr|mt|mr|mrs)\.\s+([a-zà-ÿ']+)/gi,
+    s = tr(s, /\b(st|dr|mt|mr|mrs)\.\s+([a-zà-ÿ']+)/gi,
         (_m, abbr: string, next: string) => `${DOTTED_ABBREV[abbr.toLowerCase()]!(next)} ${next}`);
-    s = s.replace(/\b(st|dr|mt)\.(?=\s*(?:[.,;:!?]|$))/gi,
+    s = tr(s, /\b(st|dr|mt)\.(?=\s*(?:[.,;:!?]|$))/gi,
         (_m, abbr: string) => ({ st: "street", dr: "drive", mt: "mount" })[abbr.toLowerCase()]!);
-    s = s.replace(/\bst\s+([a-z']+)/gi,
+    s = tr(s, /\bst\s+([a-z']+)/gi,
         (m0, next: string) => (ABBREV_FUNCTION_NEXT.test(next) ? m0 : `saint ${next}`));
 
     // 0b) MORE DOTTED ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a
     //     phrase break, and kept at a phrase end where it really is the sentence end — the same discipline
     //     as the st./dr. rule above, and the shape every arm in this step repeats.
-    s = s.replace(new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = tr(s, new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -273,7 +274,7 @@ export function normalizeEnglish(input: string): string {
             const w = PLAIN_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = s.replace(new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
+    s = tr(s, new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -282,26 +283,26 @@ export function normalizeEnglish(input: string): string {
             return w === undefined ? m0 : `${w}.`;
         });
     //     `et al.` is TWO tokens, so it needs its own arm after the single-token rule above has run.
-    s = s.replace(/\bet\s+al\.(\s+)(?=\p{L})/giu, "et al$1");
-    s = s.replace(/\bet\s+al\.(?=\s*(?:[.,;:!?)]|$))/giu, "et al.");
+    s = tr(s, /\bet\s+al\.(\s+)(?=\p{L})/giu, "et al$1");
+    s = tr(s, /\bet\s+al\.(?=\s*(?:[.,;:!?)]|$))/giu, "et al.");
     //     `c.`/`ca.` is circa ONLY before a year — a bare `c.` is the letter (or an initial) and must be
     //     left to the initials rule, so the digit lookahead is what makes this safe.
-    s = s.replace(/\bca?\.\s*(?=\d{3,4}(?!\d))/gi, "circa ");
+    s = tr(s, /\bca?\.\s*(?=\d{3,4}(?!\d))/gi, "circa ");
     //     `No.` before a DIGIT is the number sign; the rule above needs a following letter.
-    s = s.replace(/\bnos?\.\s*(?=\d)/gi, "number ");
+    s = tr(s, /\bnos?\.\s*(?=\d)/gi, "number ");
     //     `e.g.` and `i.e.` take the ENGLISH GLOSS, which is a CHOICE: readers genuinely disagree three ways
     //     (letter names, "for example", omitting it outright), so there is no single correct target here.
     //     Both must be handled before the generic dot-stripping below, which would leave "eg"/"ie" to be
     //     read as words.
     //     ⚠ The lookahead admits a DIGIT — "i.e. 0 or 1" occurs, and a letter-only lookahead lets it fall
     //     through to the dot-stripping, which reads the bare "ie" as the word [iː].
-    s = s.replace(/\be\.\s?g\.(\s+)(?=[\p{L}\d])/giu, "for example$1");
-    s = s.replace(/\be\.\s?g\.(?=\s*(?:[,;:!?)]|$))/giu, "for example.");
-    s = s.replace(/\bi\.\s?e\.(\s+)(?=[\p{L}\d])/giu, "that is$1");
-    s = s.replace(/\bi\.\s?e\.(?=\s*(?:[,;:!?)]|$))/giu, "that is.");
+    s = tr(s, /\be\.\s?g\.(\s+)(?=[\p{L}\d])/giu, "for example$1");
+    s = tr(s, /\be\.\s?g\.(?=\s*(?:[,;:!?)]|$))/giu, "for example.");
+    s = tr(s, /\bi\.\s?e\.(\s+)(?=[\p{L}\d])/giu, "that is$1");
+    s = tr(s, /\bi\.\s?e\.(?=\s*(?:[,;:!?)]|$))/giu, "that is.");
     //     a.m./p.m. likewise: dot-stripping alone leaves lowercase "am", which reads as the verb. The
     //     initialism pass cannot rescue it because that pass only claims all-caps runs.
-    s = s.replace(/\b([ap])\.\s?m\./gi, (_m, ap: string) => (ap.toLowerCase() === "a" ? "ay em" : "pee em"));
+    s = tr(s, /\b([ap])\.\s?m\./gi, (_m, ap: string) => (ap.toLowerCase() === "a" ? "ay em" : "pee em"));
     //     Other dotted initialisms (U.S., U.K.) — strip the interior dots so they cannot become pause marks,
     //     leaving the letters for the initialism pass or the dictionary.
     //     ⚠ AND UPPERCASED, because a contiguous dotted letter run IS an initialism by construction, while
@@ -310,11 +311,11 @@ export function normalizeEnglish(input: string): string {
     //     corpus audit caught — the reader said "U-S". (`u.k.` escaped only because "uk" is not a word,
     //     which is why this never showed up before.) Uppercasing is safe here precisely because the dots
     //     have already proved what the run is.
-    s = s.replace(/\b([A-Za-z](?:\.[A-Za-z]){1,4})\.(?!\w)/g, (m0) => m0.replace(/\./g, "").toUpperCase());
+    s = tr(s, /\b([A-Za-z](?:\.[A-Za-z]){1,4})\.(?!\w)/g, (m0) => m0.replace(/\./g, "").toUpperCase());
 
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".
-    s = s.replace(/\b(BCE|BC|CE|AD)\b/g,
+    s = tr(s, /\b(BCE|BC|CE|AD)\b/g,
         (m0) => ({ BCE: "bee see ee", BC: "bee see", CE: "see ee", AD: "ay dee" })[m0] ?? m0);
 
     // 0d) DIGIT GROUPING with a space (SI style, "1 356"). The number token cannot span a space, so these
@@ -337,7 +338,7 @@ export function normalizeEnglish(input: string): string {
     //     merges its first pair the head is four digits, so the second pass would refuse its own output.
     const SPACE_GROUP = new RegExp(
         `(?<!(?:${MONTH_ALT})[ \u00a0\u202f\u2009])(?<![\\d.,])[1-9]\\d{0,2}(?:[ \u00a0\u202f\u2009]\\d{3})+(?![\\d])`, "giu");  // space, NBSP, NNBSP, thin space
-    s = s.replace(SPACE_GROUP, (m0) => m0.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, SPACE_GROUP, (m0) => m0.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 0e) SCIENTIFIC NOTATION'S EXPONENT, resolved before BOTH the sign rule and the unit rule — ⚠ AND THE
     //     ORDERING IS THE WHOLE REASON THIS IS SEPARATE FROM 6b rather than the same rule.
@@ -356,7 +357,7 @@ export function normalizeEnglish(input: string): string {
     //     exponent as plain digits with the superscript lost (`9.1093837 × 10 -31 kg`). THE ATTACHED MINUS
     //     IS THE DISCRIMINATOR: `10 -31` is scientific notation, `10 - 31` (spaced both sides) is
     //     subtraction. Combined with the required `×` before the `10`, nothing else can reach this.
-    s = s.replace(/(?<=[×x·]\s?)(10)\s?(\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+|-\d+)/gu,
+    s = tr(s, /(?<=[×x·]\s?)(10)\s?(\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+|-\d+)/gu,
         (_m, ten: string, sup: string) => {
             const digits = sup.startsWith("-")
                 ? sup
@@ -372,18 +373,18 @@ export function normalizeEnglish(input: string): string {
     //     position (start of string, after a space, or after an opening paren), so "minus" would spend the
     //     operator's word on the sign's job and be ambiguous with subtraction exactly where a phonemizer
     //     cannot afford it. `negative` on a measurement is unremarkable English ("negative forty Celsius").
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1negative $2");
+    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1negative $2");
     //     ⚠ THE SIGN ARM ABOVE REQUIRES THE DIGIT IMMEDIATELY, with no `\s?`, and that is what keeps a
     //     spaced range out: `(1418 – 1450)` reads as a subtraction the moment a space is allowed after the
     //     dash. `±` can afford the `\s?` because no range is written with one.
-    s = s.replace(/(^|[\s(])±\s?(\d)/gu, "$1plus or minus $2");
+    s = tr(s, /(^|[\s(])±\s?(\d)/gu, "$1plus or minus $2");
 
     // 0f0) NUMERIC DATES, before the fraction rule (which would otherwise have to guard against them) and
     //      before the date/year steps below, whose ordinal-day and pair-wise-year rules then apply to what
     //      this emits. ISO is year-first, the US form month-first.
-    s = s.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (m0, y: string, mo: string, d: string) =>
+    s = tr(s, /\b(\d{4})-(\d{2})-(\d{2})\b/g, (m0, y: string, mo: string, d: string) =>
         isoDate(Number(y), Number(mo), Number(d)) ?? m0);
-    s = s.replace(/\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g, (m0, mo: string, d: string, y: string) =>
+    s = tr(s, /\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g, (m0, mo: string, d: string, y: string) =>
         isoDate(Number(y), Number(mo), Number(d)) ?? m0);
 
     // 0f1) MONEY with cents. Read as "five dollars fifty", not "five point five zero dollars" — a decimal
@@ -391,7 +392,7 @@ export function normalizeEnglish(input: string): string {
     // ⚠ `(?![\p{L}\p{M}])`, NOT `\b` — and the `u` flag is required for it. JS defines `\b` on ASCII `\w`,
     // so `$1.50é` was read as money while `$1.50a` was not (#949, #950). The `u` flag alone changes nothing
     // here; the guard is the change.
-    s = s.replace(/([$£€¥])\s?(\d[\d,]*)\.(\d{2})(?![\p{L}\p{M}])/gu,
+    s = tr(s, /([$£€¥])\s?(\d[\d,]*)\.(\d{2})(?![\p{L}\p{M}])/gu,
         (_m, sym: string, int: string, cents: string) => {
             const [sg, pl] = CURRENCY[sym]!;
             const unit = /^1$/.test(int.replace(/,/g, "")) ? sg : pl;
@@ -400,12 +401,12 @@ export function normalizeEnglish(input: string): string {
 
     // 0f2) PLUS. The mirror of the minus rule: a dropped sign is silent content loss. Covers the attached
     //      form too (UTC+1 → "UTC plus 1").
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
+    s = tr(s, /(\S)\+\s?(\d)/gu, "$1 plus $2");
+    s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
     // 0g) FRACTIONS. Guarded against dates (3/14/2011) and unit ratios (km/h) by requiring digits both sides
     //     and nothing numeric or alphabetic after.
-    s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[\/\d])/gu, (m0, a: string, b: string) =>
+    s = tr(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[\/\d])/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
 
     // 1) CURRENCY before anything else touches the digits: the symbol precedes but is SPOKEN after, and a
@@ -422,7 +423,7 @@ export function normalizeEnglish(input: string): string {
     //        version guard; it was here.
     //      · the UNIT step below would otherwise claim the `m` as a metre, since it runs later and `m` is a
     //        declared unit key. Consuming it here is what makes `he ran 100m` and `$1.5m` differ.
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`([$£€¥])\\s?(\\d[\\d,]*(?:\\.\\d+)?)(?:(\\s+(?:million|billion|trillion|thousand))|(${
             // ⚠ THE BOUNDARY GUARD SITS INSIDE THE ABBREVIATION ARM, NOT AFTER THE WHOLE GROUP. Placed
             // outside, it applies even when no magnitude matched — and then `$2.5tn` cannot satisfy it, so
@@ -439,11 +440,11 @@ export function normalizeEnglish(input: string): string {
     );
 
     // 2) PERCENT: "40%" → "40 percent". Before times/years so the bare number stays one token.
-    s = s.replace(/(\d)\s?%/gu, "$1 percent");
+    s = tr(s, /(\d)\s?%/gu, "$1 percent");
 
     // 3) TIMES: H:MM (optionally already followed by am/pm, which the dictionary reads fine).
     //    :00 → o'clock (dropped before am/pm: "3 pm", not "3 o'clock pm"), :0X → "oh X".
-    s = s.replace(/\b(\d{1,2}):([0-5]\d)\b(\s*[ap]m\b)?/gu, (_m, h: string, mm: string, ap?: string) => {
+    s = tr(s, /\b(\d{1,2}):([0-5]\d)\b(\s*[ap]m\b)?/gu, (_m, h: string, mm: string, ap?: string) => {
         const suffix = ap ?? "";
         if (mm === "00") return suffix ? `${h}${suffix}` : `${h} o'clock`;
         if (mm.startsWith("0")) return `${h} oh ${Number(mm)}${suffix}`;
@@ -453,7 +454,7 @@ export function normalizeEnglish(input: string): string {
     // 4) DATES: month + bare day number → ordinal suffix, letting the existing 16th path speak it
     //    (february 16 → "february 16th"). Runs BEFORE years so "february 16 2011" ordinalizes the day first
     //    and the year rule then sees "2011" with a month in context.
-    s = s.replace(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})(?!\d|\s*(?:st|nd|rd|th|percent))\b/gi, (m0, mon: string, d: string) => {
+    s = tr(s, /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})(?!\d|\s*(?:st|nd|rd|th|percent))\b/gi, (m0, mon: string, d: string) => {
         const n = Number(d);
         if (n < 1 || n > 31) return m0;
         const suf = d.endsWith("1") && n !== 11 ? "st" : d.endsWith("2") && n !== 12 ? "nd" : d.endsWith("3") && n !== 13 ? "rd" : "th";
@@ -484,7 +485,7 @@ export function normalizeEnglish(input: string): string {
     //    ⚠ It does NOT fully escape the sign rule at step 0f: that arm needs the dash to follow a space or
     //    an open paren, which `1998-1999` and `1998 - 1999` avoid but `1998 -1999` does not — that spacing
     //    still reads as a negative, exactly as it does on main. Not introduced here, and not fixed here.
-    s = s.replace(
+    s = tr(s, 
         /(?<!\b(?:pp|p|pages?|nos?|no|rooms?|chapters?|verses?|lines?|sections?|parts?|models?|items?|figs?|figures?|tables?|suites?|apt|ext)\.?\s)\b(1[1-9]\d\d|20\d\d)(\s*[-–—]\s*)(1[1-9]\d\d|20\d\d)\b(?![.,]?\d)(?!\s*(?:percent|kilometers?|meters?|km|kg|miles?|feet|ft|dollars?|usd|euros?))/gi,
         //    ⚠ AND A DATE RANGE ASCENDS. This catches what no cue list can: `call 1800-1234` is a phone
         //    number, not a reign, and it read as "18 hundred-12 34". Requiring b >= a rules out phone
@@ -501,7 +502,7 @@ export function normalizeEnglish(input: string): string {
     //    words in the investigate queue, and the recognizer plainly returns *nineteen ninety-eight*. Only
     //    the three bare determiners are allowed through: an adjective slot would let "in a 2011 people
     //    survey" past, which is the reading the context gate exists to prevent.
-    s = s.replace(
+    s = tr(s, 
         /\b(in|of|since|from|until|till|by|before|after|around|circa|year|late|early|mid)(\s+(?:the|a|an))?\s+(1[1-9]\d\d|20\d\d)\b(?![.,]?\d)(?!\s*(?:percent|kilometers?|meters?))/gi,
         (_m, ctx: string, det: string | undefined, y: string) =>
             // ⚠ THE DETERMINER ARM IS PRE-2010 ONLY, and the split is measured, not stylistic. Reaching
@@ -511,13 +512,13 @@ export function normalizeEnglish(input: string): string {
             // hundred ninety-eight". A year in the ORIGINAL tight contexts is untouched either way.
             det && Number(y) >= 2010 ? _m : `${ctx}${det ?? ""} ${yearWords(Number(y))}`,
     );
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`\\b(${MONTH_ALT})((?:\\s+\\d{1,2}(?:st|nd|rd|th))?,?)\\s+(1[1-9]\\d\\d|20\\d\\d)\\b(?![.,]?\\d)`, "gi"),
         (_m, mon: string, day: string, y: string) => `${mon}${day} ${yearWords(Number(y))}`,
     );
 
     // 6) UNITS: number + known abbreviation. Count agreement from the number.
-    s = s.replace(UNIT_RE,
+    s = tr(s, UNIT_RE,
         (_m: string, num: string, mag: string | undefined, u: string, exp: string | undefined) => {
             // ⚠ SAME TWO STEPS, SAME HELPER as the shared symbol layer — English keeps its own UNITS table
             // (this normalizer predates that layer), and it carried the same `UNITS[u.toLowerCase()]!`
@@ -560,9 +561,9 @@ export function normalizeEnglish(input: string): string {
     //     is that word's NUCLIDE, not this number's power (`0,708 ¹⁸⁰Hf`). Firing here would insert the
     //     space and thereby hide the shape from the decline below, which tests for a letter IMMEDIATELY
     //     after. `10⁶km` still spaces, because nothing separates its base from its mark.
-    s = s.replace(/(?:\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})(?:\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)(?=[\p{L}\p{M}])/gu,
+    s = tr(s, /(?:\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})(?:\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)(?=[\p{L}\p{M}])/gu,
         (m0) => `${m0} `);
-    s = s.replace(/(\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?(\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
+    s = tr(s, /(\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?(\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
         (whole, base: string, sup: string, at: number, all: string) => {
             //     ⚠ A LONE ⁰ OR ¹ IS A DEGREE SIGN OR A PRIME, not a power — see `LONE_MARK` in
             //     core/normalizeSymbols.ts for the corpus measurement. `360⁰` is a bearing and
@@ -609,7 +610,7 @@ export function normalizeEnglish(input: string): string {
     //     a stoplisted token, exactly as core's `licensed` does — `Apollo XI` is 11 and `WrestleMania XL`
     //     is 40, and both would be lost to a blanket check.
     if (/[a-z]/.test(s)) {
-        s = s.replace(/\b([A-Za-z][A-Za-z']*)\s+([IVXLCDM]{2,})\b/g, (m0, prev: string, rom: string) => {
+        s = tr(s, /\b([A-Za-z][A-Za-z']*)\s+([IVXLCDM]{2,})\b/g, (m0, prev: string, rom: string) => {
             const n = romanToInt(rom);
             if (n === null) return m0;
             const named = ROMAN_CARDINAL_CTX.test(prev);
@@ -624,7 +625,7 @@ export function normalizeEnglish(input: string): string {
     }
 
     // 7b) ROMAN NUMERALS, the closed 2–20 set: cardinal after a context word, else the regnal ordinal.
-    s = s.replace(/\b([a-z']+)\s+(ii|iii|iv|vii|viii|ix|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)\b/gi,
+    s = tr(s, /\b([a-z']+)\s+(ii|iii|iv|vii|viii|ix|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)\b/gi,
         (_m, prev: string, rom: string) => {
             const n = ROMAN[rom.toLowerCase()]!;
             if (ROMAN_CARDINAL_CTX.test(prev)) return `${prev} ${n}`;
@@ -640,8 +641,8 @@ export function normalizeEnglish(input: string): string {
     //    ⚠ THE HTML ENTITY FIRST, or the bare-`&` rule below turns `&amp;` into "and amp;" — a word invented
     //    out of markup, which is worse than the drop it replaces. (`core/markup.ts` decodes these properly,
     //    but English does not use it, and wiring it in would also strip tags.)
-    s = s.replace(/\s*&amp;\s*/giu, " and ");
-    s = s.replace(/\s*&\s*/gu, " and ");
+    s = tr(s, /\s*&amp;\s*/giu, " and ");
+    s = tr(s, /\s*&\s*/gu, " and ");
     //    `×`/`÷`/`<`/`>` only BETWEEN digits — `<` is the one sign whose bare form would eat a tag if the
     //    input ever carried markup.
     // ⚠ TWO WORDS FOR ONE SIGN, and ASCII `x` accepted alongside `×`.
@@ -653,18 +654,18 @@ export function normalizeEnglish(input: string): string {
     //     THE DISCRIMINATOR: a unit after the right operand means a measurement; an UNSPACED ascii `x`
     //     between digits is the `4x4`/`6x6` format idiom. Both take "by"; everything else takes "times".
     //     Equality of the operands cannot decide it — `4x4` and `5 × 5` are both equal and read differently.
-    s = s.replace(/(\d)\s*(×|x)\s*(?=\d)/gu, (whole, left: string, sign: string, off: number, full: string) => {
+    s = tr(s, /(\d)\s*(×|x)\s*(?=\d)/gu, (whole, left: string, sign: string, off: number, full: string) => {
         const tail = full.slice(off + whole.length);
         const hasUnit = /^\d[\d.,]*\s?[A-Za-z]/u.test(tail);
         const unspacedAscii = sign === "x" && !/\s/u.test(whole);
         return `${left} ${hasUnit || unspacedAscii ? "by" : "times"} `;
     });
-    s = s.replace(/(\d)\s*÷\s*(?=\d)/gu, "$1 divided by ");
+    s = tr(s, /(\d)\s*÷\s*(?=\d)/gu, "$1 divided by ");
     //    ⚠ `=` takes the house pattern `(\S)\s*=\s*(\S)`, not the digit gate: an equals sign between
     //    non-digits is still an equals sign (`x = y`), and unlike `<`/`>` it carries no tag hazard.
-    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 equals $2");
-    s = s.replace(/(\d)\s*<\s*(?=\d)/gu, "$1 less than ");
-    s = s.replace(/(\d)\s*>\s*(?=\d)/gu, "$1 greater than ");
+    s = tr(s, /(\S)\s*=\s*(\S)/gu, "$1 equals $2");
+    s = tr(s, /(\d)\s*<\s*(?=\d)/gu, "$1 less than ");
+    s = tr(s, /(\d)\s*>\s*(?=\d)/gu, "$1 greater than ");
 
     return s;
 }

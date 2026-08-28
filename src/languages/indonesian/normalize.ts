@@ -1,3 +1,4 @@
+import { tr } from "../../core/provenance.ts";
 /**
  * Indonesian (id) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
  * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
@@ -44,7 +45,7 @@ export function normalizeIndonesian(input: string): string {
     //    Both guards are needed. The trailing one keeps a RACE time out ("4:41.30, 2:11.60 menit" is
     //    minutes:seconds.hundredths, and the corpus has three); the LEADING one stops the scan restarting
     //    inside one and claiming "09.02" out of "1:09.02" as a clock in its own right.
-    s = s.replace(/(?<![\d.:])([01]?\d|2[0-3])[.:]([0-5]\d)\b(?!\.?\d)/gu, (whole, h: string, min: string) => {
+    s = tr(s, /(?<![\d.:])([01]?\d|2[0-3])[.:]([0-5]\d)\b(?!\.?\d)/gu, (whole, h: string, min: string) => {
         const mv = Number(min);
         return mv === 0 ? `${Number(h)}` : `${Number(h)} lewat ${mv}`;
     });
@@ -62,20 +63,20 @@ export function normalizeIndonesian(input: string): string {
     //     no amount after it would leave a lone `$` the tier cannot place. Note the corpus writes BOTH
     //     spacings — `US$ 14,7` and `US $30` — and only the closed one is broken, since the open one already
     //     puts a space between the letter and the sign.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[ \u00a0]?\d)/gu, "$");  // space, NBSP
 
     // 2) RUPIAH. `Rp` was read as the bare letter pair [rp]; the shared symbol tier is keyed on
     //    single-character signs and cannot express a two-letter prefix. Indonesian says the unit AFTER the
     //    amount, so the prefix is moved.
-    s = s.replace(/\bRp\.?\s?(\d[\d.,]*)/gu, "$1 rupiah");
+    s = tr(s, /\bRp\.?\s?(\d[\d.,]*)/gu, "$1 rupiah");
 
     // 2b) `No.` before a DIGIT is the number sign, which the letter-lookahead rule below cannot claim.
     //     The corpus instance is «kosmonot No. 11».
-    s = s.replace(/\bno\.\s?(?=\d)/giu, "nomor ");
+    s = tr(s, /\bno\.\s?(?=\d)/giu, "nomor ");
 
     // 3) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -83,7 +84,7 @@ export function normalizeIndonesian(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
+    s = tr(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -93,7 +94,7 @@ export function normalizeIndonesian(input: string): string {
         });
 
     // 4) SLASH UNITS, before the shared tier claims the bare `km`.
-    s = s.replace(new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}])`, "gu"),
+    s = tr(s, new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}])`, "gu"),
         (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`);
 
     // 5) DEGREES. °C was falling through to the English reading of the letter C.
@@ -101,8 +102,8 @@ export function normalizeIndonesian(input: string): string {
     // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
     // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
     // orthography is what supplies the accented letter. 71 other engines already guard it this way.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 derajat Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 derajat Fahrenheit");
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 derajat Celsius");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 derajat Fahrenheit");
     //    COORDINATES, the third sense of the sign, and it was UNREACHABLE UNTIL THE MOJIBAKE REPAIR. The
     //    corpus writes `di timur 35Â°W` — the coordinate's degree sign was half of a broken `°` in
     //    double-encoded text, so the bare arm below could never see it and the `W` was never a problem.
@@ -110,24 +111,24 @@ export function normalizeIndonesian(input: string): string {
     //    at which point `35°W` reached the bare arm and read *tiga puluh lima derajatW* with the direction
     //    letter glued raw into the IPA. Repairing an input EXPOSES the rules that were never exercised on it,
     //    so a mojibake fix has to be followed by a re-read of the sentences it unmasks.
-    s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
         (m, d: string, dir: string) => {
             // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122) — `iu` folds U+017F LONG S onto `s`,
             // so `12°ſ` matches `[NSEW]` and the `!` made `String.replace` stringify `undefined`.
             const word = COMPASS[dir.toLowerCase()];
             return word === undefined ? m : `${d} derajat ${word}`;
         });
-    s = s.replace(/(\d)\s?°/gu, "$1 derajat");
+    s = tr(s, /(\d)\s?°/gu, "$1 derajat");
 
     // 6) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1minus $2");
+    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1minus $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
     //    already in this file.
-    s = s.replace(/±/gu, " plus minus ");
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
+    s = tr(s, /±/gu, " plus minus ");
+    s = tr(s, /(\S)\+\s?(\d)/gu, "$1 plus $2");
+    s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
     // 6b) RELATIONAL AND DIVISION SIGNS, and this language is sourced ENTIRELY from the corpus — tier 2,
     //     audio-aligned, no Wikipedia needed. Counted in id_id as phrases:
@@ -150,13 +151,13 @@ export function normalizeIndonesian(input: string): string {
     //     `lebih besar dari` is preferred over the commoner bare `lebih dari` ("more than") because the sign is a
     //     magnitude comparison and Indonesian marks that with `besar`; both are attested, and the explicit one is
     //     what the notation means.
-    s = s.replace(/\s?=\s?/gu, " sama dengan ");
-    s = s.replace(/\s?<\s?/gu, " lebih kecil dari ");
-    s = s.replace(/\s?>\s?/gu, " lebih besar dari ");
-    s = s.replace(/\s?÷\s?/gu, " dibagi ");
+    s = tr(s, /\s?=\s?/gu, " sama dengan ");
+    s = tr(s, /\s?<\s?/gu, " lebih kecil dari ");
+    s = tr(s, /\s?>\s?/gu, " lebih besar dari ");
+    s = tr(s, /\s?÷\s?/gu, " dibagi ");
 
     // 7) FRACTIONS, as "numerator per denominator" — the ordinary spoken form; ½ is setengah.
-    s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (_m, a: string, b: string) =>
+    s = tr(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (_m, a: string, b: string) =>
         Number(a) === 1 && Number(b) === 2 ? "setengah" : `${a} per ${b}`);
 
     return s;

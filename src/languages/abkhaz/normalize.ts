@@ -46,6 +46,7 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 const ESC = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 
@@ -129,7 +130,7 @@ export function normalizeAbkhaz(text: string): string {
 
     // 1) ZERO-WIDTH marks (×51 in the corpus) — dropped before anything measures adjacency, since a ZWSP
     //    between a number and its unit makes the two non-adjacent and every later rule miss.
-    s = s.replace(/[​‌‍﻿]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
+    s = tr(s, /[​‌‍﻿]/gu, "");  // ZWSP, ZWNJ, ZWJ, BOM
 
     // 2) DE-GROUP a thousands-separated numeral (×13: 125 000, 12 364, 180 000) — FIRST among the number
     //    rules, per the playbook: the separator is otherwise read as clause punctuation or, here, as a
@@ -139,7 +140,7 @@ export function normalizeAbkhaz(text: string): string {
     //    ⚠ THE LEFT GUARD IS LOAD-BEARING: without `(?<!\d)` the 1–3 digit group BACKTRACKS into the tail
     //    of a longer number, so "1877 250 ҩык" (a year beside a count) joined into 1877250 and was read as
     //    one seven-figure number. The comment used to claim the 3-digit rule covered that; it did not.
-    s = s.replace(/(?<!\d)([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009](\d{3}))+(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<!\d)([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009](\d{3}))+(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     //    ⚠ COMMA-GROUPING TOO. Two-plus groups are unambiguous (£29,721,250 — the wiki spells that very
     //    sum de-grouped, "29,721,250 фунт стерлинг"). A SINGLE comma group collides with the decimal
@@ -148,8 +149,8 @@ export function normalizeAbkhaz(text: string): string {
     //    the 5 decimals begins ⟨0,⟩ ("0,723", "0,306"). So the INTEGER PART discriminates: a leading 0
     //    keeps the decimal reading, anything else de-groups. (The first version kept every single group
     //    as a decimal and mis-read the majority class its own comment claimed to protect.)
-    s = s.replace(/(?<![\d,])[1-9]\d{0,2}(?:,\d{3}){2,}(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d,.])([1-9]\d{0,2}),(\d{3})(?![\d,])/gu, "$1$2");
+    s = tr(s, /(?<![\d,])[1-9]\d{0,2}(?:,\d{3}){2,}(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d,.])([1-9]\d{0,2}),(\d{3})(?![\d,])/gu, "$1$2");
 
     // 2b) THE MINUS — U+2212 ONLY, and BEFORE the symbol step, because step 3 rewrites the ⟨°C⟩ this
     //    rule's operand sits in front of and the sign would be stranded against a word (trap 39).
@@ -160,7 +161,7 @@ export function normalizeAbkhaz(text: string): string {
     //    is a span, and step 4 reads it as one — as well as ordinary hyphenation; U+2212 can only be the
     //    operator, which is what licenses reading a word this wiki never spells out.
     //    ⚠ `(?<!\p{Nd}\s)` refuses the space-separated negative exponent, the fleet-wide guard.
-    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, `${MANIFEST.symbols.minus} `);
+    s = tr(s, /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}\s)\u2212(?=\p{Nd})/gu, `${MANIFEST.symbols.minus} `);
 
     // 3) SYMBOLS — percent, degrees, currency, км², the clock. The words and their ORDER are the
     //    full-wiki attestations recorded in the manifest `symbols` block (sourcing:
@@ -180,7 +181,7 @@ export function normalizeAbkhaz(text: string): string {
     //    ⚠ NOT A CLOCK: "(1:51.4)" — a race time, in the corpus — is excluded by the `[.,]\d` trailing
     //    guard ("minutes" carrying a fraction are a duration), and 25:99 by the wall-clock bounds in
     //    clockParts (h<24, mm<60, ss<60 — the shared house rule).
-    s = s.replace(new RegExp(`(?<![\\d:])${TIME}\\s?[-–—]\\s?${TIME}(?![\\d:]|[.,]\\d)`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d:])${TIME}\\s?[-–—]\\s?${TIME}(?![\\d:]|[.,]\\d)`, "gu"),
         (m0: string, h1: string, m1: string, s1: string | undefined, h2: string, m2: string,
             s2: string | undefined, off: number, whole: string) => {
             const a = clockParts(h1, m1, s1), b = clockParts(h2, m2, s2);
@@ -189,7 +190,7 @@ export function normalizeAbkhaz(text: string): string {
             const to = /[ар]ҟынӡа/u.test(after) ? "" : ` ${MANIFEST.numbers.rangeTo}`;
             return `${saidHour(whole, off) ? "" : `${MANIFEST.symbols.hour} `}${a} ${MANIFEST.numbers.rangeFrom} ${b}${to}`;
         });
-    s = s.replace(new RegExp(`(?<![\\d:])${TIME}(?![\\d:]|[.,]\\d)`, "gu"),
+    s = tr(s, new RegExp(`(?<![\\d:])${TIME}(?![\\d:]|[.,]\\d)`, "gu"),
         (m0: string, h: string, mm: string, ss: string | undefined, off: number, whole: string) => {
             const t = clockParts(h, mm, ss);
             if (t === undefined) return m0;
@@ -206,7 +207,7 @@ export function normalizeAbkhaz(text: string): string {
     //    still clocks — only a digit continuation ([.,]\d — a chain or a fraction) refuses.
     const DTIME = "(\\d{1,2})\\.(\\d{2})";
     const HOUR_ANCHOR = `(?<![\\p{L}])${ESC(MANIFEST.symbols.hour)}\\s{1,2}`;
-    s = s.replace(new RegExp(
+    s = tr(s, new RegExp(
         `${HOUR_ANCHOR}${DTIME}(?:\\s?[-–—]\\s?|\\s+${ESC(MANIFEST.numbers.rangeFrom)}\\s+)${DTIME}(?!\\d|[.,]\\d)`, "gu"),
         (m0: string, h1: string, m1: string, h2: string, m2: string, off: number, whole: string) => {
             const a = clockParts(h1, m1, undefined), b = clockParts(h2, m2, undefined);
@@ -215,7 +216,7 @@ export function normalizeAbkhaz(text: string): string {
             const to = /[ар]ҟынӡа/u.test(after) ? "" : ` ${MANIFEST.numbers.rangeTo}`;
             return `${MANIFEST.symbols.hour} ${a} ${MANIFEST.numbers.rangeFrom} ${b}${to}`;
         });
-    s = s.replace(new RegExp(`${HOUR_ANCHOR}${DTIME}(?!\\d|[.,]\\d)`, "gu"),
+    s = tr(s, new RegExp(`${HOUR_ANCHOR}${DTIME}(?!\\d|[.,]\\d)`, "gu"),
         (m0: string, h: string, mm: string) => {
             const t = clockParts(h, mm, undefined);
             return t === undefined ? m0 : `${MANIFEST.symbols.hour} ${t}`;
@@ -231,8 +232,8 @@ export function normalizeAbkhaz(text: string): string {
     //    WORD starting with C/F/K suppressed the rule ("60° Кырҭтәыла" kept its raw °). ⟨°F⟩/⟨°Ф⟩ and
     //    Kelvin still fall through deliberately: no Fahrenheit word is attested, and Kelvin is written
     //    unsigned ("135 K") — a standalone letter after ° stays untouched, a word does not.
-    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}])/gui, (_m, d: string) => `${d} ${MANIFEST.symbols.celsius}`);
-    s = s.replace(/(\d)\s?°(?!\s?[CFKКСФ](?![\p{L}]))/gui, (_m, d: string) => `${d} ${MANIFEST.symbols.degree}`);
+    s = tr(s, /(\d)\s?°\s?[CС](?![\p{L}])/gui, (_m, d: string) => `${d} ${MANIFEST.symbols.celsius}`);
+    s = tr(s, /(\d)\s?°(?!\s?[CFKКСФ](?![\p{L}]))/gui, (_m, d: string) => `${d} ${MANIFEST.symbols.degree}`);
 
     //    3c) SCALE ABBREVIATIONS (млрд/млн: "$1,86 млрд", "€ 30 млн") — BEFORE the symbol tier, so the
     //    currency rule can hop the SPELLED scale word and land the currency name LAST, in the attested
@@ -242,14 +243,14 @@ export function normalizeAbkhaz(text: string): string {
     //    both), so the dot is consumed like step 7's abbreviation dots — and like there, it may be the
     //    SENTENCE'S too, so it is re-emitted before whitespace + an upper-case letter.
     for (const [abbr, slot] of Object.entries(MANIFEST.symbols.scales))
-        s = s.replace(new RegExp(`(?<![\\p{L}])${ESC(abbr)}(?:\\.(\\s+\\p{Lu})?|(?![\\p{L}]))`, "gu"),
+        s = tr(s, new RegExp(`(?<![\\p{L}])${ESC(abbr)}(?:\\.(\\s+\\p{Lu})?|(?![\\p{L}]))`, "gu"),
             (_m, tail?: string) => (tail === undefined ? MANIFEST.numbers[slot] : `${MANIFEST.numbers[slot]}.${tail}`));
 
     //    3d) THE ASCII EXPONENT — the corpus writes "8 км2" beside "422 000 км²", and the tier's
     //    ASCII-digit arm is Latin-only by design (its lookbehind is [a-zA-Z], so a Cyrillic unit never
     //    reaches it — the Bulgarian lesson, bg/normalize.ts). Folded to the superscript here, BEFORE the
     //    tier, so both spellings take the same path.
-    s = s.replace(/(?<=\d\s?(?:км|см|м))([23])(?![\d\p{L}])/gu, (d: string) => (d === "2" ? "²" : "³"));
+    s = tr(s, /(?<=\d\s?(?:км|см|м))([23])(?![\d\p{L}])/gu, (d: string) => (d === "2" ? "²" : "³"));
 
     //    3e) PERCENT (×31), CURRENCY (×6), UNITS (км ×58, м ×21) and КМ² all go through the SHARED
     //    symbol tier (see `symbolize` above), which owns the guards: already-said suppression,
@@ -268,7 +269,7 @@ export function normalizeAbkhaz(text: string): string {
     //    the "to" word. The left guard also refuses a start just past a decimal separator (the ⟨14-15⟩
     //    inside ⟨3.14-15⟩), and the right guard refuses a separator-digit continuation but NOT a
     //    sentence dot.
-    s = s.replace(/(?<![\p{L}\d.,-])(\d+(?:[.,]\d+)?)\s?[-–—]\s?(\d+(?:[.,]\d+)?)(?!\d|[.,]\d|-)/gu,
+    s = tr(s, /(?<![\p{L}\d.,-])(\d+(?:[.,]\d+)?)\s?[-–—]\s?(\d+(?:[.,]\d+)?)(?!\d|[.,]\d|-)/gu,
         (m0: string, a: string, b: string, off: number, whole: string) => {
             // ⚠ DO NOT DOUBLE A "TO" THE TEXT ALREADY WROTE. "1800-2000 м рҟынӡа" is attested, and adding
             // the connective unconditionally read рҟынӡа twice. Same guard the shared symbol tier uses for
@@ -299,7 +300,7 @@ export function normalizeAbkhaz(text: string): string {
     //    ⚠ A LETTER MAY BE GLUED TO THE FRACTION ("0,6км", "38.61мм" — the corpus writes both), and the
     //    emitted words fused with it: 0,6км read *фбакм, one nonword. A trailing space is added exactly
     //    when the next character is a letter.
-    s = s.replace(/(?<![\d.])(\d+)[.,](\d+)(?!\d|\.\d)/gu, (m0, int: string, frac: string, off: number, whole: string) => {
+    s = tr(s, /(?<![\d.])(\d+)[.,](\d+)(?!\d|\.\d)/gu, (m0, int: string, frac: string, off: number, whole: string) => {
         if (m0.includes(".") && frac.length === 4 && int.length <= 2 && Number(int) >= 1 && Number(int) <= 12)
             return m0; // MM.YYYY
         const sep = /\p{L}/u.test(whole[off + m0.length] ?? "") ? " " : "";
@@ -314,7 +315,7 @@ export function normalizeAbkhaz(text: string): string {
     //    hard-set carries, and the spaced one only shows up in running text.
     //    ⚠ AND A TRAILING BOUNDARY, or the suffix matches the START of a longer word: 5-тәижәа glued into
     //    ахәбатәижәа.
-    s = s.replace(new RegExp(`(\\d+)[- ]${MANIFEST.numbers.ordinalSuffix}(?![\\p{L}])`, "gu"),
+    s = tr(s, new RegExp(`(\\d+)[- ]${MANIFEST.numbers.ordinalSuffix}(?![\\p{L}])`, "gu"),
         (m0, d: string) => ordinalWords(Number(d)) ?? m0);
 
     // 7) ABBREVIATIONS (×125). ⚠ THE EXPANSIONS ARE THE CORPUS'S OWN SPELLINGS, counted in it: шықәса
@@ -329,7 +330,7 @@ export function normalizeAbkhaz(text: string): string {
         //    ⚠ THE DOT MAY BE THE SENTENCE'S TOO. Consuming it unconditionally ran two sentences together
         //    ("Ари 1452ш. Аҩбатәи ауп." lost its pause), so it is re-emitted when what follows looks like a
         //    new sentence — whitespace then an upper-case letter.
-        s = s.replace(new RegExp(`(?<![\\p{L}])${abbr.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\.(\\s+\\p{Lu})?`, "gu"),
+        s = tr(s, new RegExp(`(?<![\\p{L}])${abbr.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\.(\\s+\\p{Lu})?`, "gu"),
             (_m, tail?: string) => (tail === undefined ? full : `${full}.${tail}`));
 
     return s;

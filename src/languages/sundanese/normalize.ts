@@ -43,6 +43,7 @@
  * ⟨ke-N⟩ ×142 is the Indonesian spelling of the same prefix and reads acceptably as [kə]; left alone.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Sundanese has NO nominal plural, so every CountForms is a single entry.
@@ -167,7 +168,7 @@ export function normalizeSundanese(input: string): string {
     // ⚠ AND THE SUPERSCRIPT CLASS IS SPELLED OUT, NOT WRITTEN AS `[⁰-⁹]`. That range is U+2070–U+2079 and
     // does NOT contain ¹ ² ³ (U+00B9/B2/B3, in Latin-1 Supplement), which are the three commonest powers —
     // so the range form silently failed on `$10¹²$`, the very instance it was written for.
-    s = s.replace(/\$([^$]*[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+[^$]*)\$/gu, "$1");
+    s = tr(s, /\$([^$]*[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+[^$]*)\$/gu, "$1");
 
     // ── 1. DE-GROUP THOUSANDS — FIRST, and the single most destructive defect this layer repairs ──────
     // The tokenizer splits on `\d+` and `.`/`,` are both clause punctuation, so a grouping separator became a
@@ -181,8 +182,8 @@ export function normalizeSundanese(input: string): string {
     // most: in `764.387,59` the period-group is FOLLOWED by the decimal comma, so the guard rejected it and
     // the `.` went back to being a clause pause — *tujuh ratus genep puluh opat . tilu ratus…*. Rejecting only
     // a following DIGIT is right, because a further `.\d{3}` is already consumed by the `+`.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+)(?!\d)/gu, (m) => m.replaceAll(".", ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:,\d{3})+)(?!\d)/gu, (m) => m.replaceAll(",", ""));
     // ⚠ AND THE SPACE-GROUPED FORM, ×24 (`62 262`, `5 165`, `1 000`). Flagged by `review.ts`'s own probe
     // rather than by the corpus tabulation, which counted only the two punctuation separators. The head is
     // capped at three digits and the lookbehind rejects a preceding digit, so an adjacent PAIR of numbers
@@ -192,7 +193,7 @@ export function normalizeSundanese(input: string): string {
     // and read *lˈima pˈuluh ʔənˈol .* — "fifty, zero" — losing the thousand word at exactly a sentence end.
     // Reported by `review.ts`'s `clause-final` check. A decimal tail is safe either way: `1 234.56` de-groups
     // to `1234.56` and the decimal rule reads it whole.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // ── 2. CLOCK — BEFORE the decimal rule, which would otherwise claim `7.30` as seven-point-three ──────
     // The corpus writes the hour with `jam` ×186, `tabuh` and `pukul`, and both separators (`jam 05.00`,
@@ -202,14 +203,14 @@ export function normalizeSundanese(input: string): string {
     // construction (`jam 10 liwat 10`). Shipped on that plus the sister-language pattern (Indonesian `lewat`,
     // the same construction), and the thinness is stated rather than hidden — if it is wrong, it is wrong on
     // 78 instances, and the alternative was leaving a clause pause in the middle of every clock.
-    s = s.replace(
+    s = tr(s, 
         /(?<![\d.:])\b(jam|tabuh|pukul)\s?([01]?\d|2[0-3])[.:]([0-5]\d)\b(?!\.?\d)/giu,
         (_m, w: string, h: string, min: string) =>
             Number(min) === 0 ? `${w} ${Number(h)}` : `${w} ${Number(h)} liwat ${Number(min)}`,
     );
     // A BARE `H:MM` with no hour word — the colon is clause punctuation, so it read as a pause mid-time.
     // Kept narrow: a colon only, never the period, because a bare `7.30` with no `jam` is a decimal.
-    s = s.replace(/(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)/gu,
+    s = tr(s, /(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)/gu,
         (_m, h: string, min: string) => (Number(min) === 0 ? `jam ${Number(h)}` : `jam ${Number(h)} liwat ${Number(min)}`));
 
     // ── 3. UNIT AFTER THE WORD `per` ────────────────────────────────────────────────────────────────────
@@ -227,9 +228,9 @@ export function normalizeSundanese(input: string): string {
     // ⚠ THE EXPONENT MAY BE ASCII, and only the superscript was accepted — so `27 per km2` leaked the unit
     // as raw letters (*…pər **km** dua*), the ASCII `2` then read as a separate number. GLUED ONLY, which is
     // the same asymmetry the fleet's exponent arms use: a SPACED `2` after a unit is the next number.
-    s = s.replace(/(?<=[\p{L}\p{M}])\/(km|m|cm|mm|kg|g|ha|l|c)(²|³|2|3)?(?![\p{L}\p{M}\d])/giu,
+    s = tr(s, /(?<=[\p{L}\p{M}])\/(km|m|cm|mm|kg|g|ha|l|c)(²|³|2|3)?(?![\p{L}\p{M}\d])/giu,
         (_m, u: string, exp: string | undefined) => ` per ${UNIT_WORD[u.toLowerCase()] ?? u}${EXP_WORD[EXP_ASCII[exp ?? ""] ?? exp ?? ""] ?? ""}`);
-    s = s.replace(/\bper\s+(km|m|cm|mm|kg|g|ha|l)(²|³|2|3)?(?![\p{L}\p{M}\d])/giu,
+    s = tr(s, /\bper\s+(km|m|cm|mm|kg|g|ha|l)(²|³|2|3)?(?![\p{L}\p{M}\d])/giu,
         (_m, u: string, exp: string | undefined) => `per ${UNIT_WORD[u.toLowerCase()]!}${EXP_WORD[EXP_ASCII[exp ?? ""] ?? exp ?? ""] ?? ""}`);
 
     // ── 4. THE SHARED TIER — percent, currency, units, rates, exponents, `&`, `×` ──────────────────────
@@ -249,7 +250,7 @@ export function normalizeSundanese(input: string): string {
     // after the KOMA", glossed in English by the article itself. A written corpus is the weakest evidence
     // about how a SYMBOL is spoken (playbook), so a definitional citation outranks the raw count.
     // Read digit-by-digit after the separator, which is the Austronesian convention Indonesian also takes.
-    s = s.replace(/(\d)[.,](\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} koma ${[...b].join(" ")}`);
+    s = tr(s, /(\d)[.,](\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} koma ${[...b].join(" ")}`);
 
     // ── 6. ERA MARKERS ──────────────────────────────────────────────────────────────────────────────────
     // ⚠ SM BEFORE M, always: `M` matches inside `SM` and would leave a stranded S. ×868 SM, ×417 `\d M`.
@@ -257,13 +258,13 @@ export function normalizeSundanese(input: string): string {
     // ⚠ THE OPERAND MAY CARRY THE DECADE SUFFIX `-an`, and without it 124 of the 859 `SM` were missed:
     // `170-an SM` ("the 170s BC") left the letters unread as *sm*. The corpus diff is what showed this — the
     // probe `100 SM` passed all along, because the suffix only appears in running text.
-    s = s.replace(/(\d+(?:-an)?)\s*SM\b(?![\p{L}\p{M}])/gu, "$1 saméméh Maséhi");
+    s = tr(s, /(\d+(?:-an)?)\s*SM\b(?![\p{L}\p{M}])/gu, "$1 saméméh Maséhi");
     // ⚠ THE TRAILING GUARD REJECTS A DOT THAT CONTINUES AN ABBREVIATION (`M.A.`), NOT A CLAUSE-FINAL
     // ONE — trap 58, which this same file already records twice for its other arms and then repeated
     // here. A bare `.` in the class refused every era marker that ends a sentence: `taun 1500 M.`
     // came back untouched and read *…lima ratus **m** .*, the letter bare and a spurious pause after
     // it. A name initial cannot reach this rule anyway — it requires a NUMBER immediately before.
-    s = s.replace(/(\d+(?:-an)?)\s*M\b(?![\p{L}\p{M}]|\.\p{L})/gu, "$1 Maséhi");
+    s = tr(s, /(\d+(?:-an)?)\s*M\b(?![\p{L}\p{M}]|\.\p{L})/gu, "$1 Maséhi");
 
     // ── 7. RANGES → `nepi ka` ("up to") ─────────────────────────────────────────────────────────────────
     // ×4,055, overwhelmingly year spans — `(1350-1357)`, `(669-1579 M)`, `(1482–1521)`. The hyphen was
@@ -290,7 +291,7 @@ export function normalizeSundanese(input: string): string {
     // writes the DECIMAL COMMA (`40,9 °C` ×many, and step 12 reads it), so a following comma is what declines
     // a decimal right operand. Measured: dropping it as well gains 4 more segments, every one a clause comma
     // after a year span, and admits `N-N,N` into a comma-decimal corpus for it.
-    s = s.replace(
+    s = tr(s, 
         /(?<!\b(?:nepi ka|tepi ka|dugi ka|ti|antara)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d,-])/gu,
         "$1 nepi ka $2",
     );
@@ -305,9 +306,9 @@ export function normalizeSundanese(input: string): string {
     // outright and ran the two years together with no connective at all. Claimed as a SPAN instead, with
     // the same `nepi ka` the hyphen range above uses, and bounded to CONSECUTIVE years, which is the
     // academic/regnal shape both instances have and the only one attested.
-    s = s.replace(/(?<![\d/])(\d{4})\/(\d{4})(?![\d/])/gu, (m0, a: string, b: string) =>
+    s = tr(s, /(?<![\d/])(\d{4})\/(\d{4})(?![\d/])/gu, (m0, a: string, b: string) =>
         Number(b) === Number(a) + 1 ? `${a} nepi ka ${b}` : m0);
-    s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (_m, a: string, b: string) =>
+    s = tr(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (_m, a: string, b: string) =>
         Number(a) === 1 && Number(b) === 2 ? "satengah" : `${a} per ${b}`);
 
     // ── 9. DEGREES ──────────────────────────────────────────────────────────────────────────────────────
@@ -318,9 +319,9 @@ export function normalizeSundanese(input: string): string {
     // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
     // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
     // orthography is what supplies the accented letter. 71 other engines already guard it this way.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 darajat Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 darajat Fahrenheit");
-    s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
+    s = tr(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 darajat Celsius");
+    s = tr(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 darajat Fahrenheit");
+    s = tr(s, /(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
         (m, d: string, dir: string) => {
             // ⚠ REFUSE THE WHOLE MATCH ON AN UNKNOWN DIRECTION (#1122) — `iu` folds U+017F LONG S onto `s`,
             // so `12°ſ` matches `[NSEW]` and the `!` made `String.replace` stringify `undefined`.
@@ -331,8 +332,8 @@ export function normalizeSundanese(input: string): string {
     // `25°Cölner` (the ⟨C⟩ belongs to a word), and this one then claimed the bare `°` and produced
     // `25 darajatCölner` — one fused token, read *…daraɟatt͡ʃˈolnər*. The specific-before-general
     // ordering is right; what was missing is that the general arm inherits the boundary problem.
-    s = s.replace(/(\d)\s?°(?=[\p{L}\p{M}])/gu, "$1 darajat ");
-    s = s.replace(/(\d)\s?°/gu, "$1 darajat");
+    s = tr(s, /(\d)\s?°(?=[\p{L}\p{M}])/gu, "$1 darajat ");
+    s = tr(s, /(\d)\s?°/gu, "$1 darajat");
 
     // ── 10. SIGNS ────────────────────────────────────────────────────────────────────────────────────────
     // All sourced from the filtered corpus as whole words: `sarua jeung` ×985, `leuwih gedé ti` ×36,
@@ -342,20 +343,20 @@ export function normalizeSundanese(input: string): string {
     // `lebih besar dari`. The explicit pair is the one the notation means.
     // ⚠ `±` IS ONE CHARACTER (U+00B1) and no `+` rule can match inside it — it needs its own arm or the sign
     // is dropped in silence. ×155, and in this corpus it usually means "approximately" (`saluas + 1,8 yuta`).
-    s = s.replace(/±/gu, " tambah kurang ");
+    s = tr(s, /±/gu, " tambah kurang ");
     // ⚠ THE OPERAND MAY BE PARENTHESISED, which cost the sign its only hard instance: `5 + (−3) = 2` read as
     // *lima KURANG tilu* — the `+` dropped and the bracketed minus left to stand in for it, so the expression
     // silently became a subtraction. Both arms accept `(` before the digit.
-    s = s.replace(/(\S)\+\s?(\(?\s?[-−]?\d)/gu, "$1 tambah $2");
-    s = s.replace(/(^|\s)\+\s?(\(?\s?[-−]?\d)/gu, "$1tambah $2");
+    s = tr(s, /(\S)\+\s?(\(?\s?[-−]?\d)/gu, "$1 tambah $2");
+    s = tr(s, /(^|\s)\+\s?(\(?\s?[-−]?\d)/gu, "$1tambah $2");
     // ⚠ MINUS AFTER PLUS, and the order is forced by the bracketed operand: run first, the minus arm turns
     // `5 + (−3)` into `5 + (kurang 3)`, after which the plus arm no longer sees a digit past its `(` and the
     // `+` is dropped — the expression silently becomes a subtraction.
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1kurang $2");
-    s = s.replace(/\s?=\s?/gu, " sarua jeung ");
-    s = s.replace(/\s?<\s?/gu, " leuwih leutik ti ");
-    s = s.replace(/\s?>\s?/gu, " leuwih gedé ti ");
-    s = s.replace(/\s?÷\s?/gu, " dibagi ");
+    s = tr(s, /(^|[\s(])[-−–](\d)/gu, "$1kurang $2");
+    s = tr(s, /\s?=\s?/gu, " sarua jeung ");
+    s = tr(s, /\s?<\s?/gu, " leuwih leutik ti ");
+    s = tr(s, /\s?>\s?/gu, " leuwih gedé ti ");
+    s = tr(s, /\s?÷\s?/gu, " dibagi ");
 
     return s;
 }

@@ -50,6 +50,7 @@
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
 import { NOT_LETTER_AFTER } from "../../core/boundaries.ts";
+import { tr } from "../../core/provenance.ts";
 
 /** ⚠ EVERY BOUNDARY HERE IS AN EXPLICIT LOOKAROUND, NEVER `\b` — `\b` is ASCII-defined and sees no
  *  Myanmar-block letter as a word character at all (trap 1). */
@@ -73,17 +74,17 @@ export function normalizeShan(input: string): string {
     //    decimal tail, which this corpus writes — while a bare `(?![\d.,])` declines every clause-final
     //    figure (trap 58). The separator here is a SPACE, and a decimal never has one before its
     //    fraction, so `(?!\d)` is the whole guard.
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     //    …and the no-break space, which this corpus also uses between a figure and its magnitude.
-    s = s.replace(/[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
+    s = tr(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 2) THE ERA MARKER, written in LATIN letters inside Shan text — `A.D 649-729`, `(1434 A.D.)`,
     //    `A.D 739`, `ထိုင်မႃး A.D 748`. It was reaching `core/foreign.ts` and reading as the English
     //    letter names. `ပီၶရိတ်ႉ` is this corpus's own word for the era ("ၼႂ်းပီၶရိတ်ႉ 1054",
     //    "ပီၶရိတ်ႉ 1953 တေႃႇ 1956", "ပီၵေႃးၸႃႇ 1320 ပီၶရိတ်ႉ 1950").
     //    ⚠ `B.C` IS NOT CLAIMED — see the header. Three instances do not license inventing a compound.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])A\\.?\\s?D\\.?${NOT_LETTER_AFTER}`, "gu"), "ပီၶရိတ်ႉ");
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])A\\.?\\s?D\\.?${NOT_LETTER_AFTER}`, "gu"), "ပီၶရိတ်ႉ");
 
     // 3) THE CLOCK. The colon is clause punctuation in shan.ts, so `5:23` read as *ႁႃႈ , သၢဝ်းသၢမ်* — a
     //    phrase break inside a time, and `09:00 – 10:00 မူင်း` took two of them. The corpus writes the
@@ -96,9 +97,9 @@ export function normalizeShan(input: string): string {
     //    one မူင်း after the whole span, so an unguarded rule emitted it twice on the second endpoint —
     //    the same shape Turkmen's `+11° gradus` produced. Both spellings are guarded, because this corpus
     //    writes မူင်း and မွင်း in roughly equal measure.
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])(?!\s*[မ][ူွ]င်း)/gu, (_m, h: string, mi: string) =>
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])(?!\s*[မ][ူွ]င်း)/gu, (_m, h: string, mi: string) =>
         Number(mi) === 0 ? `${h} မူင်း` : `${h} မူင်း ${mi} မိၼိတ်ႉ`);
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])(?=\s*[မ][ူွ]င်း)/gu, (_m, h: string, mi: string) =>
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])(?=\s*[မ][ူွ]င်း)/gu, (_m, h: string, mi: string) =>
         Number(mi) === 0 ? `${h} ` : `${h} မူင်း ${mi} မိၼိတ်ႉ `);
 
     // 4) DEGREES, and here the class is BOTH angular and thermal — `၁၈° ၀'`, `၉၄° ၄၀'`, `22°N`,
@@ -108,32 +109,32 @@ export function normalizeShan(input: string): string {
     //    header), and `70 ၻီႇၵရီႇ` loses the scale while `70 ၻီႇၵရီႇ` plus an invented compound would
     //    lose the reader's trust. The ⟨C⟩ and ⟨F⟩ are consumed rather than left to be read as English
     //    letter names, which is what they were doing.
-    s = s.replace(/(\d)\s?°\s?(\d+)\s?['′]/gu, "$1 ၻီႇၵရီႇ $2 မိၼိတ်ႉ ");
-    s = s.replace(/(\d)\s?°\s?[CF](?![\p{L}\p{M}])/gui, "$1 ၻီႇၵရီႇ ");
-    s = s.replace(/(\d)\s?°/gu, "$1 ၻီႇၵရီႇ ");
+    s = tr(s, /(\d)\s?°\s?(\d+)\s?['′]/gu, "$1 ၻီႇၵရီႇ $2 မိၼိတ်ႉ ");
+    s = tr(s, /(\d)\s?°\s?[CF](?![\p{L}\p{M}])/gui, "$1 ၻီႇၵရီႇ ");
+    s = tr(s, /(\d)\s?°/gu, "$1 ၻီႇၵရီႇ ");
 
     // 5) THE COUNTRY-PREFIXED CURRENCY SIGN — `US$70`, `US$50`, `US$30 ပီႇလီႇယႅၼ်ႇ`, `AU$10.6million`.
     //    The shared tier matches `$` but not `US$`, so the prefix was left to the foreign reader and the
     //    sign dropped. Stripped here to the bare sign the tier does claim; the country is a Latin run and
     //    reads as English either way, which is what this corpus's own `(Amoy)`, `(Xiamen)` glosses do too.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AU|CA|NZ|HK|SG)\s?(?=[$])/gu, "");
+    s = tr(s, /(?<![\p{L}\p{M}])(?:US|AU|CA|NZ|HK|SG)\s?(?=[$])/gu, "");
 
     // 5b) THE PLUS-MINUS SIGN gets a PAUSE, not a word. `4.5672 ± 0.0006 ၿီႇလီႇယၢၼ်ႇပီ` is the corpus's
     //     one instance and no Shan reading of ± is attested; dropping it outright ran the value and its
     //     tolerance together into one ten-digit string. A pause keeps them apart and invents nothing.
-    s = s.replace(/\s?±\s?/gu, ", ");
+    s = tr(s, /\s?±\s?/gu, ", ");
 
     // 6) NUMERIC RANGES. The dash was dropped outright and the endpoints fused — `1122-249` read as one
     //    run of words, `400-500` as *သီႇပၢၵ်ႇႁႃႈပၢၵ်ႇ*. ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A
     //    CONNECTIVE, the same measured refusal ba, kk, tt, chv and tk make.
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58) — `ဢမ်ႇယွမ်းမွၵ်ႈ 400-500 ။` is how
     //    this corpus ends a sentence.
-    s = s.replace(/(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
-    s = s.replace(/(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(?<![\d.,])(\d+)\s?-\s?(?=\d)/gu, "$1, ");
     //    THE SLASH GETS THE SAME TREATMENT. This corpus's slashes are D/M/Y dates (`10/1/1990`,
     //    `9-18/5/1962`) and a paired measurement (`2299/925 လၵ်း`), never a fraction — so a pause keeps
     //    the fields apart and invents nothing, and no fraction rule is written at all.
-    s = s.replace(/(?<![\d.,])(\d+)\s?\/\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(?<![\d.,])(\d+)\s?\/\s?(?=\d)/gu, "$1, ");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

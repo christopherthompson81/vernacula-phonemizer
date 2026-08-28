@@ -224,3 +224,56 @@ describe("phonemizeTrace — the recorder is ambient, so prove it cannot leak", 
         expect(phonemize("Obugazi: 1 244.7 km² ne ŋŋamba.", "lg")).toBe(plain);
     });
 });
+
+describe("phonemizeTrace — normalizer provenance (#1150 stage 2)", () => {
+    test("a token maps back to the input characters that produced it", () => {
+        // ⚠ THE WHOLE POINT: normalization rewrote the text, and the token still names its source.
+        const t = phonemizeTrace("Obugazi: 1 244.7 km² ne 15%.", "lg");
+        const src = (surface: string): string | undefined => {
+            const k = t.tokens.find((x) => x.surface === surface);
+            return k?.inputSpan === undefined ? undefined : "Obugazi: 1 244.7 km² ne 15%.".slice(...k.inputSpan);
+        };
+        // the unit's THREE reading-words and the figure all trace to the one source span they came from
+        expect(src("kiromita")).toBe("1 244.7 km²");
+        expect(src("kyebiriga")).toBe("1 244.7 km²");
+        expect(src("1244")).toBe("1 244.7 km²");
+        expect(src("kikumi")).toBe("15%"); // the percent reading
+        expect(src("Obugazi")).toBe("Obugazi"); // untouched text maps to itself
+    });
+
+    test("English too — a dotted abbreviation and a currency amount", () => {
+        const text = "Dr. Smith paid $1,250.";
+        const t = phonemizeTrace(text, "en");
+        const src = (surface: string): string | undefined => {
+            const k = t.tokens.find((x) => x.surface === surface);
+            return k?.inputSpan === undefined ? undefined : text.slice(...k.inputSpan);
+        };
+        expect(src("doctor")).toBe("Dr. Smith");
+        expect(src("dollars")).toBe("$1,250"); // the `$` moves to the end and the span still holds
+        expect(src("1,250")).toBe("$1,250");
+    });
+
+    /**
+     * ⚠ ABSENCE MUST MEAN "NOT KNOWN", NEVER "IDENTICAL". A normalizer step that does not route through
+     * `provenance.tr` still changes the string, so the mapping desyncs — it is withheld rather than reported
+     * wrong. That is the difference between an unknown and a confident wrong offset, and it is the same
+     * discipline `traced: false` uses for an engine that reports no tokens at all.
+     */
+    test("an input span is either right or absent — never a guess", () => {
+        for (const lang of GOLDEN_LANGS)
+            for (const text of sample(lang, 3)) {
+                let t: ReturnType<typeof phonemizeTrace>;
+                try {
+                    t = phonemizeTrace(text, lang);
+                } catch {
+                    continue;
+                }
+                for (const k of t.tokens) {
+                    if (k.inputSpan === undefined) continue;
+                    expect(k.inputSpan[0], `${lang} span start`).toBeGreaterThanOrEqual(0);
+                    expect(k.inputSpan[1], `${lang} span end past input`).toBeLessThanOrEqual(text.length);
+                    expect(k.inputSpan[0]).toBeLessThanOrEqual(k.inputSpan[1]);
+                }
+            }
+    });
+});

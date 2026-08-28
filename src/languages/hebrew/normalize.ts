@@ -1,5 +1,6 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { spacedBareExponent } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 /**
  * Hebrew / עברית (he) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -212,7 +213,7 @@ export function normalizeHebrew(input: string): string {
     //     [U+0591–U+05C7] mark class the token pattern uses — so `עולם׃` matches as ONE word and the
     //     punctuation alternative never sees it. The declared pause was silently dropped, and the mark
     //     rode into the g2p. Separating it lets the existing rule do what it already says it does.
-    s = s.replace(/\u05C3/gu, " \u05C3 ");
+    s = tr(s, /\u05C3/gu, " \u05C3 ");
 
     // 2) ⚠ BIDI FORMAT CONTROLS — ×27, and this is the concrete form of the RTL hazard. Every one is
     //    U+200F RLM, dropped by a Hebrew author to stop a Latin gloss from reordering:
@@ -223,8 +224,8 @@ export function normalizeHebrew(input: string): string {
     //    here is cheaper and safer than remembering that in fifteen places.
     //    ⚠ DELETED RATHER THAN SPACED, which is the one place trap 26 does not apply: these are zero-width
     //    by definition, so they never separated two tokens that a space now has to keep apart.
-    s = s.replace(/[‎‏‪-‮⁦-⁩​-‍﻿]/gu, "");  // LRM, RLM, LRE, RLO, LRI, PDI, ZWSP, ZWJ, BOM
-    s = s.replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ");
+    s = tr(s, /[‎‏‪-‮⁦-⁩​-‍﻿]/gu, "");  // LRM, RLM, LRE, RLO, LRI, PDI, ZWSP, ZWJ, BOM
+    s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ");
 
     // 3) DIGIT DE-GROUPING, FIRST among the numeric rules — a grouping comma is otherwise read as CLAUSE
     //    PUNCTUATION and the tail as a number in its own right (`1,234` → "one, two hundred thirty-four";
@@ -239,7 +240,7 @@ export function normalizeHebrew(input: string): string {
     //    *ʔaχat ʔesʁe nkuda ʔaʁba*, with נְקֻדָּה from the manifest).
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, not a clause mark, or a number followed
     //    by its own sentence comma would lose its last group and speak it as zero.
-    s = s.replace(/(?<![0-9.,])[1-9][0-9]{0,2}(?:,[0-9]{3})+(?![0-9]|,[0-9])/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![0-9.,])[1-9][0-9]{0,2}(?:,[0-9]{3})+(?![0-9]|,[0-9])/gu, (w) => w.replace(/,/gu, ""));
 
     // 4) THE GLOSSED ABBREVIATIONS, before the generic acronym join at step 5 (which would otherwise weld
     //    them) and before the proclitic rule at step 6 (whose `PRO_DASH` never sees these — they are glued,
@@ -254,7 +255,7 @@ export function normalizeHebrew(input: string): string {
     //    straight onto the expansion's head word: `לְ` + `סֶנְטִימֶטֶר` → *lesentimeter*.
     for (const [body, expansion, head] of ABBREV) {
         const tail = expansion.slice(head.length);
-        s = s.replace(
+        s = tr(s, 
             new RegExp(`${NOT_LETTER_BEFORE}(${PRO_DASH}?)${body}${NOT_LETTER_AFTER}`, "gu"),
             (_m: string, pre: string) => `${pre === "" ? expansion : (PROCLITIC[pre] ?? pre) + head + tail} `,
         );
@@ -292,11 +293,11 @@ export function normalizeHebrew(input: string): string {
     //    word the pipeline speaks; `צהל` is a skeleton it does — the neural nakdan vocalizes it, and the
     //    sync path stops emitting a spurious word boundary. The acronyms that are NOT read as a word are
     //    the eight at step 4, which is why step 4 runs first.
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`${NOT_LETTER_BEFORE}(${PRO_QUOTE}{1,2})${GERSHAYIM}(?=[א-ת]{2,})`, "gu"),
         (_m: string, run: string) => `${vocalize(run)} "`,
     );
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`${NOT_LETTER_BEFORE}([א-ת]{1,6})${GERSHAYIM}([א-ת]{1,8})${NOT_LETTER_AFTER}`, "gu"),
         "$1$2",
     );
@@ -316,7 +317,7 @@ export function normalizeHebrew(input: string): string {
     //    Each letter is vocalized separately (`וְ כְּ`) rather than fused, because the fused forms are exactly
     //    the u-/va- morphophonology `hebrew.jsonc` records as unmodelled. Zero non-proclitic letters occur
     //    in this position in the corpus, so the class is closed by measurement rather than by assumption.
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`${NOT_LETTER_BEFORE}(${PRO_DASH}{1,2})${DASH}(?=[0-9A-Za-z])`, "gu"),
         (_m: string, run: string) => `${vocalize(run)} `,
     );
@@ -329,7 +330,7 @@ export function normalizeHebrew(input: string): string {
     //    ×0; the corpus's other four hits are the construct אחוזי־, `אחוזי ההצלחה`, a different slot.)
     //    ⚠ AND THE WORD MAY ALREADY BE THERE (trap 12) — `20 אחוז` ×3 carries no sign at all, so the two
     //    forms cannot collide, but the guard is written anyway because it costs one alternation.
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`(${NUM})\\s?%\\s?(אחוז\\S*)?`, "gu"),
         (_m: string, n: string, named: string | undefined) => `${n} ${named ?? "אָחוּז"} `,
     );
@@ -353,8 +354,8 @@ export function normalizeHebrew(input: string): string {
     //    (the id lesson: `empat belas koma tujuh DOLAR MILIAR`). Postfix only — the corpus writes no
     //    `$ N מיליון`, and trap 9 says do not widen a guard for a shape with no instance.
     const MAG = "(?:\\s(?:אלף|מיליון|מיליארד|טריליון))?";
-    s = s.replace(new RegExp(`\\$\\s?(${NUM})`, "gu"), "$1 דּוֹלָר ");
-    s = s.replace(new RegExp(`(${NUM}${MAG})\\s?\\$`, "gu"), "$1 דּוֹלָר ");
+    s = tr(s, new RegExp(`\\$\\s?(${NUM})`, "gu"), "$1 דּוֹלָר ");
+    s = tr(s, new RegExp(`(${NUM}${MAG})\\s?\\$`, "gu"), "$1 דּוֹלָר ");
 
     // 9) ⚠ THE MINUS, WRITTEN AFTER THE UNIT — and this is the bidi hazard as a READING rather than as a
     //    regex problem. Hebrew's own corpus writes a negative temperature with the sign LAST, because in
@@ -369,7 +370,7 @@ export function normalizeHebrew(input: string): string {
     //    he.wikipedia and every quoted instance is in front of its quantity: `מינוס 80 צלזיוס`,
     //    `מינוס 273.15 מעלות צלזיוס`, `מינוס 38 מעלות`, `מינוס 4 מעלות צלזיוס`, `מינוס 14.2 מעלות`. It is
     //    ×0 in the mined corpus, which is the ordinary shape for a SIGN's word (a writer types the glyph).
-    s = s.replace(
+    s = tr(s, 
         new RegExp(`(?<![0-9.,])(${NUM})(\\s?°\\s?[CF])\\s?[-−–]`, "gui"),
         "מִינוּס $1$2",
     );
@@ -386,8 +387,8 @@ export function normalizeHebrew(input: string): string {
     //     (`קו הרוחב 78° דרום`, `קו רוחב 40°`, `זווית קשר של 104.5°`), where מעלות is the same word. The
     //     ARC-MINUTE is left unread: `36°30′` is ×2 and no minutes word is attested — the same partial ug
     //     and ps both shipped, stated rather than guessed at.
-    s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?°\\s?[CF]${NOT_LETTER_AFTER}`, "gui"), "$1 מַעֲלוֹת צֶלְזִיוּס ");
-    s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?°`, "gu"), "$1 מַעֲלוֹת ");
+    s = tr(s, new RegExp(`(?<![0-9.,])(${NUM})\\s?°\\s?[CF]${NOT_LETTER_AFTER}`, "gui"), "$1 מַעֲלוֹת צֶלְזִיוּס ");
+    s = tr(s, new RegExp(`(?<![0-9.,])(${NUM})\\s?°`, "gu"), "$1 מַעֲלוֹת ");
 
     // 11) THE EXPONENT, and the corpus glosses its own symbol TWICE — the strongest attestation available
     //     and the same shape trap 45 uses. `"שמונה בריבוע" (כי 8² = 64)` writes the word and the symbol in
@@ -400,9 +401,9 @@ export function normalizeHebrew(input: string): string {
     //     ⚠ ONLY MULTI-LETTER LATIN KEYS (traps 28/46). A bare `m` key would claim `802.11m`-shaped
     //     designations and the corpus's heavy Latin residue; `version-dot` is ×4 here, so the exposure is
     //     real, and neither `m²` nor `m³` occurs at all.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km³${NOT_LETTER_AFTER}`, "gu"), "$1 קִילוֹמֶטֶר מְעֻקָּב ");
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km²${NOT_LETTER_AFTER}`, "gu"), "$1 קִילוֹמֶטֶר רָבוּעַ ");
-    s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?²`, "gu"), "$1 בְּרִיבּוּעַ ");
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km³${NOT_LETTER_AFTER}`, "gu"), "$1 קִילוֹמֶטֶר מְעֻקָּב ");
+    s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}0-9.])(${NUM})\\s?km²${NOT_LETTER_AFTER}`, "gu"), "$1 קִילוֹמֶטֶר רָבוּעַ ");
+    s = tr(s, new RegExp(`(?<![0-9.,])(${NUM})\\s?²`, "gu"), "$1 בְּרִיבּוּעַ ");
     //     ⚠ בריבוע COVERS THE SQUARE AND NOTHING ELSE, so every other power was still being deleted — the
     //     rule above is ×3-attested for `²` and there is no corpus word for a cube or a generic power, and
     //     that refusal stands. What it does not cover is a CUBE or a generic power on a bare base, and
@@ -423,7 +424,7 @@ export function normalizeHebrew(input: string): string {
     //     and `01:29` are YouTube durations, and only `בשעה 00:00:00 לפי הזמן האוניברסלי` is a time of day.
     //     A rule emitting שעות/דקות would be right once and wrong four times.
     //     ⚠ SUBSTITUTE, NEVER DELETE (trap 26) — deleting the colon makes `12:30` the number 1230.
-    s = s.replace(/(?<=[0-9])\s?:\s?(?=[0-9]{2})/gu, " ");
+    s = tr(s, /(?<=[0-9])\s?:\s?(?=[0-9]{2})/gu, " ");
 
     return s;
 }

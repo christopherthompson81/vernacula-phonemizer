@@ -1,4 +1,5 @@
 import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
+import { tr } from "../../core/provenance.ts";
 /**
  * Asturian (ast) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -80,16 +81,16 @@ export function normalizeAsturian(input: string): string {
     //    digits follow it and decimates otherwise; the COMMA always decimates; the SPACE groups.
     //    ⚠ THE WHOLE NUMBER IS MATCHED AT ONCE, not one join per pass (trap 63), and the trailing guard
     //    rejects a DIGIT and nothing else, or every clause-final figure is declined (trap 58).
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
         (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = s.replace(/(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
+    s = tr(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     //    ⚠ AND WHAT IS LEFT CARRYING A DOT IS A DECIMAL. Once the three-digit groups are joined, the only
     //    dots between digits are the short ones (`132.46 km`, `6.9 °`, `2.5`), so they fold to the comma
     //    the engine's number branch reads. Doing it in the other order would turn every grouped figure
     //    into a decimal.
-    s = s.replace(/(?<!\d)(\d+)\.(\d+)(?!\d)/gu, "$1,$2");
+    s = tr(s, /(?<!\d)(\d+)\.(\d+)(?!\d)/gu, "$1,$2");
 
     // 2) THE ERA MARKER. `e.C.` = *enantes de Cristu* and `d.C.` = *dempués de Cristu*, written in the
     //    retained text as "Ente los años 1200 e.C. y 800 e.C.", "dende'l Neolíticu (6000 - 3000 e. C.)",
@@ -100,7 +101,7 @@ export function normalizeAsturian(input: string): string {
         [new RegExp(`${NOT_LETTER_BEFORE}d\\s?\\.\\s?C\\s?\\.`, "gu"), "dempués de Cristu"],
     ];
     for (const [re, word] of multi)
-        s = s.replace(re, (m0: string, offset: number, full: string) => {
+        s = tr(s, re, (m0: string, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
             return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
         });
@@ -109,7 +110,7 @@ export function normalizeAsturian(input: string): string {
     //    `1-III-1700`, `1-X-1929`. ⚠ THE ROMAN NUMERAL HERE IS BOUNDED AT 12 AND MUST BE, because that is
     //    the whole of what distinguishes a month from the year it sits between — and the shared roman
     //    pass has already declined the lone `X`, which is why the letter was reaching the g2p as [ʃ].
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,2})\\s?-\\s?(I{1,3}|IV|V|VI{1,3}|IX|XI{0,2})\\s?-\\s?(\\d{3,4})${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,2})\\s?-\\s?(I{1,3}|IV|V|VI{1,3}|IX|XI{0,2})\\s?-\\s?(\\d{3,4})${NOT_LETTER_AFTER}`, "gu"),
         (whole, day: string, roman: string, year: string) => {
             const m = ROMAN_MONTH[roman];
             return m === undefined ? whole : `${day} de ${MONTHS[m]} de ${year}`;
@@ -121,7 +122,7 @@ export function normalizeAsturian(input: string): string {
     //     intact. Both are the same date form and both are claimed; the month bound of 12 is what keeps
     //     this off an ordinary hyphen-joined trio, and the 3-or-4-digit year is what keeps it off a
     //     dental formula's `0-1/0-1`.
-    s = s.replace(new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,2})\\s?-\\s?(\\d{1,2})\\s?-\\s?(\\d{3,4})${NOT_LETTER_AFTER}`, "gu"),
+    s = tr(s, new RegExp(`${NOT_LETTER_BEFORE}(\\d{1,2})\\s?-\\s?(\\d{1,2})\\s?-\\s?(\\d{3,4})${NOT_LETTER_AFTER}`, "gu"),
         (whole, day: string, mon: string, year: string) => {
             const m = Number(mon);
             return m >= 1 && m <= 12 ? `${day} de ${MONTHS[m]} de ${year}` : whole;
@@ -131,20 +132,20 @@ export function normalizeAsturian(input: string): string {
     //    cuarenta* — a phrase break inside a time. The corpus writes the hour word after it ("A les 23:40
     //    h. del día 14", "Fúndese a les 2:20 h del 15 d'abril"), so the figures are left as FIGURES and
     //    only the colon is spent; `hores` ×151 is attested but the writer has already supplied `h`.
-    s = s.replace(/(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
+    s = tr(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
 
     // 5) DEGREES — and the allow-listed continuation is the whole of the rule. See the header: `°` and `º`
     //    are used for each other's job in this corpus, so the sign is read as a degree only before one of
     //    the shapes that follows a real degree here, and the lone ordinal (`5° presidente`) falls through
     //    unread rather than becoming *cinco graos presidente*.
-    s = s.replace(/(\d)\s?[°º]\s?([CF])(?![\p{L}\p{M}])/gui,
+    s = tr(s, /(\d)\s?[°º]\s?([CF])(?![\p{L}\p{M}])/gui,
         (_m, d: string, scale: string) => `${d} graos ${scale.toUpperCase() === "C" ? "Celsius" : "Fahrenheit"}`);
-    s = s.replace(/(\d)\s?[°º]\s?(\d+)\s?[′']/gu, "$1 graos $2 minutos ");
-    s = s.replace(new RegExp(`(\\d)\\s?[°º](?=${DEGREE_TAIL})`, "gu"), "$1 graos ");
+    s = tr(s, /(\d)\s?[°º]\s?(\d+)\s?[′']/gu, "$1 graos $2 minutos ");
+    s = tr(s, new RegExp(`(\\d)\\s?[°º](?=${DEGREE_TAIL})`, "gu"), "$1 graos ");
 
     // 6) SIGNS. The minus INVERTS; the corpus's `-` before a figure is otherwise a range or a date, both
     //    of which are claimed above and below.
-    s = s.replace(/(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1menos $2");
+    s = tr(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1menos $2");
 
     // 7) RANGES. The dash was dropped and the endpoints fused — `6000 - 3000 e. C.` read as one run.
     //    ⚠ THE DASH IS SPENT ON A PAUSE RATHER THAN A CONNECTIVE: Asturian writes `ente X y M` and the
@@ -152,12 +153,12 @@ export function normalizeAsturian(input: string): string {
     //    imposing the connective on a bare dash would double a word the writer already chose or not.
     //    ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58), and ⚠ a chain of three or more
     //    hyphen-joined groups is an identifier, not a span (the `0-1/0-1` of a dental formula, an ISBN).
-    s = s.replace(/(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = tr(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
     //    ⚠ AND THE SLASH IS PART OF THE GUARD, not just the hyphen: the dental formula writes `C 0-1/0-1`,
     //    where each `0-1` is a hyphenated pair flanked by a slash. Blocking on an adjacent `/` on either
     //    side is what keeps the range rule out of it; blocking only on a following hyphen was not enough,
     //    and the test caught the reading *C cero, uno barra cero, uno*.
-    s = s.replace(/(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
+    s = tr(s, /(?<![\d.,\-\/])(\d+)\s?-\s?(\d+)(?![\d\/])(?!\s?-\s?\d)/gu, "$1, $2");
 
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one

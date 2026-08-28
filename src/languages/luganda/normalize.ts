@@ -1,3 +1,4 @@
+import { tr } from "../../core/provenance.ts";
 /**
  * Luganda / Oluganda (lg) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
@@ -277,7 +278,7 @@ const CLOCK_MARKED =
 export function normalizeLuganda(input: string): string {
     // 0) THE MARKED CLOCK loses the separator's pause — see CLOCK_MARKED. First, because the numeric steps
     //    below read a digit run and the separator was splitting one in half.
-    input = input.replace(CLOCK_MARKED, (m, h1?: string, m1?: string, h2?: string, m2?: string) =>
+    input = tr(input, CLOCK_MARKED, (m, h1?: string, m1?: string, h2?: string, m2?: string) =>
         h1 !== undefined ? `${h1} ${m1}` : `${h2} ${m2}`);
     let s = input;
 
@@ -304,7 +305,7 @@ export function normalizeLuganda(input: string): string {
     //    ⚠ FIRST, because the range rule's right guard excludes a trailing letter and would otherwise decline
     //    `1990th-2000th`. A grouped ordinal is unaffected by running above the de-grouping step: `1,000th`
     //    loses its suffix here and its separators at step 3, in either order.
-    s = s.replace(/(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+    s = tr(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 2) RANGES → `okutuuka mu` for a year pair, `okutuuka ku` otherwise (see the declaration for both
     //    attestations and for the part-of-speech check). `ranges` ×2078 whole-corpus; 14 four-digit year spans
@@ -346,7 +347,7 @@ export function normalizeLuganda(input: string): string {
     //    decimal comma too (`7,2`, `5,3` in the artifact), so a trailing `,` can be the start of the right
     //    operand's fractional part. The dot is the character with no defence; the comma has two.
     const GROUPED = String.raw`[1-9]\d{0,2}(?:,\d{3})+|\d+`;
-    s = s.replace(
+    s = tr(s, 
         new RegExp(
             String.raw`(?<![-+−–—/\d.,\p{L}\p{M}])(${GROUPED})[ \u00a0]?[-–—][ \u00a0]?(${GROUPED})`  // space, NBSP
             + String.raw`(?![-+−/\d,\p{L}\p{M}])`,
@@ -372,7 +373,7 @@ export function normalizeLuganda(input: string): string {
     //    ⚠ EXACTLY THREE DIGITS PER BLOCK and a head starting 1–9, so a leading-zero run is never a grouped
     //    thousand and a digit LIST is never claimed — the maths article's *"digito satu (0,1, ne 2)"* and
     //    *"digito nnya(0,1,2 ne 3)"* are not numbers, and they are the whole of this corpus's `\d+,\d{1,2}`.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
     //    The space-grouped form: `449 964 km²`, `1 244.7 km²`, `570 074`, `429 600`, `154 000`. Same shape,
     //    and it must run before step 6, whose unit key sits immediately after the second block.
     //    ⚠ THE SECOND MEMBER OF EVERY `[ \u00a0]` CLASS IN THIS FILE IS A NO-BREAK SPACE, WRITTEN AS AN ESCAPE
@@ -382,7 +383,7 @@ export function normalizeLuganda(input: string): string {
     //    deliberate infidelity for exactly this hazard) and the retained text contains U+0020 and U+000A and no
     //    other whitespace at all — measured, 20,030 spaces, zero U+00A0. It is robustness for a dump that
     //    preserves the raw character, and an escape cannot degrade invisibly the way the literal did.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    ⚠ THE PERIOD ARM IS THE RISKY ONE AND ITS EXPOSURE IS MEASURED RATHER THAN ASSERTED. A period-grouped
     //    thousand is indistinguishable from a decimal with exactly three fractional digits, and this rule runs
     //    ABOVE step 7, so a wrong call turns 0.628 into six hundred and twenty-eight. Counted over the retained
@@ -391,7 +392,7 @@ export function normalizeLuganda(input: string): string {
     //    Kafukunya kamu` — against ZERO three-decimal-place quantities. The 1–9 head is what keeps `0.628`
     //    (an HDI figure in this corpus) out, and it is the guard doing the work: without it that arm would be
     //    a defect generator rather than a fix.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = tr(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, (w) => w.replace(/\./gu, ""));
 
     // 4) PERCENT → `N ku kikumi`, the one POSTPOSED reading in this layer. `percent` ×301 whole-corpus, 61 in
     //    the retained text.
@@ -410,7 +411,7 @@ export function normalizeLuganda(input: string): string {
     //    whenever a hundred was spelled out anywhere in the window: `abantu kikumi mu ataano ne 25%` lost the
     //    sign outright. On a wiki that routinely writes a figure beside its spelled-out form that is not an
     //    edge case, and the failure is silent — trap 12's guard eating the very reading it exists to protect.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0]?%/gu, (w, n: string, off: number, all: string) =>  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0]?%/gu, (w, n: string, off: number, all: string) =>  // space, NBSP
         saidNear(all, off, off + w.length, PERCENT, "ku buli kikumi") ? n : `${n} ${PERCENT}`);
 
     // 5) CURRENCY — the noun BEFORE its amount, this language's order (see the header). `currency` ×80
@@ -422,13 +423,13 @@ export function normalizeLuganda(input: string): string {
     //    *"obukadde bwa ddoola US$29"*, *"obukadde bwa ddoola za Amerika $1.16"*, *"Obukadde bwa Doola US$10.5M"*,
     //    *"n'asasulwa pawundi £30"*. In every one of those the correct reading DROPS the sign.
     const NAMED_DOLLAR = /d+oola|dolla|doola/iu;
-    s = s.replace(/(?<![\p{L}\p{M}])US[ \u00a0]?\$[ \u00a0]?(?=\d)/giu, (w, off: number, all: string) =>  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])US[ \u00a0]?\$[ \u00a0]?(?=\d)/giu, (w, off: number, all: string) =>  // space, NBSP
         NAMED_DOLLAR.test(all.slice(Math.max(0, off - 45), off + w.length + 45)) ? "" : `${DOLLAR} `);
-    s = s.replace(/\$[ \u00a0]?(?=\d)/gu, (w, off: number, all: string) =>  // space, NBSP
+    s = tr(s, /\$[ \u00a0]?(?=\d)/gu, (w, off: number, all: string) =>  // space, NBSP
         NAMED_DOLLAR.test(all.slice(Math.max(0, off - 45), off + w.length + 45)) ? "" : `${DOLLAR} `);
-    s = s.replace(/€[ \u00a0]?(?=\d)/gu, (w, off: number, all: string) =>  // space, NBSP
+    s = tr(s, /€[ \u00a0]?(?=\d)/gu, (w, off: number, all: string) =>  // space, NBSP
         saidNear(all, off, off + w.length, EURO) ? "" : `${EURO} `);
-    s = s.replace(/£[ \u00a0]?(?=\d)/gu, (w, off: number, all: string) =>  // space, NBSP
+    s = tr(s, /£[ \u00a0]?(?=\d)/gu, (w, off: number, all: string) =>  // space, NBSP
         saidNear(all, off, off + w.length, POUND) ? "" : `${POUND} `);
 
     // 6) UNITS — the measure noun FIRST, without exception in either source (see the header).
@@ -440,13 +441,13 @@ export function normalizeLuganda(input: string): string {
     //    NUMBER, so `580,367 km2` read *"…musanvu km bbiri"* — trap 53's Igbo defect exactly.
     const km2 = (w: string, n: string, off: number, all: string): string =>
         saidNear(all, off, off + w.length, ...spellings(KILOMETRE)) ? n : `${KILOMETRE} ${SQUARED} ${n}`;
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0\u202f\u2009]?km[²2](?![\p{L}\p{M}\d])/gu, km2);  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0\u202f\u2009]?km[²2](?![\p{L}\p{M}\d])/gu, km2);  // space, NBSP, NNBSP, thin space
     //    ⚠ THE BARE `km` ARM IS ROBUSTNESS, AND THAT IS SAID RATHER THAN IMPLIED (trap 22). Digit-adjacent `km`
     //    with nothing after it is ×0 in the retained text — every occurrence is `km²`, `km2` or `km/s` — so this
     //    arm repairs no measured defect today. It is here because `kiromita` is the best-attested unit noun in
     //    the language (×61/20) and `km` is a two-letter key with no Luganda word to collide with. The `/` in the
     //    right guard is what keeps `299,792 km/s` out: there is no rate idiom (header).
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0\u202f\u2009]?km(?![\p{L}\p{M}\d²³/])/gu,  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00a0\u202f\u2009]?km(?![\p{L}\p{M}\d²³/])/gu,  // space, NBSP, NNBSP, thin space
         (w, n: string, off: number, all: string) =>
             saidNear(all, off, off + w.length, ...spellings(KILOMETRE)) ? n : `${KILOMETRE} ${n}`);
     //    `cm` ×11 is the largest unit class in this corpus (*"obugulumivu bwa 10 cm"*, *"9” = 23 cm"*,
@@ -455,7 +456,7 @@ export function normalizeLuganda(input: string): string {
     //    `mm` ×1 and `kg` ×1 are each glossed by their own word in the sentence that contains them, which is
     //    where those two readings come from.
     for (const [key, noun] of [["cm", CENTIMETRE], ["mm", MILLIMETRE], ["kg", KILOGRAM]] as const)
-        s = s.replace(
+        s = tr(s, 
             new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+(?:\\.\\d+)?)[ \\u00a0]?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),  // space, NBSP
             (w, n: string, off: number, all: string) =>
                 saidNear(all, off, off + w.length, ...spellings(noun)) ? n : `${noun} ${n}`);
@@ -480,7 +481,7 @@ export function normalizeLuganda(input: string): string {
     //    the phoneme stream, which is precisely the leak this step exists to close. The sibling `cm`/`mm`/`kg`
     //    arms above never carried it, so this arm was the odd one out and the corpus's sentence-final `30 cm.`
     //    read correctly throughout. A guard is only free when it rejects something.
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+)[ \u00a0]m(?![\p{L}\p{M}\d²³/])/gu,  // space, NBSP
+    s = tr(s, /(?<![\d.,\p{L}\p{M}])(\d+)[ \u00a0]m(?![\p{L}\p{M}\d²³/])/gu,  // space, NBSP
         (w, n: string, off: number, all: string) =>
             saidNear(all, off, off + w.length, ...spellings(METRE)) ? n : `${METRE} ${n}`);
 
@@ -509,7 +510,7 @@ export function normalizeLuganda(input: string): string {
     //    the start of a second dot run and declines the decimal it was written for. Only a dot followed by a
     //    DIGIT is a multi-dot run; a dot followed by anything else is punctuation, and the pause it makes is
     //    correct. Found by probing the corpus's own line rather than by a unit test on a bare number.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d,\p{L}\p{M}]|\.\d)/gu,
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d,\p{L}\p{M}]|\.\d)/gu,
         (_m, int: string, frac: string) => `${int} ${[...frac].join(" ")}`);
 
     return tidy(s);

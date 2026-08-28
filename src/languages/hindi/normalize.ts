@@ -18,6 +18,7 @@
 import { MANIFEST } from "./manifest.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
+import { tr } from "../../core/provenance.ts";
 
 /**
  * ⚠ THESE TABLES ARE HINDI'S AND THEY SERVE THE WHOLE FAMILY, which is inherited behaviour and is now at
@@ -96,8 +97,8 @@ export function makeHindiNormalizer(
         //    characters, so it never matches before a Devanagari letter and every rule using it silently
         //    did nothing. Every boundary in this file is an explicit lookaround instead. (The same trap
         //    hit French, where `\b` found a boundary INSIDE `siècle` at the accent.)
-        s = s.replace(/(?<![\p{L}\p{M}])ई\.?\s?स\.?\s?पू\.?/gu, "ईसा पूर्व");
-        s = s.replace(/(?<![\p{L}\p{M}])ई\.?\s?पू\.?/gu, "ईसा पूर्व");
+        s = tr(s, /(?<![\p{L}\p{M}])ई\.?\s?स\.?\s?पू\.?/gu, "ईसा पूर्व");
+        s = tr(s, /(?<![\p{L}\p{M}])ई\.?\s?पू\.?/gu, "ईसा पूर्व");
 
         // 2) ORDINAL SUFFIXES. The suffix is attached to the numeral in writing (16वीं) but was tokenized
         //    apart from it, so it was spoken as its own word. A space may intervene in the corpus.
@@ -111,7 +112,7 @@ export function makeHindiNormalizer(
         //    a family member that has not sourced its own ordinal orthography must get NO rule rather than
         //    Hindi's — an empty alternation would otherwise compile to `()` and match everywhere.
         if (Object.keys(SUFFIX_FORM).length > 0)
-            s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?(${alt(Object.keys(SUFFIX_FORM))})(?![\\p{L}\\p{M}])`, "gu"),
+            s = tr(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?(${alt(Object.keys(SUFFIX_FORM))})(?![\\p{L}\\p{M}])`, "gu"),
                 (whole, digits: string, suffix: string) =>
                     ordinal(Number(digits), SUFFIX_FORM[suffix]!, suffix) ?? whole);
 
@@ -125,7 +126,7 @@ export function makeHindiNormalizer(
         //       · THE CONSONANT MUST BE THAT NUMBER'S OWN, so `2था` cannot match on 4's consonant.
         //       · the trailing letter-boundary, so `2राज्य` ("2 states") is not claimed as `2रा` + ज्य.
         if (Object.keys(SUPPLETIVE_CONS).length > 0)
-            s = s.replace(
+            s = tr(s, 
                 new RegExp(`(?<![\\d.,])(\\d)(${alt([...new Set(Object.values(SUPPLETIVE_CONS))])})`
                     + `(${alt(Object.keys(VOWEL_FORM))})(?![\\p{L}\\p{M}])`, "gu"),
                 (whole, d: string, cons: string, vowel: string) => {
@@ -136,11 +137,11 @@ export function makeHindiNormalizer(
 
         // 3) ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a phrase
         //    break; डॉ is matched with the dot OPTIONAL because that is how it is usually written.
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.?(\\s+)(?=[\\p{L}])`, "gu"),
+        s = tr(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.?(\\s+)(?=[\\p{L}])`, "gu"),
             (_m, ab: string, sp: string) => `${ABBREV[ab]!}${sp}`);
 
         // 4) DEVANAGARI UNIT ABBREVIATIONS, after a number. Longest first so किमी/घंटा beats किमी.
-        s = s.replace(new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
+        s = tr(s, new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`);
 
         // 5) DEGREES. The bare sign and the two scales; ° alone was dropped and °C read as a letter name.
@@ -155,7 +156,7 @@ export function makeHindiNormalizer(
         //        `º` — U+00BA MASCULINE ORDINAL INDICATOR standing in for the degree sign, exactly the
         //        substitution the Italian run found in `dell'11º`. The minutes mark is claimed ONLY after a
         //        degree, because a bare `'` is an apostrophe or a quote elsewhere (the quote-letter cell).
-        s = s.replace(/(\d)\s?[°º]\s?(\d+)\s?[´′'](?:\s?(\d+)\s?[″"])?/gu,
+        s = tr(s, /(\d)\s?[°º]\s?(\d+)\s?[´′'](?:\s?(\d+)\s?[″"])?/gu,
             (_m, deg: string, min: string, sec?: string) =>
                 `${deg} डिग्री ${min} मिनट${sec === undefined ? "" : ` ${sec} सेकंड`}`);
         //    `[°º]` in every arm below, for the same U+00BA substitution.
@@ -164,17 +165,17 @@ export function makeHindiNormalizer(
         //        bare *bˈiːs* — the whole unit silently gone, not merely the sign. They are in the RAWMARK
         //        leak class precisely because they are easy to miss this way. Found while reviewing this
         //        change: step 7b's lookahead named them as if they were handled, and they were not.
-        s = s.replace(/(\d)\s?℃/gu, "$1 डिग्री सेल्सियस");
-        s = s.replace(/(\d)\s?℉/gu, "$1 डिग्री फ़ारेनहाइट");
-        s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}])/giu, "$1 डिग्री सेल्सियस");
-        s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}])/giu, "$1 डिग्री फ़ारेनहाइट");
-        s = s.replace(/(\d)\s?[°º]/gu, "$1 डिग्री");
+        s = tr(s, /(\d)\s?℃/gu, "$1 डिग्री सेल्सियस");
+        s = tr(s, /(\d)\s?℉/gu, "$1 डिग्री फ़ारेनहाइट");
+        s = tr(s, /(\d)\s?[°º]\s?C(?![\p{L}])/giu, "$1 डिग्री सेल्सियस");
+        s = tr(s, /(\d)\s?[°º]\s?F(?![\p{L}])/giu, "$1 डिग्री फ़ारेनहाइट");
+        s = tr(s, /(\d)\s?[°º]/gu, "$1 डिग्री");
 
         // 6) TIMES. The colon was becoming a PHRASE BREAK, and a :00 was read as शून्य ("eleven, zero
         //    o'clock"). Hindi says the full form "दस बजकर तीस मिनट" — which already contains बजे's sense,
         //    so a following बजे is consumed rather than left to produce "…मिनट बजे". At :00 the minutes
         //    drop out and a following बजे is exactly right ("ग्यारह बजे").
-        s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(\s*बजे)?/gu,
+        s = tr(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(\s*बजे)?/gu,
             (_m, h: string, min: string, baje?: string) => {
                 const hw = cardinal(Number(h)).join(" ");
                 if (Number(min) === 0) return `${hw}${baje ?? " बजे"}`;
@@ -219,8 +220,8 @@ export function makeHindiNormalizer(
         //    INVERTS the meaning" is true of the minus and MUST NOT be recycled to justify the plus.
         //
         //    Both arms, so the sign is read glued to a label (`यूटीसी + 1`) or opening the quantity.
-        s = s.replace(/(\S)\+\s?(\d)/gu, "$1 प्लस $2");
-        s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1प्लस $2");
+        s = tr(s, /(\S)\+\s?(\d)/gu, "$1 प्लस $2");
+        s = tr(s, /(^|\s)\+\s?(\d)/gu, "$1प्लस $2");
 
         // 7b) MINUS — WHERE IT IS UNAMBIGUOUS, AND ONLY THERE.
         //
@@ -256,8 +257,8 @@ export function makeHindiNormalizer(
         //     that read as "31,381 MINUS 98.53 percent". Its spaced twin `साक्षरता - ६१%` escaped only by
         //     accident, because the digits are not adjacent to the dash. A negative percentage is plausible
         //     but unattested here; a dash-introduced one is attested twice, so degrees only.
-        s = s.replace(/(^|[(\[（])\s?[-−–](\d)/gu, "$1ऋण $2");
-        s = s.replace(/(?<![\p{L}\p{M}\p{Nd}-])[-−–](\d+(?:[.,]\d+)?)(?=\s?(?:°|℃|℉|डिग्री))/gu, "ऋण $1");
+        s = tr(s, /(^|[(\[（])\s?[-−–](\d)/gu, "$1ऋण $2");
+        s = tr(s, /(?<![\p{L}\p{M}\p{Nd}-])[-−–](\d+(?:[.,]\d+)?)(?=\s?(?:°|℃|℉|डिग्री))/gu, "ऋण $1");
         //     A THIRD ARM: A MINUS BEFORE A **DECIMAL**. This is the fleet's ONLY true negative number, and it
         //     was reading as positive — `०.३७२७१९ ख॰इ॰), -२.८८ परिमाण` (an astronomical magnitude) came out
         //     *do dashamlav aath aath*, sign gone. The degree arm above could not reach it: it requires a
@@ -274,7 +275,7 @@ export function makeHindiNormalizer(
         //     percentage and is not a sign, and that IS a decimal. It is excluded because a digit precedes the
         //     dash (`३१,३८१ -`), the same shape `defects.ts`'s minus guard now excludes fleet-wide. Verified on
         //     both: `-२.८८ परिमाण` reads ऋण and `-९८.५३%` stays silent.
-        s = s.replace(
+        s = tr(s, 
             /(?<![\p{L}\p{M}\p{Nd}-])(?<!\p{Nd}[\p{L}\p{M}]{0,2}[.,]?[ \t]?)[-−–](\d+[.,]\d+)(?![\d.,])/gu,
             "ऋण $1",
         );
@@ -296,28 +297,28 @@ export function makeHindiNormalizer(
         s = postposedSign(s, ">", "से अधिक");
         //     बराबर — corpus: "इस अभिमुखता अनुपात के लगभग बराबर" ("approximately equal to this aspect
         //     ratio"). Infix, which is the arithmetic reading (दस जमा दस बराबर बीस).
-        s = s.replace(/\s?=\s?/gu, " बराबर ");
+        s = tr(s, /\s?=\s?/gu, " बराबर ");
         //     गुणा and भाग — hi.wikipedia's अंकगणित names the four operations and ties each to its sign:
         //     "अंकगणित की मुख्य चार मूल प्रक्रियाएँ होती हैं जोड़ घटाना गुणा भाग", then "गुणा को x चिह्न से
         //     प्रदर्शित किया जाता है। उदाहरणः 2 x 4 = 8" and "भाग को / चिह्न से प्रदर्शित किया जाता है".
         //     `/` itself is NOT routed here — step 8 already reads it as the fraction बटा.
-        s = s.replace(/\s?×\s?/gu, " गुणा ");
-        s = s.replace(/\s?÷\s?/gu, " भाग ");
+        s = tr(s, /\s?×\s?/gu, " गुणा ");
+        s = tr(s, /\s?÷\s?/gu, " भाग ");
         //     ± takes the pair named in the पूर्णांक citation above, in its conventional order.
         // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the preceding word:
         //    `तापमान±5` read *t̪aːpmˈaːnd̪ʱən*, one token, with the stress of neither. The shared symbol tier's
         //    `ampersand` note records the same hazard for the same reason. Every other language that reads ± in this
         //    fleet uses the spaced form; these three did not, and gu/mr got it by copying hi.
-        s = s.replace(/±/gu, " धन ऋण ");
+        s = tr(s, /±/gu, " धन ऋण ");
         //     THE AMPERSAND, split the way the Mandarin pass split it: between LATIN letters it stays inside
         //     the run this engine already delegates to English (`AT&T`, `R&D` are English terms, and reading
         //     half of one in Hindi would be a code-switch mid-word); elsewhere it is और, which the corpus
         //     writes 36 times as the ordinary conjunction.
-        s = s.replace(/(?<=[A-Za-z])\s?&\s?(?=[A-Za-z])/gu, " and ");
-        s = s.replace(/\s?&\s?/gu, " और ");
+        s = tr(s, /(?<=[A-Za-z])\s?&\s?(?=[A-Za-z])/gu, " and ");
+        s = tr(s, /\s?&\s?/gu, " और ");
 
         // 8) FRACTIONS. आधा and तिहाई are suppletive; the rest are "n बटा m", the ordinary spoken form.
-        s = s.replace(/(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+        s = tr(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
             const num = Number(a), den = Number(b);
             if (num === 1 && den === 2) return "आधा";
             if (num === 1 && den === 4) return "चौथाई";

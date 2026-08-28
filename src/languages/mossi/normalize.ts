@@ -151,6 +151,7 @@
  *  The `(?<![\d.,])` / `(?![\d.,])` guards stop a match beginning or ending inside a longer run, which is
  *  the lookbehind-AND-lookahead pair trap 28 says a lookahead alone cannot replace. */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
+import { tr } from "../../core/provenance.ts";
 // ⚠ THE TRAILING GUARD IS `(?!\d)`, NOT `(?![\d.,])`, AND THAT ONE CHARACTER IS TWO SEPARATE CASES. It
 // rejected every CLAUSE-FINAL grouped figure — `50 000.` came back untouched and read *pis nu zaːlem .*,
 // losing the thousand word at exactly a sentence end (playbook trap 58, reported by `review.ts`'s
@@ -268,7 +269,7 @@ export function normalizeMossi(input: string): string {
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, before anything that counts characters — a dump carries
     //    `&nbsp;` and numeric entities, and `&nbsp;` inside a grouped figure would otherwise hide the space
     //    that step 3 matches on. The artifact's `zero-width` cell is ×2; a rendering hint is not speech.
-    s = s.replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍⁠﻿]/gu, "");
+    s = tr(s, /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍⁠﻿]/gu, "");
 
     // 3) DIGIT DE-GROUPING — FIRST among the number rules, and the playbook's own ordering rule says why: a
     //    grouping comma or period is otherwise read as CLAUSE PUNCTUATION, which is precisely the defect
@@ -279,9 +280,9 @@ export function normalizeMossi(input: string): string {
     //    ⚠ SPACE FIRST, then comma, then dot. The three arms cannot feed each other — each is anchored on
     //    both sides against `[\d.,]` — but the space arm must run before any rule that inserts a space
     //    between a figure and a following word, and step 4 is one.
-    s = s.replace(GROUPED_SPACE, (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-    s = s.replace(GROUPED_COMMA, (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
-    s = s.replace(GROUPED_DOT, (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
+    s = tr(s, GROUPED_SPACE, (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, GROUPED_COMMA, (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
+    s = tr(s, GROUPED_DOT, (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     // 4) CURRENCY, AFTER de-grouping — the sign is written against the figure's FIRST digit (`€10,000`), so
     //    matching the whole figure here means matching what step 3 has already joined up. Run the other way
@@ -289,7 +290,7 @@ export function normalizeMossi(input: string): string {
     //    The noun is emitted BEFORE the figure (see CURRENCY): Mooré puts it there.
     for (const [sign, word] of CURRENCY) {
         const rx = new RegExp(`${sign.replace(/[$]/gu, "\\$&")}\\s?(\\d)`, "gu");
-        s = s.replace(rx, `${word} $1`);
+        s = tr(s, rx, `${word} $1`);
     }
 
     // 5) THE KILOMETRE, LAST — and AFTER step 3 for the same reason step 4 is: the symbol is written against
@@ -306,8 +307,8 @@ export function normalizeMossi(input: string): string {
     //
     //    ⚠ THE EXPONENT IS CONSUMED AND UNREAD, and that is a stated loss, not a fix — see the header. What
     //    it replaces is worse than a silence: `km2 77.0` read as *km* raw plus the CARDINAL TWO.
-    s = s.replace(KM_PRE, "kilometr ");
-    s = s.replace(KM_POST, "kilometr $1");
+    s = tr(s, KM_PRE, "kilometr ");
+    s = tr(s, KM_POST, "kilometr $1");
     //    …and the same symbol with no figure at all — a caption, a table header, or a figure a bracket put
     //    out of reach. Both arms above require a digit, so those went to the sink as raw Latin. Shared
     //    guards (core/normalizeSymbols.ts): multi-letter vowel-free keys, exact case, never beside a

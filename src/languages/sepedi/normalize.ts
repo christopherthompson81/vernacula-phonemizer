@@ -94,6 +94,7 @@
 import { makeBareUnitNormalizer, makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { SepediNumbers } from "./numbers.ts";
+import { tr } from "../../core/provenance.ts";
 
 const N = loadManifest<{ numbers: SepediNumbers }>(import.meta.url, "sepedi.jsonc").numbers;
 
@@ -317,7 +318,7 @@ export function normalizeSepedi(input: string): string {
 
     // 0) The digit-colon-digit run loses its colon — see DIGIT_COLON_RUN. First, because every numeric
     //    step below reads a digit run and the colon was splitting one in half.
-    s = s.replace(DIGIT_COLON_RUN, (_m, head: string, rest: string) => head + rest.replace(COLON_G, " "));
+    s = tr(s, DIGIT_COLON_RUN, (_m, head: string, rest: string) => head + rest.replace(COLON_G, " "));
 
     // 1) DOTTED CAPITAL RUNS → the bare letters, BEFORE anything reads an interior dot as a phrase break
     //    (multi-dot abbreviations before single-dot). The retained corpus writes `B.C.E.`, `C.E.`, `F.W.`,
@@ -339,7 +340,7 @@ export function normalizeSepedi(input: string): string {
     //    ⚠ NO LETTER-NAME TABLE EXISTS FOR nso (`sources.ts`: espeak does not ship this language at all), so
     //    `core/initialisms.ts` would be a no-op and this is the best available: the SENTENCE PAUSES go, which
     //    is the measured defect, and no name is invented.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run: string, off: number, full: string) => {  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run: string, off: number, full: string) => {  // space, NBSP
         const letters = [...run.replace(/[. \u00a0]/gu, "")].join("-");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
@@ -380,9 +381,9 @@ export function normalizeSepedi(input: string): string {
     //    numeral. Four groups is 15 digits at most, inside the safe-integer range, and the corpus's largest
     //    genuine grouped number is `30 560 860` (three). The precision limit itself is an ENGINE defect, not
     //    a normalization one, and is recorded in the investigation doc rather than worked around here.
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3}){1,4}(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = tr(s, /(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3}){1,4}(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 3) THE ENGLISH ORDINAL SUFFIX (`4th`, `16th`, `19th`). Sepedi writes its own ordinals as WORDS and this
     //    corpus does exactly that beside the Latin form — *"mokgatlokgolo wa lesome senyane (19th)"*,
@@ -391,7 +392,7 @@ export function normalizeSepedi(input: string): string {
     //    morphology is invented, because the language's own is already written out wherever it is meant.
     //    Case-insensitive (trap 7). BEFORE the range step, so `1990s-2000s` cannot be confused, and before
     //    step 9 so no decimal shape is disturbed.
-    s = s.replace(/(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+    s = tr(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 4) THE RAND SIGN — LOCAL, because the guard is a measurement the shared tier cannot hold. `R` is also
     //    South Africa's ROUTE prefix, and this corpus writes both:
@@ -412,11 +413,11 @@ export function normalizeSepedi(input: string): string {
     //    ⚠ THE NOUN PRECEDES ITS FIGURE and the magnitude stays with the number, matching both the attested
     //    order (`diranta tše dimilione tše 100`) and what the tier does for `$` two steps earlier.
     const MAG = "dimilione|milione|dibilione|bilione|dipilione|pilione";
-    s = s.replace(
+    s = tr(s, 
         new RegExp(String.raw`(?<![\p{L}\p{M}\d])R[ \u00a0]?(\d+\.\d+|\d{4,})([ \u00a0](?:${MAG}))?(?![\p{L}\p{M}\d])`, "giu"),  // space, NBSP
         (_w, num: string, mag: string | undefined) => `${RAND}${mag ?? ""} ${num}`,
     );
-    s = s.replace(
+    s = tr(s, 
         new RegExp(String.raw`(?<![\p{L}\p{M}\d])R[ \u00a0]?(\d+)([ \u00a0](?:${MAG}))(?![\p{L}\p{M}\d])`, "giu"),  // space, NBSP
         (_w, num: string, mag: string) => `${RAND}${mag} ${num}`,
     );
@@ -439,7 +440,7 @@ export function normalizeSepedi(input: string): string {
     //    Case-insensitive on the key, because the corpus writes `Km`/`KM` beside `km` (trap 7); the exponent
     //    branch's ASCII `2`/`3` needs the preceding character to be a LETTER so `km 2` (a kilometre, then
     //    two) is not read as an area while `km ²` is.
-    s = s.replace(
+    s = tr(s, 
         new RegExp(
             `${NOT_VERSION}(\\d+(?:[ \u00a0\u202f\u2009]\\d{3}(?!\\d)|[.,]\\d+)*)(?![\\d.,])[ \u00a0\u202f\u2009]?(${UNIT_ALT})` +  // NBSP, NNBSP, thin space
                 `(?:[ \u00a0\u202f\u2009]?/[ \u00a0\u202f\u2009]?(${DENOM_ALT})|[ \u00a0\u202f\u2009]?(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?` +  // NBSP, NNBSP, thin space
@@ -490,12 +491,12 @@ export function normalizeSepedi(input: string): string {
     //    would leave every one of them raw in the IPA.
     const degreeC = (n: string, off: number, end: number, full: string): string =>
         saidNear(full, off, end, CELSIUS) ? n : `${n} ${CELSIUS}`;
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?C(?![\p{L}\p{M}])/gui,  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?C(?![\p{L}\p{M}])/gui,  // space, NBSP
         (w: string, n: string, off: number, full: string) => degreeC(n, off, off + w.length, full));
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?F(?![\p{L}\p{M}])/gui, "$1");  // space, NBSP
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?F(?![\p{L}\p{M}])/gui, "$1");  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º][ \u00a0]?([NSEW])(?![\p{L}\p{M}])/gu,  // space, NBSP
         (_w, n: string, c: string) => `${n} ${COMPASS[c]!}`);
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, "$1");  // space, NBSP
+    s = tr(s, /(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[ \u00a0]?[°º](?![\p{L}\p{M}])/gu, "$1");  // space, NBSP
 
     // 8) RANGES → `go ya go`. See UNTIL for the three in-corpus attestations and for why DESCENDING spans are
     //    admitted here where the nya/rw siblings admit only ascending ones.
@@ -528,7 +529,7 @@ export function normalizeSepedi(input: string): string {
     //    silent at exactly a sentence end (playbook trap 58, reported by `review.ts`'s `clause-final` check).
     //    What the separator exclusion is for is a CONTINUATION of the number into step 9's decimal, and a
     //    following digit is what tests that: `9.84-9.90` is still declined and so is a grouped `1-1,000`.
-    s = s.replace(/(?<![-–—\d.,\p{L}\p{M}])(?<![-–—][ \u00a0])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-–—\d\p{L}\p{M}]|[.,]\d)(?![ \u00a0][-–—])/gu,  // space, NBSP
+    s = tr(s, /(?<![-–—\d.,\p{L}\p{M}])(?<![-–—][ \u00a0])(\d+)[ \u00a0]?[-–—][ \u00a0]?(\d+)(?![-–—\d\p{L}\p{M}]|[.,]\d)(?![ \u00a0][-–—])/gu,  // space, NBSP
         (whole: string, a: string, b: string) =>
             Math.abs(a.length - b.length) >= 2 ? whole : `${a} ${UNTIL} ${b}`);
 
@@ -541,8 +542,8 @@ export function normalizeSepedi(input: string): string {
     //    ⚠ THE COMMA ARM'S `(?![\d,])` IS WHAT DECLINES A LIST. The corpus writes `(1,2,3,4,5,6)` — six
     //    single digits, not three decimals — and every member is either followed by a comma or preceded by
     //    one, so both guards reject the whole run. Measured: 3 true decimals, 0 list members claimed.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
-    s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = tr(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
+    s = tr(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, f));
 
     // ⚠ A padded replacement (` le `, `letters `) doubles a space that was already there and can leave one at
     // an edge. SLOT-GAP is a corpus-diff defect class; this pass must not feed it.
