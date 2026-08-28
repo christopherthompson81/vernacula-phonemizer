@@ -9,6 +9,7 @@
  */
 import { readForeignRun } from "../../core/foreign.ts";
 import { FOREIGN_RUN } from "../../core/clauses.ts";
+import { enterEngine, noteToken } from "../../core/trace.ts";
 import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
 import { loadJson } from "../../core/loadManifest.ts";
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
@@ -65,14 +66,18 @@ function promoteFirstVowel(ipa: string): string {
     return m === null ? ipa : ipa.slice(0, m.index) + "ˈ" + ipa.slice(m.index);
 }
 
+// `span` is [start, end) into the NORMALIZED input — carried only so the #1150 trace can attribute readings
+// back to the text that produced them; nothing in the reading path reads it.
 type Token =
-    | { kind: "word"; text: string }
-    | { kind: "number"; text: string; ordinal: boolean }
-    | { kind: "clause"; text: string }
+    | { kind: "word"; text: string; span: Span }
+    | { kind: "number"; text: string; ordinal: boolean; span: Span }
+    | { kind: "clause"; text: string; span: Span }
     // A run in a script this engine does not own, ALREADY resolved to IPA by whichever engine owns that
     // script (core/scripts.ts). It carries phonemes rather than text because it must bypass the tagger
     // and the resolver entirely — there is no English pronunciation of Владимир to look up.
-    | { kind: "foreign"; ipa: string };
+    | { kind: "foreign"; ipa: string; span: Span; surface: string };
+
+type Span = [number, number];
 
 // number (grouped + decimal) with optional ordinal suffix · word (letters + internal/trailing apostrophes) · clause punct
 // The word class is LATIN-SCRIPT, not [A-Za-z]: an ASCII-only class split accented loanwords at the
@@ -214,6 +219,7 @@ export class EnglishPhonemizer {
         // the Roman-numeral rules get first refusal on all-caps letter runs — run earlier, this spells
         // "Louis XIV" as EX-EYE-VEE.
         input = normalizeEnglishInitialisms(normalizeEnglish(input), (w) => this.lexicon.has(w));
+        enterEngine(input);
         const tokens: Token[] = [];
         let m: RegExpExecArray | null;
         // GAPS between tokens carry embedded foreign text. English's tokenizer matches Latin script only, so
@@ -227,7 +233,9 @@ export class EnglishPhonemizer {
                 const gap = input.slice(gapCursor, upto);
                 for (const g of gap.matchAll(FOREIGN_RUN)) {
                     const ipa = readForeignRun(g[0]);
-                    if (ipa !== undefined && ipa !== "") tokens.push({ kind: "foreign", ipa });
+                    const at = gapCursor + (g.index ?? 0);
+                    if (ipa !== undefined && ipa !== "")
+                        tokens.push({ kind: "foreign", ipa, span: [at, at + g[0].length], surface: g[0] });
                 }
             }
             gapCursor = upto;
@@ -235,16 +243,18 @@ export class EnglishPhonemizer {
         while ((m = TOKEN_RE.exec(input)) !== null) {
             claimGap(m.index);
             gapCursor = m.index + m[0].length;
+            const span: Span = [m.index, m.index + m[0].length];
             if (m[1] !== undefined)
                 tokens.push({
                     kind: "number",
                     text: m[1],
                     ordinal: m[2] !== undefined,
+                    span,
                 });
             else if (m[3] !== undefined)
-                tokens.push({ kind: "word", text: m[3] });
+                tokens.push({ kind: "word", text: m[3], span });
             else if (m[4] !== undefined)
-                tokens.push({ kind: "clause", text: m[4] });
+                tokens.push({ kind: "clause", text: m[4], span });
         }
         claimGap(input.length);
 
@@ -257,6 +267,8 @@ export class EnglishPhonemizer {
         }
         interface Unit {
             words: NumWord[];
+            span?: Span;
+            surface?: string;
             clause?: string;
             /** Already-resolved IPA (a foreign run); contributes NO words, so tagger alignment is
              *  unaffected and `expect[wi]` keeps indexing the English stream correctly. */
@@ -264,12 +276,13 @@ export class EnglishPhonemizer {
         }
         const units: Unit[] = [];
         for (const t of tokens) {
+            const src = { span: t.span, surface: t.kind === "foreign" ? t.surface : t.text };
             if (t.kind === "clause") {
                 const mk = this.clausePunctuation[t.text];
-                if (mk) units.push({ words: [], clause: mk });
-            } else if (t.kind === "foreign") units.push({ words: [], foreign: t.ipa });
+                if (mk) units.push({ words: [], clause: mk, ...src });
+            } else if (t.kind === "foreign") units.push({ words: [], foreign: t.ipa, ...src });
             else if (t.kind === "word")
-                units.push({ words: [{ text: t.text }] });
+                units.push({ words: [{ text: t.text }], ...src });
             else {
                 const n = BigInt(t.text.replace(/[,.]/g, "")); // integer part; fractional read separately below
                 const dot = t.text.indexOf(".");
@@ -286,6 +299,7 @@ export class EnglishPhonemizer {
                             { text: "point", reduced: true },
                             ...frac,
                         ],
+                        ...src,
                     });
                 } else {
                     units.push({
@@ -293,6 +307,7 @@ export class EnglishPhonemizer {
                             ? ordinalToWords(n)
                             : numberToWords(n)
                         ).map((w) => ({ text: w })),
+                        ...src,
                     });
                 }
             }
@@ -309,6 +324,8 @@ export class EnglishPhonemizer {
             citation: string;
             reduced: boolean;
             display: string;
+            /** The source token this reading came from — carried for the #1150 trace only. */
+            src?: { span: Span; surface: string };
         }
         const clauses: { items: Item[]; mark: string | null }[] = [
             { items: [], mark: null },
@@ -325,6 +342,7 @@ export class EnglishPhonemizer {
             if (u.foreign !== undefined) {
                 clauses[clauses.length - 1]!.items.push({
                     word: "", citation: u.foreign, reduced: false, display: u.foreign,
+                    src: u.span !== undefined && u.surface !== undefined ? { span: u.span, surface: u.surface } : undefined,
                 });
                 continue;
             }
@@ -338,11 +356,13 @@ export class EnglishPhonemizer {
                     citation,
                     reduced: (w.reduced ?? false) || this.unstressed.has(lw),
                     display: citation,
+                    src: u.span !== undefined && u.surface !== undefined ? { span: u.span, surface: u.surface } : undefined,
                 });
             }
         }
 
         const parts: string[] = [];
+        const traced = new Map<string, { span: Span; surface: string; emitted: string[] }>();
         for (const c of clauses) {
             for (const it of c.items) {
                 if (this.whSecondary.has(it.word))
@@ -372,10 +392,23 @@ export class EnglishPhonemizer {
                         ? last.citation
                         : promoteFirstVowel(last.citation);
             }
-            for (const it of c.items)
-                parts.push(wordTransform ? wordTransform(it.display, it.word) : it.display);
+            for (const it of c.items) {
+                const rendered = wordTransform ? wordTransform(it.display, it.word) : it.display;
+                parts.push(rendered);
+                // ⚠ RECORDED AFTER RENDERING (#1150). This pipeline is two-phase — tokens, then a POS tagger
+                // over the whole stream, then a resolver — so no token is ever "open" while its reading is
+                // produced and the streaming hooks do not fit. One source token can yield many readings (a
+                // numeral becomes words), so they accumulate per span and are reported once, below.
+                if (it.src !== undefined) {
+                    const key = `${it.src.span[0]}:${it.src.span[1]}`;
+                    const bucket = traced.get(key);
+                    if (bucket) bucket.emitted.push(rendered);
+                    else traced.set(key, { span: it.src.span, surface: it.src.surface, emitted: [rendered] });
+                }
+            }
             if (c.mark !== null) parts.push(c.mark);
         }
+        for (const t of traced.values()) noteToken(t.span, t.surface, t.emitted);
         return parts.join(" ");
     }
 }

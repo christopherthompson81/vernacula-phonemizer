@@ -26,6 +26,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { createFrench } from "../french/french.ts";
+import { noteRewrite } from "../../core/trace.ts";
 
 const LAX: Record<string, string> = { i: "ɪ", y: "ʏ", u: "ʊ" };
 // non-lengthening coda consonants; the LENGTHENING set /ʁ v z ʒ/ is deliberately absent (it keeps the vowel tense).
@@ -59,5 +60,13 @@ export const phonemizeWordRules = phonemizeWord;
 /** Build the Québécois-French phonemizer (France engine + the Québécois delta on the output). */
 export function createFrenchCA(): Phonemizer {
     const e = createFrench();
-    return { text: (input: string): string => toQuebecois(e.text(input)) };
+    // ⚠ AN ACCENT VARIANT IS A WHOLE-STRING DELTA over the base engine's output (#1150).
+    return {
+        text: (input: string): string => {
+            const pre = e.text(input);
+            const out = toQuebecois(pre);
+            noteRewrite("accent:fr-CA", pre, out);
+            return out;
+        },
+    };
 }

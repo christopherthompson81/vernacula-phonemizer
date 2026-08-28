@@ -18,6 +18,7 @@
  * structurally to identify by source pattern — `test/latin-tokenizers.test.ts` is the measurement.
  */
 import type { ScriptName } from "./scripts.ts";
+import { noteNativised } from "./trace.ts";
 
 /**
  * Word arm for an engine writing in `scripts`, as a STRING (engines assemble `TOKEN` by template from word,
@@ -107,6 +108,11 @@ export function makeNativiser(nativeClass: string, flags = "u"): (w: string) => 
     const known = (s: string): boolean => inClass.test(s.normalize("NFC"));
     return (w: string): string => {
         if (known(w)) return w;
-        return (w.match(CLUSTER) ?? []).map((c) => (known(c) ? c : foldLatinToBase(c))).join("");
+        const out = (w.match(CLUSTER) ?? []).map((c) => (known(c) ? c : foldLatinToBase(c))).join("");
+        // ⚠ THE STEP THAT WAS INVISIBLE (#1150). This rewrite happens BEFORE the g2p sees the word and leaves
+        // no mark on the output, which is how #1131/#1139/#1140 all hid. `noteNativised` is a no-op unless a
+        // trace is running.
+        noteNativised(w, out);
+        return out;
     };
 }

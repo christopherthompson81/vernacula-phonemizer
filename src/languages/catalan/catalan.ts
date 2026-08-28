@@ -18,6 +18,7 @@ import { toSegments, type Seg } from "./g2p.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeCatalan } from "./normalize.ts";
+import { noteRewrite } from "../../core/trace.ts";
 
 // Lexical stressed mid-vowel HEIGHT (open/close is not spelling-derivable — dona/dóna, os/ós).
 // word → "e" (stressed ⟨e⟩ is close /e/) or "o" (stressed ⟨o⟩ is close /o/).
@@ -63,6 +64,14 @@ const FUNCTION_WORDS = new Set(MANIFEST.functionWords);
 const CROSS_WORD_STOP = /([^\s])(\s+)([bdɡ])(?=([^\s]?))/gu;
 
 function spirantizeAcrossWords(ipa: string): string {
+    // ⚠ REPORTED TO THE TRACE (#1150): runs on the ASSEMBLED string, so a token's `emitted` reading is not
+    // what ships. Without the event the discrepancy has no cause attached.
+    const out = spirantizeAcrossWordsCore(ipa);
+    noteRewrite("spirantize-across-words", ipa, out);
+    return out;
+}
+
+function spirantizeAcrossWordsCore(ipa: string): string {
     return ipa.replace(CROSS_WORD_STOP, (m, prev: string, gap: string, stop: string, next: string) => {
         if (NASALS.has(prev)) return m;
         if (stop === "d" && (prev === "ɫ" || prev === "ʎ")) return m;   // homorganic, /d/ only

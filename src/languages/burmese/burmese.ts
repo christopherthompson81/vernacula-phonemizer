@@ -9,6 +9,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink, emitUnclaimed } from "../../core/clauses.ts";
+import { beginToken, endToken, enterEngine } from "../../core/trace.ts";
 import { numberToWords, spellDigits } from "./numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -287,14 +288,18 @@ class BurmesePhonemizer implements Phonemizer {
         // the ordered steps and the two negative results.
         const input = normalizeBurmese(rawInput);
         const { sink, finish } = clauseSink();
+        // This engine scans with its own exec loop, so it reports to the trace explicitly (#1150) — the
+        // recorder cannot derive spans for a loop it never sees.
+        enterEngine(input);
         let m: RegExpExecArray | null;
         const tok = new RegExp(TOKEN.source, "gu");
         let cursor = 0;
         while ((m = tok.exec(input))) {
             // This engine scans with its own exec loop rather than assembleClauses, so it needs the
             // gap pass explicitly — without it embedded Latin (a brand name, acronym) is dropped.
-            if (m.index > cursor) emitUnclaimed(input.slice(cursor, m.index), sink);
+            if (m.index > cursor) emitUnclaimed(input.slice(cursor, m.index), sink, cursor);
             cursor = m.index + m[0].length;
+            beginToken([m.index, cursor], m[0]);
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 // Digits (ASCII or Burmese ၀-၉) → Burmese number words, then phonemize each.
@@ -317,8 +322,9 @@ class BurmesePhonemizer implements Phonemizer {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
+            endToken();
         }
-        if (cursor < input.length) emitUnclaimed(input.slice(cursor), sink);
+        if (cursor < input.length) emitUnclaimed(input.slice(cursor), sink, cursor);
         return finish();
     }
 }

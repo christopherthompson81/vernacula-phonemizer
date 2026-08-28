@@ -144,7 +144,9 @@ public static class FrenchPhonemizer
         return Roman.NormalizeRomans(Ordinals.NormalizeFrenchOrdinalDigits(s));
     }
 
-    private abstract record Item;
+    /** `Source` is carried for the #1150 trace only — nothing in the reading path reads it. */
+    private sealed record Src(int Start, int End, string Surface);
+    private abstract record Item { public Src? Source { get; init; } }
     private sealed record WordItem(string Word) : Item;
     private sealed record PauseItem(string Pause) : Item;
     private sealed record IpaItem(string Ipa) : Item;
@@ -164,6 +166,7 @@ public static class FrenchPhonemizer
             bool IsWord(string w) => Lexicon().ContainsKey(w);
             input = SYMBOLS(Normalize.NormalizeFrenchInitialisms(
                 NormalizeFrenchNumerals(Normalize.NormalizeFrench(input, IsWord)), IsWord));
+            Core.Trace.EnterEngine(input);
             var items = new List<Item>();
             var gapCursor = 0;
             void ClaimGap(int upto)
@@ -172,7 +175,9 @@ public static class FrenchPhonemizer
                     foreach (Match g in JsRegex.MatchAll(Clauses.FOREIGN_RUN, input[gapCursor..upto]))
                     {
                         var ipa = Foreign.ReadForeignRun(g.Value);
-                        if (ipa is not null && ipa != "") items.Add(new IpaItem(ipa));
+                        var at = gapCursor + g.Index;
+                        if (ipa is not null && ipa != "")
+                            items.Add(new IpaItem(ipa) { Source = new Src(at, at + g.Value.Length, g.Value) });
                     }
                 gapCursor = upto;
             }
@@ -180,34 +185,39 @@ public static class FrenchPhonemizer
             foreach (Match m in JsRegex.MatchAll(TOKEN, input))
             {
                 ClaimGap(m.Index);
+                var src = new Src(m.Index, m.Index + m.Value.Length, m.Value);
                 gapCursor = m.Index + m.Value.Length;
-                if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) items.Add(new WordItem(m.Groups[1].Value));
+                if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) items.Add(new WordItem(m.Groups[1].Value) { Source = src });
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
                     var split = DECIMAL_SPLIT.Re.Split(m.Groups[2].Value);
                     var intPart = split[0];
                     var frac = split.Length > 1 ? split[1] : null;
                     foreach (var w in Numbers.NumberToWords(Js.Number(intPart), intPart).Split(' '))
-                        items.Add(new WordItem(w));
+                        items.Add(new WordItem(w) { Source = src });
                     if (frac is not null)
                     {
-                        items.Add(new WordItem(Manifest.MANIFEST.Numbers.DecimalSeparator));
+                        items.Add(new WordItem(Manifest.MANIFEST.Numbers.DecimalSeparator) { Source = src });
                         var asNumber = frac.Length <= 3 && !frac.StartsWith("0", StringComparison.Ordinal);
                         var parts = asNumber
                             ? Numbers.NumberToWords(Js.Number(frac), frac).Split(' ').AsEnumerable()
                             : frac.SelectMany(d => Numbers.NumberToWords(Js.Number(d.ToString()), d.ToString()).Split(' '));
-                        foreach (var w in parts) items.Add(new WordItem(w));
+                        foreach (var w in parts) items.Add(new WordItem(w) { Source = src });
                     }
                 }
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
                 {
                     var mk = CLAUSE_MARK.GetValueOrDefault(m.Groups[3].Value);
-                    if (mk is not null) items.Add(new PauseItem(mk));
+                    if (mk is not null) items.Add(new PauseItem(mk) { Source = src });
                 }
             }
             ClaimGap(input.Length);
 
             var group = new List<string>(); // IPA tokens of the current rhythmic group (until a pause)
+            // ⚠ RECORDED AT FLUSH, NOT AT PUSH (#1150): AccentFinal MUTATES the group in place before it is
+            // joined, so a reading captured at push is not the reading that ships.
+            var groupSrc = new List<Src?>();
+            var traced = new Dictionary<string, (Src Src, List<string> Emitted)>();
             var @out = "";
             var carry = ""; // liaison consonant to prepend to the next word (its new onset)
             void Flush(string? pause)
@@ -215,8 +225,17 @@ public static class FrenchPhonemizer
                 if (group.Count > 0)
                 {
                     AccentFinal(group);
+                    for (var gi = 0; gi < group.Count; gi++)
+                    {
+                        var sc = gi < groupSrc.Count ? groupSrc[gi] : null;
+                        if (sc is null) continue;
+                        var key = $"{sc.Start}:{sc.End}";
+                        if (traced.TryGetValue(key, out var b)) b.Emitted.Add(group[gi]);
+                        else traced[key] = (sc, new List<string> { group[gi] });
+                    }
                     @out += (@out != "" ? " " : "") + string.Join(" ", group);
                     group = new List<string>();
+                    groupSrc = new List<Src?>();
                 }
                 if (!string.IsNullOrEmpty(pause)) @out += $" {pause}";
             }
@@ -234,6 +253,7 @@ public static class FrenchPhonemizer
                 {
                     carry = "";
                     group.Add(ip.Ipa);
+                    groupSrc.Add(ip.Source);
                     continue;
                 }
                 var wi = (WordItem)it;
@@ -249,9 +269,11 @@ public static class FrenchPhonemizer
                     carry = LiaisonOnto(wi.Word, nw.Word);
                     if (carry != "") ipa = StripLatent(ipa, carry); // avoid doubling a citation-realised final consonant
                 }
-                if (ipa != "") group.Add(ipa);
+                if (ipa != "") { group.Add(ipa); groupSrc.Add(it.Source); }
             }
             Flush(null);
+            foreach (var (src2, emitted) in traced.Values)
+                Core.Trace.NoteToken(src2.Start, src2.End, src2.Surface, emitted);
             return @out;
         }
     }

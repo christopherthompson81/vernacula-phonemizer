@@ -36,6 +36,15 @@ public sealed class SpanishPhonemizer : ILanguage
 
     private static string SpirantizeAcrossWords(string ipa)
     {
+        // ⚠ REPORTED TO THE TRACE (#1150): this runs on the ASSEMBLED string, so a token's Emitted reading is
+        // not what ships — `gato` emits ɡˈato and the sentence reads ɣˈato.
+        var traced = SpirantizeAcrossWordsCore(ipa);
+        Core.Trace.NoteRewrite("spirantize-across-words", ipa, traced);
+        return traced;
+    }
+
+    private static string SpirantizeAcrossWordsCore(string ipa)
+    {
         return CROSS_WORD_STOP.Replace(ipa, m =>
         {
             var prev = m.Groups[1].Value;

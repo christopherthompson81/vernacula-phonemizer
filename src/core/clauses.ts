@@ -14,6 +14,7 @@
  *   }
  */
 import { getDefaultForeign, readForeignRun } from "./foreign.ts";
+import { beginToken, endToken, enterEngine, exitEngine, noteEmit } from "./trace.ts";
 
 export interface ClauseSink {
     /** Append a phonemized token, space-joined; flushes any pending pause before it. Empty strings are ignored. */
@@ -33,6 +34,7 @@ export function clauseSink(): { sink: ClauseSink; finish: () => string } {
     const sink: ClauseSink = {
         emit(ipa) {
             if (ipa === "") return;
+            noteEmit(ipa);
             if (out === "") out = ipa;
             else if (pending !== null) {
                 out += ` ${pending} ${ipa}`;
@@ -82,20 +84,30 @@ export const FOREIGN_RUN = /[\p{L}\p{M}][\p{L}\p{M}'’-]*[\u2070\u00b9\u00b2\u0
  * Latin-to-English fallback apply. Everything else in a gap — stray punctuation, whitespace — stays dropped
  * (see core/foreign.ts for why an unclaimed gap loses embedded text entirely).
  */
-export function emitUnclaimed(gap: string, sink: ClauseSink): void {
+export function emitUnclaimed(gap: string, sink: ClauseSink, base = 0): void {
     for (const m of gap.matchAll(FOREIGN_RUN)) {
         const run = m[0];
+        // ⚠ AN UNCLAIMED RUN IS STILL A TOKEN (#1150). Its reading reaches the output — an embedded `Windows`
+        // in Russian text is read by the ENGLISH engine — so leaving it outside the trace would attribute
+        // real IPA to no token at all. `base` is the gap's offset in the caller's string; call sites that do
+        // not pass it get spans relative to the gap, which is why every one in this file does.
+        beginToken([base + (m.index ?? 0), base + (m.index ?? 0) + run.length], run);
         // The script router first — it knows which language should read this run. It declines for an
         // unknown script, and for a target equal to the host (which would recurse).
         const routed = readForeignRun(run);
         if (routed !== undefined) {
             if (routed !== "") sink.emit(routed);
+            endToken();
             continue;
         }
         // Fallback: the Latin-to-English path, for wherever the router has nothing to say.
-        if (!/\p{Script=Latin}/u.test(run)) continue;
+        if (!/\p{Script=Latin}/u.test(run)) {
+            endToken();
+            continue;
+        }
         const foreign = getDefaultForeign();
         if (foreign !== undefined) sink.emit(foreign(run));
+        endToken();
     }
 }
 
@@ -105,16 +117,27 @@ export function assembleClauses(
     handle: (match: RegExpMatchArray, sink: ClauseSink) => void,
 ): string {
     const { sink, finish } = clauseSink();
-    let cursor = 0;
-    for (const m of input.matchAll(token)) {
-        const at = m.index ?? cursor;
-        // Text between the previous match and this one is text the tokenizer declined; an engine whose
-        // TOKEN already has a Latin group claims it here and leaves no gap, so this is a no-op for the
-        // engines that were already correct.
-        if (at > cursor) emitUnclaimed(input.slice(cursor, at), sink);
-        handle(m, sink);
-        cursor = at + m[0].length;
+    // ⚠ THE TRACE IS DERIVED HERE AND NOWHERE ELSE (#1150). `at`/`cursor` below were already computed and
+    // already discarded; a token's span is that arithmetic kept rather than thrown away, and its readings are
+    // whatever the handler emits between `beginToken` and `endToken`. No language module changes, and when no
+    // trace is running every call in this block is a boolean check.
+    enterEngine(input);
+    try {
+        let cursor = 0;
+        for (const m of input.matchAll(token)) {
+            const at = m.index ?? cursor;
+            // Text between the previous match and this one is text the tokenizer declined; an engine whose
+            // TOKEN already has a Latin group claims it here and leaves no gap, so this is a no-op for the
+            // engines that were already correct.
+            if (at > cursor) emitUnclaimed(input.slice(cursor, at), sink, cursor);
+            beginToken([at, at + m[0].length], m[0]);
+            handle(m, sink);
+            endToken();
+            cursor = at + m[0].length;
+        }
+        if (cursor < input.length) emitUnclaimed(input.slice(cursor), sink, cursor);
+        return finish();
+    } finally {
+        exitEngine();
     }
-    if (cursor < input.length) emitUnclaimed(input.slice(cursor), sink);
-    return finish();
 }

@@ -15,6 +15,7 @@ import { integerToChinese, digitsToChinese } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { normalizeMandarin, spellInitialisms } from "./normalize.ts";
 import { clauseSink } from "../../core/clauses.ts";
+import { beginToken, endToken, enterEngine } from "../../core/trace.ts";
 import { readForeignRun } from "../../core/foreign.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -167,6 +168,14 @@ class MandarinPhonemizer implements Phonemizer {
         // Code-point run scanner (Han / Latin / punctuation), not a single regex — so it drives clauseSink()
         // directly rather than going through assembleClauses, but reuses the shared emit/pause/flush assembly.
         const { sink, finish } = clauseSink();
+        // ⚠ THIS ENGINE REPORTS TO THE TRACE ITSELF (#1150): it scans CODE POINTS, not a regex over the
+        // string, so the recorder has no loop to derive spans from. `off` maps a code-point index to a UTF-16
+        // offset, because a span must index `normalized` exactly — `cp` indices and string indices diverge the
+        // moment a supplementary character appears, and Han has plenty.
+        const traceText = cp.join("");
+        const off: number[] = [0];
+        for (const c of cp) off.push(off[off.length - 1]! + c.length);
+        enterEngine(traceText);
         let i = 0;
         while (i < cp.length) {
             const ch = cp[i]!;
@@ -174,15 +183,19 @@ class MandarinPhonemizer implements Phonemizer {
                 // Han run (may include synthesized numerals)
                 let j = i;
                 while (j < cp.length && HAN.test(cp[j]!)) j++;
+                beginToken([off[i]!, off[j]!], cp.slice(i, j).join(""));
                 sink.emit(this.hanRun(cp.slice(i, j), exempt.slice(i, j)));
+                endToken();
                 i = j;
             } else if (LATIN.test(ch)) {
                 // Latin run → foreign (en)
                 let j = i;
                 while (j < cp.length && LATIN_RUN.test(cp[j]!)) j++;
+                beginToken([off[i]!, off[j]!], cp.slice(i, j).join(""));
                 sink.emit(
                     this.foreign ? this.foreign(cp.slice(i, j).join("")) : "",
                 );
+                endToken();
                 i = j;
             } else if (FOREIGN_CHAR.test(ch)) {
                 // A LETTER RUN THAT IS NEITHER HAN NOR LATIN → the script router (core/scripts.ts).
@@ -217,8 +230,10 @@ class MandarinPhonemizer implements Phonemizer {
                         && FOREIGN_CHAR.test(next) && !HAN.test(next) && !LATIN.test(next)) { j += 2; continue; }
                     break;
                 }
+                beginToken([off[i]!, off[j]!], cp.slice(i, j).join(""));
                 const routed = readForeignRun(cp.slice(i, j).join(""));
                 if (routed !== undefined && routed !== "") sink.emit(routed);
+                endToken();
                 i = j;
             } else {
                 // punctuation → pending pause; other → skip

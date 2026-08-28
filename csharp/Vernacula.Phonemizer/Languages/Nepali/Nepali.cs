@@ -53,7 +53,14 @@ public static class NepaliPhonemizer
             WordRules = w => NepaliVowel(b.WordRules(w)),
             Number = d => NepaliVowel(b.Number(d)),
             // Map Devanagari ə→ʌ, then restore the shielded English ə (computer stays kəmpjuːt̬ɚ).
-            Text = i => NepaliVowel(b.Text(i)).Replace(SENTINEL, "ə", StringComparison.Ordinal),
+            // ⚠ A whole-string post-pass, reported to the trace (#1150).
+            Text = i =>
+            {
+                var pre = b.Text(i);
+                var o = NepaliVowel(pre).Replace(SENTINEL, "ə", StringComparison.Ordinal);
+                Core.Trace.NoteRewrite("nepali-inherent-vowel", pre, o);
+                return o;
+            },
         };
     }
 

@@ -259,11 +259,14 @@ public sealed class BurmesePhonemizer : ILanguage
     {
         var input = Normalize.NormalizeBurmese(rawInput);
         var (sink, finish) = Clauses.ClauseSink();
+        // This engine scans with its own loop, so it reports to the trace explicitly (#1150).
+        Core.Trace.EnterEngine(input);
         var cursor = 0;
         foreach (var m in TOKEN.Matches(input))
         {
-            if (m.Index > cursor) Clauses.EmitUnclaimed(input[cursor..m.Index], sink);
+            if (m.Index > cursor) Clauses.EmitUnclaimed(input[cursor..m.Index], sink, cursor);
             cursor = m.Index + m.Length;
+            Core.Trace.BeginToken(m.Index, cursor, m.Value);
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
             {
@@ -282,8 +285,9 @@ public sealed class BurmesePhonemizer : ILanguage
             {
                 if (CLAUSE_MARK.TryGetValue(m.Groups[3].Value, out var mk) && mk.Length > 0) sink.Pause(mk);
             }
+            Core.Trace.EndToken();
         }
-        if (cursor < input.Length) Clauses.EmitUnclaimed(input[cursor..], sink);
+        if (cursor < input.Length) Clauses.EmitUnclaimed(input[cursor..], sink, cursor);
         return finish();
     }
 

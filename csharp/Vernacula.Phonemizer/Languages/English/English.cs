@@ -83,7 +83,9 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         return !m.Success ? ipa : ipa[..m.Index] + "ˈ" + ipa[m.Index..];
     }
 
-    private abstract record Token;
+    /** `Src` is carried for the #1150 trace only — nothing in the reading path reads it. */
+    private sealed record Src(int Start, int End, string Surface);
+    private abstract record Token { public Src? Source { get; init; } }
     private sealed record WordToken(string Text) : Token;
     private sealed record NumberToken(string Text, bool Ordinal) : Token;
     private sealed record ClauseToken(string Text) : Token;
@@ -200,6 +202,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         /** Already-resolved IPA (a foreign run); contributes NO words, so tagger alignment is
          *  unaffected and `expect[wi]` keeps indexing the English stream correctly. */
         public string? Foreign { get; init; }
+        public Src? Source { get; init; }
     }
 
     private sealed class Item
@@ -208,6 +211,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         public required string Citation { get; init; }
         public required bool Reduced { get; init; }
         public required string Display { get; set; }
+        public Src? Source { get; init; }
     }
 
     private sealed class ClauseAcc
@@ -224,6 +228,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     public string Text(string input, Func<string, string, string>? wordTransform, Func<string, string?>? oovOverride)
     {
         input = Normalize.NormalizeEnglishInitialisms(Normalize.NormalizeEnglish(input), w => _lexicon.ContainsKey(w));
+        Core.Trace.EnterEngine(input);
         var tokens = new List<Token>();
         var gapCursor = 0;
         void ClaimGap(int upto)
@@ -234,7 +239,9 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                 foreach (Match g in Clauses.FOREIGN_RUN.Matches(gap))
                 {
                     var ipa = Foreign.ReadForeignRun(g.Value);
-                    if (ipa is not null && ipa != "") tokens.Add(new ForeignToken(ipa));
+                    var at = gapCursor + g.Index;
+                    if (ipa is not null && ipa != "")
+                        tokens.Add(new ForeignToken(ipa) { Source = new Src(at, at + g.Value.Length, g.Value) });
                 }
             }
             gapCursor = upto;
@@ -243,9 +250,10 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         {
             ClaimGap(m.Index);
             gapCursor = m.Index + m.Value.Length;
-            if (m.Groups[1].Success) tokens.Add(new NumberToken(m.Groups[1].Value, m.Groups[2].Success));
-            else if (m.Groups[3].Success) tokens.Add(new WordToken(m.Groups[3].Value));
-            else if (m.Groups[4].Success) tokens.Add(new ClauseToken(m.Groups[4].Value));
+            var src = new Src(m.Index, gapCursor, m.Value);
+            if (m.Groups[1].Success) tokens.Add(new NumberToken(m.Groups[1].Value, m.Groups[2].Success) { Source = src });
+            else if (m.Groups[3].Success) tokens.Add(new WordToken(m.Groups[3].Value) { Source = src });
+            else if (m.Groups[4].Success) tokens.Add(new ClauseToken(m.Groups[4].Value) { Source = src });
         }
         ClaimGap(input.Length);
 
@@ -256,13 +264,13 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             {
                 case ClauseToken ct:
                     if (_clausePunctuation.TryGetValue(ct.Text, out var mk) && mk.Length > 0)
-                        units.Add(new Unit { Clause = mk });
+                        units.Add(new Unit { Clause = mk, Source = t.Source });
                     break;
                 case ForeignToken ft:
-                    units.Add(new Unit { Foreign = ft.Ipa });
+                    units.Add(new Unit { Foreign = ft.Ipa, Source = t.Source });
                     break;
                 case WordToken wt:
-                    units.Add(new Unit { Words = { new NumWord { Text = wt.Text } } });
+                    units.Add(new Unit { Words = { new NumWord { Text = wt.Text } }, Source = t.Source });
                     break;
                 case NumberToken nt:
                 {
@@ -276,7 +284,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                             .Select(w => new NumWord { Text = w });
                         var frac = nt.Text[(dot + 1)..].Select(d =>
                             new NumWord { Text = Numbers.NumberToWords(BigInteger.Parse(d.ToString(), System.Globalization.CultureInfo.InvariantCulture))[0] });
-                        var u = new Unit();
+                        var u = new Unit { Source = t.Source };
                         u.Words.AddRange(intWords);
                         u.Words.Add(new NumWord { Text = "point", Reduced = true });
                         u.Words.AddRange(frac);
@@ -284,7 +292,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                     }
                     else
                     {
-                        var u = new Unit();
+                        var u = new Unit { Source = t.Source };
                         u.Words.AddRange((nt.Ordinal ? Numbers.OrdinalToWords(n) : Numbers.NumberToWords(n))
                             .Select(w => new NumWord { Text = w }));
                         units.Add(u);
@@ -312,7 +320,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             }
             if (u.Foreign is not null)
             {
-                clauses[^1].Items.Add(new Item { Word = "", Citation = u.Foreign, Reduced = false, Display = u.Foreign });
+                clauses[^1].Items.Add(new Item { Word = "", Citation = u.Foreign, Reduced = false, Display = u.Foreign, Source = u.Source });
                 continue;
             }
             foreach (var w in u.Words)
@@ -327,11 +335,15 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                     Citation = citation,
                     Reduced = w.Reduced || _unstressed.Contains(lw),
                     Display = citation,
+                    Source = u.Source,
                 });
             }
         }
 
         var parts = new List<string>();
+        // ⚠ RECORDED AFTER RENDERING (#1150): this pipeline is two-phase, so no token is ever "open" while
+        // its reading is produced. One source token can yield many readings, so they accumulate per span.
+        var traced = new Dictionary<string, (Src Src, List<string> Emitted)>();
         foreach (var c in clauses)
         {
             foreach (var it in c.Items)
@@ -349,9 +361,20 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                     last.Display = last.Citation.Contains('ˈ') ? last.Citation : PromoteFirstVowel(last.Citation);
             }
             foreach (var it in c.Items)
-                parts.Add(wordTransform is not null ? wordTransform(it.Display, it.Word) : it.Display);
+            {
+                var rendered = wordTransform is not null ? wordTransform(it.Display, it.Word) : it.Display;
+                parts.Add(rendered);
+                if (it.Source is not null)
+                {
+                    var key = $"{it.Source.Start}:{it.Source.End}";
+                    if (traced.TryGetValue(key, out var b)) b.Emitted.Add(rendered);
+                    else traced[key] = (it.Source, new List<string> { rendered });
+                }
+            }
             if (c.Mark is not null) parts.Add(c.Mark);
         }
+        foreach (var (src, emitted) in traced.Values)
+            Core.Trace.NoteToken(src.Start, src.End, src.Surface, emitted);
         return string.Join(" ", parts);
     }
 }

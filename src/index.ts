@@ -4,6 +4,7 @@
  *   phonemize("भारत", "hi") → "bʱaːɾət̪"
  *   phonemize("I read a book", "en") → "aᶦ ɹˈɛd ə bˈʊk"
  */
+import { startTrace, stopTrace, type TraceRewrite, type TraceToken } from "./core/trace.ts";
 import { getPhonemizer } from "./registry.ts";
 import { getNeuralPhonemizer } from "./neuralRegistry.ts";
 import { prewarmForeignEnglish } from "./languages/english/englishNeural.ts";
@@ -20,6 +21,7 @@ const MIXED_LATIN = (text: string): boolean =>
     /\p{Script=Latin}/u.test(text) && /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}\p{Script=Arabic}\p{Script=Cyrillic}\p{Script=Devanagari}\p{Script=Tamil}\p{Script=Ethiopic}\p{Script=Hebrew}\p{Script=Bengali}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Gujarati}\p{Script=Gurmukhi}\p{Script=Sinhala}\p{Script=Khmer}\p{Script=Lao}\p{Script=Myanmar}\p{Script=Georgian}\p{Script=Armenian}\p{Script=Greek}\p{Script=Tibetan}\p{Script=Oriya}\p{Script=Thaana}\p{Script=Syriac}\p{Script=Cherokee}]/u.test(text);
 
 export { getPhonemizer, type Phonemizer } from "./registry.ts";
+export type { TraceRewrite, TraceToken } from "./core/trace.ts";
 
 /** Phonemize `text` in language `lang` to canonical IPA (SYNCHRONOUS). Throws for an unregistered language.
  *  This is the simple path: a complete rule/lexicon engine for every language. Two caveats it does NOT cover —
@@ -28,6 +30,61 @@ export { getPhonemizer, type Phonemizer } from "./registry.ts";
  *  their SYNC fallback. `phonemizeAsync` covers both — prefer it for real-world text. */
 export function phonemize(text: string, lang: string): string {
     return getPhonemizer(lang).text(text);
+}
+
+/** The result of {@link phonemizeTrace}: the reading, the text its spans index, and the per-token record. */
+export interface PhonemeTrace {
+    /** Byte-identical to `phonemize(text, lang)`. */
+    ipa: string;
+    /** The text the tokenizer saw — `normalize.ts` has already rewritten it. `token.span` indexes THIS. */
+    normalized: string;
+    /**
+     * ⚠ FALSE MEANS THIS ENGINE IS NOT TRACED, NOT THAT IT HAD NOTHING TO SAY. `tokens` is derived at
+     * `assembleClauses`, which 159 of 180 language directories route through — but `en`, `fr`, `cmn` and `my`
+     * hand-roll their own tokenizer loop (english's two-phase tagger, french's liaison lookahead), so they
+     * emit no tokens at all. Returning an empty list silently would be the same defect this trace exists to
+     * expose: an absence that reads like a clean result. Check this before believing `tokens`.
+     */
+    traced: boolean;
+    tokens: TraceToken[];
+    /**
+     * Whole-string rewrites, in the order they ran. ⚠ THIS IS WHY `TraceToken.emitted` MAY NOT BE A SUBSTRING
+     * OF `ipa`: a token reports what it contributed, and a rewrite here may then have changed it. Spanish
+     * spirantizes across word boundaries; Assamese collapses a doubled aspirate. Empty when nothing moved.
+     */
+    rewrites: TraceRewrite[];
+}
+
+/**
+ * `phonemize`, plus what happened on the way — the additive trace of #1150 stage 1.
+ *
+ * ⚠ `ipa` IS BYTE-IDENTICAL TO `phonemize(text, lang)`, and `test/trace.test.ts` asserts that over the golden
+ * corpus. This adds a second VIEW of the same run, never a second reading: the parity gate is 136 languages ×
+ * 26,827 rows across two engines, and a second output shape that could drift from the first would be a fork
+ * wearing a feature's clothes.
+ *
+ * ⚠ SPANS INDEX `normalized`, NOT `text`. `normalize.ts` runs before the tokenizer and REWRITES — it changes
+ * length in both directions and can REORDER (Luganda puts the measure noun before its number, so `1 244.7 km²`
+ * reads *kiromita eza kyebiriga 1244 7* with the unit's reading ahead of the figure it came after). Mapping a
+ * span back to the caller's own string is therefore not a matter of an offset, and is deliberately NOT
+ * attempted here — that is #1150 stage 2. `normalized` is returned so the spans mean something.
+ *
+ * What stage 1 buys, which is the whole reason it was worth doing on its own: `nativised` makes the
+ * input-side rewrite legible. It is the step that folded ⟨ŋ⟩→n before the g2p ran (#1131), that made a
+ * deliberate ⟨ŋ⟩ rule unreachable (#1139), and that erased Nama's phonemic length (#1140) — none of which
+ * moved a golden row, and all of which had to be found by a human reading a comment.
+ */
+export function phonemizeTrace(text: string, lang: string): PhonemeTrace {
+    startTrace(text);
+    try {
+        const ipa = phonemize(text, lang);
+        const { normalized, tokens, rewrites, traced } = stopTrace();
+        return { ipa, normalized, traced, tokens, rewrites };
+    } finally {
+        // `stopTrace` already ran on the success path; this clears the recorder when the engine THREW, so a
+        // failed call cannot leave ambient state for the next one.
+        stopTrace();
+    }
 }
 
 /** Phonemize real-world text to canonical IPA — the UNIFIED best-output entry. Identical to `phonemize` for the

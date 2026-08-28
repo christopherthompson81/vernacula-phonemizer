@@ -53,6 +53,7 @@
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
+import { noteRewrite } from "../../core/trace.ts";
 
 // Vowel nuclei the Hindi engine can emit (incl. long ː and nasalization ̃) — the intervocalic context for the flap.
 // ʌ is included because Awadhi ऐ/औ emit the central-onset diphthongs ʌi/ʌu (Saksena §2395), so a flap can border one.
@@ -79,7 +80,13 @@ function engine(foreign?: ForeignPhonemizer): ReturnType<typeof makeNativeHindi>
         word: (w) => awadhify(base.word(w)),
         wordRules: (w) => awadhify(base.wordRules(w)),
         number: (d) => awadhify(base.number(d)),
-        text: (i) => awadhify(base.text(i)),
+        // ⚠ text() is a whole-string post-pass, so it is reported to the trace (#1150).
+        text: (i) => {
+            const pre = base.text(i);
+            const out = awadhify(pre);
+            noteRewrite("awadhi-flap", pre, out);
+            return out;
+        },
     };
 }
 

@@ -11,6 +11,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { makeNepaliNormalizer } from "./normalize.ts";
+import { noteRewrite } from "../../core/trace.ts";
 
 /**
  * normalization. Nepali shares Hindi's ENGINE but not Hindi's orthographic conventions, so it
@@ -91,7 +92,13 @@ function engine(foreign?: ForeignPhonemizer): ReturnType<typeof makeNativeHindi>
         wordRules: (w) => nepaliVowel(base.wordRules(w)),
         number: (d) => nepaliVowel(base.number(d)),
         // Map Devanagari ə→ʌ, then restore the shielded English ə (computer stays kəmpjuːt̬ɚ, not kʌmpjuːt̬ɚ).
-        text: (i) => nepaliVowel(base.text(i)).split(SENTINEL).join("ə"),
+        text: (i) => {
+            const pre = base.text(i);
+            const out = nepaliVowel(pre).split(SENTINEL).join("ə");
+            // ⚠ A whole-string post-pass, so it is reported to the trace (#1150).
+            noteRewrite("nepali-inherent-vowel", pre, out);
+            return out;
+        },
     };
 }
 
