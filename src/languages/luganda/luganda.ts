@@ -3,8 +3,8 @@
  * The principal language of Uganda (~11M incl. L2). A greedy longest-match scan over the
  * grapheme table (manifest.ts) with two code rules: CONSONANT GEMINATION — a doubled consonant is a geminate
  * [Cː] (bbiri→bːiri) — and VOWEL LENGTHENING before a prenasalised consonant (Buganda→buɡaːnda). Signatures:
- * 5 vowels with DOUBLING = LENGTH; prenasalised consonants as single units (mb→ᵐb, nd→ⁿd, ng→ᵑɡ); ⟨ng'⟩→ŋ vs
- * ⟨ng⟩→ᵑɡ; ⟨ny⟩→ɲ; labialisation ⟨Cw⟩→Cʷ; the palatal STOPS ⟨c⟩=c, ⟨j⟩=ɟ; ⟨r⟩=ɾ. Tone (3-way H/L/falling) is
+ * 5 vowels with DOUBLING = LENGTH; prenasalised consonants as single units (mb→ᵐb, nd→ⁿd, ng→ᵑɡ); ⟨ng'⟩ and
+ * the literal letter ⟨ŋ⟩ both → ŋ, vs ⟨ng⟩→ᵑɡ; ⟨ny⟩→ɲ; labialisation ⟨Cw⟩→Cʷ; the palatal STOPS ⟨c⟩=c, ⟨j⟩=ɟ; ⟨r⟩=ɾ. Tone (3-way H/L/falling) is
  * lexical + unwritten → DEFERRED. Cardinal numbers: numbers.ts (citation/counting series + the mu/na
  * connectives).
  */
@@ -38,9 +38,15 @@ export function phonemizeWord(word: string): string {
         const sp = SPECIAL.find((k) => w.startsWith(k, i));
         if (sp) { out += G[sp] ?? "ⁿ"; i += sp.length; continue; }
         const c = w[i]!;
-        // 2. PRENASALISATION: ⟨n m⟩ + an obstruent → a place-assimilated superscript nasal; the obstruent is then
+        // 2. PRENASALISATION: ⟨n m ŋ⟩ + an obstruent → a place-assimilated superscript nasal; the obstruent is then
         //    scanned normally, so its labialisation (⟨dw⟩→dʷ) and gemination survive (ndw → ⁿdʷ).
-        if ((c === "n" || c === "m") && PRENASAL.has(w[i + 1] ?? "")) {
+        //    ⚠ ⟨ŋ⟩ TRIGGERS THIS TOO, and that is CONSERVATION, not a new rule (#1131). Before ⟨ŋ⟩ had a grapheme
+        //    row it fell outside NATIVE_CLASS and the nativiser folded it to ⟨n⟩, so ⟨ŋk⟩ reached this rule as
+        //    ⟨nk⟩ and read ᵑk. Giving the letter a row would have taken that away — ⟨ŋk⟩ would split into two
+        //    segments while ⟨nk⟩ stayed ᵑk, re-opening the SAME one-phoneme-two-readings split this fix closes,
+        //    displaced to the pre-obstruent slot. ⟨ŋ⟩ is not in `prenasalisable`, so ⟨ŋŋ⟩ still falls through to
+        //    the gemination rule below.
+        if ((c === "n" || c === "m" || c === "ŋ") && PRENASAL.has(w[i + 1] ?? "")) {
             const x = w[i + 1]!;
             out += "bpfv".includes(x) ? "ᵐ" : "kg".includes(x) ? "ᵑ" : "ⁿ";
             i += 1;
@@ -68,11 +74,20 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|(\\d+)|([.!?…,;:
  * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
  * core/hostWord.ts.
  *
- * ⚠ ŋ IS DELIBERATELY ABSENT: the g2p has no rule for it, and drops it outright — listing it here
- * would promise a reading that does not exist. NATIVE_CLASS is a claim ABOUT THE G2P, and
- * `test/native-inventory.test.ts` measures it character by character rather than trusting it.
+ * ⚠ ⟨ŋ⟩ IS IN THE CLASS, and the note that used to sit here said the opposite — that the g2p had no rule
+ * for the letter and "drops it outright", so listing it would promise a reading that does not exist. That was
+ * true of `phonemizeWord` and FALSE of `text()`, the path users reach (#1131). A letter this class REJECTS is not
+ * dropped, it is FOLDED: `makeNativiser` sends it through `core/hostWord.ts`'s UNDECOMPOSABLE table, which maps
+ * ŋ → n. So the shipped reading of `ziseŋŋendo` was *zisenːeːⁿdo*, an ALVEOLAR geminate standing where the
+ * orthography wrote the one segment this language's sources call contrastive — the same phoneme read two ways
+ * depending on which of ⟨ŋ⟩ and ⟨ng'⟩ the writer chose. A grapheme row (luganda.jsonc) fixes the reading; the
+ * class then has to admit the letter, or the fold still reaches it first.
+ *
+ * NATIVE_CLASS is a claim ABOUT THE G2P, and `test/native-inventory.test.ts` measures it character by character
+ * rather than trusting it — but it measures only the OVER-claim (a listed letter the g2p drops). The under-claim
+ * is silent, because a folded letter still produces sound.
  */
-const NATIVE_CLASS = "[a-z'’]";
+const NATIVE_CLASS = "[a-zŋ'’]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class LugandaPhonemizer implements Phonemizer {
