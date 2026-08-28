@@ -5,6 +5,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Mandarin;
 
@@ -104,34 +105,54 @@ public sealed class MandarinPhonemizer : ILanguage
     }
 
     /** Substitute Arabic numbers with Chinese numerals, tracking which code points are sandhi-exempt. */
-    private static (List<string> Cp, List<bool> Exempt) SubstituteNumbers(string input)
+    private static (List<string> Cp, List<bool> Exempt, List<Piece> Pieces) SubstituteNumbers(string input)
     {
         var cp = new List<string>();
         var exempt = new List<bool>();
+        // ⚠ #1150: THE PIECES ARE THE ONLY WAY THIS PASS CAN BE SEEN. It rebuilds the utterance as a
+        // code-point list rather than replacing inside a string, and it is NET LENGTH-PRESERVING
+        // (`11`→`十一`, `20`→`二十`), so it desynced the mapping without changing its length and without
+        // tripping any guard — cmn mapped 0 of 48 tokens on a row whose input and output are both 97
+        // characters. Built only while a trace is recording.
+        var rec = Tracing();
+        var pieces = new List<Piece>();
         var last = 0;
         // Comma grouping is part of the number, not a clause boundary ("783,562" is one number, no pause).
         foreach (Match m in NUMBER_RE.Matches(input))
         {
             if (m.Index > last)
+            {
+                var at = last;
                 foreach (var c in Js.CodePoints(input[last..m.Index]))
                 {
                     cp.Add(c);
                     exempt.Add(false);
+                    if (rec) pieces.Add(new Piece(c, at, at + c.Length));
+                    at += c.Length;
                 }
+            }
             // The following character must be found ACROSS WHITESPACE: the corpus writes "2009 年" with a
             // space, and the literal next character is the space, so the year and 两 rules would never fire.
             var rest = input[(m.Index + m.Value.Length)..];
             var afterM = AFTER_WS.Match(rest);
+            var before = cp.Count;
             AppendNumber(cp, exempt, m.Value, afterM.Success ? afterM.Groups[1].Value : null);
+            // the whole numeral reading traces to the whole digit run it replaced
+            if (rec) pieces.Add(new Piece(string.Concat(cp.Skip(before)), m.Index, m.Index + m.Value.Length));
             last = m.Index + m.Value.Length;
         }
         if (last < input.Length)
+        {
+            var at = last;
             foreach (var c in Js.CodePoints(input[last..]))
             {
                 cp.Add(c);
                 exempt.Add(false);
+                if (rec) pieces.Add(new Piece(c, at, at + c.Length));
+                at += c.Length;
             }
-        return (cp, exempt);
+        }
+        return (cp, exempt, pieces);
     }
 
     public string Text(string input)
@@ -142,14 +163,16 @@ public sealed class MandarinPhonemizer : ILanguage
         if (!HAN.IsMatch(input) && TONE_DIGIT_ANY.IsMatch(input) && PINYIN_INPUT.IsMatch(input))
             return _pinyinToIpa(input);
 
-        var (cp, exempt) = SubstituteNumbers(input);
+        var (cp, exempt, pieces) = SubstituteNumbers(input);
         // A code-point run scanner (Han / Latin / other), deliberately not a single regex: it drives the
         // clause sink directly instead of going through AssembleClauses, but reuses the same assembly.
         var (sink, finish) = Clauses.ClauseSink();
         // ⚠ REPORTS ITS OWN SPANS (#1150): this scans CODE POINTS, so the recorder has no loop to derive them
         // from, and a code-point index is not a string offset once a supplementary character appears (Han has
         // plenty). `off` maps one to the other so a span indexes `Normalized` exactly.
-        var traceText = string.Concat(cp);
+        // ⚠ `Rebuilt` RETURNS EXACTLY `string.Concat(cp)` — the same string, with the mapping attached when a
+        // trace is recording and nothing at all when one is not.
+        var traceText = Tracing() ? Rebuilt(input, pieces) : string.Concat(cp);
         var off = new int[cp.Count + 1];
         for (var k = 0; k < cp.Count; k++) off[k + 1] = off[k] + cp[k].Length;
         Core.Trace.EnterEngine(traceText);

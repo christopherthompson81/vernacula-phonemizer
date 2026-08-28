@@ -194,14 +194,26 @@ public class TraceTests
      * the other tests ran the initializers were already warm and the defect had evaporated.
      *
      * Both are now caught by tracking the STRING, not its length.
+     *
+     * ⚠ AND (a) IS NOW READ THE OTHER WAY ROUND. Tracking the string made the wrong span ABSENT; the pass
+     * then learned to report its own pieces through `Rebuilt`, so the honest assertion is the STRONGER one —
+     * the span is not merely withheld, it is right. What must never come back is the third state: present
+     * and wrong.
      */
     [Fact]
-    public void ANetLengthPreservingStepOutsideTheSeamYieldsAbsenceNotAWrongSpan()
+    public void ANetLengthPreservingRebuildReportsItsRealSpanNeverAPlausibleOne()
     {
-        var t = Phonemizer.PhonemizeTrace("115 10 10 中国", "cmn");
-        Assert.Equal(t.Ipa, Phonemizer.Phonemize("115 10 10 中国", "cmn"));
-        // the mapping cannot be trusted here, so it must not be offered at all
-        Assert.All(t.Tokens, k => Assert.Null(k.InputSpan));
+        const string text = "115 10 10 中国";
+        var t = Phonemizer.PhonemizeTrace(text, "cmn");
+        Assert.Equal(t.Ipa, Phonemizer.Phonemize(text, "cmn"));
+        var first = t.Tokens.FirstOrDefault(k => k.Surface.StartsWith("一百", StringComparison.Ordinal));
+        Assert.NotNull(first);
+        Assert.NotNull(first!.InputSpan);
+        Assert.Equal("115", text[first.InputSpan!.Value.Start..first.InputSpan.Value.End]);
+        // and nothing anywhere traces to whitespace it did not come from
+        foreach (var k in t.Tokens)
+            if (k.InputSpan is not null)
+                Assert.NotEqual("", text[k.InputSpan.Value.Start..k.InputSpan.Value.End].Trim());
     }
 
     [Theory]

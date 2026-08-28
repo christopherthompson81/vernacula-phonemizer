@@ -5,6 +5,7 @@
  * MIN_PIECE decode guard's measured cost.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Khmer;
 
@@ -82,6 +83,28 @@ public static class KhmerPerceptron
     public static string RestoreBoundaries(string text)
     {
         if (W.Count == 0) return text;
-        return KHMER_RUN.Replace(text, m => string.Join(ZWSP, SegmentRun(m.Value)));
+        // ⚠ THE SHIPPED PATH IS UNCHANGED — one native replace, exactly as before. The piece list below costs
+        // an array per utterance and exists only while a trace is recording.
+        if (!Tracing()) return KHMER_RUN.Replace(text, m => string.Join(ZWSP, SegmentRun(m.Value)));
+        // ⚠ PER-WORD SPANS, NOT PER-RUN (#1150). This IS a replace, so `Rewrite` would have covered it in one
+        // line — and would have stamped a single span across a whole maximal Khmer run, which for this corpus
+        // is frequently a sentence. The point of restoring boundaries is to know where the words are.
+        var pieces = new List<Piece>();
+        var at = 0;
+        foreach (var m in KHMER_RUN.Matches(text))
+        {
+            if (m.Index > at) pieces.Add(new Piece(text[at..m.Index], at, m.Index));
+            var off = m.Index;
+            var words = SegmentRun(m.Value);
+            for (var i = 0; i < words.Count; i++)
+            {
+                if (i > 0) pieces.Add(new Piece(ZWSP, off, off)); // the boundary is INSERTED: a point
+                pieces.Add(new Piece(words[i], off, off + words[i].Length));
+                off += words[i].Length;
+            }
+            at = m.Index + m.Length;
+        }
+        if (at < text.Length) pieces.Add(new Piece(text[at..], at, text.Length));
+        return Rebuilt(text, pieces);
     }
 }

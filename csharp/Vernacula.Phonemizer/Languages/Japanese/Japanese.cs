@@ -3,6 +3,7 @@
  * Ported from src/languages/japanese/japanese.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Japanese;
 
@@ -42,12 +43,12 @@ public static class JapanesePhonemizer
             // SYMBOLS must run before normalization: its % rule matches a number directly before the sign, and
             // the decimal rewrite (1.5 → 1点ゴ) destroys that adjacency.
             input = Normalize.NormalizeJapanese(SYMBOLS(input));
-            input = FULLWIDTH_DIGIT.Replace(input, d => char.ConvertFromUtf32(Js.CodePointAt0(d.Value) - 0xfee0));
+            input = Rewrite(input, FULLWIDTH_DIGIT, d => char.ConvertFromUtf32(Js.CodePointAt0(d.Value) - 0xfee0));
             // Counter fusion runs BEFORE segmentation so the fused reading flows through the kana path. The
             // headsCompound guard suppresses it when the counter kanji heads a dictionary compound (3時間,
             // 3年生); splitting there would orphan the trailing kanji into a wrong isolated reading.
             var src = input;
-            input = COUNTER_FUSION.Replace(src, m =>
+            input = Rewrite(src, COUNTER_FUSION, m =>
             {
                 var num = m.Groups[1].Value;
                 var ctr = m.Groups[2].Value;

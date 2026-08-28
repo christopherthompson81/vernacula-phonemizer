@@ -126,6 +126,13 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
   is the pipeline string means the gap is UPSTREAM, so reverting only moves the poison one line down.
 - Measure with `dotnet run --project csharp/tools/parity -- --provenance`, which ranks languages by
   tokens LOST. The fleet average says how much is missing and never where.
+- ⚠ A PASS THAT REBUILDS THE STRING NEEDS `Rebuilt(s, pieces)`, not `Rewrite`. Segmentation, a code-point
+  scanner, a rune-by-rune fold — anything that walks the input and constructs a new string — is invisible to
+  the seam, and `cmn` showed why that is worse than it sounds: its number substitution is NET
+  length-preserving (`11`→`十一`, `20`→`二十`), so it desynced the mapping without changing its length and
+  without tripping any guard. Each piece names the span it consumed; the pieces must TILE the input, and a
+  pass that miscounts has its mapping withheld. Build the list only under `Tracing()` so the shipped path is
+  untouched. `Renormalize` covers `.Normalize(...)` on the pipeline string, which is neither.
 - The TypeScript has the same pair — `tools/provenance-poison.mts` and `tools/provenance-coverage.mts` —
   and comparing the two engines' per-language rows is how a gap that belongs to only ONE of them shows
   up at all (`mai`/`awa`/`mag` read ~40-60% in C# while the TS has them at 100%).

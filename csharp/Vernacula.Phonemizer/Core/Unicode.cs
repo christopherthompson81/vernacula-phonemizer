@@ -150,10 +150,18 @@ public static class Unicode
     // property (Rune.GetUnicodeCategory == Nd) the JS regex does. Outputs are identical.
     public static string FoldNativeDigits(string s)
     {
+        // ⚠ #1150: THIS REBUILDS, IT DOES NOT REPLACE, and that is why it could not be put on the `Rewrite`
+        // seam like its TypeScript twin. It was the largest remaining C#-only gap: `२.`→`2.` and `۱۱:۲۰`→
+        // `11:20` desynced the mapping before any `Rewrite` ran, and mai/awa/mag/syl/fa each lost most of
+        // their tokens while the TypeScript had them at 100%. The piece list is built only while tracing.
+        var rec = Tracing();
+        var pieces = rec ? new List<Piece>() : null;
         StringBuilder? sb = null;
         var consumed = 0;
         foreach (var rune in s.EnumerateRunes())
         {
+            var width = rune.Utf16SequenceLength;
+            var emitted = rune.ToString();
             if (Rune.GetUnicodeCategory(rune) == UnicodeCategory.DecimalDigitNumber && rune.Value >= 0x80)
             {
                 var cp = rune.Value;
@@ -163,17 +171,20 @@ public static class Unicode
                     if (cp >= baseCp && cp <= baseCp + 9)
                     {
                         sb ??= new StringBuilder(s[..consumed]);
-                        sb.Append((char)('0' + (cp - baseCp)));
+                        emitted = ((char)('0' + (cp - baseCp))).ToString();
+                        sb.Append(emitted);
                         replaced = true;
                         break;
                     }
                 }
-                if (!replaced) sb?.Append(rune.ToString()); // a block we do not carry: leave it rather than guess
+                if (!replaced) sb?.Append(emitted); // a block we do not carry: leave it rather than guess
             }
-            else sb?.Append(rune.ToString());
-            consumed += rune.Utf16SequenceLength;
+            else sb?.Append(emitted);
+            pieces?.Add(new Piece(emitted, consumed, consumed + width));
+            consumed += width;
         }
-        return sb?.ToString() ?? s;
+        if (sb is null) return s;                       // a no-op: the mapping already describes `s`
+        return rec ? Rebuilt(s, pieces!) : sb.ToString();
     }
 
     /**

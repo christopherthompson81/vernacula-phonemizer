@@ -549,3 +549,68 @@ exception** rather than a random alphabet. `가` (U+AC00) plus a trailing T jamo
 a composition that reaches ACROSS a starter, the one thing the block chunking assumes cannot happen. The
 reading must still be exact and the mapping must be WITHHELD. Pinning that beats asserting `withheld > 0`
 over randomised input, which passed or failed depending on the seed.
+
+## Run 14 — 2026-08-28 18:10 — the segmenters, and the third primitive
+
+**Question.** `km` and `ja` mapped 0 tokens on every row, in both engines, with no poison anywhere. Run 13
+called them "the segmenters" and said they needed an API that pushes provenance rather than wrapping a
+replace. Was that right, and what does the API look like?
+
+### It was right, but the class is wider than segmentation
+
+The shape is *a pass that walks the input and constructs a new string*. Four of them, and only one is
+literally a segmenter:
+
+| pass | what it does | why the seam cannot see it |
+|---|---|---|
+| `khmerPerceptron.restoreBoundaries` | inserts U+200B at predicted word boundaries | it IS a `replace` — but per-RUN, see below |
+| `kanji.segmentText` | inserts bunsetsu spaces, は→わ / へ→え | hand-rolled character loop |
+| `mandarin.substituteNumbers` | rewrites the utterance as a code-point list | not a string operation at all |
+| `Unicode.FoldNativeDigits` (C# only) | walks runes into a `StringBuilder` | the port diverges from the TS here on purpose |
+
+### `rebuilt(s, pieces)` — each piece names the span it consumed
+
+The check is that the pieces **tile** the input: each starts where the last ended, and the last finishes at
+the end. A pass that miscounts gets its mapping withheld, which is the same bargain the other two primitives
+make. The list is built only under `tracing()`, so the shipped path is unchanged.
+
+### ⚠ Khmer's is a `replace`, and putting it on `rewrite` would have been WRONG-ish
+
+One line, and it would have worked — and stamped a single span across a maximal Khmer run, which in this
+corpus is frequently a whole sentence. The entire point of restoring boundaries is to know where the words
+are; a trace that answers "somewhere in this sentence" is correct and useless. Per-piece:
+
+    "នៅ"      <- "នៅ"        "ប៉ូលីស"   <- "ប៉ូលីស"
+    "ម៉ោង"    <- "ម៉ោង"      "បាន"      <- "បាន"
+
+Japanese shows the same on the substitution: `科学者たちわ` traces back to `科学者たちは`, so the particle
+reading is visible as an input-side fact rather than an unexplained difference.
+
+### What each fix was worth
+
+| | TS | C# |
+|---|---|---|
+| start of run | 99.4%* | 95.5% |
+| km | 0% → **100%** | 0% → **100%** |
+| ja | 0% → 78% → **100%** (two `input.replace` sites in the engine file were also off the seam) | same |
+| cmn | 67% → **100%** | 67% → **100%** |
+| `FoldNativeDigits` | already on the seam | mai/awa/mag/syl/fa → **99.8% fleet** |
+| **end** | **99.6%** | **99.8%** |
+
+`*` TS was already at 99.4% at the start of this run because Run 13's work landed first.
+
+⚠ **`FoldNativeDigits` was the whole C#-only gap**, and the count oracle had said as much a run earlier —
+mai/awa/mag/syl/fa lost most of their tokens in the port while the TypeScript had them at 100%, and their
+normalizer seam counts matched exactly, so it had to be upstream. It is: the port deliberately walks runes
+instead of using `\p{Nd}`, because a .NET pattern cannot see an astral Adlam digit. The right fix was never
+to make it a replace — it was to let it report as a rebuild.
+
+### Two tests were superseded, in both engines
+
+`a net length-preserving step outside the seam yields absence, not a wrong span` pinned the cmn case as
+ABSENT. That step now reports, so the test asserted a state the code had grown out of. Rewritten to the
+stronger claim — the span is not merely withheld, it is *right* (`一百一十五` ← `115`) — plus a check that no
+token traces to whitespace it did not come from, which is the shape the original defect took.
+
+The zero-mapped guard's exemption list is now **empty**, and the coverage floor is raised from 90% to 99%.
+A floor only bites if it sits close to the real number.

@@ -322,17 +322,27 @@ describe("phonemizeTrace — normalizer provenance (#1150 stage 2)", () => {
 
 describe("phonemizeTrace — length is not identity (#1150 stage 2)", () => {
     /**
-     * ⚠ FOUND IN THE C# PORT AND PRESENT HERE TOO. A step outside the seam that is NET length-preserving
-     * passes a length check while having shifted every interior offset — `Mandarin.SubstituteNumbers`
-     * rewrites a code-point list outside it, and `115`→`一百一十五` (+2) with each `10`→`十` (−1) cancels out.
-     * A stale identity mapping then reported a token as coming from a SPACE, in range and so invisible to a
-     * bounds assertion. The mapping now tracks the STRING, not its length.
+     * ⚠ THE CASE THAT TAUGHT THE RULE, NOW READ THE OTHER WAY ROUND. `Mandarin.substituteNumbers` rewrites the
+     * utterance as a code-point list OUTSIDE any replace, and it is NET length-preserving — `115`→`一百一十五`
+     * is +2 while each `10`→`十` is −1, and they cancel. A stale identity mapping therefore passed a length
+     * check and reported a token as coming from a SPACE: in range, and so invisible to a bounds assertion.
+     *
+     * Tracking the STRING rather than its length made that absent instead of wrong, and this test pinned the
+     * absence. The pass now reports its own pieces through `rebuilt`, so the honest assertion is the STRONGER
+     * one — the span is not merely withheld, it is right. What must never come back is the third state:
+     * present and wrong.
      */
-    test("a net length-preserving step outside the seam yields absence, not a wrong span", () => {
+    test("a net length-preserving rebuild reports its real span, never a plausible one", () => {
         const text = "115 10 10 中国";
         const t = phonemizeTrace(text, "cmn");
         expect(t.ipa).toBe(phonemize(text, "cmn"));
-        for (const k of t.tokens) expect(k.inputSpan, `${k.surface} must not be guessed`).toBeUndefined();
+        const first = t.tokens.find((k) => k.surface.startsWith("一百"));
+        expect(first?.inputSpan).toBeDefined();
+        expect(text.slice(...first!.inputSpan!)).toBe("115");
+        // and nothing anywhere traces to whitespace it did not come from
+        for (const k of t.tokens)
+            if (k.inputSpan !== undefined)
+                expect(text.slice(...k.inputSpan).trim(), `${k.surface} traced to blank space`).not.toBe("");
     });
 
     test("…and where the seam does see everything, the span is exact", () => {
@@ -395,7 +405,10 @@ describe("the seam is a drop-in for `replace`, not a near-miss (#1150)", () => {
                 tok += t.tokens.length;
                 mapped += t.tokens.filter((k) => k.inputSpan !== undefined).length;
             }
-        expect(mapped / tok).toBeGreaterThan(0.9);
+        // ⚠ A FLOOR, NOT A TARGET, and raised deliberately as the causes were closed: 90% when three shared
+        // passes and every segmenter were still dark, 99% now that they report. It exists to catch a change
+        // that quietly takes sites off the seam, so it has to sit close enough to the real number to bite.
+        expect(mapped / tok).toBeGreaterThan(0.99);
     });
 
     /**
@@ -472,15 +485,15 @@ describe("the seam is a drop-in for `replace`, not a near-miss (#1150)", () => {
      * English went to 0% while the total still read 95.6%. Zero mapped tokens across every row means the
      * mapping is being DESTROYED rather than merely incomplete, which is what a substring on the seam does.
      *
-     * The exceptions are the languages that SEGMENT: km and ja rebuild the string with inserted separators
-     * outside any regex, so nothing reports and nothing can. They are listed rather than tolerated, so
-     * adding one is a deliberate act.
+     * ⚠ THERE ARE NO EXEMPTIONS ANY MORE, and the empty list is the point. `km` and `ja` were listed here
+     * because they SEGMENT — inserting U+200B and bunsetsu spaces while rebuilding the string, which neither
+     * `rewrite` nor `renormalize` can see. `rebuilt` is the primitive for exactly that, and both now map
+     * every token. A language earning a place on this list again means a pass was added that reports
+     * nothing, which is a thing to notice rather than to accommodate.
      */
-    test("no language maps zero tokens except the ones that rebuild the string", () => {
-        const SEGMENTERS = new Set(["km", "ja"]);
+    test("no language maps zero tokens", () => {
         const zero: string[] = [];
         for (const lang of GOLDEN_LANGS) {
-            if (SEGMENTERS.has(lang)) continue;
             let tok = 0;
             let mapped = 0;
             for (const text of sample(lang, 6)) {

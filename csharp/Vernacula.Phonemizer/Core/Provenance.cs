@@ -46,6 +46,9 @@ public static class Provenance
         frozen = false;
     }
 
+    /// <summary>Is a mapping being accumulated right now? See <see cref="Rewriter.Tracing"/>.</summary>
+    public static bool IsRecording() => prov is not null && !frozen && Foreign.HostDepth() <= 1;
+
     /// <summary>Stop accumulating: everything after this is output, not input.</summary>
     public static void Freeze() => frozen = true;
 

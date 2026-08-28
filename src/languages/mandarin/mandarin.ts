@@ -18,6 +18,7 @@ import { clauseSink } from "../../core/clauses.ts";
 import { beginToken, endToken, enterEngine } from "../../core/trace.ts";
 import { readForeignRun } from "../../core/foreign.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { rebuilt, tracing, type Piece } from "../../core/provenance.ts";
 
 const HAN = /\p{Script=Han}/u;
 // ⚠ `\p{Script=Latin}`, NOT `[A-Za-z]`. The ASCII class split an accented Latin word into pieces at every
@@ -123,9 +124,17 @@ class MandarinPhonemizer implements Phonemizer {
     private substituteNumbers(input: string): {
         cp: string[];
         exempt: boolean[];
+        pieces: Piece[];
     } {
         const cp: string[] = [],
             exempt: boolean[] = [];
+        // ⚠ #1150: THE PIECES ARE THE ONLY WAY THIS PASS CAN BE SEEN. It rebuilds the utterance as a code-point
+        // list rather than replacing inside a string, and it is NET LENGTH-PRESERVING (`11`→`十一` is −0,
+        // `20`→`二十` is −0), so it desynced the mapping without changing its length and without tripping any
+        // guard — cmn mapped 0 of 48 tokens on a row whose input and output are both 97 characters. Built only
+        // while a trace is recording.
+        const rec = tracing();
+        const pieces: Piece[] = [];
         let last = 0;
         // Comma grouping is part of the number, not a clause boundary. Without this, "783,562" was read as
         // two numbers with a PAUSE between them (七百八十三 , 五百六十二) instead of 七十八万三千五百六十二.
@@ -133,26 +142,37 @@ class MandarinPhonemizer implements Phonemizer {
         const re = /[1-9]\d{0,2}(?:,\d{3})+|\d+(?:\.\d+)?/g;
         let m: RegExpExecArray | null;
         while ((m = re.exec(input)) !== null) {
-            if (m.index > last)
+            if (m.index > last) {
+                let at = last;
                 for (const c of input.slice(last, m.index)) {
                     cp.push(c);
                     exempt.push(false);
+                    if (rec) pieces.push([c, at, at + c.length]);
+                    at += c.length;
                 }
+            }
             // The following character must be found ACROSS WHITESPACE. The corpus writes "2009 年" and
             // "2 个人" with a space — 272 years and every 两 case — and taking the literal next character
             // saw the space, so the year rule and the 两 rule both silently failed: 2009 年 came out as the
             // cardinal 两千零九年 instead of the digit-by-digit 二零零九年.
             const rest = input.slice(m.index + m[0].length);
             const after = /^\s*(\S)/u.exec(rest)?.[1];
+            const before = cp.length;
             this.appendNumber(cp, exempt, m[0], after);
+            // the whole numeral reading traces to the whole digit run it replaced
+            if (rec) pieces.push([cp.slice(before).join(""), m.index, m.index + m[0].length]);
             last = m.index + m[0].length;
         }
-        if (last < input.length)
+        if (last < input.length) {
+            let at = last;
             for (const c of input.slice(last)) {
                 cp.push(c);
                 exempt.push(false);
+                if (rec) pieces.push([c, at, at + c.length]);
+                at += c.length;
             }
-        return { cp, exempt };
+        }
+        return { cp, exempt, pieces };
     }
 
     text(input: string): string {
@@ -164,7 +184,7 @@ class MandarinPhonemizer implements Phonemizer {
         if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input))
             return this.pinyinToIpa(input);
 
-        const { cp, exempt } = this.substituteNumbers(input);
+        const { cp, exempt, pieces } = this.substituteNumbers(input);
         // Code-point run scanner (Han / Latin / punctuation), not a single regex — so it drives clauseSink()
         // directly rather than going through assembleClauses, but reuses the shared emit/pause/flush assembly.
         const { sink, finish } = clauseSink();
@@ -172,7 +192,9 @@ class MandarinPhonemizer implements Phonemizer {
         // string, so the recorder has no loop to derive spans from. `off` maps a code-point index to a UTF-16
         // offset, because a span must index `normalized` exactly — `cp` indices and string indices diverge the
         // moment a supplementary character appears, and Han has plenty.
-        const traceText = cp.join("");
+        // ⚠ `rebuilt` RETURNS EXACTLY `cp.join("")` — it is the same string, with the mapping attached when a
+        // trace is recording and nothing at all when one is not.
+        const traceText = tracing() ? rebuilt(input, pieces) : cp.join("");
         const off: number[] = [0];
         for (const c of cp) off.push(off[off.length - 1]! + c.length);
         enterEngine(traceText);
