@@ -88,7 +88,7 @@ bodies are.
 4. **It composes with stage 1 for free.** A trace token already carries a span into `normalized`; provenance
    maps that span to the input, so `token → input characters` is a lookup rather than a new mechanism.
 
-### What is still unknown, and should be measured before committing
+### What was still unknown at Run 5 — all of it measured in Run 6
 
   * **180 normalizers × 2 engines.** This sweep covered 17 of them, chosen as the largest. Uniformity held,
     but "the largest" is a biased sample — the small ones may use shapes the rewrite does not cover.
@@ -99,3 +99,78 @@ bodies are.
   * **Cost in the hot path.** The prototype allocates a `[start,end)` pair per character per step. That is
     fine for a diagnostic and probably not fine for `phonemize()`, so provenance must be OFF unless a trace
     is running — the same discipline stage 1 uses.
+
+
+## Run 6 — the fleet sweep: where the hard cases actually are
+
+Run 5 sampled the 17 largest normalizers. This is all of them, plus the shared components, and it moved the
+answer: **the per-language normalizers are the easy part.**
+
+### First, is `tr` a faithful drop-in? If so the rewrite is safe BY CONSTRUCTION
+
+A differential against native `String.replace` over hand cases drawn from what the fleet actually uses
+(lookahead, lookbehind, named groups, `$1`/`$&`/`$$`, callbacks reading offset and whole string, non-global,
+unicode properties, zero-width) plus a randomised sweep:
+
+    first run:  4,000 random cases, 337 MISMATCHED
+
+⚠ **An out-of-range `$n` is LITERAL in JavaScript, not empty.** `"abc".replace(/\d+/g, "$1")` keeps the text
+`$1`, because the pattern has no group 1. The prototype emitted `""`. Also missing: `` $` ``, `$'`, `$<name>`
+with no named groups, `$0`, and the `$nn` → `$n` + digit fallback. After implementing the substitution rules
+properly: **29/29 hand cases and 4,000/4,000 random identical.**
+
+### Then the fleet
+
+    168 normalizers rewritten mechanically · 3,203 `s = s.replace(...)` sites
+    measured: 140 normalizers · 27,286 golden rows
+
+    identical      27,286      DIFFER 0        <- the rewrite is faithful IN SITU, everywhere
+    prov-length       283                      <- a pipeline step the rewrite MISSED
+    non-monotonic      13
+
+⚠ **`prov.length !== output.length` is the detector for a missed step**, and it is why static analysis was not
+the instrument: a `.replace` the rewrite does not convert still changes the string, so only the provenance
+falls out of sync. Counting unconverted `.replace(` calls statically flagged 145 of 168 files, almost all of
+them harmless locals inside predicates.
+
+### ⚠ The hard cases are the SHARED components, not the per-language files
+
+`abkhaz` and `sesotho` both desynced, and neither had an unconverted pipeline replace of its own. Both call
+`makeSymbolNormalizer` from `core/normalizeSymbols.ts` — **used by 211 language files**. Rewriting that one
+shared file:
+
+    non-monotonic   13 -> 1        prov-length   283 -> 239
+
+### And there are THREE code shapes, only one of which the pattern covers
+
+    s = s.replace(...)                    3,203 sites   covered
+    return s.replace(...)                               NOT covered — normalizeSymbols.ts:658
+    return (text) => text.replace(...)                  NOT covered — normalizeSymbols.ts:602
+    non-`replace` transformation                        per-site work
+
+### ⚠ AND THERE IS NO GENUINE REORDERING ANYWHERE
+
+Every "non-monotonic" row turned out to be a provenance DESYNC from an uncovered step — `prov` holes reading
+as a jump back to offset 0 — not text moving. Checked case by case for `ab`, `st`, `eu`, `ilo` and the last
+survivor `ltg`. Run 4's correction stands and is now fleet-wide rather than a two-language sample.
+
+### The remaining work, sized
+
+  * **The shared components.** `core/normalizeSymbols.ts` (211 users, 23 replaces, 12 self-assigning) needs
+    the `return`/closure shapes too. `core/initialisms.ts` (78 users) has **0** self-assigning replaces — a
+    different shape entirely. `core/unicode.ts`, `markup.ts`, `roman.ts` are the registry pre-passes.
+  * **Entry-point variance.** 18 normalizers have no single-argument `normalize<Lang>` export (french is
+    `(input, isWord)`; several Indic engines differ), so they could not be measured this way and were
+    REPORTED rather than skipped. 10 more have no self-assigning replace at all: ancientgreek kalaallisut
+    kiche lulesami maltese naija nama nogai tagalog totontepecmixe.
+  * **Nesting.** Ambient provenance has the same hazard stage 1's recorder had: a traced component called
+    from inside another traced component corrupts the outer array. It needs the same depth discipline.
+  * **Hot-path cost.** Still unmeasured. The prototype allocates a `[start,end)` pair per character per step,
+    so provenance must be OFF unless a trace is running.
+
+### What this means for doing the rewrites en masse
+
+The mechanical part is proven — 3,203 sites, 27,286 rows, zero output change. But shipping it now would leave
+239 rows silently desynced, which is precisely the failure mode this project keeps finding: an instrument
+that looks clean and measures nothing. The order that follows from the evidence is: cover the three shapes in
+the shared components first, add the nesting guard, measure the cost, and only then rewrite the 168.
