@@ -143,6 +143,42 @@ describe("Kirundi text normalization", () => {
             expect(normalizeKirundi(s)).not.toContain("kwadarato");
     });
 
+    // ⚠ #1136 — THE ORDER BETWEEN THE UNIT-BEFORE RULE AND DE-GROUPING. De-grouping's SPACE arm claims a
+    // head digit preceded by a LETTER, so with it running first `km2 517` — the ASCII spelling of `km² 517`
+    // — matched as `2 517`, glued the exponent onto the number (517 read as 2,517) and left `km` in the
+    // phoneme stream RAW. The unit rule now runs first, so the unit is a WORD before de-grouping looks.
+    test("a unit's ASCII exponent is not a thousands head — but a currency prefix's digit still is", () => {
+        expect(normalizeKirundi("km2 517")).toBe("ibirometero kwadarato 517");
+        expect(normalizeKirundi("mm2 500")).toBe("milimetero kwadarato 500");
+        // ⚠ ALL FOUR SEPARATORS, because de-grouping's space arm takes all four: with this lookahead at
+        // space+NBSP only, a NNBSP or thin space made THIS rule decline and de-grouping claimed the
+        // exponent anyway — the same defect one axis over.
+        // ⚠ ASSERTED ON THE READING, not the intermediate text: the separator itself survives normalization
+        // (it is whitespace, and `tidy` only collapses RUNS), so what has to be equal is what is spoken.
+        for (const sep of ["\u00a0", "\u202f", "\u2009"]) {
+            expect(phonemize(`km2${sep}517`, "rn")).toBe(phonemize("km2 517", "rn"));
+            expect(phonemize(`mm3${sep}517`, "rn")).toBe(phonemize("mm3 517", "rn"));
+        }
+        // ⚠ THE MULTI-GROUP CASE IS AMBIGUOUS AND THIS IS THE SIDE WE TAKE, not a case with one answer.
+        // `km2 517 000` reads as km² + 517,000; the competing reading is `km` + a misplaced space in
+        // 2,517,000. Glued `km2` is the ordinary ASCII spelling of `km²` while the alternative needs the
+        // writer to have DROPPED the space after `km`, so the exponent reading is the likelier one — but it
+        // does change the quantity, so it is recorded here rather than presented as unambiguous. ×0 in the
+        // corpus, and the old behaviour (`km2517000`) was not better: it leaked `km` AND read 2,517,000.
+        expect(normalizeKirundi("km2 517 000")).toBe("ibirometero kwadarato 517000");
+        // and the cube reaches #1135's handling now that step 3 sees the token at all
+        expect(normalizeKirundi("km3 517")).toBe("ibirometero³ 517");
+        // ⚠ THE OBVIOUS GUARD WOULD HAVE BROKEN THIS: `R2 500` IS a grouped thousand with a currency
+        // prefix, so "a head may not follow a letter" would split 2,500 into two numbers. The
+        // discriminator is whether the letters are a UNIT KEY, not whether there are letters.
+        expect(normalizeKirundi("R2 500")).toBe("R2500");
+        // the spaced forms this rule was written for are untouched by the reorder
+        expect(normalizeKirundi("km 1,965")).toBe("ibirometero 1965");
+        expect(normalizeKirundi("km 1 965")).toBe("ibirometero 1965");
+        expect(normalizeKirundi("mm 1.000")).toBe("milimetero 1000");
+        expect(normalizeKirundi("km² 517")).toBe("ibirometero kwadarato 517");
+    });
+
     test("three grouping conventions coexist — French dots, Anglo commas, and spaces", () => {
         expect(normalizeKirundi("12.100.000")).toBe("12100000");
         expect(normalizeKirundi("104 000 000 000")).toBe("104000000000");

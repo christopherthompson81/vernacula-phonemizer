@@ -130,7 +130,7 @@ import { MANIFEST } from "./manifest.ts";
 const AND = MANIFEST.numbers.and;
 
 /**
- * THE MEASURE NOUNS, one table shared by the tier (step 7, number-then-unit) and by step 4 (unit-then-number,
+ * THE MEASURE NOUNS, one table shared by the tier (step 7, number-then-unit) and by step 3 (unit-then-number,
  * which the tier cannot see). Both words are rn.wikipedia tokens read in the number slot, and both PRECEDE
  * their figure.
  *
@@ -192,7 +192,7 @@ const UNIT_SG: Readonly<Record<string, string>> = {
 const SQUARED = "kwadarato";
 
 /**
- * The exponent modifier for a unit noun, shared by step 4 and step 8 so the two orders cannot drift.
+ * The exponent modifier for a unit noun, shared by step 3 and step 8 so the two orders cannot drift.
  *
  * ⚠ A CUBE IS HANDED BACK AS THE SUPERSCRIPT ³ EVEN WHERE THE TEXT WROTE THE ASCII `3`, AND THAT ONE
  * CHARACTER IS THE WHOLE POINT OF THIS FUNCTION. Re-emitting the ASCII digit is not a silent leak the way a
@@ -208,7 +208,7 @@ const SQUARED = "kwadarato";
  * ⚠ THAT IS THE SHARED TIER'S OWN CONVENTION FOR AN UNDECLARED POWER, quoted from `core/normalizeSymbols.ts`:
  * *"emit the UNIT and hand the exponent back rather than abandoning the match. Returning `whole` loses the
  * QUANTITY too, not just its power … Re-emitting the exponent keeps the unit's reading and leaves `²` where
- * the leak gate can see it, turning an invisible missing reading into a visible missing WORD."* Step 4 exists
+ * the leak gate can see it, turning an invisible missing reading into a visible missing WORD."* Step 3 exists
  * to produce the SAME SHAPE the tier produces, so it must fail the same way too — before this, `km³ 517`
  * announced a SQUARE while `517 km³` (the tier) did not, and one construct read three different ways
  * depending only on where the number sat.
@@ -366,7 +366,7 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["kw'ijana"],
     currency: { "US$": [DOLLAR], "$": [DOLLAR] },
     currencyPrefix: true,
-    // Derived from the ONE table above, so the tier and step 4 can never name different words for one key.
+    // Derived from the ONE table above, so the tier and step 3 can never name different words for one key.
     units: Object.fromEntries(Object.entries(UNIT).map(([k, w]) => [k, [w]])),
     unitPrefix: true,
     exponentWords: { squared: [SQUARED], position: "after" },
@@ -421,11 +421,45 @@ export function normalizeKirundi(input: string): string {
     //    (`Ku wa mbere Mukakaro 1962 (01/07/1962)`) and the slash form already reads that way because the
     //    slash is silently dropped. Reading the dotted form identically is consistency; authoring a
     //    twelve-month table off infobox text would be the bulk data invention the playbook forbids.
-    //    ⚠ BEFORE step 3, so a de-grouping arm can never see a date's `dd.mm` as the head of a grouped run.
+    //    ⚠ BEFORE step 4, so a de-grouping arm can never see a date's `dd.mm` as the head of a grouped run.
     //    The year is 4 digits and the day/month 1–2, which is what keeps `12.100.000` (grouping) out.
     s = s.replace(/(?<![\d.,])(\d{1,2})\.(\d{1,2})\.(\d{4})(?![\d.,])/gu, "$1 $2 $3");
 
-    // 3) THOUSANDS DE-GROUPING, before every remaining numeric rule AND before the tier. A grouping comma
+    // 3) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — `km 1,965`, `km² 517`, `mm 1.000`, `mm 1,200`. The
+    //    shared tier matches ONLY number-then-unit, so these 4 instances are structurally invisible to it:
+    //    trap 47 reason 2, the Oromo case, and the reason this rule is local rather than a tier setting.
+    //    The output is the SAME SHAPE the tier's `unitPrefix` produces for the other 15, from the same table
+    //    — `ibirometero kwadarato 517` — so the two orders converge on one reading and neither can drift.
+    //    ⚠ BEFORE THE DE-GROUPING STEP, AND THAT ORDER IS A REPAIR RATHER THAN A PREFERENCE (#1136). This
+    //    rule used to run after it, on the reasoning that "a grouped operand (`km 1,965`) is already one
+    //    digit run" — but the operand only has to START with a digit for the lookahead, so it never needed
+    //    the de-grouping, and running second cost the whole match: de-grouping's SPACE arm claims a head
+    //    digit that is preceded by a LETTER, so `km2 517` — the ASCII spelling of `km² 517` — matched as
+    //    `2 517` and became `km2517`. The exponent was glued to the number (517 read as 2,517) and `km`
+    //    reached the phoneme stream RAW, which is the leak this rule exists to close. Running first, the
+    //    unit is a WORD before de-grouping ever looks, and no later arm can see a letter-adjacent head.
+    //    ⚠ THE OBVIOUS GUARD — "a grouping head may not follow a letter" — IS WRONG HERE, and the corpus
+    //    shape that refutes it is a currency prefix: `R2 500` IS a grouped thousand (2,500), and rejecting a
+    //    letter-adjacent head would split it into two numbers. The discriminator is not the letter, it is
+    //    whether the letters are a UNIT KEY — which is exactly what this rule already knows.
+    //    ⚠ THE SEPARATOR CLASS HERE MUST MATCH THE DE-GROUPING ARM'S, CHARACTER FOR CHARACTER, and it
+    //    did not: this lookahead carried space+NBSP while de-grouping's space arm carries space, NBSP,
+    //    NNBSP and thin space — so a NNBSP or a thin space between the unit and its figure made THIS
+    //    rule decline and let de-grouping claim the exponent after all, `km2<NNBSP>517` → `km2517`,
+    //    verbatim the failure this ordering exists to prevent. Two classes that must agree, and the
+    //    same defect one axis over (#1136).
+    //    ⚠ THE KEY IS BOUNDED ON BOTH SIDES and the SPACE IS MANDATORY: `(?<![\p{L}\p{M}\d])` stops `km`
+    //    matching inside a word, and `(?=[ \u00a0]\d)` is what identifies the abbreviation at all. The unspaced
+    //    shape means something else entirely — `km2` is `km²` with an ASCII exponent — and an optional space
+    //    would let this rule read that `2` as the unit's NUMBER. Trap 28's family; all 4 corpus instances are
+    //    spaced. Case-insensitive because the corpus writes `Km`/`KM` alongside `km` (trap 7).
+    const PRE_UNIT = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
+    s = s.replace(
+        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0\u202f\u2009]\\d)`, "giu"),  // space, NBSP, NNBSP, thin space
+        (_m, key: string, exp?: string) => exponentPhrase(UNIT[key.toLowerCase()]!, exp),
+    );
+
+    // 4) THOUSANDS DE-GROUPING, before every remaining numeric rule AND before the tier. A grouping comma
     //    reads as a clause pause and a grouping period as a full stop, so `12.100.000` came out as three
     //    sentences and `1,964.54` as a clause break plus a sentence break inside one area figure.
     //
@@ -448,6 +482,10 @@ export function normalizeKirundi(input: string): string {
     //    is a misfire generator (trap 9), so it is not copied over.
     //    ⚠ THE HEAD MUST START 1–9: a grouped number never opens with a leading zero, and without this the
     //    space arm would eat the neighbours of any `0 620`-shaped identifier.
+    //    ⚠ AND A HEAD MAY STILL FOLLOW A LETTER, DELIBERATELY: `R2 500` is a grouped thousand with a
+    //    currency prefix and must stay one number. The one letter-adjacent head that is NOT a thousands head
+    //    is a unit's ASCII exponent (`km2 517`), and step 3 above now claims that before this rule can see
+    //    it — which is why no guard is written here (#1136).
     //    ⚠ THE TWO ARMS TAKE DIFFERENT TRAILING GUARDS, AND THE ASYMMETRY IS THE ANGLO FORM. The dot arm uses
     //    `(?!\d|[.,]\d)`, which is rw's shape: a dot-grouped run followed by any separator-plus-digit is a
     //    dotted chain, not a number. The COMMA arm must not reject a following DOT, because `1,964.54` — nine
@@ -465,23 +503,6 @@ export function normalizeKirundi(input: string): string {
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?!\d|,\d)/gu, (w) => w.replace(/,/gu, ""));
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?!\d|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
     s = s.replace(/(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
-
-    // 4) A UNIT ABBREVIATION WRITTEN BEFORE ITS NUMBER — `km 1,965`, `km² 517`, `mm 1.000`, `mm 1,200`. The
-    //    shared tier matches ONLY number-then-unit, so these 4 instances are structurally invisible to it:
-    //    trap 47 reason 2, the Oromo case, and the reason this rule is local rather than a tier setting.
-    //    The output is the SAME SHAPE the tier's `unitPrefix` produces for the other 15, from the same table
-    //    — `ibirometero kwadarato 517` — so the two orders converge on one reading and neither can drift.
-    //    ⚠ AFTER step 3, so a grouped operand (`km 1,965`) is already one digit run.
-    //    ⚠ THE KEY IS BOUNDED ON BOTH SIDES and the SPACE IS MANDATORY: `(?<![\p{L}\p{M}\d])` stops `km`
-    //    matching inside a word, and `(?=[ \u00a0]\d)` is what identifies the abbreviation at all. The unspaced
-    //    shape means something else entirely — `km2` is `km²` with an ASCII exponent — and an optional space
-    //    would let this rule read that `2` as the unit's NUMBER. Trap 28's family; all 4 corpus instances are
-    //    spaced. Case-insensitive because the corpus writes `Km`/`KM` alongside `km` (trap 7).
-    const PRE_UNIT = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
-    s = s.replace(
-        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${PRE_UNIT})(²|³|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?(?=[ \u00a0]\\d)`, "giu"),  // space, NBSP
-        (_m, key: string, exp?: string) => exponentPhrase(UNIT[key.toLowerCase()]!, exp),
-    );
 
     // 5) SPANS. Two shapes, and BOTH are claimed here — before the tier, so a span's operands are still bare
     //    digits, and before step 6 so a `12:22/24` verse reference has already been excluded by the guard
@@ -545,7 +566,7 @@ export function normalizeKirundi(input: string): string {
     //    before the rule was written: 5 wanted, 0 false positives. `(?<![\d.,:/])` rejects a second or third
     //    date field and the `22` of `12:22/24`; `(?![\d.,]*[/:])` rejects a FIRST date field by looking ahead
     //    for the next separator; and a denominator is excluded because the character after the slash must be
-    //    a digit. AFTER step 3, so `1.500 / 1.800` is `1500 / 1800` by now and the operands are single runs.
+    //    a digit. AFTER step 4, so `1.500 / 1.800` is `1500 / 1800` by now and the operands are single runs.
     s = s.replace(/(?<![\d.,:/])(\d+)[ \u00a0]?\/[ \u00a0]?(\d+)(?![\d.,]*[/:])/gu,  // space, NBSP
         (whole, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b) ? join(a, b, full, off, false) : whole);
@@ -624,7 +645,7 @@ export function normalizeKirundi(input: string): string {
         /kw['’]ijana/iu.test(full.slice(Math.max(0, off - 45), off + w.length + 45)) ? d : w);
 
     // 7) THE SHARED SYMBOL TIER — percent, units, exponent, ampersand. See SYMBOLS above.
-    //    ⚠ BETWEEN steps 3 and 9 BY NECESSITY, and both directions are load-bearing: it must see a de-grouped
+    //    ⚠ BETWEEN steps 4 and 9 BY NECESSITY, and both directions are load-bearing: it must see a de-grouped
     //    `357588km²` (or `NOT_VERSION` refuses the unit) and it must see an intact `196.7km²` and `24,4%` (or
     //    there is no number beside the sign). That is the whole reason this file owns the call.
     s = SYMBOLS(s);
@@ -672,7 +693,7 @@ export function normalizeKirundi(input: string): string {
     //    the digit adjacent to its sign. The separator was reaching `clausePunctuation` and becoming a
     //    SENTENCE OR CLAUSE BREAK inside a number, 145 times in the corpus. NO separator word is emitted; see
     //    the header for why.
-    //    ⚠ BOTH SEPARATORS, both restricted to a 1–2 digit tail — the same discipline step 3 uses from the
+    //    ⚠ BOTH SEPARATORS, both restricted to a 1–2 digit tail — the same discipline step 4 uses from the
     //    other side. rn's decimals are `0.8`, `3.8`, `7.34`, `0.18`, `196.7`, `695.52`, `61,19`, `0,6`,
     //    `232,1`, `24,4`, `68,7` and the fractional halves of the nine ANGLO areas (`…64.54`, `…35.52`).
     //    ⚠ THE TRAILING GUARD IS `(?!\d|[.,]\d)`, NOT `(?!\d)`, and in rn its evidence is the DOTTED DATE
