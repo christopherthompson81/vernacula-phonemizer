@@ -110,6 +110,39 @@ describe("Kirundi text normalization", () => {
         expect(normalizeKirundi("kilometero kare")).toContain("kare"); // never rewritten TO kare
     });
 
+    // ⚠ A CUBE IS NOT A SQUARE, AND THE THREE PATHS NOW FAIL THE SAME WAY (#1135). No Kirundi cube word is
+    // attested (`m³`/`km³` are ×0 — the header's trap 51 floor), so an undeclared power keeps the unit's
+    // reading and HANDS THE EXPONENT BACK, which is the shared tier's own convention. Before this, the two
+    // LOCAL arms gave the cube the SQUARE's word while the tier did not, so one construct read three ways
+    // depending only on where the number sat. A wrong word is worse than a missing one.
+    test("a cube keeps the unit and hands its exponent back — it is never given the square's word", () => {
+        // step 4, the unit BEFORE its number — this is the arm that announced a square
+        expect(normalizeKirundi("km³ 517")).toBe("ibirometero³ 517");
+        // ⚠ THE ASCII SPELLING `km3 517` NEVER REACHES THIS ARM — step 3's space-grouping rule eats the `3`
+        // first (`km3 517` → `km2517`-shaped), which is a separate, filed defect (#1136). Asserted there, not
+        // here, so this test measures one rule.
+        // ⚠ BUT STEP 8's ARM HAS NO SUCH BLOCKER, AND ITS ASCII FORM IS EXACTLY WHY THE CUBE IS HANDED BACK
+        // AS A SUPERSCRIPT: a raw `3` is a DIGIT, so the tokenizer claims it and the number path SPEAKS it.
+        // Re-emitting it read `(233/km3)` as *…kuri kirometero GATATU* — "per kilometre three", a quantity
+        // invented inside a density figure, which is worse than either the missing word or the wrong one.
+        expect(normalizeKirundi("(233/km3)")).toBe("(233 kuri kirometero³)");
+        expect(normalizeKirundi("3372 hab/km3")).toBe("3372 hab kuri kirometero³");
+        // ⚠ THE ASSERTION IS ON WHAT FOLLOWS THE UNIT, not on the whole string: 233 is *…na ɡatatu* itself,
+        // so a bare "does not contain three" would pass for the wrong reason.
+        expect(phonemize("(233/km3)", "rn").trim().endsWith("kiɾometeɾo")).toBe(true);
+        // step 8, the bare denominator — the same arm, the same defect
+        expect(normalizeKirundi("(233/km³)")).toBe("(233 kuri kirometero³)");
+        // the shared tier, number-then-unit — unchanged, and it is what the other two now agree with
+        expect(normalizeKirundi("517 km³")).toBe("ibirometero³ 517");
+        // ⚠ THE SQUARE IS UNAFFECTED — it has a word, and all three paths still emit it
+        expect(normalizeKirundi("km² 517")).toBe("ibirometero kwadarato 517");
+        expect(normalizeKirundi("517 km²")).toBe("ibirometero kwadarato 517");
+        expect(normalizeKirundi("(233/km²)")).toBe("(233 kuri kirometero kwadarato)");
+        // and `kwadarato` is never spoken for a cube, on any path
+        for (const s of ["km³ 517", "517 km³", "(233/km³)", "mm³ 1000"])
+            expect(normalizeKirundi(s)).not.toContain("kwadarato");
+    });
+
     test("three grouping conventions coexist — French dots, Anglo commas, and spaces", () => {
         expect(normalizeKirundi("12.100.000")).toBe("12100000");
         expect(normalizeKirundi("104 000 000 000")).toBe("104000000000");

@@ -98,14 +98,24 @@ public class KirundiTests
     [InlineData("Km 1,965", "ibirometero 1965")]
     // ⚠ THE SPACE IS MANDATORY: the unspaced shape means something else entirely.
     [InlineData("km2 ni ikimenyetso", "km2 ni ikimenyetso")]
-    // ⚠ PINNED AS THEY SHIP, NOT AS THE FILE'S PROSE READS — both are filed, both are ×0 in the corpus, and
-    // a TS fix must meet a failing assertion here rather than change rn silently.
-    // #1135: the alternation admits `³` but the callback maps EVERY exponent to the square word, so a cube
-    // is ANNOUNCED as a square — while the tier, which honours the same file's "no cube word is declared",
-    // leaves `517 km³` as `ibirometero³ 517`. One construct, three readings.
-    [InlineData("km³ 517", "ibirometero kwadarato 517")]
-    [InlineData("(233/km³)", "(233 kuri kirometero kwadarato)")]
+    // ⚠ #1135 IS FIXED, AND THE THREE PATHS NOW FAIL THE SAME WAY. No Kirundi cube word is attested, so an
+    // undeclared power keeps the unit's reading and HANDS THE EXPONENT BACK — the shared tier's own
+    // convention, which step 4 exists to converge with. Before the fix the two LOCAL arms gave a cube the
+    // SQUARE's word while the tier did not, so one construct read three ways depending on where the number
+    // sat. A wrong word is worse than a missing one.
+    [InlineData("km³ 517", "ibirometero³ 517")]
+    [InlineData("(233/km³)", "(233 kuri kirometero³)")]
     [InlineData("517 km³", "ibirometero³ 517")]
+    [InlineData("mm³ 1000", "milimetero³ 1000")]
+    // ⚠ THE CUBE IS HANDED BACK AS A SUPERSCRIPT EVEN WHERE THE TEXT WROTE THE ASCII `3`. Step 8's arm has
+    // no #1136 blocker, and a raw `3` is a DIGIT — the tokenizer claims it and the number path SPEAKS it, so
+    // re-emitting it read `(233/km3)` as *…kuri kirometero GATATU*, a quantity invented inside a density
+    // figure. Missing word ≥ wrong word ≫ INVENTED NUMBER.
+    [InlineData("(233/km3)", "(233 kuri kirometero³)")]
+    [InlineData("3372 hab/km3", "3372 hab kuri kirometero³")]
+    // ⚠ THE SQUARE IS UNAFFECTED — it HAS a word, and all three paths still emit it.
+    [InlineData("517 km²", "ibirometero kwadarato 517")]
+    // ⚠ #1136 IS STILL OPEN and pinned as it SHIPS, so a fix meets a failing assertion here.
     // #1136: step 3's space-grouping arm runs FIRST and its lookbehind is satisfied by a preceding LETTER,
     // so it claims `2 517` inside `km2 517` — the figure becomes 2,517 and `km` leaks raw, the exact leak
     // step 4's mandatory space exists to close. ⚠ IT GENERALISES PAST UNITS: any letter+digit before a

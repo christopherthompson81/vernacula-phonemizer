@@ -204,3 +204,109 @@ again on the rebased branch rather than carried over:
 So the expectation held, and it is now measured rather than assumed. The counters in this doc's Runs 2–3 are
 left at the figures that were true when those runs happened; the current-state numbers are the ones above
 and in `csharp/STATUS.md`.
+
+## Run 6 — 2026-08-28 08:20 — #1135 fixed, and the fix is NOT the one the issue proposed
+
+**Question.** Finding 1 said a cube is announced as a square in steps 4 and 8. The issue proposed the nso
+shape — *refuse the whole match*. Is that right for rn?
+
+**No, and the shared tier says why.** `core/normalizeSymbols.ts` already has a reasoned convention for a
+power a language has not declared, and it argues against refusing:
+
+> ⚠ NO MEASURE WORD DECLARED — emit the UNIT and hand the exponent back rather than abandoning the match.
+> Returning `whole` loses the QUANTITY too, not just its power: the abbreviation reaches the phoneme sink
+> verbatim. Re-emitting the exponent keeps the unit's reading and leaves `²` where the leak gate can see it,
+> turning an invisible missing reading into a visible missing WORD in one language's data.
+
+And rn's step 4 states its own purpose in the same terms:
+
+> The output is the SAME SHAPE the tier's `unitPrefix` produces for the other 15, from the same table … so
+> the two orders converge on one reading and neither can drift.
+
+So the arm whose job is to converge with the tier must also FAIL the way the tier fails. Refusing would have
+made the three paths differ in a *new* way instead of the old one — and would have put `km³` raw into the
+phoneme stream, which is the leak step 4 exists to close. Both arms now share one `exponentPhrase` helper,
+so they cannot drift from each other either.
+
+**What moved.**
+
+    km³ 517       ibirometero kwadarato 517   →  ibirometero³ 517
+    (233/km³)     kuri kirometero kwadarato   →  kuri kirometero³
+    (233/km3)     kuri kirometero kwadarato   →  kuri kirometero³      ← ASCII, and see Run 7
+    3372 hab/km3  kuri kirometero kwadarato   →  kuri kirometero³
+    517 km³       ibirometero³ 517            →  unchanged (the tier, and now the reference)
+    km² 517       ibirometero kwadarato 517   →  unchanged — the square HAS a word
+    517 km²       ibirometero kwadarato 517   →  unchanged
+    (233/km²)     kuri kirometero kwadarato   →  unchanged
+
+End to end the ³ is dropped by the g2p, so all three cube paths now SAY the same thing —
+*ibiɾometeɾo amad͡ʒana atanu na it͡ʃumi na indwi* — where before two of them said *kwadarato* and one did not.
+
+⚠ **THE ASCII SPELLING IS NOT COVERED IN STEP 4, AND THAT IS #1136 RATHER THAN AN OVERSIGHT.** `km3 517`
+never reaches step 4: step 3's space-grouping arm eats the `3` first. The TS test says so at the point where
+the assertion would otherwise go, so the two defects stay separately measurable.
+⚠ **STEP 8's ARM HAS NO SUCH BLOCKER, AND ITS ASCII FORM IS WHERE THE FIRST CUT OF THIS FIX WENT WRONG** —
+see Run 7. The table above records step 8's ASCII rows because this PR does change them.
+
+**Gates** (TS first, then the goldens, then C# — PORTING.md's order):
+
+    npx vitest run test/kirundi.test.ts     26 passed  (1 new test, 8 assertions)
+    npm test                                288 files, 5,677 passed, 5 skipped
+    npx tsc --noEmit                        clean
+    tools/gen_parity_goldens.mts rn         **0 rows moved** — as predicted, ×0 in the corpus
+    parity fleet                            136 languages, 26,827 rows, 0 differ
+    dotnet test                             2,679 passed, 0 failed
+    differential                            4,328 comparisons (12 new cube probes), 0 differ, 0 throws
+
+⚠ **THE GOLDEN CANNOT SEE THIS FIX** — 0 rows moved in either direction, which is exactly what a ×0-in-corpus
+finding predicts and exactly why the differential probes had to carry it. The 12 new cube lines in
+`.probe/rn/probes.txt` are the only thing that measures it.
+
+**Checked, and it is not a fleet class.** Every other language with this callback shape either declares a
+cube word and discriminates (rw, hu, ko, mn) or admits only `[²2]` in its alternation so a cube can never
+match (zu). nso refuses. rn was alone in admitting `³` and then not distinguishing it.
+
+## Run 7 — 2026-08-28 08:30 — the first cut of the fix INVENTED A NUMBER, and the gate could not see it
+
+**What review caught.** Handing the exponent back is right for the superscript and wrong for the ASCII
+digit, and step 8's denominator arm reaches the ASCII alternation with no #1136 blocker in front of it. So
+the first cut turned a wrong WORD into an invented QUANTITY:
+
+    (233/km3)      before  …kuɾi kiɾometeɾo kwadaɾato       "per SQUARE kilometre"   — wrong word
+                   cut 1   …kuɾi kiɾometeɾo ɡatatu          "per kilometre THREE"    — invented number
+                   now     …kuɾi kiɾometeɾo                 "per kilometre"          — missing word
+    3372 hab/km3   same three states
+
+The cause is one character: `³` is dropped by the g2p, but `3` is a DIGIT, so the tokenizer claims it and the
+number path speaks it. Re-emitting the exponent "where the leak gate can see it" only works for a character
+the reader cannot say. **The fix is to hand a cube back as the SUPERSCRIPT regardless of how it was
+written** — visible to the gate, silent to the reader, and no invented quantity.
+
+⚠ **AND THE ORDERING OF HARMS IS NOW EXPLICIT IN THE CODE, because this run is what established it:**
+*missing word ≥ wrong word ≫ INVENTED NUMBER.* The PR's original framing ("a wrong word is worse than a
+missing one") was right as far as it went and did not rank the third case, which is the one the first cut
+produced.
+
+⚠ **NOTHING IN THE GATE SET COULD SEE IT, WHICH IS THE REAL LESSON.** The golden moved 0 rows (×0 in
+corpus). The TS↔C# differential compared 4,328 rows and passed — **because both engines moved together**: a
+differential proves the two engines AGREE, and both were newly wrong in the same way. `.probe/rn/probes.txt`
+already carried `(233/km3)` and `3372 hab/km3`, so the shapes were present and the harness still reported
+green. Only reading the OUTPUT against the previous output found it. That is PORTING.md's own warning —
+"the parity gate cannot ask 'is this right?' for you" — arriving against a change of my own rather than
+against inherited code.
+
+**A separate, pre-existing finding this surfaced (filed as #1145, not fixed here).** The SHARED TIER does the same
+thing: `517 km3` reads *ibiɾometeɾo ɡatatu amad͡ʒana atanu…* — "kilometre three, five hundred and seventeen"
+— on origin/main, before and after this change. `normalizeSymbols.ts`'s undeclared-power branch re-emits
+`exp` verbatim, and for an ASCII exponent that is a spoken digit in any language that declares one power and
+not the other. rn is merely where it was noticed; the fix belongs in the tier and affects every such
+language, so it is filed rather than patched from here.
+
+**Re-gated after the correction:**
+
+    npx vitest run test/kirundi.test.ts   26 passed (the cube test now carries the ASCII denominator too)
+    npm test                              288 files, 5,677 passed, 5 skipped
+    parity fleet                          136 languages, 26,827 rows, 0 differ
+    dotnet test                           2,681 passed, 0 failed
+    differential                          4,328 comparisons, 0 differ, 0 throws
+    gen_parity_goldens.mts rn             0 rows moved
