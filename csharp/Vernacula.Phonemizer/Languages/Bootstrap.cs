@@ -156,6 +156,7 @@ public static class Bootstrap
             Sepedi.SepediPhonemizer.RegisterSelf();
             Wolof.WolofPhonemizer.RegisterSelf();
             Finnish.FinnishPhonemizer.RegisterSelf();
+            Luganda.LugandaPhonemizer.RegisterSelf();
         }
     }
 }
