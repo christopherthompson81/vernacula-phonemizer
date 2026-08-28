@@ -1677,7 +1677,7 @@ Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (
   cut of this fix read `(233/km3)` as *…kuri kirometero gatatu* — a quantity INVENTED inside a density
   figure, worse than either the missing word or the wrong one. Caught in review, not by the gate. 0 golden
   rows moved, in either engine. ⚠ THE SHARED TIER'S OWN BRANCH DID THE OLD THING for `517 km3` —
-  pre-existing and fleet-wide — **now fixed too (#1145 → PR #1151)**: an undeclared power is handed back as
+  pre-existing and fleet-wide — **now fixed too (#1145 → PR #1152)**: an undeclared power is handed back as
   the SUPERSCRIPT however it was written, so the ASCII spelling no longer contributes a digit the number
   path can speak. 13 layers declare one power and not the other; **0 golden rows carry the shape**, so a
   core test carries the whole measurement. See `docs/bare_exponent_investigation.md`.
