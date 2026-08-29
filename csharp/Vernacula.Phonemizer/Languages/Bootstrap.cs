@@ -162,6 +162,7 @@ public static class Bootstrap
             Albanian.AlbanianPhonemizer.RegisterSelf();
             Aragonese.AragonesePhonemizer.RegisterSelf();
             Aromanian.AromanianPhonemizer.RegisterSelf();
+            Bashkir.BashkirPhonemizer.RegisterSelf();
         }
     }
 }
