@@ -1,4 +1,3 @@
-import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { rewrite } from "../../core/provenance.ts";
 /**
  * Papiamento (pap) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
@@ -45,6 +44,7 @@ import { rewrite } from "../../core/provenance.ts";
  * SOURCING — every word emitted is a pap.wikipedia TOKEN attestation whose examples were read; see
  * `tools/corpus/attest/pap.jsonc`.
  */
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** ⚠ NEVER `\b` — Papiamento carries `á é í ó ú ñ ò è ù`, which `\b` treats as boundaries (trap 1/23). */
 /** Normalize one Papiamento input string. Pure text→text. Steps are ORDER-DEPENDENT. */

@@ -1,4 +1,3 @@
-import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { rewrite } from "../../core/provenance.ts";
 /**
  * Faroese (fo) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
@@ -44,6 +43,7 @@ import { rewrite } from "../../core/provenance.ts";
  * SOURCING — every word emitted is a fo.wikipedia TOKEN attestation whose examples were read; see
  * `tools/corpus/attest/fo.jsonc`.
  */
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** ⚠ NEVER `\b` — Faroese carries `á í ó ú ý æ ø ð`, which `\b` treats as boundaries (trap 1/23). */
 /** Normalize one Faroese input string. Pure text→text. Steps are ORDER-DEPENDENT — the five jobs of the

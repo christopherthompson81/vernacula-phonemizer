@@ -31,7 +31,8 @@ public static class Normalize
      *  point, which cannot occur in the text. */
     private const string AGO = "";
     private static readonly JsRe AGO_MARK = JsRegex.Compile("(\\d{4})年(?=前)", "gu");
-    private static readonly JsRe AGO_RE = JsRegex.Compile(AGO, "gu");
+    private static readonly JsRe JS_META = JsRegex.Compile("[.*+?^${}()|[\\]\\\\]", "gu");
+    private static readonly JsRe AGO_RE = JsRegex.Compile(JS_META.Replace(AGO, "\\$&"), "gu"); // escaped — see Gan
 
     private static readonly JsRe RANGE = JsRegex.Compile(
         "(?<![\\d.,/\\-\\p{sc=Latn}])(\\d+)\\s*[-–~〜－]\\s*(\\d+)(?![\\d.,/\\-\\p{sc=Latn}])", "gu");

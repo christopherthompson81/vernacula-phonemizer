@@ -305,7 +305,9 @@ export function normalizeGan(input: string): string {
  * is a PUA code point, which cannot occur in the text, and is swapped back immediately after `spellYears`.
  */
 const AGO = "";
-const AGO_RE = new RegExp(AGO, "gu");
+// ⚠ ESCAPED: the sentinel is a PUA code point today, but a regex built from an unescaped literal
+// would silently change meaning if it ever became a metacharacter.
+const AGO_RE = new RegExp(AGO.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "gu");
 function protectDurations(s: string): string {
     return rewrite(s, /(\d{4})年(\s*(?:到|至|[-–~〜－])\s*)(\d{4})年(?=前)/gu, (_m, a: string, mid: string, b: string) => `${a}${AGO}${mid}${b}${AGO}`);
 }

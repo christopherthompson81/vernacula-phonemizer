@@ -117,7 +117,9 @@ export function normalizeXiang(input: string): string {
     // languages to fix one instance in a seventh. The sentinel is a PUA code point, which cannot occur in
     // the text, swapped back immediately after.
     const AGO = "";
-    const AGO_RE = new RegExp(AGO, "gu");
+    // ⚠ ESCAPED: the sentinel is a PUA code point today, but a regex built from an unescaped literal
+// would silently change meaning if it ever became a metacharacter.
+const AGO_RE = new RegExp(AGO.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "gu");
     s = rewrite(s, /(\d{4})年(?=前)/gu, `$1${AGO}`);
     s = spellYears(s, { rangeWord: "到" });
     s = rewrite(s, AGO_RE, "年"); // see gan for why a literal `replaceAll` becomes a global regex here

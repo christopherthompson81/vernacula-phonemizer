@@ -106,8 +106,11 @@ const LATIN_ATOMIC: Record<string, string> = {
 export function foldLatinDiacritics(s: string): string {
     const stripped = s.normalize("NFD").replace(/\p{M}+/gu, "");
     // ⚠ OFF THE SEAM: called PER WORD from `resolveWord`, not on the pipeline string. On the seam it takes
-    // English to 0% mapped. Re-running the mechanical converter over this file will re-convert it — that is
-    // how it came back once already.
+    // English to 0% mapped.
+    // ⚠ AND A MECHANICAL SWEEP WILL RE-CONVERT IT — three times so far, because nothing in the source
+    // distinguishes this from a pipeline site. What catches it is not vigilance: `test/trace.test.ts`
+    // asserts that EVERY token of EVERY golden row carries a span, so this failing is a red test rather
+    // than a silent regression. If that assertion ever looks like it needs relaxing, look here first.
     return stripped.replace(/[øæœßłđðþħıŋ]/gu, (c) => LATIN_ATOMIC[c] ?? c);
 }
 

@@ -693,3 +693,22 @@ added that does not report.
 ⚠ **175 raw `.replace` calls remain in the TypeScript and 209 in the C#, and that is correct.** They are
 per-word helpers, in-callback substring work, and lookup-table construction — the things that must NOT be on
 the seam. The number to watch is not that one; it is the zero.
+
+### Reviewing Run 15
+
+**Three findings, all fixed in place.**
+
+1. **The import demoted the module docstring in two more files** — faroese and papiamento. Fourth time. It
+   is not a reasoning failure, it is the same script inserting at line 0 when a file's first `import` is the
+   one being added, and it will keep happening until the sweep tooling is fixed or retired.
+2. **`AGO_RE`/`INSERTED_RE` were built from an UNESCAPED literal.** The sentinels are PUA code points today,
+   so the pattern is correct today; a sentinel that ever became a regex metacharacter would silently change
+   what the pattern matches. Escaped in both engines, using the port's own JS-metacharacter class rather
+   than `Regex.Escape`, whose output the translator does not accept.
+   ⚠ Worth noting what is now SAFE about that: `JS_META.Replace(...)` runs inside a STATIC INITIALIZER, which
+   is exactly where the `Initialisms` wrong-span defect came from. It cannot recur, because `JsRe.Replace`
+   no longer touches the mapping at all — the payoff from narrowing the seam, arriving three runs later.
+3. **The `unicode.ts` exclusions had no named guard**, only a comment saying a sweep would undo them. The
+   guard exists and is stronger than vigilance: the coverage assertion is now equality, so putting
+   `foldLatinDiacritics` back on the seam takes English to zero and fails a test. The comment now says so,
+   and says that a request to relax that assertion should send the reader here first.
