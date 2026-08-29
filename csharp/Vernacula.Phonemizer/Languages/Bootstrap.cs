@@ -163,6 +163,7 @@ public static class Bootstrap
             Aragonese.AragonesePhonemizer.RegisterSelf();
             Aromanian.AromanianPhonemizer.RegisterSelf();
             Bashkir.BashkirPhonemizer.RegisterSelf();
+            Basque.BasquePhonemizer.RegisterSelf();
         }
     }
 }
