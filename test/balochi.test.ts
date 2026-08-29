@@ -23,6 +23,15 @@ describe("Balochi (Southern) — cross-script canonical IPA", () => {
         expect(phonemizeRoman("ḍākṭar")).toBe("ɖaːkʈar"); // retroflex ḍ→ɖ, ṭ→ʈ
     });
 
+    test("dot-below letters survive the NFC compose (precomposed forms used to read as the empty string)", () => {
+        // The normalizer's NFC composes s+̣→ṣ, n+̣→ṇ, l+̣→ḷ. A precomposed form missing from the routing class
+        // fell into the Arabic g2p, which has no rule for it and deleted the letter.
+        expect(phonemizeWord("ṣ")).toBe("ʂ");
+        expect(phonemizeWord("ṇ")).toBe("ɳ");
+        expect(phonemizeWord("ḷ")).toBe("ɭ");
+        expect(phonemize("ṇ", "bal")).toBe("ɳ"); // combining form in the text; composed before tokenization
+    });
+
     test("the SIGNATURE retroflex ٹ→ʈ, ڈ→ɖ vs dental ت→t̪, د→d̪ (via the shared inventory)", () => {
         expect(phonemizeWord("چار")).toBe("t͡ʃaːr"); // "four" — چ→t͡ʃ (lexicon)
         expect(phonemizeRoman("čār")).toBe("t͡ʃaːr");
