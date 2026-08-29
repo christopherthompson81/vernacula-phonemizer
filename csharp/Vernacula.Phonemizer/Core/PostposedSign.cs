@@ -4,6 +4,7 @@
  * Ported from src/core/postposedSign.ts — see that file for the corpus evidence.
  */
 using System.Text.RegularExpressions;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Core;
 
@@ -15,7 +16,7 @@ public static class PostposedSignPass
     /** Rewrite `A <sign> B` as `A B <words>`, with the sign's reading after both operands. */
     public static string PostposedSign(string s, string sign, string words)
     {
-        var outp = JsRegex.Compile($"(\\S+)\\s*{sign}\\s*(\\S+)", "gu").Replace(s, m =>
+        var outp = Rewrite(s, JsRegex.Compile($"(\\S+)\\s*{sign}\\s*(\\S+)", "gu"), m =>
         {
             var a = m.Groups[1].Value;
             var b = m.Groups[2].Value;
@@ -24,6 +25,6 @@ public static class PostposedSignPass
             var marks = split.Success ? split.Groups[2].Value : "";
             return $"{a} {operand} {words}{marks}";
         });
-        return JsRegex.Compile($"\\s?{sign}\\s?", "gu").Replace(outp, $" {words} ");
+        return Rewrite(outp, JsRegex.Compile($"\\s?{sign}\\s?", "gu"), $" {words} ");
     }
 }

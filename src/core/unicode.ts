@@ -106,8 +106,11 @@ const LATIN_ATOMIC: Record<string, string> = {
 export function foldLatinDiacritics(s: string): string {
     const stripped = s.normalize("NFD").replace(/\p{M}+/gu, "");
     // ⚠ OFF THE SEAM: called PER WORD from `resolveWord`, not on the pipeline string. On the seam it takes
-    // English to 0% mapped. Re-running the mechanical converter over this file will re-convert it — that is
-    // how it came back once already.
+    // English to 0% mapped.
+    // ⚠ AND A MECHANICAL SWEEP WILL RE-CONVERT IT — three times so far, because nothing in the source
+    // distinguishes this from a pipeline site. What catches it is not vigilance: `test/trace.test.ts`
+    // asserts that EVERY token of EVERY golden row carries a span, so this failing is a red test rather
+    // than a silent regression. If that assertion ever looks like it needs relaxing, look here first.
     return stripped.replace(/[øæœßłđðþħıŋ]/gu, (c) => LATIN_ATOMIC[c] ?? c);
 }
 
@@ -440,7 +443,7 @@ export function repairDoubleEncoded(s: string): string {
     // when the two-byte arms were C2/C3-only, and widening the arm to C5 without widening this fast path left
     // `\u00c4\u00b0zmir` returning EARLY and unrepaired \u2014 the fix silently did nothing.
     if (!/[\u00c2-\u00c5\u00e2\u00e3]/u.test(s)) return s;
-    return s
+    return rewrite(rewrite(rewrite(rewrite(s
         // THREE-BYTE first, or the two-byte arms below would eat its lead. `E2 XX YY` encodes U+0800–U+FFFF;
         // the lead nibble of 0xE2 is 2, so the code point is 0x2000 plus the two continuation payloads — which
         // is why every hit here is a dash, quote or ellipsis. Measured: 16 occurrences, all in id_id
@@ -463,7 +466,7 @@ export function repairDoubleEncoded(s: string): string {
         //   mr  `उदाहरणार्थ, â€इलर्निंगâ€� आणि â€समाजीकरणâ€� ला इंटरनेट …`
         // Both siblings write U+201C/U+201D, so the residue before a letter is an OPENING quote, not a dash.
         // Measured: the sequence occurs in exactly two corpora, id_id (42) and mr_in (24), and nowhere else.
-        .replace(/\u00e2[\s\S]{2}/gu, (m) => {
+        , /\u00e2[\s\S]{2}/gu, (m) => {
             const b2 = sourceByte(m[1]!), b3 = sourceByte(m[2]!);
             if (b2 === undefined || b3 === undefined) return m;
             if (b2 < 0x80 || b2 > 0xbf || b3 < 0x80 || b3 > 0xbf) return m;
@@ -475,8 +478,8 @@ export function repairDoubleEncoded(s: string): string {
         // general: `“` is `E2 80 9C` whose third byte 0x9C maps to `œ` — A LETTER — so the opening-quote arm
         // matched `â€` and stranded the `œ`, turning `â€œ` into `“œ`. Ordering after the full decode removes the
         // whole class of interception, which is why it is the right fix rather than widening the guard.
-        .replace(/\u00e2\u20ac\ufffd/gu, "\u201d")
-        .replace(/\u00e2\u20ac(?=[\p{L}\p{M}\s]|$)/gu, "\u201c")
+        , /\u00e2\u20ac\ufffd/gu, "\u201d")
+        , /\u00e2\u20ac(?=[\p{L}\p{M}\s]|$)/gu, "\u201c")
         // TWO-BYTE, as the GENERAL formula rather than one arm per lead byte. `C2` and `C3` were special-cased
         // here for a while, and the case that showed why that was wrong is `\u00c4\u00b0zmir` \u2014 the mojibake of `\u0130`
         // (U+0130), whose UTF-8 is `C4 B0`. A lead byte of C4 was outside both arms, so the sequence survived
@@ -520,7 +523,7 @@ export function repairDoubleEncoded(s: string): string {
         // `\u00c3\u0153r\u00fcmqi` on main and does so identically here — byte 0x9C is `\u0153` in CP1252. Widening the trailing
         // class to reach it would pull in en-dashes and curly quotes, which occur constantly in running
         // text, to repair ONE token in 102 corpora. Not worth the blast radius; recorded instead.
-        .replace(/([\u00c2-\u00c5\u00e2\u00e3])([\u0080-\u00bf])/gu, (_m, lead: string, c: string) =>
+        , /([\u00c2-\u00c5\u00e2\u00e3])([\u0080-\u00bf])/gu, (_m, lead: string, c: string) =>
             String.fromCodePoint(((lead.codePointAt(0)! & 0x1f) << 6) | (c.codePointAt(0)! & 0x3f)));
 }
 

@@ -1,4 +1,3 @@
-import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 import { rewrite } from "../../core/provenance.ts";
 /**
  * Papiamento (pap) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
@@ -45,6 +44,7 @@ import { rewrite } from "../../core/provenance.ts";
  * SOURCING — every word emitted is a pap.wikipedia TOKEN attestation whose examples were read; see
  * `tools/corpus/attest/pap.jsonc`.
  */
+import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 
 /** ⚠ NEVER `\b` — Papiamento carries `á é í ó ú ñ ò è ù`, which `\b` treats as boundaries (trap 1/23). */
 /** Normalize one Papiamento input string. Pure text→text. Steps are ORDER-DEPENDENT. */
@@ -104,5 +104,5 @@ export function normalizePapiamento(input: string): string {
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
     // producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " "); // the pipeline string: a collapse that does not report desyncs every later offset
 }

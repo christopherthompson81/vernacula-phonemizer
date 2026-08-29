@@ -21,6 +21,7 @@
  * ⚠ THE SIGN IS A REGEX SOURCE STRING. `<` and `>` are literal; `+` and `*` are not. Callers pass a character
  * class or an escaped literal — this module does not guess, since a mis-escaped sign matches the wrong thing.
  */
+import { rewrite } from "./provenance.ts";
 /** Trailing marks that belong to the SENTENCE, not the operand — Latin, Devanagari and CJK forms. */
 const TRAILING = /^(.*?)([,;।॥!?)\]"'’、。]*)$/su;
 
@@ -32,12 +33,12 @@ const TRAILING = /^(.*?)([,;।॥!?)\]"'’、。]*)$/su;
  * @param words the reading, e.g. `से कम` / `पेक्षा कमी` / `ने भागणे`
  */
 export function postposedSign(s: string, sign: string, words: string): string {
-    const out = s.replace(new RegExp(`(\\S+)\\s*${sign}\\s*(\\S+)`, "gu"), (_m, a: string, b: string) => {
+    const out = rewrite(s, new RegExp(`(\\S+)\\s*${sign}\\s*(\\S+)`, "gu"), (_m, a: string, b: string) => {
         const split = TRAILING.exec(b);
         const operand = split?.[1] ?? b,
             marks = split?.[2] ?? "";
         return `${a} ${operand} ${words}${marks}`;
     });
     // The chain case: any sign left over had no left operand to attach to, so it reads infix rather than vanishing.
-    return out.replace(new RegExp(`\\s?${sign}\\s?`, "gu"), ` ${words} `);
+    return rewrite(out, new RegExp(`\\s?${sign}\\s?`, "gu"), ` ${words} `);
 }

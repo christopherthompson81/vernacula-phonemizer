@@ -8,6 +8,7 @@
  * point here — a single ambiguous grouped run is likewise left alone rather than guessed at.
  */
 
+using static Vernacula.Phonemizer.Core.Rewriter;
 namespace Vernacula.Phonemizer.Core;
 
 public static class SeparatorHygienePass
@@ -23,15 +24,15 @@ public static class SeparatorHygienePass
     {
         var s = input;
 
-        s = JsRegex.Compile(@"(?<![\d.,])([1-9]\d{0,2})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)", "gu").Replace(s,
+        s = Rewrite(s, JsRegex.Compile(@"(?<![\d.,])([1-9]\d{0,2})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)", "gu"),
             m => m.Groups[1].Value + JsRegex.Compile("[.,]", "gu").Replace(m.Groups[2].Value, ""));
 
-        s = JsRegex.Compile(@"(?<![\d.,])(\d+)[.,](\d{1,2})(?!\d)(?![.,]\d)", "gu").Replace(s, "$1 $2");
+        s = Rewrite(s, JsRegex.Compile(@"(?<![\d.,])(\d+)[.,](\d{1,2})(?!\d)(?![.,]\d)", "gu"), "$1 $2");
 
-        s = JsRegex.Compile(@"(?<![\d.])(\d{1,4})((?:\.\d{1,4}){2,})(?!\d)(?!\.\d)", "gu").Replace(s,
+        s = Rewrite(s, JsRegex.Compile(@"(?<![\d.])(\d{1,4})((?:\.\d{1,4}){2,})(?!\d)(?!\.\d)", "gu"),
             m => m.Groups[1].Value + JsRegex.Compile(@"\.", "gu").Replace(m.Groups[2].Value, " "));
 
-        s = JsRegex.Compile(@"(\d)\s?[–—]\s?(?=\d)", "gu").Replace(s, "$1, ");
+        s = Rewrite(s, JsRegex.Compile(@"(\d)\s?[–—]\s?(?=\d)", "gu"), "$1, ");
 
         return s;
     }

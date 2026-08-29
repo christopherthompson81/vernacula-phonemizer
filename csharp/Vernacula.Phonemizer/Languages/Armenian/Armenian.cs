@@ -7,6 +7,7 @@
  */
 using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Armenian;
 
@@ -148,7 +149,7 @@ public sealed class ArmenianEngine
     private static readonly JsRe INTRA_WORD_MARK = JsRegex.Compile(@"[Ա-Ֆա-ևև]+(?:[՛՜՞][Ա-Ֆա-ևև]+)+", "gu");
     private static readonly JsRe MARK_CHARS = JsRegex.Compile(@"[՛՜՞]", "gu");
 
-    private static string UnbreakMarks(string s) => INTRA_WORD_MARK.Replace(s, m =>
+    private static string UnbreakMarks(string s) => Rewrite(s, INTRA_WORD_MARK, m =>
     {
         var bare = MARK_CHARS.Replace(m.Value, "");
         return m.Value.Contains('՞') ? $"{bare}՞" : bare;

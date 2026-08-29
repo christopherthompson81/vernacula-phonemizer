@@ -4,6 +4,7 @@
  * Ported from src/languages/french/ordinals.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.French;
 
@@ -64,7 +65,7 @@ public static class Ordinals
     public static string NormalizeFrenchOrdinalDigits(string text)
     {
         if (!HAS_DIGIT.IsMatch(text)) return text;
-        return DIGIT_NOTATION.Replace(text, m =>
+        return Rewrite(text, DIGIT_NOTATION, m =>
         {
             var digits = m.Groups[1].Value;
             var n = Js.Number(digits);
@@ -93,7 +94,7 @@ public static class Ordinals
     public static string NormalizeFrenchOrdinalRomans(string text, Func<string, bool> isWord)
     {
         if (!HAS_ROMAN.IsMatch(text)) return text;
-        return ROMAN_NOTATION.Replace(text, m =>
+        return Rewrite(text, ROMAN_NOTATION, m =>
         {
             var lower = m.Value.ToLowerInvariant();
             if (isWord(lower) || ROMAN_WORD_STOPLIST.Contains(lower)) return m.Value;

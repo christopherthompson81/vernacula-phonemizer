@@ -19,6 +19,7 @@ import { renderNumber, spellDigits, westernNumberWords, type NumbersDef } from "
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { normalizeArmenian } from "./normalize.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 export interface ArmenianDef {
     vowels: Record<string, string>;
@@ -74,7 +75,9 @@ const MARK_CHARS = /[՛՜՞]/gu;
 
 /** Rejoin a word the three over-the-vowel marks would otherwise split; ՞ moves to the word's end. */
 function unbreakMarks(s: string): string {
-    return s.replace(INTRA_WORD_MARK, (w) => {
+    // ⚠ ON THE SEAM (#1150): `s` is the pipeline string — this runs before `pre` on the whole utterance.
+    // The inner call is on the MATCHED WORD and stays off it.
+    return rewrite(s, INTRA_WORD_MARK, (w) => {
         const bare = w.replace(MARK_CHARS, "");
         return w.includes("՞") ? `${bare}՞` : bare;
     });

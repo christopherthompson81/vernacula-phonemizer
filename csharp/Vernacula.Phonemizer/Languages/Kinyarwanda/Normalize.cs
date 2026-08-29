@@ -185,6 +185,7 @@ public static class Normalize
     /// testing; the marks come off after 4e, the LAST arm. Exact where a pre-block snapshot is not — the
     /// arms rewrite as they go, so any offset into a frozen copy drifts.</para></summary>
     private const string INSERTED = "\u0000";
+    private static readonly JsRe INSERTED_RE = JsRegex.Compile("\\u0000", "gu");
 
     private static string SpellDec(string n)
     {
@@ -263,7 +264,7 @@ public static class Normalize
         // ⚠ THE MARKS COME OFF HERE — AFTER 4e, the LAST arm. A step earlier and 4e would read a `dogere`
         // this file inserted as one the WRITER wrote, and suppress a noun it should emit. Unconditional and
         // once, so no mark reaches the phoneme stream even if an arm declines.
-        s = s.Replace(INSERTED, "", StringComparison.Ordinal);
+        s = Rewrite(s, INSERTED_RE, ""); // the sentinel comes off the PIPELINE string — see Gan for the shape
 
         // 5) The English ordinal suffix is NOT stripped — there is nothing to strip. See the TS.
 

@@ -239,20 +239,20 @@ const PAGE: CountForms = pair("lappuse", "lappuses");
 const NUMBER_ABBREV = "numurs";
 
 function abbreviations(text: string): string {
-    return text
+    return rewrite(rewrite(rewrite(text
         // the counted one first: it needs the figure that the generic rule would not look at
         // ⚠ THE TRAILING DOT IS OPTIONAL, because the corpus's one instance does not write it: the
         // bibliography line ends `— 160 lpp` with no period at all. A required dot left it as a raw leak.
         // Safe here in a way it would not be for `nr`, since `lpp` is not a word or a plausible fragment.
-        .replace(/(?<![\p{L}\p{M}])(\d+)(\s*)lpp\.?(?![\p{L}\p{M}])/giu, (_w, fig: string, gap: string) => `${fig}${gap || " "}${PAGE[countForm(Number(fig))]}`)
+        , /(?<![\p{L}\p{M}])(\d+)(\s*)lpp\.?(?![\p{L}\p{M}])/giu, (_w, fig: string, gap: string) => `${fig}${gap || " "}${PAGE[countForm(Number(fig))]}`)
         /**
          * ⚠ THE GAP IS RE-EMITTED, AND SUPPLIED WHEN THERE IS NONE. `nr.859` is written without a space and
          * the abbreviation's own period is consumed by the match, so a bare replacement fused the noun onto
          * the digits — *numurs859*, one token, which the number path then cannot read at all. Same defect as
          * the shared currency arm's (test/core-currency-fusion.test.ts) and the same fix: separate.
          */
-        .replace(/(?<![\p{L}\p{M}.])nr\.(\s*)(?=\d)/giu, (_w, gap: string) => `${NUMBER_ABBREV}${gap || " "}`)
-        .replace(ABBREVIATION_RE, (m: string, offset: number, full: string) => {
+        , /(?<![\p{L}\p{M}.])nr\.(\s*)(?=\d)/giu, (_w, gap: string) => `${NUMBER_ABBREV}${gap || " "}`)
+        , ABBREVIATION_RE, (m: string, offset: number, full: string) => {
             const word = ABBREVIATION[m];
             if (word === undefined) return m;
             /**
@@ -474,17 +474,17 @@ function degrees(text: string): string {
 const EQUALS = /(?<![=!<>])(?<=[\d\p{L}\p{M})²³])\s*=\s*(?=[\d\p{L}(])(?![=<>])/gu;
 
 function signs(text: string): string {
-    return text
+    return rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(rewrite(text
         // `≈200 MPa`, `≈-20 °C` — the corpus writes it 4 times and the sign was vanishing outright.
         // `aptuveni` is the corpus's and the wiki's own word for it (4 tok / 2 arts).
-        .replace(/≈\s*(?=[+−–-]?\d)/gu, `${SIGN.approximately} `)
-        .replace(/(?<![\d\p{L}])±(?=\s?\d)/gu, `${SIGN.plusMinus} `)
-        .replace(/(?<![\d\p{L}])\+(?=\s?\d)/gu, `${SIGN.plus} `)
-        .replace(/(?<![\d\p{L}])[−–-](?=\s?\d)/gu, `${SIGN.minus} `)
-        .replace(/(?<=\d)\s*÷\s*(?=\d)/gu, ` ${SIGN.dividedBy} `)
-        .replace(EQUALS, ` ${SIGN.equals} `)
-        .replace(/(?<![=!<>])(?<=[\d\p{L}])\s*<\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.lessThan} `)
-        .replace(/(?<![=!<>])(?<=[\d\p{L}])\s*>\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.greaterThan} `);
+        , /≈\s*(?=[+−–-]?\d)/gu, `${SIGN.approximately} `)
+        , /(?<![\d\p{L}])±(?=\s?\d)/gu, `${SIGN.plusMinus} `)
+        , /(?<![\d\p{L}])\+(?=\s?\d)/gu, `${SIGN.plus} `)
+        , /(?<![\d\p{L}])[−–-](?=\s?\d)/gu, `${SIGN.minus} `)
+        , /(?<=\d)\s*÷\s*(?=\d)/gu, ` ${SIGN.dividedBy} `)
+        , EQUALS, ` ${SIGN.equals} `)
+        , /(?<![=!<>])(?<=[\d\p{L}])\s*<\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.lessThan} `)
+        , /(?<![=!<>])(?<=[\d\p{L}])\s*>\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.greaterThan} `);
 }
 
 /**

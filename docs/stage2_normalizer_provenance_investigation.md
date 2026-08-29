@@ -635,3 +635,80 @@ A floor only bites if it sits close to the real number.
 
 Also documents why `tracing()` and `Tracing()` differ — the C# tests `frozen` and the TypeScript has no such
 concept, because that engine's freeze exists for a seam (`JsRe.Replace`) it no longer uses.
+
+## Run 15 — 2026-08-28 20:30 — the long tail, and 100%
+
+**Question.** 1,193 tokens across 16 languages, no shared cause visible. Was the tail a tail, or more shared
+passes?
+
+**Answer: five more shared passes, and the tail was mostly them.**
+
+| shared pass | languages it was costing |
+|---|---|
+| `core/separatorHygiene.ts` | grc, and every language whose digits are grouped |
+| `core/postposedSign.ts` | pnb — `>` → `ਤੋਂ ਵੱਧ` |
+| `core/unicode.ts` `repairDoubleEncoded` | id — `GalÃ¡pagos` → `Galápagos` |
+| `french/ordinals.ts` | fr, fr-CA — `xve` → `quinzième` |
+| `armenian/armenian.ts` `unbreakMarks` | hyw — `կ՛ունենայ` → `կունենայ` |
+
+⚠ **THE SWEEP HAD ONLY EVER TOUCHED `normalize.ts`.** Every one of these lives in an engine file, a helper,
+or `core/` — and three of them are shared tiers serving dozens of languages. The per-language ranking is what
+made them visible: a cause serving one language reads as that language's problem, and the same cause serving
+nine reads as nine problems until you look at what actually changed.
+
+### Three converter shapes it still refused
+
+- **A comment between the receiver and `.replace(`.** `whitespace only` was the rule from Run 13; in this
+  tree the long chains carry three lines of corpus evidence per link, so latgalian's and latvian's entire
+  number-notation chains sat behind it.
+- **`renormalize(...)` as a chain head** — only `rewrite(...)` was accepted as an expression receiver.
+- **`replaceAll` with a literal sentinel on the pipeline string.** `gan`, `xiang` and `rw` swap a PUA
+  sentinel back at the end of the pass. `.replaceAll` is deliberately off the seam because `rewrite`'s
+  string form is first-match-only — so these became a module-level global regex, which says "all matches" in
+  a way the seam can hear.
+
+### ⚠ Re-running the converter undid the `unicode.ts` exclusions for the THIRD time
+
+`foldLatinDiacritics`, `foldDigitsIn`, and the two per-word confusable folds. Nothing in the source marks
+them, so every sweep re-converts them. This run's conversion of that file restores them by name afterwards;
+that is a workaround, not a fix, and the fix is either a marker the converter honours or not re-running it
+over audited files.
+
+### Two call sites that are BOTH
+
+`normalizeKyrgyzInitialisms` is handed the pipeline string at one call and a matched run at another;
+`maithili`'s `fold` is a pipeline step for `text()` and a per-word helper for the word entry points. Baking
+one answer in cost the other its mapping. Both now let the CALL SITE declare — a parameter for `ky`, a
+separate `foldWord` for `mai`.
+
+### Where it lands
+
+    TS   910,910 / 910,910 tokens  (100.0%)      C#   659,379 / 659,379  (100.0%)
+    poison sites: 0 in both        goldens: byte-identical in both
+
+Every token of every golden row in 185 languages now names the input characters that produced it. The
+coverage test is no longer a floor — it asserts equality, because a single unmapped token means a pass was
+added that does not report.
+
+⚠ **175 raw `.replace` calls remain in the TypeScript and 209 in the C#, and that is correct.** They are
+per-word helpers, in-callback substring work, and lookup-table construction — the things that must NOT be on
+the seam. The number to watch is not that one; it is the zero.
+
+### Reviewing Run 15
+
+**Three findings, all fixed in place.**
+
+1. **The import demoted the module docstring in two more files** — faroese and papiamento. Fourth time. It
+   is not a reasoning failure, it is the same script inserting at line 0 when a file's first `import` is the
+   one being added, and it will keep happening until the sweep tooling is fixed or retired.
+2. **`AGO_RE`/`INSERTED_RE` were built from an UNESCAPED literal.** The sentinels are PUA code points today,
+   so the pattern is correct today; a sentinel that ever became a regex metacharacter would silently change
+   what the pattern matches. Escaped in both engines, using the port's own JS-metacharacter class rather
+   than `Regex.Escape`, whose output the translator does not accept.
+   ⚠ Worth noting what is now SAFE about that: `JS_META.Replace(...)` runs inside a STATIC INITIALIZER, which
+   is exactly where the `Initialisms` wrong-span defect came from. It cannot recur, because `JsRe.Replace`
+   no longer touches the mapping at all — the payoff from narrowing the seam, arriving three runs later.
+3. **The `unicode.ts` exclusions had no named guard**, only a comment saying a sweep would undo them. The
+   guard exists and is stronger than vigilance: the coverage assertion is now equality, so putting
+   `foldLatinDiacritics` back on the seam takes English to zero and fails a test. The comment now says so,
+   and says that a request to relax that assertion should send the reader here first.

@@ -25,6 +25,7 @@
  */
 import { numberToWords } from "./numbers.ts";
 import { romanToInt } from "../../core/roman.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Magnitude words that carry a plural ⟨s⟩ in the cardinal but lose it before -ième. NOT a general
  *  "strip final s" rule — trois/six/dix keep theirs (troisième, sixième, dixième). */
@@ -95,7 +96,7 @@ const DIGIT_NOTATION = new RegExp(`(?<![${L}\\d])(\\d+)(${SUFFIXES})(?![${L}\\d]
 
 export function normalizeFrenchOrdinalDigits(text: string): string {
     if (!/\d/.test(text)) return text;
-    return text.replace(DIGIT_NOTATION, (whole, digits: string, suffix: string) => {
+    return rewrite(text, DIGIT_NOTATION, (whole, digits: string, suffix: string) => {
         const n = Number(digits);
         const suf = suffix.toLowerCase();
         const plural = suf.endsWith("s");
@@ -122,7 +123,7 @@ const ROMAN_NOTATION = new RegExp(`(?<![${L}\\d])([ivxlcdm]+)(${SUFFIXES})(?![${
  */
 export function normalizeFrenchOrdinalRomans(text: string, isWord: (lower: string) => boolean): string {
     if (!/[ivxlcdm]/i.test(text)) return text;
-    return text.replace(ROMAN_NOTATION, (whole, base: string, suffix: string) => {
+    return rewrite(text, ROMAN_NOTATION, (whole, base: string, suffix: string) => {
         const lower = whole.toLowerCase();
         if (isWord(lower) || ROMAN_WORD_STOPLIST.has(lower)) return whole;
         const n = romanToInt(base);

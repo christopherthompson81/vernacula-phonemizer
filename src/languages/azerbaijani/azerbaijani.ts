@@ -10,6 +10,7 @@ import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { normalizeAzerbaijani } from "./normalize.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /** Phonemize a single Azerbaijani word to canonical IPA (final-syllable stress, before the stressed vowel). */
 export function phonemizeWord(word: string): string {
@@ -86,7 +87,10 @@ class AzerbaijaniPhonemizer implements Phonemizer {
         // Every other acronym in the language spelled out correctly (BMT → *be em te*), so the failure was
         // invisible except on the letter that caused it. Moved down here, where the only consumer left is the
         // tokenizer that genuinely needs the lowercase forms.
-        const normalized = SYMBOLS(normalizeAzerbaijani(input)).replace(/İ/gu, "i").replace(/I/gu, "ı");
+        // ⚠ #1150: ON THE SEAM. This is the pipeline string, and the fold is length-preserving, so leaving it
+        // off desynced every offset in the utterance without changing its length — az mapped 0 of 11 tokens
+        // on a row whose input and output are both 81 characters.
+        const normalized = rewrite(rewrite(SYMBOLS(normalizeAzerbaijani(input)), /İ/gu, "i"), /I/gu, "ı");
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/clock/era steps need the
         // number and its suffix still adjacent, which the tier would break.
         return assembleClauses(normalized, TOKEN, (m, sink) => {

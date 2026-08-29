@@ -215,14 +215,14 @@ export function normalizeKikuyu(input: string): string {
     //    ⚠ FORMAT CHARACTERS ARE STRIPPED IN THE SAME STEP, not because they are common — U+2060 WORD JOINER
     //    and U+FFFC are ×1 each here — but because a zero-width inside a word SPLITS it into two tokens, and
     //    that is the same class of silent damage the fold exists to undo. Robustness, stated as such.
-    s = renormalize(s, "NFC").replace(SUBSTITUTE_RX, (c) => SUBSTITUTE[c]!).replace(/[\p{Cf}￼]/gu, "");
+    s = rewrite(rewrite(renormalize(s, "NFC"), SUBSTITUTE_RX, (c) => SUBSTITUTE[c]!), /[\p{Cf}￼]/gu, "");
 
     // 2) HTML ENTITIES, before anything looks for a number beside a sign or a unit. `&nbsp;` ×16 sits exactly
     //    in the gap a number-unit or number-sign adjacency needs (`kilomita 700². &nbsp;&nbsp;`), and
     //    `&quot;` ×2 would otherwise reach the g2p as the word "quot".
     //    ⚠ NO AMPERSAND WORD IS SPENT — see the header; the bare sign occurs only in English names.
     //    `&amp;` is unfolded first so a doubly-escaped entity does not survive as "amp" plus a semicolon.
-    s = s.replace(/&amp;/giu, "&").replace(/&nbsp;/giu, " ").replace(/&quot;/giu, '"');
+    s = rewrite(rewrite(rewrite(s, /&amp;/giu, "&"), /&nbsp;/giu, " "), /&quot;/giu, '"');
 
     // 3) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping comma reads as a CLAUSE
     //    PAUSE, so `1,312` came out *ĩmwe , magana matatũ ikũmi na igĩrĩ* — two numbers and a pause where the
@@ -239,12 +239,12 @@ export function normalizeKikuyu(input: string): string {
     //    guard here left `3,066.3 ft` — a real elevation gloss in this corpus — UNDE-GROUPED, so it read as
     //    *ithatũ , mĩrongo ĩtandatũ na ithathatũ . ithatũ*: one number, one pause and one sentence break.
     //    Caught by this file's own test rather than by a probe, which is the point of pinning the branch.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
     //    The space-grouped form, same shape. ×0 in this corpus; the arm is here because a wiki that writes
     //    `41,200` also writes `41 200`, and it cannot fire on anything else (three digits, no letters).
     // ⚠ NAMED BY THE POISON TOOL AND STAYS ON THE SEAM, for the reason spelled out at the ordinal site below:
     // the subject is `s` itself, so the gap is an earlier kikuyu step and reverting only moves the poison.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // ⚠ `w` is the MATCH, not the pipeline string  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // ⚠ `w` is the MATCH, not the pipeline string  // space, NBSP, NNBSP, thin space
 
     // 4) THE ENGLISH ORDINAL SUFFIX (`21st`, `20th`, `70th`, `4th`, `2nd`; 194 whole-corpus). Kikuyu writes
     //    its own ordinals as WORDS with a class-agreeing prefix — this corpus has *wa mbere*, *wa kerĩ*,

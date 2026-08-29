@@ -206,7 +206,10 @@ export function normalizeGan(input: string): string {
     // ⚠ AND `\d{4}年` IS NOT ALWAYS A YEAR — see step 2b, which must run BEFORE this and does.
     s = protectDurations(s);
     s = spellYears(s, { rangeWord: "到" });
-    s = s.replaceAll(AGO, "年");
+    // ⚠ ON THE SEAM VIA A GLOBAL REGEX (#1150). `replaceAll` with a STRING pattern is deliberately not on
+    // the seam — `rewrite`'s string form is first-match-only, as `String.replace`'s is — but this restores a
+    // sentinel on the pipeline string and has to report, so it says "all matches" the way the seam can hear.
+    s = rewrite(s, AGO_RE, "年");
 
     // ── 3. the fraction, in the Chinese order ────────────────────────────────────────────────────
     // ⚠ `a/b` IS `b分之a`, "of b parts, a" — and ⟨分之⟩ is ATTESTED here in that exact construction, ×5:
@@ -302,6 +305,9 @@ export function normalizeGan(input: string): string {
  * is a PUA code point, which cannot occur in the text, and is swapped back immediately after `spellYears`.
  */
 const AGO = "";
+// ⚠ ESCAPED: the sentinel is a PUA code point today, but a regex built from an unescaped literal
+// would silently change meaning if it ever became a metacharacter.
+const AGO_RE = new RegExp(AGO.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "gu");
 function protectDurations(s: string): string {
     return rewrite(s, /(\d{4})年(\s*(?:到|至|[-–~〜－])\s*)(\d{4})年(?=前)/gu, (_m, a: string, mid: string, b: string) => `${a}${AGO}${mid}${b}${AGO}`);
 }

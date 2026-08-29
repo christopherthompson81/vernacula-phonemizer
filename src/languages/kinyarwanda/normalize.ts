@@ -369,6 +369,7 @@ function saidNear(full: string, offset: number, end: number, word: string): bool
  * and the strip is unconditional, so a mark cannot survive into the phoneme stream even if an arm declines.
  */
 const INSERTED = "\u0000";
+const INSERTED_RE = /\u0000/gu;
 
 /** Normalize one Kinyarwanda input string. Steps are ORDER-DEPENDENT; each states its coupling. */
 export function normalizeKinyarwanda(input: string): string {
@@ -515,7 +516,7 @@ export function normalizeKinyarwanda(input: string): string {
     //    `dogere` this file inserted would then read as one the WRITER wrote, and 4e would suppress a noun
     //    it should emit. Unconditional and once, so no mark can reach the phoneme stream even if an arm
     //    declines. See `INSERTED`.
-    s = s.replaceAll(INSERTED, "");
+    s = rewrite(s, INSERTED_RE, ""); // the sentinel comes off the PIPELINE string — see gan for the shape
 
     // 5) THE ENGLISH ORDINAL SUFFIX (`20th`, `3rd`) is NOT stripped here, because there is nothing to strip:
     //    the artifact contains ZERO `\d+(st|nd|rd|th)` instances. Kinyarwanda writes its ordinals as
