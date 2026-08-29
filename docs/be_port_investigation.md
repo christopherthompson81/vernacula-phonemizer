@@ -1,6 +1,6 @@
 # Belarusian (be) — C# port investigation
 
-Chronological log of the runs behind the be port. Branch `port/be-csharp`, based on `main` @ b068bafa (bpy, #1170) after the Run 2 rebase.
+Chronological log of the runs behind the be port. Branch `port/be-csharp`, based on `main` @ 2a99d056 (ka, #1171) after the Run 4 rebase.
 
 ## Run 1 — 2026-08-29 13:31 — what is there to port?
 
@@ -105,14 +105,35 @@ Result (first run, no fixes needed):
 No defect surfaced, so there is no TS-first paired fix and no golden regeneration. The read-for-correctness
 questions are covered by the pinned TS expectations (which the C# tests mirror 1:1) plus this battery.
 
-## Gates — final recount (all on the post-rebase base b068bafa)
+## Run 4 — 2026-08-29 21:40 — second rebase: Georgian landed, the last BLOCKED row clears
+
+`2a99d056` (ka, #1171) merged while the branch was unpushed. Ka touches only its own language files plus
+the two registration files, so no shared code moved and the Run 3 differential stays valid (its input set
+contains no Georgian run — a Georgian run would have differed pre-#1171, and it did not). Rebase hit the
+same one-line append-at-tail conflict in `Bootstrap.cs` (Georgian upstream, Belarusian appended after);
+`ManifestMappingTests.cs` auto-merged with both facts.
+
+Recount on the ka base:
 
     build (Vernacula.Phonemizer)        → 0 errors, 1 pre-existing Marathi CS0108 warning
-    C# suite (full)                     → 3220/3220
+    C# suite (full)                     → 3312/3312 (3220 + 92 Georgian)
     C# suite (Belarusian filter)        → 92/92
     parity be                           → 200/200 byte-identical, 0 differ
-    parity (fleet)                      → 144 languages byte-identical, 28504 rows ok, 0 differ;
-                                          bal 199/200 (1 row BLOCKED on the unported georgian, #1169)
+    parity (fleet)                      → 146 languages byte-identical, 28705 rows ok, 0 differ, 0 BLOCKED
+                                          — bal's one georgian row is now readable; the fleet's last
+                                          BLOCKED row is gone (#1171)
+    TS belarusian tests                 → 17/17 (unchanged, re-verified in Run 3)
+    FLEURS + probes differential        → 4927 rows, sync 0 / async 0 / throws 0 / leaks 0 (Run 3,
+                                          still valid: ka adds no shared code)
+    poison / provenance / ipaspans      → 0 / 4863-4863 / 4193-4193 (Run 3, same reason)
+
+## Gates — final recount (on the ka base 2a99d056)
+
+    build (Vernacula.Phonemizer)        → 0 errors, 1 pre-existing Marathi CS0108 warning
+    C# suite (full)                     → 3312/3312
+    C# suite (Belarusian filter)        → 92/92
+    parity be                           → 200/200 byte-identical, 0 differ
+    parity (fleet)                      → 146 languages byte-identical, 28705 rows ok, 0 differ, 0 BLOCKED
     TS belarusian tests                 → 17/17
     FLEURS + probes differential        → 4927 rows, sync 0 / async 0 / throws 0 / leaks 0
     poison / provenance / ipaspans      → 0 / 4863-4863 / 4193-4193
