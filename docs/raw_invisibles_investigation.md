@@ -63,7 +63,16 @@ why in a comment (the "nso lesson", #1109), while others write them raw.
 Not proposed for a mass edit: it is a convention question across ~390 sites in dozens of layers, and the
 escape-them convention is already documented where it matters most (the separator classes).
 
+## Filed as #1175
+
 ## Recommendation
+
+⚠ **AND THE SWEEP UNDER-SOLD THE PROBLEM UNTIL THE LAST STEP.** Checking which sites already *do* escape
+the marker turned up that the fleet writes this one idea **four different ways** — the raw character, the
+`\u{E000}` escape (`balochi/numbers.ts`, `persian/normalize.ts`), a runtime construction
+(`String.fromCharCode(0xe001)`, `char.ConvertFromUtf32(0xE000)`), and `\uXXXX` inside a class
+(`Persian/Normalize.cs`). So the fix is not "escape the raw ones": it is ONE NAMED, IMPORTABLE CONSTANT
+that all ~12 sites reach for, which is what #1175 proposes. Escaping alone would leave three spellings.
 
 Two changes, both behaviour-neutral, both one line each:
 

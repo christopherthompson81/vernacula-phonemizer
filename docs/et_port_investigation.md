@@ -96,5 +96,7 @@ boundaries.
 - **`JsRe` has no `Search`.** See run 3. A four-line helper here; a shared one would be better if a second
   port needs it.
 - **THE RAW-INVISIBLE-CHARACTER SWEEP.** Having found one, the whole fleet was swept for the same shape —
-  see `docs/raw_invisibles_investigation.md`. Three more code files are broken the same way, and a family
-  of PUA sentinels are written as characters that render as *nothing at all*.
+  see `docs/raw_invisibles_investigation.md`, and filed as **#1175**. Three more code files are broken the
+  same way; a family of PUA sentinels are written as characters that render as *nothing at all*; and the
+  fleet turns out to spell this one idea four different ways, so the fix is a named importable constant
+  rather than an escape.
