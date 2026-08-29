@@ -134,6 +134,54 @@ The three questions:
 **No defect found in the TypeScript by the read** — the two findings of the port were the transcription
 errors of Run 3, both C#-only, both fixed on this side. Nothing to file.
 
+## Run 8 — 2026-08-29 ~11:30 — review of #1166: the sentence-end class the golden could not see
+
+Reviewing the PR, the character classes of all 14 normalizer patterns were compared against the TS
+mechanically rather than by eye (every `[...]` in both files, unescaped and diffed by codepoint) — the
+`ab` lesson, where a five-of-six transcription was invisible to a 200-row golden. One class did not
+match:
+
+    TS   /^\s*["»)']?\s*$/u        U+0022  U+00BB  U+0029 ')'  U+0027 "'"
+    C#   "^\\s*[\"\\u00bb\\u201d\\u2019]?\\s*$"   U+0022  U+00BB  U+201D '”'  U+2019 '’'
+
+The last two members were transcribed as the CURLY quotes instead of the CLOSING BRACKET and the
+STRAIGHT apostrophe. `SENTENCE_END` decides whether the abbreviation's dot is kept as the clause pause,
+so this inverted the rule on the shape this corpus writes most — the TS comment names it directly
+(`216 061 bãn. (2002)`, `Lingvistica (gr. γλωσσολογία)`): a segment ending in a bracket lost its
+clause-final pause outright, which is trap 10 and is precisely the defect the guard exists to prevent.
+It also fired the pause where the TS does not, on a trailing `”` or `’`.
+
+    13-row probe over the abbreviation dot × what follows it
+        before the fix    rup  DIFF  9/13 rows differ
+        after the fix     rup  OK    13 rows
+
+    ts   "216 061 bãn.)"      → "216061 bãnãtori.)"     the dot KEPT
+    c#   (before)             → "216061 bãnãtori)"      the pause dropped
+
+⚠ WHY NOTHING CAUGHT IT. The guard only fires when the rest of the string is blank, so it is settled by
+what CLOSES the segment — and the golden's rows are paragraph excerpts whose abbreviations are all
+mid-string, where both classes agree. The port's own 718-line differential missed it for the same
+reason. The class of input that separates them is one character wide and sits at end-of-string.
+
+Fixed, and pinned in `AromanianTests.cs` as an 11-row theory that walks the whole class — the four
+members that keep the dot, the two curly quotes that do not, and a following word — with every expected
+value taken from the TS engine's own output rather than reasoned about.
+
+## Run 9 — 2026-08-29 ~11:45 — re-gated after the fix
+
+    dotnet test (full suite)                    2,932 pass, 0 fail  (51 Aromanian, +11 new rows)
+    parity, fleet                               140 languages, 27,627 rows, 0 differ
+    provenance rup                              5,550/5,550 tokens (100%)
+    ipaspans rup                                4,735/4,735 (100%), 0 wrong
+    differential, 12,000 generated rows         0 differ, 0 throws
+
+The 12,000-row differential was regenerated for this review with the abbreviation-dot × following-
+character axis enumerated explicitly (every closing mark, quote, bracket and space, at end of segment
+and mid-segment) alongside the four separator conventions, the dotted date, the era spans, the `di`
+particle, the ranges and the g2p corners. 16 shards over `xargs -P`, ~7s wall for the TS reference side.
+Every expectation already in `AromanianTests.cs` was also re-checked against the TS engine directly
+(65 of them, including the numerals): all agree.
+
 ## Recount
 
 `csharp/STATUS.md` said 136 of 193 at its 2026-08-28 snapshot; the branch it was written against has since
@@ -144,7 +192,7 @@ registration lines), so the differential was re-run rather than re-derived: unch
 
 ## Gates (post-rebase, re-measured)
 
-    csharp tests            2,921 pass (39 in AromanianTests.cs + 1 manifest mapping; 53 more from an), 0 fail
+    csharp tests            2,932 pass (51 in AromanianTests.cs + 1 manifest mapping; 53 more from an), 0 fail
     TS tests                test/aromanian.test.ts 14/14 (unchanged)
     parity, rup             200/200 byte-identical, 0 differ, 0 BLOCKED
     parity, fleet           140 languages, 27,627 rows, 0 differ, 0 BLOCKED

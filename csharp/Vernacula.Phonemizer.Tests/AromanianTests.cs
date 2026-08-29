@@ -130,6 +130,33 @@ public class AromanianTests
         Assert.Equal("(grãtseascã γλωσσολογία)", Norm("(gr. γλωσσολογία)"));
     }
 
+    /**
+     * ⚠ THE SENTENCE-END CLASS IS `["»)']`, AND THE GOLDEN CANNOT SEE IT. The guard decides whether the
+     * abbreviation's dot is KEPT as the clause pause, and it only fires when the rest of the string is
+     * blank — so it is settled by what closes the segment. The first cut of the port transcribed the
+     * bracket and the straight apostrophe as the curly `”` `’`, which INVERTED the rule on this corpus's
+     * own commonest shape (`216 061 bãn. (2002)`, `Lingvistica (gr. …)` — both end in a bracket): the
+     * clause-final pause was dropped outright, and every mid-string case, which is all the golden has,
+     * agreed anyway. Every expected value below is the TS engine's own output.
+     */
+    [Theory]
+    // IN the class — the dot is kept as the pause.
+    [InlineData("216 061 b\u00e3n.)", "216061 b\u00e3n\u00e3tori.)")]
+    [InlineData("Tu anlu 800 n.Hr.)", "Tu anlu 800 ninti di Hristo.)")]
+    [InlineData("Lingvistica (gr.)", "Lingvistica (gr\u00e3tseasc\u00e3.)")]
+    [InlineData("easti dr.)", "easti doctor.)")]
+    [InlineData("avea 52.360 b\u00e3n.'", "avea 52360 b\u00e3n\u00e3tori.'")]
+    [InlineData("avea 52.360 b\u00e3n.\"", "avea 52360 b\u00e3n\u00e3tori.\"")]
+    [InlineData("avea 52.360 b\u00e3n.\u00bb", "avea 52360 b\u00e3n\u00e3tori.\u00bb")]
+    [InlineData("avea 52.360 b\u00e3n.", "avea 52360 b\u00e3n\u00e3tori.")]
+    // NOT in the class — the curly quotes are not sentence-end here, so the dot goes.
+    [InlineData("avea 52.360 b\u00e3n.\u201d", "avea 52360 b\u00e3n\u00e3tori\u201d")]
+    [InlineData("avea 52.360 b\u00e3n.\u2019", "avea 52360 b\u00e3n\u00e3tori\u2019")]
+    // not a sentence end at all — the dot goes.
+    [InlineData("avea 52.360 b\u00e3n. shi", "avea 52360 b\u00e3n\u00e3tori shi")]
+    public void TheSentenceEndGuardKeepsTheDotForExactlyTheTsClass(string input, string expected) =>
+        Assert.Equal(expected, Norm(input));
+
     [Fact]
     public void TheColonIsNeverAClock()
     {

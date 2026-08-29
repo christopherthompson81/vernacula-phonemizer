@@ -66,9 +66,14 @@ public static class Normalize
         JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}n\\s?\\.\\s?Hr\\s?\\.", "gu");
     private static readonly JsRe ERA_D =
         JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}d\\s?\\.\\s?Hr\\s?\\.", "gu");
-    /** The final dot is kept at a sentence end, or the pause is lost outright. */
+    /** The final dot is kept at a sentence end, or the pause is lost outright.
+     *  ⚠ THE CLASS IS THE TS's `["»)']` — a straight quote, a guillemet, a CLOSING BRACKET and a straight
+     *  APOSTROPHE. The first cut transcribed the last two as the curly `”` `’`, which inverted the rule on
+     *  the corpus's own commonest shape: `216 061 bãn. (2002)` and `Lingvistica (gr. …)` end in a bracket,
+     *  and with `)` out of the class the clause-final pause was dropped outright (trap 10, the defect this
+     *  guard exists to prevent). Pinned in AromanianTests. */
     private static readonly JsRe SENTENCE_END =
-        JsRegex.Compile("^\\s*[\"\\u00bb\\u201d\\u2019]?\\s*$", "u");
+        JsRegex.Compile("^\\s*[\"\\u00bb)']?\\s*$", "u");
 
     private static string EraOrAbbrev(Match m, string full, string word)
     {
