@@ -223,15 +223,15 @@ const SYMBOLS = makeSymbolNormalizer({
  *  Each arm removes a dot that Latgalian orthography says is not a full stop, and nothing else. */
 function ordinalPeriod(text: string): string {
     return (
-        text
+        rewrite(rewrite(rewrite(text
             // …before a DASH, and this arm MUST run before the range step or the first endpoint of
             // `143.–153. lpp.` keeps its dot and the range pattern never sees two bare figures. 14 sites:
             // `2007.–2008. godu`, `15.–17. godu symtā`, `9.—10.gs.`, `1797.—1813.`, `10.-12.g.s.`,
             // `30.-40.gadu presē`, `1900.-1919.`, `1923.—1925.g.`.
-            .replace(/(?<![\d.,])(\d{1,4})\.(?=\s*[-–—]\s*\d)/gu, "$1")
+            , /(?<![\d.,])(\d{1,4})\.(?=\s*[-–—]\s*\d)/gu, "$1")
             // …immediately before a COMMA, which a sentence-ending period never is: `2008., 2011. i 2014.
             // godā`, `procesūs 1936., 1937. i 1938.g.`. 2 sites.
-            .replace(/(?<![\d.,])(\d{1,4})\.(?=,)/gu, "$1")
+            , /(?<![\d.,])(\d{1,4})\.(?=,)/gu, "$1")
             /**
              * …and the main arm: whitespace-or-nothing plus a LOWER-CASE letter, 139 sites. A Latgalian
              * sentence does not continue in lower case, so the dot is an ordinal marker; a digit after it is
@@ -243,7 +243,7 @@ function ordinalPeriod(text: string): string {
              * `1983.g.` — and a bare removal fuses the figure onto the word (*1922gods*), one token the
              * number path then cannot read at all. Same defect and same fix as Latvian's `nr.859`.
              */
-            .replace(/(?<![\d.,])(\d{1,4})\.(\s*)(\p{Ll})/gu,
+            , /(?<![\d.,])(\d{1,4})\.(\s*)(\p{Ll})/gu,
                 (_m, fig: string, gap: string, next: string) => `${fig}${gap || " "}${next}`)
     );
 }
@@ -262,16 +262,16 @@ function ordinalPeriod(text: string): string {
  */
 function degrees(text: string): string {
     return (
-        text
+        rewrite(rewrite(rewrite(rewrite(text
             // the writer's own `NN gradi C` — keep the word, spend the letter
-            .replace(new RegExp(`(\\d[\\d.,]*\\s+gradi)\\s+C${NOT_LETTER_AFTER}`, "gu"), "$1 pa Celseja skolai")
+            , new RegExp(`(\\d[\\d.,]*\\s+gradi)\\s+C${NOT_LETTER_AFTER}`, "gu"), "$1 pa Celseja skolai")
             // `°C` / `° C` — the scale phrase is POSTPOSED and prepositional, which is why it is spelled
             // out here rather than declared as a tier modifier: "…temperatura … -9° pa Celseja skolai".
-            .replace(new RegExp(`(\\d)\\s?°\\s?C${NOT_LETTER_AFTER}`, "gui"), "$1 gradi pa Celseja skolai")
+            , new RegExp(`(\\d)\\s?°\\s?C${NOT_LETTER_AFTER}`, "gui"), "$1 gradi pa Celseja skolai")
             // …and the bare sign: `56,4°`, `9,6° augšuok horizonta`, and the coordinate `55° 53′ 0″ N`.
             // ⚠ THE LOOKAHEAD STOPS A DOUBLING where the sentence already writes the word.
-            .replace(/(\d)\s?°(?!\s*gradi)/gu, "$1 gradi ")
-            .replace(/(\d)\s?°/gu, "$1")
+            , /(\d)\s?°(?!\s*gradi)/gu, "$1 gradi ")
+            , /(\d)\s?°/gu, "$1")
     );
 }
 

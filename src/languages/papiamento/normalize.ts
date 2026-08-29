@@ -104,5 +104,5 @@ export function normalizePapiamento(input: string): string {
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
     // producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    return rewrite(s, /[^\S\n]{2,}/gu, " "); // the pipeline string: a collapse that does not report desyncs every later offset
 }

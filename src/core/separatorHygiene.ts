@@ -37,6 +37,7 @@
  * ⚠ A LANGUAGE USING THIS IS NOT "TREATED". It has had the corpus-independent subset applied. Everything
  * that needs evidence remains open, and the per-language `normalize.ts` that calls this says so.
  */
+import { rewrite } from "./provenance.ts";
 
 /**
  * Spend the separators that cannot be anything but separators. Pure text→text; emits no word.
@@ -57,8 +58,8 @@ export function separatorHygiene(input: string): string {
     //    sentence kept all of its false stops. The pinned test is what caught it. The same three characters
     //    are wrong in the same way in eleven shipped layers, which is what `test/clause-final-range.test.ts`
     //    exists to stop; all three rules below carry the corrected form.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)/gu,
+        (_m, head: string, rest: string) => head + rewrite(rest, /[.,]/gu, ""));
 
     // 2) A mark with ONE OR TWO digits after it is a decimal in every convention — `3,5`, `1.5`, `19.95`,
     //    `44,7`. The mark becomes a SPACE: the two halves stay separate numbers, which is not how a reader
@@ -67,21 +68,21 @@ export function separatorHygiene(input: string): string {
     //    `punkts` was a facility — three rounds, three wrong candidates).
     //    ⚠ NO SPACE MAY PRECEDE THE DIGITS. `Chapter 1. 5 things` is a sentence end followed by a numeral,
     //    and requiring the mark to be tight against both sides is what keeps this off it.
-    s = s.replace(/(?<![\d.,])(\d+)[.,](\d{1,2})(?!\d)(?![.,]\d)/gu, "$1 $2");
+    s = rewrite(s, /(?<![\d.,])(\d+)[.,](\d{1,2})(?!\d)(?![.,]\d)/gu, "$1 $2");
 
     // 3) THREE OR MORE dot-joined digit runs are a date, a version or an address — `26.02.1994`,
     //    `198.51.100.0`, `v2.1.3`, `Ἡρόδοτος 2.35.1`. None is a sentence, and each currently produces two or
     //    three false full stops. The dots become spaces; no word is invented for the shape, because which
     //    shape it is cannot be told apart without evidence and the reading is the same either way.
-    s = s.replace(/(?<![\d.])(\d{1,4})((?:\.\d{1,4}){2,})(?!\d)(?!\.\d)/gu,
-        (_m, head: string, rest: string) => head + rest.replace(/\./gu, " "));
+    s = rewrite(s, /(?<![\d.])(\d{1,4})((?:\.\d{1,4}){2,})(?!\d)(?!\.\d)/gu,
+        (_m, head: string, rest: string) => head + rewrite(rest, /\./gu, " "));
 
     // 4) AN EN OR EM DASH BETWEEN DIGITS IS A SPAN, and it is currently DROPPED OUTRIGHT — `1990–1995`
     //    fuses into one run of words with no boundary at all. It becomes a pause, not a connective: the
     //    connective is a word ("do", "to", "a"), and this pass emits no words.
     //    ⚠ THE HYPHEN IS NOT INCLUDED. See the header — it is a word-joiner, a minus and a year marker in
     //    three of the languages measured this week, and telling those apart needs a corpus.
-    s = s.replace(/(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
+    s = rewrite(s, /(\d)\s?[–—]\s?(?=\d)/gu, "$1, ");
 
     return s;
 }

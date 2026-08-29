@@ -52,7 +52,7 @@ public static class Normalize
         s = Sinitic.DegroupThousands(s);
         s = ProtectDurations(s);
         s = Sinitic.SpellYears(s, new YearRuleData { RangeWord = "到" });
-        s = s.Replace(AGO, "年");
+        s = Rewrite(s, AGO_RE, "年"); // ⚠ a literal all-replace becomes a global regex so the seam can hear it
         s = Sinitic.ReorderFraction(s, "分之");
         s = SYMBOLS(s);
         s = Rewrite(s, PER_MILLE, m => $"千分之{m.Groups[1].Value}");
@@ -68,6 +68,7 @@ public static class Normalize
 
     /** ⚠ A PUA sentinel (U+E000), which cannot occur in the text; swapped back immediately after SpellYears. */
     private const string AGO = "";
+    private static readonly JsRe AGO_RE = JsRegex.Compile(AGO, "gu");
 
     private static readonly JsRe DURATION = JsRegex.Compile(
         "(\\d{4})年(\\s*(?:到|至|[-–~〜－])\\s*)(\\d{4})年(?=前)", "gu");

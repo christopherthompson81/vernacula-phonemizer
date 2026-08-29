@@ -6,6 +6,7 @@
  */
 using Vernacula.Phonemizer.Core;
 using Vernacula.Phonemizer.Languages.Hindi;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Maithili;
 
@@ -14,7 +15,9 @@ public static class MaithiliPhonemizer
     public static readonly HindiDef DEF = LoadManifest.Load<HindiDef>("languages/maithili", "maithili.jsonc");
 
     private static readonly JsRe UDATTA_AS_AVAGRAHA = JsRegex.Compile("॑", "gu");
-    private static string Fold(string s) => UDATTA_AS_AVAGRAHA.Replace(s, "ऽ");
+    private static string Fold(string s) => Rewrite(s, UDATTA_AS_AVAGRAHA, "ऽ");
+    /// <summary>⚠ The WORD entry points hand this a word, not the pipeline string — off the seam by construction.</summary>
+    private static string FoldWord(string s) => JsRegex.Replace(s, UDATTA_AS_AVAGRAHA, "ऽ");
 
     private static NativeHindiEngine? MAI;
     private static NativeHindiEngine Engine(ForeignPhonemizer? foreign = null)
@@ -27,8 +30,8 @@ public static class MaithiliPhonemizer
         // reaches Text only. Text keeps the unwrapped delegates by construction, so nothing double-folds.
         return new NativeHindiEngine
         {
-            Word = w => e.Word(Fold(w)),
-            WordRules = w => e.WordRules(Fold(w)),
+            Word = w => e.Word(FoldWord(w)),
+            WordRules = w => e.WordRules(FoldWord(w)),
             Number = e.Number,
             Text = e.Text,
         };

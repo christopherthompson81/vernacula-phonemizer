@@ -3,6 +3,7 @@
  * Ported from src/languages/azerbaijani/azerbaijani.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Azerbaijani;
 
@@ -81,7 +82,10 @@ public static class AzerbaijaniPhonemizer
             // ⚠ The İ→i / I→ı fold runs AFTER normalize.ts, not before: folding up front destroys the
             // all-caps signal the initialism pass keys on (`ı`/`i` are lowercase), so `IBM sistemi` read as
             // a word. Here the only consumer left is the tokenizer, whose /i class cannot see İ at all.
-            var normalized = DOTLESS_I.Replace(DOTTED_I.Replace(SYMBOLS(Normalize.NormalizeAzerbaijani(input)), "i"), "ı");
+            // ⚠ #1150: ON THE SEAM. This is the pipeline string, and the fold is length-preserving, so
+            // leaving it off desynced every offset without changing the length — az mapped 0 of 11 tokens on
+            // a row whose input and output are both 81 characters.
+            var normalized = Rewrite(Rewrite(SYMBOLS(Normalize.NormalizeAzerbaijani(input)), DOTTED_I, "i"), DOTLESS_I, "ı");
             return Clauses.AssembleClauses(normalized, TOKEN, (m, sink) =>
             {
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(Nat(m.Groups[1].Value)));

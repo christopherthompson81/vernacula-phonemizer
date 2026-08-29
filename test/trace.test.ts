@@ -405,10 +405,11 @@ describe("the seam is a drop-in for `replace`, not a near-miss (#1150)", () => {
                 tok += t.tokens.length;
                 mapped += t.tokens.filter((k) => k.inputSpan !== undefined).length;
             }
-        // ⚠ A FLOOR, NOT A TARGET, and raised deliberately as the causes were closed: 90% when three shared
-        // passes and every segmenter were still dark, 99% now that they report. It exists to catch a change
-        // that quietly takes sites off the seam, so it has to sit close enough to the real number to bite.
-        expect(mapped / tok).toBeGreaterThan(0.99);
+        // ⚠ NOT A FLOOR ANY MORE — EVERY token of every golden row carries a span, so the assertion is
+        // equality. It was 90% while three shared passes and every segmenter were still dark, then 99%; a
+        // floor only ever bites if it sits at the real number, and the real number is now all of them.
+        // A single unmapped token means a pass was added that does not report, which is the whole point.
+        expect(tok - mapped).toBe(0);
     });
 
     /**

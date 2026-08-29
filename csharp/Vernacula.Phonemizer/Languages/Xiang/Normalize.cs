@@ -31,6 +31,7 @@ public static class Normalize
      *  point, which cannot occur in the text. */
     private const string AGO = "";
     private static readonly JsRe AGO_MARK = JsRegex.Compile("(\\d{4})年(?=前)", "gu");
+    private static readonly JsRe AGO_RE = JsRegex.Compile(AGO, "gu");
 
     private static readonly JsRe RANGE = JsRegex.Compile(
         "(?<![\\d.,/\\-\\p{sc=Latn}])(\\d+)\\s*[-–~〜－]\\s*(\\d+)(?![\\d.,/\\-\\p{sc=Latn}])", "gu");
@@ -44,7 +45,7 @@ public static class Normalize
         s = Sinitic.DegroupThousands(s);
         s = Rewrite(s, AGO_MARK, m => $"{m.Groups[1].Value}{AGO}");
         s = Sinitic.SpellYears(s, new YearRuleData { RangeWord = "到" });
-        s = s.Replace(AGO, "年", StringComparison.Ordinal);
+        s = Rewrite(s, AGO_RE, "年"); // see Gan for why a literal all-replace becomes a global regex here
         s = Sinitic.ReorderFraction(s, "分之");
         s = SYMBOLS(s);
         s = Sinitic.ReadDecimals(s, "點");

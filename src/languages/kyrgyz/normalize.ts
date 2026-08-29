@@ -219,7 +219,12 @@ const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
  * empty lexical list plus the OOV test alone — the same position Tajik and Russian are in. ГЭС ×3 and БУУ ×4
  * are correctly left as words by that test.
  */
-export function normalizeKyrgyzInitialisms(text: string): string {
+/**
+ * ⚠ CALLED BOTH WAYS, WHICH IS WHY THE FLAG IS A PARAMETER (#1150). Line ~646 hands this the PIPELINE
+ * string; the arm below hands it a matched RUN from inside a callback. Baking `onPipeline: false` in for
+ * the second cost the first its mapping — ky mapped 0 of 37 tokens on the rows that spell an initialism.
+ */
+export function normalizeKyrgyzInitialisms(text: string, onPipeline = false): string {
     return makeInitialismNormalizer({
         letterName: (l) => LETTER_NAME[l],
         acronymLetters: ACRONYM_LETTERS,
@@ -227,7 +232,7 @@ export function normalizeKyrgyzInitialisms(text: string): string {
         isUnreadable: isUnreadableKyrgyz,
         // ⚠ OFF THE SEAM: this is called on a matched RUN from inside a callback below, not on the pipeline
         // string, and a substring there drops the whole utterance's mapping.
-    }, false)(text);
+    }, onPipeline)(text);
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -643,7 +648,7 @@ export function normalizeKyrgyz(input: string): string {
             if (kind === undefined || spelled === run) return m0; // left a word by the phonotactic test
             return glue(spelled, kind);
         });
-    s = normalizeKyrgyzInitialisms(s);
+    s = normalizeKyrgyzInitialisms(s, true); // the pipeline string — see the note on that function
 
     return s;
 }

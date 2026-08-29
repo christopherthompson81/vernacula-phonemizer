@@ -13,6 +13,7 @@ import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { normalizePapiamento } from "./normalize.ts";
+import { renormalize } from "../../core/provenance.ts";
 
 interface PapiamentoDef {
     digraphs: [string, string][];
@@ -129,7 +130,7 @@ class PapiamentoPhonemizer implements Phonemizer {
     text(input: string): string {
         // normalize.ts FIRST — its separator, era, sign and degree steps need the figure and its mark
         // still adjacent, which the tier would break — then the shared symbol tier.
-        return assembleClauses(SYMBOLS(normalizePapiamento(input.normalize("NFC"))), TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(normalizePapiamento(renormalize(input, "NFC"))), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // A digit run reads as Papiamentu number WORDS, each phonemized like any other word.
             else if (m[2]) {

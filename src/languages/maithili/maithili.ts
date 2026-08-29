@@ -30,6 +30,7 @@ import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi
 import { makeHindiNormalizer } from "../hindi/normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 /**
  * ⟨॑⟩ U+0951 IS THIS CORPUS'S SECOND SPELLING OF THE AVAGRAHA, and the artifact proves it against itself.
@@ -60,7 +61,11 @@ import { loadSharedPhonology } from "../../core/phonology.ts";
  */
 const UDATTA_AS_AVAGRAHA = /॑/gu;
 
-const fold = (s: string) => s.replace(UDATTA_AS_AVAGRAHA, "ऽ");
+// ⚠ ON THE SEAM: `fold` is applied to the PIPELINE STRING in the normalize override below, and it is
+// length-preserving — so leaving it off desynced every offset without changing the length.
+const fold = (s: string): string => rewrite(s, UDATTA_AS_AVAGRAHA, "ऽ");
+/** ⚠ The WORD entry points hand this a word, not the pipeline string — off the seam by construction. */
+const foldWord = (s: string): string => s.replace(UDATTA_AS_AVAGRAHA, "ऽ");
 
 let MAI: ReturnType<typeof engine> | undefined;
 function engine(foreign?: ForeignPhonemizer) {
@@ -86,7 +91,7 @@ function engine(foreign?: ForeignPhonemizer) {
     // `text("अब॑")`'s *ˈəbə* — and no golden could show it, since every golden goes through `text()`.
     // `text` keeps the UNWRAPPED `e.word` by construction (it closes over the inner one), so nothing
     // double-folds: by the time a token reaches it the normalizer has already replaced every U+0951.
-    return { ...e, word: (w: string) => e.word(fold(w)), wordRules: (w: string) => e.wordRules(fold(w)) };
+    return { ...e, word: (w: string) => e.word(foldWord(w)), wordRules: (w: string) => e.wordRules(foldWord(w)) };
 }
 
 /** Build the Maithili phonemizer. `foreign` handles embedded Latin runs. */
