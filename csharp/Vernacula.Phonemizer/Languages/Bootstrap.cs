@@ -160,6 +160,7 @@ public static class Bootstrap
             Kirundi.KirundiPhonemizer.RegisterSelf();
             Abkhaz.AbkhazPhonemizer.RegisterSelf();
             Albanian.AlbanianPhonemizer.RegisterSelf();
+            Aragonese.AragonesePhonemizer.RegisterSelf();
         }
     }
 }
