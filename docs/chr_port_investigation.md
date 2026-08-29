@@ -88,6 +88,42 @@ the HTML dash entities, and the Latin runs.
     poison chr                   0 sites
     typescript                   unchanged
 
+## Run 8 — 2026-08-30 ~04:20 — review of #1173: the compositor swept exhaustively
+
+The port's generator sampled numerals; the compositor deserves better than sampling, because its two
+interesting rules fire on narrow conditions — the tens CLIP only for 21–99 with a NONZERO unit, and the
+hundreds are built by suffixing the TENS word rather than the unit word, so `TENS[1]` is reachable only
+through the hundred path. Both are cheap to walk completely:
+
+    0 … 2000 exhaustively, plus every band boundary — 9999/10000, 99999/100000, 999999/1000000
+    (the 10⁶ digit-by-digit cliff), 10¹², and 2⁵³ either side
+
+And the axes the port's generator did not have:
+
+  * **ASTRAL INPUT.** `PhonemizeWord` iterates CODE POINTS (`Js.CodePoints` against the TS's `for…of`), so
+    a surrogate pair is the test that tells a code-unit loop from a code-point one: 🙂, 𐍈, and both
+    embedded mid-word.
+  * **THE SMALL-LETTER BLOCK U+13F8–13FD**, which the TOKEN class `[Ꭰ-Ᏽꭰ-ꮿ]` does NOT cover — so `text()`
+    sends it to the FOREIGN path while `PhonemizeWord` reads it happily. The two engines must agree on
+    that split, not merely on the table.
+  * **THE NORMALIZER'S BOUNDARIES**, one either side of each of the five rules: `1,23` against `1,234`
+    against `1,2345`, a leading `0,123`, `1.2`/`1.2.3`/`.5`/`5.`, all four dash spellings spaced and
+    unspaced, and the entity rule's neighbours (`&NDASH;`, `&amp;ndash;`, `&ndash` unterminated).
+  * NFD input, a combining mark, ZWJ, and the whitespace edges.
+
+    2,090 inputs, 0 differ, 0 throws
+
+## Run 9 — 2026-08-30 ~04:30 — the read, and two things that did NOT need fixing
+
+  * **The digit-by-digit fallback is the GUARDED form on both sides** — `filter(c => c >= "0" && c <= "9")`
+    in the TS, an ASCII-digit test in the C# — so #1165's whitespace-reads-as-zero quirk does not apply to
+    this language at all. Checked rather than assumed, because the fleet carries both conventions.
+  * **The manifest test needs no exclusion list.** `cherokee.jsonc` has exactly six top-level keys and
+    `CherokeeManifest` binds all six, so `AssertFullyMapped` covers the file with no `metadataOnly`
+    carve-out — unlike Georgian's, which had to exclude `provenance` and `convention`.
+
+No defect found; no code changed by the review.
+
 ## Read for correctness — filed, not fixed
 
 - **`Core/Js.cs` has `ToLowerCase` but no `ToUpperCase`**, and that asymmetry is correct rather than an
