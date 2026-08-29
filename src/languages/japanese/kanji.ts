@@ -9,6 +9,7 @@
  * adverbs.txt.
  */
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
+import { rebuilt, tracing, type Piece } from "../../core/provenance.ts";
 
 interface KanjiFallback {
     on?: string;
@@ -233,6 +234,14 @@ const DEMONSTRATIVES = ["この", "その", "あの", "どの"];
 export function segmentText(text: string): string {
     const { map, adverbs, maxUnitLength } = readings();
     const chars = [...text];
+    // ⚠ #1150: THE PIECE LIST IS BUILT ONLY WHILE A TRACE IS RECORDING. This loop rebuilds the string rather
+    // than replacing inside it, so nothing in the seam can see it and `ja` mapped 0 tokens on every row.
+    // ⚠ AND `at` IS IN CODE UNITS WHILE `i` IS IN CODE POINTS. `chars` is a code-point array, but every offset
+    // in the trace is UTF-16 — an emoji in the passthrough branch would put the two out of step, and the
+    // tiling check in `rebuilt` is what would catch it.
+    const rec = tracing();
+    const pieces: Piece[] = [];
+    let at = 0;
     let out = "",
         prev: string | undefined,
         prevAdv = false,
@@ -242,6 +251,8 @@ export function segmentText(text: string): string {
         const ch = chars[i]!;
         if (!isKanji(ch) && !isKana(ch)) {
             out += ch;
+            if (rec) pieces.push([ch, at, at + ch.length]);
+            at += ch.length;
             prev = ch;
             prevAdv = false;
             prevParticle = false;
@@ -305,7 +316,10 @@ export function segmentText(text: string): string {
                     isKanaAdverb)) ||
             (prevParticle && !chainedParticle) ||
             teFormAux;
-        if (boundary) out += " ";
+        if (boundary) {
+            out += " ";
+            if (rec) pieces.push([" ", at, at]); // the bunsetsu space is INSERTED: a point, not a range
+        }
         // Case particles: a single-mora particle after a content word ends a bunsetsu. は/へ as particles are
         // PRONOUNCED wa/e (not ha/he) — convert them here so the reading pass emits わ/え (私は→わたし わ, 東京へ→
         // とうきょう え). を is already handled in kana.ts; が/を/に pass through unchanged (unambiguous kana). は/へ
@@ -335,15 +349,17 @@ export function segmentText(text: string): string {
                         // a ≥2-mora unit and is matched before this branch, so single は after a digit is the
                         // particle.
                         (isKanji(prev) || isKana(prev) || /\d/u.test(prev)))));
-        out += particle && unit === "は"
-            ? "わ"
-            : particle && unit === "へ"
-              ? "え"
-              : unit;
+        const emitted = particle && unit === "は" ? "わ" : particle && unit === "へ" ? "え" : unit;
+        out += emitted;
+        // ⚠ `unit` IS EXACTLY THE SOURCE IT CONSUMED — every branch above either matched it against
+        // `chars.slice(i, …)` or fell back to `ch`. The は→わ / へ→え particle readings are the only
+        // substitutions, and they are one character for one.
+        if (rec) pieces.push([emitted, at, at + unit.length]);
+        at += unit.length;
         prevParticle = particle;
         prev = u[u.length - 1]!;
         prevAdv = isAdv;
         i += u.length;
     }
-    return out;
+    return rec ? rebuilt(text, pieces) : out;
 }

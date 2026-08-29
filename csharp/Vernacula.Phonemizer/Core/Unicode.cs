@@ -150,30 +150,46 @@ public static class Unicode
     // property (Rune.GetUnicodeCategory == Nd) the JS regex does. Outputs are identical.
     public static string FoldNativeDigits(string s)
     {
+        // ⚠ #1150: THIS REBUILDS, IT DOES NOT REPLACE, and that is why it could not be put on the `Rewrite`
+        // seam like its TypeScript twin. It was the largest remaining C#-only gap: `२.`→`2.` and `۱۱:۲۰`→
+        // `11:20` desynced the mapping before any `Rewrite` ran, and mai/awa/mag/syl/fa each lost most of
+        // their tokens while the TypeScript had them at 100%. The piece list is built only while tracing.
+        var rec = Tracing();
+        var pieces = rec ? new List<Piece>() : null;
         StringBuilder? sb = null;
         var consumed = 0;
         foreach (var rune in s.EnumerateRunes())
         {
+            var width = rune.Utf16SequenceLength;
+            // ⚠ `folded` STAYS NULL UNTIL THERE IS SOMETHING TO SAY. Materialising `rune.ToString()` up front
+            // reads better and costs an allocation PER RUNE on the shipped path of every utterance in every
+            // language — `sb?.Append(rune.ToString())` short-circuits the argument when `sb` is null, and
+            // that is the whole reason this fold allocates nothing for text with no native digits.
+            string? folded = null;
             if (Rune.GetUnicodeCategory(rune) == UnicodeCategory.DecimalDigitNumber && rune.Value >= 0x80)
             {
                 var cp = rune.Value;
-                var replaced = false;
                 foreach (var baseCp in NATIVE_DIGIT_BASES)
                 {
                     if (cp >= baseCp && cp <= baseCp + 9)
                     {
-                        sb ??= new StringBuilder(s[..consumed]);
-                        sb.Append((char)('0' + (cp - baseCp)));
-                        replaced = true;
+                        folded = ((char)('0' + (cp - baseCp))).ToString();
                         break;
                     }
                 }
-                if (!replaced) sb?.Append(rune.ToString()); // a block we do not carry: leave it rather than guess
+                if (folded is not null)
+                {
+                    sb ??= new StringBuilder(s[..consumed]);
+                    sb.Append(folded);
+                }
+                else sb?.Append(rune.ToString()); // a block we do not carry: leave it rather than guess
             }
             else sb?.Append(rune.ToString());
-            consumed += rune.Utf16SequenceLength;
+            pieces?.Add(new Piece(folded ?? rune.ToString(), consumed, consumed + width));
+            consumed += width;
         }
-        return sb?.ToString() ?? s;
+        if (sb is null) return s;                       // a no-op: the mapping already describes `s`
+        return rec ? Rebuilt(s, pieces!) : sb.ToString();
     }
 
     /**

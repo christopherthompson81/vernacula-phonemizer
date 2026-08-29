@@ -39,6 +39,47 @@ public static class Rewriter
     public static string Rewrite(string s, JsRe re, MatchEvaluator evaluator) =>
         re.Replace(s, evaluator, Provenance.StartTrack(s));
 
+    /// <summary>Is a trace recording? For a pass that must build its provenance explicitly, not through a seam.</summary>
+    public static bool Tracing() => Provenance.IsRecording();
+
+    /// <summary>One piece of a rebuilt string: <c>Text</c> came from <c>s[From, To)</c>. A zero-width span is an INSERTION.</summary>
+    public readonly record struct Piece(string Text, int From, int To);
+
+    /**
+     * A pass that REBUILDS the pipeline string, reporting its own pieces — the seam's third primitive, and
+     * the mirror of the TypeScript's `rebuilt`.
+     *
+     * ⚠ SEGMENTATION IS NEITHER A REPLACE NOR A NORMALIZE, and it was the last thing mapping nothing at all.
+     * `km` restores word boundaries by inserting U+200B, `ja` inserts bunsetsu spaces, and `cmn` rewrites the
+     * utterance as a code-point list; all three walk the string and build a new one, so `Rewrite` never sees
+     * them. `cmn` is the sharpest case: it is NET LENGTH-PRESERVING (`11`→`十一`, `20`→`二十`), so it desynced
+     * the mapping without changing its length and without tripping any guard.
+     *
+     * ⚠ AND THE PIECES MUST TILE THE INPUT, WHICH IS THE WHOLE CHECK. Each piece names the span it consumed;
+     * they have to start where the last one ended and finish at the end of the string. A pass that miscounts
+     * gets its mapping WITHHELD rather than a plausible-looking one.
+     */
+    public static string Rebuilt(string s, IReadOnlyList<Piece> pieces)
+    {
+        var sb = new StringBuilder(s.Length);
+        foreach (var piece in pieces) sb.Append(piece.Text);
+        var outText = sb.ToString();
+        var track = Provenance.StartTrack(s);
+        if (track is null) return outText;
+        var cursor = 0;
+        var count = 0;
+        foreach (var piece in pieces)
+        {
+            if (piece.From != cursor || piece.To < piece.From) { Provenance.PoisonExternally(s, outText); return outText; }
+            cursor = piece.To;
+            track.Stamp(piece.From, piece.To - piece.From, piece.Text.Length);
+            count += piece.Text.Length;
+        }
+        if (cursor != s.Length || count != outText.Length) { Provenance.PoisonExternally(s, outText); return outText; }
+        track.Commit(outText);
+        return outText;
+    }
+
     /**
      * A canonical block: a Hangul jamo run, a surrogate pair with its marks, or one code unit with its marks.
      *

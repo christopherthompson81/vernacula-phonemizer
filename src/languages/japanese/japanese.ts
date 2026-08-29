@@ -20,6 +20,7 @@ const toKatakana = (s: string): string =>
     s.replace(/[ぁ-ゖ]/gu, (c) => String.fromCodePoint(c.codePointAt(0)! + 0x60));
 import { accentNucleus, placeDownstep } from "./pitch.ts";
 import { MANIFEST } from "./manifest.ts";
+import { rewrite } from "../../core/provenance.ts";
 
 // Japanese clause punctuation → canonical pause marks (from japanese.jsonc).
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -55,13 +56,14 @@ class JapanesePhonemizer implements Phonemizer {
         input = normalizeJapanese(SYMBOLS(input));
         // Normalise full-width digits ０-９ → ASCII so the number path fires (３個 → さんこ, ２０２４年 → …); the \d
         // token and numberToKana are ASCII-only.
-        input = input.replace(/[０-９]/gu, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0));
+        input = rewrite(input, /[０-９]/gu, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0));
         // Number + counter (助数詞): fuse a digit run + following counter kanji into its euphonic kana reading
         // (1本→いっぽん, 3個→さんこ, 2024年→にせんにじゅうよねん) BEFORE segmentation, so it flows through the kana path.
         // readCounter returns null for a non-counter kanji (or out-of-range n) → the digits pass through unchanged.
         // Suppress the fusion when the counter kanji HEADS a dictionary compound (3時間, 3年生): splitting it off
         // would orphan the trailing kanji into a wrong isolated reading (間→あいだ, 生→なま). See headsCompound.
-        input = input.replace(
+        input = rewrite(
+            input,
             // ⚠ `つ` is listed EXPLICITLY beside Han: it is the one counter written in hiragana, and
             // matching it is what lets 1つ reach readCounter at all. Widening this to kana generally
             // would be wrong — a digit is followed by an ordinary particle constantly (3の, 5は).

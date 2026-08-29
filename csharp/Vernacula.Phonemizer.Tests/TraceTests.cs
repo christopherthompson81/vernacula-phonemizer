@@ -194,14 +194,26 @@ public class TraceTests
      * the other tests ran the initializers were already warm and the defect had evaporated.
      *
      * Both are now caught by tracking the STRING, not its length.
+     *
+     * ⚠ AND (a) IS NOW READ THE OTHER WAY ROUND. Tracking the string made the wrong span ABSENT; the pass
+     * then learned to report its own pieces through `Rebuilt`, so the honest assertion is the STRONGER one —
+     * the span is not merely withheld, it is right. What must never come back is the third state: present
+     * and wrong.
      */
     [Fact]
-    public void ANetLengthPreservingStepOutsideTheSeamYieldsAbsenceNotAWrongSpan()
+    public void ANetLengthPreservingRebuildReportsItsRealSpanNeverAPlausibleOne()
     {
-        var t = Phonemizer.PhonemizeTrace("115 10 10 中国", "cmn");
-        Assert.Equal(t.Ipa, Phonemizer.Phonemize("115 10 10 中国", "cmn"));
-        // the mapping cannot be trusted here, so it must not be offered at all
-        Assert.All(t.Tokens, k => Assert.Null(k.InputSpan));
+        const string text = "115 10 10 中国";
+        var t = Phonemizer.PhonemizeTrace(text, "cmn");
+        Assert.Equal(t.Ipa, Phonemizer.Phonemize(text, "cmn"));
+        var first = t.Tokens.FirstOrDefault(k => k.Surface.StartsWith("一百", StringComparison.Ordinal));
+        Assert.NotNull(first);
+        Assert.NotNull(first!.InputSpan);
+        Assert.Equal("115", text[first.InputSpan!.Value.Start..first.InputSpan.Value.End]);
+        // and nothing anywhere traces to whitespace it did not come from
+        foreach (var k in t.Tokens)
+            if (k.InputSpan is not null)
+                Assert.NotEqual("", text[k.InputSpan.Value.Start..k.InputSpan.Value.End].Trim());
     }
 
     [Theory]
@@ -248,6 +260,60 @@ public class TraceTests
                 Assert.InRange(sp!.Value.Start, 0, src.Length);      // never a span the caller cannot index
                 Assert.InRange(sp.Value.End, sp.Value.Start, src.Length);
             }
+        }
+        finally { Provenance.End(); }
+    }
+
+    /**
+     * #1150 — `Rebuilt`, the seam's third primitive. A pass that WALKS the input and constructs a new string
+     * is invisible to `Rewrite`: `km` inserts U+200B, `ja` inserts bunsetsu spaces, `cmn` rewrites the
+     * utterance as a code-point list, and `FoldNativeDigits` walks runes because a .NET pattern cannot see
+     * an astral Adlam digit.
+     *
+     * ⚠ THE PIECES MUST TILE THE INPUT, and that check is the only thing standing between such a pass and a
+     * confident wrong mapping.
+     */
+    [Fact]
+    public void RebuiltMapsEachPieceToWhatItConsumedAndAnInsertionToAPoint()
+    {
+        const string src = "abcd";
+        Provenance.Seed(src);
+        try
+        {
+            // `ab` -> `X`, an inserted `-`, then `c` and `d` unchanged
+            var outText = Rewriter.Rebuilt(src, new List<Rewriter.Piece>
+            {
+                new("X", 0, 2), new("-", 2, 2), new("c", 2, 3), new("d", 3, 4),
+            });
+            Assert.Equal("X-cd", outText);
+            var p = Provenance.For(outText);
+            Assert.NotNull(p);
+            Assert.Equal((0, 2), Provenance.InputSpan(p!, 0, 1));  // X came from `ab`
+            Assert.Equal((2, 3), Provenance.InputSpan(p!, 2, 3));  // c came from `c`
+            var insertion = Provenance.InputSpan(p!, 1, 2)!.Value; // the `-` is a POINT, not a range
+            Assert.Equal(insertion.Start, insertion.End);
+        }
+        finally { Provenance.End(); }
+    }
+
+    [Theory]
+    [InlineData(0)] // a gap between pieces
+    [InlineData(1)] // overlapping pieces
+    [InlineData(2)] // stopping short of the end
+    public void ARebuildThatDoesNotTileTheInputIsWithheld(int shape)
+    {
+        const string src = "abcd";
+        var pieces = shape switch
+        {
+            0 => new List<Rewriter.Piece> { new("a", 0, 1), new("d", 3, 4) },
+            1 => new List<Rewriter.Piece> { new("a", 0, 2), new("b", 1, 4) },
+            _ => new List<Rewriter.Piece> { new("a", 0, 1), new("b", 1, 2) },
+        };
+        Provenance.Seed(src);
+        try
+        {
+            var outText = Rewriter.Rebuilt(src, pieces);
+            Assert.Null(Provenance.For(outText)); // withheld, never guessed
         }
         finally { Provenance.End(); }
     }

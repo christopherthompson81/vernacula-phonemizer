@@ -3,6 +3,7 @@
  * Ported from src/languages/japanese/kanji.ts — see that file for the corpus evidence.
  */
 using Vernacula.Phonemizer.Core;
+using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.Japanese;
 
@@ -224,6 +225,14 @@ public static class Kanji
     {
         var r = Readings();
         var chars = Js.CodePoints(text);
+        // ⚠ #1150: THE PIECE LIST IS BUILT ONLY WHILE A TRACE IS RECORDING. This loop rebuilds the string
+        // rather than replacing inside it, so nothing in the seam can see it and `ja` mapped 0 tokens on
+        // every row.
+        // ⚠ AND `at` IS IN CODE UNITS WHILE `i` IS IN CODE POINTS. `chars` is a code-point list, but every
+        // offset in the trace is UTF-16; the tiling check in `Rebuilt` is what would catch them drifting.
+        var rec = Tracing();
+        var pieces = new List<Piece>();
+        var at = 0;
         var @out = "";
         string? prev = null;
         bool prevAdv = false, prevParticle = false;
@@ -234,6 +243,8 @@ public static class Kanji
             if (!IsKanji(ch) && !IsKana(ch))
             {
                 @out += ch;
+                if (rec) pieces.Add(new Piece(ch, at, at + ch.Length));
+                at += ch.Length;
                 prev = ch;
                 prevAdv = false;
                 prevParticle = false;
@@ -295,7 +306,11 @@ public static class Kanji
                      isKanaAdverb)) ||
                 (prevParticle && !chainedParticle) ||
                 teFormAux;
-            if (boundary) @out += " ";
+            if (boundary)
+            {
+                @out += " ";
+                if (rec) pieces.Add(new Piece(" ", at, at)); // the bunsetsu space is INSERTED: a point
+            }
             var nxCh = i + 1 < chars.Count ? chars[i + 1] : null;
             var copulaDe = unit == "で" && (nxCh == "す" || nxCh == "し" || nxCh == "き");
             var particle =
@@ -307,16 +322,18 @@ public static class Kanji
                  ((SINGLE_PARTICLES.Contains(unit) && IsKanji(prev)) ||
                   ((unit == "は" || unit == "へ") &&
                    (IsKanji(prev) || IsKana(prev) || DIGIT_ONE.IsMatch(prev)))));
-            @out += particle && unit == "は"
-                ? "わ"
-                : particle && unit == "へ"
-                  ? "え"
-                  : unit;
+            var emitted = particle && unit == "は" ? "わ" : particle && unit == "へ" ? "え" : unit;
+            @out += emitted;
+            // ⚠ `unit` IS EXACTLY THE SOURCE IT CONSUMED — every branch above either matched it against
+            // `chars` from `i` or fell back to `ch`. The は→わ / へ→え particle readings are the only
+            // substitutions, and they are one character for one.
+            if (rec) pieces.Add(new Piece(emitted, at, at + unit.Length));
+            at += unit.Length;
             prevParticle = particle;
             prev = u[^1];
             prevAdv = isAdv;
             i += u.Count;
         }
-        return @out;
+        return rec ? Rebuilt(text, pieces) : @out;
     }
 }

@@ -221,6 +221,58 @@ type Replacer = string | ((substring: string, ...args: any[]) => string);
 const ESCAPE_PATTERN = /[.*+?^${}()|[\]\\]/gu;
 
 /**
+ * Is a trace recording? For a pass that must build its provenance explicitly rather than through a seam.
+ * ⚠ THE C# TWIN ALSO TESTS `frozen`, and the asymmetry is real rather than an oversight: that engine has a
+ * freeze because its seam was once `JsRe.Replace`, which the whole codebase calls, so accumulation had to be
+ * stopped explicitly once the engine declared its normalized text. Here every seam entry point is
+ * input-side by construction and there is nothing to stop.
+ */
+export function tracing(): boolean {
+    return prov !== null && hostDepth() <= 1;
+}
+
+/** One piece of a rebuilt string: `text` came from `s[from, to)`. A zero-width span is an INSERTION. */
+export type Piece = readonly [text: string, from: number, to: number];
+
+/**
+ * A pass that REBUILDS the pipeline string, reporting its own pieces — the seam's third primitive.
+ *
+ * ⚠ SEGMENTATION IS NEITHER A REPLACE NOR A NORMALIZE, and it was the last thing mapping nothing at all.
+ * `km` restores word boundaries by inserting U+200B and `ja` inserts bunsetsu spaces; both walk the string
+ * and build a new one, so `rewrite` never sees them and `renormalize` does not describe them. Measured
+ * before this existed: both mapped 0 of their tokens, on every row, with no poison anywhere to say why.
+ *
+ * ⚠ AND THE PIECES MUST TILE THE INPUT, WHICH IS THE WHOLE CHECK. Each piece names the span it consumed;
+ * they have to start where the last one ended and finish at the end of the string. A pass that miscounts
+ * gets its mapping WITHHELD rather than a plausible-looking one — the same bargain every other primitive
+ * here makes.
+ *
+ * ⚠ IT IS ALSO WHY A SEGMENTER CAN BEAT `rewrite` ON PRECISION. Khmer's boundary restorer IS a `replace`
+ * over a maximal Khmer run, so putting it on the seam would have been a one-line change — and would have
+ * stamped one span across an entire sentence-length run. Per-piece spans are what make the trace usable for
+ * highlighting rather than merely correct.
+ */
+export function rebuilt(s: string, pieces: readonly Piece[]): string {
+    let out = "";
+    for (const [text] of pieces) out += text;
+    const p = prov;
+    if (p === null || hostDepth() > 1) return out;
+    if (tracked !== s) { poisonSink?.(tracked ?? "", s); poison(); return out; }
+    const next: [number, number][] = [];
+    let cursor = 0;
+    for (const [text, from, to] of pieces) {
+        if (from !== cursor || to < from) { poisonSink?.(s, out); poison(); return out; }
+        cursor = to;
+        const sp = span(p, from, to - from);
+        for (let i = 0; i < text.length; i++) next.push(sp);
+    }
+    if (cursor !== s.length || next.length !== out.length) { poisonSink?.(s, out); poison(); return out; }
+    prov = next;
+    tracked = out;
+    return out;
+}
+
+/**
  * A canonical block: a Hangul jamo run, or one code point with its combining marks.
  *
  * ⚠ NORMALIZATION DOES NOT REACH ACROSS A STARTER, which is what makes a chunked normalize equal to a
