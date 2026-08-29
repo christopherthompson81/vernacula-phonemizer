@@ -58,7 +58,8 @@ public static class NepaliPhonemizer
             {
                 var pre = b.Text(i);
                 var o = NepaliVowel(pre).Replace(SENTINEL, "ə", StringComparison.Ordinal);
-                Core.Trace.NoteRewrite("nepali-inherent-vowel", pre, o);
+                Core.Trace.// ⚠ POSITIONAL (#1150 stage 3): one character for one, so the output spans survive it.
+            NoteRewrite("nepali-inherent-vowel", pre, o, true);
                 return o;
             },
         };

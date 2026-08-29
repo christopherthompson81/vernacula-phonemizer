@@ -65,6 +65,7 @@ export function createFrenchCA(): Phonemizer {
         text: (input: string): string => {
             const pre = e.text(input);
             const out = toQuebecois(pre);
+            // ⚠ NOT positional (#1150): measured length-changing on 156 of 199 golden rows.
             noteRewrite("accent:fr-CA", pre, out);
             return out;
         },

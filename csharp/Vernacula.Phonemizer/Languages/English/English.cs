@@ -343,7 +343,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         var parts = new List<string>();
         // ⚠ RECORDED AFTER RENDERING (#1150): this pipeline is two-phase, so no token is ever "open" while
         // its reading is produced. One source token can yield many readings, so they accumulate per span.
-        var traced = new Dictionary<string, (Src Src, List<string> Emitted)>();
+        var traced = new Dictionary<string, (Src Src, List<string> Emitted, List<int> Parts)>();
         foreach (var c in clauses)
         {
             foreach (var it in c.Items)
@@ -366,16 +366,33 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                 parts.Add(rendered);
                 if (it.Source is not null)
                 {
+                    // ⚠ #1150 STAGE 3: THE PART INDEX, NOT AN OFFSET. `parts` is joined with " " at the end,
+                    // so a piece's position is only known once every piece exists; recording which slot it
+                    // went into lets the offsets be computed exactly below, rather than guessed by searching
+                    // the reading for a substring that may occur more than once.
                     var key = $"{it.Source.Start}:{it.Source.End}";
-                    if (traced.TryGetValue(key, out var b)) b.Emitted.Add(rendered);
-                    else traced[key] = (it.Source, new List<string> { rendered });
+                    if (traced.TryGetValue(key, out var b)) { b.Emitted.Add(rendered); b.Parts.Add(parts.Count - 1); }
+                    else traced[key] = (it.Source, new List<string> { rendered }, new List<int> { parts.Count - 1 });
                 }
             }
             if (c.Mark is not null) parts.Add(c.Mark);
         }
-        foreach (var (src, emitted) in traced.Values)
-            Core.Trace.NoteToken(src.Start, src.End, src.Surface, emitted);
-        return string.Join(" ", parts);
+        // ⚠ THE JOIN IS THE ARITHMETIC: piece `i` starts at the sum of the lengths before it, plus one
+        // separator per preceding piece. Computed here rather than threaded, because `parts` is complete now
+        // and was not when the pieces were made.
+        var at = new int[parts.Count];
+        var cursor = 0;
+        for (var i = 0; i < parts.Count; i++) { at[i] = cursor; cursor += parts[i].Length + 1; }
+        foreach (var (src, emitted, slots) in traced.Values)
+        {
+            var lo = slots.Min(i => at[i]);
+            var hi = slots.Max(i => at[i] + parts[i].Length);
+            Core.Trace.NoteToken(src.Start, src.End, src.Surface, emitted, null, (lo, hi));
+        }
+        var assembled = string.Join(" ", parts);
+        // ⚠ DECLARED SO IT CAN BE DISBELIEVED, exactly as `ClauseSink.Finish` does.
+        Core.Trace.NoteAssembled(assembled);
+        return assembled;
     }
 }
 

@@ -9,7 +9,7 @@
  */
 import { readForeignRun } from "../../core/foreign.ts";
 import { FOREIGN_RUN } from "../../core/clauses.ts";
-import { enterEngine, noteToken } from "../../core/trace.ts";
+import { enterEngine, noteAssembled, noteToken } from "../../core/trace.ts";
 import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
 import { loadJson } from "../../core/loadManifest.ts";
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
@@ -362,7 +362,7 @@ export class EnglishPhonemizer {
         }
 
         const parts: string[] = [];
-        const traced = new Map<string, { span: Span; surface: string; emitted: string[] }>();
+        const traced = new Map<string, { span: Span; surface: string; emitted: string[]; parts: number[] }>();
         for (const c of clauses) {
             for (const it of c.items) {
                 if (this.whSecondary.has(it.word))
@@ -401,15 +401,43 @@ export class EnglishPhonemizer {
                 // numeral becomes words), so they accumulate per span and are reported once, below.
                 if (it.src !== undefined) {
                     const key = `${it.src.span[0]}:${it.src.span[1]}`;
+                    // ⚠ #1150 STAGE 3: THE PART INDEX, NOT AN OFFSET. `parts` is joined with " " at the end, so
+                    // a piece's position is only known once every piece exists; recording which slot it went
+                    // into lets the offsets be computed exactly, below, rather than guessed by searching the
+                    // reading for a substring that may occur more than once.
                     const bucket = traced.get(key);
-                    if (bucket) bucket.emitted.push(rendered);
-                    else traced.set(key, { span: it.src.span, surface: it.src.surface, emitted: [rendered] });
+                    if (bucket) { bucket.emitted.push(rendered); bucket.parts.push(parts.length - 1); }
+                    else traced.set(key, { span: it.src.span, surface: it.src.surface, emitted: [rendered], parts: [parts.length - 1] });
                 }
             }
             if (c.mark !== null) parts.push(c.mark);
         }
-        for (const t of traced.values()) noteToken(t.span, t.surface, t.emitted);
-        return parts.join(" ");
+        // ⚠ THE JOIN IS THE ARITHMETIC: piece `i` starts at the sum of the lengths before it, plus one
+        // separator per preceding piece. Computed here rather than threaded, because `parts` is complete now
+        // and was not when the pieces were made.
+        const at: number[] = [];
+        let cursor = 0;
+        for (const piece of parts) {
+            at.push(cursor);
+            cursor += piece.length + 1; // the " " the join inserts
+        }
+        for (const t of traced.values()) {
+            // ⚠ FOLDED, NOT SPREAD. `Math.min(...arr)` passes one argument per element and throws RangeError
+            // once the list is long enough — a document-length input is exactly where a trace is most useful,
+            // so the shape that fails on big inputs is the wrong one.
+            let lo = Infinity;
+            let hi = -Infinity;
+            for (const i of t.parts) {
+                if (at[i]! < lo) lo = at[i]!;
+                if (at[i]! + parts[i]!.length > hi) hi = at[i]! + parts[i]!.length;
+            }
+            noteToken(t.span, t.surface, t.emitted, undefined, [lo, hi]);
+        }
+        const assembled = parts.join(" ");
+        // ⚠ DECLARED SO IT CAN BE DISBELIEVED, exactly as `clauseSink.finish` does: the offsets above index
+        // THIS string, and the recorder withholds them if what the caller receives is not it.
+        noteAssembled(assembled);
+        return assembled;
     }
 }
 

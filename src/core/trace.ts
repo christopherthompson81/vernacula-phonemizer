@@ -51,6 +51,21 @@ export interface TraceToken {
      * reads *ɣˈato*. This is the token's contribution, not its surviving output.
      */
     emitted: string[];
+    /**
+     * `[start, end)` into the trace's `ipa` — where this token's contribution ENDED UP (#1150 stage 3).
+     *
+     * ⚠ THIS IS THE HALF THAT CLOSES THE LOOP. `inputSpan` says which characters the reader typed; this says
+     * which characters of the reading they became. Together they are a two-way index between orthography and
+     * IPA, which is what a player needs to highlight a word while its audio plays — the motivating case for
+     * this whole issue.
+     *
+     * ⚠ ABSENT MEANS "NOT KNOWN", as everywhere else here. Eight engines rewrite the assembled string after
+     * the clause assembler; six do it one character for one and keep their spans (Spanish spirantizes across
+     * word boundaries, ɡ→ɣ), while `as` collapses a doubled aspirate and `fr-CA` applies an accent that
+     * change LENGTHS — and an offset into the pre-rewrite string would be a confident wrong answer about the
+     * post-rewrite one. See `noteRewrite`'s `positional` flag for which claim each pass makes.
+     */
+    ipaSpan?: [number, number];
 }
 
 /**
@@ -80,6 +95,15 @@ interface Recording {
     traced: boolean;
     /** Nesting of `beginToken`, so a re-entrant call nests rather than opening a second token. */
     tokenDepth: number;
+    /**
+     * Where each token's emissions landed in the ASSEMBLED reading (#1150 stage 3). `null` marks a token with
+     * an emission that could not be placed — withheld whole rather than reported from a partial union.
+     * ⚠ KEYED ON THE TOKEN OBJECT because `TraceToken` is the public shape; internal offsets that may yet be
+     * disbelieved do not belong on it.
+     */
+    spans: Map<TraceToken, [number, number] | null>;
+    /** The reading as the clause assembler built it, before any post-assembly rewrite. */
+    assembled: string | null;
 }
 
 let recording: Recording | null = null;
@@ -96,17 +120,17 @@ let recording: Recording | null = null;
 const active = (): boolean => recording !== null && hostDepth() <= 1;
 
 export function startTrace(input: string): void {
-    recording = { input, normalized: "", tokens: [], rewrites: [], current: null, traced: false, tokenDepth: 0 };
+    recording = { input, normalized: "", tokens: [], rewrites: [], current: null, traced: false, tokenDepth: 0, spans: new Map(), assembled: null };
     beginProvenance(input);
 }
 
-export function stopTrace(): {
+export function stopTrace(ipa?: string): {
     normalized: string;
     tokens: TraceToken[];
     rewrites: TraceRewrite[];
     traced: boolean;
 } {
-    const r = recording ?? { input: "", normalized: "", tokens: [], rewrites: [], traced: false };
+    const r = recording ?? { input: "", normalized: "", tokens: [], rewrites: [], traced: false, spans: new Map<TraceToken, [number, number] | null>(), assembled: null };
     // ⚠ RESOLVED AT STOP, not per token: a token is opened while the normalized string is still being
     // tokenized, and the provenance array is only complete once normalization has finished.
     const p = provenanceFor(r.normalized);
@@ -114,6 +138,15 @@ export function stopTrace(): {
         for (const t of r.tokens) {
             const is = inputSpan(p, t.span[0], t.span[1]);
             if (is !== undefined) t.inputSpan = is;
+        }
+    // ⚠ THE OUTPUT SPANS ARE ONLY OFFERED IF THE STRING THEY INDEX SURVIVED. The emission offsets are into
+    // the ASSEMBLED reading; eight engines rewrite it afterwards, and an offset into the pre-rewrite string is
+    // a confident wrong answer about the post-rewrite one. Comparing the strings is the same "length is not
+    // identity" lesson the input side learned, applied where it is cheapest to check.
+    if (ipa !== undefined && r.assembled === ipa)
+        for (const t of r.tokens) {
+            const sp = r.spans.get(t);
+            if (sp != null) t.ipaSpan = sp;
         }
     endProvenance();
     recording = null;
@@ -124,9 +157,23 @@ export function stopTrace(): {
  * Record a whole-string rewrite. A no-op when nothing changed, so a stage that did not fire costs nothing and
  * leaves no noise — the events present are exactly the ones that moved the string.
  */
-export function noteRewrite(stage: string, before: string, after: string): void {
+export function noteRewrite(stage: string, before: string, after: string, positional = false): void {
     if (!active() || recording === null || before === after) return;
     recording.rewrites.push({ stage, before, after });
+    // ⚠ `positional` IS A CLAIM THE PASS MAKES, AND THE LENGTH IS WHAT VERIFIES IT (#1150 stage 3). It means
+    // "every offset still means the same thing" — a one-for-one substitution such as Spanish's spirantization
+    // (ɡ→ɣ, b→β, d→ð), where the token spans recorded against the assembled reading are still exact.
+    //
+    // ⚠ WITHOUT IT THE DEFAULT IS WITHHOLDING, WHICH IS THE RIGHT DEFAULT. `assembled` stops matching the
+    // final reading, so `stopTrace` offers no `ipaSpan` at all rather than offsets into a string that no
+    // longer exists. A pass that changes lengths — Assamese collapsing a doubled aspirate, Nepali expanding
+    // a sentinel — cannot make this claim, and does not.
+    //
+    // ⚠ THE CLAIM IS NOT FULLY CHECKABLE, and saying so is better than implying it is: equal lengths do not
+    // rule out a REORDERING. What rules it out is that these passes are character substitutions, which is a
+    // property of the eight functions rather than of this check. `test/trace.test.ts` verifies the
+    // consequence instead — that every reported span still contains what its token emitted.
+    if (positional && before.length === after.length && recording.assembled === before) recording.assembled = after;
 }
 
 /** Enter a seam engine. The FIRST one at the top level owns the recording. */
@@ -189,15 +236,45 @@ export function noteNativised(from: string, to: string): void {
  * reading is produced, so the streaming `beginToken`/`endToken` pair does not fit. They call this instead,
  * after rendering, when span, surface and readings are all known.
  */
-export function noteToken(span: [number, number], surface: string, emitted: string[], nativised?: string): void {
+export function noteToken(
+    span: [number, number],
+    surface: string,
+    emitted: string[],
+    nativised?: string,
+    ipaSpan?: [number, number],
+): void {
     if (!active() || recording === null || !recording.traced) return;
     const t: TraceToken = { span, surface, emitted: emitted.filter((x) => x !== "") };
     if (nativised !== undefined && nativised !== surface) t.nativised = nativised;
+    // ⚠ THE TWO-PHASE ENGINES MUST PASS THIS THEMSELVES. They never open a token while its reading is being
+    // made, so `noteEmit`'s offset never reaches them; what they DO know is which slot of their own parts
+    // list each reading went into, which is the same fact one step earlier.
+    if (ipaSpan !== undefined) recording.spans.set(t, ipaSpan);
     recording.tokens.push(t);
 }
 
 /** Record one emitted reading against the token currently open. */
-export function noteEmit(ipa: string): void {
+export function noteEmit(ipa: string, at?: number): void {
     if (!active() || recording?.current == null || ipa === "") return;
     recording.current.emitted.push(ipa);
+    // ⚠ KEYED ON THE TOKEN OBJECT, not stored on it: `TraceToken` is the public shape and a parallel array of
+    // internal offsets does not belong in it. A token with SOME offsets and some missing is withheld whole.
+    const t = recording.current;
+    const cur = recording.spans.get(t);
+    if (at === undefined) { recording.spans.set(t, null); return; } // an emission with no place in the reading
+    if (cur === null) return;                                       // already withheld: one gap withholds all
+    recording.spans.set(t, cur === undefined
+        ? [at, at + ipa.length]
+        : [Math.min(cur[0], at), Math.max(cur[1], at + ipa.length)]);
+}
+
+/**
+ * The reading as the clause assembler built it, before any post-assembly rewrite.
+ *
+ * ⚠ RECORDED SO IT CAN BE DISBELIEVED. The emission offsets index THIS string; `stopTrace` reports them as
+ * `ipaSpan` only when it is still what the caller receives.
+ */
+export function noteAssembled(s: string): void {
+    if (!active() || recording === null) return;
+    recording.assembled = s;
 }

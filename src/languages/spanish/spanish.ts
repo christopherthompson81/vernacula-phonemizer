@@ -52,7 +52,7 @@ function spirantizeAcrossWords(ipa: string): string {
     // not what ships — `gato` emits ɡˈato and the sentence reads ɣˈato. Without the event a consumer sees
     // that discrepancy with no cause attached.
     const out = spirantizeAcrossWordsCore(ipa);
-    noteRewrite("spirantize-across-words", ipa, out);
+    noteRewrite("spirantize-across-words", ipa, out, true);
     return out;
 }
 

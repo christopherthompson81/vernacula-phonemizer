@@ -39,7 +39,7 @@ export function createSpanish419(): Phonemizer {
         text: (input: string): string => {
             const pre = e.text(input);
             const out = toLatinAmerican(pre);
-            noteRewrite("accent:es-419", pre, out);
+            noteRewrite("accent:es-419", pre, out, true);
             return out;
         },
     };

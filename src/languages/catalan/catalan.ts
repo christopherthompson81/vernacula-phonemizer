@@ -67,7 +67,7 @@ function spirantizeAcrossWords(ipa: string): string {
     // ⚠ REPORTED TO THE TRACE (#1150): runs on the ASSEMBLED string, so a token's `emitted` reading is not
     // what ships. Without the event the discrepancy has no cause attached.
     const out = spirantizeAcrossWordsCore(ipa);
-    noteRewrite("spirantize-across-words", ipa, out);
+    noteRewrite("spirantize-across-words", ipa, out, true);
     return out;
 }
 

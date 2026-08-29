@@ -41,7 +41,8 @@ public sealed class CatalanPhonemizer : ILanguage
     private static string SpirantizeAcrossWords(string ipa)
     {
         var traced = SpirantizeAcrossWordsCore(ipa);
-        Core.Trace.NoteRewrite("spirantize-across-words", ipa, traced);
+        Core.Trace.// ⚠ POSITIONAL (#1150 stage 3): one character for one, so the output spans survive it.
+            NoteRewrite("spirantize-across-words", ipa, traced, true);
         return traced;
     }
 

@@ -712,3 +712,78 @@ the seam. The number to watch is not that one; it is the zero.
    guard exists and is stronger than vigilance: the coverage assertion is now equality, so putting
    `foldLatinDiacritics` back on the seam takes English to zero and fails a test. The comment now says so,
    and says that a request to relax that assertion should send the reader here first.
+
+## Run 16 — 2026-08-28 22:15 — stage 3: the reading side
+
+**Question.** Stage 2 answers "which characters did the reader type to produce this token". The motivating
+case — highlighting orthography while audio plays — needs the other direction too: given a position in the
+READING, which token, and so which input characters. What is actually derivable?
+
+### What was already true, and what was not
+
+`TraceToken.emitted` says what a token CONTRIBUTED. It does not say where that contribution landed, and the
+docstring already warned it is not necessarily a substring of the reading, because eight engines rewrite the
+assembled string afterwards. So the answer had two parts: record the landing, and decide what a rewrite does
+to it.
+
+### The landing is arithmetic, and it belongs at the seam
+
+`clauseSink.emit` appends with a separator; computing the offset BEFORE the append is exact and costs
+nothing. 159 of 185 languages route through it. The two hand-rolled engines never have a token open while
+its reading is made — English is a POS tagger over the whole stream, French looks a word ahead for liaison —
+so they record which SLOT of their own parts list each reading went into and convert that to offsets once
+the list is complete. ⚠ In French the offsets must be taken AFTER `accentFinal`, which rewrites the group in
+place; before it, every piece is placed by its pre-accent length.
+
+### ⚠ Six of eight post-assembly passes are positional — MEASURED, not assumed
+
+    POSITIONAL       30/30    awa:awadhi-flap             length-changing   82/93    as:collapse-geminates
+    POSITIONAL      191/191   ca:spirantize-across-words  length-changing   43/199   fr-CA:accent:fr-CA
+    POSITIONAL      195/195   es:spirantize-across-words
+    POSITIONAL      184/184   es-419:accent:es-419
+    POSITIONAL      192/192   gl:spirantize-across-words
+    POSITIONAL      200/200   ne:nepali-inherent-vowel
+
+`noteRewrite` gained a `positional` flag: a claim the pass makes, verified as far as a length check can
+verify it, defaulting to WITHHOLDING. `as` and `fr-CA` make no claim and lose their spans, which is correct.
+
+⚠ **The claim is not fully checkable and the comment says so.** Equal lengths do not rule out a REORDERING.
+What rules it out is that these six are character substitutions — a property of the functions, not of the
+check. The tests verify the consequence instead.
+
+### ⚠ 5,754 "wrong" spans that were my checker being wrong
+
+After a positional pass a token's `emitted` is NOT a substring of the reading — Spanish emits ɡˈato where
+the sentence reads ɣˈato. Containment is the right check only where no such pass ran; after one, what
+survives is the WIDTH. The first measurement reported thousands of bad spans that were all correct.
+
+### ⚠ And the withholding test was VACUOUS, which took two sabotages to notice
+
+`as` changes length on 11 of its 200 rows. A six-row sample found none of them, so the test passed with the
+length guard REMOVED *and* with `collapse-geminates` falsely claiming to be positional. It now scans the
+whole golden and asserts it found cases — a test that cannot fail is the defect this trace exists to expose,
+reproduced inside the trace's own tests for the second time in this issue.
+
+### Where it lands
+
+    TS   811,736 / 818,579 tokens carry an ipaSpan (99.2%)      C#   591,236 / 598,079 (98.9%)
+    spans that do not cover what the token emitted: 0 in both
+    withheld: `as` and `fr-CA` only — the two passes that genuinely change lengths
+
+Both halves are now present: `text.slice(...token.inputSpan)` and `ipa.slice(...token.ipaSpan)` name the
+same token from either end.
+
+### Reviewing Run 16
+
+**Three findings, all fixed in place.**
+
+1. **`Math.min(...t.parts.map(...))` in English.** Spreading an array as arguments throws `RangeError` past
+   the engine's argument limit. ⚠ Honestly: this is DEFENSIVE, not a measured bug — the spread is per token,
+   and a token would need tens of thousands of emitted parts to reach the limit. Folded anyway, because a
+   document-length input is exactly where a trace earns its keep, and verified on one: 20,000 words, 40,000
+   tokens, all mapped.
+2. **The `ipaSpan` docstring said "eight engines rewrite the assembled string" where two lose their spans.**
+   Six of the eight are positional and keep them; the sentence read as though all eight were a problem.
+   Corrected in both engines.
+3. **Nothing else.** The seam checks out: `noteEmit`'s offsets come only from `clauseSink`, `noteAssembled`
+   is inert at depth, and a nested engine's own sink cannot clobber the host's assembled string.

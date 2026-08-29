@@ -20,6 +20,21 @@ public sealed class TraceToken
      * is withheld rather than reported wrong.
      */
     public (int Start, int End)? InputSpan { get; set; }
+
+    /**
+     * `[Start,End)` into the trace's `Ipa` — where this token's contribution ENDED UP (#1150 stage 3).
+     *
+     * ⚠ THIS IS THE HALF THAT CLOSES THE LOOP. `InputSpan` says which characters the reader typed; this says
+     * which characters of the reading they became. Together they are a two-way index between orthography and
+     * IPA, which is what a player needs to highlight a word while its audio plays.
+     *
+     * ⚠ ABSENT MEANS "NOT KNOWN", as everywhere else here. Eight engines rewrite the assembled string after
+     * the clause assembler; six do it one character for one and keep their spans, while `as` collapses a
+     * doubled aspirate and `fr-CA` applies an accent that change LENGTHS — and an offset into the
+     * pre-rewrite string would be a confident wrong answer about the post-rewrite one. See `NoteRewrite`'s
+     * `positional` flag for which claim each pass makes.
+     */
+    public (int Start, int End)? IpaSpan { get; set; }
     /** What the nativiser rewrote it to before the g2p saw it. Null when nothing was rewritten. */
     public string? Nativised { get; set; }
     /** What this token EMITTED — not necessarily a substring of the final reading; see TraceRewrite. */
@@ -50,6 +65,14 @@ public static class Trace
         public TraceResult Result = new();
         public TraceToken? Current;
         public int TokenDepth;
+        /**
+         * Where each token's emissions landed in the ASSEMBLED reading (#1150 stage 3). A null value marks a
+         * token with an emission that could not be placed — withheld whole rather than reported from a
+         * partial union.
+         */
+        public readonly Dictionary<TraceToken, (int Start, int End)?> Spans = new();
+        /** The reading as the clause assembler built it, before any post-assembly rewrite. */
+        public string? Assembled;
     }
 
     [ThreadStatic]
@@ -66,7 +89,7 @@ public static class Trace
         Provenance.Seed(input);
     }
 
-    public static TraceResult Stop()
+    public static TraceResult Stop(string? ipa = null)
     {
         var r = recording?.Result ?? new TraceResult();
         // ⚠ RESOLVED AT STOP, not per token: a token is opened while the normalized string is still being
@@ -78,6 +101,13 @@ public static class Trace
                 var span = Provenance.InputSpan(p, t.Start, t.End);
                 if (span is not null) t.InputSpan = span;
             }
+        // ⚠ THE OUTPUT SPANS ARE ONLY OFFERED IF THE STRING THEY INDEX SURVIVED. The emission offsets are
+        // into the ASSEMBLED reading; a post-assembly pass that is not one-character-for-one invalidates
+        // them, and an offset into the pre-rewrite string is a confident wrong answer about the one the
+        // caller receives.
+        if (ipa is not null && recording is not null && recording.Assembled == ipa)
+            foreach (var t in r.Tokens)
+                if (recording.Spans.TryGetValue(t, out var sp) && sp is not null) t.IpaSpan = sp;
         Provenance.End();
         recording = null;
         return r;
@@ -128,12 +158,19 @@ public static class Trace
     }
 
     /** Record a COMPLETE token — the hook for a two-phase pipeline that cannot bracket its emits. */
-    public static void NoteToken(int start, int end, string surface, IEnumerable<string> emitted, string? nativised = null)
+    /**
+     * ⚠ THE TWO-PHASE ENGINES MUST PASS `ipaSpan` THEMSELVES. They never open a token while its reading is
+     * being made, so `NoteEmit`'s offset never reaches them; what they DO know is which slot of their own
+     * parts list each reading went into, which is the same fact one step earlier.
+     */
+    public static void NoteToken(int start, int end, string surface, IEnumerable<string> emitted,
+        string? nativised = null, (int Start, int End)? ipaSpan = null)
     {
         if (!Active || recording == null || !recording.Result.Traced) return;
         var t = new TraceToken { Start = start, End = end, Surface = surface };
         foreach (var e in emitted) if (e.Length > 0) t.Emitted.Add(e);
         if (nativised != null && nativised != surface) t.Nativised = nativised;
+        if (ipaSpan is not null) recording.Spans[t] = ipaSpan;
         recording.Result.Tokens.Add(t);
     }
 
@@ -145,16 +182,44 @@ public static class Trace
     }
 
     /** Record one emitted reading against the token currently open. */
-    public static void NoteEmit(string ipa)
+    public static void NoteEmit(string ipa, int? at = null)
     {
         if (!Active || recording?.Current == null || ipa.Length == 0) return;
-        recording.Current.Emitted.Add(ipa);
+        var t = recording.Current;
+        t.Emitted.Add(ipa);
+        // ⚠ KEYED ON THE TOKEN OBJECT, not stored on it: `TraceToken` is the public shape, and offsets that
+        // may yet be disbelieved do not belong on it. One emission with no place withholds the token whole.
+        var has = recording.Spans.TryGetValue(t, out var cur);
+        if (at is null) { recording.Spans[t] = null; return; }
+        if (has && cur is null) return;
+        recording.Spans[t] = has && cur is not null
+            ? (Math.Min(cur.Value.Start, at.Value), Math.Max(cur.Value.End, at.Value + ipa.Length))
+            : (at.Value, at.Value + ipa.Length);
+    }
+
+    /**
+     * The reading as the clause assembler built it, before any post-assembly rewrite.
+     * ⚠ RECORDED SO IT CAN BE DISBELIEVED: the emission offsets index THIS string, and `Stop` offers them as
+     * `IpaSpan` only when it is still what the caller receives.
+     */
+    public static void NoteAssembled(string s)
+    {
+        if (!Active || recording == null) return;
+        recording.Assembled = s;
     }
 
     /** Record a whole-string rewrite. A no-op when nothing changed. */
-    public static void NoteRewrite(string stage, string before, string after)
+    public static void NoteRewrite(string stage, string before, string after, bool positional = false)
     {
         if (!Active || recording == null || before == after) return;
         recording.Result.Rewrites.Add(new TraceRewrite { Stage = stage, Before = before, After = after });
+        // ⚠ `positional` IS A CLAIM THE PASS MAKES, AND THE LENGTH IS WHAT VERIFIES IT (#1150 stage 3). It
+        // means "every offset still means the same thing" — a one-for-one substitution such as Spanish's
+        // spirantization (ɡ→ɣ, b→β, d→ð). Without it the default is WITHHOLDING, which is the right default:
+        // `Assembled` stops matching the final reading and `Stop` offers no span at all.
+        // ⚠ THE CLAIM IS NOT FULLY CHECKABLE — equal lengths do not rule out a REORDERING. What rules that
+        // out is that these passes are character substitutions, a property of the functions rather than of
+        // this check; the tests verify the consequence instead.
+        if (positional && before.Length == after.Length && recording.Assembled == before) recording.Assembled = after;
     }
 }
