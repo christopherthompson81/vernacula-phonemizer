@@ -137,16 +137,18 @@ errors of Run 3, both C#-only, both fixed on this side. Nothing to file.
 ## Recount
 
 `csharp/STATUS.md` said 136 of 193 at its 2026-08-28 snapshot; the branch it was written against has since
-gained `sq` and `ab`. The fleet gate before this port: **138 languages / 27,227 rows**; after:
-**139 languages / 27,427 rows, 0 differ, 0 BLOCKED**.
+gained `sq`, `ab` and `an`. Rebased onto `origin/main` (through `an`, #1164) and re-gated: the fleet gate
+before this port is **139 languages / 27,427 rows**; after, **140 languages / 27,627 rows, 0 differ,
+0 BLOCKED**. The rebase touched no shared code (the `an` commit is Aragonese-only plus its two
+registration lines), so the differential was re-run rather than re-derived: unchanged at 0 differ.
 
-## Gates
+## Gates (post-rebase, re-measured)
 
-    csharp tests            2,868 pass (39 in AromanianTests.cs + 1 manifest mapping), 0 fail
+    csharp tests            2,921 pass (39 in AromanianTests.cs + 1 manifest mapping; 53 more from an), 0 fail
     TS tests                test/aromanian.test.ts 14/14 (unchanged)
     parity, rup             200/200 byte-identical, 0 differ, 0 BLOCKED
-    parity, fleet           139 languages, 27,427 rows, 0 differ, 0 BLOCKED
-    differential            1,436 comparisons (718 lines × sync + async), 0 differ, 0 throws
+    parity, fleet           140 languages, 27,627 rows, 0 differ, 0 BLOCKED
+    differential            1,436 comparisons (718 lines × sync + async), 0 differ, 0 throws — re-run post-rebase
     leak sweep              0 of 1,436 outputs carry a raw digit or symbol
     poison                  0 sites (SUBSTRING 0, desync 0)
     provenance              5,550/5,550 tokens mapped (100%)
