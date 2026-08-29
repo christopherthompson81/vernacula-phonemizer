@@ -172,6 +172,7 @@ public static class Bootstrap
             CrimeanTatar.CrimeanTatarPhonemizer.RegisterSelf();
             Estonian.EstonianPhonemizer.RegisterSelf();
             Ewe.EwePhonemizer.RegisterSelf();
+            Chuvash.ChuvashPhonemizer.RegisterSelf();
         }
     }
 }
