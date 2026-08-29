@@ -311,6 +311,39 @@ public static class Normalize
         ("წწ\\.", "წლები"),
     ];
 
+    /** ⚠ The per-table patterns, COMPILED ONCE like every other pattern in this file. `JsRegex.Compile`
+     *  caches by (pattern, flags), so building them inside the loops was correct — but it took the cache's
+     *  lock on every call for every row, and it read as if these were the only dynamic patterns here. */
+    private static readonly (JsRe Re, string Word)[] SCALE_RULES = SCALES
+        .Select(x => (JsRegex.Compile(
+            $"(?<=\\d)\\s?{Boundaries.NOT_LETTER_BEFORE}{x.Abbr}\\.?{DEG}{Boundaries.NOT_LETTER_AFTER}", "gu"),
+            x.Word))
+        .ToArray();
+
+    /** Per currency: the prefixed arm, the "already spelled" lookahead, and the postposed arm. */
+    private static readonly (JsRe Pre, JsRe Already, JsRe Post, string Word)[] CURRENCY_RULES = CURRENCY
+        .Select(c =>
+        {
+            var sign = c.Sign == "$" ? "\\$" : c.Sign;
+            var stem = MAG_STRIP.Replace(c.Word, ""); // დოლარი → დოლარ, ევრო → ევრო: any inflected form
+            return (
+                JsRegex.Compile(
+                    $"{sign}\\s?(\\d[\\d.,]*)((?:\\s+(?:{MAG_WORD}){GEO}*)?)" +
+                    $"(?:\\s*-?({WRITTEN_ALT}){Boundaries.NOT_LETTER_AFTER})?", "gu"),
+                JsRegex.Compile($"^\\s*{stem}", "u"),
+                JsRegex.Compile($"(\\d[\\d.,]*)\\s{sign}(?!\\d)", "gu"),
+                c.Word);
+        })
+        .ToArray();
+
+    /** Per abbreviation: the before-a-word arm and the clause-final arm. */
+    private static readonly (JsRe Mid, JsRe End, string Expansion)[] ABBREV_RULES = ABBREV
+        .Select(a => (
+            JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}{a.Pattern}\\s*(?=[\\p{{L}}\\d])", "gu"),
+            JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}{a.Pattern}(?=\\s*(?:[.,;:!?»)\\]]|$))", "gu"),
+            a.Expansion))
+        .ToArray();
+
     private static string? Opt(Match m, int g) => m.Groups[g].Success ? m.Groups[g].Value : null;
 
     /** Normalize one Georgian input string. Pure text→text; every word emitted is phonemized by the g2p
@@ -427,41 +460,30 @@ public static class Normalize
         s = Rewrite(s, FIGURE_UNIT, m =>
             Attach($"{FigureToWords(m.Groups[1].Value)} {UNIT_WORD[m.Groups[2].Value]}", Opt(m, 3)));
         //    7e) THE MAGNITUDE ABBREVIATIONS, with their own dot consumed.
-        foreach (var (abbr, word) in SCALES)
-        {
-            var re = JsRegex.Compile(
-                $"(?<=\\d)\\s?{Boundaries.NOT_LETTER_BEFORE}{abbr}\\.?{DEG}{Boundaries.NOT_LETTER_AFTER}", "gu");
+        foreach (var (re, word) in SCALE_RULES)
             s = Rewrite(s, re, m => " " + Attach(word, Opt(m, 1)));
-        }
 
         // 8) CURRENCY, postposed after the magnitude in the NOMINATIVE — the frame the attesting sentence uses.
-        foreach (var (sign, word) in CURRENCY)
+        foreach (var (pre, already, post, word) in CURRENCY_RULES)
         {
-            var S = sign == "$" ? "\\$" : sign;
-            var stem = MAG_STRIP.Replace(word, ""); // დოლარი → დოლარ, ევრო → ევრო: matches any inflected form
-            var re = JsRegex.Compile(
-                $"{S}\\s?(\\d[\\d.,]*)((?:\\s+(?:{MAG_WORD}){GEO}*)?)" +
-                $"(?:\\s*-?({WRITTEN_ALT}){Boundaries.NOT_LETTER_AFTER})?", "gu");
-            var already = JsRegex.Compile($"^\\s*{stem}", "u");
             var frozen = s;
-            s = Rewrite(s, re, m =>
+            s = Rewrite(s, pre, m =>
             {
                 var head = $"{FigureToWords(m.Groups[1].Value)}{m.Groups[2].Value}";
+                // ⚠ NOT SAID TWICE (trap 12): if the writer already spelled the currency noun after the
+                // figure, the sign only supplies what is there — `$5 მილიარდი დოლარის` keeps one დოლარი.
                 var after = frozen[(m.Index + m.Length)..];
                 if (already.IsMatch(after)) return head;
                 return Attach($"{head} {word}", Opt(m, 3));
             });
-            var post = JsRegex.Compile($"(\\d[\\d.,]*)\\s{S}(?!\\d)", "gu");
             s = Rewrite(s, post, m => $"{FigureToWords(m.Groups[1].Value)} {word}");
         }
 
         // 9) ERA MARKERS AND DOTTED ABBREVIATIONS. Multi-dot before single-dot, each in two arms.
-        foreach (var (pat, expansion) in ABBREV)
+        foreach (var (mid, end, expansion) in ABBREV_RULES)
         {
-            s = Rewrite(s, JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}{pat}\\s*(?=[\\p{{L}}\\d])", "gu"),
-                expansion + " ");
-            s = Rewrite(s, JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}{pat}(?=\\s*(?:[.,;:!?»)\\]]|$))", "gu"),
-                expansion + ".");
+            s = Rewrite(s, mid, expansion + " ");
+            s = Rewrite(s, end, expansion + ".");
         }
 
         // 10) FRACTIONS.

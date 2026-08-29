@@ -115,6 +115,42 @@ Three languages move in that count, not one: `ka` itself, `bal` crossing from th
 byte-identical, and `bpy` from the previous port. ⚠ **The fleet now has no blocked rows at all** — every
 gated row in every language is compared, which is the first time that has been true in this batch.
 
+## Run 8 — 2026-08-30 ~01:20 — review of #1171: the ending × stem-kind matrix
+
+The port's generator fed the stem-alternation table NUMERALS, and numerals only end in -ი or -ა. But
+`Attach` is called on unit nouns and currency nouns too, which is where the -ე and -ო stems live (ევრო is
+o-stem; an ordinal ends in -ე), and the table branches on exactly that letter. So the review's haystack is
+the MATRIX rather than more of the same:
+
+  * all 18 WRITTEN endings × 14 head types — i- and a-stem numerals (100, 8, 9, 20, 1000), the unit nouns
+    (მ, კმ, წმ, სთ), the o-stem currency (€), the percent and degree words, and the attributive
+    `კმ²` which must truncate its adjective before the ending;
+  * MTAVRULI reaching the NORMALIZER, which is a distinct question from the g2p's fold: the normalizer
+    keys on Mkhedruli literals (`მე-`, `საათ`, `ძვ. წ.`) and runs BEFORE the g2p lowercases, so an
+    all-caps heading takes a different path through it. Both engines must agree on that path;
+  * combining marks, since the TOKEN class is `[\p{Script=Georgian}\p{M}]+`;
+  * each guard's boundary on both sides — 23:59/24:00/25:00, 1/1 vs 1/2 vs 100/101, 9999-ე vs 10000-ე,
+    1 საუკუნე vs 21 vs 22, `-0`/`+0`/`0=0`;
+  * and the refusals the file names, with their adversarial neighbours: the year ranges, the ISBN, the
+    dimension cross, `AT&T`, the European-grouped `$2.500`, the formula `E = mc²`.
+
+    329 inputs, 0 differ, 0 throws
+
+## Run 9 — 2026-08-30 ~01:35 — one thing fixed: the per-table patterns were compiled inside the loops
+
+Not a defect — `JsRegex.Compile` caches by (pattern, flags), so the SCALES, CURRENCY and ABBREV loops were
+correct. But they took the cache's lock on every call for every row, and they read as though these were
+the only dynamic patterns in a file that hoists every other one to a static field.
+
+Hoisted into three compiled tables (`SCALE_RULES`, `CURRENCY_RULES`, `ABBREV_RULES`), which also gave the
+currency arm's "not said twice" guard somewhere to be commented. 16 of the per-call compiles were the
+ABBREV pair alone.
+
+    dotnet test --filter Georgian    92/92
+    generated 10,000 rows            0 differ
+    review probe 329 rows            0 differ
+    mined corpus 380 rows            0 differ
+
 ## Read for correctness — filed, not fixed
 
 - **`JsRe` has no `Split`**, so a TS `String.split(regex)` has no direct mirror. Here the class is two ASCII
