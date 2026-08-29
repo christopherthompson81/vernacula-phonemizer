@@ -169,6 +169,7 @@ public static class Bootstrap
             Georgian.GeorgianPhonemizer.RegisterSelf();
             Belarusian.BelarusianPhonemizer.RegisterSelf();
             Cherokee.CherokeePhonemizer.RegisterSelf();
+            CrimeanTatar.CrimeanTatarPhonemizer.RegisterSelf();
         }
     }
 }
