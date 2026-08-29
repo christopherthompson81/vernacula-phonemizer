@@ -159,6 +159,7 @@ public static class Bootstrap
             Luganda.LugandaPhonemizer.RegisterSelf();
             Kirundi.KirundiPhonemizer.RegisterSelf();
             Abkhaz.AbkhazPhonemizer.RegisterSelf();
+            Albanian.AlbanianPhonemizer.RegisterSelf();
         }
     }
 }
