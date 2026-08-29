@@ -66,6 +66,30 @@ public class BishnupriyaTests
         Assert.Equal("bʱalɔbaʃa", Languages.Bengali.Bengali.PhonemizeWord("ভালবাসা")); // Bengali's lexicon
     }
 
+    /**
+     * ⚠ THE NUMERAL TABLE IS THE THIRD PLACE A SILENT BINDING WOULD HIDE, and it is bound from the PASSED
+     * def rather than the Bengali one — which is not obvious, because the shared engine reads its SYMBOL
+     * TIER from the Bengali manifest regardless of which language is being built. The two numeral tables
+     * agree on units, teens, tens and the decimal word, and differ in exactly two structural ways:
+     *
+     *   · `magnitudes.hundred` — bpy একশো against bn শত;
+     *   · `compound` — Bengali carries the full irregular 21–99 spellings (একুশ, নিরানব্বই …) and
+     *     Bishnupriya carries NONE, so bpy COMPOSES them from tens + unit.
+     *
+     * Both are silent if the def were read from the wrong place: the output stays well-formed Eastern
+     * Indic, it is simply Bengali's numerals. Asserted against both engines so the difference is legible.
+     */
+    [Theory]
+    [InlineData("100", "ek ekʃo", "æk ʃɔt̪")]        // magnitudes.hundred: একশো vs শত
+    [InlineData("200", "d̪ui ekʃo", "d̪ui ʃɔt̪")]
+    [InlineData("21", "ek biʃ", "ekuʃ")]              // no `compound` table → COMPOSED, not irregular
+    [InlineData("99", "nɔj nɔbːɔi", "niɾanɔbːoi")]
+    public void TheNumeralTableIsBoundFromThisLanguagesDef(string input, string bpy, string bengali)
+    {
+        Assert.Equal(bpy, Registry.GetPhonemizer("bpy").Text(input).Trim());
+        Assert.Equal(bengali, Registry.GetPhonemizer("bn").Text(input).Trim());
+    }
+
     [Fact]
     public void RegistryWiring() => Assert.Equal("aʈ", Phonemizer.Phonemize("আট", "bpy").Trim());
 }

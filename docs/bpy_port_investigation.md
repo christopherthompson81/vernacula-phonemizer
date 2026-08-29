@@ -122,6 +122,41 @@ rigorous, and this is the note that says so.
 `BishnupriyaManifestIsFullyMapped`, which reuses `BengaliDef` — the same shape Assamese's entry uses,
 since both languages bind the Bengali engine's def type.
 
+## Run 8 — 2026-08-29 ~22:45 — review of #1170: the THIRD place a silent binding could hide
+
+The port's own risk analysis named two manifest flags. The review's question is whether two is the whole
+list, since "the fields that could bind wrong" is an inventory and inventories are where the `ab`, `rup`
+and `bal` defects lived.
+
+It is not. The **numeral table** is a third, and it is not obvious that it is safe: the shared engine
+reads its SYMBOL TIER from the *Bengali* manifest no matter which language is being built (the TS does the
+same — `MANIFEST.symbolTier` is a module-level const in `bengali.ts`), so "this field comes from the
+passed def" is a per-field fact rather than a general rule.
+
+Compared the two tables directly. They agree on units, teens, tens and the decimal word, and differ in
+exactly two structural ways:
+
+    magnitudes.hundred    bpy একশো          bn শত
+    compound              bpy (absent)      bn the full irregular 21–99 series (একুশ … নিরানব্বই)
+
+So a mis-binding is discriminable, and the 10,000-row differential — which carries numerals throughout —
+already covers it. Confirmed by reading the outputs rather than inferring:
+
+    100   bpy ek ekʃo        bn æk ʃɔt̪        magnitudes.hundred
+    21    bpy ek biʃ         bn ekuʃ           bpy COMPOSES; bn uses the irregular
+    99    bpy nɔj nɔbːɔi     bn niɾanɔbːoi
+    1500  bpy ek ɦad͡ʒaɾ pãt͡ʃ ekʃo            (both effects in one figure)
+
+⚠ AND A FOURTH THING FELL OUT OF THE SAME TABLE: `এক` reads `ek` in bpy and `æk` in bn — which is
+`skipLexicon` again, showing up inside *every numeral containing a 1*. The flag is therefore exercised far
+more widely than the single `ভালবাসা` case that was written for it.
+
+Pinned as `TheNumeralTableIsBoundFromThisLanguagesDef` (4 rows, asserting both engines), and the new
+expectations re-run against the TypeScript engines directly:
+
+    ALL PAIRED EXPECTATIONS AGREE WITH THE TS ENGINES
+    dotnet test --filter Bishnupriya   20/20
+
 ## Read for correctness — filed, not fixed
 
 - **The differential harness is the reusable finding, not anything about Bishnupriya.** Any language whose
