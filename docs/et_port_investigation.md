@@ -91,6 +91,47 @@ boundaries.
     typescript typecheck         clean
     test/estonian.test.ts        33/33
 
+## Run 7 — 2026-08-30 ~09:10 — review of #1176: the ordinal, EXHAUSTIVELY
+
+The ordinal is what this language is, and the port's haystack only sampled it. It is small enough to walk
+completely, so the review walked it: **every n in 1…9999 against every ending the case table can produce**
+(the nominative sentinel plus the ten oblique endings), dumped from the TS and compared row by row.
+
+    109,989 (n, ending) pairs
+    THE ORDINAL MATCHES THE TS ON ALL 109989 PAIRS
+
+That covers the unit/teen/ten/hundred/thousand branches, the `compose` recursion, the nominative-vs-stem
+split, and the plural refusal at …01 and …02 — which is the one branch that returns `null` and therefore
+leaves the figure alone.
+
+## Run 8 — 2026-08-30 ~09:25 — the two places that can hide
+
+  * **THE `caseOf` STEM TABLE.** `aasta` is a PREFIX of `aastatuhande`, and the lookup is a first-match-wins
+    `startsWith` loop — so the table's ORDER could matter. Swept the whole matrix: all 19 stems × 13
+    endings, the 17 nominative nouns, and the near-misses that must fall through (`aastax`, `aastalx`,
+    `aast`, `aastatuhandex`). ⚠ The order turns out NOT to be load-bearing, because a stem that matches
+    with a non-ending remainder falls THROUGH to the next stem rather than returning — but that is a fact
+    about the loop, and it was worth establishing by sweep rather than by reading.
+  * **THE 45-CHARACTER CLAUSE WINDOW.** `saidNear` looks 45 characters either way and CUTS at a clause
+    boundary, so the interesting inputs are a `kraad…` word sitting just inside it, just outside it, and
+    across a full stop. Probed at ten distances (0, 10, 30, 40, 43, 44, 45, 46, 50, 60) on both sides, with
+    and without an intervening stop.
+  * plus astral input and the three doubling outcomes at the word edges.
+
+    608 inputs, 0 differ, 0 throws
+
+## Run 9 — 2026-08-30 ~09:35 — one comment, no behaviour change
+
+`frozen` is reassigned between the two degree arms, and the reason is not obvious: the TS callback's fourth
+argument is JS `String.replace`'s "string being searched", which is `t` **as it stands at that call** — so
+the bare-° arm looks into the OUTPUT of the scale arm, not into the original. The C# local function closes
+over the variable, so reassigning it before the second `Rewrite` is what reproduces that. Reading both arms
+against one snapshot would be a different function on any input where the first arm inserted or removed a
+`kraadi`. Said out loud at the site.
+
+    dotnet test --filter Estonian    93/93
+    generated 10,000 · review probe 608 · mined 422    all 0 differ
+
 ## Read for correctness — filed, not fixed
 
 - **`JsRe` has no `Search`.** See run 3. A four-line helper here; a shared one would be better if a second

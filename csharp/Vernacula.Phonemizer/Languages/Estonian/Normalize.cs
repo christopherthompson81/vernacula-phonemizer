@@ -300,6 +300,13 @@ public static class Normalize
             $"{m.Groups[1].Value} {DECIMAL_WORD} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         // Degrees — ⚠ NOT SAID TWICE: if `kraad…` is already in the clause window, only the figure is left.
+        //
+        // ⚠ AND `frozen` IS REASSIGNED BETWEEN THE TWO ARMS ON PURPOSE. The TS callback's fourth argument
+        // is JS `String.replace`'s "the string being searched", which is `t` AS IT STANDS AT THAT CALL —
+        // so the bare-° arm looks into the output of the scale arm, not into the original. `Degree` closes
+        // over the VARIABLE, so reassigning it before the second Rewrite is what reproduces that. Reading
+        // both arms against the same snapshot would be a different function on any input where the first
+        // arm inserted or removed a `kraadi`.
         var frozen = t;
         string Degree(Match m) =>
             SaidNear(frozen, m.Index, m.Index + m.Length, "kraad")
