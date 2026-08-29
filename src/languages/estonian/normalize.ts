@@ -326,7 +326,7 @@ const PLURAL_ENDINGS: ReadonlySet<string> = new Set(["te", "tel", "test", "il"])
  * 1000/1913/1924/2000/2011 is pinned as a ladder, because trap 56's worst instance was a silent 10× error at a
  * branch boundary that produced perfectly well-formed words.
  */
-export const NOMINATIVE = " nom"; // a sentinel that can never be a case ending
+export const NOMINATIVE = "\0nom"; // a sentinel that can never be a case ending
 
 export function ordinal(n: number, ending: string): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n > 9999) return undefined;
