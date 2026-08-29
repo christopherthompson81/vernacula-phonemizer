@@ -609,6 +609,14 @@ public class ManifestMappingTests
             Core.LoadManifest.Load<Languages.Bengali.BengaliDef>("languages/assamese", "assamese.jsonc"),
             "language", "name", "script", "provenance", "convention");
 
+    // Bishnupriya reuses the Bengali engine and its def type; its manifest carries the one divergence
+    // (heightHarmony:false — no ɔ→o raising) plus skipLexicon, which bengali.jsonc leaves unset.
+    [Fact]
+    public void BishnupriyaManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/bishnupriya", "bishnupriya.jsonc",
+            Core.LoadManifest.Load<Languages.Bengali.BengaliDef>("languages/bishnupriya", "bishnupriya.jsonc"),
+            "language", "name", "script", "provenance", "convention");
+
     [Fact]
     public void PortugueseManifestIsFullyMapped() =>
         AssertFullyMapped("languages/portuguese", "portuguese.jsonc", Languages.Portuguese.Manifest.MANIFEST,
