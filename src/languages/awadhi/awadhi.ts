@@ -84,7 +84,7 @@ function engine(foreign?: ForeignPhonemizer): ReturnType<typeof makeNativeHindi>
         text: (i) => {
             const pre = base.text(i);
             const out = awadhify(pre);
-            noteRewrite("awadhi-flap", pre, out);
+            noteRewrite("awadhi-flap", pre, out, true);
             return out;
         },
     };

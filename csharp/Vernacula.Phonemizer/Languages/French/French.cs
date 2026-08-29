@@ -217,7 +217,7 @@ public static class FrenchPhonemizer
             // ⚠ RECORDED AT FLUSH, NOT AT PUSH (#1150): AccentFinal MUTATES the group in place before it is
             // joined, so a reading captured at push is not the reading that ships.
             var groupSrc = new List<Src?>();
-            var traced = new Dictionary<string, (Src Src, List<string> Emitted)>();
+            var traced = new Dictionary<string, (Src Src, List<string> Emitted, (int Start, int End) At)>();
             var @out = "";
             var carry = ""; // liaison consonant to prepend to the next word (its new onset)
             void Flush(string? pause)
@@ -225,13 +225,21 @@ public static class FrenchPhonemizer
                 if (group.Count > 0)
                 {
                     AccentFinal(group);
+                    // ⚠ #1150 STAGE 3: OFFSETS AFTER `AccentFinal`, which REWRITES the group in place —
+                    // computing them before would place every piece by its pre-accent length. The base is
+                    // where this group lands in `out`, and the join adds one separator per preceding piece.
+                    var off = @out.Length + (@out != "" ? 1 : 0);
                     for (var gi = 0; gi < group.Count; gi++)
                     {
                         var sc = gi < groupSrc.Count ? groupSrc[gi] : null;
+                        var at = (Start: off, End: off + group[gi].Length);
+                        off += group[gi].Length + 1;
                         if (sc is null) continue;
                         var key = $"{sc.Start}:{sc.End}";
-                        if (traced.TryGetValue(key, out var b)) b.Emitted.Add(group[gi]);
-                        else traced[key] = (sc, new List<string> { group[gi] });
+                        if (traced.TryGetValue(key, out var b))
+                            traced[key] = (b.Src, b.Emitted, (Math.Min(b.At.Start, at.Start), Math.Max(b.At.End, at.End)));
+                        else traced[key] = (sc, new List<string>(), at);
+                        traced[key].Emitted.Add(group[gi]);
                     }
                     @out += (@out != "" ? " " : "") + string.Join(" ", group);
                     group = new List<string>();
@@ -272,8 +280,9 @@ public static class FrenchPhonemizer
                 if (ipa != "") { group.Add(ipa); groupSrc.Add(it.Source); }
             }
             Flush(null);
-            foreach (var (src2, emitted) in traced.Values)
-                Core.Trace.NoteToken(src2.Start, src2.End, src2.Surface, emitted);
+            foreach (var (src2, emitted, at) in traced.Values)
+                Core.Trace.NoteToken(src2.Start, src2.End, src2.Surface, emitted, null, at);
+            Core.Trace.NoteAssembled(@out); // declared so it can be disbelieved — see English and ClauseSink
             return @out;
         }
     }

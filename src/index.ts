@@ -51,6 +51,12 @@ export interface PhonemeTrace {
      * Whole-string rewrites, in the order they ran. ⚠ THIS IS WHY `TraceToken.emitted` MAY NOT BE A SUBSTRING
      * OF `ipa`: a token reports what it contributed, and a rewrite here may then have changed it. Spanish
      * spirantizes across word boundaries; Assamese collapses a doubled aspirate. Empty when nothing moved.
+     *
+     * ⚠ AND IT IS ALSO WHY `TraceToken.ipaSpan` CAN BE ABSENT (#1150 stage 3). A rewrite that is one
+     * character for one leaves every offset meaning what it meant, so the spans survive it; one that changes
+     * lengths does not, and the span is withheld rather than pointed at a string that no longer exists.
+     * Measured over the golden corpus: six of the eight are positional and keep their spans, `as` and `fr-CA`
+     * are not and lose them.
      */
     rewrites: TraceRewrite[];
 }
@@ -78,7 +84,7 @@ export function phonemizeTrace(text: string, lang: string): PhonemeTrace {
     startTrace(text);
     try {
         const ipa = phonemize(text, lang);
-        const { normalized, tokens, rewrites, traced } = stopTrace();
+        const { normalized, tokens, rewrites, traced } = stopTrace(ipa);
         return { ipa, normalized, traced, tokens, rewrites };
     } finally {
         // `stopTrace` already ran on the success path; this clears the recorder when the engine THREW, so a

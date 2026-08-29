@@ -37,14 +37,27 @@ public static class Clauses
         public void Emit(string ipa)
         {
             if (ipa == "") return;
-            Trace.NoteEmit(ipa);
-            if (@out == "") @out = ipa;
+            // ⚠ #1150 STAGE 3: THE OFFSET IS COMPUTED BEFORE THE APPEND, and the separator is part of the
+            // arithmetic rather than an afterthought — `at` is where THIS emission starts in the assembled
+            // reading, which is the only thing that makes a token's contribution locatable in the output.
+            int at;
+            if (@out == "")
+            {
+                at = 0;
+                @out = ipa;
+            }
             else if (pending != null)
             {
+                at = @out.Length + pending.Length + 2; // " " + mark + " "
                 @out += $" {pending} {ipa}";
                 pending = null;
             }
-            else @out += $" {ipa}";
+            else
+            {
+                at = @out.Length + 1; // " "
+                @out += $" {ipa}";
+            }
+            Trace.NoteEmit(ipa, at);
         }
 
         public void Pause(string mark)
@@ -55,6 +68,10 @@ public static class Clauses
         public string Finish()
         {
             if (pending != null && @out != "") @out += $" {pending}";
+            // ⚠ THE ASSEMBLED STRING IS NOT NECESSARILY THE READING. Eight engines rewrite it afterwards; the
+            // recorder compares this against the final IPA and withholds the output spans when they differ,
+            // rather than reporting offsets into a string that no longer exists.
+            Trace.NoteAssembled(@out);
             return @out;
         }
     }

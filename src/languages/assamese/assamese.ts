@@ -37,6 +37,7 @@ function wrap(base: ReturnType<typeof makeNativeBengali>): ReturnType<typeof mak
         text: (i) => {
             const pre = base.text(i);
             const out = collapseGeminates(pre);
+            // ⚠ NOT positional (#1150): it deletes, so the trace withholds its output spans rather than shifting them.
             noteRewrite("collapse-geminates", pre, out);
             return out;
         },

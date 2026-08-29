@@ -14,7 +14,7 @@
  *   }
  */
 import { getDefaultForeign, readForeignRun } from "./foreign.ts";
-import { beginToken, endToken, enterEngine, exitEngine, noteEmit } from "./trace.ts";
+import { beginToken, endToken, enterEngine, exitEngine, noteAssembled, noteEmit } from "./trace.ts";
 
 export interface ClauseSink {
     /** Append a phonemized token, space-joined; flushes any pending pause before it. Empty strings are ignored. */
@@ -34,12 +34,22 @@ export function clauseSink(): { sink: ClauseSink; finish: () => string } {
     const sink: ClauseSink = {
         emit(ipa) {
             if (ipa === "") return;
-            noteEmit(ipa);
-            if (out === "") out = ipa;
-            else if (pending !== null) {
+            // ⚠ #1150 STAGE 3: THE OFFSET IS COMPUTED BEFORE THE APPEND, and the separator is part of the
+            // arithmetic rather than an afterthought — `at` is where THIS emission starts in the assembled
+            // reading, which is the only thing that makes a token's contribution locatable in the output.
+            let at: number;
+            if (out === "") {
+                at = 0;
+                out = ipa;
+            } else if (pending !== null) {
+                at = out.length + pending.length + 2; // " " + mark + " "
                 out += ` ${pending} ${ipa}`;
                 pending = null;
-            } else out += ` ${ipa}`;
+            } else {
+                at = out.length + 1; // " "
+                out += ` ${ipa}`;
+            }
+            noteEmit(ipa, at);
         },
         pause(mark) {
             if (out !== "") pending = mark;
@@ -49,6 +59,11 @@ export function clauseSink(): { sink: ClauseSink; finish: () => string } {
         sink,
         finish() {
             if (pending !== null && out !== "") out += ` ${pending}`;
+            // ⚠ THE ASSEMBLED STRING IS NOT NECESSARILY THE READING. Eight engines rewrite it afterwards
+            // (Spanish spirantizes across word boundaries, fr-CA applies its accent). The recorder compares
+            // this against the final IPA and withholds the output spans when they differ, rather than
+            // reporting offsets into a string that no longer exists.
+            noteAssembled(out);
             return out;
         },
     };

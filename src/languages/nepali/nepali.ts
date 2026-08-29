@@ -96,7 +96,7 @@ function engine(foreign?: ForeignPhonemizer): ReturnType<typeof makeNativeHindi>
             const pre = base.text(i);
             const out = nepaliVowel(pre).split(SENTINEL).join("ə");
             // ⚠ A whole-string post-pass, so it is reported to the trace (#1150).
-            noteRewrite("nepali-inherent-vowel", pre, out);
+            noteRewrite("nepali-inherent-vowel", pre, out, true);
             return out;
         },
     };

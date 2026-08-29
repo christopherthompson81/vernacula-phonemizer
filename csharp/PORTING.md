@@ -137,6 +137,21 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
   and comparing the two engines' per-language rows is how a gap that belongs to only ONE of them shows
   up at all (`mai`/`awa`/`mag` read ~40-60% in C# while the TS has them at 100%).
 
+## ⚠ The trace's two halves — `InputSpan` and `IpaSpan`
+- A token carries **both** ends of the index: `InputSpan` names the characters the reader typed, `IpaSpan`
+  names the characters of the reading they became. Anything that assembles a reading must therefore report
+  WHERE each emission landed, not just what it was — `ClauseSink.Emit` computes the offset before appending,
+  and the two hand-rolled engines (English, French) pass it to `NoteToken` themselves because they never
+  have a token open while its reading is made.
+- ⚠ **A post-assembly pass invalidates the output spans unless it is one character for one.** `NoteRewrite`
+  takes a `positional` flag: it is a CLAIM the pass makes, verified as far as a length check can verify it,
+  and the default is withholding. Six of the eight passes are positional (spirantization, the flap, the
+  es-419 accent); `as` and `fr-CA` change lengths and correctly lose their spans. Measure with
+  `dotnet run --project csharp/tools/parity -- --ipaspans`, whose twin is `tools/ipa-span-coverage.mts`.
+- ⚠ **The check for a reported span differs either side of such a pass.** With none, the token's `Emitted`
+  IS a substring of the reading. After a positional one it is not — Spanish emits ɡˈato where the sentence
+  reads ɣˈato — and what survives is the WIDTH. Reading that wrong looks like 5,754 bad spans that are fine.
+
 ## Ordering & numbers
 - `Array.prototype.sort` default is LEXICOGRAPHIC (string) — port as `OrdinalIgnoreCase`-free
   `string.CompareOrdinal`, not the .NET culture default. `sort((a,b)=>a-b)` → numeric.

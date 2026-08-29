@@ -33,7 +33,8 @@ public static class Spanish419
         {
             var pre = inner.Text(input);
             var o = ToLatinAmerican(pre);
-            Core.Trace.NoteRewrite("accent:es-419", pre, o);
+            Core.Trace.// ⚠ POSITIONAL (#1150 stage 3): one character for one, so the output spans survive it.
+            NoteRewrite("accent:es-419", pre, o, true);
             return o;
         }
     }

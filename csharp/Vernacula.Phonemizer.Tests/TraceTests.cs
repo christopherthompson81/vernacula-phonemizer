@@ -265,6 +265,66 @@ public class TraceTests
     }
 
     /**
+     * #1150 STAGE 3 — the reading side. `InputSpan` names the characters the reader typed; `IpaSpan` names
+     * the characters of the reading they became. Together they are a two-way index between orthography and
+     * IPA, which is what a player needs to highlight a word while its audio plays.
+     */
+    [Fact]
+    public void ATokensIpaSpanSlicesTheReadingToThatTokensOwnContribution()
+    {
+        const string text = "doctor Smith paid 1,250 dollars.";
+        var t = Phonemizer.PhonemizeTrace(text, "en");
+        var smith = t.Tokens.First(k => k.Surface == "Smith");
+        Assert.NotNull(smith.IpaSpan);
+        Assert.Equal(string.Join(" ", smith.Emitted), t.Ipa[smith.IpaSpan!.Value.Start..smith.IpaSpan.Value.End]);
+        // …and the round trip: reading → token → the characters the reader typed
+        Assert.Equal("Smith", text[smith.InputSpan!.Value.Start..smith.InputSpan.Value.End]);
+    }
+
+    /**
+     * ⚠ A NUMERAL BECOMES SEVERAL WORDS, and the span has to cover all of them. A span that covered only the
+     * first would be worse than none, because it would look right.
+     */
+    [Fact]
+    public void OneTokenThatEmitsSeveralReadingsSpansAllOfThem()
+    {
+        const string text = "doctor Smith paid 1,250 dollars.";
+        var t = Phonemizer.PhonemizeTrace(text, "en");
+        var num = t.Tokens.First(k => k.Emitted.Count > 1);
+        Assert.NotNull(num.IpaSpan);
+        Assert.Equal(string.Join(" ", num.Emitted), t.Ipa[num.IpaSpan!.Value.Start..num.IpaSpan.Value.End]);
+    }
+
+    /**
+     * ⚠ ABSENT MEANS NOT KNOWN, HERE TOO — and the COUNT is asserted so the test cannot pass vacuously.
+     * `as` changes length on 11 of its 200 golden rows; the TypeScript's first version of this test sampled
+     * six rows, found none of them, and passed with the guard removed and a false positional claim in place.
+     */
+    [Theory]
+    [InlineData("as")]
+    [InlineData("fr-CA")]
+    public void ALengthChangingPostAssemblyPassWithholdsTheOutputSpans(string lang)
+    {
+        // the same upward walk the other suites use, so the test does not depend on the runner's cwd
+        var dir = AppContext.BaseDirectory;
+        while (dir is not null && !Directory.Exists(Path.Combine(dir, "goldens"))) dir = Path.GetDirectoryName(dir);
+        Assert.NotNull(dir);
+        var goldens = Path.Combine(dir!, "goldens");
+        var found = 0;
+        foreach (var line in File.ReadLines(Path.Combine(goldens, $"{lang}.tsv")))
+        {
+            var text = line.Split('\t')[0];
+            if (text.Length == 0) continue;
+            PhonemeTrace t;
+            try { t = Phonemizer.PhonemizeTrace(text, lang); } catch { continue; }
+            if (!t.Rewrites.Any(r => r.Stage != "normalize" && r.Before.Length != r.After.Length)) continue;
+            found++;
+            Assert.All(t.Tokens, k => Assert.Null(k.IpaSpan));
+        }
+        Assert.True(found > 0, $"{lang}: no length-changing post-assembly rewrite in the golden — the test proves nothing");
+    }
+
+    /**
      * #1150 — `Rebuilt`, the seam's third primitive. A pass that WALKS the input and constructs a new string
      * is invisible to `Rewrite`: `km` inserts U+200B, `ja` inserts bunsetsu spaces, `cmn` rewrites the
      * utterance as a code-point list, and `FoldNativeDigits` walks runes because a .NET pattern cannot see

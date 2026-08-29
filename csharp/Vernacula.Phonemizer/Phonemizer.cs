@@ -78,7 +78,7 @@ public static class Phonemizer
         try
         {
             var ipa = Phonemize(text, lang);
-            var r = Core.Trace.Stop();
+            var r = Core.Trace.Stop(ipa);
             return new PhonemeTrace { Ipa = ipa, Normalized = r.Normalized, Traced = r.Traced, Tokens = r.Tokens, Rewrites = r.Rewrites };
         }
         finally

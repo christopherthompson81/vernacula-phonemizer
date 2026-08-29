@@ -86,6 +86,53 @@ if (args.Contains("--poison"))
  * engines diverge on one language while the totals agree — `mai`, `awa` and `mag` read ~40-60% here
  * while the TypeScript has them at 100%.
  */
+/*
+ * `--ipaspans`: per-language #1150 stage-3 coverage — the OUTPUT half, and the twin of
+ * `tools/ipa-span-coverage.mts`.
+ *
+ * ⚠ THE CHECK DEPENDS ON WHETHER A POST-ASSEMBLY PASS RAN. With none, a token's `Emitted` IS a substring of
+ * the reading, so containment is the strong check. After a POSITIONAL pass it is not — Spanish emits ɡˈato
+ * where the sentence reads ɣˈato — and what survives is the WIDTH.
+ */
+if (args.Contains("--ipaspans"))
+{
+    var rows = new List<(string Lang, int Tok, int Mapped, int Wrong)>();
+    foreach (var f in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(x => x, StringComparer.Ordinal))
+    {
+        var lang = Path.GetFileNameWithoutExtension(f);
+        if (only.Count > 0 && !only.Contains(lang)) continue;
+        int tok = 0, mapped = 0, wrong = 0;
+        foreach (var line in File.ReadLines(f))
+        {
+            var text = line.Split('\t')[0];
+            if (text.Length == 0) continue;
+            PhonemeTrace t;
+            try { t = Phonemizer.PhonemizeTrace(text, lang); } catch { continue; }
+            var rewritten = t.Rewrites.Any(x => x.Stage != "normalize");
+            foreach (var k in t.Tokens)
+            {
+                if (k.Emitted.Count == 0) continue;
+                tok++;
+                if (k.IpaSpan is null) continue;
+                mapped++;
+                if (k.IpaSpan.Value.End > t.Ipa.Length || k.IpaSpan.Value.Start < 0) { wrong++; continue; }
+                var slice = t.Ipa[k.IpaSpan.Value.Start..k.IpaSpan.Value.End];
+                var want = k.Emitted.Sum(e => e.Length) + k.Emitted.Count - 1;
+                if (rewritten ? slice.Length != want : !k.Emitted.All(e => slice.Contains(e, StringComparison.Ordinal))) wrong++;
+            }
+        }
+        if (tok > 0) rows.Add((lang, tok, mapped, wrong));
+    }
+    var tt = rows.Sum(r => r.Tok);
+    var tm = rows.Sum(r => r.Mapped);
+    Console.WriteLine($"{rows.Count} languages · tokens with IpaSpan {tm}/{tt} ({100.0 * tm / tt:F1}%)");
+    Console.WriteLine($"⚠ spans that do not cover what the token emitted: {rows.Sum(r => r.Wrong)}\n");
+    Console.WriteLine("lost   %mapped  wrong  lang");
+    foreach (var r in rows.Where(x => x.Mapped < x.Tok || x.Wrong > 0).OrderByDescending(x => x.Tok - x.Mapped))
+        Console.WriteLine($"{r.Tok - r.Mapped,5}  {100.0 * r.Mapped / r.Tok,5:F0}%  {r.Wrong,5}  {r.Lang}");
+    return 0;
+}
+
 if (args.Contains("--provenance"))
 {
     var report = new List<(string Lang, int Tok, int Mapped, int FullRows, int Rows)>();

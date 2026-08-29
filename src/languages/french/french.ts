@@ -7,7 +7,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { readForeignRun } from "../../core/foreign.ts";
 import { FOREIGN_RUN } from "../../core/clauses.ts";
-import { enterEngine, noteToken } from "../../core/trace.ts";
+import { enterEngine, noteAssembled, noteToken } from "../../core/trace.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -265,17 +265,23 @@ class FrenchPhonemizer implements Phonemizer {
         // joined, so a reading captured when the word was pushed is not the reading that ships. `groupSrc`
         // tracks which source token produced each slot so the trace reports the post-mutation value.
         let groupSrc: (Src | undefined)[] = [];
-        const traced = new Map<string, { span: [number, number]; surface: string; emitted: string[] }>();
+        const traced = new Map<string, { span: [number, number]; surface: string; emitted: string[]; at: [number, number] }>();
         const flush = (pause: string | null): void => {
             if (group.length) {
                 accentFinal(group);
+                // ⚠ #1150 STAGE 3: OFFSETS AFTER `accentFinal`, which REWRITES the group in place — computing
+                // them before it would place every piece by its pre-accent length. The base is where this
+                // group lands in `out`, and the join's separator is one character per preceding piece.
+                let off = out.length + (out ? 1 : 0);
                 for (let gi = 0; gi < group.length; gi++) {
                     const sc = groupSrc[gi];
+                    const at: [number, number] = [off, off + group[gi]!.length];
+                    off += group[gi]!.length + 1;
                     if (sc === undefined) continue;
                     const key = `${sc.span[0]}:${sc.span[1]}`;
                     const b = traced.get(key);
-                    if (b) b.emitted.push(group[gi]!);
-                    else traced.set(key, { span: sc.span, surface: sc.surface, emitted: [group[gi]!] });
+                    if (b) { b.emitted.push(group[gi]!); b.at = [Math.min(b.at[0], at[0]), Math.max(b.at[1], at[1])]; }
+                    else traced.set(key, { span: sc.span, surface: sc.surface, emitted: [group[gi]!], at });
                 }
                 out += (out ? " " : "") + group.join(" ");
                 group = [];
@@ -326,7 +332,8 @@ class FrenchPhonemizer implements Phonemizer {
             }
         }
         flush(null);
-        for (const t of traced.values()) noteToken(t.span, t.surface, t.emitted);
+        for (const t of traced.values()) noteToken(t.span, t.surface, t.emitted, undefined, t.at);
+        noteAssembled(out); // declared so it can be disbelieved — see english.ts and clauseSink.finish
         return out;
     }
 }

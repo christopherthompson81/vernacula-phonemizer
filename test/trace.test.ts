@@ -556,3 +556,91 @@ describe("the seam is a drop-in for `replace`, not a near-miss (#1150)", () => {
         expect(zero).toEqual([]);
     });
 });
+
+describe("phonemizeTrace — the reading side (#1150 stage 3)", () => {
+    /**
+     * ⚠ THIS IS THE HALF THAT CLOSES THE LOOP. `inputSpan` names the characters the reader typed; `ipaSpan`
+     * names the characters of the reading they became. Together they are a two-way index between orthography
+     * and IPA — what a player needs to highlight a word while its audio plays, which is the case that
+     * motivated the whole issue.
+     */
+    test("a token's ipaSpan slices the reading to that token's own contribution", () => {
+        const text = "doctor Smith paid 1,250 dollars.";
+        const t = phonemizeTrace(text, "en");
+        const smith = t.tokens.find((k) => k.surface === "Smith")!;
+        expect(smith.ipaSpan).toBeDefined();
+        expect(t.ipa.slice(...smith.ipaSpan!)).toBe(smith.emitted.join(" "));
+        // …and the round trip: reading → token → the characters the reader typed
+        expect(text.slice(...smith.inputSpan!)).toBe("Smith");
+    });
+
+    /**
+     * ⚠ A NUMERAL BECOMES SEVERAL WORDS, and the span has to cover all of them. `1,250` is one source token
+     * and four readings; a span that covered only the first would be worse than none, because it would look
+     * right.
+     */
+    test("one token that emits several readings spans all of them", () => {
+        const text = "doctor Smith paid 1,250 dollars.";
+        const t = phonemizeTrace(text, "en");
+        const num = t.tokens.find((k) => k.emitted.length > 1)!;
+        expect(num.emitted.length).toBeGreaterThan(1);
+        expect(t.ipa.slice(...num.ipaSpan!)).toBe(num.emitted.join(" "));
+    });
+
+    /**
+     * ⚠ ABSENT MEANS NOT KNOWN, HERE TOO. Assamese collapses a doubled aspirate and fr-CA applies its accent
+     * AFTER assembly; both change lengths, so every offset recorded against the assembled reading is wrong
+     * about the one the caller receives. Measured over the goldens rather than assumed — see the tool.
+     */
+    test.each(["as", "fr-CA"])("a length-changing post-assembly pass withholds the output spans: %s", (lang) => {
+        // ⚠ THE WHOLE GOLDEN, NOT A SAMPLE, AND THE COUNT IS ASSERTED. `as` changes length on 11 of its 200
+        // rows; a six-row sample found none of them, so the first version of this test passed with the
+        // length guard REMOVED and with `collapse-geminates` falsely claiming to be positional. A test that
+        // cannot fail is the defect this trace exists to expose, reproduced in the trace's own tests.
+        const lines = readFileSync(`csharp/goldens/${lang}.tsv`, "utf8").split("\n").filter(Boolean);
+        let found = 0;
+        for (const line of lines) {
+            const text = line.split("\t")[0];
+            if (!text) continue;
+            let t;
+            try {
+                t = phonemizeTrace(text, lang);
+            } catch {
+                continue;
+            }
+            if (!t.rewrites.some((r) => r.stage !== "normalize" && r.before.length !== r.after.length)) continue;
+            found++;
+            expect(t.tokens.every((k) => k.ipaSpan === undefined)).toBe(true);
+        }
+        expect(found).toBeGreaterThan(0);
+    });
+
+    /**
+     * ⚠ THE FLEET INVARIANT, and it has to be read differently either side of a post-assembly pass. With no
+     * such pass a token's `emitted` IS a substring of the reading. After a POSITIONAL one it is not —
+     * Spanish emits ɡˈato where the sentence reads ɣˈato — and what survives is the WIDTH, because one
+     * character for one is exactly what "positional" claims.
+     */
+    test("every reported ipaSpan is inside the reading and covers what the token emitted", () => {
+        const bad: string[] = [];
+        for (const lang of GOLDEN_LANGS)
+            for (const text of sample(lang, 4)) {
+                let t;
+                try {
+                    t = phonemizeTrace(text, lang);
+                } catch {
+                    continue;
+                }
+                const rewritten = t.rewrites.some((r) => r.stage !== "normalize");
+                for (const k of t.tokens) {
+                    if (k.ipaSpan === undefined) continue;
+                    const slice = t.ipa.slice(k.ipaSpan[0], k.ipaSpan[1]);
+                    if (k.ipaSpan[1] > t.ipa.length || k.ipaSpan[0] < 0) { bad.push(`${lang}: ${k.surface} out of range`); continue; }
+                    const want = k.emitted.reduce((a, e) => a + e.length, 0) + k.emitted.length - 1;
+                    if (rewritten ? slice.length !== want : !k.emitted.every((e) => slice.includes(e)))
+                        bad.push(`${lang}: ${k.surface} -> ${JSON.stringify(slice)} vs ${JSON.stringify(k.emitted)}`);
+                }
+            }
+        expect(bad.slice(0, 5)).toEqual([]);
+    });
+});
