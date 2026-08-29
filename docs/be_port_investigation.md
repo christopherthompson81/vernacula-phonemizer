@@ -116,7 +116,7 @@ same one-line append-at-tail conflict in `Bootstrap.cs` (Georgian upstream, Bela
 Recount on the ka base:
 
     build (Vernacula.Phonemizer)        → 0 errors, 1 pre-existing Marathi CS0108 warning
-    C# suite (full)                     → 3312/3312 (3220 + 92 Georgian)
+    C# suite (full)                     → 3312/3312 (3220 on the ka base + 92 Belarusian)
     C# suite (Belarusian filter)        → 92/92
     parity be                           → 200/200 byte-identical, 0 differ
     parity (fleet)                      → 146 languages byte-identical, 28705 rows ok, 0 differ, 0 BLOCKED
