@@ -28,6 +28,16 @@ public static class Normalize
     private static readonly string HOUR = Manifest.MANIFEST.Symbols.Hour;
     private static readonly string RANGE_FROM = Manifest.MANIFEST.Numbers.RangeFrom;
 
+    /** A `symbols.scales` value is a KEY into `numbers` (the TS reads `MANIFEST.numbers[slot]`). The typed
+     *  C# manifest cannot index by name, so the mapping is spelled out — and an unknown slot throws rather
+     *  than falling back to a wrong scale word. */
+    private static string NumberSlot(string slot) => slot switch
+    {
+        "million" => Manifest.MANIFEST.Numbers.Million,
+        "milliard" => Manifest.MANIFEST.Numbers.Milliard,
+        _ => throw new InvalidOperationException($"abkhaz.jsonc: symbols.scales names numbers.{slot}, which is not a scale word"),
+    };
+
     /** The SHARED symbol tier — percent, currency (with the magnitude hop), units, км². */
     private static readonly Func<string, string> SYMBOLIZE = BuildSymbolize();
 
@@ -119,7 +129,7 @@ public static class Normalize
     private static readonly JsRe DEGREES_C =
         JsRegex.Compile("(\\d)\\s?\\u00b0\\s?[C\\u0421](?![\\p{L}])", "gui");
     private static readonly JsRe DEGREES_BARE =
-        JsRegex.Compile("(\\d)\\s?\\u00b0(?!\\s?[CFK\\u0421\\u0424](?![\\p{L}]))", "gui");
+        JsRegex.Compile("(\\d)\\s?\\u00b0(?!\\s?[CFK\\u041a\\u0421\\u0424](?![\\p{L}]))", "gui");
     private static readonly JsRe ASCII_EXP =
         JsRegex.Compile("(?<=\\d\\s?(?:км|см|м))([23])(?![\\d\\p{L}])", "gu");
 
@@ -197,7 +207,7 @@ public static class Normalize
         foreach (var kv in Manifest.MANIFEST.Symbols.Scales)
         {
             var abbr = kv.Key;
-            var word = kv.Value == "milliard" ? Manifest.MANIFEST.Numbers.Milliard : Manifest.MANIFEST.Numbers.Million;
+            var word = NumberSlot(kv.Value);
             s = Rewrite(s, JsRegex.Compile("(?<![\\p{L}])" + Esc(abbr) + "(?:\\.(\\s+\\p{Lu})?|(?![\\p{L}]))", "gu"),
                 m => m.Groups[1].Success ? $"{word}.{m.Groups[1].Value}" : word);
         }
