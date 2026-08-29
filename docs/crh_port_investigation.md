@@ -85,6 +85,49 @@ without their following noun, and the numeral boundaries.
     poison crh                   0 sites
     typescript                   unchanged
 
+## Run 7 — 2026-08-30 ~06:40 — review of #1174: the numeral path has no upper bound
+
+Reading `number()` for the review turned up something the port's generator had only sampled: the guard is
+`!Number.isSafeInteger(n)` and **nothing else** — no `>= 1e12` bound, unlike most of the fleet. So ANY safe
+integer composes, through a BILLION → MILLION recursion that goes much deeper than a corpus ever will:
+
+    1e9               → bir milliard                     (2 words)
+    1e15              → bir million milliard             (3 words)
+    9007199254740991  → doquz million yedi biñ yüz …    (21 words)
+    999999999999999   → …                                (24 words)
+
+So the review walks it: every magnitude boundary from 1 to 10¹⁵ with its neighbours (`base-1`, `base`,
+`base+1`, `base×2`, `base×9`), 2⁵³−1 and 2⁵³−2, and every value 0…120 where the compositor branches.
+
+And the axes the port's generator did not have:
+
+  * **THE CASING MATRIX** — `I`, `İ`, `ı`, `i` in every position and combination (`Iı`, `İi`, `iI`, `ıİ`,
+    `II`, `İİ`, `Iİ`, `İI`), plus `İstanbul`/`ISTANBUL`/`İSTANBUL` where the dotted capital is the one that
+    matters. The port's generator cased whole words; this cases the *hazard letters against each other*.
+  * **DEGENERATE WORDS** — consonant-only (the stress rule must not fire without a vowel), single letters,
+    doubled and TRIPLED letters at both edges (`bb`, `bbb`, `bbbb`, `aa`, `aaa`), which is where gemination
+    meets the word boundary.
+  * **THE ⟨v⟩ RULE AT THE EDGES and beside ⟨â⟩** — `v`, `av`, `va`, `ava`, `avva`, `âv`, `vâ`, `âvâ`. That
+    last group is the one worth having: ⟨â⟩ is a vowel LETTER mapping to [a], and the rule reads LETTERS,
+    so it is the case where spelling and phone diverge.
+  * astral input, and every normalizer boundary either side (`1,23`/`1,234`/`1,2345`, `1°X`/`1°CC`,
+    `m.e`/`me.`, `1--2`, `mlnx`, `kvadratkm`).
+
+    310 inputs, 0 differ, 0 throws
+
+## Run 8 — 2026-08-30 ~06:50 — one readability fix
+
+`COORD_RULES` was a compiled `JsRe[]` indexed in parallel with `COORDS[i]` for the adjective and noun — a
+parallel-array walk where the tuple could simply carry its own words. Folded into
+`(JsRe Re, string Adj, string Noun)[]`, which also gave the "the noun is emitted only when the writer did
+not already write it" rule somewhere to be commented. No behaviour change, and all three differentials were
+re-run to say so:
+
+    dotnet test --filter CrimeanTatar    42/42
+    generated 10,000 rows                0 differ
+    review probe 310 rows                0 differ
+    mined corpus 390 rows                0 differ
+
 ## Read for correctness — filed, not fixed
 
 - **The manifest's vowel set is named `CYR_VOWEL` in the TS**, a name inherited from the sibling Turkic

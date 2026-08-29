@@ -79,9 +79,10 @@ public static class Normalize
         ("ş\\s?\\.\\s?b\\s?\\.", "şarqiy", "boyluq"),
         ("ğ\\s?\\.\\s?b\\s?\\.", "ğarbiy", "boyluq"),
     ];
-    private static readonly JsRe[] COORD_RULES = COORDS
-        .Select(c => JsRegex.Compile(
-            $"{Boundaries.NOT_LETTER_BEFORE}{c.Pattern}(\\s*)({c.Noun}\\p{{L}}*)?", "gu"))
+    /** Compiled once, carrying their own words — so the rule loop has no parallel array to index. */
+    private static readonly (JsRe Re, string Adj, string Noun)[] COORD_RULES = COORDS
+        .Select(c => (JsRegex.Compile(
+            $"{Boundaries.NOT_LETTER_BEFORE}{c.Pattern}(\\s*)({c.Noun}\\p{{L}}*)?", "gu"), c.Adj, c.Noun))
         .ToArray();
 
     private static readonly JsRe DASH_RANGE = JsRegex.Compile("(\\d)\\s?[–—]\\s?(?=[+-]?\\d)", "gu");
@@ -135,15 +136,14 @@ public static class Normalize
         });
 
         // The compass coordinates — the noun is emitted only when the writer did not already write it.
-        for (var i = 0; i < COORD_RULES.Length; i++)
-        {
-            var (_, adj, noun) = COORDS[i];
-            s = Rewrite(s, COORD_RULES[i], m =>
+        foreach (var (re, adj, noun) in COORD_RULES)
+            s = Rewrite(s, re, m =>
             {
                 var gap = m.Groups[1].Value;
+                // The noun is emitted only when the writer did not already write it — `ş.e. enlikleri`
+                // keeps the writer's inflected form rather than gaining a second, uninflected one.
                 return m.Groups[2].Success ? $"{adj}{gap}{m.Groups[2].Value}" : $"{adj} {noun}{gap}";
             });
-        }
 
         // Ranges, then the sign — the range rules spend the dash first.
         s = Rewrite(s, DASH_RANGE, "$1, ");
