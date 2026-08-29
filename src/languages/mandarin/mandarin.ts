@@ -194,7 +194,10 @@ class MandarinPhonemizer implements Phonemizer {
         // moment a supplementary character appears, and Han has plenty.
         // ⚠ `rebuilt` RETURNS EXACTLY `cp.join("")` — it is the same string, with the mapping attached when a
         // trace is recording and nothing at all when one is not.
-        const traceText = tracing() ? rebuilt(input, pieces) : cp.join("");
+        // ⚠ KEYED ON THE PIECES, NOT ON A SECOND `tracing()` CALL. The list is built under one reading of that
+        // predicate and consumed under another; if the two ever disagreed, `rebuilt` would be handed an empty
+        // list and return "" for a non-empty utterance. `pieces` is empty exactly when the pass was untraced.
+        const traceText = pieces.length > 0 ? rebuilt(input, pieces) : cp.join("");
         const off: number[] = [0];
         for (const c of cp) off.push(off[off.length - 1]! + c.length);
         enterEngine(traceText);

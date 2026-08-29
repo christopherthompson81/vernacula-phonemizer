@@ -161,26 +161,31 @@ public static class Unicode
         foreach (var rune in s.EnumerateRunes())
         {
             var width = rune.Utf16SequenceLength;
-            var emitted = rune.ToString();
+            // ⚠ `folded` STAYS NULL UNTIL THERE IS SOMETHING TO SAY. Materialising `rune.ToString()` up front
+            // reads better and costs an allocation PER RUNE on the shipped path of every utterance in every
+            // language — `sb?.Append(rune.ToString())` short-circuits the argument when `sb` is null, and
+            // that is the whole reason this fold allocates nothing for text with no native digits.
+            string? folded = null;
             if (Rune.GetUnicodeCategory(rune) == UnicodeCategory.DecimalDigitNumber && rune.Value >= 0x80)
             {
                 var cp = rune.Value;
-                var replaced = false;
                 foreach (var baseCp in NATIVE_DIGIT_BASES)
                 {
                     if (cp >= baseCp && cp <= baseCp + 9)
                     {
-                        sb ??= new StringBuilder(s[..consumed]);
-                        emitted = ((char)('0' + (cp - baseCp))).ToString();
-                        sb.Append(emitted);
-                        replaced = true;
+                        folded = ((char)('0' + (cp - baseCp))).ToString();
                         break;
                     }
                 }
-                if (!replaced) sb?.Append(emitted); // a block we do not carry: leave it rather than guess
+                if (folded is not null)
+                {
+                    sb ??= new StringBuilder(s[..consumed]);
+                    sb.Append(folded);
+                }
+                else sb?.Append(rune.ToString()); // a block we do not carry: leave it rather than guess
             }
-            else sb?.Append(emitted);
-            pieces?.Add(new Piece(emitted, consumed, consumed + width));
+            else sb?.Append(rune.ToString());
+            pieces?.Add(new Piece(folded ?? rune.ToString(), consumed, consumed + width));
             consumed += width;
         }
         if (sb is null) return s;                       // a no-op: the mapping already describes `s`

@@ -9,7 +9,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import { phonemize, phonemizeTrace } from "../src/index.ts";
-import { beginProvenance, endProvenance, inputSpan, provenanceFor, renormalize, rewrite } from "../src/core/provenance.ts";
+import { beginProvenance, endProvenance, inputSpan, provenanceFor, rebuilt, renormalize, rewrite } from "../src/core/provenance.ts";
 
 /** A deterministic stride sample of each golden's input column. */
 function sample(lang: string, n: number): string[] {
@@ -409,6 +409,50 @@ describe("the seam is a drop-in for `replace`, not a near-miss (#1150)", () => {
         // passes and every segmenter were still dark, 99% now that they report. It exists to catch a change
         // that quietly takes sites off the seam, so it has to sit close enough to the real number to bite.
         expect(mapped / tok).toBeGreaterThan(0.99);
+    });
+
+    /**
+     * ⚠ THE PIECES MUST TILE THE INPUT, and that check is the only thing standing between a rebuilding pass
+     * and a confident wrong mapping. `km` inserts U+200B, `ja` inserts bunsetsu spaces and substitutes
+     * は→わ, `cmn` rewrites the utterance as a code-point list — none of them is a replace, so nothing else
+     * in this module can see them at all.
+     */
+    test("rebuilt maps each piece to what it consumed, and an insertion to a point", () => {
+        const src = "abcd";
+        try {
+            beginProvenance(src);
+            // `ab` -> `X`, an inserted `-`, then `c` and `d` unchanged
+            const out = rebuilt(src, [["X", 0, 2], ["-", 2, 2], ["c", 2, 3], ["d", 3, 4]]);
+            expect(out).toBe("X-cd");
+            const p = provenanceFor(out);
+            expect(p).toBeDefined();
+            expect(inputSpan(p!, 0, 1)).toEqual([0, 2]);   // X came from `ab`
+            expect(inputSpan(p!, 2, 3)).toEqual([2, 3]);   // c came from `c`
+            const insertion = inputSpan(p!, 1, 2)!;        // the `-` is a POINT, not a range
+            expect(insertion[0]).toBe(insertion[1]);
+        } finally {
+            endProvenance();
+        }
+    });
+
+    /**
+     * ⚠ WITHHELD, NOT GUESSED. A pass that miscounts — skips a character, overlaps, stops short — would
+     * otherwise produce a mapping that indexes fine and points at the wrong text, which is the one failure
+     * mode this whole module exists to prevent.
+     */
+    test.each([
+        ["a gap between pieces", [["a", 0, 1], ["d", 3, 4]] as const],
+        ["overlapping pieces", [["a", 0, 2], ["b", 1, 4]] as const],
+        ["stopping short of the end", [["a", 0, 1], ["b", 1, 2]] as const],
+    ])("a rebuild that does not tile the input is withheld: %s", (_name, pieces) => {
+        const src = "abcd";
+        try {
+            beginProvenance(src);
+            const out = rebuilt(src, pieces as unknown as Parameters<typeof rebuilt>[1]);
+            expect(provenanceFor(out)).toBeUndefined();
+        } finally {
+            endProvenance();
+        }
     });
 
     /**

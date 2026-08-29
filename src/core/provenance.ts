@@ -220,7 +220,13 @@ type Replacer = string | ((substring: string, ...args: any[]) => string);
  */
 const ESCAPE_PATTERN = /[.*+?^${}()|[\]\\]/gu;
 
-/** Is a trace recording? For a pass that must build its provenance explicitly rather than through a seam. */
+/**
+ * Is a trace recording? For a pass that must build its provenance explicitly rather than through a seam.
+ * ⚠ THE C# TWIN ALSO TESTS `frozen`, and the asymmetry is real rather than an oversight: that engine has a
+ * freeze because its seam was once `JsRe.Replace`, which the whole codebase calls, so accumulation had to be
+ * stopped explicitly once the engine declared its normalized text. Here every seam entry point is
+ * input-side by construction and there is nothing to stop.
+ */
 export function tracing(): boolean {
     return prov !== null && hostDepth() <= 1;
 }

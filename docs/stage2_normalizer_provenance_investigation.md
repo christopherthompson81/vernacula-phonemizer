@@ -614,3 +614,24 @@ token traces to whitespace it did not come from, which is the shape the original
 
 The zero-mapped guard's exemption list is now **empty**, and the coverage floor is raised from 90% to 99%.
 A floor only bites if it sits close to the real number.
+
+### Reviewing Run 14
+
+**Three findings, all fixed in place.**
+
+1. **⚠ The C# digit fold started allocating per rune on the SHIPPED path.** Hoisting `var emitted =
+   rune.ToString()` out of the branches read better and cost an allocation for every rune of every utterance
+   in every language — `sb?.Append(rune.ToString())` short-circuits its argument when `sb` is null, and that
+   short-circuit is the whole reason the fold allocates nothing for text with no native digits. `folded` now
+   stays null until there is something to say. This is the fold that runs fleet-wide; it is the worst place
+   in the tree to add a per-character allocation.
+2. **Mandarin read `tracing()` twice and assumed the two agreed.** The piece list is built under one reading
+   and consumed under another; a disagreement would hand `rebuilt` an empty list and return `""` for a
+   non-empty utterance. Keyed on `pieces.length > 0` instead, which is empty exactly when the pass was
+   untraced.
+3. **The primitive shipped without a test**, the same gap `renormalize` had a run earlier. Four now, in each
+   engine, and the tiling ones are verified by sabotage: removing the tile check fails two of them in the
+   TypeScript and two in the C#.
+
+Also documents why `tracing()` and `Tracing()` differ — the C# tests `frozen` and the TypeScript has no such
+concept, because that engine's freeze exists for a seam (`JsRe.Replace`) it no longer uses.

@@ -264,6 +264,60 @@ public class TraceTests
         finally { Provenance.End(); }
     }
 
+    /**
+     * #1150 — `Rebuilt`, the seam's third primitive. A pass that WALKS the input and constructs a new string
+     * is invisible to `Rewrite`: `km` inserts U+200B, `ja` inserts bunsetsu spaces, `cmn` rewrites the
+     * utterance as a code-point list, and `FoldNativeDigits` walks runes because a .NET pattern cannot see
+     * an astral Adlam digit.
+     *
+     * ⚠ THE PIECES MUST TILE THE INPUT, and that check is the only thing standing between such a pass and a
+     * confident wrong mapping.
+     */
+    [Fact]
+    public void RebuiltMapsEachPieceToWhatItConsumedAndAnInsertionToAPoint()
+    {
+        const string src = "abcd";
+        Provenance.Seed(src);
+        try
+        {
+            // `ab` -> `X`, an inserted `-`, then `c` and `d` unchanged
+            var outText = Rewriter.Rebuilt(src, new List<Rewriter.Piece>
+            {
+                new("X", 0, 2), new("-", 2, 2), new("c", 2, 3), new("d", 3, 4),
+            });
+            Assert.Equal("X-cd", outText);
+            var p = Provenance.For(outText);
+            Assert.NotNull(p);
+            Assert.Equal((0, 2), Provenance.InputSpan(p!, 0, 1));  // X came from `ab`
+            Assert.Equal((2, 3), Provenance.InputSpan(p!, 2, 3));  // c came from `c`
+            var insertion = Provenance.InputSpan(p!, 1, 2)!.Value; // the `-` is a POINT, not a range
+            Assert.Equal(insertion.Start, insertion.End);
+        }
+        finally { Provenance.End(); }
+    }
+
+    [Theory]
+    [InlineData(0)] // a gap between pieces
+    [InlineData(1)] // overlapping pieces
+    [InlineData(2)] // stopping short of the end
+    public void ARebuildThatDoesNotTileTheInputIsWithheld(int shape)
+    {
+        const string src = "abcd";
+        var pieces = shape switch
+        {
+            0 => new List<Rewriter.Piece> { new("a", 0, 1), new("d", 3, 4) },
+            1 => new List<Rewriter.Piece> { new("a", 0, 2), new("b", 1, 4) },
+            _ => new List<Rewriter.Piece> { new("a", 0, 1), new("b", 1, 2) },
+        };
+        Provenance.Seed(src);
+        try
+        {
+            var outText = Rewriter.Rebuilt(src, pieces);
+            Assert.Null(Provenance.For(outText)); // withheld, never guessed
+        }
+        finally { Provenance.End(); }
+    }
+
     [Fact]
     public void ACompositionThatReachesAcrossAStarterIsWithheldNotGuessed()
     {

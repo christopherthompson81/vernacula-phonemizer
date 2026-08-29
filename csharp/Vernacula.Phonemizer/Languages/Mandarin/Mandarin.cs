@@ -172,7 +172,10 @@ public sealed class MandarinPhonemizer : ILanguage
         // plenty). `off` maps one to the other so a span indexes `Normalized` exactly.
         // ⚠ `Rebuilt` RETURNS EXACTLY `string.Concat(cp)` — the same string, with the mapping attached when a
         // trace is recording and nothing at all when one is not.
-        var traceText = Tracing() ? Rebuilt(input, pieces) : string.Concat(cp);
+        // ⚠ KEYED ON THE PIECES, NOT ON A SECOND `Tracing()` CALL — the list is built under one reading of
+        // that predicate and consumed under another, and a disagreement would hand `Rebuilt` an empty list
+        // and return "" for a non-empty utterance.
+        var traceText = pieces.Count > 0 ? Rebuilt(input, pieces) : string.Concat(cp);
         var off = new int[cp.Count + 1];
         for (var k = 0; k < cp.Count; k++) off[k + 1] = off[k] + cp[k].Length;
         Core.Trace.EnterEngine(traceText);
