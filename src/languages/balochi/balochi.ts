@@ -160,7 +160,11 @@ export function phonemizeRoman(word: string): string {
 }
 
 // ── Unified: script detection + lexicon-first ────────────────────────────────────────────────────────────────
-const HAS_LATIN = /[a-zāēīōūšžčǰṭḍṛġ]/iu;
+// ⚠ THE CLASS MUST CARRY THE NFC PRECOMPOSES of every dot-below letter the retroflex table reaches:
+// `normalize` composes s+̣→ṣ (U+1E63), n+̣→ṇ (U+1E47), l+̣→ḷ (U+1E37) before the tokenizer runs, and a
+// precomposed form MISSING from this class routes to the Arabic g2p, which has no rule for it and deletes
+// the letter (ṭ/ḍ/ṛ were already present; ṇ/ṣ/ḷ were not, so a lone `ṣ` read as the empty string).
+const HAS_LATIN = /[a-zāēīōūšžčǰṭḍṛġṇṣḷ]/iu;
 
 /** One Balochi word → canonical IPA. Script auto-detected; the cross-script lexicon (full vowels) is tried first,
  *  then the per-script g2p (Roman = full vowels; Arabic = consonant + long-vowel skeleton). */
@@ -220,8 +224,12 @@ const TOKEN = new RegExp(`([ؠ-ۿݐ-ݿ‌]+|${LATIN_RUN})|(\\d+)|([،؛؟۔٬.!?
  * class was only deciding tokenization (the letter fell out of the token and fragmented, which is the defect this
  * issue is about); it becomes a silent DELETION the moment the class also drives the fold. Found by checking every
  * class against the upper case of its own letters, not by a corpus.
+ *
+ * ⚠ SAME STORY FOR THE NFC PRECOMPOSES ṇṣḷ: without them in THIS class the nativiser folds `ṣ` down to bare
+ * `s` (mark stripped) before `phonemizeRoman` can see the dot, so the retroflex is lost even where `HAS_LATIN`
+ * routes the word correctly. Both classes must carry the same inventory.
  */
-const NATIVE_CLASS = "[a-zāēīōūšžčǰṭḍṛġ\\u030C]";
+const NATIVE_CLASS = "[a-zāēīōūšžčǰṭḍṛġṇṣḷ\\u030C]";
 /** ⚠ EXPORTED FOR `test/lexicon-reachability.test.ts`, which asserts that every key in this engine's
  *  lexicons survives its own fold. A key the fold rewrites can never be matched from `text()`, and both
  *  engines agree on the miss, so the parity gate cannot see it (#1068). */
