@@ -166,6 +166,7 @@ public static class Bootstrap
             Bashkir.BashkirPhonemizer.RegisterSelf();
             Basque.BasquePhonemizer.RegisterSelf();
             Bishnupriya.BishnupriyaPhonemizer.RegisterSelf();
+            Georgian.GeorgianPhonemizer.RegisterSelf();
         }
     }
 }
