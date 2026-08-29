@@ -60,8 +60,10 @@ export interface TraceToken {
      * this whole issue.
      *
      * ⚠ ABSENT MEANS "NOT KNOWN", as everywhere else here. Eight engines rewrite the assembled string after
-     * the clause assembler (Spanish spirantizes across word boundaries, fr-CA applies its accent), and an
-     * offset into the pre-rewrite string would be a confident wrong answer about the post-rewrite one.
+     * the clause assembler; six do it one character for one and keep their spans (Spanish spirantizes across
+     * word boundaries, ɡ→ɣ), while `as` collapses a doubled aspirate and `fr-CA` applies an accent that
+     * change LENGTHS — and an offset into the pre-rewrite string would be a confident wrong answer about the
+     * post-rewrite one. See `noteRewrite`'s `positional` flag for which claim each pass makes.
      */
     ipaSpan?: [number, number];
 }

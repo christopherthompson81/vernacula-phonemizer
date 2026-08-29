@@ -422,8 +422,15 @@ export class EnglishPhonemizer {
             cursor += piece.length + 1; // the " " the join inserts
         }
         for (const t of traced.values()) {
-            const lo = Math.min(...t.parts.map((i) => at[i]!));
-            const hi = Math.max(...t.parts.map((i) => at[i]! + parts[i]!.length));
+            // ⚠ FOLDED, NOT SPREAD. `Math.min(...arr)` passes one argument per element and throws RangeError
+            // once the list is long enough — a document-length input is exactly where a trace is most useful,
+            // so the shape that fails on big inputs is the wrong one.
+            let lo = Infinity;
+            let hi = -Infinity;
+            for (const i of t.parts) {
+                if (at[i]! < lo) lo = at[i]!;
+                if (at[i]! + parts[i]!.length > hi) hi = at[i]! + parts[i]!.length;
+            }
             noteToken(t.span, t.surface, t.emitted, undefined, [lo, hi]);
         }
         const assembled = parts.join(" ");

@@ -772,3 +772,18 @@ reproduced inside the trace's own tests for the second time in this issue.
 
 Both halves are now present: `text.slice(...token.inputSpan)` and `ipa.slice(...token.ipaSpan)` name the
 same token from either end.
+
+### Reviewing Run 16
+
+**Three findings, all fixed in place.**
+
+1. **`Math.min(...t.parts.map(...))` in English.** Spreading an array as arguments throws `RangeError` past
+   the engine's argument limit. ⚠ Honestly: this is DEFENSIVE, not a measured bug — the spread is per token,
+   and a token would need tens of thousands of emitted parts to reach the limit. Folded anyway, because a
+   document-length input is exactly where a trace earns its keep, and verified on one: 20,000 words, 40,000
+   tokens, all mapped.
+2. **The `ipaSpan` docstring said "eight engines rewrite the assembled string" where two lose their spans.**
+   Six of the eight are positional and keep them; the sentence read as though all eight were a problem.
+   Corrected in both engines.
+3. **Nothing else.** The seam checks out: `noteEmit`'s offsets come only from `clauseSink`, `noteAssembled`
+   is inert at depth, and a nested engine's own sink cannot clobber the host's assembled string.

@@ -28,9 +28,11 @@ public sealed class TraceToken
      * which characters of the reading they became. Together they are a two-way index between orthography and
      * IPA, which is what a player needs to highlight a word while its audio plays.
      *
-     * ⚠ ABSENT MEANS "NOT KNOWN", as everywhere else here. Two engines rewrite the assembled string in a way
-     * that changes its LENGTH (`as` collapses a doubled aspirate, `fr-CA` applies its accent), and an offset
-     * into the pre-rewrite string would be a confident wrong answer about the post-rewrite one.
+     * ⚠ ABSENT MEANS "NOT KNOWN", as everywhere else here. Eight engines rewrite the assembled string after
+     * the clause assembler; six do it one character for one and keep their spans, while `as` collapses a
+     * doubled aspirate and `fr-CA` applies an accent that change LENGTHS — and an offset into the
+     * pre-rewrite string would be a confident wrong answer about the post-rewrite one. See `NoteRewrite`'s
+     * `positional` flag for which claim each pass makes.
      */
     public (int Start, int End)? IpaSpan { get; set; }
     /** What the nativiser rewrote it to before the g2p saw it. Null when nothing was rewritten. */
