@@ -158,6 +158,7 @@ public static class Bootstrap
             Finnish.FinnishPhonemizer.RegisterSelf();
             Luganda.LugandaPhonemizer.RegisterSelf();
             Kirundi.KirundiPhonemizer.RegisterSelf();
+            Abkhaz.AbkhazPhonemizer.RegisterSelf();
         }
     }
 }
