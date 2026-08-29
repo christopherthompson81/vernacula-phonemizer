@@ -133,6 +133,44 @@ corpus that exercised the path the generator missed.
 `eu` is the 142nd gated language; nothing moved in the other 141. `ManifestMappingTests` gained
 `BasqueManifestIsFullyMapped` — every key in `basque.jsonc` is consumed by the C# type.
 
+## Run 8 — 2026-08-29 ~17:30 — review of #1168: a probe set shaped unlike the port's own
+
+The port's generator and the port were written by the same hand, so the review's haystack was built from
+a different axis list rather than a bigger version of the same one:
+
+  * **CASING** — the port's fixtures were almost all lowercase native plus capitalised foreign; here every
+    native word appears lowercased, ALL-CAPS, capitalised and alternating, plus bare `Ñ ñ Ç ç`.
+  * **NFD INPUT** — the engine renormalizes to NFC precisely because `⟨ñ ç⟩` decompose out of the
+    `[a-zñçA-ZÑÇ]` token class and NFD input would shatter the word and drop the letter. The port's
+    generator emitted no NFD at all; here every `ñ`/`ç` fixture appears in both forms, including
+    `Iruñea 1980an` and `5 km²ko`.
+  * **THE NATIVISER BOUNDARY** — words carrying letters outside NATIVE_CLASS (`Müller`, `Ångström`,
+    `Dvořák`, `Łódź`, `Škoda`, `naïve`, `über`, `coração`) and the hyphenated compounds Basque writes.
+  * **EVERY NUMERAL BAND EDGE** the vigesimal composer crosses — 19/20, 39/40, 59/60, 79/80, 99/100,
+    999/1000, 10⁶−1/10⁶, 10⁹−1/10⁹, 10¹²−1/10¹², 2⁵³±, each also with `an`, `-ko` and ` km`.
+  * **THE MALFORMED CORNERS** of each rule: `5-`, `5- ko`, `5--ko`, `5ko-ko`, `,5a`, `1980ann`,
+    `km/h-ko-ko`, `akm-ko`, `km/x-ko`, `5°CC`, `--5`, `-−5`, `%%`, `1.000.00`, `1 0000`.
+
+    373 inputs, 0 differ, 0 throws
+
+And a separate 23-row Unicode-casing probe, because `Js.ToLowerCase` against JS `toLowerCase` is a
+divergence no Basque fixture would expose: the Turkish dotted `İ`, dotless `ı`, `ẞ`/`ß`, the `Ǆǅǆ`
+title-case triple, the `ﬁ ﬂ` ligatures, Roman-numeral codepoints, fullwidth and Arabic-Indic digits.
+
+    23 inputs, 0 differ
+
+Cumulative differential coverage for `eu`: **12,786 rows** (12,000 generated + 390 mined + 373
+second-angle + 23 casing), every one byte-identical against an `phonemizeAsync` reference, plus the
+standing 200-row golden.
+
+## Run 9 — 2026-08-29 ~17:45 — the TypeScript side, checked rather than assumed
+
+The port changes no TypeScript, but the review ran the TS structural gates anyway, since the scratch
+generators lived under `tools/` while they existed:
+
+    npm run typecheck        clean
+    npm run check:package    ok — 729 files, no docs/ tools/ test/
+
 ## Read for correctness — filed, not fixed
 
 - **`CardinalWords(NaN)` recurses until the stack dies**, in both engines — but the C# failure is
