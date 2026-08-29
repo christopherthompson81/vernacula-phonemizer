@@ -97,3 +97,19 @@ the HTML dash entities, and the Latin runs.
   sweep its own ranges before trusting it, because no shared helper is guarding that direction.
 - **`normalize.ts` exports a `CHEROKEE` character-range constant** that nothing imports today. Ported as a
   `const` for fidelity; if the script router ever needs it on the C# side it is already there.
+
+## Run 7 — 2026-08-30 ~04:00 — rebase onto the `be` merge (#1172) and recount
+
+Belarusian landed while this branch was open. Rebased onto it — **one conflict, in `Bootstrap.cs`**, where
+both ports had inserted their registration on the line after Georgian's. Resolved by keeping both, which is
+what the file wants; every other file in this port is new, so nothing else could collide.
+
+    dotnet test (full suite)     3,343 pass, 0 fail   (3,312 on the be base + 31 Cherokee)
+    parity, fleet                147 languages byte-identical, 28,905 rows, 0 differ, 0 BLOCKED
+    provenance chr               4,290/4,290 tokens mapped (100%)
+    poison chr                   0 sites
+
+⚠ The arithmetic is spelled out because the `be` review found a doc whose suite line read "+92 Georgian"
+where the 92 were Belarusian's own — the two ports happened to contribute the same number, so the
+mislabel read as arithmetic that checked out. Here 3,312 is the total ON the be base and the 31 added are
+Cherokee's; both figures were measured, not inferred.
