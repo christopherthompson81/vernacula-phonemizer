@@ -104,4 +104,21 @@ public class HawaiianTests
 
     [Fact]
     public void RegistryWiring() => Assert.Equal("aloha", Say("aloha"));
+
+    /**
+     * ⚠ THE DIGIT-BY-DIGIT FALLBACK ITERATES CODE POINTS, NOT CHARS. The TypeScript spreads the string
+     * (`[...raw]`), which yields whole code points; iterating a C# string yields UTF-16 CODE UNITS, so an
+     * astral character came back as TWO LONE SURROGATES with a space between them — malformed UTF-16 in
+     * the phoneme stream, which is worse than either sensible reading of the character.
+     *
+     * Unreachable from `text()`, whose number branch is `\d+` — but `NumberToWords` is public and the
+     * TypeScript answers it, so the two engines have to agree. Found by walking the composer: 1 divergence
+     * in 218,000 rows.
+     */
+    [Theory]
+    [InlineData("😀", "😀")]
+    [InlineData("1😀2", "ʻekahi 😀 ʻelua")]
+    [InlineData("a", "a")]
+    public void TheDigitFallbackReadsCodePointsNotCodeUnits(string raw, string want) =>
+        Assert.Equal(want, HawNumbers.NumberToWords(double.NaN, raw));
 }
