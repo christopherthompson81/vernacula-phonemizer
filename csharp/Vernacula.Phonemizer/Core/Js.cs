@@ -171,13 +171,11 @@ public static class Js
         // opposite direction from the one that was filed.
         if (t is "Infinity" or "+Infinity") return double.PositiveInfinity;
         if (t == "-Infinity") return double.NegativeInfinity;
-        // ⚠ AND THE RADIX LITERALS ARE NUMBERS TO JS: 0x10 is 16, 0b11 is 3, 0o17 is 15. No sign is
-        // allowed on them and at least one digit is required.
-        if (t.Length > 2 && t[0] == '0')
-        {
-            var radix = t[1] switch { 'x' or 'X' => 16, 'o' or 'O' => 8, 'b' or 'B' => 2, _ => 0 };
-            if (radix != 0) return ParseRadix(t.AsSpan(2), radix);
-        }
+        // ⚠ THE RADIX LITERALS ARE DELIBERATELY NOT READ, and that is a divergence from `Number()` ON
+        // PURPOSE. JS reads `0x10` as 16; no tokenizer in this fleet can hand that here, because every
+        // number branch is `\d+` and stops at the `x`. Implementing it bought unreachable code and an
+        // implied promise that this function is `Number()` in full. The target is a useful reading, not
+        // idiomatic JS — where the two differ and nothing can reach the difference, say so instead.
         // Any letter but the exponent marker means .NET would read a word form JS does not.
         foreach (var c in t) if (char.IsLetter(c) && c != 'e' && c != 'E') return double.NaN;
         return double.TryParse(t, System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out var v)
@@ -185,22 +183,6 @@ public static class Js
             : double.NaN;
     }
 
-    /// <summary>The digits of a JS radix literal (`0x…`, `0o…`, `0b…`) — NaN if empty or ill-formed.</summary>
-    private static double ParseRadix(ReadOnlySpan<char> digits, int radix)
-    {
-        if (digits.Length == 0) return double.NaN;
-        var acc = 0d;
-        foreach (var c in digits)
-        {
-            var d = c is >= '0' and <= '9' ? c - '0'
-                  : c is >= 'a' and <= 'f' ? c - 'a' + 10
-                  : c is >= 'A' and <= 'F' ? c - 'A' + 10
-                  : -1;
-            if (d < 0 || d >= radix) return double.NaN;
-            acc = acc * radix + d;
-        }
-        return acc;
-    }
 
     /**
      * THE 28 CODE POINTS JS LOWERCASES AND `ToLowerInvariant` DOES NOT (#1116).

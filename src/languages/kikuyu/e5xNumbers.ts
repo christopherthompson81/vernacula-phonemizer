@@ -20,6 +20,7 @@
  * itatũ …), i.e. the class-5/8 i-/ĩ- shape a speaker uses when counting aloud with no noun present. A TTS
  * reading a bare integer has no noun to agree with, so a concord form for some arbitrary class would be wrong.
  */
+import { digitIndex } from "../../core/numbers.ts";
 
 /** The per-language word table for the shared E5x composer. Index 0 of the *Mult arrays is unused. */
 export interface E5xNumberTable {
@@ -78,7 +79,7 @@ function render(n: number, T: E5xNumberTable): string {
  *  "thousands of millions"); only a digit string too long to be an exact double degrades to digit-by-digit. */
 export function renderE5xNumber(n: number, T: E5xNumberTable, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => (d === "0" ? T.zero : (T.units[Number(d)] ?? d))).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => (d === "0" ? T.zero : (T.units[digitIndex(d)] ?? d))).join(" ");
     if (n === 0) return T.zero;
     return render(n, T);
 }

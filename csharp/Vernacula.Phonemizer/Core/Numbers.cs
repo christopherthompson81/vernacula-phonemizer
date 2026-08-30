@@ -54,6 +54,24 @@ public class NumbersDef
 
 public static class Numbers
 {
+
+    /**
+     * The word for a SINGLE digit character, or null for anything else — the C# spelling of TypeScript's
+     * `digitIndex` (#1165).
+     *
+     * ⚠ `(int)Js.Number(c)` IS THE WRONG INDEX AND ITS WRONGNESS IS SILENT. JS `Number()` maps every
+     * whitespace character to 0 — space, tab, NBSP, NNBSP, thin space — and a C# cast of `NaN` is *also* 0,
+     * so both engines answered a units lookup with the language's word for ZERO for each one. That set is
+     * not incidental: it is exactly the fleet's own grouping-separator class, the characters de-grouping
+     * rules exist to remove. A separator surviving into a digit-by-digit fallback was therefore SPOKEN, as
+     * a digit the writer never typed.
+     *
+     * ⚠ AND IT RETURNS NULL RATHER THAN -1, WHICH IS THE ONE PLACE THE TWO ENGINES CANNOT BE SPELLED ALIKE:
+     * TypeScript's `table[-1]` is `undefined` and composes with `?? c`, while C#'s would THROW. Returning
+     * null lets the call sites keep the `?? c` shape their TS counterparts have.
+     */
+    public static string? DigitWord(IReadOnlyList<string> units, string c) =>
+        c.Length == 1 && c[0] >= '0' && c[0] <= '9' && c[0] - '0' < units.Count ? units[c[0] - '0'] : null;
     /** INDIC (South Asian) number composition: 2-2-3 lakh/crore grouping. */
     public static readonly NumberComposer indicNumberWords = IndicNumberWordsFn;
 

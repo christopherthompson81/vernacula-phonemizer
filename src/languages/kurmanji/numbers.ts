@@ -2,6 +2,7 @@
  * Kurmanji cardinal number → words (space-separated; each runs through the g2p). Kurmanji joins with "û" (and):
  * 21 → bîst û yek; hundreds/thousands are multiplied (du sed, sê hezar). Covers 0 … <10⁹.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -27,7 +28,7 @@ function below1000(n: number): string {
 /** Non-negative integer (< 10⁹) → Kurmanji words; larger / non-finite → digit-by-digit. */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // sifir
     const parts: string[] = [];
     const mil = Math.floor(n / 1e6),

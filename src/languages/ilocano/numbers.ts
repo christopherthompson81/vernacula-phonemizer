@@ -19,6 +19,7 @@
  * spelling is the attested lemma, vs. the "ribu" variant). Spanish loans (onse, beinte, mil …) are co-current in
  * everyday Ilocano — especially for clock time, dates and money — but are NOT modelled; see ilocano.jsonc.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface IloNumbers {
@@ -61,7 +62,7 @@ function below1000(n: number): string {
  *  riwriw (10⁶) scales with the "ket" conjunction. */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // sero
     if (n < 1000) return below1000(n);
     if (n < 1e6) {

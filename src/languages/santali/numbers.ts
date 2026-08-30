@@ -116,7 +116,7 @@ function below1e7(n: number): string {
 
 /** Read a digit string one digit at a time (the non-safe-integer fallback). */
 export function readDigits(digits: string): string {
-    return [...digits].map((d) => UNITS[Number(d)] ?? d).join(" ");
+    return [...digits].map((d) => UNITS[digitIndex(d)] ?? d).join(" ");
 }
 
 /**
@@ -131,4 +131,5 @@ export function numberToWords(n: number, raw?: string): string {
         r = n % 1e7;
     const head = `${numberToWords(c)} ${CRORE}`;
     return r === 0 ? head : `${head} ${below1e7(r)}`;
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

@@ -59,6 +59,7 @@
  * Covers 0 … <10¹² for rw (miriyoni 10⁶, miriyari 10⁹) and 0 … <10⁹ for rn (umuriyoni 10⁶); above that, and
  * for a non-finite or unsafe integer, digit-by-digit.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST, type RwandaRundiNumbers } from "./manifest.ts";
 
 /** Compose `n` in a Rwanda-Rundi language from its own word table. */
@@ -105,7 +106,7 @@ export function composeRwandaRundi(n: number, N: RwandaRundiNumbers, raw?: strin
     // this language has no word for is a refusal to COMPOSE, never a licence to go silent.
     const ceiling = N.billion ? 1e12 : 1e9;
     if (!Number.isSafeInteger(n) || n < 0 || n >= ceiling)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!;
     if (n < 1e9) return below1e9(n);
     const b = Math.floor(n / 1e9);

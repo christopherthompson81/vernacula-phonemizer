@@ -21,6 +21,7 @@
  *   `agree()` here rather than the shared `slavicCountForm`.
  */
 
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST, type LithuanianAgreement } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -75,7 +76,7 @@ function magnitude(count: number, forms: LithuanianAgreement, keepOne: boolean):
 export function readDigits(digits: string): string {
     return digits
         .split("")
-        .map((d) => UNITS[Number(d)] ?? d)
+        .map((d) => UNITS[digitIndex(d)] ?? d)
         .join(" ");
 }
 

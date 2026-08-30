@@ -274,7 +274,7 @@ public sealed class RomanianPhonemizer : ILanguage
     {
         if (n == 0) return NUM.Units[0];
         if (n >= 1e12)
-            return string.Join(" ", Js.CodePoints(Js.NumberToString(n)).Select(d => NUM.Units[(int)Js.Number(d)]));
+            return string.Join(" ", Js.CodePoints(Js.NumberToString(n)).Select(d => (Core.Numbers.DigitWord(NUM.Units, d) ?? d)));
         var parts = new List<string>();
         double bil = Math.Floor(n / 1_000_000_000),
             mil = Math.Floor(n % 1_000_000_000 / 1_000_000),

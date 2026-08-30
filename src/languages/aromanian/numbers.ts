@@ -88,7 +88,7 @@ function below1e6(n: number): string {
 /** Non-negative integer → Aromanian words. Out-of-range / unsafe values read digit-by-digit (never empty). */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // nulã
     if (n < 1e6) return below1e6(n);
     const m = Math.floor(n / 1e6),
@@ -97,4 +97,5 @@ export function numberToWords(n: number, raw?: string): string {
     // composes as Cunia's own gloss of the word — "unã njilji [di] miliunj", a thousand millions.
     const head = m === 1 ? MILLION : `${feminine(below1e6(m))} ${MILLIONS}`;
     return r ? `${head} ${numberToWords(r)}` : head;
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

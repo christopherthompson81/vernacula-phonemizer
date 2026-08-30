@@ -120,7 +120,7 @@ function below1e6(n: number): string {
  * plus the `nul` STOPGAP for 0 (see the header): audible and unambiguous, never silently dropped.
  */
 export function readDigits(digits: string): string {
-    return [...digits].map((d) => (d === "0" ? ZERO_STOPGAP : (UNITS[Number(d)] ?? d))).join(" ");
+    return [...digits].map((d) => (d === "0" ? ZERO_STOPGAP : (UNITS[digitIndex(d)] ?? d))).join(" ");
 }
 
 /**
@@ -141,4 +141,5 @@ export function numberToWords(n: number, raw?: string): string {
         r = n % 1e9;
     const head = b === 1 ? BILLION : `${below1000(b)} ${BILLION}`;
     return r === 0 ? head : `${head} ${numberToWords(r)}`;
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

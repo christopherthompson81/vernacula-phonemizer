@@ -12,6 +12,7 @@
  * Pattern B (bespoke) rather than the shared `westernNumberWords`: that composer has neither a connector slot nor
  * an irregular-compound slot, so it can express neither ⟨trenta y un⟩ nor the fused twenties.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface AragoneseNumbersDef {
@@ -61,7 +62,7 @@ function below1e6(n: number): string {
 /** Non-negative integer → Aragonese words. Out-of-range / unsafe values read digit-by-digit (never empty). */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // zero
     if (n < 1e6) return below1e6(n);
     for (const sc of N.scales) {

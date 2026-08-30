@@ -55,6 +55,7 @@
  *     than as letters is a LEXICAL fact and I have no source for it; letter-spelling is always an
  *     available Thai reading, so it is the safe default for the whole class.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { segment } from "./segment.ts";
 import { MANIFEST } from "./manifest.ts";
 import { NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
@@ -118,7 +119,7 @@ const ABBREV_RULES = ABBREV.map((a) => ({
 /** Digits of a numeral, spelled one at a time — how Thai reads the fractional part of a decimal
  *  (3.5 = สามจุดห้า; 802.11 = …จุดหนึ่งหนึ่ง, never จุดสิบเอ็ด). */
 const spellDigits = (ds: string): string =>
-    [...ds].map((d) => THAI_DIGIT_WORDS[Number(d)] ?? d).join(" ");
+    [...ds].map((d) => THAI_DIGIT_WORDS[digitIndex(d)] ?? d).join(" ");
 
 /** `HH.MM` → the formal Thai clock: `H นาฬิกา M นาที`. Zero minutes are dropped (11.00 น. is
  *  สิบเอ็ดนาฬิกา, not …ศูนย์นาที). Hours/minutes stay as ASCII digit runs so thai.ts's cardinal

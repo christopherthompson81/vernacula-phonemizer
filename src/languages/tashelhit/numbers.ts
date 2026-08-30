@@ -161,7 +161,7 @@ function bigHead(count: number, sg: string, pl: string): string {
 
 /** Read a digit string one digit at a time (the ≥10¹² / unsafe-integer fallback). */
 export function readDigits(digits: string): string {
-    return [...digits].map((d) => UNITS[Number(d)] ?? d).join(" ");
+    return [...digits].map((d) => UNITS[digitIndex(d)] ?? d).join(" ");
 }
 
 /**
@@ -183,4 +183,5 @@ export function numberToWords(n: number, raw?: string): string {
         r = n % 1e9;
     const head = bigHead(b, BILLION, BILLION_PLURAL);
     return r === 0 ? head : `${head} ${AND} ${numberToWords(r)}`;
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

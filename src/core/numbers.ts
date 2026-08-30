@@ -352,6 +352,25 @@ export function renderNumber(
  * Non-digit characters (a grouping comma, a stray sign) are skipped rather than guessed at. A `units`
  * entry that is empty is a genuine gap in the language's data and is likewise skipped, not invented.
  */
+/**
+ * THE INDEX OF A SINGLE DIGIT CHARACTER in a `units`-shaped table, or -1 for anything else.
+ *
+ * ⚠ THIS EXISTS BECAUSE `Number(c)` IS THE WRONG INDEX AND ITS WRONGNESS IS SILENT (#1165). `Number()`
+ * maps EVERY whitespace character to 0 — space, tab, NBSP, NNBSP, thin space — so a units table indexed
+ * by it answers with the language's word for ZERO for each one. And that set is not incidental: it is
+ * exactly the fleet's own grouping-separator class, the characters de-grouping rules exist to remove. A
+ * separator that survives into a digit-by-digit fallback is therefore SPOKEN, as a digit the writer never
+ * typed. Measured across the composers: 106 of 194 probes changed their reading when a separator was left
+ * in the operand.
+ *
+ * Returning -1 rather than throwing keeps every caller's existing shape working: `table[-1]` is
+ * `undefined`, so an `?? c` passes the character through and a `.filter` drops it, each exactly as before
+ * for real digits. The DECISION about non-digits is `spellDigits`'s and is unchanged — see its header.
+ */
+export function digitIndex(c: string): number {
+    return c >= "0" && c <= "9" ? Number(c) : -1;
+}
+
 export function spellDigits(digits: string, d: NumbersDef, word: (w: string) => string): string {
     return [...digits]
         .map((c) => (c >= "0" && c <= "9" ? d.units[Number(c)] : undefined))
@@ -362,3 +381,4 @@ export function spellDigits(digits: string, d: NumbersDef, word: (w: string) => 
         .map((w) => word(w))
         .join(" ");
 }
+

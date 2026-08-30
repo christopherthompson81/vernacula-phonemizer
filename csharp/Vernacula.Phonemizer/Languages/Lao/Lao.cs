@@ -237,7 +237,7 @@ public static class LaoPhonemizer
         {
             return Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n))))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
-                .Select(d => LO_UNITS[(int)Js.Number(d)])
+                .Select(d => (Core.Numbers.DigitWord(LO_UNITS, d) ?? d))
                 .ToList();
         }
         if (n == 0) return new List<string> { LO_UNITS[0] };

@@ -20,6 +20,7 @@
  *   • Sotho 6–9 are RELATIVE verb forms (tsheletseng, supileng, robedi, robong) and take no class prefix, so they
  *     look identical in all three series — that is correct, not a copy-paste slip.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 /** The Sesotho cardinal number words (see sesotho.jsonc "numbers" for the cited sources). */
@@ -70,7 +71,7 @@ function class8Multiple(head: string, k: number): string {
 /** A non-negative integer → space-separated Sesotho cardinal words. */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => (d === "0" ? N.zero : (N.units[Number(d)] ?? d))).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => (d === "0" ? N.zero : (N.units[digitIndex(d)] ?? d))).join(" ");
     if (n === 0) return N.zero;
     if (n < 10) return N.units[n]!; // a BARE numeral → the citation/counting stem
     const parts: string[] = [];

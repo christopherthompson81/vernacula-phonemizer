@@ -5,6 +5,7 @@
  * partitive stems (kymmentä / sataa / tuhatta / miljoonaa) are used when a count precedes the magnitude. The returned
  * space-separated word(s) are each phonemized downstream by phonemizeWord.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -31,7 +32,7 @@ function below1000(n: number): string {
 /** Read a raw digit STRING digit-by-digit (nolla / yksi / …) — the fallback for out-of-range or over-long numbers.
  *  Operates on the string (not a float) so no precision is lost and an exponential String(Number) can't leak e/+. */
 export function readDigits(digits: string): string {
-    return digits.split("").map((d) => (Number(d) === 0 ? N.zero : N.units[Number(d)] ?? d)).join(" ");
+    return digits.split("").map((d) => (Number(d) === 0 ? N.zero : N.units[digitIndex(d)] ?? d)).join(" ");
 }
 
 /** A non-negative integer → its Finnish cardinal reading (space-separated at the tuhat/miljoona magnitude joints).

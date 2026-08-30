@@ -4,6 +4,7 @@
  * concord is contextual. Covers 0 … <10¹⁵; larger / non-safe / non-finite → digit-by-digit. Numbers are
  * unmeasured (no referee) — best-effort.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -56,7 +57,7 @@ const CAP = 1e15;
 
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= CAP)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!;
     for (const [value, word] of SCALES) {
         if (n < value) continue;

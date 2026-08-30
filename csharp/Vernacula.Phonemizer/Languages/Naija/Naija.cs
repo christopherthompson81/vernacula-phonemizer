@@ -244,7 +244,7 @@ public sealed class NaijaPhonemizer : ILanguage
                 else
                 {
                     sink.Emit(ORD.Marker);
-                    foreach (var d in Js.CodePoints(m.Groups[3].Value)) sink.Emit(NUM.Units[(int)Js.Number(d)]);
+                    foreach (var d in Js.CodePoints(m.Groups[3].Value)) sink.Emit((Core.Numbers.DigitWord(NUM.Units, d) ?? d));
                 }
             }
             else if (Truthy(m, 4))
@@ -276,7 +276,7 @@ public sealed class NaijaPhonemizer : ILanguage
                     if (frac is not null && frac != "")
                     {
                         sink.Emit(NUM.Point);
-                        foreach (var d in Js.CodePoints(frac)) sink.Emit(NUM.Units[(int)Js.Number(d)]);
+                        foreach (var d in Js.CodePoints(frac)) sink.Emit((Core.Numbers.DigitWord(NUM.Units, d) ?? d));
                     }
                 }
                 else
@@ -284,7 +284,7 @@ public sealed class NaijaPhonemizer : ILanguage
                     foreach (var d in Js.CodePoints(bare))
                     {
                         if (d == ".") sink.Emit(NUM.Point);
-                        else sink.Emit(NUM.Units[(int)Js.Number(d)]);
+                        else sink.Emit((Core.Numbers.DigitWord(NUM.Units, d) ?? d));
                     }
                 }
             }

@@ -6,6 +6,7 @@
  * vowels incl. ⟨õ⟩→ɤ; NO n→ŋ before a velar (king→kinɡ). Palatalization + the Q2/Q3 half-long quantity grade are
  * only partially orthographic → not emitted, folded in the referee eval.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
@@ -96,7 +97,7 @@ function numberToText(n: number): string {
 function number(digits: string): string {
     const n = Number(digits);
     if (!Number.isSafeInteger(n) || n >= 1e9)
-        return [...digits].map((d) => phonemizeWord(N.units[Number(d)] ?? d)).join(" "); // read digit-by-digit
+        return [...digits].map((d) => phonemizeWord(N.units[digitIndex(d)] ?? d)).join(" "); // read digit-by-digit
     return numberToText(n).split(" ").filter(Boolean).map(phonemizeWord).join(" ");
 }
 

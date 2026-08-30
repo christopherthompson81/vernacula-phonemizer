@@ -40,6 +40,7 @@
  * (wuu claims coordinates before degrees, nan claims a tilde range before its temperature, cjy declines
  * degrees outright because ⟨度⟩ is SILENT in its dict). A monolithic builder would have to hide that.
  */
+import { digitIndex } from "../core/numbers.ts";
 import { rewrite } from "./provenance.ts";
 
 /** 0–9 as Han numerals. The default; a language may pass its own (〇 vs 零 is a real corpus choice). */
@@ -47,7 +48,7 @@ export const HAN_DIGITS: readonly string[] = ["零", "一", "二", "三", "四",
 
 /** A digit string read ONE DIGIT AT A TIME — what Sinitic gives a year (二零零九) and a decimal's tail. */
 export function spellHanDigits(s: string, digits: readonly string[] = HAN_DIGITS): string {
-    return [...s].map((c) => digits[Number(c)] ?? c).join("");
+    return [...s].map((c) => digits[digitIndex(c)] ?? c).join("");
 }
 
 /**

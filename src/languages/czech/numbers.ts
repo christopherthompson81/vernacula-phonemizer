@@ -5,6 +5,7 @@
  * milion/miliony/milionů).
  */
 
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Number words are authored DATA — consolidated in czech.jsonc; the composition logic below is the algorithm.
@@ -45,7 +46,7 @@ function agree(
 
 /** Read a raw digit STRING digit-by-digit — the fallback above the declared top magnitude. */
 function readDigits(digits: string): string {
-    return [...digits].map((d) => UNITS[Number(d)] ?? d).join(" ");
+    return [...digits].map((d) => UNITS[digitIndex(d)] ?? d).join(" ");
 }
 
 /**

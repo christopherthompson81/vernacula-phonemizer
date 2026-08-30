@@ -2,6 +2,7 @@
  * Swedish number → words (cardinals). Swedish compounds tens-first (tjugoett = 21, trettiotvå = 32) as a single
  * word, and splits at the thousand/million boundaries so each chunk reads through the g2p. Covers 0 … <10⁹.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -27,7 +28,7 @@ function below1000(n: number): string {
 /** Non-negative integer (< 10⁹) → Swedish words; larger / non-finite → digit-by-digit. */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // noll
     if (n < 1000) return below1000(n);
     const parts: string[] = [];

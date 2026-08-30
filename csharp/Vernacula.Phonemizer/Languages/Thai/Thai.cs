@@ -21,7 +21,7 @@ public static class ThaiPhonemizer
         {
             return Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n))))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
-                .Select(d => TH_UNITS[(int)Js.Number(d)])
+                .Select(d => (Core.Numbers.DigitWord(TH_UNITS, d) ?? d))
                 .ToList();
         }
         if (n == 0) return new List<string> { TH_UNITS[0] };

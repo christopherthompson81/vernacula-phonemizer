@@ -30,6 +30,7 @@
  * ერთი მილიარდი, both attested in running ka.wikipedia text (მილიონი/მილიარდი are borrowed nouns).
  */
 
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST, type GeorgianNumeralPair } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -69,7 +70,7 @@ function magnitude(count: number, forms: GeorgianNumeralPair, more: boolean, kee
 export function readDigits(digits: string): string {
     return digits
         .split("")
-        .map((d) => UNITS[Number(d)] ?? d)
+        .map((d) => UNITS[digitIndex(d)] ?? d)
         .join(" ");
 }
 

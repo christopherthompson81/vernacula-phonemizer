@@ -2,6 +2,7 @@
  * Somali cardinal number → words. Somali joins with "iyo" (and): within 1-99 it is units-FIRST (21 → kow iyo
  * labaatan), while hundreds/thousands come first (234 → laba boqol iyo afar iyo soddon). Covers 0 … <10⁶.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -29,7 +30,7 @@ function below1000(n: number): string {
  *  malyuun (10⁶) with the "iyo" connector, largest-first. */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // eber
     if (n < 1000) return below1000(n);
     if (n < 1e6) {

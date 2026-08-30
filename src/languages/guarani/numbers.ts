@@ -96,7 +96,7 @@ function below1e6(n: number): string {
 
 /** Read a digit string one digit at a time (the ≥10⁹ / unsafe-integer fallback). */
 export function readDigits(digits: string): string {
-    return [...digits].map((d) => UNITS[Number(d)] ?? d).join(" ");
+    return [...digits].map((d) => UNITS[digitIndex(d)] ?? d).join(" ");
 }
 
 /**
@@ -110,4 +110,5 @@ export function numberToWords(n: number, raw?: string): string {
         r = n % 1e6;
     const head = (m === 1 ? "" : below1000(m)) + MILLION; // sua · mokõisua · pasua 10⁷ · sasua 10⁸
     return r === 0 ? head : `${head} ${below1e6(r)}`;
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

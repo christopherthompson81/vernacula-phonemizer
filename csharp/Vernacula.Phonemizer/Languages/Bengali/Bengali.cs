@@ -239,7 +239,7 @@ public static class Bengali
                 var head = double.IsInteger(intN) && Math.Abs(intN) <= 9007199254740991d
                     ? Numbers.RenderNumber(intN, def.Numbers, W)
                     : Numbers.SpellDigits(intHead, def.Numbers, W);
-                var frac = Js.CodePoints(ascii[(dot + 1)..]).Select(d => W(def.Numbers.Units[(int)Js.Number(d)]));
+                var frac = Js.CodePoints(ascii[(dot + 1)..]).Select(d => W((Core.Numbers.DigitWord(def.Numbers.Units, d) ?? d)));
                 return string.Join(" ", new[] { head, W(def.Numbers.DecimalWord!) }.Concat(frac));
             }
             var n = Js.Number(ascii);
