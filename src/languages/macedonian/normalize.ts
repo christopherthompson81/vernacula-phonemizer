@@ -114,13 +114,13 @@ export function normalizeMacedonianInitialisms(text: string): string {
 // ── Ordinal transforms ───────────────────────────────────────────────────────
 /** Masculine definite: append the postpositive article -от to the LAST word (осумнаесетти → осумнаесеттиот,
  *  седми → седмиот). For compounds only the last element takes it (дваесет и првиот). */
-const mascDef = (base: string): string => rewrite(base, /(\S+)$/u, "$1от");
+const mascDef = (base: string): string => base.replace(/(\S+)$/u, "$1от");
 /** Feminine indefinite: the last word's -и → -а (седми → седма, први → прва, илјадити → илјадита). */
-const femIndef = (base: string): string => rewrite(base, /(\S+)и$/u, "$1а");
+const femIndef = (base: string): string => base.replace(/(\S+)и$/u, "$1а");
 /** Feminine definite: append -та to the last word (прва → првата, трета → третата). */
 const femDef = (base: string): string => femIndef(base).replace(/(\S+)$/u, "$1та");
 /** Definite plural: append -те to the last word (седумдесетти → седумдесеттите; шеснаесет → шеснаесетте). */
-const pluralDef = (words: string): string => rewrite(words, /(\S+)$/u, "$1те");
+const pluralDef = (words: string): string => words.replace(/(\S+)$/u, "$1те");
 
 /**
  * The written ordinal suffix → how to build the full form from the number's masculine-indefinite ordinal.

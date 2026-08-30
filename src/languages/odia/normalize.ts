@@ -71,7 +71,7 @@ const UNIT_WORD: Readonly<Record<string, string>> = {
 };
 const UNIT_ALT = Object.keys(UNIT_WORD)
     .sort((a, b) => b.length - a.length)
-    .map((k) => rewrite(k, /\./gu, "\\."))
+    .map((k) => k.replace(/\./gu, "\\."))
     .join("|");
 
 /** Measure nouns that may stand either side of a rate slash. A CLOSED LIST on both sides, because only
@@ -137,7 +137,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    REQUIRED, which keeps a list separator ("1990, 1991" — a space follows) out of the match.
         //    Indian grouping is unattested in THIS corpus (0 instances) and is carried anyway: it costs
         //    one line and Indic sources write it.
-        s = rewrite(s, /(?<![\d,])(\d{1,2}(?:,\d{2})+,\d{3})(?![\d,])/gu, (m) => rewrite(m, /,/gu, ""));
+        s = rewrite(s, /(?<![\d,])(\d{1,2}(?:,\d{2})+,\d{3})(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
         s = rewrite(s, /(?<![\d,])([1-9]\d{0,2}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
         // 6) ODIA DOT-ABBREVIATION LEFTOVERS whose expansion is not sourceable — କି.ଗ୍ରା. after a number

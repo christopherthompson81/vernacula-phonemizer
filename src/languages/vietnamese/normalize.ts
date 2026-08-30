@@ -118,7 +118,7 @@ export function normalizeVietnamese(input: string): string {
     // ⚠ Comma grouping is formally ambiguous under the Vietnamese convention (`7,000` is 7.0 or 7000). It is
     // claimed anyway because a currency context settles the attested case and the alternative reading
     // ("bảy , không") is wrong either way.
-    s = rewrite(s, /(?<!\d)(?<!\d[.,])[1-9]\d{0,2}(?:,\d{3})+(?!\d)/gu, (n) => rewrite(n, /,/gu, ""));
+    s = rewrite(s, /(?<!\d)(?<!\d[.,])[1-9]\d{0,2}(?:,\d{3})+(?!\d)/gu, (n) => n.replace(/,/gu, ""));
 
     // ── 7. dash ranges → "đến" ───────────────────────────────────────────────────────────────────
     // AFTER de-grouping (so 1.000-1.300 parses) and BEFORE the decimal rules — step 8 would otherwise turn

@@ -372,7 +372,7 @@ export function normalizeBambara(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma, which would split off the last
     //    group and speak it as zero.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => rewrite(w, /,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
     s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a list.
     //    Requiring every group to be exactly three digits does that: `san ba 2 fo 3` has no 3-digit group,

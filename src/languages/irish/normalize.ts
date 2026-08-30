@@ -174,9 +174,9 @@ export function normalizeIrish(input: string): string {
     s = rewrite(s, /(?<![\p{L}\p{M}])A\.D\.(?![\p{L}\p{M}])/giu, "tar éis Chríost");
     s = rewrite(s, /(?<![\p{L}\p{M}])R\.C\.(?![\p{L}\p{M}])/giu, "roimh Chríost");
     s = rewrite(s, /(?<![\p{L}\p{M}])AD(?=\s*\d+)/giu, "tar éis Chríost");
-    s = rewrite(s, /(?<![\p{L}\p{M}])\d[\d,]*\s+AD(?![\p{L}\p{M}])/giu, (m0) => rewrite(m0, /AD/giu, "tar éis Chríost"));
+    s = rewrite(s, /(?<![\p{L}\p{M}])\d[\d,]*\s+AD(?![\p{L}\p{M}])/giu, (m0) => m0.replace(/AD/giu, "tar éis Chríost"));
     s = rewrite(s, /(?<![\p{L}\p{M}])BC(?=\s*\d+)/giu, "roimh Chríost");
-    s = rewrite(s, /(?<![\p{L}\p{M}])\d[\d,]*\s+BC(?![\p{L}\p{M}])/giu, (m0) => rewrite(m0, /BC/giu, "roimh Chríost"));
+    s = rewrite(s, /(?<![\p{L}\p{M}])\d[\d,]*\s+BC(?![\p{L}\p{M}])/giu, (m0) => m0.replace(/BC/giu, "roimh Chríost"));
     s = rewrite(s, /(?<![\p{L}\p{M}])N\.A\.(?![\p{L}\p{M}])/giu, "Náisiúin Aontaithe");
     s = rewrite(s, /(?<![\p{L}\p{M}])S\.A\.(?![\p{L}\p{M}])/giu, "Stáit Aontaithe");
     // `srl.` is *agus araile* ("et cetera") — corpus: `iompar ar thalamh, srl.`, previously the
@@ -191,7 +191,7 @@ export function normalizeIrish(input: string): string {
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `George W. Bush` — the W. suffix dot is a break.
-    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
     //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
     //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
@@ -215,7 +215,7 @@ export function normalizeIrish(input: string): string {
     //    rather than to the corpus text.
     s = rewrite(s, /(\ban )?(?<![\d.,])(\d[\d,]*)ú(?![\p{L}\p{M}])([ \u00a0]+([\p{L}\p{M}]+))?/giu,  // space, NBSP
         (m0, art: string | undefined, d: string, spaced: string | undefined, noun: string | undefined) => {
-            const n = Number(rewrite(d, /,/gu, ""));
+            const n = Number(d.replace(/,/gu, ""));
             if (!Number.isFinite(n) || n < 1) return m0;
             // A noun is only pulled INSIDE for the compounds that enclose one; elsewhere it stays put.
             const encloses = n > 10 && (n < 20 || n % 10 !== 0)

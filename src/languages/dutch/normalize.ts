@@ -145,7 +145,7 @@ export function normalizeDutch(input: string): string {
     //    The pattern deliberately ENDS on a dot rather than allowing a trailing separator, so the space
     //    after the run survives — an earlier `(?:\p{Lu}\.\s?){2,}` swallowed it and glued "V.S. met" into
     //    the single token *VSmet*, which the initialism pass then could not see as a caps run at all.
-    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
 
     // 3) SINGLE-DOT ABBREVIATIONS. As in German, two branches: mid-sentence the dot is CONSUMED so it
     //    cannot become a phrase break; at a phrase end it is kept, because there it really is the sentence

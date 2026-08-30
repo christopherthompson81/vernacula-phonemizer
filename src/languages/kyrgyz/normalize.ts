@@ -349,7 +349,7 @@ export function normalizeKyrgyz(input: string): string {
     // 2) THE COMMA AS A THOUSANDS SEPARATOR, but ONLY when it groups more than once — `2,774,460`,
     //    `5,294,000`, `17,840,000`. Multi-group is unambiguous; a SINGLE `\d,\d{3}` is not, and is refused at
     //    the foot of this file with its 50/50 count. Above the decimal rule, which owns the same character.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3}){2,}(?![\d.,])/gu, (m0) => rewrite(m0, /,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:,\d{3}){2,}(?![\d.,])/gu, (m0) => m0.replace(/,/gu, ""));
 
     // 3) MULTI-DOT ABBREVIATIONS, before any single-dot handling, or the interior dot survives as a phrase
     //    break. All three are corroborated by the same corpus spelling the phrase out beside them:

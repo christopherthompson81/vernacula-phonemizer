@@ -110,7 +110,7 @@ const SYMBOLS = makeSymbolNormalizer({
  * and must become a real space, or the degree and unit rules see a letter where they expect a boundary.
  */
 const stripJoiners = (s: string): string =>
-    rewrite(rewrite(s, /&nbsp;/gu, " "), /[​-‍⁠﻿­]/gu, "");
+    rewrite(s.replace(/&nbsp;/gu, " "), /[​-‍⁠﻿­]/gu, "");
 
 /**
  * Dotted abbreviations, as a CLOSED LIST — because the shape-based count is a lie in this corpus. A pattern

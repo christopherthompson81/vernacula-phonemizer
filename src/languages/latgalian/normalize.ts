@@ -337,7 +337,7 @@ export function normalizeLatgalian(input: string): string {
     //    `450,295 km²`, `2,300 km²`. The `(?!\d)` after the run is what leaves `0,702804` and `55,883333`
     //    alone — a fourth digit after the group means the comma was a decimal all along.
     s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rewrite(rest, /,/gu, ""));
+        (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
     // 5) THE MAGNITUDE ABBREVIATIONS, before the tier so its magnitude hop can see them: `Ledzīvotāju
     //    Austrejas - 8,9 mil.`, `runoj vydyskai … 400 mln. ļaužu`. Both read as bare syllables today.

@@ -159,7 +159,7 @@ export function normalizeMalay(input: string): string {
     //    6a) `A.S.` ×8 (Amerika Syarikat) read as `ˈa . s .` — two spurious pauses mid-sentence. Collapsing
     //        the dots hands the letter run to the existing initialism path. Two branches, because at a
     //        clause end the last dot really is the sentence end and must stay a pause.
-    s = rewrite(s, /(?<![\p{L}\p{M}.])((?:[A-Z]\.){2,})(?=\s+\p{L})/gu, (_m, ab: string) => rewrite(ab, /\./gu, ""));
+    s = rewrite(s, /(?<![\p{L}\p{M}.])((?:[A-Z]\.){2,})(?=\s+\p{L})/gu, (_m, ab: string) => ab.replace(/\./gu, ""));
     s = rewrite(s, /(?<![\p{L}\p{M}.])((?:[A-Z]\.){2,})(?=\s*(?:[,;:!?)]|$))/gu,
         (_m, ab: string) => `${ab.replace(/\./gu, "")}.`);
     //    6b) The three abbreviations whose MALAY wording differs from Indonesian's table. Same two-branch

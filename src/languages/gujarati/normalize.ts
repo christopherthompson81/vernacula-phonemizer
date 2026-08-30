@@ -70,7 +70,7 @@ const DOTTED: Readonly<Record<string, string>> = {
 };
 const DOTTED_ALT = Object.keys(DOTTED)
     .sort((a, b) => b.length - a.length)
-    .map((k) => rewrite(k, /\./gu, "\\."))
+    .map((k) => k.replace(/\./gu, "\\."))
     .join("|");
 
 /**

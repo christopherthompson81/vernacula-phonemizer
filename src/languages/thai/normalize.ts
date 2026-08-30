@@ -103,7 +103,7 @@ const ABBREV: readonly { from: string; to: string; unitOnly: boolean }[] = [
     { from: "ดร.", to: "ดอกเตอร์", unitOnly: false },
 ];
 
-const esc = (s: string): string => rewrite(s, /[.$*+?^{}()|[\]\\/]/gu, "\\$&");
+const esc = (s: string): string => s.replace(/[.$*+?^{}()|[\]\\/]/gu, "\\$&");
 
 /** `\b` is ASCII-defined and matches NOTHING against Thai script — the trap that bit six of the first
  *  thirteen languages. Every left-edge guard in this file is this explicit lookbehind instead. */

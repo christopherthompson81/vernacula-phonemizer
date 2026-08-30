@@ -37,7 +37,7 @@ import { rewrite } from "../../core/provenance.ts";
  *  segmentText's hiragana-specific は→わ particle heuristic cannot corrupt an internal は — はち would
  *  otherwise surface as わち. Same reason japanese.ts folds readCounter's output. */
 const toKatakana = (s: string): string =>
-    rewrite(s, /[ぁ-ゖ]/gu, (c) => String.fromCodePoint(c.codePointAt(0)! + 0x60));
+    s.replace(/[ぁ-ゖ]/gu, (c) => String.fromCodePoint(c.codePointAt(0)! + 0x60));
 
 /** Digit → its katakana name, for the places Japanese reads digits ONE AT A TIME rather than composing a
  *  cardinal: the fractional part of a decimal (6.34 is ろくてん*さんよん*, never ろくてんさんじゅうよん).
@@ -275,7 +275,7 @@ export function normalizeJapanese(input: string): string {
 }
 
 const toHiragana = (s: string): string =>
-    rewrite(s, /[ァ-ヶ]/gu, (c) => String.fromCodePoint(c.codePointAt(0)! - 0x60));
+    s.replace(/[ァ-ヶ]/gu, (c) => String.fromCodePoint(c.codePointAt(0)! - 0x60));
 
 /** The five vowel phonemes, longest-first so ɯᵝ and the mid-lowered e̞/o̞ are matched whole. */
 const VOWEL_IPA: readonly string[] = Object.values(MANIFEST.vowels).sort((a, b) => b.length - a.length);

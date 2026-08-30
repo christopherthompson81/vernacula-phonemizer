@@ -59,7 +59,7 @@ export function separatorHygiene(input: string): string {
     //    are wrong in the same way in eleven shipped layers, which is what `test/clause-final-range.test.ts`
     //    exists to stop; all three rules below carry the corrected form.
     s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)/gu,
-        (_m, head: string, rest: string) => head + rewrite(rest, /[.,]/gu, ""));
+        (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""));
 
     // 2) A mark with ONE OR TWO digits after it is a decimal in every convention — `3,5`, `1.5`, `19.95`,
     //    `44,7`. The mark becomes a SPACE: the two halves stay separate numbers, which is not how a reader
@@ -75,7 +75,7 @@ export function separatorHygiene(input: string): string {
     //    three false full stops. The dots become spaces; no word is invented for the shape, because which
     //    shape it is cannot be told apart without evidence and the reading is the same either way.
     s = rewrite(s, /(?<![\d.])(\d{1,4})((?:\.\d{1,4}){2,})(?!\d)(?!\.\d)/gu,
-        (_m, head: string, rest: string) => head + rewrite(rest, /\./gu, " "));
+        (_m, head: string, rest: string) => head + rest.replace(/\./gu, " "));
 
     // 4) AN EN OR EM DASH BETWEEN DIGITS IS A SPAN, and it is currently DROPPED OUTRIGHT — `1990–1995`
     //    fuses into one run of words with no boundary at all. It becomes a pause, not a connective: the

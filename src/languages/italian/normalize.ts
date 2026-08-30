@@ -90,7 +90,7 @@ const DEG = MANIFEST.degree;
  * was invisible while the noun was a hard-coded plural and wrong the moment a count is read off it.
  */
 function degrees(n: string): string {
-    return Number(rewrite(n, ",", ".")) === 1
+    return Number(n.replace(",", ".")) === 1
         ? `${MANIFEST.apocopatedOne} ${DEG.singular}`
         : `${n} ${DEG.plural}`;
 }
@@ -113,7 +113,7 @@ export function normalizeItalianInitialisms(text: string): string {
 const ordinal = (n: number): string | undefined => ROMAN_POLICY.ordinal(n);
 
 /** Feminine ordinal: the final -o becomes -a (decimo → decima). */
-const feminine = (masc: string): string => rewrite(masc, /o$/u, "a");
+const feminine = (masc: string): string => masc.replace(/o$/u, "a");
 
 /** Fraction denominators with a suppletive name; the rest take the ordinal (1/5 = un quinto). Plural is the
  *  regular masculine -o → -i (tre quarti). */
@@ -309,7 +309,7 @@ export function normalizeItalian(input: string): string {
             // simply drops the magnitude and matches anyway, which is worse than either outcome.
             if (CURRENCY_WORD.test(whole.slice(offset + m0.length))) return `${num}${mag ?? ""}`;
             const forms = CURRENCY[sign]!;
-            const word = mag !== undefined || Number(rewrite(num, /[.,]/gu, "")) !== 1 ? forms[1]! : forms[0]!;
+            const word = mag !== undefined || Number(num.replace(/[.,]/gu, "")) !== 1 ? forms[1]! : forms[0]!;
             // ⚠ THE NOUN MUST NOT FUSE WITH WHAT FOLLOWS, the same repair `core/normalizeSymbols.ts` carries
             // for the shared arm. The match ends at the digits (or the magnitude), so an ABBREVIATED
             // magnitude glued to the number left the noun abutting it and the tokenizer read one word:

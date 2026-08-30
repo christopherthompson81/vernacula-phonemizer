@@ -87,7 +87,7 @@ export function makeAmharicNormalizer(
         //    MULTI-DOT FIRST, and the multi-dot form also loses its TRAILING dot. ⚠ That is safe only because
         //    Amharic terminates sentences with ። rather than with an ASCII dot, so no sentence-final pause is
         //    at risk.
-        s = rewrite(s, new RegExp(`(?:${FID}{1,5}\\.){2,}${FID}{0,5}\\.?`, "gu"), (m) => rewrite(m, /\./gu, ""));
+        s = rewrite(s, new RegExp(`(?:${FID}{1,5}\\.){2,}${FID}{0,5}\\.?`, "gu"), (m) => m.replace(/\./gu, ""));
         //    Then the single INTERIOR dot (ኪ.ሜ, ዓ.ም, ፒ.ኤም). Bounded by a fidel on BOTH sides, so it cannot
         //    touch 1.5, 802.11a, or a genuine trailing period after a word.
         s = rewrite(s, new RegExp(`(?<=${FID})\\.(?=${FID})`, "gu"), "");

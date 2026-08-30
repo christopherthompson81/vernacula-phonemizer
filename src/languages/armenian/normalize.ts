@@ -269,7 +269,7 @@ export function normalizeArmenian(input: string): string {
     // 1b. TWO OR MORE `.`/`,` groups — grouping with no ambiguity left to resolve.
     s = rewrite(s,
         /(?<!\d)(?<!\d[.,])([1-9]\d{0,2})((?:([.,])\d{3}){2,})(?!\d)(?![.,]\d)/gu,
-        (_m, head: string, rest: string) => head + rewrite(rest, /[.,]/gu, ""),
+        (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""),
     );
     // 1c. ONE `.`/`,` group. Grouping unless (b) or (c) fires. ⚠ A DOTTED DATE cannot reach this rule:
     //     `30.08.1918` and `8.11.1953` have TWO-digit groups, and the `[.,]`-excluding lookarounds on both
@@ -408,7 +408,7 @@ export function normalizeArmenian(input: string): string {
     s = rewrite(s,
         new RegExp(`(?<!\\d)(?<!\\d[.,])(\\d[\\d ]*\\d|\\d)[-\\u2010\\u2011\\u2013\\u2014]րդ(${ARM_LOWER}*)${NOT_LETTER_AFTER}`, "gu"),
         (m, digits: string, tail: string) => {
-            const bare = rewrite(digits, / /gu, "");
+            const bare = digits.replace(/ /gu, "");
             if (!DIGITS_ONLY.test(bare)) return m;
             const ord = ordinalWords(Number(bare));
             return ord === undefined ? m : tail === "" ? ord : attachSuffix(ord, tail);

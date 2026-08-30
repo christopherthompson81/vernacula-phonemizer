@@ -75,7 +75,7 @@ export function normalizePortugueseInitialisms(text: string): string {
 
 /** Feminine ordinal: every element of a compound inflects (trigésimo sétimo → trigésima sétima). */
 function feminineOrdinal(masc: string): string {
-    return masc.split(" ").map((w) => rewrite(w, /o$/u, "a")).join(" ");
+    return masc.split(" ").map((w) => w.replace(/o$/u, "a")).join(" ");
 }
 
 /** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora). */
@@ -156,7 +156,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    Every ordinal in this corpus is within range (`1º` ×5, `37º` ×3, `1.000º` ×3, `60º`, `11º`, `16º`,
     //    `7ª` ×3, `5ª` ×2), so this arm is for arbitrary text rather than for a corpus instance.
     s = rewrite(s, /\b([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(?:º|ª)/gu, (whole, digits: string) => {
-        const n = Number(rewrite(digits, /\./gu, ""));
+        const n = Number(digits.replace(/\./gu, ""));
         const masc = portugueseOrdinal(n);
         if (masc === undefined) return digits;
         return /ª/u.test(whole) ? feminineOrdinal(masc) : masc;

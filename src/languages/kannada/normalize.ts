@@ -161,7 +161,7 @@ export function normalizeKannada(input: string): string {
     //    the expansion is a bonus that is only taken where it is safe.
     s = rewrite(s, KM_RE, (m, off: number, full: string) =>
         new RegExp(`^[\\p{L}\\p{M}]`, "u").test(full.slice(off + m.length))
-            ? rewrite(m, /\s*\.\s*/gu, "")
+            ? m.replace(/\s*\.\s*/gu, "")
             : "ಕಿಲೋಮೀಟರ್");
     s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}ಮಿ\\s*\\.\\s*ಮೀ`, "gu"), "ಮಿಮೀ");
     s = rewrite(s, INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());

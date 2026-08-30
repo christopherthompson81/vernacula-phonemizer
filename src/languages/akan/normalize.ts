@@ -366,11 +366,11 @@ export function normalizeAkan(input: string): string {
     //    refuses to de-group a number followed by its own sentence comma, so `24,000, na …` would split
     //    off `000` and speak it as zero (the ln finding, reproduced here).
     s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3}){2,})(?![\d]|\.\d)/gu, (w) => rewrite(w, /\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3}){2,})(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a row.
     //    Requiring every group to be exactly three digits does that: `afe 1961 – 25` has no 3-digit group,
     //    and `bosome 9 1946` is not `\d{1,3}( \d{3})+` because 1946 is four digits.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 4) UNITS, BEFORE DECIMALS — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten into a word plus spaced digits (the playbook's standing coupling), and after
@@ -421,7 +421,7 @@ export function normalizeAkan(input: string): string {
     //    with a bare hyphen stranded between the two halves.
     s = rewrite(s, new RegExp(`(?<![\\d.,:\\-–—])(${NUM})\\s?%?\\s?[-–—]\\s?(${NUM})\\s?%`, "gu"),
         (whole: string, a: string, b: string, at: number, str: string) => {
-            if (Number(rewrite(a, /,/gu, "")) >= Number(rewrite(b, /,/gu, ""))) return whole;
+            if (Number(a.replace(/,/gu, "")) >= Number(b.replace(/,/gu, ""))) return whole;
             const word = alreadyPercented(str.slice(0, at)) ? "" : `${PERCENT} `;
             return `${word}${a} ${TO} ${b}`;
         });

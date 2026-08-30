@@ -1094,7 +1094,7 @@ export function normalizeSlovenian(input: string): string {
 /** The VALUE of a Slovene-written number ("2,4" → 2.4), for the local agreement calls — the fractional
  *  part is what selects `slCountForm`'s fifth slot, so it must survive. */
 function numOf(n: string): number {
-    return Number(rewrite(n, ",", "."));
+    return Number(n.replace(",", "."));
 }
 
 /** Escape a literal for embedding in a RegExp source. */

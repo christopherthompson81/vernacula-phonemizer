@@ -156,7 +156,7 @@ export function normalizeZulu(input: string): string {
     //    as they were, since no letter-name reading is available for Zulu.
     //    The lone-initial arm (`uJoji W. Hlathi`) risks eating a sentence-final period before a new capital,
     //    which is why it requires a letter and a space immediately before the initial.
-    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     s = rewrite(s, /(?<=\p{L}[ \u00a0])(\p{Lu})\.(?=[ \u00a0]+\p{Lu})/gu, "$1");  // space, NBSP
 
     // 5) THOUSANDS DE-GROUPING, before anything else numeric: the grouping comma reads as CLAUSE
@@ -173,7 +173,7 @@ export function normalizeZulu(input: string): string {
     //    SPACE GROUPING too (`ku- 100 000 abantu`) — read as two numbers, *ikhulu iqanda*. Blocks of EXACTLY
     //    three digits only, the same discipline the shared tier states for its own `NUM`: without it `30 9`
     //    would fuse two unrelated numbers.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})([ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (whole) => rewrite(whole, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})([ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (whole) => whole.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5b) SPORTS TIMES — `4:41.30`, racing paces. NOT clocks, and the clock rule below correctly refuses
     //     them (a third `.dd` field) — but refusing is not enough: the colon then survives as a CLAUSE PAUSE

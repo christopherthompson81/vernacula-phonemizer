@@ -275,7 +275,7 @@ export function normalizeHaitian(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma.
     s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => rewrite(w, /\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    The SPACE form must additionally reject a bare adjacency that is really two numbers in a list;
     //    requiring every group to be exactly three digits does that (`ant 1854 ak 1889` has no 3-digit
     //    group). The corpus uses both U+0020 and U+00A0 here.
@@ -403,7 +403,7 @@ export function normalizeHaitian(input: string): string {
     s = rewrite(s,
         /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?%\s?[-–—]\s?(\d+(?:[.,]\d+)?)\s?%/gu,
         (whole, a: string, b: string) =>
-            Number(rewrite(a, ",", ".")) < Number(rewrite(b, ",", ".")) ? `${a}% a ${b}%` : whole,
+            Number(a.replace(",", ".")) < Number(b.replace(",", ".")) ? `${a}% a ${b}%` : whole,
     );
     s = rewrite(s, RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} a ${b}` : whole));
 

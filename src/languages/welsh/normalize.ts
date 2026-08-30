@@ -199,7 +199,7 @@ export function normalizeWelsh(input: string): string {
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `George W. Bush` — the W. suffix dot is a break.
-    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
     //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
     //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
@@ -219,7 +219,7 @@ export function normalizeWelsh(input: string): string {
     //    comma-thousands separator (1,000fed). BEFORE the clock rule so a digit run is not first claimed
     //    as a time.
     s = rewrite(s, /(?<![\d.,])(\d[\d,]*)(fed|ed|af|eg|ydd|ain)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
-        const n = Number(rewrite(d, /,/gu, ""));
+        const n = Number(d.replace(/,/gu, ""));
         if (!Number.isFinite(n) || n < 0 || n >= 100000) return m0;
         const ord = ordinalWords(n);
         return ord === undefined ? m0 : ord;

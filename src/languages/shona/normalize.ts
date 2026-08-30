@@ -223,7 +223,7 @@ export function normalizeShonaPre(input: string): string {
     //    apart by what follows: a letter with no space is a glued word, a space then a capital (or the end
     //    of input) is a sentence end, anything else is mid-sentence.
     s = rewrite(s, /(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run, off: number, full: string) => {  // space, NBSP
-        const letters = rewrite(run, /[. \u00a0]/gu, "");  // NBSP
+        const letters = run.replace(/[. \u00a0]/gu, "");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
         // ⚠ PUT BACK THE SPACE THE RUN SWALLOWED (trap 10). `(?:\p{Lu}\.[ \u00a0]?){2,}` lets a space follow the

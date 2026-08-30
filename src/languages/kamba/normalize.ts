@@ -261,7 +261,7 @@ export function normalizeKamba(input: string): string {
     s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:,\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
     s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:\.\d{3})+)(?!\d)/gu,
-        (_m, head: string, rest: string) => head + rewrite(rest, /\./gu, ""));
+        (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
 
     // 8) RANGES → `kũthi`, ABOVE THE DECIMAL STEP and that ordering is a defect this layer would otherwise
     //    have INTRODUCED (trap 56, and hil's ceb ordering lesson). The corpus's `miaka 4.2- 3.9 tene muno` is

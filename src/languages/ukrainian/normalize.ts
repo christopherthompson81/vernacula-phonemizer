@@ -220,7 +220,7 @@ const MULTI_DOT: readonly (readonly [RegExp, string])[] = DEF.multiDotAbbrev.map
     let src = "(?<![\\p{L}\\p{M}])";
     parts.forEach((part, i) => {
         if (i > 0) src += parts[i - 1]!.endsWith(".") ? "\\s?" : "\\s+";
-        src += rewrite(part, /\./gu, "\\.");
+        src += part.replace(/\./gu, "\\.");
     });
     return [new RegExp(src, "giu"), reading] as const;
 });
