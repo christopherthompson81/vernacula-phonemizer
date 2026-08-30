@@ -120,7 +120,13 @@ public sealed class IlocanoPhonemizer : ILanguage
      *  gliding/stress/6th-vowel), then the rule g2p for OOV. */
     public static string PhonemizeWord(string word)
     {
-        var key = Js.ToLowerCase(word).Normalize(NormalizationForm.FormC);
+        // ⚠ `Js.Normalize`, NOT `string.Normalize`. The subject is a RAW WORD, and .NET refuses a string
+        // carrying an unpaired surrogate where JS returns it unchanged — so `PhonemizeWord("a\ud83d")`
+        // THREW here while the TypeScript answered `ʔˈa`. A g2p that indexes UTF-16 units hands the halves
+        // over one at a time, so this is a designed-for input. Found by an astral/surrogate walk: 2,205 of
+        // 8,379 words threw. `PhonemizeWordRules` needs no guard — its subject is composed IPA. See #1199
+        // for the other 45 sites in the fleet.
+        var key = Js.Normalize(Js.ToLowerCase(word), NormalizationForm.FormC);
         return Lex.Value.TryGetValue(key, out var ipa) ? ipa : PhonemizeWordRules(word);
     }
 

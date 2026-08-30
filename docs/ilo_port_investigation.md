@@ -244,3 +244,167 @@ The three questions per file, against the TS docstrings:
   multiplier, which is what `count < 10 &&` enforces), the ket chain, the <10⁹ cut with the
   digit-by-digit fallback. `scaleGroup` is never called with 0 (every caller's divisor is ≥ 1),
   which is what keeps `sero` out of a magnitude slot.
+
+---
+
+# PR review (#1194)
+
+## Run A — 2026-08-30 12:20 — rebase onto main, and the conflict that has bitten this fleet before
+
+The branch was 3 commits behind (`is` #1192, the digit-fallback sweep #1193, `ga` #1195). One conflict,
+in `Bootstrap.cs`, resolved by keeping all three registrations. `ManifestMappingTests.cs` auto-merged.
+
+⚠ The auto-merge was CHECKED rather than trusted — a naive keep-both on that file has silently detached
+a `[Fact]` attribute from its test three times in this porting run. The test project compiles with 0
+errors and the whole suite runs, so the attribute is attached.
+
+    parity -- ilo (after the rebase)   ilo  OK  94 rows
+
+## Run B — 2026-08-30 12:25 — **the pattern scanner was wrong before the port was**
+
+The mechanical pattern diff first reported **8 of Ilocano's 9 TypeScript patterns MISSING from the C#**.
+None of them were. The scanner only understood `"..."` C# literals, and this port writes them
+`@"..."` — where a backslash is literal and `""` is the escape. A scanner that reports a port as broken
+is the failure mode that wastes a review; it was fixed to read verbatim strings before anything else was
+believed.
+
+With it fixed:
+
+    TS literals: 9 (9 distinct)    C#: 10 (10 distinct)
+    in TS, not in C#:  0
+    in C#, not in TS:  1   →  /,/gu
+
+The one extra is the de-grouping step's inner replace: the TS spells it `m.replaceAll(",", "")` (a STRING
+replace, so no literal for the scanner to find) and the C# spells it `COMMAS.Replace(m.Value, "")`.
+Identical in effect, and `JsRe.Replace` is the right call there — the subject is a matched group.
+
+## Run C — 2026-08-30 12:30 — the six DYNAMIC patterns, dumped from both engines
+
+The clock arms, the per-slot and the abbreviation rule are built with `new RegExp` / string concatenation
+on both sides, so no source scanner can see them. Dumped instead — a RegExp-constructor hook on the TS
+side, reflection over the `JsRe` static fields on the C# side:
+
+    TS  (?<![\d.:+\-−])([01]?\d|2[0-3]):([0-5]\d)(?!\d)(?=\s*(?:[ap]\.?\s?m\.?(?![\p{L}])|GMT|UTC))  giu
+    C#  (?<![\d.:+\-−])(…same…)                                                                  giu
+    TS  (?<=tunggal\s(?:maysa\s(?:a|nga)\s)?)(km²|m²|km|m)(?![\p{L}\p{M}²³])                          gu
+    C#  (?<=tunggal\s(?:maysa\s(?:a|nga)\s)?)(km²|m²|km|m)(?![\p{L}\p{M}²³])                gu
+    TS  (?<![\p{L}\p{M}])(blng|dr|jr|sr|st)\.                                                         giu
+    C#  (?<![\p{L}\p{M}])(blng|dr|jr|sr|st)\.                                                         giu
+
+All six agree; the only differences are escape-vs-literal for U+2212 and ²³, which JsRegex resolves
+identically (and the differentials confirm). **The PER_SLOT alternation is `(km²|m²|km|m)`** — the stray
+`}` the port's own probe caught is gone, and both `ABBREV_ALT` and `PER_UNIT_ALT` come out in the same
+order on both sides (`OrderByDescending` is stable, matching JS's `Array.prototype.sort`).
+
+## Run D — 2026-08-30 12:35 — the differentials
+
+One process per side, `clearForeignOov()` once, rows in order. Transport is arrays of UTF-16 CODE UNITS,
+so a lone surrogate survives (a JSON string cannot carry one; a UTF-8 file makes it U+FFFD — #1193).
+
+    corpus  (543 lines: 262 mined + 132 attest + 149 probes)   norm 0 · text 0
+    generated haystack (3,994 lines)                            norm 0 · text 0
+    numbers (0…200,000 exhaustive + boundaries + stride + fallback arms; 200,203)     0 differ
+
+The g2p ENUMERATED, at both entry points (the shipped lexicon-first path and the pure rule path):
+
+    full 30-character NATIVE_CLASS alphabet, 1–3 letters      27,930 words   0 differ  (both paths)
+    13 class representatives, 5 letters                      371,293 words   0 differ  (both paths)
+
+## Run E — 2026-08-30 12:40 — **THE DEFECT: `PhonemizeWord` threw on a lone surrogate**
+
+The astral/surrogate walk — U+1F600 and its two halves crossed with the letters that decide the scan,
+8,379 words — found it:
+
+    PhonemizeWord("a\ud83d")   TS: "ʔˈa"   C#: !!ERR String contains invalid Unicode code points
+    2,205 of 8,379 words threw   (the RULE path: 0 of 8,379 — it normalizes composed IPA, not the input)
+
+`Ilocano.cs:123` built the lexicon key with `Js.ToLowerCase(word).Normalize(NormalizationForm.FormC)`.
+**.NET's `string.Normalize` refuses a string carrying an unpaired surrogate; JS returns it unchanged.**
+A g2p that indexes UTF-16 units hands the halves over one at a time, so this is a designed-for input.
+
+⚠ AND IT IS THE THIRD APPEARANCE OF ONE HAZARD: `LatinPhones` already guards it for its own NFD,
+`Js.ToLowerCase` had it via `char.ConvertFromUtf32` (#1195), and the language engines have it on the raw
+input word. A fleet sweep from the SHIPPED entry point measured the scale:
+
+    C#:  193 languages × 5 surrogate probes:  100 threw, 715 ok   —  25 languages
+         ab ak as bal bm chr chv crh ee eu fa he hmn ht ka ln pbt ps qu rup sv syl ug wo za
+    TS:  the same 25 × the same probes:         0 threw, 125 ok
+
+Filed as **#1199** (46 sites). Fixed HERE: the Ilocano site, plus the shared `Js.Normalize` the sweep
+will use.
+
+## Run F — 2026-08-30 12:45 — **and the first fix was wrong; its own pin caught it**
+
+The obvious helper body was `IsWellFormedUtf16(s) ? s.Normalize(form) : s`. That is a DIVERGENCE, not a
+fix — **JS still normalizes the well-formed parts around an unpaired half**:
+
+    "\uD83Dé"              .normalize("NFC")  →  "\uD83Dé"     (NOT unchanged)
+    "a\uD83Déb"  .normalize("NFC")  →  "a\uD83Déb"
+
+The shipped body splits at each unpaired surrogate — every one is a starter, so it blocks composition
+across itself — and normalizes each run on its own. Measured against Node over a combinatorial fuzz of
+surrogate halves, combining marks, precomposed/decomposed letters, Hangul (algorithmic composition) and
+a singleton exclusion, at 1–3 positions:
+
+    7,239 strings, NFC: 0 differ    NFD: 0 differ
+
+and the walk that found the throw, re-run: **0 of 8,379** on both entry points.
+
+## Run G — 2026-08-30 12:50 — the adversarial fuzz, and the one class it leaves
+
+    hostile fuzz (850 lines)   norm: 0 differ    text: 17 differ
+
+**All 17 contain a Tifinagh code point** (checked mechanically, not eyeballed: every differing row has a
+character in U+2D30–2D7F, and the residue is empty). That is #1196 — Tifinagh routes to `shi`, which is
+not ported to C#, so the foreign run is dropped in every language. `Registry.PortPending` names it:
+`PORT PENDING requested: tashelhit`. Not this port's, and not a regression.
+
+## Run H — 2026-08-30 12:55 — the seam gates pointed at a REAL corpus
+
+The 94-row golden is 94 DISTINCT texts (unlike ga's 3), so it is a better witness than most — but still
+94 rows. A 4,501-row reference was generated FROM THE TYPESCRIPT over the corpus + haystack, swapped in
+for `csharp/goldens/ilo.tsv`, both engines' gates run, and the golden restored.
+
+    parity ilo                 4,501 rows OK, 0 differ
+    parity --poison ilo        0 sites (SUBSTRING 0, desync 0)
+    parity --provenance ilo    40,599/40,599 (100.0%)
+    parity --ipaspans ilo      36,085/36,085 (100.0%), wrong 0
+
+    provenance-poison.mts      0 sites
+    provenance-coverage.mts --full   40,599/40,599      ipa-span-coverage.mts --full  36,085/36,085
+    seam-parity.mts            ilo absent from the disagreement table
+
+The token counts match EXACTLY across the two engines, which is the stronger reading than either
+percentage alone.
+
+    leak sweep   corpus 0/543 · haystack 0/3,994, on BOTH engines
+
+## Run I — 2026-08-30 12:58 — the TypeScript fix, verified rather than trusted
+
+This PR's TS change is the #1122 dotted-abbreviation miss branch. The claim that its pin fails against
+the pre-fix file was CHECKED by reverting the file and running the suite:
+
+    against origin/main's normalize.ts   1 failed | 19 passed   ← the new pin, and only it
+    against the fixed file               20 passed
+
+## Read for correctness — two unreachable divergences, recorded not changed
+
+Both are `"".includes("")`, which is TRUE in JS and false in the C# equivalents:
+
+- `isVowelFinal("")` — TS `"aeiou".includes(w[w.length-1] ?? "")` is true for an empty word; the C#
+  guards `w.Length > 0`. Reachable only if a `units` entry were empty.
+- `stressed`'s nucleus test — TS `VOWEL_PH.includes(u[0] ?? "")` counts an EMPTY unit as a nucleus; the
+  C# does not. Reachable only if a manifest value were empty.
+
+Neither is reachable: `ilocano.jsonc` has **no empty value** in `digraphs` (6), `consonants` (24),
+`vowels` (5), `clausePunctuation` (6) or `numbers.units` (10) — checked mechanically, not assumed. The
+5-letter walk covers every path that could reach them.
+
+## Run J — 2026-08-30 13:05 — the full gates
+
+    dotnet test (full suite)          4,374 pass, 0 fail
+    parity (ALL goldens)              160 languages, 31,164 rows, 0 differ
+    npx vitest run (full suite)       290 files, 5,738 pass, 0 fail
+
+(5,738, not 5,739: this PR's TypeScript change adds an `expect` to an EXISTING test rather than
+a new case.)

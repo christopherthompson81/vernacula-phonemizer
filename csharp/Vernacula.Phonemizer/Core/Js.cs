@@ -27,6 +27,56 @@ public static class Js
         return outp;
     }
 
+    /**
+     * JS `String.prototype.normalize`, which NEVER throws — .NET's `string.Normalize` refuses a string
+     * containing an UNPAIRED SURROGATE with `ArgumentException: String contains invalid Unicode code
+     * points`, and JS returns it unchanged.
+     *
+     * ⚠ THIS IS THE THIRD APPEARANCE OF ONE HAZARD (.NET refuses an unpaired surrogate where JS is
+     * indifferent): `LatinPhones.LatinPhone` guards it for its own NFD, `ApplyLowerExtra` had it via
+     * `char.ConvertFromUtf32` (#1195), and the language engines have it on the raw input word. A g2p that
+     * indexes UTF-16 code units hands the halves of an astral character over ONE AT A TIME — which the Ewe
+     * and Irish scans do deliberately — so this is a designed-for input, not a pathological one.
+     *
+     * ⚠ USE IT ON UNTRUSTED INPUT, NOT ON COMPOSED OUTPUT. IPA built from manifest values is always
+     * well-formed, and a guard there is noise that hides where the real risk is. See #1199 for the fleet
+     * sweep; the distinction has to be made per site.
+     */
+    public static string Normalize(string s, NormalizationForm form)
+    {
+        if (IsWellFormedUtf16(s)) return s.Normalize(form);
+        // ⚠ AND "UNCHANGED" IS NOT THE ANSWER — JS still normalizes the WELL-FORMED PARTS around an
+        // unpaired half. Measured, after a first version of this got it wrong and its own pin caught it:
+        //     "\uD83D\u0065\u0301".normalize("NFC")  ===  "\uD83D\u00E9"     (not unchanged)
+        //     "\u0061\uD83D\u0065\u0301\u0062"       ===  "\u0061\uD83D\u00E9\u0062"
+        // So the string is split AT each unpaired surrogate — every one is a starter, so it blocks
+        // composition across itself — and each run is normalized on its own.
+        var sb = new StringBuilder(s.Length);
+        var run = 0;
+        for (var i = 0; i < s.Length; i++)
+        {
+            if (char.IsHighSurrogate(s[i]) && i + 1 < s.Length && char.IsLowSurrogate(s[i + 1])) { i++; continue; }
+            if (!char.IsSurrogate(s[i])) continue;
+            if (i > run) sb.Append(s[run..i].Normalize(form));
+            sb.Append(s[i]);
+            run = i + 1;
+        }
+        if (run < s.Length) sb.Append(s[run..].Normalize(form));
+        return sb.ToString();
+    }
+
+    /** Does every surrogate in `s` sit in a well-formed pair? `string.Normalize` demands it; JS does not. */
+    private static bool IsWellFormedUtf16(string s)
+    {
+        for (var i = 0; i < s.Length; i++)
+        {
+            if (!char.IsSurrogate(s[i])) continue;
+            if (!char.IsHighSurrogate(s[i]) || i + 1 >= s.Length || !char.IsLowSurrogate(s[i + 1])) return false;
+            i++;
+        }
+        return true;
+    }
+
     /// <summary>The ECMAScript `WhiteSpace ∪ LineTerminator` set — the set `String.prototype.trim` strips
     /// AND the set `Number(s)` reads as 0, which are the same set. ⚠ IT IS NOT `char.IsWhiteSpace`, IN BOTH
     /// DIRECTIONS: .NET does not count U+FEFF (the BOM, which JS does) and does count U+0085 (which JS does
