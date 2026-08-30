@@ -29,9 +29,10 @@ public class LanguageBootstrapTests
         // that was ported — Quechua's Cyrillic rows are read by the RUSSIAN engine.
         // ⚠ THE SAMPLE MUST BE A LANGUAGE THAT IS STILL UNPORTED, so it changes as the port advances — it was
         // `de` until German landed. Pick one far down the queue rather than the next one up, so this does not
-        // have to be edited every batch.
-        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("is"));
-        Assert.Contains("icelandic", Registry.PortPending);
+        // have to be edited every batch. `nci` (Classical Nahuatl) has zero L1 speakers in the catalogue —
+        // the bottom of the descending-population queue.
+        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("nci"));
+        Assert.Contains("nahuatl", Registry.PortPending);
     }
 
     [Theory]

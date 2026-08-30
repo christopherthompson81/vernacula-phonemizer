@@ -179,6 +179,7 @@ public static class Bootstrap
             Hawaiian.HawaiianPhonemizer.RegisterSelf();
             Hiligaynon.HiligaynonPhonemizer.RegisterSelf();
             Hmong.HmongPhonemizer.RegisterSelf();
+            Icelandic.IcelandicPhonemizer.RegisterSelf();
         }
     }
 }

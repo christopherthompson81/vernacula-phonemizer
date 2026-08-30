@@ -828,4 +828,9 @@ public class ManifestMappingTests
             new { numbers = Languages.Haitian.Numbers.N },
             "language", "name", "script", "digraphs", "hiatusVowels", "graphemes", "clausePunctuation",
             "ordinalTails");
+
+    [Fact]
+    public void IcelandicManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/icelandic", "icelandic.jsonc", Languages.Icelandic.Manifest.MANIFEST,
+            "language", "name", "script");
 }
