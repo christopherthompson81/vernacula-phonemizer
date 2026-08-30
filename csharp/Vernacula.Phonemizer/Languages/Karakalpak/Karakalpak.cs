@@ -22,8 +22,9 @@ public static class KarakalpakPhonemizer
     {
         // Turkish-style casing FIRST: the dotless capital ⟨I⟩→[ɯ] must lowercase to ⟨ı⟩ (JS toLowerCase
         // would give dotted ⟨i⟩=[i]), and the dotted capital ⟨İ⟩→⟨i⟩. Before the generic lowercase, so
-        // capitalized back-vowel words (proper nouns) keep [ɯ].
-        var cased = I_DOTLESS.Replace(I_DOTTED.Replace(word.Normalize(NormalizationForm.FormC), "i"), "ı");
+        // capitalized back-vowel words (proper nouns) keep [ɯ]. ⚠ `Js.Normalize`, not `string.Normalize` —
+        // JS `normalize` never throws, and .NET's refuses a lone surrogate the tokenizer can hand over (#1199).
+        var cased = I_DOTLESS.Replace(I_DOTTED.Replace(Js.Normalize(word, NormalizationForm.FormC), "i"), "ı");
         var chars = Js.CodePoints(Js.ToLowerCase(cased));
         var segs = new List<string>();
         for (var i = 0; i < chars.Count; i++)

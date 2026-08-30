@@ -152,6 +152,32 @@ new normalizer was handed a substring.
 TypeScript unchanged — both Run-2 bugs were C#-only porting errors, fixed in C# only per the
 bidirectional policy.
 
+## Run 12 — 2026-08-30 ~20:50 — rebase onto current main: the #1199 sweep caught this port
+
+Main took three ports while this branch was in flight (kam, shi, and the #1199 lone-surrogate fix,
+76 sites in 60 files). The rebase was clean, but the new
+`LoneSurrogateTests.NoPublicSingleStringEntryPointThrowsOnALoneSurrogate` — a reflection sweep over
+EVERY public single-string entry point in every language, which the pre-sweep tree had no equivalent
+of — named exactly one site:
+
+    entry points throwing on a lone surrogate:
+    KarakalpakPhonemizer.PhonemizeWord
+
+`PhonemizeWord`'s `word.Normalize(NormalizationForm.FormC)` is #1199's exact shape: JS `normalize`
+never throws, .NET's refuses a lone surrogate, and the g2p is the per-word surface the tokenizer
+usually keeps a surrogate half out of. The pipeline-string path (`Renormalize`) had already been fixed
+in #1200, which is why `Phonemize()` itself did not throw — only the public word entry point did.
+Fixed the way the sweep fixed its 76 sites: `Js.Normalize(word, NormalizationForm.FormC)`. For
+well-formed input `Js.Normalize` is `s.Normalize(form)` verbatim, so the differentials re-ran and
+stayed clean:
+
+    corpus (745) sync AND async   0 differ
+    numerals (1,000,011)          0 differ
+    dotnet test                   4,614/4,614
+    parity, fleet                 164 languages, 31,964 rows, 0 differ, 0 BLOCKED
+
+TypeScript unchanged.
+
 ## Read for correctness — recorded, not fixed
 
 - **The catalogue's `fleurs = 1` for kaa is stale.** Karakalpak is not in the 102-split FLEURS release
