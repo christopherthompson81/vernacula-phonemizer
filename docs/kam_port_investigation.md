@@ -121,3 +121,107 @@ language's row moved.
   * No defect found in either engine. The two things that would have diverged — the degree callback's
     pre-match prefix and the digit-by-digit fallback's whitespace-as-zero index — were hazards the
     hazard list caught before a run, not findings the gate caught.
+
+---
+
+# PR review (#1200)
+
+## Run A — 2026-08-30 13:25 — rebase and the mechanical diffs
+
+Rebased onto main (2 behind: #1198 kea, #1194 ilo). One `Bootstrap.cs` conflict; both projects rebuild
+with 0 errors, which is the check that matters after a `ManifestMappingTests`-adjacent merge.
+
+    parity -- kam (after the rebase)   kam  OK  200 rows
+
+**Patterns.** Source-scanned literals plus a RegExp-constructor hook on the TS side; reflection over the
+`JsRe` static fields on the C# side. 17 C# patterns, every one byte-identical to its TypeScript
+counterpart with flags. The 2 TS-only literals are the de-grouping arms' inner `rest.replace(/,/gu,"")`
+and `rest.replace(/\./gu,"")` — matched groups, spelled `string.Replace` in the C#, which is the correct
+non-seam call on both sides.
+
+⚠ Two patterns in the TS hook dump belong to the SHARED TIER, not to kam — `(\p{Nd})\s*(×|x)\s*(?=\p{Nd})`
+and the `[    ]` class both come from `core/normalizeSymbols.ts`. Checked before treating
+their absence from the kam C# as a gap. **kam has TWO de-grouping arms (comma, dot) and no space arm**,
+on both sides — unlike kea, which has three.
+
+`GRAPHEME_KEYS` is length-descending and stable on both sides (`OrderByDescending` / `sort((a,b)=>b.length-a.length)`).
+
+## Run B — 2026-08-30 13:30 — the differentials and the walks
+
+One process per side, `clearForeignOov()` once, rows in order, code-unit transport.
+
+    corpus (1,994 lines: 1,992 FLEURS kam_ke + the golden's own)   norm 0 · text 0
+    generated haystack (1,898 lines)                                norm 0 · text 0
+    numbers (0…200,000 exhaustive + boundaries + stride to 10¹²
+             + the fallback arms incl. an astral raw; 326,327)      0 differ
+
+The g2p ENUMERATED:
+
+    full 29-character word inventory, 1–3 letters      25,259 words   0 differ
+    16 class representatives, 4 letters                65,536 words   0 differ
+
+## Run C — 2026-08-30 13:35 — **DEFECT 1: `PhonemizeWord` threw on a lone surrogate**
+
+The astral/surrogate walk — U+1F600 and its two halves crossed with the letters that decide the scan:
+
+    PhonemizeWord("a\ud83d")   TS: "a"   C#: !!ERR String contains invalid Unicode code points
+    2,949 of 12,672 words threw
+
+`Kamba.cs` normalized the RAW WORD with `string.Normalize`, which refuses an unpaired surrogate where JS
+returns it unchanged. #1199's class. Fixed with the shared `Js.Normalize`; the walk re-runs at 0 of 12,672.
+
+## Run D — 2026-08-30 13:40 — **DEFECT 2: the same hazard IN THE SHARED CORE, on the shipped path**
+
+The adversarial fuzz (888 hostile lines) failed 48 rows on the NORMALIZE path — which `PhonemizeWord`'s
+fix does not touch:
+
+    normalizeKamba("1\ud83d000")   TS: "1\ud83d000"   C#: !!ERR String contains invalid Unicode code points
+
+`Rewriter.Renormalize` opened with `s.Normalize(form)` on the **pipeline string**. That is reachable from
+the shipped `Phonemize()` for every engine whose normalize pass begins with a renormalization — not a kam
+bug at all. Fixed there (both the whole-string call and the per-block one on the traced path, since the
+blocks are slices of the same untrusted string).
+
+⚠ THE SCALE, MEASURED BEFORE AND AFTER over every code in `Registry.cs`:
+
+    before   193 languages × 5 surrogate probes:  100 threw, 809 ok  —  25 languages
+    after                                          16 threw, 809 ok  —   4 (chv fa qu sv)
+
+**21 of the 25 languages in #1199 were this one shared-core site.** The issue was updated with the new
+scope rather than left claiming 25.
+
+## Run E — 2026-08-30 13:45 — the seam gates on a real corpus
+
+A 3,892-row reference generated from the TypeScript over the corpus + haystack, swapped in for
+`csharp/goldens/kam.tsv`, both engines' gates run, golden restored.
+
+    parity kam                 3,892 rows OK, 0 differ
+    parity --poison kam        0 sites      provenance 52,800/52,800   IpaSpan 47,256/47,256
+    provenance-poison.mts      0 sites      --full coverage: 52,800/52,800 and 47,256/47,256
+    seam-parity.mts            kam absent from the disagreement table
+
+    leak sweep   corpus 0/1,994 · haystack 0/1,898, on BOTH engines
+
+The token counts match EXACTLY across the two engines.
+
+## Run F — 2026-08-30 13:48 — the fuzz residue
+
+    hostile fuzz (888 lines)   norm: 0 differ    text: 17 differ
+
+All 17 contain a Tifinagh code point — checked mechanically, the residue is empty. That is #1196.
+
+## Read for correctness — notes, nothing filed
+
+- **The confusable fold is spelled correctly on both sides**: the outer call is `rewrite`/`Rewrite` (the
+  pipeline string) and the four inner folds are plain replaces on a matched word. Unlike kea, kam's TS
+  tail is already `rewrite`, so there is no undeclared mutation here.
+- **`KAMBA_WORD` carries `i`+`u`**, so JS's fold widens its alphabet (`ſ` reaches `s`, U+212A reaches `k`).
+  Identical in both engines — JsRegex models the widening — so it is faithful, not a divergence.
+- **The three apostrophe variants** (`'`, `’`, `ʼ`) are folded to `'` before the ⟨ng'⟩ key lookup on both
+  sides, and the 1–3 walk includes all three.
+
+## Run G — 2026-08-30 13:55 — the full gates
+
+    dotnet test (full suite)          4,532 pass, 0 fail
+    parity (ALL goldens)              162 languages, 31,564 rows, 0 differ
+    npx vitest run (full suite)       290 files, 5,740 pass, 0 fail

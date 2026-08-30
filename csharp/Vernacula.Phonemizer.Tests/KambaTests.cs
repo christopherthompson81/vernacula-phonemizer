@@ -265,4 +265,41 @@ public class KambaTests
         // AND NO FRACTION RULE.
         Assert.Contains("1/5 inzi", KamNormalize.NormalizeKamba("5mm (1/5 inzi)"));
     }
+
+    /**
+     * ⚠ A LONE SURROGATE MUST NOT THROW. `PhonemizeWord` normalizes the RAW WORD to NFC before the scan,
+     * and .NET's `string.Normalize` refuses a string carrying an unpaired half where JS returns it
+     * unchanged. Found by an astral/surrogate walk during the port review — 2,949 of 12,672 words threw.
+     * A g2p that indexes UTF-16 units hands the halves over one at a time, so this is a designed-for input.
+     * #1199's class; the fix is the shared `Js.Normalize`. Every expectation is the TypeScript's own answer.
+     */
+    [Theory]
+    [InlineData("lone high", "\ud83d", "")]
+    [InlineData("lone low", "\ude00", "")]
+    [InlineData("trailing half", "a\ud83d", "a")]
+    [InlineData("leading half", "\ud83da", "a")]
+    [InlineData("stranded mid-word", "a\ud83db", "aβ")]
+    [InlineData("inside a Kamba word", "k\ud83dtu", "ktu")]
+    public void PhonemizeWordSurvivesALoneSurrogate(string label, string word, string want) =>
+        Assert.Equal((label, want), (label, KamEngine.PhonemizeWord(word)));
+
+    /**
+     * …and the same for the NORMALIZE pass, which is reachable from the SHIPPED `Phonemize()`. Its opening
+     * `Renormalize` carried the identical hazard in the SHARED CORE, so this threw for every engine whose
+     * normalize begins with a renormalization — 25 languages before the fix, 4 after.
+     */
+    [Theory]
+    [InlineData("bare half", "\ud83d", "\ud83d")]
+    [InlineData("half between words", "ki \ud83d ta", "ki \ud83d ta")]
+    [InlineData("half inside a digit run", "1\ud83d000", "1\ud83d000")]
+    [InlineData("half after a decimal", "1.5 \ud83d", "1 5 \ud83d")]
+    [InlineData("half before a degree letter", "30\ud83dC", "30\ud83dC")]
+    public void NormalizeSurvivesALoneSurrogate(string label, string input, string want) =>
+        Assert.Equal((label, want), (label, KamNormalize.NormalizeKamba(input)));
+
+    [Theory]
+    [InlineData("ki \ud83d ta", "ki ta")]
+    [InlineData("1\ud83d000", "emwɛ nɔti")]
+    public void TheShippedPathSurvivesALoneSurrogate(string input, string want) =>
+        Assert.Equal(want, Phonemizer.Phonemize(input, "kam").Trim());
 }

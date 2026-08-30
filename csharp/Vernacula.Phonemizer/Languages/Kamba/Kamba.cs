@@ -18,7 +18,11 @@ public sealed class KambaPhonemizer : ILanguage
     public static string PhonemizeWord(string word)
     {
         // ⚠ NFC FIRST, like the TS: a decomposed ⟨ĩ⟩ would not match the grapheme key.
-        var w = Js.ToLowerCase(word.Normalize(System.Text.NormalizationForm.FormC));
+        // ⚠ AND `Js.Normalize`, NOT `string.Normalize`. The subject is a RAW WORD, and .NET refuses a string
+        // carrying an unpaired surrogate where JS returns it unchanged — `PhonemizeWord("a\ud83d")` THREW
+        // here while the TypeScript answered "a". Found by an astral/surrogate walk: 2,949 of 12,672 words
+        // threw. This is #1199's class; the shared helper is the fix that issue's sweep will use.
+        var w = Js.ToLowerCase(Js.Normalize(word, System.Text.NormalizationForm.FormC));
         var outp = new StringBuilder();
         var i = 0;
         while (i < w.Length)

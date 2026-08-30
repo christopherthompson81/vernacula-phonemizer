@@ -36,7 +36,7 @@ public class JsNormalizeTests
     // …and the control: a well-formed string composes exactly as `string.Normalize` would.
     [InlineData("no surrogate at all", "e\u0301", "\u00e9")]
     public void ALoneSurrogateIsReturnedUnchangedNotThrownOn(string label, string s, string want) =>
-        Assert.Equal(want, Js.Normalize(s, NormalizationForm.FormC));
+        Assert.Equal((label, want), (label, Js.Normalize(s, NormalizationForm.FormC)));
 
     /** ⚠ AND THE UNGUARDED CALL REALLY DOES THROW — the pin is worthless if .NET ever stops refusing. */
     [Fact]

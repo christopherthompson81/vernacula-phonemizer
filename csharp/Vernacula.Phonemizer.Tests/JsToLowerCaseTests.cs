@@ -114,7 +114,7 @@ public class JsToLowerCaseTests
     // GROWS — a length-preserving assertion here would be wrong, and was.
     [InlineData("halves around U+0130", "\ud83d\u0130\ude00", "\ud83d\u0069\u0307\ude00")]
     public void ALoneSurrogateIsLowercasedNotThrownOn(string label, string s, string want) =>
-        Assert.Equal(want, Js.ToLowerCase(s));
+        Assert.Equal((label, want), (label, Js.ToLowerCase(s)));
 
 }
 
