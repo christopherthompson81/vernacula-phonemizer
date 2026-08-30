@@ -124,8 +124,102 @@ multi-word split, and it was the test suite, not the gate, that found it: the xu
 before the first parity run, and the gate (which does carry `abäj tew` in the golden) was run only
 after the fix.
 
-⚠ **WHAT THIS PORT DOES NOT DO:** it does not touch `csharp/STATUS.md`. The two ports landed on
-this base (kam #1200, shi #1202) left it as-is — it is a dated snapshot ("as of 2026-08-28") whose
-count table has not been updated since, and a sibling branch (`port/kaa-karakalpak`) removes the
-file entirely ("the investigation docs and the code cover it"). Editing its numbers here would be
-work the next merge undoes.
+⚠ **WHAT THIS PORT DOES NOT DO:** it does not touch `csharp/STATUS.md`, and by the time it merges
+there is nothing to touch. That file was a dated snapshot ("as of 2026-08-28") whose count table had
+not been updated since; #1205 retired it — the findings register moved into the investigation docs,
+and the state it also carried is now asked of the engine:
+
+    dotnet run --project csharp/tools/parity -- --unported
+
+⚠ AND THAT FLAG IS WHY `quc` IS WORTH PORTING NOW. It reports the five codes that had NO GOLDEN, which
+is the state that makes a language unportable — there is nothing to be byte-identical to. `quc` was one
+of them; `tools/gen_quc_golden.mts` is what removes it from that list.
+
+---
+
+# PR review (#1204)
+
+## Run A — 2026-08-30 16:10 — rebase, and the golden's provenance
+
+Rebased onto main (1 behind: #1205, which retired `csharp/STATUS.md`). Build clean, `quc` 175/175.
+
+⚠ **THE FIRST THING TO CHECK ON A HAND-ROLLED GOLDEN IS THAT IT REPRODUCES.** A generator nobody re-runs
+is a golden nobody can regenerate after a legitimate TS change:
+
+    npx tsx tools/gen_quc_golden.mts   →  byte-for-byte identical to the committed csharp/goldens/quc.tsv
+
+175 rows, 175 distinct texts. The provenance claim in the header is accurate: 127 referee headwords + 2
+ASCII-apostrophe spellings + 46 numerals, rendered through `phonemizeAsync` per the goldens' convention.
+It is a **parity pin, not corpus coverage** — and it is what takes `quc` off the "NO GOLDEN" list, which
+is the state that makes a language unportable at all.
+
+## Run B — 2026-08-30 16:15 — patterns and the read
+
+    TS literals: 3 (3 distinct)   C#: 3 (3 distinct)
+    in TS, not in C#: 0     in C#, not in TS: 0
+
+The two grapheme tables are shared via `kiche.jsonc`, so they cannot drift; `ORDER` is
+`OrderByDescending(k => k.Length)` against the TS's `sort((a,b) => b.length - a.length)` — both stable.
+
+Read for correctness, three things checked rather than assumed:
+
+- **`Js.Normalize` from the start.** The raw word is NFC'd before the scan, which is #1199's shape; this
+  port never had the defect.
+- **The bounds test precedes `CompareOrdinal`.** `CompareOrdinal(w, i, key, 0, len)` with a length past the
+  end compares only what is there, so testing afterwards is too late — the C# comment says so and the code
+  does it.
+- **The multi-word branch uses the untrimmed `word` on the non-split path**, matching the TS, which trims
+  only for the whitespace TEST.
+
+## Run C — 2026-08-30 16:25 — the walks, which carry the weight here
+
+⚠ **THERE IS NO CORPUS.** No FLEURS split, no mined artifact, no TSV — so PORTING.md's corpus-wide
+differential is UNAVAILABLE and the walks are the evidence.
+
+    full alphabet (41 chars: letters + unit constituents + all three apostrophe glyphs), 1–3   70,643   0 differ
+    16 class representatives, 4 letters + the MULTI-WORD branch                                65,558   0 differ
+    astral + both surrogate halves × the letters, 1–3                                          11,109   0 differ
+    the vigesimal composer, EXHAUSTIVE over 0…4,000 plus the fallback arms                      4,018   0 differ
+    adversarial fuzz, 972 hostile lines                                        norm 0 · text 0
+
+The multi-word rows are in the 4-letter walk on purpose: the split RECURSES per word, and no single-token
+walk reaches it. That is the branch whose missing `.map(phonemizeWord)` the PR's own xunit suite caught.
+
+The composer walk is exhaustive over its whole documented range rather than sampled, because the three
+score bases (⟨winaq⟩, ⟨kʼal⟩, ⟨muchʼ⟩) and the ⟨qʼo⟩ multiples change over at values a sample can miss.
+
+## Run D — 2026-08-30 16:35 — **the seam corpus builder crashed, and the first gate run was on a stump**
+
+The first golden-swap reference came out at **271 rows** and the gates passed over it. That was wrong: the
+builder had thrown `UnicodeEncodeError: surrogates not allowed` part-way through writing, because the fuzz
+lines it was folding in contain lone surrogates and a `.tsv` is UTF-8. It had already written 271 rows, so
+everything downstream looked green.
+
+⚠ **THE SAME CLASS THAT HAS NOW BITTEN THIS HARNESS THREE TIMES** (#1193's UTF-8 file, #1195's JSON
+string, this). Rebuilt with an explicit well-formedness filter — the surrogate class is covered by the
+code-unit-transport fuzz, and a golden-swap reference is text:
+
+    parity quc                 71,786 rows OK, 0 differ
+    parity --poison quc        0 sites      provenance 74,520/74,520   IpaSpan 73,806/73,806
+    provenance-poison.mts      0 sites      --full coverage: 74,520/74,520 and 73,806/73,806
+    seam-parity.mts            quc absent from the disagreement table
+
+The token counts match EXACTLY across the two engines. The normalizer makes no `Rewrite` call at all —
+it is one `SeparatorHygiene` call — so poison 0 is expected rather than earned, and is recorded as such.
+
+    leak sweep   fuzz 0/972, on BOTH engines
+
+## Run E — 2026-08-30 16:40 — the stale note, corrected
+
+The port doc explained that it deliberately left `csharp/STATUS.md` alone because "a sibling branch
+removes the file entirely". That branch has merged (#1205), so the paragraph described a file that no
+longer exists. Rewritten to point at what replaced it — and at the fact that `--unported` is what names
+the codes with NO GOLDEN, which is the state `tools/gen_quc_golden.mts` exists to remove.
+
+    parity --unported (after this port)   193 codes · 168 ported · 25 UNPORTED
+                                          quc is gone from the list; 4 codes still have no golden
+
+## Run F — 2026-08-30 16:45 — the gates
+
+    dotnet test (full suite)          4,663 pass, 0 fail
+    parity (ALL goldens)              165 languages, 32,139 rows, 0 differ
