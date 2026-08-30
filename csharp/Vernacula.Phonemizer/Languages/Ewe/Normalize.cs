@@ -179,8 +179,13 @@ public static class Normalize
         //    than a base letter with an orphaned mark the scan drops. TOKEN admits U+0342 (it is inside the
         //    U+0300–U+036F range), so the word never broke on it — the mark simply reached the scan and was
         //    dropped as unmapped, which is why this one is silent where ⟨Ð⟩ is loud.
-        s = Rewrite(Rewrite(Rewrite(s, HOMO_D, ED), HOMO_ENG, ENG), HOMO_TILDE, TILDE)
-            .Normalize(NormalizationForm.FormC);
+        //    ⚠ AND THE RE-NFC GOES THROUGH THE SEAM. It is a normalization OF THE PIPELINE STRING and it
+        //    CHANGES THE LENGTH — `a` + U+0303 becomes a one-character ⟨ã⟩ — so a bare `String.Normalize`
+        //    here desyncs the provenance map and every later step reports against a string the tracker
+        //    does not recognise. Measured: 5 of the 396 mined ee.wikipedia rows lost their mapping
+        //    ENTIRELY, and they are precisely the U+0342 rows this fold exists to repair.
+        s = Renormalize(Rewrite(Rewrite(Rewrite(s, HOMO_D, ED), HOMO_ENG, ENG), HOMO_TILDE, TILDE),
+            NormalizationForm.FormC);
 
         // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, before the ampersand rule at step 11 — else `&nbsp;` is
         //    read as the word "and" followed by the letters n-b-s-p. This wiki writes 9 of its 16 ampersands
