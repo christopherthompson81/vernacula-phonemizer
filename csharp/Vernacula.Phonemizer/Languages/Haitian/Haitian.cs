@@ -41,7 +41,7 @@ public sealed class HaitianPhonemizer : ILanguage
     /** Scan a lowercased Haitian word into IPA phone tokens (the digraphs + the context-dependent nasals). */
     private static List<string> Scan(string word)
     {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         var outp = new List<string>();
         var i = 0;
         while (i < w.Length)

@@ -18,7 +18,7 @@ public static class HawaiianPhonemizer
     /** Phonemize a single Hawaiian word to canonical IPA — a direct single-grapheme scan. */
     public static string PhonemizeWord(string word)
     {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         var outp = new List<string>();
         // ⚠ CODE-POINT iteration, matching the TS `for (const ch of w)`: an unknown mark (hyphen etc.) is
         // skipped, and an astral letter is one element, not two halves.

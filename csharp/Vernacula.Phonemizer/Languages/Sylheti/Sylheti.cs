@@ -44,7 +44,7 @@ public sealed class SylhetiPhonemizer : ILanguage
     /** One Sylheti word → canonical IPA (rules only; tone deferred). */
     public static string PhonemizeWord(string word)
     {
-        var x = G2p(word.Normalize(NormalizationForm.FormC));
+        var x = G2p(Js.Normalize(word, NormalizationForm.FormC));
         x = LENGTH_ASPIRATE.Replace(GEMINATE.Replace(x, "$1ː"), "$1ː");
         var syls = JsRegex.MatchAll(VOWEL_G, x).Count;
         if (syls >= 2) x = DeleteFinalInherent(x);

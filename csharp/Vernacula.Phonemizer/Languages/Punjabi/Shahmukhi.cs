@@ -84,7 +84,7 @@ public static class Shahmukhi
     {
         var prepped = SHADDA_AFTER_VOWEL.Replace(
             TANWIN_ALIF.Replace(
-                LETTERFORM_RE.Replace(word.Normalize(System.Text.NormalizationForm.FormC), c => LETTERFORM[c.Value]),
+                LETTERFORM_RE.Replace(Js.Normalize(word, System.Text.NormalizationForm.FormC), c => LETTERFORM[c.Value]),
                 "$1"),
             "ّ$1");
         var s = Js.CodePoints(prepped);

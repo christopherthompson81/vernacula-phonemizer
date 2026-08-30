@@ -25,7 +25,7 @@ public sealed class LingalaPhonemizer : ILanguage
     /** One Lingala word → canonical IPA (segmental + per-nucleus tone). */
     public static string PhonemizeWord(string word)
     {
-        var s = word.ToLowerInvariant().Normalize(NormalizationForm.FormD);
+        var s = Js.Normalize(word.ToLowerInvariant(), NormalizationForm.FormD);
         var outp = "";
         var i = 0;
         while (i < s.Length)

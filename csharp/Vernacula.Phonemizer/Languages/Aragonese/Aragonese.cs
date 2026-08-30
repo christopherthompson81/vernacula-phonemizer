@@ -28,7 +28,7 @@ public static class AragonesePhonemizer
     /** Scan a lowercased Aragonese word into IPA phone tokens. */
     private static List<string> Scan(string word)
     {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         var outp = new List<string>();
         var i = 0;
         while (i < w.Length)

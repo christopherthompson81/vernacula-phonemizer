@@ -52,7 +52,7 @@ public sealed class OccitanPhonemizer : ILanguage
      */
     private static List<Tok> Scan(string word)
     {
-        var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        var w = Js.Normalize(word, NormalizationForm.FormC).ToLowerInvariant();
         var toks = new List<Tok>();
         var i = 0;
         while (i < w.Length)
@@ -137,7 +137,7 @@ public sealed class OccitanPhonemizer : ILanguage
     /** Final unstressed ⟨a⟩ → [ɔ] (Languedocien: França→fɾansɔ). Operates on the raw word's last letter. */
     private static void FinalA(string word, List<Tok> toks)
     {
-        var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        var w = Js.Normalize(word, NormalizationForm.FormC).ToLowerInvariant();
         if (toks.Count > 0 && toks[^1].Ph == "a" && w.EndsWith("a", StringComparison.Ordinal)) toks[^1].Ph = "ɔ";
     }
 

@@ -61,7 +61,7 @@ public sealed class BurmesePhonemizer : ILanguage
      */
     public static List<Syllable> Syllabify(string word)
     {
-        var s = Js.CodePoints(word.Normalize(NormalizationForm.FormC));
+        var s = Js.CodePoints(Js.Normalize(word, NormalizationForm.FormC));
         var n = s.Count;
         var syls = new List<Syllable>();
         var i = 0;
@@ -194,7 +194,7 @@ public sealed class BurmesePhonemizer : ILanguage
      *  reads the dict it is rebuilding and drops every covered entry. */
     public static string PhonemizeWordRules(string word)
     {
-        var nfc = word.Normalize(NormalizationForm.FormC);
+        var nfc = Js.Normalize(word, NormalizationForm.FormC);
         var syls = Syllabify(nfc);
         if (VoicingLexicon().TryGetValue(nfc, out var flags) && flags.Length > 0)
         {
@@ -213,7 +213,7 @@ public sealed class BurmesePhonemizer : ILanguage
     private static string PhonemizeSubword(string word)
     {
         // JS `lex ? lex : rules(word)` — a blank/empty dict value is FALSY and falls through to the rules.
-        var lex = Dictionary_().TryGetValue(word.Normalize(NormalizationForm.FormC), out var l) ? l : null;
+        var lex = Dictionary_().TryGetValue(Js.Normalize(word, NormalizationForm.FormC), out var l) ? l : null;
         return !string.IsNullOrEmpty(lex) ? lex : PhonemizeWordRules(word);
     }
 
@@ -227,7 +227,7 @@ public sealed class BurmesePhonemizer : ILanguage
     public static List<string> SegmentWord(string token)
     {
         var (set, maxLen) = SegWords();
-        var cs = Js.CodePoints(token.Normalize(NormalizationForm.FormC));
+        var cs = Js.CodePoints(Js.Normalize(token, NormalizationForm.FormC));
         if (set.Count == 0 || cs.Count == 0) return new List<string> { token };
         var sylls = Syllabify(string.Concat(cs)); // whole-run pass, reused for both the boundaries and the safety check
         var bound = new HashSet<int> { cs.Count };

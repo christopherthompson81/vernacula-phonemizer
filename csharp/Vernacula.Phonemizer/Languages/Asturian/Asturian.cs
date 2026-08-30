@@ -39,7 +39,7 @@ public sealed class AsturianPhonemizer : ILanguage
     /** Scan a lowercased Asturian word into IPA phone tokens. */
     private static List<string> Scan(string word)
     {
-        var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        var w = Js.Normalize(word, NormalizationForm.FormC).ToLowerInvariant();
         var outp = new List<string>();
         var i = 0;
         while (i < w.Length)

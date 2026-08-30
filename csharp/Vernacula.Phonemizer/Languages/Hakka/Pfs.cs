@@ -38,7 +38,7 @@ public static class Pfs
     /** A syllable stripped to its bare letters, plus whichever tone mark it carried. */
     private static (string Base, string Mark) StripTone(string syl)
     {
-        var d = syl.Normalize(NormalizationForm.FormD);
+        var d = Js.Normalize(syl, NormalizationForm.FormD);
         var mark = Js.CodePoints(d).FirstOrDefault(c => c.Length == 1 && TONE_MARKS.IndexOf(c[0]) >= 0) ?? "";
         return (TONE_RE.Replace(d, ""), mark);
     }
@@ -50,7 +50,7 @@ public static class Pfs
     private static string FoldVariants(string s) => TS.Replace(TSH.Replace(s, "chh"), "ch");
 
     /** The lookup key for a PFS string: lower-cased, variant-folded, and NFD so the marks compare. */
-    private static string Key(string s) => FoldVariants(Js.ToLowerCase(s)).Normalize(NormalizationForm.FormD);
+    private static string Key(string s) => Js.Normalize(FoldVariants(Js.ToLowerCase(s)), NormalizationForm.FormD);
 
     private sealed class Index
     {

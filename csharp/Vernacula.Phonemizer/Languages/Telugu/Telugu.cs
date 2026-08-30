@@ -37,7 +37,7 @@ public static class TeluguPhonemizer
     /** One Telugu word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        var norm = JsRegex.Replace(word.Normalize(System.Text.NormalizationForm.FormC), FINAL_ANUSVARA, _ => "మ్");
+        var norm = JsRegex.Replace(Js.Normalize(word, System.Text.NormalizationForm.FormC), FINAL_ANUSVARA, _ => "మ్");
         var x = G2p(norm);
         x = JsRegex.Replace(x, GEMINATE, m => m.Groups[1].Value + "ː");
         x = JsRegex.Replace(x, ASPIRATE_AFTER_LENGTH, m => m.Groups[1].Value + "ː");

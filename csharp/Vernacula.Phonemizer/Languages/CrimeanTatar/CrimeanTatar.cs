@@ -27,7 +27,7 @@ public static class CrimeanTatarPhonemizer
     /** One Crimean Tatar word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        var cased = DOTLESS_I.Replace(DOTTED_I.Replace(word.Normalize(NormalizationForm.FormC), "i"), "ı");
+        var cased = DOTLESS_I.Replace(DOTTED_I.Replace(Js.Normalize(word, NormalizationForm.FormC), "i"), "ı");
         var chars = Js.CodePoints(Js.ToLowerCase(cased));
         var segs = new List<string>();
         for (var i = 0; i < chars.Count; i++)

@@ -62,7 +62,7 @@ public sealed class SwedishPhonemizer : ILanguage
     /** One Swedish word → canonical IPA. Monosyllables carry no ˈ / accent. */
     public static string PhonemizeWord(string word)
     {
-        var w = Js.ToLowerCase(word).Normalize(System.Text.NormalizationForm.FormC);
+        var w = Js.Normalize(Js.ToLowerCase(word), System.Text.NormalizationForm.FormC);
         if (EXCEPTIONS.TryGetValue(w, out var exc)) return exc;
 
         Lexicon().TryGetValue(w, out var lex);
@@ -107,13 +107,13 @@ public sealed class SwedishPhonemizer : ILanguage
             }
             else outp += s.Ph;
         }
-        return outp.Normalize(System.Text.NormalizationForm.FormC);
+        return Js.Normalize(outp, System.Text.NormalizationForm.FormC);
     }
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
 
     /** NFC fold, hoisted OUT of `Text()` on purpose — see swedish.ts (normalization/review.ts's trap-6 check). */
-    private static string Nfc(string s) => s.Normalize(System.Text.NormalizationForm.FormC);
+    private static string Nfc(string s) => Js.Normalize(s, System.Text.NormalizationForm.FormC);
 
     /// <summary>⚠ THE WORD ARM CARRIES A MEDIAL APOSTROPHE, guarded by a LOOKAHEAD rather than a character
     /// class. LATIN_RUN stops at `\u0027`, so a name or possessive carrying one arrived as two runs and read as

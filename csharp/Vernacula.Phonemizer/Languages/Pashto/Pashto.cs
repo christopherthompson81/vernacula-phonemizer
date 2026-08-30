@@ -56,7 +56,7 @@ public sealed class PashtoPhonemizer : ILanguage
     private static string G2p(string word)
     {
         var s = Js.CodePoints(SHADDA_AFTER_VOWEL.Replace(
-            TANWIN_ALIF.Replace(word.Normalize(NormalizationForm.FormC), "$1"), "ّ$1"));
+            TANWIN_ALIF.Replace(Js.Normalize(word, NormalizationForm.FormC), "$1"), "ّ$1"));
         var n = s.Count;
         var outp = "";
         var i = 0;

@@ -44,7 +44,7 @@ public static class Normalize
     {
         var s = input;
 
-        s = AMP.Replace(s.Normalize(NormalizationForm.FormC), "&");
+        s = AMP.Replace(Js.Normalize(s, NormalizationForm.FormC), "&");
         // ⚠ THE MISS BRANCH IS REACHABLE AND FALLS BACK TO THE MATCH (#1122): the pattern's `iu` flags fold
         // U+017F LONG S onto `s`, so `&ſup2;` matches while its key does not exist. The TS asserted non-null
         // and spoke the word "undefined"; this indexer THREW `KeyNotFoundException` for the whole caller.

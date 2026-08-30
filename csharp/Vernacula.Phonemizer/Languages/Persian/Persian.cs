@@ -68,7 +68,7 @@ public static class PersianPhonemizer
     /** Persian word → canonical IPA (consonant + long-vowel skeleton + default short vowel). */
     private static string G2p(string word)
     {
-        var s = Js.CodePoints(word.Normalize(System.Text.NormalizationForm.FormC));
+        var s = Js.CodePoints(Js.Normalize(word, System.Text.NormalizationForm.FormC));
         var n = s.Count;
         var @out = "";
         var i = 0;
@@ -213,7 +213,7 @@ public static class PersianPhonemizer
     public static string NormalizePersianOrthography(string text) =>
         // NFC first, so decomposed input (NFD آ = bare alef + combining madda) composes to the single code
         // point the tagger vocab and the آ→aː rule key on; then fold the Arabic variants.
-        FA_ORTHO_RE.Replace(text.Normalize(System.Text.NormalizationForm.FormC), c => FA_ORTHO.GetValueOrDefault(c.Value, c.Value));
+        FA_ORTHO_RE.Replace(Js.Normalize(text, System.Text.NormalizationForm.FormC), c => FA_ORTHO.GetValueOrDefault(c.Value, c.Value));
 
     /**
      * TEXT NORMALIZATION — the pre-tokenizer pass. Public because the NEURAL entry points do their own

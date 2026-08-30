@@ -180,7 +180,7 @@ public static class Bengali
         /** Pure RULE-ENGINE word→IPA (no lexicon): the honest signal used by the referee eval. */
         string WordRules(string w)
         {
-            var norm = w.Normalize(System.Text.NormalizationForm.FormC);
+            var norm = Js.Normalize(w, System.Text.NormalizationForm.FormC);
             norm = ANUSVARA.Replace(norm, "ঙ্"); // velar-nasal sign → full [ŋ]
             norm = KHANDA_TA.Replace(norm, "ত্"); // khanda ta → vowelless dental [t̪]
             norm = OYA.Replace(norm, "ওআ");
@@ -212,7 +212,7 @@ public static class Bengali
         {
             if (def.SkipLexicon != true)
             {
-                if (Lexicon().TryGetValue(w.Normalize(System.Text.NormalizationForm.FormC), out var hit)) return hit;
+                if (Lexicon().TryGetValue(Js.Normalize(w, System.Text.NormalizationForm.FormC), out var hit)) return hit;
             }
             if (oov is not null)
             {

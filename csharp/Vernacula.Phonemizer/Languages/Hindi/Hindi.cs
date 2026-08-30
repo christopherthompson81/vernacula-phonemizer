@@ -178,7 +178,7 @@ public static class Hindi
 
         /** SHIPPED word→IPA: a whole-word lexicon override then the rule engine. */
         string Word(string w) =>
-            lexicon is not null && lexicon.TryGetValue(w.Normalize(NormalizationForm.FormC), out var v) ? v : WordRules(w);
+            lexicon is not null && lexicon.TryGetValue(Js.Normalize(w, NormalizationForm.FormC), out var v) ? v : WordRules(w);
 
         string ToAscii(string digits) =>
             string.Concat(Js.CodePoints(digits)

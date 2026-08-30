@@ -22,7 +22,7 @@ public static class UzbekPhonemizer
     /** One Uzbek (Latin) word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        var s = APOS.Replace(Js.ToLowerCase(word).Normalize(NormalizationForm.FormC), APOS_C);
+        var s = APOS.Replace(Js.Normalize(Js.ToLowerCase(word), NormalizationForm.FormC), APOS_C);
         var chars = Js.CodePoints(s);
         var outp = new List<string>();
         for (var i = 0; i < chars.Count;)

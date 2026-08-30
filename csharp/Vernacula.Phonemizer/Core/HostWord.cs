@@ -87,7 +87,7 @@ public static class HostWord
         /** NFC then `+`, so the test is "every character is in the inventory". ⚠ `+` rather than one
          *  occurrence, because a cluster is base plus marks and not every mark composes; and NFC only,
          *  never also NFD, or a decomposed `ñ` would be judged native and emitted raw. */
-        bool Known(string s) => inClass.IsMatch(s.Normalize(NormalizationForm.FormC));
+        bool Known(string s) => inClass.IsMatch(Js.Normalize(s, NormalizationForm.FormC));
         return w =>
         {
             if (Known(w)) return w;

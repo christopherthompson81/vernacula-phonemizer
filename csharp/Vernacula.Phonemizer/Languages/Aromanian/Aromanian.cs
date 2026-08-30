@@ -28,7 +28,7 @@ public static class AromanianPhonemizer
     /** One Aromanian word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        var s = Js.CodePoints(Js.ToLowerCase(word.Normalize(NormalizationForm.FormC)));
+        var s = Js.CodePoints(Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC)));
         var n = s.Count;
         var outp = new List<string>();
         bool PrevVowel() => outp.Count > 0 && IsVowelPh(outp[^1]);

@@ -92,7 +92,7 @@ public static class G2p
         {
             if (KNOWN_LETTERS.Contains(c)) return c;
             if (FOREIGN_LETTER.TryGetValue(c, out var named)) return named;
-            var b = MARKS_RUN.Replace(c.Normalize(System.Text.NormalizationForm.FormD), "");
+            var b = MARKS_RUN.Replace(Js.Normalize(c, System.Text.NormalizationForm.FormD), "");
             if (FOREIGN_LETTER.TryGetValue(b, out var mapped)) return mapped;
             return Js.CodePoints(b).Count == 1 && KNOWN_LETTERS.Contains(b) ? b : c;
         }).ToList();

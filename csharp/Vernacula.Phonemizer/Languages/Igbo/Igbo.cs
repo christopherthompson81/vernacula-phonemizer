@@ -26,7 +26,7 @@ public sealed class IgboPhonemizer : ILanguage
     /** One Igbo word → canonical IPA (segments + tone-when-marked). */
     public static string PhonemizeWord(string word)
     {
-        var s = Js.CodePoints(Js.ToLowerCase(word).Normalize(NormalizationForm.FormD));
+        var s = Js.CodePoints(Js.Normalize(Js.ToLowerCase(word), NormalizationForm.FormD));
         var n = s.Count;
         var outp = new StringBuilder();
 

@@ -69,7 +69,7 @@ public static class BavarianPhonemizer
     /** Scan a lowercased word into phone tokens: longest-match digraphs, then single graphemes. */
     private static List<Tok> Scan(string word)
     {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         var toks = new List<Tok>();
         var i = 0;
         while (i < w.Length)

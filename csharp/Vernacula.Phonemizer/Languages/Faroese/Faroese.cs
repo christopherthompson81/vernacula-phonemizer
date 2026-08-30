@@ -38,7 +38,7 @@ public static class FaroesePhonemizer
     /** Scan a lowercased Faroese word into vowel/consonant segments (greedy, vowel digraphs first). */
     private static List<Seg> Scan(string word)
     {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         var segs = new List<Seg>();
         var i = 0;
         while (i < w.Length)

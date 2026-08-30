@@ -62,7 +62,7 @@ public static class IcelandicPhonemizer
      *  clusters), the geminate stops, and the ⟨k g⟩→[c] palatalization + the context-dependent ⟨nn⟩. */
     private static List<Tok> Scan(string word)
     {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         var toks = new List<Tok>();
         var i = 0;
         while (i < w.Length)
