@@ -19,7 +19,7 @@ public static class BasquePhonemizer
     public static string PhonemizeWord(string word)
     {
         // NFC so ⟨ñ ç⟩ stay single codepoints (NFD would drop the mark)
-        var chars = Js.CodePoints(Js.ToLowerCase(word.Normalize(NormalizationForm.FormC)));
+        var chars = Js.CodePoints(Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC)));
         var outp = new List<string>();
         for (var i = 0; i < chars.Count; i++)
         {

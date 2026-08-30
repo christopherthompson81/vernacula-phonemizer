@@ -67,7 +67,7 @@ public static class GuaraniPhonemizer
      */
     public static string PhonemizeWord(string word)
     {
-        var w = JsRegex.Replace(Js.ToLowerCase(word.Normalize(NormalizationForm.FormC)), PUSO_GLYPHS, "'");
+        var w = JsRegex.Replace(Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC)), PUSO_GLYPHS, "'");
         var chars = Js.CodePoints(w);
         var segs = new List<string>();
         // Per emitted vowel segment: its segment index + whether its source grapheme was acute / nasal.

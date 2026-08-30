@@ -158,7 +158,7 @@ public static class PunjabiPhonemizer
             var isShah = Shahmukhi.SHAHMUKHI_WORD.IsMatch(w);
             var x = isShah
                 ? Shahmukhi.ScanShahmukhi(w)
-                : g2p(addakRe.Replace(w.Normalize(System.Text.NormalizationForm.FormC), "$1੍$1"));
+                : g2p(addakRe.Replace(Js.Normalize(w, System.Text.NormalizationForm.FormC), "$1੍$1"));
             x = ASP_AFTER_LENGTH.Replace(GEMINATE.Replace(x, "$1ː"), "$1ː");
             var syls = VOWEL_G.Matches(x).Count;
             if (syls >= 2) x = FINAL_SCHWA.Replace(x, "");

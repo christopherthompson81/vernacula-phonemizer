@@ -17,7 +17,7 @@ public sealed class UmbunduPhonemizer : ILanguage
     /** Strip the tone accents (acute U+0301 = H, grave U+0300 = L; tone is DEFERRED) but KEEP the nasalisation
      *  tilde (U+0303) — decompose, drop only the tone marks, recompose. */
     private static string StripTone(string w) =>
-        TONE_MARKS.Replace(w.Normalize(NormalizationForm.FormD), "").Normalize(NormalizationForm.FormC);
+        Js.Normalize(TONE_MARKS.Replace(Js.Normalize(w, NormalizationForm.FormD), ""), NormalizationForm.FormC);
 
     private static bool StartsWithAt(string w, string key, int i) =>
         i + key.Length <= w.Length && string.CompareOrdinal(w, i, key, 0, key.Length) == 0;

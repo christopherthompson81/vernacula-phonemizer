@@ -29,7 +29,7 @@ public sealed class KalaallisutPhonemizer : ILanguage
      */
     public static string PhonemizeWord(string word)
     {
-        var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        var w = Js.Normalize(word, NormalizationForm.FormC).ToLowerInvariant();
         var chars = Js.CodePoints(w);
         var outp = new List<string>();
         for (var i = 0; i < chars.Count; i++)

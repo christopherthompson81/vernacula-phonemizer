@@ -19,7 +19,7 @@ public sealed class UyghurPhonemizer : ILanguage
     /** Phonemize a single Uyghur word to canonical IPA (segmental; final devoicing; non-tonal). */
     public static string PhonemizeWord(string word)
     {
-        var w = word.Normalize(NormalizationForm.FormC);
+        var w = Js.Normalize(word, NormalizationForm.FormC);
         var seg = new List<string>();
         foreach (var ch in Js.CodePoints(w))
             if (G.TryGetValue(ch, out var g)) seg.Add(g);

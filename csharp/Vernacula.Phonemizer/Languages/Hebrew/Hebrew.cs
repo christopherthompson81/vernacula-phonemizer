@@ -47,7 +47,7 @@ public sealed class HebrewPhonemizer : ILanguage
      */
     public static List<HebrewChunk> PhonemizeAligned(string word)
     {
-        var cps = Js.CodePoints(word.Normalize(NormalizationForm.FormC));
+        var cps = Js.CodePoints(Js.Normalize(word, NormalizationForm.FormC));
         var chunks = new List<HebrewChunk>();
         var k = 0;
         var prevVowel = ""; // last vowel emitted — decides whether a bare ⟨י⟩ is a silent mater or a [j] glide

@@ -284,7 +284,7 @@ public static class TibetanPhonemizer
     /** Phonemize one Tibetan word (one or more tsheg-separated syllables). */
     public static string PhonemizeWord(string word)
     {
-        var w = word.Normalize(System.Text.NormalizationForm.FormC);
+        var w = Js.Normalize(word, System.Text.NormalizationForm.FormC);
         var outp = new List<string>();
         foreach (var syl in w.Split(SYLL_SPLIT))
         {

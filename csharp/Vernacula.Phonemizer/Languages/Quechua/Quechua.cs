@@ -26,7 +26,7 @@ public sealed class QuechuaPhonemizer : ILanguage
     /** Phonemize one Quechua word → canonical IPA: longest-match scan + penultimate stress. */
     public static string PhonemizeWord(string word)
     {
-        var w = APOSTROPHE.Replace(word.Normalize(NormalizationForm.FormC).ToLowerInvariant(), "'");
+        var w = APOSTROPHE.Replace(Js.Normalize(word, NormalizationForm.FormC).ToLowerInvariant(), "'");
         var segs = new List<string>();
         var i = 0;
         while (i < w.Length)

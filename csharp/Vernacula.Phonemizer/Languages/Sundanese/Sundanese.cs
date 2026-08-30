@@ -25,7 +25,7 @@ public static class SundanesePhonemizer
     public static string PhonemizeWord(string word)
     {
         var latin = SundaAksara.IsAksaraSunda(word) ? SundaAksara.AksaraToLatin(word) : word;
-        var s = Js.CodePoints(Js.ToLowerCase(latin).Normalize(NormalizationForm.FormC));
+        var s = Js.CodePoints(Js.Normalize(Js.ToLowerCase(latin), NormalizationForm.FormC));
         var segs = new List<string>();
         for (var i = 0; i < s.Count;)
         {

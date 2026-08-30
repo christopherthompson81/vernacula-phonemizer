@@ -30,7 +30,7 @@ public static class AbkhazPhonemizer
     {
         // Normalize the curly apostrophe ’ (U+2019) to ASCII ' — the pharyngealizer ⟨х'⟩ (TOKEN admits both, but the
         // CLUSTER/MODIFIER keys use only ASCII '); real typographic Abkhaz text uses the curly form.
-        var s = Js.CodePoints(Js.ToLowerCase(word.Normalize(NormalizationForm.FormC).Replace("\u2019", "'")));
+        var s = Js.CodePoints(Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC).Replace("\u2019", "'")));
         var outp = new List<string>();
         for (var i = 0; i < s.Count; i++)
         {

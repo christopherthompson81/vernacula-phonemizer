@@ -33,7 +33,7 @@ public static class EwePhonemizer
     /** Phonemize one Ewe word → canonical IPA: longest-match scan (nasalization tilde kept, tone dropped). */
     public static string PhonemizeWord(string word)
     {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         var chars = Js.CodePoints(w);
         var segs = new List<string>();
         var i = 0;
@@ -83,7 +83,7 @@ public static class EwePhonemizer
             // every marked CONSONANT, whose base letter Ewe reads perfectly well: `Podobský` → *podobsk
             // (⟨y⟩ = /j/ is in the table), `Française` → *flanaise (⟨c⟩ = /t͡s/ is too). The vowel test
             // belongs on the TILDE, which is where it is, and this branch does what it says.
-            var nfd = Js.CodePoints(c.Normalize(NormalizationForm.FormD));
+            var nfd = Js.CodePoints(Js.Normalize(c, NormalizationForm.FormD));
             var bas = nfd[0];
             if (G.TryGetValue(bas, out var gb))
             {

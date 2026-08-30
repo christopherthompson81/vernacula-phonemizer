@@ -75,7 +75,7 @@ public static class Abugida
 
         return word =>
         {
-            var s = Js.CodePoints(word.Normalize(NormalizationForm.FormC));
+            var s = Js.CodePoints(Js.Normalize(word, NormalizationForm.FormC));
             var outp = "";
             var i = 0;
             void Nasalize()

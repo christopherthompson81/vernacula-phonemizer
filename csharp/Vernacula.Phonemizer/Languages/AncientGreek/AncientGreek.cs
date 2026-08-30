@@ -51,7 +51,7 @@ public static class AncientGreekPhonemizer
     {
         // ⚠ NFD FIRST, THEN LOWERCASE, and `Js.ToLowerCase` rather than .NET's: JS lowercases Σ to the FINAL
         // ς in final position and .NET returns σ in every culture. ⟨ς⟩ is a grapheme key here.
-        var s = Js.CodePoints(Js.ToLowerCase(word.Normalize(NormalizationForm.FormD)));
+        var s = Js.CodePoints(Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormD)));
         // Group base letters with their following combining marks.
         var units = new List<Unit>();
         for (var i = 0; i < s.Count; i++)

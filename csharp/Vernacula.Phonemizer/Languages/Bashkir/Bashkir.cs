@@ -51,7 +51,7 @@ public static class BashkirPhonemizer
 
     public static bool IsRussianLoan(string word)
     {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         var cps = Js.CodePoints(w);
         if (cps.Any(BASHKIR_LETTER.Contains)) return false; // a native Bashkir letter → native word
         return cps.Any(BACK_V.Contains) && cps.Any(FRONT_V.Contains); // harmony violation → loan
@@ -69,7 +69,7 @@ public static class BashkirPhonemizer
     public static string PhonemizeWordNative(string word)
     {
         // Folded here too: this entry is exported and referee-eval calls it directly, bypassing the router.
-        var w = FoldLegacyCodepage(Js.ToLowerCase(word.Normalize(NormalizationForm.FormC)));
+        var w = FoldLegacyCodepage(Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC)));
         var chars = Js.CodePoints(w);
         // ⟨л⟩ is dark [ɫ] in a back-harmony word, clear [l] in a front one
         var backWord = chars.Any(BACK.Contains);

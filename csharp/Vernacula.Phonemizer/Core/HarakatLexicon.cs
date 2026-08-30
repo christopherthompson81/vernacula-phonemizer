@@ -53,6 +53,6 @@ public static class HarakatLexicon
     public static string RestoreHarakat(string word, IReadOnlyDictionary<string, string> lexicon)
     {
         if (HARAKAT.IsMatch(word)) return word;
-        return lexicon.TryGetValue(word.Normalize(NormalizationForm.FormC), out var v) ? v : word;
+        return lexicon.TryGetValue(Js.Normalize(word, NormalizationForm.FormC), out var v) ? v : word;
     }
 }

@@ -65,7 +65,7 @@ public static class G2p
     /** Urdu word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        var s = Js.CodePoints(word.Normalize(System.Text.NormalizationForm.FormC));
+        var s = Js.CodePoints(Js.Normalize(word, System.Text.NormalizationForm.FormC));
         var n = s.Count;
         var @out = "";
         var i = 0;

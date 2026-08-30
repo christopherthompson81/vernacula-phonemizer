@@ -33,7 +33,7 @@ public static class GeorgianPhonemizer
         // ⚠ Mkhedruli is caseless, but MTAVRULI titlecase (U+1C90–1CBF, used for all-caps headings) must be
         // lowercased to the Mkhedruli block the table keys on — else those codepoints miss the scan and are
         // silently dropped. Verified against JS across all 48 Mtavruli codepoints before this was written.
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         var outp = new StringBuilder();
         var i = 0;
         while (i < w.Length)

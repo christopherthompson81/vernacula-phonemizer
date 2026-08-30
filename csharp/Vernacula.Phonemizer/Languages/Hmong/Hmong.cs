@@ -25,7 +25,7 @@ public static class HmongPhonemizer
      *  signal `Reads` and `ReadRun` key on). */
     public static string SyllableToIpa(string syl)
     {
-        var w = Js.ToLowerCase(syl.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(syl, NormalizationForm.FormC));
         if (w.Length == 0) return "";
         // The tone = the final consonant LETTER (RPA has no codas); no such letter → tone 4 (mid).
         var last = w[^1].ToString();

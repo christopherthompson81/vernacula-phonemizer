@@ -36,7 +36,7 @@ public sealed class KannadaPhonemizer : ILanguage
     /** One Kannada word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        var norm = FINAL_ANUSVARA.Replace(word.Normalize(NormalizationForm.FormC), "ಮ್");
+        var norm = FINAL_ANUSVARA.Replace(Js.Normalize(word, NormalizationForm.FormC), "ಮ್");
         var x = G2p(norm);
         x = LENGTH_ASPIRATE.Replace(GEMINATE.Replace(x, "$1ː"), "$1ː");
         x = RETROFLEX_GEM.Replace(x, "ɭː"); // ಳ್ಳ → geminate retroflex [ɭː]

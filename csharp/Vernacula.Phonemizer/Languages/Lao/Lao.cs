@@ -37,7 +37,7 @@ public static class LaoPhonemizer
     /** Reorder a leading vowel (ເ ແ ໂ ໃ ໄ) to AFTER its consonant (cluster): ເມ → ມເ, so the scanner reads L→R. */
     private static string Reorder(string w)
     {
-        var s = Js.CodePoints(w.Normalize(System.Text.NormalizationForm.FormC));
+        var s = Js.CodePoints(Js.Normalize(w, System.Text.NormalizationForm.FormC));
         var @out = new System.Text.StringBuilder();
         for (var i = 0; i < s.Count; i++)
         {

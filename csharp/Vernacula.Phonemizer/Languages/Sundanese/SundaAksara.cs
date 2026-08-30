@@ -81,7 +81,7 @@ public static class SundaAksara
     /** Transliterate an Aksara Sunda word → the Sundanese Latin orthography (the caller runs the su g2p). */
     public static string AksaraToLatin(string word)
     {
-        var s = Js.CodePoints(word.Normalize(NormalizationForm.FormC));
+        var s = Js.CodePoints(Js.Normalize(word, NormalizationForm.FormC));
         var n = s.Count;
         var sb = new StringBuilder();
         var i = 0;

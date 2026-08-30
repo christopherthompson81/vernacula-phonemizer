@@ -105,7 +105,7 @@ public static class MinNanPhonemizer
     /** One Tâi-lô/POJ syllable → (segmental IPA, tone CATEGORY), or null for an empty base. */
     private static (string Seg, string Tone)? SyllableParts(string syl)
     {
-        var nfd = syl.Normalize(NormalizationForm.FormD);
+        var nfd = Js.Normalize(syl, NormalizationForm.FormD);
         var tone = "";
         var stripped = new StringBuilder();
         foreach (var ch in Js.CodePoints(nfd))
@@ -113,7 +113,7 @@ public static class MinNanPhonemizer
             if (TONE_MARK.TryGetValue(ch, out var t)) tone = t;
             else stripped.Append(ch);
         }
-        var b = PojToTailo(Js.ToLowerCase(stripped.ToString().Normalize(NormalizationForm.FormC)));
+        var b = PojToTailo(Js.ToLowerCase(Js.Normalize(stripped.ToString(), NormalizationForm.FormC)));
         if (b == "") return null;
         if (tone == "") tone = CHECKED.IsMatch(b) ? "4" : "1";
         return (BaseToIpa(b), tone);

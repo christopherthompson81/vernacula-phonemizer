@@ -38,7 +38,7 @@ public sealed class MaoriPhonemizer : ILanguage
      */
     public static string PhonemizeWord(string word)
     {
-        var w = word.Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        var w = Js.Normalize(word, NormalizationForm.FormC).ToLowerInvariant();
         var outp = new List<string>();
         var i = 0;
         while (i < w.Length)

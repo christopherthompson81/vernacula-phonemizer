@@ -35,14 +35,14 @@ public static class G2p
     {
         var tone = NGANG;
         var outp = "";
-        foreach (var ch in Js.CodePoints(syl.Normalize(System.Text.NormalizationForm.FormD)))
+        foreach (var ch in Js.CodePoints(Js.Normalize(syl, System.Text.NormalizationForm.FormD)))
         {
             if (TONE.TryGetValue(ch, out var t)) tone = t;
             else outp += ch;
         }
         return new ToneSplit
         {
-            Base = outp.Normalize(System.Text.NormalizationForm.FormC).ToLowerInvariant(),
+            Base = Js.Normalize(outp, System.Text.NormalizationForm.FormC).ToLowerInvariant(),
             Tone = tone,
         };
     }

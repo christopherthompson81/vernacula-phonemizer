@@ -60,7 +60,7 @@ public sealed class MalayalamPhonemizer : ILanguage
     /** One Malayalam word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        var norm = word.Normalize(NormalizationForm.FormC);
+        var norm = Js.Normalize(word, NormalizationForm.FormC);
         // SAMVRITOKARAM detected BEFORE chillu expansion — a chillu-final word ends in the chillu char, not
         // in ്, so it correctly does NOT take the [ɨ].
         var samvrit = norm.EndsWith(VIRAMA, StringComparison.Ordinal);

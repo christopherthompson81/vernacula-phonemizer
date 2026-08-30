@@ -46,7 +46,7 @@ public sealed class OdiaPhonemizer : ILanguage
     /** One Odia word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        var norm = word.Normalize(NormalizationForm.FormC);
+        var norm = Js.Normalize(word, NormalizationForm.FormC);
         var x = G2p(norm);
         x = LENGTH_ASPIRATE.Replace(GEMINATE.Replace(x, "$1ː"), "$1ː");
         x = RETROFLEX_GEM.Replace(x, "ɭː"); // ଳ୍ଳ → geminate retroflex [ɭː]

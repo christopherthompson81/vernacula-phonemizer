@@ -124,7 +124,7 @@ public sealed class BalochiPhonemizer : ILanguage
      *  dot-below→retroflex (NFD unifies precomposed and combining forms). */
     public static string PhonemizeRoman(string word)
     {
-        var a = Js.CodePoints(Js.ToLowerCase(word).Normalize(NormalizationForm.FormD));
+        var a = Js.CodePoints(Js.Normalize(Js.ToLowerCase(word), NormalizationForm.FormD));
         var outp = new List<string>();
         for (var i = 0; i < a.Count; i++)
         {

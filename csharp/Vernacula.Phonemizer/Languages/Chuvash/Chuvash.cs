@@ -34,7 +34,7 @@ public static class ChuvashPhonemizer
     public static string PhonemizeWord(string word)
     {
         // NFC-normalize + JS toLowerCase, then spread into CODE POINTS (astral pairs stay one element).
-        var chars = Js.CodePoints(Js.ToLowerCase(word.Normalize(NormalizationForm.FormC)));
+        var chars = Js.CodePoints(Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC)));
         var segs = new List<Seg>();
         for (var i = 0; i < chars.Count; i++)
         {
@@ -195,7 +195,7 @@ public static class ChuvashPhonemizer
             // symbol tier. And `spellAttributive` LAST, because the question it answers (is a noun coming?)
             // has no answer until the tier has turned `км` into `километр`.
             var prepared = Normalize.SpellAttributive(SYMBOLS(
-                Normalize.NormalizeChuvashInitialisms(Normalize.NormalizeChuvash(input.Normalize(NormalizationForm.FormC)))));
+                Normalize.NormalizeChuvashInitialisms(Normalize.NormalizeChuvash(Js.Normalize(input, NormalizationForm.FormC)))));
             return Clauses.AssembleClauses(prepared, TOKEN, (m, sink) =>
             {
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0)

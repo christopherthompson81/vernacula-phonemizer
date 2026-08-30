@@ -63,7 +63,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
         foreach (var c in cps)
         {
             if (KNOWN_LETTERS.Contains(c)) { sb.Append(c); continue; }
-            var b = MARKS.Replace(c.Normalize(NormalizationForm.FormD), "");
+            var b = MARKS.Replace(Js.Normalize(c, NormalizationForm.FormD), "");
             sb.Append(b.Length == 1 && KNOWN_LETTERS.Contains(b) ? b : c);
         }
         return sb.ToString();
@@ -149,7 +149,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
      */
     private static string PhonemizeMorpheme(string word, bool finalDevoice = true, bool emitStress = true)
     {
-        var w = FoldForeignLetters(Js.ToLowerCase(word.Normalize(NormalizationForm.FormC)));
+        var w = FoldForeignLetters(Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC)));
         var stressNucleus = StressedNucleus(w); // primary-stress nucleus (native first-syllable + loan-suffix overrides)
         var outSb = new StringBuilder();
         var i = 0;
@@ -286,7 +286,7 @@ public sealed class AfrikaansPhonemizer : ILanguage
     /** The RULE ENGINE ALONE — no proper-noun lexicon. */
     public static string PhonemizeWordRules(string word)
     {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
+        var w = Js.ToLowerCase(Js.Normalize(word, NormalizationForm.FormC));
         if (w == "'n" || w == "’n") return "ə"; // the indefinite article ⟨'n⟩ = [ə]
         string? spelled = Js.CodePoints(w).Count == 1 && LETTER_NAME.TryGetValue(w, out var ln) ? ln : null;
         if (spelled is not null) return PhonemizeMorpheme(spelled);

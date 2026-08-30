@@ -55,7 +55,7 @@ public static class UrduPhonemizer
     {
         if (!HarakatLexicon.HARAKAT.IsMatch(word))
         {
-            if (IpaLexicon().TryGetValue(word.Normalize(System.Text.NormalizationForm.FormC), out var ipa)
+            if (IpaLexicon().TryGetValue(Js.Normalize(word, System.Text.NormalizationForm.FormC), out var ipa)
                 && ipa.Length > 0)
                 return WeightStress.ApplyWeightStress(ipa).Normalize(System.Text.NormalizationForm.FormC);
         }
