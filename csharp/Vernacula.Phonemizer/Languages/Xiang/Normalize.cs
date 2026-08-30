@@ -29,7 +29,7 @@ public static class Normalize
 
     /** `N年前` is "N years AGO", a quantity — the sentinel hides the year from spellYears and is a PUA code
      *  point, which cannot occur in the text. */
-    private const string AGO = "";
+    private const string AGO = Markers.PUA_SENTINEL;
     private static readonly JsRe AGO_MARK = JsRegex.Compile("(\\d{4})年(?=前)", "gu");
     private static readonly JsRe JS_META = JsRegex.Compile("[.*+?^${}()|[\\]\\\\]", "gu");
     private static readonly JsRe AGO_RE = JsRegex.Compile(JS_META.Replace(AGO, "\\$&"), "gu"); // escaped — see Gan

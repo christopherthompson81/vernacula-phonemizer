@@ -39,6 +39,7 @@
  */
 import type { NumbersDef } from "../../core/numbers.ts";
 
+import { PUA_SENTINEL } from "../../core/markers.ts";
 /** The fa numbers table: the shared schema (units/teens/tens/hundreds/magnitudes) + the connective's IPA. */
 export interface FaNumbersDef extends NumbersDef {
     hundreds: string[];
@@ -49,7 +50,7 @@ export interface FaNumbersDef extends NumbersDef {
 
 // Internal marker: "this word carries the connective". Stripped by the word renderer, which then appends the
 // connective's IPA. A private-use codepoint, so it can never collide with a Persian spelling.
-const CONNECTIVE = "\u{E000}";
+const CONNECTIVE = PUA_SENTINEL;
 
 /** Wrap a word→IPA renderer so a connective-marked word gets [o] appended to its IPA (بیست → [bˈiːsto]). */
 export function encliticWord(word: (w: string) => string, d: FaNumbersDef): (w: string) => string {

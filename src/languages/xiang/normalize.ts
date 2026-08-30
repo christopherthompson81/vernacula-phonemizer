@@ -71,6 +71,7 @@
  * silence. Shipped as an inference from the family, labelled as one.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { PUA_SENTINEL } from "../../core/markers.ts";
 import { degroupThousands, readDecimals, reorderFraction, spellYears } from "../../core/sinitic.ts";
 import { rewrite } from "../../core/provenance.ts";
 
@@ -116,7 +117,7 @@ export function normalizeXiang(input: string): string {
     // every other Sinitic corpus (cjy, hak, nan, wuu, yue, cmn), so a shared change would be carried by six
     // languages to fix one instance in a seventh. The sentinel is a PUA code point, which cannot occur in
     // the text, swapped back immediately after.
-    const AGO = "";
+    const AGO = PUA_SENTINEL;
     // ⚠ ESCAPED: the sentinel is a PUA code point today, but a regex built from an unescaped literal
 // would silently change meaning if it ever became a metacharacter.
 const AGO_RE = new RegExp(AGO.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "gu");

@@ -43,6 +43,7 @@
  *   npx tsx tools/normalization/mine.ts backfill [--dir tools/corpus/mined] [--dry]
  */
 import { readFileSync, writeFileSync, appendFileSync, readdirSync, openSync, readSync, closeSync } from "node:fs";
+import { PUA_SENTINEL } from "../../src/core/markers.ts";
 import { StringDecoder } from "node:string_decoder";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -74,7 +75,7 @@ export type SegmentMode = "sentence" | "paragraph";
  * dots are protected before splitting and restored after. Under-splitting is harmless — the length cap
  * bounds a segment anyway — whereas over-splitting silently deletes the evidence.
  */
-const DOT_SENTINEL = "";
+const DOT_SENTINEL = PUA_SENTINEL;
 const PROTECT: RegExp[] = [
     /(?<![\p{L}\p{M}])(?:\p{L}\.){2,}/gu, // U.S., M.Ö., ಕ್ರಿ.ಪೂ
     /(?<![\p{L}\p{M}])\p{L}\.(?=\s*[\p{Nd}\p{Lu}])/gu, // a lone initial: J. S. Bach, S. 42

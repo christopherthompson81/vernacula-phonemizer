@@ -118,6 +118,7 @@
  * mostly `&nbsp;` and they never reach this file.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { PUA_SENTINEL } from "../../core/markers.ts";
 import { degroupThousands, readDecimals, reorderFraction, spellYears } from "../../core/sinitic.ts";
 import { rewrite } from "../../core/provenance.ts";
 
@@ -304,7 +305,7 @@ export function normalizeGan(input: string): string {
  * instances in one corpus, and a shared change would be carried by six languages to fix them. The sentinel
  * is a PUA code point, which cannot occur in the text, and is swapped back immediately after `spellYears`.
  */
-const AGO = "";
+const AGO = PUA_SENTINEL;
 // ⚠ ESCAPED: the sentinel is a PUA code point today, but a regex built from an unescaped literal
 // would silently change meaning if it ever became a metacharacter.
 const AGO_RE = new RegExp(AGO.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "gu");

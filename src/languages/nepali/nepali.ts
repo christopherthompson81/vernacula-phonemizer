@@ -7,6 +7,7 @@
  * औ→[ʌu], and व→[w]. Validated vs wikipron nep + kaikki.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
+import { PUA_SENTINEL } from "../../core/markers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -72,7 +73,7 @@ const nepaliVowel = (s: string): string => s.replace(/ə/gu, "ʌ");
 // text() interleaves EMBEDDED-Latin runs (English via `foreign`), whose /ə/ is a real, contrastive vowel that
 // must NOT become [ʌ]. So the foreign output's ə is shielded behind a private-use sentinel before interleaving,
 // then restored after the Devanagari ə→ʌ map.
-const SENTINEL = "";
+const SENTINEL = PUA_SENTINEL;
 
 function engine(foreign?: ForeignPhonemizer): ReturnType<typeof makeNativeHindi> {
     const shieldedForeign: ForeignPhonemizer | undefined = foreign

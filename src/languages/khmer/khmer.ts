@@ -19,6 +19,7 @@
  * logical-order, so no leading-vowel reorder is needed.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { NUL_SENTINEL } from "../../core/markers.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -87,7 +88,7 @@ interface Unit {
  * to attach a coda and ឥណ្ឌា came out *ʔə.ɗiə* instead of *ʔən.ɗiə*, dropping the ណ. This sentinel is never looked
  * up in `DEF.vowels`, because PASS 3 emits an `iv` unit and moves on before the vowel lookup.
  */
-const IV_VS = "\u0000";
+const IV_VS = NUL_SENTINEL;
 
 // Exceptions lexicon (word → canonical IPA) for the RULE-UNPREDICTABLE residual — inherent-vowel length,
 // internal-doubling, Pali/Sanskrit loanword vowels. These are LEXICAL (not derivable from the spelling, per

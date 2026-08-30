@@ -22,6 +22,7 @@
  */
 import type { NumbersDef } from "../../core/numbers.ts";
 
+import { PUA_SENTINEL } from "../../core/markers.ts";
 /** Balochi numbers table: the shared schema (lakh/crore magnitudes) + the enclitic connective and 10^9 word. */
 export interface BalNumbersDef extends NumbersDef {
     magnitudes: NumbersDef["magnitudes"] & { arab: string };
@@ -31,7 +32,7 @@ export interface BalNumbersDef extends NumbersDef {
 
 // Internal marker: "this word carries the enclitic connective". Stripped by the word renderer, which then appends
 // the connective's IPA. A private-use codepoint, so it can never collide with a Balochi spelling.
-const ENCLITIC = "\u{E000}";
+const ENCLITIC = PUA_SENTINEL;
 
 /** Wrap a language word→IPA renderer so a connective-marked word gets the enclitic -u appended to its IPA. */
 export function encliticWord(word: (w: string) => string, d: BalNumbersDef): (w: string) => string {
