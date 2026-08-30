@@ -118,6 +118,12 @@ No un-phonemized digit or sign leaks into either engine's phoneme stream over th
     parity chv                               chv  OK  200 rows
     build                                    0 warnings, 0 errors
 
+⚠ **RECOUNTED AFTER THE REBASE ONTO CURRENT `main`** (which had since taken the ee port; the additive
+conflicts in `Bootstrap.cs` and `ManifestMappingTests.cs` were resolved to keep every language):
+
+    dotnet test (full suite)                 3,616 pass, 0 fail   (74 Chuvash + 1 manifest mapping)
+    parity, fleet                            151 languages byte-identical, 29,705 rows, 0 differ, 0 BLOCKED
+
 `chv` is gated; nothing moved in the other languages. TypeScript unchanged (both Run-2 bugs were
 C#-only porting errors, fixed in C# only per the bidirectional policy).
 
@@ -138,3 +144,86 @@ C#-only porting errors, fixed in C# only per the bidirectional policy).
   on every stem (пӗрре → пӗрремӗш, тӑваттӑ → тӑваттӑмӗш). The corpus settles the FULL-vs-ATTRIBUTIVE
   stem with the fraction sentence "вĕсенчен виççĕ тăваттăмĕш пайĕ": built on тӑваттӑ, not тӑват.
   C# `OrdinalOf` mirrors this exactly.
+
+## Run 8 — 2026-08-29 ~19:00 — review of #1178: the mechanical diffs
+
+Reading is not the instrument. Both pattern sets were dumped and compared as data — every `JsRe` the port
+compiles (by reflection over the four classes' static fields, `RomanPolicy` included) against every
+RegExp the TypeScript uses (the dynamic ones by hooking the constructor around `normalizeChuvash`,
+`spellAttributive` and a `text()` call, the literals by scanning the source):
+
+    30 C# patterns; 0 not present verbatim in the TS pattern set
+    53 TS patterns; every one with no C# counterpart is shared-tier, not this language's
+
+⚠ TWO WERE FLAGGED AND BOTH WERE MY INSTRUMENT, NOT THE PORT. `FRACTION` differs by `\/` against `/` —
+a JS regex-literal necessity that means the same thing in .NET — and `ATTRIBUTIVE` was absent from the TS
+side only because `spellAttributive` builds its pattern inside the function body and my first hook never
+called it. Both resolved by fixing the instrument rather than the code.
+
+Then every hand-copied table, as a map rather than as a set of literals:
+
+    LETTER_NAME     35 rows / 35 rows — identical key for key AND value for value
+    legalOnsets     15 / 15 — identical in content and order
+    legalCodas      15 / 15 — identical in content and order
+    acronymLetters   9 / 9  — identical in content and order
+    numbers.ts      every literal present on both sides
+
+## Run 9 — 2026-08-29 ~19:10 — both numeral series, walked rather than sampled
+
+Chuvash has TWO series and the attributive one is selected by a boolean that a golden cannot see failing
+— a mis-bound `attr` still yields well-formed Chuvash, just the wrong series. So the whole reachable
+space was enumerated instead of sampled:
+
+    every n in 0…999,999 in FULL *and* in ATTRIBUTIVE, the million and milliard decade
+    structure, and the invariant -мӗш ordinal for 1…2000
+    BOTH SERIES AND THE ORDINAL MATCH THE TS ON ALL 2037964 ROWS
+
+## Run 10 — 2026-08-29 ~19:20 — three differentials under the corrected harness
+
+References built the way `tools/gen_parity_goldens.mts` builds a golden: one process, `clearForeignOov()`
+once, rows in order, through `phonemizeAsync`.
+
+    mined + attest                804 unique texts     0 differ
+    generated haystack         18,785 rows             0 differ
+    review probe                  561 rows             0 differ
+
+The haystack covers **the voicing pass exhaustively** — every (previous letter, obstruent, following
+vowel) triple the rule can see, which is the headline rule and the one a sample would under-test —
+gemination at every position including in a voicing slot (where it must BLOCK), ⟨е⟩ after every letter
+including the ⟨ъ⟩/⟨ь⟩ separating-sign arm, ⟨ь⟩ at every position and after ⟨й⟩ (where it must NOT apply),
+reduced-only and vowel-less words for the stress rule, both numeral series through the text path, every
+normalizer pattern with the shapes each guard must decline, the acronym list, the roman policy in BOTH
+encodings of ⟨ĕ/ӗ⟩ across all fifteen case endings, and the whole symbol tier.
+
+The review probe adds what the haystack could not reach: **NFD input** (220 real corpus lines decomposed
+— see run 11), the JS/.NET lowercase divergence set through the public word entry point, the `[Ѐ-ӿ]`
+token class's own block boundaries, non-canonical Roman spellings and the policy's 100 bound, the ordinal
+suffix splice at every suffix length, and the clock/fraction shapes that must be refused.
+
+## Run 11 — 2026-08-29 ~19:30 — the seam gates, and a finding that is NOT this port's
+
+    --provenance chv (19,589 NFC rows)   70,996/70,996 (100.0%)
+    --ipaspans chv                       63,249/63,249, 0 wrong
+    --poison chv                         0 sites
+    …with the 561-row review probe added: 71,832/80,681 (89.0%), one desync site
+
+The desync is `input.Normalize(FormC)` in `Text()` — a raw normalization of the pipeline string, which
+CHANGES THE LENGTH for ⟨ӑ ӗ ӳ⟩ and is invisible to the tracker. ⚠ **AND THE TYPESCRIPT DOES IT TOO, on
+the same 245 rows** (`available 316, WITHHELD 245`), so this is a faithful port of a shared defect rather
+than a port defect. A second class appeared beside it in the TS only — `s=" 000"`, `s=" 456"`, matched
+SUBSTRINGS, from `rewrite()` called on a callback parameter in the fractional de-grouping arm. **The C#
+port is already correct there**, using `SPACE_SEPS.Replace`.
+
+⚠ **BOTH ARE FLEET-WIDE, WHICH IS WHY NEITHER IS FIXED HERE**: 195 `.normalize()` calls across 98
+language directories, and 58 substring-seam sites across 37. Fixing one arbitrary site inside a port PR
+would leave the fleet inconsistent and hide the class. Filed as #1179, with the ee fixes from #1177 as
+the worked example. chv's own mined corpus is 100% NFC, so nothing is lost for this language today.
+
+## Run 12 — 2026-08-29 ~19:40 — the expectations, re-run against the TypeScript
+
+All 69 hard-coded values in `ChuvashTests.cs` were extracted mechanically and fed back through
+`phonemizeWord` / `phonemizeAsync` / `normalizeChuvash` / `ordinalOf` / `foldCyrillicConfusables` in the
+TypeScript engine, rather than trusted because the C# agreed with them.
+
+    ALL 69 TEST EXPECTATIONS AGREE WITH THE TS ENGINE
+    dotnet test --filter Chuvash    74/74
