@@ -60,12 +60,18 @@ public static class Numbers
     }
 
     /** Read a raw digit STRING digit-by-digit — the fallback beyond the მილიარდი group (n ≥ 10¹²). */
+    /**
+     * ⚠ THE GUARD IS THE ASCII-DIGIT TEST, NOT `Js.Number`. The TS is `UNITS[digitIndex(d)] ?? d`, and
+     * `digitIndex` answers -1 for anything that is not an ASCII digit. Guarding on `Js.Number` instead
+     * looked equivalent and was — until `Js.Number` was made JS-faithful (#1183), at which point
+     * `Number(" ")` became 0, the guard passed, and a SPACE inside a digit run read as ნული, the word
+     * for ZERO. That is #1165's invented zero arriving by a different door.
+     *
+     * ⚠ AND THE ITERATION STAYS OVER CHARS, deliberately: the TS uses `.split("")`, which yields UTF-16
+     * code units, NOT `[...]`, which would yield code points. Faithful here means chars.
+     */
     public static string ReadDigits(string digits) =>
-        string.Join(" ", digits.Select(d =>
-        {
-            var v = Js.Number(d.ToString());
-            return double.IsInteger(v) && v >= 0 && v < UNITS.Count ? UNITS[(int)v] : d.ToString();
-        }));
+        string.Join(" ", digits.Select(d => Core.Numbers.DigitWord(UNITS, d.ToString()) ?? d.ToString()));
 
     /** A non-negative integer (&lt; 10¹²) → space-separated Georgian cardinal words. */
     public static string NumberToWords(double n, string? raw = null)

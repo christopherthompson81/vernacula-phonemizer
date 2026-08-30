@@ -52,8 +52,11 @@ public static class Numbers
     public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0)
-            return string.Join(" ", (raw ?? Js.NumberToString(Math.Abs(n))).Select(d =>
-                d == '0' ? N.Zero : d >= '1' && d <= '9' && d - '0' < N.Units.Count ? N.Units[d - '0'] : d.ToString()));
+            // ⚠ CODE POINTS, NOT CHARS. The TS spreads the string (`[...raw]`), which yields whole code
+            // points; iterating a C# string yields UTF-16 CODE UNITS, so an astral character came back as
+            // two LONE SURROGATES with a space between them — malformed UTF-16 in the phoneme stream.
+            return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n))).Select(d =>
+                d == "0" ? N.Zero : Core.Numbers.DigitWord(N.Units, d) ?? d));
         if (n == 0) return N.Zero;
         return Join(Components(n, true));
     }
