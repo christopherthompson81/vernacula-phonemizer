@@ -199,9 +199,19 @@ export function normalizeGalician(input: string): string {
     // 4) SINGLE-DOT ABBREVIATIONS. Two branches: mid-sentence the dot is CONSUMED so it cannot become a
     //    phrase break; at a phrase end it is kept, because there it really is the sentence end.
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+        (m0, ab: string, sp: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own keys but
+            // carries `i`+`u`, so JS's fold widens it — `ſ`→`s` reaches the `sr`/`sra` keys — and a
+            // near-miss matches while its key is absent. The `!` here made `String.replace` stringify
+            // `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}${sp}`;
+        });
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 5) ORDINAL INDICATORS — º (U+00BA) and ª (U+00AA), which were reaching the phoneme string as nothing
     //    at all (the tokenizer does not match them, so `1º` read as the bare cardinal *un*).

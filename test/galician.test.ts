@@ -120,6 +120,11 @@ describe("galician text normalization", () => {
         expect(normalizeGalician("no 5 de maio")).toBe("no 5 de maio");
         expect(normalizeGalician("Dr. Silva")).toBe("doutor Silva");
         expect(normalizeGalician("etc.")).toBe("etcétera."); // clause-final: the dot IS the sentence end
+        // ⚠ THE FOLDED NEAR-MISS (#1122): the pattern is built from the table's own keys under `i`+`u`,
+        // and JS's fold widens `s` onto the long s, so `ſr.` matches the `sr` arm while its key is absent.
+        // Declined as a whole, not stringified as "undefined".
+        expect(normalizeGalician("ſr. Silva")).toBe("ſr. Silva");
+        expect(normalizeGalician("ſra. Pardo")).toBe("ſra. Pardo");
     });
 
     test("percent, currency and the unit tier — each word attested on gl.wikipedia", () => {
