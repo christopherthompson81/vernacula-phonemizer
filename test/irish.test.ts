@@ -209,6 +209,17 @@ describe("dotted abbreviations the corpus writes without their dot", () => {
     });
 });
 
+// The DECIMAL-UNIT miss branch, found by the C# port review. The alternation is built from the unit
+// table's own keys but the pattern carries `i`+`u`, so JS's fold widens it — `\u017F`→`s` reaches `msu` —
+// and a near-miss matches while `m\u017Fu` is absent from the table. The `!` then stringified `undefined`
+// INTO THE READING. Same shape as gl's #1122.
+describe("Irish: a folded near-miss on a decimal unit is refused, not spoken", () => {
+    test("`1.5 m\u017Fu` keeps its text; `1.5 msu` still reads the unit", () => {
+        expect(normalizeIrish("1.5 msu")).toBe("1 pointe a c\u00faig m\u00edle san uair");
+        expect(normalizeIrish("1.5 m\u017Fu")).toBe("1 pointe a c\u00faig m\u017Fu");
+    });
+});
+
 describe("Irish: a comma before a minus is not a range", () => {
     test("reads `1, -2` as a negative, and a real range as a range", () => {
         expect(phonemize("1, -2", "ga")).not.toContain("ɡˈɔ dʲˈiː");

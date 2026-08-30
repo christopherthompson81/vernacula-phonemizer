@@ -180,6 +180,7 @@ public static class Bootstrap
             Hiligaynon.HiligaynonPhonemizer.RegisterSelf();
             Hmong.HmongPhonemizer.RegisterSelf();
             Icelandic.IcelandicPhonemizer.RegisterSelf();
+            Irish.IrishPhonemizer.RegisterSelf();
         }
     }
 }
