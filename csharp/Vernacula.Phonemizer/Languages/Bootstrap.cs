@@ -178,6 +178,7 @@ public static class Bootstrap
             Guarani.GuaraniPhonemizer.RegisterSelf();
             Hawaiian.HawaiianPhonemizer.RegisterSelf();
             Hiligaynon.HiligaynonPhonemizer.RegisterSelf();
+            Hmong.HmongPhonemizer.RegisterSelf();
         }
     }
 }
