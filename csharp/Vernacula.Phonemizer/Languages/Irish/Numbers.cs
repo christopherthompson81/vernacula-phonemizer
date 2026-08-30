@@ -31,7 +31,7 @@ public static class Numbers
     private static readonly JsRe SPACE_RUN = JsRegex.Compile("\\s+", "g");
 
     /** Lenition: insert `h` after the initial consonant (céad → chéad, míle → mhíle). */
-    public static string Lenite(string w) =>
+    private static string Lenite(string w) =>
         LENITABLE.IsMatch(w) ? w[0] + "h" + w[1..] : w;
 
     /** Eclipsis: prefix the voiced/nasal counterpart (céad → gcéad). `m` has no eclipsed form. */

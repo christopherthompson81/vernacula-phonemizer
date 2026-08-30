@@ -246,3 +246,136 @@ over `[0-9&%$€£¥°º±×÷<>=/¾½²³]`.
   key outside that, but `n < 20` after `n <= 10` returned makes 11–19 the only reachable inputs. The C#
   uses an indexer, which would THROW rather than speak a word; the ordinal walk (Run 8, 0…3,000 × 7
   nouns) reaches every arm and neither engine takes that branch.
+
+---
+
+# PR review (#1195)
+
+## Run 12 — 2026-08-30 12:35 — the adversarial fuzz, and **the transport had to be fixed first**
+
+The Run 8 walks are exhaustive over IRISH LETTERS, which is the wrong alphabet for the questions
+"does the C# throw where the TS does not" and "do the two still agree on text the language does not
+own". A hostile corpus was built for exactly that: astral characters, LONE surrogates, combining marks,
+control characters, exotic spaces, eight other scripts, the case-fold hazards (U+017F, U+212A) spelled
+into every unit / rate / compass table position, extreme digit runs, and a deterministic BMP sweep
+(every 331st code point) — **756 lines**.
+
+⚠ **THE HARNESS COULD NOT CARRY THE CORPUS.** The first run died on
+`System.InvalidOperationException: Cannot read incomplete UTF-16 JSON text as string with missing low
+surrogate` — a JSON string cannot hold a lone surrogate, and a UTF-8 file replaces it with U+FFFD. That
+is #1193's harness bug in a second disguise, and it would have made every surrogate probe unreadable.
+Both drivers were changed to exchange **arrays of UTF-16 code units**, so the comparison sees exactly
+what the engine saw.
+
+## Run 13 — 2026-08-30 12:45 — **THE DEFECT: `Js.ToLowerCase` THREW on a lone surrogate**
+
+An astral/surrogate g2p walk — U+1F600 and its two halves crossed with the Irish letters that decide
+quality, at 1–3 positions, **16,224 words** — found it:
+
+    PhonemizeWord("\ud83d")   TS: ""      C#: !!ERR A valid UTF32 value … should not include
+                                              surrogate codepoint values (Parameter 'utf32')
+    1,940 of 16,224 words threw
+
+The throw is in the **shared core**, not in Irish:
+
+    at System.Char.ConvertFromUtf32(Int32)
+    at Vernacula.Phonemizer.Core.Js.ApplyLowerExtra(String)  Js.cs:286
+    at Vernacula.Phonemizer.Core.Js.ToLowerCase(String)      Js.cs:311
+    at …Irish.IrishPhonemizer.PhonemizeWord(String)
+
+`NeedsLowerExtra` admits EVERY high surrogate — it has to, so an astral cased letter reaches the
+`LOWER_EXTRA` table — and `ApplyLowerExtra` then rebuilt each position with `char.ConvertFromUtf32`,
+which refuses a surrogate value. **JS returns the string unchanged.** The same hazard `LatinPhones`
+already guards for `string.Normalize`, in a second shared-core function, and reachable from ANY engine
+that lowercases a word: a g2p indexing UTF-16 units hands the halves over one at a time, which is
+exactly what the Ewe and Irish scans do by design.
+
+Fixed by copying the code units as written rather than rebuilding them from the code point, plus a
+`CategoryOf` that names `Surrogate` directly for the two `Final_Sigma` context tests (`IsCased` /
+`IsCaseIgnorable` reach an unpaired half whenever one stands next to a Σ). Pinned in
+`JsToLowerCaseTests`.
+
+Measured, not assumed — a lowercase differential over the class the fix touches (Σ, ς, σ, both
+surrogate halves, the pair, Garay U+10D50/U+10D70, U+0130, U+A7CB, U+1C89 and the case-ignorables, at
+1–3 positions):
+
+    5,184 strings   →  0 differ, 0 throws
+
+and the walk that found it, re-run:
+
+    astral/surrogate g2p walk, phonemizeWord:  0 of 16,224 differ
+    astral/surrogate g2p walk, g2pWord:        0 of 16,224 differ
+
+## Run 14 — 2026-08-30 12:50 — the harness was wrong too, and it manufactured 5,998 "differences"
+
+The same walk's `g2p` column first reported 5,998 disagreements — `ſ` reading as `sˠ` and ⵡ as `w` on
+the TS side against nothing on the C# side. **None of them were real.** `ts_units.mts` had no `g2p`
+mode, so the argument fell through to the full `phonemizeAsync` text path, where the nativiser's fold
+and the script router do exactly that. Measured directly:
+
+    g2pWord("ſ")   TS: ""     toSegments: []      latinPhone(U+017F): undefined
+    g2pWord("ⵡ")   TS: ""     toSegments: []      latinPhone(U+2D61): undefined
+    g2pWord("aſ")  TS: "ˈa"
+
+which is what the C# already answered. Recorded because the instrument being wrong in the direction of
+"the port looks broken" is the failure mode that wastes a review — the same shape as #1193's UTF-8
+transport.
+
+## Run 15 — 2026-08-30 12:52 — the one surviving divergence is a language, not a bug
+
+    hostile fuzz, norm:  0 of 756 differ
+    hostile fuzz, text:  1 of 756 differ
+
+    in:  "an ⵡ5ú ⵡ 1.5ⵡ"
+    TS:  ˈan̪ˠ w kˈuːɟuː w ˈa hˈeːn̪ˠ pˠˈɔnʲtʲə ˈa kˈuːɟ w
+    C#:  ˈan̪ˠ   kˈuːɟuː   ˈa hˈeːn̪ˠ pˠˈɔnʲtʲə ˈa kˈuːɟ
+
+U+2D61 is TIFINAGH LETTER YAW. Both engines route Tifinagh to `shi` (Tashelhit) — `Scripts.cs:86` says
+so — but **Tashelhit is not ported to C#**, so the foreign run is dropped. The driver was made to report
+`Registry.PortPending` and it says exactly that: `PORT PENDING requested: tashelhit`.
+
+NOT Irish's, and not a regression: reproduced in five other ported languages.
+
+    an ⵡ lá     TS: gl "ˈaŋ w lˈa"   ee "an w la"   en "æn w lˈɑː"   is "ˈan w lˈau"
+                C#: gl "ˈaŋ lˈa"     ee "an la"     en "æn lˈɑː"     is "ˈan lˈau"
+
+This is the documented "blocked, not wrong" class, and the fleet gate is blind to it because no golden
+row carries Tifinagh. Recorded rather than filed — it closes when `shi` lands.
+
+## Run 16 — 2026-08-30 12:55 — review notes that changed nothing
+
+- **The three externally-imported Irish symbols are all public on the C# side** — `nat`/`Nat`
+  (`test/lexicon-reachability.test.ts`), `phonemizeWord` (`tools/referee-eval`) and `g2pWord`
+  (`tools/gen/build-ga-lexicon.mts`). `isUnreadableIrish` is imported by nothing outside the language,
+  checked rather than assumed.
+- **The two spellings of the same character class were kept apart.** `numbers.ts` writes
+  `/^[aeiouáéíóú]/i` and `normalize.ts` writes `/^[aeiouáéíóú]/u`; likewise `/\s+/g` against `/\s+/gu`.
+  Verbatim PER SITE, which is the lesson the Icelandic port's blanket normalization taught.
+- **`Lenite` was narrowed to `private`** — it is module-private in the TypeScript and nothing outside
+  `Numbers.cs` calls it.
+- **`RATE_UNIT` and `COMPASS` keep a throwing indexer.** Both were checked for the fold hazard that made
+  the decimal-unit table's miss branch reachable: the rate keys contain no `s` for `ſ` to reach, and the
+  compass letter resolves through a `ToUpperInvariant` measured to agree with JS. The hostile fuzz spells
+  both hazards into both positions and neither throws.
+
+## Run 17 — 2026-08-30 13:05 — **the new test was wrong twice, and the second way was silent**
+
+The first spelling of the lone-surrogate pin asserted `s.Length == got.Length`, which the suite
+rejected: `"\ud83d\u0130\ude00"` lowercases to FOUR characters, because U+0130 maps to `i` + U+0307.
+A length-preserving invariant was never the right claim; the rows now carry Node's own
+`toLowerCase` answers, obtained from the reference engine rather than reasoned about.
+
+⚠ **AND THE SECOND FAULT WAS SILENT.** With the answers in, the runner said:
+
+    Skipping test case with duplicate ID … ALoneSurrogateIsLowercasedNotThrownOn(s: "\ufffd", …)
+
+xUnit hashes the SERIALIZED display name, and a lone HIGH surrogate and a lone LOW surrogate both
+render as U+FFFD — so two rows collided and **one was silently dropped**, 49 tests where 8 rows should
+give 50. That is the same class as the harness faults above: an instrument that reports success without
+having run. Each row now carries a distinguishing label, and the count moved 49 → 50.
+
+## Run 18 — 2026-08-30 13:10 — the gates, re-run after the core fix
+
+    dotnet test (full suite)          4,290 pass, 0 fail
+    parity (ALL goldens)              159 languages, 31,070 rows, 0 differ
+    npx vitest run (full suite)       290 files, 5,738 pass, 0 fail   (TypeScript untouched by the fix)

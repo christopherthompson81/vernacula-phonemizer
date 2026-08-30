@@ -279,12 +279,16 @@ public static class Js
         var sb = new StringBuilder(s.Length);
         for (var i = 0; i < s.Length; i++)
         {
-            var cp = char.IsHighSurrogate(s[i]) && i + 1 < s.Length && char.IsLowSurrogate(s[i + 1])
-                ? char.ConvertToUtf32(s[i], s[i + 1])
-                : s[i];
+            var pair = char.IsHighSurrogate(s[i]) && i + 1 < s.Length && char.IsLowSurrogate(s[i + 1]);
+            var cp = pair ? char.ConvertToUtf32(s[i], s[i + 1]) : s[i];
+            // ⚠ THE CODE UNITS ARE COPIED AS WRITTEN, not rebuilt from the code point. This used to be
+            // `char.ConvertFromUtf32(cp)`, which THROWS on an UNPAIRED SURROGATE — and `NeedsLowerExtra`
+            // admits every high surrogate, so `phonemizeWord("\ud83d")` threw where JS returns the string
+            // unchanged. The same hazard LatinPhones already guards for `string.Normalize`.
             if (LOWER_EXTRA.TryGetValue(cp, out var rep)) sb.Append(rep);
-            else sb.Append(char.ConvertFromUtf32(cp));
-            if (cp > 0xFFFF) i++;
+            else if (pair) sb.Append(s[i]).Append(s[i + 1]);
+            else sb.Append(s[i]);
+            if (pair) i++;
         }
         return sb.ToString();
     }
@@ -328,7 +332,7 @@ public static class Js
      */
     private static bool IsCaseIgnorable(int cp)
     {
-        var cat = CharUnicodeInfo.GetUnicodeCategory(char.ConvertFromUtf32(cp), 0);
+        var cat = CategoryOf(cp);
         return cat is UnicodeCategory.NonSpacingMark
             or UnicodeCategory.EnclosingMark
             or UnicodeCategory.Format
@@ -337,9 +341,20 @@ public static class Js
             || cp is '\'' or '\u2019' or '\u00b7' or '\u0387' or ':' or '.';
     }
 
+    /**
+     * ⚠ A LONE SURROGATE IS A VALID JS STRING AND AN INVALID CODE POINT. `char.ConvertFromUtf32` THROWS on
+     * one; JS's own property lookup answers Cs, which is neither cased nor case-ignorable. Both callers
+     * below reach here with an unpaired half whenever one stands next to a Σ, so the category is named
+     * directly rather than round-tripped through a string that cannot be built.
+     */
+    private static UnicodeCategory CategoryOf(int cp) =>
+        cp is >= 0xD800 and <= 0xDFFF
+            ? UnicodeCategory.Surrogate
+            : CharUnicodeInfo.GetUnicodeCategory(char.ConvertFromUtf32(cp), 0);
+
     private static bool IsCased(int cp)
     {
-        var cat = CharUnicodeInfo.GetUnicodeCategory(char.ConvertFromUtf32(cp), 0);
+        var cat = CategoryOf(cp);
         return cat is UnicodeCategory.UppercaseLetter
             or UnicodeCategory.LowercaseLetter
             or UnicodeCategory.TitlecaseLetter;

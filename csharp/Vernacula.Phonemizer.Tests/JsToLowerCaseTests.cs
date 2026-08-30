@@ -85,6 +85,37 @@ public class JsToLowerCaseTests
         Assert.Equal("i\u0307", Js.ToLowerCase("\u0130")); // no Σ anywhere
         Assert.Equal("abc", Js.ToLowerCase("ABC"));         // and the ordinary string is untouched
     }
+
+    /**
+     * ⚠ A LONE SURROGATE IS A VALID JS STRING AND AN INVALID CODE POINT, and this function THREW on one.
+     * `NeedsLowerExtra` admits EVERY high surrogate — it has to, so an astral cased letter can reach the
+     * `LOWER_EXTRA` table — and `ApplyLowerExtra` then rebuilt each position with
+     * `char.ConvertFromUtf32`, which refuses a surrogate value. JS returns the half unchanged. The same
+     * hazard `LatinPhones` already guards for `string.Normalize`, in a second shared-core function, and
+     * reachable from ANY engine that lowercases a word.
+     *
+     * Found by walking the Irish g2p over U+1F600 and its two halves: 1,940 of 16,224 words threw.
+     * Every expectation below is Node's own `String.prototype.toLowerCase` answer.
+     */
+    /// ⚠ THE `label` IS LOAD-BEARING, not decoration: xUnit hashes the SERIALIZED display name, and a
+    /// lone HIGH surrogate and a lone LOW surrogate both render as U+FFFD — without it the two rows
+    /// collide and one is SILENTLY SKIPPED ("Skipping test case with duplicate ID").
+    [Theory]
+    [InlineData("lone high", "\ud83d", "\ud83d")]
+    [InlineData("lone low", "\ude00", "\ude00")]
+    [InlineData("stranded mid-word", "a\ud83db", "a\ud83db")]
+    [InlineData("the well-formed pair", "\ud83d\ude00", "\ud83d\ude00")]
+    // Beside a Σ, which is what drives the Final_Sigma context test — an unpaired half is Cs, so it is
+    // neither cased nor case-ignorable and the sigma stays σ in every one of these.
+    [InlineData("sigma then half", "\u03a3\ud83d", "\u03c3\ud83d")]
+    [InlineData("half then sigma", "\ud83d\u03a3", "\ud83d\u03c3")]
+    [InlineData("sigma pair sigma", "\u03a3\ud83d\ude00\u03a3", "\u03c3\ud83d\ude00\u03c3")]
+    // …and beside a mapping that IS in LOWER_EXTRA. ⚠ U+0130 lowercases to TWO characters, so the string
+    // GROWS — a length-preserving assertion here would be wrong, and was.
+    [InlineData("halves around U+0130", "\ud83d\u0130\ude00", "\ud83d\u0069\u0307\ude00")]
+    public void ALoneSurrogateIsLowercasedNotThrownOn(string label, string s, string want) =>
+        Assert.Equal(want, Js.ToLowerCase(s));
+
 }
 
 /**
@@ -132,4 +163,13 @@ public class LowercaseReachesTheWordPathTests
         Assert.DoesNotContain("İ", got);
         Assert.DoesNotContain("I", got);
     }
+
+    /**
+     * …and the engine entry point that found the throw. A g2p that indexes UTF-16 units hands the halves
+     * of an astral character over ONE AT A TIME — which is exactly what the Ewe and Irish scans do by
+     * design — so the word path really does reach `Js.ToLowerCase` with an unpaired half.
+     */
+    [Fact]
+    public void AWordEndingInALoneSurrogateStillReads() =>
+        Assert.Equal("ˈa", Languages.Irish.IrishPhonemizer.PhonemizeWord("a\ud83d"));
 }
