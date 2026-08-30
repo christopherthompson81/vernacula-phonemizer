@@ -236,7 +236,12 @@ export function normalizeEwe(input: string): string {
     //    base letter with an orphaned mark the scan drops. `TOKEN` admits U+0342 (it is inside the
     //    ̀-ͯ range), so the word never broke on it — the mark simply reached `phonemizeWord` and was
     //    dropped as unmapped, which is why this one is silent where ⟨Ð⟩ is loud.
-    s = rewrite(rewrite(rewrite(s, /[ÐĐ]/gu, "Ɖ"), /Ƞ/gu, "Ŋ"), /͂/gu, "̃").normalize("NFC");
+    //    ⚠ AND THE RE-NFC GOES THROUGH `renormalize`, NOT `String.prototype.normalize`. It is a
+    //    normalization OF THE PIPELINE STRING and it CHANGES THE LENGTH (`a` + U+0303 becomes a
+    //    one-character ⟨ã⟩), so a bare call desyncs the provenance map and every later step then
+    //    reports against a string the tracker does not recognise. Measured on the mined corpus: 5 of 396
+    //    rows lost their mapping entirely, and they are precisely the U+0342 rows this fold repairs.
+    s = renormalize(rewrite(rewrite(rewrite(s, /[ÐĐ]/gu, "Ɖ"), /Ƞ/gu, "Ŋ"), /͂/gu, "̃"), "NFC");
 
     // 2) HTML ENTITIES AND ZERO-WIDTH MARKS, before the ampersand rule at step 11 — else `&nbsp;` is read as
     //    the word "and" followed by the letters n-b-s-p. This wiki writes 9 of its 16 ampersands as entities
@@ -257,10 +262,14 @@ export function normalizeEwe(input: string): string {
     //    refuses to de-group a number followed by its own sentence comma, so `24,000, na …` would split off
     //    `000` and speak it as zero (the ln finding).
     s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
+    //    ⚠ `w.replace`, NOT `rewrite`, INSIDE THE CALLBACK — and likewise for the two percent operands at
+    //    step 5. The seam declares "this string IS the pipeline string"; a MATCHED SUBSTRING is not, and
+    //    calling it there reports a span against a string the tracker has never seen. `--poison` named all
+    //    three sites; none of them changes a character of output.
     //    The SPACE form is ×1 in the retained text (`10 955 000`, Greece's population). Requiring every group
     //    to be exactly three digits is what stops it claiming two adjacent numbers — `ƒe 1961 – 25` has no
     //    three-digit group and `Ɔktoba 22 lia le ƒe 1899` is four digits.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?![\d]| \d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 4) UNITS, BEFORE DECIMALS — the number-unit adjacency this rule matches on is destroyed the moment a
     //    decimal is rewritten (the playbook's standing coupling), and after de-grouping so `1,904,569 km2`
@@ -291,7 +300,7 @@ export function normalizeEwe(input: string): string {
     //    ⚠ ASCENDING AND CHAIN-GUARDED, the same tests step 8 uses — see there for why.
     s = rewrite(s, new RegExp(`(?<![\\d.,:\\-–—])(${NUM})\\s?%?\\s?[-–—]\\s?(${NUM})\\s?%`, "gu"),
         (whole: string, a: string, b: string) =>
-            (Number(rewrite(a, /,/gu, "")) < Number(rewrite(b, /,/gu, "")) ? `${a} ${TO} ${b} ${PERCENT}` : whole));
+            (Number(a.replace(/,/gu, "")) < Number(b.replace(/,/gu, "")) ? `${a} ${TO} ${b} ${PERCENT}` : whole));
     s = rewrite(s, new RegExp(`(?<![\\d.,])(${NUM})\\s?%`, "gu"), `$1 ${PERCENT}`);
 
     // 6) CURRENCY, PREPOSED, and before decimals for the same reason percent is. Longest key first (see
