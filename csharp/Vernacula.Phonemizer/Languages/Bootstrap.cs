@@ -184,6 +184,7 @@ public static class Bootstrap
             Irish.IrishPhonemizer.RegisterSelf();
             Kabuverdianu.KabuverdianuPhonemizer.RegisterSelf();
             Kamba.KambaPhonemizer.RegisterSelf();
+            Tashelhit.TashelhitPhonemizer.RegisterSelf();
         }
     }
 }
