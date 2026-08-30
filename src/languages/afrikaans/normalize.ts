@@ -77,14 +77,14 @@ const DOTTED_ABBREV = MANIFEST.dottedAbbreviations; // afrikaans.jsonc
 // The keys contain DOTS (m.p.u), so each must be regex-escaped before joining the alternation.
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV)
     .sort((a, b) => b.length - a.length)
-    .map((k) => rewrite(k, /[.*+?^${}()|[\]\\]/gu, "\\$&"))
+    .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"))
     .join("|");
 // Only the DOTTED keys may appear WITHOUT their trailing dot (`m.p.u` before a space/paren/end). A plain
 // word like `dr` is NEVER matched bare — it is the start of "Dromaeosauridae" and would misfire.
 const BARE_ALT = Object.keys(DOTTED_ABBREV)
     .filter((k) => k.includes("."))
     .sort((a, b) => b.length - a.length)
-    .map((k) => rewrite(k, /[.*+?^${}()|[\]\\]/gu, "\\$&"))
+    .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"))
     .join("|");
 
 const SIGN = MANIFEST.signWords; // afrikaans.jsonc — one word per math/sign symbol

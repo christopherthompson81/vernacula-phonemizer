@@ -67,7 +67,7 @@ export function makeUrduNormalizer(numbers: NumbersDef): (text: string) => strin
     };
 
     return (input: string): string => {
-        let s = rewrite(input, ARABIC_DIGIT, foldDigit);
+        let s = input.replace(ARABIC_DIGIT, foldDigit);
 
         // 1) ARABIC SYMBOL CHARACTERS → ASCII, so the shared symbol tier (ASCII-keyed) applies. ٪ occurs
         //    once in this corpus and was dropped outright, exactly as in Arabic.

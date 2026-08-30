@@ -98,7 +98,7 @@ export function normalizeAromanian(input: string): string {
         (_m, head: string, rest: string) => head + rest.replace(/[.,]/gu, ""));
     //    …and the SPACE, which this corpus also uses (`216 061 bãn.`, `170 000 di mãrchi`, `21 000 000`).
     s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)(?![.,]\d)/gu,  // space, NBSP, NNBSP, thin space
-        (_m, head: string, rest: string) => head + rewrite(rest, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    ⚠ AND WHAT IS LEFT WITH ONE OR TWO DIGITS IS A DECIMAL, spent rather than spoken: `virgulã` is ×0
     //    on this wiki and no other decimal-point candidate is attested, so the mark becomes a space. The
     //    defect being fixed is the false SENTENCE BREAK — `0.48%` read as *nulã . patrudzãts shi optu*.

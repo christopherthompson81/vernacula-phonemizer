@@ -320,7 +320,7 @@ export function normalizeKazakh(input: string): string {
     //    tier. The suffix on a rate is claimed here too (сағатқа = "to the hour").
     s = rewrite(s, /(\d[\d ]*)\s?(км)\s*\/\s*(сағ|сағат)(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
         (_m, d: string, u: string, denom: string, sfx: string) => {
-            const n = Number(rewrite(d, / /gu, ""));
+            const n = Number(d.replace(/ /gu, ""));
             // ⚠ The ternary this replaced had two identical branches. Here that is CORRECT rather than a
             // bug — the alternation is `(сағ|сағат)`, an abbreviation and its full form, and both read
             // *сағат*. Stated plainly so it does not read as an unfinished branch. (Fula had the same
@@ -334,7 +334,7 @@ export function normalizeKazakh(input: string): string {
         });
     s = rewrite(s, /(\d[\d ]*)\s?миля\s*\/\s*сағат(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?(?![\p{L}\p{M}])/giu,
         (_m, d: string, sfx: string) => {
-            const n = Number(rewrite(d, / /gu, ""));
+            const n = Number(d.replace(/ /gu, ""));
             const base = `${orthographic(n)} миля сағат`;
             if (sfx !== undefined && sfx !== "") {
                 const caseName = CASE_BY_SUFFIX[sfx.toLowerCase()];

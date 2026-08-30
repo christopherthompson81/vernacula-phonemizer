@@ -123,7 +123,7 @@ const MAGNITUDE_ALT = "मिलियन|बिलियन|ट्रिलि�
 
 // Only `$` is a regex metacharacter among the four signs; escaping the others is an *invalid escape* in
 // `u` mode rather than a harmless belt-and-braces, which is why the class is built this way.
-const CUR_ALT = Object.keys(CURRENCY).map((c) => rewrite(c, /[$]/gu, "\\$&")).join("|");
+const CUR_ALT = Object.keys(CURRENCY).map((c) => c.replace(/[$]/gu, "\\$&")).join("|");
 const NOUN_ALT = [...new Set(Object.values(CURRENCY))].join("|");
 const MAG_TAIL = `(\\s*(?:${MAGNITUDE_ALT})(?![\\p{L}\\p{M}]))?`;
 /**
@@ -257,7 +257,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         s = rewrite(s,
             /(?<![\d.,:])([1-9]\d{0,2}(?:,\d{3})+|\d+)\s?(औं|औँ)(?![\p{L}\p{M}])/gu,
             (whole, digits: string, suffix: string) => {
-                const n = Number(rewrite(digits, /,/gu, ""));
+                const n = Number(digits.replace(/,/gu, ""));
                 return Number.isSafeInteger(n) ? ordinal(n, suffix) ?? whole : whole;
             },
         );

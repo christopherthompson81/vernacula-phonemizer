@@ -244,7 +244,7 @@ export function normalizeKikuyu(input: string): string {
     //    `41,200` also writes `41 200`, and it cannot fire on anything else (three digits, no letters).
     // ⚠ NAMED BY THE POISON TOOL AND STAYS ON THE SEAM, for the reason spelled out at the ordinal site below:
     // the subject is `s` itself, so the gap is an earlier kikuyu step and reverting only moves the poison.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // ⚠ `w` is the MATCH, not the pipeline string  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // ⚠ `w` is the MATCH, not the pipeline string  // space, NBSP, NNBSP, thin space
 
     // 4) THE ENGLISH ORDINAL SUFFIX (`21st`, `20th`, `70th`, `4th`, `2nd`; 194 whole-corpus). Kikuyu writes
     //    its own ordinals as WORDS with a class-agreeing prefix — this corpus has *wa mbere*, *wa kerĩ*,

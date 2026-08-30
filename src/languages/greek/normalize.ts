@@ -114,7 +114,7 @@ function minuteWords(m: number): string {
 const DOTTED: Readonly<Record<string, string>> = MANIFEST.abbreviations;
 const DOTTED_ALT = Object.keys(DOTTED)
     .sort((a, b) => b.length - a.length)
-    .map((s) => rewrite(s, /\./gu, "\\."))
+    .map((s) => s.replace(/\./gu, "\\."))
     .join("|");
 
 // ── the shared symbol tier ──────────────────────────────────────────────────────────────────────────

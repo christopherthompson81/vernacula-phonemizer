@@ -321,7 +321,7 @@ export function normalizeTashelhit(input: string): string {
     //    WHEN THE SENTENCE ENDS — both taken from the bm layer, same arguments.
     s = rewrite(s, /(?<![\p{L}\p{M}.])((?:\p{L}\.){2,4})(?!\p{L}\.)(?![\p{L}\p{M}])/gu,
         (whole: string, _g: string, off: number, all: string) => {
-            const body = rewrite(whole, /\./gu, "");
+            const body = whole.replace(/\./gu, "");
             const rest = all.slice(off + whole.length);
             return /^[ \u00a0]*(?:$|\p{Lu})/u.test(rest) ? `${body}.` : body;  // space, NBSP
         });
@@ -353,7 +353,7 @@ export function normalizeTashelhit(input: string): string {
     s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    ⚠ U+066C ARABIC THOUSANDS SEPARATOR, ×2 — `¥ 106٬710٬325`. Moroccan text mixes the digit sets and the
     //    engine's tokenizer already accepts ٠-٩, so the separator has to be de-grouped on the same terms.
-    s = rewrite(s, /(?<![\d٬])([\d٠-٩]{1,3})((?:٬[\d٠-٩]{3})+)(?![\d٠-٩]|٬[\d٠-٩])/gu, (w) => rewrite(w, /٬/gu, ""));
+    s = rewrite(s, /(?<![\d٬])([\d٠-٩]{1,3})((?:٬[\d٠-٩]{3})+)(?![\d٠-٩]|٬[\d٠-٩])/gu, (w) => w.replace(/٬/gu, ""));
     //    The SPACE form (×19: `1 351 m`, `gr 16 500 d 30 000`, `5 262 km`, `∼26 100 a.l.`) additionally has
     //    to reject a bare adjacency that is really two numbers. Requiring every group to be EXACTLY three
     //    digits does that: `wiss 11 d 57 n tusdadt` has no 3-digit group and `21 mars 2020` is not

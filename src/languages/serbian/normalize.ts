@@ -499,7 +499,7 @@ export function normalizeSerbian(input: string): string {
 
 /** Integer part of a Serbian-written number ("3,50" → 3), for the local count-agreement calls. */
 function intOf(n: string): number {
-    return Math.trunc(Number(rewrite(rewrite(n, /\./gu, ""), ",", ".")));
+    return Math.trunc(Number(rewrite(n.replace(/\./gu, ""), ",", ".")));
 }
 
 /**

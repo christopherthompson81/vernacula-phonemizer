@@ -86,7 +86,7 @@ export function normalizeLatin(input: string): string {
     //    guard carrying a bare `.` or `,` declines every clause-final figure; what it has to exclude is a
     //    separator that is CONTINUING the number (`.5`), which is `(?![.,]\d)`.
     s = rewrite(s, /(?<!\d)(?<![\d][.,])([1-9]\d{0,2})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
-        (_m, head: string, rest: string) => head + rewrite(rest, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 2) THE ERA MARKER — Latin's own, and its own expansion. `a.C.n.` = *ante Christum natum*,

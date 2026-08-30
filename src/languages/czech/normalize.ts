@@ -301,7 +301,7 @@ export function normalizeCzech(input: string): string {
         (m0: string, list: string, offset: number, whole: string) => {
             const loc = /(?:v|ve)\s+$/iu.test(whole.slice(0, offset));
             const c: OrdCase = loc ? "loc" : "gen";
-            return `${rewrite(list, /(\d+)\./gu, (_m, n: string) => inflectOrdinal(ordinal(Number(n))!, c))}století`;
+            return `${list.replace(/(\d+)\./gu, (_m, n: string) => inflectOrdinal(ordinal(Number(n))!, c))}století`;
         });
 
     // 8) DECADE — `N. + let/letech` (60. let, 70. let, 20./30./50./80. letech) governs the

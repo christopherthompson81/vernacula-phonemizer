@@ -30,7 +30,6 @@ import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi
 import { makeHindiNormalizer } from "../hindi/normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
-import { rewrite } from "../../core/provenance.ts";
 
 /**
  * ⟨॑⟩ U+0951 IS THIS CORPUS'S SECOND SPELLING OF THE AVAGRAHA, and the artifact proves it against itself.
@@ -63,7 +62,7 @@ const UDATTA_AS_AVAGRAHA = /॑/gu;
 
 // ⚠ ON THE SEAM: `fold` is applied to the PIPELINE STRING in the normalize override below, and it is
 // length-preserving — so leaving it off desynced every offset without changing the length.
-const fold = (s: string): string => rewrite(s, UDATTA_AS_AVAGRAHA, "ऽ");
+const fold = (s: string): string => s.replace(UDATTA_AS_AVAGRAHA, "ऽ");
 /** ⚠ The WORD entry points hand this a word, not the pipeline string — off the seam by construction. */
 const foldWord = (s: string): string => s.replace(UDATTA_AS_AVAGRAHA, "ऽ");
 

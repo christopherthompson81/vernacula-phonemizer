@@ -168,7 +168,7 @@ export function normalizeChuvash(input: string): string {
     //    group sitting behind a decimal separator, correctly, because that is how `1.234 567` is kept from
     //    being read as grouping. The fractional side needs its own pass, anchored on the separator.
     s = rewrite(s, /([.,]\d{3})((?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu,  // space, NBSP, NNBSP, thin space
-        (_m, head: string, rest: string) => head + rewrite(rest, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     s = rewrite(s, /[ \u00a0\u202f\u2009]/gu, " ");  // space, NBSP, NNBSP, thin space
 
     // 1) THE MAGNITUDE ABBREVIATIONS, before any single-dot rule — `1,3 млн. çын`, `143,8 млн. çын`,

@@ -424,7 +424,7 @@ export function normalizeHungarian(input: string): string {
             const stem = dateStem(Number(d));
             if (stem === undefined) return whole;
             // day 1's stem is *elsej-*, so the written `j` of `1-jén` is already in the stem.
-            return stem + (Number(d) === 1 ? rewrite(suf, /^j/u, "") : suf);
+            return stem + (Number(d) === 1 ? suf.replace(/^j/u, "") : suf);
         },
     );
     // 10b) Everything else concatenates onto the cardinal, which is correct because the orthography

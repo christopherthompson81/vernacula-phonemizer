@@ -193,7 +193,7 @@ export function normalizeSundanese(input: string): string {
     // and read *lˈima pˈuluh ʔənˈol .* — "fifty, zero" — losing the thousand word at exactly a sentence end.
     // Reported by `review.ts`'s `clause-final` check. A decimal tail is safe either way: `1 234.56` de-groups
     // to `1234.56` and the decimal rule reads it whole.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (m) => rewrite(m, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+)(?!\d)/gu, (m) => m.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // ── 2. CLOCK — BEFORE the decimal rule, which would otherwise claim `7.30` as seven-point-three ──────
     // The corpus writes the hour with `jam` ×186, `tabuh` and `pukul`, and both separators (`jam 05.00`,

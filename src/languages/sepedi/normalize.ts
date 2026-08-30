@@ -382,8 +382,8 @@ export function normalizeSepedi(input: string): string {
     //    genuine grouped number is `30 560 860` (three). The precision limit itself is an ENGINE defect, not
     //    a normalization one, and is recorded in the investigation doc rather than worked around here.
     s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
-    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => rewrite(w, /\./gu, ""));
-    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3}){1,4}(?!\d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3}){1,4}(?!\d|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3}){1,4}(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 3) THE ENGLISH ORDINAL SUFFIX (`4th`, `16th`, `19th`). Sepedi writes its own ordinals as WORDS and this
     //    corpus does exactly that beside the Latin form — *"mokgatlokgolo wa lesome senyane (19th)"*,

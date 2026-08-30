@@ -275,8 +275,8 @@ export function normalizeLingala(input: string): string {
     //    ⚠ THE TRAILING GUARD EXCLUDES A FOLLOWING SEPARATOR+DIGIT, NOT A CLAUSE MARK. A plain `(?![\d.,])`
     //    refuses to de-group a number followed by its own sentence comma, so `24,000, na wengine` would
     //    split off `000` and speak it as zero.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => rewrite(w, /,/gu, ""));
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => rewrite(w, /\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})((?:\.\d{3})+)(?![\d]|\.\d)/gu, (w) => w.replace(/\./gu, ""));
     //    The SPACE form additionally has to reject a bare adjacency that is really two numbers in a list.
     //    Requiring every group to be exactly three digits does that: `mibu 1600 kino 1850` has no 3-digit
     //    group, and `sanza 9 1946` is not `\d{1,3}( \d{3})+` because 1946 is four.
@@ -353,7 +353,7 @@ export function normalizeLingala(input: string): string {
     s = rewrite(s,
         /(?<![\d.,])(\d+(?:[.,]\d+)?)\s?%\s?[-–—]\s?(\d+(?:[.,]\d+)?)\s?%/gu,
         (whole, a: string, b: string) =>
-            Number(rewrite(a, ",", ".")) < Number(rewrite(b, ",", ".")) ? `${a}% kino ${b}%` : whole,
+            Number(a.replace(",", ".")) < Number(b.replace(",", ".")) ? `${a}% kino ${b}%` : whole,
     );
     s = rewrite(s, RANGE, (whole, a: string, gap: string, b: string) => {
         if (Number(a) >= Number(b)) return whole;

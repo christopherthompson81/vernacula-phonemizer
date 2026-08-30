@@ -192,7 +192,7 @@ export function normalizeGalician(input: string): string {
 
     // 3) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass (step 14) reads them as LETTERS.
     //    ⚠ `\p{Lu}`, never `[A-Z]` — Galician's own ⟨Á É Í Ó Ú Ñ⟩ are capitals outside ASCII (trap 1/7).
-    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     //    A single initial before a surname: the dot is a break, not a full stop.
     s = rewrite(s, /(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
 
@@ -229,7 +229,7 @@ export function normalizeGalician(input: string): string {
     //    a temperature on a genuine `o 1000º aniversario`. Recorded in the investigation doc, run 3.
     s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(º|ª)(?![\p{L}\p{M}])/gu,
         (_m, digits: string, ind: string) => {
-            const n = Number(rewrite(digits, /\./gu, ""));
+            const n = Number(digits.replace(/\./gu, ""));
             const masc = n <= ORDINAL_INDICATOR_MAX ? galicianOrdinal(n) : undefined;
             if (masc === undefined) return digits;
             return ind === "ª" ? feminineOrdinal(masc) : masc;

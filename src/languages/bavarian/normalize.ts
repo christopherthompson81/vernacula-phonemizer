@@ -330,7 +330,7 @@ export function normalizeBavarian(input: string): string {
     //     (`(?<!\p{Nd})` + at most three leading digits), which is what stops `12345 678` merging, so it
     //     cannot use the zero-width form step 6 does and matches the run instead.
     s = rewrite(s, /(?<!\p{Nd})([1-9]\p{Nd}{0,2})((?:[ \u00a0\u202f\u2009]\p{Nd}{3})+)(?!\p{Nd})/gu,  // space, NBSP, NNBSP, thin space
-        (_m, head: string, rest: string) => head + rewrite(rest, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+        (_m, head: string, rest: string) => head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 7) DEGREES, before the unit rules so the scale letter is not left to the Latin fallback, and before
     //    the sign rule so `−20 °C` still has its `°C` visible when the sign is judged. 11 in the Bavarian

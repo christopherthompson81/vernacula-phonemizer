@@ -77,7 +77,7 @@ export function normalizeSpanishInitialisms(text: string): string {
 
 /** Feminine ordinal: every element of a compound inflects (vigésimo primero → vigésima primera). */
 function feminineOrdinal(masc: string): string {
-    return masc.split(" ").map((w) => rewrite(w, /o$/u, "a")).join(" ");
+    return masc.split(" ").map((w) => w.replace(/o$/u, "a")).join(" ");
 }
 
 /** Non-negative integer → words with the final *uno* feminized (hora and minuto agreement: la una, las
@@ -252,7 +252,7 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
         (m0, mon: string) =>
             (americas
                 ? `${MANIFEST.ordinals.units[1]!} de ${mon}`
-                : rewrite(m0, /1\.?º?/u, MANIFEST.numbers.ones[1]!)));
+                : m0.replace(/1\.?º?/u, MANIFEST.numbers.ones[1]!)));
 
     return s;
 }

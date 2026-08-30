@@ -191,7 +191,7 @@ export function normalizeAzerbaijani(input: string): string {
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `Corc V. Buş` — the W.-style initial dot is a break.
-    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => rewrite(m0, /[.\s]/gu, ""));  // space, NBSP
+    s = rewrite(s, /(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));  // space, NBSP
     //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
     //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
     //    carried this line verbatim and every one of them has capitals outside ASCII; here it is

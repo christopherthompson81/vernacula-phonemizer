@@ -215,7 +215,7 @@ const value = (run: string): number =>
 
 /** Delete a space that merely separates a numeral from a Tibetan word. See step 12 for the measurement. */
 const squeezeNumeralSpace = (t: string): string =>
-    rewrite(rewrite(t, new RegExp(`([${D}])[ \\t]+(?=[${TIB}])`, "gu"), "$1")
+    rewrite(t.replace(new RegExp(`([${D}])[ \\t]+(?=[${TIB}])`, "gu"), "$1")
         , new RegExp(`([${TIB}])[ \\t]+(?=[${D}])`, "gu"), "$1");
 
 export function normalizeTibetan(input: string): string {

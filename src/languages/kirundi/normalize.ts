@@ -406,7 +406,7 @@ export function normalizeKirundi(input: string): string {
     //    ⚠ `J.-C.` (French *Jésus-Christ*, ×1) is deliberately NOT matched — the hyphen breaks the run, so the
     //    `{2,}` never fires. One instance of French date-marker debris is not worth widening the class for.
     s = rewrite(s, /(?<![\p{L}\p{M}])(?:\p{Lu}\.[ \u00a0]?){2,}(?:\p{Lu}(?![\p{L}\p{M}]))?/gu, (run: string, off: number, full: string) => {  // space, NBSP
-        const letters = rewrite(run, /[. \u00a0]/gu, "");  // NBSP
+        const letters = run.replace(/[. \u00a0]/gu, "");  // NBSP
         const rest = full.slice(off + run.length);
         if (/^[\p{L}\p{M}]/u.test(rest)) return `${letters} `;
         if (!run.endsWith(".")) return letters;
@@ -503,7 +503,7 @@ export function normalizeKirundi(input: string): string {
     //    ordering.
     s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?!\d|,\d)/gu, (w) => w.replace(/,/gu, ""));
     s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?!\d|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
-    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 5) SPANS. Two shapes, and BOTH are claimed here — before the tier, so a span's operands are still bare
     //    digits, and before step 6 so a `12:22/24` verse reference has already been excluded by the guard

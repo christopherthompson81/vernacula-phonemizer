@@ -293,7 +293,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
             (w) => w.replace(/,/gu, ""));
         //    The DOT form only in its multi-group shape (×35), where a decimal reading is impossible.
         s = rewrite(s, new RegExp(`(?<![${D}.,،])([${D}]{1,3})((?:(?<!(?<![${D}])0)\\.[${D}]{3}){2,})(?![${D}]|\\.[${D}])`, "gu"),
-            (w) => rewrite(w, /\./gu, ""));
+            (w) => w.replace(/\./gu, ""));
         //    ⚠ THERE IS NO SPACE ARM, AND THAT IS A MEASUREMENT RATHER THAN AN OMISSION. `D{1,3}( D{3})+`
         //    matches 115 times and NOT ONE of them is a Western-style space grouping. They are phone
         //    numbers (`90 510`, `+1 613 745-1576`, `059 133`), data-table columns

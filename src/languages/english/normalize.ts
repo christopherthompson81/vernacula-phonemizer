@@ -338,7 +338,7 @@ export function normalizeEnglish(input: string): string {
     //     merges its first pair the head is four digits, so the second pass would refuse its own output.
     const SPACE_GROUP = new RegExp(
         `(?<!(?:${MONTH_ALT})[ \u00a0\u202f\u2009])(?<![\\d.,])[1-9]\\d{0,2}(?:[ \u00a0\u202f\u2009]\\d{3})+(?![\\d])`, "giu");  // space, NBSP, NNBSP, thin space
-    s = rewrite(s, SPACE_GROUP, (m0) => rewrite(m0, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, SPACE_GROUP, (m0) => m0.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 0e) SCIENTIFIC NOTATION'S EXPONENT, resolved before BOTH the sign rule and the unit rule — ⚠ AND THE
     //     ORDERING IS THE WHOLE REASON THIS IS SEPARATE FROM 6b rather than the same rule.
@@ -395,7 +395,7 @@ export function normalizeEnglish(input: string): string {
     s = rewrite(s, /([$£€¥])\s?(\d[\d,]*)\.(\d{2})(?![\p{L}\p{M}])/gu,
         (_m, sym: string, int: string, cents: string) => {
             const [sg, pl] = CURRENCY[sym]!;
-            const unit = /^1$/.test(rewrite(int, /,/g, "")) ? sg : pl;
+            const unit = /^1$/.test(int.replace(/,/g, "")) ? sg : pl;
             return cents === "00" ? `${int} ${unit}` : `${int} ${unit} ${Number(cents)}`;
         });
 

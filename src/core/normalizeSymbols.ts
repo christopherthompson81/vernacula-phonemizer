@@ -599,7 +599,7 @@ export function makeBareUnitNormalizer(
             `(?![\\p{L}\\p{M}\\p{Nd}'’ʼ/²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))`,
         "gu",
     );
-    return (text: string): string => rewrite(text, re, (_whole: string, u: string) => map.get(u)!);
+    return (text: string): string => text.replace(re, (_whole: string, u: string) => map.get(u)!);
 }
 
 /**
@@ -1001,7 +1001,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // two initialisms (`B&B`) must become three tokens, and any later rule that reads a token boundary
         // needs the split to have happened already.
         if (d.ampersand !== undefined)
-            text = rewrite(rewrite(text, /&amp;/giu, "&"), /[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
+            text = rewrite(text.replace(/&amp;/giu, "&"), /[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
         let s = text;
         const isUnitKey = (k: string): boolean =>
             d.units?.[k] !== undefined ||

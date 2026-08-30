@@ -129,7 +129,7 @@ const MILA: readonly [string, string, string] = ["míľa", "míle", "míľ"];
  * such hour (`1:15` read *jeden … pätnásť*). Only the suffix changes, so a compound is handled by the same
  * replacement: dvadsaťjeden → dvadsaťjedna, dvadsaťdva → dvadsaťdve.
  */
-const feminine = (words: string): string => rewrite(rewrite(words, /jeden$/u, "jedna"), /dva$/u, "dve");
+const feminine = (words: string): string => rewrite(words.replace(/jeden$/u, "jedna"), /dva$/u, "dve");
 
 // ---------------------------------------------------------------------------------------------------
 // ORDINALS

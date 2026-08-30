@@ -377,8 +377,8 @@ export function normalizeWolof(input: string): string {
     //    groupings — 6 against 2, and both readings of `1,602` were wrong before (it was a clause pause).
     //    ⚠ THE SPACE ARM'S TRAILING GUARD IS `(?![\d])` ONLY. `1,602 189 2` — the same constant written with
     //    spaced digit groups — is rejected by the LEADING guard instead, because `602` is preceded by a comma.
-    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => rewrite(w, /,/gu, ""));
-    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => rewrite(w, /\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:,\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/,/gu, ""));
+    s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:\.\d{3})+(?![\d]|[.,]\d)/gu, (w) => w.replace(/\./gu, ""));
     s = rewrite(s, /(?<![\d.,])[1-9]\d{0,2}(?:[ \u00a0\u202f\u2009]\d{3})+(?![\d])/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
     // 6) RANGES → `ba`. 21 ascending digit-flanked spans in the retained text once verse references are

@@ -383,7 +383,7 @@ export function normalizeLuganda(input: string): string {
     //    deliberate infidelity for exactly this hazard) and the retained text contains U+0020 and U+000A and no
     //    other whitespace at all — measured, 20,030 spaces, zero U+00A0. It is robustness for a dump that
     //    preserves the raw character, and an escape cannot degrade invisibly the way the literal did.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => rewrite(w, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:[ \u00a0\u202f\u2009]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     //    ⚠ THE PERIOD ARM IS THE RISKY ONE AND ITS EXPOSURE IS MEASURED RATHER THAN ASSERTED. A period-grouped
     //    thousand is indistinguishable from a decimal with exactly three fractional digits, and this rule runs
     //    ABOVE step 7, so a wrong call turns 0.628 into six hundred and twenty-eight. Counted over the retained
@@ -392,7 +392,7 @@ export function normalizeLuganda(input: string): string {
     //    Kafukunya kamu` — against ZERO three-decimal-place quantities. The 1–9 head is what keeps `0.628`
     //    (an HDI figure in this corpus) out, and it is the guard doing the work: without it that arm would be
     //    a defect generator rather than a fix.
-    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, (w) => rewrite(w, /\./gu, ""));
+    s = rewrite(s, /(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, (w) => w.replace(/\./gu, ""));
 
     // 4) PERCENT → `N ku kikumi`, the one POSTPOSED reading in this layer. `percent` ×301 whole-corpus, 61 in
     //    the retained text.
