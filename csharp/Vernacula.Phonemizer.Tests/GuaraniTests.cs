@@ -275,4 +275,37 @@ public class GuaraniTests
 
     [Fact]
     public void RegistryWiring() => Assert.Equal("ɲaˈⁿde", Phonemizer.Phonemize("ñande", "gn").Trim());
+
+    /**
+     * ⚠ THE `?? d` IN `readDigits`, WHICH THE PORT DROPPED AND NOTHING SAW. The TypeScript is
+     * `UNITS[Number(d)] ?? d`: JS array indexing turns NaN, a negative, a fraction or an out-of-range
+     * value into `undefined`, and the `??` passes the CHARACTER THROUGH. The C# read
+     * `UNITS[(int)Js.Number(d)]`, and `(int)NaN` is 0 — so EVERY non-digit character came back as
+     * `mba'eve`, the word for ZERO. Not a different reading: a quantity invented out of a character that
+     * carries none.
+     *
+     * Reachable through the public API rather than only in theory: `numberToWords(n)` with no `raw` reads
+     * `String(n)`, which for n ≥ 1e21 is EXPONENT form — so `1e+21` was read as though the `e` and the `+`
+     * were both zeros.
+     *
+     * ⚠ AND WHITESPACE MUST STILL READ AS ZERO, because JS `Number(" ")` is 0, not NaN. That arm is
+     * asserted too — the two engines have to agree on the odd cases as well as the sensible ones.
+     */
+    [Theory]
+    [InlineData("1e+21", "peteĩ e + mokõi peteĩ")]   // the exponent form String(n) produces
+    [InlineData("-5", "- po")]
+    [InlineData("a", "a")]
+    [InlineData("٣", "٣")]                            // a non-ASCII digit is NOT a Guaraní numeral
+    [InlineData("😀", "😀")]
+    [InlineData("0x10", "mba'eve x peteĩ mba'eve")]
+    [InlineData(" ", "mba'eve")]                      // JS Number(" ") is 0 — whitespace DOES index
+    [InlineData("1 2", "peteĩ mba'eve mokõi")]
+    [InlineData("", "")]
+    public void ReadDigitsPassesANonDigitThroughInsteadOfInventingAZero(string input, string want) =>
+        Assert.Equal(want, Numbers.ReadDigits(input));
+
+    [Fact]
+    // …and the whole path, from the number rather than from a raw token.
+    public void AboveOneETwentyOneTheExponentFormIsReadCharacterByCharacter() =>
+        Assert.Equal("peteĩ e + mokõi peteĩ", Numbers.NumberToWords(1e21));
 }

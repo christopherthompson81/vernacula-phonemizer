@@ -59,9 +59,39 @@ public static class Numbers
         return r == 0 ? head : $"{head} {Below1000(r)}";
     }
 
-    /** Read a digit string one digit at a time (the ≥10⁹ / unsafe-integer fallback). */
+    /**
+     * Read a digit string one digit at a time (the ≥10⁹ / unsafe-integer fallback).
+     *
+     * ⚠ THE `?? d` IS LOAD-BEARING AND WAS MISSING. The TypeScript is `UNITS[Number(d)] ?? d`: JS array
+     * indexing converts the index to a property key, so NaN, a negative, a fraction or an out-of-range
+     * value all yield `undefined` and the `??` passes the CHARACTER THROUGH. Without it `(int)Js.Number(d)`
+     * turns NaN into 0 and every non-digit read as `mba'eve` — the word for ZERO, i.e. a quantity invented
+     * out of a character that carries none. `numberToWords(1e21)` with no `raw` reads `String(n)` in
+     * EXPONENT form, so `peteĩ e + mokõi peteĩ` became `peteĩ mba'eve mba'eve mokõi peteĩ`.
+     *
+     * ⚠ AND WHITESPACE STILL INDEXES, because `Number(" ")` is 0 in JS, not NaN. That is faithful, not a
+     * loose end: the two engines have to agree on the odd cases as well as the sensible ones.
+     */
     public static string ReadDigits(string digits) =>
-        string.Join(" ", Js.CodePoints(digits).Select(d => UNITS[(int)Js.Number(d)]));
+        string.Join(" ", Js.CodePoints(digits).Select(d =>
+        {
+            var n = JsNumberOfCodePoint(d);
+            return double.IsInteger(n) && n >= 0 && n < UNITS.Length ? UNITS[(int)n] : d;
+        }));
+
+    /**
+     * JS `Number(d)` for a SINGLE code point: JS whitespace (and the empty string) is **0**, an ASCII
+     * digit is its value, everything else is NaN.
+     *
+     * ⚠ SPELLED OUT RATHER THAN ROUTED THROUGH `Js.Number`, which returns NaN for whitespace and for the
+     * empty string where JS returns 0. That divergence is a Core one with 714 call sites behind it and is
+     * filed separately; expressing the two lines of JS semantics this function actually needs keeps the
+     * engines identical here without moving a shared primitive from inside a port review.
+     */
+    private static double JsNumberOfCodePoint(string d) =>
+        d.Length == 0 || d.All(Js.IsJsWhiteSpace) ? 0d
+        : d.Length == 1 && d[0] >= '0' && d[0] <= '9' ? d[0] - '0'
+        : double.NaN;
 
     /**
      * Non-negative integer → Guaraní cardinal words. ≥10⁹ or non-safe → digit-by-digit.
