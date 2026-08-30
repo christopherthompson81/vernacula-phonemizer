@@ -430,7 +430,13 @@ export function normalizeIlocano(input: string): string {
 
     // ── 7. DOTTED ABBREVIATIONS — closed list, see DOTTED_ABBREV ─────────────────────────────────────────
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}`);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
+            // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
+            // key is absent. The `!` here made `String.replace` stringify `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}`;
+        });
 
     // ── 8. `c.` / `ca.` BEFORE A YEAR → `agarup a` ───────────────────────────────────────────────────────
     // ×157 (`c.` ×130, `ca.` ×27), always Latin *circa* introducing a date: `(c. 371–287 BC)`,

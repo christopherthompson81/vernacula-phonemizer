@@ -231,6 +231,11 @@ describe("Ilocano text normalization", () => {
         // unguarded `c\.` would read every `C.` in an author list as "approximately".
         expect(say("Mathew, S. P. and C. R. Chitra")).toBe(
             "mˈathɛw , s . p . ʔˈand k . ɾ . khˈitɾa");
+        // ⚠ #1122: the pattern is built from the table's own keys with `i`+`u`, so the fold widens it —
+        // `ſr.` matches `sr` while `ſr` is not a key. The match falls through UNCHANGED (the g2p then
+        // drops the long s it has no rule for) rather than reading the word "undefined", which the
+        // table's `!` used to stringify.
+        expect(say("Bilin ſr. 1")).toBe("bˈilin ɾ . mˈajsa");
     });
 
     test("⚠ THE SOURCED REFUSALS — these stay silent on purpose (see defects.ts)", () => {
