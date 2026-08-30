@@ -137,3 +137,77 @@ the shipped entry point, the golden and the parity tool all measure `Phonemize`,
   "indexing and .Length semantics match JS exactly". Every Faroese letter is BMP, and the
   nativiser folds anything outside the class before the g2p, so the difference is unobservable —
   but it is the faithful reading.
+
+## Run N — 2026-08-29 ~19:20 — review of #1180: A REAL DEFECT, in a character class
+
+The mechanical pattern diff is the instrument that found it. Every `JsRe` the port compiles was dumped by
+reflection (statics plus the abbreviation tuple array) and compared against every RegExp the TypeScript
+uses — the dynamic ones by hooking the constructor, the literals by scanning source. One differed:
+
+    TS   ^\s*["»)']?\s*$
+    C#   ^[\s*["»)']?\s*$
+                ↑ a stray `[`
+
+⚠ **AND IT PARSES, WHICH IS WHY NOTHING SAW IT.** The extra bracket opens a character class, so `\s*` is
+swallowed into it: the leading whitespace run collapses to **at most one character**, and `*` and `[`
+become *members* of the class. The regex is well-formed and plausible-looking, and the 200-row golden
+never exercises it.
+
+What it controls is the abbreviation pass's sentence-end test — whether `kl.` → `klokkan.` keeps its dot.
+Measured over 23 tail shapes, **9 differed**:
+
+    "Hann kom kl. \""   TS  klokkan. "     C#  klokkan "     ← the DOT, and the PAUSE, deleted
+    "Hann kom kl.  »"   TS  klokkan. »     C#  klokkan »
+    "Hann kom kl. )"    TS  klokkan. )     C#  klokkan )
+    "Hann kom kl.*"     TS  klokkan*       C#  klokkan.*     ← and the over-accept, the other way
+
+⚠ **THE COSTLY DIRECTION IS THE UNDER-ACCEPT, AND IT IS THE EXACT LOSS THE TS COMMENT NAMES.** That guard
+exists because "⚠ THE FINAL DOT IS KEPT AT A SENTENCE END, or the pause is lost outright (trap 10)". A
+closing quote after an abbreviation is ordinary Faroese typography — `…kl. "` ends a quoted sentence — and
+the port silently dropped the sentence break on every one of them.
+
+Fixed, and pinned in both directions as `TheAbbreviationSentenceEndGuard` (8 rows); all 8 expectations
+re-run against the TypeScript engine. After the fix: **23 of 23 tail shapes identical.**
+
+## Run N+1 — 2026-08-29 ~19:30 — the rest of the mechanical sweep
+
+    26 C# patterns; 0 not present verbatim in the TS pattern set   (after the fix)
+    48 TS patterns; every one with no C# counterpart is shared-tier, not this language's
+    NATIVE_CLASS, the symbol tier's exponent position, and the TOKEN's host-word run: identical
+
+## Run N+2 — 2026-08-29 ~19:40 — three differentials
+
+References built the way `gen_parity_goldens.mts` builds a golden: one process, `clearForeignOov()` once,
+rows in order.
+
+    generated haystack    39,663 rows   0 differ
+    mined + attest           738 rows   0 differ
+    review probe           1,597 rows   0 differ
+
+⚠ **THE G2P IS WALKED, NOT SAMPLED, AT SHORT LENGTHS.** Faroese's alphabet is 29 letters and the rule
+under test is length-conditioned vowel quality, which is a function of the syllable — so every 1-, 2- and
+3-letter string over the alphabet is enumerated (25,317 of them), which covers the open/closed contrast,
+the geminate length count and the cluster rules exhaustively rather than by sample. On top of that: every
+named rule with its trigger in eight prefixes × ten suffixes (skerping before ⟨gv ggj⟩, the front-vs-round
+glide race, g/k affrication with ⟨ø⟩ REFUSED, the retroflex r-clusters, ⟨ll⟩→[tl], hv/hj, the pre-nasal
+shift, word-final -um), 9,000 random 4–10 letter words, the numeral composer, and the whole symbol tier.
+
+The review probe adds NFD input (200 real corpus lines decomposed), the JS/.NET lowercase divergence set —
+which for a **Latin-script** host reaches `text()` too, unlike the Cyrillic languages — the `[Ѐ-ӿ]`-style
+token edges, the five jobs of the full stop at their boundaries, the ordinal guard's following-lowercase
+test, and **the abbreviation guard swept over every 0-, 1- and 2-character tail** drawn from the
+characters it can see, since that is where the defect was.
+
+## Run N+3 — 2026-08-29 ~19:45 — the gates
+
+    provenance fo (41,998 rows)   88,602/88,602 (100.0%)
+    ipaspans fo                   81,182/81,182, 0 wrong
+    poison fo                     0 sites (SUBSTRING 0, desync 0)
+    dotnet test                   3,672 pass, 0 fail   (56 Faroese + 1 manifest mapping)
+    parity, fleet                 152 languages byte-identical, 29,905 rows, 0 differ, 0 BLOCKED
+    regex-diff                    124,812 probes identical, 0 differ, 0 refused
+    typescript                    test/faroese.test.ts 13/13, unchanged
+
+⚠ Neither of #1179's two provenance classes fires here — `fo` comes back 100% mapped with 0 poison sites
+even over the NFD probe rows. This normalizer neither re-normalizes the pipeline string mid-flight nor
+calls the seam on a matched substring.

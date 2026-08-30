@@ -47,8 +47,17 @@ public static class Normalize
         (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}mió\\s?\\.", "gu"), "milliónir"),
         (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}uml\\s?\\.", "gu"), "umleið"),
     };
-    /** The ABBREV's sentence-end test: only whitespace and at most one closing quote/paren remain. */
-    private static readonly JsRe ABBREV_SENTENCE_END = JsRegex.Compile("^[\\s*[\"»)']?\\s*$", "u");
+    /**
+     * The ABBREV's sentence-end test: only whitespace and at most one closing quote/paren remain.
+     *
+     * ⚠ `\s*` THEN THE CLASS — NOT ONE CLASS CONTAINING `\s`. This read `^[\s*["»)']?\s*$`, whose stray
+     * `[` swallows the `\s*` into the character class, so the whole leading run collapses to AT MOST ONE
+     * character and `*` and `[` become members of it. Both directions are wrong and the costly one is the
+     * under-accept: `kl. "` no longer looked like a sentence end, so the final dot was dropped and THE
+     * PAUSE WENT WITH IT — the exact loss the TS comment says this guard exists to prevent (trap 10).
+     * 9 of 23 tail shapes differed from the TypeScript before this.
+     */
+    private static readonly JsRe ABBREV_SENTENCE_END = JsRegex.Compile("^\\s*[\"»)']?\\s*$", "u");
 
     /** 5) THE ORDINAL PERIOD — the dot is spent and NO WORD IS EMITTED (the ordinal is refused; see the TS).
      *  The guard is a FOLLOWING LOWERCASE WORD: an uppercase one begins a new sentence. */

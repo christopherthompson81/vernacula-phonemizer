@@ -100,6 +100,28 @@ public class FaroeseTests
     [InlineData("2,5 mió. kr.", "2,5 milliónir kr.")]
     public void TheAbbreviationsAreTheCorpusOwn(string input, string want) => Assert.Equal(want, Norm(input));
 
+    /**
+     * ⚠ THE ABBREVIATION'S SENTENCE-END GUARD, PINNED BECAUSE THE PORT GOT IT WRONG AND NOTHING SAW IT.
+     * The test is `^\s*["»)']?\s*$` — whitespace, then AT MOST ONE closing quote or paren. The port read
+     * it as `^[\s*["»)']?\s*$`, whose stray `[` swallows the `\s*` into the character class: the leading
+     * run collapses to at most ONE character and `*`/`[` become members of it.
+     *
+     * The costly direction is the under-accept. `Hann kom kl. "` stopped looking like a sentence end, so
+     * the final dot was dropped — AND THE PAUSE WENT WITH IT, which is the exact loss the guard exists to
+     * prevent. A closing quote after an abbreviation is ordinary Faroese typography, and 9 of 23 tail
+     * shapes differed from the TypeScript. Both directions are asserted so neither can come back.
+     */
+    [Theory]
+    [InlineData("Hann kom kl. \"", "Hann kom klokkan. \"")]   // whitespace THEN a quote — still a sentence end
+    [InlineData("Hann kom kl.  »", "Hann kom klokkan. »")]
+    [InlineData("Hann kom kl. )", "Hann kom klokkan. )")]
+    [InlineData("Hann kom kl. '", "Hann kom klokkan. '")]
+    [InlineData("Hann kom kl.*", "Hann kom klokkan*")]        // `*` is NOT a closing quote — no dot kept
+    [InlineData("Hann kom kl.[", "Hann kom klokkan[")]
+    [InlineData("Hann kom kl.", "Hann kom klokkan.")]         // the plain sentence end, unchanged
+    [InlineData("Hann kom kl. og fór", "Hann kom klokkan og fór")] // mid-sentence, no dot
+    public void TheAbbreviationSentenceEndGuard(string input, string want) => Assert.Equal(want, Norm(input));
+
     [Fact]
     public void TheColonIsNotAClockHere()
     {
