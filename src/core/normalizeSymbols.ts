@@ -599,7 +599,14 @@ export function makeBareUnitNormalizer(
             `(?![\\p{L}\\p{M}\\p{Nd}'’ʼ/²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))`,
         "gu",
     );
-    return (text: string): string => text.replace(re, (_whole: string, u: string) => map.get(u)!);
+    // ⚠ `rewrite`, NOT `text.replace` — the subject IS the pipeline string here, and a bare replace is
+    // invisible to the provenance tracker. This one line desynced the map for EVERY language that
+    // declares a bare unit: the tracker went on believing the text still said `kg` while the live string
+    // said `kilograms`, and every seam call after it poisoned. 120 hits across 38 languages on the mined
+    // corpora, all attributed downstream to `spacedBareExponent` and the glued-exponent rule, which were
+    // themselves correct (#1179). ⚠ THE C# MIRROR ALREADY USED ITS SEAM — this is one of the few places
+    // where the TypeScript was behind its own port.
+    return (text: string): string => rewrite(text, re, (_whole: string, u: string) => map.get(u)!);
 }
 
 /**
@@ -1001,7 +1008,9 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // two initialisms (`B&B`) must become three tokens, and any later rule that reads a token boundary
         // needs the split to have happened already.
         if (d.ampersand !== undefined)
-            text = rewrite(text.replace(/&amp;/giu, "&"), /[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
+            // ⚠ BOTH ARMS ON THE SEAM: the inner `.replace` runs on the PIPELINE STRING, so a bare one
+            // desyncs the tracker and the outer `rewrite` — which is correct — then poisons for it.
+            text = rewrite(rewrite(text, /&amp;/giu, "&"), /[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
         let s = text;
         const isUnitKey = (k: string): boolean =>
             d.units?.[k] !== undefined ||

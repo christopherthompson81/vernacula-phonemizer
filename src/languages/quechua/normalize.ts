@@ -263,9 +263,12 @@ export function normalizeQuechua(input: string): string {
     // silent damage of the same class as a dropped letter.
     // ⚠ NFC first, so a decomposed letter is one code point before any literal below is matched; the g2p
     // NFCs again downstream and the fold is idempotent, so this costs nothing.
-    s = renormalize(s, "NFC").replace(/&amp;/giu, "&")
-        .replace(/&(?:nbsp|bull|sup2|sup3);/giu, (e) => ENTITY[e.toLowerCase()] ?? e)
-        .replace(/\p{Cf}/gu, "");
+    // ⚠ EVERY ARM ON THE SEAM. These ran as chained native `.replace` calls on the PIPELINE STRING — and
+    // the last one, the format-character strip, is exactly what desynced the tracker: it deleted the
+    // corpus's 25 zero-widths without reporting them, and every later `rewrite` poisoned for it (#1179).
+    s = rewrite(rewrite(rewrite(renormalize(s, "NFC"), /&amp;/giu, "&"),
+        /&(?:nbsp|bull|sup2|sup3);/giu, (e) => ENTITY[e.toLowerCase()] ?? e),
+        /\p{Cf}/gu, "");
 
     // ── 2. DE-GROUP THOUSANDS — FIRST among the numeric rules, and the largest defect this layer repairs ─
     // `.` and `,` are both clause punctuation in quechua.jsonc and the TOKEN splits on `\d+`, so

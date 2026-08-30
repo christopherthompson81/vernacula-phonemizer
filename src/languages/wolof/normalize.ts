@@ -310,10 +310,12 @@ export function normalizeWolof(input: string): string {
     //    ⚠ THE FORMAT-CHARACTER STRIP IS NOT COSMETIC: the artifact's `zero-width` cell is ×5, and a
     //    zero-width character INSIDE a word splits it into two tokens — silent damage of the same class as a
     //    dropped letter.
-    s = renormalize(s, "NFC")
-        .replace(/&amp;/giu, "&")
-        .replace(/&(?:sup2|sup3|nbsp|alpha);?/giu, (e) => ENTITY[`&${e.slice(1).replace(";", "").toLowerCase()}`] ?? e)
-        .replace(/\p{Cf}/gu, "");
+    // ⚠ EVERY ARM ON THE SEAM. These were chained native `.replace` calls on the PIPELINE STRING, and
+    // the format-character strip is what desynced the tracker — it deleted the corpus's zero-widths
+    // without reporting them, so every later `rewrite` poisoned for it (#1179).
+    s = rewrite(rewrite(rewrite(renormalize(s, "NFC"), /&amp;/giu, "&"),
+        /&(?:sup2|sup3|nbsp|alpha);?/giu, (e: string) => ENTITY[`&${e.slice(1).replace(";", "").toLowerCase()}`] ?? e),
+        /\p{Cf}/gu, "");
 
     // 2) DEGREES → `aj`, BEFORE the tier (which does not read `°` at all) and before de-grouping, whose
     //    space arm must not see `3° 40'P` as a grouped number.

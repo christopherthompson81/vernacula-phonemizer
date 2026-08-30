@@ -69,7 +69,7 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         // capital before the dot also stripped the SENTENCE period after an acronym — `NASA. Bush` and
         // `the U.S. The next` lost their pause — so the initial must be a single letter.
         s = rewrite(s, /(?<![\p{L}\p{M}])([A-Z])\.(?=\s+[A-Z])/gu, "$1");
-        s = rewrite(s, /(?<![\p{L}\p{M}])[\p{Script=Bengali}\p{M}]+\.(?:[ \u00a0]?[\p{Script=Bengali}\p{M}]+\.)+/gu, (m0) => rewrite(m0.replace(/\./gu, " "), /\s+/gu, " "));  // space, NBSP
+        s = rewrite(s, /(?<![\p{L}\p{M}])[\p{Script=Bengali}\p{M}]+\.(?:[ \u00a0]?[\p{Script=Bengali}\p{M}]+\.)+/gu, (m0) => m0.replace(/\./gu, " ").replace(/\s+/gu, " "));  // space, NBSP
 
         // 2) THE `Nশ` CLASSICAL ORDINALS (11–20) and `1শ` = একশ. The শ suffix is the ordinal for a
         //    two-digit 11–20 (century ordinals — the corpus's dominant use), but `1শ` is "one hundred".

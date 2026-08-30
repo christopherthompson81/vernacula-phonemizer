@@ -272,9 +272,11 @@ export function normalizeHmong(input: string): string {
     //    unaccented ASCII so NFC is identity for Hmong's own letters, but the corpus's embedded foreign
     //    names arrive in both compositions. Zero-width ×4, every one paragraph-initial. The entity strip
     //    must precede step 10 or `&nbsp;` reads as "and" plus the letters n-b-s-p.
-    let s = renormalize(input, "NFC")
-        .replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ")
-        .replace(/[​‌‍⁠﻿]/gu, "");
+    // ⚠ EVERY ARM ON THE SEAM. These ran as chained native `.replace` calls on the PIPELINE STRING, so the
+    // entity fold and the zero-width strip were invisible to the provenance tracker and every later
+    // `rewrite` reported against a string it did not recognise (#1179).
+    let s = rewrite(rewrite(renormalize(input, "NFC"), /&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " "),
+        /[​‌‍⁠﻿]/gu, "");
 
     // 2) DASH FOLD, so step 9 can see the corpus's en dash. `–` (U+2013) ×3 and one of them is a real year
     //    span (`1859–1917`); leaving it unfolded would make the range rule miss a sixth of its instances.

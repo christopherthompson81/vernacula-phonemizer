@@ -69,7 +69,7 @@ function inflectOrdinal(base: string, written: string): string | undefined {
     const words = base.split(" ");
     const last = words[words.length - 1]!;
     const soft = last.endsWith("ий"); // третий is the only soft stem in the 1–19 table
-    const stem = rewrite(last, /(ый|ой|ий)$/u, "");
+    const stem = last.replace(/(ый|ой|ий)$/u, ""); // one word out of a split, not the pipeline string
     words[words.length - 1] = stem + (soft ? forms[1] : forms[0] || last.slice(stem.length));
     return words.join(" ");
 }
