@@ -641,6 +641,10 @@ public class ManifestMappingTests
             "language", "name", "script");
 
     [Fact]
+    public void ChuvashManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/chuvash", "chuvash.jsonc", Languages.Chuvash.Manifest.MANIFEST);
+
+    [Fact]
     public void GeorgianManifestIsFullyMapped() =>
         AssertFullyMapped("languages/georgian", "georgian.jsonc", Languages.Georgian.Manifest.MANIFEST,
             "language", "name", "script", "provenance", "convention");
