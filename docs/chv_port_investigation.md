@@ -89,7 +89,7 @@ English engine, not Chuvash:
 
 Chuvash Cyrillic content is byte-identical on every line. The async path is byte-identical on all
 809 because the async prewarm warms the English memo, so the foreign runs converge (the already-filed
-"a Latin-script host never prewarms" class in STATUS.md — both engines keep the current behaviour).
+"a Latin-script host never prewarms" class in `docs/csharp_port_findings_investigation.md` — both engines keep the current behaviour).
 
 ## Run 5 — 2026-08-29 ~17:10 — off-golden probes, targeting the arm gaps
 
@@ -131,7 +131,7 @@ C#-only porting errors, fixed in C# only per the bidirectional policy).
 
 - **The four sync-mode foreign-run differences are the English engine, not Chuvash, and both engines
   agree on them in async.** No Chuvash defect. The Latin-script-host prewarm gap is already filed
-  fleet-wide in STATUS.md; a Latin-script host (chv is Cyrillic, but the embedded run is Latin) that
+  fleet-wide in `docs/csharp_port_findings_investigation.md`; a Latin-script host (chv is Cyrillic, but the embedded run is Latin) that
   the tokenizer declines routes to English with an empty memo in sync and a warm memo in async.
 - **`unitPer` is the EMPTY STRING** in the manifest — Chuvash says "A per B" with a
   possessive-locative DENOMINATOR, not a preposition, so the rate tier composes `A [B-loc]`. There is

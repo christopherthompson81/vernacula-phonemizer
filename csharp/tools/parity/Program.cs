@@ -15,6 +15,7 @@
 //
 //   dotnet run --project csharp/tools/parity            all goldens
 //   dotnet run --project csharp/tools/parity -- fr th   just these codes
+//   dotnet run --project csharp/tools/parity -- --unported   which codes have no C# engine
 using System.Text;
 using Vernacula.Phonemizer;
 using Vernacula.Phonemizer.Core;
@@ -30,6 +31,65 @@ var only = args.Where(a => !a.StartsWith('-')).ToHashSet();
  * textually identical to the pipeline form; only running the corpus and asking who handed the seam an
  * unrecognised string tells them apart. Needs a Debug build for line numbers.
  */
+/*
+ * `--unported`: WHICH registry codes have no C# engine. Asked of the ENGINE — every code `Registry.cs`
+ * routes is created and the port-pending ones reported — rather than read off a hand-kept list, because a
+ * hand-kept list is exactly what `csharp/STATUS.md` was and exactly how it went stale (it said 136 of 193
+ * at a point when the number was already higher).
+ *
+ * ⚠ AND IT IS NOT REDUNDANT WITH `parity | grep "not ported"`, WHICH WAS THE OBVIOUS OBJECTION AND WAS
+ * MEASURED. The main loop is GOLDEN-DRIVEN (`EnumerateFiles(goldens, "*.tsv")`), so a code with no golden
+ * is never visited and never prints:
+ *     grep "not ported"   21 codes, after a full ~2-minute gate run over 31,964 rows
+ *     --unported          26 codes, in seconds
+ * The five it cannot see — mto naq nog quc smj — are exactly the ones that CANNOT be ported yet, because a
+ * language with nothing to be byte-identical to has no gate. Those are the most useful rows in the list,
+ * which is why the flag also reports each code's engine and whether a golden exists at all.
+ *
+ * ⚠ THE CODES COME FROM `Registry.cs`'s OWN `case` LABELS. The registry has no enumeration export, and
+ * duplicating one here would reintroduce the drift this flag exists to remove.
+ *
+ *   dotnet run --project csharp/tools/parity -- --unported
+ */
+if (args.Contains("--unported"))
+{
+    var registrySrc = Path.Combine(AppContext.BaseDirectory, "../../../../../Vernacula.Phonemizer/Registry.cs");
+    if (!File.Exists(registrySrc)) registrySrc = "csharp/Vernacula.Phonemizer/Registry.cs";
+    var codes = JsRegex.Compile("^\\s*case \"([^\"]+)\":", "gmu")
+        .Matches(File.ReadAllText(registrySrc))
+        .Select(m => m.Groups[1].Value).Distinct(StringComparer.Ordinal)
+        .OrderBy(c => c, StringComparer.Ordinal).ToList();
+    // ⚠ CATCH THE TYPE, NOT THE MESSAGE. `Registry.Create` throws `NotImplementedException("port pending:
+    // <key>")` and the row loop below catches `NotImplementedException` — matching that is what keeps this
+    // flag honest. A `Message.Contains("port pending")` test reads the same today and reports ZERO UNPORTED,
+    // silently and greenly, the day anyone rewords the string.
+    // ⚠ AND `ClearPortPending` PER CODE, for the reason the row loop states: the set is process-wide and
+    // only grows, so without this every later code inherits the first unported one's key.
+    var pending = new List<(string Code, string Engine)>();
+    foreach (var code in codes)
+    {
+        Registry.ClearPortPending();
+        try { Phonemizer.Phonemize("a", code); }
+        catch (NotImplementedException)
+        {
+            // The registry records WHICH engine it was asked for, which is the useful half: several codes
+            // route to one engine (`gd` → scottishgaelic), so the engine count is what the port queue is.
+            pending.Add((code, Registry.PortPending.FirstOrDefault() ?? "?"));
+        }
+        catch { /* any other refusal is a different question */ }
+    }
+    var engines = pending.Select(p => p.Engine).Where(e => e != "?").Distinct(StringComparer.Ordinal).ToList();
+    Console.WriteLine($"{codes.Count} codes routed by Registry.cs · {codes.Count - pending.Count} ported · {pending.Count} UNPORTED ({engines.Count} distinct engines)");
+    Console.WriteLine(string.Join(" ", pending.Select(p => p.Code)));
+    Console.WriteLine("\n(a golden is what makes one gateable: csharp/goldens/<code>.tsv)");
+    foreach (var (c, engine) in pending)
+    {
+        var g = Path.Combine(goldens, c + ".tsv");
+        Console.WriteLine($"  {c,-5} → {engine,-18} {(File.Exists(g) ? $"golden {File.ReadLines(g).Count()} rows" : "NO GOLDEN — needs tools/gen_parity_goldens.mts first")}");
+    }
+    return 0;
+}
+
 if (args.Contains("--poison"))
 {
     var hits = new Dictionary<string, (int N, string Kind, string Sample)>(StringComparer.Ordinal);

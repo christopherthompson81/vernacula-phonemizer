@@ -184,7 +184,8 @@ Every expectation already in `AromanianTests.cs` was also re-checked against the
 
 ## Recount
 
-`csharp/STATUS.md` said 136 of 193 at its 2026-08-28 snapshot; the branch it was written against has since
+The retired `csharp/STATUS.md` said 136 of 193 at its 2026-08-28 snapshot — a hand-kept count, which is why
+the number is now asked of the engine (`dotnet run --project csharp/tools/parity -- --unported`); the branch it was written against has since
 gained `sq`, `ab` and `an`. Rebased onto `origin/main` (through `an`, #1164) and re-gated: the fleet gate
 before this port is **139 languages / 27,427 rows**; after, **140 languages / 27,627 rows, 0 differ,
 0 BLOCKED**. The rebase touched no shared code (the `an` commit is Aragonese-only plus its two

@@ -500,7 +500,7 @@ reproduce passes it forever; everything below moved **0 of 200 golden rows**.
 (Cyrillic is ×0 in bs_ba, ≥2^53 digit runs are ×0, and the fractions are ×2 lines whose old reading was
 merely *wrong*, not absent). Off-golden probes — 296 lines, one per arm plus the neighbour each arm must
 decline — are what carried the weight, and the reading of their OUTPUT is what found the residuals now filed
-in `csharp/STATUS.md` (the decimal count disagreement between the local `/s` rule and the shared tier; space
+in `docs/bs_port_investigation.md` (the decimal count disagreement between the local `/s` rule and the shared tier; space
 grouping; the round-thousand stranded pause; `km³`; U+2212 fusing a range).
 
 **Gate after.** TS 5,503 pass / 5 skipped; C# 1,198 pass; parity **111 languages, 21,896 rows, 0 differ,

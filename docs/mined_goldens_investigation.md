@@ -91,7 +91,7 @@ Excluding foreign-script rows entirely still leaves: **40 of 60 codes at a full 
 **Decision for run 3.** Order CLEAN rows first, then the rest, up to N. Deterministic (no dependence on
 what happens to be ported today, which must not leak into a reference artifact), it front-loads the
 self-contained rows so a golden is gateable as early as possible, and the residual dependency gets
-reported the same way `STATUS.md` already reports it for the ledger-sourced goldens.
+reported the same way the gate already reports it for the ledger-sourced goldens.
 
 ## Run 3 — 2026-08-25 22:20
 

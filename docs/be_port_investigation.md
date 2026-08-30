@@ -65,7 +65,7 @@ Recount on the new base (all gates re-run, none trusted from before the rebase):
     dotnet test (full suite)                           → 3220/3220 pass
 
 The fleet number moved from the 140-language / 27,627-row baseline to 144 languages / 28,504 rows: the four
-new goldens (4×200) plus be's 200 rows, minus the bal blocked row. STATUS.md gets these numbers, not the
+new goldens (4×200) plus be's 200 rows, minus the bal blocked row. The gate reports these numbers, not the
 pre-rebase ones.
 
 ## Run 3 — 2026-08-29 15:31 — the widening battery: FLEURS differential, probes, poison/provenance/ipaspans

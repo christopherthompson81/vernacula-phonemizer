@@ -360,4 +360,61 @@ silently. `nɡa` → *ᵑɡa*, `anɡ` → *aːᵑɡ*, `nɡwadde` → *ᵑɡʷad�
     reviewer re-running it over the manifest's own 27 single-letter keys got 2,269 frames / 165 differing —
     same conclusion, different number). The alphabet is now named: ASCII a–z with ⟨g⟩ replaced by U+0261,
     26³ − 25³ = 1,951.
-  * `csharp/STATUS.md` still listed both #1132 items as open findings, so an auditor would have re-filed them.
+  * the findings register still listed both #1132 items as open, so an auditor would have re-filed them.
+    (That register was `csharp/STATUS.md`; it now lives in the investigation docs — see the section below.)
+
+---
+
+## Findings from the C# port
+
+> ⚠ **Migrated from `csharp/STATUS.md`**, which is retired. That file was a diary plus a state
+> snapshot; the diary belongs here, and the state (what is ported, what is not) is answered by
+> tooling — `dotnet run --project csharp/tools/parity -- --unported`. The text below is verbatim.
+
+### From the lg port (2026-08-28) — 200/200 first run
+
+Luganda has no shared symbol tier (the measure noun PRECEDES its number, and the tier can only postpose), so
+all seven normalization steps are local. Parity **200/200 byte-identical on the first run**, 0 BLOCKED;
+corpus-wide differential over FLEURS `lg_ug` + the mined artifact + probes = **4,488 lines × sync AND async
+= 8,976 comparisons, 0 differ, 0 throws, 0 PortPending**, and 0 of 4,488 outputs carry a digit or an unread
+symbol. (Re-run after rebasing onto #1134 — see `docs/lg_port_investigation.md` Run 5; the line count is not
+comparable to the first run's 4,442, whose hand probes were in a gitignored `.probe/` that did not survive.)
+
+⚠ **THE GOLDEN REACHES FIVE OF THE SEVEN STEPS.** Step 1 (the English ordinal suffix) is ×0 in it, and
+step 3's SPACE and PERIOD arms are ×0 in it — the period arm, the one the TS itself calls "the risky one"
+because a period-grouped thousand is indistinguishable from a three-place decimal, is ×0 in FLEURS as well
+and rests on the mined artifact and the probes alone.
+
+Three findings, all reproduced IDENTICALLY by both engines, so all three were FILED (#1131, #1132).
+⚠ **ALL THREE ARE NOW FIXED** — #1132's two data-side items landed in PR #1142 (the U+0261 alias deleted, and
+the twelve unreachable prenasal rows deleted; both in the shared `data/` tree, so the C# needed no change).
+⚠ **THE FIRST WAS FIXED FIRST** — #1131 landed in the TypeScript as PR #1134 while this port was in review, and
+this port implements the fixed behaviour (rebased; the grapheme row came free from the shared `data/` tree,
+the `NATIVE_CLASS` and prenasalisation-trigger halves were ported). Kept here as the finding that produced it:
+
+- **⟨ŋ⟩ did not "drop outright" — the shipped path folded it to ⟨n⟩ and spoke an alveolar geminate.**
+  `luganda.ts`'s `NATIVE_CLASS` note is true of `phonemizeWord` and false of `text()`: a token outside the
+  class goes through `makeNativiser`, whose `UNDECOMPOSABLE` table maps ŋ→n first. `ŋŋamba` reads *nːaːᵐba*
+  where `ng'amba` reads *ŋaːᵐba*, and this language's own FLEURS line *"…mu ziseŋŋendo…"* reads
+  *zisenːeːⁿdo*. 2 FLEURS lines and 4 mined lines carry a literal ⟨ŋ⟩; the golden carries 0. ⚠ AND THE
+  REFEREE EVAL IMPORTS `phonemizeWord` DIRECTLY, so the 99.1% measures the path where the letter is dropped,
+  not the path where it is spoken as [n] — question 3, exactly (filed as #1141).
+  ⚠ The fix also had to add ⟨ŋ⟩ to the PRENASALISATION trigger, which the finding did not anticipate: while
+  the letter folded to ⟨n⟩ it reached that rule, so ⟨ŋk⟩ read *ᵑk*, and the grapheme row alone took that away.
+  **A fix that adds an orthographic row must ask what the fold was silently doing for that letter first.**
+- **The ⟨ɡ⟩ (U+0261) entry in `prenasalisable` was a "defensive alias" that made the reading worse, not
+  better** (FIXED in #1142 — deleted). There is no ⟨ɡ⟩ grapheme row and the superscript choice tests the ASCII
+  string `"kg"`, so `nɡa` → *ⁿa*: the alias fired the prenasal rule, picked the wrong place, dropped the
+  consonant anyway and spuriously lengthened the vowel (`anɡ` → *aːⁿ*). Without it the same input reads *na*.
+  ×0 in every corpus measured — latent, not live. Measured exhaustively over the 1,951 three-letter frames
+  containing U+0261: 153 differ, **0 in the alias's favour**.
+  ⚠ Deletion alone would make the letter fail predictably, not correctly (`luɡanda` → *luaːⁿda*), so the same
+  PR added the general repair: a `ɡ → g` row in `Core/HostWord`'s UNDECOMPOSABLE table. Script g is a
+  typographic variant of ⟨g⟩, never an orthographic input key in any NATIVE_CLASS language (verified), and the
+  row fixes the fleet — `ɡato` read *ˈato* in es, `ɡut` *uːt* in de. Moves one golden row (hil).
+- **The twelve prenasal digraph rows in the grapheme table were unreachable** (question 2; FIXED in #1142 —
+  deleted). `OTHER_DIGRAPHS` filters length-2 keys to `k[1] === "w"` or vowel+vowel, deliberately and with a
+  comment saying so, while the jsonc's own block comment claimed the scanner tried "…+ Cw + prenasal + vowel
+  digraphs → singles". Verified row by row that the code rule reproduces all twelve byte-identically, so **no
+  behaviour was at stake** — the rows were deleted rather than re-commented, since `convention.prenasal` states
+  the mapping and the code rule computes it, and a test now pins all twelve.
