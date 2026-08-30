@@ -152,11 +152,55 @@ public static class Js
     /// separator and "," a decimal point — a language module parsing its own captured digits would then
     /// give a different number on a de-DE machine than on an en-US one, with nothing in the output to say
     /// why. Every call site gets it right by not having to remember. NaN for an unparseable string, as
-    /// JS `Number()` gives.</summary>
-    public static double Number(string s) =>
-        double.TryParse(s, System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out var v)
+    /// JS `Number()` gives.
+    ///
+    /// ⚠ AND IT IS NOW THE WHOLE OF `Number()`, MEASURED RATHER THAN CLAIMED. A 72-probe differential
+    /// against node found 22 divergences in four classes — the empty/whitespace string (JS +0), leading
+    /// or trailing NON-ASCII whitespace, the radix literals, and the case-insensitive `"infinity"` .NET
+    /// accepted but JS does not. All four are handled below and the differential is now 0/72.</summary>
+    public static double Number(string s)
+    {
+        // ⚠ JS `ToNumber(String)` TRIMS FIRST, and the empty result is +0 — not NaN. `double.TryParse`
+        // rejects an empty or whitespace-only string, and its idea of whitespace is ASCII, so `"\u00a01"`
+        // and `"\ufeff1"` failed as well. Every character a de-grouping rule exists to REMOVE is in this
+        // set, so the difference sat directly under the numeral paths (#1183).
+        var t = Trim(s);
+        if (t.Length == 0) return 0d;
+        // ⚠ THE INFINITIES ARE SPELLED EXACTLY AND CASE-SENSITIVELY in JS; .NET's parser also accepts
+        // `"infinity"` and `"nan"`, so it was the MORE permissive of the two here — a divergence in the
+        // opposite direction from the one that was filed.
+        if (t is "Infinity" or "+Infinity") return double.PositiveInfinity;
+        if (t == "-Infinity") return double.NegativeInfinity;
+        // ⚠ AND THE RADIX LITERALS ARE NUMBERS TO JS: 0x10 is 16, 0b11 is 3, 0o17 is 15. No sign is
+        // allowed on them and at least one digit is required.
+        if (t.Length > 2 && t[0] == '0')
+        {
+            var radix = t[1] switch { 'x' or 'X' => 16, 'o' or 'O' => 8, 'b' or 'B' => 2, _ => 0 };
+            if (radix != 0) return ParseRadix(t.AsSpan(2), radix);
+        }
+        // Any letter but the exponent marker means .NET would read a word form JS does not.
+        foreach (var c in t) if (char.IsLetter(c) && c != 'e' && c != 'E') return double.NaN;
+        return double.TryParse(t, System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out var v)
             ? v
             : double.NaN;
+    }
+
+    /// <summary>The digits of a JS radix literal (`0x…`, `0o…`, `0b…`) — NaN if empty or ill-formed.</summary>
+    private static double ParseRadix(ReadOnlySpan<char> digits, int radix)
+    {
+        if (digits.Length == 0) return double.NaN;
+        var acc = 0d;
+        foreach (var c in digits)
+        {
+            var d = c is >= '0' and <= '9' ? c - '0'
+                  : c is >= 'a' and <= 'f' ? c - 'a' + 10
+                  : c is >= 'A' and <= 'F' ? c - 'A' + 10
+                  : -1;
+            if (d < 0 || d >= radix) return double.NaN;
+            acc = acc * radix + d;
+        }
+        return acc;
+    }
 
     /**
      * THE 28 CODE POINTS JS LOWERCASES AND `ToLowerInvariant` DOES NOT (#1116).
