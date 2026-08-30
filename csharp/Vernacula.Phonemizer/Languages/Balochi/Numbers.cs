@@ -13,7 +13,7 @@ public static class Numbers
     // Internal marker: "this word carries the enclitic connective". Stripped by the word renderer, which
     // then appends the connective's IPA. A private-use code point, so it can never collide with a Balochi
     // spelling.
-    private static readonly string ENCLITIC = char.ConvertFromUtf32(0xE000);
+    private const string ENCLITIC = Markers.PUA_SENTINEL;
 
     /** Wrap a word→IPA renderer so a connective-marked word gets the enclitic -u appended to its IPA. */
     public static Func<string, string> EncliticWord(Func<string, string> word, BalochiNumbersDef d) =>

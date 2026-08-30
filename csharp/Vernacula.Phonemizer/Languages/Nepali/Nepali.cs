@@ -34,7 +34,7 @@ public static class NepaliPhonemizer
 
     /** U+E000 — the private-use sentinel that shields an EMBEDDED-Latin run's contrastive /ə/ from the
      *  Devanagari ə→ʌ map below. */
-    private const string SENTINEL = "";
+    private const string SENTINEL = Markers.PUA_SENTINEL;
     private static readonly JsRe SCHWA = JsRegex.Compile("ə", "gu");
 
     /** The Devanagari inherent/independent vowel stays ə through the shared schwa-deletion, then surfaces

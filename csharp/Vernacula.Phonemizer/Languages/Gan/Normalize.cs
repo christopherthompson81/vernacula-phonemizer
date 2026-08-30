@@ -67,7 +67,7 @@ public static class Normalize
     }
 
     /** ⚠ A PUA sentinel (U+E000), which cannot occur in the text; swapped back immediately after SpellYears. */
-    private const string AGO = "";
+    private const string AGO = Markers.PUA_SENTINEL;
     // ⚠ ESCAPED: the sentinel is a PUA code point today, but a pattern built from an unescaped literal would
     // silently change meaning if it ever became a metacharacter.
     private static readonly JsRe JS_META = JsRegex.Compile("[.*+?^${}()|[\\]\\\\]", "gu");

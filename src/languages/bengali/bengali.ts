@@ -15,6 +15,7 @@
  * Stress is word-initial and weak in Bengali; the broad referee does not mark it, so we leave it unmarked.
  */
 import { makeAbugidaG2P } from "../../core/abugida.ts";
+import { PUA_SENTINEL_2 } from "../../core/markers.ts";
 import type { CountForms } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
 import { LATIN_RUN } from "../../core/hostWord.ts";
@@ -119,7 +120,7 @@ export function makeNativeBengali(
     // ্যা (ya-phôla + aa-matra) and word-initial অ্যা spell the vowel [æ] in Bengali (mostly loanwords:
     // ক্যান্ডি→kænɖi, গ্যাস→ɡæʃ, ব্যাগ→bæɡ). There is no [æ] matra, so we rewrite the sequence to a private-use
     // SENTINEL and register it as both a matra (after a consonant) and an independent vowel (word-initial অ্যা).
-    const AE = String.fromCharCode(0xe001);
+    const AE = PUA_SENTINEL_2;
     def.vowelSigns[AE] = { ipa: "æ" };
     def.independentVowels[AE] = { ipa: "æ" };
     const g2p = makeAbugidaG2P(def, phon);
