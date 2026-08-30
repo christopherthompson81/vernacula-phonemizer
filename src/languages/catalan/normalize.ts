@@ -229,7 +229,7 @@ export function normalizeCatalan(input: string): string {
         // bare ordinal gave *un tercer* for 1/3 and *tres quart* for 3/4.
         const noun = den === 3 ? "terç" : den === 4 ? "quart" : ordinalWords(den, false);
         if (noun === undefined) return m0;
-        const plural = den === 3 ? "terços" : den === 4 ? "quarts" : rewrite(noun, /è$/u, "ens");
+        const plural = den === 3 ? "terços" : den === 4 ? "quarts" : noun.replace(/è$/u, "ens");
         return `${numberToWords(num)} ${num === 1 ? noun : plural}`;
     });
 

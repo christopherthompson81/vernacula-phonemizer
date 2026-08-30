@@ -111,7 +111,8 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //      all. It is kept because the ARABIC-SEMICOLON arm below is not general and cannot be: the
         //      shared decoder's pattern ends at an ASCII `;`, and `&nbsp؛` is a fact about this dump.
         //    An entity NOT in this list still falls through to the shared decoder unchanged.
-        let s = input.replace(/&(nbsp|lrm|rlm|zwnj|zwj|amp|ndash|mdash)[;؛]/giu,
+        // ⚠ ON THE SEAM — the entity fold runs on the PIPELINE STRING (#1179).
+        let s = rewrite(input, /&(nbsp|lrm|rlm|zwnj|zwj|amp|ndash|mdash)[;؛]/giu,
             (_m, name: string) => (name.toLowerCase() === "amp" ? "&" : name.toLowerCase() === "ndash" ? "–"
                 : name.toLowerCase() === "mdash" ? "—" : name.toLowerCase() === "nbsp" ? " " : ""));
 

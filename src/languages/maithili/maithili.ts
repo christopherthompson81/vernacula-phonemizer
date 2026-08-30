@@ -27,6 +27,7 @@
  * carries Maithili morphology — होइत अछि, रहल जे, सेकेण्ड सँ.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
+import { rewrite } from "../../core/provenance.ts";
 import { makeHindiNormalizer } from "../hindi/normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
@@ -62,7 +63,8 @@ const UDATTA_AS_AVAGRAHA = /॑/gu;
 
 // ⚠ ON THE SEAM: `fold` is applied to the PIPELINE STRING in the normalize override below, and it is
 // length-preserving — so leaving it off desynced every offset without changing the length.
-const fold = (s: string): string => s.replace(UDATTA_AS_AVAGRAHA, "ऽ");
+// ⚠ ON THE SEAM: this one takes the PIPELINE STRING (`hindi(fold(input))`), unlike `foldWord` below.
+const fold = (s: string): string => rewrite(s, UDATTA_AS_AVAGRAHA, "ऽ");
 /** ⚠ The WORD entry points hand this a word, not the pipeline string — off the seam by construction. */
 const foldWord = (s: string): string => s.replace(UDATTA_AS_AVAGRAHA, "ऽ");
 

@@ -34,7 +34,7 @@ const DEG = MANIFEST.degree;
  * ukrainian/normalize.ts, which hit it first.
  */
 function degreeWord(n: string): string {
-    return Number(rewrite(n, ",", ".")) === 1 ? DEG.singular : DEG.plural;
+    return Number(n.replace(",", ".")) === 1 ? DEG.singular : DEG.plural; // a numeral string
 }
 
 const GROUP_SPACE = "    ";  // NBSP, NNBSP, thin space

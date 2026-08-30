@@ -214,8 +214,12 @@ const value = (run: string): number =>
     Number(run.replace(/[༠-༩]/gu, (c) => String(c.codePointAt(0)! - 0x0F20)));
 
 /** Delete a space that merely separates a numeral from a Tibetan word. See step 12 for the measurement. */
+// ⚠ BOTH ARMS GO THROUGH THE SEAM. The inner one was `t.replace(...)` on the PIPELINE STRING, so the
+// space it deleted was invisible to the provenance tracker — and the outer `rewrite`, which was correct,
+// then reported against a string the tracker did not recognise and poisoned. 110 hits on the mined corpus,
+// every one attributed to the arm that was right (#1179).
 const squeezeNumeralSpace = (t: string): string =>
-    rewrite(t.replace(new RegExp(`([${D}])[ \\t]+(?=[${TIB}])`, "gu"), "$1")
+    rewrite(rewrite(t, new RegExp(`([${D}])[ \\t]+(?=[${TIB}])`, "gu"), "$1")
         , new RegExp(`([${TIB}])[ \\t]+(?=[${D}])`, "gu"), "$1");
 
 export function normalizeTibetan(input: string): string {

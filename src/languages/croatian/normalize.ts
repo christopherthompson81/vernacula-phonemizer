@@ -119,7 +119,7 @@ const STUPANJ = ["stupanj", "stupnja", "stupnjeva"] as const; // 1 stupanj · 2 
 
 /** Integer part of a Croatian-written number ("2,4" → 2), for the local count-agreement calls. */
 function intOf(n: string): number {
-    return Math.trunc(Number(rewrite(rewrite(n, /\./gu, ""), ",", ".")));
+    return Math.trunc(Number(n.replace(/\./gu, "").replace(",", "."))); // a numeral string, not the pipeline
 }
 
 // ---------------------------------------------------------------------------------------------------

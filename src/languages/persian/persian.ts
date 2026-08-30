@@ -6,6 +6,7 @@
  * text, a DEFAULT short vowel [a] (the crude stand-in for the deferred short-vowel-restoration subsystem).
  */
 import type { Phonemizer } from "../../registry.ts";
+import { rewrite, renormalize } from "../../core/provenance.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN } from "../../core/hostWord.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
@@ -257,7 +258,9 @@ export function normalizePersianOrthography(text: string): string {
     // NFC first so decomposed input (e.g. NFD آ = bare alef + combining madda U+0653) composes to the single
     // codepoint the tagger vocab + the آ→aː rule key on — the sync g2p already NFC-normalizes, the neural path must
     // too. Then fold the Arabic-script letter variants to their Farsi forms.
-    return text.normalize("NFC").replace(/[يكىة]/gu, (c) => FA_ORTHO[c] ?? c);
+    // ⚠ ON THE SEAM. Both arms run on the PIPELINE STRING: the NFC and the letterform fold were native,
+    // so the tracker went on believing the text still held ⟨ك⟩ and every later `rewrite` poisoned (#1179).
+    return rewrite(renormalize(text, "NFC"), /[يكىة]/gu, (c: string) => FA_ORTHO[c] ?? c);
 }
 
 /**

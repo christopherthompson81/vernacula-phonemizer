@@ -81,7 +81,7 @@ export function galicianOrdinal(n: number): string | undefined {
 
 /** The feminine of a Galician ordinal: every element ends in -o and takes -a (vixésima primeira). */
 function feminineOrdinal(masc: string): string {
-    return rewrite(masc, /o(?=\s|$)/gu, "a");
+    return masc.replace(/o(?=\s|$)/gu, "a"); // a word this file COMPOSED, not the pipeline string
 }
 
 /** Ordinal indicators above this read as CARDINALS — see step 5. */
