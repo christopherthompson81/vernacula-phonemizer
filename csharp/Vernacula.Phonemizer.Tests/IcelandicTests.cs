@@ -216,4 +216,29 @@ public class IcelandicTests
 
     [Fact]
     public void RegistryWiring() => Assert.Equal("jˈɛɣ tˈala ˈislɛnskʏ .", Say("Ég tala íslensku."));
+
+    /**
+     * ⚠ THE CURRENCY ESCAPE, PINNED — the defect this port found in itself, which nothing was holding.
+     *
+     * The step regex-escapes each sign before composing its two placement patterns. Spelling that escape
+     * the .NET way produced `\\$` where the TypeScript yields `\$`, so the composed pattern never matched
+     * and `$5` read *fˈɪm* — the sign SILENTLY DROPPED — instead of *5 dalir*.
+     *
+     * ⚠ AND ONLY `$` IS AFFECTED, WHICH IS EXACTLY WHY THE GOLDEN COULD NOT SEE IT: it is the one sign in
+     * this table that is also a regex metacharacter (€ £ ¥ escape to themselves), and the `is` golden
+     * carries no `$`-before-digit row. So the three non-metacharacter signs are asserted BESIDE it — they
+     * are the control that says the escape is right rather than merely absent.
+     */
+    [Theory]
+    [InlineData("$5", "5 dalir")]
+    [InlineData("5$", "5 dalir")]
+    [InlineData("$ 5", "5 dalir")]
+    [InlineData("5 $", "5 dalir")]
+    [InlineData("€5", "5 evrur")]
+    [InlineData("5€", "5 evrur")]
+    [InlineData("£5", "5 pund")]
+    [InlineData("5 £", "5 pund")]
+    [InlineData("¥5", "5 jen")]
+    [InlineData("5 ¥", "5 jen")]
+    public void EveryCurrencySignEscapesToItself(string input, string want) => Assert.Equal(want, Norm(input));
 }

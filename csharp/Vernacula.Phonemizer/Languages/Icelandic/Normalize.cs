@@ -39,18 +39,18 @@ public static class Normalize
     private static readonly JsRe PERCENT = JsRegex.Compile("(\\d+)\\s*%", "gu");
     private static readonly JsRe CELSIUS_SIGN = JsRegex.Compile("℃", "gu");
     private static readonly JsRe FAHRENHEIT_SIGN = JsRegex.Compile("℉", "gu");
-    private static readonly JsRe DEGREE_C = JsRegex.Compile("(\\d)\\s*°\\s*C(?![\\p{L}])", "giu");
-    private static readonly JsRe DEGREE_F = JsRegex.Compile("(\\d)\\s*°\\s*F(?![\\p{L}])", "giu");
+    private static readonly JsRe DEGREE_C = JsRegex.Compile("(\\d)\\s*°\\s*C(?!\\p{L})", "giu");
+    private static readonly JsRe DEGREE_F = JsRegex.Compile("(\\d)\\s*°\\s*F(?!\\p{L})", "giu");
     private static readonly JsRe DEGREE_BARE = JsRegex.Compile("(\\d)\\s*°", "gu");
 
     /** SQUARED UNITS, before the plain unit rule or the `km` is consumed and the exponent stranded. */
-    private static readonly JsRe KM_SQUARED = JsRegex.Compile("(?<![\\p{L}])km\\s*[²2](?!\\d)", "giu");
-    private static readonly JsRe M_SQUARED = JsRegex.Compile("(?<![\\p{L}])m\\s*[²2](?!\\d)", "giu");
-    private static readonly JsRe KM_CUBED = JsRegex.Compile("(?<![\\p{L}])km\\s*[³3](?!\\d)", "giu");
-    private static readonly JsRe M_CUBED = JsRegex.Compile("(?<![\\p{L}])m\\s*[³3](?!\\d)", "giu");
+    private static readonly JsRe KM_SQUARED = JsRegex.Compile("(?<!\\p{L})km\\s*[²2](?!\\d)", "giu");
+    private static readonly JsRe M_SQUARED = JsRegex.Compile("(?<!\\p{L})m\\s*[²2](?!\\d)", "giu");
+    private static readonly JsRe KM_CUBED = JsRegex.Compile("(?<!\\p{L})km\\s*[³3](?!\\d)", "giu");
+    private static readonly JsRe M_CUBED = JsRegex.Compile("(?<!\\p{L})m\\s*[³3](?!\\d)", "giu");
 
     /** RATES, before the plain unit loop — its `(?!\p{L})` guard is satisfied by a slash. */
-    private static readonly JsRe RATE_KM = JsRegex.Compile("(?<![\\p{L}])km\\s*/\\s*(?:klst\\.?|h)(?![\\p{L}])", "giu");
+    private static readonly JsRe RATE_KM = JsRegex.Compile("(?<!\\p{L})km\\s*/\\s*(?:klst\\.?|h)(?![\\p{L}])", "giu");
 
     /** The Latin unit table, keyed by the SOURCE the TS splices into the composed pattern. Placed in
      *  order: ⟨mph⟩ first so no later two-letter key can bite into it. */
