@@ -20,15 +20,27 @@ public static class TamilNumbersComposer
     private static TamilNumbers.MagnitudesDef M => N.Magnitudes;
 
     /** 1–99. `10 + u` is suppletive (பன்னிரண்டு); 21–99 is the ten's OBLIQUE form plus the unit. */
+    /**
+     * ⚠ A FRACTIONAL INDEX IS `undefined` IN JS, NOT A TRUNCATION. `ONES[1.5]` is `undefined` — JS array
+     * indexing converts the index to a property key, and "1.5" is not one — so the TS emits an empty slot
+     * and `numberToWords(1.5)` reads as "". A C# `(int)` cast truncates to 1 and said ஒன்று, "one": a
+     * quantity invented out of a value the TS declines to read. `Slot` reproduces the JS rule, and the
+     * empty string joins exactly as `undefined` does.
+     *
+     * Unreachable from `text()`, whose token is `\d+` — but `numberToWords` is public and the TS answers it.
+     */
+    private static string Slot(IReadOnlyList<string> table, double i) =>
+        double.IsInteger(i) && i >= 0 && i < table.Count ? table[(int)i] : "";
+
     private static List<string> Below100(double n)
     {
         if (n <= 0) return new List<string>();
-        if (n < 10) return new List<string> { ONES[(int)n] };
-        if (n < 20) return n == 10 ? new List<string> { TENS[1] } : new List<string> { TEENS[(int)n - 11] };
+        if (n < 10) return new List<string> { Slot(ONES, n) };
+        if (n < 20) return n == 10 ? new List<string> { TENS[1] } : new List<string> { Slot(TEENS, n - 11) };
         double t = Math.Floor(n / 10), u = n % 10;
         return u == 0
-            ? new List<string> { TENS[(int)t] }
-            : new List<string> { TENS_C[(int)t], ONES[(int)u] };
+            ? new List<string> { Slot(TENS, t) }
+            : new List<string> { Slot(TENS_C, t), Slot(ONES, u) };
     }
 
     /** 1–999. The hundred is a fused stem, and takes its oblique form when a remainder follows. */
