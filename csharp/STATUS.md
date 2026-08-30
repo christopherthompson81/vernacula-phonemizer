@@ -16,12 +16,12 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 ## State
 
 - **Core: 28/28 done.** The regex translator is differentially verified against Node (118,014 results, 0 diff).
-- **Languages: 136 of 193 registry codes**, all **200/200** except where a golden is thinner
-  (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined tier,
-  so their goldens are what exists).
-  **26,827 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
+- **Languages: 185 of 193 registry codes (162 distinct languages)**, all **200/200** except where a golden
+  is thinner (cjy 29, hsn 67, ak 131 — those languages have no wikipedia and no FLEURS, or a thinner mined
+  tier, so their goldens are what exists).
+  **31,564 rows, 0 differ, 0 BLOCKED.** ORDER IS DESCENDING SPEAKER POPULATION (user direction), from
   `tools/language-catalogue/languages.db`.
-  Ported: acm acw af afb ajp ak am apc apd ar ary arz as ast awa ayl az bar bg bho bm bn bo bs ca ceb cjy ckb cmn cs da de el en en-GB en-IN es es-419 fa ff fi fr fr-CA gan grc gu ha hak he hi hne hr hsn ht hu hy id ig it ja jv kk kl km kmr kn ko la lg ln lo mad mag mai mg mi ml mn mr ms my nan nb ne nl nso nya oc om or pa pcm pl pnb ps pt pt-BR qu rkt rn ro ru rw sd si skr sl sn so sr st su sv sw syl ta te tg th ti tl tn tr ug uk umb ur uz vi wo wuu xh yo yue za zu.
+  Ported: ab acm acw af afb ajp ak am an apc apd ar ary arz as ast awa ayl az ba bal bar be bg bho bm bn bo bpy bs ca cdo ceb chr chv cjy ckb cmn crh cs cy da de ee el en-GB en-IN en es-419 es et eu fa ff fi fo fr-CA fr ga gan gd gl gn grc gu ha hak haw he hi hil hmn hne hr hsn ht hu hy hyw id ig ilo is it ja jv ka kaa kam kea ki kk kl km kmr kn ko ky la lb lg ln lo lt ltg luo lv mad mag mai mg mi mk ml mn mos mr ms mt my nan nb nci ne nl nso nya oc om or pa pap pcm pl pnb ps pt-BR pt qu rkt rn ro ru rup rw sat sd shi shn si sk skr sl sn so sq sr st su sv sw syl ta te tg th ti tk tl tn tr tt ug uk umb ur uz vi wo wuu xh yo yue za zu.
   ⚠ THE GATE NOW DISTINGUISHES **BLOCKED** FROM **WRONG**. A row whose embedded foreign run reaches an
   unported engine is counted and PRINTED separately, never as a diff — the verdict is per row and
   evidential (`Registry.ClearPortPending` is cleared before each row, because the set is process-wide and
@@ -140,12 +140,24 @@ Resume here. Read `PORTING.md` first; it is the contract and it has been amended
 - **nb is the third**, and the one where the tagger carries the most weight: 2,926 of 3,718 corpus lines read
   differently sync vs async, so a port registering only the sync engine would have missed almost every golden
   row rather than one. It is also the first port to need `LoadTsvMap`'s `fold` (#1068) — see the nb section.
-- **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
-  adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
-  (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
-  ⚠ on rule 1, where the JS `filter` lookahead reads the PRE-filter array.
-- **Every cross-engine dependency the goldens have is now satisfied** — the 65 self-contained goldens
-  plus the 44 that route a foreign run to `en`/`ru`/`el` can all be gated as they land.
+ - **th is the first SPACELESS script.** `Core/Segment.cs`'s DAG maximal-matcher was already in place; Thai
+   adds the TCC boundary constraint over it. The syllabifier is the largest single language file so far
+   (716 TS lines) and its epitran-derived schwa rewrites are ORDER-DEPENDENT and NON-OVERLAPPING — see the
+   ⚠ on rule 1, where the JS `filter` lookahead reads the PRE-filter array.
+ - **kaa is the smallest Turkic port yet — 395 TS lines, no neural path, no Roman policy, no shared-core
+   change.** The Turkish-style dotless-I casing (dotless capital ⟨I⟩→[ɯ] before the generic lowercase) and
+   the oxytone stress that backs up over one onset consonant are the two signature rules; the normalizer's
+   load-bearing refusals are the EM-DASH copula (30 "is" clauses in the corpus) and the `+`-is-C++ digit
+   lookahead. ⚠ **NO FLEURS** — the catalogue's `fleurs = 1` flag is stale (Karakalpak is not in the 102
+   splits; the directory says so and the generator consults the directory), so the weight falls on the
+   mined + attest corpora: **745 unique lines × sync AND async, 0 differ, 0 throws**, plus 160 off-golden
+   probes (the dotless `mln`/`mlrd`, `US$`, NBSP de-grouping, U+2212, the Latin ⟨C⟩ scale letter, the
+   sentence-end era dot, every number above 10⁹, the 2^53 boundary) — **0 differ, 0 throws** — and the
+   numerals walked exhaustively (**1,000,011 rows, both engines identical**). Seam gates clean: provenance
+   5707/5707, ipaspans 4923/4923 (0 wrong), poison 0 sites. First parity run 200/200. See
+   `docs/kaa_port_investigation.md`.
+ - **Every cross-engine dependency the goldens have is now satisfied** — the 65 self-contained goldens
+   plus the 44 that route a foreign run to `en`/`ru`/`el` can all be gated as they land.
 - `Languages/Bootstrap.cs` is the registration list: one line per ported language, plus the neural table.
 
 ## Next, in order
@@ -1712,3 +1724,51 @@ Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (
 Recorded, not filed: `kirundi.jsonc`'s `convention.affricates` still reads `⟨j⟩→ʒ`, Kinyarwanda's value,
 contradicting the same file's header, its own grapheme table and the shipped reading (`jana` → *d͡ʒana*) —
 on the single fact that distinguishes rn from rw. `convention` is metadata neither engine reads.
+
+### From the kaa port (2026-08-30) — 200/200 first run; full log in `docs/kaa_port_investigation.md`
+
+The smallest Turkic port: three modules (395 TS lines), no neural path, no Roman policy, no
+shared-core change. Gate **161 → 162 languages, 31,364 → 31,564 rows, 0 differ, 0 BLOCKED**; C# tests
+4,455 → 4,485 (29 Karakalpak + 1 manifest mapping). Both first-run bugs were C#-only porting errors,
+fixed in C# only per the bidirectional policy:
+
+- **CS0136 — C# has no JS block scope for the enclosing block.** The TS `numberToWords` reuses `r`/`outp`
+  in every branch; the last declares them at METHOD-BODY level, which encloses the `if` blocks, and C#
+  refuses a same-named local in a nested block regardless of source order. A minimal repro confirmed
+  sibling blocks are legal — the enclosing-body declaration is what trips it. Fixed by renaming the final
+  branch's locals to `rem`/`res`, the exact convention the Chuvash port used for the identical shape.
+- **The digraph scan compared against the whole key, not the key's characters.** TS destructures
+  `DIGRAPHS.find(([k]) => chars[i] === k[0] && …)` — `k` is the two-letter key and `k[0]`/`k[1]` its
+  characters. The first draft compared `chars[i]` to the WHOLE key `"sh"`, so no digraph ever fired:
+  `úsh` read *ˈysh*, `Ishan` *ɯsˈhɑn*. The gate could not catch it (no golden row separates the two
+  readings); the unit tests did. Fixed the Basque way: the pair list is re-keyed to a whole-grapheme
+  `DIGRAPHS` lookup — for two-letter keys that is exactly the TS test.
+
+Verification, per the PORTING.md two widenings (FLEURS unavailable — see below):
+
+    mined + attest corpus        745 unique lines   0 differ  (sync AND async)
+    off-golden probes            160 lines          0 differ  (sync AND async)
+    numerals, walked             1,000,011 rows     0 differ
+    leak sweep                   0 of 905 outputs carry a raw digit or symbol
+    --provenance kaa             5707/5707 (100.0%)
+    --ipaspans kaa               4923/4923 (100.0%), 0 wrong
+    --poison kaa                 0 sites (SUBSTRING 0, desync 0)
+
+⚠ **THE CATALOGUE'S `fleurs = 1` FOR kaa IS STALE — the #1102 class in the reverse direction.** Karakalpak
+is not one of the 102 FLEURS splits and no `kaa_*` transcript directory exists; the generator consults
+the directory, not the flag, so nothing misbehaves — the golden was built from the mined tier, as the
+directory's absence dictates. A data-file correction belongs to the catalogue's own maintenance. The
+0 SUBSTRING poison count is the one that matters for the seam: the de-grouping callbacks strip their
+separators with `JsRe.Replace` on the CAPTURED side, exactly as the TS callback's bare `rest.replace`
+is off `rewrite()`.
+
+Recorded, not filed, from the read-for-correctness pass (both engines agree on every one):
+
+- **`8-12C` reads the ⟨C⟩ as [k], not "UNREAD" as the normalizer's header says.** The header's claim is
+  that no DEGREE reading is emitted — true, no scale word comes out — but the bare ⟨C⟩ then reaches the
+  tokenizer as a one-letter word and the g2p's `latinPhone` fall-through reads it as [k]
+  (*sekiz, on eki k*). That is the engine's documented behaviour for any letter with no rule, shared by
+  every Latin engine; the header's prose is imprecise rather than the code wrong.
+- **The percent-suffix set is the corpus's own and `ind`/`ken` are correctly declined** — `96%ind`
+  leaves the suffix behind as a separate word rather than fusing it; the guard `(?![\p{L}\p{M}])` after
+  the suffix class cannot be widened without claiming suffixes the corpus never writes.
