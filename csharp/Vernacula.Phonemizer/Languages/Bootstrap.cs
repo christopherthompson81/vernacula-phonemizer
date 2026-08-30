@@ -175,6 +175,7 @@ public static class Bootstrap
             Chuvash.ChuvashPhonemizer.RegisterSelf();
             Faroese.FaroesePhonemizer.RegisterSelf();
             Galician.GalicianPhonemizer.RegisterSelf();
+            Guarani.GuaraniPhonemizer.RegisterSelf();
         }
     }
 }
