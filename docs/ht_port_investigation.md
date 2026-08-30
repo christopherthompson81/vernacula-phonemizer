@@ -82,7 +82,7 @@ handed to `Normalize`).
 
 ## Run 4 — 2026-08-26, reading for defects the gate cannot see
 
-Both engines agree byte-for-byte on every item below, so no gate could ever fire on one. See STATUS.md
+Both engines agree byte-for-byte on every item below, so no gate could ever fire on one. See the register below
 for the summary; the measurements are here.
 
 ### A decimal glued to a letter reads its separator as a CLAUSE BREAK — ×8 attested, NOT FIXED
@@ -148,7 +148,7 @@ band); this is the gap between them.
 * `2 − 2 fè zewo` → *de de* — U+2212 in SPACED arithmetic is silent (step 4b claims the LEADING sign only,
   deliberately). An operator dropped, not mis-read.
 * `20 °Cx` → *vɛ̃ kks* and `(0) c°` → *zewo k* — the degree sign vanishes when a letter follows or when the
-  number is not adjacent. Identical to the `lo` finding already filed in STATUS.md.
+  number is not adjacent. Identical to the `lo` finding already filed in `docs/csharp_port_findings_investigation.md`.
 * `ISBN`, `US`, `X` read as Haitian WORDS (*isbn*, *us*, *ks*) because ht has no `letterName` table —
   espeak ships no Haitian Creole. The fleet-wide sourcing block `normalize.ts` already records.
 
@@ -157,3 +157,51 @@ band); this is the gap between them.
 `normalize.ts` step 1's zero-width class was written
 with the four characters written literally, so the line reads as an empty class. Escaped to `/[\u200b\u200c\u200d\ufeff]/` in both
 engines — the #931 rule. Verified byte-identical over all 938 differential lines afterwards.
+
+---
+
+## Findings from the C# port
+
+> ⚠ **Migrated from `csharp/STATUS.md`**, which is retired. That file was a diary plus a state
+> snapshot; the diary belongs here, and the state (what is ported, what is not) is answered by
+> tooling — `dotnet run --project csharp/tools/parity -- --unported`. The text below is verbatim.
+
+### From the ht port (2026-08-26) — 200/200 first run
+
+⚠ **THE INTRA-WORD MARK CLASS IS LIVE IN ht, AND IT IS THE TYPOGRAPHIC APOSTROPHE, NOT THE ASCII ONE.**
+Haitian writes `l'ap`, `n'ap`, `ki-sa`, `pa-t`, and the word arm already carried `"'-"` — measured over
+mined + attest + the 200 golden texts, 73+46 intra-word U+0027 and 229+35 intra-word hyphens all read as
+ONE token. **U+2019 did not**: 13 mined + 2 golden instances, every one an elision, and every one split at
+the mark — `l’Hôpital` → *l hopital* against `l'Hôpital` → *lhopital*, a stranded [l] in front of the
+noun. `core/clauses.ts`'s own `LATIN_RUN`/`FOREIGN_RUN` list U+2019 and ~20 sibling Latin engines do too;
+ht simply missed it. Fixed TS-first (`"'-"` → `"'’-"`, and the same in `NATIVE_CLASS`), **2 golden rows
+moved**, pinned in both suites as "the two spellings must read IDENTICALLY".
+⚠ The second half of the Swedish fix (#1073) was NOT needed and that was checked, not assumed: `scan` has
+no fall-through — an unnamed character is dropped, never passed into the IPA — so a leading or trailing
+quote still reads as nothing (`’moun` → *mun*).
+
+Found, not fixed:
+
+- **A decimal glued to a letter reads its separator as a CLAUSE BREAK — ×8 attested.** Step 10's trailing
+  `(?![\d\p{L}\p{M}])` is documented as keeping a dotted designation (`802.11a`) out; declining is not
+  neutral, because the surviving `.`/`,` is then CLAUSE PUNCTUATION. `17.09m.` → *disɛt . nɛf m .*,
+  `1.9pwen` → *ɛ̃ . nɛf pwɛ̃*, `442.7k` → *… kaɣãnde . sɛt k*, `802.11n` → *ɥit sã de . ɔ̃z n*. ⚠ **Two of
+  the eight are `normalize.ts`'s OWN attestations** — `1 a 1,5m` and `50cm a 1,80m`, quoted twice in the
+  file as the evidence for the `a` connective, read *ɛ̃ a ɛ̃ , sɛ̃k m*. 3 of the 12 corpus instances are
+  genuine quantities, 5 are designations/DOIs, 2 are already rescued by the unit tier — and the current
+  reading is wrong for ALL of them. NOT FIXED because the repair (read the separator as `vigil`) trades a
+  bogus full stop for a bogus *vigil* in the designation half; that is a corpus call, not a port call.
+  0 golden rows reach the shape.
+- **A NON-ASCENDING span drops its unit entirely.** `53-50 km` → *sɛ̃kãntwa sɛ̃kãt km* against `50-53 km`
+  → *… kilomɛt*. Step 5's `(?<!\d\s?[-–—]\s?)` on the single-operand arm is only ever REACHED when the
+  span arm declined (a successful span rewrites the dash away), so its whole effect is to delete the unit
+  in exactly that branch. ×0 attested — the `tl numberStressIdx` shape, live the moment one appears.
+- **The `-eyen` ordinal band strands a bare *jɛm*** — the before-picture step 12 exists to fix, surviving
+  wherever `ordinalTails` has no match: `20yèm` → *vɛ̃tjɛm* but `21yèm` → *vɛ̃tejɛ̃ jɛm*, and likewise 31,
+  41, 81, 101, 0 and every magnitude. Needs a sourced Haitian ordinal for the decade+`eyen` band; all 22
+  `ordinalTails` rows themselves ARE reached (checked by composing every band).
+- Shared shapes, already filed for other languages: `2 − 2` reads *de de* (step 4b claims the LEADING
+  U+2212 only, deliberately); `20 °Cx` → *vɛ̃ kks* and `(0) c°` → *zewo k* (the `lo` degree finding);
+  `ISBN`/`US`/`X` read as Haitian words because espeak ships no Haitian Creole letter names.
+- Hygiene, no output change: step 1's zero-width class was written with the four INVISIBLE characters, so
+  the line read as an empty class. Escaped in both engines (the #931 rule).

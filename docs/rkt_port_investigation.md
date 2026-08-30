@@ -221,3 +221,96 @@ either shared-core (and already filed for another language) or a data question w
   the clock (`11:20` → *ˈeɡaɾo bˈɔd͡zkɔɾ bˈis mˈinɔʈ*), the ordinals (`1ला` → *pˈɔɦla*, Hindi पहला),
   प्रतिशत, the unit words and the whole shared symbol tier. Confirmed reachable and confirmed
   unsourceable — the Toulmin list contains none of these words.
+
+---
+
+## Findings from the C# port
+
+> ⚠ **Migrated from `csharp/STATUS.md`**, which is retired. That file was a diary plus a state
+> snapshot; the diary belongs here, and the state (what is ported, what is not) is answered by
+> tooling — `dotnet run --project csharp/tools/parity -- --unported`. The text below is verbatim.
+
+### From the rkt port (2026-08-27) — 200/200 first run
+
+**rkt (Rangpuri / KRNB, ~15M — the largest unported language)** — ONE 27-line C# file plus a `Bootstrap`
+line. Gate **118 → 119 languages, 23,296 → 23,496 rows, 0 differ, 0 BLOCKED**; C# tests 1,358 → 1,381.
+`rangpuri.ts` is 40 lines and composes `makeNativeHindi` with **no overrides, no lexicon, no script
+override** — the thinnest composition in the family — so every KRNB fact is in `rangpuri.jsonc` and **the
+shared Hindi core needed no change**. ⚠ Per trap 55 the ported siblings (bho, hne, mai, awa, mr, ne, gu)
+were used only to confirm the COMPOSITION SHAPE; no rule, value or reasoning was borrowed from any of them.
+
+⚠ **rkt HAS NO CORPUS AT ALL, AND ITS GOLDEN IS VARIANT-DERIVED.** No FLEURS split, no
+`tools/corpus/mined/rkt.jsonc`, no `attest/`, no rkt.wikipedia, nothing under `/mnt/data`.
+`csharp/goldens/rkt.tsv` is 200 rows of **HINDI FLEURS text** re-rendered by `tools/gen_variant_golden.mts`,
+so 200/200 pins C#↔TS parity and says nothing about Rangpuri. Its one source is
+`tools/referee-eval/referees/rkt.toulmin-rp.tsv` — 370 Deva→IPA pairs machine-extracted from a two-column
+PDF, which the eval config itself annotates as ~15% alignment noise. All the weight is on the widenings:
+**6,851 unique lines** (3,395 FLEURS `hi_in` cols 3+4, 1,427 Devanagari strings from six sibling mined
+artifacts, the 200 golden texts, the 370 referee headwords, 1,717 hand-built) × sync AND async =
+**13,702 comparisons, 13,700 identical, 0 throws, 2 BLOCKED** (one mined line carrying an embedded TIBETAN
+run — `bo` is unported, so TS reads `ལ་དྭགས` and C# drops it).
+
+⚠ **AND FOUR FLEET SHAPES ARE UNREACHABLE FROM ANY TEXT rkt CAN BE SHOWN**, measured not assumed: space-grouped
+thousands **0**, `0,NNN` **0**, caret exponents **0** (and `10^6` READS here, unlike pcm/ha/yo/sw/id), digit
+runs >15 **0**. They rest entirely on the hand-built lines. Avagraha is 214 in the corpora and **every one is
+mai/mag** (`कऽ`, `करलऽ`) — 0 in the golden, 0 in FLEURS, 0 in the referee, and rkt sets no `retainOnAvagraha`.
+
+**Reachability sweep** (sabotage each of 124 manifest leaves, re-render all 6,851 lines): **116 live, 8 dead,
+and every dead one is a DECLARATIVE STRING** — the five `signs.*.effect` fields (which the manifest's own
+anusvara note already says are not dispatched), `schwaDeletion.medialRule`, `numbers.grouping`, and
+`nasalVowelsAreShort` (inert because rkt declares no long vowels at all). **No lexical table is unreached.**
+⚠ `schwaDeletion.medialRule` and `numbers.grouping` are dead in **nine** Devanagari manifests and
+`ManifestMappingTests` cannot see either: it diffs the TOP-LEVEL key set, and both parents are claimed whole.
+
+**Fixed in TypeScript: NOTHING, and that is the honest outcome.** No defect was found in rkt's own 40 lines
+or its manifest that any available source could adjudicate. The manifest's strongest claim was tested against
+the referee and HOLDS: positional voiceless deaspiration is **24 of 25 word-initial keeping [ʰ], 0 of 9
+elsewhere**; voiced-aspirate retention 29/29; deaffrication 11/11. Folded backbone 236/370 (63.8%), symbol
+accuracy 86.8%, residual dominated by PDF extraction noise. ⚠ Path check: `phonemizeWord` (what the referee
+eval scores) and the shipped `text()` path are the SAME function here — rkt passes no lexicon, so
+`word === wordRules`. Not the `pa` shape.
+
+**Found and NOT fixed:**
+
+- ⚠ **THE 80 WORD HAS NO FINAL VOWEL AND IT IS IN THE GOLDEN.** `numbers.tens["80"]` is ⟨आइस⟩ → ***ˈais***,
+  in 2 of the 200 golden rows (`80 प्रतिशत`, `380 मीटर`). Every other ten is a transparent respelling of the
+  Bengali/KRNB form with ই written ⟨इ⟩ — बिस/বিশ, चाइलिस/চল্লিশ, षाइठ/ষাট, सत्तइर/সত্তর, नब्बइ/নব্বই — and
+  on that pattern 80 আশি is ⟨आशि⟩ *aʃi*, not ⟨आइस⟩ with the sibilant and vowel transposed and the wrong
+  sibilant letter. NOT FIXED: the referee has NO numerals, `rangpuri.ts` states "numbers deferred", and the
+  change would move golden rows on a hypothesis. Needs a KRNB numeral source — which the module header
+  already names as the missing thing.
+- **21–99 read as two words** (`21` → *ˈek bˈis*, `56` → *sˈɔj pˈɔsas*): `numbers.compound` is `{}`, so
+  `indicNumberWords` takes its documented unit-then-tens fallback. KRNB, like Bengali, has fused irregulars
+  for the whole band. Same blocker.
+- **छय (6) and सय (100) are HOMOPHONES here** — both *sɔj*, because छ→s lands on the phone सय already has,
+  so `356` reads *t̪ˈin sˈɔj sˈɔj pˈɔsas*. A genuine consequence of the sourced deaffrication, not an error
+  in it. Recorded because the reading looks like a bug and is not.
+- ⚠ **THE GEMINATE postRule GIVES ONE CONSTRUCTION TWO ANSWERS, DECIDED BY PLACE.** Its LETTER class carries
+  `ʰ?ʱ?` so घ्घ→*ɡʱː* and भ्भ→*bʱː*, but `t̪ d̪ ʈ ɖ d͡z` sit in the bare tail without it, so ध्ध, ढ्ढ and
+  झ्झ keep two full segments. ×0 attested — Devanagari writes द्ध, ड्ढ, ज्झ, and all three of THOSE geminate
+  correctly (`बुद्ध` → *bˈud̪ːʱ*). The LIVE half is the omission of **`ɾ`**: `ɽ` is in the class and `ɾ` is
+  not, र्र is the 9th most frequent geminate in the Devanagari corpora at **67 instances**, and the golden
+  itself carries the ungeminated pair (`दर्रा` → *d̪ˈɔɾɾa*). Whether a geminate tap should be `ɾː` has no rkt
+  referee; व्व, य्य, ह्ह, ञ्ञ are in the same bucket.
+- **A guard's safe branch strands a separator the tokenizer reads as CLAUSE PUNCTUATION.**
+  `makeNativeHindi`'s number token carries a nested lookbehind so a grouping comma may not follow a lone zero
+  — which correctly killed the su 1000× shape (`0,001` → *एक*). The residue is that the comma then falls to
+  the clause arm: `0,001` reads ***ʃˈunj , ˈek***, one number becoming two with a pause. ×0 attested
+  (Devanagari text writes the decimal point) and it reaches all **17** languages built from this maker, so it
+  is a family decision, not a port one.
+- **The leading-zero shape is LIVE but HARMLESS here, and reading the instances is what said so.** `007` →
+  *sˈat̪*. All ~45 leading-zero runs in the Devanagari corpora are clock or date fields (`06:30`, `07:30`,
+  `01-01-1923`, `08.11.1992`), one UTC offset and one ISBN — in every one, dropping the zero is the RIGHT
+  reading. The 100× shape needs `0` plus a fraction and no rkt-reachable text has one. ⚠ The same check
+  killed a second scare: five apparent comma-decimals (`9,86`, `82,40`, `1,18`…) are all clipped INDIAN LAKH
+  GROUPS (`1,72,96,455`) the tokenizer joins correctly.
+- **Checked and DECLINED as a defect**: `abugida.ts` emits a plain `h` for the visarga while all nine
+  Devanagari manifests map ह to `ɦ` (125 instances; `क्रमशः` → *kɾˈɔmʃɔh*). The visarga is classically
+  voiceless, so the split reads as deliberate. Recorded so the next reader does not re-open it.
+- **Shared shapes confirmed live, already filed elsewhere**: `1 000` → *ˈek ʃˈunj*; `2 − 2` → *d̪ˈui d̪ˈui*;
+  `25°Cx` → *… ɖˈiɡɾi ks*; `1500 ई.` → *… ˈi .* (the era arm handles only ई.पू./ई.स.पू.); `11:20:30` → two
+  stranded colons as pauses.
+- **Inherited Hindi words in KRNB sound**, which `rangpuri.ts` already flags and refuses to guess at: the
+  clock (`11:20` → *ˈeɡaɾo bˈɔd͡zkɔɾ bˈis mˈinɔʈ*), the ordinals (`1ला` → *pˈɔɦla*, Hindi पहला), प्रतिशत, the
+  unit words and the whole shared symbol tier. Confirmed reachable and confirmed unsourceable — the Toulmin
+  list contains none of them.

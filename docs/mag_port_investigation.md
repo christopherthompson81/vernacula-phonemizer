@@ -159,7 +159,7 @@ silently by someone who reads only the word "word-initial".
 
 ## Run 7 — 2026-08-27 — the manifest's inherited claims, checked one at a time
 
-STATUS.md records that bho had **six wrong claims** in its manifest. `magahi.jsonc` was derived from
+The findings register (now `docs/csharp_port_findings_investigation.md`) records that bho had **six wrong claims** in its manifest. `magahi.jsonc` was derived from
 `bhojpuri.jsonc` and **carries copies of several of them, which were retracted in bho and left standing here**
 — which is the whole argument against a copied comment. All hygiene; 0 output change; verified by re-running
 the 302-line differential after each edit.
@@ -275,3 +275,126 @@ Counted first, then read — every entry below carries the number that decided i
 | vitest | 5,552 passed | **5,556 passed, 5 skipped** (+4, all in test/magahi.test.ts) |
 | C# tests | 1,359 | **1,394 passed** (+35, MagahiTests.cs) |
 | corpus + probe differential | — | 1,020 comparisons, 0 differ, 0 throws, 4 BLOCKED (Tibetan) |
+
+---
+
+## Findings from the C# port
+
+> ⚠ **Migrated from `csharp/STATUS.md`**, which is retired. That file was a diary plus a state
+> snapshot; the diary belongs here, and the state (what is ported, what is not) is answered by
+> tooling — `dotnet run --project csharp/tools/parity -- --unported`. The text below is verbatim.
+
+### From the mag port (2026-08-27) — 200/200 first run
+
+**mag (Magahi, ~13M)** — ONE new C# file (27 lines, the `Bhojpuri.cs` shape), one `Bootstrap` line, one
+`ManifestMappingTests` fact; `Registry.cs` already carried `case "mag"`. Gate **118 → 119 languages, 23,296 →
+23,496 rows, 0 differ, 0 BLOCKED**; C# tests 1,359 → 1,394, vitest +4.
+⚠ **THE SHARED HINDI CORE NEEDED NO CHANGE** — mag is `makeNativeHindi(magahi.jsonc, …)` and reaches only
+`Hindi`, `LoadManifest`, `PhonologyLoader` and `Registry.ReadAsEnglish`, all ported for `hi`.
+
+⚠ **ITS GOLDEN IS THE MINED TIER OVER REAL MAGAHI, NOT A VARIANT RENDER** — and that was worth checking rather
+than assuming, because bho's *is* Hindi text. `mag` is not a target in `gen_variant_golden.mts`, has no FLEURS
+directory, and `gen_parity_goldens.mts` reports it as `0 FLEURS + 1 mined`. So 200/200 is corpus coverage of
+the language. ⚠ **The cost of having no FLEURS is that the corpus-wide differential is 302 LINES, not
+thousands** — the whole mined artifact plus the golden texts (the 200 golden rows are a subset and add none).
+Off-golden probes carry more weight here than in a FLEURS language, and the run that mattered proved it.
+
+Fixed in TypeScript first with tests, goldens regenerated, then ported:
+
+- ⚠ **MAGAHI'S ORDINAL SUFFIX IS मा, AND HINDI'S INHERITED TABLE WAS 100% UNREACHABLE.**
+  `makeHindiNormalizer` takes `own?.ordinalSuffixes ?? MANIFEST.ordinalSuffixes` and magahi.jsonc declared
+  none, so mag used Hindi's वाँ/वीं/वें — which `hindi/normalize.ts`'s own header defends as "pan-Hindi-belt"
+  and therefore safe for the family. Measured over mag's 302 lines: **15 `digit + मा`, ALL ordinals, and 0
+  of वाँ/वीं/वें and 0 of ला/रा/था/ठा.** The suffix therefore fell through to the tokenizer as its own word,
+  and मा is an ordinary Magahi word ("mother"), so the failure read as fluent nonsense rather than a gap:
+  `१७मा शताब्दी` → *sˈət̪ɾəɦ **mˈɑ** sət̪ˈɑbd̪ime*, `१०मा बेर` → *d̪ˈəs **mˈɑ** bˈeɾ*. Now
+  *sət̪ɾˈəɦmɑ sət̪ˈɑbd̪i* / *d̪ˈəsmɑ bˈeɾ*. **4 golden rows move.**
+- ⚠ **AND THE FIRST DRAFT OF THAT FIX WAS A REGRESSION NO GOLDEN AND NO CORPUS DIFFERENTIAL COULD SEE.**
+  `own?.x ?? MANIFEST.x` overrides **WHOLESALE**, so a block declaring only `{"मा": 0}` silently took Hindi's
+  rows AND the entire suppletive arm away: `१६वीं सदी` went *solˈəɦbĩ sˈəd̪i* → *sˈoləɦ **bˈĩ** sˈəd̪i* and
+  `१ला` went *pˈəɦlɑ* → *ˈek **lˈɑ*** — the same stray-syllable defect, traded from one spelling onto another.
+  Both shapes are ×0 in the mag corpus, so only the hand-built probe list (one line per ARM, including the
+  arms the corpus never uses) showed it. The shipped block repeats Hindi's rows verbatim and ADDS मा; both
+  suites now pin the Hindi arms and their guards (`२था` is the past copula, not 2's suffix) so it cannot be
+  narrowed again. **⚠ A PER-FILE FALLBACK IS AN OVERRIDE, NOT A MERGE — declaring one row of it deletes the
+  rest, and the deletion is invisible wherever the deleted rows are unattested.**
+- **Manifest hygiene, 0 output change — and it is the bho class recurring, which STATUS predicted.**
+  magahi.jsonc was derived from bhojpuri.jsonc and **carries copies of claims that were RETRACTED in bho and
+  left standing here**: the header still said *"Native canonical-IPA definition for **Hindi (hi)**"*, ⟨ऐ⟩ and
+  ⟨औ⟩ still claimed *"Bhojpuri KEEPS the diphthong"* against their own ɛ/ɔ values, ⟨श⟩/⟨ष⟩ and the
+  `finalRules` note attributed Bihari-core features to *"Bhojpuri"* in a Magahi file, `provenance` ended on
+  the orphaned fragment *"→ ."*, and the numbers note still called the 21–99 table *"a bounded remaining
+  authoring task"* when it is complete (72 rows, hindi.jsonc's byte for byte). ⚠ **Worst of the set: ⟨य⟩ was
+  annotated "palatal approximant" and ⟨व⟩ "labiodental approximant" — the descriptions of the values this
+  language exists to NOT have.** The header now separates the three mechanisms by which mag speaks Hindi words,
+  as chhattisgarhi.jsonc does, and magahi.ts names the hardcoded normalizer words it inherits and cannot see
+  (डिग्री, प्लस, ऋण, बराबर, गुणा, भाग, बटा/आधा, और, किमी→किलोमीटर, डॉ→डॉक्टर) beside the four it confirms.
+- **`nasalVowelsAreShort` IS INERT IN MAGAHI, and the inherited note argued for it from a Hindi referee.** Its
+  only effect is stripping a trailing ː, and no value in this manifest carries one — Magahi has no phonemic
+  length. **Sabotage-verified: flipping it moves 0 of 302 corpus lines.** Stated rather than deleted.
+
+**Found and NOT fixed:**
+
+- ⚠ **THE GLIDE HARDENING IS CITED WORD-INITIALLY AND APPLIED IN EVERY POSITION — the whole of what makes mag
+  a separate engine, and the implementation is 5× wider than its source.** magahi.ts, magahi.jsonc's
+  `provenance` and test/magahi.test.ts all state Vinod Kumar 2026 §6.2 as *word-initial* व→[b] / य→[d͡ʒ]; the
+  manifest implements it as a flat `consonants` map. Counted across the 302 lines: **व word-initial 481 vs
+  1,178 elsewhere; य 182 vs 1,586** — ~81% of the applications are outside the cited position, on ordinary
+  words (महाकाव्य → *məɦɑkˈɑbd͡ʒ*, पाण्डव → *pˈɑnɖəb*, भारतीय → *bʱˈɑɾt̪id͡ʒ*, कौरवके → *kɔɾˈəbke*). The
+  engine COULD express the narrow rule (map व→w / य→j, add `^w`→b / `^j`→d͡ʒ `postRules`, which run per word),
+  so this is a decision about the source and not a machinery limit. **NOT TAKEN because there is no instrument
+  to take it with**: mag has no referee (`tools/referee-eval/langs` carries awa/bho/hne, not mag) and no FLEURS
+  audio, and the change would move essentially every golden row on a coin flip. Both engines keep the current
+  reading; it is now PINNED by `GlideHardeningIsNotPositional` in both suites so nobody who reads only the
+  words "word-initial" can narrow it silently.
+- **Three of the seven shared Hindi abbreviations can essentially never fire, and the stranded dot becomes a
+  CLAUSE BREAK.** Step 3's context is `\.?(\s+)(?=[\p{L}])` — a LETTER must follow — but `सं` is "number",
+  `पृ` is "page" and `अध्या` is "chapter", whose complement is a NUMERAL: `सं. १०` → *sˈə̃ **.** d̪ˈəs*,
+  `पृ. २५` → *pɾˈi **.** pˈət͡ʃːis*. Both halves fail at once. ×0 attested in mag; it is hindi/normalize.ts's
+  table and reaches eleven languages, so reported rather than repaired here (trap 55).
+- **The abbreviation and unit tables are keyed on the ASCII dot and mag writes U+0970 ॰**, ×20 in corpus:
+  `डॉ॰ बाबासाहेब` → *ɖˈɔ …* against `डॉ. …` → *ɖˈɔkʈəɾ …* (×3, plus `प्रो॰`), and `कि॰मी॰` → *kˈi mˈi* against
+  `किमी` → *kˈilomiʈəɾ*. Two spellings of one abbreviation, one read and one not. Fleet-shaped (hi/mr/ne write
+  ॰ too).
+- **`किमी` is claimed only with an ADJACENT digit and no following letter — 8 of its 16 instances fail.**
+  `वर्ग किमी` ×6 (the number is two words away) and `२०० किमीसे` / `६५० किमीमे` ×2 — **Magahi glues its
+  postpositions, which is the feature the corpus is judged by**, so the trailing `(?![\p{L}\p{M}])` rejects
+  exactly the normal orthography. All eight read the pseudo-word *kˈimi*/*kˈimise*, which is what UNIT_WORD's
+  docstring says the table exists to prevent. The new ordinal rule has the identical exposure (`१०मासे` →
+  *d̪ˈəs mˈɑse*, ×0). Widening either guard is a fleet decision.
+- **km² reads two different wrong ways**: `५६,०१९ किमी²` drops the square entirely and `२,००,००० किमी२` reads
+  it as a following number (*… kˈilomiʈəɾ d̪ˈo*). ×1 each — the shared exponent tier is keyed on LATIN unit
+  keys, so a Devanagari unit never reaches it. The ig `km³` shape.
+- **`२२°उ॰` → *ɖˈiɡɾiu*** — the bare-degree replacement `"$1 डिग्री"` has no trailing space and the next letter
+  fuses onto the degree word. ⚠ **×1 ATTESTED, which is the first REAL corpus instance of a shape filed
+  constructed for su (`25°Cölner`), lo and sl (`20 °Cx`).**
+- **Twelve Vedic citations read as fractions.** `ऋ॰ १०/१३७/१-७` → *… sˈɛ̃n̪t̪is **bˈəʈɑ** ˈek sˈɑt̪*: step 8's
+  leading `(?<![\d.,])` lets the match start mid-citation. 12 of the corpus's 14 slash-with-digits are this and
+  the other 2 are seat pairs — **mag has ZERO true fractions**, so the rule is a net loss in this language. A
+  corpus call on a shared rule.
+- **`25/12सीट` → *pˈət͡ʃːis bˈəʈɑ **bɑɾˈəɦsiʈ*** — step 8's `(?![\d/])` admits a LETTER and the composed words
+  fuse onto it: one pseudo-token with the stress of neither. ×1. Trap #1 of the file's own step 2, one step on.
+- **`ऋ०` injects a spurious "zero"** — the abbreviation is written with DEVANAGARI DIGIT ZERO instead of ॰,
+  `foldNativeDigits` makes it `0`, and the tokenizer reads a number: *ɾˈi **sˈund͡ʒ***. ×1. Its twin `ऋ॰` is
+  dropped silently instead. A hazard of the shared fold.
+- **A ratio reads as pause-separated numbers.** `३:३:२:१ के अनुपात` → *t̪ˈin , t̪ˈin , d̪ˈo , ˈek …*: the clock
+  arm correctly declines and `clausePunctuation` then maps every `:` to a comma. ×1, and both of the corpus's
+  digit-colon-digit instances are this shape — declining is not neutral (the `lo`/`ckb` class).
+- **`0,001` strands its comma as CLAUSE PUNCTUATION** → *sˈund͡ʒ **,** ˈek*, the residue of the lone-`0`
+  grouping guard in `hindi.ts`'s tokenizer (the ig/uz shape). ×0 attested, and the comma is a GROUPING mark in
+  this orthography so `0,001` is not a well-formed Magahi decimal to begin with. `००७` → *sˈɑt̪* is the fleet
+  `Number("007")` shape; the DECIMAL path is safe because `number()` maps the fractional run digit by digit.
+- Shared shapes, ×0 here, filed elsewhere: `१०००/२०००` loses its slash, `१०^६` drops its caret, `(0) c°` loses
+  the scale letter.
+- Hygiene for the hi owner: `hindi/normalize.ts`'s header states *"HINDI TEXT WRITES NUMBERS WITH ASCII DIGITS
+  … so no digit transliteration is needed here"*. True of hi; **false of mag, where 135 of 158 digit runs are
+  Devanagari.** Nothing breaks — `registry.ts`'s `foldNativeDigits` runs first — but a reader of the shared file
+  would conclude the family is ASCII-only.
+
+**Widenings.** Corpus-wide differential over all **302 unique mag lines** (the whole mined artifact + the 200
+golden texts, which are a subset) plus **208 hand-built probe lines**, × sync AND async = **1,020 comparisons,
+0 differ, 0 throws**, 4 BLOCKED on `tibetan` from two lines carrying an embedded Tibetan run. 13 of the 510
+lines read differently sync vs async in BOTH engines — all embedded Latin reaching English's BiLSTM; mag has no
+neural tier of its own. ⚠ **Coverage of the probe-only arms, stated rather than assumed**: currency signs other
+than ₹, space-grouped thousands, caret exponents, U+2212, ± ÷ × < >, `℃`/`℉`, a true fraction, a `:00` clock, an
+above-2⁵³ digit run and every ASCII-dotted abbreviation are ×0 in the corpus and rest entirely on the probes.

@@ -160,3 +160,79 @@ sd/bn/af/fr do.
   onto the degree word, U+2212 between digits.
 - **`007` reads *ħawt`*** — `Number("007")` drops the leading zeros. Fleet-wide shape; the DECIMAL path
   is safe here because the fractional part is read digit by digit, never through `Number`.
+
+---
+
+## Findings from the C# port
+
+> ⚠ **Migrated from `csharp/STATUS.md`**, which is retired. That file was a diary plus a state
+> snapshot; the diary belongs here, and the state (what is ported, what is not) is answered by
+> tooling — `dotnet run --project csharp/tools/parity -- --unported`. The text below is verbatim.
+
+### From the ckb port (2026-08-27) — 200/200 first run
+
+**ckb (Central Kurdish / Sorani, ~8M)** — 6 files, ~430 C# lines, gate **114 → 115 languages, 22,496 →
+22,696 rows, 0 differ, 0 BLOCKED**. ⚠ **NO PERSO-ARABIC CORE WAS INVOLVED, and that was worth checking
+rather than assuming**: ckb is a Perso-Arabic script but imports none of the shared abjad machinery — the
+SORANI alphabet writes every long vowel and the short /a/, so there is no short-vowel wall to restore and
+nothing in `Core/HarakatLexicon.cs` / `Core/RiderDiacritizer.cs` is reachable. It shares only `Clauses`,
+`LoadManifest`, `LoadTsv`, `Numbers`, `Unicode`, `Foreign` and `StructuralTagger`, and the neural tier is
+`CreateWordStructuralTagger` + `WordLevelNeuralPrepass` unchanged, as in sd/bn/af/fr. **The shared core
+needed no change.**
+
+Widenings: corpus-wide differential over **4,275 unique lines** (8,696 FLEURS `ckb_iq` col 3+4, 143 mined,
+the 200 golden texts, 261 hand-built) × sync AND async = **8,550 comparisons, 0 differ, 0 throws**.
+⚠ The corpus alone covers NONE of the degree sign, the currency signs, the relational signs, U+2212 or an
+above-2⁵³ digit run — all five are 0 in FLEURS + mined and rest entirely on the hand-built lines. 3,292 of
+the 4,275 lines read differently on the async path in both engines, so the tagger tier is live on both
+sides rather than silently serving the sync reading.
+
+Fixed in TypeScript first, with tests, goldens regenerated, then ported:
+
+- ⚠ **A FIX WITH A STATED ARGUMENT DID NOT REACH THE SECOND CASE THE ARGUMENT COVERS.** `scanWord`
+  special-cases the one-letter word ⟨و⟩ because "a bare [w] is not pronounceable as a word" — and Sorani
+  has TWO matres lectionis. The one-letter ⟨ی⟩ is the detached IZAFE (`٢٤ ی ئەیلول` "the 24th OF
+  September", `16ی ئەیلوول`, `80%ی داهات`) and read as a bare **[j]**, 405 times across the corpus; the
+  next one-letter token down is 14 instances of a fragment, so it is one construction, not a tail.
+  Measured exactly as the ⟨و⟩ note was (min of wav2vec2 and allosaurus, 151 affected rows): median
+  0.3575 → 0.3558, mean 0.3849 → 0.3794, **72 closer / 1 further**. `i` and `iː` score IDENTICALLY —
+  `fold` strips length — so the quality is decided on the language, and deletion again wins on rows
+  (149/2) and loses on the mean, which is the ⟨و⟩ note's own connected-speech finding. **15 golden rows
+  move.**
+- ⚠ **AN ERA-SHAPED DISCRIMINATOR QUESTION, ANSWERED PER SIGN.** The signed-number rule admits a LETTER
+  before the sign for `UTC+1`, and applied that to the minus as well. Reading the instances rather than
+  counting them: the one letter-adjacent PLUS is `(UTC+1)`; all **20** letter-adjacent MINUSES are
+  designations — `کۆڤید-19`, `نوێ-COVID-19`, `HJR-3`, `Il-76s`, `چانداریان-1` — and not one is a
+  subtraction, so COVID-19 read *koːviːd kam noːzda*, "covid MINUS nineteen". Split into two arms; the
+  minus takes the ordinary non-letter boundary. **0 golden rows move.** (Cf. kmr's digit guard and
+  Serbian's case guard for the same class: the discriminator each corpus supports is different, and here
+  it is the SIGN.)
+- Hygiene: `normalize.ts`'s header claimed the decimal rule "accepts one or two fractional digits". It has
+  no cap; the fractional part is read digit by digit either way, and it is the UNIT rule's `NOT_VERSION`
+  guard that tells `802.11m` from a quantity.
+
+**Found and NOT fixed:**
+
+- ⚠ **THE ZERO NUMERAL HAS NO NUCLEUS, IT IS ALREADY IN THE GOLDEN, AND THE LEXICON IS THE WRONG PLACE
+  FOR IT.** `سفر` reads *sfɾ* — the only word in the numbers table with no vowel — and it is not obscure:
+  2 of the 200 golden rows carry it (`3.50 مەتر` → *seː xaːɫ peːnd͡ʒ **sfɾ** matɪɾ*), 43 occurrences
+  corpus-wide, and every one of the 22 colon-clock instances routes through it. This is precisely the
+  class the module header cites as "not a variant, IMPOSSIBLE" (ملیۆن → *mljoːn*). All three obvious
+  fixes are closed: the AsoSoft builder's pair for سفر is *safar*, so the bizroke-only filter dropped the
+  row on purpose and a whole-word entry would pick one reading of a genuine homograph; the tagger DOES
+  read it *sɪfɪɾ* but the number path never consults the OOV resolver and `wordLevelNeuralPrepass` keys
+  its map off words present in the TEXT, which a composed number word is not; and the manifest states
+  "no hand IPA" for this table. It needs a NUMERAL-CONTEXT reading — the zero word is unambiguously
+  *sifir* in a numeral — which is a design decision, not a port one.
+- **The lexicon is looked up on the UNSTRIPPED token while the scan strips ZWNJ + tatweel**, so a headword
+  whose corpus spelling carries either mark can never hit it. Measured: ×0 reachable in FLEURS + mined.
+  `loadTsvMap`'s `fold` option (#1072) is the mechanism the day one appears.
+- **A rate declines when its denominator is inflected**: `٨٣ کیلۆمەتر/کاتژمێرێك` — the
+  `(?![\p{L}\p{M}\d])` guard rejects the ـێك suffix, the slash is then dropped, and the "per" is lost.
+  ×2, plus `300میل/کاتژمێر` ×1 where میل is simply not in the numerator table. The `lo` degree shape:
+  how far number–unit adjacency should stretch is a corpus argument.
+- **`1 / 5` loses its slash** — ckb has no fraction rule at all. ×1, and inventing one on n=1 is #955.
+- Shared shapes, ×0 attested here and already filed elsewhere: space-grouped thousands
+  (`1 000 000` → *jak sfɾ sfɾ*), caret exponents (`10^6` → *da*), `25°Cx` gluing the letters onto the
+  degree word, U+2212 between digits, and `007` → *ħawt* (`Number` drops leading zeros — the DECIMAL path
+  is safe, because the fractional part never goes through `Number`).

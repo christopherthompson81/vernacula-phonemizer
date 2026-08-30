@@ -114,7 +114,7 @@ composer all matched the TS on the first differential.
 
 Two ports landed on `main` after this branch cut (hil #1190, hmn #1191). Rebased onto `origin/main`;
 the only conflict was the `Bootstrap.cs` append (kept all three: Hiligaynon, Hmong, Icelandic). Aligned
-with the recent convention (haw/hil/hmn made no `STATUS.md` change) — the port is recorded here, not in
+with the recent convention (haw/hil/hmn made no `STATUS.md` change; that file is now retired) — the port is recorded here, not in
 the resume log. Re-counted on the new base; the is-specific gates are unchanged, only the fleet-wide
 totals moved:
 

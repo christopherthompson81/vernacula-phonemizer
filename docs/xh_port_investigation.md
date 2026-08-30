@@ -179,7 +179,7 @@ TS ↔ C#, sync AND async:
 
 ⚠ **sync and async are byte-identical for every one of the 3,047 corpus lines.** That is not a broken
 async path: xh has no tagger of its own, and its embedded English goes through the already-filed
-"a Latin-script host never prewarms" finding in `STATUS.md`, so the foreign reader serves the n-gram
+"a Latin-script host never prewarms" finding (now in `docs/csharp_port_findings_investigation.md`), so the foreign reader serves the n-gram
 reading in both modes. Stated rather than left implied, because for a neural language the same number
 would mean the tagger was never installed.
 
@@ -216,3 +216,122 @@ those sweeps: re-running the harness from it exercises patterns that no longer e
 do. The file was reverted rather than regenerated here, because a 579-line refresh of a shared artifact does
 not belong in a language bring-up — but it wants regenerating and committing on its own, and until then the
 harness must be run after `extract_regexes.mts`, never from the checked-in copy.
+
+---
+
+## Findings from the C# port
+
+> ⚠ **Migrated from `csharp/STATUS.md`**, which is retired. That file was a diary plus a state
+> snapshot; the diary belongs here, and the state (what is ported, what is not) is answered by
+> tooling — `dotnet run --project csharp/tools/parity -- --unported`. The text below is verbatim.
+
+### From the xh port (2026-08-27) — the reported `\p{Lu}` guard was DEAD, and the `/i` was doing a second job
+
+**xh (Xhosa / isiXhosa, ~8M L1)** — 4 files, ~470 C# lines over a 592-line TS module. It is the Nguni
+sibling of `zu` and REUSES the ported `Zulu/G2p.cs` scan, `NguniLoans.cs` and `ZuluManifest` shape with its
+own table (⟨rh⟩→[x], the Xhosa number words); the shared core needed no change. Gate **118 → 119 languages,
+23,296 → 23,496 rows, 0 differ, 0 BLOCKED**; C# tests 1,360 → 1,385. **200/200 on the first parity run**,
+before and after the fourth fix. Full log in `docs/xh_port_investigation.md`.
+
+`createXhosa` takes TWO English hooks and both are live: `readAsEnglish` for an embedded Latin run, and a
+PREDICATE asking whether the English LEXICON knows a word — the third of the three signals that decide
+click-vs-foreign. ⚠ Those are different questions, and the C# already had the right one: `EnglishKnownWord`
+is `KnownWord` (CMUdict + heteronyms, `string?`) and the registry threads `w => … is not null`, matching the
+TS's `knownWord(w) !== undefined`. The engine's `KnownWord`/`CanPronounce` distinction would have widened
+signal 2 onto every OOV word.
+
+Fixed in TypeScript first with tests, goldens regenerated — **0 of 200 golden rows moved for all four**:
+
+- ⚠ **THE `\p{Lu}`-UNDER-`/i` GUARD REPORTED BY THE sl PORT IS REAL, AND THE REPAIR IS NOT "DROP THE FLAG".**
+  `(u?)Mnu\.?(?=[  ]\p{Lu})` under `giu`: the lookahead requires only a letter, so the honorific's
+  "expanded ONLY before a capitalised name" guard requires nothing. Unlike Slovenian — where the identical
+  shape made `ga.` fire on the accusative pronoun and the regnal rule match ordinary prose — **xh has no
+  attested false positive**: all 10 corpus instances are honorific + name, and `mnu`/`umnu` is not a Xhosa
+  word. ⚠ **But the `i` was doing a SECOND job the report could not see**: the corpus writes the concord
+  three ways — `Mnu.`, `uMnu` and sentence-initial `UMnu.` — and `(u?)` is case-sensitive material under
+  that flag, so dropping it alone would stop `UMnu. Costello` expanding, a regression in the properly-cased
+  column. Fixed the sl way, by spelling the concord's own case into the class (`([uU]?)`). Measured cost,
+  stated: 5 occurrences over 4 corpus lines change and **every one is FLEURS' all-lowercase column 4** — a
+  transcript artifact. **The fleet sweep for this shape is now down to one site**, `slovenian`'s `CLOCK_GOV`,
+  which that port filed deliberately.
+- ⚠ **THE a.m./p.m. MARKER HAD NO RIGHT EDGE, AND `ama-` IS A NOUN-CLASS PREFIX.** Step 8's optional group
+  `[  ]*([AaPp])\.?[Mm]\.?` ended wherever it liked, so ` Am` of the FOLLOWING WORD matched it:
+  `9:30 amaXhosa` read *ithoba namashumi amathathu **kusasa**aXhosa* — the word destroyed and a spurious
+  "in the morning" emitted; `14:00 Amabini` → *…kusasaabini*. `ama-` heads some of the commonest nouns in
+  the language (*amaqondo, amashumi, amakhulu, amapolisa*), so the neighbour is ordinary text rather than an
+  adversarial construction. ×0 attested, and trap 56 exactly: the pseudo-word it leaves is invisible to every
+  leak and DROP class. Fixed with `(?![\p{L}\p{M}])`; `9:30 AM` and `10:30p.m.` still read.
+- ⚠ **xh COMES OFF `ACCEPTED_LOSSY`, ON ITS OWN FILE'S EVIDENCE.** It was in the list's "NO FALLBACK AT ALL"
+  class ("a per-language behaviour ADDITION … wants the language's own evidence"), and the compositor has no
+  ceiling — it recurses through `izigidi` multipliers — so above 2⁵³ it composed right past the rounding and
+  `…001` and `…009` both read *izigidi izigidi izigidi iwaka*. The evidence was in `normalize.ts`: `spell()`
+  already reads a decimal's fractional part DIGIT AT A TIME through the same compositor, for the reason its
+  docstring gives. The fallback emits the string that path already emits (`KU[d]`, and the manifest's `zero`
+  for 0 — ⚠ `KU[0]` is the EMPTY STRING), so nothing is invented. ⚠ The call site passes the
+  SEPARATOR-STRIPPED token by construction: step 4 de-groups the TEXT, so the `\d+` match is already clean.
+  Its sibling `zu` has no such precedent in its own file and stays listed.
+- ⚠ **A DECLINED CLOCK STRANDED ITS COLON, AND `:` IS DECLARED CLAUSE PUNCTUATION.** Step 8 refuses a sports
+  time on purpose (`4: 41.30` is a pace, not 4:41), and the colon then reached the tokenizer as a PAUSE in
+  the middle of a quantity. **8 occurrences across three constructions** — the two paces and the UK degree
+  class `2:2 isidanga seklasi` — and not one surviving digit-colon-digit in the corpus is punctuation. The
+  playbook's "safe branch strands a separator the tokenizer reads as clause punctuation", live. A colon with
+  a digit on BOTH sides is dropped after the two clock rules have had their claim; nothing is invented,
+  because the operands already read as bare numbers. `Umzekelo: 5 abantu` and `ngo-2007: kwathi` keep theirs.
+
+**Widenings.** Corpus-wide differential over **3,047 unique lines** (3,018 FLEURS `xh_za` col 3+4, 134 mined,
+95 golden texts) × sync AND async = **6,094 comparisons, 0 differ, 0 throws**, plus **184 off-golden probes**
+(one per arm plus the adversarial neighbour each arm must decline, the g2p corners and the loan lexicon) ×
+both modes = 368 more, 0 differ. ⚠ **sync and async are byte-identical for every corpus line, and that is
+correct here**: xh has no tagger of its own and its embedded English hits the already-filed "a Latin-script
+host never prewarms" path, so the foreign reader serves the n-gram reading in both modes. ⚠ The corpus
+carries **ZERO** instances of the relational signs `= ≈ < >`, `÷`, U+2212, a caret exponent, the euro sign, a
+16+-digit run, a comma decimal with a 3+ digit tail, a decimal range carrying a unit, or spaced personal
+initials — all of those rest on the probe list alone. Literal-inventory audit: no control characters either
+side, and every one-sided code point is explained (the C# writes U+00A0/202F/2009 literally where the TS
+escapes them; the IPA letters appear only in TS comment text). Reachability: every `UNIT_WORD`, `PER`,
+`CUR_WORD`, `COMPASS`, `MAGNITUDES`, `WORD_ACRONYMS` and `NGUNI_LETTER_NAME` row fires.
+
+**Found and NOT fixed — filed, with the count that decided it:**
+
+- **The compass arm is case-SENSITIVE while the Celsius arm one line above is `/i`**, so `35°w` matches
+  neither: the degree sign is DROPPED and the `w` reaches the g2p as a bare [w] — the exact class step 12
+  exists to prevent. ×1, and it is FLEURS' lowercased column 4; a longitude is written `35°W`. Widening the
+  arm on the strength of a transcript artifact would also admit a bare one-letter `n`/`s`/`e`/`w` after a
+  degree sign, which Xhosa's vowel-initial locatives make less far-fetched than it looks. Recorded instead.
+- **`0230UTC` reads *amakhulu amabini amashumi amathathu*** — "two hundred and thirty". Two defects in one
+  token, both deliberate elsewhere: `Number("0230")` drops the leading zero (the fleet's filed shape), and
+  the all-caps rule's `\d` lookbehind leaves a digit-adjacent acronym alone, so `UTC` reaches the g2p raw as
+  [ˈuːtʼkǀ] — a DENTAL CLICK, which is the reading the letter-name table was written to remove. ×1 line, and
+  a compact `HHMM`+timezone rule invented on n=1 is #955. The same guard costs `I-JAS 39C Gripen`, where the
+  `C` reads [kǀ]; ×1.
+- **`20 °Cx` loses the sign and reads BOTH letters as clicks** (*…kǀkǁ*) — the su/lo/sl `°Cx` shape, and
+  worse here because c and x are clicks. All three degree arms decline on the trailing letter. ×0 attested;
+  the repair is the same fleet decision, not an xh edit.
+- **`1 / 5` and `1/2` lose the slash** — xh has no fraction rule at all (the fleet-wide su finding). ×0.
+- **The euro sign is declared NOWHERE** — not in the tier, not in `CUR_WORD` — so `€14.7` reads *ishumi nane
+  isixhenxe* with the sign silently gone, while `$`/`£`/`¥` all read. ×0 attested, and the four declared
+  words are corpus tokens; a fifth would be invention.
+- **A decimal range carrying a unit loses its joiner**: `1.5-2.5 km` → *kunye kuhlanu kubini kuhlanu
+  iikhilomitha*. Step 6's unit arm claims `2.5 km` before step 7 can see a decimal on the right of the dash —
+  and step 7's own comment lists its couplings to steps 10 and 15 but not to 6. ×0 attested.
+- **SPACED personal initials keep both dots**: `N. W. Wayne` → *n . w . wayne*, two sentence breaks and two
+  bare letters. Step 2's dotted-run rule needs the capitals CONTIGUOUS and its glued-initial arm needs the
+  next capital adhering, so a conventionally spaced pair matches neither. ×0 attested (the corpus's initials
+  are all glued, `uN.Wayne`).
+- **`802.11m` reads as a measurement** — *amakhulu asibhozo nambini kunye kunye iimitha* — because step 6's
+  unit arm has no version guard. The ckb `NOT_VERSION` shape. ×0.
+- **A version number keeps one dot as a pause**: `1.2.3` → *kunye kubini . kuthathu*; the decimal rule
+  consumes the first dot and the scan resumes past it. ×0.
+- **`100 200` fuses into one number** (*amawaka ikhulu amakhulu amabini*), the space-degrouping rule's known
+  ambiguity — the blocks are exactly three digits, which is the only discriminator available. ×0 in this
+  shape.
+- ⚠ **`csharp/regex-corpus.jsonl` IS STALE — a shared artifact, not an xh one.** Re-extracting it produces a
+  579-line diff in languages this port never touched: `zulu/normalize.ts` records `(\d{1,3})(,\d{3})+` where
+  the source now reads `([1-9]\d{0,2})(,\d{3})+`, and it still carries the DOUBLED PLAIN SPACE classes that
+  #925/#935 widened. Re-running `csharp/tools/regex-diff` from the checked-in copy therefore exercises
+  patterns that no longer exist and misses the ones that do. Run over the FRESH extraction it is clean
+  (**117,045 results identical, 0 differ, 0 refused**, xh's patterns included). Reverted rather than
+  regenerated here — a 579-line refresh of a shared artifact does not belong in a language bring-up.
+- **`COALESCE` has three dead keys** (`e`, `o`, `u`): `connective()` looks the table up on the first letter
+  of a numeral head, and every head the compositor can produce begins with `i` or `a`. Inert, not wrong —
+  the file says the three-way set is written for completeness — and recorded so nobody re-derives it.

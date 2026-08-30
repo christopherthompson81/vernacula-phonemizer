@@ -149,3 +149,12 @@ separate change; recorded here with the reproduction rather than attempted insid
   already ported, so that pair is diverged in `main` today. The root cause is `core/loadManifest.ts`
   handing every engine a prototype-bearing object; the general fix touches every language at once and is a
   fleet-wide decision, not a port PR's.
+
+---
+
+## Findings from the C# port
+
+This language's findings were filed in a MULTI-LANGUAGE batch entry, which is kept whole rather than
+split four ways — see `docs/csharp_port_findings_investigation.md`. (That register was `csharp/STATUS.md`,
+now retired: the diary belongs in the investigation docs, and the state it also carried — what is
+ported — is answered by `dotnet run --project csharp/tools/parity -- --unported`.)

@@ -187,7 +187,7 @@ in review. rn was branched from the same `main` as lg, not stacked on it, so wha
 
 The conflicts were exactly the three files two independent ports must both touch, and none of them is code
 that runs: `Bootstrap.cs` (adjacent registration lines — keep both), `ManifestMappingTests.cs` (adjacent
-`[Fact]` blocks — keep both), and `STATUS.md` (the shared counters and the `Ported:` list — union, and the
+`[Fact]` blocks — keep both), and `STATUS.md` (then the shared counters and the `Ported:` list — union, and the
 lg section kept verbatim as its author rewrote it in Run 5 of that doc).
 
 ⚠ **AND THE BASE HAD MOVED UNDER THE FIRST MEASUREMENT, WHICH IS THE REASON TO RE-RUN RATHER THAN TO
@@ -203,7 +203,7 @@ again on the rebased branch rather than carried over:
 
 So the expectation held, and it is now measured rather than assumed. The counters in this doc's Runs 2–3 are
 left at the figures that were true when those runs happened; the current-state numbers are the ones above
-and in `csharp/STATUS.md`.
+and in `csharp/STATUS.md` (retired; its register is now in the investigation docs).
 
 ## Run 6 — 2026-08-28 08:20 — #1135 fixed, and the fix is NOT the one the issue proposed
 
@@ -472,3 +472,76 @@ alternative is to refuse the spaced form entirely, which is the defect this fix 
     dotnet test                                       2,719 passed, 0 failed
     rn differential                                   4,372 comparisons, 0 differ, 0 throws
     tools/extract_regexes.mts                         re-extracted (the seam pattern is new)
+
+---
+
+## Findings from the C# port
+
+> ⚠ **Migrated from `csharp/STATUS.md`**, which is retired. That file was a diary plus a state
+> snapshot; the diary belongs here, and the state (what is ported, what is not) is answered by
+> tooling — `dotnet run --project csharp/tools/parity -- --unported`. The text below is verbatim.
+
+### From the rn port (2026-08-28) — 200/200 first run
+
+Kirundi shares Kinyarwanda's numeral COMPOSITOR and nothing else: `Kirundi/Numbers.cs` is a wrapper around
+`Kinyarwanda.Numbers.ComposeRwandaRundi` with rn's own table, and every normalizer rule was taken from rn's
+own corpus rather than from the sibling — the TS header lists seven that diverge, the load-bearing one being
+SQUARED, where rw's `kare` is the Kirundi ADVERB "early" in all 20 of its rn.wikipedia hits.
+
+⚠ **rn HAS NO FLEURS CORPUS**, so PORTING.md's corpus-wide differential does not exist for this language and
+the probes carry it. Differential over the mined artifact + the golden + the referee wordlist + 176 hand
+probes = **2,158 lines × sync AND async = 4,316 comparisons, 0 differ, 0 throws**; 0 of 2,158 outputs carry
+a digit or an unread symbol. ⚠ **THE GOLDEN REACHES ONLY FOUR OF THE NINE STEPS** (1, 2, 4, 5c and 6d are
+×0 in it, as is space grouping), and ⚠ **the 1,601-line referee list is a WORDLIST carrying one digit in
+total** — it exercises the g2p broadly and the normalizer not at all, which is why it is counted separately
+rather than folded into a headline number.
+
+Three findings, all reproduced IDENTICALLY by both engines, so all three FILED (#1135, #1136, #1137):
+
+- ~~**A CUBE READS AS A SQUARE in two of rn's three exponent paths.**~~ **FIXED (#1135 → PR #1143).** Steps 4
+  and 8 both carried `³` in the pattern and mapped every exponent to `SQUARED`, so `km³ 517` announced a
+  SQUARE while `517 km³` (the tier) did not — one construct, three readings. Both arms now go through one
+  `exponentPhrase` helper that keeps the unit's reading and HANDS THE EXPONENT BACK for an undeclared power,
+  which is **the shared tier's own convention** (`normalizeSymbols.ts`: *"emit the UNIT and hand the exponent
+  back rather than abandoning the match … Returning `whole` loses the QUANTITY too"*) and the shape step 4
+  exists to converge with. ⚠ NOT the nso refusal the issue first proposed — the tier argues against it, and
+  step 4's own docstring says its job is to match the tier. ⚠ AND THE CUBE IS HANDED BACK AS THE SUPERSCRIPT
+  EVEN WHERE THE TEXT WROTE THE ASCII `3`: a raw digit is claimed by the tokenizer and SPOKEN, so the first
+  cut of this fix read `(233/km3)` as *…kuri kirometero gatatu* — a quantity INVENTED inside a density
+  figure, worse than either the missing word or the wrong one. Caught in review, not by the gate. 0 golden
+  rows moved, in either engine. ⚠ THE SHARED TIER'S OWN BRANCH DID THE OLD THING for `517 km3` —
+  pre-existing and fleet-wide — **now fixed too (#1145 → PR #1152)**: an undeclared power is handed back as
+  the SUPERSCRIPT however it was written, so the ASCII spelling no longer contributes a digit the number
+  path can speak. **22 layers** declare one power and not the other; **0 golden rows carry the shape**, so
+  a core test carries the whole measurement. ⚠ AND THE FIX HAD TO LAND AT **TWO** SITES — the rate branch
+  (`withPower`) re-emitted the raw digit too, AND classified an ASCII `3` as a SQUARE, which is worse than
+  the gap the fallback exists to leave. Both found in review, not by the gate. See `docs/bare_exponent_investigation.md`.
+- ~~**Step 3's space-grouping arm eats an ASCII exponent digit.**~~ **FIXED (#1136 → PR #1147).** `km2 517`
+  became `km2517` — exponent glued to the number (517 read as 2,517), space gone, and **`km` left in the
+  phoneme stream raw**. ⚠ **THE GUARD THE ISSUE PROPOSED WOULD HAVE BROKEN A REAL NUMBER**: `R2 500` IS a
+  grouped thousand with a currency prefix, and "a head may not follow a letter" splits it into *two* — the
+  discriminator is whether the letters are a UNIT KEY. So the fix is an ORDER, not a guard: the
+  unit-before-number rule now runs BEFORE de-grouping (the two steps swap and are renumbered). The old
+  order's stated reason did not survive reading — the rule's lookahead needs the operand only to START with
+  a digit, so it never needed de-grouping. Exactly 2 rows moved over the 2,169-line set, 0 golden rows, and
+  the second is a bonus: **#1135's cube handling was unreachable for the ASCII spelling** until this landed.
+  ⚠ **AND THE FIRST CUT WAS NARROWER THAN THE ARM IT GUARDS** — the unit rule's lookahead carried space+NBSP
+  while de-grouping's space arm carries space, NBSP, NNBSP and thin space, so `km2<NNBSP>517` reproduced the
+  defect exactly. Two classes that must agree character for character; caught in review, not by the gate.
+- ~~**The `US$` compound key cannot match any of the three shapes it was declared for.**~~ **FIXED
+  (#1137 → PR #1149), AND IN THE TIER RATHER THAN IN rn.** `US$` is declared by **36 language layers** and
+  the matching lives in `core/normalizeSymbols.ts`, so declaring `"US $"` in rn's own table would have put a
+  workaround where the bug is not and left 35 layers with the gap. A compound key now admits the tier's
+  optional separator **at its letter→sign seam** — `US$`/`AUD$`/`CN¥` gain it, all-letter codes (`PLN`,
+  `zł`) do not, because a code with no seam must not match across a real token gap. ⚠ Regenerating ALL 169
+  goldens moved **two rows**: rn loses its stray *us*, and **ilo** gains the fuller noun its own table
+  declares (*doliar ti Estados Unidos*) — ilo's header records this class at ×98, so the spaced form was
+  live there too and unmeasured. ⚠ AND **rw's OWN TEST PINNED THE LEAK AS THE ANSWER** (`US $ 115,600,000`
+  → *`US` amadolari …*), so a third language had it live; only the unit test saw it, rw's golden carrying no
+  such row. ⚠ **THE FIRST CUT OF THE SEAM ATE AN AFRIKAANS PRONOUN** — no minimum on the letter run meant it
+  also widened the ONE-letter `U$` af declares, and ⟨U⟩ is af's polite second-person pronoun, so `U $50` lost
+  the word AND became a US dollar. `{2,}` excludes exactly that key. Caught in review, not by the gate.
+
+Recorded, not filed: `kirundi.jsonc`'s `convention.affricates` still reads `⟨j⟩→ʒ`, Kinyarwanda's value,
+contradicting the same file's header, its own grapheme table and the shipped reading (`jana` → *d͡ʒana*) —
+on the single fact that distinguishes rn from rw. `convention` is metadata neither engine reads.

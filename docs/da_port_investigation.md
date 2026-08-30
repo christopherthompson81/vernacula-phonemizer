@@ -203,3 +203,96 @@ dotnet run --project csharp/tools/parity -- da   200/200
 ```
 
 All three post-fix differentials were re-run after each TS fix landed and was ported, not only at the end.
+
+---
+
+## Findings from the C# port
+
+> ⚠ **Migrated from `csharp/STATUS.md`**, which is retired. That file was a diary plus a state
+> snapshot; the diary belongs here, and the state (what is ported, what is not) is answered by
+> tooling — `dotnet run --project csharp/tools/parity -- --unported`. The text below is verbatim.
+
+### From the da port (2026-08-27) — 200/200 first run, four TS-side fixes, ONE golden row moved
+
+**da (Danish, ~6M)** — 7 files, ~640 C# lines. The THIRD neural language after af/fa (sd, ckb since):
+`DanishNeural.cs` + `DanishTagger.cs` install a per-grapheme BiLSTM beside the sync engine, and
+`Bootstrap.cs` installs the `NeuralRegistry` entry with it. `DanishAsyncUsesTheTagger` pins that the async
+reading differs from the rule one. Gate **114 → 115 languages, 22,496 → 22,696 rows, 0 differ, 0 BLOCKED**.
+Widenings: the FLEURS `da_dk` differential is 3,756 lines (col 3+4) × normalize/sync/async = **11,268 rows,
+0 differ**; off-golden probes are 184 + 95 hand-built lines (one per normalize arm plus the adversarial
+neighbour, the four space characters against seven separator-bearing shapes, every g2p rule, the number
+corners) × the same three modes, **0 differ, 0 throws**. Corpus coverage of the arms, measured not assumed:
+746 lines carry a digit, 108 a dotted ordinal, 82 a period-grouped thousand, 46 `km`, 38 a dotted
+abbreviation, 33 a span, 32 a decimal comma, 26 a colon clock, 18 a rate slash, 12 a currency sign, 8 a
+percent, 4 a degree sign, 4 an exponent, 4 an ampersand — and **ZERO** relational signs, U+2212, infix `+`,
+`NxN`, space-grouped thousands or >12-digit runs, so those arms rest on the probes alone.
+
+⚠ **THE LEXICON IS LOADED THROUGH ITS OWN NATIVISER (#1068) AND THE PORT HAD TO PASS THE `fold`.** Four of
+da-lexicon.tsv's 37,008 keys are unreachable through `text()`'s own fold (`joão`, `jón`, `voilà`, `genève`);
+three of the four folded spellings are already in the file and WIN, one of them — `geneve` ʃeˈnɛːv against
+`genève` ʃeˈnɛv — with a DIFFERENT value, which is da's single row in `lexicon-reachability`'s shadowed
+ledger. `joão` is the one free slot. Pinned in C# by `DanishLexiconIsLoadedThroughItsOwnNativiser`.
+
+Fixed in TypeScript first, each with a test, then ported:
+
+- ⚠ **THE NEURAL PRE-PASS TOKENIZED AND KEYED DIFFERENTLY FROM THE ENGINE IT FEEDS, so the tagger tier was
+  SKIPPED for every word the nativiser rewrites.** `danish.ts` hands `oovOverride` the NATIVISED spelling of
+  a `LATIN_RUN` match (`nat(m[1])`); `danishNeural.ts` used a hand-listed letter class keyed by the RAW
+  match. Both halves miss: an accented letter is a KEY MISS (`Galápagosøer` tagged under its own spelling
+  while the engine asked for `Galapagosøer`, so it read the rule's *ɡˈalapaɡosøɐ* against the tagger's
+  *ɡaˈlaːˀpaˌɡɐsˌøːˀɐ*), and a letter the list omits SPLITS the word (`Cañitas` tagged as `Ca` + `itas`, two
+  readings nothing asks for). 21 distinct types / 22 tokens over FLEURS da_dk, and the tagger declines NONE
+  of them once the fold has removed the out-of-vocab letter. Both files now derive the tokenizer and the key
+  from `danish.ts`'s own exports. **1 golden row moved** — the only one of the four fixes that moves any.
+  ⚠ The comment asserting the false premise was IN the file ("the pre-pass keys the tagged map by the raw
+  match, which is what the sync engine hands `oovOverride`"): question 1 of the correctness lens, again.
+- **#1059: the number call site dropped `raw`.** `danish.ts` called `numberToWords(Number(m[2]))` and
+  `numbers.ts` did not declare the parameter, so the digit-at-a-time fallback — which exists *precisely
+  because the double cannot be trusted* — read the rounded float back out. `9007199254740993` read as its
+  neighbour `…992` and `12345678901234567890` ended *nul nul nul* against a written `890`. da is off
+  `large-numeral-fidelity`'s ACCEPTED_LOSSY, the list that may only shrink. **0 golden rows** (the golden's
+  longest digit run is 5). ⚠ `fo`, `lb` and `bar` share `unitsFirstNumbers.ts` and were STILL on that
+  list when this entry was written — reported, not fixed here (separate bring-ups; trap 55). All three
+  have since been threaded and removed from it; `bar`'s C# call site carries the same `raw` and the same
+  two assertions.
+- **The degree noun FUSED with the following letter — corpus-attested, ×2 distinct FLEURS sentences.** The
+  scale-letter arms decline a letter RUN on purpose (`25°Cölner` is not Celsius) and the bare `(\d)\s*°`
+  arm then left `grader` abutting it, so the compass bearing `35°V` (longitude west) became the one token
+  `graderV` and read *ɡʁˈaðeʁv* — a plausible Danish-looking pseudo-word no leak class can see (trap 56)
+  — where the space gives *ˈɡʁɑːðɐ ˈveːˀ*. ⚠ **The repair was ALREADY IN THIS FILE**, in step 12, for
+  exactly this shape (`$110m` → *dˈolaʁm*); the degree arm simply never got it. **0 golden rows** (the
+  golden carries no degree sign at all).
+- **Four dead manifest keys, the #901 shape.** A sabotage sweep over `danish.jsonc` (each of its 132 string
+  leaves corrupted in turn, against a probe of every letter × 8 shapes + every integer 0–120 + every ordinal
+  1–31 + every clause mark) found `consonants.t`, `.d`, `.r` and `.c` unreached: those four letters are
+  intercepted by context rules that carried a LITERAL COPY of the manifest's value, so both engines agreed
+  about a value neither read. The default phone now comes from the manifest; only the context ALLOPHONES
+  (ð, final-⟨t⟩ [d], soft-⟨c⟩ [s]) stay literal, which is what the manifest header already says. **0 golden
+  rows**, and the re-run sweep is 26 → 22 unreached leaves, all 22 prose.
+
+**Found and NOT fixed — filed, with the count that decided it:**
+
+- **`km³` is dropped silently while `km²` reads** (ig's finding, third language). SQUARED declares `m³` but
+  not `km³`, and the shared tier then claims the bare `km` and STRANDS the `³`, which the tokenizer drops:
+  `5 km³` → *fem kilometer*. ×0 in da_dk (all 4 exponent instances are `km²`), so declaring *kubikkilometer*
+  is the #955 invention trap even though it is compositional from two words already in the table.
+- **An `h:mm:ss` stamp keeps a stranded colon.** The clock arm claims the first pair and leaves `:19`, which
+  IS clause punctuation: `19:19:19` → *nitten nitten , nitten*. so's #1050 shape; ×0 in da_dk.
+- **U+2212 between digits fuses a range** (`1838−1917` → two years, nothing between) and a spaced one is
+  dropped (`2 − 2` → *to to*). The range class is `[-–—]`; ×0 U+2212 in da_dk, so #955 files it.
+- **A second comma strands itself as CLAUSE PUNCTUATION.** `(\d+),(\d+)` claims the first pair only, so
+  `12,345,678` → *tolv komma tre fire fem , seks hundrede og otteoghalvfjerds*. The file argues the Danish
+  comma is purely decimal and the corpus agrees (×0 multi-comma numerals), so the shape is unreachable from
+  real Danish — but it is one paste of English-grouped text away.
+- **The ordinal arms disagree about a leading zero.** Step 8 keys `ORDINALS[String(Number(a))]` and steps
+  9/10 key the raw digits, so `01.-02. maj` reads *første til anden* while `01. maj` is left as a cardinal
+  plus a full stop. ×0 (the corpus's three `0N.` instances are all the period CLOCK the header declines on
+  purpose), so this is an inconsistency rather than a live defect.
+- **A three-term span claims only its last pair**: `1990-1995-2000` → *1990-1995 til 2000*, the first dash
+  dropped outright. ×0. And **space-grouped thousands are not de-grouped** (`1 000 km` → *en nul
+  kilometer*) — but the file's header DECLARES that decision, and it is right: ×0 across all four space
+  characters in da_dk, which group with periods (×82).
+- Hygiene, no output change: `normalize.ts` says its `percent` tier declaration "never fires" because the
+  local rule claims every `%` — the local rule is `(\d+)\s*%` and does NOT claim a PREFIXED sign, so the
+  tier is what reads `%50`. And `phonemizeWordRules`'s `lw[2] !== "r"` guard is redundant: the character
+  class it guards already excludes ⟨r⟩.
