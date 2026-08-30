@@ -185,8 +185,14 @@ export function normalizeKabuverdianu(input: string): string {
     //    numbers the way a looser one would.
     const degroup = (mark: string) =>
         new RegExp(`(?<!\\d)(?<![\\d][.,])([1-9]\\d{0,2})((?:${mark}\\d{3})+)(?!\\d)`, "gu");
+    //    ⚠ THE INNER CALL IS `.replace`, NOT `rewrite`. Its subject is `rest` — a MATCHED GROUP, never the
+    //    pipeline string — so declaring it to the provenance tracker reports a span against a string the
+    //    tracker has never seen. It was `rewrite` and the poison gate named it: 111 SUBSTRING hits at
+    //    normalize.ts:189. Invisible to the shipped golden, because `\d[ ]\d{3}` is ×0 in kea_cv and only
+    //    the space arm reaches it — found by a haystack that writes `5 000` on purpose. The dot and comma
+    //    arms below were already spelled correctly.
     s = rewrite(s, degroup("[ \\u00a0\\u202f\\u2009]"), (_m, head: string, rest: string) =>  // space, NBSP, NNBSP, thin space
-        head + rewrite(rest, /[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
+        head + rest.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
     s = rewrite(s, degroup("\\."), (_m, head: string, rest: string) => head + rest.replace(/\./gu, ""));
     s = rewrite(s, degroup(","), (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
 
@@ -318,5 +324,8 @@ export function normalizeKabuverdianu(input: string): string {
     // A padded replacement doubles a space that was already there. Harmless downstream because
     // assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not be the one
     // producing candidates for it.
-    return s.replace(/[^\S\n]{2,}/gu, " ");
+    // ⚠ `rewrite`, NOT `.replace`. This mutates THE PIPELINE STRING, and an undeclared mutation desyncs the
+    // input mapping for every token after it — measured over a 3,748-row corpus, the plain `.replace` cost
+    // 129 of 52,973 tokens their input span (99.8%) where the C# port, which declares it, maps 100%.
+    return rewrite(s, /[^\S\n]{2,}/gu, " ");
 }

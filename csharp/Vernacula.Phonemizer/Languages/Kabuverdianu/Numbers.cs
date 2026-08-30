@@ -46,8 +46,12 @@ public static class Numbers
     public static string NumberToWords(double n, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e12)
-            return string.Join(" ", (raw ?? Js.NumberToString(Math.Abs(n)))
-                .Select(d => d >= '0' && d <= '9' ? ONES[d - '0'] : d.ToString()));
+            // ⚠ CODE POINTS, NOT CHARS. The TS spreads the string (`[...raw]`), which yields whole code
+            // points; iterating a C# string yields UTF-16 CODE UNITS, so an astral character came back as
+            // two LONE SURROGATES with a space between them — malformed UTF-16 in the phoneme stream. This
+            // is the class #1193 swept out of six languages; the shape reappeared here.
+            return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n)))
+                .Select(d => Core.Numbers.DigitWord(ONES, d) ?? d));
         if (n == 0) return ONES[0]; // zéru
         if (n < 1e6) return Below1e6(n);
         double m = Math.Floor(n / 1e6), r = n % 1e6;

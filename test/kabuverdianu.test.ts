@@ -261,3 +261,21 @@ describe("Kabuverdianu text normalization", () => {
         expect(say("dôs átumu di idrojéniu y un átumu di oksijéniu")).toContain("ˈi ˈũ");
     });
 });
+
+// ⚠ THE SPACE DE-GROUPING ARM, WHICH NO CORPUS LINE REACHES. `\d[ ]\d{3}` is ×0 in kea_cv, so neither the
+// corpus nor the golden can gate it — and it is the arm whose inner call was `rewrite` on a MATCHED GROUP,
+// which the poison gate scored as 111 SUBSTRING hits once a haystack wrote `5 000` on purpose (found by the
+// C# port review, #1198). The behaviour is unchanged by that fix; this pins the arm so it stays exercised.
+describe("kea: the space de-grouping arm", () => {
+    test("all four separators group, and a two-digit tail does not", () => {
+        expect(normalizeKabuverdianu("5 000")).toBe("5000");
+        expect(normalizeKabuverdianu("5\u00a0000")).toBe("5000");   // NBSP
+        expect(normalizeKabuverdianu("5\u202f000")).toBe("5000");   // NNBSP
+        expect(normalizeKabuverdianu("5\u2009000")).toBe("5000");   // thin space
+        expect(normalizeKabuverdianu("1 000 000")).toBe("1000000");
+        expect(normalizeKabuverdianu("5 00")).toBe("5 00");
+    });
+    test("and the reading is one number, not two", () => {
+        expect(phonemize("5 000", "kea").trim()).toBe("sˈĩŋku mˈil");
+    });
+});

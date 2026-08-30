@@ -181,4 +181,42 @@ public class KabuverdianuTests
         Assert.Equal(plain, Norm(plain));
         Assert.Contains("ˈi ˈũ", Say("dôs átumu di idrojéniu y un átumu di oksijéniu"));
     }
+
+    /**
+     * ⚠ THE DIGIT-BY-DIGIT FALLBACK ITERATES CODE POINTS, NOT CHARS. The TS spreads the string
+     * (`[...raw]`), which yields whole code points; iterating a C# string yields UTF-16 CODE UNITS, so an
+     * astral character came back as TWO LONE SURROGATES with a space between them — malformed UTF-16 in
+     * the phoneme stream, which is worse than either sensible reading. This is the class #1193 swept out
+     * of six languages; the shape reappeared here and the port review measured it:
+     *     before  NumberToWords(NaN, "1😀2")  =  "un \ud83d \ude00 dos"
+     *     after                              =  "un 😀 dos"    (the TypeScript's own answer)
+     * Unreachable from `text()` — the token is `\d+` — but `NumberToWords` is public and the TS answers it.
+     */
+    [Theory]
+    [InlineData("1😀2", "un 😀 dos")]
+    [InlineData("😀", "😀")]
+    [InlineData("a", "a")]
+    [InlineData("", "")]
+    [InlineData("1000000000000", "un zéru zéru zéru zéru zéru zéru zéru zéru zéru zéru zéru zéru")]
+    public void TheDigitFallbackReadsCodePointsNotCodeUnits(string raw, string want) =>
+        Assert.Equal(want, Numbers.NumberToWords(double.NaN, raw));
+
+    /**
+     * ⚠ THE SPACE DE-GROUPING ARM, which no corpus line reaches. `\d[ ]\d{3}` is ×0 in kea_cv, so the
+     * golden cannot gate it — and it is the arm whose TypeScript carried a SUBSTRING seam call that the
+     * poison gate named only once a haystack wrote `5 000` on purpose. All four separators are pinned:
+     * ASCII space, NBSP, NNBSP and thin space.
+     */
+    [Theory]
+    [InlineData("5 000", "5000")]
+    [InlineData("5\u00a0000", "5000")]
+    [InlineData("5\u202f000", "5000")]
+    [InlineData("5\u2009000", "5000")]
+    [InlineData("1 000 000", "1000000")]
+    [InlineData("5 00", "5 00")]   // ⚠ NOT three digits — the group test declines
+    public void TheSpaceDeGroupingArm(string input, string want) =>
+        Assert.Equal(want, Normalize.NormalizeKabuverdianu(input));
+
+    [Fact]
+    public void ASpaceGroupedThousandReadsAsOneNumber() => Assert.Equal("sˈĩŋku mˈil", Say("5 000"));
 }
