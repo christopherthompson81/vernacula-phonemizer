@@ -275,9 +275,18 @@ export function normalizeIrish(input: string): string {
     s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/giu,
         (m0, i: string, f: string) =>
             `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")} `);
+    // ⚠ THE UNIT MISS BRANCH IS REACHABLE, and the `!` here spoke the word "undefined". The alternation is
+    //    built from this table's own keys but the pattern carries `i`+`u`, so JS's fold widens it — `ſ`→`s`
+    //    reaches `msu` — and a near-miss matches while its key is absent: measured, `1.5 mſu` read
+    //    *1 pointe a cúig undefined*. Same shape as gl's #1122. Refuse the whole match.
+    const DECIMAL_UNIT: Record<string, string> = { km: "ciliméadar", m: "méadar", kg: "cileagram",
+        mm: "milliméadar", cm: "ceintiméadar", msu: "míle san uair", "km/u": "ciliméadar san uair" };
     s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|msu|km\/u)(?![\p{L}\p{M}])/giu,
-        (m0, i: string, f: string, u: string) =>
-            `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")} ${({ km: "ciliméadar", m: "méadar", kg: "cileagram", mm: "milliméadar", cm: "ceintiméadar", msu: "míle san uair", "km/u": "ciliméadar san uair" } as Record<string, string>)[u.toLowerCase()]!}`);
+        (m0, i: string, f: string, u: string) => {
+            const w = DECIMAL_UNIT[u.toLowerCase()];
+            return w === undefined ? m0
+                : `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")} ${w}`;
+        });
     s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")}`);
 
