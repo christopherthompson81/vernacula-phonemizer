@@ -176,6 +176,7 @@ public static class Bootstrap
             Faroese.FaroesePhonemizer.RegisterSelf();
             Galician.GalicianPhonemizer.RegisterSelf();
             Guarani.GuaraniPhonemizer.RegisterSelf();
+            Hawaiian.HawaiianPhonemizer.RegisterSelf();
         }
     }
 }
