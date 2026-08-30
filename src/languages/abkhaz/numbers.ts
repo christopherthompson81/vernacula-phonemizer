@@ -6,6 +6,7 @@
  * words themselves — with the base-20 system, the -и connective, the class-agreement judgment call and the
  * sources — live in abkhaz.jsonc.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -43,7 +44,7 @@ function thousands(count: number): string {
 export function readDigits(digits: string): string {
     return digits
         .split("")
-        .map((d) => UNITS[Number(d)] ?? d)
+        .map((d) => UNITS[digitIndex(d)] ?? d)
         .join(" ");
 }
 

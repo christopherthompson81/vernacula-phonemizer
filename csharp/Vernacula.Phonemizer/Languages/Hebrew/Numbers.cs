@@ -113,7 +113,7 @@ public static class Numbers
         if (dot < 0)
             return string.Join(" ", IntegerWords(Js.Number(digits), digits).Select(HebrewPhonemizer.PhonemizeWord));
         var intWords = IntegerWords(Js.Number(digits[..dot]), digits[..dot]);
-        var fracWords = Js.CodePoints(digits[(dot + 1)..]).Select(d => N.UnitsF[(int)Js.Number(d)]);
+        var fracWords = Js.CodePoints(digits[(dot + 1)..]).Select(d => (Core.Numbers.DigitWord(N.UnitsF, d) ?? d));
         return string.Join(" ", intWords.Append(N.Point).Concat(fracWords).Select(HebrewPhonemizer.PhonemizeWord));
     }
 }

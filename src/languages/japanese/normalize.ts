@@ -29,6 +29,7 @@
  * ⚠ BUT ONLY BETWEEN TWO DIGITS. Most 分の in running text is 自分の ("one's own"), and 7時30分の is a genuine
  * ふん — a blanket rewrite corrupts every one of them.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { applyReadings } from "./kanji.ts";
 import { rewrite } from "../../core/provenance.ts";
@@ -190,7 +191,7 @@ export function normalizeJapanese(input: string): string {
     //    says 点 and then the fractional digits INDIVIDUALLY, so those are emitted as katakana digit names
     //    while the integer part stays digits for the cardinal compositor: 6.34 → 6点サンヨン.
     s = rewrite(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
-        (_m, int: string, frac: string) => `${int}点${[...frac].map((d) => DIGIT_KANA[Number(d)]!).join("")}`);
+        (_m, int: string, frac: string) => `${int}点${[...frac].map((d) => DIGIT_KANA[digitIndex(d)]!).join("")}`);
 
     // 7) RANGES (×37). 〜 and its full-width and ASCII twins are read から between the two endpoints
     //    (2～3回, 1894年～1895年). The mark itself is in no table, so it was silently dropped and the range

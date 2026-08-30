@@ -78,6 +78,7 @@
  *   - ATTESTED RANGE / FALLBACK: 0 … 10¹²−1. At 10¹² and above, and for any non-safe integer, this falls back to
  *     DIGIT-BY-DIGIT over the Danish units (the lexc lists no Danish scale word above `milliard`).
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 /**
@@ -125,7 +126,7 @@ function dkBelow1e6(n: number): string {
 
 /** Read a digit string one digit at a time (the ≥10¹² / unsafe-integer fallback; Danish units). */
 export function readDigits(digits: string): string {
-    return [...digits].map((d) => (d === "0" ? NATIVE[0]! : DK_UNITS[Number(d)] || d)).join(" ");
+    return [...digits].map((d) => (d === "0" ? NATIVE[0]! : DK_UNITS[digitIndex(d)] || d)).join(" ");
 }
 
 /**

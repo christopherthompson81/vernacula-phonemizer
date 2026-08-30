@@ -4,6 +4,7 @@
  * (vinte e un, trinta e dous — Galician has no compound single-word 21–29, unlike Spanish veintiuno).
  */
 
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -43,7 +44,7 @@ function below1e6(n: number): string {
  *  Out-of-range / unsafe values read digit-by-digit (never empty). */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e18)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!;
     if (n < 1e6) return below1e6(n);
     if (n < 1e12) {

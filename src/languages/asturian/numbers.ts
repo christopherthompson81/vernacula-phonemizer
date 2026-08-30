@@ -16,6 +16,7 @@
  * sensitive (a bare round hundred vs a hundred with a remainder), which the flat `hundreds[]` slot cannot encode;
  * nor can that composer express the ⟨y⟩ connector or the fused twenties.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface AsturianNumbersDef {
@@ -68,7 +69,7 @@ function below1e6(n: number): string {
 /** Non-negative integer → Asturian words. Out-of-range / unsafe values read digit-by-digit (never empty). */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // cero
     if (n < 1e6) return below1e6(n);
     for (const sc of N.scales) {

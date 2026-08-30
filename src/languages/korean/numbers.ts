@@ -3,6 +3,7 @@
  * ~100) and native (하나 둘 셋 …, for small counts). This uses the Sino-Korean system (the default for digits),
  * scaling by 만 (10^4) / 억 (10^8) like other CJK. Digits are read as Hangul then phonemized.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Number words are authored DATA — consolidated in korean.jsonc; the myriad-group compositor below is the algorithm.
@@ -35,7 +36,7 @@ function below10000(n: number): string {
  * needs no word the engine has not measured.
  */
 export function spellDigits(digits: string): string {
-    return [...digits].map((c) => ONES[Number(c)] ?? "").join("");
+    return [...digits].map((c) => ONES[digitIndex(c)] ?? "").join("");
 }
 
 /** Non-negative integer → Sino-Korean Hangul. `""` when out of range — see `spellDigits`, and its callers. */

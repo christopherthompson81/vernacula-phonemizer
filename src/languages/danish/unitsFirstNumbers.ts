@@ -66,7 +66,7 @@ function below1000(n: number, d: UnitsFirstDef): string {
 /** Non-negative integer (< 10¹²) → number words, largest magnitude first; larger / non-finite → digit-by-digit. */
 export function unitsFirstNumberToWords(n: number, d: UnitsFirstDef, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...(raw ?? String(Math.abs(n)))].map((c) => d.ones[Number(c)] ?? c).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((c) => d.ones[digitIndex(c)] ?? c).join(" ");
     if (n === 0) return d.ones[0]!;
     const parts: string[] = [];
     const bil = Math.floor(n / 1e9),
@@ -78,4 +78,5 @@ export function unitsFirstNumberToWords(n: number, d: UnitsFirstDef, raw?: strin
     if (th) parts.push(th === 1 ? d.thousand.one : `${below1000(th, d)}${d.mulJoin}${d.thousand.word}`);
     if (r) parts.push(below1000(r, d));
     return parts.join(d.groupJoin);
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

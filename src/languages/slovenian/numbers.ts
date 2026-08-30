@@ -5,6 +5,7 @@
  * hundreds and thousands are space-separated. Number agreement uses the Slovene DUAL (2 → milijona). No numeric
  * referee exists → these are the standard forms.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -39,7 +40,7 @@ function countWord(n: number, gender: "m" | "f"): string {
 
 /** Read a raw digit STRING digit-by-digit (nič/ena/…) — the fallback for out-of-range / over-long numbers. */
 export function readDigits(digits: string): string {
-    return digits.split("").map((d) => UNITS[Number(d)] ?? d).join(" ");
+    return digits.split("").map((d) => UNITS[digitIndex(d)] ?? d).join(" ");
 }
 
 /** A non-negative integer (< 1e12) → space-separated Slovene cardinal words. */

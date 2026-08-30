@@ -17,6 +17,7 @@
  *       en.wiktionary.org/wiki/два (Serbo-Croatian feminine = dvije)
  *   - jedna = feminine nominative of jedan — en.wiktionary.org/wiki/jedna#Serbo-Croatian
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 type NumberData = (typeof MANIFEST)["numbers"];
@@ -56,7 +57,7 @@ export function composeSlavicNumber(n: number, N: NumberData, raw?: string): str
             : words;
 
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // nula
     if (n < 1000) return below1000(n);
     const parts: string[] = [];

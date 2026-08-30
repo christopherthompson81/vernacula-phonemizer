@@ -96,7 +96,7 @@ function below1e6(n: number): string {
 
 /** Read a digit string one digit at a time (the above-10¹² / unsafe-integer fallback). */
 export function readDigits(digits: string): string {
-    return [...digits].map((d) => (d === "0" ? ZERO : (UNITS[Number(d)] ?? d))).join(" ");
+    return [...digits].map((d) => (d === "0" ? ZERO : (UNITS[digitIndex(d)] ?? d))).join(" ");
 }
 
 /**
@@ -117,4 +117,5 @@ export function numberToWords(n: number, raw?: string): string {
         r = n % 1e9;
     const head = b === 1 ? MILLIARD : `${below1000(b, true)} ${MILLIARD}`;
     return r === 0 ? head : `${head} ${numberToWords(r)}`;
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

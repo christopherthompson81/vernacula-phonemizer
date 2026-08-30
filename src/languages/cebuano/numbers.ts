@@ -3,6 +3,7 @@
  * join tens-first with the ligature "ug" (napulo ug usa = 11, kaluhaan ug usa = 21); hundreds/thousands use the
  * "ka" ligature (duha ka gatos). Covers 0 … <10⁶. Spanish numerals (uno, dos) common in speech are not modelled.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface CebNumbers {
@@ -42,7 +43,7 @@ function below1000(n: number): string {
  *  milyon (10⁶) scales with the "ug" connector. */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // sero
     if (n < 1000) return below1000(n);
     if (n < 1e6) {

@@ -6,6 +6,7 @@
  * superscript-tone → Chao contour-letter conversion (taking the SURFACE tone after a sandhi arrow ⁻), and Han
  * numeral composition. A language module supplies only its dict + its Chao map + its punctuation.
  */
+import { digitIndex } from "../core/numbers.ts";
 import type { Phonemizer } from "../registry.ts";
 import { assembleClauses, clauseSink } from "./clauses.ts";
 import { LATIN_RUN } from "./hostWord.ts";
@@ -132,7 +133,7 @@ function integerToHan(n: number): string {
  * ways for no reason the caller can see.
  */
 function spellDigits(s: string): string {
-    return [...s].map((c) => DIGITS[Number(c)] ?? c).join("");
+    return [...s].map((c) => DIGITS[digitIndex(c)] ?? c).join("");
 }
 
 // The greedy-segmentation window = the longest dict key (in code points). Cached per dict Map instance so it is

@@ -4,6 +4,7 @@
  * viens); teens take the -padsmit suffix as one word (vienpadsmit). Hundreds/thousands: (count) simti / tūkstoši.
  * No numeric referee exists → these are the standard Latvian forms.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -41,7 +42,7 @@ function magnitude(count: number, forms: { one: string; many: string }, keepOne:
 
 /** Read a raw digit STRING digit-by-digit — the fallback for out-of-range / over-long numbers. */
 export function readDigits(digits: string): string {
-    return digits.split("").map((d) => UNITS[Number(d)] ?? d).join(" ");
+    return digits.split("").map((d) => UNITS[digitIndex(d)] ?? d).join(" ");
 }
 
 /** A non-negative integer (< 1e9) → space-separated Latvian cardinal words. */

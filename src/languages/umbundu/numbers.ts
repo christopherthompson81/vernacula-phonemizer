@@ -17,6 +17,7 @@
  *   • the connective is "la", ELIDED to "l'" before a vowel-initial word (ekwi l'epandu = 16), so components
  *     chain as ovita vitãlo l'akwi atãlo la vitãlo (555).
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -55,7 +56,7 @@ function multiplier(k: number): string {
 /** A non-negative integer → space-separated Umbundu cardinal words. */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => (d === "0" ? N.zero : (N.units[Number(d)] ?? d))).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => (d === "0" ? N.zero : (N.units[digitIndex(d)] ?? d))).join(" ");
     if (n === 0) return N.zero;
     return join(components(n, true));
 }

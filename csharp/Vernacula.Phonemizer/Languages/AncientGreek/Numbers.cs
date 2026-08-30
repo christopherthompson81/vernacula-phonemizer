@@ -86,7 +86,7 @@ public static class Numbers
             // JS `String(n)` — NOT `Math.abs`, so a negative keeps its sign character, which the filter drops.
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(n))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
-                .Select(d => UNITS[(int)Js.Number(d)]));
+                .Select(d => (Core.Numbers.DigitWord(UNITS, d) ?? d)));
         if (n == 0) return UNITS[0]; // οὐδέν — Classical Greek has no cardinal zero
         // Decompose in BASE 10,000 (the myriad), highest group first.
         var groups = new List<int>();

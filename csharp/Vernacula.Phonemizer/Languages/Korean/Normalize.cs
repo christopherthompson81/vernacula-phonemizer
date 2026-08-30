@@ -203,7 +203,7 @@ public static class Normalize
         //    digits are read INDIVIDUALLY (7.75 → 칠 점 칠오), and the result is Hangul so rule 8 skips it.
         s = Rewrite(s, DECIMAL_RE, m =>
             $"{KoreanNumbers.NumberToWords(Js.Number(m.Groups[1].Value))}점" +
-            string.Concat(Js.CodePoints(m.Groups[2].Value).Select(d => Manifest.MANIFEST.Numbers.Ones[(int)Js.Number(d)])));
+            string.Concat(Js.CodePoints(m.Groups[2].Value).Select(d => (Core.Numbers.DigitWord(Manifest.MANIFEST.Numbers.Ones, d) ?? d))));
 
         // 7) NATIVE-SERIES COUNTERS, BEFORE rule 8 claims the digits for the Sino series. Gated at 99, since
         //    ≥100 is Sino for every counter. Joined, because numeral + counter is one phonological word and

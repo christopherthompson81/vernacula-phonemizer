@@ -136,7 +136,7 @@ function magnitudePhrase(count: number, m: Magnitude, N: MalteseNumbers): string
 
 /** Read a digit string one digit at a time (the ≥10¹² / unsafe-integer fallback). */
 export function readDigits(digits: string, N: MalteseNumbers): string {
-    return [...digits].map((d) => N.units[Number(d)] ?? d).join(" ");
+    return [...digits].map((d) => N.units[digitIndex(d)] ?? d).join(" ");
 }
 
 /**
@@ -174,4 +174,5 @@ export function numberToWords(n: number, N: MalteseNumbers): string {
     // `u` attaches to the FINAL constituent only; the rest simply juxtapose.
     if (parts.length === 1) return parts[0]!;
     return `${parts.slice(0, -1).join(" ")} ${N.connector} ${parts[parts.length - 1]}`;
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

@@ -16,6 +16,7 @@
  * Handles 0 … 10¹²-1; beyond that (or an unsafe int) it falls back to reading the TOKEN's digits one-by-one. Decimals
  * ("3.14") read as integer · נְקֻדָּה · fractional digits one-by-one.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { phonemizeWord } from "./hebrew.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -89,7 +90,7 @@ function compose(n: number): string[][] {
 function integerWords(n: number, raw?: string): string[] {
     if (n === 0) return [N.unitsF[0]!];
     if (n >= 1e12 || !Number.isSafeInteger(n))
-        return [...(raw ?? String(n))].map((d) => N.unitsF[Number(d)] ?? d);
+        return [...(raw ?? String(n))].map((d) => N.unitsF[digitIndex(d)] ?? d);
     return compose(n).flat();
 }
 

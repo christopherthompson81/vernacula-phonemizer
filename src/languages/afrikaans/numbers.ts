@@ -4,6 +4,7 @@
  * are authored in afrikaans.jsonc; numberToWords returns them space-separated and afrikaans.ts phonemizes each
  * through the g2p, so numbers stay in our canonical convention. Handles 0 … 10⁹-1; digit-by-digit fallback beyond.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -36,7 +37,7 @@ function magnitude(mult: number, word: string, bareAtOne: boolean): string {
 /** 0 … 10⁹-1 → Afrikaans words; beyond (or unsafe) → digit-by-digit units. */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) {
-        return (raw ?? String(n)).split("").map((d) => N.units[Number(d)] ?? d).join(" ");
+        return (raw ?? String(n)).split("").map((d) => N.units[digitIndex(d)] ?? d).join(" ");
     }
     if (n < 1000) return below1000(n);
     const parts: string[] = [];

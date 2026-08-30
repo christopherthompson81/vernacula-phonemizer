@@ -5,6 +5,7 @@
  * 5+ tisíc/miliónov (paucal 2–4). Both magnitude nouns are MASCULINE INANIMATE, so the multiplier is dva, not dve —
  * see `count` below for the sources.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const { units: UNITS, teens: TEENS, tens: TENS, hundreds: HUNDREDS, magnitudes: MAG } = MANIFEST.numbers;
@@ -45,7 +46,7 @@ function count(n: number): string {
 /** Read a raw digit STRING digit-by-digit (nula/jeden/…) — the fallback for out-of-range or over-long numbers
  *  (Slovak has no miliarda tier here). Operates on the string so no float precision is lost. */
 export function readDigits(digits: string): string {
-    return digits.split("").map((d) => UNITS[Number(d)] ?? d).join(" ");
+    return digits.split("").map((d) => UNITS[digitIndex(d)] ?? d).join(" ");
 }
 
 /** A non-negative integer (< 1e9) → space-separated Slovak cardinal words. */

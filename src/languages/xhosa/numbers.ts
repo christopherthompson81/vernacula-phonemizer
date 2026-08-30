@@ -4,6 +4,7 @@
  * classes with an ama-/izi- multiplier), reading the Xhosa number words (2 = -bini, 6–9 differ from Zulu).
  * Returns space-separated Xhosa TEXT; the phonemizer runs each word through the shared g2p.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -18,7 +19,7 @@ const KU = N.ku,
  * `ku-` form of zero), so the zero word is taken from the manifest directly.
  */
 function readDigits(digits: string): string {
-    return [...digits].map((d) => (d === "0" ? N.zero : (KU[Number(d)] ?? d))).join(" ");
+    return [...digits].map((d) => (d === "0" ? N.zero : (KU[digitIndex(d)] ?? d))).join(" ");
 }
 
 /**

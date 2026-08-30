@@ -19,6 +19,7 @@
  * also matches the 1990 orthographic reform.
  */
 
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Number words are authored DATA — consolidated in french.jsonc; the composition logic below is the algorithm.
@@ -62,7 +63,7 @@ function below1000(n: number): string {
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
         return [...(raw ?? String(Math.abs(n)))]
-            .map((d) => SMALL[Number(d)] ?? d)
+            .map((d) => SMALL[digitIndex(d)] ?? d)
             .join(" ");
     if (n === 0) return SMALL[0]!; // zéro
     if (n < 1000) return below1000(n);

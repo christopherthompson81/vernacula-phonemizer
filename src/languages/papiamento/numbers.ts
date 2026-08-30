@@ -72,7 +72,7 @@ function below1e6(n: number): string {
 /** Non-negative integer → Papiamentu words. Out-of-range / unsafe values read digit-by-digit (never empty). */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // sero
     if (n < 1e6) return below1e6(n);
     const m = Math.floor(n / 1e6),
@@ -81,4 +81,5 @@ export function numberToWords(n: number, raw?: string): string {
     // "mil mion" (a thousand million) — no unattested Papiamentu billion lexeme is invented.
     const head = `${m === 1 ? ONES[1] : below1e6(m)} ${MILLION}`;
     return r ? `${head} ${AND} ${numberToWords(r)}` : head;
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

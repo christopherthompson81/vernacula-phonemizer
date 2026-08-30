@@ -198,7 +198,7 @@ public static class Hindi
                 var head = double.IsInteger(intN) && Math.Abs(intN) <= 9007199254740991d
                     ? Core.Numbers.RenderNumber(intN, def.Numbers, Word)
                     : Core.Numbers.SpellDigits(intText, def.Numbers, Word);
-                var frac = Js.CodePoints(ascii[(dot + 1)..]).Select(d => Word(def.Numbers.Units[(int)Js.Number(d)]));
+                var frac = Js.CodePoints(ascii[(dot + 1)..]).Select(d => Word((Core.Numbers.DigitWord(def.Numbers.Units, d) ?? d)));
                 return string.Join(" ", new[] { head, Word(def.Numbers.DecimalWord!) }.Concat(frac));
             }
             var n = Js.Number(ascii);

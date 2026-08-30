@@ -17,6 +17,7 @@
  * Numbers are unmeasured by the referee (epitran sna-Latn is word-only, and its list carries no numerals), so
  * the evidence for every form here is the corpus and sn.wikipedia rather than a gate.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -70,7 +71,7 @@ function below1e6(n: number): string {
  */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!;
     if (n < 1e6) return below1e6(n);
     // ⚠ THE COUNT OF A MAGNITUDE IS ITSELF A FULL NUMERAL and takes class-6 concord from the magnitude noun,

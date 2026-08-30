@@ -44,27 +44,17 @@ public class JsNumberTests
     [InlineData("　1　", 1d)]
     public void SurroundingJsWhitespaceIsTrimmed(string s, double want) => Assert.Equal(want, Js.Number(s));
 
-    /** CLASS 3 — the radix literals ARE numbers to JS; `NumberStyles.Float` reads none of them. */
+    /**
+     * ⚠ CLASS 3 WAS THE RADIX LITERALS, AND THEY ARE DELIBERATELY NOT READ. JS makes `0x10` 16; nothing
+     * in this fleet can deliver that string here, because every tokenizer's number branch is `\d+` and
+     * stops at the `x`. Implementing it bought unreachable code and an implied promise of full `Number()`
+     * fidelity. Pinned as NaN so the divergence is a decision on the record rather than a gap.
+     */
     [Theory]
-    [InlineData("0x10", 16d)]
-    [InlineData("0X10", 16d)]
-    [InlineData("0xff", 255d)]
-    [InlineData("0b11", 3d)]
-    [InlineData("0B11", 3d)]
-    [InlineData("0o17", 15d)]
-    [InlineData("0O17", 15d)]
-    public void RadixLiteralsAreRead(string s, double want) => Assert.Equal(want, Js.Number(s));
-
-    /** …and an ill-formed or signed one is NaN, as in JS. */
-    [Theory]
-    [InlineData("0x")]
-    [InlineData("0b")]
-    [InlineData("0o")]
-    [InlineData("0b12")]   // 2 is not a binary digit
-    [InlineData("0o18")]   // 8 is not an octal digit
-    [InlineData("0xzz")]
-    [InlineData("-0x10")]  // JS allows no sign on a radix literal
-    public void IllFormedRadixLiteralsAreNaN(string s) => Assert.True(double.IsNaN(Js.Number(s)));
+    [InlineData("0x10")]
+    [InlineData("0b11")]
+    [InlineData("0o17")]
+    public void RadixLiteralsAreDeliberatelyNotRead(string s) => Assert.True(double.IsNaN(Js.Number(s)));
 
     /**
      * CLASS 4 — and this one ran the OTHER WAY: .NET's parser accepts `"infinity"` and `"nan"`

@@ -34,6 +34,7 @@
  * (5-3으로 이긴, which Korean reads 오 대 삼 and not 오에서 삼), and the internal hyphen of COVID-19 / XDR-TB /
  * 슈퍼-G. Too overloaded to claim, so it keeps its current dropped behaviour.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { rewrite } from "../../core/provenance.ts";
@@ -268,7 +269,7 @@ export function normalizeKorean(input: string): string {
     //    칠 점 칠오, never 칠 점 칠십오, which is what the number path produced), and the whole thing is
     //    emitted as Hangul so rule 8 leaves it alone.
     s = rewrite(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, (_m, int: string, frac: string) =>
-        `${numberToWords(Number(int))}점${[...frac].map((d) => MANIFEST.numbers.ones[Number(d)]!).join("")}`);
+        `${numberToWords(Number(int))}점${[...frac].map((d) => MANIFEST.numbers.ones[digitIndex(d)]!).join("")}`);
 
     // 7) NATIVE-SERIES COUNTERS, before rule 8 claims the digits for the Sino series. Gated at 99
     //    because the native numerals stop there (아흔아홉) and ≥100 is Sino for every counter: 100명 is

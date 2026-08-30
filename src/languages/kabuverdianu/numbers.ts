@@ -20,6 +20,7 @@
  * which happens to match — but it cannot express the ⟨sen⟩ vs plural-⟨-sentus⟩ hundreds series alongside the
  * juxtaposed tens without a compound slot, and keeping this as a compositor keeps 10⁹ derivable (see below).
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface KabuverdianuNumbersDef {
@@ -71,7 +72,7 @@ function below1e6(n: number): string {
 /** Non-negative integer → Kabuverdianu words. Out-of-range / unsafe values read digit-by-digit (never empty). */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => ONES[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // zéru
     if (n < 1e6) return below1e6(n);
     const m = Math.floor(n / 1e6),

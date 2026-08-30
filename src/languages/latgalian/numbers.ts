@@ -90,7 +90,7 @@ function magnitude(count: number, forms: Forms, fem: boolean, keepOne: boolean):
 export function readDigits(digits: string): string {
     return digits
         .split("")
-        .map((d) => UNITS[Number(d)] ?? d)
+        .map((d) => UNITS[digitIndex(d)] ?? d)
         .join(" ");
 }
 
@@ -112,4 +112,5 @@ export function numberToWords(n: number, raw?: string): string {
     if (th) parts.push(magnitude(th, THOUSAND, true, false)); // ⚠ feminine multiplier; 1000 → bare tyukstūša
     if (n) parts.push(sub1000(n, false));
     return parts.join(" ");
-}
+}import { digitIndex } from "../../core/numbers.ts";
+

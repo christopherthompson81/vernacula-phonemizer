@@ -55,7 +55,7 @@ public static class FulaNumbers
         {
             return string.Join(" ", Js.CodePoints((raw ?? Js.NumberToString(Math.Abs(n))))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
-                .Select(d => ONES[(int)Js.Number(d)]));
+                .Select(d => (Core.Numbers.DigitWord(ONES, d) ?? d)));
         }
         if (n < 1000) return Below1000(n);
         if (n < 1e6)

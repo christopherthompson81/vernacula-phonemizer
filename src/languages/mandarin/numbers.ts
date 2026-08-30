@@ -7,6 +7,7 @@
  * this is the default quantity reading.
  */
 
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Number-reading tables are authored DATA — consolidated in cmn.jsonc; the compositor below is the algorithm.
@@ -74,6 +75,6 @@ export function integerToChinese(n: number): string {
  *  quantity word — the caller marks them sandhi-exempt. */
 export function digitsToChinese(digits: string): string {
     return [...digits]
-        .map((d) => (d === "0" ? N.zeroDigit : (DIG[Number(d)] ?? d)))
+        .map((d) => (d === "0" ? N.zeroDigit : (DIG[digitIndex(d)] ?? d)))
         .join("");
 }

@@ -47,6 +47,7 @@
  *
  * Covers 0 … <10¹²; above that, digit-by-digit. Full sourcing: docs/investigations/za_normalization_investigation.md.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -92,7 +93,7 @@ function group(n: number, bound: boolean): string {
 /** Non-negative integer (< 10¹²) → Zhuang words; larger / non-finite → digit-by-digit. */
 export function numberToWords(n: number, raw?: string): string {
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
-        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[Number(d)] ?? d).join(" ");
+        return [...(raw ?? String(Math.abs(n)))].map((d) => N.units[digitIndex(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // lingz
 
     const yi = Math.floor(n / 1e8), // 億 groups

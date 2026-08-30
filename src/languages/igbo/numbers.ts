@@ -24,6 +24,7 @@
  * Nothing external can score a composed numeral. The corpus attestations above are the evidence, and the anchor is
  * the adjudicated gold in test/igbo.test.ts. Treat a change here as unverifiable except against those.
  */
+import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
@@ -61,7 +62,7 @@ function group(n: number, size: number, magnitude: string): string {
 
 /** Digit-by-digit, in Igbo units — the floor that keeps any digit from reaching the English fallback. */
 function digits(s: string): string {
-    return [...s].map((d) => (d === "0" ? N.zero : d === "1" ? N.one : N.units[Number(d)] ?? d))
+    return [...s].map((d) => (d === "0" ? N.zero : d === "1" ? N.one : N.units[digitIndex(d)] ?? d))
         .filter(Boolean).join(" ");
 }
 
