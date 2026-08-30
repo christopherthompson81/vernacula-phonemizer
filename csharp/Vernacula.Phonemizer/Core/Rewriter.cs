@@ -104,7 +104,12 @@ public static class Rewriter
      */
     public static string Renormalize(string s, NormalizationForm form)
     {
-        var whole = s.Normalize(form);
+        // ⚠ `Js.Normalize`, NOT `string.Normalize`. The subject is the PIPELINE STRING — untrusted input —
+        // and .NET refuses a string carrying an unpaired surrogate where JS returns it unchanged. This
+        // THREW from the shipped `Phonemize()` for every engine whose normalize pass opens with a
+        // renormalization: `normalizeKamba("1\ud83d000")` threw where the TypeScript answered
+        // `"1\ud83d000"`. #1199's class, in the shared core rather than in one language.
+        var whole = Js.Normalize(s, form);
         // ⚠ THE UNTRACED TEST COMES FIRST, and the order is the point. `whole == s` is an O(n) comparison, so
         // putting it ahead would charge every shipped utterance for a check only the traced path can act on.
         // `StartTrack` returns null on the first field read when nothing is recording.
@@ -115,7 +120,7 @@ public static class Rewriter
         var rebuilt = new StringBuilder(whole.Length);
         foreach (Match m in CANONICAL_BLOCK.Matches(s))
         {
-            var piece = m.Value.Normalize(form);
+            var piece = Js.Normalize(m.Value, form); // the pieces are slices of `s`, so equally untrusted
             rebuilt.Append(piece);
             track.Stamp(at, m.Value.Length, piece.Length);
             at += m.Value.Length;

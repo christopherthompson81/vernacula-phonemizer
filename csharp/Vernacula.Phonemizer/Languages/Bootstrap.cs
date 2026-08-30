@@ -183,6 +183,7 @@ public static class Bootstrap
             Ilocano.IlocanoPhonemizer.RegisterSelf();
             Irish.IrishPhonemizer.RegisterSelf();
             Kabuverdianu.KabuverdianuPhonemizer.RegisterSelf();
+            Kamba.KambaPhonemizer.RegisterSelf();
         }
     }
 }
