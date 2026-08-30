@@ -649,6 +649,11 @@ public class ManifestMappingTests
             "language", "name", "script");
 
     [Fact]
+    public void KicheManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/kiche", "kiche.jsonc", Languages.Kiche.Manifest.MANIFEST,
+            "language", "name", "script");
+
+    [Fact]
     public void ChuvashManifestIsFullyMapped() =>
         AssertFullyMapped("languages/chuvash", "chuvash.jsonc", Languages.Chuvash.Manifest.MANIFEST);
 
