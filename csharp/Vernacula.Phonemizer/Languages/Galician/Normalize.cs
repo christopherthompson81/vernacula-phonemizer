@@ -29,7 +29,11 @@ public static class Normalize
     private static readonly JsRe FEMINAL_O = JsRegex.Compile("o(?=\\s|$)", "gu");
 
     /** The feminine of a Galician ordinal: every element ends in -o and takes -a (vixésima primeira). */
-    private static string FeminineOrdinal(string masc) => Rewrite(masc, FEMINAL_O, "a");
+    /** ⚠ `JsRe.Replace`, NOT the `Rewrite` seam — `masc` is a word this file COMPOSED, never the pipeline
+     *  string, so declaring it to the provenance tracker reports a span against a string it has never seen.
+     *  The TypeScript uses `rewrite` at all three of this file's equivalent sites and poisons for it (see
+     *  #1179); the C# side is spelled the way ee/chv/fo already spell it. Behaviour is identical. */
+    private static string FeminineOrdinal(string masc) => FEMINAL_O.Replace(masc, "a");
 
     private const double ORDINAL_INDICATOR_MAX = 100;
 
@@ -152,7 +156,8 @@ public static class Normalize
 
         // 3) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass (step 14) reads them as
         //    LETTERS. A single initial before a surname: the dot is a break, not a full stop.
-        s = Rewrite(s, DOTTED_CAPS, m => Rewrite(m.Value, DOTTED_CAPS_MARKS, ""));
+        //    ⚠ The INNER call is `JsRe.Replace`: its subject is the MATCHED RUN, not the pipeline string.
+        s = Rewrite(s, DOTTED_CAPS, m => DOTTED_CAPS_MARKS.Replace(m.Value, ""));
         s = Rewrite(s, LONE_INITIAL_DOT, "");
 
         // 4) SINGLE-DOT ABBREVIATIONS. Two branches: mid-sentence the dot is CONSUMED so it cannot become a
@@ -171,7 +176,7 @@ public static class Normalize
         s = Rewrite(s, ORDINAL_IND, m =>
         {
             var digits = m.Groups[1].Value;
-            var n = Js.Number(Rewrite(digits, DOTS_IN, ""));
+            var n = Js.Number(DOTS_IN.Replace(digits, "")); // a matched group, not the pipeline string
             var masc = n <= ORDINAL_INDICATOR_MAX ? GalicianOrdinal(n) : null;
             if (masc is null) return digits;
             return m.Groups[2].Value == "ª" ? FeminineOrdinal(masc) : masc;

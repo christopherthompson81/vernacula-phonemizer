@@ -169,3 +169,79 @@ fo run's 151 by the mt/ps goldens that landed in later fix commits, not by this 
   step 6; the fraction-LENGTH discriminator (1–2 digits = decimal, 3 = grouping) is the
   same call Catalan ships, and the `1.500`/`460.000`/`10.5.3`/`802.11n` probes pin both
   the rule and its recorded version-designation exposure.
+
+## Review of #1181 — the #1122 fix is complete, and one new finding
+
+### The #1122 class, closed rather than patched
+
+The PR found the long s by reading a near-miss. The review's question is whether `ſ` is the *whole* class,
+since "the characters JS's fold widens onto a table key" is an inventory and inventories are where the ab,
+rup and bal defects lived. It is enumerable, so it was enumerated — every codepoint from U+0041 to
+U+2FFFF, against the precise defect condition:
+
+    matches `^k$` under `iu` for some key character k, AND `.toLowerCase() !== k`
+    (an ASCII capital is NOT in the class: `Dr.` matching `dr` is the point of the `i` flag,
+     and `"drA".toLowerCase()` reaches the table)
+
+    characters meeting that condition: 1
+       's' ← U+017F ſ
+
+    …and every probe built from it — `ſr. Silva`, `ſra.`, `x ſra. y`, all key positions —
+    is returned UNCHANGED: the #1122 class is fully closed.
+
+⚠ **AND THE SAME SWEEP CLEARS THE ONE OTHER `!` IN THE FILE.** `{N,S,E,O}[c]!` at the compass rule looks
+like the identical shape, but its pattern carries `gu` and **no `i`** — the key set is closed and the miss
+branch is unreachable. The two degree rules above it do carry `i`, and use string replacements rather than
+a table lookup. So the fix is exactly as wide as the defect.
+
+### THE FINDING: three seam sites in the NEW C# code
+
+    --poison gl, over the 200-row golden       0 sites
+    --poison gl, over the differential corpus  2 sites, both SUBSTRING
+
+⚠ **AND THAT GAP IS THE POINT.** The PR's "0 sites" was measured where the rules never fire. Pointed at
+the mined + FLEURS + generated corpus, the gate names `Normalize.cs:155` and `:174`; a grep for the shape
+finds a third at `:32` that no corpus row happens to reach. All three call the `Rewrite` seam on a string
+that is NOT the pipeline string:
+
+    FeminineOrdinal(masc)          — a word this file COMPOSED
+    Rewrite(m.Value, …)            — the matched dotted-capital run
+    Rewrite(digits, …)             — a matched group
+
+⚠ **ALL THREE ARE FAITHFUL PORTS** — the TypeScript uses `rewrite` at all three (lines 84, 195, 232) and
+poisons for it. But this is NEW C# code, and ee, chv and fo all ship 0 poison sites; a port that lights up
+the gate is a regression in the standard the batch already meets. Fixed on the C# side only, spelled the
+way its siblings spell it. The TypeScript half stays for #1179's sweep, which is what that issue is for.
+
+    after: --poison gl  0 sites (SUBSTRING 0, desync 0)
+    output byte-identical on all 31,875 differential rows and the 200-row golden
+
+### The rest
+
+    40 C# patterns; 0 not present verbatim in the TS set
+       (4 were flagged and all 4 were the instrument: three ERA literals sit inside an array so the
+        scanner's preceding-character class missed them, and the g2p FALLBACK `/[a-zñ]/` carries no flags
+        so the flag filter dropped it. ⚠ THE ERA FLAGS WERE THEN CHECKED BY HAND because the TS comment
+        makes them load-bearing — `a. e. c.` is `giu` and `a.C.`/`d.C.` are `gu`, case-sensitively, and
+        the C# matches all three.)
+    units table       11 keys, same order, same singular/plural pairs
+    exponent words    squared AND cubed declared; bareExponent squared only — both sides
+    98 test expectations re-run against the TypeScript engine (91 extracted mechanically, 7 by hand)
+
+    FLEURS gl_es + mined + attest    2,603 rows   0 differ
+    generated haystack              29,272 rows   0 differ
+    the golden regenerates BYTE-UNCHANGED from the modified TypeScript
+
+The haystack walks the g2p at 1–2 letters over the full alphabet and at 3 letters over the 24-letter core,
+then drives every one of the fourteen normalizer steps at its guard: the era markers in both cases (the
+case-sensitivity above), the abbreviation near-misses including `ſr`, the ordinal indicator across its
+100 bound, the dot-decimal vs thousands-dot discriminator at 1/2/3 fractional digits, the compass table,
+the clock against the three-field timestamp, the fraction bound at twelve, `MARPOL 73/78`, clause-final
+ranges, the ídem sign and the initialisms.
+
+    provenance gl (31,875 rows)   119,517/119,517 (100.0%)
+    ipaspans gl                   110,093/110,093, 0 wrong
+    dotnet test                   3,789 pass
+    parity, fleet                 153 languages, 30,105 rows, 0 differ, 0 BLOCKED
+    regex-diff                    124,812 probes identical, 0 differ
+    vitest (FULL suite)           289 files, 5,736 tests pass
