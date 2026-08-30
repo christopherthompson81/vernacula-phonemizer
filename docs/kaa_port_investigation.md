@@ -195,3 +195,103 @@ TypeScript unchanged.
   `96%ken` leave the suffix behind as a separate word (`procent ind`) rather than fusing it — the
   guard `(?![\p{L}\p{M}])` after the suffix class is doing its job, and the alternative `[ıi]n?`
   cannot match `in` inside `ind` without a following letter. Both engines agree.
+
+---
+
+# PR review (#1203)
+
+## Run A — 2026-08-30 15:35 — **THE ONE DEFECT IS THE FILE THE PR DELETES**
+
+The branch is up to date with main and its port is clean. The reviewable issue is not in the port: this
+PR also deletes **`csharp/STATUS.md` (1,714 lines)**, with the note "the investigation docs and the code
+cover it".
+
+⚠ **THEY DO NOT.** Measured rather than assumed — every bold headline under the file's `## Filed, not
+fixed` register, looked for anywhere under `docs/`:
+
+    bold findings under "Filed, not fixed":  134
+      found verbatim somewhere under docs/:   14
+      NOT found anywhere under docs/:        120
+
+and **14 investigation docs POINT AT the file** rather than reproducing it — `xh`, `chv`, `ht`, `lg`,
+`rn`, `rup`, `bs`, `be`, `is`, `mag`, `mined_goldens`… Several say, in so many words, "the finding in
+STATUS.md". Deleting it dangles those references and discards the content they defer to.
+
+Examples of findings that exist ONLY there:
+
+    · A LATIN-SCRIPT host never prewarms, so its delegated foreign words get the n-gram reading
+    · pcm: an above-2⁵³ ordinal fallback that had never run
+    · tl: `ika-N` moved the cardinal's stress
+    · wuu: `string.Trim()` ≠ `String.prototype.trim`
+    · Caret exponents drop fleet-wide
+    · wuu `A&B` never reaches the letter-name rule
+
+**Restored.** The file may well deserve to go — it is dated 2026-08-28 and the recent convention is that
+ports do not update it (`is_port_investigation.md:117` records exactly that) — but retiring a
+120-finding register is its own decision with its own migration, not a line item in a language port.
+
+## Run B — 2026-08-30 15:40 — the mechanical pattern diff, in two halves
+
+    TS literals: 20 (20 distinct)   C#: 23 static
+    in TS, not in C#:  0
+    in C#, not in TS:  3
+
+All three are accounted for: two (`MAG_NEXT` de-grouping, `(\d)-j\s?\.`) are built with `new RegExp` on
+the TS side and so are invisible to a literal scanner, and the third — `^\s*["»)']?\s*$` — is at
+`normalize.ts:174`, where the scanner's regex-vs-division heuristic cannot see it.
+
+⚠ **AND "0 TS-ONLY" DOES NOT PROVE THE DYNAMICS ARE PRESENT**, because the scanner never saw them. So the
+13 TS dynamics were dumped by a RegExp-constructor hook and checked against the C#'s 34 compiled patterns
+(reflection), after normalizing `\uXXXX` to the character:
+
+    TS dynamic patterns NOT present in the C#:  0
+
+⚠ The sentence-end literal is the shape where a stray `[` was once found in Faroese. Compared character
+by character here: both engines carry `^\s*["»)']?\s*$` with flag `u`. Correct.
+
+## Run C — 2026-08-30 15:45 — the differentials
+
+One process per side, `clearForeignOov()` once, rows in order, code-unit transport.
+
+    corpus (745 lines: 474 mined + 271 attest)          norm 0 · text 0
+    generated haystack (546 lines)                       norm 0 · text 0
+    numerals (0…200,000 exhaustive + the magnitude
+              decades + a stride to 10⁹; 200,328)        0 differ
+
+The g2p ENUMERATED over the alphabet the shared jsonc declares (32 letters + the two digraph
+constituents), 1–3 letters, **plus the upper-case forms** — because the dotless-I casing is this port's
+signature rule and a lower-case-only walk cannot reach it:
+
+    45,329 words   0 differ
+
+And the astral/surrogate walk, which is the class that found a defect in three of the last four ports:
+
+    11,109 words   0 differ
+
+⚠ **0, including the surrogate probes.** The PR states it fixed one `PhonemizeWord` site that the new
+`LoneSurrogateTests` reflection sweep named after main took #1201. Confirmed: nothing throws.
+
+## Run D — 2026-08-30 15:50 — the fuzz and the seam gates
+
+    hostile fuzz (888 lines)   norm: 0 differ    text: 0 differ
+
+⚠ **AND THE TIFINAGH RESIDUE IS GONE.** Every port reviewed before this one left 15–17 fuzz rows
+differing on U+2D30–2D7F, because `shi` was unported (#1196). `shi` landed in #1202, so this is the first
+port whose fuzz is clean on that class too.
+
+A 1,291-row reference generated from the TypeScript over the corpus + haystack, swapped in for
+`csharp/goldens/kaa.tsv`, both engines' gates run, golden restored:
+
+    parity kaa                 1,291 rows OK, 0 differ
+    parity --poison kaa        0 sites      provenance 33,761/33,761   IpaSpan 29,170/29,170
+    provenance-poison.mts      0 sites      --full coverage: 33,761/33,761 and 29,170/29,170
+    seam-parity.mts            kaa absent from the disagreement table (26 unported, down from 27)
+
+The token counts match EXACTLY across the two engines.
+
+    leak sweep   corpus 0/745 · haystack 0/546, on BOTH engines
+
+## Run E — 2026-08-30 15:55 — the gates
+
+    dotnet test (full suite)          4,614 pass, 0 fail
+    parity (ALL goldens)              164 languages, 31,964 rows, 0 differ
