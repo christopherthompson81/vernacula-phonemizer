@@ -100,7 +100,10 @@ public sealed class ScottishGaelicPhonemizer : ILanguage
             // vowel clusters (longest-match) → the pronounced nucleus.
             if (IsVowel(c))
             {
-                var key = VOWEL_CLUSTERS.FirstOrDefault(k => StartsWithAt(w, k, i));
+                // TS `VOWEL_CLUSTERS.find(...)` — a plain loop over the already longest-first list, so the
+                // per-position closure `FirstOrDefault` would allocate on every vowel of every word is gone.
+                string? key = null;
+                foreach (var k in VOWEL_CLUSTERS) if (StartsWithAt(w, k, i)) { key = k; break; }
                 if (key is not null)
                 {
                     segs.Add(new Seg { Ph = DEF.Vowels[key], Nucleus = true });

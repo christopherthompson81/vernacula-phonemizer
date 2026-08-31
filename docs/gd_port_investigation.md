@@ -57,3 +57,45 @@ callbacks (`Normalize.cs` — the pattern is built from the table's own keys und
 indexer would throw where the TS returned the match unchanged), and the `segs.Count > 0` guard on
 the word-final ⟨dh⟩/⟨gh⟩ drop (`ScottishGaelic.cs` — without it a bare word-initial digraph is
 consumed before the lenition branch can resolve it).
+
+## Run 3 — 2026-08-31 — the review's own differential, and the one gate that was missed
+
+The port review re-ran the gates independently rather than trusting Run 2's deleted script, and pushed
+the differential wider than the corpus-derived reference could reach.
+
+```
+$ dotnet test --filter FullyQualifiedName~ScottishGaelic     77/77
+$ dotnet test                                                5,979/5,979
+$ dotnet run --project csharp/tools/parity -- gd             200 rows, 0 differ
+$ dotnet run --project csharp/tools/parity -- gd --provenance --ipaspans
+    4,681/4,681 tokens with IpaSpan, 0 wrong
+```
+
+Then three generated references, each written over `csharp/goldens/gd.tsv` for the run and the committed
+golden restored afterwards (md5 `90549a9f…` checked back):
+
+| reference | rows | result |
+|---|---|---|
+| hand-picked adversaries (bare ⟨dh⟩/⟨gh⟩, doubled consonants, all-caps, every vowel cluster, every normalization branch, both separator marks) | 159 | 0 differ |
+| xorshift fuzz over the Gaelic grapheme inventory + digraphs + punctuation + 50 numeric shapes, 1–6 words | 9,000 | 0 differ |
+| the numeral compositor: every integer 0–2,200, a stride through 10^6, every power boundary, `9007199254740991`/`…92`, a 40-digit run, leading zeros, and `N duine` on a stride of 7 through 20,000 | 5,307 | 0 differ |
+
+**14,466 generated rows, zero divergence.** Every expected value in `ScottishGaelicTests.cs` was also
+re-derived from the TS engine directly (`phonemizeWord`, `numberToWords`, `normalizeScottishGaelic`,
+`phonemize`) and all 77 matched. Nothing in the C# throws where the TS returns: the two documented
+seams (`#1122`'s miss branch, the `segs.Count > 0` guard) both hold, and the `LENITABLE` regex
+correctly carries `i` WITHOUT `u` so ECMAScript's legacy Canonicalize keeps a long ⟨ſ⟩ out of
+`^[bcdfgmpst]` — the case `JsRegexDialectTests.LegacyIDoesNotFoldNonAsciiOntoAscii` names this module for.
+
+**The one real gap: gd was not added to `ManifestMappingTests.cs`.** That gate exists because
+System.Text.Json silently deserializes an unmatched JSON member to the type's default — the English
+ARPABET failure, where a mangled key cost 42 golden rows and nothing threw. 123 ported languages carry a
+`Manifest.cs`; 154 `AssertFullyMapped` facts guard them; gd had none, so a future rename of
+`slenderVowels` or `teenWord` would have produced silent `""` rather than a failure. Added and it
+passes on the first run — the record does claim every key today, so this was a latent gate gap, not a
+live defect. ⚠ Four other codes are in the same state and are OUT OF SCOPE here: `CentralKurdish`,
+`Kabuverdianu`, `Luo`, `Umbundu`.
+
+Also applied: the vowel-cluster longest-match in `Scan` was `VOWEL_CLUSTERS.FirstOrDefault(k => …)`,
+which allocates a closure capturing `w` and `i` at every vowel of every word. Replaced with the plain
+loop the TS `.find()` already is. Parity re-checked byte-identical after the change.
