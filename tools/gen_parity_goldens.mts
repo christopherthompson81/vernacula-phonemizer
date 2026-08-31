@@ -130,8 +130,19 @@ function minedRows(code: string): string[] {
   return [...kept.filter(isClean), ...kept.filter((t) => !isClean(t))];
 }
 
-/** First TSV under the language's likely module dirs, first column = headwords. */
-function lexiconWords(code: string): string[] {
+/**
+ * Headwords from the language's own word list, first column of the first usable TSV.
+ *
+ * ⚠ TWO LOCATIONS, AND THE SECOND ONE IS WHY SEVEN CODES SHIPPED UNGATED. This scanned only
+ * `data/languages/<dir>/*.tsv`, so a language whose only word list lives under
+ * `tools/referee-eval/referees/<code>.*.tsv` found nothing and was skipped — and a skipped golden is not
+ * a thin gate, it is NO gate: `parity`, `--provenance`, `--ipaspans` and `--poison` all pass over the
+ * code in silence, and the fleet count does not move when the port lands, so nothing says it is missing.
+ * naq (Nama) and smj (Lule Sami) both shipped that way, each with a referee TSV sitting in the tree the
+ * whole time. The referee tier is consulted only AFTER the data/ tier declines, so no existing golden
+ * changes source.
+ */
+function lexiconWords(code: string, allowReferee = false): string[] {
   // ⚠ MODULES ARE IN src/, THEIR DATA IS IN data/ since the shared-tree move — this scans both:
   //   the .ts to identify which directory owns the code, the .tsv under data/ for the headwords.
   const guesses = readdirSync("src/languages").filter((d) => {
@@ -151,6 +162,38 @@ function lexiconWords(code: string): string[] {
         if (words.length >= N) break;
       }
       if (words.length >= 20 && guesses.length) return words;
+    }
+  }
+  // The referee tier — a lexicon that lives beside the referee harness rather than under data/.
+  // ⚠ ONLY FOR A LANGUAGE THAT WOULD OTHERWISE HAVE NO GOLDEN AT ALL, and the caller decides that by
+  // asking whether one is already on disk. TWO WAYS THIS TIER CAN DO HARM, both measured before the
+  // guard was written:
+  //   · Consulted from the mined tier's TOP-UP it grew 16 unrelated goldens (ak, hil, hmn, ilo …) by
+  //     appending referee headwords to gates that were already fine — a change to those languages'
+  //     gates, and a separate decision from closing an ungated one. Hence `thin`-path only.
+  //   · Consulted for a language whose RICH source is merely unavailable in this working copy it is
+  //     worse than useless. The FLEURS ledger is a 337 MB artifact that is not always present; without
+  //     it the generator yields nothing for ~24 codes and SKIPS them, leaving their committed goldens
+  //     untouched, which is the safe outcome. This tier turns that nothing into something thin, and the
+  //     thin file then OVERWRITES the good one — measured: 12 goldens (grc, quc, acm, rkt, bho, es-419,
+  //     pt-BR and the Arabic family) rewritten, quc losing 48 rows and acm 92. Hence the caller's
+  //     existence check: a golden that is already committed is never downgraded by this tier.
+  if (!allowReferee) return [];
+  // ⚠ SORTED, so which file wins is deterministic when a code has more than one referee.
+  const refDir = "tools/referee-eval/referees";
+  if (existsSync(refDir)) {
+    for (const f of readdirSync(refDir).sort()) {
+      if (!f.startsWith(`${code}.`) || !f.endsWith(".tsv")) continue;
+      const words: string[] = [];
+      for (const line of readFileSync(`${refDir}/${f}`, "utf8").split("\n")) {
+        if (line.startsWith("#") || !line.trim()) continue;
+        const w = line.split("\t")[0]?.trim();
+        // ⚠ A HEADWORD MUST CONTAIN A LETTER. These files carry the odd bare-mark or punctuation row
+        // (naq's list opens with one), and a golden row of `-` pins nothing while reading as noise.
+        if (w && /\p{L}/u.test(w)) words.push(w);
+        if (words.length >= N) break;
+      }
+      if (words.length >= 20) return words;
     }
   }
   return [];
@@ -229,7 +272,10 @@ for (const code of codes) {
       }
     }
   }
-  if (!rows.length) { rows = lexiconWords(code); tier = "thin"; }
+  // ⚠ THE REFEREE TIER IS OFFERED ONLY WHERE NO GOLDEN EXISTS YET — see `lexiconWords`. A committed
+  // golden is never replaced by a thinner referee-derived one just because a richer source is
+  // missing from this checkout.
+  if (!rows.length) { rows = lexiconWords(code, !existsSync(`${OUT}/${code}.tsv`)); tier = "thin"; }
   const out: string[] = [];
   for (const text of rows) {
     try {
