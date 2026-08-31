@@ -204,3 +204,40 @@ neither a port defect:
   · the `m.`/`m` residuals and the layer's documented refusals, pinned in the suite as they read so a future
     change has to be deliberate;
   · **#1211**, the missing `min.` and currency mop-ups.
+
+## Run 10 — 2026-08-31 08:50 — closing #1211
+
+Both halves were argued structurally in the issue; the instances back them.
+
+  · **`min.` ×4, and 2 are left raw.** `(10–60 min.)` and `78 val. 25 min.` have a claimable numeral and
+    already read. `2:11.60 min.` and `1:09.02 min.` do not — the operand is a duration the colon guards
+    refuse — so the abbreviation stayed exactly where it started and reached the g2p as *mʲɪn* plus a
+    spurious sentence break. `val.` in the identical position was already mopped up. **Fixed**, with the
+    same guard and the file's own `minute` noun in the genitive plural; nothing new is sourced.
+  · **Currency ×24 sign occurrences, and exactly 1 survives.** Every other one carries a claimable figure.
+    The survivor is `55.89 mlrd €` — an English-format decimal the operand anchor refuses, correctly. The
+    magnitude was mopped up to *milijardų* and the `€` was not, and since `€` is not a letter the tokenizer
+    never emitted it: **deleted, not leaked**. **Fixed**, genitive plural for want of a count.
+
+⚠ **THE SYMBOLS ONLY, NEVER `Lt`.** A bare-`Lt` mop-up would fire on any capitalised abbreviation spelled
+that way, and all four corpus `Lt` carry a claimable figure already. `€ $ £` cannot be anything but
+currency, which is what makes them safe to claim with no operand — the same test the `№` guard applies in
+the Latvian layer.
+
+    "2:11.60 min. lėčiau"  ->  "2:11.60 minučių lėčiau"
+    "55.89 mlrd €"         ->  "55.89 milijardų eurų"
+    "515,3 km/val."        ->  "515 kablelis 3 km/val."     a rate still blocks both
+    "515,3 km/min."        ->  "515 kablelis 3 km/min."
+    "$90 milijonų dolerių" ->  "devyniasdešimt milijonų dolerių"   say-it-twice still suppresses
+    "64 000 Lt"            ->  "šešiasdešimt keturi tūkstančiai litų"
+
+⚠ **A PRE-EXISTING TEST PINNED THE DEFECT AND HAD TO BE UPDATED.** `normalizeLithuanian("55.89 mlrd €")`
+was asserted to be `"55.89 milijardų €"` in both suites — a row whose comment argued the MAGNITUDE half of
+the mop-up and left the other half unstated, so the surviving `€` was recorded as correct rather than
+noticed. Both rows now end `milijardų eurų`, with the reason written next to them.
+
+**No golden regeneration:** the 200-row golden carries no currency sign and no `min.`, and re-running it
+through the changed TS gives `0 of 200 golden rows change`. Both engines then agreed on a **5,028-row**
+differential — every sign × operand × magnitude × ordering, every `min.` operand shape, plus the golden, the
+2,712-line corpus and the 1,540-row interaction corpus: 0 differ on `norm` and `text`. Regex corpus
+re-extracted, JsRegex diff 124,863 identical / 0 DIFFER.
