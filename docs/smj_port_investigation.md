@@ -171,3 +171,35 @@ Nothing found in this port remains unfixed. Three things stand, none a port defe
   · **#1214**, the sign's letters read as native phonemes, likewise pinned;
   · **smj still has no golden**, so the standing fleet parity run covers it with zero rows. The evidence that
     the port is correct is the differential in Runs 2–3, not the gate. Closing it needs an smj text source.
+
+## Run 8 — 2026-08-31 09:30 — closing #1212 (shared tier)
+
+`separatorHygiene` now claims the SPACE group as rule 0, above everything, iterated to a fixed point.
+
+    "1 000"          ->  "1000"          "21 2001"  ->  "21 2001"   (4 digits: declined)
+    "1 000 000"      ->  "1000000"       "0 000"    ->  "0 000"     (standalone 0: declined)
+    "12 345 678"     ->  "12345678"      "1 00"     ->  "1 00"
+    "1 385 000 000"  ->  "1385000000"    "1.234"    ->  "1.234"     (still ambiguous, still refused)
+
+⚠ **ONE GROUP IS ENOUGH HERE AND TWO ARE REQUIRED FOR THE DOT/COMMA, AND THAT ASYMMETRY IS THE ARGUMENT.**
+The dot rule needs two because `1.234` is genuinely ambiguous between grouping and a three-place decimal. A
+space is never a decimal separator in any convention, so that ambiguity does not arise — and the shape is
+Lithuanian's own, measured there at 24 sites, all genuine, zero false positives. Both of Lithuanian's guards
+came across with it, and each declines something real: the right edge takes exactly three digits (which is
+what keeps `21 2001`, a date, whole) and the left edge rejects a standalone `0`.
+
+**Scope, measured before the edit.** Seven languages call this pass — grc, kl, quc, smj, naq, nog, mto — and
+only three of them have a golden. **Zero space-grouped figures occur in any of them**, so the change moves no
+existing reference at all: `quc` 175/175, `grc` 200/200, `kl` 200/200 unchanged, fleet 169/169 byte-identical.
+The four ported consumers (smj, kl, grc, quc) agreed with the TS on a 108-row shape differential; naq, nog
+and mto are `port pending` in C#, so only the TS side exists and nothing can diverge.
+
+⚠ **THE smj PINS DID THEIR JOB.** `LuleSamiTests` recorded `1 000` → *akta nålla* and `1 000 000` → *akta
+nålla nålla* as the defect, deliberately, so that a fix would have to change them. It did: they now read
+*tuvsán* and *millijåvnnå*.
+
+⚠ **AND THE FULL TS SUITE CAUGHT A CONVENTION I BROKE.** `test/invisible-characters.test.ts` requires an
+invisible character to be written as an escape AND NAMED on its line or the one above — and it strips block
+comments first, so the naming has to be a TRAILING `//`, which is why Lithuanian's identical constant
+carries `// space, NBSP, NNBSP, thin space` on the line rather than in the doc comment above it. Fixed in
+both engines.

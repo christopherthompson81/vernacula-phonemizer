@@ -18,6 +18,33 @@ describe("separator hygiene — what it claims", () => {
         expect(separatorHygiene("1.234.567.")).toBe("1234567.");
     });
 
+    // #1212 — THE SPACE GROUP, which was in neither the rules nor the refusals. `1.234.567` was joined and
+    // `1 000 000` was not, so the same quantity was fixed in the two conventions these languages do not use
+    // and missed in the one several of them do: smj and kl are Nordic orthography, where the SPACE is the
+    // standard thousands separator. Untouched, `1 000 000` read *one zero zero* — a silent 1000× error, the
+    // very class this pass exists to close.
+    test("a space thousands separator is grouping — and ONE group is enough", () => {
+        expect(separatorHygiene("1 000")).toBe("1000");
+        expect(separatorHygiene("1 000 000")).toBe("1000000");   // to a fixed point
+        expect(separatorHygiene("12 345 678")).toBe("12345678");
+        expect(separatorHygiene("1 385 000 000")).toBe("1385000000");
+        expect(separatorHygiene("1 000,5")).toBe("1000 5");      // the decimal rule still runs after
+        // ⚠ ONE group suffices here and TWO are required for the dot/comma, and that asymmetry is the
+        // point: `1.234` is ambiguous between grouping and a three-place decimal, and A SPACE IS NEVER A
+        // DECIMAL SEPARATOR IN ANY CONVENTION. Lithuanian measured this exact shape over its own corpus —
+        // 24 sites, all genuine, zero false positives.
+        expect(separatorHygiene("1.234")).toBe("1.234");
+    });
+
+    test("⚠ the space group's two guards, each of which declines something real", () => {
+        // EXACTLY three digits: a fourth disqualifies it, which is what keeps a bare date-like pair whole.
+        expect(separatorHygiene("21 2001")).toBe("21 2001");
+        expect(separatorHygiene("1 0000")).toBe("1 0000");
+        expect(separatorHygiene("1 00")).toBe("1 00");
+        // a STANDALONE zero is not a thousands head, so `0 000` is not welded into a figure nobody wrote
+        expect(separatorHygiene("0 000")).toBe("0 000");
+    });
+
     test("one or two digits after a mark is a decimal — the mark is spent, no word is emitted", () => {
         expect(separatorHygiene("3,5")).toBe("3 5");
         expect(separatorHygiene("19.95")).toBe("19 95");

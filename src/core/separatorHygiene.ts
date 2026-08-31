@@ -32,7 +32,11 @@
  *     Bible verse in a DIFFERENT CODEPOINT (U+02D0); Karakalpak's five-digit ones are ISO standard
  *     numbers. A clock rule needs evidence and there is none.
  *   · No sign is read. `%`, `$`, `°`, `+`, `−`, `=` all keep their current behaviour, which is to be
- *     dropped — visible to the leak gates, and honestly unfixed rather than dishonestly filled.
+ *     dropped — visible to the leak gates, and honestly unfixed rather than dishonestly filled. ⚠ THAT
+ *     VISIBILITY CLAIM HOLDS FOR THE SIGNS AND NOT FOR THE LETTERS BESIDE THEM — see #1214: `20°C` drops
+ *     the `°` and then reads ⟨C⟩ as a native grapheme, which is a READING rather than a leak.
+ *   · ⚠ THE SPACE GROUP WAS ALSO ABSENT FROM THIS LIST, WHICH IS WHY IT WENT UNNOTICED FOR SO LONG (#1212).
+ *     It is now RULE 0 above rather than a refusal; the reasoning is there.
  *
  * ⚠ A LANGUAGE USING THIS IS NOT "TREATED". It has had the corpus-independent subset applied. Everything
  * that needs evidence remains open, and the per-language `normalize.ts` that calls this says so.
@@ -45,8 +49,42 @@ import { rewrite } from "./provenance.ts";
  * The four rules, in the only order they compose in — multi-group joins run before the short-decimal rule
  * so `1.234.567` is one number before anything looks for a two-digit tail.
  */
+/** ASCII space, NBSP, NNBSP, thin space. Written as ESCAPES: a literal U+00A0 collapses invisibly to a
+ *  duplicate ASCII space under an editor or a copy-paste and the class silently becomes one alternative. */
+const SP = "[ \\u00a0\\u202f\\u2009]";  // space, NBSP, NNBSP, thin space
+/**
+ * ⚠ THE SPACE GROUP, WHICH WAS IN NEITHER THE RULES NOR THE REFUSALS (#1212). `1.234.567` was joined and
+ * `1 000 000` was not, so the same quantity was fixed in the two conventions these languages do not use and
+ * missed in the one several of them do — smj and kl are written in Nordic orthography, where the SPACE is
+ * the standard thousands separator. Untouched it read *one zero zero*: a silent 1000× error, and precisely
+ * the class this pass exists to close (its own motivating case is Cherokee's `17,000` → *seventeen, ZERO*).
+ *
+ * ⚠ AND ONE GROUP IS ENOUGH HERE, unlike the dot/comma rule above. That rule needs TWO because `1.234` is
+ * genuinely ambiguous — three digits after a dot is grouping in one convention and a three-place decimal in
+ * another. **A space is never a decimal separator in any convention**, so the ambiguity that forces the
+ * multi-group requirement simply does not arise. The shape is the one Lithuanian's own de-grouping rule
+ * uses, and that layer measured it over its corpus: 24 space-group sites, all 24 genuine, zero false
+ * positives.
+ *
+ * ⚠ THE TWO GUARDS ARE CARRIED ACROSS WITH IT. The right edge takes EXACTLY three digits — a fourth
+ * disqualifies the group, which is what declines a bare pair of numbers like `21 2001` (a date, and the one
+ * `digit SPACE digit` in any affected golden). The left edge rejects a STANDALONE `0`, so `0 000` is not
+ * welded into a figure the writer did not write.
+ *
+ * Iterated to a FIXED POINT, because one pass consumes only the first separator of a pair; it terminates
+ * because every pass that does anything deletes a character.
+ */
+const SPACE_GROUP = new RegExp(`(?<=\\d)(?<!(?<![\\d.,])0)${SP}(?=\\d{3}(?!\\d))`, "gu");
+
 export function separatorHygiene(input: string): string {
     let s = input;
+
+    // 0) THE SPACE GROUP — above everything, for the reason every de-grouping rule in this tree is first:
+    //    the separator must stop being a boundary before any other rule reads the number around it.
+    for (let prev = ""; prev !== s; ) {
+        prev = s;
+        s = rewrite(s, SPACE_GROUP, "");
+    }
 
     // 1) A run of TWO OR MORE three-digit groups is grouping in every convention that groups — `1.234.567`,
     //    `1,234,567`, `19,605,052`. One group is ambiguous and is left alone (see the header). Today this
