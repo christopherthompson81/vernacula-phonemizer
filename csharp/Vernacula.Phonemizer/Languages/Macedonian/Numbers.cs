@@ -18,18 +18,17 @@ public static class Numbers
     /**
      * Build the Macedonian words for n; "и" precedes the final component (дваесет и еден; сто и еден).
      *
-     * ⚠ A NON-INTEGER `n` DIVERGES FROM THE TS AT THIS BOUNDARY, AND IT IS UNREACHABLE. JS indexes
-     * `units[0.5]` as a property lookup and gets `undefined` (the TS's `!` is a lie there); C# must
-     * truncate to `Units[0]` and says *нула*. Matching JS would mean a nullable return threaded through all
-     * fourteen call sites for a case none of them can produce — every caller passes an integer, and that is
-     * enumerated rather than assumed: the clock's `Number(h)`/`Number(min)`, the ordinal rule's
-     * `Number(digits)`, `Text()`'s `Number(intPart)`/`Number(joined)`/`Number(d)` are all `\d+` captures,
-     * the internal recursions are `Math.Floor`/`%` of integers, and the dead `Number()` helper guards with
-     * a safe-integer test first. Recorded because the difference is real, not because it can be hit.
+     * ⚠ A NON-INTEGER IS REFUSED EXPLICITLY, AND THAT CLOSES A CROSS-ENGINE DIVERGENCE AT AN UNREACHABLE
+     * BOUNDARY. Without the guard, JS indexes `units[0.5]` as a property lookup and gets `undefined` — the
+     * TS's `!` is a lie there — while C# must truncate to `Units[0]` and say *нула*. No caller can produce
+     * it, and that is enumerated rather than assumed: the clock's `Number(h)`/`Number(min)`, the ordinal
+     * rule's `Number(digits)` and `Text()`'s `Number(intPart)`/`Number(joined)`/`Number(d)` are all `\d+`
+     * captures, and the internal recursions are `Math.Floor`/`%` of integers. Both engines now refuse it
+     * the same way, so they agree by construction rather than by luck.
      */
     public static string NumberToText(double n, string? raw = null)
     {
-        if (n < 0) return "";
+        if (n < 0 || !double.IsInteger(n)) return "";
         if (n < 10) return NUM.Units[(int)n];
         if (n == 10) return NUM.Ten;
         if (n < 20) return NUM.Teens[(int)n - 11];

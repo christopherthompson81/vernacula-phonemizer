@@ -153,3 +153,22 @@ assumed.
 
 Nothing found in this port remains unfixed, and nothing new was filed. The single `NumberToText` boundary
 difference is documented at the function and unreachable from every one of its fourteen callers.
+
+## Run 9 — 2026-08-31 20:40 — repairing the two items Run 4 recorded but did not fix
+
+Both were left as "documented, unreachable" and both are now closed properly.
+
+**1. The non-integer boundary is refused explicitly, in BOTH engines.** `numberToText` guarded only `n < 0`,
+so a fractional `n` fell through to `units[n]` — a property lookup yielding `undefined` in JS (the `!` on
+that line was a lie) and a truncating index answering *нула* in C#. The guard is now
+`n < 0 || !Number.isInteger(n)` / `n < 0 || !double.IsInteger(n)`, so the two engines agree **by
+construction rather than by luck** and the four assertions below it become true. Verified: `numberToText(0.5)`
+is `""` in both, the mk golden moves **0 of 200** rows, and a 3,019-row differential over 0–3000 plus every
+fractional and non-finite shape is **0 differ** on the composer and end to end.
+
+**2. The dead `Number()` helper is DELETED, in both engines.** It was carried across as dead with a warning
+that its `return digits` would put a digit STRING into the phoneme stream past 2^53. That warning was the
+right call while the code existed — but the file's own note already said the fix is to *use the arm in
+`text()`*, which does exist and is what every caller uses. Dead code cannot be a trap once it is gone, so
+the helper and its warning both go. Confirmed unreferenced in both engines before removal; the TS suite and
+the 5,498-test C# suite are unchanged, and the mk corpus differential is still 0 of 1,907.

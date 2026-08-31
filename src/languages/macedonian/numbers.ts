@@ -25,7 +25,13 @@ const NUM = loadManifest<{ numbers: NumbersDef }>(import.meta.url, "macedonian.j
 
 /** Build the Macedonian words for n; "и" precedes the final component (дваесет и еден; сто и еден). */
 export function numberToText(n: number, raw?: string): string {
-    if (n < 0) return "";
+    // ⚠ A NON-INTEGER IS REFUSED EXPLICITLY, AND THAT CLOSES A CROSS-ENGINE DIVERGENCE AT AN UNREACHABLE
+    // BOUNDARY (found porting to C#). Without it, `units[0.5]` is a property lookup that yields `undefined`
+    // here — the `!` below is a lie for that input — while a typed port must truncate the index and answer
+    // *нула*. No caller can produce it: every one passes a `\d+` capture, a `Math.floor`, or a `%` of
+    // integers. Refusing it makes the two engines agree by construction instead of by luck, and makes the
+    // assertions on the next four lines true.
+    if (n < 0 || !Number.isInteger(n)) return "";
     if (n < 10) return NUM.units[n]!;
     if (n === 10) return NUM.ten;
     if (n < 20) return NUM.teens[n - 11]!;
