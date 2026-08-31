@@ -927,4 +927,9 @@ public class ManifestMappingTests
     public void NamaManifestIsFullyMapped() =>
         AssertFullyMapped("languages/nama", "nama.jsonc", Languages.Nama.Manifest.DEF,
             "language", "name", "script");
+
+    [Fact]
+    public void NogaiManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/nogai", "nogai.jsonc", Languages.Nogai.Manifest.DEF,
+            "language", "name", "script");
 }
