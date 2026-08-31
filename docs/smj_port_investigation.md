@@ -135,10 +135,39 @@ added or left behind.
   · **`IsSafeInteger` is a local helper**, following the existing fleet idiom (Sepedi spells it identically,
     noting there is no BCL equivalent) rather than adding to the shared tier.
 
+## Run 7 — 2026-08-31 06:40 — review of #1213
+
+**Culture and ordering.** One hit in the whole port — `t.AsSpan(i).StartsWith(pair[0], StringComparison.Ordinal)`,
+which is the explicit-ordinal spelling of the TS's `t.startsWith(k, i)`. No `ToLower`/`ToUpper`, no culture
+compare, no number formatting, no order-dependent dictionary, no build warnings. The only lowercase in the
+port is `Js.ToLowerCase`, which is the JS-faithful one.
+
+⚠ **THE SIGN IS DROPPED BUT ITS LETTERS ARE READ.** The layer's header says the untouched classes — degrees,
+units, "every abbreviation" — stay "visible to the leak gates". Measured, that is true of the SIGNS and false
+of the LETTERS beside them:
+
+    "20 °"  -> ˈkuoktɑlohke          the sign IS dropped, as advertised
+    "10 %"  -> ˈlokev                    "
+    "20°C"  -> ˈkuoktɑlohke ˈk       ⟨C⟩ is a real Lule Sami grapheme reading [k]
+    "5 kg"  -> ˈvihtːɑ ˈkʰk          a stressed nonsense word
+    "12 m"  -> ˈlokenɑnkuoktɑ ˈm
+    "nr. 5" -> ˈnr . ˈvihtːɑ         …plus a spurious SENTENCE BREAK
+
+Nothing is dropped and nothing raw survives, so there is no DROP and no RAW-LATIN residue — the output is
+well-formed IPA that happens to mean something else. Trap 56, and the same defect Lithuanian's layer exists to
+close (`17 °C` → *septyniolika t͡s*), reached here by a language with no corpus to close it with.
+
+The reading itself is unfixable without evidence and that is honestly stated everywhere else; what is wrong is
+the **visibility claim**, which a future porter would rely on. ⚠ And the gate behaviour itself could NOT be
+verified — the header cites `mine.ts scan`, which is not in this repository, so what is recorded above is what
+the engine emits, not what some scanner elsewhere does or does not catch. Filed as **#1214** with that caveat
+stated, and pinned in the suite.
+
 ## Outstanding
 
-Nothing found in this port remains unfixed. Two things stand, neither a port defect:
+Nothing found in this port remains unfixed. Three things stand, none a port defect:
 
   · **#1212**, the space thousands separator, pinned as it reads in the suite;
+  · **#1214**, the sign's letters read as native phonemes, likewise pinned;
   · **smj still has no golden**, so the standing fleet parity run covers it with zero rows. The evidence that
     the port is correct is the differential in Runs 2–3, not the gate. Closing it needs an smj text source.

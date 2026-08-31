@@ -196,4 +196,29 @@ public class LuleSamiTests
     [InlineData("1 000 000", "ˈɑktɑ ˈnolːɑ ˈnolːɑ")]
     public void TheNormalizationIsSeparatorHygieneAndNothingElse(string text, string want) =>
         Assert.Equal(want, Say(text));
+
+    /**
+     * ⚠ THE SIGN IS DROPPED BUT ITS LETTERS ARE READ AS NATIVE PHONEMES, and that is the half of the
+     * "untouched" classes that does not behave the way the layer's header describes. `normalize.ts` says
+     * degrees, units and "every abbreviation" are left untouched and "still visible to the leak gates" —
+     * true of the SIGNS, which are dropped, and not true of the LETTERS beside them: ⟨C⟩ is a real Lule
+     * Sami grapheme reading [k], so `20°C` comes out *guoktalåhke k* — a plausible phoneme with no basis,
+     * which is a READING rather than a leak. Same shape as the `°C`→/t͡s/ defect Lithuanian's layer was
+     * written to close, reached here by a language that has no corpus to close it with.
+     *
+     * Pinned as it reads, not as it ought to read, so that a fix has to change these lines deliberately.
+     * Filed as #1214.
+     */
+    [Theory]
+    [InlineData("20°C", "ˈkuoktɑlohke ˈk")]      // ⟨C⟩ → [k]
+    [InlineData("20°F", "ˈkuoktɑlohke ˈf")]
+    [InlineData("20 °", "ˈkuoktɑlohke")]         // the bare sign IS dropped, as the header says
+    [InlineData("5 kg", "ˈvihtːɑ ˈkʰk")]         // the unit letters take a stress mark of their own
+    [InlineData("5 km", "ˈvihtːɑ ˈkʰm")]
+    [InlineData("12 m", "ˈlokenɑnkuoktɑ ˈm")]
+    [InlineData("nr. 5", "ˈnr . ˈvihtːɑ")]       // …and an abbreviation adds a spurious sentence break
+    [InlineData("10 %", "ˈlokev")]               // a bare sign: dropped
+    [InlineData("€5", "ˈvihtːɑ")]
+    public void TheSignIsDroppedButItsLettersAreRead(string text, string want) =>
+        Assert.Equal(want, Say(text));
 }
