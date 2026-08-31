@@ -428,3 +428,17 @@ gives `0 of 200 golden rows change`, so no golden regeneration was needed. Both 
 denominators × glued/spaced, plus the golden): **0 differ on `norm` and on `text`.**
 
 Pinned in both suites.
+
+⚠ **THE FULL TS SUITE CAUGHT ONE MORE THING THE ga-ONLY RUN COULD NOT.** `csharp/regex-corpus.jsonl` is a
+recorded extraction of every pattern in `src/`, and `test/regex-corpus-fresh.test.ts` fails when it goes
+stale — so changing a pattern is not done until the corpus is re-extracted AND the translation diff is run.
+The test's own message says why the diff matters: *"a newly recorded pattern may be one JsRegex has never
+been asked to translate, and that is the whole point of keeping this current."* Which is exactly the case
+here — `(\s*\/)?` is a new shape. Ran both:
+
+    npx tsx tools/extract_regexes.mts     2,314 distinct patterns from 711 files
+    dotnet run --project csharp/tools/regex-diff
+        124,812 probe results identical, 0 DIFFER, 0 threw
+        0 patterns refused by JsRegex
+
+So the new optional-group spelling behaves identically under JsRegex, and the corpus row was updated.
