@@ -90,3 +90,75 @@ regex-replace, no segmentation or per-rune fold.
 Port complete on `port/lb-luxembourgish`, uncommitted. Every gate green with no TS-side finding to
 file: the two Run-1 defects were port transcription errors (a class where the translator's refusal is
 the designed failure mode) with no TypeScript half, so the bidirectional rule does not trigger.
+
+## Run 7 — 2026-08-31 21:30 — independent review of #1223
+
+Rebased onto a main that had moved eight commits. The only conflict was `Bootstrap.cs`'s registration
+block — resolved keeping all four new entries in alphabetical order (Luo, Luxembourgish, Macedonian,
+Maltese). 200/200 and 131 tests after.
+
+**THE GAPS IN THIS LOG, FILLED.** Runs 1–6 have no exhaustive g2p walk, no astral or lone-surrogate fuzz,
+no digit-family probe and no culture sweep:
+
+    exhaustive g2p + digraph-order walk                       357,215 words   0 differ
+      (all 1–3-letter words over the 28-letter orthography, all 4-letter over the 24 that carry a rule,
+       EVERY one of the 26 digraphs in every slot against every other — tsch/sch/ch and éi/ei and äu/au
+       are what make the longest-match order load-bearing — plus the rules the table cannot express:
+       initial st/sp, single ⟨s⟩→[z], ⟨e⟩→[æ]/[ə], final ⟨g⟩, ⟨n⟩ before a velar, geminate collapse,
+       intervocalic ⟨g⟩, and every unstressed prefix × stem × ending)
+    FLEURS lb_lu cols 3+4 + golden, norm and text               3,822 rows    0 differ
+    numbers 0–20,000 exhaustive + magnitude seams + non-finite  20,035 rows    0 differ
+    five digit families × 14 operand frames                        145 rows    0 differ
+    astral / lone-surrogate fuzz, norm and text                  36,419 rows    0 differ
+    astral / lone-surrogate fuzz, WORD                           36,419 rows    **1 differs**
+
+**THE ORDER CLAIM, DECIDED RATHER THAN ARGUED.** Run 4 and the PR both state that the digraph sort is
+stable in both engines and that the golden re-proves it. That is an argument; the decidable question is
+whether the two engines build the same list. Dumped both — **identical, 26 keys, same order**
+(`tsch|sch|ch|ck|qu|…|ää|ss`). The C# `ABBREV_ALT` is likewise a stable length-descending join.
+
+**Culture sweep:** three sites, all accounted for — the two `OrderByDescending` just decided, and one
+`char.ToUpperInvariant` in `FractionNoun`, where every ordinal stem opens on ⟨é⟩ or an ASCII letter and the
+two runtimes fold identically. `Js.Normalize` (not `string.Normalize`) is used on the raw word, so the
+#1199 lone-surrogate throw is already handled.
+
+## ⚠ Run 8 — the one differing row, and it is NOT a port defect
+
+    phonemizeWord("ge\uD800é")   TS  ɡəˈeː      C#  ɡˈæeː
+    phonemizeWord("ge\uD800a")   TS  ɡəˈa       C#  ɡˈæa
+
+Reduced from 1-in-36,419 to a targeted prefix × junk × vowel grid: **56 of 245**. The trigger is an
+unstressed prefix followed by a LONE SURROGATE, and the stress rule's `UNSTRESSED_PREFIX` test answers
+differently, which moves both the stress mark and the ⟨e⟩ quality.
+
+Isolated to the regex itself, outside the port:
+
+    ^(ge|be|er|zer|ze)[^aeiouyäëéô]|^ver   flags u
+      "ge\uD800é"   JS true   C# False        ⚠
+      "ge\uD800"    JS true   C# False        ⚠
+      "ge𐀀é"        JS true   C# True    (a well-formed pair agrees)
+
+`Core/JsRegex.cs` translates a `u`-mode negated class into `(?:AstralPair|(?![\uD800-\uDFFF])[^body])`
+**deliberately**, with the rationale written in place: emitting a plain `[^…]` "would match a LONE SURROGATE
+and report half a character as the answer". JS disagrees. So this is a known design choice in the shared
+tier whose cost had never been measured — and Luxembourgish's stress rule is the first rule in the fleet
+whose OUTPUT depends on the answer. The same fuzz over lv, lt, smj, ky, luo, mk and mt is 0 differ.
+
+⚠ **AND THE TOOL THAT EXISTS TO CATCH THIS CANNOT PROBE IT.** `extract_regexes.mts`'s own header says a
+curated probe set "tests what someone thought of"; its `PROBES` carry astral pairs, ligatures, dotted and
+dotless I, Deseret — and no lone surrogate. Adding one is not a one-line change, because the corpus
+transport throws on it:
+
+    System.InvalidOperationException: Cannot read incomplete UTF-16 JSON text as string with missing
+    low surrogate.  at JsonDocument.GetString  …  regex-diff/Program.cs:line 40
+
+So the one input class where `JsRegex` knowingly differs from JS is **structurally invisible** to the tool
+whose job is to prove they agree, and `regex-diff` will keep reporting 124,863 identical / 0 DIFFER. Filed
+as **#1227** with the repro and with what a fix needs (the transport first — code-unit arrays, as the
+per-language harnesses here already use — then the decision about which engine is the reference).
+
+Nothing in the port changes: it reproduces `JsRegex`'s behaviour exactly, which is what a port is for.
+
+## Outstanding
+
+Nothing found in the port itself. **#1227** stands, in the shared tier.
