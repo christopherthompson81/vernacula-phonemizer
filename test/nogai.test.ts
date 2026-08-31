@@ -23,6 +23,12 @@ describe("Nogai (ногай тили) canonical IPA", () => {
 
     test("simple vowels, в→w coda, iotation, final stress", () => {
         expect(phonemizeWord("сув")).toBe("ˈsuw"); // ⟨в⟩→[w] post-vocalic coda (water)
+        // ⚠ WORD-INITIAL ⟨в⟩ — there is NO preceding segment, so the post-vocalic test is false and the
+        // onset reading [v] stands. Pinned because the C# port read the previous segment without a
+        // bounds check and CRASHED on every word beginning with ⟨в⟩ (see NogaiTests.cs); nothing in the
+        // golden or either suite started with one, so every gate passed.
+        expect(phonemizeWord("вагон")).toBe("vaˈɡon"); // a loan, onset [v]
+        expect(phonemizeWord("в")).toBe("v"); //         the bare letter — the degenerate case
         expect(phonemizeWord("эмшек")).toBe("emˈʃek"); // ⟨ш⟩→[ʃ] (breast)
         expect(phonemizeWord("юлдыз")).toBe("julˈdɯz"); // ⟨ю⟩→[ju], ⟨ы⟩→[ɯ] (star)
         expect(phonemizeWord("эки")).toBe("eˈki"); // final (oxytone) stress (two)

@@ -144,8 +144,16 @@ function minedRows(code: string): string[] {
  * they are built by `tools/gen_variant_golden.mts`, not here — an earlier draft of this tier would have
  * swept `en-gb.wikipron-uk.tsv` (76,284 headwords) into a main golden and missed doing so only because
  * the code is cased `en-GB` and the file `en-gb.*`. Coincidence is not a guard.
+ *
+ * ⚠ AND `nog` LEFT THIS LIST THE DAY IT GOT A BETTER SOURCE. A language with its own golden generator
+ * must NOT be here, because this tier would overwrite that generator's output with the referee headwords
+ * — measured, not feared: with `nog` listed, `gen_parity_goldens.mts nog` rewrote the 68-row
+ * `tools/gen_nog_golden.mts` artifact down to 24, discarding every numeral-composer arm and the
+ * above-2^53 digit fallback, and said "1 lexicon-only golden" while doing it. `quc` has never been here
+ * for the same reason (`gen_quc_golden.mts`). The rule: this list is for codes with NO other source at
+ * all, and a bespoke generator counts as a source.
  */
-const REFEREE_LEXICON_ONLY = new Set(["naq", "nog", "smj"]);
+const REFEREE_LEXICON_ONLY = new Set(["naq", "smj"]);
 
 /**
  * Headwords from the language's own word list, first column of the first usable TSV.

@@ -56,7 +56,14 @@ public static class NogaiPhonemizer
             {
                 var nx = i + 1 < chars.Count ? chars[i + 1] : null;
                 var coda = nx is null || !Manifest.CYR_VOWEL.Contains(nx);
-                segs.Add(IsVowelSeg(segs[^1]) && coda ? "w" : "v");
+                // ⚠ `segs.Count > 0` FIRST, and it is not defensive padding — it is the port. The TS reads
+                // `segs[segs.length - 1]`, which is `undefined` on an empty list and makes `isVowelSeg`
+                // return false, so a WORD-INITIAL ⟨в⟩ yields [v]. `segs[^1]` throws instead, so every word
+                // beginning with ⟨в⟩ — вагон, восток, влак, and the bare letter — crashed with
+                // ArgumentOutOfRangeException where the TS reads `vaˈɡon`. The ⟨е⟩ branch below already had
+                // this guard; this branch did not, and neither the golden nor the tests contain a
+                // word-initial ⟨в⟩, so every gate passed.
+                segs.Add(segs.Count > 0 && IsVowelSeg(segs[^1]) && coda ? "w" : "v");
                 continue;
             }
             // word-initial / post-vocalic ⟨е⟩ → [je]; after a consonant → [e].

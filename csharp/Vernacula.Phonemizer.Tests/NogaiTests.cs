@@ -36,6 +36,13 @@ public class NogaiTests
     [Theory]
     // simple vowels, в→w coda, iotation, final stress.
     [InlineData("сув", "ˈsuw")]        // ⟨в⟩→[w] post-vocalic coda (water)
+    // ⚠ WORD-INITIAL ⟨в⟩: no preceding segment, so the post-vocalic test is false and [v] stands. These
+    // two rows exist because reading the previous segment as `segs[^1]` — where the TS reads
+    // `segs[segs.length - 1]` and gets `undefined` — threw ArgumentOutOfRangeException on EVERY word
+    // beginning with ⟨в⟩. Neither the 68-row golden nor either suite contained one, so parity, the seam
+    // gates and 5,840 tests all passed over a hard crash.
+    [InlineData("вагон", "vaˈɡon")]    // a loan, onset [v]
+    [InlineData("в", "v")]             // the bare letter — the degenerate case
     [InlineData("эмшек", "emˈʃek")]    // ⟨ш⟩→[ʃ] (breast)
     [InlineData("юлдыз", "julˈdɯz")]   // ⟨ю⟩→[ju], ⟨ы⟩→[ɯ] (star)
     [InlineData("эки", "eˈki")]        // final (oxytone) stress (two)
