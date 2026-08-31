@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createLatvian, phonemizeWord } from "../src/languages/latvian/latvian.ts";
+import { normalizeLatvian } from "../src/languages/latvian/normalize.ts";
 
 // Latvian (lv, latviešu) — Baltic (~1.5M), sister of Lithuanian but a SEPARATE engine. Latvian WRITES what Lithuanian
 // leaves implicit: palatalization (ģ ķ ļ ņ → ɟ c ʎ ɲ), vowel length (macrons ā ē ī ū → ː), and stress is FIXED on
@@ -190,6 +191,14 @@ describe("Latvian canonical IPA — Baltic rule g2p (written palatals/length + f
         // a COUNTED abbreviation takes the agreement rule, and the corpus writes it with no trailing dot
         expect(lv.text("160 lpp").trim()).toBe("sˈimts sˈɛʃdɛsmit lˈappusɛs");
         expect(lv.text("nr. 859").trim()).toBe("nˈumurs ˈastuɔ̯ɲi sˈimti pˈiɛt͡sdɛsmit dˈɛviɲi");
+        // ⚠ `№` IS THE SAME WORD AND WAS SILENTLY DELETED (#1209). It is not a letter, so the tokenizer
+        // never emitted it — `2MV-4 №3` read as *…divi trīs* with the "number" simply gone, while `nr. 3`
+        // two words away read *numurs trīs*. Nothing was left over, so no leak class could see it.
+        expect(normalizeLatvian("2MV-4 №3")).toBe("2MV-4 numurs 3");
+        expect(normalizeLatvian("№3")).toBe("numurs 3");   // the gap is SUPPLIED, or the noun fuses
+        expect(normalizeLatvian("№ 3")).toBe("numurs 3");
+        // ⚠ A BARE `№` WITH NO OPERAND IS REFUSED — it is metalinguistic, not a count.
+        expect(normalizeLatvian("№")).toBe("№");
     });
 
     /**
@@ -240,5 +249,21 @@ describe("Latvian canonical IPA — Baltic rule g2p (written palatals/length + f
      */
     test("an upper-case initial pair is not the `t.i.` abbreviation", () => {
         expect(lv.text("T.I. Ivanovs bija").trim()).not.toContain("tˈas ˈir");
+    });
+});
+
+// #1209 — `‰` AND `§` ARE REFUSED, MEASURED RATHER THAN OVERLOOKED. espeak supplies both (`‰ pRomiles_!`,
+// `§ sektsija`) and `promiles` is attested 5/2, so vocabulary is not the obstacle — the instances are.
+// BOTH `‰` in the retained text are METALINGUISTIC and carry no operand ("Promili apzīmē ar promiles zīmi,
+// ko pieraksta ‰", "sāļumu mēra promilēs (‰)"), so a `NUM ‰` rule fires on neither and reading the bare
+// sign would say the word a SECOND time in a sentence that already writes it — trap 12, a silent drop
+// traded for a stutter. `§` is ×0 in the retained text and espeak's *sekcija* is one unverified tier for a
+// sense Latvian legal writing normally spells *paragrāfs*.
+describe("Latvian: the permille and section signs stay silent, on the instances rather than the vocabulary", () => {
+    test("a metalinguistic sign is not read, and its already-written word is not doubled", () => {
+        expect(normalizeLatvian("sāļumu mēra promilēs (‰)")).toBe("sāļumu mēra promilēs (‰)");
+        expect(normalizeLatvian("5 ‰")).toBe("5 ‰");
+        expect(normalizeLatvian("§ 5")).toBe("§ 5");
+        expect(normalizeLatvian("5 §")).toBe("5 §");
     });
 });
