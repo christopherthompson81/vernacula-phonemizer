@@ -204,6 +204,7 @@ public static class Bootstrap
             Nogai.NogaiPhonemizer.RegisterSelf();
             Papiamento.PapiamentoPhonemizer.RegisterSelf();
             Santali.SantaliPhonemizer.RegisterSelf();
+            ScottishGaelic.ScottishGaelicPhonemizer.RegisterSelf();
         }
     }
 }
