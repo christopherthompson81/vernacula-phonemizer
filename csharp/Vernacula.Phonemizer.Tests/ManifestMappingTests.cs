@@ -868,4 +868,9 @@ public class ManifestMappingTests
     public void TashelhitManifestIsFullyMapped() =>
         AssertFullyMapped("languages/tashelhit", "tashelhit.jsonc", Languages.Tashelhit.Manifest.MANIFEST,
             "language", "name", "script");
+
+    [Fact]
+    public void LatgalianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/latgalian", "latgalian.jsonc", Languages.Latgalian.Manifest.MANIFEST,
+            "language", "name", "script");
 }
