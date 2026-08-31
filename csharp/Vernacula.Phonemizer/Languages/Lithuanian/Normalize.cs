@@ -222,6 +222,11 @@ public static class Normalize
     private static readonly JsRe HOUR_RE = JsRegex.Compile($"{NUM}{SP}*val\\.", "gu");
     private static readonly JsRe MINUTE_RE = JsRegex.Compile($"{NUM}{SP}*min\\.", "gu");
     private static readonly JsRe VAL_MOP = JsRegex.Compile("(?<![/\\p{L}\\p{M}])val\\.", "gu");
+    /** ⚠ `min.` TAKES THE SAME MOP-UP AS `val.`, WHICH IT DID NOT HAVE (#1211) — see the call site. */
+    private static readonly JsRe MIN_MOP = JsRegex.Compile("(?<![/\\p{L}\\p{M}])min\\.", "gu");
+    /** ⚠ THE SYMBOL CURRENCIES ONLY, NEVER THE LETTER FORM `Lt` (#1211) — see the call site. */
+    private static readonly IReadOnlyList<(string Sign, string Noun)> SIGN_ONLY =
+        new[] { ("€", "euro"), ("\\$", "dollar"), ("£", "pound") };
     private static readonly JsRe MONTH_ABBREV = JsRegex.Compile($"{NOT_LETTER_BEFORE}[Mm]ėn\\.", "gu");
     private static readonly JsRe PVZ = JsRegex.Compile($"{NOT_LETTER_BEFORE}[Pp]vz\\.", "gu");
     private static readonly JsRe IR_KT = JsRegex.Compile($"{NOT_LETTER_BEFORE}ir{SP}+kt\\.", "giu");
@@ -459,6 +464,19 @@ public static class Normalize
             }
         }
 
+        //    ⚠ AND A CURRENCY SIGN WHOSE FIGURE THIS LAYER DECLINED IS STILL READ (#1211), for exactly the
+        //    reason the magnitude mop-up below gives — and it is the worse half of the two. `55.89 mlrd €`
+        //    is an English-format decimal, refused outright by the operand anchor and correctly; the
+        //    magnitude was then mopped up to *milijardų* and the `€` was NOT, and because `€` is not a
+        //    letter the tokenizer never emitted it. So it did not LEAK, it VANISHED: an amount read with no
+        //    currency, and nothing left over for any gate to see. Refusing to read the NUMBER is not a
+        //    reason to delete the unit. With no count to agree with, the genitive plural.
+        //    ⚠ THE SYMBOLS ONLY, NEVER `Lt`: two letters, and a bare-`Lt` mop-up would fire on any
+        //    capitalised abbreviation spelled that way, while all four corpus `Lt` carry a claimable figure
+        //    already. `€ $ £` cannot be anything but currency, which is what makes them safe with no operand.
+        foreach (var (sign, noun) in SIGN_ONLY)
+            t = Rewrite(t, JsRegex.Compile(sign, "gu"), $" {N(noun).Gen} ");
+
         // 9) THE REMAINING MAGNITUDE ABBREVIATIONS, whatever the currency step did not already claim.
         //    ⚠ A MAGNITUDE GOVERNING A FOLLOWING NOUN TAKES THE GENITIVE — "19 tūkst. hektarų" against a
         //    bare "20 tūkst." ⚠ BUT "ANY LETTER" ALSO MATCHED TEXT THIS LAYER ITSELF INSERTED: step 1
@@ -521,6 +539,13 @@ public static class Normalize
         //     or the `val.` left behind goes back to being a vowel-less cluster plus a spurious break. A
         //     LEADING `/` still blocks it: `515,3 km/val.` is a RATE refused whole by the unit step.
         t = Rewrite(t, VAL_MOP, $" {N("hour").Gen} ");
+        //     ⚠ AND `min.` TAKES THE SAME MOP-UP, WHICH IT DID NOT HAVE (#1211). Its rule above needs a
+        //     claimable numeral, so when the figure is a duration this layer refuses — `2:11.60 min.`,
+        //     `1:09.02 min.`, both in the retained text — the abbreviation was left exactly where it started
+        //     and reached the g2p as *mʲɪn* plus a spurious sentence break: verbatim the defect the header
+        //     records as the reason `min.` was declared at all, reintroduced by the refusal. Nothing new is
+        //     sourced — the noun is this file's own `minute` entry, genitive plural for want of a count.
+        t = Rewrite(t, MIN_MOP, $" {N("minute").Gen} ");
         t = Rewrite(t, MONTH_ABBREV, $" {W("month")} ");
 
         // 11) THE REMAINING SINGLE-DOT ABBREVIATIONS. Each currently reaches the g2p as a vowel-less cluster

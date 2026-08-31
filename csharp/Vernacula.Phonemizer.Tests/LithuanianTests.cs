@@ -265,7 +265,10 @@ public class LithuanianTests
     [InlineData("apie 3 tūkstančius upių", "apie 3 tūkstančius upių")]
     [InlineData("37 tūkstančių hektarų", "37 tūkstančių hektarų")]
     // A magnitude whose FIGURE this layer declined is still expanded, or it goes to the g2p raw.
-    [InlineData("55.89 mlrd €", "55.89 milijardų €")]
+    // ⚠ AND SO IS THE CURRENCY SIGN, SINCE #1211. This row used to end `milijardų €`, which recorded the
+    // magnitude half of the mop-up and left the other half unargued: the `€` was not leaked but DELETED,
+    // because it is not a letter and the tokenizer never emitted it.
+    [InlineData("55.89 mlrd €", "55.89 milijardų eurų")]
     public void AMagnitudeBetweenTheFigureAndItsUnitIsClaimed(string text, string want) =>
         Assert.Equal(want, NT(text));
 
@@ -412,6 +415,35 @@ public class LithuanianTests
     [Fact]
     public void TheAmpersandIsSpacedOnBothSides() =>
         Assert.Equal("Stafecka, A. ir Mikuleniene, D.", N("Stafecka, A. & Mikuleniene, D."));
+
+    /**
+     * #1211 — THE MOP-UP WAS WRITTEN FOR `val.` AND THE MAGNITUDE BUT NOT FOR `min.` OR THE CURRENCY SIGN.
+     * This layer twice decides in writing that refusing to read the NUMBER is not a reason to hand the
+     * abbreviation back to the g2p; two members of that same class never got the line.
+     *
+     * `min.`'s own rule needs a claimable numeral, so a DURATION operand left the abbreviation exactly where
+     * it started — *mʲɪn* plus a spurious sentence break, verbatim the defect the header records as the
+     * reason `min.` was declared at all, while `val.` in the identical position was already mopped up.
+     * ⚠ And a currency SIGN was deleted rather than leaked: `€` is not a letter, so the tokenizer never
+     * emitted it and an amount was read with no currency at all, nothing left for any gate to see.
+     */
+    [Theory]
+    [InlineData("2:11.60 min. lėčiau", "2:11.60 minučių lėčiau")]
+    [InlineData("1:09.02 min.", "1:09.02 minučių")]
+    [InlineData("12,367.7 €", "12,367.7 eurų")]
+    // …and every CLAIMED case is untouched, including the say-it-twice guard.
+    [InlineData("61,40 mlrd €", "šešiasdešimt vienas kablelis keturi nulis milijardų eurų")]
+    [InlineData("$90 milijonų dolerių", "devyniasdešimt milijonų dolerių")]
+    [InlineData("25 min.", "dvidešimt penkios minutės")]
+    [InlineData("78 val. 25 min.", "septyniasdešimt aštuonios valandos dvidešimt penkios minutės")]
+    // ⚠ A RATE STILL BLOCKS BOTH, or the denominator would be read while the numerator stays raw.
+    [InlineData("515,3 km/val.", "515 kablelis 3 km/val.")]
+    [InlineData("515,3 km/min.", "515 kablelis 3 km/min.")]
+    // ⚠ THE SYMBOLS ONLY, NEVER `Lt` — two letters, and a bare-`Lt` mop-up would fire on any capitalised
+    // abbreviation spelled that way. All four corpus `Lt` carry a claimable figure already.
+    [InlineData("64 000 Lt", "šešiasdešimt keturi tūkstančiai litų")]
+    public void ARefusedFigureNoLongerTakesItsUnitDownWithIt(string text, string want) =>
+        Assert.Equal(want, NT(text));
 
     /**
      * ⚠ `ReadDigits` ITERATES CODE UNITS, NOT CODE POINTS — the TS spells it `digits.split("")`, which

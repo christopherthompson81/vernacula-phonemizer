@@ -420,10 +420,43 @@ describe("Lithuanian normalization — the refusals, the anchors, and the two re
         expect(normalizeLithuanian("apie 3 tūkstančius upių")).toBe("apie 3 tūkstančius upių");
         expect(normalizeLithuanian("37 tūkstančių hektarų")).toBe("37 tūkstančių hektarų");
         // A magnitude whose FIGURE this layer declined is still expanded, or it goes to the g2p raw.
-        expect(normalizeLithuanian("55.89 mlrd €").trim()).toBe("55.89 milijardų €");
+        // ⚠ AND SO IS THE CURRENCY SIGN, SINCE #1211. This line used to end `milijardų €`, which recorded
+        // the magnitude half of the mop-up and left the other half unargued: the `€` was not leaked but
+        // DELETED, because it is not a letter and the tokenizer never emitted it.
+        expect(normalizeLithuanian("55.89 mlrd €").trim()).toBe("55.89 milijardų eurų");
     });
 
     // Two units were in neither the rule table nor the header's declined list, so they simply leaked.
+    // #1211 — THE MOP-UP WAS WRITTEN FOR `val.` AND THE MAGNITUDE BUT NOT FOR `min.` OR THE CURRENCY SIGN.
+    // This layer twice decides in writing that refusing to read the NUMBER is not a reason to hand the
+    // abbreviation back to the g2p; two members of that same class never got the line.
+    test("a refused figure no longer takes its unit down with it", () => {
+        // `min.`'s own rule needs a claimable numeral, so a DURATION operand left the abbreviation exactly
+        // where it started — *mʲɪn* plus a spurious sentence break, verbatim the defect the header records
+        // as the reason `min.` was declared at all. `val.` in the identical position was already mopped up.
+        expect(normalizeLithuanian("2:11.60 min. lėčiau")).toBe("2:11.60 minučių lėčiau");
+        expect(normalizeLithuanian("1:09.02 min.").trim()).toBe("1:09.02 minučių");
+        // ⚠ AND A CURRENCY SIGN WAS DELETED RATHER THAN LEAKED. `55.89` is an English-format decimal the
+        // operand anchor refuses, correctly; the magnitude was mopped up and the `€` was not, and since `€`
+        // is not a letter the tokenizer never emitted it — an amount read with no currency at all, with
+        // nothing left over for any gate to see.
+        expect(normalizeLithuanian("55.89 mlrd €").trim()).toBe("55.89 milijardų eurų");
+        expect(normalizeLithuanian("12,367.7 €").trim()).toBe("12,367.7 eurų");
+        // …and every CLAIMED case is untouched, including the say-it-twice guard.
+        expect(normalizeLithuanian("61,40 mlrd €").trim())
+            .toBe("šešiasdešimt vienas kablelis keturi nulis milijardų eurų");
+        expect(normalizeLithuanian("$90 milijonų dolerių")).toBe("devyniasdešimt milijonų dolerių");
+        expect(normalizeLithuanian("25 min.").trim()).toBe("dvidešimt penkios minutės");
+        expect(normalizeLithuanian("78 val. 25 min.").trim())
+            .toBe("septyniasdešimt aštuonios valandos dvidešimt penkios minutės");
+        // ⚠ A RATE STILL BLOCKS BOTH, or the denominator would be read while the numerator stays raw.
+        expect(normalizeLithuanian("515,3 km/val.")).toBe("515 kablelis 3 km/val.");
+        expect(normalizeLithuanian("515,3 km/min.")).toBe("515 kablelis 3 km/min.");
+        // ⚠ THE SYMBOLS ONLY, NEVER `Lt` — two letters, and a bare-`Lt` mop-up would fire on any
+        // capitalised abbreviation spelled that way. All four corpus `Lt` carry a claimable figure.
+        expect(normalizeLithuanian("64 000 Lt").trim()).toBe("šešiasdešimt keturi tūkstančiai litų");
+    });
+
     test("`g`, `mg` and `min.` are declared; the rate and the letter-glued form are still refused", () => {
         expect(normalizeLithuanian("sveria 90 g,").trim()).toBe("sveria devyniasdešimt gramų,");
         expect(normalizeLithuanian("1 g").trim()).toBe("vienas gramas");

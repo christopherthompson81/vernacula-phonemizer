@@ -684,6 +684,22 @@ export function normalizeLithuanian(input: string): string {
         );
     }
 
+    //    ⚠ AND A CURRENCY SIGN WHOSE FIGURE THIS LAYER DECLINED IS STILL READ (#1211), for exactly the
+    //    reason the magnitude mop-up below gives — and it is the worse half of the two. `55.89 mlrd €` is
+    //    an English-format decimal, refused outright by the operand anchor and correctly; the magnitude was
+    //    then mopped up to *milijardų* and the `€` was NOT, and because `€` is not a letter the tokenizer
+    //    never emitted it. So it did not LEAK, it VANISHED: the reading was an amount with no currency, in
+    //    a sentence about trade balances, and nothing was left over for any gate to see. Refusing to read
+    //    the NUMBER is not a reason to delete the unit. With no count to agree with, the genitive plural.
+    //    ⚠ THE SYMBOLS ONLY, NEVER THE LETTER FORM. `Lt` is two letters and a bare-`Lt` mop-up would fire
+    //    on any capitalised abbreviation that happens to be spelled that way; all four corpus `Lt` carry a
+    //    claimable figure already. `€ $ £` cannot be anything but currency, which is what makes them safe
+    //    to claim with no operand — the same test the `№` guard applies in the Latvian layer.
+    const SIGN_ONLY: readonly [string, LithuanianAgreement][] =
+        [["€", N.euro], ["\\$", N.dollar], ["£", N.pound]];
+    for (const [sign, forms] of SIGN_ONLY)
+        t = rewrite(t, new RegExp(sign, "gu"), ` ${forms.gen} `);
+
     // 9) THE REMAINING MAGNITUDE ABBREVIATIONS — `mln.` ×18, `mlrd.` ×8, `tūkst.` ×27, whatever the currency
     //    step did not already claim. espeak supplies both (`mln  m;il;ij'o:nai_`, `tūkst  t'u:kstantS;ei_`)
     //    and the nouns are the engine's OWN magnitude table, so nothing new is authored here.
@@ -790,6 +806,14 @@ export function normalizeLithuanian(input: string): string {
     //     refused whole by the unit step — expanding its denominator here would be exactly the half-read
     //     that guard exists to prevent (trap 53).
     t = rewrite(t, new RegExp(`(?<![/\\p{L}\\p{M}])val\\.`, "gu"), ` ${N.hour.gen} `);
+    //     ⚠ AND `min.` TAKES THE SAME MOP-UP, WHICH IT DID NOT HAVE (#1211). Its rule above needs a
+    //     claimable numeral, so when the figure is a duration this layer refuses — `2:11.60 min.`,
+    //     `1:09.02 min.`, both in the retained text — the abbreviation was left exactly where it started
+    //     and reached the g2p as *mʲɪn* plus a spurious sentence break. That is verbatim the defect the
+    //     header records as the reason `min.` was declared at all, reintroduced by the refusal, and it is
+    //     the same shape the `val.` line one above exists to close. Nothing new is sourced: the noun is
+    //     this file's own `minute` entry, in the genitive plural because there is no count to agree with.
+    t = rewrite(t, new RegExp(`(?<![/\\p{L}\\p{M}])min\\.`, "gu"), ` ${N.minute.gen} `);
     t = rewrite(t, new RegExp(`${NOT_LETTER_BEFORE}[Mm]ėn\\.`, "gu"), ` ${W.month} `);
 
     // 11) THE REMAINING SINGLE-DOT ABBREVIATIONS. Each currently reaches the g2p as a vowel-less cluster
