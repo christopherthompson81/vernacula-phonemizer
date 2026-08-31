@@ -158,7 +158,43 @@ registration and the mapping-test entry. Nothing Latvian-specific reached the sh
     so the figure stays a cardinal (wrong), but the period is still removed, because a Latvian sentence does
     not continue in lower case and a spurious clause boundary corrupts the prosody of everything after it.
 
+## Run 9 — 2026-08-30 22:30 — review of #1208
+
+Two sweeps the differentials structurally cannot do.
+
+**Culture and ordering hazards.** The only culture-sensitive call in the Latvian sources is
+`scale.ToUpperInvariant()` in `Degrees`, and its capture is `([CF])` under the `i` flag — the only values
+reachable are C/F/c/f, where invariant upper-casing and JS `toUpperCase` agree. `OrderByDescending` and JS
+`sort` are both stable and both start from the same insertion order, which is why `ABBREVIATION_RE` came out
+identical. Nothing else formats a number, compares a string culturally, or depends on dictionary order.
+
+**⚠ `\d` matches Unicode digits in .NET and only ASCII in JS `u` mode** — a classic silent translation
+hazard, and the astral fuzz only covered it by accident (the pool happened to contain U+1D7CE). Closed it
+properly: six digit families (Arabic-Indic, fullwidth, Devanagari, Bengali, mathematical bold, ASCII) across
+20 frames — de-grouping, decimal comma, range, ordinal period, unit, percent, degree, sign guards, and
+mixed-family figures. **251 rows, 0 differ on `norm` and `text`.**
+
+**Output leak sweep over the 347,046-row reference.** Zero stringified `undefined`/`null`/`NaN`, zero double
+spaces (the slot-gap class), zero digits surviving into a reading. The emitted-character residue against the
+manifest inventory is ⟨ŋ⟩ (produced by the nasal pass in code, not the manifest) and the foreign/host-word
+tier handing back Russian, Bengali and Japanese phones — nothing Latvian-specific.
+
+⚠ **15 inputs produce an EMPTY reading**, and three of them are a real defect: `‰`, `№` and `§` have no rule
+in any position, so the tokenizer never emits them and they are deleted in silence. `likuma § nosaka` reads
+*likuma nosaka*. For `=`, `<`, `+` the same silence is deliberate — an unflanked operator must not be read —
+but these three can never be read at all. And `normalize.ts:96`, the SIGN table's own attestation header,
+already records **`promiles` 5 tok / 2 arts**: the evidence was gathered and the wiring never happened.
+
+Both engines are byte-identical here, so it is a reference-engine gap and not a port defect. Filed as
+**#1209** rather than fixed: it changes what the engine says, which needs corpus evidence and a golden
+regeneration, and `§` does not occur in the retained lv corpus at all — exactly the shape where a
+linguistically obvious rule has measured net negative here before.
+
 ## Outstanding
 
-Nothing found in this port remains unfixed. The standing half-measure above is the TS's own documented
-trade, identical in both engines, not a port defect.
+Nothing found in this port remains unfixed. Two things are deliberately left standing, both identical in
+both engines and neither a port defect:
+
+  · the untabulated-follower half-measure (cardinal kept, period dropped) — the TS's own documented trade,
+    pinned in the suite so a future change has to be deliberate;
+  · **#1209**, the silent deletion of `‰`, `№` and `§`.
