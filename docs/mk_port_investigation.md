@@ -120,6 +120,35 @@ pins: an assertion nobody measured is a guess wearing a test's clothing.
   · **`ExponentPosition.Before`** and a KEYED `UnitPer` (`h`/`ч` → "на", `s`/`с` → "во"), because the rate
     preposition differs by denominator.
 
+## Run 8 — 2026-08-31 15:20 — review of #1222
+
+**THE HOMOGLYPH SCAN, WHICH IS THIS LANGUAGE'S OWN HAZARD.** The TS suite warns about it in writing:
+Фаренхајт must carry Cyrillic ⟨ј⟩ U+0458, not Latin ⟨j⟩ U+006A, because the two are indistinguishable on
+screen but a Latin j falls outside the Cyrillic token class — the word splits in three and the j is handed
+to the foreign reader as the ENGLISH LETTER NAME, *fˈarɛnxa d͡ʒˈeᶦ t*. Nothing is dropped and nothing raw
+survives, so no leak gate can see it. A port that hand-types several hundred Cyrillic literals is exactly
+where that typo would be introduced, and a differential only catches it on a REACHABLE string.
+
+So every string literal in the port and its suite was scanned for a mixed Cyrillic/Latin script whose
+minority characters are ENTIRELY homoglyphs — the signature of a typo rather than a deliberate mixed table
+like the letter-name map or the dual-script unit keys:
+
+    854 string literals scanned · mixed-script with an all-homoglyph minority: 0
+
+⚠ The first pass reported five, and all five were the scanner's own fault: it was counting the `s` of `\s`
+and the `o` of a `{o}` interpolation hole as letters. Stripping escapes and interpolation first, and then
+verifying the scanner still detects a PLANTED Latin `j` in Фаренхајт, is what makes the zero mean anything.
+
+**Structural read.** `VOICE` is built by inverting `DEVOICE`, which in C# throws on a duplicate key where
+JS would silently keep the last — the nine values are distinct, and the build proves it. `Scan`'s
+`chars[i + 1]` is guarded exactly as the TS's `?? ""`. The `[ \u00a0]` classes are written as ESCAPES with
+the naming comment on the line, matching the fleet convention. The TypeScript side is untouched, so the
+regex corpus is unaffected and its freshness test passes.
+
+**`mk` is in the registry's `VULGAR_FOLD_OPT_OUT` in the C# too**, and the fraction rows are asserted
+through `Phonemizer.Phonemize` — the registry path — so the opt-out is exercised end to end rather than
+assumed.
+
 ## Outstanding
 
 Nothing found in this port remains unfixed, and nothing new was filed. The single `NumberToText` boundary
