@@ -109,6 +109,42 @@ that guard lands in `Core/NormalizeSymbols.cs`, both assertions fail and say so.
     fact lives in one place rather than being restated as a separate form.
   · **`ToUpperInvariant` is equivalent BY CONSTRUCTION** at its one site: the capture is `([CF])` under `i`.
 
+## Run 7 — 2026-08-31 19:00 — review of #1224
+
+⚠ **THE CLOCK-TAIL APOSTROPHE CLASS HAS A DUPLICATED MEMBER.** `ta['’’]` looks like three alternatives and
+is two: U+0027 and U+2019 **twice** — 2 distinct code points in 3 slots. The minus rule's opener set in the
+same file *does* carry U+2018 separately, so the third slot was most likely meant to be it.
+
+Measured before deciding anything, over the 2,734-text corpus:
+
+    `ta` + U+0027 (')   1362      before a day-part (filg/wara/bil):  24
+    `ta` + U+2019 (’)   1023                                          10
+    `ta` + U+2018 (‘)      0                                           0
+    `ta` + U+02BC (ʼ)      2   (`taʼ kelliema`)                        0
+
+So the duplicate **costs nothing**: the character it was probably meant to be does not occur in this corpus
+at all, and neither U+2018 nor U+02BC ever precedes a day-part. Mirrored faithfully rather than "fixed" —
+changing the reference engine for zero measured benefit is the move this repo's discipline exists to
+prevent. Recorded here so the next reader does not mistake it for a live gap.
+
+⚠ **AND THE INSTRUMENT I REACHED FOR FIRST WAS UNSOUND.** For a diacritic-heavy orthography the valuable
+check is a literal-by-literal diff between the engines — a mistyped ⟨ħ⟩ for ⟨h⟩ is exactly the typo that
+survives a human read. The first version parsed quoted literals out of both files and reported three
+Maltese words present in the C# and absent from the TS: `fis-siegħa`, `fis-sekonda`, `siegħa`. All three
+were **artifacts**. Naive quote pairing desynchronises on a `"` inside a regex character class or a template
+literal, so an earlier unbalanced quote swallowed the span; a direct substring check showed the strings
+byte-identical in both files, same U+0127.
+
+Replaced with **containment**, which avoids quote pairing entirely — every Maltese-shaped literal the C#
+emits must appear somewhere in the TS sources:
+
+    67 Maltese-shaped literals in the C# · 8 carrying a diacritic · 0 not found in the TS
+    instrument sanity — a planted `fis-siegha` (ħ→h) IS flagged: true
+
+The sanity probe is the part that makes the zero mean anything, and it is the same lesson the Macedonian
+homoglyph scan and the Luo `"null"` false positive each taught: an instrument that cannot fail proves
+nothing.
+
 ## Outstanding
 
 Nothing found in this port remains unfixed, and nothing new was filed. The rate residual is the TS's own
