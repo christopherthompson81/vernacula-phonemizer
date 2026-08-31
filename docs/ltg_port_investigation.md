@@ -125,3 +125,58 @@ Three hand-written extras failed, and all three were my authoring, not the port:
 
     dotnet test (full suite)          4,779 pass, 0 fail
     parity (ALL goldens)              167 languages, 32,539 rows, 0 differ
+
+---
+
+# PR review (#1207)
+
+The port pass measured the arms in ISOLATION. This pass measures the things that isolation cannot reach.
+
+## Run 9 — 2026-08-30 19:30 — the `\b` prohibition, checked rather than trusted
+
+The TS header opens with ⚠ **NEVER `\b`** — Latgalian carries ⟨ā ē ī ō ū y č š ž ģ ķ ļ ņ⟩, which `\b`
+treats as word boundaries. Grepped both engines:
+
+    C#:  0 occurrences
+    TS:  1 occurrence — inside the comment that forbids it
+
+The boundary guards are `Boundaries.NOT_LETTER_BEFORE/AFTER` on both sides.
+
+## Run 10 — 2026-08-30 19:35 — **the interaction corpus, which is what the captured subject needed**
+
+The era and "and others" callbacks read the text AFTER the match to decide whether the final dot is a
+sentence end. In the TS that text is `full` — the subject `String.replace` hands the callback. In the C#
+it is a captured variable, snapshotted before each `Rewrite`. Those agree **only if the snapshot is the
+same string the matcher is running over**, and a single-shape probe cannot tell: the mistake only shows
+once an EARLIER arm has already changed the text's length before the current one runs.
+
+So: every ordered PAIR of 22 arm shapes, plus 4,000 TRIPLES in a sentence frame, plus the dot-decision
+tails:
+
+    4,510 interaction lines   norm 0 differ · text 0 differ
+
+## Run 11 — 2026-08-30 19:40 — the three behaviours the TS header singles out
+
+    312 focused probes   norm 0 differ · text 0 differ
+
+and the readings themselves, which are the point:
+
+    "21 %"        →  21 procents          ← singular after a count ending in …1
+    "11 %"        →  11 procenti          ← …but not …11
+    "21,5 %"      →  21 5 procenti        ← ⚠ A FRACTION NEVER TAKES THE SINGULAR, and it is arithmetic
+                                            rather than a rule: `n % 10` of 21.5 is 1.5, not 1. That is a
+                                            DOUBLE modulo in both engines, which is why it is probed.
+    "2 km²"       →  2 kvadratkilometri   ← ⚠ `compound`: one word. `after` would emit *kilometri kvadrat*
+                                            and `before` *kvadrat kilometri*, neither of which is a word.
+    "450,295 km²" →  450295 kvadratkilometri   ← de-grouping ahead of the tier, as step 4 requires
+
+The `/iu` TOKEN fold was probed in WORD position too (`ſ`→s, U+212A→k against `cylvāks`, `Latgola`,
+`absurds`, `sovs` and the upper-case forms): 0 differ.
+
+## Run 12 — 2026-08-30 19:45 — the gates, unchanged
+
+No code moved during the review, so the port's gates stand:
+
+    dotnet test (full suite)          4,779 pass, 0 fail
+    parity (ALL goldens)              167 languages, 32,539 rows, 0 differ
+    parity --unported                 23 (down from 24)
