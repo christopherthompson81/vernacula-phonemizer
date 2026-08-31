@@ -61,7 +61,7 @@ public static class E5xNumbers
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0)
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n))).Select(d =>
-                d == "0" ? T.Zero : Numbers.DigitWord(T.Units, d) ?? d));
+                d == "0" ? T.Zero : Core.Numbers.DigitWord(T.Units, d) ?? d)); // qualified: Kikuyu.Numbers shadows Core.Numbers here
         if (n == 0) return T.Zero;
         return Render(n, T);
     }

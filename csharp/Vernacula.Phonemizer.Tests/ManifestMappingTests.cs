@@ -860,6 +860,11 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance", "convention");
 
     [Fact]
+    public void KikuyuManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/kikuyu", "kikuyu.jsonc", Languages.Kikuyu.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
+
+    [Fact]
     public void TashelhitManifestIsFullyMapped() =>
         AssertFullyMapped("languages/tashelhit", "tashelhit.jsonc", Languages.Tashelhit.Manifest.MANIFEST,
             "language", "name", "script");
