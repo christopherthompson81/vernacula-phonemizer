@@ -942,4 +942,10 @@ public class ManifestMappingTests
     public void SantaliManifestIsFullyMapped() =>
         AssertFullyMapped("languages/santali", "santali.jsonc", Languages.Santali.Manifest.DEF,
             "language", "name", "script");
+
+    [Fact]
+    public void ScottishGaelicManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/scottishgaelic", "scottishgaelic.jsonc",
+            Languages.ScottishGaelic.Manifest.MANIFEST,
+            "language", "name", "script", "provenance");
 }
