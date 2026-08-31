@@ -187,6 +187,7 @@ public static class Bootstrap
             Kamba.KambaPhonemizer.RegisterSelf();
             Kikuyu.KikuyuPhonemizer.RegisterSelf();
             Latgalian.LatgalianPhonemizer.RegisterSelf();
+            Latvian.LatvianPhonemizer.RegisterSelf();
             Tashelhit.TashelhitPhonemizer.RegisterSelf();
             Kiche.KicheePhonemizer.RegisterSelf();
         }

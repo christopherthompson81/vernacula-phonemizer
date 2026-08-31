@@ -873,4 +873,9 @@ public class ManifestMappingTests
     public void LatgalianManifestIsFullyMapped() =>
         AssertFullyMapped("languages/latgalian", "latgalian.jsonc", Languages.Latgalian.Manifest.MANIFEST,
             "language", "name", "script");
+
+    [Fact]
+    public void LatvianManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/latvian", "latvian.jsonc", Languages.Latvian.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
 }
