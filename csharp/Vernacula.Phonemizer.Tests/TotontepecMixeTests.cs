@@ -41,7 +41,7 @@ public class TotontepecMixeTests
     [Theory]
     // the Crawford ALLOPHONY: post-nasal voicing + intervocalic lenition + the palatal and voiceless nasals.
     [InlineData("cumantoc", "kumandok")] // 'nahualism' — POST-NASAL: ⟨nt⟩→[nd]
-    [InlineData("tocu̱nágu̱c", "tokunaɣuk")] // 'toad' — intervocalic ⟨g⟩→[ɣ]; the UNDERLINE and the ACUTE stress-mark are
+    [InlineData("tocu̱nágu̱c", "tokunaɣuk")] // 'toad' — intervocalic ⟨g⟩→[ɣ]; the UNDERLINE and the ACUTE stress-mark are stripped (not emitted), so the vowel is READ, not dropped
     [InlineData("mpahk", "mbahk")] // Crawford's own example: ⟨mp⟩→[mb] ('your bone')
     [InlineData("nyuhm", "ɲum̥")] // ⟨ny⟩→[ɲ]; ⟨hm⟩ → the VOICELESS nasal [m̥] (§1.121)
     public void TheCrawfordAllophony(string word, string want) => Assert.Equal(want, Word(word));
@@ -98,7 +98,7 @@ public class TotontepecMixeTests
     public void AboveTheAttestedRangeAndTheZeroStopgap()
     {
         Assert.Equal("sero", Numbers.NumberToWords(0));
-        Assert.Equal("to'c sero sero sero", Numbers.NumberToWords(1000, "1000"));
+        Assert.Equal("to'c sero sero sero", Numbers.NumberToWords(1000));
     }
 
     [Theory]

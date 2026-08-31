@@ -19,9 +19,9 @@ public sealed class Seg
 
 public static class TotontepecMixePhonemizer
 {
-    private static IReadOnlyDictionary<string, string> VOWEL => Manifest.DEF.Vowels;
-    private static IReadOnlyDictionary<string, string> CONS => Manifest.DEF.Consonants;
-    private static IReadOnlyDictionary<string, string> POSTNASAL_VOICE => Manifest.DEF.PostNasalVoice;
+    private static readonly IReadOnlyDictionary<string, string> VOWEL = Manifest.DEF.Vowels;
+    private static readonly IReadOnlyDictionary<string, string> CONS = Manifest.DEF.Consonants;
+    private static readonly IReadOnlyDictionary<string, string> POSTNASAL_VOICE = Manifest.DEF.PostNasalVoice;
     private static readonly (string Key, string Ph)[] DIGRAPHS = Manifest.DIGRAPHS;
     private static readonly IReadOnlySet<string> NASAL = Manifest.NASAL;
     private static readonly IReadOnlySet<string> VELAR = Manifest.VELAR;
