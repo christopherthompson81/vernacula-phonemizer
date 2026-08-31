@@ -192,6 +192,7 @@ public static class Bootstrap
             Lithuanian.LithuanianPhonemizer.RegisterSelf();
             LuleSami.LuleSamiPhonemizer.RegisterSelf();
             Luo.LuoPhonemizer.RegisterSelf();
+            Macedonian.MacedonianPhonemizer.RegisterSelf();
             Tashelhit.TashelhitPhonemizer.RegisterSelf();
             Kiche.KicheePhonemizer.RegisterSelf();
         }
