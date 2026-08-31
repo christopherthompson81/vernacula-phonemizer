@@ -223,7 +223,7 @@ public class NahuatlTests
      *  Invisible, so it can only ever be noise. ZWJ/ZWNJ are deliberately NOT touched. */
     [Theory]
     [InlineData("uan \u200B\u200Beli nopa", "uan eli nopa")]
-    [InlineData("Cicero; \u200BArpino", "Cicero; Arpino")]
+    [InlineData("Cicero;\u200B Arpino", "Cicero; Arpino")]
     public void TheZeroWidthSpaceIsStrippedWithoutFusingItsNeighbours(string input, string expected) =>
         Assert.Equal(expected, Norm(input));
 
