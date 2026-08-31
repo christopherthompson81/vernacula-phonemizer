@@ -246,3 +246,57 @@ TypeScript unchanged.
 - **The percent word is `пайыз` and the corpus's `процент` ×14 are all the banking sense** (interest),
   which the shared symbol tier correctly does not claim — the same register trap 37 names, resolved the
   way the TS resolved it. Nothing to change in the C#.
+
+## Run 12 — 2026-08-31 10:20 — independent review of #1215, on the rebased branch
+
+Rebased onto a main that had moved five commits (the lv/lt/smj ports and four backlog fixes). The rebase
+resolved, and re-running everything below was the point of the review rather than a formality.
+
+**ONE DEFECT FOUND, AND TWO-THIRDS OF IT WAS MINE.** `Bootstrap.cs` registers into a 12-space block, and
+three lines sat at 8: `Lithuanian` and `LuleSami`, which I mis-indented in the earlier merges, and `Kyrgyz`,
+which the rebase then placed after them. Kyrgyz was also out of alphabetical order, sitting between LuleSami
+and Tashelhit. All three re-indented; Kyrgyz moved up beside the other K's. Cosmetic, but a registration
+list is exactly where a mis-indented line hides a missing one.
+
+**THE GAPS IN THIS LOG, FILLED.** Runs 1–11 have no exhaustive g2p walk, no astral or lone-surrogate fuzz,
+no digit-family probe and no culture sweep. Each was run:
+
+    exhaustive g2p + harmony walk                              284,431 words   0 differ
+      (all 1–3-letter words over the full 36-letter alphabet, all 4-letter over the 22 that
+       participate in a rule, EVERY consonant between EVERY vowel pair in both directions — the
+       harmony-governor test — plus doubled vowels and the velars in onset vs coda per vowel class)
+    astral / lone-surrogate fuzz, norm + word + text            36,081 rows    0 differ
+    six digit families × 15 operand frames (\d vs \p{Nd})       191 rows       0 differ
+    the ORDINAL, exhaustive 0–10,000 plus every magnitude seam  10,071 rows    0 differ
+    corpus differential (mined + attest + FLEURS + golden)       2,807 rows     0 differ (norm and text)
+
+**THE `OrderByDescending`-OVER-A-`Dictionary` CLAIM, CHECKED RATHER THAN ACCEPTED.** Run 7 argues the unit-key
+order is semantically irrelevant. That is an argument; the decidable question is whether the two engines build
+the same alternation. Dumped both — the TS through a `RegExp`-constructor hook, the C# by reflecting
+`UNIT_KEYS` — and they are **byte-identical, all 34 keys in the same order** (md5 `f9e7a4bf…` both sides).
+LINQ's `OrderByDescending` is a documented STABLE sort and JS's `Array.sort` has been stable since ES2019, so
+both are "stable by length descending over insertion order"; what was unproven was that `Dictionary`
+enumeration equals insertion order, and for this build it demonstrably does. Empirically closed, not
+argued closed.
+
+**THE SEAM GATES WIDENED 87×.** The golden is 200 rows, so Run 9 saw 4,048 tokens. Golden-swapped a
+287,421-row reference built from the corpus and the walks, ran every gate on both engines, restored:
+
+    parity        287,421 rows byte-identical, 0 differ
+    provenance    tokens 356,069/356,069 (100.0%)
+    ipaspans      346,699/346,699 (100.0%), 0 spans that do not cover what was emitted
+    poison        0 sites
+    TS twins      4048/4048 and 3623/3623 on the shipped golden, 0 bad spans, 0 poison
+
+**Output leak sweep over the 287,421 readings:** zero stringified `undefined`/`null`/`NaN`, zero double
+spaces, zero digits and zero CYRILLIC surviving into a reading. Thirty inputs give an empty reading and all
+thirty are words made only of ⟨ъ⟩ and ⟨ь⟩ — the silent hard and soft signs, which correctly denote no sound.
+
+**Culture and ordering sweep:** the only hit is `VOWELS.IndexOf(w[^1])`, the `char` overload, which is
+ordinal by definition. No `ToLower`/`ToUpper`, no culture compare, no number formatting.
+
+`NormalizeKyrgyzInitialisms` is `private` in C# where the TS exports it — noted and left: neither suite
+tests that seam directly, both reach it through the pipeline, and the differentials cover it.
+
+**Fleet: 170 languages byte-identical, 33,139 rows, 5,158 C# tests; the TypeScript side is untouched by this
+PR and its suites pass.** Nothing else found.
