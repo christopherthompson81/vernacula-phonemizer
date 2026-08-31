@@ -948,4 +948,8 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/scottishgaelic", "scottishgaelic.jsonc",
             Languages.ScottishGaelic.Manifest.MANIFEST,
             "language", "name", "script", "provenance");
+    [Fact]
+    public void ShanManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/shan", "shan.jsonc", Languages.Shan.Manifest.DEF,
+            "language", "name", "script");
 }
