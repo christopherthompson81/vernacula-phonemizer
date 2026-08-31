@@ -1,5 +1,6 @@
 // The portable half of test/nama.test.ts — Nama / Khoekhoe (naq), a Khoe-Kwadi CLICK language.
-// ⚠ naq HAS NO GOLDEN AND NO CORPUS ARTIFACT in this repo, so these tests are the whole instrument.
+// ⚠ naq HAS NO CORPUS ARTIFACT in this repo (no FLEURS, no mined corpus); it has a 45-row LEXICON-ONLY
+// golden, which gates the g2p but pins no normalization, so these tests remain the instrument.
 using Vernacula.Phonemizer;
 using NaEngine = Vernacula.Phonemizer.Languages.Nama.NamaPhonemizer;
 using NaNormalize = Vernacula.Phonemizer.Languages.Nama.Normalize;

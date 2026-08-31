@@ -130,8 +130,36 @@ function minedRows(code: string): string[] {
   return [...kept.filter(isClean), ...kept.filter((t) => !isClean(t))];
 }
 
-/** First TSV under the language's likely module dirs, first column = headwords. */
-function lexiconWords(code: string): string[] {
+/**
+ * Codes whose ONLY text source in this repo is a referee lexicon under `tools/referee-eval/referees/`.
+ *
+ * ⚠ AN EXPLICIT LIST BECAUSE THE CONDITION IS NOT INFERABLE. The generator cannot tell "this language
+ * has no rich source" from "the rich source is not in this checkout", and guessing in either direction
+ * damages something — see `lexiconWords`. Membership is a claim about the REPO, so it is checked here
+ * rather than derived: each of these has no FLEURS split, no `tools/corpus/mined/<code>.jsonc`, and no
+ * `data/languages/<dir>/*.tsv`, and each yields at least the 20-headword floor from its referee.
+ *
+ * ⚠ `mto` IS DELIBERATELY ABSENT: its ASJP list carries only 3 usable headwords, under the floor, so it
+ * stays ungated until it has a real source. `en-GB` and the other accent variants are absent because
+ * they are built by `tools/gen_variant_golden.mts`, not here — an earlier draft of this tier would have
+ * swept `en-gb.wikipron-uk.tsv` (76,284 headwords) into a main golden and missed doing so only because
+ * the code is cased `en-GB` and the file `en-gb.*`. Coincidence is not a guard.
+ */
+const REFEREE_LEXICON_ONLY = new Set(["naq", "nog", "smj"]);
+
+/**
+ * Headwords from the language's own word list, first column of the first usable TSV.
+ *
+ * ⚠ TWO LOCATIONS, AND THE SECOND ONE IS WHY SEVEN CODES SHIPPED UNGATED. This scanned only
+ * `data/languages/<dir>/*.tsv`, so a language whose only word list lives under
+ * `tools/referee-eval/referees/<code>.*.tsv` found nothing and was skipped — and a skipped golden is not
+ * a thin gate, it is NO gate: `parity`, `--provenance`, `--ipaspans` and `--poison` all pass over the
+ * code in silence, and the fleet count does not move when the port lands, so nothing says it is missing.
+ * naq (Nama) and smj (Lule Sami) both shipped that way, each with a referee TSV sitting in the tree the
+ * whole time. The referee tier is consulted only AFTER the data/ tier declines, so no existing golden
+ * changes source.
+ */
+function lexiconWords(code: string, allowReferee = false): string[] {
   // ⚠ MODULES ARE IN src/, THEIR DATA IS IN data/ since the shared-tree move — this scans both:
   //   the .ts to identify which directory owns the code, the .tsv under data/ for the headwords.
   const guesses = readdirSync("src/languages").filter((d) => {
@@ -151,6 +179,42 @@ function lexiconWords(code: string): string[] {
         if (words.length >= N) break;
       }
       if (words.length >= 20 && guesses.length) return words;
+    }
+  }
+  // The referee tier — a lexicon that lives beside the referee harness rather than under data/.
+  // ⚠ OPT-IN PER CODE (`REFEREE_LEXICON_ONLY`), NEVER INFERRED. Three ways this tier can do harm, all
+  // three measured rather than reasoned about:
+  //   · From the mined tier's TOP-UP it grew 16 unrelated goldens (ak, hil, hmn, ilo …) by appending
+  //     referee headwords to gates that were already fine. Hence the `thin` path only.
+  //   · For a language whose RICH source is merely absent from THIS checkout it is worse than useless.
+  //     The FLEURS ledger is a 337 MB artifact that is not always present; without it the generator
+  //     yields nothing for ~24 codes and SKIPS them, leaving their committed goldens alone — that skip
+  //     is the safety. This tier turns the nothing into something thin, and the thin file then
+  //     OVERWRITES the good one: measured, 12 goldens rewritten, quc losing 48 rows and acm 92.
+  //   · ⚠ AND THE OBVIOUS GUARD FOR THAT — "only when no golden exists yet" — IS A TRAP, which is why
+  //     it is not what this does. It makes the tool's output depend on its own previous output, so the
+  //     golden becomes WRITE-ONCE: corrupt `naq.tsv` to a single bogus row, regenerate, and the
+  //     corruption survives, because the file existing is what switches the tier off. A reference that
+  //     cannot be refreshed when its engine legitimately changes is a worse defect than the one being
+  //     fixed, and the failure is silent and undiscoverable.
+  // The list states the FACT — these codes have no source but a referee lexicon — instead of inferring
+  // it from a file that may simply be missing. Deterministic, refreshable, and no blast radius.
+  if (!allowReferee) return [];
+  // ⚠ SORTED, so which file wins is deterministic when a code has more than one referee.
+  const refDir = "tools/referee-eval/referees";
+  if (existsSync(refDir)) {
+    for (const f of readdirSync(refDir).sort()) {
+      if (!f.startsWith(`${code}.`) || !f.endsWith(".tsv")) continue;
+      const words: string[] = [];
+      for (const line of readFileSync(`${refDir}/${f}`, "utf8").split("\n")) {
+        if (line.startsWith("#") || !line.trim()) continue;
+        const w = line.split("\t")[0]?.trim();
+        // ⚠ A HEADWORD MUST CONTAIN A LETTER. These files carry the odd bare-mark or punctuation row
+        // (naq's list opens with one), and a golden row of `-` pins nothing while reading as noise.
+        if (w && /\p{L}/u.test(w)) words.push(w);
+        if (words.length >= N) break;
+      }
+      if (words.length >= 20) return words;
     }
   }
   return [];
@@ -229,7 +293,8 @@ for (const code of codes) {
       }
     }
   }
-  if (!rows.length) { rows = lexiconWords(code); tier = "thin"; }
+  // ⚠ THE REFEREE TIER IS OFFERED ONLY TO THE CODES THAT OPT IN — see `REFEREE_LEXICON_ONLY`.
+  if (!rows.length) { rows = lexiconWords(code, REFEREE_LEXICON_ONLY.has(code)); tier = "thin"; }
   const out: string[] = [];
   for (const text of rows) {
     try {
