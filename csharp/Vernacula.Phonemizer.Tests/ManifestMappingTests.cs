@@ -912,4 +912,9 @@ public class ManifestMappingTests
     [Fact]
     public void LuxembourgishManifestIsFullyMapped() =>
         AssertFullyMapped("languages/luxembourgish", "luxembourgish.jsonc", Languages.Luxembourgish.Manifest.MANIFEST);
+
+    [Fact]
+    public void MossiManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/mossi", "mossi.jsonc", Languages.Mossi.Manifest.MANIFEST,
+            "language", "name", "script", "provenance", "convention");
 }
