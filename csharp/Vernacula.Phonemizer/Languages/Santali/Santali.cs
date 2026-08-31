@@ -113,10 +113,16 @@ public static class SantaliPhonemizer
         // ⚠ Santali hallmark: a WORD-FINAL voiced stop is CHECKED/glottalized (dak→dakʼ, met→metʼ) — but
         // NOT when marked plain by a trailing ⟨ᱽ AHAD⟩, and only in a real syllable (a lone-consonant
         // citation like ⟨ᱵ⟩ stays [b]).
+        // ⚠ `CHECKED[fin]` where the TS writes `CHECKED[l]!` — the one site the port would have indexed
+        // hard. `voicedStops` and `checked` are two INDEPENDENT tables in santali.jsonc and nothing gates
+        // their agreement, so a data-only edit adding a stop to the first alone throws
+        // KeyNotFoundException here where the TS merely emits `undefined`. Guarded like the other five
+        // table reads in this scan: unreachable on today's manifest, and the miss leaves the stop plain
+        // rather than killing the process.
         var fin = Last();
         if (fin is not null && Manifest.VOICED_STOP.Contains(fin) && ahadAt != segs.Count - 1
-            && segs.Any(IsVowelSeg))
-            segs[^1] = CHECKED[fin];
+            && segs.Any(IsVowelSeg) && CHECKED.TryGetValue(fin, out var finChk))
+            segs[^1] = finChk;
 
         return Js.Normalize(string.Concat(segs), NormalizationForm.FormC);
     }

@@ -110,8 +110,10 @@ public static class Normalize
         Percent = ["ᱥᱟᱭᱠᱚᱲᱟ"],
         Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
         {
-            // ⚠ INSERTION-ORDERED, longest-first at the call site: `US$` and `HK$` are their own keys
-            // because a bare `$` is letter-bounded on the left and cannot match inside a code prefix.
+            // ⚠ `US$` and `HK$` are their own keys because a bare `$` is letter-bounded on the left and
+            // cannot match inside a code prefix. The TS relies on insertion order; here the ordering is
+            // the TIER's, not this Dictionary's — `NormalizeSymbols` sorts the keys longest-first itself,
+            // which is what makes `US$` win over `$` regardless of enumeration order.
             // Both emit the plain dollar noun — no Santali name for the Hong Kong dollar is attested.
             ["US$"] = ["ᱰᱚᱞᱟᱨ"],
             ["HK$"] = ["ᱰᱚᱞᱟᱨ"],
