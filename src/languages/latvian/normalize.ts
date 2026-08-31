@@ -95,6 +95,15 @@ const RATE_DENOMINATORS: Record<string, string> = { h: "stundā", s: "sekundē",
  * The SIGN words, all from espeak-ng `lv_list` and cross-checked against lv.wikipedia where a token exists:
  * vienāds 6 tok / 2 arts, dalīts 5/2, reiz 8/2, mīnuss 1/1, procenti 10/3, promiles 5/2.
  *
+ * ⚠ `‰` AND `§` ARE DELIBERATELY NOT READ, MEASURED RATHER THAN OVERLOOKED (#1209). espeak supplies both
+ * (`‰ pRomiles_!`, `§ sektsija`) and `promiles` is attested 5/2, so the vocabulary is not the obstacle —
+ * the instances are. Both `‰` in the retained text are METALINGUISTIC and carry no operand: *"Promili
+ * apzīmē ar promiles zīmi, ko pieraksta ‰"* and *"sāļumu mēra promilēs (‰)"*. A `NUM ‰` rule fires on
+ * neither, and reading the bare sign would say the word a SECOND time in a sentence that already writes it
+ * — trap 12, turning a silent drop into a stutter. `§` is ×0 in the retained text, and espeak's *sekcija*
+ * is a single tier for a sense Latvian legal writing normally spells *paragrāfs*; one unverified tier for
+ * zero instances is not a reading. `№` DID have instances and is now claimed — see `abbreviations`.
+ *
  * ⚠ `plusmīnuss` IS THE ONE WORD WITH NO WIKIPEDIA TOKEN (0/0) and it is declared anyway, on espeak's
  * `± plusmi:nuss` alone. Said rather than implied: `±` is a single code point, so no `+` rule can reach
  * inside it, and without an entry the sign vanishes silently. A one-tier word is weaker evidence than a
@@ -239,7 +248,7 @@ const PAGE: CountForms = pair("lappuse", "lappuses");
 const NUMBER_ABBREV = "numurs";
 
 function abbreviations(text: string): string {
-    return rewrite(rewrite(rewrite(text
+    return rewrite(rewrite(rewrite(rewrite(text
         // the counted one first: it needs the figure that the generic rule would not look at
         // ⚠ THE TRAILING DOT IS OPTIONAL, because the corpus's one instance does not write it: the
         // bibliography line ends `— 160 lpp` with no period at all. A required dot left it as a raw leak.
@@ -252,6 +261,18 @@ function abbreviations(text: string): string {
          * the shared currency arm's (test/core-currency-fusion.test.ts) and the same fix: separate.
          */
         , /(?<![\p{L}\p{M}.])nr\.(\s*)(?=\d)/giu, (_w, gap: string) => `${NUMBER_ABBREV}${gap || " "}`)
+        /**
+         * ⚠ `№` (U+2116) IS THE SAME WORD AND WAS SILENTLY DELETED (#1209). It is not a letter, so the
+         * tokenizer never emitted it: `2MV-4 №3` read as *…divi trīs* with the "number" simply gone —
+         * nothing left over, so no leak class, DROP or provenance gap could see it, while `nr. 3` two words
+         * away read *numurs trīs*. The same word in the same slot, disagreeing with itself.
+         * ⚠ A FOLLOWING DIGIT IS REQUIRED, and that is the whole guard. All four corpus instances are
+         * spacecraft designations with the figure glued on (`2MV-4 №3`, `2MV-3 №1`), and a bare `№` with no
+         * operand is metalinguistic — the shape the `‰` measurement below refuses for the same reason.
+         * The gap is re-emitted and supplied when absent, exactly as `nr.` does, or the noun fuses onto the
+         * digits and the number path cannot read them at all.
+         */
+        , /№(\s*)(?=\d)/gu, (_w, gap: string) => `${NUMBER_ABBREV}${gap || " "}`)
         , ABBREVIATION_RE, (m: string, offset: number, full: string) => {
             const word = ABBREVIATION[m];
             if (word === undefined) return m;

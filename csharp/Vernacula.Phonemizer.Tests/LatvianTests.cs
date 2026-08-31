@@ -23,6 +23,8 @@ public class LatvianTests
     private static readonly JsRe WS = JsRegex.Compile("\\s+", "gu");
     private static string Word(string s) => LvEngine.PhonemizeWord(s);
     private static string Say(string s) => Js.Trim(WS.Replace(Phonemizer.Phonemize(s, "lv"), " "));
+    /** The normalization layer alone — pure text→text, for the rules whose point is what they do NOT read. */
+    private static string N(string s) => Vernacula.Phonemizer.Languages.Latvian.Normalize.NormalizeLatvian(s);
     private static string[] Toks(string s) => Split(Say(s));
     private static string[] Split(string s) => s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -197,6 +199,13 @@ public class LatvianTests
         // a COUNTED abbreviation takes the agreement rule; the corpus writes it with no trailing dot
         Assert.Equal("sˈimts sˈɛʃdɛsmit lˈappusɛs", Say("160 lpp"));
         Assert.Equal("nˈumurs ˈastuɔ̯ɲi sˈimti pˈiɛt͡sdɛsmit dˈɛviɲi", Say("nr. 859"));
+        // ⚠ `№` IS THE SAME WORD AND WAS SILENTLY DELETED (#1209). It is not a letter, so the tokenizer
+        // never emitted it — `2MV-4 №3` read as *…divi trīs* with the "number" simply gone, while `nr. 3`
+        // two words away read *numurs trīs*. Nothing was left over, so no leak class could see it.
+        Assert.Equal("2MV-4 numurs 3", N("2MV-4 №3"));
+        Assert.Equal("numurs 3", N("№3"));   // the gap is SUPPLIED, or the noun fuses onto the digits
+        Assert.Equal("numurs 3", N("№ 3"));
+        Assert.Equal("№", N("№"));           // a bare sign with no operand is metalinguistic, and refused
         // ⚠ PERSONAL INITIALS ARE NOT ABBREVIATIONS — matching case-insensitively made `T.I. Ivanovs`, an
         // initial pair lv.wikipedia writes, introduce a surname with *tas ir*. Latvian writes these lower case.
         Assert.DoesNotContain("tˈas ˈir", Say("T.I. Ivanovs bija"));
@@ -231,6 +240,22 @@ public class LatvianTests
         Assert.Equal("ˈa", Word($"a{hi}"));
         Assert.Equal("ˈab", Word($"a{hi}b"));
     }
+
+    /**
+     * #1209 — `‰` AND `§` ARE REFUSED, MEASURED RATHER THAN OVERLOOKED. espeak supplies both
+     * (`‰ pRomiles_!`, `§ sektsija`) and `promiles` is attested 5/2, so vocabulary is not the obstacle —
+     * the instances are. BOTH `‰` in the retained text are METALINGUISTIC and carry no operand
+     * ("Promili apzīmē ar promiles zīmi, ko pieraksta ‰", "sāļumu mēra promilēs (‰)"), so a `NUM ‰` rule
+     * fires on neither and reading the bare sign would say the word a SECOND time in a sentence that
+     * already writes it — trap 12, a silent drop traded for a stutter. `§` is ×0 in the retained text, and
+     * espeak's *sekcija* is one unverified tier for a sense Latvian legal writing spells *paragrāfs*.
+     */
+    [Theory]
+    [InlineData("sāļumu mēra promilēs (‰)", "sāļumu mēra promilēs (‰)")]
+    [InlineData("5 ‰", "5 ‰")]
+    [InlineData("§ 5", "§ 5")]
+    [InlineData("5 §", "5 §")]
+    public void ThePermilleAndSectionSignsStaySilent(string text, string want) => Assert.Equal(want, N(text));
 
     /** The thousand is a MASCULINE noun that keeps its numeral, unlike Latgalian's feminine `tyukstūša`. */
     [Theory]

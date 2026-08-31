@@ -198,3 +198,39 @@ both engines and neither a port defect:
   · the untabulated-follower half-measure (cardinal kept, period dropped) — the TS's own documented trade,
     pinned in the suite so a future change has to be deliberate;
   · **#1209**, the silent deletion of `‰`, `№` and `§`.
+
+## Run 10 — 2026-08-31 08:15 — closing #1209, and correcting its own recommendation
+
+The issue recommended, in order: wire `‰` → *promiles* ("evidence already in the file"), then `№` → *numurs*,
+and leave `§`. **Reading the instances inverted the first two-thirds of that.**
+
+espeak's `lv_list` in fact supplies all three — `‰ pRomiles_!`, `§ sektsija`, `$ dola:Ri` — so vocabulary was
+never the obstacle. The obstacle is what the instances are:
+
+  · **`‰` ×2, and BOTH are metalinguistic with no operand.** *"Promili apzīmē ar promiles zīmi, ko pieraksta
+    ‰"* and *"sāļumu mēra promilēs (‰)"* — the sign is the SUBJECT of the sentence, and each sentence already
+    writes the word. A `NUM ‰` rule fires on neither, and reading the bare sign would say *promiles* a SECOND
+    time — trap 12, trading a silent drop for a stutter. **Not wired**, and the refusal is now recorded in the
+    file beside the sign table rather than left as an absence.
+  · **`§` ×0**, confirmed. espeak's *sekcija* is a single unverified tier for a sense Latvian legal writing
+    normally spells *paragrāfs*. One tier for zero instances is not a reading. **Not wired.**
+  · **`№` ×4, and every one is a genuine "number N"** — the spacecraft designations `2MV-4 №3`, `2MV-4 №4`,
+    `2MV-3 №1`. The word is already declared (`NUMBER_ABBREV = "numurs"`, attested 25/3) for `nr.`, so
+    `nr. 3` and `№3` were disagreeing about the same phrase in the same file. **Wired.**
+
+⚠ The `№` rule requires a FOLLOWING DIGIT, which is the whole guard: a bare `№` is metalinguistic, exactly
+the shape the `‰` refusal is keyed on. And the gap is supplied when absent — `№3` must not fuse into
+*numurs3*, the same defect `nr.859` was fixed for two lines above.
+
+    "2MV-4 №3"  ->  "2MV-4 numurs 3"      "№"    ->  "№"        (refused)
+    "№3"        ->  "numurs 3"            "5 ‰"  ->  "5 ‰"      (refused)
+    "№ 3"       ->  "numurs 3"            "§ 5"  ->  "§ 5"      (refused)
+
+**No golden regeneration:** the 200-row golden contains none of the three signs, and `parity -- lv` stays
+200/200. Both engines then agreed on a **3,008-row** differential — every sign × operand × spacing shape,
+plus the golden and the whole 2,703-line corpus: 0 differ on `norm` and `text`. Pinned in both suites, the
+refusals as refusals.
+
+⚠ One self-inflicted break worth recording: the first edit added a fourth clause to `abbreviations`, which
+is a chain of three nested `rewrite(` calls, without adding the fourth call — a syntax error esbuild caught
+immediately. Cheap here; the shape is worth knowing, because a chain that long hides its own arity.

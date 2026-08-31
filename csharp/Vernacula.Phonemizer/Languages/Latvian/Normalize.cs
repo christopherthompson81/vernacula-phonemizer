@@ -135,6 +135,8 @@ public static class Normalize
 
     private static readonly JsRe LPP = JsRegex.Compile("(?<![\\p{L}\\p{M}])(\\d+)(\\s*)lpp\\.?(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe NR = JsRegex.Compile("(?<![\\p{L}\\p{M}.])nr\\.(\\s*)(?=\\d)", "giu");
+    /** ⚠ `№` (U+2116) IS THE SAME WORD AND WAS SILENTLY DELETED (#1209) — see the call site. */
+    private static readonly JsRe NUMERO = JsRegex.Compile("№(\\s*)(?=\\d)", "gu");
     private static readonly JsRe NEXT_IS_CAPITAL = JsRegex.Compile("^\\s+\\p{Lu}", "u");
 
     private static string Abbreviations(string text)
@@ -149,6 +151,21 @@ public static class Normalize
         // ⚠ THE GAP IS RE-EMITTED, AND SUPPLIED WHEN THERE IS NONE. `nr.859` is written without a space and
         // the abbreviation's own period is consumed, so a bare replacement fused the noun onto the digits.
         s = Rewrite(s, NR, m =>
+        {
+            var gap = m.Groups[1].Value;
+            return $"{NUMBER_ABBREV}{(gap.Length > 0 ? gap : " ")}";
+        });
+        /**
+         * ⚠ `№` IS THE SAME WORD AND WAS SILENTLY DELETED (#1209). It is not a letter, so the tokenizer
+         * never emitted it: `2MV-4 №3` read as *…divi trīs* with the "number" simply gone — nothing left
+         * over, so no leak class, DROP or provenance gap could see it, while `nr. 3` two words away read
+         * *numurs trīs*. The same word in the same slot, disagreeing with itself.
+         * ⚠ A FOLLOWING DIGIT IS REQUIRED, and that is the whole guard. All four corpus instances are
+         * spacecraft designations with the figure glued on (`2MV-4 №3`, `2MV-3 №1`); a bare `№` with no
+         * operand is metalinguistic, the shape the `‰` refusal is keyed on for the same reason. The gap is
+         * supplied when absent, exactly as `nr.` does, or the noun fuses onto the digits.
+         */
+        s = Rewrite(s, NUMERO, m =>
         {
             var gap = m.Groups[1].Value;
             return $"{NUMBER_ABBREV}{(gap.Length > 0 ? gap : " ")}";
