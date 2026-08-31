@@ -10,7 +10,9 @@
  * or collapse to a cluster — `1000 R.C.` reads [bk].
  *
  * ⚠ THE RATE DENOMINATORS ARE IRISH TOO: `km/u` is the Irish spelling of km/h (uair = hour), and `msu` is
- * míle san uair, i.e. mph. A rule keyed on the English abbreviations alone misses both.
+ * míle san uair, i.e. mph. A rule keyed on the English abbreviations alone misses both. Step 10 reads both,
+ * for an INTEGER operand — which is every one of the ×16 the corpus has. ⚠ A DECIMAL operand before a rate
+ * is REFUSED WHOLE (#1197): it is ×0 in the corpus, and half-reading it strands the denominator.
  *
  * ⚠ WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text so
  * the word path stresses them; the comma-thousands and dot-decimal stay DIGITS so the shared symbol tier can
@@ -279,13 +281,31 @@ export function normalizeIrish(input: string): string {
     //    built from this table's own keys but the pattern carries `i`+`u`, so JS's fold widens it — `ſ`→`s`
     //    reaches `msu` — and a near-miss matches while its key is absent: measured, `1.5 mſu` read
     //    *1 pointe a cúig undefined*. Same shape as gl's #1122. Refuse the whole match.
+    // ⚠ A RATE IS REFUSED WHOLE, NEVER HALF (#1197). Without the slash guard this rule claimed the
+    //    NUMERATOR of a decimal rate and left the denominator raw — `12.8 km/u` read *12 pointe a hocht
+    //    ciliméadar/u* and `1.5 m/s` *1 pointe a cúig méadar/s*, where the stranded `/u` and `/s` are then
+    //    dropped by the g2p. That is a SILENTLY LOST "per hour", strictly worse than the two raw letters it
+    //    replaced, and it is the same trade Lithuanian's unit rule earned its own slash guards for.
+    //    ⚠ AND `km\/u` IS GONE FROM THE ALTERNATION RATHER THAN REORDERED IN FRONT OF `km`. It could never
+    //    match — JS alternation is ordered, `km` is tried first, and the old `(?![\p{L}\p{M}])` guard was
+    //    satisfied by the `/` — so it was a key that did nothing. Reordering it would have made the DECIMAL
+    //    rate readable, which the corpus does not ask for: measured over 4,480 ga texts (mined + attest +
+    //    FLEURS + golden), decimal-plus-`km/u` is ×0 and decimal-plus-`km/h` is ×0, while the INTEGER forms
+    //    (×7 and ×9) are step 10's and already read. A key that lies is deleted, not promoted.
     const DECIMAL_UNIT: Record<string, string> = { km: "ciliméadar", m: "méadar", kg: "cileagram",
-        mm: "milliméadar", cm: "ceintiméadar", msu: "míle san uair", "km/u": "ciliméadar san uair" };
-    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|msu|km\/u)(?![\p{L}\p{M}])/giu,
-        (m0, i: string, f: string, u: string) => {
+        mm: "milliméadar", cm: "ceintiméadar", msu: "míle san uair" };
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|msu)(?![\p{L}\p{M}])(\s*\/)?/giu,
+        (m0, i: string, f: string, u: string, slash: string | undefined) => {
             const w = DECIMAL_UNIT[u.toLowerCase()];
-            return w === undefined ? m0
-                : `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")} ${w}`;
+            if (w === undefined) return m0;
+            const num = `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")}`;
+            // ⚠ THE UNIT IS RE-EMITTED RAW AND SPACED WHEN A SLASH FOLLOWS, rather than declined outright.
+            //    A bare refusal looks right and is not: the plain-decimal rule below then claims `12.8` on
+            //    its own and emits no trailing space, so the GLUED form `12.8km/u` came back as
+            //    *12 pointe a hochtkm/u* — one fused token, which is the merge defect (traps 18/26) and
+            //    worse than the half-read it was meant to repair. Keeping the match and spacing the raw
+            //    unit refuses to SPEAK it while still separating it. Measured, not reasoned.
+            return slash === undefined ? `${num} ${w}` : `${num} ${u}${slash}`;
         });
     s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")}`);

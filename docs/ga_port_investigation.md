@@ -379,3 +379,52 @@ having run. Each row now carries a distinguishing label, and the count moved 49 
     dotnet test (full suite)          4,290 pass, 0 fail
     parity (ALL goldens)              159 languages, 31,070 rows, 0 differ
     npx vitest run (full suite)       290 files, 5,738 pass, 0 fail   (TypeScript untouched by the fix)
+
+
+## Run 7 — 2026-08-31 07:30 — closing #1197
+
+The issue prescribed the first step itself: *"it wants a corpus count first: `km/u` after a decimal may well
+be ×0 in the mined corpus, in which case the honest fix is to delete the key rather than reorder for it."*
+
+Measured over **4,480 ga texts** (mined + attest + FLEURS `ga_ie` + the golden):
+
+    DECIMAL + km/u     0        INTEGER + km/u     7
+    DECIMAL + km/h     0        INTEGER + km/h     9
+    any msu            4        any slash-rate    17
+
+So the hypothesis holds: the decimal rate does not occur, and both integer forms are step 10's and already
+read. `km\/u` was **deleted** from step 7's alternation and from `DECIMAL_UNIT`, not promoted in front of
+`km` — a key that lies is removed, not given a job the corpus never asks for.
+
+⚠ **BUT DELETING THE DEAD KEY DOES NOT FIX THE READING, AND THE READING WAS THE ACTUAL DEFECT.** With the
+alternation unchanged, `12.8 km/u` still matched on `km` — the old trailing guard `(?![\p{L}\p{M}])` is
+satisfied by a `/` — so the numerator was claimed and the denominator left raw for the g2p to drop. And the
+class is wider than the issue's title: `1.5 m/s` read *1 pointe a cúig méadar/s* by the same route. That is
+trap 54, the shape Lithuanian's unit rule earned its slash guards for.
+
+**First attempt: a `(?!\s*\/)` guard so the whole match declines.** Measured, and it introduced a worse
+defect than it fixed:
+
+    "12.8 km/u"  ->  "12 pointe a hocht km/u"        good
+    "12.8km/u"   ->  "12 pointe a hochtkm/u"         ⚠ FUSED — one token
+
+The glued form falls through to the plain-decimal rule, which emits no trailing space, so the number and the
+unit weld together. That is the merge defect (traps 18/26) and strictly worse than the half-read it replaced.
+
+**What shipped instead:** the optional trailing slash is CAPTURED rather than excluded, and when it is
+present the rule keeps the match, reads the number, and re-emits the unit **raw and spaced** — refusing to
+SPEAK it while still separating it.
+
+    "12.8 km/u"  ->  "12 pointe a hocht km/u"
+    "12.8km/u"   ->  "12 pointe a hocht km/u"
+    "1.5 m/s"    ->  "1 pointe a cúig m/s"
+    "12.8 km"    ->  "12 pointe a hocht ciliméadar"   unchanged
+    "12.8 msu"   ->  "12 pointe a hocht míle san uair" unchanged
+    "160km/u"    ->  "céad seasca ciliméadar san uair" unchanged (step 10)
+
+**Zero corpus effect, verified rather than assumed:** re-running the 200-row golden through the changed TS
+gives `0 of 200 golden rows change`, so no golden regeneration was needed. Both engines then agreed on a
+6,000-row differential built from every rate shape (6 operands × 5 fractions × 10 unit spellings × 8
+denominators × glued/spaced, plus the golden): **0 differ on `norm` and on `text`.**
+
+Pinned in both suites.

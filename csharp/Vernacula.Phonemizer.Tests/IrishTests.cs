@@ -255,6 +255,35 @@ public class IrishTests
     public void ADecimalUnitNearMissIsRefusedNotSpokenAsUndefined(string text, string want) =>
         Assert.Equal(want, Norm(text));
 
+    /**
+     * #1197 — A DECIMAL OPERAND BEFORE A RATE IS REFUSED WHOLE. The rule used to claim the NUMERATOR and
+     * leave the denominator raw: `12.8 km/u` read *12 pointe a hocht ciliméadar/u*, and the stranded `/u`
+     * is then dropped by the g2p — a silently lost "per hour", strictly worse than the raw letters it
+     * replaced.
+     *
+     * ⚠ AND `km\/u` WAS DELETED FROM THE ALTERNATION RATHER THAN REORDERED IN FRONT OF `km`. It could never
+     * match — ordered alternation, `km` wins, and the old trailing guard was satisfied by the `/` — and
+     * promoting it would have made the decimal rate readable, which the corpus does not ask for: over 4,480
+     * ga texts decimal-plus-`km/u` and decimal-plus-`km/h` are each ×0, while the INTEGER forms (×7, ×9)
+     * are step 10's and already read.
+     *
+     * ⚠ THE GLUED FORM MUST NOT FUSE. Declining the match outright looked right and was not: DECIMAL_PLAIN
+     * then claimed `12.8` alone and emitted no trailing space, giving *12 pointe a hochtkm/u* — one token,
+     * the merge defect. The unit is re-emitted raw AND SPACED.
+     */
+    [Theory]
+    [InlineData("12.8 km/u", "12 pointe a hocht km/u")]
+    [InlineData("12.8km/u", "12 pointe a hocht km/u")]
+    [InlineData("1.5 km/h", "1 pointe a cúig km/h")]
+    [InlineData("1.5 m/s", "1 pointe a cúig m/s")]
+    // …and every non-rate reading is unchanged, with the INTEGER rate still read by step 10.
+    [InlineData("12.8 km", "12 pointe a hocht ciliméadar")]
+    [InlineData("12.8 msu", "12 pointe a hocht míle san uair")]
+    [InlineData("160km/u", "céad seasca ciliméadar san uair")]
+    [InlineData("70km/h", "seachtó ciliméadar san uair")]
+    public void ADecimalRateIsRefusedWholeAndItsUnitIsSpaced(string text, string want) =>
+        Assert.Equal(want, Norm(text));
+
     /** ⚠ The compass letter is upper-cased before the lookup, and `ſ` matches `[NSEW]` under `i`+`u`. JS
      *  `"ſ".toUpperCase()` is "S" and .NET's `ToUpperInvariant` agrees (measured, not assumed), so the fold
      *  resolves to the same word on both sides rather than missing the table. */
