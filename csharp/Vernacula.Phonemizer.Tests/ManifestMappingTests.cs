@@ -953,4 +953,9 @@ public class ManifestMappingTests
     public void ShanManifestIsFullyMapped() =>
         AssertFullyMapped("languages/shan", "shan.jsonc", Languages.Shan.Manifest.DEF,
             "language", "name", "script");
+
+    [Fact]
+    public void TatarManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/tatar", "tatar.jsonc", Languages.Tatar.Manifest.MANIFEST,
+            "language", "name", "script");
 }

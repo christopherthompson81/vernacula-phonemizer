@@ -206,6 +206,7 @@ public static class Bootstrap
             Santali.SantaliPhonemizer.RegisterSelf();
             ScottishGaelic.ScottishGaelicPhonemizer.RegisterSelf();
             Shan.ShanPhonemizer.RegisterSelf();
+            Tatar.TatarPhonemizer.RegisterSelf();
         }
     }
 }
