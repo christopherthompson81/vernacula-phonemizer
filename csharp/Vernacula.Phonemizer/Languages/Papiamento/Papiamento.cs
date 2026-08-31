@@ -39,7 +39,9 @@ public static class PapiamentoPhonemizer
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData
     {
         Percent = new[] { "porshento" },
-        // ⚠ INSERTION-ORDERED, like JS `Object.keys`: the tier sorts keys longest-first, stably.
+        // ⚠ The ordering that matters is the TIER's, not this Dictionary's — `NormalizeSymbols`
+        // sorts the keys longest-first itself, which is what keeps `km`/`cm`/`mm` from losing to `m`.
+        // `Dictionary<string, …>` guarantees no enumeration order and none is relied on here.
         Currency = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
         {
             ["$"] = new[] { "dollar", "dollarnan" },
@@ -82,13 +84,23 @@ public static class PapiamentoPhonemizer
             var c = chars[i];
             // ⚠ THE TS DESTRUCTURES THE KEY STRING: `([k]) => chars[i] === k[0]` compares against the
             // key's first/second code unit, not the whole key — `p[0]` here is the key, `dg[1]` the value.
+            // ⚠ `p.Count > 1 && p[0].Length == 2` IS NOT DEFENSIVE NOISE, it is the shape the slices
+            // below assume: `p[0][..1]` throws on an empty key and `dg[1]` on a one-element row, where
+            // the TS reads `undefined` and simply fails to match. Both are unreachable on today's
+            // jsonc — every digraph row is a 2-char key and a value — so this states the invariant the
+            // scan depends on rather than letting a data-only edit turn a non-match into a crash.
             var dg = DIGRAPHS.FirstOrDefault(p =>
-                chars[i] == p[0][..1] && i + 1 < chars.Count && chars[i + 1] == p[0][1..]);
+                p.Count > 1 && p[0].Length == 2
+                && chars[i] == p[0][..1] && i + 1 < chars.Count && chars[i + 1] == p[0][1..]);
             if (dg is not null) { segs.Add(dg[1]); i++; continue; }
             if (c == "o" && i + 1 < chars.Count && chars[i + 1] == "u") { segs.Add("ɔ"); continue; } // the ⟨ou⟩ diphthong → [ɔu]
             // CODA ⟨n⟩ is RETAINED: WORD-FINAL ⟨n⟩ → the velar nasal [ŋ], also NASALIZING the preceding
             // vowel. A ⟨n⟩ before a consonant or a vowel stays [n].
-            if (c == "n" && i + 1 >= chars.Count && segs.Count > 0
+            // ⚠ `segs[^1].Length > 0` guards the SAME asymmetry: the TS `"".slice(-1)` is `""` and
+            // `IPA_VOWEL.has("")` is false, while `""[^1..]` throws. No `letters`/`digraphs` value in
+            // the jsonc is empty, so this cannot fire today — it keeps a later empty grapheme a
+            // non-match here instead of an ArgumentOutOfRangeException.
+            if (c == "n" && i + 1 >= chars.Count && segs.Count > 0 && segs[^1].Length > 0
                 && Ipa.IPA_VOWEL.Contains(segs[^1][^1..]))
             {
                 // ⚠ `[^1..]` IS THE TS `slice(-1)`: the LAST UTF-16 CODE UNIT, so a precomposed nasal

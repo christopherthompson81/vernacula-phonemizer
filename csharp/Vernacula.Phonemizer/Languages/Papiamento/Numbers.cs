@@ -3,7 +3,6 @@
  * Ported from src/languages/papiamento/numbers.ts — see that file for the Wiktionary/palabricks
  * sourcing and the two composition rules that shape the sub-1000 single word.
  */
-using System.Text;
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.Papiamento;
