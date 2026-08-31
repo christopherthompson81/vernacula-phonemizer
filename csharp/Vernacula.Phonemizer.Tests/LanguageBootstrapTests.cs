@@ -28,12 +28,14 @@ public class LanguageBootstrapTests
         // run, so without the record a golden row simply differs and reads as a porting bug in the language
         // that was ported — Quechua's Cyrillic rows are read by the RUSSIAN engine.
         // ⚠ THE SAMPLE MUST BE A LANGUAGE THAT IS STILL UNPORTED, so it changes as the port advances — it was
-        // `de` until German landed, and `nci` until Classical Nahuatl. Pick one far down the queue rather than
-        // the next one up, so this does not have to be edited every batch. `mto` (Totontepec Mixe) is the
-        // smallest L1 population (6,000) of the unported languages, and it has no golden yet — a language with
-        // nothing to be byte-identical to has no gate, so it is the least likely to be the next port.
-        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("mto"));
-        Assert.Contains("totontepecmixe", Registry.PortPending);
+        // `de` until German landed, `nci` until Classical Nahuatl, and `mto` until Totontepec Mixe.
+        // ⚠ AND THE HEURISTIC THAT PICKED THE LAST THREE IS NOW EXHAUSTED. It was "choose one with no golden,
+        // since a language with nothing to be byte-identical to has no gate and so is the least likely to be
+        // ported next" — and `mto` was the last such language. All four codes still unported (cy, hyw, sk, tk)
+        // carry a 200-row golden, so the sample is simply the one whose script is furthest from anything the
+        // fleet already reads. Expect to edit this line every batch from here on.
+        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("hyw"));
+        Assert.Contains("westarmenian", Registry.PortPending);
     }
 
     [Theory]

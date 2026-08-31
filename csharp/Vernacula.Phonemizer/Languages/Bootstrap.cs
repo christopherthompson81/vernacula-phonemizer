@@ -207,6 +207,7 @@ public static class Bootstrap
             ScottishGaelic.ScottishGaelicPhonemizer.RegisterSelf();
             Shan.ShanPhonemizer.RegisterSelf();
             Tatar.TatarPhonemizer.RegisterSelf();
+            TotontepecMixe.TotontepecMixePhonemizer.RegisterSelf();
         }
     }
 }
