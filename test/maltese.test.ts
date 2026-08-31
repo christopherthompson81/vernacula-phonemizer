@@ -311,6 +311,10 @@ describe("Maltese text normalization — the rules' branches", () => {
         // stays visible to the leak gates instead of half a reading reaching the phoneme stream.
         expect(normalizeMaltese("5 km/j")).toBe("5 km/j");
         expect(normalizeMaltese("5 m/kg")).toBe("5 m/kg");
+        // ⚠ AND ONE DEGENERATE SHAPE IS STILL STRANDED: a trailing slash with NO denominator at all. The
+        // guard keys on what follows the slash and nothing follows it. Not corpus-attested; pinned AS IT
+        // READS so a future widening of that guard fails here and says so, rather than changing in silence.
+        expect(normalizeMaltese("5 km/")).toBe("5 kilometri/");
     });
 
     // ── THE `-il` LINKER BETWEEN A NUMBER AND ITS UNIT. The tier's number→unit pattern allows only
