@@ -186,10 +186,11 @@ public static class Bootstrap
             Kabuverdianu.KabuverdianuPhonemizer.RegisterSelf();
             Kamba.KambaPhonemizer.RegisterSelf();
             Kikuyu.KikuyuPhonemizer.RegisterSelf();
+            Kyrgyz.KyrgyzPhonemizer.RegisterSelf();
             Latgalian.LatgalianPhonemizer.RegisterSelf();
             Latvian.LatvianPhonemizer.RegisterSelf();
-        Lithuanian.LithuanianPhonemizer.RegisterSelf();
-        LuleSami.LuleSamiPhonemizer.RegisterSelf();
+            Lithuanian.LithuanianPhonemizer.RegisterSelf();
+            LuleSami.LuleSamiPhonemizer.RegisterSelf();
             Tashelhit.TashelhitPhonemizer.RegisterSelf();
             Kiche.KicheePhonemizer.RegisterSelf();
         }
