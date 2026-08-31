@@ -917,4 +917,9 @@ public class ManifestMappingTests
     public void MossiManifestIsFullyMapped() =>
         AssertFullyMapped("languages/mossi", "mossi.jsonc", Languages.Mossi.Manifest.MANIFEST,
             "language", "name", "script", "provenance", "convention");
+
+    [Fact]
+    public void NahuatlManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/nahuatl", "nahuatl.jsonc", Languages.Nahuatl.Manifest.MANIFEST,
+            "language", "name", "script");
 }
