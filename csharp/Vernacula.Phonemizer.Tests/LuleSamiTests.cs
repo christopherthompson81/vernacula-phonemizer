@@ -186,14 +186,13 @@ public class LuleSamiTests
     [InlineData("5 %", "ˈvihtːɑ")]                      // no percent word is emitted — none is sourced
     [InlineData("€5", "ˈvihtːɑ")]                       // nor a currency word
     [InlineData("12:30", "ˈlokenɑnkuoktɑ , ˈkolmːolohke")] // no clock rule: the colon keeps its pause
-    // ⚠ THE SPACE-GROUPED FORM IS NOT CLAIMED, AND THIS PINS THE DEFECT RATHER THAN THE INTENT. `1 000`
-    // reads as *akta nålla* — "one zero", a silent 1000× error, which is precisely the class
-    // `separatorHygiene` was built to close (its header's motivating case is `17,000` → *seventeen, ZERO*).
-    // The space is neither claimed by the pass nor listed among its refusals, and it is the STANDARD
-    // thousands separator in the Nordic orthography this language is written in. Filed as #1212; pinned as
-    // it reads so that a fix has to change this line deliberately.
-    [InlineData("1 000", "ˈɑktɑ ˈnolːɑ")]
-    [InlineData("1 000 000", "ˈɑktɑ ˈnolːɑ ˈnolːɑ")]
+    // ⚠ THE SPACE-GROUPED FORM IS NOW CLAIMED (#1212). These two rows used to read *akta nålla* and *akta
+    // nålla nålla* — "one zero" and "one zero zero", a silent 1000× error — because `separatorHygiene`
+    // joined the dot and comma conventions and not the SPACE, which is the standard thousands separator in
+    // the Nordic orthography this language is written in. They were pinned as the defect precisely so that
+    // a fix would have to change them deliberately, and this is that change.
+    [InlineData("1 000", "ˈtʰuvsɑːn")]
+    [InlineData("1 000 000", "ˈmilːijovnːo")]
     public void TheNormalizationIsSeparatorHygieneAndNothingElse(string text, string want) =>
         Assert.Equal(want, Say(text));
 
