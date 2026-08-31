@@ -154,13 +154,15 @@ public static class Normalize
     /** The magnitude abbreviations, and the noun each expands to. ⚠ NO `g` FLAG — the TS spells these as
      *  plain literals and calls `.test` on them, which is stateless. A `g` here would make every other
      *  call fail through `lastIndex`. */
+    /** ⚠ The two steps below build their patterns from `Re.Source` rather than from a second list of the
+     *  same three strings, which is what the TS does (`re.source`) and for the same reason: a parallel array
+     *  is a hand-maintained duplicate that can drift out of step with the table it mirrors. */
     private static readonly IReadOnlyList<(JsRe Re, LithuanianAgreement Forms)> MAGS = new[]
     {
         (JsRegex.Compile("mlrd", "u"), Manifest.MANIFEST.Numbers.Magnitudes.Billion),
         (JsRegex.Compile("mln", "u"), Manifest.MANIFEST.Numbers.Magnitudes.Million),
         (JsRegex.Compile("tūkst", "u"), Manifest.MANIFEST.Numbers.Magnitudes.Thousand),
     };
-    private static readonly IReadOnlyList<string> MAG_SOURCES = new[] { "mlrd", "mln", "tūkst" };
 
     /**
      * A CLOCK'S SEPARATOR LOSES ITS PAUSE BEHIND `val.` — and nothing else happens. NO WORD IS EMITTED;
@@ -466,7 +468,7 @@ public static class Normalize
         for (var i = 0; i < MAGS.Count; i++)
         {
             var forms = MAGS[i].Forms;
-            var re = JsRegex.Compile($"{NUM}{SP}*({MAG_SOURCES[i]}){NOT_LETTER_AFTER}\\.?", "gu");
+            var re = JsRegex.Compile($"{NUM}{SP}*({MAGS[i].Re.Source}){NOT_LETTER_AFTER}\\.?", "gu");
             var subject = t;
             t = Rewrite(t, re, m =>
             {
@@ -487,7 +489,7 @@ public static class Normalize
         for (var i = 0; i < MAGS.Count; i++)
         {
             var forms = MAGS[i].Forms;
-            var re = JsRegex.Compile($"{NOT_LETTER_BEFORE}(?:{MAG_SOURCES[i]}){NOT_LETTER_AFTER}\\.?", "gu");
+            var re = JsRegex.Compile($"{NOT_LETTER_BEFORE}(?:{MAGS[i].Re.Source}){NOT_LETTER_AFTER}\\.?", "gu");
             t = Rewrite(t, re, $" {forms.Gen} ");
         }
 

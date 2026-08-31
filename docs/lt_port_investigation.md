@@ -161,7 +161,46 @@ Leak sweep: exactly four paths touched — the new `Languages/Lithuanian/`, the 
     and one year read as metres, both in the retained corpus, neither separable from the string. An unpinned
     known defect is indistinguishable from a regression the next reader introduces.
 
+## Run 9 — 2026-08-31 03:00 — review of #1210
+
+**One structural fix in the port.** Steps 9 and 9b built their patterns from a hand-written parallel array
+`MAG_SOURCES = ["mlrd", "mln", "tūkst"]` mirroring the three entries already in `MAGS`. The TS reads
+`re.source` off the table itself precisely so there is nothing to drift; the C# now does the same and the
+parallel array is gone. Behaviour-neutral, re-verified: corpus norm/text, interaction norm/full and the
+36,962-row astral fuzz all still 0 differ.
+
+**A leak measurement rather than an invented instrument.** The TS header cites `mine.ts scan`, which is not
+in this repository, so the thing it measures was measured directly instead: normalize the 2,712-line corpus
+and ask which unit, abbreviation and sign keys SURVIVE into the text the g2p will read. That is exactly what
+this layer exists to prevent, and both engines produce identical normalized text, so anything found is
+inherited rather than a port defect.
+
+Most survivors are the header's own documented refusals, and the measurement confirms them rather than
+finding anything: all eleven surviving `km` are RATES (`km/h`, `km/val.`, `km/s`), the `d.` is the version
+string `1.13d.`, and `kcal`, `Mbit`, `MB/s`, `kV`, the bare `°`, `×`, `±` and `a.m.` are each declined on the
+record.
+
+⚠ **Two are not documented, and they are the same defect twice.** The layer twice decides in writing that
+*refusing to read the NUMBER is not a reason to hand the abbreviation back to the g2p* — once for `val.`,
+once for the magnitude — and two members of that same class never got the line:
+
+  · **`min.` has no mop-up.** `2:11.60 min.` → `… mʲɪn .` — a vowel-less cluster read as a word plus a
+    spurious sentence break, which is verbatim the defect the header records as the reason `min.` was
+    declared at all. `val.` in the identical position is mopped up. The noun is already in the manifest.
+  · **A currency sign whose figure was refused is DELETED.** `55.89 mlrd €` → the magnitude IS mopped up
+    (*milijardų*) and the `€` is not — and since `€` is not a Latin letter the tokenizer never emits it, so
+    it does not leak, it vanishes. `importas 55.89 milijardų €` reads as an amount with no currency. Nothing
+    is left over, so no leak class, DROP, poison site or provenance gap can see it.
+
+One instance each in the retained corpus (`min.` 1 of 3; a currency sign 1 of 18). The counts are not the
+argument — the structural one is. Filed as **#1211**; not fixed here, because it changes what the engine says
+and needs a golden regeneration rather than a port PR.
+
 ## Outstanding
 
-Nothing found in this port remains unfixed, and nothing new was filed. The residuals and refusals pinned in
-the suite are the TS's own measured trades — identical in both engines, and none of them a port defect.
+Nothing found in this port remains unfixed. Two things are left standing, both identical in both engines and
+neither a port defect:
+
+  · the `m.`/`m` residuals and the layer's documented refusals, pinned in the suite as they read so a future
+    change has to be deliberate;
+  · **#1211**, the missing `min.` and currency mop-ups.
