@@ -136,3 +136,84 @@ The fleet total moved exactly ki's 200 rows; no other language's row moved.
     derived.
   * No defect found in either engine. Nothing filed, no TS-side fix needed — the TS suite is
     green and untouched.
+
+---
+
+# PR review (#1206)
+
+## Run A — 2026-08-30 18:00 — **the highest-risk line is the one-liner in a SHARED module**
+
+Rebased onto main (1 behind: #1204 quc). The port adds four files and changes one line in a fifth —
+`Kikuyu/E5xNumbers.cs`, which **Kamba also uses**:
+
+    - d == "0" ? T.Zero : Numbers.DigitWord(T.Units, d) ?? d
+    + d == "0" ? T.Zero : Core.Numbers.DigitWord(T.Units, d) ?? d
+
+⚠ **THE QUALIFICATION IS NECESSARY AND ITS FAILURE MODE IS BENIGN**, which is worth establishing rather
+than assuming. Adding `Kikuyu/Numbers.cs` puts a `Numbers` class in the SAME NAMESPACE as `E5xNumbers`,
+and a same-namespace type beats a `using`-imported one — so the unqualified reference would have rebound
+from `Core.Numbers` to `Kikuyu.Numbers`. Checked: `Kikuyu.Numbers` has **no `DigitWord`**, so the rebind
+is a COMPILE ERROR, not a silent switch to a different method. Good.
+
+⚠ **AND KAMBA HAD TO BE RE-MEASURED ON THE ARM THAT LINE IS IN**, because parity cannot reach it — the
+tokenizer's number group is `\d+`, so the digit-by-digit fallback only runs for a non-safe, negative or
+non-numeric argument. Both languages, through the shared module, over 0…200,000 plus the magnitude
+boundaries plus the fallback arms (`-1`, `1.5`, `NaN`, `abc`, `9007199254740993`, `1😀2`, `٠١٢`, a
+30-digit run):
+
+    kam  200,335 probes  0 differ
+    ki   200,335 probes  0 differ
+
+## Run B — 2026-08-30 18:10 — **the substitute class was spelled twice, and that is a drift**
+
+The pattern diff came out 22 v 22 with one on each side:
+
+    in TS, not in C#:  /,/gu                    — the de-group inner replace; the C# uses `m.Value.Replace(",", "")`
+    in C#, not in TS:  /[űŰūŪûÛŭŬīĪîÎ]/gu       — the orthographic-substitute fold
+
+The second is not a scanner artifact. **The TypeScript DERIVES that class from the table's own keys** —
+``new RegExp(`[${Object.keys(SUBSTITUTE).join("")}]`, "gu")`` — while the C# hand-wrote the literal. They
+agree today, character for character. They would stop agreeing the moment anyone adds a substitute: the
+TS regex updates itself and a literal does not. That is the "a table spelled twice is a table that
+drifts" argument this codebase makes everywhere else, and the fix is one line:
+
+    JsRegex.Compile("[" + string.Concat(SUBSTITUTE.Keys) + "]", "gu")
+
+Both engines dumped after the change, and the compiled forms are identical:
+
+    TS  ["[űŰūŪûÛŭŬīĪîÎ]","gu"]
+    C#  ["[űŰūŪûÛŭŬīĪîÎ]","gu"]
+
+(A `Dictionary` preserves insertion order, so the derived class comes out in the same order `Object.keys`
+gives — the classes are set-equivalent regardless, but identical is easier to diff.)
+
+## Run C — 2026-08-30 18:20 — the differentials and the walks
+
+⚠ **NO FLEURS FOR ki**, so the corpus-wide differential rides on the mined + attest artifacts.
+
+    corpus (728 lines: 391 mined + 337 attest)              norm 0 · text 0
+    g2p walk, 29-char alphabet, 1–3 letters                  25,327 words   0 differ
+    astral + both surrogate halves × the letters, 1–3        11,109 words   0 differ
+    adversarial fuzz, 930 hostile lines                      norm 0 · text 0
+    leak sweep                                               0/728 and 0/930, both engines
+
+⚠ The walk carries the twelve SUBSTITUTE characters explicitly, in isolation and in the corpus's own
+words (`nyamű`, `mūndū`, `kūrī`, `Îri`, `gĩkűyű`, `ŭrĩa`). No walk over the ORTHOGRAPHIC alphabet reaches
+them — they are precisely the characters the orthography does not have, which is why the fold exists.
+
+## Run D — 2026-08-30 18:25 — the seam gates on a real corpus
+
+A 26,879-row reference generated from the TypeScript over the corpus + walk + fuzz, swapped in for
+`csharp/goldens/ki.tsv`, both engines' gates run, golden restored:
+
+    parity ki                  26,879 rows OK, 0 differ
+    parity --poison ki         0 sites      provenance 49,769/49,769   IpaSpan 46,850/46,850
+    provenance-poison.mts      0 sites      --full coverage: 49,769/49,769 and 46,850/46,850
+    seam-parity.mts            ki absent from the disagreement table (24 unported, down from 25)
+
+The token counts match EXACTLY across the two engines.
+
+## Run E — 2026-08-30 18:30 — the gates
+
+    dotnet test (full suite)          4,720 pass, 0 fail
+    parity (ALL goldens)              166 languages, 32,339 rows, 0 differ

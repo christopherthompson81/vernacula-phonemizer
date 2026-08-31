@@ -39,7 +39,13 @@ public static class Normalize
         ["î"] = "ĩ", ["Î"] = "Ĩ",
     };
 
-    private static readonly JsRe SUBSTITUTE_RX = JsRegex.Compile("[űŰūŪûÛŭŬīĪîÎ]", "gu");
+    // ⚠ DERIVED FROM THE TABLE'S OWN KEYS, like the TS's `new RegExp(`[${Object.keys(SUBSTITUTE).join("")}]`)`.
+    // Hand-writing the class works today and drifts tomorrow: add a substitute to the table and the TS regex
+    // updates itself while a literal here silently does not — the "a table spelled twice is a table that
+    // drifts" argument this codebase makes everywhere else. A `Dictionary` preserves insertion order, so the
+    // class comes out in the same order the TS's `Object.keys` gives.
+    private static readonly JsRe SUBSTITUTE_RX =
+        JsRegex.Compile("[" + string.Concat(SUBSTITUTE.Keys) + "]", "gu");
     private static readonly JsRe FORMAT_CHARS = JsRegex.Compile("[\\p{Cf}￼]", "gu");
     private static readonly JsRe AMP = JsRegex.Compile("&amp;", "giu");
     private static readonly JsRe NBSP = JsRegex.Compile("&nbsp;", "giu");
