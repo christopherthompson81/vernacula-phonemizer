@@ -159,7 +159,10 @@ public sealed class BalochiPhonemizer : ILanguage
         if (HAS_LATIN.IsMatch(word))
         {
             word = Nat(word);
-            var key = Js.ToLowerCase(word).Normalize(NormalizationForm.FormC);
+            // ⚠ `Js.Normalize`, NOT `string.Normalize` (#1199, reached via #1227): .NET throws on an
+            // UNPAIRED surrogate where JS composes around it. Line 70's call above is on LEXICON keys,
+            // which cannot carry one; this one is on the caller's WORD, which can.
+            var key = Js.Normalize(Js.ToLowerCase(word), NormalizationForm.FormC);
             return ro.TryGetValue(key, out var hit) ? hit : PhonemizeRoman(word);
         }
         return ar.TryGetValue(word, out var hit2) ? hit2 : PhonemizeArabic(word);

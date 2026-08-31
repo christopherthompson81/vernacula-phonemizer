@@ -50,7 +50,7 @@ const strip = (s: string) =>
    .replace(/`(?:[^`\\]|\\.)*`/g, "``");
 const LITERAL = /(?<![\w)\]])\/((?:[^/\\\n[]|\\.|\[(?:[^\]\\]|\\.)*\])+)\/([dgimsuvy]*)/g;
 
-const PROBES: string[] = ["abc def", "ABC DEF", "hello, world.", "  spaced  out  ", "123 456", "1.5", "1,500", "10:08", "2026-08-23", "007", "٢٠٢٤ ٣", "৩৫ ২৪", "१२३", "๑๒๓", "café naïve", "ÅNGSTRÖM", "Grüße", "İstanbul", "ĳsselmeer", "Ελληνικά", "Русский", "עברית", "العربية", "हिन्दी", "ไทย", "中文", "日本語", "한국어", "ǀclick ǁtwo", "kʼeʼ ɓaɗ", "ˈstrʌk.tʃɚ", "tʰˈɛn əklˈɑːk", "<b>tag</b>", "a&amp;b", "km<sup>2</sup>", "{en:five}", "h5n1", "covid19", "", " ", "\t", "a\nb", "-", "—", "…", "'’‘", "\"quoted\"", "\u017f\u212a\u2126\u1e9e\u0131\u0345", "\u00df\u0130i\u0307", "\u{1E950}\u{1E94F}", "\u{20001}\u{2B740}\u{1F600}"];
+const PROBES: string[] = ["abc def", "ABC DEF", "hello, world.", "  spaced  out  ", "123 456", "1.5", "1,500", "10:08", "2026-08-23", "007", "٢٠٢٤ ٣", "৩৫ ২৪", "१२३", "๑๒๓", "café naïve", "ÅNGSTRÖM", "Grüße", "İstanbul", "ĳsselmeer", "Ελληνικά", "Русский", "עברית", "العربية", "हिन्दी", "ไทย", "中文", "日本語", "한국어", "ǀclick ǁtwo", "kʼeʼ ɓaɗ", "ˈstrʌk.tʃɚ", "tʰˈɛn əklˈɑːk", "<b>tag</b>", "a&amp;b", "km<sup>2</sup>", "{en:five}", "h5n1", "covid19", "", " ", "\t", "a\nb", "-", "—", "…", "'’‘", "\"quoted\"", "\u017f\u212a\u2126\u1e9e\u0131\u0345", "\u00df\u0130i\u0307", "\u{1E950}\u{1E94F}", "\u{20001}\u{2B740}\u{1F600}", "\uD800", "\uDC00", "a\uD800b", "a\uDC00b", "ge\uD800\u00e9", "\uD800\uD800", "x\uDBFF"];
 
 /**
  * ⚠ THE FOLD TABLE IS THE PROBE SOURCE. Every ordered pair in csharp/fold-pairs.json is one JS
@@ -102,6 +102,12 @@ function derivedProbes(re: RegExp, source: string): string[] {
 // A non-u pattern can match HALF a surrogate pair, and JSON cannot carry a lone surrogate (the C#
 // reader rejects it outright). Encode those code units as a sentinel the harness decodes back —
 // dropping them would hide the one behaviour where both engines really are UTF-16 unit machines.
+// ⚠ APPLIED TO THE PROBE SUBJECT AS WELL AS THE RESULT (#1227), AND FOR SEVERAL MONTHS IT WAS NOT.
+// The encoder existed and was wired only to `got`, so a subject carrying an unpaired half could not be
+// written at all — `JsonDocument.GetString` throws "Cannot read incomplete UTF-16 JSON text" on it. That
+// made the ONE input class where JsRegex knowingly departs from JS structurally unprobeable: a `u`-mode
+// NEGATED CLASS matches a lone surrogate in JS and is translated here so that it does not. The tool whose
+// job is to prove the two agree could not ask the question, and reported 0 DIFFER while it stood open.
 const enc = (s: string) =>
   [...s].map((ch) => {
     const u = ch.charCodeAt(0);
@@ -134,7 +140,7 @@ for (const f of globSync("src/**/*.ts")) {
         const got = flags.includes("g")
           ? [...p.matchAll(new RegExp(pattern, base + "g"))].map((x) => x[0])
           : [p.match(new RegExp(pattern, base))?.[0] ?? "\u0000null"];
-        matches.push([p, got.map(enc)]);
+        matches.push([enc(p), got.map(enc)]);
       } catch { /* a probe this pattern rejects is not evidence */ }
     }
     rows.push(JSON.stringify({ pattern, flags, file: f, matches }));
