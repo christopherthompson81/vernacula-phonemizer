@@ -958,4 +958,10 @@ public class ManifestMappingTests
     public void TatarManifestIsFullyMapped() =>
         AssertFullyMapped("languages/tatar", "tatar.jsonc", Languages.Tatar.Manifest.MANIFEST,
             "language", "name", "script");
+
+    [Fact]
+    public void TotontepecMixeManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/totontepecmixe", "totontepecmixe.jsonc",
+            Languages.TotontepecMixe.Manifest.DEF,
+            "language", "name", "script");
 }
