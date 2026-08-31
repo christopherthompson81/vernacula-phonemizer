@@ -201,6 +201,7 @@ public static class Bootstrap
             Kiche.KicheePhonemizer.RegisterSelf();
             Mossi.MossiPhonemizer.RegisterSelf();
             Nahuatl.NahuatlPhonemizer.RegisterSelf();
+            Nogai.NogaiPhonemizer.RegisterSelf();
         }
     }
 }
