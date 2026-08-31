@@ -9,6 +9,9 @@
  * ⚠ THE CLOCK AND ERA MARKERS ARE IRISH ABBREVIATIONS, not English ones: `i.n.` / `r.n.` are iarnóin and
  * réamhnóin (p.m. / a.m.), `A.D.` is tar éis Chríost and `R.C.` roimh Chríost.
  *
+ * ⚠ A DECIMAL OPERAND BEFORE A RATE IS REFUSED WHOLE (#1197) — ×0 in the corpus, and half-reading it
+ * strands the denominator. Step 10 reads both denominators for an INTEGER operand, which is every one of
+ * the ×16 the corpus has.
  * ⚠ THE RATE DENOMINATORS ARE IRISH TOO: `km/u` is the Irish spelling of km/h (uair = hour), and `msu` is
  * míle san uair, i.e. mph.
  */
@@ -212,8 +215,14 @@ public static class Normalize
     private static readonly JsRe AP_A = JsRegex.Compile("^a", "");
     private static readonly JsRe GIGAHERTZ = JsRegex.Compile("(?<![\\d.,])(\\d+\\.\\d+)\\s?Ghz?(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe VERSION_LETTER = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d+)(?=[a-z](?![\\p{L}\\p{M}]))", "giu");
+    /** ⚠ `km\/u` IS GONE FROM THE ALTERNATION RATHER THAN REORDERED IN FRONT OF `km` (#1197). It could
+     *  never match — alternation is ordered, `km` is tried first, and the old trailing guard was satisfied
+     *  by the `/` — so it was a key that did nothing. Reordering would have made the DECIMAL rate readable,
+     *  which the corpus does not ask for: over 4,480 ga texts, decimal-plus-`km/u` is ×0 and
+     *  decimal-plus-`km/h` is ×0, while the INTEGER forms (×7, ×9) are step 10's and already read.
+     *  The optional trailing slash is CAPTURED, not excluded — see the call site. */
     private static readonly JsRe DECIMAL_UNIT = JsRegex.Compile(
-        "(?<![\\d.,])(\\d+)\\.(\\d+)\\s?(km|m|kg|mm|cm|msu|km\\/u)(?![\\p{L}\\p{M}])", "giu");
+        "(?<![\\d.,])(\\d+)\\.(\\d+)\\s?(km|m|kg|mm|cm|msu)(?![\\p{L}\\p{M}])(\\s*\\/)?", "giu");
     private static readonly JsRe DECIMAL_PLAIN = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d+)(?![\\d.])", "giu");
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d+),(\\d{1,2})(?![\\d,])", "gu");
     private static readonly JsRe THREE_QUARTERS = JsRegex.Compile("(\\d+)¾", "gu");
@@ -243,7 +252,7 @@ public static class Normalize
     private static readonly IReadOnlyDictionary<string, string> UNIT_WORD = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["km"] = "ciliméadar", ["m"] = "méadar", ["kg"] = "cileagram", ["mm"] = "milliméadar",
-        ["cm"] = "ceintiméadar", ["msu"] = "míle san uair", ["km/u"] = "ciliméadar san uair",
+        ["cm"] = "ceintiméadar", ["msu"] = "míle san uair",
     };
     private static readonly IReadOnlyDictionary<string, string> RATE_UNIT = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -360,10 +369,22 @@ public static class Normalize
         // pattern is built from this table's own keys but carries `i`+`u`, so JS's fold widens it — `ſ`→`s`
         // reaches the `msu` key — and a near-miss matches while `mſu` is absent from the table. Refuse the
         // whole match, as gl/#1122 does. (Both engines were corrected together.)
+        // ⚠ A RATE IS REFUSED WHOLE, NEVER HALF (#1197). This rule used to claim the NUMERATOR of a decimal
+        // rate and leave the denominator raw — `12.8 km/u` read *12 pointe a hocht ciliméadar/u* and
+        // `1.5 m/s` *1 pointe a cúig méadar/s*, where the stranded `/u` is then dropped by the g2p: a
+        // SILENTLY LOST "per hour", strictly worse than the raw letters it replaced.
+        // ⚠ THE UNIT IS RE-EMITTED RAW AND SPACED RATHER THAN THE MATCH DECLINED. A bare refusal looks right
+        // and is not: DECIMAL_PLAIN below then claims `12.8` on its own and emits no trailing space, so the
+        // GLUED form `12.8km/u` came back as *12 pointe a hochtkm/u* — one fused token, the merge defect.
+        // Measured, not reasoned.
         s = Rewrite(s, DECIMAL_UNIT, m =>
-            UNIT_WORD.TryGetValue(Js.ToLowerCase(m.Groups[3].Value), out var uw)
-                ? $"{m.Groups[1].Value} pointe {SpellDigits(m.Groups[2].Value)} {uw}"
-                : m.Value);
+        {
+            if (!UNIT_WORD.TryGetValue(Js.ToLowerCase(m.Groups[3].Value), out var uw)) return m.Value;
+            var num = $"{m.Groups[1].Value} pointe {SpellDigits(m.Groups[2].Value)}";
+            return m.Groups[4].Success
+                ? $"{num} {m.Groups[3].Value}{m.Groups[4].Value}"
+                : $"{num} {uw}";
+        });
         s = Rewrite(s, DECIMAL_PLAIN, m => $"{m.Groups[1].Value} pointe {SpellDigits(m.Groups[2].Value)}");
 
         // 7c) COMMA-DECIMALS — `12,5`. Corpus-absent (Irish follows English), but the comma must not LEAK as a

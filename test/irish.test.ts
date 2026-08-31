@@ -220,6 +220,31 @@ describe("Irish: a folded near-miss on a decimal unit is refused, not spoken", (
     });
 });
 
+// #1197 — A DECIMAL OPERAND BEFORE A RATE IS REFUSED WHOLE. The rule used to claim the NUMERATOR and leave
+// the denominator raw: `12.8 km/u` read *12 pointe a hocht ciliméadar/u*, and the stranded `/u` is then
+// dropped by the g2p — a silently lost "per hour", strictly worse than the raw letters it replaced.
+// ⚠ AND `km\/u` WAS DELETED FROM THE ALTERNATION RATHER THAN REORDERED IN FRONT OF `km`. It could never
+// match (ordered alternation; `km` wins and the old guard was satisfied by the `/`), and promoting it would
+// have made the decimal rate readable, which the corpus does not ask for: over 4,480 ga texts,
+// decimal-plus-`km/u` and decimal-plus-`km/h` are each ×0, while the INTEGER forms (×7, ×9) already read.
+describe("Irish: a decimal rate is refused whole, and its unit is spaced rather than fused", () => {
+    test("the numerator is not claimed and the denominator is not stranded", () => {
+        expect(normalizeIrish("12.8 km/u")).toBe("12 pointe a hocht km/u");
+        expect(normalizeIrish("1.5 km/h")).toBe("1 pointe a cúig km/h");
+        expect(normalizeIrish("1.5 m/s")).toBe("1 pointe a cúig m/s");
+        // ⚠ THE GLUED FORM MUST NOT FUSE. Declining the match outright looked right and was not: the
+        // plain-decimal rule then claimed `12.8` alone and emitted no trailing space, giving
+        // *12 pointe a hochtkm/u* — one token, the merge defect. The unit is re-emitted raw AND SPACED.
+        expect(normalizeIrish("12.8km/u")).toBe("12 pointe a hocht km/u");
+    });
+    test("every non-rate reading is unchanged, and the INTEGER rate still reads", () => {
+        expect(normalizeIrish("12.8 km")).toBe("12 pointe a hocht ciliméadar");
+        expect(normalizeIrish("12.8 msu")).toBe("12 pointe a hocht míle san uair");
+        expect(normalizeIrish("160km/u")).toBe("céad seasca ciliméadar san uair");
+        expect(normalizeIrish("70km/h")).toBe("seachtó ciliméadar san uair");
+    });
+});
+
 describe("Irish: a comma before a minus is not a range", () => {
     test("reads `1, -2` as a negative, and a real range as a range", () => {
         expect(phonemize("1, -2", "ga")).not.toContain("ɡˈɔ dʲˈiː");
