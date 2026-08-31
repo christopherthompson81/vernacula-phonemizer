@@ -244,10 +244,18 @@ public static class Normalize
     private static string EuroSpelling(string text) => Rewrite(text, EURO_RE, "$1ewro");
 
     // ── THE CLOCK, then STEP 8. THE DECIMAL POINT ────────────────────────────────────────────────────────
+    /**
+     * ⚠ THE APOSTROPHE CLASS HELD U+2019 TWICE — three slots, two distinct code points, which is the shape a
+     * typo leaves behind. Measured over the 2,734-text corpus: `ta` + U+0027 ×1362, + U+2019 ×1023,
+     * + U+02BC ×2 (`taʼ kelliema`), + U+2018 ×0. The duplicate cost nothing, and U+2018 — the character the
+     * third slot was most likely meant to be — does not occur at all, so it is NOT added on speculation.
+     * The duplicate is replaced by U+02BC, which the corpus does write for this very morpheme. Behaviour
+     * today is unchanged: none of the three ever precedes a day-part in this corpus.
+     */
     /** ⚠ THE TIMEZONE IS IN THIS LIST BECAUSE `f'12.00 GMT` WAS NOT (#1102): it fell through to the decimal
      *  rule and read *tnaʃ punt zɛrɔ*, the exact confidently-wrong reading the guard exists to prevent. */
     private static readonly JsRe CLOCK_TAIL =
-        JsRegex.Compile("^\\s?(?:[ap]\\s?\\.?\\s?m\\b|ta['’’]\\s?(?:filg|wara|bil)|(?:GMT|UTC|CET|CEST)\\b)", "iu");
+        JsRegex.Compile("^\\s?(?:[ap]\\s?\\.?\\s?m\\b|ta['’ʼ]\\s?(?:filg|wara|bil)|(?:GMT|UTC|CET|CEST)\\b)", "iu");
     private static readonly JsRe CLOCK_COLON =
         JsRegex.Compile("(?<![\\d.,:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])", "gu");
     private static readonly JsRe CLOCK_DOT =

@@ -149,3 +149,27 @@ nothing.
 
 Nothing found in this port remains unfixed, and nothing new was filed. The rate residual is the TS's own
 recorded limitation, identical in both engines and pinned in both suites.
+
+## Run 8 — 2026-08-31 20:50 — repairing the apostrophe class Run 7 measured
+
+Run 7 measured the duplicate and left it, on the grounds that it cost nothing. It is now repaired, because
+"costs nothing" was an argument for not GUESSING at U+2018 — not an argument for leaving three slots holding
+two code points.
+
+    before   ta['’’]   U+0027, U+2019, U+2019      2 distinct of 3
+    after    ta['’ʼ]   U+0027, U+2019, U+02BC      3 distinct of 3
+
+⚠ **U+2018 IS STILL NOT ADDED**, and that is the measurement doing its job: it is ×0 in the corpus, so
+adding it would be speculation. The duplicate is replaced by **U+02BC**, which the corpus DOES write for
+this very morpheme — `taʼ kelliema` ×2 — so the slot now holds an attested character instead of a repeat.
+
+And the change is not cosmetic. Measured on the shape:
+
+    9.30 ta<U+0027> filgħodu   ->  "9 u nofs ta' filgħodu"     (unchanged)
+    9.30 ta<U+2019> filgħodu   ->  "9 u nofs ta’ filgħodu"     (unchanged)
+    9.30 ta<U+02BC> filgħodu   ->  "9 u nofs taʼ filgħodu"     ⚠ was "9 punt 30 taʼ filgħodu"
+    9.30 ta<U+2018> filgħodu   ->  "9 punt 30 ta‘ filgħodu"    (still declined, deliberately)
+
+So a real clock shape that used to read *nine point thirty* now reads as a time. Verified: the mt golden
+moves **0 of 200** rows, a 1,330-row differential over every apostrophe variant × day-part × time shape is
+0 differ on both engines, and the 2,734-text corpus is still 0 differ.

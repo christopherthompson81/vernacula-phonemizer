@@ -180,23 +180,6 @@ public sealed class MacedonianPhonemizer : ILanguage
     }
 
     /**
-     * One number token → its words, phonemized.
-     *
-     * ⚠ DEAD, AND LEFT THAT WAY DELIBERATELY (#1095). Nothing calls this: `Text()` below reaches
-     * `NumberToText` directly, because it has to split the decimal comma first. It is recorded rather than
-     * repaired — its `return digits` would put a DIGIT STRING into the phoneme stream past 2^53, so it is a
-     * live trap for whoever wires it up, and the fix is to use the arm in `Text()` rather than to give this
-     * one a `raw`. Ported as dead for the same reason it is kept dead in the TypeScript.
-     */
-    private static string Number(string digits)
-    {
-        var n = Js.Number(digits);
-        if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d)) return digits;
-        return string.Join(" ", Numbers.NumberToText(n).Split(' ')
-            .Where(w => w.Length > 0).Select(PhonemizeWord));
-    }
-
-    /**
      * A word (Macedonian Cyrillic) / number / punctuation token. ⚠ The number carries its DECIMAL COMMA
      * (Macedonian's decimal mark) so the comma is not read as clause punctuation — `6,5` was coming out as
      * a phrase break between "шест" and "пет". A 3-digit block after the comma is GROUPING, not a fraction

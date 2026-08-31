@@ -160,19 +160,6 @@ export function phonemizeWord(word: string): string {
 }
 
 // ── Numbers (decimal; Macedonian) ─────────────────────────────────────────────
-/**
- * One number token → its words, phonemized.
- *
- * ⚠ DEAD, AND LEFT THAT WAY DELIBERATELY (#1095). Nothing calls this: `text()` below reaches `numberToText`
- * directly, because it has to split the decimal comma first. It is recorded rather than repaired — its
- * `return digits` would put a DIGIT STRING into the phoneme stream past 2^53, so it is a live trap for
- * whoever wires it up, and the fix is to use the arm in `text()` rather than to give this one a `raw`.
- */
-function number(digits: string): string {
-    const n = Number(digits);
-    if (!Number.isSafeInteger(n)) return digits;
-    return numberToText(n).split(" ").filter(Boolean).map(phonemizeWord).join(" ");
-}
 
 // A word (Macedonian Cyrillic) / number / punctuation token. The number carries its DECIMAL COMMA
 // (Macedonian's decimal mark) so the comma is not read as clause punctuation — `6,5` was coming out as a

@@ -203,3 +203,45 @@ invisible character to be written as an escape AND NAMED on its line or the one 
 comments first, so the naming has to be a TRAILING `//`, which is why Lithuanian's identical constant
 carries `// space, NBSP, NNBSP, thin space` on the line rather than in the doc comment above it. Fixed in
 both engines.
+
+## Run 9 — 2026-08-31 20:10 — closing #1214, on the measurement rather than on the rule
+
+The claim half was corrected for smj in #1220. The READING half was left open, and the question it turns on
+is how often the shape occurs. Measured across **all seven languages that call `separatorHygiene`** and every
+text any of them has — the grc/kl/quc goldens plus every mined and attest artifact:
+
+    lang    texts   °+scale   bare °   unit-after-digit   abbrev dot   %   currency
+    grc       200         0        0                  0            2   3          0
+    kl        200         0        0                  0            0   0          0
+    quc       175         0        0                  0            0   0          0
+    smj / naq / nog / mto — no text at all
+    TOTAL                 0        0                  0            2   3          0
+
+**The defect class has ZERO instances.** `°C` never occurs; neither does a bare `°`, a unit letter after a
+digit, or a currency sign. grc's five hits are a `%` (a SIGN, dropped, which is the documented behaviour and
+not this defect) and a Latin car model inside `Audi TT.` — neither is the sign-plus-bound-letter shape.
+
+⚠ **AND THE ×0 PARTLY REFLECTS THE ABSENCE OF A CORPUS, WHICH IS SAID HERE RATHER THAN GLOSSED.** Four of the
+seven have no text whatsoever; the other three have only a 175–200-row golden. This is not the same kind of
+zero as Latvian's `§` ×0 over 2,703 real lines.
+
+So why close it rather than write the rule? Because unlike #1212 — where the fix was to SPEND A SEPARATOR,
+emitted no word, and had Lithuanian's 24/24 measurement behind the shape — this one has no move that is
+clearly better:
+
+  · emitting a degree word needs vocabulary these languages by definition do not have;
+  · dropping the bound letter replaces an audible-but-wrong reading with a SILENT one, and the repo's own
+    doctrine prefers refusing whole and leaving VISIBLE — a deletion is not visible either.
+
+Two arguable options, zero measured instances, and a shared-tier change across eight languages. That is the
+shape this repo's discipline exists to decline.
+
+**What was done instead, and it is the whole of what the issue asked for at minimum.** The false claim was
+not only smj's: all six other `separatorHygiene` callers carried the IDENTICAL sentence, byte for byte
+(`md5 761bb526df38` over the same span in every one). Corrected in all six TypeScript headers plus the one
+C# header that carried it (`AncientGreek/Normalize.cs`); `kl` and `quc` phrase their C# headers differently
+and never made the claim.
+
+⚠ Still true, and repeated so nobody acts on this without checking: **the gate behaviour itself could not be
+verified.** The headers cite `mine.ts scan`, which is not in this repository, so what is recorded is what the
+engine emits — not what some scanner elsewhere does or does not catch.
