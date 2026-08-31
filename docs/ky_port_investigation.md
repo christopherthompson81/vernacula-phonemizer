@@ -137,9 +137,11 @@ No un-phonemized digit or sign leaks into either engine's phoneme stream over th
 ## Run 7 — 2026-08-30 ~20:15 — the pattern diff, static and dynamic
 
 The static patterns are checked the fleet way — `csharp/tools/regex-diff` replays Node's recorded match
-results for every pattern in `csharp/regex-corpus.jsonl` through the C# `JsRegex` and compares:
+results for every pattern in `csharp/regex-corpus.jsonl` through the C# `JsRegex` and compares. The 27
+ky records (26 from `normalize.ts` + the TOKEN from `kyrgyz.ts`):
 
-    124,812 probe results identical, 0 DIFFER, 0 threw
+    ky corpus replay     1,421 probe results identical, 0 DIFFER, 0 threw
+    full corpus replay   124,812 probe results identical, 0 DIFFER, 0 threw   (all languages)
     0 patterns refused by JsRegex
 
 The dynamic patterns (the 10 `new RegExp` constructions in `normalize.ts` — the two ordinal heads, the
@@ -204,6 +206,31 @@ run off the seam (`JsRe.Replace` on the captured side) are the two raw replaces 
 TypeScript unchanged — this port is a C#-only mirror of an already-green TS engine, per the bidirectional
 policy. The fleet count rose by one language (ky) and the unported list dropped by one; no other language
 moved.
+
+## Run 11 — 2026-08-31 ~03:15 — rebase onto current main
+
+Main took five ports while this branch was in flight (ki #1206, ltg #1207, lv #1208, lt #1210, smj #1213).
+The rebase had one conflict, in the expected place:
+
+    Bootstrap.cs   the append-only registration list — five new RegisterSelf() lines on main,
+                   Kyrgyz's on this branch, both at the same spot. Kept both; order is irrelevant
+                   (each factory self-registers).
+
+Nothing else touched shared core (`csharp/Vernacula.Phonemizer/Core`, the engine root, or `src/`), so the
+ky-specific results are structurally unchanged and were re-run rather than re-derived to confirm:
+
+    ky seam gates      poison 0 · provenance 4048/4048 (100%) · IpaSpan 3623/3623 (100%), 0 wrong
+    vitest kyrgyz      13/13
+    regex-diff ky      1,421 probe results identical, 0 DIFFER
+
+Recounted on the new base:
+
+    dotnet test (full suite)                 5,136 pass, 0 fail   (36 Kyrgyz + 1 manifest mapping)
+    parity, fleet                            170 languages byte-identical, 33,139 rows, 0 differ
+                                               ky  OK  200 rows   (smj has no golden, so +4 languages)
+    parity --unported                        193 codes · 174 ported · 19 UNPORTED — ky is gone from the list
+
+TypeScript unchanged.
 
 ## Read for correctness — recorded, not fixed
 
