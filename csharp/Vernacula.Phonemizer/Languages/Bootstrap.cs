@@ -206,6 +206,7 @@ public static class Bootstrap
             Santali.SantaliPhonemizer.RegisterSelf();
             ScottishGaelic.ScottishGaelicPhonemizer.RegisterSelf();
             Shan.ShanPhonemizer.RegisterSelf();
+            Slovak.SlovakPhonemizer.RegisterSelf();
             Tatar.TatarPhonemizer.RegisterSelf();
             TotontepecMixe.TotontepecMixePhonemizer.RegisterSelf();
             Turkmen.TurkmenPhonemizer.RegisterSelf();
