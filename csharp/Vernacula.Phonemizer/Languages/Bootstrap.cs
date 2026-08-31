@@ -198,6 +198,7 @@ public static class Bootstrap
             Maltese.MaltesePhonemizer.RegisterSelf();
             Tashelhit.TashelhitPhonemizer.RegisterSelf();
             Kiche.KicheePhonemizer.RegisterSelf();
+            Mossi.MossiPhonemizer.RegisterSelf();
         }
     }
 }
