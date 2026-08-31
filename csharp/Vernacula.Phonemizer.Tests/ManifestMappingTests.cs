@@ -932,4 +932,9 @@ public class ManifestMappingTests
     public void NogaiManifestIsFullyMapped() =>
         AssertFullyMapped("languages/nogai", "nogai.jsonc", Languages.Nogai.Manifest.DEF,
             "language", "name", "script");
+
+    [Fact]
+    public void SantaliManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/santali", "santali.jsonc", Languages.Santali.Manifest.DEF,
+            "language", "name", "script");
 }
