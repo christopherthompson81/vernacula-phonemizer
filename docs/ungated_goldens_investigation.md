@@ -102,3 +102,68 @@ theories, +1 from the Maltese pin below.
 - ⚠ **Worth knowing:** running `gen_parity_goldens.mts` without the FLEURS ledger present yields
   nothing for ~24 codes. It skips them safely, but anyone adding a tier to that tool should re-run the
   Run 3 control before trusting a diff.
+
+## Run 5 — 2026-08-31 12:44 — reviewing the fix, and the trap in my own guard
+
+Reviewed this change the way the port PRs are reviewed. The Run 3 guard — "offer the referee tier only
+when no golden exists yet" — is **wrong**, and the test that finds it is one line:
+
+```
+$ printf 'DELIBERATELY-WRONG\txxx\n' > csharp/goldens/naq.tsv
+$ npx tsx tools/gen_parity_goldens.mts naq
+0 FLEURS + 0 mined + 0 lexicon-only goldens; 1 empty: naq
+$ cat csharp/goldens/naq.tsv
+DELIBERATELY-WRONG	xxx
+```
+
+⚠ The golden is **WRITE-ONCE**. Making the tool's output depend on its own previous output means the
+file existing is what switches the tier off, so a reference that is corrupt — or merely stale after its
+engine legitimately changes — can never be refreshed, and nothing says so. That is a worse defect than
+the one being fixed, and exactly the class this log exists to catch.
+
+The error underneath it: I used "does a golden exist?" as a proxy for "does this language have a rich
+source?", when the whole problem in Run 3 was that the generator **cannot tell** "no rich source" from
+"the rich source is not in this checkout". A proxy for an unknowable is still unknowable.
+
+Replaced with an explicit opt-in list, `REFEREE_LEXICON_ONLY = {naq, nog, smj}` — a claim about the
+repo, checked once and stated, rather than inferred per run. Re-verified all three properties:
+
+```
+corrupted golden regenerates to the identical md5   cfd81b54b5dce345 → cfd81b54b5dce345
+full regeneration                                   0 modified, 0 new
+run twice                                           byte-identical
+```
+
+Two more things the review turned up:
+
+- ⚠ `mto` is **deliberately not** on the list: its ASJP file yields 3 usable headwords against the
+  generator's 20-row floor. It stays ungated until it has a real source; a 3-row golden would be a gate
+  in name only.
+- ⚠ `en-GB` has a **76,284-headword** wikipron lexicon and no main golden, and the Run 3 inference
+  version skipped it only because the code is cased `en-GB` and the file `en-gb.*`. Accent variants are
+  built by `gen_variant_golden.mts`, not here. Coincidence is not a guard — another reason the list is
+  explicit.
+
+## Run 6 — 2026-08-31 12:52 — the stale claims the fix itself created
+
+Closing the gate made four comments false, in the same way the Maltese comment repaired alongside this
+work was false. Swept and corrected:
+
+| file | claim | now |
+| --- | --- | --- |
+| `LuleSamiTests.cs` | "no FLEURS, no mined artifact **and no lexicon** … produces NO golden … covers this language with ZERO rows" | the lexicon existed all along; smj has a 43-row golden |
+| `nama.ts`, `test/nama.test.ts`, `NamaTests.cs` | "naq HAS NO GOLDEN AND NO CORPUS ARTIFACT … the tests are the whole instrument" | no corpus artifact still true; a 45-row lexicon-only golden now exists |
+
+The naq wording is narrowed rather than deleted, because the substance survives: a headword golden pins
+the **g2p** and not the **normalization**, so for everything downstream of a word those tests really are
+still the instrument. The explicit pins in `LuleSamiTests` are kept for the same reason, plus one a
+golden can never provide — they say WHY a reading is what it is.
+
+## Gates
+
+```
+dotnet test        5,877 passed, 0 failed
+fleet parity       179 languages byte-identical, 0 differ (34,627 rows)   [was 177]
+TS suite           290 files / 5,746 tests
+naq / smj          parity, provenance, ipaspans, poison — all clean
+```

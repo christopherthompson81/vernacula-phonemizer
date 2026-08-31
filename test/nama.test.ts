@@ -69,7 +69,9 @@ describe("Nama (Khoekhoe) canonical IPA", () => {
 // #1140 — BOTH of Nama's diacritic contrasts were being erased before the g2p ran. `nama.jsonc`'s `letters`
 // table declares macron = LONG and circumflex = NASALIZED (annotated there as phonemic), but the accented
 // vowels were outside NATIVE_CLASS, so `makeNativiser` stripped the marks and ⟨ā⟩/⟨â⟩ both arrived as ⟨a⟩.
-// ⚠ naq HAS NO GOLDEN AND NO CORPUS ARTIFACT, so these tests are the entire instrument for this language.
+// ⚠ naq HAS NO CORPUS ARTIFACT (no FLEURS, no mined corpus), so these tests carry most of the weight for
+// this language. It now has a 45-row LEXICON-ONLY golden built from the wiktionary referee, which gates the
+// g2p but pins no normalization — so for everything downstream of a word these tests remain the instrument.
 describe("Nama diacritics — macron is length, circumflex is nasalization (#1140)", () => {
     const say = (w: string): string => getPhonemizer("naq").text(w).trim();
 

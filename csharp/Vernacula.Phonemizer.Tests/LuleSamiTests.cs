@@ -5,11 +5,16 @@
  * as the deferred residual. The hallmark is the North-Saami-style VOICELESS ⟨b d g⟩ → [p t k]
  * (aspiration-not-voicing). First-syllable stress, always emitted.
  *
- * ⚠ THIS SUITE CARRIES MORE THAN THE TS SUITE'S ASSERTIONS, AND DELIBERATELY. smj has no FLEURS split, no
- * mined artifact and no lexicon, so `tools/gen_parity_goldens.mts` produces NO golden for it and the fleet
- * parity run covers this language with ZERO rows. That makes this file the only standing regression gate
- * the port has, so the multigraph longest-match order and the four number stem alternations — which are
- * data an ordinary golden would pin implicitly — are pinned explicitly here instead.
+ * ⚠ THIS SUITE CARRIES MORE THAN THE TS SUITE'S ASSERTIONS, AND DELIBERATELY. smj has no FLEURS split and
+ * no mined artifact, so it was for a long time covered by the fleet parity run with ZERO rows, and this
+ * file was the only standing regression gate the port had — hence the multigraph longest-match order and
+ * the four number stem alternations pinned explicitly here, being data an ordinary golden would pin
+ * implicitly.
+ * ⚠ THE "no lexicon" HALF OF THAT WAS WRONG AND IS NOW FIXED: `smj.asjp-swadesh.tsv` was in the tree the
+ * whole time, under `tools/referee-eval/referees/`, which `gen_parity_goldens.mts` did not scan. It does
+ * now, and smj has a 43-row lexicon-only golden — so parity, provenance, ipaspans and poison all cover
+ * this language. The explicit pins below are kept: a headword golden pins the g2p and not the
+ * normalization, and these assertions say WHY each reading is what it is, which a golden never does.
  *
  * Every expected value is the TypeScript engine's own output.
  */

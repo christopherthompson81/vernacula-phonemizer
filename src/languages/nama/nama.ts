@@ -83,8 +83,11 @@ export function phonemizeWord(word: string): string {
  * and both contrasts were erased before the g2p ran: `ǃkhās` read *ᵏǃʰas* not *ᵏǃʰaːs*, `ǂgâ` read *ᵏǂa* not
  * *ᵏǂã*. Nothing looked broken, because a folded letter still produces a sound.
  *
- * ⚠ naq HAS NO GOLDEN AND NO CORPUS ARTIFACT in this repo, so no differential can witness this and the tests
- * are the whole instrument. Both cases are listed because the nativiser flags here are "u", not "iu".
+ * ⚠ naq HAS NO CORPUS ARTIFACT in this repo — no FLEURS split, no mined corpus — so no running-text
+ * differential can witness this and the tests carry most of the weight. Both cases are listed because the
+ * nativiser flags here are "u", not "iu". (It does now have a 45-row LEXICON-ONLY golden, built from
+ * `naq.wiktionary-khoekhoe.tsv`: that pins the g2p, which is what this class is about, but not the
+ * normalization, so "the tests are the whole instrument" still holds for everything downstream of a word.)
  *
  * ⚠ THE COST, STATED RATHER THAN DISCOVERED: ⟨â ê î ô û⟩ is EXACTLY the Afrikaans circumflex set, and
  * Afrikaans is the dominant contact language where this engine is used. Judging those clusters native means
