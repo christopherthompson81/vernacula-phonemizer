@@ -37,7 +37,9 @@ foreach (var line in File.ReadLines(path))
     bool global = re.Global;
     foreach (var pair in doc.GetProperty("matches").EnumerateArray())
     {
-        var input = pair[0].GetString()!;
+        // ⚠ THE SUBJECT IS DECODED TOO (#1227). It used to be read raw, which is why no probe could
+        // carry a lone surrogate and why the `u`-mode negated-class divergence was invisible here.
+        var input = Decode(pair[0].GetString()!);
         var want = pair[1].EnumerateArray().Select(x => Decode(x.GetString()!)).ToArray();
         string[] got;
         try

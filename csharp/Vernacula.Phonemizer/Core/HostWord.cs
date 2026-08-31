@@ -68,10 +68,19 @@ public static class HostWord
      * Drop combining marks so precomposed and decomposed accents behave alike, then map what NFD cannot
      * reach.
      */
+    /// <remarks>
+    /// ⚠ `Js.Normalize`, NOT `string.Normalize` (#1199, reached via #1227). .NET throws
+    /// `ArgumentException: String contains invalid Unicode code points` on an UNPAIRED surrogate where JS
+    /// composes the well-formed parts around it and leaves the half alone. This site was written with the
+    /// raw call and was safe only by accident: the nativiser reaches it through a `u`-mode NEGATED CLASS,
+    /// and JsRegex used to exclude lone surrogates from those, so no unpaired half ever arrived. Making
+    /// negated classes match JS (#1227) made the path live, and `LoneSurrogateTests` caught it the same
+    /// minute — which is the whole reason that guard walks every entry point by reflection.
+    /// </remarks>
     public static string FoldLatinToBase(string w) =>
         UNDECOMPOSABLE_RE.Replace(
-            MarksRun.Replace(w.Normalize(NormalizationForm.FormD), "")
-                .Normalize(NormalizationForm.FormC),
+            Js.Normalize(MarksRun.Replace(Js.Normalize(w, NormalizationForm.FormD), ""),
+                NormalizationForm.FormC),
             c => UNDECOMPOSABLE.TryGetValue(c.Value, out var v) ? v : c.Value);
 
     /**

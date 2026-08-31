@@ -246,8 +246,29 @@ public static class JsRegex
     // astral character, and \p{L} matches NEITHER half of an astral letter. Every "any character
     // except..." construct is therefore emitted as "a whole surrogate pair, OR a non-surrogate unit",
     // and every \p{...} gains its astral half as an alternation.
+    // ⚠ THE PAIR ALTERNATIVE COMES FIRST EVERYWHERE IT IS USED, so a well-formed pair is consumed whole
+    // and the single-unit arm beside it only ever sees an UNPAIRED half — which that arm now MATCHES, as
+    // JS `u` does (#1227). The four shorthand negations below and the negated-class branch all used to
+    // exclude "\uD800-\uDFFF" there; that excluded a lone surrogate the reference engine accepts.
     private const string AstralPair = "[\uD800-\uDBFF][\uDC00-\uDFFF]";
-    private const string NoSurrogate = "\uD800-\uDFFF";
+
+    /**
+     * The guard on the SINGLE-UNIT arm of every negated class: match one code unit unless it is half of a
+     * WELL-FORMED PAIR. A LONE surrogate IS matched, because JS `u` matches one (#1227).
+     *
+     * ⚠ IT IS NOT `(?![\uD800-\uDFFF])`, WHICH IS WHAT IT USED TO BE. That excluded every surrogate, so a
+     * lone one never matched and this engine silently disagreed with the reference — observable in a
+     * READING (Luxembourgish's stress rule: `ge\uD800é` is ɡəˈeː in TS and was ɡˈæeː here) and unprobeable
+     * until #1227 fixed the corpus transport.
+     * ⚠ AND IT IS NOT `(?!AstralPair)` ALONE EITHER, which is where the first cut of this fix landed: that
+     * refuses the HIGH half of a pair and still matches the LOW half, so `^[^\p{L}]` began matching inside
+     * `𠀁` — the opposite error, and one the new probes caught immediately.
+     * The clauses are: not the start of a pair; and either the unit is not a low surrogate, or it is not
+     * preceded by a high one. High-followed-by-low IS a pair by definition, so those two together identify
+     * exactly "the second half of a pair" without blocking a lone low that follows an ordinary character.
+     */
+    private const string NotPairHalf =
+        "(?!" + AstralPair + ")(?<![\uD800-\uDBFF](?=[\uDC00-\uDFFF]))";
     // ⚠ /i WITHOUT /u NEEDS THE OPPOSITE OF THE WIDENING — .NET IgnoreCase equates ONE non-ASCII
     // character with an ASCII one that JS legacy /i refuses to: U+212A KELVIN with k/K. (Measured,
     // not assumed: over the whole BMP, .NET equates exactly that pair to an ASCII letter, JS legacy
@@ -550,16 +571,30 @@ public static class JsRegex
                 if (foldWide) AppendFoldExtras(body);
                 if (negated && unicode)
                 {
-                    // "any code point except these": a whole astral pair (unless the class itself
-                    // covers it), or one non-surrogate unit. Emitting plain [^…] would match a LONE
-                    // SURROGATE and report half a character as the answer.
-                    // ⚠ THE SURROGATE EXCLUSION IS A LOOKAHEAD, NOT A CLASS MEMBER. Appending
-                    // "\uD800-\uDFFF" to the body corrupts a body that ends in a literal hyphen:
-                    // [^a-] became [^a-\uD800-\uDFFF], reading "a-\uD800" as a RANGE, and stopped
-                    // matching "q" entirely. The body must be emitted exactly as JS wrote it.
+                    // "any code point except these": a whole astral pair (unless the class itself covers
+                    // it), or one code unit. The pair alternative comes FIRST, so a well-formed pair is
+                    // consumed whole and the single-unit arm only ever sees an UNPAIRED half — which is
+                    // exactly JS's `u` semantics.
+                    //
+                    // ⚠ THE SINGLE-UNIT ARM DELIBERATELY MATCHES A LONE SURROGATE (#1227), AND FOR A LONG
+                    // TIME IT DELIBERATELY DID NOT. It carried `(?![\uD800-\uDFFF])`, on the reasoning
+                    // that matching half a character "reports half a character as the answer". That
+                    // reasoning is defensible about Unicode and wrong about this project: JS `u` DOES match
+                    // a lone surrogate with a negated class, the TypeScript engine is the reference these
+                    // goldens encode, and a deliberate improvement over the reference is still a parity
+                    // break. It was observable in a READING — Luxembourgish's stress rule tests such a
+                    // class, so `ge\uD800é` came out ɡəˈeː in TS and ɡˈæeː here — and it was invisible to
+                    // `regex-diff`, whose corpus transport could not carry an unpaired half until #1227
+                    // fixed it. With the probe in place the divergence measured 64 results over 12
+                    // patterns; removing the lookahead takes it to 0.
+                    //
+                    // ⚠ THE ASTRAL EXCLUSION IS STILL A LOOKAHEAD, NOT A CLASS MEMBER. Appending a range
+                    // to the body corrupts a body that ends in a literal hyphen: [^a-] became
+                    // [^a-\uD800-\uDFFF], reading "a-\uD800" as a RANGE, and stopped matching "q"
+                    // entirely. The body must be emitted exactly as JS wrote it.
                     sbOut.Append("(?:");
                     if (astral.Count > 0) sbOut.Append("(?!").Append(UnicodeScripts.GuardAstral(string.Join("|", astral))).Append(')');
-                    sbOut.Append(AstralPair).Append("|(?![").Append(NoSurrogate).Append("])[^").Append(body).Append("])");
+                    sbOut.Append(AstralPair).Append('|').Append(NotPairHalf).Append("[^").Append(body).Append("])");
                 }
                 else if (astral.Count == 0)
                 {
@@ -694,7 +729,7 @@ public static class JsRegex
             case 'd': sb.Append(inClass ? "0-9" : "[0-9]"); return i + 2;
             case 'D':
                 if (inClass) throw new NotSupportedException($"JsRegex: in-class \\D not supported: {pattern}");
-                sb.Append(unicode ? $"(?:{AstralPair}|[^0-9{NoSurrogate}])" : "[^0-9]");
+                sb.Append(unicode ? $"(?:{AstralPair}|{NotPairHalf}[^0-9])" : "[^0-9]");
                 return i + 2;
             case 'w':
             {
@@ -706,13 +741,13 @@ public static class JsRegex
             {
                 if (inClass) throw new NotSupportedException($"JsRegex: in-class \\W not supported: {pattern}");
                 var w = foldWide ? FoldWordInner : AsciiWordInner;
-                sb.Append(unicode ? $"(?:{AstralPair}|[^{w}{NoSurrogate}])" : "[^" + w + "]");
+                sb.Append(unicode ? $"(?:{AstralPair}|{NotPairHalf}[^{w}])" : "[^" + w + "]");
                 return i + 2;
             }
             case 's': sb.Append(inClass ? JsWhitespaceInner : "[" + JsWhitespaceInner + "]"); return i + 2;
             case 'S':
                 if (inClass) throw new NotSupportedException($"JsRegex: in-class \\S not supported (except the [\\s\\S] idiom): {pattern}");
-                sb.Append(unicode ? $"(?:{AstralPair}|[^{JsWhitespaceInner}{NoSurrogate}])" : "[^" + JsWhitespaceInner + "]");
+                sb.Append(unicode ? $"(?:{AstralPair}|{NotPairHalf}[^{JsWhitespaceInner}])" : "[^" + JsWhitespaceInner + "]");
                 return i + 2;
             case 'b':
                 sb.Append(inClass ? "\\u0008" : WordBoundaryFor(foldWide)); // in-class \b is BACKSPACE in JS
@@ -829,7 +864,7 @@ public static class JsRegex
             {
                 sb.Append("(?:");
                 if (catAstral is not null) sb.Append("(?!").Append(UnicodeScripts.GuardAstral(catAstral)).Append(')');
-                sb.Append(AstralPair).Append("|[^\\p{").Append(name).Append('}').Append(NoSurrogate).Append("])");
+                sb.Append(AstralPair).Append('|').Append(NotPairHalf).Append("[^\\p{").Append(name).Append('}').Append("])");
             }
             else
             {
