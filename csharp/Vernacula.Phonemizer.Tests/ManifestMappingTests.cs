@@ -934,6 +934,11 @@ public class ManifestMappingTests
             "language", "name", "script");
 
     [Fact]
+    public void PapiamentoManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/papiamento", "papiamento.jsonc", Languages.Papiamento.Manifest.MANIFEST,
+            "language", "name", "script");
+
+    [Fact]
     public void SantaliManifestIsFullyMapped() =>
         AssertFullyMapped("languages/santali", "santali.jsonc", Languages.Santali.Manifest.DEF,
             "language", "name", "script");
