@@ -202,6 +202,7 @@ public static class Bootstrap
             Mossi.MossiPhonemizer.RegisterSelf();
             Nahuatl.NahuatlPhonemizer.RegisterSelf();
             Nogai.NogaiPhonemizer.RegisterSelf();
+            Papiamento.PapiamentoPhonemizer.RegisterSelf();
             Santali.SantaliPhonemizer.RegisterSelf();
         }
     }
