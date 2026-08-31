@@ -922,4 +922,9 @@ public class ManifestMappingTests
     public void NahuatlManifestIsFullyMapped() =>
         AssertFullyMapped("languages/nahuatl", "nahuatl.jsonc", Languages.Nahuatl.Manifest.MANIFEST,
             "language", "name", "script");
+
+    [Fact]
+    public void NamaManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/nama", "nama.jsonc", Languages.Nama.Manifest.DEF,
+            "language", "name", "script");
 }
