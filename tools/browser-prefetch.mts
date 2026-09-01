@@ -10,11 +10,15 @@
  * missing optional TSV is not an error to `loadTsv`: it is an empty Map, and every word then takes the OOV
  * fallback and gets a plausible wrong reading. This asks the engine instead.
  *
- * ⚠ THE OUTPUT HAS TWO PHASES BECAUSE THE ENGINE DOES. `engine` is what importing the registry reads —
+ * ⚠ THE OUTPUT HAS TWO PHASES BECAUSE THE ENGINE DOES. `engine` is what importing `src/index.ts` reads —
  * every language's manifest, at module scope, 182 files / 4.5 MB — and it is needed whatever language you
- * want. `languages[code]` is what `getPhonemizer(code)` then reads on top of that. A consumer that ships
- * only the second gets a list that worked in this process, where the import had already happened, and
- * fails in the browser.
+ * want. `languages[code]` is what `phonemizeAsync(text, code)` then reads on top of that. A consumer that
+ * ships only the second gets a list that worked in this process, where the import had already happened,
+ * and fails in the browser.
+ *
+ * The engine phase imports the ENTRY, not `registry.ts`: `index.ts` and `neuralRegistry.ts` have module
+ * scope of their own, and importing them inside the language phase would charge their reads to whichever
+ * language happened to go first.
  *
  * ⚠ ONE CHILD PROCESS PER LANGUAGE, BECAUSE THE LOADERS MEMOIZE. Every table is cached in its module
  * (`READINGS ??= …`, `let cached`), so in a single process the SECOND language to want a shared file
@@ -60,7 +64,7 @@ let sink: string[] = [];
 setDataSource({ read: (key) => { const bytes = base.read(key); sink.push(key); return bytes; } });
 
 const engineSink = sink;
-await import("../src/registry.ts");
+const { phonemizeAsync } = await import("../src/index.ts");
 const engine = [...new Set(engineSink)].sort();
 
 const bytes = (keys: string[]): number => keys.reduce((n, k) => n + base.read(k).byteLength, 0);
@@ -79,7 +83,6 @@ const bytes = (keys: string[]): number => keys.reduce((n, k) => n + base.read(k)
  */
 async function recordOne(code: string): Promise<string[]> {
     sink = [];
-    const { phonemizeAsync } = await import("../src/index.ts");
     await phonemizeAsync(probe, code);
     return [...new Set(sink)].sort();
 }
