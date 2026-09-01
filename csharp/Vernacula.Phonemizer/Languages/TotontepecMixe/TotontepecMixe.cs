@@ -59,10 +59,17 @@ public static class TotontepecMixePhonemizer
             // Only reached when every grapheme (digraphs included) has declined, so the language's own
             // reading wins.
             {
+                // ⚠ THE SEGMENT IS CLASSIFIED, NOT ASSUMED CONSONANTAL. `LatinPhone` returns real VOWEL
+                // phones for letters that reach here — å→[oː], æ, and the circumflex/tilde series — and
+                // marking those `Vowel = false` made them invisible to the intervocalic ⟨d g⟩ lenition and
+                // the word-final ⟨v⟩ terminus, both of which ask whether the NEIGHBOUR is a vowel.
+                // ⚠ The residual is the helper's own scope: `IsVowel` knows this language's inventory
+                // (aeiouæɨʌʊ), so ⟨ø⟩ and ⟨œ⟩ are still consonantal. Widening it would be a claim about the
+                // phonology no source here supports.
                 var ph = CONS.TryGetValue(c, out var cp)
                     ? cp
                     : LatinPhones.LatinPhone(c, new PhoneOpts { Initial = i == 0, IncludeH = true });
-                if (ph is not null) segs.Add(new Seg { Ph = ph, Vowel = false });
+                if (ph is not null) segs.Add(new Seg { Ph = ph, Vowel = IsVowel(ph) });
             }
             i++;
         }
@@ -77,6 +84,11 @@ public static class TotontepecMixePhonemizer
             if (t.AsSpan(i).StartsWith(d.Key, StringComparison.Ordinal)) return d;
         return null;
     }
+
+    /** TS `isVowel` — this language's OWN vowel inventory, tested against the phone's FIRST character
+     *  (so a length mark or a diacritic after it does not matter). */
+    private static bool IsVowel(string ph) =>
+        ph.Length > 0 && "aeiouæɨʌʊ".Contains(ph[0], StringComparison.Ordinal);
 
     private static bool Nas(string ph) => ph == "m" || ph == "n" || ph == "ɲ" || ph == "ŋ";
 

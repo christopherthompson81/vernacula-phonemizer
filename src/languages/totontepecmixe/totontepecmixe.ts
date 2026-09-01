@@ -56,8 +56,13 @@ export function phonemizeWord(word: string): string {
         }
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
         // reached when every grapheme (digraphs included) has declined, so the language's own reading wins.
+        // ⚠ AND THE SEGMENT IS CLASSIFIED, NOT ASSUMED CONSONANTAL. `latinPhone` returns real VOWEL phones
+        // for letters that reach it — å→[oː], æ, œ, ø, and the circumflex/tilde/ring vowels — and marking
+        // those `vowel: false` made them invisible to the intervocalic ⟨d g⟩ lenition and the word-final
+        // ⟨v⟩ terminus, both of which ask whether the NEIGHBOUR is a vowel. `aøda` read *aøda* where `aoda`
+        // reads *aoða*. No CONS value is affected: none of them begins with a vowel character.
         { const ph = CONS[c] ?? latinPhone(c, { initial: i === 0, includeH: true });
-          if (ph !== undefined) segs.push({ ph, vowel: false }); }
+          if (ph !== undefined) segs.push({ ph, vowel: isVowel(ph) }); }
         i++;
     }
     consonantPasses(segs);

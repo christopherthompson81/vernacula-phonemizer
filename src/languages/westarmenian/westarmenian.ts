@@ -3,7 +3,9 @@
  * standard. Reuses the shared, manifest-driven Armenian engine (armenian.ts `makeArmenianEngine`); everything specific
  * to Western Armenian lives in westarmenian.jsonc — chiefly the CONSONANT SHIFT (classical voiced ⟨բ դ գ ձ ջ⟩ and
  * classical aspirate ⟨փ թ ք ց չ⟩ merge to voiceless-aspirated [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]; classical voiceless ⟨պ տ կ ծ ճ⟩ →
- * voiced [b d ɡ d͡z d͡ʒ]), the rhotic neutralisation ⟨ր ռ⟩→[ɾ], and the ⟨յու/իւ⟩→[ʏ] / ⟨յո⟩→[œ] digraphs.
+ * voiced [b d ɡ d͡z d͡ʒ]), the rhotic neutralisation ⟨ր ռ⟩→[ɾ], the front-rounded ⟨իւ⟩→[ʏ] digraph and the
+ * POST-CONSONANT-ONLY ⟨յու⟩→[ʏ] (word-initial ⟨յու⟩ stays the glide [ju]). ⚠ There is NO ⟨յո⟩→[œ]: it
+ * falls out as ⟨յ⟩→j + ⟨ո⟩→o = [jo] (յոթ→jotʰ), nothing in the manifest maps to [œ], and the test pins it.
  *
  * Validated vs wikipron hye_armn_w broad (17211) + narrow (17584).
  */

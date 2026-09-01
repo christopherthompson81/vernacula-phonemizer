@@ -5,7 +5,6 @@
  * repetition mark. The letter values, tone marks, number words and the encyclopedic record live in
  * shan.jsonc.
  */
-import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -237,9 +236,11 @@ const BURMESE_ONLY = /[က-ဃစ-ဏဒ-နဖ-ဘဟ-အ]/u;
 
 class ShanPhonemizer implements Phonemizer {
     text(input: string): string {
-        // Shan digits (U+1090–1099) fold to ASCII up front (core/unicode.ts), so a Shan-digit run composes
-        // exactly like a Western one. The token class still admits ႐-႙ so an unfolded digit could never
-        // fall between the WORD ranges and vanish.
+        // Shan digits (U+1090–1099) fold to ASCII in `normalizeShan` below — NOT here — so a Shan-digit run
+        // composes exactly like a Western one. ⚠ This file used to import `foldNativeDigits` and never call
+        // it; the fold has always been the normalizer's, which is what the next comment says and is the
+        // whole reason that pass has to run first. The token class still admits ႐-႙ so an unfolded digit
+        // could never fall between the WORD ranges and vanish.
         // normalize.ts FIRST — it folds the native digits itself (the engine's own fold runs too late for a
         // de-grouping rule to see them) and its clock, degree and era steps need the figures still adjacent
         // to their marks — then the shared symbol tier, which matches a unit only when a NUMBER is adjacent.

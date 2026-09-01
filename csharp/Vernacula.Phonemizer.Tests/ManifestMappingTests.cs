@@ -986,4 +986,20 @@ public class ManifestMappingTests
     public void TurkmenManifestIsFullyMapped() =>
         AssertFullyMapped("languages/turkmen", "turkmen.jsonc", Languages.Turkmen.Manifest.DEF,
             "language", "name", "script");
+
+    [Fact]
+    public void KabuverdianuManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/kabuverdianu", "kabuverdianu.jsonc",
+            Languages.Kabuverdianu.Manifest.MANIFEST,
+            "language", "name", "script");
+
+    [Fact]
+    public void LuoManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/luo", "luo.jsonc", Languages.Luo.Manifest.MANIFEST,
+            "provenance", "convention");
+
+    [Fact]
+    public void UmbunduManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/umbundu", "umbundu.jsonc", Languages.Umbundu.Manifest.MANIFEST,
+            "provenance", "convention");
 }

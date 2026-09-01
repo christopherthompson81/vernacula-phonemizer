@@ -34,6 +34,34 @@ describe("Totontepec Mixe (ayöök) canonical IPA", () => {
     test("registry wiring", () => {
         expect(getPhonemizer("mto").text("kääm").trim()).toBe("kæːm");
     });
+
+    /**
+     * ⚠ A LETTER THAT REACHES `latinPhone` IS CLASSIFIED, NOT ASSUMED CONSONANTAL. The scan's miss branch
+     * used to push `{ ph, vowel: false }` unconditionally while the file's own `isVowel` helper sat unused —
+     * so `latinPhone`'s genuine VOWEL returns (å→[oː], æ, œ, ø, and the circumflex/tilde/ring vowels) were
+     * invisible to the two passes that ask whether the NEIGHBOUR is a vowel: the intervocalic ⟨d g⟩ lenition
+     * and the word-final ⟨v⟩ terminus.
+     *
+     * ⚠ AND THE SHIPPED PATH HID IT. `text()` nativises first, folding ø→o, so the defect was reachable only
+     * through the EXPORTED `phonemizeWord` — which is what this file and referee-eval call. Two entry points,
+     * two engines, for exactly the inputs the dead helper was written for.
+     */
+    test("a latinPhone vowel counts as a vowel for the lenition and the ⟨v⟩ terminus", () => {
+        expect(phonemizeWord("aoda")).toBe("aoða"); //  the control: a TABLE vowel lenites the ⟨d⟩
+        expect(phonemizeWord("aåda")).toBe("aoːða"); // …and so does a miss-branch one (was *aoːda*)
+        expect(phonemizeWord("aæga")).toBe("aæɣa"); //  (was *aæɡa*)
+        expect(phonemizeWord("aæv")).toBe("aæf"); //    the word-final ⟨v⟩ terminus (was *aæv*)
+        expect(phonemizeWord("aîda")).toBe("aiða"); //  the circumflex series reaches it too
+        // ⚠ NO CONS VALUE IS AFFECTED — none of them begins with a vowel character.
+        expect(phonemizeWord("cumantoc")).toBe("kumandok");
+        expect(phonemizeWord("nyuhm")).toBe("ɲum̥");
+        // ⚠ AND THE RESIDUAL IS STATED RATHER THAN WIDENED. `isVowel` recognises this language's OWN
+        // inventory — `aeiouæɨʌʊ` — so ⟨ø⟩→[ø] and ⟨œ⟩→[œ] are still classified consonantal and still do
+        // not lenite. Extending the set to cover them would be a claim about the phonology that no source
+        // here supports; wiring the helper fixes what the helper knows, and the rest is disclosed.
+        expect(phonemizeWord("aøda")).toBe("aøda");
+        expect(phonemizeWord("aœda")).toBe("aœda");
+    });
 });
 
 // ---------------------------------------------------------------------------------------------------------
