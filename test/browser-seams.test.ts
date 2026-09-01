@@ -98,7 +98,18 @@ describe("the browser seams", () => {
         const node = rec.getDataSource();
         expect(node, "Node auto-installs its source via process.getBuiltinModule").toBeDefined();
         const prefetched = new Map<string, Uint8Array>();
-        rec.setDataSource({ read: (key) => { const b = node!.read(key); prefetched.set(key, b); return b; } });
+        // ⚠ AND RECORD WHAT NODE ITSELF COULD NOT SERVE. Some reads are ALLOWED to fail — `loadTsv`'s
+        //   `optional`, every model loader — so an absent key is not evidence of a broken seam, and
+        //   counting it as a miss below would make this test fail for a language whose optional table
+        //   simply is not shipped. Every optional file happens to exist in this checkout, which is exactly
+        //   why the distinction has to be made here rather than when it first bites.
+        const absent = new Set<string>();
+        rec.setDataSource({
+            read: (key) => {
+                try { const b = node!.read(key); prefetched.set(key, b); return b; }
+                catch (err) { absent.add(key); throw err; }
+            },
+        });
 
         // The two phases the browser consumer has to prefetch separately: importing the engine reads every
         // language's manifest at module scope, and only then does getPhonemizer(lang) read that language's
@@ -122,7 +133,10 @@ describe("the browser seams", () => {
         browser.setDataSource({
             read: (key) => {
                 const bytes = frozen.get(key);
-                if (bytes === undefined) { missed.push(key); throw new Error(`not prefetched: ${key}`); }
+                if (bytes === undefined) {
+                    if (!absent.has(key)) missed.push(key); // Node could not serve it either → not a miss
+                    throw new Error(`not prefetched: ${key}`);
+                }
                 return bytes;
             },
         });
@@ -147,7 +161,13 @@ describe("the browser seams", () => {
             const rec = await import("../src/core/dataSource.ts");
             const node = rec.getDataSource()!;
             const prefetched = new Map<string, Uint8Array>();
-            rec.setDataSource({ read: (key) => { const b = node.read(key); prefetched.set(key, b); return b; } });
+            const absent = new Set<string>();
+            rec.setDataSource({
+                read: (key) => {
+                    try { const b = node.read(key); prefetched.set(key, b); return b; }
+                    catch (err) { absent.add(key); throw err; }
+                },
+            });
 
             const engine = await import("../src/index.ts");
             const text = "hei verden, kringkastingssjefen";
@@ -166,7 +186,10 @@ describe("the browser seams", () => {
             browser.setDataSource({
                 read: (key) => {
                     const bytes = frozen.get(key);
-                    if (bytes === undefined) { missed.push(key); throw new Error(`not prefetched: ${key}`); }
+                    if (bytes === undefined) {
+                        if (!absent.has(key)) missed.push(key); // Node lacked it too → not a seam failure
+                        throw new Error(`not prefetched: ${key}`);
+                    }
                     return bytes;
                 },
             });
@@ -185,6 +208,21 @@ describe("the browser seams", () => {
         },
         120_000,
     );
+
+    test("recordDataKeys reports only keys that EXIST — an absent optional file is not prefetchable", async () => {
+        vi.resetModules();
+        const ds = await import("../src/core/dataSource.ts");
+        const node = ds.getDataSource()!;
+        ds.setDataSource({ read: (key) => node.read(key) });
+        const { keys } = ds.recordDataKeys(() => {
+            try { ds.readData("languages/thai/thai.jsonc"); } catch { /* exists */ }
+            try { ds.readData("languages/thai/no-such-table.tsv"); } catch { /* the point */ }
+        });
+        // ⚠ A READ IS ALLOWED TO FAIL HERE. `loadTsv`'s `optional` and every model loader treat a missing
+        //   file as "degrade", not as an error — so recording the key before the read would put files that
+        //   do not exist into a prefetch manifest and the consumer would ship fetches that 404.
+        expect(keys).toEqual(["languages/thai/thai.jsonc"]);
+    });
 
     test("with no source installed at all, a read is a directed error — never an empty lexicon", async () => {
         vi.resetModules();

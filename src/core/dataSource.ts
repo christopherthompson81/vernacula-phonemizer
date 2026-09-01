@@ -46,13 +46,18 @@ export function getDataSource(): DataSource | undefined {
 
 /** Raw bytes for `key`. Throws if no source is installed, or if the source throws. */
 export function readData(key: string): Uint8Array {
-    recorder?.add(key);
     if (source === undefined) {
         throw new Error(
             `No data source installed — cannot read "${key}". Off Node there is no default: call setDataSource() BEFORE importing the engine (see src/browser.ts).`,
         );
     }
-    return source.read(key);
+    const bytes = source.read(key);
+    // ⚠ RECORDED ONLY ON SUCCESS, AND THE ORDER IS THE WHOLE POINT. Plenty of reads here are ALLOWED to
+    //   fail — `loadTsv`'s `optional`, and every model loader, treat a missing file as "degrade", not as an
+    //   error. Recording before the read would put keys that do not exist into a prefetch manifest, and the
+    //   consumer would ship fetches that 404. You can only prefetch bytes that exist.
+    recorder?.add(key);
+    return bytes;
 }
 
 const UTF8 = new TextDecoder("utf-8");

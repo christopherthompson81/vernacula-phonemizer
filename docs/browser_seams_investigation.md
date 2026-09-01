@@ -127,3 +127,32 @@ rather than the built-in specifier.
 C# parity **189 languages byte-identical, 0 differ** (36,495 rows); provenance **39,540/39,540 (100%)`;
 poison clean on both engines; `regex-diff` **141,184 probe results identical, 0 DIFFER** after re-extracting
 the corpus for the two new patterns (`src/core/dataPath.ts`, `src/core/nodeDataSource.ts`).
+
+## Run 7 — 2026-09-01 — a key that does not exist is not prefetchable
+
+Question (self-review of the diff, while the code review ran): `readData` records the key *before* calling
+`source.read`. What happens for a read that is allowed to fail?
+
+```
+npx tsx …  # sweep 18 languages, collecting keys the engine asks for that NODE ITSELF lacks
+→ []
+```
+
+Raw finding — **empty, in this checkout**, which is the reason to fix it rather than the reason not to.
+Plenty of reads here are *allowed* to fail: `loadTsv`'s `optional`, and every model loader, treat a missing
+file as "degrade", not as an error. Recording before the read means:
+
+- `tools/browser-prefetch.mts` emits keys that do not exist, and the consumer ships fetches that 404;
+- the tool's own `bytes()` re-reads each key and would throw on one;
+- the replay test counts the key as a MISS, so a language whose optional table simply is not shipped would
+  fail a gate that is supposed to be about the seam.
+
+None of it fires today only because every optional file happens to exist here — the same shape as the
+Slovak and Welsh defects earlier in this porting sweep, where every golden instance sat on the safe side.
+
+Fixed in three places: record after a successful read; push in the tool after the read returns; and have
+the replay distinguish "Node could not serve it either" from "the frozen Map was short". Pinned directly by
+`recordDataKeys reports only keys that EXIST`, so the invariant is asserted rather than inherited from the
+contents of a checkout.
+
+`vitest run` 291 files / 5,755 tests.

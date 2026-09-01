@@ -55,7 +55,9 @@ if (base === undefined) throw new Error("no data source — run this under Node"
 // to be, or a second recording started across an `await` would collect the first one's keys — and the
 // registry import below is an `await`. Wrapping the source is the same measurement without that limit.
 let sink: string[] = [];
-setDataSource({ read: (key) => { sink.push(key); return base.read(key); } });
+// Recorded only on success — an absent optional file is a legal read here (`loadTsv`'s `optional`, every
+// model loader), and a key that does not exist is not prefetchable: emitting it ships a fetch that 404s.
+setDataSource({ read: (key) => { const bytes = base.read(key); sink.push(key); return bytes; } });
 
 const engineSink = sink;
 await import("../src/registry.ts");
