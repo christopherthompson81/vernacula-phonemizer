@@ -5,11 +5,10 @@
  * importing an external IPA convention. Homographs and OOV words are NOT in the lexicon and fall through to the
  * context-aware tagger. See he-lexicon.tsv + tools/hebrew/build-lexicon.py.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
 import { phonemizeWord } from "./hebrew.ts";
-import { dataDir } from "../../core/dataPath.ts";
+import { dataFile } from "../../core/dataPath.ts";
+import { readDataText } from "../../core/dataSource.ts";
 
 let cache: Map<string, string> | undefined; // skeleton → niqqud
 
@@ -17,8 +16,8 @@ function load(): Map<string, string> {
     if (cache) return cache;
     cache = new Map();
     try {
-        const path = join(dataDir(import.meta.url), "he-lexicon.tsv");
-        for (const line of readFileSync(path, "utf8").split("\n")) {
+        const key = dataFile(import.meta.url, "he-lexicon.tsv");
+        for (const line of readDataText(key).split("\n")) {
             if (!line || line.startsWith("#")) continue;
             const [skel, niqqud] = line.split("\t");
             if (skel && niqqud) cache.set(skel, niqqud);

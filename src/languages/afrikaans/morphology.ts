@@ -6,12 +6,11 @@
  * af-stems.PROVENANCE.md). ⚠ Afrikaans has no per-stem Fugen flags, so the linking-element order is static, and
  * none of German's language-specific quirks (un-/mit-/sch/seams/-en) apply.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
 import { makeDecompose, type MorphologyConfig } from "../../core/germanicMorphology.ts";
 import { MANIFEST } from "./manifest.ts";
-import { dataDir } from "../../core/dataPath.ts";
+import { dataFile } from "../../core/dataPath.ts";
+import { readDataText } from "../../core/dataSource.ts";
 
 const M = MANIFEST.morphology;
 
@@ -22,8 +21,8 @@ function stems(): Set<string> {
     if (STEMS === undefined) {
         STEMS = new Set();
         try {
-            const path = join(dataDir(import.meta.url), "af-stems.txt");
-            for (const line of readFileSync(path, "utf8").split("\n")) {
+            const key = dataFile(import.meta.url, "af-stems.txt");
+            for (const line of readDataText(key).split("\n")) {
                 const w = line.trim().toLowerCase();
                 if (w) STEMS.add(w);
             }

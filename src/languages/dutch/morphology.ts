@@ -6,12 +6,11 @@
  * dutch.jsonc; the stem lexicon is a frequency wordlist (nl-stems.txt, hunspell nl.dic base forms). No per-stem
  * Fugen flags → a static linking-element order, and none of German's language-specific quirks apply.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
 import { makeDecompose, type MorphologyConfig } from "../../core/germanicMorphology.ts";
 import { MANIFEST } from "./manifest.ts";
-import { dataDir } from "../../core/dataPath.ts";
+import { dataFile } from "../../core/dataPath.ts";
+import { readDataText } from "../../core/dataSource.ts";
 
 const M = MANIFEST.morphology;
 
@@ -22,8 +21,8 @@ function stems(): Set<string> {
     if (STEMS === undefined) {
         STEMS = new Set();
         try {
-            const path = join(dataDir(import.meta.url), "nl-stems.txt");
-            for (const line of readFileSync(path, "utf8").split("\n")) {
+            const key = dataFile(import.meta.url, "nl-stems.txt");
+            for (const line of readDataText(key).split("\n")) {
                 const w = line.trim().toLowerCase();
                 if (w) STEMS.add(w);
             }

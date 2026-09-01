@@ -10,8 +10,7 @@
  * absent, the pre-pass degrades to a no-op and callers get the lexicon+default path. See
  * and tools/perso-arabic/export_onnx.py.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readData, readDataText } from "./dataSource.ts";
 
 import { HARAKAT, HARAKAT_G, stripHarakat } from "./harakatLexicon.ts";
 import { loadOrt } from "./onnx.ts";
@@ -105,12 +104,12 @@ export async function loadRiderDiacritizer(modelBytes: Uint8Array, meta: RiderDi
  *  loadRiderDiacritizer directly if you want the underlying error surfaced. */
 export async function createRiderDiacritizer(): Promise<RiderDiacritizer | undefined> {
     const dir = dataDir(import.meta.url);
-    let bytes: Buffer, meta: RiderDiacritizerMeta;
+    let bytes: Uint8Array, meta: RiderDiacritizerMeta;
     try {
-        bytes = readFileSync(join(dir, "riderDiacritizer.onnx"));
-        meta = JSON.parse(readFileSync(join(dir, "riderDiacritizer.meta.json"), "utf8")) as RiderDiacritizerMeta;
+        bytes = readData(`${dir}/riderDiacritizer.onnx`);
+        meta = JSON.parse(readDataText(`${dir}/riderDiacritizer.meta.json`)) as RiderDiacritizerMeta;
     } catch { return undefined; } // model or sidecar meta absent/corrupt
     try {
-        return await loadRiderDiacritizer(new Uint8Array(bytes), meta);
+        return await loadRiderDiacritizer(bytes, meta);
     } catch { return undefined; } // onnxruntime-node absent or the session failed to build → sync fallback
 }

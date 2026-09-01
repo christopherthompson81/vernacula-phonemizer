@@ -15,13 +15,13 @@
  * `onnxruntime-node` is optional (lazy import); createFaTagger() resolves to `undefined` (no-op) if it or the model
  * is absent — identical to the seq2seq restorer's contract, so callers fall back to the word-level path.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 import { stressPerWord, type FaContextRestorer } from "./contextRestorer.ts";
 
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
 import { dataDir } from "../../core/dataPath.ts";
+import { readData, readDataText } from "../../core/dataSource.ts";
+import { env } from "../../core/env.ts";
 
 
 const SHORT_V = new Set(["a", "e", "o"]);
@@ -58,13 +58,13 @@ export async function createFaTagger(basename = "fa-tagger"): Promise<FaContextR
     const dir = dataDir(import.meta.url);
     let meta: TaggerMeta, modelBytes: Uint8Array;
     try {
-        meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as TaggerMeta;
-        modelBytes = readFileSync(join(dir, `${basename}.int8.onnx`));
+        meta = JSON.parse(readDataText(`${dir}/${basename}.meta.json`)) as TaggerMeta;
+        modelBytes = readData(`${dir}/${basename}.int8.onnx`);
     } catch { return undefined; }
     // First-syllable-vowel pin (fa-pin-vowels.tsv, skeleton→first short vowel). Optional — empty if absent.
     const pin = new Map<string, string>();
     try {
-        for (const line of readFileSync(join(dir, "fa-pin-vowels.tsv"), "utf8").split("\n")) {
+        for (const line of readDataText(`${dir}/fa-pin-vowels.tsv`).split("\n")) {
             if (!line || line.startsWith("#")) continue;
             const [w, v] = line.split("\t");
             if (w && v) pin.set(w, v);
@@ -74,7 +74,7 @@ export async function createFaTagger(basename = "fa-tagger"): Promise<FaContextR
     try {
         ortLib = await loadOrt("Persian neural tagging");
         // Shipping default is CPU. Opt into a GPU execution provider (fast eval iteration) with FA_ORT_EP=cuda.
-        const ep = process.env.FA_ORT_EP;
+        const ep = env("FA_ORT_EP");
         sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
     } catch { return undefined; }
     const UNK = meta.src["<unk>"] ?? 1;

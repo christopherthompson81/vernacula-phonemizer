@@ -11,8 +11,6 @@
  * `onnxruntime-node` is an OPTIONAL dependency imported lazily; if it — or the model — is absent, createEnglishTagger()
  * resolves to `undefined` and the async path (enNeural.ts) falls back to the sync n-gram engine.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
@@ -20,6 +18,8 @@ import { collapseGeminates, enforceSinglePrimary } from "./englishG2p.ts";
 import { makeArpabetToIpa } from "./englishArpabet.ts";
 import { MANIFEST } from "./manifest.ts";
 import { dataDir } from "../../core/dataPath.ts";
+import { readData, readDataText } from "../../core/dataSource.ts";
+import { env } from "../../core/env.ts";
 
 export interface EnglishTagger {
     /** A bare OOV word (letters) → canonical IPA, or "" to defer to the sync n-gram engine (out-of-vocab letter). */
@@ -31,13 +31,13 @@ export async function createEnglishTagger(basename = "en-g2p-tagger"): Promise<E
     const dir = dataDir(import.meta.url);
     let meta: TaggerMeta, modelBytes: Uint8Array;
     try {
-        meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as TaggerMeta;
-        modelBytes = readFileSync(join(dir, `${basename}.int8.onnx`)); // dynamic-int8 quantised (9.4MB fp32 → 2.4MB)
+        meta = JSON.parse(readDataText(`${dir}/${basename}.meta.json`)) as TaggerMeta;
+        modelBytes = readData(`${dir}/${basename}.int8.onnx`); // dynamic-int8 quantised (9.4MB fp32 → 2.4MB)
     } catch { return undefined; }
     let ortLib: OrtLike, sess: OrtSession;
     try {
         ortLib = await loadOrt("English neural OOV G2P");
-        const ep = process.env.EN_ORT_EP; // CPU default; opt into a GPU execution provider for fast eval
+        const ep = env("EN_ORT_EP"); // CPU default; opt into a GPU execution provider for fast eval
         sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
     } catch { return undefined; }
     const nTags = Object.keys(meta.tags).length;

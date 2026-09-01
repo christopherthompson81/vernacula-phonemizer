@@ -12,7 +12,6 @@
  * `onnxruntime-node` is optional; absent it (or the model),
  * createNorwegianTagger() resolves to `undefined` and callers fall back to the sync rule engine.
  */
-import { dirname } from "node:path";
 
 import { createWordStructuralTagger, oneStress, type WordStructuralTagger } from "../../core/structuralTagger.ts";
 import { dataDir } from "../../core/dataPath.ts";

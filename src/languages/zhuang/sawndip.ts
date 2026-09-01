@@ -17,10 +17,18 @@
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
 let READINGS: ReadonlyMap<string, string> | undefined;
-/** Lazy: the glyph→reading dict is only read on first Sawndip use (the registry imports za eagerly). */
-function readings(): ReadonlyMap<string, string> {
+/**
+ * Lazy: the glyph→reading dict is only read on first Sawndip use (the registry imports za eagerly).
+ *
+ * ⚠ EXPORTED SO THE REACHABILITY TEST READS THE DICTIONARY THE ENGINE READS. It used to re-open the file
+ * itself through a hand-written `../data/languages/zhuang/…` path — a guess into the asset tree, which
+ * `core/dataPath.ts` exists to stop, and which would have let the test pass against a file the engine does
+ * not load. It is also the only caller anywhere that asked `loadTsvMap` to resolve from outside `src/`.
+ */
+export function sawndipReadings(): ReadonlyMap<string, string> {
     return (READINGS ??= loadTsvMap(import.meta.url, "sawndip-readings.tsv"));
 }
+const readings = sawndipReadings;
 
 /**
  * Is `cp` a Sawndip-capable code point (the blocks the shipped dictionary draws on)?

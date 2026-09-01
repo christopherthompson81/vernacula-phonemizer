@@ -15,7 +15,6 @@
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the .onnx — is absent,
  * createSindhiTagger() resolves to `undefined` and callers fall back to the sync rule engine (no throw).
  */
-import { dirname } from "node:path";
 
 import { createWordStructuralTagger, type WordStructuralTagger } from "../../core/structuralTagger.ts";
 import { dataDir } from "../../core/dataPath.ts";

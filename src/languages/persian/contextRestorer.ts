@@ -13,11 +13,11 @@
  * the .onnx models are absent. Output is already Iranian (trained on the Iranian-normalised corpus); this adds
  * per-word final stress to match the sync g2p convention.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
 import { loadOrt, type OrtLike, type OrtSession, type OrtTensor } from "../../core/onnx.ts";
 import { dataDir } from "../../core/dataPath.ts";
+import { readData, readDataText } from "../../core/dataSource.ts";
+import { env } from "../../core/env.ts";
 
 interface Meta { src: Record<string, number>; tgt: Record<string, number>; H: number; bos: number; eos: number; unk: number }
 
@@ -47,16 +47,16 @@ export async function createFaContextRestorer(basename = "fa-context-restorer"):
     const dir = dataDir(import.meta.url);
     let meta: Meta, encBytes: Uint8Array, decBytes: Uint8Array;
     try {
-        meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as Meta;
-        encBytes = readFileSync(join(dir, `${basename}.enc.onnx`));
-        decBytes = readFileSync(join(dir, `${basename}.dec.onnx`));
+        meta = JSON.parse(readDataText(`${dir}/${basename}.meta.json`)) as Meta;
+        encBytes = readData(`${dir}/${basename}.enc.onnx`);
+        decBytes = readData(`${dir}/${basename}.dec.onnx`);
     } catch { return undefined; }
     let ortLib: OrtLike, enc: OrtSession, dec: OrtSession;
     try {
         ortLib = await loadOrt("Persian neural restoration");
         // Shipping default is CPU (no CUDA dependency). Opt into a GPU execution provider — e.g. for fast
         // test/eval iteration — with FA_ORT_EP=cuda (or webgpu); needs the CUDA runtime libs on LD_LIBRARY_PATH.
-        const ep = process.env.FA_ORT_EP;
+        const ep = env("FA_ORT_EP");
         const opts = ep ? { executionProviders: ep.split(",") } : undefined;
         enc = await ortLib.InferenceSession.create(encBytes, opts);
         dec = await ortLib.InferenceSession.create(decBytes, opts);

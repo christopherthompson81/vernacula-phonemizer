@@ -1,17 +1,16 @@
 /**
- * Load a per-language JSONC data manifest relative to the calling module. Collapses the readFileSync +
+ * Load a per-language JSONC data manifest relative to the calling module. Collapses the read +
  * path-resolution + parseJsonc boilerplate that every src/languages/<lang>/manifest.ts otherwise repeats.
  * Pass `import.meta.url` and the manifest filename; the file is resolved beside the caller and parsed once.
  *
  *   export const MANIFEST = loadManifest<XManifest>(import.meta.url, "x.jsonc");
  */
-import { readFileSync } from "node:fs";
-
 import { dataFile } from "./dataPath.ts";
+import { readDataText } from "./dataSource.ts";
 import { parseJsonc } from "./jsonc.ts";
 
 export function loadManifest<T>(metaUrl: string, filename: string): T {
-    return parseJsonc<T>(readFileSync(dataFile(metaUrl, filename), "utf8"));
+    return parseJsonc<T>(readDataText(dataFile(metaUrl, filename)));
 }
 
 /**
@@ -20,5 +19,5 @@ export function loadManifest<T>(metaUrl: string, filename: string): T {
  * character JSONC scan would be wasted work.
  */
 export function loadJson<T>(metaUrl: string, filename: string): T {
-    return JSON.parse(readFileSync(dataFile(metaUrl, filename), "utf8")) as T;
+    return JSON.parse(readDataText(dataFile(metaUrl, filename))) as T;
 }

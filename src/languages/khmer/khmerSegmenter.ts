@@ -27,11 +27,9 @@
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the .onnx model — is absent,
  * `createKhmerSegmenter()` resolves to `undefined` and callers keep today's unsegmented sync behaviour (no throw).
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { dataDir } from "../../core/dataPath.ts";
+import { readData, readDataText } from "../../core/dataSource.ts";
 
 /** U+200B ZERO WIDTH SPACE — what Khmer writers type at a word boundary, and what the tokeniser breaks a run on. */
 export const ZWSP = "​";
@@ -63,15 +61,20 @@ export interface KhmerSegmenter {
  */
 export function createKhmerSegmenter(basename = "km-segmenter"): Promise<KhmerSegmenter | undefined> {
     const dir = dataDir(import.meta.url);
-    let meta: Meta;
+    // ⚠ THE MODEL IS LOADED AS BYTES, NOT AS A PATH. `InferenceSession.create` accepts either, and this
+    // was the one ORT call site in the engine that passed a filesystem path — which no data source but the
+    // Node one can satisfy, and which would have made Khmer the single language that could not run in a
+    // browser however the data seam was installed. Bytes go through `readData` like every other model.
+    let meta: Meta, modelBytes: Uint8Array;
     try {
-        meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as Meta;
+        meta = JSON.parse(readDataText(`${dir}/${basename}.meta.json`)) as Meta;
+        modelBytes = readData(`${dir}/${basename}.int8.onnx`);
     } catch {
         return Promise.resolve(undefined);
     }
     return loadOrt("Khmer word segmentation")
         .then(async (ort: OrtLike) => {
-            const session: OrtSession = await ort.InferenceSession.create(join(dir, `${basename}.int8.onnx`));
+            const session: OrtSession = await ort.InferenceSession.create(modelBytes);
             return build(ort, session, meta);
         })
         .catch(() => undefined);
