@@ -208,6 +208,7 @@ public static class Bootstrap
             Shan.ShanPhonemizer.RegisterSelf();
             Tatar.TatarPhonemizer.RegisterSelf();
             TotontepecMixe.TotontepecMixePhonemizer.RegisterSelf();
+            Turkmen.TurkmenPhonemizer.RegisterSelf();
         }
     }
 }

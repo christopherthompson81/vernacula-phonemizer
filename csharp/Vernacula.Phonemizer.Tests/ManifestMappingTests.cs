@@ -964,4 +964,9 @@ public class ManifestMappingTests
         AssertFullyMapped("languages/totontepecmixe", "totontepecmixe.jsonc",
             Languages.TotontepecMixe.Manifest.DEF,
             "language", "name", "script");
+
+    [Fact]
+    public void TurkmenManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/turkmen", "turkmen.jsonc", Languages.Turkmen.Manifest.DEF,
+            "language", "name", "script");
 }
