@@ -129,3 +129,26 @@ without checking. **Not copied into the C# header**, which claims only the ⟨ի
 actually there. Filed rather than fixed: it is a TS/data-side edit, and PORTING.md wants those TS-first.
 
 Welsh (`cy`) is now the ONLY unported language.
+
+## Run 6 — 2026-08-31 — independent review differential (adversarial, not corpus)
+
+Question: does the port diverge anywhere the Run 3 probe set did not reach — specifically the
+JS-vs-.NET regex seams (`\s` membership, `$` vs `\z`, nested lookbehind in `GROUP_COMMA`, the
+`[^\S\n]` negated class) and the unbounded `(\d+)` operand in `BOUND_SUFFIX`?
+
+Reused `.probe/hyw` with two hand-written adversarial files (100 lines total, no corpus text):
+degenerate grouping (`0,000`, `1,0000`, `445,000,000`, `12.34.56`, `1 377 808,5`), the four-group
+space-grouping shape trap 63 names (`80 239 800 000`), suffix operands past 2^53
+(`9007199254740993-ին`, `999999999999999999-ին`), every era/astro/magnitude abbreviation in isolation
+and uppercased, the degree arms with a Cyrillic С and a lowercase scale letter, and a whitespace file
+carrying U+FEFF and U+0085 (the two characters where .NET `\s` and JS `\s` disagree in opposite
+directions) inside `մ.թ.`, the WS_RUN collapse and the grouping separators.
+
+    $ npx tsx .probe/hyw/run.mts extra.txt ts.tsv && dotnet run --project .probe/hyw/hywprobe.csproj -- extra.txt cs.tsv
+    $ diff ts.tsv cs.tsv
+    NO DIFF   (both files, 4 entry points, 0 throws either side)
+
+**Implication.** JsRegex is already normalising both `\s` sets and `$`→`\z`, and the nested negative
+lookbehind evaluates identically under .NET's right-to-left lookbehind. No behavioural finding; the
+review's three fixes are all non-behavioural (unused `using`, a `.ToList()` the Eastern sibling does
+not take, and a header that under-claimed the ⟨յու⟩ digraph while the jsonc over-claims ⟨յո⟩).

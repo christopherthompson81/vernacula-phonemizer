@@ -4,7 +4,9 @@
  * everything specific to Western Armenian lives in westarmenian.jsonc — chiefly the CONSONANT SHIFT
  * (classical voiced ⟨բ դ գ ձ ջ⟩ and classical aspirate ⟨փ թ ք ց չ⟩ merge to voiceless-aspirated
  * [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]; classical voiceless ⟨պ տ կ ծ ճ⟩ → voiced [b d ɡ d͡z d͡ʒ]), the rhotic
- * neutralisation ⟨ր ռ⟩→[ɾ], and the ⟨իւ⟩→[ʏ] digraph.
+ * neutralisation ⟨ր ռ⟩→[ɾ], and the front-rounded ⟨իւ⟩→[ʏ] digraph plus the POST-CONSONANT-ONLY
+ * ⟨յու⟩→[ʏ] (word-initial ⟨յու⟩ stays the glide [ju]). ⚠ There is NO ⟨յո⟩→[œ] digraph, whatever
+ * westarmenian.jsonc's own header and `provenance` string say: ⟨յո⟩ falls out as [jo] (յոթ→jotʰ).
  * Ported from src/languages/westarmenian/westarmenian.ts — see that file for the referee validation.
  */
 using Vernacula.Phonemizer.Core;

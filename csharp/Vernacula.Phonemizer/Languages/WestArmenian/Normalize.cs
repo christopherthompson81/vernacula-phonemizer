@@ -10,7 +10,6 @@
  * per-word sourcing, and the refusals (no clock rule; ± and ÷ take a pause).
  */
 using Vernacula.Phonemizer.Core;
-using Vernacula.Phonemizer.Languages.Armenian;
 using static Vernacula.Phonemizer.Core.Rewriter;
 
 namespace Vernacula.Phonemizer.Languages.WestArmenian;
@@ -68,7 +67,7 @@ public static class Normalize
      */
     private static string AttachSuffix(string cardinal, string suffix)
     {
-        var words = cardinal.Split(' ').ToList();
+        var words = cardinal.Split(' ');
         var stem = words[^1];
         if (stem.EndsWith("երկու", StringComparison.Ordinal)) stem = $"{stem}ք";
         else if (stem.EndsWith("ը", StringComparison.Ordinal)) stem = stem[..^1];
@@ -84,7 +83,7 @@ public static class Normalize
         if (IRREGULAR_ORDINAL.TryGetValue(Js.NumberToString(n), out var irregular)) return irregular;
         var cardinal = CardinalWords(n);
         if (cardinal is null) return null;
-        var words = cardinal.Split(' ').ToList();
+        var words = cardinal.Split(' ');
         var stem = words[^1];
         if (stem.EndsWith("ը", StringComparison.Ordinal)) stem = $"{stem[..^1]}ն";
         words[^1] = $"{stem}երորդ";
