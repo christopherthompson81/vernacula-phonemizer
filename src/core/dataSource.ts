@@ -44,12 +44,33 @@ export function getDataSource(): DataSource | undefined {
     return source;
 }
 
+/**
+ * No source installed at all — a CONFIGURATION error, not a missing file, and its own type so that the
+ * callers who legitimately swallow a missing file cannot swallow this too.
+ *
+ * ⚠ `loadTsv`'s `optional` and every model loader catch broadly, by design: an absent table means
+ * "degrade", not "fail". Untyped, a seam error reaches them as the same exception and the optional lexicon
+ * quietly becomes an EMPTY Map — every word then takes the OOV path and gets a plausible wrong reading,
+ * the failure this seam's header promises never to produce. `loadTsv` rethrows this one.
+ *
+ * The reachable path is narrow, and saying so is the point of writing it down: a consumer who NEVER calls
+ * `setDataSource` dies at the first `loadManifest`, which does not catch, so the import fails loudly.
+ * What this guards is the later, quieter case — `setDataSource(undefined)` mid-run, or an optional table
+ * read lazily on first use long after the manifests loaded.
+ */
+export class NoDataSourceError extends Error {
+    constructor(key: string) {
+        super(
+            `No data source installed — cannot read "${key}". Off Node there is no default: call setDataSource() BEFORE importing the engine (see src/browser.ts).`,
+        );
+        this.name = "NoDataSourceError";
+    }
+}
+
 /** Raw bytes for `key`. Throws if no source is installed, or if the source throws. */
 export function readData(key: string): Uint8Array {
     if (source === undefined) {
-        throw new Error(
-            `No data source installed — cannot read "${key}". Off Node there is no default: call setDataSource() BEFORE importing the engine (see src/browser.ts).`,
-        );
+        throw new NoDataSourceError(key);
     }
     const bytes = source.read(key);
     // ⚠ RECORDED ONLY ON SUCCESS, AND THE ORDER IS THE WHOLE POINT. Plenty of reads here are ALLOWED to

@@ -36,7 +36,11 @@ function moduleKey(metaUrl: string): string {
 
 /** The key for `filename` in the calling module's data directory. */
 export function dataFile(metaUrl: string, filename: string): string {
-    return `${moduleKey(metaUrl)}/${filename}`;
+    const dir = moduleKey(metaUrl);
+    // A module sitting directly in `src/` has an EMPTY directory key; `${dir}/${filename}` would then
+    // produce a leading-slash key ("/x.jsonc") that Node's join happens to forgive and a Map lookup — or
+    // the C# resolver — does not. Same string on both engines or the key is not a key.
+    return dir === "" ? filename : `${dir}/${filename}`;
 }
 
 /** The calling module's data DIRECTORY key — for the loaders that read several files from one place.

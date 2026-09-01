@@ -183,3 +183,49 @@ symptom until a consumer hit it.
 words are lexicon-covered. The async replay test uses `"hei verden, kringkastingssjefen"`, which does not —
 an assertion that the neural reading differs from the fallback is worth nothing on a string where it
 doesn't.
+
+## Run 9 — 2026-09-01 — review findings, and the one that was a tautology
+
+`/code-review 1246 --fix`. Nine findings; seven fixed, two skipped as decisions rather than defects. The
+ones worth recording:
+
+- **The import-phase assertion was vacuous.** I wrote `recordDataKeys(() => undefined)` and asserted
+  `keys.length === 0` — trivially true, and it measured nothing about the two-phase split the comment above
+  it claimed to make "observable". `recordDataKeys` is synchronous and the engine import is an `await`, so
+  it *cannot* wrap that phase. I had already hit this limit in `browser-prefetch.mts` and moved to a wrapped
+  source there, then left the vacuous version standing in the test. Now a snapshot of the wrapped source at
+  the phase boundary: import phase > 100 keys, and the per-language phase asserted genuinely ADDITIVE.
+- **The `node:` gate had three holes**: `[a-z/]+` excluded `_`, so `node:child_process` and
+  `node:worker_threads` were invisible; a side-effect `import "node:fs"` matched neither alternative; and
+  the bare spelling `from "fs"` — which a bundler resolves exactly as eagerly — was not checked at all. A
+  language module reintroducing `import { readFileSync } from "fs"` would have passed the gate written to
+  catch it. Replaced with a specifier extractor checked against the builtin set.
+- **`loadTsv`'s `optional` swallowed a missing SEAM, not just a missing file** → an empty Map and a
+  plausible wrong reading. Now a typed `NoDataSourceError` that `optional` rethrows. ⚠ Reachability
+  checked rather than assumed: a consumer who NEVER calls `setDataSource` dies at the first `loadManifest`
+  (which does not catch), so the guard is for the narrower later case — `setDataSource(undefined)` mid-run,
+  or an optional table read lazily long after the manifests.
+- **`loadOrt`'s catch cleared the memo unconditionally**, so a `setOrtLoader` during an in-flight load would
+  have its new memo discarded when the OLD load rejected. Verified by reverting the fix locally: the new
+  test goes red (`expected 2 to be 1` — the loader ran twice) and green with it.
+- **`dataFile` produced a leading-slash key** (`"/x.jsonc"`) for a module directly in `src/`. Node's join
+  forgives it, a Map lookup and the C# resolver do not. Currently unreachable — no root module loads data —
+  so it is pinned as shape, not as a reproduced bug.
+
+## Run 10 — 2026-09-01 — the published package has no data (pre-existing, filed separately)
+
+The review flagged that `files` in package.json does not list `data/`. Measured rather than inferred:
+
+```
+npm pack → 734 files, 0 under data/
+npm install ./vernacula-phonemizer-0.1.0.tgz && phonemize("hola","es")
+→ Error: ENOENT … node_modules/vernacula-phonemizer/data/languages/hindi/hindi.jsonc
+```
+
+The published package is non-functional: it throws on the first manifest read, at registry import. This
+**predates this PR** and is unchanged by it — the old `dataPath.ts` resolved the same `<pkg>/data` — but
+this PR adds a `./browser` export that advertises npm consumption, so it is newly relevant.
+
+Not fixed here. `data/` is 151 MB, so the answer is a distribution decision (a second package, a postinstall
+fetch, `VERNACULA_DATA_DIR` plus documentation), not a one-line `files` addition, and #1245 did not ask for
+it. Filed as its own issue.

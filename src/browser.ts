@@ -43,7 +43,7 @@
  *
  * Nothing in this file's module graph resolves a `node:` specifier — `test/browser-graph.test.ts` pins that.
  */
-export { setDataSource, getDataSource, readData, readDataText, recordDataKeys, type DataSource } from "./core/dataSource.ts";
+export { setDataSource, getDataSource, readData, readDataText, recordDataKeys, NoDataSourceError, type DataSource } from "./core/dataSource.ts";
 export { setOrtLoader, type OrtLike, type OrtSession, type OrtTensor } from "./core/onnx.ts";
 export { dataFile, dataDir } from "./core/dataPath.ts";
 

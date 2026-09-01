@@ -119,6 +119,11 @@ describe("the browser seams", () => {
         expect(dataDir(url)).toBe("languages/thai");
         // Windows `file:` URLs must not produce a different key, or the two engines disagree by platform.
         expect(dataFile("file:///C:/v/src/core/phonology.jsonc", "x.tsv")).toBe("core/x.tsv");
+        // A module sitting directly in `src/` has an EMPTY directory key. No such module loads data today,
+        // so this is the shape holding rather than a bug reproducing — but `${dir}/${filename}` would give
+        // "/x.jsonc", a leading slash that Node's join forgives and a Map lookup (or C#) does not.
+        expect(dataFile("file:///v/src/registry.ts", "x.jsonc")).toBe("x.jsonc");
+        expect(dataDir("file:///v/src/registry.ts")).toBe("");
         // ⚠ LOUD ON A LOST SOURCE PATH. A bundler that rewrites `import.meta.url` to a chunk URL erases the
         //   only thing naming the data; guessing a key would surface as a missing lexicon, i.e. a plausible
         //   wrong reading — the defect class the goldens are least able to see.
@@ -147,17 +152,23 @@ describe("the browser seams", () => {
 
         // The two phases the browser consumer has to prefetch separately: importing the engine reads every
         // language's manifest at module scope, and only then does getPhonemizer(lang) read that language's
-        // tables. Recording nests, so the split is observable rather than folded together.
-        const importPhase = rec.recordDataKeys(() => undefined);
+        // tables.
+        // ⚠ THE IMPORT PHASE CANNOT BE MEASURED WITH `recordDataKeys`, WHICH IS WHY IT IS COUNTED HERE.
+        //   That helper is synchronous and the import is an `await`, so wrapping an empty callback around
+        //   it records nothing and asserts nothing — a green line that can never go red. The wrapped
+        //   source above is the measurement; snapshot it at the phase boundary instead.
         const engine = await import("../src/index.ts");
+        const importPhase = new Set(prefetched.keys());
         const perLanguage = rec.recordDataKeys(() =>
             CASES.map(([lang, text]) => engine.phonemize(text, lang)),
         );
         const expected = perLanguage.result;
         expect(expected.every((ipa) => ipa.length > 0)).toBe(true);
         // The import phase dominates and is fixed; the per-language phase is what lazy loading buys.
+        expect(importPhase.size).toBeGreaterThan(100); // every language's manifest, at module scope
         expect(prefetched.size).toBeGreaterThan(perLanguage.keys.length);
-        expect(importPhase.keys.length).toBe(0); // nothing is read before the engine module is imported
+        // …and the per-language phase is genuinely ADDITIONAL, or the split it documents is not real.
+        expect(perLanguage.keys.filter((k) => !importPhase.has(k)).length).toBeGreaterThan(0);
 
         // ── Phase 2: no filesystem. A frozen Map, and a key outside it is a hard error. ─────────────────
         vi.resetModules();
@@ -303,7 +314,27 @@ describe("the browser seams", () => {
         await expect(onnx.loadOrt("test")).resolves.toBe(second);
 
         onnx.setOrtLoader(() => Promise.reject(new Error("no runtime here")));
-        await expect(onnx.loadOrt("Khmer word segmentation")).rejects.toThrow(/setOrtLoader/u);
+        const failed = onnx.loadOrt("Khmer word segmentation");
+        await expect(failed).rejects.toThrow(/setOrtLoader/u);
+        // The underlying failure survives as `cause` — for a browser runtime (a WASM fetch, a missing
+        // artifact) it is the only actionable part of the message.
+        await expect(failed).rejects.toMatchObject({ cause: expect.objectContaining({ message: "no runtime here" }) });
+
+        // ⚠ A LOAD THAT REJECTS MUST ONLY CLEAR **ITS OWN** MEMO. Install a slow failing loader, swap it
+        //   mid-flight, and let the first one reject: a blanket `ortPromise = undefined` in the catch would
+        //   discard the NEW memo, so every later loadOrt would re-run the loader instead of reusing it.
+        let slowReject: (e: Error) => void = () => {};
+        onnx.setOrtLoader(() => new Promise((_, rej) => { slowReject = rej; }));
+        const inflight = onnx.loadOrt("first");
+        let built = 0;
+        onnx.setOrtLoader(() => { built++; return Promise.resolve(fake); });
+        const after = onnx.loadOrt("second");
+        slowReject(new Error("the old one, late"));
+        await expect(inflight).rejects.toThrow();
+        await expect(after).resolves.toBe(fake);
+        await expect(onnx.loadOrt("third")).resolves.toBe(fake);
+        expect(built).toBe(1); // the memo survived the older load's rejection
+
         onnx.setOrtLoader(undefined);
     });
 });

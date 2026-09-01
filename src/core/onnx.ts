@@ -78,15 +78,23 @@ export function setOrtLoader(next: (() => Promise<unknown>) | undefined): void {
  */
 export function loadOrt(context = "Neural inference"): Promise<OrtLike> {
     if (ortPromise) return ortPromise;
-    const load = loader ?? ((): Promise<unknown> => import(ORT_SPECIFIER));
-    return (ortPromise = load()
+    const installed = loader;
+    const load = installed ?? ((): Promise<unknown> => import(ORT_SPECIFIER));
+    const mine: Promise<OrtLike> = load()
         .then((m) => ((m as { default?: unknown }).default ?? m) as unknown as OrtLike)
-        .catch(() => {
-            ortPromise = undefined;
+        .catch((err: unknown) => {
+            // ⚠ ONLY CLEAR THE MEMO IF IT IS STILL OURS. A `setOrtLoader()` during an in-flight load
+            //   installs a new promise; a blanket `ortPromise = undefined` here would then discard the
+            //   NEW memo when the OLD load finally rejects, and every later loadOrt would re-run the
+            //   loader. And keep `err` as the cause — for a browser runtime the underlying failure (a
+            //   WASM fetch, a missing artifact) is the only actionable part of the message.
+            if (ortPromise === mine) ortPromise = undefined;
             throw new Error(
-                loader
+                installed
                     ? `${context} failed to load the ONNX runtime installed with setOrtLoader().`
                     : `${context} needs the optional dependency \`onnxruntime-node\`. Install it with \`npm install onnxruntime-node\`.`,
+                { cause: err },
             );
-        }));
+        });
+    return (ortPromise = mine);
 }

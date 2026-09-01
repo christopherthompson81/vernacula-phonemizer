@@ -16,7 +16,6 @@ import { readData, readDataText } from "./dataSource.ts";
 import { env } from "./env.ts";
 
 import { loadOrt, type OrtLike, type OrtSession } from "./onnx.ts";
-import { dataDir } from "./dataPath.ts";
 
 /** `src`: symbol → id (incl. `<pad>`=0, `<unk>`=1). `tags`: tag-id → IPA chunk. `charTags`: symbol-id → the tag-ids
  *  that symbol may emit (the consonant mask). Emitted by the train/export tools (export_tagger_onnx.py /

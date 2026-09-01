@@ -10,7 +10,7 @@
  * missing file yield an empty Map instead of throwing (for lexicons that may be absent).
  */
 import { dataFile } from "./dataPath.ts";
-import { readDataText } from "./dataSource.ts";
+import { NoDataSourceError, readDataText } from "./dataSource.ts";
 
 /** Read a data file beside `metaUrl`, returning its non-blank, non-`#`-comment lines. `optional` → [] on a
  *  missing file (else rethrows). Shared by loadTsvMap and loadLines so both parse lines identically. */
@@ -23,7 +23,10 @@ function readDataLines(
     try {
         text = readDataText(dataFile(metaUrl, filename));
     } catch (err) {
-        if (optional) return [];
+        // ⚠ `optional` FORGIVES A MISSING FILE, NEVER A MISSING SEAM. A forgotten `setDataSource()` is a
+        //   configuration error, and swallowing it here would turn every optional lexicon into an EMPTY
+        //   Map — each word then takes the OOV path and gets a plausible wrong reading, silently.
+        if (optional && !(err instanceof NoDataSourceError)) return [];
         throw err;
     }
     return text.split(/\r?\n/).filter((l) => l !== "" && !l.startsWith("#"));
