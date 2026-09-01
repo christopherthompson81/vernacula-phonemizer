@@ -38,5 +38,11 @@
   },
   "engines": {
     "node": ">=22.3"
+  },
+  "workspaces": [
+    "data"
+  ],
+  "dependencies": {
+    "vernacula-phonemizer-data": "^0.1.0"
   }
 }

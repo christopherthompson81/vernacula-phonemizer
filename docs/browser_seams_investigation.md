@@ -229,3 +229,66 @@ this PR adds a `./browser` export that advertises npm consumption, so it is newl
 Not fixed here. `data/` is 151 MB, so the answer is a distribution decision (a second package, a postinstall
 fetch, `VERNACULA_DATA_DIR` plus documentation), not a one-line `files` addition, and #1245 did not ask for
 it. Filed as its own issue.
+
+# Publishing the data (#1247)
+
+## Run 11 — 2026-09-01 — the distribution decision, measured
+
+Question: `files` omits `data/`, so an installed copy throws. What should ship?
+
+```
+data/                 151 MB, 347 tracked files, 0 gitignored
+  models (.onnx/.pt)   90.8 MB in 19 files
+  everything else      69.1 MB in 328 files
+175 language dirs: median 8 KB · 141 of them under 100 KB, 1.5 MB TOTAL
+  heaviest: ar 35 · khmer 15 · en 14 · fa 13 · ja 8.9 · ru 8.4 MB
+one package, all in:  63.4 MB tarball / 159.0 MB unpacked (1,080 files)
+```
+
+The distribution is brutally skewed — six languages are 94 of the 144 MB — but per-language packages are
+blocked anyway: `registry.ts` reads **every** language's manifest at module scope, so no consumer can have
+a subset of manifests. The real choice was one package or two.
+
+⚠ And splitting by KIND (code / data / models) was measured and rejected: it makes the default install
+rule-only, and `phonemize()` is the fallback path. The good reading comes from `phonemizeAsync`.
+
+Decision (owner): **a separate `vernacula-phonemizer-data` package**, a real dependency of the engine. It is
+the packaging form of the rule `core/dataPath.ts` already states — data is owned by no engine — so the tree
+is published as-is and the C# port can consume the same artifact. `data/package.json` makes the tree itself
+the package; `workspaces: ["data"]` links it in a checkout.
+
+Verified end to end, not inferred:
+
+```
+npm pack -w data → 60.5 MB ;  npm pack → 3.0 MB  (engine, src only)
+npm install ./…-data.tgz ./….tgz  in a clean app
+  es      : ˈola kˈe tˈal
+  th      : sˈa˨˩wa˨˩tdˌiː˧
+  nb async: ˈhæɪ ˈʋæɖɳ , ˈkɾɪŋkɑstɪŋsˌʃeːfən     ← neural tier live
+  nb sync : ˈhæɪ ˈʋæɖɳ , ˈkɾɪŋkɑstɪŋsːjəfən      ← and it differs, so the model really loaded
+```
+
+The engine drops from a would-be 63.4 MB to **3.0 MB**.
+
+## Run 12 — 2026-09-01 — the attribution obligation, and two gates
+
+⚠ `NOTICE.md` IS ABOUT THE DATA, so the data package is the artifact that must carry it. It exists because
+the project "ships and distributes data derived from third-party sources", and two upstreams (EDRDG's
+JMdict/KANJIDIC among them) require specific, named acknowledgement — "obligations, not courtesies", in its
+own words. A bare tree of tables would be a licence violation, not an untidy package. `LICENSE`, `LICENSES/`
+and `NOTICE.md` are copied in at pack time (`prepack`) so the repo keeps one source of truth.
+
+Two gates, both verified by breaking them rather than by reading them:
+
+- `tools/check-package-fence.mjs` gained a REQUIRED-file probe. The old fence was one-directional — it
+  caught a file that LEAKS, never one that is missing, which is exactly how `data/` came to be absent from
+  every artifact while the check stayed green. Removing `core` from the data package's `files` now exits 1
+  naming `core/phonology.jsonc`; restored, exit 0.
+- `test/data-package.test.ts` pins version lockstep, the dependency range, that the engine ships no data,
+  that every tracked top-level directory under `data/` is one the package ships, and the attribution set.
+
+⚠ Also fixed on the way: the `prepack` script logged to **stdout**, which `npm pack --json` shares — the log
+line landed inside the JSON and every parse of it failed. It logs to stderr now.
+
+Stale doc corrected: README's repository layout still described the pre-move world
+(`src/languages/<lang>/ … + data`, "`src/` is self-contained at runtime").

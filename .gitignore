@@ -79,3 +79,8 @@ csharp/**/obj/
 # instead, where no sibling can reach it, and ignoring it here is the other half: a probe harness must
 # never be able to reach a commit via `git add -A`. See csharp/PORTING.md.
 .probe/
+
+# Copied into the data package at pack time by tools/pack-data-licenses.mjs (single source is the repo root).
+data/LICENSE
+data/LICENSES/
+data/NOTICE.md

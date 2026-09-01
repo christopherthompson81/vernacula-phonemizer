@@ -13,8 +13,16 @@ import { execFileSync } from "node:child_process";
 
 const FORBIDDEN = /^(docs|tools|test)\/|\.test\.ts$/u;
 
-const raw = execFileSync("npm", ["pack", "--dry-run", "--json"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
-const files = JSON.parse(raw)[0].files.map((f) => f.path);
+/** `npm pack --dry-run --json` for one workspace (or the root), as a list of paths. */
+const packed = (args) => {
+    const raw = execFileSync("npm", ["pack", "--dry-run", "--json", ...args], {
+        encoding: "utf8",
+        maxBuffer: 256 * 1024 * 1024,
+    });
+    return JSON.parse(raw)[0].files.map((f) => f.path);
+};
+
+const files = packed([]);
 
 const leaked = files.filter((p) => FORBIDDEN.test(p));
 if (leaked.length) {
@@ -23,4 +31,38 @@ if (leaked.length) {
     if (leaked.length > 40) console.error(`  … and ${leaked.length - 40} more`);
     process.exit(1);
 }
-console.log(`ok — ${files.length} files, no docs/ tools/ test/`);
+
+/**
+ * ⚠ AND ASSERT WHAT THE PACKAGES CAN LOAD, NOT ONLY WHAT THEY EXCLUDE (#1247).
+ *
+ * The fence above is one-directional: it catches a file that LEAKS, never one that is missing. That is how
+ * `data/` came to be absent from every publishable artifact while this check stayed green — `npm pack`
+ * produced 734 files with ZERO under `data/`, and an installed copy threw ENOENT on `hindi.jsonc` at the
+ * first manifest read, before any consumer code ran. The engine ships no data BY DESIGN now; the data
+ * package is what must carry it, so probe the keys the engine reads first and the model the async path
+ * needs. A probe list is not coverage, but it is the difference between a check that can fail and one that
+ * cannot.
+ */
+const REQUIRED = [
+    "core/phonology.jsonc", // the shared abugida tables
+    "languages/hindi/hindi.jsonc", // the first manifest `registry.ts` reads — where #1247 surfaced
+    "languages/norwegian/nb-g2p-tagger.int8.onnx", // the async path is the one that matters
+    "languages/norwegian/nb-g2p-tagger.meta.json",
+    "NOTICE.md", // the attribution the data itself obliges; see test/data-package.test.ts
+    "LICENSE",
+];
+const dataFiles = new Set(packed(["-w", "data"]));
+const missing = REQUIRED.filter((p) => !dataFiles.has(p));
+if (missing.length) {
+    console.error(`the data package would publish without ${missing.length} required file(s):`);
+    for (const p of missing) console.error(`  ${p}`);
+    process.exit(1);
+}
+if (files.some((p) => p.startsWith("data/"))) {
+    console.error("the engine package ships data/ — it must come from vernacula-phonemizer-data");
+    process.exit(1);
+}
+
+console.log(
+    `ok — engine ${files.length} files (no docs/ tools/ test/, no data/), data package ${dataFiles.size} files`,
+);
