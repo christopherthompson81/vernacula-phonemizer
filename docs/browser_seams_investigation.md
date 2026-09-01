@@ -229,3 +229,132 @@ this PR adds a `./browser` export that advertises npm consumption, so it is newl
 Not fixed here. `data/` is 151 MB, so the answer is a distribution decision (a second package, a postinstall
 fetch, `VERNACULA_DATA_DIR` plus documentation), not a one-line `files` addition, and #1245 did not ask for
 it. Filed as its own issue.
+
+# Publishing the data (#1247)
+
+## Run 11 — 2026-09-01 — the distribution decision, measured
+
+Question: `files` omits `data/`, so an installed copy throws. What should ship?
+
+```
+data/                 151 MB, 347 tracked files, 0 gitignored
+  models (.onnx/.pt)   90.8 MB in 19 files
+  everything else      69.1 MB in 328 files
+175 language dirs: median 8 KB · 141 of them under 100 KB, 1.5 MB TOTAL
+  heaviest: ar 35 · khmer 15 · en 14 · fa 13 · ja 8.9 · ru 8.4 MB
+one package, all in:  63.4 MB tarball / 159.0 MB unpacked (1,080 files)
+```
+
+The distribution is brutally skewed — six languages are 94 of the 144 MB — but per-language packages are
+blocked anyway: `registry.ts` reads **every** language's manifest at module scope, so no consumer can have
+a subset of manifests. The real choice was one package or two.
+
+⚠ And splitting by KIND (code / data / models) was measured and rejected: it makes the default install
+rule-only, and `phonemize()` is the fallback path. The good reading comes from `phonemizeAsync`.
+
+Decision (owner): **a separate `vernacula-phonemizer-data` package**, a real dependency of the engine. It is
+the packaging form of the rule `core/dataPath.ts` already states — data is owned by no engine — so the tree
+is published as-is and the C# port can consume the same artifact. `data/package.json` makes the tree itself
+the package; `workspaces: ["data"]` links it in a checkout.
+
+Verified end to end, not inferred:
+
+```
+npm pack -w data → 60.5 MB ;  npm pack → 3.0 MB  (engine, src only)
+npm install ./…-data.tgz ./….tgz  in a clean app
+  es      : ˈola kˈe tˈal
+  th      : sˈa˨˩wa˨˩tdˌiː˧
+  nb async: ˈhæɪ ˈʋæɖɳ , ˈkɾɪŋkɑstɪŋsˌʃeːfən     ← neural tier live
+  nb sync : ˈhæɪ ˈʋæɖɳ , ˈkɾɪŋkɑstɪŋsːjəfən      ← and it differs, so the model really loaded
+```
+
+The engine drops from a would-be 63.4 MB to **3.0 MB**.
+
+## Run 12 — 2026-09-01 — the attribution obligation, and two gates
+
+⚠ `NOTICE.md` IS ABOUT THE DATA, so the data package is the artifact that must carry it. It exists because
+the project "ships and distributes data derived from third-party sources", and two upstreams (EDRDG's
+JMdict/KANJIDIC among them) require specific, named acknowledgement — "obligations, not courtesies", in its
+own words. A bare tree of tables would be a licence violation, not an untidy package. `LICENSE`, `LICENSES/`
+and `NOTICE.md` are copied in at pack time (`prepack`) so the repo keeps one source of truth.
+
+Two gates, both verified by breaking them rather than by reading them:
+
+- `tools/check-package-fence.mjs` gained a REQUIRED-file probe. The old fence was one-directional — it
+  caught a file that LEAKS, never one that is missing, which is exactly how `data/` came to be absent from
+  every artifact while the check stayed green. Removing `core` from the data package's `files` now exits 1
+  naming `core/phonology.jsonc`; restored, exit 0.
+- `test/data-package.test.ts` pins version lockstep, the dependency range, that the engine ships no data,
+  that every tracked top-level directory under `data/` is one the package ships, and the attribution set.
+
+⚠ Also fixed on the way: the `prepack` script logged to **stdout**, which `npm pack --json` shares — the log
+line landed inside the JSON and every parse of it failed. It logs to stderr now.
+
+Stale doc corrected: README's repository layout still described the pre-move world
+(`src/languages/<lang>/ … + data`, "`src/` is self-contained at runtime").
+
+## Run 13 — 2026-09-01 — review of #1248, and a licence bug I introduced fixing it
+
+Eight findings. The largest is one the review scoped OUT and I judged in, because this PR was papering over
+it:
+
+**`.gitignore` still said `src/…` for the trainer intermediates, and the data move committed an 8.9 MB
+torch checkpoint.**
+
+```
+git log --diff-filter=A -- data/languages/khmer/km_segmenter.pt
+→ 908fface  repo: shared data/ tree for both engines (#876)
+```
+
+`km_segmenter.pt` is gitignored *by rule* — "a regeneratable intermediate; only the int8 graph and its meta
+ship" — but the rule named `src/languages/khmer/…`, so `git mv` carried the file out from under its own
+ignore and `git add` committed it. Meanwhile `test/packaging.test.ts` enforced "every gitignored `src/` path
+is restated as a `files` negation" against paths that no longer exist: both lists propped each other up
+while guarding nothing, and #1248's first draft hand-negated the `.pt` in the data package — a band-aid over
+the actual defect. The four fp32 `.onnx` intermediates were never tracked, so the move left them behind and
+they are gone from the tree entirely.
+
+Fixed at the root: the patterns now name `data/…`, `git rm --cached` untracks the checkpoint (kept on disk),
+the engine's dead `!src/languages/…` negations are dropped, and `packaging.test.ts` guards the DATA
+package's allowlist — which is where the override-`.gitignore` trap now lives.
+
+### ⚠ And deriving that gate mechanically stripped the attribution set
+
+Generating the negations from `.gitignore` gave `!LICENSE`, `!LICENSES/`, `!NOTICE.md` — because the
+pack-time copies are gitignored too. Measured:
+
+```
+npm pack --dry-run -w data → 349 entries (was 364)
+  NOTICE.md              → True     (npm force-includes these two)
+  LICENSE                → True
+  LICENSES/PROVENANCE.md → False    ← 15 attribution files gone
+```
+
+**Every gate stayed green**, because `data-package.test.ts` asserted `files` *contains* `"LICENSES"` — which
+it did, as a positive, with a `!` negation after it. Checking the DECLARATION instead of the ARTIFACT is
+exactly what let it through, in the one package whose stated purpose is carrying an exactly-true attribution
+set.
+
+Two reasons a path is gitignored here, and they are opposite: a trainer intermediate must NOT ship; the
+licence copies are generated at pack time and MUST. The rule is now "accounted for — negated **or**
+deliberately shipped", and `check-package-fence.mjs` probes `LICENSES/PROVENANCE.md` and
+`licencing_posture.md` in the PACKED output. Verified by re-introducing the bug: exit 1 naming both files;
+restored, exit 0.
+
+### The rest
+
+- **`^0.1.0` → an exact pin.** The test comment said "LOCKSTEP, NOT COMPATIBILITY" while the range said
+  compatibility. A caret admits any newer 0.1.x (and any 1.x later), and a data package the engine did not
+  expect is a set of keys that may not be there — `loadTsv`'s `optional` returning an empty Map, i.e. a
+  plausible wrong reading, not an error.
+- **`resolveDataRoot` is now injectable and tested on every branch.** It is the whole behavioural payload of
+  the split and was verified only by a manual tarball install; two of its branches (installed consumer, data
+  package absent) are unreachable from a checkout. Six cases, including the bundled-`import.meta.url` guard
+  and a Windows `file:` URL.
+- Applied by the review: the unguarded `/src/` split (`slice(0, -1)` would chop the URL's last character and
+  name a directory that never existed), `cpSync` overlaying rather than mirroring `LICENSES/` (a retired
+  licence would survive from an earlier pack), and two stale doc lines.
+
+Re-verified end to end: engine 3.0 MB, data 60.5 MB, 15 licence files present, `km_segmenter.pt` absent,
+`nb` async ≠ `nb` sync. `npm ci` on a clean checkout exits 0 and the fence runs with no `node_modules`
+(the two CI jobs). vitest 292 files / 5,768 tests.

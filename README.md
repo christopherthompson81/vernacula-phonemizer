@@ -204,6 +204,38 @@ letters `˥˩`, offglide superscripts `aᶦ aᶷ`, and geminates as length `ː`.
 flapping `t̬` and the weak vowel `ᵻ`. The notation primitives (`src/core/unicode.ts`,
 `src/core/phonology.jsonc`) are the source of truth.
 
+## Install
+
+```sh
+npm install vernacula-phonemizer            # engine (~3 MB) + its data dependency
+npm install onnxruntime-node                # optional: enables the neural tier
+```
+
+The assets live in a **separate package**, `vernacula-phonemizer-data` (~60 MB), which the engine declares
+as a real dependency — so a plain install works, and the 151 MB tree is not duplicated into every consumer
+that only wants the engine. The split is the packaging form of the rule the code states: **data is owned by
+no engine.** The TypeScript engine and the C# port read the same tree by the same keys
+(`languages/thai/syllables.tsv`), and the published package *is* that tree.
+
+`VERNACULA_DATA_DIR` overrides the location if you ship the assets elsewhere; a checkout always wins over
+the installed package, so tools and tests read the tree you are editing.
+
+**In a browser**, import `vernacula-phonemizer/browser`, supply the bytes yourself, and point the ONNX
+runtime at `onnxruntime-web`:
+
+```ts
+import { setDataSource, setOrtLoader, loadEngine } from "vernacula-phonemizer/browser";
+
+setDataSource({ read: (key) => prefetched.get(key) ?? missing(key) });
+setOrtLoader(() => import("onnxruntime-web"));
+const { phonemizeAsync } = await loadEngine();   // ← call the seams BEFORE this
+await phonemizeAsync("hei verden", "nb");
+```
+
+`npx tsx tools/browser-prefetch.mts <lang…>` records exactly which keys to prefetch, in two phases: a fixed
+~4.5 MB read when the engine is imported (every language's manifest loads at module scope), plus the
+per-language set. `phonemize()` stays synchronous throughout — only the module load is async.
+
 ## Usage
 
 ```ts
@@ -232,11 +264,15 @@ src/registry.ts         sync dispatch — one explicit row per language
 src/neuralRegistry.ts   async dispatch — the neural/restoration best paths
 src/core/               shared engine (abugida, Sinitic dict, stress, schwa, numbers,
                         symbol normalizer, tagger runtime, notation) — code only
-src/languages/<lang>/   per-language module + *.jsonc manifest + data + any model/tagger
-                        + <lang>Neural.ts where a neural tier exists
+src/languages/<lang>/   per-language module (+ <lang>Neural.ts where a neural tier exists)
 src/languages/perso-arabic/  the harakat model shared by the ur/ps/pa riders
+src/browser.ts          browser entry — the injectable seams, engine behind one dynamic import
 
-tools/gen/              generators that BUILD shipped data under src/languages/
+data/                   the SHARED asset store, published as vernacula-phonemizer-data
+data/languages/<lang>/  that language's *.jsonc manifest, tables, lexicons and models
+data/core/              assets shared across languages (phonology tables, the rider model)
+
+tools/gen/              generators that BUILD shipped data under data/languages/
 tools/referee-eval/     the independent-referee harness + referees/ + regression floors
 tools/eval/             one-off per-language validation vs an external source/benchmark
 tools/<lang>/           that language's model train/export pipeline (mirrors src/languages/)
@@ -247,8 +283,9 @@ LICENSES/                   every data artifact → upstream source → parent l
 test/                        golden IPA tests
 ```
 
-Nothing under `tools/` ships — `src/` is self-contained at runtime; `tools/` is the provenance
-and reproducibility record plus the measurement harnesses ([`tools/README.md`](tools/README.md)).
+Nothing under `tools/` ships — it is the provenance and reproducibility record plus the measurement
+harnesses ([`tools/README.md`](tools/README.md)). `src/` carries no assets: everything the engine loads
+comes from `data/`, through the one `read(key)` seam in `src/core/dataSource.ts`.
 
 ## License & provenance
 

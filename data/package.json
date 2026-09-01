@@ -1,0 +1,33 @@
+{
+  "name": "vernacula-phonemizer-data",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Canonical-IPA phonemizer data — the shared asset store read by the TypeScript engine and the C# port alike.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christopherthompson81/vernacula-phonemizer.git",
+    "directory": "data"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    "./*": "./*"
+  },
+  "files": [
+    "core",
+    "languages",
+    "LICENSE",
+    "LICENSES",
+    "NOTICE.md",
+    "!languages/english/en-g2p-tagger.onnx",
+    "!languages/french/fr-g2p-tagger.onnx",
+    "!languages/danish/da-g2p-tagger.onnx",
+    "!languages/norwegian/nb-g2p-tagger.onnx",
+    "!languages/khmer/km_segmenter.pt",
+    "!**/*.log",
+    "!**/*.scratch.*"
+  ],
+  "scripts": {
+    "prepack": "node ../tools/pack-data-licenses.mjs"
+  }
+}
