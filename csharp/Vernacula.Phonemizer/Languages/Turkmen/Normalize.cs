@@ -229,8 +229,7 @@ public static class Normalize
     private static string AttachOrdinal(string whole, string digits, string rawSuffix)
     {
         var n = Js.Number(digits);
-        // JS `Number.isSafeInteger(n)`: an integral double inside ±2^53 − 1.
-        if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991.0)) return whole;
+        if (!Numbers.IsSafeInteger(n)) return whole;
         var suffix = Js.ToLowerCase(rawSuffix);
         var front = suffix.StartsWith("nji", StringComparison.Ordinal)
             || suffix.StartsWith("inji", StringComparison.Ordinal)

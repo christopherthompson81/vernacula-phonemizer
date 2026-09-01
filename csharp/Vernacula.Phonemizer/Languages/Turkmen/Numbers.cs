@@ -14,6 +14,9 @@ namespace Vernacula.Phonemizer.Languages.Turkmen;
 
 public static class Numbers
 {
+    /** JS `Number.isSafeInteger(n)`: an integral double inside ±2^53 − 1. */
+    internal static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
+
     public static List<string?> TurkmenNumberWords(double n, NumbersDef d)
     {
         if (n < 10) return [d.Units[(int)n]];

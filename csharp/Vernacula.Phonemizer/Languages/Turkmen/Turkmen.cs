@@ -88,7 +88,7 @@ public static class TurkmenPhonemizer
     private static string Number(string digits)
     {
         var n = Js.Number(digits);
-        if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991.0))
+        if (!Numbers.IsSafeInteger(n))
             return Core.Numbers.SpellDigits(digits, Manifest.DEF.Numbers, PhonemizeWord);
         return Core.Numbers.RenderNumber(n, Manifest.DEF.Numbers, PhonemizeWord, Numbers.TurkmenNumberWords);
     }

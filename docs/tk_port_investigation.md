@@ -149,3 +149,33 @@ PORTING.md's three questions:
 **No findings to file against the TypeScript.** The unread `digraphs` slot is documented above rather
 than filed: it is empty, the header explains why, and removing it would be a change to the data
 contract for no behavioural gain.
+
+## Run 6 — 2026-08-31 — review pass: a second, adversarial differential
+
+Re-ran the Run 3 harness (`.probe/tk/`) over two probe sets built independently of the port, to test
+the classes the original 6,251-line set could not reach — throw-shaped inputs and case hazards rather
+than well-formed Turkmen.
+
+    adv.txt   3,098 lines — lone surrogates ("1\ud83d000", "ýüz\ud800", "a\udfff-nji ýyl"), astral
+                            characters, the Turkish case pair İ/ı against the `giu` flags and
+                            `Js.ToLowerCase`, "1-NJİ ýyl", `9007199254740993`, a 22-digit run, a
+                            1e21 run, every ordinal in six written spellings, 3,000 random walks
+    adv2.txt  4,502 lines — the symbol tier (units, `km/sag`, `m/s`, currency, `km²`/`km³`, `&`,
+                            the three magnitudes), the initialism runs, all five era spellings,
+                            both fraction orders, the degree/coordinate family, 4,500 random walks
+                            over the full symbol alphabet and a word-salad generator
+
+    rows 7,600 | TS throws 0, C# throws 0
+    TOTAL differ: 0 of 60,800 comparisons (8 entry points)
+
+Negative result, and the useful kind: the three hazards specifically hunted — `string.Concat(segs)
+.Normalize()` (plain, not `Js.Normalize`) on a word carrying an unpaired surrogate, `Js.ToLowerCase`
+vs .NET casing on İ/ı in `AttachOrdinal`, and `d.Units[(int)n]` / `d.Tens[key]` throwing where the TS
+yields `undefined` — are all UNREACHABLE. `LatinPhones.LatinPhone` declines a lone surrogate so no
+non-IPA segment ever reaches the join; the ordinal regex is anchored on `nj` so no dotted-I path
+exists; and both index sites are entered only from `\d+` runs.
+
+`--fix`: the only change applied is a reuse cleanup — the `Number.isSafeInteger` predicate was
+inlined with its magic constant twice (`Turkmen.cs` `Number`, `Normalize.cs` `AttachOrdinal`). Hoisted
+to `Numbers.IsSafeInteger`, which is where the rest of the fleet keeps it. Suite 6,238/6,238, `tk`
+golden still 200/200 byte-identical.
