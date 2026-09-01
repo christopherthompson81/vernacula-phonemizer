@@ -6,15 +6,20 @@ node_modules
 .venv/
 __pycache__/
 
+# ⚠ THESE MOVED TO data/ AND THE PATTERNS DID NOT FOLLOW (#1247). While they still said `src/…`, the data
+# move (#876) carried km_segmenter.pt out from under this rule and `git add` committed the 8.9 MB torch
+# checkpoint these lines exist to keep out. The fp32 .onnx intermediates were untracked, so the move left
+# them behind and they no longer exist anywhere — only the int8 models are in the tree.
+#
 # fp32 intermediate from the G2P trainers; only the int8-quantised model is shipped
-src/languages/english/en-g2p-tagger.onnx
-src/languages/french/fr-g2p-tagger.onnx
-src/languages/danish/da-g2p-tagger.onnx
-src/languages/norwegian/nb-g2p-tagger.onnx
+data/languages/english/en-g2p-tagger.onnx
+data/languages/french/fr-g2p-tagger.onnx
+data/languages/danish/da-g2p-tagger.onnx
+data/languages/norwegian/nb-g2p-tagger.onnx
 
 # Khmer boundary tagger: the torch checkpoint is a regeneratable intermediate — only the int8 graph and its
 # meta ship. Rebuild with tools/khmer/build_km_segmenter_data.py + train_km_segmenter.py from a kmwiki dump.
-src/languages/khmer/km_segmenter.pt
+data/languages/khmer/km_segmenter.pt
 
 tools/fa-restoration/__pycache__/
 

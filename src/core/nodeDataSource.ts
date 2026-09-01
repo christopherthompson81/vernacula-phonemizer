@@ -66,16 +66,37 @@ function urlToPath(url: string): string {
  * hence the try — and resolution is relative to THIS module, so an installed engine finds the data package
  * hoisted beside it.
  */
-function dataRoot(fs: NodeFs): string {
-    const override = env("VERNACULA_DATA_DIR");
+export interface DataRootProbes {
+    /** read an environment variable (`core/env.ts` in production) */
+    env: (name: string) => string | undefined;
+    /** does this directory exist? */
+    exists: (path: string) => boolean;
+    /** resolve a package specifier to a URL; THROWS when the package is absent */
+    resolve: (specifier: string) => string;
+    /** the module URL the checkout is derived from */
+    moduleUrl: string;
+}
+
+/**
+ * The resolution itself, with its three inputs injected — this is the entire behavioural payload of the
+ * data-package split, and every branch of it is otherwise reachable only from an installed tarball.
+ * `test/data-package.test.ts` drives all four cases through here; `dataRoot` below is the production wiring.
+ */
+export function resolveDataRoot(p: DataRootProbes): string {
+    const override = p.env("VERNACULA_DATA_DIR");
     if (override !== undefined) return override;
 
-    const url = import.meta.url.replace(/\\/gu, "/");
-    const repo = `${urlToPath(url.slice(0, url.lastIndexOf("/src/")))}/data`;
-    if (fs.existsSync(repo)) return repo;
+    const url = p.moduleUrl.replace(/\\/gu, "/");
+    // ⚠ GUARD THE `/src/` SPLIT. A bundler that rewrites `import.meta.url` to a chunk URL leaves no
+    //   `/src/` segment, and `slice(0, -1)` would then silently chop the URL's LAST CHARACTER — the
+    //   eventual ENOENT would name `…/index.j/data/…`, a directory that never existed. Fall back to the
+    //   module's own directory so the path in the error is at least a real place to look.
+    const cut = url.lastIndexOf("/src/");
+    const repo = `${urlToPath(url.slice(0, cut < 0 ? url.lastIndexOf("/") : cut))}/data`;
+    if (p.exists(repo)) return repo;
 
     try {
-        const pkg = import.meta.resolve("vernacula-phonemizer-data/package.json");
+        const pkg = p.resolve("vernacula-phonemizer-data/package.json");
         return urlToPath(pkg.slice(0, pkg.lastIndexOf("/")));
     } catch {
         // Fall through to the checkout path so the error names a real directory rather than a resolution
@@ -84,8 +105,21 @@ function dataRoot(fs: NodeFs): string {
     }
 }
 
-/** A DataSource over the local filesystem, rooted at `root` (default: the repo's `data/`), or `undefined`
- *  when this runtime has no `fs`. Keys are `/`-joined onto the root — Node accepts `/` on every platform. */
+/** Production wiring for {@link resolveDataRoot}. `resolve` is wrapped rather than passed by reference:
+ *  `import.meta.resolve` is bound to this module, which is what makes step 3 find the data package hoisted
+ *  beside an installed engine. */
+function dataRoot(fs: NodeFs): string {
+    return resolveDataRoot({
+        env,
+        exists: (path) => fs.existsSync(path),
+        resolve: (specifier) => import.meta.resolve(specifier),
+        moduleUrl: import.meta.url,
+    });
+}
+
+/** A DataSource over the local filesystem, rooted at `root` (default: whatever `dataRoot` resolves — the
+ *  env override, the checkout, then the data package), or `undefined` when this runtime has no `fs`.
+ *  Keys are `/`-joined onto the root — Node accepts `/` on every platform. */
 export function nodeDataSource(root?: string): DataSource | undefined {
     const fs = builtinFs();
     if (fs === undefined) return undefined;

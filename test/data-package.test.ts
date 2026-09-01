@@ -17,6 +17,8 @@ import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { describe, expect, test } from "vitest";
 
+import { resolveDataRoot } from "../src/core/nodeDataSource.ts";
+
 interface Pkg {
     name: string;
     version: string;
@@ -37,7 +39,11 @@ describe("the data package", () => {
         //   data package one release behind is a set of missing files, and a missing file is `loadTsv`'s
         //   `optional` returning an empty Map — a plausible wrong reading, not an error.
         expect(data.version).toBe(root.version);
-        expect(root.dependencies?.["vernacula-phonemizer-data"]).toBe(`^${root.version}`);
+        // ⚠ AN EXACT PIN, NOT A CARET. A caret admits any newer 0.1.x — and once versions reach 1.x, any
+        //   1.x — which is compatibility semantics, not lockstep. A data package the engine did not expect
+        //   is a set of keys that may not be there, and a missing key is `loadTsv`'s `optional` returning
+        //   an EMPTY Map: a plausible wrong reading, not an error. Nothing downstream would report it.
+        expect(root.dependencies?.["vernacula-phonemizer-data"]).toBe(root.version);
         // A workspace, so a checkout resolves the dependency to the live tree rather than a published copy.
         expect(root.workspaces).toContain("data");
     });
@@ -75,5 +81,77 @@ describe("the data package", () => {
         // `km_segmenter.pt` is the training checkpoint — `khmerSegmenter.ts` loads `km-segmenter.int8.onnx`.
         expect(data.files).toContain("!languages/khmer/km_segmenter.pt");
         expect(data.files?.some((f) => f.startsWith("!") && f.includes(".int8.onnx"))).toBe(false);
+    });
+});
+
+/**
+ * ⚠ THE RESOLUTION IS THE PAYLOAD, AND NOTHING ELSE REACHES IT. The gates above check packaging METADATA;
+ * a tarball install checks the happy path once, by hand. These drive every branch, including the two a
+ * checkout can never take — an installed consumer (no `<pkg>/data`, so the package answers) and a
+ * consumer missing the data package entirely.
+ */
+describe("dataRoot resolution", () => {
+    const never = (): string => { throw new Error("resolve should not have been reached"); };
+    const url = "file:///home/u/proj/src/core/nodeDataSource.ts";
+
+    test("1. VERNACULA_DATA_DIR wins outright — an explicit answer is never second-guessed", () => {
+        expect(resolveDataRoot({
+            env: () => "/mnt/assets",
+            exists: () => true, // …even though a checkout is right there
+            resolve: never,
+            moduleUrl: url,
+        })).toBe("/mnt/assets");
+    });
+
+    test("2. the CHECKOUT beats the installed package", () => {
+        // 96 tools, 290 test files and the C# parity harness read the live tree. A stale installed copy
+        // shadowing it would make them measure a different corpus than the one under edit — silently,
+        // since every file would still resolve.
+        expect(resolveDataRoot({
+            env: () => undefined,
+            exists: (p) => p === "/home/u/proj/data",
+            resolve: never,
+            moduleUrl: url,
+        })).toBe("/home/u/proj/data");
+    });
+
+    test("3. an INSTALLED engine falls through to the data package", () => {
+        expect(resolveDataRoot({
+            env: () => undefined,
+            exists: () => false, // node_modules/vernacula-phonemizer/data does not exist
+            resolve: () => "file:///app/node_modules/vernacula-phonemizer-data/package.json",
+            moduleUrl: "file:///app/node_modules/vernacula-phonemizer/src/core/nodeDataSource.ts",
+        })).toBe("/app/node_modules/vernacula-phonemizer-data");
+    });
+
+    test("4. with the package absent, the error names a real directory", () => {
+        // `import.meta.resolve` throws when the package is missing. Returning the checkout path makes the
+        // eventual failure an ENOENT on a path someone can go and look at, rather than a resolution error.
+        expect(resolveDataRoot({
+            env: () => undefined,
+            exists: () => false,
+            resolve: () => { throw new Error("ERR_MODULE_NOT_FOUND"); },
+            moduleUrl: url,
+        })).toBe("/home/u/proj/data");
+    });
+
+    test("⚠ a bundled `import.meta.url` does not silently chop the path", () => {
+        // No `/src/` segment: `slice(0, -1)` would take the URL's LAST CHARACTER off and produce
+        // `…/index.j/data`, a directory that never existed, in an error message claiming to name a real one.
+        expect(resolveDataRoot({
+            env: () => undefined,
+            exists: () => false,
+            resolve: () => { throw new Error("nope"); },
+            moduleUrl: "https://cdn.example/assets/index-a1b2c3.js",
+        })).toBe("https://cdn.example/assets/data");
+    });
+
+    test("a Windows file: URL resolves to the same place as a POSIX one", () => {
+        expect(resolveDataRoot({
+            env: () => undefined,
+            exists: () => true,
+            resolve: never,
+            moduleUrl: "file:///C:/proj/src/core/nodeDataSource.ts",
+        })).toBe("C:/proj/data");
     });
 });

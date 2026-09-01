@@ -48,8 +48,14 @@ const REQUIRED = [
     "languages/hindi/hindi.jsonc", // the first manifest `registry.ts` reads — where #1247 surfaced
     "languages/norwegian/nb-g2p-tagger.int8.onnx", // the async path is the one that matters
     "languages/norwegian/nb-g2p-tagger.meta.json",
-    "NOTICE.md", // the attribution the data itself obliges; see test/data-package.test.ts
+    // ⚠ THE ATTRIBUTION SET, PROBED IN THE PACKED OUTPUT AND NOT IN `files`. Declaring the names is not
+    //   the same as shipping them: a `!` negation derived from .gitignore once stripped all 15 files under
+    //   LICENSES/ — PROVENANCE.md, the per-artifact licence map, among them — while the unit test that
+    //   reads `files` stayed green, because `files` still NAMED "LICENSES". Only packing shows it.
+    "NOTICE.md",
     "LICENSE",
+    "LICENSES/PROVENANCE.md",
+    "LICENSES/licencing_posture.md",
 ];
 const dataFiles = new Set(packed(["-w", "data"]));
 const missing = REQUIRED.filter((p) => !dataFiles.has(p));

@@ -15,6 +15,9 @@ const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
     files?: string[];
     license?: string;
 };
+const dataPkg = JSON.parse(readFileSync(join(ROOT, "data/package.json"), "utf8")) as {
+    files?: string[];
+};
 
 describe("npm packaging", () => {
     it("declares a license and a files allowlist", () => {
@@ -30,18 +33,48 @@ describe("npm packaging", () => {
             expect(positives, `${never}/ must not be published`).not.toContain(never);
     });
 
-    it("restates every gitignored src/ path as a files negation", () => {
+    /**
+     * ⚠ THE ALLOWLIST THAT OVERRIDES .gitignore IS THE **DATA** PACKAGE'S NOW, AND THE RULE HAD NOT MOVED
+     * WITH IT (#1247). This test used to check `src/` paths, and it passed for a year while guarding
+     * nothing: the trainers' intermediates moved to `data/` in #876 and `.gitignore` kept saying `src/…`,
+     * so the move carried `km_segmenter.pt` out from under its own rule and committed the 8.9 MB torch
+     * checkpoint. `data/package.json` blanket-includes `core` and `languages`, so any gitignored
+     * intermediate written under them ships into a 60 MB package unless it is negated — the same trap,
+     * one directory over.
+     */
+    it("restates every gitignored data/ path as a data-package files negation", () => {
         const ignored = readFileSync(join(ROOT, ".gitignore"), "utf8")
             .split("\n")
             .map((l) => l.trim())
-            .filter((l) => l.startsWith("src/"));
-        const negated = new Set((pkg.files ?? []).filter((f) => f.startsWith("!")).map((f) => f.slice(1)));
-        expect(ignored.length, "expected some gitignored src/ intermediates").toBeGreaterThan(0);
-        for (const path of ignored)
+            .filter((l) => l.startsWith("data/"));
+        const negated = new Set((dataPkg.files ?? []).filter((f) => f.startsWith("!")).map((f) => f.slice(1)));
+        const positives = new Set((dataPkg.files ?? []).filter((f) => !f.startsWith("!")));
+        expect(ignored.length, "expected some gitignored data/ intermediates").toBeGreaterThan(0);
+        for (const path of ignored) {
+            const rel = path.slice("data/".length).replace(/\/$/u, ""); // package keys are root-relative
+            // ⚠ ACCOUNTED FOR, NOT MERELY NEGATED — the two reasons a path is gitignored are opposite here.
+            //   A trainer intermediate is ignored because it must NOT ship. LICENSE / LICENSES/ / NOTICE.md
+            //   are ignored because they are COPIES generated at pack time from the repo root, and they are
+            //   the one thing this package absolutely must carry. Deriving "gitignored ⇒ negate" from the
+            //   first class silently stripped the second: 15 attribution files, including
+            //   LICENSES/PROVENANCE.md, vanished from the packed set while every gate here stayed green.
             expect(
-                negated.has(path),
-                `.gitignore excludes ${path}, but package.json "files" would publish it — add "!${path}"`,
+                negated.has(rel) || positives.has(rel),
+                `.gitignore excludes ${path}: either negate it ("!${rel}") or ship it deliberately`,
             ).toBe(true);
+        }
+    });
+
+    it("negates the unanchored gitignored globs inside the data package too", () => {
+        // Same subtlety as for src/ below: `*.log` and friends match anywhere, and an allowlist ignores
+        // them. `core` and `languages` are blanket includes, so nothing else stops a stray one shipping.
+        const globs = readFileSync(join(ROOT, ".gitignore"), "utf8")
+            .split("\n")
+            .map((l) => l.trim())
+            .filter((l) => l && !l.startsWith("#") && !l.includes("/") && l.includes("*"));
+        const negated = new Set(dataPkg.files ?? []);
+        for (const g of globs)
+            expect(negated.has(`!**/${g}`), `data/package.json "files" needs "!**/${g}"`).toBe(true);
     });
 
     // The subtler half: .gitignore's UNANCHORED globs (*.scratch.*, *.log, __pycache__/) match anywhere,

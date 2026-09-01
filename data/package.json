@@ -19,7 +19,13 @@
     "LICENSE",
     "LICENSES",
     "NOTICE.md",
-    "!languages/khmer/km_segmenter.pt"
+    "!languages/english/en-g2p-tagger.onnx",
+    "!languages/french/fr-g2p-tagger.onnx",
+    "!languages/danish/da-g2p-tagger.onnx",
+    "!languages/norwegian/nb-g2p-tagger.onnx",
+    "!languages/khmer/km_segmenter.pt",
+    "!**/*.log",
+    "!**/*.scratch.*"
   ],
   "scripts": {
     "prepack": "node ../tools/pack-data-licenses.mjs"

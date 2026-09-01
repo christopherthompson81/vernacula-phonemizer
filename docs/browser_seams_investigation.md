@@ -292,3 +292,69 @@ line landed inside the JSON and every parse of it failed. It logs to stderr now.
 
 Stale doc corrected: README's repository layout still described the pre-move world
 (`src/languages/<lang>/ … + data`, "`src/` is self-contained at runtime").
+
+## Run 13 — 2026-09-01 — review of #1248, and a licence bug I introduced fixing it
+
+Eight findings. The largest is one the review scoped OUT and I judged in, because this PR was papering over
+it:
+
+**`.gitignore` still said `src/…` for the trainer intermediates, and the data move committed an 8.9 MB
+torch checkpoint.**
+
+```
+git log --diff-filter=A -- data/languages/khmer/km_segmenter.pt
+→ 908fface  repo: shared data/ tree for both engines (#876)
+```
+
+`km_segmenter.pt` is gitignored *by rule* — "a regeneratable intermediate; only the int8 graph and its meta
+ship" — but the rule named `src/languages/khmer/…`, so `git mv` carried the file out from under its own
+ignore and `git add` committed it. Meanwhile `test/packaging.test.ts` enforced "every gitignored `src/` path
+is restated as a `files` negation" against paths that no longer exist: both lists propped each other up
+while guarding nothing, and #1248's first draft hand-negated the `.pt` in the data package — a band-aid over
+the actual defect. The four fp32 `.onnx` intermediates were never tracked, so the move left them behind and
+they are gone from the tree entirely.
+
+Fixed at the root: the patterns now name `data/…`, `git rm --cached` untracks the checkpoint (kept on disk),
+the engine's dead `!src/languages/…` negations are dropped, and `packaging.test.ts` guards the DATA
+package's allowlist — which is where the override-`.gitignore` trap now lives.
+
+### ⚠ And deriving that gate mechanically stripped the attribution set
+
+Generating the negations from `.gitignore` gave `!LICENSE`, `!LICENSES/`, `!NOTICE.md` — because the
+pack-time copies are gitignored too. Measured:
+
+```
+npm pack --dry-run -w data → 349 entries (was 364)
+  NOTICE.md              → True     (npm force-includes these two)
+  LICENSE                → True
+  LICENSES/PROVENANCE.md → False    ← 15 attribution files gone
+```
+
+**Every gate stayed green**, because `data-package.test.ts` asserted `files` *contains* `"LICENSES"` — which
+it did, as a positive, with a `!` negation after it. Checking the DECLARATION instead of the ARTIFACT is
+exactly what let it through, in the one package whose stated purpose is carrying an exactly-true attribution
+set.
+
+Two reasons a path is gitignored here, and they are opposite: a trainer intermediate must NOT ship; the
+licence copies are generated at pack time and MUST. The rule is now "accounted for — negated **or**
+deliberately shipped", and `check-package-fence.mjs` probes `LICENSES/PROVENANCE.md` and
+`licencing_posture.md` in the PACKED output. Verified by re-introducing the bug: exit 1 naming both files;
+restored, exit 0.
+
+### The rest
+
+- **`^0.1.0` → an exact pin.** The test comment said "LOCKSTEP, NOT COMPATIBILITY" while the range said
+  compatibility. A caret admits any newer 0.1.x (and any 1.x later), and a data package the engine did not
+  expect is a set of keys that may not be there — `loadTsv`'s `optional` returning an empty Map, i.e. a
+  plausible wrong reading, not an error.
+- **`resolveDataRoot` is now injectable and tested on every branch.** It is the whole behavioural payload of
+  the split and was verified only by a manual tarball install; two of its branches (installed consumer, data
+  package absent) are unreachable from a checkout. Six cases, including the bundled-`import.meta.url` guard
+  and a Windows `file:` URL.
+- Applied by the review: the unguarded `/src/` split (`slice(0, -1)` would chop the URL's last character and
+  name a directory that never existed), `cpSync` overlaying rather than mirroring `LICENSES/` (a retired
+  licence would survive from an earlier pack), and two stale doc lines.
+
+Re-verified end to end: engine 3.0 MB, data 60.5 MB, 15 licence files present, `km_segmenter.pt` absent,
+`nb` async ≠ `nb` sync. `npm ci` on a clean checkout exits 0 and the fence runs with no `node_modules`
+(the two CI jobs). vitest 292 files / 5,768 tests.

@@ -6,11 +6,6 @@
     "src",
     "LICENSES",
     "NOTICE.md",
-    "!src/languages/english/en-g2p-tagger.onnx",
-    "!src/languages/french/fr-g2p-tagger.onnx",
-    "!src/languages/danish/da-g2p-tagger.onnx",
-    "!src/languages/norwegian/nb-g2p-tagger.onnx",
-    "!src/languages/khmer/km_segmenter.pt",
     "!src/**/*.scratch.*",
     "!src/**/*.log",
     "!src/**/__pycache__"
@@ -43,6 +38,6 @@
     "data"
   ],
   "dependencies": {
-    "vernacula-phonemizer-data": "^0.1.0"
+    "vernacula-phonemizer-data": "0.1.0"
   }
 }

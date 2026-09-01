@@ -12,7 +12,7 @@
  * Copied at pack time rather than committed, so the repo keeps ONE source of truth and the copies cannot
  * drift from it. They are gitignored; `test/data-package.test.ts` pins that `files` still names them.
  */
-import { cpSync, copyFileSync } from "node:fs";
+import { cpSync, copyFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,6 +21,10 @@ const data = join(repo, "data");
 
 copyFileSync(join(repo, "LICENSE"), join(data, "LICENSE"));
 copyFileSync(join(repo, "NOTICE.md"), join(data, "NOTICE.md"));
+// ⚠ PRUNE BEFORE COPYING. `cpSync` overlays, it does not mirror, and `data/LICENSES/` is gitignored — so
+// a licence file RETIRED from the repo root would survive here from an earlier pack and keep shipping in
+// the data package, which is the one artifact whose licence set has to be exactly true.
+rmSync(join(data, "LICENSES"), { recursive: true, force: true });
 cpSync(join(repo, "LICENSES"), join(data, "LICENSES"), { recursive: true });
 // ⚠ stderr, NOT stdout. `npm pack --json` writes its manifest to stdout and a prepack script shares it,
 // so a friendly log line here lands INSIDE the JSON and every consumer of it fails to parse.

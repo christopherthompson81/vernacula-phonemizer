@@ -272,7 +272,7 @@ data/                   the SHARED asset store, published as vernacula-phonemize
 data/languages/<lang>/  that language's *.jsonc manifest, tables, lexicons and models
 data/core/              assets shared across languages (phonology tables, the rider model)
 
-tools/gen/              generators that BUILD shipped data under src/languages/
+tools/gen/              generators that BUILD shipped data under data/languages/
 tools/referee-eval/     the independent-referee harness + referees/ + regression floors
 tools/eval/             one-off per-language validation vs an external source/benchmark
 tools/<lang>/           that language's model train/export pipeline (mirrors src/languages/)
