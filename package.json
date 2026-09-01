@@ -15,10 +15,11 @@
     "!src/**/*.log",
     "!src/**/__pycache__"
   ],
-  "description": "Canonical-IPA phonemizer — native, rule- and lexicon-based. Hindi, English, Mandarin, Spanish, Arabic.",
+  "description": "Canonical-IPA phonemizer \u2014 native, rule- and lexicon-based. Hindi, English, Mandarin, Spanish, Arabic.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./browser": "./src/browser.ts"
   },
   "scripts": {
     "test": "vitest run",
@@ -34,5 +35,8 @@
     "tsx": "^4",
     "typescript": "^5",
     "vitest": "^2"
+  },
+  "engines": {
+    "node": ">=22.3"
   }
 }

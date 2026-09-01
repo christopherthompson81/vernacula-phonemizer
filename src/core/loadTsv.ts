@@ -1,6 +1,6 @@
 /**
  * Load a `key<TAB>value` TSV beside the calling module into a Map, skipping blank and `#`-comment lines.
- * Collapses the readFileSync + split + comment-skip + tab-split boilerplate that the per-language dictionary
+ * Collapses the read + split + comment-skip + tab-split boilerplate that the per-language dictionary
  * loaders (stress / tone / rhyme / lexicon tables) otherwise repeat.
  *
  *   const STRESS = loadTsvMap(import.meta.url, "stress.tsv", Number, { optional: true });
@@ -9,9 +9,8 @@
  * `undefined` skips the row (for loaders that filter, e.g. reject non-numeric values). `optional: true` makes a
  * missing file yield an empty Map instead of throwing (for lexicons that may be absent).
  */
-import { readFileSync } from "node:fs";
-
 import { dataFile } from "./dataPath.ts";
+import { NoDataSourceError, readDataText } from "./dataSource.ts";
 
 /** Read a data file beside `metaUrl`, returning its non-blank, non-`#`-comment lines. `optional` → [] on a
  *  missing file (else rethrows). Shared by loadTsvMap and loadLines so both parse lines identically. */
@@ -20,12 +19,14 @@ function readDataLines(
     filename: string,
     optional: boolean,
 ): string[] {
-    const path = dataFile(metaUrl, filename);
     let text: string;
     try {
-        text = readFileSync(path, "utf8");
+        text = readDataText(dataFile(metaUrl, filename));
     } catch (err) {
-        if (optional) return [];
+        // ⚠ `optional` FORGIVES A MISSING FILE, NEVER A MISSING SEAM. A forgotten `setDataSource()` is a
+        //   configuration error, and swallowing it here would turn every optional lexicon into an EMPTY
+        //   Map — each word then takes the OOV path and gets a plausible wrong reading, silently.
+        if (optional && !(err instanceof NoDataSourceError)) return [];
         throw err;
     }
     return text.split(/\r?\n/).filter((l) => l !== "" && !l.startsWith("#"));

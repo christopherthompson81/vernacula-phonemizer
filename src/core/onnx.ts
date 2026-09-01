@@ -1,10 +1,14 @@
 /**
- * Shared onnxruntime-node plumbing for every neural path (fa tagger/seq2seq/context restorers, the rider + Arabic
+ * Shared ONNX-runtime plumbing for every neural path (fa tagger/seq2seq/context restorers, the rider + Arabic
  * diacritizers, the Bengali OOV tagger). `onnxruntime-node` is an OPTIONAL dependency: it is imported lazily here
  * exactly once per process, and consumers wrap `loadOrt()` in their own try/catch to fall back to the sync path
  * (or, for bare Arabic, to surface the install hint). ⚠ ONE SOURCE FOR THE Ort* INTERFACES AND THE LOADER: hand-
  * copied per consumer they drift, and they had — different `OrtTensor.data` unions, `create(path)` vs
- * `create(bytes, options)`.
+ * `create(bytes, options)`. `setOrtLoader()` swaps the runtime (e.g. `onnxruntime-web`) without any consumer
+ * changing, which is what that single source buys.
+ *
+ * ⚠ EVERY CONSUMER NOW PASSES MODEL **BYTES** TO `InferenceSession.create`, never a path. Khmer passed a
+ * filesystem path until #1245 — the one call site no data source but the local filesystem could satisfy.
  */
 
 /** An ORT output/input tensor. `data` is the widest union any consumer needs (int64 ids, float32 logits/states,
@@ -47,6 +51,25 @@ export interface OrtLike {
 const ORT_SPECIFIER = "onnxruntime-node";
 
 let ortPromise: Promise<OrtLike> | undefined;
+let loader: (() => Promise<unknown>) | undefined;
+
+/**
+ * Replace the ORT provider — the second of the two seams that make the engine browser-ready (#1245).
+ *
+ *   setOrtLoader(() => import("onnxruntime-web"));
+ *
+ * `OrtLike`/`OrtSession`/`OrtTensor` were already runtime-agnostic interfaces and `loadOrt()` was already a
+ * lazy dynamic import behind a const specifier, so this is the whole of seam 2: `onnxruntime-web` satisfies
+ * the same contract, and every neural path reaches it through `loadOrt()`.
+ *
+ * ⚠ IT CLEARS THE MEMO. `loadOrt` caches the resolved library for the process, and a loader installed after
+ * something had already prewarmed a model would otherwise be accepted and ignored — the caller would see a
+ * successful `setOrtLoader` and keep running on the old runtime. Passing `undefined` restores the default.
+ */
+export function setOrtLoader(next: (() => Promise<unknown>) | undefined): void {
+    loader = next;
+    ortPromise = undefined;
+}
 
 /**
  * Lazily import onnxruntime-node once per process. `context` names the caller for the missing-dependency error (e.g.
@@ -55,12 +78,23 @@ let ortPromise: Promise<OrtLike> | undefined;
  */
 export function loadOrt(context = "Neural inference"): Promise<OrtLike> {
     if (ortPromise) return ortPromise;
-    return (ortPromise = import(ORT_SPECIFIER)
+    const installed = loader;
+    const load = installed ?? ((): Promise<unknown> => import(ORT_SPECIFIER));
+    const mine: Promise<OrtLike> = load()
         .then((m) => ((m as { default?: unknown }).default ?? m) as unknown as OrtLike)
-        .catch(() => {
-            ortPromise = undefined;
+        .catch((err: unknown) => {
+            // ⚠ ONLY CLEAR THE MEMO IF IT IS STILL OURS. A `setOrtLoader()` during an in-flight load
+            //   installs a new promise; a blanket `ortPromise = undefined` here would then discard the
+            //   NEW memo when the OLD load finally rejects, and every later loadOrt would re-run the
+            //   loader. And keep `err` as the cause — for a browser runtime the underlying failure (a
+            //   WASM fetch, a missing artifact) is the only actionable part of the message.
+            if (ortPromise === mine) ortPromise = undefined;
             throw new Error(
-                `${context} needs the optional dependency \`onnxruntime-node\`. Install it with \`npm install onnxruntime-node\`.`,
+                installed
+                    ? `${context} failed to load the ONNX runtime installed with setOrtLoader().`
+                    : `${context} needs the optional dependency \`onnxruntime-node\`. Install it with \`npm install onnxruntime-node\`.`,
+                { cause: err },
             );
-        }));
+        });
+    return (ortPromise = mine);
 }

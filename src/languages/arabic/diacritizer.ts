@@ -6,8 +6,7 @@
  *
  * Position-preserving: only harakat are inserted after Arabic letters; digits/punctuation/spacing are kept.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readData, readDataText } from "../../core/dataSource.ts";
 
 import { MANIFEST } from "./manifest.ts";
 import { loadOrt } from "../../core/onnx.ts";
@@ -167,10 +166,10 @@ export async function createArabicDiacritizer(variety?: string): Promise<ArabicD
   const dir = dataDir(import.meta.url);
   const bases = variety === "egyptian" ? ["diacritizer-egy", "diacritizer"] : ["diacritizer"];
   for (const base of bases) {
-    let bytes: Buffer;
-    try { bytes = readFileSync(join(dir, `${base}.onnx`)); } catch { continue; }
-    const meta = JSON.parse(readFileSync(join(dir, `${base}.meta.json`), "utf8")) as DiacritizerMeta;
-    return loadArabicDiacritizer(new Uint8Array(bytes), meta);
+    let bytes: Uint8Array;
+    try { bytes = readData(`${dir}/${base}.onnx`); } catch { continue; }
+    const meta = JSON.parse(readDataText(`${dir}/${base}.meta.json`)) as DiacritizerMeta;
+    return loadArabicDiacritizer(bytes, meta);
   }
   return undefined;
 }

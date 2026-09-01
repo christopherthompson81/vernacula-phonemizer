@@ -31,7 +31,6 @@
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the .onnx — is absent,
  * createCentralKurdishTagger() resolves to `undefined` and callers fall back to the sync engine (no throw).
  */
-import { dirname } from "node:path";
 
 import { createWordStructuralTagger, type WordStructuralTagger } from "../../core/structuralTagger.ts";
 import { phonemizeWordRules } from "./central-kurdish.ts";

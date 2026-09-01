@@ -12,11 +12,10 @@
  * UNK-permits-all) shape and intentionally do NOT use the word-level factory — but they DO still consume `maskedArgmax`
  * + `TaggerMeta` below, so a change to that decode kernel or the meta shape must keep those two compiling too.
  */
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readData, readDataText } from "./dataSource.ts";
+import { env } from "./env.ts";
 
 import { loadOrt, type OrtLike, type OrtSession } from "./onnx.ts";
-import { dataDir } from "./dataPath.ts";
 
 /** `src`: symbol → id (incl. `<pad>`=0, `<unk>`=1). `tags`: tag-id → IPA chunk. `charTags`: symbol-id → the tag-ids
  *  that symbol may emit (the consonant mask). Emitted by the train/export tools (export_tagger_onnx.py /
@@ -77,7 +76,7 @@ export interface WordStructuralTagger {
 }
 
 export interface WordTaggerOptions {
-    /** the calling module's directory (`dataDir(import.meta.url)`) — the model + meta live beside it */
+    /** the calling module's data-directory KEY (`dataDir(import.meta.url)`) — model + meta live beside it */
     dir: string;
     /** meta filename stem; loads `${basename}.meta.json` */
     basename: string;
@@ -102,14 +101,14 @@ export interface WordTaggerOptions {
 export async function createWordStructuralTagger(opts: WordTaggerOptions): Promise<WordStructuralTagger | undefined> {
     let meta: TaggerMeta, modelBytes: Uint8Array;
     try {
-        meta = JSON.parse(readFileSync(join(opts.dir, `${opts.basename}.meta.json`), "utf8")) as TaggerMeta;
-        modelBytes = readFileSync(join(opts.dir, opts.modelFile));
+        meta = JSON.parse(readDataText(`${opts.dir}/${opts.basename}.meta.json`)) as TaggerMeta;
+        modelBytes = readData(`${opts.dir}/${opts.modelFile}`);
     } catch { return undefined; }
     let ortLib: OrtLike, sess: OrtSession;
     try {
         ortLib = await loadOrt(opts.context);
         // Shipping default is CPU. Opt into a GPU execution provider (fast eval iteration) via the env var.
-        const ep = process.env[opts.epEnv];
+        const ep = env(opts.epEnv);
         sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
     } catch { return undefined; }
     const nTags = Object.keys(meta.tags).length;

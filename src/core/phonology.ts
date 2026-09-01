@@ -3,11 +3,9 @@
  * Universal, output-affecting DATA (place-of-articulation + homorganic nasal) — see that file's header
  * for the data-vs-code split. Memoized: the file is read once.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-
 import { parseJsonc } from "./jsonc.ts";
-import { dataDir } from "./dataPath.ts";
+import { dataFile } from "./dataPath.ts";
+import { readDataText } from "./dataSource.ts";
 
 /**
  * Universal (not language-specific) phonology tables, loaded from data/native/_shared/phonology.jsonc.
@@ -21,14 +19,14 @@ export interface Phonology {
     homorganicNasal: Record<string, string>;
 }
 
-const SHARED_DIR = dataDir(import.meta.url); // phonology.jsonc sits beside this module
+const SHARED_KEY = dataFile(import.meta.url, "phonology.jsonc"); // it sits beside this module
 
 let cached: Phonology | undefined;
 
 /** Read + parse the shared phonology tables (JSONC — strip comments). Memoized after first call. */
 export function loadSharedPhonology(): Phonology {
     if (cached === undefined) {
-        cached = parseJsonc<Phonology>(readFileSync(join(SHARED_DIR, "phonology.jsonc"), "utf8"));
+        cached = parseJsonc<Phonology>(readDataText(SHARED_KEY));
     }
     return cached;
 }

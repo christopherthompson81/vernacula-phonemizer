@@ -16,7 +16,6 @@
  * file supplies only the af-specific preprocess. `onnxruntime-node` is optional; absent it (or the model),
  * createAfrikaansTagger() resolves to `undefined` and callers fall back to the sync path.
  */
-import { dirname } from "node:path";
 
 import { createWordStructuralTagger, type WordStructuralTagger } from "../../core/structuralTagger.ts";
 import { dataDir } from "../../core/dataPath.ts";

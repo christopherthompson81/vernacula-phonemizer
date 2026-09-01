@@ -14,14 +14,14 @@
  * `onnxruntime-node` is OPTIONAL (lazy); if it — or the model — is absent, createHebrewTagger() resolves to
  * `undefined` and the caller falls back to the sync (vocalized-only) engine.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
 import { phonemizeWord } from "./hebrew.ts";
 import { lexiconLookup } from "./lexicon.ts";
 import { dataDir } from "../../core/dataPath.ts";
+import { readData, readDataText } from "../../core/dataSource.ts";
+import { env } from "../../core/env.ts";
 
 const BARE = "∅"; // the tag for a consonant with no niqqud
 const SPACE = " "; // the tag for a space char (word boundary)
@@ -42,13 +42,13 @@ export async function createHebrewTagger(basename = "he-tagger"): Promise<Hebrew
     const dir = dataDir(import.meta.url);
     let meta: TaggerMeta, modelBytes: Uint8Array;
     try {
-        meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as TaggerMeta;
-        modelBytes = readFileSync(join(dir, `${basename}.int8.onnx`));
+        meta = JSON.parse(readDataText(`${dir}/${basename}.meta.json`)) as TaggerMeta;
+        modelBytes = readData(`${dir}/${basename}.int8.onnx`);
     } catch { return undefined; }
     let ortLib: OrtLike, sess: OrtSession;
     try {
         ortLib = await loadOrt("Hebrew neural restoration");
-        const ep = process.env.HE_ORT_EP;
+        const ep = env("HE_ORT_EP");
         sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
     } catch { return undefined; }
     const nTags = Object.keys(meta.tags).length;

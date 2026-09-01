@@ -11,7 +11,6 @@
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the model — is absent, createDanishTagger()
  * resolves to `undefined` and the async path (daNeural.ts) falls back to the sync rule engine.
  */
-import { dirname } from "node:path";
 
 import { createWordStructuralTagger, oneStress, type WordStructuralTagger } from "../../core/structuralTagger.ts";
 import { dataDir } from "../../core/dataPath.ts";

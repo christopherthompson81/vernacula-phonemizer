@@ -2,8 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { getPhonemizer } from "../src/registry.ts";
 import { phonemizeWord } from "../src/languages/zhuang/zhuang.ts";
-import { isSawndip, sawndipToReadings } from "../src/languages/zhuang/sawndip.ts";
-import { loadTsvMap } from "../src/core/loadTsv.ts";
+import { isSawndip, sawndipReadings, sawndipToReadings } from "../src/languages/zhuang/sawndip.ts";
 
 // Sawndip (古壮字) — the Han-derived LOGOGRAPHIC second script for Zhuang (za), read via a glyph→Standard-Zhuang-reading
 // dictionary routed through the za Latin g2p (the Adlam/Tifinagh second-script pattern). reference-parity,
@@ -32,7 +31,7 @@ describe("Zhuang Sawndip (second-script front-end)", () => {
     });
 
     test("the shipped dictionary is well-formed and every reading is phonemizable", () => {
-        const dict = loadTsvMap(import.meta.url, "../data/languages/zhuang/sawndip-readings.tsv");
+        const dict = sawndipReadings();
         expect(dict.size).toBeGreaterThan(2000);
         for (const [glyph, reading] of dict) {
             expect([...glyph].length).toBe(1); // single codepoint per key
@@ -51,7 +50,7 @@ describe("Zhuang Sawndip (second-script front-end)", () => {
     // ⚠ AND THE PROBE ASSERTS A NON-EMPTY READING, not merely that the two paths agree: a glyph that both
     // the predicate and the engine silently drop is exactly what this is here to catch.
     test("⚠ EVERY dictionary key is REACHABLE from the shipped entry point", () => {
-        const dict = loadTsvMap(import.meta.url, "../data/languages/zhuang/sawndip-readings.tsv");
+        const dict = sawndipReadings();
         const unreachable = [...dict.keys()].filter((g) => !isSawndip(g) || za.text(g) === "");
         expect(unreachable).toEqual([]);
         // the four blocks the old bounds excluded, named so a regression says which one came back

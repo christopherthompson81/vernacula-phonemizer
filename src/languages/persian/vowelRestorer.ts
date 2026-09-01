@@ -12,11 +12,10 @@
  * createFaVowelRestorer() resolves to `undefined` and callers fall back to the lexicon+default sync path (no throw).
  * See data/languages/persian/fa-vowel-restorer.PROVENANCE.md and tools/persian/export_s2s_onnx.py.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
 import { loadOrt, type OrtLike, type OrtSession, type OrtTensor } from "../../core/onnx.ts";
 import { dataDir } from "../../core/dataPath.ts";
+import { readData, readDataText } from "../../core/dataSource.ts";
 
 interface Meta {
     src: Record<string, number>;
@@ -51,9 +50,9 @@ export async function createFaVowelRestorer(): Promise<FaVowelRestorer | undefin
     const dir = dataDir(import.meta.url);
     let meta: Meta, encBytes: Uint8Array, decBytes: Uint8Array;
     try {
-        meta = JSON.parse(readFileSync(join(dir, "fa-vowel-restorer.meta.json"), "utf8")) as Meta;
-        encBytes = readFileSync(join(dir, "fa-vowel-restorer.enc.onnx"));
-        decBytes = readFileSync(join(dir, "fa-vowel-restorer.dec.onnx"));
+        meta = JSON.parse(readDataText(`${dir}/fa-vowel-restorer.meta.json`)) as Meta;
+        encBytes = readData(`${dir}/fa-vowel-restorer.enc.onnx`);
+        decBytes = readData(`${dir}/fa-vowel-restorer.dec.onnx`);
     } catch {
         return undefined; // model or sidecar absent
     }
