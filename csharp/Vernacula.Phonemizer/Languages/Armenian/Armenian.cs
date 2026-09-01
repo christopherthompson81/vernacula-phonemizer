@@ -181,7 +181,9 @@ public sealed class ArmenianEngine
 public static class Armenian
 {
     /** Build a full Armenian engine (phonemizer + word g2p) from one dialect manifest. `pre` is the
-     *  dialect's own text-normalization pass; hyw deliberately passes none. */
+     *  dialect's own text-normalization pass — an omitted one is the identity. ⚠ The orthographic facts
+     *  about the SCRIPT (the ՛ ՜ ՞ marks that TOKEN would otherwise split a word on) live in the ENGINE,
+     *  not in a `pre`: written into one dialect's pass, the other dialect keeps the defect. */
     public static ArmenianEngine MakeArmenianEngine(ArmenianDef def, Func<string, string>? pre = null) =>
         new(def, pre ?? (s => s));
 

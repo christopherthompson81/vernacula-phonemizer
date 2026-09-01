@@ -27,15 +27,16 @@ public class LanguageBootstrapTests
         // A missing engine must be a NAMED failure. The script router catches this exception and drops the
         // run, so without the record a golden row simply differs and reads as a porting bug in the language
         // that was ported — Quechua's Cyrillic rows are read by the RUSSIAN engine.
-        // ⚠ THE SAMPLE MUST BE A LANGUAGE THAT IS STILL UNPORTED, so it changes as the port advances — it was
-        // `de` until German landed, `nci` until Classical Nahuatl, and `mto` until Totontepec Mixe.
-        // ⚠ AND THE HEURISTIC THAT PICKED THE LAST THREE IS NOW EXHAUSTED. It was "choose one with no golden,
-        // since a language with nothing to be byte-identical to has no gate and so is the least likely to be
-        // ported next" — and `mto` was the last such language. All four codes still unported (cy, hyw, sk, tk)
-        // carry a 200-row golden, so the sample is simply the one whose script is furthest from anything the
-        // fleet already reads. Expect to edit this line every batch from here on.
-        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("hyw"));
-        Assert.Contains("westarmenian", Registry.PortPending);
+        // ⚠ THE SAMPLE MUST BE A LANGUAGE THAT IS STILL UNPORTED, so it changes as the port advances — it
+        // was `de` until German landed, `nci` until Classical Nahuatl, `mto` until Totontepec Mixe, and
+        // `hyw` until Western Armenian.
+        // ⚠ AND `cy` IS THE LAST ONE THERE IS. Welsh is the only code left that Registry.cs routes without a
+        // C# engine behind it, so when it lands this test has NO valid sample and cannot simply be
+        // repointed. It should then be rewritten against a SYNTHETIC unregistered name rather than a real
+        // language — the invariant under test is "a missing engine is a NAMED failure", which does not need
+        // a genuinely unported language to demonstrate. Said here so the next person is not left hunting.
+        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("cy"));
+        Assert.Contains("welsh", Registry.PortPending);
     }
 
     [Theory]
