@@ -156,3 +156,30 @@ the replay distinguish "Node could not serve it either" from "the frozen Map was
 contents of a checkout.
 
 `vitest run` 291 files / 5,755 tests.
+
+## Run 8 — 2026-09-01 — the browser entry, end to end
+
+Question: does `src/browser.ts` actually deliver the ordering it claims — seams installable before anything
+is read — and does the whole engine run from a Map?
+
+```
+import src/browser.ts → count reads → prefetch via a wrapped source → freeze → phonemizeAsync("…","nb")
+```
+
+Raw finding:
+
+```
+reads on importing src/browser.ts: 0
+prefetched: 185 keys, 6.13 MB
+nb: ˈhæɪ ˈʋæɖɳ        (from the frozen Map, no filesystem, ORT via setOrtLoader)
+```
+
+Implication: the deferral works, and 185 keys / 6.13 MB is the real cost of a Norwegian page including the
+neural tier — 4.46 MB of it the fixed engine set. Promoted to a test, because that `0` is the load-bearing
+claim of the file and a future static import in `browser.ts` would silently take it to 182 with no other
+symptom until a consumer hit it.
+
+⚠ Note the probe text matters: `phonemizeAsync("hei verden","nb")` equals the sync reading, because both
+words are lexicon-covered. The async replay test uses `"hei verden, kringkastingssjefen"`, which does not —
+an assertion that the neural reading differs from the fallback is worth nothing on a string where it
+doesn't.

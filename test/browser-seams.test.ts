@@ -209,6 +209,27 @@ describe("the browser seams", () => {
         120_000,
     );
 
+    test("⚠ importing `src/browser.ts` reads NOTHING — the seams are static, the engine is not", async () => {
+        vi.resetModules();
+        const reads: string[] = [];
+        const probe = await import("../src/core/dataSource.ts");
+        const node = probe.getDataSource()!;
+        probe.setDataSource({ read: (key) => { reads.push(key); return node.read(key); } });
+
+        await import("../src/browser.ts");
+        // ⚠ THIS IS THE WHOLE REASON `loadEngine()` IS A DYNAMIC IMPORT. `registry.ts` statically imports
+        //   all 193 language modules and each `manifest.ts` calls `loadManifest()` at MODULE SCOPE, so a
+        //   static import here would perform 182 reads (4.5 MB) while this module's own body — including
+        //   the consumer's setDataSource() call — had not yet run. A browser consumer could then never
+        //   install a source in time, and the failure would be at import, before any of their code.
+        expect(reads).toEqual([]);
+
+        // …and the engine is genuinely reachable through it, not merely deferred.
+        const { getPhonemizer } = await (await import("../src/browser.ts")).loadEngine();
+        expect(getPhonemizer("es").text("hola")).toBeTruthy();
+        expect(reads.length).toBeGreaterThan(100);
+    }, 120_000);
+
     test("recordDataKeys reports only keys that EXIST — an absent optional file is not prefetchable", async () => {
         vi.resetModules();
         const ds = await import("../src/core/dataSource.ts");
