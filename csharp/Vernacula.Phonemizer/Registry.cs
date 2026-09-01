@@ -72,7 +72,9 @@ public static class Registry
      */
     public static void EnsureLanguages() => Languages.Bootstrap.EnsureRegistered();
 
-    private static ILanguage Create(string key)
+    /** ⚠ `internal`, not private, so LanguageBootstrapTests can reach the port-pending path with a
+     *  synthetic key — see that test for why a real unported language is no longer available to it. */
+    internal static ILanguage Create(string key)
     {
         EnsureLanguages();
         if (Factories.TryGetValue(key, out var f)) return f();

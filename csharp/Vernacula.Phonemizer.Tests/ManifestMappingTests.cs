@@ -877,6 +877,11 @@ public class ManifestMappingTests
             "language", "name", "script", "provenance");
 
     [Fact]
+    public void WelshManifestIsFullyMapped() =>
+        AssertFullyMapped("languages/welsh", "welsh.jsonc", Languages.Welsh.Manifest.MANIFEST,
+            "language", "name", "script", "provenance");
+
+    [Fact]
     public void KambaManifestIsFullyMapped() =>
         AssertFullyMapped("languages/kamba", "kamba.jsonc", Languages.Kamba.Manifest.MANIFEST,
             "language", "name", "script", "provenance", "convention");

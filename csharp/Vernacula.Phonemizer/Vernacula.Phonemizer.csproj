@@ -9,4 +9,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.4" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- ⚠ For LanguageBootstrapTests ONLY, and for one reason: with every routed code now ported, the
+         "engine with no factory" state is unreachable through the public API, so the invariant that a
+         missing engine is a NAMED failure could otherwise only be tested by leaving a language unported. -->
+    <InternalsVisibleTo Include="Vernacula.Phonemizer.Tests" />
+  </ItemGroup>
 </Project>

@@ -27,16 +27,23 @@ public class LanguageBootstrapTests
         // A missing engine must be a NAMED failure. The script router catches this exception and drops the
         // run, so without the record a golden row simply differs and reads as a porting bug in the language
         // that was ported — Quechua's Cyrillic rows are read by the RUSSIAN engine.
-        // ⚠ THE SAMPLE MUST BE A LANGUAGE THAT IS STILL UNPORTED, so it changes as the port advances — it
-        // was `de` until German landed, `nci` until Classical Nahuatl, `mto` until Totontepec Mixe, and
-        // `hyw` until Western Armenian.
-        // ⚠ AND `cy` IS THE LAST ONE THERE IS. Welsh is the only code left that Registry.cs routes without a
-        // C# engine behind it, so when it lands this test has NO valid sample and cannot simply be
-        // repointed. It should then be rewritten against a SYNTHETIC unregistered name rather than a real
-        // language — the invariant under test is "a missing engine is a NAMED failure", which does not need
-        // a genuinely unported language to demonstrate. Said here so the next person is not left hunting.
-        Assert.Throws<NotImplementedException>(() => Registry.GetPhonemizer("cy"));
-        Assert.Contains("welsh", Registry.PortPending);
+        // ⚠ THE SAMPLE USED TO BE A REAL UNPORTED LANGUAGE, and changed as the port advanced — `de` until
+        // German landed, `nci` until Classical Nahuatl, `mto` until Totontepec Mixe, `hyw` until Western
+        // Armenian, `cy` until Welsh. ⚠ WELSH WAS THE LAST ONE. Every code Registry.cs routes now has an
+        // engine, so the state under test is no longer reachable through the public API and there is no
+        // language left to point at.
+        //
+        // The invariant does not need one. It is "a key with no registered factory raises a NAMED failure
+        // AND records itself in PortPending" — the parity gate reads that set so `blocked` reads differently
+        // from `wrong` — and a SYNTHETIC key exercises exactly that. ⚠ NOT `GetPhonemizer("zzz")`: an
+        // unrouted CODE hits the switch's `default:` and throws ArgumentException without ever reaching
+        // `Create`, so it would test the other branch and leave PortPending unexercised.
+        const string synthetic = "no-such-engine-zzz";
+        Registry.ClearPortPending();
+        var ex = Assert.Throws<NotImplementedException>(() => Registry.Create(synthetic));
+        Assert.Contains(synthetic, ex.Message, StringComparison.Ordinal); // NAMED, not anonymous
+        Assert.Contains(synthetic, Registry.PortPending);
+        Registry.ClearPortPending();
     }
 
     [Theory]

@@ -159,6 +159,7 @@ public static class Bootstrap
             Sesotho.SesothoPhonemizer.RegisterSelf();
             Sepedi.SepediPhonemizer.RegisterSelf();
             Wolof.WolofPhonemizer.RegisterSelf();
+            Welsh.WelshPhonemizer.RegisterSelf();
             Finnish.FinnishPhonemizer.RegisterSelf();
             Luganda.LugandaPhonemizer.RegisterSelf();
             Kirundi.KirundiPhonemizer.RegisterSelf();
