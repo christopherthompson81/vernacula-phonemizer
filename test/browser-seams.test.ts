@@ -58,10 +58,40 @@ function sources(dir: URL): string[] {
     return out;
 }
 
+/** Node's built-in module names. A core module is importable WITHOUT the `node:` prefix (`from "fs"`), and
+ *  a gate that only looked for the prefix would wave the un-prefixed spelling straight through. */
+const NODE_BUILTINS = new Set([
+    "assert", "async_hooks", "buffer", "child_process", "cluster", "console", "constants", "crypto", "dgram",
+    "diagnostics_channel", "dns", "domain", "events", "fs", "http", "http2", "https", "inspector", "module",
+    "net", "os", "path", "perf_hooks", "process", "punycode", "querystring", "readline", "repl", "sea",
+    "stream", "string_decoder", "sys", "test", "timers", "tls", "trace_events", "tty", "url", "util", "v8",
+    "vm", "wasi", "worker_threads", "zlib",
+]);
+
+/**
+ * Every module specifier a file imports — `from "x"`, a side-effect `import "x"`, `import("x")`, `require("x")`.
+ *
+ * ⚠ ALL FOUR FORMS, AND THE BARE NAME TOO. The obvious gate — `from "node:…"` — misses a side-effect
+ * `import "node:fs"`, a `require()`, every builtin whose name carries an underscore or a digit
+ * (`node:child_process`, `node:worker_threads`, `node:v8`), and the un-prefixed spelling `from "fs"`, which
+ * a bundler resolves exactly as eagerly. Collect the specifiers and decide on the string.
+ */
+function specifiers(src: string): string[] {
+    const out: string[] = [];
+    const re = /(?:\bfrom|^[ \t]*import|\bimport\s*\(|\brequire\s*\()\s*["']([^"']+)["']/gmu;
+    for (const m of src.matchAll(re)) out.push(m[1]!);
+    return out;
+}
+
+/** Does this file reach a Node built-in, by either spelling? */
+function importsNodeBuiltin(src: string): boolean {
+    return specifiers(src).some((s) => s.startsWith("node:") || NODE_BUILTINS.has(s.split("/")[0]!));
+}
+
 describe("the browser seams", () => {
     test("⚠ NOTHING IN src/ IMPORTS A `node:` SPECIFIER — a bundler resolves the graph, not the branch", () => {
         const offenders = sources(new URL("../src/", import.meta.url))
-            .filter((f) => /(?:from|import\()\s*["']node:[a-z/]+["']/u.test(code(f)))
+            .filter((f) => importsNodeBuiltin(code(f)))
             .map((f) => f.replace(/^.*\/src\//u, "src/"));
         // A static `node:` import is resolved by a bundler whether or not the code path runs, so one of
         // these anywhere in the graph is a broken browser build. `nodeDataSource.ts` is how Node is reached
@@ -71,10 +101,14 @@ describe("the browser seams", () => {
 
     test("`process` is touched only where its absence is handled", () => {
         const users = sources(new URL("../src/", import.meta.url))
-            .filter((f) => /\bprocess\.(?:env|cwd|argv|platform)\b/u.test(code(f)))
+            .filter((f) => /\bprocess\s*\.\s*[A-Za-z_$]/u.test(code(f)))
             .map((f) => f.replace(/^.*\/src\//u, "src/"));
         // A bare `process.env.X` is a ReferenceError in a browser, not `undefined`. Every reader goes
         // through `core/env.ts`, which optional-chains off `globalThis`.
+        // ⚠ ANY PROPERTY, NOT A LIST OF FOUR. `process.versions`, `process.exit`, `process.stdout` and
+        // `process.hrtime` throw the same ReferenceError as `process.env`, and enumerating the ones
+        // someone happened to use makes the gate a record of the past. The two guarded files read
+        // `(globalThis as {process?: …}).process`, which is `.process`, not `process.`, so they stay under it.
         expect(users).toEqual([]);
     });
 

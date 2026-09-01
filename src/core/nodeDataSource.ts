@@ -9,7 +9,9 @@
  * simply does not exist in a browser, so the file has no bundler-visible Node dependency at all and no
  * `browser` field / alias config is imposed on a consumer.
  *
- * The consequence is the version floor in package.json `engines`: `getBuiltinModule` is Node ≥20.16/≥22.3.
+ * The consequence is a version floor. `getBuiltinModule` landed in Node 20.16 and 22.3, so the API floor is
+ * the earlier of those — but package.json declares `>=22.3`, because 22 is the only line CI runs and a
+ * declared floor should be one that is tested rather than one that is merely believed.
  *
  * ⚠ AND IT AUTO-INSTALLS, because the alternative was 96 tools and 290 test files each remembering an
  * import. `getDefaultDataSource()` returns undefined off Node, so a browser reaches `setDataSource()` or a
