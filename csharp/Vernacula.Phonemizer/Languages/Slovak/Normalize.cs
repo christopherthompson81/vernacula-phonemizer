@@ -222,11 +222,11 @@ public static class Normalize
      *  instrumental. */
     private static readonly (JsRe Re, string Word)[] MULTI_DOT =
     {
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])p\\.\\s?n\\.\\s?l\\.?(?!\\p{L}\\p{M})", "giu"), "pred naším letopočtom"),
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])pred\\s+n\\.\\s?l\\.?(?!\\p{L}\\p{M})", "giu"), "pred naším letopočtom"),
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])n\\.\\s?l\\.?(?!\\p{L}\\p{M})", "giu"), "nášho letopočtu"),
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])n\\.\\s?m\\.?(?!\\p{L}\\p{M})", "giu"), "nad morom"),
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])t\\.\\s?j\\.?(?!\\p{L}\\p{M})", "giu"), "to jest"),
+        (JsRegex.Compile("(?<![\\p{L}\\p{M}])p\\.\\s?n\\.\\s?l\\.?(?![\\p{L}\\p{M}])", "giu"), "pred naším letopočtom"),
+        (JsRegex.Compile("(?<![\\p{L}\\p{M}])pred\\s+n\\.\\s?l\\.?(?![\\p{L}\\p{M}])", "giu"), "pred naším letopočtom"),
+        (JsRegex.Compile("(?<![\\p{L}\\p{M}])n\\.\\s?l\\.?(?![\\p{L}\\p{M}])", "giu"), "nášho letopočtu"),
+        (JsRegex.Compile("(?<![\\p{L}\\p{M}])n\\.\\s?m\\.?(?![\\p{L}\\p{M}])", "giu"), "nad morom"),
+        (JsRegex.Compile("(?<![\\p{L}\\p{M}])t\\.\\s?j\\.?(?![\\p{L}\\p{M}])", "giu"), "to jest"),
     };
 
     /** SINGLE-DOT abbreviations → their expansion. */

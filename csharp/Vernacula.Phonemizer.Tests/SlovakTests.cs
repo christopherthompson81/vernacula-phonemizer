@@ -151,6 +151,10 @@ public class SlovakTests
     [InlineData("tuniak atď.", "tuniak a tak ďalej.")]
     [InlineData("Dr. Ehud Ur", "doktor Ehud Ur")]
     [InlineData("kozmonaut č. 11", "kozmonaut číslo 11")]
+    // ⚠ THE ERA MARKER'S RIGHT BOUNDARY IS A CHARACTER CLASS: `n. l` inside a word-initial run must NOT
+    //    be claimed (the port briefly wrote `(?!\p{L}\p{M})` for `(?![\p{L}\p{M}])`, which claimed it).
+    [InlineData("Bol n. lekárom", "Bol n. lekárom")]
+    [InlineData("t. jazyk je", "t. jazyk je")]
     public void ThousandsDecimalsRangesVersionEraAbbreviations(string input, string want) =>
         Assert.Equal(want, SlovakNormalize.NormalizeSlovak(input));
 
