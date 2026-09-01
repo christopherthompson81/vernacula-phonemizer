@@ -8,15 +8,16 @@
 //      · classical VOICELESS  ⟨պ տ կ ծ ճ⟩ → [b d ɡ d͡z d͡ʒ]        (VOICED)
 //      (պատ→bɑd, բարի→pʰɑɾi, փակ→pʰɑɡ, գործ→kʰoɾd͡z, կով→ɡov.)
 //   RHOTIC NEUTRALISATION — Eastern's tap ⟨ր⟩→[ɾ] vs trill ⟨ռ⟩→[r] both become a single tap [ɾ] in Western.
-//   FRONT-ROUNDED vowels from the palatal sequences ⟨յու⟩/⟨իւ⟩→[ʏ] and ⟨յո⟩→[œ] (loan-heavy: Turkish/French names,
-//      and the classical ⟨իւ⟩ spelling kept in Western orthography) — handled as digraphs.
+//   FRONT-ROUNDED vowels from the palatal sequences ⟨իւ⟩→[ʏ] (always) and ⟨յու⟩→[ʏ] (POST-CONSONANT only —
+//      word-initial ⟨յու⟩ is the glide [ju]), the classical ⟨իւ⟩ spelling being kept in Western orthography.
+//      ⚠ NO ⟨յո⟩→[œ]: see the `digraphs` note below — ⟨յո⟩ falls out as [jo] and nothing here maps to [œ].
 //
 // Validated vs wikipron hye_armn_w broad (17211) + narrow (17584).
 {
     "language": "hyw",
     "name": "Western Armenian",
     "script": ["Armenian"],
-    "provenance": "Authored Western Armenian rule g2p — the CONSONANT SHIFT (classical voiced+aspirate ⟨բ դ գ ձ ջ / փ թ ք ց չ⟩ → [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]; classical voiceless ⟨պ տ կ ծ ճ⟩ → [b d ɡ d͡z d͡ʒ]), rhotic neutralisation ⟨ր ռ⟩→[ɾ], the ⟨յու/իւ⟩→[ʏ] ⟨յո⟩→[œ] digraphs — reusing the shared Armenian engine. Cross-checked vs wikipron hye_armn_w broad + narrow.",
+    "provenance": "Authored Western Armenian rule g2p — the CONSONANT SHIFT (classical voiced+aspirate ⟨բ դ գ ձ ջ / փ թ ք ց չ⟩ → [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]; classical voiceless ⟨պ տ կ ծ ճ⟩ → [b d ɡ d͡z d͡ʒ]), rhotic neutralisation ⟨ր ռ⟩→[ɾ], the ⟨իւ⟩→[ʏ] digraph and the post-consonant-only ⟨յու⟩→[ʏ] — reusing the shared Armenian engine. Cross-checked vs wikipron hye_armn_w broad + narrow.",
 
     // Vowels — identical to Eastern (the shift is consonantal). ⟨ե⟩→e / ⟨ո⟩→o are the BARE values; the initial [j]/[v]
     // onset is added in code.

@@ -129,7 +129,12 @@ const MILA: readonly [string, string, string] = ["míľa", "míle", "míľ"];
  * such hour (`1:15` read *jeden … pätnásť*). Only the suffix changes, so a compound is handled by the same
  * replacement: dvadsaťjeden → dvadsaťjedna, dvadsaťdva → dvadsaťdve.
  */
-const feminine = (words: string): string => rewrite(words.replace(/jeden$/u, "jedna"), /dva$/u, "dve");
+// ⚠ NEITHER REPLACE IS ON THE PROVENANCE SEAM, and the `dva` one used to be. `words` is a freshly
+// composed numeral, never the pipeline string — every call site below passes `numberToWords(...)` —
+// so `rewrite` here asserted something false about the offsets and took `provenance.ts`'s
+// `tracked !== s` branch. It cost nothing measurable (poison 0, coverage 100% either way, because no
+// golden row reaches it), which is exactly why it survived; the rule is the contract, not the count.
+const feminine = (words: string): string => words.replace(/jeden$/u, "jedna").replace(/dva$/u, "dve");
 
 // ---------------------------------------------------------------------------------------------------
 // ORDINALS

@@ -49,6 +49,35 @@ public class TotontepecMixeTests
     [Fact]
     public void RegistryWiring() => Assert.Equal("kæːm", Say("kääm").Trim());
 
+    [Fact]
+    /**
+     * ⚠ A LETTER THAT REACHES `LatinPhone` IS CLASSIFIED, NOT ASSUMED CONSONANTAL. The scan's miss branch
+     * used to push `Vowel = false` unconditionally while the TS's own `isVowel` helper sat unused — so
+     * `LatinPhone`'s genuine VOWEL returns (å→[oː], æ, and every accented vowel the strip pass leaves
+     * standing: ⟨â ã ê î ï ô õ û⟩ in Latin-1 plus the macron/breve/ogonek/caron/double-grave series beyond
+     * it, 62 lowercase letters in all) were invisible to the intervocalic ⟨d g⟩ lenition and the word-final
+     * ⟨v⟩ terminus, both of which ask whether the NEIGHBOUR is a vowel. ⚠ ⟨ø⟩ and ⟨œ⟩ are NOT among them —
+     * `IsVowel` does not know them, and the last two assertions pin that residual.
+     * ⚠ AND THE SHIPPED PATH HID IT: `Text()` nativises first, so it was reachable only through the
+     * exported `PhonemizeWord` — which this file and referee-eval call.
+     */
+    public void ALatinPhoneVowelCountsAsAVowel()
+    {
+        Assert.Equal("aoða", Word("aoda"));   // the control: a TABLE vowel lenites the ⟨d⟩
+        Assert.Equal("aoːða", Word("aåda"));  // …and so does a miss-branch one (was *aoːda*)
+        Assert.Equal("aæɣa", Word("aæga"));   // (was *aæɡa*)
+        Assert.Equal("aæf", Word("aæv"));     // the word-final ⟨v⟩ terminus (was *aæv*)
+        Assert.Equal("aiða", Word("aîda"));   // the circumflex series reaches it too
+        Assert.Equal("aiða", Word("aïda"));   // …and the diaeresis: ⟨ä ë ö ü⟩ are TABLE keys, ⟨ï⟩ is not
+        // ⚠ NO CONS VALUE IS AFFECTED — none of them begins with a vowel character.
+        Assert.Equal("kumandok", Word("cumantoc"));
+        Assert.Equal("ɲum̥", Word("nyuhm"));
+        // ⚠ AND THE RESIDUAL IS STATED RATHER THAN WIDENED. `IsVowel` recognises this language's OWN
+        // inventory (aeiouæɨʌʊ), so ⟨ø⟩ and ⟨œ⟩ are still classified consonantal and still do not lenite.
+        Assert.Equal("aøda", Word("aøda"));
+        Assert.Equal("aœda", Word("aœda"));
+    }
+
     [Theory]
     // Cardinal numbers. VIGESIMAL: the real bases are the four TWENTIES and 30/50/70/90 are those plus the
     // ten-word; everything below 100 is written SOLID. Crawford is a PHONOLOGY with no numerals, so the data
