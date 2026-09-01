@@ -38,9 +38,11 @@ describe("Totontepec Mixe (ayöök) canonical IPA", () => {
     /**
      * ⚠ A LETTER THAT REACHES `latinPhone` IS CLASSIFIED, NOT ASSUMED CONSONANTAL. The scan's miss branch
      * used to push `{ ph, vowel: false }` unconditionally while the file's own `isVowel` helper sat unused —
-     * so `latinPhone`'s genuine VOWEL returns (å→[oː], æ, œ, ø, and the circumflex/tilde/ring vowels) were
-     * invisible to the two passes that ask whether the NEIGHBOUR is a vowel: the intervocalic ⟨d g⟩ lenition
-     * and the word-final ⟨v⟩ terminus.
+     * so `latinPhone`'s genuine VOWEL returns (å→[oː], æ, and every accented vowel the strip pass leaves
+     * standing: ⟨â ã ê î ï ô õ û⟩ in Latin-1 plus the macron/breve/ogonek/caron/double-grave series beyond
+     * it, 62 lowercase letters in all) were invisible to the two passes that ask whether the NEIGHBOUR is a
+     * vowel: the intervocalic ⟨d g⟩ lenition and the word-final ⟨v⟩ terminus. ⚠ ⟨ø⟩ and ⟨œ⟩ are NOT among
+     * them — `isVowel` does not know them, and the last two assertions pin that residual.
      *
      * ⚠ AND THE SHIPPED PATH HID IT. `text()` nativises first, folding ø→o, so the defect was reachable only
      * through the EXPORTED `phonemizeWord` — which is what this file and referee-eval call. Two entry points,
@@ -52,6 +54,8 @@ describe("Totontepec Mixe (ayöök) canonical IPA", () => {
         expect(phonemizeWord("aæga")).toBe("aæɣa"); //  (was *aæɡa*)
         expect(phonemizeWord("aæv")).toBe("aæf"); //    the word-final ⟨v⟩ terminus (was *aæv*)
         expect(phonemizeWord("aîda")).toBe("aiða"); //  the circumflex series reaches it too
+        expect(phonemizeWord("aïda")).toBe("aiða"); //  …and so does the diaeresis (⟨ä ë ö ü⟩ are TABLE keys,
+        //                                              ⟨ï⟩ is not, so it lands in the miss branch)
         // ⚠ NO CONS VALUE IS AFFECTED — none of them begins with a vowel character.
         expect(phonemizeWord("cumantoc")).toBe("kumandok");
         expect(phonemizeWord("nyuhm")).toBe("ɲum̥");

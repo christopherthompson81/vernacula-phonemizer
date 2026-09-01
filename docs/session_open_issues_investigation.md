@@ -56,15 +56,24 @@ Fixed TS-FIRST with a test, then mirrored to C#, per PORTING.md. **No golden was
 moved**: `isVowel` is local to this file, `mto` has no golden of its own, and the fleet gate is unchanged
 at 189 languages / 36,495 rows / 0 differ.
 
-⚠ **AND THE MEASUREMENT CORRECTED THE FILED CLAIM.** The finding as filed said `å æ œ ø` and the accented
-vowels were affected. Measured over 276 probes in the frames the two passes read, the letters that
-actually change are **eight**: `â ã å æ î ô õ û`.
+⚠ **AND THE MEASUREMENT CORRECTED THE FILED CLAIM — TWICE.** The finding as filed said `å æ œ ø` and the
+accented vowels were affected. A first pass over 276 probes reported **eight** letters, `â ã å æ î ô õ û`,
+and that count was itself wrong: it was read off a Latin-1 probe set that happened to omit ⟨ê⟩ and ⟨ï⟩.
+Re-measured by enumerating U+00A0–U+024F directly — strip the acute/grave, drop the ⟨a e i o u ä ë ö ü⟩
+table keys and the CONS keys, and ask `isVowel(latinPhone(c))` — the real set is **ten in Latin-1**
+(`â ã å æ ê î ï ô õ û`) and **62 lowercase letters overall**, the rest being the macron/breve/ogonek/
+caron/double-grave series in Latin Extended-A/B (`ā ă ą ē ĕ ė ę ě ĩ ī ĭ į ō ŏ ő ũ ū ŭ ů ű ų ơ ư ǎ ǐ ǒ ǔ ǖ ǚ
+ǟ ǡ ǣ ǫ ǭ ǻ ǽ ȁ ȃ ȅ ȇ ȉ ȋ ȍ ȏ ȕ ȗ ȧ ȩ ȫ ȭ ȯ ȱ`). ⟨ä ë ö ü⟩ do NOT appear because they are table keys; the
+acute/grave-accented letters do not either, because the strip pass has already reduced them to bare
+vowels. All 62 map to plain vowel phones, so the wider set is the fix working, not extra risk — but
+"eight" understated it and the code comments have been corrected to say so.
 
     aåda   aoːda → aoːða        aæv   aæv → aæf
     aæga   aæɡa  → aæɣa         aîda  aida → aiða
+    aïda   aida  → aiða         aêda  aeda → aeða
 
 **`ø` and `œ` do NOT change**, because `isVowel`'s set is this language's own inventory — `aeiouæɨʌʊ` —
-and neither is in it. That residual is disclosed in both test files rather than removed: widening the set
+and neither is in it. That residual is disclosed in both test files AND in both engines' comments rather than removed: widening the set
 to cover them would be a claim about Totontepec Mixe phonology that no source here supports, on a
 language whose referee is three ASJP headwords. Wiring the helper fixes what the helper knows.
 
@@ -81,3 +90,20 @@ was reachable only through the exported `PhonemizeWord` — which the test files
     parity --provenance (fleet)     → 911,293/911,293 (100.0%)
     TS provenance-poison / coverage → 0 sites · 39,540/39,540 (100.0%)
     seam-parity                     → 23 disagree (was 24), 0 not yet ported
+
+## Review pass — 2026-08-31
+
+Re-measured the `mto` claim during code review, because the number was going to be quoted.
+
+    npx tsx <probe>   # U+00A0–U+024F: strip acute/grave, skip the table + CONS keys,
+                      # report every c where isVowel(latinPhone(c)) is now true
+
+Raw finding: **62 lowercase letters**, not eight — the filed set omitted ⟨ê⟩ and ⟨ï⟩ inside Latin-1 and
+the whole macron/breve/ogonek/caron/double-grave series outside it. Confirmed against BOTH engines over
+`a<c>da` / `a<c>v` frames: TypeScript and C# agree on all 24 Latin-1 probes, ⟨ø⟩ and ⟨œ⟩ included.
+
+Implication: no behavioural change (every one of the 62 maps to a plain vowel phone, so classifying them
+as vowels is the point of the fix) — but the comments in `totontepecmixe.ts`, `TotontepecMixe.cs` and both
+test files said "the circumflex/tilde series", and the TS comment additionally used `aøda` as its *before*
+example when `aøda` is the *after* behaviour too. Corrected all four, and pinned ⟨ï⟩ in both test files so
+the wider set is asserted rather than described.

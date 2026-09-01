@@ -60,12 +60,14 @@ public static class TotontepecMixePhonemizer
             // reading wins.
             {
                 // ⚠ THE SEGMENT IS CLASSIFIED, NOT ASSUMED CONSONANTAL. `LatinPhone` returns real VOWEL
-                // phones for letters that reach here — å→[oː], æ, and the circumflex/tilde series — and
-                // marking those `Vowel = false` made them invisible to the intervocalic ⟨d g⟩ lenition and
-                // the word-final ⟨v⟩ terminus, both of which ask whether the NEIGHBOUR is a vowel.
-                // ⚠ The residual is the helper's own scope: `IsVowel` knows this language's inventory
-                // (aeiouæɨʌʊ), so ⟨ø⟩ and ⟨œ⟩ are still consonantal. Widening it would be a claim about the
-                // phonology no source here supports.
+                // phones for letters that reach here — å→[oː], æ, and every accented vowel the strip pass
+                // leaves standing (⟨â ã ê î ï ô õ û⟩ in Latin-1, plus the macron/breve/ogonek/caron/
+                // double-grave series beyond it: 62 lowercase letters in all) — and marking those
+                // `Vowel = false` made them invisible to the intervocalic ⟨d g⟩ lenition and the
+                // word-final ⟨v⟩ terminus, both of which ask whether the NEIGHBOUR is a vowel.
+                // ⚠ The residual is the helper's own scope, and is NOT fixed here: `IsVowel` knows this
+                // language's inventory (aeiouæɨʌʊ), so ⟨ø⟩ and ⟨œ⟩ are still consonantal and still do not
+                // lenite. Widening it would be a claim about the phonology no source here supports.
                 var ph = CONS.TryGetValue(c, out var cp)
                     ? cp
                     : LatinPhones.LatinPhone(c, new PhoneOpts { Initial = i == 0, IncludeH = true });
