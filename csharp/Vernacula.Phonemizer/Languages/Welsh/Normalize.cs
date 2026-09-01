@@ -40,7 +40,7 @@ public static class Normalize
         LegalCodas = new HashSet<string>(new[]
         {
             "b", "d", "f", "g", "l", "m", "n", "p", "r", "s", "t", "v", "w", "y", "x", "ch", "dd", "ff",
-            "ll", "ng", "ph", "th", "nt", "st", "mb", "nd", "rd", "ld", "mp", "nc", "ng",
+            "ll", "ng", "ph", "th", "nt", "st", "nt", "mb", "nd", "rd", "ld", "mp", "nc", "ng",
             "bl", "ml", "dl", "fl", "gl", "tl", "fn", "lt", "sg", "rn", "sb", "tr", "str",
         }, StringComparer.Ordinal),
         // ONE phoneme each — see PhonotacticsData.Digraphs.
@@ -130,6 +130,12 @@ public static class Normalize
         return null;
     }
 
+    /** The soft-mutation map for a single initial consonant (the digraphs are settled before it). */
+    private static readonly IReadOnlyDictionary<string, string> SOFT = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["p"] = "b", ["t"] = "d", ["c"] = "g", ["b"] = "f", ["d"] = "dd", ["g"] = "", ["m"] = "f",
+    };
+
     /**
      * SOFT MUTATION (treiglad meddal) of a word's initial consonant. Obligatory after the preposition `i` (to).
      *
@@ -142,10 +148,6 @@ public static class Normalize
         if (two == "ll") return "l" + (text.Length > 2 ? text[2..] : "");
         if (two == "rh") return "r" + (text.Length > 2 ? text[2..] : "");
         if (two is "ch" or "dd" or "ff" or "ng" or "ph" or "th") return text;
-        var SOFT = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["p"] = "b", ["t"] = "d", ["c"] = "g", ["b"] = "f", ["d"] = "dd", ["g"] = "", ["m"] = "f",
-        };
         return SOFT.TryGetValue(Js.ToLowerCase(text[0].ToString()), out var soft) ? soft + text[1..] : text;
     }
 
@@ -297,10 +299,18 @@ public static class Normalize
             if (!Numbers.IsSafeInteger(n)) return m.Value;
             var words = Numbers.NumberToWords(n);
             if (words == "" || HAS_DIGIT.IsMatch(words)) return m.Value;
-            // The pattern carries no `i`, so the captured unit is always one of the table's own keys — the
-            // miss branch is the defensive guard against the TS's `!` stringifying a miss as "undefined".
-            var u = m.Groups[3].Success && UNIT_WORD.TryGetValue(Js.ToLowerCase(m.Groups[3].Value.Trim()), out var uw)
-                ? $" {uw}" : "";
+            // ⚠ `Js.Trim`, NOT `string.Trim()`. Group 3 captures the `\s?` TOGETHER with the unit, and the
+            // shim's `\s` is the ECMAScript WhiteSpace set — which includes U+FEFF, a character .NET's
+            // `Trim()` does not strip (it is Cf, not Zs). `3-4\uFEFFkm` left the key as "\ufeffkm", missed
+            // the table, and the unit was DELETED from the reading while the TS still said *cilometr*.
+            var u = "";
+            if (m.Groups[3].Success)
+            {
+                // A table of READINGS: refuse the whole match on a miss rather than drop the unit in
+                // silence (the same rule the decimal-unit rule below applies).
+                if (!UNIT_WORD.TryGetValue(Js.ToLowerCase(Js.Trim(m.Groups[3].Value)), out var uw)) return m.Value;
+                u = $" {uw}";
+            }
             return $"{m.Groups[1].Value} i {Soften(words)}{u}";
         });
 
