@@ -63,19 +63,42 @@ export type ForeignPhonemizer = (latin: string) => string | undefined;
 // the 7-vowel system /i e ɛ a ɔ o u/ (no schwa reduction, no vowel-length), TH-stopping (θ→t, ð→d), NON-RHOTIC
 // codas (car→ka, water→wata; onset r→ɾ). Lexical mergers inherited from the GenAm source (LOT/PALM, TRAP/BATH)
 // are unresolved — a documented ceiling.
-const V = "iɪeɛæaɑɔoʊuʌəɐ"; // English vowels (for the onset-/r/ lookahead), before nativisation collapses them
+/**
+ * English vowels, for the onset-/r/ lookahead — the alphabet as it stands at that line, before nativisation
+ * collapses it. Stress and length are stripped by the first rule, so no mark class is needed here.
+ *
+ * ⚠ `ᵻ` WAS MISSING AND THAT DELETED ONSET /r/ (#1250). The parent's reduced vowel for unstressed `re-`/`ri-`
+ * is a vowel, but it was not in this string, so `ɹᵻ` failed the onset test, fell through to the blanket drop
+ * below, and `reports` read *ipɔts* — the /r/ off the front of the word. Audited over all 117,479 dict words
+ * rather than patched for the reported symbol: `ᵻ` (×828) is the ONLY vowel that can follow an `ɹ`/`r` here
+ * and is missing; every other character that can is a consonant or the word end, i.e. a genuine coda.
+ */
+const V = "iɪeɛæaɑɔoʊuʌəɐᵻ";
 function nativise(en: string): string {
     return en
         .normalize("NFC")
         .replace(/[ˈˌː]/gu, "") // stress, length
         .replace(/aᶦ/gu, "ai").replace(/aᶷ/gu, "au").replace(/[ɔo]ᶦ/gu, "ɔi") // PRICE/MOUTH/CHOICE
         .replace(/eᶦ/gu, "e").replace(/[oə]ᶷ/gu, "o") // FACE→e, GOAT→o
-        .replace(/ɝ/gu, "ɔ").replace(/ɚ/gu, "a") // NURSE/lettER — the r is absorbed
+        // NURSE/lettER. ⚠ THE r IS ABSORBED ONLY IN CODA (#1250). These two ran unconditionally and mapped
+        // the r-coloured vowel to a plain one BEFORE the onset rule below could see it, so a PRE-VOCALIC
+        // ɚ/ɝ — where the /r/ is the onset of the next syllable and not a coda at all — lost it: `around`
+        // (`ɚˈaᶷnd`) read *aaund*, `correct` *kaɛkt*, `arrive` *aaiv*. Measured over the 117k dict, 3,776 of
+        // them are pre-vocalic (ɚ ×3,457, ɝ ×319). The tap is emitted here rather than left for the onset
+        // rule because that rule matches `[ɹr]` and this vowel carries its r as a diacritic, not a segment.
+        // Same split en-GB already makes for its linking /ɹ/, in the same position, for the same reason.
+        .replace(new RegExp(`ɝ(?=[${V}])`, "gu"), "ɔɾ").replace(/ɝ/gu, "ɔ")
+        .replace(new RegExp(`ɚ(?=[${V}])`, "gu"), "aɾ").replace(/ɚ/gu, "a")
         .replace(/ʰ/gu, "").replace(/̬/gu, "") // deaspirate, un-flap
         .replace(/θ/gu, "t").replace(/ð/gu, "d") // TH-stopping
         .replace(/ɫ/gu, "l").replace(/ʲ/gu, "j") // dark-l → l; palatal glide (abbreviate→abɾivijet) → j
         .replace(new RegExp(`[ɹr](?=[${V}])`, "gu"), "ɾ") // ONSET r → tap
-        .replace(/[ɹr]/gu, "") // CODA r → dropped (Naija is non-rhotic)
+        // CODA r → dropped (Naija is non-rhotic). ⚠ THE CODA CONDITION IS WRITTEN OUT (#1250) though the
+        // onset rule one line up has already consumed every onset, which made this a blanket delete that was
+        // correct only for as long as that rule stayed exhaustive — and it was not. Spelled out, a symbol
+        // that ever reaches here before a vowel LEAKS as `ɹ` where a reader can see it instead of vanishing.
+        // Verified a no-op today: the two fixes above leave nothing pre-vocalic for it to catch.
+        .replace(new RegExp(`[ɹr](?![${V}])`, "gu"), "")
         .replace(/[iɪᵻ]/gu, "i").replace(/[uʊ]/gu, "u") // FLEECE/KIT, GOOSE/FOOT
         .replace(/[ʌɐ]/gu, "ɔ").replace(/ə/gu, "a") // STRUT→ɔ; schwa→a (lossy — see note)
         .replace(/[ɔɒ]/gu, "ɔ").replace(/[æɑ]/gu, "a"); // THOUGHT/LOT→ɔ; TRAP/PALM→a
