@@ -422,8 +422,9 @@ public static class NormalizeSymbols
      * ⚠ `foldSingle` LIFTS THAT RESTRICTION and only the RATE DENOMINATOR passes it — after the `/` of a rate,
      * ⟨H⟩ is not plausibly henry.
      *
-     * Returns null when neither step resolves; every caller must then leave the text ALONE rather than emit
-     * half a reading.
+     * Returns null when neither step resolves, and what a caller does then depends on WHICH half failed. An
+     * unresolvable HEAD unit leaves the text alone — there is no reading to give. An unresolvable DENOMINATOR
+     * reads the numerator and strands the rest (#1249); see the TS for the measurement.
      */
     public static V? ResolveUnitSymbol<V>(
         IReadOnlyDictionary<string, V>? declared,
@@ -481,6 +482,11 @@ public static class NormalizeSymbols
         var keys = order.OrderByDescending(k => k.Length).ToList();
         var re = JsRegex.Compile(
             "(?<![\\p{L}\\p{M}\\p{Nd}'’ʼ/-])(?<!\\p{Nd}\\s)(" + string.Join("|", keys) + ")"
+                // ⚠ THE TRAILING `/` STAYS HERE THOUGH #1249 TOOK IT OFF THE DIGIT-ADJACENT ARM — a
+                // deliberate disagreement, not an oversight. Without a numeral underwriting the numerator,
+                // removing it read `mm/dd/yyyy` (a date-format placeholder) as *millimetre/dd/yyyy* and
+                // `mg/kg` (a ratio of two readable units, whose second half the lookbehind forbids) as
+                // *milligram/kg* — the half reading in its pure form. See the TS.
                 + "(?![\\p{L}\\p{M}\\p{Nd}'’ʼ/²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))",
             "gu");
         return text => Rewrite(text, re, m => map[m.Groups[1].Value]);
@@ -651,11 +657,11 @@ public static class NormalizeSymbols
                   NOT_VERSION + "(" + NUM + ")" + magAltU + "\\s?(" + unitAlt + ")"
                       + "(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(" + denomKeys + ")(\u00b2|\u00b3)?"
                       + "|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?"
-                      + "(?![" + wordCont + "\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])"
-                      // ⚠ AN UNREADABLE RATE DECLINES RATHER THAN HALF-READING (#1093) — see the TS for the
-                      // two measured counter-examples that put the line at an ASCII-Latin denominator rather
-                      // than at any slash, and for why the exponent is rejected here too.
-                      + "(?!\\s?/\\s?[A-Za-z])(?!(?<=[a-zA-Z])[23]\\s?/\\s?[A-Za-z])",
+                      // ⚠ AN UNREADABLE RATE READS ITS NUMERATOR AND STRANDS ONLY THE DENOMINATOR (#1249).
+                      // The `(?!\s?/\s?[A-Za-z])` decline that stood after this lookahead (#1093/#1098)
+                      // discarded the numerator's reading with it and bought nothing for the denominator —
+                      // see the TS for the 193-code measurement.
+                      + "(?![" + wordCont + "\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])",
                   "giu")
             : null;
         /**
@@ -870,15 +876,31 @@ public static class NormalizeSymbols
                     }
                     if (denom is not null)
                     {
-                        // A rate needs both nouns and the connective; without any of them leave the text alone rather than emit
-                        // half a reading. Same exact-then-folded resolution as the head unit, except that folding is allowed
+                        // Same exact-then-folded resolution as the head unit, except that folding is allowed
                         // for a ONE-letter denominator (see ResolveUnitSymbol) — the slash position rules out the other unit.
                         var dl = denom.ToLowerInvariant();
                         var dUnit = ResolveUnitSymbol(d.Units, unitsFolded, denom, true);
                         var dWord = (dUnit is not null && dUnit.Count > 0 ? dUnit[0] : null)
                             ?? ResolveUnitSymbol(d.RateDenominators, denomFolded, denom, true);
                         var per = d.UnitPer?.For(denom, dl);
-                        if (per is null || dWord is null) return whole;
+                        // ⚠ A RATE NEEDS BOTH NOUNS AND THE CONNECTIVE — AND WITHOUT THEM IT READS THE HALF IT
+                        // HAS (#1249). This used to `return whole`, "rather than emit half a reading", the same
+                        // trade the slash guard on the regex above made; the same measurement retires it, since
+                        // the raw `/m` is re-emitted here either way and declining only spent the numerator.
+                        // 57 of the 86 residual declines fleet-wide were this one branch — see the TS.
+                        // ⚠ THE TAIL IS RE-EMITTED VERBATIM, SPACE INCLUDED — `\s?` sits on both sides of the
+                        // slash, so cutting at the slash itself swallows the one before it. `Js.IsJsWhiteSpace`
+                        // and not `char.IsWhiteSpace`: the TS cuts with `/\s$/u` and the two sets differ in
+                        // both directions (U+FEFF, U+0085) — see Core/Js.cs.
+                        if (per is null || dWord is null)
+                        {
+                            var slash = whole.IndexOf('/');
+                            if (slash < 0) return whole;
+                            var cut = slash > 0 && Js.IsJsWhiteSpace(whole[slash - 1]) ? slash - 1 : slash;
+                            var headOnly = numExp is null ? head : WithPower(head, numExp);
+                            var said = d.UnitPrefix ? headOnly + " " + q : q + " " + headOnly;
+                            return said + whole[cut..];
+                        }
                         // ⚠ THE DENOMINATOR MAY CARRY AN EXPONENT — ⟨20,164 katao/km²⟩, the population-density shape. Composed
                         // only when the language declares `ExponentWords`; otherwise the old reading stands and
                         // the superscript is re-emitted where the leak gate can see it, as the head branch does.

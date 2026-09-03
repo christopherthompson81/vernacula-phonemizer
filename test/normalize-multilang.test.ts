@@ -1036,8 +1036,15 @@ describe("a unit symbol standing alone", () => {
         expect(n("kmx")).toBe("kmx");
         expect(n("xkm")).toBe("xkm");
         expect(phonemize("makmur", "id")).toBe("mˈaʔmur"); // a real word with `km` inside it
-        // Half a rate is what this module refuses everywhere else, so a `/` on either side declines.
+        // Half a rate is what this arm refuses, so a `/` on either side declines — and it goes on refusing
+        // one though #1249 took the same guard off the DIGIT-ADJACENT arm, which is a deliberate
+        // disagreement between the two. Without a numeral underwriting the numerator, removing it here read
+        // `mm/dd/yyyy` as *millimetre/dd/yyyy* and `mg/kg` — a ratio of two readable units, whose second
+        // half the lookbehind forbids — as *milligram/kg*, the half reading in its pure form.
         expect(phonemize("km/h", "de")).toBe("km h");
+        expect(phonemize("h/km", "de")).toBe("h km");
+        expect(phonemize("mm/dd/yyyy", "de")).toBe("m t ˈyːyːyːyː"); // no millimetre in it
+        expect(phonemize("mg/kg", "de")).toBe("mk kk"); // a ratio: neither half read, both visible
         // `245&nbsp;km 2` (yo) is a squared kilometre with the entity in the way; a stray "2" is worse.
         expect(n("km 2")).toBe("km 2");
         expect(n("km²")).toBe("km²");

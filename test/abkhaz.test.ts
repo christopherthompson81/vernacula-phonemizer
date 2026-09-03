@@ -244,8 +244,11 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // see it; an UNDECLARED one stays whole.
         expect(normalizeAbkhaz("100 м³")).toBe("100 метра³");
         expect(normalizeAbkhaz("5,24 г/см³")).toContain("см³");
-        // A rate with a DECLARED denominator is refused whole (no per-word, no half reading)…
-        expect(normalizeAbkhaz("0,6км/км²")).toContain("км/км²");
+        // A rate with a DECLARED denominator has no per-word here, so the NUMERATOR reads and the
+        // denominator strands (#1249). The residual is unchanged by that — `0,6км/км²` phonemized
+        // *anolʲ fba kʼm kʼm* under the old refusal and *anolʲ fba kʼilometʼra kʼm* now, the same `kʼm`
+        // either way — so refusing bought no visibility and only cost the kilometre.
+        expect(normalizeAbkhaz("0,6км/км²")).toBe("0 фба километра/км²");
         // …but an UNKNOWN denominator is not a rate the tier can see: the numerator reads as a word and
         // ⟨/с⟩ stays visible. Header comment states this; pinned so a tier-level change shows up here.
         expect(normalizeAbkhaz("100 м/с")).toBe("100 метра/с");
