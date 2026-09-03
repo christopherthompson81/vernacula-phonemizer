@@ -1,0 +1,135 @@
+# The rate decline throws away the numerator (#1249)
+
+`#1093` → `#1098` made an unreadable rate DECLINE rather than half-read, on the stated trade that "a half
+reading is worse than a visible leak". `#1249` reported that in 45 languages the decline produces no visible
+leak at all — the stranded `km` and `h` route to the English foreign reader and come back as letter names.
+This log is the measurement that settled which way the trade actually runs.
+
+## Run 1 — 2026-09-03 15:50 — does the report reproduce?
+
+```
+npx tsx repro.mts        # phonemizeAsync("160 km/h", …) and ("160 km", …) for am ka vi ja et ab
+```
+
+Question: is the reported failure the decline, or a data gap?
+
+```
+am  160 km/h -> məto sɨlsa ˈʊkm ˈeᶦt͡ʃ          am  160 km -> məto sɨlsa kilo metɨɾ
+ka  160 km/h -> as samɔt͡sʰi kʼilɔmɛtʼɾi ˈeᶦt͡ʃ  ka  160 km -> as samɔt͡sʰi kʼilɔmɛtʼɾi
+vi  160 km/h -> … ˈʊkm zˈəː˨˩                  vi  160 km -> … kˈi˧ lˈo˧ mˈɛ˧˥t̪
+et  160 km/h -> sˈɑdɑ kˈuːskymːend km h        et  160 km -> sˈɑdɑ kˈuːskymːend kˈilomeːtrit
+ja  12.8 km/秒 -> … kiɾo̞me̞ꜜːto̞ɾɯᵝ bʲo̞ꜜː      (the #1098 counter-example, correct)
+```
+
+Reproduces exactly. `am` reads `160 km` perfectly and reads `160 km/h` as letter names, so the loss is the
+decline and not a missing unit noun. `vi`'s inversion is real: the denominator IS read (*giờ*) while the
+numerator is declined.
+
+## Run 2 — 2026-09-03 15:55 — the fleet, classified
+
+```
+npx tsx fleet.mts base.json "160 km/h" "160 km" "160 m³/s" "12.8 km/秒" "120mg/100ml"   # 193 codes
+node classify.mjs base.json
+```
+
+Question: how large is each population, and is "Latin-script host" a usable discriminator for
+"declining leaves a visible leak"?
+
+| outcome for `160 km/h` | count |
+|---|---|
+| rate read in full | 88 |
+| `km` leaks as raw ASCII — the intended visible leak | 35 |
+| `km`/`h` voiced as English letter names | 34 |
+| still the #1093 half reading (unit noun + letter name) | 5 |
+| language does not read `160 km` either — out of scope | 17 |
+
+Matches the issue's shape (its 45/34/5 differ only in where the out-of-scope line is drawn).
+
+**Negative result, and the important one: script is NOT the discriminator.** `hmn` and `vi` are Latin-script
+and land in the letter-name bucket, because their engines route unclaimed Latin to the English reader; `ltg`
+and `pcm` are Latin-script and *phonemize* the residual (`km x`, `km et͡ʃ`), so their "visible leak" is not
+visible either. Whether a decline leaves something a reader can see is a property of the host ENGINE's OOV
+path, which `makeSymbolNormalizer` cannot see — it holds `SymbolData`, not a language code, at 279 call
+sites. So a host-keyed guard was ruled out here rather than in review.
+
+## Run 3 — 2026-09-03 16:00 — remove the guard and diff the fleet
+
+```
+# experimental: delete (?!\s?/\s?[A-Za-z]) and (?!(?<=[a-zA-Z])[23]\s?/\s?[A-Za-z]) from unitRe
+npx tsx fleet.mts noguard.json …  &&  node diff.mjs base.json noguard.json
+```
+
+Question: what does the decline actually buy?
+
+146 readings change, and **in every one of them the residue after the slash is character-for-character
+what the decline left there**:
+
+```
+et   sˈɑdɑ kˈuːskymːend km h      →  sˈɑdɑ kˈuːskymːend kˈilomeːtrit h
+ltg  sɨmts sʲæʒʲdʲæsʲmʲit km x    →  sɨmts sʲæʒʲdʲæsʲmʲit kʲilɔmʲætri x
+pcm  wan … siksti km et͡ʃ          →  wan … siksti kilomita et͡ʃ
+am   məto sɨlsa kʰˈeᶦəm ˈeᶦt͡ʃ     →  məto sɨlsa kilo metɨɾ ˈeᶦt͡ʃ
+```
+
+**This is the finding the change rests on.** The guard never made the denominator more visible; the `h` is
+exactly as present either way. It only deleted the numerator's reading. So the trade #1098 priced —
+half a reading versus a visible leak — was not on offer: what it bought was a *smaller* reading of the same
+leak.
+
+Second, unlooked-for result: `160 m³/s` lost the POWER too, in 86 engines, because the guard rejected the
+exponent branch and the group fell through to EMPTY — es read *m ˈal kˈuβo s* where it now reads
+*mˈetɾos kˈuβikos s*. The ASCII twin is worse: `5 m2/s` read *five m two s*, the exponent claimed by the
+NUMBER path and spoken.
+
+Both #1098 counter-examples are untouched (`120mg/100ml` in every engine, `12.8 km/秒` in ja). One
+unexpected mover: ga `12.8 km/秒` gained its kilometre.
+
+## Run 4 — 2026-09-03 16:05 — what the suite pinned
+
+`npx vitest run` → 3 failures, all of them the old thesis rather than collateral:
+`test/rate-half-reading.test.ts` (the #1098 pin), `test/maltese.test.ts` and `test/malagasy.test.ts` (two
+per-language pins carrying explicit "if that guard ever lands, change this line" instructions from #1093).
+Nothing else in 5,768 tests moved.
+
+## Run 5 — 2026-09-03 16:15 — a better instrument, and the residual
+
+The old test's instrument ("plain reading + a tail ≤4 chars") can only see half readings. The defect #1249
+is about is the opposite shape, so the instrument was rewritten: ask whether the rate spells the SYMBOL out
+— as a whitespace-delimited raw token, or as ENGLISH's reading of it (the letter names a non-Latin host
+routes to) — where the plain form reads it as a word.
+
+```
+npx tsx probe3.mts   # 193 codes × 5 shapes, before and after
+before: 383 code+shape pairs declining a numerator the language reads
+after:  86        (no new pairs — the ledger is a strict subset)
+```
+
+**57 of the surviving 86 were one shape, `kg/m`, and a different route to the same defect.** Where the
+denominator resolves to a DECLARED unit but the language has no `unitPer` word, the rate alternative matches
+and the callback returns `whole` — "a rate needs both nouns and the connective; without any of them leave the
+text alone rather than emit half a reading", the same trade written a second time. `et` shows the two routes
+side by side: `5 kg/s` (whose `s` is not a unit key) read the kilogram, `5 kg/m` read *vˈiːs kɡ m*.
+
+Fall through there as well — read the numerator, re-emit `whole` from the slash:
+
+```
+after the callback fix: 36 pairs, 15 codes (ak bal bm bo ee hmn ht ki lg ln lt mn mos nci ro)
+```
+
+Every survivor is an engine with a LOCAL unit table rather than a call to the shared tier — the shape a
+language reaches for when its unit noun PRECEDES the number. Each hand-wrote its own trailing guard, the core
+fix cannot reach them, and each is a per-file edit needing its own before/after. Recorded as
+`ACCEPTED_DECLINE` in `test/rate-half-reading.test.ts`, keyed by code AND shape so it can only shrink.
+
+## What did not get fixed, and why
+
+- **`vi` came out fully right** — *mˈo˨˩ˀt̪ t͡ɕˈa˧m sˈa˧˥w mˈɨə˧j kˈi˧ lˈo˧ mˈɛ˧˥t̪ zˈəː˨˩*, since Vietnamese
+  resolves `/h` → *giờ* in its own pass and only ever needed the tier to stop discarding the kilometre. The
+  issue's headline inversion is closed.
+- **`hmn` still reads letter names for both halves**, on its local unit table (below), not on the tier. A
+  Latin-script host whose engine routes unclaimed Latin to the English reader is a `core/foreign.ts`
+  question in any case, not a `normalizeSymbols` one.
+- **The 15 local-table engines.** See above.
+- **The Cyrillic ⟨/с⟩ residual (ab, ba)** is unchanged: this guard was ASCII-only and never covered it.
+  `0,6км/км²` phonemized *anolʲ fba kʼm kʼm* before and *anolʲ fba kʼilometʼra kʼm* now — the same `kʼm`,
+  one more word read.

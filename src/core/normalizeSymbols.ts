@@ -579,8 +579,16 @@ export function isBareUnitKey(key: string): boolean {
  * ⚠ BUT IT DOES READ SYMBOLS THAT PATH COULD NOT REACH, and that is the point rather than a side effect:
  * `10-15(-17) cm` (jv) and `2 zillion km` have a bracket or an undeclared word between the numeral and the
  * symbol. That distance is a reason not to COUNT the unit; it was never a reason to leave raw ASCII in the
- * phoneme stream. Where the digit path declines because a reading would be HALF a reading, though, this one
- * declines too — hence the `/` guard, a rate whose denominator noun the language may not declare.
+ * phoneme stream.
+ *
+ * ⚠ AND IT READS THE NUMERATOR OF AN UNREADABLE RATE, which is the half of the `/` guard that came off with
+ * #1249. A bare `km/h` in a table header used to decline whole, to keep the abbreviation visible; measured
+ * over all 193 registry codes that is not what happens — the stranded `km` routes to the English foreign
+ * reader in 34 of them and comes back as *kʰˈeᶦəm*, letter names, with nothing raw left to see. Declining
+ * bought no visibility for the `h` and spent the `km`; the two arms agree again, on the other side.
+ * ⚠ THE LOOKBEHIND `/` STAYS. After a slash the key is the DENOMINATOR, and this arm has no numerator match
+ * of its own to pair it with — reading it alone is the half reading with the halves swapped, and no
+ * measurement here says otherwise.
  *
  * ⚠ NOT BEFORE AN EXPONENT, superscript or ASCII. `245&nbsp;km 2` (yo) is a squared kilometre written with
  * the entity in the way; reading the unit and leaving a stray "2" behind is worse than the visible leak.
@@ -596,7 +604,7 @@ export function makeBareUnitNormalizer(
     const keys = [...map.keys()].sort((a, b) => b.length - a.length);
     const re = new RegExp(
         `(?<![\\p{L}\\p{M}\\p{Nd}'’ʼ/-])(?<!\\p{Nd}\\s)(${keys.join("|")})` +
-            `(?![\\p{L}\\p{M}\\p{Nd}'’ʼ/²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))`,
+            `(?![\\p{L}\\p{M}\\p{Nd}'’ʼ²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))`,
         "gu",
     );
     // ⚠ `rewrite`, NOT `text.replace` — the subject IS the pipeline string here, and a bare replace is
@@ -913,46 +921,53 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               // this regex — be `55 м³/с` loses the unit as well, which is a Belarusian finding, not a
               // tier one.
               //
-              // ⚠ BUT THE TIER'S RESPONSE TO THAT DATA GAP WAS ITS OWN DEFECT, AND THE TRAILING GUARD NOW
-              // REJECTS A SLASH (#1093). When the denominator is UNDECLARED the rate alternative fails, the
-              // optional group matches EMPTY, and the arm used to claim the numerator anyway — speaking the
-              // unit noun and stranding `/с` as a bare letter. That is a HALF READING, and
-              // `makeBareUnitNormalizer` two screens below refuses exactly this ("a half reading is worse
-              // than a visible leak"); the two arms disagreed, and the bare one was right. With `/` in the
-              // guard an unreadable rate DECLINES and the symbol stays visible to the leak gates instead.
+              // ⚠ THE TIER'S RESPONSE TO THAT DATA GAP WAS ITS OWN DEFECT, AND THE SLASH GUARD THAT ANSWERED
+              // IT WAS A SECOND ONE (#1093 → #1098 → #1249). When the denominator is UNDECLARED the rate
+              // alternative fails, the optional group matches EMPTY, and the arm claims the NUMERATOR alone —
+              // speaking the unit noun and leaving `/с` outside the match. #1098 called that a HALF READING
+              // and rejected the whole match with `(?!\s?/\s?[A-Za-z])`, on the stated trade that "a half
+              // reading is worse than a visible leak": the abbreviation would then stay in the text where the
+              // leak gates and a reader can see it. Fleet-wide it took 290 half readings to 29.
               //
-              // ⚠ AND THE SLASH IS FATAL ONLY BEFORE AN ASCII-LATIN DENOMINATOR, which is where the leak
-              // actually is: a bare `h`, `s`, `yr`, `kg` is an ABBREVIATION with no word behind it, and it
-              // reaches the sink as raw letters (or, in a non-Latin script, as English letter names). Two
-              // measured counter-examples fix the line here rather than at "any slash":
-              //   · `120mg/100ml` (Min Nan's blood-sugar article) is a RATIO of two readable quantities —
-              //     this arm reads the first and its own next match reads the second, so nothing is
-              //     stranded and declining would leak BOTH units raw;
-              //   · `12.8 km/秒` (a Japanese golden row) has a denominator that IS a word the engine reads.
-              //     Declining it took `12.8 kilometre byou` — very nearly right — to *kʰˈeᶦəm*, the ENGLISH
-              //     LETTER NAMES for `km` routed out of Japanese. A regression, not a gap.
-              // ⚠ A CYRILLIC ⟨/с⟩ IS THEREFORE STILL HALF-READ (ab, ba) and that residual is left pinned in
-              // test/abkhaz.test.ts rather than swept in here: the symbol there is Cyrillic too, so the
-              // trade a decline would make is a different one and wants its own evidence.
+              // ⚠ THE LEAK IT DECLINED TO IS NOT VISIBLE, MEASURED. Declining throws away the NUMERATOR's
+              // reading too — and the numerator is a word these languages say perfectly well one character to
+              // the left. Probing all 193 registry codes with `160 km/h` and `160 m³/s`, the guard costs a
+              // reading in **146** of them, and in **34** the stranded `km` never reaches the output as raw
+              // ASCII at all: it routes to the English foreign reader and comes back as LETTER NAMES. am
+              // `160 km/h` read *məto sɨlsa kʰˈeᶦəm ˈeᶦt͡ʃ* — "one-sixty kay-em aitch" — and hi, ja, th, kn,
+              // ml, yue and 28 more alike. Confident, audible and wrong, with nothing raw left for a gate to
+              // find. It is the same failure the digit paragraph below already refuses, never carried across
+              // to the slash.
               //
-              // ⚠ AND IT REJECTS THE EXPONENT TOO, for the same reason and in the same breath. With only `/`
-              // the group BACKTRACKS: `5 m³/s` failed the rate alternative (no `s` declared), failed the
-              // exponent alternative on the new slash guard, then matched the group EMPTY — claiming a bare
-              // `5 m` and stranding `³/s`. A superscript or an ASCII 2/3 after the unit means the exponent
-              // branch should have taken it, so if control reaches the guard still holding one, the match is
-              // wrong and must not stand.
+              // ⚠ THE DECIDING MEASUREMENT IS THAT THE DENOMINATOR'S FATE DOES NOT CHANGE EITHER WAY. Across
+              // all 146 diffs the residue after the slash is character-for-character what the decline left
+              // there — et `sˈɑdɑ kˈuːskymːend km h` → `… kˈilomeːtrit h`, ltg `km x` → `kʲilɔmʲætri x`,
+              // pcm `km et͡ʃ` → `kilomita et͡ʃ`. The guard never bought visibility for `h`; it only spent the
+              // numerator. So the trade #1098 priced was not on offer, and the arm now reads what it can read
+              // and strands only the part with no word behind it — exactly what a Cyrillic `9,44 м³/с` has
+              // always done, this guard being ASCII-only and never covering it (pinned, test/abkhaz.test.ts).
               //
-              // ⚠ AND IT DOES **NOT** REJECT A PLAIN DIGIT, which was tried and reverted on the goldens. A
-              // digit after the unit is a SEPARATE class — `2005 MM13` (an asteroid designation su reads as
-              // *millimetre 13*) — and refusing it there also refused Japanese `約20 km15マイル`, where the
-              // digit is the parenthesised conversion the FLEURS text lost its brackets around and `km` is a
-              // genuine kilometre. Worse, a non-Latin script has no visible leak to decline TO: the raw `km`
+              // ⚠ AND THE EXPONENT WENT WITH IT, not just the noun. `160 m³/s` fell through the rejected
+              // exponent branch to an EMPTY group, so es read *m ˈal kˈuβo s* where it now reads *mˈetɾos
+              // kˈuβikos s*, and 100+ engines lost the power the same way. Restoring it strands nothing: the
+              // trailing lookahead one line down already refuses a following ²³, so the exponent branch cannot
+              // be skipped over a superscript, and its ASCII twin (`5 m2/s`) is taken by that branch's own
+              // `(?<=[a-zA-Z])[23]` condition, which is satisfied with a slash after it.
+              //
+              // ⚠ THE TWO COUNTER-EXAMPLES #1098 MEASURED ARE UNAFFECTED and stay right: `120mg/100ml` (Min
+              // Nan's blood-sugar article) is a RATIO of two readable quantities — this arm reads the first
+              // and its own next match reads the second — and `12.8 km/秒` (a Japanese golden row) has a
+              // denominator that IS a word the engine reads. Neither ever entered the ASCII guard.
+              //
+              // ⚠ AND THE TRAILING LOOKAHEAD DOES **NOT** REJECT A PLAIN DIGIT, which was tried and reverted
+              // on the goldens. A digit after the unit is a SEPARATE class — `2005 MM13` (an asteroid
+              // designation su reads as *millimetre 13*) — and refusing it there also refused Japanese
+              // `約20 km15マイル`, where the digit is the parenthesised conversion the FLEURS text lost its
+              // brackets around and `km` is a genuine kilometre. Worse, a non-Latin script has no visible leak to decline TO: the raw `km`
               // routes to the English foreign reader and `20 km` read *nid͡ʑɯᵝː kʰˈeᶦəm* — "twenty kay-em"
               // inside Japanese, which is a confident error, not a gap. The designation class is reported
-              // rather than folded in here. What it DOES reject is an ASCII 2/3 that is itself followed by
-              // an unreadable slash — `5 m2/s`, the exponent branch's own condition read backwards, which is
-              // the one digit case that is unambiguously this defect and not the designation one.
-              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])(?!\\s?/\\s?[A-Za-z])(?!(?<=[a-zA-Z])[23]\\s?/\\s?[A-Za-z])`,
+              // rather than folded in here.
+              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])`,
               "giu",
           )
         : null;
@@ -1176,8 +1191,6 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     if (forms === undefined) return whole;
                     const head = pick(forms, n, cf);
                     if (denom !== undefined) {
-                        // A rate needs both nouns and the connective; without any of them leave the text
-                        // alone rather than emit half a reading.
                         // Same exact-then-folded resolution as the head unit, and for the same reason:
                         // ⟨h⟩ hour and ⟨H⟩ henry are different units.
                         // Same two steps as the head, but folding is allowed for a ONE-letter denominator
@@ -1187,7 +1200,6 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                         const dWord = resolveUnitSymbol(d.units, unitsFolded, denom, true)?.[0]
                             ?? resolveUnitSymbol(d.rateDenominators, denomFolded, denom, true);
                         const per = typeof d.unitPer === "string" ? d.unitPer : (d.unitPer?.[denom] ?? d.unitPer?.[dl]);
-                        if (per === undefined || dWord === undefined) return whole;
                         // ⚠ THE DENOMINATOR MAY CARRY AN EXPONENT — ⟨20,164 katao/km²⟩, the population-density
                         // shape. The rate alternative used to end at the denominator key, so the ² fell outside
                         // the match and was silently dropped (tl's largest exponent class, 13 of 35). Composed
@@ -1217,6 +1229,21 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                                 : ePos === "before" ? `${ew} ${noun}`
                                 : `${noun} ${ew}`;
                         };
+                        // ⚠ A RATE NEEDS BOTH NOUNS AND THE CONNECTIVE — AND WITHOUT THEM IT READS THE HALF IT
+                        // HAS (#1249). This used to `return whole`, "rather than emit half a reading", which is
+                        // the same trade the slash guard on the regex above made and the same measurement
+                        // retires it: declining spends the NUMERATOR's reading and buys the denominator no
+                        // visibility, because the raw `/m` is re-emitted here either way. It is reached where
+                        // the DENOMINATOR resolves to a declared unit but the language has no `unitPer` word —
+                        // et writes the inessive (*kilomeetrit tunnis*) and declares none, so `5 kg/m` read
+                        // *vˈiːs kɡ m* while `5 kg/s`, whose `s` is not a unit key at all, read the kilogram.
+                        // 57 of the 86 residual declines fleet-wide were this one branch.
+                        if (per === undefined || dWord === undefined) {
+                            const slash = whole.indexOf("/");
+                            const headOnly = numExp === undefined ? head : withPower(head, numExp);
+                            const said = d.unitPrefix ? `${headOnly} ${q}` : `${q} ${headOnly}`;
+                            return slash < 0 ? whole : `${said}${whole.slice(slash)}`;
+                        }
                         let dPhrase = typeof dWord === "string" ? dWord : dWord[0]!;
                         if (denomExp !== undefined) dPhrase = withPower(dPhrase, denomExp);
                         // \u26a0 AND THE NUMERATOR TAKES IT TOO \u2014 `9,44 \u043c\u00b3/\u0441`, the river-discharge shape, which

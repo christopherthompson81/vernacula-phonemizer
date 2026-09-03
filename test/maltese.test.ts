@@ -302,15 +302,12 @@ describe("Maltese text normalization — the rules' branches", () => {
         expect(normalizeMaltese("5 cm/s")).toBe("5 ċentimetri fis-sekonda");
         expect(normalizeMaltese("20 km / h")).toBe("20 kilometru fis-siegħa"); // spaced slash, either side
         // ⚠ THE DENOMINATOR TABLE IS CLOSED — `h` and `s` are the only two this corpus writes (×0 of anything
-        // else) — AND THE RESIDUAL IS NOW CLOSED RATHER THAN PINNED. This block used to assert
-        // `5 kilometri/j` and `5 metri/kg`, the shared tier matching the head unit and stranding what follows
-        // the slash, with the note that "the fix is a guard on the tier's unit match in
-        // `core/normalizeSymbols.ts`, which is reported, not edited here … if that guard ever lands, these two
-        // assertions fail and should become `5 km/j` / `5 m/kg` unchanged." THE GUARD LANDED (#1093), and this
-        // is that instruction carried out: an unlisted denominator now declines whole, so the abbreviation
-        // stays visible to the leak gates instead of half a reading reaching the phoneme stream.
-        expect(normalizeMaltese("5 km/j")).toBe("5 km/j");
-        expect(normalizeMaltese("5 m/kg")).toBe("5 m/kg");
+        // else) — AND THE RESIDUAL HAS NOW MOVED TWICE. It was `5 kilometri/j` before #1093, `5 km/j` after
+        // it, and is `5 kilometri/j` again: #1249 measured that declining the whole match never made the `/j`
+        // any more visible than stranding it does, and the price was the NUMERATOR's reading in 146 of the
+        // 193 registry codes. The unreadable half is what declines; the readable half is read.
+        expect(normalizeMaltese("5 km/j")).toBe("5 kilometri/j");
+        expect(normalizeMaltese("5 m/kg")).toBe("5 metri/kg");
         // ⚠ AND ONE DEGENERATE SHAPE IS STILL STRANDED: a trailing slash with NO denominator at all. The
         // guard keys on what follows the slash and nothing follows it. Not corpus-attested; pinned AS IT
         // READS so a future widening of that guard fails here and says so, rather than changing in silence.
@@ -331,9 +328,11 @@ describe("Maltese text normalization — the rules' branches", () => {
         expect(normalizeMaltese("12-il mil")).toBe("12-il mil");
         expect(normalizeMaltese("12-il minuta")).toBe("12-il minuta");
         expect(normalizeMaltese("15-il kilometru")).toBe("15-il kilometru");
-        // ⚠ AND AN EXPONENT OR A RATE ON A LINKED NUMERAL IS REFUSED WHOLE (×0 here) rather than stranded.
+        // ⚠ AN EXPONENT ON A LINKED NUMERAL IS STILL REFUSED WHOLE (×0 here) rather than stranded — a stray
+        // `²` has no word to belong to. A RATE reads its numerator since #1249; the `/h` strands, as it did
+        // under the decline.
         expect(normalizeMaltese("16-il km²")).toBe("16-il km²");
-        expect(normalizeMaltese("16-il km/h")).toBe("16-il km/h");
+        expect(normalizeMaltese("16-il km/h")).toBe("16-il kilometru/h");
     });
 
     // ── THE TWO NUMERAL PARSERS MUST AGREE, and the review's fourth finding is the shape where they did not:

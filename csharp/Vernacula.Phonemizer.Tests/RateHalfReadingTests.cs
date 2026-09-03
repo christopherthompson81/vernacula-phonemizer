@@ -1,14 +1,17 @@
-// The C# half of test/rate-half-reading.test.ts — an unreadable rate must DECLINE, not half-read (#1093).
+// The C# half of test/rate-half-reading.test.ts — an unreadable rate reads its NUMERATOR and strands only
+// the denominator (#1093 → #1098 → #1249).
 //
-// ⚠ THE DEFECT WAS A TIER ANSWERING A DATA GAP WITH HALF A READING: `km/h` is a unit plus a denominator
-// NOUN, and a language that has not sourced the noun cannot say it — but the shared arm matched the
-// numerator anyway and left `/h` outside the match, to reach the sink as a bare letter. `MakeBareUnitNormalizer`
-// two screens below it already refused exactly this ("a half reading is worse than a visible leak"); the two
-// arms disagreed and the bare one was right.
+// ⚠ THIS CONTRACT HAS BEEN BOTH WAYS ROUND. `km/h` is a unit plus a denominator NOUN, and a language that
+// has not sourced the noun cannot say it. The arm first matched the numerator anyway and left `/h` outside
+// the match; #1098 called that a half reading and rejected the whole match, so the abbreviation would stay
+// where the leak gates can see it. #1249 measured that the abbreviation stays there EITHER WAY — the residue
+// after the slash is character-for-character the same — while declining additionally throws away a reading
+// the language has, and in 34 of the 193 registry codes hands the raw `km` to the English foreign reader,
+// which says the LETTER NAMES. So the tier reads what it can read and strands what has no word behind it.
 //
 // The fleet-wide sweep lives in the TS, where every registry code is reachable. What is pinned here is the
-// TIER CONTRACT itself, at the level the C# owns it, plus the two counter-examples that put the line at an
-// ASCII-Latin denominator rather than at any slash.
+// TIER CONTRACT itself, at the level the C# owns it, plus the two counter-examples #1098 measured — both
+// unaffected, since neither was ever an ASCII-Latin denominator.
 using Vernacula.Phonemizer.Core;
 using Xunit;
 
@@ -34,17 +37,19 @@ public class RateHalfReadingTests
     });
 
     [Theory]
-    // An UNDECLARED denominator: the whole match declines and the symbol stays visible to the leak gates.
-    [InlineData("5 m/s")]
-    [InlineData("5 km/h")]
-    [InlineData("2-3 cm/yr")]
-    // …and the exponent goes with it, in both spellings. Without this the group BACKTRACKS to empty and
-    // claims a bare `5 m`, stranding `³/s`.
-    [InlineData("5 m³/s")]
-    [InlineData("5 km²/h")]
-    [InlineData("5 m2/s")]
-    [InlineData("5 km2/h")]
-    public void AnUnreadableRateDeclinesWhole(string input) => Assert.Equal(input, Plain(input));
+    // An UNDECLARED denominator: the NUMERATOR reads and only the `/den` strands, exactly as visible after
+    // the slash as it was when the whole match declined.
+    [InlineData("5 m/s", "5 metre/s")]
+    [InlineData("5 km/h", "5 kilometre/h")]
+    [InlineData("2-3 cm/yr", "2-3 centimetre/yr")]
+    // …and the EXPONENT comes with the numerator, in both spellings. The decline rejected that branch too,
+    // so `5 m³/s` used to lose the POWER as well as the noun; no `³` is stranded, because the trailing
+    // lookahead refuses one and forces the exponent branch to take it.
+    [InlineData("5 m³/s", "5 metre³/s")]
+    [InlineData("5 km²/h", "5 kilometre²/h")]
+    [InlineData("5 m2/s", "5 metre²/s")]
+    [InlineData("5 km2/h", "5 kilometre²/h")]
+    public void AnUnreadableRateReadsItsNumerator(string input, string want) => Assert.Equal(want, Plain(input));
 
     [Theory]
     // ⚠ THE TWO MEASURED COUNTER-EXAMPLES. A DIGIT after the slash is a RATIO of two readable quantities —
@@ -63,8 +68,8 @@ public class RateHalfReadingTests
     [InlineData("5 km²/h", "5 square kilometre per hour")]
     [InlineData("5 km2/h", "5 square kilometre per hour")]
     [InlineData("5 km²", "5 square kilometre")]
-    // …and an undeclared denominator still declines even where a rate IS declared.
-    [InlineData("5 km/s", "5 km/s")]
+    // …and an undeclared denominator strands where a rate IS declared, without costing the numerator.
+    [InlineData("5 km/s", "5 kilometre/s")]
     public void ADeclaredRateStillReads(string input, string want) => Assert.Equal(want, WithRate(input));
 
     [Theory]

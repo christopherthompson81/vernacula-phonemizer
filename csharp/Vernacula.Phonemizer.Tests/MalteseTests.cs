@@ -197,20 +197,15 @@ public class MalteseTests
      * THE RATE — local, because the idiom is not "A per B": Maltese says *kilometri FIS-SIEGĦA*, a
      * preposition fused with the definite article and its noun, which `UnitPer` cannot spell.
      * ⚠ THE DENOMINATOR TABLE IS CLOSED — `h` and `s` are the only two this corpus writes — AND AN
-     * UNLISTED DENOMINATOR DECLINES WHOLE. This comment used to say the residual was PINNED: that an
-     * unlisted denominator fell through to the tier, which matched the head unit and stranded the rest
-     * (`5 km/j` → *5 kilometri/j*), that it could not be closed from this layer, and that the assertion
-     * would fail the day a guard landed on the tier's unit match. THE GUARD LANDED IN #1093, BEFORE THIS
-     * PORT — so `5 km/j` and `5 m/kg` below are not a defect held still, they are the REPAIRED reading:
-     * the abbreviation stays visible to the leak gates instead of half a reading reaching the phoneme
-     * stream. Corrected here because the stale wording told a reader the opposite of the truth and sent
-     * one review off to propose a `Core/NormalizeSymbols.cs` edit that was already made. The TS twin
-     * (`test/maltese.test.ts`) has carried the accurate version since #1093.
+     * UNLISTED DENOMINATOR NOW READS ITS NUMERATOR AND STRANDS THE REST. The residual here has moved
+     * twice: `5 kilometri/j` before #1093, `5 km/j` under #1098's whole-match decline, and
+     * `5 kilometri/j` again since #1249 measured that declining never made the `/j` any more visible
+     * than stranding it does — the price was the NUMERATOR's reading in 146 of the 193 registry codes.
+     * The TS twin (`test/maltese.test.ts`) carries the same three-step history.
      *
-     * ⚠ ONE DEGENERATE SHAPE IS STILL STRANDED, IN BOTH ENGINES IDENTICALLY: a trailing slash with no
-     * denominator at all, `5 km/` → *5 kilometri/*. The guard keys on what follows the slash, and nothing
-     * follows it. Not a parity defect (TS and C# agree byte-for-byte) and not corpus-attested; recorded
-     * rather than repaired, so the next reader does not re-derive it.
+     * ⚠ THE DEGENERATE SHAPE IS UNCHANGED THROUGHOUT, IN BOTH ENGINES IDENTICALLY: a trailing slash with
+     * no denominator at all, `5 km/` → *5 kilometri/*. Not a parity defect (TS and C# agree byte-for-byte)
+     * and not corpus-attested; recorded rather than repaired, so the next reader does not re-derive it.
      */
     [Theory]
     [InlineData("300 km/h", "300 kilometru fis-siegħa")]
@@ -221,8 +216,8 @@ public class MalteseTests
     [InlineData("300,000 km/s", "300000 kilometru fis-sekonda")]
     [InlineData("5 cm/s", "5 ċentimetri fis-sekonda")]
     [InlineData("20 km / h", "20 kilometru fis-siegħa")]   // spaced slash, either side
-    [InlineData("5 km/j", "5 km/j")]                       // an unlisted denominator declines WHOLE (#1093)
-    [InlineData("5 m/kg", "5 m/kg")]
+    [InlineData("5 km/j", "5 kilometri/j")]                // an unlisted denominator strands ALONE (#1249)
+    [InlineData("5 m/kg", "5 metri/kg")]
     [InlineData("5 km/", "5 kilometri/")]                  // ⚠ the degenerate residual, pinned as it reads
     public void TheRate(string text, string want) => Assert.Equal(want, N(text));
 
@@ -237,7 +232,7 @@ public class MalteseTests
     [InlineData("12-il minuta", "12-il minuta")]
     [InlineData("15-il kilometru", "15-il kilometru")]
     [InlineData("16-il km²", "16-il km²")]           // the exponent and rate forms are left to their steps
-    [InlineData("16-il km/h", "16-il km/h")]
+    [InlineData("16-il km/h", "16-il kilometru/h")]        // the rate reads its numerator (#1249)
     public void TheIlLinker(string text, string want) => Assert.Equal(want, N(text));
 
     /**
