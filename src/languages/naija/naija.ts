@@ -74,6 +74,17 @@ export type ForeignPhonemizer = (latin: string) => string | undefined;
  * and is missing; every other character that can is a consonant or the word end, i.e. a genuine coda.
  */
 const V = "iɪeɛæaɑɔoʊuʌəɐᵻ";
+/**
+ * The four rhotic rules, HOISTED. `nativise` runs once per word and built these from `V` inside the chain,
+ * recompiling four patterns per call. The C# port has always held them as statics; this is the TypeScript
+ * catching up rather than a new idea, and it is the "repeated recompilation of regexes" PORTING.md lists as
+ * free to fix — no byte of any golden moves. Measured, 40k dict words through `phonemize(w, "pcm")`, median
+ * of five runs: 420 ms → 392 ms.
+ */
+const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[${V}])`, "gu");
+const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[${V}])`, "gu");
+const ONSET_R = new RegExp(`[ɹr](?=[${V}])`, "gu");
+const CODA_R = new RegExp(`[ɹr](?![${V}])`, "gu");
 function nativise(en: string): string {
     return en
         .normalize("NFC")
@@ -87,18 +98,18 @@ function nativise(en: string): string {
         // them are pre-vocalic (ɚ ×3,457, ɝ ×319). The tap is emitted here rather than left for the onset
         // rule because that rule matches `[ɹr]` and this vowel carries its r as a diacritic, not a segment.
         // Same split en-GB already makes for its linking /ɹ/, in the same position, for the same reason.
-        .replace(new RegExp(`ɝ(?=[${V}])`, "gu"), "ɔɾ").replace(/ɝ/gu, "ɔ")
-        .replace(new RegExp(`ɚ(?=[${V}])`, "gu"), "aɾ").replace(/ɚ/gu, "a")
+        .replace(NURSE_PREVOCALIC, "ɔɾ").replace(/ɝ/gu, "ɔ")
+        .replace(LETTER_PREVOCALIC, "aɾ").replace(/ɚ/gu, "a")
         .replace(/ʰ/gu, "").replace(/̬/gu, "") // deaspirate, un-flap
         .replace(/θ/gu, "t").replace(/ð/gu, "d") // TH-stopping
         .replace(/ɫ/gu, "l").replace(/ʲ/gu, "j") // dark-l → l; palatal glide (abbreviate→abɾivijet) → j
-        .replace(new RegExp(`[ɹr](?=[${V}])`, "gu"), "ɾ") // ONSET r → tap
+        .replace(ONSET_R, "ɾ") // ONSET r → tap
         // CODA r → dropped (Naija is non-rhotic). ⚠ THE CODA CONDITION IS WRITTEN OUT (#1250) though the
         // onset rule one line up has already consumed every onset, which made this a blanket delete that was
         // correct only for as long as that rule stayed exhaustive — and it was not. Spelled out, a symbol
         // that ever reaches here before a vowel LEAKS as `ɹ` where a reader can see it instead of vanishing.
         // Verified a no-op today: the two fixes above leave nothing pre-vocalic for it to catch.
-        .replace(new RegExp(`[ɹr](?![${V}])`, "gu"), "")
+        .replace(CODA_R, "")
         .replace(/[iɪᵻ]/gu, "i").replace(/[uʊ]/gu, "u") // FLEECE/KIT, GOOSE/FOOT
         .replace(/[ʌɐ]/gu, "ɔ").replace(/ə/gu, "a") // STRUT→ɔ; schwa→a (lossy — see note)
         .replace(/[ɔɒ]/gu, "ɔ").replace(/[æɑ]/gu, "a"); // THOUGHT/LOT→ɔ; TRAP/PALM→a

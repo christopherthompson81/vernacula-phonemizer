@@ -153,3 +153,62 @@ counted, so the non-rhoticity the accents exist for is not asserted away. 117,47
 One exclusion, and it is not an onset loss: `dr` is an ABBREVIATION the two engines expand to different
 WORDS — `en` reads *drive* (`dɹˈaᶦv`), pcm's own table reads *dakta*. Listed by name rather than filtered by
 a heuristic, so the exception stays a fact about the abbreviation tables.
+
+## Run 8 — 2026-09-03 19:05 — review sweep, and one thing found that is NOT this fix
+
+Swept all 117,479 dict words through both fixed engines looking for damage the before/after counts would not
+show — a raw `ɹ` leaking out of pcm's newly-guarded coda drop, a doubled tap, a doubled `ɹ` in en-GB:
+
+```
+npx tsx leak.mts
+pcmDoubleTap  none        gbDoubleR  none        pcmStray  none
+pcmRawR       were: wɛre
+```
+
+The one hit is **not** from the rule path and is **not** new — `were` and `werey` are hand-authored LEXICON
+entries in `data/languages/naija/naija.jsonc` (`"were": "wɛre"`, Naija *wèrè*, "madman"), and the lexicon
+bypasses `nativise` entirely. Verified identical on both sides of the fix.
+
+⚠ IT IS A REAL DEFECT THOUGH, AND AN ADJACENT ONE: that manifest is internally inconsistent about its own
+rhotic. Three of its seven rhotic-bearing IPA values use a plain `r` (`wɛre` ×2, `d͡ʒare`) and four use the
+tap `ɾ` (`jaɾn`, `kɾez`, `ɾod`, plus the `r` → `ɾ` consonant mapping itself). The rule path can only ever
+produce `ɾ` — the consonant table says so — so the same phoneme reaches the phoneme stream spelled two ways
+depending on whether the word was in the lexicon.
+
+NOT FIXED HERE, deliberately. It is a data question with its own evidence to gather (does the NLA orthography
+manual or Faraclas write a trill anywhere, or is this simply three entries typed with an ASCII `r`?), it is
+not caused by and does not interact with the /r/-deletion fix, and three lexicon values changed on a hunch is
+exactly the unsourced edit this repo's data rules exist to prevent. Reported so the next reader has the count
+and the file.
+
+## What did not get fixed, and why
+
+- **The pcm lexicon's rhotic inconsistency** — above.
+- **`ɐ` and `o` stay in en-GB's `VOWEL`** though the audit proves both unreachable. The class is a negative
+  lookahead; the error is one-sided; a superset is the safe shape. See the header comment on the class.
+- **The referee number is a tenth of a point.** The `ɹᵻ` population is thin in a 76k list dominated by names,
+  and no fold in `en-GB.jsonc` was touched, so this is the real size of the gain by that instrument. The
+  dict sweep (833 words, none shortened) is the measurement that actually sizes the defect.
+
+## Run 9 — 2026-09-03 19:25 — a perf defect the fix introduced, and the one it was sitting next to
+
+Reading the diff back: the two new `ɚ`/`ɝ` rules were written as `new RegExp(...)` **inside** `nativise`,
+which runs once per word. That is the "repeated recompilation of regexes" PORTING.md lists as free to fix,
+and I had just added two more of them to a hot path.
+
+Hoisted all four of naija's rhotic patterns, then noticed en-GB does the same thing eight times over in
+`toRP` — pre-existing there, but the same file the fix already edits and the same class. Measured, 40k dict
+words, median of five runs each:
+
+| | per-word `new RegExp` | hoisted |
+|---|---|---|
+| pcm | 420 ms | **392 ms** (−7%) |
+| en-GB | 1916 ms | **1607 ms** (−16%) |
+
+Both verified output-identical: `csharp/tools/parity` reports `200 rows ok, 0 differ` for each, and the
+authored tests pass unchanged. The C# port has held all twelve as statics since it was written, so this is
+the TypeScript catching up rather than a new idea.
+
+⚠ ONE HAZARD WORTH THE COMMENT IT GOT: a `/g` regex hoisted to module scope carries `lastIndex`. All twelve
+are used with `.replace`, which resets it; the same move under `.test()` or `.exec()` would be a stateful bug
+that only shows on the second call.

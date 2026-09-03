@@ -48,6 +48,23 @@ const VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻ";
  */
 const CODA = `(?![ˈˌ]*[${VOWEL}])`; // an /ɹ/ NOT before a (optionally stressed) vowel = coda → non-rhotic
 
+/**
+ * The eight rhotic patterns, HOISTED. `toRP` runs once per word and built every one of them from `VOWEL`
+ * inside the chain, recompiling eight patterns per call — the "repeated recompilation of regexes" PORTING.md
+ * lists as free to fix. Measured, 40k dict words through `phonemize(w, "en-GB")`, median of five runs:
+ * 1916 ms → 1607 ms, and no byte of any golden moves. The C# port has held these as statics all along.
+ * ⚠ EVERY ONE IS USED WITH `.replace` ONLY. A `/g` regex hoisted to module scope carries `lastIndex`, so the
+ * same move under `.test()` or `.exec()` would be a stateful bug; `replace` resets it.
+ */
+const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[ˈˌ]*[${VOWEL}])`, "gu");
+const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[ˈˌ]*[${VOWEL}])`, "gu");
+const NEAR = new RegExp(`ɪɹ${CODA}`, "gu");
+const SQUARE = new RegExp(`ɛɹ${CODA}`, "gu");
+const CURE = new RegExp(`ʊɹ${CODA}`, "gu");
+const NORTH = new RegExp(`ɔːɹ${CODA}`, "gu");
+const START = new RegExp(`ɑːɹ${CODA}`, "gu");
+const CODA_R = new RegExp(`ɹ${CODA}`, "gu");
+
 export interface LexSets {
     bath: Set<string>; // æ → ɑː
     cloth: Set<string>; // ɔː → ɒ
@@ -76,8 +93,8 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     s = s.replace(/ᶦ/gu, "ɪ").replace(/ᶷ/gu, "ʊ"); // FACE/PRICE/MOUTH/CHOICE offglides
     s = s.replace(/ʲ/gu, ""); // drop the palatal on-glide (idea)
     // NURSE ɝ / lettER ɚ: before a vowel keep a linking /ɹ/; in coda non-rhotic.
-    s = s.replace(new RegExp(`ɝ(?=[ˈˌ]*[${VOWEL}])`, "gu"), "ɜːɹ").replace(/ɝ/gu, "ɜː");
-    s = s.replace(new RegExp(`ɚ(?=[ˈˌ]*[${VOWEL}])`, "gu"), "əɹ").replace(/ɚ/gu, "ə");
+    s = s.replace(NURSE_PREVOCALIC, "ɜːɹ").replace(/ɝ/gu, "ɜː");
+    s = s.replace(LETTER_PREVOCALIC, "əɹ").replace(/ɚ/gu, "ə");
     // LOT: GenAm [ɑː] not before /ɹ/ → [ɒ]; PALM words keep [ɑː].
     if (!(lex && lex.palm.has(w))) s = s.replace(/ɑː(?!ɹ)/gu, "ɒ");
     // Lexical sets (shipped path only).
@@ -92,12 +109,12 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s
-        .replace(new RegExp(`ɪɹ${CODA}`, "gu"), "ɪə") // NEAR
-        .replace(new RegExp(`ɛɹ${CODA}`, "gu"), "ɛə") // SQUARE
-        .replace(new RegExp(`ʊɹ${CODA}`, "gu"), "ʊə") // CURE
-        .replace(new RegExp(`ɔːɹ${CODA}`, "gu"), "ɔː") // NORTH/FORCE
-        .replace(new RegExp(`ɑːɹ${CODA}`, "gu"), "ɑː") // START
-        .replace(new RegExp(`ɹ${CODA}`, "gu"), ""); // drop remaining coda /ɹ/
+        .replace(NEAR, "ɪə") // NEAR
+        .replace(SQUARE, "ɛə") // SQUARE
+        .replace(CURE, "ʊə") // CURE
+        .replace(NORTH, "ɔː") // NORTH/FORCE
+        .replace(START, "ɑː") // START
+        .replace(CODA_R, ""); // drop remaining coda /ɹ/
     return s;
 }
 
