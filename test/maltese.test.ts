@@ -328,11 +328,14 @@ describe("Maltese text normalization — the rules' branches", () => {
         expect(normalizeMaltese("12-il mil")).toBe("12-il mil");
         expect(normalizeMaltese("12-il minuta")).toBe("12-il minuta");
         expect(normalizeMaltese("15-il kilometru")).toBe("15-il kilometru");
-        // ⚠ AN EXPONENT ON A LINKED NUMERAL IS STILL REFUSED WHOLE (×0 here) rather than stranded — a stray
-        // `²` has no word to belong to. A RATE reads its numerator since #1249; the `/h` strands, as it did
-        // under the decline.
+        // ⚠ AND AN EXPONENT OR A RATE ON A LINKED NUMERAL IS REFUSED WHOLE (×0 here) rather than stranded.
+        // ⚠ THE RATE HERE IS THE **BARE** ARM'S, NOT THE COUNTED ONE'S, and that is why #1249 did not move
+        // it: the linker makes the numeral non-adjacent, so the tier's number→unit pattern cannot match and
+        // only `makeBareUnitNormalizer` can see the `km` — and its trailing `/` guard stays, for the
+        // `mm/dd/yyyy` and `mg/kg` shapes it exists to refuse. `5 km/j` two tests up is the counted arm and
+        // reads its numerator; these two are the same file's other arm and do not.
         expect(normalizeMaltese("16-il km²")).toBe("16-il km²");
-        expect(normalizeMaltese("16-il km/h")).toBe("16-il kilometru/h");
+        expect(normalizeMaltese("16-il km/h")).toBe("16-il km/h");
     });
 
     // ── THE TWO NUMERAL PARSERS MUST AGREE, and the review's fourth finding is the shape where they did not:

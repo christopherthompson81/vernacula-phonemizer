@@ -482,10 +482,12 @@ public static class NormalizeSymbols
         var keys = order.OrderByDescending(k => k.Length).ToList();
         var re = JsRegex.Compile(
             "(?<![\\p{L}\\p{M}\\p{Nd}'’ʼ/-])(?<!\\p{Nd}\\s)(" + string.Join("|", keys) + ")"
-                // ⚠ THE TRAILING `/` CAME OFF WITH #1249 — a bare `km/h` reads its numerator and strands
-                // the denominator, as the digit-adjacent arm now does. The LOOKBEHIND `/` stays: after a
-                // slash the key is the denominator, with no numerator match of its own to pair it with.
-                + "(?![\\p{L}\\p{M}\\p{Nd}'’ʼ²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))",
+                // ⚠ THE TRAILING `/` STAYS HERE THOUGH #1249 TOOK IT OFF THE DIGIT-ADJACENT ARM — a
+                // deliberate disagreement, not an oversight. Without a numeral underwriting the numerator,
+                // removing it read `mm/dd/yyyy` (a date-format placeholder) as *millimetre/dd/yyyy* and
+                // `mg/kg` (a ratio of two readable units, whose second half the lookbehind forbids) as
+                // *milligram/kg* — the half reading in its pure form. See the TS.
+                + "(?![\\p{L}\\p{M}\\p{Nd}'’ʼ/²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))",
             "gu");
         return text => Rewrite(text, re, m => map[m.Groups[1].Value]);
     }

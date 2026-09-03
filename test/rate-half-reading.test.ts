@@ -21,6 +21,11 @@
  * the `h`; it only spent the numerator. So the trade #1098 priced was not on offer, and the tier now reads
  * what it can read and strands only the part with no word behind it.
  *
+ * ⚠ AND THIS IS THE COUNTED ARM ONLY. `makeBareUnitNormalizer` keeps its `/` guard and a bare `km/h` still
+ * declines — the two premises above are a NUMERAL underwriting the numerator and a denominator that is an
+ * abbreviation rather than the other half of a ratio, and a bare key has neither. Taking the guard off there
+ * too read `mm/dd/yyyy` as *millimetre/dd/yyyy* and `mg/kg` as *milligram/kg*; see that function's header.
+ *
  * THE INSTRUMENT IS LANGUAGE-AGNOSTIC and needs no IPA knowledge: ask whether the plain unit reads as a
  * WORD, and then whether the rate spells the SAME symbol out — as raw ASCII, or as the English letter names
  * a non-Latin host routes it to. A language that never reads the unit is out of scope on its own terms.

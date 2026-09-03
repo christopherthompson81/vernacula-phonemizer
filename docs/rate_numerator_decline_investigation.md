@@ -81,8 +81,11 @@ exponent branch and the group fell through to EMPTY — es read *m ˈal kˈuβo 
 *mˈetɾos kˈuβikos s*. The ASCII twin is worse: `5 m2/s` read *five m two s*, the exponent claimed by the
 NUMBER path and spoken.
 
-Both #1098 counter-examples are untouched (`120mg/100ml` in every engine, `12.8 km/秒` in ja). One
-unexpected mover: ga `12.8 km/秒` gained its kilometre.
+Both #1098 counter-examples are untouched (`120mg/100ml` in every engine, `12.8 km/秒` in ja).
+
+⚠ Correction, from Run 7: the "ga `12.8 km/秒` gained its kilometre" line first recorded here was
+mis-attributed. That row moved on the BARE-unit arm, not on `unitRe` — `noguard.json` leaves it at `kmˠ` —
+and it went back when the bare arm was reverted.
 
 ## Run 4 — 2026-09-03 16:05 — what the suite pinned
 
@@ -157,3 +160,38 @@ claim holds for each, not most.
 
 Re-measured after all three: `160 km/h` 60 codes changed, `160 m³/s` 86, `12.8 km/秒` 1 — identical to Run 3,
 and no reading anywhere gained a letter-name spelling it did not have.
+
+## Run 7 — 2026-09-03 17:10 — the bare-unit arm goes back, and why the two arms now disagree
+
+A review pass caught what Runs 1–6 did not probe: the same guard was taken off `makeBareUnitNormalizer`,
+whose matches have **no numeral in front of them**, and every measurement in this log is of a *rate with a
+quantity*. Probed directly:
+
+```
+mm/dd/yyyy  ->  millimetre/dd/yyyy      a date-format placeholder; `mm` is not a millimetre
+mg/kg       ->  milligram/kg            a RATIO of two readable units
+km/h        ->  kilometre/h             the case the widening was for
+```
+
+Both losses are real and neither is in scope of the sweep:
+
+- `mm/dd/yyyy` is a confident error produced out of a string with no quantity in it at all. `dd/mm/yyyy`
+  survives only by accident of the lookbehind, which is not a rule.
+- `mg/kg` is the half reading **in its pure form** — both halves readable, this arm's own lookbehind
+  forbidding the second, so it reads one and abandons the other. The counted arm does not have this failure:
+  with a numeral it composes both halves through `unitPer`, or reads the numerator and strands a denominator
+  that has no noun at all.
+
+So the trailing `/` goes back on the bare arm and comes off only the counted one. **That is a deliberate
+disagreement between two arms this file has previously insisted must agree,** and the reason is that they
+answer different questions: the counted arm's numerator is underwritten by a numeral, and the only thing
+after its slash is a denominator with no word behind it. Neither premise holds for a bare key.
+
+Reverting also closes the two documentation findings the review raised, which were consequences of the same
+widening rather than separate defects: `src/languages/haitian/normalize.ts:110`'s invariant ("`9 km/h` must
+never read `9 kilomèt` with a stranded `/h`") holds again — `km/h` declines in ht, ak, bm, ln, om, nso, mos,
+bal, ee — and the sentence eleven callers copy to describe the shared guards ("never beside a numeral, a
+rate slash or an exponent") is true again without editing eleven files.
+
+Re-measured after the revert: `160 km/h` 60 codes changed, `160 m³/s` 86, and the ACCEPTED_DECLINE ledger is
+byte-identical at 36 pairs. The counted arm — the whole of #1249 — is untouched by giving the bare one back.

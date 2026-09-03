@@ -232,7 +232,9 @@ public class MalteseTests
     [InlineData("12-il minuta", "12-il minuta")]
     [InlineData("15-il kilometru", "15-il kilometru")]
     [InlineData("16-il km²", "16-il km²")]           // the exponent and rate forms are left to their steps
-    [InlineData("16-il km/h", "16-il kilometru/h")]        // the rate reads its numerator (#1249)
+    // ⚠ THE BARE ARM'S RATE, NOT THE COUNTED ONE'S — the linker makes the numeral non-adjacent, so only
+    // `MakeBareUnitNormalizer` can see this `km`, and its trailing `/` guard stays (see the TS).
+    [InlineData("16-il km/h", "16-il km/h")]
     public void TheIlLinker(string text, string want) => Assert.Equal(want, N(text));
 
     /**

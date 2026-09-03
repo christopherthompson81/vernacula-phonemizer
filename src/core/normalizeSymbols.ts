@@ -584,14 +584,21 @@ export function isBareUnitKey(key: string): boolean {
  * symbol. That distance is a reason not to COUNT the unit; it was never a reason to leave raw ASCII in the
  * phoneme stream.
  *
- * ⚠ AND IT READS THE NUMERATOR OF AN UNREADABLE RATE, which is the half of the `/` guard that came off with
- * #1249. A bare `km/h` in a table header used to decline whole, to keep the abbreviation visible; measured
- * over all 193 registry codes that is not what happens — the stranded `km` routes to the English foreign
- * reader in 34 of them and comes back as *kʰˈeᶦəm*, letter names, with nothing raw left to see. Declining
- * bought no visibility for the `h` and spent the `km`; the two arms agree again, on the other side.
- * ⚠ THE LOOKBEHIND `/` STAYS. After a slash the key is the DENOMINATOR, and this arm has no numerator match
- * of its own to pair it with — reading it alone is the half reading with the halves swapped, and no
- * measurement here says otherwise.
+ * ⚠ AND THE `/` GUARD STAYS HERE THOUGH #1249 TOOK IT OFF THE DIGIT-ADJACENT ARM, which is a deliberate
+ * DISAGREEMENT between the two and not an oversight. There the numerator's reading is underwritten by a
+ * NUMERAL in front of it, and the only thing after the slash is a denominator with no word behind it. Here
+ * neither premise holds, and taking the guard off was tried and reverted on two measured shapes:
+ *   · `mm/dd/yyyy` — a date-format placeholder, where `mm` is not a millimetre and reading it gives
+ *     *millimetre/dd/yyyy*, a confident error out of a string with no quantity in it at all. (`dd/mm/yyyy`
+ *     survives only by accident of the lookbehind, which is not a rule.)
+ *   · `mg/kg` — a RATIO of two readable units, where this arm can read the first and its own lookbehind
+ *     forbids the second, so the reading it produces (*milligram/kg*) is the half reading in its pure form.
+ *     The digit-adjacent arm does not have this failure: with a numeral it composes both halves, or reads
+ *     the numerator and strands a denominator that has no noun.
+ * So a bare `km/h` still declines whole, and the abbreviation stays where the leak gates can see it. The
+ * two arms answer different questions and #1249's measurement covers only the counted one.
+ * ⚠ AND THE LOOKBEHIND `/` STAYS FOR ITS OWN REASON. After a slash the key is the DENOMINATOR, and this arm
+ * has no numerator match to pair it with — reading it alone is the same half reading with the halves swapped.
  *
  * ⚠ NOT BEFORE AN EXPONENT, superscript or ASCII. `245&nbsp;km 2` (yo) is a squared kilometre written with
  * the entity in the way; reading the unit and leaving a stray "2" behind is worse than the visible leak.
@@ -607,7 +614,7 @@ export function makeBareUnitNormalizer(
     const keys = [...map.keys()].sort((a, b) => b.length - a.length);
     const re = new RegExp(
         `(?<![\\p{L}\\p{M}\\p{Nd}'’ʼ/-])(?<!\\p{Nd}\\s)(${keys.join("|")})` +
-            `(?![\\p{L}\\p{M}\\p{Nd}'’ʼ²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))`,
+            `(?![\\p{L}\\p{M}\\p{Nd}'’ʼ/²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))`,
         "gu",
     );
     // ⚠ `rewrite`, NOT `text.replace` — the subject IS the pipeline string here, and a bare replace is
@@ -961,6 +968,12 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               // Nan's blood-sugar article) is a RATIO of two readable quantities — this arm reads the first
               // and its own next match reads the second — and `12.8 km/秒` (a Japanese golden row) has a
               // denominator that IS a word the engine reads. Neither ever entered the ASCII guard.
+              //
+              // ⚠ AND `makeBareUnitNormalizer` KEEPS ITS `/` GUARD, so the two arms of this file now
+              // DISAGREE on purpose — see its header for the two shapes that measured it (`mm/dd/yyyy`,
+              // `mg/kg`). Everything above rests on two premises a bare key does not have: a NUMERAL
+              // underwriting the numerator, and a denominator that is an abbreviation with no word behind
+              // it rather than the other half of a ratio.
               //
               // ⚠ AND THE TRAILING LOOKAHEAD DOES **NOT** REJECT A PLAIN DIGIT, which was tried and reverted
               // on the goldens. A digit after the unit is a SEPARATE class — `2005 MM13` (an asteroid
