@@ -17,8 +17,73 @@
 import { createEnglish, type EnglishPhonemizer } from "../english/english.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
-const VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoa";
-const CODA = `(?![ˈˌ]?[${VOWEL}])`; // an /ɹ/ NOT before a (optionally stressed) vowel = coda → non-rhotic
+/**
+ * THE VOWELS THIS FILE'S "not before a vowel = coda" GUARD HAS TO KNOW ABOUT — and it is the POST-transform
+ * alphabet, not GenAm's. All three uses sit after the GOAT/offglide/NURSE/lettER remaps above, so the class
+ * covers what those rules LEAVE, which is why `ɜ` and `ɒ` (SSBE-only) are in it.
+ *
+ * ⚠ `ᵻ` WAS MISSING AND THAT DELETED ONSET /ɹ/ (#1250). The reduced vowel the parent emits for unstressed
+ * `re-`/`ri-` is a vowel, but it was not in this string, so `ɹᵻ` satisfied "NOT before a vowel" and the drop
+ * on the last line of the block below took the /ɹ/ off the FRONT of the word — `reports` read *ᵻpʰˈɔːts*,
+ * "'eports", and 13 of 13 GenAm `ɹᵻ` words with it. Non-rhotic English drops CODA /r/ and never onset /r/,
+ * so nothing about the accent licensed it. It is not only word-initial: `alacrity` lost the /ɹ/ of `kɹ`.
+ *
+ * ⚠ AUDITED RATHER THAN PATCHED, over all 117,479 dict words: `ᵻ` (×828) is the ONLY vowel that can follow
+ * an `ɹ` at this point and is missing here. Every other character that can is a consonant or the word end —
+ * a genuine coda — so this was one gap and not the symptom of a drifted inventory.
+ * ⚠ AND "AT THIS POINT" IS DOING WORK IN THAT SENTENCE. The parent writes `ɹɚ` 115 times and `ɹɝ` 8 times,
+ * and neither is in this class; they are safe because the two linking rules above CONSUME the r-coloured
+ * vowel before the coda guard runs, not because the class covers them. The completeness claim holds given
+ * the ordering, and `PRE_VOWEL` is what the rules that run BEFORE that point use.
+ *
+ * ⚠ AND `ɐ` AND `o` STAY THOUGH THE SAME AUDIT SAYS BOTH ARE UNREACHABLE. `ɐ` is emitted nowhere by this
+ * engine; `o` is emitted 17,063 times but only ever inside `oᶷ`, which GOAT rewrites two lines above the
+ * first use. The class sits in a NEGATIVE lookahead, so the error here is ONE-SIDED — a vowel missing
+ * deletes a consonant, a vowel that never occurs costs nothing — and the safe shape is a generous superset.
+ * test/onset-r.test.ts re-runs the audit against the engine's own output so the gap cannot
+ * reopen; trimming the class to today's inventory would buy nothing and spend that asymmetry.
+ */
+const VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻ";
+/**
+ * THE SAME VOWELS ONE STEP EARLIER, for the two LINKING rules — and one step earlier `ɚ` and `ɝ` are still
+ * in the string, because those two rules are what consume them.
+ *
+ * ⚠ AND THEY ARE VOWELS, SO AN `ɚ` BEFORE ANOTHER ONE IS PRE-VOCALIC (#1250, review). Looking ahead for
+ * `VOWEL` alone, the first `ɚ` of `ɚɚ` failed the linking test, fell through to the unconditional
+ * `ɚ → ə`, and its onset /r/ was deleted — `caterer` (`kʰˈeᶦt̬ɚɚ`) read *kʰˈeɪtəə* for RP /ˈkeɪtərə/, and
+ * 96 dict words with it. That is the SAME defect as the missing `ᵻ`, one rule to the left, and the sweep
+ * that was supposed to catch it shared the omission; test/onset-r.test.ts now counts them.
+ *
+ * ⚠ A SEPARATE CLASS RATHER THAN TWO MORE CHARACTERS IN `VOWEL`. Adding them there would be a no-op for the
+ * coda guard — nothing r-coloured survives these two rules, so `CODA` can never see one — but `VOWEL` is
+ * documented as the POST-transform alphabet and `ɚ`/`ɝ` are not in it. A class that says something false
+ * about itself is how the first omission survived.
+ */
+const PRE_VOWEL = `${VOWEL}ɚɝ`;
+/**
+ * ⚠ A RUN OF STRESS MARKS, NOT ONE (#1250). This was `[ˈˌ]?`, and the parent emits `ˌˈ` together on five
+ * dict words — `greedier` is `ɡɹˌˈiːd̬iʲɚ` — where one optional mark cannot see the `iː` behind the pair and
+ * the ONSET CLUSTER `ɡɹ` lost its /ɹ/, exactly as the missing vowel did. `*` costs nothing: more marks
+ * before a vowel still means "before a vowel".
+ */
+const CODA = `(?![ˈˌ]*[${VOWEL}])`; // an /ɹ/ NOT before a (optionally stressed) vowel = coda → non-rhotic
+
+/**
+ * The eight rhotic patterns, HOISTED. `toRP` runs once per word and built every one of them from `VOWEL`
+ * inside the chain, recompiling eight patterns per call — the "repeated recompilation of regexes" PORTING.md
+ * lists as free to fix. Measured, 40k dict words through `phonemize(w, "en-GB")`, median of five runs:
+ * 1916 ms → 1607 ms, and no byte of any golden moves. The C# port has held these as statics all along.
+ * ⚠ EVERY ONE IS USED WITH `.replace` ONLY. A `/g` regex hoisted to module scope carries `lastIndex`, so the
+ * same move under `.test()` or `.exec()` would be a stateful bug; `replace` resets it.
+ */
+const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
+const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
+const NEAR = new RegExp(`ɪɹ${CODA}`, "gu");
+const SQUARE = new RegExp(`ɛɹ${CODA}`, "gu");
+const CURE = new RegExp(`ʊɹ${CODA}`, "gu");
+const NORTH = new RegExp(`ɔːɹ${CODA}`, "gu");
+const START = new RegExp(`ɑːɹ${CODA}`, "gu");
+const CODA_R = new RegExp(`ɹ${CODA}`, "gu");
 
 export interface LexSets {
     bath: Set<string>; // æ → ɑː
@@ -48,8 +113,8 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     s = s.replace(/ᶦ/gu, "ɪ").replace(/ᶷ/gu, "ʊ"); // FACE/PRICE/MOUTH/CHOICE offglides
     s = s.replace(/ʲ/gu, ""); // drop the palatal on-glide (idea)
     // NURSE ɝ / lettER ɚ: before a vowel keep a linking /ɹ/; in coda non-rhotic.
-    s = s.replace(new RegExp(`ɝ(?=[ˈˌ]?[${VOWEL}])`, "gu"), "ɜːɹ").replace(/ɝ/gu, "ɜː");
-    s = s.replace(new RegExp(`ɚ(?=[ˈˌ]?[${VOWEL}])`, "gu"), "əɹ").replace(/ɚ/gu, "ə");
+    s = s.replace(NURSE_PREVOCALIC, "ɜːɹ").replace(/ɝ/gu, "ɜː");
+    s = s.replace(LETTER_PREVOCALIC, "əɹ").replace(/ɚ/gu, "ə");
     // LOT: GenAm [ɑː] not before /ɹ/ → [ɒ]; PALM words keep [ɑː].
     if (!(lex && lex.palm.has(w))) s = s.replace(/ɑː(?!ɹ)/gu, "ɒ");
     // Lexical sets (shipped path only).
@@ -64,12 +129,12 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s
-        .replace(new RegExp(`ɪɹ${CODA}`, "gu"), "ɪə") // NEAR
-        .replace(new RegExp(`ɛɹ${CODA}`, "gu"), "ɛə") // SQUARE
-        .replace(new RegExp(`ʊɹ${CODA}`, "gu"), "ʊə") // CURE
-        .replace(new RegExp(`ɔːɹ${CODA}`, "gu"), "ɔː") // NORTH/FORCE
-        .replace(new RegExp(`ɑːɹ${CODA}`, "gu"), "ɑː") // START
-        .replace(new RegExp(`ɹ${CODA}`, "gu"), ""); // drop remaining coda /ɹ/
+        .replace(NEAR, "ɪə") // NEAR
+        .replace(SQUARE, "ɛə") // SQUARE
+        .replace(CURE, "ʊə") // CURE
+        .replace(NORTH, "ɔː") // NORTH/FORCE
+        .replace(START, "ɑː") // START
+        .replace(CODA_R, ""); // drop remaining coda /ɹ/
     return s;
 }
 

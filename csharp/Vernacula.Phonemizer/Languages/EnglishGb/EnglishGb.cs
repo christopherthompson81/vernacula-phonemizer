@@ -31,9 +31,24 @@ public sealed class LexSets
 
 public static class EnglishGb
 {
-    private const string VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoa";
-    /** An /ɹ/ NOT before a (optionally stressed) vowel = coda → non-rhotic. */
-    private const string CODA = $"(?![ˈˌ]?[{VOWEL}])";
+    /** The vowels the "not before a vowel = coda" guard must know about — the POST-transform alphabet, since
+     *  all three uses sit after the GOAT/offglide/NURSE/lettER remaps (hence SSBE-only `ɜ`, `ɒ`).
+     *  ⚠ `ᵻ` WAS MISSING AND THAT DELETED ONSET /ɹ/ (#1250) — `reports` read *ᵻpʰˈɔːts*. Audited over the
+     *  117,479-word dict: `ᵻ` (×828) is the only vowel that can follow an `ɹ` here and was absent, and `ɐ`/`o`
+     *  stay though unreachable — the class is a NEGATIVE lookahead, so a missing vowel deletes a consonant
+     *  while a dead one costs nothing. See the TS for the audit. */
+    private const string VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻ";
+    /** The same vowels ONE STEP EARLIER, for the two LINKING rules — one step earlier `ɚ`/`ɝ` are still in
+     *  the string, because those two rules are what consume them, and they are VOWELS: an `ɚ` before another
+     *  one is pre-vocalic (#1250, review). Looking ahead for VOWEL alone deleted the onset /ɹ/ of `ɚɚ` —
+     *  `caterer` read *kʰˈeɪtəə* — in 96 dict words. Separate from VOWEL because VOWEL describes the
+     *  POST-transform alphabet, which no longer holds either symbol. See the TS. */
+    private const string PRE_VOWEL = VOWEL + "ɚɝ";
+    /** An /ɹ/ NOT before a (optionally stressed) vowel = coda → non-rhotic.
+     *  ⚠ A RUN OF MARKS, NOT ONE (#1250): the parent emits `ˌˈ` together on five dict words (`greedier` is
+     *  `ɡɹˌˈiːd̬iʲɚ`), where one optional mark could not see the vowel behind the pair and the ONSET cluster
+     *  `ɡɹ` lost its /ɹ/. */
+    private const string CODA = $"(?![ˈˌ]*[{VOWEL}])";
 
     private static IReadOnlySet<string> LoadSet(string file) =>
         new HashSet<string>(LoadTsv.LoadTsvMap("languages/english-gb", file, optional: true).Keys, StringComparer.Ordinal);
@@ -54,9 +69,9 @@ public static class EnglishGb
     private static readonly JsRe OFFGLIDE_I = JsRegex.Compile("ᶦ", "gu");
     private static readonly JsRe OFFGLIDE_U = JsRegex.Compile("ᶷ", "gu");
     private static readonly JsRe PALATAL = JsRegex.Compile("ʲ", "gu");
-    private static readonly JsRe NURSE_PREVOCALIC = JsRegex.Compile($"ɝ(?=[ˈˌ]?[{VOWEL}])", "gu");
+    private static readonly JsRe NURSE_PREVOCALIC = JsRegex.Compile($"ɝ(?=[ˈˌ]*[{PRE_VOWEL}])", "gu");
     private static readonly JsRe NURSE = JsRegex.Compile("ɝ", "gu");
-    private static readonly JsRe LETTER_PREVOCALIC = JsRegex.Compile($"ɚ(?=[ˈˌ]?[{VOWEL}])", "gu");
+    private static readonly JsRe LETTER_PREVOCALIC = JsRegex.Compile($"ɚ(?=[ˈˌ]*[{PRE_VOWEL}])", "gu");
     private static readonly JsRe LETTER = JsRegex.Compile("ɚ", "gu");
     private static readonly JsRe LOT = JsRegex.Compile("ɑː(?!ɹ)", "gu");
     // ⚠ FIRST-OCCURRENCE ONLY — no "g" flag. See the note at the call sites.

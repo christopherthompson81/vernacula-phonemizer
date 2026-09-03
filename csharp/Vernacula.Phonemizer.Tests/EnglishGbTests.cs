@@ -71,6 +71,31 @@ public class EnglishGbTests
         Assert.Contains("ɔː", Say("go north"));     // NORTH/FORCE
     }
 
+    /// <summary>
+    /// AN ONSET /r/ IS NEVER DELETED (#1250). Non-rhotic English drops CODA /r/ and never onset /r/, but the
+    /// guard is a NEGATIVE test spelled out as a vowel string, and `ᵻ` — the reduced vowel the parent emits
+    /// for unstressed `re-`/`ri-` — was missing from it. So `ɹᵻ` counted as "not before a vowel" and the /r/
+    /// came off the FRONT of the word. The fleet-wide audit over all 117,479 dict words lives in the TS
+    /// (test/onset-r.test.ts), where the parent engine is cheap to drive; what is pinned here is the
+    /// contract, plus the stress-mark run that hid a vowel from the same guard.
+    /// </summary>
+    [Theory]
+    [InlineData("reports", "ɹᵻpʰˈɔːts")]
+    [InlineData("alacrity", "əlˈækɹᵻti")]   // NOT only word-initial — the /ɹ/ of the cluster `kɹ`
+    [InlineData("asperity", "əspˈɛɹᵻti")]   // …and `ɛɹ` before `ᵻ` is not SQUARE
+    [InlineData("authority", "əθˈɔːɹᵻti")]  // …nor `ɔːɹ` NORTH
+    [InlineData("report", "ɹipʰˈɔːt")]      // the tell: this vowel resolves to `i`, and was never affected
+    [InlineData("greedier", "ɡɹˌˈiːdiə")]   // `ɡɹˌˈiːd̬iʲɚ` — two stress marks, one optional mark could not see past
+    public void AnOnsetRSurvivesTheReducedVowel(string word, string want) =>
+        Assert.Equal(want, EnglishGb.PhonemizeWord(word));
+
+    [Theory]
+    [InlineData("car", "kʰˈɑː")]
+    [InlineData("market", "mˈɑːkət")]
+    [InlineData("water", "wˈɔːtə")]
+    public void ACodaRIsStillDropped(string word, string want) =>
+        Assert.Equal(want, EnglishGb.PhonemizeWord(word));
+
     [Fact]
     public void TheRuleOnlyPathIsTheNonCircularSignalAndDiffersFromShipped()
     {

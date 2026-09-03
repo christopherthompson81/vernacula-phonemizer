@@ -23,8 +23,16 @@ public sealed class NaijaPhonemizer : ILanguage
     private static NaijaOrdinalsDef ORD => DEF.Ordinals;
     private static IReadOnlyDictionary<string, string> LETTER => DEF.LetterNames;
 
-    // English vowels (for the onset-/r/ lookahead), before nativisation collapses them.
-    private const string V = "iɪeɛæaɑɔoʊuʌəɐ";
+    // English vowels (for the onset-/r/ lookahead), before nativisation collapses them. Stress and length are
+    // stripped by the first rule, so no mark class is needed here.
+    // ⚠ `ᵻ` WAS MISSING AND THAT DELETED ONSET /r/ (#1250) — `reports` read *ipɔts*. Audited over the
+    // 117,479-word dict: `ᵻ` (×828) is the only vowel that can follow an `ɹ`/`r` here and was absent; every
+    // other character that can is a consonant or the word end. See the TS.
+    private const string V = "iɪeɛæaɑɔoʊuʌəɐᵻ";
+    // The same vowels ONE STEP EARLIER, for the two NURSE/lettER rules — one step earlier `ɚ`/`ɝ` are still
+    // in the string, and they are VOWELS: an `ɚ` before another one is pre-vocalic (#1250, review). Looking
+    // ahead for V alone ate the onset /r/ of `ɚɚ` — `caterer` read *ketaa* — in 96 dict words.
+    private const string PRE_V = V + "ɚɝ";
 
     private static readonly JsRe N_STRESS = JsRegex.Compile("[ˈˌː]", "gu");
     private static readonly JsRe N_PRICE = JsRegex.Compile("aᶦ", "gu");
@@ -32,7 +40,13 @@ public sealed class NaijaPhonemizer : ILanguage
     private static readonly JsRe N_CHOICE = JsRegex.Compile("[ɔo]ᶦ", "gu");
     private static readonly JsRe N_FACE = JsRegex.Compile("eᶦ", "gu");
     private static readonly JsRe N_GOAT = JsRegex.Compile("[oə]ᶷ", "gu");
+    // NURSE/lettER. ⚠ THE r IS ABSORBED ONLY IN CODA (#1250): these ran unconditionally and mapped the
+    // r-coloured vowel to a plain one before the onset rule could see it, so a PRE-VOCALIC ɚ/ɝ lost its /r/
+    // — `around` read *aaund*, `correct` *kaɛkt*. 3,776 of them are pre-vocalic over the dict (ɚ ×3,457,
+    // ɝ ×319). Same split en-GB makes for its linking /ɹ/.
+    private static readonly JsRe N_NURSE_PREVOCALIC = JsRegex.Compile($"ɝ(?=[{PRE_V}])", "gu");
     private static readonly JsRe N_NURSE = JsRegex.Compile("ɝ", "gu");
+    private static readonly JsRe N_LETTER_PREVOCALIC = JsRegex.Compile($"ɚ(?=[{PRE_V}])", "gu");
     private static readonly JsRe N_LETTER = JsRegex.Compile("ɚ", "gu");
     private static readonly JsRe N_ASPIRATION = JsRegex.Compile("ʰ", "gu");
     private static readonly JsRe N_FLAP = JsRegex.Compile("̬", "gu");
@@ -41,7 +55,10 @@ public sealed class NaijaPhonemizer : ILanguage
     private static readonly JsRe N_DARKL = JsRegex.Compile("ɫ", "gu");
     private static readonly JsRe N_PALATAL = JsRegex.Compile("ʲ", "gu");
     private static readonly JsRe N_ONSET_R = JsRegex.Compile($"[ɹr](?=[{V}])", "gu");
-    private static readonly JsRe N_CODA_R = JsRegex.Compile("[ɹr]", "gu");
+    // ⚠ THE CODA CONDITION IS WRITTEN OUT (#1250) though N_ONSET_R above has already consumed every onset:
+    // as a blanket delete this was correct only for as long as that rule stayed exhaustive, and it was not.
+    // Spelled out, anything that ever reaches here before a vowel LEAKS as `ɹ` instead of vanishing.
+    private static readonly JsRe N_CODA_R = JsRegex.Compile($"[ɹr](?![{V}])", "gu");
     private static readonly JsRe N_FLEECE = JsRegex.Compile("[iɪᵻ]", "gu");
     private static readonly JsRe N_GOOSE = JsRegex.Compile("[uʊ]", "gu");
     private static readonly JsRe N_STRUT = JsRegex.Compile("[ʌɐ]", "gu");
@@ -59,7 +76,9 @@ public sealed class NaijaPhonemizer : ILanguage
         s = N_CHOICE.Replace(s, "ɔi");
         s = N_FACE.Replace(s, "e");
         s = N_GOAT.Replace(s, "o");
+        s = N_NURSE_PREVOCALIC.Replace(s, "ɔɾ");
         s = N_NURSE.Replace(s, "ɔ");
+        s = N_LETTER_PREVOCALIC.Replace(s, "aɾ");
         s = N_LETTER.Replace(s, "a");
         s = N_ASPIRATION.Replace(s, "");
         s = N_FLAP.Replace(s, "");
