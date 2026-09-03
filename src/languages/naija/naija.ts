@@ -72,8 +72,19 @@ export type ForeignPhonemizer = (latin: string) => string | undefined;
  * below, and `reports` read *ipɔts* — the /r/ off the front of the word. Audited over all 117,479 dict words
  * rather than patched for the reported symbol: `ᵻ` (×828) is the ONLY vowel that can follow an `ɹ`/`r` here
  * and is missing; every other character that can is a consonant or the word end, i.e. a genuine coda.
+ * ⚠ "HERE" IS DOING WORK IN THAT SENTENCE: `ɚ`/`ɝ` are vowels and are NOT in this class, and they are safe
+ * only because the two rules above consume them before the onset rule runs. `PRE_V` is what those use.
  */
 const V = "iɪeɛæaɑɔoʊuʌəɐᵻ";
+/**
+ * The same vowels one step earlier, for the two NURSE/lettER rules — one step earlier `ɚ` and `ɝ` are still
+ * in the string, because those two rules are what consume them.
+ * ⚠ AND THEY ARE VOWELS, SO AN `ɚ` BEFORE ANOTHER ONE IS PRE-VOCALIC (#1250, review): looking ahead for `V`
+ * alone, the first `ɚ` of `ɚɚ` missed the split below and the unconditional `ɚ → a` ate its onset /r/ —
+ * `caterer` read *ketaa*, `acquirer` *akwaiaa*, 96 dict words in all. Kept separate from `V` for the reason
+ * en-GB keeps its own separate: `V` describes the alphabet the ONSET rule sees, which no longer has them.
+ */
+const PRE_V = `${V}ɚɝ`;
 /**
  * The four rhotic rules, HOISTED. `nativise` runs once per word and built these from `V` inside the chain,
  * recompiling four patterns per call. The C# port has always held them as statics; this is the TypeScript
@@ -81,8 +92,8 @@ const V = "iɪeɛæaɑɔoʊuʌəɐᵻ";
  * free to fix — no byte of any golden moves. Measured, 40k dict words through `phonemize(w, "pcm")`, median
  * of five runs: 420 ms → 392 ms.
  */
-const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[${V}])`, "gu");
-const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[${V}])`, "gu");
+const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[${PRE_V}])`, "gu");
+const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[${PRE_V}])`, "gu");
 const ONSET_R = new RegExp(`[ɹr](?=[${V}])`, "gu");
 const CODA_R = new RegExp(`[ɹr](?![${V}])`, "gu");
 function nativise(en: string): string {

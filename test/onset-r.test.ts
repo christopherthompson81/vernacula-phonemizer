@@ -29,8 +29,15 @@ const WORDS = readFileSync("data/languages/english/g2p-dict.tsv", "utf8")
     .filter((l) => l && !l.startsWith("#"))
     .map((l) => l.split("\t")[0]!);
 
-/** GenAm's own vowels — the parent alphabet, not either descendant's. `ᵻ` included, which is the point. */
-const GENAM_VOWEL = "iɪeɛæəɐɑɔʌʊuoaᵻ";
+/**
+ * GenAm's own vowels — the parent alphabet, not either descendant's.
+ *
+ * ⚠ `ᵻ` IS IN IT, which is the point of the sweep. ⚠ AND SO ARE `ɚ` AND `ɝ`, which is the point of the sweep
+ * being an INSTRUMENT rather than a restatement: they are vowels, an `ɚ` before another `ɚ` is a /r/ before a
+ * vowel, and leaving them out gave this file the same blind spot as the bug it was written to catch. 96 dict
+ * words (`caterer` `kʰˈeᶦt̬ɚɚ`, `adventurer`, `acquirer`) sat inside it, reported clean.
+ */
+const GENAM_VOWEL = "iɪeɛæəɐɑɔʌʊuoaᵻɚɝ";
 /** `ɹ` before a (possibly stress-marked) vowel, and the r-coloured vowels, which are a /r/ before one. */
 const ONSET_R = new RegExp(`(?:ɹ(?=[ˈˌ]*[${GENAM_VOWEL}])|[ɚɝ](?=[ˈˌ]*[${GENAM_VOWEL}]))`, "gu");
 

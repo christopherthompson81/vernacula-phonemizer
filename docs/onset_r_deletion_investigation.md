@@ -108,6 +108,8 @@ Rendered all 117,479 dict words through both engines before and after:
 | en-GB | **833** | 0 |
 | pcm | **4,553** | 0 |
 
+(Run 10 takes these to 928 and 4,648 — see below. Still zero shortened.)
+
 Nothing got shorter, which is the shape of the claim: this fix only ever puts a consonant back.
 
 ⚠ The en-GB 833 are three classes, and only the first was reported:
@@ -212,3 +214,50 @@ the TypeScript catching up rather than a new idea.
 ⚠ ONE HAZARD WORTH THE COMMENT IT GOT: a `/g` regex hoisted to module scope carries `lastIndex`. All twelve
 are used with `.replace`, which resets it; the same move under `.test()` or `.exec()` would be a stateful bug
 that only shows on the second call.
+
+## Run 10 — 2026-09-03 19:50 — the fix was incomplete in exactly the way it diagnoses
+
+A review pass caught the thing this whole document exists to prevent, one rule to the left of where I looked.
+
+`ɚ` and `ɝ` **are vowels**, and neither is in `VOWEL`/`V`. The two LINKING rules — the ones that split an
+r-coloured vowel into "keep the /r/" and "absorb it" — look ahead with that same class, so when an `ɚ` is
+followed by *another* `ɚ`/`ɝ` the first one fails the pre-vocalic test, falls through to the unconditional
+`ɚ → ə` / `ɚ → a`, and its onset /r/ is deleted:
+
+```
+caterer      en = kʰˈeᶦt̬ɚɚ    →  en-GB  kʰˈeɪtəə     pcm  ketaa       RP is /ˈkeɪtərə/
+adventurer   ædvˈɛnt͡ʃɚɚ      →  ædvˈɛnt͡ʃəə                advɛnt͡ʃaa
+acquirer     əkwˈaᶦɚɚ         →  əkwˈaɪəə                   akwaiaa
+murderer     mˈɝd̬ɚɚ          →  mˈɜːdəə                    mɔdaa
+```
+
+**96 dict words**, and it is the identical defect class to the missing `ᵻ`.
+
+⚠ AND THE SWEEP IN RUN 7 REPORTED THEM CLEAN, because `GENAM_VOWEL` in the test omitted `ɚ`/`ɝ` too. An
+instrument that shares the blind spot of the bug is not an instrument — it is the same assumption written
+twice, and it defeats the whole point of auditing rather than patching. Widening the test's class alone turns
+it red on 95 words before any engine change, which is how it should have read from the start.
+
+The fix is a SEPARATE class rather than two more characters in `VOWEL`/`V`. Adding them there would be a
+provable no-op for the coda guards — nothing r-coloured survives the linking rules, so `CODA`/`ONSET_R` can
+never see one — but those classes are documented as the alphabet at the point they are USED, and `ɚ`/`ɝ` are
+not in it. A class that says something false about itself is how the first omission survived; `PRE_VOWEL` /
+`PRE_V` say what they are: the same vowels one step earlier, where the r-coloured pair still exists.
+
+⚠ AND THE ORIGINAL AUDIT'S CONCLUSION NEEDED THE SAME QUALIFIER. "The only vowel that can follow an `ɹ` here
+and is missing" is true, but the parent writes `ɹɚ` 115 times and `ɹɝ` 8 times and neither is in the class —
+they are safe because of RULE ORDERING, not coverage. That distinction is what licensed skipping `ɚɝ` in the
+first place, so both engines' headers now state it.
+
+Re-measured against the same pre-fix baseline:
+
+| | words changed | became SHORTER |
+|---|---|---|
+| en-GB | 833 → **928** | 0 |
+| pcm | 4,553 → **4,648** | 0 |
+
+Goldens re-rendered: en-GB moves 0 further rows, pcm 2. `csharp/tools/parity`: 400 rows ok, 0 differ.
+
+Two documentation defects from the same review, both fixed: the class header pointed at
+`test/english-gb-onset-r.test.ts`, a path that does not exist (the file is `test/onset-r.test.ts`), and the
+completeness claim above needed the ordering qualifier.

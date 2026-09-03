@@ -31,15 +31,35 @@ import { loadTsvMap } from "../../core/loadTsv.ts";
  * ⚠ AUDITED RATHER THAN PATCHED, over all 117,479 dict words: `ᵻ` (×828) is the ONLY vowel that can follow
  * an `ɹ` at this point and is missing here. Every other character that can is a consonant or the word end —
  * a genuine coda — so this was one gap and not the symptom of a drifted inventory.
+ * ⚠ AND "AT THIS POINT" IS DOING WORK IN THAT SENTENCE. The parent writes `ɹɚ` 115 times and `ɹɝ` 8 times,
+ * and neither is in this class; they are safe because the two linking rules above CONSUME the r-coloured
+ * vowel before the coda guard runs, not because the class covers them. The completeness claim holds given
+ * the ordering, and `PRE_VOWEL` is what the rules that run BEFORE that point use.
  *
  * ⚠ AND `ɐ` AND `o` STAY THOUGH THE SAME AUDIT SAYS BOTH ARE UNREACHABLE. `ɐ` is emitted nowhere by this
  * engine; `o` is emitted 17,063 times but only ever inside `oᶷ`, which GOAT rewrites two lines above the
  * first use. The class sits in a NEGATIVE lookahead, so the error here is ONE-SIDED — a vowel missing
  * deletes a consonant, a vowel that never occurs costs nothing — and the safe shape is a generous superset.
- * test/english-gb-onset-r.test.ts re-runs the audit against the engine's own output so the gap cannot
+ * test/onset-r.test.ts re-runs the audit against the engine's own output so the gap cannot
  * reopen; trimming the class to today's inventory would buy nothing and spend that asymmetry.
  */
 const VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻ";
+/**
+ * THE SAME VOWELS ONE STEP EARLIER, for the two LINKING rules — and one step earlier `ɚ` and `ɝ` are still
+ * in the string, because those two rules are what consume them.
+ *
+ * ⚠ AND THEY ARE VOWELS, SO AN `ɚ` BEFORE ANOTHER ONE IS PRE-VOCALIC (#1250, review). Looking ahead for
+ * `VOWEL` alone, the first `ɚ` of `ɚɚ` failed the linking test, fell through to the unconditional
+ * `ɚ → ə`, and its onset /r/ was deleted — `caterer` (`kʰˈeᶦt̬ɚɚ`) read *kʰˈeɪtəə* for RP /ˈkeɪtərə/, and
+ * 96 dict words with it. That is the SAME defect as the missing `ᵻ`, one rule to the left, and the sweep
+ * that was supposed to catch it shared the omission; test/onset-r.test.ts now counts them.
+ *
+ * ⚠ A SEPARATE CLASS RATHER THAN TWO MORE CHARACTERS IN `VOWEL`. Adding them there would be a no-op for the
+ * coda guard — nothing r-coloured survives these two rules, so `CODA` can never see one — but `VOWEL` is
+ * documented as the POST-transform alphabet and `ɚ`/`ɝ` are not in it. A class that says something false
+ * about itself is how the first omission survived.
+ */
+const PRE_VOWEL = `${VOWEL}ɚɝ`;
 /**
  * ⚠ A RUN OF STRESS MARKS, NOT ONE (#1250). This was `[ˈˌ]?`, and the parent emits `ˌˈ` together on five
  * dict words — `greedier` is `ɡɹˌˈiːd̬iʲɚ` — where one optional mark cannot see the `iː` behind the pair and
@@ -56,8 +76,8 @@ const CODA = `(?![ˈˌ]*[${VOWEL}])`; // an /ɹ/ NOT before a (optionally stress
  * ⚠ EVERY ONE IS USED WITH `.replace` ONLY. A `/g` regex hoisted to module scope carries `lastIndex`, so the
  * same move under `.test()` or `.exec()` would be a stateful bug; `replace` resets it.
  */
-const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[ˈˌ]*[${VOWEL}])`, "gu");
-const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[ˈˌ]*[${VOWEL}])`, "gu");
+const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
+const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
 const NEAR = new RegExp(`ɪɹ${CODA}`, "gu");
 const SQUARE = new RegExp(`ɛɹ${CODA}`, "gu");
 const CURE = new RegExp(`ʊɹ${CODA}`, "gu");
