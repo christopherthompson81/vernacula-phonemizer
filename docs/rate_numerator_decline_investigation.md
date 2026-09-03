@@ -133,3 +133,27 @@ fix cannot reach them, and each is a per-file edit needing its own before/after.
 - **The Cyrillic ⟨/с⟩ residual (ab, ba)** is unchanged: this guard was ASCII-only and never covered it.
   `0,6км/км²` phonemized *anolʲ fba kʼm kʼm* before and *anolʲ fba kʼilometʼra kʼm* now — the same `kʼm`,
   one more word read.
+
+## Run 6 — 2026-09-03 16:45 — review pass
+
+Three things the sweep did not catch, found reading the diff back:
+
+1. **The tail was not re-emitted verbatim.** `\s?` sits on BOTH sides of the slash in the pattern, so cutting
+   the fall-through at `whole.indexOf("/")` swallowed the space before it: `5 kg / m` came back as
+   `5 kilogram/ m`. A rule that CONSUMES text puts it back. Cut at the trailing `\s` instead —
+   `Js.IsJsWhiteSpace` on the C# side, not `char.IsWhiteSpace`, since the TS cuts with `/\s$/u` and the two
+   sets differ in both directions (U+FEFF, U+0085).
+2. **Two doc blocks on `resolveUnitSymbol` still stated the old policy** ("every caller must then leave the
+   text ALONE rather than emit half a reading"). The rule now depends on WHICH half failed: an unresolvable
+   HEAD leaves the text alone (there is no reading to give), an unresolvable DENOMINATOR reads the numerator.
+3. **`csharp/regex-corpus.jsonl` went stale** — the `/\s$/u` literal added in (1) is an extracted pattern.
+   Re-extracted; one row added, none dropped.
+
+And one claim that was asserted rather than checked, which is the caution #1095 exists for: "the survivors
+are the engines that keep a local unit table". Verified per code — fourteen of the fifteen never call
+`makeSymbolNormalizer` at all, and `nci` calls it without `units`, stating so in its own header and keeping
+a hand-written rule whose lookahead spells out its own `/` on its own corpus evidence (`segundo` ×0). The
+claim holds for each, not most.
+
+Re-measured after all three: `160 km/h` 60 codes changed, `160 m³/s` 86, `12.8 km/秒` 1 — identical to Run 3,
+and no reading anywhere gained a letter-name spelling it did not have.

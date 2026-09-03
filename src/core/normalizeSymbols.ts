@@ -502,16 +502,19 @@ function foldedIndex<V>(map: Record<string, V> | undefined): Record<string, V> {
  *     support. Declining leaves the symbol as text, which the g2p then reads as a letter.
  *
  * ⚠ `foldSingle` LIFTS THE ONE-LETTER RESTRICTION, and only the RATE DENOMINATOR passes it. Denominators
- * are almost always one letter (h, s, u, ч), so without this `100 KM/H` resolved neither half and the
- * callback abandoned the whole match, leaking two raw abbreviations. The position is what makes it safe:
- * after the `/` of a rate, ⟨H⟩ is not plausibly henry — nobody writes kilometres per henry.
+ * are almost always one letter (h, s, u, ч), so without this `100 KM/H` resolved neither half and leaked two
+ * raw abbreviations — since #1249 it would leak one, the numerator being read, which is better and still not
+ * the reading the text supports. The position is what makes it safe: after the `/` of a rate, ⟨H⟩ is not
+ * plausibly henry — nobody writes kilometres per henry.
  *
  * ⚠ THE ONE-LETTER RULE ALSO HAS A REAL EXCEPTION IN THE DATA, not handled here: ⟨L⟩ and ⟨l⟩ are BOTH
  * official for the litre, so the languages that declare it declare both spellings and the exact branch
  * resolves either. The rule is about symbols whose two cases are DIFFERENT units, not about case as such.
  *
- * Returns `undefined` when neither step resolves; every caller must then leave the text ALONE rather than
- * emit half a reading — the policy this module already states for a rate with a missing noun.
+ * Returns `undefined` when neither step resolves, and what a caller does then depends on WHICH half failed.
+ * An unresolvable HEAD unit leaves the text alone — there is no reading to give. An unresolvable
+ * DENOMINATOR reads the numerator and strands the rest (#1249): declining there spent a reading the
+ * language has and bought the denominator no visibility, since the raw `/h` is re-emitted either way.
  */
 export function resolveUnitSymbol<V>(
     declared: Record<string, V> | undefined,
@@ -1238,11 +1241,16 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                         // et writes the inessive (*kilomeetrit tunnis*) and declares none, so `5 kg/m` read
                         // *vˈiːs kɡ m* while `5 kg/s`, whose `s` is not a unit key at all, read the kilogram.
                         // 57 of the 86 residual declines fleet-wide were this one branch.
+                        // ⚠ THE TAIL IS RE-EMITTED VERBATIM, SPACE INCLUDED. `\s?` sits on both sides of the
+                        // slash in the pattern, so cutting at the slash itself swallowed the one before it
+                        // and `5 kg / m` came back as `5 kilogram/ m`. A rule that CONSUMES text puts it back.
                         if (per === undefined || dWord === undefined) {
                             const slash = whole.indexOf("/");
+                            if (slash < 0) return whole;
+                            const cut = whole.slice(0, slash).replace(/\s$/u, "").length;
                             const headOnly = numExp === undefined ? head : withPower(head, numExp);
                             const said = d.unitPrefix ? `${headOnly} ${q}` : `${q} ${headOnly}`;
-                            return slash < 0 ? whole : `${said}${whole.slice(slash)}`;
+                            return `${said}${whole.slice(cut)}`;
                         }
                         let dPhrase = typeof dWord === "string" ? dWord : dWord[0]!;
                         if (denomExp !== undefined) dPhrase = withPower(dPhrase, denomExp);

@@ -35,10 +35,13 @@ const SHAPES = [["km", "h"], ["m", "s"], ["km²", "h"], ["m³", "s"], ["kg", "m"
  * ⚠ STILL DECLINING THE WHOLE RATE, LISTED BY CODE AND SHAPE SO THE LIST CAN ONLY SHRINK.
  *
  * ⚠ EVERY ENTRY IS PRE-EXISTING AND THE LEDGER SHRANK BY 347. Run on both sides of #1249 the sweep found
- * **383** code+shape pairs declining a rate whose numerator the language reads, and **36**: no pair is new,
- * and the ones that remain are the engines that keep a LOCAL unit table rather than calling the shared tier
- * — the shape a language reaches for when its unit noun PRECEDES the number, since the tier can only
- * postpose. Each hand-wrote its own trailing guard, the core fix cannot reach them, and every one is a
+ * **383** code+shape pairs declining a rate whose numerator the language reads, and **36**: no pair is new.
+ *
+ * ⚠ AND "EACH", NOT "MOST" — CHECKED RATHER THAN INFERRED, which is the caution #1095 was filed about.
+ * Every one of the fifteen codes here handles units LOCALLY rather than through the shared tier: fourteen
+ * never call `makeSymbolNormalizer` at all, and `nci` calls it without `units` and says so in its own
+ * header ("this layer declares no shared symbol tier"), keeping a hand-written rule whose lookahead spells
+ * out its own `/` for its own corpus reasons. So the core fix cannot reach them, and every one is a
  * per-file edit needing its own before/after.
  *
  * ⚠ A NEW ENTRY MUST NOT JOIN THIS LIST. It exists to be emptied.

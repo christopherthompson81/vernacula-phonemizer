@@ -422,8 +422,9 @@ public static class NormalizeSymbols
      * ⚠ `foldSingle` LIFTS THAT RESTRICTION and only the RATE DENOMINATOR passes it — after the `/` of a rate,
      * ⟨H⟩ is not plausibly henry.
      *
-     * Returns null when neither step resolves; every caller must then leave the text ALONE rather than emit
-     * half a reading.
+     * Returns null when neither step resolves, and what a caller does then depends on WHICH half failed. An
+     * unresolvable HEAD unit leaves the text alone — there is no reading to give. An unresolvable DENOMINATOR
+     * reads the numerator and strands the rest (#1249); see the TS for the measurement.
      */
     public static V? ResolveUnitSymbol<V>(
         IReadOnlyDictionary<string, V>? declared,
@@ -885,12 +886,18 @@ public static class NormalizeSymbols
                         // trade the slash guard on the regex above made; the same measurement retires it, since
                         // the raw `/m` is re-emitted here either way and declining only spent the numerator.
                         // 57 of the 86 residual declines fleet-wide were this one branch — see the TS.
+                        // ⚠ THE TAIL IS RE-EMITTED VERBATIM, SPACE INCLUDED — `\s?` sits on both sides of the
+                        // slash, so cutting at the slash itself swallows the one before it. `Js.IsJsWhiteSpace`
+                        // and not `char.IsWhiteSpace`: the TS cuts with `/\s$/u` and the two sets differ in
+                        // both directions (U+FEFF, U+0085) — see Core/Js.cs.
                         if (per is null || dWord is null)
                         {
                             var slash = whole.IndexOf('/');
+                            if (slash < 0) return whole;
+                            var cut = slash > 0 && Js.IsJsWhiteSpace(whole[slash - 1]) ? slash - 1 : slash;
                             var headOnly = numExp is null ? head : WithPower(head, numExp);
                             var said = d.UnitPrefix ? headOnly + " " + q : q + " " + headOnly;
-                            return slash < 0 ? whole : said + whole[slash..];
+                            return said + whole[cut..];
                         }
                         // ⚠ THE DENOMINATOR MAY CARRY AN EXPONENT — ⟨20,164 katao/km²⟩, the population-density shape. Composed
                         // only when the language declares `ExponentWords`; otherwise the old reading stands and
