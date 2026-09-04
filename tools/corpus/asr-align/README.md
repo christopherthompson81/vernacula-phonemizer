@@ -178,6 +178,7 @@ Two folds were proposed and refused, both recorded at the fold site so they are 
 |---|---|
 | `phonemize-fleurs.mts` | run THIS repo's engine over FLEURS transcripts → `byid/<lang>.tsv` |
 | `asr_align_corpus.py` | GPU pass: audio → recognized phones, into SQLite beside our IPA |
+| `asr_align_dir.py` | the same GPU pass for a corpus that did NOT come from FLEURS — audio from `--dirs`, `text`/`ipa` from the ingest manifest |
 | `asr_align_allo.py` | the SECOND recognizer: allosaurus (PHOIBLE-trained, espeak-independent) → `phones_allo` |
 | `allo_fast.py` | vectorizes allosaurus's per-frame MFCC loop; `--selftest` proves it bit-identical |
 | `allo_compare.py` | reads the two recognizers against each other — does a queue median survive a change of tradition? |
@@ -242,10 +243,17 @@ just that the import worked.
 export ASR_ALIGN_ROOT=/path/to/corpus         # default: /mnt/data/omnivoice_ipa
 npx tsx phonemize-fleurs.mts <lang>...        # ⚠ never --limit: it slices then WRITES, truncating the file
 python3 asr_align_corpus.py --langs <lang>... [--redo]
+# …or, for a corpus ingested from a directory rather than FLEURS (same table, same model, same medians):
+python3 asr_align_dir.py --lang <lang> --dirs <audio-dir>...
 python3 scan_silent_audio.py <lang>...        # before label: it reads silent_audio.tsv AT IMPORT
 python3 asr_align_label.py --apply
 python3 asr_align_report.py --langs <lang>...
 ```
+
+⚠ **Do not run both aligners over one language.** They write the same `(lang, wav)` rows and either is a
+complete recognition pass on its own; `asr_align_dir.py` keys on the audio file's basename precisely so that
+re-running it over an extracted FLEURS tree RESUMES instead of inserting a second row per recording, which
+would score every utterance twice and shift that language's median and MAD.
 
 ⚠ **Order is load-bearing and every stage fails silently if skipped.** No IPA → the aligner scores every
 utterance 1.0. No label → rows sit at `status NULL`, invisible to any exclusion gate and indistinguishable
