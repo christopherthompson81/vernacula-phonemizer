@@ -120,16 +120,21 @@ describe("an unreadable rate reads its numerator and strands only the denominato
         expect(fixed).toEqual([]);
     });
 
-    test("the denominator still strands VISIBLY — reading the numerator does not hide it", () => {
-        // ⚠ THE WHOLE CASE FOR #1249 IS THIS PAIR. The `h` is exactly as present as it was under the decline;
-        // what changed is that the kilometre is now spoken. A test that only watched the numerator could be
-        // satisfied by an arm that swallowed the slash instead, which would be the real half reading.
-        expect(phonemize("160 km/h", "et").trim()).toBe("sˈɑdɑ kˈuːskymːend kˈilomeːtrit h");
-        expect(phonemize("160 km/h", "am").trim()).toBe("məto sɨlsa kilo metɨɾ ˈeᶦt͡ʃ");
-        // …and the EXPONENT came back with it: the decline rejected that branch too, so `160 m³/s` lost the
-        // POWER as well as the noun in 100+ engines.
-        expect(phonemize("160 m³/s", "es").trim()).toBe("θjˈento sesˈenta mˈetɾos kˈuβikos s");
-        expect(phonemize("5 m2/s", "et").trim()).toBe("vˈiːs rˈuːtmeːtrit s"); // the ASCII twin, likewise
+    test("the numerator is read, and the unreadable denominator is now SILENT rather than spoken", () => {
+        // ⚠ THIS ASSERTION HAS MOVED TWICE AND THE HISTORY IS THE POINT (#1093 → #1098 → #1249 → #1255).
+        // #1249 pinned the stranded `h` here, on the argument that it "is exactly as present as it was under
+        // the decline". True, and #1255 measured what "present" then means: in 36 non-Latin hosts the `h`
+        // routes to the English foreign reader and is VOICED (*ˈeᶦt͡ʃ*), in 23 Latin hosts it stays a literal
+        // `h` which IS a valid IPA symbol and is rendered, and in 11 more the host's own g2p reads it as a
+        // native phone (haw `/s` → [k]). It was never a leak anyone could see; it was a reading. The symbol
+        // is now consumed and dropped — a missing word, which this file's ordering prefers to a wrong one.
+        // The DENOMINATOR NOUN is still the repair; test/rate-denominator.test.ts ledgers who lacks one.
+        expect(phonemize("160 km/h", "et").trim()).toBe("sˈɑdɑ kˈuːskymːend kˈilomeːtrit");
+        expect(phonemize("160 km/h", "am").trim()).toBe("məto sɨlsa kilo metɨɾ");
+        // …and the EXPONENT is still recovered, which was #1249's own second finding: the decline rejected
+        // that branch too, so `160 m³/s` lost the POWER as well as the noun in 100+ engines.
+        expect(phonemize("160 m³/s", "es").trim()).toBe("θjˈento sesˈenta mˈetɾos kˈuβikos");
+        expect(phonemize("5 m2/s", "et").trim()).toBe("vˈiːs rˈuːtmeːtrit"); // the ASCII twin, likewise
     });
 
     test("a DECLARED rate still reads, and the two measured counter-examples are untouched", () => {

@@ -302,12 +302,13 @@ describe("Maltese text normalization — the rules' branches", () => {
         expect(normalizeMaltese("5 cm/s")).toBe("5 ċentimetri fis-sekonda");
         expect(normalizeMaltese("20 km / h")).toBe("20 kilometru fis-siegħa"); // spaced slash, either side
         // ⚠ THE DENOMINATOR TABLE IS CLOSED — `h` and `s` are the only two this corpus writes (×0 of anything
-        // else) — AND THE RESIDUAL HAS NOW MOVED TWICE. It was `5 kilometri/j` before #1093, `5 km/j` after
-        // it, and is `5 kilometri/j` again: #1249 measured that declining the whole match never made the `/j`
-        // any more visible than stranding it does, and the price was the NUMERATOR's reading in 146 of the
-        // 193 registry codes. The unreadable half is what declines; the readable half is read.
-        expect(normalizeMaltese("5 km/j")).toBe("5 kilometri/j");
-        expect(normalizeMaltese("5 m/kg")).toBe("5 metri/kg");
+        // else) — AND THE RESIDUAL HAS NOW MOVED THREE TIMES, which is worth the space. `5 kilometri/j`
+        // before #1093; `5 km/j` under #1098's whole-match decline; `5 kilometri/j` again when #1249 measured
+        // that declining never made the `/j` visible and cost the numerator in 146 of 193 codes; and now
+        // `5 kilometri`, because #1255 measured what the stranded `/j` actually DOES — it is spoken, as an
+        // English letter name, a literal IPA symbol, or a native phone, depending only on the host.
+        expect(normalizeMaltese("5 km/j")).toBe("5 kilometri");
+        expect(normalizeMaltese("5 m/kg")).toBe("5 metri");
         // ⚠ AND ONE DEGENERATE SHAPE IS STILL STRANDED: a trailing slash with NO denominator at all. The
         // guard keys on what follows the slash and nothing follows it. Not corpus-attested; pinned AS IT
         // READS so a future widening of that guard fails here and says so, rather than changing in silence.

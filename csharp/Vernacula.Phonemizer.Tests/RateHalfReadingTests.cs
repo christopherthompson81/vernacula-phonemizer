@@ -37,18 +37,22 @@ public class RateHalfReadingTests
     });
 
     [Theory]
-    // An UNDECLARED denominator: the NUMERATOR reads and only the `/den` strands, exactly as visible after
-    // the slash as it was when the whole match declined.
-    [InlineData("5 m/s", "5 metre/s")]
-    [InlineData("5 km/h", "5 kilometre/h")]
+    // An UNDECLARED denominator: the NUMERATOR reads and the symbol is CONSUMED AND DROPPED (#1255). It was
+    // stranded here under #1249, on the argument that it stayed visible; measured over 193 codes it was not
+    // visible but SPOKEN — an English letter name in a non-Latin host, a literal IPA `h` in a Latin one, a
+    // native phone in eleven more. Missing word ≥ wrong word.
+    [InlineData("5 m/s", "5 metre")]
+    [InlineData("5 km/h", "5 kilometre")]
+    // ⚠ …BUT `yr` KEEPS ITS SLASH, and that is the vowel test doing its job rather than an inconsistency:
+    // the drop is restricted to VOWEL-FREE runs (`isBareUnitKey`'s discriminator), because a short run WITH
+    // a vowel may be a word the host reads — nl `km/uur` is *ˈyr*, sw `km/saa` is *sˈaː*. `y` counts as a
+    // vowel there, so `yr` is on the conservative side and keeps today's behaviour.
     [InlineData("2-3 cm/yr", "2-3 centimetre/yr")]
-    // …and the EXPONENT comes with the numerator, in both spellings. The decline rejected that branch too,
-    // so `5 m³/s` used to lose the POWER as well as the noun; no `³` is stranded, because the trailing
-    // lookahead refuses one and forces the exponent branch to take it.
-    [InlineData("5 m³/s", "5 metre³/s")]
-    [InlineData("5 km²/h", "5 kilometre²/h")]
-    [InlineData("5 m2/s", "5 metre²/s")]
-    [InlineData("5 km2/h", "5 kilometre²/h")]
+    // …and the EXPONENT still comes with the numerator, in both spellings — #1249's own second finding.
+    [InlineData("5 m³/s", "5 metre³")]
+    [InlineData("5 km²/h", "5 kilometre²")]
+    [InlineData("5 m2/s", "5 metre²")]
+    [InlineData("5 km2/h", "5 kilometre²")]
     public void AnUnreadableRateReadsItsNumerator(string input, string want) => Assert.Equal(want, Plain(input));
 
     [Theory]
@@ -68,8 +72,8 @@ public class RateHalfReadingTests
     [InlineData("5 km²/h", "5 square kilometre per hour")]
     [InlineData("5 km2/h", "5 square kilometre per hour")]
     [InlineData("5 km²", "5 square kilometre")]
-    // …and an undeclared denominator strands where a rate IS declared, without costing the numerator.
-    [InlineData("5 km/s", "5 kilometre/s")]
+    // …and an undeclared denominator is dropped where a rate IS declared, without costing the numerator.
+    [InlineData("5 km/s", "5 kilometre")]
     public void ADeclaredRateStillReads(string input, string want) => Assert.Equal(want, WithRate(input));
 
     [Theory]

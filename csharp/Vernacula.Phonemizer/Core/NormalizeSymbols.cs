@@ -492,6 +492,13 @@ public static class NormalizeSymbols
         return text => Rewrite(text, re, m => map[m.Groups[1].Value]);
     }
 
+    /** The tail the rate arm may DROP rather than re-emit — the same shape the unit pattern's own stranded
+     *  group consumes, spelled once so the regex and the callback cannot drift apart (#1255). Vowel-free so
+     *  it is a SYMBOL and not a word, ASCII so the host's own script is never touched, at most three letters
+     *  and one power. See the TS. */
+    private static readonly JsRe STRANDED_SYMBOL =
+        JsRegex.Compile("^\\s?\\/\\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?:\u00b2|\u00b3|[23])$|^\\s?\\/\\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}$", "u");
+
     /** `t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")` */
     private static readonly JsRe ESC_RE = JsRegex.Compile("[.*+?^${}()|[\\]\\\\]", "gu");
     /** The currency-key escape, which also lists `$` first — kept as its own pattern so the ports diff. */
@@ -647,6 +654,9 @@ public static class NormalizeSymbols
         // fractional part and matches `11g` on its own — the lookbehind stops a match beginning inside a number,
         // the lookahead one beginning at its front. Either decimal separator, since a designation is not
         // localised but the text around it is.
+        // The tail the rate arm may DROP rather than re-emit — the same shape the unit pattern's own
+        // stranded group consumes, spelled once so the regex and the callback cannot drift apart (#1255).
+        // See the TS.
         string[] DESIGNATIONS = ["802[.,]11"];
         var NOT_VERSION = "(?<![\\d.,])(?!(?:" + string.Join("|", DESIGNATIONS) + ")[a-zA-Z](?![a-zA-Z\\d]))";
         var unitRe = d.Units is not null
@@ -657,6 +667,23 @@ public static class NormalizeSymbols
                   NOT_VERSION + "(" + NUM + ")" + magAltU + "\\s?(" + unitAlt + ")"
                       + "(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(" + denomKeys + ")(\u00b2|\u00b3)?"
                       + "|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?"
+                      // ⚠ AND AN UNREADABLE DENOMINATOR IS CONSUMED AND DROPPED (#1255). Stranding it left a
+                      // WRONG READING, not a gap: 36 non-Latin hosts voice it through the English foreign
+                      // reader (ja "…kiromeetoru AITCH") and 23 Latin hosts keep a literal `h`, which IS a
+                      // valid IPA symbol and is rendered as the glottal fricative. No gate saw either. This
+                      // file's own ordering settles it — missing word ≥ wrong word — and the repo litigated
+                      // the same "the leak gate can see it" premise once already in bare-exponent. The repair
+                      // is the DENOMINATOR NOUN; test/rate-denominator.test.ts ledgers the gaps.
+                      // 1-3 ASCII letters AND NO VOWEL AMONG THEM — `isBareUnitKey`'s own discriminator,
+                      // adopted here for the same measured reason ("an alphabet that writes its vowels does
+                      // not write vowel-less words"): a vowel-free run is a SYMBOL, a run with a vowel may be
+                      // a WORD. Without it this dropped nl `km/uur` (*ˈyr*, Dutch for hour), sw `km/saa` and
+                      // cs `km/hod`, while the vowel-free ones are the defect (de `/Std` → *ʃtt*, fr `/hr` →
+                      // *ʁ*). `12.8 km/秒` and a Cyrillic `⟨/с⟩` are untouched, and `120mg/100ml` (a digit) is
+                      // not this. The denominator's OWN EXPONENT goes with it, superscript or ASCII —
+                      // without that `9.8 m/s²` and `1000 kg/m³` kept the whole defect, and `9.8 m/s2` had ja
+                      // read the `2` as a NUMBER. NON-CAPTURING: the callback reads its groups positionally.
+                      + "(?:\\s?/\\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?:²|³|[23])?(?![\\p{L}\\p{M}\\p{Nd}]))?"
                       // ⚠ AN UNREADABLE RATE READS ITS NUMERATOR AND STRANDS ONLY THE DENOMINATOR (#1249).
                       // The `(?!\s?/\s?[A-Za-z])` decline that stood after this lookahead (#1093/#1098)
                       // discarded the numerator's reading with it and bought nothing for the denominator —
@@ -892,6 +919,11 @@ public static class NormalizeSymbols
                         // slash, so cutting at the slash itself swallows the one before it. `Js.IsJsWhiteSpace`
                         // and not `char.IsWhiteSpace`: the TS cuts with `/\s$/u` and the two sets differ in
                         // both directions (U+FEFF, U+0085) — see Core/Js.cs.
+                        // ⚠ AND THE TAIL IS DROPPED WHEN IT IS THE VOWEL-FREE ASCII SYMBOL the regex above
+                        // would have consumed (#1255): this branch is reached when the denominator IS a
+                        // declared unit but there is no `UnitPer`, so that group never sees it, and
+                        // `1000 kg/m³` read *…kiloɡɨɾam ˈɛm kjˈuːbd*. Same test in both places so they cannot
+                        // drift; a Cyrillic `⟨/км²⟩` or anything with a vowel is re-emitted as before.
                         if (per is null || dWord is null)
                         {
                             var slash = whole.IndexOf('/');
@@ -899,7 +931,8 @@ public static class NormalizeSymbols
                             var cut = slash > 0 && Js.IsJsWhiteSpace(whole[slash - 1]) ? slash - 1 : slash;
                             var headOnly = numExp is null ? head : WithPower(head, numExp);
                             var said = d.UnitPrefix ? headOnly + " " + q : q + " " + headOnly;
-                            return said + whole[cut..];
+                            var tail = whole[cut..];
+                            return STRANDED_SYMBOL.IsMatch(tail) ? said : said + tail;
                         }
                         // ⚠ THE DENOMINATOR MAY CARRY AN EXPONENT — ⟨20,164 katao/km²⟩, the population-density shape. Composed
                         // only when the language declares `ExponentWords`; otherwise the old reading stands and
