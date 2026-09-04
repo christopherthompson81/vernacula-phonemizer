@@ -206,3 +206,70 @@ so is the ledger (221 / 208 / 47), because `h` and `s` are vowel-free.
 guard and was still dropping `/yr`. Mirrored; byte-identical again. Two of this issue's three near-misses were
 found by parity rather than by a test, which is an argument for running it on every change that touches the
 shared tier and not only when a golden moves.
+
+## Run 8 — 2026-09-04 15:10 — review, and the defect that survived the fix
+
+**1. The denominator's own EXPONENT was not covered, so the whole defect survived in `m/s²` and `kg/m³`.**
+The stranded group had no `(²|³)?` of its own — unlike the declared-rate branch, which has always taken one —
+and the trailing lookahead refuses a following superscript, so on `9.8 m/s²` the group matched `/s`, the
+lookahead rejected the `²`, the engine backtracked the group to empty and stranded `/s²` exactly as before.
+All three classes, intact, in a shape the mined corpora actually carry (`kg/m³`, `g/cm³`, `g/m²`, `l/m²`):
+
+```
+ja  9.8 m/s²    …me̞ːto̞ɾɯᵝ ˈɛs no̞ nid͡ʑo̞ː     et  9.8 m/s²  …mˈeːtrit s      haw  …mika k
+ja  9.8 m/s2    …me̞ːto̞ɾɯᵝ ˈɛs ni            ⟵ the ASCII 2 read as a NUMBER
+```
+
+The last line is this file's own "≫ INVENTED NUMBER", the outcome its ordering ranks last. Both spellings
+are now taken. The three shapes the test probes are all exponent-free, so nothing would have caught it.
+
+**2. And `1000 kg/m³` needed the OTHER path.** Where the denominator IS a declared unit but the language has
+no `unitPer`, the regex's stranded group never sees it and the #1249 fall-through re-emits the tail — am read
+*…kiloɡɨɾam ˈɛm kjˈuːbd*. The same vowel-free ASCII test now governs both, spelled once as `STRANDED_SYMBOL`
+so the regex and the callback cannot drift apart. A Cyrillic `⟨/км²⟩` is re-emitted as before, verified.
+
+**3. ⚠ THE INSTRUMENT COULD NOT SEE THE CLASS ITS OWN HEADER CALLS THE WORST.** `classify` scored "spoken"
+by listing the ways a symbol can surface — the raw letter, its uppercase, English's reading — and anything
+else counted as success. But the fourth class *is* anything else: the host's g2p reading the letter as a
+native phone. It now asks the ENGINE what it says for the bare symbol, which covers all four routes at once
+because in every one of them the engine is simply phonemizing the symbol. That surfaced **seven more**
+pairs — da `/h` → *ˈhɔːˀ*, nb → *ˈhoː*, mt → *ħ*, za `/s` → *θ*, smj ×3 — every one verified pre-existing by
+running the widened classifier on both sides of the change. `ACCEPTED_SPOKEN` was a lower bound, not a census.
+
+⚠ That is the third time in three issues that an instrument shared the blind spot of the defect it was
+written to catch (#1250's `GENAM_VOWEL` twice, now this). The pattern is always the same: the instrument
+enumerates the failure modes already known instead of asking the engine.
+
+**4. The accepted cost of the vowel test is now pinned.** `min`, `sec` and `yr` keep being spoken — et
+`160 km/min` → *…mˈin*, ja → *mˈɪn*, et `160 cm/yr` → *…ˈir* — and `csharp/goldens/ilo.tsv` records one of
+them (`3 cm/yr` → *…sɛntimˈɛtɾo jɾ*). Pinned rather than left to a comment, because "documented in a comment"
+is exactly how the leak-gate premise this issue retired survived three rounds.
+
+**5. Not fixed, reported:** `csharp/goldens/km.tsv` is stale against the current engine on one row, including
+Khmer word-segmentation differences this change cannot touch (`/s` strands identically on both sides). Its
+parity gate is presumably already red. Pre-existing drift, outside this issue.
+
+## Run 9 — 2026-09-04 15:40 — full-fleet parity found a golden #1249 left stale
+
+Running `csharp/tools/parity` over all 189 languages rather than the two this change touches:
+
+```
+188 languages byte-identical, 1 differ (36,494 rows ok, 1 differ)
+  ab  DIFF 1/200
+```
+
+```
+ab  0,6км/км²   golden  … anolʲ fba kʼm kʼm …            the state before #1249
+                engine  … anolʲ fba kʼilometʼra kʼm …    the state since #1249
+```
+
+⚠ **THAT ROW HAS BEEN RED SINCE #1249 MERGED.** That change made the arm read the numerator of an unreadable
+rate and its abkhaz effect was pinned in `test/abkhaz.test.ts` — but the parity golden was never re-rendered,
+because parity was only run for the two languages that PR's own probes touched. Nothing else looks at a
+golden's IPA column, so it sat there. Re-rendered; byte-identical again.
+
+The lesson is the one Run 7 already drew and this makes concrete: **run full-fleet parity on any change to
+the shared tier**, not just on the languages the change was reasoned about. Four separate problems in this
+issue were found by parity rather than by a test — the sync re-render that would have rewritten 74 goldens,
+the truncation filter that hid `ilo`, the C# guard left un-mirrored, and now a stale golden from a previous
+merge. No test in either suite asserts a golden's IPA column, so parity is the only gate that reads it.

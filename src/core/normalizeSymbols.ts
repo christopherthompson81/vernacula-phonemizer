@@ -912,7 +912,14 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // Either decimal separator, because a designation is not localised but the text around it is (`802,11` in
     // mr and hr). Add a designation here only with the same measurement — the whole point is that this list is
     // evidence, not intuition.
-    const DESIGNATIONS = ["802[.,]11"];
+    /**
+ * The tail the rate arm may DROP rather than re-emit — the same shape the unit pattern's own stranded group
+ * consumes, spelled once so the regex and the callback cannot drift apart (#1255). Vowel-free so it is a
+ * SYMBOL and not a word (`isBareUnitKey`'s discriminator), ASCII so a denominator in the host's own script is
+ * never touched, at most three letters and one power.
+ */
+const STRANDED_SYMBOL = /^\s?\/\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?:\u00b2|\u00b3|[23])?$/u;
+const DESIGNATIONS = ["802[.,]11"];
     const NOT_VERSION = `(?<![\\d.,])(?!(?:${DESIGNATIONS.join("|")})[a-zA-Z](?![a-zA-Z\\d]))`;
     const unitRe = d.units
         ? new RegExp(
@@ -1005,6 +1012,16 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               //     de `160 km/Std`  was *ʃtt*   ·  es `160 km/hr` was *r*   ·  fr `km/hr` was *ʁ*
               // The cost is that `min`, `sec` and `yr` are no longer dropped; they keep today's behaviour,
               // which is the safe side of a one-sided error.
+              // ⚠ AND THE DENOMINATOR'S OWN EXPONENT GOES WITH IT, which the declared-rate branch has always
+              // taken and this group at first did not. Without it `9.8 m/s²` and `1000 kg/m³` — both attested
+              // in the mined corpora, alongside `g/cm³`, `g/m²`, `l/m²` — kept the whole defect: the group
+              // matched `/s`, the trailing lookahead then refused the `²`, the engine backtracked the group
+              // to empty and stranded `/s²` exactly as before. ja read *…me̞ːto̞ɾɯᵝ ˈɛs no̞ nid͡ʑo̞ː*, et
+              // *…mˈeːtrit s*, haw *…mika k* — all three classes, intact, in the shape the change was for.
+              // ⚠ THE ASCII SPELLING TOO, and it is the worse half: `9.8 m/s2` had ja reading the `2` as a
+              // NUMBER — *…ˈɛs ni* — which is this file's own "≫ INVENTED NUMBER", the outcome its ordering
+              // ranks last. A following DIGIT still stops the group (`/s23` is untouched), so this admits
+              // exactly the one-character power the exponent branch itself admits.
               // ⚠ BOUNDED AT THREE and ASCII-ONLY so a denominator in the host's own script is untouched —
               // `12.8 km/秒` is a word the engine reads, and the Cyrillic `⟨/с⟩` residual stays exactly where
               // #1098 left it. A DIGIT after the slash is likewise not this: `120mg/100ml` is a ratio of two
@@ -1025,7 +1042,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               // routes to the English foreign reader and `20 km` read *nid͡ʑɯᵝː kʰˈeᶦəm* — "twenty kay-em"
               // inside Japanese, which is a confident error, not a gap. The designation class is reported
               // rather than folded in here.
-              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?:\\s?/\\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?![\\p{L}\\p{M}\\p{Nd}]))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])`,
+              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?:\\s?/\\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?:²|³|[23])?(?![\\p{L}\\p{M}\\p{Nd}]))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])`,
               "giu",
           )
         : null;
@@ -1296,16 +1313,24 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                         // et writes the inessive (*kilomeetrit tunnis*) and declares none, so `5 kg/m` read
                         // *vˈiːs kɡ m* while `5 kg/s`, whose `s` is not a unit key at all, read the kilogram.
                         // 57 of the 86 residual declines fleet-wide were this one branch.
-                        // ⚠ THE TAIL IS RE-EMITTED VERBATIM, SPACE INCLUDED. `\s?` sits on both sides of the
-                        // slash in the pattern, so cutting at the slash itself swallowed the one before it
-                        // and `5 kg / m` came back as `5 kilogram/ m`. A rule that CONSUMES text puts it back.
+                        // ⚠ THE TAIL IS RE-EMITTED VERBATIM, SPACE INCLUDED — `\s?` sits on both sides of the
+                        // slash in the pattern, so cutting at the slash itself swallowed the one before it and
+                        // `5 kg / m` came back as `5 kilogram/ m`. A rule that CONSUMES text puts it back.
+                        // ⚠ EXCEPT WHEN THE TAIL IS THE VOWEL-FREE ASCII SYMBOL THE REGEX ABOVE WOULD HAVE
+                        // DROPPED (#1255). This branch is reached when the denominator IS a declared unit but
+                        // the language has no `unitPer`, so the regex's own stranded-group never sees it — and
+                        // `1000 kg/m³` then read *…kiloɡɨɾam ˈɛm kjˈuːbd* in am, the English letter name plus
+                        // "cubed", which is the very defect one line up is written to remove. Same test, so
+                        // the two paths cannot disagree: vowel-free, ASCII, at most three letters and one
+                        // power. A Cyrillic `⟨/км²⟩` or anything with a vowel is re-emitted as before.
                         if (per === undefined || dWord === undefined) {
                             const slash = whole.indexOf("/");
                             if (slash < 0) return whole;
                             const cut = whole.slice(0, slash).replace(/\s$/u, "").length;
                             const headOnly = numExp === undefined ? head : withPower(head, numExp);
                             const said = d.unitPrefix ? `${headOnly} ${q}` : `${q} ${headOnly}`;
-                            return `${said}${whole.slice(cut)}`;
+                            const tail = whole.slice(cut);
+                            return STRANDED_SYMBOL.test(tail) ? said : `${said}${tail}`;
                         }
                         let dPhrase = typeof dWord === "string" ? dWord : dWord[0]!;
                         if (denomExp !== undefined) dPhrase = withPower(dPhrase, denomExp);

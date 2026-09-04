@@ -64,7 +64,18 @@ const classify = (code: string, unit: string, denom: string): "unread-unit" | "r
     if (pt.includes(unit) || pt.some((t) => t === en(unit))) return "unread-unit"; // a different gap entirely
     const extra = tokens(rate).filter((t) => !pt.includes(t));
     if (extra.length === 0) return "silent";
-    return extra.some((t) => t === denom || t === denom.toUpperCase() || t === en(denom)) ? "spoken" : "read";
+    // ⚠ "SPOKEN" IS ASKED BY PHONEMIZING THE SYMBOL, not by listing the ways it can come out. An earlier
+    // draft compared the extra tokens against the raw letter and against ENGLISH's reading of it, and so
+    // could not see the class this file's own header calls the worst of the four: the HOST's g2p reading the
+    // letter as a native phone. haw `/s` → *k*, ltg `/h` → *x*, cdo → a toned *h˥˥*, el → *eits*, ilo `/yr`
+    // → *jɾ* — none of those equal `s`, `h` or `ˈɛs`, so every one scored as "read", i.e. success. The
+    // instrument shared the blind spot of the defect, which is the same failure #1250's review found twice.
+    // Asking the engine what it says for the bare symbol covers all four routes at once, because in every
+    // one of them the engine is simply phonemizing the symbol.
+    const asSymbol = tokens(say(denom, code) ?? "");
+    const spoken = extra.some((t) => t === denom || t === denom.toUpperCase() || t === en(denom))
+        || (asSymbol.length > 0 && asSymbol.every((t) => extra.includes(t)));
+    return spoken ? "spoken" : "read";
 };
 
 /**
@@ -81,7 +92,12 @@ const ACCEPTED_SPOKEN = new Set(
     ("ko kg/h|kl kg/h|ro kg/h|mr km/h|mr kg/h|sd kg/h|ak km/h|ak m/s|ak kg/h|ps km/h|ps kg/h|pbt km/h|" +
         "pbt kg/h|bg kg/h|is kg/h|haw kg/h|bo m/s|nci m/s|naq kg/h|ee km/h|ee m/s|bar kg/h|hmn km/h|" +
         "bal km/h|bal m/s|mn km/h|mn kg/h|yo m/s|my m/s|nya m/s|ln km/h|ln kg/h|bm km/h|mos km/h|ki km/h|" +
-        "ki m/s|ki kg/h|ka km/h|ka kg/h|lt km/h|lt m/s|lt kg/h|lg km/h|lg m/s|lg kg/h|ug km/h|ug kg/h"
+        "ki m/s|ki kg/h|ka km/h|ka kg/h|lt km/h|lt m/s|lt kg/h|lg km/h|lg m/s|lg kg/h|ug km/h|ug kg/h|" +
+        // ⚠ THESE SEVEN WERE INVISIBLE TO THE FIRST INSTRUMENT and are what widening it found: the host's own
+        // g2p reading the letter as a native phone. da `/h` → *ˈhɔːˀ*, nb → *ˈhoː*, mt → *ħ*, za `/s` → *θ*,
+        // smj spells the whole rate. Verified pre-existing by running the widened classifier on both sides of
+        // this change — identical output — so they are a blind spot being opened, not a regression.
+        "da kg/h|mt kg/h|smj km/h|smj m/s|smj kg/h|za m/s|nb kg/h"
     ).split("|"),
 );
 
@@ -126,6 +142,21 @@ describe("a rate denominator with no word is silent, not spoken (#1255)", () => 
         }
         expect(silent.length, `declare a denominator noun for these:\n${silent.join(" · ")}`)
             .toBeLessThanOrEqual(SILENT_BUDGET);
+    });
+
+    test("⚠ THE ACCEPTED COST — a denominator WITH a vowel keeps today's behaviour, right or wrong", () => {
+        // The vowel test buys back nl `km/uur`, sw `km/saa` and cs `km/hod` (pinned below), and it costs the
+        // vowel-BEARING abbreviations `min`, `sec` and `yr`, which are still spoken. Pinned rather than left
+        // implicit, because "documented in a comment" is how the leak-gate premise this whole issue retired
+        // survived for three rounds. These are the WRONG readings the change deliberately does not reach.
+        expect(phonemize("160 km/min", "et").trim()).toBe("sˈɑdɑ kˈuːskymːend kˈilomeːtrit mˈin");
+        expect(phonemize("160 km/sec", "et").trim()).toBe("sˈɑdɑ kˈuːskymːend kˈilomeːtrit sˈek");
+        expect(phonemize("160 cm/yr", "et").trim()).toBe("sˈɑdɑ kˈuːskymːend sˈentimeːtrit ˈir");
+        expect(phonemize("160 km/min", "ja").trim()).toBe("çäkɯᵝɾo̞kɯᵝd͡ʑɯᵝː kiɾo̞me̞ꜜːto̞ɾɯᵝ mˈɪn");
+        // ⚠ AND ONE OF THEM IS IN A GOLDEN: csharp/goldens/ilo.tsv carries `3 cm/yr` → *…sɛntimˈɛtɾo jɾ*,
+        // where `jɾ` is Ilocano's g2p reading ⟨yr⟩. The golden records what the engine says, so it records
+        // this too; the row is not an endorsement and it moves the day `yr` is handled.
+        expect(phonemize("3 cm/yr", "ilo").trim()).toBe("tˈallo sɛntimˈɛtɾo jɾ");
     });
 
     test("the reported shapes, and the counter-examples that must not move", () => {
