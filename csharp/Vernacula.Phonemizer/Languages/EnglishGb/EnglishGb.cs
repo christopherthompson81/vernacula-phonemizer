@@ -37,7 +37,10 @@ public static class EnglishGb
      *  117,479-word dict: `ᵻ` (×828) is the only vowel that can follow an `ɹ` here and was absent, and `ɐ`/`o`
      *  stay though unreachable — the class is a NEGATIVE lookahead, so a missing vowel deletes a consonant
      *  while a dead one costs nothing. See the TS for the audit. */
-    private const string VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻ";
+    // ⚠ `ᶦ`/`ᶷ` JOINED THIS CLASS WITH #1252. The #1250 audit's "the only vowel that could follow an ɹ here"
+    // held only because the generic offglide map rewrote them to full ɪ/ʊ before this class was consulted;
+    // #1252 deleted that map. A no-op today (`ɹᶦ` cannot occur), added because the error here is one-sided.
+    private const string VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻᶦᶷ";
     /** The same vowels ONE STEP EARLIER, for the two LINKING rules — one step earlier `ɚ`/`ɝ` are still in
      *  the string, because those two rules are what consume them, and they are VOWELS: an `ɚ` before another
      *  one is pre-vocalic (#1250, review). Looking ahead for VOWEL alone deleted the onset /ɹ/ of `ɚɚ` —
@@ -89,10 +92,11 @@ public static class EnglishGb
     /** The OFFGLIDE TRIPHTHONGS. ⚠ WITHOUT THESE #1252 WOULD HAVE DELETED A SCHWA IN 238 WORDS: the generic
      *  offglide map used to rewrite `ᶦ`/`ᶷ` to full `ɪ`/`ʊ` first, so NEAR and CURE fired on the result and
      *  turned offglide + coda /ɹ/ into RP's triphthong (`ˈæbʃaᶦɹ` → `ˈæbʃaɪə`). Keeping the superscript stops
-     *  them matching and the coda-/ɹ/ drop takes the `ɹ` instead. Same CODA guard, so a LINKING /ɹ/ survives
+     *  them matching and the coda-/ɹ/ drop takes the `ɹ` instead. Named for the GLIDE, not one lexical set:
+     *  the patterns are bare, so `ᶦ` covers FACE as well as PRICE/CHOICE. Same CODA guard, so a LINKING /ɹ/ survives
      *  (`əkwˈaᶦɹɪŋ`). See the TS. */
-    private static readonly JsRe PRICE_R = JsRegex.Compile($"ᶦɹ{CODA}", "gu");
-    private static readonly JsRe MOUTH_R = JsRegex.Compile($"ᶷɹ{CODA}", "gu");
+    private static readonly JsRe IGLIDE_R = JsRegex.Compile($"ᶦɹ{CODA}", "gu");
+    private static readonly JsRe UGLIDE_R = JsRegex.Compile($"ᶷɹ{CODA}", "gu");
     private static readonly JsRe NEAR = JsRegex.Compile($"ɪɹ{CODA}", "gu");
     private static readonly JsRe SQUARE = JsRegex.Compile($"ɛɹ{CODA}", "gu");
     private static readonly JsRe CURE = JsRegex.Compile($"ʊɹ{CODA}", "gu");
@@ -126,8 +130,8 @@ public static class EnglishGb
             if (lex.Lotr.Contains(w)) s = LOTR_FIRST.Replace(s, "ɒɹ");
         }
         // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
-        s = PRICE_R.Replace(s, "ᶦə");   // PRICE/CHOICE + coda r (fire, choir)
-        s = MOUTH_R.Replace(s, "ᶷə");   // MOUTH/GOAT + coda r (hour, power)
+        s = IGLIDE_R.Replace(s, "ᶦə");  // any ᶦ-glide + coda r: FACE, PRICE, CHOICE (ayr, fire, choir)
+        s = UGLIDE_R.Replace(s, "ᶷə");  // any ᶷ-glide + coda r: MOUTH, GOAT (hour, power, lower)
         s = NEAR.Replace(s, "ɪə");
         s = SQUARE.Replace(s, "ɛə");
         s = CURE.Replace(s, "ʊə");

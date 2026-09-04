@@ -194,3 +194,40 @@ It is the right spelling, and the boundary is exactly where they put it:
 ⚠ Point 2 answers whether the SEQUENCE is well-formed for this engine. It does not answer whether a given
 downstream MODEL has seen the pair — that is a fact about that model's corpus and stays the reporter's to
 measure, exactly as their caveat says.
+
+## Run 8 — 2026-09-04 10:05 — review pass
+
+Four findings, all real, all fixed. The first is the interesting one because it is this branch quietly
+invalidating an audit from two issues ago.
+
+**1. `VOWEL` stopped covering the alphabet it claims to.** Its docblock says it is "the POST-transform
+alphabet … what those rules LEAVE", and the #1250 audit concluded `ᵻ` was "the ONLY vowel that can follow an
+`ɹ` here and is missing". Both were true *only because the generic offglide map rewrote `ᶦ`/`ᶷ` to full
+`ɪ`/`ʊ` before the class was ever consulted*. This change deletes that map, so the two offglides now survive
+into the post-transform string and are absent from the class.
+
+Not a live bug — the parent never emits a glide without its nucleus in front of it, so `ɹᶦ` cannot occur —
+but the file's own stated policy is a generous superset *because the error here is one-sided*, which is why
+`ɐ` and `o` are kept though provably unreachable. Added `ᶦᶷ`, and verified the widening is a no-op:
+
+```
+dict en-GB rows changed: 0 / 117,479      referee-list rows changed: 0 / 76,284      pcm: 0
+```
+
+⚠ The same omission was in `test/onset-r.test.ts`'s `GENAM_VOWEL`, so the instrument could not have caught it
+either — the identical shape as the `ɚ`-before-`ɚ` miss that the #1250 review found in that same constant.
+Twice now, so the class is spelled out in full rather than trimmed to what looks reachable.
+
+**2. The TS docblock still named a rule this change deletes** — "GOAT/**offglide**/NURSE/lettER remaps". The
+C# twin was updated in the same diff and the TS original was missed, so the two ports' comments disagreed
+about the same code.
+
+**3. `test/referee-eval.test.ts`'s en-GB floor comment was stale**, and this one mattered: it is the file's
+record of *why* the 0.38 floor holds, and it still listed the four-fold set that — per Run 5 — scores
+26.8%/76.2% and would blow straight through that floor. `docs/language-maturity.md` had been updated and this
+had not, so the two records contradicted each other. Now names all five folds and states that they are
+load-bearing, with the measured no-fold number.
+
+**4. `PRICE_R` was named for one lexical set but matches bare `ᶦɹ`**, so it also fires on FACE — `ˈeᶦɹ` (ayr)
+→ `ˈeᶦə`, `æɫvˈeᶦɹ` (alvare). Renamed `IGLIDE_R`/`UGLIDE_R` and the comments name every set that ends in the
+glide, because a name saying PRICE sends the next reader looking for a FACE rule that does not exist.

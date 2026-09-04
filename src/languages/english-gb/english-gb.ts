@@ -20,7 +20,7 @@ import { loadTsvMap } from "../../core/loadTsv.ts";
 
 /**
  * THE VOWELS THIS FILE'S "not before a vowel = coda" GUARD HAS TO KNOW ABOUT — and it is the POST-transform
- * alphabet, not GenAm's. All three uses sit after the GOAT/offglide/NURSE/lettER remaps above, so the class
+ * alphabet, not GenAm's. All three uses sit after the GOAT/NURSE/lettER remaps above, so the class
  * covers what those rules LEAVE, which is why `ɜ` and `ɒ` (SSBE-only) are in it.
  *
  * ⚠ `ᵻ` WAS MISSING AND THAT DELETED ONSET /ɹ/ (#1250). The reduced vowel the parent emits for unstressed
@@ -29,9 +29,16 @@ import { loadTsvMap } from "../../core/loadTsv.ts";
  * "'eports", and 13 of 13 GenAm `ɹᵻ` words with it. Non-rhotic English drops CODA /r/ and never onset /r/,
  * so nothing about the accent licensed it. It is not only word-initial: `alacrity` lost the /ɹ/ of `kɹ`.
  *
- * ⚠ AUDITED RATHER THAN PATCHED, over all 117,479 dict words: `ᵻ` (×828) is the ONLY vowel that can follow
- * an `ɹ` at this point and is missing here. Every other character that can is a consonant or the word end —
- * a genuine coda — so this was one gap and not the symptom of a drifted inventory.
+ * ⚠ AUDITED RATHER THAN PATCHED, over all 117,479 dict words: `ᵻ` (×828) was the ONLY vowel that could
+ * follow an `ɹ` at this point and was missing here. Every other character that can is a consonant or the word
+ * end — a genuine coda — so that was one gap and not the symptom of a drifted inventory.
+ * ⚠ AND `ᶦ`/`ᶷ` JOINED THE CLASS WITH #1252, which is the audit being kept honest rather than a second gap.
+ * That audit's answer was true only because the generic offglide map rewrote them to full `ɪ`/`ʊ` BEFORE this
+ * class was ever consulted; #1252 deleted that map, so they now survive into the post-transform string and
+ * the class would no longer be the superset it says it is. Nothing changes today — the parent never emits an
+ * offglide without its nucleus in front of it, so `ɹᶦ` cannot occur, and the dict and the referee word list
+ * are both byte-identical with and without them — but the one-sided-error argument above is exactly why they
+ * go in anyway.
  * ⚠ AND "AT THIS POINT" IS DOING WORK IN THAT SENTENCE. The parent writes `ɹɚ` 115 times and `ɹɝ` 8 times,
  * and neither is in this class; they are safe because the two linking rules above CONSUME the r-coloured
  * vowel before the coda guard runs, not because the class covers them. The completeness claim holds given
@@ -44,7 +51,7 @@ import { loadTsvMap } from "../../core/loadTsv.ts";
  * test/onset-r.test.ts re-runs the audit against the engine's own output so the gap cannot
  * reopen; trimming the class to today's inventory would buy nothing and spend that asymmetry.
  */
-const VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻ";
+const VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻᶦᶷ";
 /**
  * THE SAME VOWELS ONE STEP EARLIER, for the two LINKING rules — and one step earlier `ɚ` and `ɝ` are still
  * in the string, because those two rules are what consume them.
@@ -88,9 +95,12 @@ const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
  * `ᶷɹ` ×94. The `ɚ` twins (`ᶦɚ` ×550, `ᶷɚ` ×285) need nothing, since `ɚ` becomes `ə` on its own.
  * ⚠ UNDER THE SAME `CODA` GUARD as the others, so a LINKING /ɹ/ still survives: `əkwˈaᶦɹɪŋ` (acquiring) has
  * the `ɹ` before a vowel and keeps it.
+ * ⚠ NAMED FOR THE GLIDE, NOT FOR ONE LEXICAL SET, because the patterns are bare `ᶦɹ`/`ᶷɹ` and each covers
+ * every set that ends in that glide: `ᶦ` is FACE as well as PRICE and CHOICE (`ˈeᶦɹ` → `ˈeᶦə`, ayr), `ᶷ` is
+ * GOAT as well as MOUTH. A name that said PRICE would send the next reader looking for a FACE rule.
  */
-const PRICE_R = new RegExp(`ᶦɹ${CODA}`, "gu");
-const MOUTH_R = new RegExp(`ᶷɹ${CODA}`, "gu");
+const IGLIDE_R = new RegExp(`ᶦɹ${CODA}`, "gu");
+const UGLIDE_R = new RegExp(`ᶷɹ${CODA}`, "gu");
 const NEAR = new RegExp(`ɪɹ${CODA}`, "gu");
 const SQUARE = new RegExp(`ɛɹ${CODA}`, "gu");
 const CURE = new RegExp(`ʊɹ${CODA}`, "gu");
@@ -175,8 +185,8 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s
-        .replace(PRICE_R, "ᶦə") // PRICE/CHOICE + coda r — the triphthong (fire, choir)
-        .replace(MOUTH_R, "ᶷə") // MOUTH/GOAT + coda r — likewise (hour, power)
+        .replace(IGLIDE_R, "ᶦə") // any ᶦ-glide + coda r: FACE, PRICE and CHOICE (ayr, fire, choir)
+        .replace(UGLIDE_R, "ᶷə") // any ᶷ-glide + coda r: MOUTH and GOAT (hour, power, lower)
         .replace(NEAR, "ɪə") // NEAR
         .replace(SQUARE, "ɛə") // SQUARE
         .replace(CURE, "ʊə") // CURE
