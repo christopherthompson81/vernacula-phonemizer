@@ -32,12 +32,15 @@ public sealed class LexSets
 public static class EnglishGb
 {
     /** The vowels the "not before a vowel = coda" guard must know about — the POST-transform alphabet, since
-     *  all three uses sit after the GOAT/offglide/NURSE/lettER remaps (hence SSBE-only `ɜ`, `ɒ`).
+     *  all three uses sit after the GOAT/NURSE/lettER remaps (hence SSBE-only `ɜ`, `ɒ`).
      *  ⚠ `ᵻ` WAS MISSING AND THAT DELETED ONSET /ɹ/ (#1250) — `reports` read *ᵻpʰˈɔːts*. Audited over the
      *  117,479-word dict: `ᵻ` (×828) is the only vowel that can follow an `ɹ` here and was absent, and `ɐ`/`o`
      *  stay though unreachable — the class is a NEGATIVE lookahead, so a missing vowel deletes a consonant
      *  while a dead one costs nothing. See the TS for the audit. */
-    private const string VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻ";
+    // ⚠ `ᶦ`/`ᶷ` JOINED THIS CLASS WITH #1252. The #1250 audit's "the only vowel that could follow an ɹ here"
+    // held only because the generic offglide map rewrote them to full ɪ/ʊ before this class was consulted;
+    // #1252 deleted that map. A no-op today (`ɹᶦ` cannot occur), added because the error here is one-sided.
+    private const string VOWEL = "iɪeɛæəɜɐɑɒɔʌʊuoaᵻᶦᶷ";
     /** The same vowels ONE STEP EARLIER, for the two LINKING rules — one step earlier `ɚ`/`ɝ` are still in
      *  the string, because those two rules are what consume them, and they are VOWELS: an `ɚ` before another
      *  one is pre-vocalic (#1250, review). Looking ahead for VOWEL alone deleted the onset /ɹ/ of `ɚɚ` —
@@ -65,9 +68,16 @@ public static class EnglishGb
 
     private static readonly JsRe FLAP_T = JsRegex.Compile("t̬", "gu");
     private static readonly JsRe FLAP_D = JsRegex.Compile("d̬", "gu");
+    /** GOAT — RP's central onset, the parent's offglide. ⚠ THE CLOSING DIPHTHONGS KEEP THE SUPERSCRIPT
+     *  (#1252): `əʊ eɪ aɪ aʊ ɔɪ` are correct IPA for RP, so this is a CONSISTENCY decision between two
+     *  variants of one engine — `en` has written `oᶷ eᶦ aᶦ aᶷ ɔᶦ` for a long time and `en-GB` did not follow
+     *  it — and a superscript offglide is ONE unit where two full vowels are two symbols. Measured over the
+     *  first 60 golden rows of every ported language, the superscript spellings are where the English family
+     *  already lives (`eᶦ` 28 languages, `aᶦ` 27) and the plain ones are mostly Burmese/German/Devanagari
+     *  (`eɪ` 2, `aɪ` 13). `eᶦ aᶦ aᶷ ɔᶦ` are now byte-identical to the parent's; only the GOAT ONSET differs,
+     *  deliberately — that is REALISATION (RP central vs GenAm back rounded), not notation. `əᶷ` is not novel
+     *  to this fleet: Welsh already writes it (`dəᶷˈɛdɔð`). See the TS. */
     private static readonly JsRe GOAT = JsRegex.Compile("oᶷ", "gu");
-    private static readonly JsRe OFFGLIDE_I = JsRegex.Compile("ᶦ", "gu");
-    private static readonly JsRe OFFGLIDE_U = JsRegex.Compile("ᶷ", "gu");
     private static readonly JsRe PALATAL = JsRegex.Compile("ʲ", "gu");
     private static readonly JsRe NURSE_PREVOCALIC = JsRegex.Compile($"ɝ(?=[ˈˌ]*[{PRE_VOWEL}])", "gu");
     private static readonly JsRe NURSE = JsRegex.Compile("ɝ", "gu");
@@ -79,6 +89,14 @@ public static class EnglishGb
     private static readonly JsRe CLOTH_FIRST = JsRegex.Compile("ɔː", "u");
     private static readonly JsRe YOD_FIRST = JsRegex.Compile("([tdnszθl])(ʰ?)([ˈˌ]?)uː", "u");
     private static readonly JsRe LOTR_FIRST = JsRegex.Compile("ɑːɹ", "u");
+    /** The OFFGLIDE TRIPHTHONGS. ⚠ WITHOUT THESE #1252 WOULD HAVE DELETED A SCHWA IN 238 WORDS: the generic
+     *  offglide map used to rewrite `ᶦ`/`ᶷ` to full `ɪ`/`ʊ` first, so NEAR and CURE fired on the result and
+     *  turned offglide + coda /ɹ/ into RP's triphthong (`ˈæbʃaᶦɹ` → `ˈæbʃaɪə`). Keeping the superscript stops
+     *  them matching and the coda-/ɹ/ drop takes the `ɹ` instead. Named for the GLIDE, not one lexical set:
+     *  the patterns are bare, so `ᶦ` covers FACE as well as PRICE/CHOICE. Same CODA guard, so a LINKING /ɹ/ survives
+     *  (`əkwˈaᶦɹɪŋ`). See the TS. */
+    private static readonly JsRe IGLIDE_R = JsRegex.Compile($"ᶦɹ{CODA}", "gu");
+    private static readonly JsRe UGLIDE_R = JsRegex.Compile($"ᶷɹ{CODA}", "gu");
     private static readonly JsRe NEAR = JsRegex.Compile($"ɪɹ{CODA}", "gu");
     private static readonly JsRe SQUARE = JsRegex.Compile($"ɛɹ{CODA}", "gu");
     private static readonly JsRe CURE = JsRegex.Compile($"ʊɹ{CODA}", "gu");
@@ -91,8 +109,7 @@ public static class EnglishGb
     {
         var w = Js.ToLowerCase(word);
         var s = FLAP_D.Replace(FLAP_T.Replace(genAm, "t"), "d"); // un-flap the tapped coronal
-        s = GOAT.Replace(s, "əʊ");                               // GOAT, before the generic offglide map
-        s = OFFGLIDE_U.Replace(OFFGLIDE_I.Replace(s, "ɪ"), "ʊ"); // FACE/PRICE/MOUTH/CHOICE offglides
+        s = GOAT.Replace(s, "əᶷ");
         s = PALATAL.Replace(s, "");                              // drop the palatal on-glide (idea)
         // NURSE ɝ / lettER ɚ: before a vowel keep a LINKING /ɹ/; in coda non-rhotic.
         s = NURSE.Replace(NURSE_PREVOCALIC.Replace(s, "ɜːɹ"), "ɜː");
@@ -113,6 +130,8 @@ public static class EnglishGb
             if (lex.Lotr.Contains(w)) s = LOTR_FIRST.Replace(s, "ɒɹ");
         }
         // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
+        s = IGLIDE_R.Replace(s, "ᶦə");  // any ᶦ-glide + coda r: FACE, PRICE, CHOICE (ayr, fire, choir)
+        s = UGLIDE_R.Replace(s, "ᶷə");  // any ᶷ-glide + coda r: MOUTH, GOAT (hour, power, lower)
         s = NEAR.Replace(s, "ɪə");
         s = SQUARE.Replace(s, "ɛə");
         s = CURE.Replace(s, "ʊə");

@@ -36,8 +36,12 @@ const WORDS = readFileSync("data/languages/english/g2p-dict.tsv", "utf8")
  * being an INSTRUMENT rather than a restatement: they are vowels, an `ɚ` before another `ɚ` is a /r/ before a
  * vowel, and leaving them out gave this file the same blind spot as the bug it was written to catch. 96 dict
  * words (`caterer` `kʰˈeᶦt̬ɚɚ`, `adventurer`, `acquirer`) sat inside it, reported clean.
+ * ⚠ AND SO ARE THE OFFGLIDES `ᶦ`/`ᶷ`, for the same reason and by the same lesson. An `ɹ` before one cannot
+ * occur today (the parent never emits a glide without its nucleus in front of it), which is exactly what was
+ * said about `ɚ` before another `ɚ` until it was measured. Since #1252 en-GB carries them into its output, so
+ * the instrument spells the whole parent alphabet rather than the part that seemed reachable.
  */
-const GENAM_VOWEL = "iɪeɛæəɐɑɔʌʊuoaᵻɚɝ";
+const GENAM_VOWEL = "iɪeɛæəɐɑɔʌʊuoaᵻɚɝᶦᶷ";
 /** `ɹ` before a (possibly stress-marked) vowel, and the r-coloured vowels, which are a /r/ before one. */
 const ONSET_R = new RegExp(`(?:ɹ(?=[ˈˌ]*[${GENAM_VOWEL}])|[ɚɝ](?=[ˈˌ]*[${GENAM_VOWEL}]))`, "gu");
 
