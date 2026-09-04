@@ -369,7 +369,10 @@ const SYMBOLS = makeSymbolNormalizer({
         kg: ["kilogramo"], mg: ["miligramo"], nm: ["nanometro"], lb: ["libra"], lbs: ["libra"],
         l: ["litro"], L: ["litro"], ha: ["ektarya"],
         katao: ["katao"], naninirahan: ["naninirahan"] },
-    rateDenominators: { s: "segundo" },
+    // ⟨oras⟩ is the hour (#1257): `mga ilang oras bago`, `ang yunit ng oras`, ×16 in the mined artifact. With only
+    // `s` declared, `160 km/h` read *kilomˈetɾo* and stopped, while `km/oras` read through. Same noun ilo, hil and
+    // ceb declare, and the same `bawat` below composes it.
+    rateDenominators: { s: "segundo", h: "oras" },
     // ⟨km²⟩ — the artifact's single largest dropped class (×22 of the 35 superscripts: katao/km², 56,594 km²).
     // The word is POSTPOSED: tl.wikipedia "kilometro kuwadrado" 1,605 against "kwadrado" 54 (spelling) and 0
     // for the preposed orders. ⟨kubiko⟩ ("metro kubiko" ×19) rides the same evidence, thinner but the same

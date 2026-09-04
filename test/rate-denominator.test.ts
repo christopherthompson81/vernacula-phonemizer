@@ -111,7 +111,11 @@ const ACCEPTED_SPOKEN = new Set(
  * are a to-do list, and every `rateDenominators`/`unitPer` declaration that lands shrinks it. The failure
  * message prints the whole list, so anyone who moves the number sees exactly which languages moved.
  */
-const SILENT_BUDGET = 208;
+// 208 at #1255; 199 after #1257 declared the nine pairs the repo already had the noun for (tg h/s, jv h, mad s,
+// tl h, an s, haw s). ⚠ TWO OF THE REMAINING ENTRIES ARE DECISIONS, NOT GAPS: ff `m/s` and kmr `m/s` are silent
+// because their files say so (the class-agreeing "one" for Fula's second is unsourced; no Kurmanji per-second
+// reading is attested). They stay in the count rather than in a list, because the count is what shrinks.
+const SILENT_BUDGET = 199;
 
 describe("a rate denominator with no word is silent, not spoken (#1255)", () => {
     test("no engine speaks the denominator SYMBOL — as raw Latin, or as an English letter name", () => {
@@ -181,5 +185,22 @@ describe("a rate denominator with no word is silent, not spoken (#1255)", () => 
         // the guard is 1–3 ASCII letters, so `秒` and `100ml` are both outside it.
         expect(phonemize("12.8 km/秒", "ja").trim()).toBe("d͡ʑɯᵝːni te̞ɴhät͡ɕi kiɾo̞me̞ꜜːto̞ɾɯᵝ bʲo̞ꜜː");
         expect(phonemize("120mg/100ml", "nan").trim()).not.toMatch(/\bmg\b|\bml\b/u);
+    });
+
+    test("#1257 — the nine pairs the repo already had the noun for, now read in full", () => {
+        // Pure aliases of a noun the language had declared under its own spelling…
+        expect(phonemize("160 km/h", "tg").trim()).toBe("sadˈu ʃˈast kilɔmˈetr dˈar sɔˈat"); // = `160 км/соат`
+        expect(phonemize("160 kg/h", "tg").trim()).toBe("sadˈu ʃˈast kilɔɡrˈamm dˈar sɔˈat");
+        expect(phonemize("160 km/h", "jv").trim()).toBe("sˈat̪ʊs səwˈid̪aʔ kilomˈɛt̪ər pˈər d͡ʒˈam"); // = `160 km/jam`
+        expect(phonemize("160 m/s", "mad").trim()).toBe("atɔs bɤn ənːəm pɔlɔ mɛtəɾ pəɾ dɨtik"); // = `160 m/detik`
+        // …and three nouns attested in the language's own artifact, composed by the per-word it already declared.
+        expect(phonemize("160 km/h", "tl").trim()).toBe("sandaʔˈan ʔˈat ʔanimnapˈu kilomˈetɾo bˈawat ʔˈoɾas");
+        expect(phonemize("160 m/s", "an").trim()).toBe("θjent siʃanta metɾos po seɡundo");
+        expect(phonemize("160 m/s", "haw").trim()).toBe("hoʔokahi haneli kanaono mika o ka kekona");
+        // ⚠ AND THE ONE ALIAS THAT LOOKED FREE AND IS NOT. uk, ba and mk all alias Cyrillic `с` to the second, but
+        // tg's one artifact instance of `км/с` is an animal's running speed — per HOUR by the number — so `с` is
+        // ambiguous there and stays undeclared. This is the spoken-symbol class in a script the #1255 guard
+        // (ASCII-only) does not reach; pinned so the decision is visible rather than a comment.
+        expect(phonemize("160 км/с", "tg").trim()).toBe("sadˈu ʃˈast kilɔmˈetr s");
     });
 });

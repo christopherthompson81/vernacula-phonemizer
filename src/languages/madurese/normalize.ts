@@ -171,7 +171,9 @@ const SYMBOLS = makeSymbolNormalizer({
     // ⚠ DENOMINATOR-ONLY, never standalone (the `Il-76s` hazard the field exists for). `taon` is the
     // corpus's own slash denominator — `2000–3000 mm/taon` — and `detik` is mad.wikipedia's, in the same
     // slot with the word spelled out: `kapasitas aliran maksimumna 13.500 meter kubik per detik` ×3.
-    rateDenominators: { taon: "taon", detik: "detik" },
+    // `s` is an ASCII alias of `detik` (#1257): `160 m/s` read *mɛtəɾ* alone while `160 m/detik` read in full.
+    // `h` stays undeclared — `jam` is ×0 as a word in either artifact (every hit is a substring).
+    rateDenominators: { taon: "taon", detik: "detik", s: "detik" },
     // ⚠ BOTH WORDS ARE ATTESTED IN THE UNIT-MODIFIER SLOT, which is the only slot that counts (trap 37 —
     // the bare modifier is never the attestation). `persegi`: the corpus's `ḍaèra ra-kèra 361 juta
     // kilometer persegi`, and mad.wikipedia's `120 meter persegi (1.300 kaki persegi)` ×20 articles.

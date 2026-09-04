@@ -229,7 +229,7 @@ public sealed class TagalogPhonemizer : ILanguage
             ["ha"] = new[] { "ektarya" }, ["katao"] = new[] { "katao" },
             ["naninirahan"] = new[] { "naninirahan" },
         },
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal) { ["s"] = "segundo" },
+        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal) { ["s"] = "segundo", ["h"] = "oras" }, // `h` → oras (#1257)
         ExponentWords = new ExponentWordsDef
         {
             Squared = new[] { "kuwadrado" }, Cubed = new[] { "kubiko" }, Position = "after",

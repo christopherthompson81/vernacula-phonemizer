@@ -137,7 +137,10 @@ const SYMBOLS = makeSymbolNormalizer({
         "hab": ["habitant", "habitants"], "habitants": ["habitant", "habitants"],
     },
     unitPer: "por",
-    rateDenominators: { "h": "ora" },
+    // ⟨segundo⟩ is attested IN THE SLOT (#1257): `5.720 metros cubicos por segundo`, `2.832 metros cubicos por
+    // segundo`, `un metro por segundo cada segundo`, `os radians por segundo (rad/s)` — an.wikipedia spells out
+    // exactly the phrase `por` + this noun composes.
+    rateDenominators: { "h": "ora", "s": "segundo" },
     exponentWords: { squared: ["cuadrau", "cuadraus"], cubed: ["cubico", "cubicos"], position: "after" },
     ampersand: "y",
     magnitudes: ["millón", "millons", "billón", "billons"],
