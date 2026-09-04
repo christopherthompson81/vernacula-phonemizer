@@ -38,7 +38,7 @@ cmn  [ᶦⁱ] → i, [ᵘᶷ] → u                                             
 ga   ⁱ → ""     "our i-offglide before a slender consonant — the referee OMITS it"   referee: NOTHING
 ```
 
-⚠ Note the ga fold: `replace: ""`. That is the [[folds-must-not-delete-the-axis]] shape — the eval cannot see
+⚠ Note the ga fold: `replace: ""`. That is the "fold deletes the axis" shape — the eval cannot see
 whether the offglide is right because the fold deletes it before scoring. Every other fold maps the letter to
 a segment the referee also writes.
 
