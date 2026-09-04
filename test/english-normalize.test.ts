@@ -318,6 +318,12 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
         // consonant, the same 206 the pruned model lost; ISIL → *ˈɪsɪ*, GIF → *ɡˈɪ*). That is the n-gram's own
         // weakness, filed separately, not the threshold's — so the pin uses a shape it reads whole.
         expect(phonemize("SNAV", "en")).toBe("snˈæv"); // 4, pronounceable → word
+        // …and #1265: a silent word-final consonant letter now costs the n-gram half a vowel penalty regardless of
+        // the order it was found at, so GIF keeps its f (*ɡˈɪ* before). Held-out: 216 → 71 words losing a final
+        // consonant, word accuracy 47.20 → 47.39%, nothing worse. SNES is still *snz* — its swallowed E is the
+        // VOWEL rule's order exemption, a separate decision.
+        expect(phonemize("GIF", "en")).toBe("ɡˈɪf");
+        expect(phonemize("SNES", "en")).toBe("snz");
         expect(phonemize("BAMF", "en")).toBe("bˈæmf");
         expect(phonemize("the NHS", "en")).toBe("ðə ˈɛn ˈeᶦt͡ʃ ˈɛs"); // 3 → letters
         expect(phonemize("the WTO", "en")).toBe("ðə dˈʌbəɫjuː tʰˈiː ˈoᶷ"); // 3 → letters

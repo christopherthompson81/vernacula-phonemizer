@@ -201,6 +201,10 @@ public static class EnglishG2pFactory
                 var c = w[i].ToString();
                 var raw = _gchunks.TryGetValue(c, out var g) ? g : new List<string> { "" };
                 var emptyPenalized = VOWEL_LETTER.Contains(c) && !(c == "e" && i == w.Length - 1);
+                // ⚠ A silent WORD-FINAL consonant letter costs HALF the vowel penalty, regardless of the order found
+                // (#1265) — mirrors englishG2p.ts, where the measurement is recorded. Not `y`, not a doubled letter.
+                var finalConsonant = i == w.Length - 1 && w[i] >= 'a' && w[i] <= 'z' && !VOWEL_LETTER.Contains(c) && w[i] != 'y'
+                    && !(i > 0 && w[i - 1] == w[i]);
                 var sibLetter = "sxzc".Contains(c, StringComparison.Ordinal);
                 var filtered = sibLetter ? raw : raw.Where(ch =>
                 {
@@ -217,6 +221,7 @@ public static class EnglishG2pFactory
                         var (lp, ord) = ScoreTokAt(h.Hist, $"{c}:{chunk}");
                         var s = h.Score + lp;
                         if (chunk == "" && emptyPenalized && ord < _model.EvpOrder) s -= _model.Evp;
+                        if (chunk == "" && finalConsonant) s -= _model.Evp / 2;
                         var hist = new List<string>(h.Hist) { $"{c}:{chunk}" };
                         var phones = chunk.Length > 0
                             ? new List<string>(h.Phones).Concat(chunk.Split(' ')).ToList()

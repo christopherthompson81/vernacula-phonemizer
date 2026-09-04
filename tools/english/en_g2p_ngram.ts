@@ -241,6 +241,9 @@ function decode(w: string): string[] {
         const c = w[i]!;
         const chunks = graphemeChunks.get(c) ?? new Set([""]);
         const emptyPenalized = VOWEL_LETTER.has(c) && !(c === "e" && i === w.length - 1);
+        // Mirror of the runtime (englishG2p.ts, #1265): a silent word-final consonant letter costs half EVP,
+        // regardless of the order found — so the held-out number here is the shipped decoder's.
+        const finalConsonant = i === w.length - 1 && /^[a-z]$/u.test(c) && !VOWEL_LETTER.has(c) && c !== "y" && w[i - 1] !== c;
         const sibLetter = "sxzc".includes(c); // only these letters legitimately emit a trailing S/Z
         const next: Hyp[] = [];
         for (const h of beam) {
@@ -255,6 +258,7 @@ function decode(w: string): string[] {
                 const [lp, order] = scoreTokAt(h.hist, tok);
                 let s = h.score + lp;
                 if (chunk === "" && emptyPenalized && order < EVP_ORDER) s -= EVP; // penalize only GUESSED silence
+                if (chunk === "" && finalConsonant) s -= EVP / 2;
                 next.push({
                     toks: [...h.toks, tok],
                     hist: [...h.hist, tok],
