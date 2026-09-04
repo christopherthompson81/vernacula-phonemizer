@@ -190,7 +190,12 @@
         // `нафар дар километри квадратӣ` is how tg.wikipedia spells out its own `нафар/км²`, and `Километр/соат`
         // is the title of its km/h article — so the connective is `дар` and the hour noun is `соат` (×71/20).
         "unitPer": "дар",
-        "rateDenominators": { "соат": "соат", "сония": "сония", "сон": "сония" },
+        // ⚠ THE ASCII KEYS ARE ALIASES OF THE SAME TWO NOUNS, nothing new (#1257). `km` is a declared Latin key
+        // above, so `160 km/h` matched the numerator and the tier dropped the `/h` for want of a word — the rate
+        // read short — while `160 км/соат` read in full. Cyrillic `с` is deliberately NOT aliased: its one artifact
+        // instance is an animal's running speed, `суръаташ 40—45 км/с`, which is per HOUR by the number, so `с`
+        // is ambiguous in this corpus in a way `сон.` (`10 м/сон.`, `2500м мукааб/сон.`) and `s` are not.
+        "rateDenominators": { "соат": "соат", "сония": "сония", "сон": "сония", "h": "соат", "s": "сония" },
         "magnitudes": ["миллиард", "миллион", "ҳазор", "триллион"],
         // `&` was dropped outright (×3 DROP + ×4 inside a foreign run). `ва` is the Tajik conjunction and the
         // tier spaces it, because `Blohm & Voss` is two tokens and joining them would make one.

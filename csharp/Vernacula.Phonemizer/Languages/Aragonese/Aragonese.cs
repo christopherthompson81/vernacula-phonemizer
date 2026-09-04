@@ -114,7 +114,7 @@ public static class AragonesePhonemizer
             ["habitants"] = new[] { "habitant", "habitants" },
         },
         UnitPer = "por",
-        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal) { ["h"] = "ora" },
+        RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal) { ["h"] = "ora", ["s"] = "segundo" }, // `s` → segundo (#1257)
         ExponentWords = new ExponentWordsDef
         {
             Squared = new[] { "cuadrau", "cuadraus" },

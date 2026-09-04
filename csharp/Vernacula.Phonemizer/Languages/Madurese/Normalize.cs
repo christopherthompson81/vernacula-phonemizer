@@ -41,7 +41,7 @@ public static class Normalize
         UnitPer = "per",
         RateDenominators = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["taon"] = "taon", ["detik"] = "detik",
+            ["taon"] = "taon", ["detik"] = "detik", ["s"] = "detik", // `s` aliases `detik` (#1257)
         },
         ExponentWords = new ExponentWordsDef { Squared = new[] { "persegi" }, Cubed = new[] { "kubik" } },
         Ampersand = "bân",

@@ -90,7 +90,10 @@ const SYMBOLS = makeSymbolNormalizer({
         "kp": ["kapuaʻi"], "mil": ["mile"], "mph": ["mile o ka hola"],
     },
     unitPer: "o ka",
-    rateDenominators: { "h": "hola" },
+    // ⟨kekona⟩ is the second (#1257), attested DIGIT-ADJACENT in the unit sense — `60 kekona`, `90 kekona`,
+    // `He 30 kekona ka manawa` — ×6 on haw.wikipedia plus ×1 in the mined artifact. `o ka` composes it the way
+    // it already composes `mile o ka hola`.
+    rateDenominators: { "h": "hola", "s": "kekona" },
     exponentWords: { squared: ["kuea"], cubed: ["kupika"], position: "after" },
     ampersand: "a me",
     magnitudes: ["miliona", "biliona"],

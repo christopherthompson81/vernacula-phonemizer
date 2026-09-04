@@ -1042,7 +1042,7 @@ const DESIGNATIONS = ["802[.,]11"];
               // routes to the English foreign reader and `20 km` read *nid͡ʑɯᵝː kʰˈeᶦəm* — "twenty kay-em"
               // inside Japanese, which is a confident error, not a gap. The designation class is reported
               // rather than folded in here.
-              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?:\\s?/\\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?:²|³|[23])?(?![\\p{L}\\p{M}\\p{Nd}]))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])`,
+              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?:\\s?/\\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?:²|³|[23])?(?![\\p{L}\\p{M}\\p{Nd}]))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])`,
               "giu",
           )
         : null;

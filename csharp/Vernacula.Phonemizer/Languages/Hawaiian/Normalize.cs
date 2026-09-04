@@ -38,6 +38,7 @@ public static class Normalize
         RateDenominators = new Dictionary<string, string>
         {
             ["h"] = "hola",
+            ["s"] = "kekona", // the second, attested digit-adjacent ×7 (#1257)
         },
         // ⚠ `kuea` FOLLOWS the unit (`mile kuea`), the opposite of the Turkic rounds either side of this one.
         ExponentWords = new ExponentWordsDef

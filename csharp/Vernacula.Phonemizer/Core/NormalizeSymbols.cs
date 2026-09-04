@@ -665,7 +665,7 @@ public static class NormalizeSymbols
                   // `9,44 м³/с` matches the EXPONENT branch, ends at the ³, and leaves `/с` outside the match to reach
                   // the phoneme sink as a bare letter.
                   NOT_VERSION + "(" + NUM + ")" + magAltU + "\\s?(" + unitAlt + ")"
-                      + "(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(" + denomKeys + ")(\u00b2|\u00b3)?"
+                      + "(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(" + denomKeys + ")(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?"
                       + "|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?"
                       // ⚠ AND AN UNREADABLE DENOMINATOR IS CONSUMED AND DROPPED (#1255). Stranding it left a
                       // WRONG READING, not a gap: 36 non-Latin hosts voice it through the English foreign

@@ -137,7 +137,10 @@
         // of corpus lines; `unitPer` already supplies "per", which is the corpus's own rate word
         // (`mèter kubik per detik`). Denominator keys are not matchable standalone, so this cannot make a bare
         // `taun` into a unit.
-        "rateDenominators": { "jam": "jam", "detik": "detik", "s": "detik", "taun": "taun" },
+        // ⚠ `h` IS AN ALIAS OF `jam` (#1257): the corpus writes the rate both ways — `5 km/jam`, `50 km/jam`,
+        // `70&nbsp;km/ jam`, `2,5&nbsp;km/ jam` — and `km/h` read short, numerator only, because `jam` had no ASCII key
+        // while `detik` did.
+        "rateDenominators": { "jam": "jam", "detik": "detik", "s": "detik", "taun": "taun", "h": "jam" },
         "unitPer": "per",
         "exponentWords": { "squared": ["persegi"], "cubed": ["kubik"], "position": "after" },
         // `$` is the sign the corpus actually writes (`$64 juta dolar AS`, `AS$143 milyar`, `1$ = Rp.`), and both

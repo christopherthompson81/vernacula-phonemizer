@@ -72,6 +72,12 @@ public class RateHalfReadingTests
     [InlineData("5 km²/h", "5 square kilometre per hour")]
     [InlineData("5 km2/h", "5 square kilometre per hour")]
     [InlineData("5 km²", "5 square kilometre")]
+    // ⚠ AND THE DENOMINATOR TAKES THE ASCII EXPONENT TOO (#1257 review). It accepted only `²`/`³`, so `km/h2`
+    // matched `km/h` and handed the `2` to the NUMBER path — "per hour TWO". Same alternative as the numerator,
+    // same lookahead, so a following digit or letter still ends the exponent.
+    [InlineData("5 km/h²", "5 kilometre per square hour")]
+    [InlineData("5 km/h2", "5 kilometre per square hour")]
+    [InlineData("5 km/h2020", "5 kilometre per hour2020")]
     // …and an undeclared denominator is dropped where a rate IS declared, without costing the numerator.
     [InlineData("5 km/s", "5 kilometre")]
     public void ADeclaredRateStillReads(string input, string want) => Assert.Equal(want, WithRate(input));

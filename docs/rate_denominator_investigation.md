@@ -273,3 +273,129 @@ the shared tier**, not just on the languages the change was reasoned about. Four
 issue were found by parity rather than by a test — the sync re-render that would have rewritten 74 goldens,
 the truncation filter that hid `ilo`, the C# guard left un-mirrored, and now a stale golden from a previous
 merge. No test in either suite asserts a golden's IPA column, so parity is the only gate that reads it.
+
+## Run 10 — 2026-09-03 20:44 — #1257: classifying the 208 by what the language already declares
+
+Question: which of the 208 silent pairs need NO new sourcing, because the noun is already in the repo?
+
+```
+npx tsx scratch/ledger.mts silent          # the test's own classify(), dumped   → 208 pairs, 102 codes
+grep -rn 'rateDenominators\s*:' src data   # 75 declarations
+grep -oF <noun> tools/corpus/{mined,attest}/<code>.jsonc | wc -l   # then read the contexts
+```
+
+⚠ **The corpus on `/mnt/data` cannot attest anything** — `corpus/tokens/manifest_*.jsonl` carries `ipa` and no
+`text`, and `corpus/fleurs_transcripts/` holds one directory. The attestation tier for this work is the in-repo
+`tools/corpus/mined/<code>.jsonc` (adversarially selected) and `tools/corpus/attest/<code>.jsonc` (Wikipedia
+word attestation), which is what every existing `rateDenominators` comment already cites.
+
+Silent codes that already declare a map, by what is missing:
+
+| code | declares | missing | in-repo evidence for the missing noun |
+|---|---|---|---|
+| tg | `соат сония сон`, `unitPer: дар` | ASCII `h`, `s` | **none needed** — same nouns |
+| jv | `jam detik s taun`, `per` | `h` | **none needed** — `km/jam` ×4 in the mined artifact, so the alias is the corpus's own spelling |
+| mad | `taon detik`, `per` | `s`, `h` | `s`: **none needed** (`detik`, `meter kubik per detik` ×3). `h`: `jam` ×0 as a word — all 18 grep hits are substrings |
+| tl | `s: segundo`, `bawat` | `h` | `oras` ×11 mined / ×2 attest (word-bounded), in the hour sense (`mga ilang oras bago`, `ang yunit ng oras`) |
+| an | `h: ora`, `por` | `s` | `metros cubicos por segundo` ×2, `un metro por segundo`, `radians por segundo (rad/s)` — the slot itself |
+| haw | `h: hola`, `o ka` | `s` | `kekona` ×6 attest + ×1 mined (word-bounded), digit-adjacent (`60 kekona`, `90 kekona`, `He 30 kekona ka manawa`) |
+| nan | `biáu s kg ml` | `h` | `點鐘` ×1 attest, ×0 mined — a lead, not a finding. **Left.** |
+| hil | `h: oras`, `kada` | `s` | `segundo` ×0, no attest artifact. **Left.** |
+| st | `h: hora`, `ka` | `s` | `motsotso`/`motsotsoana` ×0. **Left.** |
+| ff | `h: wakkati gootel` | `s` | **deliberate** — fula.ts: the class-agreeing "one" for `sahaawa` is unsourced |
+| kmr | `h: saetê de` | `s` | **deliberate** — kurmanji: no per-second reading attested on ku.wikipedia |
+
+Two claims in the issue did not survive measurement:
+
+- **"The `unitPer`-keyed tier."** All four object-form `unitPer` declarations (sk, lb, hr, mk) declare BOTH
+  `h` and `s` in `rateDenominators` already; none is on the ledger. That tier is empty.
+- **The Cyrillic `с` alias for tg** looked as free as `h`/`s` — uk, ba and mk all declare it. But tg's one
+  artifact instance is `суръаташ 40—45 км/с`, an animal's running speed, which is per HOUR by the number.
+  `с` is ambiguous in this corpus in a way `сон.` (`10 м/сон.`, `2500м мукааб/сон.`) is not, so it is **not**
+  aliased; `160 км/с` keeps reading *kilɔmˈetr s* — a spoken symbol the #1255 guard does not reach because
+  the guard is ASCII-only. Noted, not fixed here.
+- ff and kmr are on the ledger as *silent* but their files record the silence as a decision. The budget
+  counts them as to-do; they are not.
+
+So the zero-evidence tier is tg (`h`,`s`), jv (`h`), mad (`s`) — 5 pairs on the three test shapes — and the
+in-repo-attested tier is tl (`h`), an (`s`), haw (`s`) — 4 more. Nine pairs, six languages, on both engines.
+
+## Run 11 — 2026-09-03 20:50 — the nine land; nothing else moves
+
+```
+npx tsx scratch/ledger.mts silent | wc -l        # 208 → 199
+diff <(before) <(after)                          # exactly: tg km/h kg/h · tl km/h kg/h · jv km/h kg/h · haw m/s · an m/s · mad m/s
+npx tsx scratch/ledger.mts all | cut -f3 | sort | uniq -c   # 223 read · 199 silent · 54 spoken · 94 unread-unit
+npx tsx tools/gen_parity_goldens.mts tg jv mad tl an haw    # 0 golden rows changed
+```
+
+`spoken` is still 54 — the 47 in `ACCEPTED_SPOKEN` plus the 7 the widened classifier opened in Run 8 — so the
+change moved nine pairs from *silent* to *read* and nothing across any other boundary. `SILENT_BUDGET` 208 → 199.
+
+⚠ **No golden carries any of the nine shapes**, so parity cannot see a C# mirror that was missed — and four of
+the six are inline declarations mirrored by hand (mad, tl, an, haw; tg and jv load the jsonc on both sides).
+That is why the nine readings are pinned in BOTH test suites (`test/rate-denominator.test.ts` #1257 block,
+`csharp/Vernacula.Phonemizer.Tests/RateDenominatorAliasTests.cs`) rather than left to the ledger count, which
+only says *how many*, not *which*. The tenth pin in each is the tg `км/с` decision from Run 10.
+
+Readings, both engines:
+
+```
+tg   160 km/h   sadˈu ʃˈast kilɔmˈetr dˈar sɔˈat              (was …kilɔmˈetr)
+jv   160 km/h   sˈat̪ʊs səwˈid̪aʔ kilomˈɛt̪ər pˈər d͡ʒˈam         (was …kilomˈɛt̪ər)
+mad  160 m/s    atɔs bɤn ənːəm pɔlɔ mɛtəɾ pəɾ dɨtik             (was …mɛtəɾ)
+tl   160 km/h   sandaʔˈan ʔˈat ʔanimnapˈu kilomˈetɾo bˈawat ʔˈoɾas
+an   160 m/s    θjent siʃanta metɾos po seɡundo                (`po` is the engine's existing reading of `por`)
+haw  160 m/s    hoʔokahi haneli kanaono mika o ka kekona
+```
+
+Full-fleet `csharp/tools/parity`, per Run 9's lesson:
+
+```
+189 languages byte-identical, 0 differ (36495 rows ok, 0 differ)
+```
+
+and the C# mirror suite (`RateDenominatorAliasTests` + `RateHalfReadingTests`): 24 passed.
+
+## Run 12 — 2026-09-03 21:20 — review: declaring the noun exposed the denominator's ASCII-exponent hole
+
+Review probes over the six languages, against a worktree of `main`:
+
+```
+                 main                                  branch (data only)
+haw 9.8 m/s2     ʔeiwa ʔewalu mika                     ʔeiwa ʔewalu mika o ka kekona ʔelua      ← "second TWO"
+an  9.8 m/s2     nweu koma weito metɾos                nweu koma weito metɾos po seɡundo dos
+nl  9.8 m/s2     …mˈeːtər pˈɛr sˈeːkɔndə tʋˈeː          (unchanged — nl always had `s`, and always read the 2)
+an  9.8 m/s²     nweu koma weito metɾos                …metɾos po seɡundo kwadɾau               ← correct
+```
+
+⚠ **A declared denominator with an ASCII exponent read the digit as a NUMBER** — the class the tier's own
+ordering puts last: *missing word ≥ wrong word ≫ invented number*. #1145 taught the NUMERATOR branch to take
+`m3` as well as `m³`, and #1255 put the same `(?<=[a-zA-Z])[23](?![\d\p{L}])` on the stranded-symbol guard;
+the DENOMINATOR group stayed `(²|³)?`. So `m/s2` matched `m/s`, the match ended before the `2`, and the number
+path spoke it. For an undeclared `s` the #1255 guard swallowed `/s2` whole — silent — which is why declaring
+the noun in six languages turned a missing word into an invented number for exactly this spelling. nl, de-via-
+tier, and every other language with a declared denominator had it already.
+
+Fix: the denominator exponent group takes the same alternative as the numerator's, both sides; the callback
+already routed `denomExp` through `withPower`, which already classifies `"2"`/`"3"`. Regex literal changed →
+`csharp/regex-corpus.jsonl` regenerated.
+
+Fleet measurement — does the ASCII spelling read the same as the superscript? (`scratch/s2.mts`, 193 codes ×
+`9.8 m/s2`, `12 m3/s2`, `7 km/h2`):
+
+```
+main                 same 247, differ 332
+branch, data only    same 238, differ 341     the 9 exposed pairs
+branch, with fix     same 370, differ 209     51 languages now agree; NOTHING newly differs
+```
+
+The 209 that still differ are languages where neither spelling composes through the tier (a local arm, an
+undeclared denominator, no `exponentWords`) — pre-existing and out of scope. Two shapes were checked so the
+guard does not over-reach: `3 m/s2020` still reads the year, and `5 km/h2a` is untouched, both because the
+`(?![\d\p{L}])` lookahead is the same one the numerator uses. `160 км/соат2` still speaks the 2 — the
+`(?<=[a-zA-Z])` lookbehind is Latin-only on both halves, and widening it is a separate question.
+
+Also found in review, and corrected: the attestation counts in the tl and haw comments were SUBSTRING counts
+(`grep -oF`) — `oras` ×16 was ×11 as a word, `kekona` ×7 was ×6 plus the attest entry's own `"word"` line.
+The word-bounded numbers are what the comments and Run 10's table now say.
