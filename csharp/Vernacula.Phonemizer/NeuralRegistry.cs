@@ -8,7 +8,10 @@ public static class NeuralRegistry
 {
     private static readonly Dictionary<string, Func<string, Task<string>>> NEURAL = new(StringComparer.Ordinal)
     {
-        ["en"] = Languages.English.EnglishNeural.PhonemizeEnNeural, // BiLSTM OOV reader (else the sync n-gram OOV G2P)
+        ["en"] = text => Languages.English.EnglishNeural.PhonemizeEnNeural(text), // BiLSTM OOV reader (else the sync n-gram OOV G2P)
+        // ⚠ THE ACCENT VARIANTS TAKE THE SAME READER (#1260); until this entry existed their async path WAS the sync path.
+        ["en-GB"] = text => Languages.English.EnglishNeural.PhonemizeEnNeural(text, "en-GB", Languages.EnglishGb.EnglishGb.RpWordTransform()),
+        ["en-IN"] = text => Languages.English.EnglishNeural.PhonemizeEnNeural(text, "en-IN", Languages.EnglishIn.EnglishIn.IndianWordTransform),
         ["af"] = Languages.Afrikaans.AfrikaansNeural.PhonemizeAfNeural,
         ["bn"] = Languages.Bengali.BengaliNeural.PhonemizeBnNeural,
         // per-grapheme BiLSTM reading the words the NST lexicon misses; its tag alphabet embeds the stress

@@ -48,6 +48,8 @@ const en = (s: string): string => {
     return EN.get(s)!;
 };
 const tokens = (s: string): string[] => s.split(/\s+/u).filter(Boolean);
+/** IPA-shaped Latin back to the letters a key is written in (ɡ→g), so a raw `kɡ` reads as the key `kg`. */
+const latin = (t: string): string => t.replace(/ɡ/gu, "g").replace(/[ˈˌːʰ]/gu, "");
 
 /**
  * The three outcomes for one language × one rate shape, from the outside.
@@ -61,7 +63,11 @@ const classify = (code: string, unit: string, denom: string): "unread-unit" | "r
     const rate = say(`160 ${unit}/${denom}`, code);
     if (plain === null || rate === null) return "unread-unit";
     const pt = tokens(plain);
-    if (pt.includes(unit) || pt.some((t) => t === en(unit))) return "unread-unit"; // a different gap entirely
+    // ⚠ A RAW UNIT IS RECOGNISED BY ITS LETTERS, NOT BY WHAT ENGLISH SAYS FOR THEM. An earlier draft compared
+    // against `en(unit)`, which only worked because the pruned n-gram happened to return `kg` as the literal
+    // `kɡ` — retraining it (#1260) made English say *kʰˈɪŋ*, and sixteen languages whose output had not changed
+    // by a byte were suddenly "spoken". A host that emits the key's own letters (IPA ɡ for g) has not read it.
+    if (pt.some((t) => t === unit || latin(t) === unit || t === en(unit))) return "unread-unit"; // a different gap entirely
     const extra = tokens(rate).filter((t) => !pt.includes(t));
     if (extra.length === 0) return "silent";
     // ⚠ "SPOKEN" IS ASKED BY PHONEMIZING THE SYMBOL, not by listing the ways it can come out. An earlier
@@ -97,7 +103,10 @@ const ACCEPTED_SPOKEN = new Set(
         // g2p reading the letter as a native phone. da `/h` → *ˈhɔːˀ*, nb → *ˈhoː*, mt → *ħ*, za `/s` → *θ*,
         // smj spells the whole rate. Verified pre-existing by running the widened classifier on both sides of
         // this change — identical output — so they are a blind spot being opened, not a regression.
-        "da kg/h|mt kg/h|smj km/h|smj m/s|smj kg/h|za m/s|nb kg/h"
+        // ⚠ smj `km/h` and `m/s` LEFT THIS LIST when the raw-letter fold arrived (#1260): Lule Sami says *ˈm* for `m`
+        // and *ˈkʰm* for `km` — the LETTERS, not a noun — so those were never "spoken denominators", they were an
+        // unread unit the first instrument could not see. `kg/h` stays: *ˈkʰk* is not the key's letters.
+        "da kg/h|mt kg/h|smj kg/h|za m/s|nb kg/h"
     ).split("|"),
 );
 

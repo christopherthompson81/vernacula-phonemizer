@@ -161,5 +161,13 @@ public static class EnglishGb
      */
     public static ILanguage CreateEnglishGB() => new EnGbLanguage(EnglishFactory.CreateEnglish(), Sets());
 
+    /** The per-word delta on its own, for the ASYNC entry (EnglishNeural) — same hook, same lexical sets. */
+    private static Func<string, string, string>? RP_HOOK;
+    public static Func<string, string, string> RpWordTransform()
+    {
+        if (RP_HOOK is null) { var lex = Sets(); RP_HOOK = (ipa, word) => ToRP(ipa, word, lex); }
+        return RP_HOOK;
+    }
+
     internal static void RegisterSelf() => Registry.Register("english-gb", CreateEnglishGB);
 }

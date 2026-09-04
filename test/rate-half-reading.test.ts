@@ -84,8 +84,13 @@ const enReads = (sym: string): string => {
     if (!EN.has(sym)) EN.set(sym, phonemize(sym, "en").trim());
     return EN.get(sym)!;
 };
+/** IPA-shaped Latin back to the key's letters (ɡ→g): a host that emits `kɡ` has left `kg` raw. ⚠ Recognised
+ *  by the LETTERS, not only by what English says for them — the pruned n-gram happened to return `kg` as the
+ *  literal `kɡ`, and retraining it (#1260) turned `enReads("kg")` into *kʰˈɪŋ*, which made five unchanged
+ *  outputs look as though they had started reading the unit. */
+const latin = (t: string): string => t.replace(/ɡ/gu, "g").replace(/[ˈˌːʰ]/gu, "");
 const spelledOut = (reading: string, sym: string): boolean =>
-    reading.split(/\s+/u).includes(sym) || reading.includes(enReads(sym));
+    reading.split(/\s+/u).some((t) => t === sym || latin(t) === sym) || reading.includes(enReads(sym));
 
 describe("an unreadable rate reads its numerator and strands only the denominator (#1249)", () => {
     test("no engine discards a numerator reading it has", () => {

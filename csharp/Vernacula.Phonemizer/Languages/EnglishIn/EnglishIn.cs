@@ -71,5 +71,8 @@ public static class EnglishIn
     /** Build the Indian-English phonemizer (GenAm engine + the GIE delta on each WORD's output). */
     public static ILanguage CreateEnglishIN() => new EnInLanguage(EnglishFactory.CreateEnglish());
 
+    /** The per-word delta on its own, for the ASYNC entry (EnglishNeural). */
+    public static string IndianWordTransform(string ipa, string _) => ToIndian(ipa);
+
     internal static void RegisterSelf() => Registry.Register("english-in", CreateEnglishIN);
 }

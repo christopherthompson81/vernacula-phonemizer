@@ -284,7 +284,7 @@ describe("Hmong (hmn) — a Latin run the converter cannot read", () => {
     test("an initialism gets ENGLISH letter names, because no Hmong letter-name table is attested", () => {
         expect(say("BBC")).toBe("bˌiːbisˈiː");
         expect(say("GDP")).toBe("ɡˈiːdˈiːpʰˈiː");
-        expect(say("L. L. Zamenhof")).toBe("ˈɛɫ . ˈɛɫ . zˈæmənhf"); // the corpus's own `L. L. Zamenhof`
+        expect(say("L. L. Zamenhof")).toBe("ˈɛɫ . ˈɛɫ . zˈæmɪnhəf"); // the corpus's own `L. L. Zamenhof` (n-gram OOV; was *zˈæmənhf* before #1260)
     });
 
     // The routing must not reach a word the engine CAN read: an ordinary RPA sentence is untouched, and a

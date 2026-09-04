@@ -208,7 +208,8 @@ describe("script routing covers every script the README exercises", () => {
 describe("embedded foreign runs use the NEURAL English OOV reader under phonemizeAsync", () => {
     // OOV in CMUdict, and each one the sync n-gram reads differently from the tagger — a word both paths agree
     // on would pass whether or not the prewarm ran.
-    const NAMES = ["liguria", "adekoya", "riomaggiore", "caboolture", "sezen"];
+    // (`caboolture` was the fifth until #1260 — the retrained n-gram reads it exactly as the tagger does.)
+    const NAMES = ["liguria", "adekoya", "riomaggiore", "croydon", "sezen"];
 
     // Hosts across the three delegation paths: the script-router's Latin target (th, ko), and an engine that
     // claims Latin itself and is handed the reader at construction (hi).
