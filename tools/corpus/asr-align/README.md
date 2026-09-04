@@ -172,6 +172,24 @@ Two folds were proposed and refused, both recorded at the fold site so they are 
   this corpus ever had was Kazakh ⟨ь⟩/⟨ъ⟩ emitting a spurious glottal stop in 408 rows. Folding it away
   deletes the evidence for that class. Measured 1.8:1 against 4.6:1 for keeping it.
 
+**The superscript offglides are the exception to the modifier-letter strip, per language** (#1261). `fold()`
+drops every Lm character because `ʲ ˠ ʰ ʷ` are marks the recognizer never emits — but `ᶦ ᶷ ⁱ ᵘ ᶤ` are the
+engine's offglide of a closing diphthong, and the recognizer writes that segment as `ɪ`/`ʊ`/`i`. Dropping
+them scored every English closing diphthong one phone short. `OFFGLIDE` in `asr_align_report.py` expands
+them **on our side, per language**, and only where measurement says the recognizer hears the segment:
+
+- Expanded where the diphthong is the language's own — en_us 0.180 → 0.156 (2,363 rows closer / 75 further
+  for `ᶦ`), en_gb 0.205 → 0.183, cy, ta, Mandarin's `aⁱ` (2,917 / 148), the Bantu `ai`/`au` of ny sn xh zu.
+- **Not** expanded where `ᶦ`/`ᶷ` sit in an English loan read by the English arm inside a non-Latin host —
+  am, ar, bg, bn, fa, he, hi, ja, kk, km, ko, th, vi… — because the recognizer, listening to that language,
+  writes `ebay` and `craigslist` as monophthongs; nor Czech ⟨ou⟩ (111 / 1,346), nor Irish `ⁱ`, which is
+  slender-consonant colouring, not a glide (97 / 1,869). And the back glide `ᶷ` is absorbed far more often
+  than `ᶦ`: cy, ta, gl, mi, xh expand one and not the other.
+
+A cell is listed when n ≥ 20, the language's median does not get worse, and more rows move closer than
+further — `ɀ`'s criterion, per language. Callers that pass no `lang` get the drop, never a guess. Full
+tables in `docs/asr_align_offglide_fold_investigation.md`.
+
 ## Layout
 
 | file | what it answers |

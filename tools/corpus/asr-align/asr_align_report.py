@@ -55,8 +55,52 @@ STRIP = set("ˈˌːˑ˥˦˧˨˩꜀꜁꜂꜃꜄꜅꜆꜇ꜛꜜ|‖")
 PUNCT = set(",.!?;:()[]{}\"'«»„“”‘’—–")
 
 
-def fold(ipa: str) -> list[str]:
+# ⚠ THE SUPERSCRIPT OFFGLIDES ARE VOWELS, NOT MODIFIERS — where the recognizer hears them (#1261). `ᶦ ᶷ ⁱ ᵘ ᶤ`
+# are category Lm like `ʲ ˠ ʰ`, but they are the engine's offglide of a closing diphthong (eᶦ aᶷ, Mandarin
+# aⁱ, Welsh eᶤ), and the recognizer writes that segment — as `ɪ`/`ʊ`/`i` — so dropping them scored a deletion
+# that was never there: every English closing diphthong, one phone short, a fixed 0.02 on en_us's median.
+#
+# ⚠ BUT NOT EVERYWHERE, and the table below is the measurement, not a linguistic judgement. Measured per
+# (language, letter) over all 163,166 aligned rows that carry one, expanding ONLY that cell: the recognizer
+# hears the segment where the diphthong is the LANGUAGE'S OWN (en 2363 rows closer / 75 further for ᶦ; cy,
+# ta, cmn's aⁱ 2917/148, the Bantu ai/au of ny sn xh zu), and does NOT where our ᶦ/ᶷ sit in an English
+# loan read by the English arm inside a non-Latin host — am, ar, bg, bn, fa, he, hi, ja, kk, km, ko, th,
+# vi write `ebay` and `craigslist` as monophthongs (`eː`), so expanding adds a phone with no counterpart.
+# Two letters mean different things in different engines: `ⁱ` is Mandarin's offglide (expand) and Irish's
+# slender-consonant colouring (97/1869 — keep dropping); Czech ⟨ou⟩ comes back as ONE vowel (111/1346).
+# And the back glide is absorbed more readily than the front one: cy, ta, gl, mi, xh expand ᶦ and not ᶷ.
+#
+# A cell is listed when n ≥ 20, the language's MEDIAN does not get worse with only that cell expanded, and
+# more rows move closer than further — `ɀ`'s criterion, applied per language because the fact is per
+# language. Everything else keeps today's behaviour. Targets are what the recognizer writes there, not the
+# letter's nominal value: Welsh ᶤ comes back as ɪ (470 of 741; ɨ 22) and Hausa's ᵘ would be ʊ, not u.
+# Full tables in docs/asr_align_offglide_fold_investigation.md, Runs 2–5.
+#
+# ⚠ OUR SIDE ONLY, by construction: the recognizer never emits these letters, so `fold(phones, lang)` is
+# unchanged. Callers that do not know the language get the old fold, which is the drop — never a guess.
+OFFGLIDE: dict[str, dict[str, str]] = {
+    "en_us": {"ᶦ": "ɪ", "ᶷ": "ʊ"},       # 0.1795 → 0.1561
+    "en_gb": {"ᶦ": "ɪ", "ᶷ": "ʊ"},       # 0.2048 → 0.1826   (#1252's notation, #1258's 0.026)
+    "cy_gb": {"ᶦ": "ɪ", "ᶤ": "ɪ"},       # 0.2697 → 0.2578   ᶷ 634/1129 — not heard
+    "cmn_hans_cn": {"ⁱ": "i"},           # 0.2886 → 0.2690   ᵘ 51/2981, ᶦ 1/146 — not heard
+    "ta_in": {"ᶦ": "ɪ"},                 # 0.5510 → 0.5348   flags 48 → 68: the tail was hidden
+    "es_419": {"ᶦ": "ɪ", "ᶷ": "ʊ"},
+    "gl_es": {"ᶦ": "ɪ"},                 # ᶷ 211/1047 — not heard
+    "mi_nz": {"ᶦ": "ɪ"},
+    "ny_mw": {"ᶦ": "ɪ", "ᶷ": "ʊ"},
+    "sn_zw": {"ᶦ": "ɪ", "ᶷ": "ʊ"},
+    "xh_za": {"ᶦ": "ɪ"},
+    "zu_za": {"ᶦ": "ɪ"},                 # ᶷ 105/89 but the median moves up — kept dropping
+    "ru_ru": {"ᶦ": "ɪ"},                 # 41/39 — at the line, listed by the rule
+    "mk_mk": {"ᶦ": "ɪ"},                 # 14/13 — same
+}
+
+
+def fold(ipa: str, lang: str | None = None) -> list[str]:
     """IPA string → comparable phone units: the segmental backbone both sides can be judged on.
+
+    `lang` is the DB language key (`en_us`); with it, the offglides in `OFFGLIDE[lang]` are expanded to the
+    vowel the recognizer writes for them BEFORE the modifier-letter strip below. Without it they are dropped.
 
     ⚠ MODIFIER LETTERS MUST GO TOO, and missing that silently broke two whole languages. `ˠ ʲ ʰ ʷ ᶦ` are
     Unicode category **Lm** with combining class 0, so a `unicodedata.combining()` test keeps them and each
@@ -66,7 +110,11 @@ def fold(ipa: str) -> list[str]:
     "investigate" list came out EMPTY, because when everything is uniformly bad nothing looks like an
     outlier. English `ᶦ`-offglides had the same problem in miniature.
 
-    The recognizer emits none of these marks, so they cannot inform the comparison in either direction."""
+    The recognizer emits none of these marks, so they cannot inform the comparison in either direction —
+    ⚠ except the offglide letters, which are vowels; see `OFFGLIDE` above for where that is measured true."""
+    if lang is not None:
+        for k, v in OFFGLIDE.get(lang, {}).items():
+            ipa = ipa.replace(k, v)
     out: list[str] = []
     for ch in unicodedata.normalize("NFD", ipa):
         if ch in STRIP or ch in PUNCT or ch.isspace():
@@ -201,7 +249,33 @@ def dist(a: list[str], b: list[str]) -> float:
     return 1.0 - SequenceMatcher(None, a, b, autojunk=False).ratio()
 
 
+def selftest() -> int:
+    """The `OFFGLIDE` invariants, with no DB — the same convention as `asr_align_allo.py --selftest`."""
+    bad: list[str] = []
+    LM = {"ᶦ", "ᶷ", "ⁱ", "ᵘ", "ᶤ"}
+    for lang, m in OFFGLIDE.items():
+        for k, v in m.items():
+            if k not in LM:
+                bad.append(f"{lang}: {k!r} is not an offglide letter")
+            if unicodedata.category(k) != "Lm":
+                bad.append(f"{lang}: {k!r} is not Lm — the strip below would not have dropped it")
+            if len(v) != 1 or unicodedata.category(v) != "Ll":
+                bad.append(f"{lang}: target {v!r} must be one plain vowel letter")
+    # Our side expands; the recognizer's side never carried the letter, so it must be untouched.
+    if fold("eᶦ", "en_us") != ["e", "ɪ"] or fold("eᶦ") != ["e"] or fold("eᶦ", "am_et") != ["e"]:
+        bad.append("fold(): expansion must be per language, and the drop must stay the default")
+    if fold("eɪ", "en_us") != fold("eɪ"):
+        bad.append("fold(): a recognizer string must fold the same with and without lang")
+    for b in bad:
+        print(b, file=sys.stderr)
+    print(f"selftest: {len(OFFGLIDE)} languages, {sum(len(m) for m in OFFGLIDE.values())} cells, "
+          f"{'FAIL' if bad else 'ok'}", file=sys.stderr)
+    return 1 if bad else 0
+
+
 def main() -> None:
+    if "--selftest" in sys.argv:
+        sys.exit(selftest())
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=DB)
     ap.add_argument("--out", default=OUT)
@@ -231,7 +305,7 @@ def main() -> None:
                 continue
             scored, short = [], []
             for sid, wav, txt, ipa, ph in rows:
-                fi, fp = fold(ipa), fold(ph)
+                fi, fp = fold(ipa, lang), fold(ph, lang)
                 # The recognizer produced far too little to be compared with. 0.35 is well below any
                 # convention difference: two IPA transcriptions of the same utterance do not differ
                 # threefold in phone count.

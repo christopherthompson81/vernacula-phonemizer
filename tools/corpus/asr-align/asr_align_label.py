@@ -137,7 +137,7 @@ def apply_auto(db: sqlite3.Connection) -> None:
             (lang,)))
         scored, short = [], []
         for lg, wav, ipa, ph in rows:
-            fi, fp = fold(ipa or ""), fold(ph or "")
+            fi, fp = fold(ipa or "", lang), fold(ph or "", lang)
             if not fp or (len(fi) >= 12 and len(fp) < 0.35 * len(fi)):
                 short.append((lg, wav))
                 continue
@@ -168,9 +168,9 @@ def apply_auto(db: sqlite3.Connection) -> None:
         # ⚠ FOLDED PHONE COUNT, not LENGTH(ipa). SQL's LENGTH counts characters — diacritics, spaces and
         # stress marks included — which is a different scale per language and made this disagree with the
         # analysis that found the defect (608 rows vs 611). The rate has to be seconds per PHONE.
-        rate = [(w, (ns / 16000) / len(fold(ipa))) for w, ipa, ns in db.execute(
+        rate = [(w, (ns / 16000) / len(fold(ipa, lang))) for w, ipa, ns in db.execute(
             "SELECT wav,ipa,n_samples FROM utt WHERE lang=? AND ipa IS NOT NULL AND n_samples>0",
-            (lang,)) if ipa and len(fold(ipa)) >= 12]
+            (lang,)) if ipa and len(fold(ipa, lang)) >= 12]
         if rate:
             med_r = statistics.median(r for _, r in rate)
             for w, r in rate:

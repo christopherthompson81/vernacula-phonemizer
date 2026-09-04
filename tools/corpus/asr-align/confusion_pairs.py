@@ -50,7 +50,7 @@ def confusions(db: sqlite3.Connection, lang: str, status: str) -> tuple[Counter,
         q += " AND status=?"
     rows = db.execute(q, (lang, status) if status != "all" else (lang,))
     for ipa, ph in rows:
-        a, b = list(fold(ipa or "")), list(fold(ph or ""))
+        a, b = list(fold(ipa or "", lang)), list(fold(ph or "", lang))
         if not a or not b:
             continue
         n += 1
