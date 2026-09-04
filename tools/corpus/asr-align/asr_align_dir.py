@@ -60,7 +60,7 @@ CREATE INDEX IF NOT EXISTS utt_lang ON utt(lang);
 """
 
 
-def load_manifest(lang: str) -> dict[str, tuple[str, str]]:
+def load_manifest(lang: str) -> dict[str, tuple[str | None, str | None]]:
     """id -> (text, ipa), straight out of the ingest manifest. No second IPA source, by design."""
     p = f"{MANIFESTS}/manifest_{lang}.jsonl"
     out: dict[str, tuple[str, str]] = {}
@@ -68,16 +68,43 @@ def load_manifest(lang: str) -> dict[str, tuple[str, str]]:
         for line in f:
             if line.strip():
                 r = json.loads(line)
-                out[r["id"]] = (r.get("text") or "", r.get("ipa") or "")
+                # ⚠ MISSING IPA STAYS None, NOT "". `asr_align_report.py` filters `phones != ''` but only
+                # `ipa IS NOT NULL`, because the FLEURS writer stores NULL when it has no IPA. An empty
+                # string would pass that filter, skip the recognizer-short branch (it needs ≥12 phones) and
+                # score `dist == 1.0` — straight to the top of the investigate queue, dragging the median
+                # with it. No manifest carries an empty `ipa` today; this keeps the two writers agreeing
+                # before one does.
+                out[r["id"]] = (r.get("text") or None, r.get("ipa") or None)
     return out
 
 
 def find_audio(dirs: list[str]) -> dict[str, str]:
+    """stem -> path, over every audio file under `dirs`.
+
+    ⚠ A DUPLICATE STEM IS REPORTED, NOT SWALLOWED. The manifest id is matched by BASENAME, so two files
+    with the same stem in different `--dirs` are two candidate recordings for one id and only one of them
+    can win. Dropping the loser silently would let this pass align a row against the wrong audio and then
+    report the distance as if it meant something — the one failure mode a QC tool must not have. The scan
+    is sorted so the winner is deterministic across runs, and every collision is printed.
+    """
     out: dict[str, str] = {}
+    clashes: list[tuple[str, str, str]] = []
     for d in dirs:
-        for f in glob.glob(f"{d}/**/*", recursive=True):
-            if f.lower().endswith((".wav", ".flac", ".mp3", ".opus")):
-                out.setdefault(os.path.splitext(os.path.basename(f))[0], f)
+        for f in sorted(glob.glob(f"{d}/**/*", recursive=True)):
+            if not f.lower().endswith((".wav", ".flac", ".mp3", ".opus")):
+                continue
+            stem = os.path.splitext(os.path.basename(f))[0]
+            if stem in out:
+                clashes.append((stem, out[stem], f))
+            else:
+                out[stem] = f
+    if clashes:
+        print(f"# ⚠ {len(clashes):,} DUPLICATE STEM(S) across --dirs; keeping the first of each:",
+              file=sys.stderr)
+        for stem, kept, dropped in clashes[:10]:
+            print(f"    {stem}: kept {kept}, ignored {dropped}", file=sys.stderr)
+        if len(clashes) > 10:
+            print(f"    … and {len(clashes) - 10:,} more", file=sys.stderr)
     return out
 
 
@@ -108,7 +135,7 @@ def main() -> int:
         print("no manifest row matched an audio file -- check --dirs", file=sys.stderr)
         return 1
 
-    os.makedirs(os.path.dirname(a.db), exist_ok=True)
+    os.makedirs(os.path.dirname(a.db) or ".", exist_ok=True)  # `--db align.sqlite` has no dirname
     db = sqlite3.connect(a.db)
     db.executescript(SCHEMA)
     db.execute("PRAGMA journal_mode=WAL")
@@ -117,6 +144,15 @@ def main() -> int:
     # the FLEURS script's comment records a run that reported success while skipping every row.
     have = set() if a.redo else {r[0] for r in db.execute(
         "SELECT wav FROM utt WHERE lang=?", (a.lang,))}
+    # ⚠ AND THE KEY IS THE FILE'S BASENAME, WHICH IS WHAT `asr_align_corpus.py` WRITES. The PRIMARY KEY is
+    # (lang, wav), and that script stores the audio member's basename — `10010386886416577453.wav` — while
+    # the manifest's `id` is the bare `10010386886416577453`. Keying on the id here would not collide with
+    # it, so pointing `--dirs` at an extracted FLEURS tree for a language the FLEURS pass had already done
+    # would find `have` empty, redo the whole GPU pass, and INSERT a SECOND row per recording under the same
+    # `lang`. The report scores each utterance once per row, so that shifts the language's median and MAD —
+    # and the duplicate's `sentence_id` is the uid rather than the FLEURS sentence id, so the sibling screen
+    # (the one thing in the harness that can say "not ours" with certainty) sees no sibling where one exists.
+    # `sentence_id` stays the utterance id; only the ROW KEY is made to agree.
 
     # do_phonemize=False: the tokenizer builds an espeak backend in its constructor and hard-requires
     # the `phonemizer` package, but only for the ENCODE direction. We only decode CTC ids.
@@ -129,7 +165,7 @@ def main() -> int:
         model = model.half()
     print(f"# model on {dev}, batch {a.batch}", file=sys.stderr)
 
-    def flush(batch: list[tuple[str, str, str, "np.ndarray"]]) -> None:
+    def flush(batch: list[tuple[str, str, str | None, str | None, "np.ndarray"]]) -> None:
         if not batch:
             return
         feats = ext([b[3] for b in batch], sampling_rate=SR, return_tensors="pt", padding=True)
@@ -138,35 +174,46 @@ def main() -> int:
             iv = iv.half()
         with torch.no_grad():
             logits = model(iv, attention_mask=feats.get("attention_mask", None)).logits
-        for (uid, txt, ipa, aud), ids in zip(batch, torch.argmax(logits, dim=-1)):
+        for (uid, wav, txt, ipa, aud), ids in zip(batch, torch.argmax(logits, dim=-1)):
             db.execute(
                 "INSERT OR REPLACE INTO utt(lang,sentence_id,wav,text,ipa,phones,n_samples) "
                 "VALUES (?,?,?,?,?,?,?)",
                 # sentence_id == the utterance id: one recording per id, nothing to repeat.
-                (a.lang, uid, uid, txt, ipa, tok.decode(ids), len(aud)),
+                # wav == the file's basename, so the row key agrees with the FLEURS writer's.
+                (a.lang, uid, wav, txt, ipa, tok.decode(ids), len(aud)),
             )
         db.commit()
 
-    t0, n, batch = time.time(), 0, []
+    t0, n, last, batch = time.time(), 0, 0, []
     for uid in todo:
-        if uid in have:
+        wav = os.path.basename(audio[uid])
+        if wav in have:
             continue
+        # ⚠ THE RESAMPLE IS INSIDE THE GUARD TOO. `sf.read` is not the only step that can throw on one bad
+        # member: `librosa.resample` raises on an empty or malformed buffer, and `res_type="soxr_hq"` needs
+        # the optional `soxr` backend, so a machine without it would die on the FIRST odd-rate file — after
+        # loading the model, and on a corpus whose whole point is that it is NOT 16 kHz. Same invariant this
+        # file already states for the read: one bad file must not kill the pass.
         try:
             aud, sr = sf.read(audio[uid], dtype="float32")
+            if aud.ndim > 1:
+                aud = aud.mean(axis=1)
+            if sr != SR:            # SLR83 is 48 kHz; skipping here would align nothing
+                aud = librosa.resample(aud, orig_sr=sr, target_sr=SR, res_type="soxr_hq")
         except Exception as e:      # one bad file must not kill the pass
             print(f"  {uid}: unreadable ({e})", file=sys.stderr)
             continue
-        if aud.ndim > 1:
-            aud = aud.mean(axis=1)
-        if sr != SR:                # SLR83 is 48 kHz; skipping here would align nothing
-            aud = librosa.resample(aud, orig_sr=sr, target_sr=SR, res_type="soxr_hq")
         txt, ipa = man[uid]
-        batch.append((uid, txt, ipa, aud))
+        batch.append((uid, wav, txt, ipa, aud))
         n += 1
         if len(batch) >= a.batch:
             flush(batch)
             batch = []
-            if n % 200 == 0:
+            # ⚠ SINCE the last line, not `n % 200`: the flush only happens on multiples of `--batch`, so a
+            # modulo test against a fixed 200 fires only where the two share factors — `--batch 7` printed
+            # three progress lines in 5,000 utterances instead of twenty-five, and `--batch 3` eight.
+            if n - last >= 200:
+                last = n
                 print(f"    {n:,}/{len(todo):,} ({n / (time.time() - t0):.1f}/s)", file=sys.stderr)
         if a.limit and n >= a.limit:
             break
