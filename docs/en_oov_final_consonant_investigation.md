@@ -99,3 +99,24 @@ Goldens: 10 files, 39 rows of English OOV runs inside other languages moved (nan
 `en.tsv` and the variant goldens did not — they are async-rendered, so their OOV words come from the BiLSTM
 and never reach this decoder. (`gen_parity_goldens.mts` again rewrote `en-GB.tsv` with a different sentence
 selection; reverted and re-rendered with `gen_variant_golden.mts`, which reports no change.)
+
+## Run 5 — 2026-09-04 23:05 — review: SNES and ISIL were never the decoder's to get right
+
+Review note: *SNES is "es-nes" and ISIL "eye-sil" — mixed letter-pronounced acronyms, lexical.* Right: a
+letter, then a syllable. The letter route says *ˈɛs ˈɛn ˈiː ˈɛs*, the word route says *snz* (A3) or *sn*
+(before), and no rule can produce the mixed form because nothing in the spelling marks where the letters stop
+and the syllable starts. Run 3's "SNES → snz, ISIL → ˈɪsɪ — not reopened" was pinning a wrong reading as if
+it were a target. Both go into `accent-lexicon.tsv`, in the same shape as the lexicon's own `emcee`
+*ˈɛmsˈiː* and `tv` *tʰˈiːvˈiː*, under a comment marking them hand-authored rather than CMUdict:
+
+```
+snes  ˈɛsnˈɛs        isil  ˈaᶦsɪɫ
+```
+
+The lexicon precedes the tagger and the n-gram on every path, so `SNES` reads the same sync, async, and
+through the accent deltas (*ðə ˈɛsnˈɛs* in en-GB), and inside a foreign run: the FLEURS sentence "an alleged
+Daesh (ISIL) militant" is in 58 goldens as an English run inside other languages, and 32 rows in 18 files
+moved from the n-gram's *ˈɪsɪ* / the tagger's *ˈɪzəɫ* to the lexical reading. GIF stays the decoder's —
+*ɡˈɪf* is what the rule earns, and it is right.
+
+What this leaves for the decoder is exactly the class Run 4 measured: ordinary words reached as OOV.

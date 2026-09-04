@@ -124926,3 +124926,7 @@ zyskowski		zɪskˈɔːfski
 zyuganov		zjˈuːɡɑːnɑːv
 zyuganov's		zjˈuːɡɑːnɑːvz
 zywicki		zɪwˈɪki
+# HAND-AUTHORED, not CMUdict: MIXED letter+syllable acronym readings, which no letter rule or OOV model can derive
+# (the letter route says ˈɛs ˈɛn ˈiː ˈɛs, the word route swallows a letter). Lexical, like emcee / tv above.
+snes		ˈɛsnˈɛs
+isil		ˈaᶦsɪɫ
