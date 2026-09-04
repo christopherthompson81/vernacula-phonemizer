@@ -203,4 +203,22 @@ describe("a rate denominator with no word is silent, not spoken (#1255)", () => 
         // (ASCII-only) does not reach; pinned so the decision is visible rather than a comment.
         expect(phonemize("160 км/с", "tg").trim()).toBe("sadˈu ʃˈast kilɔmˈetr s");
     });
+
+    test("#1257 review — a declared denominator takes the ASCII exponent too, instead of handing it to the number path", () => {
+        // ⚠ DECLARING THE NOUN EXPOSED THIS. With `s` undeclared, `9.8 m/s2` dropped `/s2` whole (silent). With
+        // it declared, the denominator group accepted only `²`/`³`, so the match ended before the `2` and the
+        // number path SPOKE it — haw *mika o ka kekona ʔelua*, "metre per second TWO", the invented-number
+        // class. nl had the same reading all along. The denominator now takes the numerator's own alternative.
+        expect(phonemize("9.8 m/s2", "an").trim()).toBe("nweu koma weito metɾos po seɡundo kwadɾau");
+        expect(phonemize("9.8 m/s2", "an").trim()).toBe(phonemize("9.8 m/s²", "an").trim());
+        expect(phonemize("9.8 m/s2", "haw").trim()).toBe("ʔeiwa ʔewalu mika o ka kekona kuea");
+        expect(phonemize("9.8 m/s2", "nl").trim()).toBe("nˈeːɣən . ˈɑxt mˈeːtər pˈɛr vˈirkˈɑntə sˈeːkɔndə");
+        // The population-density shape in its ASCII spelling — tl's largest exponent class.
+        expect(phonemize("20,164 katao/km2", "tl").trim()).toBe("dalawampˈuŋ lˈibo sandaʔˈan ʔˈat ʔanimnapˈut ʔˈapat katˈaʔo bˈawat kilomˈetɾo kuwadɾˈado");
+        // ⚠ AND THE SAME LOOKAHEAD THE NUMERATOR USES keeps a year and a word out of it…
+        expect(phonemize("3 m/s2020", "nl").trim()).toBe("drˈi mˈeːtər pˈɛr sˈeːkɔndə tʋˈeːdˈœy̯zənt tʋˈɪntəx");
+        expect(phonemize("5 km/h2a", "nl").trim()).toBe("vˈɛi̯f kˈiloːmətər pˈɛr ˈyr tʋˈeː ˈaː");
+        // …while the Latin-only lookbehind, also the numerator's, leaves a Cyrillic denominator's `2` as it was.
+        expect(phonemize("160 км/соат2", "tg").trim()).toBe("sadˈu ʃˈast kilɔmˈetr dˈar sɔˈat dˈu");
+    });
 });

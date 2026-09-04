@@ -369,7 +369,7 @@ const SYMBOLS = makeSymbolNormalizer({
         kg: ["kilogramo"], mg: ["miligramo"], nm: ["nanometro"], lb: ["libra"], lbs: ["libra"],
         l: ["litro"], L: ["litro"], ha: ["ektarya"],
         katao: ["katao"], naninirahan: ["naninirahan"] },
-    // ⟨oras⟩ is the hour (#1257): `mga ilang oras bago`, `ang yunit ng oras`, ×16 in the mined artifact. With only
+    // ⟨oras⟩ is the hour (#1257): `mga ilang oras bago`, `ang yunit ng oras`, ×11 as a word in the mined artifact (×2 attest). With only
     // `s` declared, `160 km/h` read *kilomˈetɾo* and stopped, while `km/oras` read through. Same noun ilo, hil and
     // ceb declare, and the same `bawat` below composes it.
     rateDenominators: { s: "segundo", h: "oras" },
