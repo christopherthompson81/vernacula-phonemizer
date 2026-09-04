@@ -179,7 +179,10 @@ them scored every English closing diphthong one phone short. `OFFGLIDE` in `asr_
 them **on our side, per language**, and only where measurement says the recognizer hears the segment:
 
 - Expanded where the diphthong is the language's own — en_us 0.180 → 0.156 (2,363 rows closer / 75 further
-  for `ᶦ`), en_gb 0.205 → 0.183, cy, ta, Mandarin's `aⁱ` (2,917 / 148), the Bantu `ai`/`au` of ny sn xh zu.
+  for `ᶦ`), en_gb 0.205 → 0.183, cy, ta, Mandarin's `aⁱ` (2,917 / 148). ⚠ The ny sn xh zu cells are NOT
+  Bantu diphthongs — those engines emit none of these letters. Their offglides are English numerals
+  (`ngo-2009` → *θaᶷzənd naᶦn*) placed by the corpus's numeral register (`numeral_register.mts`), and the
+  readers said them in English too, so the cell is real; it is the English offglide inside a Bantu row.
 - **Not** expanded where `ᶦ`/`ᶷ` sit in an English loan read by the English arm inside a non-Latin host —
   am, ar, bg, bn, fa, he, hi, ja, kk, km, ko, th, vi… — because the recognizer, listening to that language,
   writes `ebay` and `craigslist` as monophthongs; nor Czech ⟨ou⟩ (111 / 1,346), nor Irish `ⁱ`, which is

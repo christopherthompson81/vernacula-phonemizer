@@ -63,12 +63,19 @@ PUNCT = set(",.!?;:()[]{}\"'«»„“”‘’—–")
 # ⚠ BUT NOT EVERYWHERE, and the table below is the measurement, not a linguistic judgement. Measured per
 # (language, letter) over all 163,166 aligned rows that carry one, expanding ONLY that cell: the recognizer
 # hears the segment where the diphthong is the LANGUAGE'S OWN (en 2363 rows closer / 75 further for ᶦ; cy,
-# ta, cmn's aⁱ 2917/148, the Bantu ai/au of ny sn xh zu), and does NOT where our ᶦ/ᶷ sit in an English
+# ta, cmn's aⁱ 2917/148), and does NOT where our ᶦ/ᶷ sit in an English
 # loan read by the English arm inside a non-Latin host — am, ar, bg, bn, fa, he, hi, ja, kk, km, ko, th,
 # vi write `ebay` and `craigslist` as monophthongs (`eː`), so expanding adds a phone with no counterpart.
 # Two letters mean different things in different engines: `ⁱ` is Mandarin's offglide (expand) and Irish's
 # slender-consonant colouring (97/1869 — keep dropping); Czech ⟨ou⟩ comes back as ONE vowel (111/1346).
 # And the back glide is absorbed more readily than the front one: cy, ta, gl, mi, xh expand ᶦ and not ᶷ.
+# ⚠ ny sn xh zu ARE NOT BANTU DIPHTHONGS, which an earlier draft of this comment claimed; those engines emit
+# none of these letters. Their rows' ᶦ/ᶷ are ENGLISH NUMERALS — `ngo-2009` as *tʰuː θaᶷzənd naᶦn* — put there
+# on purpose by the corpus's numeral register (tools/corpus/numeral_register.mts: a Xhosa news reader
+# voices the year in English), and the recognizer confirms the readers did (`t aʊ z ə n d`). So the
+# expansion is heard, and the cell is real — but it is the ENGLISH offglide inside a Bantu row, and says
+# nothing about Bantu notation. Same for mi (English proper nouns) and ru/mk (loans). See
+# docs/offglide_notation_investigation.md.
 #
 # A cell is listed when n ≥ 20, the language's MEDIAN does not get worse with only that cell expanded, and
 # more rows move closer than further — `ɀ`'s criterion, applied per language because the fact is per
