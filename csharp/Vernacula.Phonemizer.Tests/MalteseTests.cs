@@ -216,8 +216,8 @@ public class MalteseTests
     [InlineData("300,000 km/s", "300000 kilometru fis-sekonda")]
     [InlineData("5 cm/s", "5 ċentimetri fis-sekonda")]
     [InlineData("20 km / h", "20 kilometru fis-siegħa")]   // spaced slash, either side
-    [InlineData("5 km/j", "5 kilometri/j")]                // an unlisted denominator strands ALONE (#1249)
-    [InlineData("5 m/kg", "5 metri/kg")]
+    [InlineData("5 km/j", "5 kilometri")]                  // an unlisted denominator is DROPPED (#1255)
+    [InlineData("5 m/kg", "5 metri")]
     [InlineData("5 km/", "5 kilometri/")]                  // ⚠ the degenerate residual, pinned as it reads
     public void TheRate(string text, string want) => Assert.Equal(want, N(text));
 

@@ -657,6 +657,16 @@ public static class NormalizeSymbols
                   NOT_VERSION + "(" + NUM + ")" + magAltU + "\\s?(" + unitAlt + ")"
                       + "(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(" + denomKeys + ")(\u00b2|\u00b3)?"
                       + "|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?"
+                      // ⚠ AND AN UNREADABLE DENOMINATOR IS CONSUMED AND DROPPED (#1255). Stranding it left a
+                      // WRONG READING, not a gap: 36 non-Latin hosts voice it through the English foreign
+                      // reader (ja "…kiromeetoru AITCH") and 23 Latin hosts keep a literal `h`, which IS a
+                      // valid IPA symbol and is rendered as the glottal fricative. No gate saw either. This
+                      // file's own ordering settles it — missing word ≥ wrong word — and the repo litigated
+                      // the same "the leak gate can see it" premise once already in bare-exponent. The repair
+                      // is the DENOMINATOR NOUN; test/rate-denominator.test.ts ledgers the gaps. 1-3 ASCII
+                      // letters only, so `12.8 km/秒` and a Cyrillic `⟨/с⟩` are untouched and `120mg/100ml`
+                      // (a digit) is not this. NON-CAPTURING: the callback reads its groups positionally.
+                      + "(?:\\s?/\\s?[A-Za-z]{1,3}(?![\\p{L}\\p{M}\\p{Nd}]))?"
                       // ⚠ AN UNREADABLE RATE READS ITS NUMERATOR AND STRANDS ONLY THE DENOMINATOR (#1249).
                       // The `(?!\s?/\s?[A-Za-z])` decline that stood after this lookahead (#1093/#1098)
                       // discarded the numerator's reading with it and bought nothing for the denominator —

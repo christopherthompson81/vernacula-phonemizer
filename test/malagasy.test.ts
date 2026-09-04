@@ -68,7 +68,7 @@ describe("Malagasy text normalization", () => {
         // match did not make the ⟨/s⟩ any more visible — it only cost the kilometre. This number is still
         // read out as a distance, which is a MALAGASY DATA GAP (no `s` denominator noun sourced), and it is
         // now visible as one. The grouping under test is unaffected either way.
-        expect(normalizeMalagasy("299 792,458 km/s")).toBe("299792 faingo 4 5 8 kilaometatra/s");
+        expect(normalizeMalagasy("299 792,458 km/s")).toBe("299792 faingo 4 5 8 kilaometatra");
     });
 
     it("the comma is the decimal at every width", () => {

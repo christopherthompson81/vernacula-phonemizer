@@ -969,6 +969,38 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               // and its own next match reads the second — and `12.8 km/秒` (a Japanese golden row) has a
               // denominator that IS a word the engine reads. Neither ever entered the ASCII guard.
               //
+              // ⚠ AND AN UNREADABLE DENOMINATOR IS CONSUMED AND DROPPED, not left behind (#1255). #1249 had
+              // the arm strand it, on the premise that the abbreviation then stays visible to the leak gates.
+              // Measured over all 193 codes on `160 km/h`, that premise is false on BOTH sides of the split
+              // it creates, and what is left behind is a WRONG READING rather than a gap:
+              //   · 36 non-Latin hosts never see the `h` at all — it routes to the English foreign reader and
+              //     is VOICED: ja reads `çäkɯᵝɾo̞kɯᵝd͡ʑɯᵝː kiɾo̞me̞ꜜːto̞ɾɯᵝ ˈeᶦt͡ʃ`, "one-sixty kilometre AITCH";
+              //   · 23 Latin hosts keep it as literal `h` — and `h` IS A VALID IPA SYMBOL, so et's
+              //     `kˈilomeːtrit h` is not an inert leak a reader spots, it is the voiceless glottal
+              //     fricative and anything consuming this IPA renders it. `s`, `l`, `t`, `m`, `min`, `yr` are
+              //     all IPA-legal the same way.
+              // `isBareUnitKey`'s own header already records why no gate catches the second ("a Latin run in
+              // a Latin-script language looks exactly like a word"), and the first never reaches the output as
+              // Latin at all. Nothing was being kept visible; the arm was emitting a phone.
+              //
+              // ⚠ THE ORDERING THAT SETTLES IT IS THIS FILE'S OWN, from the exponent branch below —
+              // **missing word ≥ wrong word ≫ invented number** — and the repo has litigated this exact
+              // premise once already: test/bare-exponent.test.ts's "⚠ AN UNDECLARED LANGUAGE KEEPS THE DIGITS
+              // — the mark was NOT staying visible, it was being eaten", where the same "the leak gate can
+              // see it" comment was found to be certifying a bug in 169 of 193 codes.
+              // ⚠ DROPPING IT IS NOT THE REPAIR, only the better of two wrong answers. The repair is the
+              // DENOMINATOR NOUN, which is per-language data and per-DENOMINATOR at that — cmn reads `km/h`
+              // and fails only on `/s`. test/rate-denominator.test.ts ledgers every language that reaches
+              // this branch, so the gap stays discoverable where it can be acted on rather than in the IPA.
+              //
+              // ⚠ ONE-TO-THREE ASCII LETTERS AND NO FURTHER: short enough to be an abbreviation (`h`, `s`,
+              // `yr`, `kg`, `min`), bounded so a real word after a slash is left alone, and ASCII-only so a
+              // denominator in the host's own script is untouched — `12.8 km/秒` is a word the engine reads,
+              // and the Cyrillic `⟨/с⟩` residual stays exactly where #1098 left it. A DIGIT after the slash
+              // is likewise not this: `120mg/100ml` is a ratio of two readable quantities. NON-CAPTURING,
+              // because the callback reads its groups POSITIONALLY and must not shift; the drop is simply the
+              // replacement not putting it back.
+              //
               // ⚠ AND `makeBareUnitNormalizer` KEEPS ITS `/` GUARD, so the two arms of this file now
               // DISAGREE on purpose — see its header for the two shapes that measured it (`mm/dd/yyyy`,
               // `mg/kg`). Everything above rests on two premises a bare key does not have: a NUMERAL
@@ -983,7 +1015,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               // routes to the English foreign reader and `20 km` read *nid͡ʑɯᵝː kʰˈeᶦəm* — "twenty kay-em"
               // inside Japanese, which is a confident error, not a gap. The designation class is reported
               // rather than folded in here.
-              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])`,
+              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?:\\s?/\\s?[A-Za-z]{1,3}(?![\\p{L}\\p{M}\\p{Nd}]))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])`,
               "giu",
           )
         : null;
