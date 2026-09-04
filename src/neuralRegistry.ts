@@ -7,6 +7,8 @@
 import { prePass } from "./registry.ts";
 import { phonemizeArabic } from "./languages/arabic/arabic.ts";
 import { phonemizeEnNeural } from "./languages/english/englishNeural.ts";
+import { rpWordTransform } from "./languages/english-gb/english-gb.ts";
+import { indianWordTransform } from "./languages/english-in/english-in.ts";
 import { phonemizeBnNeural } from "./languages/bengali/bengaliNeural.ts";
 import { phonemizeDaNeural } from "./languages/danish/danishNeural.ts";
 import { phonemizeNbNeural } from "./languages/norwegian/norwegianNeural.ts";
@@ -28,6 +30,11 @@ const ARABIC_VARIETY: Record<string, string | undefined> = {
 
 const NEURAL: Record<string, (text: string) => Promise<string>> = {
     en: phonemizeEnNeural, // BiLSTM OOV reader (else the sync n-gram OOV G2P)
+    // ⚠ THE ACCENT VARIANTS TAKE THE SAME READER (#1260). They compose on the sync `en` engine, and until this
+    // entry existed their async path WAS the sync path — the n-gram tail, with everything it gets wrong
+    // (`Croydon` → *kɹˈɒɔᶦdɒn*), inside the one corpus slice built on `phonemizeAsync`.
+    "en-GB": (text) => phonemizeEnNeural(text, { host: "en-GB", wordTransform: rpWordTransform() }),
+    "en-IN": (text) => phonemizeEnNeural(text, { host: "en-IN", wordTransform: indianWordTransform }),
     sd: phonemizeSdNeural, // per-letter BiLSTM restoring the abjad's unwritten short vowels on OOV words
     // per-grapheme BiLSTM reading the words BOTH af lexicons miss: 91.4% vs the rules' 63.5% word-exact
     // on a dictionary-gold held-out split, because af's residual is stress-conditioned vowel quality — contextual, not tabulable

@@ -213,6 +213,15 @@ export function phonemizeWordRules(word: string): string {
  *  reusing the full number/heteronym/prosody context. Linking-r ACROSS words is deferred (per-word scope). */
 export function createEnglishGB(): { text(input: string): string } {
     const e = createEnglish();
-    const lex = sets();
-    return { text: (input: string): string => e.text(input, (ipa, word) => toRP(ipa, word, lex)) };
+    return { text: (input: string): string => e.text(input, rpWordTransform()) };
+}
+
+/** The per-word delta on its own, for the ASYNC entry (englishNeural.ts) — same hook, same lexical sets. */
+let RP_HOOK: ((ipa: string, word: string) => string) | undefined;
+export function rpWordTransform(): (ipa: string, word: string) => string {
+    if (RP_HOOK === undefined) {
+        const lex = sets();
+        RP_HOOK = (ipa, word) => toRP(ipa, word, lex);
+    }
+    return RP_HOOK;
 }

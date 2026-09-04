@@ -68,5 +68,8 @@ export const phonemizeWordRules = phonemizeWord;
 /** Build the Indian-English phonemizer (GenAm engine + the GIE delta on each word's output). */
 export function createEnglishIN(): { text(input: string): string } {
     const e = createEnglish();
-    return { text: (input: string): string => e.text(input, (ipa) => toIndian(ipa)) };
+    return { text: (input: string): string => e.text(input, indianWordTransform) };
 }
+
+/** The per-word delta on its own, for the ASYNC entry (englishNeural.ts). */
+export const indianWordTransform = (ipa: string): string => toIndian(ipa);

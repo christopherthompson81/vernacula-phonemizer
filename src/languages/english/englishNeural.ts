@@ -71,11 +71,19 @@ export async function prewarmForeignEnglish(text: string): Promise<void> {
  * Phonemize English text with the neural tagger filling the OOV tail. Async because the ONNX pass is; falls back to
  * the plain sync path (CMUdict + n-gram engine) when the model / `onnxruntime-node` is unavailable.
  */
-export async function phonemizeEnNeural(text: string): Promise<string> {
+export async function phonemizeEnNeural(
+    text: string,
+    /** An ACCENT VARIANT rides here (#1260): its host code, and the per-word delta `createEnglishGB` /
+     *  `createEnglishIN` hand to `text()`. Without this the variants composed on the sync engine only, so
+     *  `phonemizeAsync("Croydon", "en-GB")` was the n-gram's *kɹˈɒɔᶦdɒn* while `"en"` had the tagger's
+     *  *kɹˈɔᶦd̬ən* — the corpus is built on the async path, and en-GB was the one English that never got it. */
+    variant?: { host: string; wordTransform: (ipa: string, word: string) => string },
+): Promise<string> {
     if (taggerP === undefined) taggerP = createEnglishTagger();
     const tagger = await taggerP;
     const E = enEngine();
-    if (!tagger) return withHost("en", () => E.text(text)); // no model → sync path
+    const host = variant?.host ?? "en";
+    if (!tagger) return withHost(host, () => E.text(text, variant?.wordTransform)); // no model → sync path
 
     // PRE-PASS: tag each distinct OOV word once. Skip words the sync engine already knows (dict/heteronym) — they are
     // served authoritatively by the sync path; genuinely-OOV pure-alpha words go to the BiLSTM. An empty tag ("")
@@ -93,5 +101,5 @@ export async function phonemizeEnNeural(text: string): Promise<string> {
     // (numbers, heteronym POS, possessives, punctuation) is the sync path, so only OOV word readings differ.
     // `withHost` — this engine is built here, not by the registry, so nothing else pushes the host and a
     // foreign run would be dropped for want of one (core/foreign.ts). Synchronous, as that stack requires.
-    return withHost("en", () => E.text(text, undefined, (g2pKey) => tagged.get(g2pKey)));
+    return withHost(host, () => E.text(text, variant?.wordTransform, (g2pKey) => tagged.get(g2pKey)));
 }

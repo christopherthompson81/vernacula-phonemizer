@@ -173,7 +173,7 @@ public class HmongTests
     {
         Assert.Equal("bˌiːbisˈiː", Say("BBC"));
         Assert.Equal("ɡˈiːdˈiːpʰˈiː", Say("GDP"));
-        Assert.Equal("ˈɛɫ . ˈɛɫ . zˈæmənhf", Say("L. L. Zamenhof"));
+        Assert.Equal("ˈɛɫ . ˈɛɫ . zˈæmɪnhəf", Say("L. L. Zamenhof"));
     }
 
     [Fact]

@@ -7,6 +7,7 @@
  */
 using Vernacula.Phonemizer;
 using Vernacula.Phonemizer.Languages.EnglishGb;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Vernacula.Phonemizer.Tests;
@@ -104,5 +105,19 @@ public class EnglishGbTests
         Assert.NotEqual(EnglishGb.PhonemizeWordRules("grass"), EnglishGb.PhonemizeWord("grass"));
         // A word in no set reads the same either way.
         Assert.Equal(EnglishGb.PhonemizeWordRules("green"), EnglishGb.PhonemizeWord("green"));
+    }
+
+    [Fact]
+    public async Task AsyncTakesTheTaggerThenTheDelta()
+    {
+        // ⚠ #1260: en-GB composes on the sync `en` engine, and its async path WAS the sync path — `Croydon` (OOV)
+        // reached the n-gram, which doubled the vowel, and the RP delta faithfully carried *kɹˈɒɔᶦdɒn* into the
+        // corpus. The variant now takes the same BiLSTM reading `en` does, then the delta.
+        Assert.Equal("kɹˈɔᶦdən", (await Phonemizer.PhonemizeAsync("Croydon", "en-GB")).Trim());
+        Assert.NotEqual(Phonemizer.Phonemize("Croydon", "en-GB").Trim(), (await Phonemizer.PhonemizeAsync("Croydon", "en-GB")).Trim());
+        // A dictionary word and everything that is not an OOV word are byte-identical to the sync variant.
+        const string s = "The cat sat on the mat in 1997 at Roydon.";
+        Assert.Equal(Phonemizer.Phonemize(s, "en-GB"), await Phonemizer.PhonemizeAsync(s, "en-GB"));
+        Assert.Equal("kɾˈɔɪɖən", (await Phonemizer.PhonemizeAsync("Croydon", "en-IN")).Trim());
     }
 }

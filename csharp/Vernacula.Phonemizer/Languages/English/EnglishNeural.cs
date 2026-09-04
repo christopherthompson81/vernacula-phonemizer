@@ -57,12 +57,15 @@ public static class EnglishNeural
         }
     }
 
-    /** Phonemize English text with the neural tagger filling the OOV tail. */
-    public static async Task<string> PhonemizeEnNeural(string text)
+    /** Phonemize English text with the neural tagger filling the OOV tail.
+     *  An ACCENT VARIANT rides on `host` + `wordTransform` (#1260): the same per-word delta `CreateEnglishGB` /
+     *  `CreateEnglishIN` hand to `Text()`. Without this the variants composed on the sync engine only, so their
+     *  async reading was the n-gram's — `Croydon` → *kɹˈɒɔᶦdɒn* — while `en` had the tagger's. */
+    public static async Task<string> PhonemizeEnNeural(string text, string host = "en", Func<string, string, string>? wordTransform = null)
     {
         var tagger = await Tagger().ConfigureAwait(false);
         var E = EnEngine();
-        if (tagger is null) return Foreign.WithHost("en", () => E.Text(text)); // no model → sync path
+        if (tagger is null) return Foreign.WithHost(host, () => E.Text(text, wordTransform, null)); // no model → sync path
 
         var tagged = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (Match m in WORD.Matches(text))
@@ -74,6 +77,6 @@ public static class EnglishNeural
             var ipa = await tagger.Tag(key).ConfigureAwait(false);
             if (ipa.Length > 0) tagged[key] = ipa;
         }
-        return Foreign.WithHost("en", () => E.Text(text, null, g2pKey => tagged.TryGetValue(g2pKey, out var v) ? v : null));
+        return Foreign.WithHost(host, () => E.Text(text, wordTransform, g2pKey => tagged.TryGetValue(g2pKey, out var v) ? v : null));
     }
 }

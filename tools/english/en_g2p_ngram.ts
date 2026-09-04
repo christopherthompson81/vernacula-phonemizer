@@ -7,6 +7,10 @@
  *   4. Decode a new word with a beam over graphemic segmentations, scoring joint-token n-grams.
  * Predicts stress-bearing ARPABET → arpabetToIpa → canonical. Word-acc vs CMUdict = OOV canonical quality.
  *   npx tsx tools/english/en_g2p_ngram.ts [--order N] [--beam K] [--iters M] [--phonemic] [--errors]
+ *   The SHIPPED model (data/languages/english/g2p-model.json) is `--comp --morph --emit`, with CMUDICT the
+ *   public-domain cmudict.dict and EN_FREQ the shipped g2p-common.txt; that reproduces it byte for byte
+ *   (verified #1260). ⚠ --emit writes the model BEFORE the held-out score below is computed, and prunes with
+ *   --topk (default: none) — score the emitted file, not this run's tables, when the width changes.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -478,6 +482,23 @@ if (argIdx("--emit") >= 0) {
     const { writeFileSync } = await import("node:fs");
     const { join: pjoin } = await import("node:path");
     const minC = argIdx("--minc") >= 0 ? Number(process.argv[argIdx("--minc") + 1]) : 3;
+    // ⚠ NO TOP-K PRUNING BY DEFAULT (#1260). This was `.slice(0, 4)` — every context kept its four commonest
+    // continuations and the unigram table kept FOUR TOKENS — and nothing ever scored the model as emitted: the
+    // held-out accuracy printed below is computed on the in-memory tables, and `--emit` exits before it runs.
+    // Scored as shipped (scratch/ngram_bench2.mts in the #1260 log), on the same held-out tenth:
+    //
+    //     top-K   size    word-acc(stress)  word-acc(seg)  PER      spurious VV (a doubled vowel: croydon → kɹɑːɔᶦdɑːn)
+    //     4       2.8MB   25.36%            29.20%         24.00%   13.63%      ← what shipped
+    //     8       3.0MB   33.82%            38.80%         19.41%    7.82%
+    //     16      3.1MB   40.40%            45.87%         16.19%    5.69%
+    //     32      3.2MB   45.00%            51.41%         14.32%    4.95%
+    //     all     3.3MB   47.20%            53.25%         13.71%    5.40%      ← default now (minCount 3 still applies)
+    //
+    // Half a megabyte bought back almost half the model's word accuracy. A word outside a kept context scored
+    // log(1e-7) for EVERY chunk, so all chunks tied and the tie went to whichever later context happened to exist —
+    // `croydon` was K R AA1 OY2 D AA0 N because `d:D` after `o:AA1 y:OY2` was a stored continuation. `--topk N`
+    // restores the pruning for a size experiment; 0 means all.
+    const topK = argIdx("--topk") >= 0 ? Number(process.argv[argIdx("--topk") + 1]) : 0;
     // Default output is the English engine's own directory — "read from an external data root, write into
     // src/", the convention tools/README states.
     const dir =
@@ -490,7 +511,7 @@ if (argIdx("--emit") >= 0) {
             const kept = [...m.entries()]
                 .filter(([, c]) => c >= minC)
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 4);
+                .slice(0, topK > 0 ? topK : undefined);
             if (kept.length) model[`${o}|${ctx}`] = { t: ctxTotal[o]!.get(ctx)!, c: kept };
         }
     const gc: Record<string, string[]> = {};
