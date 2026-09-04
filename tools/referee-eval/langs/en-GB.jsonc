@@ -10,6 +10,17 @@
         { "pattern": "ʰ", "replace": "", "note": "aspiration on p/t/k — our GenAm engine marks it, the referee doesn't" },
         { "pattern": "ɫ", "replace": "l", "note": "DARK/velarised coda ⟨l⟩ [ɫ] — our engine marks the velarisation, the broad referee writes plain [l]; one phoneme" },
         { "pattern": "ɐ", "replace": "ə", "note": "the near-open central [ɐ] the narrow referee uses for NURSE/STRUT/commA ~ our [ə]/[ɜ]" },
-        { "pattern": "ɜ", "replace": "ə", "note": "NURSE [ɜː] ~ [ə] after the backbone strips length — unify with the referee's [ə]/[ɐ]" }
+        { "pattern": "ɜ", "replace": "ə", "note": "NURSE [ɜː] ~ [ə] after the backbone strips length — unify with the referee's [ə]/[ɐ]" },
+        // The five CLOSING DIPHTHONGS, which en-GB writes with the parent's superscript offglide since #1252
+        // — one unit rather than two full vowels that collide with every other language's ə/ɪ/ʊ in a shared
+        // IPA corpus. The referee writes them the standard way, so these fold the notation and nothing else.
+        // ⚠ EXACTLY THE FIVE `en.jsonc` ALREADY CARRIES, for exactly the same reason; only the GOAT ONSET
+        // differs between the two (RP's central [ə] against GenAm's [o]), which is a real phone contrast and
+        // is NOT folded here.
+        { "pattern": "əᶷ", "replace": "əʊ", "note": "our GOAT offglide əᶷ vs referee əʊ" },
+        { "pattern": "eᶦ", "replace": "eɪ", "note": "our FACE offglide eᶦ vs referee eɪ" },
+        { "pattern": "aᶦ", "replace": "aɪ", "note": "our PRICE offglide aᶦ vs referee aɪ" },
+        { "pattern": "aᶷ", "replace": "aʊ", "note": "our MOUTH offglide aᶷ vs referee aʊ" },
+        { "pattern": "ɔᶦ", "replace": "ɔɪ", "note": "our CHOICE offglide ɔᶦ vs referee ɔɪ" }
     ]
 }

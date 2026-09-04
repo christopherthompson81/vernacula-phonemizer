@@ -13,7 +13,10 @@
 import { describe, expect, it } from "vitest";
 import { phonemizeWord } from "../src/languages/english-gb/english-gb.ts";
 
-// word → adjudicated SSBE IPA in OUR output convention (aspirated kʰ/tʰ/pʰ, dark coda [ɫ], ɹ, ᵻ reduced-high).
+// word → adjudicated SSBE IPA in OUR output convention (aspirated kʰ/tʰ/pʰ, dark coda [ɫ], ɹ, ᵻ reduced-high,
+// and since #1252 the parent's SUPERSCRIPT offglide on the closing diphthongs — `əᶷ eᶦ aᶦ aᶷ ɔᶦ`, one unit
+// each, where a reference transcription writes `əʊ eɪ aɪ aʊ ɔɪ`). The DEFERRED note above quotes reference
+// notation on purpose: it describes a phenomenon this engine does not produce.
 const GOLD: [string, string][] = [
     // START / non-rhotic coda r + linking-r vowels
     ["car", "kʰˈɑː"], ["start", "stˈɑːt"], ["hard", "hˈɑːd"], ["park", "pʰˈɑːk"],
@@ -29,8 +32,8 @@ const GOLD: [string, string][] = [
     // yod-retention (Cuː → Cjuː) after /n s θ/
     ["new", "njˈuː"], ["news", "njˈuːz"], ["student", "stjˈuːdənt"], ["stupid", "stjˈuːpəd"], ["nude", "njˈuːd"],
     ["enthusiasm", "ɪnθjˈuːziˌæzəm"], ["numerous", "njˈuːməɹəs"], ["assume", "əsjˈuːm"],
-    // GOAT (əʊ)
-    ["goat", "ɡˈəʊt"], ["home", "hˈəʊm"], ["road", "ɹˈəʊd"], ["know", "nˈəʊ"], ["boat", "bˈəʊt"],
+    // GOAT (əᶷ — the parent's offglide since #1252, RP's central onset)
+    ["goat", "ɡˈəᶷt"], ["home", "hˈəᶷm"], ["road", "ɹˈəᶷd"], ["know", "nˈəᶷ"], ["boat", "bˈəᶷt"],
     // centring diphthongs NEAR / SQUARE / CURE (non-rhotic)
     ["near", "nˈɪə"], ["here", "hˈɪə"], ["dear", "dˈɪə"], ["square", "skwˈɛə"], ["care", "kʰˈɛə"], ["hair", "hˈɛə"],
     ["cure", "kjˈʊə"], ["pure", "pjˈʊə"],
@@ -41,14 +44,14 @@ const GOLD: [string, string][] = [
     // PALM exceptions (keep [ɑː] against the LOT rule)
     ["father", "fˈɑːðə"], ["spa", "spˈɑː"], ["drama", "dɹˈɑːmə"], ["banana", "bənˈɑːnə"],
     // dark coda [ɫ]
-    ["little", "lˈɪtəɫ"], ["people", "pʰˈiːpəɫ"], ["apple", "ˈæpəɫ"], ["table", "tʰˈeɪbəɫ"],
+    ["little", "lˈɪtəɫ"], ["people", "pʰˈiːpəɫ"], ["apple", "ˈæpəɫ"], ["table", "tʰˈeᶦbəɫ"],
     // wide diphthongs FACE/PRICE/MOUTH/CHOICE + FLEECE/GOOSE
-    ["face", "fˈeɪs"], ["price", "pɹˈaɪs"], ["time", "tʰˈaɪm"], ["mouth", "mˈaʊθ"], ["now", "nˈaʊ"],
-    ["choice", "t͡ʃˈɔɪs"], ["boy", "bˈɔɪ"], ["fleece", "flˈiːs"], ["goose", "ɡˈuːs"], ["blue", "blˈuː"],
+    ["face", "fˈeᶦs"], ["price", "pɹˈaᶦs"], ["time", "tʰˈaᶦm"], ["mouth", "mˈaᶷθ"], ["now", "nˈaᶷ"],
+    ["choice", "t͡ʃˈɔᶦs"], ["boy", "bˈɔᶦ"], ["fleece", "flˈiːs"], ["goose", "ɡˈuːs"], ["blue", "blˈuː"],
     // linking-r kept before a vowel
     ["different", "dˈɪfəɹənt"],
     // LOT before intervocalic r (sorry vs starry split — lexical, mined `lotr` set)
-    ["sorry", "sˈɒɹi"], ["borrow", "bˈɒɹəʊ"], ["tomorrow", "təmˈɒɹəʊ"],
+    ["sorry", "sˈɒɹi"], ["borrow", "bˈɒɹəᶷ"], ["tomorrow", "təmˈɒɹəᶷ"],
 ];
 
 describe("en-GB (SSBE/BBC) accent transform", () => {

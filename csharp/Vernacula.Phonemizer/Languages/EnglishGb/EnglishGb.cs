@@ -32,7 +32,7 @@ public sealed class LexSets
 public static class EnglishGb
 {
     /** The vowels the "not before a vowel = coda" guard must know about — the POST-transform alphabet, since
-     *  all three uses sit after the GOAT/offglide/NURSE/lettER remaps (hence SSBE-only `ɜ`, `ɒ`).
+     *  all three uses sit after the GOAT/NURSE/lettER remaps (hence SSBE-only `ɜ`, `ɒ`).
      *  ⚠ `ᵻ` WAS MISSING AND THAT DELETED ONSET /ɹ/ (#1250) — `reports` read *ᵻpʰˈɔːts*. Audited over the
      *  117,479-word dict: `ᵻ` (×828) is the only vowel that can follow an `ɹ` here and was absent, and `ɐ`/`o`
      *  stay though unreachable — the class is a NEGATIVE lookahead, so a missing vowel deletes a consonant
@@ -65,9 +65,11 @@ public static class EnglishGb
 
     private static readonly JsRe FLAP_T = JsRegex.Compile("t̬", "gu");
     private static readonly JsRe FLAP_D = JsRegex.Compile("d̬", "gu");
+    /** GOAT — RP's central onset, the parent's offglide. ⚠ THE CLOSING DIPHTHONGS KEEP THE SUPERSCRIPT
+     *  (#1252): `əʊ eɪ aɪ aʊ ɔɪ` are correct IPA for RP but two full vowels are two symbols to anything
+     *  reading the IPA, and they collide with every other language's ə/ɪ/ʊ in a shared corpus. `eᶦ aᶦ aᶷ ɔᶦ`
+     *  are now byte-identical to the parent's; only the GOAT onset differs, deliberately. See the TS. */
     private static readonly JsRe GOAT = JsRegex.Compile("oᶷ", "gu");
-    private static readonly JsRe OFFGLIDE_I = JsRegex.Compile("ᶦ", "gu");
-    private static readonly JsRe OFFGLIDE_U = JsRegex.Compile("ᶷ", "gu");
     private static readonly JsRe PALATAL = JsRegex.Compile("ʲ", "gu");
     private static readonly JsRe NURSE_PREVOCALIC = JsRegex.Compile($"ɝ(?=[ˈˌ]*[{PRE_VOWEL}])", "gu");
     private static readonly JsRe NURSE = JsRegex.Compile("ɝ", "gu");
@@ -79,6 +81,13 @@ public static class EnglishGb
     private static readonly JsRe CLOTH_FIRST = JsRegex.Compile("ɔː", "u");
     private static readonly JsRe YOD_FIRST = JsRegex.Compile("([tdnszθl])(ʰ?)([ˈˌ]?)uː", "u");
     private static readonly JsRe LOTR_FIRST = JsRegex.Compile("ɑːɹ", "u");
+    /** The OFFGLIDE TRIPHTHONGS. ⚠ WITHOUT THESE #1252 WOULD HAVE DELETED A SCHWA IN 238 WORDS: the generic
+     *  offglide map used to rewrite `ᶦ`/`ᶷ` to full `ɪ`/`ʊ` first, so NEAR and CURE fired on the result and
+     *  turned offglide + coda /ɹ/ into RP's triphthong (`ˈæbʃaᶦɹ` → `ˈæbʃaɪə`). Keeping the superscript stops
+     *  them matching and the coda-/ɹ/ drop takes the `ɹ` instead. Same CODA guard, so a LINKING /ɹ/ survives
+     *  (`əkwˈaᶦɹɪŋ`). See the TS. */
+    private static readonly JsRe PRICE_R = JsRegex.Compile($"ᶦɹ{CODA}", "gu");
+    private static readonly JsRe MOUTH_R = JsRegex.Compile($"ᶷɹ{CODA}", "gu");
     private static readonly JsRe NEAR = JsRegex.Compile($"ɪɹ{CODA}", "gu");
     private static readonly JsRe SQUARE = JsRegex.Compile($"ɛɹ{CODA}", "gu");
     private static readonly JsRe CURE = JsRegex.Compile($"ʊɹ{CODA}", "gu");
@@ -91,8 +100,7 @@ public static class EnglishGb
     {
         var w = Js.ToLowerCase(word);
         var s = FLAP_D.Replace(FLAP_T.Replace(genAm, "t"), "d"); // un-flap the tapped coronal
-        s = GOAT.Replace(s, "əʊ");                               // GOAT, before the generic offglide map
-        s = OFFGLIDE_U.Replace(OFFGLIDE_I.Replace(s, "ɪ"), "ʊ"); // FACE/PRICE/MOUTH/CHOICE offglides
+        s = GOAT.Replace(s, "əᶷ");
         s = PALATAL.Replace(s, "");                              // drop the palatal on-glide (idea)
         // NURSE ɝ / lettER ɚ: before a vowel keep a LINKING /ɹ/; in coda non-rhotic.
         s = NURSE.Replace(NURSE_PREVOCALIC.Replace(s, "ɜːɹ"), "ɜː");
@@ -113,6 +121,8 @@ public static class EnglishGb
             if (lex.Lotr.Contains(w)) s = LOTR_FIRST.Replace(s, "ɒɹ");
         }
         // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
+        s = PRICE_R.Replace(s, "ᶦə");   // PRICE/CHOICE + coda r (fire, choir)
+        s = MOUTH_R.Replace(s, "ᶷə");   // MOUTH/GOAT + coda r (hour, power)
         s = NEAR.Replace(s, "ɪə");
         s = SQUARE.Replace(s, "ɛə");
         s = CURE.Replace(s, "ʊə");

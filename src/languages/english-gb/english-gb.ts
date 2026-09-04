@@ -8,7 +8,8 @@
  * The delta (GenAm → SSBE), from the referee:
  *   • NON-RHOTICITY: coda /ɹ/ dropped; r-coloured vowels remap — NURSE ɝ→ɜː, lettER ɚ→ə, START ɑːɹ→ɑː, NORTH ɔːɹ→ɔː,
  *     NEAR ɪɹ→ɪə, SQUARE ɛɹ→ɛə, CURE ʊɹ→ʊə. Before a vowel, ɚ/ɝ keep a LINKING /ɹ/ (different→dɪfəɹənt).
- *   • GOAT oᶷ→əʊ; the FACE/PRICE/MOUTH/CHOICE offglides ᶦ→ɪ, ᶷ→ʊ; the dark coda /ɫ/ stays (folded ɫ~l in the eval).
+ *   • GOAT oᶷ→əᶷ; FACE/PRICE/MOUTH/CHOICE keep the parent's SUPERSCRIPT offglide (#1252); the dark coda
+ *     /ɫ/ stays (folded ɫ~l in the eval).
  *   • LOT ɑː→ɒ (un-does GenAm's father-bother merger); un-flap the tapped /t̬/→[t].
  *   • THE LEXICAL SETS (GenAm doesn't carry these splits → word lists): BATH æ→ɑː (grass, dance), CLOTH ɔː→ɒ (off,
  *     dog), yod-retention Cuː→Cjuː (new→njuː), and PALM (exceptions kept [ɑː] against the LOT rule: father, spa).
@@ -78,6 +79,18 @@ const CODA = `(?![ˈˌ]*[${VOWEL}])`; // an /ɹ/ NOT before a (optionally stress
  */
 const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
 const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
+/**
+ * ⚠ THE OFFGLIDE TRIPHTHONGS, AND WITHOUT THEM #1252 WOULD HAVE DELETED A SCHWA IN 238 WORDS. Until that
+ * change the generic offglide map rewrote `ᶦ`/`ᶷ` to full `ɪ`/`ʊ` FIRST, so `NEAR` and `CURE` fired on the
+ * result and turned offglide + coda /ɹ/ into RP's triphthong: `ˈæbʃaᶦɹ` → `aɪɹ` → `ˈæbʃaɪə`, `ˈaᶷɹbæk` →
+ * `aʊɹ` → `ˈaʊəbæk`. Keeping the superscript stops those two matching, the coda-/ɹ/ drop takes the `ɹ`
+ * instead, and the schwa is never emitted at all — `ˈæbʃaᶦ`, `ˈaᶷbæk`. Measured over the dict: `ᶦɹ` ×465 and
+ * `ᶷɹ` ×94. The `ɚ` twins (`ᶦɚ` ×550, `ᶷɚ` ×285) need nothing, since `ɚ` becomes `ə` on its own.
+ * ⚠ UNDER THE SAME `CODA` GUARD as the others, so a LINKING /ɹ/ still survives: `əkwˈaᶦɹɪŋ` (acquiring) has
+ * the `ɹ` before a vowel and keeps it.
+ */
+const PRICE_R = new RegExp(`ᶦɹ${CODA}`, "gu");
+const MOUTH_R = new RegExp(`ᶷɹ${CODA}`, "gu");
 const NEAR = new RegExp(`ɪɹ${CODA}`, "gu");
 const SQUARE = new RegExp(`ɛɹ${CODA}`, "gu");
 const CURE = new RegExp(`ʊɹ${CODA}`, "gu");
@@ -109,8 +122,23 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     const w = word.toLowerCase();
     let s = genAm;
     s = s.replace(/t̬/gu, "t").replace(/d̬/gu, "d"); // un-flap the tapped coronal
-    s = s.replace(/oᶷ/gu, "əʊ"); // GOAT (before the generic offglide map)
-    s = s.replace(/ᶦ/gu, "ɪ").replace(/ᶷ/gu, "ʊ"); // FACE/PRICE/MOUTH/CHOICE offglides
+    // ⚠ THE CLOSING DIPHTHONGS KEEP THE PARENT'S SUPERSCRIPT OFFGLIDE (#1252), and the GOAT onset is the only
+    // thing this line still changes. `əʊ eɪ aɪ aʊ ɔɪ` are correct IPA for RP and were never wrong; they are
+    // wrong as a CONVENTION, because two full vowels are two independent symbols to anything reading the IPA
+    // and a superscript offglide is one unit. In a shared multilingual corpus that is not hypothetical: over
+    // 271,798 OmniVoice utterances, `əʊ` is 917 tokens with NO English behind it (sd 394, mn 359, nb 102) and
+    // `eɪ` is 1,913 of which 1,899 are Burmese — so a model conditioned on this IPA renders en-GB's GOAT
+    // through phones it learned from Sindhi and its FACE from Burmese. `eᶦ aᶦ aᶷ ɔᶦ` are now byte-identical
+    // to what `en` emits and inherit its training directly.
+    // ⚠ `əᶷ` KEEPS RP'S CENTRAL ONSET and is deliberately NOT the parent's `oᶷ`: substituting that would make
+    // en-GB sound American rather than fix anything. It is a novel COMBINATION — the corpus has `ə`, has `ᶷ`,
+    // has `oᶷ`/`aᶷ` as units, but has never seen this pair — which is the premise an IPA-conditioned model
+    // rests on and is untested for it. If it renders badly the honest fix is corpus-side (en-GB audio in the
+    // fine-tune), not more notation.
+    // ⚠ AND THE CENTRING DIPHTHONGS ARE LEFT ALONE. `ɪə ɛə ʊə` are contaminated the same way, but the obvious
+    // parallel `ɪᵊ ɛᵊ ʊᵊ` is worse: `ᵊ` occurs ZERO times in that corpus, so it would trade a
+    // contaminated-but-trained symbol for an untrained one. No notation fixes a vowel the model never heard.
+    s = s.replace(/oᶷ/gu, "əᶷ"); // GOAT — RP's central onset, the parent's offglide
     s = s.replace(/ʲ/gu, ""); // drop the palatal on-glide (idea)
     // NURSE ɝ / lettER ɚ: before a vowel keep a linking /ɹ/; in coda non-rhotic.
     s = s.replace(NURSE_PREVOCALIC, "ɜːɹ").replace(/ɝ/gu, "ɜː");
@@ -129,6 +157,8 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s
+        .replace(PRICE_R, "ᶦə") // PRICE/CHOICE + coda r — the triphthong (fire, choir)
+        .replace(MOUTH_R, "ᶷə") // MOUTH/GOAT + coda r — likewise (hour, power)
         .replace(NEAR, "ɪə") // NEAR
         .replace(SQUARE, "ɛə") // SQUARE
         .replace(CURE, "ʊə") // CURE
