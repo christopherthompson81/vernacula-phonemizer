@@ -138,6 +138,14 @@ describe("a rate denominator with no word is silent, not spoken (#1255)", () => 
         // ⚠ A DECLARED DENOMINATOR IS UNTOUCHED — this only ever removes a symbol with no word behind it.
         expect(phonemize("160 km/h", "de").trim()).toContain("ʃtˈʊndə");
         expect(phonemize("160 m/s", "tr").trim()).toBe("sanijedˈe jˈyz aɫtmˈɯʃ mˈetɾe"); // a PREFIX arm, still read
+        // ⚠ AND A SHORT RUN **WITH A VOWEL** IS LEFT ALONE, because it may be a word the host reads — which
+        // is `isBareUnitKey`'s own discriminator, five screens up in the same file. Without it the guard ate
+        // nl's *ˈyr* (`km/uur`), sw's *sˈaː* (`km/saa`) and cs's *ɦˈot* (`km/hod`).
+        expect(phonemize("160 km/uur", "nl").trim()).toBe("ɦˈɔndərtzˈɛstəx kˈiloːmətər ˈyr");
+        expect(phonemize("160 km/saa", "sw").trim()).toContain("sˈaː");
+        // …while the vowel-free ones are exactly the defect this closes.
+        expect(phonemize("160 km/Std", "de").trim()).toBe("ˈaɪ̯nhʊndɐtzɛçt͡sɪç kilomˈeːtɐ");
+        expect(phonemize("160 km/hr", "fr").trim()).toBe("sɑ̃ swasɑ̃t kilɔmˈɛtʁ");
         // ⚠ AND NEITHER IS A DENOMINATOR IN THE HOST'S OWN SCRIPT, nor a ratio of two readable quantities:
         // the guard is 1–3 ASCII letters, so `秒` and `100ml` are both outside it.
         expect(phonemize("12.8 km/秒", "ja").trim()).toBe("d͡ʑɯᵝːni te̞ɴhät͡ɕi kiɾo̞me̞ꜜːto̞ɾɯᵝ bʲo̞ꜜː");

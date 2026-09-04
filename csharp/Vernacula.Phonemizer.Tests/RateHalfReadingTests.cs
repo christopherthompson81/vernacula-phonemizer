@@ -43,7 +43,11 @@ public class RateHalfReadingTests
     // native phone in eleven more. Missing word ≥ wrong word.
     [InlineData("5 m/s", "5 metre")]
     [InlineData("5 km/h", "5 kilometre")]
-    [InlineData("2-3 cm/yr", "2-3 centimetre")]
+    // ⚠ …BUT `yr` KEEPS ITS SLASH, and that is the vowel test doing its job rather than an inconsistency:
+    // the drop is restricted to VOWEL-FREE runs (`isBareUnitKey`'s discriminator), because a short run WITH
+    // a vowel may be a word the host reads — nl `km/uur` is *ˈyr*, sw `km/saa` is *sˈaː*. `y` counts as a
+    // vowel there, so `yr` is on the conservative side and keeps today's behaviour.
+    [InlineData("2-3 cm/yr", "2-3 centimetre/yr")]
     // …and the EXPONENT still comes with the numerator, in both spellings — #1249's own second finding.
     [InlineData("5 m³/s", "5 metre³")]
     [InlineData("5 km²/h", "5 kilometre²")]

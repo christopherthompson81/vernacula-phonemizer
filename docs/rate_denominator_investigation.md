@@ -171,3 +171,38 @@ four times and each round's reasoning was correct on the evidence it had.
   `test/rate-denominator.test.ts` is the to-do list, and it can only shrink.
 - **Class 1 was NOT closed as "working as intended"**, which the issue offered. `h` is a valid IPA symbol, so
   it was never the visible leak the design assumed; it is in scope and it is fixed.
+
+## Run 7 — 2026-09-04 14:20 — review: the guard was eating real words
+
+Probing the shapes languages ACTUALLY write for a rate — not just `km/h` — the `[A-Za-z]{1,3}` guard was
+dropping readings that were correct before it:
+
+```
+                        before              after (as first written)
+nl  160 km/uur   …kˈiloːmətər ˈyr           …kˈiloːmətər        ⟵ Dutch "uur", read correctly
+af  160 km/uur   …ˈyːr                      …                   ⟵ likewise
+sw  160 km/saa   …sˈaː                      …                   ⟵ Swahili "saa", hour
+cs  160 km/hod   …ɦˈot                      …                   sv 160 km/tim → tiːm, fi /tun → tun
+```
+
+against the ones the issue is about, where the same slot produces garbage:
+
+```
+de  160 km/Std   …ʃtt          es 160 km/hr  …r          fr 160 km/hr  …ʁ          et /h  …h
+```
+
+⚠ AND THE DISCRIMINATOR THAT SEPARATES THEM IS ALREADY IN THIS FILE. `isBareUnitKey` decides the same
+question five screens up — is this short Latin run a SYMBOL or a WORD? — and answers it with a **vowel test**,
+measured: "the vowel-free symbols (`km` ×68, `kg`, `cm`, `mm`) were units in every instance … an alphabet
+that writes its vowels does not write vowel-less words". Every regression above has a vowel; every case the
+issue reports does not. The guard now excludes vowels, `y` included, exactly as that rule does.
+
+The cost is that `min`, `sec` and `yr` are no longer dropped — they keep today's behaviour, which is the safe
+side of a one-sided error. The `160 km/h` fleet numbers are unchanged by the narrowing (160 / 0 / 5 / 24) and
+so is the ledger (221 / 208 / 47), because `h` and `s` are vowel-free.
+
+⚠ AND THE `ilo` GOLDEN ROW CAUGHT A MISSED MIRROR. With the narrowing applied to the TypeScript only,
+`csharp/tools/parity` reported `ilo DIFF 1/94` — TS `…sɛntimˈɛtɾo jɾ`, C# `…sɛntimˈɛtɾo`. The C# had the wide
+guard and was still dropping `/yr`. Mirrored; byte-identical again. Two of this issue's three near-misses were
+found by parity rather than by a test, which is an argument for running it on every change that touches the
+shared tier and not only when a golden moves.

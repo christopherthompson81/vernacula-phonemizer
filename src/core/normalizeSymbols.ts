@@ -993,13 +993,23 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               // and fails only on `/s`. test/rate-denominator.test.ts ledgers every language that reaches
               // this branch, so the gap stays discoverable where it can be acted on rather than in the IPA.
               //
-              // ⚠ ONE-TO-THREE ASCII LETTERS AND NO FURTHER: short enough to be an abbreviation (`h`, `s`,
-              // `yr`, `kg`, `min`), bounded so a real word after a slash is left alone, and ASCII-only so a
-              // denominator in the host's own script is untouched — `12.8 km/秒` is a word the engine reads,
-              // and the Cyrillic `⟨/с⟩` residual stays exactly where #1098 left it. A DIGIT after the slash
-              // is likewise not this: `120mg/100ml` is a ratio of two readable quantities. NON-CAPTURING,
-              // because the callback reads its groups POSITIONALLY and must not shift; the drop is simply the
-              // replacement not putting it back.
+              // ⚠ ONE TO THREE ASCII LETTERS, **AND NO VOWEL AMONG THEM**, which is the whole discriminator and
+              // is not a new one — it is `isBareUnitKey`'s, five screens up, adopted here for the same reason
+              // and with the same measurement behind it: "An alphabet that writes its vowels does not write
+              // vowel-less words", so a vowel-free run is a SYMBOL and a run with a vowel may be a WORD.
+              // ⚠ AND WITHOUT IT THIS DROPPED REAL WORDS, measured on the shapes languages actually write:
+              //     nl `160 km/uur`  was *…kˈiloːmətər ˈyr*   — Dutch for "hour", read correctly
+              //     af `160 km/uur`  was *…ˈyːr*              ·  sw `160 km/saa` was *sˈaː*, Swahili "hour"
+              //     cs `160 km/hod`  was *ɦˈot*               ·  sv `160 km/tim` was *tiːm*
+              // against the vowel-free ones, which are what the issue is about:
+              //     de `160 km/Std`  was *ʃtt*   ·  es `160 km/hr` was *r*   ·  fr `km/hr` was *ʁ*
+              // The cost is that `min`, `sec` and `yr` are no longer dropped; they keep today's behaviour,
+              // which is the safe side of a one-sided error.
+              // ⚠ BOUNDED AT THREE and ASCII-ONLY so a denominator in the host's own script is untouched —
+              // `12.8 km/秒` is a word the engine reads, and the Cyrillic `⟨/с⟩` residual stays exactly where
+              // #1098 left it. A DIGIT after the slash is likewise not this: `120mg/100ml` is a ratio of two
+              // readable quantities. NON-CAPTURING, because the callback reads its groups POSITIONALLY and
+              // must not shift; the drop is simply the replacement not putting it back.
               //
               // ⚠ AND `makeBareUnitNormalizer` KEEPS ITS `/` GUARD, so the two arms of this file now
               // DISAGREE on purpose — see its header for the two shapes that measured it (`mm/dd/yyyy`,
@@ -1015,7 +1025,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               // routes to the English foreign reader and `20 km` read *nid͡ʑɯᵝː kʰˈeᶦəm* — "twenty kay-em"
               // inside Japanese, which is a confident error, not a gap. The designation class is reported
               // rather than folded in here.
-              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?:\\s?/\\s?[A-Za-z]{1,3}(?![\\p{L}\\p{M}\\p{Nd}]))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])`,
+              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?:\\s?/\\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?![\\p{L}\\p{M}\\p{Nd}]))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc\u00b2\u00b3])`,
               "giu",
           )
         : null;

@@ -664,9 +664,14 @@ public static class NormalizeSymbols
                       // file's own ordering settles it — missing word ≥ wrong word — and the repo litigated
                       // the same "the leak gate can see it" premise once already in bare-exponent. The repair
                       // is the DENOMINATOR NOUN; test/rate-denominator.test.ts ledgers the gaps. 1-3 ASCII
-                      // letters only, so `12.8 km/秒` and a Cyrillic `⟨/с⟩` are untouched and `120mg/100ml`
-                      // (a digit) is not this. NON-CAPTURING: the callback reads its groups positionally.
-                      + "(?:\\s?/\\s?[A-Za-z]{1,3}(?![\\p{L}\\p{M}\\p{Nd}]))?"
+                      // 1-3 ASCII letters AND NO VOWEL AMONG THEM — `isBareUnitKey`'s own discriminator,
+                      // adopted here for the same measured reason ("an alphabet that writes its vowels does
+                      // not write vowel-less words"): a vowel-free run is a SYMBOL, a run with a vowel may be
+                      // a WORD. Without it this dropped nl `km/uur` (*ˈyr*, Dutch for hour), sw `km/saa` and
+                      // cs `km/hod`, while the vowel-free ones are the defect (de `/Std` → *ʃtt*, fr `/hr` →
+                      // *ʁ*). `12.8 km/秒` and a Cyrillic `⟨/с⟩` are untouched, and `120mg/100ml` (a digit) is
+                      // not this. NON-CAPTURING: the callback reads its groups positionally.
+                      + "(?:\\s?/\\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?![\\p{L}\\p{M}\\p{Nd}]))?"
                       // ⚠ AN UNREADABLE RATE READS ITS NUMERATOR AND STRANDS ONLY THE DENOMINATOR (#1249).
                       // The `(?!\s?/\s?[A-Za-z])` decline that stood after this lookahead (#1093/#1098)
                       // discarded the numerator's reading with it and bought nothing for the denominator —
