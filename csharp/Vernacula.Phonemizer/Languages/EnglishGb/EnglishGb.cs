@@ -66,9 +66,14 @@ public static class EnglishGb
     private static readonly JsRe FLAP_T = JsRegex.Compile("t̬", "gu");
     private static readonly JsRe FLAP_D = JsRegex.Compile("d̬", "gu");
     /** GOAT — RP's central onset, the parent's offglide. ⚠ THE CLOSING DIPHTHONGS KEEP THE SUPERSCRIPT
-     *  (#1252): `əʊ eɪ aɪ aʊ ɔɪ` are correct IPA for RP but two full vowels are two symbols to anything
-     *  reading the IPA, and they collide with every other language's ə/ɪ/ʊ in a shared corpus. `eᶦ aᶦ aᶷ ɔᶦ`
-     *  are now byte-identical to the parent's; only the GOAT onset differs, deliberately. See the TS. */
+     *  (#1252): `əʊ eɪ aɪ aʊ ɔɪ` are correct IPA for RP, so this is a CONSISTENCY decision between two
+     *  variants of one engine — `en` has written `oᶷ eᶦ aᶦ aᶷ ɔᶦ` for a long time and `en-GB` did not follow
+     *  it — and a superscript offglide is ONE unit where two full vowels are two symbols. Measured over the
+     *  first 60 golden rows of every ported language, the superscript spellings are where the English family
+     *  already lives (`eᶦ` 28 languages, `aᶦ` 27) and the plain ones are mostly Burmese/German/Devanagari
+     *  (`eɪ` 2, `aɪ` 13). `eᶦ aᶦ aᶷ ɔᶦ` are now byte-identical to the parent's; only the GOAT ONSET differs,
+     *  deliberately — that is REALISATION (RP central vs GenAm back rounded), not notation. `əᶷ` is not novel
+     *  to this fleet: Welsh already writes it (`dəᶷˈɛdɔð`). See the TS. */
     private static readonly JsRe GOAT = JsRegex.Compile("oᶷ", "gu");
     private static readonly JsRe PALATAL = JsRegex.Compile("ʲ", "gu");
     private static readonly JsRe NURSE_PREVOCALIC = JsRegex.Compile($"ɝ(?=[ˈˌ]*[{PRE_VOWEL}])", "gu");

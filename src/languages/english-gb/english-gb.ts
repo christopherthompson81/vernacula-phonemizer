@@ -123,18 +123,36 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     let s = genAm;
     s = s.replace(/t̬/gu, "t").replace(/d̬/gu, "d"); // un-flap the tapped coronal
     // ⚠ THE CLOSING DIPHTHONGS KEEP THE PARENT'S SUPERSCRIPT OFFGLIDE (#1252), and the GOAT onset is the only
-    // thing this line still changes. `əʊ eɪ aɪ aʊ ɔɪ` are correct IPA for RP and were never wrong; they are
-    // wrong as a CONVENTION, because two full vowels are two independent symbols to anything reading the IPA
-    // and a superscript offglide is one unit. In a shared multilingual corpus that is not hypothetical: over
-    // 271,798 OmniVoice utterances, `əʊ` is 917 tokens with NO English behind it (sd 394, mn 359, nb 102) and
-    // `eɪ` is 1,913 of which 1,899 are Burmese — so a model conditioned on this IPA renders en-GB's GOAT
-    // through phones it learned from Sindhi and its FACE from Burmese. `eᶦ aᶦ aᶷ ɔᶦ` are now byte-identical
-    // to what `en` emits and inherit its training directly.
-    // ⚠ `əᶷ` KEEPS RP'S CENTRAL ONSET and is deliberately NOT the parent's `oᶷ`: substituting that would make
-    // en-GB sound American rather than fix anything. It is a novel COMBINATION — the corpus has `ə`, has `ᶷ`,
-    // has `oᶷ`/`aᶷ` as units, but has never seen this pair — which is the premise an IPA-conditioned model
-    // rests on and is untested for it. If it renders badly the honest fix is corpus-side (en-GB audio in the
-    // fine-tune), not more notation.
+    // thing this line still changes. `əʊ eɪ aɪ aʊ ɔɪ` are correct IPA for RP and were never wrong — this is a
+    // CONSISTENCY decision between two variants of one engine, which is how the issue itself framed it: `en`
+    // has written `oᶷ eᶦ aᶦ aᶷ ɔᶦ` for a long time and `en-GB`, which is `en` plus a lexical-set delta, did
+    // not follow it. A superscript offglide is ONE unit; two full vowels are two independent symbols to
+    // anything reading the IPA.
+    //
+    // ⚠ MEASURED IN THIS REPO, over the first 60 golden rows of every ported language — the collision is not
+    // hypothetical, and after this change en-GB is on the right side of it:
+    //     eᶦ  28 languages (en 92, en-GB 77, nan 65, cy 51)   ·  eɪ  2 (my 56, la 6)
+    //     aᶦ  27 languages (ta 174, en 86, en-GB 76)          ·  aɪ  13 (de 139, my 117, en-IN 76)
+    //     aᶷ  14 languages (en 41, en-GB 27, cy 26)           ·  aʊ  8  (my 122, de 65)
+    //     oᶷ  46 languages                                     ·  əʊ  3  (mai 43, awa 13, mn 12)
+    // So the plain spellings are, in this fleet, mostly Burmese, German and Devanagari-language sequences,
+    // and the superscript ones are where the English family already lives.
+    //
+    // ⚠ THE REPORTER'S DOWNSTREAM NUMBERS, CORRECTED, because the first version of them was wrong and is
+    // quoted in a few places. They come from a TTS model conditioned on this IPA, and the counts that matter
+    // are its 28 TRAINED languages, not the 102-language alignment/QC database first cited: `eɪ` has ELEVEN
+    // occurrences in training, all Russian (the earlier "1,899 Burmese" was from the QC database — Burmese is
+    // not in the trained set at all), against `eᶦ` at 9,567; `aɪ`/`aʊ` are German-only (7,468 / 2,755); `əʊ`
+    // is Sindhi, 394 of 434. That is a fact about that model, not about this engine, and it is the REASON the
+    // change was proposed rather than the argument for it — the argument is the consistency above.
+    //
+    // ⚠ `əᶷ` KEEPS RP'S CENTRAL ONSET and is deliberately NOT the parent's `oᶷ`: the onset is REALISATION
+    // (RP's central unrounded vowel against GenAm's back rounded one) and only the offglide is NOTATION, so
+    // substituting `oᶷ` would make en-GB sound American rather than fix anything. The pairing is not novel to
+    // this fleet either — Welsh already writes it, `dəᶷˈɛdɔð` (*dywedodd*) — so `ə` + superscript `ᶷ` is a
+    // sequence the engine's own IPA already contains. Whether a given downstream MODEL has seen the pair is a
+    // separate question and belongs to that model's corpus.
+    //
     // ⚠ AND THE CENTRING DIPHTHONGS ARE LEFT ALONE. `ɪə ɛə ʊə` are contaminated the same way, but the obvious
     // parallel `ɪᵊ ɛᵊ ʊᵊ` is worse: `ᵊ` occurs ZERO times in that corpus, so it would trade a
     // contaminated-but-trained symbol for an untrained one. No notation fixes a vowel the model never heard.

@@ -129,3 +129,68 @@ every consumer of the convention is updated with it.)
 - **`əᶷ` is a novel combination and stays untested here.** The corpus has `ə`, has `ᶷ`, and has `oᶷ`/`aᶷ` as
   units, but has never seen this pair. Substituting the parent's `oᶷ` would make en-GB sound American, which
   is not a fix; if `əᶷ` renders badly the honest answer is en-GB audio in the fine-tune. Recorded, not guessed.
+
+## Run 6 — 2026-09-04 09:10 — the reporter corrected the corpus numbers, and they were wrong in a way worth recording
+
+Two comments landed on #1252 after this branch was opened.
+
+⚠ **The counts quoted in the issue (and in my first draft of the code comment) were from the wrong layer.**
+They came from `align.sqlite`, the alignment/QC database — 271,798 rows over **102** languages — not from
+what the downstream model trained on, which is a subset sampled over **28** languages (v6 fine-tune: 82,258
+utterances). Restricted to the trained set:
+
+| sequence | all 102 | 28 trained | trained sources |
+|---|---|---|---|
+| `oᶷ` | 10,766 | 6,897 | en_us 3,175, cs_cz 2,026, vi_vn 608 |
+| `əʊ` | 917 | 434 | **sd_in 394**, ru_ru 39, hi_in 1 |
+| `eᶦ` | 12,816 | 9,567 | en_us 4,146, cy_gb 3,535 |
+| `eɪ` | 1,913 | **11** | ru_ru 11 |
+| `aᶦ` | 18,202 | 15,341 | ta_in 7,653, en_us 3,398 |
+| `aɪ` | 12,474 | 7,595 | **de_de 7,468** |
+| `aᶷ` | 4,515 | 3,708 | cy_gb 1,327, en_us 1,217 |
+| `aʊ` | 8,258 | 2,786 | **de_de 2,755** |
+| `ᵊ` | 0 | 0 | — |
+
+**The Burmese attribution was wrong** — Burmese is not in the trained set at all. `eɪ` has ELEVEN training
+occurrences, all Russian. The conclusion gets sharper, not weaker, and `ᵊ` is still zero either way so the
+centring-diphthong recommendation is unchanged. Every quotation of the old figures in this tree is corrected.
+
+⚠ **AND THE SECOND COMMENT REFRAMED THE DECISION, WHICH CHANGED WHAT THE CODE COMMENT SHOULD ARGUE.** The
+reporter's own words: *"None of the corpus detail is a prerequisite for deciding this issue … That is a
+consistency question between two variants of the same engine."* The downstream corpus is the REASON the
+change was proposed, not the argument for it. So the comment in `english-gb.ts` now leads with an in-repo
+measurement anyone can re-run, and cites the (corrected) downstream numbers as motivation.
+
+The in-repo measurement, over the first 60 golden rows of every ported language:
+
+```
+eᶦ  28 languages (en 92, en-GB 77, nan 65, cy 51)   ·  eɪ  2 (my 56, la 6)
+aᶦ  27 languages (ta 174, en 86, en-GB 76)          ·  aɪ  13 (de 139, my 117, en-IN 76)
+aᶷ  14 languages (en 41, en-GB 27, cy 26)           ·  aʊ  8  (my 122, de 65)
+oᶷ  46 languages                                     ·  əʊ  3  (mai 43, awa 13, mn 12)
+```
+
+Same story, measured on this side of the boundary: the superscript spellings are where the English family
+already lives, the plain ones are mostly Burmese, German and Devanagari sequences.
+
+## Run 7 — 2026-09-04 09:20 — the one question the reporter asked for judgement on
+
+> *"whether `əᶷ` is the right spelling — i.e. that RP GOAT keeps its central unrounded onset and only the
+> offglide changes notation … I would rather not guess at the boundary between 'notation' and 'realisation'
+> in someone else's engine."*
+
+It is the right spelling, and the boundary is exactly where they put it:
+
+1. **The onset is realisation, the offglide is notation.** RP GOAT is a central unrounded onset, GenAm's is
+   back rounded — a real phone contrast this engine already encodes elsewhere (it is why `en-GB.jsonc` folds
+   `ɐ`/`ɜ` to `ə` for the referee but has never folded the GOAT onset). The superscript is a spelling for the
+   glide, and spelling it does not touch the nucleus. Substituting `oᶷ` would change the phone.
+2. **`ə` + superscript `ᶷ` is not novel to this engine.** Welsh already emits it — `dəᶷˈɛdɔð` (*dywedodd*),
+   4 occurrences in cy's golden sample alone. So the pairing is already inside the fleet's IPA, independent
+   of en-GB.
+3. **The nucleus set for a superscript glide was never restricted to `o`/`a`.** `en` itself writes `eᶦ` and
+   `ɔᶦ`, so "any vowel + superscript glide" is the established pattern and `ə` is not a special case.
+
+⚠ Point 2 answers whether the SEQUENCE is well-formed for this engine. It does not answer whether a given
+downstream MODEL has seen the pair — that is a fact about that model's corpus and stays the reporter's to
+measure, exactly as their caveat says.
