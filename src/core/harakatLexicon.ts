@@ -26,7 +26,7 @@ export const stripHarakat = (word: string): string => word.replace(HARAKAT_G, ""
  * whereas the entry suppresses it and the word comes out unpronounceable (بزنس → *bzns*, برتخت → *brt̪xt̪*).
  *
  * 26 such rows are in `pashto/lexicon.tsv`, all in one alphabetical run (بر…/بز…) — the residue of the
- * loose-fold mining that `ps_neural_restoration_investigation.md` Run 11 identified and fixed at scale
+ * loose-fold mining that `docs/investigations/ps/ps_neural_restoration_investigation.md` Run 11 identified and fixed at scale
  * ("ps silver was 78% all-bare"). fa/ur/pnb have none, so this costs them nothing; the guard lives here so
  * a re-mine cannot reintroduce the class into any of the four.
  */

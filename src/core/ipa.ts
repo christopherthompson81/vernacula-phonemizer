@@ -7,7 +7,7 @@
  *
  * ⚠ A NARROWER LOCAL LIST IS NOT AUTOMATICALLY A BUG — sometimes it is load-bearing. Icelandic's omits
  * plain ⟨e⟩, which suppresses its hiatus glide before the ⟨ei ey⟩ diphthongs, and the referee ATTESTS that
- * glideless reading; switching it to this class measurably loses ground (docs/ipa_classes_investigation.md
+ * glideless reading; switching it to this class measurably loses ground (docs/investigations/referee/ipa_classes_investigation.md
  * Run 7). Before converting an engine, check what its narrowness is doing, and measure with
  * tools/referee-eval/eval.ts rather than reasoning from the shape of the list.
  *

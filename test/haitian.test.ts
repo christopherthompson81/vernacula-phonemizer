@@ -111,7 +111,7 @@ describe("Haitian Creole canonical IPA — phonemic IPN g2p + the nasal-vowel ru
 // ── TEXT NORMALIZATION (src/languages/haitian/normalize.ts) ────────────────────────────────────────────
 // Evidence: tools/corpus/mined/ht.jsonc plus an ht.wikipedia dump (800,158 paragraphs, of which 154,110 are
 // Creole — this wiki is 15.1% FRENCH, and every count in normalize.ts is quoted over the Creole subset).
-// Full log: docs/investigations/ht_normalization_investigation.md.
+// Full log: docs/investigations/ht/ht_normalization_investigation.md.
 describe("Haitian Creole text normalization", () => {
     const ht = createHaitian();
 

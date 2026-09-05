@@ -38,7 +38,7 @@ Status values, and the split they encode:
                     means someone looked.
 
 ⚠ WITHOUT `examined_clean` THE QUEUE SENDS YOU BACK INTO WORK ALREADY DONE. Run 42 of
-docs/investigations/asr_align_qc_investigation.md ranked the all-flagged queue by size and found three of
+docs/investigations/asr-align/asr_align_qc_investigation.md ranked the all-flagged queue by size and found three of
 its top five were already investigated and clean, with the investigation doc itself acting as the mark —
 "the queue needs an 'examined, no defect' mark; until it has one, this table is the mark". Run 54 then
 re-walked the declined ceb/fil/mi/ig numeral-register decision for the same reason. A prose table in a

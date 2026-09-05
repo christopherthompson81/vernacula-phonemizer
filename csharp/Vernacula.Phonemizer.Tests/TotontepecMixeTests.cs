@@ -7,7 +7,7 @@
  * ⚠ THIS FILE IS THIS LANGUAGE'S GOLDEN. `mto` has NO `csharp/goldens/mto.tsv` — deliberately, since its
  * ASJP list carries only three usable headwords (`tools/gen_parity_goldens.mts:142`) — so the parity,
  * provenance and ipaspans gates all report ZERO ROWS for it. These authored values and the TS↔C#
- * differential in `docs/mto_port_investigation.md` are the whole gate.
+ * differential in `docs/investigations/mto/mto_port_investigation.md` are the whole gate.
  *
  * Every expected value is the TypeScript engine's own output.
  */

@@ -41,7 +41,7 @@ describe("Hakka Chinese (Meixian) canonical IPA", () => {
 // ── NORMALIZATION ─────────────────────────────────────────────────────────────────────────────────────
 // The sixth Sinitic layer and the first built ON `core/sinitic.ts`. Tests pin the rule's BRANCHES rather
 // than the corpus's instances (playbook trap 13), and in particular the branches the corpus does NOT
-// exercise. `docs/investigations/hak_normalization_investigation.md` carries the counts.
+// exercise. `docs/investigations/hak/hak_normalization_investigation.md` carries the counts.
 describe("Hakka normalization", () => {
     test("thousands de-grouping — the grouping comma was a clause pause AND destroyed the value", () => {
         // Before: `1,000人` read *it̚˩ , laŋ˩˩ ŋin˩˩* — "one … zero people".

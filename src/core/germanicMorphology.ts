@@ -80,7 +80,7 @@ export function makeDecompose(cfg: MorphologyConfig): (word: string) => Decomp {
         // lexicon is a WORDLIST, so at ≥3 every three-letter word in it becomes a compound head and the splitter
         // shatters ordinary vocabulary — measured on af, dropping the floor to 3 scores +33/−143 (bak·kie,
         // dog·ter, ven·ster, sui·ker, don·ker…). A named-exception list for the real 3-letter stems was built and
-        // REJECTED; see docs/afrikaans_stress_investigation.md Run 7 for why it cannot be made safe here.
+        // REJECTED; see docs/investigations/af/afrikaans_stress_investigation.md Run 7 for why it cannot be made safe here.
         for (let i = w.length - minTail; i >= 4; i--) {
             const head = w.slice(0, i);
             if (!cfg.isConstituent(head)) continue;

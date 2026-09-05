@@ -11,18 +11,18 @@ DEST="${1:?usage: export-public.sh <destination-dir>}"
 [ -e "$DEST" ] && { echo "refusing: $DEST already exists" >&2; exit 1; }
 mkdir -p "$DEST"
 git archive HEAD | tar -x -C "$DEST"
-rm -rf "$DEST/docs/investigations"          # per-language bring-up logs — not published
+# docs/investigations/ IS published (decided with the tree reorganisation into <lang>/ and <topic>/ folders):
+# the root-level logs always were, and 200+ code comments cite them by path.
 echo "exported $(find "$DEST" -type f | wc -l) files to $DEST"
 echo
 echo
 echo "verifying the export:"
-# corpus/mined carries Wikipedia text that legitimately contains these shapes; this script and
-# packaging.test.ts name docs/investigations on purpose, so both are excluded from their own check.
-SKIP='corpus/mined|export-public.sh|packaging.test.ts'
-# `Run N` cites docs/investigations, which the line above deletes — so every such reference is a
-# pointer to something the published tree does not contain. Checked here because nothing else can:
-# they accumulated to 107 across src/, tools/ and test/ (37 of them inside test NAMES) unnoticed.
-for pat in '/home/[a-z]|/mnt/data|~/Programming' 'espeak-ng-portable' 'docs/investigations' '\bRun[ -][0-9]+'; do
+# corpus/mined carries Wikipedia text that legitimately contains these shapes; this script is excluded
+# from its own check.
+SKIP='corpus/mined|export-public.sh'
+# (The `docs/investigations` and `Run N` patterns that stood here guarded a tree that deleted the logs;
+# with the logs published, a citation of one is a link, not a leak.)
+for pat in '/home/[a-z]|/mnt/data|~/Programming' 'espeak-ng-portable'; do
     n=$( { grep -rInE "$pat" "$DEST" 2>/dev/null || true; } | { grep -vE "$SKIP" || true; } | wc -l)
     if [ "$n" -eq 0 ]; then echo "  ok    no $pat"; else
         echo "  FAIL  $n hits for $pat"

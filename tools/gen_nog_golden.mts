@@ -6,7 +6,7 @@
  * `data/languages/nogai/` — the fleet generator's three tiers all come up empty for it. The only Nogai
  * TEXT in this repository is the 24 headwords of the coarse ASJP referee
  * (`tools/referee-eval/referees/nog.asjp-swadesh.tsv`) — the same source the TypeScript engine was
- * brought up against (docs/investigations/nog_native_bringup_investigation.md) — plus the single kaikki
+ * brought up against (docs/investigations/nog/nog_native_bringup_investigation.md) — plus the single kaikki
  * attestation (туькен), which Run 2 deliberately kept OUT of the folded referee so the coarse referee
  * stays internally consistent.
  *

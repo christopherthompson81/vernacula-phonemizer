@@ -15,7 +15,7 @@
  * ⟨ӑ ӗ ҫ ӳ⟩, so the block-range tokenizer split 3,424 words and handed the strays to the English reader
  * (`çĕр` → *sˈɛp*, `пĕрремĕш` → five tokens). The rows now live in `core/unicode.ts`'s
  * `foldCyrillicConfusables`, which already ran for `chv` and simply had no entry for them; the measurement
- * that made a shared-table change safe is in `docs/investigations/chv_normalization_investigation.md`.
+ * that made a shared-table change safe is in `docs/investigations/chv/chv_normalization_investigation.md`.
  *
  * ⚠ THE SECOND FINDING IS THAT THE RESEARCH WAS ALREADY DONE AND NOTHING CALLED IT. `numbers.ts` sources
  * and implements Chuvash's TWO NUMERAL SERIES — FULL/substantival (пӗрре, иккӗ, виҫҫӗ, пиллӗк) for

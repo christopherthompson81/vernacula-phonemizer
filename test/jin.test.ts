@@ -45,7 +45,7 @@ describe("cjy text normalization", () => {
     // ⚠ THIS LANGUAGE HAS NO CORPUS. There is no cjy.wikipedia and no FLEURS; the only Jin text that exists
     // is the Wikimedia Incubator's Wp/cjy (3,060 Han characters, artifact covers 7/35 cells). So the rules
     // rest on the SHIPPED DICT — which decides whether a word can be spoken at all — and on that thin text.
-    // Evidence and every refusal: docs/investigations/cjy_normalization_investigation.md.
+    // Evidence and every refusal: docs/investigations/cjy/cjy_normalization_investigation.md.
 
     test("⚠ THE DICT IS THE GATE: an uncovered character is SILENT, not mispronounced", () => {
         // This is why the degree, 两-classifier and relational-sign rules are all refused: the words vanish.

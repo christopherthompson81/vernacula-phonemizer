@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Urdu OOV tagger — LEARNING CURVE on a FIXED dev set.
 
-WHY THIS EXISTS. Run 3 of docs/investigations/ur_tagger_investigation.md concluded "doubling the
+WHY THIS EXISTS. Run 3 of docs/investigations/ur/ur_tagger_investigation.md concluded "doubling the
 data widened the gap" from two rows whose always-ə priors differ (62.9% vs 71.5%) — i.e. whose
 DEV SETS differ, because ur_train_tagger.py draws dev as a 10% slice of the pool and the pool
 grew. That is not a data-scaling experiment. Run 4 then read the train/dev gap (92.6/63.8) as

@@ -14,7 +14,7 @@ import { renormalize, rewrite } from "../../core/provenance.ts";
  * The evidence is `tools/corpus/mined/ps.jsonc` (dump-sourced, 178,645
  * segments, so its `sample` tier IS the real distribution) plus a fresh ps.wikipedia dump — 242,649 lines
  * after `wikidump-to-text.py` + `filter-markup.py` + a local category-residue drop. Every count below is
- * over that file. Full log: `docs/investigations/ps_normalization_investigation.md`.
+ * over that file. Full log: `docs/investigations/ps/ps_normalization_investigation.md`.
  *
  * ⚠ AND EVERY PATTERN HERE USES AN EXPLICIT DIGIT CLASS, NEVER `\d`. Pashto writes Extended Arabic-Indic
  * ۰-۹ (U+06F0) mostly, Arabic-Indic ٠-٩ (U+0660) sometimes and ASCII sometimes — routinely all three in one

@@ -4,7 +4,7 @@ Recognize phones a SECOND time with allosaurus, beside the wav2vec2 column, for 
 
 `asr_align_corpus.py` filled `phones` from `facebook/wav2vec2-xlsr-53-espeak-cv-ft`. That model is
 fine-tuned on **espeak** labels, so it is not independent of espeak for symbol choices OR dialect
-choices -- and four separate findings in docs/investigations/asr_align_qc_investigation.md turned on
+choices -- and four separate findings in docs/investigations/asr-align/asr_align_qc_investigation.md turned on
 being unable to separate the instrument's convention from the speech (the hy/ky/ur low-vowel holds,
 the es_419 theta, the "22 languages cannot spell Latin acronyms" framing, the BCS devoicing rate).
 

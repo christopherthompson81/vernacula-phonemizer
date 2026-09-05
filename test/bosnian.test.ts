@@ -62,7 +62,7 @@ describe("Bosnian canonical IPA — shared Serbo-Croatian g2p + Bosnian deltas",
 
 // Bosnian TEXT NORMALIZATION. Every test below encodes a finding measured over the 1,976 deduplicated
 // utterances of FLEURS bs_ba; the count that decided each one is in the comment, and the full re-measurement
-// table is in docs/investigations/bs_normalization_investigation.md.
+// table is in docs/investigations/bs/bs_normalization_investigation.md.
 //
 // ⚠ THIS LAYER IS THE FLEET'S TRAP-55 CASE. Bosnian has TWO already-treated siblings (serbian/normalize.ts,
 // croatian/normalize.ts) and 18 of their 38 arms held against Bosnian's own corpus. The tests marked

@@ -2,7 +2,7 @@
 
 **Status:** plan only. Nothing here has been built or run. Written 2026-08-22, at the
 close of the ASR-alignment QC campaign (see
-`docs/investigations/asr_align_qc_investigation.md`), as a description of the
+`docs/investigations/asr-align/asr_align_qc_investigation.md`), as a description of the
 instrument that campaign turned out to need and did not have.
 
 ---

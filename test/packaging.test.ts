@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 // What `npm publish` would ship. Without a `files` allowlist npm falls back to `.gitignore` and packs the whole
 // repo — 2193 files / 253 MB, including all of tools/ (which carries absolute developer paths and 64 MB of referee
-// corpora) and all 234 docs/investigations/ files, which are not meant to leave the working tree at all.
+// corpora) and docs/ — the investigation logs are part of the public tree, but not of the npm package.
 //
 // The subtlety this guards: **a `files` allowlist OVERRIDES `.gitignore`.** Adding `"files": ["src", …]` silently
 // re-included two gitignored fp32/torch intermediates (da-g2p-tagger.onnx, km_segmenter.pt — 18 MB of artifacts

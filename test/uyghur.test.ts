@@ -33,7 +33,7 @@ describe("Uyghur canonical IPA — greedy letter g2p", () => {
 // ── TEXT NORMALIZATION (src/languages/uyghur/normalize.ts) ────────────────────────────────────────────
 // Evidence: `tools/corpus/mined/ug.jsonc` (ug.wikipedia dump, 66,091 paragraphs / 429 mined segments),
 // `attest.ts` against ug.wikipedia, and the wikipron referee above. Log:
-// `docs/investigations/ug_normalization_investigation.md`. These pin the RULE'S BRANCHES rather than the
+// `docs/investigations/ug/ug_normalization_investigation.md`. These pin the RULE'S BRANCHES rather than the
 // corpus's instances (playbook trap 13) — the corpus attests four of the ordinal's cases and the rule has
 // more, so the ones it is silent about are enumerated here.
 describe("Uyghur text normalization", () => {

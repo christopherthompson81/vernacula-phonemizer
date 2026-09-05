@@ -16,7 +16,7 @@
  *   sl   key `abstraktən` · no Slovene input will EVER contain ə — those keys are kaikki phonetic
  *        respellings that leaked into the orthographic key column. The key never agreed with anything.
  *
- * The measurement that produced the ledger is `docs/investigations/nativiser_lexicon_seam_investigation.md`.
+ * The measurement that produced the ledger is `docs/investigations/normalization/nativiser_lexicon_seam_investigation.md`.
  *
  * ⚠ TS-ONLY, DELIBERATELY. This asserts a property of the DATA against a fold, and both engines read the same
  * TSVs — so a C# mirror would re-measure the same numbers unless the two nativisers had diverged, which is

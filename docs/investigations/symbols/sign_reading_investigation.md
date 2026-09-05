@@ -1,0 +1,3419 @@
+# Signed numbers and the multiplication sign — what the `math-sign` / `signed-number` cells actually measure
+
+Scope: #586, the two cells `arithmetic` (`[+±×÷=<>]`) and `signed-number` (`[-−–]` before a digit). Opened
+because #627 closed both "by negative" — *no corpus spells a plus, so no rule is authorable* — and that
+conclusion was reached from a class-level count without ever resolving **which symbol** in **which shape**.
+
+## Run 1 — 2026-08-03 — resolve the two cells per SYMBOL instead of per class
+
+The class-level gate (`coverage.ts`) reports `arithmetic DROP` / `signed-number DROP` for 29 languages. That
+number is a count of *probe hits, not causes* (playbook trap: a gate's count is not a defect count), so the
+first question is which symbol each hit is.
+
+Command — over all 66 committed artifacts, per symbol, the differential drop test (substitute, never delete):
+
+```
+per-symbol: [+ − × ÷ ± = < >] plus [-–] restricted to the digit-initial (minus) shape
+for each: does phonemize(line) === phonemize(line with symbol → space) ?
+```
+
+### Raw finding
+
+`+` drops in **17** languages: am fa gu kn mi ml my nb ne sr sw ta te vi xh yue zu.
+`×` drops in **4**: ar hu ja th.
+`-`/`–` (minus shape) drops in **12**: de el gu hi kn ml mr my ta th xh zu.
+
+### What the `+` hits actually are — two universal sentences, and nothing else
+
+Every single `+` instance in every artifact is one of two FLEURS sentences (the universal-sentence
+technique — FLEURS is a translation of one English set, so a shape recurs fleet-wide):
+
+- `+30 °C` — the Montevideo sentence, "in the summer months temperatures above +30 °C are common"
+  → am gu mi ne sw ta te vi xh zu
+- `UTC+1` — the Downing Street protest sentence, "began around 11:00 local time (UTC+1) on Whitehall"
+  → fa kn ml sr yue
+
+**These are two different phenomena and want two different readings.** A signed temperature is arithmetic-ish
+("plus thirty degrees"); a UTC offset is an offset ("UTC plus one"). Neither is *arithmetic* — the cell is
+misnamed for what it is catching.
+
+### What the `×` hits actually are — two more universal sentences
+
+- the manuscript: "(measuring 29¾ inches × 24½ inches)" → ar, th
+- the film camera: "6 × 6 cm, more precisely 56 × 56 mm" → ja, hu (also cs, nb, en, which already read it)
+
+Both are **dimensions** ("six by six centimetres"), not multiplication. Two things fall out:
+
+- ⚠ **`hu` writes BOTH spellings in one sentence** — `6 x 6 cm` (ASCII x) *and* `56 × 56 mm` (U+00D7). That is
+  an internal control, not a typo: the ASCII variant is real orthography and must be handled. A rule matching
+  only U+00D7 reads half of hu's own sentence.
+- ⚠ **THE DIMENSION `×` IS NOT RELIABLY DIGIT-FLANKED.** In ar's `29¾ بوصة × 24½ بوصة` the left neighbour is a
+  unit WORD and the numbers carry vulgar fractions. `(\d)\s*×\s*(\d)` — the shape cs uses — misses it
+  entirely. Any guard written from the film-camera sentence alone is wrong for the manuscript sentence.
+
+### What the minus hits actually are — almost all FALSE POSITIVES, with named causes
+
+This is the part #627 got wrong, and the part I previously dismissed "by eye" without naming the causes.
+Resolved individually, the 12 languages' minus hits are:
+
+| language | text | what it really is |
+|---|---|---|
+| de, gu | `dem 10.-11.`, `10મી -11મી` | an ordinal **range** |
+| el | `–12 χιλιόμετρα … Σιέμ Ριπ–` | a **parenthetical dash pair**, an aside |
+| hi, mr, ta | `चंद्रयान -1`, `சந்திரயான் -1` | a product **designation** (Chandrayaan-1) |
+| kn, zu | `26 -00`, `1995 -96`, `ngo-26 -00` | a **score** / a year range |
+| xh, zu | `ezingama-3000`, `wama-10 -11` | Bantu **hyphen-bound numeric prefix** |
+
+So the `signed-number` cell is measuring a negative number in **approximately none** of its hits. Its guard
+`(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\p{Nd})` is defeated by a space after a word (`चंद्रयान -1` — the guard sees
+a space, not a letter), and by the Bantu prefix, where a hyphen is ordinary orthography.
+
+**Implication for the plan.** Building hybrid corpora to give this cell more material would add text to a cell
+that cannot tell a minus from a Zulu noun prefix. The guard is the prerequisite, not the corpus.
+
+### What this retires, and what it confirms
+
+- ✗ Retired: #627's "no rule is authorable because no corpus spells a plus". The corpora contain **17
+  languages' worth of dropped `+`** in two well-defined shapes. The sign is unspelled, but the *shape* is
+  abundant — what was missing was a sourced WORD, which is a sourcing problem, not a corpus-content one.
+- ✓ Confirmed, and this is the real reason a hybrid/wiki route is needed: the word for "plus" / "minus" /
+  "by" is a **written sign in every corpus**, so no amount of FLEURS reading yields it. It has to come from
+  prose that spells it out — the wiki route, exactly as `ff`'s `kaaree` and `ga`'s `cearnach` did.
+- The design follows from the split: the SHAPES are cross-linguistically identical (`+30 °C`, `UTC+1`,
+  `6×6 cm`), only the WORD differs → a shared-tier cell with declared words, not 17 local rules. Languages
+  with an idiomatic split keep their local rule — `cmn` says 零下 ("below zero") before a degree word and 负
+  otherwise, which is precisely the "truly language-idiomatic" case that belongs local.
+
+### Next step
+
+1. Tighten the `minus` guard so the cell measures minuses (prerequisite for trusting any later count).
+2. Source `plus` / `minus` / `by` per language, corpus → referee → wiki, and declare them in the tier.
+3. Re-measure. Only then is an empty cell evidence of anything.
+
+## Run 2 — 2026-08-03 — the guard, and then the sourcing wall
+
+### The guard (shipped, c517e4b)
+
+Added a second lookbehind excluding the range shape. 15 dropped-minus hits → **9**; de, kn, ml, th, zu go
+clean. hi's one real negative survives, which is the constraint that set the window width. Tooling-only, so no
+runtime effect. Remaining 9: 4 designations, 2 apposition dashes, hi's `पू.-1200` (a range the tight window
+cannot reach — accepted), hi's true negative, xh's `kangange -40 mph` (a Bantu prefix with an intruding space).
+
+### The sourcing wall — this is the real blocker, and it is NOT corpus volume
+
+`concept.ts --items Q6265342,Q10764194,Q1900125` (plus sign / minus sign / ×) over all 19 affected languages:
+
+```
+       plus sign      minus sign     ×
+  am   +              -              ×          ← the LABEL IS THE BARE CHARACTER
+  gu   +              -              ×             …and so for fa kn mi ml ne sr sw ta te th xh zu
+  ar   علامة زائد     علامة ناقص     علامة الضرب
+  hu   pluszjel       mínuszjel      ×
+  ja   プラス記号        マイナス記号       ×
+  vi   +              -              dấu nhân
+  yue  加號            減號            乘號
+```
+
+**14 of 19 languages return the bare character as their own label for it.** That is the same laundering the
+tool's header warns about — a label that is the symbol says nothing about what a reader says. Only ar, hu, ja,
+vi, yue yield a word at all, and those are SIGN NAMES (`pluszjel` = "plus-sign", 加號 = "plus-sign"), which
+still need the operand-position sense checked separately.
+
+`attest.ts` on the candidates, senses checked (trap 37 — the bare modifier is never the attestation):
+
+| candidate | verdict | what the hits actually are |
+|---|---|---|
+| hu `mínusz` | ✓ **attested, right sense** | `egy sárga lap: mínusz 1 pont` — directly before a number |
+| ja `マイナス` | ✓ attested by a **reading gloss** | the album title `-（マイナス）`: the character, then its reading |
+| ja `プラス` | ✗ sense unproven | only the TV title `99プラス` |
+| ja `掛ける` | ✗ wrong sense | pouring broth over noodles |
+| ar `في` | ✗ wrong sense | the locative preposition "in", thousands of hits |
+| ar `ضرب` | ✗ wrong sense | "struck" — a hurricane struck the city |
+| th `ลบ` | ✗ wrong sense | the ADJECTIVE "negative", `การป้อนกลับทางลบ` = negative feedback |
+| th `คูณ`, `บวก` | ✗ | zero hits |
+| hu `-szor` | ~ real, wrong sense | `13-szor` = "13 times over" (frequency), and vowel-harmonic → local if ever |
+
+### Why more corpus would not fix this, and what would
+
+The dimension `×` and the signed `+` are **written as signs in running prose, in every language, including in
+the wiki**. So the word is not rare in the corpus — it is *systematically absent from written text*, because
+writing uses the glyph. Adding text cannot surface a word that writing never spells. That is a different
+failure from `ff`'s `kaaree` and `ga`'s `cearnach`, which were ordinary words merely missing from FLEURS and
+sitting in wiki prose; those the wiki route found immediately.
+
+The two things that DID work are worth naming, because they are the only routes that can work here:
+
+- a **reading gloss** — text that writes the character and then its pronunciation (`-（マイナス）`). Rare, but
+  decisive when present, and findable by searching for a character next to a parenthesis.
+- a **word-only context where the sign cannot be used** — `mínusz 1 pont` in a rules list. Prose that must
+  read as speech (sports rules, recipes, spoken-register text) spells what formal prose signs.
+
+⚠ So NOTHING is shipped for ar/th here, and hu/ja's sourced words do not match their measured defects: hu's
+and ja's actual drop is `×`, not the minus. Declaring `mínusz` for hu would be speculative robustness for a
+symbol hu's corpus already reads. Recorded as unsourced rather than filled with a plausible guess.
+
+### What this run establishes
+
+- #627's conclusion is retired but its *instinct about the corpus* was half right: the SHAPE is abundant (17
+  languages' dropped `+`), the WORD is unobtainable from written text by construction. "No rule is authorable"
+  was wrong; "no rule is authorable **from prose alone, for most of the fleet**" is right, and is a much
+  narrower claim than the one closed on.
+- The remaining route for the other 14 languages is a **speech-register source**, not a bigger corpus: a
+  reading gloss, a spoken-register wiki (Wikipedia's "spoken articles"), or a language's own maths-teaching
+  text. Untried here.
+- ⚠ `hu` writes `6 x 6` and `56 × 56` in ONE sentence, so whatever eventually ships must accept the ASCII `x`.
+
+## Run 3 — 2026-08-03 — ASR ON THE FLEURS AUDIO. The wall comes down.
+
+**The speech-register source was sitting in the corpus the whole time.** FLEURS ships audio aligned to every
+transcript, so the sentence containing `+30 °C` has a recording of a human reading it aloud. Whatever the
+speaker said in that position **is** the word — no prose required, and prose was never going to give it.
+
+Checked first, and negative: FLEURS's own column 4 ("normalized" transcription, which this repo's tooling never
+reads — it takes column 3) only lowercases and strips punctuation. It **keeps `+` as a sign** in all 19
+languages. So the text side of the dataset is exhausted; the audio side is not.
+
+### Route
+
+Local audio: `$ASR_ALIGN_ROOT/corpus/audio_cache/data/<corpus>/audio/train.tar.gz`, 29 languages, 46G.
+ASR: AI4Bharat IndicConformer, ONNX, 22 Indic languages with per-language vocab spans —
+`<local path>`, driven by
+`vernacula/scripts/indicconformer_export/validate_indicconformer_package.py` (pure onnxruntime, no torch).
+
+⚠ `indicconformer_onnx` (the 400M export) decodes EMPTY, including on the reference audio its own docs use. A
+broken export is indistinguishable from an unintelligible recording unless you check a known-good file first.
+Use the 600m package.
+
+### ta — `பிளஸ்`, three speakers, two sentences
+
+```
++30 °C   →  …வெப்பம் பிளஸ் முப்பது டிகிரி சி…      (piḷas = "plus")
+UTC+1    →  …சுமார் பதினோரு மணிக்கு யூடிசி பிளஸ் ஒன்…   ×2 speakers
+UTC+1    →  (third speaker skipped the parenthetical entirely)
+```
+
+The offset is read wholly as English loans — `ஒன்` ("one"), not Tamil `ஒன்று`.
+
+### hi — and here the two shapes DIVERGE, which is the finding
+
+```
+UTC+1    →  …यूटीसी प्लस एक…   /  …यूटीसी प्लस वन…      plus SPOKEN, 2 speakers
++ 30° C  →  …तीस डिग्री सेल्सियस से अधिक…             plus NOT SPOKEN, 2 speakers
+```
+
+**Both Hindi speakers omitted the `+` before the temperature and both said `प्लस` in the offset.** So:
+
+- ✓ Run 1's guess that `+30 °C` and `UTC+1` are read differently is confirmed as a fact about **speakers**.
+- ⚠ **BUT THE OMISSION IS NOT A LICENCE TO DROP THE SIGN, and concluding that was this run's error.** The
+  target is TTS: a reader who skips a character the author explicitly typed is evidence about reading habits,
+  not about content we may delete. An author who writes `+30 °C` marked the sign deliberately, so the faithful
+  rendering voices it. Both ta and hi therefore read the plus in both positions.
+- What the audio DOES settle is the **word** — hi's `प्लस`, replacing a `धन` that was correctly sourced from a
+  maths article naming the sign and is simply the wrong register. That correction is the run's real product.
+- Corollary for the gate: had the silence shipped, hi's `+30 °C` would have registered as a permanent `DROP`,
+  since a differential test only knows the symbol vanished. Voicing the sign keeps gate and reading aligned.
+- Both speakers also said `सेल्सियस` for a bare `C`, and one read `1` as Hindi `एक` while the other used
+  English `वन` — the same sentence, the same position, two registers.
+
+### What this establishes as a method
+
+A FOURTH sourcing tier, above the wiki: **the corpus's own audio**. It is stronger than every text tier for
+this class of question, because it answers *what a reader says*, which is the actual question a phonemizer
+asks, and it is immune to the failure that blocked Runs 1–2 (prose writes the glyph, so the word is absent
+from writing by construction — not rare, absent).
+
+It also supplies something no text tier can: **evidence about reading habit** — "two speakers read this sign as
+nothing". ⚠ That is not the same as "the correct output is silence", and the distinction is the whole lesson of
+this run. For a TTS target the written character is the content; the recording is a referee on *how* it is said,
+and an audio referee will routinely hear things that do not line up with the script. Interpret it, don't obey it.
+
+### Coverage and limits, measured
+
+- audio cache and the omnivoice token set cover the **same 28–29 corpora**; `te_in` is in NEITHER, and te's
+  `+` rows are in `train` while only its `test` tarball is cached. te needs a network fetch.
+- every other affected language has `train` cached and its `+` rows in `train`: am ta vi xh zu ar ja th hi.
+- but ASR coverage is the binding constraint: IndicConformer is Indic-only, so of the affected set only
+  **ta and hi** are reachable locally today. am/vi/xh/zu/ar/ja/th need Cohere-transcribe, OmniVoice or
+  Qwen3-ASR — all present in the HF cache but all requiring torch, which is broken in this environment
+  (`libtorch_global_deps.so` missing).
+- the omnivoice token `.npz` set is a route to reconstruct audio for the 28 covered corpora, but it does not
+  extend LANGUAGE coverage — it needs the omnivoice decoder, i.e. torch again.
+
+## Run 4 — 2026-08-03 — the C# ONNX backends: en confirms the convention, ar and ja get their word
+
+The Indic path covered only ta/hi. Vernacula ships **C# ONNX** ASR backends and the weights are installed at
+`~/.local/share/Vernacula/models` (parakeet, qwen3asr, cohere_transcribe, whisper_turbo) — no torch involved, so
+the "blocked on a broken torch install" note in Run 3 was wrong about the whole fleet, only right about the
+Python path.
+
+```
+dotnet run --project src/Vernacula.CLI -c Release --no-build -- --audio X.wav \
+  --model <dir with parakeet files + silero_vad.onnx> --diarization vad --export-format txt
+  [--asr qwen3asr --qwen3asr-model ~/.local/share/Vernacula/models/qwen3asr --language ja]
+```
+⚠ Parakeet resolves its files at the `--model` ROOT while silero/sortformer live in subdirectories, so a
+composed directory of symlinks is needed; pointing `--model` at the models root fails on `nemo128.onnx`.
+
+### en (parakeet) — the convention, measured
+
+| shape | speakers | result |
+|---|---|---|
+| `temperatures above +30°C` | 2 | **0 of 2 voice the plus** — "temperatures above thirty degrees Celsius are common" |
+| `(UTC+1)` | 3 | **2 of 3** say "UTC plus one"; the third skipped the parenthetical entirely |
+
+Confirms the general convention independently: **a measurement plus is frequently omitted, a UTC offset is
+voiced.** en behaves exactly as hi does. ⚠ **NO CODE CHANGE FOLLOWS** — under the TTS policy the written sign is
+content and gets voiced, so en's existing unconditional `plus` is correct. The measurement closes the follow-up
+rather than opening a change.
+
+Also: the "one speaker skips `(UTC+1)`" pattern has now recurred in **ta and en**. Treat a missing
+parenthetical as expected reader behaviour, not as a signal about the language.
+
+### ar and ja — the dimension `×`, sourced at last
+
+| lang | decoded | reading |
+|---|---|---|
+| ja | `六掛ける六センチ` … `56かける56ミリ` | `×` → **かける** |
+| ar | `…ستة وثلاثين في أربعة وعشرين ملليمتر…` | `×` → **في** |
+
+Both are the words Run 2 failed to source and mis-attested: `掛ける` returned the everyday verb (broth over
+noodles) and `في` returned thousands of locative hits. The dimension sense is invisible in writing because
+writing uses the glyph; the recording puts the word in the slot.
+
+⚠ **ar was cross-checked with two backends** because Qwen3-ASR rendered the slot as `فاربعة` — a ف-initial
+function word with the yāʾ elided, suggestive but not clean. Cohere renders `في أربعة` cleanly. That agreement
+settles the TRANSCRIPTION, not speaker variation: it is still one speaker, and ar's second `×` instance sits in
+the `test` split whose audio this corpus does not carry. ja likewise has one speaker, but the sign occurs
+**twice inside the one utterance** and both were rendered かける.
+
+Shipped: ar reads `في` keyed on the FOLLOWING digit alone (the manuscript's `29¾ بوصة × 24½ بوصة` has a unit
+word on the left, so a digit-flanked rule misses it); ja keys on both digits, which is safe because the
+language is unspaced.
+
+Gates: corpus diff **ar DROP 2 → 0** (defect-free on this class), **ja DROP 2 → 1**; 2/1702 and 1/1788 changed,
+every change read. Referee eval unchanged by construction — zero `×` in any ar or ja referee list.
+
+### Remaining, honestly
+
+- th, vi, am, xh, zu — audio cached, ASR backends present; not yet run.
+- te — in neither the audio cache nor the token set; needs a download.
+- hu's `×` — European, so parakeet covers it, but hu has no FLEURS corpus here (its `×` came from the mined
+  wiki artifact), so there is no aligned recording to consult.
+- ⚠ ar drops the vulgar fraction in `29¾` (reads "twenty-nine"). Pre-existing, unrelated to this work, unfixed.
+
+## Run 5 — 2026-08-03 — vi shipped; th/am/xh/zu are backend-limited, and the `ipa` field is CIRCULAR
+
+### vi (Cohere) — `cộng`, 2 of 2 speakers on both sentences
+
+`(UTC +1)` → "…utc cộng một…"; `+30°C` → "…trên ba mươi độ c" (sign not voiced). Shipped voicing both arms per
+the TTS policy. vi joins en and hi in the convention. Corpus diff DROP 2 → 0.
+
+### th, am, xh, zu — not sourceable with the installed backends
+
+| lang | backend | outcome |
+|---|---|---|
+| th | Cohere | transcribes Thai audio as **Vietnamese-looking nonsense** — unusable, obviously so |
+| th | Whisper | accurate Thai, but **re-orthographizes**: emits `UTC + 1` and `11.00 น.` |
+| am, xh, zu | Cohere | decodes collapse into loops and hallucinated language switches |
+
+⚠ **THE ASR MUST EMIT SPOKEN FORM, NOT WRITTEN FORM.** This is a selection criterion for the whole method, not
+a fixable step. Verified in `WhisperTurbo.cs`: no text post-processing exists anywhere in the file (the only
+`Normalize` is ISO language-code remapping) and the text path is a plain byte-level BPE decode of emitted
+tokens. So the `+` is a TOKEN THE DECODER CHOSE — Whisper trained on web-scraped audio/written-text pairs and
+emits formatted text end-to-end. Once re-orthographized the evidence is gone; no post-process recovers it.
+IndicConformer (CTC, verbatim) / Cohere / Qwen3-ASR all verbalize; Whisper does not.
+
+⚠ A convergent lead deliberately NOT used: three of the collapsed decodes independently emitted "plus one" near
+the UTC slot (am `بلاس وان`, xh `UTC plus one`, zu `U. T. C. plus one.`). Suggestive that these languages use
+the English loan in offsets — but taking a fragment out of a garbage decode is laundering. Logged as a lead.
+
+The unblock, untried here because it needs torch (broken in this environment: `libtorch_global_deps.so`):
+**`facebook/mms-1b-all`** (1162 languages, CTC so verbatim, per-language adapters incl. `amh`/`xho`/`zul`/`tha`)
+and, for IPA rather than text, **`facebook/wav2vec2-xlsr-53-espeak-cv-ft`** — a phone recognizer structurally
+cannot re-orthographize, which is exactly the Whisper failure mode.
+
+### ⚠ THE `omnivoice_ipa` MANIFEST `ipa` FIELD IS OUR OWN OUTPUT — NOT AN AUDIO REFEREE
+
+`$ASR_ALIGN_ROOT/corpus/tokens/manifest_<corpus>.jsonl` carries a per-utterance `ipa` field, and the
+corpus name invites reading it as audio-derived. It is not. Compared against `phonemize()` on the same text for
+am/xh/zu it is **essentially identical** — same phone inventory, same stress marks, same idiosyncratic click
+transcription (`ikʼwiŋɡ̤iŋ̤ǃˈaːna`); the only differences are older behaviour (am lacks today's `diɡɨɾi sˈiː`,
+commas placed differently).
+
+So the absence of a "plus" word in that field reflects **our dropping of the sign**, not what any speaker said.
+Reaching for it as evidence would be reading our own bug back. It IS useful as a snapshot of past output for
+regression archaeology — never for sourcing.
+
+## Run 6 — 2026-08-03 — pt's unexplained `DROP currency ×1`, and a verification that verified nothing
+
+The standing note on pt's declared `US$` key said it was "verified on the direct form, inert on the corpus, and
+the difference is not yet explained". Both halves are now resolved, and the explanation indicts the check.
+
+Isolation, which is what makes the cause visible:
+
+```
+US$ 11.000          → ˈõzɨ mˈiɫ dˈɔlɐɾɨʃ      "onze mil dólares"    ✓
+por US$ 11.000 a    → poɾ ˈu ˈesɨ ˈõzɨ mˈiɫ    "por U S onze mil"    ✗
+```
+
+It reads correctly **iff the currency expression is the entire string** — any token before or after breaks it,
+independent of the number. Instrumenting the two layers separately:
+
+```
+US$ 11.000        → initialisms → US$ 11.000              (untouched)
+por US$ 11.000 a  → initialisms → por u esse$ 11.000 a    (US split into letters)
+```
+
+**Cause.** `portuguese.ts` composes `SYMBOLS(initialisms(normalize(x)))`, so the initialism pass runs BEFORE the
+symbol tier and splits the all-caps run; the `$` is then preceded by a letter and the tier's guard — the one
+that stops a key biting into a word — correctly refuses it. The sign vanishes.
+
+⚠ **WHY THE ORIGINAL CHECK PASSED.** `core/initialisms.ts` opens with an all-caps-DOCUMENT guard,
+`if (!/\p{Ll}/.test(text) && /\s/.test(text.trim())) return text`. The probe string `US$ 11.000` contains no
+lowercase at all, so it tripped that guard and skipped the pass entirely. **The one context tested was the one
+context where the interfering rule is inactive.** A single-expression probe can trip a document-level
+heuristic — test a sign inside a sentence.
+
+**Fix, and why it is local.** pt folds `US$`/`AUD$` → `$` in normalize step 5b, before initialisms; the
+compound keys are removed as unreachable. Folding rather than emitting words keeps the tier's count agreement
+(`US$ 1` still reads *dólar*). The fold is the attested reading, not a convenience: **both pt_br speakers say
+the currency word and never voice the code** — "vendidas por 11 mil dólares a 22 mil e quinhentos dólares a
+onça" (Parakeet, 2 of 2).
+
+⚠ **NOT fixed in `core/initialisms.ts`.** Excluding `\p{Sc}` from that pass's trailing guard would fix pt and
+regress the others: measured across all 66 artifacts, **20 languages carry an uppercase run glued to a currency
+sign, every instance `US$` or `AUD$`, no counterexample** — and 18 of them declare no compound key, so they
+would stop spelling the letters and start reading `US` as a WORD with the sign still dropped. The general
+repair is to let the currency tier claim a sign before the initialism pass sees the letters, which is a
+reordering and belongs to its own change.
+
+Gates: corpus diff pt 1/1943, **DROP 1 → 0**. (The pre-existing `RAWMARK 1`, the `1.000º` ordinal, is untouched.)
+
+## Run 7 — 2026-08-03 — the PHONEME recognizer closes am, xh and zu. Text ASR could not, and here is the proof.
+
+Run 5 left four languages blocked. Two more models were tried, and the difference between them is the finding.
+
+### `facebook/mms-1b-all` — accurate, and WRONG FOR THIS QUESTION
+
+1162 languages, CTC, per-language adapters. It transcribes am/xh/zu/th well. But at the sign it emits
+**the sign**: `utc+1` (amh), `kwe-+30°c` (xho), `kuka-+30°c` (zul), `utc.1` (tha). Its vocabulary is
+orthographic — characters, digits, punctuation.
+
+A `+` in that output is tempting to read as "a plus was spoken". **A control on languages whose answer was
+already known kills that reading:**
+
+| language | speakers actually said (verbalizing ASR) | MMS emitted |
+|---|---|---|
+| ta `+30 °C` | `பிளஸ் முப்பது` | `130ப` — word lost |
+| ta `UTC+1` | `பிளஸ் ஒன்` | `utc.1` — word lost |
+| hi `यूटीसी + 1` | `प्लस एक` (2 of 2) | `यूटीसी1` / `यूटीसी.1` — **word lost** |
+| vi `UTC +1` | `cộng một` (2 of 2) | `utc cộng 1` — rendered |
+
+So MMS is unreliable **in both directions** at a sign slot: it dropped two demonstrably spoken plus words and
+rendered a third. Its `+` for xho/zul is a character, not evidence. ⚠ Without this control the run would have
+reported "xh and zu voice the plus" on the strength of a `+` glyph.
+
+### `facebook/wav2vec2-xlsr-53-espeak-cv-ft` — the right instrument
+
+A PHONEME recognizer: its vocabulary contains **no `+` and no digits**, so it physically cannot echo the
+orthography back. Whatever is in the slot must appear as phones. (Decoded with a hand-rolled CTC collapse over
+`vocab.json` — the `Wav2Vec2PhonemeCTCTokenizer` demands the `phonemizer` package at construction, which is only
+needed for text→phoneme encoding, not for decoding.)
+
+**Validated on hi first, where the answer was already known — 4 of 4:**
+
+```
+UTC  →  j uː d i s iː  p l a s e k        ("plus ek")   matches प्लस एक
+UTC  →  j uː d i s iː  p l e s w a n      ("plus one")  matches प्लस वन
+temp →  m e t iː s d e ɡ r i s s e l ʃ e s     no plus phones — matches the SILENCE
+temp →  m e d iː z l i ɡ l s e l s i s         no plus phones
+```
+
+Reproducing the silence is the part that matters: it shows the instrument is not inventing the word either.
+
+### Results
+
+| lang | `UTC+1` | `+30 °C` |
+|---|---|---|
+| am | `m j uː t iː s iː p l a s w a n` — **2 of 3** (third skips the parenthetical) | `s a l a s a d i ɡ l i s…` — **no plus, 2 of 2** |
+| xh | `p l a s w a n` — **3 of 3** | `…k w e t e t i…` — **no plus, 2 of 2** |
+| zu | `p l a s w a n` — **1 of 3**; the other two skip the parenthetical, so 1 of 1 among readers | `p l a s o m aɪ n a s…` — plus present, ONE noisy file |
+
+All three voice the English loan. The skip pattern has now recurred in **ta, en, am and zu** — a missing
+parenthetical is expected reader behaviour, not a fact about the language.
+
+### What shipped, and three judgements inside it
+
+- **am** — new rule, `+` → `ፕላስ` (reads `pɨlas`). DROP 2 → 0.
+- **xh** — `dibanisa` → `plas`. ⚠ This CORRECTS a correctly-sourced word: `dibanisa` is the HSRC English/isiXhosa
+  maths dictionary's ADDITION OPERATOR, a right gloss of the symbol and the wrong register for a reader.
+  ⚠ And it UPGRADES an honest limit: xh left `+30 °C` unread partly because "Xhosa has no attested positivity
+  word". The word is now known, so absence is no longer the argument — what survives is the redundancy with the
+  sentence's own *angaphezulu* ("above"), and the recordings confirm it, since both Montevideo speakers produce
+  no plus phones while all three UTC speakers do. Same language, same sign, two positions, distinction made by
+  the readers. DROP 2 → 2 (a word swap; the residual is that deliberately-silent sentence).
+- **zu** — ` no-` → `plas`. ` no-` was inferred from the sense of `(UTC+1)` while the rule's own comment said a
+  bare positive sign was left under-specified "rather than guessing a borrowing". It did not need guessing.
+  DROP 3 → 2. ⚠ zu's temperature position is NOT decided: its one Montevideo file decodes as
+  `p l a s o m aɪ n a s`, so plus phones are present unlike xh's two speakers, but one noisy file is not a
+  source and no separate temperature arm was invented.
+- ⚠ Spelled `plas`, not `plus`, in xh/zu: the attested vowel is [a] and both orthographies are phonemic, so
+  `plus` would read `pʼlˈuːs`. **The conventional loan spelling in isiXhosa/isiZulu is UNSOURCED** — this
+  spelling is chosen to reproduce the attested phones, which is what this layer exists to feed.
+
+### Where this leaves the class
+
+Sourced from audio and shipped: **ta, hi, vi, am, xh, zu** (plus), **ar, ja** (`×`), **pt** (currency), with
+**en** measured and deliberately unchanged. Still unreachable: **th** (Cohere cannot do the language; Whisper
+re-orthographizes; MMS emits the sign — the phoneme model was not run on it) and the twelve languages with no
+locally cached audio at all (gu kn ml ne sr sw mi yue te fa nb my), which need a FLEURS download.
+
+## Run 8 — 2026-08-03 — `p l a s o m aɪ n a s` is not Zulu, it is `-+`
+
+Run 7 filed zu's Montevideo decode — `…kuka p l a s o m aɪ n a s v e d i…` — as "plus phones present but the
+decode is noisy". That was lazy. Read as words it is plainly "plus or minus", which is semantically incoherent
+for *angaphezu* ("above") — and the explanation is in the SOURCE TEXT, not the audio:
+
+```
+zu:  amazinga okushisa angaphezu kuka-+30°C avamile.     ← hyphen IMMEDIATELY followed by the sign
+xh:  amaqondo angaphezulu kwe +30°C aqhelekile.          ← space before the sign
+```
+
+`kuka-` is Zulu's bound-prefix hyphen, so the text carries **`-+`, two adjacent marks, and the reader voiced
+BOTH**. The decode is therefore accurate, not noisy — a faithful reading of a two-character sequence. And the
+xh/zu divergence Run 7 attributed to *language* is really a difference in the source orthography: same sign,
+same sentence, different neighbouring character, different reading.
+
+⚠ **So there is no zu evidence about a plain `+` before a temperature.** The one recording speaks to `-+`.
+
+### And the `-+` broke our normalizer too
+
+Probing it surfaced a live defect that the Run 7 numbers had hidden (zu's DROP went 3 → 2, not 3 → 1):
+
+```
++30°C     → amazinga angu-30      the plus SILENTLY GONE
+kuka-+30  → kuka- plas 30         without °C, the plus rule fires fine
+```
+
+zu's degree pattern opened with `[+]?` — matching the sign and never re-emitting it. Harmless while zu had no
+sourced plus word; once `plas` was sourced it HID one. And the sign could not reach the sign step regardless:
+after the degree rewrite the text reads `+amazinga…`, and that step requires a digit after the sign.
+
+Fixed by the ordering coupling the playbook records — **claim the sign before the rule that consumes its
+operand**: a plus arm at step 8c, before degrees, and `[+]?` removed from both degree patterns so a form the
+arm misses cannot be quietly eaten there either. `+30°C` now reads `plas amazinga angu-30`; the corpus sentence
+reads `kuka- plas 30` (the degree noun still suppressed by the existing trap-12 rule, since *amazinga* precedes).
+
+Corpus diff zu **DROP 3 → 1**, 3 utterances changed, all three accounted for:
+
+| line | change |
+|---|---|
+| 428 | **IPA byte-identical** — only the `⟪DROP:minus⟫` annotation vanished. That is Run 2's guard fix landing on a real utterance: `ngo-26 -00` is a score, not a minus. |
+| 947 | `nˈɔː kʼˈuːɲɛ` → `pʼlˈaːs kʼˈuːɲɛ` — the offset word |
+| 1437 | the plus now read; `⟪DROP:math-sign⟫` gone |
+
+The lesson worth keeping: **an odd decode is a question about the TEXT before it is a fact about the language.**
+"Noisy" was the wrong verdict; the corpus had a two-character sequence in it, and both the reader and the
+normalizer stumbled on the same thing.
+
+## Run 9 — 2026-08-03 — th, the last language with cached audio. `บวก`.
+
+Thai was the one language where every prior tier had failed, each in a different way — which makes it the
+cleanest demonstration of why the phoneme recognizer is the right instrument:
+
+| tier | outcome on Thai |
+|---|---|
+| `concept.ts` (Wikidata label) | returns the BARE CHARACTER `+` as Thai's own label for "plus sign" |
+| `attest.ts` on `ลบ` | the ADJECTIVE "negative" (`การป้อนกลับทางลบ`, negative feedback) — not the operator |
+| `attest.ts` on `คูณ`, `บวก` | zero hits in the wiki haystack |
+| Cohere-transcribe | renders Thai audio as VIETNAMESE-looking nonsense |
+| Whisper large-v3-turbo | accurate Thai, but RE-ORTHOGRAPHIZES: `UTC + 1`, `11.00 น.` |
+| MMS-1b-all (tha) | accurate, and also emits the sign: `utc.1` |
+
+`facebook/wav2vec2-xlsr-53-espeak-cv-ft`, whose 392-token vocabulary contains no `+`, both th_th speakers:
+
+```
+… t ɔ ŋ k i5 n   j uː t iː s i5   b ʊ k   l i5 ŋ   t i5 w aɪ h ɑu5 s …
+… t ɑu5 ŋ t i5 n  j u5 t i5 s i5  b ʊ k   n ŋ     t i5 w aɪ t h ɑu5 s …
+```
+
+`j uː t iː s i5` = ยูทีซี · **`b ʊ k` = บวก** · `n ŋ` / `l i5 ŋ` = หนึ่ง → "UTC บวก หนึ่ง", **2 of 2**.
+
+No new lexical data was needed: the engine already reads บวก as `bˈua˨˩k` and หนึ่ง as `nˈɯ˨˩ŋ`, matching the
+decode. Shipped at step 8b, BEFORE the degree rule — the ordering coupling zu's `[+]?` taught, insurance here
+since Thai's degree rule does not match the sign today.
+
+⚠ `+30 °C` has ZERO instances in th_th — this corpus does not carry the Montevideo sentence, unlike most of the
+fleet — so that arm is the arbitrary-text case #584 argues for, not an attested one.
+
+Corpus diff th **DROP 4 → 2**, 2 utterances changed, both accounted for:
+
+| line | change |
+|---|---|
+| 484 | **IPA byte-identical** — only `⟪DROP:minus⟫` vanished: the guard fix on the range `ค.ศ. 1000 -1300` |
+| 1517 | the UTC sentence now reads บวก; `⟪DROP:math-sign⟫` gone |
+
+th's remaining 2: the `×` of the manuscript sentence (`29¾ นิ้ว × 24½ นิ้ว`) — which sits in th's **test** split,
+whose audio this corpus does not carry, so it is unsourced and no rule was invented (`คูณ` is ×0 in the wiki) —
+and the `B&B` ampersand.
+
+## Where the class stands after nine runs
+
+**Sourced from audio and shipped:** ta, hi, vi, am, xh, zu, th (plus) · ar, ja (`×`) · pt (currency).
+**Measured and deliberately unchanged:** en — the convention is confirmed, and the TTS policy says voice the
+written sign, so its existing unconditional `plus` is correct.
+**Still unreachable:** the twelve languages with no locally cached audio — gu kn ml ne sr sw mi yue te fa nb my
+— which need a FLEURS download; and th's `×`, ar's second `×`, and or/pa's `¥`, all in uncached splits or absent.
+
+## Run 10 — 2026-08-03 — closing the class: hi's true negative, and the final residuals
+
+### ⚠ A measurement bug in my own probe, caught before it was reported
+
+The closing re-measurement used `persym.ts`, which HARD-CODES its own copy of the `minus` regex — the
+pre-fix one. Its `-(neg)` column therefore showed 15 hits and looked like a regression of Run 2. It is not a
+regression; it is the same trap that bit `minus.ts` at the start of this investigation, and for the same
+reason. **A probe that copies a pattern instead of importing it measures the past.** The `+`/`×` columns use
+plain `\+`/`×` and were valid.
+
+### hi's `-२.८८ परिमाण` — the fleet's only true negative, fixed
+
+It read *do dashamlav aath aath*, positive. The existing degree arm could not reach it: that arm requires a
+DEGREE word after the number, and परिमाण ("magnitude") is not one. Adding परिमाण to the lookahead would fix one
+sentence and teach nothing, so the general property was used instead:
+
+**A MINUS BEFORE A DECIMAL.** Every false positive this class suffers is an INTEGER — designation
+(`चंद्रयान -1`, `फ़ॉर्मूला-1`), score, year range (`२०१७ -१७`) — and none of those is ever written with a
+fractional part.
+
+⚠ The single counterexample is the one hi's own file already documents: `कोच (३१,३८१ -९८.५३% हिंदू)`, where the
+dash INTRODUCES the percentage and is a decimal. It is excluded because a digit precedes the dash, so the range
+guard is repeated on this arm rather than trusted to the class above. Verified both ways: `-२.८८ परिमाण` now
+reads ऋण, `-९८.५३%` stays silent.
+
+Inert on the FLEURS corpus — that sentence comes from hi's wiki hybrid fill, so `hi` corpus diff stays DROP 1→1
+(its 2 changed utterances are the plus work from Run 3). The effect shows in the artifact measurement.
+
+### Final state of both classes
+
+**minus: 9 → 8 hits, and ZERO are true negatives.** All eight have named causes:
+
+| residual | cause | decidable here? |
+|---|---|---|
+| gu `એચજેઆર -3`, hi/mr/ta `चंद्रयान -1` | designation | ✗ needs a lexicon — `word␣-␣digit` is also a real minus |
+| el `–12 χιλιόμετρα … Ριπ–`, my `(Koreans -၂သန်း)` | apposition dash | ✗ |
+| hi `पू.-1200` | range past the tight window | ✗ by design — widening it swallowed hi's true negative |
+| xh `kangange -40 mph` | Bantu hyphen prefix + intruding space | ✗ |
+
+**math-sign / plus:** shipped from audio in ta, hi, vi, am, xh, zu, th; `×` in ar, ja; en measured and
+correctly unchanged. Remaining `+` drops are the twelve languages with **no locally cached audio**
+(fa gu kn mi ml my nb ne sr sw te yue) plus xh's deliberate, now-sourced silence. Remaining `×`: hu (ASCII
+`6 x 6`, no FLEURS corpus so no aligned audio) and th (test split, uncached).
+
+**So the class is closed to the limit of the available evidence**, and what remains is a data-acquisition
+task (a FLEURS download) or genuinely undecidable without a lexicon — not an unexamined gap.
+
+## Run 11 — 2026-08-03 — can the 2 kbps codec substitute for the audio? Tested, and the answer is "for one question only"
+
+The corpus ships Higgs-Audio-v2 codec tokens (`corpus/tokens/codes_<lang>.npz`, 7–12 MB per language against
+~1.6 GB of audio), so the obvious economy is to keep the codes and drop the tarballs. Measured from the npz
+shapes the bitrate is **8 quantizers × 25 Hz × 10 bits = 2.0 kbps** at 24 kHz native, which is deep in
+"intelligible but not faithful" territory — so it needed a test rather than a decision.
+
+⚠ The reconstruction path is REAL and already in the tree: `higgs_decoder.onnx` (86 MB) plus
+`ingest_fleurs.py`'s own `validate_roundtrip`. No torch needed. Worth checking before assuming, because a
+tokenizer with no decoder would have made the whole idea moot.
+
+**The test that matters is the one with ground truth.** hi's four `+` utterances were already decoded from REAL
+audio in Run 3 — two where the plus is spoken, two where it is silent — so the round trip can be graded rather
+than admired: decode from codes, resample 24 k → 16 k, re-run the phoneme recognizer.
+
+| utterance | real audio | reconstructed | |
+|---|---|---|---|
+| UTC (1) | `j u d i s i p l a s e k` | `j u d i s i p l a s e k` | ✓ identical |
+| UTC (2) | `j uː d i s iː p l e s w a n` | `j uː d iː s s t iː p l a s w ɔ l` | ✓ `p l a s` survives |
+| temp (1) | `m e t iː s d e ɡ r i s …` no plus | `m e d iː s d e ɡ r i s …` no plus | ✓ silence preserved |
+| temp (2) | `m e d iː z l i ɡ l …` no plus | `m e d iː z l i ɡ l i …` no plus | ✓ silence preserved |
+
+**4 of 4 survive**, log-mel spectral distance 3.04–3.19 dB, durations frame-exact.
+
+### ⚠ But the degradation lands exactly where this session made a decision
+
+```
+real  p l e s w a n     →  recon  p l a s w ɔ l      the VOWEL moved [e] → [a]
+real  … e k  p a r …    →  recon  … e k  b a r …     voicing flipped p → b
+```
+
+The `plas` vs `plus` spelling shipped for xh and zu rests on **the attested vowel being [a]** — and this round
+trip can manufacture exactly that shift. So:
+
+- ✓ **presence or absence of a word in a slot** — survives 2 kbps
+- ✗ **fine phonetic judgement** (vowel quality, voicing) — does NOT, and that is what an orthography choice
+  rests on
+
+### Conclusion — and ⚠ THE STORAGE QUESTION IS SETTLED SEPARATELY: KEEP ALL THE AUDIO
+
+The finding here is about EVIDENCE, not about disk. Reconstruction answers "is there a word in this slot" and
+must not be used to answer "which word" — any sourcing done from reconstructed audio has to say so.
+
+⚠ **The full audio is retained deliberately, and pruning it would be wrong.** This investigation only ever
+needed 2–5 utterances per language, and an earlier draft of this section concluded from that "prune to the
+extracted utterances". That reasoning was scoped to sign-sourcing and is too narrow: the corpus audio is also
+the material for FINE-TUNING work, which wants the whole distribution — every speaker, every utterance,
+lossless. A conclusion drawn from one consumer's needs should not become the archive's policy. All 58 GiB stays
+(182 G free on the volume, so there is no pressure forcing the question).
+
+That leaves the codec test with exactly one use, which is still worth having: the npz set is a **validated
+fallback** for a yes/no question if a tarball is ever missing. It is not a substitute for the audio and not a
+storage strategy.
+
+## Run 12 — 2026-08-04 09:xx — the re-sweep after vulgar fractions: 15 cells → 6, and the PHANTOM SYMBOL class
+
+Re-measured #586 from scratch rather than trusting the running tally. `npx tsx tools/normalization/coverage.ts`
+reported **15 defective cells across 12 of 37 treated languages**, which split cleanly into six the user had
+already ruled out of scope (five designations — `चंद्रयान -1` in hi/mr/ta, `એચજેઆર -3` in gu, and kn's is the
+same HJR-3 sentence — plus el's documented apposition dash) and **nine actionable**.
+
+### What the nine actually were, and four of them were recurrences
+
+| lang | cell | mechanism |
+|---|---|---|
+| id | degree | **NOT A DEGREE.** `Ä°zmir` is mojibake for `İzmir` |
+| id | currency | `US$ 14,7` — the initialism defect, third occurrence after pt and nl |
+| it | exponent | `2,2 milioni di km²` — a magnitude between number and unit |
+| it | arithmetic | `volo+hotel` — a plus joining WORDS |
+| or | arithmetic | `(UTC+1)` |
+| bn, or | currency | `¥` |
+| fa, ja | ampersand | `B&B` |
+
+### ⚠ THE PHANTOM SYMBOL — the finding worth keeping from this run
+
+Two of the nine were not defects at all. Latin-1 punctuation doubles as a UTF-8 continuation byte, so
+half-repaired mojibake **manufactures a symbol** for a later pass to reason about:
+
+```
+Ä°zmir   = Ä + °   →  a DEGREE SIGN in a sentence about a city's population
+SÃ£o     = Ã + £   →  a POUND SIGN in a Brazilian place name
+```
+
+Both were being chased as per-language defects. This is the same trap `repairDoubleEncoded`'s header already
+recorded for mr's `â€` stranding a `€` that `\p{Sc}` read as a phantom currency — **the third instance of one
+pattern**, which is what promotes it from an anecdote to a class: mojibake does not merely fail to read, it
+INVENTS symbols, and the invented ones look exactly like the real ones the gates hunt for.
+
+`repairDoubleEncoded` covered lead bytes C2, C3 and E2. `İ` is `C4 B0`, outside all three. Replaced the two
+special-cased two-byte arms with the UTF-8 formula `cp = ((lead & 0x1f) << 6) | (b2 & 0x3f)`, which subsumes
+what they said (for C2 it returns b2 — "drop the Â"; for C3, b2 + 0x40) and extends to C4/C5.
+
+Bounded by measurement on the file's own standard: `[C4C5]` + a continuation byte occurs **twice across all 67
+corpora, both `Ä°` in id_id**, and `[C6-CF]` occurs **zero** times, so stopping at C5 costs nothing.
+
+⚠ **The first version of the fix silently did nothing.** The function's early-out guard was `[ÂÃâ]`, so
+`Ä°zmir` returned before reaching the widened arm. Caught only because the probe printed the input unchanged.
+*A fast path is part of a pattern's definition; widening one without the other is a no-op that typechecks.*
+
+### The gates were measuring a string the engine never reads
+
+Consequence of the above, and the more general fix: both `coverage.ts` and `corpus-diff.ts` scanned RAW corpus
+text, while the engine applies `repairDoubleEncoded` to every input before any language rule runs. So the gates
+were hunting symbols in text the engine never sees — reporting an **un-closable** DROP on `São Paulo`, because
+the differential test is unreliable on corrupt input (blanking a phantom leaves a byte-identical reading, which
+scores as a drop). Both now repair at ingestion.
+
+⚠ **The ruler must be the same on both sides of a before/after; only the ENGINE should differ.** Verifying this
+meant copying the updated `corpus-diff.ts` into the pinned baseline worktree — using the old instrument for
+"before" and the new one for "after" would have conflated a tooling change with an engine change. With
+consistent ingestion, id went `DROP 2 → 0`; with mixed ingestion it had falsely read `3 → 1`.
+
+### Audio, and one thing the phones settled that MMS would have got backwards
+
+Six cells needed a WORD, so the fourth sourcing tier again. All six languages' audio was already local
+(121 GiB at `corpus/audio_cache`). Nine clips, 2–3 speakers where available.
+
+- **it `volo+hotel`** — MMS-1b-all (`ita`): `pacchetti combinati vol o più hotel`. The reader says *più*, the
+  arithmetic word, for a `+` that is not arithmetic. Directly attested.
+- **fa `B&B`** — wav2vec2, **both** speakers: `b iː a n b iː` / `b i a n d b iː` = *bī and bī*, the ENGLISH
+  word. ⚠ **MMS alone would have scored this a DROP**: it omits the span for speaker A and renders it
+  `هاب بینبی` for B, floated to the head of the sentence looking like a false start. The phones show it is
+  neither. Second time this session that the two instruments disagreed and the phone recogniser was right for
+  "what is said" while MMS was right for "which word".
+- **ja `B&B`** — `b iː a n d ə b iː`. **The epenthetic vowel is the proof**: Japanese cannot close a syllable
+  in /d/, so a borrowed "and" must surface as /a.n.do/. That `ə` is the language's own phonotactics stamped on
+  the English word, which is exactly what アンド spells. A bare English "and" would decode without it.
+- **bn, or `¥`** — both bn speakers and the or speaker voice **no currency word at all**
+  (`d a m d u a z ɛ r p a ʃ o t e k`; `s a t o h z e r h e b a`). Voiced anyway, per the standing TTS policy:
+  an explicitly typed character is content, and a speaker's omission is evidence about reading habit. The audio
+  bounds what it can — it proves no OTHER word competes for the slot. The words themselves (`ইয়েন`, `ୟେନ`) are
+  ordinary lexis and are marked as such, not credited to the corpus.
+- **or `(UTC+1)`** — ⚠ **the weakest-sourced cell in the whole sweep, and labelled so in the code.** Both or
+  speakers skip the entire parenthetical (`11:00 ଘ ରେ`, `11:0t ରେ`) — the parenthetical-skip pattern already
+  seen in ta/en/am/zu/mi/ne/sr/sw/yue/te, never counted against a word. So no attestation exists and the rule
+  ships on **typology**: the six Indic languages whose plus WAS resolved from audio this sweep all borrow, with
+  no native-word counterexample (hi प्लस, ne प्लस, te ప్లస్, gu પ્લસ, kn ಪ್ಲಸ್, ml പ്ലസ്, ta பிளஸ்). Seven
+  recordings across four scripts is a strong prior, and ଯୋଗ — the native noun "addition" — is the exact shape
+  those recordings ruled out elsewhere (hi's first draft used धन and audio corrected it).
+
+### Two errors of my own, both caught by re-reading the output rather than the differential
+
+1. **The `US$` fold turned a silent DROP into an audible word-order error.** Unfolding let id's tier place the
+   currency noun, and it placed it wrong: *empat belas koma tujuh DOLAR MILIAR* instead of *…miliar dolar*,
+   because without a `magnitudes` list the magnitude is not part of the quantity. ⚠ *Closing a drop is not
+   finished when the differential changes — only when the READING is checked.*
+2. **it's `magnitudes` was withheld for one consumer and broke another.** The list was deliberately absent so
+   the CURRENCY path could not emit `5 milioni dollari` without the partitive — but `magnitudes` also gates
+   `magAltU`, the UNIT path's connective hop, so withholding it left the tier unable to cross `milioni di` and
+   `2,2 milioni di km²` read as *…milioni di KM*: exponent dropped AND unit noun raw in the IPA. One field, two
+   consumers, only one of which had the problem. Safe to declare because normalize.ts step 10 runs first and
+   consumes the whole preposed currency shape; measured, the corpus has exactly one currency-sign sentence,
+   postposed, and zero sentences pairing a sign with *milioni*/*miliardi*.
+
+### A cell can hide behind itself
+
+`or`'s `£27 ନିୟୁତ` — a transfer fee reading *satāisa niyuta deya*, currency gone — only appeared **after** the
+`¥` was fixed, because the coverage audit reports the FIRST defective instance per cell. Same for id. *A cell
+is not done when a fix lands; it is done when the cell re-scans clean.*
+
+### Repairing an input exposes the rules that were never exercised on it
+
+`id`'s coordinate degree had no rule, and could not have been noticed: the corpus writes `di timur 35Â°W`, so
+the sign was half of a broken `°` and the bare `(\d)\s?°` arm never saw it. Mending the mojibake put `35°W` in
+front of that arm, which produced `tiga puluh lima derajatW` — the direction letter glued raw into the IPA.
+Fixed with a compass map mirroring it's. *A mojibake fix must be followed by a re-read of the sentences it
+unmasks, because those sentences are reaching their language's rules for the first time.*
+
+### Result
+
+**15 defective cells → 6**, and all six remaining are the out-of-scope class (five designations + el's
+apposition dash). **Zero actionable defects remain in the 37 treated languages.**
+
+Gates: tsc clean; **202 test files, 2901 tests** (10 added, including a new `test/unicode-mojibake.test.ts` for
+the phantom-symbol class); corpus diffs on all six changed languages read in full —
+
+| lang | changed | DROP before → after |
+|---|---|---|
+| id | 5/1936 | 2 → 0 |
+| it | 2/1978 | 2 → 0 |
+| bn | 1/1981 | 1 → 0 |
+| or | 3/1327 | 3 → 0 |
+| fa | 1/1856 | 1 → 0 |
+| ja | 1/1788 | 1 → 0 |
+
+No DIGIT, SLOT-GAP, RAWMARK or THROW introduced anywhere.
+
+### ⚠ ADJACENT DEFECT FOUND, DELIBERATELY NOT FIXED HERE — id's tokenizer is ASCII-only
+
+Reading the id diff surfaced a real defect in a different class. `id`'s `TOKEN` is `([a-zA-Z]+)`, so **every
+accented Latin letter fragments the word** and each fragment is read as an English letter name:
+
+```
+São Paulo  →  s ˈə ˈo paˈulo          Cañitas  →  t͡ʃˈa ˈɛn ˈitas
+Klöcker    →  ʔl ˈoᶷ t͡ʃkˈər           İzmir    →  ˈaᶦ zmˈir      (Izmir → ˈizmir, correctly)
+```
+
+Not a #586 cell and invisible to both gates — the output has no digits and no raw marks, so it is a WRONG-WORD
+defect, not a leak or a drop. It is pre-existing; the mojibake repair only changed which wrong reading appears
+(`ˈə zmˈir` → `ˈaᶦ zmˈir`) while making the underlying text correct.
+
+**yue already solved this exact problem** — `test/cantonese.test.ts` pins "accented Latin stays one run for the
+foreign phonemizer (×9)". That is the model for id, and the pointer for whoever picks this up. Left out of scope
+because it needs its own measurement across every ASCII-tokenizer language, not a patch smuggled into a
+symbol-inventory sweep.
+
+## Run 13 — 2026-08-04 — el was MISCLASSIFIED: not a negative, a missing PAUSE
+
+Asked whether all six residual cells were the designation/ambiguous-negative class. Five are. **el was not**,
+and checking rather than assuming turned it into a fix.
+
+el's cell was reported as `signed-number DROP` on `Ο ναός Πνομ Κρομ –12 χιλιόμετρα … Σιέμ Ριπ– που …`. It is an
+**apposition bracketed by dashes**, the Greek equivalent of commas or parentheses, and BOTH dashes were being
+dropped silently — so the aside ran into its host clause with no break:
+
+```
+was  … pnom kɾom   ðeka ðio çiʎometɾa … sçem ɾip   pu vɾiscete …
+now  … pnom kɾom , ðeka ðio çiʎometɾa … sçem ɾip , pu vɾiscete …
+```
+
+**The missing thing was a PHRASE BREAK, not a word.** No amount of hunting for a minus vocabulary could ever
+have closed it, which is why it sat in the residual for the whole sweep — it had been filed under the class that
+has no fix.
+
+### The corpus separates the two uses BY CHARACTER, with no overlap
+
+| shape | count | what it is |
+|---|---|---|
+| ASCII hyphen `-` before a digit | **29** | every one a range or designation — `3-5%`, `1469-1539`, `56-64 χιλιόμετρα/ώρα`, `7:00-8:00`, `26 - 00`, `COVID-19`, `Chandrayaan-1` |
+| EN DASH `–` before a digit | **1** | the apposition above |
+| EM DASH `—` before a digit | **0** | |
+
+So el contains **zero true negatives**, and its en/em dash is never arithmetic. That is what makes keying on the
+dash CHARACTER safe here — a fact about this language's typography, not a fleet default.
+
+⚠ **One instance proves the whitespace guard is needed.** Of the 21 en/em dashes, 20 are appositional with a
+space on at least one side; the twenty-first is `Apollo–Soyuz` (left in Latin script), an en dash used as a
+COMPOUND JOINER, with no space on either side. A pause there would be wrong. 20/20 against 1/1 — and the corpus
+diff confirmed it, changing exactly 12 of the 13 dash-bearing sentences and leaving Apollo–Soyuz alone.
+
+⚠ **My first draft of the comment said `Απόλλο–Σογιούζ`.** The corpus writes it in LATIN. Caught by grepping for
+the actual unchanged instance instead of trusting what I had just written about it.
+
+### An asymmetry found by probing past the fix
+
+While checking the dash rule against every shape, `θερμοκρασία -5 βαθμοί` read as plain *pende*. el voices `+`
+as συν (step 11, from a single `(UTC +1)`) and had **no minus word at all**. Added μείον, reusing the guard
+`defects.ts` arrived at after resolving all 66 artifacts by hand rather than reinventing it.
+Labelled **robustness, not a measured repair**, and said so in the code: with zero true negatives in el_gr no
+gate can see it and its corpus diff is empty by construction. Worth having anyway, because a `-5` that reads
+exactly like `5` is the silent content loss #586 exists to remove, and the plus/minus asymmetry inside one file
+is indefensible on its own terms.
+
+### Result
+
+**6 defective cells → 5**, and the residual is now HOMOGENEOUS: two universal sentences (`चंद्रयान -1`,
+`એચજેઆર -3`) across the five languages that write a space before the hyphen — hi, mr, ta, gu, kn. All are
+designations whose hyphen is correctly silent; the readings are already right, and the DROP differential simply
+cannot distinguish a spaced designation hyphen from a minus. Accepted as the limitless lexical problem.
+
+Gates: tsc clean; 202 files / 2902 tests; el diff 12/1969, DROP 1 → 0, no DIGIT/SLOT-GAP/RAWMARK/THROW.
+
+⚠ **The lesson worth keeping is about the residual itself.** A defect parked under a class that has no fix stops
+being re-examined. el sat there for the whole sweep because the label said "ambiguous negative", and one question
+about whether the label was right turned it into a twelve-sentence improvement. Re-derive the classification of
+anything in a permanent-residual list before treating the list as closed.
+
+## Run 14 — 2026-08-04 — the ten artifact-side cells: 10 → 2, and the residual is ONE fleet-wide gap
+
+Worked the ten cells the widened audit surfaced. Diagnosed each against the actual matched character before
+touching anything, which was necessary: **the labels were wrong on four of them**.
+
+| cell | label said | what it actually was | outcome |
+|---|---|---|---|
+| hi currency | currency | **`¢`**, a CENT SIGN — not the `°` in the shown prefix | declared `सेंट` |
+| hi signed-number | minus | era RANGE `600 ई. पू.-1200 ई.` | accepted |
+| hi exponent | exponent | bare `२०²` | **open — fleet-wide gap** |
+| mi arithmetic | arithmetic | attested plus the engine cannot pronounce | accepted |
+| my signed-number | minus | apposition `(Koreans -၂သန်း)` | accepted |
+| my arithmetic | arithmetic | compound joiner `အချိန်+ရပ်ဝန်းထု` … **and `အာဆီယံ +၃`** | fixed + accepted |
+| my exponent | exponent | `E = mc²` — **English text**, and English's gap | **open — same gap** |
+| my iteration | iteration | wikitable markup + a bare `ゝ` | markup fixed, mark accepted |
+| xh signed-number | minus | stray hyphen `kangange -40 mph` | accepted |
+| xh arithmetic | arithmetic | `+30°C`, suppressed on purpose | **fixed on policy** |
+
+### ⚠ xh's silence was SOURCED and was reversed anyway — the policy decides, not the recording
+
+xh's `+30°C` was deliberately silent, and the reasoning was good: both xh_za speakers of the Montevideo
+sentence produce no plus phones in the TEMPERATURE position while all three of the UTC sentence do — the
+"same sign, two readings in one language" rule. The file called the residual DROP "permissible".
+
+That evidence is unchanged and still correct. What overrides it is the standing rule: **for TTS an explicitly
+typed character is CONTENT, and a speaker's omission is evidence about reading habit, not licence to delete.**
+The identical case was already decided on hi — hi's `+30 °C` silence was shipped on 2-of-2 omission and then
+reverted to voicing under this rule — and xh was simply never brought along. Measured: `hi`, `zu`, `te` and `sw`
+all read this sign and **xh alone did not**, with zu being xh's closest relative and the language where the plus
+rule was moved ahead of degrees for exactly this reason. A sourced finding can be correct and still not decide
+the question; the policy is a separate layer, and consistency across the fleet is evidence that it was applied.
+
+### `my`'s plus: the both-sides guard was too tight by exactly two instances
+
+my already read `+` between digits as `အပေါင်း`, and its comment correctly argues that a LETTER-flanked plus is
+a compound joiner (`အချိန်+ရပ်ဝန်းထု` = *spacetime*) and stays silent — genuinely different from Italian's
+`volo+hotel`, a coordination whose reader was recorded saying *più*. Same glyph, different function.
+
+But the guard was "digits on BOTH sides", which also excluded the two cases where the sign is a word:
+`အာဆီယံ +၃` — **ASEAN Plus Three**, where the plus is part of the organisation's NAME — and `(+⅔)`, a
+positivity marker on a fraction. A digit AFTER is the discriminator, and every compound has a letter on both
+sides, so it separates them with no overlap.
+
+⚠ **The etymology plus was left unimplemented, and its reading is attested.** `(gêeo = Earth) + (graphein = to
+write)` is a third construction, and the artifact **glosses the symbol in its own text** — `နိ+ ဝါန =နိ နှင့် ဝါန`
+("ni+vāna = ni AND vāna") — so an etymological `+` is `နှင့်`, not `အပေါင်း`. Three instances, all inside a
+bracket-gloss shape narrow enough that a rule would be fitted to the article rather than to the language.
+Recorded rather than shipped.
+
+### Markup was being SPOKEN, which is worse than a drop
+
+my's `iteration` evidence is two wikitable rows, and `stripMarkup` handles HTML but not wikitable syntax, so
+`|bgcolor="#F3F5DE"| ゝ …` read as *bɡkˈʌlɚ ɲi˨m̥ja˥ˀ ˈɛf θoʊɴ ˈɛf ŋa dˈiː* — "bgcolor equals F 3 F 5 D E", a
+style attribute recited one hex digit at a time. That is the inverse of the dropped-sign problem: **audible
+garbage**, and strictly worse, because silence can at least be mistaken for a reading choice.
+
+Fixed in `stripMarkup`, on the philosophy its own header states ("a phonemizer handed `<i>` should render it,
+not read it"). ⚠ **The `!` header arms were written and then removed** — wikitables mark headers with `!` and
+`!!`, so both belong to the syntax, but measured across all 67 corpora AND all 67 artifacts they occur **zero
+times**, while `!` is ordinary sentence punctuation everywhere. Zero value against a real cost (`Wow!! Amazing`
+would lose its clause break). Only the `|` shapes ship. Verified byte-identical on en, lb (`&apos;` ×192) and
+ms (`<i>` tags) — the three most markup-prone corpora.
+
+And the mark itself: **a bare iteration mark has nothing to repeat**, so silence is the only correct output.
+Routed to Japanese it still reads empty, because `ja` also has no antecedent. Those two rows are also my's ENTIRE
+`iteration` evidence and they describe JAPANESE kana in a Burmese article — `ゝ`/`ゞ` are not Burmese orthography.
+
+### The residual is ONE gap in two languages, and it is fleet-wide
+
+Both remaining cells are a **bare-number exponent**: hi's `२०²` and my's `E = mc²` (the latter inside an
+embedded ENGLISH run, so it is English's gap). Measured — **every language drops it**:
+
+```
+en 20² → twˈɛnti     de 20² → t͡svˈant͡sɪç   fr 20² → vˈɛ̃      it 20² → vˈenti
+es 20² → bˈeᶦnte     hi 20² → bˈiːs        pt 20² → vˈĩtɨ     ru 20² → dvˈat͡sətʲ
+```
+
+The exponent machinery is **unit-only** across the whole fleet, and the bare form needs a DIFFERENT word from
+the unit modifier — English wants "squared", not the "square" of *square kilometres*, and Italian needs a
+connective (*venti al quadrato*). English does not even use the shared `exponentWords`; it handles `km²`
+locally. So closing this needs a new tier field plus sourced words for 67 languages, which is its own pass.
+Left OPEN and visible rather than mislabelled accepted — these two are not correct-as-is.
+
+⚠ **hi's two cells are probably the same corrupt sentence.** `२०² या १०²` and `२०¢ या १०¢` are the same Vernier
+sentence in two artifact copies with a different character in the slot, which is the signature of an OCR or
+encoding corruption of `″` (arc-seconds — a Vernier scale reads those, not money and not squares). Neither `¢`
+nor `²` is what the author wrote. `¢` was declared anyway, because the engine's job is to read the character it
+is given, and that caveat is in the code.
+
+### The accepted baseline generalised to any class, and immediately proved itself
+
+`ACCEPTED_SILENT` was minus-only; it is now keyed `lang → class → literal strings`. Adding my's compound
+plus **immediately surfaced a new instance** — `အာဆီယံ +၃`, which the accept correctly did NOT cover because it
+names strings and not shapes. That is the property working in the wild rather than only in a test.
+
+### Result
+
+**10 defective cells → 2.** 12 accepted across 7 languages, every one printed with its reason. Gates: tsc clean;
+**204 files / 2914 tests**; corpus diffs xh 1/1509 (DROP 2→1, the single change read), hi 0/1702, and en / lb / ms
+byte-identical.
+
+## Run 15 — 2026-08-04 — arbitrary exponent reading: the audit reaches 0/67
+
+Implemented the bare-exponent reading the last run identified as the residual, and the audit is now **0
+defective cells across 0/67 treated languages**.
+
+### The 4+ reading: CARDINAL, not ordinal
+
+Asked for a suggestion on the reading for powers above 3. Shipped **"to the power of N"** rather than
+**"to the Nth power"**, and the argument is cross-linguistic rather than stylistic:
+
+- the ordinal form needs the EXPONENT'S ORDINAL in every language, and several inflect it for gender and case
+  — the Icelandic, Czech and Serbian runs each had to build ordinal tables, and the exponent would then need
+  its own agreement rules
+- the cardinal reuses the number path that already exists in every engine, and needs exactly ONE connective
+  phrase per language
+
+"to the fifth power" is the more idiomatic English of the two; it is not worth 67 languages of ordinal
+morphology, and the cardinal is unambiguous. `{e}` is emitted as DIGITS so each language's own number path
+speaks it.
+
+### Why it could not reuse `exponentWords`
+
+That field holds the UNIT MODIFIER, and in most languages the modifier and the predicate are different words:
+
+| | unit modifier | bare predicate |
+|---|---|---|
+| en | *square* kilometres | twenty *squared* |
+| it | chilometri *quadrati* | venti *al quadrato* |
+| hi | *वर्ग* किलोमीटर | बीस *का वर्ग* |
+| de | *Quadrat*kilometer | zwanzig *zum Quadrat* |
+
+Reusing it would have produced "twenty square". So `bareExponent` is a new field, and it takes TEMPLATES
+(`{n}` base, `{e}` exponent) rather than words, because the connective and the word order are language data —
+`{n} al quadrato`, `{n}の{e}乗`, `{n} की घात {e}`. No arrangement of fixed fields expresses all three.
+
+### Two mechanisms, because English does not use the shared tier
+
+English has no `makeSymbolNormalizer` call at all — it handles `km²` in its own normalize.ts — so it needed a
+local twin of the rule. Worth knowing before assuming a tier field reaches the whole fleet.
+
+⚠ **Ordering is load-bearing in both.** The bare rule runs AFTER the unit path. Matching first would claim
+every `km²` and read it "kilometre squared" instead of "square kilometres" — so by the time control reaches the
+bare rule, a surviving superscript provably has no unit to modify, which is the condition the rule wants.
+
+### The base may be LETTERS, and a superscript now travels with a foreign run
+
+`E = mc²` was the case that exposed the gap, and it needed a second fix. `²` is `No`, not `\p{L}`, so
+`FOREIGN_RUN` ended at `mc` and left the exponent in the gap to be dropped — my's artifact quotes the formula
+and routes the Latin to English, which never saw the `²`. Including a TRAILING superscript in the run fixes it
+for every host at once: **the fix is to stop cutting the expression in half, not to invent a Burmese reading
+for an English formula.** Only trailing, and only superscript digits — a superscript cannot begin a word, so
+this can neither start a run that would not otherwise exist nor swallow a host character.
+
+### Provenance, stated because it is weaker than most data here
+
+Ten languages declared: en, de, fr, es, it, pt, ru, ja, cmn, hi. These are **standard mathematical register,
+not corpus attestations**, and the sourcing attempt is worth recording because it FAILED informatively:
+
+```
+hi घात:0   ru степени:0   de Potenz:0   it potenza:0   ko 제곱:0   vi lũy thừa:0
+th กำลัง:6  ← the PROGRESSIVE ASPECT marker      fa توان:8 / ar أس:8  ← substring traps
+fr carré:4 / cmn 平方:8 / hi वर्ग:5     ← all the UNIT modifier, in km² sentences
+```
+
+Every apparent hit was either the unit modifier or the substring trap `tools/normalization/attest.ts` exists to
+catch. FLEURS is news and encyclopedia prose and contains no spoken arithmetic, so the power words are simply
+not in it. Declared anyway under #584's rule — a dropped sign is inaudible, the one outcome that cannot be
+right — and labelled in each file so no later pass credits the corpus with them.
+
+⚠ **de has no distinct predicate cube word** and takes the generic form (*acht hoch drei*), which is the
+standard spoken German. Recorded so it does not look like an omission.
+
+The other 57 languages are UNDECLARED BY DESIGN: the field is optional, undeclared behaviour is unchanged, and
+the superscript stays where the RAWMARK leak gate can see it — the same choice the unit branch makes for a
+missing measure word, and for the same reason.
+
+### Measured surface, so nobody mistakes this for a hot path
+
+Across all 67 artifacts a superscript follows a NON-unit base **twice** (hi's `२०²`/`१०²`, both the corrupt
+Vernier sentence) plus my's `mc²`. `⁴`-`⁹` and multi-digit superscripts occur **ZERO** times. The other ~113
+superscripts are unit exponents the existing path already reads — including 11 with a NON-LATIN unit
+abbreviation (`ኪ.ሜ²`, `किमि²`, `км²`) that an earlier Latin-only count had misfiled as "other".
+
+### Result
+
+**Audit: 0 defective cells across 0/67 treated languages**, with 12 accepted cells printed with their reasons.
+Gates: tsc clean; **205 files / 2920 tests**; corpus diffs on twelve languages (en de fr es it pt ru ja cmn hi
+el th) all **byte-identical** — the expected outcome, since FLEURS carries only unit exponents, and the
+confirmation that a fleet-wide `FOREIGN_RUN` change regressed nothing.
+
+## Run 16 — 2026-08-04 — self-review of the exponent work: three fixes, one of them a real bug
+
+Reviewed the four branch commits before opening the PR. Three findings, and the first was a genuine defect
+shipped minutes earlier.
+
+### ⚠ A FOOTNOTE MARKER IS NOT AN EXPONENT — and my first guard against it did nothing
+
+A superscript digit on an ordinary word is a CITATION far more often than a power: `Smith¹` is a footnote, and
+reading it *smˈɪθ tʰuː ðə pʰˈaᶷɚ ʌv wˈʌn* is exactly the confidently-wrong outcome this repo ranks below
+silence. The rule matched `[\p{L}\p{M}]+` before a superscript with no length limit, so it did that.
+
+Capped the letter base at three characters — mathematical variables are short (`x`, `mc`, `E`), prose words are
+not. **Then probed the motivating case and the cap had changed nothing:** `{1,3}` happily matches the LAST three
+letters of a long word, so `Smith¹` matched `ith` and still read as arithmetic. A length limit only limits
+anything if the match must START at a word boundary; `(?<![\p{L}\p{M}])` is what makes the cap a cap.
+
+*A guard has to be tested against the input that motivated it, not merely against the cases it was already
+passing.* Second time this session a change typechecked, ran, and did nothing — the first was
+`repairDoubleEncoded`'s early-out guard.
+
+Measured to set the cap: after mojibake repair every real letter base in the fleet is a two-letter unit
+(`km²` ×108) or `mc`. The apparent long ones were `kmÂ²` and `AsunciÃ³n`, where the `²`/`³` is half of a
+double-encoded byte and not an exponent at all — the phantom class again, this time inflating a length
+distribution. Known exclusion: `किमि²` (ne, 4 chars) is a genuine Devanagari unit abbreviation and is now out of
+reach, which is the right place for it to fail — a unit exponent belongs to the unit path.
+
+### `{|` had to be anchored to line start
+
+The wikitable-open arm consumed TO END OF LINE. Unanchored, a stray `{|` in prose — set-builder notation, a code
+snippet — would have deleted the rest of the sentence. A table open is always first on its line, so the anchor
+costs nothing and bounds the damage to nothing. Verified: `the set {|x|} is defined and more text follows`
+survives intact.
+
+### ⚠ AND I MADE THE STALE-RULER MISTAKE I WARNED ABOUT IN RUN 12
+
+Re-diffing after the fixes, `ne` reported 8 changed utterances and `id` 6 — alarming, since neither declares
+`bareExponent`. Both were **my own measurement error**: I compared against baseline files that did not come from
+the right commit (`id.before` was several commits old and `ne.before` had never been emitted at all). Re-emitted
+from the true branch point (`45c0226`): **both byte-identical, 0/1993 and 0/1936.**
+
+Run 12 states the rule — "the ruler must be the same on both sides of a before/after; only the ENGINE should
+differ" — and I still reached for a leftover file because it had the right name. *A baseline needs its commit
+recorded, not just its filename.* The false alarm cost one re-run; believing it would have cost a wild goose
+chase through two languages that were never touched.
+
+### Result
+
+Gates after the fixes: tsc clean; **205 files / 2921 tests** (one added, pinning the footnote case and the
+boundary guard that makes the cap work); audit **0 defective cells across 0/67**; corpus diffs byte-identical on
+en, de, it, hi, ne and id against the true branch point.
+
+## Run 17 — 2026-08-04 — assessing against #586's own text, and the last named open item
+
+Read the issue rather than working from memory of it, and checked each thing it asks for.
+
+### What the issue asks, and where it stands
+
+| #586 asks for | status |
+|---|---|
+| Round 1 — sweep every treated language against the full inventory | **done**, and the sweep itself was found to be running on 37 of 67 |
+| Round 2 — re-run, because round 1 changes the inventory | **done**, repeatedly; audit now 0/67 |
+| Audit the inventory against DECLARATIONS, not just rule comments | **checked** — every widely-declared field has a cell (`units` 105, `percent` 57, `currency` 54, `magnitudes` 52, `exponentWords` 51, `unitPer` 22 → `rate`, `ampersand` 17). No missing cell. |
+| `arithmetic` / `=` — "needs a per-language decision, not a shared default" | **32 of 67 read it, 35 drop.** Still the deferred per-language item the issue describes. |
+| Negative exponents in scientific notation — "has a cell now, no rule" | **CLOSED this run** |
+
+⚠ **My own exponent work had a hole in exactly the place the issue names.** `U+207B` SUPERSCRIPT MINUS was
+missing from the superscript run, so `10⁻³¹` read as bare *tʰˈɛn* — sign and power both gone. Implementing
+"arbitrary exponent reading" and omitting the negative exponent left the issue's last named item open while
+looking closed.
+
+### ⚠ AND THE UNIT LEAKED, which is worse than the drop it accompanied
+
+`9.11 × 10⁻³¹ kg` read as `… tʰˈaᶦmz tʰˈɛn kɡ` — a RAW `kɡ` in the IPA. A superscript sits BETWEEN the number
+and its unit, which breaks the adjacency the unit rule matches on, so the unit failed and its abbreviation
+reached the phoneme stream verbatim. Fixed by resolving the scientific-notation exponent BEFORE the unit rule,
+which leaves the exponent's DIGITS immediately next to the unit — step 6 then sees `31 kg` and the whole phrase
+comes out "…to the power of negative thirty-one kilograms", which is how a person says it.
+
+**Two placements, and both are necessary**: scientific notation must precede the unit rule or the unit leaks; a
+bare exponent must follow it or it steals every `km²` and reads it "kilometre squared".
+
+⚠ **And it had to precede the SIGN rule too.** First placed after it, the ASCII form silently failed: step 0e
+had already rewritten `-31` to "negative 31", so the pattern could no longer match and the reading kept saying
+"ten negative thirty-one" — sign present, power missing. Three ordering constraints on one rule, each found by
+probing rather than by reading.
+
+### "negative" for the sign, "minus" for the operator
+
+Corrected on the point that `minus` is the arithmetic OPERATOR and English convention reserves it for that,
+spending `negative` on a sign attached to an amount. English's step 0e only ever matches the SIGN position
+(start of string, after a space, after an open paren) — so it was spending the operator's word on the sign's
+job. Now `-31` → "negative thirty-one", `-5 °C` → "negative five degrees Celsius".
+
+The disambiguation is real and cheap: `negative` on a measurement is unremarkable English, and a bare `10 - 4`
+is currently DROPPED, so "minus" in English output could only ever have come from a sign anyway.
+
+⚠ **Most languages do not split the two words** — de *minus*, fr *moins*, ru *минус* serve both senses — so
+`bareExponent.negative` is each language's OWN sign word, lifted from the minus rule already in its
+normalize.ts rather than invented: de minus, fr moins, es menos, it meno, pt menos, ru минус, ja マイナス,
+cmn 负, hi ऋण. Sourcing from the repo's own shipped data beats sourcing from my own confidence.
+
+⚠ **Two test pins would have passed VACUOUSLY.** `expect(...).not.toContain("minus")` on the range cases still
+passed after the change — because that word is no longer emitted anywhere by the rule, so the assertion tested
+nothing. Retargeted to `"negative"`. *A regression pin has to name the string the code can actually emit;*
+renaming an output silently defuses every negative assertion about it.
+
+### What the corpus forms actually are
+
+Scientific notation occurs 4 times in the artifacts, and only 2 are recoverable:
+
+```
+my  9.1093837 × 10 -31 kg     ASCII, superscript flattened  → now reads
+my  2.5×10 -11 m              ASCII, superscript flattened  → now reads
+hi  2.802×1010 वर्ग फु         `10¹⁰` FLATTENED INTO THE MANTISSA — unrecoverable
+hi  1.1×109 वर्ग फु            `10⁹` likewise — unrecoverable
+```
+
+⚠ The last two are **data loss, not a rule gap**: `2.802×1010` genuinely reads "2.802 times 1010" and nothing in
+the text says the exponent was ever superscripted. Recorded so no later pass tries to "fix" them by guessing
+where a power boundary was.
+
+The ASCII form needs the ATTACHED minus as its discriminator — `10 -31` is scientific notation, `10 - 31`
+(spaced both sides) is subtraction — and both real instances write it attached, which is the convention.
+Combined with the required `×`, nothing that is not scientific notation reaches the rule.
+
+### Result
+
+Gates: tsc clean; **205 files / 2921 tests**; audit **0 defective cells across 0/67**; corpus diffs
+byte-identical on en, de, hi and ru — expected, since en_us contains no true negative at all (the fleet's only
+one is hi's astronomical magnitude) and no corpus writes a superscripted exponent.
+
+**Outstanding against #586 after this run: the `arithmetic` / `=` item only** — 35 of 67 languages still drop
+`=`, which the issue itself defers as needing a per-language decision rather than a shared default.
+
+## Run 18 — 2026-08-04 — "are WE causing the data loss?" — yes, and the answer found three more defects
+
+Run 17 recorded hi's `2.802×1010` as unrecoverable "data loss, not a rule gap". Challenged on whether the loss
+was ours or the orthography's. **It was ours**, and I had asserted otherwise without checking.
+
+### Two places flatten `<sup>`, and the arithmetic proves the value
+
+`wikidump-to-text.py:32` (`RE_TAG = re.compile(r"<[^>]+>")`) and `stripMarkup` both delete the brackets and
+leave the digits INLINE. So `2.802×10<sup>10</sup>` is mined and read as `2.802×1010` — the exponent merges into
+the mantissa and no later pass can find the boundary.
+
+The arithmetic settles it, rather than a guess about the wiki source:
+
+```
+2,603 वर्ग किलोमीटर (2.802×1010 वर्ग फुट)   →  2,603 km² IS 2.802×10¹⁰ sq ft
+100 kमी2 (1.1×109 वर्ग फुट)                →  100 km²   IS 1.1×10⁹ sq ft
+```
+
+The values only reconcile with the exponent restored. Both tools now render `<sup>N</sup>` to real superscript
+characters before the tag pass.
+
+⚠ **IT HID BECAUSE THE UNIT CASE LOOKED FINE.** `km<sup>2</sup>` flattens to `km2`, and the shared tier
+deliberately accepts an ASCII exponent after a letter — the branch that made the original `<sup>` fix work. So
+twelve corpora carry a harmless-*looking* `km2` and only a NUMBER base made the collision visible. *A lossy
+transform that stays readable in the common case is the hardest kind to notice.*
+
+### ⚠ AND "HARMLESS-LOOKING" WAS WRONG, WHICH MY OWN TEST CAUGHT
+
+I wrote that the unit case "survives flattening because the tier accepts an ASCII exponent" and asserted it.
+The assertion FAILED. Measured properly: 7 of the 9 tier languages carrying `km2` do read it as an exponent
+(el es ml bg ne hu cmn) — but **en, sw and nb do not**, and there the `2` falls out of the unit match and reads
+as a SEPARATE NUMBER: *"nineteen thousand five hundred kilometres TWO"*. Audibly wrong, and invisible to both
+gates — no superscript survives to leak, nothing vanishes for DROP to catch.
+
+- **en** matched only `[²³]`; now accepts `[23]` too, bounded by the unit list so `H2O` and `802.11g` cannot
+  match. Fixes `3136 mm2` in en_us.
+- **sw / nb** differ for another reason entirely: they declare no `exponentWords`, so the tier hands the exponent
+  back BY DESIGN — the documented visible gap, not this bug. Left as a data gap.
+
+### ⚠ AND CHASING THAT FOUND A LEAK IN ENGLISH — the first language ever treated
+
+`2.2 million km2 of ocean` (the archipelago sentence, in en_us) read as *… mˈɪɫjən ˈʊkm tʰˈuː …*: **the unit
+abbreviation reached the phoneme stream as RAW LETTERS** and the area was lost. The plain `2.2 million km` leaks
+too, so it is the MAGNITUDE breaking adjacency, not the exponent.
+
+This is the same defect the shared tier fixed with `magnitudes` — reported by the Luxembourgish run, found again
+in Italian earlier this sweep — and English does not use that tier, so it never got the hop. Added, with the
+magnitude re-emitted in place and forcing the PLURAL (the singular test reads the digits alone, so `1 million km`
+would otherwise say "kilometre").
+
+⚠ **No gate could see this one either.** Bare Latin letters are in no leak class, and nothing vanished. Two
+independent invisible defects in en_us, both surfaced by asking who caused a data loss.
+
+### Support every encoding, render them all to Unicode
+
+On the observation that a caller passes whichever encoding is at hand. Three now converge on one reading:
+
+| encoding | before | now |
+|---|---|---|
+| `km²` | ok | ok |
+| `km<sup>2</sup>` | → `km2`, flattened | → `km²` |
+| `km&sup2;` | **stayed LITERAL** — read as "ampersand sup two semicolon" | → `km²` |
+| `km^2` | `ˈʊkm tʰˈuː` — unit LEAKED | → `km²` |
+| `km&#178;` | ok (numeric entities already worked) | ok |
+
+Named entities were the inconsistency: the numeric form worked while every NAMED one that maps to a readable
+character was left literal. Added `sup1-3`, `frac12/14/34`, `minus`, `plusmn`, `micro`, `permil`, `cent` — each
+paired with machinery that already reads it. Caret notation became a shared fold beside `foldSquaredDegrees`,
+guarded to require an alphanumeric before and only signed digits after (`a ^ b` untouched; `^` occurs ZERO times
+in all 67 corpora, so it is robustness for what a caller may hand us).
+
+### ⚠ AND `<sub>` IS DELIBERATELY *NOT* MAPPED — I wrote it, then measured it out
+
+Symmetry argued for rendering `<sub>2</sub>` to `₂`. Measured:
+
+```
+CO2 levels  → kʰˈoᶷ tʰˈuː lˈɛvəɫz     the flattened ASCII form — the 2 IS spoken
+CO₂ levels  → kʰˈoᶷ lˈɛvəɫz           "correctly" rendered — the 2 is GONE
+```
+
+Nothing reads a subscript digit, so the "correct" rendering takes a readable form and makes it silent — **the
+same error as the bug this whole run is about, pointed the other way.** `<sub>` occurs zero times in all 67
+corpora and artifacts, so there was no benefit to weigh against a measured regression. *A transform is only a
+repair if something downstream can read what it produces.*
+
+### The existing artifacts are NOT retro-repaired, deliberately
+
+The two hi entries still carry `1010`/`109`, and twelve corpora still carry `km2`. The arithmetic proves the
+VALUES, but not the exact markup that was there — I inferred `<sup>` from the flattening pattern. Hand-editing
+mined evidence on an inference is weaker than regenerating it from the dump, so the tools are fixed and
+regeneration is the mechanism. Recorded here so the flattened forms are not mistaken for source fidelity.
+
+### Result
+
+Gates: tsc clean; **205 files / 2927 tests**; audit **0 defective cells across 0/67**; corpus diffs — en 2/1976
+(both the defects above, read individually) and el, es, lb, ms, vi **byte-identical**.
+
+## Run 19 — 2026-08-04 — the `arithmetic` item, and it was not about `=` at all
+
+#586's last open item was `arithmetic` / `=`, deferred as "needs a per-language decision". Measuring it first
+changed what the work was.
+
+### The sign counts were almost all phantoms
+
+`=` ×50, `<` ×6, `>` ×6, `±` ×1 across the artifacts — and reading them:
+
+- **`<` and `>` ×12** — every one is an HTML TAG (`<i>`, `<sup>`) in ms. Not operators; `stripMarkup` removes them.
+- **`±` ×1** — `Las CaÃ±itas`: the mojibake `Ã±` CONTAINS `±`. The phantom class again.
+- **`=` ×50** — dominated by cmn's artifact carrying MediaWiki/LaTeX residue (`{\displaystyle W={\frac{Rv+Cm}{v+m}}}`,
+  `Missing required parameter 1=month!`), which is being READ ALOUD as English. One genuine arithmetic (`1+4=5分`).
+- **`×` ×20** — the only genuinely attested one, and mostly DIMENSIONS.
+
+⚠ So `=` is largely an artifact-quality problem, not a vocabulary one, and `±`/`<`/`>` have ZERO real instances.
+
+### ⚠ THE REAL DEFECT WAS ASCII `x`, AND IT WAS AUDIBLE GARBAGE
+
+Counted in the corpora: `NxN`-shaped forms occur **~85 times against ~20 for `×`** — the ASCII form is dominant.
+And almost every engine read the `x` as its own LETTER NAME:
+
+```
+en  6x6 cm → sˈɪks ˈɛks sˈɪks …     it  sˈej KS sˈej      fr  sis IKS sis      de  zɛçs KS zɛçs
+```
+
+Not a drop — *audible garbage*, which is why no leak or DROP gate ever saw it. hu was the only language right,
+because it was fixed by hand earlier this sweep. Separately, 31 of 67 dropped `×` entirely.
+
+### Two decisions, arbitrated
+
+**1. `×` has TWO readings, and English uses different words.** A DIMENSION is "six BY six centimetres"; a PRODUCT
+is "five TIMES five"; a `4x4` is "a four BY four". Most languages reuse one word (cs *krát*, da *gange*,
+ro *ori*, ca *per*, ga *faoi*), so `multiply.by` defaults to `times` and a single-word language costs nothing.
+The discriminator is mechanical: a unit follows → `by`; UNSPACED ascii between digits → `by` (the `4x4`/`6x6`
+idiom); else `times`. ⚠ Equality of operands cannot decide it — `4x4` and `5 × 5` are both equal and read
+differently.
+
+**2. Attested first, then register.** The sweep found the word attested almost nowhere, and the apparent hits are
+HOMOGRAPHS OF PREPOSITIONS: es `por` ×23, it `per` ×25, ru `на` ×31 — all the preposition, never the operator.
+Same trap as the exponent sourcing. So provenance is marked per language: **✓ TREE** where the word came from
+that language's own existing `×` rule (20 languages — zero new sourcing, and declaring it is what fixes ASCII
+`x` for them), **~ REG** where it is standard register for a language that dropped the sign (11).
+
+### Two ordering bugs, both found by probing
+
+⚠ **The declarations landed in the WRONG OBJECT for four languages.** Anchoring the insertion on the first
+`percent:`/`units:` line matched a field in an unrelated type or config near the top of the file, not the
+`makeSymbolNormalizer({…})` call — so it, id, sw and mk typechecked, shipped, and did NOTHING. Caught because
+`it 5 × 5` still read *t͡ʃˈinkwe t͡ʃˈinkwe*. *A config field in the wrong object is invisible to the compiler.*
+
+⚠ **The rule had to run BEFORE the unit path, not after.** Placed after, `unitPrefix` languages broke: Swahili's
+unit path MOVES the noun ahead of its number, so `6x6 cm` became *sita KS sentimita sita* — no digit after the
+sign, and the `x` fell through to the letter reading. Running first is better anyway: the unit is still an
+ABBREVIATION, so "is a unit coming?" is just "digit then letters", and the unit path still finds `6 cm` adjacent.
+
+### Result
+
+31 languages declared. Corpus diffs, every changed line read: **en 1/1976** (`ˈɛks`→`baᶦ`), **de 2/1956**
+(`ks`→`maːl`), **it 3/1978** (`ks`→`pˈer`), **cs 2/1947** (`ks`→`krˈaːt`), **el 1/1969** (`ˈɛks`→`epi`),
+sw 0/1938. Every one is a letter name becoming a word; no DROP, DIGIT, RAWMARK, SLOT-GAP or THROW anywhere.
+Gates: tsc clean; 205 files / 2927 tests; audit 0 defective cells across 0/67.
+
+**Still open**: ~26 languages have no multiplication word (the droppers I could not source confidently), cmn's
+artifact carries LaTeX/template residue that is read aloud, and `±`/`<`/`>` remain undeclared almost fleet-wide
+with zero attested instances.
+
+## Run 20 — 2026-08-04 — items (2) and (1): LaTeX residue, and the multiplication word fleet-wide
+
+### (2) LaTeX/template residue was being READ ALOUD
+
+cmn's artifact carries `{\displaystyle W={\frac {Rv+Cm}{v+m}}}` and three MediaWiki template ERROR messages.
+Both were spoken as English — *dˈʌbəɫjuː dɪsplˈeᶦstaᶦɫ …* ("W displaystyle W") and *mˈɪsɪŋ ɹikwˈaᶦɚd pɚˈæmət̬ɚ*.
+Same class as the wikitable prefix: not a dropped sign but AUDIBLE GARBAGE.
+
+- **Engine**: `stripMarkup` now removes LaTeX control sequences. ⚠ Zero risk, measured — a BACKSLASH occurs
+  **zero times in all 67 corpora** and in one artifact entry, so `\word` can never reach real prose.
+- ⚠ **The brace strip had to be conditional, which the first version got wrong.** `[{}]` unconditionally
+  reached ordinary text (`a {curly} aside` → `a  curly  aside`). Braces are rare rather than impossible in prose,
+  so a LaTeX COMMAND is what licenses treating them as math. No command, no brace strip.
+  (Also needed a non-global twin for the presence test — `.test()` on a `/g` regex advances `lastIndex` and makes
+  alternate calls disagree with themselves.)
+- **Mining tool**: a paragraph containing a MediaWiki error marker is now DISCARDED WHOLE. These are FIXED
+  strings from a broken template, so unlike ordinary garbage they can be matched exactly rather than guessed at,
+  and the surrounding text is template expansion with no reliable prose to salvage.
+
+### (1) The multiplication word, from 33 broken to 1
+
+Started at 33 languages either dropping `×` or reading ASCII `x` as a LETTER NAME. Now **one**.
+
+⚠ **My first measurement of who was broken was WRONG, twice over.** The detector looked for `ks`/`eks` in the
+IPA — which matches `sˈɪks` (English "six") and `eksi` (Greek "six"). Both false positives, and both languages
+were already correct. Replaced with the only reliable test: *does the ASCII form read identically to the `×`
+form?* That split the failures into two groups that need different fixes, which the leak-string test could never
+have shown.
+
+| group | fix | count |
+|---|---|---|
+| no word at all | declare `multiply` (~REG standard register) | 17 |
+| reads `×`, not ASCII `x` | declare `multiply` (✓TREE — their OWN word) or extend their local table | 16 |
+
+Words came from the language's own existing rule wherever one existed (✓TREE, zero new sourcing) — harvested
+from two different shapes, `replace(/×/…)` AND the `[/×/gu, " word "]` TABLE form that a first grep missed.
+The rest are ~REG, marked distinctly in each file.
+
+⚠ **Eight languages do not route this through the tier at all** and needed their local rule extended instead —
+a reminder that a tier field does not reach a language that never asked the tier. ar and om use a third shape
+again (`new RegExp` with a digit class; a two-group `replace`), and fa had no `×` rule of any kind.
+
+### Result
+
+**32 of 33 fixed.** Corpus diffs, every changed line read: cmn 2/1999 (`ˈɛks`→乘以), ta 1/1886 (`ˈɛks`→பெருக்கல்),
+ru 0/1959, sv 0/1863. Gates: tsc clean; 205 files / 2927 tests; audit 0 defective cells across 0/67.
+
+**Still open**: om's `×` (its local rule and the `unitPrefix` reorder interact — ASCII `x` works, `×` still
+drops), and item (3), `±`/`<`/`>`, which remain undeclared almost fleet-wide with ZERO attested instances.
+
+## Run 21 — 2026-08-04 — "no way to find an equal sentence and listen?" — yes, and it corrected my data
+
+Challenged on shipping 17 multiplication words as "standard register" without trying the audio. The challenge was
+right: I had dismissed the audio route on TEXT grounds ("the corpora are news prose"), which is exactly the
+argument the FOURTH SOURCING TIER exists to answer — a sign's word is absent from text BY CONSTRUCTION, so you
+listen. It is the same method that resolved ~15 languages' plus word earlier in this sweep, and I did not reach
+for it.
+
+### The universal sentence is the `4x4` vehicle sentence
+
+Present in 14 of the 17. ⚠ **MMS was useless, as its own documented limitation predicts** — it echoes the
+orthography at a sign: `4x4` came back as `4x4`, `44`, `4ু4`, `4ራ 4ራ`. wav2vec2 (no digits, no `x` in its
+392-token vocabulary) is the instrument that can answer.
+
+### Four register guesses CONFIRMED, and one CORRECTED
+
+| lang | phones | reading | vs my guess |
+|---|---|---|---|
+| am | `a r a t **b a** r a t` | *arat ba arat* → በ | ✓ confirmed |
+| bn | `tʃ a r **ɡ u n a** …` | *char guna* → গুণ | ✓ confirmed |
+| mr | `tʃ a r **ɡ u n i l e** tʃ a r` | *char gunile char* → गुणिले | ✓ confirmed |
+| ne | `tʃ a r **ɡ u n a** t a r` | *char guna char* → गुणा | ✓ confirmed |
+| uk | `tʃ o t e r i … **n a** tʃ e t e r e` | *chotyry NA chetery* → **на** | ✗ I shipped `помножити на` |
+
+`помножити на` is the full verbal form a textbook uses; **a reader saying a dimension uses the bare
+preposition.** Corrected. That is a real defect the audio caught and no text source would have.
+
+### ⚠ AND A FINDING THAT CHANGES THE MODEL: `4x4` IS A BORROWED DESIGNATION
+
+Several readers do not use their language's multiplication word at all:
+
+```
+mi  f o  b aɪ  f o          "four BY four"     — English
+pa  dʒ a r  b aɪ  dʒ a r    "char BY char"     — Punjabi four, ENGLISH by
+om  f o r  b aɪ … f o r     "four by four"     — English
+kn  f o r  i n t u  f o r   "four INTO four"   — Indian English "into"
+gu  f o ɾ  e k s  v o r     "four EKS four"    — the LETTER, spelled
+fa  … e k s  f o r …        "eks four"         — the LETTER, spelled
+```
+
+So `4x4` is not arithmetic in these languages — it is a **vehicle designation carried whole from English**, and
+the readers carry its pronunciation with it. Two of them even spell the `x` as a letter, which is the one thing
+this sweep set out to eliminate — *and for those two speakers it is the correct reading of a borrowed term.*
+
+⚠ **This does NOT mean the register words are wrong.** They were declared for the ARITHMETIC/dimension sense
+(`6 × 6 cm`), which this sentence does not test. What it means is that `4x4` needs its own treatment as a
+designation, on the same footing as `चंद्रयान -1` — and that the `by` slot cannot simply be filled with the
+English word, because reproducing "four by four" in Punjabi or Māori orthography is the unrenderable-loan problem
+mi's plus already documented.
+
+Recorded rather than acted on: changing six languages' reading of `4x4` on one speaker each is thinner evidence
+than the correction it would make, and the arithmetic sense is unaffected.
+
+### The lesson
+
+*I had the tier, the method, the audio and the universal-sentence technique, and still defaulted to register
+because the TEXT sweep failed.* The text failing is the trigger for the audio tier, not a reason to stop. Four
+confirmations and one correction from fourteen clips, at maybe twenty minutes of work.
+
+## Run 22 — 2026-08-04 — om's `×`: the straggler was the same ordering bug, a third time
+
+`normalizeOromo("6 × 6 cm")` → `"6 × seentiimeetira 6"`. Oromo's unit rules honour `unitPrefix` and **move the
+noun ahead of its number**, so by the time the sign rule ran there was no digit after the `×` and *si’a* was
+DROPPED. `6x6 cm` failed the mirror way: the `x` broke the unit rule's adjacency, so the sign read and **`cm`
+LEAKED** instead.
+
+Moving the sign rule above the unit block fixes both at once — the reordering has not happened yet, and the unit
+rule then still finds `6 cm` adjacent.
+
+⚠ **This is the THIRD time this exact ordering has bitten in this sweep**, and every time it was a `unitPrefix`
+language that exposed it:
+1. the shared tier's `multiply`, where Swahili read *sita KS sentimita sita*
+2. English's scientific-notation exponent, where the superscript between number and unit leaked `kg`
+3. om here
+
+*A rule that consumes a sign between two operands must run before any rule that may REORDER those operands.*
+Worth stating as a rule of thumb rather than rediscovering: `unitPrefix` is the flag that makes it happen, so a
+new sign rule should be probed against a `unitPrefix` language (sw, om) and not only against a fleet-typical one.
+
+Verified: om corpus diff **0/1218 byte-identical** — expected, since om_et's own text writes the sign in the
+`4x4` sentence only, which the earlier ASCII fix already covered. Unit forms pinned in the test (noun-first
+`km 6,387`, the rate `165km/h`, `sq mi`, `km²`) because they are what the reorder exists for.
+
+Gates: tsc clean; 205 files / 2928 tests; audit 0 defective cells across 0/67.
+
+## Run 23 — 2026-08-04 — the phantom `±`: fixing the DATA, not just reading around it
+
+#654 cited `Las CaÃ±itas` as the fleet's only `±`. The engine already repaired it — but the ARTIFACT still carried
+the mojibake, so every measurement over the mined text still saw the phantom.
+
+⚠ **THE ARTIFACTS ARE OURS, AND A CORRUPT ONE IS WORSE THAN AN INCOMPLETE ONE.** The mis-decode of a letter
+CONTAINS a sign: `Ã±` contains `±`, `Ä°` contains `°`, `Ã£` contains `£`, `Â²` contains `²`. So the file did not
+merely fail to read — it MANUFACTURED symbols for every downstream measurement, and #586 chased both the `°` and
+the `£` as per-language defects before the cause was found. Repairing the stored text is what stops that class of
+false lead at its source.
+
+Three things done, in the order that matters:
+
+1. **The mining tool now repairs double-encoding** (`repair_double_encoded` in wikidump-to-text.py), before
+   anything reads a symbol out of the text — so a regenerated artifact needs no errata at all.
+2. **The 13 affected entries were corrected in place** (id ×12, mr ×1), editing the RAW jsonc so comments and
+   formatting survive and only the mojibake bytes change.
+3. **An ERRATA block was added to each header**, because an artifact records its own provenance and a correction
+   is part of that.
+
+### ⚠ AND THE TWO ERRATA ARE NOT THE SAME KIND, which I got wrong on the first pass
+
+I wrote one errata text and applied it to both files, claiming "the decode is EXACT, nothing is guessed". True for
+id, **false for mr** — and checking what actually changed is what caught it:
+
+| file | change | kind |
+|---|---|---|
+| id | `Ã±`→`ñ`, `Ã£`→`ã`, `Ä°`→`İ`, `Â²`→`²`, `Ã³`→`ó` | **exact DECODE** — UTF-8 `C2..C5 XX` encodes a known code point |
+| mr | `â€इलर्निंगâ€�` → `“इलर्निंग”` | **INFERENCE** — the third byte did not survive; U+FFFD is all that is left |
+
+mr's repair reconstructs rather than decodes, so its errata now says so and cites the two constraints that make it
+safe to store: U+FFFD is a **fingerprint** (only five `E2 80 xx` third bytes are unmapped in CP1252, and `9D` = `”`
+is by far the commonest in running text), and the pairing is **corroborated across languages** (en
+`“learning” and “socialization”`, hi `“लर्निंग” और “सोशलाइजेशन”` — the same sentence with its bytes intact, which is
+what settles the OPENING quote rather than a dash). Plus the damage is bounded even if wrong: every candidate is a
+quote, dash or space, all clause marks or silent here, so a wrong pick cannot produce a wrong WORD.
+
+*Applying one justification to two changes because they were in the same commit is exactly how a stronger claim
+gets attached to weaker evidence.* The `<sup>` flattening in the same file's history is the third kind and is
+still NOT retro-repaired: `10<sup>10</sup>` → `1010` loses the boundary, and restoring it would need inferring
+where the boundary was.
+
+### Result
+
+`±` in the artifacts: **1 → 0**. The phantom is gone from the data, not merely tolerated by the readers.
+Gates: tsc clean; 205 files / 2928 tests; audit 0 defective cells across 0/67; both artifacts re-parse
+(id 80 hard + 30 sample, mr 77 + 30).
+
+⚠ **The `Las Cañitas` READING is still wrong, for an unrelated reason** — `t͡ʃˈa ˈɛn ˈitas`, "cha en itas", because
+`id`'s TOKEN is `[a-zA-Z]+` and every accented Latin letter fragments the word. That is the ASCII-tokenizer defect
+already recorded in Run 12; the correct spelling now reaches it, and it still cannot read it. `yue` solved this
+with `\p{Script=Latin}` and pins it with a test.
+
+## Run 24 — 2026-08-04 — id's ASCII tokenizer: the defect the phantom `±` was hiding behind
+
+Repairing `Las CaÃ±itas` to `Las Cañitas` (Run 23) made the *spelling* right and the *reading* no better:
+`t͡ʃˈa ˈɛn ˈitas` — "cha EN itas". `id`'s TOKEN word group was `[a-zA-Z]+`, so a diacritic ENDED the token, the
+letter carrying it became an unclaimed gap read as an English LETTER NAME, and the rest of the word started over.
+One word became three, none of them right:
+
+```
+Cañitas → t͡ʃˈa ˈɛn ˈitas      São → s ˈə ˈo      Klöcker → ʔl ˈoᶷ t͡ʃkˈər      Cochamó → t͡ʃˈot͡ʃha ˈoᶷ
+```
+
+⚠ **INVISIBLE TO EVERY GATE.** No digit or raw mark survives, and nothing VANISHES, so it is a WRONG-WORD defect
+that neither the leak classes nor the differential DROP test can reach. It was found by reading a corpus diff —
+the same way English's magnitude leak was.
+
+### Widening the token was necessary but not sufficient
+
+`\p{Script=Latin}[\p{Script=Latin}\p{M}]*` stopped the fragmentation, and the reading was still wrong:
+`Cañitas` → *t͡ʃaˈitas*, because id's native g2p has no rule for `ñ` and silently **drops the letter it cannot
+spell**. Quieter than fragmenting, no more correct.
+
+⚠ **A DIACRITIC IS THE SIGNAL, and it is a reliable one**: Indonesian orthography has none, so a token carrying
+one is a FOREIGN NAME and belongs on the foreign path. `NATIVE_WORD = /^[a-zA-Z]+$/` routes it, and the registry
+now injects English exactly as it does for Hindi — `createIndonesian` accepted no reader at all before, so
+`this.foreign` was always undefined and the fallback always fired.
+
+*This is the difference from yue's fix, which looked like the same problem.* yue's Latin group already fed the
+foreign reader, so widening the pattern was the whole change. id's Latin group is its NATIVE word group, so
+widening it alone just hands the g2p letters it cannot pronounce. Same symptom, two different fixes.
+
+**Malay inherits both**, since `createMalay` wraps `createIndonesian` — it had to be threaded through, or `ms`
+would have kept the defect `id` just lost.
+
+### Result
+
+`id Cañitas` → `kʰˈæniːt̬əs`, **byte-identical to English's reading**, and the same for `ms`/`zsm`.
+Corpus diffs **id 21/1936 and ms 21/1908**, every changed line read: every one is a fragmented name becoming a
+whole word (`t͡ʃˈa ˈɛn ˈitas`→`kʰˈæniːt̬əs`, `ʔl ˈoᶷ t͡ʃkˈər`→`klˈɑːkɚ`, ` ˈə ˈo`→`ˈaᶷ`). No DROP, DIGIT,
+RAWMARK, SLOT-GAP or THROW.
+
+Gates: tsc clean; 205 files / 2929 tests; audit 0 defective cells across 0/67.
+
+⚠ **AND THE PROBE SAYS 42 LANGUAGES FRAGMENT**, not one. That number needs care before it becomes a work item:
+for a NON-Latin-script language an accented Latin word is a foreign run and the script router may already handle
+it, so the probe (comparing space counts against an ASCII twin) will over-report. The genuinely comparable cases
+are the Latin-script engines whose own word group is ASCII-or-partial — `xh`, `zu`, `sw`, `om`, `naija`, `akan`,
+`nama`, `tagalog`, and the partial-diacritic ones (`cs`, `it`, `pl`, `sk`, `sl`, `lv`, `lt`, `nb`, `ro`, `ig`,
+`yo`). Each needs the id treatment: widen the token AND decide whether its g2p or a foreign reader takes the
+result. Worth its own issue rather than a blind sweep.
+
+### Run 24b — "shouldn't Latin runs get sent whole?" — the phrasing is fine, the WORDS were not
+
+Asked whether an embedded Latin run should reach the foreign reader whole, spaces included, rather than word by
+word. Measured both halves of the question:
+
+**Phrasing: word-by-word is already almost identical to whole-phrase.** `bit by bit` in a non-Latin host reads
+`bˈɪt bˈaᶦ bˈɪt` against English's own `bˈɪt baᶦ bˈɪt` — the only difference is stress on a function word. Not
+worth a mechanism.
+
+⚠ **But the probe exposed the same ASCII-tokenizer defect in FIVE more places.** `São Paulo` in Hindi read
+*ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ* — "ES ə O Paulo" — because `makeNativeHindi`'s Latin group was `[A-Za-z]+` too. Widened
+there (**17 languages compose it**) plus `pa` and `or`, which carry their own tokenizer.
+
+*The fix was simpler here than in id, for a structural reason worth recording*: in these engines the Latin group
+ALREADY means "foreign" — its match goes straight to the injected reader — so widening the pattern is the whole
+change. Indonesian's Latin group is its NATIVE word group, so widening it also required deciding native-vs-foreign
+per token. **Same symptom, two different fixes, and the difference is which side of the routing boundary the
+group sits on.**
+
+⚠ **The genuinely undecidable case is Latin-in-Latin, and it is left alone.** `bit by bit` and `high wheel base`
+are pure-ASCII English phrases in Indonesian text; nothing in the characters distinguishes them from Indonesian,
+so `id` reads them natively (*bˈit bj bˈit*) and that cannot be fixed without a lexicon. Capitalisation was
+considered as a signal for extending a foreign run across spaces and rejected: `Kota São Paulo` would pull the
+Indonesian `Kota` into the English run.
+
+Corpus diffs, every changed line read: hi 2/1702, ne 2/1993, gu 1/1996, mr/pa/or 0 — every change a letter-name
+fragment becoming a word (`ˈɛs ˈə mˈiː`→`sˈæmi`, `ˈɛs ˈʌ ˈo`→`sˈa`). `or`'s Latin-`I`-as-danda rule and `pa`'s
+initialisms verified intact. Gates: tsc clean; 205 files / 2930 tests; audit 0 defective cells across 0/67.
+
+## Run 25 — 2026-08-04 — #657 opened, and the first Latin-script engine done (om)
+
+Filed #657 for the 14 Latin-script engines still shredding accented Latin, then started on it.
+
+### The method needs no new linguistic data, which is what makes it mechanical
+
+The observation that unlocks it: **each engine's current token class already IS its declared native inventory.**
+So the class is lifted verbatim into a `NATIVE_WORD` test, the token widens to all Latin, and a token failing the
+test goes to the foreign reader. Step 1 is a copy, not a judgement.
+
+### ⚠ `ig` and `yo` do NOT need fixing, which the measurement caught before the edit
+
+Both already use `À-ɏḀ-ỿ`, wide enough to hold the word: `ig São Paulo` → `sao paulo`, `yo` → `sa˧o˧ k͡pa˧u˧lo˧`.
+They read the name NATIVELY rather than routing it — a different judgement call, and a defensible one. They were
+on my scope list from a probe that only detected *fragmentation*; checking each before touching it kept two
+languages out of a change they did not need.
+
+### om done, and the registry comment was the trap
+
+`return createOromo(); // no foreign needed — om is Latin-script`
+
+⚠ **Being Latin-script is exactly what made a reader NECESSARY, not unnecessary.** Because the word group claims
+Latin text, an accented foreign name was CLAIMED and then mangled by a g2p with no rule for the letter — the
+opposite of the comment's reasoning. `São Paulo` read *s ˈə ˈo paˈulo*.
+
+Corpus diff **3/1218**, every line read — all three are letter-name fragments becoming words
+(`t͡ʃʼˈa ˈɛn itˈa`→`kʰˈæniːt̬ə`, `ˈa ˈaᶦ nˈos`→`ʰˈæiːnoᶷz`, `ard ˈaᶦ ˈuni ˈoᶷ`→`ɑːɹd̬ɪ jˈuːnjə`). Native Oromo
+byte-identical; the `×` and rate rules re-verified, since both key on the Latin class.
+
+### Remaining in #657
+
+`pcm` and `tl` fragment and have a reader — but ⚠ **`pcm` deliberately NATIVISES English rather than reading it
+as English** (`phonemizeWord(m[1], this.foreign)` uses the reader as a DICT lookup, per its own header), so it
+wants the token widened WITHOUT the routing change. Then the twelve needing a reader injected: `xh`, `zu`, `sw`,
+`akan`, `nama`, `cs`, `it`, `pl`, `sk`, `sl`, `lv`, `lt`, `nb`, `ro`.
+
+Gates: tsc clean; 205 files / 2931 tests; audit 0 defective cells across 0/67.
+
+## Run 26 — 2026-08-04 — pcm: the fix is HALF the fix, and the missing half made one case worse
+
+pcm fragments like the others (`São Paulo` → *ɛs ˈə o pɔlo*, "ES ə O") so it needed fixing — but **not** the same
+fix. Its header is explicit: the rule g2p is applied to English-spelled tokens "rather than routing them to the
+English phonemizer … nativising is more correct for the creole", and its own output proves it — `water` → *wata*,
+`computer` → *kampjuta*, against English's *wˈɔːt̬ɚ* / *kəmpjˈuːt̬ɚ*. Routing an accented token to the foreign
+reader would contradict the engine's design.
+
+So: widen the token, **no** native-vs-foreign routing.
+
+### ⚠ And widening alone made one case WORSE, which only appeared on a third example
+
+`São Paulo` → *so pɔlo* and `Cañitas` → *kaitas* both looked like wins. `Klöcker` → **klkkeɾ** — pcm has no rule
+for `ö`, so the letter simply VANISHED and left an unpronounceable cluster, where fragmenting had at least
+produced syllables.
+
+**Nativising an English-spelled word means reading it with Naija values, which requires a letter to read.
+Dropping it is not nativising, it is deleting.** So an accent folds to its BASE first (NFD, discard marks), and
+every accented form now reads identically to its ASCII twin:
+
+```
+São Paulo → sau pɔlo   = Sao Paulo      Cañitas → kanitas = Canitas      Klöcker → klokkeɾ = Klocker
+```
+
+*Two examples agreed and the third disagreed.* Had I stopped at `São`/`Cañitas` — both of which lose a letter the
+g2p cannot use and still read plausibly — the regression would have shipped looking like a fix.
+
+### The shape of #657 is now three variants, not one
+
+| engine kind | fix |
+|---|---|
+| Latin group means FOREIGN (`hi` +16, `pa`, `or`) | widen the pattern; that is all |
+| Latin group is NATIVE, engine reads foreign names as foreign (`id`/`ms`, `om`) | widen **+** route non-native tokens to the reader |
+| Latin group is NATIVE, engine NATIVISES by design (`pcm`) | widen **+** fold the accent to its base; **no** routing |
+
+The third was not in the issue's method when I wrote it. Worth checking each remaining engine for which kind it
+is before applying anything — `xh`, `zu`, `sw`, `akan`, `nama` are the ones most likely to be nativisers too.
+
+Gates: tsc clean; 205 files / 2932 tests; audit 0 defective cells across 0/67.
+
+## Run 27 — 2026-08-04 — tl: a fourth shape, where the fold has to be CONDITIONAL
+
+`tl` is a NATIVISER like pcm — `computer` → *kompˈuteɾ*, not English's *kəmpjˈuːt̬ɚ*, and its declared reader is
+not auto-used. So the pcm treatment applies: widen the token, fold the accent, no routing.
+
+⚠ **Except that `ñ` IS TAGALOG ORTHOGRAPHY**, inherited from Spanish and read as /ɲ/. `Doña` → *dˈoɲa* and
+`Cañitas` → *kaɲˈitas* were already correct. **pcm's unconditional fold would have destroyed exactly the accented
+letter this language CAN read**, turning `ñ` into `n`.
+
+So the fold is gated on the language's own inventory: a token the native class ACCEPTS is passed through
+untouched, and only a token it REJECTS is folded. Both halves then work:
+
+```
+Cañitas → kaɲˈitas   (ñ preserved)          São Paulo → saʔˈo paʔˈulo = Sao Paulo
+Doña    → dˈoɲa      (ñ preserved)          Klöcker   → klˈokkeɾ      = Klocker
+```
+
+The hyphen-compound token shape was preserved through the widening — Tagalog writes `kaibigan-ko` as one word,
+and `kaʔibiɡˈanʔko` is unchanged.
+
+### The variant table, now four rows
+
+| Latin group | engine reads a foreign name | fix |
+|---|---|---|
+| means FOREIGN (`hi` +16, `pa`, `or`) | via the reader | widen the pattern; that is all |
+| NATIVE (`id`/`ms`, `om`) | via the reader | widen **+** route non-native tokens to it |
+| NATIVE (`pcm`) | NATIVISED | widen **+** fold accent to base, unconditionally |
+| NATIVE, **with native accents** (`tl`) | NATIVISED | widen **+** fold **only** what the native class rejects |
+
+*Each of the last three was discovered by the engine after it, not predicted.* The lesson for the remaining
+twelve: read what the engine does with an ordinary English loan (`computer`) and with an accented letter that is
+in its class, before choosing a fix. Two probes, and they pick the row.
+
+Gates run separately: tsc PASS; 205 files / 2933 tests; audit 0 defective cells across 0/67.
+Remaining in #657: `xh`, `zu`, `sw`, `akan`, `nama`, `cs`, `it`, `pl`, `sk`, `sl`, `lv`, `lt`, `nb`, `ro` — all
+needing a reader injected or a fold chosen, and all needing the two probes first.
+
+## Run 28 — 2026-08-04 — #657 closed out: the remaining fourteen, and a test that lied twice
+
+Applied the `tl` shape to all fourteen remaining engines. The two probes picked the row before any edit, and they
+picked the SAME row for all of them: every one NATIVISES its loans — `cs computer` → *t͡sˈomputɛr* (Czech `c` =
+/ts/), `it` → *kompˈuter*, `pl` → *kɔmpˈutɛr*, none of them English's *kəmpjˈuːt̬ɚ*. **None has a reader injected,
+and injecting English would have been wrong** — Czech reading a French name should not sound English.
+
+So: widen the token, fold only what the native class rejects. Uniform across all fourteen, and the transform needs
+no linguistic data because each engine's own class supplies the inventory.
+
+Result: `São Paulo` and `Klöcker` now read exactly like their ASCII twins in all fourteen, while every native
+accent survives — `čas`, `perché`, `łódź`, `blåbær`, `țară`, and Nama's `ǀgôa` → *ᵏǀoa* with the click intact.
+
+Corpus diffs, ten languages: cs 10/1947, it 14/1978, pl 11/1919, nb 19/1859, ro 12/1958, xh 16/1509, zu 18/1478,
+sk 9/1719, sl 16/1903, sw 0/1938. Sampled and read — every change is a letter-name fragment collapsing into a
+word (`s ˈə mˈiː`→`sˈaːmi`, ` ˈoᶷ kkˈ`→`ˈokk`, ` ˈɛn ˈ`→`ɲ`). No DROP, DIGIT, RAWMARK, SLOT-GAP or THROW.
+
+### ⚠ AND THE NEW TEST ASSERTED THE WRONG THING TWICE
+
+`test/latin-tokenizers.test.ts` is the fleet-wide pin so the next instance is caught by a test rather than by
+reading a diff. Its native-accent case took three attempts, and both failures are worth keeping:
+
+1. **Vacuous.** I compared the native word against its de-accented form and demanded they differ. Akan's `ɛ` and
+   Nama's clicks are **distinct letters, not base-plus-diacritic** — NFD cannot decompose them, so there is
+   nothing for a fold to destroy and the comparison can never be true. Failed on `ak ɛdwuma`.
+2. **Still wrong after guarding for that.** Nama reads `ô` as /o/ in its OWN g2p, so `ǀgôa` and `ǀgoa` coincide
+   *legitimately*. Identical output is not evidence the accent was dropped.
+
+Both versions were testing a PROXY — "differs from de-accented" — for the property I actually wanted, which is
+"the word is not shredded". Asserting the property directly (no English letter names in the output, and the word
+occupies exactly one token) passes for all fourteen and cannot lie about it.
+
+*A proxy assertion fails in the cases where the proxy and the property come apart, which are exactly the cases
+worth testing.* Stated directly, the test is also shorter.
+
+Gates run separately: tsc PASS; **206 files / 2937 tests**; audit 0 defective cells across 0/67.
+
+## Run 29 — 2026-08-04 — ⚠ Run 28 WAS WRONG: #657 was 91 languages, not fourteen, and the scope was mis-derived
+
+**Question.** "So #657 is done?"
+
+**Command.** The same fleet-wide behavioural probe Run 28's test was built from, but over ALL registered languages
+rather than the fourteen: `Cañitas`, `São`, `Klöcker`, asserting *no English letter name in the output AND the word
+occupies exactly one token*.
+
+    checked 180 registered languages
+    ⚠ STILL FRAGMENTING (91)
+    TREATED still fragmenting (28): as az bn ca hr da ff de ha hu is ga ja kn ko lb ml mi fa sr sd es sv te tr ur uz cy
+    UNTREATED still fragmenting (63)
+
+**⚠ THE NEGATIVE RESULT, AND IT IS THE IMPORTANT ONE: I replaced a measurement with a grep.** The original probe
+that opened #657 reported **42 languages fragmenting** — correct. The work list was then re-derived from
+`grep '^const TOKEN'`, which found 21 files, and the two numbers were never reconciled. Every engine not declaring
+its tokenizer in that exact shape fell out of scope silently — including `de`, `es`, `sv`, `tr`, `sr`, all of which
+the probe had already flagged. Run 28's "the remaining fourteen" was the grep's output, not the defect's extent.
+
+*A structural pattern is a convenience; the measurement is the scope.* This is the same error as the audit's
+hardcoded 37-of-67 language list, made four runs after that was written down. The correction is structural, not
+resolve-to-do-better: the probe becomes the test, sweeping every code the registry serves, with the remaining
+languages named in an allow-list that the test also checks is not stale.
+
+### The 91 classify into two shapes, and 17 of them collapse to 10 edit sites
+
+Two probes per language. `computer` → does the output match English (ROUTES to an injected reader) or is it the
+engine's own (NATIVISES)? Then `Ka<accent>o` for each of `ñ ã ö é å ç ł` against its de-accented twin → differs but
+does not fragment, so the letter is NATIVE and must survive a fold.
+
+17 routers, 74 nativisers. The routers collapse to ten sites because the engines share modules — `bengali.ts`
+serves `bn`/`as`/`bpy`, `sinitic/hanDictIpa.ts` serves `gan`/`hak`/`cjy`/`hsn`.
+
+**`ja`/`ko` are a DIFFERENT defect wearing the same symptom.** Their tokenizers are fine. Their initialism spellers
+are bounded by `(?<![A-Za-z])…(?![A-Za-z])`, and an ASCII-only lookaround does not see an accented letter as a
+letter — so the `S` of `São` passed the *isolated capital* test and was spelled out as a letter name, leaving the
+rest of the name behind: `São` → *esu / ˈʌɔː*, `Sámi` → *ˈesɯ ˈɑːmi*. The fix widens the BOUNDARY, not the matched
+class, which is correctly ASCII-caps-only — an initialism is ASCII by definition, but the thing that decides where
+one ENDS is not.
+
+### ⚠ The architecture correction, mid-run
+
+> "Shared code for the scanner seems important, so that the limited regex isn't used to decide script-level
+> routing. It feels like it should be an early decision and not repeated in multiple places."
+
+That names the class exactly, and it is why widening 108 regexes one at a time was the wrong shape of fix. Each
+engine's hand-written letter list —
+
+    const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d+)|([.!?…,;:])/gu;        // de
+    const TOKEN = /([a-zçëA-ZÇË]+)|(\d+)|([.!?…,;:])/giu;          // sq
+
+— was doing two unrelated jobs, and is only correct for one:
+
+1. **which script is this** — a ROUTING question, a property of the script. A letter list is a bad approximation of
+   a script: anything it omits falls out of the token, lands in the gap, and `emitUnclaimed` routes it as foreign.
+   **One omitted letter re-routes mid-word.** This decision was being made 108 times over and was wrong in all 108.
+2. **which letters can I pronounce** — an INVENTORY question, genuinely per-language and genuinely lexical.
+
+`core/hostWord.ts` splits them. `hostWordRun(scripts, extra)` answers (1) from the script, once, so there is no
+letter list left to omit a letter from. `makeNativiser(NATIVE_WORD)` answers (2), taking each engine's former token
+class verbatim — demoted from a routing decision to what it always was, a statement about which letters the g2p has
+rules for. Sixteen copies of `foldToBase`/`nat` collapse into it.
+
+**⚠ AND THE SCOPE LIMIT, measured rather than assumed: shared script scanning cannot fix the 74 nativisers.**
+Script routing only ever fires ACROSS scripts. A Portuguese name inside Spanish text is Latin inside Latin — there
+is no routing decision to get right and the run correctly stays with the host. What remains is inventory: the g2p
+has no rule for `ã` and simply DROPS it, and dropping is not nativising but deleting (`Klöcker` → *klkkeɾ*). So the
+shared scanner prevents recurrence of the cross-script class, and the same-script class needs the fold regardless.
+Two decisions, two mechanisms, and conflating them is what produced the bug in the first place.
+
+### Applied, and the corpus diff
+
+Ten router sites widened to `LATIN_RUN`; `ja`/`ko` boundaries widened; the sixteen already-treated nativisers
+migrated onto the shared module. **91 → 74 fragmenting.** tsc PASS, 206 files / 2937 tests.
+
+Corpus diff against baseline `b0c9882`, the ten router languages that have a FLEURS corpus, every change read:
+
+| lang | changed | what |
+|---|---|---|
+| as | 2/1961 | `İzmir` *ˈaᶦ tsmˈaᶦɹ* → *ˈɪzmaᶦɹ*; `levé` *lˈɛv ˈiː* → *ɪlˈɛv* |
+| bn | 7/1981 | `Cañitas`, `Asunción`, `Erdoğan`, `Guaraní`, `Ürümqi`, `Taínos`, `Guaycurú`/`Payaguá` — all whole now |
+| fa | 1/1856 | `Cochamó` *kt͡ʃˈæm ˈoᶷ* → *kt͡ʃˈæmɔː* |
+| sd | 1/2009 | `levé` |
+| te | 2/1757 | `levé`; `Barça` *bˈɑːɹ sˈiː ˈə* → *bˈɑːɹkə* |
+| ko | 2/1746 | `Müslüm`; `Sámi` *ˈesɯ ˈɑːmi* → *sˈæmi* (the initialism-boundary fix) |
+| kn ml ur ja | 0 | no accented Latin in those corpora — the fix is real but unattested there |
+
+No defect-class count moved in either direction; all 15 changes are the defect being repaired.
+
+**Negative result worth keeping:** `levé` is the recurring one, and it is the *universal-sentence* technique paying
+off in reverse — one French word in one FLEURS sentence surfaces the same defect in `as`, `sd` and `te` at once,
+because all three are translations of the same English source. A single attested word is fleet-wide evidence.
+
+## Run 30 — 2026-08-04 — 74 → 11, and the fold semantics were wrong in three separate ways
+
+Mechanical migration of the 74 nativisers: lift each engine's token word class to `NATIVE_CLASS`, derive the
+TOKEN word arm from the SCRIPT via `hostWordRun`, wrap the word handler in `nat()`. **62 of the 74 transformed
+mechanically** (63 codes, since `es-419` rides on `es`); 11 remain for hand treatment. Result: **91 → 11**.
+
+The transform is scripted, not typed by hand, which is the only reason a 62-language change was reviewable. The
+guard that made it safe was refusing to touch anything it could not prove simple — a multi-script word arm, a
+tokenizer that is not a top-level `const TOKEN`, a handler that is not `if (m[1])`. Those became the SKIP list
+rather than a silent best-effort.
+
+### ⚠ Three defects, each found by the corpus diff and none by any probe or test
+
+**1. `hostWordRun` required a LETTER in lead position, and Hausa writes a leading apostrophe.**
+
+`'yan` is Hausa for "sons of"; the apostrophe carries the glottalisation. Requiring a Latin letter first left it
+outside the token, so `ʔʲˈan` came out *jˈan* — the glottal simply gone. The old hand-written classes were FLAT
+(`[a-zɓɗƙƴ'’]+`), so everything in them was lead-legal; an engine that instead spelled the join out
+(`[X]+(?:['’-][X]+)*`) meant those characters MEDIALLY only. Both shapes have to survive, so `hostWordRun` grew a
+`medialOnly` parameter and the transform decides which from the arm's own shape. ha 46 → 15 changes.
+
+*The lead position is not the same question as the continuation, and "one letter, then more letters" reads as
+obviously right while being wrong for every orthography with a word-initial mark.*
+
+**2. The fold was ALL-OR-NOTHING PER WORD, so one foreign letter corrupted every other letter beside it.**
+
+Turkish came back at **189/1876 = 10.1% changed**, which is what a fix reaching far too far looks like. `İsveç`
+failed the word-level inventory test on `İ`, so the fold also flattened the `ç` to `c` — and Turkish reads `c` as
+/d͡ʒ/, so the word read *ɯsvˈed͡ʒ*. `makeNativiser` now judges each character separately.
+
+**And the 10.1% was real anyway.** `İ` (U+0130) has no Unicode simple case-fold to `i` — it folds to `i` + a
+combining dot — so the `/i/` flag never made the old class accept it. `İtalya` was fragmenting and reading as
+English *"I"* + *talya*; folding it to bare `I` then hit Turkish's DOTLESS capital and gave *ɯtaɫja*, the wrong
+vowel. Adding `İ` to the inventory fixes it properly: `g2p.ts` already maps İ→i with the right locale rule, it
+just had to be handed the letter. Every one of the 189 is an `İ`-initial Turkish word — `İtalya`, `İngilizce`,
+`İran`, `İsrail`, `İmparatorluk`, `İlçe` — previously read as an English letter name. **The largest single-language
+win in the issue.** (Azerbaijani hit the identical trap and had already solved it the other way, normalising İ→i
+before tokenizing. Two engines, same trap, two independent fixes, and neither knew about the other.)
+
+**3. NFD cannot reach a letter that does not decompose, so the fold left it to be DROPPED.**
+
+`Æthelred` in German read *thˈɛlʁət* — the Æ gone. `æ ø œ ð þ ß ł đ ħ ŋ ɛ ɔ ə ɓ ɗ ƙ ƴ ı` are DISTINCT letters, not
+base-plus-mark; NFD leaves them alone, the g2p has no rule, and the letter is deleted. Measured: **86 languages
+dropped at least one, roughly 80 languages per letter.** An explicitly typed character is content, and deleting it
+is neither nativising nor routing, so `foldLatinToBase` gained a second tier mapping each to the nearest letter
+the g2p is guaranteed to read. 86 → 32, and the residual 32 are probe artifacts (the fold target is itself silent
+in that language, e.g. Spanish `h`).
+
+⚠ SINGLE LETTERS, NOT the conventional digraphs. `æ`→ae, `ø`→oe, `þ`→th, `ŋ`→ng are the standard ASCII
+transliterations, but a g2p reading `ae` as two vowel segments turns one sound into two — worse than an imprecise
+single vowel. `ß`→`ss` is the one exception, because that IS the German orthographic identity and every g2p reads
+`ss` as a single /s/.
+
+### ⚠ And then the per-character fold exposed something the word-level fold had been hiding
+
+Romanian: `Thérèse` → *ˈthrese*, the é gone. Romanian's class claimed `á é í ó ú à` — but its g2p has no rules for
+them. **The word-level fold had been masking the mismatch by accident**: a word containing one was rejected whole,
+so everything in it got folded and the over-claimed letter came out readable. Judging characters separately trusts
+the class, and the class was lying.
+
+`NATIVE_CLASS` is a CLAIM ABOUT THE G2P, so measure it. Probe every character an engine claims against
+`phonemize("ka" + c + "o") === phonemize("kao")`. Eight engines over-claim: **da ro kea mt lb rup ast lg**. Each
+had the offending letters removed, and `test/native-inventory.test.ts` now pins it.
+
+⚠ The first version of that probe flagged **fourteen** languages, and six were false positives: `'`, `’`, `ʼ`,
+`·`, `‑` and bare combining marks carry no segment, so a g2p ignoring one is CORRECT. Narrowed to `\p{L}` minus
+`\p{Lm}` — the modifier-letter apostrophes are letters by Unicode category and punctuation by function.
+
+**Luxembourgish is the second-largest win, and it was invisible until the class stopped lying.** Removing
+`à á â ô û ü ö` took lb from 33 to **227/1896 = 12.0% changed**, and every one is a vowel that had been SILENTLY
+DELETED: `berühmt` read *bærmt*, `verfügbar` *fərfɡbarə*, `Ostküst` *ostkst*, `Südkoreaner* *stkorəanər*,
+`endgülteg` *ændɡltəχ*. Twelve percent of Luxembourgish utterances were missing a vowel.
+
+📌 FOLLOW-UP, recorded rather than papered over: `ü`/`ö` ARE Luxembourgish letters in German loans, and the honest
+fix is g2p rules (/y/, /ø/) rather than a fold to `u`/`o`. The fold is strictly better than deletion and is not
+the right answer. Same for Luganda's `ŋ` → `n`.
+
+### Corpus diff — 25 languages, every change read
+
+tr 189/1876 · lb 227/1896 · cy 49/2009 · ca 15/1841 · de 26/1956 · hr 21/2007 · sv 20/1863 · ha 15/1497 ·
+ro 14/1958 · ga 14/1948 · da 14/1878 · hu 7/1995 · az 3/1919 · is 1/846 · mi 1/1994 · uz 1/1957 · cs 1/1947 ·
+it 1/1978 · nb 1/1859 · zu 1/1478 · pl 0 · sk 0 · sl 0 · sw 0 · xh 0
+
+**No defect class moved in either direction in any of the 25.** Every change is a fragment collapsing into a word
+or a deleted letter becoming audible: `Cañitas`, `São`, `Klöcker`, `Galápagos`, `Asunción`, `Erdoğan`, `Taínos`,
+`Guaycurú`, `Payaguá`, `Chișinău`, `Cochamó`, `Bartolomé`, `Jiménez`, `Fernández`, `Sápmi`, `Sámi`, `Ürümqi`,
+`İzmir`, `Æthelred`, `Łódź`, `élevé`, `República`, `Hāngī`, `Halarsvík`, `Guaraníerne`.
+
+The zeroes are as informative as the counts: cs/sk/sl/sw/pl/xh were already correct and the semantics change did
+not disturb them, which is what says the per-character fold is a strict refinement rather than a different answer.
+
+### What remains
+
+**11 languages**, all for the reason the transform refused to guess:
+
+| why | languages |
+|---|---|
+| word arm mixes Latin with a second script | `bs` `sr` (Cyrillic), `bm` (N'Ko), `ff` (Adlam), `su` (Sundanese), `za` (Han) |
+| Perso-Arabic OR Latin as two alternatives in one group | `bal` |
+| tokenizer is not a top-level `const TOKEN`, or the handler is not `if (m[1])` | `hmn` `nan` `shi` `jv` |
+
+Each needs its scripts named explicitly to `hostWordRun` — mechanical, but a blind widening would let a
+MIXED-script run become one token, which is a behaviour change worth not making by accident.
+
+Gates run separately: tsc PASS; **207 files / 2940 tests**; audit 0 defective cells across 0/67.
+
+## Run 31 — 2026-08-04 — the last 11, and #657 reaches ZERO
+
+The eleven the transform refused to guess at, done by hand. Result: **`✓ none fragment an accented Latin word`**
+across all 180 registered languages. `REMAINING` in `test/latin-tokenizers.test.ts` is now empty, and the sweep
+fails in BOTH directions so it cannot be repopulated to quiet a regression.
+
+| language | shape | treatment |
+|---|---|---|
+| `sr` `bs` | Cyrillic + Latin in one class | `hostWordRun(["Latin"], "а-шђјљњћџ")` — the Cyrillic range stays as literal class content, so the widening touches only the Latin half |
+| `bm` | Latin + N'Ko | `hostWordRun(["Latin", "Nko"])` — bm IS the fleet's N'Ko engine, so the full script is right |
+| `ff` | Latin + Adlam | `hostWordRun(["Latin", "Adlam"])` |
+| `su` | Latin + Sundanese | `hostWordRun(["Latin", "Sundanese"])` |
+| `shi` | Latin + Tifinagh | `hostWordRun(["Latin", "Tifinagh"])` |
+| `za` | Latin arm with `'` join; Han is a separate arm | `hostWordRun(["Latin"], "", "'")` |
+| `bal` | Perso-Arabic OR Latin as two alternatives | kept the alternation, widened only the Latin arm |
+| `hmn` | tokenizer is a local `const tok` | same treatment, inventory at module scope |
+| `jv` | handler is `if (m[1] \|\| m[2])` | ⚠ only group 1 nativises — group 2 is the Aksara Jawa run, this language's OWN script, where there is no inventory question to ask |
+| `nan` | Latin arm is group 3, with a hyphen join | `hostWordRun(["Latin"], "", "-")` |
+
+### ⚠ `\p{Script=X}` INCLUDES X'S DIGITS, and the word arm precedes the number arm
+
+Widening bm and ff to their second scripts broke both languages' native-digit tests: N'Ko's ߀–߉ are
+`Script=Nko` and Adlam's 𞥐–𞥙 are `Script=Adlam`, so the script-derived word class silently swallowed every
+native-digit numeral before the number arm could see it. `hostWordRun` now refuses digits outright
+(`(?!\p{Nd})` per position — `[\p{Script=Nko}--\p{Nd}]` says it directly but needs the `v` flag, which these
+tokenizers do not use).
+
+*This is the multi-script hazard the transform's SKIP list existed to avoid, and it landed anyway on the very
+languages the list deferred — which is the argument for the list, not against it: the failure surfaced in two
+existing tests instead of in a corpus nobody diffed.*
+
+### The Serbian `й`, and a probe that measured its own frame
+
+The inventory audit flagged `sr`/`bs` for claiming `й`, `у` and `х`. Two of those three were the PROBE'S FAULT.
+It built `ka` + letter + `o`, and sr/bs write both Cyrillic and Latin with the engine choosing a script PER WORD
+— so `kaуo` is a mixed word no orthography contains, and the engine drops the minority script's letter. `ухо`
+reads *uxo* and `хвала` *xʋala*, both perfectly. The frame now matches the letter's script.
+
+`й` survived the corrected probe and is a REAL over-claim: the old class used the coarse range `а-ш`, which
+sweeps up `й` — a Russian letter this orthography does not have (it writes `ј`, U+0458, outside the range and
+listed separately). Excluding it hands the letter to the fold, and `й` DOES decompose (и + combining breve), so
+`Толстой` now reads *tolstoi* instead of losing its final letter. ⚠ The TOKEN deliberately stays wide: claiming
+the whole Cyrillic run is the SCRIPT question, and getting that right is what puts the letter in front of the
+fold at all.
+
+### "Mixed script words might need a Latinizer?" — mostly already there, and the gap is elsewhere
+
+Asked mid-run, and worth answering with a measurement. `kaуo` **already** becomes `kayo`: `foldLatinConfusables`
+maps a Cyrillic/Greek look-alike sitting between two Latin letters to its Latin twin, and it runs in the registry
+pipeline for every language before any tokenizer sees the text.
+
+⚠ AND NOTE IT FOLDS BY SHAPE, NOT BY VALUE — `у` → `y` because it LOOKS like one, though Serbian `у` SOUNDS like
+`u`. That is the right call for the case it exists for (a homoglyph typo, where the author meant the Latin
+letter); it would be the wrong call for genuine transliteration. Two different operations that happen to have the
+same input.
+
+For genuine cross-script text the SCRIPT ROUTER is the better answer than transliteration, because routing
+preserves the source phonology instead of approximating it. A Serbian↔Latin transliterator would be defensible —
+that mapping is bijective and standardised — but it buys little: real text writes whole words in one script, and
+the router already handles whole words.
+
+**The actual gap the question uncovered is not cross-script at all.** `phonemize("kayo", "sr")` returns *kao* — the
+`y` is DROPPED, because Serbian's class claims all of `a-z` while Serbian Latin has no `q w x y`.
+
+### 📌 A separate defect, measured: 43 engines claim `a-z` and drop part of it
+
+    sr hr bs   drop q w x y          ak   drops c j q v x z
+    mi         drops b c d f g j l q s v x y z   (thirteen of twenty-six)
+    qu         drops b d f g v x z    naq  drops c f q v y z    tk  drops c q x
+
+So `Cañitas` keeps its `ñ` now and still loses its `C` in Maori.
+
+⚠ NOT the same fix, and that is why it is not in this issue. Folding an accent has a UNIVERSAL answer — strip the
+mark and the base letter is right everywhere. An absent ASCII consonant has none: `q`→k, `w`→v or u, `x`→ks,
+`c`→k or s are per-language substitution choices needing sourcing, and for several of these languages the better
+answer is to ROUTE the foreign name to a reader rather than nativise it at all.
+
+⚠ AND SOME OF THE 43 ARE CORRECT SILENCE, NOT LOSS. Spanish/Italian/Catalan/Galician/Occitan/Latin `h` IS silent.
+Worse, my probe's own frame manufactures false positives: testing `a` builds `kaao` and testing `o` builds `kaoo`,
+which gemination and vowel-length rules make identical to `kao` — that is the whole of German's "drops a h o q"
+and Maltese's "drops a h o". The finding needs per-language judgement, not a table, which is exactly why the
+inventory test states the ASCII exemption explicitly rather than leaving it to look like coverage.
+
+### Corpus diff, the last two with corpora
+
+sr 2/1923 (`élevé`, `Ōō`) · ff 13/1500 (`Bé`, `Ōō`, `São`). No defect class moved either way.
+
+Gates run separately: tsc PASS; **207 files / 2940 tests**; audit 0 defective cells across 0/67.
+
+## Run 32 — 2026-08-04 — self-review: four defects in my own fix, and one over-reach I reverted
+
+Reviewing the branch before merge, with checks aimed at the failure modes a corpus diff CANNOT see — the ~150
+languages with no corpus. Six mechanical checks over every engine carrying a `NATIVE_CLASS`: case coverage, lead
+vs medial, numbers still tokenizing, punctuation still reaching the clause machinery, the fold actually taking
+effect, and transform leftovers.
+
+### 1. ⚠ NFC DEFEATS A CLASS WRITTEN AS BASE + COMBINING RANGE
+
+The worst of the four, and it silently deleted a TONE. `makeNativiser` normalised each cluster to NFC and tested
+it against ONE class occurrence. Tâi-lô tone 8 is base + U+030D COMBINING VERTICAL LINE ABOVE, which composes to
+nothing, so NFC leaves the cluster two characters long and a single-occurrence test rejects it — the fold then
+stripped the tone it was asked to protect. `ta̍k` read *tak*, while `tâi` (precomposed) kept its tone. **A tone
+language quietly losing one tone is as bad as this layer gets.** Fixed with `+`: the question is "is every
+character of this cluster in the inventory", not "is this cluster one class match".
+
+### 2. ⚠ AND THE GENEROUS-LOOKING FIX FOR (1) BROKE IT THE OTHER WAY
+
+My first fix also tested the DECOMPOSED form, on the reasoning that a class may spell an accent either way and
+both should be honoured. That makes every combining-range class enormously over-permissive: `ñ` decomposes to
+`n` + U+0303, U+0303 sits inside Tâi-lô's `̀-̍`, so `ñ` was judged NATIVE, escaped the fold, reached a g2p with
+no rule for it and came out **verbatim** — `Cañitas` in Min Nan read *cañitas˥*, raw orthography in the phoneme
+string. Min Dong and Tashelhit the same.
+
+*A range written for six tone marks cannot be read as a licence for every mark in its numeric span.* NFC only.
+
+### 3. ⚠ THREE CLASSES LISTED THEIR ACCENTS IN LOWER CASE ONLY
+
+Welsh was missing ten capitals (`ÀÈÌÒÙÏËÖÄÜ`), Min Nan five (`ÀÁÂĀǍ`), Balochi the combining caron. Inherited
+from the original token classes, and HARMLESS while the class only decided tokenization — the capital fell out of
+the token and fragmented, which is the defect this issue is about. It becomes a silent DELETION the moment the
+same class drives the fold. `TÂI` lost the tone `tâi` kept.
+
+*A latent data gap becomes a live defect when you give the data a second job.* Found by checking every class
+against the upper case of its own letters — no corpus involved, and cy/nan's corpus diffs did not move.
+
+### 4. ⚠ A GUARD THAT EDITS ITS INPUT IS NOT A GUARD
+
+`hostWordRun` documented "put `-` last" and left it to the caller. The very next caller passed `"-·"` and
+produced `[\p{M}-·]` — a range from a property escape, a hard SyntaxError at first use. So I made the function
+move every `-` to the end, which looks robust and **silently destroyed a legitimate range**: `sr`/`bs` pass their
+whole Cyrillic alphabet as `"а-шђјљњћџ"`, and helpfully relocating that hyphen collapsed `а-ш` to `аш` and
+dropped twenty-two letters out of the inventory. The over-claim test caught it immediately (22 findings for sr).
+Replaced with VALIDATION: compile the class at construction and throw a named error. A constraint a caller can
+silently violate belongs in the callee — but enforcing it must not mean rewriting what the caller meant.
+
+### 📌 AND ONE OVER-REACH, REVERTED
+
+The leak probe found `cdo` (Min Dong) emitting *cañitas˥˥*. It is a REAL leak — and identical on `main`, because
+cdo never fragmented and so was never in this issue's scope. I applied the standard treatment anyway and **broke
+two real tests**: cdo's class expresses its own letters as base plus a combining range, and NFC composes several
+of them into precomposed forms the class does not list, so the fold destroyed `ṳ` (U+1E73, read /y/) and `ø̤`.
+Narrowing that range needs Bàng-uâ-cê orthographic sourcing — evidence, not a table.
+
+Reverted, and the leak test is explicitly scoped to engines that DECLARE an inventory, with the reason stated at
+the assertion so the exclusion is not mistaken for coverage. *Taking a pre-existing, out-of-scope defect and
+fixing it mechanically without the sourcing is how a clean change acquires a regression.*
+
+### Probes that measured their own frames — a running tally, because this keeps happening
+
+Four times on this issue now. The leak probe alone was wrong twice more in this run: first it flagged **139**
+engines by treating any combining mark as orthography, when combining marks are ordinary IPA diacritics
+(`t̬` voicing, `ɐ̃` nasalisation, `t͡s` the affricate tie). Narrowed to precomposed letters, it flagged **99**,
+because `æ` is a phoneme. Narrowed to letters that are NEVER IPA, it flagged **9**, of which **5 were still
+wrong**: `ã õ ĩ ũ` are nasalised vowels (`gn`, `ee`, `umb`, `yo` all emit them correctly) and `è ì` are this
+repo's own pitch-accent notation — `sv` marks accent 2 with a grave.
+
+139 → 99 → 9 → 1 real finding. *Every intermediate number looked like a discovery.*
+
+### Verification
+
+All 27 corpus diffs re-run after the fixes: byte-identical to the verified numbers, no defect class moved.
+Gates run separately: tsc PASS; **207 files / 2943 tests**; audit 0 defective cells across 0/67; probe
+`✓ none fragment an accented Latin word`.
+
+## Run 33 — 2026-08-04 — #663: the orthographic fold is the WRONG MECHANISM, and Uzbek proved it in one test
+
+### Step 1, re-measuring, because the 43-engine list was known-contaminated
+
+Two frame bugs had to be fixed before the number meant anything.
+
+**Aliasing.** The original probe used one frame, `ka` + L + `o`, compared against `kao` — so testing `a` built
+`kaao` and testing `o` built `kaoo`, which gemination and vowel-length rules collapse to `kao`. That was the whole
+of German's reported "drops a h o q" and Maltese's "drops a h o". Fixed by choosing, per letter, only frames whose
+own characters are DISJOINT from the letter under test.
+
+**Position.** The replacement frames were all INTERVOCALIC (`mi_ru`, `se_la`, `to_pi`), and German `h` is silent in
+exactly that position while being perfectly pronounceable word-initially. So the probe reported German, Spanish,
+Italian, Catalan, Galician and six more as "dropping h" when it had measured a CORRECT contextual silence. Fixed by
+spanning initial, medial and final, and requiring EVERY usable frame to agree.
+
+Result: **45 engines**, `x` in 30, `q` in 29, `c` in 17; Maori missing thirteen of twenty-six. Six of the 45 are
+`h`-only and almost certainly correct silence (Italian, Galician, Aragonese, Asturian write `h` and read nothing).
+
+### Step 2 built the wrong thing
+
+`core/latinFallback.ts`: a central letter→LETTER table (`q`→k, `x`→ks, `c`→k), applied transitively by
+`makeNativiser` when the fold's output was still unreadable, with per-language overrides (Maori `s`→`h`, since
+Maori borrows /s/ as /h/ — `Christmas` → `Kirihimete`). Two self-inflicted defects on the way, both caught by my
+own checks:
+
+· **A total table cycles where a measured-only one could not.** `k`↔`t`, `m`↔`n`, `e`↔`i`, `o`↔`u` — each row
+  individually right, collectively useless, because the cycle guard stops the oscillation and then leaves the
+  letter ALONE. `Cañitas` in a Maori-like inventory came back *Canitat*, the `C` untouched. Fixed by making the
+  rows a DAG onto six terminals.
+· **`u` is not a terminal.** I wrote the terminal set from what LOOKS basic (`a i u t n`) rather than from the
+  measurement — and Malagasy is measurably missing `u`, so `u`→`o` and `o`→`u` ended up in the same table.
+· And the acyclicity CHECK was wrong too: a global visited-set calls RECONVERGENCE a cycle, and `x`→`ks` reaches
+  `t` through both `k` and `s`. It rejected the correct table. DFS with an on-path set.
+
+### ⚠ AND THEN 10 TESTS FAILED, and the failure is the whole argument
+
+Removing a letter from an engine's `NATIVE_CLASS` is what lets the fold reach it. Uzbek cannot read a bare `c`, so
+`c` came out of the class — and **Uzbek writes /t͡ʃ/ as the DIGRAPH `ch`**. Every Uzbek ordinal broke:
+
+    ikkinchi   →  ikkinkhi        (t͡ʃ → kh)
+    uch        →  ukh
+    kichik     →  kikhik
+
+*A letter can be unreadable ALONE and essential as part of a sequence.* The inventory is per-character; a g2p reads
+sequences. Croatian, Luxembourgish, Maori and Serbian broke the same way — 10 tests across 5 files.
+
+That is not a bug in the table. It is a bug in the LAYER: an orthographic substitution runs before the g2p, so it
+rewrites the spelling the g2p is about to read, and any multigraph is collateral damage.
+
+### 📌 THE REDIRECTION, and it is the right one
+
+> "My original idea was that phones unknown to a language would still be available. So even if Ç/ç appeared in a
+> word where that diacritized letter form isn't in the language, the g2p could phonemize it with sound. I figured
+> there wouldn't be a need to describe out-of-language overrides, and that those centralized phonetics would be
+> used."
+
+A central letter→**PHONE** table, consulted by the g2p when it has no rule, rather than a letter→letter table
+applied before it. That fixes both defects of what I built:
+
+| | orthographic fold (built, reverted) | central phones (the redirection) |
+|---|---|---|
+| digraphs | DESTROYS them — `ch`→`kh` | untouched; the g2p still sees `ch` and its own rule wins |
+| per-language data | NEEDED, because folding to a host letter is lossy in language-specific ways (`mi` s→h) | none — the letter keeps its own sound |
+| `ç` in Maori | →`c`→`k`, the sound is gone | /t͡ʃ/, the sound survives |
+| voice inventory | never leaves the host's phone set | may emit a phone the host voice lacks — accepted deliberately |
+
+The last row is the real trade and it is now a recorded decision rather than an accident: a Maori voice may not
+render /t͡ʃ/, and preserving the source sound is judged worth that.
+
+⚠ The hook is the open question, and it is not free: the g2p is the layer that KNOWS it has no rule, and there are
+45 of them. A post-hoc "did a letter vanish" check on the output would be fragile in exactly the way these probes
+keep being fragile. So this needs a look at how many engines share a g2p helper before it is scoped.
+
+Reverted to `ad3fb37`; the measurement is preserved in the issue. tsc PASS, 207 files / 2943 tests.
+
+## Run 34 — 2026-08-04 — #663: positional ⟨x⟩, and MEASURING which languages are strict CV instead of guessing
+
+### ⟨x⟩ is /z/ word-initially
+
+`x`→/ks/ is the letter's value between or after vowels (`Xerox` → *…oks*, `taxi`), but no language that borrows
+⟨x⟩ begins a word with the cluster — `Xerox`, `xylophone`, `Xanthe` all start /z/. Emitting /ks/ there manufactured
+an initial cluster the SOURCE language does not have either, which is the worst case: illegal in the host and wrong
+about the loan. `latinPhone` now takes the position; `ak Xerox` → *zeroks*.
+
+⚠ And it correctly does NOT fire where a language has its own ⟨x⟩ rule: Albanian reads ⟨x⟩ as /d͡z/ and Uzbek as
+/χ/, so `sq Xerox` → *ˈd͡zɛɾod͡z* and `uz axis` → *aχˈis* — untouched, because the fall-through is never reached.
+That is the placement doing its job.
+
+### ⚠ "The suspicious ones should be measured/routed" — measured, and my assumption was wrong
+
+I had assumed the routing set was "engines missing many letters": mi 13, qu 7, naq 6, ak 6, mad 5, yo 5, mg 5.
+That is a proxy for the wrong property. What makes the letter-level floor produce ILLEGAL output is strict CV
+phonotactics — no codas, no clusters — and letter count does not measure that.
+
+Measured from each language's OWN text (corpus where one exists, lexicon/manifest otherwise), the share of words
+ending in a consonant:
+
+| lang | letters missing | word-final consonant |
+|---|---|---|
+| **mi** | 13 | **4.9%** |
+| hr | 4 | 23.2% |
+| ff | 3 | 26.5% |
+| nso | 3 | 45.8% |
+| uz | 2 | 51.7% |
+| az | 1 | 60.2% |
+| lb | 1 | 83.8% |
+
+**Māori is the only strict-CV engine in the set, by a factor of five** — and it is already routed. Every other
+measurable language permits codas freely, so the floor produces legal forms and routing would be a regression, not
+an improvement. Letter count and phonotactic restrictiveness are not the same axis: `ff` is missing three letters
+and permits codas at 26.5%; `mi` is missing thirteen and permits them at 4.9%.
+
+⚠ AND MY CLUSTER METRIC WAS CONFOUNDED, so only the coda figure is load-bearing. A crude vowel/non-vowel test
+counts Māori's own ⟨ng⟩ and ⟨wh⟩ digraphs as consonant clusters, which is why Māori shows 30.8% "clusters" while
+being the strictest CV language in the fleet. The digraph is one segment; the metric cannot see that.
+
+⚠ NO EVIDENCE FOR SEVEN OF THE CANDIDATES. `naq qu ak mad yo mg` and several others have under 400 words of native
+text available, so they are absent from the table entirely — not passing it. Deciding to route them would be acting
+on the letter-count proxy I have just shown does not measure the property. Recorded as needing corpus data.
+
+Gates run separately: tsc PASS; 207 files / 2943 tests; audit 0 defective cells across 0/67.
+
+## Run 35 — 2026-08-04 — #663 complete: 45 engines → 9, and all nine remaining are by design
+
+The last three fall-through idioms hooked (`az kl kaa naq ltg`, then `mg tk crh`). Behavioural measurement across
+every registered language: **45 engines dropping an ASCII letter → 9**, and each of the nine is deliberate:
+
+| remaining | why |
+|---|---|
+| `gl it quc an ast wo` | ⟨h⟩ ONLY. Written and read as nothing in those orthographies; the table declines `h` by default and these engines never opt in. Correct silence, not loss. |
+| `sr hr bs` | Deferred to the normalization work. They share one Serbo-Croatian g2p, and `35°W` normalises to `stepeniW` — the degree rule consumes `°` and leaves the compass letter ATTACHED to the previous word. Voicing it reads *stepeniw*; the right answer is the Serbian word for "west", which is normalization vocabulary, not a phone. |
+
+Residual letters: `h` 6, and `q w x y` only via the three deferred engines. From `x` in 30 engines and `q` in 29.
+
+### Four g2p idioms, none of them findable by grep
+
+The scan loops fall into four shapes, and locating them by pattern-matching found 8 of 41 — the same "structural
+pattern instead of a measurement" error as #657, made again:
+
+1. `if (ph !== undefined) push; i += 1;` — the fall-through is the IMPLICIT else, so augmenting the LOOKUP
+   (`G[c] ?? latinPhone(c, …)`) is the whole hook (14 engines)
+2. `if (!matched) i++;` — an explicit miss branch on a longest-match loop (14 engines)
+3. a commented `i += 1; // unknown → skip` at the end of a long if/continue chain (9 engines)
+4. `for (let i = 0; …; i++)` with NO fall-through statement at all — the increment is the loop header, so the
+   branch has to be written (8 engines)
+
+### ⚠ And ⟨q x⟩ IN THE OUTPUT IS USUALLY CORRECT, which broke my leak probe a fifth time
+
+`crh Quixote → quiksoˈte`, `az Xerox → xeɾˈox`, `kaa → χeˈroχ`, `naq → xerox` all keep a ⟨q⟩ or ⟨x⟩ — and every one
+is that language's OWN rule firing, because /q/ and /x/ are their phonemes. The fall-through was never reached.
+A probe that flags "a letter that looks like orthography" cannot distinguish orthography from a phonetic alphabet
+that is itself written in Latin letters. Fifth time on these two issues; the lesson is that IPA is Latin.
+
+Gates run separately: tsc PASS; 207 files / 2943 tests; audit 0 defective cells across 0/67.
+
+## Run 36 — 2026-08-04 — #654: the sourcing half, and a measurement that settles the scope question
+
+### Re-measured, and the counts are unchanged since #586
+
+`±` dropped by 56/66 · `÷` 48 · `<` 35 · `>` 35 · `=` 35. Probed as a sign between two operands, comparing
+against the bare pair, so a sign that changes nothing is inaudible.
+
+### ⚠ "Is logic symbology needed in every language?" — measured, and the answer is NO with evidence
+
+Counted across all 67 corpora AND all 67 mined artifacts:
+
+| class | attested |
+|---|---|
+| arithmetic / relational | `=` ×52 · `<` ×37 · `>` ×37 · `±` ×6 |
+| …and NOT attested | `÷` `≤` `≥` `≠` `≈` `∓` `∝` — zero |
+| logic / set / analysis | `∀ ∃ ∈ ∉ ⊂ ⊃ ∪ ∩ ∧ ∨ ¬ ⇒ ⇔ ∴ ∵ ⊕ ⊗ ∑ ∏ ∫ ∂ √ ∞ ≡ ≅ ⊆ ⊇ ∅` — **ZERO, all of them** |
+
+So propagating logic notation to 67 languages would be inventing register for symbols that occur nowhere in the
+evidence. It is not merely low priority; there is no observation to source it from. The reason is linguistic as well
+as statistical: relational and arithmetic operators are school-level and every language has vernacular words for
+them, while logic notation is read in an English-derived academic register even by non-English speakers — so the
+per-language vocabulary a tier field would need does not exist to be found.
+
+⚠ AND `÷` IS IN THE SAME UNATTESTED CATEGORY as `≤`/`≥`/`≠`, which the issue's suggested order did not distinguish.
+`÷` is missing from 48 engines, which makes it look like the second priority; it occurs zero times. The three signs
+with any evidence at all are `=`, `<`, `>`.
+
+### The ± sourcing: 19 languages at ZERO new cost, read out of their own shipped rules
+
+`±` is derivable where a language already ships BOTH a plus word and a minus word. Extracted by running each
+language's own `normalize` and diffing against the sign-free input — measured from shipped behaviour, not harvested
+by pattern:
+
+| ✓ TREE (both words already shipped) | plus | minus |
+|---|---|---|
+| ar | زَائِد | نَاقِص |
+| ckb | کۆ | کەم |
+| cs / sk | plus | mínus |
+| de / hr / id / lb / sl | plus | minus |
+| el | συν | μείον |
+| es | más | menos |
+| fr | plus | moins |
+| ja | プラス | マイナス |
+| mk / ru | плюс/плус | минус |
+| pt | mais | menos |
+| sd | جمع | منفي |
+| uk | плюс | мінус |
+| uz | plyus | minus |
+
+Six languages already read `±` and they confirm the FORM: `bg плюс минус`, `da plus minus`, `is plús mínus`,
+`nb pluss minus`, `ro plus minus`, `sv plus minus` — bare juxtaposition, no conjunction. `cmn` uses a dedicated
+word (`正负`) rather than a juxtaposition, and `en` is the outlier that needs one (`plus or minus`), which is the
+same en-specific split already documented for `negative` vs `minus`.
+
+### ⚠ AND I WALKED STRAIGHT INTO THE HARVESTING TRAP THE ISSUE DOCUMENTS
+
+My first minus probe used several frames including a spaced hyphen between numerals, and returned:
+
+    bg до · da til · sv till · pl do · hr do · sr do · uk до · ga go dtí · cy i dri · is til · nb til
+    ro până la · ckb بۆ · ff haa · ha zuwa · sd کان # تائين          ← RANGE words ("to", "until")
+    xh thabatha · zu ukukhipha · om hir'isuu                         ← subtraction VERBS, not sign words
+
+**A hyphen between numerals is a RANGE in most orthographies**, and the engines read it that way deliberately, so
+that frame answers a different question. Only a sign with NO LEFT OPERAND cannot be a range — `−3 m` is the one
+frame whose answer is certainly the sign word. Re-probed that way, the minus column above is trustworthy and
+`xh`/`zu`/`om` correctly show no minus word at all.
+
+*The issue predicted this exact failure and I reproduced it anyway.* What made it recoverable was that the wrong
+answers were readable as words: `до` and `til` are obviously "to". A numeric harvest would have looked fine.
+
+### Not implemented yet, and why the sourcing was worth banking first
+
+The plus/minus rules are per-language and take at least three shapes — an inline `s.replace(/\+/…)` (de), a
+`[/±/gu, " word "]` table entry (bg, da, sv), and a `new RegExp` with a digit class. A tier field does not reach the
+eight languages that never route through the tier. That is the same fan-out the `multiply` work took, and doing it
+badly is how the Uzbek digraph regression happened in #663 — so the 19-row table above is the durable half.
+
+Gates unchanged: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67.
+
+## Run 37 — 2026-08-04 — #654: validate against the repo's OWN gate, not a scratchpad probe
+
+*"tools/normalization has tools for finding attestations, they're just not tuned for those symbols. Reuse them?"*
+
+Correct, and I had been writing throwaway probes past a gate that already asks the question. `review.ts --lang X`
+carries a **`plus-minus` cell** — it was there the whole time, empty. Run against the eighteen languages just
+changed, it now reports the reading and **0 failing**:
+
+    de  ±5 → plʊs mˈiːnʊs fʏnf      es  ±5 → mˈas mˈenos θˈinko     ru  ±5 → plʲus mʲˈinʊs pʲætʲ
+    ja  ±5 → pɯᵝɾäsɯᵝmäꜜinäsɯᵝ ɡo̞   el  ±5 → sin mion pende         ar  ±5 → zˈaːʔid nˈaːqisˤ xamsa
+    uk  ±5 → plʲus mʲinus pjatʲ     sd  ±5 → d͡ʒˈəmaː mˈənəfiː pˈəɲd͡ʒə   cs  ±5 → plˈus mˈiːnus pjˈɛt
+
+German's single remaining failure is the pre-existing `Yen` sourcing gap, which `attest.ts`'s own header names as
+one of the known-hard cases. Nothing I added introduced a sourcing failure.
+
+*The gate's verdict is worth more than my probe's, and it is repeatable by anyone.* My scratchpad probe measured
+"does the output differ from the sign-free input" — a weaker question, and one I had to write twice because the
+first version harvested range words.
+
+### The tooling that already covers the remaining signs
+
+| tool | what it answers | state for #654 |
+|---|---|---|
+| `cells.ts` `signs` (`[%‰+±×÷=<>]\|\p{Sc}`) | does the artifact EXERCISE a sign cell | 17 languages — the thin attestation my count found, independently |
+| `cells.ts` `arithmetic` (`\p{Nd}\s*[+×÷=<>≤≥≈]\s*\p{Nd}`) | a sign BETWEEN operands | 2 languages |
+| `review.ts` | per-language cell readings + the sourcing verdict | `plus-minus` cell now filled for 18 more |
+| `attest.ts` | is a candidate WORD real in this language (token vs SUBSTRING) | the route for `=`/`<`/`>`, where the corpus has nothing |
+
+So the cell machinery already knows `÷ = < > ≤ ≥ ≈`; what it reports is that almost nothing exercises them —
+the same conclusion as the direct count, reached by a different instrument, which is the useful part.
+
+⚠ AND `attest.ts` IS THE RIGHT INSTRUMENT FOR THE REMAINING THREE, not a new probe. `=`/`<`/`>` have no corpus
+sentence to read, so a candidate reading has to be checked against Wikipedia — which is exactly what `attest.ts`
+does, with the token-vs-substring separation that four earlier greps needed. Tuning it for symbols means asking it
+about the candidate WORDS (`kleiner als`, `menor que`), not about the symbol.
+
+Gates unchanged: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67; review.ts 0 failing on all
+eighteen changed languages.
+
+## Run 38 — 2026-08-04 — #654: the relational exemplars, and why the remaining 35 cannot be derived
+
+Same zero-cost extraction used for `±` — run each language's own `normalize` and diff against the sign-free input.
+**30 languages already ship `=`, `<` and `>`; 14 also ship `÷`.**
+
+| lang | `=` | `<` | `>` | `÷` |
+|---|---|---|---|---|
+| af | gelyk aan | kleiner as | groter as | gedeel deur |
+| bg | равно на | по-малко от | по-голямо от | делено на |
+| cmn | 等于 | 小于 | 大于 | 除以 |
+| cs | rovná se | menší než | větší než | děleno |
+| da | lig med | mindre end | større end | divideret med |
+| en | equals | less than | greater than | divided by |
+| is | jafnt og | minna en | meira en | deilt með |
+| lb | ass gläich | méi kleng ewéi | méi grouss ewéi | dividéiert duerch |
+| mk | еднакво на | помало од | поголемо од | поделено со |
+| nb | er lik | mindre enn | større enn | delt på |
+| ro | egal cu | mai mic decât | mai mare decât | împărțit la |
+| sd | برابر | کان گهٽ | کان وڌيڪ | ورهايل |
+| sk | rovná sa | menší ako | väčší ako | delené |
+| sv | lika med | mindre än | större än | delat med |
+| ckb | یەکسانە بە | کەمتر لە | زیاتر لە | دابەش بە |
+
+…and `=`/`<`/`>` only: `as az ca cy ff ga ha hr kk ms om sl uz xh zu`.
+
+**The register is consistent across all 30**: equality is "equal to", the inequalities are a comparative plus the
+language's "than", and division is a passive participle plus "by". That is the school-mathematics register the
+`multiply` and `plus` data already sit in, and it is what makes these readings ✓ TREE rather than invented.
+
+### ⚠ The remaining 35 CANNOT be derived, and this is where the ± route runs out
+
+`±` worked because it is a COMPOUND of two words each language already shipped — plus and minus were both already
+in the tree, so juxtaposing them added nothing. `=`/`<`/`>`/`÷` are not compounds of anything already present: a
+language missing `<` needs its comparative-plus-than construction, which is new vocabulary regardless of how it is
+assembled. There is no second word in the tree to lift.
+
+So the 35 need the fourth tier, and the corpus cannot supply it: `=` ×52 is LaTeX/MediaWiki residue and one
+`1+4=5分`, and every `<`/`>` is an HTML tag `stripMarkup` removes. **There is no recording to listen to and no
+sentence to read** — `attest.ts` against Wikipedia is the only remaining route, checking a CANDIDATE word with the
+token-vs-substring separation, exactly as its header describes.
+
+⚠ AND THE CANDIDATE HAS TO COME FROM SOMEWHERE FIRST. `attest.ts` verifies a word; it does not propose one. For
+each of the 35 the candidate is that language's own comparative construction, which is grammar rather than a sign
+rule — so this is genuinely per-language reading, not a fan-out over a table. That is the difference between the
+±  work (mechanical, 18 languages in one pass) and this.
+
+### Where #654 stands
+
+| sign | dropped | note |
+|---|---|---|
+| `±` | 56 → **37** | 18 languages added at zero sourcing cost; gate-clean |
+| `÷` | 48 | measured UNATTESTED — belongs with ≤/≥/≠ as robustness, not the issue's second priority |
+| `=` `<` `>` | 35 each | the only signs with any attestation; 30 exemplars recorded above; the 35 need per-language sourcing |
+| logic notation | — | ZERO occurrences fleet-wide; out of scope with evidence |
+
+Gates unchanged: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67.
+
+## Run 39 — 2026-08-04 — #654: one language end to end, and the blueprint it produced
+
+German as the pilot, chosen because it has a corpus to diff against and I could check the method's answer
+independently. `=`/`<`/`>`/`÷` all read now:
+
+    7 = 3  → zˈiːbən ɡlaɪ̯ç dʁaɪ̯              7 ÷ 3  → zˈiːbən ɡətˈaɪ̯lt dʊɐ̯ç dʁaɪ̯
+    7 < 3  → zˈiːbən klˈaɪ̯nɐ als dʁaɪ̯        3 + 4 = 7 → dʁaɪ̯ plʊs fiːɐ̯ ɡlaɪ̯ç zˈiːbən
+
+`review.ts --lang de` now fills the `equals` and `divide` cells; corpus diff 0/1956; 2951 tests pass.
+
+### ⚠ RUN 38 WAS WRONG: the corpus CAN source these, and I had asked it the wrong question
+
+Run 38 concluded "there is no sentence to read — `attest.ts` against Wikipedia is the only remaining route." That
+was based on searching the corpora for the SIGN. The sign is genuinely absent. **The WORDS are ordinary comparative
+prose and are in the corpus in quantity.**
+
+Counted as tokens in de_de (4212 utterances):
+
+    kleiner als    7 phrase hits    (kleiner ×22, als ×606)
+    geteilt durch  2 phrase hits    (geteilt ×4,  durch ×171)
+    größer         ×10              — the mirror of the attested `kleiner als`
+    gleich         ×3 TOKEN / ×107 SUBSTRING
+
+*I had been looking for the notation and concluding the vocabulary was unavailable.* Two different questions.
+
+### The four traps this one language hit
+
+1. **⚠ `gleich` is the substring trap, a fifth time.** 107 raw hits look decisive; 104 are inside `Vergleich`,
+   `gleichzeitig`, `gleichfalls`. Three are the standalone word. Still attested — 3 token hits IS attestation — but
+   a plain grep would rank it the best-sourced of the four when it is the thinnest.
+2. **⚠ Phrase-level attestation is too strict a bar.** `größer als` has ZERO phrase hits while both its words are
+   common. The construction is `ADJ + als`; `kleiner als` proves the construction and `größer` proves the adjective.
+   Demanding the exact pair would reject a reading the corpus fully supports.
+3. **⚠ `attest.ts` confirms EXISTENCE, NOT REGISTER — and this is the important one.** Run against
+   `ist gleich,kleiner als,größer als,geteilt durch`, German Wikipedia returned three `absent` and one `attested`:
+   `größer als` ×2, both from ***"Gott ist größer als Elvis"*, a film title.** The tool's own printed warning is
+   exactly this — "a token hit proves the word EXISTS, never that it fits the slot" — and the one hit it found is
+   the wrong sense. For a mathematical reading, general Wikipedia gives nothing or a false positive.
+4. **The copula.** German math register says `ist gleich`, `ist kleiner als`. The bare form is emitted because the
+   sign appears in running text where the verb is present or absent for its own reasons — the same call `en` makes
+   with `equals` rather than `is equal to`.
+
+### 📌 THE BLUEPRINT, in tier order, each with the pilot's evidence
+
+| tier | source | what it settles | evidence from this pilot |
+|---|---|---|---|
+| 1 | the language's OWN shipped rules | a COMPOUND of words already present | `±` = plus + minus, 18 languages at zero cost |
+| 2 | the FLEURS corpus, searched for the WORDS not the sign | is this vocabulary real in this language | `kleiner als` ×7, `geteilt durch` ×2 — token-level, substring separated |
+| 3 | Wikipedia via `attest.ts` | does the word EXIST at all | necessary, NOT sufficient — returned a film title as the maths reading |
+| 4 | a MATH-REGISTER source (textbook, Wikipedia's own mathematics articles) | does the word fit THIS SLOT | the tier the pilot shows is required, not optional |
+
+Tier 4 is the answer to "high-school mathematics textbooks should have letter spellings for these words". The pilot
+demonstrates why it is not a nicety: the reading is register-specific, tier 2 gives thin coverage for the
+specifically-mathematical sense (`gleich` ×3), and tier 3 actively misleads. A register-matched source is the only
+one that confirms the SENSE rather than the string.
+
+⚠ AND TIER 2 IS NOT AVAILABLE EVERYWHERE. de_de has 4212 utterances; the thin corpora have a few hundred. For
+those, tiers 3 and 4 are the whole haystack — which is the same asymmetry `attest.ts`'s header records for `zu`
+and `xh`, where espeak ships nothing and the referee is programmatic G2P output.
+
+### Cost, for scoping the remaining 34
+
+One language: four rules, one corpus count, one `attest.ts` run, one gate pass. The sourcing dominated; the code
+was four `s.replace` lines. That ratio is why this is per-language reading rather than a fan-out over a table.
+
+Gates: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67; review.ts de fills equals + divide.
+
+## Run 40 — 2026-08-04 — #654: six languages through the blueprint, and a defect in the tool it rests on
+
+Continuing one language at a time: **es fr pt it ru nl**, each sourced through the four tiers, each gated on its
+own. All six now read `=` `<` `>` `÷`; `it` and `nl` also gained the tier-1 `±` compound.
+
+    es  siete igual a tres · menor que · mayor que · dividido por
+    fr  sept est égal à trois · est inférieur à · est supérieur à · divisé par
+    pt  sete igual a três · menor que · maior que · dividido por
+    it  sette è uguale a tre · è minore di · è maggiore di · diviso per
+    ru  семь равно три · меньше чем · больше чем · разделить на
+    nl  zeven is gelijk aan drie · kleiner dan · groter dan · gedeeld door
+
+### ⚠ FIRST, A MANUFACTURED NEGATIVE IN `attest.ts` — and every prior verdict is affected
+
+Spanish `menor que` came back **absent**. It has 180,953 hits on es.wikipedia.
+
+The extracts call passed 20 titles with `exlimit: "20"`. The API accepts that, answers with a WARNING rather than
+an error — `"exlimit" was too large for a whole article extracts request, lowered to 1` — and returns **the first
+page only**. So the probe searched twenty articles, read one, and reported the other nineteen as containing
+nothing. This is precisely the failure mode the file's own `api()` comment warns about, arriving through a door
+nobody had checked: not a missing User-Agent but a silently downgraded parameter.
+
+**Verdicts recorded before this fix understate by up to 20×**, including the three German `absent` results in
+Run 39. Fixed to one title per request. `exintro=1` does permit the batch, but only lead paragraphs, and a
+relational word is body prose.
+
+⚠ The lesson generalises past this bug: *an API warning is not an error, and a tool that treats absence as a
+finding must check for both.*
+
+### Two new tools, both reuses of the existing tier structure
+
+**`corpus-words.ts`** — the tier-2 counter. Token / substring-only / phrase counts against FLEURS, with the
+unspaced-script flag `attest.ts` already carries. Validated by reproducing the German pilot's hand counts exactly
+(`gleich` 3t/107s, `kleiner als` ×7, `größer als` ×0 phrase, `geteilt durch` ×2).
+
+**`attest.ts --context`** — the tier-4 register restriction. Terms appended to the SEARCH query only; the hit
+test, boundaries and verdict are untouched, so it narrows *which articles are sampled* without loosening what
+counts as a hit. This is the mechanism that makes tier 4 usable with the tooling already here.
+
+### 📌 WHAT THE SIX LANGUAGES ADDED TO THE BLUEPRINT
+
+**1. Tier 2 settled the reading alone exactly ONCE — nl.** For the other five the corpus gave partial evidence at
+best, and twice gave *wrong* evidence:
+
+| lang | corpus evidence for the equality/comparison word | verdict |
+|---|---|---|
+| nl | `is gelijk aan` ×2 phrase, `kleiner dan` ×5 phrase | sufficient |
+| es | `menor que` ×9, `igual a` ×5, `mayor que` ×3 | sufficient but for `÷` |
+| de | `kleiner als` ×7, `gleich` ×3 token | sufficient, thin |
+| pt | `igual` ×0 token / ×0 substring — **absent entirely** | insufficient |
+| it | `minore di` ×2, `maggiore di` ×4 — **both the wrong sense** | misleading |
+| ru | `равно` ×4 token — **all `равно как и`, "as well as"** | misleading |
+
+**2. ⚠ THE WRONG-SENSE FAILURE IS NOW A NAMED TRAP, because two of six hit it.** Italian's `la sorella minore di
+germania` is the *younger sister of*; `il numero maggiore di basi` is a superlative plus a partitive, not a
+comparison at all. Russian's `равно как и` is a conjunction. Each is a genuine token hit of the exact phrase, in
+the corpus, in prose — and each argues for a different construction than the sign needs. **A phrase count cannot
+detect this; only the quoted example can.** That is the same lesson as `attest.ts`'s film title, one tier lower
+than where it was first recorded.
+
+**3. The register tier's best sources are ones that read the notation aloud.** Three of six produced evidence far
+stronger than "the word occurs in maths prose":
+
+- **ru** — a pronunciation gloss: `6 : 3 = 2` («шесть разделить на три равно два»), `65 : 5 = 13`, «два плюс два
+  равно четыре». The reading, quoted as speech, beside the notation.
+- **pt** — the article NAMES the signs: "o sinal de menor que ( < ), o sinal de maior que ( > )", then
+  "a ÷ b = c (a dividido por b é igual a c)".
+- **fr** — « a divisé par b est égal à c », both signs in one sentence between two operands.
+
+So tier 4 is not merely "a register-matched corpus". *The article class to look for is the one that has to
+explain the notation to a reader* — the division/arithmetic articles do this and general prose never does.
+
+**4. ⚠ INFLECTION MEANS AN EXACT-FORM TOKEN COUNT UNDER-REPORTS THE LEMMA — and the substring column is where
+the word is hiding, sometimes legitimately.** French `supérieur` is ×0 token / ×18 substring, and all 18 are
+`supérieure(s)`, the same adjective inflected; `divisé` ×0/×2 is `divisée`. Dutch `gedeeld` ×0/×3 is `gedeelde`.
+That is the *opposite* of the classic trap, where the containing word is unrelated — and the two are
+indistinguishable by count. Same column, opposite meanings, and only the examples separate them.
+
+The classic trap also produced its sharpest instance yet: **French `égale` is ×0 TOKEN / ×190 SUBSTRING, and every
+one of the 190 is inside `également` ("also")** — a word with no arithmetic sense whatever. Sixth time this error
+has been caught, first time the containing word is semantically unrelated rather than merely longer.
+
+**5. ⚠ A NEW TIER THE BLUEPRINT DID NOT HAVE: GRAMMATICAL COMPATIBILITY WITH `numbers.ts`.** Russian is the first
+language where the attested reading *cannot be shipped as attested*. `меньше` governs the GENITIVE — the register
+quotes are `меньше нуля`, `больше 1` — while `numbers.ts` emits NOMINATIVE cardinals, so `7 < 3` would read
+*семь меньше три*, an ungrammatical case. The `чем` construction takes the nominative and is itself corpus-attested
+(`меньше чем` ×8, `больше чем` ×6), so it is both correct and sourced.
+
+*Attestation of a reading is not sufficient if the reading requires case the number generator cannot produce.*
+Expect this again in every case-marking language still on the list — pl, cs, uk, lt, lv, et, fi, hu, tr all
+govern something.
+
+**6. The copula splits the fleet, and the split is grammatical rather than stylistic.** `de es pt en` emit the
+bare form; `fr it` keep the verb, because `sept égal à trois` / `sette uguale a tre` are not constructions those
+languages admit — the adjective needs its verb, so there is nothing to drop *to*. `lb` (`ass gläich`) and `nb`
+(`er lik`) already shipped the copular shape, so both forms were in the fleet before this. The test is not
+consistency across languages; it is whether the bare form is a construction the language has.
+
+### Recorded, not acted on
+
+`pt` reads `y` as NOTHING (`x y z` → *ʃ ʃ*) and this is pre-existing, not caused by anything here. It is the
+same class as the `sr`/`hr`/`bs` deferral: Portuguese has no nativiser, so #663's leak test — scoped to engines
+that DECLARE an inventory — could not see it. Belongs with the normalization-layer work, not with #654.
+
+### Where #654 stands
+
+| sign | dropped before | dropped now | note |
+|---|---|---|---|
+| `±` | 37 | **35** | it and nl gained the tier-1 compound |
+| `=` `<` `>` | 34 dirs | **28 dirs** | de es fr pt it ru nl read them |
+| `÷` | 48 | 41 | same six, plus de |
+
+Gates for all six, run separately: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67;
+`review.ts` fills `equals`/`less-than`/`greater-than`/`divide` for each; corpus diff 0 changed for every one
+(es 0/1948, fr 0/1972, pt 0/1943, it 0/1978, ru 0/1959, nl 0/1829) — zero is the correct result, because what
+the corpora lack is the notation, which is the whole reason these needed tiers 3 and 4.
+
+## Run 41 — 2026-08-04 — #654: ar ja ko tr, and the infix assumption breaking
+
+Four more languages, and this batch is where the European rule SHAPE stopped generalising. Every language up to
+Run 40 read the sign by substituting words *between* the operands. Three of these four cannot.
+
+    ar  سبعة يُسَاوِي ثلاثة · أَصْغَر مِن · أَكْبَر مِن · مَقْسُوم عَلَى     (10 registered codes at once)
+    ja  なな イコール さん · 7は3より小さい · 7は3より大きい · なな わる さん
+    ko  칠은 삼과 같다 · 칠은 삼보다 작다 · 칠은 삼보다 크다 · 칠 나누기 삼
+    tr  yedi eşittir üç · yedi üçten küçüktür · yedi üçten büyüktür · yedi bölü üç
+
+### ⚠ AN INFIX RULE IN A VERB-FINAL LANGUAGE INVERTS THE MEANING
+
+Japanese puts the predicate last. ja.wikipedia reads the chain `1 < x < 5` as 「xは1より大きく5より小さい」, so
+`A < B` is 「AはBより小さい」. Substituting より小さい *between* the operands the way de/es/fr/pt/it/ru/nl/pl/uk/el
+all do would give 「7より小さい3」 — **"3, which is smaller than 7"**, the comparison backwards.
+
+This is a different failure from anything earlier in the issue. A wrong-sense attestation ships a reading that is
+odd; an infix rule in a verb-final language ships a reading that is *false*. So ja and ko consume BOTH operands
+and rebuild the clause, and only the signs that genuinely are infix in those languages (`=`/`÷` in ja, `÷` in ko)
+keep the simple form.
+
+⚠ AND THE CONSEQUENCE: **a two-operand rule can only fire where it can identify both operands.** Where an operand
+is not something the rule can spell, the sign stays dropped — the status quo — because a rule that is correct
+about what it claims beats a total rule that garbles the rest.
+
+### 📌 A NEW TIER, ABOVE ATTESTATION: CAN THE RULE CONSTRUCT THE READING AT ALL
+
+Run 40 added grammatical compatibility with `numbers.ts` as a consideration. Turkish sharpens it into a *choice
+criterion*, because tr.wikipedia attests **two** readings of `=` in the same article:
+
+    "beş artı üç sekize eşittir"     5 + 3 = 8    dative, postposed
+    "bir artı bir eşittir iki"       1 + 1 = 2    infix, no case at all
+
+Both are real. The infix one ships, and not for tidiness: **a case-marked reading can only be built for an operand
+the rule can SPELL.** The dative version would have left `x = y` unread, because there is no way to inflect an
+operand whose spoken form the rule does not know. Where two forms are attested, prefer the one whose construction
+does not depend on knowing the operand.
+
+The comparatives have no such alternative — the ablative *is* the construction — so those two fire only between
+numbers, and the rule builds the suffix from the spelled word: vowel harmony from the stem's last vowel, and the
+ablative's consonant assimilating to a voiceless final. Verified across the whole numeral vocabulary rather than
+assumed: üçten, dörtten, altıdan, kırktan, yüzden.
+
+Korean needed the same self-spelling for a different reason — the particles are allomorphic on the **spelled**
+number (7 → 칠 takes 은, 4 → 사 takes 는), decided by whether the last Hangul syllable is closed, and the
+digit-to-word pass runs later and could not repair a particle already chosen wrongly.
+
+### The wrong-sense trap again, and the partitive is its commonest shape
+
+Arabic's corpus gives `أكبر من` ×10 phrase hits and **they are the partitive** — "a LARGER SET OF small places",
+where مِن marks the partitive rather than the standard of comparison. Identical in shape to Italian's
+`numero maggiore di basi`. Two unrelated languages, same failure: *the comparative-plus-preposition string is
+shared between comparison and partition, so a phrase count cannot separate them.*
+
+⚠ AND THE USER CORRECTED THE UKRAINIAN VERSION OF THIS CLAIM, which is worth keeping distinct. `поділити на`
+is NOT a second sense — Slavic uses one preposition for both readings, so the phrase is ambiguous exactly where
+English distinguishes *divide into* from *divide by*, and the sense lives in the ARGUMENT (a plural noun vs a
+numeral). That is *no evidence either way*, not counter-evidence. The Italian and Arabic cases are genuinely
+different constructions; the Ukrainian one was me over-reading a count.
+
+### Three defects found by writing the rules, all pre-existing
+
+1. **ja: the topic particle は read /ha/ after a digit.** The は→わ gate accepted a preceding kanji or kana but
+   not a DIGIT, so 「7は」 stayed /ha/. **Four corpus utterances change**, every one a topic particle after a
+   numeral (`3分の1は`, `HJR-3は`, `Il-76は`, `KV62は`) and every one wrong before.
+2. **ko: no rule for ANY additive sign.** `+`, `−`, `±` were all dropped — `3 + 4` read 삼 사, two bare numbers.
+   Fixing it hit the ordering rule again: the degree rule REORDERS (it lifts 섭씨 in front of the number) and had
+   stranded the sign, reading 마이너스 섭씨 오도 ("minus Celsius five degrees"). It now carries the sign across.
+3. **tr: no minus and no ±**, both named by the same article that gave the relational readings.
+
+Korean went from 8 dropped sign classes to 0; Turkish from 4 to 0.
+
+### The ampersand, and where it belongs
+
+The `ampersand` cell was the last hard fail in ko/tr, and the user's framing settled what it is: **a Latin-script
+printing ligature, not native vocabulary anywhere.** That makes it a *loan* in a non-Latin script and a *native
+word* in a Latin one, which is exactly how the fleet now reads it:
+
+    ko  앤드   ·  ja  アンド        (the symbol arrives inside a Latin run — R&B, P&R — so the reading is a loan)
+    tr  ve    ·  nl  en           (a Latin-script language reads it with its own conjunction)
+
+Not an arithmetic sign, so not #654's subject — but the gate demanded it and the distinction is the answer.
+
+### ⚠ A GATE-DISCIPLINE FAILURE WORTH RECORDING
+
+The `es` corpus diff in commit 4b57e2b was **a null test**. `corpus-diff.ts emit` resolves the engine relative to
+the CURRENT WORKING DIRECTORY, the shell was still inside the baseline worktree from the "before" emit, and so
+both sides were the same tree. It reported 0/1948 — the right answer, arrived at without measuring anything.
+
+Re-run properly: still 0/1948. *A gate that cannot fail is not a gate*, and this one silently could not, which
+is the same class of error as the `attest.ts` `exlimit` warning in Run 40 — a tool reporting a confident result
+it had no evidence for. Every subsequent diff in this session was run with an explicit absolute `cd`.
+
+### Where #654 stands
+
+| sign | dropped at Run 40 | dropped now |
+|---|---|---|
+| `±` | 35 | **31** (it nl pl ko tr, plus ja/ar already) |
+| `=` `<` `>` | 28 dirs | **24 dirs** |
+| `÷` | 41 | 37 |
+
+Thirteen languages now read all four: de es fr pt it ru nl pl uk el ar ja ko tr (fourteen counting `ar`'s ten
+codes as one). Gates per language, run separately: tsc PASS; 208 files / 2951 tests; corpus diff ar 0/1702,
+ko 0/1746, tr 0/1876, ja 4/1788 (every change read, all four the particle fix).
+
+## Run 42 — 2026-08-04 — #654: vi th id fa, and FLEURS is a PARALLEL corpus
+
+    vi  bảy bằng ba · nhỏ hơn · lớn hơn · chia cho          th  เจ็ด เท่ากับ สาม · น้อยกว่า · มากกว่า · หารด้วย
+    id  tujuh sama dengan tiga · lebih kecil/besar dari     fa  هفت برابر است با سه · کوچکتر از … است · تقسیم بر
+
+### 📌 THE FINDING THAT CHANGES THE REST OF THIS ISSUE
+
+**FLEURS is a parallel corpus, and one of its sentences reads a division ALOUD with a numeral operand.** The
+English is *"the aspect ratio of this format dividing by twelve to obtain the simplest whole-number ratio is
+therefore said to be 3:2"*, and it is present in **57 of the 67 corpora**:
+
+    de  geteilt durch zwölf     es  dividir por doce      fr  en divisant par douze   it  diviso per dodici
+    ru  поделенное на двенадцать uk  поділене на дванадцять pl  dzielimy przez dwanaście  el  διαιρούμενος με το δώδεκα
+    vi  chia cho mười hai       th  หารด้วย 12            id  dibagi dua belas        fa  تقسیم بر دوازده
+    ar  القسمة على 12           ja  —                     ko  —                       tr  on ikiye bölünür
+    hi  से भाग देना             ta  ஆல் வகுத்தல்           ml  ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ  ur  سے تقسیم دے کر
+    cy  rannu â deuddeg         ga  roinnt ar a dó dhéag  ms  terbahagi kepada        uz  o'n ikkiga bo'lish
+    …and 30 more.  MISSING in 10: af as bn ff ha om or sw te xh zu
+
+So for almost every language left, **the division word is available at the STRONGEST tier** — a recording of a
+human saying it, in the slot, with a numeral operand — rather than at tier 3 (Wikipedia existence) or tier 4
+(register). I had been treating tier 2 as "search the corpus for the word" and it is better than that: *search the
+corpus for the SENTENCE that performs the operation, then read what the translator wrote.*
+
+⚠ It also retroactively corroborates readings already shipped from other tiers (de `geteilt durch`, fa `تقسیم بر`,
+th `หารด้วย`, vi `chia cho`, id `dibagi` are all this sentence), and flags two to revisit: es_419 writes `dividir
+por` (infinitive) where I shipped the participle `dividido por`, and el writes `διαιρούμενος με` where I shipped
+`διά`. Neither is wrong — the corpus instance is inflected *for its sentence* (`διαιρούμενος` agrees with `λόγος`)
+while a sign reading must be neutral — but the tension is worth recording rather than smoothing over.
+
+### ⚠ THE HOMOGRAPH MAJORITY, AND THE ESCAPE FROM IT
+
+Vietnamese `bằng` is the في trap at full strength: **×352 token hits on vi.wikipedia, ×224 corpus phrase hits, and
+every sampled one is the INSTRUMENTAL preposition** — "bằng các chứng minh toán học" (by mathematical proofs),
+"tìm con mồi bằng mùi" (finds prey BY SMELL), plus `bằng chứng` (evidence). It is also, genuinely, the equals word.
+A count-only pass would have ranked it the best-attested word in the whole issue while proving nothing at all.
+
+**The escape is to probe the SLOT rather than the WORD** — search for the sign's NAME and for the reading WITH its
+operands:
+
+    dấu bằng ×5   "Kết quả được biểu thị sau dấu bằng. Ví dụ: 1 + 1 = 2  («một cộng một bằng hai»)"
+                  "cho biết chúng bằng nhau, biểu diễn thông qua dấu bằng ( = )"
+
+That generalises to every homograph case, and it is the same move `attest.ts --after` already makes for a unit
+modifier: *define the search by something you already know, so the word you are unsure of cannot hide.*
+
+It also worked for the pre-existing sourcing doubt in `th`. That file recorded that `attest.ts` on ลบ "returns the
+ADJECTIVE negative — การป้อนกลับทางลบ — not the operator", and wrote no minus rule. Probing the sign's name settles
+it: 「เครื่องหมายลบ (−) ใช้ได้สามลักษณะในคณิตศาสตร์: ตัวดำเนินการลบ」 — *the minus sign has three uses in
+mathematics: the subtraction operator…*. Same article incidentally confirms `เท่ากับ`.
+
+### Four pre-existing gaps closed, and the operator/sign split is now a pattern
+
+`vi`, `th` and `fa` had **no minus rule and no ±**, so `-5 °C` read as five degrees ABOVE zero — and the vi file
+had already argued the case for one ("omitting a plus is LOSSLESS while omitting a minus INVERTS") without a rule
+following. `fa` additionally had **no degree rule at all**, its header having recorded that the corpus spells units
+out; both scale readings turn out to be corpus-attested in the slot (`۳۰ درجه سانتی‌گراد` ×2, `۹۰ درجه فارنهایت` ×3).
+
+⚠ **THREE LANGUAGES NOW SPLIT THE SIGN FROM THE OPERATION**, and it is a real distinction rather than a stylistic
+one — the sign name reads a negative QUANTITY, the operator name reads a subtraction:
+
+| lang | sign (a negative number) | operator (a subtraction) |
+|---|---|---|
+| ko | 마이너스 / 플러스 | 빼기 / 더하기 |
+| vi | âm | trừ |
+| fa | منفی | منها, به اضافه |
+
+vi.wikipedia states it outright: "dấu trừ và số âm, đôi khi dấu âm được đặt cao hơn một chút so với dấu trừ".
+
+### ⚠ A FALSE POSITIVE THE FLEET'S GUARD DOES NOT COVER — found by the diff, not by a probe
+
+The new Thai minus rule read the year range `ค.ศ. 1000 -1300` as a subtraction. The fleet convention rejects a
+sign with a space AFTER it (`26 - 00`, a score — it's own note), and **this range is spaced only BEFORE the sign**,
+so that guard never fires. Now a digit anywhere to the left rejects the match: *a negative quantity does not follow
+a number; a range does.* One instance in 1,906 utterances, and no probe would have found it — only reading the
+diff did.
+
+### ⚠ AND ONE MORE TOOL DEFECT: `corpus-words.ts` SPLIT ON ZWNJ
+
+Persian writes compounds with U+200C, and the tool's token split treated it as a separator — so `سانتی‌گراد`,
+present twice in exactly the slot being probed, was reported `substring-only`, i.e. **as a negative**. The
+incoherence is what gave it away: *0 token hits with 2 PHRASE hits is impossible unless the tokenizer is wrong.*
+Fixed; the distinct-token count for fa went 7,017 → 8,108, so 1,091 further Persian tokens were being split.
+
+Third tool defect in three runs (Run 40's `exlimit`, Run 41's cwd null test, this), and all three share a shape:
+**the tool reported a confident NEGATIVE it had no evidence for.** For sourcing work that is the dangerous
+direction of error, because a negative ends the search.
+
+### Where #654 stands
+
+| sign | dropped at Run 41 | dropped now |
+|---|---|---|
+| `±` | 31 | **27** |
+| `=` `<` `>` | 24 dirs | **20 dirs** |
+| `÷` | 37 | 33 |
+
+Seventeen languages read all four: de es fr pt it ru nl pl uk el ar ja ko tr vi th id fa (eighteen with `ar`'s ten
+codes as one). Gates per language: tsc PASS; 208 files / 2951 tests; `review.ts` reports **"sign classes: none
+dropped"** for all four in this batch, where vi/th/fa had 3/2/3 dropped before; corpus diff id 0/1936, fa 0/1856,
+th 0/1906, vi 1/1978 (read: `B&amp;Bs` now voices the ampersand).
+
+## Run 43 — 2026-08-04 — #654: exploiting the parallel sentence, and the gate that caught a regression
+
+The user asked whether the parallel-sentence finding from Run 42 had been exhausted. **It had not** — I had used
+it for four languages and then gone straight back to probing one at a time, which is the slower route it was meant
+to replace. Fixed by making it a tool mode and then working the batch it is actually good for.
+
+    corpus-words.ts --sentence '3\s?:\s?2'      → the reading of the operation, in all 57 languages that carry it
+
+### What the harvest gives, and what it does not
+
+The division word, for every language with the sentence, spoken, in the slot, with a numeral operand:
+
+| lang | as the translator wrote it | shape |
+|---|---|---|
+| mr | बाराने भागणे | postpositional, instrumental on the operand |
+| gu | બાર દ્વારા વિભાજીત | postpositional |
+| ta | பன்னிரண்டால் வகுத்தல் | postpositional |
+| kn | ಹನ್ನೆರಡರಿಂದ ಭಾಗಿಸುವಿಕೆ | postpositional |
+| ml | പന്ത്രണ്ട് ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ | postpositional |
+| pa · ur · ne · sd · am | ਨਾਲ ਭਾਗ · سے تقسیم · विभाजन गरेर · سان ونڊ · በመክፈል | postpositional |
+| az · uz | on ikiyə bölmə · o'n ikkiga bo'lish | postpositional, dative/oblique |
+| hr · cy · ga · ca · sl | dijeli se s · rannu â · roinnt ar · dividint per · delimo z | infix |
+| yue · ja | 除以 12 · 12で割って | infix |
+| mi · ms | whakawehe ki · terbahagi kepada | infix |
+
+⚠ **A HIT IS A LEAD, NOT A READING**, and the tool now says so in its header. The verb is inflected *for that
+sentence*: el's `διαιρούμενος` agrees with `λόγος`, es and ca write gerunds/infinitives, ml writes "when divided".
+A sign reading has to be neutral, so the sentence settles **which word** the language uses and the **form** is
+still a per-language judgement. Read the output; do not paste it.
+
+### The batch this was for: four languages, one rule each
+
+`ca hr cy ga` already read `=` `<` `>` and dropped only the division sign. Of the eight languages in that
+position, `ms` and `uz` already read it, and two are deferred with reasons:
+
+- **az** puts the second operand in the DATIVE ("altı üçə bölünür"), so it needs Turkish's spelled-operand
+  machinery rather than a substitution. `bölü` (the Turkish-style infix) is ×0 on az.wikipedia; `bölünür` ×11.
+- **sl** has both `deljeno z` and `delimo z` at ×0 on sl.wikipedia, so only the corpus's one inflected instance
+  exists, which is not enough to pick a neutral form from.
+
+⚠ **TWO OF THE FOUR SOURCES READ THE SIGN ITSELF** — the strongest shape tier 4 takes — and both corroborate a
+word the file already emitted, which is the first time this issue got evidence in both directions at once:
+
+    hr   "a podijeljeno s b jednako c:  a ÷ b = c"        the ÷ glyph, its reading, and hr's own `jednako`
+    cy   "mae a rhannu â b yn hafal ag c"                 likewise with cy's own `yn hafal`
+         'Gellir ysgrifennu "a rhannu â b" fel a ganlyn'  and named again as a quoted expression
+
+Two choices went against the tidier-looking form, both on evidence: `ca` ships the participle `dividit per` over
+the corpus's gerund (a gerund is inflected for its clause, not for the notation), and `ga` ships the corpus's
+`roinnt ar` over `roinnte ar`, which is ×0.
+
+### ⚠ THE GATE CAUGHT ME DELETING A WORKING RULE
+
+My scripted edit to `croatian/normalize.ts` **replaced** the `>` rule line instead of appending after it, so
+`6 > 5` silently went back to reading two bare numbers. `review.ts` reported `DROPPED: greater-than` where the
+baseline had it passing, and that is the only reason it was noticed — the tests pass either way, and the corpus
+diff is 0 because the corpus contains no `>`.
+
+The lesson is not "be careful". *A sweep that edits several files needs a gate that fails on REGRESSION and not
+only on absence*, and the sign-class check is that gate because it re-measures every class in every language on
+every run. The corpus diff cannot serve here, precisely because these signs are absent from the corpora — which
+is the whole reason this issue needed tiers 3 and 4 in the first place.
+
+### The Indic/Dravidian group, and the shared rewrite
+
+`mr` and `gu` are done (Run 43's first commit) and both are POSTPOSITIONAL in all three of the relational and
+division readings. That made Hindi's comparative rewrite worth extracting to `core/postposedSign.ts`, since
+`ta kn ml pa ur ne` will all need it: the two non-obvious parts — keeping trailing punctuation off the operand,
+and the catch-all second pass without which a CHAINED comparison silently vanishes — were defects found in Hindi
+first and are exactly what decays when copied. Hindi's corpus diff is 0/1702 after the extraction.
+
+⚠ `mr`'s `बरोबर` is another **homograph majority**: most of its ×21 corpus tokens are the postposition "with"
+(`तुमच्या बरोबर`, `त्याच बरोबर`), and the equality sense is the minority but is the arithmetic reading
+(`तो बरोबर आहे`, `अनुक्रमे बरोबर`). Third instance after vi's `bằng` and ar's `في` — *for a sign reading, the
+count is not the evidence; the quoted sense is.*
+
+### Where #654 stands
+
+Measured behaviourally over every registered code, not counted by hand:
+
+| sign | dropped at Run 39 (the pilot) | dropped now |
+|---|---|---|
+| `=` `<` `>` | 149 codes | **118** |
+| `÷` | 163 | **126** |
+| `±` | 141 | **131** |
+
+Twenty-three languages read all four: de es fr pt it ru nl pl uk el ar ja ko tr vi th id fa mr gu (+ hi already),
+with ca hr cy ga completing the division sign. Counting `ar`'s ten codes separately, that is 31 registered codes
+for `=`/`<`/`>` and 37 for `÷`.
+
+Gates for this run: tsc PASS; 208 files / 2951 tests; corpus diff mr 0/1992, gu 0/1996, hi 0/1702, ca 0/1841,
+hr 0/2007, cy 0/2009, ga 0/1948 — and `review.ts` "sign classes: none dropped" for hr, with ca/cy/ga clean but
+for the pre-existing ± and mr/gu clean but for mr's deliberately declined minus.
+
+## Run 44 — 2026-08-04 — #654: the measurement moves into the audit, and the denominator was wrong
+
+### 📌 THE NUMBER I HAD BEEN QUOTING WAS AGAINST THE WRONG DENOMINATOR
+
+The user asked for the count as **n/67**, and asking the question exposed the error. I had been reporting against
+REGISTERED CODES — 192 of them — which counts ten Arabic dialects as ten languages and includes every language
+with no normalization layer at all. That overstated both the remaining work and the progress.
+
+`coverage.ts` already owns the right denominator: the languages that HAVE a `normalize.ts`, the 67 of
+"0 defective cells across 0/67". On the user's suggestion the sweep now lives there rather than in a scratch
+probe, sharing `SIGN_CASES` with `review.ts` via `defects.ts` so the two cannot disagree about what a dropped
+sign is. `review.ts` is a CLI script and cannot be imported, which is exactly why the fleet number had been
+re-derived by hand each time it was quoted.
+
+    === signs still DROPPED, fleet-wide (#654) ===        (after this run)
+      minus        18/67      plus-minus   28/67      equals       12/67
+      plus          2/67      ampersand    14/67      less-than    11/67
+      degrees       1/67      divide       20/67      greater-than 11/67
+      times · exponent · currency · percent    0/67
+
+⚠ **TWO OF THOSE CLASSES MY FRAMING WAS NOT TRACKING AT ALL** — `minus` 18/67 and `ampersand` 14/67. Naming the
+issue after `= < > ÷ ±` made the other droppable signs invisible to my own reporting, which is the same failure
+the audit's own header records about its hardcoded 37-of-67 list.
+
+⚠ **AND IT TURNS A LUCKY CATCH INTO A GATE.** These signs are absent from the corpora, so `corpus-diff` reports
+0 changed whether a rule works or has just been deleted — Run 43's Croatian regression was caught only because
+`review.ts` happened to be run for that language. Sweeping all 67 on every audit run makes it structural.
+
+### Languages completed this run
+
+    ta   ஏழு சமம் மூன்று · ஐ விட குறைவாக · ஐ விட அதிகமாக · வகுத்தல்
+    ml   ആറ് ഹരണം മൂന്ന് · എക്കാൾ കുറവ് · എക്കാൾ കൂടുതൽ          (= left dropped, see below)
+    yue  七等於三 · 小於 · 大於 · 除以
+    hu   hét egyenlő három · kisebb mint · nagyobb mint          (÷ deferred, see below)
+
+**Two sources state the reading outright**, and both cover two signs at once:
+
+    yue  「A ÷ B = Q...R  讀做  A 除以 B 等於 Q 餘 R」     讀做 = "is read as"
+    ta   「"3 + 2 = 5" அதாவது, "3 கூட்டல் 2 சமம் 5"」      and "a வகுத்தல் b என்பது"
+
+⚠ **TAMIL MIXES THE RULE SHAPES, and that is about the CONSTRUCTIONS rather than about word order.** `சமம்` and
+`வகுத்தல்` are nominal ("equal", "division") and sit between the operands; the comparison is a postposition
+(`விட` follows the standard). So an infix comparative would read backwards while an infix equality is correct —
+in the same language. Being verb-final does not decide the shape; each sign's own construction does.
+
+### ⚠ WHY THE PARALLEL SENTENCE COULD NOT SOURCE MALAYALAM — the user asked, and the answer is morphological
+
+The harvest gives ml `പന്ത്രണ്ട് ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ`, and **both halves are inflected for that sentence**:
+
+    ഹരിക്കുമ്പോൾ = ഹരിക്ക്- (divide) + -ുമ്പോൾ,  and -ുമ്പോൾ IS the word "when"
+                   (historically -ഉം + പോൾ "time")
+
+It is a temporal SUBORDINATOR, subordinated here to the main predicate `ആണെന്ന് പറയാം` ("can be said to be") —
+*"when divided using twelve, the ratio is 3:2"*. Between two operands there is no main clause for it to attach
+to, so `6 ÷ 3` would read *"six when-divided three"*: a fragment awaiting a predicate that never arrives.
+
+And independently: `ഉപയോഗിച്ച്` ("using") is a CONVERB, not the instrumental case `-കൊണ്ട്` Malayalam puts on a
+divisor. The translator wrote a two-clause **paraphrase** of the operation, not a reading of the notation.
+
+*So the sentence establishes the ROOT with certainty and nothing reliable about the FORM.* `ഹരി-` is certain; the
+form came from ml.wikipedia naming the sign against the glyph in a section heading — `=== ഹരണം (÷ or /) ===` —
+and a sign NAME reads infix (`el` ίσον, `ja` イコール, `ta` வகுத்தல்). ⚠ That last step is a fleet PATTERN, not an
+attested `a ഹരണം b` string, and is marked as such in the file.
+
+### Two new measurement-trap shapes, both from Malayalam
+
+1. ⚠ **`ഹരണം`'s six corpus hits are all inside `അപഹരണം`, "ABDUCTION".** The substring trap, best instance yet.
+2. ⚠ **`-എക്കാൾ` ("than") has a token count of ×0 BY CONSTRUCTION, not by absence.** It is a BOUND morpheme and
+   appears only fused (`ഷോക്കിനെക്കാൾ`, `ഭാഷകളെക്കാൾ`). *An agglutinative language's comparative morpheme cannot
+   be token-counted at all* — the counterpart of the Persian ZWNJ false negative. What is countable is the head
+   it governs (`കൂടുതൽ` ×182, `കുറവ്` ×12).
+
+### ⚠ A FOURTH MANUFACTURED NEGATIVE IN THE TOOLING — Han is spaced per character
+
+`corpus-words.ts` reported Cantonese as having **no word for any of the four signs**. FLEURS writes Han with a
+space between EVERY character — 「此 格 式 的 長 寬 比 除 以 12」 — so a two-character word never matches as
+written. Cantonese has three of the four in its own corpus, with numeric operands. Fixed by removing whitespace
+from both sides for an unspaced script, where it carries no linguistic information.
+
+Fourth in this issue, after `attest.ts`'s `exlimit` (Run 40), the cwd null test (Run 41) and the Persian ZWNJ
+split (Run 42). **All four have the same shape: a confident NEGATIVE with nothing behind it.** For sourcing that
+is the dangerous direction of error, because a negative ends the search — a false positive gets caught when you
+read the examples, and a false negative never gets read at all.
+
+### Two deferrals, both morphological rather than sourcing gaps
+
+- **hu `÷`** — `osztva` is well attested (×8) and governs the INSTRUMENTAL on the operand every time
+  (`a-t b-vel osztva`, `1 osztva x-szel`). So `A ÷ B` is "A B-vel osztva", needing the numeral spelled here plus
+  vowel harmony AND consonant assimilation (`három → hárommal`, `négy → néggyel`, `egy → eggyel`).
+- **az `÷`** — the dative on the second operand (`altı üçə bölünür`), the same shape.
+- **ml `=`** — the only pure sourcing gap: `സമം`, `തുല്യം`, `ഹരിച്ചാൽ` are ×0 in BOTH corpus and wiki, and
+  nothing names the `=` glyph. Reported, not guessed.
+
+Both morphological deferrals want `tr`'s and `ko`'s machinery — spell the operand, then build the suffix — which
+is a separate piece of work from reading a sign. Emitting a bare form would be an ungrammatical CASE, not an
+accent.
+
+### Where #654 stands, n/67
+
+| sign | at Run 39 (the pilot) | now |
+|---|---|---|
+| `=` | 30/67 read | **55/67** — dropped by 12 |
+| `<` `>` | 30/67 | **56/67** — dropped by 11 |
+| `÷` | 15/67 | **47/67** — dropped by 20 |
+| `±` | 30/67 | **39/67** — dropped by 28 |
+
+Still dropping the relational signs (11–12): `am bn kn mi ne or pa sr sw te ur` (+ `ml` for `=` only).
+Of these `sr` is the compass-vocabulary deferral the user assigned to the normalization work, and `mi` is the
+fleet's most extreme routing case (#663).
+
+Gates for this run: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67 and 12 accepted;
+corpus diff ta 0/1886, ml 0/1955, hu 0/1995, yue 0/1726.
+
+## Run 45 — 2026-08-04 — #654: the relational comparisons reach 0/67
+
+    sr једнако · мање од · веће од · подељено са      ur برابر · سے کم · سے زیادہ · تقسیم
+    pa ਬਰਾਬਰ · ਤੋਂ ਘੱਟ · ਤੋਂ ਵੱਧ · ਭਾਗ                kn ಸಮ · ಗಿಂತ ಕಡಿಮೆ · ಗಿಂತ ಹೆಚ್ಚು · ಭಾಗಿಸುವಿಕೆ
+    ne बराबर · भन्दा कम · भन्दा बढी · विभाजन          te సమానం · కంటే తక్కువ · కంటే ఎక్కువ · భాగించడం
+    bn সমান · থেকে কম · থেকে বেশি · ভাগ               sw sawa na · chini ya · zaidi ya · kugawanya kwa
+    or ସମାନ · ଠାରୁ କମ · ଠାରୁ ଅଧିକ · ଭାଗ               am እኩል · ከ_ ያነሰ · ከ_ የበለጠ · በ_ በመክፈል
+    mi rite ki · iti iho i · nui ake i · whakawehe ki
+
+### 📌 `<` AND `>` ARE NOW 0/67 — read by every treated language
+
+| sign | at the German pilot | now |
+|---|---|---|
+| `<` `>` | 37/67 dropped | **0/67** |
+| `=` | 37/67 | **1/67** — `ml` only |
+| `÷` | 52/67 | **8/67** |
+| `±` | 37/67 | 28/67 |
+
+**Nine of these eleven languages were sourced from their own corpora alone**, no Wikipedia needed — `ur pa ne te
+bn or` and, for three of four readings, `sw`. That is the opposite of what Run 39's blueprint predicted: the pilot
+concluded tier 2 would be thin and tiers 3–4 would carry the work, and for the well-resourced European languages
+it was right. For the Indic and Dravidian corpora it is backwards — those corpora carry the comparative
+constructions in quantity (`ਤੋਂ ਵੱਧ` ×51, `भन्दा बढी` ×75, `సే ఎక్కువ` ×40, `zaidi ya` ×107) because comparison is
+ordinary prose, and it was the EQUALITY word that needed a register source, not the comparatives.
+
+### ⚠ AMHARIC NEEDED A RULE SHAPE NOTHING ELSE IN THE ISSUE HAD USED
+
+Every other language either substitutes between the operands or appends after them. **Amharic PREFIXES the
+standard of comparison**: `ከ-` goes on the front of the operand and the comparative follows, so `A < B` is
+"A ከB ያነሰ" — and the corpus shows it on a numeric operand directly, `ለትንሽ ከ40,000 ያነሰ የህዝብ ቁጥር` (a population of
+fewer than 40,000). `core/postposedSign.ts` cannot express that: it appends words after the operand and never
+modifies it. The division is the same shape with `በ-`.
+
+So the fleet now has **four** rule shapes, and which one applies is a property of the SIGN'S CONSTRUCTION in that
+language, not of the language's word order:
+
+| shape | languages |
+|---|---|
+| infix substitution | de es fr pt it ru nl pl uk el ar hu sw yue mi, `ta`/`fa`/`ja` for SOME signs |
+| postposed, words after both operands | hi ur pa ne te bn or mr gu kn ml ta tr ja ko fa |
+| postposed with a case suffix built on the spelled operand | tr (ablative), ko (topic + comparative particle) |
+| **prefixed onto the standard** | **am** |
+
+`ta` remains the clearest proof that the shape is per-sign: `சமம்` and `வகுத்தல்` are nominal and infix while its
+comparison is postpositional, in one language. `mi` is the second — all four infix in a VSO language, because the
+comparative's "than" (`i`) precedes the standard.
+
+### ⚠ MĀORI COULD BE DONE ONLY BECAUSE THE WORDS ARE SAYABLE
+
+The same file leaves the PLUS unread, and the note there is the reason: both FLEURS speakers voice the English
+loan `plas`, and Māori has no /l/ and no /s/, so the g2p would emit **[pa]** — a confidently wrong syllable where
+there is currently silence. The four relational readings are built from Māori phonemes (`rite ki`, `iti iho i`,
+`nui ake i`, `whakawehe ki`), so nothing has to be approximated. *A reading is only shippable if the engine can
+say it*, which is a constraint no amount of sourcing can substitute for.
+
+### More traps, and one the harvest itself produced
+
+- ⚠ **`ಸಮ` (kn) is the largest substring trap in the issue: ×0 TOKEN / ×399 SUBSTRING**, inside `ಸಮುದಾಯ`
+  (community), `ಸಮಾನವಾಗಿ` (equally), `ಸಮಸ್ಯೆ` (problem) — *and* a homograph in the right register, since several
+  wiki hits are `ಸಮ ಸಂಖ್ಯೆ`, "EVEN number". Neither count could settle it; a **symbol glossary** did:
+  kn.wikipedia lists the signs against their names — "ಭಾಗಿಸುವುದು: '÷' … ಬೆಲೆ ಸಮ '=' ಸರಿ-ಸಮ,(ಈಕ್ವಲ್ಸ್)".
+- `ভাগ` (bn) ×12 token / ×202 substring, mostly inside `বেশিরভাগ` ("most"); `ଭାଗ` (or) ×9 / ×60 inside `ତଳଭାଗରେ`.
+- ⚠ **`sw` INVERTS THE TIER ORDER IN BOTH DIRECTIONS AT ONCE.** Its corpus division hits are the partition sense
+  (`kugawanya nyuklia` = nuclear fission), so the register tier settles `÷` — but its WIKI hits for `chini ya` are
+  the wrong sense too ("Chini ya Elimu kwa wote" = UNDER the programme) while the corpus has it on a real quantity
+  (`huenda chini ya kiwango cha kugandisha`, below freezing, ×70). *The tiers rank HAYSTACKS, not individual
+  findings*, and a language can need the weaker tier for one reading and the stronger for another.
+- ⚠ **THE HARVEST'S "57 of 67" WAS AN UNDERCOUNT.** `--sentence '3\s?:\s?2'` reported `te` absent; the sentence is
+  there and writes the ratio **without the colon** ("3 2 గా చెప్పబడింది"). The true count is 58. *A
+  parallel-sentence probe has to be keyed on something the translators could not reformat, and a punctuation mark
+  is not that.*
+
+### What remains, and why
+
+| sign | dropped | reason |
+|---|---|---|
+| `=` | **ml** | the only PURE sourcing gap left: `സമം` `തുല്യം` `ഹരിച്ചാൽ` are ×0 in BOTH corpus and wiki, and nothing names the `=` glyph |
+| `÷` | az · hu | MORPHOLOGICAL: the operand takes a case (`üçə bölünür`, `B-vel osztva`) with harmony and consonant assimilation — wants `tr`/`ko`'s spell-then-suffix machinery |
+| `÷` | sl | both `deljeno z` and `delimo z` are ×0 on sl.wikipedia; only one inflected corpus instance exists |
+| `÷` | ff · ha · kk · om · zu | no parallel sentence in the corpus and thin wikis — the genuinely under-resourced tail |
+| `÷` | mi | the division IS read; this line is the `6 ÷ 3` probe hitting mi's #663 English routing on the bare probe |
+| `±` | 28 | the tail that has no confirmable minus word, plus the eight that never route through the tier |
+| `minus` · `ampersand` | 18 · 14 | classes the `= < > ÷ ±` framing never tracked; now visible in the audit |
+
+Gates for this run, every language separately: tsc PASS; 208 files / 2951 tests; audit **0 defective cells across
+0/67**; corpus diff sr 0/1923, ur 0/1644, pa 0/1589, kn 0/1811, ne 0/1993, te 0/1757, bn 0/1981, sw 0/1938,
+or 0/1327, am 0/1922, mi 0/1994.
+
+## Run 46 — 2026-08-04 — #654: the ampersand was a missing CELL, and the Māori argument corrected
+
+### 📌 NINE OF THIRTEEN SIGN CLASSES ARE NOW AT ZERO
+
+    equals · less-than · greater-than · times · exponent · currency · percent · ampersand   0/67
+    plus 1/67 (mi, intentional)   ·   degrees 1/67 (mi)   ·   divide 8/67
+    minus 17/67   ·   plus-minus 27/67
+
+### ⚠ THE AMPERSAND NEEDED NO NEW CODE AT ALL, AND THE TIER HAD ALREADY SAID SO
+
+Fourteen languages dropped `&` outright — `am ar bn el kn ne or pa sr te ur fr hu sw` — and
+`core/normalizeSymbols.ts` already has an `ampersand` cell whose own note diagnosed the situation exactly:
+
+> *"Every one of them has a high-frequency conjunction to spend — und ×1135, dan ×1053, og ×1135, и ×1129,
+> және ×561 — so this was a missing CELL, not a sourcing problem."*
+
+All fourteen route through that tier and none had filled it in. **One line of declared data each.** Every
+conjunction was verified against its own corpus rather than assumed, and each is among the language's commonest
+words: `እና` ×1545 · `এবং` ×1987 · `και` ×2717 · `ಮತ್ತು` ×1683 · `र` ×2379 · `ଏବଂ` ×975 · `ਅਤੇ` ×1441 ·
+`మరియు` ×1003 · `اور` ×1476 · `et` ×2234 · `és` ×2257 · `na` ×3577 · `и` ×255.
+
+⚠ Arabic is the one case where the substring column is legitimately the larger number: `وَ` is ×71 standalone
+against ×12128 substring, because Arabic writes the conjunction as a **PREFIX**. A grammatical reason, not a
+misleading one — the mirror image of every substring trap in this issue.
+
+*The lesson is about where to look before writing anything: the fleet already had a slot for this, and eight
+languages' worth of #562's reasoning sitting in a comment above it.*
+
+### ⚠ AND FIXING A SIGN FIXED A FOREIGN-RUN LEAK — el improved twice over
+
+Greek previously read `B&B` through the ENGLISH fallback as *bˈiː bˈiː*. Substituting the ampersand SPLITS the
+token, which let Greek's own `LETTER_NAME` table claim each letter, so it now reads *bi ce bi* — μπι και μπι, in
+Greek phonology. Not the intent, and a coupling worth recording: **a sign rule can change which ENGINE reads the
+surrounding run**, the same shape as #663's routing work. Two of the other thirteen changed (am, sw), both the
+`B&B` sentence the tier's note names, both correct.
+
+### ⚠ THE MĀORI PLUS ARGUMENT WAS WRONG IN ITS REASONING, AND THE USER CAUGHT IT
+
+Māori now reads the plus BETWEEN TWO NUMBERS as `tāpiri`. Two questions decided the shape of that:
+
+**Does `tāpiri` mean "positive"?** No. mi.wikipedia uses it for appending and summing, twice on quantities —
+"te tāpiri i ngā rahinga whenua me rahinga wai" (the SUM of the land and water areas) and "kāore pea te tāpiri i
+ngā tatau … e **ōrite** ki te tapeke" (the sum of the counts may not EQUAL the total, which independently
+corroborates the equality word). It is a transitive verb, never a polarity marker.
+
+**Is it a sign-vs-operator contrast?** ⚠ **NO, AND CLAIMING SO IMPORTED KOREAN'S STRUCTURE ONTO MĀORI.** The first
+draft of that comment said the arrangement was "the same division of labour as ko's 더하기 vs 마이너스". Korean has
+TWO attested words, one per job. **Māori has ONE native word plus a GAP**: `tāpiri`'s semantics reach the
+operation and not the sign, and no native sign word turned up at all. The asymmetry is in what `tāpiri` MEANS.
+
+⚠ And the user's general principle is the reason to *expect* no split: **where a register is borrowed, the
+source's own conflations come with it.** English spells both jobs `plus`, so a borrowing register has no reason to
+separate them, and the loan the recordings show (`plas`, both speakers) most likely covers BOTH positions in
+speech. That is now the stated reason the sign arm stays silent — the attested reading there is the loan, the loan
+is unsayable (/l/, /s/ → [pa]), and `tāpiri` on `+30°C` would say *"thirty degrees APPEND"*.
+
+The rule is recorded as an **INFERENCE FROM THE WORD'S MEANING, not an attestation in the slot**: mi_nz contains
+no arithmetic expression at all, so there is no recording of a Māori speaker reading `3 + 4`, and no claim that
+one would prefer `tāpiri` to the loan. The narrow claim is only that where the loan cannot be pronounced, a native
+word whose sense is exactly this operation beats a wrong syllable.
+
+### Punjabi, and evidence arriving in both directions
+
+pa's corpus gives nothing usable for the additive signs — `ਜਮਾਂ` ×0, `ਪਲੱਸ` only inside the brand `ਮੈਟਰੋਪਲੱਸ`,
+`ਜੋੜ` ×1 token against ×33 substring (`ਜੋੜੇ`, "couples"). pa.wikipedia settles all of it by naming the sign and
+then reading an expression:
+
+    "ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ (ਜਿਸਨੂੰ ਆਮ ਤੌਰ 'ਤੇ "+" ਦੇ ਚਿੰਨ੍ਹ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ …)"     addition, denoted by the "+" sign
+    "3 ਜਮ੍ਹਾਂ 2 ਬਰਾਬਰ 5 ਹਨ।"                                              3 PLUS 2 EQUALS 5
+
+⚠ The second quote **corroborates the equality word committed earlier from the corpus** (`ਬਰਾਬਰ` ×8). Evidence in
+both directions from two different tiers, which has happened once before (hr/cy, where the source used the file's
+own equals word) and is the strongest confirmation shape this issue has produced.
+
+### What remains, with reasons
+
+| class | dropped | why |
+|---|---|---|
+| `minus` | 17 | ⚠ NOT a sourcing problem but a DISAMBIGUATION one. `nl` and `mr` already document deliberate refusals (every `-\d` in nl_nl is a score or a range; mr's is `चंद्रयान -1`), and th proved the hazard live — a year range read as a subtraction. Each needs the range/score/designation analysis per corpus; the guard built for th/vi/fa/pa is the reusable part. |
+| `plus-minus` | 27 | COUPLED to the above — ± is tier-1 free once a language has a minus word, so this collapses toward the 17 rather than being separate work. |
+| `divide` | 8 | az · hu MORPHOLOGICAL (the operand takes a case with harmony and assimilation — wants tr/ko's spell-then-suffix machinery) · sl no attestable neutral form · ff ha kk om zu the genuinely under-resourced tail |
+| `plus` | 1 | mi, and intentional: the SIGN position only, with the reasoning above |
+| `degrees` | 1 | mi — `pūtu` is "boots", so the obvious candidate is wrong; unsourced |
+
+Gates: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67; corpus diff 0 changed for eleven of
+the fourteen ampersand languages and 1 each for am/sw/el, every change read.
+
+## Run 47 — 2026-08-04 — #654: the residual worked down, and where it genuinely stops
+
+    === signs still DROPPED, fleet-wide (#654) ===
+      minus         2/67   am my            (+7 intentional: gu kn mi mr nl ta yue)
+      plus          0/67                    (+1 intentional: mi)
+      plus-minus   14/67
+      divide        4/67   ff ha om zu
+      degrees       1/67   mi
+      equals · less-than · greater-than · times · ampersand · exponent · currency · percent    0/67
+
+### 📌 THE GATES NOW DISTINGUISH INTENT FROM OMISSION
+
+`ACCEPTED_SIGN_SILENCE` (defects.ts) is the synthetic-probe counterpart of `ACCEPTED_SILENT`, and the difference
+is the unit: the older one names CORPUS LINES ("this sentence's hyphen is a designation"), this one names a whole
+CLASS for a language ("no reading of this sign is shippable here"). Three languages had a permanently red
+`sign classes` line for reasons already argued in their own files, which left the line unable to report a
+REGRESSION — its only job. `review.ts` now prints `INTENT` and passes; `coverage.ts` counts them in a separate
+column and prints the reason, never subtracting silently.
+
+⚠ It is deliberately short: only a refusal ARGUED IN THE LANGUAGE'S OWN FILE qualifies. "No rule yet" keeps
+failing, because quieting a TODO is the one use of this mechanism that would make the audit worse.
+
+### ⚠ THE MINUS CLASS TURNS ON ONE MEASURABLE QUESTION
+
+Not sourcing — **does the corpus contain `word · space · hyphen · digit`?** That shape is identical to a genuine
+`was -5`, so no guard can separate them; telling them apart needs a lexicon. Measured across every candidate:
+
+| verdict | languages | instance |
+|---|---|---|
+| MUST DECLINE | gu | the bill `એચજેઆર -3` **and** the spaced ordinal range `ગોથિક શૈલી 10મી -11મી` |
+| | kn · ta · mr · hi | `ಎಚ್‌ಜೆಆರ್ -3` · `சந்திரயான் -1` · `चंद्रयान -1` |
+| | yue | `伊 爾 -76` — ⚠ AN ARTEFACT OF THE TRANSCRIPT (see below) |
+| | nl | every `-\d` is a score or a range |
+| SAFE, shipped | hu pl sr sw ml ne or te | zero such instances, and zero unguarded of any kind |
+
+Three guards do the rest: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately
+before (rejects closed designations), and **a digit ANYWHERE to the left** — the last for the SPACED range or
+score, which the fleet's usual guard misses because the character before the hyphen is a space. That gap cost a
+real defect in `th`, where a year range read as a subtraction.
+
+⚠ **AND THE CORPUS DIFF REJECTED TAMIL AFTER THE GUARDS PASSED IT.** The rule refused every range, score and
+closed designation, then read `சந்திரயான் -1` as *minus one*. Worse than a gap: `ACCEPTED_SILENT` already listed
+that exact instance as CORRECTLY silent, so the rule converted an accepted silence into an audible error.
+*A guard that looks complete is not evidence; the diff is.*
+
+⚠ **AND IT IS THE SAME SENTENCE IN FIVE LANGUAGES.** FLEURS is parallel, so the Chandrayaan designation appears
+in gu, hi, kn, mr and ta — which are **exactly** the five languages `ACCEPTED_SILENT` lists for `minus`. Recorded
+in defects.ts so the decision is not rediscovered five times.
+
+⚠ **AND yue's INSTANCE IS THE TRANSCRIPT, NOT THE LANGUAGE.** FLEURS spaces Han per character, so `Il-76` is
+stored as `伊 爾 -76` — letter, space, hyphen. Third time in this issue that per-character spacing changed an
+answer, after it hid Cantonese's `除以` entirely and then its `小於`/`大於`.
+
+### The best sources this run, all naming the sign rather than using the word
+
+    te  "రేడియల్ వేగాన్ని -5.5 కి.మీ./సె. … ఈ మైనస్ గుర్తు"      a signed number, then "this MINUS SIGN"
+    ne  "घटाउ (जुन माइनस चिन्ह ⟨−⟩द्वारा सङ्केत गरिन्छ)"           names the minus SIGN
+    ml  "പ്ലസ്-മൈനസ് ചിഹ്നം, ±, ഒന്നിലധികം അർത്ഥങ്ങളുള്ള …"       names the ± GLYPH — minus and ± in one quote
+    hu  "A két előjel a pluszjel (+) és a mínuszjel (−)"        names BOTH signs
+    sw  "Namba hasi … ni namba halisi ambayo ni pungufu ya 0"   the negative-number article
+    kk  "3-ке бөлінеді"                                        divisible BY 3, on a numeric operand
+
+### ⚠ THE FILM-TITLE TRAP CLOSES THE ISSUE AS IT OPENED IT
+
+± is now blocked on a mismatch rather than on sourcing: the two halves a language has often do not pair. `bn` has
+`যোগ` (an operation, "addition") and `ঋণাত্মক` (a polarity, "negative"); `ur` has `جمع` and `منفی`; `xh` has `plas`
+and `thabatha` ("to subtract"). ± marks a TOLERANCE, so it needs two SIGN names, and juxtaposing an operation with
+a polarity reads as neither.
+
+So I probed for the ± glyph's own NAME, which is what worked for `ml`. Two hits:
+
+    bn  প্লাস মাইনাস ×1     — in a FILMOGRAPHY list
+    kn  ಪ್ಲಸ್ ಮೈನಸ್ ×2      — "ಕಿರುಚಿತ್ರ ಪ್ಲಸ್ ಮೈನಸ್", the SHORT FILM *Plus Minus*
+
+**The German pilot's first tier-3 result was `größer als` ×2, both from the film *"Gott ist größer als Elvis"*.**
+Forty-odd runs later the last unsourced cell fails the same way, in two more languages. It is the most durable
+finding in the issue: *a title is a string with no sense, and existence checks cannot see the difference.*
+
+### Where it genuinely stops, with reasons
+
+| class | left | why it stops |
+|---|---|---|
+| `minus` | am | `ኔጋቲቭ` ×14 is the PHOTOGRAPHIC negative (`ፎቶ ኔጋቲቭ`), the rest is the moral sense; `ማይነስ` ×0; `ከዜሮ በታች` ×2 is "below zero", a temperature idiom that does not generalise to a bare `-5` |
+| | my | ⚠ NO FLEURS CORPUS AT ALL, so the "measured safe" argument every shipped language rests on is unavailable. Its evidence would have to come from the mined artifact |
+| `plus-minus` | 14 | the pairing mismatch above; the glyph's name is a film title where it appears at all |
+| `divide` | ff ha om zu | ⚠ all four token counts were the WRONG SENSE, and I claimed otherwise one commit earlier: `feccere` is "part/region", `rabawa` is the fair-division economics article, `qooduu` is "divide into two types", `ahlukanise` is "severed the veins" |
+| `degrees` | mi | `pūtu` is BOOTS. And the inventory wall stands: `Celsius` carries /s/, which Māori lacks, exactly as `plus` and `minus` do |
+
+⚠ **THE MĀORI INVENTORY WALL IS NOW THREE CELLS DEEP** — plus, minus and degrees — and it is one fact, not three
+gaps: the attested reading in each is an English loan whose phones Māori does not have. `tāpiri` shows the shape
+of the only escape (a native word whose sense is exactly the operation), and there is no such word for a polarity
+marker or for a temperature scale.
+
+Gates for this run, every language separately: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across
+0/67; corpus diff 0 changed for hu pl sr ml ne or te sl kk af ca cy ga zu hu az, and the two non-zero results
+read (ta reverted; sw's single change is the earlier ampersand work).
+
+## Run 48 — 2026-08-04 — #654: PR #665, and what reviewing the diff found
+
+Branch `sign-reading-654`, 43 commits, 107 files. Ten of thirteen sign classes at 0/67.
+
+### ⚠ THREE DEFECTS FOUND BY REVIEW, NONE BY THE TESTS
+
+**1. ± fused onto the preceding word in gu, mr and hi.** Found by listing every sign rule the PR adds side by
+side, which made one row look different from the other twenty-odd: three languages used `/±\s?/` with an
+UNSPACED replacement.
+
+    gu  તાપમાન±5  →  t̪apmanˈəpləs mˈainəs pˈãɲt͡ʃ      ← "tapman" + "plas" as ONE token
+    hi  तापमान±5   →  t̪aːpmˈaːnd̪ʱən ɾˈɪɳ pˈaː̃t͡ʃ
+
+hi's was pre-existing; gu's and mr's were mine, **copied from it in this branch**. The shared tier's own
+`ampersand` note already records this hazard verbatim. All three fixed, because leaving hi's means the next
+language to copy it inherits the defect again. Then verified across the whole PR — 32 languages × 4 signs, a
+letter directly against the sign, no fusion anywhere.
+
+**2. `review.ts` and `coverage.ts` disagreed about an accepted silence.** `coverage.ts` has consulted
+`ACCEPTED_SILENT` since #586; `mine.ts scan` — which `review.ts` shells out to — never did. So mr's
+`चंद्रयान -1` was accepted as a designation by the audit and reported as `DROP minus` by review, *in the same
+repo, on the same sentence*. `ACCEPTED` now joins `REDUNDANT` as a NOTE rather than a defect. This is the
+divergence the issue was asked to handle, one layer below where I handled it.
+
+**3. mi's `ACCEPTED_SILENT` entry was dead.** It accepted `+30 tākiri` because Māori's inventory could not say
+the attested loan — but this branch routes unspellable words to English, so the plus now reads and the accept
+covered nothing. ⚠ **A baseline entry that can never fire is worse than none: it masks exactly the regression
+the table exists to expose.** The audit surfaced it on its own, going 12/7 → 11/6 accepted.
+
+⚠ **AND A TEST CAUGHT THAT ONE**, which is the right outcome: `accepted-silent.test.ts` pins the table's key
+list so table and test cannot drift. Both updated together.
+
+### ⚠ AND I NEARLY REPORTED THE WHOLE BRANCH AS LOST
+
+Mid-review, `src/languages/maori/normalize.ts` showed 107 lines with none of my rules, `git log` showed no
+commits from this session, and `git status` showed it clean. I was two commands from concluding the work had
+been destroyed. **The shell was in `/tmp/vp-base-654`** — the detached baseline worktree used for corpus diffs —
+so every `git` and `grep` was reading the pinned pre-session tree. The branch was intact the whole time.
+
+That is the **fourth** time the cwd of that worktree changed an answer in this issue (after the null corpus
+diff, and twice more). The worktree is now REMOVED, since every corpus diff it existed for is done. *A pinned
+copy of the repo one `cd` away is a loaded gun for any tool that resolves paths relative to the cwd* — and
+`git`, `grep`, `tsx` and `corpus-diff` all do.
+
+### Checks that came back clean
+
+- **Chained comparisons** survive in all twelve postposed languages (`2 < 5 < 9` keeps both), which is what
+  `core/postposedSign.ts`'s second pass exists for.
+- **am's prefix rule** handles non-digit operands: `x < y` → "ɛks kə wai janəsə".
+- **HTML is stripped before these rules** (`<b>gras</b>` → gras), and a URL's `=` reading as "equals" is
+  ESTABLISHED behaviour rather than something this PR introduces — en/da/sv/bg/ro all did it before the branch.
+- **`mine.ts`'s new ACCEPTED path is correctly scoped** — hi reports "no defects" with "ACCEPTED minus ×2" as a
+  note, matching its two entries exactly.
+- Every remaining `review.ts` failure is a documented residual class, plus nl's pre-existing test-coverage gate.
+  nl and mr each had TWO failures before this branch and now have one.
+
+### Final state
+
+| class | dropped | note |
+|---|---|---|
+| `= < > × & ² $ % °` and `plus` | **0/67** | read by every treated language |
+| `minus` | 2/67 | am (photographic-negative homograph) · my (no corpus at all) — 6 intentional |
+| `÷` | 4/67 | ff ha om zu — floor established SEVEN ways |
+| `±` | 12/67 | the operation-vs-polarity pairing mismatch |
+
+Gates: tsc PASS · 208 files / 2951 tests · audit 0 defective cells across 0/67 and 11 accepted · `review.ts`
+per language · `corpus-diff` against a pinned baseline for every language touched, every change read.

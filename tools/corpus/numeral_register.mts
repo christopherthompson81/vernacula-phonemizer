@@ -13,7 +13,7 @@
  * ⚠ EVERY ENTRY IS MEASURED AGAINST AUDIO, NOT INFERRED FROM THE REGION. Each candidate register was scored
  * over that language's whole digit-bearing corpus by re-phonemizing the digit runs in the candidate and
  * comparing to a phone recognizer's output. Only the CLEAN languages are wired
- * (docs/investigations/asr_align_qc_investigation.md run 19):
+ * (docs/investigations/asr-align/asr_align_qc_investigation.md run 19):
  *
  *     sn  381 closer /  19 further  (95%)      nya 378 /  19  (95%)
  *     zu  379 closer /  21 further  (95%)      xh  362 /  38  (91%)

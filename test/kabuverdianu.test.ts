@@ -82,7 +82,7 @@ describe("Kabuverdianu canonical IPA — ALUPEC g2p + nasalization (anchored on 
 // Every test below encodes a FINDING measured over the 1,931 unique utterances of FLEURS kea_cv (3,945
 // rows; FLEURS repeats each sentence per speaker). There is no mined artifact for kea and no Kabuverdianu
 // Wikipedia, so the corpus is the whole haystack — see
-// docs/investigations/kea_normalization_investigation.md.
+// docs/investigations/kea/kea_normalization_investigation.md.
 //
 // ⚠ ASSERTED THROUGH `phonemize`, NOT THROUGH `normalizeKabuverdianu`, wherever an upstream pre-pass is
 // part of the story: the vulgar-fraction fold in core/unicode.ts runs at the registry dispatch point, so a

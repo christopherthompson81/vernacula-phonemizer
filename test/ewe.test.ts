@@ -69,7 +69,7 @@ describe("Ewe (Eʋegbe) canonical IPA", () => {
 });
 
 // ── TEXT NORMALIZATION (src/languages/ewe/normalize.ts) ───────────────────────────────────────────────
-// Evidence and refusals: that file's header and docs/investigations/ee_normalization_investigation.md.
+// Evidence and refusals: that file's header and docs/investigations/ee/ee_normalization_investigation.md.
 // The corpus is ee.wikipedia (tools/corpus/mined/ee.jsonc, 5,921 paragraphs) — there is no FLEURS for Ewe.
 describe("Ewe text normalization", () => {
     const ee = createEwe();

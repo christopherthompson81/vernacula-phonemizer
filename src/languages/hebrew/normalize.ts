@@ -10,7 +10,7 @@ import { renormalize, rewrite } from "../../core/provenance.ts";
  * searches against he.wikipedia, the en.wiktionary vocalized→Modern-Israeli referee (2,561 words), and the
  * engine's own `hebrew.jsonc`. **espeak ships no Hebrew at all**, so `sources.ts` reports `[NONE]
  * letter-names` and there is no dictsource tier. Full log:
- * `docs/investigations/he_normalization_investigation.md`.
+ * `docs/investigations/he/he_normalization_investigation.md`.
  * ⚠ THIS HEADER USED TO OPEN "THERE IS NO FLEURS FOR HEBREW", AND THAT IS NO LONGER TRUE — `he_il` landed
  * later, 3,991 unique transcript texts, and the parity golden is now drawn from it. It was swept for every
  * refusal below while porting to C#, and it CORROBORATES all of them rather than overturning any: ₪ ×0,

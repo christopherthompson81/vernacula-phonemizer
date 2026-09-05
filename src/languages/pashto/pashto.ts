@@ -21,7 +21,7 @@
  * ⚠⚠ AND DO NOT QUOTE THIS ENGINE'S REFEREE SCORE WITHOUT THE CAVEAT: the lexicon is mined from wikipron/kaikki,
  * which ARE the referees, so the shipped number is substantially circular (pbt slice: shipped 69.6%, espeak-only
  * lexicon 46.7%, rules-only 46.9%). Engine changes are compared on RULES-ONLY. See tools/referee-eval/langs/
- * ps.jsonc and docs/investigations/ps_neural_restoration_investigation.md Run 11.
+ * ps.jsonc and docs/investigations/ps/ps_neural_restoration_investigation.md Run 11.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -250,7 +250,7 @@ function g2p(word: string): string {
     // ⚠ AND IT COSTS THE ALPHABET, WHICH IS WHY THE REFEREE LOOKS WORSE THAN IT IS. wikipron lists every
     // letter as a headword against its bare consonant (⟨ب⟩ = b, ⟨ت⟩ = t …), so this guard "loses" 39 of
     // them and the raw score reads 69.6% → 67.5%. Excluding letter names — which is the methodology
-    // `ps_neural_restoration_investigation.md` Run 11 already used, "ex letter-names, 1306 words" — it is
+    // `docs/investigations/ps/ps_neural_restoration_investigation.md` Run 11 already used, "ex letter-names, 1306 words" — it is
     // **71.7% → 72.7%**, and kaikki-pus 72.3% → 73.5% with the Kandahari-tagged slice flat at 79.4%.
     // The trade is 4,415 corpus tokens of the genitive particle against citation forms of the alphabet.
     if (out && !/[aeiouɑɐɒɔəɛɪʊʌeo]/u.test(out)) {

@@ -3,7 +3,7 @@
 //
 // ⚠ rn HAS NO FLEURS SPLIT (the catalogue says `fleurs 0` and there is no `rn` transcript directory), so
 // PORTING.md's corpus-wide differential is unavailable in its usual form and the weight falls on these plus
-// the off-golden probes. See docs/rn_port_investigation.md.
+// the off-golden probes. See docs/investigations/rn/rn_port_investigation.md.
 //
 // ⚠ KINYARWANDA IS NOT A SOURCE FOR KIRUNDI — seven normalizer rules diverge after re-measurement, and the
 // cases below pin the ones that would silently read as rw if the sibling's table were copied.

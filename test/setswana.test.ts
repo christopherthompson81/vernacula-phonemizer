@@ -62,7 +62,7 @@ describe("Setswana cardinal numbers (bo-counting series)", () => {
 // lookup and a fallback, or a guard and the shape it must decline, both sides are asserted — including
 // shapes tn.wikipedia does not happen to contain, because a table is correct exactly where you looked.
 // Every word form asserted here is sourced at its declaration in normalize.ts / setswana.ts; the trail is
-// in docs/investigations/tn_normalization_investigation.md.
+// in docs/investigations/tn/tn_normalization_investigation.md.
 import { normalizeSetswanaPre, normalizeSetswanaPost } from "../src/languages/setswana/normalize.ts";
 
 describe("Setswana normalization — the symbols a reader says aloud", () => {

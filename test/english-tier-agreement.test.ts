@@ -13,7 +13,7 @@
  *
  * ⚠ WRITING THIS TEST FOUND A LIVE DEFECT IN #1085, THE FIX IT WAS AUDITING. Core's DECLARED branch still
  * read `0,708 ¹⁸⁰Hf` as a power, because core's own glued pass defeated the guard there — the same
- * interaction, unfixed in core. See `docs/investigations/english_symbol_tier_investigation.md`.
+ * interaction, unfixed in core. See `docs/investigations/en/english_symbol_tier_investigation.md`.
  *
  * So this asserts the two agree on the shapes they both claim, with the known differences pinned as
  * expected rather than papered over. A third divergence fails here before it ships.

@@ -55,7 +55,7 @@ describe("Tigrinya canonical IPA — Ge'ez syllabary + preserved gutturals", () 
 // ── TEXT NORMALIZATION (src/languages/tigrinya/normalize.ts) ──────────────────────────────────────────
 // Counts are over tools/corpus/mined/ti.jsonc — a ti.wikipedia dump artifact, 323 deduplicated lines.
 // Every rule's sourcing and every refusal is argued in normalize.ts's header and in
-// docs/investigations/ti_normalization_investigation.md.
+// docs/investigations/ti/ti_normalization_investigation.md.
 //
 // ⚠ PIN THE RULE'S BRANCHES, NOT THE CORPUS'S INSTANCES (trap 13). The ordinal has a TABLE branch and an
 // out-of-table branch; the de-grouping has a comma branch, a period branch and the comma-guard that
@@ -183,7 +183,7 @@ describe("Tigrinya text normalization", () => {
 });
 
 // The silent-deletion finding in ti, and the systematic hole it turned out to be.
-// Evidence: docs/investigations/silent_sea_investigation.md Run 6.
+// Evidence: docs/investigations/normalization/silent_sea_investigation.md Run 6.
 describe("Tigrinya (ti) — the labiovelar orders", () => {
     /**
      * ⚠ THREE OF THE SIX LABIOVELAR SUB-SERIES WERE INCOMPLETE, AND WHAT WAS PRESENT WAS OFF BY ONE ORDER.

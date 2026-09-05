@@ -113,7 +113,7 @@ describe("pashto canonical IPA", () => {
 
 // ── TEXT NORMALIZATION (src/languages/pashto/normalize.ts) ──────────────────────────────────────────────
 // Counts cited are over a fresh ps.wikipedia dump — 242,649 lines after markup and category-residue
-// filtering. Full derivation in docs/investigations/ps_normalization_investigation.md.
+// filtering. Full derivation in docs/investigations/ps/ps_normalization_investigation.md.
 const normalizePashto = makePashtoNormalizer({ numeralWords: numberToText });
 
 describe("pashto text normalization", () => {

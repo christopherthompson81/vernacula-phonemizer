@@ -173,7 +173,7 @@ function label(lang: string): void {
     // build flag — never use it to produce a shipped lexicon. `silver.tsv` and `silver.kaikki.tsv` ARE wikipron
     // and kaikki, which are also ps's referees, so a lexicon row mined from them and then scored against them is
     // circular. Dropping them leaves the espeak tranche, which no referee has ever seen, and the resulting score
-    // is the one to quote. See docs/investigations/ps_neural_restoration_investigation.md Run 11.
+    // is the one to quote. See docs/investigations/ps/ps_neural_restoration_investigation.md Run 11.
     const NO_REF_SILVER = process.argv.includes("--no-referee-silver");
     const sources = NO_REF_SILVER
         ? []

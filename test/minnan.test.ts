@@ -99,7 +99,7 @@ describe("nan POJ → Tâi-lô fold (the converter was Tâi-lô-only)", () => {
     // ⚠ WHY: `minnan.jsonc`'s finals table is the epitran nan-Latn-tl spec — the TÂI-LÔ spellings — so POJ
     // input worked only where the two orthographies coincide and fell through to "leave the romanization
     // visible" everywhere else. The corpus IS POJ, so 533 of 3,805 word types (1,482 tokens) emitted raw
-    // romanization instead of IPA. See docs/investigations/nan_normalization_investigation.md Run 3–4.
+    // romanization instead of IPA. See docs/investigations/nan/nan_normalization_investigation.md Run 3–4.
     test("every correspondence the two orthographies differ on now converges", () => {
         for (const [poj, tailo] of [
             ["peng", "ping"],       // eng ↔ ing
@@ -159,7 +159,7 @@ describe("nan POJ → Tâi-lô fold (the converter was Tâi-lô-only)", () => {
 });
 
 describe("nan text normalization", () => {
-    // Evidence, refusals and dead ends: docs/investigations/nan_normalization_investigation.md.
+    // Evidence, refusals and dead ends: docs/investigations/nan/nan_normalization_investigation.md.
     // ⚠ SOURCED IN POJ, EMITTED IN HAN. nan.wikipedia is romanized (268 Han characters against 38,490 Latin
     // in the retained corpus), which is where every word was sourced — but users write Han, and the POJ
     // spellings LEAK ASCII through the converter, so the emitted forms are Han. See the file header.

@@ -154,7 +154,7 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         expect(ab.text("Ари 1452ш. Аҩбатәи ауп.").trim()).toContain(" . ");
     });
 
-    // ── SYMBOLS: words sourced from the FULL ab.wikipedia text (docs/abkhaz_vocabulary_investigation.md),
+    // ── SYMBOLS: words sourced from the FULL ab.wikipedia text (docs/investigations/ab/abkhaz_vocabulary_investigation.md),
     // because the sampled corpus artifact attests none of them and espeak does not ship Abkhaz. Asserted
     // at the TEXT level: what matters here is which word lands where, not its phonemes.
     test("normalization: percent takes the postposed word — once", () => {

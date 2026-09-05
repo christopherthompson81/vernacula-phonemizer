@@ -44,7 +44,7 @@ export interface AbkhazManifest {
         rangeTo: string;
     };
     /** Words for symbols (%, °, currency, км², the clock) — attested in FULL ab.wikipedia text, not the
-     *  sampled corpus artifact; sourcing in docs/abkhaz_vocabulary_investigation.md. */
+     *  sampled corpus artifact; sourcing in docs/investigations/ab/abkhaz_vocabulary_investigation.md. */
     symbols: {
         percent: string;
         degree: string;

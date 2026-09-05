@@ -56,7 +56,7 @@ public static class LoadTsv
     /// list first. Two keys can fold onto the same free slot, and "first wins" only means anything if the
     /// order is the file's. A Dictionary happens to preserve insertion order here, but relying on that for a
     /// tie-break would be relying on an implementation detail the TS side does not share.</para>
-    /// See docs/investigations/nativiser_lexicon_seam_investigation.md and test/lexicon-reachability.</summary>
+    /// See docs/investigations/normalization/nativiser_lexicon_seam_investigation.md and test/lexicon-reachability.</summary>
     public static Dictionary<string, V> LoadTsvMap<V>(
         string moduleDir,
         string filename,

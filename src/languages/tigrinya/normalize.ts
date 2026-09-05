@@ -3,7 +3,7 @@
  *
  * EVIDENCE: tools/corpus/mined/ti.jsonc, a ti.wikipedia dump artifact (1,338 segments; the committed
  * hard+sample tiers are 323 deduplicated lines). Counts below are over those 323 lines. The full
- * investigation, including every refusal and its count, is docs/investigations/ti_normalization_investigation.md.
+ * investigation, including every refusal and its count, is docs/investigations/ti/ti_normalization_investigation.md.
  *
  * ⚠ `\b` IS ASCII-DEFINED AND MATCHES NOTHING AGAINST ETHIOPIC — every boundary here is an explicit
  * `(?<![\p{L}\p{M}])` / `[ሀ-ፚ]` lookaround (trap 1).

@@ -9,7 +9,7 @@
  *
  * The engine is stubbed rather than imported. `silentCharsIn` takes a `Say` callback precisely so its
  * discrimination can be tested without 182 engines, and the fleet measurement lives in
- * `docs/investigations/silent_deletion_detector_investigation.md` where its numbers can be re-run.
+ * `docs/investigations/normalization/silent_deletion_detector_investigation.md` where its numbers can be re-run.
  */
 import { describe, expect, test } from "vitest";
 

@@ -46,7 +46,7 @@ public sealed class AbkhazNumbersDef
 }
 
 /** Words for symbols (%, °, currency, км², the clock) — attested in FULL ab.wikipedia text, not the
- *  sampled corpus artifact; sourcing in docs/abkhaz_vocabulary_investigation.md. */
+ *  sampled corpus artifact; sourcing in docs/investigations/ab/abkhaz_vocabulary_investigation.md. */
 public sealed class AbkhazSymbolsDef
 {
     public string Percent { get; init; } = "";

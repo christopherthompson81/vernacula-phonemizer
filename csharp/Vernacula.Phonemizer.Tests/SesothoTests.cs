@@ -3,7 +3,7 @@
 //
 // ⚠ st HAS NO FLEURS SPLIT (verified, not assumed — the catalogue says `fleurs 0` and the only Sotho-group
 // transcript is `nso_za`), so PORTING.md's corpus-wide differential is unavailable and the weight falls on
-// these plus the off-golden probes. See docs/st_port_investigation.md.
+// these plus the off-golden probes. See docs/investigations/st/st_port_investigation.md.
 using Vernacula.Phonemizer;
 using StEngine = Vernacula.Phonemizer.Languages.Sesotho.SesothoPhonemizer;
 using StNormalize = Vernacula.Phonemizer.Languages.Sesotho.Normalize;

@@ -77,7 +77,7 @@ function number(digits: string): string {
     const n = Number(digits);
     // ⚠ OUT OF RANGE MUST STILL BE READ. Returning `digits` leaks ASCII into the IPA — the 10¹² cap is a
     // limit of the authored magnitude words, not a reason to stop speaking. Digit-at-a-time, the same
-    // fallback the fleet uses at the 2^53 cliff; see docs/investigations/bignum_fallback_investigation.md.
+    // fallback the fleet uses at the 2^53 cliff; see docs/investigations/numbers/bignum_fallback_investigation.md.
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
         return [...digits].map((c) => numberToText(Number(c))).map(phonemizeWord).join(" ");
     return numberToText(n).split(" ").map(phonemizeWord).join(" ");

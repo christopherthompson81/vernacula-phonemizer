@@ -123,7 +123,7 @@ const TOKEN = /([Ѐ-ӿ]+)|(\d+(?:,\d+)?)|([.!?…,;:])/gu;
 
 /**
  * SYMBOL NORMALIZATION — Bashkir. Every word is a ba.wikipedia TOKEN attestation whose examples were read
- * (see normalize.ts's header and docs/investigations/ba_normalization_investigation.md, run 3):
+ * (see normalize.ts's header and docs/investigations/ba/ba_normalization_investigation.md, run 3):
  *   `процент` ×206 · `километр` ×69 · `килограмм` ×65 · `доллар` ×221 · `евро` ×87 ·
  *   `һум` ×142 ("Һум — Рәсәй Федерацияһының милли аҡсаһы") · `квадрат` ×165 · `куб` ×35 · `тапҡыр` ×103.
  * The corpus's own text supplies the exponent slot verbatim — "майҙаны 130 395 квадрат километр" — which

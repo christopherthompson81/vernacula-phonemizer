@@ -4,7 +4,7 @@
  *
  * Evidence: `tools/corpus/mined/hy.jsonc` (hy.wikipedia dump, 2,517,219 segments; 260 hard + 200 sample
  * retained, and because it is dump-sourced the sample tier IS the language's real distribution). Counts
- * below are dump-wide unless marked. Full working: `docs/investigations/hy_normalization_investigation.md`.
+ * below are dump-wide unless marked. Full working: `docs/investigations/hy/hy_normalization_investigation.md`.
  *
  * ⚠ THE BOUND CASE SUFFIX IS THIS LANGUAGE'S DEFINING FORM — trap 14, and denser here than in any language
  * that has met it so far. Armenian glues its case/article morphology straight onto the DIGITS with a hyphen:

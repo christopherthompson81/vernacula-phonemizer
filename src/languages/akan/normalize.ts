@@ -13,7 +13,7 @@
  * because the two differ in orthography, in vocabulary and — as the terms file records — in every single
  * month name. Where a rule rests on TWI evidence alone the comment says so. `akan.jsonc`'s numerals are
  * the Asante series, so Twi is the variety this engine actually implements.
- * Full log: `docs/investigations/ak_normalization_investigation.md`.
+ * Full log: `docs/investigations/ak/ak_normalization_investigation.md`.
  *
  * ⚠ AND THE CORPUS IS CODE-MIXED. Both wikis carry English organisation names, English citation furniture
  * and whole English passages (4.3% / 7.9% of paragraphs, dropped before mining), so a raw count is a lead

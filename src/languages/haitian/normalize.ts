@@ -4,7 +4,7 @@
  *
  * ⚠ THERE IS NO FLEURS FOR HAITIAN CREOLE. The evidence is `tools/corpus/mined/ht.jsonc` (dump-sourced, so
  * its `sample` tier IS the real distribution) plus a fresh ht.wikipedia dump — 800,158 paragraphs after
- * `wikidump-to-text.py` + `filter-markup.py`. Full log: `docs/investigations/ht_normalization_investigation.md`.
+ * `wikidump-to-text.py` + `filter-markup.py`. Full log: `docs/investigations/ht/ht_normalization_investigation.md`.
  *
  * ⚠ AND 15.1% OF THAT DUMP IS FRENCH, WHICH IS THE HAZARD THIS PARTICULAR LANGUAGE INVITES. Haitian Creole
  * is French-LEXIFIED and orthographically INDEPENDENT: its spelling is phonemic and deliberately unlike

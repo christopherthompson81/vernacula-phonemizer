@@ -15,7 +15,7 @@
  *   dotted Cyrillic abbreviation, and its evidence is RUSSIAN: `М.` (Moscow) ×26, `Т.` (том) ×7, `А.` ×22,
  *   `В.` ×17 are the bibliography blocks that end a tg.wikipedia article. 7.0% of the mined artifact is
  *   Russian-language text and it is not spread evenly — it lands in exactly the cells a Cyrillic normalizer
- *   would mine. No rule here touches them. (See `docs/investigations/tg_normalization_investigation.md`.)
+ *   would mine. No rule here touches them. (See `docs/investigations/tg/tg_normalization_investigation.md`.)
  *
  * ⚠ THE ONE CHARACTER THAT SPLITS A TAJIK WORD IS NOT A LETTER. All 35 letters, including ғ ӣ қ ӯ ҳ ҷ, are
  * inside the engine's `[Ѐ-ӿ]` token class — probed one by one, bound inside a word, 0 defective. The SOFT

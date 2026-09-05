@@ -10,7 +10,7 @@ import { phonemizeWord } from "../src/languages/wu/wu.ts";
 //   · `phonemize(…, "wuu")` for the shapes whose whole point is that they reach the g2p — which is also what
 //     proves the wiring, and is the only thing that would have caught the drop classes below.
 // Every rule's evidence and every refusal's measurement is in
-// docs/investigations/wuu_normalization_investigation.md.
+// docs/investigations/wuu/wuu_normalization_investigation.md.
 const CL = "个個位本张張只隻条條件对對群种種次天年岁歲块塊层層排组組步口面首部台辆輛架座间間扇页頁杯碗瓶盒袋斤磅吨噸";
 const LN: Record<string, string> = {
     A: "诶", B: "皮", C: "西", D: "地", E: "衣", F: "诶夫", G: "其", H: "诶尺", I: "阿", J: "杰",

@@ -1,0 +1,401 @@
+# The rate DENOMINATOR is still unread (#1255)
+
+#1249 fixed the numerator: an unreadable rate now reads what it can and strands only the part with no word
+behind it. This is about that stranded part. The reporter splits it three ways; the measurement says two of
+the three are the same defect wearing different clothes, and that the "visible leak" the design assumes is
+not visible in either of them.
+
+## Run 1 — 2026-09-04 11:10 — the fleet, classified
+
+```
+npx tsx class55.mts      # phonemize("160 km/h") over all 193 registry codes
+```
+
+| outcome | count |
+|---|---|
+| rate read in full | 106 |
+| **class 1** — numerator read, denominator left as raw Latin (`… kˈilomeːtrit h`) | 23 |
+| **class 2** — neither part read, whole rate raw (`… km h`) | 24 |
+| **class 3** — numerator read, denominator voiced as an ENGLISH LETTER NAME (`… ˈeᶦt͡ʃ`) | 36 |
+
+Class 3 is every non-Latin-script host in the affected set and class 1 is every Latin-script one, which is
+the same split #1249 measured for the numerator, one symbol to the right.
+
+Class 2 is the 24 engines with LOCAL unit tables that the shared tier cannot reach — `ln`, `lt`, `ak`, `bm`,
+`ht`, `mos`, `bal`, `ee`, `ki`, `lg`, `hmn`, `mn` and friends. They are already ledgered as
+`ACCEPTED_DECLINE` in `test/rate-half-reading.test.ts` from #1249, each needing its own per-file edit. Not
+this issue's machinery.
+
+## Run 2 — 2026-09-04 11:20 — ⚠ class 1 is NOT "working as specified"
+
+The issue files class 1 as the intended visible leak, "filing it only because a bare `h` in an IPA stream is
+still literal Latin text". It is worse than that, and the reason is one line of IPA:
+
+```
+et  160 km/h  →  sˈɑdɑ kˈuːskymːend kˈilomeːtrit h
+```
+
+**`h` is a valid IPA symbol.** That trailing character is not an inert leak a reader spots — it is the
+voiceless glottal fricative, and anything consuming this IPA renders it. Same for `s` → [s], and for the
+other short denominators: `l`, `t`, `d`, `m`, `min`, `yr` are all IPA-legal sequences. So class 1 emits a
+SPURIOUS PHONE and class 3 emits an English word; neither is a leak anyone can see, and both are wrong
+readings rather than gaps.
+
+⚠ AND NO GATE SEES EITHER. `isBareUnitKey`'s own header already records why: "In a Latin-script language that
+leak is INVISIBLE to every existing gate — DIGIT hunts digits and RAWMARK hunts punctuation, while a Latin
+run in a Latin-script language looks exactly like a word." In a non-Latin host the `h` does not even survive
+to the output as `h`; it has already become *ˈeᶦt͡ʃ*. So the "stays where the leak gate can see it" premise
+is false on both sides of the split.
+
+## Run 3 — 2026-09-04 11:30 — the precedent, which this repo has already litigated twice
+
+This is not a new question here. `test/bare-exponent.test.ts` carries a test whose name is the finding:
+
+> **⚠ AN UNDECLARED LANGUAGE KEEPS THE DIGITS — the mark was NOT staying visible, it was being eaten.**
+> "This test used to CERTIFY THE BUG … its comment claimed the mark 'stays where the RAWMARK leak gate can
+> see it'. It does not: the mark survives the symbol tier and is then dropped by the language's own
+> tokenizer … 169 of 193 registry codes read `10⁶` as *ten*."
+
+And `normalizeSymbols.ts` states the ordering that resolved it, in the exponent branch:
+
+> **Missing word ≥ wrong word ≫ INVENTED NUMBER.**
+
+Applied here, the stranded denominator is a WRONG word in all 59 languages of classes 1 and 3 — an English
+letter name in 36, a spurious phone in 23. Dropping it is a MISSING word. By the repo's own ordering the drop
+is the better of the two, and the ordering is not mine: it is the line the exponent branch was written to.
+
+⚠ WHAT IS ACTUALLY BEST IS NEITHER — it is declaring the denominator noun, which is per-language data with
+its own attestation requirement (`cmn` reads `km/h` correctly and fails only on `/s`, so these are
+per-DENOMINATOR gaps, not per-language ones). Dropping the wrong reading does not close that gap and must not
+be allowed to hide it, which is what the ledger below is for.
+
+## Run 4 — 2026-09-04 12:10 — the fix, and a fourth failure mode the first count had scored as success
+
+The tier's unit pattern gains one optional non-capturing group after the rate/exponent alternation:
+`(?:\s?/\s?[A-Za-z]{1,3}(?![\p{L}\p{M}\p{Nd}]))?`. It CONSUMES an unreadable short-ASCII denominator, and the
+callback simply does not put it back. One to three ASCII letters, so `12.8 km/秒`, a Cyrillic `⟨/с⟩` and the
+`120mg/100ml` ratio are all outside it; non-capturing, because the callback reads its groups positionally.
+
+Re-classified over all 193 codes on `160 km/h`:
+
+| | before | after |
+|---|---|---|
+| read in full | 106 | **160** |
+| class 1 — raw Latin denominator | 23 | **0** |
+| class 3 — English letter name | 36 | **5** |
+| class 2 — whole rate raw (local-arm engines) | 24 | 24 |
+
+The 5 remaining class-3 codes (`mr ps pbt ka ug`) read their numerator through a LOCAL arm, so the shared
+pattern never matches and never covers the `/h`. Same population as class 2 and as #1249's `ACCEPTED_DECLINE`.
+
+⚠ AND A WIDER SWEEP OVER THREE SHAPES FOUND A FOURTH CLASS THE FIRST INSTRUMENT HAD CALLED SUCCESS. Counting
+"the rate produced a token the plain reading did not" as "the denominator was read" credits eleven pairs
+where what was produced is the HOST'S OWN G2P reading the raw Latin letter as a native phone:
+
+```
+haw  160 m/s   →  … mika k       Hawaiian has no /s/, so ⟨s⟩ is read as [k]
+ltg  160 km/h  →  … kʲilɔmʲætri x        pl likewise → x
+cdo  160 km/h  →  … kuŋ˥˥ li˧˧ h˥˥       a TONED [h]
+el   160 kg/h  →  … cila eits            pcm → et͡ʃ
+```
+
+That is the most insidious of the four, because nothing about the output looks like a leak. All eleven now
+drop the symbol instead. (`READ IN FULL` therefore reads 232 → 221 on the naive count, which is the count
+being wrong, not a regression — verified pair by pair.)
+
+⚠ Two instrument defects were found and fixed while measuring, both of the kind that would have shipped a
+false ledger: `rate.includes(en(denom))` reported nl's perfectly correct *mˈeːtər pˈɛr sˈeːkɔndə* as a
+failure because `zˈɛstəx` contains `ˈɛs` (now whitespace-token comparison), and the same substring test
+inflated the "still wrong" count from 47 to 229.
+
+Final counts, three shapes × 190 codes: **read 221 · silent 208 · still speaking the symbol 47** (was
+232 / 15 / 229). No pair is newly wrong.
+
+## Run 5 — 2026-09-04 12:40 — the goldens need NOTHING, and the near-miss that established it
+
+First attempt re-rendered every golden with `phonemize()` and reported **74 files, 4,306 rows** — including
+whole-file churn in `ar`, `he`, `fa`, `bn`, `sd`, `ur`. That is not this change. `gen_parity_goldens.mts`
+renders with **`phonemizeAsync`**, which enables the lexicon/neural tiers those languages depend on; a sync
+re-render would have silently rewritten 74 goldens to a weaker path's output and called it a rate fix.
+
+Re-rendered with `phonemizeAsync`: 9 files, 50 rows — and those were *still* not this change. `mi` and `vi`
+dominate it, and the diffs are `Daesh`/`ISIL` moving between `dˈʌs ˈaᶦsɪɫ` and `dˈɛʃ ˈɪzəɫ`: the English
+neural OOV tier, which depends on whether the ONNX model is loadable in the running environment.
+
+Restricted to rows whose TEXT actually carries the shape (`/` + 1–3 ASCII letters) AND whose new IPA is a
+pure truncation of the old:
+
+```
+files: 0   rows: 0   skipped (not a truncation): 1
+```
+
+⚠ AND THAT ANSWER WAS WRONG TOO — the truncation filter was the third bad instrument in this run, and the
+FULL-FLEET PARITY RUN is what caught it. `ilo` has one row with `cm/yr`, and its old reading is not a prefix
+of the new one because it was never a truncation to begin with:
+
+```
+ilo   was  … tˈallo km jɾ kadaɡˈiti …        Ilocano's own g2p voicing ⟨cm⟩ as [km] and ⟨yr⟩ as [jɾ]
+      now  … tˈallo sɛntimˈɛtɾo kadaɡˈiti …  the centimetre read, the year dropped
+```
+
+That is the Run-4 fourth class again — a host reading the raw letters as native phones — and a filter built
+around "the fix only ever removes something" could not see the one row where it also ADDS a reading. One
+golden row moves, `csharp/tools/parity` is byte-identical over the whole fleet with it, and the lesson is
+that three separate instruments in this issue were wrong in the same direction: each assumed the shape of the
+answer before measuring it.
+
+## Run 6 — 2026-09-04 13:15 — the pins this revises, for the third time
+
+Three TS assertions and two C# ones failed, all of them the previous thesis stated as a fact:
+
+- `test/rate-half-reading.test.ts` — "the denominator still strands VISIBLY — reading the numerator does not
+  hide it". That test was #1249's own case, and its argument was that the `h` "is exactly as present as it
+  was under the decline". True; #1255 is the measurement of what *present* then means.
+- `test/maltese.test.ts` / `MalteseTests.cs` — `5 km/j`. This residual has now moved **three times**:
+  `5 kilometri/j` before #1093, `5 km/j` under #1098's whole-match decline, `5 kilometri/j` when #1249
+  measured that the decline bought nothing, and `5 kilometri` now.
+- `test/malagasy.test.ts` — the speed of light, still a Malagasy data gap, now silent rather than spoken.
+
+Each comment carries the whole chain rather than just its current value, because the line has been argued
+four times and each round's reasoning was correct on the evidence it had.
+
+## What was NOT done, and why
+
+- **Class 2 (24 codes) and the 5 remaining class-3 codes are untouched.** `ln`, `lt`, `ak`, `bm`, `ht`,
+  `mos`, `ki`, `lg`, `mr`, `ps`, `pbt`, `ka`, `ug` and the rest read their rate through a LOCAL arm in their
+  own engine, so the shared pattern never covers the `/denominator` and cannot consume it. Same population as
+  #1249's `ACCEPTED_DECLINE`, same per-file work, now ledgered a second way in `ACCEPTED_SPOKEN`.
+- **The denominator nouns are not declared here.** That is the actual repair and it is per-language,
+  per-denominator, attested data — `cmn` reads `km/h` and fails only on `/s`. Sourcing 208 readings from
+  recall is exactly the unsourced edit this repo's data rules exist to prevent. `SILENT_BUDGET` in
+  `test/rate-denominator.test.ts` is the to-do list, and it can only shrink.
+- **Class 1 was NOT closed as "working as intended"**, which the issue offered. `h` is a valid IPA symbol, so
+  it was never the visible leak the design assumed; it is in scope and it is fixed.
+
+## Run 7 — 2026-09-04 14:20 — review: the guard was eating real words
+
+Probing the shapes languages ACTUALLY write for a rate — not just `km/h` — the `[A-Za-z]{1,3}` guard was
+dropping readings that were correct before it:
+
+```
+                        before              after (as first written)
+nl  160 km/uur   …kˈiloːmətər ˈyr           …kˈiloːmətər        ⟵ Dutch "uur", read correctly
+af  160 km/uur   …ˈyːr                      …                   ⟵ likewise
+sw  160 km/saa   …sˈaː                      …                   ⟵ Swahili "saa", hour
+cs  160 km/hod   …ɦˈot                      …                   sv 160 km/tim → tiːm, fi /tun → tun
+```
+
+against the ones the issue is about, where the same slot produces garbage:
+
+```
+de  160 km/Std   …ʃtt          es 160 km/hr  …r          fr 160 km/hr  …ʁ          et /h  …h
+```
+
+⚠ AND THE DISCRIMINATOR THAT SEPARATES THEM IS ALREADY IN THIS FILE. `isBareUnitKey` decides the same
+question five screens up — is this short Latin run a SYMBOL or a WORD? — and answers it with a **vowel test**,
+measured: "the vowel-free symbols (`km` ×68, `kg`, `cm`, `mm`) were units in every instance … an alphabet
+that writes its vowels does not write vowel-less words". Every regression above has a vowel; every case the
+issue reports does not. The guard now excludes vowels, `y` included, exactly as that rule does.
+
+The cost is that `min`, `sec` and `yr` are no longer dropped — they keep today's behaviour, which is the safe
+side of a one-sided error. The `160 km/h` fleet numbers are unchanged by the narrowing (160 / 0 / 5 / 24) and
+so is the ledger (221 / 208 / 47), because `h` and `s` are vowel-free.
+
+⚠ AND THE `ilo` GOLDEN ROW CAUGHT A MISSED MIRROR. With the narrowing applied to the TypeScript only,
+`csharp/tools/parity` reported `ilo DIFF 1/94` — TS `…sɛntimˈɛtɾo jɾ`, C# `…sɛntimˈɛtɾo`. The C# had the wide
+guard and was still dropping `/yr`. Mirrored; byte-identical again. Two of this issue's three near-misses were
+found by parity rather than by a test, which is an argument for running it on every change that touches the
+shared tier and not only when a golden moves.
+
+## Run 8 — 2026-09-04 15:10 — review, and the defect that survived the fix
+
+**1. The denominator's own EXPONENT was not covered, so the whole defect survived in `m/s²` and `kg/m³`.**
+The stranded group had no `(²|³)?` of its own — unlike the declared-rate branch, which has always taken one —
+and the trailing lookahead refuses a following superscript, so on `9.8 m/s²` the group matched `/s`, the
+lookahead rejected the `²`, the engine backtracked the group to empty and stranded `/s²` exactly as before.
+All three classes, intact, in a shape the mined corpora actually carry (`kg/m³`, `g/cm³`, `g/m²`, `l/m²`):
+
+```
+ja  9.8 m/s²    …me̞ːto̞ɾɯᵝ ˈɛs no̞ nid͡ʑo̞ː     et  9.8 m/s²  …mˈeːtrit s      haw  …mika k
+ja  9.8 m/s2    …me̞ːto̞ɾɯᵝ ˈɛs ni            ⟵ the ASCII 2 read as a NUMBER
+```
+
+The last line is this file's own "≫ INVENTED NUMBER", the outcome its ordering ranks last. Both spellings
+are now taken. The three shapes the test probes are all exponent-free, so nothing would have caught it.
+
+**2. And `1000 kg/m³` needed the OTHER path.** Where the denominator IS a declared unit but the language has
+no `unitPer`, the regex's stranded group never sees it and the #1249 fall-through re-emits the tail — am read
+*…kiloɡɨɾam ˈɛm kjˈuːbd*. The same vowel-free ASCII test now governs both, spelled once as `STRANDED_SYMBOL`
+so the regex and the callback cannot drift apart. A Cyrillic `⟨/км²⟩` is re-emitted as before, verified.
+
+**3. ⚠ THE INSTRUMENT COULD NOT SEE THE CLASS ITS OWN HEADER CALLS THE WORST.** `classify` scored "spoken"
+by listing the ways a symbol can surface — the raw letter, its uppercase, English's reading — and anything
+else counted as success. But the fourth class *is* anything else: the host's g2p reading the letter as a
+native phone. It now asks the ENGINE what it says for the bare symbol, which covers all four routes at once
+because in every one of them the engine is simply phonemizing the symbol. That surfaced **seven more**
+pairs — da `/h` → *ˈhɔːˀ*, nb → *ˈhoː*, mt → *ħ*, za `/s` → *θ*, smj ×3 — every one verified pre-existing by
+running the widened classifier on both sides of the change. `ACCEPTED_SPOKEN` was a lower bound, not a census.
+
+⚠ That is the third time in three issues that an instrument shared the blind spot of the defect it was
+written to catch (#1250's `GENAM_VOWEL` twice, now this). The pattern is always the same: the instrument
+enumerates the failure modes already known instead of asking the engine.
+
+**4. The accepted cost of the vowel test is now pinned.** `min`, `sec` and `yr` keep being spoken — et
+`160 km/min` → *…mˈin*, ja → *mˈɪn*, et `160 cm/yr` → *…ˈir* — and `csharp/goldens/ilo.tsv` records one of
+them (`3 cm/yr` → *…sɛntimˈɛtɾo jɾ*). Pinned rather than left to a comment, because "documented in a comment"
+is exactly how the leak-gate premise this issue retired survived three rounds.
+
+**5. Not fixed, reported:** `csharp/goldens/km.tsv` is stale against the current engine on one row, including
+Khmer word-segmentation differences this change cannot touch (`/s` strands identically on both sides). Its
+parity gate is presumably already red. Pre-existing drift, outside this issue.
+
+## Run 9 — 2026-09-04 15:40 — full-fleet parity found a golden #1249 left stale
+
+Running `csharp/tools/parity` over all 189 languages rather than the two this change touches:
+
+```
+188 languages byte-identical, 1 differ (36,494 rows ok, 1 differ)
+  ab  DIFF 1/200
+```
+
+```
+ab  0,6км/км²   golden  … anolʲ fba kʼm kʼm …            the state before #1249
+                engine  … anolʲ fba kʼilometʼra kʼm …    the state since #1249
+```
+
+⚠ **THAT ROW HAS BEEN RED SINCE #1249 MERGED.** That change made the arm read the numerator of an unreadable
+rate and its abkhaz effect was pinned in `test/abkhaz.test.ts` — but the parity golden was never re-rendered,
+because parity was only run for the two languages that PR's own probes touched. Nothing else looks at a
+golden's IPA column, so it sat there. Re-rendered; byte-identical again.
+
+The lesson is the one Run 7 already drew and this makes concrete: **run full-fleet parity on any change to
+the shared tier**, not just on the languages the change was reasoned about. Four separate problems in this
+issue were found by parity rather than by a test — the sync re-render that would have rewritten 74 goldens,
+the truncation filter that hid `ilo`, the C# guard left un-mirrored, and now a stale golden from a previous
+merge. No test in either suite asserts a golden's IPA column, so parity is the only gate that reads it.
+
+## Run 10 — 2026-09-03 20:44 — #1257: classifying the 208 by what the language already declares
+
+Question: which of the 208 silent pairs need NO new sourcing, because the noun is already in the repo?
+
+```
+npx tsx scratch/ledger.mts silent          # the test's own classify(), dumped   → 208 pairs, 102 codes
+grep -rn 'rateDenominators\s*:' src data   # 75 declarations
+grep -oF <noun> tools/corpus/{mined,attest}/<code>.jsonc | wc -l   # then read the contexts
+```
+
+⚠ **The corpus on `<data root>` cannot attest anything** — `corpus/tokens/manifest_*.jsonl` carries `ipa` and no
+`text`, and `corpus/fleurs_transcripts/` holds one directory. The attestation tier for this work is the in-repo
+`tools/corpus/mined/<code>.jsonc` (adversarially selected) and `tools/corpus/attest/<code>.jsonc` (Wikipedia
+word attestation), which is what every existing `rateDenominators` comment already cites.
+
+Silent codes that already declare a map, by what is missing:
+
+| code | declares | missing | in-repo evidence for the missing noun |
+|---|---|---|---|
+| tg | `соат сония сон`, `unitPer: дар` | ASCII `h`, `s` | **none needed** — same nouns |
+| jv | `jam detik s taun`, `per` | `h` | **none needed** — `km/jam` ×4 in the mined artifact, so the alias is the corpus's own spelling |
+| mad | `taon detik`, `per` | `s`, `h` | `s`: **none needed** (`detik`, `meter kubik per detik` ×3). `h`: `jam` ×0 as a word — all 18 grep hits are substrings |
+| tl | `s: segundo`, `bawat` | `h` | `oras` ×11 mined / ×2 attest (word-bounded), in the hour sense (`mga ilang oras bago`, `ang yunit ng oras`) |
+| an | `h: ora`, `por` | `s` | `metros cubicos por segundo` ×2, `un metro por segundo`, `radians por segundo (rad/s)` — the slot itself |
+| haw | `h: hola`, `o ka` | `s` | `kekona` ×6 attest + ×1 mined (word-bounded), digit-adjacent (`60 kekona`, `90 kekona`, `He 30 kekona ka manawa`) |
+| nan | `biáu s kg ml` | `h` | `點鐘` ×1 attest, ×0 mined — a lead, not a finding. **Left.** |
+| hil | `h: oras`, `kada` | `s` | `segundo` ×0, no attest artifact. **Left.** |
+| st | `h: hora`, `ka` | `s` | `motsotso`/`motsotsoana` ×0. **Left.** |
+| ff | `h: wakkati gootel` | `s` | **deliberate** — fula.ts: the class-agreeing "one" for `sahaawa` is unsourced |
+| kmr | `h: saetê de` | `s` | **deliberate** — kurmanji: no per-second reading attested on ku.wikipedia |
+
+Two claims in the issue did not survive measurement:
+
+- **"The `unitPer`-keyed tier."** All four object-form `unitPer` declarations (sk, lb, hr, mk) declare BOTH
+  `h` and `s` in `rateDenominators` already; none is on the ledger. That tier is empty.
+- **The Cyrillic `с` alias for tg** looked as free as `h`/`s` — uk, ba and mk all declare it. But tg's one
+  artifact instance is `суръаташ 40—45 км/с`, an animal's running speed, which is per HOUR by the number.
+  `с` is ambiguous in this corpus in a way `сон.` (`10 м/сон.`, `2500м мукааб/сон.`) is not, so it is **not**
+  aliased; `160 км/с` keeps reading *kilɔmˈetr s* — a spoken symbol the #1255 guard does not reach because
+  the guard is ASCII-only. Noted, not fixed here.
+- ff and kmr are on the ledger as *silent* but their files record the silence as a decision. The budget
+  counts them as to-do; they are not.
+
+So the zero-evidence tier is tg (`h`,`s`), jv (`h`), mad (`s`) — 5 pairs on the three test shapes — and the
+in-repo-attested tier is tl (`h`), an (`s`), haw (`s`) — 4 more. Nine pairs, six languages, on both engines.
+
+## Run 11 — 2026-09-03 20:50 — the nine land; nothing else moves
+
+```
+npx tsx scratch/ledger.mts silent | wc -l        # 208 → 199
+diff <(before) <(after)                          # exactly: tg km/h kg/h · tl km/h kg/h · jv km/h kg/h · haw m/s · an m/s · mad m/s
+npx tsx scratch/ledger.mts all | cut -f3 | sort | uniq -c   # 223 read · 199 silent · 54 spoken · 94 unread-unit
+npx tsx tools/gen_parity_goldens.mts tg jv mad tl an haw    # 0 golden rows changed
+```
+
+`spoken` is still 54 — the 47 in `ACCEPTED_SPOKEN` plus the 7 the widened classifier opened in Run 8 — so the
+change moved nine pairs from *silent* to *read* and nothing across any other boundary. `SILENT_BUDGET` 208 → 199.
+
+⚠ **No golden carries any of the nine shapes**, so parity cannot see a C# mirror that was missed — and four of
+the six are inline declarations mirrored by hand (mad, tl, an, haw; tg and jv load the jsonc on both sides).
+That is why the nine readings are pinned in BOTH test suites (`test/rate-denominator.test.ts` #1257 block,
+`csharp/Vernacula.Phonemizer.Tests/RateDenominatorAliasTests.cs`) rather than left to the ledger count, which
+only says *how many*, not *which*. The tenth pin in each is the tg `км/с` decision from Run 10.
+
+Readings, both engines:
+
+```
+tg   160 km/h   sadˈu ʃˈast kilɔmˈetr dˈar sɔˈat              (was …kilɔmˈetr)
+jv   160 km/h   sˈat̪ʊs səwˈid̪aʔ kilomˈɛt̪ər pˈər d͡ʒˈam         (was …kilomˈɛt̪ər)
+mad  160 m/s    atɔs bɤn ənːəm pɔlɔ mɛtəɾ pəɾ dɨtik             (was …mɛtəɾ)
+tl   160 km/h   sandaʔˈan ʔˈat ʔanimnapˈu kilomˈetɾo bˈawat ʔˈoɾas
+an   160 m/s    θjent siʃanta metɾos po seɡundo                (`po` is the engine's existing reading of `por`)
+haw  160 m/s    hoʔokahi haneli kanaono mika o ka kekona
+```
+
+Full-fleet `csharp/tools/parity`, per Run 9's lesson:
+
+```
+189 languages byte-identical, 0 differ (36495 rows ok, 0 differ)
+```
+
+and the C# mirror suite (`RateDenominatorAliasTests` + `RateHalfReadingTests`): 24 passed.
+
+## Run 12 — 2026-09-03 21:20 — review: declaring the noun exposed the denominator's ASCII-exponent hole
+
+Review probes over the six languages, against a worktree of `main`:
+
+```
+                 main                                  branch (data only)
+haw 9.8 m/s2     ʔeiwa ʔewalu mika                     ʔeiwa ʔewalu mika o ka kekona ʔelua      ← "second TWO"
+an  9.8 m/s2     nweu koma weito metɾos                nweu koma weito metɾos po seɡundo dos
+nl  9.8 m/s2     …mˈeːtər pˈɛr sˈeːkɔndə tʋˈeː          (unchanged — nl always had `s`, and always read the 2)
+an  9.8 m/s²     nweu koma weito metɾos                …metɾos po seɡundo kwadɾau               ← correct
+```
+
+⚠ **A declared denominator with an ASCII exponent read the digit as a NUMBER** — the class the tier's own
+ordering puts last: *missing word ≥ wrong word ≫ invented number*. #1145 taught the NUMERATOR branch to take
+`m3` as well as `m³`, and #1255 put the same `(?<=[a-zA-Z])[23](?![\d\p{L}])` on the stranded-symbol guard;
+the DENOMINATOR group stayed `(²|³)?`. So `m/s2` matched `m/s`, the match ended before the `2`, and the number
+path spoke it. For an undeclared `s` the #1255 guard swallowed `/s2` whole — silent — which is why declaring
+the noun in six languages turned a missing word into an invented number for exactly this spelling. nl, de-via-
+tier, and every other language with a declared denominator had it already.
+
+Fix: the denominator exponent group takes the same alternative as the numerator's, both sides; the callback
+already routed `denomExp` through `withPower`, which already classifies `"2"`/`"3"`. Regex literal changed →
+`csharp/regex-corpus.jsonl` regenerated.
+
+Fleet measurement — does the ASCII spelling read the same as the superscript? (`scratch/s2.mts`, 193 codes ×
+`9.8 m/s2`, `12 m3/s2`, `7 km/h2`):
+
+```
+main                 same 247, differ 332
+branch, data only    same 238, differ 341     the 9 exposed pairs
+branch, with fix     same 370, differ 209     51 languages now agree; NOTHING newly differs
+```
+
+The 209 that still differ are languages where neither spelling composes through the tier (a local arm, an
+undeclared denominator, no `exponentWords`) — pre-existing and out of scope. Two shapes were checked so the
+guard does not over-reach: `3 m/s2020` still reads the year, and `5 km/h2a` is untouched, both because the
+`(?![\d\p{L}])` lookahead is the same one the numerator uses. `160 км/соат2` still speaks the 2 — the
+`(?<=[a-zA-Z])` lookbehind is Latin-only on both halves, and widening it is a separate question.
+
+Also found in review, and corrected: the attestation counts in the tl and haw comments were SUBSTRING counts
+(`grep -oF`) — `oras` ×16 was ×11 as a word, `kekona` ×7 was ×6 plus the attest entry's own `"word"` line.
+The word-bounded numbers are what the comments and Run 10's table now say.

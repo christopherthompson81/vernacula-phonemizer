@@ -62,7 +62,7 @@ describe("Latgalian (latgaļu volūda) canonical IPA", () => {
 
 // Text normalization (src/languages/latgalian/normalize.ts). Every case encodes a measurement over the
 // retained text of tools/corpus/mined/ltg.jsonc (394 segments of a 3,444-paragraph ltg.wikipedia dump);
-// the reason is in the comment beside it. See docs/investigations/ltg_normalization_investigation.md.
+// the reason is in the comment beside it. See docs/investigations/ltg/ltg_normalization_investigation.md.
 describe("Latgalian text normalization", () => {
     test("⟨g.⟩ is the YEAR, not the gram — the one key that must not be ported from Latvian", () => {
         // `\d[\s.]?g\.` is ×32 in the retained text (`1577 g.`, `1935 g. apreļa 22 d.`, `1983.g.`) against

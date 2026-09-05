@@ -91,7 +91,7 @@ looks like one pooled acoustic mapping rather than a per-language convention. Bo
   preference for the commoner symbol as weak, and look for the fr/de/pt-style control showing it resolves
   the contrast where one genuinely exists.
 
-Worked through in `docs/investigations/low_vowel_notation_investigation.md`, which proposed three language
+Worked through in `docs/investigations/referee/low_vowel_notation_investigation.md`, which proposed three language
 changes on recognizer evidence and then withdrew all three on this basis.
 
 ## The second recognizer — `phones_allo`
@@ -191,7 +191,7 @@ them **on our side, per language**, and only where measurement says the recogniz
 
 A cell is listed when n ≥ 20, the language's median does not get worse, and more rows move closer than
 further — `ɀ`'s criterion, per language. Callers that pass no `lang` get the drop, never a guess. Full
-tables in `docs/asr_align_offglide_fold_investigation.md`.
+tables in `docs/investigations/asr-align/asr_align_offglide_fold_investigation.md`.
 
 ## Layout
 

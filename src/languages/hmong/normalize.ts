@@ -21,7 +21,7 @@
  * cell here is a query that HAS been run (the `cjy` situation), and — the consequence that matters —
  * **`attest.ts` cannot be run for this language at all**: it probes `<lang>.wikipedia.org`, and the only wiki
  * that exists is already IN this corpus, so a probe would be the corpus answering itself. Full log:
- * `docs/investigations/hmn_normalization_investigation.md`.
+ * `docs/investigations/hmn/hmn_normalization_investigation.md`.
  *
  * ⚠ THE PARAGRAPH-LEVEL CONTAMINATION CHECK CAME BACK NEGATIVE, which is worth stating because the fleet's
  * recent runs all came back positive (bal 37.4% Persian/Urdu, bar 24% German, ht 15.1% French, su 12.9%

@@ -169,7 +169,7 @@ class BiLSTM(nn.Module):
         `torch.tensor([len(x) for x in xs])`, and all three call sites already unpack it as `lens` — the
         lengths were plumbed end to end and then never passed to the model. The perso-arabic rider is a direct
         descendant of this file and carried the same shape, as did every tagger derived from it.
-        See docs/investigations/asr_align_qc_investigation.md Runs 41-49."""
+        See docs/investigations/asr-align/asr_align_qc_investigation.md Runs 41-49."""
         h = s.emb(x)
         if lengths is None:
             return s.fc(s.lstm(h)[0])

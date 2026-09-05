@@ -48,7 +48,7 @@
  * the "head must start 1–9" guard separates the two populations 4 against 0.
  *
  * Deliberately not done, each with the measurement behind it — see
- * `docs/investigations/tn_normalization_investigation.md` for the full sourcing trail:
+ * `docs/investigations/tn/tn_normalization_investigation.md` for the full sourcing trail:
  *   · NO `€` READING (4 instances). `diyuro` is ×0 on tn.wikipedia and `yuro` is 6 tokens in 2 articles, of
  *     which FIVE are the UEFA football tournament (*Yuro ya Basadi ya UEFA ya 2017*). The sixth is a genuine
  *     currency use in one article — a lead, not a finding. A wrong currency word is confidently wrong where

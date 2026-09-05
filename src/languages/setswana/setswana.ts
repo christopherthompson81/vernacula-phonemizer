@@ -61,7 +61,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
  * The shared symbol tier's Setswana data. Every field is sourced against the mined artifact
  * (`tools/corpus/mined/tn.jsonc`) or `attest.ts` against tn.wikipedia — espeak does not ship Setswana at all
  * and Wikidata carries no tn label for any of these concepts, so those two are the whole haystack. The
- * sourcing trail is in `docs/investigations/tn_normalization_investigation.md`; what a declaration turns on
+ * sourcing trail is in `docs/investigations/tn/tn_normalization_investigation.md`; what a declaration turns on
  * is recorded here.
  *
  * ⚠ EVERY NOUN CARRIES ITS CONCORD COPULA, and that is data, not decoration. Of the 51 measure-noun

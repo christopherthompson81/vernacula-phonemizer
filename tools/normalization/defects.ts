@@ -3175,7 +3175,7 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // measurement over `tools/corpus/mined/he.jsonc` (he.wikipedia, 380 segments) plus `attest.ts` and
         // targeted `insource:` searches against that wiki. The refusals are argued in
         // `src/languages/hebrew/normalize.ts`'s header and logged in
-        // `docs/investigations/he_normalization_investigation.md`.
+        // `docs/investigations/he/he_normalization_investigation.md`.
         //
         // ⚠ NO `minus` KEY, DELIBERATELY, AND THE GATE STAYS RED ON IT — the `rw`/`ht` position exactly.
         // Hebrew's negative IS read, in the one slot the corpus writes it: the sign follows the unit
@@ -3511,7 +3511,7 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     ti: {
         // ⚠ EVERY COUNT BELOW IS OVER `tools/corpus/mined/ti.jsonc` (323 deduplicated lines from a
         // ti.wikipedia dump) and argued in src/languages/tigrinya/normalize.ts and in
-        // docs/investigations/ti_normalization_investigation.md.
+        // docs/investigations/ti/ti_normalization_investigation.md.
         //
         // ⚠ `minus` AND `plus` ARE DELIBERATELY ABSENT FROM THIS BLOCK, and that omission is the whole point
         // of the split. Each has exactly ONE genuine Tigrinya instance that this layer does not read — the
@@ -3614,7 +3614,7 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // ⚠ EVERY COUNT BELOW IS OVER `tools/corpus/mined/tg.jsonc` (455 retained segments of a 237,973-segment
         // tg.wikipedia dump), corroborated where stated by `insource:` REGEX article counts against that wiki,
         // and argued in `src/languages/tajik/normalize.ts` and
-        // `docs/investigations/tg_normalization_investigation.md`. tg has NO FLEURS corpus and espeak ships no
+        // `docs/investigations/tg/tg_normalization_investigation.md`. tg has NO FLEURS corpus and espeak ships no
         // Tajik at all, so the artifact, `attest.ts` against tg.wikipedia and Wikidata are the whole haystack;
         // the wikipron/epitran referees are WORD lists and can say nothing about any sign.
         //
@@ -4057,7 +4057,7 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // of an 89,427-paragraph bo.wikipedia dump — with the artifact's whole-corpus `counts` quoted where
         // they differ. `attest.ts` against bo.wikipedia and `concept.ts` are the second tier; espeak does
         // not ship Tibetan at all, so there is no third. Every refusal is argued in
-        // src/languages/tibetan/normalize.ts and worked in docs/investigations/bo_normalization_investigation.md.
+        // src/languages/tibetan/normalize.ts and worked in docs/investigations/bo/bo_normalization_investigation.md.
         // ⚠ `minus` IS DELIBERATELY ABSENT, AND THAT IS WHY `review.ts --lang bo` STAYS RED ON IT — the
         // gn / ak / ln / bm / ilo stance. Tibetan has at least one genuine negative in the retained text
         // (`Ayding Lake (−154m)`, a below-sea-level elevation), and omitting a minus INVERTS where omitting

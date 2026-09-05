@@ -5,7 +5,7 @@
  * ⚠ THERE IS NO FLEURS FOR EWE. The evidence is `tools/corpus/mined/ee.jsonc` (ee.wikipedia dump,
  * 5,921 paragraphs, 398 retained) plus `tools/normalization/attest.ts` against ee.wikipedia, whose findings
  * are cached in `tools/corpus/attest/ee.jsonc`. Every count below says which. Full log:
- * `docs/investigations/ee_normalization_investigation.md`.
+ * `docs/investigations/ee/ee_normalization_investigation.md`.
  *
  * ⚠ AND THE CORPUS IS CODE-MIXED THREE WAYS. Ghana and Togo are multilingual, so ee.wikipedia carries
  * ENGLISH (whole passages, citation furniture, Sotheby's price lists), FRENCH names and Twi/Akan material.

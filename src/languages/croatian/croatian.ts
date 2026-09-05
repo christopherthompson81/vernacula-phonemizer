@@ -7,7 +7,7 @@
  * the tokenizer is Latin-only. STRESS POSITION arrives with the shared g2p — phonemizeWord is Serbian's, and it
  * now reads the unified Serbo-Croatian stress lexicon (Wiktionary does not split sr/hr/bs, and the Ijekavian
  * lemmas hr needs are in the same dump as the Ekavian ones), including the four-way contour.
- * docs/investigations/south_slavic_stress_investigation.md.
+ * docs/investigations/normalization/south_slavic_stress_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

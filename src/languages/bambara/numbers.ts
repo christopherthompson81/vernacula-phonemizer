@@ -29,7 +29,7 @@
  *       `mugan ni wolonwula` for the 27 letters of the alphabet, and 1879 spelled out in one 20th-c. birth date.
  *   [c] kasahorow "Bambara Numbers Zero To 20" — fu 'zero' (= Bamadaba \lx fú \ge zéro).
  *
- * WHERE THE SOURCES SPLIT, and how each was decided (docs/investigations/bm_normalization_investigation.md,
+ * WHERE THE SOURCES SPLIT, and how each was decided (docs/investigations/bm/bm_normalization_investigation.md,
  * Runs 5–9 — an earlier revision of this file shipped the losing side of the first four):
  *   8    segin, not seegin.   Bamadaba \lx ségin with \va séegin; An ka taa headword segin. ⚠ Untoned, this
  *        collides with the VERB sègin 'revenir' — a different lexeme by tone, and the reason the corpus's 24

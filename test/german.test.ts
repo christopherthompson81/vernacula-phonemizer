@@ -411,7 +411,7 @@ describe("german normalization", () => {
         //   `°c`/`°f` outnumber `°C`/`°F` 298 to 151. The scale rule was uppercase-only, so `32 °c` fell
         //   through to the bare-degree rule and left a loose `c` for the g2p (`c → k` context-free),
         //   reading *zweiunddreissig Grad k*. Caught by two readers of one FLEURS utterance saying
-        //   "Grad Celsius" and "Grad Fahrenheit"; see docs/investigations/asr_align_qc_investigation.md.
+        //   "Grad Celsius" and "Grad Fahrenheit"; see docs/investigations/asr-align/asr_align_qc_investigation.md.
         expect(phonemize("32 °c", "de")).toBe("t͡svaɪ̯ʊndʁˈaɪ̯sɪç ɡʁaːt t͡sˈɛlzi̯ʊs");
         expect(phonemize("90 °f", "de")).toBe("nˈɔʏ̯nt͡sɪç ɡʁaːt fˈaːʁənhaɪ̯t");
     });

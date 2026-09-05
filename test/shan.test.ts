@@ -62,7 +62,7 @@ describe("Shan (shn) cardinal numbers", () => {
 });
 
 // The three findings of the silent-deletion scan, and the one it got right for the wrong reason.
-// Evidence and sourcing: docs/investigations/silent_sea_investigation.md Run 4.
+// Evidence and sourcing: docs/investigations/normalization/silent_sea_investigation.md Run 4.
 describe("Shan (shn) — the characters that used to read as nothing", () => {
     /**
      * ⚠ THE VOICED SERIES OF THE SHAN LETTER BLOCK WAS ABSENT FROM `onsets`. U+1075–U+1081 is the Shan run;

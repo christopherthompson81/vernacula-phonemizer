@@ -11,7 +11,7 @@
  * The evidence is `tools/corpus/mined/ln.jsonc` (dump-sourced, so its
  * `sample` tier IS the real distribution) plus a fresh ln.wikipedia dump — 23,678 paragraphs after
  * `wikidump-to-text.py` + `filter-markup.py`. Every count below is over that dump unless it says
- * otherwise. Full log: `docs/investigations/ln_normalization_investigation.md`.
+ * otherwise. Full log: `docs/investigations/ln/ln_normalization_investigation.md`.
  *
  * ⚠ AND THE CORPUS IS HEAVILY CODE-MIXED. A Lingala wiki carries whole French bibliographies, French
  * sentences and Portuguese quotations, so a raw count is a lead about the FILE, not about the language;

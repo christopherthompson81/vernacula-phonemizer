@@ -97,7 +97,7 @@ describe("Bambara canonical IPA — greedy g2p + nasalisation", () => {
 // TEXT NORMALIZATION (normalize.ts). Asserted on the STRING the pass produces, not on IPA, because
 // that is the layer under test — and separately through `phonemize` where the point is that the rule
 // reaches the g2p at all. Evidence and counts live in normalize.ts's header and in
-// docs/investigations/bm_normalization_investigation.md; these pin the rule's BRANCHES (trap 13), so
+// docs/investigations/bm/bm_normalization_investigation.md; these pin the rule's BRANCHES (trap 13), so
 // several cases below are deliberately shapes the corpus does NOT contain.
 describe("Bambara text normalization", () => {
     test("percent: kɛmɛsarada, POSTPOSED — and the sign is dropped when the word is already there", () => {
